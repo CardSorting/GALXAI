@@ -1,0 +1,233 @@
+{
+  "observed_at": "2026-09-13T06:39:59.353883+00:00",
+  "base_revision": "b8a5d390061fc16c3655b8f5cc3f2e00cd4b2da9",
+  "scope": "Local image-workspace ergonomics refinement after the September 13 blank-canvas extension. No deployment or live generation.",
+  "prior_evidence": [
+    "docs/knowledge/audits/2026-09-13-image-generation-canvas.json",
+    "docs/knowledge/audits/2026-09-13-request-efficiency-hardening.json"
+  ],
+  "source_and_guide_sha256": {
+    "src/components/images/ImageStudio.tsx": "ab1c8bc0dab475b059bb5897e537cfd6d4f5a59f4c48d4284d81a91f01b467d6",
+    "src/components/images/GenerationCanvas.tsx": "5d06b9b12b94497d67248d1b09d76864662f992c58e742cbd63b65d6a76239d4",
+    "src/components/images/StudioArtwork.tsx": "d56f19c4ca3e463f3983d02c766eb8c4165d1514472344bb4a9fccc3514abd7c",
+    "src/components/images/studio.css": "c7beb475eaca359b6123d7971819d1ab078eef2f2db719784271719650488192",
+    "src/components/images/studio-contract.ts": "4fcb43507d41db7ce597afdcff7b7c8116347e2fb03b6b88cd8f0fc75467140e",
+    "src/components/images/use-image-studio.ts": "2e11a038e60ecd924e283cf4b664e1c886c48b9664e1bd7d4cb1bd43afdef0de",
+    "scripts/test-image-studio.ts": "d52104c40cfe81051937d7e981e537b2235374055e4d3642e0b95c47f58d8926",
+    "scripts/verify-image-studio-ui.ts": "c619d6e918e74ae4bbac6858a6d3487e99539ca4ab99811e50152ef627d9f4f8",
+    "docs/maintainers/image-studio-review.md": "cb2751b2b25059bf25dae5f5daf53acc6695395ef3317d7bf0831835a001c117",
+    "docs/maintainers/image-workspace-ux-audit-2026-09-13.md": "76fe9280b091d3ebc35c7d1dc79d334fd63d2472622ef8e32453d49316fe5610",
+    "docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md": "b91627ef8ba5f81278a9e6e1e66ab1d8cea6273e5fced58ec0a157d56f740eea",
+    "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md": "148217dea5612e5c07bdae488c2190f9f66308aaa06e57a2bbfddbf2c5d7512f",
+    ".impeccable/surfaces/src-app-images-page-tsx.md": "1c65c5b875569f8eb7e1522f26d6402a7be7115109bd488129308f08d4915601"
+  },
+  "semantic_review": [
+    "Reviewed the complete quota-efficiency and navigation guides against the image workspace, generation contract/hook and current browser fixture. Reconciled Image/Grid, selected filmstrip, local paging, collection snapshots, progressive update controls, session scope and thumbnail transfer limits. Navigation budgets and network contracts are unchanged.",
+    "Reviewed new and unmapped presentation/style/test/private-audit paths under the existing mapped ImageStudio/use-image-studio boundary. No new persistence, API or authorization boundary is introduced. The existing domain mapping plus owning guide covers these additions; broader fingerprints are not an exhaustive module audit.",
+    "Both generation completion paths continue to project allowlisted images before accumulating the session array. Browsing operates on these projections and never forwards raw responses. Library and download authorization, artifact sanitation, idempotency, pending recovery and request-rate handling remain unchanged.",
+    "Image view follows newest results by default; explicit selection stays stable through new work and Create/library navigation. A lightbox snapshots the collection at open, scopes arrow shortcuts away from editing/text selection, contains focus and restores the opener or canvas. No added generation POST results from browsing.",
+    "Mobile submission folds the composer and transfers focus to the canvas. Edit restores prompt focus; errors reopen settings so cooldown/recovery remains available. Back to images is mobile-only; short desktops expose a settings-scroll cue.",
+    "The simulation remains labeled, bounded and visibility-aware without fake percentages or partial-image claims. Pause animation remains independent from pause/resume updates. Original protected image artifacts still back thumbnails; no transfer optimization is claimed.",
+    "The independent documenter reconciled the private surface brief after the last source correction. Prior records remain dated; the baseline 26/40 design and 16/20 technical audit scores are not post-change usability scores."
+  ],
+  "validation": {
+    "production_build": {
+      "command": "npm run build",
+      "exit_code": 0,
+      "includes": "TypeScript; local .env.local loaded; browser network isolated"
+    },
+    "targeted_eslint": {
+      "exit_code": 0,
+      "scope": "ImageStudio.tsx, GenerationCanvas.tsx, StudioArtwork.tsx"
+    },
+    "image_security": {
+      "command": "npm run test:image:security",
+      "passed": 23,
+      "failed": 0
+    },
+    "studio_contract": {
+      "command": "node --import tsx --test scripts/test-image-studio.ts",
+      "passed": 5,
+      "failed": 0
+    },
+    "request_efficiency": {
+      "command": "npm run test:egress:transport",
+      "passed": 40,
+      "failed": 0
+    },
+    "documentation_fixtures": {
+      "command": "npm run test:docs",
+      "passed": 36,
+      "failed": 0
+    },
+    "browser": {
+      "command": "scripts/verify-image-studio-ui.ts",
+      "exit_code": 0,
+      "target": "http://127.0.0.1:3417/images",
+      "external_requests": "blocked; generation and library responses mocked",
+      "results": [
+        {
+          "label": "guest-1440",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "guest-390",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "pending-1440",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "inspector-1440",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "library-1440",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "library-390",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "inspector-390",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "library-error-390",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "latest-1440",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "grid-1440",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "browse-inspector-1440",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "continuity-1440",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "workspace-short",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "latest-390",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "grid-390",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "browse-inspector-390",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "continuity-390",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "continuity-320",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "composer-expanded-390",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "filmstrip-900",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "simulation-1440",
+          "overflow": false,
+          "accessibility": []
+        }
+      ],
+      "coverage": [
+        "blank canvas and draft recovery",
+        "direct/asynchronous completion and receipt recovery",
+        "view and selection continuity through new results and library navigation",
+        "filmstrip scroll selection with twelve images at 900px",
+        "lightbox paging, arrow keys, containment and Escape focus return",
+        "mobile prompt fold/edit/back and error recovery",
+        "desktop mobile-only-action exclusion",
+        "320px, 390px, short desktop and normal desktop",
+        "thumbnail sizing and malformed-output retention",
+        "manual animation pause, hidden tab and reduced motion",
+        "saved library authorization/errors, favorites, pagination and download"
+      ]
+    },
+    "compiled_boundary": {
+      "command": "npm run docs:check:build",
+      "exit_code": 0,
+      "browser_rendered_assets": 640
+    },
+    "removed_content_scan": {
+      "scope": "final local /images HTML and linked scripts",
+      "files": 21,
+      "removed_copy_hits": []
+    },
+    "independent_assessments": {
+      "design": "workspace_design_assessment",
+      "technical": "workspace_technical_assessment",
+      "design_score": "26/40 baseline",
+      "technical_score": "16/20 baseline",
+      "detector": {
+        "command": "detect.mjs --json src/components/images",
+        "exit_code": 0,
+        "findings": []
+      },
+      "overlay": "not injected: native evaluation is read-only"
+    },
+    "independent_finish_review": {
+      "agent": "workspace_finish_reviewer",
+      "initial_disposition": "fix",
+      "required_captures_valid": 12,
+      "material_fix": "Hide mobile-only Back to images above760px; retain expanded mobile action",
+      "final_disposition": "ship for the scored responsive fix",
+      "remaining": []
+    },
+    "correction_history": [
+      "Initial browser run found mobile cooldown hidden after an error; errors now reopen the composer.",
+      "Source review corrected filmstrip centering and tied mobile focus transfer to collapse state.",
+      "Final visual review corrected desktop cascade of the mobile return action; final fixture adds explicit desktop exclusion and mobile Edit/Back focus assertions."
+    ],
+    "documentation_lifecycle": "Final docs:review, docs:sync and docs:check follow this retained evidence; final command result is reported separately to avoid self-referential evidence hashes."
+  },
+  "limits": [
+    "No deployment, paid generation, live library persistence, allowance or output-quality validation.",
+    "No physical-device or comprehensive screen-reader usability study; Axe results are scoped fixtures, not a conformance certificate.",
+    "No measured Core Web Vitals or large-library transfer/memory improvement. Thumbnails retain original authorized artifacts and session results remain in memory.",
+    "Baseline assessors inspected live guest tabs and retained signed-in fixtures; source changed near the end of their reviews. Final controlled captures verify the resulting implementation.",
+    "No new detector ignore was added; the design hook stopped repeating hints after its edit-count threshold. The final CSS fix was reviewed directly and recaptured."
+  ]
+}

@@ -16,17 +16,16 @@ export interface StudioImage {
 }
 export interface PendingGeneration { id: string; startedAt: number; settings: StudioSettings }
 export const DEFAULT_SETTINGS: StudioSettings = { prompt: '', ratio: '1:1', quality: 'standard', count: 1 };
-export const STARTERS = [
-  { title: 'Somewhere unexpected', category: 'Cinematic landscape', image: '/images/studio/desert.webp', ratio: '3:2' as Ratio,
-    alt: 'Terracotta dunes beside a blue desert lake',
-    prompt: 'A cinematic photograph of terracotta dunes beside a still blue desert lake. A tiny traveler stands on a ridge. Wind-rippled sand, distant mountains, soft evening light, extraordinary natural detail.' },
-  { title: 'Make the everyday extraordinary', category: 'Product photography', image: '/images/studio/glass.webp', ratio: '1:1' as Ratio,
-    alt: 'Cobalt blue perfume bottle on sunlit travertine',
-    prompt: 'A sculptural cobalt blue glass perfume bottle on a warm travertine plinth. Hard afternoon sunlight, crisp shadows, refracted blue light on stone. Editorial product photography. No label or text.' },
-  { title: 'Build a little world', category: 'Paper illustration', image: '/images/studio/paper.webp', ratio: '1:1' as Ratio,
-    alt: 'Paper miniature of a house on a floating garden island',
-    prompt: 'A tiny cream house with a red roof on a floating island of lush foliage, a winding path, and one fluffy cloud against a dusty rose sky. Tactile layered paper illustration with dimensional shadows.' },
-];
+
+/** Keep completion order without duplicating a receipt observed more than once. */
+export function appendCreations(current: StudioImage[], completed: StudioImage[]): StudioImage[] {
+  const seen = new Set(current.map(image => image.id));
+  return [...current, ...completed.filter(image => {
+    if (seen.has(image.id)) return false;
+    seen.add(image.id);
+    return true;
+  })];
+}
 
 function object(value: unknown): Record<string, unknown> {
   return value !== null && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {};

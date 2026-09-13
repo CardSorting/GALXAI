@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { generationBody, readGeneration, readLibrary, readPending, readSettings, safeImageUrl } from '../src/components/images/studio-contract';
+import { appendCreations, generationBody, readGeneration, readLibrary, readPending, readSettings, safeImageUrl } from '../src/components/images/studio-contract';
 
 test('studio accepts owned raster artifacts and rejects remote, active, and malformed URLs', () => {
   for (const value of ['https://evil.test/image.png', '//evil.test/image.png', 'javascript:alert(1)', 'data:image/svg+xml;base64,AAAA',
@@ -37,4 +37,14 @@ test('draft and receipt recovery restrict settings and construct a minimal reque
   assert.equal(readPending({ id: '../api/private', startedAt: Date.now(), settings }), null);
   assert.equal(readPending({ id: 'receipt', startedAt: Infinity, settings }), null);
   assert.deepEqual(readPending({ id: 'receipt', startedAt: 123, settings, private: true }), { id: 'receipt', startedAt: 123, settings });
+});
+
+test('the session gallery accumulates completed batches and deduplicates repeated receipts without losing distinct images', () => {
+  const first = readGeneration({ data: [{ b64_json: 'iVBORw0KGgo=' }, { b64_json: 'iVBORw0KGgo=' }] }, readSettings({ prompt: 'First batch', count: 2 }), 'first');
+  const second = readGeneration({ data: [{ b64_json: 'iVBORw0KGgo=' }] }, readSettings({ prompt: 'Second batch' }), 'second');
+  const gallery = appendCreations([], first);
+  const combined = appendCreations(gallery, [...first, ...second, ...second]);
+  assert.deepEqual(combined.map(image => image.id), ['first-0', 'first-1', 'second-0']);
+  assert.deepEqual(gallery, first, 'completion does not mutate the previous gallery');
+  assert.deepEqual(appendCreations(combined, first), combined, 'recovering an already observed receipt does not add cards');
 });

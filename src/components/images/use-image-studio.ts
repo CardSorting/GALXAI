@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { startActivityPolling, imageStatusDelay } from '@/lib/resilience/activity-polling';
-import { DEFAULT_SETTINGS, generationBody, readGeneration, readLibrary, readPending, readSettings, studioError,
+import { DEFAULT_SETTINGS, appendCreations, generationBody, readGeneration, readLibrary, readPending, readSettings, studioError,
   type PendingGeneration, type StudioImage, type StudioSettings } from './studio-contract';
 
 function stored(key: string): unknown {
@@ -19,13 +19,14 @@ export function useImageStudio(owner: string | null, token?: string) {
   const [pending, setPending] = useState<PendingGeneration | null>(null);
   const [polling, setPolling] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [submission, setSubmission] = useState<StudioSettings | null>(null);
   const [uncertain, setUncertain] = useState(false);
   const [progress, setProgress] = useState('');
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [retryAt, setRetryAt] = useState(0);
   const [now, setNow] = useState(Date.now());
-  const [latest, setLatest] = useState<StudioImage[]>([]);
+  const [creations, setCreations] = useState<StudioImage[]>([]);
   const [images, setImages] = useState<StudioImage[]>([]);
   const [libraryLoading, setLibraryLoading] = useState(Boolean(owner));
   const [libraryError, setLibraryError] = useState('');
@@ -132,7 +133,8 @@ export function useImageStudio(owner: string | null, token?: string) {
           if (Date.now() >= deadline) { setPolling(false); setNotice('Still waiting. You can check the status again or look in your library.'); return null; }
           return imageStatusDelay(attempt++, response.headers.get('Retry-After'));
         }
-        setLatest(readGeneration(payload, pending.settings, pending.id));
+        const completed = readGeneration(payload, pending.settings, pending.id);
+        setCreations(current => appendCreations(current, completed));
         setNotice('Your images are ready. Download them or reuse the prompt.');
         save(`${key}:pending`, null); save(`${key}:unconfirmed`, null); setPending(null); setPolling(false); refresh();
       } catch {
@@ -150,6 +152,7 @@ export function useImageStudio(owner: string | null, token?: string) {
     const controller = new AbortController(); submitController.current = controller;
     const timeout = setTimeout(() => controller.abort(), 180_000);
     const snapshot = readSettings(settings);
+    setSubmission(snapshot);
     const id = crypto.randomUUID();
     save(`${key}:unconfirmed`, true);
     try {
@@ -171,13 +174,15 @@ export function useImageStudio(owner: string | null, token?: string) {
         if (!request) throw new Error('Invalid request receipt');
         save(`${key}:pending`, request); save(`${key}:unconfirmed`, null); setPending(request); setPolling(true);
       } else {
-        setLatest(readGeneration(payload, snapshot, id)); save(`${key}:unconfirmed`, null); refresh(); setNotice('Your images are ready.');
+        const completed = readGeneration(payload, snapshot, id);
+        setCreations(current => appendCreations(current, completed));
+        save(`${key}:unconfirmed`, null); refresh(); setNotice('Your images are ready.');
       }
     } catch {
       if (alive.current) { setError('The connection was interrupted. Your images may still finish. Check your library before generating again.'); setUncertain(true); }
     } finally {
       clearTimeout(timeout); submitLock.current = false;
-      if (alive.current) setSubmitting(false);
+      if (alive.current) { setSubmitting(false); setSubmission(null); }
     }
   }
 
@@ -199,9 +204,9 @@ export function useImageStudio(owner: string | null, token?: string) {
     setPolling(false); setPending(null); setUncertain(false); setError(''); save(`${key}:pending`, null); save(`${key}:unconfirmed`, null);
     setNotice('Ready for a new generation. Earlier images may still appear in your library.');
   }
-  return { settings, setSettings, ready, pending, polling, setPolling, submitting, uncertain, progress, error, notice, setNotice,
+  return { settings, setSettings, ready, pending, polling, setPolling, submitting, submission, uncertain, progress, error, notice, setNotice,
     retryIn: Math.max(0, Math.ceil((retryAt - now) / 1000)), elapsed: pending ? Math.max(0, Math.floor((now - pending.startedAt) / 1000)) : 0,
-    latest, images, total, cursor, libraryLoading, libraryError, search, setSearch, favorites, setFavorites, sort, setSort,
+    creations, images, total, cursor, libraryLoading, libraryError, search, setSearch, favorites, setFavorites, sort, setSort,
     generate, refresh, retryLibrary: () => { if (!libraryLoading) void fetchLibrary(libraryRetryCursor.current); },
     loadMore: () => { if (cursor && !libraryLoading) void fetchLibrary(cursor); }, toggleFavorite, busyAsset, clearPending };
 }

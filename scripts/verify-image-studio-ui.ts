@@ -14,8 +14,8 @@ const browser = await chromium.launch({ headless: true, executablePath: '/Applic
 const results: unknown[] = [];
 const sentinel = 'private-diagnostic-sentinel';
 
-async function setup(width: number, authenticated: boolean) {
-  const context = await browser.newContext({ viewport: { width, height: 1000 }, reducedMotion: 'reduce' });
+async function setup(width: number, authenticated: boolean, reducedMotion: 'reduce' | 'no-preference' = 'reduce') {
+  const context = await browser.newContext({ viewport: { width, height: 1000 }, reducedMotion });
   const state = { posts: 0, polls: 0, patches: 0, complete: false, mode: 'success', libraryMode: 'success', libraryHold: null as Promise<void> | null, payload: null as any,
     images: [] as any[], favorites: new Set<string>(), libraryQueries: [] as string[] };
   if (authenticated) await context.addInitScript(() => {
@@ -35,6 +35,8 @@ async function setup(width: number, authenticated: boolean) {
       if (state.mode === 'offline') return route.abort();
       if (state.mode === 'limited') return json({ error: { code: 'rate_limited', message: sentinel } }, 429, { 'Retry-After': '2' });
       if (state.mode === 'unauthorized') return json({ error: { message: sentinel } }, 401);
+      if (state.mode === 'malformed') return json({ data: [{ url: 'https://evil.test/image.png' }], internal: sentinel });
+      if (state.mode === 'immediate') return json({ data: Array.from({ length: state.payload.n }, () => ({ b64_json: picture.toString('base64'), internal: sentinel })) });
       return json({ id: 'request-fixture', status: 'queued', task_url: 'https://evil.test/private', internal: sentinel }, 202);
     }
     if (url.pathname === '/v1/images/requests/request-fixture') {
@@ -70,6 +72,7 @@ async function setup(width: number, authenticated: boolean) {
   return { context, page, state, pageErrors };
 }
 async function inspect(page: any, label: string) {
+  await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
   await page.evaluate(() => document.fonts.ready);
   const widths = await page.evaluate(() => { const body = document.querySelector('.studio-canvas-body')!.getBoundingClientRect(); return { available: innerWidth, canvas: body.width }; });
   if (widths.available < 760) assert.equal(widths.canvas, widths.available, 'mobile canvas uses full width');
@@ -79,7 +82,10 @@ async function inspect(page: any, label: string) {
   const axe = await new AxeBuilder({ page }).include('.studio').withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();
   const issues = axe.violations.map((issue: any) => ({ id: issue.id, impact: issue.impact, nodes: issue.nodes.map((node: any) => node.target) }));
   results.push({ label, overflow, accessibility: issues });
-  if (!process.env.GALX_STUDIO_NO_CAPTURE) await page.screenshot({ path: path.join(out, `${label}.png`), fullPage: !(await page.getByRole('dialog').count()) });
+  if (!process.env.GALX_STUDIO_NO_CAPTURE) {
+    await page.screenshot({ path: path.join(out, `${label}.png`), fullPage: !(await page.getByRole('dialog').count()) });
+    if (/^(latest|grid|simulation|continuity)-/.test(label)) await page.locator('.studio-creations').screenshot({ path: path.join(out, `${label}-canvas.png`) });
+  }
   assert.deepEqual(issues, [], `${label}: accessibility checks pass`);
   return issues;
 }
@@ -89,9 +95,13 @@ try {
     await page.goto(base + '/images', { waitUntil: 'networkidle' });
     await page.getByRole('link', { name: 'Sign in to generate' }).waitFor().catch(async (error: Error) => { console.log('BROWSER DEBUG', pageErrors, (await page.locator('body').innerText()).slice(0,3000)); await page.screenshot({ path: path.join(out, 'debug.png'), fullPage: true }); throw error; });
     await inspect(page, `guest-${width}`);
+    assert.equal(await page.locator('.studio-creations img, .studio-creations canvas').count(), 0, 'the canvas starts blank');
+    assert.doesNotMatch(await page.locator('.studio').innerText(), /What will you imagine|AI-generated examples|Somewhere unexpected|High detail can take longer/);
     assert(await page.evaluate(() => Boolean(document.querySelector('.studio-view-nav')!.compareDocumentPosition(document.querySelector('.studio-composer')!) & Node.DOCUMENT_POSITION_FOLLOWING)), 'navigation precedes composer in keyboard order');
-    await page.getByRole('button', { name: 'Use prompt: Somewhere unexpected' }).click();
-    assert.match(await page.getByLabel('Prompt', { exact: true }).inputValue(), /terracotta/);
+    await page.getByLabel('Prompt', { exact: true }).fill('A terracotta landscape');
+    const clearSize = await page.getByRole('button', { name: 'Clear', exact: true }).boundingBox();
+    assert(clearSize.width >= 44 && clearSize.height >= 44, 'Clear has a forgiving touch target');
+    await page.getByRole('button', { name: 'Landscape 3:2' }).click();
     assert.equal(await page.getByRole('button', { name: 'Landscape 3:2' }).getAttribute('aria-pressed'), 'true');
     await page.reload({ waitUntil: 'networkidle' });
     assert.match(await page.getByLabel('Prompt', { exact: true }).inputValue(), /terracotta/);
@@ -110,6 +120,10 @@ try {
   await page.getByRole('button', { name: '2 images', exact: true }).click();
   await page.getByLabel('Prompt', { exact: true }).press('Control+Enter');
   await page.getByRole('heading', { name: 'Waiting to start…' }).waitFor();
+  assert.equal(await page.locator('.studio-denoising').count(), 1);
+  await page.getByRole('button', { name: 'Grid', exact: true }).click();
+  assert.equal(await page.locator('.studio-denoising').count(), 2, 'each requested image has a pending slot');
+  await page.getByRole('button', { name: 'Image', exact: true }).click();
   assert.equal(state.posts, 1);
   const beforeHidden = state.polls;
   await page.evaluate(() => { Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'hidden' }); document.dispatchEvent(new Event('visibilitychange')); });
@@ -118,14 +132,16 @@ try {
   await page.evaluate(() => { Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'visible' }); document.dispatchEvent(new Event('visibilitychange')); });
   await page.waitForFunction(() => document.visibilityState === 'visible');
   assert.deepEqual(state.payload, { model: 'openai-gpt-image-latest', prompt: 'A cinematic blue desert lake', n: 2, size: '1536x1024', quality: 'standard', response_format: 'url' });
-  await page.getByRole('button', { name: 'Pause status checks' }).click();
-  await page.getByRole('button', { name: 'Check status', exact: true }).waitFor();
+  await page.getByText('Generation options', { exact: true }).click();
+  await page.getByRole('button', { name: 'Pause updates' }).click();
+  await page.getByRole('button', { name: 'Resume updates', exact: true }).waitFor();
   await inspect(page, 'pending-1440');
   await page.reload({ waitUntil: 'networkidle' });
   await page.getByRole('heading', { name: 'Waiting to start…' }).waitFor();
   assert.equal(state.posts, 1, 'reload resumes retrieval without another generation');
   state.complete = true;
-  await page.getByRole('heading', { name: 'Fresh from your imagination' }).waitFor();
+  await page.getByRole('button', { name: 'Open image: A cinematic blue desert lake' }).waitFor();
+  assert.equal(await page.locator('.studio-denoising').count(), 0, 'completion replaces the simulation with real image output');
   await page.getByRole('button', { name: 'Open image: A cinematic blue desert lake' }).click();
   await page.getByRole('dialog').waitFor();
   await inspect(page, 'inspector-1440');
@@ -202,6 +218,146 @@ try {
   await page.getByRole('alert').filter({ hasText: 'earlier request was interrupted' }).waitFor();
   assert.equal(state.posts, 3); assert.deepEqual(pageErrors, []);
   await context.close();
+
+  for (const width of [1440, 390]) {
+    const run = await setup(width, true);
+    run.state.mode = 'immediate';
+    await run.page.goto(base + '/images', { waitUntil: 'networkidle' });
+    await run.page.getByLabel('Prompt', { exact: true }).fill('Two blue landscapes');
+    await run.page.getByRole('button', { name: '2 images', exact: true }).click();
+    await run.page.getByRole('button', { name: 'Generate 2 images', exact: true }).click();
+    await run.page.getByText('2 images this session', { exact: true }).waitFor();
+    assert.equal(await run.page.locator('.studio-focused-image').count(), 1, 'latest view shows just the newest image');
+    if (width < 760) await run.page.getByRole('button', { name: 'Edit prompt', exact: true }).click();
+    await run.page.getByLabel('Prompt', { exact: true }).fill('A third image');
+    await run.page.getByRole('button', { name: '1 image', exact: true }).click();
+    await run.page.getByRole('button', { name: 'Generate image', exact: true }).click();
+    await run.page.getByRole('button', { name: 'Open image: A third image' }).waitFor();
+    if (width > 760) assert.equal(await run.page.locator('.studio-return-results').isVisible(), false, 'mobile return action stays hidden on desktop');
+    await inspect(run.page, `latest-${width}`);
+    await run.page.getByRole('button', { name: 'Grid', exact: true }).click();
+    assert.equal(await run.page.locator('.studio-creation-thumbnail').count(), 3, 'all completed batches remain in the session array');
+    assert(await run.page.locator('.studio-creation-thumbnail').first().evaluate((el: HTMLElement) => el.getBoundingClientRect().width <= 160), 'grid cards stay thumbnail sized');
+    await inspect(run.page, `grid-${width}`);
+    const thumb = run.page.getByRole('button', { name: 'Open image: Two blue landscapes' }).first();
+    await thumb.click();
+    await run.page.getByRole('dialog').waitFor();
+    const dialog = run.page.getByRole('dialog');
+    assert(await dialog.getByRole('button', { name: 'Previous image', exact: true }).isDisabled());
+    await run.page.keyboard.press('ArrowRight');
+    await dialog.getByText('2 of 3', { exact: true }).waitFor();
+    await dialog.getByRole('button', { name: 'Next image', exact: true }).click();
+    await dialog.getByText('3 of 3', { exact: true }).waitFor();
+    assert(await dialog.getByRole('button', { name: 'Next image', exact: true }).isDisabled());
+    await run.page.keyboard.press('Tab');
+    assert(await dialog.evaluate((el: HTMLElement) => el.contains(document.activeElement)), 'keyboard focus stays in the dialog');
+    await inspect(run.page, `browse-inspector-${width}`);
+    await run.page.keyboard.press('Escape');
+    assert(await thumb.evaluate((el: HTMLElement) => el === document.activeElement), 'lightbox restores focus to the thumbnail');
+    await run.page.getByRole('button', { name: 'My images', exact: true }).click();
+    await run.page.getByRole('button', { name: 'Create', exact: true }).click();
+    assert.equal(await run.page.getByRole('button', { name: 'Grid', exact: true }).getAttribute('aria-pressed'), 'true', 'view survives library navigation');
+    await run.page.getByRole('button', { name: 'Image', exact: true }).click();
+    await run.page.getByRole('button', { name: 'Show image 1: Two blue landscapes', exact: true }).click();
+    await run.page.locator('.studio-focused-image').focus();
+    await run.page.keyboard.press('ArrowRight');
+    assert.equal(await run.page.getByRole('button', { name: 'Show image 2: Two blue landscapes', exact: true }).getAttribute('aria-pressed'), 'true', 'focused image supports arrow navigation');
+    if (width < 760) await run.page.getByRole('button', { name: 'Edit prompt', exact: true }).click();
+    await run.page.getByLabel('Prompt', { exact: true }).fill('Another landscape while browsing');
+    run.state.mode = 'success';
+    await run.page.getByRole('button', { name: 'Generate image', exact: true }).click();
+    await run.page.getByRole('heading', { name: 'Waiting to start…' }).waitFor();
+    assert.equal(await run.page.locator('.studio-focused-image').count(), 1, 'browsing keeps an earlier image visible while generating');
+    await run.page.getByRole('button', { name: 'View generation', exact: true }).click();
+    assert.equal(await run.page.locator('.studio-denoising').count(), 1);
+    await run.page.getByRole('button', { name: 'Previous generated image', exact: true }).click();
+    run.state.complete = true;
+    await run.page.getByText('4 images this session', { exact: true }).waitFor();
+    await run.page.locator('.studio-focused-image').filter({ has: run.page.getByAltText('A third image', { exact: true }) }).waitFor();
+    assert.equal(await run.page.getByRole('button', { name: 'Show image 3: A third image', exact: true }).getAttribute('aria-pressed'), 'true', 'completion does not steal the selected image');
+    await run.page.getByRole('button', { name: 'Latest image', exact: true }).click();
+    await run.page.getByRole('button', { name: 'Open image: Another landscape while browsing', exact: true }).waitFor();
+    assert.equal(run.state.posts, 3, 'browsing never submits a generation');
+    await inspect(run.page, `continuity-${width}`);
+    if (width === 390) {
+      await run.page.setViewportSize({ width: 320, height: 740 });
+      await inspect(run.page, 'continuity-320');
+      await run.page.setViewportSize({ width, height: 1000 });
+    } else {
+      await run.page.setViewportSize({ width: 1280, height: 700 });
+      await inspect(run.page, 'workspace-short');
+      assert(await run.page.getByText('Scroll for more settings', { exact: true }).isVisible());
+      await run.page.setViewportSize({ width, height: 1000 });
+    }
+    await run.page.getByRole('button', { name: 'Grid', exact: true }).click();
+    if (width < 760) await run.page.getByRole('button', { name: 'Edit prompt', exact: true }).click();
+    if (width < 760) {
+      assert(await run.page.getByRole('button', { name: 'Back to images', exact: true }).isVisible());
+      await run.page.waitForFunction(() => document.activeElement?.id === 'studio-prompt');
+      assert(await run.page.getByLabel('Prompt', { exact: true }).evaluate((el: HTMLElement) => el === document.activeElement), 'Edit prompt restores text-entry focus');
+      await inspect(run.page, 'composer-expanded-390');
+      await run.page.getByRole('button', { name: 'Back to images', exact: true }).click();
+      assert.equal(await run.page.getByLabel('Prompt', { exact: true }).isVisible(), false);
+      await run.page.getByRole('button', { name: 'Edit prompt', exact: true }).click();
+    }
+    run.state.mode = 'malformed';
+    await run.page.getByRole('button', { name: 'Generate image', exact: true }).click();
+    await run.page.getByRole('alert').filter({ hasText: 'connection was interrupted' }).waitFor();
+    assert.equal(await run.page.locator('.studio-creation-thumbnail').count(), 4, 'invalid output does not add an image or discard previous results');
+    assert.equal(await run.page.locator('.studio-denoising').count(), 0, 'an interrupted submission stops its animation');
+    assert.deepEqual(run.pageErrors, []);
+    await run.context.close();
+  }
+
+  const strip = await setup(900, true);
+  strip.state.mode = 'immediate';
+  await strip.page.goto(base + '/images', { waitUntil: 'networkidle' });
+  await strip.page.getByLabel('Prompt', { exact: true }).fill('A twelve-image browsing session');
+  await strip.page.getByRole('button', { name: '4 images', exact: true }).click();
+  for (let batch = 1; batch <= 3; batch++) {
+    await strip.page.getByRole('button', { name: 'Generate 4 images', exact: true }).click();
+    await strip.page.getByText(`${batch * 4} images this session`, { exact: true }).waitFor();
+  }
+  const selectedThumb = strip.page.locator('.studio-filmstrip [aria-pressed="true"]');
+  const stripBounds = await strip.page.locator('.studio-filmstrip').boundingBox();
+  const selectedBounds = await selectedThumb.boundingBox();
+  assert(selectedBounds.x >= stripBounds.x && selectedBounds.x + selectedBounds.width <= stripBounds.x + stripBounds.width, 'selected filmstrip image scrolls into view at intermediate widths');
+  await inspect(strip.page, 'filmstrip-900');
+  await strip.context.close();
+
+  const motion = await setup(1440, true, 'no-preference');
+  await motion.page.goto(base + '/images', { waitUntil: 'networkidle' });
+  await motion.page.getByLabel('Prompt', { exact: true }).fill('A softly lit landscape');
+  await motion.page.getByRole('button', { name: 'Generate image', exact: true }).click();
+  await motion.page.getByRole('heading', { name: 'Waiting to start…' }).waitFor();
+  const pixels = () => motion.page.locator('.studio-denoising').evaluate((canvas: HTMLCanvasElement) => canvas.toDataURL());
+  const initial = await pixels();
+  await motion.page.waitForTimeout(400);
+  assert.notEqual(await pixels(), initial, 'the simulation changes while generating');
+  await motion.page.getByRole('button', { name: 'Pause animation', exact: true }).click();
+  await motion.page.waitForTimeout(100);
+  const paused = await pixels();
+  await motion.page.waitForTimeout(300);
+  assert.equal(await pixels(), paused, 'pausing the animation freezes the canvas');
+  await motion.page.getByText('Generation options', { exact: true }).click();
+  assert(await motion.page.getByRole('button', { name: 'Pause updates', exact: true }).isVisible(), 'animation controls do not pause status retrieval');
+  await motion.page.getByRole('button', { name: 'Play animation', exact: true }).click();
+  await inspect(motion.page, 'simulation-1440');
+  await motion.page.evaluate(() => { Object.defineProperty(document, 'hidden', { configurable: true, value: true }); document.dispatchEvent(new Event('visibilitychange')); });
+  const hidden = await pixels();
+  await motion.page.waitForTimeout(300);
+  assert.equal(await pixels(), hidden, 'hidden canvases stop painting');
+  await motion.page.evaluate(() => { Object.defineProperty(document, 'hidden', { configurable: true, value: false }); document.dispatchEvent(new Event('visibilitychange')); });
+  await motion.page.waitForTimeout(300);
+  assert.notEqual(await pixels(), hidden, 'visible canvases resume painting');
+  await motion.page.emulateMedia({ reducedMotion: 'reduce' });
+  await motion.page.waitForTimeout(100);
+  const reduced = await pixels();
+  await motion.page.waitForTimeout(300);
+  assert.equal(await pixels(), reduced, 'reduced motion keeps the simulation static');
+  assert.equal(motion.state.posts, 1);
+  assert.deepEqual(motion.pageErrors, []);
+  await motion.context.close();
 } finally {
   await browser.close();
   await fs.writeFile(path.join(out, 'verification.json'), JSON.stringify(results, null, 2));

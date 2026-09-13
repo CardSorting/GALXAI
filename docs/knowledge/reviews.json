@@ -970,19 +970,22 @@
     }
   },
   "client-efficiency": {
-    "reviewer": "Codex performance maintainer",
-    "note": "Reviewed second-pass recovery pacing and cancellation, rolling navigation budgets, retained library error states, exact-page retry and access-denied clearing against complete current guides and isolated browser/security evidence.",
+    "reviewer": "Codex frontend maintainer",
+    "note": "Semantically reviewed continuous image browsing, scoped keyboard and focus behavior, progressive waiting controls and responsive recovery against the complete quota-efficiency and navigation guides. Reconciled private surface and audit records; retained local build, security, 21-state browser and independent visual evidence. No deployment or measured performance improvement claimed.",
     "reviewed_at": "2026-09-13",
     "review_by": "2026-09-20",
     "evidence": {
-      "docs/knowledge/audits/2026-09-13-request-efficiency-hardening.json": "1e5d1dc3e7c86ecb581ecbb25cccd812db9d3fa3afc1c28a9d0bf89d198151a2"
+      "docs/knowledge/audits/2026-09-13-request-efficiency-hardening.json": "1e5d1dc3e7c86ecb581ecbb25cccd812db9d3fa3afc1c28a9d0bf89d198151a2",
+      "docs/knowledge/audits/2026-09-13-image-composer-simplification.json": "7598fac3dabbb29b0a1d70c9e6e1901104a413cecd2d6a007bdab8b50caf602c",
+      "docs/knowledge/audits/2026-09-13-image-generation-canvas.json": "7828c3fa452aed725c00744c5d3a28f156f86381eed6a6289520040c88e2384d",
+      "docs/knowledge/audits/2026-09-13-image-workspace-ergonomics.json": "1c656ff43bc4314756ab29d208d94fd45c1d509f6cf05e222c48d979a29d206f"
     },
     "files": {
       "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md": "148217dea5612e5c07bdae488c2190f9f66308aaa06e57a2bbfddbf2c5d7512f",
-      "docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md": "ef39d6fa3f62d2e09aa28da6eb47246380bcc55d3cc6d77071db654087ef7cc2",
+      "docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md": "b91627ef8ba5f81278a9e6e1e66ab1d8cea6273e5fced58ec0a157d56f740eea",
       "scripts/test-request-efficiency.ts": "2a004bc34569fb72e40b2dde1e9567674bea10365fe7134459bfa275eb56a591",
       "scripts/test-sites-workspace.ts": "cfd5ced896fb0ae0c9608abd7a9befeeb9e97c1742ca102a654ed6d70fca45db",
-      "scripts/verify-image-studio-ui.ts": "4c349bdc95665d69819c4dc5262b10722963500147f5b3f621c1694e53a9b1a6",
+      "scripts/verify-image-studio-ui.ts": "c619d6e918e74ae4bbac6858a6d3487e99539ca4ab99811e50152ef627d9f4f8",
       "scripts/verify-sites-workspace-ui.ts": "b1821725236e252e3a774fbbe06cfdd6ef34183ab67edf230c94c99e8099271c",
       "src/components/common/CommandMenu.tsx": "6aefcaef61f99be58961b9c5caa1954692ed1aa746666fe6fc6ffb59aeb8adb3",
       "src/components/common/IntentLink.tsx": "c866bc13acbbc81829c9f4ec1be5736bfb064c7a039c3d43ab5c524dd5d6e201",
@@ -990,8 +993,8 @@
       "src/components/dashboard/Footer.tsx": "b2f9edcdb3a685a260e592ded25eee6c590ce5403c577599d1911c6d743a80d9",
       "src/components/dashboard/MobileBottomNav.tsx": "35e50ba3e6a286bd2f2fe9d44f49e4a68cb0869f7d2398aa9c14c214dc2e9493",
       "src/components/dashboard/Navigation.tsx": "5a8d113f7afa1031873740e353866fbf895c7864c34087f924768fda8f3d2628",
-      "src/components/images/ImageStudio.tsx": "3a38b2d10e03a9a99387c9891f6fd19f4bb67e49aef9dc1803cb6aac2dea7b52",
-      "src/components/images/use-image-studio.ts": "66a82856110e375f877e5381576e3675cc81506da21753b691a4a57e69113374",
+      "src/components/images/ImageStudio.tsx": "ab1c8bc0dab475b059bb5897e537cfd6d4f5a59f4c48d4284d81a91f01b467d6",
+      "src/components/images/use-image-studio.ts": "2e11a038e60ecd924e283cf4b664e1c886c48b9664e1bd7d4cb1bd43afdef0de",
       "src/components/sites/use-sites-workspace.ts": "876c4ef5a44a49870897967d5b2de5f13f54b4ce7bde8f1e09a2edfdfb289a1e",
       "src/lib/resilience/activity-polling.ts": "8018eef80ba6c49a401721f3607aef14aaa773bac1c1f108bc55f99f4b0fac7a",
       "src/lib/resilience/intent-prefetch.ts": "16ba381ee0376e1afde4261a0be688eae977bcbaaf3fe07e3387d0dd8b051c24"

@@ -2938,6 +2938,16 @@
       "decision": null
     },
     {
+      "path": "docs/maintainers/image-workspace-ux-audit-2026-09-13.md",
+      "title": "Image workspace UX investigation — September 13, 2026",
+      "scope": "operational-record",
+      "kind": "evidence",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
       "path": "docs/manifesto/PRODUCT_VISION_AND_NORTH_STAR.md",
       "title": "🌟 PRODUCT VISION & THE NORTH STAR",
       "scope": "commercial-draft",

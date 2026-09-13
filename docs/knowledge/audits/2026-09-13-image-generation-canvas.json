@@ -1,0 +1,182 @@
+{
+  "observed_at": "2026-09-13T06:19:58.109152+00:00",
+  "base_revision": "b8a5d390061fc16c3655b8f5cc3f2e00cd4b2da9",
+  "scope": "Local working-tree image canvas extension after composer simplification. No deployment, live generation, new provider, or server/API contract change.",
+  "prior_evidence": [
+    "docs/knowledge/audits/2026-09-13-request-efficiency-hardening.json",
+    "docs/knowledge/audits/2026-09-13-image-composer-simplification.json"
+  ],
+  "source_and_guide_sha256": {
+    "src/components/images/ImageStudio.tsx": "624ff2b1700db76aec47c7f338d8a4a6d94b1e64fc4cdfbcb3ef18c942f7ec1d",
+    "src/components/images/GenerationCanvas.tsx": "21d0da52b01a9e9f8887d0f976620245851cd50d85015319c9e2d283a7dceb77",
+    "src/components/images/StudioArtwork.tsx": "d56f19c4ca3e463f3983d02c766eb8c4165d1514472344bb4a9fccc3514abd7c",
+    "src/components/images/studio.css": "14443aaf16726067593e205ebcbe7d1a872dd69b22b4d3706e812043c2ea3bec",
+    "src/components/images/studio-contract.ts": "4fcb43507d41db7ce597afdcff7b7c8116347e2fb03b6b88cd8f0fc75467140e",
+    "src/components/images/use-image-studio.ts": "2e11a038e60ecd924e283cf4b664e1c886c48b9664e1bd7d4cb1bd43afdef0de",
+    "scripts/test-image-studio.ts": "d52104c40cfe81051937d7e981e537b2235374055e4d3642e0b95c47f58d8926",
+    "scripts/verify-image-studio-ui.ts": "670dd577f37274a1a9d5fed9952a20c61e7c4271c83a9d43feccbafc165aff93",
+    "docs/maintainers/image-studio-review.md": "c0f3115871d944883c2fe0ba4eae42a8140ec2eec8d094f22026f520491e23b2",
+    "docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md": "917dd1ff74d81d977fdfaa3836714e3d22d6148a033a5d588e3ba46d7f2c3213",
+    "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md": "148217dea5612e5c07bdae488c2190f9f66308aaa06e57a2bbfddbf2c5d7512f",
+    ".impeccable/surfaces/src-app-images-page-tsx.md": "0f7e2b1d22066c638d3feab0caccccf356937c6189224d367f730abb5267bada"
+  },
+  "semantic_review": [
+    "Reviewed image workspace, new presentation components, browser settings/projection contract, and generation hook against the complete quota-efficiency and navigation guides. Added canvas behavior and animation limits to the quota guide; navigation budgets remain unchanged.",
+    "Both synchronous and asynchronous completion paths validate the complete response before appending a batch. Receipt/image IDs deduplicate observations without merging distinct images with identical pixels. The array resets on owner/workspace remount and is separate from the saved library.",
+    "Captured submission settings prevent edited composer controls from altering the active placeholder count. Existing pending receipt recovery, generation locks, Retry-After, uncertain-outcome handling, library retention and access-denied clearing remain.",
+    "The procedural simulation is visibly labeled Generation animation, uses no prompt or provider data, and infers neither partial image content nor completion percentage. It stops for manual pause, reduced motion, hidden/offscreen state, paused retrieval, errors and unmount.",
+    "Reviewed unmapped presentation, contract, style, test and documentation paths as part of the mapped ImageStudio/use-image-studio surface. These add no new API, persistence or authentication boundary. The existing parent and hook mapping plus owning guide cover this change; the broader domain fingerprint is not an exhaustive module audit.",
+    "Reconciled current behavior in the studio maintainer record while preserving the initial September 10 and earlier September 13 local observations. Historical artwork is removed from the Create UI and browser contract; existing assets remain fixture/history material.",
+    "The finish documenter reconciled the entire private surface brief with the built canvas, new component targets and dated evidence. Root reviewed it and corrected the removed-copy scan count to 21 total files (HTML plus 20 scripts). DESIGN.md and global sidecars remain unchanged."
+  ],
+  "validation": {
+    "production_build": {
+      "command": "npm run build",
+      "exit_code": 0,
+      "includes": "TypeScript validation",
+      "configuration": "Next.js loaded local .env.local; browser traffic was isolated using request interception."
+    },
+    "targeted_eslint": {
+      "exit_code": 0,
+      "files": [
+        "src/components/images/ImageStudio.tsx",
+        "src/components/images/GenerationCanvas.tsx",
+        "src/components/images/StudioArtwork.tsx",
+        "src/components/images/studio-contract.ts",
+        "src/components/images/use-image-studio.ts"
+      ]
+    },
+    "image_security": {
+      "command": "npm run test:image:security",
+      "passed": 23,
+      "failed": 0
+    },
+    "studio_contract": {
+      "command": "node --import tsx --test scripts/test-image-studio.ts",
+      "passed": 5,
+      "failed": 0
+    },
+    "request_efficiency": {
+      "command": "npm run test:egress:transport",
+      "passed": 40,
+      "failed": 0
+    },
+    "documentation_fixtures": {
+      "command": "npm run test:docs",
+      "passed": 36,
+      "failed": 0
+    },
+    "browser": {
+      "command": "scripts/verify-image-studio-ui.ts",
+      "target": "http://127.0.0.1:3417/images",
+      "external_requests": "blocked; generation and library responses intercepted",
+      "exit_code": 0,
+      "results": [
+        {
+          "label": "guest-1440",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "guest-390",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "pending-1440",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "inspector-1440",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "library-1440",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "library-390",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "inspector-390",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "library-error-390",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "latest-1440",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "grid-1440",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "latest-390",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "grid-390",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "simulation-1440",
+          "overflow": false,
+          "accessibility": []
+        }
+      ],
+      "coverage": [
+        "blank guest canvas and draft recovery",
+        "asynchronous receipt resume without duplicate submission",
+        "synchronous multi-image completion and successive batch accumulation",
+        "latest/grid and thumbnail sizing",
+        "thumbnail lightbox with Escape/focus return",
+        "malformed output leaves prior results intact",
+        "manual animation pause independent of status polling",
+        "hidden-tab animation stop/resume",
+        "reduced-motion static simulation",
+        "existing downloads, Favorites, pagination and library error/authorization recovery"
+      ]
+    },
+    "compiled_private_boundary": {
+      "command": "npm run docs:check:build",
+      "exit_code": 0,
+      "browser_rendered_assets": 640
+    },
+    "removed_content_scan": {
+      "scope": "local production /images HTML and associated scripts",
+      "files": 21,
+      "removed_copy_hits": []
+    },
+    "design_hook": {
+      "fixed": "5px toggle radius changed to existing 4px scale",
+      "suppressions_added": 0,
+      "outstanding_findings": []
+    },
+    "independent_finish_review": {
+      "disposition": "ship",
+      "required_captures_valid": 9,
+      "material_fixes": [],
+      "scope": "Requested blank canvas, labeled simulation, accumulation, latest/grid, thumbnail lightbox and established visual identity; no production acceptance."
+    }
+  },
+  "limits": [
+    "No deployment, paid generation, live library persistence or billing verification.",
+    "No physical-device, full screen-reader or measured performance assessment.",
+    "Session results remain in memory; no persistence or unlimited session-memory guarantee.",
+    "Offscreen suspension is source-reviewed; the browser fixture separately tests hidden-tab and reduced-motion behavior."
+  ]
+}

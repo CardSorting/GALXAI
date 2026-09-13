@@ -1,0 +1,95 @@
+{
+  "observed_at": "2026-09-13T06:01:37.271665+00:00",
+  "base_revision": "b8a5d390061fc16c3655b8f5cc3f2e00cd4b2da9",
+  "scope": "Working-tree removal of image composer model and quality controls. Local production build and intercepted browser fixtures only; no deployment or live generation.",
+  "prior_evidence": "docs/knowledge/audits/2026-09-13-request-efficiency-hardening.json",
+  "source_and_guide_sha256": {
+    "src/components/images/ImageStudio.tsx": "4eb685128caee3375c2317ff26191c043cb527604f64a4db00101ad982ae81b0",
+    "src/components/images/studio.css": "cd667fcac47c6b90c69d7de1ea11c31163ee4cfb0f5fa64a08345d7793c5bccf",
+    "src/components/images/studio-contract.ts": "72a30f8e590cc3361229871fa1b01ea284234e518450ffe9ffd9b6c92006fa95",
+    "src/components/images/use-image-studio.ts": "66a82856110e375f877e5381576e3675cc81506da21753b691a4a57e69113374",
+    ".impeccable/surfaces/src-app-images-page-tsx.md": "0a81aa5ac1e206f3ebe35e070600e90c23d5bee80521e51a3ad1a999e60dc282",
+    "docs/maintainers/image-studio-review.md": "904b590ddde53c0aad823e3c96dc02602f8beab0f116afc54024d60c72f6b7e3",
+    "docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md": "ef39d6fa3f62d2e09aa28da6eb47246380bcc55d3cc6d77071db654087ef7cc2",
+    "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md": "148217dea5612e5c07bdae488c2190f9f66308aaa06e57a2bbfddbf2c5d7512f"
+  },
+  "semantic_review": [
+    "Reviewed ImageStudio and its browser contract/hook against the complete quota-efficiency and navigation guides. This change only removes composer controls and associated spacing/styles; polling, library retries, ownership, saved settings and request DTOs are unchanged.",
+    "Updated the full surface brief and affected behavior in the image-studio maintainer record. Preserved September 10 verification as dated evidence.",
+    "Inspected unmapped CSS, surface brief and maintainer record paths; they belong to this existing image surface and introduce no new runtime boundary.",
+    "The broader client-efficiency fingerprint inventory is unchanged outside ImageStudio. Prior evidence retains its original scope; this review does not re-audit unrelated modules."
+  ],
+  "checks": {
+    "npm run test:image:security": {
+      "passed": 23,
+      "failed": 0,
+      "note": "Initial sandbox run could not bind the localhost HTTP fixture; rerun outside sandbox passed."
+    },
+    "node --import tsx --test scripts/test-image-studio.ts": {
+      "passed": 4,
+      "failed": 0
+    },
+    "npx eslint src/components/images/ImageStudio.tsx": "passed",
+    "npm run build": "passed, including TypeScript validation; local .env.local loaded by Next.js",
+    "npm run test:docs": {
+      "passed": 36,
+      "failed": 0
+    },
+    "scripts/verify-image-studio-ui.ts": {
+      "target": "http://127.0.0.1:3417/images",
+      "exit_code": 0,
+      "results": [
+        {
+          "label": "guest-1440",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "guest-390",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "pending-1440",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "inspector-1440",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "library-1440",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "library-390",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "inspector-390",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "library-error-390",
+          "overflow": false,
+          "accessibility": []
+        }
+      ]
+    },
+    "visual_review": "Viewed guest-1440.png and guest-390.png from this run. Model/quality controls and their helper copy are absent; prompt, aspect ratio, count and generation action remain.",
+    "npm run docs:check:build": {
+      "passed": true,
+      "browser_and_rendered_assets": 640,
+      "scope": "Compiled private-marker and runtime-trace check; not a live site audit."
+    }
+  },
+  "limits": [
+    "No production deployment, paid generation, live persistence verification, physical-device or full screen-reader assessment.",
+    "Existing image-detail metadata and historical/reused quality settings remain supported."
+  ]
+}
