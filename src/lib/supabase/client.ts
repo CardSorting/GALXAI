@@ -11,6 +11,21 @@ import { BroccoliAuthoritativeGovernor } from '@/core/broccolidb/BroccoliAuthori
 
 let adminClientInstance: SupabaseClient<Database> | null = null;
 let defaultClientInstance: SupabaseClient<Database> | null = null;
+let authClientInstance: SupabaseClient<Database> | null = null;
+
+/** Identity checks must not share the database query budget or circuit breaker. */
+export function getSupabaseAuthClient(): SupabaseClient<Database> {
+  if (authClientInstance) return authClientInstance;
+  const config = getSupabaseConfig();
+  if (!config.hasDataApiCredential) throw new Error('Auth service is not configured');
+  authClientInstance = createClient<Database>(config.supabaseUrl, config.supabaseAnonKey, {
+    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+    global: { fetch: (input, init) => fetch(input, { ...init,
+      signal: init?.signal ? AbortSignal.any([init.signal, AbortSignal.timeout(8000)]) : AbortSignal.timeout(8000),
+    }) },
+  });
+  return authClientInstance;
+}
 
 export class SupabaseCircuitBreakerError extends Error {
   constructor(message: string) {
@@ -130,4 +145,5 @@ export function isSupabaseAdminConfigured(): boolean {
 export function resetSupabaseClients(): void {
   adminClientInstance = null;
   defaultClientInstance = null;
+  authClientInstance = null;
 }

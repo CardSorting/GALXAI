@@ -19,6 +19,7 @@ export async function GET(
     const { assetId } = await params;
     const authEngine = GalxAuthEngine.getInstance();
     const authResult = await authEngine.resolveAuthIdentity(req);
+    if (authResult.error === 'AUTH_UNAVAILABLE') return NextResponse.json({ success: false, error: 'Your session could not be checked. Try again shortly.' }, { status: 503, headers: { 'Cache-Control': 'private, no-store', 'Retry-After': '3' } });
     if (!authResult.authenticated || !authResult.userId || authResult.userId === 'anonymous_developer') {
       return NextResponse.json({ success: false, error: 'Sign in to view this image.' }, { status: 401 });
     }
@@ -62,6 +63,7 @@ export async function PATCH(
     const { assetId } = await params;
     const authEngine = GalxAuthEngine.getInstance();
     const authResult = await authEngine.resolveAuthIdentity(req);
+    if (authResult.error === 'AUTH_UNAVAILABLE') return NextResponse.json({ success: false, error: 'Your session could not be checked. Try again shortly.' }, { status: 503, headers: { 'Cache-Control': 'private, no-store', 'Retry-After': '3' } });
     if (!authResult.authenticated || !authResult.userId || authResult.userId === 'anonymous_developer') {
       return NextResponse.json({ success: false, error: 'Sign in to manage this image.' }, { status: 401 });
     }
@@ -112,6 +114,7 @@ export async function DELETE(
     const { assetId } = await params;
     const authEngine = GalxAuthEngine.getInstance();
     const authResult = await authEngine.resolveAuthIdentity(req);
+    if (authResult.error === 'AUTH_UNAVAILABLE') return NextResponse.json({ success: false, error: 'Your session could not be checked. Try again shortly.' }, { status: 503, headers: { 'Cache-Control': 'private, no-store', 'Retry-After': '3' } });
     if (!authResult.authenticated || !authResult.userId || authResult.userId === 'anonymous_developer') {
       return NextResponse.json({ success: false, error: 'Sign in to manage this image.' }, { status: 401 });
     }

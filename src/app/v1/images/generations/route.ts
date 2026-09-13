@@ -2,7 +2,8 @@ import { NextRequest } from 'next/server';
 import { galxRouter } from '@/core/router/GalxModelRouter';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 import { GalxSeatTierEngine } from '@/core/subscription/GalxSeatTierEngine';
-import { GalxTaskQueueEngine } from '@/core/queue/GalxTaskQueueEngine';
+import { ImageRequestService } from '@/lib/images/request-service';
+import { ImageRequestConflict } from '@/lib/images/request-repository';
 import { ModelCatalog } from '@/core/router/ModelCatalog';
 import { ImageCapacityError } from '@/core/router/ImageCapacityError';
 import { RelayDispatchError } from '@/core/router/adapters/RelayChatTransport';
@@ -32,6 +33,7 @@ export async function POST(req: NextRequest) {
   const requestId = crypto.randomUUID();
   try {
     const auth = await GalxAuthEngine.getInstance().resolveAuthIdentity(req);
+    if (auth.error === 'AUTH_UNAVAILABLE') return imageError('temporarily_unavailable', requestId, 3);
     if (!auth.authenticated || !auth.userId) return imageError('unauthorized', requestId);
     let raw: Record<string, unknown>;
     try {
@@ -63,16 +65,16 @@ export async function POST(req: NextRequest) {
       sessionId: typeof raw.session_id === 'string' ? raw.session_id : typeof raw.sessionId === 'string' ? raw.sessionId : 'default',
       idempotencyKey: req.headers.get('idempotency-key') || undefined,
     };
+    if (body.idempotencyKey && !/^[\x21-\x7e]{1,128}$/.test(body.idempotencyKey)) return imageError('invalid_request', requestId);
+    if ((body.sessionId?.length || 0) > 128) return imageError('invalid_request', requestId);
     if (req.headers.get('x-galx-async') === 'true' || req.headers.get('prefer') === 'respond-async') {
-      const { task } = GalxTaskQueueEngine.getInstance().createTask({
-        id: crypto.randomUUID(), queueId: 'image-gen', userId: auth.userId, idempotencyKey: body.idempotencyKey,
-        target: { type: 'INTERNAL_MODEL', taskKind: 'image_generation', imagePayload: body,
-          isPriorityUser: entitlement.isPriorityUser, webhookCompletionUrl: req.headers.get('x-galx-webhook-url') || undefined, webhookHmacSecret: req.headers.get('x-galx-webhook-secret') || undefined },
-      });
+      const task = await ImageRequestService.getInstance().create(auth.userId, { ...body,
+        response_format: format === 'url' ? 'url' : 'b64_json', outputFormat: outputFormat as ImageFormat | undefined }, entitlement.isPriorityUser);
       const taskUrl = `/v1/images/requests/${encodeURIComponent(task.id)}`;
       const headers = imageHeaders(requestId, 'application/json');
       headers.set('Location', taskUrl);
-      return new Response(JSON.stringify({ id: task.id, status: 'queued', task_url: taskUrl }), { status: 202, headers });
+      headers.set('Retry-After', '3');
+      return new Response(JSON.stringify({ id: task.id, status: task.state, task_url: taskUrl }), { status: 202, headers });
     }
     // Only explicitly supported request fields reach dispatch. No user-selected shards or internal headers.
     const result = await galxRouter.routeImageGeneration({ request: body, userId: auth.userId,
@@ -81,6 +83,7 @@ export async function POST(req: NextRequest) {
       responseFormat: format as ImageResponseFormat, outputFormat: outputFormat as ImageFormat | undefined });
   } catch (error) {
     logImageFailure(requestId, error);
+    if (error instanceof ImageRequestConflict) return imageError('idempotency_conflict', requestId);
     if (error instanceof ImageCapacityError) return imageError('temporarily_unavailable', requestId, error.retryAfterSeconds);
     const failure = error as { status?: number; code?: string; reason?: string; name?: string };
     if (failure?.status === 429) return imageError('rate_limited', requestId, 5);

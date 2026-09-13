@@ -273,6 +273,11 @@ export class BroccoliImageLibraryBuffer {
     return this.flushBatch();
   }
 
+  public async flushAssetsDurably(userId: string, assetIds: string[]): Promise<void> {
+    await this.flushSync();
+    if (assetIds.some(id => this.writeQueue.get(id)?.userId === userId)) throw new Error('Image changes could not be saved');
+  }
+
   /**
    * Queries the visual library with sub-0.05ms memory lookup, automatic cold-cache warming,
    * filtering, sorting, and pagination.

@@ -1,8 +1,9 @@
 import type { PublicImageArtifact } from './image-artifact';
 
-export type PublicImageErrorCode = 'invalid_request' | 'unauthorized' | 'rate_limited' | 'generation_failed' | 'unsupported_input' | 'timeout' | 'temporarily_unavailable' | 'not_found';
+export type PublicImageErrorCode = 'invalid_request' | 'unauthorized' | 'rate_limited' | 'generation_failed' | 'unsupported_input' | 'timeout' | 'temporarily_unavailable' | 'not_found' | 'idempotency_conflict';
 const errors: Record<PublicImageErrorCode, { status: number; message: string }> = {
   invalid_request: { status: 400, message: 'Check the image request and try again.' },
+  idempotency_conflict: { status: 409, message: 'This retry key was used for a different request. Check the original request before starting another.' },
   unauthorized: { status: 401, message: 'Provide a valid GALX API key or sign in.' },
   rate_limited: { status: 429, message: 'Your request limit has been reached. Try again later.' },
   generation_failed: { status: 502, message: 'The image could not be generated. Contact support with the request ID if this continues.' },

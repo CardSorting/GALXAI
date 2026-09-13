@@ -7,7 +7,7 @@
  */
 
 import * as crypto from 'node:crypto';
-import { getSupabaseAdmin } from '../../lib/supabase/client';
+import { getSupabaseAuthClient } from '../../lib/supabase/client';
 import { GalxCryptoVault, PRIMARY_KEY_VERSION } from '../vault/GalxCryptoVault';
 import { galxRouter } from '../router/GalxModelRouter';
 import { GalxPersistence } from '../../lib/storage/GalxPersistence';
@@ -1064,8 +1064,12 @@ export class GalxAuthEngine {
     // Only the authentication service may establish a bearer token's identity.
     // Decoded payloads and caller-supplied user identifiers are not credentials.
     if (token.startsWith('eyJ')) {
+      const unavailable = () => ({ authenticated: false, userId: 'anonymous_developer',
+        authType: 'session_token' as const, isPriorityUser: false, error: 'AUTH_UNAVAILABLE' });
       try {
-        const { data, error } = await getSupabaseAdmin().auth.getUser(token);
+        // User-token verification needs only the public Auth client. Requiring a
+        // service-role credential here incorrectly rejects valid browser sessions.
+        const { data, error } = await getSupabaseAuthClient().auth.getUser(token);
         if (!error && data.user?.id) {
           return {
             authenticated: true,
@@ -1077,8 +1081,10 @@ export class GalxAuthEngine {
             token
           };
         }
+        if (!error || !error.status || error.status >= 500 || error.status === 429) return unavailable();
       } catch {
-        // Authentication outages fail closed; never fall back to decoded claims.
+        // Fail closed without telling a valid user their session has expired.
+        return unavailable();
       }
     }
 

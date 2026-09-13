@@ -18,6 +18,7 @@ export async function POST(req: NextRequest) {
     const authEngine = GalxAuthEngine.getInstance();
     const authResult = await authEngine.resolveAuthIdentity(req);
 
+    if (authResult.error === 'AUTH_UNAVAILABLE') return NextResponse.json({ success: false, error: 'Your session could not be checked. Try again shortly.' }, { status: 503, headers: { 'Cache-Control': 'private, no-store', 'Retry-After': '3' } });
     if (!authResult.authenticated || !authResult.userId || authResult.userId === 'anonymous_developer') {
       return NextResponse.json({ success: false, error: 'Sign in to manage your image library.' }, { status: 401 });
     }

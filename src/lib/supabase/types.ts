@@ -53,6 +53,11 @@ export type GalxIdempotencyState = 'IN_FLIGHT' | 'COMMITTED' | 'FAILED';
 export interface Database {
   private: {
     Tables: {
+      galx_image_requests: {
+        Row: { id: string; user_id: string; idempotency_key: string; payload_hash: string; payload: Json; is_priority: boolean; state: 'queued' | 'generating' | 'completed' | 'failed' | 'cancelled'; asset_ids: string[] | null; created_at: string; updated_at: string; deadline_at: string | null };
+        Insert: { id: string; user_id: string; idempotency_key: string; payload_hash: string; payload: Json; is_priority?: boolean };
+        Update: { state?: 'queued' | 'generating' | 'completed' | 'failed' | 'cancelled'; asset_ids?: string[]; payload?: Json; updated_at?: string; deadline_at?: string }; Relationships: [];
+      };
       developer_access_requests: {
         Row: { user_id: string; email: string; use_case: string; expected_traffic: string; introduction: string | null; github_url: string | null; linkedin_url: string | null; cohort_interest: 'next' | 'later' | null; application_updated_at: string | null; status: 'pending' | 'approved' | 'revoked' | 'declined'; revision: number; expires_at: string | null; requested_at: string; reviewed_at: string | null; reviewed_by: string | null; last_feedback_at: string | null };
         Insert: { user_id: string; email: string; use_case: string; expected_traffic: string; introduction?: string | null; github_url?: string | null; linkedin_url?: string | null; cohort_interest?: 'next' | 'later' | null };

@@ -74,63 +74,12 @@ export class ImageLibraryRepository {
     assetId: string,
     isFavorite: boolean
   ): Promise<ImageGenerationRecord | null> {
-    const updated = this.buffer.enqueueMutation(userId, assetId, { isFavorite });
-    if (updated) return updated;
-
-    // If not in buffer, perform direct update in Supabase
-    if (isSupabaseAdminConfigured()) {
-      const supabase = getSupabaseAdmin();
-      const { data, error } = await supabase
-        .from('user_image_library')
-        .update({ is_favorite: isFavorite, updated_at: new Date().toISOString() })
-        .eq('id', assetId)
-        .eq('user_id', userId)
-        .select()
-        .single();
-
-      if (!error && data) {
-        const record: ImageGenerationRecord = {
-          id: data.id,
-          userId: data.user_id,
-          sessionId: data.session_id,
-          status: data.status as any,
-          prompt: data.prompt,
-          revisedPrompt: data.revised_prompt,
-          model: data.model,
-          aspectRatio: data.aspect_ratio,
-          dimensions: data.dimensions,
-          quality: data.quality,
-          publicUrl: data.public_url,
-          r2Key: data.r2_key,
-          contentType: data.content_type,
-          sizeBytes: Number(data.size_bytes),
-          sha256: data.sha256,
-          lqip: data.lqip,
-          seed: data.seed,
-          latencyMs: data.latency_ms,
-          costUsd: Number(data.cost_usd),
-          isFavorite: Boolean(data.is_favorite),
-          tags: data.tags || [],
-          metadata: (data.metadata as Record<string, unknown>) || {},
-          createdAt: data.created_at,
-          updatedAt: data.updated_at
-        };
-        this.buffer.l1Table.put(record.id, record);
-        this.buffer.markPersisted(record.id);
-        return record;
-      }
-    } else {
-      try {
-        await executePostgresQuery(
-          'UPDATE public.user_image_library SET is_favorite = $1, updated_at = now() WHERE id = $2 AND user_id = $3;',
-          [isFavorite, assetId, userId]
-        );
-      } catch (err: any) {
-        console.warn(`[ImageLibraryRepository] Direct Postgres favorite update fallback: ${err.message}`);
-      }
-    }
-
-    return null;
+    // Commit before acknowledging a favorite, including on a cold server instance.
+    await this.buffer.flushAssetsDurably(userId, [assetId]);
+    const changed = await this.buffer.batchSetFavorite(userId, [assetId], isFavorite);
+    if (changed !== 1) return null;
+    await this.buffer.flushAssetsDurably(userId, [assetId]);
+    return this.buffer.getAsset(userId, assetId);
   }
 
   /**

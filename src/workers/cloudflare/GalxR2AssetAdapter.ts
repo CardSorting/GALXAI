@@ -209,39 +209,13 @@ export class GalxR2AssetAdapter {
       extension: ext
     });
 
-    const sanitizeHeaderValue = (str: string): string => {
-      return str.replace(/[^\x00-\x7F]/g, (char) => {
-        if (char === '’' || char === '‘') return "'";
-        if (char === '“' || char === '”') return '"';
-        if (char === '—' || char === '–') return '-';
-        if (char === '…') return '...';
-        return '';
-      }).slice(0, 1024);
-    };
-
-    const metadata: Record<string, string> = {
-      ...params.metadata,
-      'user_id': userId,
-      'session_id': sessionId,
-      'image_id': imageId,
-      'prompt': sanitizeHeaderValue(params.prompt || ''),
-      'model': params.model || 'openai-gpt-image-latest',
-      'dimensions': params.size || '1024x1024',
-      'quality': params.quality || 'standard',
-      'created_at_ms': String(Date.now())
-    };
-
-    if (params.revisedPrompt) {
-      metadata['revised_prompt'] = sanitizeHeaderValue(params.revisedPrompt);
-    }
-
     const r2Result = await this.r2Manager.putObject({
       bucket: 'images',
       key,
       data: buffer,
       contentType,
-      metadata,
-      cacheControl: 'public, max-age=31536000, immutable'
+      // Object headers are observable; operational metadata stays in the private catalog.
+      cacheControl: 'private, no-store'
     });
 
     const lqip = this.generateLqipPlaceholder(params.size, params.prompt);

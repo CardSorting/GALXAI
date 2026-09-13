@@ -15,7 +15,7 @@ import { POST } from '../src/app/v1/images/generations/route';
 import { GET as getTask } from '../src/app/v1/images/requests/[id]/route';
 import { GalxAuthEngine } from '../src/core/auth/GalxAuthEngine';
 import { GalxSeatTierEngine } from '../src/core/subscription/GalxSeatTierEngine';
-import { GalxTaskQueueEngine } from '../src/core/queue/GalxTaskQueueEngine';
+import { ImageRequestService } from '../src/lib/images/request-service';
 import { galxRouter } from '../src/core/router/GalxModelRouter';
 import { ImageCapacityError } from '../src/core/router/ImageCapacityError';
 import { RelayDispatchError } from '../src/core/router/adapters/RelayChatTransport';
@@ -47,13 +47,13 @@ async function inspectArtifact(response: Response, format = 'png') {
 // The HTTP adapter serializes the actual application Response without interpreting its body.
 // All assertions below use a real HTTP client's bytes and headers.
 test('raw image HTTP boundary: success, compatibility, errors, async and adversarial fields', async t => {
-  const restore = [GalxAuthEngine.getInstance, GalxSeatTierEngine.getInstance, galxRouter.routeImageGeneration, GalxTaskQueueEngine.getInstance, ImageLibraryRepository.getInstance, GalxR2AssetAdapter.getInstance, GalxQueueEventBus.getInstance];
+  const restore = [GalxAuthEngine.getInstance, GalxSeatTierEngine.getInstance, galxRouter.routeImageGeneration, ImageRequestService.getInstance, ImageLibraryRepository.getInstance, GalxR2AssetAdapter.getInstance, GalxQueueEventBus.getInstance];
   let authenticated = true, capped = false, failure: unknown, calls = 0;
-  let task: any = { id: 'opaque-task', userId: 'customer', status: 'QUEUED', queueId: secret, lastError: { message: secret },
+  let task: any = { id: 'opaque-task', user_id: 'customer', state: 'queued', asset_ids: ['asset'], queueId: secret, lastError: { message: secret },
     target: { type: 'INTERNAL_MODEL', taskKind: 'image_generation' }, result: { data: result, shardId: secret } };
   GalxAuthEngine.getInstance = () => ({ resolveAuthIdentity: async () => ({ authenticated, userId: authenticated ? 'customer' : undefined }) }) as any;
   GalxSeatTierEngine.getInstance = () => ({ resolveUserSeatTier: async () => ({ isCapped: capped, isPriorityUser: false }) }) as any;
-  GalxTaskQueueEngine.getInstance = () => ({ createTask: () => ({ task }), getTask: () => task }) as any;
+  ImageRequestService.getInstance = () => ({ create: async () => task, resume: () => {}, repository: { get: async () => task } }) as any;
   galxRouter.routeImageGeneration = async () => { calls++; if (failure) throw failure; return result as any; };
   ImageLibraryRepository.getInstance = () => ({ getAsset: async (userId: string, assetId: string) => userId === 'customer' && assetId === 'asset' ? { r2Key: secret } : null }) as any;
   GalxR2AssetAdapter.getInstance = () => ({ getAssetBuffer: async () => fixture }) as any;
@@ -136,7 +136,7 @@ test('raw image HTTP boundary: success, compatibility, errors, async and adversa
       assert.equal(forbidden.test(JSON.stringify(body)), false);
       const pending = await fetch(origin); assert.equal(pending.status, 202);
       assert.deepEqual(await pending.json(), { id: task.id, status: 'queued' });
-      task.status = 'COMPLETED'; await inspectArtifact(await fetch(origin));
+      task.state = 'completed'; await inspectArtifact(await fetch(origin));
       const snapshot = await (await fetch(`${origin}?snapshot=true`)).json();
       assert.equal(forbidden.test(JSON.stringify(snapshot)), false);
       assert.deepEqual(Object.keys(snapshot.task).sort(), ['id', 'result', 'status']);
@@ -150,11 +150,18 @@ test('raw image HTTP boundary: success, compatibility, errors, async and adversa
       task.result.data = { data: [{ asset_id: 'asset', url: 'https://internal.example/private/bucket' }], shardId: secret };
       await inspectArtifact(await fetch(origin));
       task.result.data = result;
-      task.status = 'FAILED'; await checkError(await fetch(origin), 502, 'generation_failed');
-      task.userId = 'someone-else'; await checkError(await fetch(origin), 404, 'not_found');
+      task.response_format = 'url';
+      const links = await (await fetch(origin, { headers: { accept: 'application/json' } })).json();
+      assert.deepEqual(Object.keys(links.data[0]), ['url']);
+      assert(links.data[0].url.startsWith('https://galx.ai/v1/images/assets/'));
+      assert.equal(forbidden.test(JSON.stringify(links)), false);
+      task.output_format = 'jpeg'; await inspectArtifact(await fetch(origin), 'jpeg');
+      task.output_format = undefined;
+      task.state = 'failed'; await checkError(await fetch(origin), 502, 'generation_failed');
+      task.user_id = 'someone-else'; await checkError(await fetch(origin), 404, 'not_found');
     });
   } finally {
-    [GalxAuthEngine.getInstance, GalxSeatTierEngine.getInstance, galxRouter.routeImageGeneration, GalxTaskQueueEngine.getInstance, ImageLibraryRepository.getInstance, GalxR2AssetAdapter.getInstance, GalxQueueEventBus.getInstance] = restore as any;
+    [GalxAuthEngine.getInstance, GalxSeatTierEngine.getInstance, galxRouter.routeImageGeneration, ImageRequestService.getInstance, ImageLibraryRepository.getInstance, GalxR2AssetAdapter.getInstance, GalxQueueEventBus.getInstance] = restore as any;
     await new Promise<void>(resolve => server.close(() => resolve()));
   }
 });
