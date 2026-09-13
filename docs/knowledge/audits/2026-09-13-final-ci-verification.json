@@ -1,0 +1,139 @@
+{
+  "observed_at": "2026-09-13T05:00:12Z",
+  "status": "passed-hosted",
+  "scope": "Final application preflight and documentation gates for the committed image repair plus knowledge activation. This is CI acceptance, not a new production deployment or live browser acceptance.",
+  "source_commit": "3a5de9f",
+  "verified_revision": "e9d5baa144c14aab6fe64aa5e3508eaa62008215",
+  "application_preflight": {
+    "conclusion": "success",
+    "event": "push",
+    "headSha": "e9d5baa144c14aab6fe64aa5e3508eaa62008215",
+    "jobs": [
+      {
+        "completedAt": "2026-09-13T04:59:11Z",
+        "conclusion": "success",
+        "name": "Vercel Pre-Flight Verification",
+        "steps": [
+          {
+            "conclusion": "success",
+            "name": "Set up job"
+          },
+          {
+            "conclusion": "success",
+            "name": "Checkout Source Code"
+          },
+          {
+            "conclusion": "success",
+            "name": "Setup Node.js 22"
+          },
+          {
+            "conclusion": "success",
+            "name": "Install Dependencies"
+          },
+          {
+            "conclusion": "success",
+            "name": "Verify documentation and incident prevention records"
+          },
+          {
+            "conclusion": "success",
+            "name": "Verify incident guard rejects unsafe and stale records"
+          },
+          {
+            "conclusion": "success",
+            "name": "Verify public image, identity and ownership boundaries"
+          },
+          {
+            "conclusion": "success",
+            "name": "Verify durable image requests and Favorites in isolated PostgreSQL"
+          },
+          {
+            "conclusion": "success",
+            "name": "Verify YAML security patch"
+          },
+          {
+            "conclusion": "success",
+            "name": "Audit production dependencies"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run 8-Phase Vercel Pre-Flight Audit Engine"
+          },
+          {
+            "conclusion": "success",
+            "name": "Verify browser agent deployment contract"
+          },
+          {
+            "conclusion": "success",
+            "name": "Verify logical agent session isolation"
+          },
+          {
+            "conclusion": "success",
+            "name": "Verify cooldown recovery and image retry contract"
+          },
+          {
+            "conclusion": "success",
+            "name": "Install isolated database test tools"
+          },
+          {
+            "conclusion": "success",
+            "name": "Verify egress budgets and bounded replay"
+          },
+          {
+            "conclusion": "success",
+            "name": "Verify physical-request budgets and isolated build credentials"
+          },
+          {
+            "conclusion": "success",
+            "name": "Verify controller authority during slow worker I/O"
+          },
+          {
+            "conclusion": "success",
+            "name": "ESLint & Style Checks"
+          },
+          {
+            "conclusion": "success",
+            "name": "TypeScript Type Safety Check"
+          },
+          {
+            "conclusion": "success",
+            "name": "Next.js Production Build"
+          },
+          {
+            "conclusion": "success",
+            "name": "Verify incident records stay outside compiled public assets"
+          },
+          {
+            "conclusion": "success",
+            "name": "Post Setup Node.js 22"
+          },
+          {
+            "conclusion": "success",
+            "name": "Post Checkout Source Code"
+          },
+          {
+            "conclusion": "success",
+            "name": "Complete job"
+          }
+        ]
+      }
+    ],
+    "status": "completed",
+    "url": "https://github.com/CardSorting/GALXAI/actions/runs/34739011895"
+  },
+  "knowledge_audit": {
+    "event": "push",
+    "revision": "e9d5baa144c14aab6fe64aa5e3508eaa62008215",
+    "url": "https://github.com/CardSorting/GALXAI/actions/runs/34739011885",
+    "conclusion": "success"
+  },
+  "closes_actions": [
+    "ACT-004",
+    "ACT-007"
+  ],
+  "limits": [
+    "First weekly schedule event remains unobserved; manual/push knowledge execution is verified.",
+    "Pre-existing gateway workflow fixture failure remains open as ACT-011; this receipt does not certify or deploy that gateway.",
+    "Hosted preflight emitted existing lint/action-runtime warnings but completed successfully. No unrelated warning cleanup was performed.",
+    "Docker application image build, production storage accounting, continuous monitoring and new live product acceptance remain outside these checks."
+  ]
+}

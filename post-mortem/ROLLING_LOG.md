@@ -271,3 +271,17 @@ Incident: `INC-20260913-DOCS`. Kind: `follow-up`.
 **Next step:** Push the fixture correction and verify hosted image/security and durable database steps.
 
 Evidence: [2026-09-13-image-ci-origin.json](../docs/knowledge/audits/2026-09-13-image-ci-origin.json).
+
+## EVT-20260913-CI-FINAL-VERIFIED — 2026-09-13T05:00:13.308840Z
+
+Incident: `INC-20260913-DOCS`. Kind: `verification`.
+
+**Observation:** The corrected application preflight and documentation audit both completed successfully at e9d5baa.
+
+**Action:** Verified exact revision and final hosted step results, including image/security, isolated image persistence, build and compiled private-content scan.
+
+**Result:** ACT-004 and ACT-007 closed with retained CI evidence. Recovery source and knowledge activation are committed and pushed.
+
+**Next step:** Maintain weekly evidence-backed reviews and existing operational follow-ups; reconcile the separate pre-existing gateway fixture under ACT-011.
+
+Evidence: [2026-09-13-final-ci-verification.json](../docs/knowledge/audits/2026-09-13-final-ci-verification.json).

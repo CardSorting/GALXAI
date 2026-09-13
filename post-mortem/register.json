@@ -179,9 +179,12 @@
       "incident": "INC-20260913-IMAGES",
       "owner": "release maintainer",
       "review_by": "2026-09-14",
-      "status": "open",
+      "status": "completed",
       "next_step": "Review and commit the deployed generation fix plus this documentation change, then verify the pushed CI run when authorized.",
-      "closure": "Record commit SHA, push and CI result separately; reconcile deployed dirty-tree source with Git."
+      "closure": "Record commit SHA, push and CI result separately; reconcile deployed dirty-tree source with Git.",
+      "evidence": [
+        "docs/knowledge/audits/2026-09-13-final-ci-verification.json"
+      ]
     },
     {
       "id": "ACT-005",
@@ -206,9 +209,12 @@
       "incident": "INC-20260913-DOCS",
       "owner": "release maintainer",
       "review_by": "2026-09-14",
-      "status": "open",
+      "status": "completed",
       "next_step": "Verify the documentation guard and image regression gates run on the remote branch after the workflow is pushed.",
-      "closure": "Link a successful remote CI run; local checks alone do not establish remote enforcement."
+      "closure": "Link a successful remote CI run; local checks alone do not establish remote enforcement.",
+      "evidence": [
+        "docs/knowledge/audits/2026-09-13-final-ci-verification.json"
+      ]
     },
     {
       "id": "ACT-008",
