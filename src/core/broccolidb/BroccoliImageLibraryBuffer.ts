@@ -1,16 +1,8 @@
-/**
- * GALXAI: BroccoliDB High-Velocity In-Memory Visual Library Buffer & Read Shield
- *
- * Slashes database egress costs, connection hops, and Cloudflare R2 Class A compute cycles:
- * 1. L1 Reactive Memory Substrate: Stores user visual assets in RAM (0ms latency, $0 egress).
- * 2. Micro-Batch Write Coalescing: Buffers writes and updates in RAM, then debounces and
- *    flushes to Supabase PostgreSQL in a single multi-row RPC roundtrip (`fn_batch_upsert_image_library`).
- * 3. R2 Write Avoidance: Keeps PostgreSQL authoritative instead of duplicating private prompts
- *    into predictable public-bucket catalogs; only binary image objects live in R2.
- * 4. Stampede & Cold-Start Shield: Warms L1 cache on-demand from indexed PostgreSQL with zero stampedes.
- */
+/** Bounded process-local image metadata and page caches; PostgreSQL owns durable records. */
 
 import { BroccoliDbTable } from './broccolidb-table';
+import { BroccoliBoundedCache, BroccoliReadCoordinator } from './broccolidb-bounded-cache';
+import { decodeLibraryCursor, encodeLibraryCursor, libraryScope } from '../../lib/images/library-cursor';
 import type {
   ImageGenerationRecord,
   ImageLibraryPage,
@@ -34,23 +26,23 @@ export interface BroccoliBufferMetrics {
 export class BroccoliImageLibraryBuffer {
   private static instance: BroccoliImageLibraryBuffer;
 
-  // L1 In-Memory Database Table for zero-latency, zero-egress reads
-  public readonly l1Table: BroccoliDbTable<ImageGenerationRecord>;
+  // Bounded hot metadata, independent of pending writes.
+  private readonly recordCache = new BroccoliBoundedCache<ImageGenerationRecord>('galx_image_library_l1', { entries: 512, bytes: 16 * 1024 * 1024, ttlMs: 60_000 });
+  public readonly l1Table: BroccoliDbTable<ImageGenerationRecord> = this.recordCache.table;
 
   // Pending write queue (keyed by assetId to deduplicate multiple updates)
   private readonly writeQueue = new Map<string, ImageGenerationRecord>();
+  private readonly queuedSizes = new Map<string, number>();
+  private queuedBytes = 0;
 
   // Tracks records known to exist in PostgreSQL so queued mutations are not
   // confused with never-persisted writes during delete coalescing.
   private readonly persistedAssetIds = new Set<string>();
 
-  // Users currently being warmed to avoid thundering herd on cold cache
-  private readonly warmingUsers = new Map<string, Promise<void>>();
-
   // Query-shaped pages are cached briefly to collapse repeated filter/sort requests.
-  private readonly queryPageCache = new Map<string, { expiresAtMs: number; page: ImageLibraryPage }>();
-  private readonly queryPageTtlMs = 30_000;
-  private readonly maxQueryPageEntries = 500;
+  private readonly queryPageCache = new BroccoliBoundedCache<ImageLibraryPage>('galx_image_library_pages', { entries: 128, bytes: 8 * 1024 * 1024, ttlMs: 15_000 });
+  private readonly reads = new BroccoliReadCoordinator(8, 64);
+  private mutationEpoch = 0;
 
   // Configuration
   private readonly batchThreshold: number = 10;
@@ -68,7 +60,6 @@ export class BroccoliImageLibraryBuffer {
   private lastFlushTimestampMs = Date.now();
 
   private constructor() {
-    this.l1Table = new BroccoliDbTable<ImageGenerationRecord>('galx_image_library_l1');
     this.l1Table.createIndex('userId');
     this.l1Table.createIndex('sessionId');
     this.l1Table.createIndex('aspectRatio');
@@ -86,14 +77,14 @@ export class BroccoliImageLibraryBuffer {
 
   /**
    * Enqueues an image generation record into the high-velocity L1 buffer.
-   * Immediately readable in memory (<0.01ms), flushed to PostgreSQL in micro-batches.
+   * Pending writes remain in the bounded queue until PostgreSQL acknowledges them.
    */
   public enqueueRecord(record: ImageGenerationRecord): void {
     // 1. Instant L1 in-memory write
-    this.l1Table.put(record.id, record);
+    this.queueRecord(record);
+    this.recordCache.put(record.id, record);
 
     // 2. Queue for batched persistence
-    this.writeQueue.set(record.id, record);
     this.invalidateUserQueryCache(record.userId);
     this.totalBufferedWrites++;
 
@@ -107,7 +98,7 @@ export class BroccoliImageLibraryBuffer {
 
   /** Records that an L1 asset was loaded or mutated through PostgreSQL. */
   public markPersisted(assetId: string): void {
-    if (assetId) this.persistedAssetIds.add(assetId);
+    if (this.writeQueue.has(assetId)) this.persistedAssetIds.add(assetId);
   }
 
   /**
@@ -118,7 +109,7 @@ export class BroccoliImageLibraryBuffer {
     assetId: string,
     delta: Partial<ImageGenerationRecord>
   ): ImageGenerationRecord | null {
-    const existing = this.l1Table.get(assetId);
+    const existing = this.writeQueue.get(assetId) || this.recordCache.get(assetId);
     if (!existing || existing.userId !== userId) {
       return null;
     }
@@ -129,8 +120,8 @@ export class BroccoliImageLibraryBuffer {
       updatedAt: new Date().toISOString()
     };
 
-    this.l1Table.put(assetId, updated);
-    this.writeQueue.set(assetId, updated);
+    this.queueRecord(updated);
+    this.recordCache.put(assetId, updated);
     this.invalidateUserQueryCache(userId);
     this.totalBufferedWrites++;
 
@@ -144,8 +135,8 @@ export class BroccoliImageLibraryBuffer {
   }
 
   /**
-   * Flushes the queued records to Supabase PostgreSQL and Cloudflare R2 in an atomic micro-batch.
-   * Slashes N database connection hops down to 1 roundtrip.
+   * Flushes up to 64 queued records to PostgreSQL in one atomic batch.
+   * Concurrent requests share the active flush.
    */
   public async flushBatch(): Promise<number> {
     if (this.isFlushing) {
@@ -161,7 +152,7 @@ export class BroccoliImageLibraryBuffer {
 
     // Snapshot without clearing. Entries are removed only after the authoritative write
     // succeeds, preventing a transient database failure from dropping buffered assets.
-    const batch = Array.from(this.writeQueue.values());
+    const batch = Array.from(this.writeQueue.values()).slice(0, 64);
 
     if (this.flushTimer) {
       clearTimeout(this.flushTimer);
@@ -242,8 +233,8 @@ export class BroccoliImageLibraryBuffer {
       // Remove only the exact versions included in this flush. Concurrent mutations of the
       // same asset remain queued for the next batch.
       for (const record of batch) {
-        this.persistedAssetIds.add(record.id);
-        if (this.writeQueue.get(record.id) === record) this.writeQueue.delete(record.id);
+        if (this.writeQueue.get(record.id) === record) this.removeQueuedRecord(record.id);
+        else if (this.writeQueue.has(record.id)) this.persistedAssetIds.add(record.id);
       }
 
       // 3. Update telemetry
@@ -270,7 +261,13 @@ export class BroccoliImageLibraryBuffer {
    * Forces an immediate synchronous flush of all buffered writes.
    */
   public async flushSync(): Promise<number> {
-    return this.flushBatch();
+    let total = 0;
+    // A bounded queue requires at most two snapshots in the absence of new work.
+    for (let attempt = 0; attempt < 4 && this.writeQueue.size; attempt++) {
+      const flushed = await this.flushBatch(); total += flushed;
+      if (!flushed) break;
+    }
+    return total;
   }
 
   public async flushAssetsDurably(userId: string, assetIds: string[]): Promise<void> {
@@ -279,8 +276,7 @@ export class BroccoliImageLibraryBuffer {
   }
 
   /**
-   * Queries the visual library with sub-0.05ms memory lookup, automatic cold-cache warming,
-   * filtering, sorting, and pagination.
+   * Reads a short-lived cached page or an authoritative filtered database page.
    */
   public async queryLibrary(
     userId: string,
@@ -288,30 +284,29 @@ export class BroccoliImageLibraryBuffer {
   ): Promise<ImageLibraryPage> {
     const normalizedOptions: ImageLibraryFilterOptions = {
       ...options,
-      limit: Math.min(Math.max(options.limit ?? 48, 1), 100),
+      limit: Number.isSafeInteger(options.limit) ? Math.min(Math.max(options.limit!, 1), 100) : 48,
       sort: options.sort === 'oldest' ? 'oldest' : 'newest'
     };
     const cacheKey = `${userId}\u0000${JSON.stringify(normalizedOptions)}`;
     const cached = this.queryPageCache.get(cacheKey);
-    if (cached && cached.expiresAtMs > Date.now()) return cached.page;
-    if (cached) this.queryPageCache.delete(cacheKey);
-
-    const hasPendingUserWrites = Array.from(this.writeQueue.values())
-      .some((record) => record.userId === userId);
-    const authoritative = hasPendingUserWrites
-      ? null
-      : await this.queryAuthoritativePage(userId, normalizedOptions);
-    if (authoritative) {
-      for (const record of authoritative.records) {
-        this.l1Table.put(record.id, record);
-        this.persistedAssetIds.add(record.id);
+    if (cached) return cached;
+    const epoch = this.mutationEpoch;
+    return this.reads.run(`page:${epoch}:${cacheKey}`, async () => {
+      const pendingIds = [...this.writeQueue.values()].filter(record => record.userId === userId).map(record => record.id);
+      if (isSupabaseConfigured() && pendingIds.length) await this.flushAssetsDurably(userId, pendingIds);
+      const authoritative = await this.queryAuthoritativePage(userId, normalizedOptions);
+      if (authoritative) {
+        if (authoritative.records.some(record => record.userId !== userId)) throw new Error('Invalid library owner');
+        if (epoch === this.mutationEpoch) this.queryPageCache.put(cacheKey, authoritative);
+        return authoritative;
       }
-      this.cacheQueryPage(cacheKey, authoritative);
-      return authoritative;
-    }
+      // A partial cache is never an authoritative library or a successful outage response.
+      if (isSupabaseConfigured() || process.env.NODE_ENV === 'production') throw new Error('Image library read unavailable');
+      return this.queryLocalLibrary(userId, normalizedOptions);
+    });
+  }
 
-    // 1. Warm cache from PostgreSQL if user records are not in memory
-    await this.ensureUserWarmed(userId);
+  private async queryLocalLibrary(userId: string, options: ImageLibraryFilterOptions): Promise<ImageLibraryPage> {
 
     // 2. Query all records for user from L1 table
     let records: ImageGenerationRecord[] = [...this.l1Table.query({
@@ -360,10 +355,10 @@ export class BroccoliImageLibraryBuffer {
     const sort = options.sort || 'newest';
     records.sort((a, b) => {
       if (sort === 'oldest') {
-        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        return a.createdAt.localeCompare(b.createdAt) || a.id.localeCompare(b.id);
       }
       // default: newest
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      return b.createdAt.localeCompare(a.createdAt) || b.id.localeCompare(a.id);
     });
 
     const totalCount = records.length;
@@ -376,7 +371,7 @@ export class BroccoliImageLibraryBuffer {
         return sort === 'oldest' ? comparison > 0 : comparison < 0;
       });
     }
-    const limit = normalizedOptions.limit!;
+    const limit = options.limit!;
     const hasMore = records.length > limit;
     const pagedRecords = records.slice(0, limit);
     const lastRecord = pagedRecords.at(-1);
@@ -394,19 +389,38 @@ export class BroccoliImageLibraryBuffer {
    * Retrieves a single asset by ID.
    */
   public async getAsset(userId: string, assetId: string): Promise<ImageGenerationRecord | null> {
-    let item = this.l1Table.get(assetId);
-    if (!item) {
-      await this.ensureUserWarmed(userId);
-      item = this.l1Table.get(assetId);
+    if (!isSupabaseConfigured()) {
+      if (process.env.NODE_ENV === 'production') throw new Error('Image lookup unavailable');
+      const local = this.writeQueue.get(assetId) || this.recordCache.get(assetId);
+      return local?.userId === userId ? local : null;
     }
-    return item && item.userId === userId ? item : null;
+    // Cached metadata cannot authorize an artifact after deletion on another instance.
+    return this.reads.run(`asset:${this.mutationEpoch}:${userId}:${assetId}`, async () => {
+      if (this.writeQueue.get(assetId)?.userId === userId) await this.flushAssetsDurably(userId, [assetId]);
+      let row: any;
+      if (isSupabaseAdminConfigured()) {
+        const result = await getSupabaseAdmin().from('user_image_library').select('*').eq('user_id', userId).eq('id', assetId).abortSignal(AbortSignal.timeout(8_000)).maybeSingle();
+        if (result.error) throw result.error;
+        row = result.data;
+      } else {
+        const result = await executePostgresQuery<{ record: any }>('SELECT to_jsonb(library) AS record FROM public.user_image_library AS library WHERE user_id=$1 AND id=$2 LIMIT 1;', [userId, assetId]);
+        if (!result) throw new Error('Image lookup unavailable');
+        row = result.rows[0]?.record;
+      }
+      if (!row) { this.recordCache.delete(assetId); return null; }
+      const record = this.mapDatabaseRow(row);
+      if (record.userId !== userId) return null;
+      this.recordCache.put(assetId, record);
+      return record;
+    });
   }
 
   private async queryAuthoritativePage(
     userId: string,
     options: ImageLibraryFilterOptions
   ): Promise<ImageLibraryPage | null> {
-    const cursor = this.decodeCursor(options.cursor);
+    const scope = libraryScope(userId, options);
+    const cursor = decodeLibraryCursor(options.cursor, options.includeSummary === false ? scope : undefined);
     const args = {
       p_user_id: userId,
       p_limit: options.limit ?? 48,
@@ -421,7 +435,26 @@ export class BroccoliImageLibraryBuffer {
 
     try {
       let payload: any = null;
-      if (isSupabaseAdminConfigured()) {
+      if (options.includeSummary === false) {
+        if (isSupabaseAdminConfigured()) {
+          const { data, error } = await getSupabaseAdmin().rpc('fn_page_user_image_library', { ...args, p_before: cursor?.before || false }).abortSignal(AbortSignal.timeout(8_000));
+          if (error) throw error;
+          payload = data;
+        } else if (isSupabaseConfigured()) {
+          const result = await executePostgresQuery<{ result: any }>('SELECT public.fn_page_user_image_library($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) AS result;',
+            [args.p_user_id,args.p_limit,args.p_cursor_created_at ?? null,args.p_cursor_id ?? null,args.p_session_id ?? null,args.p_aspect_ratio ?? null,args.p_is_favorite ?? null,args.p_search ?? null,args.p_sort,cursor?.before || false]);
+          payload = result?.rows[0]?.result;
+        }
+        if (!payload || !Array.isArray(payload.records) || payload.records.length > (options.limit ?? 48)) return null;
+        const records = payload.records.map((row: any) => this.mapDatabaseRow(row)) as ImageGenerationRecord[];
+        const first = records[0], last = records.at(-1);
+        const firstAnchor = first || cursor, lastAnchor = last || cursor;
+        const next = cursor?.before ? Boolean(cursor) : payload.hasMore === true;
+        const previous = cursor?.before ? payload.hasMore === true : Boolean(cursor);
+        return { records, totalCount: null, stats: null, availableSessions: [],
+          nextCursor: next && lastAnchor ? encodeLibraryCursor({ createdAt: lastAnchor.createdAt, id: lastAnchor.id, scope }) : null,
+          previousCursor: previous && firstAnchor ? encodeLibraryCursor({ createdAt: firstAnchor.createdAt, id: firstAnchor.id, before: true, scope }) : null };
+      } else if (isSupabaseAdminConfigured()) {
         const { data, error } = await getSupabaseAdmin().rpc('fn_query_user_image_library', args);
         if (error) throw error;
         payload = data;
@@ -467,7 +500,7 @@ export class BroccoliImageLibraryBuffer {
         nextCursor
       };
     } catch (error: any) {
-      console.warn(`[BroccoliImageLibraryBuffer] Authoritative page query fallback: ${error.message}`);
+      console.warn(`[BroccoliImageLibraryBuffer] Authoritative page query failed: ${error.message}`);
       return null;
     }
   }
@@ -485,13 +518,14 @@ export class BroccoliImageLibraryBuffer {
   public async batchDeleteAssets(userId: string, assetIds: string[]): Promise<number> {
     const uniqueIds = [...new Set(assetIds.filter((id) => typeof id === 'string' && id.length > 0))].slice(0, 500);
     if (uniqueIds.length === 0) return 0;
+    if (isSupabaseConfigured()) await this.flushAssetsDurably(userId, uniqueIds);
 
     const localR2Keys = uniqueIds.flatMap((id) => {
       const item = this.l1Table.get(id);
       return item?.userId === userId && item.r2Key ? [item.r2Key] : [];
     });
-    const unpersistedIds = uniqueIds.filter((id) => !this.persistedAssetIds.has(id));
-    const persistedIds = uniqueIds.filter((id) => this.persistedAssetIds.has(id));
+    const unpersistedIds = uniqueIds.filter((id) => this.writeQueue.get(id)?.userId === userId && !this.persistedAssetIds.has(id));
+    const persistedIds = uniqueIds.filter((id) => !unpersistedIds.includes(id));
     let affectedIds: string[] = [...unpersistedIds];
     let r2KeysToDelete: string[] = unpersistedIds.flatMap((id) => {
       const record = this.l1Table.get(id);
@@ -531,9 +565,8 @@ export class BroccoliImageLibraryBuffer {
 
     // Evict only records confirmed deleted by the authoritative mutation.
     for (const id of affectedIds) {
-      this.l1Table.delete(id);
-      this.writeQueue.delete(id);
-      this.persistedAssetIds.delete(id);
+      this.recordCache.delete(id);
+      this.removeQueuedRecord(id);
     }
     this.invalidateUserQueryCache(userId);
 
@@ -565,6 +598,7 @@ export class BroccoliImageLibraryBuffer {
   public async batchSetFavorite(userId: string, assetIds: string[], isFavorite: boolean): Promise<number> {
     const uniqueIds = [...new Set(assetIds.filter((id) => typeof id === 'string' && id.length > 0))].slice(0, 500);
     if (uniqueIds.length === 0) return 0;
+    if (isSupabaseConfigured()) await this.flushAssetsDurably(userId, uniqueIds);
 
     const pendingIds = uniqueIds.filter((id) => this.writeQueue.get(id)?.userId === userId);
     const persistedIds = uniqueIds.filter((id) => !pendingIds.includes(id));
@@ -604,7 +638,7 @@ export class BroccoliImageLibraryBuffer {
     const updatedAt = new Date().toISOString();
     for (const id of affectedIds) {
       const record = this.l1Table.get(id);
-      if (record?.userId === userId) this.l1Table.put(id, { ...record, isFavorite, updatedAt });
+      if (record?.userId === userId) this.recordCache.put(id, { ...record, isFavorite, updatedAt });
     }
     this.invalidateUserQueryCache(userId);
     return affectedIds.length;
@@ -621,69 +655,11 @@ export class BroccoliImageLibraryBuffer {
       totalDatabaseHopsSaved: this.totalDatabaseHopsSaved,
       estimatedEgressBytesSaved: this.estimatedEgressBytesSaved,
       lastFlushTimestampMs: this.lastFlushTimestampMs,
-      l1CachedRecordCount: this.l1Table.count()
+      l1CachedRecordCount: this.recordCache.size
     };
   }
 
-  /**
-   * Warms L1 memory from PostgreSQL on cold-start with stampede protection.
-   */
-  private async ensureUserWarmed(userId: string): Promise<void> {
-    const existing = this.l1Table.query({ where: { userId } });
-    if (existing.length > 0) {
-      return; // Already warm
-    }
-
-    const inFlight = this.warmingUsers.get(userId);
-    if (inFlight) {
-      await inFlight;
-      return;
-    }
-    if (!isSupabaseConfigured()) return;
-
-    let warmPromise!: Promise<void>;
-    warmPromise = (async () => {
-      try {
-      let data: any[] | null = null;
-      if (isSupabaseAdminConfigured()) {
-        const supabase = getSupabaseAdmin();
-        const res = await supabase
-          .from('user_image_library')
-          .select('*')
-          .eq('user_id', userId)
-          .order('created_at', { ascending: false })
-          .limit(200);
-        if (res.error) {
-          console.warn(`[BroccoliImageLibraryBuffer] Cold-start cache warm warning: ${res.error.message}`);
-        } else {
-          data = res.data;
-        }
-      } else {
-        const res = await executePostgresQuery<any>(
-          'SELECT * FROM public.user_image_library WHERE user_id = $1 ORDER BY created_at DESC LIMIT 200;',
-          [userId]
-        );
-        data = res?.rows || null;
-      }
-
-      if (data && Array.isArray(data)) {
-        for (const row of data) {
-          const record = this.mapDatabaseRow(row);
-          this.l1Table.put(record.id, record);
-          this.persistedAssetIds.add(record.id);
-        }
-      }
-      } finally {
-        if (this.warmingUsers.get(userId) === warmPromise) this.warmingUsers.delete(userId);
-      }
-    })();
-    this.warmingUsers.set(userId, warmPromise);
-    await warmPromise;
-  }
-
-  /**
-   * Computes aggregate library stats in sub-microsecond memory.
-   */
+  /** Statistics for unconfigured local fixtures only. */
   private computeStats(records: readonly ImageGenerationRecord[] | ImageGenerationRecord[]): ImageLibraryStats {
     let totalBytes = 0;
     let favoriteCount = 0;
@@ -751,34 +727,24 @@ export class BroccoliImageLibraryBuffer {
   }
 
   private decodeCursor(cursor?: string): { createdAt: string; id: string } | null {
-    if (!cursor || cursor.length > 512) return null;
-    try {
-      const decoded = JSON.parse(Buffer.from(cursor, 'base64url').toString('utf8'));
-      if (
-        typeof decoded?.createdAt !== 'string' ||
-        Number.isNaN(Date.parse(decoded.createdAt)) ||
-        typeof decoded?.id !== 'string' ||
-        decoded.id.length === 0 ||
-        decoded.id.length > 160
-      ) return null;
-      return { createdAt: new Date(decoded.createdAt).toISOString(), id: decoded.id };
-    } catch {
-      return null;
-    }
+    return decodeLibraryCursor(cursor);
   }
 
-  private cacheQueryPage(cacheKey: string, page: ImageLibraryPage): void {
-    if (this.queryPageCache.size >= this.maxQueryPageEntries) {
-      const oldestKey = this.queryPageCache.keys().next().value;
-      if (oldestKey) this.queryPageCache.delete(oldestKey);
-    }
-    this.queryPageCache.set(cacheKey, { expiresAtMs: Date.now() + this.queryPageTtlMs, page });
+  private queueRecord(record: ImageGenerationRecord): void {
+    const bytes = Buffer.byteLength(JSON.stringify(record));
+    const nextBytes = this.queuedBytes - (this.queuedSizes.get(record.id) || 0) + bytes;
+    if ((!this.writeQueue.has(record.id) && this.writeQueue.size >= 128) || nextBytes > 16 * 1024 * 1024) throw new Error('Image write capacity temporarily unavailable');
+    this.writeQueue.set(record.id, record); this.queuedSizes.set(record.id, bytes); this.queuedBytes = nextBytes;
+  }
+
+  private removeQueuedRecord(id: string): void {
+    this.queuedBytes -= this.queuedSizes.get(id) || 0;
+    this.queuedSizes.delete(id); this.writeQueue.delete(id); this.persistedAssetIds.delete(id);
   }
 
   private invalidateUserQueryCache(userId: string): void {
+    this.mutationEpoch++;
     const prefix = `${userId}\u0000`;
-    for (const key of this.queryPageCache.keys()) {
-      if (key.startsWith(prefix)) this.queryPageCache.delete(key);
-    }
+    this.queryPageCache.deleteWhere(key => key.startsWith(prefix));
   }
 }

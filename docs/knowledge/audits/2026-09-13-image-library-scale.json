@@ -1,0 +1,492 @@
+{
+  "observed_at": "2026-09-13T07:51:45.024992+00:00",
+  "base_revision": "45705ca1eff2f1e1456fdd83899d702ff1ffd87e",
+  "scope": "Local implementation and isolated verification of bounded image libraries, thumbnails and BroccoliDB admission. Existing uncommitted navigation work is preserved; no commit, push, migration deployment, paid generation or production mutation.",
+  "source_and_guide_sha256": {
+    ".impeccable/surfaces/src-app-images-page-tsx.md": "b84e9a4c2fc1edeaad7d568c869453d53642681ada3c7b2f08281a9827c2b005",
+    "docs/DEPLOYMENT.md": "28c5be7ada567d6f10142427d58a05cced562bfeabb2c73b36c0a5447c880ef0",
+    "docs/QUEUE_SPECIFICATION.md": "fa7b78efd6cce520136479e32e821faeb8a1fb7366d0d0a01a6be26ecd6f81a4",
+    "docs/adr/0146-bounded-image-libraries.md": "dad595c3ba77130dff652fed27bb420f3f315e3bb16412913a964f601da13e21",
+    "docs/knowledge/registry.json": "588bd0430d48561ada1be7644f89d641b029d87bc0f0b32a052683d932d12c79",
+    "docs/maintainers/COMPACTOR_FUZZING_AND_QA_MATRIX.md": "72325ecd8087214538910b8ee29bc739c20146b7491eb0947ed417b39229a87a",
+    "docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md": "c4853cb699faf0903db09c9e88505795354dc75b40a54af1b9db40730254fab1",
+    "docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md": "4a89fa638e27f6f4b99006a6ffba54630f8fd7f3508c2f4a9c2919382f494cba",
+    "docs/maintainers/image-library-scale.md": "761e20e45ef289fa99c1add605bff237a96c2eb2debf475fa71de248e5bca7e1",
+    "docs/maintainers/image-public-boundary.md": "79cb97916d4d9257931a30667e2a346e4fb8316e2659c5ccd3f086d60b84fbad",
+    "docs/maintainers/image-studio-review.md": "0c48aa61a4612fdd09839c3ee8b579ab3767481c1b7fb933607fbf4bb8aa1203",
+    "docs/operations/developer-preview.md": "2d3d647964b4fa83a7c88af31b239a41945b1ce742d1018892b2d0d61cd27eee",
+    "package.json": "70e82077c8f5133eacc5c91f0aaaea0f6b01f61677917b960fe590ae0ad6348a",
+    "post-mortem/runbooks/image-generation.md": "bb7bd5459d463c6e70cc9b9aef8ad4fb33f4e2b0d2463fa3060eefbb1ff40c23",
+    "scripts/run-supabase-integration.ts": "4ac4663b0e5af3245973fea0ae65777c97a9bbc1ca13d774ca422dde6cb0597b",
+    "scripts/test-auth-identity-boundary.ts": "cffabd38e8cb7502b9e7d0b022b2999dc13b7e0ba40fc9709d06fb22b3a2f199",
+    "scripts/test-image-library-http.ts": "f889bc632c6ccd33aa5f1f40f321ce75bd2167e7758fdde602db230f5d524f84",
+    "scripts/test-image-library-scale-db.ts": "131e2decca645d22522ffbd90170a3e47f81b6db068d93f6429d3c5d30ee02b7",
+    "scripts/test-image-library-scale.ts": "1d4aeade107bc2d715654f4853bdc1be660bded657ca8cabd0fd34a67423389e",
+    "scripts/test-image-public-http.ts": "f343e35cb44e78f9685749c94b28b584b416ba79b8de137ee155f60e1894343c",
+    "scripts/test-image-studio.ts": "2a30138c6f7acc9cdc0065a6730720d97db12b258a68e202d61461b3213cf4cb",
+    "scripts/verify-image-library-scale-ui.ts": "c3ae469b3316dd5e21065e53ea63d3fb57e39275be975ff7459f423fc54aa341",
+    "scripts/verify-image-public-http.ts": "c400b2a8fa2c79a5459ddb8eb24ae06d98048e086fc61f025618c3202b20be1d",
+    "scripts/verify-image-studio-ui.ts": "2ef688e1fd94c024f4b2b5ae93ecd2941353407dc7094c8202db2a36ec77b265",
+    "scripts/verify-navigation-ui.ts": "df76b8139492cae2b92e50b7bbdac7d24b1c2991e3e25e06d8a2c244f6c5b5c7",
+    "src/app/api/images/library/route.ts": "954b062d5ee0725326b563508812b8b44020c534252901d672df3a828db3a829",
+    "src/app/globals.css": "654220cbc1d5cfe0427f65a61cb6c5a71cd6865a0773e1915f239632edc800c7",
+    "src/app/images/page.tsx": "cf8928e3cc48fd9e295e267a381232e26cc23fdc44af71971180763ff7ae215e",
+    "src/app/layout.tsx": "d2e6515d18cee2a76bd20484b96ab8e186c3fbce7a04caf3044013f1cea15b76",
+    "src/app/loading.tsx": "f207ad9a82d0313283cb6b7ec9e29ef27e5be7d3e60bff9409e79a4e42e2c5e7",
+    "src/app/not-found.tsx": "97bce16b76ab7b5cc9510270452b574e30eb8e127106629b6a16e3c26b53627f",
+    "src/app/sites/[id]/page.tsx": "341759131634ae84f5707591b12033e2472700901eea5752c0636438c2559aae",
+    "src/app/sites/page.tsx": "915d68c35111338d82d6bf5146c96a2e4f74949cb6845e7726c26349f4c1e1fd",
+    "src/app/v1/images/assets/[token]/route.ts": "044fa9a26b97f227e4d920e2cd2d58892e430b4f073656afe76e027093b79168",
+    "src/app/v1/images/assets/[token]/thumbnail/route.ts": "e505a1372b026e66e2555c13b6b2fa406ec1e198588800896de05d9d953d73f2",
+    "src/components/dashboard/Navigation.tsx": "35d5a28048721be2cc0747608a166974945709ace3ba8900f9d3392d2950c5d5",
+    "src/components/dashboard/navigation.module.css": "9043e70641391d3acd89c47f5c8ebb8f6b45b3dabc21771b2ad5ba9057d5a2a1",
+    "src/components/home/PublicHome.tsx": "2919bbcf60aa9cbddf4577b4a1c84907fe83a0e841c29121bf72baf0ff38a042",
+    "src/components/images/GenerationCanvas.tsx": "d72eb5935b6388bbe46b42a662b3d1dc94a4da242cbbaf89b450e94bf4cc40e0",
+    "src/components/images/ImageStudio.tsx": "b63d6280c7629fae543d052c5882e21575fec9703e3ebaaf1349fa210e1cd6ac",
+    "src/components/images/StudioArtwork.tsx": "427128b4f3ea300222b74fdfe132564237030507f1d40c20093c89ef52e26229",
+    "src/components/images/studio-contract.ts": "3ce65065b74514f504e63a6918f13c659f9b7d51f52dabad78a1208031d71361",
+    "src/components/images/studio.css": "640cf90a5b88f7dc91e286d70bb917316d9a3915d73553b991314b25048f056a",
+    "src/components/images/use-image-studio.ts": "229e0d11f8229da62e7c898c56fa8ab473ef9c74d32c032561788edb5cd1835d",
+    "src/core/broccolidb/BroccoliImageLibraryBuffer.ts": "840d2e9fd075d314e196c056564b911b7a1d2b63ff0569f5ee16fb7604d81915",
+    "src/core/broccolidb/broccolidb-bounded-cache.ts": "b8ad79e3317aded063d85bca666542fe34d2b153773f543df91effb151ea869e",
+    "src/core/contracts/GalxContracts.ts": "590b8997bba7de483ace6daa173d936962449c1dfd4fb39372f051d8ed23fd25",
+    "src/core/storage/GalxUnifiedR2StorageManager.ts": "6ddf189a26e68f37a1109b416d6b5137df0288476cbe34801f0721845d349bf4",
+    "src/core/storage/bounded-object-body.ts": "f2edc7ee66b0a76a19dc3cd46868654158113833f2c123b8b42a3600bb47bbb2",
+    "src/lib/images/library-cursor.ts": "53d3e327e5e3ee57de4d045c62b73b8cfd1c69cb048013052c4af9f461bce798",
+    "src/lib/images/read-image-artifact.ts": "af490bc9ccfa13d3e341574936f0929725ff2d1c9f042f53a48e0a45e8e7cb8b",
+    "src/lib/security/image-artifact.ts": "295df387bacc6f27620f36c8b90eaceb31934ded26c14117c2cea3efac3fa593",
+    "src/lib/security/preview-policy.ts": "13fafe386b3d02d406a9d5e20a513197dee847fa8703d1c646577f5038457c9e",
+    "src/lib/security/public-image-record.ts": "777deaa9a0ce4a75aae539ae21a90b3ec8c1c11e19997f8664b8a35de91b1f9e",
+    "src/lib/supabase/repositories/ImageLibraryRepository.ts": "0ab87ab48cf9abc21cf80214818742b9d89c8ce168ddb5a4358e5397314323d7",
+    "src/lib/supabase/types.ts": "37e1edbb7cac9ad96738ec3a481166b046dcc90ec76aac01fccc7a5483829aff",
+    "src/workers/cloudflare/GalxR2AssetAdapter.ts": "b870f5f0c5aa94fcb490547cc16e280f0966eaa03a204622e576bab4d0b3672c",
+    "supabase/migrations/20260913071757_image_library_bounded_pages.sql": "dcbaf3db4aba01f6b3f3665344cff5a0987726b6b6977b4671d37f64dc8d47f4",
+    "supabase/rollbacks/20260913071757_image_library_bounded_pages.down.sql": "3e5a81e83ff822934b9d2bc243cb49eb3dccee0b1f621796747bf8fd710f0bc1"
+  },
+  "findings": [
+    {
+      "severity": "P1",
+      "finding": "Unbounded recent results and accumulated library pages",
+      "resolution": "120-entry recent working set with string budget and selected/newest preservation; one 36-image saved page; explicit Previous/Next and empty-page recovery."
+    },
+    {
+      "severity": "P1",
+      "finding": "Full-library summary work repeated for every page and timestamp precision loss",
+      "resolution": "Additive page-only RPC, matching partial indexes, bound parameters, microsecond-preserving timestamp/ID cursors and both directions."
+    },
+    {
+      "severity": "P1",
+      "finding": "Partial hot history used as complete outage fallback; older-asset lookup limited by warming",
+      "resolution": "Configured database reads fail explicitly; single owner/ID lookup is authoritative even on warm artifact hits."
+    },
+    {
+      "severity": "P1",
+      "finding": "Unbounded cache/write metadata and repeated identical reads",
+      "resolution": "BroccoliDB LRU count/byte/TTL caps, bounded unique work and queue waits, shared in-flight reads; unsaved entries never evicted."
+    },
+    {
+      "severity": "P1",
+      "finding": "Full originals in every thumbnail and unbounded storage-read lifetime/bytes",
+      "resolution": "512-pixel reencoded WebP previews, bounded transformation work and cache; streamed byte limits, aborts and bounded gzip expansion."
+    },
+    {
+      "severity": "P1",
+      "finding": "Thumbnail child missing from public-product route policy, caught by compiled review",
+      "resolution": "Exact child exemption, no arbitrary descendants; capability and authoritative ownership remain required. Policy unit test and compiled invalid-capability 404 confirm the integration."
+    },
+    {
+      "severity": "P2",
+      "finding": "Full prompts eagerly transferred; detail races and failed-page continuity",
+      "resolution": "300-character card preview, lazy full details/reuse, disabled copy/reuse until loaded, cancelled stale detail responses, exact failed-page retry."
+    },
+    {
+      "severity": "P2",
+      "finding": "Mobile grid density and extra refresh row",
+      "resolution": "Uniform contained thumbnails, two phone columns, accessible icon reuse, compact heading/refresh row, top and bottom page controls."
+    }
+  ],
+  "semantic_review": [
+    "Reviewed the changed studio contract/hook/components/CSS, page DTO/query parsing, detail and binary routes, BroccoliDB cache/coordinator and write-buffer paths, owner repository, R2 adapter/storage streaming, SQL migration/rollback/types, public-product route policy and tests. Source review found no current external writes to the exposed cache tables that bypass their new caps.",
+    "Reconciled the complete affected image boundary, scale, queue, database operations, BroccoliDB verification, quota-efficiency, developer-preview and deployment guides. Image recovery runbook now distinguishes receipt rollback from page-query/index rollback. Historical studio review checkpoints remain labeled history; the current surface brief describes bounded behavior.",
+    "Reviewed Supabase database authority reference, preview/admin/hybrid guides, private-preview policy/middleware, release readiness and storage containment for unchanged authority. The new exact thumbnail exemption retains capability/owner enforcement and does not grant developer or staff access. No payment, entitlement, approval or role table changed.",
+    "Reviewed documentation policy, change workflow, knowledge operations/command reference and ADR template. Registry maps previously unmapped image UI/contracts/storage/tests to owning guidance. ADR 0146 remains proposed with local delivery; generated synchronization cannot accept it.",
+    "Inspected unmapped paths: historical evidence and review metadata remain private; the new ADR is registered; studio operational history is explicitly historical; private surface briefs are not public contracts. Sites/Home wrapper and shared navigation changes were already reviewed in the separate retained navigation evidence and were not modified by this task.",
+    "The broader source/guide fingerprints detect drift; this is not an exhaustive re-audit of unrelated domain implementations. Critical watched changes concern image library/delivery, policy exemption, fixture entry points and associated guidance; earlier incident observations and prevention statuses are preserved."
+  ],
+  "primary_references": [
+    "https://developer.apple.com/documentation/photos/phcachingimagemanager",
+    "https://engineering.fb.com/2011/02/10/web/developing-facebook-s-new-photo-viewer/",
+    "https://engineering.fb.com/2014/02/27/web/an-analysis-of-facebook-photo-caching-2/",
+    "https://www.postgresql.org/docs/17/queries-limit.html",
+    "https://www.postgresql.org/docs/current/indexes-ordering.html",
+    "https://supabase.com/docs/guides/database/query-optimization",
+    "https://sharp.pixelplumbing.com/api-resize/",
+    "https://sharp.pixelplumbing.com/api-output/"
+  ],
+  "validation": {
+    "production_build": {
+      "command": "npm run build",
+      "exit_code": 0,
+      "scope": "Final application including exact public thumbnail exemption; Next loaded existing .env.local. No dotenv was copied into any fixture."
+    },
+    "image_security": {
+      "command": "npm run test:image:security",
+      "passed": 29,
+      "failed": 0,
+      "scope": "Real HTTP serialization with controlled dependencies, artifacts/metadata, auth/retry/public-boundary and thumbnail policy cases."
+    },
+    "working_set_tests": {
+      "command": "npm run test:image:scale",
+      "passed": 15,
+      "failed": 0,
+      "scope": "10000 completions, pinned selection and byte caps; DTO/cursor validation; cache expiry/eviction, read coalescing/overload/queue timeout, pending retention, invalidation races, streaming abort/overflow and gzip/cache bounds."
+    },
+    "image_database": {
+      "command": "npm run test:image:db",
+      "checks": 37,
+      "failed": 0
+    },
+    "general_database": {
+      "command": "npm run db:test",
+      "checks": 94,
+      "failed": 0
+    },
+    "large_library_database": {
+      "command": "npm run test:image:library-db",
+      "exit_code": 0,
+      "result": {
+        "checks": 17,
+        "fixtureRows": 50001,
+        "fullyTraversedPerSort": 10000,
+        "queryMillisecondsMedianOf5": {
+          "legacy": 249.6426249999995,
+          "compact": 2.263375000000451
+        },
+        "deepPagePlan": [
+          {
+            "Plan": {
+              "Node Type": "Limit",
+              "Parallel Aware": false,
+              "Async Capable": false,
+              "Startup Cost": 0.41,
+              "Total Cost": 68.41,
+              "Plan Rows": 37,
+              "Plan Width": 20,
+              "Actual Startup Time": 0.042,
+              "Actual Total Time": 0.061,
+              "Actual Rows": 37,
+              "Actual Loops": 1,
+              "Shared Hit Blocks": 12,
+              "Shared Read Blocks": 0,
+              "Shared Dirtied Blocks": 0,
+              "Shared Written Blocks": 0,
+              "Local Hit Blocks": 0,
+              "Local Read Blocks": 0,
+              "Local Dirtied Blocks": 0,
+              "Local Written Blocks": 0,
+              "Temp Read Blocks": 0,
+              "Temp Written Blocks": 0,
+              "Plans": [
+                {
+                  "Node Type": "Index Only Scan",
+                  "Parent Relationship": "Outer",
+                  "Parallel Aware": false,
+                  "Async Capable": false,
+                  "Scan Direction": "Forward",
+                  "Index Name": "idx_image_library_completed_page",
+                  "Relation Name": "user_image_library",
+                  "Alias": "user_image_library",
+                  "Startup Cost": 0.41,
+                  "Total Cost": 2784.59,
+                  "Plan Rows": 1515,
+                  "Plan Width": 20,
+                  "Actual Startup Time": 0.041,
+                  "Actual Total Time": 0.057,
+                  "Actual Rows": 37,
+                  "Actual Loops": 1,
+                  "Index Cond": "((user_id = '602553ac-71f5-4b4e-b56b-26ce30f6f524'::text) AND (ROW(created_at, id) < ROW('2026-09-01 00:00:00.0005+00'::timestamp with time zone, 'scale-001500'::text)))",
+                  "Rows Removed by Index Recheck": 0,
+                  "Heap Fetches": 37,
+                  "Shared Hit Blocks": 12,
+                  "Shared Read Blocks": 0,
+                  "Shared Dirtied Blocks": 0,
+                  "Shared Written Blocks": 0,
+                  "Local Hit Blocks": 0,
+                  "Local Read Blocks": 0,
+                  "Local Dirtied Blocks": 0,
+                  "Local Written Blocks": 0,
+                  "Temp Read Blocks": 0,
+                  "Temp Written Blocks": 0
+                }
+              ]
+            },
+            "Planning": {
+              "Shared Hit Blocks": 0,
+              "Shared Read Blocks": 0,
+              "Shared Dirtied Blocks": 0,
+              "Shared Written Blocks": 0,
+              "Local Hit Blocks": 0,
+              "Local Read Blocks": 0,
+              "Local Dirtied Blocks": 0,
+              "Local Written Blocks": 0,
+              "Temp Read Blocks": 0,
+              "Temp Written Blocks": 0
+            },
+            "Planning Time": 0.063,
+            "Triggers": [],
+            "Execution Time": 0.07
+          }
+        ],
+        "cachedPages": 107,
+        "cachedPageBytes": 8327978
+      }
+    },
+    "database_integrity": {
+      "command": "npm run db:verify",
+      "migration_pairs": 104,
+      "fatal": 0,
+      "warnings": 0,
+      "scope": "Static validation; no applied production-state claim."
+    },
+    "request_efficiency": {
+      "command": "npm run test:egress:transport",
+      "passed": 40,
+      "failed": 0
+    },
+    "preview_regression": {
+      "command": "npm run test:developer-preview",
+      "passed": 14,
+      "failed": 0
+    },
+    "broccoli_hardening": {
+      "command": "npm run test:broccolidb:hardening",
+      "exit_code": 0
+    },
+    "broccoli_facade": {
+      "command": "npm run test:broccolidb:api",
+      "exit_code": 0
+    },
+    "focused_eslint": {
+      "exit_code": 0,
+      "warnings": 0,
+      "scope": "Image components, bounded cache/coordinator, buffer, storage manager/reader, cursor, artifact service and preview policy."
+    },
+    "large_library_browser": {
+      "command": "scripts/verify-image-library-scale-ui.ts",
+      "exit_code": 0,
+      "results": [
+        {
+          "width": 1440,
+          "fixtureImages": 10000,
+          "consecutivePages": 100,
+          "maxCards": 36,
+          "maxGridImages": 36,
+          "overflow": false,
+          "axeViolations": 0,
+          "requests": {
+            "pages": 108,
+            "details": 4,
+            "originals": 1,
+            "thumbnails": 2041
+          }
+        },
+        {
+          "width": 390,
+          "fixtureImages": 10000,
+          "consecutivePages": 3,
+          "maxCards": 36,
+          "maxGridImages": 36,
+          "overflow": false,
+          "axeViolations": 0,
+          "requests": {
+            "pages": 11,
+            "details": 4,
+            "originals": 1,
+            "thumbnails": 49
+          }
+        },
+        {
+          "width": 320,
+          "fixtureImages": 10000,
+          "consecutivePages": 3,
+          "maxCards": 36,
+          "maxGridImages": 36,
+          "overflow": false,
+          "axeViolations": 0,
+          "requests": {
+            "pages": 11,
+            "details": 4,
+            "originals": 1,
+            "thumbnails": 57
+          }
+        }
+      ],
+      "scope": "Final UI source at 1440/390/320; external calls blocked, generation prohibited, metadata/artifacts synthetic. Browser screenshots use historical fixture artwork, not live generated output."
+    },
+    "studio_browser": {
+      "command": "scripts/verify-image-studio-ui.ts",
+      "exit_code": 0,
+      "results": [
+        {
+          "label": "guest-1440",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "guest-390",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "pending-1440",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "inspector-1440",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "library-1440",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "library-390",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "inspector-390",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "library-error-390",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "latest-1440",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "grid-1440",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "browse-inspector-1440",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "continuity-1440",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "workspace-short",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "latest-390",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "grid-390",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "browse-inspector-390",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "continuity-390",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "continuity-320",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "composer-expanded-390",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "filmstrip-900",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "simulation-1440",
+          "overflow": false,
+          "accessibility": []
+        }
+      ],
+      "scope": "21 existing workflow states, modified only for recent labels and replacing page behavior. Last later application edit was the server public-route policy, verified separately through compiled HTTP."
+    },
+    "compiled_http": {
+      "command": "GALX_VERIFY_ORIGIN=http://127.0.0.1:3417 node --import tsx scripts/verify-image-public-http.ts",
+      "exit_code": 0,
+      "browser_assets": 25,
+      "scope": "Final production build; exact invalid original/thumbnail capability 404, current private API denials, developer-page redirects, Images/home/schema and linked assets. No authorized generation or live asset retrieval."
+    },
+    "additional_marker_scan": {
+      "files": 895,
+      "markers": [
+        "galx_image_thumbnails",
+        "fn_page_user_image_library",
+        "Image write capacity temporarily unavailable",
+        "BroccoliReadCoordinator",
+        "PRIVATE_CANARY",
+        "image_library_bounded_pages"
+      ],
+      "hits": []
+    },
+    "illustrative_preview_bytes": {
+      "fixture": "public/images/studio/desert.webp, historical test artwork",
+      "original": 95890,
+      "thumbnail": 12716,
+      "scope": "Encoded fixture file sizes; not captured production transfer or a compression guarantee."
+    },
+    "baseline": {
+      "fixture": "10000 completions in batches of four; 100 simultaneous identical metadata reads",
+      "retainedCreations": 10000,
+      "retainedJsonBytes": 1956671,
+      "appendMilliseconds": 619.634458,
+      "concurrentDatabaseReads": 100
+    },
+    "baseline_comparison_limits": "The before snapshot uses synthetic metadata and a stubbed 10ms database read. Current tests retain 120 entries after 10000 completions and coalesce 100 identical actual buffer calls into one stubbed database operation. Append timing is not reported as a production or browser-heap benchmark.",
+    "corrections": [
+      "Browser fixture initially asserted thumbnail requests before native lazy loading; it now waits for a loaded preview.",
+      "Earlier studio assertions referred to accumulated pages and old session-count copy; they now assert page replacement and recent labels.",
+      "Targeted TypeScript checks corrected abortSignal builder ordering and a Buffer union.",
+      "The visual fix batch removed duplicate page copy and the mobile refresh row; final captures reviewed at 390/320 and desktop.",
+      "Storage review accounted for Node fetch automatic gzip decoding and added an expansion-bomb regression.",
+      "Compiled verification caught an outdated private-preview status expectation and missing exact thumbnail exemption; the verifier now checks public-product pages, private redirects and the exact artifact guard."
+    ],
+    "documentation_lifecycle": "Final explicit review, docs:sync, docs:check, docs:check:build and docs:audit results follow this frozen record; no self-referential evidence hash is used."
+  },
+  "limits": [
+    "No production database migration, deployment, paid generation, live load, remote CI or account mutation.",
+    "Local SQL medians are five-run loopback fixtures; no production latency/SLO or overall site-capacity guarantee.",
+    "Caches/queues are per process; unique-work coalescing does not limit every HTTP caller and byte budgets exclude JavaScript/index/decoder overhead.",
+    "Selected/newest legacy inline images can exceed the normal recent string budget; the newest results remain reachable.",
+    "Rare substring searches can inspect many owner rows. Legacy summary/session APIs are not all converted to the new compact paging contract.",
+    "A cold thumbnail still reads/decodes the original. Multi-instance cold traffic and on-demand processing costs require production observation.",
+    "Application/storage writes are not one atomic commit; failed metadata admission may leave an uploaded artifact for private reconciliation.",
+    "No physical-device, full screen-reader or measured Core Web Vitals acceptance. Final UI review was local Chrome with synthetic results.",
+    "The additive function/index migration must precede the application; writer-blocking index creation needs target-specific rollout review."
+  ],
+  "prior_navigation_evidence": "docs/knowledge/audits/2026-09-13-navigation-continuity.json"
+}

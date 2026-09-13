@@ -116,9 +116,9 @@
 .studio-canvas-caption > button { flex-shrink: 0; }
 .studio-artwork-reveal { animation: studio-reveal 650ms cubic-bezier(.16,1,.3,1) both; }
 @keyframes studio-reveal { from { filter: blur(12px); opacity: .4; } to { filter: blur(0); opacity: 1; } }
-.studio-results-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 22px; align-items: start; }
+.studio-results-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(min(200px,100%),1fr)); gap: 20px; align-items: start; }
 .studio-result { min-width: 0; }
-.studio-result-preview { display: block; position: relative; width: 100%; min-height: 100px; max-height: 480px; overflow: hidden; border-radius: 8px; background: var(--studio-panel); }
+.studio-result-preview { display: block; position: relative; width: 100%; min-height: 100px; max-height: 280px; overflow: hidden; border-radius: 8px; background: var(--studio-panel); }
 .studio-artwork { object-fit: contain; }
 .studio-result-preview:hover { outline: 1px solid #818cf8; outline-offset: 2px; }
 .studio-result-prompt { font-size: 13px; color: var(--studio-muted); line-height: 1.6; margin-top: 12px; overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow-wrap: anywhere; }
@@ -181,7 +181,7 @@
   .studio-scroll-hint { display: flex; align-items: center; justify-content: space-between; color: var(--studio-muted); font-size: 11px; margin-bottom: 8px; }
 }
 @media (min-width: 1600px) { .studio-workspace { grid-template-columns: 360px minmax(0,1fr); } .studio-composer { padding: 28px; } .studio-canvas-body { padding: 36px; } }
-@media (max-width: 1199px) { .studio-workspace { grid-template-columns: 300px minmax(0,1fr); } .studio-composer { padding: 20px; } .studio-section-heading { align-items: flex-start; flex-direction: column; gap: 10px; } .studio-results-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media (max-width: 1199px) { .studio-workspace { grid-template-columns: 300px minmax(0,1fr); } .studio-composer { padding: 20px; } .studio-section-heading { align-items: flex-start; flex-direction: column; gap: 10px; } }
 @media (max-width: 900px) { .studio-view-nav, .studio-canvas-body { padding-left: 20px; padding-right: 20px; } .studio-view-nav > div { gap: 18px; } .studio-view-nav > div > button svg { display: none; } .studio-section-heading h2 { font-size: 22px; } .studio-creations-toolbar { align-items: flex-start; flex-direction: column; gap: 16px; } .studio-inspector-content { grid-template-columns: minmax(0,1fr) 300px; } }
 @media (max-width: 760px) {
   .studio-heading { min-height: 64px; padding: 12px 20px; }
@@ -233,8 +233,18 @@
   .studio-inspector-toolbar h2 { font-size: 14px; }
   .studio-detail-prompt { max-height: 180px; }
 }
-@media (max-width: 420px) { .studio-view-nav > div { gap: 19px; } .studio-view-nav > div > button { font-size: 12px; gap: 5px; } .studio-view-nav > div > button svg { width: 14px; } .studio-view-nav { padding: 0 14px; gap: 2px; } .studio-results-grid { grid-template-columns: 1fr; } .studio-library-toolbar { flex-direction: column; } }
+@media (max-width: 420px) { .studio-view-nav > div { gap: 19px; } .studio-view-nav > div > button { font-size: 12px; gap: 5px; } .studio-view-nav > div > button svg { width: 14px; } .studio-view-nav { padding: 0 14px; gap: 2px; } .studio-results-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; } .studio-card-reuse { min-width: 44px; } .studio-card-reuse span { display: none; } .studio-result-actions, .studio-result-actions > div { gap: 0; } .studio-library-toolbar { flex-direction: column; } }
 @media (prefers-reduced-motion: reduce) { .studio-animation-toggle { display: none; } }
 @media (prefers-reduced-motion: reduce) { .studio *, .studio *::before, .studio *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
 
 .studio-empty-actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+
+/* Page controls stay in place while the visible page refreshes. */
+.studio-library-pagination { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--studio-line); }
+.studio-library-pagination > span { font-size: 13px; color: var(--studio-muted); white-space: nowrap; }
+.studio-session-note .studio-text-button { display: inline-flex; margin-left: 4px; }
+
+.studio-library-pagination-top { margin: 0 0 20px; padding: 0; border: 0; }
+.studio-result-prompt { min-height: 3.2em; }
+
+@media (max-width: 760px) { .studio-library .studio-section-heading { flex-direction: row; align-items: center; } }

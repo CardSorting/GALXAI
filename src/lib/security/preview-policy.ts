@@ -19,7 +19,7 @@ export function isPublicProductPath(pathname: string): boolean {
   const p = normalizedPath(pathname);
   if (publicApis.has(p) || publicPages.has(p) || publicAssets.has(p)) return true;
   // Resource identifiers never extend an exemption to sibling API namespaces.
-  if (/^\/v1\/images\/(?:requests\/[^/]+(?:\/stream)?|assets\/[^/]+|sessions\/[^/]+)$/.test(p)) return true;
+  if (/^\/v1\/images\/(?:requests\/[^/]+(?:\/stream)?|assets\/[^/]+(?:\/thumbnail)?|sessions\/[^/]+)$/.test(p)) return true;
   if (/^\/api\/images\/library\/[^/]+$/.test(p) || /^\/api\/sites\/published\/[^/]+$/.test(p)) return true;
   if (/^\/sites\/[^/]+$/.test(p) || /^\/billing(?:\/|$)/.test(p)) return true;
   if (/^\/(?:brand|fonts|inspiration)\//.test(p) || /^\/images\/studio\/(?:desert|glass|paper)\.webp$/.test(p)) return true;

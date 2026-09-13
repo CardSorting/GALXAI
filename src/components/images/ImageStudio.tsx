@@ -17,13 +17,18 @@ export function ImageStudio() {
 }
 
 function StudioWorkspace({ owner, token, authLoading }: { owner: string | null; token?: string; authLoading: boolean }) {
-  const studio = useImageStudio(owner, token);
   const [view, setView] = useState<'create' | 'library'>('create');
   const [active, setActive] = useState<StudioImage | null>(null);
   const [activeCollection, setActiveCollection] = useState<StudioImage[]>([]);
   const [activeSource, setActiveSource] = useState<'create' | 'library'>('create');
   const [layout, setLayout] = useState<'image' | 'grid'>('image');
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const studio = useImageStudio(owner, token, view === 'library', selectedId);
+  const [detailError, setDetailError] = useState('');
+  const [detailRevision, setDetailRevision] = useState(0);
+  const [reusing, setReusing] = useState<string | null>(null);
+  const reuseController = useRef<AbortController | null>(null);
+  const libraryHeading = useRef<HTMLHeadingElement>(null);
   const [composerOpen, setComposerOpen] = useState(true);
   const [downloading, setDownloading] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -36,11 +41,33 @@ function StudioWorkspace({ owner, token, authLoading }: { owner: string | null; 
   const returnFocus = useRef<HTMLElement | null>(null);
   const downloadingLock = useRef(false);
   const lastCopied = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const { settings, setSettings } = studio;
+  const { settings, setSettings, getDetails } = studio;
+  const previousLibraryPage = useRef(studio.page);
   const busy = studio.submitting || studio.polling;
-  const activeImage = active ? studio.images.find(image => image.id === active.id) || active : null;
+  const activeImage = active;
   const activeIndex = activeCollection.findIndex(image => image.id === active?.id);
   const dialogOpen = Boolean(active);
+
+  useEffect(() => {
+    if (!active) { setActiveCollection([]); setDetailError(''); return; }
+    if (active.detailsLoaded !== false) return;
+    const controller = new AbortController();
+    setDetailError('');
+    void getDetails(active, controller.signal).then(image => {
+      if (!controller.signal.aborted) setActive(image);
+    }).catch(() => { if (!controller.signal.aborted) setDetailError('Details couldn’t be loaded. Your image is still here.'); });
+    return () => controller.abort();
+  }, [active, getDetails, detailRevision]);
+  useEffect(() => () => reuseController.current?.abort(), []);
+  useEffect(() => {
+    const changed = previousLibraryPage.current !== studio.page;
+    previousLibraryPage.current = studio.page;
+    if (changed && view === 'library') {
+      libraryHeading.current?.focus({ preventScroll: true });
+      libraryHeading.current?.scrollIntoView({ block: 'nearest', behavior: 'instant' });
+    }
+  }, [studio.page, view]);
+  useEffect(() => { if (studio.libraryError.includes('Sign in')) { setActive(null); setActiveCollection([]); } }, [studio.libraryError]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -81,6 +108,16 @@ function StudioWorkspace({ owner, token, authLoading }: { owner: string | null; 
     setSettings(readSettings({ ...settings, prompt, ratio, quality }));
     setActive(null); setCopied(false); studio.setNotice('Prompt added. Make it your own, then generate.'); focusPrompt();
   }
+  async function reusePrompt(image: StudioImage) {
+    reuseController.current?.abort();
+    const controller = new AbortController(); reuseController.current = controller;
+    setReusing(image.id);
+    try {
+      const detail = await studio.getDetails(image, controller.signal);
+      if (!controller.signal.aborted) applyPrompt(detail.prompt, detail.ratio, detail.quality);
+    } catch { if (!controller.signal.aborted) studio.setNotice('The prompt couldn’t be loaded. Try again.'); }
+    finally { if (!controller.signal.aborted) setReusing(null); }
+  }
   function showLibrary(favorites = false) { setView('library'); studio.setFavorites(favorites); }
   function openImage(image: StudioImage, source: 'create' | 'library') {
     setActiveCollection(source === 'create' ? studio.creations : studio.images);
@@ -120,11 +157,16 @@ function StudioWorkspace({ owner, token, authLoading }: { owner: string | null; 
     if (lastCopied.current) clearTimeout(lastCopied.current);
     lastCopied.current = setTimeout(() => setCopied(false), 2200);
   }
+  const libraryPagination = (position: 'top' | 'bottom') => (studio.images.length > 0 || studio.page > 1) && <nav className={`studio-library-pagination studio-library-pagination-${position}`} aria-label={position === 'top' ? 'Image library pages' : 'Image library pages, bottom'}>
+    <button className="studio-secondary" disabled={!studio.previousCursor || studio.libraryLoading} onClick={studio.previousPage}><ArrowLeft aria-hidden="true" />Previous</button>
+    <span aria-live={position === 'top' ? 'polite' : 'off'} aria-atomic="true">Page {studio.page}</span>
+    <button className="studio-secondary" disabled={!studio.cursor || studio.libraryLoading} onClick={studio.nextPage}>Next<ArrowRight aria-hidden="true" /></button>
+  </nav>;
   const imageCard = (image: StudioImage) => <article className="studio-result" key={image.id}>
-    <button className="studio-result-preview" style={{ aspectRatio: image.ratio.replace(':', '/') }} onClick={() => openImage(image, 'library')} aria-label={`Open image: ${image.prompt.slice(0, 100)}`}><Artwork image={image} /></button>
+    <button className="studio-result-preview" style={{ aspectRatio: '1' }} onClick={() => openImage(image, 'library')} aria-label={`Open image: ${image.prompt.slice(0, 100)}`}><Artwork image={image} /></button>
     <p className="studio-result-prompt">{image.prompt}</p>
     <div className="studio-result-actions">
-      <button className="studio-text-button" onClick={() => applyPrompt(image.prompt, image.ratio, image.quality)}><RefreshCw aria-hidden="true" />Reuse prompt</button>
+      <button className="studio-text-button studio-card-reuse" aria-label="Reuse prompt" disabled={reusing === image.id} onClick={() => void reusePrompt(image)}><RefreshCw aria-hidden="true" /><span>{reusing === image.id ? 'Loading…' : 'Reuse prompt'}</span></button>
       <div>
         {image.saved && <button className="studio-icon-button" aria-label={image.favorite ? 'Remove from favorites' : 'Add to favorites'} aria-pressed={image.favorite} disabled={studio.busyAsset === image.id} onClick={() => void studio.toggleFavorite(image)}><Star aria-hidden="true" fill={image.favorite ? 'currentColor' : 'none'} /></button>}
         <button className="studio-icon-button" aria-label="Download image" disabled={downloading} onClick={() => void download(image)}><ArrowDownToLine aria-hidden="true" /></button>
@@ -189,15 +231,17 @@ function StudioWorkspace({ owner, token, authLoading }: { owner: string | null; 
 
           {view === 'create' ? <GenerationCanvas images={studio.creations} request={studio.pending?.settings || studio.submission}
             animating={busy && !studio.error} onOpen={image => openImage(image, 'create')} onDownload={image => void download(image)} downloading={downloading}
-            onReuse={image => applyPrompt(image.prompt, image.ratio, image.quality)} layout={layout} onLayout={setLayout} selectedId={selectedId} onSelect={setSelectedId} />
+            onReuse={image => applyPrompt(image.prompt, image.ratio, image.quality)} layout={layout} onLayout={setLayout} selectedId={selectedId} onSelect={setSelectedId} onLibrary={() => showLibrary()} />
           : <section className="studio-library" aria-label={studio.favorites ? 'Favorite images' : 'Your images'}>
-            <div className="studio-section-heading"><div><h2>{studio.favorites ? 'Your favorites' : 'Your images'}</h2><p>{owner ? 'A little inspiration, saved for later.' : 'Sign in to see the images you’ve made.'}</p></div><button className="studio-icon-button" aria-label="Refresh library" disabled={studio.libraryLoading || !owner} onClick={studio.refresh}><RefreshCw className={studio.libraryLoading ? 'studio-spin' : undefined} aria-hidden="true" /></button></div>
+            <div className="studio-section-heading"><div><h2 ref={libraryHeading} tabIndex={-1}>{studio.favorites ? 'Your favorites' : 'Your images'}</h2><p>{owner ? 'A little inspiration, saved for later.' : 'Sign in to see the images you’ve made.'}</p></div><button className="studio-icon-button" aria-label="Refresh library" disabled={studio.libraryLoading || !owner} onClick={studio.refresh}><RefreshCw className={studio.libraryLoading ? 'studio-spin' : undefined} aria-hidden="true" /></button></div>
             {owner ? <><div className="studio-library-toolbar"><div className="studio-search"><Search aria-hidden="true" /><input aria-label="Search your images" type="search" value={studio.search} onChange={event => studio.setSearch(event.target.value)} placeholder="Search by prompt…" maxLength={200} /></div><div className="studio-select-wrap"><select aria-label="Sort images" value={studio.sort} onChange={event => studio.setSort(event.target.value)}><option value="newest">Newest first</option><option value="oldest">Oldest first</option></select><ChevronDown aria-hidden="true" /></div></div>
+              {libraryPagination('top')}
               {studio.libraryError && <div className={studio.images.length ? 'studio-alert' : 'studio-empty'} role="alert">
                 {studio.images.length ? <p>Couldn’t update your library. Your loaded images are still here.</p> : <><h3>Your images couldn’t be loaded</h3><p>{studio.libraryError}</p></>}
                 <div className="studio-empty-actions"><button className="studio-secondary" disabled={studio.libraryLoading} onClick={studio.retryLibrary}>Try again</button>{studio.libraryError.includes('Sign in') && <Link className="studio-primary" href="/auth/signin?next=%2Fimages">Sign in again</Link>}</div>
               </div>}
-              {studio.libraryLoading && !studio.images.length ? <div className="studio-results-grid" aria-label="Loading images" aria-busy="true">{[0, 1, 2].map(index => <div key={index} className="studio-skeleton" />)}</div> : studio.images.length ? <><div className="studio-library-count" role="status">{studio.libraryLoading ? 'Updating images…' : `${studio.total.toLocaleString()} ${studio.total === 1 ? 'image' : 'images'}`}</div><div className="studio-results-grid">{studio.images.map(imageCard)}</div>{studio.cursor && !studio.libraryError && <button className="studio-secondary studio-load-more" disabled={studio.libraryLoading} onClick={studio.loadMore}>{studio.libraryLoading ? 'Loading…' : 'Load more images'}</button>}</> : !studio.libraryError && <div className="studio-empty"><ImageIcon aria-hidden="true" /><h3>{studio.search ? 'No images match your search' : studio.favorites ? 'Keep your favorites close' : 'Your next idea belongs here'}</h3><p>{studio.search ? 'Try a different word from your prompt.' : studio.favorites ? 'Star an image in your library to find it here.' : 'Generate your first image to start your collection.'}</p><button className="studio-secondary" onClick={() => studio.search ? studio.setSearch('') : studio.favorites ? showLibrary() : focusPrompt()}>{studio.search ? 'Clear search' : studio.favorites ? 'Browse my images' : 'Create an image'}</button></div>}
+              {studio.libraryLoading && !studio.images.length ? <div className="studio-results-grid" aria-label="Loading images" aria-busy="true">{[0, 1, 2].map(index => <div key={index} className="studio-skeleton" />)}</div> : studio.images.length ? <><div className="studio-library-count" role="status">{studio.libraryLoading ? 'Updating images…' : `${studio.images.length} ${studio.images.length === 1 ? 'image' : 'images'} on this page`}</div><div className="studio-results-grid">{studio.images.map(imageCard)}</div></> : !studio.libraryError && <div className="studio-empty"><ImageIcon aria-hidden="true" /><h3>{studio.page > 1 ? 'No images on this page' : studio.search ? 'No images match your search' : studio.favorites ? 'Keep your favorites close' : 'Your next idea belongs here'}</h3><p>{studio.page > 1 ? 'Your library may have changed. Return to the first page to keep browsing.' : studio.search ? 'Try a different word from your prompt.' : studio.favorites ? 'Star an image in your library to find it here.' : 'Generate your first image to start your collection.'}</p><button className="studio-secondary" onClick={() => studio.page > 1 ? studio.firstPage() : studio.search ? studio.setSearch('') : studio.favorites ? showLibrary() : focusPrompt()}>{studio.page > 1 ? 'Back to first page' : studio.search ? 'Clear search' : studio.favorites ? 'Browse my images' : 'Create an image'}</button></div>}
+              {libraryPagination('bottom')}
             </> : <div className="studio-empty"><ImageIcon aria-hidden="true" /><h3>Your own space to create</h3><p>Generate images, save your favorites, and pick up where you left off.</p><Link href="/auth/signin?next=%2Fimages" className="studio-primary">Sign in to get started<ArrowRight aria-hidden="true" /></Link></div>}
           </section>}
         </div>
@@ -208,10 +252,10 @@ function StudioWorkspace({ owner, token, authLoading }: { owner: string | null; 
       if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') { event.preventDefault(); browseImage(event.key === 'ArrowLeft' ? -1 : 1); }
     }}>
       {activeImage && <><div className="studio-inspector-toolbar"><h2 id="studio-inspector-title">Image details</h2><div className="studio-image-paging" role="group" aria-label="Browse images"><button className="studio-icon-button" aria-label="Previous image" disabled={activeIndex <= 0} onClick={() => browseImage(-1)}><ArrowLeft aria-hidden="true" /></button><span aria-live="polite" aria-atomic="true">{activeIndex + 1} of {activeCollection.length}</span><button className="studio-icon-button" aria-label="Next image" disabled={activeIndex >= activeCollection.length - 1} onClick={() => browseImage(1)}><ArrowRight aria-hidden="true" /></button></div><button className="studio-icon-button" aria-label="Close image details" autoFocus onClick={() => setActive(null)}><X aria-hidden="true" /></button></div><div className="studio-inspector-content"><div className="studio-inspector-image"><Artwork key={activeImage.id} image={activeImage} large /></div><div className="studio-inspector-details">
-        <h3>Prompt</h3><p className="studio-detail-prompt">{activeImage.prompt || 'No prompt saved.'}</p><button className="studio-text-button" onClick={() => void copyPrompt(activeImage.prompt)}>{copied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}{copied ? 'Copied' : 'Copy prompt'}</button>
+        <h3>Prompt</h3>{activeImage.detailsLoaded === false ? detailError ? <div role="alert"><p>{detailError}</p><button className="studio-text-button" onClick={() => setDetailRevision(value => value + 1)}>Retry details</button></div> : <p role="status">Loading full prompt…</p> : <p className="studio-detail-prompt">{activeImage.prompt || 'No prompt saved.'}</p>}<button className="studio-text-button" disabled={activeImage.detailsLoaded === false} onClick={() => void copyPrompt(activeImage.prompt)}>{copied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}{copied ? 'Copied' : 'Copy prompt'}</button>
         <dl><div><dt>Model</dt><dd>{IMAGE_MODEL.name}</dd></div><div><dt>Aspect ratio</dt><dd>{activeImage.ratio}</dd></div><div><dt>Quality</dt><dd>{activeImage.quality === 'hd' ? 'High detail' : 'Standard'}</dd></div>{activeImage.createdAt && <div><dt>Created</dt><dd>{new Date(activeImage.createdAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}</dd></div>}</dl>
         <button className="studio-primary" disabled={downloading} onClick={() => void download(activeImage)}><ArrowDownToLine aria-hidden="true" />{downloading ? 'Downloading…' : 'Download image'}</button>
-        <button className="studio-secondary" onClick={() => applyPrompt(activeImage.prompt, activeImage.ratio, activeImage.quality)}><RefreshCw aria-hidden="true" />Reuse prompt & settings</button>
+        <button className="studio-secondary" disabled={activeImage.detailsLoaded === false} onClick={() => applyPrompt(activeImage.prompt, activeImage.ratio, activeImage.quality)}><RefreshCw aria-hidden="true" />Reuse prompt & settings</button>
         {activeImage.saved && <button className="studio-secondary" disabled={studio.busyAsset === activeImage.id} aria-pressed={activeImage.favorite} onClick={async () => { if (await studio.toggleFavorite(activeImage)) setActive({ ...activeImage, favorite: !activeImage.favorite }); }}><Star aria-hidden="true" fill={activeImage.favorite ? 'currentColor' : 'none'} />{activeImage.favorite ? 'Remove from favorites' : 'Add to favorites'}</button>}
         <p className="studio-field-hint">Reusing a prompt creates a new image.</p>
         <div className="studio-inspector-status" role="status">{studio.notice}</div>

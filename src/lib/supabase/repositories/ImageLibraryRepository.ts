@@ -1,9 +1,9 @@
 /**
  * GALXAI: User Visual Library & Request Content Repository
  *
- * Combines PostgreSQL (Supabase) as authoritative data ruler with
- * BroccoliDB as the high-velocity L1 in-memory write buffer and read shield.
- * Employs micro-batching to eliminate egress costs and database connection hops.
+ * Combines PostgreSQL (Supabase) as authoritative storage with
+ * BroccoliDB as a bounded process-local write buffer and read cache.
+ * Coalesces pending metadata writes; durable acknowledgement is explicit.
  */
 
 import { getSupabaseAdmin, isSupabaseConfigured, isSupabaseAdminConfigured } from '../client';
@@ -32,8 +32,7 @@ export class ImageLibraryRepository {
   }
 
   /**
-   * Queries user visual library with microsecond L1 memory lookups,
-   * rich search, facet filtering, and automated cold-start database warming.
+   * Queries bounded cached or authoritative pages, with optional legacy summaries.
    */
   public async getLibrary(
     userId: string,
@@ -147,6 +146,7 @@ export class ImageLibraryRepository {
     }
 
     const { stats } = await this.buffer.queryLibrary(userId);
+    if (!stats) throw new Error('Image library summary unavailable');
     return stats;
   }
 

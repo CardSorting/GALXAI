@@ -12,7 +12,7 @@ The normalization path is internal result -> decoded/re-encoded artifact -> publ
 DTO -> HTTP response. Formatting helpers receive only normalized bytes or public
 image fields. The native and relay adapters request base64 so normalization never
 fetches an arbitrary provider URL. Downloads resolve an authenticated, expiring
-opaque capability and re-encode stored images again, including historical assets.
+opaque capability and re-encode stored images again, including historical assets. The exact thumbnail child is included in the public-product route policy; it requires no developer-preview grant and arbitrary child routes are not exempted. The thumbnail child route uses the same capability, checks the current owner-scoped row before every cache hit, and emits a fresh WebP preview inside 512×512. Storage/processing work has explicit admission, byte and time bounds. [Large-library guidance](image-library-scale.md) owns the precise limits and concurrent-read semantics.
 
 Public errors use stable categories and opaque request IDs. Middleware no longer
 adds execution timing or route-classification headers. Operational endpoints require
@@ -29,7 +29,7 @@ The HTTP suite opens a loopback server around the actual route handlers and merg
 middleware headers. It tests binary success, explicit JSON, format conversions,
 metadata removal, malformed input, auth failures, rate limits, unavailable models,
 capacity errors, exhausted dispatch errors, timeouts, async polling, terminal SSE,
-downloads, expired/tampered capabilities, unknown fields, and alternate gateway errors.
+downloads, expired/tampered capabilities, unknown fields, and alternate gateway errors. Compact library tests add explicit prompt-preview DTOs, full owner-authorized details, thumbnail sizing/metadata removal, coalesced reads, expired/foreign/deleted capability denial and safe failures with Retry-After. The compact endpoint rejects unknown/duplicate query parameters and never accepts an input user ID as authority.
 The OpenAPI test closes JSON object schemas. Documentation and catalog checks
 prevent reintroduction of known private vocabulary in published contracts.
 

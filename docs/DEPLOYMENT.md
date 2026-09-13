@@ -23,6 +23,8 @@ Run `npm run docs:check`, appropriate [hardening checks](maintainers/RELAY_HARDE
 
 The image request migration must be applied before the application relies on durable async receipts. Configure Auth, database, server-only storage and reachable generation dependencies in the target environment; local credentials and a Ready deployment do not verify those dependencies. Follow [application configuration](VERCEL_DEPLOYMENT.md) and [image acceptance](../post-mortem/runbooks/image-generation.md).
 
+The [bounded-library migration](maintainers/image-library-scale.md#validation-rollout-and-recovery) must precede the compact library client. Review index creation against target write load, keep the previous summary RPC compatible, and verify older-asset/thumbnail retrieval separately from new generation.
+
 Preserve owner-scoped receipts and committed artifacts through rollback. The populated image table is intentionally protected from destructive rollback. Keep developer-preview checks enforced at both the application and gateway; a pre-gate successful release is not a safe rollback. Staff authority remains independent. Record recovery in [the incident system](../post-mortem/README.md).
 
 For storage pressure, use [bounded deployment cleanup](../post-mortem/runbooks/deployment-storage.md). Preserve aliases and a compatible rollback; verify storage-accounting totals separately from removed-deployment counts.

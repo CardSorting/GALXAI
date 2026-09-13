@@ -42,8 +42,9 @@ Owner role: **Product/API maintainer**. Domain: `images`.
 - [Application queues and relay jobs](../../docs/QUEUE_SPECIFICATION.md)
 - [Image public boundary verification](../../docs/maintainers/image-public-boundary.md)
 - [Image generation and library recovery](../../post-mortem/runbooks/image-generation.md)
+- [Large image libraries](../../docs/maintainers/image-library-scale.md)
 
-Relevant checks (select for the change; impact discovery never executes these): `npm run test:image:security`, `npm run test:image:db`.
+Relevant checks (select for the change; impact discovery never executes these): `npm run test:image:security`, `npm run test:image:db`, `npm run test:image:scale`, `npm run test:image:library-db`.
 
 ## Identity and private developer preview
 
@@ -108,6 +109,7 @@ Owner role: **BroccoliDB maintainer**. Domain: `broccolidb`.
 
 - [Developer preview reads and hybrid sync](../../docs/operations/preview-hybrid-sync.md)
 - [BroccoliDB compaction and synchronization checks](../../docs/maintainers/COMPACTOR_FUZZING_AND_QA_MATRIX.md)
+- [Large image libraries](../../docs/maintainers/image-library-scale.md)
 
 Relevant checks (select for the change; impact discovery never executes these): `npm run test:broccolidb:api`, `npm run test:broccolidb:hardening`, `npm run test:egress:transport`.
 

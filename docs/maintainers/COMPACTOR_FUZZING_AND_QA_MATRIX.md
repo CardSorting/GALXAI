@@ -12,6 +12,7 @@ Private maintainer guide. This review covers the canonical compaction facade, pr
 | Provenance and adversarial input | [Safety guard](../../src/core/broccolidb/BroccoliCompactionSafety.ts), `npm run test:broccolidb:hardening` | The tested high-risk evidence and fallback invariants; not complete semantic fidelity |
 | Preview read caching or batching | [Read coordinator](../../src/lib/supabase/repositories/PreviewReadSync.ts), [sync contract](../operations/preview-hybrid-sync.md), `npm run test:developer-preview` | Current authorization despite warm snapshots, pool/account isolation, eviction, bounded batches and failure handling |
 | Database read/write effects | `npm run test:developer-preview:db`, `npm run test:preview-admin:db`, `npm run db:test` | The tested SQL, transaction, role, concurrency and durability cases in disposable fixtures |
+| Image library working sets | [Scale guide](image-library-scale.md), `npm run test:image:scale`, `npm run test:image:library-db`, `npm run test:image:security` | Bounded caches/queues, expiry, coalescing, cursor ties, older assets, sanitized thumbnails and failed-read recovery in isolated fixtures |
 | Image persistence | [Image recovery](../../post-mortem/runbooks/image-generation.md), `npm run test:image:db` | Receipt ownership, single dispatch and durable Favorites behavior in the fixture |
 | Transport and build isolation | `npm run test:egress:transport` | Physical request budgets and isolated build configuration for the tested paths |
 
@@ -21,7 +22,7 @@ Derive size boundaries from the owning source constants and check both allowed a
 
 The compaction API is private preview. The facade API suite supplies synthetic verified identities and approval reads while retaining the real route guards. It tests unauthenticated and verified-but-unapproved denial. Do not restore anonymous access or use real credentials to make the suite pass. Public Images and Sites keep their separate product policy.
 
-BroccoliDB snapshots optimize response payloads; they do not authorize a caller, commit a mutation or replace durable PostgreSQL records. Re-check current grants before reusing payloads and preserve uncertainty on failed writes. Reuse the existing read coordinator and its bounded per-pool scheduling instead of adding another permission cache.
+BroccoliDB snapshots optimize response payloads; they do not authorize a caller, commit a mutation or replace durable PostgreSQL records. Re-check current grants before reusing payloads and preserve uncertainty on failed writes. Preview reads retain their existing bounded per-pool coordinator. Image-library metadata and artifact processing have separate bounded work coordinators described in the scale guide; neither is a permission cache.
 
 ## Evidence and limits
 

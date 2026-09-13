@@ -98,7 +98,8 @@ test('image library and favorites verify sessions without administrator credenti
             : { data: { user: { id: 'verified-user' } }, error: null } as any;
         };
         try {
-          for (const query of ['?userId=attacker-chosen', '?isFavorite=true&userId=attacker-chosen']) {
+          assert.equal((await library(new NextRequest('https://galx.ai/api/images/library?userId=attacker-chosen', { headers }))).status, 400);
+          for (const query of ['', '?isFavorite=true']) {
             const response = await library(new NextRequest(`https://galx.ai/api/images/library${query}`, { headers }));
             assert.equal(response.status, 200);
             assert.equal(response.headers.get('cache-control'), 'private, no-store');

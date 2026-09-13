@@ -1291,6 +1291,7 @@ export interface ImageLibraryStats {
 }
 
 export interface ImageLibraryFilterOptions {
+  readonly includeSummary?: boolean;
   readonly sessionId?: string;
   readonly aspectRatio?: string;
   readonly isFavorite?: boolean;
@@ -1302,10 +1303,11 @@ export interface ImageLibraryFilterOptions {
 
 export interface ImageLibraryPage {
   readonly records: ImageGenerationRecord[];
-  readonly totalCount: number;
-  readonly stats: ImageLibraryStats;
+  readonly totalCount: number | null;
+  readonly stats: ImageLibraryStats | null;
   readonly availableSessions: Array<{ sessionId: string; count: number }>;
   readonly nextCursor: string | null;
+  readonly previousCursor?: string | null;
 }
 
 export * from './GalxQueueContracts';

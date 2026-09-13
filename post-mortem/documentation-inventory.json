@@ -1299,6 +1299,12 @@
       "title": "ADR 0145: Maintain knowledge with source changes"
     },
     {
+      "path": "docs/adr/0146-bounded-image-libraries.md",
+      "scope": "decision-record",
+      "category": "docs",
+      "title": "ADR 0146: Bounded image library browsing and preview delivery"
+    },
+    {
       "path": "docs/adr/README.md",
       "scope": "current-guide",
       "category": "docs",
@@ -1753,6 +1759,12 @@
       "scope": "current-guide",
       "category": "docs",
       "title": "Vercel quota efficiency"
+    },
+    {
+      "path": "docs/maintainers/image-library-scale.md",
+      "scope": "current-guide",
+      "category": "docs",
+      "title": "Large image libraries"
     },
     {
       "path": "docs/maintainers/image-public-boundary.md",

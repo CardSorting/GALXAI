@@ -1,9 +1,9 @@
 import { logImageFailure } from '@/lib/security/private-image-diagnostics';
-import { publicImageRecord } from '@/lib/security/public-image-record';
+import { publicImageRecord, publicImageSummary } from '@/lib/security/public-image-record';
 import { NextRequest, NextResponse } from 'next/server';
 import { ImageLibraryRepository } from '@/lib/supabase/repositories/ImageLibraryRepository';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
-import type { ImageLibraryFilterOptions } from '@/core/contracts/GalxContracts';
+import { InvalidImageLibraryQuery, readImageLibraryQuery } from '@/lib/images/library-cursor';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic';
 /**
  * GET /api/images/library
  * Returns the user's visual library filtered by search, aspect ratio, session, and favorite status.
- * Backed by BroccoliDB L1 read shield for 0ms, zero-egress responses.
+ * Compact cursor pages avoid full-library summaries during browsing.
  */
 export async function GET(req: NextRequest) {
   try {
@@ -20,26 +20,11 @@ export async function GET(req: NextRequest) {
 
     if (authResult.error === 'AUTH_UNAVAILABLE') return NextResponse.json({ success: false, error: 'Your session could not be checked. Try again shortly.' }, { status: 503, headers: { 'Cache-Control': 'private, no-store', 'Retry-After': '3' } });
     if (!authResult.authenticated || !authResult.userId || authResult.userId === 'anonymous_developer') {
-      return NextResponse.json({ success: false, error: 'Sign in to view your image library.' }, { status: 401 });
+      return NextResponse.json({ success: false, error: 'Sign in to view your image library.' }, { status: 401, headers: { 'Cache-Control': 'private, no-store' } });
     }
 
-    const searchParams = req.nextUrl.searchParams;
     const userId = authResult.userId;
-    const requestedLimit = Number(searchParams.get('limit') || 48);
-    const requestedSort = searchParams.get('sort');
-    const search = searchParams.get('search')?.trim();
-
-    const options: ImageLibraryFilterOptions = {
-      sessionId: searchParams.get('sessionId') || undefined,
-      aspectRatio: searchParams.get('aspectRatio') || undefined,
-      isFavorite: searchParams.has('isFavorite')
-        ? searchParams.get('isFavorite') === 'true'
-        : undefined,
-      search: search ? search.slice(0, 200) : undefined,
-      sort: requestedSort === 'oldest' ? 'oldest' : 'newest',
-      limit: Number.isSafeInteger(requestedLimit) ? Math.min(Math.max(requestedLimit, 1), 100) : 48,
-      cursor: searchParams.get('cursor') || undefined
-    };
+    const options = readImageLibraryQuery(req.nextUrl.searchParams);
 
     const repo = ImageLibraryRepository.getInstance();
     const libraryResult = await repo.getLibrary(userId, options);
@@ -50,17 +35,19 @@ export async function GET(req: NextRequest) {
       total: libraryResult.totalCount,
       limit: options.limit,
       nextCursor: libraryResult.nextCursor,
-      stats: { totalImages: libraryResult.stats.totalImages, totalBytes: libraryResult.stats.totalBytes,
+      previousCursor: libraryResult.previousCursor || null,
+      stats: libraryResult.stats ? { totalImages: libraryResult.stats.totalImages, totalBytes: libraryResult.stats.totalBytes,
         favoriteCount: libraryResult.stats.favoriteCount, sessionCount: libraryResult.stats.sessionCount,
-        aspectRatios: Object.fromEntries(Object.entries(libraryResult.stats.aspectRatios).filter(([key, value]) => /^\d+:\d+$/.test(key) && typeof value === 'number')) },
+        aspectRatios: Object.fromEntries(Object.entries(libraryResult.stats.aspectRatios).filter(([key, value]) => /^\d+:\d+$/.test(key) && typeof value === 'number')) } : null,
       availableSessions: libraryResult.availableSessions.map(item => ({ sessionId: item.sessionId, count: item.count })),
-      records: libraryResult.records.map(publicImageRecord)
+      records: libraryResult.records.map(record => options.includeSummary === false ? publicImageSummary(record) : publicImageRecord(record))
     }, { headers: { 'Cache-Control': 'private, no-store' } });
   } catch (err: unknown) {
+    if (err instanceof InvalidImageLibraryQuery) return NextResponse.json({ success: false, error: 'Check your library filters and try again.' }, { status: 400, headers: { 'Cache-Control': 'private, no-store' } });
     logImageFailure(crypto.randomUUID(), err);
     return NextResponse.json(
       { success: false, error: 'The image library is temporarily unavailable.' },
-      { status: 500 }
+      { status: 503, headers: { 'Cache-Control': 'private, no-store', 'Retry-After': '3' } }
     );
   }
 }

@@ -11,15 +11,16 @@ Use this for Images, Favorites, async generation and download failures. Start wi
 | Request fails immediately | Storage configuration and generation-service reachability | Repair the failing dependency; a stored failure does not authorize replay |
 | Request remains pending | Receipt claim/deadline and correlated execution evidence | Read the original receipt; inspect the library for completed assets before a new submission |
 | Download or library unavailable | Owner-scoped asset row, object existence, sanitized artifact delivery | Repair delivery separately from synthesis; do not regenerate an existing image |
+| Large library or preview stalls | Bounded page RPC/index deployment, query selectivity, cache/processing admission and storage read limits | Use the [scale guide](../../docs/maintainers/image-library-scale.md); retry retrieval, never silently return partial hot history or regenerate |
 | Favorite acknowledged then disappears | Durable asset flush, mutation result and owner filter | Require durable mutation before success; verify after reload |
 
 ## Preflight before releasing a repair
 
 Check the source and target separately. The image path requires the private image-request migration, application database access, working public Auth verification, required server-only image storage configuration and a reachable generation service. Local `.env.local` or a deployment marked Ready is not sufficient proof. The admin client must continue rejecting publishable credentials; never promote a public key to privileged authority.
 
-Use [database operations](../../docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md) for migrations. The September 13 migration is additive; its rollback refuses to drop populated receipts. Retain it during compatible application rollback. Never substitute the old process-local image queue or silently retry claimed generation.
+Use [database operations](../../docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md) for migrations. The durable-receipt migration is additive; its rollback refuses to drop populated receipts. The separate bounded-library migration adds only a page function and ordering indexes; apply it before the compact client, and remove dependent readers before its non-destructive SQL rollback. Retain it during compatible application rollback. Never substitute the old process-local image queue or silently retry claimed generation.
 
-Run `npm run test:image:security`, `npm run test:image:db`, `npm run test:developer-preview`, and a production build for image/auth/persistence changes. Run BroccoliDB hardening when its write path changes. The database runner uses an isolated disposable fixture, never production data. Record actual totals and failures in the incident, not permanent test counts in this guide.
+Run `npm run test:image:security`, `npm run test:image:db`, `npm run test:developer-preview`, and a production build for image/auth/persistence changes. Run BroccoliDB hardening when its write path changes. For library/thumbnail changes also run `npm run test:image:scale` and `npm run test:image:library-db`, plus the controlled large-library browser fixture. The database runner uses an isolated disposable fixture, never production data. Record actual totals and failures in the incident, not permanent test counts in this guide.
 
 ## Live acceptance
 

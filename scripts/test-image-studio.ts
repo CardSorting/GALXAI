@@ -15,7 +15,7 @@ test('library projection discards unexpected fields, unsafe URLs, and invalid da
     model: 'private-model', shardId: 'private-shard', r2Key: 'private-storage', quality: 'secret', createdAt: 'invalid', aspectRatio: 'bad', internal: { secret: 'hidden' } };
   const result = readLibrary({ success: true, total: 2, nextCursor: 'next', records: [record, { ...record, publicUrl: 'https://evil.test/image.png' }] });
   assert.equal(result.images.length, 1);
-  assert.deepEqual(Object.keys(result.images[0]).sort(), ['createdAt','favorite','id','prompt','quality','ratio','saved','url']);
+  assert.deepEqual(Object.keys(result.images[0]).sort(), ['createdAt','detailsLoaded','favorite','id','prompt','quality','ratio','saved','thumbnailUrl','url']);
   assert.equal(result.images[0].createdAt, '');
   assert.equal(result.images[0].ratio, '1:1');
   assert.doesNotMatch(JSON.stringify(result), /private-|secret|hidden/);

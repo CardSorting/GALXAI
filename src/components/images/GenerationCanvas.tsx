@@ -64,10 +64,11 @@ function DenoisingSimulation({ running, seed }: { running: boolean; seed: number
   return <canvas ref={canvasRef} className="studio-denoising" aria-hidden="true" />;
 }
 
-export function GenerationCanvas({ images, request, animating, onOpen, onDownload, onReuse, downloading, layout, onLayout, selectedId, onSelect }: {
+export function GenerationCanvas({ images, request, animating, onOpen, onDownload, onReuse, downloading, layout, onLayout, selectedId, onSelect, onLibrary }: {
   images: StudioImage[]; request: StudioSettings | null; animating: boolean;
   onOpen: (image: StudioImage) => void; onDownload: (image: StudioImage) => void; onReuse: (image: StudioImage) => void; downloading: boolean;
   layout: 'image' | 'grid'; onLayout: (layout: 'image' | 'grid') => void;
+  onLibrary: () => void;
   selectedId: string | null; onSelect: (id: string | null) => void;
 }) {
   const [paused, setPaused] = useState(false);
@@ -92,7 +93,7 @@ export function GenerationCanvas({ images, request, animating, onOpen, onDownloa
 
   return <section className="studio-creations" aria-labelledby="studio-creations-title">
     <div className="studio-creations-toolbar">
-      <div><h2 id="studio-creations-title">Your creations</h2><p>{images.length} {images.length === 1 ? 'image' : 'images'} this session</p></div>
+      <div><h2 id="studio-creations-title">Your creations</h2><p>{images.length} recent {images.length === 1 ? 'image' : 'images'}</p></div>
       <div className="studio-layout-toggle" role="group" aria-label="Results view">
         <button type="button" aria-pressed={layout === 'image'} onClick={() => onLayout('image')}><ImageIcon aria-hidden="true" />Image</button>
         <button type="button" aria-pressed={layout === 'grid'} onClick={() => onLayout('grid')}><LayoutGrid aria-hidden="true" />Grid</button>
@@ -135,6 +136,6 @@ export function GenerationCanvas({ images, request, animating, onOpen, onDownloa
     </div> : selected && layout === 'image' ? <div className="studio-canvas-caption studio-result-caption">
       <p className="studio-canvas-prompt">{selected.prompt}</p><div className="studio-selected-actions"><button type="button" className="studio-text-button" onClick={() => onReuse(selected)}><RefreshCw aria-hidden="true" />Reuse prompt</button><button type="button" className="studio-icon-button" aria-label="Download selected image" disabled={downloading} onClick={() => onDownload(selected)}><ArrowDownToLine aria-hidden="true" /></button></div>
     </div> : null}
-    {images.length > 0 && <p className="studio-session-note">This session’s images. Find saved results in My images.</p>}
+    {images.length > 0 && <p className="studio-session-note">Recent creations stay here. <button className="studio-text-button" onClick={onLibrary}>Browse all saved images<ArrowRight aria-hidden="true" /></button></p>}
   </section>;
 }

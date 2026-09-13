@@ -63,16 +63,32 @@
         "scripts/test-image-requests-db.ts",
         "scripts/test-image-public-http.ts",
         "supabase/migrations/20260913025900_durable_image_requests.sql",
-        "supabase/rollbacks/20260913025900_durable_image_requests.down.sql"
+        "supabase/rollbacks/20260913025900_durable_image_requests.down.sql",
+        "src/components/images/**/*",
+        "src/app/images/page.tsx",
+        "src/core/contracts/GalxContracts.ts",
+        "src/core/storage/GalxUnifiedR2StorageManager.ts",
+        "src/core/storage/bounded-object-body.ts",
+        "src/lib/security/image-artifact.ts",
+        "src/lib/security/public-image-record.ts",
+        "scripts/test-image-library-*.ts",
+        "scripts/test-image-studio.ts",
+        "scripts/verify-image-library-scale-ui.ts",
+        "supabase/migrations/20260913071757_image_library_bounded_pages.sql",
+        "supabase/rollbacks/20260913071757_image_library_bounded_pages.down.sql",
+        "scripts/verify-image-public-http.ts"
       ],
       "guides": [
         "docs/QUEUE_SPECIFICATION.md",
         "docs/maintainers/image-public-boundary.md",
-        "post-mortem/runbooks/image-generation.md"
+        "post-mortem/runbooks/image-generation.md",
+        "docs/maintainers/image-library-scale.md"
       ],
       "checks": [
         "npm run test:image:security",
-        "npm run test:image:db"
+        "npm run test:image:db",
+        "npm run test:image:scale",
+        "npm run test:image:library-db"
       ]
     },
     "access": {
@@ -88,7 +104,8 @@
         "src/lib/supabase/repositories/PreviewReadSync.ts",
         "scripts/test-developer-preview.ts",
         "scripts/test-preview-admin.ts",
-        "scripts/test-preview-read-sync.ts"
+        "scripts/test-preview-read-sync.ts",
+        "scripts/test-auth-identity-boundary.ts"
       ],
       "guides": [
         "docs/operations/developer-preview.md",
@@ -207,7 +224,8 @@
       ],
       "guides": [
         "docs/operations/preview-hybrid-sync.md",
-        "docs/maintainers/COMPACTOR_FUZZING_AND_QA_MATRIX.md"
+        "docs/maintainers/COMPACTOR_FUZZING_AND_QA_MATRIX.md",
+        "docs/maintainers/image-library-scale.md"
       ],
       "checks": [
         "npm run test:broccolidb:api",
@@ -225,6 +243,11 @@
         "src/components/common/CommandMenu.tsx",
         "src/components/common/NotFoundSearchHelper.tsx",
         "src/components/dashboard/Navigation.tsx",
+        "src/components/dashboard/navigation.module.css",
+        "src/app/layout.tsx",
+        "src/app/loading.tsx",
+        "src/app/not-found.tsx",
+        "src/app/globals.css",
         "src/components/dashboard/MobileBottomNav.tsx",
         "src/components/dashboard/Footer.tsx",
         "src/components/images/use-image-studio.ts",
@@ -233,7 +256,9 @@
         "scripts/test-request-efficiency.ts",
         "scripts/test-sites-workspace.ts",
         "scripts/verify-sites-workspace-ui.ts",
-        "scripts/verify-image-studio-ui.ts"
+        "scripts/verify-image-studio-ui.ts",
+        "scripts/verify-navigation-ui.ts",
+        "scripts/verify-image-library-scale-ui.ts"
       ],
       "guides": [
         "docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md",
@@ -333,6 +358,17 @@
       "target": "Private GitHub Actions documentation audit on main",
       "revision": "28d8caad5a20febe2438541012a90c493055ffb3",
       "observed_at": "2026-09-13T04:53:57.140197Z"
+    },
+    "docs/adr/0146-bounded-image-libraries.md": {
+      "status": "proposed",
+      "delivery": "local",
+      "domain": "images",
+      "owner": "Product/API maintainer",
+      "date": "2026-09-13",
+      "evidence": [
+        "docs/knowledge/audits/2026-09-13-image-library-scale.json"
+      ],
+      "supersedes": []
     }
   },
   "managed_adr_from": 145,

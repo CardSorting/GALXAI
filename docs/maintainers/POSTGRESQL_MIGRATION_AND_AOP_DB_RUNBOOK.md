@@ -11,6 +11,7 @@ Private database guide. Read the applicable repository Supabase skills before da
 | `npm run db:status` | Read migration history and compare local files; unavailable history is unknown, not “all applied” |
 | `npm run db:verify` | Static integrity checks; not proof a remote schema is applied |
 | `npm run db:test` | Full suite against an isolated disposable PostgreSQL fixture |
+| `npm run test:image:library-db` | Large-library pagination, role, old-asset and rollback checks against 50,000 owned fixture images |
 | `npm run test:image:db` | Image receipts/Favorites suite against that isolated fixture |
 | `npm run db:migrate` | Legacy manager apply action is intentionally disabled; not the production migration workflow |
 | `npm run db:push` | Direct migration mutation script; not a harmless preflight and not the default workflow below |
@@ -24,6 +25,8 @@ Use the current Supabase CLI help to discover syntax. For this imperative reposi
 Prefer additive rollout and preserve readers for already accepted operations. Review actual PostgreSQL lock/transaction behavior; concurrent index creation is not “zero lock” and cannot be placed blindly inside a transaction. A populated-table change needs a plan based on its data and query workload.
 
 Keep private operation tables unavailable to browser database roles. RLS, explicit privileges and owner predicates are complementary. Do not copy blanket service-role grants or add `SECURITY DEFINER` to bypass a permission error. Privileged functions need justified callers, fixed trusted search paths and targeted tests.
+
+The [large-library migration](image-library-scale.md#validation-rollout-and-recovery) adds partial ordering indexes and a page-only function. Review writer-blocking index creation against the target size/load; its timeout bounds are not a zero-lock promise. Apply it before dependent application readers.
 
 Run static integrity, relevant isolated database tests, authorization/adversarial cases and application checks before applying. Verify rollback behavior in the fixture; a safe rollback may intentionally refuse data loss rather than delete new records.
 

@@ -175,9 +175,9 @@ try {
   } finally { state.libraryHold = null; releaseLibrary(); }
   await page.waitForFunction(() => !document.querySelector<HTMLButtonElement>('button[aria-label="Refresh library"]')?.disabled);
   state.libraryMode = 'pages'; await page.getByRole('button', { name: 'Refresh library' }).click();
-  await page.getByRole('button', { name: 'Load more images' }).waitFor();
+  await page.waitForFunction(() => Array.from(document.querySelectorAll<HTMLButtonElement>('.studio-library-pagination button')).some(button => button.textContent === 'Next' && !button.disabled));
   state.libraryMode = 'error';
-  await page.getByRole('button', { name: 'Load more images' }).click();
+  await page.getByRole('navigation', { name: 'Image library pages', exact: true }).getByRole('button', { name: 'Next', exact: true }).click();
   await page.getByRole('alert').filter({ hasText: 'Couldn’t update your library' }).waitFor();
   assert(await page.getByRole('button', { name: 'Open image: A cinematic blue desert lake' }).isVisible(), 'failed pagination keeps existing images');
   const failedPage = state.libraryQueries.at(-1);
@@ -189,13 +189,13 @@ try {
   await inspect(page, 'library-1440');
   await page.setViewportSize({ width: 390, height: 844 });
   await inspect(page, 'library-390');
-  await page.getByRole('button', { name: 'Open image: A cinematic blue desert lake' }).click();
+  await page.getByRole('button', { name: 'Open image: Another beautiful landscape' }).click();
   await inspect(page, 'inspector-390');
   await page.keyboard.press('Escape');
   state.libraryMode = 'error'; await page.getByRole('button', { name: 'Refresh library' }).click();
   await page.getByRole('alert').filter({ hasText: 'Couldn’t update your library' }).waitFor();
-  assert(await page.getByRole('button', { name: 'Open image: A cinematic blue desert lake' }).isVisible(), 'failed refresh keeps the library usable');
-  assert(await page.getByRole('button', { name: 'Open image: Another beautiful landscape' }).isVisible(), 'failed refresh preserves every loaded page');
+  assert.equal(await page.getByRole('button', { name: 'Open image: A cinematic blue desert lake' }).count(), 0, 'earlier page is released');
+  assert(await page.getByRole('button', { name: 'Open image: Another beautiful landscape' }).isVisible(), 'failed refresh preserves the visible page');
   await inspect(page, 'library-error-390');
   state.libraryMode = 'unauthorized'; await page.getByRole('button', { name: 'Refresh library' }).click();
   await page.getByRole('link', { name: 'Sign in again', exact: true }).waitFor();
@@ -226,7 +226,7 @@ try {
     await run.page.getByLabel('Prompt', { exact: true }).fill('Two blue landscapes');
     await run.page.getByRole('button', { name: '2 images', exact: true }).click();
     await run.page.getByRole('button', { name: 'Generate 2 images', exact: true }).click();
-    await run.page.getByText('2 images this session', { exact: true }).waitFor();
+    await run.page.getByText('2 recent images', { exact: true }).waitFor();
     assert.equal(await run.page.locator('.studio-focused-image').count(), 1, 'latest view shows just the newest image');
     if (width < 760) await run.page.getByRole('button', { name: 'Edit prompt', exact: true }).click();
     await run.page.getByLabel('Prompt', { exact: true }).fill('A third image');
@@ -272,7 +272,7 @@ try {
     assert.equal(await run.page.locator('.studio-denoising').count(), 1);
     await run.page.getByRole('button', { name: 'Previous generated image', exact: true }).click();
     run.state.complete = true;
-    await run.page.getByText('4 images this session', { exact: true }).waitFor();
+    await run.page.getByText('4 recent images', { exact: true }).waitFor();
     await run.page.locator('.studio-focused-image').filter({ has: run.page.getByAltText('A third image', { exact: true }) }).waitFor();
     assert.equal(await run.page.getByRole('button', { name: 'Show image 3: A third image', exact: true }).getAttribute('aria-pressed'), 'true', 'completion does not steal the selected image');
     await run.page.getByRole('button', { name: 'Latest image', exact: true }).click();
@@ -316,7 +316,7 @@ try {
   await strip.page.getByRole('button', { name: '4 images', exact: true }).click();
   for (let batch = 1; batch <= 3; batch++) {
     await strip.page.getByRole('button', { name: 'Generate 4 images', exact: true }).click();
-    await strip.page.getByText(`${batch * 4} images this session`, { exact: true }).waitFor();
+    await strip.page.getByText(`${batch * 4} recent images`, { exact: true }).waitFor();
   }
   const selectedThumb = strip.page.locator('.studio-filmstrip [aria-pressed="true"]');
   const stripBounds = await strip.page.locator('.studio-filmstrip').boundingBox();

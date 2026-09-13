@@ -2086,6 +2086,26 @@
       }
     },
     {
+      "path": "docs/adr/0146-bounded-image-libraries.md",
+      "title": "ADR 0146: Bounded image library browsing and preview delivery",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": {
+        "status": "proposed",
+        "delivery": "local",
+        "domain": "images",
+        "owner": "Product/API maintainer",
+        "date": "2026-09-13",
+        "evidence": [
+          "docs/knowledge/audits/2026-09-13-image-library-scale.json"
+        ],
+        "supersedes": []
+      }
+    },
+    {
       "path": "docs/adr/README.md",
       "title": "Architecture decision records",
       "scope": "current-guide",
@@ -2913,6 +2933,19 @@
         "prefetch",
         "polling"
       ],
+      "decision": null
+    },
+    {
+      "path": "docs/maintainers/image-library-scale.md",
+      "title": "Large image libraries",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [
+        "images",
+        "broccolidb"
+      ],
+      "curation": "assigned",
+      "keywords": [],
       "decision": null
     },
     {

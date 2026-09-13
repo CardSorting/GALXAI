@@ -3524,6 +3524,14 @@ export interface Database {
         };
         Returns: Json;
       };
+      fn_page_user_image_library: {
+        Args: {
+          p_user_id: string; p_limit?: number; p_cursor_created_at?: string; p_cursor_id?: string;
+          p_session_id?: string; p_aspect_ratio?: string; p_is_favorite?: boolean;
+          p_search?: string; p_sort?: 'newest' | 'oldest'; p_before?: boolean;
+        };
+        Returns: Json;
+      };
       fn_upsert_owned_chat_messages: {
         Args: { p_conversation_id: string; p_user_id: string; p_messages: Json };
         Returns: Json;

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { startActivityPolling, imageStatusDelay } from '@/lib/resilience/activity-polling';
-import { DEFAULT_SETTINGS, appendCreations, generationBody, readGeneration, readLibrary, readPending, readSettings, studioError,
+import { DEFAULT_SETTINGS, appendCreations, generationBody, readGeneration, readLibrary, readImageDetail, readPending, readSettings, studioError,
   type PendingGeneration, type StudioImage, type StudioSettings } from './studio-contract';
 
 function stored(key: string): unknown {
@@ -12,7 +12,8 @@ function save(key: string, value: unknown) {
   try { if (value === null) sessionStorage.removeItem(key); else sessionStorage.setItem(key, JSON.stringify(value)); } catch { /* Private browsing may disable storage. */ }
 }
 
-export function useImageStudio(owner: string | null, token?: string) {
+export function useImageStudio(owner: string | null, token?: string, libraryActive = true, pinnedId?: string | null) {
+  const pinned = useRef(pinnedId); pinned.current = pinnedId;
   const key = `galx-image-studio:${owner || 'guest'}`;
   const [settings, setSettings] = useState<StudioSettings>(DEFAULT_SETTINGS);
   const [ready, setReady] = useState(false);
@@ -28,10 +29,12 @@ export function useImageStudio(owner: string | null, token?: string) {
   const [now, setNow] = useState(Date.now());
   const [creations, setCreations] = useState<StudioImage[]>([]);
   const [images, setImages] = useState<StudioImage[]>([]);
-  const [libraryLoading, setLibraryLoading] = useState(Boolean(owner));
+  const [libraryLoading, setLibraryLoading] = useState(false);
   const [libraryError, setLibraryError] = useState('');
   const [cursor, setCursor] = useState<string | null>(null);
-  const [total, setTotal] = useState(0);
+  const [total, setTotal] = useState<number | null>(null);
+  const [previousCursor, setPreviousCursor] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [favorites, setFavorites] = useState(false);
   const [sort, setSort] = useState('newest');
@@ -44,7 +47,8 @@ export function useImageStudio(owner: string | null, token?: string) {
   const libraryController = useRef<AbortController | null>(null);
   const librarySequence = useRef(0);
   const libraryView = useRef('');
-  const libraryRetryCursor = useRef<string | undefined>(undefined);
+  const libraryRetry = useRef<{ cursor?: string; page: number }>({ page: 1 });
+  const loadedPage = useRef<{ cursor?: string; page: number }>({ page: 1 });
   const assetLock = useRef(false);
   const headers = useCallback((): Record<string, string> => ({ Accept: 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) }), [token]);
 
@@ -72,7 +76,7 @@ export function useImageStudio(owner: string | null, token?: string) {
   useEffect(() => { if (retryAt && now >= retryAt) setRetryAt(0); }, [now, retryAt]);
 
   const refresh = useCallback(() => setRevision(value => value + 1), []);
-  const fetchLibrary = useCallback(async (after?: string) => {
+  const fetchLibrary = useCallback(async (after?: string, requestedPage = 1) => {
     if (!owner) { setImages([]); setLibraryLoading(false); return; }
     const sequence = ++librarySequence.current;
     libraryController.current?.abort();
@@ -80,9 +84,9 @@ export function useImageStudio(owner: string | null, token?: string) {
     const timeout = window.setTimeout(() => controller.abort(), 20_000);
     setLibraryLoading(true); setLibraryError('');
     const view = JSON.stringify([owner, filter, favorites, sort]);
-    if (!after && libraryView.current !== view) { setImages([]); setCursor(null); }
+    if (!after && libraryView.current !== view) { setImages([]); setCursor(null); setPreviousCursor(null); setPage(1); }
     libraryView.current = view;
-    const params = new URLSearchParams({ limit: '36', sort });
+    const params = new URLSearchParams({ limit: '36', sort, summary: 'none' });
     if (filter) params.set('search', filter);
     if (favorites) params.set('isFavorite', 'true');
     if (after) params.set('cursor', after);
@@ -93,18 +97,20 @@ export function useImageStudio(owner: string | null, token?: string) {
       if (!response.ok) {
         if ([401,403].includes(response.status) && alive.current && sequence === librarySequence.current) {
           accessDenied = true;
-          setImages([]); setCursor(null); setTotal(0);
+          setImages([]); setCursor(null); setPreviousCursor(null); setPage(1); setTotal(null);
           failureMessage = studioError(response.status);
         }
         throw new Error('Library unavailable');
       }
       const result = readLibrary(await response.json());
       if (!alive.current || sequence !== librarySequence.current) return;
-      setImages(current => after ? [...current, ...result.images.filter(image => !current.some(item => item.id === image.id))] : result.images);
+      setImages(result.images);
+      setPreviousCursor(result.previousCursor); setPage(requestedPage);
+      loadedPage.current = { cursor: after, page: requestedPage };
       setCursor(result.cursor); setTotal(result.total);
     } catch {
       if (alive.current && sequence === librarySequence.current) {
-        libraryRetryCursor.current = accessDenied ? undefined : after;
+        libraryRetry.current = accessDenied ? { page: 1 } : { cursor: after, page: requestedPage };
         setLibraryError(controller.signal.aborted ? 'Your library took too long to load. Try again.' : failureMessage);
       }
     } finally {
@@ -112,7 +118,14 @@ export function useImageStudio(owner: string | null, token?: string) {
       if (alive.current && sequence === librarySequence.current) setLibraryLoading(false);
     }
   }, [favorites, filter, headers, owner, sort]);
-  useEffect(() => { void fetchLibrary(); return () => { libraryController.current?.abort(); }; }, [fetchLibrary, revision]);
+  const cancelLibrary = useCallback(() => { librarySequence.current++; libraryController.current?.abort(); }, []);
+  useEffect(() => {
+    if (libraryActive) {
+      const sameView = libraryView.current === JSON.stringify([owner, filter, favorites, sort]);
+      void fetchLibrary(sameView ? loadedPage.current.cursor : undefined, sameView ? loadedPage.current.page : 1);
+    }
+    return cancelLibrary;
+  }, [fetchLibrary, revision, libraryActive, owner, filter, favorites, sort, cancelLibrary]);
 
   useEffect(() => {
     if (!pending || !polling || !owner) return;
@@ -134,7 +147,7 @@ export function useImageStudio(owner: string | null, token?: string) {
           return imageStatusDelay(attempt++, response.headers.get('Retry-After'));
         }
         const completed = readGeneration(payload, pending.settings, pending.id);
-        setCreations(current => appendCreations(current, completed));
+        setCreations(current => appendCreations(current, completed, pinned.current));
         setNotice('Your images are ready. Download them or reuse the prompt.');
         save(`${key}:pending`, null); save(`${key}:unconfirmed`, null); setPending(null); setPolling(false); refresh();
       } catch {
@@ -175,7 +188,7 @@ export function useImageStudio(owner: string | null, token?: string) {
         save(`${key}:pending`, request); save(`${key}:unconfirmed`, null); setPending(request); setPolling(true);
       } else {
         const completed = readGeneration(payload, snapshot, id);
-        setCreations(current => appendCreations(current, completed));
+        setCreations(current => appendCreations(current, completed, pinned.current));
         save(`${key}:unconfirmed`, null); refresh(); setNotice('Your images are ready.');
       }
     } catch {
@@ -185,6 +198,13 @@ export function useImageStudio(owner: string | null, token?: string) {
       if (alive.current) { setSubmitting(false); setSubmission(null); }
     }
   }
+
+  const getDetails = useCallback(async (image: StudioImage, signal: AbortSignal) => {
+    if (image.detailsLoaded !== false) return image;
+    const response = await fetch(`/api/images/library/${encodeURIComponent(image.id)}`, { headers: headers(), signal: AbortSignal.any([signal, AbortSignal.timeout(20_000)]), cache: 'no-store' });
+    if (!response.ok) throw new Error('Image details could not be loaded. Try again.');
+    return readImageDetail(await response.json(), image.id);
+  }, [headers]);
 
   async function toggleFavorite(image: StudioImage) {
     if (!owner || !image.saved || assetLock.current) return;
@@ -206,7 +226,9 @@ export function useImageStudio(owner: string | null, token?: string) {
   }
   return { settings, setSettings, ready, pending, polling, setPolling, submitting, submission, uncertain, progress, error, notice, setNotice,
     retryIn: Math.max(0, Math.ceil((retryAt - now) / 1000)), elapsed: pending ? Math.max(0, Math.floor((now - pending.startedAt) / 1000)) : 0,
-    creations, images, total, cursor, libraryLoading, libraryError, search, setSearch, favorites, setFavorites, sort, setSort,
-    generate, refresh, retryLibrary: () => { if (!libraryLoading) void fetchLibrary(libraryRetryCursor.current); },
-    loadMore: () => { if (cursor && !libraryLoading) void fetchLibrary(cursor); }, toggleFavorite, busyAsset, clearPending };
+    creations, images, total, cursor, previousCursor, page, getDetails, libraryLoading: libraryLoading || Boolean(owner && libraryActive && !libraryView.current), libraryError, search, setSearch, favorites, setFavorites, sort, setSort,
+    generate, refresh, retryLibrary: () => { if (!libraryLoading) void fetchLibrary(libraryRetry.current.cursor, libraryRetry.current.page); },
+    firstPage: () => { if (!libraryLoading) void fetchLibrary(); },
+    nextPage: () => { if (cursor && !libraryLoading) void fetchLibrary(cursor, page + 1); },
+    previousPage: () => { if (previousCursor && !libraryLoading) void fetchLibrary(previousCursor, Math.max(1, page - 1)); }, toggleFavorite, busyAsset, clearPending };
 }

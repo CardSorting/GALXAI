@@ -13,6 +13,7 @@
  */
 
 import * as crypto from 'node:crypto';
+import { BroccoliBoundedCache } from '../../core/broccolidb/broccolidb-bounded-cache';
 import { BroccoliDbTable } from '../../core/broccolidb/broccolidb-table';
 import { BroccoliNaturalQueryParser } from '../../core/broccolidb/broccolidb-natural-query';
 import { BroccoliImageLibraryBuffer } from '../../core/broccolidb/BroccoliImageLibraryBuffer';
@@ -80,11 +81,12 @@ export interface SessionImageManifest {
 
 export class GalxR2AssetAdapter {
   private static instance: GalxR2AssetAdapter;
+  private readonly assetCache = new BroccoliBoundedCache<UserSessionImageResult>('r2_assets', { entries: 512, bytes: 8 * 1024 * 1024, ttlMs: 60_000 });
   public readonly assetTable: BroccoliDbTable<UserSessionImageResult>;
   private readonly r2Manager: GalxUnifiedR2StorageManager;
 
   private constructor() {
-    this.assetTable = new BroccoliDbTable<UserSessionImageResult>('r2_assets');
+    this.assetTable = this.assetCache.table;
     this.assetTable.createIndex('contentType');
     this.assetTable.createIndex('userId');
     this.assetTable.createIndex('sessionId');
@@ -239,9 +241,9 @@ export class GalxR2AssetAdapter {
       lqipDataUri: lqip
     };
 
-    this.assetTable.put(imageId, result);
+    this.assetCache.put(imageId, result);
 
-    // Enqueue into BroccoliImageLibraryBuffer for micro-batched persistence to PostgreSQL & R2 master catalog
+    // Enqueue into BroccoliImageLibraryBuffer for micro-batched persistence to PostgreSQL
     try {
       const libraryBuffer = BroccoliImageLibraryBuffer.getInstance();
       const aspectRatio = this.extractAspectRatio(params.size);
@@ -272,7 +274,7 @@ export class GalxR2AssetAdapter {
         updatedAt: new Date().toISOString()
       });
     } catch (bufErr: any) {
-      console.warn(`[GalxR2AssetAdapter] BroccoliImageLibraryBuffer enqueue warning: ${bufErr.message}`);
+      throw bufErr;
     }
 
     // Synchronously update session manifest in R2 so caller can immediately inspect it
@@ -325,7 +327,7 @@ export class GalxR2AssetAdapter {
       uploadedAtMs: Date.now(),
     };
 
-    this.assetTable.put(assetId, result);
+    this.assetCache.put(assetId, result);
     return result;
   }
 
@@ -333,25 +335,17 @@ export class GalxR2AssetAdapter {
    * Retrieves asset metadata from the fast in-memory BroccoliDB index.
    */
   getAsset(assetId: string): UserSessionImageResult | null {
-    return this.assetTable.get(assetId) || null;
+    return this.assetCache.get(assetId) || null;
   }
 
   /**
-   * Lists all images generated in a specific user session.
+   * Lists the first 100 stored images in a session (legacy adapter).
    */
   async listSessionImages(userId: string, sessionId: string): Promise<UserSessionImageResult[]> {
     const cleanUserId = userId.trim();
     const cleanSessionId = sessionId.trim();
 
-    // Query in-memory BroccoliDB index
-    const records = this.assetTable.getAll().filter(
-      (a) => a.userId === cleanUserId && a.sessionId === cleanSessionId
-    );
-    if (records.length > 0) {
-      return records.sort((a, b) => b.uploadedAtMs - a.uploadedAtMs);
-    }
-
-    // Fall back to querying R2 prefix
+    // A bounded metadata cache cannot represent a complete storage listing.
     const prefix = `users/${cleanUserId.replace(/[^a-zA-Z0-9_-]/g, '_')}/sessions/${cleanSessionId.replace(/[^a-zA-Z0-9_-]/g, '_')}/images/`;
     const listed = await this.r2Manager.listObjects({ bucket: 'images', prefix, maxKeys: 100 });
     const { publicDomain, bucketName } = this.r2Manager.resolveBucket('images');
@@ -371,20 +365,11 @@ export class GalxR2AssetAdapter {
   }
 
   /**
-   * Lists all images belonging to a user across sessions.
+   * Lists a bounded storage page across sessions.
    */
   async listUserImages(userId: string, options?: { limit?: number; continuationToken?: string }): Promise<{ images: UserSessionImageResult[]; nextContinuationToken?: string }> {
     const cleanUserId = userId.trim();
     const limit = options?.limit || 50;
-
-    const inMemory = this.assetTable.getAll()
-      .filter((a) => a.userId === cleanUserId)
-      .sort((a, b) => b.uploadedAtMs - a.uploadedAtMs)
-      .slice(0, limit);
-
-    if (inMemory.length > 0) {
-      return { images: inMemory };
-    }
 
     const prefix = `users/${cleanUserId.replace(/[^a-zA-Z0-9_-]/g, '_')}/`;
     const listed = await this.r2Manager.listObjects({
@@ -431,7 +416,7 @@ export class GalxR2AssetAdapter {
       (a) => a.userId === cleanUserId && a.sessionId === cleanSessionId
     );
     for (const r of records) {
-      this.assetTable.delete(r.assetId);
+      this.assetCache.delete(r.assetId);
     }
 
     return { deletedCount: res.deleted.length };
@@ -507,7 +492,7 @@ export class GalxR2AssetAdapter {
    * Retrieves raw asset data from Cloudflare R2.
    */
   async getAssetBuffer(key: string): Promise<Buffer> {
-    const res = await this.r2Manager.getObject('images', key);
+    const res = await this.r2Manager.getObject('images', key, true, { maxBytes: 32 * 1024 * 1024, signal: AbortSignal.timeout(15_000) });
     return res.data;
   }
 

@@ -26,12 +26,23 @@ for (const token of [
 const options = await fetch(`${base}/v1/images/generations`, { method: 'OPTIONS' });
 assert.equal(options.status, 204);
 assert.doesNotMatch(JSON.stringify(Object.fromEntries(options.headers)), /X-Galx-Queue|X-Deployment-Id|X-Edge-FastPath|Server-Timing/i);
-for (const path of ['/api/relay/status', '/api/internal/telemetry', '/api/queues']) {
-  const denied = await fetch(`${base}${path}`); assert.equal(denied.status, 404);
+for (const [path, status] of [['/api/relay/status',401], ['/api/internal/telemetry',404], ['/api/queues',401]] as const) {
+  // Machine routes retain their own admin guard; other private APIs hit the preview gate first.
+  const denied = await fetch(`${base}${path}`); assert.equal(denied.status, status);
   assert.doesNotMatch(await denied.text(), forbidden);
 }
+for (const suffix of ['', '/thumbnail']) {
+  const denied = await fetch(`${base}/v1/images/assets/invalid-capability${suffix}`);
+  assert.equal(denied.status, 404, 'image capabilities reach their artifact guard without a developer-preview grant');
+  assert.equal((await denied.json()).error.code, 'not_found');
+}
+for (const path of ['/models/openai-gpt-image-latest','/models/gpt-5.6-sol','/llms.txt']) {
+  const denied = await fetch(`${base}${path}`, { redirect: 'manual' });
+  assert.equal(denied.status, 307);
+  assert.equal(new URL(denied.headers.get('location')!, base).pathname, '/developers');
+}
 const browserAssets = new Set<string>();
-for (const path of ['/', '/models/openai-gpt-image-latest', '/models/gpt-5.6-sol', '/llms.txt', '/api/openapi.json']) {
+for (const path of ['/', '/images', '/api/openapi.json']) {
   const page = await fetch(`${base}${path}`); assert.equal(page.status, 200, path);
   const html = await page.text();
   assert.doesNotMatch(html, forbidden, path);

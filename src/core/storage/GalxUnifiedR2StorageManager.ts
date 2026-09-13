@@ -26,6 +26,7 @@ import * as path from 'node:path';
 import { Readable } from 'node:stream';
 import * as zlib from 'node:zlib';
 import { BroccoliTelemetryEngine } from '../telemetry/BroccoliTelemetryEngine';
+import { readBoundedObjectBody, type ObjectReadBounds } from './bounded-object-body';
 
 export type R2KnownBucket =
   | 'training'
@@ -413,13 +414,15 @@ export class GalxUnifiedR2StorageManager {
   /**
    * Retrieves an object with L1 memory hot-cache read-through and decompressive streaming.
    */
-  public async getObject(bucket: R2KnownBucket, key: string, useCache = true): Promise<R2GetObjectResult> {
+  public async getObject(bucket: R2KnownBucket, key: string, useCache = true, bounds?: ObjectReadBounds): Promise<R2GetObjectResult> {
+    bounds?.signal.throwIfAborted();
     const { bucketName, workerBindingName } = this.resolveBucket(bucket);
 
     // 1. Check L1 Hot Cache
     if (useCache) {
       const cached = this.cacheL1Get(bucketName, key);
       if (cached) {
+        if (bounds && cached.data.length > bounds.maxBytes) throw new Error('Object exceeds read limit');
         return {
           success: true,
           data: cached.data,
@@ -436,10 +439,9 @@ export class GalxUnifiedR2StorageManager {
       const r2Bucket = this.workerEnv[workerBindingName];
       const obj = await r2Bucket.get(key);
       if (!obj) throw new Error(`Object not found in R2: ${bucketName}/${key}`);
-      const arrayBuf = await obj.arrayBuffer();
-      const buf = Buffer.from(arrayBuf);
+      const buf = bounds ? await readBoundedObjectBody(obj.body, bounds) : Buffer.from(await obj.arrayBuffer());
       const isGzipped = obj.httpMetadata?.contentEncoding === 'gzip';
-      const decompressed = isGzipped ? zlib.gunzipSync(buf) : buf;
+      const decompressed = isGzipped ? zlib.gunzipSync(buf, bounds ? { maxOutputLength: bounds.maxBytes } : undefined) : buf;
 
       this.cacheL1Put(bucketName, key, decompressed, obj.httpMetadata?.contentType || 'application/octet-stream', obj.etag);
 
@@ -457,14 +459,18 @@ export class GalxUnifiedR2StorageManager {
     // 3. AWS SigV4 Resilient Driver
     if (this.isConfigured()) {
       const result = await this.executeWithRetry(async () => {
-        return this.executeSigV4Get(bucketName, key);
-      }, `GET ${bucketName}/${key}`);
+        return this.executeSigV4Get(bucketName, key, bounds);
+      }, `GET ${bucketName}/${key}`, bounds ? 0 : 3);
 
       let decompressed = result.data;
       if (result.isGzipped) {
         try {
-          decompressed = zlib.gunzipSync(result.data);
-        } catch {
+          // Node fetch can already decode HTTP gzip while retaining its header.
+          if (!bounds || (result.data[0] === 0x1f && result.data[1] === 0x8b)) {
+            decompressed = zlib.gunzipSync(result.data, bounds ? { maxOutputLength: bounds.maxBytes } : undefined);
+          }
+        } catch (error) {
+          if (bounds) throw error;
           decompressed = result.data;
         }
       }
@@ -483,10 +489,11 @@ export class GalxUnifiedR2StorageManager {
       throw new Error(`Object not found in local cache: ${bucketName}/${key}`);
     }
 
+    if (bounds && fs.statSync(targetLocalPath).size > bounds.maxBytes) throw new Error('Object exceeds read limit');
     const fileBuf = fs.readFileSync(targetLocalPath);
     let finalBuf = fileBuf;
     if (key.endsWith('.gz')) {
-      try { finalBuf = zlib.gunzipSync(fileBuf); } catch {}
+      try { finalBuf = zlib.gunzipSync(fileBuf, bounds ? { maxOutputLength: bounds.maxBytes } : undefined); } catch (error) { if (bounds) throw error; }
     }
 
     return {
@@ -1053,7 +1060,7 @@ export class GalxUnifiedR2StorageManager {
     return { success: true, etag: res.headers.get('etag') || undefined };
   }
 
-  private async executeSigV4Get(bucketName: string, key: string): Promise<R2GetObjectResult> {
+  private async executeSigV4Get(bucketName: string, key: string, bounds?: ObjectReadBounds): Promise<R2GetObjectResult> {
     const host = `${this.accountId}.r2.cloudflarestorage.com`;
     const canonicalUri = `/${bucketName}/${key.split('/').map(encodeURIComponent).join('/')}`;
     const payloadHash = crypto.createHash('sha256').update('').digest('hex');
@@ -1087,14 +1094,16 @@ export class GalxUnifiedR2StorageManager {
     const res = await fetch(url, {
       method: 'GET',
       headers: { ...headers, Authorization: authHeader },
+      signal: bounds?.signal,
     });
 
     if (!res.ok) {
+      if (bounds) await res.body?.cancel();
       throw new Error(`Cloudflare R2 GET failed (${res.status} ${res.statusText})`);
     }
 
     const isGzipped = res.headers.get('content-encoding') === 'gzip';
-    const arrayBuf = await res.arrayBuffer();
+    const arrayBuf = bounds ? await readBoundedObjectBody(res.body, bounds) : Buffer.from(await res.arrayBuffer());
 
     return {
       success: true,

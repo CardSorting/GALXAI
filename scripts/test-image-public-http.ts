@@ -55,7 +55,7 @@ test('raw image HTTP boundary: success, compatibility, errors, async and adversa
   GalxSeatTierEngine.getInstance = () => ({ resolveUserSeatTier: async () => ({ isCapped: capped, isPriorityUser: false }) }) as any;
   ImageRequestService.getInstance = () => ({ create: async () => task, resume: () => {}, repository: { get: async () => task } }) as any;
   galxRouter.routeImageGeneration = async () => { calls++; if (failure) throw failure; return result as any; };
-  ImageLibraryRepository.getInstance = () => ({ getAsset: async (userId: string, assetId: string) => userId === 'customer' && assetId === 'asset' ? { r2Key: secret } : null }) as any;
+  ImageLibraryRepository.getInstance = () => ({ getAsset: async (userId: string, assetId: string) => userId === 'customer' && assetId === 'asset' ? { id: 'asset', userId: 'customer', status: 'completed', r2Key: secret } : null }) as any;
   GalxR2AssetAdapter.getInstance = () => ({ getAssetBuffer: async () => fixture }) as any;
   GalxQueueEventBus.getInstance = () => ({ subscribeTask: () => () => {} }) as any;
   const server = createServer(async (req, res) => {

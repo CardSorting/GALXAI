@@ -21,6 +21,8 @@ Public async images use [durable PostgreSQL receipts](../src/lib/images/request-
 
 [The service](../src/lib/images/request-service.ts) tracks bounded work with Next.js `after`. Status reads can schedule an unclaimed queued request; claimed attempts are never leased for redispatch. Timeout/failed status is not proof of no side effect. A late authoritative completion can be recorded. Cancellation only succeeds before dispatch; keep original identity and check the library before another submission.
 
+The [large-library implementation](maintainers/image-library-scale.md) bounds process-local metadata/page caches and pending image writes. A full write buffer rejects admission without evicting unsaved records; durable asset acknowledgement remains required. Browsing outages return unavailable instead of a partial cache presented as complete history. This does not add a durable generation queue.
+
 The application's receipt persistence does not make upstream execution exactly once or transfer its guarantee to generic queues, relay jobs or SDK retries. Follow [image recovery](../post-mortem/runbooks/image-generation.md) and [ADR 0144](adr/0144-durable-images-and-incident-documentation.md).
 
 ## Throughput isolation

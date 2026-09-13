@@ -24,7 +24,7 @@ let ownedContainer = false, pool: Pool | undefined;
 const workspace = await mkdtemp(path.join(tmpdir(), 'galx-integration-'));
 try {
   const args = process.argv.slice(2);
-  if (args.length && (args.length !== 1 || !['--billing', '--domains', '--workspace', '--fair', '--plans', '--preview', '--admin', '--admin-ui', '--images'].includes(args[0]))) throw new Error('Supported options: --billing, --domains, --workspace, --fair, --plans, --preview, --admin');
+  if (args.length && (args.length !== 1 || !['--billing', '--domains', '--workspace', '--fair', '--plans', '--preview', '--admin', '--admin-ui', '--images', '--image-library'].includes(args[0]))) throw new Error('Supported options: --billing, --domains, --workspace, --fair, --plans, --preview, --admin');
   let url = process.env.GALX_INTEGRATION_DATABASE_URL;
   if (url) isolatedIntegrationEnvironment({ GALX_INTEGRATION_DATABASE_URL: url });
   else {
@@ -78,8 +78,8 @@ try {
     let spawnError: Error | undefined;
     const child = spawn(process.execPath, ['--import', import.meta.resolve('tsx'),
       '--import', path.join(root, 'scripts/lib/integration-no-network.ts'),
-      path.join(root, args[0] === '--images' ? 'scripts/test-image-requests-db.ts' : args[0] === '--admin-ui' ? 'scripts/verify-preview-admin-ui.ts' : args[0] === '--admin' ? 'scripts/test-preview-admin-db.ts' : args[0] === '--preview' ? 'scripts/test-developer-preview-db.ts' : args[0] === '--plans' ? 'scripts/test-sites-plans-db.ts' : args[0] === '--fair' ? 'scripts/test-sites-fair-db.ts' : args[0] === '--domains' ? 'scripts/test-sites-domains-db.ts' : args[0] === '--workspace' ? 'scripts/test-sites-workspace-db.ts' : 'scripts/test-supabase-integration.ts'),
-      ...(['--domains','--workspace', '--fair', '--plans', '--preview', '--admin', '--admin-ui', '--images'].includes(args[0]) ? [] : args)],
+      path.join(root, args[0] === '--image-library' ? 'scripts/test-image-library-scale-db.ts' : args[0] === '--images' ? 'scripts/test-image-requests-db.ts' : args[0] === '--admin-ui' ? 'scripts/verify-preview-admin-ui.ts' : args[0] === '--admin' ? 'scripts/test-preview-admin-db.ts' : args[0] === '--preview' ? 'scripts/test-developer-preview-db.ts' : args[0] === '--plans' ? 'scripts/test-sites-plans-db.ts' : args[0] === '--fair' ? 'scripts/test-sites-fair-db.ts' : args[0] === '--domains' ? 'scripts/test-sites-domains-db.ts' : args[0] === '--workspace' ? 'scripts/test-sites-workspace-db.ts' : 'scripts/test-supabase-integration.ts'),
+      ...(['--domains','--workspace', '--fair', '--plans', '--preview', '--admin', '--admin-ui', '--images', '--image-library'].includes(args[0]) ? [] : args)],
     { cwd: workspace, env, stdio: 'inherit', timeout: args[0] === '--admin-ui' ? 300000 : 180000, signal: controller.signal });
     child.on('error', error => { spawnError = error; });
     child.on('close', code => spawnError ? reject(spawnError) : resolve(code ?? 1));
