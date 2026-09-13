@@ -2,82 +2,157 @@
 
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import Link from 'next/link';
+import { ArrowRight, Check, ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { normalizeProfile, TRAFFIC_OPTIONS, validateApplication, type ApplicationDetails, type ApplicationErrors, type ApplicationInput } from '@/lib/developers/application';
+import styles from './developer-preview.module.css';
+
 type Status = 'loading' | 'not_requested' | 'pending' | 'approved' | 'revoked' | 'declined' | 'expired' | 'session_required' | 'error';
+type Draft = Omit<ApplicationInput, 'cohort_interest'> & { cohort_interest: '' | ApplicationInput['cohort_interest'] };
+const emptyDraft: Draft = { introduction: '', github_url: '', linkedin_url: '', use_case: '', expected_traffic: 'exploring', cohort_interest: '' };
+const fieldIds = { introduction: 'preview-introduction', github_url: 'preview-github', linkedin_url: 'preview-linkedin', use_case: 'preview-project', expected_traffic: 'preview-traffic', cohort_interest: 'preview-next' };
+const cohortLabel = (value: string | null) => value === 'next' ? 'Interested in the next cohort' : value === 'later' ? 'Interested in a future cohort' : 'Not provided yet';
+
+function ApplicationSummary({ value }: { value: ApplicationDetails | Draft }) {
+  return <dl className={styles.summary}>
+    <div><dt>Introduction</dt><dd>{value.introduction || 'Not provided yet'}</dd></div>
+    <div><dt>Profiles</dt><dd className={styles.profileLinks}>{(['github', 'linkedin'] as const).map(kind => {
+      const url = normalizeProfile(value[`${kind}_url`], kind);
+      return url ? <a key={kind} href={url} target="_blank" rel="noopener noreferrer">{url.replace('https://', '')}<span className={styles.srOnly}> (opens in a new tab)</span></a> : null;
+    })}{!value.github_url && !value.linkedin_url && 'Not provided yet'}</dd></div>
+    <div><dt>Your project</dt><dd>{value.use_case}</dd></div>
+    <div><dt>Expected API requests</dt><dd>{TRAFFIC_OPTIONS[value.expected_traffic]}</dd></div>
+    <div><dt>Cohort preference</dt><dd>{cohortLabel(value.cohort_interest)}</dd></div>
+  </dl>;
+}
 
 export function DeveloperPreview() {
-  const { user, isLoading } = useAuth();
-  const token = user?.token;
-  const [expiresAt, setExpiresAt] = useState<string | null>(null);
+  const auth = useAuth();
+  // Account changes unmount private drafts and cancel client requests immediately.
+  return <PreviewFlow key={auth.user?.id ?? 'guest'} user={auth.user} isLoading={auth.isLoading} />;
+}
+
+function PreviewFlow({ user, isLoading }: Pick<ReturnType<typeof useAuth>, 'user' | 'isLoading'>) {
   const [status, setStatus] = useState<Status>('loading');
-  const [useCase, setUseCase] = useState('');
-  const [traffic, setTraffic] = useState('exploring');
+  const [application, setApplication] = useState<ApplicationDetails | null>(null);
+  const [expiresAt, setExpiresAt] = useState<string | null>(null);
+  const [draft, setDraft] = useState<Draft>(emptyDraft);
+  const [editing, setEditing] = useState(false);
+  const [reviewing, setReviewing] = useState(false);
+  const [errors, setErrors] = useState<ApplicationErrors>({});
   const [feedback, setFeedback] = useState('');
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState('');
+  const [conflict, setConflict] = useState(false);
   const [refresh, setRefresh] = useState(0);
-  const submitting = useRef(false);
-  const accountId = user?.id;
-  useEffect(() => { setUseCase(''); setFeedback(''); setNotice(''); setExpiresAt(null); }, [accountId]);
+  const [focusVersion, setFocusVersion] = useState(0);
+  const heading = useRef<HTMLHeadingElement>(null);
+  const errorSummary = useRef<HTMLDivElement>(null);
+  const mutation = useRef<AbortController | null>(null);
+  const accountId = user?.id, token = user?.token;
+  const focusHeading = () => setFocusVersion(value => value + 1);
+  useEffect(() => { if (focusVersion) heading.current?.focus(); }, [focusVersion]);
+  useEffect(() => { if (Object.keys(errors).length) errorSummary.current?.focus(); }, [errors]);
+  useEffect(() => () => mutation.current?.abort(), []);
+
+  function applySaved(data: { status: Status; application?: ApplicationDetails | null; expires_at?: string | null }) {
+    setStatus(['not_requested', 'pending', 'approved', 'revoked', 'declined', 'expired', 'session_required'].includes(data.status) ? data.status : 'error');
+    setApplication(data.application ?? null); setExpiresAt(data.expires_at ?? null);
+  }
   useEffect(() => {
     if (isLoading) return;
     if (!accountId) { setStatus('not_requested'); return; }
-    const controller = new AbortController();
-    setStatus('loading');
-    fetch('/api/developer-access', { cache: 'no-store', signal: controller.signal,
-      headers: token ? { Authorization: `Bearer ${token}` } : {} })
-      .then(async response => { if (response.status === 401) return { status: 'session_required' }; if (!response.ok) throw new Error(); return response.json(); })
-      .then(data => { if (controller.signal.aborted) return; setStatus(['not_requested', 'pending', 'approved', 'revoked', 'declined', 'expired', 'session_required'].includes(data.status) ? data.status : 'error'); setExpiresAt(data.expires_at || null); })
+    const controller = new AbortController(); setStatus('loading');
+    fetch('/api/developer-access', { cache: 'no-store', signal: controller.signal, headers: token ? { Authorization: `Bearer ${token}` } : {} })
+      .then(async response => { if (response.status === 401) return { status: 'session_required' as const }; if (!response.ok) throw new Error(); return response.json(); })
+      .then(data => { if (!controller.signal.aborted) applySaved(data); })
       .catch(() => { if (!controller.signal.aborted) setStatus('error'); });
     return () => controller.abort();
   }, [accountId, token, refresh, isLoading]);
 
-  async function submit(event: FormEvent, kind: 'request' | 'feedback') {
-    event.preventDefault(); if (submitting.current) return;
-    submitting.current = true; setBusy(true); setNotice('');
+  function startEditing() {
+    if (application) setDraft({ introduction: application.introduction ?? '', github_url: application.github_url ?? '', linkedin_url: application.linkedin_url ?? '',
+      use_case: application.use_case, expected_traffic: application.expected_traffic, cohort_interest: application.cohort_interest ?? '' });
+    setEditing(true); setReviewing(false); setErrors({}); setNotice(''); focusHeading();
+  }
+  function update<K extends keyof Draft>(key: K, value: Draft[K]) { setDraft(previous => ({ ...previous, [key]: value })); }
+  function review(event: FormEvent) {
+    event.preventDefault();
+    const checked = validateApplication(draft); setErrors(checked.errors);
+    if (Object.keys(checked.errors).length) return;
+    setDraft(checked.value); setReviewing(true); setNotice(''); focusHeading();
+  }
+  async function save(kind: 'application' | 'feedback') {
+    if (mutation.current) return;
+    const controller = new AbortController(); mutation.current = controller; setBusy(true); setNotice('');
     try {
       const response = await fetch(`/api/developer-access${kind === 'feedback' ? '/feedback' : ''}`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-        body: JSON.stringify(kind === 'feedback' ? { message: feedback } : { use_case: useCase, expected_traffic: traffic }),
+        method: kind === 'application' && editing ? 'PATCH' : 'POST', signal: controller.signal,
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: JSON.stringify(kind === 'feedback' ? { message: feedback } : { ...draft, ...(editing ? { revision: application?.revision } : {}) }),
       });
       const data = await response.json();
+      if (controller.signal.aborted) return;
       if (!response.ok) {
-        if (response.status === 401) setStatus('session_required');
-        if (response.status === 403 && data.error?.code === 'developer_preview_required') setRefresh(n => n + 1);
+        if (response.status === 401) { setStatus('session_required'); setDraft(emptyDraft); setApplication(null); setFeedback(''); setEditing(false); setReviewing(false); }
+        if (response.status === 409) setConflict(true);
+        if (response.status === 400 && data.error?.fields) { setErrors(validateApplication(draft).errors); setReviewing(false); }
+        if (kind === 'feedback' && response.status === 403) setRefresh(n => n + 1);
         setNotice(data.error?.message || 'We couldn’t save that. Please try again.'); return;
       }
-      if (kind === 'request') { setStatus(data.status); setExpiresAt(data.expires_at || null); }
-      else { setFeedback(''); setNotice('Feedback received. Thank you for helping shape GALX.'); }
-    } catch { setNotice('We couldn’t save that. Check your connection and try again.'); }
-    finally { submitting.current = false; setBusy(false); }
+      if (kind === 'application') {
+        applySaved(data); setEditing(false); setReviewing(false); setConflict(false);
+        setNotice(editing ? 'Application updated. Your original place in the review queue is unchanged.' : 'Application received. You can check its status here.'); focusHeading();
+      } else { setFeedback(''); setNotice('Feedback received. Thank you for helping shape GALX.'); }
+    } catch { if (!controller.signal.aborted) setNotice('We couldn’t save that. Your draft is still here. Check your connection and try again.'); }
+    finally { if (!controller.signal.aborted) { mutation.current = null; setBusy(false); } }
   }
-  const field = 'w-full rounded-xl border border-white/20 bg-[#101420] p-3 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-400';
-  const button = 'inline-flex min-h-11 items-center justify-center rounded-xl bg-indigo-600 px-5 py-3 font-semibold text-white hover:bg-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-indigo-400 disabled:opacity-60';
-  return <section className="mt-10 border-t border-white/15 pt-8" aria-label="Developer access">
-    {isLoading ? <p role="status">Checking your preview access…</p> : !user ? <>
-      <h2 className="text-2xl font-semibold">Join the developer waitlist</h2>
-      <p className="mt-3 max-w-prose text-zinc-300">Create an account and verify your email, then tell us what you want to build. We review requests individually and open access gradually. Signup does not grant API access.</p>
-      <div className="mt-6 flex flex-wrap items-center gap-5"><Link className={button} href="/auth/signup?next=%2Fdevelopers">Sign up to request access</Link><Link className="underline underline-offset-4" href="/auth/signin?next=%2Fdevelopers">Already have an account? Sign in</Link></div>
-    </> : status === 'loading' ? <p role="status">Checking your preview access…</p>
-      : status === 'session_required' ? <><h2 className="text-2xl font-semibold">Sign in to check your access</h2><p className="mt-3 max-w-prose text-zinc-300">Use your verified account to request developer access or view your current status. Your saved request will be waiting for you.</p><Link className={`${button} mt-5`} href="/auth/signin?next=%2Fdevelopers">Sign in again</Link></>
-      : status === 'error' ? <><p role="alert">We couldn’t check your access. Please try again.</p><button className={`${button} mt-4`} onClick={() => setRefresh(n => n + 1)}>Try again</button></>
-      : status === 'not_requested' ? <form onSubmit={event => submit(event, 'request')} className="max-w-2xl space-y-6">
-        <h2 className="text-2xl font-semibold">Tell us what you’re building</h2>
-        <p className="text-zinc-300">Your request is linked to your verified account. We use these details to review access and follow up about the preview. There’s no guaranteed invitation date.</p>
-        <div><label className="mb-2 block font-medium" htmlFor="preview-project">What would you use the API for?</label><textarea id="preview-project" className={field} rows={5} minLength={20} maxLength={2000} required value={useCase} onChange={event => setUseCase(event.target.value)} aria-describedby="project-hint" /><p id="project-hint" className="mt-2 text-sm text-zinc-400">20–2,000 characters. Please leave out passwords, API keys, and sensitive customer data.</p></div>
-        <div><label className="mb-2 block font-medium" htmlFor="preview-traffic">Expected API requests</label><select id="preview-traffic" className={field} value={traffic} onChange={event => setTraffic(event.target.value)}><option value="exploring">I’m still exploring</option><option value="under_100_daily">Fewer than 100 per day</option><option value="under_1000_daily">100–1,000 per day</option><option value="over_1000_daily">More than 1,000 per day</option></select></div>
-        <button className={button} disabled={busy}>{busy ? 'Submitting…' : 'Request developer access'}</button>
-      </form>
-      : status === 'approved' ? <>
-        <h2 className="text-2xl font-semibold">Your preview access is approved</h2>{expiresAt && <p className="mt-3 text-zinc-300">Your access is available until {new Date(expiresAt).toLocaleString()}.</p>}
-        <p className="mt-3 text-zinc-300">You can create an API key and explore the developer tools. This is an early preview; share what works and where you need help.</p>
-        <div className="mt-5 flex flex-wrap gap-5"><Link className={button} href="/keys">Manage API keys</Link><Link className="self-center underline underline-offset-4" href="/docs">Read the API docs</Link><Link className="self-center underline underline-offset-4" href="/playground">Open playground</Link></div>
-        <form className="mt-10 max-w-2xl space-y-4" onSubmit={event => submit(event, 'feedback')}><label htmlFor="preview-feedback" className="block text-xl font-semibold">Share private feedback</label><p id="feedback-hint" className="text-zinc-300">Feedback goes to the GALX team and is not published. Tell us what happened and what you expected. Leave out credentials and sensitive data.</p><textarea id="preview-feedback" aria-describedby="feedback-hint" className={field} rows={5} minLength={10} maxLength={4000} required value={feedback} onChange={event => setFeedback(event.target.value)} /><button className={button} disabled={busy}>{busy ? 'Sending…' : 'Send private feedback'}</button></form>
-      </> : <>
-        <h2 className="text-2xl font-semibold">{status === 'pending' ? 'You’re on the developer waitlist' : status === 'expired' ? 'Your preview access period has ended' : status === 'declined' ? 'Your request was reviewed' : 'Your developer access is paused'}</h2>
-        <p className="mt-3 max-w-prose text-zinc-300">{status === 'pending' ? 'Your request is saved. We review requests individually as we make room for more participants. Check back here for your access status.' : status === 'declined' ? 'We’re unable to open developer access for your project at this stage. Your request remains on file for future review. Images and Sites are still available.' : 'Developer API calls are unavailable for your account. Images and Sites are still available. Your original access request is saved for review.'}</p>
-        <button className={`${button} mt-5`} onClick={() => setRefresh(n => n + 1)}>Check access status</button>
-      </>}
-    <p role="status" aria-live="polite" className="mt-5 text-zinc-200">{notice}</p>
+  const fieldError = (key: keyof ApplicationInput) => errors[key] && <p id={`${fieldIds[key]}-error`} className={styles.fieldError}>{errors[key]}</p>;
+  const describedBy = (key: keyof ApplicationInput, hint: string) => `${hint}${errors[key] ? ` ${fieldIds[key]}-error` : ''}`;
+  const showForm = status === 'not_requested' || (status === 'pending' && editing);
+  return <section className={styles.panel} aria-label="Developer application" aria-busy={busy}>
+    {isLoading || status === 'loading' ? <p role="status">Checking your preview access…</p> : !user ? <>
+      <h2>Apply for the private preview</h2><p>Start with a verified GALX account. Then share a short introduction, a profile, and what you’d like to build.</p>
+      <p>We read each application and invite builders as space opens. Applying doesn’t grant API access.</p>
+      <div className={styles.actions}><Link className={styles.primary} href="/auth/signup?next=%2Fdevelopers">Sign up to apply <ArrowRight size={16} aria-hidden="true" /></Link><Link className={styles.textLink} href="/auth/signin?next=%2Fdevelopers">Already have an account? Sign in</Link></div>
+    </> : status === 'session_required' ? <>
+      <h2>Sign in to check your access</h2><p>Use your verified account to apply or view your current status. Your saved application will be waiting for you.</p><Link className={styles.primary} href="/auth/signin?next=%2Fdevelopers">Sign in again</Link>
+    </> : status === 'error' ? <>
+      <h2>We couldn’t check your access</h2><p role="alert">Please try again. Your saved application is unchanged.</p><button className={styles.primary} onClick={() => setRefresh(n => n + 1)}>Try again</button>
+    </> : showForm ? <>
+      <div className={styles.formHeading}><h2 ref={heading} tabIndex={-1}>{reviewing ? 'Review your application' : editing ? 'Update your application' : 'Tell us a little about yourself'}</h2><p>{reviewing ? 'Check your details before sharing them with the GALX team.' : 'A short introduction is enough. We’re interested in the builder and the project.'}</p></div>
+      <p className={styles.account}>Applying as <strong>{user.email}</strong></p>
+      {reviewing ? <>
+        <ApplicationSummary value={draft} /><p className={styles.helper}>Your application is private to you and the GALX team. An invitation and API access require review.</p>
+        <div className={styles.actions}><button className={styles.primary} disabled={busy || conflict} onClick={() => void save('application')}>{busy ? 'Saving application…' : editing ? 'Save changes' : 'Submit application'}<ArrowRight size={16} aria-hidden="true" /></button><button className={styles.secondary} disabled={busy} onClick={() => { setReviewing(false); focusHeading(); }}><ArrowLeft size={16} aria-hidden="true" /> Edit answers</button></div>
+      </> : <form noValidate onSubmit={review} className={styles.form}>
+        {Object.keys(errors).length > 0 && <div ref={errorSummary} tabIndex={-1} role="alert" className={styles.errorSummary}><h3>Check your application</h3><ul>{Object.entries(errors).map(([key, error]) => <li key={key}><a href={`#${fieldIds[key as keyof ApplicationInput]}`}>{error}</a></li>)}</ul></div>}
+        <fieldset className={styles.group}><legend>About you</legend>
+          <div className={styles.field}><label htmlFor="preview-introduction">A short introduction</label><p id="introduction-hint" className={styles.helper}>What’s your background, and what do you enjoy building? A sentence or two, 20–1,000 characters.</p><textarea id="preview-introduction" name="introduction" rows={3} minLength={20} maxLength={1000} required value={draft.introduction} onChange={e => update('introduction', e.target.value)} aria-invalid={Boolean(errors.introduction)} aria-describedby={describedBy('introduction', 'introduction-hint')} />{fieldError('introduction')}</div>
+          <div><p id="profiles-hint" className={styles.helper}>Add GitHub or LinkedIn so we can get to know your work. One profile is enough; both are welcome.</p><div className={styles.profileFields}>{(['github', 'linkedin'] as const).map(kind => {
+            const key = `${kind}_url` as const;
+            return <div className={styles.field} key={kind}><label htmlFor={fieldIds[key]}>{kind === 'github' ? 'GitHub profile' : 'LinkedIn profile'}</label><input id={fieldIds[key]} name={key} type="text" inputMode="url" autoCapitalize="none" autoCorrect="off" spellCheck={false} maxLength={300} placeholder={kind === 'github' ? 'github.com/yourname' : 'linkedin.com/in/yourname'} value={draft[key] ?? ''} onChange={e => update(key, e.target.value)} aria-invalid={Boolean(errors[key])} aria-describedby={describedBy(key, 'profiles-hint')} />{fieldError(key)}</div>;
+          })}</div></div>
+        </fieldset>
+        <fieldset className={styles.group}><legend>Your project</legend>
+          <div className={styles.field}><label htmlFor="preview-project">What would you use the API for?</label><p id="project-hint" className={styles.helper}>Describe your idea, who it’s for, and what you’d like to try. An early idea is welcome. 20–2,000 characters.</p><textarea id="preview-project" name="use_case" rows={4} minLength={20} maxLength={2000} required value={draft.use_case} onChange={e => update('use_case', e.target.value)} aria-invalid={Boolean(errors.use_case)} aria-describedby={describedBy('use_case', 'project-hint')} />{fieldError('use_case')}</div>
+          <div className={styles.field}><label htmlFor="preview-traffic">Expected API requests</label><p id="traffic-hint" className={styles.helper}>A rough estimate helps us plan the cohort. It’s fine if you’re still exploring.</p><select id="preview-traffic" name="expected_traffic" value={draft.expected_traffic} onChange={e => update('expected_traffic', e.target.value as Draft['expected_traffic'])} aria-invalid={Boolean(errors.expected_traffic)} aria-describedby={describedBy('expected_traffic', 'traffic-hint')}>{Object.entries(TRAFFIC_OPTIONS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select>{fieldError('expected_traffic')}</div>
+        </fieldset>
+        <fieldset className={styles.group} aria-describedby={describedBy('cohort_interest', 'cohort-hint')}><legend>Would you join the next private cohort?</legend><p id="cohort-hint" className={styles.helper}>Participants try the API with a real project and share candid, private feedback as we improve it.</p><div className={styles.choices}>{(['next', 'later'] as const).map(value => <label className={styles.choice} key={value}><input id={`preview-${value}`} type="radio" name="cohort_interest" value={value} required checked={draft.cohort_interest === value} onChange={() => update('cohort_interest', value)} /><span><strong>{value === 'next' ? 'Yes, I’d like to participate' : 'I’m interested, but a future cohort is better'}</strong><span>{value === 'next' ? 'I’m willing to test and share feedback.' : 'Keep my application for a later group.'}</span></span></label>)}</div>{fieldError('cohort_interest')}</fieldset>
+        <p className={styles.helper}>Only share information you’re comfortable sending to GALX. Leave out passwords, API keys, and sensitive customer data. <Link href="/privacy">Privacy policy</Link></p>
+        <div className={styles.actions}><button className={styles.primary}>Review application <ArrowRight size={16} aria-hidden="true" /></button>{editing && <button className={styles.secondary} type="button" onClick={() => { setEditing(false); setErrors({}); setNotice(''); focusHeading(); }}>Cancel</button>}</div>
+      </form>}
+    </> : status === 'approved' ? <>
+      <h2 ref={heading} tabIndex={-1}>Your preview access is approved</h2>{expiresAt && <p>Your access is available until {new Date(expiresAt).toLocaleString()}.</p>}<p>Start with a small project and tell us how it goes. Your feedback helps shape the next cohort’s experience.</p>
+      <div className={styles.actions}><Link className={styles.primary} href="/keys">Manage API keys</Link><Link className={styles.textLink} href="/docs">Read the API docs</Link><Link className={styles.textLink} href="/playground">Open playground</Link></div>
+      <form className={styles.feedbackForm} onSubmit={e => { e.preventDefault(); void save('feedback'); }}><label htmlFor="preview-feedback">Share private feedback</label><p id="feedback-hint" className={styles.helper}>Tell us what happened and what you expected. Only the GALX team can read your feedback. Leave out credentials and sensitive data.</p><textarea id="preview-feedback" aria-describedby="feedback-hint" rows={5} minLength={10} maxLength={4000} required value={feedback} onChange={e => setFeedback(e.target.value)} /><button className={styles.primary} disabled={busy}>{busy ? 'Sending…' : 'Send private feedback'}</button></form>
+    </> : <>
+      {status === 'pending' && <Check className={styles.received} size={28} aria-hidden="true" />}<h2 ref={heading} tabIndex={-1}>{status === 'pending' ? 'You’re on the developer waitlist' : status === 'expired' ? 'Your preview access period has ended' : status === 'declined' ? 'Your request was reviewed' : 'Your developer access is paused'}</h2>
+      <p>{status === 'pending' ? 'Your application is saved. We review each project and open access as we make room for another small group. Check your status here; there’s no guaranteed invitation date.' : status === 'declined' ? 'We’re unable to open developer access for your project at this stage. Your application remains on file for future review. Images and Sites are still available.' : 'Developer API calls are unavailable for your account. Your original application is saved for review. Images and Sites are still available.'}</p>
+      {status === 'pending' && application && <><p className={styles.preference}>{cohortLabel(application.cohort_interest)}</p>{!application.introduction && <p>Help us get to know you: add an introduction, a profile, and your cohort preference to your existing application.</p>}<details className={styles.savedDetails}><summary>Your saved application</summary><ApplicationSummary value={application} /></details></>}
+      <div className={styles.actions}>{status === 'pending' && application && <button className={styles.primary} onClick={startEditing}>{application.introduction ? 'Update application' : 'Complete application'}</button>}<button className={styles.secondary} onClick={() => { setNotice(''); setRefresh(n => n + 1); }}>Check access status</button></div>
+    </>}
+    <div role="status" aria-live="polite" className={notice ? styles.notice : styles.silent}>{notice}</div>
+    {conflict && <button className={styles.secondary} disabled={busy} onClick={() => { setConflict(false); setEditing(false); setReviewing(false); setDraft(emptyDraft); setNotice(''); setRefresh(n => n + 1); }}>Discard edits and reload</button>}
   </section>;
 }

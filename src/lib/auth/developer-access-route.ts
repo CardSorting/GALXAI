@@ -3,12 +3,17 @@ import { AccountIdentityError, requireAccountIdentity } from './accountIdentity'
 import { DeveloperAccessRepository, type PreviewRecord } from '@/lib/supabase/repositories/DeveloperAccessRepository';
 import { previewError, previewResponse } from '@/lib/security/developer-access';
 import { isSameOriginRequest } from '@/lib/security/same-origin';
+import { validateApplication } from '@/lib/developers/application';
 
-const trafficOptions = new Set(['exploring', 'under_100_daily', 'under_1000_daily', 'over_1000_daily']);
 function publicStatus(record: PreviewRecord | null) {
   const expired = record?.status === 'approved' && record.expires_at && record.expires_at.getTime() <= Date.now();
   return { status: expired ? 'expired' : record?.status ?? 'not_requested', requested_at: record?.requested_at.toISOString() ?? null,
-    expires_at: record?.status === 'approved' ? record.expires_at?.toISOString() ?? null : null };
+    expires_at: record?.status === 'approved' ? record.expires_at?.toISOString() ?? null : null,
+    application: record ? {
+      introduction: record.introduction ?? null, github_url: record.github_url ?? null, linkedin_url: record.linkedin_url ?? null,
+      use_case: record.use_case, expected_traffic: record.expected_traffic, cohort_interest: record.cohort_interest ?? null,
+      revision: record.revision ?? 1, updated_at: record.application_updated_at?.toISOString() ?? null,
+    } : null };
 }
 export function createDeveloperAccessHandlers(deps = {
   identity: requireAccountIdentity,
@@ -32,25 +37,30 @@ export function createDeveloperAccessHandlers(deps = {
     }
     try { return JSON.parse(Buffer.concat(chunks).toString('utf8')); } catch { return null; }
   }
+  async function saveApplication(req: NextRequest, editing: boolean) {
+    try {
+      if (!isSameOriginRequest(req, true)) return previewError(403, 'origin_not_allowed', 'Submit your application from the GALX website.');
+      const actor = await deps.identity(req);
+      const input = await body(req);
+      const { value, errors } = validateApplication(input);
+      if (Object.keys(errors).length) return previewResponse({ error: {
+        code: 'invalid_request', message: 'Check the highlighted fields and try again.', fields: errors,
+      } }, 400);
+      if (editing && (!Number.isSafeInteger(input?.revision) || input.revision < 1)) return previewError(400, 'invalid_revision', 'Refresh your application before saving changes.');
+      const repo = deps.repository();
+      const record = editing ? await repo.updateApplication(actor.id, input.revision, value)
+        : await repo.request(actor.id, actor.email, value.use_case, value.expected_traffic, value);
+      if (!record) return previewError(409, 'application_changed', 'Your application or access status changed. Reload the saved application before editing again.');
+      return previewResponse(publicStatus(record));
+    } catch (error) { return failure(error); }
+  }
   return {
     GET: async (req: NextRequest) => {
       try { const actor = await deps.identity(req); return previewResponse(publicStatus(await deps.repository().get(actor.id))); }
       catch (error) { return failure(error); }
     },
-    POST: async (req: NextRequest) => {
-      try {
-        if (!isSameOriginRequest(req, true))
-          return previewError(403, 'origin_not_allowed', 'Submit your request from the GALX website.');
-        const actor = await deps.identity(req);
-        const input = await body(req);
-        const useCase = typeof input?.use_case === 'string' ? input.use_case.trim() : '';
-        if (useCase.length < 20 || useCase.length > 2000 || !trafficOptions.has(input?.expected_traffic))
-          return previewError(400, 'invalid_request', 'Describe your project in 20–2,000 characters and choose expected traffic.');
-        const record = await deps.repository().request(actor.id, actor.email, useCase, input.expected_traffic);
-        if (!record) throw new Error('Request not persisted');
-        return previewResponse(publicStatus(record));
-      } catch (error) { return failure(error); }
-    },
+    POST: (req: NextRequest) => saveApplication(req, false),
+    PATCH: (req: NextRequest) => saveApplication(req, true),
     feedback: async (req: NextRequest) => {
       try {
         if (!isSameOriginRequest(req, true))

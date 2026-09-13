@@ -54,9 +54,9 @@ export interface Database {
   private: {
     Tables: {
       developer_access_requests: {
-        Row: { user_id: string; email: string; use_case: string; expected_traffic: string; status: 'pending' | 'approved' | 'revoked' | 'declined'; revision: number; expires_at: string | null; requested_at: string; reviewed_at: string | null; reviewed_by: string | null; last_feedback_at: string | null };
-        Insert: { user_id: string; email: string; use_case: string; expected_traffic: string };
-        Update: { status?: 'pending' | 'approved' | 'revoked' | 'declined'; revision?: number; expires_at?: string | null; reviewed_at?: string; reviewed_by?: string; last_feedback_at?: string }; Relationships: [];
+        Row: { user_id: string; email: string; use_case: string; expected_traffic: string; introduction: string | null; github_url: string | null; linkedin_url: string | null; cohort_interest: 'next' | 'later' | null; application_updated_at: string | null; status: 'pending' | 'approved' | 'revoked' | 'declined'; revision: number; expires_at: string | null; requested_at: string; reviewed_at: string | null; reviewed_by: string | null; last_feedback_at: string | null };
+        Insert: { user_id: string; email: string; use_case: string; expected_traffic: string; introduction?: string | null; github_url?: string | null; linkedin_url?: string | null; cohort_interest?: 'next' | 'later' | null };
+        Update: { introduction?: string; github_url?: string | null; linkedin_url?: string | null; cohort_interest?: 'next' | 'later'; application_updated_at?: string; use_case?: string; expected_traffic?: string; status?: 'pending' | 'approved' | 'revoked' | 'declined'; revision?: number; expires_at?: string | null; reviewed_at?: string; reviewed_by?: string; last_feedback_at?: string }; Relationships: [];
       };
       developer_preview_feedback: {
         Row: { id: string; user_id: string; message: string; created_at: string; resolved_at: string | null; resolved_by: string | null; revision: number };

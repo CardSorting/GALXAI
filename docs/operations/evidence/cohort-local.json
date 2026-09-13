@@ -1,0 +1,30 @@
+{
+  "checkedAt": "2026-09-12",
+  "environment": "isolated production build and disposable PostgreSQL",
+  "captures": 35,
+  "widths": [
+    390,
+    768,
+    1440
+  ],
+  "axeViolations": 0,
+  "documentOverflows": 0,
+  "pageErrors": 0,
+  "productionBuild": "passed",
+  "developerAuthorizationTests": 8,
+  "adminAuthorizationTests": 6,
+  "imageSecurityTests": 19,
+  "existingDatabaseTests": 94,
+  "migrationPairsVerified": 102,
+  "previewDatabaseTests": "passed",
+  "adminDatabaseTests": "passed",
+  "lint": "passed",
+  "designDetectorFindings": 0,
+  "liveApplicantSubmissionTested": false,
+  "cohortCaptures": 19,
+  "adminCaptures": 16,
+  "securityAdvisor": {
+    "cohortFindings": 0,
+    "existingAuthWarning": "auth_leaked_password_protection"
+  }
+}

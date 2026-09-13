@@ -1,4 +1,5 @@
 'use client';
+import { normalizeProfile } from '@/lib/developers/application';
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, ArrowRight, Check, Clock3, Inbox, MessageSquare, RefreshCw, ShieldCheck, Users } from 'lucide-react';
@@ -159,7 +160,7 @@ export function PreviewAdminWorkspace({ initialActor }: { initialActor: AdminAct
           {!list && !error && <div role="status" className={styles.empty}><div className={styles.skeleton} /><div className={styles.skeleton} /><p>Loading {title[view].toLowerCase()}…</p></div>}
           {list?.items.length === 0 && <div className={styles.empty}><Inbox size={28} aria-hidden="true" /><h2>{query ? 'No matching requests' : view === 'requests' && filter === 'pending' ? 'The waitlist is up to date' : view === 'feedback' && filter === 'open' ? 'No open feedback' : 'Nothing in this view yet'}</h2><p>{query ? 'Try another email or clear your search.' : view === 'requests' ? 'New requests appear here after someone signs up and submits their project.' : view === 'feedback' ? 'Feedback from approved participants will appear here.' : 'Updates will appear here as your team works.'}</p></div>}
           {view === 'requests' && (list?.items as AccessRequest[] | undefined)?.map(item => <button key={item.user_id} className={styles.requestRow} aria-pressed={selected === item.user_id} onClick={() => setSelected(item.user_id)} disabled={busy}>
-            <div className={styles.line}><strong>{item.email}</strong><Badge state={item.access_state} /></div><p>{item.use_case}</p><div className={styles.line}><span>{traffic[item.expected_traffic]}</span><time dateTime={item.requested_at}>{date(item.requested_at)}</time></div></button>)}
+            <div className={styles.line}><strong>{item.email}</strong><Badge state={item.access_state} /></div><p>{item.use_case}</p><div className={styles.line}><span>{item.cohort_interest === 'next' ? 'Interested in next cohort' : item.cohort_interest === 'later' ? 'Prefers a future cohort' : 'Cohort preference not provided'}</span><time dateTime={item.requested_at}>{date(item.requested_at)}</time></div></button>)}
           {view === 'feedback' && (list?.items as FeedbackItem[] | undefined)?.map(feedbackCard)}
           {view === 'activity' && list && <div className={styles.activityList}>{(list.items as AuditItem[]).map(item => <div key={item.id}><p className={styles.subject}>{item.subject_label}</p><Activity items={[item]} /></div>)}</div>}
           {view === 'staff' && <>
@@ -183,6 +184,16 @@ export function PreviewAdminWorkspace({ initialActor }: { initialActor: AdminAct
           {detailError && <div className={styles.error} role="alert">{detailError}<button onClick={() => setRefresh(v => v + 1)}>Reload request</button></div>}
           {detail && request && <>
             <div className={styles.detailHeader}><Badge state={request.access_state} /><h2 ref={detailHeading} tabIndex={-1}>{request.email}</h2><p>Requested {date(request.requested_at)} · {traffic[request.expected_traffic]}</p></div>
+            <section className={styles.detailSection}><h3>Meet the builder</h3>
+              <p className={styles.message}>{request.introduction || 'This application was submitted before introductions were added.'}</p>
+              <div className={styles.actions}>{(['github', 'linkedin'] as const).map(kind => {
+                const url = normalizeProfile(request[`${kind}_url`], kind);
+                return url ? <a key={kind} className={styles.secondary} href={url} target="_blank" rel="noopener noreferrer">{kind === 'github' ? 'GitHub profile' : 'LinkedIn profile'}<span className={styles.srOnly}> (opens in a new tab)</span></a> : null;
+              })}</div>
+              <p className={styles.muted}>Profiles are provided by the applicant.</p>
+              <p className={styles.message}>{request.cohort_interest === 'next' ? 'Interested in joining the next private cohort and sharing feedback.' : request.cohort_interest === 'later' ? 'Prefers a future cohort; not ready to participate yet.' : 'Cohort preference not provided.'}</p>
+              {request.application_updated_at && <p className={styles.muted}>Application updated {time(request.application_updated_at)}.</p>}
+            </section>
             <section className={styles.detailSection}><h3>What they’re building</h3><p className={styles.message}>{request.use_case}</p></section>
             <section className={styles.detailSection}><h3>Developer access</h3><p className={styles.muted}>{request.access_state === 'approved' ? `Access is active${request.expires_at ? ' until ' + time(request.expires_at) : ' with no expiry'}.` : 'Developer API and tools are unavailable for this account.'} Images and Sites remain available.</p>
               {canReview && <form className={styles.reviewForm} onSubmit={review}><label>Decision<select value={outcome} disabled={busy} onChange={e => setOutcome(e.target.value as RequestState)}>{actions.map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select></label>

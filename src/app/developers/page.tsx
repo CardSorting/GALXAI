@@ -2,13 +2,18 @@ import Link from 'next/link';
 import { Navigation } from '@/components/dashboard/Navigation';
 import { DeveloperPreview } from '@/components/developers/DeveloperPreview';
 import { constructMetadata } from '@/lib/seo/metadata';
-export const metadata = constructMetadata({ title: 'Developer API private preview', description: 'Request access to the GALX developer API private preview. Images and Sites remain available to everyone.', canonicalPath: '/developers' });
+import styles from '@/components/developers/developer-preview.module.css';
+export const metadata = constructMetadata({ title: 'Developer API private preview', description: 'Apply to a small GALX developer cohort. Build with us, share private feedback, and help shape a better API experience. Images and Sites are open now.', canonicalPath: '/developers' });
 export default function DevelopersPage() {
-  return <><Navigation /><main className="mx-auto w-full max-w-4xl px-5 py-12 sm:py-20">
-    <p className="text-sm font-semibold text-indigo-300">Developer API · Private preview</p>
-    <h1 className="mt-4 max-w-2xl text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">Build with us, from the beginning.</h1>
-    <p className="mt-6 max-w-2xl text-lg leading-relaxed text-zinc-300">We’re opening developer access gradually so we can support each participant, learn from private feedback, and improve the experience together.</p>
-    <p className="mt-5 max-w-2xl leading-relaxed text-zinc-300">Image generation and Sites are open now. You can <Link className="text-white underline underline-offset-4" href="/images">create images</Link> and <Link className="text-white underline underline-offset-4" href="/sites">build a site</Link> without joining this waitlist.</p>
-    <DeveloperPreview />
+  return <><Navigation /><main className={styles.page}>
+    <header className={styles.hero}><h1>A smaller cohort.<br />A better place to build.</h1>
+      <p>We’re opening the developer API to small groups of builders. That gives us room to keep costs manageable, improve performance, and give each person a thoughtful first experience.</p>
+    </header>
+    <div className={styles.layout}><DeveloperPreview /><aside className={styles.aside} aria-label="About the private cohort">
+      <section><h2>Build with us, from the beginning</h2><p>Bring a real project or an early idea. Try the API, tell us what works, and share privately where the experience could be better.</p><p>We grow each cohort at a pace we can support.</p></section>
+      <section><h2>What builders are reporting</h2><p>Current cohort members report <strong>30–60% lower token and inference spend.</strong></p><p>These are participant-reported results. Savings vary by workload and aren’t guaranteed.</p></section>
+      <section><h2>What happens next</h2><ol className={styles.steps}><li><strong>Share your application</strong>An introduction, a profile, and your project.</li><li><strong>We review it personally</strong>We consider your project and the room in the next cohort.</li><li><strong>Check your access here</strong>Your status and next steps appear on this page. There’s no fixed invitation date.</li></ol></section>
+      <section><h2>Ready to make something today?</h2><p>Images and Sites are open now. No developer waitlist needed.</p><div className={styles.publicLinks}><Link href="/images">Create images</Link><Link href="/sites">Build a site</Link></div></section>
+    </aside></div>
   </main></>;
 }

@@ -4,16 +4,17 @@ import { AdminError } from '@/lib/admin/errors';
 import type { AccessRequest, AdminActor, AdminRole, AuditItem, FeedbackItem, Page, RequestState, StaffMember } from '@/lib/admin/preview-contract';
 
 type Identity = { id: string; email: string };
-const requestColumns = 'user_id, email, use_case, expected_traffic, status, requested_at, reviewed_at, expires_at, revision';
+const requestColumns = 'user_id, email, use_case, expected_traffic, introduction, github_url, linkedin_url, cohort_interest, application_updated_at, status, requested_at, reviewed_at, expires_at, revision';
 const auditColumns = `id, actor_email, action, subject, previous_state, next_state, reason, expires_at, created_at,
   COALESCE((SELECT email FROM private.developer_access_requests WHERE user_id=private.preview_admin_audit.subject),
     CASE WHEN action IN ('request_reviewed','feedback_resolved','feedback_reopened') THEN 'Former participant' ELSE subject END) AS subject_label`;
 const feedbackColumns = 'f.id, f.user_id, a.email, f.message, f.created_at, f.resolved_at, f.revision';
 const iso = (value: Date | null) => value?.toISOString() ?? null;
-type RequestRow = Omit<AccessRequest, 'access_state' | 'requested_at' | 'reviewed_at' | 'expires_at'> & { requested_at: Date; reviewed_at: Date | null; expires_at: Date | null };
+type RequestRow = Omit<AccessRequest, 'access_state' | 'requested_at' | 'reviewed_at' | 'expires_at' | 'application_updated_at'> & { requested_at: Date; reviewed_at: Date | null; expires_at: Date | null; application_updated_at: Date | null };
 type AuditRow = Omit<AuditItem, 'created_at' | 'expires_at'> & { created_at: Date; expires_at: Date | null };
 type FeedbackRow = Omit<FeedbackItem, 'created_at' | 'resolved_at'> & { created_at: Date; resolved_at: Date | null };
 const requestDTO = (r: RequestRow): AccessRequest => ({ user_id: r.user_id, email: r.email, use_case: r.use_case,
+  introduction: r.introduction, github_url: r.github_url, linkedin_url: r.linkedin_url, cohort_interest: r.cohort_interest, application_updated_at: iso(r.application_updated_at),
   expected_traffic: r.expected_traffic, status: r.status, access_state: r.status === 'approved' && r.expires_at && r.expires_at.getTime() <= Date.now() ? 'expired' : r.status,
   requested_at: r.requested_at.toISOString(), reviewed_at: iso(r.reviewed_at), expires_at: iso(r.expires_at), revision: r.revision });
 const auditDTO = (r: AuditRow): AuditItem => ({ id: r.id, actor_email: r.actor_email, action: r.action, subject: r.subject, subject_label: r.subject_label,

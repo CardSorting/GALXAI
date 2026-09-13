@@ -4,6 +4,8 @@ export type AdminActor = { id: string; email: string; role: AdminRole };
 export type RequestState = 'pending' | 'approved' | 'revoked' | 'declined';
 export type AccessState = RequestState | 'expired';
 export type AccessRequest = { user_id: string; email: string; use_case: string; expected_traffic: string;
+  introduction: string | null; github_url: string | null; linkedin_url: string | null;
+  cohort_interest: 'next' | 'later' | null; application_updated_at: string | null;
   status: RequestState; access_state: AccessState; requested_at: string; reviewed_at: string | null;
   expires_at: string | null; revision: number };
 export type FeedbackItem = { id: string; user_id: string; email: string; message: string; created_at: string;

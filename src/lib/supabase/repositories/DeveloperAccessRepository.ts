@@ -1,8 +1,11 @@
 import { getPostgresPool } from '@/lib/db/postgres';
 import type { Pool } from 'pg';
+import type { ApplicationInput } from '@/lib/developers/application';
 
 export type PreviewStatus = 'pending' | 'approved' | 'revoked' | 'declined';
 export type PreviewRecord = { user_id: string; email: string; use_case: string; expected_traffic: string;
+  introduction?: string | null; github_url?: string | null; linkedin_url?: string | null;
+  cohort_interest?: 'next' | 'later' | null; revision?: number; application_updated_at?: Date | null;
   status: PreviewStatus; requested_at: Date; reviewed_at: Date | null; expires_at?: Date | null };
 
 export class DeveloperAccessRepository {
@@ -10,6 +13,7 @@ export class DeveloperAccessRepository {
   private db() { if (!this.database) throw new Error('Preview storage unavailable'); return this.database; }
   async get(userId: string): Promise<PreviewRecord | null> {
     const result = await this.db().query<PreviewRecord>(`SELECT user_id, email, use_case, expected_traffic,
+      introduction, github_url, linkedin_url, cohort_interest, revision, application_updated_at,
       status, requested_at, reviewed_at, expires_at FROM private.developer_access_requests WHERE user_id = $1`, [userId]);
     return result.rows[0] ?? null;
   }
@@ -18,11 +22,24 @@ export class DeveloperAccessRepository {
       WHERE user_id=$1 AND status='approved' AND (expires_at IS NULL OR expires_at>now())`, [userId]);
     return result.rowCount === 1;
   }
-  async request(userId: string, email: string, useCase: string, traffic: string) {
+  async request(userId: string, email: string, useCase: string, traffic: string, details?: ApplicationInput) {
     // Retrying, editing a request, or resubmitting after revocation can never approve it.
-    await this.db().query(`INSERT INTO private.developer_access_requests (user_id, email, use_case, expected_traffic)
-      VALUES ($1, $2, $3, $4) ON CONFLICT (user_id) DO NOTHING`, [userId, email, useCase, traffic]);
+    await this.db().query(`INSERT INTO private.developer_access_requests
+      (user_id, email, use_case, expected_traffic, introduction, github_url, linkedin_url, cohort_interest)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT (user_id) DO NOTHING`,
+    [userId, email, useCase, traffic, details?.introduction ?? null, details?.github_url ?? null, details?.linkedin_url ?? null, details?.cohort_interest ?? null]);
     return this.get(userId);
+  }
+  async updateApplication(userId: string, revision: number, input: ApplicationInput): Promise<PreviewRecord | null> {
+    // Editing never resets queue order, approval, expiry or a staff decision. It invalidates stale reviews.
+    const result = await this.db().query<PreviewRecord>(`UPDATE private.developer_access_requests
+      SET introduction=$3, github_url=$4, linkedin_url=$5, use_case=$6, expected_traffic=$7,
+        cohort_interest=$8, application_updated_at=now(), revision=revision+1
+      WHERE user_id=$1 AND revision=$2 AND status='pending'
+      RETURNING user_id, email, use_case, expected_traffic, introduction, github_url, linkedin_url,
+        cohort_interest, revision, application_updated_at, status, requested_at, reviewed_at, expires_at`,
+    [userId, revision, input.introduction, input.github_url, input.linkedin_url, input.use_case, input.expected_traffic, input.cohort_interest]);
+    return result.rows[0] ?? null;
   }
   async feedback(userId: string, message: string) {
     // Serialize each account's submissions, with a durable per-account rate limit.

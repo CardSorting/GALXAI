@@ -40,7 +40,7 @@ try {
   await denied(repo.session({ id: applicant, email: 'applicant@example.test' }));
   const detail = await repo.detail(viewer, applicant);
   assert(detail.activity.some(x => x.action === 'request_reviewed'));
-  assert.deepEqual(Object.keys(detail.request).sort(), ['access_state','email','expected_traffic','expires_at','requested_at','reviewed_at','revision','status','use_case','user_id'].sort());
+  assert.deepEqual(Object.keys(detail.request).sort(), ['access_state','email','expected_traffic','expires_at','requested_at','reviewed_at','revision','status','use_case','user_id','introduction','github_url','linkedin_url','cohort_interest','application_updated_at'].sort());
   await assert.rejects(repo.review(owner, applicant, record.revision, 'revoked', 'x'.repeat(1001), null));
   assert.equal((await current()).revision, record.revision, 'audit failure must roll back the permission change');
   assert.equal(await access.isApproved(applicant), true);

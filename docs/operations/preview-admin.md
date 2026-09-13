@@ -22,7 +22,7 @@ The migrations, site and API gateway were deployed on 2026-09-12. The first owne
 ## Daily review
 
 1. Open **Requests → Waiting**. Search by email or account ID when following up with a known participant.
-2. Select a project, read its description and expected traffic, then choose a decision. Approval defaults to 30 days; 7 days, 90 days and no expiry are also available.
+2. Select a project, read the builder's introduction, supplied profiles, cohort preference, project description and expected traffic, then choose a decision. Profile ownership is self-reported. Older applications may not include the new details. Approval defaults to 30 days; 7 days, 90 days and no expiry are also available.
 3. Add an internal decision note. The confirmation names the account, period and immediate effect. Saving creates the decision and history entry in one transaction.
 4. Use **Next request** to continue reviewing. Each admission is individual so the operator controls cohort growth.
 5. Use **Feedback** to review participant reports. Marking one resolved removes it from the open inbox; it can be reopened. Resolution does not send a response to the participant.
@@ -44,7 +44,7 @@ Staff access requires a verified account session. API keys, customer approval, p
 
 ## Conflict and recovery behavior
 
-Every permission record has a revision. A stale browser receives a conflict instead of overwriting someone else's decision. Decision notes survive workspace refresh and switching between requests while the workspace remains open; reloading the browser or closing the tab does not persist drafts. Network errors do not trigger automatic mutation retries. If the account changes, staff access is removed or the session expires, the UI clears private records and drafts and requires sign-in again. On a database outage, administration and private API checks fail closed; Images and Sites retain their own access path.
+Every permission record has a revision. Pending applicants can update their application; each edit increments the same revision so a stale staff review cannot decide against changed details. A stale browser receives a conflict instead of overwriting someone else's decision. Decision notes survive workspace refresh and switching between requests while the workspace remains open; reloading the browser or closing the tab does not persist drafts. Network errors do not trigger automatic mutation retries. If the account changes, staff access is removed or the session expires, the UI clears private records and drafts and requires sign-in again. On a database outage, administration and private API checks fail closed; Images and Sites retain their own access path.
 
 The original operator `approve`/`revoke` CLI remains a trusted recovery path. It increments revisions and records an operator audit event; CLI approvals have no expiry. Prefer the workspace for normal review. Keep database credentials out of browsers and use them only in trusted server environments.
 

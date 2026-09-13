@@ -33,3 +33,5 @@ The paired down migration deletes preview requests and feedback, so export those
 - The final local production HTTP scan checked private route denials (including misleading extensions and middleware-skip headers), redirects, public-product reachability, public image OpenAPI, six rendered pages and 26 associated browser scripts. The broader preview-page scan found only generic Supabase SDK relay-error identifiers after developer search data was removed. This is scoped local evidence, not an audit of the live deployment or every private page.
 
 Both migrations, the production site and API gateway were deployed on 2026-09-12. The first owner is provisioned and bound to the founder-specified, verified account ID. See the [activation receipt](preview-activation.md) for exact deployments and scoped live evidence.
+
+The cohort application update is live: introductions, GitHub/LinkedIn profiles, next/future-cohort interest, a review screen and editable pending applications. See the [cohort implementation and activation record](developer-cohort-application.md).

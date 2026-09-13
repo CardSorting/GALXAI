@@ -21,7 +21,7 @@ try {
         if (url.pathname === '/api/developer-access') {
           assert.equal(req.headers().authorization, 'Bearer preview-fixture-token');
           if (state.unavailable) return json({ error:{ code:'request_unavailable', message:'Your request could not be saved. Please try again.' } },503);
-          if (req.method() === 'POST') { state.posts++; assert.deepEqual(Object.keys(req.postDataJSON()).sort(), ['expected_traffic','use_case']); state.status='pending'; }
+          if (req.method() === 'POST') { state.posts++; assert.deepEqual(Object.keys(req.postDataJSON()).sort(), ['cohort_interest','expected_traffic','github_url','introduction','linkedin_url','use_case']); state.status='pending'; }
           return json({ status:state.status, requested_at:null });
         }
         if (url.pathname === '/api/developer-access/feedback') { state.feedback++; assert.deepEqual(Object.keys(req.postDataJSON()), ['message']); return json({received:true},201); }
@@ -39,17 +39,21 @@ try {
       }
       await page.goto(base+'/developers',{waitUntil:'networkidle'});
       if (!signedIn) {
-        await page.getByRole('link',{name:'Sign up to request access',exact:true}).waitFor();
+        await page.getByRole('link',{name:'Sign up to apply',exact:true}).waitFor();
         await inspect('guest');
-        await page.getByRole('link',{name:'create images',exact:true}).click();
+        await page.getByRole('link',{name:'Create images',exact:true}).click();
         await page.waitForURL(base+'/images');
         assert.equal(new URL(page.url()).pathname,'/images');
         await page.goto(base+'/sites'); assert.equal(new URL(page.url()).pathname,'/sites');
         await page.goto(base+'/'); await inspect('home');
       } else {
+        await page.getByLabel('A short introduction', {exact:true}).fill('I am a builder working on small research tools.');
+        await page.getByLabel('GitHub profile', {exact:true}).fill('github.com/preview-builder');
+        await page.getByRole('radio', {name:/Yes, I’d like to participate/}).check();
         await page.getByLabel('What would you use the API for?').fill('I am building a writing assistant for a small research team.');
         await inspect('request');
-        await page.getByRole('button',{name:'Request developer access',exact:true}).click();
+        await page.getByRole('button',{name:'Review application',exact:true}).click();
+        await page.getByRole('button',{name:'Submit application',exact:true}).click();
         await page.getByRole('heading',{name:'You’re on the developer waitlist'}).waitFor(); assert.equal(state.posts,1);
         await page.reload();await page.getByRole('heading',{name:'You’re on the developer waitlist'}).waitFor();
         await inspect('pending');

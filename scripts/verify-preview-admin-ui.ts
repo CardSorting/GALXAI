@@ -11,13 +11,14 @@ import { request as httpRequest } from 'node:http';
 import { PreviewAdminRepository } from '../src/lib/supabase/repositories/PreviewAdminRepository';
 import { DeveloperAccessRepository } from '../src/lib/supabase/repositories/DeveloperAccessRepository';
 import { isolatedIntegrationEnvironment } from './lib/integration-test-environment';
+import { verifyCohortUI } from './lib/cohort-ui-checks';
 const root = fileURLToPath(new URL('../', import.meta.url));
 const env = isolatedIntegrationEnvironment(process.env);
 const pool = new Pool({ connectionString: process.env.GALX_INTEGRATION_DATABASE_URL, ssl: false });
 const repo = new PreviewAdminRepository(pool), access = new DeveloperAccessRepository(pool);
 const workspace = await mkdtemp(path.join(tmpdir(), 'galx-admin-ui-'));
 const output = path.join(root, '.impeccable/review/preview-admin'); await mkdir(output, { recursive: true });
-const identities = Object.fromEntries(['owner','reviewer','viewer','outsider'].map(role => [role, { id: randomUUID(), email: `${role}@preview.example.test`, name: role, token: randomBytes(24).toString('hex') }]));
+const identities = Object.fromEntries(['owner','reviewer','viewer','outsider','participant1440','participant768','participant390'].map(role => [role, { id: randomUUID(), email: `${role}@preview.example.test`, name: role, token: randomBytes(24).toString('hex') }]));
 const authFile = path.join(workspace, 'identities.json');
 await writeFile(authFile, JSON.stringify(Object.fromEntries(Object.values(identities).map(actor => [actor.token, actor]))), { mode: 0o600 });
 await repo.bootstrap(identities.owner.email); await repo.session(identities.owner);
@@ -26,7 +27,9 @@ const requestIds: string[] = [];
 for (let i = 0; i < 28; i++) {
   const id = randomUUID(); requestIds.push(id);
   await access.request(id, i === 0 ? 'maya@smallstudio.example' : i === 1 ? 'alex@research.example' : `builder${i}@preview.example.test`,
-    i === 0 ? 'We’re building a writing assistant for a six-person design studio. We want to explore draft summaries before offering it to our clients.' : i === 1 ? 'A private research assistant for a small community archive. We want to test citations and share feedback on confusing responses.' : 'Exploring a small application with a few colleagues before inviting a wider group.', i % 2 ? 'exploring' : 'under_100_daily');
+    i === 0 ? 'We’re building a writing assistant for a six-person design studio. We want to explore draft summaries before offering it to our clients.' : i === 1 ? 'A private research assistant for a small community archive. We want to test citations and share feedback on confusing responses.' : 'Exploring a small application with a few colleagues before inviting a wider group.', i % 2 ? 'exploring' : 'under_100_daily', i === 0 ? {
+      introduction: 'I’m Maya, a designer and developer working with a small creative studio.', github_url: 'https://github.com/maya-builder', linkedin_url: 'https://www.linkedin.com/in/maya-builder', cohort_interest: 'next', use_case: '', expected_traffic: 'under_100_daily',
+    } : undefined);
 }
 await repo.review(identities.owner, requestIds[1], 1, 'approved', 'A small project with a clear feedback plan.', 30);
 await access.feedback(requestIds[1], 'The first request worked well. When a request takes longer, a clearer progress message would help our team understand what to do next.');
@@ -143,6 +146,7 @@ try {
     }
   }
   await anonymous.close();
+  checks.push(...await verifyCohortUI({ browser, base, output: path.join(root, '.impeccable/review/developer-cohort'), identities, access, repo, AxeBuilder }));
   assert(checks.every((check:any)=>!check.violations || check.violations.length===0),'Accessibility violations: see checks.json');
   console.log('PASS: production desktop/mobile admin review, approval, pause, stale conflict, feedback, staff, activity, role isolation, admin chunk protection and public bundle scans.');
 } finally {
