@@ -63,6 +63,10 @@ try {
     await context.addInitScript((actor: any) => localStorage.setItem('galx_custom_auth_user', JSON.stringify({ ...actor, provider: 'fixture' })), identities.owner);
     await context.route('**/*', (route: any) => new URL(route.request().url()).origin === base ? route.continue() : route.abort());
     const page = await context.newPage(); const errors: string[] = []; page.on('pageerror', (e: Error) => errors.push(e.message));
+    const readRequests: string[] = [];
+    page.on('request', (request: any) => {
+      if (request.method() === 'GET' && new URL(request.url()).pathname === '/api/admin/preview') readRequests.push(request.url());
+    });
     activePage = page;
     page.on('response', async (response: any) => {
       if (response.url().includes('/api/admin/preview') && response.request().method() === 'POST')
@@ -79,6 +83,8 @@ try {
     }
     const response = await page.goto(base+'/admin',{waitUntil:'networkidle'}); assert.equal(response?.status(),200);
     await page.getByRole('button',{name:/maya@smallstudio/}).waitFor(); assert.equal(await page.getByRole('navigation',{name:'Mobile navigation',exact:true}).count(),0); await capture('inbox');
+    assert.equal(readRequests.length, 1, 'initial inbox uses one browser request after identity hydration');
+    assert.equal(new URL(readRequests[0]).searchParams.get('view'), 'requests');
     await page.getByRole('button',{name:/maya@smallstudio/}).click(); await page.getByRole('textbox',{name:'Internal decision note',exact:true}).waitFor(); await capture('review');
     await page.getByRole('textbox',{name:'Internal decision note',exact:true}).fill('Small team with a thoughtful, bounded project.');
     await page.getByRole('button',{name:'Refresh',exact:true}).click();
@@ -139,10 +145,10 @@ try {
   assert(adminChunk); assert.equal((await anonymous.request.get(base+'/_next/'+adminChunk)).status(),401);
   for (const pathname of ['/','/developers','/images','/sites']) {
     const response = await anonymous.request.get(base+pathname); assert.equal(response.status(),200);
-    const html = await response.text(); assert(!/owner@preview|maya@smallstudio|Internal decision note|preview_admin_audit/.test(html));
+    const html = await response.text(); assert(!/owner@preview|maya@smallstudio|Internal decision note|preview_admin_audit|preview_application_snapshots|PreviewReadSync|wanted\.ordinality/.test(html));
     for (const match of html.matchAll(/<script[^>]+src="([^"]+)"/g)) {
       const asset = await anonymous.request.get(base+match[1]); const js=await asset.text();
-      assert(!/preview_admin_audit|preview_admin_members|Internal decision note|Staff access added/.test(js));
+      assert(!/preview_admin_audit|preview_admin_members|Internal decision note|Staff access added|preview_application_snapshots|PreviewReadSync|wanted\.ordinality/.test(js));
     }
   }
   await anonymous.close();

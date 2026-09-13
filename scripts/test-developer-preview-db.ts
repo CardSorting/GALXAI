@@ -6,6 +6,7 @@ import { PreviewAdminRepository } from '../src/lib/supabase/repositories/Preview
 import type { ApplicationInput } from '../src/lib/developers/application';
 import { DeveloperAccessRepository } from '../src/lib/supabase/repositories/DeveloperAccessRepository';
 import { isolatedIntegrationEnvironment } from './lib/integration-test-environment';
+import { verifyPreviewSync } from './lib/preview-sync-db-checks';
 isolatedIntegrationEnvironment({ GALX_INTEGRATION_DATABASE_URL: process.env.GALX_INTEGRATION_DATABASE_URL });
 const pool = new Pool({ connectionString: process.env.GALX_INTEGRATION_DATABASE_URL, ssl: false });
 const account = randomUUID(), other = randomUUID();
@@ -61,6 +62,7 @@ try {
   }
   const response = await pool.query('SELECT message FROM private.developer_preview_feedback WHERE user_id=$1', [account]);
   assert.equal(response.rowCount, 1);
+  await verifyPreviewSync(pool);
   const rollback = await pool.connect();
   try {
     await rollback.query('BEGIN');

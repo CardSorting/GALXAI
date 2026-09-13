@@ -67,14 +67,16 @@ export function PreviewAdminWorkspace({ initialActor }: { initialActor: AdminAct
     return data;
   }, [token]);
   useEffect(() => {
+    if (authLoading || user?.id !== initialActor.id || locked) return;
     const controller = new AbortController(); setList(null); setError('');
     const params = new URLSearchParams({ view, status: filter, q: query, page: String(page) });
-    Promise.all([api('?view=session', undefined, controller.signal), api('?' + params, undefined, controller.signal)])
-      .then(([session, data]) => { if (!controller.signal.aborted) { setActor(session.actor); setList(data); } })
+    api('?' + params, undefined, controller.signal)
+      .then(data => { if (!controller.signal.aborted) { setActor(data.actor); setList(data); } })
       .catch(e => { if (!controller.signal.aborted) setError(e.message); });
     return () => controller.abort();
-  }, [view, filter, query, page, refresh, api]);
+  }, [view, filter, query, page, refresh, api, authLoading, user?.id, initialActor.id, locked]);
   useEffect(() => {
+    if (authLoading || user?.id !== initialActor.id || locked) return;
     if (!selected || view !== 'requests') { setDetail(null); return; }
     const controller = new AbortController(); setDetailLoading(true); setDetailError(''); setDetail(null);
     api('?view=request&id=' + encodeURIComponent(selected), undefined, controller.signal).then(data => {
@@ -83,7 +85,7 @@ export function PreviewAdminWorkspace({ initialActor }: { initialActor: AdminAct
       setReason(decisionDrafts.current.get(selected) || '');
     }).catch(e => { if (!controller.signal.aborted) setDetailError(e.message); }).finally(() => { if (!controller.signal.aborted) setDetailLoading(false); });
     return () => controller.abort();
-  }, [selected, view, refresh, api]);
+  }, [selected, view, refresh, api, authLoading, user?.id, initialActor.id, locked]);
   useEffect(() => { if (detail) detailHeading.current?.focus(); }, [detail]);
   function switchView(next: View) {
     setView(next); setFilter(next === 'feedback' ? 'open' : 'pending'); setPage(1); setQuery(''); setSearch(''); setSelected(null); setNotice(''); setError(''); setStaffEdit(null);

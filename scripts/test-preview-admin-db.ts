@@ -23,6 +23,19 @@ try {
   await repo.updateStaff(owner, viewer.email, null, 'viewer', 'Read private feedback.');
   assert.equal((await repo.session(reviewer)).role, 'reviewer'); assert.equal((await repo.session(viewer)).role, 'viewer');
   await access.request(applicant, 'applicant@example.test', '<script>alert(1)</script> building a writing tool', 'under_100_daily');
+  let readQueries = 0;
+  const measured = new PreviewAdminRepository(new Proxy(pool, { get(target, key) {
+    if (key === 'query') return async (sql: string, values: unknown[]) => { readQueries++; return target.query(sql, values); };
+    const value = Reflect.get(target, key); return typeof value === 'function' ? value.bind(target) : value;
+  } }));
+  for (const read of [() => measured.session(owner), () => measured.requests(owner, 'all', '', 1),
+    () => measured.detail(owner, applicant), () => measured.feedback(owner, 'all', 1),
+    () => measured.activity(owner, 1), () => measured.staff(owner, 1)]) {
+    readQueries = 0; await read(); assert.equal(readQueries, 1, 'staff membership and read payload must use one database roundtrip');
+  }
+  assert.equal((await measured.requests(viewer, 'all', '', 1)).actor.role, 'viewer', 'list includes the current actor without a second browser request');
+  await denied(measured.staff(viewer, 1));
+  console.log('PASS: admin session, inbox, detail, feedback, activity and staff reads each use one SQL roundtrip.');
   const current = () => repo.detail(owner, applicant).then(r => r.request);
   await denied(repo.requests(outsider, 'all', '', 1)); await denied(repo.detail(outsider, applicant));
   await denied(repo.staff(reviewer, 1)); await denied(repo.activity(outsider, 1)); await denied(repo.feedback(outsider, 'all', 1));
