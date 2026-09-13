@@ -1,8 +1,8 @@
 {
   "version": 1,
   "reviewer": "Codex maintainer review",
-  "reviewed_at": "2026-09-13T04:44:04.009219Z",
-  "note": "Re-reviewed navigation portability guard and affected CI guidance after first hosted failure; retained dated image studio evidence and added ignored-target regression coverage. Other critical contracts unchanged.",
+  "reviewed_at": "2026-09-13T04:54:37.195167Z",
+  "note": "Reviewed corrected image artifact-origin fixture, retained hosted knowledge receipts and complete current-state/CI guidance. Recovery source now committed; scheduled-event and product pipeline evidence remain separate.",
   "files": {
     ".dockerignore": "fb4dc7ef84e7f36c5bfed0f267187a022bbb61e66dd26060295b133e08fa74c5",
     ".github/workflows/vercel-preflight.yml": "7f07dc34445f2f79962b120c7492642251d9855a9c3d49502034abe99e9ad79e",
@@ -39,7 +39,7 @@
     "docs/operations/signup-credit.md": "6e0462a35d8042512bc6e5d1ea890a330e7bd3cc015d4b9938e7febf5c9fa135",
     "docs/operations/wallet-lifecycle.md": "ddc86ed1d3347f5fff19a07581bc040c52eee7a115c279a2ba28bceae92303db",
     "package.json": "fca32d051d0d1adcec38b9a377d11c0dcf558c43a0cde607876f2988f74802e4",
-    "post-mortem/CURRENT_STATE.md": "faca103f97b303e8064a68bde4f261afb49e4b36adec286cb227d8ffa0b0bfdd",
+    "post-mortem/CURRENT_STATE.md": "1824505f447d54d96a8c9a02c507923bb4e6005509a008e668c14f765a09f689",
     "post-mortem/README.md": "d28cbc9427aaa4aba99057517831e49f79244a686e1ce35640c4f566abbae8b8",
     "post-mortem/failure-modes/README.md": "9b393988df34fcc31a9f7e8eb573120280ddcc14497cc76cd1cd90a5d99ebb90",
     "post-mortem/failure-modes/access-and-documentation.md": "6fbd494cfd46c8dc5aed9361cb8f0813aabcb1538b4bea134cc5c913269325ce",
@@ -55,7 +55,7 @@
     "scripts/run-relay-federation.ts": "72532065e18f56bfbacbae55ad0b10179b62a5021e739ee9a914966c6fd1593d",
     "scripts/run-supabase-integration.ts": "1c79e464c55a33466789d93b266be3eadeba5b76ab9044c61370a2b3a50e0658",
     "scripts/test-auth-identity-boundary.ts": "84550e409184f40b7e6f723afd1a0447df485ceadd140dbd18e7de9e695bc220",
-    "scripts/test-image-public-http.ts": "c196e6361b7a470fff0211e1f1482d16536b34b2504556e7421fe88088d34c96",
+    "scripts/test-image-public-http.ts": "7887c8ec24dc58e9ae7de8c35bdb7f5171c67f49f95209932fe891800ac86077",
     "scripts/test-image-requests-db.ts": "04c727c232bd555757381eb6ebfd6a4ff3e6ff381e63890e7f16ce309a6bd516",
     "scripts/test-post-mortem.py": "fba33221df8a4d167f0e0662cfe1543f76628adcc52b70e0d6f2528f72b8ef4a",
     "scripts/verify-docs.py": "083c3dc63302861d5d754c67e8db11d837097f0660681951c65c7649e9540ae0",

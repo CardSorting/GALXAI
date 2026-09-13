@@ -18,6 +18,8 @@ It does not run every repository test, a paid inference benchmark, or automatica
 
 PR and push runs fetch history and compare the incident journal against the event baseline, so committing a rewritten journal does not bypass the append-only check. Scheduled/manual runs compare the current committed prefix; they do not reconstruct changes outside that baseline.
 
+The [September 13 activation receipt](../knowledge/audits/2026-09-13-ci-activation.json) confirms the workflow is active on `main` and both manual and push audits passed at `28d8caa`. The first attempt exposed ignored local evidence links; its correction and fixture coverage are retained. This dated receipt does not assert a scheduled event, required merge checks or full application/gateway CI success.
+
 Regeneration is a local authoring step. CI does not rewrite docs, refresh review fingerprints, create issues, send messages, approve ADRs or deploy. Unreviewed registered domains fail; unreviewed historical documents remain classified separately. The schedule requires an enabled workflow on the default branch and can be delayed by GitHub. Use the [weekly audit runbook](../runbooks/weekly-knowledge-audit.md) to inspect activation, dispatch a bounded verification and triage missed or failed runs. A manual success proves the same audit job, not that a future cron event has already fired.
 
 ## Gateway workflow

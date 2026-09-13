@@ -229,3 +229,45 @@ Incident: `INC-20260913-DOCS`. Kind: `follow-up`.
 **Next step:** Verify a clean committed checkout, push the correction and rerun hosted CI.
 
 Evidence: [2026-09-13-ci-portability.json](../docs/knowledge/audits/2026-09-13-ci-portability.json).
+
+## EVT-20260913-GATEWAY-CI-FIXTURE — 2026-09-13T04:45:22.174012Z
+
+Incident: `INC-20260913-DOCS`. Kind: `follow-up`.
+
+**Observation:** The separately triggered gateway workflow failed on a pre-existing fixture assertion for a removed public diagnostic field.
+
+**Action:** Compared gateway source and fixture against the pre-task revision and inspected the failed run; recorded bounded follow-up ACT-011.
+
+**Result:** Both files were unchanged from the pre-task revision. The gateway deployment step was skipped. No internal response field was restored.
+
+**Next step:** Reconcile the complete gateway fixture with current private-preview authorization and public DTO allowlists, preserve positive and denied-user coverage, then verify worker tests and dry-run independently.
+
+Evidence: [2026-09-13-gateway-ci-observation.json](../docs/knowledge/audits/2026-09-13-gateway-ci-observation.json).
+
+## EVT-20260913-KNOWLEDGE-CI-ACTIVE — 2026-09-13T04:53:57.140197Z
+
+Incident: `INC-20260913-DOCS`. Kind: `verification`.
+
+**Observation:** Corrected documentation workflow is active on the private default branch and both hosted push and manual runs passed.
+
+**Action:** Verified exact revision, successful job steps, private status artifact and all eight current domain reviews; preserved the failed activation attempt.
+
+**Result:** Weekly Monday 09:17 UTC audit is enabled. The same job passed via manual dispatch and push; the first schedule event remains future.
+
+**Next step:** Maintain evidence-backed reviews and inspect the scheduled run after its expected window. Complete application CI verification and retain separate gateway fixture follow-up.
+
+Evidence: [2026-09-13-ci-activation.json](../docs/knowledge/audits/2026-09-13-ci-activation.json).
+
+## EVT-20260913-IMAGE-CI-ORIGIN — 2026-09-13T04:53:57.140197Z
+
+Incident: `INC-20260913-DOCS`. Kind: `follow-up`.
+
+**Observation:** Application CI passed docs guards then found a hard-coded production-origin expectation in an image fixture.
+
+**Action:** Test both default and configured artifact origins explicitly without changing production code or CI public fixture configuration.
+
+**Result:** All 23 image/security checks passed locally with the CI fixture environment.
+
+**Next step:** Push the fixture correction and verify hosted image/security and durable database steps.
+
+Evidence: [2026-09-13-image-ci-origin.json](../docs/knowledge/audits/2026-09-13-image-ci-origin.json).

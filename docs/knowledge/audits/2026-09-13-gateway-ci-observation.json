@@ -1,0 +1,12 @@
+{
+  "observed_at": "2026-09-13T04:45:22.174012Z",
+  "status": "open-pre-existing-fixture-failure",
+  "run_url": "https://github.com/CardSorting/GALXAI/actions/runs/34738519550",
+  "revision": "93bdc3d7e2f0c6fa97426fcaae02c5a1e2d77eac",
+  "failed_step": "Verify Cloudflare Worker Components",
+  "failure": "Health fixture expects edgePoP to echo CF-Ray in the public payload. Current public response omits that internal field.",
+  "source_comparison": "git diff 022a376 HEAD for scripts/test-cloudflare-workers.ts and src/workers/cloudflare/GalxEdgeGateway.ts was empty; both contracts predate the activation push.",
+  "containment": "Gateway test failed before bundle validation and deployment. No gateway deployment occurred in that run. Do not restore internal public fields to satisfy the stale fixture.",
+  "next_step": "Reconcile the complete gateway fixture with current private-preview authorization and public DTO allowlists, preserve positive and denied-user coverage, then verify worker tests and dry-run independently.",
+  "scope": "Separate gateway workflow, not the offline documentation audit. Domain review does not imply every repository test is current."
+}

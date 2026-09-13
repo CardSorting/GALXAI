@@ -1,12 +1,13 @@
 {
   "knowledge": {
     "reviewer": "Codex maintainer review",
-    "note": "Reviewed clean-checkout failure, preserved historical evidence and updated ignored-target guard, regression fixture and full CI/runbook instructions.",
+    "note": "Reviewed hosted manual/push success, downloaded all-eight-domain artifact, failed clean-checkout attempt and corrected navigation regression; reconciled complete CI, ADR and knowledge guides with verified activation scope.",
     "reviewed_at": "2026-09-13",
     "review_by": "2026-09-20",
     "evidence": {
       "docs/knowledge/audits/2026-09-13-domain-reviews.json": "a443998d6c6de0ea06fb379fd907ad1c564566013c7bfdd285002dfe1a39700a",
-      "docs/knowledge/audits/2026-09-13-ci-portability.json": "bf85fdcb35f6a336dd764f4e8e4135c9332729d56d69909670076324b1dee7b1"
+      "docs/knowledge/audits/2026-09-13-ci-portability.json": "bf85fdcb35f6a336dd764f4e8e4135c9332729d56d69909670076324b1dee7b1",
+      "docs/knowledge/audits/2026-09-13-ci-activation.json": "a2055ec65dbc44003caf40c94148a14625ffbcc9314bd7dd46fce6410b3ded64"
     },
     "files": {
       ".github/CODEOWNERS": "ef2f416d15f027dc8f197ad844289c9a44c8e843d3214d1590a3a380e939d13f",
@@ -17,17 +18,17 @@
       "docs/AGENTS.md": "0a1e687ab43a1e6c2266720e175de60cd6f10958cdf3456690c1f743c4784044",
       "docs/DOCUMENTATION_POLICY.md": "ab2030f9d15010634b9a2d9cf2bc680fdf4ae961c2ee3f9f7ad567e99d49d40c",
       "docs/README.md": "c37661656ca1bf29ca98ad96d7ee69547eba3c1b4a301b303e81e01ca39e130e",
-      "docs/adr/0145-maintained-knowledge-and-decision-lifecycle.md": "b34e884a1633bc3974896ba7f487a4dedadee748332d9e186c0d78b90169b68c",
+      "docs/adr/0145-maintained-knowledge-and-decision-lifecycle.md": "6fae04f9767dc698da73123151fdc6aa4f61f40786f176a9e5f9db336188d47a",
       "docs/explanations/README.md": "da413b402cb2a1ca0543e7f04f3bf51dbe77b7d23461d02303f77a40b19e0928",
       "docs/how-to/README.md": "918eab39cc2b083bf8267825904aa8c153e1ccb6ea82ba7d01eba5b929c13d14",
       "docs/how-to/change-with-documentation.md": "abcf6bfb2f0aadcf8cfc2fdae18ac8f3f84565f127c34f7453d50e7283006e40",
       "docs/knowledge/DESIGN_RATIONALE.md": "edd3cf9b49ed794fbe8bf14448fd0c56cb4d8df832bab81cdf07e9ea2e2204a1",
-      "docs/knowledge/README.md": "11734853777bc2ba5c9c9b8d14cd9301d9076b06d4a748307234d907cefb82a5",
-      "docs/knowledge/registry.json": "377c0bbc71c5bec18dc5cfad94d072e49bac678745c157adb85af305eae3b3df",
+      "docs/knowledge/README.md": "5ad219aeee44a9c065db2ca69e5a6498966fed42e2d8c74773dbc055d0220931",
+      "docs/knowledge/registry.json": "9626afc580d108164491f7f91b24ace89384eab45f872ae1083caca97418bd97",
       "docs/knowledge/templates/adr.md": "28773b3cbdb53ad34f08d0362e87b6dba24b6fd76ddb6c85db8ad63d99ad1331",
       "docs/knowledge/templates/runbook.md": "19679a7eb8c1a3aafd87852fa93817e7bf9ef4696772c8deb1617366c290abc1",
       "docs/maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md": "d2cd40a5684ce13365e5be75f5324963d2f4e0770d4a003d55d4b29b0e85a0e4",
-      "docs/maintainers/CI_PIPELINE_AND_AUTOMATION_SPEC.md": "a00031f7da97a35afadb2a2ba78c719705e9aab53f5837b25daa817f0fced67e",
+      "docs/maintainers/CI_PIPELINE_AND_AUTOMATION_SPEC.md": "3e1f44c0ca217beac08ab940ff035ac462685cb738005ef05ca78a5dfe253ec7",
       "docs/maintainers/DAY_1_TO_30_ONBOARDING_ROADMAP.md": "e9295b186cf9d5f9bc0c6a943f54af40ff52122aa5f8d880d5263c00d2dd7fd4",
       "docs/maintainers/MAINTAINER_ONBOARDING_ASSESSMENT.md": "619331130e6bd5559c36059c617449712178a0fb16b8ef6487a00402bd8bd525",
       "docs/maintainers/SUBSYSTEM_MAINTAINER_MATRIX.md": "9d0dad1aa9c7ce7790428d7ae587c8e4acb456538380062d0a65de8859791b57",
@@ -49,17 +50,18 @@
   },
   "images": {
     "reviewer": "Codex maintainer review",
-    "note": "Durable receipt ownership, acknowledgement ordering, single claim, ambiguous outcomes, cancellation, asset completion and rollback preservation. Existing repairs match the reviewed image contracts; retain their separate deployed acceptance evidence. Limits: Synthetic HTTP/database fixtures and prior dated frontend evidence; no new paid generation or load test.",
+    "note": "Re-reviewed raw HTTP artifact fixture and configured download URL contract after hosted CI isolated-origin failure. Both configured and default origins pass with unchanged public DTO and opaque-path checks; no runtime change.",
     "reviewed_at": "2026-09-13",
     "review_by": "2026-09-20",
     "evidence": {
-      "docs/knowledge/audits/2026-09-13-domain-reviews.json": "a443998d6c6de0ea06fb379fd907ad1c564566013c7bfdd285002dfe1a39700a"
+      "docs/knowledge/audits/2026-09-13-domain-reviews.json": "a443998d6c6de0ea06fb379fd907ad1c564566013c7bfdd285002dfe1a39700a",
+      "docs/knowledge/audits/2026-09-13-image-ci-origin.json": "3179932e2b8e81416691dca402be5a88bd47e30819f49307d8f5ffcf198d4e8a"
     },
     "files": {
       "docs/QUEUE_SPECIFICATION.md": "97fe5b62395c891f01a9a6b54d52dd0b208e7566311bf6c5a26353b3b7c3c689",
       "docs/maintainers/image-public-boundary.md": "b7a1f92dbef83daabe9e47a3cbf5339a7e011e00d42f814c409f6eacde3bd714",
       "post-mortem/runbooks/image-generation.md": "86acf1763fa269db5f74fd90fd7f003ae1527128299ba198a34b80d23af91245",
-      "scripts/test-image-public-http.ts": "c196e6361b7a470fff0211e1f1482d16536b34b2504556e7421fe88088d34c96",
+      "scripts/test-image-public-http.ts": "7887c8ec24dc58e9ae7de8c35bdb7f5171c67f49f95209932fe891800ac86077",
       "scripts/test-image-requests-db.ts": "04c727c232bd555757381eb6ebfd6a4ff3e6ff381e63890e7f16ce309a6bd516",
       "src/app/api/images/library/[assetId]/route.ts": "841b0e38f6bdbc67ecde213e8cc25179d208f23648439b46d592bbbb772345df",
       "src/app/api/images/library/batch/route.ts": "33a5248bf381fc7af7301e1a2e058f01f437f6e8d0aa8d24563703b9e1de35e3",
@@ -483,11 +485,13 @@
   },
   "delivery": {
     "reviewer": "Codex maintainer review",
-    "note": "Build exclusions, CI triggers, Node versions, rollback guidance, domain scheduler and gateway public/private entrypoint contracts. Align Docker base with declared Node 22 runtime and correct guide verification scope. Limits: Docker application image not rebuilt; local build does not prove live public cleanliness. Hosted CI recorded separately.",
+    "note": "Reviewed active documentation workflow and exact hosted receipts; separately inspected pre-existing gateway fixture failure and skipped deployment, tracked ACT-011. Canonical release contracts remain unchanged; full product CI and Docker build are not certified.",
     "reviewed_at": "2026-09-13",
     "review_by": "2026-09-20",
     "evidence": {
-      "docs/knowledge/audits/2026-09-13-domain-reviews.json": "a443998d6c6de0ea06fb379fd907ad1c564566013c7bfdd285002dfe1a39700a"
+      "docs/knowledge/audits/2026-09-13-domain-reviews.json": "a443998d6c6de0ea06fb379fd907ad1c564566013c7bfdd285002dfe1a39700a",
+      "docs/knowledge/audits/2026-09-13-ci-activation.json": "a2055ec65dbc44003caf40c94148a14625ffbcc9314bd7dd46fce6410b3ded64",
+      "docs/knowledge/audits/2026-09-13-gateway-ci-observation.json": "2c441741ccfd95c4c91461fa5d5d04f904e586c44402c5d1f75d63a08787db16"
     },
     "files": {
       ".dockerignore": "fb4dc7ef84e7f36c5bfed0f267187a022bbb61e66dd26060295b133e08fa74c5",

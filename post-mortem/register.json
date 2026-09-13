@@ -243,6 +243,18 @@
       "evidence": [
         "post-mortem/incidents/2026/2026-09-13-documentation/verification.json"
       ]
+    },
+    {
+      "id": "ACT-011",
+      "incident": "INC-20260913-DOCS",
+      "owner": "release maintainer",
+      "review_by": "2026-09-14",
+      "status": "open",
+      "next_step": "Reconcile the complete gateway fixture with current private-preview authorization and public DTO allowlists, preserve positive and denied-user coverage, then verify worker tests and dry-run independently.",
+      "closure": "Record passing gateway fixture and bundle checks against the current preview gate and sanitized public responses; never reopen public diagnostics to satisfy an obsolete assertion.",
+      "evidence": [
+        "docs/knowledge/audits/2026-09-13-gateway-ci-observation.json"
+      ]
     }
   ]
 }

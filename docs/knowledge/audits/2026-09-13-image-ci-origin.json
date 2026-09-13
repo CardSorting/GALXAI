@@ -1,0 +1,19 @@
+{
+  "observed_at": "2026-09-13T04:53:57.140197Z",
+  "status": "corrected-local",
+  "failed_run": "https://github.com/CardSorting/GALXAI/actions/runs/34738613797",
+  "failed_revision": "28d8caad5a20febe2438541012a90c493055ffb3",
+  "cause": "Async artifact test hard-coded galx.ai while CI correctly configured NEXT_PUBLIC_APP_URL=https://galx.invalid.",
+  "reviewed_source": "scripts/test-image-public-http.ts and src/lib/security/image-download-url.ts",
+  "correction": "Fixture now explicitly verifies default and configured artifact origins plus opaque asset paths, and restores the prior environment in finally. Production implementation and CI isolation remain unchanged.",
+  "checks": [
+    {
+      "command": "npm run test:image:security with the same three public fixture environment variables as CI",
+      "result": "passed",
+      "tests": 23
+    }
+  ],
+  "limits": [
+    "Local loopback HTTP fixtures; corrected hosted preflight is pending the next push."
+  ]
+}

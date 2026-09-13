@@ -18,6 +18,7 @@ Service recovery does not close prevention work. Dates are review deadlines, not
 | ACT-006 / INC-20260912-AUTH | identity maintainer / 2026-09-20 | Audit any remaining administrator credential dependencies independently of public Auth verification. Closure: Affected admin paths use valid least-privilege authority or remain explicitly unavailable; no publishable key is elevated. |
 | ACT-007 / INC-20260913-DOCS | release maintainer / 2026-09-14 | Verify the documentation guard and image regression gates run on the remote branch after the workflow is pushed. Closure: Link a successful remote CI run; local checks alone do not establish remote enforcement. |
 | ACT-008 / INC-20260913-DOCS | documentation maintainer / 2026-09-20 | Review open actions and source-bound guides weekly and on relevant releases. Closure: Append dated reviews, correct stale statements and reset review deadlines only with evidence; this is an ongoing responsibility. |
+| ACT-011 / INC-20260913-DOCS | release maintainer / 2026-09-14 | Reconcile the complete gateway fixture with current private-preview authorization and public DTO allowlists, preserve positive and denied-user coverage, then verify worker tests and dry-run independently. Closure: Record passing gateway fixture and bundle checks against the current preview gate and sanitized public responses; never reopen public diagnostics to satisfy an obsolete assertion. |
 
 ## Completed
 

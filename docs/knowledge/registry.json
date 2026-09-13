@@ -279,14 +279,19 @@
   "decisions": {
     "docs/adr/0145-maintained-knowledge-and-decision-lifecycle.md": {
       "status": "accepted",
-      "delivery": "local",
+      "delivery": "verified",
       "domain": "knowledge",
       "owner": "Documentation maintainer",
       "date": "2026-09-13",
       "evidence": [
-        "docs/knowledge/audits/2026-09-13-verification.json"
+        "docs/knowledge/audits/2026-09-13-verification.json",
+        "docs/knowledge/audits/2026-09-13-domain-reviews.json",
+        "docs/knowledge/audits/2026-09-13-ci-activation.json"
       ],
-      "supersedes": []
+      "supersedes": [],
+      "target": "Private GitHub Actions documentation audit on main",
+      "revision": "28d8caad5a20febe2438541012a90c493055ffb3",
+      "observed_at": "2026-09-13T04:53:57.140197Z"
     }
   },
   "managed_adr_from": 145,

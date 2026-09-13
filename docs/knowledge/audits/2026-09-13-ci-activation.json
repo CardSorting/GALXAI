@@ -1,0 +1,107 @@
+{
+  "observed_at": "2026-09-13T04:53:57.140197Z",
+  "status": "verified-hosted-knowledge-audit",
+  "repository": "CardSorting/GALXAI",
+  "visibility": "private",
+  "default_branch": "main",
+  "workflow": {
+    "id": 356907473,
+    "path": ".github/workflows/documentation.yml",
+    "state": "active",
+    "cron": "17 9 * * 1",
+    "schedule_description": "Monday 09:17 UTC; subject to GitHub scheduling delay",
+    "permissions": {
+      "contents": "read"
+    },
+    "artifact_retention_days": 14
+  },
+  "verified_revision": "28d8caad5a20febe2438541012a90c493055ffb3",
+  "runs": [
+    {
+      "event": "workflow_dispatch",
+      "id": 34738617429,
+      "url": "https://github.com/CardSorting/GALXAI/actions/runs/34738617429",
+      "conclusion": "success",
+      "job_completed_at": "2026-09-13T04:45:20Z"
+    },
+    {
+      "event": "push",
+      "id": 34738613865,
+      "url": "https://github.com/CardSorting/GALXAI/actions/runs/34738613865",
+      "conclusion": "success"
+    }
+  ],
+  "hosted_checks": [
+    "Documentation/incident/knowledge validation",
+    "20 incident and 16 knowledge guard fixtures",
+    "Complete/current review gate",
+    "Markdown owner/deadline summary step",
+    "Private review-status artifact retained and downloaded; all eight states verified"
+  ],
+  "review_status": {
+    "knowledge": {
+      "state": "reviewed",
+      "owner": "Documentation maintainer",
+      "review_by": "2026-09-20"
+    },
+    "images": {
+      "state": "reviewed",
+      "owner": "Product/API maintainer",
+      "review_by": "2026-09-20"
+    },
+    "access": {
+      "state": "reviewed",
+      "owner": "Security/access maintainer",
+      "review_by": "2026-09-20"
+    },
+    "sites": {
+      "state": "reviewed",
+      "owner": "Sites maintainer",
+      "review_by": "2026-09-20"
+    },
+    "relay": {
+      "state": "reviewed",
+      "owner": "Relay operator",
+      "review_by": "2026-09-20"
+    },
+    "database": {
+      "state": "reviewed",
+      "owner": "Database operator",
+      "review_by": "2026-09-20"
+    },
+    "delivery": {
+      "state": "reviewed",
+      "owner": "Release operator",
+      "review_by": "2026-09-20"
+    },
+    "broccolidb": {
+      "state": "reviewed",
+      "owner": "BroccoliDB maintainer",
+      "review_by": "2026-09-20"
+    }
+  },
+  "local_checks": [
+    {
+      "command": "npm run docs:audit and npm run test:docs in a clean committed local clone",
+      "revision": "28d8caad5a20febe2438541012a90c493055ffb3",
+      "result": "passed"
+    },
+    {
+      "command": "npm run docs:check:build",
+      "scope": "Local production build from the reviewed image repair/knowledge activation working tree; 640 browser/rendered assets and runtime traces",
+      "result": "passed"
+    }
+  ],
+  "initial_failure": {
+    "run_url": "https://github.com/CardSorting/GALXAI/actions/runs/34738523204",
+    "cause": "Ignored local evidence links missing from clean checkout",
+    "correction": "28d8caad5a20febe2438541012a90c493055ffb3"
+  },
+  "limits": [
+    "This receipt verifies manual and push execution; no schedule event has yet been observed.",
+    "Branch protection and required-check configuration were not changed or certified.",
+    "The application preflight exposed a separate isolated-origin test assumption; correction is tracked separately. This receipt does not assert full application CI success.",
+    "The pre-existing gateway fixture failure remains tracked as ACT-011; no gateway deployment occurred in its failed run.",
+    "No continuous availability, exhaustive legacy-doc/module review, Docker image build or new live product acceptance is implied."
+  ]
+}

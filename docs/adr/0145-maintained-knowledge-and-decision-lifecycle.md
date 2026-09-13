@@ -28,7 +28,7 @@ If metadata or navigation is wrong, correct the registry and regenerate. Correct
 
 ## Confirmation and delivery
 
-Validate registry/lifecycle, complete link coverage, runbook contracts, drift and explicit review behavior in adversarial fixtures. Run existing private publication guards and the production build for the changed repository boundary. Record actual local results in [the audit evidence](../knowledge/audits/2026-09-13-verification.json). Hosted weekly execution remains unverified until pushed and observed.
+Validate registry/lifecycle, complete link coverage, runbook contracts, drift and explicit review behavior in adversarial fixtures. Run existing private publication guards and the production build for the changed repository boundary. Initial local results remain in [the audit evidence](../knowledge/audits/2026-09-13-verification.json). The [activation receipt](../knowledge/audits/2026-09-13-ci-activation.json) verifies active default-branch configuration and successful manual/push audits at `28d8caa`, including 36 guard fixtures. Delivery is verified for this private knowledge workflow; the first scheduled event, branch protection and product deployment remain separate claims.
 
 ## Relationships
 

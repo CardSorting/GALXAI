@@ -151,10 +151,25 @@ test('raw image HTTP boundary: success, compatibility, errors, async and adversa
       await inspectArtifact(await fetch(origin));
       task.result.data = result;
       task.response_format = 'url';
-      const links = await (await fetch(origin, { headers: { accept: 'application/json' } })).json();
-      assert.deepEqual(Object.keys(links.data[0]), ['url']);
-      assert(links.data[0].url.startsWith('https://galx.ai/v1/images/assets/'));
-      assert.equal(forbidden.test(JSON.stringify(links)), false);
+      const originalAppUrl = process.env.NEXT_PUBLIC_APP_URL;
+      try {
+        for (const [configured, expectedOrigin] of [
+          [undefined, 'https://galx.ai'],
+          ['https://artifacts.example.invalid/app', 'https://artifacts.example.invalid'],
+        ] as const) {
+          if (configured === undefined) delete process.env.NEXT_PUBLIC_APP_URL;
+          else process.env.NEXT_PUBLIC_APP_URL = configured;
+          const links = await (await fetch(origin, { headers: { accept: 'application/json' } })).json();
+          assert.deepEqual(Object.keys(links.data[0]), ['url']);
+          const artifactUrl = new URL(links.data[0].url);
+          assert.equal(artifactUrl.origin, expectedOrigin);
+          assert.match(artifactUrl.pathname, /^\/v1\/images\/assets\/[^/]+$/);
+          assert.equal(forbidden.test(JSON.stringify(links)), false);
+        }
+      } finally {
+        if (originalAppUrl === undefined) delete process.env.NEXT_PUBLIC_APP_URL;
+        else process.env.NEXT_PUBLIC_APP_URL = originalAppUrl;
+      }
       task.output_format = 'jpeg'; await inspectArtifact(await fetch(origin), 'jpeg');
       task.output_format = undefined;
       task.state = 'failed'; await checkError(await fetch(origin), 502, 'generation_failed');

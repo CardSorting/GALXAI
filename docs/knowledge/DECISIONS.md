@@ -6,4 +6,4 @@ Generated metadata, separate from [the full ADR catalog](../adr/README.md). Unre
 
 | Decision | Decision status | Delivery evidence | Owner |
 | --- | --- | --- | --- |
-| [ADR 0145: Maintain knowledge with source changes](../../docs/adr/0145-maintained-knowledge-and-decision-lifecycle.md) | accepted | local | Documentation maintainer |
+| [ADR 0145: Maintain knowledge with source changes](../../docs/adr/0145-maintained-knowledge-and-decision-lifecycle.md) | accepted | verified | Documentation maintainer |
