@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import { Navigation } from '@/components/dashboard/Navigation';
 import { ImageStudio } from '@/components/images/ImageStudio';
 
 export const metadata: Metadata = {
@@ -10,5 +9,5 @@ export const metadata: Metadata = {
 };
 
 export default function ImagesPage() {
-  return <div className="image-studio-page"><Navigation /><ImageStudio /></div>;
+  return <div className="image-studio-page"><ImageStudio /></div>;
 }

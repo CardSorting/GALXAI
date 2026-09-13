@@ -1,0 +1,24 @@
+.header { position: relative; z-index: 10; flex-shrink: 0; border-bottom: 1px solid var(--border, rgba(255,255,255,.1)); background: var(--background, #07080d); }
+.inner { display: grid; grid-template-columns: minmax(0, 1fr) 152px; align-items: center; gap: 0 16px; max-width: 1280px; margin-inline: auto; padding: 12px 20px 0; }
+.brand { display: inline-flex; align-items: center; justify-self: start; min-height: 44px; }
+.links { grid-column: 1 / -1; grid-row: 2; display: flex; align-items: center; gap: 24px; min-width: 0; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: thin; scrollbar-color: var(--foreground-muted) transparent; }
+.link { position: relative; display: inline-flex; align-items: center; flex: 0 0 auto; min-height: 52px; color: var(--foreground-muted, #9ca3af); font-size: 14px; font-weight: 500; white-space: nowrap; text-decoration: none; transition: color 160ms ease-out; }
+.link:hover, .link[aria-current], .accountLink:hover { color: var(--foreground, #f3f4f6); }
+.link::after, .pending { position: absolute; inset: auto 0 8px; height: 2px; background: var(--foreground, #f3f4f6); content: ''; pointer-events: none; opacity: 0; transition: opacity 160ms ease-out; }
+.link[aria-current]::after { opacity: 1; }
+.pending[data-pending="true"] { opacity: .5; transition-delay: 120ms; }
+.account { grid-column: 2; grid-row: 1; display: flex; justify-content: flex-end; align-items: center; gap: 16px; min-height: 44px; width: 152px; font-size: 14px; white-space: nowrap; }
+.accountLink { display: inline-flex; align-items: center; min-height: 44px; background: none; border: 0; color: var(--foreground-muted, #9ca3af); cursor: pointer; font: inherit; text-decoration: none; transition: color 160ms ease-out; }
+.signIn { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding-inline: 16px; border: 1px solid var(--border, rgba(255,255,255,.1)); border-radius: 8px; color: var(--foreground, #f3f4f6); transition: background-color 160ms ease-out; }
+.signIn:hover { background: var(--surface, #0d101c); }
+.accountPlaceholder { width: 82px; height: 44px; border: 1px solid var(--border, rgba(255,255,255,.1)); border-radius: 8px; }
+.header :is(a, button):focus-visible { outline: 2px solid var(--primary, #6366f1); outline-offset: -2px; border-radius: 4px; }
+@media (min-width: 900px) {
+  .inner { grid-template-columns: 152px minmax(0, 1fr) 152px; padding-block: 12px; }
+  .links { grid-column: 2; grid-row: 1; justify-content: center; }
+  .link { min-height: 52px; }
+  .account { grid-column: 3; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .header *, .header *::after { transition: none; }
+}

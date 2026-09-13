@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowUpRight, Check, Plus } from 'lucide-react';
-import { Navigation } from '@/components/dashboard/Navigation';
 import { PRO_PLAN } from '@/lib/billing/pro-plan';
 import { SitesExample } from './SitesExample';
 import { PlanAction } from './PlanAction';
@@ -26,7 +25,7 @@ const questions = [
   { question: 'What does “extremely early public beta” mean?', answer: 'We’re sharing Sites early because we believe a real first version teaches you more than an idea left in your notes. Expect rough edges and a product that is still taking shape. Try a small idea, tell us where you get stuck, and help us understand what is worth building next.' },
 ];
 export function PublicHome() {
-  return <><Navigation variant="sites" /><main id="homepage-content" tabIndex={-1} className={styles.page}>
+  return <><main id="homepage-content" tabIndex={-1} className={styles.page}>
     <section className={styles.hero} aria-labelledby="sites-title">
       <div className={styles.sky} aria-hidden="true"><Image src="/brand/galaxy-hero-banner.jpg" alt="" fill priority sizes="(max-width: 800px) 100vw, 1280px" /></div>
       <div className={styles.heroCopy}>

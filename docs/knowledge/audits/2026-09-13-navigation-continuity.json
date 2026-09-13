@@ -1,0 +1,343 @@
+{
+  "observed_at": "2026-09-13T07:10:50.344406+00:00",
+  "base_revision": "45705ca1eff2f1e1456fdd83899d702ff1ffd87e",
+  "scope": "Local shared-navigation continuity and public loading/recovery refinement. No deployment or live generation.",
+  "source_and_guide_sha256": {
+    "src/components/dashboard/Navigation.tsx": "35d5a28048721be2cc0747608a166974945709ace3ba8900f9d3392d2950c5d5",
+    "src/components/dashboard/navigation.module.css": "9043e70641391d3acd89c47f5c8ebb8f6b45b3dabc21771b2ad5ba9057d5a2a1",
+    "src/app/layout.tsx": "d2e6515d18cee2a76bd20484b96ab8e186c3fbce7a04caf3044013f1cea15b76",
+    "src/app/globals.css": "654220cbc1d5cfe0427f65a61cb6c5a71cd6865a0773e1915f239632edc800c7",
+    "src/app/loading.tsx": "f207ad9a82d0313283cb6b7ec9e29ef27e5be7d3e60bff9409e79a4e42e2c5e7",
+    "src/app/not-found.tsx": "97bce16b76ab7b5cc9510270452b574e30eb8e127106629b6a16e3c26b53627f",
+    "src/app/images/page.tsx": "cf8928e3cc48fd9e295e267a381232e26cc23fdc44af71971180763ff7ae215e",
+    "src/app/sites/page.tsx": "915d68c35111338d82d6bf5146c96a2e4f74949cb6845e7726c26349f4c1e1fd",
+    "src/app/sites/[id]/page.tsx": "341759131634ae84f5707591b12033e2472700901eea5752c0636438c2559aae",
+    "src/components/home/PublicHome.tsx": "2919bbcf60aa9cbddf4577b4a1c84907fe83a0e841c29121bf72baf0ff38a042",
+    "scripts/verify-navigation-ui.ts": "df76b8139492cae2b92e50b7bbdac7d24b1c2991e3e25e06d8a2c244f6c5b5c7",
+    "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md": "622a1d4dea293e4f7b8345296ac56ec6b14f99c2a6f09e8339d56541ce887bec",
+    "docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md": "937804baf339b2ebfd21e1d6973060c0cd7f42c3c48b4143f3c6ae14dce05b9d",
+    "docs/knowledge/registry.json": "6959ebd37bbd172aca53002dda5a4b26d45b251799531e6134365b0de299e9f8",
+    ".impeccable/surfaces/src-components-dashboard-navigation-tsx.md": "ba6c03ad9c1fe085f353c4e51954de4368b90daa4dde77698ffd8c6d464bbdfa",
+    ".impeccable/surfaces/src-app-images-page-tsx.md": "08c25375084605ef18a02385710b031c7368b69fec226673d87a711642781740",
+    ".impeccable/surfaces/src-app-developers-page-tsx.md": "f24e7fc29c5d79d3cdd3c04aeb59a4ede5189ae5bf1b6846c3f6d4307a481e5a"
+  },
+  "semantic_review": [
+    "Reviewed the complete navigation and quota-efficiency guides against Navigation, IntentLink, root layout/loading, page wrappers and the browser fixture. The single link order, fixed account region, root-mounted product header, hash selection, scroll behavior, pending feedback and coordinated rollback are reconciled.",
+    "Home, Images and Sites retain one mounted header across client navigation. Nested Sites and invalid Site IDs retain exactly one header. Other pages keep the same Navigation component. Header continuity does not preserve a departed image workspace or change account, generation, billing or developer access.",
+    "Reviewed root layout/global styles, the fixed-width account-loading/guest/user states and the installed Next.js 15.5.25 useLinkStatus and smooth-scroll helper. Pending hints change no dimensions. Explicit focus scrolling reveals clipped menu links; reduced motion disables transitions and smooth scrolling.",
+    "Existing request intent budgets, private page authorization and API contracts remain unchanged. The public loading and not-found surfaces now describe recovery without internal diagnostics or invented timings/status. Not-found recovery links use the existing IntentLink budget and public product destinations.",
+    "Reviewed the exact registry additions against knowledge operations, documentation policy, change workflow, knowledge command reference, maintenance runbook, README and ADR 0145. The six new monitored paths cover shared-header CSS, root layout/loading/not-found/global styles and its browser fixture. No owner, workflow, decision status or review policy changes.",
+    "Inspected every unmapped source edit: product page wrappers and PublicHome only remove local header ownership now covered by the mapped root/component. Private surface briefs reconcile the shared header; they create no public contract. Historical evidence remains unchanged. Broader fingerprints detect drift and do not certify an exhaustive module audit."
+  ],
+  "primary_references": [
+    "https://nextjs.org/docs/app/api-reference/functions/use-link-status",
+    "https://nextjs.org/docs/app/api-reference/file-conventions/loading",
+    "https://nextjs.org/docs/app/getting-started/layouts-and-pages"
+  ],
+  "validation": {
+    "production_build": {
+      "command": "npm run build",
+      "exit_code": 0,
+      "includes": "TypeScript; Next loaded the existing .env.local; no dotenv was copied into fixtures."
+    },
+    "source_eslint": {
+      "exit_code": 0,
+      "scope": "Navigation, root layout/loading/not-found, Images/Sites page wrappers and PublicHome. Repository ESLint excludes scripts; no fixture lint or fixture TypeScript coverage is claimed."
+    },
+    "image_security": {
+      "command": "npm run test:image:security",
+      "passed": 23,
+      "failed": 0
+    },
+    "request_efficiency": {
+      "command": "npm run test:egress:transport",
+      "passed": 40,
+      "failed": 0
+    },
+    "documentation_fixtures": {
+      "command": "npm run test:docs",
+      "passed": 36,
+      "failed": 0
+    },
+    "navigation_browser": {
+      "command": "scripts/verify-navigation-ui.ts",
+      "exit_code": 0,
+      "target": "http://127.0.0.1:3417",
+      "widths": [
+        1440,
+        900,
+        768,
+        390,
+        320
+      ],
+      "results": [
+        {
+          "label": "sites-1440-guest",
+          "header_height": 77,
+          "accessibility": []
+        },
+        {
+          "label": "images-1440-guest",
+          "header_height": 77,
+          "accessibility": []
+        },
+        {
+          "label": "sites-1440-account",
+          "header_height": 77,
+          "accessibility": []
+        },
+        {
+          "label": "images-1440-account",
+          "header_height": 77,
+          "accessibility": []
+        },
+        {
+          "label": "sites-900-guest",
+          "header_height": 77,
+          "accessibility": []
+        },
+        {
+          "label": "images-900-guest",
+          "header_height": 77,
+          "accessibility": []
+        },
+        {
+          "label": "sites-900-account",
+          "header_height": 77,
+          "accessibility": []
+        },
+        {
+          "label": "images-900-account",
+          "header_height": 77,
+          "accessibility": []
+        },
+        {
+          "label": "sites-768-guest",
+          "header_height": 109,
+          "accessibility": []
+        },
+        {
+          "label": "images-768-guest",
+          "header_height": 109,
+          "accessibility": []
+        },
+        {
+          "label": "sites-768-account",
+          "header_height": 109,
+          "accessibility": []
+        },
+        {
+          "label": "images-768-account",
+          "header_height": 109,
+          "accessibility": []
+        },
+        {
+          "label": "sites-390-guest",
+          "header_height": 109,
+          "accessibility": []
+        },
+        {
+          "label": "images-390-guest",
+          "header_height": 109,
+          "accessibility": []
+        },
+        {
+          "label": "sites-390-account",
+          "header_height": 109,
+          "accessibility": []
+        },
+        {
+          "label": "images-390-account",
+          "header_height": 109,
+          "accessibility": []
+        },
+        {
+          "label": "sites-320-guest",
+          "header_height": 109,
+          "accessibility": []
+        },
+        {
+          "label": "images-320-guest",
+          "header_height": 109,
+          "accessibility": []
+        },
+        {
+          "label": "sites-320-account",
+          "header_height": 109,
+          "accessibility": []
+        },
+        {
+          "label": "images-320-account",
+          "header_height": 109,
+          "accessibility": []
+        },
+        {
+          "label": "site-detail-1440",
+          "header_height": 77,
+          "accessibility": []
+        },
+        {
+          "label": "site-not-found-1440",
+          "header_height": 77,
+          "accessibility": []
+        },
+        {
+          "label": "slow-navigation-390",
+          "header_height": 109,
+          "accessibility": []
+        }
+      ],
+      "coverage": [
+        "Home/Sites/Images link order and geometry within 0.5px",
+        "header DOM continuity across routes",
+        "guest/account geometry equivalence",
+        "back/forward",
+        "Pricing and FAQ hash navigation",
+        "explicit sign-in return destination",
+        "keyboard focus reveals scrollable links",
+        "nested Site and not-found navigation",
+        "sanitized not-found copy and public recovery links",
+        "slow-route pending feedback",
+        "reduced motion",
+        "no document overflow",
+        "zero navigation mutation requests and browser page errors"
+      ],
+      "capture_scope": "Scoped header Axe checks in 23 states, plus two keyboard captures. Desktop, phone, keyboard and final not-found screenshots opened for visual review."
+    },
+    "image_browser": {
+      "command": "scripts/verify-image-studio-ui.ts",
+      "exit_code": 0,
+      "results": [
+        {
+          "label": "guest-1440",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "guest-390",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "pending-1440",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "inspector-1440",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "library-1440",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "library-390",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "inspector-390",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "library-error-390",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "latest-1440",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "grid-1440",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "browse-inspector-1440",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "continuity-1440",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "workspace-short",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "latest-390",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "grid-390",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "browse-inspector-390",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "continuity-390",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "continuity-320",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "composer-expanded-390",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "filmstrip-900",
+          "overflow": false,
+          "accessibility": []
+        },
+        {
+          "label": "simulation-1440",
+          "overflow": false,
+          "accessibility": []
+        }
+      ],
+      "revision_scope": "Passed with the final shared-header/focus code. The only later application-source edit was the separate not-found copy, icon and recovery links; the final navigation fixture and production build include that edit."
+    },
+    "compiled_boundary": {
+      "command": "npm run docs:check:build",
+      "exit_code": 0,
+      "browser_rendered_assets": 639
+    },
+    "removed_copy_scan": {
+      "files": 1524,
+      "scope": ".next/static and .next/server/app JS, HTML, RSC and text files",
+      "removed_copy_hits": []
+    },
+    "corrections": [
+      "The first browser fixture attempted localStorage injection in sandboxed Site preview frames; account initialization is now restricted to the top frame.",
+      "An added keyboard assertion exposed partially clipped focus in the overflowing row; waiting for native scroll did not resolve it. A bounded focus handler now reveals the whole link, and the final five-width guest/account fixture passes.",
+      "The nested not-found screenshot exposed legacy diagnostic copy and a perpetual spinner. Replaced them with plain public recovery copy and a static icon, reconciled destinations and added rendered-copy assertions.",
+      "The sandbox prevented an initial isolated Chrome launch; the approved local browser command completed successfully outside that process restriction."
+    ],
+    "documentation_lifecycle": "Explicit reviews and docs:sync/docs:check follow this retained evidence; their final command results are reported separately to avoid self-referential evidence hashes."
+  },
+  "limits": [
+    "No production deployment, paid generation, live publishing, account entitlement or billing acceptance test.",
+    "Chrome localhost fixtures with external network blocked and account/workspace responses mocked. No physical-device, Safari/Firefox or comprehensive screen-reader assessment.",
+    "Header geometry and scoped accessibility checks are not a measured navigation latency, Core Web Vitals improvement or universal accessibility certificate.",
+    "Compiled marker scans and tested routes do not establish that every live page is clean. Private source fingerprints cover a broader inventory than the stated semantic and runtime checks."
+  ]
+}

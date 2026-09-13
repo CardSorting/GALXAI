@@ -1,15 +1,69 @@
 'use client';
-import { IntentLink as Link } from '@/components/common/IntentLink';
+
+import { useEffect, useState } from 'react';
+import { useLinkStatus } from 'next/link';
 import { usePathname } from 'next/navigation';
+import { IntentLink as Link } from '@/components/common/IntentLink';
 import { useAuth } from '@/contexts/AuthContext';
 import { GalxGalaxyLogo } from '@/components/brand/GalxGalaxyLogo';
-const links = [{ label: 'Images', href: '/images' }, { label: 'Sites', href: '/sites' }, { label: 'Developer preview', href: '/developers' }];
-export function Navigation({ variant = 'default' }: { variant?: 'default' | 'sites' }) {
-  const { user, logout } = useAuth(); const pathname = usePathname();
-  const items = variant === 'sites' ? [{label:'Sites',href:'/sites'},{label:'Pricing',href:'/#pricing'},{label:'FAQ',href:'/#faq'},{label:'Images',href:'/images'}] : links;
-  return <header className="border-b border-white/10 bg-[#07090e]"><div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-6 gap-y-2 px-5 py-4">
-    <Link href="/" aria-label="GALX home" className="py-2"><GalxGalaxyLogo size={30} textClassName="text-xl" /></Link>
-    <nav aria-label="Main navigation" className="order-3 flex w-full flex-wrap items-center gap-6 sm:order-none sm:w-auto">{items.map(link => <Link key={link.href} href={link.href} aria-current={pathname === link.href ? 'page' : undefined} className={`inline-flex min-h-11 items-center text-sm font-medium hover:text-white ${pathname === link.href ? 'text-white underline underline-offset-8' : 'text-zinc-300'}`}>{link.label}</Link>)}</nav>
-    <div className="flex items-center gap-4 text-sm">{user ? <><Link href="/billing" className="inline-flex min-h-11 items-center">Account</Link><button onClick={() => void logout()} className="min-h-11 text-zinc-300 hover:text-white">Sign out</button></> : <Link href={variant === 'sites' ? '/auth/signin?next=%2Fsites' : '/auth/signin'} className="inline-flex min-h-11 items-center rounded-xl border border-white/20 px-4 hover:bg-white/10">Sign in</Link>}</div>
-  </div></header>;
+import styles from './navigation.module.css';
+
+const links = [
+  { label: 'Sites', href: '/sites' },
+  { label: 'Images', href: '/images' },
+  { label: 'Pricing', href: '/#pricing' },
+  { label: 'FAQ', href: '/#faq' },
+  { label: 'Developer preview', href: '/developers' },
+];
+const isProductRoute = (pathname: string) => pathname === '/' || pathname === '/images' || /^\/sites(?:\/|$)/.test(pathname);
+
+function NavigationFeedback({ label }: { label: string }) {
+  const { pending } = useLinkStatus();
+  return <><span className={styles.pending} data-pending={pending} aria-hidden="true" /><span className="sr-only" role="status">{pending ? `Opening ${label}…` : ''}</span></>;
+}
+
+/** Keep the product header mounted while the page or its loading boundary changes. */
+export function ProductNavigation() {
+  const pathname = usePathname();
+  return isProductRoute(pathname) ? <Navigation inLayout /> : null;
+}
+
+export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
+  const { user, isLoading, logout } = useAuth();
+  const pathname = usePathname();
+  const [hash, setHash] = useState('');
+  useEffect(() => {
+    const sync = () => setHash(window.location.hash);
+    sync();
+    window.addEventListener('hashchange', sync);
+    window.addEventListener('popstate', sync);
+    return () => { window.removeEventListener('hashchange', sync); window.removeEventListener('popstate', sync); };
+  }, [pathname]);
+  // Legacy error/not-found surfaces can still include Navigation themselves.
+  if (!inLayout && isProductRoute(pathname)) return null;
+  const returnTo = pathname === '/' ? '/sites' : pathname;
+
+  return <header className={styles.header}>
+    <div className={styles.inner}>
+      <Link href="/" aria-label="GALX home" className={styles.brand}><GalxGalaxyLogo size={30} textClassName="text-xl" /></Link>
+      <nav aria-label="Main navigation" className={styles.links}>
+        {links.map(link => {
+          const [path, fragment] = link.href.split('#');
+          const active = fragment ? pathname === path && hash === `#${fragment}` : pathname === path || pathname.startsWith(`${path}/`);
+          return <Link key={link.href} href={link.href} className={styles.link} aria-current={active ? (fragment ? 'location' : 'page') : undefined}
+            onFocus={event => {
+              const link = event.currentTarget;
+              const nav = link.parentElement;
+              if (nav && nav.scrollWidth > nav.clientWidth) link.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'instant' });
+            }}
+            onNavigate={() => setHash(fragment ? `#${fragment}` : '')}>{link.label}<NavigationFeedback label={link.label} /></Link>;
+        })}
+      </nav>
+      <div className={styles.account} aria-busy={isLoading && !user}>
+        {user ? <><Link href="/billing" className={styles.accountLink}>Account</Link><button className={styles.accountLink} onClick={() => void logout()}>Sign out</button></>
+          : isLoading ? <span className={styles.accountPlaceholder} role="status" aria-label="Loading account" />
+          : <Link href={`/auth/signin?next=${encodeURIComponent(returnTo)}`} className={styles.signIn}>Sign in</Link>}
+      </div>
+    </div>
+  </header>;
 }

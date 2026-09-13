@@ -1,16 +1,13 @@
 import React from 'react';
-import Link from 'next/link';
+import { IntentLink as Link } from '@/components/common/IntentLink';
 import { Navigation } from '@/components/dashboard/Navigation';
 import {
   Compass,
-  ArrowRight,
-  Terminal,
-  Cpu,
-  Key,
+  PanelsTopLeft,
+  Image,
+  Code2,
   CreditCard,
-  FileText,
-  Home,
-  Users2
+  Home
 } from 'lucide-react';
 import { NotFoundSearchHelper } from '@/components/common/NotFoundSearchHelper';
 
@@ -25,33 +22,23 @@ export default function NotFound() {
 
           {/* 404 Visual Icon */}
           <div className="w-20 h-20 rounded-3xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center mx-auto text-cyan-400 shadow-xl shadow-cyan-500/15">
-            <Compass className="w-10 h-10 animate-spin" style={{ animationDuration: '20s' }} />
+            <Compass className="w-10 h-10" />
           </div>
 
           <div className="space-y-2 max-w-md mx-auto">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-cyan-300 text-xs font-mono font-bold">
-              <span>HTTP 404 • ROUTE UNRESOLVED</span>
+              <span>404</span>
             </div>
             <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
               Page Not Found
             </h1>
             <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed font-sans">
-              The requested endpoint or path is not mapped in the GALXAI model gateway routing table.
+              That page isn’t available. Check the address, or choose a destination below.
             </p>
           </div>
 
           {/* Interactive Smart Search Recovery */}
           <NotFoundSearchHelper />
-
-          {/* Terminal Hint */}
-          <div className="p-4 rounded-2xl bg-[#040508] border border-white/5 font-mono text-xs text-zinc-400 max-w-md mx-auto text-left space-y-1 shadow-inner">
-            <div className="flex items-center gap-2 text-zinc-500 border-b border-white/5 pb-2 text-[10px]">
-              <Terminal className="w-3.5 h-3.5 text-cyan-400" />
-              <span>ROUTER DIAGNOSTIC LOG</span>
-            </div>
-            <div className="text-rose-400 text-[11px] pt-1">404 ERR_ROUTE_NOT_FOUND</div>
-            <div className="text-[10px] text-zinc-500">status: 404 &bull; residency: global &bull; gateway: online</div>
-          </div>
 
           {/* Quick Destination Links */}
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 max-w-2xl mx-auto font-mono text-xs pt-2">
@@ -64,35 +51,35 @@ export default function NotFound() {
             </Link>
 
             <Link
-              href="/models"
+              href="/sites"
               className="p-3.5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 hover:text-white flex flex-col items-center justify-center gap-1.5 transition-all group"
             >
-              <Cpu className="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform" />
-              <span className="font-bold">Models</span>
+              <PanelsTopLeft className="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform" />
+              <span className="font-bold">Sites</span>
             </Link>
 
             <Link
-              href="/keys"
+              href="/images"
               className="p-3.5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 hover:text-white flex flex-col items-center justify-center gap-1.5 transition-all group"
             >
-              <Key className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
-              <span className="font-bold">API Keys</span>
+              <Image className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
+              <span className="font-bold">Images</span>
             </Link>
 
             <Link
-              href="/teams/seats"
+              href="/billing"
               className="p-3.5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 hover:text-white flex flex-col items-center justify-center gap-1.5 transition-all group"
             >
-              <Users2 className="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform" />
-              <span className="font-bold">Seats</span>
+              <CreditCard className="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform" />
+              <span className="font-bold">Account</span>
             </Link>
 
             <Link
-              href="/docs"
+              href="/developers"
               className="col-span-2 sm:col-span-1 p-3.5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 hover:text-white flex flex-col items-center justify-center gap-1.5 transition-all group"
             >
-              <FileText className="w-4 h-4 text-indigo-400 group-hover:scale-110 transition-transform" />
-              <span className="font-bold">Docs</span>
+              <Code2 className="w-4 h-4 text-indigo-400 group-hover:scale-110 transition-transform" />
+              <span className="font-bold">Developer preview</span>
             </Link>
           </div>
         </div>

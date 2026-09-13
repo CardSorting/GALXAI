@@ -90,9 +90,14 @@
 
 html {
   scroll-behavior: smooth;
+  scrollbar-gutter: stable;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
 }
 
 body {
@@ -226,5 +231,4 @@ body {
 .animate-pulse-glow {
   animation: pulseGlow 8s ease-in-out infinite;
 }
-
 

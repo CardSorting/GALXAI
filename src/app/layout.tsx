@@ -9,6 +9,7 @@ import { SkipToContent } from "@/components/common/SkipToContent";
 import { AccessibilityAnnouncer } from "@/components/common/AccessibilityAnnouncer";
 import { Footer } from "@/components/dashboard/Footer";
 import { MobileBottomNav } from "@/components/dashboard/MobileBottomNav";
+import { ProductNavigation } from "@/components/dashboard/Navigation";
 import { ClientResilienceProvider } from "@/components/common/ClientResilienceProvider";
 import { SITE_CONFIG } from "@/lib/seo/siteConfig";
 import { JsonLd } from "@/lib/seo/jsonld";
@@ -125,7 +126,7 @@ export default function RootLayout({
   const rootGraphSchema = { '@context': 'https://schema.org', '@type': 'WebSite', name: 'GALX', url: SITE_CONFIG.url, description: SITE_CONFIG.description };
 
   return (
-    <html lang="en" className={`dark ${fontSans.variable} ${fontMono.variable}`}>
+    <html lang="en" data-scroll-behavior="smooth" className={`dark ${fontSans.variable} ${fontMono.variable}`}>
       <head>
         {/* OpenSearch Auto-Discovery for Browser URL bar integration */}
         <link
@@ -164,6 +165,7 @@ export default function RootLayout({
               <AccessibilityAnnouncer />
               <AuthProvider>
                 <PersonaProvider>
+                  <ProductNavigation />
                   <div id="main-content" tabIndex={-1} className="relative z-10 flex-1 flex flex-col pb-16 lg:pb-0 outline-none">
                     {children}
                     <Footer />
