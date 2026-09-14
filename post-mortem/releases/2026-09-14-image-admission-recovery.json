@@ -1,0 +1,76 @@
+{
+  "classification": "private",
+  "observed_at": "2026-09-14T22:34:23.809568Z",
+  "source": "372b3d8",
+  "prior_source": "085d6d1",
+  "deployment": {
+    "initial": "dpl_71gDq6dNYXAqS8LkRDpeCLQu74nV",
+    "final": "dpl_68B57bGSQDUSacbrAUb48Soh4TRz",
+    "final_status": "Ready, production alias galx.ai; UI verified",
+    "completed_at": "2026-09-14T22:36:20Z"
+  },
+  "implemented": [
+    "Empty optional quota projection and expired candidate filtering with authoritative admission retained",
+    "Four bounded owner-scoped recoverable frontend requests; concurrent nonoverlapping polling; same-key lost-ack recovery; truthful elapsed status",
+    "Complete registry read reservation before I/O prevents partial-refill starvation without increasing budgets",
+    "Typed relay 503 plus not_accepted plus exact capacity/readiness allowlist persists generation_not_started; ambiguous outcomes remain unknown"
+  ],
+  "verification": {
+    "production_build": "passed",
+    "typescript": "passed",
+    "raw_http_authorization_tests": 40,
+    "disposable_image_database_checks": 43,
+    "initial_live_public_http": "passed; 27 browser assets",
+    "initial_live_cache_checks": 34,
+    "signed_in_library": "Two existing images, thumbnails and full frog image rendered",
+    "saved_download": {
+      "status": 200,
+      "format": "png",
+      "bytes": 3732263,
+      "width": 1312,
+      "height": 1199,
+      "decoded": true,
+      "metadataRemoved": true,
+      "publicHeadersClean": true
+    },
+    "earlier_regression_evidence": "post-mortem/incidents/2026/2026-09-13-image-generation/frontend-admission-recovery-20260914.json",
+    "final_live_public_http": "passed; 27 browser assets",
+    "authenticated_rendered_boundary": "passed; no private markers in visible studio text",
+    "frontend_request": "One snow-leopard request; confirmed non-start message and bounded manual cooldown; no automatic resubmission. Check my images navigated correctly and showed the same two saved images.",
+    "compiled_scan": "668 browser/rendered assets passed",
+    "scan_note": "An ad-hoc overly broad matcher initially matched React Error.prepareStackTrace. Inspected the match and used the existing word-bounded publication matcher.",
+    "authenticated_browser_scripts": "23 observed studio/library scripts passed"
+  },
+  "controller": {
+    "registryFresh": true,
+    "requests": 215271,
+    "failures": 1404,
+    "counterReset": false,
+    "unknownReceiptsRetained": 6,
+    "imageCapabilities": 0,
+    "workerReplaced": false
+  },
+  "remaining_blocker": {
+    "admin_image_probe": "502 image_probe_failed after 3430ms",
+    "bounded_protocol_diagnostic": "Completed reasoning/message only; no image output",
+    "explicit_image_tool_diagnostic": "Upstream rejected requested tool choice as absent despite an image_generation tools declaration",
+    "interpretation": "Configured upstream is currently not exposing image tool capability. Do not force readiness, auto-replay or promise an underlying image model.",
+    "new_frontend_generation": "Known refusal flow verified; successful new image not established"
+  },
+  "limits": [
+    "No sustained production throughput measurement",
+    "No new-image library or download acceptance possible until upstream capability returns",
+    "No quota, credential, policy, database, or durable counter mutations",
+    "No worker replacement or secret rotation",
+    "Commits are local; direct Vercel deployment does not imply hosted CI"
+  ],
+  "semantic_review": [
+    "Read affected images guides and revised non-start classification to match typed relay evidence",
+    "Reconciled relay guide runtime acceptance separately from source availability",
+    "Reviewed unmapped regression import and append-only journal"
+  ],
+  "references": [
+    "https://developers.openai.com/api/docs/guides/tools-image-generation",
+    "https://learn.microsoft.com/en-us/azure/architecture/patterns/asynchronous-request-reply"
+  ]
+}

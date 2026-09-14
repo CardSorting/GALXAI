@@ -789,3 +789,45 @@ Incident: `INC-20260913-IMAGES`. Kind: `observation`.
 **Next step:** Qualify the supervised controller restart and application release, then perform one bounded frontend generation.
 
 Evidence: [test-registry-egress-guard.ts](../scripts/test-registry-egress-guard.ts), [test-registry-api-egress.ts](../scripts/test-registry-api-egress.ts).
+
+## EVT-20260914-image-registry-restart — 2026-09-14T22:18:54.664206Z
+
+Incident: `INC-20260913-IMAGES`. Kind: `containment`.
+
+**Observation:** Final administrator preflight found zero pending reservations, zero tracked jobs and healthy durable receipt storage. The running launchd job reads the reviewed source workspace.
+
+**Action:** Restarted only the existing gui/501/com.galxai.federation.production launchd job to load the complete-reservation guard. Preserved the guard, signing state, worker volumes and all journals; no budget or credential edits.
+
+**Result:** Listener returned. Persisted request counts remained monotonic, six unknown admission tombstones remained retained, and failed-read counts stopped increasing while byte tokens accumulated. One later full read succeeded; fresh capability readiness is still pending.
+
+**Next step:** Observe fresh image capability readiness, qualify deployment dpl_71gDq6dNYXAqS8LkRDpeCLQu74nV and submit one bounded frontend request.
+
+Evidence: [registry-egress-guard.ts](../src/relay/registry-egress-guard.ts), [frontend-admission-recovery-20260914.json](incidents/2026/2026-09-13-image-generation/frontend-admission-recovery-20260914.json).
+
+## EVT-20260914-image-upstream-capability — 2026-09-14T22:34:23.809568Z
+
+Incident: `INC-20260913-IMAGES`. Kind: `observation`.
+
+**Observation:** Registry freshness recovered with monotonic counters and unchanged budgets; image capability remained absent.
+
+**Action:** Ran bounded existing administrator image verification, then two protocol diagnostics to distinguish empty completion from explicit tool rejection. Did not alter model selection, credentials or readiness.
+
+**Result:** Admin probe failed; ordinary completion returned no image; explicit image tool selection was rejected upstream as absent. Existing library image renders and sanitized binary download pass.
+
+**Next step:** Release proven non-start classification; confirm frontend refusal preserves safe recovery. Restore legitimate image-enabled upstream capability before claiming recovery.
+
+Evidence: [2026-09-14-image-admission-recovery.json](releases/2026-09-14-image-admission-recovery.json).
+
+## EVT-20260914-image-frontend-refusal-verified — 2026-09-14T22:38:31.266939Z
+
+Incident: `INC-20260913-IMAGES`. Kind: `verification`.
+
+**Observation:** Production source 372b3d8 is Ready on galx.ai.
+
+**Action:** Submitted one signed-in snow-leopard request and followed Check my images. Verified raw HTTP and public assets, existing image decode and metadata sanitation.
+
+**Result:** Frontend correctly reported generation did not start, with a manual cooldown and no automatic resubmission; library retained two existing images. No successful new image is claimed.
+
+**Next step:** ACT-020 remains open for upstream image capability and successful end-to-end acceptance.
+
+Evidence: [2026-09-14-image-admission-recovery.json](releases/2026-09-14-image-admission-recovery.json).

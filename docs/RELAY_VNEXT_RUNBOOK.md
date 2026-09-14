@@ -127,7 +127,7 @@ Treat the ownership change as a staged deployment. First run the guardian, actua
 
 Start the new job with the same namespace and state directory. Confirm `authority_established`, a stable listener, registry freshness, required capability readiness, unchanged worker generations and one real test request before widening traffic. Keep the old plist, compatible controller build, private state backup and worker images available until that acceptance completes. If the new job fails, stop it and prove its process group and inherited descriptors are gone before archiving its marker; restore the prior plist/build and let the old launcher create its own marker. Do not force-unlock or delete a guard. A rollback that cannot prove exclusive ownership is a bounded outage requiring operator intervention.
 
-The current evidence covers the disposable stages only. No production plist, marker migration or disruptive rollback was applied during this recovery work.
+The September 14 deployed guardian/worker acceptance is retained in the dated record linked above. That earlier acceptance does not establish current registry readiness or completion of the remaining isolated host/daemon/storage drills; use current-state evidence before intervention.
 
 ## September 8 image-frame repair
 

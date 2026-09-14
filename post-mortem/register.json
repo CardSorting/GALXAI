@@ -451,7 +451,7 @@
       "owner": "image maintainer",
       "review_by": "2026-09-16",
       "status": "open",
-      "next_step": "Validate and release empty-window admission and recoverable frontend request tracking; verify one bounded real image request.",
+      "next_step": "Restore legitimate image-enabled upstream capability, then verify one bounded frontend image and library/download. Admission/tracking, confirmed non-start classification and registry-starvation fixes are deployed and verified; upstream image probes currently fail.",
       "closure": "Retain regression, deployment and signed-in generation/library evidence; distinguish local throughput fixtures from live capacity."
     }
   ]

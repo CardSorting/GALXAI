@@ -48,17 +48,17 @@
   },
   "images": {
     "reviewer": "Codex image incident review",
-    "note": "Scoped review of changed admission projection, non-start DTOs, original-request recovery, complete I/O reservation and affected canonical guides; isolated tests retained separately from deployment.",
+    "note": "Reconciled full affected image contracts: typed proven non-start refusals, unknown outcome preservation, bounded parallel tracking, privacy and quota semantics; verified source/tests and deployment refusal acceptance. Upstream generation remains unavailable.",
     "reviewed_at": "2026-09-14",
     "review_by": "2026-09-21",
     "evidence": {
-      "post-mortem/incidents/2026/2026-09-13-image-generation/frontend-admission-recovery-20260914.json": "9da508a818affe41ef45c66779837994d9fe7045ffb90a097996175d974c4b36"
+      "post-mortem/releases/2026-09-14-image-admission-recovery.json": "171dc91d445654c37921a3ee3fcd7418c164dbd0b526c398750d47cb96816a9d"
     },
     "files": {
       "docs/QUEUE_SPECIFICATION.md": "1128aaa7784959e883e82bb91ca8ac2bd74502b5fb601ea7195d6cea411e30f3",
       "docs/maintainers/FREE_GENERATION_QUOTA.md": "e43d24867079c13c8437b7002d8730a6bb954c321437716b4185f8c94c6d6249",
       "docs/maintainers/image-library-scale.md": "f63c2fbd23c9014f4b0243abd7d4c25ba18965f386c03441d3674682533ebd66",
-      "docs/maintainers/image-public-boundary.md": "93368c6c6081d4fb77e00a56b653d840c5e05f824ca6e145ed2e7e9affecc717",
+      "docs/maintainers/image-public-boundary.md": "c28abd5e053067107d321bffbb9e1848a868c4d68f589c52d46febeb56b5e3c6",
       "docs/maintainers/readable-urls.md": "ea1fed2e15baa2097f0c1a906c98c66ab3343cd25aba9613151cd9f9480abb60",
       "post-mortem/runbooks/image-generation.md": "c754643273e0d941d9befe9a14e8ae20520ad7eab27452707855dd9286800262",
       "scripts/test-free-generation-gate-db.ts": "2919f39490203795965f494f61b288305ea7136e544515cc504d9e8a0ff7e037",
@@ -69,7 +69,7 @@
       "scripts/test-image-library-scale-db.ts": "131e2decca645d22522ffbd90170a3e47f81b6db068d93f6429d3c5d30ee02b7",
       "scripts/test-image-library-scale.ts": "1d4aeade107bc2d715654f4853bdc1be660bded657ca8cabd0fd34a67423389e",
       "scripts/test-image-public-http.ts": "b5d812f3daf27df33ccb27fe5936f84b56d0880a05bc309a89c5b8c9ba95f39f",
-      "scripts/test-image-requests-db.ts": "50bcf49748940f8d2e56323fc89fecdd459f890def2e5b3a77a69986d50ef9e9",
+      "scripts/test-image-requests-db.ts": "a42635ad7fb9432c23d79e715784085690742efcfd1b252df34856bcf0488037",
       "scripts/test-image-retry-contract.ts": "2dd9ae9d1e5b4c3ce132961cf05e37c3f983209a0a0c148abfdd870be92da292",
       "scripts/test-image-studio.ts": "d42d7f521a2b9678f69fdc395a2873d933f159346b1a0cac076a3171e6786f14",
       "scripts/test-relay-image-generation.ts": "d66f497b893ed0026806fbc928dbafff65be90b2e505e86c7da32b4df9d67140",
@@ -114,7 +114,7 @@
       "src/lib/images/navigation.ts": "827b7f91ef06422452aa03f66721e866be9755399c4514393230ce4fdcfc8e5c",
       "src/lib/images/read-image-artifact.ts": "af490bc9ccfa13d3e341574936f0929725ff2d1c9f042f53a48e0a45e8e7cb8b",
       "src/lib/images/request-repository.ts": "00dabfcb9cc6ba59a80aa8f3d15c2f9c8df813be9db3024c1c01cdd0a688ba47",
-      "src/lib/images/request-service.ts": "9f84336a4f6191bf07b58c4a35d3b4bd031e25086bb477d7feef9e6b005d9b69",
+      "src/lib/images/request-service.ts": "8873301571d260bbb185591e7192337538e2087c48e0be6074d0d916fcfcd6e8",
       "src/lib/security/image-artifact.ts": "295df387bacc6f27620f36c8b90eaceb31934ded26c14117c2cea3efac3fa593",
       "src/lib/security/public-image-http.ts": "793b1a19ed4a704439544df062e6921f1f0e9862503a4e6dc38f01246e90584d",
       "src/lib/security/public-image-record.ts": "777deaa9a0ce4a75aae539ae21a90b3ec8c1c11e19997f8664b8a35de91b1f9e",
@@ -347,16 +347,16 @@
   },
   "relay": {
     "reviewer": "Codex image incident review",
-    "note": "Scoped review of changed admission projection, non-start DTOs, original-request recovery, complete I/O reservation and affected canonical guides; isolated tests retained separately from deployment.",
+    "note": "Reviewed affected relay guide bodies and complete-reservation guard evidence; distinguish recovered registry from absent image capability. Existing guardian scope and open destructive drills remain explicit.",
     "reviewed_at": "2026-09-14",
     "review_by": "2026-09-21",
     "evidence": {
-      "post-mortem/incidents/2026/2026-09-13-image-generation/frontend-admission-recovery-20260914.json": "9da508a818affe41ef45c66779837994d9fe7045ffb90a097996175d974c4b36"
+      "post-mortem/releases/2026-09-14-image-admission-recovery.json": "171dc91d445654c37921a3ee3fcd7418c164dbd0b526c398750d47cb96816a9d"
     },
     "files": {
       "docs/ARCHITECTURE.md": "d821254fb3272cdc6c7575f6a548a1f041fe1506a10fd14b6bdd058539482e5d",
       "docs/FEDERATION_STRATEGY.md": "e199e9e58ed6070a3e60185173649ca61d8f1fc87e113f93099e45d76afc3fc4",
-      "docs/RELAY_VNEXT_RUNBOOK.md": "faf0e092d99dfbaf897ebf0111a4113bb2fbc9a0bcbe98c88afec049a29202b6",
+      "docs/RELAY_VNEXT_RUNBOOK.md": "49f15c6fa5bd03842302999b584e6993bea6cf01c6bfc55c7932748c56d6de0b",
       "docs/TELEMETRY_AND_OBSERVABILITY.md": "e46a148ae3ed55f818f5e45362559b0074bb1f975b3782978e3e815941e9812e",
       "docs/maintainers/RELAY_HARDENING.md": "64aada975343365578ae8476131e25d4c6b242ebf08815fd81910c4f6529bbc6",
       "docs/maintainers/RELAY_TELEMETRY.md": "f02e84a73fb2a6242ea55410f7f852e35c225dff85d978c75c8a9d1ccd1765ea",
