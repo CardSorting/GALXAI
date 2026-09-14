@@ -6,13 +6,12 @@ import { createClient } from '@/utils/supabase/client';
 import { registerAccount, type SignupCredentials } from '@/lib/auth/signup';
 import { safeAuthRedirect } from '@/lib/auth/redirects';
 import { LOGOUT_STATE_KEY, SessionRequestFence, logoutState, markLogout, readSessionProfile, rememberOwner } from '@/lib/auth/browser-session';
-import { AuthEntryShell } from '@/components/auth/AuthEntryShell';
-import styles from '@/components/auth/auth-entry.module.css';
 
 export interface AuthUser { id: string; email?: string; name?: string; avatarUrl?: string; provider?: string; token?: string; role?: string; company?: string; }
 export interface DemoUserParams { role?: 'dev' | 'lead' | 'enterprise'; email?: string; name?: string; }
-type Status = 'loading' | 'ready' | 'unavailable' | 'signing_out' | 'signout_failed';
+export type AuthStatus = 'loading' | 'ready' | 'unavailable' | 'signing_out' | 'signout_failed';
 interface AuthContextType {
+  status: AuthStatus; retrySession: () => Promise<void>;
   user: AuthUser | null; session: Session | null; supabaseUser: User | null; isAuthenticated: boolean; isLoading: boolean;
   signInWithOAuth: (provider: Provider, options?: { redirectTo?: string; queryParams?: Record<string, string>; scopes?: string }) => Promise<void>;
   signInWithPassword: (credentials: { email: string; password: string }) => Promise<{ error: Error | null; data?: any }>;
@@ -31,13 +30,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [supabase] = useState(createClient);
   const [user, setUser] = useState<AuthUser | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [status, setStatus] = useState<Status>('loading');
+  const [status, setStatus] = useState<AuthStatus>('loading');
   const candidate = useRef<Session | null>(null), currentUser = useRef<AuthUser | null>(null);
   const fence = useRef(new SessionRequestFence()), alive = useRef(false), logoutLock = useRef(false);
   const lastVerified = useRef(0);
   const verifying = useRef(false);
   const initialization = useRef(0);
-  const recoveryHeading = useRef<HTMLHeadingElement>(null);
   const clearUser = useCallback(() => { currentUser.current = null; setUser(null); setSession(null); rememberOwner(null); }, []);
 
   const verify = useCallback(async (next: Session | null) => {
@@ -100,7 +98,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     window.addEventListener('storage', storage); window.addEventListener('online', resume); window.addEventListener('focus', resume); document.addEventListener('visibilitychange', resume);
     return () => { alive.current = false; requestFence.invalidate(); clearTimeout(scheduled); subscription.unsubscribe(); window.removeEventListener('storage', storage); window.removeEventListener('online', resume); window.removeEventListener('focus', resume); document.removeEventListener('visibilitychange', resume); };
   }, [supabase, verify, clearUser]);
-  useEffect(() => { if (status === 'signout_failed' || status === 'unavailable') recoveryHeading.current?.focus(); }, [status]);
 
   const beginSignIn = () => { markLogout(null); fence.current.invalidate(); };
   const signInWithOAuth: AuthContextType['signInWithOAuth'] = async (provider, options) => {
@@ -139,12 +136,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch { if (alive.current) setStatus('signout_failed'); }
     finally { logoutLock.current = false; }
   };
-  const value: AuthContextType = { user, session, supabaseUser: session?.user ?? null, isAuthenticated: Boolean(user), isLoading: status === 'loading' || status === 'signing_out', signInWithOAuth, signInWithPassword, signUp, signInWithOtp, signInWithSSO, signOut, logout: signOut, loginWithOAuth: provider => signInWithOAuth(provider as Provider), signInWithDemo: () => location.assign('/auth/signin'), signInWithProviderKey: async () => ({ success: false, error: 'Sign in to your GALX account to manage connections.' }) };
-  const blocked = status === 'signing_out' || status === 'signout_failed' || status === 'unavailable';
-  return <AuthContext.Provider value={value}>{blocked ? <AuthEntryShell>
-    <div className={styles.intro}><h1 ref={recoveryHeading} tabIndex={-1}>{status === 'unavailable' ? 'We couldn’t check your session' : status === 'signing_out' ? 'Signing out…' : 'Finish signing out'}</h1>
-      <p role={status === 'signing_out' ? 'status' : undefined}>{status === 'unavailable' ? 'Check your connection and try again.' : status === 'signing_out' ? 'Your workspace is hidden while we end this browser’s session.' : 'Your workspace is hidden. We couldn’t finish signing out. Try again to secure this browser.'}</p></div>
-    {status !== 'signing_out' && <button className={`${styles.button} ${styles.primary}`} onClick={() => status === 'unavailable' ? void verify(candidate.current) : void signOut()}>{status === 'unavailable' ? 'Try again' : 'Retry sign-out'}</button>}
-  </AuthEntryShell> : children}</AuthContext.Provider>;
+  const retrySession = async () => { if (!verifying.current && !logoutState()) await verify(candidate.current); };
+  const value: AuthContextType = { status, retrySession, user, session, supabaseUser: session?.user ?? null, isAuthenticated: Boolean(user), isLoading: status === 'loading' || status === 'signing_out', signInWithOAuth, signInWithPassword, signUp, signInWithOtp, signInWithSSO, signOut, logout: signOut, loginWithOAuth: provider => signInWithOAuth(provider as Provider), signInWithDemo: () => location.assign('/auth/signin'), signInWithProviderKey: async () => ({ success: false, error: 'Sign in to your GALX account to manage connections.' }) };
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+
 }
 export function useAuth() { const context = useContext(AuthContext); if (!context) throw new Error('useAuth must be used within an AuthProvider'); return context; }

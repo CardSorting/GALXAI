@@ -22,3 +22,6 @@
 @media (prefers-reduced-motion: reduce) {
   .header *, .header *::after { transition: none; }
 }
+
+.accountStatus { color: var(--foreground); font-size: 12px; white-space: normal; text-align: end; }
+.accountLink:disabled { opacity: .65; cursor: wait; }

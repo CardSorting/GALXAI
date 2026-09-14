@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { appendCreations, generationBody, readGeneration, readLibrary, readPending, readSettings, safeImageUrl } from '../src/components/images/studio-contract';
+import { appendCreations, generationBody, readGeneration, readLibrary, readPending, readSettings, safeImageUrl, studioError } from '../src/components/images/studio-contract';
 
 test('studio accepts owned raster artifacts and rejects remote, active, and malformed URLs', () => {
   for (const value of ['https://evil.test/image.png', '//evil.test/image.png', 'javascript:alert(1)', 'data:image/svg+xml;base64,AAAA',
@@ -47,4 +47,11 @@ test('the session gallery accumulates completed batches and deduplicates repeate
   assert.deepEqual(combined.map(image => image.id), ['first-0', 'first-1', 'second-0']);
   assert.deepEqual(gallery, first, 'completion does not mutate the previous gallery');
   assert.deepEqual(appendCreations(combined, first), combined, 'recovering an already observed receipt does not add cards');
+});
+
+
+test('permission denial never tells an authenticated user to sign in again', () => {
+  assert.match(studioError(401), /Sign in again/);
+  for (const status of [403, 429, 500, 503]) assert.doesNotMatch(studioError(status), /expired|sign in/i);
+  assert.match(studioError(403), /account/);
 });

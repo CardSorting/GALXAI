@@ -14,7 +14,7 @@ for(const path of ['/images','/sites','/sites/00000000-0000-4000-8000-0000000000
 for(const path of ['/images','/sites','/sites/00000000-0000-4000-8000-000000000000']) {
  for(const [suffix,status] of [['forged',307],['unavailable',503],['revoked',307],['lookup-unavailable',503],['valid',200]]) {
   const response=await fetch(origin+path,{headers:{cookie:session(suffix)},redirect:'manual'});assert.equal(response.status,status,`${path} ${suffix}`); assert.match(response.headers.get('cache-control'),/private.*no-store/);const body=await response.text();assert.doesNotMatch(body,forbidden);
-  if(suffix==='valid') {assert(body.includes('Opening your workspace'));for(const m of body.matchAll(/(?:src|href)="([^"?#]*\/_next\/static\/[^"?#]+\.(?:js|css))"/g)) assets.add(new URL(m[1],origin).href);}
+  if(suffix==='valid') {assert(/data-workspace-loading="(?:Images|Sites)"/.test(body));for(const m of body.matchAll(/(?:src|href)="([^"?#]*\/_next\/static\/[^"?#]+\.(?:js|css))"/g)) assets.add(new URL(m[1],origin).href);}
   checks++;
  }
  for(const method of ['HEAD','POST','OPTIONS']) {const response=await fetch(origin+path,{method,redirect:'manual'});assert.equal(response.status,method==='HEAD'?307:401);checks++;}

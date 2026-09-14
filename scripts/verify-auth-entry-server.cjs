@@ -17,18 +17,24 @@ if (require.main === module) {
   child.on('exit', code => { process.exitCode = code ?? 1; });
 } else {
   const revoked = new Set();
+  const renderChecks = new Map();
   globalThis.fetch = async (input, init) => {
     const url = new URL(typeof input === 'string' ? input : input.url || String(input));
     const credential = new Headers(init?.headers || input.headers).get('authorization') || '';
     if (url.hostname === 'supabase.invalid' && url.pathname === '/auth/v1/logout') { revoked.add(credential); return new Response(null, { status: 204 }); }
     if (url.hostname === 'supabase.invalid' && url.pathname === '/rest/v1/rpc/fn_account_session_active') {
+      if (credential.endsWith('.render-unavailable')) {
+        const checks = (renderChecks.get(credential) || 0) + 1;
+        renderChecks.set(credential, checks);
+        if (checks > 1) return Response.json({ error: 'PRIVATE_AUTH_SENTINEL' }, { status: 503 });
+      }
       if (credential.endsWith('.lookup-unavailable')) return Response.json({ error: 'PRIVATE_AUTH_SENTINEL' }, { status: 503 });
       return Response.json(!revoked.has(credential) && !credential.endsWith('.revoked'));
     }
     if (url.hostname === 'supabase.invalid' && url.pathname === '/auth/v1/user') {
       const authorization = new Headers(init?.headers || input.headers).get('authorization') || '';
       if (authorization.endsWith('.unavailable')) return Response.json({ code: 'unavailable', msg: 'PRIVATE_AUTH_SENTINEL' }, { status: 503 });
-      if (['.valid', '.revoked', '.lookup-unavailable'].some(suffix => authorization.endsWith(suffix))) return Response.json({ id: '00000000-0000-4000-8000-000000000001', aud: 'authenticated', role: 'authenticated', is_anonymous: false, email: 'fixture@example.test', email_confirmed_at: '2026-09-13T00:00:00Z' });
+      if (['.valid', '.revoked', '.lookup-unavailable', '.render-unavailable'].some(suffix => authorization.endsWith(suffix))) return Response.json({ id: '00000000-0000-4000-8000-000000000001', aud: 'authenticated', role: 'authenticated', is_anonymous: false, email: 'fixture@example.test', email_confirmed_at: '2026-09-13T00:00:00Z' });
       return Response.json({ code: 'bad_jwt', msg: 'PRIVATE_AUTH_SENTINEL' }, { status: 401 });
     }
     throw new Error('External network disabled in isolated HTTP fixture');

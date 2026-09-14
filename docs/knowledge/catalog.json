@@ -2587,6 +2587,22 @@
       "decision": null
     },
     {
+      "path": "docs/knowledge/audits/2026-09-14-workspace-recovery-ux.md",
+      "title": "Workspace recovery and navigation — second audit",
+      "scope": "operational-record",
+      "kind": "evidence",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [
+        "workspace",
+        "recovery",
+        "navigation",
+        "ux",
+        "audit"
+      ],
+      "decision": null
+    },
+    {
       "path": "docs/knowledge/templates/adr.md",
       "title": "ADR template",
       "scope": "domain-reference",
@@ -3790,6 +3806,16 @@
     {
       "path": "post-mortem/incidents/2026/2026-09-13-workspace-auth/README.md",
       "title": "Unauthenticated workspace page access",
+      "scope": "operational-record",
+      "kind": "navigation",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-09-13-workspace-render/README.md",
+      "title": "Workspace server-render failure and navigation recovery",
       "scope": "operational-record",
       "kind": "navigation",
       "domains": [],

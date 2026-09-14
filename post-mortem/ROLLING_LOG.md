@@ -495,3 +495,59 @@ Incident: `INC-20260913-WORKSPACE`. Kind: `recovery`.
 **Next step:** Mark ACT-013 complete and the incident recovered. Retain ACT-014 for separate proof/device prevention and ACT-015 for the nonreproduced availability observation; reconcile/attest documentation. No Git commit, push, new hosted CI, generation, billing or publication is implied.
 
 Evidence: [session-revocation-release.json](incidents/2026/2026-09-13-workspace-auth/session-revocation-release.json), [session-revocation-migration.json](incidents/2026/2026-09-13-workspace-auth/session-revocation-migration.json).
+
+## EVT-20260913-render-observation — 2026-09-14T00:21:25.988194Z
+
+Incident: `INC-20260913-RENDER`. Kind: `observation`.
+
+**Observation:** User reported production RSC failure digest 2759966064 on Images/Sites navigation. Exact route/request time and cause remain unverified.
+
+**Action:** Inspected current state, auth failure runbooks, serving deployment and workspace guards; prepared typed outage recovery and route loading/error boundaries.
+
+**Result:** Source confirms an expected verification outage was thrown into a raw-diagnostic root fallback. Local correction prepared; serving target is dpl_vcR2NY1tHydyvA7jACT5aDSQcpRf. No deployment performed.
+
+**Next step:** Run synthetic page-outage and fresh retry browser fixtures, authorization/HTTP tests, production build and private-content scans.
+
+Evidence: [README.md](incidents/2026/2026-09-13-workspace-render/README.md).
+
+## EVT-20260913-render-local-verification — 2026-09-14T00:32:51.993320Z
+
+Incident: `INC-20260913-RENDER`. Kind: `verification`.
+
+**Observation:** Final isolated compiled fixture reproduces middleware success followed by unavailable page verification without rendering protected content.
+
+**Action:** Ran authorization/HTTP tests, a clean complete production build, desktop/mobile recovery and slow-navigation checks, accessibility inspection and compiled boundary scans.
+
+**Result:** 39 image/security, 33 session and 16 Sites checks passed; 106 compiled HTTP/asset checks, browser cases and 659-asset private scan passed. Retry fetched fresh server state and preserved the header; zero navigation mutations. No production deployment.
+
+**Next step:** Complete documentation attestation; retain open production diagnosis and release acceptance in ACT-016.
+
+Evidence: [local-verification.json](incidents/2026/2026-09-13-workspace-render/local-verification.json).
+
+## EVT-20260914-render-ux-audit — 2026-09-14T00:47:11.139238Z
+
+Incident: `INC-20260913-RENDER`. Kind: `observation`.
+
+**Observation:** Second-pass source review found browser profile failure still replaced the full layout, 403 image copy implied expiry, and status regions were nested under busy content. Recovery lacked failed-retry/offline feedback and keyboard continuity.
+
+**Action:** Contained browser recovery inside page content, retained the public shell and exact public reading allowlist, clarified 403, added guarded manual retry and long-wait feedback, and expanded synthetic browser coverage.
+
+**Result:** Production build and full existing authentication browser suite passed. Expanded desktop checks exposed forced-color contrast findings; explicit system colors added and confirmation run in progress. No production deployment or exact digest correlation.
+
+**Next step:** Complete expanded desktop/mobile and accessibility confirmation, inspect captures, retain dated evidence and reconcile guides. ACT-016 remains open for production diagnosis and acceptance.
+
+Evidence: [README.md](incidents/2026/2026-09-13-workspace-render/README.md).
+
+## EVT-20260914-render-ux-verified — 2026-09-14T00:50:42.691811Z
+
+Incident: `INC-20260913-RENDER`. Kind: `verification`.
+
+**Observation:** Expanded fixtures confirmed distinct server and browser verification outage paths, repeated failed/manual recovery, private-content withholding and preserved public navigation.
+
+**Action:** Completed production build, full auth and expanded desktop/phone navigation fixtures, raw HTTP/authorization checks, theme/reflow/accessibility review and private-content scan; reconciled affected guides and retained immutable second-pass evidence.
+
+**Result:** 39 security, 33 session, 16 image-contract/scale and 16 Sites tests passed; 109 compiled HTTP checks/32 assets, 15 auth browser states and expanded workspace sequences passed with no product mutations. Final compiled scan covered 661 assets with no tested violations. Lint has eight existing warnings; 37 documentation fixtures passed.
+
+**Next step:** Complete explicit documentation attestations/checks. Keep ACT-016 open: no production deployment or exact digest correlation.
+
+Evidence: [ux-second-pass-verification.json](incidents/2026/2026-09-13-workspace-render/ux-second-pass-verification.json), [2026-09-14-workspace-recovery-ux.md](../docs/knowledge/audits/2026-09-14-workspace-recovery-ux.md).

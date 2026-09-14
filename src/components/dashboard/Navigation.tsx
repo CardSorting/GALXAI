@@ -1,5 +1,6 @@
 'use client';
 
+import { useTransition } from 'react';
 import { useLinkStatus } from 'next/link';
 import { usePathname } from 'next/navigation';
 import { IntentLink as Link } from '@/components/common/IntentLink';
@@ -23,7 +24,8 @@ export function ProductNavigation() {
 }
 
 export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
-  const { user, isLoading, logout } = useAuth();
+  const { user, isLoading, logout, status, retrySession } = useAuth();
+  const [checking, startChecking] = useTransition();
   const pathname = usePathname();
   // Legacy error/not-found surfaces can still include Navigation themselves.
   if (!inLayout && isProductRoute(pathname)) return null;
@@ -45,6 +47,9 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
       </nav>
       <div className={styles.account} aria-busy={isLoading && !user}>
         {user ? <><Link href="/billing" className={styles.accountLink}>Account</Link><button className={styles.accountLink} onClick={() => void logout()}>Sign out</button></>
+          : status === 'unavailable' ? <button className={styles.accountLink} disabled={checking}
+            onClick={() => startChecking(async () => { await retrySession(); })}>{checking ? 'Checking account…' : 'Retry account'}</button>
+          : status === 'signout_failed' ? <span className={styles.accountStatus}>Sign-out incomplete</span>
           : isLoading ? <span className={styles.accountPlaceholder} role="status" aria-label="Loading account" />
           : <Link href={`/auth/signin?next=${encodeURIComponent(returnTo)}`} className={styles.signIn}>Sign in</Link>}
       </div>

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import { AuthSessionContent } from '@/components/auth/AuthSessionContent';
 import { AuthProvider } from "@/contexts/AuthContext";
 import { PersonaProvider } from "@/contexts/PersonaContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
@@ -167,7 +168,7 @@ export default function RootLayout({
                 <PersonaProvider>
                   <ProductNavigation />
                   <div id="main-content" tabIndex={-1} className="relative z-10 flex-1 flex flex-col pb-16 lg:pb-0 outline-none">
-                    {children}
+                    <AuthSessionContent>{children}</AuthSessionContent>
                     <Footer />
                   </div>
                   <MobileBottomNav />

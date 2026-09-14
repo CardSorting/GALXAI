@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { ImageStudio } from '@/components/images/ImageStudio';
-import { requireWorkspaceSession } from '@/lib/auth/require-workspace-session';
+import { WorkspacePageGate } from '@/components/auth/WorkspacePageGate';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,6 +13,5 @@ export const metadata: Metadata = {
 };
 
 export default async function ImagesPage() {
-  await requireWorkspaceSession('/images');
-  return <div className="image-studio-page"><ImageStudio /></div>;
+  return <WorkspacePageGate pathname="/images"><div className="image-studio-page"><ImageStudio /></div></WorkspacePageGate>;
 }

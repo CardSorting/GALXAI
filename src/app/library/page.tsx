@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import { Navigation } from '@/components/dashboard/Navigation';
 import { VisualLibraryDashboard } from '@/components/library/VisualLibraryDashboard';
-import { requireWorkspaceSession } from '@/lib/auth/require-workspace-session';
+import { WorkspacePageGate } from '@/components/auth/WorkspacePageGate';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,14 +19,12 @@ export const metadata: Metadata = {
 };
 
 export default async function VisualLibraryPage() {
-  await requireWorkspaceSession('/library');
-
   return (
-    <div className="min-h-screen bg-[#07090e] text-white flex flex-col selection:bg-indigo-500/40 selection:text-white">
+    <WorkspacePageGate pathname="/library"><div className="min-h-screen bg-[#07090e] text-white flex flex-col selection:bg-indigo-500/40 selection:text-white">
       <Navigation />
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <VisualLibraryDashboard />
       </main>
-    </div>
+    </div></WorkspacePageGate>
   );
 }

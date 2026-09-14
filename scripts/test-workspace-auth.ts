@@ -134,8 +134,31 @@ test('server page guard independently denies anonymous entry when middleware did
   }));
   for (const path of ['src/app/images/page.tsx', 'src/app/sites/page.tsx', 'src/app/sites/[id]/page.tsx']) {
     const page = readFileSync(path, 'utf8');
-    assert.match(page, /await requireWorkspaceSession\(/, path);
+    assert.match(page, /<WorkspacePageGate pathname=/, path);
     assert.match(page, /export const dynamic = 'force-dynamic'/, path);
-    assert(page.indexOf('await requireWorkspaceSession(') < page.indexOf('return <'), path);
+    assert.match(page, /<WorkspacePageGate[^>]+>[\s\S]*<\/WorkspacePageGate>/, path);
   }
+});
+
+
+test('independent page verification distinguishes an outage from an invalid session', async () => {
+  (globalThis as any).AsyncLocalStorage ??= AsyncLocalStorage;
+  const { workAsyncStorage } = await import('next/dist/server/app-render/work-async-storage.external.js');
+  const { workUnitAsyncStorage } = await import('next/dist/server/app-render/work-unit-async-storage.external.js');
+  const { requireWorkspaceSession, WorkspaceSessionUnavailableError } = await import('../src/lib/auth/require-workspace-session');
+  const store = { type: 'request', phase: 'render', cookies: new NextRequest('https://galx.ai/images', { headers: { cookie: sessionCookie } }).cookies };
+  const originalFetch = globalThis.fetch;
+  let active: boolean | null = null;
+  globalThis.fetch = async input => String(input).includes('/auth/v1/user')
+    ? Response.json({ id: 'verified', is_anonymous: false })
+    : active === null ? Response.json({ error: 'PRIVATE_AUTH_SENTINEL' }, { status: 503 }) : Response.json(active);
+  try {
+    await workAsyncStorage.run({} as any, () => workUnitAsyncStorage.run(store as any, async () => {
+      await assert.rejects(requireWorkspaceSession('/images'), WorkspaceSessionUnavailableError);
+      active = false;
+      await assert.rejects(requireWorkspaceSession('/images'), error => String((error as any).digest).startsWith('NEXT_REDIRECT;'));
+      active = true;
+      await requireWorkspaceSession('/images');
+    }));
+  } finally { globalThis.fetch = originalFetch; }
 });

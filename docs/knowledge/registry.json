@@ -140,7 +140,9 @@
         "src/lib/supabase/repositories/SessionRepository.ts",
         "src/app/api/teams/seats/route.ts",
         "src/app/library/page.tsx",
-        "scripts/verify-workspace-cache-http.mjs"
+        "scripts/verify-workspace-cache-http.mjs",
+        "src/components/auth/WorkspacePageGate.tsx",
+        "src/components/auth/AuthSessionContent.tsx"
       ],
       "guides": [
         "docs/operations/developer-preview.md",
@@ -321,7 +323,14 @@
         "src/app/sitemap.ts",
         "scripts/test-public-reading.ts",
         "scripts/verify-public-reading-ui.mjs",
-        "src/lib/seo/siteConfig.ts"
+        "src/lib/seo/siteConfig.ts",
+        "src/app/error.tsx",
+        "src/app/images/error.tsx",
+        "src/app/images/loading.tsx",
+        "src/components/common/RouteRecovery.tsx",
+        "src/components/common/WorkspaceLoading.tsx",
+        "src/components/common/workspace-route.module.css",
+        "scripts/verify-workspace-navigation.mjs"
       ],
       "guides": [
         "docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md",
@@ -410,6 +419,10 @@
         "401",
         "session expiry"
       ]
+    },
+    "docs/knowledge/audits/2026-09-14-workspace-recovery-ux.md": {
+      "kind": "evidence",
+      "keywords": ["workspace", "recovery", "navigation", "ux", "audit"]
     },
     "docs/knowledge/audits/2026-09-13-workspace-auth-ux.md": {
       "kind": "evidence",

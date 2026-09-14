@@ -124,7 +124,8 @@ export function readGeneration(value: unknown, settings: StudioSettings, id: str
   });
 }
 export function studioError(status: number): string {
-  if (status === 401 || status === 403) return 'Your session has expired. Sign in again to continue.';
+  if (status === 403) return 'This action isn’t available for your account.';
+  if (status === 401) return 'Your session has expired. Sign in again to continue.';
   if (status === 429) return 'Your request limit has been reached. Wait before trying again.';
   if (status === 400) return 'Check your prompt and settings, then try again.';
   if (status === 404) return 'This request is no longer available. Check your library for its images before generating again.';

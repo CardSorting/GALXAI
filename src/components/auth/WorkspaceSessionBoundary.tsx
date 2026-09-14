@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { WORKSPACE_SESSION_REJECTED } from '@/lib/auth/workspace-client';
 import { workspaceSignInPath } from '@/lib/security/workspace-policy';
 import styles from './auth-entry.module.css';
+import { WorkspaceLoading } from '@/components/common/WorkspaceLoading';
 
 /** Unmount account content on sign-out/401; this complements the server entry guards. */
 export function WorkspaceSessionBoundary({ children }: { children: ReactNode }) {
@@ -25,7 +26,7 @@ export function WorkspaceSessionBoundary({ children }: { children: ReactNode }) 
     return () => window.removeEventListener(WORKSPACE_SESSION_REJECTED, reject);
   }, [owner]);
   if (user && rejected !== owner) return children;
-  if (isLoading && !rejected) return <div className={styles.locked}><p role="status">Opening your workspace…</p></div>;
+  if (isLoading && !rejected) return <WorkspaceLoading product={pathname.startsWith('/sites') ? 'Sites' : 'Images'} />;
   const next = workspaceSignInPath(pathname, new URLSearchParams(search.toString()));
   return <section className={styles.locked} aria-labelledby="workspace-signin-heading"><div className={styles.panel}>
     <div className={styles.intro}><h1 ref={heading} tabIndex={-1} id="workspace-signin-heading">Sign in to continue</h1><p>Your session has ended. Sign in again to return to this workspace.</p></div>

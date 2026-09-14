@@ -1,0 +1,252 @@
+{
+  "observed_at": "2026-09-14T00:50:42.691811Z",
+  "scope": "Second UX pass; local dirty working tree based on 24fd18f; isolated compiled production fixtures. No production deployment or live acceptance.",
+  "reviewer": "Codex",
+  "reviewed_source_hashes": {
+    "scripts/test-image-studio.ts": "0bde9c97c823f8bae75027cf0a8558bdfea781979f20768e241a7d4bbc8cf7dd",
+    "scripts/test-workspace-auth.ts": "f2060e9de971ffd6cb621e917abc5a2cb196e3bcfc67b68e546359416a72ae38",
+    "scripts/verify-auth-entry-server.cjs": "7d2feba2a30fa4f89cd9b2055156dc4462d4ab2dd9b9118b7fef3c31048f9468",
+    "scripts/verify-workspace-auth-http.mjs": "7089d666c2d3d728f21f348a13c11b1ae6b553574b59aba6a42b17260a0e75d9",
+    "scripts/verify-workspace-navigation.mjs": "beb585c8d0b57cf1edcdac1c28a0a33782cf3ce2c2f6d1e73948cb9d8e3a6fea",
+    "src/app/error.tsx": "e3a2bef2077e69d2d090e7602a4fc98c8cbf2bf55194b5c84b6fa4b38b2424d8",
+    "src/app/globals.css": "aef642880793b1fe4ab83421a48f3a6072b79ee04bc2dd5c1220737e658381bb",
+    "src/app/images/error.tsx": "0b2a04890cd8de8ea6adf8eb58541aae5409033c49b28d90a51cb386af1d1097",
+    "src/app/images/loading.tsx": "7874f6730a73d1b21ce1c8d0f957f6ac3a7368adbc38e9467c05db9236279223",
+    "src/app/images/page.tsx": "8ef73a8fe0c2a6e0a223c7b992f5d4138c1e877d835db96b5740813fe5ab36f8",
+    "src/app/layout.tsx": "e3955fb2a682da536a4e99252dcd60b980b3479d82481737d4545f08d6213d95",
+    "src/app/library/page.tsx": "61b9b82fafc3c9a295a1afd9ce6b11473d0b62fe7f2a3ff7c517696c24c20d99",
+    "src/app/sites/[id]/page.tsx": "b3bac5436139d92b3ead98523d5dd36c057682f4d818fabbe27afe0d928ce63d",
+    "src/app/sites/error.tsx": "f2d40e7c5567e92746b18fc489099f7ab1331393859d7fae9a34db13f2bc4736",
+    "src/app/sites/loading.tsx": "652066b8b7a8a11a586f6fb795a198f3168a752cad03f187a45ac9014bf61aad",
+    "src/app/sites/page.tsx": "cabbb9f20b8699a2033c8e43f41db94cb01e256067ad92a34d005680551efa39",
+    "src/components/auth/AuthSessionContent.tsx": "342c68db8ec6ce2b9faca802de65022ac8e558a565f3d51fb821a2afe182b574",
+    "src/components/auth/WorkspacePageGate.tsx": "dc1bd7080a4eb470769c85fad310fb8bf242a51e5afc81a3ee8811a20cd48f24",
+    "src/components/auth/WorkspaceSessionBoundary.tsx": "9b3a1c0cb564aa160a0e7190a5e34d05e9ab866a0015d17a5a051b3b8f6c31d2",
+    "src/components/common/RouteRecovery.tsx": "f8cd899a886cd28baa57b23f500c3750cafd3c0b8709cd0e5e892f58b3de2c35",
+    "src/components/common/WorkspaceLoading.tsx": "fcc220850cf2a7280d3cbb9d46a3f579da1f4fb8c298f0b37b54e6d7c1d84820",
+    "src/components/common/workspace-route.module.css": "6654e288040f2196747f08319a9cad95916f086708d14b4cdafaabe40db88523",
+    "src/components/dashboard/Navigation.tsx": "a155637b96d2f4f0d4bed6aee26e863a9a5a3bf4f8ac9fc473b8b920292000bb",
+    "src/components/dashboard/navigation.module.css": "e28c497101d868476ec86be685549f3b02660dab84711b8b303f45facb89b180",
+    "src/components/images/studio-contract.ts": "1f51b43e0aa113d00f32136152b7c3d878c81d351bdf4411150b3ad3f557c596",
+    "src/contexts/AuthContext.tsx": "e6e8d52e3bf3592779e849a65b2dc8bafb7fdedf8fa9d6ac44ffb2a2b8a40842",
+    "src/lib/auth/require-workspace-session.ts": "6bdeaafe20fff2ff98e6ef767e6d9b20ae9319dbea818e3e8f044a66f12f104c"
+  },
+  "reviewed_guides": [
+    "docs/operations/workspace-auth.md",
+    "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md",
+    "docs/maintainers/SITES_WORKSPACE.md",
+    "docs/maintainers/image-public-boundary.md",
+    "docs/DOCUMENTATION_POLICY.md",
+    "docs/how-to/change-with-documentation.md",
+    "docs/reference/knowledge-commands.md",
+    "post-mortem/CURRENT_STATE.md",
+    "post-mortem/failure-modes/identity.md",
+    "docs/knowledge/registry.json"
+  ],
+  "semantic_review": "Reconciled complete affected guide bodies and surface briefs against independent server admission, root content containment, explicit public reading allowlist, logout recovery, authored 401/403 distinctions, focused guarded retries, local draft continuity and loading geometry/status. New AuthSessionContent source mapped to access; new audit categorized as evidence. Remaining unmapped paths are private dated/generated records or design briefs. No ADR status or authority changed. Broad domain fingerprints remain a drift inventory, not an exhaustive module audit.",
+  "audit": "docs/knowledge/audits/2026-09-14-workspace-recovery-ux.md",
+  "checks": {
+    "image_security": {
+      "command": "npm run test:image:security",
+      "passed": 39
+    },
+    "session_authority": {
+      "command": "npm run test:auth:sessions",
+      "passed": 33
+    },
+    "image_scale_and_contract": {
+      "command": "npm run test:image:scale",
+      "passed": 16
+    },
+    "sites_workspace": {
+      "command": "npm run test:sites:workspace",
+      "passed": 16
+    },
+    "lint": {
+      "command": "npm run lint",
+      "errors": 0,
+      "existing_warnings": 8
+    },
+    "production_build": {
+      "command": "CI=true node scripts/build-ci.mjs in complete isolated source/public/config copy",
+      "passed": true,
+      "includes_type_validation": true,
+      "build_id": "wuzyUwGc5hywcFGkknzyM",
+      "environment": "Synthetic CI configuration; no dotenv or real credentials; never deploy this artifact",
+      "source_copy_verified": true
+    },
+    "compiled_http": {
+      "command": "node scripts/verify-workspace-auth-http.mjs",
+      "passed": 109,
+      "assets": 32
+    },
+    "workspace_browser": {
+      "results": [
+        {
+          "route": "/images",
+          "check": "middleware success followed by page outage; HTML/RSC fail closed without workspace content"
+        },
+        {
+          "route": "/sites",
+          "check": "middleware success followed by page outage; HTML/RSC fail closed without workspace content"
+        },
+        {
+          "route": "/sites/00000000-0000-4000-8000-000000000000",
+          "check": "middleware success followed by page outage; HTML/RSC fail closed without workspace content"
+        },
+        {
+          "width": 1440,
+          "check": "server/browser recovery; single retry and focus; offline; safe home; both drafts; 403; stable shell; delayed navigation; history; reduced motion; accessibility",
+          "posts": 0,
+          "extended": "long wait; 320px reflow; two themes; forced colors; doubled text"
+        },
+        {
+          "width": 390,
+          "check": "server/browser recovery; single retry and focus; offline; safe home; both drafts; 403; stable shell; delayed navigation; history; reduced motion; accessibility",
+          "posts": 0
+        }
+      ],
+      "assets": 10,
+      "scope": "Synthetic account and API fixtures; compiled production application; no production acceptance"
+    },
+    "auth_browser": {
+      "passed": true,
+      "visualStates": 15,
+      "coverage": [
+        "server entry",
+        "password success/error/deduplication",
+        "email-link nonenumeration and callback",
+        "existing/stale identity",
+        "401 unmount and draft retention",
+        "403 stays in workspace",
+        "503 recovery",
+        "reflow and accessibility",
+        "current-browser sign-out across reload/tabs",
+        "failed sign-out retry",
+        "late verification after logout"
+      ]
+    },
+    "auth_accessibility_states": [
+      {
+        "label": "replace-session-1440",
+        "violations": []
+      },
+      {
+        "label": "replace-session-390",
+        "violations": []
+      },
+      {
+        "label": "signin-1440",
+        "violations": []
+      },
+      {
+        "label": "password-error-1440",
+        "violations": []
+      },
+      {
+        "label": "email-link-1440",
+        "violations": []
+      },
+      {
+        "label": "signin-390",
+        "violations": []
+      },
+      {
+        "label": "password-error-390",
+        "violations": []
+      },
+      {
+        "label": "email-link-390",
+        "violations": []
+      },
+      {
+        "label": "expired-1440",
+        "violations": []
+      },
+      {
+        "label": "unavailable-1440",
+        "violations": []
+      },
+      {
+        "label": "expired-390",
+        "violations": []
+      },
+      {
+        "label": "unavailable-390",
+        "violations": []
+      },
+      {
+        "label": "signin-reflow-320",
+        "violations": []
+      },
+      {
+        "label": "signout-retry-1440",
+        "violations": []
+      },
+      {
+        "label": "signout-retry-390",
+        "violations": []
+      }
+    ],
+    "compiled_private_boundary": {
+      "assets": 661,
+      "violations": 0
+    },
+    "design_detector": {
+      "initial_advisories": 7,
+      "final_findings": []
+    },
+    "documentation_fixtures": {
+      "command": "npm run test:docs",
+      "passed": 37
+    },
+    "diff_whitespace": {
+      "passed": true
+    }
+  },
+  "visual_review": {
+    "captures": {
+      ".impeccable/review/workspace-ux-audit/images-permission-1440.png": "10057626b5895075927260baa73d18201f8882aab7166dd376e56073b19b1426",
+      ".impeccable/review/workspace-ux-audit/images-permission-390.png": "22d5a4f74837b77dcee32ad2cfef8bfc5420c7e5239ac26a5228d727719f140b",
+      ".impeccable/review/workspace-ux-audit/images-ready-1440.png": "f0f22fec22073cef943ea79be6fb9abac3a9b5422a61cb361ecacd3fe23d0aee",
+      ".impeccable/review/workspace-ux-audit/images-ready-390.png": "0c17fbaf893d995352944e1a3dcfed37ce090a4ddef9ade7554dd4ac479bac19",
+      ".impeccable/review/workspace-ux-audit/images-recovery-1440.png": "75148461d3b425e2a46de820836d876a8c459b56a413734f5e55cace4734395d",
+      ".impeccable/review/workspace-ux-audit/images-recovery-390.png": "d980eef95a44005db86bd43afb21dfdeab0420ba4e52ac1345c9cc80492b9095",
+      ".impeccable/review/workspace-ux-audit/images-slow-1440.png": "8f548154d9050c3b292dde16ce20f344b59983487676e1ba2d2ffef5645803f3",
+      ".impeccable/review/workspace-ux-audit/profile-retry-1440.png": "6a91f3b65751509030ae803aeafc231f40d39c101f85c794b6261e895ae01d5b",
+      ".impeccable/review/workspace-ux-audit/profile-retry-390.png": "98be0c32c683d670eb83a9903f740d87ad89be21dbbd472fb2d39e9def4a62fd",
+      ".impeccable/review/workspace-ux-audit/recovery-contrast-320.png": "a0c135124759539392c1116a663d66b57571d63dd9ad123c9dc32adbc97f1324",
+      ".impeccable/review/workspace-ux-audit/recovery-emerald-320.png": "b0e935cc7ef9c44117c96123a8ccd160c4583a107da13088f0bac89550e84a15",
+      ".impeccable/review/workspace-ux-audit/recovery-forced-colors-double-text-320.png": "fbcd3410873a6babad453147ebb92167c41f485eb3e0b489fae81b91b958e006",
+      ".impeccable/review/workspace-ux-audit/sites-ready-1440.png": "b7c142ac196d29693bbcc20a4f7441c4285bec8bf94bf81a6ba084b553c2c760",
+      ".impeccable/review/workspace-ux-audit/sites-ready-390.png": "53b94b9b4a2883631b2c66b933eadbecb0436bacf75067846f7f0e5eed7fa366",
+      ".impeccable/review/workspace-ux-audit/sites-recovery-1440.png": "dc6273fae747575dd31cf57eca5d3375bebd93fb7972b1349238584b5f5d30af",
+      ".impeccable/review/workspace-ux-audit/sites-recovery-390.png": "e11b6cbfec2d27331bd82a742c98b2ec088d06fc34ad17fbd445f585c10b4f18",
+      ".impeccable/review/workspace-ux-audit/sites-reduced-motion-1440.png": "c29ce8a10c40a46ba2bcde13b6fc3668d4990307b13a13016a9ee8799c46e86f",
+      ".impeccable/review/workspace-ux-audit/sites-reduced-motion-390.png": "2cea131085793e5c8f441f2c6e2a0d1638e4454d79a327d12e3ecef67a616a7c"
+    },
+    "inspection": "Reviewed desktop/phone recovery, loading, ready Sites/Images, phone 403 and forced-color doubled text together. One correction batch added status spacing and product-specific toolbar/breakpoint geometry. Final desktop/phone recovery and long-wait captures confirmed spacing; fixture asserts unchanged desktop toolbar height when slow feedback appears.",
+    "local_capture_location": ".impeccable/review/workspace-ux-audit/"
+  },
+  "verification_corrections": [
+    "Initial image HTTP tests could not bind localhost in the sandbox; rerun with required permissions passed.",
+    "Expanded forced-color/doubled-text fixture reported action and link contrast failures; explicit system colors passed confirmation.",
+    "Final source build and full browser suites rerun after the visual spacing/geometry correction; all changed src files match the served isolated copy."
+  ],
+  "limitations": [
+    "Production digest 2759966064 remains uncorrelated; no new live logs or hosted acceptance establish its cause.",
+    "No deployment, database schema change, real account operation, paid generation, image-storage, billing or publication mutation.",
+    "Browser fixtures use synthetic account/API transport and localhost; CSP bypass is fixture-only. Raw HTTP checks retain real application headers.",
+    "Axe checks surrounding main content with the sandboxed preview iframe excluded; no physical device, full screen-reader, all-locale or field performance certification.",
+    "Draft continuity is existing best-effort per-tab/account storage, not cloud synchronization.",
+    "Selected marker scans are scoped regression guards, not a proof of universal nondisclosure."
+  ],
+  "references": [
+    "https://carbondesignsystem.com/patterns/loading-pattern/",
+    "https://carbondesignsystem.com/components/inline-loading/usage/",
+    "https://slack.com/intl/en-gb/help/articles/201457107-Send-and-read-messages-in-Slack",
+    "https://atlassian.design/components/empty-state/",
+    "https://www.w3.org/WAI/WCAG22/Understanding/status-messages.html",
+    "https://www.w3.org/WAI/ARIA/apg/practices/keyboard-interface/"
+  ]
+}

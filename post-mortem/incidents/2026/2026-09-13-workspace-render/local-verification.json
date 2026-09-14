@@ -1,0 +1,120 @@
+{
+  "observed_at": "2026-09-14T00:32:51.993320Z",
+  "scope": "Local working tree based on 24fd18f; synthetic compiled Auth/HTTP/browser fixtures; no production deployment or acceptance",
+  "reviewer": "Codex",
+  "reviewed_source_hashes": {
+    "scripts/test-workspace-auth.ts": "f2060e9de971ffd6cb621e917abc5a2cb196e3bcfc67b68e546359416a72ae38",
+    "scripts/verify-auth-entry-server.cjs": "7d2feba2a30fa4f89cd9b2055156dc4462d4ab2dd9b9118b7fef3c31048f9468",
+    "scripts/verify-workspace-auth-http.mjs": "7089d666c2d3d728f21f348a13c11b1ae6b553574b59aba6a42b17260a0e75d9",
+    "scripts/verify-workspace-navigation.mjs": "a45d29a1e1a4cacc18ccf3c9f72e19a4635a643ad14bf06374bf9f812e8de3f9",
+    "src/app/error.tsx": "e3a2bef2077e69d2d090e7602a4fc98c8cbf2bf55194b5c84b6fa4b38b2424d8",
+    "src/app/globals.css": "aef642880793b1fe4ab83421a48f3a6072b79ee04bc2dd5c1220737e658381bb",
+    "src/app/images/error.tsx": "0b2a04890cd8de8ea6adf8eb58541aae5409033c49b28d90a51cb386af1d1097",
+    "src/app/images/loading.tsx": "7874f6730a73d1b21ce1c8d0f957f6ac3a7368adbc38e9467c05db9236279223",
+    "src/app/images/page.tsx": "8ef73a8fe0c2a6e0a223c7b992f5d4138c1e877d835db96b5740813fe5ab36f8",
+    "src/app/library/page.tsx": "61b9b82fafc3c9a295a1afd9ce6b11473d0b62fe7f2a3ff7c517696c24c20d99",
+    "src/app/sites/[id]/page.tsx": "b3bac5436139d92b3ead98523d5dd36c057682f4d818fabbe27afe0d928ce63d",
+    "src/app/sites/error.tsx": "f2d40e7c5567e92746b18fc489099f7ab1331393859d7fae9a34db13f2bc4736",
+    "src/app/sites/loading.tsx": "652066b8b7a8a11a586f6fb795a198f3168a752cad03f187a45ac9014bf61aad",
+    "src/app/sites/page.tsx": "cabbb9f20b8699a2033c8e43f41db94cb01e256067ad92a34d005680551efa39",
+    "src/components/auth/WorkspacePageGate.tsx": "dc1bd7080a4eb470769c85fad310fb8bf242a51e5afc81a3ee8811a20cd48f24",
+    "src/components/auth/WorkspaceSessionBoundary.tsx": "9b3a1c0cb564aa160a0e7190a5e34d05e9ab866a0015d17a5a051b3b8f6c31d2",
+    "src/components/common/RouteRecovery.tsx": "5ba496f896a4300a0d635ae19456b3b1b1d8760d08a28feaceac32863c38fad3",
+    "src/components/common/WorkspaceLoading.tsx": "6bb49878f5989095ffe346dbd4eb329bd9a33caf5d498cc326d65ce25764fc3c",
+    "src/components/common/workspace-route.module.css": "2158c02b64fc385cf13c93c2c8d0d9a1ee9a92864d223488b575e892b45c31e6",
+    "src/lib/auth/require-workspace-session.ts": "6bdeaafe20fff2ff98e6ef767e6d9b20ae9319dbea818e3e8f044a66f12f104c"
+  },
+  "reviewed_guides": [
+    "docs/operations/workspace-auth.md",
+    "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md",
+    "docs/maintainers/image-public-boundary.md",
+    "docs/maintainers/SITES_WORKSPACE.md",
+    "docs/DOCUMENTATION_POLICY.md",
+    "docs/how-to/change-with-documentation.md",
+    "docs/reference/knowledge-commands.md",
+    "post-mortem/CURRENT_STATE.md",
+    "post-mortem/failure-modes/identity.md",
+    "post-mortem/failure-modes/README.md"
+  ],
+  "semantic_review": "Reviewed the complete affected guide bodies against server-page admission, middleware unavailability, fresh manual recovery, layout ownership and client hydration. Mapped newly introduced source and fixture paths in the domain registry. No ADR status changed. Other domain files are a drift inventory, not an exhaustive new audit. Existing database, generation, ownership, publishing and billing contracts remain separate.",
+  "checks": {
+    "image_security": {
+      "passed": 39
+    },
+    "session_authority": {
+      "passed": 33
+    },
+    "sites_workspace": {
+      "passed": 16
+    },
+    "lint": {
+      "errors": 0,
+      "existing_warnings": 8
+    },
+    "production_build": {
+      "passed": true,
+      "includes_type_validation": true,
+      "build_id": "jI56VoXAzj9zZhwudsStM",
+      "environment": "isolated CI credentials; complete source/public/config copy, including Tailwind; never deploy this synthetic build"
+    },
+    "compiled_http": {
+      "passed": 106,
+      "assets": 29
+    },
+    "browser": {
+      "results": [
+        {
+          "route": "/images",
+          "check": "middleware success followed by page outage; HTML/RSC fail closed without workspace content"
+        },
+        {
+          "route": "/sites",
+          "check": "middleware success followed by page outage; HTML/RSC fail closed without workspace content"
+        },
+        {
+          "route": "/sites/00000000-0000-4000-8000-000000000000",
+          "check": "middleware success followed by page outage; HTML/RSC fail closed without workspace content"
+        },
+        {
+          "width": 1440,
+          "check": "fresh manual retry, stable header, delayed navigation, back/forward, reduced motion, accessibility",
+          "posts": 0
+        },
+        {
+          "width": 390,
+          "check": "fresh manual retry, stable header, delayed navigation, back/forward, reduced motion, accessibility",
+          "posts": 0
+        }
+      ],
+      "assets": 10,
+      "scope": "Synthetic account and API fixtures; compiled production application; no production acceptance"
+    },
+    "compiled_private_boundary": {
+      "assets": 659,
+      "violations": 0
+    },
+    "documentation_fixture_tests": {
+      "passed": true
+    },
+    "diff_whitespace": {
+      "passed": true
+    }
+  },
+  "verification_corrections": [
+    "Sandbox denied initial HTTP sockets, browser launch and font downloads; required permissions used for reruns.",
+    "First isolated build omitted Tailwind configuration. A clean complete build replaced it; initial visual captures are not acceptance evidence.",
+    "Axe uses existing legacy mode to avoid trying to inject into the sandboxed Site preview. The preview frame is excluded; the surrounding page is checked."
+  ],
+  "limitations": [
+    "Production digest 2759966064 remains uncorrelated. Installed Vercel CLI log attempt returned no events; this does not establish nonrecurrence.",
+    "No real account, generation, image-storage, database, billing or publication writes; no deployment.",
+    "Desktop/mobile are Chromium fixtures at 1440/390px, not physical-device or full assistive-technology acceptance.",
+    "Route recovery uses static authored copy. This scoped correction does not audit or replace every legacy error screen."
+  ],
+  "references": [
+    "https://nextjs.org/docs/app/api-reference/file-conventions/error",
+    "https://nextjs.org/docs/app/api-reference/functions/use-router",
+    "https://supabase.com/docs/guides/monitoring-and-debugging",
+    "https://supabase.com/changelog.md"
+  ]
+}

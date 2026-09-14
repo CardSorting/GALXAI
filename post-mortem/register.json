@@ -163,6 +163,24 @@
       "recovery_evidence": [
         "post-mortem/incidents/2026/2026-09-13-workspace-auth/session-revocation-release.json"
       ]
+    },
+    {
+      "id": "INC-20260913-RENDER",
+      "category": "navigation",
+      "severity": "SEV-2",
+      "status": "investigating",
+      "title": "Workspace server-render failure and navigation recovery",
+      "owner": "Codex (active responder)",
+      "record": "post-mortem/incidents/2026/2026-09-13-workspace-render/README.md",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-09-13-workspace-render/README.md",
+        "post-mortem/incidents/2026/2026-09-13-workspace-render/local-verification.json",
+        "post-mortem/incidents/2026/2026-09-13-workspace-render/ux-second-pass-verification.json"
+      ],
+      "failure_modes": [
+        "FM-AUTH-003"
+      ],
+      "recovery_evidence": []
     }
   ],
   "actions": [
@@ -337,6 +355,19 @@
       "closure": "The failure is diagnosed and corrected with a reproducing check, or the maintainer explicitly records an evidence-backed nonrecurrence/monitoring disposition; no cached authorization fallback is introduced.",
       "evidence": [
         "post-mortem/incidents/2026/2026-09-13-workspace-auth/session-revocation-release.json"
+      ]
+    },
+    {
+      "id": "ACT-016",
+      "incident": "INC-20260913-RENDER",
+      "owner": "application/release maintainer",
+      "review_by": "2026-09-14",
+      "status": "open",
+      "next_step": "Local server/browser recovery, retained shell, draft continuity, keyboard/offline/403/reflow, authorization, HTTP/asset and production-build checks passed. Deploy the reviewed source when authorized, correlate the reported digest privately, and verify real authenticated Images/Sites navigation.",
+      "closure": "Retain local regression/build/asset evidence and deployed authenticated acceptance; establish the production cause or explicitly retain an evidence-backed unresolved diagnosis.",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-09-13-workspace-render/local-verification.json",
+        "post-mortem/incidents/2026/2026-09-13-workspace-render/ux-second-pass-verification.json"
       ]
     }
   ]

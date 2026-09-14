@@ -232,3 +232,9 @@ body {
   animation: pulseGlow 8s ease-in-out infinite;
 }
 
+
+/* A finite handoff from the loading shell to the usable workspace. */
+@media (prefers-reduced-motion: no-preference) {
+  .image-studio-page .studio, .sites-workspace { animation: workspace-arrival 180ms ease-out; }
+  @keyframes workspace-arrival { from { opacity: .82; } to { opacity: 1; } }
+}
