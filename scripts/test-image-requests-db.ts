@@ -5,6 +5,7 @@ import { readFileSync } from 'node:fs';
 import { Pool } from 'pg';
 import { ImageRequestRepository, ImageRequestConflict } from '../src/lib/images/request-repository';
 import { ImageRequestService } from '../src/lib/images/request-service';
+import { RelayDispatchError } from '../src/core/router/adapters/RelayChatTransport';
 import { ImageLibraryRepository } from '../src/lib/supabase/repositories/ImageLibraryRepository';
 const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 8 });
 const otherPool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 });
@@ -63,6 +64,20 @@ try {
   assert.equal((await cold.get(owner,busy.id))?.failure_code,'generation_not_started');
   assert.equal(await cold.claim(owner,busy.id),null);
   assert.equal((await cold.get(owner,failed.id))?.failure_code,null); checks++;
+  for (const [state, code, status, expected] of [
+    ['not_accepted','model_temporarily_unavailable',503,'generation_not_started'],
+    ['unknown','model_temporarily_unavailable',503,null],
+    ['accepted','model_temporarily_unavailable',503,null],
+    ['not_accepted','unrecognized',503,null],
+    ['not_accepted','model_temporarily_unavailable',502,null],
+  ] as const) {
+    const receipt=await repo.create(owner,{...payload,idempotencyKey:randomUUID()},false);
+    let dispatches=0;
+    const service=new ImageRequestService(repo,async()=>{dispatches++;throw new RelayDispatchError('image_http_error',
+      {status,executionState:state,upstreamCode:code});},()=>{});
+    await service.run(owner,receipt.id); await service.run(owner,receipt.id);
+    assert.equal(dispatches,1); assert.equal((await cold.get(owner,receipt.id))?.failure_code,expected); checks++;
+  }
   // No success receipt when image persistence silently fails.
   const unsaved=await repo.create(owner,{...payload,idempotencyKey:randomUUID()},false);
   await new ImageRequestService(repo,async()=>({data:[{asset_id:'unsaved'}]} as any),()=>{}).run(owner,unsaved.id);

@@ -1,3 +1,4 @@
+import './test-image-capacity-projection';
 import assert from 'node:assert/strict';
 import { GalxModelRouter } from '../src/core/router/GalxModelRouter';
 import { ImageCapacityError } from '../src/core/router/ImageCapacityError';

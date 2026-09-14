@@ -1,5 +1,6 @@
 import { after } from 'next/server';
 import { ImageCapacityError } from '../../core/router/ImageCapacityError';
+import { RelayDispatchError } from '../../core/router/adapters/RelayChatTransport';
 import { getPostgresPool } from '../db/postgres';
 import { ImageRequestRepository, type ImageRequestRecord, type StoredImageRequest } from './request-repository';
 import type { GalxModelRouter } from '../../core/router/GalxModelRouter';
@@ -51,7 +52,11 @@ export class ImageRequestService {
         await this.repository.complete(owner,id,assets as string[]);
       } catch (error) {
         logImageFailure(id,error);
-        await this.repository.fail(owner,id,error instanceof ImageCapacityError);
+        const notStarted = error instanceof ImageCapacityError || (error instanceof RelayDispatchError &&
+          error.status === 503 && error.executionState === 'not_accepted' &&
+          ['model_temporarily_unavailable', 'model_capacity_exhausted', 'federation_unavailable',
+            'admission_capacity_exhausted', 'relay_reconciling', 'server_draining'].includes(error.upstreamCode || ''));
+        await this.repository.fail(owner,id,notStarted);
         if (reportFailure) throw error;
       }
     } catch (error) { logImageFailure(id,error); if (reportFailure) throw error; }
