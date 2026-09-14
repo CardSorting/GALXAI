@@ -30,6 +30,10 @@ export function useImageStudio(owner: string | null, token?: string, libraryActi
   const [progress, setProgress] = useState('');
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+  const [availability, setAvailability] = useState<'available' | 'unavailable' | 'unknown'>('unknown');
+  const [checkingAvailability, setCheckingAvailability] = useState(false);
+  const availabilityLock = useRef(false);
+  const availabilitySequence = useRef(0);
   const [retryAt, setRetryAt] = useState(0);
   const [now, setNow] = useState(Date.now());
   const [creations, setCreations] = useState<StudioImage[]>([]);
@@ -57,6 +61,24 @@ export function useImageStudio(owner: string | null, token?: string, libraryActi
   const activeTasks = useRef<Map<string, PendingGeneration>>(new Map());
   const headers = useCallback((): Record<string, string> => ({ Accept: 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) }), [token]);
 
+  const checkAvailability = useCallback(async () => {
+    if (!owner || availabilityLock.current) return;
+    availabilityLock.current = true; setCheckingAvailability(true);
+    const sequence = ++availabilitySequence.current;
+    try {
+      const response = await workspaceFetch(owner, '/api/images/availability', {
+        headers: headers(), cache: 'no-store', signal: AbortSignal.timeout(7000),
+      });
+      const data = await response.json().catch(() => null);
+      if (!alive.current || sequence !== availabilitySequence.current) return;
+      if (response.ok && (data?.status === 'available' || data?.status === 'unavailable')) {
+        setAvailability(data.status);
+        if (data.status === 'available') setNotice('Image generation is available. Your prompt is ready when you are.');
+      } else setNotice('Availability could not be checked. Your draft is still here.');
+    } catch { if (alive.current && sequence === availabilitySequence.current) setNotice('Availability could not be checked. Your draft is still here.'); }
+    finally { if (sequence === availabilitySequence.current) { availabilityLock.current = false; if (alive.current) setCheckingAvailability(false); } }
+  }, [owner, headers]);
+
   useEffect(() => {
     alive.current = true;
     const draft = stored(`${key}:draft`) ?? (owner ? stored('galx-image-studio:guest:draft') : null);
@@ -80,6 +102,11 @@ export function useImageStudio(owner: string | null, token?: string, libraryActi
     setReady(true);
     return () => { alive.current = false; submitController.current?.abort(); libraryController.current?.abort(); };
   }, [key, owner]);
+  const invalidateAvailability = useCallback(() => { availabilitySequence.current++; availabilityLock.current = false; }, []);
+  useEffect(() => {
+    setAvailability('unknown'); void checkAvailability();
+    return invalidateAvailability;
+  }, [checkAvailability, invalidateAvailability]);
   useEffect(() => { if (ready) save(`${key}:draft`, settings); }, [key, ready, settings]);
   useEffect(() => { const timer = window.setTimeout(() => setFilter(search.trim()), 300); return () => clearTimeout(timer); }, [search]);
   useEffect(() => {
@@ -179,6 +206,7 @@ export function useImageStudio(owner: string | null, token?: string, libraryActi
               activeTasks.current.delete(task.id); changed = true;
               const time = Date.now(); setNow(time); setRetryAt(time + Math.max(5000, delay));
               setError('Your image generation did not start. Try again shortly.');
+              void checkAvailability();
               window.dispatchEvent(new Event(GENERATION_QUOTA_CHANGED));
             } else if (failure === 'auth' || failure === 'unconfirmed') {
               task.paused = true; changed = true;
@@ -211,10 +239,10 @@ export function useImageStudio(owner: string | null, token?: string, libraryActi
       return delay;
     });
     return () => { active = false; stop(); };
-  }, [headers, owner, pending?.id, polling, refresh, persistTasks]);
+  }, [headers, owner, pending?.id, polling, refresh, persistTasks, checkAvailability]);
 
   async function generate(recovery?: PendingGeneration) {
-    if (!owner || !settings.prompt.trim() || submitting || submitLock.current || (uncertain && !recovery) || activeTasks.current.size >= MAX_ACTIVE_GENERATIONS || Date.now() < retryAt) return;
+    if (!owner || !settings.prompt.trim() || submitting || submitLock.current || (!recovery && availability === 'unavailable') || (uncertain && !recovery) || activeTasks.current.size >= MAX_ACTIVE_GENERATIONS || Date.now() < retryAt) return;
     submitLock.current = true; setSubmitting(true); setError(''); setNotice('');
     setUncertain(false); save(`${key}:unconfirmed`, null);
     const controller = new AbortController(); submitController.current = controller;
@@ -308,7 +336,7 @@ export function useImageStudio(owner: string | null, token?: string, libraryActi
   const estimatedTotal = estimateGenerationSeconds(activeSettings);
   const progressMetrics = calculateGenerationProgress(elapsed, estimatedTotal, pending ? (progress.includes('Waiting') ? 'queued' : 'processing') : 'queued');
 
-  return { recoverableSubmission, recoverSubmission: () => { const original = readPending(stored(`${key}:submission`)); if (original) void generate(original); }, activeCount, atCapacity: activeCount >= MAX_ACTIVE_GENERATIONS, resumeUpdates, settings, setSettings, ready, pending, polling, setPolling, submitting, submission, uncertain, progress, error, notice, setNotice,
+  return { availability, checkingAvailability, checkAvailability, recoverableSubmission, recoverSubmission: () => { const original = readPending(stored(`${key}:submission`)); if (original) void generate(original); }, activeCount, atCapacity: activeCount >= MAX_ACTIVE_GENERATIONS, resumeUpdates, settings, setSettings, ready, pending, polling, setPolling, submitting, submission, uncertain, progress, error, notice, setNotice,
     retryIn: Math.max(0, Math.ceil((retryAt - now) / 1000)), elapsed,
     estimatedTotal, remainingSeconds: progressMetrics.remainingSeconds, progressPercent: progressMetrics.percent,
     generationPhase: progressMetrics.phase, phaseStatusText: progressMetrics.statusText,

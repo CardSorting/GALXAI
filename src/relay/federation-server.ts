@@ -242,6 +242,14 @@ export class RelayFederationServer {
       throw new RequestError(404, 'not_found', 'Route not found.');
     }
     const tenant = this.authenticate(req);
+    if (req.method === 'GET' && path === '/v1/images/availability') {
+      const model = url.searchParams.get('model');
+      if (!model || !/^[a-zA-Z0-9._:-]{1,128}$/.test(model)) throw new RequestError(400, 'invalid_request', 'Specify a valid image model.');
+      const available = !this.draining && this.lifecycle.routable() &&
+        this.lifecycle.capabilities.eligible(`image:${model}`).length > 0;
+      // Advisory capability only: no probes, reservations, inventories or diagnostics.
+      return this.json(res, 200, { available }, { 'Cache-Control': 'private, no-store' });
+    }
     const match = path.match(/^\/v1\/jobs\/([^/]+)(\/(?:stream|cancel|receipt))?$/);
     if (match) {
       if (req.method !== (match[2] === '/cancel' ? 'POST' : 'GET')) throw new RequestError(405, 'method_not_allowed', 'Unsupported job method.');

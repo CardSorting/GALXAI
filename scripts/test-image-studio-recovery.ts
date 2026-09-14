@@ -17,8 +17,10 @@ test('concurrent generation survives transient status failures, reload and lost 
   let studio!: ReturnType<typeof useImageStudio>, mode = 'queued', posts = 0;
   const submitted: Array<{key:string;body:string}> = [], polled: string[] = [];
   const result = () => Response.json({data:[{url:'/v1/images/assets/completed'}]});
+  let available = true, availabilityReads = 0;
   globalThis.fetch = async (input, init) => {
     const url = String(input);
+    if (url.includes('/api/images/availability')) { availabilityReads++; return Response.json({status:available?'available':'unavailable'}); }
     if (init?.method === 'POST') {
       posts++; submitted.push({key:(init.headers as Record<string,string>)['Idempotency-Key'],body:String(init.body)});
       if (mode === 'lost') throw new Error('lost acknowledgement');
@@ -39,6 +41,15 @@ test('concurrent generation survives transient status failures, reload and lost 
   try {
     await act(async()=>root.render(createElement(Harness)));
     await act(async()=>studio.setSettings({...studio.settings,prompt:'Original prompt'}));
+    available=false;
+    await act(async()=>{await studio.checkAvailability();});
+    assert.equal(studio.availability,'unavailable');
+    await act(async()=>{await studio.generate();}); assert.equal(posts,0);
+    await act(async()=>{await studio.checkAvailability();}); assert.equal(posts,0);
+    assert(availabilityReads>=2); assert.equal(studio.settings.prompt,'Original prompt');
+    available=true;
+    await act(async()=>{await studio.checkAvailability();});
+    assert.equal(studio.availability,'available'); assert.equal(posts,0);
     for(let i=0;i<4;i++) await act(async()=>{await studio.generate();});
     await settle();
     assert.equal(studio.activeCount,4); assert(studio.atCapacity);
