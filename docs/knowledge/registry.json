@@ -185,20 +185,25 @@
         "src/lib/billing/sites-*.ts",
         "src/app/sites/**/*.tsx",
         "src/components/sites/SitesWorkspace.tsx",
-        "src/components/sites/use-sites-workspace.ts"
+        "src/components/sites/use-sites-workspace.ts",
+        "scripts/manage-pro-access.ts",
+        "scripts/test-sites-plans-db.ts",
+        "src/components/billing/PlanPanel.tsx"
       ],
       "guides": [
         "docs/maintainers/SITES_OPERATIONS.md",
         "docs/maintainers/SITES_FAIR_USAGE.md",
         "docs/maintainers/SITES_WORKSPACE.md",
-        "docs/maintainers/SITES_DOMAINS.md"
+        "docs/maintainers/SITES_DOMAINS.md",
+        "docs/adr/0148-complimentary-pro-access.md"
       ],
       "checks": [
         "npm run test:sites:fair",
         "npm run test:sites:workspace",
         "npm run test:sites:conversation",
         "npm run test:sites:fair:db",
-        "npm run test:sites:workspace:db"
+        "npm run test:sites:workspace:db",
+        "npm run test:sites:plans:db"
       ]
     },
     "relay": {
@@ -514,6 +519,21 @@
       "target": "galx.ai application, linked account database and zone browser-cache policy",
       "revision": "e0e5be199e1c64b8873f029a3445facdbc29ac90 + reviewed working tree (dpl_HRid6XFt1G4ZaHiRj7izmucgs9yZ)",
       "observed_at": "2026-09-13T20:37:20.230Z"
+    },
+    "docs/adr/0148-complimentary-pro-access.md": {
+      "status": "accepted",
+      "delivery": "verified",
+      "domain": "sites",
+      "owner": "Product/API maintainer",
+      "date": "2026-09-14",
+      "evidence": [
+        "docs/knowledge/audits/2026-09-14-complimentary-pro.json",
+        "post-mortem/releases/2026-09-14-complimentary-pro-access.json"
+      ],
+      "supersedes": [],
+      "target": "galx.ai account Pro eligibility",
+      "revision": "68162da + reviewed working tree (dpl_BNgo95mjZxGLnMXimHxAs5MrGLMG)",
+      "observed_at": "2026-09-14T01:51:14.255272+00:00"
     }
   },
   "managed_adr_from": 145,

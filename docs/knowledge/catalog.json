@@ -2141,6 +2141,32 @@
       }
     },
     {
+      "path": "docs/adr/0148-complimentary-pro-access.md",
+      "title": "ADR 0148: Explicit complimentary Pro access",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [
+        "sites"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": {
+        "status": "accepted",
+        "delivery": "verified",
+        "domain": "sites",
+        "owner": "Product/API maintainer",
+        "date": "2026-09-14",
+        "evidence": [
+          "docs/knowledge/audits/2026-09-14-complimentary-pro.json",
+          "post-mortem/releases/2026-09-14-complimentary-pro-access.json"
+        ],
+        "supersedes": [],
+        "target": "galx.ai account Pro eligibility",
+        "revision": "68162da + reviewed working tree (dpl_BNgo95mjZxGLnMXimHxAs5MrGLMG)",
+        "observed_at": "2026-09-14T01:51:14.255272+00:00"
+      }
+    },
+    {
       "path": "docs/adr/README.md",
       "title": "Architecture decision records",
       "scope": "current-guide",

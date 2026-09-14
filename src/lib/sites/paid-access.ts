@@ -3,9 +3,22 @@ import type Stripe from 'stripe';
 import { FairUsageError } from './fair-policy';
 import type { FairPolicy, PaidAccess } from './fair-store';
 
-/** Provider-read evidence only. Claims, customer metadata, wallet deposits and
- * editable organization tiers never grant Sites. No positive process-local cache. */
+/** Explicit operator grants are read from current server-managed account data.
+ * JWT claims, user metadata, staff roles and editable tiers are not authority. */
+export async function hasComplimentaryProAccess(pool: Pick<Pool,'connect'>, account: string): Promise<boolean> {
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(account)) return false;
+  const db = await pool.connect();
+  try {
+    const result = await db.query(`SELECT EXISTS(SELECT 1 FROM auth.users WHERE id=$1::uuid
+      AND raw_app_meta_data->'galx_pro'='true'::jsonb AND email_confirmed_at IS NOT NULL AND is_anonymous=false
+      AND deleted_at IS NULL AND (banned_until IS NULL OR banned_until<=statement_timestamp())) AS granted`, [account]);
+    return result.rows[0]?.granted === true;
+  } finally { db.release(); }
+}
+
+/** Current complimentary grant or verified paid coverage; no positive cache. */
 export async function requirePaidSitesAccess(pool: Pick<Pool,'connect'>, stripe: Stripe | null, account: string, policy: FairPolicy, now=Date.now()):Promise<PaidAccess>{
+  if(await hasComplimentaryProAccess(pool,account)) return {accountId:account,validUntil:now+15000,policyRevision:policy.revision};
   if(!stripe)throw new FairUsageError(503,'membership_authority');
   const db=await pool.connect();let customer:string|undefined;
   try { customer=(await db.query('SELECT stripe_customer_id FROM public.galx_stripe_customers WHERE user_id=$1',[account])).rows[0]?.stripe_customer_id; }

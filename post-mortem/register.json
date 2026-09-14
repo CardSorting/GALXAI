@@ -175,7 +175,8 @@
       "evidence": [
         "post-mortem/incidents/2026/2026-09-13-workspace-render/README.md",
         "post-mortem/incidents/2026/2026-09-13-workspace-render/local-verification.json",
-        "post-mortem/incidents/2026/2026-09-13-workspace-render/ux-second-pass-verification.json"
+        "post-mortem/incidents/2026/2026-09-13-workspace-render/ux-second-pass-verification.json",
+        "post-mortem/releases/2026-09-14-complimentary-pro-access.json"
       ],
       "failure_modes": [
         "FM-AUTH-003"
@@ -363,11 +364,12 @@
       "owner": "application/release maintainer",
       "review_by": "2026-09-14",
       "status": "open",
-      "next_step": "Local server/browser recovery, retained shell, draft continuity, keyboard/offline/403/reflow, authorization, HTTP/asset and production-build checks passed. Deploy the reviewed source when authorized, correlate the reported digest privately, and verify real authenticated Images/Sites navigation.",
+      "next_step": "The September 14 complimentary Pro release includes the reviewed recovery source and verifies normal signed-in Sites entry for the requested account. Keep this action open: correlate the reported digest privately and complete the original authenticated Images/Sites recovery acceptance matrix.",
       "closure": "Retain local regression/build/asset evidence and deployed authenticated acceptance; establish the production cause or explicitly retain an evidence-backed unresolved diagnosis.",
       "evidence": [
         "post-mortem/incidents/2026/2026-09-13-workspace-render/local-verification.json",
-        "post-mortem/incidents/2026/2026-09-13-workspace-render/ux-second-pass-verification.json"
+        "post-mortem/incidents/2026/2026-09-13-workspace-render/ux-second-pass-verification.json",
+        "post-mortem/releases/2026-09-14-complimentary-pro-access.json"
       ]
     }
   ]

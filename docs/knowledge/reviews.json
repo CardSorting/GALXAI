@@ -1,11 +1,12 @@
 {
   "knowledge": {
     "reviewer": "Codex",
-    "note": "Reviewed the changed URL/navigation contracts and complete affected guide bodies listed in retained evidence; source-to-guide mapping additions inspected. Unchanged inventory is drift coverage, not an exhaustive new audit. Historical observations and ADR/delivery status preserved.",
+    "note": "Reviewed ADR 0148 delivery against ready deployment and real-account Billing/Sites acceptance with hashed source and scoped scans. Current state and historical chronology preserve open prevention work.",
     "reviewed_at": "2026-09-14",
     "review_by": "2026-09-20",
     "evidence": {
-      "docs/knowledge/audits/2026-09-14-readable-urls.json": "a9275d1a3baa6c43af763f8814cc9acd4cf2a118757e06b02b6380fb4741946c"
+      "docs/knowledge/audits/2026-09-14-complimentary-pro.json": "07e547eb365095b20a600b7fbd7bb79c07e70df7da60b4c151f594e5b263f4b1",
+      "post-mortem/releases/2026-09-14-complimentary-pro-access.json": "bd61c577dfab60b621ab5e0b0662075153ddf85c2c7d29283eba0870ed4ae108"
     },
     "files": {
       ".github/CODEOWNERS": "ef2f416d15f027dc8f197ad844289c9a44c8e843d3214d1590a3a380e939d13f",
@@ -22,7 +23,7 @@
       "docs/how-to/change-with-documentation.md": "abcf6bfb2f0aadcf8cfc2fdae18ac8f3f84565f127c34f7453d50e7283006e40",
       "docs/knowledge/DESIGN_RATIONALE.md": "edd3cf9b49ed794fbe8bf14448fd0c56cb4d8df832bab81cdf07e9ea2e2204a1",
       "docs/knowledge/README.md": "5ad219aeee44a9c065db2ca69e5a6498966fed42e2d8c74773dbc055d0220931",
-      "docs/knowledge/registry.json": "b1e167734a573297f299a1a0cb8e1af20c30c959d00f8e96b524deb140b1a241",
+      "docs/knowledge/registry.json": "170dffd02187112c5a465650f5c5de58692b43071bc01203cce08698e89fbb7f",
       "docs/knowledge/templates/adr.md": "28773b3cbdb53ad34f08d0362e87b6dba24b6fd76ddb6c85db8ad63d99ad1331",
       "docs/knowledge/templates/runbook.md": "19679a7eb8c1a3aafd87852fa93817e7bf9ef4696772c8deb1617366c290abc1",
       "docs/maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md": "b7df75535611c14aabe599764a6f6c2a4f0f1461d068929602c68e39d8ce850d",
@@ -239,17 +240,20 @@
   },
   "sites": {
     "reviewer": "Codex",
-    "note": "Reviewed the changed URL/navigation contracts and complete affected guide bodies listed in retained evidence; source-to-guide mapping additions inspected. Unchanged inventory is drift coverage, not an exhaustive new audit. Historical observations and ADR/delivery status preserved.",
+    "note": "Reviewed current account grant lookup, operator SQL, strict identity tests, Billing status and full affected Sites guide procedures; payment and staff boundaries remain separate. Evidence limits the semantic review to named contracts.",
     "reviewed_at": "2026-09-14",
     "review_by": "2026-09-20",
     "evidence": {
-      "docs/knowledge/audits/2026-09-14-readable-urls.json": "a9275d1a3baa6c43af763f8814cc9acd4cf2a118757e06b02b6380fb4741946c"
+      "docs/knowledge/audits/2026-09-14-complimentary-pro.json": "07e547eb365095b20a600b7fbd7bb79c07e70df7da60b4c151f594e5b263f4b1"
     },
     "files": {
+      "docs/adr/0148-complimentary-pro-access.md": "4d454694d9a03c11485d32a428c9b7bb1de635f00e62f60ed51ac86619ad6922",
       "docs/maintainers/SITES_DOMAINS.md": "f52a50eb38cda71d7ff08ad09bf0a13d5b60ee661eec5cf36e08734580c6c3e2",
-      "docs/maintainers/SITES_FAIR_USAGE.md": "edbd5785a1d41b3a7c55bd1aea505f825a41dd7581311f84a7e170ee6f6845df",
-      "docs/maintainers/SITES_OPERATIONS.md": "50e36e5689d37f78beb0a40011b92de6a940203663549049ebe6d15b4af32550",
-      "docs/maintainers/SITES_WORKSPACE.md": "c8abcc9161c7c16e76b32276372ad03a346e56db3dbf015663a544256fb81487",
+      "docs/maintainers/SITES_FAIR_USAGE.md": "c80a7ea68004ccab28705f206bf923b8e0d5ac269906aeb6bd6f3e1d28adace0",
+      "docs/maintainers/SITES_OPERATIONS.md": "eb3ce4b07445cb4db201a443303214702f488a993a2b59955244d589ed5e6a2b",
+      "docs/maintainers/SITES_WORKSPACE.md": "1bfed7c60631d40eb84fb829a18202fb7198d1ce2130b2fcb964bbfa40bf8475",
+      "scripts/manage-pro-access.ts": "1ebddafc9bfcc287daf63cfab41d7fd20825b51840fd697dcb41a873fa1d2dbb",
+      "scripts/test-sites-plans-db.ts": "2087a2e605429b2a73cd2455c6fb4ecbf34a23d60e1b15fffa396985cdbb23e8",
       "src/app/api/sites/content/route.ts": "b99c87335b9f2772b9ef423bb8e577b71357d89d3b2c0e3b5b0a8a95bc05aae4",
       "src/app/api/sites/domains/route.ts": "04a78970e61861898a5066b36cd760ed9224a368adf33562bf6bb2a0762ab2c7",
       "src/app/api/sites/published/[hostname]/route.ts": "d652aa4a54dc2e80070068d08462ccc331c545385ff80dad3baf050bd2a536dc",
@@ -258,6 +262,7 @@
       "src/app/sites/error.tsx": "f2d40e7c5567e92746b18fc489099f7ab1331393859d7fae9a34db13f2bc4736",
       "src/app/sites/loading.tsx": "652066b8b7a8a11a586f6fb795a198f3168a752cad03f187a45ac9014bf61aad",
       "src/app/sites/page.tsx": "cabbb9f20b8699a2033c8e43f41db94cb01e256067ad92a34d005680551efa39",
+      "src/components/billing/PlanPanel.tsx": "a6565129e56eb86840d08c120d89ae289e19400955ba078669231d6b998aa098",
       "src/components/sites/SitesWorkspace.tsx": "56272ac370be8d494c168a5abb1a1d4c2841dcc04d5913a0379f77cc43f48df9",
       "src/components/sites/use-sites-workspace.ts": "9066d56b4b1dca6023af035f0e6fee399047f4ad1ee2b0e60de71b5db1d4bac8",
       "src/lib/billing/sites-activation.ts": "463fb43566536bf0f6efeb01a3efacb1f9ebd6ec73e895a00e7c7ec6bae49b19",
@@ -278,7 +283,7 @@
       "src/lib/sites/included-content-route.ts": "6745cba68c99476267510b9ed24ca19b7281b4ab35cf1ab4b77c3d030d733d13",
       "src/lib/sites/included-generation.ts": "02aba4f58ebd50918cd008c1360d619a16128cd998d8a80576176dd79ee82eda",
       "src/lib/sites/managed-hosting.ts": "a2a94957a1ded9dfa9a44a637d2e6d7348040f3176d43cd116953fdcaac6cb6b",
-      "src/lib/sites/paid-access.ts": "db668df86ebf6eb941eb9748ccd46c85841c14ab0908037f4f469f37377b5bd2",
+      "src/lib/sites/paid-access.ts": "2484475f8e26444154da463b6f4d7f35261880a46786f125938ebf02211c7d45",
       "src/lib/sites/published-proxy.ts": "57f9c1b7248d8b3e0e646af7a05463c3b9a905c5ef2bf24311f9d0dd6347a189",
       "src/lib/sites/published-route.ts": "5aab9ba2411529a02d7c41611c7813c1b78f05d1af522e85969529147a682124",
       "src/lib/sites/site-preview.ts": "71ce24bc322774268fe5c452aa04e65d999b55a997c370b2ff5480f4e42a9186",
@@ -349,16 +354,16 @@
   },
   "database": {
     "reviewer": "Codex",
-    "note": "Reviewed additive private lookup/invoker permissions, owner binding, rollback, native PostgreSQL persistence, full authority and migration guides, 29 isolated session and 94 full database checks. Prior failed assumptions are retained; live application is separate.",
-    "reviewed_at": "2026-09-13",
+    "note": "Reviewed Auth fixture column additions and account-keyed JSON flag mutation against database authority and migration guides; no schema change. Isolated 94-test suite and 16 plan checks passed.",
+    "reviewed_at": "2026-09-14",
     "review_by": "2026-09-20",
     "evidence": {
-      "post-mortem/incidents/2026/2026-09-13-workspace-auth/session-revocation-verification.json": "b9cd6e7ca98a4d787f4097513fcc5efb7b0843a079c02cd6b5d55687acdaca19"
+      "docs/knowledge/audits/2026-09-14-complimentary-pro.json": "07e547eb365095b20a600b7fbd7bb79c07e70df7da60b4c151f594e5b263f4b1"
     },
     "files": {
       "docs/SUPABASE_PARANOID_ARCHITECTURE_SPEC.md": "ebe3942880188ff96f58cdc227b7d7e5f31a03a0dcaea9c1b7eace2aeeac7372",
       "docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md": "d8e5e423980a7125dee184f8149ed46865129f582f743fb7dfcf6c7c54ccac7e",
-      "scripts/fixtures/integration-bootstrap.sql": "36d0ef086e82dccb3b9fd4514b428f83993799baa606302f1d52bb1651eb2562",
+      "scripts/fixtures/integration-bootstrap.sql": "7e44c36f452fe91403820b88bcee79231c81240abafe31df7948e5866e0cfa72",
       "scripts/manage-migrations.ts": "16b43fd34f4e1cf642da920dadd614997ff960b8297ef98202b1f5398fadf3fc",
       "scripts/run-supabase-integration.ts": "7c7aa01dbfe2cc90ffc82d8faff358c95b996aa8fe2e26c8c778f24edd810f23",
       "scripts/test-account-session-db.ts": "436c1540c1fd23b5ca4feb11f826d6c2a69d89698843eb3b1b9066d86b4dcab3",

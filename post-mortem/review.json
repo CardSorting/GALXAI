@@ -1,8 +1,8 @@
 {
   "version": 1,
   "reviewer": "Codex",
-  "reviewed_at": "2026-09-14T01:22:36.733155Z",
-  "note": "Reviewed changed preview policy, finite legacy image/auth redirect contracts, unchanged callback/account authority and the complete workspace-auth guide. Local URL/auth/browser/build evidence is recorded in docs/knowledge/audits/2026-09-14-readable-urls.json; no deployment or broad unchanged-module audit is implied.",
+  "reviewed_at": "2026-09-14T01:53:17.284110Z",
+  "note": "Reviewed complimentary Pro source and live release evidence, current deployment observation, and render incident chronology. Account grant, owner preservation, live Billing/Sites entry and scoped privacy checks passed; ACT-016 and full incident recovery remain open.",
   "files": {
     ".dockerignore": "fb4dc7ef84e7f36c5bfed0f267187a022bbb61e66dd26060295b133e08fa74c5",
     ".github/workflows/vercel-preflight.yml": "09622787a106e43da895626d39fe1e361672fecbad6d2469c6e9959019a39c58",
@@ -40,7 +40,7 @@
     "docs/operations/wallet-lifecycle.md": "ddc86ed1d3347f5fff19a07581bc040c52eee7a115c279a2ba28bceae92303db",
     "docs/operations/workspace-auth.md": "ca767816aedda8c350bd7cf4469261e6b5a15d78c01541bd42f1e5a53c6558c0",
     "package.json": "ec2263a72616a76c213a5f0d5f26c2bfcd7c68cfebf833b512cbb41269dcf791",
-    "post-mortem/CURRENT_STATE.md": "48cbbcf21a3d430fd99d4c86afaaa412ca8e5a9b27d870125f58eedec2de8a25",
+    "post-mortem/CURRENT_STATE.md": "976e69885d0e70de91c5b4d5346d097c0e054fd6eb227657f4c2b7ec1b1f7d54",
     "post-mortem/README.md": "d28cbc9427aaa4aba99057517831e49f79244a686e1ce35640c4f566abbae8b8",
     "post-mortem/failure-modes/README.md": "b83ecd5ca97cf5ccdc3de822c356be8319d51d635bf788ff1ee76ea76aac4f9a",
     "post-mortem/failure-modes/access-and-documentation.md": "3370ac35bb931f6a691071076decbdca69f8de79a137ae178395c9bd34e466fe",

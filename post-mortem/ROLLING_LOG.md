@@ -551,3 +551,17 @@ Incident: `INC-20260913-RENDER`. Kind: `verification`.
 **Next step:** Complete explicit documentation attestations/checks. Keep ACT-016 open: no production deployment or exact digest correlation.
 
 Evidence: [ux-second-pass-verification.json](incidents/2026/2026-09-13-workspace-render/ux-second-pass-verification.json), [2026-09-14-workspace-recovery-ux.md](../docs/knowledge/audits/2026-09-14-workspace-recovery-ux.md).
+
+## EVT-20260914-pro-release-render-observation — 2026-09-14T01:52:21.478316Z
+
+Incident: `INC-20260913-RENDER`. Kind: `verification`.
+
+**Observation:** The authorized complimentary Pro release includes the previously local-only workspace recovery source.
+
+**Action:** Deployed the reviewed working tree based on 68162da and verified Billing Pro access plus normal signed-in Sites entry for the requested existing owner account.
+
+**Result:** Deployment dpl_BNgo95mjZxGLnMXimHxAs5MrGLMG is Ready at galx.ai. This is narrow account-access acceptance, not complete recovery of the original render incident. No generation or publication was submitted.
+
+**Next step:** Keep ACT-016 open; correlate the original digest and finish the original authenticated Images/Sites recovery matrix.
+
+Evidence: [2026-09-14-complimentary-pro-access.json](releases/2026-09-14-complimentary-pro-access.json).

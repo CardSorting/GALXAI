@@ -1311,6 +1311,12 @@
       "title": "ADR 0147: Verified account and session authority"
     },
     {
+      "path": "docs/adr/0148-complimentary-pro-access.md",
+      "scope": "decision-record",
+      "category": "docs",
+      "title": "ADR 0148: Explicit complimentary Pro access"
+    },
+    {
       "path": "docs/adr/README.md",
       "scope": "current-guide",
       "category": "docs",

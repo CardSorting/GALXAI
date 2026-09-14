@@ -1,0 +1,85 @@
+{
+  "observed_at": "2026-09-14T01:44:31.910521+00:00",
+  "scope": "Complimentary Pro eligibility, narrow trusted account flag provisioning, accurate Billing status, and documentation mapping. No payment, generation or publication.",
+  "base_revision": "68162da0a6b5dd5571f6675a189b97ae158d0c26",
+  "reviewed_contracts": [
+    "src/lib/sites/paid-access.ts",
+    "scripts/manage-pro-access.ts",
+    "scripts/test-sites-plans-db.ts",
+    "scripts/fixtures/integration-bootstrap.sql",
+    "src/components/billing/PlanPanel.tsx"
+  ],
+  "reviewed_guides": [
+    "docs/maintainers/SITES_OPERATIONS.md",
+    "docs/maintainers/SITES_FAIR_USAGE.md",
+    "docs/maintainers/SITES_WORKSPACE.md",
+    "docs/SUPABASE_PARANOID_ARCHITECTURE_SPEC.md",
+    "docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md",
+    "docs/DOCUMENTATION_POLICY.md",
+    "docs/knowledge/README.md",
+    "docs/how-to/change-with-documentation.md",
+    "docs/maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md",
+    "docs/adr/0148-complimentary-pro-access.md"
+  ],
+  "source_sha256": {
+    "src/lib/sites/paid-access.ts": "2484475f8e26444154da463b6f4d7f35261880a46786f125938ebf02211c7d45",
+    "scripts/manage-pro-access.ts": "1ebddafc9bfcc287daf63cfab41d7fd20825b51840fd697dcb41a873fa1d2dbb",
+    "scripts/test-sites-plans-db.ts": "2087a2e605429b2a73cd2455c6fb4ecbf34a23d60e1b15fffa396985cdbb23e8",
+    "scripts/fixtures/integration-bootstrap.sql": "7e44c36f452fe91403820b88bcee79231c81240abafe31df7948e5866e0cfa72",
+    "src/components/billing/PlanPanel.tsx": "a6565129e56eb86840d08c120d89ae289e19400955ba078669231d6b998aa098"
+  },
+  "findings": [
+    "Current database boolean grants Pro without trusting JWT claims, user metadata, staff roles or editable tiers.",
+    "Operator changes only one JSON metadata flag for an exact verified account and reads it back; no schema or payment mutation.",
+    "Existing fair usage, ownership, staff and developer access checks remain independent.",
+    "ADR 0148 acceptance is based on the explicit user request; delivery is recorded separately."
+  ],
+  "checks": [
+    {
+      "command": "npm run test:sites:plans:db",
+      "result": "passed",
+      "checks": 16,
+      "private_plan_role_denials": 24,
+      "complimentary_role_denials": 2
+    },
+    {
+      "command": "npm run test:sites:fair",
+      "result": "passed",
+      "tests": 7
+    },
+    {
+      "command": "npm run test:sites:workspace",
+      "result": "passed",
+      "tests": 16
+    },
+    {
+      "command": "npm run test:image:security",
+      "result": "passed",
+      "tests": 39
+    },
+    {
+      "command": "npm run db:verify",
+      "result": "passed",
+      "migrations": 105,
+      "warnings": 0
+    },
+    {
+      "command": "npm run db:test",
+      "result": "passed",
+      "tests": 94
+    },
+    {
+      "command": "npx tsc --noEmit",
+      "result": "passed"
+    },
+    {
+      "command": "npx eslint src/lib/sites/paid-access.ts src/components/billing/PlanPanel.tsx",
+      "result": "passed"
+    }
+  ],
+  "limits": [
+    "Fingerprint inventory is broader than this targeted semantic review. Unchanged subsystem code was not exhaustively audited.",
+    "Database fixtures model the Auth columns used; they are not a complete Auth service emulator.",
+    "Local tests do not prove live browser acceptance; build and deployment evidence are separate."
+  ]
+}

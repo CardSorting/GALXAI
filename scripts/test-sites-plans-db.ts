@@ -8,6 +8,7 @@ import { createProCheckout, fulfillPlanStripeEvent, isProPaymentAdjustment, proP
 import { fulfillStripeEvent } from '../src/lib/billing/fulfillment';
 import type { FairPolicy } from '../src/lib/sites/fair-store';
 import { SiteDomainRegistry } from '../src/lib/sites/domain-registry';
+import { hasComplimentaryProAccess, requirePaidSitesAccess } from '../src/lib/sites/paid-access';
 const pool=new Pool({connectionString:process.env.GALX_INTEGRATION_DATABASE_URL,max:8});
 const fixture=JSON.parse(await readFile(new URL('../GALX_Fair_Usage_Test_Fixture.json',import.meta.url),'utf8'));
 const policy:FairPolicy={mode:'enforce',pool_id:'test-plans',revision:1,limits:fixture.policy,paid_price_ids:['price_pro']};
@@ -36,6 +37,39 @@ function fake(){
 const input=(userId=randomUUID(),requestId=randomUUID())=>({userId,requestId,origin:'https://galx.ai'});
 const event=(type:string,object:any,created=100)=>({id:'evt_'+randomUUID(),type,created,data:{object}} as any);
 try{
+  await check('complimentary Pro requires a current server grant and verified active account',async()=>{
+    const owner=randomUUID(),other=randomUUID();
+    await pool.query(`INSERT INTO auth.users(id,email_confirmed_at,raw_user_meta_data) VALUES($1,now(),'{"galx_pro":true}')`,[owner]);
+    assert.equal(await hasComplimentaryProAccess(pool,owner),false);
+    for(const value of ['"true"','1','{}','false','null']) {
+      await pool.query(`UPDATE auth.users SET raw_app_meta_data=jsonb_build_object('galx_pro',$2::jsonb) WHERE id=$1`,[owner,value]);
+      assert.equal(await hasComplimentaryProAccess(pool,owner),false);
+    }
+    await pool.query(`UPDATE auth.users SET raw_app_meta_data='{"galx_pro":true}' WHERE id=$1`,[owner]);
+    assert.deepEqual(await requirePaidSitesAccess(pool,null,owner,policy,1000),{accountId:owner,policyRevision:1,validUntil:16000});
+    assert.equal(await hasComplimentaryProAccess(pool,other),false);
+    await pool.query('UPDATE auth.users SET is_anonymous=true WHERE id=$1',[owner]);
+    assert.equal(await hasComplimentaryProAccess(pool,owner),false);
+    await pool.query('UPDATE auth.users SET is_anonymous=false WHERE id=$1',[owner]);
+    for(const field of ['banned_until','deleted_at']) {
+      await pool.query(`UPDATE auth.users SET ${field}=now()+interval '1 hour' WHERE id=$1`,[owner]);
+      assert.equal(await hasComplimentaryProAccess(pool,owner),false);
+      await pool.query(`UPDATE auth.users SET ${field}=NULL WHERE id=$1`,[owner]);
+    }
+    await pool.query('UPDATE auth.users SET email_confirmed_at=NULL WHERE id=$1',[owner]);
+    assert.equal(await hasComplimentaryProAccess(pool,owner),false);
+    await pool.query(`UPDATE auth.users SET email_confirmed_at=now(),raw_app_meta_data='{}' WHERE id=$1`,[owner]);
+    assert.equal(await hasComplimentaryProAccess(pool,owner),false);
+    for(const role of ['anon','authenticated']) {
+      const db=await pool.connect();
+      try {
+        await db.query('BEGIN');await db.query('SET LOCAL ROLE '+role);
+        await assert.rejects(db.query(`UPDATE auth.users SET raw_app_meta_data='{"galx_pro":true}' WHERE id=$1`,[owner]),(e:any)=>e.code==='42501');
+      } finally {await db.query('ROLLBACK');db.release();}
+    }
+    const failedPool={connect:async()=>{throw new Error('Authority unavailable');}} as any;
+    await assert.rejects(requirePaidSitesAccess(failedPool,null,owner,policy));
+  });
   await check('fresh checkout uses owned customer, one plan, hosted URL and short transactions',async()=>{
     const f=fake(),i=input();f.before(async()=>{const idle=await pool.query("SELECT count(*) FROM pg_stat_activity WHERE datname=current_database() AND state='idle in transaction'");assert.equal(Number(idle.rows[0].count),0);});
     const r=await createProCheckout(pool,f.stripe,policy,i);assert.deepEqual(Object.keys(r),['url']);assert(r.url.startsWith('https://checkout.stripe.com/'));

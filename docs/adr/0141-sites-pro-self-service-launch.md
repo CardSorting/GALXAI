@@ -5,6 +5,8 @@
 Date: 2026-09-12. Status: accepted. Audience: private maintainers.
 Extends [ADR 0140](0140-paid-sites-and-shared-fair-usage.md). The owner explicitly requested a strategy and its application to remove the missing-plan/missing-limits pause.
 
+September 14 eligibility extension: [ADR 0148](0148-complimentary-pro-access.md) adds explicit complimentary Pro account grants. The original paid-subscription decision and dated launch evidence below are preserved.
+
 ## Decision
 
 Launch GALX Pro at $20/month for one account, including Sites creation, updates and managed publication under fair usage. The live billing account contained recurring products for other applications and zero active subscriptions, but no GALX recurring product. Do not grant GALX entitlement from unrelated products or turn prepaid compute deposits into an indefinite paid plan. Existing Team/Enterprise published offers remain assisted; their seats and credits are outside this launch.

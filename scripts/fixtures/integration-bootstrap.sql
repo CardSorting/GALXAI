@@ -21,6 +21,8 @@ CREATE TABLE auth.users (
   id uuid PRIMARY KEY,
   email text,
   email_confirmed_at timestamptz,
+  banned_until timestamptz,
+  deleted_at timestamptz,
   is_anonymous boolean NOT NULL DEFAULT false,
   raw_app_meta_data jsonb NOT NULL DEFAULT '{}',
   raw_user_meta_data jsonb NOT NULL DEFAULT '{}'

@@ -6,6 +6,8 @@ Date: 2026-09-12. Status: accepted. Audience: private maintainers.
 Launch follow-up: [ADR 0141](0141-sites-pro-self-service-launch.md) supplies Pro checkout, subscription lifecycle handling and the owner-delegated initial limits; the original disabled migration remains historical.
 Supersedes new Sites pricing/admission in [ADR 0134](0134-fixed-price-sites-generation-with-opaque-provider-quotas.md) and the price-acceptance flow in [ADR 0139](0139-browser-sites-workspace-and-managed-publishing.md). Retains their historical receipts and publication boundaries.
 
+September 14 eligibility extension: [ADR 0148](0148-complimentary-pro-access.md) adds explicit complimentary Pro account grants. The original paid-subscription decision and dated launch evidence below are preserved.
+
 ## Decision
 
 Include Sites creation, updates and managed publication in eligible active paid subscriptions. Remove the per-generation quote and wallet charge from new workspace and content requests. Use the supplied private [fair-use handoff](../../GALX_Fair_Usage_Agent_Handoff.md) and [synthetic fixture](../../GALX_Fair_Usage_Test_Fixture.json) as the policy specification and acceptance inputs. Neither file is a production configuration or public document.

@@ -71,8 +71,9 @@ Owner role: **Sites maintainer**. Domain: `sites`.
 - [Sites paid access and fair usage](../../docs/maintainers/SITES_FAIR_USAGE.md)
 - [Sites workspace operations](../../docs/maintainers/SITES_WORKSPACE.md)
 - [Sites address operations](../../docs/maintainers/SITES_DOMAINS.md)
+- [ADR 0148: Explicit complimentary Pro access](../../docs/adr/0148-complimentary-pro-access.md)
 
-Relevant checks (select for the change; impact discovery never executes these): `npm run test:sites:fair`, `npm run test:sites:workspace`, `npm run test:sites:conversation`, `npm run test:sites:fair:db`, `npm run test:sites:workspace:db`.
+Relevant checks (select for the change; impact discovery never executes these): `npm run test:sites:fair`, `npm run test:sites:workspace`, `npm run test:sites:conversation`, `npm run test:sites:fair:db`, `npm run test:sites:workspace:db`, `npm run test:sites:plans:db`.
 
 ## Relay lifecycle and operations
 

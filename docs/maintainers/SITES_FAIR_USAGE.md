@@ -9,13 +9,13 @@ Private maintainer runbook for [ADR 0140](../adr/0140-paid-sites-and-shared-fair
 | Concern | Existing entry point and implementation |
 | --- | --- |
 | Verified parent account | `requireAccountIdentity`; Sites accepts explicit verified session bearers, not inference keys or submitted identity |
-| Paid entitlement | `paid-access.ts` reads the durable Stripe customer mapping and current paid recurring subscription coverage; no editable tier fallback |
+| Pro eligibility | `paid-access.ts` reads a current explicit complimentary grant or verified paid recurring subscription coverage; no editable tier or staff-role fallback |
 | Chat and content dispatch | Workspace and content routes both call `included-configuration.ts` and `included-generation.ts` |
 | Policy and actual accounting scope | One private `galx_sites_fair_policy` row names the shared delivery pool for all Sites callers; routing aliases never supply this ID |
 | Cross-worker state | `SitesFairStore` uses existing pooled PostgreSQL; no new service, queue, daemon or reconciliation scheduler |
 | Readiness source | Existing private Sites contract preflight, plus the shared local concurrency authority; existing federation/worker limits remain in force |
 | Durable outcome | Existing receipt transport; saved grant/job/origin/output identifies the original request |
-| Publication | Existing workspace snapshots and DNS outbox/worker; new publications additionally require paid access |
+| Publication | Existing workspace snapshots and DNS outbox/worker; new publications additionally require Pro eligibility |
 | Historical billing | Persisted workspace mode and original content receipts retain legacy settlement; never submit new work through that adapter |
 
 The prior seat engine uses weighted messages, process-local caches and editable tier overrides, so it is not this policy's authority or proof of payment. No compatible Sites allowance window existed: the policy uses a fixed-duration window anchored to shared database time, with operator-supplied duration. General inference pricing and seat-engine windows are unchanged. All Sites from the same verified account share the counter across pool changes. Current Sites APIs do not accept API keys, so additional keys cannot create another account allowance.
@@ -48,9 +48,25 @@ The controller has no implicit numeric defaults. The owner delegated an initial 
 
 The controller never derives limits from supplier token balances. Its snapshot basis is `shared-local-admission`: it governs only locally reserved Sites capacity, with a read-only compatibility/readiness check. Existing shared relay admission protects physical execution across other traffic. It cannot guarantee a still-unknown supplier quota, cost, subscription-wide balance or model identity.
 
-Paid access uses an existing verified customer mapping, active subscription, eligible recurring item and matching paid invoice line covering the current period. A second current read verifies settled invoice payments and rejects refunds or disputes. SDK retries are disabled; each provider read is bounded to four seconds and 100 records. A short internal proof expires at the earlier of fifteen seconds or paid coverage end; admission rechecks freshness and the policy revision. No positive cache outlives that proof. Missing customer mapping is a paid-plan denial; absent billing authority, configuration or incomplete evidence is unavailable. Up to 100 subscriptions are inspected; unexpectedly larger/incomplete results fail closed. Off-platform contracts need a deliberate verified entitlement source; do not use organization-tier text as a substitute.
+For accounts without an explicit complimentary grant, paid access uses an existing verified customer mapping, active subscription, eligible recurring item and matching paid invoice line covering the current period. A second current read verifies settled invoice payments and rejects refunds or disputes. SDK retries are disabled; each provider read is bounded to four seconds and 100 records. A short internal proof expires at the earlier of fifteen seconds or paid coverage end; admission rechecks freshness and the policy revision. No positive cache outlives that proof. Missing customer mapping is a paid-plan denial; absent billing authority, configuration or incomplete evidence is unavailable. Up to 100 subscriptions are inspected; unexpectedly larger/incomplete results fail closed. Complimentary account grants use the separately authorized procedure below; do not use organization-tier text as a substitute.
 
-Keep `GALX_SITES_CONTENT_ENABLED`, managed-hosting configuration and publication/domain flags under their existing operational control. Included browser requests require the new policy and paid eligibility rather than per-account companion enrollment. Native connection/domain administration retains its prior cohort contract. The DNS worker also claims managed rows with a matching account-owned published snapshot, independent of the native account list. Paid access is checked at publication; already accepted snapshots continue to reconcile after plan expiry. Selecting a paid plan or deploying a new app does not itself configure a hosting provider.
+Keep `GALX_SITES_CONTENT_ENABLED`, managed-hosting configuration and publication/domain flags under their existing operational control. Included browser requests require the new policy and Pro eligibility rather than per-account companion enrollment. Native connection/domain administration retains its prior cohort contract. The DNS worker also claims managed rows with a matching account-owned published snapshot, independent of the native account list. Pro eligibility is checked at publication; already accepted snapshots continue to reconcile after plan expiry. Selecting a paid plan or deploying a new app does not itself configure a hosting provider.
+
+## Complimentary Pro account grants
+
+[ADR 0148](../adr/0148-complimentary-pro-access.md) authorizes explicit complimentary Pro provisioning when requested by the account operator. Staff membership alone grants nothing. The current boolean `galx_pro` in `auth.users.raw_app_meta_data` is read directly for the authenticated account, with confirmed email, non-anonymous/non-deleted identity and no active ban. JWT claims and `raw_user_meta_data` are ignored. There is no positive process cache. Database failure fails closed; the ordinary fifteen-second admission proof limit also applies to complimentary grants.
+
+From a trusted server environment, use:
+
+```sh
+node --env-file-if-exists=.env.local --import tsx scripts/manage-pro-access.ts status <account-id>
+node --env-file-if-exists=.env.local --import tsx scripts/manage-pro-access.ts grant <account-id>
+node --env-file-if-exists=.env.local --import tsx scripts/manage-pro-access.ts revoke <account-id>
+```
+
+The operator command makes a single account-keyed update through the configured privileged database connection, merges only the Pro flag, and reads it back. Record the authorized action and minimal private evidence; never expose credentials or full account records. This requires no schema migration and changes no staff membership, preview approval, wallet balance, subscription or payment. It does not send email. Revocation affects the next membership check; previously issued admission proof can last at most fifteen seconds. Already admitted work and saved Sites retain normal recovery.
+
+Deploy the compatible application before claiming live acceptance. Check the signed-in Billing and Sites setup responses report included access and that an unrelated account remains denied. Billing says Pro access is active without asserting a payment. Public response allowlists reveal no grant mechanism or administrative metadata. Revoke the flag to undo this grant; rolling back the application restores paid-only checks and retains saved work and all payment history.
 
 ## Admission, flow and recovery
 
@@ -114,7 +130,7 @@ Pro is $20/month for one verified account and includes Sites creation and public
 
 `private.galx_plan_checkouts` permits one open attempt per account. A short database transaction claims its durable lease; all Stripe calls run outside transactions. Customer mapping publication coordinates with the existing top-up lock and keeps the winning customer. Identical provider parameters and idempotency keys survive lost acknowledgements. Another browser resumes the current checkout. An old uncertain attempt without a session reference remains closed for operator review rather than risking a second subscription. Checkout completion is not itself proof of paid access.
 
-The existing signed webhook records checkout completion, invoices and `customer.subscription.*` events atomically with its event receipt. Terminal cancellation cannot be overwritten by older events. The subscription table is an operational projection; current Stripe evidence remains the access authority. Subscription refunds/disputes are classified through invoice payments and never alter prepaid wallet credit. The dedicated portal permits payment-method changes and period-end cancellation, with plan/quantity changes disabled. Portal access survives a Sites policy pause. Publishing does not consume a message or create a new Stripe charge.
+The existing signed webhook records checkout completion, invoices and `customer.subscription.*` events atomically with its event receipt. Terminal cancellation cannot be overwritten by older events. The subscription table is an operational projection; current Stripe evidence remains the paid-subscription authority. Subscription refunds/disputes are classified through invoice payments and never alter prepaid wallet credit. The dedicated portal permits payment-method changes and period-end cancellation, with plan/quantity changes disabled. Portal access survives a Sites policy pause. Publishing does not consume a message or create a new Stripe charge.
 
 No active tax registrations were found. Provisioning leaves automatic tax disabled and does not create registrations or change existing tax settings. Review registrations and subscription tax collection before a later tax rollout; enabling an option alone is not registration.
 

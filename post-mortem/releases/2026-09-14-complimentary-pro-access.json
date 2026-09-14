@@ -1,0 +1,56 @@
+{
+  "observed_at": "2026-09-14T01:51:14.255272+00:00",
+  "scope": "Explicit complimentary Pro for the owner-specified existing account; preserve owner role.",
+  "authorization": "User requested Pro permissions for an existing administrator account.",
+  "account_sha256": "982ccb4223d2101748c37f1b9418322b3ab69541a35c8be0f2eb30705aa4c0d2",
+  "source_base": "68162da0a6b5dd5571f6675a189b97ae158d0c26",
+  "dirty_tree": true,
+  "account_change": {
+    "before": false,
+    "after": true,
+    "readback_verified": true,
+    "owner_role_preserved": true,
+    "browser_account_match_verified": true,
+    "affected_rows": 1,
+    "schema_changes": 0,
+    "payments_created": 0,
+    "subscriptions_created": 0,
+    "email_sent": false
+  },
+  "local_build": {
+    "build": "passed",
+    "node": "22.21.1",
+    "files": 687,
+    "markers": 65,
+    "hits": [],
+    "private_boundary_errors": [],
+    "source_sha256": {
+      "src/lib/sites/paid-access.ts": "2484475f8e26444154da463b6f4d7f35261880a46786f125938ebf02211c7d45",
+      "src/components/billing/PlanPanel.tsx": "a6565129e56eb86840d08c120d89ae289e19400955ba078669231d6b998aa098"
+    },
+    "log_sha256": "dc1ce58accc27ce10d580811fa40b053b1da60d89247aef94715ea08fee3baed"
+  },
+  "validation": "docs/knowledge/audits/2026-09-14-complimentary-pro.json",
+  "deployment": {
+    "state": "ready",
+    "id": "dpl_BNgo95mjZxGLnMXimHxAs5MrGLMG",
+    "url": "https://galxai-oospfvqby-cardsortings-projects.vercel.app",
+    "serving": "https://galx.ai",
+    "git_commit_created": false
+  },
+  "limits": [
+    "No generation, publication, payment, new credentials or staff grants.",
+    "Live acceptance is scoped to this account Pro permission and existing access boundaries; no broad incident recovery or load acceptance.",
+    "Direct API browser navigation was blocked by the browser client. Signed-in Billing and Sites were verified through their normal interfaces."
+  ],
+  "live_acceptance": {
+    "signed_in_billing": "Your Pro access is active. Sites is included.",
+    "signed_in_sites": "Workspace opens; composer states Included with your plan.",
+    "anonymous_forged_plan_status": 401,
+    "anonymous_forged_sites_status": 401,
+    "denials_private_no_store": true,
+    "public_assets_scanned": 22,
+    "private_markers": 65,
+    "hits": []
+  }
+}

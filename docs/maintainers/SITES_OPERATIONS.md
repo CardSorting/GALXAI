@@ -2,11 +2,11 @@
 
 <!-- docs-scope: current-guide -->
 
-Private maintainer guide. [ADR 0140](../adr/0140-paid-sites-and-shared-fair-usage.md) supersedes new per-generation pricing with eligible paid-plan access and shared fair usage. The [fair-use runbook](SITES_FAIR_USAGE.md) defines current configuration, admission, membership and rollout. Public documentation describes only [the capability and access contract](../SITES_CONTENT.md).
+Private maintainer guide. [ADR 0140](../adr/0140-paid-sites-and-shared-fair-usage.md) supersedes new per-generation pricing with eligible paid-plan access and shared fair usage; [ADR 0148](../adr/0148-complimentary-pro-access.md) adds explicit operator-provisioned complimentary Pro access. The [fair-use runbook](SITES_FAIR_USAGE.md) defines current configuration, admission, membership and rollout. Public documentation describes only [the capability and access contract](../SITES_CONTENT.md).
 
 ## Current path
 
-The browser workspace and content API use the same included-generation adapter and shared authority. They neither quote new generation prices nor reserve, debit or settle wallet funds for new work. Account-owned creation and managed publication also require paid access. Browsing, export, recovery and unpublishing preserve existing work.
+The browser workspace and content API use the same included-generation adapter and shared authority. They neither quote new generation prices nor reserve, debit or settle wallet funds for new work. Account-owned creation and managed publication also require current Pro eligibility. Browsing, export, recovery and unpublishing preserve existing work.
 
 The [workspace runbook](SITES_WORKSPACE.md) covers private drafts, publication snapshots and managed hosting. [Address operations](SITES_DOMAINS.md) covers the existing DNS worker. The optional native workflow retains its own connection and domain gates. No new worker or external service is added for fair usage.
 
