@@ -1,0 +1,116 @@
+{
+  "version": 1,
+  "classification": "private",
+  "incident": "INC-20260913-IMAGES",
+  "observed_at": "2026-09-14T20:34:00Z",
+  "source_revision": "d228ed4c3857e5ee7343eeb391535fce676cc2b4",
+  "environment": {
+    "host": "macOS 26.5.1 arm64 (Darwin 25.5.0)",
+    "node": "v26.8.1",
+    "python": "3.14.7",
+    "docker_context": "desktop-linux",
+    "docker_server": "Docker Desktop Linux VM / Engine 29.7.2 / linux arm64",
+    "docker_live_restore": false,
+    "isolation": "disposable namespaces and local filesystem fixtures; no host reboot, daemon restart or production storage fault was injected",
+    "target_checks": "Docker canary namespaces were unique and cleaned; destructive host/daemon/storage drills were not run because the target also hosts unrelated workloads"
+  },
+  "passed": [
+    {
+      "name": "process ownership, guardian fencing and blocked-controller detection",
+      "result": "passed",
+      "evidence": "python3 scripts/test-relay-controller-supervisor.py; 15 tests passed in 8.584s",
+      "coverage": "guardian death, simultaneous starters, paused owner, process-group termination, quiet workload and bounded restart budget"
+    },
+    {
+      "name": "launcher crash/hang, active receipt recovery and quiet workload",
+      "result": "passed",
+      "evidence": "npm run test:relay:recovery; 42 tests passed; three additional launcher/worker fixture repetitions passed",
+      "coverage": "real launcher process lifecycle with fixture registry/discovery; unknown receipt remains non-replayable; normal long-running and quiet work included"
+    },
+    {
+      "name": "durable receipt, admission, expiry/eviction and older snapshot fixtures",
+      "result": "passed in isolated local storage",
+      "evidence": "relay recovery suite and lifecycle recovery tests",
+      "coverage": "write failures, read-only permissions, bounded receipt retention, capacity exhaustion and older-state restoration; no deployed-volume restoration"
+    },
+    {
+      "name": "read-only recovery storage",
+      "result": "passed in local filesystem fixture",
+      "evidence": "relay admission/durability tests",
+      "coverage": "safety-critical admission/replay path fails closed while uncertainty is preserved"
+    },
+    {
+      "name": "Docker policy, adoption, capability loss and generation fencing",
+      "result": "passed against real Docker Desktop daemon in disposable namespaces",
+      "evidence": "candidate lifecycle and federation Docker canaries",
+      "coverage": "restart=no, controller-only replacement, retained adoption, stale health fencing and missing capability 503"
+    },
+    {
+      "name": "restart-budget exhaustion and recovery reset",
+      "result": "passed in process/lifecycle fixtures only",
+      "evidence": "guardian and lifecycle recovery tests",
+      "coverage": "bounded attempts, exhaustion alert/containment and dependency-restored reset behavior; not a real daemon outage"
+    }
+  ],
+  "not_run": [
+    {
+      "name": "host reboot and unattended guardian boot",
+      "status": "not_run",
+      "reason": "No disposable VM/host was available; rebooting the shared macOS host was outside the authorized isolation boundary",
+      "replacement_evidence": "launchd chain and process-supervision fixtures only; does not certify boot integration"
+    },
+    {
+      "name": "Docker daemon restart while idle or during active work",
+      "status": "not_run",
+      "reason": "Docker Desktop serves unrelated containers and live-restore=false; daemon restart would affect them",
+      "replacement_evidence": "real Docker lifecycle canaries and command-timeout cleanup only; daemon-side uncertain outcomes remain open"
+    },
+    {
+      "name": "Docker unavailable at startup then restored",
+      "status": "not_run",
+      "reason": "No isolated daemon boundary was available for a safe outage injection",
+      "replacement_evidence": "fixture dependency refusal and bounded readiness behavior; no real startup outage"
+    },
+    {
+      "name": "recovery storage full",
+      "status": "not_run",
+      "reason": "No safe quota/full-disk injection was available",
+      "replacement_evidence": "local write-error and read-only fixtures; deployed named volume was not filled"
+    },
+    {
+      "name": "retained-state restoration against deployed volume",
+      "status": "not_run",
+      "reason": "No disposable copy of the deployed retained volume was prepared for destructive restore",
+      "replacement_evidence": "older snapshot and same-volume replacement fixtures passed; full host restoration remains open"
+    },
+    {
+      "name": "restart-budget exhaustion after a real dependency recovers",
+      "status": "not_run",
+      "reason": "The production guardian budget was deliberately not exhausted and no real daemon outage was injected",
+      "replacement_evidence": "fixture exhaustion/reset path passed; production budget remains bounded and observable"
+    }
+  ],
+  "soak": {
+    "runs": 3,
+    "result": "3 of 3 passed",
+    "harness": "scripts/test-relay-launcher-worker-recovery.ts",
+    "real_processes": true,
+    "real_docker": false,
+    "fixture_registry_and_adoption_driver": true,
+    "measurements": {
+      "crash_to_required_ready_ms": [287, 333, 329],
+      "crash_to_successful_request_ms": [353, 403, 398],
+      "hang_to_required_ready_ms": [2239, 2201, 2236],
+      "hang_to_successful_request_ms": [2288, 2250, 2288],
+      "active_receipt_recovered": [true, true, true],
+      "upstream_executions": [3, 3, 3],
+      "quiet_active_ms": [2500, 2500, 2500]
+    },
+    "limitation": "Fixture repetition is evidence of process recovery and request classification, not a Docker-daemon, reboot or production SLA"
+  },
+  "acceptance": {
+    "act018": "open",
+    "reason": "All unperformed destructive subitems remain explicitly open; fixture and disposable Docker evidence is not substituted for host, daemon, storage or retained-state drills",
+    "next_step": "Run each not_run item only inside an isolated host/daemon/storage environment and record fault-to-detection, authority, capability readiness, first request, independent duplicate evidence and cleanup"
+  }
+}

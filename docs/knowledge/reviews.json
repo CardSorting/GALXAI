@@ -347,21 +347,22 @@
   },
   "relay": {
     "reviewer": "relay maintainer",
-    "note": "Reviewed the deployed ACT-019 guardian cutover, crash and paused-controller canaries, retained worker image boundary, request evidence and state-conditional rollback against the private rollout verification.",
+    "note": "Reviewed the deployed d228 worker artifact, launchd guardian chain, kernel-held ownership, readiness-versus-registry dependency behavior, ACT-018 isolated drill evidence and state-preserving rollback against the current single-host target.",
     "reviewed_at": "2026-09-14",
     "review_by": "2026-09-27",
     "evidence": {
-      "post-mortem/incidents/2026/2026-09-13-image-generation/act019-rollout-verification-20260914.json": "90583fef5aaf23db11c3ae6fe6f809bef542ad02a0854860937c442b12d44a1d"
+      "post-mortem/incidents/2026/2026-09-13-image-generation/act019-deployment-acceptance-20260914.json": "f19ca0b236a5cd3e8ce0fadbcbb793275575794039b87a471657669e8709c79d",
+      "post-mortem/incidents/2026/2026-09-13-image-generation/act018-isolated-drills-20260914.json": "c6b1d525ffdd6be6c89fba32de68ae1e9adfb1e61d9c57336360f9e46a531319"
     },
     "files": {
       "docs/ARCHITECTURE.md": "d821254fb3272cdc6c7575f6a548a1f041fe1506a10fd14b6bdd058539482e5d",
       "docs/FEDERATION_STRATEGY.md": "e199e9e58ed6070a3e60185173649ca61d8f1fc87e113f93099e45d76afc3fc4",
-      "docs/RELAY_VNEXT_RUNBOOK.md": "df23036d91d2b7c089f9176524482e252632542957b78f4a35eaf4952888a51a",
+      "docs/RELAY_VNEXT_RUNBOOK.md": "c9eabd973ba5b0d6c3f1dae66e38f07285345dfd2e1e6e06cde736d1eac00812",
       "docs/TELEMETRY_AND_OBSERVABILITY.md": "e46a148ae3ed55f818f5e45362559b0074bb1f975b3782978e3e815941e9812e",
-      "docs/maintainers/RELAY_HARDENING.md": "656dc04e3f0621a7805d74b9fb65549ffd6cb9a94c07d3ed66c40022827f2620",
+      "docs/maintainers/RELAY_HARDENING.md": "64aada975343365578ae8476131e25d4c6b242ebf08815fd81910c4f6529bbc6",
       "docs/maintainers/RELAY_TELEMETRY.md": "f02e84a73fb2a6242ea55410f7f852e35c225dff85d978c75c8a9d1ccd1765ea",
       "docs/maintainers/TELEMETRY_AND_METRICS_OBSERVABILITY.md": "88aabb0e760cc1820ade69d60ab3b02a1cf290d9f12c8b6f2381ba34f9ff6009",
-      "post-mortem/runbooks/controller-lock.md": "78b94c730974d49d15ef9a5fecade941972838c7af32a7934a565255c80762ed",
+      "post-mortem/runbooks/controller-lock.md": "1cad00a5a93f951cc9bd9ccb97210ed6333a1ccc595e37889583c40105971a3b",
       "scripts/install-federation-service.ts": "05ec9c28d24ee2389a835234758d01f3fa33480f6b62acb91f78cbd80d5f19d7",
       "scripts/relay-controller-supervisor.py": "9816c1874766bc25f1806da918e3e8adcf567c2d135035b5c8290cc73dcbd34a",
       "scripts/relay-federation-controller.ts": "892f3ce8978a4d853c5035aac4d99cce2fa2797e9e450c0057b9808ee5afcbc4",

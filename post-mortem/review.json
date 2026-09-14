@@ -1,8 +1,8 @@
 {
   "version": 1,
   "reviewer": "relay maintainer",
-  "reviewed_at": "2026-09-14T19:39:31.037064Z",
-  "note": "Reviewed the final ACT-019 rollout record, current-state update, guardian canary measurements, state-preserving rollback gates and remaining worker-image/ACT-018 limits against the deployed target.",
+  "reviewed_at": "2026-09-14T20:34:44.622240Z",
+  "note": "Reviewed the deployed ACT-019 worker artifact migration, guardian boot chain, lock descriptor lifetime, readiness-versus-dependency behavior, ACT-018 isolated drill evidence and state-preserving fail-closed rollback against the current host target.",
   "files": {
     ".dockerignore": "fb4dc7ef84e7f36c5bfed0f267187a022bbb61e66dd26060295b133e08fa74c5",
     ".github/workflows/vercel-preflight.yml": "124587ef1b14fe558513720535d613a30f4dd2f384e28b2f6d70d3b5c24ae2ef",
@@ -40,7 +40,7 @@
     "docs/operations/wallet-lifecycle.md": "ddc86ed1d3347f5fff19a07581bc040c52eee7a115c279a2ba28bceae92303db",
     "docs/operations/workspace-auth.md": "ca767816aedda8c350bd7cf4469261e6b5a15d78c01541bd42f1e5a53c6558c0",
     "package.json": "6da178b435547f0e5365e52ad602d8d8ba920d8c200084d1855e3f42a90c2395",
-    "post-mortem/CURRENT_STATE.md": "1c47c59cd0337d5258b97696e8e3955ae5feb2a00f983f4c4cff85117d3eeb9f",
+    "post-mortem/CURRENT_STATE.md": "ac6be592d4b7c97d67dc091b6750f49617e10fa4f0e18fc48aa406768dc80a2e",
     "post-mortem/README.md": "d28cbc9427aaa4aba99057517831e49f79244a686e1ce35640c4f566abbae8b8",
     "post-mortem/failure-modes/README.md": "b83ecd5ca97cf5ccdc3de822c356be8319d51d635bf788ff1ee76ea76aac4f9a",
     "post-mortem/failure-modes/access-and-documentation.md": "3370ac35bb931f6a691071076decbdca69f8de79a137ae178395c9bd34e466fe",
@@ -48,7 +48,7 @@
     "post-mortem/failure-modes/deployment.md": "8bd515438f638abc96045faa6fd4833db036b17dbdd3486c6f0f553b4898b0ef",
     "post-mortem/failure-modes/identity.md": "071fb0e84e23e20366b5ff0955e5f0ac233c5db74f1fbc212b66faa2496cc55c",
     "post-mortem/failure-modes/images.md": "29806e139c64cce91569d35ede99961612c6f7e9dbe50fab23c60252b05f522c",
-    "post-mortem/runbooks/controller-lock.md": "78b94c730974d49d15ef9a5fecade941972838c7af32a7934a565255c80762ed",
+    "post-mortem/runbooks/controller-lock.md": "1cad00a5a93f951cc9bd9ccb97210ed6333a1ccc595e37889583c40105971a3b",
     "post-mortem/runbooks/deployment-storage.md": "056e84c5fa65ddbaeae5cbe9a09bf64a0f04cf6548fc30abe519de60028fdd3f",
     "post-mortem/runbooks/documentation.md": "fd746dabbf007657e9aca7e0ba0a81e4fc8a6b9559ec35bb2847d2061ce542bc",
     "post-mortem/runbooks/image-generation.md": "fd924e15945b8965bab815b44a15e0b631e61a84beafe30ececa658985837b1c",

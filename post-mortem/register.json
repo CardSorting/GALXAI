@@ -218,9 +218,10 @@
       "review_by": "2026-09-20",
       "status": "completed",
       "next_step": "Retain the guardian alert regression and review its bounded restart budget with future supervisor changes.",
-      "closure": "The external guardian emits actionable, redacted events for legacy/ambiguous ownership, blocked progress and unproven termination. Twelve isolated process drills passed without deleting ownership evidence or repeatedly invoking inference.",
+      "closure": "The external guardian emits actionable, redacted events for legacy/ambiguous ownership, blocked progress and unproven termination. Fifteen isolated process drills plus the deployed crash/pause canaries passed without deleting ownership evidence or repeatedly invoking inference.",
       "evidence": [
         "post-mortem/incidents/2026/2026-09-13-image-generation/controller-recovery-verification-20260914.json",
+        "post-mortem/incidents/2026/2026-09-13-image-generation/act019-deployment-acceptance-20260914.json",
         "scripts/test-relay-controller-supervisor.py",
         "scripts/test-relay-launcher-recovery.py"
       ]
@@ -232,9 +233,11 @@
       "review_by": "2026-09-20",
       "status": "completed",
       "next_step": "Keep the separate daemon/reboot/retained-state drills open under ACT-018; do not infer them from local process fixtures.",
-      "closure": "Real launcher/controller/worker processes and an isolated Docker lifecycle canary proved one owner, live-lock refusal, process-group fencing, worker adoption, preserved generation/state and single dispatch. Recovery timings are retained in the dated verification record.",
+      "closure": "Real launcher/controller/worker processes and an isolated Docker lifecycle canary proved one owner, live-lock refusal, process-group fencing, worker adoption, preserved generation/state and single dispatch. The deployed d228 image acceptance added controller crash, pause and worker-failure canaries with restart=no and bounded recovery; destructive daemon, reboot and storage drills remain isolated.",
       "evidence": [
         "post-mortem/incidents/2026/2026-09-13-image-generation/controller-recovery-verification-20260914.json",
+        "post-mortem/incidents/2026/2026-09-13-image-generation/act019-deployment-acceptance-20260914.json",
+        "post-mortem/incidents/2026/2026-09-13-image-generation/act018-isolated-drills-20260914.json",
         "scripts/test-relay-launcher-worker-recovery.ts",
         "scripts/test-relay-lifecycle-docker.ts"
       ]
@@ -245,17 +248,29 @@
       "owner": "relay maintainer",
       "review_by": "2026-09-27",
       "status": "open",
-      "next_step": "Run the remaining isolated acceptance subitems separately: Docker-daemon restart during work; Docker unavailable at startup then restored; host reboot and unattended guardian boot; retained-state restoration; full/read-only recovery storage; and exhausted restart-budget recovery.",
-      "closure": "For each subitem record fault-to-detection, safe authority handover, required-capability readiness, first successful request, independent duplicate-dispatch outcome and rollback/cleanup evidence. Mark unsupported destructive drills not run; do not close ACT-018 from fixture or canary coverage."
+      "next_step": "Run each explicitly not-run isolated acceptance subitem separately: Docker-daemon restart during work; Docker unavailable at startup then restored; host reboot and unattended guardian boot; retained-state restoration; full/read-only recovery storage; and exhausted restart-budget recovery. Current fixture and disposable Docker results are recorded in act018-isolated-drills-20260914.json.",
+      "closure": "For each subitem record fault-to-detection, safe authority handover, required-capability readiness, first successful request, independent duplicate-dispatch outcome and rollback/cleanup evidence. Mark unsupported destructive drills not run; do not close ACT-018 from fixture or canary coverage.",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-09-13-image-generation/act018-isolated-drills-20260914.json",
+        "scripts/test-relay-controller-supervisor.py",
+        "scripts/test-relay-launcher-worker-recovery.ts",
+        "scripts/test-relay-lifecycle-docker.ts"
+      ]
     },
     {
       "id": "ACT-019",
       "incident": "INC-20260913-IMAGES",
       "owner": "release/relay maintainer",
       "review_by": "2026-09-20",
-      "status": "open",
-      "next_step": "Complete the retained-worker image boundary with a controller-owned, preserved-volume replacement from galxai-relay:act019-d228ed4, then validate a state-compatible rollback after admission evidence exists.",
-      "closure": "The host guardian cutover, one-authority fencing, real Docker restart-policy migration, controller-crash adoption, paused-controller recovery and stable-key request canaries passed. The action remains open because the retained worker is still the September 11 image and the pre-patch binary cannot safely roll back after candidate admissions or unknown outcomes; close only after the d228 worker image is deployed or the supported contract explicitly excludes worker-side changes, with compatible rollback evidence."
+      "status": "completed",
+      "next_step": "Observe the deployed single-host contract and reopen only for an observed incident, reproduced defect or concrete deployment requirement. Keep destructive host, daemon and storage work under ACT-018.",
+      "closure": "The d228 runtime and fresh worker image galxai-relay:act019-d228-clean-20260914 were deployed through launchd -> Node launcher -> Python guardian -> Node controller. The retained worker was replaced through the controller-owned preserved-volume path with restart policy no; one-authority fencing, crash/pause/worker canaries, stable-key completion/replay, generation fencing, bounded restart and fail-closed rollback passed. A later dependency refusal kept readiness at 503 without dispatch or restart storm and is recorded as a bounded limitation, not a lockup.",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-09-13-image-generation/act019-deployment-acceptance-20260914.json",
+        "post-mortem/incidents/2026/2026-09-13-image-generation/act019-rollout-verification-20260914.json",
+        "scripts/test-relay-launcher-worker-recovery.ts",
+        "scripts/test-relay-lifecycle-docker.ts"
+      ]
     },
     {
       "id": "ACT-004",

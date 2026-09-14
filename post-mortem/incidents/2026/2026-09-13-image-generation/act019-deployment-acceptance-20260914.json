@@ -1,0 +1,178 @@
+{
+  "version": 1,
+  "classification": "private",
+  "incident": "INC-20260913-IMAGES",
+  "observed_at": "2026-09-14T20:32:00Z",
+  "runtime_source_revision": "d228ed4c3857e5ee7343eeb391535fce676cc2b4",
+  "tested_revision": "d228ed4c3857e5ee7343eeb391535fce676cc2b4",
+  "checkout": {
+    "source_artifact": "clean git archive of the exact runtime revision",
+    "worktree_at_artifact_build": "clean",
+    "secrets_or_credentials_recorded": false
+  },
+  "artifact": {
+    "build_file": "Dockerfile.relay",
+    "build_context": "clean archive of d228ed4c3857e5ee7343eeb391535fce676cc2b4",
+    "image_tag": "galxai-relay:act019-d228-clean-20260914",
+    "image_id": "sha256:1ca356a31fd529af9ac817b7384a3a37f6b6ebf7be23681f5ada73252b29aff1",
+    "repository_digest": "sha256:1ca356a31fd529af9ac817b7384a3a37f6b6ebf7be23681f5ada73252b29aff1",
+    "created_at": "2026-09-14T19:12:53.088611845Z",
+    "entrypoint": "docker-entrypoint.sh",
+    "command": ["node", "dist/relay.mjs"],
+    "healthcheck": "wget /health",
+    "bundle_check": "passed; expected receipt and unknown-state markers present",
+    "worker_canary": "passed outside production with the candidate image"
+  },
+  "deployment": {
+    "environment": "local production launchd target; controlled rollout, no remote production endpoint",
+    "host": "macOS 26.5.1 arm64 (Darwin 25.5.0)",
+    "node": "v26.8.1",
+    "python": "3.14.7",
+    "launchd": {
+      "label": "com.galxai.federation.production",
+      "state": "running after controlled canaries",
+      "runs_after_controlled_drills": 4,
+      "plist": "/Users/bozoegg/Library/LaunchAgents/com.galxai.federation.production.plist",
+      "plist_sha256": "b14366c2822177ef782347974426f07985b0d5796510de799a51bb28b19edd8a",
+      "keep_alive_successful_exit": false,
+      "run_at_load": true,
+      "exit_timeout_seconds": 180,
+      "throttle_interval_seconds": 10,
+      "process_chain": "launchd -> Node launcher -> Python guardian -> Node controller",
+      "active_controller_authorities": 1,
+      "listener": "127.0.0.1:3001"
+    },
+    "docker": {
+      "context": "desktop-linux",
+      "server": "Docker Desktop Linux VM / Engine 29.7.2 / linux arm64",
+      "live_restore": false,
+      "worker": {
+        "id": "2d6c4dd67efa07b6c710f93c354df2729a9288f970bf02ebfc31f8af25a9e508",
+        "image_tag": "galxai-relay:act019-d228-clean-20260914",
+        "image_digest": "sha256:1ca356a31fd529af9ac817b7384a3a37f6b6ebf7be23681f5ada73252b29aff1",
+        "status": "running",
+        "health": "healthy",
+        "restart_policy": "no",
+        "generation": "1e96da5f-bbda-488a-91bb-41f5a293063f",
+        "state_volume": "galx-shard-a5bb38581ffb74fe21b0-state:/app/.broccolidb",
+        "state_volume_preserved": true
+      }
+    },
+    "readiness_at_cutover": {
+      "health_ready": 200,
+      "pending_admission": 0,
+      "tracked_jobs": 0,
+      "recovery_durable": true,
+      "recovery_storage_healthy": true,
+      "required_capabilities": "available"
+    }
+  },
+  "ownership_migration": {
+    "old_worker_image_tag": "galxai-relay:sites-fixed-20260912-2b72afd",
+    "old_worker_image_digest": "sha256:39f0361c2c4492158362ce603c6fdaddfad40c99f120afb4760ea0e1ed51bbbf",
+    "old_worker_restart_policy": "no",
+    "new_worker_restart_policy": "no",
+    "old_owner_graceful_shutdown_removed_worker": true,
+    "replacement_mode": "controller-owned remove/create with the named state volume preserved",
+    "old_legacy_marker": "archived as an unchanged private rollback record; no manual lock deletion",
+    "new_marker_format": "{\"format\":\"galx-local-flock-v1\"}",
+    "guard_mode": "600",
+    "initial_cutover_adoption": false,
+    "subsequent_crash_and_pause_adoption": true,
+    "generation_changed_on_replacement": true
+  },
+  "isolated_candidate_canaries": {
+    "lifecycle_docker": "passed; retained policy migrated, rejected worker removed, surviving worker adopted and cold rejected credential was never allocated",
+    "federation_docker": "passed; one shard per container, capability loss recovered without restart, stale health fenced and missing model returned 503",
+    "namespaces": "unique disposable namespaces; cleaned after each run"
+  },
+  "canaries": {
+    "normal_request": {
+      "stable_identity": true,
+      "initial_status": 202,
+      "terminal_state": "completed",
+      "same_identity_replay": "same terminal receipt and idempotency-hit response; no second admission",
+      "result": "passed"
+    },
+    "controller_crash": {
+      "fault": "SIGKILL exact controller process",
+      "fault_to_detection_ms": 10,
+      "fault_to_authority_ms": 208,
+      "fault_to_controller_started_ms": 395,
+      "fault_to_worker_adoption_ms": 1122,
+      "fault_to_capability_evidence_ms": 1160,
+      "fault_to_required_ready_ms": 14591,
+      "required_ready_to_successful_request_ms": 3165,
+      "result": "passed; no active work before fault, one authority and retained candidate worker adopted"
+    },
+    "controller_pause": {
+      "fault": "SIGSTOP exact controller process",
+      "fault_to_event_loop_detection_ms": 14920,
+      "fault_to_authority_ms": 15169,
+      "fault_to_controller_started_ms": 15355,
+      "fault_to_worker_adoption_ms": 15788,
+      "fault_to_capability_evidence_ms": 15826,
+      "fault_to_required_ready_ms": 16076,
+      "required_ready_to_successful_request_ms": 2115,
+      "result": "passed; configured heartbeat budget explains detection"
+    },
+    "worker_failure": {
+      "fault": "controller-owned worker stopped with Docker stop timeout",
+      "fault_to_restart_scheduled_ms": 1563,
+      "fault_to_worker_removed_ms": 1741,
+      "fault_to_worker_starting_ms": 5501,
+      "fault_to_worker_started_ms": 6286,
+      "fault_to_capability_evidence_ms": 11562,
+      "fault_to_required_ready_ms": 11945,
+      "required_ready_to_successful_request_ms": 2140,
+      "restart_budget_attempts": 1,
+      "restart_budget_blocked": false,
+      "result": "passed; candidate digest, restart=no, new generation and same volume verified"
+    },
+    "dependency_refusal_after_extra_crash": {
+      "fault": "controller SIGKILL after persisted registry egress allowance was exhausted",
+      "listener_reachable_ms": 14978,
+      "readiness_observed": "503 for 120 seconds",
+      "registry_fresh": false,
+      "blocked_stage": "required registry capability readiness",
+      "error_class": "shard_registry_unavailable",
+      "admission_result": "503 federation_unavailable, not_accepted; no dispatch",
+      "restart_storm": false,
+      "classification": "bounded dependency refusal, not a controller event-loop lockup",
+      "state_reset_or_force_unlock": false
+    }
+  },
+  "safety_evidence": {
+    "exclusive_authority": "one live launchd -> guardian -> controller chain observed throughout the rollout and canaries",
+    "generation_fencing": "passed in the real Docker lifecycle canary and worker replacement; stale health/mutation handles were rejected",
+    "stable_request_identity": "passed normal request and same-key replay",
+    "unknown_outcome_preservation": "passed fixture and deployed admission checks; unavailable evidence remains blocked/unknown rather than replayed",
+    "durable_receipts": "durable=true and storageHealthy=true at accepted cutover and successful canaries",
+    "restart_budget": "bounded lifecycle/guardian budgets passed; production worker canary consumed one attempt without storm",
+    "independent_execution_recorder": "not available; duplicate execution was not independently measured outside relay evidence"
+  },
+  "rollback": {
+    "prepared_before_rollout": true,
+    "legacy_plist_and_marker": "unchanged private archive retained before bootout",
+    "before_candidate_admission": "boot out new chain, prove group/listener/descriptor termination, restore archived legacy plist only after identity recheck",
+    "after_candidate_admission_or_unknown": "fail closed, preserve journals/tombstones/volume, and use a compatible artifact or manual reconciliation; never start the old binary against new state",
+    "state_deletion_or_force_unlock": false,
+    "rollback_readiness": "state-conditional and fail-closed; old binary is intentionally not accepted after candidate admissions"
+  },
+  "validation": {
+    "npm_run_test_relay_recovery": "42 passed",
+    "guardian_process_suite": "15 passed in 8.584s",
+    "relay_capability_suite": "154 passed",
+    "docker_candidate_lifecycle_canary": "passed",
+    "docker_candidate_federation_canary": "passed",
+    "launcher_worker_soak": "3 of 3 fixture repetitions passed; crash-to-ready 287/333/329 ms; hang-to-ready 2239/2201/2236 ms; no real Docker or registry",
+    "typescript": "npx tsc --noEmit passed",
+    "production_build_and_lint": "passed; Next.js build generated 285 pages; eslint 0 errors and 8 pre-existing warnings"
+  },
+  "acceptance": {
+    "act019": "closed for the deployed single-host recovery contract",
+    "basis": "fresh worker artifact deployed by controller-owned preserved-volume replacement; launchd guardian chain, exclusive authority, required-ready normal/crash/pause/worker canaries, stable identity, fencing, bounded restart and fail-closed rollback evidence passed",
+    "current_limitation": "the service may remain safely not-ready when the retained registry egress guard cannot authorize the full registry response; this is observable and requires dependency/budget recovery rather than a restart or state reset",
+    "act018": "open; destructive host, daemon and storage drills remain isolated and individually tracked"
+  }
+}

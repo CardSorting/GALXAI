@@ -733,3 +733,31 @@ Incident: `INC-20260913-IMAGES`. Kind: `verification`.
 **Next step:** Use the recorded production heartbeat timings as deployment behavior rather than the 2.302-second fixture baseline; complete the worker-image boundary and retain all unperformed ACT-018 drills.
 
 Evidence: [act019-rollout-verification-20260914.json](incidents/2026/2026-09-13-image-generation/act019-rollout-verification-20260914.json).
+
+## EVT-20260914-act019-worker-image-acceptance — 2026-09-14T20:32:00Z
+
+Incident: `INC-20260913-IMAGES`. Kind: `verification`.
+
+**Observation:** The fresh d228 worker artifact was validated in isolation and deployed through the controller-owned preserved-volume replacement path.
+
+**Action:** Built galxai-relay:act019-d228-clean-20260914 from a clean archive of d228ed4c3857e5ee7343eeb391535fce676cc2b4, verified its bundle and entrypoint, ran disposable real-Docker lifecycle/federation canaries, drained and removed the retained September 11 worker, created the candidate with the existing named volume and restart policy no, then ran normal, crash, paused-controller and worker-failure canaries.
+
+**Result:** The deployed worker digest is sha256:1ca356a31fd529af9ac817b7384a3a37f6b6ebf7be23681f5ada73252b29aff1. One launchd -> Node launcher -> Python guardian -> Node controller authority remained active; stable-key work completed and replayed from the same receipt; crash, pause and worker recovery returned required readiness and successful requests without a restart storm. A later controller crash encountered the persisted registry egress guard budget and remained safely not-ready with 503 admission and no dispatch, which is classified as a bounded dependency refusal rather than a controller lockup.
+
+**Next step:** Observe the deployed contract and reopen ACT-019 only for an observed incident, reproduced defect or concrete deployment requirement; keep unperformed host, daemon and storage drills under ACT-018.
+
+Evidence: [act019-deployment-acceptance-20260914.json](incidents/2026/2026-09-13-image-generation/act019-deployment-acceptance-20260914.json).
+
+## EVT-20260914-act018-isolated-drills — 2026-09-14T20:34:00Z
+
+Incident: `INC-20260913-IMAGES`. Kind: `verification`.
+
+**Observation:** The remaining ACT-018 work was split into passed fixture/disposable-Docker coverage and destructive drills that were explicitly not run outside an isolated host/daemon/storage boundary.
+
+**Action:** Recorded the macOS/Docker Desktop environment, target checks, 15 guardian tests, 42 recovery tests, 154 capability tests, real-Docker candidate canaries and three launcher/worker fixture soak repetitions. Marked host reboot, Docker daemon restart, real Docker-unavailable startup, full storage, deployed retained-state restore and real dependency recovery after budget exhaustion as not run.
+
+**Result:** All executed checks passed. The three fixture repetitions recovered crash and paused-controller paths with no unexplained safety failure; read-only/write-error, receipt uncertainty, older snapshot and restart-budget fixtures failed closed as designed. ACT-018 remains open because fixture and disposable-Docker evidence cannot certify destructive host, daemon or deployed-storage behavior.
+
+**Next step:** Run each not-run subitem only in a disposable environment with independent execution recording, then append fault-to-detection, authority, required-ready, first-request, outcome and cleanup evidence.
+
+Evidence: [act018-isolated-drills-20260914.json](incidents/2026/2026-09-13-image-generation/act018-isolated-drills-20260914.json).
