@@ -48,7 +48,7 @@
   },
   "images": {
     "reviewer": "Product/API maintainer",
-    "note": "Streamlined user flow for high throughput: unblocked composer authority, concurrent task tracking, optimized polling cadence, and removed pause/cancel clutter.",
+    "note": "Consolidated composer UI: removed style pills, quality buttons, and verbose aspect ratio text for clean, zen creative flow.",
     "reviewed_at": "2026-09-14",
     "review_by": "2026-09-28",
     "evidence": {
@@ -94,10 +94,10 @@
       "src/components/dashboard/GenerationGateNotice.tsx": "435013796b565f458365f8397bef585bec48d01f982c93e0bd0b0fb665a2d224",
       "src/components/dashboard/generation-gate.module.css": "efd8526722ca0ad42aec319a56bc2ea7e638185f30c35cea9b445dfb69bba4a4",
       "src/components/images/GenerationCanvas.tsx": "4341702fc0842c20a7d860b8241a4bf55780919b73254f54915a61cd09269473",
-      "src/components/images/ImageStudio.tsx": "5ad7f37a6471d1cb4eb5f7867e3ba620348cf4f3826ead81273f43c2dddc9ece",
+      "src/components/images/ImageStudio.tsx": "7ce87acfbb53ef3799b5ac7676128fd383413fb31a13d98a40a61e7b8210450c",
       "src/components/images/StudioArtwork.tsx": "427128b4f3ea300222b74fdfe132564237030507f1d40c20093c89ef52e26229",
       "src/components/images/studio-contract.ts": "cbe272da86f7af1ec6279856cb4c13aa8f4de939384284fbaf0c80ae3f70188d",
-      "src/components/images/studio.css": "6c6a152d700fec3c7cd96d6ebe6e4d59a1c919fb9e2ee0165af0871e07bc1263",
+      "src/components/images/studio.css": "8448bc4018a22090fb103c9c533bc947a64759e70f6486a067845d175a8f8d3d",
       "src/components/images/use-image-studio.ts": "49c062625ae17467e30bc7da6bbe6ad7994e5206bd44ba77fba5f680ebdf0b46",
       "src/contexts/GenerationAllowanceContext.tsx": "d73875872f3814131bfc18029e69a72091993d906af63058ca37282f2c261a7c",
       "src/core/broccolidb/BroccoliImageLibraryBuffer.ts": "840d2e9fd075d314e196c056564b911b7a1d2b63ff0569f5ee16fb7604d81915",
@@ -1184,7 +1184,7 @@
   },
   "client-efficiency": {
     "reviewer": "Product/performance maintainer",
-    "note": "Streamlined high-throughput generation flow: unblocked composer, eliminated pause/cancel friction, client I/O execution authority preserved.",
+    "note": "Consolidated composer UI: removed style pills, quality buttons, and verbose aspect ratio text for clean, zen creative flow.",
     "reviewed_at": "2026-09-14",
     "review_by": "2026-09-28",
     "evidence": {
@@ -1261,7 +1261,7 @@
       "src/components/home/public-home.module.css": "e7e697b7e6dcbe2b393e179901eb9f4f365f7e6fb75fd6e114b67e0ea44868a1",
       "src/components/home/use-galaxy-interactions.ts": "0a654c3abd4d7f562172df5d79afd94ee3b1c86509693dbc69d993920497d348",
       "src/components/home/use-story-entrance.ts": "8e3d8a6634a4b67456cff4d17ef76e2d450b136a4b844b86c21b4ec6b6b24a67",
-      "src/components/images/ImageStudio.tsx": "5ad7f37a6471d1cb4eb5f7867e3ba620348cf4f3826ead81273f43c2dddc9ece",
+      "src/components/images/ImageStudio.tsx": "7ce87acfbb53ef3799b5ac7676128fd383413fb31a13d98a40a61e7b8210450c",
       "src/components/images/use-image-studio.ts": "49c062625ae17467e30bc7da6bbe6ad7994e5206bd44ba77fba5f680ebdf0b46",
       "src/components/public-content/DESIGN.json": "d8594db0bdf0f53295e4a7cb9cb7f770f47e54498d93489d2349cabb14373d61",
       "src/components/public-content/DESIGN.md": "5690bd552b364e0c2f353e2e4d50e0b0ce983605b589f42a3bdf5bdde4c22236",

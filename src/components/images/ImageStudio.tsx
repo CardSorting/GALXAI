@@ -10,7 +10,7 @@ import { ArrowDownToLine, ArrowLeft, ArrowRight, Check, ChevronDown, Copy, Image
 import { useAuth } from '@/contexts/AuthContext';
 import { WorkspaceSessionBoundary } from '@/components/auth/WorkspaceSessionBoundary';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
-import { DEFAULT_SETTINGS, GENERATION_PHASES, IMAGE_MODEL, INSPIRATION_PROMPTS, MAX_PROMPT, RATIOS, STYLE_PRESETS, readSettings, type StarterTemplate, type StudioImage, type StudioSettings } from './studio-contract';
+import { DEFAULT_SETTINGS, GENERATION_PHASES, IMAGE_MODEL, INSPIRATION_PROMPTS, MAX_PROMPT, RATIOS, readSettings, type StarterTemplate, type StudioImage, type StudioSettings } from './studio-contract';
 import { useImageStudio } from './use-image-studio';
 import { GenerationCanvas } from './GenerationCanvas';
 import { StudioArtwork as Artwork } from './StudioArtwork';
@@ -226,57 +226,15 @@ function StudioWorkspace({ owner, token, authLoading }: { owner: string | null; 
               {settings.prompt && <button type="button" className="studio-text-button" onClick={() => { setPrevious(settings); setSettings(current => ({ ...current, prompt: '' })); promptRef.current?.focus(); }}>Clear</button>}
             </div>
           </div>
-          <textarea id="studio-prompt" ref={promptRef} value={settings.prompt} maxLength={MAX_PROMPT} rows={6} placeholder={"Describe what you imagine…\n\nTry a subject, a setting, and a mood."} aria-describedby="studio-prompt-hint" onChange={event => setSettings(current => ({ ...current, prompt: event.target.value }))} />
-          <div className="studio-prompt-hint" id="studio-prompt-hint"><span>Be specific about light, color, and composition.</span>{settings.prompt.length > 28_000 && <span>{settings.prompt.length.toLocaleString()} / {MAX_PROMPT.toLocaleString()}</span>}</div>
-          
-          <div className="studio-styles-bar" aria-label="Style presets">
-            <span className="studio-styles-label">Style inspiration:</span>
-            <div className="studio-styles-pills">
-              {STYLE_PRESETS.map(preset => {
-                const isActive = settings.prompt.toLowerCase().includes(preset.name.toLowerCase());
-                return (
-                  <button
-                    key={preset.id}
-                    type="button"
-                    className="studio-style-chip"
-                    aria-pressed={isActive}
-                    onClick={() => {
-                      setPrevious(settings);
-                      setSettings(current => {
-                        const currentPrompt = current.prompt.trim();
-                        if (isActive) {
-                          const cleaned = currentPrompt.replace(new RegExp(`,?\\s*${preset.tag}`, 'gi'), '').replace(new RegExp(`,?\\s*${preset.name}`, 'gi'), '').trim();
-                          return { ...current, prompt: cleaned };
-                        } else {
-                          const updated = currentPrompt ? `${currentPrompt}, ${preset.tag}` : preset.tag;
-                          return { ...current, prompt: updated };
-                        }
-                      });
-                    }}
-                  >
-                    {preset.name}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+          <textarea id="studio-prompt" ref={promptRef} value={settings.prompt} maxLength={MAX_PROMPT} rows={6} placeholder={"Describe what you imagine…\n\nTry a subject, a setting, and a mood."} aria-describedby={settings.prompt.length > 28_000 ? "studio-prompt-hint" : undefined} onChange={event => setSettings(current => ({ ...current, prompt: event.target.value }))} />
+          {settings.prompt.length > 28_000 && <div className="studio-prompt-hint" id="studio-prompt-hint"><span>{settings.prompt.length.toLocaleString()} / {MAX_PROMPT.toLocaleString()}</span></div>}
 
           {previous && <button type="button" className="studio-text-button studio-undo" onClick={() => { setSettings(previous); setPrevious(null); studio.setNotice('Previous prompt restored.'); }}>Undo prompt change</button>}
 
-          <fieldset className="studio-fieldset"><legend>Aspect ratio</legend><div className="studio-ratios">{RATIOS.map(ratio => <button type="button" key={ratio.value} aria-label={`${ratio.label} ${ratio.value}`} aria-pressed={settings.ratio === ratio.value} title={`${ratio.label} (${ratio.useCase})`} onClick={() => setSettings(current => ({ ...current, ratio: ratio.value }))}>
-            <span className="studio-ratio-icon"><span style={{ width: ratio.width, height: ratio.height }} /></span>
+          <fieldset className="studio-fieldset"><legend>Aspect ratio</legend><div className="studio-ratios" role="radiogroup" aria-label="Aspect ratio">{RATIOS.map(ratio => <button type="button" key={ratio.value} aria-label={`${ratio.label} ${ratio.value}`} aria-pressed={settings.ratio === ratio.value} title={`${ratio.label} (${ratio.value})`} onClick={() => setSettings(current => ({ ...current, ratio: ratio.value }))}>
+            <span className="studio-ratio-icon" aria-hidden="true"><span style={{ width: Math.round(ratio.width * 0.7), height: Math.round(ratio.height * 0.7) }} /></span>
             <span className="studio-ratio-value">{ratio.value}</span>
-            <span className="studio-ratio-tag">{ratio.label}</span>
-          </button>)}</div><p className="studio-field-hint">{RATIOS.find(ratio => ratio.value === settings.ratio)?.label} ({RATIOS.find(ratio => ratio.value === settings.ratio)?.useCase}) · {RATIOS.find(ratio => ratio.value === settings.ratio)?.size.replace('x', ' × ')} px</p></fieldset>
-
-          <fieldset className="studio-fieldset studio-quality"><legend>Detail quality</legend><div className="studio-quality-options">
-            <button type="button" aria-pressed={settings.quality === 'standard'} onClick={() => setSettings(current => ({ ...current, quality: 'standard' }))}>
-              <span className="studio-quality-title">Standard</span><span className="studio-quality-meta">Fast (~14s)</span>
-            </button>
-            <button type="button" aria-pressed={settings.quality === 'hd'} onClick={() => setSettings(current => ({ ...current, quality: 'hd' }))}>
-              <span className="studio-quality-title">High detail</span><span className="studio-quality-meta">Enhanced (~22s)</span>
-            </button>
-          </div></fieldset>
+          </button>)}</div></fieldset>
 
           <fieldset className="studio-fieldset studio-count"><legend>Number of images</legend><div>{[1, 2, 3, 4].map(count => <button type="button" key={count} aria-pressed={settings.count === count} aria-label={`${count} ${count === 1 ? 'image' : 'images'}`} onClick={() => setSettings(current => ({ ...current, count }))}>{count}</button>)}</div></fieldset>
           </div>
