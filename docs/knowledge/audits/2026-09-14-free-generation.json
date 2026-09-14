@@ -1,0 +1,304 @@
+{
+  "observed_at": "2026-09-14T03:39:06.632559+00:00",
+  "base_revision": "0c8fa4ae9fff930ad0c70ee960f39e35b86dacdb",
+  "scope": "Completion of resumed one-time free generation working tree; local implementation and validation only.",
+  "reviewed_contracts": [
+    "scripts/run-supabase-integration.ts",
+    "scripts/test-free-generation-quota-db.ts",
+    "scripts/test-free-generation-quota.ts",
+    "scripts/test-image-public-http.ts",
+    "scripts/test-image-retry-contract.ts",
+    "scripts/test-sites-workspace.ts",
+    "scripts/verify-free-generation-ui.mjs",
+    "scripts/verify-image-public-http.ts",
+    "src/app/api/billing/generation-quota/route.ts",
+    "src/app/api/sites/workspace/route.ts",
+    "src/app/v1/images/generations/route.ts",
+    "src/components/dashboard/FreeGenerationQuota.tsx",
+    "src/components/dashboard/Navigation.tsx",
+    "src/components/dashboard/navigation.module.css",
+    "src/components/images/studio-contract.ts",
+    "src/components/images/use-image-studio.ts",
+    "src/components/sites/SitesWorkspace.tsx",
+    "src/components/sites/use-sites-workspace.ts",
+    "src/lib/billing/free-generation-contract.ts",
+    "src/lib/billing/free-generation-quota.ts",
+    "src/lib/billing/generation-access.ts",
+    "src/lib/billing/generation-quota-route.ts",
+    "src/lib/images/request-repository.ts",
+    "src/lib/images/request-service.ts",
+    "src/lib/public-content/content.ts",
+    "src/lib/security/public-image-http.ts",
+    "src/lib/sites/included-configuration.ts",
+    "src/lib/sites/included-generation.ts",
+    "src/lib/sites/workspace-contract.ts",
+    "src/lib/sites/workspace-repository.ts",
+    "src/lib/sites/workspace-route.ts",
+    "src/lib/supabase/types.ts",
+    "supabase/migrations/20260914030425_free_generation_quota.sql",
+    "supabase/rollbacks/20260914030425_free_generation_quota.down.sql",
+    ".github/workflows/vercel-preflight.yml"
+  ],
+  "reviewed_guides": [
+    ".impeccable/surfaces/src-app-knowledge-base-page-tsx.md",
+    ".impeccable/surfaces/src-components-dashboard-navigation-tsx.md",
+    "PRODUCT.md",
+    "docs/DOCUMENTATION_POLICY.md",
+    "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md",
+    "docs/PRODUCT_SURFACE_STRATEGY.md",
+    "docs/QUEUE_SPECIFICATION.md",
+    "docs/SITES_CONTENT.md",
+    "docs/SITES_WORKSPACE.md",
+    "docs/SUPABASE_PARANOID_ARCHITECTURE_SPEC.md",
+    "docs/adr/0149-one-time-free-generation.md",
+    "docs/adr/README.md",
+    "docs/how-to/change-with-documentation.md",
+    "docs/maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md",
+    "docs/maintainers/FREE_GENERATION_QUOTA.md",
+    "docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md",
+    "docs/maintainers/PUBLIC_DISCOVERY.md",
+    "docs/maintainers/SITES_FAIR_USAGE.md",
+    "docs/maintainers/SITES_OPERATIONS.md",
+    "docs/maintainers/SITES_WORKSPACE.md",
+    "docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md",
+    "docs/maintainers/image-public-boundary.md",
+    "docs/reference/knowledge-commands.md",
+    "post-mortem/CURRENT_STATE.md",
+    "post-mortem/runbooks/image-generation.md",
+    "docs/maintainers/CI_PIPELINE_AND_AUTOMATION_SPEC.md"
+  ],
+  "source_sha256": {
+    "scripts/run-supabase-integration.ts": "6db150424f58853f6e4508281a1ee8f58a92d782c2ca80373d12b45b1bb4e590",
+    "scripts/test-free-generation-quota-db.ts": "c1521975486657476210056875e43578b7fe7165a107b15d21cf1ec97a1930d7",
+    "scripts/test-free-generation-quota.ts": "b91bf19c9eaf6db1bd7d99e14fcb43cefc860d08f0b043315847d58f3d8a7fd0",
+    "scripts/test-image-public-http.ts": "1f5ed3d877c44d61eacd281cc3bf3eee2d9c1f65f911c1d36eb5e20e95e5f6a2",
+    "scripts/test-image-retry-contract.ts": "2dd9ae9d1e5b4c3ce132961cf05e37c3f983209a0a0c148abfdd870be92da292",
+    "scripts/test-sites-workspace.ts": "561a03851b1bf57a2792ad25ba8c3eb21ed7d72de2b82dc99d54fdd3e531fb5b",
+    "scripts/verify-free-generation-ui.mjs": "8f6706d4bf66edb5844ad40698dab5a7581873dbef8e72a7a36ddc285fbebb5c",
+    "scripts/verify-image-public-http.ts": "0d67711089e20bd43e0dc88d4385adfbdfee3ff4b04c2ea54495cff1925e50a8",
+    "src/app/api/billing/generation-quota/route.ts": "3ff9b9124e6541d8beb1095566b54ff0d69ec4110558ff71f9a96a1e2aa45974",
+    "src/app/api/sites/workspace/route.ts": "c6db0ab4de0d484ff2b90b253ff8f9a1172cd308da8710bd1d6a8a5a8e3eea74",
+    "src/app/v1/images/generations/route.ts": "a3897baa7171c68642c59f8e4fd9cdd1fbf9576a5f9bd0283fef0da187ca5f0c",
+    "src/components/dashboard/FreeGenerationQuota.tsx": "8b5911e2574e4e16ca9ee67b9300d6896b509bd4262f19d6b8a2741da35905ba",
+    "src/components/dashboard/Navigation.tsx": "4f4e795fdf8c469fee83351da97240214a46a132c7b9257f86dce6665e834e5c",
+    "src/components/dashboard/navigation.module.css": "bb8be9de213c0027191295a1a12bb1dbe336a8bca7d40858ea46a81dc68e9631",
+    "src/components/images/studio-contract.ts": "4ebf39fe97f225f9f666701d786078399654777bc7e8505cc1a12317c95ea673",
+    "src/components/images/use-image-studio.ts": "47f4de5f5df9973ad82d2ba610a1217907de3e95abfd05106104508fdff83022",
+    "src/components/sites/SitesWorkspace.tsx": "d99ef0f39b8649637cf05d1fb4cc5fa4672897819e0430c74055bc18b7128d9c",
+    "src/components/sites/use-sites-workspace.ts": "c48380c06527effbee6bcb01d128074fe911b16d23b7e7dbe7b1c2340732ef60",
+    "src/lib/billing/free-generation-contract.ts": "e49845852e0e30e24408eba374bdccce8b43523fc827c6dd2c2f5c9baef19b18",
+    "src/lib/billing/free-generation-quota.ts": "71d9ab920647b2b836d9f4ccc2b75b0477df5cdc1a00ed4773153e26f4251da6",
+    "src/lib/billing/generation-access.ts": "1a77356339a5cbf70d5db07651c7e94072524b23eb344f5353dfd1d33e18af87",
+    "src/lib/billing/generation-quota-route.ts": "e05771fb4d7470a4b9d29992712f53c93c531730ed352140ec444342731c0c18",
+    "src/lib/images/request-repository.ts": "d53eaad8a38f40005c71109e3fc2a82509442566664089d86285d77002aac421",
+    "src/lib/images/request-service.ts": "a58c5440d2e4b108bb7d0c3fea7dd978076e2019fada05718b7dab0f864bb9ec",
+    "src/lib/public-content/content.ts": "3989811e9a75fded097662abc1fedd4340b38d400d29f5a0fc94d1fc819249e8",
+    "src/lib/security/public-image-http.ts": "b71ed0e6209d252d38268d1ada097c9aa2f0bea5738acf0d36858f907f84baaf",
+    "src/lib/sites/included-configuration.ts": "cceb69569e8a9c11453e098aea6c116e6e2affc4313009a338c593984398acba",
+    "src/lib/sites/included-generation.ts": "2b740e6e1f7d9de36985091d4e1dd125cbf2996e3a5f9030ac18f9802bb3c92d",
+    "src/lib/sites/workspace-contract.ts": "6eb762c8d6695c6d9b00c86c81f14662a846f07e40a8929284ae7b10a7dce809",
+    "src/lib/sites/workspace-repository.ts": "31126b15b8811f8c36001495af49b28a283c5f5651aac9a8ae84540ee72109a2",
+    "src/lib/sites/workspace-route.ts": "4e86a10eea6d7d0d2466e3a40c6d744f9211f47f817bbb6850ccb3e79f6d14e8",
+    "src/lib/supabase/types.ts": "17003d61dc1ca932664b6f8d57b27b6b6914448d04b9e301f8dde02d08263b48",
+    "supabase/migrations/20260914030425_free_generation_quota.sql": "4ca1d231a805f0e15a6c20638b5728eb8ebe05ecd2158e63d68d8cf27177563b",
+    "supabase/rollbacks/20260914030425_free_generation_quota.down.sql": "e3e4d3a28ddcb51ae9ec5970304591ce63a9d9495c81f1805a1d6be60fa25328",
+    ".github/workflows/vercel-preflight.yml": "124587ef1b14fe558513720535d613a30f4dd2f384e28b2f6d70d3b5c24ae2ef"
+  },
+  "findings": [
+    "Free quota is a restricted one-time account allowance, separate from wallet deposits and paid subscriptions.",
+    "Current verified account and Pro authority control admission; public quota DTO and image artifacts use explicit allowlists.",
+    "Concurrent allocations/deductions commit with durable work; exact retries never deduct twice, including cancellations and Pro-to-free replays.",
+    "Proven non-start releases are atomic with terminal state, expired queued images can be released, and uncertain dispatch remains deducted.",
+    "Free publication requires the allocated Site. Public guides now distinguish three free turns from ongoing Pro fairness.",
+    "Counter displays remaining Site turns accessibly, fences accounts, bounds overlapping reads and handles unavailable data.",
+    "Compiled HTTP verifier now expects the canonical /login URL; prior /auth/signin assertion was stale.",
+    "Application preflight now runs the new quota authority/database suite and Sites workspace boundary tests; no hosted CI run was triggered."
+  ],
+  "checks": [
+    {
+      "command": "npm run test:free-quota",
+      "result": "passed",
+      "checks": 3
+    },
+    {
+      "command": "npm run test:free-quota:db",
+      "result": "passed",
+      "checks": 51
+    },
+    {
+      "command": "npm run test:image:security",
+      "result": "passed",
+      "checks": 40
+    },
+    {
+      "command": "npm run test:image:db",
+      "result": "passed",
+      "checks": 37
+    },
+    {
+      "command": "npm run test:sites:workspace",
+      "result": "passed",
+      "checks": 18
+    },
+    {
+      "command": "npm run test:sites:fair",
+      "result": "passed",
+      "checks": 7
+    },
+    {
+      "command": "npm run test:sites:workspace:db",
+      "result": "passed",
+      "checks": 86
+    },
+    {
+      "command": "npm run test:sites:fair:db",
+      "result": "passed",
+      "checks": 26
+    },
+    {
+      "command": "npm run test:sites:plans:db",
+      "result": "passed",
+      "checks": 16
+    },
+    {
+      "command": "npm run db:test",
+      "result": "passed",
+      "checks": 94
+    },
+    {
+      "command": "npm run test:egress:transport",
+      "result": "passed",
+      "checks": 42
+    },
+    {
+      "command": "npm run test:auth:sessions",
+      "result": "passed",
+      "checks": 33
+    },
+    {
+      "command": "npm run test:image:scale",
+      "result": "passed",
+      "checks": 16
+    },
+    {
+      "command": "npm run test:preview-admin",
+      "result": "passed",
+      "checks": 6
+    },
+    {
+      "command": "npm run db:verify",
+      "result": "passed",
+      "fatal": 0,
+      "warnings": 0
+    },
+    {
+      "command": "npx tsc --noEmit",
+      "result": "passed"
+    },
+    {
+      "command": "npm run lint",
+      "result": "passed",
+      "errors": 0,
+      "pre_existing_warnings": 8
+    },
+    {
+      "command": "node scripts/build-ci.mjs (isolated clean environment)",
+      "result": "passed",
+      "build_root": "/tmp/galx-quota-build-so4nhf6e",
+      "deployed": false
+    },
+    {
+      "command": "GALX_VERIFY_ORIGIN=http://localhost:3427 node --import tsx scripts/verify-image-public-http.ts",
+      "result": "passed",
+      "linked_browser_assets": 27
+    },
+    {
+      "command": "validate_build plus quota-specific private-marker scan",
+      "result": "passed",
+      "files": 668,
+      "issues": [],
+      "extraMarkers": [
+        "private.galx_free_generation",
+        "identity_hash",
+        "allowance_usd",
+        "free-generation:"
+      ]
+    },
+    {
+      "command": "npm run test:sites:conversation",
+      "result": "passed",
+      "tests": 15
+    },
+    {
+      "command": "node --import tsx --test scripts/test-public-reading.ts scripts/test-public-information-boundary.ts",
+      "result": "passed",
+      "tests": 10
+    },
+    {
+      "command": "npm run test:docs",
+      "result": "passed"
+    },
+    {
+      "command": "node scripts/verify-free-generation-ui.mjs",
+      "result": "passed",
+      "scope": "local synthetic Chromium; no external services",
+      "results": [
+        {
+          "width": 1440,
+          "states": [
+            "free",
+            "exhausted",
+            "unavailable",
+            "recovered",
+            "pro"
+          ],
+          "overlap": "coalesced",
+          "axeViolations": 0,
+          "mutations": 0
+        },
+        {
+          "width": 390,
+          "states": [
+            "free",
+            "exhausted",
+            "unavailable",
+            "recovered",
+            "pro"
+          ],
+          "overlap": "coalesced",
+          "axeViolations": 0,
+          "mutations": 0
+        },
+        {
+          "width": 320,
+          "states": [
+            "free",
+            "exhausted",
+            "unavailable",
+            "recovered",
+            "pro"
+          ],
+          "overlap": "coalesced",
+          "axeViolations": 0,
+          "mutations": 0
+        }
+      ]
+    }
+  ],
+  "migration_inventory": {
+    "applied": 105,
+    "pending": [
+      "20260914030425_free_generation_quota.sql"
+    ],
+    "production_mutations": 0
+  },
+  "review_scope_limits": [
+    "Broader domain fingerprints are inventory; this is a targeted review of changed source and canonical guides, not an exhaustive audit of every unchanged module.",
+    "Supabase fixtures model relevant account fields in PostgreSQL 17; external payment and generation services are blocked.",
+    "Normalized original-email hashing does not establish person-level anti-abuse or track every subsequent email change.",
+    "No production migration, deployment, payment, generation, publication or live account acceptance occurred.",
+    "Initial sandbox restrictions blocked Docker/listeners and font downloads; permitted isolated reruns passed.",
+    "First send-control geometry assertion used an exact viewport boundary; final fixture allows one CSS pixel of subpixel rounding and additionally checks hit testing without submission.",
+    "No incident status or prevention item was closed by this development work."
+  ]
+}

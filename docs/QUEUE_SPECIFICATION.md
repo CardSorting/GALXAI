@@ -13,13 +13,15 @@ Parent agents assign one key per logical operation and preserve the same payload
 
 Admission receipts provide bounded process-local acknowledgement recovery. A controller restart or expired admission receipt can remove deduplication evidence. Separately, opted-in Sites text jobs persist completion receipts on the original worker volume. Their signed receipt references can reach a replacement worker on that retained volume, while stream/status/cancel URLs retain generation binding. This does not create a distributed queue or permit another execution after uncertainty. See [ADR 0135](adr/0135-durable-sites-receipts-and-local-admission.md) and the [recovery table](RELAY_API_REFERENCE.md#request-recovery).
 
-Current Sites admission follows eligible paid-plan inclusion and shared fair usage. Historical fixed/metered receipts retain their original contract and reconciliation; wallet reservation is not the requirement for every new Sites operation. Account admission is independent of federation execution capacity. Queue time is included in the worker's local wall-time bound. See [Sites operations](maintainers/SITES_OPERATIONS.md).
+Current Sites admission follows Pro inclusion or the limited free workspace allowance and shared fair usage. The standalone content API stays Pro-only. Historical fixed/metered receipts retain their original contract and reconciliation; wallet reservation is not the requirement for every new Sites operation. Account admission is independent of federation execution capacity. Queue time is included in the worker's local wall-time bound. See [Sites operations](maintainers/SITES_OPERATIONS.md).
 
 ## Application image requests
 
-Public async images use [durable PostgreSQL receipts](../src/lib/images/request-repository.ts), not the generic process-local task table. The application commits before 202, scopes reads and transitions to the verified owner, fingerprints idempotency keys and claims dispatch atomically. Completion requires all owned image assets to be durably cataloged.
+Public async images and synchronous free images use [durable PostgreSQL receipts](../src/lib/images/request-repository.ts), not the generic process-local task table. The application commits before 202, scopes reads and transitions to the verified owner, fingerprints idempotency keys and claims dispatch atomically. Completion requires all owned image assets to be durably cataloged.
 
 [The service](../src/lib/images/request-service.ts) tracks bounded work with Next.js `after`. Status reads can schedule an unclaimed queued request; claimed attempts are never leased for redispatch. Timeout/failed status is not proof of no side effect. A late authoritative completion can be recorded. Cancellation only succeeds before dispatch; keep original identity and check the library before another submission.
+
+The [one-time free allowance](maintainers/FREE_GENERATION_QUOTA.md) commits image deductions with newly inserted receipts. Replays reuse saved outcomes without another deduction; queued cancellation, safe queue expiry and proven capacity non-start release only the corresponding usage. Dispatched uncertainty stays deducted.
 
 The [large-library implementation](maintainers/image-library-scale.md) bounds process-local metadata/page caches and pending image writes. A full write buffer rejects admission without evicting unsaved records; durable asset acknowledgement remains required. Browsing outages return unavailable instead of a partial cache presented as complete history. This does not add a durable generation queue.
 

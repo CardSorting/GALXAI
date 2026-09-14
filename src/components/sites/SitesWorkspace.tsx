@@ -67,7 +67,7 @@ function Workspace({owner,token,authLoading,initialId,initialStarter}: {owner:st
     if (!next) requestAnimationFrame(() => promptRef.current?.focus());
   }
   async function submit() {
-    if (!owner || !prompt.trim() || busy || studio.loading || studio.access!=='included' || site?.generating || checkpoint) return;
+    if (!owner || !prompt.trim() || busy || studio.loading || !['included','free'].includes(studio.access) || site?.generating || checkpoint) return;
     const submitted=prompt;let targetKey=draftKey;stick.current=true;submitting.current=true;
     try{sessionStorage.setItem(targetKey+':submitted',JSON.stringify({text:submitted,intent}));}catch{}
     remember('');
@@ -144,10 +144,10 @@ function Workspace({owner,token,authLoading,initialId,initialStarter}: {owner:st
             {site?.archived ? <div className="sites-archived"><p>This Site is archived.</p><button className="sites-button" onClick={()=>void studio.change({action:'archive',archived:false})}>Restore Site</button></div> : <form className="sites-composer" onSubmit={e=>{e.preventDefault();void submit();}}>
               <label className="sr-only" htmlFor="site-prompt">Describe your Site or ask for a change</label>
               <textarea id="site-prompt" ref={promptRef} value={prompt} maxLength={1800} rows={3} placeholder={site?.generating?'Draft your next message while we work…':intent==='discuss'?'Ask a question or explore an idea…':site?.document?'What would you like to change?':'Tell us about your Site…'} onChange={e=>remember(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.nativeEvent.isComposing){e.preventDefault();if(owner)void submit();}}}/>
-              <div className="sites-composer-actions"><div className="sites-modes" aria-label="Message mode"><button type="button" aria-pressed={intent==='build'} onClick={()=>remember(prompt,'build')}>Build</button><button type="button" aria-pressed={intent==='discuss'} onClick={()=>remember(prompt,'discuss')}>Discuss</button></div>{owner?<button className="sites-send" type="submit" disabled={studio.connection==='offline'||authLoading||studio.loading||openingSite||busy||Boolean(checkpoint)||site?.generating||studio.access!=='included'||!prompt.trim()||new TextEncoder().encode(prompt).length>2000} aria-label="Send message"><ArrowUp aria-hidden="true" /></button>:<Link className="sites-primary" href={`/login?next=${encodeURIComponent(initialStarter?.href || "/sites")}`}>Sign in to create<ArrowUpRight aria-hidden="true" /></Link>}</div>
+              <div className="sites-composer-actions"><div className="sites-modes" aria-label="Message mode"><button type="button" aria-pressed={intent==='build'} onClick={()=>remember(prompt,'build')}>Build</button><button type="button" aria-pressed={intent==='discuss'} onClick={()=>remember(prompt,'discuss')}>Discuss</button></div>{owner?<button className="sites-send" type="submit" disabled={studio.connection==='offline'||authLoading||studio.loading||openingSite||busy||Boolean(checkpoint)||site?.generating||!['included','free'].includes(studio.access)||!prompt.trim()||new TextEncoder().encode(prompt).length>2000} aria-label="Send message"><ArrowUp aria-hidden="true" /></button>:<Link className="sites-primary" href={`/login?next=${encodeURIComponent(initialStarter?.href || "/sites")}`}>Sign in to create<ArrowUpRight aria-hidden="true" /></Link>}</div>
             </form>}
             <p className="sites-composer-hint">{new TextEncoder().encode(prompt).length>2000?'Shorten your message to send it.':intent==='discuss'?'Explore ideas without changing your draft.':'Build applies your request to the current draft.'} <span>Shift + Enter for a new line.</span></p>
-            <p className="sites-help sites-plan-note">{studio.access==='included'?'Included with your plan.':`Create with ${PRO_PLAN.name} for $${PRO_PLAN.monthlyPriceUsd}/month.`} Fair use applies; you may need to pause between updates.</p>
+            <p className="sites-help sites-plan-note">{studio.access==='free'?'Your free site includes 3 turns total.':studio.access==='included'?'Included with your plan.':`Create with ${PRO_PLAN.name} for $${PRO_PLAN.monthlyPriceUsd}/month.`} Fair use applies; you may need to pause between updates.</p>
           </div>
         </>}
       </section>

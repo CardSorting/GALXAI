@@ -4,8 +4,9 @@ import type { SitesGenerationInput } from '../billing/sites-generation';
 import { FairUsageError } from './fair-policy';
 import { SitesFairStore,type FairInvocation,type FairPolicy,type PaidAccess } from './fair-store';
 
-export interface IncludedGenerationReply { text:string; completed:boolean; }
-const view=(row:FairInvocation):IncludedGenerationReply=>({text:row.output||'',completed:['completed','not_started','failed'].includes(row.state)});
+export interface IncludedGenerationReply { text:string; completed:boolean; notStarted?:boolean; }
+const view=(row:FairInvocation):IncludedGenerationReply=>({text:row.output||'',completed:['completed','not_started','failed'].includes(row.state),
+  ...(row.state==='not_started'?{notStarted:true}:{})});
 const hash=(v:unknown)=>createHash('sha256').update(JSON.stringify(v)).digest('hex');
 export async function recoverIncludedGeneration(store:SitesFairStore,account:string,operation:string,relay:{url:string;key:string},signal:AbortSignal,
   reader=readRelayReceipt):Promise<IncludedGenerationReply>{

@@ -45,11 +45,11 @@ const browserAssets = new Set<string>();
 for (const path of ['/images', '/sites', '/sites/00000000-0000-4000-8000-000000000000']) {
   const page = await fetch(`${base}${path}`, { redirect: 'manual' });
   assert.equal(page.status, 307, path);
-  assert.equal(new URL(page.headers.get('location')!, base).pathname, '/auth/signin');
+  assert.equal(new URL(page.headers.get('location')!, base).pathname, '/login');
   assert.equal(page.headers.get('cache-control'), 'private, no-store');
   assert.doesNotMatch(await page.text(), forbidden, path);
 }
-for (const path of ['/', '/auth/signin', '/api/openapi.json']) {
+for (const path of ['/', '/login', '/pricing/galx-pro', '/knowledge-base/getting-started', '/api/openapi.json']) {
   const page = await fetch(`${base}${path}`); assert.equal(page.status, 200, path);
   const html = await page.text();
   assert.doesNotMatch(html, forbidden, path);
@@ -58,6 +58,12 @@ for (const path of ['/', '/auth/signin', '/api/openapi.json']) {
     assert.equal(asset.origin, new URL(base).origin);
     browserAssets.add(asset.href);
   }
+}
+for (const authorization of ['', 'Bearer forged-quota-session']) {
+  const denied=await fetch(`${base}/api/billing/generation-quota`,{headers:authorization?{authorization}:{}});
+  assert.equal(denied.status,401);
+  assert.equal(denied.headers.get('cache-control'),'private, no-store');
+  assert.doesNotMatch(await denied.text(),forbidden);
 }
 assert.ok(browserAssets.size > 0, 'Rendered pages must expose browser assets for verification');
 for (const url of browserAssets) {

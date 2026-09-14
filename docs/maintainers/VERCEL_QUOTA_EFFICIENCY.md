@@ -23,6 +23,10 @@ Prioritize avoidable request/CPU work, then origin bytes and speculative reads. 
 
 [Vercel's Fluid pricing](https://vercel.com/docs/functions/usage-and-pricing) distinguishes active CPU, provisioned memory and invocations. Network waiting does not have the same CPU cost as executing code. [CDN usage](https://vercel.com/docs/manage-cdn-usage) separately counts visitor transfer and origin transfer; middleware can add another origin hop. Reducing calls avoids request overhead, but does not imply proportional CPU or money savings for an entire project.
 
+## Free allowance counter
+
+The signed-in shared header adds a private quota read on route entry, focus, visibility and generation-change events, plus a sixty-second visible interval. Requests have a fifteen-second deadline, one in-flight guard and owner/unmount cancellation. Pro hides the counter; failures never fabricate remaining counts. This is an additional per-visible-tab request cost, not a server push stream or cross-tab leader. [Quota operations](FREE_GENERATION_QUOTA.md) owns its allowance and retry contract.
+
 ## Implemented request budgets
 
 | Interaction | Previous behavior | Implemented behavior |

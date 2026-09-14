@@ -1,4 +1,5 @@
 'use client';
+import { GENERATION_QUOTA_CHANGED } from '@/lib/billing/free-generation-contract';
 import { workspaceFetch } from '@/lib/auth/workspace-client';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { startActivityPolling, recoveryDelay } from '@/lib/resilience/activity-polling';
@@ -6,7 +7,7 @@ import { readWorkspaceSite, readSiteSummary, readSiteMessage, workspaceError, ty
 
 class WorkspaceClientError extends Error {
   constructor(message:string,readonly status:number,readonly retryAfter:string|null=null){super(message);}
-  get definitive(){return [400,401,403,404,409,429].includes(this.status);}
+  get definitive(){return [400,401,402,403,404,409,429].includes(this.status);}
 }
 const EMPTY_MESSAGES:SiteMessage[]=[];
 const newer=(a:{revision:number;updatedAt:string},b:{revision:number;updatedAt:string})=>a.revision>b.revision || (a.revision===b.revision && Date.parse(a.updatedAt)>=Date.parse(b.updatedAt));
@@ -30,11 +31,13 @@ export function useSitesWorkspace(owner: string | null, token?: string, initialI
       if (!response.ok) {
         if(response.status===403 && alive.current){setAccess('paid_plan_required');setPublishing(false);}
         let code: unknown; try { code = (await response.json())?.error?.code; } catch {}
-        throw new WorkspaceClientError(code === 'invalid_username' ? 'Use 3–20 lowercase letters, numbers, or hyphens. Start with a letter and end with a letter or number.'
+        throw new WorkspaceClientError(code === 'free_site_limit' ? 'Your free site has already been created. Open it in My sites, or upgrade to Pro to create more.'
+          : code === 'free_quota_exhausted' ? 'Your three free site turns are used up. Upgrade to Pro to keep creating.'
+          : code === 'invalid_username' ? 'Use 3–20 lowercase letters, numbers, or hyphens. Start with a letter and end with a letter or number.'
           : code === 'username_unavailable' ? 'That username isn’t available. Choose another, or refresh to use your saved username.'
           : code === 'request_too_long' ? 'Shorten your message or project notes, then try again.' : workspaceError(response.status),response.status,response.headers.get('Retry-After'));
       }
-      const result=await response.json();if(alive.current)setConnection('online');return result;
+      const result=await response.json();if(body)window.dispatchEvent(new Event(GENERATION_QUOTA_CHANGED));if(alive.current)setConnection('online');return result;
     } catch(error) {
       if(alive.current && !signal?.aborted && !(error instanceof WorkspaceClientError))setConnection(navigator.onLine?'reconnecting':'offline');
       throw error;
@@ -64,7 +67,7 @@ export function useSitesWorkspace(owner: string | null, token?: string, initialI
         if (!alive.current || epoch !== loadEpoch.current) return;
         if (data.site) accept(data.site);
         setSites(current => rows.map(row => { const old=current.find(s=>s.id===row.id); return old && newer(old,row) ? old : row; }));
-        setAccess(data.setup.access==='included' ? 'included' : data.setup.access==='paid_plan_required' ? 'paid_plan_required' : 'unavailable');
+        setAccess(data.setup.access==='free' ? 'free' : data.setup.access==='included' ? 'included' : data.setup.access==='paid_plan_required' ? 'paid_plan_required' : 'unavailable');
         setPublishing(data.setup.publishing==='available');
         setUsername(typeof data.setup.username==='string' ? data.setup.username : null);
         refreshedAt.current = Date.now();

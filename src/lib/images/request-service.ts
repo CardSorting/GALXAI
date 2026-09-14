@@ -1,4 +1,5 @@
 import { after } from 'next/server';
+import { ImageCapacityError } from '../../core/router/ImageCapacityError';
 import { getPostgresPool } from '../db/postgres';
 import { ImageRequestRepository, type ImageRequestRecord, type StoredImageRequest } from './request-repository';
 import type { GalxModelRouter } from '../../core/router/GalxModelRouter';
@@ -26,10 +27,10 @@ export class ImageRequestService {
     private readonly generate = generateImage,
     private readonly schedule: (work: () => Promise<void>) => void = after) {}
 
-  async create(owner: string, payload: StoredImageRequest, priority: boolean) {
+  async create(owner: string, payload: StoredImageRequest, priority: boolean, free = false, schedule = true) {
     if (!GalxUnifiedR2StorageManager.getInstance().isConfigured()) throw new Error('Image storage unavailable');
-    const record = await this.repository.create(owner, payload, priority);
-    this.resume(record);
+    const record = await this.repository.create(owner, payload, priority, free);
+    if(schedule) this.resume(record);
     return record;
   }
 
@@ -37,7 +38,7 @@ export class ImageRequestService {
     if (record.state === 'queued') this.schedule(() => this.run(record.user_id, record.id));
   }
 
-  async run(owner: string, id: string) {
+  async run(owner: string, id: string, reportFailure = false) {
     try {
       const request = await this.repository.claim(owner,id);
       if (!request) return;
@@ -50,9 +51,10 @@ export class ImageRequestService {
         await this.repository.complete(owner,id,assets as string[]);
       } catch (error) {
         logImageFailure(id,error);
-        await this.repository.fail(owner,id);
+        await this.repository.fail(owner,id,error instanceof ImageCapacityError);
+        if (reportFailure) throw error;
       }
-    } catch (error) { logImageFailure(id,error); }
+    } catch (error) { logImageFailure(id,error); if (reportFailure) throw error; }
   }
 }
 

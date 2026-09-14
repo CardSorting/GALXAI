@@ -61,6 +61,12 @@ jobs:
       - name: Verify durable image requests and Favorites in isolated PostgreSQL
         run: npm run test:image:db
 
+      - name: Verify free-generation authority, quota and recovery
+        run: |
+          npm run test:free-quota
+          npm run test:free-quota:db
+          npm run test:sites:workspace
+
       - name: Verify isolated historical image artifact fixture
         run: npm run test:relay:image
 

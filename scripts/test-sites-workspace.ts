@@ -7,6 +7,7 @@ import { renderSitePreview } from '../src/lib/sites/site-preview';
 import { publishedSiteRoute } from '../src/lib/sites/published-route';
 import { ManagedSitesHosting, managedDomainPlan, verifyManagedSite } from '../src/lib/sites/managed-hosting';
 import { FairUsageError } from '../src/lib/sites/fair-policy';
+import { FreeQuotaError } from '../src/lib/billing/free-generation-quota';
 import { SiteDomainError } from '../src/lib/sites/domains';
 import { publishedSiteProxy, PUBLISHED_SITE_HEADERS } from '../src/lib/sites/published-proxy';
 const id='e6581c35-7a8d-4c01-a630-a3c8e6f9531b',operation='93cf1b29-93f8-4a1c-84d4-a39fe9534d43';
@@ -28,6 +29,39 @@ function fixture(){
   return{handle,repo,current:()=>current,dispatches:()=>dispatches,reads:()=>reads,setMode:(next:string)=>mode=next};
 }
 function request(body?:unknown,authorization='Bearer alice',query=''){return new Request('https://galx.ai/api/sites/workspace'+query,{method:body?'POST':'GET',headers:{authorization,'Content-Type':'application/json',cookie:'admin=true'},...(body?{body:JSON.stringify(body)}:{})});}
+
+test('free workspace admission enforces quota before dispatch and preserves ambiguous work',async()=>{
+  for(const mode of ['quota','deferred','unknown','not_started']){
+    const f=fixture();let dispatches=0,released=false;
+    const repo={...f.repo,begin:async(...args:any[])=>{
+      assert.equal(args[6],true);if(mode==='quota')throw new FreeQuotaError();
+      return (f.repo.begin as any)(...args);
+    },finish:async(...args:any[])=>{released=args[7]===true;return (f.repo.finish as any)(...args);}};
+    const handle=sitesWorkspaceRoute({authenticate:async()=>({id:'alice'}),repository:()=>repo as any,
+      requireAccess:async()=>'free',prepare:async()=>({free:true,generate:async()=>{
+        dispatches++;if(mode==='deferred')throw new FairUsageError(503,'private capacity');
+        if(mode==='unknown')throw new Error('private dispatch');
+        return{text:'',completed:true,notStarted:true,private:'secret'};
+      }}),recover:async()=>({text:'',completed:false})});
+    const setup=await handle(request(undefined,'Bearer alice','?view=setup'));
+    assert.equal((await setup.json()).access,'free');
+    const response=await handle(request({action:'generate',id,revision:0,operationId:operation,brief:'Build a page'}));
+    assert.equal(response.status,mode==='quota'?402:mode==='deferred'?503:200);
+    assert.equal(dispatches,mode==='quota'?0:1);
+    assert.equal(released,['deferred','not_started'].includes(mode));
+    if(mode==='unknown')assert.equal(f.current().operation_id,operation);
+    const raw=await response.text();assert.doesNotMatch(raw,/private|notStarted|operation_id/);
+  }
+});
+test('free publication checks the allocated site before creating a public snapshot',async()=>{
+  const f=fixture();let publishes=0;
+  const handle=sitesWorkspaceRoute({authenticate:async()=>({id:'alice'}),repository:()=>({...f.repo,
+    requireFreeSite:async()=>{throw new FreeQuotaError('free_site_limit');}}) as any,
+    requireAccess:async()=>'free',prepare:async()=>({free:true,generate:async()=>({text:'',completed:false})}),
+    recover:async()=>({text:'',completed:false}),canPublish:()=>true,publish:async()=>{publishes++;return row();}});
+  const response=await handle(request({action:'publish',audience:'public',id,revision:0,username:'alice'}));
+  assert.equal(response.status,402);assert.deepEqual(await response.json(),{error:{code:'free_site_limit'}});assert.equal(publishes,0);
+});
 const generate={action:'generate',id,operationId:operation,revision:0,brief:'Build a page'};
 test('workspace rejects anonymous, customer API keys and forged admin cookies before storage',async()=>{const f=fixture();for(const auth of['','Bearer api-key','Bearer admin']){const response=await f.handle(request(undefined,auth));assert.equal(response.status,401);assert.deepEqual(await response.json(),{error:{code:'sign_in_required'}});}assert.equal(f.reads(),0);});
 test('workspace enforces ownership before membership checks or dispatching and emits an explicit DTO',async()=>{const f=fixture();assert.equal((await f.handle(request(generate,'Bearer bob'))).status,404);assert.equal(f.dispatches(),0);

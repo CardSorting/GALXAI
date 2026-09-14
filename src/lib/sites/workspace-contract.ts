@@ -10,7 +10,7 @@ export interface WorkspaceSite {
 }
 export type SiteSummary = Omit<WorkspaceSite, 'document' | 'messages' | 'context' | 'historyCursor'>;
 export interface SiteVersion { version: number; label: string; createdAt: string; }
-export type SitesAccess = 'included' | 'paid_plan_required' | 'unavailable';
+export type SitesAccess = 'free' | 'included' | 'paid_plan_required' | 'unavailable';
 export function readSiteDocument(input: unknown): SiteDocument | null {
   const v = input as Record<string, unknown> | null;
   const fields = (x: any, keys: string) => x && typeof x === 'object' && !Array.isArray(x) && Object.keys(x).sort().join(',') === keys;

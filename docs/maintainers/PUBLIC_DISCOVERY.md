@@ -22,7 +22,7 @@ Global navigation and the footer expose Sites, Images, Pricing, FAQ, Knowledge b
 | `/knowledge-base/public-beta` | Expectations, interruptions and useful feedback |
 | `/knowledge-base/images-and-developer-access` | Distinguish Sites, Images and approved developer access |
 
-Static route files select authored guides from `src/lib/public-content/content.ts`. The homepage reuses the same FAQ answers and plan inclusions. Price/name come from `src/lib/billing/pro-plan.ts`; do not duplicate operational product mappings or supplier settings. No new annual plan, discount, free generation, image price or availability guarantee is introduced.
+Static route files select authored guides from `src/lib/public-content/content.ts`. The homepage reuses the same FAQ answers and plan inclusions. Price/name come from `src/lib/billing/pro-plan.ts`; do not duplicate operational product mappings or supplier settings. The one-time welcome allowance now permits one Site with three total turns and five images, under [quota operations](FREE_GENERATION_QUOTA.md). Reconcile all getting-started, pricing and FAQ bodies with those limits. No new annual plan, discount, image price or availability guarantee is introduced.
 
 ## Public boundary and SEO
 

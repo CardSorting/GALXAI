@@ -6,7 +6,7 @@ Private maintainer guide. [ADR 0140](../adr/0140-paid-sites-and-shared-fair-usag
 
 ## Current path
 
-The browser workspace and content API use the same included-generation adapter and shared authority. They neither quote new generation prices nor reserve, debit or settle wallet funds for new work. Account-owned creation and managed publication also require current Pro eligibility. Browsing, export, recovery and unpublishing preserve existing work.
+The browser workspace and content API use the same included-generation adapter and shared authority. They neither quote new generation prices nor reserve, debit or settle wallet funds for new work. The standalone content API requires current Pro eligibility. The browser workspace additionally offers one allocated free Site and three total turns under [quota operations](FREE_GENERATION_QUOTA.md); only that Site can publish through free access. Browsing, export, recovery and unpublishing preserve existing work.
 
 The [workspace runbook](SITES_WORKSPACE.md) covers private drafts, publication snapshots and managed hosting. [Address operations](SITES_DOMAINS.md) covers the existing DNS worker. The optional native workflow retains its own connection and domain gates. No new worker or external service is added for fair usage.
 
@@ -18,6 +18,6 @@ The [archived September 12 operations guide](../../internal/scaling-strategy-202
 
 ## Verification and rollback
 
-Run `npm run test:sites:fair`, `npm run test:sites:fair:db`, `npm run test:sites:workspace`, `npm run test:sites:workspace:db`, `npm run db:verify`, and `npm run db:test`. The database suites create disposable isolated fixtures; no separate legacy fixture is needed. Run the isolated application production build and public-boundary scan described in the fair-use runbook.
+Run `npm run test:free-quota`, `npm run test:free-quota:db`, `npm run test:sites:fair`, `npm run test:sites:fair:db`, `npm run test:sites:workspace`, `npm run test:sites:workspace:db`, `npm run db:verify`, and `npm run db:test`. The database suites create disposable isolated fixtures; no separate legacy fixture is needed. Run the isolated application production build and public-boundary scan described in the fair-use runbook.
 
 Disable the private policy first to stop admission. Keep included and legacy recovery, published snapshots, domains and their workers available. The additive migration's DOWN file disables admission and preserves private state. Do not turn a rollback into new wallet billing or discard unresolved reservations.

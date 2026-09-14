@@ -10,8 +10,8 @@ Private product authority, reconciled September 13, 2026. [PRODUCT.md](../PRODUC
 | --- | --- |
 | Homepage | Sites-first idea, prototype, revision and public-address pitch; pricing followed by FAQ; extremely early public beta expectations |
 | Public guidance | Dedicated `/pricing`, `/faq`, `/knowledge-base` and eight authored guides, with capability-only copy and no workspace access grant |
-| Sites | Public product with authenticated owned drafts, continuing conversations, preview/version history and explicit managed publication; paid-plan and fair-use requirements remain |
-| Images | Public product with existing account/usage requirements, creation, durable async receipts, owned library, Favorites and sanitized download |
+| Sites | Public product with authenticated owned drafts, continuing conversations, preview/version history and explicit managed publication; one free Site with three total turns, or Pro access under fair usage |
+| Images | Public product with a one-time five-image allowance and existing Pro account/usage requirements, creation, durable async receipts, owned library, Favorites and sanitized download |
 | Developer preview | Signup, project introduction, GitHub/LinkedIn profiles and cohort interest; individual approval before private API/tool access |
 | Staff administration | Independent owner/reviewer/viewer membership, approval inbox, activity history and private feedback |
 | Destination chat and arbitrary execution | Not introduced by the image studio or bounded Sites workspace; downstream and other proposals retain their own scope |
@@ -22,7 +22,7 @@ Public means users can discover and engage with Images and Sites without develop
 
 Explain the pain removed: arranging development, producing an early prototype, revising it and publishing a shareable version. Explain user outcomes and the early beta's purpose, not implementation. Homepage content and metadata omit provider/model names. “Unlimited revisions and turns” must retain the established fair-use meaning, without promising unlimited concurrent capacity or abuse tolerance.
 
-Current Pro pricing and eligible plan mappings come from the maintained billing/product configuration and [Sites fair usage](maintainers/SITES_FAIR_USAGE.md), not historical fixed-price draft documents. Images/API usage and prepaid credits retain separate terms. Existing per-generation Sites receipts retain their originally accepted contract and recovery path; do not reprice history.
+The one-time free allowance is defined in [quota operations](maintainers/FREE_GENERATION_QUOTA.md); it is not wallet credit or unlimited free use. Current Pro pricing and eligible plan mappings come from the maintained billing/product configuration and [Sites fair usage](maintainers/SITES_FAIR_USAGE.md), not historical fixed-price draft documents. Images/API usage and prepaid credits retain separate terms. Existing per-generation Sites receipts retain their originally accepted contract and recovery path; do not reprice history.
 
 Small developer cohorts support controlled demand and a trustworthy first experience. Participant savings reports are observations requiring attribution and bounded claims, not guaranteed inference discounts. Signup/payment never substitutes for approval.
 

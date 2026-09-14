@@ -1,4 +1,6 @@
 import test from 'node:test';
+import { GenerationAccess } from '../src/lib/billing/generation-access';
+import { FreeQuotaError } from '../src/lib/billing/free-generation-quota';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import sharp from 'sharp';
@@ -47,6 +49,9 @@ async function inspectArtifact(response: Response, format = 'png') {
 // The HTTP adapter serializes the actual application Response without interpreting its body.
 // All assertions below use a real HTTP client's bytes and headers.
 test('raw image HTTP boundary: success, compatibility, errors, async and adversarial fields', async t => {
+  const resolveAccess=GenerationAccess.resolve;
+  GenerationAccess.resolve=async()=> 'pro';
+  t.after(()=>{GenerationAccess.resolve=resolveAccess;});
   const restore = [GalxAuthEngine.getInstance, GalxSeatTierEngine.getInstance, galxRouter.routeImageGeneration, ImageRequestService.getInstance, ImageLibraryRepository.getInstance, GalxR2AssetAdapter.getInstance, GalxQueueEventBus.getInstance];
   let authenticated = true, capped = false, failure: unknown, calls = 0;
   let task: any = { id: 'opaque-task', user_id: 'customer', state: 'queued', asset_ids: ['asset'], queueId: secret, lastError: { message: secret },
@@ -174,6 +179,30 @@ test('raw image HTTP boundary: success, compatibility, errors, async and adversa
       task.output_format = undefined;
       task.state = 'failed'; await checkError(await fetch(origin), 502, 'generation_failed');
       task.user_id = 'someone-else'; await checkError(await fetch(origin), 404, 'not_found');
+    });
+    await t.test('free requests enforce quota for sync and async and keep artifact/error allowlists',async()=>{
+      GenerationAccess.resolve=async()=>'free';
+      const before=calls;
+      let exhausted=false,created=0,runs=0;
+      task={id:'opaque-task',user_id:'customer',state:'completed',asset_ids:['asset'],response_format:'b64_json',private:secret};
+      ImageRequestService.getInstance=()=>({create:async(owner:string,payload:any,_priority:boolean,free:boolean,schedule=true)=>{
+        assert.equal(owner,'customer');assert.equal(free,true);created++;
+        assert.equal(payload.private,undefined);
+        if(exhausted)throw Object.assign(new FreeQuotaError(),{message:secret});
+        task.response_format=payload.response_format;task.output_format=payload.outputFormat;
+        if(schedule)task.state='queued';return task;
+      },run:async()=>{runs++;task.state='completed';},resume:()=>{},repository:{get:async()=>task}}) as any;
+      await inspectArtifact(await send({prompt:'flower',private:secret,output_format:'webp'}),'webp');
+      assert.equal(runs,1);
+      const json=await send({prompt:'flower',response_format:'b64_json'});checkHeaders(json);
+      const raw=await json.text();assert.doesNotMatch(raw,forbidden);assert.deepEqual(Object.keys(JSON.parse(raw)).sort(),['created','data']);
+      const asyncResponse=await send({prompt:'flower'},{prefer:'respond-async'});checkHeaders(asyncResponse);
+      assert.equal(asyncResponse.status,202);assert.deepEqual(Object.keys(await asyncResponse.json()).sort(),['id','status','task_url']);
+      exhausted=true;
+      for(const headers of [{},{prefer:'respond-async'}])await checkError(await send(undefined,headers),402,'free_quota_exhausted');
+      assert.equal(created,5);assert.equal(runs,2);assert.equal(calls,before,'free requests never use the unreserved dispatch path');
+      GenerationAccess.resolve=async()=>{throw Object.assign(new Error(secret),{status:503});};
+      await checkError(await send(),503,'temporarily_unavailable');assert.equal(created,5);
     });
   } finally {
     [GalxAuthEngine.getInstance, GalxSeatTierEngine.getInstance, galxRouter.routeImageGeneration, ImageRequestService.getInstance, ImageLibraryRepository.getInstance, GalxR2AssetAdapter.getInstance, GalxQueueEventBus.getInstance] = restore as any;

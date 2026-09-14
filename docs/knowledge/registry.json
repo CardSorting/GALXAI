@@ -79,21 +79,30 @@
         "scripts/verify-image-public-http.ts",
         "scripts/test-relay-image-generation.ts",
         "src/app/images/**/*.tsx",
-        "scripts/verify-url-navigation.mjs"
+        "scripts/verify-url-navigation.mjs",
+        "src/lib/billing/free-generation*.ts",
+        "src/lib/billing/generation-*.ts",
+        "src/app/api/billing/generation-quota/**/*.ts",
+        "scripts/test-free-generation*.ts",
+        "scripts/test-image-retry-contract.ts",
+        "scripts/verify-image-public-http.ts"
       ],
       "guides": [
         "docs/QUEUE_SPECIFICATION.md",
         "docs/maintainers/image-public-boundary.md",
         "post-mortem/runbooks/image-generation.md",
         "docs/maintainers/image-library-scale.md",
-        "docs/maintainers/readable-urls.md"
+        "docs/maintainers/readable-urls.md",
+        "docs/maintainers/FREE_GENERATION_QUOTA.md"
       ],
       "checks": [
         "npm run test:image:security",
         "npm run test:image:db",
         "npm run test:image:scale",
         "npm run test:image:library-db",
-        "npm run test:relay:image"
+        "npm run test:relay:image",
+        "npm run test:free-quota",
+        "npm run test:free-quota:db"
       ]
     },
     "access": {
@@ -157,7 +166,13 @@
         "src/components/admin/PreviewAdminWorkspace.tsx",
         "src/components/billing/BillingClient.tsx",
         "src/components/developers/DeveloperPreview.tsx",
-        "src/components/keys/QuickTopUpClient.tsx"
+        "src/components/keys/QuickTopUpClient.tsx",
+        "src/lib/billing/free-generation*.ts",
+        "src/lib/billing/generation-*.ts",
+        "src/app/api/billing/generation-quota/**/*.ts",
+        "scripts/test-free-generation*.ts",
+        "src/components/dashboard/FreeGenerationQuota.tsx",
+        "scripts/verify-free-generation-ui.mjs"
       ],
       "guides": [
         "docs/operations/developer-preview.md",
@@ -168,12 +183,15 @@
         "docs/STANDARDIZED_OAUTH_AND_INGESTION_ARCHITECTURE.md",
         "docs/SECURITY_POSTURE_AND_THREAT_MODEL.md",
         "docs/adr/0147-verified-account-and-session-authority.md",
-        "docs/maintainers/readable-urls.md"
+        "docs/maintainers/readable-urls.md",
+        "docs/maintainers/FREE_GENERATION_QUOTA.md"
       ],
       "checks": [
         "npm run test:preview-admin",
         "npm run test:image:security",
-        "npm run test:auth:sessions"
+        "npm run test:auth:sessions",
+        "npm run test:free-quota",
+        "npm run test:free-quota:db"
       ]
     },
     "sites": {
@@ -188,14 +206,22 @@
         "src/components/sites/use-sites-workspace.ts",
         "scripts/manage-pro-access.ts",
         "scripts/test-sites-plans-db.ts",
-        "src/components/billing/PlanPanel.tsx"
+        "src/components/billing/PlanPanel.tsx",
+        "src/lib/billing/free-generation*.ts",
+        "src/lib/billing/generation-*.ts",
+        "src/app/api/billing/generation-quota/**/*.ts",
+        "scripts/test-free-generation*.ts"
       ],
       "guides": [
         "docs/maintainers/SITES_OPERATIONS.md",
         "docs/maintainers/SITES_FAIR_USAGE.md",
         "docs/maintainers/SITES_WORKSPACE.md",
         "docs/maintainers/SITES_DOMAINS.md",
-        "docs/adr/0148-complimentary-pro-access.md"
+        "docs/adr/0148-complimentary-pro-access.md",
+        "docs/maintainers/FREE_GENERATION_QUOTA.md",
+        "docs/adr/0149-one-time-free-generation.md",
+        "docs/SITES_WORKSPACE.md",
+        "docs/SITES_CONTENT.md"
       ],
       "checks": [
         "npm run test:sites:fair",
@@ -203,7 +229,9 @@
         "npm run test:sites:conversation",
         "npm run test:sites:fair:db",
         "npm run test:sites:workspace:db",
-        "npm run test:sites:plans:db"
+        "npm run test:sites:plans:db",
+        "npm run test:free-quota",
+        "npm run test:free-quota:db"
       ]
     },
     "relay": {
@@ -247,7 +275,8 @@
       ],
       "guides": [
         "docs/SUPABASE_PARANOID_ARCHITECTURE_SPEC.md",
-        "docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md"
+        "docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md",
+        "docs/maintainers/FREE_GENERATION_QUOTA.md"
       ],
       "checks": [
         "npm run db:verify",
@@ -355,13 +384,16 @@
         "src/lib/images/navigation.ts",
         "src/components/common/FloatingActionDock.tsx",
         "src/app/robots.ts",
-        "scripts/verify-url-navigation.mjs"
+        "scripts/verify-url-navigation.mjs",
+        "src/components/dashboard/FreeGenerationQuota.tsx",
+        "scripts/verify-free-generation-ui.mjs"
       ],
       "guides": [
         "docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md",
         "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md",
         "docs/maintainers/PUBLIC_DISCOVERY.md",
-        "docs/maintainers/readable-urls.md"
+        "docs/maintainers/readable-urls.md",
+        "docs/PRODUCT_SURFACE_STRATEGY.md"
       ],
       "checks": [
         "npm run test:egress:transport",
@@ -464,6 +496,17 @@
         "ux",
         "audit"
       ]
+    },
+    "docs/maintainers/FREE_GENERATION_QUOTA.md": {
+      "kind": "how-to",
+      "keywords": [
+        "free",
+        "allowance",
+        "quota",
+        "images",
+        "sites",
+        "billing"
+      ]
     }
   },
   "runbooks": [
@@ -534,6 +577,17 @@
       "target": "galx.ai account Pro eligibility",
       "revision": "68162da + reviewed working tree (dpl_BNgo95mjZxGLnMXimHxAs5MrGLMG)",
       "observed_at": "2026-09-14T01:51:14.255272+00:00"
+    },
+    "docs/adr/0149-one-time-free-generation.md": {
+      "status": "proposed",
+      "delivery": "local",
+      "domain": "sites",
+      "owner": "Product/API maintainer",
+      "date": "2026-09-14",
+      "evidence": [
+        "docs/knowledge/audits/2026-09-14-free-generation.json"
+      ],
+      "supersedes": []
     }
   },
   "managed_adr_from": 145,

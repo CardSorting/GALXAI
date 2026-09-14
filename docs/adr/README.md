@@ -165,3 +165,4 @@ Use the [authoring guide](../maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md) f
 | 0146 | [ADR 0146: Bounded image library browsing and preview delivery](0146-bounded-image-libraries.md) | Proposed; local implementation and isolated verification, no deployment |
 | 0147 | [ADR 0147: Verified account and session authority](0147-verified-account-and-session-authority.md) | Proposed; local account, connection and session security corrections; release acceptance separate |
 | 0148 | [ADR 0148: Explicit complimentary Pro access](0148-complimentary-pro-access.md) | Authorized account grants with current server checks; payment and staff permissions remain independent |
+| 0149 | [ADR 0149: One-time free generation allowance](0149-one-time-free-generation.md) | Proposed; local quota enforcement and retained-state recovery, production release separate |

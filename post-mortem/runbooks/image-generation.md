@@ -8,6 +8,7 @@ Use this for Images, Favorites, async generation and download failures. Start wi
 | --- | --- | --- |
 | Expired-session error on a signed-in account | Auth result vs transport failure; public Auth configuration type | Verify with the dedicated Auth client; retain 401 for rejected tokens and 503 for temporary verification failure |
 | POST 202 followed by missing status | Exact deployment, applied image migration, owner and receipt ID | Confirm the durable repository is serving both POST and GET; do not recreate the generation |
+| Free quota denied or appears stale | Server account allowance, original receipt state and release evidence | Follow [quota operations](../../docs/maintainers/FREE_GENERATION_QUOTA.md); refresh the counter and preserve unknown execution deductions |
 | Request fails immediately | Storage configuration and generation-service reachability | Repair the failing dependency; a stored failure does not authorize replay |
 | Request remains pending | Receipt claim/deadline and correlated execution evidence | Read the original receipt; inspect the library for completed assets before a new submission |
 | Download or library unavailable | Owner-scoped asset row, object existence, sanitized artifact delivery | Repair delivery separately from synthesis; do not regenerate an existing image |
@@ -20,7 +21,9 @@ Check the source and target separately. The image path requires the private imag
 
 Use [database operations](../../docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md) for migrations. The durable-receipt migration is additive; its rollback refuses to drop populated receipts. The separate bounded-library migration adds only a page function and ordering indexes; apply it before the compact client, and remove dependent readers before its non-destructive SQL rollback. Retain it during compatible application rollback. Never substitute the old process-local image queue or silently retry claimed generation.
 
-Run `npm run test:image:security`, `npm run test:image:db`, `npm run test:developer-preview`, and a production build for image/auth/persistence changes. Run BroccoliDB hardening when its write path changes. For library/thumbnail changes also run `npm run test:image:scale` and `npm run test:image:library-db`, plus the controlled large-library browser fixture. The database runner uses an isolated disposable fixture, never production data. Record actual totals and failures in the incident, not permanent test counts in this guide.
+The quota migration must also precede dependent image handlers. Its rollback retains grants and usage; stop new free admission by rolling back the application, never by deleting allowance records.
+
+Run `npm run test:free-quota`, `npm run test:free-quota:db`, `npm run test:image:security`, `npm run test:image:db`, `npm run test:developer-preview`, and a production build for image/auth/persistence changes. Run BroccoliDB hardening when its write path changes. For library/thumbnail changes also run `npm run test:image:scale` and `npm run test:image:library-db`, plus the controlled large-library browser fixture. The database runner uses an isolated disposable fixture, never production data. Record actual totals and failures in the incident, not permanent test counts in this guide.
 
 ## Live acceptance
 

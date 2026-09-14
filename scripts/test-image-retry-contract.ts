@@ -6,11 +6,14 @@ import { GalxSeatTierEngine } from '../src/core/subscription/GalxSeatTierEngine'
 import { galxRouter } from '../src/core/router/GalxModelRouter';
 import { ImageCapacityError } from '../src/core/router/ImageCapacityError';
 import { RelayDispatchError } from '../src/core/router/adapters/RelayChatTransport';
+import { GenerationAccess } from '../src/lib/billing/generation-access';
 
 const auth = GalxAuthEngine.getInstance;
 const seat = GalxSeatTierEngine.getInstance;
 const route = galxRouter.routeImageGeneration;
+const access = GenerationAccess.resolve;
 try {
+  GenerationAccess.resolve = async () => 'pro';
   GalxAuthEngine.getInstance = () => ({ resolveAuthIdentity: async () => ({ authenticated: true, userId: 'fixture' }) }) as any;
   GalxSeatTierEngine.getInstance = () => ({ resolveUserSeatTier: async () => ({ isCapped: false, tier: 'standard' }) }) as any;
   for (const failure of [new ImageCapacityError(Date.now() + 30000), new RelayDispatchError('image_deadline_or_cancelled')]) {
@@ -33,6 +36,7 @@ try {
   GalxAuthEngine.getInstance = auth;
   GalxSeatTierEngine.getInstance = seat;
   galxRouter.routeImageGeneration = route;
+  GenerationAccess.resolve = access;
 }
 
 // Exercise the actual dispatcher decision without starting persistence workers.

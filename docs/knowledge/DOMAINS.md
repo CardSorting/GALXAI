@@ -44,8 +44,9 @@ Owner role: **Product/API maintainer**. Domain: `images`.
 - [Image generation and library recovery](../../post-mortem/runbooks/image-generation.md)
 - [Large image libraries](../../docs/maintainers/image-library-scale.md)
 - [Readable product URLs](../../docs/maintainers/readable-urls.md)
+- [Free generation quota operations](../../docs/maintainers/FREE_GENERATION_QUOTA.md)
 
-Relevant checks (select for the change; impact discovery never executes these): `npm run test:image:security`, `npm run test:image:db`, `npm run test:image:scale`, `npm run test:image:library-db`, `npm run test:relay:image`.
+Relevant checks (select for the change; impact discovery never executes these): `npm run test:image:security`, `npm run test:image:db`, `npm run test:image:scale`, `npm run test:image:library-db`, `npm run test:relay:image`, `npm run test:free-quota`, `npm run test:free-quota:db`.
 
 ## Identity and private developer preview
 
@@ -60,8 +61,9 @@ Owner role: **Security/access maintainer**. Domain: `access`.
 - [Authentication security posture and threat model](../../docs/SECURITY_POSTURE_AND_THREAT_MODEL.md)
 - [ADR 0147: Verified account and session authority](../../docs/adr/0147-verified-account-and-session-authority.md)
 - [Readable product URLs](../../docs/maintainers/readable-urls.md)
+- [Free generation quota operations](../../docs/maintainers/FREE_GENERATION_QUOTA.md)
 
-Relevant checks (select for the change; impact discovery never executes these): `npm run test:preview-admin`, `npm run test:image:security`, `npm run test:auth:sessions`.
+Relevant checks (select for the change; impact discovery never executes these): `npm run test:preview-admin`, `npm run test:image:security`, `npm run test:auth:sessions`, `npm run test:free-quota`, `npm run test:free-quota:db`.
 
 ## Sites workspace and publication
 
@@ -72,8 +74,12 @@ Owner role: **Sites maintainer**. Domain: `sites`.
 - [Sites workspace operations](../../docs/maintainers/SITES_WORKSPACE.md)
 - [Sites address operations](../../docs/maintainers/SITES_DOMAINS.md)
 - [ADR 0148: Explicit complimentary Pro access](../../docs/adr/0148-complimentary-pro-access.md)
+- [Free generation quota operations](../../docs/maintainers/FREE_GENERATION_QUOTA.md)
+- [ADR 0149: One-time free generation allowance](../../docs/adr/0149-one-time-free-generation.md)
+- [Create and manage Sites](../../docs/SITES_WORKSPACE.md)
+- [Site content generation](../../docs/SITES_CONTENT.md)
 
-Relevant checks (select for the change; impact discovery never executes these): `npm run test:sites:fair`, `npm run test:sites:workspace`, `npm run test:sites:conversation`, `npm run test:sites:fair:db`, `npm run test:sites:workspace:db`, `npm run test:sites:plans:db`.
+Relevant checks (select for the change; impact discovery never executes these): `npm run test:sites:fair`, `npm run test:sites:workspace`, `npm run test:sites:conversation`, `npm run test:sites:fair:db`, `npm run test:sites:workspace:db`, `npm run test:sites:plans:db`, `npm run test:free-quota`, `npm run test:free-quota:db`.
 
 ## Relay lifecycle and operations
 
@@ -96,6 +102,7 @@ Owner role: **Database operator**. Domain: `database`.
 
 - [Supabase authority and operational boundaries](../../docs/SUPABASE_PARANOID_ARCHITECTURE_SPEC.md)
 - [PostgreSQL migration and recovery operations](../../docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md)
+- [Free generation quota operations](../../docs/maintainers/FREE_GENERATION_QUOTA.md)
 
 Relevant checks (select for the change; impact discovery never executes these): `npm run db:verify`, `npm run db:test`.
 
@@ -128,5 +135,6 @@ Owner role: **Product/performance maintainer**. Domain: `client-efficiency`.
 - [Navigation and request intent](../../docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md)
 - [Public navigation, pricing and knowledge base](../../docs/maintainers/PUBLIC_DISCOVERY.md)
 - [Readable product URLs](../../docs/maintainers/readable-urls.md)
+- [GALX product surface strategy](../../docs/PRODUCT_SURFACE_STRATEGY.md)
 
 Relevant checks (select for the change; impact discovery never executes these): `npm run test:egress:transport`, `npm run test:image:security`, `npm run build`.

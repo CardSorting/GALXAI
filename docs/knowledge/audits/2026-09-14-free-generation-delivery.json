@@ -1,0 +1,28 @@
+{
+  "observed_at": "2026-09-14T03:41:02.952406+00:00",
+  "scope": "Release review of the new quota checks in application preflight; no remote workflow run or deployment.",
+  "reviewed_sources": [
+    ".github/workflows/vercel-preflight.yml"
+  ],
+  "reviewed_guides": [
+    "docs/DEPLOYMENT.md",
+    "docs/VERCEL_DEPLOYMENT.md",
+    "docs/runbooks/release-readiness.md",
+    "post-mortem/runbooks/deployment-storage.md",
+    "docs/maintainers/CI_PIPELINE_AND_AUTOMATION_SPEC.md",
+    "docs/maintainers/FREE_GENERATION_QUOTA.md"
+  ],
+  "findings": [
+    "The added CI step executes quota authority, disposable database accounting and Sites workspace checks with existing fixture configuration.",
+    "The workflow parses through the installed js-yaml consumer. Existing permissions, triggers, build isolation and deployment boundaries remain unchanged.",
+    "Quota migration must precede dependent application handlers; the new quota runbook defines application rollback with retained database records.",
+    "All local test/build/browser evidence is retained in 2026-09-14-free-generation.json; local success does not imply hosted CI or production acceptance."
+  ],
+  "checks": [
+    {
+      "command": "Parse .github/workflows/vercel-preflight.yml with installed js-yaml and assert quota database step exists",
+      "result": "passed"
+    }
+  ],
+  "unmapped_review": "Generated catalogs/inventories, ADR navigation, product scope and surface briefs were inspected as supporting documentation; no unmatched runtime boundary remains."
+}

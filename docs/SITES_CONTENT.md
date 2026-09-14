@@ -4,6 +4,8 @@
 
 Create a simple page or revise its content through [Sites](https://galx.ai/sites). Creating, updating and publishing Sites is included with GALX Pro, subject to fair usage. New updates do not carry a separate generation charge.
 
+The free Site allowance is available in the browser workspace. The standalone API described here requires Pro access.
+
 This API produces structured text for a static information page. It does not create a working store, account system or custom application. Publishing is a separate action; your conversation and unpublished changes stay private.
 
 Activate GALX Pro in [Billing](https://galx.ai/billing#plan). After payment is confirmed, return to Sites. You can manage or cancel the subscription from Billing; cancellation takes effect at the end of the paid period. API and image usage remain separate.

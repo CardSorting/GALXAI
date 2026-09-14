@@ -40,6 +40,10 @@ Decorative loops stop when the hero leaves the viewport or the document is hidde
 
 The [scoped design record](../src/components/home/DESIGN.md) owns this homepage's appearance. The patterns adapt [Apple's reduced-motion approach](https://webkit.org/blog/7551/responsive-design-for-motion/), [Material's response timing](https://m1.material.io/motion/duration-easing.html) and [W3C's pause guidance](https://www.w3.org/WAI/WCAG22/Understanding/pause-stop-hide.html). The playful refinement draws on [Vercel Ship's responsive depth and scroll storytelling](https://vercel.com/blog/designing-and-building-the-vercel-ship-conference-platform), [Vercel's interruptible interaction guidance](https://vercel.com/design/guidelines) and [Linear's predictable action placement](https://linear.app/now/behind-the-latest-design-refresh). These are adaptations of documented patterns, not endorsements, copies of their implementations or performance guarantees.
 
+## Free allowance status
+
+Signed-in free accounts see a compact allowance row below navigation with remaining Sites, Images and Site turns. Confirmed Pro hides it. Account changes fence old values and cancel reads; loading/unavailable states never display invented counts. The row can wrap independently without changing link order or account-control dimensions. [Quota operations](maintainers/FREE_GENERATION_QUOTA.md) owns its authenticated read, lifecycle and local browser fixture.
+
 ## Public guides and search
 
 The [public discovery guide](maintainers/PUBLIC_DISCOVERY.md) owns Pricing, FAQ, eight pricing/product guides, the searchable knowledge-base index, canonical metadata, sitemap coverage and the explicit route allowlist. These pages retain the shared header and omit the workspace-only mobile bottom bar. Reading-page links use `IntentLink`; search/filtering is local and sends no search API request. Native FAQ disclosures remain usable when client bundles are unavailable.

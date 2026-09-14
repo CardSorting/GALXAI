@@ -9,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { GalxGalaxyLogo } from '@/components/brand/GalxGalaxyLogo';
 import { PUBLIC_NAVIGATION, isPublicReadingPath } from '@/lib/public-content/routes';
 import styles from './navigation.module.css';
+import { FreeGenerationQuota } from './FreeGenerationQuota';
 
 const links = PUBLIC_NAVIGATION;
 const isProductRoute = (pathname: string) => pathname === '/' || /^\/images(?:\/|$)/.test(pathname) || /^\/sites(?:\/|$)/.test(pathname) || isPublicReadingPath(pathname);
@@ -46,6 +47,7 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
             }}>{link.label}<NavigationFeedback label={link.label} /></Link>;
         })}
       </nav>
+      <FreeGenerationQuota />
       <div className={styles.account} aria-busy={isLoading && !user}>
         {user ? <><Link href="/billing" className={styles.accountLink}>Account</Link><button className={styles.accountLink} onClick={() => void logout()}>Sign out</button></>
           : status === 'unavailable' ? <button className={styles.accountLink} disabled={checking}

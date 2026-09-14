@@ -25,3 +25,6 @@
 
 .accountStatus { color: var(--foreground); font-size: 12px; white-space: normal; text-align: end; }
 .accountLink:disabled { opacity: .65; cursor: wait; }
+.quota { grid-column: 1 / -1; grid-row: 3; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px 8px; padding: 2px 0 12px; color: var(--foreground-muted, #9ca3af); font-size: 12px; line-height: 1.5; }
+.quotaCounts { color: var(--foreground, #f3f4f6); font-variant-numeric: tabular-nums; white-space: nowrap; }
+@media (min-width: 1100px) { .quota { grid-row: 2; padding: 0; } }

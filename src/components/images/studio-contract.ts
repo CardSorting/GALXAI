@@ -124,6 +124,7 @@ export function readGeneration(value: unknown, settings: StudioSettings, id: str
   });
 }
 export function studioError(status: number): string {
+  if (status === 402) return 'Your free image generation quota is used up. Upgrade to Pro to keep creating.';
   if (status === 403) return 'This action isn’t available for your account.';
   if (status === 401) return 'Your session has expired. Sign in again to continue.';
   if (status === 429) return 'Your request limit has been reached. Wait before trying again.';

@@ -1,7 +1,8 @@
 import type { PublicImageArtifact } from './image-artifact';
 
-export type PublicImageErrorCode = 'invalid_request' | 'unauthorized' | 'rate_limited' | 'generation_failed' | 'unsupported_input' | 'timeout' | 'temporarily_unavailable' | 'not_found' | 'idempotency_conflict';
+export type PublicImageErrorCode = 'free_quota_exhausted' | 'invalid_request' | 'unauthorized' | 'rate_limited' | 'generation_failed' | 'unsupported_input' | 'timeout' | 'temporarily_unavailable' | 'not_found' | 'idempotency_conflict';
 const errors: Record<PublicImageErrorCode, { status: number; message: string }> = {
+  free_quota_exhausted: { status: 402, message: 'Your free image generation quota is used up. Upgrade to Pro to keep creating.' },
   invalid_request: { status: 400, message: 'Check the image request and try again.' },
   idempotency_conflict: { status: 409, message: 'This retry key was used for a different request. Check the original request before starting another.' },
   unauthorized: { status: 401, message: 'Provide a valid GALX API key or sign in.' },

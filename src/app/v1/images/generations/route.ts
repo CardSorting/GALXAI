@@ -2,7 +2,9 @@ import { NextRequest } from 'next/server';
 import { galxRouter } from '@/core/router/GalxModelRouter';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 import { GalxSeatTierEngine } from '@/core/subscription/GalxSeatTierEngine';
-import { ImageRequestService } from '@/lib/images/request-service';
+import { ImageRequestService, imageRequestResponse } from '@/lib/images/request-service';
+import { GenerationAccess } from '@/lib/billing/generation-access';
+import { FreeQuotaError } from '@/lib/billing/free-generation-quota';
 import { ImageRequestConflict } from '@/lib/images/request-repository';
 import { ModelCatalog } from '@/core/router/ModelCatalog';
 import { ImageCapacityError } from '@/core/router/ImageCapacityError';
@@ -67,14 +69,23 @@ export async function POST(req: NextRequest) {
     };
     if (body.idempotencyKey && !/^[\x21-\x7e]{1,128}$/.test(body.idempotencyKey)) return imageError('invalid_request', requestId);
     if ((body.sessionId?.length || 0) > 128) return imageError('invalid_request', requestId);
+    const free = await GenerationAccess.resolve(auth.userId) === 'free';
     if (req.headers.get('x-galx-async') === 'true' || req.headers.get('prefer') === 'respond-async') {
       const task = await ImageRequestService.getInstance().create(auth.userId, { ...body,
-        response_format: format === 'url' ? 'url' : 'b64_json', outputFormat: outputFormat as ImageFormat | undefined }, entitlement.isPriorityUser);
+        response_format: format === 'url' ? 'url' : 'b64_json', outputFormat: outputFormat as ImageFormat | undefined }, entitlement.isPriorityUser, free);
       const taskUrl = `/v1/images/requests/${encodeURIComponent(task.id)}`;
       const headers = imageHeaders(requestId, 'application/json');
       headers.set('Location', taskUrl);
       headers.set('Retry-After', '3');
       return new Response(JSON.stringify({ id: task.id, status: task.state, task_url: taskUrl }), { status: 202, headers });
+    }
+    if (free) {
+      const service=ImageRequestService.getInstance();
+      const task=await service.create(auth.userId,{...body,response_format:format==='url'?'url':'b64_json',outputFormat:outputFormat as ImageFormat | undefined},entitlement.isPriorityUser,true,false);
+      await service.run(auth.userId,task.id,true);
+      const completed=await service.repository.get(auth.userId,task.id);
+      if(completed?.state==='completed') return imageRequestResponse(completed,requestId,format!=='binary');
+      return imageError(completed?.state==='failed'||completed?.state==='cancelled'?'generation_failed':'timeout',requestId);
     }
     // Only explicitly supported request fields reach dispatch. No user-selected shards or internal headers.
     const result = await galxRouter.routeImageGeneration({ request: body, userId: auth.userId,
@@ -83,6 +94,7 @@ export async function POST(req: NextRequest) {
       responseFormat: format as ImageResponseFormat, outputFormat: outputFormat as ImageFormat | undefined });
   } catch (error) {
     logImageFailure(requestId, error);
+    if (error instanceof FreeQuotaError) return imageError('free_quota_exhausted',requestId);
     if (error instanceof ImageRequestConflict) return imageError('idempotency_conflict', requestId);
     if (error instanceof ImageCapacityError) return imageError('temporarily_unavailable', requestId, error.retryAfterSeconds);
     const failure = error as { status?: number; code?: string; reason?: string; name?: string };

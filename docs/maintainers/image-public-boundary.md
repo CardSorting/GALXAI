@@ -22,6 +22,10 @@ public projection. Logs omit arbitrary provider message payloads, which may quot
 user secrets, while keeping categories, status and call sites. Existing operational
 metrics retain capacity, model, attempt and timing information privately.
 
+## Free generation admission
+
+[Quota operations](FREE_GENERATION_QUOTA.md) owns the one-time five-image account allowance. New free requests, synchronous and asynchronous, reserve requested quantity atomically with durable receipt creation. Saved retries reuse their original state without another deduction, including cancellation and plan changes. Pro retains existing image usage/admission rules. Confirmed capacity non-start and queued cancellation release deductions atomically; ambiguous generation and storage failures retain them. Grant reads expire never-claimed queued work safely. Public 402 quota errors stay allowlisted and generic. The header obtains only current plan and remaining customer counts; no grant/payment/execution records reach the browser.
+
 ## Workspace entry
 
 `/images` requires a verified account session before the studio is rendered. Middleware checks workspace paths before asset exemptions; the server page repeats verification and is dynamically rendered. `/library` also remains session protected. Missing, malformed, forged or expired-without-refresh sessions cannot render the workspace. Anonymous Supabase users are denied. Refresh uses the Auth service and retains response cookies; temporary middleware verification failures return a generic 503. The independent server page gate withholds studio content and renders authored recovery on an expected outage, including when streaming has already committed HTTP 200. Manual retry fetches fresh server state; unexpected failures stay within the Images route boundary. No raw diagnostics or automatic retry timers appear in these recovery views. Pages and denials use private, no-store headers and noindex. This account gate is independent from developer-preview approval, API ownership and expiring artifact capabilities; published artifacts and the three studio example images keep their existing delivery contracts.

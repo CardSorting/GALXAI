@@ -301,8 +301,10 @@
       "title": "GALX product surface strategy",
       "scope": "current-guide",
       "kind": "reference",
-      "domains": [],
-      "curation": "unreviewed",
+      "domains": [
+        "client-efficiency"
+      ],
+      "curation": "assigned",
       "keywords": [],
       "decision": null
     },
@@ -479,8 +481,10 @@
       "title": "Site content generation",
       "scope": "current-guide",
       "kind": "reference",
-      "domains": [],
-      "curation": "unreviewed",
+      "domains": [
+        "sites"
+      ],
+      "curation": "assigned",
       "keywords": [],
       "decision": null
     },
@@ -489,8 +493,10 @@
       "title": "Create and manage Sites",
       "scope": "current-guide",
       "kind": "reference",
-      "domains": [],
-      "curation": "unreviewed",
+      "domains": [
+        "sites"
+      ],
+      "curation": "assigned",
       "keywords": [],
       "decision": null
     },
@@ -2167,6 +2173,28 @@
       }
     },
     {
+      "path": "docs/adr/0149-one-time-free-generation.md",
+      "title": "ADR 0149: One-time free generation allowance",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [
+        "sites"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": {
+        "status": "proposed",
+        "delivery": "local",
+        "domain": "sites",
+        "owner": "Product/API maintainer",
+        "date": "2026-09-14",
+        "evidence": [
+          "docs/knowledge/audits/2026-09-14-free-generation.json"
+        ],
+        "supersedes": []
+      }
+    },
+    {
       "path": "docs/adr/README.md",
       "title": "Architecture decision records",
       "scope": "current-guide",
@@ -2756,6 +2784,28 @@
       "domains": [],
       "curation": "unreviewed",
       "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/maintainers/FREE_GENERATION_QUOTA.md",
+      "title": "Free generation quota operations",
+      "scope": "current-guide",
+      "kind": "how-to",
+      "domains": [
+        "images",
+        "access",
+        "sites",
+        "database"
+      ],
+      "curation": "assigned",
+      "keywords": [
+        "free",
+        "allowance",
+        "quota",
+        "images",
+        "sites",
+        "billing"
+      ],
       "decision": null
     },
     {

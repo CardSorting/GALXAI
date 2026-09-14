@@ -1,4 +1,5 @@
 import type { Pool, PoolClient } from 'pg';
+import { assignFreeSite, consumeFreeGeneration, FreeQuotaError, releaseFreeGeneration, requireAssignedFreeSite } from '../billing/free-generation-quota';
 import { readSiteDocument, readSiteMessage, type SiteDocument, type SiteMessage, type SiteIntent, type WorkspaceSite, type SiteSummary } from './workspace-contract';
 import { type DomainPlan, siteHostname } from './domains';
 import { recallQuery, sitesContextCache, type SitesContextCache } from './hybrid-context';
@@ -29,7 +30,7 @@ export class SitesWorkspaceRepository {
     try { await db.query('BEGIN'); await db.query("SET LOCAL statement_timeout='5s'; SET LOCAL lock_timeout='3s'");
       const result = await run(db); await db.query('COMMIT'); return result;
     } catch (error) { try { await db.query('ROLLBACK'); } catch { broken = true; }
-      if (error instanceof WorkspaceError) throw error; broken = true; throw new WorkspaceError();
+      if (error instanceof WorkspaceError || error instanceof FreeQuotaError) throw error; broken = true; throw new WorkspaceError();
     } finally { db.release(broken); }
   }
   private async locked(db: PoolClient, owner: string, id: string) {
@@ -135,13 +136,14 @@ export class SitesWorkspaceRepository {
     try{this.cache.put(result.key,result.messages);}catch{}
     return result.messages;
   }
-  async create(owner: string, id: string, title: string) {
+  async create(owner: string, id: string, title: string, free = false) {
     return this.tx(async db => {
       await db.query('SELECT pg_advisory_xact_lock(hashtextextended($1,0))',[`sites-workspace:${owner}`]);
       const existing = (await db.query<WorkspaceRow>('SELECT * FROM private.galx_site_workspaces WHERE id=$1 AND user_id=$2',[id,owner])).rows[0];
       if (existing) return this.hydrate(db,existing);
       const count = Number((await db.query('SELECT count(*) FROM private.galx_site_workspaces WHERE user_id=$1',[owner])).rows[0].count);
       if (count >= 50) throw new WorkspaceError(429);
+      if (free) await assignFreeSite(db,owner,id);
       return (await db.query<WorkspaceRow>('INSERT INTO private.galx_site_workspaces(id,user_id,title) VALUES($1,$2,$3) RETURNING *',[id,owner,title])).rows[0];
     });
   }
@@ -152,18 +154,23 @@ export class SitesWorkspaceRepository {
         WHERE user_id=$1 AND id=$2 RETURNING *`,[owner,id,change.title ?? row.title,change.archived ?? row.archived,change.notes ?? row.project_notes ?? ''])).rows[0];
       return this.hydrate(db,{...row,...next}); });
   }
-  async begin(owner: string, id: string, revision: number, operation: string, brief: string, intent:SiteIntent='build') {
+  async begin(owner: string, id: string, revision: number, operation: string, brief: string, intent:SiteIntent='build', free = false) {
     return this.tx(async db => { const row = await this.locked(db,owner,id);
       if (row.operation_id || row.archived || row.revision !== revision || (await db.query('SELECT 1 FROM private.galx_site_turns WHERE user_id=$1 AND site_id=$2 AND operation_id=$3',[owner,id,operation])).rowCount) throw new WorkspaceError(409);
       const sequence=(row.turn_count || 0)+1;
+      if (free) await consumeFreeGeneration(db,owner,'site',`${id}:${operation}`,1,id);
       await db.query(`INSERT INTO private.galx_site_turns(site_id,user_id,sequence,operation_id,intent,user_text,state) VALUES($1,$2,$3,$4,$5,$6,'pending')`,[id,owner,sequence,operation,intent,brief]);
       const next=(await db.query<WorkspaceRow>(`UPDATE private.galx_site_workspaces SET operation_id=$3,operation_brief=$4,operation_intent=$5,turn_count=$6,
         operation_started_at=now(),operation_mode='included',updated_at=now() WHERE user_id=$1 AND id=$2 RETURNING *`,[owner,id,operation,brief,intent,sequence])).rows[0];
       return this.hydrate(db,{...row,...next}); });
   }
-  async finish(owner: string, id: string, operation: string, document: SiteDocument | null, message: string, memory:string|null=null, failed=false) {
+  async requireFreeSite(owner: string, id: string) {
+    return this.tx(async db => { await this.locked(db,owner,id); await requireAssignedFreeSite(db,owner,id); });
+  }
+  async finish(owner: string, id: string, operation: string, document: SiteDocument | null, message: string, memory:string|null=null, failed=false, notStarted=false) {
     return this.tx(async db => { const row = await this.locked(db,owner,id);
       if (row.operation_id !== operation) return this.hydrate(db,row);
+      if (notStarted) await releaseFreeGeneration(db,owner,'site',`${id}:${operation}`);
       const changed=document!==null && JSON.stringify(readSiteDocument(document))!==JSON.stringify(readSiteDocument(row.document));
       const version=(row.document_version || 0)+(changed?1:0),summary=memory ?? row.context_summary ?? '';
       if(changed)await db.query(`INSERT INTO private.galx_site_versions(site_id,user_id,version,document,context_summary,label,source) VALUES($1,$2,$3,$4,$5,$6,'generation')`,[id,owner,version,document,summary,(row.operation_brief || 'Draft updated').slice(0,200)]);

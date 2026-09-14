@@ -10,3 +10,4 @@ Generated metadata, separate from [the full ADR catalog](../adr/README.md). Unre
 | [ADR 0146: Bounded image library browsing and preview delivery](../../docs/adr/0146-bounded-image-libraries.md) | proposed | deployed | Product/API maintainer |
 | [ADR 0147: Verified account and session authority](../../docs/adr/0147-verified-account-and-session-authority.md) | proposed | deployed | Security/account maintainer |
 | [ADR 0148: Explicit complimentary Pro access](../../docs/adr/0148-complimentary-pro-access.md) | accepted | verified | Product/API maintainer |
+| [ADR 0149: One-time free generation allowance](../../docs/adr/0149-one-time-free-generation.md) | proposed | local | Product/API maintainer |

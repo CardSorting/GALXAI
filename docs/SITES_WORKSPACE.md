@@ -4,11 +4,13 @@
 
 Sign in to open [Sites](https://galx.ai/sites) and create a simple website through conversation. Sign-in is required before accessing the workspace or a saved Site. Your chat appears on the left and your page preview on the right. On a phone, use the Chat and Preview tabs to switch between them.
 
-Activate GALX Pro in [Billing](https://galx.ai/billing#plan). After payment is confirmed, return to Sites. You can manage or cancel the subscription from Billing; cancellation takes effect at the end of the paid period. API and image usage remain separate.
+A verified account includes one free Site with three conversation turns in total. Build and Discuss each use a turn. Check the header for your remaining free Sites, turns and images. Archiving a Site does not reset this one-time allowance.
+
+To continue beyond the allowance, activate GALX Pro in [Billing](https://galx.ai/billing#plan). After payment is confirmed, return to Sites. You can manage or cancel the subscription from Billing; cancellation takes effect at the end of the paid period. API and image usage remain separate.
 
 ## Start with an idea
 
-Describe the page you want and send your request. You can start with a product launch, a portfolio or an event page. Creating, updating and publishing Sites is included with GALX Pro, subject to fair usage. There is no separate charge for each Site update. The workspace shows whether your account has access.
+Describe the page you want and send your request. You can start with a product launch, a portfolio or an event page. You can create and publish your free Site, using up to three total conversation turns. GALX Pro includes further Sites creation, updates and publishing, subject to fair usage. There is no separate charge for each Site update. The workspace shows whether your account has access.
 
 Review the draft, then describe what you want to change. Each turn builds on your current draft, project notes and a summary of earlier decisions, with relevant earlier exchanges when available. This release creates simple information pages; it does not create accounts, working checkout forms or custom application behavior for your visitors.
 
@@ -48,6 +50,6 @@ If you go offline, you can keep drafting; reconnect before sending. Returning to
 
 Generation and publishing may be unavailable for an account during rollout. The workspace shows their availability separately. Existing Sites created through another connected workflow retain their original access settings and setup requirements; they are not automatically imported into My Sites.
 
-Fair usage helps keep Sites available across accounts. You may be asked to pause before another update. Access can become available again without waiting for a new billing period. Your saved work stays available while updates are paused.
+Fair usage helps keep Sites available across accounts. You may be asked to pause before another update. A temporary fair-use pause can end without waiting for a new billing period. Exhausted free turns do not renew; Pro is required to continue beyond them. Your saved work stays available while updates are paused.
 
 See [Site addresses](SITE_ADDRESSES.md) and [Site content generation](SITES_CONTENT.md) for their capability and access contracts.

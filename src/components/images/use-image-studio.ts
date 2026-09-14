@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { GENERATION_QUOTA_CHANGED } from '@/lib/billing/free-generation-contract';
 import { workspaceFetch } from '@/lib/auth/workspace-client';
 import { startActivityPolling, imageStatusDelay } from '@/lib/resilience/activity-polling';
 import { DEFAULT_SETTINGS, appendCreations, generationBody, readGeneration, readLibrary, readImageDetail, readPending, readSettings, studioError,
@@ -171,6 +172,7 @@ export function useImageStudio(owner: string | null, token?: string, libraryActi
     try {
       const response = await workspaceFetch(owner, '/v1/images/generations', { method: 'POST', headers: { ...headers(), 'Content-Type': 'application/json', Prefer: 'respond-async', 'Idempotency-Key': id },
         body: JSON.stringify(generationBody(snapshot)), signal: controller.signal });
+      window.dispatchEvent(new Event(GENERATION_QUOTA_CHANGED));
       if (!alive.current) return;
       if (!response.ok) {
         const seconds = Number(response.headers.get('Retry-After'));

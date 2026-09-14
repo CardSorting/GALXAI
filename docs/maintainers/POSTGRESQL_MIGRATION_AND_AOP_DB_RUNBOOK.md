@@ -13,6 +13,7 @@ Private database guide. Read the applicable repository Supabase skills before da
 | `npm run db:test` | Full suite against an isolated disposable PostgreSQL fixture |
 | `npm run test:image:library-db` | Large-library pagination, role, old-asset and rollback checks against 50,000 owned fixture images |
 | `npm run test:relay:image` | Historical command name for isolated object/catalog consistency, decoding and ownership checks; no live relay or generation |
+| `npm run test:free-quota:db` | Private allowance enrollment, concurrent deductions, retries, non-start release and retained rollback in an isolated fixture |
 | `npm run test:image:db` | Image receipts/Favorites suite against that isolated fixture |
 | `npm run db:migrate` | Legacy manager apply action is intentionally disabled; not the production migration workflow |
 | `npm run db:push` | Direct migration mutation script; not a harmless preflight and not the default workflow below |
@@ -28,6 +29,8 @@ Prefer additive rollout and preserve readers for already accepted operations. Re
 Keep private operation tables unavailable to browser database roles. RLS, explicit privileges and owner predicates are complementary. Do not copy blanket service-role grants or add `SECURITY DEFINER` to bypass a permission error. Privileged functions need justified callers, fixed trusted search paths and targeted tests.
 
 The [large-library migration](image-library-scale.md#validation-rollout-and-recovery) adds partial ordering indexes and a page-only function. Review writer-blocking index creation against the target size/load; its timeout bounds are not a zero-lock promise. Apply it before dependent application readers.
+
+The [free-generation migration](FREE_GENERATION_QUOTA.md) adds private grant and usage tables and must precede dependent application handlers. Its DOWN file retains identity/usage and only reasserts denied privileges; roll back the application to stop free admission.
 
 Run static integrity, relevant isolated database tests, authorization/adversarial cases and application checks before applying. Verify rollback behavior in the fixture; a safe rollback may intentionally refuse data loss rather than delete new records.
 

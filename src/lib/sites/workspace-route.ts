@@ -1,4 +1,5 @@
 import { SitesBillingError, type SitesGenerationReply } from '../billing/sites-generation';
+import { FreeQuotaError } from '../billing/free-generation-quota';
 import { boundedDomainJson } from './cloudflare-dns';
 import { SiteDomainError } from './domains';
 import { readSiteSummary, type SiteDocument, type SitesAccess, type SiteIntent } from './workspace-contract';
@@ -10,14 +11,14 @@ import { SitesWorkspaceRepository, WorkspaceError, workspaceView } from './works
 export interface WorkspaceDependencies {
   authenticate(request: Request): Promise<{ id: string }>;
   repository(): SitesWorkspaceRepository;
-  requireAccess(owner: string): Promise<void>;
-  prepare(owner: string, signal: AbortSignal): Promise<{ generate(operation: string, brief: string, document: SiteDocument | null, context?: ConversationContext): Promise<IncludedGenerationReply> }>;
+  requireAccess(owner: string): Promise<void | 'pro' | 'free'>;
+  prepare(owner: string, signal: AbortSignal): Promise<{ free?: boolean; generate(operation: string, brief: string, document: SiteDocument | null, context?: ConversationContext): Promise<IncludedGenerationReply> }>;
   recover(owner: string, operation: string, signal: AbortSignal, mode: 'legacy' | 'included'): Promise<SitesGenerationReply | IncludedGenerationReply>;
   canPublish?(owner: string): boolean;
   publish?(owner: string, id: string, revision: number, username: string): Promise<Parameters<typeof workspaceView>[0]>;
 }
 const headers = { 'Cache-Control': 'private, no-store', 'X-Content-Type-Options': 'nosniff' };
-const fail = (status: number, publicCode?: 'invalid_username' | 'username_unavailable' | 'rate_limited' | 'request_too_long', retry?:number) => Response.json({ error: { code: publicCode || ({401:'sign_in_required',403:'paid_plan_required',404:'site_not_found',409:'site_changed',429:'site_limit_reached'} as Record<number,string>)[status] || 'site_unavailable' } }, { status, headers:{...headers,...(retry?{'Retry-After':String(retry)}:{})} });
+const fail = (status: number, publicCode?: 'free_quota_exhausted' | 'free_site_limit' | 'invalid_username' | 'username_unavailable' | 'rate_limited' | 'request_too_long', retry?:number) => Response.json({ error: { code: publicCode || ({401:'sign_in_required',403:'paid_plan_required',404:'site_not_found',409:'site_changed',429:'site_limit_reached'} as Record<number,string>)[status] || 'site_unavailable' } }, { status, headers:{...headers,...(retry?{'Retry-After':String(retry)}:{})} });
 const uuid = (v: unknown): v is string => typeof v === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(v);
 const keys = (v: Record<string, unknown>, names: string) => Object.keys(v).sort().join(',') === names;
 const title = (v: unknown): v is string => typeof v === 'string' && v.trim().length > 0 && v.length <= 90 && !/[\u0000-\u001f\u007f]/.test(v);
@@ -32,9 +33,9 @@ export function sitesWorkspaceRoute(deps: WorkspaceDependencies) {
         const positive=(v:string|null)=>v!==null && /^[1-9][0-9]{0,8}$/.test(v)?Number(v):undefined;
         const setup = async () => {
           let access: SitesAccess = 'unavailable';
-          try { await deps.prepare(owner,request.signal); access='included'; }
+          try { const prepared=await deps.prepare(owner,request.signal); access=prepared.free ? 'free' : 'included'; }
           catch(error) { if(error instanceof FairUsageError && error.status===403)access='paid_plan_required'; }
-          return { access, publishing: access==='included' && deps.canPublish?.(owner) ? 'available' : 'unavailable', username:await repo.username(owner) };
+          return { access, publishing: (access==='included' || access==='free') && deps.canPublish?.(owner) ? 'available' : 'unavailable', username:await repo.username(owner) };
         };
         if (url.searchParams.get('view') === 'bootstrap') {
           const names = [...url.searchParams.keys()].sort().join(',');
@@ -68,14 +69,14 @@ export function sitesWorkspaceRoute(deps: WorkspaceDependencies) {
       if (url.search || !request.headers.get('content-type')?.startsWith('application/json')) return fail(400);
       const body = await boundedDomainJson(new Response(request.body), 12000, AbortSignal.any([request.signal, AbortSignal.timeout(5000)])) as Record<string, any>;
       if (!body || Array.isArray(body) || !uuid(body.id)) return fail(400);
-      if (body.action === 'create' && keys(body,'action,id,title') && title(body.title)) { await deps.requireAccess(owner); return reply(await repo.create(owner,body.id,body.title.trim())); }
+      if (body.action === 'create' && keys(body,'action,id,title') && title(body.title)) { const plan=await deps.requireAccess(owner); return reply(await repo.create(owner,body.id,body.title.trim(),plan==='free')); }
       if (body.action === 'rename' && keys(body,'action,id,revision,title') && title(body.title) && Number.isSafeInteger(body.revision))
         return reply(await repo.update(owner,body.id,body.revision,{title:body.title.trim()}));
       if (body.action === 'archive' && keys(body,'action,archived,id,revision') && typeof body.archived === 'boolean' && Number.isSafeInteger(body.revision))
         return reply(await repo.update(owner,body.id,body.revision,{archived:body.archived}));
       if(body.action === 'publish' && keys(body,'action,audience,id,revision,username') && body.audience==='public' && Number.isSafeInteger(body.revision) && typeof body.username==='string'){
         await repo.get(owner,body.id);
-        await deps.requireAccess(owner);
+        if (await deps.requireAccess(owner)==='free') await repo.requireFreeSite(owner,body.id);
         if(!deps.canPublish?.(owner) || !deps.publish)return fail(503);
         return reply(await deps.publish(owner,body.id,body.revision,body.username));
       }
@@ -86,6 +87,8 @@ export function sitesWorkspaceRoute(deps: WorkspaceDependencies) {
         return reply(await repo.restore(owner,body.id,body.revision,body.version));
       const finish = async (operation: string, result: SitesGenerationReply | IncludedGenerationReply, intent:SiteIntent='build') => {
         if ('completed' in result ? !result.completed : !result.cost) return reply(await repo.get(owner,body.id));
+        if ('notStarted' in result && result.notStarted) return reply(await repo.finish(owner,body.id,operation,null,
+          'This update did not start. Please try again later.',null,true,true));
         const parsed=readConversationResult(result.text,intent);
         return reply(await repo.finish(owner,body.id,operation,parsed?.document || null,parsed?.message ||
           'This reply could not be saved. Your previous draft is safe. Please try again.',parsed?.memory ?? null,!parsed));
@@ -113,17 +116,18 @@ export function sitesWorkspaceRoute(deps: WorkspaceDependencies) {
       conversationMessages(brief,context); // Validate the complete input before reserving this turn.
       const prepared = await deps.prepare(owner,request.signal);
       context.recalled=await repo.recall(owner,body.id,body.revision,brief);
-      const row = await repo.begin(owner,body.id,body.revision,body.operationId,brief,intent);
+      const row = await repo.begin(owner,body.id,body.revision,body.operationId,brief,intent,prepared.free);
       try { return await finish(body.operationId,await prepared.generate(`${body.id}:${body.operationId}`,brief,row.document,context),intent); }
       catch (error) {
         // Only proven pre-admission deferrals can clear the workspace operation.
         if (error instanceof FairUsageError && error.beforeAdmission) {
-          await repo.finish(owner,body.id,body.operationId,null,'This update did not start. Please try again later.',null,true);
+          await repo.finish(owner,body.id,body.operationId,null,'This update did not start. Please try again later.',null,true,true);
           return fail(error.status,error.status===429?'rate_limited':undefined,error.retryAfter);
         }
         return reply(await repo.get(owner,body.id));
       }
     } catch (error) {
+      if(error instanceof FreeQuotaError)return fail(402,error.code);
       if(error instanceof ConversationInputError)return fail(400,'request_too_long');
       if(error instanceof FairUsageError)return fail(error.status,error.status===429?'rate_limited':undefined,error.retryAfter);
       if (error instanceof SiteDomainError && error.code === 'invalid_username') return fail(400,'invalid_username');

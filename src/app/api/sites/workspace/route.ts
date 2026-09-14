@@ -15,7 +15,7 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 90;
 const handle = sitesWorkspaceRoute({
-  requireAccess: async owner => { await includedSitesConfiguration().membership(owner); },
+  requireAccess: async owner => (await includedSitesConfiguration().membership(owner,true)).plan,
   canPublish: owner => {
       return process.env.GALX_SITES_MANAGED_PUBLISH_ENABLED==='1' && process.env.GALX_SITES_DOMAINS_ENABLED==='1' &&
         Boolean(process.env.GALX_SITES_HOSTING_PROJECT && process.env.GALX_SITES_HOSTING_TEAM && process.env.GALX_SITES_HOSTING_TOKEN && process.env.GALX_SITES_HOSTING_CNAME);
@@ -31,8 +31,8 @@ const handle = sitesWorkspaceRoute({
   repository: () => { const pool = getPostgresPool(); if (!pool || pool.waitingCount >= 25) throw new WorkspaceError(); return new SitesWorkspaceRepository(pool); },
   prepare: async (owner, signal) => {
     const config = includedSitesConfiguration();
-    const generate = await config.prepare(owner);
-    return { generate: (operation,brief,document,context) => generate({ operationId: operation,requestedModel: config.model,signal,
+    const generate = await config.prepare(owner,true);
+    return { free:generate.free, generate: (operation,brief,document,context) => generate({ operationId: operation,requestedModel: config.model,signal,
         messages: conversationMessages(brief,context || {document,notes:'',summary:'',messages:[],intent:'build'}) }) };
   },
   recover: async (owner, operation, signal, mode) => {

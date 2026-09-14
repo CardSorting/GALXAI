@@ -53,6 +53,14 @@ export type GalxIdempotencyState = 'IN_FLIGHT' | 'COMMITTED' | 'FAILED';
 export interface Database {
   private: {
     Tables: {
+      galx_free_generation_grants: {
+        Row: { user_id: string; identity_hash: string; allowance_usd: number; site_id: string | null; created_at: string };
+        Insert: { user_id: string; identity_hash: string }; Update: { site_id?: string }; Relationships: [];
+      };
+      galx_free_generation_usage: {
+        Row: { user_id: string; kind: 'site' | 'image'; operation_id: string; quantity: number; released: boolean; created_at: string };
+        Insert: { user_id: string; kind: 'site' | 'image'; operation_id: string; quantity: number }; Update: { released?: boolean }; Relationships: [];
+      };
       galx_image_requests: {
         Row: { id: string; user_id: string; idempotency_key: string; payload_hash: string; payload: Json; is_priority: boolean; state: 'queued' | 'generating' | 'completed' | 'failed' | 'cancelled'; asset_ids: string[] | null; created_at: string; updated_at: string; deadline_at: string | null };
         Insert: { id: string; user_id: string; idempotency_key: string; payload_hash: string; payload: Json; is_priority?: boolean };

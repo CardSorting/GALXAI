@@ -27,6 +27,10 @@ September 13 user-reported Images/Sites render failure is tracked in [INC-202609
 
 The September 14 UTC [second UX audit](../docs/knowledge/audits/2026-09-14-workspace-recovery-ux.md) extends containment to initial browser profile failure while preserving the public shell, and adds distinct permission, retry, offline, keyboard and long-wait behavior. Its [separate local evidence](incidents/2026/2026-09-13-workspace-render/ux-second-pass-verification.json) covers draft continuity, repeated recovery, the complete auth browser regression, reflow/themes and private-content checks. The source is included in the September 14 Pro deployment above. The Pro check confirms normal signed-in Sites entry for the requested account, but does not establish the original failure cause or the full incident recovery matrix; ACT-016 remains open.
 
+## Local work awaiting release
+
+The September 14 [free-generation completion review](../docs/knowledge/audits/2026-09-14-free-generation.json) covers one free Site with three turns, five images, server-enforced deductions and the account counter. Migration `20260914030425_free_generation_quota.sql` was the only pending migration at the read-only inventory in this session. It was not applied to production and the application was not deployed. Existing live Pro evidence above remains the latest acceptance; follow [quota operations](../docs/maintainers/FREE_GENERATION_QUOTA.md) for deployment sequencing and retained-state rollback.
+
 ## Regression boundaries
 
 - Keep public image routes independent from developer approval storage; keep developer routes gated on both entry points.

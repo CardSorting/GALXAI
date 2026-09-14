@@ -1317,6 +1317,12 @@
       "title": "ADR 0148: Explicit complimentary Pro access"
     },
     {
+      "path": "docs/adr/0149-one-time-free-generation.md",
+      "scope": "decision-record",
+      "category": "docs",
+      "title": "ADR 0149: One-time free generation allowance"
+    },
+    {
       "path": "docs/adr/README.md",
       "scope": "current-guide",
       "category": "docs",
@@ -1639,6 +1645,12 @@
       "scope": "domain-reference",
       "category": "docs",
       "title": "🛠️ Maintainer Guide: Flaky Tests, CI Traps & Deterministic Triage"
+    },
+    {
+      "path": "docs/maintainers/FREE_GENERATION_QUOTA.md",
+      "scope": "current-guide",
+      "category": "docs",
+      "title": "Free generation quota operations"
     },
     {
       "path": "docs/maintainers/GIT_WORKFLOWS_AND_HOOKS.md",
