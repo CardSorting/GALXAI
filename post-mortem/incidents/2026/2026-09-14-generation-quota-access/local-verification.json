@@ -1,0 +1,63 @@
+{
+  "observed_at": "2026-09-14T04:28:45.727533+00:00",
+  "base_revision": "c4c2bdfafa05f925ec861dcc3ab1b39e94d4781f",
+  "scope": "Local exact-route correction for production quota-read developer-preview interception; no migration or budget mutation.",
+  "observed_production": {
+    "deployment": "dpl_2fcK1FRXc9yyFomC8F7w3Pa6ae1p",
+    "source": "cd4585fb4c24ee5e6a33922a71f50a3cbcf576c6",
+    "signed_in_billing": "Pro active; free quota header unavailable",
+    "anonymous_quota_body": "developer-preview authentication_required and request_access_url instead of account error"
+  },
+  "reviewed_sources": [
+    "src/lib/security/preview-policy.ts",
+    "scripts/test-developer-preview.ts",
+    "scripts/verify-image-public-http.ts"
+  ],
+  "reviewed_guides": [
+    "docs/operations/developer-preview.md",
+    "docs/maintainers/FREE_GENERATION_QUOTA.md",
+    "docs/maintainers/SITES_FAIR_USAGE.md",
+    "docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md",
+    "docs/VERCEL_DEPLOYMENT.md",
+    "post-mortem/runbooks/triage.md",
+    "post-mortem/CURRENT_STATE.md"
+  ],
+  "source_sha256": {
+    "src/lib/security/preview-policy.ts": "a609cf57962c3d98e46340655501f03a4457cdc6e490ba920df0071dd976e08c",
+    "scripts/test-developer-preview.ts": "856f244787a68161ce776119547345185cbdfe2c55071cbc46903499e4aef8ba",
+    "scripts/verify-image-public-http.ts": "c4b1e12705a2dae186551817cf4c2bd8351efe91c9883cd8e7936a3fee7a409f"
+  },
+  "validation": {
+    "developer_preview": {
+      "tests": 15,
+      "failed": 0
+    },
+    "image_security": {
+      "tests": 40,
+      "failed": 0
+    },
+    "quota": {
+      "tests": 4,
+      "failed": 0
+    },
+    "typescript": "passed",
+    "production_build": "passed with synthetic credentials only; Node 26.8.1",
+    "compiled_boundary": {
+      "files": 668,
+      "errors": [],
+      "additional_gate_markers": 8,
+      "hits": []
+    },
+    "compiled_http": {
+      "status": "passed",
+      "browser_assets": 27,
+      "account_error_body_verified": true
+    }
+  },
+  "limitations": [
+    "Corrected production deployment and authenticated acceptance remain pending.",
+    "Local Homebrew Node 22 failed to start due to a missing simdjson dynamic library; working Node 26 completed the build. Hosted CI uses Node 22 independently.",
+    "The earlier live negative 401 assertion did not establish that quota requests reached account authority.",
+    "No live generation or publication was submitted."
+  ]
+}

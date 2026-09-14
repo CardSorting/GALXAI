@@ -2,6 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { NextRequest } from 'next/server';
 import { isPublicProductPath, normalizedPath } from '../src/lib/security/preview-policy';
+import { previewMiddleware } from '../src/lib/security/preview-middleware';
+import { generationQuotaRoute } from '../src/lib/billing/generation-quota-route';
 import { enforceDeveloperAccess } from '../src/lib/security/developer-access';
 import { createDeveloperAccessHandlers } from '../src/lib/auth/developer-access-route';
 import { AccountIdentityError } from '../src/lib/auth/accountIdentity';
@@ -35,6 +37,18 @@ test('anonymous, pending, revoked, forged grants, and unavailable authority cann
   assert.equal(await enforceDeveloperAccess(req, deps), null);
   approved = false;
   assert.equal((await enforceDeveloperAccess(req, deps))?.status, 403, 'revocation must not use a cached grant');
+});
+
+test('account quota reads bypass developer approval but retain account authentication',async()=>{
+  const request=new NextRequest('https://galx.ai/api/billing/generation-quota');
+  assert.equal(await previewMiddleware(request),null);
+  for(const path of ['/api/billing/generation-quota/','/api/billing/%67eneration-quota'])assert(isPublicProductPath(path));
+  for(const path of ['/api/billing/generation-quota/private','/api/billing/generation-quota-evil','/api/billing/private'])assert(!isPublicProductPath(path));
+  const unused=async():Promise<never>=>{throw new Error('Must not query quota');};
+  const anonymous=generationQuotaRoute({authenticate:async()=>{throw new AccountIdentityError();},plan:unused,quota:unused,availability:unused});
+  const denied=await anonymous(request);assert.equal(denied.status,401);assert.equal(denied.headers.get('cache-control'),'private, no-store');
+  const pro=generationQuotaRoute({authenticate:async()=>({id:'verified-account'}),plan:async owner=>{assert.equal(owner,'verified-account');return 'pro';},quota:unused,availability:unused});
+  assert.deepEqual(await (await pro(request)).json(),{plan:'pro',quota:null});
 });
 
 test('requests bind to verified identity, ignore approval/owner fields, and return an explicit DTO', async () => {

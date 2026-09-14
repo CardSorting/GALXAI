@@ -2535,6 +2535,12 @@
       "title": "Workspace server-render failure and navigation recovery"
     },
     {
+      "path": "post-mortem/incidents/2026/2026-09-14-generation-quota-access/README.md",
+      "scope": "operational-record",
+      "category": "post-mortem",
+      "title": "Generation quota read blocked by developer approval"
+    },
+    {
       "path": "post-mortem/runbooks/controller-lock.md",
       "scope": "current-guide",
       "category": "post-mortem",

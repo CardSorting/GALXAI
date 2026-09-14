@@ -63,7 +63,9 @@ for (const authorization of ['', 'Bearer forged-quota-session']) {
   const denied=await fetch(`${base}/api/billing/generation-quota`,{headers:authorization?{authorization}:{}});
   assert.equal(denied.status,401);
   assert.equal(denied.headers.get('cache-control'),'private, no-store');
-  assert.doesNotMatch(await denied.text(),forbidden);
+  const body=await denied.text();
+  assert.doesNotMatch(body,forbidden);
+  assert.deepEqual(JSON.parse(body),{error:'Sign in again to view your account.'},'quota requests must reach account authority, not developer-preview middleware');
 }
 assert.ok(browserAssets.size > 0, 'Rendered pages must expose browser assets for verification');
 for (const url of browserAssets) {

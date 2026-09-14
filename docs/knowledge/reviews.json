@@ -48,15 +48,15 @@
   },
   "images": {
     "reviewer": "Codex",
-    "note": "Reviewed the quota fixture clock boundary, independent race accounts, strict rejection reasons, and canonical quota/fairness contracts. Runtime authority and limits are unchanged; retained local and hosted-failure evidence distinguishes their scope.",
+    "note": "Reviewed the exact quota read exemption, independent account authority, strict raw-response acceptance and canonical rollout/rollback guides. No database or paid policy change. Local build and scoped security evidence retained; production correction pending.",
     "reviewed_at": "2026-09-14",
     "review_by": "2026-09-20",
     "evidence": {
-      "docs/knowledge/audits/2026-09-14-free-gate-ci-fixture.json": "f92e62f6a8584210f5ddd0135498759f858fca20835c68a2e0dafac2b2748c95"
+      "post-mortem/incidents/2026/2026-09-14-generation-quota-access/local-verification.json": "433698475b5b71d3d01d0872449c9618c5d6d3152c5117f9e60acd243a4be938"
     },
     "files": {
       "docs/QUEUE_SPECIFICATION.md": "2406ed769b2813e2e0c2d94249aa637e623651183b448ee01af667f9f49c0173",
-      "docs/maintainers/FREE_GENERATION_QUOTA.md": "1750780f8b90d88ee40395e7bc2df0248298fd8ff552beb6630455ee65e19016",
+      "docs/maintainers/FREE_GENERATION_QUOTA.md": "e43d24867079c13c8437b7002d8730a6bb954c321437716b4185f8c94c6d6249",
       "docs/maintainers/image-library-scale.md": "0d5233d9dfd2dd62128585a8d5b345142660d00235fd511dff239726ff1927bc",
       "docs/maintainers/image-public-boundary.md": "d2946b74f907dd9f076125019fe9b732849bd51ca7f71a8b5b66a75f5d91d7ba",
       "docs/maintainers/readable-urls.md": "ea1fed2e15baa2097f0c1a906c98c66ab3343cd25aba9613151cd9f9480abb60",
@@ -74,7 +74,7 @@
       "scripts/test-image-studio.ts": "0bde9c97c823f8bae75027cf0a8558bdfea781979f20768e241a7d4bbc8cf7dd",
       "scripts/test-relay-image-generation.ts": "d66f497b893ed0026806fbc928dbafff65be90b2e505e86c7da32b4df9d67140",
       "scripts/verify-image-library-scale-ui.ts": "0e7003e1f256f99f28c953537b16044b50678c700b496c53d47f1b0104ff23cc",
-      "scripts/verify-image-public-http.ts": "0d67711089e20bd43e0dc88d4385adfbdfee3ff4b04c2ea54495cff1925e50a8",
+      "scripts/verify-image-public-http.ts": "c4b1e12705a2dae186551817cf4c2bd8351efe91c9883cd8e7936a3fee7a409f",
       "scripts/verify-url-navigation.mjs": "129685c1a8d30ee36d2bfbfa3a2369d945aad24ebde602289a94c9a061b46c07",
       "src/app/api/billing/generation-quota/route.ts": "9886f0b6132866ea12dcd80ba3301b9e6ccb8bc9eeac9ae3aca9a2ef1d64621f",
       "src/app/api/images/library/[assetId]/route.ts": "841b0e38f6bdbc67ecde213e8cc25179d208f23648439b46d592bbbb772345df",
@@ -128,19 +128,19 @@
   },
   "access": {
     "reviewer": "Codex",
-    "note": "Reviewed the quota fixture clock boundary, independent race accounts, strict rejection reasons, and canonical quota/fairness contracts. Runtime authority and limits are unchanged; retained local and hosted-failure evidence distinguishes their scope.",
+    "note": "Reviewed the exact quota read exemption, independent account authority, strict raw-response acceptance and canonical rollout/rollback guides. No database or paid policy change. Local build and scoped security evidence retained; production correction pending.",
     "reviewed_at": "2026-09-14",
     "review_by": "2026-09-20",
     "evidence": {
-      "docs/knowledge/audits/2026-09-14-free-gate-ci-fixture.json": "f92e62f6a8584210f5ddd0135498759f858fca20835c68a2e0dafac2b2748c95"
+      "post-mortem/incidents/2026/2026-09-14-generation-quota-access/local-verification.json": "433698475b5b71d3d01d0872449c9618c5d6d3152c5117f9e60acd243a4be938"
     },
     "files": {
       "docs/SECURITY_POSTURE_AND_THREAT_MODEL.md": "69e35e1344f7d5812bf26a2cec7cf45f0b27911e461432d0a8537e41532ddc89",
       "docs/STANDARDIZED_OAUTH_AND_INGESTION_ARCHITECTURE.md": "3a37cd365a75b01230b4fba5b280040280bbdba09ebae9aca167281fc1d26b82",
       "docs/adr/0147-verified-account-and-session-authority.md": "5c97eaabc0faa667f329c44ed0366125c96cb0cbd4625f7cf84649b882e57a96",
-      "docs/maintainers/FREE_GENERATION_QUOTA.md": "1750780f8b90d88ee40395e7bc2df0248298fd8ff552beb6630455ee65e19016",
+      "docs/maintainers/FREE_GENERATION_QUOTA.md": "e43d24867079c13c8437b7002d8730a6bb954c321437716b4185f8c94c6d6249",
       "docs/maintainers/readable-urls.md": "ea1fed2e15baa2097f0c1a906c98c66ab3343cd25aba9613151cd9f9480abb60",
-      "docs/operations/developer-preview.md": "5a0c12b0badd17203fe22d81353cc64f7e3a3ee6227aca662048f1d2dbff5e04",
+      "docs/operations/developer-preview.md": "e969ea469bcfb8356b8776408b407a9db66b6b02f1eb68b18d3af66bc239719a",
       "docs/operations/preview-activation.md": "d724da3eefe8b52d2557f0f4be91a70ed3562f56e7586e17fe0c2dc06c824e44",
       "docs/operations/preview-admin.md": "d7e854fdd3ff3d1aadbee97d0163c1a38cf3a7626a2907c540093003f5064b40",
       "docs/operations/preview-hybrid-sync.md": "1ac7ce76537660cfc507a595c942d4da2324060b8a3f15ddf9ab96d993ff38e9",
@@ -148,7 +148,7 @@
       "scripts/manage-free-generation.ts": "7a1f786789e9507e758c13db2e750c5edc982fec2b714e646d7e0bf9526fbb2b",
       "scripts/test-auth-entry.ts": "21ddab9a5ae2aa036c392a98202c41ef4de48a8c46309bff276f23430dfec130",
       "scripts/test-auth-identity-boundary.ts": "7a4c8de24a4c82869d1adeb4c57567a574d206116b16df37681e8569bffefe93",
-      "scripts/test-developer-preview.ts": "a4bdcbd3308a4694ce53a910dbd9cd2f0e8a8252674f39186ef7caa9e65076ec",
+      "scripts/test-developer-preview.ts": "856f244787a68161ce776119547345185cbdfe2c55071cbc46903499e4aef8ba",
       "scripts/test-free-generation-gate-db.ts": "2919f39490203795965f494f61b288305ea7136e544515cc504d9e8a0ff7e037",
       "scripts/test-free-generation-quota-db.ts": "26d3381b0a90285cce6d954b954601fb7a5a4596998389ac7091cfb7b49d9b04",
       "scripts/test-free-generation-quota.ts": "cbf7034c6f10ecfcf6176718f693a2636af775899e05552b5d7c53c58f142fb3",
@@ -251,7 +251,7 @@
       "src/lib/security/internal-access.ts": "ea9c2c0f280b819e285b04bb1c82b8e1669c8498ec1e05a6560a34d27a25d11c",
       "src/lib/security/normalize-image-output.ts": "205920bbb0a1df05c955211edc4d738b21cabefbe04bd0a5386ac5e0ac0af4bd",
       "src/lib/security/preview-middleware.ts": "ea577ad1118ca166c882cd8a5d335221a2a1a5b65b4cfa7b0078daa76572229d",
-      "src/lib/security/preview-policy.ts": "b8df23ea7cf60bc3fce41a973e443a321116ffdb396a3dbcf275423bb2c41719",
+      "src/lib/security/preview-policy.ts": "a609cf57962c3d98e46340655501f03a4457cdc6e490ba920df0071dd976e08c",
       "src/lib/security/private-image-diagnostics.ts": "b2f34531192d580a86ff2bfe9cc65df9586ec28abb5648e0fc5cace2aba40255",
       "src/lib/security/public-image-http.ts": "8f2436f638149bcffa2a82e89b45007fd53c8f0abbe14e7475a80de788f17058",
       "src/lib/security/public-image-record.ts": "777deaa9a0ce4a75aae539ae21a90b3ec8c1c11e19997f8664b8a35de91b1f9e",
@@ -271,11 +271,11 @@
   },
   "sites": {
     "reviewer": "Codex",
-    "note": "Reviewed the quota fixture clock boundary, independent race accounts, strict rejection reasons, and canonical quota/fairness contracts. Runtime authority and limits are unchanged; retained local and hosted-failure evidence distinguishes their scope.",
+    "note": "Reviewed the exact quota read exemption, independent account authority, strict raw-response acceptance and canonical rollout/rollback guides. No database or paid policy change. Local build and scoped security evidence retained; production correction pending.",
     "reviewed_at": "2026-09-14",
     "review_by": "2026-09-20",
     "evidence": {
-      "docs/knowledge/audits/2026-09-14-free-gate-ci-fixture.json": "f92e62f6a8584210f5ddd0135498759f858fca20835c68a2e0dafac2b2748c95"
+      "post-mortem/incidents/2026/2026-09-14-generation-quota-access/local-verification.json": "433698475b5b71d3d01d0872449c9618c5d6d3152c5117f9e60acd243a4be938"
     },
     "files": {
       "docs/SITES_CONTENT.md": "f98ca011a897c22f6a54f078d973b94de0930110edb76f9c64c5a58b34f950de",
@@ -283,7 +283,7 @@
       "docs/adr/0148-complimentary-pro-access.md": "4d454694d9a03c11485d32a428c9b7bb1de635f00e62f60ed51ac86619ad6922",
       "docs/adr/0149-one-time-free-generation.md": "e7c5afab039f366bb0759520d43e3ad00dda80ba3c205ab6616e68c083b40016",
       "docs/adr/0150-free-generation-admission-gate.md": "2becd927bc09b387f04bc089726a4d850a142f8ecdd2040e6fed5e686fd447b7",
-      "docs/maintainers/FREE_GENERATION_QUOTA.md": "1750780f8b90d88ee40395e7bc2df0248298fd8ff552beb6630455ee65e19016",
+      "docs/maintainers/FREE_GENERATION_QUOTA.md": "e43d24867079c13c8437b7002d8730a6bb954c321437716b4185f8c94c6d6249",
       "docs/maintainers/SITES_DOMAINS.md": "f52a50eb38cda71d7ff08ad09bf0a13d5b60ee661eec5cf36e08734580c6c3e2",
       "docs/maintainers/SITES_FAIR_USAGE.md": "2dc00a84e044a28c4e2d9e10077c4f9ef290aaa8dbbeec9fbe739d52e74b4f51",
       "docs/maintainers/SITES_OPERATIONS.md": "06cb6972ca8dc7d1d0402d04621fc4fcf728968092e86ffa2385c9c44a95577d",
@@ -406,15 +406,15 @@
   },
   "database": {
     "reviewer": "Codex",
-    "note": "Reviewed additive private policy/capacity/tier migration, index scope, short lock/statement limits, explicit role denial, revision/expiry configuration and preserving rollback. Both quota migrations remain unapplied to production; fixture applies 107 migrations and 86 quota checks.",
+    "note": "Reviewed the exact quota read exemption, independent account authority, strict raw-response acceptance and canonical rollout/rollback guides. No database or paid policy change. Local build and scoped security evidence retained; production correction pending.",
     "reviewed_at": "2026-09-14",
     "review_by": "2026-09-20",
     "evidence": {
-      "docs/knowledge/audits/2026-09-14-free-admission-gate.json": "311848419564b9b9050da6d82cbca26f0229f2d8a17a8220d1c1c6d83d129e97"
+      "post-mortem/incidents/2026/2026-09-14-generation-quota-access/local-verification.json": "433698475b5b71d3d01d0872449c9618c5d6d3152c5117f9e60acd243a4be938"
     },
     "files": {
       "docs/SUPABASE_PARANOID_ARCHITECTURE_SPEC.md": "ebe3942880188ff96f58cdc227b7d7e5f31a03a0dcaea9c1b7eace2aeeac7372",
-      "docs/maintainers/FREE_GENERATION_QUOTA.md": "1750780f8b90d88ee40395e7bc2df0248298fd8ff552beb6630455ee65e19016",
+      "docs/maintainers/FREE_GENERATION_QUOTA.md": "e43d24867079c13c8437b7002d8730a6bb954c321437716b4185f8c94c6d6249",
       "docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md": "2556863fcf782fa5aaf7dda5f382d2406d939b6651321e3ef7b91439c5cd2869",
       "scripts/fixtures/integration-bootstrap.sql": "7e44c36f452fe91403820b88bcee79231c81240abafe31df7948e5866e0cfa72",
       "scripts/manage-free-generation.ts": "7a1f786789e9507e758c13db2e750c5edc982fec2b714e646d7e0bf9526fbb2b",

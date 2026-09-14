@@ -3952,6 +3952,16 @@
       "decision": null
     },
     {
+      "path": "post-mortem/incidents/2026/2026-09-14-generation-quota-access/README.md",
+      "title": "Generation quota read blocked by developer approval",
+      "scope": "operational-record",
+      "kind": "navigation",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
       "path": "post-mortem/runbooks/controller-lock.md",
       "title": "Controller ownership and stale-lock recovery",
       "scope": "current-guide",

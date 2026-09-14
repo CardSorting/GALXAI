@@ -565,3 +565,17 @@ Incident: `INC-20260913-RENDER`. Kind: `verification`.
 **Next step:** Keep ACT-016 open; correlate the original digest and finish the original authenticated Images/Sites recovery matrix.
 
 Evidence: [2026-09-14-complimentary-pro-access.json](releases/2026-09-14-complimentary-pro-access.json).
+
+## EVT-20260914-quota-preview-interception — 2026-09-14T04:27:58.976165Z
+
+Incident: `INC-20260914-QUOTA`. Kind: `observation`.
+
+**Observation:** Signed-in Billing confirms Pro while quota header is unavailable; anonymous quota GET returns developer-preview auth error before account authority.
+
+**Action:** Kept both free budgets paused; prepared an exact product-support route exemption plus middleware/account and raw-response regression coverage.
+
+**Result:** Missing exact allowlist entry established in deployed source; no quota or entitlement records modified.
+
+**Next step:** Complete local build and checks, deploy the correction and verify signed-in Pro entry before budget activation.
+
+Evidence: [README.md](incidents/2026/2026-09-14-generation-quota-access/README.md).
