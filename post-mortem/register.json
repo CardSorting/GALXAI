@@ -187,15 +187,18 @@
       "id": "INC-20260914-QUOTA",
       "category": "authorization",
       "severity": "SEV-2",
-      "status": "investigating",
+      "status": "recovered",
       "title": "Generation quota read blocked by developer approval",
       "owner": "Codex (active responder)",
       "record": "post-mortem/incidents/2026/2026-09-14-generation-quota-access/README.md",
       "evidence": [
-        "post-mortem/incidents/2026/2026-09-14-generation-quota-access/README.md"
+        "post-mortem/incidents/2026/2026-09-14-generation-quota-access/README.md",
+        "post-mortem/releases/2026-09-14-free-generation-gate.json"
       ],
       "failure_modes": [],
-      "recovery_evidence": []
+      "recovery_evidence": [
+        "post-mortem/releases/2026-09-14-free-generation-gate.json"
+      ]
     }
   ],
   "actions": [
@@ -391,11 +394,12 @@
       "incident": "INC-20260914-QUOTA",
       "owner": "application/access maintainer",
       "review_by": "2026-09-15",
-      "status": "open",
-      "next_step": "Verify the exact quota route exemption through middleware, preserve its account guard, deploy the correction and check the real Pro header/composers.",
+      "status": "completed",
+      "next_step": "Middleware/account regression and exact account-error body check are deployed; signed-in Pro acceptance passed. Retain these checks for future supporting endpoints.",
       "closure": "Regression and raw account-error body checks pass; corrected production release shows Pro access without a free-quota error and retains anonymous denial.",
       "evidence": [
-        "post-mortem/incidents/2026/2026-09-14-generation-quota-access/README.md"
+        "post-mortem/incidents/2026/2026-09-14-generation-quota-access/README.md",
+        "post-mortem/releases/2026-09-14-free-generation-gate.json"
       ]
     }
   ]

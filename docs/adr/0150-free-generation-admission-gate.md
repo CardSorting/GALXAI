@@ -2,7 +2,7 @@
 
 <!-- docs-scope: decision-record -->
 
-Date: 2026-09-14. Status: proposed. Owner: Product/API maintainer. Delivery: local.
+Date: 2026-09-14. Status: proposed. Owner: Product/API maintainer. Delivery: deployed.
 
 ## Problem and direction
 
@@ -20,4 +20,4 @@ Use public status and remaining allowance near the composer, a firm stop before 
 
 ## Delivery and recovery
 
-The [quota runbook](../maintainers/FREE_GENERATION_QUOTA.md) owns the exact contract, migration ordering, revision-checked operator command and retained-state rollback. [Local evidence](../knowledge/audits/2026-09-14-free-admission-gate.json) records validation. The new migration seeds both resources paused. No production change, capacity increase or budget activation is implied by this proposed local record.
+The [quota runbook](../maintainers/FREE_GENERATION_QUOTA.md) owns the exact contract, migration ordering, revision-checked operator command and retained-state rollback. [Local evidence](../knowledge/audits/2026-09-14-free-admission-gate.json) records validation. The migration seeds both resources paused. The [September 14 release](../../post-mortem/releases/2026-09-14-free-generation-gate.json) records both applied migrations and the corrected application. A revision-checked image trial allows one outstanding unit, three hourly and ten cumulative, expiring September 15 at 03:25 UTC without renewal. Free Sites remain paused under the preserved paid-capacity policy. These are dated deployment facts; the decision status remains proposed and live free generation/load acceptance is not claimed.

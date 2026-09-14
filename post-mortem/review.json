@@ -1,8 +1,8 @@
 {
   "version": 1,
   "reviewer": "Codex",
-  "reviewed_at": "2026-09-14T04:29:09.109471Z",
-  "note": "Reviewed quota middleware exemption, current production observations, incident containment and account-response regression. Gate budgets remain paused; preserved prior journal entries.",
+  "reviewed_at": "2026-09-14T04:36:31.389250Z",
+  "note": "Reviewed final production release evidence and canonical handover: both migrations applied, corrected quota account route verified, bounded expiring image budget active, free Sites paused, ACT-017 complete with unrelated actions preserved.",
   "files": {
     ".dockerignore": "fb4dc7ef84e7f36c5bfed0f267187a022bbb61e66dd26060295b133e08fa74c5",
     ".github/workflows/vercel-preflight.yml": "124587ef1b14fe558513720535d613a30f4dd2f384e28b2f6d70d3b5c24ae2ef",
@@ -40,7 +40,7 @@
     "docs/operations/wallet-lifecycle.md": "ddc86ed1d3347f5fff19a07581bc040c52eee7a115c279a2ba28bceae92303db",
     "docs/operations/workspace-auth.md": "ca767816aedda8c350bd7cf4469261e6b5a15d78c01541bd42f1e5a53c6558c0",
     "package.json": "274647833b5fe0a7ea681a2c03086ad694856be5599511817811b9c9ba375e88",
-    "post-mortem/CURRENT_STATE.md": "3c12fc389080d921c579537fea93d1eda14efd9fa11a7544bd96ea919dafc96d",
+    "post-mortem/CURRENT_STATE.md": "139f6e2181db1bb2ea017a24f290e70d778b78508a3903b336401d408cf621f6",
     "post-mortem/README.md": "d28cbc9427aaa4aba99057517831e49f79244a686e1ce35640c4f566abbae8b8",
     "post-mortem/failure-modes/README.md": "b83ecd5ca97cf5ccdc3de822c356be8319d51d635bf788ff1ee76ea76aac4f9a",
     "post-mortem/failure-modes/access-and-documentation.md": "3370ac35bb931f6a691071076decbdca69f8de79a137ae178395c9bd34e466fe",

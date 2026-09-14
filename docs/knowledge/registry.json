@@ -610,25 +610,33 @@
     },
     "docs/adr/0149-one-time-free-generation.md": {
       "status": "proposed",
-      "delivery": "local",
+      "delivery": "deployed",
       "domain": "sites",
       "owner": "Product/API maintainer",
       "date": "2026-09-14",
       "evidence": [
-        "docs/knowledge/audits/2026-09-14-free-generation.json"
+        "docs/knowledge/audits/2026-09-14-free-generation.json",
+        "post-mortem/releases/2026-09-14-free-generation-gate.json"
       ],
-      "supersedes": []
+      "supersedes": [],
+      "target": "galx.ai account generation gate",
+      "revision": "d19e4ee1ad4b446e689bb4b85db48ec3a6f08fb0",
+      "observed_at": "2026-09-14T04:36:11.300721Z"
     },
     "docs/adr/0150-free-generation-admission-gate.md": {
       "status": "proposed",
-      "delivery": "local",
+      "delivery": "deployed",
       "domain": "sites",
       "owner": "Product/API maintainer",
       "date": "2026-09-14",
       "evidence": [
-        "docs/knowledge/audits/2026-09-14-free-admission-gate.json"
+        "docs/knowledge/audits/2026-09-14-free-admission-gate.json",
+        "post-mortem/releases/2026-09-14-free-generation-gate.json"
       ],
-      "supersedes": []
+      "supersedes": [],
+      "target": "galx.ai account generation gate",
+      "revision": "d19e4ee1ad4b446e689bb4b85db48ec3a6f08fb0",
+      "observed_at": "2026-09-14T04:36:11.300721Z"
     }
   },
   "managed_adr_from": 145,

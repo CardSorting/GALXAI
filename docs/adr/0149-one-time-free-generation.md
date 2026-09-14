@@ -2,7 +2,7 @@
 
 <!-- docs-scope: decision-record -->
 
-Date: 2026-09-14. Status: proposed. Owner: Product/API maintainer. Delivery: local.
+Date: 2026-09-14. Status: proposed. Owner: Product/API maintainer. Delivery: deployed.
 
 ## Context and decision
 
@@ -18,6 +18,6 @@ This partially extends the Pro eligibility scope of ADRs [0140](0140-paid-sites-
 
 ## Delivery, recovery and confirmation
 
-Apply the additive quota migration before a compatible application deployment. Roll back the application to stop new free admissions while retaining grants, usage, receipts and saved work. The paired DOWN file preserves all records and denied Data API access. Never delete allowance records as a refund or rollback.
+Apply both quota migrations in timestamp order before a compatible application deployment. ADR 0150 adds the required aggregate stop gate. Its DOWN file pauses free admission and retains records; the earlier quota DOWN only preserves denied privileges. Roll back to compatible gated code or the preceding Pro-only release, never the earlier unbounded free application. Retain grants, usage, receipts and saved work; never delete allowance records as a refund or rollback.
 
-The [quota runbook](../maintainers/FREE_GENERATION_QUOTA.md) defines exact lifetime/release behavior, rollout, verification and remaining limitations. [Local evidence](../knowledge/audits/2026-09-14-free-generation.json) records tests and reviewed source. Production migration, deployment and real customer acceptance are separate work; local completion does not mark this decision accepted.
+The [quota runbook](../maintainers/FREE_GENERATION_QUOTA.md) defines exact lifetime/release behavior, rollout, verification and remaining limitations. [Local evidence](../knowledge/audits/2026-09-14-free-generation.json) records tests and reviewed source. The [September 14 release](../../post-mortem/releases/2026-09-14-free-generation-gate.json) records both applied migrations, the corrected deployed application, signed-in Pro/read-only acceptance and the bounded image trial. Free Sites remain paused. Actual free generation and publication were not submitted; delivery does not mark this decision accepted.

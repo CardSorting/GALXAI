@@ -579,3 +579,17 @@ Incident: `INC-20260914-QUOTA`. Kind: `observation`.
 **Next step:** Complete local build and checks, deploy the correction and verify signed-in Pro entry before budget activation.
 
 Evidence: [README.md](incidents/2026/2026-09-14-generation-quota-access/README.md).
+
+## EVT-20260914-quota-gate-release-verified — 2026-09-14T04:36:11.300721Z
+
+Incident: `INC-20260914-QUOTA`. Kind: `verification`.
+
+**Observation:** Corrected quota route serves account authority; Pro Billing, Sites and Images load without the false free quota notice.
+
+**Action:** Verified corrected production release and hosted CI, then applied and read back the reviewed one-outstanding/three-hourly/ten-total image budget with fixed expiry. Preserved paused free Sites and paid policy revision 4.
+
+**Result:** Both migrations applied, role denials/indexes confirmed, exact anonymous/forged account error and public HTTP/27-asset/34-cache checks passed. No live generation, payment or publication submitted.
+
+**Next step:** Retain automatic expiry and cumulative stop; any further budget or Sites capacity change needs fresh evidence and explicit revision-checked configuration. Existing unrelated incidents remain open.
+
+Evidence: [2026-09-14-free-generation-gate.json](releases/2026-09-14-free-generation-gate.json).

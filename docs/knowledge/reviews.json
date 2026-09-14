@@ -1,11 +1,11 @@
 {
   "knowledge": {
     "reviewer": "Codex",
-    "note": "Reviewed ADR 0150 as proposed/local with retained evidence, explicit source mapping for gate/UI/operator/CSS paths and current guide reconciliation. Supporting inventories and dated research remain separate from runtime or production authority; synchronization does not accept decisions.",
+    "note": "Reviewed applied migration and private role/index evidence, exact deployed source and hosted CI, recovered quota account boundary, expiring image budget and preserved paid-only Sites capacity. ADR delivery updated separately from proposed decision status; historical and untested generation scope retained.",
     "reviewed_at": "2026-09-14",
     "review_by": "2026-09-20",
     "evidence": {
-      "docs/knowledge/audits/2026-09-14-free-admission-gate.json": "311848419564b9b9050da6d82cbca26f0229f2d8a17a8220d1c1c6d83d129e97"
+      "post-mortem/releases/2026-09-14-free-generation-gate.json": "f22e6abe2db93e7a08b97548cfaf802bb1f3b413e4a98e8fad06c17c2c764df1"
     },
     "files": {
       ".github/CODEOWNERS": "ef2f416d15f027dc8f197ad844289c9a44c8e843d3214d1590a3a380e939d13f",
@@ -22,7 +22,7 @@
       "docs/how-to/change-with-documentation.md": "abcf6bfb2f0aadcf8cfc2fdae18ac8f3f84565f127c34f7453d50e7283006e40",
       "docs/knowledge/DESIGN_RATIONALE.md": "edd3cf9b49ed794fbe8bf14448fd0c56cb4d8df832bab81cdf07e9ea2e2204a1",
       "docs/knowledge/README.md": "5ad219aeee44a9c065db2ca69e5a6498966fed42e2d8c74773dbc055d0220931",
-      "docs/knowledge/registry.json": "ad20b6d6ed2f755360dcbee4396700a3f4ea12b2c81c4baf666e18ce1ff5e677",
+      "docs/knowledge/registry.json": "9014c60e18fe6cab2f989cc8c233b8c0744f13ab84861f1bd2b28ecae89ba072",
       "docs/knowledge/templates/adr.md": "28773b3cbdb53ad34f08d0362e87b6dba24b6fd76ddb6c85db8ad63d99ad1331",
       "docs/knowledge/templates/runbook.md": "19679a7eb8c1a3aafd87852fa93817e7bf9ef4696772c8deb1617366c290abc1",
       "docs/maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md": "b7df75535611c14aabe599764a6f6c2a4f0f1461d068929602c68e39d8ce850d",
@@ -271,18 +271,18 @@
   },
   "sites": {
     "reviewer": "Codex",
-    "note": "Reviewed the exact quota read exemption, independent account authority, strict raw-response acceptance and canonical rollout/rollback guides. No database or paid policy change. Local build and scoped security evidence retained; production correction pending.",
+    "note": "Reviewed applied migration and private role/index evidence, exact deployed source and hosted CI, recovered quota account boundary, expiring image budget and preserved paid-only Sites capacity. ADR delivery updated separately from proposed decision status; historical and untested generation scope retained.",
     "reviewed_at": "2026-09-14",
     "review_by": "2026-09-20",
     "evidence": {
-      "post-mortem/incidents/2026/2026-09-14-generation-quota-access/local-verification.json": "433698475b5b71d3d01d0872449c9618c5d6d3152c5117f9e60acd243a4be938"
+      "post-mortem/releases/2026-09-14-free-generation-gate.json": "f22e6abe2db93e7a08b97548cfaf802bb1f3b413e4a98e8fad06c17c2c764df1"
     },
     "files": {
       "docs/SITES_CONTENT.md": "f98ca011a897c22f6a54f078d973b94de0930110edb76f9c64c5a58b34f950de",
       "docs/SITES_WORKSPACE.md": "f21da2e198defa4d075b5adcc191f35a34b06ccf04246f10ffeb9eb907f48bed",
       "docs/adr/0148-complimentary-pro-access.md": "4d454694d9a03c11485d32a428c9b7bb1de635f00e62f60ed51ac86619ad6922",
-      "docs/adr/0149-one-time-free-generation.md": "e7c5afab039f366bb0759520d43e3ad00dda80ba3c205ab6616e68c083b40016",
-      "docs/adr/0150-free-generation-admission-gate.md": "2becd927bc09b387f04bc089726a4d850a142f8ecdd2040e6fed5e686fd447b7",
+      "docs/adr/0149-one-time-free-generation.md": "c6de81c42fec045d765b8768d7f8d7f0d1afef9c771a248e6a95ac8197e471d5",
+      "docs/adr/0150-free-generation-admission-gate.md": "23c6220cad7a15f262e05e9fc9c134622551c218e474da1a8ed262e9a95563a8",
       "docs/maintainers/FREE_GENERATION_QUOTA.md": "e43d24867079c13c8437b7002d8730a6bb954c321437716b4185f8c94c6d6249",
       "docs/maintainers/SITES_DOMAINS.md": "f52a50eb38cda71d7ff08ad09bf0a13d5b60ee661eec5cf36e08734580c6c3e2",
       "docs/maintainers/SITES_FAIR_USAGE.md": "2dc00a84e044a28c4e2d9e10077c4f9ef290aaa8dbbeec9fbe739d52e74b4f51",

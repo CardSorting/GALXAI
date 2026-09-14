@@ -1,0 +1,235 @@
+{
+  "observed_at": "2026-09-14T04:36:11.300721Z",
+  "authorization": "User requested implementation, push and completion of the pending migrations/deployment and paused budget handover.",
+  "source_revision": "d19e4ee1ad4b446e689bb4b85db48ec3a6f08fb0",
+  "source_tree_clean_at_deploy": true,
+  "deployment": {
+    "id": "dpl_4ToBKASnCSgDbWNLkpaRbw4zxhgU",
+    "url": "https://galx.ai",
+    "status": "Ready",
+    "trigger": "Git push",
+    "previous_serving_observed": "dpl_BqoGaCHLouvsf5im3dRwfMx9FzNs",
+    "initial_quota_release": "dpl_2fcK1FRXc9yyFomC8F7w3Pa6ae1p",
+    "test_only_followup": "dpl_EBE4Nbv8hH5Jsy71yFF9bmPyuE7V"
+  },
+  "migrations": {
+    "applied": [
+      "20260914030425_free_generation_quota.sql",
+      "20260914035003_free_generation_admission_gate.sql"
+    ],
+    "applied_at_utc": "2026-09-14T04:18:38Z",
+    "inventory": {
+      "applied": 107,
+      "pending": 0,
+      "remote_only": 0
+    },
+    "linked_target_matches": true,
+    "rls": [
+      {
+        "relname": "galx_free_generation_grants",
+        "relrowsecurity": true,
+        "relforcerowsecurity": true
+      },
+      {
+        "relname": "galx_free_generation_policy",
+        "relrowsecurity": true,
+        "relforcerowsecurity": true
+      },
+      {
+        "relname": "galx_free_generation_usage",
+        "relrowsecurity": true,
+        "relforcerowsecurity": true
+      }
+    ],
+    "denied_role_table_selects": 9,
+    "no_table_privileges_for_app_roles": true,
+    "columns": [
+      {
+        "table_name": "galx_free_generation_usage",
+        "column_name": "capacity_settled",
+        "is_nullable": "NO",
+        "column_default": "false"
+      },
+      {
+        "table_name": "galx_sites_fair_invocations",
+        "column_name": "tier",
+        "is_nullable": "NO",
+        "column_default": "'pro'::text"
+      }
+    ],
+    "indexes": [
+      {
+        "relname": "galx_free_generation_usage_active",
+        "indisvalid": true
+      },
+      {
+        "relname": "galx_free_generation_usage_flow",
+        "indisvalid": true
+      }
+    ]
+  },
+  "free_budget": {
+    "image_change": {
+      "kind": "image",
+      "expectedRevision": 1,
+      "enabled": true,
+      "validUntil": "2026-09-15T03:25:08.936Z",
+      "maxOutstanding": 1,
+      "maxHourUnits": 3,
+      "maxDayUnits": 10,
+      "maxTotalUnits": 10
+    },
+    "preview_applied": false,
+    "committed": true,
+    "committed_at_utc": "2026-09-14T04:34:54.931Z",
+    "readback": [
+      {
+        "kind": "image",
+        "enabled": true,
+        "revision": "2",
+        "valid_until": "2026-09-15T03:25:08.936Z",
+        "max_outstanding": 1,
+        "max_hour_units": 3,
+        "max_day_units": 10,
+        "max_total_units": "10",
+        "admitted_units": "0"
+      },
+      {
+        "kind": "site",
+        "enabled": false,
+        "revision": "1",
+        "valid_until": null,
+        "max_outstanding": 0,
+        "max_hour_units": 0,
+        "max_day_units": 0,
+        "max_total_units": "0",
+        "admitted_units": "0"
+      }
+    ],
+    "sites": "Paused; existing two-slot paid policy is preserved.",
+    "paid_policy_revision": "4",
+    "paid_policy_limits": {
+      "flow_window_seconds": 60,
+      "pool_max_outstanding": 2,
+      "snapshot_ttl_seconds": 5,
+      "account_max_outstanding": 1,
+      "allowance_window_seconds": 86400,
+      "baseline_protected_slots": 1,
+      "request_deadline_seconds": 45,
+      "baseline_message_threshold": 20,
+      "refresh_timeout_milliseconds": 2000,
+      "admission_deadline_milliseconds": 4000,
+      "pool_max_attempts_per_flow_window": 6,
+      "dispatch_grant_expiry_milliseconds": 3000,
+      "account_max_attempts_per_flow_window": 2,
+      "account_max_continuation_outstanding": 1,
+      "active_continuation_demand_ttl_seconds": 120,
+      "continuation_max_attempts_per_flow_window": 3,
+      "provider_max_attempts_per_logical_invocation": 1
+    },
+    "automatic_renewal": false,
+    "customer_quota_and_aggregate_counters_reset": false
+  },
+  "capacity_observation": {
+    "at_utc": "2026-09-14T04:34:02.044Z",
+    "basis": "Read-only configured private controller capability snapshot; local workload headroom, not supplier balances.",
+    "registry_fresh": true,
+    "image_eligible_workers": 1,
+    "image_capacity": 4,
+    "image_active_streams": 0,
+    "queued_work": 0,
+    "risk": "One eligible image worker; conservative pilot with one outstanding unit and ten cumulative admissions, no auto renewal. Sites paid ceiling remains two and admits no free Sites."
+  },
+  "live_acceptance": {
+    "pro_billing": "Active Pro shown; erroneous quota notice absent after corrected release.",
+    "pro_sites": "Workspace loaded; Included with your plan; no free quota notice.",
+    "pro_images": "Composer loaded without free stop notice; empty prompt correctly disabled generation.",
+    "generations_submitted": 0,
+    "publications_submitted": 0,
+    "payments_submitted": 0,
+    "exact_quota_account_401_body": "passed for anonymous and forged sessions",
+    "image_public_http": "passed with 27 browser assets",
+    "cache_checks": 34,
+    "private_surface_scan": {
+      "observedAt": "2026-09-14T04:33:48.178Z",
+      "origin": "https://galx.ai",
+      "pages": [
+        "/",
+        "/login",
+        "/pricing/galx-pro",
+        "/knowledge-base/getting-started",
+        "/api/openapi.json"
+      ],
+      "assets": 27,
+      "privateMarkers": 13,
+      "configuredSecretsAbsent": true,
+      "hits": []
+    },
+    "scan_classification": "An initial secret-marker match was a sb_publishable_ value matching NEXT_PUBLIC configuration, held under a misnamed local variable. It was classified as public; no private gate markers matched."
+  },
+  "local_validation": {
+    "quota_db_checks": 86,
+    "database_checks": 94,
+    "static_integrity": {
+      "migrations": 107,
+      "fatal": 0,
+      "warnings": 0
+    },
+    "developer_preview_tests": 15,
+    "image_security_tests": 40,
+    "quota_unit_tests": 4,
+    "fairness_unit_tests": 9,
+    "typescript": "passed",
+    "production_build": "passed, isolated synthetic credentials",
+    "compiled_boundary": {
+      "files": 668,
+      "errors": [],
+      "additional_gate_markers": 8,
+      "hits": []
+    },
+    "documentation_fixtures": 37
+  },
+  "hosted_ci": {
+    "preflight": {
+      "run": 34806233285,
+      "source": "d19e4ee1ad4b446e689bb4b85db48ec3a6f08fb0",
+      "conclusion": "success"
+    },
+    "documentation": {
+      "run": 34806233195,
+      "conclusion": "success"
+    },
+    "initial_preflight": {
+      "run": 34805660762,
+      "conclusion": "failure",
+      "evidence": "docs/knowledge/audits/2026-09-14-free-gate-ci-fixture.json"
+    },
+    "fixture_only_preflight": {
+      "run": 34805944846,
+      "conclusion": "cancelled by successor push"
+    },
+    "gateway": {
+      "run": 34805660676,
+      "conclusion": "success",
+      "deployment_step": "skipped"
+    }
+  },
+  "reviewed_guides": [
+    "docs/maintainers/FREE_GENERATION_QUOTA.md",
+    "docs/operations/developer-preview.md",
+    "docs/maintainers/SITES_FAIR_USAGE.md",
+    "docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md",
+    "docs/VERCEL_DEPLOYMENT.md",
+    "docs/adr/0149-one-time-free-generation.md",
+    "docs/adr/0150-free-generation-admission-gate.md",
+    "post-mortem/CURRENT_STATE.md"
+  ],
+  "limitations": [
+    "No real free-account generation, live load, paid settlement or publication was submitted.",
+    "Image workload units are not dollars and do not measure remaining supplier usage.",
+    "Free Sites are deliberately paused under the preserved paid-capacity policy.",
+    "Budget expiry/exhaustion requires a new explicit revision-checked approval, never an automatic refill.",
+    "ADR decision status remains proposed; deployment evidence is recorded separately.",
+    "Unrelated open incidents and prevention actions remain open."
+  ]
+}
