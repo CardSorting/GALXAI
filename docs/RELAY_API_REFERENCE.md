@@ -69,9 +69,9 @@ Names are normalized, unique and limited to 1–40 characters; built-in tab name
 
 Every new inference request names the exact model. The controller bounds JSON intake to 2 MiB and ten seconds. Provide `Idempotency-Key` per logical operation and preserve it with the same payload when recovering an acknowledgement. `X-Galx-Task-Id` is correlation only. The controller assigns a fresh request ID.
 
-Admission replay receipts are tenant- and route-scoped, process-local, and retained for ten minutes from admission: at most 1,000 live keys, 32 MiB aggregate capture/response storage, and 8 MiB per response. Live keys are not evicted to admit new work. A large image can stream successfully without being retained for replay. Completed receipts can be retrieved after model capability loss.
+Admission replay receipts are tenant- and route-scoped. The controller persists a private identity tombstone for ten minutes after admission (pending entries become unknown after controller loss); retained response bodies stay process-local. The in-memory cache permits at most 1,000 live keys, 32 MiB aggregate capture/response storage, and 8 MiB per response. Live keys are not evicted to admit new work. A large image can stream successfully without being retained for replay. Completed receipts can be retrieved after model capability loss, but a completed response body may be unavailable after controller replacement.
 
-Preserve the response `X-Galx-Idempotency-Scope` and send it on retries. A changed scope rejects the request; absent this precondition, restart or receipt expiry can permit new execution with the same key. This is not durable exactly-once execution.
+Preserve the response `X-Galx-Idempotency-Scope` and send it on retries. A changed scope rejects the request; without that precondition, a retained tombstone still blocks an uncertain key, while expiry or unavailable evidence requires a new explicit reconciliation decision. This is not durable exactly-once execution.
 
 ## Request recovery
 
@@ -102,7 +102,7 @@ The administrator readiness query has `model`, `maxOutputTokens` and a fresh `no
 
 `GET /v1/jobs/:id/receipt` returns only `id`, `status`, `output`, `usage`, `retainedUntil`. Status is `pending`, `unknown`, `not_started` or `completed`. Output and usage can be null. A completed receipt with null usage supports fixed-price settlement, while metered settlement requires valid usage. A fenced `not_started` receipt supports a zero-cost close; missing/expired/unknown receipts do not.
 
-The signed reference remains tenant-bound and has a 30-day lifetime. Unlike streams/cancellation, a receipt read can reach a replacement worker on the original shard's retained volume. This endpoint does not restart inference or extend the process-local admission deduplication cache. Public account recovery supplies only the original operation ID; its server adapter resolves this private reference and saved price.
+The signed reference remains tenant-bound and has a 30-day lifetime. Unlike streams/cancellation, a receipt read can reach a replacement worker on the original shard's retained volume. This endpoint does not restart inference or extend the admission tombstone or process-local response-cache windows. Public account recovery supplies only the original operation ID; its server adapter resolves this private reference and saved price.
 
 ## Image compatibility
 

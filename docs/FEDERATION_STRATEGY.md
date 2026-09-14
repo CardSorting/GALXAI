@@ -7,7 +7,9 @@
 
 A shard is registered credential authority; an inference worker executes requests; a repair desktop is an independent operator workspace. An eligible shard can own **at most one active managed worker** on a Docker host. Registered, rejected, expired, paused or unavailable records are not a count of serving containers. A desktop link does not enroll an account or add capacity.
 
-The controller reads the encrypted PostgreSQL registry and reconciles owned containers. Each worker receives one assigned credential, separate internal inference/admin keys and its own checkpoint volume. Workers receive no registry access, vault root, host home or Docker socket. Deterministic shard container names, ownership labels, generation checks and an exclusive controller lock enforce single-host ownership. Multiple Docker hosts require a distributed ownership lease before sharing credentials.
+The controller reads the encrypted PostgreSQL registry and reconciles owned containers. Each worker receives one assigned credential, separate internal inference/admin keys and its own checkpoint volume. Workers receive no registry access, vault root, host home or Docker socket. Deterministic shard container names, ownership labels, generation checks and the launcher's external kernel-held local guard enforce single-host ownership. A permanent compatibility marker blocks an incompatible old launcher during rollout; ambiguous legacy ownership fails closed. Multiple Docker hosts require a distributed ownership lease and a fencing-capable resource boundary before sharing credentials.
+
+Kubernetes could add pod restart and capability probes, but it would not repair the single-host stale-marker failure or prove that an uncertain Docker mutation and its descendants have ended. Kubernetes leader election also does not by itself fence a paused old controller. The current single-host strategy therefore keeps the local kernel guard, external guardian and one launchd restart authority; a Kubernetes migration is not part of this repair. Reconsider orchestration only with a multi-host ownership lease, durable state contract and fencing at the resource-management boundary.
 
 **Automatic worker lifecycle remains supported. Ambient credential population is retired.** Starting a controller or creating a desktop must not scan host logins or enroll an unknown account. Use [explicit enrollment](maintainers/RELAY_CREDENTIAL_ENROLLMENT.md); refresh an existing account through its [linked desktop](maintainers/RELAY_DESKTOPS.md).
 
@@ -27,6 +29,7 @@ There is no federation-wide waiting queue or implicit cross-model fallback. A ca
 | Unknown, stale, degraded or empty capability | Stop new admissions; retain worker for rediscovery |
 | Authoritative credential 401 | Persist revision-specific rejection; suppress repeated starts |
 | Transient discovery/start failure | Retry with bounded backoff |
+| Unexpected worker stop or disappearance | The controller is the only federation-worker restart authority; it waits with exponential backoff and pauses after five attempts in ten minutes with a private restart-budget alert |
 | Operator maintenance hold | Block admissions and replacement starts; preserve an existing worker, including a rejected one |
 | Credential removed, revoked, expired or changed | Retire old authority; a hold cannot override registry authority |
 | Explicit resume | Remove hold; rejection, cooldown and capability checks still apply |
@@ -55,7 +58,7 @@ Internal transport and administrator records preserve execution identifiers. Pub
 
 Each logical operation gets an idempotency key, reused only for the same payload and principal. Task IDs correlate work; they do not grant authority. Accepted jobs return signed tenant- and generation-bound recovery URLs. Status, cancellation and stream recovery target the original worker even after capability removal; streams and cancellation cannot attach to a replacement. Durable text receipt reads have the retained-volume exception below.
 
-Controller admission receipts are process-local: ten minutes, 1,000 keys, 32 MiB aggregate and 8 MiB per retained response. A full window rejects new keyed admissions rather than evicting live evidence. Preserve the returned scope; changed scope or unknown admission requires reconciliation, not blind replay. Images dispatch once. This is not durable exactly-once execution.
+The supervised controller retains a private admission tombstone journal across restart: ten minutes for completed identity records, 1,000 keys, 32 MiB aggregate and 8 MiB per retained response in memory. Prompts, credentials and response bodies are never persisted. A pending record becomes `unknown` after controller loss and never authorizes replay; completed response bodies remain process-local and may return an explicit non-retained result after restart. A full or unavailable journal rejects new keyed admissions rather than guessing. Preserve the returned scope; changed scope or unknown admission requires reconciliation, not blind replay. Images dispatch once. This is not durable exactly-once execution.
 
 See [request recovery](RELAY_API_REFERENCE.md#request-recovery) and [ADR 0130](adr/0130-image-receipts-and-uncertain-outcomes.md).
 
@@ -63,7 +66,7 @@ See [request recovery](RELAY_API_REFERENCE.md#request-recovery) and [ADR 0130](a
 
 Current application Sites work uses eligible paid-plan inclusion and shared fair admission under [ADR 0140](adr/0140-paid-sites-and-shared-fair-usage.md). The application does not quote or debit new per-generation wallet charges. The local execution profile verifies byte, wall-time, attempt and receipt readiness across eligible workers and again at dispatch; it does not invent supplier quota or token-usage evidence.
 
-Durable text receipts are separate from the process-local admission cache. A receipt can be read after replacement of its original worker using that shard's retained volume and the original tenant-bound signed reference. Streams and cancellation stay on the admitting generation. Missing references, expired signatures or lost volumes do not authorize replay or release uncertain occupancy. [Sites operations](maintainers/SITES_OPERATIONS.md) and [fair usage](maintainers/SITES_FAIR_USAGE.md) own current admission, retention, rollout and recovery.
+Durable text receipts are separate from the controller admission tombstones. A receipt can be read after replacement of its original worker using that shard's retained volume and the original tenant-bound signed reference. Streams and cancellation stay on the admitting generation. Missing references, expired signatures or lost volumes do not authorize replay or release uncertain occupancy. [Sites operations](maintainers/SITES_OPERATIONS.md) and [fair usage](maintainers/SITES_FAIR_USAGE.md) own current admission, retention, rollout and recovery.
 
 Earlier fixed/metered operations retain their accepted tariff, hold and settlement semantics. Confirmed durable completion can settle an original fixed charge without fabricating token usage; uncertain completion retains the hold. Those contracts do not apply to new included work. The legacy metered profile retains its own ceiling/usage requirements.
 

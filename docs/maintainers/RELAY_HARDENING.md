@@ -16,6 +16,19 @@ python3 scripts/verify-docs.py
 
 The capability suite covers lifecycle, desktop/credential recovery, maintenance, monitor authorization, telemetry and HTTP/adaptive-quota behavior. Enrollment tests cover retired entrypoints, validation and isolation. Public-boundary tests inspect adversarial bodies, headers, errors and artifacts. Guest tests exercise CLI/source handling without a real account sign-in.
 
+## Controller recovery drills
+
+```sh
+npm run test:relay:guardian
+npm run test:relay:launcher
+node --import tsx --test scripts/test-relay-launcher-worker-recovery.ts
+node --import tsx --test scripts/test-relay-docker-recovery.ts scripts/test-relay-admission-durability.ts
+```
+
+These use real guardian, launcher, controller, HTTP and WebSocket processes in disposable private directories. The worker drill retains one synthetic worker generation across a controller `SIGKILL`, completes an already-dispatched stream exactly once, then exercises an externally detected event-loop stall. The Docker and admission drills reproduce a TERM-ignoring CLI, immutable container-name reuse, uncertain daemon mutations, durable pending receipts and unavailable receipt storage. Preserve the emitted timing JSON and any retained failure directory when a run fails; do not delete a guard or journal to make a test pass.
+
+Federation workers use Docker restart policy `no`; the lifecycle controller is their sole restart authority. Unexpected exits or inventory disappearance are retried with backoff, capped at five attempts in ten minutes, and then surface `worker_restart_budget_exhausted` for operator action. Provider capability loss remains a readiness signal and does not trigger worker or controller restart.
+
 ## Storage and real containers
 
 ```sh
@@ -28,6 +41,8 @@ The storage harness uses disposable PostgreSQL plus mocked REST tests. Read its 
 
 Docker canaries use synthetic inventories/credentials. The federation canary removes containers but retains checkpoint volumes under its existing driver behavior. The lifecycle canary removes its containers and checkpoint volumes. Desktop previews use a scoped test manifest for retryable cleanup. Never expand cleanup to normal production workspaces.
 
+The isolated lifecycle canary was run on 2026-09-14 against the local Docker daemon with image `galxai-relay:lifecycle-recovery` and a unique `recovery-*` namespace. It passed worker restart/rejection retention, removed the rejected worker, adopted the surviving worker after controller recreation, and prevented allocation for a cold rejected credential. This does not cover a daemon restart, host reboot, delayed daemon startup, full/read-only retained storage or production credentials; those drills remain open under ACT-018.
+
 ## Build and browser checks
 
 Run `npm run build` and relevant source lint. For changed guest/worker code, build the corresponding image and test that candidate explicitly. A successful build does not replace a running container.
@@ -38,7 +53,7 @@ Scan rendered public pages and browser assets for selected private markers and i
 
 ## Acceptance limits
 
-Fixtures do not prove provider approval, current upstream compatibility, physical phone input, guest semantic accessibility or paid application completion. Real inference can incur usage and needs its own bounded verification. Record exact deployments separately from local tests; see [the session record](RELAY_SESSION_VERIFICATION_20260909.md).
+Fixtures do not prove provider approval, current upstream compatibility, physical phone input, guest semantic accessibility or paid application completion. The controller drills also do not prove a host reboot or Docker-daemon restart contract. Real inference can incur usage and needs its own bounded verification. Record exact deployments separately from local tests; see [the session record](RELAY_SESSION_VERIFICATION_20260909.md) and [the controller recovery evidence](../../post-mortem/incidents/2026/2026-09-13-image-generation/controller-recovery-verification-20260914.json).
 
 ## Historical Sites fixed-price boundary
 

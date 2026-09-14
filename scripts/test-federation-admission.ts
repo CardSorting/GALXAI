@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import http from 'node:http';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import { CapabilityRegistry } from '../src/relay/capability-registry.js';
 import { RelayFederationLifecycle, type RelayHandle } from '../src/relay/federation-lifecycle.js';
 import { RelayFederationServer } from '../src/relay/federation-server.js';
@@ -29,6 +32,25 @@ async function fixture(handler:(req:http.IncomingMessage,res:http.ServerResponse
   return{front,lifecycle,record,base,headers,submit,get handle(){return handle;},rotate:async()=>{record.remove('a');handle={...handle,generation:'two'};publish();await lifecycle.reconcile();},close:async()=>{await front.stop();await lifecycle.stop();worker.closeAllConnections();await new Promise<void>(r=>worker.close(()=>r()));}};
 }
 const answer=(res:http.ServerResponse,id='job-1')=>{res.writeHead(202,{'Content-Type':'application/json','Retry-After':'3','X-Galx-Trace-Id':'trace-1'});res.end(JSON.stringify({id,status:'queued',streamUrl:`/v1/jobs/${id}/stream`,statusUrl:`/v1/jobs/${id}`}));};
+
+test('lost first acknowledgement cannot redispatch the same key after controller restart without a learned scope', async () => {
+  const directory=fs.mkdtempSync(path.join(os.tmpdir(),'galx-admission-crash-'));
+  const admissionReceiptPath=path.join(directory,'admissions.json');
+  let dispatched=0;
+  let f=await fixture((_req,res)=>{dispatched++;res.destroy();},{admissionReceiptPath});
+  try {
+    const first=await f.submit(undefined,{'Idempotency-Key':'stable-operation'});
+    assert.equal(first.status,502);assert.equal(dispatched,1);
+    await f.close();
+    f=await fixture((_req,res)=>{dispatched++;answer(res);},{admissionReceiptPath});
+    const recovery=await f.submit(undefined,{'Idempotency-Key':'stable-operation'});
+    assert.equal(recovery.status,502,'replacement forgot the uncertain admission and dispatched duplicate work');
+    assert.equal((await recovery.json()).error.code,'relay_admission_unknown');
+    assert.equal(dispatched,1);
+    assert.equal((await f.submit(undefined,{'Idempotency-Key':'different-operation'})).status,202);
+    assert.equal(dispatched,2,'independent new work still proceeds');
+  } finally {await f.close();fs.rmSync(directory,{recursive:true,force:true});}
+});
 
 for (const local of [false, true]) test(`failed Sites dispatch preflight releases capacity and leaves the same admission key retryable (local=${local})`, async () => {
   let legacy = true, submitted = 0, checks = 0;

@@ -45,3 +45,7 @@ Primary implementation references: [Next.js after](https://nextjs.org/docs/app/a
 ## Deployment
 
 Production deployment Ready: `dpl_GvvnzykiKbuJa3EPt8RU8yg3xsfN`, `https://galxai-2m98f2la0-cardsortings-projects.vercel.app`, serving `galx.ai` and `www.galx.ai`. Source changes are deployed from the working tree and remain uncommitted and unpushed.
+
+## Follow-up controller recovery evidence
+
+The historical stale-marker repair above did not include automatic recovery. A separate 2026-09-14 implementation pass now has focused evidence for the local guardian, live-controller hang detection, Docker command cleanup, immutable container targeting, durable admission uncertainty, retained-worker adoption and an isolated Docker lifecycle canary. See [the dated verification record](controller-recovery-verification-20260914.json). Its local process and container results do not certify production rollout, host reboot, Docker-daemon restart, delayed daemon startup or retained-state restoration; those drills remain open under ACT-018.

@@ -3,6 +3,8 @@ import path from 'node:path';
 import os from 'node:os';
 import { execFileSync } from 'node:child_process';
 
+// Validate the Python runtime before producing a service that depends on kernel flock.
+execFileSync(process.env.RELAY_SUPERVISOR_PYTHON || 'python3', ['-c', 'import fcntl, selectors'], { stdio: 'pipe', timeout: 5000 });
 if (process.platform !== 'darwin') throw Error('This installer uses macOS launchd. Use your host supervisor on other platforms.');
 const root = process.cwd();
 const namespace = process.env.RELAY_FEDERATION_NAMESPACE || 'production';
@@ -12,7 +14,7 @@ const label = `com.galxai.federation.${namespace}`;
 const directory = path.join(root,'.relay',`federation-${namespace}`);
 fs.mkdirSync(directory,{recursive:true,mode:0o700});
 const escape = (value:string) => value.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-const env: Record<string,string> = { NODE_ENV:'production', PATH:'/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin',
+const env: Record<string,string> = { RELAY_SUPERVISOR_PYTHON: process.env.RELAY_SUPERVISOR_PYTHON || 'python3', NODE_ENV:'production', PATH:'/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin',
   RELAY_FEDERATION_NAMESPACE:namespace, RELAY_FEDERATION_PORT:String(port),
   RELAY_FEDERATION_IMAGE:process.env.RELAY_FEDERATION_IMAGE || 'galxai-relay:vnext',
   RELAY_CODEX_IMAGE_TOOL_ALIAS:process.env.RELAY_CODEX_IMAGE_TOOL_ALIAS === 'true' ? 'true' : 'false' };
@@ -24,7 +26,7 @@ const plist = `<?xml version="1.0" encoding="UTF-8"?>
 <key>ProgramArguments</key><array>${[process.execPath,`--env-file=${path.join(root,'.env.local')}`,'--import','tsx',path.join(root,'scripts/run-relay-federation.ts')].map(v=>`<string>${escape(v)}</string>`).join('')}</array>
 <key>WorkingDirectory</key><string>${escape(root)}</string>
 <key>EnvironmentVariables</key><dict>${Object.entries(env).map(([k,v])=>`<key>${k}</key><string>${escape(v)}</string>`).join('')}</dict>
-<key>RunAtLoad</key><true/><key>KeepAlive</key><true/><key>ThrottleInterval</key><integer>10</integer>
+<key>RunAtLoad</key><true/><key>KeepAlive</key><dict><key>SuccessfulExit</key><false/></dict><key>ThrottleInterval</key><integer>10</integer>
 <key>ExitTimeOut</key><integer>180</integer>
 <key>StandardOutPath</key><string>${escape(path.join(directory,'stdout.log'))}</string>
 <key>StandardErrorPath</key><string>${escape(path.join(directory,'stderr.log'))}</string>

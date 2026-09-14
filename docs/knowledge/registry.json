@@ -254,6 +254,16 @@
       "sources": [
         "src/relay/**/*.ts",
         "scripts/run-relay-federation.ts",
+        "scripts/install-federation-service.ts",
+        "scripts/relay-controller-supervisor.py",
+        "scripts/relay-federation-controller.ts",
+        "scripts/test-federation-admission.ts",
+        "scripts/test-relay-admission-durability.ts",
+        "scripts/test-relay-controller-supervisor.py",
+        "scripts/test-relay-docker-recovery.ts",
+        "scripts/test-relay-launcher-recovery.py",
+        "scripts/test-relay-launcher-worker-recovery.ts",
+        "scripts/test-relay-lifecycle-docker.ts",
         "src/app/api/internal/telemetry/route.ts",
         "src/core/telemetry/**/*.ts"
       ],

@@ -593,3 +593,87 @@ Incident: `INC-20260914-QUOTA`. Kind: `verification`.
 **Next step:** Retain automatic expiry and cumulative stop; any further budget or Sites capacity change needs fresh evidence and explicit revision-checked configuration. Existing unrelated incidents remain open.
 
 Evidence: [2026-09-14-free-generation-gate.json](releases/2026-09-14-free-generation-gate.json).
+
+## EVT-20260914-controller-recovery-reproduction — 2026-09-14T17:11:42.993495Z
+
+Incident: `INC-20260913-IMAGES`. Kind: `observation`.
+
+**Observation:** User reports intermittent relay lockups. Code inspection distinguishes crash-left ownership metadata from a live controller stalled in Docker subprocess cleanup; current production cause remains uncorrelated.
+
+**Action:** Reproduced actual DockerShardDriver.list against a TERM-ignoring synthetic Docker process; retained failing regression before replacing CLI timeout handling with verified process-group cleanup.
+
+**Result:** Before fix remained blocked after 7.5 seconds despite the 5-second timeout; initial focused fix returned after 5.692 seconds with command termination verified. No production process or container was changed.
+
+**Next step:** Validate ownership and external hang supervision through actual launcher processes; reconcile uncertain daemon operations, retained worker adoption and request outcomes; retain deployment and unperformed drills as open work.
+
+Evidence: [controller-recovery-initial-reproduction.json](incidents/2026/2026-09-13-image-generation/controller-recovery-initial-reproduction.json).
+
+## EVT-20260914-controller-recovery-verified — 2026-09-14T17:32:16.300Z
+
+Incident: `INC-20260913-IMAGES`. Kind: `verification`.
+
+**Observation:** The focused recovery implementation was exercised through the external guardian, actual launcher/controller/worker processes, Docker command paths, admission persistence and an isolated Docker lifecycle canary.
+
+**Action:** Ran 12 guardian drills, the empty-registry launcher drill, the retained-worker launcher drill, Docker timeout/identity regressions, admission and mutation journal durability tests, the focused 94-test relay suite, TypeScript, production build and the unique-namespace Docker canary.
+
+**Result:** Before/after regressions now pass: legacy persistent ownership blocks the old launcher, the new kernel guard recovers without marker deletion, a TERM-ignoring Docker CLI is terminated and verified, stale name-based mutations are fenced by immutable ID, and a lost acknowledgement remains unknown without redispatch. The Docker canary retained rejection state, removed only the rejected worker, adopted the survivor and refused cold rejected allocation. No production process, credential or namespace was touched.
+
+**Next step:** Keep ACT-018 open for host reboot, Docker-daemon restart/delayed startup, retained-state restoration and full/read-only storage drills; complete a reviewed legacy-marker rollout before production adoption.
+
+Evidence: [controller-recovery-verification-20260914.json](incidents/2026/2026-09-13-image-generation/controller-recovery-verification-20260914.json).
+
+## EVT-20260914-controller-journal-initialization-repair — 2026-09-14T17:49:00Z
+
+Incident: `INC-20260913-IMAGES`. Kind: `observation`.
+
+**Observation:** A rerun of the actual launcher drill exposed a startup durability edge: the first supervised controller created the compatibility marker but no empty Docker mutation journal, so the replacement correctly failed closed on the marker-without-journal state.
+
+**Action:** Added atomic empty-journal creation before marker initialization, retained fail-closed behavior for a marker with missing or corrupt journal, and added a first-start file assertion before rerunning the launcher drill.
+
+**Result:** The isolated launcher drill passed after the repair with a replacement health recovery of 0.393 seconds and hang recovery of 2.282 seconds; no production state was touched.
+
+**Next step:** Rerun the complete recovery, capability, build and documentation checks; keep ACT-018 and reviewed legacy-marker migration open.
+
+Evidence: [test-relay-admission-durability.ts](../scripts/test-relay-admission-durability.ts), [test-relay-launcher-recovery.py](../scripts/test-relay-launcher-recovery.py), [controller-recovery-verification-20260914.json](incidents/2026/2026-09-13-image-generation/controller-recovery-verification-20260914.json).
+
+## EVT-20260914-controller-recovery-final-validation — 2026-09-14T17:51:09Z
+
+Incident: `INC-20260913-IMAGES`. Kind: `verification`.
+
+**Observation:** The repaired first-start journal path and focused controller recovery changes passed the complete isolated validation matrix.
+
+**Action:** Reran 12 guardian drills, the actual launcher drill, 24 recovery tests, 153 existing relay capability/lifecycle tests, the isolated Docker canary, TypeScript, lint, the production build and documentation checks.
+
+**Result:** All required isolated tests passed. The latest measured guardian handover samples were 0.058/0.061/0.061 seconds; empty-launcher crash and hang recovery were 0.393 and 2.282 seconds; retained-worker crash recovery reached readiness/request in 302/372 ms and hang recovery in 2243/2291 ms; Docker CLI cleanup returned in 5612 ms. Build generated 285 pages. Lint had zero errors and eight pre-existing warnings. No production process, credential or namespace was touched.
+
+**Next step:** Keep ACT-018 open for host reboot, Docker-daemon restart/delayed startup, retained-state restoration and full/read-only storage drills; complete reviewed legacy-marker rollout before production adoption.
+
+Evidence: [controller-recovery-verification-20260914.json](incidents/2026/2026-09-13-image-generation/controller-recovery-verification-20260914.json).
+
+## EVT-20260914-controller-restart-authority-repair — 2026-09-14T18:09:49Z
+
+Incident: `INC-20260913-IMAGES`. Kind: `observation`.
+
+**Observation:** The recovery audit found two possible restart authorities for federation workers: Docker was configured to restart containers while lifecycle reconciliation also replaced stopped workers.
+
+**Action:** Changed federation worker creation to Docker restart policy `no`; added controller-only replacement with exponential backoff, a five-attempt ten-minute budget and an actionable `worker_restart_budget_exhausted` event. Added a regression for valid generation handover so it is not mistaken for disappearance.
+
+**Result:** The focused lifecycle and enrollment regressions passed; no production container or namespace was changed.
+
+**Next step:** Rerun the complete isolated recovery, capability, build and documentation matrix and retain daemon/reboot/storage drills as ACT-018.
+
+Evidence: [docker-shard-driver.ts](../src/relay/docker-shard-driver.ts), [federation-lifecycle.ts](../src/relay/federation-lifecycle.ts), [test-relay-lifecycle-recovery.ts](../scripts/test-relay-lifecycle-recovery.ts), [test-relay-enrollment.ts](../scripts/test-relay-enrollment.ts).
+
+## EVT-20260914-controller-recovery-final-validation-2 — 2026-09-14T18:09:49Z
+
+Incident: `INC-20260913-IMAGES`. Kind: `verification`.
+
+**Observation:** The controller-only worker restart repair and prior ownership, hang and receipt fixes passed the final isolated validation matrix.
+
+**Action:** Ran 12 guardian drills, the empty-registry launcher drill, the retained-worker launcher drill, 24 recovery tests, 154 relay capability/lifecycle tests, the isolated Docker lifecycle canary, TypeScript, lint, the sequential production build and documentation checks.
+
+**Result:** Guardian handover samples were 0.062/0.060/0.061 seconds; empty-launcher crash and hang recovery were 0.311 and 2.272 seconds; retained-worker crash reached readiness/request in 301/367 ms and hang in 2255/2302 ms; the TERM-ignoring Docker CLI returned after 5615 ms. The canary passed with rejection retention, survivor adoption and cold rejected allocation prevented. The build generated 285 pages; lint had zero errors and eight pre-existing warnings. No production process, credential or namespace was touched.
+
+**Next step:** Keep ACT-018 open for host reboot, Docker-daemon restart/delayed startup, retained-state restoration and full/read-only storage drills; complete reviewed legacy-marker rollout before production adoption.
+
+Evidence: [controller-recovery-verification-20260914.json](incidents/2026/2026-09-13-image-generation/controller-recovery-verification-20260914.json).

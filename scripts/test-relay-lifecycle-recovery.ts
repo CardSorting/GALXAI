@@ -126,6 +126,53 @@ test('fleet cleanup drains more than three rejected workers and does not respawn
   }
 });
 
+test('unexpected worker exits use one controller restart authority with backoff and a bounded storm budget', async () => {
+  let now = 100000, generation = 0, starts = 0;
+  const desired = shard('restartable');
+  let workers: RelayHandle[] = [];
+  const records = new CapabilityRegistry(() => now);
+  const driver: RelayDriver = {
+    list: async () => workers.slice(),
+    start: async s => {
+      starts++;
+      const h = { ...handle(s), id: `worker-${++generation}`, generation: `generation-${generation}`, running: true };
+      workers = [h]; records.remove(s.id); records.register(s.id, h.id, h.generation, s.provider);
+      records.publishInventory(records.beginRefresh(s.id)!, ['A']); records.heartbeat(s.id, {});
+      return h;
+    },
+    inspect: async h => { records.heartbeat(h.shardId, {}); return { record: records.get(h.shardId) }; },
+    remove: async () => { workers = []; },
+  };
+  const lifecycle = new RelayFederationLifecycle(async () => [desired], driver, () => now);
+  try {
+    await lifecycle.reconcile();
+    assert.equal(starts, 1);
+    // A process exit is retired, then the controller waits for its bounded
+    // retry delay before allocating the next generation.
+    for (let attempt = 1; attempt <= 5; attempt++) {
+      workers[0].running = false;
+      await lifecycle.reconcile();
+      await new Promise(resolve => setImmediate(resolve));
+      const retry = lifecycle.monitorState().retries.find(row => row.shardId === desired.id);
+      assert(retry, `restart ${attempt} has a retry deadline`);
+      assert.equal(starts, attempt, 'a stopped worker is not replaced in the same reconciliation');
+      now = retry.retryAt;
+      await lifecycle.reconcile();
+      assert.equal(starts, attempt + 1);
+    }
+    workers[0].running = false;
+    await lifecycle.reconcile();
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(starts, 6, 'the sixth crash is contained instead of starting another worker');
+    assert.equal(lifecycle.snapshot().lastError, 'worker_restart_budget_exhausted');
+    assert.equal(lifecycle.monitorState().restartBudgets.find(row => row.shardId === desired.id)?.blocked, true);
+    assert(lifecycle.activity.snapshot().events.some(event => event.code === 'worker_restart_budget_exhausted'));
+    now += 600000;
+    await lifecycle.reconcile();
+    assert.equal(starts, 6, 'a bounded budget does not silently reset on a timer');
+  } finally { await lifecycle.stop(); }
+});
+
 test('journal write failure prevents destruction and a corrupt journal fails closed', async () => {
   const s = shard('a'), h = handle(s);
   let removals = 0;

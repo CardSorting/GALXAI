@@ -8,7 +8,7 @@ Audience: private maintainers. Extends [ADR 0126](0126-capability-aware-shard-re
 
 ## Problem and decision
 
-A stream and a process-local admission cache cannot prove a completed result after worker replacement. Billing needs durable evidence of the original execution without starting another request. Persist a tenant-bound receipt before dispatch, mark dispatch before opening the supplier attempt, and commit completion evidence before broadcasting successful completion.
+A stream and a bounded admission response cache cannot prove a completed result after worker replacement. Billing needs durable evidence of the original execution without starting another request. Persist a tenant-bound receipt before dispatch, mark dispatch before opening the supplier attempt, and commit completion evidence before broadcasting successful completion.
 
 The worker journal is independent of stream replay and stored on its retained volume. A replacement writer fences the previous writer. Queued work becomes `not_started`; previously running work becomes `unknown`. Only positive fenced non-dispatch evidence can release a reservation automatically. Failed, cancelled, expired or missing work is not equivalent to non-dispatch.
 
@@ -30,7 +30,7 @@ Customer operation IDs are scoped to the verified account before relay dispatch.
 
 Federation signed receipt references bind tenant, job and original shard and last 30 days. Receipt reads may reach a replacement generation using that shard's retained volume. Stream and cancellation URLs remain bound to the admitting generation. This is the specific exception to the original-generation rule in ADR 0126; it does not move execution or stream state.
 
-The ten-minute process-local admission cache remains a separate mechanism. Restart, changed scope or cache expiry never authorizes an application to repeat uncertain generation. The application hold survives those events and is the financial admission authority. Reconciliation uses GET, the original origin and saved rate; it does not generate, switch providers, guess a job reference or accept customer-supplied usage.
+The relay's ten-minute private admission tombstone journal remains a separate mechanism; response bodies are still process-local. Restart, changed scope or cache expiry never authorizes an application to repeat uncertain generation. The application hold survives those events and is the financial admission authority. Reconciliation uses GET, the original origin and saved rate; it does not generate, switch providers, guess a job reference or accept customer-supplied usage.
 
 ## Storage and failure limits
 

@@ -3,13 +3,13 @@
 <!-- docs-scope: decision-record -->
 
 Date: 2026-09-08. Audience: internal maintainers; do not publish as site content.
-Status: single-dispatch and uncertain-outcome rules remain current. September 8–9 evidence is retained below. [ADR 0144](0144-durable-images-and-incident-documentation.md) supersedes process-local application receipt storage for public async images; relay admission-cache limits remain separate.
+Status: single-dispatch and uncertain-outcome rules remain current. September 8–9 evidence is retained below. [ADR 0144](0144-durable-images-and-incident-documentation.md) supersedes process-local application receipt storage for public async images; the relay now persists a bounded private admission identity tombstone while retaining response bodies in process memory.
 
 ## Decision
 
 Treat image synthesis as a non-idempotent operation. Dispatch once; neither the relay nor the application image service automatically repeats image synthesis after an error. A lost response cannot establish that generation did not happen. Keep health observations independent from permission to replay work.
 
-The relay’s tenant-scoped image admission receipts fingerprint the request, reject conflicting reuse even while pending, replay retained successful responses, and preserve uncertain outcomes. The relay admission cache retains its bounded implementation: ten-minute process-local window, 1,000 keys, 32 MiB aggregate response storage and 8 MiB per retained response. Do not evict a live key to admit a new write. These are bounded retry protections, not durable exactly-once execution across restarts.
+The relay’s tenant-scoped image admission receipts fingerprint the request, reject conflicting reuse even while pending, replay retained successful responses, and preserve uncertain outcomes. A private journal persists the identity hash, expiry and state for a ten-minute completed window and converts pending state to unknown after controller loss; response bodies remain in the bounded process-local cache of 1,000 keys, 32 MiB aggregate and 8 MiB per retained response. Do not evict a live key to admit a new write. These are bounded retry protections, not durable exactly-once execution across restarts.
 
 The public application now separately commits owner-scoped PostgreSQL image receipts before 202, claims dispatch atomically and ties completion to committed owned assets. Do not return public async status reads to a process-local task table. This does not make upstream execution exactly once. Follow [image recovery](../../post-mortem/runbooks/image-generation.md).
 
@@ -35,4 +35,4 @@ The request-token contract follows [AWS guidance on safe retries](https://aws.am
 
 ## Related text workflow
 
-[ADR 0135](0135-durable-sites-receipts-and-local-admission.md) introduces separate durable receipts for opted-in Sites text jobs. It does not change this image admission cache, recover image artifacts after restart, or establish paid Hive completion. Historical fixed-price Sites receipts retain [ADR 0134](0134-fixed-price-sites-generation-with-opaque-provider-quotas.md); new included Sites admission follows ADR 0140. Application image persistence follows ADR 0144 independently.
+[ADR 0135](0135-durable-sites-receipts-and-local-admission.md) introduces separate durable receipts for opted-in Sites text jobs. It does not change the relay's bounded tombstone contract, recover image artifacts after restart, or establish paid Hive completion. Historical fixed-price Sites receipts retain [ADR 0134](0134-fixed-price-sites-generation-with-opaque-provider-quotas.md); new included Sites admission follows ADR 0140. Application image persistence follows ADR 0144 independently.

@@ -216,18 +216,37 @@
       "incident": "INC-20260913-IMAGES",
       "owner": "relay maintainer",
       "review_by": "2026-09-20",
-      "status": "open",
-      "next_step": "Implement bounded private detection for a supervised controller that cannot start because of a stale lock.",
-      "closure": "A controlled stopped-controller fixture triggers an actionable alert without deleting a lock or repeatedly invoking inference."
+      "status": "completed",
+      "next_step": "Retain the guardian alert regression and review its bounded restart budget with future supervisor changes.",
+      "closure": "The external guardian emits actionable, redacted events for legacy/ambiguous ownership, blocked progress and unproven termination. Twelve isolated process drills passed without deleting ownership evidence or repeatedly invoking inference.",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-09-13-image-generation/controller-recovery-verification-20260914.json",
+        "scripts/test-relay-controller-supervisor.py",
+        "scripts/test-relay-launcher-recovery.py"
+      ]
     },
     {
       "id": "ACT-003",
       "incident": "INC-20260913-IMAGES",
       "owner": "relay maintainer",
       "review_by": "2026-09-20",
+      "status": "completed",
+      "next_step": "Keep the separate daemon/reboot/retained-state drills open under ACT-018; do not infer them from local process fixtures.",
+      "closure": "Real launcher/controller/worker processes and an isolated Docker lifecycle canary proved one owner, live-lock refusal, process-group fencing, worker adoption, preserved generation/state and single dispatch. Recovery timings are retained in the dated verification record.",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-09-13-image-generation/controller-recovery-verification-20260914.json",
+        "scripts/test-relay-launcher-worker-recovery.ts",
+        "scripts/test-relay-lifecycle-docker.ts"
+      ]
+    },
+    {
+      "id": "ACT-018",
+      "incident": "INC-20260913-IMAGES",
+      "owner": "relay maintainer",
+      "review_by": "2026-09-27",
       "status": "open",
-      "next_step": "Rehearse crash/restart and guarded lock recovery using disposable controller state.",
-      "closure": "Prove one owner, live-lock refusal, preserved workers/state and no duplicate dispatch; record recovery timing."
+      "next_step": "Run isolated Docker-daemon restart, host reboot, delayed daemon startup, retained-state restoration and full/read-only journal storage drills with a disposable deployment contract.",
+      "closure": "Each drill records fault-to-detection, safe authority handover, required-capability readiness, first successful request, duplicate-dispatch outcome and rollback/cleanup evidence. A drill that the environment cannot safely support remains explicitly not run."
     },
     {
       "id": "ACT-004",

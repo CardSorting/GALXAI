@@ -1,0 +1,19 @@
+{
+  "observed_at": "2026-09-14T17:11:42.993495+00:00",
+  "revision": "077b678b429ed6a91de3de331599624c273999d9",
+  "environment": "macOS, Node v26.8.1; synthetic Docker executable, actual DockerShardDriver.list; no Docker daemon or registry access",
+  "confirmed_reproductions": [
+    {
+      "fault": "Docker executable ignores SIGTERM",
+      "before": "Real command received TERM at original 5000ms execFile timeout; list remained pending at 7500ms and regression failed.",
+      "test": "scripts/test-relay-docker-recovery.ts",
+      "after_initial_fix": "TERM then SIGKILL with process-group absence and child exit verification; same regression passed, 5692ms fault-to-return.",
+      "repetitions": 1
+    }
+  ],
+  "limitations": [
+    "Does not establish this as the cause of the user's current production intermittency.",
+    "No production fault injection or deployment.",
+    "Daemon-side mutation uncertainty and recovery readiness require separate tests."
+  ]
+}

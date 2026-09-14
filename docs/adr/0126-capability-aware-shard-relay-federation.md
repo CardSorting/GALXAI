@@ -13,13 +13,15 @@ The former shared relay selected spare capacity before proving requested-model a
 
 Separate host-owned reconciliation, capability indexing and inference admission. Each managed worker receives one immutable assigned credential, internal inference/admin keys and a checkpoint volume. Workers receive no database/vault authority, source checkout, host home or Docker socket.
 
-An eligible shard owns at most one active managed worker on a Docker host. Deterministic shard names, Docker uniqueness, ownership labels, generation checks and an exclusive controller lock enforce local ownership. This is not distributed consensus; multiple hosts need a shared lease.
+An eligible shard owns at most one active managed worker on a Docker host. Deterministic shard names, Docker uniqueness, ownership labels, generation checks and the external guardian's kernel-held controller guard enforce local ownership. This is not distributed consensus; multiple hosts need a shared lease and fencing boundary.
 
 Authenticated fresh model evidence precedes health/load selection. Unknown or expired evidence cannot admit requests. The reverse index limits selection to the requested capability. No eligible pool yields `model_temporarily_unavailable`; exhausted eligible capacity yields `model_capacity_exhausted`, both 503. The sole explicit OAuth image compatibility extension is defined by ADR 0127; no implicit fallback follows a failure.
 
 There is no global waiting queue. Model-scoped reservations bridge acknowledgement/sample lag. Lost acknowledgements retain bounded conservative reservations and are not blindly replayed. Images dispatch once. Signed jobs bind tenant, original worker generation, job and expiry; streams and cancellation stay attached to the original generation despite later capability loss. Opted-in durable text receipt reads may use a replacement worker on the original retained volume under [ADR 0135](0135-durable-sites-receipts-and-local-admission.md); execution itself is not moved. Restart detection uses process start evidence, not only container identity.
 
 Empty inventories remain available for rediscovery and never cause deletion by themselves. Removed, revoked, expired or changed authority retires old workers. Credential rejection normally retires/suppresses that revision, except an existing worker under an explicit maintenance hold is preserved for repair. Holds block admissions and replacement starts without overriding registry authority.
+
+Federation workers use Docker restart policy `no`; the lifecycle controller is their single restart authority. An unexpected stopped or missing worker is retired, retried with exponential backoff and capped at five attempts in ten minutes. `worker_restart_budget_exhausted` pauses replacement for operator inspection, while upstream capability loss remains a readiness condition and does not restart the worker or controller.
 
 Cold candidates now pass inventory authentication before allocation. A 401 persists rejection by revision; transient failures back off. Inventory success does not prove an inference handshake. Explicit enrollment replaces ambient population.
 
@@ -45,7 +47,7 @@ Browser checks at 1440px and 390px covered the interface then implemented. The d
 
 ADR 0127 records the September 7 production cutover, replacing the original pending-cutover status. [The September 9 record](../maintainers/RELAY_SESSION_VERIFICATION_20260909.md) records later cleanup, desktop work and retained worker identity. Use [current operations](../RELAY_VNEXT_RUNBOOK.md) instead of treating the original shared deployment as a rollback default.
 
-Single-host ownership, process-local admission receipts, provider-specific inventory stability and physical-device/guest accessibility remain bounded as documented. ADR 0135 adds a separate durable text receipt store; it does not extend image replay or make admission caches durable. A valid image does not verify a complete paid application transaction.
+Single-host ownership, the bounded private admission tombstones, provider-specific inventory stability and physical-device/guest accessibility remain bounded as documented. ADR 0135 adds a separate durable text receipt store; it does not extend image replay or make response bodies durable. A valid image does not verify a complete paid application transaction.
 
 ## Pattern references
 

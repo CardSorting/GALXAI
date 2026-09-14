@@ -7,7 +7,7 @@
 | --- | --- | --- |
 | Product application | Customer authentication, entitlements, allowed response contracts | Keeps internal operations out of public output |
 | PostgreSQL registry | Encrypted credential/control-plane state | Authoritative; projections cannot restore removed rows |
-| Host controller | Reconcile owned workers, capabilities, admissions and recovery | Single host; exclusive namespace lock |
+| Host controller | Reconcile owned workers, capabilities, admissions and recovery | Single host; external guardian holds the kernel namespace guard and launchd is the restart authority |
 | Shard worker | One assigned credential and inference lifecycle | At most one active managed worker per eligible shard |
 | Desktop manager | Isolated operator workspaces and explicit links | Desktop session required; not serving capacity |
 | Credential bridge | Validate saved guest login and conditionally replace authority | Recoverable private intent plus registry compare-and-swap |

@@ -16,7 +16,7 @@ import { readRelayJson, relayRequestHeaders, relayResponseHeaders } from './fede
 import { readJsonBody, RequestError, validateModelRequest } from './request-policy.js';
 import type { RelayFederationLifecycle, RelayHandle } from './federation-lifecycle.js';
 
-interface Options { apiKeys: string[]; adminKeys: string[]; secret: string; host?: string; port?: number; drainTimeoutMs?: number; admissionTimeoutMs?: number; transport?: typeof fetch; egressSnapshot?: () => unknown; desktops?: DesktopManager; }
+interface Options { apiKeys: string[]; adminKeys: string[]; secret: string; host?: string; port?: number; drainTimeoutMs?: number; admissionTimeoutMs?: number; admissionReceiptPath?: string; transport?: typeof fetch; egressSnapshot?: () => unknown; desktops?: DesktopManager; }
 interface Affinity { shard: string; generation: string; job: string; tenant: string; expires: number; }
 const equal = (a: string, b: string) => Buffer.byteLength(a) === Buffer.byteLength(b) && timingSafeEqual(Buffer.from(a), Buffer.from(b));
 const terminal = (status: string) => ['completed', 'failed', 'cancelled'].includes(status);
@@ -33,7 +33,7 @@ export class RelayFederationServer {
   private draining = false;
   private readonly shutdown = new AbortController();
   private readonly instanceId = randomUUID();
-  private readonly receipts = new AdmissionReceipts();
+  private readonly receipts: AdmissionReceipts;
   private readonly monitor = new MonitorSessions();
   private readonly telemetry: FederationTelemetry;
   private readonly desktops: DesktopGateway;
@@ -41,6 +41,8 @@ export class RelayFederationServer {
   private readonly requests = new WeakMap<IncomingMessage, string>();
   private readonly timer: NodeJS.Timeout;
   constructor(readonly lifecycle: RelayFederationLifecycle, private readonly options: Options) {
+    this.receipts = new AdmissionReceipts(Date.now, 600000, 1000, 32 * 1024 * 1024, options.admissionReceiptPath,
+      event => this.lifecycle.activity.record({ category: 'fleet', level: 'error', code: event.code }));
     if (!options.apiKeys.length || !options.adminKeys.length || [...options.apiKeys, ...options.adminKeys].some(k => !k.trim()) || options.secret.length < 32) throw new Error('Federation requires inference, admin and signing credentials');
     for (const value of [options.drainTimeoutMs ?? 30000, options.admissionTimeoutMs ?? 15000]) if (!Number.isSafeInteger(value) || value < 1 || value > 360000) throw new Error('Invalid federation timeout');
     this.telemetry = new FederationTelemetry(lifecycle, options.transport ?? fetch);
@@ -282,7 +284,7 @@ export class RelayFederationServer {
       if (replay.receipt.state === 'pending') throw new RequestError(409, 'request_in_progress', 'This request is already running. Retry with the same key to retrieve its result.');
       if (replay.receipt.state === 'unknown') throw new RequestError(502, 'relay_admission_unknown', 'This request may have executed. Its acknowledgement is unavailable; do not submit duplicate work.');
       const cached = replay.receipt.response;
-      if (!cached) throw new RequestError(409, 'result_not_retained', 'This request finished, but its response exceeded the replay budget. Do not repeat it as new work.');
+      if (!cached) throw new RequestError(409, 'result_not_retained', 'This request was accepted, but its original response is no longer retained. Use its existing recovery reference; do not repeat it as new work.');
       res.writeHead(cached.status, { ...cached.headers, 'x-galx-idempotency-hit': 'true' }); res.end(cached.body); return;
     }
     try {
@@ -358,7 +360,7 @@ export class RelayFederationServer {
         if (!dispatched) throw error; // A failed read-only preflight admitted no work.
         // A lost acknowledgement may conceal admitted work. Never replay it or immediately return its slot.
         retained = !acknowledged && !this.shutdown.signal.aborted;
-        if (replay) replay.receipt.state = 'unknown';
+        if (replay) try { this.receipts.unknown(replay.receipt); } catch { /* The receipt journal already emitted a private diagnostic. */ }
         if (retained) {
           const hold = setTimeout(() => { this.release(owner); this.holds.delete(hold); }, 360000);
           hold.unref(); this.holds.add(hold);
@@ -370,7 +372,7 @@ export class RelayFederationServer {
   private monitorSnapshot() { return { capturedAt: Date.now(), availability: this.lifecycle.snapshot(), fleet: this.lifecycle.monitorState(),
     desktops: this.options.desktops?.snapshot().desktops.map(d => ({ id: d.id, name: d.name, shardId: d.relayId ?? null })) ?? [],
     activity: this.lifecycle.activity.snapshot(), telemetry: this.telemetry.snapshot(), admission: { draining: this.draining,
-      pending: [...this.reservations.values()].reduce((a, b) => a + b, 0), trackedJobs: this.jobs.size } }; }
+      pending: [...this.reservations.values()].reduce((a, b) => a + b, 0), trackedJobs: this.jobs.size, recovery: this.receipts.diagnostics() } }; }
   async start() { if (this.draining) throw new Error('Federation already stopped'); await new Promise<void>((resolve, reject) => { this.server.once('error', reject); this.server.listen(this.options.port ?? 3301, this.options.host ?? '127.0.0.1', resolve); }); this.telemetry.start(); }
   stop(): Promise<void> {
     if (this.stopping) return this.stopping;

@@ -15,6 +15,7 @@ export interface DesiredShard {
   cooldownUntilMs?: number;
 }
 export interface RelayHandle {
+  containerId?: string;
   running?: boolean;
   id: string;
   shardId: string;
@@ -44,6 +45,14 @@ export class RelayFederationLifecycle {
   // Expired credentials remain discoverable for administrator repair, never admission.
   private registered = new Map<string, DesiredShard>();
   private readonly retry = new Map<string, { revision: string; attempts: number; at: number }>();
+  // A federation worker has one restart authority: this controller. Keep a
+  // short history separate from the ordinary inspection backoff so a worker
+  // that starts and immediately dies cannot reset the storm budget on every
+  // successful inspection.
+  private readonly restartHistory = new Map<string, { revision: string; times: number[] }>();
+  private readonly restartBlocked = new Map<string, string>();
+  private readonly restartWindowMs = 10 * 60_000;
+  private readonly restartLimit = 5;
   private registryReadAt = 0;
   private inventoryReadAt = 0;
   private readonly maintenance: Map<string, number>;
@@ -88,6 +97,12 @@ export class RelayFederationLifecycle {
       }
     }
     for (const [id, backoff] of this.retry) if (!this.current(id, backoff.revision)) this.retry.delete(id);
+    for (const [id, history] of this.restartHistory) {
+      if (this.desired.get(id)?.credentialRevision !== history.revision) this.restartHistory.delete(id);
+    }
+    for (const [id, revision] of this.restartBlocked) {
+      if (this.desired.get(id)?.credentialRevision !== revision) this.restartBlocked.delete(id);
+    }
   }
   private current(id: string, revision: string): boolean {
     const shard = this.desired.get(id);
@@ -120,6 +135,10 @@ export class RelayFederationLifecycle {
     const retained = new Map<string, RelayHandle>();
     for (const handle of running) {
       const shard = desiredById.get(handle.shardId);
+      const unexpectedStop = handle.running === false && !!shard
+        && shard.credentialRevision === handle.credentialRevision
+        && !this.invalid.has(handle.shardId) && !this.maintenance.has(handle.shardId);
+      if (unexpectedStop) this.scheduleWorkerRestart(shard!, 'worker_stopped');
       if (handle.running === false || !shard || shard.credentialRevision !== handle.credentialRevision || retained.has(handle.shardId)
         || (this.invalid.get(handle.shardId) === shard.credentialRevision && !this.maintenance.has(handle.shardId))) {
         this.capabilities.remove(handle.shardId, handle.generation);
@@ -127,6 +146,9 @@ export class RelayFederationLifecycle {
       } else retained.set(handle.shardId, handle);
     }
     for (const [id, handle] of this.relays) if (!running.some(r => r.shardId === id && r.generation === handle.generation) && !this.draining.has(id)) {
+      const shard = desiredById.get(id);
+      if (!running.some(r => r.shardId === id) && shard && shard.credentialRevision === handle.credentialRevision
+        && !this.invalid.has(id) && !this.maintenance.has(id)) this.scheduleWorkerRestart(shard, 'worker_disappeared');
       this.capabilities.remove(id, handle.generation);
       this.relays.delete(id);
       this.activity.record({ category: 'fleet', level: 'warning', code: 'worker_disappeared', shardId: id, generation: handle.generation });
@@ -139,6 +161,7 @@ export class RelayFederationLifecycle {
       while (cursor < work.length && !this.stopping) {
         const shard = work[cursor++];
         if (!this.current(shard.id, shard.credentialRevision) || (this.retry.get(shard.id)?.at ?? 0) > this.now()) continue;
+        if (this.restartBlocked.get(shard.id) === shard.credentialRevision) continue;
         if ((this.invalid.get(shard.id) === shard.credentialRevision && !retained.has(shard.id)) || this.draining.has(shard.id)
           || (this.maintenance.has(shard.id) && !retained.has(shard.id))
           || (!retained.has(shard.id) && running.some(r => r.shardId === shard.id))) continue;
@@ -208,6 +231,26 @@ export class RelayFederationLifecycle {
     }));
     if (!this.retry.size && this.lastError === 'relay_reconciliation_incomplete') this.lastError = undefined;
   }
+  private scheduleWorkerRestart(shard: DesiredShard, reason: 'worker_stopped' | 'worker_disappeared'): void {
+    const now = this.now();
+    const previous = this.restartHistory.get(shard.id);
+    const times = (previous?.revision === shard.credentialRevision ? previous.times : []).filter(at => now - at < this.restartWindowMs);
+    if (this.restartBlocked.get(shard.id) === shard.credentialRevision) return;
+    if (times.length >= this.restartLimit) {
+      this.restartHistory.set(shard.id, { revision: shard.credentialRevision, times });
+      this.restartBlocked.set(shard.id, shard.credentialRevision);
+      this.retry.delete(shard.id);
+      this.capabilities.heartbeat(shard.id, { health: 'unavailable' }, 0, false);
+      this.activity.record({ category: 'fleet', level: 'error', code: 'worker_restart_budget_exhausted', shardId: shard.id, count: times.length });
+      this.lastError = 'worker_restart_budget_exhausted';
+      return;
+    }
+    times.push(now);
+    this.restartHistory.set(shard.id, { revision: shard.credentialRevision, times });
+    const retryAt = now + Math.min(30_000, 1000 * 2 ** Math.min(5, times.length));
+    this.retry.set(shard.id, { revision: shard.credentialRevision, attempts: times.length, at: retryAt });
+    this.activity.record({ category: 'fleet', level: 'warning', code: 'worker_restart_scheduled', shardId: shard.id, count: times.length, retryAt });
+  }
   private retire(handle: RelayHandle, reason: string): void {
     // Keep existing job affinity; draining never blocks unrelated shard reconciliation.
     this.relays.set(handle.shardId, handle);
@@ -253,7 +296,8 @@ export class RelayFederationLifecycle {
         paused, pausedAt: this.maintenance.get(s.id) ?? null, canManage: !expired && this.routable() && !this.draining.has(s.id),
         activeStreams: fresh ? c.activeStreams : null, queueDepth: fresh ? c.queueDepth : null, capacity: fresh ? c.capacity : null,
         eligibleModels: eligible.length, uncoveredModels: eligible.filter(m => m.eligibleShardCount === 1).length,
-        retryAt: this.retry.get(s.id)?.at ?? null, cooldownUntil: cooldown ? s.cooldownUntilMs! : null,
+        retryAt: this.retry.get(s.id)?.at ?? null, restartBudgetBlocked: this.restartBlocked.get(s.id) === s.credentialRevision,
+        cooldownUntil: cooldown ? s.cooldownUntilMs! : null,
         events: events.filter(e => e.shardId === s.id && e.category === 'fleet').slice(0, 5).map(e => ({ id: e.id, at: e.at, code: e.code })) };
     });
   }
@@ -262,6 +306,7 @@ export class RelayFederationLifecycle {
   monitorState() { return { desiredCount: this.desired.size, runningCount: [...this.relays.values()].filter(h => h.running !== false).length,
     maintenance: [...this.maintenance].map(([shardId, since]) => ({ shardId, since })),
     draining: [...this.draining.keys()], retries: [...this.retry].map(([shardId, r]) => ({ shardId, attempts: r.attempts, retryAt: r.at })),
+    restartBudgets: [...this.restartHistory].map(([shardId, r]) => ({ shardId, attempts: r.times.length, windowMs: this.restartWindowMs, blocked: this.restartBlocked.get(shardId) === r.revision })),
     cooldowns: [...this.desired.values()].filter(s => (s.cooldownUntilMs ?? 0) > this.now()).map(s => ({ shardId: s.id, until: s.cooldownUntilMs! })) }; }
   private error(code: string) { if (this.lastError !== code) this.activity.record({ category: 'fleet', level: 'error', code }); this.lastError = code; }
   snapshot() { const snapshot = this.capabilities.snapshot();

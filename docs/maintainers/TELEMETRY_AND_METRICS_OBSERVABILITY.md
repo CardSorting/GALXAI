@@ -26,6 +26,6 @@ For images, reconcile the original durable receipt and owned asset before callin
 
 ## Alerts and verification
 
-Define each new alert from a real source signal, measured units, ownership and an actionable runbook. Confirm exporter behavior and collector configuration in the intended environment before describing it as active. The controller availability alert remains [open prevention work](../../post-mortem/OPEN_ITEMS.md); a runbook is not an installed monitor.
+Define each new alert from a real source signal, measured units, ownership and an actionable runbook. The local guardian now emits redacted controller-availability events for blocked ownership, stalled progress, unproven termination, restart-budget exhaustion and missing required capabilities. Confirm launchd installation, exporter behavior and collector configuration in the intended environment before describing those alerts as active in production; the unperformed deployment drills remain [open prevention work](../../post-mortem/OPEN_ITEMS.md).
 
 Record dated observations and missing coverage. Use the owning tests and private route authorization checks for source changes. Do not expose operational diagnostics to customers to make troubleshooting easier.

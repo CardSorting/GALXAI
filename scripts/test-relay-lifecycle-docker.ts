@@ -21,6 +21,7 @@ const upstream = http.createServer((req, res) => {
 await new Promise<void>(resolve => upstream.listen(0, '0.0.0.0', resolve));
 const driver = new DockerShardDriver({ namespace, secret: randomBytes(32).toString('hex'),
   image: process.env.GALX_DOCKER_CANARY_IMAGE || 'galxai-relay:lifecycle-recovery',
+  mutationJournalPath: path.join(dir, 'docker-operations.json'),
   inventoryUrl: 'http://host.docker.internal:' + (upstream.address() as any).port,
   preflightInventoryUrl: 'http://127.0.0.1:' + (upstream.address() as any).port });
 const desired: DesiredShard[] = ['healthy', 'rejected'].map(name => ({ id: namespace + '-' + name, provider: 'openai',

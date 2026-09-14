@@ -19,7 +19,7 @@ npm run relay:federation
 
 The launcher defaults to namespace `vnext-canary`, loopback port 3301 and image `galxai-relay:vnext`. These defaults do not isolate registry credentials: never start a second controller against credentials already owned by production. Use synthetic fixtures for a disposable canary.
 
-The controller persists its signing secret, exclusive lock, rejection revisions, maintenance holds, desktop journal and egress state beneath `.relay/federation-<namespace>/`. Preserve this private directory across restarts. Use [guarded lock recovery](../post-mortem/runbooks/controller-lock.md): prove the previous process absent, listener unowned and lock unchanged before archiving that exact stale file. An inaccessible or live process is not stale. The September 13 manual repair did not add automatic stale-lock recovery.
+The controller persists its signing secret, kernel-held ownership guard, compatibility marker, rejection revisions, maintenance holds, desktop journal, Docker mutation journal, admission receipt journal and egress state beneath `.relay/federation-<namespace>/`. Preserve this private directory across restarts. The launcher delegates one authority to [the local guardian](../scripts/relay-controller-supervisor.py), which uses an OS-managed `flock`, inherits the guard into the controller and Docker subprocesses, and lets launchd perform the only controller restart. A crash is recovered after the old process group is proven gone; a paused, ambiguous or legacy owner fails closed with a bounded private alert. Use [guarded lock recovery](../post-mortem/runbooks/controller-lock.md) for a one-time old-marker migration. Never delete `controller.guard`, force-unlock, or run the old and new launchers together.
 
 Use `npm run relay:open` and `npm run relay:desktops` on the host. The launcher delegates an authorized session; do not enter the admin key into a browser. `/health` is liveness only. `/health/ready`, `/api/capabilities` and controller `/api/telemetry` require admin authorization.
 
@@ -37,6 +37,9 @@ Use `npm run relay:open` and `npm run relay:desktops` on the host. The launcher 
 | Worker shard concurrency | 4 by default |
 | Request body / image frame | 2 MiB / 32 MiB |
 | Reconciliation starts and retirements | Bounded to three concurrent operations |
+| Federation worker restart authority | Controller only; Docker workers use `--restart no`, five attempts per ten minutes, then an operator alert |
+| Guardian ownership wait / heartbeat / startup-reconcile progress | 5 seconds / 15 seconds / 300 seconds by default; set explicit environment budgets for a deployment with slower measured startup |
+| Guardian shutdown / termination verification | 180 seconds graceful shutdown / 5 seconds after escalation before `termination_unproven` retains the guard |
 
 Host environment settings are not all automatically propagated into workers. Inspect [driver configuration](../src/relay/docker-shard-driver.ts) and effective capability snapshots before tuning. An image build or config edit does not update a running container.
 
@@ -84,7 +87,17 @@ Preserve signing state and receipt volumes. The durable text receipt endpoint ca
 
 Use one idempotency key per logical operation and preserve payload, principal and returned scope. Save signed job URLs after acceptance; poll, stream or cancel that job instead of submitting new inference. `X-Galx-Task-Id` correlates parent/child work without granting authority.
 
-The [API recovery table](RELAY_API_REFERENCE.md#request-recovery) governs conflicts, uncertain admission and generation loss. Receipts last ten minutes in the controller process, with 1,000 keys, 32 MiB aggregate and 8 MiB per response. They are not durable exactly-once execution. Image synthesis is not automatically replayed after an uncertain outcome.
+The [API recovery table](RELAY_API_REFERENCE.md#request-recovery) governs conflicts, uncertain admission and generation loss. Admission identity tombstones retain ten minutes of completed records across controller restart, with 1,000 keys; response bodies remain process-local within the 32 MiB aggregate and 8 MiB per-response cache. They are not durable exactly-once execution. Image synthesis is not automatically replayed after an uncertain outcome.
+
+## Recovery supervision and failure isolation
+
+The guardian emits private, redacted events for `authority_established`, `event_loop_stalled`, `controller_progress_stalled`, `ownership_wait_exceeded`, `restart_budget_exhausted`, `termination_unproven` and missing required capabilities. Process liveness, controller progress and capability readiness are separate signals. A provider outage or an empty capability snapshot is a readiness failure and does not by itself restart the controller. The guardian applies a five-attempt ten-minute restart budget and bounded termination escalation; inspect the blocked stage before raising a budget or restarting manually.
+
+Every federation worker Docker CLI has a bounded deadline and returns only after the child and its pipes close. A timeout or output overflow terminates the subprocess; if cleanup cannot be proven, the controller reports `command_cleanup_unproven` and the guardian retains ownership while containing the process group. Docker-daemon mutations are recorded before `run`, `stop` or `rm`; a pending entry blocks conflicting work until a later inventory read proves the safe outcome. Generation and immutable container-ID checks prevent delayed commands from affecting a replacement worker.
+
+Federation worker containers are created with Docker restart policy `no`; the lifecycle controller owns stop, removal and replacement. Unexpected stopped or missing workers use exponential backoff and a five-attempt ten-minute budget. `worker_restart_budget_exhausted` is a bounded outage requiring private worker and dependency inspection; it does not silently turn into an endless restart loop. Desktop containers are a separate resource with their own desktop-manager policy.
+
+Admission receipts persist only a hash, expiry and state. A pending receipt becomes `unknown` after controller loss and never authorizes replay; completed response bodies remain process-local. If receipt storage is missing, malformed, read-only or full, new admissions fail closed with `admission_storage_unavailable`. A retained worker is adopted after controller restart before any replacement is considered. The [recovery evidence](../post-mortem/incidents/2026/2026-09-13-image-generation/controller-recovery-verification-20260914.json) records the actual launcher and worker lifecycle drills.
 
 ## Throughput and failure isolation
 
@@ -104,7 +117,17 @@ Execution identifiers and diagnostics remain in internal transport and administr
 
 `node --import tsx scripts/install-federation-service.ts` prepares and validates a launchd plist in the ignored state directory. Its explicit `--install` option installs the service; it refuses to overwrite an existing installed plist. The plist reads server configuration from the repository environment without embedding credentials.
 
+The installer preflights Python `fcntl`/`selectors` support and configures launchd to retry only unsuccessful exits. A healthy intentional stop does not create a restart loop. The guardian itself never retries a child, and its restart budget emits a bounded alert when repeated failures exhaust the window. Keep `controller.guard`, the compatibility marker and all journals in the same private local filesystem; a network or unsupported filesystem fails closed.
+
 The September 9 deployment used `com.galxai.federation.production`, namespace `production`, loopback port 3001 and worker image tag `galxai-relay:image-frame-fix`. These are dated deployment observations; inspect the active supervisor before changing it.
+
+## Guardian rollout and rollback
+
+Treat the ownership change as a staged deployment. First run the guardian, actual-launcher and retained-worker drills in a disposable namespace, then prepare the launchd plist without installing it. For an existing namespace, stop admissions, record the private state and worker generations, stop the old job, and verify its controller and descendants have ended, the listener is unowned and the legacy `controller.lock` contents are unchanged. Archive that exact legacy marker in private evidence only after the final recheck; never run old and new launchers together.
+
+Start the new job with the same namespace and state directory. Confirm `authority_established`, a stable listener, registry freshness, required capability readiness, unchanged worker generations and one real test request before widening traffic. Keep the old plist, compatible controller build, private state backup and worker images available until that acceptance completes. If the new job fails, stop it and prove its process group and inherited descriptors are gone before archiving its marker; restore the prior plist/build and let the old launcher create its own marker. Do not force-unlock or delete a guard. A rollback that cannot prove exclusive ownership is a bounded outage requiring operator intervention.
+
+The current evidence covers the disposable stages only. No production plist, marker migration or disruptive rollback was applied during this recovery work.
 
 ## September 8 image-frame repair
 

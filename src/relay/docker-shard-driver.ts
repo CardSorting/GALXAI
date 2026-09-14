@@ -1,15 +1,17 @@
-import { execFile } from 'node:child_process';
-import { promisify } from 'node:util';
 import { createHash, createHmac, randomUUID } from 'node:crypto';
 import { readRelayJson } from './federation-http-policy.js';
 import type { DesiredShard, RelayDriver, RelayHandle } from './federation-lifecycle.js';
 import { discoverOpenAIModels } from './capability-discovery.js';
+import { runDockerCommand, DockerCommandError } from './docker-command.js';
+import { DockerMutationError, DockerMutationJournal } from './docker-mutation-journal.js';
 
-const execute = promisify(execFile);
 export interface DockerShardDriverOptions {
   namespace: string;
   image: string;
   secret: string;
+  /** Required in the supervised deployment; omitted only by disposable fixtures. */
+  mutationJournalPath?: string;
+  onDiagnostic?: (event: { code: string; stage: string; shardId?: string }) => void;
   codexImageToolAlias?: boolean;
   sitesOutputLimitForwarding?: boolean;
   /** Explicit test upstream overrides; never supplied by an API request. */
@@ -20,22 +22,32 @@ export interface DockerShardDriverOptions {
 }
 export class DockerShardDriver implements RelayDriver {
   private readonly label = 'io.galx.federation';
+  private readonly mutations: DockerMutationJournal;
   constructor(private readonly options: DockerShardDriverOptions) {
     if (!/^[a-z0-9-]{1,32}$/.test(options.namespace) || !options.image || options.secret.length < 32) throw new Error('Invalid federation driver configuration');
+    try { this.mutations = new DockerMutationJournal(options.mutationJournalPath); }
+    catch (error) {
+      this.options.onDiagnostic?.({ code: error instanceof DockerMutationError ? error.code : 'docker_journal_unavailable', stage: 'docker_journal' });
+      throw error;
+    }
   }
   private async docker(args: string[], env?: NodeJS.ProcessEnv): Promise<string> {
-    try { return (await execute('docker', args, { timeout: ['ps', 'inspect'].includes(args[0]) ? 5000 : 60000, maxBuffer: 4 * 1024 * 1024, env: env ?? process.env })).stdout.trim(); }
-    catch { throw new Error(`Docker ${args[0]} failed`); } // Never include credential-bearing environment or raw inspect output.
+    try { return await runDockerCommand(args, { timeoutMs: ['ps', 'inspect'].includes(args[0]) ? 5000 : 60000, env }); }
+    catch (error) {
+      this.options.onDiagnostic?.({ code: error instanceof DockerCommandError ? error.code : 'docker_command_failed', stage: `docker_${args[0]}` });
+      throw error;
+    }
   }
   private keys(id: string, generation: string) {
     const key = (role: string) => createHmac('sha256', this.options.secret).update(`${id}:${generation}:${role}`).digest('hex');
     return { inferenceKey: key('inference'), adminKey: key('admin') };
   }
   private name(shardId: string) { return `galx-shard-${createHash('sha256').update(shardId).digest('hex').slice(0, 20)}`; }
-  private readonly inspectFormat = '{{json .Name}}\t{{json .Config.Labels}}\t{{json .NetworkSettings.Ports}}\t{{.State.Running}}\t{{.State.StartedAt}}';
+  private readonly inspectFormat = '{{json .Name}}\t{{json .Config.Labels}}\t{{json .NetworkSettings.Ports}}\t{{.State.Running}}\t{{.State.StartedAt}}\t{{.Id}}';
   private parseContainer(output: string): RelayHandle {
     // Only non-secret fields; Config.Env never leaves Docker.
-    const [rawName, rawLabels, rawPorts, running, startedAt] = output.split('\t');
+    const [rawName, rawLabels, rawPorts, running, startedAt, containerId] = output.split('\t');
+    if (!/^[a-f0-9]{64}$/.test(containerId)) throw new Error('Invalid immutable container identity');
     const id = String(JSON.parse(rawName)).replace(/^\//, '');
     const labels = JSON.parse(rawLabels);
     if (labels[this.label] !== this.options.namespace) throw new Error('Refusing foreign container ownership');
@@ -46,7 +58,7 @@ export class DockerShardDriver implements RelayDriver {
     const containerGeneration = labels['io.galx.generation'];
     const generation = `${containerGeneration}@${startedAt}`;
     if (id !== this.name(shardId)) throw new Error('Managed relay name does not match shard ownership');
-    return { id, shardId, generation, credentialRevision: labels['io.galx.credential-revision'],
+    return { id, containerId, shardId, generation, credentialRevision: labels['io.galx.credential-revision'],
       running: running === 'true', endpoint: `http://127.0.0.1:${port || 1}`, ...this.keys(id, containerGeneration) };
   }
   private async inspectContainer(id: string): Promise<RelayHandle> {
@@ -59,9 +71,17 @@ export class DockerShardDriver implements RelayDriver {
       const output = await this.docker(['inspect', '--format', this.inspectFormat, ...names.slice(offset, offset + 64)]);
       result.push(...output.split('\n').filter(Boolean).map(line => this.parseContainer(line)));
     }
+    for (const entry of this.mutations.pending()) {
+      const found = result.find(handle => entry.action === 'run' ? handle.id === entry.target : handle.containerId === entry.target);
+      const resolved = entry.action === 'run' ? found?.generation.split('@')[0] === entry.generation
+        : entry.action === 'stop' ? !found || found.running === false : !found;
+      if (resolved) this.mutations.complete(entry);
+      else this.options.onDiagnostic?.({ code: 'docker_mutation_uncertain', stage: `docker_${entry.action}`, shardId: entry.shardId });
+    }
     return result;
   }
   async start(shard: DesiredShard): Promise<RelayHandle> {
+    this.mutations.assertClear(shard.id);
     // Validate cold candidates before allocating a container. Existing workers
     // continue independently while failed candidates back off or await sign-in.
     await discoverOpenAIModels(shard, AbortSignal.timeout(10000), fetch, this.options.preflightInventoryUrl ?? this.options.inventoryUrl);
@@ -78,7 +98,10 @@ export class DockerShardDriver implements RelayDriver {
       ...(this.options.inventoryUrl ? { RELAY_CAPABILITY_INVENTORY_URL: this.options.inventoryUrl } : {}) };
     const args = ['run', '-d', '--name', id, '--label', `${this.label}=${this.options.namespace}`,
       '--label', `io.galx.shard=${shard.id}`, '--label', `io.galx.generation=${generation}`,
-      '--label', `io.galx.credential-revision=${shard.credentialRevision}`, '--restart', 'unless-stopped',
+      '--label', `io.galx.credential-revision=${shard.credentialRevision}`,
+      // The federation lifecycle is the single restart authority for workers.
+      // Docker must not race it by restarting a stopped container in place.
+      '--restart', 'no',
       '--init', '--user', '1000:1000', '--read-only', '--cap-drop', 'ALL', '--security-opt', 'no-new-privileges:true',
       '--pids-limit', '128', '--memory', '512m', '--cpus', '1', '--publish', '127.0.0.1::3001',
       '--tmpfs', '/tmp:rw,noexec,nosuid,size=16m,uid=1000,gid=1000',
@@ -87,16 +110,30 @@ export class DockerShardDriver implements RelayDriver {
     for (const name of ['RELAY_SHARD_ID', 'RELAY_ID', 'RELAY_GENERATION', 'RELAY_ASSIGNED_SHARD', 'RELAY_CODEX_IMAGE_TOOL_ALIAS', 'RELAY_SITES_OUTPUT_LIMIT_FORWARDING', 'RELAY_API_KEYS', 'RELAY_ADMIN_API_KEYS',
       ...(this.options.wsEndpoint ? ['CODEX_WS_ENDPOINT'] : []), ...(this.options.inventoryUrl ? ['RELAY_CAPABILITY_INVENTORY_URL'] : [])]) args.push('-e', name);
     args.push(this.options.image);
+    const mutation = this.mutations.begin({ shardId: shard.id, action: 'run', target: id, generation });
     await this.docker(args, env);
-    return this.inspectContainer(id);
+    const result = await this.inspectContainer(id);
+    if (result.generation.split('@')[0] !== generation) throw new Error('Docker creation identity changed');
+    this.mutations.complete(mutation);
+    return result;
   }
   async remove(relay: RelayHandle): Promise<void> {
-    const current = await this.inspectContainer(relay.id);
+    this.mutations.assertClear(relay.shardId);
+    const current = await this.inspectContainer(relay.containerId ?? relay.id);
     if (current.generation !== relay.generation) throw new Error('Refusing stale relay removal');
-    await this.docker(['stop', '--time', '40', relay.id]);
-    await this.docker(['rm', relay.id]); // Dedicated checkpoint volume is retained.
+    const target = current.containerId!;
+    if (!/^[a-f0-9]{64}$/.test(target)) throw new Error('Invalid immutable container identity');
+    const stopping = this.mutations.begin({ shardId: relay.shardId, action: 'stop', target, generation: current.generation });
+    await this.docker(['stop', '--time', '40', target]);
+    this.mutations.complete(stopping);
+    const stopped = await this.inspectContainer(target);
+    if (stopped.running !== false || stopped.generation !== current.generation) throw new Error('Worker changed while draining');
+    const removing = this.mutations.begin({ shardId: relay.shardId, action: 'rm', target, generation: current.generation });
+    await this.docker(['rm', target]); // Dedicated checkpoint volume is retained.
+    this.mutations.complete(removing);
   }
   async inspect(relay: RelayHandle) {
+    if (this.mutations.has(relay.shardId)) return {}; // Never admit into a resource with an unresolved daemon mutation.
     const response = await fetch(`${relay.endpoint}/api/capabilities`, { headers: { Authorization: `Bearer ${relay.adminKey}` },
       redirect: 'error', signal: AbortSignal.timeout(3000) });
     if (!response.ok) return {};
@@ -119,7 +156,7 @@ export class DockerShardDriver implements RelayDriver {
       } else await status.body?.cancel();
     }
     // Docker's process start identity fences snapshots across in-place container restarts.
-    if ((await this.inspectContainer(relay.id)).generation !== relay.generation) return {};
+    if ((await this.inspectContainer(relay.containerId ?? relay.id)).generation !== relay.generation) return {};
     return { record: { ...record, generation: relay.generation }, invalidCredential };
   }
 }

@@ -16,7 +16,7 @@ Maintain one private incident system in `post-mortem`: a dated current-state rec
 
 Queued work can be claimed within its bounded window; claimed work is not leased for another dispatch after uncertainty. Deadline expiry reports bounded failure rather than another synthesis. Stored assets and original receipt identity are retained. A late authoritative completion can be recorded; status expiry is not proof that no side effect occurred. Cancellation does not imply a refund.
 
-The stopped controller was recovered by archiving a proven stale lock after process/listener/file-identity checks. The exclusive lock remains the single-owner guard; automatic stale-lock reclamation was not implemented. Keep this residual risk in follow-up work rather than describing manual recovery as a permanent crash-recovery feature.
+The historical stopped controller was recovered by archiving a proven stale lock after process/listener/file-identity checks. The follow-up launcher now uses a kernel-held local guard and external guardian for automatic crash recovery; its isolated evidence is dated separately, and production rollout/legacy-marker migration remain open. Keep those deployment limits explicit rather than treating local drills as production acceptance.
 
 ## Evidence and limits
 

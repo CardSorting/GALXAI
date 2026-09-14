@@ -1,0 +1,79 @@
+{
+  "observed_at": "2026-09-14T17:51:09Z",
+  "revision": "working-tree based on 077b678b429ed6a91de3de331599624c273999d9",
+  "environment": "macOS, Node v26.8.1, Python 3, local Docker daemon; synthetic registry/upstream credentials and unique temporary namespaces; no production state or credentials",
+  "confirmed_causes_and_fixes": [
+    {
+      "fault": "Legacy launcher leaves persistent controller.lock after SIGKILL",
+      "before": "Actual launcher worker drill failed to restart because the old launcher saw controller.lock and exited before serving the replacement.",
+      "after": "The new launcher uses a kernel-held controller.guard under an external Python guardian. A killed controller is terminated as a process group, the guard remains held until authority ends, and a replacement starts without deleting ownership files.",
+      "evidence": "scripts/test-relay-launcher-worker-recovery.ts",
+      "repetitions": 1
+    },
+    {
+      "fault": "Live controller waits forever after a Docker CLI timeout when the child ignores TERM",
+      "before": "The real DockerShardDriver.list path remained pending after the original 5-second execFile timeout; the regression failed at 7.5 seconds.",
+      "after": "The command runner sends TERM, escalates to KILL, verifies child exit and pipe close, and reports cleanup_unproven when that cannot be proved. The regression returned in approximately 5.7 seconds.",
+      "evidence": "scripts/test-relay-docker-recovery.ts",
+      "repetitions": 1
+    },
+    {
+      "fault": "Delayed Docker operations can target a reused container name",
+      "before": "The name-based stop/remove path allowed a delayed operation to mutate a replacement using the same name.",
+      "after": "Stop and remove use the immutable 64-character container ID, and generation checks reject stale handles.",
+      "evidence": "scripts/test-relay-docker-recovery.ts",
+      "repetitions": 1
+    },
+    {
+      "fault": "Controller loss after dispatch can lose the acknowledgement",
+      "before": "A restarted controller forgot the in-memory admission and redispatched the same idempotency key; the regression observed two dispatches.",
+      "after": "A private receipt journal persists only identity hash/state. Pending becomes unknown on restart; the same key returns relay_admission_unknown and is never redispatched. Completed response bodies are not treated as durable replay data.",
+      "evidence": "scripts/test-federation-admission.ts and scripts/test-relay-admission-durability.ts",
+      "repetitions": 1
+    },
+    {
+      "fault": "A clean first supervised startup created the ownership marker but omitted the empty Docker mutation journal",
+      "before": "The first controller could serve successfully, then a replacement failed closed because the marker existed while docker-operations.json did not.",
+      "after": "Initial journal setup now atomically creates the empty journal before the compatibility marker; a marker without its journal remains a fail-closed unavailable-storage state. The launcher restart regression and an explicit first-start assertion pass.",
+      "evidence": "scripts/test-relay-admission-durability.ts and scripts/test-relay-launcher-recovery.py",
+      "repetitions": 1
+    },
+    {
+      "fault": "Federation workers previously had Docker restart policy while the lifecycle controller also replaced stopped workers",
+      "before": "A worker process exit could be acted on by both Docker's restart policy and controller reconciliation, leaving two restart authorities for one resource.",
+      "after": "Federation workers now use Docker restart policy `no`; the lifecycle controller alone retires and replaces unexpected stopped or missing workers with exponential backoff and a five-attempt ten-minute budget. The regression proves the sixth crash is contained and emits `worker_restart_budget_exhausted`.",
+      "evidence": "src/relay/docker-shard-driver.ts and scripts/test-relay-lifecycle-recovery.ts",
+      "repetitions": 1
+    }
+  ],
+  "measured_recovery": {
+    "guardian_child_sigkill_to_replacement_authority_seconds": [0.062, 0.060, 0.061],
+    "actual_launcher_empty_registry_crash_to_health_seconds": 0.311,
+    "actual_launcher_empty_registry_hang_to_health_seconds": 2.272,
+    "actual_launcher_retained_worker_crash_to_required_ready_ms": 301,
+    "actual_launcher_retained_worker_crash_to_successful_request_ms": 367,
+    "actual_launcher_retained_worker_hang_to_required_ready_ms": 2255,
+    "actual_launcher_retained_worker_hang_to_successful_request_ms": 2302,
+    "docker_cli_timeout_to_verified_return_ms": 5615,
+    "docker_lifecycle_canary": "passed"
+  },
+  "validation": {
+    "guardian_process_drills": "12 passed",
+    "launcher_process_drill": "passed; empty-registry readiness remained 503 as required",
+    "worker_restart_authority_regression": "passed; Docker policy `no`, controller-only replacement, five-attempt ten-minute budget and sixth-crash containment",
+    "existing_relay_capability_suite": "154 passed, 0 failed",
+    "recovery_node_suite": "24 passed, 0 failed",
+    "typescript": "npx tsc --noEmit passed",
+    "production_build": "Next.js build passed; 285 static pages",
+    "docker_lifecycle_canary": "passed against galxai-relay:lifecycle-recovery with synthetic inventory; rejected worker removed, surviving worker adopted, cold rejected credential not allocated",
+    "real_worker_execution": "WebSocket worker fixture passed; real Docker worker execution was not used in that launcher drill",
+    "documentation": "npm run docs:check and npm run test:docs passed",
+    "lint": "0 errors, 8 pre-existing warnings"
+  },
+  "remaining_uncertainty": [
+    "The local reproductions establish failure paths and safe containment, not the causal distribution of the September 13 production intermittency.",
+    "Host reboot, Docker-daemon restart, delayed daemon startup, retained-state restoration and full/read-only state storage drills were not run and remain open under ACT-018.",
+    "The legacy controller.lock marker requires one reviewed migration archive before the new launcher can own that namespace; no automatic takeover is attempted.",
+    "No production deployment or disruptive production fault injection was performed."
+  ]
+}

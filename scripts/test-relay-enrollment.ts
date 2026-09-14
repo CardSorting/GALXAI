@@ -38,17 +38,19 @@ test('pre-start rejection persists across restart and permits only a new credent
 
 test('validated cold candidates allocate once and are then adopted by automatic reconciliation', async t => {
   const driver = new DockerShardDriver({ namespace: 'test', image: 'test', secret: 's'.repeat(32) });
-  const calls:string[]=[];
+  const calls:string[]=[]; let allocationArgs: string[] = [];
   t.mock.method(globalThis,'fetch',async()=>{calls.push('validate');return Response.json({data:[{id:'A'}]});});
   const handle={id:'worker',shardId:candidate.id,generation:'g',credentialRevision:candidate.credentialRevision,endpoint:'http://127.0.0.1:1',inferenceKey:'i',adminKey:'a'};
-  t.mock.method(driver as any,'docker',async()=>{calls.push('allocate');return '';});
+  t.mock.method(driver as any,'docker',async(args: string[])=>{calls.push('allocate');allocationArgs=args;return '';});
   t.mock.method(driver as any,'inspectContainer',async()=>handle);
   let running:typeof handle[]=[];
   t.mock.method(driver,'list',async()=>running);
   const start=driver.start.bind(driver);t.mock.method(driver,'start',async s=>{const h=await start(s);running=[h];return h;});
   t.mock.method(driver,'inspect',async()=>({}));t.mock.method(driver,'remove',async()=>{});
   const lifecycle=new RelayFederationLifecycle(async()=>[candidate],driver);
-  await lifecycle.reconcile();await lifecycle.reconcile();assert.deepEqual(calls,['validate','allocate']);await lifecycle.stop();
+  await lifecycle.reconcile();await lifecycle.reconcile();assert.deepEqual(calls,['validate','allocate']);
+  assert.equal(allocationArgs[allocationArgs.indexOf('--restart') + 1], 'no', 'the controller, not Docker, owns worker restarts');
+  await lifecycle.stop();
 });
 test('preflight service errors and journal failures back off without claiming a saved rejection', async () => {
   let now = 100000, starts = 0, invalid = false;
