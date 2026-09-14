@@ -245,8 +245,17 @@
       "owner": "relay maintainer",
       "review_by": "2026-09-27",
       "status": "open",
-      "next_step": "Run isolated Docker-daemon restart, host reboot, delayed daemon startup, retained-state restoration and full/read-only journal storage drills with a disposable deployment contract.",
-      "closure": "Each drill records fault-to-detection, safe authority handover, required-capability readiness, first successful request, duplicate-dispatch outcome and rollback/cleanup evidence. A drill that the environment cannot safely support remains explicitly not run."
+      "next_step": "Run the remaining isolated acceptance subitems separately: Docker-daemon restart during work; Docker unavailable at startup then restored; host reboot and unattended guardian boot; retained-state restoration; full/read-only recovery storage; and exhausted restart-budget recovery.",
+      "closure": "For each subitem record fault-to-detection, safe authority handover, required-capability readiness, first successful request, independent duplicate-dispatch outcome and rollback/cleanup evidence. Mark unsupported destructive drills not run; do not close ACT-018 from fixture or canary coverage."
+    },
+    {
+      "id": "ACT-019",
+      "incident": "INC-20260913-IMAGES",
+      "owner": "release/relay maintainer",
+      "review_by": "2026-09-20",
+      "status": "open",
+      "next_step": "Align the affected deployment with the reviewed guardian launcher, migrate the retained worker restart policy, and verify the loaded revision through the existing launchd service without a second restart authority.",
+      "closure": "Record a compatible state-preserving rollout and rollback, confirm the installed plist and running process use the guardian, confirm every retained federation container uses restart policy no, and observe one representative recovery. Until then the current deployment remains pre-patch and the recovery patch is not operationally accepted."
     },
     {
       "id": "ACT-004",

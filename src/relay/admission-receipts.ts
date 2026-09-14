@@ -9,7 +9,7 @@ export interface AdmissionReceipt {
   state: 'pending' | 'complete' | 'unknown';
   response?: { status: number; headers: Record<string, string>; body: Buffer };
 }
-/** Bounded response cache plus optional durable admission tombstones. Never evict a live key to admit another write. */
+/** Bounded response cache plus optional durable admission tombstones. Never evict a live or uncertain key to admit another write. */
 export class AdmissionReceipts {
   private readonly entries = new Map<string, AdmissionReceipt>();
   private bytes = 0;
@@ -76,5 +76,21 @@ export class AdmissionReceipts {
     };
   }
   forget(id: string) { const old = this.entries.get(id); if (old?.response) this.bytes -= old.response.body.length; this.entries.delete(id); this.persist(); }
-  prune() { for (const [id, receipt] of this.entries) if (receipt.state === 'complete' && receipt.expires <= this.now()) this.forget(id); }
+  prune() {
+    const now = this.now();
+    let changed = false;
+    for (const receipt of this.entries.values()) {
+      if (receipt.state !== 'complete' || receipt.expires > now) continue;
+      // A completed key that has outlived its response-cache window is still
+      // evidence that work was accepted. Retain the identity permanently as
+      // unknown so a late retry cannot turn an old operation into new work.
+      receipt.state = 'unknown';
+      if (receipt.response) {
+        this.bytes -= receipt.response.body.length;
+        delete receipt.response;
+      }
+      changed = true;
+    }
+    if (changed) this.persist();
+  }
 }

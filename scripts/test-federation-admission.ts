@@ -197,14 +197,14 @@ test('shutdown is single-flight and bounds a stalled image operation',async()=>{
   const request=f.submit({model:'A',prompt:'stall'},{},'/v1/images/generations').catch(()=>null);
   try{await until(()=>started);const start=Date.now(),stop=f.front.stop();assert.equal(f.front.stop(),stop);await stop;assert(Date.now()-start<1000);await request;}finally{await f.close();}
 });
-test('receipt budgets retain live keys, isolate tenants, and never retain oversized response bodies',()=>{
+test('receipt budgets retain live and uncertain keys, isolate tenants, and never retain oversized response bodies',()=>{
   let now=100;const r=new AdmissionReceipts(()=>now,1000,2,10);
   const first=r.begin('a','chat','key',{model:'A'});r.complete(first.receipt,202,{},Buffer.from('ok'));
   assert.equal(r.begin('a','chat','key',{model:'A'}).existing,true);assert.equal(r.begin('b','chat','key',{model:'A'}).existing,false);
   assert.throws(()=>r.begin('c','chat','key',{model:'A'}),/retry window is full/);
-  now+=1001;const replacement=r.begin('a','chat','key',{model:'A'});assert.equal(replacement.existing,false);
-  r.complete(replacement.receipt,200,{},Buffer.alloc(11));assert.equal(replacement.receipt.response,undefined);
-  assert.equal(r.begin('a','chat','key',{model:'A'}).receipt.state,'complete');
+  now+=1001;const expired=r.begin('a','chat','key',{model:'A'});assert.equal(expired.existing,true);assert.equal(expired.receipt.state,'unknown');assert.equal(expired.receipt.response,undefined);
+  assert.throws(()=>r.begin('a','chat','new-key',{model:'A'}),/retry window is full/);
+  assert.throws(()=>r.begin('a','chat','key',{model:'B'}),/different request parameters/);
 });
 
 

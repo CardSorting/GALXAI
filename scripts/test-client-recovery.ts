@@ -6,6 +6,7 @@ import { resilientFetch, safeJsonParse } from '../src/lib/resilience/ResilientCl
 import { BroccoliOutboxEngine } from '../src/lib/resilience/BroccoliOutboxEngine';
 import { claimChunkReload } from '../src/lib/resilience/chunk-recovery';
 import { RecoveryNotice } from '../src/components/common/RecoveryNotice';
+import { GalxAI, GalxAIClientCore } from '../src/sdk/client';
 
 function network(t: TestContext, online: boolean) {
   const prior = Object.getOwnPropertyDescriptor(globalThis, 'navigator');
@@ -30,6 +31,55 @@ test('server no-retry and long Retry-After return control without retrying', asy
   t.mock.method(globalThis, 'fetch', async () => { calls++; return new Response(null, { status: 429, headers: { 'retry-after': '600' } }); });
   await assert.rejects(resilientFetch('/api/long-cooldown', { enableCacheFallback: false }));
   assert.equal(calls, 2);
+});
+test('browser relay client stops on an ambiguous execution state even with a stable key', async t => {
+  network(t, true); let calls = 0;
+  t.mock.method(globalThis, 'fetch', async () => {
+    calls++;
+    return new Response(JSON.stringify({ error: { execution_state: 'unknown', message: 'inspect the operation' } }), {
+      status: 502, headers: { 'content-type': 'application/json' },
+    });
+  });
+  await assert.rejects(resilientFetch('/api/ambiguous', {
+    method: 'POST', idempotencyKey: 'stable', maxRetries: 2, enableCacheFallback: false, baseDelayMs: 1,
+  }), (error: any) => error.executionState === 'unknown' && error.shouldRetry === false);
+  assert.equal(calls, 1, 'execution_state=unknown vetoes browser retries');
+});
+test('SDK mutation retries require stable identity and honor ambiguous relay outcomes', async () => {
+  let calls = 0;
+  const ambiguous = () => new Response(JSON.stringify({ error: {
+    code: 'relay_admission_unknown', execution_state: 'unknown', message: 'inspect the existing operation'
+  } }), { status: 502, headers: { 'content-type': 'application/json', 'x-should-retry': 'false' } });
+  const client = new GalxAIClientCore({ apiKey: 'fixture', baseURL: 'http://relay.test', maxRetries: 3,
+    fetch: async () => { calls++; return ambiguous(); } });
+  await assert.rejects(client.request('/v1/images/generations', { method: 'POST', body: { prompt: 'same' } }),
+    (error: any) => error.executionState === 'unknown' && error.shouldRetry === false);
+  assert.equal(calls, 1, 'an explicit no-replay response is not retried');
+
+  calls = 0;
+  const noKey = new GalxAIClientCore({ apiKey: 'fixture', baseURL: 'http://relay.test', maxRetries: 3,
+    fetch: async () => { calls++; throw new Error('connection dropped after dispatch'); } });
+  await assert.rejects(noKey.request('/v1/images/generations', { method: 'POST', body: { prompt: 'same' } }));
+  assert.equal(calls, 1, 'a mutation without caller identity is not replayed after a transport failure');
+
+  calls = 0;
+  const stable = new GalxAIClientCore({ apiKey: 'fixture', baseURL: 'http://relay.test', maxRetries: 1,
+    fetch: async (_input, init) => { calls++; assert.equal(new Headers(init?.headers).get('idempotency-key'), 'stable');
+      if (calls === 1) throw new Error('retryable transport failure');
+      return Response.json({ ok: true }); } });
+  await stable.request('/v1/images/generations', { method: 'POST', body: { prompt: 'same' }, idempotencyKey: 'stable' });
+  assert.equal(calls, 2, 'a caller-owned key permits a bounded retry');
+});
+test('SDK model fallback stops after an ambiguous relay response', async () => {
+  let calls = 0;
+  const client = new GalxAI({ apiKey: 'fixture', baseURL: 'http://relay.test', maxRetries: 2,
+    fetch: async () => { calls++; return new Response(JSON.stringify({ error: {
+      code: 'relay_admission_unknown', execution_state: 'unknown', message: 'inspect the existing operation'
+    } }), { status: 502, headers: { 'content-type': 'application/json', 'x-should-retry': 'false' } }); } });
+  await assert.rejects(client.chat.completions.createWithFallback({ model: 'first', fallbackModels: ['second'],
+    messages: [{ role: 'user', content: 'same work' }], stream: false }),
+    (error: any) => error.executionState === 'unknown');
+  assert.equal(calls, 1, 'fallback cannot dispatch the same unknown operation to another model');
 });
 test('offline acknowledgement waits for durable enqueue and never claims completion', async t => {
   network(t, false); let calls = 0, queued = 0;

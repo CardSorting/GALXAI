@@ -31,7 +31,7 @@ test('SIGKILL after persisted admission retains uncertainty without prompts or r
   } finally {if(child.exitCode===null&&child.signalCode===null){const exit=once(child,'exit');child.kill('SIGKILL');await exit;}fs.rmSync(directory,{recursive:true,force:true});}
 });
 
-test('uncertain admissions do not expire, known non-dispatch releases its key, completed evidence retains the documented window',()=>{
+test('uncertain admissions do not expire, known non-dispatch releases its key, and completed expiry becomes an unknown tombstone',()=>{
   const directory=temporary(),file=path.join(directory,'admissions.json');let now=10000;
   try {
     let r=open(file,()=>now);
@@ -42,9 +42,15 @@ test('uncertain admissions do not expire, known non-dispatch releases its key, c
     assert.equal(r.begin('tenant','chat','accepted',{model:'A'}).receipt.state,'complete');
     assert.equal(r.begin('tenant','chat','accepted',{model:'A'}).receipt.response,undefined);
     assert.equal(r.begin('tenant','chat','not-dispatched',{model:'A'}).existing,false);
-    now+=86400000;r.prune();r=open(file,()=>now);
+    now+=86400000;r.prune();
     assert.equal(r.begin('tenant','chat','uncertain',{model:'A'}).receipt.state,'unknown');
-    assert.equal(r.begin('tenant','chat','accepted',{model:'A'}).existing,false);
+    const expired=r.begin('tenant','chat','accepted',{model:'A'});
+    assert.equal(expired.existing,true);
+    assert.equal(expired.receipt.state,'unknown');
+    assert.equal(expired.receipt.response,undefined);
+    r=open(file,()=>now);
+    assert.equal(r.begin('tenant','chat','accepted',{model:'A'}).receipt.state,'unknown');
+    assert.throws(() => r.begin('tenant','chat','accepted',{model:'B'}), /different request parameters/, 'an expired key remains a conflict tombstone');
   } finally {fs.rmSync(directory,{recursive:true,force:true});}
 });
 

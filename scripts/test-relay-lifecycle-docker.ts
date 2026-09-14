@@ -39,9 +39,18 @@ async function until(check: () => Promise<boolean>) {
 try {
   const handles = [];
   for (const s of desired) handles.push(await driver.start(s));
+  // Simulate a retained worker created by the legacy launcher. The controller
+  // must migrate its effective policy before admitting the worker, without a
+  // restart or a replacement container.
+  execFileSync('docker', ['update', '--restart', 'unless-stopped', handles[0].containerId!], { timeout: 10000, stdio: 'pipe' });
+  const migrated = (await driver.list()).find(h => h.containerId === handles[0].containerId)!;
+  assert.equal(migrated.restartPolicy, 'no');
+  assert.equal(execFileSync('docker', ['inspect', '--format', '{{.HostConfig.RestartPolicy.Name}}', handles[0].containerId!], { encoding: 'utf8' }).trim(), 'no');
   const rejected = handles[1];
   rejectSynthetic = true; // Simulate revocation after successful enrollment.
-  await until(async () => { try { return (await driver.inspect(rejected)).invalidCredential === true; } catch { return false; } });
+  // Discovery is performed at worker start. Restart only after the fixture
+  // begins rejecting this credential; an already-running worker can retain a
+  // previously healthy capability indefinitely.
   execFileSync('docker', ['restart', rejected.id], { timeout: 60000, stdio: 'pipe' });
   const recovered = (await driver.list()).find(h => h.shardId === rejected.shardId)!;
   assert.notEqual(recovered.generation, rejected.generation);
@@ -59,7 +68,7 @@ try {
   const cold = { ...desired[1], id: namespace + '-cold' }; desired.push(cold);
   await lifecycle.reconcile(); assert.equal(journal.load().get(cold.id), cold.credentialRevision);
   assert.equal((await driver.list()).length, 1);
-  console.log(JSON.stringify({ passed: true, workerRestartRetainsRejection: true, rejectedWorkerRemoved: true, controllerRestartDoesNotRespawn: true, coldRejectionNeverAllocated: true }));
+  console.log(JSON.stringify({ passed: true, retainedWorkerPolicyMigrated: true, workerRestartRetainsRejection: true, rejectedWorkerRemoved: true, controllerRestartDoesNotRespawn: true, coldRejectionNeverAllocated: true }));
 } finally {
   await lifecycle?.stop();
   for (const h of await driver.list()) await driver.remove(h);

@@ -1,0 +1,122 @@
+{
+  "version": 1,
+  "classification": "private",
+  "observed_at": "2026-09-14T18:49:15Z",
+  "source_revision_at_audit": "8fa5c6b6d217f7c4995b3840e72302799c648c84 before the recovery acceptance changes",
+  "tested_revision": "730263a3001bfcb96158b24cd6e5a9dcb9e723b8",
+  "checkout": {
+    "working_tree_at_start": "dirty with recovery, SDK, test and documentation changes",
+    "production_changes": false,
+    "secrets_or_credentials_recorded": false
+  },
+  "environment": {
+    "host": "macOS 26.5.1, Darwin 25.5.0, arm64",
+    "node": "v26.8.1",
+    "python": "3.14.7",
+    "docker_context": "desktop-linux",
+    "docker_server": "Docker Desktop Linux VM, Engine 29.7.2, kernel 7.0.12-linuxkit, aarch64",
+    "docker_live_restore": false,
+    "docker_root": "/var/lib/docker"
+  },
+  "running_deployment": {
+    "launchd_label": "com.galxai.federation.production",
+    "launcher": "pre-patch direct scripts/run-relay-federation.ts wrapper",
+    "launchd_state": "running; repeated historical exits reported code 1",
+    "launchd_keepalive": "unconditional KeepAlive/run-at-load in the installed plist",
+    "loaded_revision": "not correlated; process predates this reviewed checkout",
+    "ownership_state": "legacy .relay/federation-production/controller.lock exists; reviewed controller.guard and supervisor journal are absent",
+    "federation_image": "galxai-relay:sites-fixed-20260912-2b72afd",
+    "federation_image_digest": "sha256:39f0361c2c4492158362ce603c6fdaddfad40c99f120afb4760ea0e1ed51bbbf",
+    "managed_worker_policy": "unless-stopped",
+    "managed_worker_state_volume": "galx-shard-a5bb38581ffb74fe21b0-state:/app/.broccolidb",
+    "health_observation": "health endpoint and container health were available during the audit; this proves liveness only"
+  },
+  "evidence_table": [
+    {
+      "claim": "Kernel-held local ownership, descriptor lifetime and external progress supervision",
+      "implemented": true,
+      "tested_with_fixtures": true,
+      "tested_against_real_dependencies": false,
+      "deployed": false,
+      "evidence": ["scripts/relay-controller-supervisor.py", "scripts/test-relay-controller-supervisor.py", "14 guardian drills passed"]
+    },
+    {
+      "claim": "Actual launcher/controller recovery and live-controller hang fencing",
+      "implemented": true,
+      "tested_with_fixtures": true,
+      "tested_against_real_dependencies": false,
+      "deployed": false,
+      "evidence": ["scripts/test-relay-launcher-recovery.py", "scripts/test-relay-launcher-worker-recovery.ts", "fixture registry/Docker discovery"]
+    },
+    {
+      "claim": "Docker timeout cleanup, immutable identity and legacy restart-policy migration",
+      "implemented": true,
+      "tested_with_fixtures": true,
+      "tested_against_real_dependencies": true,
+      "deployed": false,
+      "evidence": ["scripts/test-relay-docker-recovery.ts", "scripts/test-relay-lifecycle-docker.ts", "unique disposable namespace canary passed"]
+    },
+    {
+      "claim": "Admission and durable receipt uncertainty, expiry and older-snapshot restoration",
+      "implemented": true,
+      "tested_with_fixtures": true,
+      "tested_against_real_dependencies": false,
+      "deployed": false,
+      "evidence": ["scripts/test-relay-admission-durability.ts", "scripts/test-relay-durable-receipts.ts", "SQLite and filesystem fixtures"]
+    },
+    {
+      "claim": "Frontend/browser and Node SDK retry path preserves unknown/accepted outcomes",
+      "implemented": true,
+      "tested_with_fixtures": true,
+      "tested_against_real_dependencies": false,
+      "deployed": false,
+      "evidence": ["scripts/test-client-recovery.ts", "browser execution_state=unknown no-replay regression", "stable-key SDK retry regression"]
+    },
+    {
+      "claim": "Guardian boot integration and the running deployment use the reviewed patch",
+      "implemented": true,
+      "tested_with_fixtures": true,
+      "tested_against_real_dependencies": false,
+      "deployed": false,
+      "evidence": ["disposable installer generated a valid guardian plist", "installed launchd plist remains pre-patch"]
+    }
+  ],
+  "drills": [
+    {
+      "name": "guardian death while controller remains alive",
+      "result": "passed in isolated real-process fixture; controller stopped progress after the inherited pipe closed and replacement acquired authority only after retirement"
+    },
+    {
+      "name": "simultaneous starts, paused owner, delayed commands, hung worker/event loop",
+      "result": "passed in 14 guardian process drills with bounded escalation and no manual lock deletion"
+    },
+    {
+      "name": "Docker CLI ignores TERM and stale name is reused",
+      "result": "passed in isolated process/fixture regressions; process group termination and immutable container ID checks completed"
+    },
+    {
+      "name": "retained worker created with legacy restart policy",
+      "result": "passed once in a unique disposable namespace against the real Docker Desktop daemon; policy migrated to no before admission"
+    },
+    {
+      "name": "receipt expiry, capacity exhaustion, old SQLite snapshot restoration and client retries",
+      "result": "passed in local SQLite/filesystem/browser/SDK fixtures; unknown evidence remains blocking and is not evicted"
+    }
+  ],
+  "not_run": [
+    "host reboot and unattended launchd boot of the reviewed guardian",
+    "Docker daemon restart during active work",
+    "Docker unavailable during startup then restored",
+    "recovery storage full or read-only against the deployed layout",
+    "retained-state restoration against the deployed volume",
+    "restart-budget exhaustion followed by dependency recovery",
+    "production rollout, representative production recovery and disruptive drills"
+  ],
+  "remaining_uncertainty": [
+    "The complete cause of the historical intermittent production lockups is not established.",
+    "The current live launchd process is an older wrapper with a legacy lock marker, so the reviewed guardian and its boot behavior are not operationally accepted.",
+    "The current retained federation worker uses unless-stopped while the reviewed lifecycle expects controller-only restart authority; migration is implemented and canary-tested but not applied to production.",
+    "Older-state restoration before durable admission evidence exists remains a deployment contract/manual-reconciliation case; the tested post-reservation snapshot fails closed.",
+    "Real daemon-side uncertain outcomes and independent workload execution recording remain open under ACT-018."
+  ]
+}

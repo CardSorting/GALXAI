@@ -5,7 +5,7 @@
 
 import type { ChatCompletionRequest, ChatCompletionResponse, ChatCompletionChunk } from '../core/contracts/GalxContracts';
 import type { CompletionsResource } from './resources/chat';
-import { APIError } from './errors';
+import { APIError, isNonReplayableError } from './errors';
 
 export type ForgivingResilienceParams = string | Omit<ChatCompletionRequest, 'model'>;
 
@@ -55,6 +55,9 @@ export class ModelResilience {
           attemptsMade: attempt
         };
       } catch (err: any) {
+        // A lost acknowledgement is not a model failure. Stop the cascade so
+        // the next model cannot execute the same non-idempotent request.
+        if (isNonReplayableError(err)) throw err;
         errors.push({ model, error: err.message || 'Model request failed' });
       }
     }

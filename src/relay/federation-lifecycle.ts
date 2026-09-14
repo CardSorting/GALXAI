@@ -16,6 +16,8 @@ export interface DesiredShard {
 }
 export interface RelayHandle {
   containerId?: string;
+  /** Effective Docker policy observed during discovery; private lifecycle evidence. */
+  restartPolicy?: string;
   running?: boolean;
   id: string;
   shardId: string;

@@ -21,6 +21,7 @@ import { ModelResilience } from '../resilience';
 import { ChatCompletionBuilder } from '../builder';
 import { StructuredOutputExtractor, type StructuredChatParams } from '../structured';
 import { ChatCompletionStream } from '../stream';
+import { isNonReplayableError } from '../errors';
 
 export class ChatResource {
   readonly completions: CompletionsResource;
@@ -205,6 +206,10 @@ export class CompletionsResource {
           _fallbacksTriggered: fallbacksTriggered
         };
       } catch (err: any) {
+        // A relay may have accepted work before the response was lost. Do not
+        // turn that explicit uncertainty into a fresh request on another
+        // model. The caller must inspect the existing operation instead.
+        if (isNonReplayableError(err)) throw err;
         lastError = err;
         fallbacksTriggered++;
         if (i === models.length - 1) {

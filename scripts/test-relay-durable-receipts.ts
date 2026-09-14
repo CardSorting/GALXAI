@@ -54,7 +54,45 @@ test('a replacement writer fences prior dispatch and completion before releasing
   } finally { first.close(); second.close(); fs.rmSync(directory, { recursive: true, force: true }); }
 });
 
-test('capacity fails closed, unknown receipts never expire, and terminal evidence expires after 30 days', () => {
+test('restoring an earlier receipt snapshot preserves identity and fails closed after restart', () => {
+  const directory = temp();
+  const snapshot = path.join(directory, 'earlier.sqlite');
+  const store = new DurableReceipts(directory);
+  try {
+    store.reserve('restored', tenant, fingerprint);
+    fs.copyFileSync(path.join(directory, 'receipts.sqlite'), snapshot);
+    store.dispatch('restored', tenant);
+    store.complete('restored', tenant, 'late result', usage);
+    assert.equal(store.lookup('restored', tenant)?.status, 'completed');
+  } finally { store.close(); }
+
+  fs.copyFileSync(snapshot, path.join(directory, 'receipts.sqlite'));
+  const restored = new DurableReceipts(directory);
+  try {
+    assert.equal(restored.lookup('restored', tenant)?.status, 'not_started');
+    restored.reserve('restored', tenant, fingerprint);
+    assert.equal(restored.lookup('restored', tenant)?.status, 'not_started');
+    assert.throws(() => restored.dispatch('restored', tenant), /conflict/);
+    assert.throws(() => restored.reserve('restored', tenant, other), /conflict/);
+  } finally { restored.close(); fs.rmSync(directory, { recursive: true, force: true }); }
+});
+
+test('expired not-started evidence becomes an unknown tombstone instead of releasing admission', () => {
+  const directory = temp(); let now = Date.now(); const store = new DurableReceipts(directory, () => now);
+  try {
+    store.reserve('not-started', tenant, fingerprint);
+    store.stop('not-started', tenant);
+    assert.equal(store.lookup('not-started', tenant)?.status, 'not_started');
+    now += RECEIPT_RETENTION_MS;
+    const expired = store.lookup('not-started', tenant);
+    assert.equal(expired?.status, 'unknown');
+    assert.equal(expired?.retainedUntil, null);
+    store.reserve('not-started', tenant, fingerprint);
+    assert.throws(() => store.dispatch('not-started', tenant), /conflict/);
+  } finally { store.close(); fs.rmSync(directory, { recursive: true, force: true }); }
+});
+
+test('capacity fails closed, unknown receipts never expire, and expired terminal evidence becomes an unknown tombstone', () => {
   const directory = temp(); let now = Date.now(); const store = new DurableReceipts(directory, () => now, 2);
   try {
     store.reserve('unknown', tenant, fingerprint); store.dispatch('unknown', tenant); store.stop('unknown', tenant);
@@ -63,9 +101,16 @@ test('capacity fails closed, unknown receipts never expire, and terminal evidenc
     assert.throws(() => store.complete('done', tenant, 'changed', usage), /conflict/);
     assert.throws(() => store.reserve('third', tenant, fingerprint), /capacity/);
     now += RECEIPT_RETENTION_MS + 1;
-    assert.equal(store.lookup('done', tenant), null);
+    const expired = store.lookup('done', tenant);
+    assert.equal(expired?.status, 'unknown');
+    assert.equal(expired?.output, null);
+    assert.equal(expired?.usage, null);
+    assert.equal(expired?.retainedUntil, null);
     assert.equal(store.lookup('unknown', tenant)?.status, 'unknown');
-    store.reserve('third', tenant, fingerprint);
+    store.reserve('done', tenant, fingerprint);
+    assert.equal(store.lookup('done', tenant)?.status, 'unknown');
+    assert.throws(() => store.reserve('done', tenant, other), /conflict/);
+    assert.throws(() => store.reserve('third', tenant, fingerprint), /capacity/);
     assert.throws(() => store.reserve('unknown', tenant, other), /conflict/);
   } finally { store.close(); fs.rmSync(directory, { recursive: true, force: true }); }
 });

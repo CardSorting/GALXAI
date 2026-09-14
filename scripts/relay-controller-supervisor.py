@@ -191,7 +191,7 @@ def main():
                             stage_since = last_heartbeat
                     elif event.get('event') in ('operation_start', 'operation_end'):
                         ident = event.get('id')
-                        if isinstance(ident, str) and len(ident) <= 64 and event.get('stage') in ('docker_ps', 'docker_inspect', 'docker_run', 'docker_stop', 'docker_rm'):
+                        if isinstance(ident, str) and len(ident) <= 64 and event.get('stage') in ('docker_ps', 'docker_inspect', 'docker_run', 'docker_update', 'docker_stop', 'docker_rm'):
                             if event['event'] == 'operation_end':
                                 operations.pop(ident, None)
                             elif len(operations) < 32:

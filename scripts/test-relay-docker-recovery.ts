@@ -7,6 +7,7 @@ import { spawn, type ChildProcess } from 'node:child_process';
 import { once } from 'node:events';
 import { createHash } from 'node:crypto';
 import { DockerShardDriver } from '../src/relay/docker-shard-driver.js';
+import { DockerMutationJournal } from '../src/relay/docker-mutation-journal.js';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 const alive = (pid: number) => { try { process.kill(pid, 0); return true; } catch (e: any) { if (e.code === 'ESRCH') return false; throw e; } };
@@ -61,7 +62,7 @@ test('delayed Docker stop/remove targets immutable container identity after its 
     const args=process.argv.slice(2);s.calls.push(args);
     if(args[0]==='inspect') {
       const labels={'io.galx.federation':'test-identity','io.galx.shard':'synthetic-shard','io.galx.generation':'generation','io.galx.credential-revision':'v1'};
-      const fields=[JSON.stringify('/'+s.name),JSON.stringify(labels),JSON.stringify({'3001/tcp':[{HostIp:'127.0.0.1',HostPort:'3000'}]}),String(s.running),'started'];
+      const fields=[JSON.stringify('/'+s.name),JSON.stringify(labels),JSON.stringify({'3001/tcp':[{HostIp:'127.0.0.1',HostPort:'3000'}]}),String(s.running),'no','started'];
       if(args.join(' ').includes('.Id'))fields.push(s.originalId);
       console.log(fields.join('\\t'));
     } else if(args[0]==='stop'||args[0]==='rm') {
@@ -84,4 +85,31 @@ test('delayed Docker stop/remove targets immutable container identity after its 
     if(oldState===undefined)delete process.env.GALX_DOCKER_TEST_STATE;else process.env.GALX_DOCKER_TEST_STATE=oldState;
     fs.rmSync(directory,{recursive:true,force:true});
   }
+});
+
+test('retained workers with a legacy restart policy are migrated before admission', async t => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'galx-docker-policy-'));
+  const journalPath = path.join(directory, 'docker-operations.json');
+  const name = 'galx-shard-' + createHash('sha256').update('policy-shard').digest('hex').slice(0, 20);
+  const containerId = 'c'.repeat(64);
+  let policy = 'unless-stopped';
+  const calls: string[][] = [];
+  const labels = { 'io.galx.federation': 'test-policy', 'io.galx.shard': 'policy-shard', 'io.galx.generation': 'generation', 'io.galx.credential-revision': 'v1' };
+  const inspect = () => [JSON.stringify('/' + name), JSON.stringify(labels), JSON.stringify({ '3001/tcp': [{ HostIp: '127.0.0.1', HostPort: '3000' }] }), 'true', policy, 'started', containerId].join('\t');
+  const driver = new DockerShardDriver({ namespace: 'test-policy', image: 'unused', secret: 'x'.repeat(32), mutationJournalPath: journalPath });
+  t.mock.method(driver as any, 'docker', async (args: string[]) => {
+    calls.push(args);
+    if (args[0] === 'ps') return name;
+    if (args[0] === 'inspect') return inspect();
+    if (args[0] === 'update') { assert.deepEqual(args.slice(0, 3), ['update', '--restart', 'no']); assert.equal(args[3], containerId); policy = 'no'; return ''; }
+    throw new Error('unexpected docker operation');
+  });
+  try {
+    const first = await driver.list();
+    assert.equal(first[0].restartPolicy, 'no');
+    assert.equal(calls.filter(args => args[0] === 'update').length, 1);
+    assert.deepEqual(new DockerMutationJournal(journalPath).pending(), []);
+    await driver.list();
+    assert.equal(calls.filter(args => args[0] === 'update').length, 1, 'a migrated retained worker is not updated on every reconciliation');
+  } finally { fs.rmSync(directory, { recursive: true, force: true }); }
 });

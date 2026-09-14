@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 
-export interface DockerMutation { id: string; shardId: string; action: 'run' | 'stop' | 'rm'; target: string; generation: string; startedAt: number; }
+export interface DockerMutation { id: string; shardId: string; action: 'run' | 'stop' | 'rm' | 'policy'; target: string; generation: string; startedAt: number; }
 export class DockerMutationError extends Error {
   constructor(readonly code: 'docker_mutation_uncertain' | 'docker_journal_unavailable') { super(code); }
 }
@@ -28,7 +28,7 @@ export class DockerMutationJournal {
       const value = JSON.parse(fs.readFileSync(filename, 'utf8'));
       if (value.version !== 1 || !Array.isArray(value.entries) || value.entries.length > 2048) throw new Error();
       for (const row of value.entries) {
-        if (!row || typeof row !== 'object' || !/^[a-f0-9-]{36}$/.test(row.id) || !['run', 'stop', 'rm'].includes(row.action)
+        if (!row || typeof row !== 'object' || !/^[a-f0-9-]{36}$/.test(row.id) || !['run', 'stop', 'rm', 'policy'].includes(row.action)
           || typeof row.shardId !== 'string' || !row.shardId || row.shardId.length > 256 || this.entries.has(row.shardId)
           || typeof row.target !== 'string' || !/^[a-zA-Z0-9_-]{1,128}$/.test(row.target)
           || typeof row.generation !== 'string' || !row.generation || row.generation.length > 256 || !Number.isSafeInteger(row.startedAt)) throw new Error();

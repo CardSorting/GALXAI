@@ -87,7 +87,7 @@ Preserve signing state and receipt volumes. The durable text receipt endpoint ca
 
 Use one idempotency key per logical operation and preserve payload, principal and returned scope. Save signed job URLs after acceptance; poll, stream or cancel that job instead of submitting new inference. `X-Galx-Task-Id` correlates parent/child work without granting authority.
 
-The [API recovery table](RELAY_API_REFERENCE.md#request-recovery) governs conflicts, uncertain admission and generation loss. Admission identity tombstones retain ten minutes of completed records across controller restart, with 1,000 keys; response bodies remain process-local within the 32 MiB aggregate and 8 MiB per-response cache. They are not durable exactly-once execution. Image synthesis is not automatically replayed after an uncertain outcome.
+The [API recovery table](RELAY_API_REFERENCE.md#request-recovery) governs conflicts, uncertain admission and generation loss. Admission response bodies remain process-local within the 32 MiB aggregate and 8 MiB per-response cache for ten minutes; after that, completed identities remain permanent `unknown` tombstones across controller restart. The journal holds at most 1,000 keys and never evicts uncertain evidence, so capacity exhaustion fails closed pending operator reconciliation. These are not durable exactly-once execution. Image synthesis is not automatically replayed after an uncertain outcome.
 
 ## Recovery supervision and failure isolation
 
@@ -97,7 +97,7 @@ Every federation worker Docker CLI has a bounded deadline and returns only after
 
 Federation worker containers are created with Docker restart policy `no`; the lifecycle controller owns stop, removal and replacement. Unexpected stopped or missing workers use exponential backoff and a five-attempt ten-minute budget. `worker_restart_budget_exhausted` is a bounded outage requiring private worker and dependency inspection; it does not silently turn into an endless restart loop. Desktop containers are a separate resource with their own desktop-manager policy.
 
-Admission receipts persist only a hash, expiry and state. A pending receipt becomes `unknown` after controller loss and never authorizes replay; completed response bodies remain process-local. If receipt storage is missing, malformed, read-only or full, new admissions fail closed with `admission_storage_unavailable`. A retained worker is adopted after controller restart before any replacement is considered. The [recovery evidence](../post-mortem/incidents/2026/2026-09-13-image-generation/controller-recovery-verification-20260914.json) records the actual launcher and worker lifecycle drills.
+Admission receipts persist only a hash, expiry and state. A pending receipt becomes `unknown` after controller loss; an expired completed receipt is converted to the same permanent unknown tombstone, and neither state authorizes replay. Completed response bodies remain process-local. If receipt storage is missing, malformed, read-only or full, new admissions fail closed with `admission_storage_unavailable`; live and uncertain entries are never evicted. A retained worker is adopted after controller restart before any replacement is considered. The [recovery evidence](../post-mortem/incidents/2026/2026-09-13-image-generation/controller-recovery-verification-20260914.json) records the actual launcher and worker lifecycle drills.
 
 ## Throughput and failure isolation
 

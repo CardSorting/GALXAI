@@ -1,11 +1,11 @@
 {
   "knowledge": {
-    "reviewer": "Codex",
-    "note": "Reviewed the documentation inventory and generated knowledge views after the relay recovery evidence and test-command changes; source review remains private and no runtime acceptance is implied.",
+    "reviewer": "relay maintainer",
+    "note": "Reviewed the committed recovery test-script registration and generated knowledge impact; no runtime behavior or deployment authority changed.",
     "reviewed_at": "2026-09-14",
     "review_by": "2026-09-27",
     "evidence": {
-      "post-mortem/incidents/2026/2026-09-13-image-generation/controller-recovery-verification-20260914.json": "9186271c949f763e0c5d50d8e62c3bcbb1a05243fd7c127d4385ccf45d1749b8"
+      "post-mortem/incidents/2026/2026-09-13-image-generation/recovery-acceptance-audit-20260914.json": "3ad01fb443d8fb7a2bdb4c0b3e45556806219598cc2ce93732d91274db32afd3"
     },
     "files": {
       ".github/CODEOWNERS": "ef2f416d15f027dc8f197ad844289c9a44c8e843d3214d1590a3a380e939d13f",
@@ -38,7 +38,7 @@
       "docs/runbooks/weekly-knowledge-audit.md": "ade4fc2133306e1b544d8783f647bc4c5b8a85e3a89ce769d36f586a91c36169",
       "docs/tutorials/README.md": "7cc84f00412108e1c8ec84ef127b15027b606bd16c2dc290f6efc607b9ca5268",
       "docs/tutorials/first-change.md": "06b7c9501cfe62893978e1da6556d6d4fc0d88f4e36b484d05dad4ad72d9fd60",
-      "package.json": "e11e33c64ea8653c718a23bf357aa5b1dbccc76477188c3a3b084c450901bd97",
+      "package.json": "6da178b435547f0e5365e52ad602d8d8ba920d8c200084d1855e3f42a90c2395",
       "scripts/docs-kb.py": "57642bcce6edcdec6b14dc285e973c1c7ba43d9b8908903826befcba6e992d88",
       "scripts/test-docs-kb.py": "83aa914e66cc04d866fd4c77554760748f8e1d07378326c49ac1738f12851856",
       "scripts/test-post-mortem.py": "fba33221df8a4d167f0e0662cfe1543f76628adcc52b70e0d6f2528f72b8ef4a",
@@ -346,43 +346,43 @@
     }
   },
   "relay": {
-    "reviewer": "Codex",
-    "note": "Reviewed the supervised federation launcher, kernel guard, controller-only worker restart policy, bounded worker restart budget and explicit guardian deadlines against the updated private runbooks.",
+    "reviewer": "relay maintainer",
+    "note": "Reviewed the committed relay recovery source and guides, guardian ownership, Docker policy migration, retention semantics and actual deployment mismatch against the private acceptance audit.",
     "reviewed_at": "2026-09-14",
     "review_by": "2026-09-27",
     "evidence": {
-      "post-mortem/incidents/2026/2026-09-13-image-generation/controller-recovery-verification-20260914.json": "9186271c949f763e0c5d50d8e62c3bcbb1a05243fd7c127d4385ccf45d1749b8"
+      "post-mortem/incidents/2026/2026-09-13-image-generation/recovery-acceptance-audit-20260914.json": "3ad01fb443d8fb7a2bdb4c0b3e45556806219598cc2ce93732d91274db32afd3"
     },
     "files": {
       "docs/ARCHITECTURE.md": "d821254fb3272cdc6c7575f6a548a1f041fe1506a10fd14b6bdd058539482e5d",
-      "docs/FEDERATION_STRATEGY.md": "6dac8ff4be5c123ae66cae08e93570c15751cdb6d7aba1606d8c1f1d36cd7d57",
-      "docs/RELAY_VNEXT_RUNBOOK.md": "46b3dce7880856ae164fed6772492662c34734b5c4c03175be3cca90905396fb",
+      "docs/FEDERATION_STRATEGY.md": "e199e9e58ed6070a3e60185173649ca61d8f1fc87e113f93099e45d76afc3fc4",
+      "docs/RELAY_VNEXT_RUNBOOK.md": "df23036d91d2b7c089f9176524482e252632542957b78f4a35eaf4952888a51a",
       "docs/TELEMETRY_AND_OBSERVABILITY.md": "e46a148ae3ed55f818f5e45362559b0074bb1f975b3782978e3e815941e9812e",
       "docs/maintainers/RELAY_HARDENING.md": "656dc04e3f0621a7805d74b9fb65549ffd6cb9a94c07d3ed66c40022827f2620",
       "docs/maintainers/RELAY_TELEMETRY.md": "f02e84a73fb2a6242ea55410f7f852e35c225dff85d978c75c8a9d1ccd1765ea",
       "docs/maintainers/TELEMETRY_AND_METRICS_OBSERVABILITY.md": "88aabb0e760cc1820ade69d60ab3b02a1cf290d9f12c8b6f2381ba34f9ff6009",
-      "post-mortem/runbooks/controller-lock.md": "9f9b15a981ec24ab86994805fd72c55b21f09a36f2e0b6cdf3956fe08583e050",
+      "post-mortem/runbooks/controller-lock.md": "cc35088be3945aa90ce69ab9a8a601c24c2afd71dedfafb8f5b504d8ef9130e8",
       "scripts/install-federation-service.ts": "05ec9c28d24ee2389a835234758d01f3fa33480f6b62acb91f78cbd80d5f19d7",
-      "scripts/relay-controller-supervisor.py": "50d12371f255f36a2552c8fe6903d6dd4944b314ecda981bbaec7a1f9d89c49a",
+      "scripts/relay-controller-supervisor.py": "9816c1874766bc25f1806da918e3e8adcf567c2d135035b5c8290cc73dcbd34a",
       "scripts/relay-federation-controller.ts": "892f3ce8978a4d853c5035aac4d99cce2fa2797e9e450c0057b9808ee5afcbc4",
       "scripts/run-relay-federation.ts": "e37abe51cedb4125010b41a19e9a376bc9f1876d42d58b2fc24ee850f751fcad",
-      "scripts/test-federation-admission.ts": "0f5e505ddf981f70bc7a27af25cee5badcf70b94583d6308153f5ce6088e397a",
-      "scripts/test-relay-admission-durability.ts": "586ef5639fcf2cebff77d9979d1694946242f5cc3e19f5af8e30a24e587f1c7d",
-      "scripts/test-relay-controller-supervisor.py": "f7e2b77337762e054e661316c16d66a9197c2aea3a5c052c5bd5ed7ea3457b13",
-      "scripts/test-relay-docker-recovery.ts": "f30b8e114e0f69b8880073d3fdf0d02e0ff0736be36ba2b262e3ebcc331b35f9",
+      "scripts/test-federation-admission.ts": "7c8ca32e90964f5f53d8a3a7959b98bc5b2f5a4f8825d336943d745047b05a3f",
+      "scripts/test-relay-admission-durability.ts": "8bd7b193b9dfdb9fc44990b497e1ff163ce252330f1642895be5e68f6d746017",
+      "scripts/test-relay-controller-supervisor.py": "03ec42f7945f42b1b585039959834b3da3206cd5e453bae9dea8010452bba81c",
+      "scripts/test-relay-docker-recovery.ts": "77f6a081cfbd5df57e6d2ff1594f28abfc83ea82df375cde6ed3fe4238c47bf9",
       "scripts/test-relay-launcher-recovery.py": "5aea7dddcf7ddc8a2c6c02d4b2ee05420f306ba9fc5ff86c4d72c5144dce6ba7",
       "scripts/test-relay-launcher-worker-recovery.ts": "267a0fa4944ffb0b96868d1ecf699ad43ace24e3e2c1b5f87d1fab1a98f96387",
-      "scripts/test-relay-lifecycle-docker.ts": "3c17b4bcb97b122336ef40ddfc90271ff829fddcabd29757fa3cfc4985705fc7",
+      "scripts/test-relay-lifecycle-docker.ts": "3ac647b801d5ca0be8436de28e0b0a3d79b8ec9e0bd224b2d66a2f38848afa02",
       "src/app/api/internal/telemetry/route.ts": "839fb768dbc22a6619eef9aa7160c854cfb2676bd20df2161ab8c18e0f1c8a77",
       "src/core/telemetry/BroccoliTelemetryEngine.ts": "1b3ca676839e192702ccfcc93328d15823bfee3f9b1f1f7720e5ef2920e6fd9a",
       "src/core/telemetry/GalxMetricsEngine.ts": "2029c5ef71184396146838cf6426f78540eb4f70acf2d69249824b8c339afa31",
       "src/core/telemetry/GalxOTelExporter.ts": "ad50e22f598970df2142ad8e9b69c42a3be45d59f51dad5ff744bbeb82b96695",
-      "src/relay/admission-receipt-journal.ts": "a1495e679d4991bfca161f8289fb87e30c666b2682227f9edf6a8ad636cd66a2",
-      "src/relay/admission-receipts.ts": "d7ac206b8d26f9609eb88080e5221dac57c206e53f6458bfaa6e3171e1779c66",
+      "src/relay/admission-receipt-journal.ts": "fe1ca56660b6fe9b0f5e8c4e84a738f1cd0ece9f6d534973bec05b296bd8bbf7",
+      "src/relay/admission-receipts.ts": "fce1d8f18efa8e921addf18a55c4a0d0a5eac4c0015c7b20e188a9a67af5e605",
       "src/relay/capability-discovery.ts": "cde7d5599ff00a6db7573060284ec587ae1dd8b7376db23740c9903296533624",
       "src/relay/capability-registry.ts": "b3c916e46a6f95ce31f5a666f61da54580f21568aff2655edcd122d18f788599",
       "src/relay/completion-usage.ts": "f66f22fcffdbcf9fce8ff8f78b0c8aed95f2e1c7f5b9676039be12a7b153c1a5",
-      "src/relay/controller-progress.ts": "b5b96f957c4da7369c78283741155c17b61e35db89cae575c8ebf70b1cbfe69e",
+      "src/relay/controller-progress.ts": "efeac834cb0ce6521a63c09c2f953dfc15f34d5b4821fc54f6c0046b2c2728c7",
       "src/relay/desired-shards.ts": "bde5c33d51d5d203498e2664b4db62195c5cf13b32c9dbb6c72a3067cdff7473",
       "src/relay/desktop-credential-refresh.ts": "2e00af2b968ab0d8e9f10f4b7cce81ff700b51310a7e6a47375f0842371e4e16",
       "src/relay/desktop-credentials.ts": "cfa6601bb3aaea34399497da4c15e96adb95b867b775cc073e9d5c3062a5ce83",
@@ -392,11 +392,11 @@
       "src/relay/desktop-manager.ts": "31ebac3a4cfb312b3d23591df60b70b2367110c1c5bb2f69917e60a5cd886855",
       "src/relay/desktop-organization.ts": "c7810ea48555c9d7065c8ee9dc225eb47cdf6843e89ab2888796dc4a9e13a3b8",
       "src/relay/docker-command.ts": "bb0e5ae620376d30f990eb52b98456c3eb26258e65d976ec7fafc9861b90e9a8",
-      "src/relay/docker-mutation-journal.ts": "a510ea97d4a7cf0fee7a1b3ed4e5e274bd0f7a9e9296bdd2eb36e98fb382f55e",
-      "src/relay/docker-shard-driver.ts": "66fcda2b4ce7017150837fc3829b104969f5f5abc56becdc0560673bc5ff3b94",
-      "src/relay/durable-receipts.ts": "4f6554ff380556c0dcfe44d47dc40e3e10aaba1d3183f5807d227b7e56693fed",
+      "src/relay/docker-mutation-journal.ts": "856709ea1120166f8b1f062d2df860ed92d9ef585058b9553984c2c57aa2a4b4",
+      "src/relay/docker-shard-driver.ts": "7b410dc638b3177a24484fb2ec23abedb8b38d2aa940c15e25667f174e4ab2e3",
+      "src/relay/durable-receipts.ts": "2fbb4df6a94d1077150ab8247cc58a6beab2d2984fc6f21d699e7d48ff147a35",
       "src/relay/federation-http-policy.ts": "4ee18420fa7f3220004033886242a6127cd8dd27186b50ba6546c21155ed8f5a",
-      "src/relay/federation-lifecycle.ts": "f552497e71134dd8c146b5a39b4fab933ec9a1849b87b10b4ed24a5db76548f5",
+      "src/relay/federation-lifecycle.ts": "7943f2f3dd1fd243ed2e08b413ff247bc09b0eee575d912fffef5e6773ecdc45",
       "src/relay/federation-server.ts": "e1dc2db0f72ff6b75115a03a018500fd2c4f5484f7868ba9c44dedaf8283102a",
       "src/relay/federation-telemetry.ts": "e350ed4cd63593d7ed94828792cce0d547151353c31c4afe9488320a8e12afe9",
       "src/relay/fixture-credential-cleanup.ts": "c84d1beaaa3c9e90ef81707f0a3adc90c6a3053007e14df844240b85f6aa6afc",
@@ -1182,12 +1182,12 @@
     }
   },
   "client-efficiency": {
-    "reviewer": "Codex",
-    "note": "Reviewed shared allowance provider lifecycle, owner fencing, one trailing refresh, composer stop states and keyboard guards, preserved drafts and viewport sizing. Browser widths 1440/390/320 and 668 compiled assets passed; no field performance or live cleanliness claim.",
+    "reviewer": "relay maintainer",
+    "note": "Reviewed the committed bounded browser and SDK retry contract and explicit unknown/accepted no-replay behavior against the private acceptance audit.",
     "reviewed_at": "2026-09-14",
     "review_by": "2026-09-20",
     "evidence": {
-      "docs/knowledge/audits/2026-09-14-free-admission-gate.json": "311848419564b9b9050da6d82cbca26f0229f2d8a17a8220d1c1c6d83d129e97"
+      "post-mortem/incidents/2026/2026-09-13-image-generation/recovery-acceptance-audit-20260914.json": "3ad01fb443d8fb7a2bdb4c0b3e45556806219598cc2ce93732d91274db32afd3"
     },
     "files": {
       "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md": "ef866a86e704126bafa511a94e04893e3c23571789bd1aadba977f58a42c4429",
@@ -1274,7 +1274,7 @@
       "src/lib/images/navigation.ts": "827b7f91ef06422452aa03f66721e866be9755399c4514393230ce4fdcfc8e5c",
       "src/lib/public-content/content.ts": "2ff7c827bd40c9dcd7ebbcfb0fcb6ca9c72e0dd7d90cda1317fcc6a6092f6fe2",
       "src/lib/public-content/routes.ts": "4fc0e78c5faa3d9e6005416d03e03232744536ade21452338aff44caf8582bd3",
-      "src/lib/resilience/ResilientClient.ts": "e223d69fbcc370ea4fa1bbd19897060e6be1e992f6e6f9a62599d9c603f50d6a",
+      "src/lib/resilience/ResilientClient.ts": "c69f29741d62b5840162de4f67f8507f996d81f43bfec5b2c372a20beeb15822",
       "src/lib/resilience/activity-polling.ts": "8018eef80ba6c49a401721f3607aef14aaa773bac1c1f108bc55f99f4b0fac7a",
       "src/lib/resilience/intent-prefetch.ts": "62757c1efa0eac5edf811d322fc30608852a3277669be87a2ae9fe63fd3e9c19",
       "src/lib/seo/metadata.ts": "cacce49c9f6890b89abeb545f0fda395fc8c4afa29900f2aa5753cc225951fd0",

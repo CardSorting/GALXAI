@@ -677,3 +677,31 @@ Incident: `INC-20260913-IMAGES`. Kind: `verification`.
 **Next step:** Keep ACT-018 open for host reboot, Docker-daemon restart/delayed startup, retained-state restoration and full/read-only storage drills; complete reviewed legacy-marker rollout before production adoption.
 
 Evidence: [controller-recovery-verification-20260914.json](incidents/2026/2026-09-13-image-generation/controller-recovery-verification-20260914.json).
+
+## EVT-20260914-controller-acceptance-audit — 2026-09-14T18:49:15Z
+
+Incident: `INC-20260913-IMAGES`. Kind: `verification`.
+
+**Observation:** The recovery release-candidate audit reconciled the reviewed dirty checkout with the running host and Docker deployment before further changes.
+
+**Action:** Inspected the current revision, launchd job, process command, private state directory, Docker context/server, live-restore setting, retained worker policy and image digest; generated a disposable guardian plist; ran the 42-test relay/recovery matrix, 14 guardian drills, 154 capability/lifecycle tests, the launcher drill, TypeScript, lint, and a unique-namespace real Docker canary.
+
+**Result:** The focused implementation passed its fixture matrix and the canary migrated a retained worker from unless-stopped to no before admission. The installed launchd job is still the pre-patch direct wrapper with a legacy marker, and the running federation worker still uses unless-stopped; the reviewed guardian is not deployed or boot-verified. Docker daemon outage, host reboot, storage fault, retained deployed-state restoration, exhausted-budget recovery and production rollout were not run.
+
+**Next step:** Keep ACT-018 open for individually recorded isolated dependency/storage drills and ACT-019 open for state-compatible guardian rollout, retained-policy migration and observed recovery.
+
+Evidence: [recovery-acceptance-audit-20260914.json](incidents/2026/2026-09-13-image-generation/recovery-acceptance-audit-20260914.json).
+
+## EVT-20260914-recovery-replay-contract — 2026-09-14T18:49:15Z
+
+Incident: `INC-20260913-IMAGES`. Kind: `verification`.
+
+**Observation:** Receipt retention and client retry paths were tightened so expiration does not silently authorize an old request as new work.
+
+**Action:** Converted expired completed and known-not-started evidence to permanent unknown tombstones; added older-snapshot restoration coverage; limited Node SDK mutation retries to caller-owned stable identity; preserved unknown/accepted classifications through SDK fallback and browser resilient fetch.
+
+**Result:** Admission, durable receipt and client recovery regressions passed. Unknown evidence remains retained and capacity fails closed; browser and SDK tests made one call for ambiguous outcomes and only a stable-key transport failure retried once. This is local fixture evidence, not deployed client-path acceptance.
+
+**Next step:** Retain the contract in the isolated ACT-018 matrix and verify frontend, gateway and worker behavior after the guardian deployment is aligned.
+
+Evidence: [test-relay-admission-durability.ts](../scripts/test-relay-admission-durability.ts), [test-relay-durable-receipts.ts](../scripts/test-relay-durable-receipts.ts), [test-client-recovery.ts](../scripts/test-client-recovery.ts), [recovery-acceptance-audit-20260914.json](incidents/2026/2026-09-13-image-generation/recovery-acceptance-audit-20260914.json).

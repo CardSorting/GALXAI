@@ -14,6 +14,9 @@ export class GalxError extends Error {
   readonly errorDetails?: any;
   readonly headers?: Headers | Record<string, string>;
   readonly requestId?: string;
+  /** Relay recovery classification. Ambiguous/accepted work must not be replayed. */
+  readonly executionState?: 'unknown' | 'accepted' | 'not_accepted';
+  readonly shouldRetry?: boolean;
 
   constructor(
     message: string,
@@ -70,36 +73,63 @@ export class APIError extends GalxError {
       retryAfter = parseRetryAfter(retryHeader);
     }
 
+    let error: APIError;
     switch (statusCode) {
       case 400:
-        return new BadRequestError(message, data?.error?.param, suggestedFix, headers);
+        error = new BadRequestError(message, data?.error?.param, suggestedFix, headers); break;
       case 401:
-        return new AuthenticationError(message, suggestedFix, headers);
+        error = new AuthenticationError(message, suggestedFix, headers); break;
       case 402:
-        return new PaymentRequiredError(message, suggestedFix, headers);
+        error = new PaymentRequiredError(message, suggestedFix, headers); break;
       case 403:
-        return new PermissionDeniedError(message, suggestedFix, headers);
+        error = new PermissionDeniedError(message, suggestedFix, headers); break;
       case 404:
-        return new NotFoundError(message, suggestedFix, headers);
+        error = new NotFoundError(message, suggestedFix, headers); break;
       case 409:
-        return new ConflictError(message, suggestedFix, headers);
+        error = new ConflictError(message, suggestedFix, headers); break;
       case 422:
-        return new UnprocessableEntityError(message, data?.error?.param, suggestedFix, headers);
+        error = new UnprocessableEntityError(message, data?.error?.param, suggestedFix, headers); break;
       case 429:
-        return new RateLimitError(message, retryAfter ?? data?.retry_after, suggestedFix, headers);
+        error = new RateLimitError(message, retryAfter ?? data?.retry_after, suggestedFix, headers); break;
       case 502:
-        return new BadGatewayError(message, suggestedFix, headers);
+        error = new BadGatewayError(message, suggestedFix, headers); break;
       case 503:
-        return new ServiceUnavailableError(message, suggestedFix, headers);
+        error = new ServiceUnavailableError(message, suggestedFix, headers); break;
       case 504:
-        return new GatewayTimeoutError(message, suggestedFix, headers);
+        error = new GatewayTimeoutError(message, suggestedFix, headers); break;
       default:
         if (statusCode >= 500) {
-          return new InternalServerError(message, statusCode, suggestedFix, headers);
+          error = new InternalServerError(message, statusCode, suggestedFix, headers);
+          break;
         }
-        return new APIError(message, statusCode, code, data, suggestedFix, headers);
+        error = new APIError(message, statusCode, code, data, suggestedFix, headers);
+        break;
     }
+    const executionState = data?.error?.execution_state;
+    const header = typeof (headers as any)?.get === 'function'
+      ? (headers as Headers).get('x-should-retry')
+      : Object.entries((headers ?? {}) as Record<string, string>).find(([key]) => key.toLowerCase() === 'x-should-retry')?.[1];
+    Object.assign(error, {
+      executionState: ['unknown', 'accepted', 'not_accepted'].includes(executionState) ? executionState : undefined,
+      // Ambiguous or already accepted work is never safe to replay, even if a
+      // gateway omitted the explicit veto header.
+      shouldRetry: executionState === 'unknown' || executionState === 'accepted'
+        ? false : header === 'true' ? true : header === 'false' ? false : undefined,
+    });
+    return error;
   }
+}
+
+/** True when the response identifies work that must be inspected rather than replayed. */
+export function isNonReplayableError(error: unknown): boolean {
+  const value = error as { executionState?: string; shouldRetry?: boolean; headers?: Headers | Record<string, string> } | null;
+  if (!value) return false;
+  if (value.executionState === 'unknown' || value.executionState === 'accepted' || value.shouldRetry === false) return true;
+  const headers = value.headers;
+  const retry = typeof (headers as any)?.get === 'function'
+    ? (headers as Headers).get('x-should-retry')
+    : Object.entries((headers ?? {}) as Record<string, string>).find(([key]) => key.toLowerCase() === 'x-should-retry')?.[1];
+  return retry === 'false';
 }
 
 export class BadRequestError extends APIError {

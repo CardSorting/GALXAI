@@ -43,11 +43,12 @@ export class DockerShardDriver implements RelayDriver {
     return { inferenceKey: key('inference'), adminKey: key('admin') };
   }
   private name(shardId: string) { return `galx-shard-${createHash('sha256').update(shardId).digest('hex').slice(0, 20)}`; }
-  private readonly inspectFormat = '{{json .Name}}\t{{json .Config.Labels}}\t{{json .NetworkSettings.Ports}}\t{{.State.Running}}\t{{.State.StartedAt}}\t{{.Id}}';
+  private readonly inspectFormat = '{{json .Name}}\t{{json .Config.Labels}}\t{{json .NetworkSettings.Ports}}\t{{.State.Running}}\t{{.HostConfig.RestartPolicy.Name}}\t{{.State.StartedAt}}\t{{.Id}}';
   private parseContainer(output: string): RelayHandle {
     // Only non-secret fields; Config.Env never leaves Docker.
-    const [rawName, rawLabels, rawPorts, running, startedAt, containerId] = output.split('\t');
+    const [rawName, rawLabels, rawPorts, running, restartPolicy, startedAt, containerId] = output.split('\t');
     if (!/^[a-f0-9]{64}$/.test(containerId)) throw new Error('Invalid immutable container identity');
+    if (!['no', 'always', 'unless-stopped', 'on-failure'].includes(restartPolicy)) throw new Error('Invalid Docker restart policy');
     const id = String(JSON.parse(rawName)).replace(/^\//, '');
     const labels = JSON.parse(rawLabels);
     if (labels[this.label] !== this.options.namespace) throw new Error('Refusing foreign container ownership');
@@ -58,7 +59,7 @@ export class DockerShardDriver implements RelayDriver {
     const containerGeneration = labels['io.galx.generation'];
     const generation = `${containerGeneration}@${startedAt}`;
     if (id !== this.name(shardId)) throw new Error('Managed relay name does not match shard ownership');
-    return { id, containerId, shardId, generation, credentialRevision: labels['io.galx.credential-revision'],
+    return { id, shardId, containerId, restartPolicy, generation, credentialRevision: labels['io.galx.credential-revision'],
       running: running === 'true', endpoint: `http://127.0.0.1:${port || 1}`, ...this.keys(id, containerGeneration) };
   }
   private async inspectContainer(id: string): Promise<RelayHandle> {
@@ -74,11 +75,32 @@ export class DockerShardDriver implements RelayDriver {
     for (const entry of this.mutations.pending()) {
       const found = result.find(handle => entry.action === 'run' ? handle.id === entry.target : handle.containerId === entry.target);
       const resolved = entry.action === 'run' ? found?.generation.split('@')[0] === entry.generation
-        : entry.action === 'stop' ? !found || found.running === false : !found;
+        : entry.action === 'stop' ? !found || found.running === false
+          : entry.action === 'rm' ? !found
+            : !found || (found.containerId === entry.target && found.generation === entry.generation && found.restartPolicy === 'no');
       if (resolved) this.mutations.complete(entry);
       else this.options.onDiagnostic?.({ code: 'docker_mutation_uncertain', stage: `docker_${entry.action}`, shardId: entry.shardId });
     }
-    return result;
+    const reconciled: RelayHandle[] = [];
+    for (const handle of result) {
+      if (handle.restartPolicy === 'no') { reconciled.push(handle); continue; }
+      // Existing containers may have been created by the legacy Docker
+      // restart policy. Convert them before admitting them to this controller;
+      // otherwise Docker and lifecycle reconciliation would both restart one
+      // resource. The immutable ID and generation fence make this migration
+      // safe across name reuse and delayed daemon responses.
+      const target = handle.containerId;
+      if (!target) throw new DockerMutationError('docker_mutation_uncertain');
+      const mutation = this.mutations.begin({ shardId: handle.shardId, action: 'policy', target, generation: handle.generation });
+      await this.docker(['update', '--restart', 'no', target]);
+      const updated = await this.inspectContainer(target);
+      if (updated.containerId !== target || updated.generation !== handle.generation || updated.restartPolicy !== 'no') {
+        throw new DockerMutationError('docker_mutation_uncertain');
+      }
+      this.mutations.complete(mutation);
+      reconciled.push(updated);
+    }
+    return reconciled;
   }
   async start(shard: DesiredShard): Promise<RelayHandle> {
     this.mutations.assertClear(shard.id);

@@ -19,13 +19,19 @@ export class GalxError extends Error {
   public status?: number;
   public code?: string;
   public isRetryable: boolean;
+  /** Relay execution classification. Unknown/accepted work must not be replayed. */
+  public executionState?: 'unknown' | 'accepted' | 'not_accepted';
+  public shouldRetry?: boolean;
 
-  constructor(message: string, options?: { status?: number; code?: string; isRetryable?: boolean }) {
+  constructor(message: string, options?: { status?: number; code?: string; isRetryable?: boolean;
+    executionState?: 'unknown' | 'accepted' | 'not_accepted'; shouldRetry?: boolean }) {
     super(message);
     this.name = 'GalxError';
     this.status = options?.status;
     this.code = options?.code;
     this.isRetryable = options?.isRetryable ?? false;
+    this.executionState = options?.executionState;
+    this.shouldRetry = options?.shouldRetry;
   }
 }
 
@@ -104,6 +110,24 @@ export async function safeJsonParse<T = any>(res: Response): Promise<{ data: T |
   } catch {
     // If response is HTML (e.g. 502 Bad Gateway or 504 Gateway Timeout), capture text cleanly
     return { data: null, rawText: 'Non-JSON server response or HTML error page', isJson: false };
+  }
+}
+
+/** Read only the public recovery fields from an error response without consuming the caller's body. */
+async function readRecoveryClassification(res: Response): Promise<{
+  executionState?: 'unknown' | 'accepted' | 'not_accepted';
+  shouldRetry?: boolean;
+}> {
+  const header = res.headers.get('x-should-retry');
+  const shouldRetry = header === 'true' ? true : header === 'false' ? false : undefined;
+  try {
+    const parsed = await safeJsonParse<{ error?: { execution_state?: unknown } }>(res.clone());
+    const state = parsed.data?.error?.execution_state;
+    const executionState = ['unknown', 'accepted', 'not_accepted'].includes(String(state))
+      ? state as 'unknown' | 'accepted' | 'not_accepted' : undefined;
+    return { executionState, shouldRetry: executionState === 'unknown' || executionState === 'accepted' ? false : shouldRetry };
+  } catch {
+    return { shouldRetry };
   }
 }
 
@@ -296,6 +320,7 @@ async function executeResilientFetch<T = any>(
         headers,
         signal: mergedSignal,
       });
+      const recovery = !res.ok ? await readRecoveryClassification(res) : {};
 
       // Handle 401 / 403 permanent auth failures
       if (res.status === 401 || res.status === 403) {
@@ -303,9 +328,12 @@ async function executeResilientFetch<T = any>(
         throw new GalxAuthError(`Authentication failure (${res.status}) on ${url}`);
       }
 
-      if (!res.ok && res.headers.get('x-should-retry') === 'false') {
+      const noReplay = recovery.shouldRetry === false
+        || recovery.executionState === 'unknown' || recovery.executionState === 'accepted';
+      if (!res.ok && noReplay) {
         await res.body?.cancel();
-        throw new GalxError('This request cannot be retried automatically.', { status: res.status });
+        throw new GalxError('This request cannot be retried automatically.', { status: res.status,
+          executionState: recovery.executionState, shouldRetry: false });
       }
 
       // Handle 429 Rate Limiting
@@ -323,6 +351,8 @@ async function executeResilientFetch<T = any>(
         throw new GalxError(`Request failed (HTTP ${res.status}).`, {
           status: res.status,
           isRetryable: true,
+          executionState: recovery.executionState,
+          shouldRetry: recovery.shouldRetry,
         });
       }
 

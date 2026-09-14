@@ -17,7 +17,8 @@ const hash = (v: string) => createHash('sha256').update(v).digest('hex');
 
 /** Private per-worker durable evidence, independently retrievable after restart.
  * DELETE journal deliberately avoids the affected SQLite WAL-reset versions.
- * One fenced writer, bounded capacity, full synchronization, no expiry of unknowns.
+ * One fenced writer, bounded capacity, full synchronization, no expiry of
+ * unknowns. Expired terminal evidence is retained as an unknown tombstone.
  */
 export class DurableReceipts {
   private readonly db: Database;
@@ -67,11 +68,17 @@ export class DurableReceipts {
   }
   private writer() { check(this.db.prepare('SELECT epoch FROM authority WHERE id=1').get()?.epoch === this.epoch, 'receipt_writer_fenced'); }
   verifyReady(): void { this.tx(() => this.writer()); }
+  private retainExpiredEvidence(): void {
+    // Forgetting a completed or known-not-started row would make a late retry
+    // indistinguishable from new work. Keep its request identity/fingerprint,
+    // discard the output, and make the outcome permanently uncertain instead.
+    this.db.prepare("UPDATE receipts SET phase='unknown', outcome=NULL, outcome_hash=NULL, retained_until=NULL WHERE retained_until IS NOT NULL AND retained_until <= ? AND phase IN ('completed','not_started')").run(this.now());
+  }
   reserve(id: string, tenant: string, fingerprint: string): void {
     check(/^[\w-]{1,128}$/.test(id) && /^[a-f0-9]{64}$/.test(tenant) && /^[a-f0-9]{64}$/.test(fingerprint), 'invalid_receipt_identity');
     this.tx(() => {
       this.writer();
-      this.db.prepare('DELETE FROM receipts WHERE retained_until IS NOT NULL AND retained_until < ?').run(this.now());
+      this.retainExpiredEvidence();
       const old = this.db.prepare('SELECT fingerprint FROM receipts WHERE id=? AND tenant=?').get(id, tenant);
       if (old) { check(old.fingerprint === fingerprint, 'receipt_conflict'); return; }
       check(this.db.prepare('SELECT count(*) AS n FROM receipts').get().n < this.capacity, 'receipt_capacity_exhausted');
@@ -101,20 +108,23 @@ export class DurableReceipts {
     });
   }
   lookup(id: string, tenant: string): DurableReceipt | null {
-    check(!this.closed);
-    const row = this.db.prepare('SELECT phase,outcome,outcome_hash,retained_until FROM receipts WHERE id=? AND tenant=?').get(id, tenant);
-    if (!row || (row.retained_until !== null && row.retained_until < this.now())) return null;
-    let outcome = { output: null as string | null, usage: null as CompletionUsage | null };
-    if (row.phase === 'completed') {
-      check(typeof row.outcome === 'string' && hash(row.outcome) === row.outcome_hash, 'receipt_integrity_failed');
-      const parsed = JSON.parse(row.outcome);
-      check(parsed.output === null || (typeof parsed.output === 'string' && Buffer.byteLength(parsed.output) <= 12000));
-      const usage = parsed.usage && completionUsage({ status: 'completed', usage: { input_tokens: parsed.usage.prompt_tokens, output_tokens: parsed.usage.completion_tokens, total_tokens: parsed.usage.total_tokens } });
-      check(!parsed.usage || usage, 'receipt_integrity_failed');
-      outcome = { output: parsed.output, usage: usage ?? null };
-    }
-    return { id, status: row.phase === 'queued' || row.phase === 'running' ? 'pending' : row.phase,
-      output: outcome.output, usage: outcome.usage, retainedUntil: row.retained_until };
+    return this.tx(() => {
+      this.writer();
+      this.retainExpiredEvidence();
+      const row = this.db.prepare('SELECT phase,outcome,outcome_hash,retained_until FROM receipts WHERE id=? AND tenant=?').get(id, tenant);
+      if (!row) return null;
+      let outcome = { output: null as string | null, usage: null as CompletionUsage | null };
+      if (row.phase === 'completed') {
+        check(typeof row.outcome === 'string' && hash(row.outcome) === row.outcome_hash, 'receipt_integrity_failed');
+        const parsed = JSON.parse(row.outcome);
+        check(parsed.output === null || (typeof parsed.output === 'string' && Buffer.byteLength(parsed.output) <= 12000));
+        const usage = parsed.usage && completionUsage({ status: 'completed', usage: { input_tokens: parsed.usage.prompt_tokens, output_tokens: parsed.usage.completion_tokens, total_tokens: parsed.usage.total_tokens } });
+        check(!parsed.usage || usage, 'receipt_integrity_failed');
+        outcome = { output: parsed.output, usage: usage ?? null };
+      }
+      return { id, status: row.phase === 'queued' || row.phase === 'running' ? 'pending' : row.phase,
+        output: outcome.output, usage: outcome.usage, retainedUntil: row.retained_until };
+    });
   }
   close() { if (!this.closed) { this.db.close(); this.closed = true; } }
 }

@@ -167,7 +167,7 @@ export class GalxAIClientCore {
     const url = `${this.baseURL}${path.startsWith('/') ? path : `/${path}`}`;
     const method = options.method || 'GET';
     const timeoutMs = options.timeoutMs ?? options.timeout ?? this.timeoutMs;
-    const maxRetries = options.maxRetries ?? options.max_retries ?? this.maxRetries;
+    const requestedMaxRetries = options.maxRetries ?? options.max_retries ?? this.maxRetries;
     const startTime = Date.now();
 
     const headers: Record<string, string> = {
@@ -185,6 +185,13 @@ export class GalxAIClientCore {
     if (idempotencyKey) {
       headers['Idempotency-Key'] = idempotencyKey;
     }
+    const explicitIdempotencyKey = idempotencyKey || Object.entries(headers)
+      .find(([name, value]) => name.toLowerCase() === 'idempotency-key' && typeof value === 'string' && value.length > 0)?.[1];
+    // A transport error after a mutation may mean that the provider already
+    // executed it. Automatic mutation retries require caller-supplied stable
+    // identity; reads retain the normal retry budget.
+    const maxRetries = ['GET', 'HEAD'].includes(method.toUpperCase()) || !!explicitIdempotencyKey
+      ? requestedMaxRetries : 0;
 
     // Middleware onRequest Hook
     const requestCtx = {
@@ -394,6 +401,15 @@ export class GalxAIClientCore {
       } catch {}
     }
 
+    const executionState = errorData?.error?.execution_state;
+    const noReplay = res.headers.get('x-should-retry') === 'false'
+      || executionState === 'unknown' || executionState === 'accepted';
+    if (noReplay) {
+      // Preserve the relay's safety classification on the typed error so
+      // model fallback helpers cannot turn it into a fresh request.
+      throw APIError.fromResponse(res.status, errorData, res.headers);
+    }
+
     // Retryable status codes (408, 429, 500, 502, 503, 504)
     if ([408, 429, 500, 502, 503, 504].includes(res.status) && attempt <= maxRetries) {
       const retryHeader = res.headers.get('retry-after') || res.headers.get('retry-after-ms');
@@ -486,6 +502,9 @@ export class GalxAIClientCore {
     if (this.apiKey) {
       headers['Authorization'] = `Bearer ${this.apiKey}`;
     }
+    const idempotencyKey = options.idempotencyKey || options.idempotency_key
+      || Object.entries(options.headers ?? {}).find(([name, value]) => name.toLowerCase() === 'idempotency-key' && value)?.[1];
+    if (idempotencyKey) headers['Idempotency-Key'] = idempotencyKey;
 
     if (options.signal?.aborted) {
       throw new UserAbortError();

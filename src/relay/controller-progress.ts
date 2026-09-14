@@ -13,7 +13,7 @@ export function controllerCommandCleanupUnproven(): void {
 
 export function controllerOperationEvent(event: 'operation_start' | 'operation_end', id: string, stage: string, timeoutMs: number): void {
   if (progressFd === undefined) return;
-  if (!/^[a-zA-Z0-9-]{1,64}$/.test(id) || !['docker_ps', 'docker_inspect', 'docker_run', 'docker_stop', 'docker_rm'].includes(stage)) return;
+  if (!/^[a-zA-Z0-9-]{1,64}$/.test(id) || !['docker_ps', 'docker_inspect', 'docker_run', 'docker_update', 'docker_stop', 'docker_rm'].includes(stage)) return;
   try { fs.writeSync(progressFd, JSON.stringify({ event, id, stage, timeoutMs }) + '\n'); }
   catch { process.exit(1); }
 }

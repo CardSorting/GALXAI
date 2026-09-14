@@ -6,7 +6,9 @@ import { RequestError } from './request-policy.js';
 export interface AdmissionEvidence { id: string; fingerprint: string; expires: number; state: 'pending' | 'complete' | 'unknown'; }
 
 /** Bounded private tombstones; never persists prompts, credentials or image bodies.
- * Pending at process loss is uncertain. A lost response is never permission to dispatch again.
+ * Pending at process loss is uncertain. A completed response-cache expiry is
+ * also converted to an unknown identity tombstone. A lost response is never
+ * permission to dispatch again.
  */
 export class AdmissionReceiptJournal {
   private poisoned = false;

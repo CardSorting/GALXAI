@@ -17,9 +17,12 @@ FIXTURE = r'''
 const fs = require('node:fs');
 const fd = Number(process.env.GALX_CONTROLLER_PROGRESS_FD);
 const stageStartedAt = Date.now();
-const beat = () => { try { fs.writeSync(fd, JSON.stringify({event:'heartbeat',stage:process.env.FIXTURE_STAGE || 'idle',stageStartedAt})+'\n'); } catch { process.exit(1); } };
+const life = process.env.FIXTURE_LIFE_FILE;
+const beat = () => { try { fs.writeSync(fd, JSON.stringify({event:'heartbeat',stage:process.env.FIXTURE_STAGE || 'idle',stageStartedAt})+'\n'); if(life) fs.writeFileSync(life,String(Date.now())); } catch { process.exit(1); } };
 beat();
+if(process.env.FIXTURE_OPERATION === '1') fs.writeSync(fd, JSON.stringify({event:'operation_start',id:'outstanding-op',stage:'docker_ps',timeoutMs:5000})+'\n');
 if(process.env.FIXTURE_CLEANUP_UNPROVEN === '1') fs.writeSync(fd, JSON.stringify({event:'command_cleanup_unproven'})+'\n');
+if(process.env.FIXTURE_OPERATION_STALL === '1') { fs.writeSync(fd, JSON.stringify({event:'operation_start',id:'docker-run-fixture',stage:'docker_run',timeoutMs:1000})+'\n'); while(true) {} }
 if(process.env.FIXTURE_HANG === '1') while(true) {}
 setInterval(beat, 50);
 '''
@@ -90,6 +93,39 @@ class GuardianDrills(unittest.TestCase):
     def test_event_loop_stall_is_terminated_before_replacement(self):
         p,log=self.start(FIXTURE_HANG='1'); self.event(log,'event_loop_stalled');p.wait(timeout=3)
         self.event(log,'authority_ended');q,ql=self.start();self.event(ql,'authority_established')
+
+    def test_guardian_death_keeps_authority_fenced_until_controller_exits(self):
+        life=self.directory/'controller-life';p,log=self.start(FIXTURE_LIFE_FILE=str(life));owner=self.event(log,'authority_established')['pid']
+        time.sleep(0.15);before=life.read_text()
+        os.kill(p.pid, signal.SIGKILL);p.wait(timeout=2)
+        # The controller inherited the guard descriptor. A replacement may not
+        # take authority merely because the guardian disappeared. It remains
+        # alive briefly, then the closed progress pipe makes it retire itself.
+        os.kill(owner, 0)
+        end=time.monotonic()+3;last=life.read_text();stable_since=None
+        while time.monotonic()<end:
+            current=life.read_text() if life.exists() else last
+            if current != last: last=current;stable_since=None
+            elif stable_since is None: stable_since=time.monotonic()
+            elif time.monotonic()-stable_since >= 0.2: break
+            time.sleep(0.05)
+        else: self.fail('controller kept writing after guardian death')
+        q,ql=self.start();self.event(ql,'authority_established');q.terminate();q.wait(timeout=3)
+
+    def test_outstanding_docker_operation_is_reported_before_controller_fencing(self):
+        p,log=self.start(FIXTURE_OPERATION_STALL='1');event=self.event(log,'event_loop_stalled');p.wait(timeout=3)
+        self.assertEqual(event['operations'], [{'stage':'docker_run','deadlineMs':1000}])
+        self.event(log,'authority_ended')
+
+    def test_duplicate_guardian_cannot_take_over_outstanding_operation(self):
+        # Keep the operation outstanding while the original guardian is alive.
+        # A contender must fail closed; handover is only possible after the
+        # original guardian has ended the controller and its process group.
+        p,log=self.start(FIXTURE_OPERATION='1');self.event(log,'authority_established')
+        q,ql=self.start();self.event(ql,'ownership_wait_exceeded');q.wait(timeout=2)
+        self.assertFalse(any(e['code']=='authority_established' for e in self.events(ql)))
+        p.terminate();p.wait(timeout=3);self.event(log,'authority_ended')
+        r,rl=self.start();self.event(rl,'authority_established');r.terminate();r.wait(timeout=3)
 
     def test_live_but_stalled_reconciliation_is_distinct(self):
         p,log=self.start(FIXTURE_STAGE='reconcile');self.event(log,'controller_progress_stalled');p.wait(timeout=3)
