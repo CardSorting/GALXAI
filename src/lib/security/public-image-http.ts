@@ -1,7 +1,8 @@
 import type { PublicImageArtifact } from './image-artifact';
 
-export type PublicImageErrorCode = 'free_generation_paused' | 'free_generation_busy' | 'free_quota_exhausted' | 'invalid_request' | 'unauthorized' | 'rate_limited' | 'generation_failed' | 'unsupported_input' | 'timeout' | 'temporarily_unavailable' | 'not_found' | 'idempotency_conflict';
+export type PublicImageErrorCode = 'generation_not_started' | 'free_generation_paused' | 'free_generation_busy' | 'free_quota_exhausted' | 'invalid_request' | 'unauthorized' | 'rate_limited' | 'generation_failed' | 'unsupported_input' | 'timeout' | 'temporarily_unavailable' | 'not_found' | 'idempotency_conflict';
 const errors: Record<PublicImageErrorCode, { status: number; message: string }> = {
+  generation_not_started: { status: 503, message: 'Your image generation did not start. Please try again shortly.' },
   free_generation_paused: { status: 429, message: 'Free image creation is temporarily paused. Your quota has not been used. Try later or explore Pro.' },
   free_generation_busy: { status: 429, message: 'Free image creation is busy. Your quota has not been used. Try again later.' },
   free_quota_exhausted: { status: 402, message: 'Your free image generation quota is used up. Upgrade to Pro to keep creating.' },

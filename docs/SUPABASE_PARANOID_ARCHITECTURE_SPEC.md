@@ -16,6 +16,12 @@ Use explicit privileges and owner/tenant predicates with RLS appropriate to each
 
 Financial, audit and accepted-operation state must commit atomically at their defined boundary. Image receipts commit before async acknowledgement, claims arbitrate dispatch, and success requires owned committed assets. Favorites commit before acknowledgement. Keep record identity across uncertainty rather than manufacturing success from local memory. Native session creation, lookup, rotation and revocation and device-grant approval/polling require authoritative results. No cache may restore a denied/revoked session or acknowledge a failed write. Native account provenance and previous-token grace are enforced in the authentication engine; [workspace auth](operations/workspace-auth.md) owns the source contract and rollout limitations.
 
+## Optional admission policy projection
+
+`galx_shard_accounts.sliding_window_quota = {}` means no optional sliding window is configured. The repository projects only this empty object as absent; nonempty policies retain their configured limits and fail closed when malformed. Local candidate selection excludes expired credentials before scoring; durable lease admission still enforces permissions, expiry, quotas, concurrency and fencing. Do not repair projection bugs by altering production limits or restoring revoked entries.
+
+Image receipt failures retain a minimal `failureCode` in their existing private JSON payload only for proven non-start. No schema migration or privilege change is needed; compatible older readers treat it as generic failure. Owner checks and atomic usage release remain in the same statement.
+
 ## Migrations, tests and evidence
 
 Migration and rollback files are reviewed together. Additive schema may be retained during application rollback; populated records can make destructive rollback intentionally unavailable. Read current CLI help, verify the intended target/pending list, preserve vault configuration and apply only the reviewed set.

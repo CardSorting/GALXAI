@@ -9,7 +9,7 @@ Use this for Images, Favorites, async generation and download failures. Start wi
 | Expired-session error on a signed-in account | Auth result vs transport failure; public Auth configuration type | Verify with the dedicated Auth client; retain 401 for rejected tokens and 503 for temporary verification failure |
 | POST 202 followed by missing status | Exact deployment, applied image migration, owner and receipt ID | Confirm the durable repository is serving both POST and GET; do not recreate the generation |
 | Free quota denied or appears stale | Server account allowance, original receipt state and release evidence | Follow [quota operations](../../docs/maintainers/FREE_GENERATION_QUOTA.md); refresh the counter and preserve unknown execution deductions |
-| Request fails immediately | Storage configuration and generation-service reachability | Repair the failing dependency; a stored failure does not authorize replay |
+| Request fails immediately | Correlated admission category, optional quota projection, credential expiry, storage and service reachability | An explicit `generation_not_started` result permits a new manual attempt; generic failure stays uncertain. Empty optional quota objects must project as absent; do not reset counters, grant permissions or mark expired credentials healthy. |
 | Request remains pending | Receipt claim/deadline and correlated execution evidence | Read the original receipt; inspect the library for completed assets before a new submission |
 | Download or library unavailable | Owner-scoped asset row, object existence, sanitized artifact delivery | Repair delivery separately from synthesis; do not regenerate an existing image |
 | Large library or preview stalls | Bounded page RPC/index deployment, query selectivity, cache/processing admission and storage read limits | Use the [scale guide](../../docs/maintainers/image-library-scale.md); retry retrieval, never silently return partial hot history or regenerate |
@@ -24,6 +24,8 @@ Use [database operations](../../docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB
 The quota migration must also precede dependent image handlers. Its rollback retains grants and usage; stop new free admission by rolling back the application, never by deleting allowance records.
 
 Run `npm run test:free-quota`, `npm run test:free-quota:db`, `npm run test:image:security`, `npm run test:image:db`, `npm run test:developer-preview`, and a production build for image/auth/persistence changes. Run BroccoliDB hardening when its write path changes. For library/thumbnail changes also run `npm run test:image:scale` and `npm run test:image:library-db`, plus the controlled large-library browser fixture. The database runner uses an isolated disposable fixture, never production data. Record actual totals and failures in the incident, not permanent test counts in this guide.
+
+The studio preserves a bounded collection of receipt IDs across reload and navigation. Recover request uses the saved exact POST key and payload after an acknowledgement loss. Check status/Resume updates only retrieves accepted work. Transient status failures must not remove receipts; known non-start failures stop observation and provide a short manual retry cooldown. Inspect private logs to correlate historical generic failures; do not rewrite old receipts solely from a library page being empty.
 
 ## Live acceptance
 

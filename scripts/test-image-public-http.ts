@@ -179,6 +179,13 @@ test('raw image HTTP boundary: success, compatibility, errors, async and adversa
       task.output_format = 'jpeg'; await inspectArtifact(await fetch(origin), 'jpeg');
       task.output_format = undefined;
       task.state = 'failed'; await checkError(await fetch(origin), 502, 'generation_failed');
+      task.failure_code = 'generation_not_started';
+      await checkError(await fetch(origin), 503, 'generation_not_started');
+      const rejected = await (await fetch(`${origin}?snapshot=true`)).json();
+      assert.deepEqual(rejected.task.error, { code: 'generation_not_started' });
+      task.failure_code = secret;
+      await checkError(await fetch(origin), 502, 'generation_failed');
+      delete task.failure_code;
       task.user_id = 'someone-else'; await checkError(await fetch(origin), 404, 'not_found');
     });
     await t.test('free requests enforce quota for sync and async and keep artifact/error allowlists',async()=>{

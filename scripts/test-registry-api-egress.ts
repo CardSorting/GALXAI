@@ -123,7 +123,8 @@ const config = () => ({ databaseUrl: undefined, supabaseUrl: 'https://fixture.in
 test('one failed coalesced read has one backoff; retry hints suppress all owner-scope traffic', async t => {
   let now = 10_000, requests = 0, status = 503;
   t.mock.method(Date, 'now', () => now);
-  const reader = new ShardProjectionReader({ config, guard: new RegistryEgressGuard({ now: () => now }),
+  // Isolate API backoff from byte-reservation recovery (covered by the guard suite).
+  const reader = new ShardProjectionReader({ config, guard: new RegistryEgressGuard({ now: () => now, policy: { burstBytes: 1024 * 1024 } }),
     fetch: async () => {
       requests++;
       return status === 200 ? Response.json([], { headers: { 'content-range': '*/0' } })

@@ -8,12 +8,13 @@ export type ImageRequestState = 'queued' | 'generating' | 'completed' | 'failed'
 export interface ImageRequestRecord {
   id: string; user_id: string; state: ImageRequestState; asset_ids: string[] | null;
   response_format?: 'url' | 'b64_json'; output_format?: ImageFormat;
+  failure_code?: string;
 }
 export type StoredImageRequest = ImageGenerationRequest & { outputFormat?: ImageFormat };
 interface ClaimedRequest extends ImageRequestRecord { payload: StoredImageRequest; is_priority: boolean }
 export class ImageRequestConflict extends Error {}
 
-const columns = `id,user_id,asset_ids,payload->>'response_format' AS response_format,payload->>'outputFormat' AS output_format,CASE
+const columns = `id,user_id,asset_ids,payload->>'failureCode' AS failure_code,payload->>'response_format' AS response_format,payload->>'outputFormat' AS output_format,CASE
   WHEN state='generating' AND deadline_at < now() THEN 'failed'
   WHEN state='queued' AND created_at < now()-interval '5 minutes' THEN 'failed'
   ELSE state END AS state`;
@@ -65,7 +66,7 @@ export class ImageRequestRepository {
       FROM private.galx_free_generation_policy WHERE kind='image'
         AND EXISTS(SELECT 1 FROM private.galx_free_generation_usage WHERE user_id::text=$1 AND kind='image' AND operation_id=$2::text) FOR SHARE
     ), stopped AS (
-      UPDATE private.galx_image_requests SET state='failed',payload='{}'::jsonb,updated_at=now()
+      UPDATE private.galx_image_requests SET state='failed',payload=jsonb_build_object('failureCode','generation_not_started'),updated_at=now()
       WHERE user_id=$1 AND id=$2::uuid AND state='queued'
         AND EXISTS(SELECT 1 FROM private.galx_free_generation_usage WHERE user_id::text=$1 AND kind='image' AND operation_id=$2::text)
         AND NOT coalesce((SELECT enabled AND valid_until>clock_timestamp() FROM gate),false) RETURNING id
@@ -96,7 +97,8 @@ export class ImageRequestRepository {
 
   async fail(owner: string, id: string, notStarted = false): Promise<void> {
     await this.pool.query(`WITH failed AS (
-      UPDATE private.galx_image_requests SET state='failed',payload='{}'::jsonb,updated_at=now()
+      UPDATE private.galx_image_requests SET state='failed',payload=CASE WHEN $3::boolean
+        THEN jsonb_build_object('failureCode','generation_not_started') ELSE '{}'::jsonb END,updated_at=now()
       WHERE user_id=$1 AND id=$2::uuid AND state='generating' RETURNING id
     ) UPDATE private.galx_free_generation_usage SET released=true,capacity_settled=true
       WHERE $3::boolean AND user_id=$1::uuid AND kind='image'

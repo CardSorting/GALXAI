@@ -3,9 +3,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { GENERATION_QUOTA_CHANGED } from '@/lib/billing/free-generation-contract';
 import { workspaceFetch } from '@/lib/auth/workspace-client';
-import { startActivityPolling, imageStatusDelay } from '@/lib/resilience/activity-polling';
+import { startActivityPolling, imageStatusDelay, retryAfterDelay } from '@/lib/resilience/activity-polling';
 import { DEFAULT_SETTINGS, appendCreations, generationBody, readGeneration, readLibrary, readImageDetail, readPending, readSettings, studioError,
-  estimateGenerationSeconds, calculateGenerationProgress,
+  estimateGenerationSeconds, calculateGenerationProgress, readPendingGenerations, generationStatusFailure, MAX_ACTIVE_GENERATIONS,
   type PendingGeneration, type StudioImage, type StudioSettings } from './studio-contract';
 
 function stored(key: string): unknown {
@@ -21,9 +21,11 @@ export function useImageStudio(owner: string | null, token?: string, libraryActi
   const [settings, setSettings] = useState<StudioSettings>(DEFAULT_SETTINGS);
   const [ready, setReady] = useState(false);
   const [pending, setPending] = useState<PendingGeneration | null>(null);
+  const [activeCount, setActiveCount] = useState(0);
   const [polling, setPolling] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submission, setSubmission] = useState<StudioSettings | null>(null);
+  const [recoverableSubmission, setRecoverableSubmission] = useState(false);
   const [uncertain, setUncertain] = useState(false);
   const [progress, setProgress] = useState('');
   const [error, setError] = useState('');
@@ -60,11 +62,16 @@ export function useImageStudio(owner: string | null, token?: string, libraryActi
     const draft = stored(`${key}:draft`) ?? (owner ? stored('galx-image-studio:guest:draft') : null);
     if (draft) setSettings(readSettings(draft));
     if (owner) save('galx-image-studio:guest:draft', null);
-    const request = readPending(stored(`${key}:pending`));
+    activeTasks.current.clear();
+    setRecoverableSubmission(Boolean(readPending(stored(`${key}:submission`))));
+    const restored = readPendingGenerations(stored(`${key}:tasks`) ?? stored(`${key}:pending`));
+    restored.forEach(task => activeTasks.current.set(task.id, task));
+    setActiveCount(restored.length);
+    const request = restored.at(-1);
     if (request) {
       activeTasks.current.set(request.id, request);
       setPending(request);
-      setPolling(true);
+      setPolling(restored.some(task => !task.paused));
     }
     else if (stored(`${key}:unconfirmed`) === true) {
       setUncertain(true);
@@ -115,7 +122,7 @@ export function useImageStudio(owner: string | null, token?: string, libraryActi
       setPreviousCursor(result.previousCursor); setPage(requestedPage);
       loadedPage.current = { cursor: after, page: requestedPage };
       setCursor(result.cursor); setTotal(result.total);
-      if (uncertain) { setUncertain(false); save(`${key}:unconfirmed`, null); }
+      // Loading a page cannot establish the outcome of an unrelated generation.
     } catch {
       if (alive.current && sequence === librarySequence.current) {
         libraryRetry.current = accessDenied ? { page: 1 } : { cursor: after, page: requestedPage };
@@ -125,7 +132,7 @@ export function useImageStudio(owner: string | null, token?: string, libraryActi
       clearTimeout(timeout);
       if (alive.current && sequence === librarySequence.current) setLibraryLoading(false);
     }
-  }, [favorites, filter, headers, owner, sort, uncertain, key]);
+  }, [favorites, filter, headers, owner, sort]);
   const cancelLibrary = useCallback(() => { librarySequence.current++; libraryController.current?.abort(); }, []);
   useEffect(() => {
     if (libraryActive) {
@@ -135,89 +142,88 @@ export function useImageStudio(owner: string | null, token?: string, libraryActi
     return cancelLibrary;
   }, [fetchLibrary, revision, libraryActive, owner, filter, favorites, sort, cancelLibrary]);
 
+  const persistTasks = useCallback(() => {
+    const tasks = [...activeTasks.current.values()];
+    save(`${key}:tasks`, tasks.length ? tasks : null);
+    save(`${key}:pending`, null);
+    setActiveCount(tasks.length);
+    setPending(tasks.filter(task => !task.paused).at(-1) || tasks.at(-1) || null);
+  }, [key]);
+
+  const resumeUpdates = useCallback(() => {
+    for (const task of activeTasks.current.values()) delete task.paused;
+    persistTasks(); setPolling(true);
+  }, [persistTasks]);
+
   useEffect(() => {
-    if (!polling || !owner || (!pending && activeTasks.current.size === 0)) return;
+    if (!polling || !owner || activeTasks.current.size === 0) return;
     let active = true, attempt = 0;
-    setError(''); setProgress(current => current || 'Checking your generation…');
+    const checkStartedAt = Date.now();
+    setError(''); setProgress('Checking your generation…');
     const stop = startActivityPolling(async signal => {
-      try {
-        const tasks = Array.from(activeTasks.current.values());
-        if (tasks.length === 0 && pending) tasks.push(pending);
-        if (tasks.length === 0) { setPolling(false); return null; }
-        let serverDelay: string | null = null;
-        for (const task of tasks) {
-          if (!active || !alive.current || signal.aborted) return null;
-          try {
-            const response = await workspaceFetch(owner, `/v1/images/requests/${encodeURIComponent(task.id)}`, {
-              headers: headers(), signal: AbortSignal.any([signal, AbortSignal.timeout(25_000)]), cache: 'no-store',
-            });
-            if (signal.aborted || !active || !alive.current) return null;
-            if (!response.ok) {
-              activeTasks.current.delete(task.id);
-              if (task.id === pending?.id) {
-                setError(studioError(response.status));
-                save(`${key}:pending`, null);
-                save(`${key}:unconfirmed`, null);
-                setPending(null);
-              }
-              continue;
+      const tasks = [...activeTasks.current.values()].filter(task => !task.paused);
+      if (!tasks.length) { setPolling(false); return null; }
+      let delay = imageStatusDelay(attempt++, null), changed = false, completedAny = false;
+      // A bounded set of independent GETs avoids one slow result blocking the rest.
+      await Promise.all(tasks.map(async task => {
+        try {
+          const response = await workspaceFetch(owner, `/v1/images/requests/${encodeURIComponent(task.id)}`, {
+            headers: headers(), signal: AbortSignal.any([signal, AbortSignal.timeout(25_000)]), cache: 'no-store',
+          });
+          const payload = await response.json().catch(() => null);
+          if (!active || !alive.current || signal.aborted) return;
+          delay = Math.max(delay, retryAfterDelay(response.headers.get('Retry-After')));
+          if (!response.ok) {
+            const failure = generationStatusFailure(response.status, payload);
+            if (failure === 'not-started') {
+              activeTasks.current.delete(task.id); changed = true;
+              const time = Date.now(); setNow(time); setRetryAt(time + Math.max(5000, delay));
+              setError('Your image generation did not start. Try again shortly.');
+              window.dispatchEvent(new Event(GENERATION_QUOTA_CHANGED));
+            } else if (failure === 'auth' || failure === 'unconfirmed') {
+              task.paused = true; changed = true;
+              setError(studioError(response.status));
+            } else {
+              setProgress('Reconnecting… Your generation may still be running.');
             }
-            const payload = await response.json();
-            if (signal.aborted || !active || !alive.current) return null;
-            if (response.status === 202) {
-              if (task.id === pending?.id) {
-                setProgress(payload.status === 'queued' ? 'Waiting to start…' : 'Creating your images…');
-              }
-              const retryAfter = response.headers.get('Retry-After');
-              if (retryAfter) serverDelay = retryAfter;
-              if (Date.now() - task.startedAt >= 300_000) {
-                activeTasks.current.delete(task.id);
-                if (task.id === pending?.id) {
-                  setPending(null);
-                  save(`${key}:pending`, null);
-                  setNotice('Still waiting. You can check the status again or look in your library.');
-                }
-              }
-              continue;
-            }
-            const completed = readGeneration(payload, task.settings, task.id);
-            setCreations(current => appendCreations(current, completed, pinned.current));
-            activeTasks.current.delete(task.id);
-            if (task.id === pending?.id) {
-              save(`${key}:pending`, null);
-              save(`${key}:unconfirmed`, null);
-              setPending(null);
-              setNotice('Your images are ready. Download them or reuse the prompt.');
-            }
-            refresh();
-          } catch {
-            // Transient check error
+            return;
           }
+          if (response.status === 202) {
+            if (task.id === pending?.id) setProgress(payload?.status === 'queued' ? 'Waiting to start…' : 'Creating your images…');
+            return;
+          }
+          const completed = readGeneration(payload, task.settings, task.id);
+          setCreations(current => appendCreations(current, completed, pinned.current));
+          activeTasks.current.delete(task.id); changed = true; completedAny = true;
+          setNotice('Your images are ready. Download them or reuse the prompt.');
+        } catch {
+          if (active && alive.current && !signal.aborted) setProgress('Reconnecting… Your generation may still be running.');
         }
-        if (activeTasks.current.size === 0) {
-          setPolling(false);
-          return null;
-        }
-        if (serverDelay) return imageStatusDelay(attempt++, serverDelay);
-        return attempt++ < 3 ? 1600 : imageStatusDelay(attempt, null);
-      } catch {
-        if (!active || !alive.current) return null;
-        setPolling(false); setError('The status check was interrupted. Check again to resume this generation.');
+      }));
+      if (!active || !alive.current || signal.aborted) return null;
+      if (changed) persistTasks();
+      if (completedAny) refresh();
+      if (![...activeTasks.current.values()].some(task => !task.paused)) { setPolling(false); return null; }
+      if (Date.now() - checkStartedAt >= 300_000) {
+        setPolling(false); setNotice('Updates paused after a long wait. Resume updates to check the same requests.');
+        return null;
       }
-      return null;
+      return delay;
     });
     return () => { active = false; stop(); };
-  }, [headers, key, owner, pending, polling, refresh]);
+  }, [headers, owner, pending?.id, polling, refresh, persistTasks]);
 
-  async function generate() {
-    if (!owner || !settings.prompt.trim() || submitting || submitLock.current || Date.now() < retryAt) return;
+  async function generate(recovery?: PendingGeneration) {
+    if (!owner || !settings.prompt.trim() || submitting || submitLock.current || (uncertain && !recovery) || activeTasks.current.size >= MAX_ACTIVE_GENERATIONS || Date.now() < retryAt) return;
     submitLock.current = true; setSubmitting(true); setError(''); setNotice('');
     setUncertain(false); save(`${key}:unconfirmed`, null);
     const controller = new AbortController(); submitController.current = controller;
     const timeout = setTimeout(() => controller.abort(), 180_000);
-    const snapshot = readSettings(settings);
+    const snapshot = readSettings(recovery?.settings || settings);
     setSubmission(snapshot);
-    const id = crypto.randomUUID();
+    const id = recovery?.id || crypto.randomUUID();
+    save(`${key}:submission`, { id, startedAt: recovery?.startedAt || Date.now(), settings: snapshot });
+    setRecoverableSubmission(true);
     save(`${key}:unconfirmed`, true);
     try {
       const response = await workspaceFetch(owner, '/v1/images/generations', { method: 'POST', headers: { ...headers(), 'Content-Type': 'application/json', Prefer: 'respond-async', 'Idempotency-Key': id },
@@ -232,7 +238,7 @@ export function useImageStudio(owner: string | null, token?: string, libraryActi
           : code==='free_generation_busy'?'Free image creation is busy right now. Your quota was not used. Try again later.'
           : code==='free_quota_exhausted'?'Your free image quota is used up. Explore Pro to keep creating.':studioError(response.status));
         if (response.status >= 500) setUncertain(true);
-        else save(`${key}:unconfirmed`, null);
+        else { save(`${key}:unconfirmed`, null); save(`${key}:submission`, null); setRecoverableSubmission(false); }
         return;
       }
       const payload = await response.json();
@@ -241,11 +247,11 @@ export function useImageStudio(owner: string | null, token?: string, libraryActi
         const request = readPending({ id: payload.id, startedAt: Date.now(), settings: snapshot });
         if (!request) throw new Error('Invalid request receipt');
         activeTasks.current.set(request.id, request);
-        save(`${key}:pending`, request); save(`${key}:unconfirmed`, null); setPending(request); setPolling(true);
+        persistTasks(); save(`${key}:unconfirmed`, null); save(`${key}:submission`, null); setRecoverableSubmission(false); setPolling(true);
       } else {
         const completed = readGeneration(payload, snapshot, id);
         setCreations(current => appendCreations(current, completed, pinned.current));
-        save(`${key}:unconfirmed`, null); refresh(); setNotice('Your images are ready.');
+        save(`${key}:unconfirmed`, null); save(`${key}:submission`, null); setRecoverableSubmission(false); refresh(); setNotice('Your images are ready.');
       }
     } catch {
       if (alive.current) { setError('The connection was interrupted. Your images may still finish. Check your library before generating again.'); setUncertain(true); }
@@ -277,8 +283,9 @@ export function useImageStudio(owner: string | null, token?: string, libraryActi
     finally { assetLock.current = false; if (alive.current) setBusyAsset(null); }
   }
   function clearPending() {
-    activeTasks.current.clear();
-    setPolling(false); setPending(null); setUncertain(false); setError(''); save(`${key}:pending`, null); save(`${key}:unconfirmed`, null);
+    // Explicit dismissal releases only paused/unconfirmed work; active work stays tracked.
+    for (const task of activeTasks.current.values()) if (task.paused) activeTasks.current.delete(task.id);
+    persistTasks(); setUncertain(false); setError(''); save(`${key}:unconfirmed`, null); save(`${key}:submission`, null); setRecoverableSubmission(false);
     setNotice('Ready for a new generation. Earlier images may still appear in your library.');
   }
 
@@ -301,7 +308,7 @@ export function useImageStudio(owner: string | null, token?: string, libraryActi
   const estimatedTotal = estimateGenerationSeconds(activeSettings);
   const progressMetrics = calculateGenerationProgress(elapsed, estimatedTotal, pending ? (progress.includes('Waiting') ? 'queued' : 'processing') : 'queued');
 
-  return { settings, setSettings, ready, pending, polling, setPolling, submitting, submission, uncertain, progress, error, notice, setNotice,
+  return { recoverableSubmission, recoverSubmission: () => { const original = readPending(stored(`${key}:submission`)); if (original) void generate(original); }, activeCount, atCapacity: activeCount >= MAX_ACTIVE_GENERATIONS, resumeUpdates, settings, setSettings, ready, pending, polling, setPolling, submitting, submission, uncertain, progress, error, notice, setNotice,
     retryIn: Math.max(0, Math.ceil((retryAt - now) / 1000)), elapsed,
     estimatedTotal, remainingSeconds: progressMetrics.remainingSeconds, progressPercent: progressMetrics.percent,
     generationPhase: progressMetrics.phase, phaseStatusText: progressMetrics.statusText,

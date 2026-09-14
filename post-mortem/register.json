@@ -108,7 +108,7 @@
       "id": "INC-20260913-IMAGES",
       "category": "images",
       "severity": "SEV-1",
-      "status": "recovered",
+      "status": "investigating",
       "title": "Durable generation, storage and controller recovery",
       "owner": "maintainer",
       "record": "post-mortem/incidents/2026/2026-09-13-image-generation/README.md",
@@ -444,6 +444,15 @@
         "post-mortem/incidents/2026/2026-09-14-generation-quota-access/README.md",
         "post-mortem/releases/2026-09-14-free-generation-gate.json"
       ]
+    },
+    {
+      "id": "ACT-020",
+      "incident": "INC-20260913-IMAGES",
+      "owner": "image maintainer",
+      "review_by": "2026-09-16",
+      "status": "open",
+      "next_step": "Validate and release empty-window admission and recoverable frontend request tracking; verify one bounded real image request.",
+      "closure": "Retain regression, deployment and signed-in generation/library evidence; distinguish local throughput fixtures from live capacity."
     }
   ]
 }

@@ -18,7 +18,8 @@ export interface StudioImage {
   createdAt: string; favorite: boolean; saved: boolean;
   thumbnailUrl?: string; detailsLoaded?: boolean;
 }
-export interface PendingGeneration { id: string; startedAt: number; settings: StudioSettings }
+export const MAX_ACTIVE_GENERATIONS = 4;
+export interface PendingGeneration { id: string; startedAt: number; settings: StudioSettings; paused?: true }
 export const DEFAULT_SETTINGS: StudioSettings = { prompt: '', ratio: '1:1', quality: 'standard', count: 1 };
 
 export interface StylePreset {
@@ -213,7 +214,25 @@ export function readPending(value: unknown): PendingGeneration | null {
   const data = object(value);
   if (typeof data.id !== 'string' || !/^[a-zA-Z0-9_-]{1,160}$/.test(data.id) ||
     typeof data.startedAt !== 'number' || !Number.isFinite(data.startedAt)) return null;
-  return { id: data.id, startedAt: data.startedAt, settings: readSettings(data.settings) };
+  return { id: data.id, startedAt: data.startedAt, settings: readSettings(data.settings), ...(data.paused === true ? { paused: true as const } : {}) };
+}
+export function readPendingGenerations(value: unknown): PendingGeneration[] {
+  const entries = Array.isArray(value) ? value : [value];
+  const unique = new Map<string, PendingGeneration>();
+  for (const entry of entries.slice(0, MAX_ACTIVE_GENERATIONS)) {
+    const task = readPending(entry);
+    if (task) unique.set(task.id, task);
+  }
+  return [...unique.values()];
+}
+
+export function generationStatusFailure(status: number, value: unknown): 'not-started' | 'unconfirmed' | 'retry' | 'auth' {
+  const code = object(object(value).error).code;
+  if (status === 503 && code === 'generation_not_started') return 'not-started';
+  if (status === 502 && code === 'generation_failed') return 'unconfirmed';
+  if (status === 401 || status === 403) return 'auth';
+  if (status === 404 || status === 409 || status === 400) return 'unconfirmed';
+  return 'retry';
 }
 export function generationBody(settings: StudioSettings) {
   const clean = readSettings(settings);

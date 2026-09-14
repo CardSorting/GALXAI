@@ -21,3 +21,9 @@ Keep the original request ID and idempotency key. Check its owner-scoped status 
 Regression commands: `npm run test:image:security`, `npm run test:image:db`, and `npm run test:broccolidb:hardening`. The database suite uses disposable PostgreSQL and covers cross-connection reads, concurrent claims, wrong owners, incomplete assets, cold Favorites and restricted database roles. Live acceptance is one authorized frontend generation, download decoding and My images/Favorites after reload. Preserve any ambiguous attempt rather than repeatedly clicking Generate.
 
 Evidence: [September 13 recovery](../incidents/2026/2026-09-13-image-generation/README.md). Follow [image recovery](../runbooks/image-generation.md) for incident order.
+
+## FM-IMG-004 — available capacity rejected before dispatch
+
+An empty optional sliding-window object must project as absent; otherwise undefined arithmetic denies otherwise usable accounts. Expired credentials must not win selection ahead of usable candidates. The database remains authoritative for the resulting lease and all configured limits. A proven pre-dispatch rejection persists only `generation_not_started`; generic failed historical receipts are not retroactively reclassified.
+
+If application admission is repaired but generation is still unavailable, inspect the independent registry/capability boundary. Partial I/O reservations can starve cold-read recovery by consuming every small refill. The guard now requires the complete reservation before I/O; see [registry recovery](../../docs/RELAY_VNEXT_RUNBOOK.md#registry-reservation-recovery). Never reset counters, remove journals or widen permissions as a workaround.

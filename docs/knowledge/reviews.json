@@ -47,20 +47,20 @@
     }
   },
   "images": {
-    "reviewer": "Product/API maintainer",
-    "note": "Consolidated composer UI: removed style pills, quality buttons, and verbose aspect ratio text for clean, zen creative flow.",
+    "reviewer": "Codex image incident review",
+    "note": "Scoped review of changed admission projection, non-start DTOs, original-request recovery, complete I/O reservation and affected canonical guides; isolated tests retained separately from deployment.",
     "reviewed_at": "2026-09-14",
-    "review_by": "2026-09-28",
+    "review_by": "2026-09-21",
     "evidence": {
-      "post-mortem/incidents/2026/2026-09-13-image-generation/controller-recovery-verification-20260914.json": "9186271c949f763e0c5d50d8e62c3bcbb1a05243fd7c127d4385ccf45d1749b8"
+      "post-mortem/incidents/2026/2026-09-13-image-generation/frontend-admission-recovery-20260914.json": "9da508a818affe41ef45c66779837994d9fe7045ffb90a097996175d974c4b36"
     },
     "files": {
-      "docs/QUEUE_SPECIFICATION.md": "ab45ff8ed87f3c863efafe0e227719cd135772c1e3df7919f39021884e87a487",
+      "docs/QUEUE_SPECIFICATION.md": "1128aaa7784959e883e82bb91ca8ac2bd74502b5fb601ea7195d6cea411e30f3",
       "docs/maintainers/FREE_GENERATION_QUOTA.md": "e43d24867079c13c8437b7002d8730a6bb954c321437716b4185f8c94c6d6249",
-      "docs/maintainers/image-library-scale.md": "0d5233d9dfd2dd62128585a8d5b345142660d00235fd511dff239726ff1927bc",
-      "docs/maintainers/image-public-boundary.md": "d2946b74f907dd9f076125019fe9b732849bd51ca7f71a8b5b66a75f5d91d7ba",
+      "docs/maintainers/image-library-scale.md": "f63c2fbd23c9014f4b0243abd7d4c25ba18965f386c03441d3674682533ebd66",
+      "docs/maintainers/image-public-boundary.md": "93368c6c6081d4fb77e00a56b653d840c5e05f824ca6e145ed2e7e9affecc717",
       "docs/maintainers/readable-urls.md": "ea1fed2e15baa2097f0c1a906c98c66ab3343cd25aba9613151cd9f9480abb60",
-      "post-mortem/runbooks/image-generation.md": "fd924e15945b8965bab815b44a15e0b631e61a84beafe30ececa658985837b1c",
+      "post-mortem/runbooks/image-generation.md": "c754643273e0d941d9befe9a14e8ae20520ad7eab27452707855dd9286800262",
       "scripts/test-free-generation-gate-db.ts": "2919f39490203795965f494f61b288305ea7136e544515cc504d9e8a0ff7e037",
       "scripts/test-free-generation-quota-db.ts": "26d3381b0a90285cce6d954b954601fb7a5a4596998389ac7091cfb7b49d9b04",
       "scripts/test-free-generation-quota.ts": "cbf7034c6f10ecfcf6176718f693a2636af775899e05552b5d7c53c58f142fb3",
@@ -68,10 +68,10 @@
       "scripts/test-image-library-http.ts": "f889bc632c6ccd33aa5f1f40f321ce75bd2167e7758fdde602db230f5d524f84",
       "scripts/test-image-library-scale-db.ts": "131e2decca645d22522ffbd90170a3e47f81b6db068d93f6429d3c5d30ee02b7",
       "scripts/test-image-library-scale.ts": "1d4aeade107bc2d715654f4853bdc1be660bded657ca8cabd0fd34a67423389e",
-      "scripts/test-image-public-http.ts": "9339419b81996015666aa18c8c7e5fa38e58c1ad3dd665ad868d34819b600164",
-      "scripts/test-image-requests-db.ts": "04c727c232bd555757381eb6ebfd6a4ff3e6ff381e63890e7f16ce309a6bd516",
+      "scripts/test-image-public-http.ts": "b5d812f3daf27df33ccb27fe5936f84b56d0880a05bc309a89c5b8c9ba95f39f",
+      "scripts/test-image-requests-db.ts": "50bcf49748940f8d2e56323fc89fecdd459f890def2e5b3a77a69986d50ef9e9",
       "scripts/test-image-retry-contract.ts": "2dd9ae9d1e5b4c3ce132961cf05e37c3f983209a0a0c148abfdd870be92da292",
-      "scripts/test-image-studio.ts": "cd7d275578467f1c0ce4c421d71aabcae18153968831e3be970dbc41bf539af5",
+      "scripts/test-image-studio.ts": "d42d7f521a2b9678f69fdc395a2873d933f159346b1a0cac076a3171e6786f14",
       "scripts/test-relay-image-generation.ts": "d66f497b893ed0026806fbc928dbafff65be90b2e505e86c7da32b4df9d67140",
       "scripts/verify-image-library-scale-ui.ts": "0e7003e1f256f99f28c953537b16044b50678c700b496c53d47f1b0104ff23cc",
       "scripts/verify-image-public-http.ts": "c4b1e12705a2dae186551817cf4c2bd8351efe91c9883cd8e7936a3fee7a409f",
@@ -88,17 +88,17 @@
       "src/app/v1/images/assets/[token]/route.ts": "044fa9a26b97f227e4d920e2cd2d58892e430b4f073656afe76e027093b79168",
       "src/app/v1/images/assets/[token]/thumbnail/route.ts": "e505a1372b026e66e2555c13b6b2fa406ec1e198588800896de05d9d953d73f2",
       "src/app/v1/images/generations/route.ts": "f805349641364e3caea2a83275040558cf7d05db595d75450331409e54e20e85",
-      "src/app/v1/images/requests/[id]/route.ts": "5cdd77d1389c743f7bd19a4193c51fdefcb0a8e288bf42c7a5e178406b3c10f6",
+      "src/app/v1/images/requests/[id]/route.ts": "0bf6cfb29e706629565c90e2efbf3e601109820a3d92bfb8a83af70c1c1210f5",
       "src/app/v1/images/requests/[id]/stream/route.ts": "721bcb68476feeed8aa1ae6508bae784c4a5be77b067597a479c5ccafe827a84",
       "src/app/v1/images/sessions/[sessionId]/route.ts": "3571f44b6fb521942a0a2b8b3fc7b7e9196488d68ea5d5261de5d92edf771dc7",
       "src/components/dashboard/GenerationGateNotice.tsx": "435013796b565f458365f8397bef585bec48d01f982c93e0bd0b0fb665a2d224",
       "src/components/dashboard/generation-gate.module.css": "efd8526722ca0ad42aec319a56bc2ea7e638185f30c35cea9b445dfb69bba4a4",
       "src/components/images/GenerationCanvas.tsx": "4341702fc0842c20a7d860b8241a4bf55780919b73254f54915a61cd09269473",
-      "src/components/images/ImageStudio.tsx": "7ce87acfbb53ef3799b5ac7676128fd383413fb31a13d98a40a61e7b8210450c",
+      "src/components/images/ImageStudio.tsx": "b28ff44376b47767d0bf997f358d632530df353ec484645bee3813d0b9ff1787",
       "src/components/images/StudioArtwork.tsx": "427128b4f3ea300222b74fdfe132564237030507f1d40c20093c89ef52e26229",
-      "src/components/images/studio-contract.ts": "cbe272da86f7af1ec6279856cb4c13aa8f4de939384284fbaf0c80ae3f70188d",
+      "src/components/images/studio-contract.ts": "cfa22ffc7df750e747c805a7a8ee394dfb76fdc9adcd2beabcb9872536f0d5bb",
       "src/components/images/studio.css": "8448bc4018a22090fb103c9c533bc947a64759e70f6486a067845d175a8f8d3d",
-      "src/components/images/use-image-studio.ts": "49c062625ae17467e30bc7da6bbe6ad7994e5206bd44ba77fba5f680ebdf0b46",
+      "src/components/images/use-image-studio.ts": "8d38f586ad6be495494c4a556a45f7d1edbb774c465d47a272c623a6cfe77ec1",
       "src/contexts/GenerationAllowanceContext.tsx": "d73875872f3814131bfc18029e69a72091993d906af63058ca37282f2c261a7c",
       "src/core/broccolidb/BroccoliImageLibraryBuffer.ts": "840d2e9fd075d314e196c056564b911b7a1d2b63ff0569f5ee16fb7604d81915",
       "src/core/contracts/GalxContracts.ts": "8f38c428f004a323d0f90b679f3fd0bf5737118ea724154edd6ffe84d001907f",
@@ -113,10 +113,10 @@
       "src/lib/images/library-cursor.ts": "53d3e327e5e3ee57de4d045c62b73b8cfd1c69cb048013052c4af9f461bce798",
       "src/lib/images/navigation.ts": "827b7f91ef06422452aa03f66721e866be9755399c4514393230ce4fdcfc8e5c",
       "src/lib/images/read-image-artifact.ts": "af490bc9ccfa13d3e341574936f0929725ff2d1c9f042f53a48e0a45e8e7cb8b",
-      "src/lib/images/request-repository.ts": "aeab0e024c51a37abed88e294112b26d81e71aeebf459b43bc6cf09ebe4a8cde",
-      "src/lib/images/request-service.ts": "a58c5440d2e4b108bb7d0c3fea7dd978076e2019fada05718b7dab0f864bb9ec",
+      "src/lib/images/request-repository.ts": "00dabfcb9cc6ba59a80aa8f3d15c2f9c8df813be9db3024c1c01cdd0a688ba47",
+      "src/lib/images/request-service.ts": "9f84336a4f6191bf07b58c4a35d3b4bd031e25086bb477d7feef9e6b005d9b69",
       "src/lib/security/image-artifact.ts": "295df387bacc6f27620f36c8b90eaceb31934ded26c14117c2cea3efac3fa593",
-      "src/lib/security/public-image-http.ts": "8f2436f638149bcffa2a82e89b45007fd53c8f0abbe14e7475a80de788f17058",
+      "src/lib/security/public-image-http.ts": "793b1a19ed4a704439544df062e6921f1f0e9862503a4e6dc38f01246e90584d",
       "src/lib/security/public-image-record.ts": "777deaa9a0ce4a75aae539ae21a90b3ec8c1c11e19997f8664b8a35de91b1f9e",
       "src/lib/supabase/repositories/ImageLibraryRepository.ts": "0ab87ab48cf9abc21cf80214818742b9d89c8ce168ddb5a4358e5397314323d7",
       "src/workers/cloudflare/GalxR2AssetAdapter.ts": "b870f5f0c5aa94fcb490547cc16e280f0966eaa03a204622e576bab4d0b3672c",
@@ -127,12 +127,12 @@
     }
   },
   "access": {
-    "reviewer": "Codex",
-    "note": "Reviewed the exact quota read exemption, independent account authority, strict raw-response acceptance and canonical rollout/rollback guides. No database or paid policy change. Local build and scoped security evidence retained; production correction pending.",
+    "reviewer": "Codex image incident review",
+    "note": "Scoped review of changed admission projection, non-start DTOs, original-request recovery, complete I/O reservation and affected canonical guides; isolated tests retained separately from deployment.",
     "reviewed_at": "2026-09-14",
-    "review_by": "2026-09-20",
+    "review_by": "2026-09-21",
     "evidence": {
-      "post-mortem/incidents/2026/2026-09-14-generation-quota-access/local-verification.json": "433698475b5b71d3d01d0872449c9618c5d6d3152c5117f9e60acd243a4be938"
+      "post-mortem/incidents/2026/2026-09-13-image-generation/frontend-admission-recovery-20260914.json": "9da508a818affe41ef45c66779837994d9fe7045ffb90a097996175d974c4b36"
     },
     "files": {
       "docs/SECURITY_POSTURE_AND_THREAT_MODEL.md": "69e35e1344f7d5812bf26a2cec7cf45f0b27911e461432d0a8537e41532ddc89",
@@ -253,7 +253,7 @@
       "src/lib/security/preview-middleware.ts": "ea577ad1118ca166c882cd8a5d335221a2a1a5b65b4cfa7b0078daa76572229d",
       "src/lib/security/preview-policy.ts": "a609cf57962c3d98e46340655501f03a4457cdc6e490ba920df0071dd976e08c",
       "src/lib/security/private-image-diagnostics.ts": "b2f34531192d580a86ff2bfe9cc65df9586ec28abb5648e0fc5cace2aba40255",
-      "src/lib/security/public-image-http.ts": "8f2436f638149bcffa2a82e89b45007fd53c8f0abbe14e7475a80de788f17058",
+      "src/lib/security/public-image-http.ts": "793b1a19ed4a704439544df062e6921f1f0e9862503a4e6dc38f01246e90584d",
       "src/lib/security/public-image-record.ts": "777deaa9a0ce4a75aae539ae21a90b3ec8c1c11e19997f8664b8a35de91b1f9e",
       "src/lib/security/public-task-response.ts": "c8ea0b785d5ee0d3d5d8def768a7d2cff940c6d712e8bec98e21ad34d9e32649",
       "src/lib/security/same-origin.ts": "28b03863cac4d9b1ce840f96e4ecec94ffb7e9e4ac70c694707b3aff3dcd6d17",
@@ -346,18 +346,17 @@
     }
   },
   "relay": {
-    "reviewer": "relay maintainer",
-    "note": "Reviewed the deployed d228 worker artifact, launchd guardian chain, kernel-held ownership, readiness-versus-registry dependency behavior, ACT-018 isolated drill evidence and state-preserving rollback against the current single-host target.",
+    "reviewer": "Codex image incident review",
+    "note": "Scoped review of changed admission projection, non-start DTOs, original-request recovery, complete I/O reservation and affected canonical guides; isolated tests retained separately from deployment.",
     "reviewed_at": "2026-09-14",
-    "review_by": "2026-09-27",
+    "review_by": "2026-09-21",
     "evidence": {
-      "post-mortem/incidents/2026/2026-09-13-image-generation/act019-deployment-acceptance-20260914.json": "291e5811ae82e1f33cd5bc80cea34b7edbaf659a4dcbd6732d6895cf7578ec04",
-      "post-mortem/incidents/2026/2026-09-13-image-generation/act018-isolated-drills-20260914.json": "c6b1d525ffdd6be6c89fba32de68ae1e9adfb1e61d9c57336360f9e46a531319"
+      "post-mortem/incidents/2026/2026-09-13-image-generation/frontend-admission-recovery-20260914.json": "9da508a818affe41ef45c66779837994d9fe7045ffb90a097996175d974c4b36"
     },
     "files": {
       "docs/ARCHITECTURE.md": "d821254fb3272cdc6c7575f6a548a1f041fe1506a10fd14b6bdd058539482e5d",
       "docs/FEDERATION_STRATEGY.md": "e199e9e58ed6070a3e60185173649ca61d8f1fc87e113f93099e45d76afc3fc4",
-      "docs/RELAY_VNEXT_RUNBOOK.md": "c9eabd973ba5b0d6c3f1dae66e38f07285345dfd2e1e6e06cde736d1eac00812",
+      "docs/RELAY_VNEXT_RUNBOOK.md": "faf0e092d99dfbaf897ebf0111a4113bb2fbc9a0bcbe98c88afec049a29202b6",
       "docs/TELEMETRY_AND_OBSERVABILITY.md": "e46a148ae3ed55f818f5e45362559b0074bb1f975b3782978e3e815941e9812e",
       "docs/maintainers/RELAY_HARDENING.md": "64aada975343365578ae8476131e25d4c6b242ebf08815fd81910c4f6529bbc6",
       "docs/maintainers/RELAY_TELEMETRY.md": "f02e84a73fb2a6242ea55410f7f852e35c225dff85d978c75c8a9d1ccd1765ea",
@@ -408,7 +407,7 @@
       "src/relay/operator-enrollment.ts": "0b6b67a6ce8c3e18a216714d0aa7f145b7ca506c8a4906c03778a508ca4161d2",
       "src/relay/quota-policy.ts": "2e5af1cfcb4dadbe0a03dafb3b0b417dfb35f49e36bfc39b1edf779b3bd09ed0",
       "src/relay/registry-api-reader.ts": "2d8a97d6673bef4d411af5bdb12aae2299fd98b9bf75dc4c839fbaedf23df5d7",
-      "src/relay/registry-egress-guard.ts": "8c48f9a6a280501bcf85768029b65df745c6d08db25e6f42df72fc5e5702ac2c",
+      "src/relay/registry-egress-guard.ts": "693524a9a7a388bd7172d07168bf8a70ef41cf82cdde65d2abb8c2d4d1efed10",
       "src/relay/relay-server.ts": "fa827934bf4b7a8478d45853180ff262fee08f5946585e98a703eeaa76e0ad5a",
       "src/relay/request-policy.ts": "6671c797c578a5841bcbcc88ba10d991a02bbcf37847e6365755b5629fb7c5fc",
       "src/relay/shard-maintenance-store.ts": "3b7e18bf84af004f406eebe868d71c8371d5d1821454a471ec0e0615505811e4",
@@ -420,15 +419,15 @@
     }
   },
   "database": {
-    "reviewer": "Codex",
-    "note": "Reviewed the exact quota read exemption, independent account authority, strict raw-response acceptance and canonical rollout/rollback guides. No database or paid policy change. Local build and scoped security evidence retained; production correction pending.",
+    "reviewer": "Codex image incident review",
+    "note": "Scoped review of changed admission projection, non-start DTOs, original-request recovery, complete I/O reservation and affected canonical guides; isolated tests retained separately from deployment.",
     "reviewed_at": "2026-09-14",
-    "review_by": "2026-09-20",
+    "review_by": "2026-09-21",
     "evidence": {
-      "post-mortem/incidents/2026/2026-09-14-generation-quota-access/local-verification.json": "433698475b5b71d3d01d0872449c9618c5d6d3152c5117f9e60acd243a4be938"
+      "post-mortem/incidents/2026/2026-09-13-image-generation/frontend-admission-recovery-20260914.json": "9da508a818affe41ef45c66779837994d9fe7045ffb90a097996175d974c4b36"
     },
     "files": {
-      "docs/SUPABASE_PARANOID_ARCHITECTURE_SPEC.md": "ebe3942880188ff96f58cdc227b7d7e5f31a03a0dcaea9c1b7eace2aeeac7372",
+      "docs/SUPABASE_PARANOID_ARCHITECTURE_SPEC.md": "8474baed32faf88b19fbc5f69e34fcefdb034c3a6f7f5774f472ba438d291edd",
       "docs/maintainers/FREE_GENERATION_QUOTA.md": "e43d24867079c13c8437b7002d8730a6bb954c321437716b4185f8c94c6d6249",
       "docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md": "2556863fcf782fa5aaf7dda5f382d2406d939b6651321e3ef7b91439c5cd2869",
       "scripts/fixtures/integration-bootstrap.sql": "7e44c36f452fe91403820b88bcee79231c81240abafe31df7948e5866e0cfa72",
@@ -464,7 +463,7 @@
       "src/lib/supabase/repositories/SessionRepository.ts": "d1b96ce2aed9fe7370e8330e4750892f88b99c6306d008ae2f154b0b3722f62d",
       "src/lib/supabase/repositories/ShardHealthRepository.ts": "747f920d2a1c5144c66ad145b7b387e4861c4e908c5c2bbe2d60663dc5f8733a",
       "src/lib/supabase/repositories/ShardProjectionReader.ts": "254a1486d9f201d6bf1adc3110abfabfa54d7273c816db859ea35b8c16b51887",
-      "src/lib/supabase/repositories/ShardRepository.ts": "2f3e33166528ed8f3a1c2ffdaf7565d048588b90c46d61a510554481962aaa93",
+      "src/lib/supabase/repositories/ShardRepository.ts": "be6b6b2e339b0132e54593ad16703c3bd39fd42b4d8164ef64ab9dd9b4a6cdbc",
       "src/lib/supabase/repositories/SignupCreditRepository.ts": "b79640d2c41c0b749673602e54d250e095a8bec7e2f5f1641cda7085d6aed956",
       "src/lib/supabase/repositories/SloCanaryRepository.ts": "9155e11b6e12143eeae2340be96255cad2eaedfd1e020a6d8fee9e1844ff410d",
       "src/lib/supabase/repositories/SpendGovernanceRepository.ts": "83b0bb42ebe4b70908fe94b7f0aef1bbdc378efa0d1ada083bb0bff70795a998",
@@ -732,16 +731,16 @@
     }
   },
   "broccolidb": {
-    "reviewer": "Codex",
-    "note": "Reviewed the changed URL/navigation contracts and complete affected guide bodies listed in retained evidence; source-to-guide mapping additions inspected. Unchanged inventory is drift coverage, not an exhaustive new audit. Historical observations and ADR/delivery status preserved.",
+    "reviewer": "Codex image incident review",
+    "note": "Scoped review of changed admission projection, non-start DTOs, original-request recovery, complete I/O reservation and affected canonical guides; isolated tests retained separately from deployment.",
     "reviewed_at": "2026-09-14",
-    "review_by": "2026-09-20",
+    "review_by": "2026-09-21",
     "evidence": {
-      "docs/knowledge/audits/2026-09-14-readable-urls.json": "a9275d1a3baa6c43af763f8814cc9acd4cf2a118757e06b02b6380fb4741946c"
+      "post-mortem/incidents/2026/2026-09-13-image-generation/frontend-admission-recovery-20260914.json": "9da508a818affe41ef45c66779837994d9fe7045ffb90a097996175d974c4b36"
     },
     "files": {
       "docs/maintainers/COMPACTOR_FUZZING_AND_QA_MATRIX.md": "72325ecd8087214538910b8ee29bc739c20146b7491eb0947ed417b39229a87a",
-      "docs/maintainers/image-library-scale.md": "0d5233d9dfd2dd62128585a8d5b345142660d00235fd511dff239726ff1927bc",
+      "docs/maintainers/image-library-scale.md": "f63c2fbd23c9014f4b0243abd7d4c25ba18965f386c03441d3674682533ebd66",
       "docs/operations/preview-hybrid-sync.md": "1ac7ce76537660cfc507a595c942d4da2324060b8a3f15ddf9ab96d993ff38e9",
       "scripts/test-broccolidb-compaction-api-route.ts": "7572d2e9b785d7dbd42828f04090fc5d6a2a189dcf8f649e7e0b355fac9496bd",
       "scripts/test-broccolidb-production-hardening.ts": "faafec0e952a4bc3ea7c45093735de5d99772f08d434d47a33cb29db86373070",
@@ -1183,18 +1182,18 @@
     }
   },
   "client-efficiency": {
-    "reviewer": "Product/performance maintainer",
-    "note": "Consolidated composer UI: removed style pills, quality buttons, and verbose aspect ratio text for clean, zen creative flow.",
+    "reviewer": "Codex image incident review",
+    "note": "Scoped review of changed admission projection, non-start DTOs, original-request recovery, complete I/O reservation and affected canonical guides; isolated tests retained separately from deployment.",
     "reviewed_at": "2026-09-14",
-    "review_by": "2026-09-28",
+    "review_by": "2026-09-21",
     "evidence": {
-      "post-mortem/incidents/2026/2026-09-13-image-generation/recovery-acceptance-audit-20260914.json": "3ad01fb443d8fb7a2bdb4c0b3e45556806219598cc2ce93732d91274db32afd3"
+      "post-mortem/incidents/2026/2026-09-13-image-generation/frontend-admission-recovery-20260914.json": "9da508a818affe41ef45c66779837994d9fe7045ffb90a097996175d974c4b36"
     },
     "files": {
       "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md": "ef866a86e704126bafa511a94e04893e3c23571789bd1aadba977f58a42c4429",
       "docs/PRODUCT_SURFACE_STRATEGY.md": "46ef6d28dce49b5c72c821dd1284516ac748c80c8e90878898b76fe2ddf0b398",
       "docs/maintainers/PUBLIC_DISCOVERY.md": "510d8d5559705b41cbe8f7bb5d68f2718e46bdfac2152d413d61fc80da1f4ebd",
-      "docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md": "bd88e347246d564d051381f793e3d47e5d468a9166cf98b9c53da7f14564e1fb",
+      "docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md": "07276c3767f6cca25ae9723120b450e0ed994740202ff485207714a092254a43",
       "docs/maintainers/readable-urls.md": "ea1fed2e15baa2097f0c1a906c98c66ab3343cd25aba9613151cd9f9480abb60",
       "scripts/test-public-reading.ts": "652b7b210a1d79d83c8bc9e6c38468410ad6a8f36c1f2f778c0f9a55192ca4d3",
       "scripts/test-request-efficiency.ts": "2a004bc34569fb72e40b2dde1e9567674bea10365fe7134459bfa275eb56a591",
@@ -1261,8 +1260,8 @@
       "src/components/home/public-home.module.css": "e7e697b7e6dcbe2b393e179901eb9f4f365f7e6fb75fd6e114b67e0ea44868a1",
       "src/components/home/use-galaxy-interactions.ts": "0a654c3abd4d7f562172df5d79afd94ee3b1c86509693dbc69d993920497d348",
       "src/components/home/use-story-entrance.ts": "8e3d8a6634a4b67456cff4d17ef76e2d450b136a4b844b86c21b4ec6b6b24a67",
-      "src/components/images/ImageStudio.tsx": "7ce87acfbb53ef3799b5ac7676128fd383413fb31a13d98a40a61e7b8210450c",
-      "src/components/images/use-image-studio.ts": "49c062625ae17467e30bc7da6bbe6ad7994e5206bd44ba77fba5f680ebdf0b46",
+      "src/components/images/ImageStudio.tsx": "b28ff44376b47767d0bf997f358d632530df353ec484645bee3813d0b9ff1787",
+      "src/components/images/use-image-studio.ts": "8d38f586ad6be495494c4a556a45f7d1edbb774c465d47a272c623a6cfe77ec1",
       "src/components/public-content/DESIGN.json": "d8594db0bdf0f53295e4a7cb9cb7f770f47e54498d93489d2349cabb14373d61",
       "src/components/public-content/DESIGN.md": "5690bd552b364e0c2f353e2e4d50e0b0ce983605b589f42a3bdf5bdde4c22236",
       "src/components/public-content/KnowledgeSearch.tsx": "485027842c5ca930fed7b440387676f04891ee8efe6d9d2d822073256b43a04d",

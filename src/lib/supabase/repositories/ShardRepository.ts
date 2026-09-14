@@ -760,7 +760,10 @@ export class ShardRepository {
         ? Number(data.credential_expires_at_ms)
         : protectedMetadata.expiresAtMs,
       privacyCapabilities: (data.privacy_capabilities || undefined) as any,
-      slidingWindowQuota: (data.sliding_window_quota || undefined) as any,
+      // An empty optional policy is absent, not a quota with undefined limits.
+      // Nonempty invalid policies remain fail-closed.
+      slidingWindowQuota: (data.sliding_window_quota && Object.keys(data.sliding_window_quota).length
+        ? data.sliding_window_quota : undefined) as any,
       supportedModels: data.supported_models || undefined,
       unsupportedModels: data.unsupported_models || undefined,
       registryRevision: Number(data.registry_revision || 1),

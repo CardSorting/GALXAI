@@ -7,7 +7,7 @@ import os from 'node:os';
 import path from 'node:path';
 import pg from 'pg';
 import { ShardProjectionReader, SHARD_PROJECTION_COLUMNS, SHARD_PROJECTION_DELTA_SQL, SHARD_API_DELTA_OPTIONS } from '../src/lib/supabase/repositories/ShardProjectionReader';
-import { RegistryEgressGuard } from '../src/relay/registry-egress-guard';
+import { RegistryEgressGuard, RegistryEgressLimitError } from '../src/relay/registry-egress-guard';
 import { ShardRegistrySync, readRegistryApiDelta, type RegistryRow } from '../src/relay/shard-registry-sync';
 import { GalxCredentialSubstrate } from '../src/core/substrate/GalxCredentialSubstrate';
 import type { GalxPersistence } from '../src/lib/storage/GalxPersistence';
@@ -195,7 +195,8 @@ test('REST uses bounded same-project authenticated reads and refuses oversized r
   assert.equal(requests, 1); assert.equal(bodyCancelled, true);
 });
 
-test('SQL failover cooldown preserves the budget for confirmed REST reads', async () => {
+test('SQL failover cooldown preserves the budget for confirmed REST reads', async t => {
+  let now = 100000; t.mock.method(Date, 'now', () => now);
   const source = { ...Object.fromEntries(SHARD_PROJECTION_COLUMNS.map(column => [column, null])),
     id: 'fallback', user_id: 'alice', priority: 1, registry_revision: 1, created_at: '2026-09-09',
     encrypted_ciphertext: 'cipher', encrypted_iv: 'iv', encrypted_tag: 'tag' } as RegistryRow;
@@ -212,6 +213,9 @@ test('SQL failover cooldown preserves the budget for confirmed REST reads', asyn
       return Response.json(rows, { headers: { 'content-range': rows.length ? '0-0/1' : '*/1' } });
     },
   });
+  await assert.rejects(reader.read('alice'), RegistryEgressLimitError);
+  assert.equal(httpReads,0,'failed SQL retains its reservation; REST waits for full room');
+  now += 10000;
   assert.equal((await reader.read('alice'))[0].encrypted_ciphertext, 'cipher');
   assert.equal((await reader.read('alice'))[0].encrypted_ciphertext, 'cipher');
   assert.equal(sqlReads, 1); assert.equal(httpReads, 5);

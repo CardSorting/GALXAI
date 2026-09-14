@@ -761,3 +761,31 @@ Incident: `INC-20260913-IMAGES`. Kind: `verification`.
 **Next step:** Run each not-run subitem only in a disposable environment with independent execution recording, then append fault-to-detection, authority, required-ready, first-request, outcome and cleanup evidence.
 
 Evidence: [act018-isolated-drills-20260914.json](incidents/2026/2026-09-13-image-generation/act018-isolated-drills-20260914.json).
+
+## EVT-20260914-image-admission-projection — 2026-09-14T21:52:44.181840Z
+
+Incident: `INC-20260913-IMAGES`. Kind: `observation`.
+
+**Observation:** Live image POST at 21:46:54 UTC returned 202; its receipt returned 502. Private deployment logs identify ImageCapacityError before dispatch. The signed-in library renders two preexisting images. Read-only authority query found two unretracted nonexpired/undated healthy accounts with an empty optional sliding-window object, plus one expired unretracted account.
+
+**Action:** Reproduced empty-window projection denial and expired candidate selection in isolated pool fixtures. Corrected empty policy projection, expired candidate filtering, known non-start receipt classification, and frontend request retention. No production records or limits were changed.
+
+**Result:** Three focused capacity regression tests pass. Remaining validations and release are pending.
+
+**Next step:** Verify receipt/public contracts, concurrent recovery, production build and documentation; then qualify the compatible deployment and one bounded frontend generation.
+
+Evidence: [test-image-capacity-projection.ts](../scripts/test-image-capacity-projection.ts).
+
+## EVT-20260914-image-registry-starvation — 2026-09-14T22:08:29.208473Z
+
+Incident: `INC-20260913-IMAGES`. Kind: `observation`.
+
+**Observation:** Independent administrator checks show registryFresh=false, shard_registry_unavailable and zero image capability entries. The persistent egress guard had 205 consecutive failed refreshes and less than 10 KiB of burst room.
+
+**Action:** Reproduced partial-refill starvation and changed reservations to require the full response bound before I/O. Retained policy, counters and journals.
+
+**Result:** Guard/API tests pass, including repeated recovery checks after exhaustion and persisted restart budgets. Deployment remains pending.
+
+**Next step:** Qualify the supervised controller restart and application release, then perform one bounded frontend generation.
+
+Evidence: [test-registry-egress-guard.ts](../scripts/test-registry-egress-guard.ts), [test-registry-api-egress.ts](../scripts/test-registry-api-egress.ts).

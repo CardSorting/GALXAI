@@ -642,6 +642,9 @@ export class GalxCredentialPool {
 
     // 3. Filter accounts through 6-State Circuit Breaker, Model Gating, and Adaptive Concurrency Limits
     const candidateAccounts = complianceEligibleAccounts.filter((acc) => {
+      // Renewal belongs to the credential lifecycle; do not select a candidate
+      // the durable authority must reject while other capacity is available.
+      if (acc.expiresAtMs !== undefined && acc.expiresAtMs <= nowMs) return false;
       const circuitEval = this.circuitBreaker.evaluateAccountStatus(acc, nowMs, req.targetModel);
       if (!circuitEval.canAttempt) return false;
 

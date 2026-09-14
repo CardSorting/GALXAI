@@ -58,6 +58,11 @@ try {
   const failing=new ImageRequestService(repo,async()=>{attempts++;throw new Error('ambiguous failure');},()=>{});
   await failing.run(owner,failed.id); await failing.run(owner,failed.id);
   assert.equal(attempts,1); assert.equal((await cold.get(owner,failed.id))?.state,'failed'); checks++;
+  const busy=await repo.create(owner,{...payload,idempotencyKey:randomUUID()},false);
+  await repo.claim(owner,busy.id); await repo.fail(owner,busy.id,true);
+  assert.equal((await cold.get(owner,busy.id))?.failure_code,'generation_not_started');
+  assert.equal(await cold.claim(owner,busy.id),null);
+  assert.equal((await cold.get(owner,failed.id))?.failure_code,null); checks++;
   // No success receipt when image persistence silently fails.
   const unsaved=await repo.create(owner,{...payload,idempotencyKey:randomUUID()},false);
   await new ImageRequestService(repo,async()=>({data:[{asset_id:'unsaved'}]} as any),()=>{}).run(owner,unsaved.id);

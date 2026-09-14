@@ -20,6 +20,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     if (req.nextUrl.searchParams.get('snapshot') === 'true') {
       return new Response(JSON.stringify({ task: await imageRequestSnapshot(task) }), { headers: imageHeaders(requestId, 'application/json') });
     }
+    if (task.state === 'failed' && task.failure_code === 'generation_not_started') return imageError('generation_not_started', requestId, 5);
     if (task.state === 'failed' || task.state === 'cancelled') return imageError('generation_failed', requestId);
     if (task.state !== 'completed') {
       const headers = imageHeaders(requestId, 'application/json'); headers.set('Retry-After', '3');

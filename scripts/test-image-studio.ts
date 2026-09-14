@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { appendCreations, generationBody, readGeneration, readLibrary, readPending, readSettings, safeImageUrl, studioError } from '../src/components/images/studio-contract';
+import { readPendingGenerations, generationStatusFailure, MAX_ACTIVE_GENERATIONS, appendCreations, generationBody, readGeneration, readLibrary, readPending, readSettings, safeImageUrl, studioError } from '../src/components/images/studio-contract';
 
 test('studio accepts owned raster artifacts and rejects remote, active, and malformed URLs', () => {
   for (const value of ['https://evil.test/image.png', '//evil.test/image.png', 'javascript:alert(1)', 'data:image/svg+xml;base64,AAAA',
@@ -78,3 +78,23 @@ test('time estimation and progress calculation provide predictable bounds and ph
   assert.match(late.statusText, /almost ready/i);
 });
 
+
+
+test('status retrieval retries transient errors without treating them as generation rejection', () => {
+  for (const status of [408, 429, 500, 502, 503, 504]) assert.equal(generationStatusFailure(status, {error:{message:'private diagnostic'}}), 'retry');
+  assert.equal(generationStatusFailure(503, {error:{code:'generation_not_started'}}), 'not-started');
+  assert.equal(generationStatusFailure(502, {error:{code:'generation_failed'}}), 'unconfirmed');
+  assert.equal(generationStatusFailure(401, {}), 'auth');
+  assert.equal(generationStatusFailure(404, {}), 'unconfirmed');
+  assert.equal(generationStatusFailure(200, {error:{code:'generation_not_started'}}), 'retry');
+});
+test('reload retains bounded independent requests including paused uncertain outcomes', () => {
+  const tasks = Array.from({length:12}, (_,i) => ({id:`task-${i}`,startedAt:123,settings:{prompt:`Prompt ${i}`},paused:true,internal:'secret'}));
+  const restored=readPendingGenerations(tasks);
+  assert.equal(restored.length,MAX_ACTIVE_GENERATIONS);
+  assert.equal(restored[0].paused,true);
+  assert.doesNotMatch(JSON.stringify(restored), /secret|internal/);
+  assert.equal(readPendingGenerations([tasks[0],tasks[0]]).length,1);
+  assert.equal(readPendingGenerations(tasks[0]).length,1);
+  assert.deepEqual(readPendingGenerations(null),[]);
+});

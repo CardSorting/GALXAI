@@ -136,3 +136,9 @@ A real client image larger than the former frame limit succeeded after the separ
 ## Image resilience follow-up
 
 [ADR 0130](adr/0130-image-receipts-and-uncertain-outcomes.md) defines single-dispatch images and uncertain-result recovery. The September 9 controller reload and worker-image build do not prove deployment of every application or DreamBees change, nor replacement of a retained worker. Check the dated component matrix before claiming rollout.
+
+## Registry reservation recovery
+
+Registry I/O must reserve the complete requested response bound plus protocol overhead before sending. An insufficient byte or request balance refuses locally without spending either token balance. Failed dispatched reads retain their full reservation; complete responses refund only measured unused bytes. This prevents a cold registry refresh from repeatedly spending partial refills that cannot carry its response. Persistent counters, budget policy and credentials survive restart unchanged. A full reservation may take several minutes to replenish under the existing hourly budget; readiness remains unavailable until an authoritative refresh and capability checks succeed. Never clear the journal or increase budget merely to hide the outage.
+
+Use authenticated `/api/egress` and `/api/capabilities` to distinguish budget refusal from provider failures. During a source-only repair, verify no accepted work, restart through the existing supervised launchd boundary, retain worker volumes and journals, and observe the original counter continuity plus fresh capability readiness. The local guard regression exercises repeated thirty-second checks after failed reads; it does not establish provider capacity or live load behavior.

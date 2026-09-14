@@ -75,6 +75,7 @@ export function imageRequestResponse(record: ImageRequestRecord, requestId: stri
 /** Explicit public DTO, including for SSE. Never serialize the private receipt. */
 export async function imageRequestSnapshot(record: ImageRequestRecord) {
   return { id: record.id, status: record.state,
+    ...(record.state === 'failed' && record.failure_code === 'generation_not_started' ? { error: { code: 'generation_not_started' } } : {}),
     ...(record.state === 'completed' ? { result: { data: await (await imageRequestResponse(record,crypto.randomUUID(),true)).json() } } : {}),
   };
 }

@@ -69,8 +69,11 @@ export class RegistryEgressGuard {
     this.refill();
     const requested = options.maxResponseBytes ?? this.policy.maxResponseBytes;
     if (!Number.isSafeInteger(requested) || requested < 0) throw new RegistryEgressLimitError();
-    const allowance = Math.floor(Math.min(this.policy.maxResponseBytes, requested, this.state.byteTokens - this.policy.overheadBytes));
-    if (this.state.requestTokens < 1 || allowance < 4096) {
+    const allowance = Math.min(this.policy.maxResponseBytes, requested);
+    // Wait for a complete reservation. Repeated partial reads consume each
+    // refill before a cold registry can fit, turning bounded backoff into an
+    // indefinite outage. Refusal must consume neither byte nor request tokens.
+    if (this.state.requestTokens < 1 || allowance < 4096 || this.state.byteTokens < allowance + this.policy.overheadBytes) {
       this.state.blocked++;
       this.persist();
       this.warnLimit();

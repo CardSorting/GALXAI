@@ -10,7 +10,7 @@ import { ArrowDownToLine, ArrowLeft, ArrowRight, Check, ChevronDown, Copy, Image
 import { useAuth } from '@/contexts/AuthContext';
 import { WorkspaceSessionBoundary } from '@/components/auth/WorkspaceSessionBoundary';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
-import { DEFAULT_SETTINGS, GENERATION_PHASES, IMAGE_MODEL, INSPIRATION_PROMPTS, MAX_PROMPT, RATIOS, readSettings, type StarterTemplate, type StudioImage, type StudioSettings } from './studio-contract';
+import { DEFAULT_SETTINGS, IMAGE_MODEL, INSPIRATION_PROMPTS, MAX_PROMPT, RATIOS, readSettings, type StarterTemplate, type StudioImage, type StudioSettings } from './studio-contract';
 import { useImageStudio } from './use-image-studio';
 import { GenerationCanvas } from './GenerationCanvas';
 import { StudioArtwork as Artwork } from './StudioArtwork';
@@ -240,9 +240,9 @@ function StudioWorkspace({ owner, token, authLoading }: { owner: string | null; 
           </div>
           <div className="studio-submit-area">
             {owner && <GenerationGateNotice kind="images" quantity={settings.count}/>}
-            {!owner && !authLoading ? <Link className="studio-primary" href={authEntryPath(pathname)}><Sparkles aria-hidden="true" />Sign in to generate<ArrowRight aria-hidden="true" /></Link> : <button className="studio-primary" type="submit" disabled={gate.blocked || !studio.ready || authLoading || !settings.prompt.trim() || studio.submitting || studio.uncertain || studio.retryIn > 0}>
+            {!owner && !authLoading ? <Link className="studio-primary" href={authEntryPath(pathname)}><Sparkles aria-hidden="true" />Sign in to generate<ArrowRight aria-hidden="true" /></Link> : <button className="studio-primary" type="submit" disabled={gate.blocked || !studio.ready || authLoading || !settings.prompt.trim() || studio.submitting || studio.uncertain || studio.atCapacity || studio.retryIn > 0}>
               {studio.submitting ? <LoaderCircle className="studio-spin" aria-hidden="true" /> : <Sparkles aria-hidden="true" />}
-              {authLoading ? 'Loading…' : studio.submitting ? 'Submitting…' : studio.retryIn > 0 ? `Try again in ${studio.retryIn}s` : `Generate ${settings.count === 1 ? 'image' : `${settings.count} images`}`}
+              {authLoading ? 'Loading…' : studio.submitting ? 'Submitting…' : studio.retryIn > 0 ? `Try again in ${studio.retryIn}s` : studio.atCapacity ? 'Four requests tracked' : `Generate ${settings.count === 1 ? 'image' : `${settings.count} images`}`}
             </button>}
             <p>{owner ? <>Uses your account’s image allowance. <span className="studio-shortcut">⌘ / Ctrl + Enter</span></> : 'Your prompt stays here while you sign in.'}</p>
           </div>
@@ -253,62 +253,33 @@ function StudioWorkspace({ owner, token, authLoading }: { owner: string | null; 
 
         <div className="studio-canvas-body" ref={canvasRef} tabIndex={-1}>
           <div className="studio-announcement" role="status" aria-live="polite">{studio.notice}</div>
-          {studio.error && <div className="studio-alert" role="alert"><p>{studio.error}</p><div className="studio-alert-actions"><button className="studio-text-button" onClick={() => { showLibrary(); studio.refresh(); studio.clearPending(); }}>Check my images<ArrowRight aria-hidden="true" /></button>{studio.uncertain && <button className="studio-text-button" onClick={() => studio.clearPending()}>Dismiss & create</button>}{studio.error.includes('Sign in') && <Link className="studio-text-button" href={authEntryPath(pathname)}>Sign in</Link>}</div></div>}
+          {studio.error && <div className="studio-alert" role="alert"><p>{studio.error}</p><div className="studio-alert-actions"><button className="studio-text-button" onClick={() => { showLibrary(); studio.refresh(); }}>Check my images<ArrowRight aria-hidden="true" /></button>{studio.uncertain && studio.recoverableSubmission && <button className="studio-text-button" disabled={studio.submitting || studio.retryIn > 0} onClick={studio.recoverSubmission}>Recover request</button>}{studio.pending && !studio.polling && <button className="studio-text-button" onClick={studio.resumeUpdates}>Check status</button>}{(studio.uncertain || studio.pending?.paused) && <button className="studio-text-button" onClick={() => studio.clearPending()}>Dismiss & create</button>}{studio.error.includes('Sign in') && <Link className="studio-text-button" href={authEntryPath(pathname)}>Sign in</Link>}</div></div>}
           {(studio.pending || studio.submitting) && <section className="studio-progress" aria-label="Generation status">
             <div className="studio-progress-top">
               <div className="studio-progress-heading">
                 {busy ? <LoaderCircle className="studio-spin" aria-hidden="true" /> : <ImageIcon aria-hidden="true" />}
                 <div>
                   <h2 aria-live="polite" aria-atomic="true">
-                    {studio.submitting ? 'Submitting your prompt' : studio.polling ? studio.progress : (studio.progress || 'Creating your images…')}
+                    {studio.submitting ? 'Submitting your prompt' : studio.polling ? studio.progress : 'Updates paused'}
                   </h2>
                   <p className="studio-progress-meta">
                     {studio.pending ? (
                       <>
-                        <span>{studio.pending.settings.count} {studio.pending.settings.count === 1 ? 'image' : 'images'} · {studio.pending.settings.ratio} · {studio.pending.settings.quality === 'hd' ? 'HD' : 'Standard'}</span>
+                        <span>{studio.activeCount > 1 && `${studio.activeCount} requests tracked · `}{studio.pending.settings.count} {studio.pending.settings.count === 1 ? 'image' : 'images'} · {studio.pending.settings.ratio} · {studio.pending.settings.quality === 'hd' ? 'HD' : 'Standard'}</span>
                         <span className="studio-progress-divider">·</span>
                         <span>{Math.floor(studio.elapsed / 60)}:{String(studio.elapsed % 60).padStart(2, '0')} elapsed</span>
-                        <span className="studio-progress-divider">·</span>
-                        <span className="studio-progress-eta">{studio.remainingSeconds > 0 ? `~${studio.remainingSeconds}s remaining` : 'Almost ready…'}</span>
                       </>
                     ) : 'Sending your request…'}
                   </p>
                 </div>
               </div>
 
-              {studio.pending && (
-                <div className="studio-progress-bar-wrap" aria-hidden="true">
-                  <div className="studio-progress-bar">
-                    <div className="studio-progress-fill" style={{ transform: `scaleX(${Math.max(0.01, studio.progressPercent / 100)})` }} />
-                  </div>
-                  <div className="studio-progress-step-info">
-                    <span>{studio.phaseStatusText}</span>
-                    <span className="studio-progress-percent">{studio.progressPercent}%</span>
-                  </div>
-                </div>
-              )}
-
-              {studio.pending && (
-                <div className="studio-progress-stepper" aria-hidden="true">
-                  {(['queued', 'synthesizing', 'refining', 'finalizing'] as const).map((stageKey, idx) => {
-                    const phase = GENERATION_PHASES[stageKey];
-                    const isCurrent = studio.generationPhase.key === stageKey;
-                    const isPassed = phase.stepNumber < studio.generationPhase.stepNumber;
-                    return (
-                      <div key={stageKey} className={`studio-phase-step ${isCurrent ? 'studio-phase-active' : isPassed ? 'studio-phase-done' : ''}`}>
-                        <span className="studio-phase-dot" />
-                        <span>{idx + 1}. {phase.shortLabel}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
             </div>
 
             {studio.pending && <p className="studio-progress-prompt">{studio.pending.settings.prompt}</p>}
-            <p className="studio-progress-reassurance">✨ Safe to navigate: your images continue generating in the background.</p>
+            <p className="studio-progress-reassurance">Your requests stay tracked while you browse.</p>
 
-            <details className="studio-progress-options"><summary>Generation options</summary><div className="studio-progress-actions">{studio.pending && (studio.polling ? <button className="studio-secondary" onClick={() => { studio.setPolling(false); studio.setNotice('Updates paused. Your generation may continue.'); }}>Pause updates</button> : <button className="studio-secondary" onClick={() => studio.setPolling(true)}>Resume updates</button>)}
+            <details className="studio-progress-options"><summary>Generation options</summary><div className="studio-progress-actions">{studio.pending && (studio.polling ? <button className="studio-secondary" onClick={() => { studio.setPolling(false); studio.setNotice('Updates paused. Your generation may continue.'); }}>Pause updates</button> : <button className="studio-secondary" onClick={() => studio.resumeUpdates()}>Resume updates</button>)}
               <button className="studio-text-button" onClick={() => { studio.clearPending(); focusPrompt(); }}>Start a new generation</button></div>
             <p>Pausing updates doesn’t cancel your generation.</p></details>
           </section>}

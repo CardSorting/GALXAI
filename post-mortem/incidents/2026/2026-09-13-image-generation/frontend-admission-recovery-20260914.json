@@ -1,0 +1,75 @@
+{
+  "classification": "private",
+  "observed_at": "2026-09-14T22:10:04.871408Z",
+  "base_revision": "73d073c4d1ea56ae39ca2adf7eb5a8fcc02d3778",
+  "scope": "Local working-tree correction and separately identified read-only production observations; deployment pending",
+  "findings": [
+    "Empty optional sliding-window object excluded usable capacity; expired candidates were selectable before authoritative rejection.",
+    "Production logs correlated the reported error to pre-dispatch ImageCapacityError.",
+    "Transient status errors erased tracking; concurrent requests persisted only the latest receipt.",
+    "Independent production controller registry was unavailable; partial byte reservations starved cold registry recovery."
+  ],
+  "changes": [
+    "Project only empty optional quota objects as absent and exclude expired candidates without changing durable permission/quota authority.",
+    "Persist allowlisted known non-start failure in existing private payload; preserve ambiguous outcomes and owner-scoped access.",
+    "Retain at most four requests per tab, bounded parallel status reads, retry-after/offline controls, exact-key manual submission recovery and independent library navigation.",
+    "Show observed request status and elapsed time without synthetic completion percentages.",
+    "Reserve complete registry response bound before I/O; preserve persistent counters, conservative failure charges and policy limits."
+  ],
+  "verification": {
+    "capacity_projection": 3,
+    "studio_contract_and_scale": 19,
+    "studio_dom_recovery": "passed; four requests, transient 503, reload, known non-start, lost acknowledgement exact key/payload",
+    "public_http_and_auth": 40,
+    "image_database": 38,
+    "database_integrity": "passed",
+    "database_integration": 94,
+    "free_quota_unit": 4,
+    "free_quota_database": 86,
+    "developer_preview": 15,
+    "activity_and_egress": 42,
+    "registry_guard_and_api": 16,
+    "registry_projection_database": 7,
+    "relay_capabilities": 154,
+    "typescript": "passed",
+    "targeted_lint": "passed",
+    "production_build": "passed before final registry correction; final rebuild pending",
+    "compiled_boundary": "668 assets scanned; fingerprint attestation pending",
+    "initial_failures": [
+      "Sandbox denied fixture ports/Docker; approved isolated reruns passed.",
+      "Two failover fixtures assumed partial byte reservations; updated to assert full-budget waiting or isolate request backoff."
+    ]
+  },
+  "semantic_review": {
+    "guides": [
+      "docs/QUEUE_SPECIFICATION.md",
+      "docs/RELAY_VNEXT_RUNBOOK.md",
+      "docs/SUPABASE_PARANOID_ARCHITECTURE_SPEC.md",
+      "docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md",
+      "docs/maintainers/FREE_GENERATION_QUOTA.md",
+      "docs/maintainers/image-public-boundary.md",
+      "docs/maintainers/image-library-scale.md",
+      "docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md",
+      "docs/maintainers/readable-urls.md",
+      "docs/operations/workspace-auth.md",
+      "post-mortem/runbooks/image-generation.md",
+      "post-mortem/failure-modes/images.md",
+      "post-mortem/CURRENT_STATE.md"
+    ],
+    "unmapped_review": [
+      "src/core/pool/GalxCredentialPool.ts: existing local candidate prefilter, durable admission untouched",
+      "scripts/test-image-capacity-projection.ts and scripts/test-image-studio-recovery.ts: isolated regression harnesses",
+      "incident generated navigation and journal: private evidence only"
+    ],
+    "limits": "Scoped semantic review of affected contracts; fingerprint inventory is broader than executed tests."
+  },
+  "references": [
+    "https://learn.microsoft.com/en-us/azure/architecture/patterns/asynchronous-request-reply"
+  ],
+  "remaining": [
+    "Final production rebuild and docs checks",
+    "Controlled deployment and real frontend generation/download/reload",
+    "Sustained production throughput, payment settlement and destructive host/daemon drills not tested"
+  ],
+  "dom_reproduction": "Install jsdom@26.1.0 under a temporary prefix, then GALX_JSDOM_MODULE=/absolute/prefix/node_modules/jsdom/lib/api.js node --import tsx --test scripts/test-image-studio-recovery.ts. No dependency is added to the production bundle."
+}

@@ -15,7 +15,7 @@ test('byte reservations survive restart and block I/O until allowance replenishe
     await assert.rejects(first.run(async () => { throw new Error('connection dropped after dispatch'); }));
     const resumed = new RegistryEgressGuard(options);
     assert.equal(resumed.snapshot().requests, 1);
-    await resumed.run(async (allowance, charge) => { charge(allowance); });
+    await resumed.run(async (allowance, charge) => { charge(allowance); }, { maxResponseBytes: 4096 });
     let calls = 0;
     await assert.rejects(resumed.run(async () => { calls++; }), RegistryEgressLimitError);
     assert.equal(calls, 0, 'budget rejection happens before the origin request');
@@ -76,4 +76,20 @@ test('strict defaults bound bursts but allow a day of ordinary polling and bound
   }
   assert.equal(guard.snapshot().failures, 0);
   assert(guard.snapshot().accountedBytes < 50 * 1024 * 1024);
+});
+
+test('repeated recovery checks accumulate a full cold-read reservation instead of starving forever', async () => {
+  let now = 100000, reads = 0;
+  const guard = new RegistryEgressGuard({ now: () => now });
+  await assert.rejects(guard.run(async () => { throw new Error('lost first read'); }));
+  // Consume remaining room using an explicitly smaller operation.
+  await assert.rejects(guard.run(async () => { throw new Error('lost second read'); }, { maxResponseBytes: 250000 }));
+  const before = guard.snapshot();
+  for (let i=0; i<12; i++) {
+    now += 30000;
+    try { await guard.run(async (allowance, charge) => { reads++; assert.equal(allowance,262144); charge(175207); }); } catch (error) { assert(error instanceof RegistryEgressLimitError); }
+  }
+  assert(reads > 0, 'recovery succeeds without resetting state or increasing the budget');
+  assert.equal(guard.snapshot().failures,before.failures,'insufficient reservations never initiate doomed I/O');
+  assert.equal(guard.snapshot().requests,before.requests+reads);
 });
