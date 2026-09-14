@@ -1,0 +1,155 @@
+{
+  "version": 1,
+  "classification": "private",
+  "incident": "INC-20260913-IMAGES",
+  "observed_at": "2026-09-14T19:36:00Z",
+  "runtime_source_revision": "d228ed4c3857e5ee7343eeb391535fce676cc2b4",
+  "rollout_evidence_checkout": "955221b",
+  "deployment": {
+    "environment": "local production launchd target; no remote production endpoint",
+    "host": "macOS 26.5.1 arm64 (Darwin 25.5.0)",
+    "node": "v26.8.1",
+    "python": "3.14.7",
+    "launchd": {
+      "label": "com.galxai.federation.production",
+      "state": "running",
+      "runs_after_controlled_drills": 3,
+      "launcher_pid": 35028,
+      "guardian_pid": 35029,
+      "controller_pid": 35030,
+      "plist": "/Users/bozoegg/Library/LaunchAgents/com.galxai.federation.production.plist",
+      "plist_sha256": "5301f199af88ca6b37bfc03564390d8cd2664a7f8d00d57cb1d820664b537a30",
+      "keep_alive_successful_exit": false,
+      "run_at_load": true,
+      "exit_timeout_seconds": 180,
+      "environment_allowlist": {
+        "RELAY_FEDERATION_NAMESPACE": "production",
+        "RELAY_FEDERATION_PORT": "3001",
+        "RELAY_FEDERATION_IMAGE": "galxai-relay:sites-fixed-20260912-2b72afd",
+        "RELAY_SUPERVISOR_PYTHON": "python3",
+        "RELAY_CODEX_IMAGE_TOOL_ALIAS": "true",
+        "RELAY_SITES_OUTPUT_LIMIT_FORWARDING": "true"
+      },
+      "process_chain": "launchd -> Node launcher -> Python guardian -> Node controller",
+      "listener": "127.0.0.1:3001",
+      "active_controller_authorities": 1
+    },
+    "docker": {
+      "context": "desktop-linux",
+      "server": "Docker Desktop Linux VM / Engine 29.7.2 / linux arm64",
+      "live_restore": false,
+      "worker": {
+        "id": "269d27292512a83d9faef2d752b66f4de1ce7c73eb448a66aea7158bb8781921",
+        "name": "galx-shard-a5bb38581ffb74fe21b0",
+        "image": "galxai-relay:sites-fixed-20260912-2b72afd",
+        "image_digest": "sha256:39f0361c2c4492158362ce603c6fdaddfad40c99f120afb4760ea0e1ed51bbbf",
+        "status": "running",
+        "health": "healthy",
+        "restart_policy": "no",
+        "shard": "codex_openai_mtm_1788471539350",
+        "generation": "82548ba4-a8cd-4bd1-b2f7-23f5789f40ea",
+        "mount": "galx-shard-a5bb38581ffb74fe21b0-state:/app/.broccolidb",
+        "preflight_id": "c28bf99262c438de70c4216261ec1c957e284713594354c5cc542e6123528e49",
+        "preflight_generation": "5ea6a70f-fd23-4aaf-8819-efecbc5ad880",
+        "preflight_image_digest": "sha256:39f0361c2c4492158362ce603c6fdaddfad40c99f120afb4760ea0e1ed51bbbf",
+        "candidate_built_tag": "galxai-relay:act019-d228ed4",
+        "candidate_built_digest": "sha256:92c1eb8ee6ba30391f0da9c51abeb48f961299a76b089dfaf3f2fb7c2dc13cba"
+      }
+    }
+  },
+  "ownership_migration": {
+    "old_plist_sha256": "d1e5a7c623a5f60d2bef304ba463156aba25d84b9e262e53dc9462d97430d23f",
+    "legacy_marker_sha256": "51a9b5d4bbff3d43a103b3b8b9c4ffcf4c837bd4685e1be3bbb2fa53a0b31c89",
+    "legacy_marker_bytes": 5,
+    "legacy_marker_after_shutdown": "owner_removed_marker; exact pre-shutdown bytes retained",
+    "rollback_archive": "post-mortem/incidents/2026/2026-09-13-image-generation/evidence/raw/act019-rollout-2026-09-14T19-18-39-288Z",
+    "new_marker_format": "{\"format\":\"galx-local-flock-v1\"}\n",
+    "new_marker_sha256": "37c6f3aab7530d22b1164e53f240b8d4596c9d181b0fbb978ff95c288e2a480c",
+    "guard_mode": "600",
+    "state_volume_preserved": true,
+    "old_owner_graceful_shutdown_removed_worker": true,
+    "initial_cutover_worker_adopted": false,
+    "post_crash_worker_adopted": true
+  },
+  "evidence_table": {
+    "guardian_boot": "deployed and observed through launchd -> guardian -> controller process chain",
+    "ownership": "deployed kernel-held guard; one authority; old marker archived from owner shutdown; no manual lock deletion",
+    "worker_restart_policy": "real Docker daemon observed policy no after controller reconciliation",
+    "worker_image": "candidate d228 image built and digest recorded but retained deployed worker remains the September 11 image",
+    "host_admission": "deployed; durable admissions journal initialized; stable request accepted and completed",
+    "worker_receipt_code": "not deployed to retained worker; candidate image boundary remains open",
+    "act018_dependency_drills": "not run against production by authorization"
+  },
+  "canaries": {
+    "controller_crash": {
+      "fault": "SIGKILL exact controller PID 32106",
+      "fault_injected_at": "2026-09-14T19:30:17.868Z",
+      "guardian_detected_at": "2026-09-14T19:30:17.889Z",
+      "authority_established_at": "2026-09-14T19:30:18.079Z",
+      "worker_adopted_at": "2026-09-14T19:30:18.670Z",
+      "required_ready_at": "2026-09-14T19:30:55.681Z",
+      "fault_to_detection_ms": 21,
+      "fault_to_authority_ms": 211,
+      "fault_to_worker_adoption_ms": 802,
+      "fault_to_required_ready_ms": 37813,
+      "result": "passed; no active work; one guardian authority"
+    },
+    "controller_pause": {
+      "fault": "SIGSTOP exact controller PID 33990",
+      "fault_injected_at": "2026-09-14T19:33:47.415Z",
+      "detected_at": "2026-09-14T19:34:02.133Z",
+      "authority_ended_at": "2026-09-14T19:34:02.154Z",
+      "authority_established_at": "2026-09-14T19:34:02.337Z",
+      "required_ready_at": "2026-09-14T19:34:02.991Z",
+      "fault_to_detection_ms": 14718,
+      "fault_to_authority_ms": 14923,
+      "fault_to_required_ready_ms": 15576,
+      "fixture_comparison_ms": 2302,
+      "result": "passed; production heartbeat budget dominates detection"
+    }
+  },
+  "request_canary": {
+    "first_attempt": {
+      "initial_status": 202,
+      "stable_identity_used": true,
+      "client_harness": "failed while resolving a relative status URL after dispatch; no retry was sent",
+      "post_attempt_telemetry": "admission retained=1; no duplicate claim"
+    },
+    "corrected_attempt": {
+      "initial_status": 202,
+      "model": "gpt-5.5",
+      "stable_identity_used": true,
+      "idempotency_key_sha256": "ed850fb67721ca4c79be678855d7328c9bd1fda61579d2c7298a4e004dcb7f52",
+      "terminal_status": 200,
+      "terminal_state": "completed",
+      "result": "passed"
+    },
+    "independent_execution_recorder": "not available; no duplicate-execution claim is based solely on relay logs"
+  },
+  "post_canary_state": {
+    "ready": true,
+    "registry_fresh": true,
+    "active_jobs": 0,
+    "pending_admission": 0,
+    "tracked_jobs": 0,
+    "recovery_retained": 2,
+    "recovery_unknown": 0,
+    "storage_healthy": true,
+    "worker_restart_policy": "no"
+  },
+  "limitations": [
+    "The running retained worker uses the September 11 image digest sha256:39f0361c2c4492158362ce603c6fdaddfad40c99f120afb4760ea0e1ed51bbbf; d228 worker-side durable-receipt changes are not deployed.",
+    "The old controller gracefully removed its worker during bootout, so the first guardian start cold-started a same-volume worker. Adoption was proven on subsequent controller crash and pause handovers, not at the initial cutover.",
+    "No independent workload recorder was available; duplicate execution remains a contract assertion rather than an independently observed production fact.",
+    "Docker-daemon restart, host reboot, delayed startup, storage faults, retained-state restoration and restart-budget exhaustion remain isolated ACT-018 drills."
+  ],
+  "rollback": {
+    "prepared_before_change": true,
+    "old_plist_archive": "evidence/raw/act019-rollout-2026-09-14T19-18-39-288Z/legacy-production-installed.plist",
+    "legacy_marker_archive": "evidence/raw/act019-rollout-2026-09-14T19-18-39-288Z/legacy-controller.lock",
+    "before_admission": "bootout new guardian, prove process group/listener gone, restore old plist and let old owner create its marker",
+    "after_admission_or_unknown": "do not start old binary; preserve new journals/tombstones, keep admissions blocked and reconcile or use a compatible rollback binary",
+    "state_compatible_for_old_binary_after_candidate_work": false
+  },
+  "acceptance": "partial: host guardian/controller recovery and worker restart-policy cutover are deployed and canaried; ACT-019 remains open for the retained worker image boundary and state-compatible post-admission rollback."
+}

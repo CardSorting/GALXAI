@@ -347,11 +347,11 @@
   },
   "relay": {
     "reviewer": "relay maintainer",
-    "note": "Reviewed the ACT-019 state-compatible guardian cutover, legacy marker migration, worker image boundary and conditional rollback gates against the current launcher and deployment preflight.",
+    "note": "Reviewed the deployed ACT-019 guardian cutover, crash and paused-controller canaries, retained worker image boundary, request evidence and state-conditional rollback against the private rollout verification.",
     "reviewed_at": "2026-09-14",
     "review_by": "2026-09-27",
     "evidence": {
-      "post-mortem/incidents/2026/2026-09-13-image-generation/act019-rollout-plan-20260914.json": "e5c4f695e5377e0eaadfa7ea91329f271d75481b167c61e8ec4a358fd9ef3dbd"
+      "post-mortem/incidents/2026/2026-09-13-image-generation/act019-rollout-verification-20260914.json": "90583fef5aaf23db11c3ae6fe6f809bef542ad02a0854860937c442b12d44a1d"
     },
     "files": {
       "docs/ARCHITECTURE.md": "d821254fb3272cdc6c7575f6a548a1f041fe1506a10fd14b6bdd058539482e5d",

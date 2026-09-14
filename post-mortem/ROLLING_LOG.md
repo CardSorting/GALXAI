@@ -705,3 +705,31 @@ Incident: `INC-20260913-IMAGES`. Kind: `verification`.
 **Next step:** Retain the contract in the isolated ACT-018 matrix and verify frontend, gateway and worker behavior after the guardian deployment is aligned.
 
 Evidence: [test-relay-admission-durability.ts](../scripts/test-relay-admission-durability.ts), [test-relay-durable-receipts.ts](../scripts/test-relay-durable-receipts.ts), [test-client-recovery.ts](../scripts/test-client-recovery.ts), [recovery-acceptance-audit-20260914.json](incidents/2026/2026-09-13-image-generation/recovery-acceptance-audit-20260914.json).
+
+## EVT-20260914-act019-rollout-production — 2026-09-14T19:36:00Z
+
+Incident: `INC-20260913-IMAGES`. Kind: `verification`.
+
+**Observation:** The affected single-host launchd deployment was pre-patch at preflight; the reviewed host controller source was d228ed4c3857e5ee7343eeb391535fce676cc2b4.
+
+**Action:** Captured a redacted preflight, built candidate worker image galxai-relay:act019-d228ed4, archived the old plist and exact legacy marker bytes, booted out the direct wrapper, and installed the reviewed guardian through the existing launchd job. The guardian owns controller.guard and the inherited descriptor; Docker reconciliation changed the retained worker restart policy to no without a second restart authority.
+
+**Result:** The new launchd process chain is running with one authority, fresh authenticated readiness, a healthy same-volume worker and policy no. The old owner removed its worker during graceful shutdown, so the first start cold-started a same-volume worker; the exact d228 worker image was built but not deployed. The rollout is therefore a host-controller/policy acceptance with the worker-image boundary open.
+
+**Next step:** Keep ACT-019 open for a controller-owned preserved-volume deployment of the d228 worker image or an explicit supported contract excluding worker-side receipt changes, and for a state-compatible post-admission rollback binary. Keep ACT-018 destructive daemon, reboot and storage drills isolated.
+
+Evidence: [act019-rollout-plan-20260914.json](incidents/2026/2026-09-13-image-generation/act019-rollout-plan-20260914.json), [act019-rollout-verification-20260914.json](incidents/2026/2026-09-13-image-generation/act019-rollout-verification-20260914.json).
+
+## EVT-20260914-act019-recovery-canaries — 2026-09-14T19:36:00Z
+
+Incident: `INC-20260913-IMAGES`. Kind: `verification`.
+
+**Observation:** The deployed guardian was exercised through a controller crash, a paused event loop and stable-identity request canaries with no active work before each destructive fault.
+
+**Action:** SIGKILL recovery measured 21 ms to detection, 211 ms to authority, 802 ms to worker adoption and 37.813 s to required readiness. SIGSTOP recovery emitted event_loop_stalled at 14.718 s, established authority at 14.923 s and restored readiness at 15.576 s. A corrected stable-key request returned 202 and terminal completed; a separate client harness error after an accepted 202 did not send a retry.
+
+**Result:** Both recovery canaries passed with one live authority, no restart storm beyond the controlled runs, zero active/tracked jobs afterward and healthy durable admission storage. No independent workload recorder was available, so duplicate execution was not independently measured; the retained worker remains on the pre-patch image.
+
+**Next step:** Use the recorded production heartbeat timings as deployment behavior rather than the 2.302-second fixture baseline; complete the worker-image boundary and retain all unperformed ACT-018 drills.
+
+Evidence: [act019-rollout-verification-20260914.json](incidents/2026/2026-09-13-image-generation/act019-rollout-verification-20260914.json).

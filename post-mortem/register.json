@@ -254,8 +254,8 @@
       "owner": "release/relay maintainer",
       "review_by": "2026-09-20",
       "status": "open",
-      "next_step": "Align the affected deployment with the reviewed guardian launcher, migrate the retained worker restart policy, and verify the loaded revision through the existing launchd service without a second restart authority.",
-      "closure": "Record a compatible state-preserving rollout and rollback, confirm the installed plist and running process use the guardian, confirm every retained federation container uses restart policy no, and observe one representative recovery. Until then the current deployment remains pre-patch and the recovery patch is not operationally accepted."
+      "next_step": "Complete the retained-worker image boundary with a controller-owned, preserved-volume replacement from galxai-relay:act019-d228ed4, then validate a state-compatible rollback after admission evidence exists.",
+      "closure": "The host guardian cutover, one-authority fencing, real Docker restart-policy migration, controller-crash adoption, paused-controller recovery and stable-key request canaries passed. The action remains open because the retained worker is still the September 11 image and the pre-patch binary cannot safely roll back after candidate admissions or unknown outcomes; close only after the d228 worker image is deployed or the supported contract explicitly excludes worker-side changes, with compatible rollback evidence."
     },
     {
       "id": "ACT-004",
