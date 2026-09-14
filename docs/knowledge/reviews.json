@@ -1,11 +1,11 @@
 {
   "knowledge": {
-    "reviewer": "relay maintainer",
-    "note": "Reviewed the committed recovery test-script registration and generated knowledge impact; no runtime behavior or deployment authority changed.",
+    "reviewer": "Codex image availability review",
+    "note": "Reviewed two added image ownership patterns and security-test inclusion against registry/schema/maintenance/reference guides; no decision status or automation authority changes.",
     "reviewed_at": "2026-09-14",
-    "review_by": "2026-09-27",
+    "review_by": "2026-09-21",
     "evidence": {
-      "post-mortem/incidents/2026/2026-09-13-image-generation/recovery-acceptance-audit-20260914.json": "3ad01fb443d8fb7a2bdb4c0b3e45556806219598cc2ce93732d91274db32afd3"
+      "post-mortem/releases/2026-09-14-image-availability-second-pass.json": "02c2eaec5775083ab349e165ed0dbe2545c07dcb76657021e5e7b8bf563d68c5"
     },
     "files": {
       ".github/CODEOWNERS": "ef2f416d15f027dc8f197ad844289c9a44c8e843d3214d1590a3a380e939d13f",
@@ -22,7 +22,7 @@
       "docs/how-to/change-with-documentation.md": "abcf6bfb2f0aadcf8cfc2fdae18ac8f3f84565f127c34f7453d50e7283006e40",
       "docs/knowledge/DESIGN_RATIONALE.md": "edd3cf9b49ed794fbe8bf14448fd0c56cb4d8df832bab81cdf07e9ea2e2204a1",
       "docs/knowledge/README.md": "5ad219aeee44a9c065db2ca69e5a6498966fed42e2d8c74773dbc055d0220931",
-      "docs/knowledge/registry.json": "77b5eb001d2243fad301ec71ce02d0ef9f7a7efe2d224f4b1c1852de28e1ec0b",
+      "docs/knowledge/registry.json": "b97ebc359a79f0f266bbc1154d793bc6633504ac09155784cb6e489530e0a5b7",
       "docs/knowledge/templates/adr.md": "28773b3cbdb53ad34f08d0362e87b6dba24b6fd76ddb6c85db8ad63d99ad1331",
       "docs/knowledge/templates/runbook.md": "19679a7eb8c1a3aafd87852fa93817e7bf9ef4696772c8deb1617366c290abc1",
       "docs/maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md": "b7df75535611c14aabe599764a6f6c2a4f0f1461d068929602c68e39d8ce850d",
@@ -38,7 +38,7 @@
       "docs/runbooks/weekly-knowledge-audit.md": "ade4fc2133306e1b544d8783f647bc4c5b8a85e3a89ce769d36f586a91c36169",
       "docs/tutorials/README.md": "7cc84f00412108e1c8ec84ef127b15027b606bd16c2dc290f6efc607b9ca5268",
       "docs/tutorials/first-change.md": "06b7c9501cfe62893978e1da6556d6d4fc0d88f4e36b484d05dad4ad72d9fd60",
-      "package.json": "6da178b435547f0e5365e52ad602d8d8ba920d8c200084d1855e3f42a90c2395",
+      "package.json": "35fab6cb81658759091d813bda1538cc0a974ac93eb08b9040cea869ee3e8edd",
       "scripts/docs-kb.py": "57642bcce6edcdec6b14dc285e973c1c7ba43d9b8908903826befcba6e992d88",
       "scripts/test-docs-kb.py": "83aa914e66cc04d866fd4c77554760748f8e1d07378326c49ac1738f12851856",
       "scripts/test-post-mortem.py": "fba33221df8a4d167f0e0662cfe1543f76628adcc52b70e0d6f2528f72b8ef4a",
@@ -47,23 +47,24 @@
     }
   },
   "images": {
-    "reviewer": "Codex image incident review",
-    "note": "Reconciled full affected image contracts: typed proven non-start refusals, unknown outcome preservation, bounded parallel tracking, privacy and quota semantics; verified source/tests and deployment refusal acceptance. Upstream generation remains unavailable.",
+    "reviewer": "Codex image availability review",
+    "note": "Reviewed availability route, bounded reader, full image boundary/library/runbook guidance, draft-preserving frontend and no-POST regressions; actual generation remains unavailable.",
     "reviewed_at": "2026-09-14",
     "review_by": "2026-09-21",
     "evidence": {
-      "post-mortem/releases/2026-09-14-image-admission-recovery.json": "171dc91d445654c37921a3ee3fcd7418c164dbd0b526c398750d47cb96816a9d"
+      "post-mortem/releases/2026-09-14-image-availability-second-pass.json": "02c2eaec5775083ab349e165ed0dbe2545c07dcb76657021e5e7b8bf563d68c5"
     },
     "files": {
       "docs/QUEUE_SPECIFICATION.md": "1128aaa7784959e883e82bb91ca8ac2bd74502b5fb601ea7195d6cea411e30f3",
       "docs/maintainers/FREE_GENERATION_QUOTA.md": "e43d24867079c13c8437b7002d8730a6bb954c321437716b4185f8c94c6d6249",
-      "docs/maintainers/image-library-scale.md": "f63c2fbd23c9014f4b0243abd7d4c25ba18965f386c03441d3674682533ebd66",
-      "docs/maintainers/image-public-boundary.md": "c28abd5e053067107d321bffbb9e1848a868c4d68f589c52d46febeb56b5e3c6",
+      "docs/maintainers/image-library-scale.md": "1d392194b33c69dcb3f0e470477f4ef8e31f38a177769f577c3bc9a9224d8683",
+      "docs/maintainers/image-public-boundary.md": "28dabdfeb94e2317b1fe3cd9d003a08e0afc0ca78677a69735483dc74ecf9d25",
       "docs/maintainers/readable-urls.md": "ea1fed2e15baa2097f0c1a906c98c66ab3343cd25aba9613151cd9f9480abb60",
-      "post-mortem/runbooks/image-generation.md": "c754643273e0d941d9befe9a14e8ae20520ad7eab27452707855dd9286800262",
+      "post-mortem/runbooks/image-generation.md": "48af2ca94f463e312c3fb2183b63c18ac9e99325608a38189d4b228a918c5c9a",
       "scripts/test-free-generation-gate-db.ts": "2919f39490203795965f494f61b288305ea7136e544515cc504d9e8a0ff7e037",
       "scripts/test-free-generation-quota-db.ts": "26d3381b0a90285cce6d954b954601fb7a5a4596998389ac7091cfb7b49d9b04",
       "scripts/test-free-generation-quota.ts": "cbf7034c6f10ecfcf6176718f693a2636af775899e05552b5d7c53c58f142fb3",
+      "scripts/test-image-availability.ts": "a1a6e18cea9ba2664d94fd82affbe3316ea4879ec290da4b5901275c3a9debef",
       "scripts/test-image-library-api.ts": "e29b96a2542534a2aad54fc5ecb6481829a238fdf78b55f900dc17824e9e479c",
       "scripts/test-image-library-http.ts": "f889bc632c6ccd33aa5f1f40f321ce75bd2167e7758fdde602db230f5d524f84",
       "scripts/test-image-library-scale-db.ts": "131e2decca645d22522ffbd90170a3e47f81b6db068d93f6429d3c5d30ee02b7",
@@ -74,9 +75,10 @@
       "scripts/test-image-studio.ts": "d42d7f521a2b9678f69fdc395a2873d933f159346b1a0cac076a3171e6786f14",
       "scripts/test-relay-image-generation.ts": "d66f497b893ed0026806fbc928dbafff65be90b2e505e86c7da32b4df9d67140",
       "scripts/verify-image-library-scale-ui.ts": "0e7003e1f256f99f28c953537b16044b50678c700b496c53d47f1b0104ff23cc",
-      "scripts/verify-image-public-http.ts": "c4b1e12705a2dae186551817cf4c2bd8351efe91c9883cd8e7936a3fee7a409f",
+      "scripts/verify-image-public-http.ts": "5c97ef30335855d86465aa2e1077ccfa5ca3fbf7660042e4a722915df4e9a3b6",
       "scripts/verify-url-navigation.mjs": "129685c1a8d30ee36d2bfbfa3a2369d945aad24ebde602289a94c9a061b46c07",
       "src/app/api/billing/generation-quota/route.ts": "9886f0b6132866ea12dcd80ba3301b9e6ccb8bc9eeac9ae3aca9a2ef1d64621f",
+      "src/app/api/images/availability/route.ts": "266d821c25d12990a45aac497bdb5051dfa75110004e90a73bd9cad61c860624",
       "src/app/api/images/library/[assetId]/route.ts": "841b0e38f6bdbc67ecde213e8cc25179d208f23648439b46d592bbbb772345df",
       "src/app/api/images/library/batch/route.ts": "33a5248bf381fc7af7301e1a2e058f01f437f6e8d0aa8d24563703b9e1de35e3",
       "src/app/api/images/library/route.ts": "954b062d5ee0725326b563508812b8b44020c534252901d672df3a828db3a829",
@@ -94,11 +96,11 @@
       "src/components/dashboard/GenerationGateNotice.tsx": "435013796b565f458365f8397bef585bec48d01f982c93e0bd0b0fb665a2d224",
       "src/components/dashboard/generation-gate.module.css": "efd8526722ca0ad42aec319a56bc2ea7e638185f30c35cea9b445dfb69bba4a4",
       "src/components/images/GenerationCanvas.tsx": "4341702fc0842c20a7d860b8241a4bf55780919b73254f54915a61cd09269473",
-      "src/components/images/ImageStudio.tsx": "b28ff44376b47767d0bf997f358d632530df353ec484645bee3813d0b9ff1787",
+      "src/components/images/ImageStudio.tsx": "58201072e7330eaf5ae8be66fac70a29a1c72b318cd10321fc20098a48aea6bc",
       "src/components/images/StudioArtwork.tsx": "427128b4f3ea300222b74fdfe132564237030507f1d40c20093c89ef52e26229",
       "src/components/images/studio-contract.ts": "cfa22ffc7df750e747c805a7a8ee394dfb76fdc9adcd2beabcb9872536f0d5bb",
       "src/components/images/studio.css": "8448bc4018a22090fb103c9c533bc947a64759e70f6486a067845d175a8f8d3d",
-      "src/components/images/use-image-studio.ts": "8d38f586ad6be495494c4a556a45f7d1edbb774c465d47a272c623a6cfe77ec1",
+      "src/components/images/use-image-studio.ts": "22b3ac9a41f10bceb777942da4c63ea84e079e7c85aff5d7027d019f0f1b8ff1",
       "src/contexts/GenerationAllowanceContext.tsx": "d73875872f3814131bfc18029e69a72091993d906af63058ca37282f2c261a7c",
       "src/core/broccolidb/BroccoliImageLibraryBuffer.ts": "840d2e9fd075d314e196c056564b911b7a1d2b63ff0569f5ee16fb7604d81915",
       "src/core/contracts/GalxContracts.ts": "8f38c428f004a323d0f90b679f3fd0bf5737118ea724154edd6ffe84d001907f",
@@ -110,6 +112,7 @@
       "src/lib/billing/free-generation-quota.ts": "b84c0d1be9c595067cafe738efbc9d1976889dcdfd025b22114860e9e3d79683",
       "src/lib/billing/generation-access.ts": "7d0f05c6a9ea2c7e4b4fc532eb264215c4ca57be2633187a564f02d44116fb26",
       "src/lib/billing/generation-quota-route.ts": "f35bd7b7f55b7b43d3d43de3a1103e081cb82a50355b6f2e1f31d2233129de49",
+      "src/lib/images/availability.ts": "f5313a5b5f64199ee41ef837e308eb15c96a9a5dfaad4428cff7e30d9e7a44b3",
       "src/lib/images/library-cursor.ts": "53d3e327e5e3ee57de4d045c62b73b8cfd1c69cb048013052c4af9f461bce798",
       "src/lib/images/navigation.ts": "827b7f91ef06422452aa03f66721e866be9755399c4514393230ce4fdcfc8e5c",
       "src/lib/images/read-image-artifact.ts": "af490bc9ccfa13d3e341574936f0929725ff2d1c9f042f53a48e0a45e8e7cb8b",
@@ -127,12 +130,12 @@
     }
   },
   "access": {
-    "reviewer": "Codex image incident review",
-    "note": "Scoped review of changed admission projection, non-start DTOs, original-request recovery, complete I/O reservation and affected canonical guides; isolated tests retained separately from deployment.",
+    "reviewer": "Codex image availability review",
+    "note": "Reviewed exact product exemption with independent active-account verification, private responses, anonymous denial and sibling-route tests; developer approval and administrator authority remain separate.",
     "reviewed_at": "2026-09-14",
     "review_by": "2026-09-21",
     "evidence": {
-      "post-mortem/incidents/2026/2026-09-13-image-generation/frontend-admission-recovery-20260914.json": "9da508a818affe41ef45c66779837994d9fe7045ffb90a097996175d974c4b36"
+      "post-mortem/releases/2026-09-14-image-availability-second-pass.json": "02c2eaec5775083ab349e165ed0dbe2545c07dcb76657021e5e7b8bf563d68c5"
     },
     "files": {
       "docs/SECURITY_POSTURE_AND_THREAT_MODEL.md": "69e35e1344f7d5812bf26a2cec7cf45f0b27911e461432d0a8537e41532ddc89",
@@ -148,7 +151,7 @@
       "scripts/manage-free-generation.ts": "7a1f786789e9507e758c13db2e750c5edc982fec2b714e646d7e0bf9526fbb2b",
       "scripts/test-auth-entry.ts": "21ddab9a5ae2aa036c392a98202c41ef4de48a8c46309bff276f23430dfec130",
       "scripts/test-auth-identity-boundary.ts": "7a4c8de24a4c82869d1adeb4c57567a574d206116b16df37681e8569bffefe93",
-      "scripts/test-developer-preview.ts": "856f244787a68161ce776119547345185cbdfe2c55071cbc46903499e4aef8ba",
+      "scripts/test-developer-preview.ts": "003bf14b03200cabcaf5f5cf918e04bb51e2da17fe3ac3cd3d911b1f76deed93",
       "scripts/test-free-generation-gate-db.ts": "2919f39490203795965f494f61b288305ea7136e544515cc504d9e8a0ff7e037",
       "scripts/test-free-generation-quota-db.ts": "26d3381b0a90285cce6d954b954601fb7a5a4596998389ac7091cfb7b49d9b04",
       "scripts/test-free-generation-quota.ts": "cbf7034c6f10ecfcf6176718f693a2636af775899e05552b5d7c53c58f142fb3",
@@ -251,7 +254,7 @@
       "src/lib/security/internal-access.ts": "ea9c2c0f280b819e285b04bb1c82b8e1669c8498ec1e05a6560a34d27a25d11c",
       "src/lib/security/normalize-image-output.ts": "205920bbb0a1df05c955211edc4d738b21cabefbe04bd0a5386ac5e0ac0af4bd",
       "src/lib/security/preview-middleware.ts": "ea577ad1118ca166c882cd8a5d335221a2a1a5b65b4cfa7b0078daa76572229d",
-      "src/lib/security/preview-policy.ts": "a609cf57962c3d98e46340655501f03a4457cdc6e490ba920df0071dd976e08c",
+      "src/lib/security/preview-policy.ts": "262f20567e664673e9878e0cab3485fff94199f9558d234444a576a84df4a07d",
       "src/lib/security/private-image-diagnostics.ts": "b2f34531192d580a86ff2bfe9cc65df9586ec28abb5648e0fc5cace2aba40255",
       "src/lib/security/public-image-http.ts": "793b1a19ed4a704439544df062e6921f1f0e9862503a4e6dc38f01246e90584d",
       "src/lib/security/public-image-record.ts": "777deaa9a0ce4a75aae539ae21a90b3ec8c1c11e19997f8664b8a35de91b1f9e",
@@ -346,17 +349,17 @@
     }
   },
   "relay": {
-    "reviewer": "Codex image incident review",
-    "note": "Reviewed affected relay guide bodies and complete-reservation guard evidence; distinguish recovered registry from absent image capability. Existing guardian scope and open destructive drills remain explicit.",
+    "reviewer": "Codex image availability review",
+    "note": "Reviewed additive authenticated boolean capability read and owning guide; no probe, reservation, changed execution, or relaxed admission. Live supervisor continuity verified.",
     "reviewed_at": "2026-09-14",
     "review_by": "2026-09-21",
     "evidence": {
-      "post-mortem/releases/2026-09-14-image-admission-recovery.json": "171dc91d445654c37921a3ee3fcd7418c164dbd0b526c398750d47cb96816a9d"
+      "post-mortem/releases/2026-09-14-image-availability-second-pass.json": "02c2eaec5775083ab349e165ed0dbe2545c07dcb76657021e5e7b8bf563d68c5"
     },
     "files": {
       "docs/ARCHITECTURE.md": "d821254fb3272cdc6c7575f6a548a1f041fe1506a10fd14b6bdd058539482e5d",
       "docs/FEDERATION_STRATEGY.md": "e199e9e58ed6070a3e60185173649ca61d8f1fc87e113f93099e45d76afc3fc4",
-      "docs/RELAY_VNEXT_RUNBOOK.md": "49f15c6fa5bd03842302999b584e6993bea6cf01c6bfc55c7932748c56d6de0b",
+      "docs/RELAY_VNEXT_RUNBOOK.md": "f997edc995b24f8ee0bf4a384c6a265d45e4326a24782eca894a9daef293b818",
       "docs/TELEMETRY_AND_OBSERVABILITY.md": "e46a148ae3ed55f818f5e45362559b0074bb1f975b3782978e3e815941e9812e",
       "docs/maintainers/RELAY_HARDENING.md": "64aada975343365578ae8476131e25d4c6b242ebf08815fd81910c4f6529bbc6",
       "docs/maintainers/RELAY_TELEMETRY.md": "f02e84a73fb2a6242ea55410f7f852e35c225dff85d978c75c8a9d1ccd1765ea",
@@ -397,7 +400,7 @@
       "src/relay/durable-receipts.ts": "2fbb4df6a94d1077150ab8247cc58a6beab2d2984fc6f21d699e7d48ff147a35",
       "src/relay/federation-http-policy.ts": "4ee18420fa7f3220004033886242a6127cd8dd27186b50ba6546c21155ed8f5a",
       "src/relay/federation-lifecycle.ts": "7943f2f3dd1fd243ed2e08b413ff247bc09b0eee575d912fffef5e6773ecdc45",
-      "src/relay/federation-server.ts": "e1dc2db0f72ff6b75115a03a018500fd2c4f5484f7868ba9c44dedaf8283102a",
+      "src/relay/federation-server.ts": "5d3a03968dbf0c0f0029d3da8db164d4af89f7de8751bff2c5290f97445a56d8",
       "src/relay/federation-telemetry.ts": "e350ed4cd63593d7ed94828792cce0d547151353c31c4afe9488320a8e12afe9",
       "src/relay/fixture-credential-cleanup.ts": "c84d1beaaa3c9e90ef81707f0a3adc90c6a3053007e14df844240b85f6aa6afc",
       "src/relay/image-compatibility.ts": "ae23a7f0ee484a9ffc06aa04987407eeaddac5daa8efae48f0b07db4c284a992",
@@ -731,16 +734,16 @@
     }
   },
   "broccolidb": {
-    "reviewer": "Codex image incident review",
-    "note": "Scoped review of changed admission projection, non-start DTOs, original-request recovery, complete I/O reservation and affected canonical guides; isolated tests retained separately from deployment.",
+    "reviewer": "Codex image availability review",
+    "note": "Reviewed shared image-library guide plus full preview-sync and compactor guides. Only advisory outage UX was added to the shared guide; cache, batching, persistence, authority and BroccoliDB source contracts remain unchanged. Image scale/security regressions passed; no broader compaction requalification claimed.",
     "reviewed_at": "2026-09-14",
     "review_by": "2026-09-21",
     "evidence": {
-      "post-mortem/incidents/2026/2026-09-13-image-generation/frontend-admission-recovery-20260914.json": "9da508a818affe41ef45c66779837994d9fe7045ffb90a097996175d974c4b36"
+      "post-mortem/releases/2026-09-14-image-availability-second-pass.json": "02c2eaec5775083ab349e165ed0dbe2545c07dcb76657021e5e7b8bf563d68c5"
     },
     "files": {
       "docs/maintainers/COMPACTOR_FUZZING_AND_QA_MATRIX.md": "72325ecd8087214538910b8ee29bc739c20146b7491eb0947ed417b39229a87a",
-      "docs/maintainers/image-library-scale.md": "f63c2fbd23c9014f4b0243abd7d4c25ba18965f386c03441d3674682533ebd66",
+      "docs/maintainers/image-library-scale.md": "1d392194b33c69dcb3f0e470477f4ef8e31f38a177769f577c3bc9a9224d8683",
       "docs/operations/preview-hybrid-sync.md": "1ac7ce76537660cfc507a595c942d4da2324060b8a3f15ddf9ab96d993ff38e9",
       "scripts/test-broccolidb-compaction-api-route.ts": "7572d2e9b785d7dbd42828f04090fc5d6a2a189dcf8f649e7e0b355fac9496bd",
       "scripts/test-broccolidb-production-hardening.ts": "faafec0e952a4bc3ea7c45093735de5d99772f08d434d47a33cb29db86373070",
@@ -1182,18 +1185,18 @@
     }
   },
   "client-efficiency": {
-    "reviewer": "Codex image incident review",
-    "note": "Scoped review of changed admission projection, non-start DTOs, original-request recovery, complete I/O reservation and affected canonical guides; isolated tests retained separately from deployment.",
+    "reviewer": "Codex image availability review",
+    "note": "Reviewed advisory single-flight GET triggers, bounded reads, stale-response fencing and no automatic polling/generation; reconciled efficiency and image UX guides.",
     "reviewed_at": "2026-09-14",
     "review_by": "2026-09-21",
     "evidence": {
-      "post-mortem/incidents/2026/2026-09-13-image-generation/frontend-admission-recovery-20260914.json": "9da508a818affe41ef45c66779837994d9fe7045ffb90a097996175d974c4b36"
+      "post-mortem/releases/2026-09-14-image-availability-second-pass.json": "02c2eaec5775083ab349e165ed0dbe2545c07dcb76657021e5e7b8bf563d68c5"
     },
     "files": {
       "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md": "ef866a86e704126bafa511a94e04893e3c23571789bd1aadba977f58a42c4429",
       "docs/PRODUCT_SURFACE_STRATEGY.md": "46ef6d28dce49b5c72c821dd1284516ac748c80c8e90878898b76fe2ddf0b398",
       "docs/maintainers/PUBLIC_DISCOVERY.md": "510d8d5559705b41cbe8f7bb5d68f2718e46bdfac2152d413d61fc80da1f4ebd",
-      "docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md": "07276c3767f6cca25ae9723120b450e0ed994740202ff485207714a092254a43",
+      "docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md": "f3c15a9b27dfd2a29fcd14ca737b38a6f72078318517f85dcdfdabd9c046dcc9",
       "docs/maintainers/readable-urls.md": "ea1fed2e15baa2097f0c1a906c98c66ab3343cd25aba9613151cd9f9480abb60",
       "scripts/test-public-reading.ts": "652b7b210a1d79d83c8bc9e6c38468410ad6a8f36c1f2f778c0f9a55192ca4d3",
       "scripts/test-request-efficiency.ts": "2a004bc34569fb72e40b2dde1e9567674bea10365fe7134459bfa275eb56a591",
@@ -1260,8 +1263,8 @@
       "src/components/home/public-home.module.css": "e7e697b7e6dcbe2b393e179901eb9f4f365f7e6fb75fd6e114b67e0ea44868a1",
       "src/components/home/use-galaxy-interactions.ts": "0a654c3abd4d7f562172df5d79afd94ee3b1c86509693dbc69d993920497d348",
       "src/components/home/use-story-entrance.ts": "8e3d8a6634a4b67456cff4d17ef76e2d450b136a4b844b86c21b4ec6b6b24a67",
-      "src/components/images/ImageStudio.tsx": "b28ff44376b47767d0bf997f358d632530df353ec484645bee3813d0b9ff1787",
-      "src/components/images/use-image-studio.ts": "8d38f586ad6be495494c4a556a45f7d1edbb774c465d47a272c623a6cfe77ec1",
+      "src/components/images/ImageStudio.tsx": "58201072e7330eaf5ae8be66fac70a29a1c72b318cd10321fc20098a48aea6bc",
+      "src/components/images/use-image-studio.ts": "22b3ac9a41f10bceb777942da4c63ea84e079e7c85aff5d7027d019f0f1b8ff1",
       "src/components/public-content/DESIGN.json": "d8594db0bdf0f53295e4a7cb9cb7f770f47e54498d93489d2349cabb14373d61",
       "src/components/public-content/DESIGN.md": "5690bd552b364e0c2f353e2e4d50e0b0ce983605b589f42a3bdf5bdde4c22236",
       "src/components/public-content/KnowledgeSearch.tsx": "485027842c5ca930fed7b440387676f04891ee8efe6d9d2d822073256b43a04d",

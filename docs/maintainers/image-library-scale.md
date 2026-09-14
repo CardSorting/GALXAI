@@ -54,6 +54,12 @@ Thumbnails are freshly encoded WebP, fit inside 512×512 without enlargement, an
 
 Thumbnail cache keys use authoritative owner, asset identity, hash and update time. Identical work shares storage/decode processing. Native browser image loading remains lazy; full-resolution display/download is on demand. The on-demand design avoids a migration/backfill of stored images but the first preview still requires reading and decoding its original. Many cold instances or low cache reuse can therefore retain appreciable storage/CPU cost. It is not a CDN cache or pre-generated derivative system.
 
+## Availability and outage ergonomics
+
+The studio reads advisory image availability once on account entry, on a confirmed non-start, and on explicit Check availability. Reads are single-flight within the mounted studio, bounded by seven seconds, and fenced against stale account responses. There is no automatic availability polling or generation replay. A confirmed outage keeps the composer editable and library usable, disables new generations, and offers an explicit read-only check. A recovered capability re-enables manual generation without submitting the saved draft. Existing accepted/ambiguous receipt recovery remains separate.
+
+[Adobe Firefly troubleshooting](https://helpx.adobe.com/firefly/web/troubleshoot/unable-to-generate-content-or-images.html) distinguishes unavailable capacity from credits and other errors. GALX similarly exposes actionable product state; it does not offer a model switch without a verified alternative or claim availability from ordinary chat health.
+
 ## Familiar precedents
 
 [Apple's Photos caching API](https://developer.apple.com/documentation/photos/phcachingimagemanager) supports target-sized image requests and starting/stopping bounded asset preloading. GALX applies the same principle to small grid previews and original detail, without claiming an Apple Photos implementation or adding speculative original downloads.

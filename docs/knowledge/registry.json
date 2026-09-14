@@ -56,6 +56,8 @@
         "src/lib/images/**/*.ts",
         "src/app/v1/images/**/*.ts",
         "src/app/api/images/library/**/*.ts",
+        "src/app/api/images/availability/**/*.ts",
+        "scripts/test-image-availability.ts",
         "src/lib/security/public-image-http.ts",
         "src/core/broccolidb/BroccoliImageLibraryBuffer.ts",
         "src/lib/supabase/repositories/ImageLibraryRepository.ts",

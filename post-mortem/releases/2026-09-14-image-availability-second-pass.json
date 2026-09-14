@@ -1,0 +1,65 @@
+{
+  "classification": "private",
+  "source": "f39d2db",
+  "deployment": "dpl_G8xQDq1rRUUtCjGn5h9i2wAqM7Ae",
+  "deployment_status": "Ready; production alias galx.ai verified in Vercel",
+  "root_cause_status": "Configured active connection has no current image capability. All registered API-key connections are revoked/retracted; none was re-enabled. Approved image-capable connection requested from owner.",
+  "change": [
+    "Account-authorized allowlisted advisory availability read; exact developer-preview exemption",
+    "Inference-authenticated boolean capability endpoint; no generation, reservations or paid probes",
+    "Draft-preserving outage state; GET-only explicit availability check; recovery of existing receipts stays separate",
+    "Available response only re-enables manual generation; no automatic resubmission"
+  ],
+  "validation": {
+    "security_auth_tests": 42,
+    "federation_and_availability_tests": 4,
+    "developer_preview_tests": 9,
+    "scale_tests": 19,
+    "dom_integration": "passed including no POST while unavailable, GET-only recovery, preserved draft, restored manual readiness and prior lost-ack/reload coverage",
+    "typescript": "production build and precommit pass",
+    "eslint": "passed",
+    "production_build": "passed",
+    "compiled_assets": 669,
+    "controller_live_read": "unavailable",
+    "controller_continuity": {
+      "registryFresh": true,
+      "requests": 215904,
+      "failures": 1404,
+      "unknownReceipts": 6,
+      "pending": 0,
+      "trackedJobs": 0
+    },
+    "live_public_http": "passed including anonymous availability denial and 27 public browser assets",
+    "live_authenticated_ui": "Unavailable on entry; one-click GET recheck; prompt preserved; generation disabled; Browse my images opens both existing images.",
+    "live_reflow": "Desktop and 390x844 mobile screenshot inspection; no horizontal document overflow. Viewport reset afterward.",
+    "live_image_chunks": 4
+  },
+  "not_performed": [
+    "New image generation because no verified upstream image capability",
+    "Sustained production throughput benchmark",
+    "Credential rotation, counter reset, reactivation of revoked connections",
+    "New dependency, provider purchase or new credential provisioning"
+  ],
+  "review": {
+    "domains": [
+      "images",
+      "relay",
+      "access",
+      "client-efficiency",
+      "knowledge"
+    ],
+    "unmapped": [
+      "scripts/test-image-studio-recovery.ts DOM-only fixture",
+      "scripts/test-relay-federation-http.ts existing transport fixture",
+      "post-mortem evidence and append-only journal"
+    ],
+    "new_mapping": "Availability route and regression added to image knowledge mapping",
+    "knowledge_scope": "Reviewed exact new image source/test mapping and existing security script inclusion; registry ownership and review/evidence lifecycle unchanged."
+  },
+  "references": [
+    "https://helpx.adobe.com/firefly/web/troubleshoot/unable-to-generate-content-or-images.html",
+    "https://developers.openai.com/api/docs/guides/tools-image-generation"
+  ],
+  "limits": "An advisory read is not a guarantee of admission, queue capacity, generation success or billing settlement. Successful generation remains open under ACT-020.",
+  "deployed_at": "2026-09-14T22:49:27Z"
+}

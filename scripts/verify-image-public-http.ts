@@ -26,7 +26,7 @@ for (const token of [
 const options = await fetch(`${base}/v1/images/generations`, { method: 'OPTIONS' });
 assert.equal(options.status, 204);
 assert.doesNotMatch(JSON.stringify(Object.fromEntries(options.headers)), /X-Galx-Queue|X-Deployment-Id|X-Edge-FastPath|Server-Timing/i);
-for (const [path, status] of [['/api/relay/status',401], ['/api/internal/telemetry',404], ['/api/queues',401]] as const) {
+for (const [path, status] of [['/api/images/availability',401], ['/api/relay/status',401], ['/api/internal/telemetry',404], ['/api/queues',401]] as const) {
   // Machine routes retain their own admin guard; other private APIs hit the preview gate first.
   const denied = await fetch(`${base}${path}`); assert.equal(denied.status, status);
   assert.doesNotMatch(await denied.text(), forbidden);

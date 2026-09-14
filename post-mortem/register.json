@@ -451,7 +451,7 @@
       "owner": "image maintainer",
       "review_by": "2026-09-16",
       "status": "open",
-      "next_step": "Restore legitimate image-enabled upstream capability, then verify one bounded frontend image and library/download. Admission/tracking, confirmed non-start classification and registry-starvation fixes are deployed and verified; upstream image probes currently fail.",
+      "next_step": "Connect an approved image-capable upstream and verify one bounded frontend image plus library/download. Source f39d2db advisory availability and outage UX is deployed and verified; connection clarification remains pending. No revoked connection was re-enabled.",
       "closure": "Retain regression, deployment and signed-in generation/library evidence; distinguish local throughput fixtures from live capacity."
     }
   ]

@@ -47,6 +47,8 @@ Empty capability state retains a worker for recovery. A rejected credential revi
 
 ## Image verification
 
+Authenticated inference callers can read `/v1/images/availability?model=...` for a boolean advisory capability result. The read does not probe or reserve capacity and exposes no inventory or diagnostics. Deploy this additive controller endpoint before the compatible application; older controllers yield unknown availability in the app.
+
 Inventory does not prove tool support. Internal image-operation keys use `image:<model>`; callers send the model ID without that prefix. Chat and image eligibility are independent.
 
 An administrator can intentionally POST `/api/capabilities/probe-image` on the assigned worker with an exact model and small prompt. This performs real upstream generation and can incur usage. Publication requires valid image output and current observation fences. Enabled compatibility workers also have the bounded paid cadence below.

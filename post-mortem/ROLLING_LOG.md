@@ -831,3 +831,45 @@ Incident: `INC-20260913-IMAGES`. Kind: `verification`.
 **Next step:** ACT-020 remains open for upstream image capability and successful end-to-end acceptance.
 
 Evidence: [2026-09-14-image-admission-recovery.json](releases/2026-09-14-image-admission-recovery.json).
+
+## EVT-20260914-image-availability-second-pass — 2026-09-14T22:44:44.241210Z
+
+Incident: `INC-20260913-IMAGES`. Kind: `observation`.
+
+**Observation:** Fresh read confirms healthy registry and no image capability. Production environment-name inspection found no separate platform image API key; prior bounded upstream rejection evidence still applies.
+
+**Action:** Added account-authenticated allowlisted availability read, inference-authenticated boolean capability endpoint, and a draft-preserving unavailable state with explicit GET-only recheck. Asked for an approved image-capable connection without requesting credentials in chat.
+
+**Result:** Local HTTP capability tests, 42 security/auth tests, 19 scale tests, DOM recovery/outage tests and developer-preview scope tests pass. Generation restoration is not established.
+
+**Next step:** Complete build and deploy the additive read boundary and UX, then verify signed-in outage behavior. Await approved image connection for real generation acceptance.
+
+Evidence: [availability.ts](../src/lib/images/availability.ts), [test-image-availability.ts](../scripts/test-image-availability.ts), [test-image-studio-recovery.ts](../scripts/test-image-studio-recovery.ts).
+
+## EVT-20260914-image-availability-controller-release — 2026-09-14T22:46:48.098456Z
+
+Incident: `INC-20260913-IMAGES`. Kind: `verification`.
+
+**Observation:** Read-only aggregate connection inspection found every registered API-key connection revoked/retracted; the active connection still has no image capability.
+
+**Action:** Committed f39d2db and loaded the additive controller availability endpoint through existing launchd. Submitted production application deployment dpl_G8xQDq1rRUUtCjGn5h9i2wAqM7Ae.
+
+**Result:** Controller registryFresh=true, persisted requests monotonic at 215904, failures unchanged at 1404, six unknown receipts retained, no pending/tracked jobs. Application helper returned unavailable with no generation.
+
+**Next step:** Verify final signed-in desktop/mobile outage UX, then preserve the connection requirement as open.
+
+Evidence: [federation-server.ts](../src/relay/federation-server.ts), [availability.ts](../src/lib/images/availability.ts).
+
+## EVT-20260914-image-availability-live-ux — 2026-09-14T22:51:53.239083Z
+
+Incident: `INC-20260913-IMAGES`. Kind: `verification`.
+
+**Observation:** Source f39d2db is Ready on galx.ai.
+
+**Action:** Verified signed-in unavailable state, explicit availability rechecks, draft continuity and library navigation at desktop and 390px mobile width; reset viewport and scanned public responses/assets.
+
+**Result:** Outage flow and existing library pass, with no image generation submitted. Upstream image capability remains absent; approved connection clarification is pending.
+
+**Next step:** Keep ACT-020 open for actual generation restoration and acceptance.
+
+Evidence: [2026-09-14-image-availability-second-pass.json](releases/2026-09-14-image-availability-second-pass.json).

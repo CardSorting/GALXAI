@@ -33,6 +33,7 @@ One root allowance provider shares a private quota read between the signed-in he
 | --- | --- | --- |
 | Sites startup / refresh | Setup + summaries + optional selected detail: 2–3 HTTP calls | One authenticated bootstrap, summaries plus optional selected detail; no shared response cache |
 | Repeated Sites focus | Refresh burst could schedule another full refresh after one second | Thirty-second freshness window, one in-flight bootstrap per selection; reconnect/manual/change events remain responsive |
+| Image availability | Generation attempts used to discover an outage | One bounded advisory GET on account entry, confirmed non-start or explicit check; no timer, paid probe or generation POST |
 | Image status | A check every 2.5 seconds, even hidden | Up to four independently tracked requests, one parallel batch at a time; 2.5s, then 5s, then 10s spacing honoring longer Retry-After; no hidden/offline polling |
 | Sites recovery / pending address | Recovery could overlap the original generation; fixed failure cadence and visibility-triggered checks | Wait for local mutations; one cancellable check after a four-second grace period, eight seconds between successful pending reads; failures back off with jitter and Retry-After |
 | Shared header/footer/mobile links | Next.js viewport prefetch | Hover/focus dwell, three unique destinations in any rolling ten seconds, thirty-second deduplication |

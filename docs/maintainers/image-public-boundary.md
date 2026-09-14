@@ -25,6 +25,12 @@ metrics retain capacity, model, attempt and timing information privately.
 Free sync/async creation passes the aggregate admission gate in [quota operations](FREE_GENERATION_QUOTA.md). It returns only `free_generation_paused` or `free_generation_busy` with 429 and the existing retry veto; private policy reasons and counters never appear. Receipt claim rechecks a pause; paid requests do not wait on that free-policy lock. Cancellation/non-start refunds customer quota but never replenishes the aggregate attempt budget.
 
 
+## Capability availability
+
+`GET /api/images/availability` requires a verified active account and returns only `status: available | unavailable | unknown` with private, no-store headers. The server reads the configured controller using its existing inference credential, accepts at most 1 KiB, refuses redirects and times out after five seconds. No upstream objects, diagnostics, model inventory or headers reach the browser. A missing/older endpoint or failed read is unknown, never proof of readiness. The exact route is exempt from developer approval, not account verification.
+
+The controller’s authenticated `GET /v1/images/availability?model=...` projects one boolean from fresh image capability. It performs no paid probe, reservation, generation or quota mutation. Availability is advisory; authoritative admission still runs for every generation.
+
 ## Free generation admission
 
 [Quota operations](FREE_GENERATION_QUOTA.md) owns the one-time five-image account allowance. New free requests, synchronous and asynchronous, reserve requested quantity atomically with durable receipt creation. Saved retries reuse their original state without another deduction, including cancellation and plan changes. Pro retains existing image usage/admission rules. Confirmed capacity non-start and queued cancellation release deductions atomically; ambiguous generation and storage failures retain them. Grant reads expire never-claimed queued work safely. Public 402 quota errors stay allowlisted and generic. The shared header/composer provider obtains only current plan, remaining customer counts and allowlisted availability; no grant/payment/execution records reach the browser.
