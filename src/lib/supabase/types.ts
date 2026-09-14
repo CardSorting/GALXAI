@@ -53,13 +53,17 @@ export type GalxIdempotencyState = 'IN_FLIGHT' | 'COMMITTED' | 'FAILED';
 export interface Database {
   private: {
     Tables: {
+      galx_free_generation_policy: {
+        Row: { kind:'site'|'image';enabled:boolean;revision:number;valid_until:string|null;max_outstanding:number;max_hour_units:number;max_day_units:number;max_total_units:number;admitted_units:number;updated_at:string };
+        Insert: {kind:'site'|'image'};Update: {enabled?:boolean;revision?:number;valid_until?:string;max_outstanding?:number;max_hour_units?:number;max_day_units?:number;max_total_units?:number;updated_at?:string};Relationships: [];
+      };
       galx_free_generation_grants: {
         Row: { user_id: string; identity_hash: string; allowance_usd: number; site_id: string | null; created_at: string };
         Insert: { user_id: string; identity_hash: string }; Update: { site_id?: string }; Relationships: [];
       };
       galx_free_generation_usage: {
-        Row: { user_id: string; kind: 'site' | 'image'; operation_id: string; quantity: number; released: boolean; created_at: string };
-        Insert: { user_id: string; kind: 'site' | 'image'; operation_id: string; quantity: number }; Update: { released?: boolean }; Relationships: [];
+        Row: { user_id: string; kind: 'site' | 'image'; operation_id: string; quantity: number; released: boolean; capacity_settled:boolean; created_at: string };
+        Insert: { user_id: string; kind: 'site' | 'image'; operation_id: string; quantity: number }; Update: { released?: boolean; capacity_settled?:boolean }; Relationships: [];
       };
       galx_image_requests: {
         Row: { id: string; user_id: string; idempotency_key: string; payload_hash: string; payload: Json; is_priority: boolean; state: 'queued' | 'generating' | 'completed' | 'failed' | 'cancelled'; asset_ids: string[] | null; created_at: string; updated_at: string; deadline_at: string | null };
@@ -102,9 +106,9 @@ export interface Database {
         Insert: { pool_id: string }; Update: { revision?: number; snapshot?: Json | null; refresh_token?: string | null; refresh_until?: string | null; cooldown_until?: string | null }; Relationships: [];
       };
       galx_sites_fair_invocations: {
-        Row: { account_id: string; invocation_id: string; pool_id: string; digest: string; allowance_window: number; policy_revision: number; snapshot_revision: number; lane: 'BASELINE' | 'CONTINUATION'; counted: boolean;
+        Row: { account_id: string; invocation_id: string; pool_id: string; digest: string; allowance_window: number; policy_revision: number; snapshot_revision: number; lane: 'BASELINE' | 'CONTINUATION'; tier:'pro'|'free'; counted: boolean;
           state: 'reserved' | 'dispatching' | 'completed' | 'not_started' | 'failed' | 'unknown'; admitted_at: string; grant_id: string; grant_expires_at: string; job_id: string | null; origin: string | null; output: string | null; non_dispatch_evidence: Json | null };
-        Insert: { account_id: string; invocation_id: string; pool_id: string; digest: string; allowance_window: number; policy_revision: number; snapshot_revision: number; lane: 'BASELINE' | 'CONTINUATION'; state: 'reserved'; admitted_at: string; grant_id: string; grant_expires_at: string };
+        Insert: { account_id: string; invocation_id: string; pool_id: string; digest: string; allowance_window: number; policy_revision: number; snapshot_revision: number; lane: 'BASELINE' | 'CONTINUATION'; tier:'pro'|'free'; state: 'reserved'; admitted_at: string; grant_id: string; grant_expires_at: string };
         Update: { counted?: boolean; state?: 'dispatching' | 'completed' | 'not_started' | 'failed' | 'unknown'; job_id?: string; origin?: string; output?: string | null }; Relationships: [];
       };
       galx_sites_fair_demand: {

@@ -16,7 +16,7 @@ let now=1_000_000;const events:Record<string,unknown>[]=[];
 const store=new SitesFairStore(pool,()=>now,event=>events.push(event)),other=new SitesFairStore(pool,()=>now,event=>events.push(event));
 let policy:FairPolicy={mode:'enforce',pool_id:fixture.initial_snapshot.pool_id,revision:1,limits:readFairLimits(fixture.policy),paid_price_ids:['price_fixture']};
 const digest=createHash('sha256').update('synthetic').digest('hex');
-const access=(accountId:string)=>({accountId,policyRevision:policy.revision,validUntil:now+15000});
+const access=(accountId:string)=>({tier:'pro' as const,accountId,policyRevision:policy.revision,validUntil:now+15000});
 const admit=(account:string,invocation=randomUUID(),authority=store)=>authority.admit(policy,access(account),invocation,digest,Date.now()+policy.limits.admission_deadline_milliseconds);
 async function fresh(readiness='READY',ceiling=8){
   await pool.query(`INSERT INTO private.galx_sites_fair_pools(pool_id,revision,snapshot) VALUES($1,1,$2)

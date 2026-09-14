@@ -36,7 +36,7 @@ export interface FairCounts {
 export class FairUsageError extends Error {
   constructor(readonly status: number, readonly reason: string, readonly retryAfter?: number, readonly beforeAdmission = true) { super('Sites access unavailable'); }
 }
-export function decideFairAdmission(p: FairLimits, s: PoolSnapshot | null, c: FairCounts, now: number, poolId: string): FairLane {
+export function decideFairAdmission(p: FairLimits, s: PoolSnapshot | null, c: FairCounts, now: number, poolId: string, tier:'pro'|'free'='pro'): FairLane {
   const lane: FairLane = c.messages < p.baseline_message_threshold ? 'BASELINE' : 'CONTINUATION';
   if (!s || s.pool_id !== poolId || !Number.isSafeInteger(s.revision) || s.revision < 1 || !Number.isFinite(s.observed_at) ||
     !Number.isFinite(s.valid_until) || s.observed_at > now || s.valid_until <= now || s.valid_until <= s.observed_at ||
@@ -44,6 +44,11 @@ export function decideFairAdmission(p: FairLimits, s: PoolSnapshot | null, c: Fa
     !Number.isSafeInteger(s.local_concurrency_limit) || s.local_concurrency_limit < 0 || !['READY','CONSTRAINED'].includes(s.readiness))
     throw new FairUsageError(503,'snapshot');
   const ceiling = Math.min(p.pool_max_outstanding,s.local_concurrency_limit);
+  // Free work can use at most the first quarter of healthy shared room and
+  // rolling dispatch budget. Tiny/constrained pools are paid-only. Paid work
+  // counts toward this threshold, so free work backs off as paid demand rises.
+  if(tier==='free' && (s.readiness!=='READY' || c.outstanding>=Math.floor(ceiling/4) ||
+      c.attempts>=Math.floor(p.pool_max_attempts_per_flow_window/4)))throw new FairUsageError(429,'free_capacity',60);
   if (c.outstanding >= ceiling) throw new FairUsageError(503,'pool_outstanding');
   if (c.accountOutstanding >= p.account_max_outstanding) throw new FairUsageError(429,'account_outstanding');
   if (c.attempts >= p.pool_max_attempts_per_flow_window) throw new FairUsageError(503,'pool_flow',p.flow_window_seconds);

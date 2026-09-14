@@ -5,6 +5,7 @@ import { GalxSeatTierEngine } from '@/core/subscription/GalxSeatTierEngine';
 import { ImageRequestService, imageRequestResponse } from '@/lib/images/request-service';
 import { GenerationAccess } from '@/lib/billing/generation-access';
 import { FreeQuotaError } from '@/lib/billing/free-generation-quota';
+import { FreeGenerationGateError } from '@/lib/billing/free-generation-gate';
 import { ImageRequestConflict } from '@/lib/images/request-repository';
 import { ModelCatalog } from '@/core/router/ModelCatalog';
 import { ImageCapacityError } from '@/core/router/ImageCapacityError';
@@ -94,6 +95,7 @@ export async function POST(req: NextRequest) {
       responseFormat: format as ImageResponseFormat, outputFormat: outputFormat as ImageFormat | undefined });
   } catch (error) {
     logImageFailure(requestId, error);
+    if (error instanceof FreeGenerationGateError) return imageError(error.code,requestId);
     if (error instanceof FreeQuotaError) return imageError('free_quota_exhausted',requestId);
     if (error instanceof ImageRequestConflict) return imageError('idempotency_conflict', requestId);
     if (error instanceof ImageCapacityError) return imageError('temporarily_unavailable', requestId, error.retryAfterSeconds);

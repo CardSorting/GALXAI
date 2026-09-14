@@ -37,7 +37,7 @@ export class ImageRequestRepository {
       INSERT INTO private.galx_image_requests (id,user_id,idempotency_key,payload_hash,payload,is_priority)
       VALUES ($1,$2,$3,$4,$5::jsonb,$6)
       ON CONFLICT (user_id,idempotency_key) DO NOTHING
-      RETURNING ${columns},payload_hash`, [randomUUID(), owner, key, hash, JSON.stringify(payload), priority]);
+      RETURNING ${columns},payload_hash`, [randomUUID(), owner, key, hash, JSON.stringify(payload), priority && !free]);
     // A separate statement sees a concurrent winner after the INSERT has waited.
     // Replays retain the original charge, including after cancellation or a plan change.
     const row = result.rows[0] || (await connection.query<ImageRequestRecord & { payload_hash: string }>(
@@ -60,29 +60,45 @@ export class ImageRequestRepository {
   async claim(owner: string, id: string): Promise<ClaimedRequest | null> {
     if (!validId(id)) return null;
     // A claim is never leased for redispatch: a lost acknowledgement must not double-charge.
-    return (await this.pool.query<ClaimedRequest>(`UPDATE private.galx_image_requests
+    return (await this.pool.query<ClaimedRequest>(`WITH gate AS MATERIALIZED (
+      SELECT enabled,valid_until
+      FROM private.galx_free_generation_policy WHERE kind='image'
+        AND EXISTS(SELECT 1 FROM private.galx_free_generation_usage WHERE user_id::text=$1 AND kind='image' AND operation_id=$2::text) FOR SHARE
+    ), stopped AS (
+      UPDATE private.galx_image_requests SET state='failed',payload='{}'::jsonb,updated_at=now()
+      WHERE user_id=$1 AND id=$2::uuid AND state='queued'
+        AND EXISTS(SELECT 1 FROM private.galx_free_generation_usage WHERE user_id::text=$1 AND kind='image' AND operation_id=$2::text)
+        AND NOT coalesce((SELECT enabled AND valid_until>clock_timestamp() FROM gate),false) RETURNING id
+    ), released AS (
+      UPDATE private.galx_free_generation_usage SET released=true,capacity_settled=true
+      WHERE user_id::text=$1 AND kind='image' AND operation_id IN (SELECT id::text FROM stopped)
+    ) UPDATE private.galx_image_requests
       SET state='generating',deadline_at=now()+interval '160 seconds',updated_at=now()
-      WHERE user_id=$1 AND id=$2 AND state='queued' AND created_at > now()-interval '5 minutes'
+      WHERE user_id=$1 AND id=$2::uuid AND state='queued' AND created_at > now()-interval '5 minutes'
+        AND (NOT EXISTS(SELECT 1 FROM private.galx_free_generation_usage WHERE user_id::text=$1 AND kind='image' AND operation_id=$2::text)
+          OR coalesce((SELECT enabled AND valid_until>clock_timestamp() FROM gate),false))
       RETURNING id,user_id,state,asset_ids,payload,is_priority`, [owner,id])).rows[0] || null;
   }
 
   async complete(owner: string, id: string, assets: string[]): Promise<void> {
     if (!assets.length || assets.length > 4 || new Set(assets).size !== assets.length) throw new Error('Invalid image assets');
     // Receipt completion and library visibility are checked in one database round trip.
-    const result = await this.pool.query(`UPDATE private.galx_image_requests
+    const result = await this.pool.query(`WITH completed AS (UPDATE private.galx_image_requests
       SET state='completed',asset_ids=$3::text[],
         payload=jsonb_strip_nulls(jsonb_build_object('response_format',payload->'response_format','outputFormat',payload->'outputFormat')),updated_at=now()
-      WHERE user_id=$1 AND id=$2 AND (state='generating' OR (state='completed' AND asset_ids=$3::text[]))
+      WHERE user_id=$1 AND id=$2::uuid AND (state='generating' OR (state='completed' AND asset_ids=$3::text[]))
       AND (SELECT count(*) FROM public.user_image_library WHERE user_id=$1 AND id=ANY($3::text[]) AND status='completed')=cardinality($3::text[])
-      RETURNING id`, [owner,id,assets]);
+      RETURNING id), settled AS (UPDATE private.galx_free_generation_usage SET capacity_settled=true
+        WHERE user_id::text=$1 AND kind='image' AND operation_id IN (SELECT id::text FROM completed))
+      SELECT id FROM completed`, [owner,id,assets]);
     if (result.rowCount !== 1) throw new Error('Image assets were not committed');
   }
 
   async fail(owner: string, id: string, notStarted = false): Promise<void> {
     await this.pool.query(`WITH failed AS (
       UPDATE private.galx_image_requests SET state='failed',payload='{}'::jsonb,updated_at=now()
-      WHERE user_id=$1 AND id=$2 AND state='generating' RETURNING id
-    ) UPDATE private.galx_free_generation_usage SET released=true
+      WHERE user_id=$1 AND id=$2::uuid AND state='generating' RETURNING id
+    ) UPDATE private.galx_free_generation_usage SET released=true,capacity_settled=true
       WHERE $3::boolean AND user_id=$1::uuid AND kind='image'
         AND operation_id IN (SELECT id::text FROM failed)`, [owner,id,notStarted]);
   }
@@ -92,8 +108,8 @@ export class ImageRequestRepository {
     // Once dispatch begins it may already be billed; cancellation cannot promise otherwise.
     return (await this.pool.query(`WITH cancelled AS (
       UPDATE private.galx_image_requests SET state='cancelled',payload='{}'::jsonb,updated_at=now()
-      WHERE user_id=$1 AND id=$2 AND state='queued' RETURNING id
-    ), released AS (UPDATE private.galx_free_generation_usage SET released=true
+      WHERE user_id=$1 AND id=$2::uuid AND state='queued' RETURNING id
+    ), released AS (UPDATE private.galx_free_generation_usage SET released=true,capacity_settled=true
       WHERE user_id=$1::uuid AND kind='image' AND operation_id IN (SELECT id::text FROM cancelled) RETURNING operation_id)
       SELECT id FROM cancelled`, [owner,id])).rowCount === 1;
   }

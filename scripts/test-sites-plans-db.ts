@@ -46,7 +46,7 @@ try{
       assert.equal(await hasComplimentaryProAccess(pool,owner),false);
     }
     await pool.query(`UPDATE auth.users SET raw_app_meta_data='{"galx_pro":true}' WHERE id=$1`,[owner]);
-    assert.deepEqual(await requirePaidSitesAccess(pool,null,owner,policy,1000),{accountId:owner,policyRevision:1,validUntil:16000});
+    assert.deepEqual(await requirePaidSitesAccess(pool,null,owner,policy,1000),{tier:'pro',accountId:owner,policyRevision:1,validUntil:16000});
     assert.equal(await hasComplimentaryProAccess(pool,other),false);
     await pool.query('UPDATE auth.users SET is_anonymous=true WHERE id=$1',[owner]);
     assert.equal(await hasComplimentaryProAccess(pool,owner),false);

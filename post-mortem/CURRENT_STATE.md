@@ -29,7 +29,7 @@ The September 14 UTC [second UX audit](../docs/knowledge/audits/2026-09-14-works
 
 ## Local work awaiting release
 
-The September 14 [free-generation completion review](../docs/knowledge/audits/2026-09-14-free-generation.json) covers one free Site with three turns, five images, server-enforced deductions and the account counter. Migration `20260914030425_free_generation_quota.sql` was the only pending migration at the read-only inventory in this session. It was not applied to production and the application was not deployed. Existing live Pro evidence above remains the latest acceptance; follow [quota operations](../docs/maintainers/FREE_GENERATION_QUOTA.md) for deployment sequencing and retained-state rollback.
+The September 14 [free-generation completion review](../docs/knowledge/audits/2026-09-14-free-generation.json) covers the one-time welcome allowance. The subsequent [admission-gate review](../docs/knowledge/audits/2026-09-14-free-admission-gate.json) adds aggregate limits, expiry, pause-at-dispatch, paid Sites capacity protection and composer stop states. The earlier read-only inventory confirmed 105 applied migrations and `20260914030425_free_generation_quota.sql` pending. This follow-up additionally creates `20260914035003_free_generation_admission_gate.sql`; neither has been applied to production here. The application is not deployed and no free budget is enabled. Existing live Pro evidence above remains the latest acceptance. Follow [quota operations](../docs/maintainers/FREE_GENERATION_QUOTA.md) for ordering and retained-state rollback.
 
 ## Regression boundaries
 

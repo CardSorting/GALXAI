@@ -78,6 +78,7 @@ Owner role: **Sites maintainer**. Domain: `sites`.
 - [ADR 0149: One-time free generation allowance](../../docs/adr/0149-one-time-free-generation.md)
 - [Create and manage Sites](../../docs/SITES_WORKSPACE.md)
 - [Site content generation](../../docs/SITES_CONTENT.md)
+- [ADR 0150: Bounded free admission and paid capacity protection](../../docs/adr/0150-free-generation-admission-gate.md)
 
 Relevant checks (select for the change; impact discovery never executes these): `npm run test:sites:fair`, `npm run test:sites:workspace`, `npm run test:sites:conversation`, `npm run test:sites:fair:db`, `npm run test:sites:workspace:db`, `npm run test:sites:plans:db`, `npm run test:free-quota`, `npm run test:free-quota:db`.
 

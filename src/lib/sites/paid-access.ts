@@ -18,7 +18,7 @@ export async function hasComplimentaryProAccess(pool: Pick<Pool,'connect'>, acco
 
 /** Current complimentary grant or verified paid coverage; no positive cache. */
 export async function requirePaidSitesAccess(pool: Pick<Pool,'connect'>, stripe: Stripe | null, account: string, policy: FairPolicy, now=Date.now()):Promise<PaidAccess>{
-  if(await hasComplimentaryProAccess(pool,account)) return {accountId:account,validUntil:now+15000,policyRevision:policy.revision};
+  if(await hasComplimentaryProAccess(pool,account)) return {accountId:account,validUntil:now+15000,policyRevision:policy.revision,tier:'pro'};
   if(!stripe)throw new FairUsageError(503,'membership_authority');
   const db=await pool.connect();let customer:string|undefined;
   try { customer=(await db.query('SELECT stripe_customer_id FROM public.galx_stripe_customers WHERE user_id=$1',[account])).rows[0]?.stripe_customer_id; }
@@ -58,7 +58,7 @@ export async function requirePaidSitesAccess(pool: Pick<Pool,'connect'>, stripe:
       }
       if(settled<invoice.amount_paid)continue;
       const end=item.current_period_end*1000;
-      if(item.current_period_start*1000<=now&&end>now) return {accountId:account,validUntil:Math.min(end,now+15000),policyRevision:policy.revision};
+      if(item.current_period_start*1000<=now&&end>now) return {accountId:account,validUntil:Math.min(end,now+15000),policyRevision:policy.revision,tier:'pro'};
     }
   }
   // An unexpectedly large catalogue cannot turn an incomplete read into a denial

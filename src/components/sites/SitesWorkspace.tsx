@@ -8,6 +8,7 @@ import { renderSitePreview } from '@/lib/sites/site-preview';
 import { type SiteDocument, type SiteSummary, type SiteIntent, type SiteVersion } from '@/lib/sites/workspace-contract';
 import { SITE_STARTERS, type SiteStarterSelection } from '@/lib/sites/starters';
 import { PRO_PLAN } from '@/lib/billing/pro-plan';
+import { GenerationGateNotice, useGenerationGate } from '@/components/dashboard/GenerationGateNotice';
 import { useSitesWorkspace } from './use-sites-workspace';
 import { SiteNotesEditor } from './SiteNotesEditor';
 import { SiteContentPanel } from './SiteContentPanel';
@@ -21,6 +22,15 @@ export function SitesWorkspace({initialId,initialStarter}: {initialId?:string;in
 }
 function Workspace({owner,token,authLoading,initialId,initialStarter}: {owner:string|null;token?:string;authLoading:boolean;initialId?:string;initialStarter?:SiteStarterSelection}) {
   const studio = useSitesWorkspace(owner,token,initialId);
+  const gate=useGenerationGate('sites',studio.access==='free');
+  const workspaceRef=useRef<HTMLElement>(null);
+  useEffect(()=>{
+    const element=workspaceRef.current;if(!element)return;
+    const resize=()=>element.style.setProperty('--sites-available-height',`${Math.max(640,window.innerHeight-element.getBoundingClientRect().top-window.scrollY)}px`);
+    const observer=new ResizeObserver(resize),header=document.querySelector('header');
+    if(header)observer.observe(header);window.addEventListener('resize',resize);resize();
+    return()=>{observer.disconnect();window.removeEventListener('resize',resize);};
+  },[]);
   const [prompt,setPrompt] = useState(''), [tab,setTab] = useState<'chat'|'sites'|'context'|'history'>('chat'), [mobile,setMobile] = useState<'chat'|'preview'>('chat');
   const [device,setDevice] = useState<'desktop'|'mobile'>('desktop'), [search,setSearch] = useState(''), [archived,setArchived] = useState(false);
   const [publishOpen,setPublishOpen] = useState(false), [username,setUsername] = useState(''), [rename,setRename] = useState(false), [title,setTitle] = useState('');
@@ -67,7 +77,7 @@ function Workspace({owner,token,authLoading,initialId,initialStarter}: {owner:st
     if (!next) requestAnimationFrame(() => promptRef.current?.focus());
   }
   async function submit() {
-    if (!owner || !prompt.trim() || busy || studio.loading || !['included','free'].includes(studio.access) || site?.generating || checkpoint) return;
+    if (gate.blocked || !owner || !prompt.trim() || busy || studio.loading || !['included','free'].includes(studio.access) || site?.generating || checkpoint) return;
     const submitted=prompt;let targetKey=draftKey;stick.current=true;submitting.current=true;
     try{sessionStorage.setItem(targetKey+':submitted',JSON.stringify({text:submitted,intent}));}catch{}
     remember('');
@@ -102,7 +112,7 @@ function Workspace({owner,token,authLoading,initialId,initialStarter}: {owner:st
     const a = document.createElement('a'); a.href=url; a.download=checkpoint?`site-version-${checkpoint.version}.html`:'site.html'; a.click(); setTimeout(() => URL.revokeObjectURL(url),1000); setNotice(checkpoint?`Version ${checkpoint.version} was downloaded.`:'Your page was downloaded.');
   }
   const filtered = studio.sites.filter(s => s.archived === archived && s.title.toLowerCase().includes(search.toLowerCase()));
-  return <main className="sites-workspace" aria-label="Sites workspace">
+  return <main ref={workspaceRef} className="sites-workspace" aria-label="Sites workspace">
     <div className="sites-heading"><div className="sites-heading-title"><PanelsTopLeft aria-hidden="true" /><h1>Sites</h1><span>A place for your next idea.</span></div>
       <button className="sites-button" onClick={() => choose(null)} disabled={busy}><Plus aria-hidden="true" />New Site</button></div>
     {(studio.error || notice) && <div className="sites-feedback sites-shared-feedback" role={studio.error?'alert':'status'}><p>{studio.error || notice}</p>{studio.error && <button className="sites-text-button" onClick={()=>void studio.refresh()}>Refresh Site<RefreshCw aria-hidden="true" /></button>}<button className="sites-icon" aria-label="Dismiss message" onClick={()=>{studio.setError('');setNotice('');}}><X aria-hidden="true" /></button></div>}
@@ -144,9 +154,10 @@ function Workspace({owner,token,authLoading,initialId,initialStarter}: {owner:st
             {site?.archived ? <div className="sites-archived"><p>This Site is archived.</p><button className="sites-button" onClick={()=>void studio.change({action:'archive',archived:false})}>Restore Site</button></div> : <form className="sites-composer" onSubmit={e=>{e.preventDefault();void submit();}}>
               <label className="sr-only" htmlFor="site-prompt">Describe your Site or ask for a change</label>
               <textarea id="site-prompt" ref={promptRef} value={prompt} maxLength={1800} rows={3} placeholder={site?.generating?'Draft your next message while we work…':intent==='discuss'?'Ask a question or explore an idea…':site?.document?'What would you like to change?':'Tell us about your Site…'} onChange={e=>remember(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.nativeEvent.isComposing){e.preventDefault();if(owner)void submit();}}}/>
-              <div className="sites-composer-actions"><div className="sites-modes" aria-label="Message mode"><button type="button" aria-pressed={intent==='build'} onClick={()=>remember(prompt,'build')}>Build</button><button type="button" aria-pressed={intent==='discuss'} onClick={()=>remember(prompt,'discuss')}>Discuss</button></div>{owner?<button className="sites-send" type="submit" disabled={studio.connection==='offline'||authLoading||studio.loading||openingSite||busy||Boolean(checkpoint)||site?.generating||!['included','free'].includes(studio.access)||!prompt.trim()||new TextEncoder().encode(prompt).length>2000} aria-label="Send message"><ArrowUp aria-hidden="true" /></button>:<Link className="sites-primary" href={`/login?next=${encodeURIComponent(initialStarter?.href || "/sites")}`}>Sign in to create<ArrowUpRight aria-hidden="true" /></Link>}</div>
+              <div className="sites-composer-actions"><div className="sites-modes" aria-label="Message mode"><button type="button" aria-pressed={intent==='build'} onClick={()=>remember(prompt,'build')}>Build</button><button type="button" aria-pressed={intent==='discuss'} onClick={()=>remember(prompt,'discuss')}>Discuss</button></div>{owner?<button className="sites-send" type="submit" disabled={gate.blocked||studio.connection==='offline'||authLoading||studio.loading||openingSite||busy||Boolean(checkpoint)||site?.generating||!['included','free'].includes(studio.access)||!prompt.trim()||new TextEncoder().encode(prompt).length>2000} aria-label="Send message"><ArrowUp aria-hidden="true" /></button>:<Link className="sites-primary" href={`/login?next=${encodeURIComponent(initialStarter?.href || "/sites")}`}>Sign in to create<ArrowUpRight aria-hidden="true" /></Link>}</div>
             </form>}
             <p className="sites-composer-hint">{new TextEncoder().encode(prompt).length>2000?'Shorten your message to send it.':intent==='discuss'?'Explore ideas without changing your draft.':'Build applies your request to the current draft.'} <span>Shift + Enter for a new line.</span></p>
+            {owner && <GenerationGateNotice kind="sites" knownFree={studio.access==='free'}/>}
             <p className="sites-help sites-plan-note">{studio.access==='free'?'Your free site includes 3 turns total.':studio.access==='included'?'Included with your plan.':`Create with ${PRO_PLAN.name} for $${PRO_PLAN.monthlyPriceUsd}/month.`} Fair use applies; you may need to pause between updates.</p>
           </div>
         </>}

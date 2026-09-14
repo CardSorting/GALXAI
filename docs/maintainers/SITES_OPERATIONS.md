@@ -4,6 +4,9 @@
 
 Private maintainer guide. [ADR 0140](../adr/0140-paid-sites-and-shared-fair-usage.md) supersedes new per-generation pricing with eligible paid-plan access and shared fair usage; [ADR 0148](../adr/0148-complimentary-pro-access.md) adds explicit operator-provisioned complimentary Pro access. The [fair-use runbook](SITES_FAIR_USAGE.md) defines current configuration, admission, membership and rollout. Public documentation describes only [the capability and access contract](../SITES_CONTENT.md).
 
+Free workspace generation additionally requires the separate expiring aggregate budget and paid-capacity protection in [quota operations](FREE_GENERATION_QUOTA.md). Both free resources seed paused; the current two-slot paid launch policy also keeps free Sites paused. Pausing this budget leaves Pro admission and saved-work recovery available. Apply both quota migrations before releasing dependent handlers.
+
+
 ## Current path
 
 The browser workspace and content API use the same included-generation adapter and shared authority. They neither quote new generation prices nor reserve, debit or settle wallet funds for new work. The standalone content API requires current Pro eligibility. The browser workspace additionally offers one allocated free Site and three total turns under [quota operations](FREE_GENERATION_QUOTA.md); only that Site can publish through free access. Browsing, export, recovery and unpublishing preserve existing work.

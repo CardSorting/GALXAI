@@ -85,7 +85,10 @@
         "src/app/api/billing/generation-quota/**/*.ts",
         "scripts/test-free-generation*.ts",
         "scripts/test-image-retry-contract.ts",
-        "scripts/verify-image-public-http.ts"
+        "scripts/verify-image-public-http.ts",
+        "src/components/dashboard/GenerationGateNotice.tsx",
+        "src/components/dashboard/generation-gate.module.css",
+        "src/contexts/GenerationAllowanceContext.tsx"
       ],
       "guides": [
         "docs/QUEUE_SPECIFICATION.md",
@@ -172,7 +175,11 @@
         "src/app/api/billing/generation-quota/**/*.ts",
         "scripts/test-free-generation*.ts",
         "src/components/dashboard/FreeGenerationQuota.tsx",
-        "scripts/verify-free-generation-ui.mjs"
+        "scripts/verify-free-generation-ui.mjs",
+        "src/components/dashboard/GenerationGateNotice.tsx",
+        "src/components/dashboard/generation-gate.module.css",
+        "src/contexts/GenerationAllowanceContext.tsx",
+        "scripts/manage-free-generation.ts"
       ],
       "guides": [
         "docs/operations/developer-preview.md",
@@ -210,7 +217,13 @@
         "src/lib/billing/free-generation*.ts",
         "src/lib/billing/generation-*.ts",
         "src/app/api/billing/generation-quota/**/*.ts",
-        "scripts/test-free-generation*.ts"
+        "scripts/test-free-generation*.ts",
+        "src/components/dashboard/GenerationGateNotice.tsx",
+        "src/components/dashboard/generation-gate.module.css",
+        "src/contexts/GenerationAllowanceContext.tsx",
+        "scripts/test-sites-fair.ts",
+        "scripts/test-sites-fair-db.ts",
+        "src/components/sites/sites.css"
       ],
       "guides": [
         "docs/maintainers/SITES_OPERATIONS.md",
@@ -221,7 +234,8 @@
         "docs/maintainers/FREE_GENERATION_QUOTA.md",
         "docs/adr/0149-one-time-free-generation.md",
         "docs/SITES_WORKSPACE.md",
-        "docs/SITES_CONTENT.md"
+        "docs/SITES_CONTENT.md",
+        "docs/adr/0150-free-generation-admission-gate.md"
       ],
       "checks": [
         "npm run test:sites:fair",
@@ -271,7 +285,9 @@
         "scripts/manage-migrations.ts",
         "scripts/fixtures/integration-bootstrap.sql",
         "scripts/test-account-session-db.ts",
-        "scripts/test-supabase-integration.ts"
+        "scripts/test-supabase-integration.ts",
+        "scripts/manage-free-generation.ts",
+        "src/lib/billing/free-generation-policy.ts"
       ],
       "guides": [
         "docs/SUPABASE_PARANOID_ARCHITECTURE_SPEC.md",
@@ -386,7 +402,11 @@
         "src/app/robots.ts",
         "scripts/verify-url-navigation.mjs",
         "src/components/dashboard/FreeGenerationQuota.tsx",
-        "scripts/verify-free-generation-ui.mjs"
+        "scripts/verify-free-generation-ui.mjs",
+        "src/components/dashboard/GenerationGateNotice.tsx",
+        "src/components/dashboard/generation-gate.module.css",
+        "src/contexts/GenerationAllowanceContext.tsx",
+        "src/components/sites/sites.css"
       ],
       "guides": [
         "docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md",
@@ -507,6 +527,16 @@
         "sites",
         "billing"
       ]
+    },
+    "docs/knowledge/audits/2026-09-14-free-admission-gate.md": {
+      "kind": "evidence",
+      "keywords": [
+        "free",
+        "quota",
+        "admission",
+        "ux",
+        "audit"
+      ]
     }
   },
   "runbooks": [
@@ -586,6 +616,17 @@
       "date": "2026-09-14",
       "evidence": [
         "docs/knowledge/audits/2026-09-14-free-generation.json"
+      ],
+      "supersedes": []
+    },
+    "docs/adr/0150-free-generation-admission-gate.md": {
+      "status": "proposed",
+      "delivery": "local",
+      "domain": "sites",
+      "owner": "Product/API maintainer",
+      "date": "2026-09-14",
+      "evidence": [
+        "docs/knowledge/audits/2026-09-14-free-admission-gate.json"
       ],
       "supersedes": []
     }

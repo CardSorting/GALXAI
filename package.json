@@ -296,6 +296,7 @@
     "test:image:security": "node --import tsx --test scripts/test-image-public-http.ts scripts/test-image-library-http.ts scripts/test-public-information-boundary.ts scripts/test-image-retry-contract.ts scripts/test-auth-identity-boundary.ts scripts/test-workspace-auth.ts scripts/test-auth-entry.ts",
     "test:yaml:security": "node --test scripts/test-yaml-security.mjs",
     "test:egress:transport": "node --import tsx --test scripts/test-registry-api-egress.ts scripts/test-ci-build.mjs scripts/test-request-efficiency.ts scripts/test-sites-workspace.ts",
+    "free:policy": "node --env-file-if-exists=.env.local --import tsx scripts/manage-free-generation.ts",
     "test:free-quota": "node --import tsx --test scripts/test-free-generation-quota.ts",
     "test:free-quota:db": "node --import tsx scripts/run-supabase-integration.ts --free-quota",
     "test:signup-credit": "node --import tsx --test scripts/test-signup-credit.ts scripts/test-signup-key-security.ts",

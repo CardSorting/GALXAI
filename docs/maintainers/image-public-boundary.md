@@ -22,9 +22,12 @@ public projection. Logs omit arbitrary provider message payloads, which may quot
 user secrets, while keeping categories, status and call sites. Existing operational
 metrics retain capacity, model, attempt and timing information privately.
 
+Free sync/async creation passes the aggregate admission gate in [quota operations](FREE_GENERATION_QUOTA.md). It returns only `free_generation_paused` or `free_generation_busy` with 429 and the existing retry veto; private policy reasons and counters never appear. Receipt claim rechecks a pause; paid requests do not wait on that free-policy lock. Cancellation/non-start refunds customer quota but never replenishes the aggregate attempt budget.
+
+
 ## Free generation admission
 
-[Quota operations](FREE_GENERATION_QUOTA.md) owns the one-time five-image account allowance. New free requests, synchronous and asynchronous, reserve requested quantity atomically with durable receipt creation. Saved retries reuse their original state without another deduction, including cancellation and plan changes. Pro retains existing image usage/admission rules. Confirmed capacity non-start and queued cancellation release deductions atomically; ambiguous generation and storage failures retain them. Grant reads expire never-claimed queued work safely. Public 402 quota errors stay allowlisted and generic. The header obtains only current plan and remaining customer counts; no grant/payment/execution records reach the browser.
+[Quota operations](FREE_GENERATION_QUOTA.md) owns the one-time five-image account allowance. New free requests, synchronous and asynchronous, reserve requested quantity atomically with durable receipt creation. Saved retries reuse their original state without another deduction, including cancellation and plan changes. Pro retains existing image usage/admission rules. Confirmed capacity non-start and queued cancellation release deductions atomically; ambiguous generation and storage failures retain them. Grant reads expire never-claimed queued work safely. Public 402 quota errors stay allowlisted and generic. The shared header/composer provider obtains only current plan, remaining customer counts and allowlisted availability; no grant/payment/execution records reach the browser.
 
 ## Workspace entry
 

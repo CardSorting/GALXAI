@@ -1323,6 +1323,12 @@
       "title": "ADR 0149: One-time free generation allowance"
     },
     {
+      "path": "docs/adr/0150-free-generation-admission-gate.md",
+      "scope": "decision-record",
+      "category": "docs",
+      "title": "ADR 0150: Bounded free admission and paid capacity protection"
+    },
+    {
       "path": "docs/adr/README.md",
       "scope": "current-guide",
       "category": "docs",
@@ -1573,6 +1579,12 @@
       "scope": "operational-record",
       "category": "docs",
       "title": "Workspace authentication: second-pass audit"
+    },
+    {
+      "path": "docs/knowledge/audits/2026-09-14-free-admission-gate.md",
+      "scope": "operational-record",
+      "category": "docs",
+      "title": "Free admission and composer audit — September 14, 2026"
     },
     {
       "path": "docs/knowledge/audits/2026-09-14-workspace-recovery-ux.md",

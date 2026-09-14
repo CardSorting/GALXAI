@@ -8,6 +8,8 @@ import { SitesWorkspaceRepository } from '../src/lib/sites/workspace-repository'
 import { ImageRequestRepository } from '../src/lib/images/request-repository';
 import { ImageRequestService } from '../src/lib/images/request-service';
 import { ImageCapacityError } from '../src/core/router/ImageCapacityError';
+import { settleFreeCapacity } from '../src/lib/billing/free-generation-gate';
+import { runFreeGateChecks } from './test-free-generation-gate-db';
 import { generationAccess } from '../src/lib/billing/generation-access';
 import { StripeEngine } from '../src/lib/stripe/stripe';
 const pool=new Pool({connectionString:process.env.DATABASE_URL,max:12});
@@ -19,6 +21,8 @@ const account=async(id:string,email=`${id}@quota.invalid`,confirmed=true)=>pool.
 try {
   const migration=readFileSync(new URL('../supabase/migrations/20260914030425_free_generation_quota.sql',import.meta.url),'utf8');
   await pool.query(migration);await pool.query(migration);checks++;
+  checks+=await runFreeGateChecks(pool);
+  await pool.query("UPDATE private.galx_free_generation_policy SET enabled=true,valid_until=now()+interval '1 hour',max_outstanding=100,max_hour_units=1000,max_day_units=10000,max_total_units=100000");
   await account(owner);await account(other);await account(pro);
   const cold=new Pool({connectionString:process.env.DATABASE_URL,max:2});
   try {
@@ -37,6 +41,7 @@ try {
       const operation=randomUUID();
       await sites.begin(owner,site.id,site.revision,operation,'Build','build',true);
       site=await sites.finish(owner,site.id,operation,null,'Reply');
+      await settleFreeCapacity(pool,owner,'site',`${site.id}:${operation}`);
     }
     await assert.rejects(sites.begin(owner,site.id,site.revision,randomUUID(),'Fourth','discuss',true),FreeQuotaError);
     assert.equal((await readFreeGenerationQuota(pool,owner)).siteTurns,0);checks++;
@@ -46,11 +51,13 @@ try {
     const duplicates=await Promise.all(Array.from({length:5},()=>images.create(owner,{...payload,n:4,idempotencyKey:key},false,true)));
     assert.equal(new Set(duplicates.map(r=>r.id)).size,1);
     assert.equal((await readFreeGenerationQuota(cold,owner)).images,1);checks++;
+    await settleFreeCapacity(pool,owner,'image',duplicates[0].id);
     const fifth=await Promise.allSettled(Array.from({length:5},()=>images.create(owner,{...payload,idempotencyKey:randomUUID()},false,true)));
     assert.equal(fifth.filter(r=>r.status==='fulfilled').length,1);
     assert.equal((await readFreeGenerationQuota(pool,owner)).images,0);checks++;
     assert.equal(Number((await pool.query('SELECT count(*) FROM private.galx_image_requests WHERE user_id=$1',[owner])).rows[0].count),2);checks++;
     await assert.rejects(images.create(owner,{...payload,n:2,idempotencyKey:randomUUID()},false,true),FreeQuotaError);checks++;
+    await settleFreeCapacity(pool,owner,'image',(fifth.find(r=>r.status==='fulfilled') as PromiseFulfilledResult<any>).value.id);
     const batch=duplicates[0];
     assert.equal(await images.cancel(other,batch.id),false);
     assert(await images.cancel(owner,batch.id));assert.equal(await images.cancel(owner,batch.id),false);

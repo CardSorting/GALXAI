@@ -42,7 +42,7 @@ The [scoped design record](../src/components/home/DESIGN.md) owns this homepage'
 
 ## Free allowance status
 
-Signed-in free accounts see a compact allowance row below navigation with remaining Sites, Images and Site turns. Confirmed Pro hides it. Account changes fence old values and cancel reads; loading/unavailable states never display invented counts. The row can wrap independently without changing link order or account-control dimensions. [Quota operations](maintainers/FREE_GENERATION_QUOTA.md) owns its authenticated read, lifecycle and local browser fixture.
+Signed-in free accounts see a compact allowance row below navigation with remaining Sites, Images and Site turns. Confirmed Pro hides it. Account changes fence old values and cancel reads; loading/unavailable states never display invented counts. A shared provider also supplies composer stop states and a pending manual recheck; overlapping events retain one trailing refresh. Permanent exhaustion stays distinct from temporary availability. The row can wrap independently without changing link order or account-control dimensions. [Quota operations](maintainers/FREE_GENERATION_QUOTA.md) owns its authenticated read, lifecycle and local browser fixture.
 
 ## Public guides and search
 

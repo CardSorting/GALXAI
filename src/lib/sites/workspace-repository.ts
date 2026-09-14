@@ -1,5 +1,6 @@
 import type { Pool, PoolClient } from 'pg';
 import { assignFreeSite, consumeFreeGeneration, FreeQuotaError, releaseFreeGeneration, requireAssignedFreeSite } from '../billing/free-generation-quota';
+import { FreeGenerationGateError } from '../billing/free-generation-gate';
 import { readSiteDocument, readSiteMessage, type SiteDocument, type SiteMessage, type SiteIntent, type WorkspaceSite, type SiteSummary } from './workspace-contract';
 import { type DomainPlan, siteHostname } from './domains';
 import { recallQuery, sitesContextCache, type SitesContextCache } from './hybrid-context';
@@ -30,7 +31,7 @@ export class SitesWorkspaceRepository {
     try { await db.query('BEGIN'); await db.query("SET LOCAL statement_timeout='5s'; SET LOCAL lock_timeout='3s'");
       const result = await run(db); await db.query('COMMIT'); return result;
     } catch (error) { try { await db.query('ROLLBACK'); } catch { broken = true; }
-      if (error instanceof WorkspaceError || error instanceof FreeQuotaError) throw error; broken = true; throw new WorkspaceError();
+      if (error instanceof WorkspaceError || error instanceof FreeQuotaError || error instanceof FreeGenerationGateError) throw error; broken = true; throw new WorkspaceError();
     } finally { db.release(broken); }
   }
   private async locked(db: PoolClient, owner: string, id: string) {

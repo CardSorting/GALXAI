@@ -19,7 +19,7 @@ GALX helps builders turn an early idea into a site they can revise, preview and 
 
 ## Core Capabilities
 
-The Sites workspace supports conversations, draft versions, previews and explicit managed publication. A verified account has a one-time allowance of one Site with three turns and five images. GALX Pro includes continuing Sites creation under fair usage; revisions and conversation turns follow that policy. Images and API usage retain separate account/billing contracts. Follow [Sites operations](docs/maintainers/SITES_OPERATIONS.md) and the customer [Sites guide](docs/SITES_WORKSPACE.md) for the implemented scope. Do not imply arbitrary application execution beyond the actual product contract.
+The Sites workspace supports conversations, draft versions, previews and explicit managed publication. A verified account has a one-time allowance of one Site with three turns and five images, subject to availability. Temporary free-creation pauses preserve prompts and saved work; the composer offers a manual recheck and plan link. GALX Pro includes continuing Sites creation under fair usage; revisions and conversation turns follow that policy. Images and API usage retain separate account/billing contracts. Follow [Sites operations](docs/maintainers/SITES_OPERATIONS.md) and the customer [Sites guide](docs/SITES_WORKSPACE.md) for the implemented scope. Do not imply arbitrary application execution beyond the actual product contract.
 
 The image studio supports creation, owned library retrieval, Favorites and downloads. Accepted async image requests have durable owner-scoped receipts, while execution remains bounded and uncertain attempts are not automatically repeated.
 

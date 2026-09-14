@@ -25,7 +25,7 @@ Prioritize avoidable request/CPU work, then origin bytes and speculative reads. 
 
 ## Free allowance counter
 
-The signed-in shared header adds a private quota read on route entry, focus, visibility and generation-change events, plus a sixty-second visible interval. Requests have a fifteen-second deadline, one in-flight guard and owner/unmount cancellation. Pro hides the counter; failures never fabricate remaining counts. This is an additional per-visible-tab request cost, not a server push stream or cross-tab leader. [Quota operations](FREE_GENERATION_QUOTA.md) owns its allowance and retry contract.
+One root allowance provider shares a private quota read between the signed-in header and both composers on route entry, focus, visibility and generation-change events, plus a sixty-second visible interval. Requests have a fifteen-second deadline, one in-flight guard, one trailing refresh for overlapping changes, and owner/unmount cancellation. Composers do not add duplicate quota requests; their manual recheck reuses the provider. Pro hides the counter; failures never fabricate remaining counts. This is an additional per-visible-tab request cost, not a server push stream or cross-tab leader. [Quota operations](FREE_GENERATION_QUOTA.md) owns its allowance and retry contract.
 
 ## Implemented request budgets
 

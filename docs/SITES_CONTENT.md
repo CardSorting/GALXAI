@@ -4,7 +4,7 @@
 
 Create a simple page or revise its content through [Sites](https://galx.ai/sites). Creating, updating and publishing Sites is included with GALX Pro, subject to fair usage. New updates do not carry a separate generation charge.
 
-The free Site allowance is available in the browser workspace. The standalone API described here requires Pro access.
+The free Site allowance is available in the browser workspace. The standalone API described here requires Pro access. Browser free creation also depends on availability; its composer preserves your prompt during a temporary pause.
 
 This API produces structured text for a static information page. It does not create a working store, account system or custom application. Publishing is a separate action; your conversation and unpublished changes stay private.
 

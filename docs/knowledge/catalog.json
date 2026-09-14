@@ -2195,6 +2195,28 @@
       }
     },
     {
+      "path": "docs/adr/0150-free-generation-admission-gate.md",
+      "title": "ADR 0150: Bounded free admission and paid capacity protection",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [
+        "sites"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": {
+        "status": "proposed",
+        "delivery": "local",
+        "domain": "sites",
+        "owner": "Product/API maintainer",
+        "date": "2026-09-14",
+        "evidence": [
+          "docs/knowledge/audits/2026-09-14-free-admission-gate.json"
+        ],
+        "supersedes": []
+      }
+    },
+    {
       "path": "docs/adr/README.md",
       "title": "Architecture decision records",
       "scope": "current-guide",
@@ -2635,6 +2657,22 @@
       "keywords": [
         "auth",
         "sign-in",
+        "ux",
+        "audit"
+      ],
+      "decision": null
+    },
+    {
+      "path": "docs/knowledge/audits/2026-09-14-free-admission-gate.md",
+      "title": "Free admission and composer audit — September 14, 2026",
+      "scope": "operational-record",
+      "kind": "evidence",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [
+        "free",
+        "quota",
+        "admission",
         "ux",
         "audit"
       ],

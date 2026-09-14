@@ -177,7 +177,10 @@ export function useImageStudio(owner: string | null, token?: string, libraryActi
       if (!response.ok) {
         const seconds = Number(response.headers.get('Retry-After'));
         if (Number.isFinite(seconds) && seconds > 0) { const time = Date.now(); setNow(time); setRetryAt(time + Math.min(seconds, 3600) * 1000); }
-        setError(studioError(response.status));
+        const code=(await response.json().catch(()=>null))?.error?.code;
+        setError(code==='free_generation_paused'?'Free image creation is temporarily paused. Your quota was not used. Try later or explore Pro.'
+          : code==='free_generation_busy'?'Free image creation is busy right now. Your quota was not used. Try again later.'
+          : code==='free_quota_exhausted'?'Your free image quota is used up. Explore Pro to keep creating.':studioError(response.status));
         if (response.status >= 500) setUncertain(true);
         else save(`${key}:unconfirmed`, null);
         return;

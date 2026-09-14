@@ -7,6 +7,7 @@ import { renderSitePreview } from '../src/lib/sites/site-preview';
 import { publishedSiteRoute } from '../src/lib/sites/published-route';
 import { ManagedSitesHosting, managedDomainPlan, verifyManagedSite } from '../src/lib/sites/managed-hosting';
 import { FairUsageError } from '../src/lib/sites/fair-policy';
+import { FreeGenerationGateError } from '../src/lib/billing/free-generation-gate';
 import { FreeQuotaError } from '../src/lib/billing/free-generation-quota';
 import { SiteDomainError } from '../src/lib/sites/domains';
 import { publishedSiteProxy, PUBLISHED_SITE_HEADERS } from '../src/lib/sites/published-proxy';
@@ -31,10 +32,10 @@ function fixture(){
 function request(body?:unknown,authorization='Bearer alice',query=''){return new Request('https://galx.ai/api/sites/workspace'+query,{method:body?'POST':'GET',headers:{authorization,'Content-Type':'application/json',cookie:'admin=true'},...(body?{body:JSON.stringify(body)}:{})});}
 
 test('free workspace admission enforces quota before dispatch and preserves ambiguous work',async()=>{
-  for(const mode of ['quota','deferred','unknown','not_started']){
+  for(const mode of ['quota','paused','busy','deferred','unknown','not_started']){
     const f=fixture();let dispatches=0,released=false;
     const repo={...f.repo,begin:async(...args:any[])=>{
-      assert.equal(args[6],true);if(mode==='quota')throw new FreeQuotaError();
+      assert.equal(args[6],true);if(mode==='quota')throw new FreeQuotaError();if(['paused','busy'].includes(mode))throw new FreeGenerationGateError(mode==='paused'?'free_generation_paused':'free_generation_busy');
       return (f.repo.begin as any)(...args);
     },finish:async(...args:any[])=>{released=args[7]===true;return (f.repo.finish as any)(...args);}};
     const handle=sitesWorkspaceRoute({authenticate:async()=>({id:'alice'}),repository:()=>repo as any,
@@ -46,8 +47,8 @@ test('free workspace admission enforces quota before dispatch and preserves ambi
     const setup=await handle(request(undefined,'Bearer alice','?view=setup'));
     assert.equal((await setup.json()).access,'free');
     const response=await handle(request({action:'generate',id,revision:0,operationId:operation,brief:'Build a page'}));
-    assert.equal(response.status,mode==='quota'?402:mode==='deferred'?503:200);
-    assert.equal(dispatches,mode==='quota'?0:1);
+    assert.equal(response.status,mode==='quota'?402:['paused','busy'].includes(mode)?429:mode==='deferred'?503:200);
+    assert.equal(dispatches,['quota','paused','busy'].includes(mode)?0:1);
     assert.equal(released,['deferred','not_started'].includes(mode));
     if(mode==='unknown')assert.equal(f.current().operation_id,operation);
     const raw=await response.text();assert.doesNotMatch(raw,/private|notStarted|operation_id/);

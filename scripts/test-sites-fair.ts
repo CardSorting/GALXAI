@@ -36,7 +36,7 @@ function membership(subscription:any,customer='cus_owner'){
 const paid={customer:'cus_owner',status:'active',pause_collection:null,items:{data:[{id:'si_paid',quantity:1,price:{id:'price_paid',recurring:{}},current_period_start:900,current_period_end:2000}]},
   latest_invoice:{id:'in_paid',customer:'cus_owner',status:'paid',amount_paid:2000,lines:{data:[{amount:2000,pricing:{price_details:{price:'price_paid'}},parent:{subscription_item_details:{subscription_item:'si_paid'}},period:{start:900,end:2000}}]}}};
 test('Membership uses verified customer, eligible recurring price, active paid invoice and current period',async()=>{
-  assert.deepEqual(await membership(paid).run(),{accountId:'alice',policyRevision:1,validUntil:now+15000});
+  assert.deepEqual(await membership(paid).run(),{tier:'pro',accountId:'alice',policyRevision:1,validUntil:now+15000});
   for(const subscription of [{...paid,refunded:true},{...paid,status:'trialing'},{...paid,status:'past_due'},{...paid,customer:'cus_other'}, {...paid,pause_collection:{}}, {...paid,latest_invoice:{...paid.latest_invoice,amount_paid:0}}, {...paid,items:{data:[{...paid.items.data[0],price:{id:'price_other',recurring:{}}}]}}, {...paid,latest_invoice:{...paid.latest_invoice,lines:{data:[]}}}, {...paid,items:{data:[{...paid.items.data[0],current_period_end:999}]}}])await assert.rejects(membership(subscription).run(),(e:any)=>e.status===403);
   const missing=membership(paid,'');await assert.rejects(missing.run());assert.equal(missing.network(),0);
 });
@@ -60,4 +60,16 @@ test('Paid denial applies to create, generate and publish; saved Sites remain ac
   }
   assert.equal(mutations,0);assert.deepEqual(await (await handle(request())).json(),{sites:[]});
   assert.deepEqual(await (await handle(request(undefined,'?view=setup'))).json(),{access:'paid_plan_required',publishing:'unavailable',username:null});
+});
+
+test('free Sites leave paid concurrency and rolling capacity protected, including constrained/tiny pools',()=>{
+  assert.equal(decideFairAdmission(p,snapshot,zero,now,'test','free'),'BASELINE');
+  for(const counts of [{...zero,outstanding:2},{...zero,attempts:3}]) {
+    assert.throws(()=>decideFairAdmission(p,snapshot,counts,now,'test','free'),(e:any)=>e.reason==='free_capacity');
+    assert.equal(decideFairAdmission(p,snapshot,counts,now,'test','pro'),'BASELINE');
+  }
+  for(const s of [{...snapshot,readiness:'CONSTRAINED' as const},{...snapshot,local_concurrency_limit:3}]) {
+    assert.throws(()=>decideFairAdmission(p,s,zero,now,'test','free'));
+    assert.equal(decideFairAdmission(p,s,zero,now,'test','pro'),'BASELINE');
+  }
 });

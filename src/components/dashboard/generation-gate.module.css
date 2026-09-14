@@ -1,0 +1,8 @@
+.notice { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; padding-block: 12px; border-top: 1px solid var(--sites-line, var(--studio-line, currentColor)); color: var(--sites-fg, var(--foreground)); }
+.title { margin: 0; font-size: 14px; font-weight: 600; line-height: 1.5; font-variant-numeric: tabular-nums; }
+.detail { margin: 4px 0 0; font-size: 14px; line-height: 1.5; color: var(--sites-muted, var(--studio-muted, var(--foreground-muted))); max-width: 60ch; overflow-wrap: anywhere; }
+.actions { display: flex; flex-wrap: wrap; gap: 4px 16px; }
+.actions a, .actions button { display: inline-flex; align-items: center; min-height: 44px; padding: 4px 0; color: inherit; font-size: 14px; font-weight: 600; text-decoration: underline; text-underline-offset: 4px; background: transparent; border: 0; cursor: pointer; }
+.actions a:focus-visible, .actions button:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; border-radius: 2px; }
+
+.actions button:disabled { opacity: .6; cursor: wait; }

@@ -1,5 +1,6 @@
 import { SitesBillingError, type SitesGenerationReply } from '../billing/sites-generation';
 import { FreeQuotaError } from '../billing/free-generation-quota';
+import { FreeGenerationGateError } from '../billing/free-generation-gate';
 import { boundedDomainJson } from './cloudflare-dns';
 import { SiteDomainError } from './domains';
 import { readSiteSummary, type SiteDocument, type SitesAccess, type SiteIntent } from './workspace-contract';
@@ -18,7 +19,7 @@ export interface WorkspaceDependencies {
   publish?(owner: string, id: string, revision: number, username: string): Promise<Parameters<typeof workspaceView>[0]>;
 }
 const headers = { 'Cache-Control': 'private, no-store', 'X-Content-Type-Options': 'nosniff' };
-const fail = (status: number, publicCode?: 'free_quota_exhausted' | 'free_site_limit' | 'invalid_username' | 'username_unavailable' | 'rate_limited' | 'request_too_long', retry?:number) => Response.json({ error: { code: publicCode || ({401:'sign_in_required',403:'paid_plan_required',404:'site_not_found',409:'site_changed',429:'site_limit_reached'} as Record<number,string>)[status] || 'site_unavailable' } }, { status, headers:{...headers,...(retry?{'Retry-After':String(retry)}:{})} });
+const fail = (status: number, publicCode?: 'free_generation_paused' | 'free_generation_busy' | 'free_quota_exhausted' | 'free_site_limit' | 'invalid_username' | 'username_unavailable' | 'rate_limited' | 'request_too_long', retry?:number) => Response.json({ error: { code: publicCode || ({401:'sign_in_required',403:'paid_plan_required',404:'site_not_found',409:'site_changed',429:'site_limit_reached'} as Record<number,string>)[status] || 'site_unavailable' } }, { status, headers:{...headers,...(retry?{'Retry-After':String(retry)}:{})} });
 const uuid = (v: unknown): v is string => typeof v === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(v);
 const keys = (v: Record<string, unknown>, names: string) => Object.keys(v).sort().join(',') === names;
 const title = (v: unknown): v is string => typeof v === 'string' && v.trim().length > 0 && v.length <= 90 && !/[\u0000-\u001f\u007f]/.test(v);
@@ -122,11 +123,12 @@ export function sitesWorkspaceRoute(deps: WorkspaceDependencies) {
         // Only proven pre-admission deferrals can clear the workspace operation.
         if (error instanceof FairUsageError && error.beforeAdmission) {
           await repo.finish(owner,body.id,body.operationId,null,'This update did not start. Please try again later.',null,true,true);
-          return fail(error.status,error.status===429?'rate_limited':undefined,error.retryAfter);
+          return fail(error.status,error.reason==='free_capacity'?'free_generation_busy':error.status===429?'rate_limited':undefined,error.retryAfter);
         }
         return reply(await repo.get(owner,body.id));
       }
     } catch (error) {
+      if(error instanceof FreeGenerationGateError)return fail(429,error.code);
       if(error instanceof FreeQuotaError)return fail(402,error.code);
       if(error instanceof ConversationInputError)return fail(400,'request_too_long');
       if(error instanceof FairUsageError)return fail(error.status,error.status===429?'rate_limited':undefined,error.retryAfter);

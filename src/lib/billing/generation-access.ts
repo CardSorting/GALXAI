@@ -16,7 +16,7 @@ export async function generationMembership(owner: string, pool: Pool, policy: Fa
     return {plan:'pro' as const,access};
   } catch(error) {
     if (error instanceof FairUsageError && error.status === 403) return {plan:'free' as const,
-      access:{accountId:owner,validUntil:Date.now()+15000,policyRevision:policy.revision}};
+      access:{accountId:owner,validUntil:Date.now()+15000,policyRevision:policy.revision,tier:'free' as const}};
     throw error;
   }
 }

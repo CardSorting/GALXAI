@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthSessionContent } from '@/components/auth/AuthSessionContent';
+import { GenerationAllowanceProvider } from '@/contexts/GenerationAllowanceContext';
 import { AuthProvider } from "@/contexts/AuthContext";
 import { PersonaProvider } from "@/contexts/PersonaContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
@@ -165,14 +166,14 @@ export default function RootLayout({
               <SkipToContent />
               <AccessibilityAnnouncer />
               <AuthProvider>
-                <PersonaProvider>
+                <GenerationAllowanceProvider><PersonaProvider>
                   <ProductNavigation />
                   <div id="main-content" tabIndex={-1} className="relative z-10 flex-1 flex flex-col pb-16 lg:pb-0 outline-none">
                     <AuthSessionContent>{children}</AuthSessionContent>
                     <Footer />
                   </div>
                   <MobileBottomNav />
-                </PersonaProvider>
+                </PersonaProvider></GenerationAllowanceProvider>
               </AuthProvider>
             </LanguageProvider>
           </AppearanceProvider>

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { GenerationGateNotice, useGenerationGate } from '@/components/dashboard/GenerationGateNotice';
 import { usePathname } from 'next/navigation';
 import { IMAGE_PATHS, imageView, type ImageView } from '@/lib/images/navigation';
 import { authEntryPath } from '@/lib/auth/redirects';
@@ -48,6 +49,7 @@ function StudioWorkspace({ owner, token, authLoading }: { owner: string | null; 
   const downloadingLock = useRef(false);
   const lastCopied = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { settings, setSettings, getDetails } = studio;
+  const gate=useGenerationGate('images',false,settings.count);
   const previousLibraryPage = useRef(studio.page);
   const busy = studio.submitting || studio.polling;
   const activeImage = active;
@@ -199,7 +201,7 @@ function StudioWorkspace({ owner, token, authLoading }: { owner: string | null; 
         </nav>
       <aside className={`studio-composer ${view === 'library' ? 'studio-composer-library' : ''} ${!composerOpen ? 'studio-composer-collapsed' : ''}`} aria-label="Image creation settings">
         <div className="studio-composer-summary"><div><p>{settings.prompt || 'Your next image'}</p><span>{settings.ratio} · {settings.count} {settings.count === 1 ? 'image' : 'images'}</span></div><button type="button" className="studio-secondary" aria-expanded={composerOpen} aria-controls="studio-create-form" onClick={focusPrompt}>Edit prompt</button></div>
-        <form id="studio-create-form" ref={formRef} onSubmit={event => { event.preventDefault(); changeView('create'); void studio.generate(); }} onKeyDown={event => {
+        <form id="studio-create-form" ref={formRef} onSubmit={event => { event.preventDefault(); if(gate.blocked)return; changeView('create'); void studio.generate(); }} onKeyDown={event => {
           if ((event.metaKey || event.ctrlKey) && event.key === 'Enter' && !event.nativeEvent.isComposing) { event.preventDefault(); formRef.current?.requestSubmit(); }
         }}>
           <div className="studio-composer-heading"><h2>Create an image</h2><SlidersHorizontal aria-hidden="true" />{studio.creations.length > 0 && <button type="button" className="studio-text-button studio-return-results" onClick={() => { setComposerOpen(false); canvasRef.current?.focus({ preventScroll: true }); canvasRef.current?.scrollIntoView({ block: 'start' }); }}>Back to images<ArrowRight aria-hidden="true" /></button>}</div>
@@ -217,7 +219,8 @@ function StudioWorkspace({ owner, token, authLoading }: { owner: string | null; 
           <fieldset className="studio-fieldset studio-count"><legend>Number of images</legend><div>{[1, 2, 3, 4].map(count => <button type="button" key={count} aria-pressed={settings.count === count} aria-label={`${count} ${count === 1 ? 'image' : 'images'}`} onClick={() => setSettings(current => ({ ...current, count }))}>{count}</button>)}</div></fieldset>
           </div>
           <div className="studio-submit-area">
-            {!owner && !authLoading ? <Link className="studio-primary" href={authEntryPath(pathname)}><Sparkles aria-hidden="true" />Sign in to generate<ArrowRight aria-hidden="true" /></Link> : <button className="studio-primary" type="submit" disabled={!studio.ready || authLoading || !settings.prompt.trim() || busy || Boolean(studio.pending) || studio.uncertain || studio.retryIn > 0}>
+            {owner && <GenerationGateNotice kind="images" quantity={settings.count}/>}
+            {!owner && !authLoading ? <Link className="studio-primary" href={authEntryPath(pathname)}><Sparkles aria-hidden="true" />Sign in to generate<ArrowRight aria-hidden="true" /></Link> : <button className="studio-primary" type="submit" disabled={gate.blocked || !studio.ready || authLoading || !settings.prompt.trim() || busy || Boolean(studio.pending) || studio.uncertain || studio.retryIn > 0}>
               {busy ? <LoaderCircle className="studio-spin" aria-hidden="true" /> : <Sparkles aria-hidden="true" />}
               {authLoading ? 'Loading…' : studio.submitting ? 'Submitting…' : studio.polling ? 'Generating…' : studio.retryIn > 0 ? `Try again in ${studio.retryIn}s` : `Generate ${settings.count === 1 ? 'image' : `${settings.count} images`}`}
             </button>}

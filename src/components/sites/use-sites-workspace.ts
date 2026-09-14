@@ -30,8 +30,11 @@ export function useSitesWorkspace(owner: string | null, token?: string, initialI
         ...(body ? {body:JSON.stringify(body)} : {}) });
       if (!response.ok) {
         if(response.status===403 && alive.current){setAccess('paid_plan_required');setPublishing(false);}
+        if(body)window.dispatchEvent(new Event(GENERATION_QUOTA_CHANGED));
         let code: unknown; try { code = (await response.json())?.error?.code; } catch {}
         throw new WorkspaceClientError(code === 'free_site_limit' ? 'Your free site has already been created. Open it in My sites, or upgrade to Pro to create more.'
+          : code === 'free_generation_paused' ? 'Free Site creation is temporarily paused. Your turn was not used. Try later or explore Pro.'
+          : code === 'free_generation_busy' ? 'Free Site creation is busy right now. Your turn was not used. Try again later.'
           : code === 'free_quota_exhausted' ? 'Your three free site turns are used up. Upgrade to Pro to keep creating.'
           : code === 'invalid_username' ? 'Use 3–20 lowercase letters, numbers, or hyphens. Start with a letter and end with a letter or number.'
           : code === 'username_unavailable' ? 'That username isn’t available. Choose another, or refresh to use your saved username.'
@@ -149,7 +152,7 @@ export function useSitesWorkspace(owner: string | null, token?: string, initialI
     },undefined,4000);
   },[site?.id,site?.generating,site?.address?.status,owner,busy,call,accept]);
   async function send(brief: string,intent:SiteIntent,onCreated?:(id:string)=>void): Promise<WorkspaceSite | null> {
-    if (!owner || !navigator.onLine || access!=='included' || loading || (selected.current && !site) || lock.current || site?.generating || site?.archived) return null;
+    if (!owner || !navigator.onLine || !['included','free'].includes(access) || loading || (selected.current && !site) || lock.current || site?.generating || site?.archived) return null;
     lock.current = true; setBusy(true);setActivity(intent==='discuss'?'Thinking through your question…':'Updating your draft…');setError('');
     let operationKey='',operationId='',targetId='';
     try {

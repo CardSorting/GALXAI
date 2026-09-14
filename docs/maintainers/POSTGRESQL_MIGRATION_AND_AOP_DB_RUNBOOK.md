@@ -30,7 +30,7 @@ Keep private operation tables unavailable to browser database roles. RLS, explic
 
 The [large-library migration](image-library-scale.md#validation-rollout-and-recovery) adds partial ordering indexes and a page-only function. Review writer-blocking index creation against the target size/load; its timeout bounds are not a zero-lock promise. Apply it before dependent application readers.
 
-The [free-generation migration](FREE_GENERATION_QUOTA.md) adds private grant and usage tables and must precede dependent application handlers. Its DOWN file retains identity/usage and only reasserts denied privileges; roll back the application to stop free admission.
+The [free-generation migrations](FREE_GENERATION_QUOTA.md) add private grants/usage, followed by the aggregate policy, capacity flag, bounded-query indexes and Sites tier. Apply both in timestamp order before dependent handlers. The aggregate policy seeds paused; its DOWN file disables new free admission while retaining every record. The older quota DOWN only reasserts privileges. Use the compatible gate or a Pro-only application rollback, never the earlier unbounded free implementation.
 
 Run static integrity, relevant isolated database tests, authorization/adversarial cases and application checks before applying. Verify rollback behavior in the fixture; a safe rollback may intentionally refuse data loss rather than delete new records.
 

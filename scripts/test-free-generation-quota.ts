@@ -8,10 +8,11 @@ import { StripeEngine } from '../src/lib/stripe/stripe';
 import { FairUsageError } from '../src/lib/sites/fair-policy';
 
 const owner='00000000-0000-4000-8000-000000000001';
+const availability={sites:'available' as const,images:'available' as const};
 const secret='PRIVATE_CANARY_database_grant_identity';
 test('quota endpoint derives ownership from verified identity and projects a no-store DTO',async()=>{
   let reads=0,pro=false;
-  const handle=generationQuotaRoute({authenticate:async request=>{
+  const handle=generationQuotaRoute({availability:async()=>availability,authenticate:async request=>{
     if(request.headers.get('authorization')!=='Bearer verified') throw Object.assign(new AccountIdentityError(),{message:secret});
     return{id:owner,private:secret};
   },plan:async id=>{assert.equal(id,owner);return pro?'pro':'free';},quota:async id=>{
@@ -26,18 +27,18 @@ test('quota endpoint derives ownership from verified identity and projects a no-
   assert.equal((await send('',undefined,'POST')).status,405);
   const response=await send();assert.equal(response.headers.get('cache-control'),'private, no-store');
   assert.deepEqual([...response.headers.keys()].sort(),['cache-control','content-type','x-content-type-options']);
-  assert.deepEqual(await response.json(),{plan:'free',quota:{sites:1,images:5,siteTurns:3}});
+  assert.deepEqual(await response.json(),{plan:'free',quota:{sites:1,images:5,siteTurns:3},availability});
   pro=true;assert.deepEqual(await (await send()).json(),{plan:'pro',quota:null});assert.equal(reads,1);
 });
 test('invalid quota data and authority outages cannot become free access or leak diagnostics',async()=>{
   for(const quota of [null,{}, {sites:2,images:5,siteTurns:3},{sites:1,images:6,siteTurns:3},{sites:1,images:5,siteTurns:4},{sites:1,images:-1,siteTurns:3},{sites:1,images:1.5,siteTurns:3}]){
     assert.equal(readGenerationAllowance({plan:'free',quota}),null);
-    const response=await generationQuotaRoute({authenticate:async()=>({id:owner}),plan:async()=>'free',quota:async()=>quota as any})(new Request('https://galx.ai/quota'));
+    const response=await generationQuotaRoute({availability:async()=>availability,authenticate:async()=>({id:owner}),plan:async()=>'free',quota:async()=>quota as any})(new Request('https://galx.ai/quota'));
     assert.equal(response.status,503);assert.doesNotMatch(await response.text(),/PRIVATE_CANARY|TypeError|stack/);
   }
   assert.equal(readGenerationAllowance({plan:'pro',quota:{images:5}}),null);
   let quotaCalls=0;
-  const response=await generationQuotaRoute({authenticate:async()=>({id:owner}),plan:async()=>{throw new Error(secret);},quota:async()=>{quotaCalls++;throw new Error();}})(new Request('https://galx.ai/quota'));
+  const response=await generationQuotaRoute({availability:async()=>availability,authenticate:async()=>({id:owner}),plan:async()=>{throw new Error(secret);},quota:async()=>{quotaCalls++;throw new Error();}})(new Request('https://galx.ai/quota'));
   assert.equal(response.status,503);assert.equal(quotaCalls,0);assert.doesNotMatch(await response.text(),/PRIVATE_CANARY/);
 });
 test('only authoritative absence of Pro permits free membership; grants and outages stay distinct',async()=>{
@@ -57,4 +58,12 @@ test('only authoritative absence of Pro permits free membership; grants and outa
     unavailable=false;granted=false;StripeEngine.getInstance=()=>({getClient:()=>null}) as any;
     await assert.rejects(generationMembership(owner,pool,policy),FairUsageError);
   } finally {StripeEngine.getInstance=saved;}
+});
+
+test('availability uses a closed allowlist and does not expose policy or grant fields',async()=>{
+  const quota={sites:1,images:5,siteTurns:3};
+  for(const availability of [null,{}, {sites:'enabled',images:'available'},{sites:'available',images:1}])assert.equal(readGenerationAllowance({plan:'free',quota,availability}),null);
+  assert.deepEqual(readGenerationAllowance({plan:'free',quota,availability:{sites:'paused',images:'busy',policy:secret},source:secret}),{plan:'free',quota,availability:{sites:'paused',images:'busy'}});
+  const response=await generationQuotaRoute({authenticate:async()=>({id:owner}),plan:async()=>'free',quota:async()=>quota,availability:async()=>{throw new Error(secret);}})(new Request('https://galx.ai/quota'));
+  assert.equal(response.status,503);assert.doesNotMatch(await response.text(),/PRIVATE_CANARY/);
 });

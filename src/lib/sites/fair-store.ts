@@ -1,11 +1,12 @@
 import { createHash,randomUUID } from 'node:crypto';
 import type { Pool, PoolClient } from 'pg';
 import { decideFairAdmission, FairUsageError, readFairLimits, type FairCounts, type FairLane, type FairLimits, type PoolSnapshot } from './fair-policy';
+import { freeDispatchOpen, settleFreeCapacity } from '../billing/free-generation-gate';
 
 export interface FairPolicy { mode: 'disabled' | 'shadow' | 'enforce'; pool_id: string; revision: number; limits: FairLimits; paid_price_ids: string[]; }
-export interface PaidAccess { accountId: string; validUntil: number; policyRevision: number; }
+export interface PaidAccess { accountId: string; validUntil: number; policyRevision: number; tier:'pro'|'free'; }
 export interface FairInvocation {
-  account_id: string; invocation_id: string; pool_id: string; digest: string; lane: FairLane;
+  account_id: string; invocation_id: string; pool_id: string; digest: string; lane: FairLane; tier:'pro'|'free';
   state: 'reserved' | 'dispatching' | 'completed' | 'not_started' | 'failed' | 'unknown';
   grant_id: string; grant_expires_at: Date; job_id: string | null; origin: string | null; output: string | null;
 }
@@ -96,6 +97,7 @@ export class SitesFairStore {
   }
   async admit(policy: FairPolicy, access: PaidAccess, invocation: string, digest: string, deadline: number): Promise<{row:FairInvocation;dispatch:boolean}> {
     if(!/^[a-zA-Z0-9_.:-]{1,120}$/.test(invocation)||!/^[a-f0-9]{64}$/.test(digest))throw new FairUsageError(400,'invalid_request');
+    if(!['pro','free'].includes(access.tier))throw new FairUsageError(503,'membership');
     const account=access.accountId,p=policy.limits,started=performance.now();
     const result=await this.tx(async(db,now)=>{
       await db.query('SELECT pg_advisory_xact_lock(hashtextextended($1,0))',[`sites-fair-account:${account}`]);
@@ -107,6 +109,8 @@ export class SitesFairStore {
       if(access.validUntil<=now)throw new FairUsageError(503,'membership_expired');
       const existing=(await db.query<FairInvocation>('SELECT * FROM private.galx_sites_fair_invocations WHERE account_id=$1 AND invocation_id=$2',[account,invocation])).rows[0];
       if(existing){if(existing.digest!==digest)throw new FairUsageError(409,'invocation_conflict');return {row:existing,dispatch:false};}
+      if(access.tier==='free' && !(await db.query(`SELECT 1 FROM private.galx_free_generation_usage
+        WHERE user_id::text=$1 AND kind='site' AND operation_id=$2 AND NOT released AND NOT capacity_settled`,[account,invocation])).rowCount)throw new FairUsageError(503,'free_reservation');
       const cooldown=(await db.query('SELECT until_at FROM private.galx_sites_fair_cooldowns WHERE account_id=$1',[account])).rows[0];
       if(cooldown?.until_at.getTime()>now)throw new FairUsageError(429,'account_cooldown',Math.ceil((cooldown.until_at.getTime()-now)/1000));
       if(pool.cooldown_until?.getTime()>now)throw new FairUsageError(503,'pool_cooldown',Math.ceil((pool.cooldown_until.getTime()-now)/1000));
@@ -130,7 +134,7 @@ export class SitesFairStore {
         AND (state IN ('reserved','dispatching','unknown') OR admitted_at>$4 OR (account_id=$1 AND allowance_window=$3 AND counted))`,[account,policy.pool_id,window,start])).rows[0] as FairCounts;
       await db.query('DELETE FROM private.galx_sites_fair_demand WHERE pool_id=$1 AND expires_at<=$2',[policy.pool_id,new Date(now)]);
       counts.activeDemand=Number((await db.query('SELECT count(*) FROM private.galx_sites_fair_demand WHERE pool_id=$1',[policy.pool_id])).rows[0].count);
-      if(counts.messages>=p.baseline_message_threshold){
+      if(access.tier==='pro' && counts.messages>=p.baseline_message_threshold){
         const known=(await db.query('SELECT 1 FROM private.galx_sites_fair_demand WHERE pool_id=$1 AND account_id=$2',[policy.pool_id,account])).rowCount;
         if(!known&&counts.activeDemand>=10000)throw new FairUsageError(503,'demand_bound');
         await db.query(`INSERT INTO private.galx_sites_fair_demand(pool_id,account_id,expires_at) VALUES($1,$2,$3)
@@ -140,13 +144,13 @@ export class SitesFairStore {
       let lane:FairLane;
       now=await this.now(db);
       if(Math.floor(now/(p.allowance_window_seconds*1000))!==window||access.validUntil<=now||Number(pool.snapshot?.revision)!==Number(pool.revision))throw new FairUsageError(503,'stale_admission');
-      try {lane=decideFairAdmission(p,pool.snapshot,counts,now,policy.pool_id);}catch(error){
+      try {lane=decideFairAdmission(p,pool.snapshot,counts,now,policy.pool_id,access.tier);}catch(error){
         if(error instanceof FairUsageError)return {denial:error,counts,snapshot:pool.snapshot}; // Commit bounded demand, never a logical charge.
         throw error;
       }
       const row=(await db.query<FairInvocation>(`INSERT INTO private.galx_sites_fair_invocations
-        (account_id,invocation_id,pool_id,digest,allowance_window,lane,state,admitted_at,grant_id,grant_expires_at,policy_revision,snapshot_revision)
-        VALUES($1,$2,$3,$4,$5,$6,'reserved',$7,$8,$9,$10,$11) RETURNING *`,[account,invocation,policy.pool_id,digest,window,lane,new Date(now),randomUUID(),new Date(now+p.dispatch_grant_expiry_milliseconds),policy.revision,Number(pool.revision)])).rows[0];
+        (account_id,invocation_id,pool_id,digest,allowance_window,lane,state,admitted_at,grant_id,grant_expires_at,policy_revision,snapshot_revision,tier)
+        VALUES($1,$2,$3,$4,$5,$6,'reserved',$7,$8,$9,$10,$11,$12) RETURNING *`,[account,invocation,policy.pool_id,digest,window,lane,new Date(now),randomUUID(),new Date(now+p.dispatch_grant_expiry_milliseconds),policy.revision,Number(pool.revision),access.tier])).rows[0];
       return {row,dispatch:true,counts,snapshot:pool.snapshot};
     },deadline);
     this.observe({event:'admission',account:createHash('sha256').update(account).digest('hex').slice(0,16),pool:policy.pool_id,invocation,
@@ -169,7 +173,7 @@ export class SitesFairStore {
   async start(account:string,invocation:string,grant:string):Promise<boolean>{
     return this.change(account,invocation,async(db,row,now)=>{
       if(row.state!=='reserved'||row.grant_id!==grant)return false;
-      if(row.grant_expires_at.getTime()<=now){await db.query(`UPDATE private.galx_sites_fair_invocations SET state='not_started',counted=false WHERE account_id=$1 AND invocation_id=$2`,[account,invocation]);return false;}
+      if(row.grant_expires_at.getTime()<=now || (row.tier==='free' && !await freeDispatchOpen(db,'site'))){await db.query(`UPDATE private.galx_sites_fair_invocations SET state='not_started',counted=false WHERE account_id=$1 AND invocation_id=$2`,[account,invocation]);return false;}
       await db.query(`UPDATE private.galx_sites_fair_invocations SET state='dispatching' WHERE account_id=$1 AND invocation_id=$2`,[account,invocation]);return true;
     });
   }
@@ -198,6 +202,7 @@ export class SitesFairStore {
       if(['completed','failed','not_started'].includes(row.state)){
         if(row.state!==state||row.output!==output)throw new FairUsageError(503,'receipt',undefined,false);return row;
       }
+      if(row.tier==='free')await settleFreeCapacity(db,account,'site',invocation);
       return (await db.query<FairInvocation>(`UPDATE private.galx_sites_fair_invocations SET state=$3,output=$4,counted=CASE WHEN $3='not_started' THEN false ELSE counted END WHERE account_id=$1 AND invocation_id=$2 RETURNING *`,[account,invocation,state,output])).rows[0];
     });
   }

@@ -1,0 +1,327 @@
+{
+  "observed_at": "2026-09-14T04:08:32.155014+00:00",
+  "base_revision": "cddf1d0e7ee7d7f33e954da8ea1bacd9baac0aa6",
+  "scope": "Local strengthening of free admission and paid protection; no production activation.",
+  "reviewed_contracts": [
+    "package.json",
+    "scripts/manage-free-generation.ts",
+    "scripts/test-free-generation-gate-db.ts",
+    "scripts/test-free-generation-quota-db.ts",
+    "scripts/test-free-generation-quota.ts",
+    "scripts/test-image-public-http.ts",
+    "scripts/test-sites-fair-db.ts",
+    "scripts/test-sites-fair.ts",
+    "scripts/test-sites-plans-db.ts",
+    "scripts/test-sites-workspace.ts",
+    "scripts/verify-free-generation-ui.mjs",
+    "src/app/api/billing/generation-quota/route.ts",
+    "src/app/layout.tsx",
+    "src/app/v1/images/generations/route.ts",
+    "src/components/dashboard/FreeGenerationQuota.tsx",
+    "src/components/dashboard/GenerationGateNotice.tsx",
+    "src/components/dashboard/generation-gate.module.css",
+    "src/components/images/ImageStudio.tsx",
+    "src/components/images/use-image-studio.ts",
+    "src/components/sites/SitesWorkspace.tsx",
+    "src/components/sites/sites.css",
+    "src/components/sites/use-sites-workspace.ts",
+    "src/contexts/GenerationAllowanceContext.tsx",
+    "src/lib/billing/free-generation-contract.ts",
+    "src/lib/billing/free-generation-gate.ts",
+    "src/lib/billing/free-generation-policy.ts",
+    "src/lib/billing/free-generation-quota.ts",
+    "src/lib/billing/generation-access.ts",
+    "src/lib/billing/generation-quota-route.ts",
+    "src/lib/images/request-repository.ts",
+    "src/lib/public-content/content.ts",
+    "src/lib/security/public-image-http.ts",
+    "src/lib/sites/fair-policy.ts",
+    "src/lib/sites/fair-store.ts",
+    "src/lib/sites/paid-access.ts",
+    "src/lib/sites/workspace-repository.ts",
+    "src/lib/sites/workspace-route.ts",
+    "src/lib/supabase/types.ts",
+    "supabase/migrations/20260914035003_free_generation_admission_gate.sql",
+    "supabase/rollbacks/20260914035003_free_generation_admission_gate.down.sql"
+  ],
+  "reviewed_guides": [
+    ".impeccable/surfaces/src-app-sites-page-tsx.md",
+    ".impeccable/surfaces/src-components-dashboard-navigation-tsx.md",
+    "PRODUCT.md",
+    "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md",
+    "docs/PRODUCT_SURFACE_STRATEGY.md",
+    "docs/QUEUE_SPECIFICATION.md",
+    "docs/SITES_CONTENT.md",
+    "docs/SITES_WORKSPACE.md",
+    "docs/adr/0150-free-generation-admission-gate.md",
+    "docs/maintainers/CI_PIPELINE_AND_AUTOMATION_SPEC.md",
+    "docs/maintainers/FREE_GENERATION_QUOTA.md",
+    "docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md",
+    "docs/maintainers/SITES_FAIR_USAGE.md",
+    "docs/maintainers/SITES_OPERATIONS.md",
+    "docs/maintainers/SITES_WORKSPACE.md",
+    "docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md",
+    "docs/maintainers/image-public-boundary.md",
+    "post-mortem/CURRENT_STATE.md"
+  ],
+  "source_sha256": {
+    "package.json": "274647833b5fe0a7ea681a2c03086ad694856be5599511817811b9c9ba375e88",
+    "scripts/manage-free-generation.ts": "7a1f786789e9507e758c13db2e750c5edc982fec2b714e646d7e0bf9526fbb2b",
+    "scripts/test-free-generation-gate-db.ts": "55e3bccca8dbbb6eefdad4600a774c61fe21a204fdb2df86b1f5becf0d35bb66",
+    "scripts/test-free-generation-quota-db.ts": "26d3381b0a90285cce6d954b954601fb7a5a4596998389ac7091cfb7b49d9b04",
+    "scripts/test-free-generation-quota.ts": "cbf7034c6f10ecfcf6176718f693a2636af775899e05552b5d7c53c58f142fb3",
+    "scripts/test-image-public-http.ts": "9339419b81996015666aa18c8c7e5fa38e58c1ad3dd665ad868d34819b600164",
+    "scripts/test-sites-fair-db.ts": "81c54900423732529355f40b450ab354edee2b24a705e6a95e19e97faba01b92",
+    "scripts/test-sites-fair.ts": "ad6db13e635ee5c7367c4ce556bf33773ff8722eca01c281a20d5bb23e2b129c",
+    "scripts/test-sites-plans-db.ts": "ef3bb836a5f42b3cd9bc0eaa07c8338ec634f76fa844dfedd76630c1a8886672",
+    "scripts/test-sites-workspace.ts": "89fc880ca7e6fb211ac2214ed75bd1a222d03dc33dae9344731641fee8e3ff6c",
+    "scripts/verify-free-generation-ui.mjs": "a03011864866e4d172a07d67f185fcbd996df3c5347fc9338825719793ddbdbd",
+    "src/app/api/billing/generation-quota/route.ts": "9886f0b6132866ea12dcd80ba3301b9e6ccb8bc9eeac9ae3aca9a2ef1d64621f",
+    "src/app/layout.tsx": "a41022bb87ace85a678554bab5aa51579bc4f12e96a602f87cfa5bb606d9e6bb",
+    "src/app/v1/images/generations/route.ts": "f805349641364e3caea2a83275040558cf7d05db595d75450331409e54e20e85",
+    "src/components/dashboard/FreeGenerationQuota.tsx": "538830f4078467a692ec7f463d545148aa21935ce4c22c44d901f92e9e7d67c1",
+    "src/components/dashboard/GenerationGateNotice.tsx": "435013796b565f458365f8397bef585bec48d01f982c93e0bd0b0fb665a2d224",
+    "src/components/dashboard/generation-gate.module.css": "efd8526722ca0ad42aec319a56bc2ea7e638185f30c35cea9b445dfb69bba4a4",
+    "src/components/images/ImageStudio.tsx": "2484445b06ef8d0426aa6c1108199f3865ddd0edea679565f409ee9b7bc6cf90",
+    "src/components/images/use-image-studio.ts": "e42785dbc52a93e785992bb400d8e0b77daa16b319b5640b2fbf3728db893d68",
+    "src/components/sites/SitesWorkspace.tsx": "fb4764619565d0fe6e743d7930204ff15ca4eb71bbe8131b53e8e0184c1bc7f1",
+    "src/components/sites/sites.css": "c0bae18b97b929439551d3252d6aeca9f05539e445bd6f79737388d31edf3859",
+    "src/components/sites/use-sites-workspace.ts": "47714d686d824d498dfe3ec88e6797426f24e41ffed896f934950c06b63cf00b",
+    "src/contexts/GenerationAllowanceContext.tsx": "d73875872f3814131bfc18029e69a72091993d906af63058ca37282f2c261a7c",
+    "src/lib/billing/free-generation-contract.ts": "dc21e2e396feafb371e64be27c68c62ac29e1a748c4d521003f67ac6286bca6a",
+    "src/lib/billing/free-generation-gate.ts": "385cf534e4b41b597def64ff923aef56b2ee1e478a721886085327b45ed792df",
+    "src/lib/billing/free-generation-policy.ts": "463ce63039316e7124d4e055b13288a6dcbbe9802f99115777f3c5675b51b152",
+    "src/lib/billing/free-generation-quota.ts": "b84c0d1be9c595067cafe738efbc9d1976889dcdfd025b22114860e9e3d79683",
+    "src/lib/billing/generation-access.ts": "7d0f05c6a9ea2c7e4b4fc532eb264215c4ca57be2633187a564f02d44116fb26",
+    "src/lib/billing/generation-quota-route.ts": "f35bd7b7f55b7b43d3d43de3a1103e081cb82a50355b6f2e1f31d2233129de49",
+    "src/lib/images/request-repository.ts": "aeab0e024c51a37abed88e294112b26d81e71aeebf459b43bc6cf09ebe4a8cde",
+    "src/lib/public-content/content.ts": "2ff7c827bd40c9dcd7ebbcfb0fcb6ca9c72e0dd7d90cda1317fcc6a6092f6fe2",
+    "src/lib/security/public-image-http.ts": "8f2436f638149bcffa2a82e89b45007fd53c8f0abbe14e7475a80de788f17058",
+    "src/lib/sites/fair-policy.ts": "1854d010ea293179aa730cef706fb93e57f3df7bf8b0756de09837c369b016be",
+    "src/lib/sites/fair-store.ts": "ac3f4f76ec848c122aa5b2be7b84554faa6d96a37619c4537494aa3d963ea44c",
+    "src/lib/sites/paid-access.ts": "5a3670a30c3553ec465339c35a8c35449794f08c3e2059f79e1a3d7f136b5418",
+    "src/lib/sites/workspace-repository.ts": "79f041050100b05a6b251731eeeb65e244712d06bb751be820ad61f54c0a4608",
+    "src/lib/sites/workspace-route.ts": "b03ea8af720cf2b368c4f90d567eba25cb471e7bcdb86a9a1a5b017eb240f98b",
+    "src/lib/supabase/types.ts": "5afade720962a42f34dda28701f48d04b08db66a2861941016b25f2b66f0fab0",
+    "supabase/migrations/20260914035003_free_generation_admission_gate.sql": "97fd0547a8649bb99182cb33482a2df6a86496a5c01405e00e423cd9b16abb1c",
+    "supabase/rollbacks/20260914035003_free_generation_admission_gate.down.sql": "e7fdf81b68396ac1587237f0a21f5b7e889b2dd53c7286553a92459da09d7b47"
+  },
+  "findings": [
+    "Paused-by-default expiring aggregate resource budgets, one outstanding free operation per account across resources, and permanent aggregate attempt accounting.",
+    "Free Sites use at most the first quarter of healthy shared concurrency and rolling attempts, and never contribute paid continuation demand.",
+    "Pause rechecked at dispatch; unknown work retains capacity and quota. Paid dispatch does not lock the free policy.",
+    "One allowance provider and distinct composer stop states; free Sites send-hook bug fixed; prompt/keyboard behavior covered by synthetic fixtures.",
+    "Existing image /api/run alias delegates to the public quota path; generic queue mutation remains internal-only.",
+    "All new runtime and operator paths mapped to documentation domains; generated inventories and surface briefs reviewed as support documents."
+  ],
+  "checks": [
+    {
+      "command": "npm run test:free-quota",
+      "result": "passed",
+      "checks": 4
+    },
+    {
+      "command": "npm run test:free-quota:db",
+      "result": "passed",
+      "checks": 86
+    },
+    {
+      "command": "npm run test:image:security",
+      "result": "passed",
+      "checks": 40
+    },
+    {
+      "command": "npm run test:sites:fair",
+      "result": "passed",
+      "checks": 8
+    },
+    {
+      "command": "npm run test:sites:workspace",
+      "result": "passed",
+      "checks": 18
+    },
+    {
+      "command": "npm run test:image:db",
+      "result": "passed",
+      "checks": 37
+    },
+    {
+      "command": "npm run test:sites:fair:db",
+      "result": "passed",
+      "checks": 26
+    },
+    {
+      "command": "npm run test:sites:workspace:db",
+      "result": "passed",
+      "checks": 86
+    },
+    {
+      "command": "npm run test:sites:plans:db",
+      "result": "passed",
+      "checks": 16
+    },
+    {
+      "command": "npm run db:test",
+      "result": "passed",
+      "checks": 94
+    },
+    {
+      "command": "npm run test:egress:transport",
+      "result": "passed",
+      "checks": 42
+    },
+    {
+      "command": "node --import tsx --test scripts/test-public-reading.ts scripts/test-public-information-boundary.ts",
+      "result": "passed",
+      "checks": 10
+    },
+    {
+      "command": "npm run db:verify",
+      "result": "passed",
+      "fatal": 0,
+      "warnings": 0
+    },
+    {
+      "command": "npx tsc --noEmit",
+      "result": "passed"
+    },
+    {
+      "command": "npm run lint",
+      "result": "passed",
+      "pre_existing_warnings": 8
+    },
+    {
+      "command": "Isolated node scripts/build-ci.mjs",
+      "result": "passed",
+      "configuration": "synthetic, no dotenv"
+    },
+    {
+      "command": "node scripts/verify-free-generation-ui.mjs",
+      "result": "passed",
+      "results": [
+        {
+          "width": 1440,
+          "states": [
+            "free",
+            "paused",
+            "busy",
+            "exhausted",
+            "unavailable",
+            "recovered",
+            "pro",
+            "images-exhausted"
+          ],
+          "overlap": "one trailing refresh",
+          "axeViolations": 0,
+          "syntheticPosts": 2
+        },
+        {
+          "width": 390,
+          "states": [
+            "free",
+            "paused",
+            "busy",
+            "exhausted",
+            "unavailable",
+            "recovered",
+            "pro",
+            "images-exhausted"
+          ],
+          "overlap": "one trailing refresh",
+          "axeViolations": 0,
+          "syntheticPosts": 2
+        },
+        {
+          "width": 320,
+          "states": [
+            "free",
+            "paused",
+            "busy",
+            "exhausted",
+            "unavailable",
+            "recovered",
+            "pro",
+            "images-exhausted"
+          ],
+          "overlap": "one trailing refresh",
+          "axeViolations": 0,
+          "syntheticPosts": 2
+        }
+      ]
+    },
+    {
+      "command": "GALX_VERIFY_ORIGIN=http://localhost:3427 node --import tsx scripts/verify-image-public-http.ts",
+      "result": "passed",
+      "linked_browser_assets": 27
+    },
+    {
+      "command": "Compiled boundary and additional admission-marker scan",
+      "result": "passed",
+      "result_detail": {
+        "build": "/tmp/galx-free-gate-build-4_jq4ke7",
+        "files": 668,
+        "additional_private_markers": [
+          "galx_free_generation_policy",
+          "capacity_settled",
+          "admitted_units",
+          "identity_hash",
+          "max_total_units",
+          "free_reservation",
+          "shared-local-admission",
+          "free-generation:"
+        ],
+        "errors": []
+      }
+    },
+    {
+      "command": "Impeccable detector on new notice CSS/component",
+      "result": "passed",
+      "findings": 0,
+      "suppressions_added": 0
+    },
+    {
+      "command": "node --import tsx scripts/manage-free-generation.ts --help",
+      "result": "passed"
+    },
+    {
+      "command": "npm run test:docs",
+      "result": "passed"
+    }
+  ],
+  "migration_inventory": {
+    "applied_at_read": 105,
+    "pending_local": [
+      "20260914030425_free_generation_quota.sql",
+      "20260914035003_free_generation_admission_gate.sql"
+    ],
+    "production_mutations": 0
+  },
+  "review_scope_limits": [
+    "Targeted changed-contract review; broader domain fingerprints inventory unchanged modules rather than certifying every path.",
+    "No production migration, deployment, budget activation, real payment, generation or publication.",
+    "No person-level identity guarantee, upstream remaining-balance measurement or paid latency/SLA guarantee.",
+    "No live-site cleanliness or actual cost savings claim.",
+    "Initial database run found UUID parameter typing; corrected rerun passed.",
+    "First UI run passed desktop Sites states, then used a nonexistent Images route; the fixture route was corrected for confirmation.",
+    "No incident or prevention action was closed.",
+    "Final code also bypasses usage-history aggregation for paused/expired/cumulatively exhausted policy; the final build and quota DB fixture include that safeguard."
+  ],
+  "browser_status": "passed",
+  "health_score": {
+    "accessibility": 3,
+    "performance": 3,
+    "responsive": 3,
+    "theming": 3,
+    "implementation_integrity": 4,
+    "total": 16,
+    "scope": "header and new gate; selected composer interactions, not whole product"
+  },
+  "research_sources": [
+    "https://support.claude.com/en/articles/8114491-get-started-with-claude",
+    "https://support.claude.com/en/articles/9876003-i-have-a-paid-claude-subscription-pro-max-team-or-enterprise-plans-why-do-i-have-to-pay-separately-to-use-the-claude-api-and-console",
+    "https://vercel.com/docs/plans/hobby",
+    "https://docs.lovable.dev/introduction/credits-and-usage",
+    "https://supabase.com/changelog.md",
+    "https://supabase.com/docs/guides/database/postgres/row-level-security"
+  ]
+}

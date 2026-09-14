@@ -1,5 +1,6 @@
 import type { Pool, PoolClient } from 'pg';
 import type { FreeGenerationQuota } from './free-generation-contract';
+import { reserveFreeCapacity } from './free-generation-gate';
 
 export class FreeQuotaError extends Error {
   constructor(readonly code: 'free_quota_exhausted' | 'free_site_limit' = 'free_quota_exhausted') { super(code); }
@@ -27,7 +28,7 @@ async function grant(db: PoolClient, owner: string): Promise<Grant | null> {
         AND id::text IN (SELECT operation_id FROM private.galx_free_generation_usage
           WHERE user_id=$1::uuid AND kind='image' AND NOT released)
       RETURNING id
-    ) UPDATE private.galx_free_generation_usage SET released=true
+    ) UPDATE private.galx_free_generation_usage SET released=true,capacity_settled=true
       WHERE user_id=$1::uuid AND kind='image' AND operation_id IN (SELECT id::text FROM expired)`,[owner]);
   }
   return row;
@@ -53,11 +54,12 @@ export async function consumeFreeGeneration(db: PoolClient, owner: string, kind:
   }
   const used = Number((await db.query('SELECT coalesce(sum(quantity),0) AS used FROM private.galx_free_generation_usage WHERE user_id=$1 AND kind=$2 AND NOT released', [owner,kind])).rows[0].used);
   if (used + quantity > (kind === 'site' ? 3 : 5)) throw new FreeQuotaError();
+  await reserveFreeCapacity(db,owner,kind,quantity);
   await db.query('INSERT INTO private.galx_free_generation_usage(user_id,kind,operation_id,quantity) VALUES($1,$2,$3,$4)', [owner,kind,operation,quantity]);
 }
 /** Only call with proof of no dispatch. Failures/timeouts alone are not proof. */
 export async function releaseFreeGeneration(db: Pick<PoolClient, 'query'>, owner: string, kind: 'site' | 'image', operation: string) {
-  await db.query('UPDATE private.galx_free_generation_usage SET released=true WHERE user_id=$1 AND kind=$2 AND operation_id=$3 AND NOT released', [owner,kind,operation]);
+  await db.query('UPDATE private.galx_free_generation_usage SET released=true,capacity_settled=true WHERE user_id=$1 AND kind=$2 AND operation_id=$3 AND NOT released', [owner,kind,operation]);
 }
 export async function readFreeGenerationQuota(pool: Pick<Pool,'connect'>, owner: string): Promise<FreeGenerationQuota> {
   const db = await pool.connect();
