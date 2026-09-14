@@ -5,55 +5,134 @@ import { ArrowDownToLine, ArrowLeft, ArrowRight, ImageIcon, LayoutGrid, Maximize
 import { STARTER_TEMPLATES, type StarterTemplate, type StudioImage, type StudioSettings } from './studio-contract';
 import { StudioArtwork } from './StudioArtwork';
 
-/** Decorative simulation only: no partial image, progress estimate, or provider data. */
-function DenoisingSimulation({ running, seed }: { running: boolean; seed: number }) {
+/** Modern Luminous Latent Flux simulation replacing noisy procedural TV static. */
+function LatentFluxSimulation({ running, seed }: { running: boolean; seed: number }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const elapsed = useRef(0);
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    const context = canvas?.getContext('2d', { alpha: false });
+    const context = canvas?.getContext('2d');
     if (!canvas || !context) return;
-    const size = 192;
-    canvas.width = size; canvas.height = size;
-    const frame = context.createImageData(size, size);
-    const field = new Float32Array(size * size);
-    let randomState = (seed + 1) * 982451653;
-    const random = () => { randomState ^= randomState << 13; randomState ^= randomState >>> 17; randomState ^= randomState << 5; return (randomState >>> 0) / 4294967296; };
-    const noise = () => Float32Array.from({ length: size * size }, () => random());
-    let from = noise(), to = noise(), epoch = -1;
-    for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
-      field[y * size + x] = (Math.sin(x / 39 + seed) + Math.cos(y / 47 - seed) + Math.sin((x + y) / 61)) / 6 + .5;
-    }
+    const size = 256;
+    canvas.width = size;
+    canvas.height = size;
+    const centerX = size / 2;
+    const centerY = size / 2;
+
+    // Deterministic particle set generated from seed for repeatable, jitter-free flow
+    const particleCount = 36;
+    const particles = Array.from({ length: particleCount }, (_, i) => {
+      const angle = (i / particleCount) * Math.PI * 2 + (seed * 1.618);
+      const radius = 26 + ((i * 19 + seed * 37) % 85);
+      const speed = 0.0007 + ((i * 7) % 5) * 0.0003;
+      const radiusOffset = ((i * 13) % 7) * 0.1;
+      const pSize = 1.1 + ((i * 11) % 4) * 0.45;
+      const hue = ((seed * 53 + i * 23) % 140) + 175; // electric cyan through magenta/violet
+      return { angle, radius, speed, radiusOffset, size: pSize, hue };
+    });
+
     function draw(time: number) {
-      const nextEpoch = Math.floor(time / 900);
-      if (nextEpoch !== epoch) { from = to; to = noise(); epoch = nextEpoch; }
-      const blend = (time % 900) / 900;
-      const smooth = blend * blend * (3 - 2 * blend);
-      const grain = .16 + .7 * Math.exp(-time / 6500);
-      for (let i = 0; i < field.length; i++) {
-        const value = field[i] * (1 - grain) + (from[i] * (1 - smooth) + to[i] * smooth) * grain;
-        const pixel = i * 4;
-        frame.data[pixel] = 24 + value * 116;
-        frame.data[pixel + 1] = 28 + value * 122;
-        frame.data[pixel + 2] = 47 + value * 158;
-        frame.data[pixel + 3] = 255;
+      context!.clearRect(0, 0, size, size);
+
+      // 1. Deep cosmic dark background with gentle radial vignette
+      const bgGrad = context!.createRadialGradient(centerX, centerY, 8, centerX, centerY, size * 0.72);
+      bgGrad.addColorStop(0, '#0d1322');
+      bgGrad.addColorStop(0.55, '#080a12');
+      bgGrad.addColorStop(1, '#05060a');
+      context!.fillStyle = bgGrad;
+      context!.fillRect(0, 0, size, size);
+
+      const t = time * 0.0012;
+      context!.save();
+      context!.globalCompositeOperation = 'screen';
+
+      // 2. Harmonic Fluid Waves: Luminous Cyan Ribbon
+      context!.beginPath();
+      const wave1Grad = context!.createLinearGradient(0, centerY - 45, size, centerY + 45);
+      wave1Grad.addColorStop(0, 'rgba(0, 229, 255, 0.02)');
+      wave1Grad.addColorStop(0.5, 'rgba(0, 240, 255, 0.28)');
+      wave1Grad.addColorStop(1, 'rgba(0, 160, 255, 0.02)');
+      context!.fillStyle = wave1Grad;
+      context!.moveTo(0, size);
+      for (let x = 0; x <= size; x += 8) {
+        const y = centerY + Math.sin(x * 0.018 + t + seed) * 30 + Math.cos(x * 0.011 - t * 0.8) * 16;
+        context!.lineTo(x, y);
       }
-      context!.putImageData(frame, 0, 0);
+      context!.lineTo(size, size);
+      context!.closePath();
+      context!.fill();
+
+      // 3. Harmonic Fluid Waves: Radiant Magenta / Violet Ribbon
+      context!.beginPath();
+      const wave2Grad = context!.createLinearGradient(0, centerY + 35, size, centerY - 35);
+      wave2Grad.addColorStop(0, 'rgba(255, 42, 133, 0.02)');
+      wave2Grad.addColorStop(0.5, 'rgba(255, 0, 128, 0.24)');
+      wave2Grad.addColorStop(1, 'rgba(138, 43, 226, 0.02)');
+      context!.fillStyle = wave2Grad;
+      context!.moveTo(0, 0);
+      for (let x = 0; x <= size; x += 8) {
+        const y = centerY + Math.sin(x * 0.015 - t * 1.1 + seed * 2) * 26 + Math.sin(x * 0.025 + t * 0.7) * 14;
+        context!.lineTo(x, y);
+      }
+      context!.lineTo(size, 0);
+      context!.closePath();
+      context!.fill();
+
+      // 4. Central Luminous Core Flare (Breathing aperture)
+      const pulse = Math.sin(t * 2.2) * 0.16 + 0.84;
+      const coreGrad = context!.createRadialGradient(centerX, centerY, 0, centerX, centerY, 46 * pulse);
+      coreGrad.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
+      coreGrad.addColorStop(0.2, 'rgba(0, 240, 255, 0.6)');
+      coreGrad.addColorStop(0.55, 'rgba(168, 85, 247, 0.22)');
+      coreGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      context!.fillStyle = coreGrad;
+      context!.beginPath();
+      context!.arc(centerX, centerY, 46 * pulse, 0, Math.PI * 2);
+      context!.fill();
+
+      // 5. Latent Particle Vectors with Additive Bloom
+      context!.globalCompositeOperation = 'lighter';
+      for (const p of particles) {
+        const curAngle = p.angle + time * p.speed;
+        const r = p.radius * (0.88 + Math.sin(time * 0.0015 + p.angle + p.radiusOffset) * 0.12);
+        const px = centerX + Math.cos(curAngle) * r;
+        const py = centerY + Math.sin(curAngle) * r * 0.72; // slight perspective inclination
+
+        context!.beginPath();
+        context!.arc(px, py, p.size, 0, Math.PI * 2);
+        context!.fillStyle = `hsla(${p.hue}, 95%, 68%, 0.88)`;
+        context!.fill();
+
+        context!.beginPath();
+        context!.arc(px, py, p.size * 2.8, 0, Math.PI * 2);
+        context!.fillStyle = `hsla(${p.hue}, 90%, 62%, 0.18)`;
+        context!.fill();
+      }
+
+      context!.restore();
     }
+
     let animation = 0, previous = 0, painted = 0, visible = false;
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
     function tick(time: number) {
       elapsed.current += previous ? Math.min(time - previous, 100) : 0;
       previous = time;
-      if (time - painted >= 80) { draw(elapsed.current); painted = time; }
+      if (time - painted >= 16) { draw(elapsed.current); painted = time; }
       animation = requestAnimationFrame(tick);
     }
+
     function sync() {
       cancelAnimationFrame(animation); previous = 0;
-      if (running && visible && !document.hidden && !reducedMotion.matches) animation = requestAnimationFrame(tick);
+      if (running && visible && !document.hidden && !reducedMotion.matches) {
+        animation = requestAnimationFrame(tick);
+      } else {
+        draw(elapsed.current || 1200);
+      }
     }
-    draw(elapsed.current);
+
+    draw(elapsed.current || 1200);
     const observer = new IntersectionObserver(entries => { visible = entries[0]?.isIntersecting ?? false; sync(); });
     observer.observe(canvas);
     document.addEventListener('visibilitychange', sync);
@@ -95,7 +174,7 @@ export function GenerationCanvas({ images, request, animating, onOpen, onDownloa
   }
 
   const pending = (index: number) => <div className="studio-generation-placeholder" role="img" aria-label={`Image ${index + 1} is pending. Generation animation, not an image preview.`}>
-    <DenoisingSimulation running={running} seed={index} />
+    <LatentFluxSimulation running={running} seed={index} />
     <div className="studio-pending-hud" aria-hidden="true">
       <div className="studio-hud-badge">
         <span className="studio-hud-pulse" />

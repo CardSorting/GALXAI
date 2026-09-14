@@ -52,6 +52,7 @@ export function useImageStudio(owner: string | null, token?: string, libraryActi
   const libraryRetry = useRef<{ cursor?: string; page: number }>({ page: 1 });
   const loadedPage = useRef<{ cursor?: string; page: number }>({ page: 1 });
   const assetLock = useRef(false);
+  const activeTasks = useRef<Map<string, PendingGeneration>>(new Map());
   const headers = useCallback((): Record<string, string> => ({ Accept: 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) }), [token]);
 
   useEffect(() => {
@@ -60,7 +61,11 @@ export function useImageStudio(owner: string | null, token?: string, libraryActi
     if (draft) setSettings(readSettings(draft));
     if (owner) save('galx-image-studio:guest:draft', null);
     const request = readPending(stored(`${key}:pending`));
-    if (request) { setPending(request); setPolling(true); }
+    if (request) {
+      activeTasks.current.set(request.id, request);
+      setPending(request);
+      setPolling(true);
+    }
     else if (stored(`${key}:unconfirmed`) === true) {
       setUncertain(true);
       setError('An earlier request was interrupted. Check your library before generating again.');
@@ -110,6 +115,7 @@ export function useImageStudio(owner: string | null, token?: string, libraryActi
       setPreviousCursor(result.previousCursor); setPage(requestedPage);
       loadedPage.current = { cursor: after, page: requestedPage };
       setCursor(result.cursor); setTotal(result.total);
+      if (uncertain) { setUncertain(false); save(`${key}:unconfirmed`, null); }
     } catch {
       if (alive.current && sequence === librarySequence.current) {
         libraryRetry.current = accessDenied ? { page: 1 } : { cursor: after, page: requestedPage };
@@ -119,7 +125,7 @@ export function useImageStudio(owner: string | null, token?: string, libraryActi
       clearTimeout(timeout);
       if (alive.current && sequence === librarySequence.current) setLibraryLoading(false);
     }
-  }, [favorites, filter, headers, owner, sort]);
+  }, [favorites, filter, headers, owner, sort, uncertain, key]);
   const cancelLibrary = useCallback(() => { librarySequence.current++; libraryController.current?.abort(); }, []);
   useEffect(() => {
     if (libraryActive) {
@@ -130,28 +136,70 @@ export function useImageStudio(owner: string | null, token?: string, libraryActi
   }, [fetchLibrary, revision, libraryActive, owner, filter, favorites, sort, cancelLibrary]);
 
   useEffect(() => {
-    if (!pending || !polling || !owner) return;
+    if (!polling || !owner || (!pending && activeTasks.current.size === 0)) return;
     let active = true, attempt = 0;
-    const deadline = Date.now() + 300_000;
-    setError(''); setProgress('Checking your generation…');
+    setError(''); setProgress(current => current || 'Checking your generation…');
     const stop = startActivityPolling(async signal => {
       try {
-        const response = await workspaceFetch(owner, `/v1/images/requests/${encodeURIComponent(pending.id)}`, {
-          headers: headers(), signal: AbortSignal.any([signal, AbortSignal.timeout(25_000)]), cache: 'no-store',
-        });
-        if (signal.aborted || !active || !alive.current) return null;
-        if (!response.ok) { setError(studioError(response.status)); setPolling(false); return null; }
-        const payload = await response.json();
-        if (signal.aborted || !active || !alive.current) return null;
-        if (response.status === 202) {
-          setProgress(payload.status === 'queued' ? 'Waiting to start…' : 'Creating your images…');
-          if (Date.now() >= deadline) { setPolling(false); setNotice('Still waiting. You can check the status again or look in your library.'); return null; }
-          return imageStatusDelay(attempt++, response.headers.get('Retry-After'));
+        const tasks = Array.from(activeTasks.current.values());
+        if (tasks.length === 0 && pending) tasks.push(pending);
+        if (tasks.length === 0) { setPolling(false); return null; }
+        let serverDelay: string | null = null;
+        for (const task of tasks) {
+          if (!active || !alive.current || signal.aborted) return null;
+          try {
+            const response = await workspaceFetch(owner, `/v1/images/requests/${encodeURIComponent(task.id)}`, {
+              headers: headers(), signal: AbortSignal.any([signal, AbortSignal.timeout(25_000)]), cache: 'no-store',
+            });
+            if (signal.aborted || !active || !alive.current) return null;
+            if (!response.ok) {
+              activeTasks.current.delete(task.id);
+              if (task.id === pending?.id) {
+                setError(studioError(response.status));
+                save(`${key}:pending`, null);
+                save(`${key}:unconfirmed`, null);
+                setPending(null);
+              }
+              continue;
+            }
+            const payload = await response.json();
+            if (signal.aborted || !active || !alive.current) return null;
+            if (response.status === 202) {
+              if (task.id === pending?.id) {
+                setProgress(payload.status === 'queued' ? 'Waiting to start…' : 'Creating your images…');
+              }
+              const retryAfter = response.headers.get('Retry-After');
+              if (retryAfter) serverDelay = retryAfter;
+              if (Date.now() - task.startedAt >= 300_000) {
+                activeTasks.current.delete(task.id);
+                if (task.id === pending?.id) {
+                  setPending(null);
+                  save(`${key}:pending`, null);
+                  setNotice('Still waiting. You can check the status again or look in your library.');
+                }
+              }
+              continue;
+            }
+            const completed = readGeneration(payload, task.settings, task.id);
+            setCreations(current => appendCreations(current, completed, pinned.current));
+            activeTasks.current.delete(task.id);
+            if (task.id === pending?.id) {
+              save(`${key}:pending`, null);
+              save(`${key}:unconfirmed`, null);
+              setPending(null);
+              setNotice('Your images are ready. Download them or reuse the prompt.');
+            }
+            refresh();
+          } catch {
+            // Transient check error
+          }
         }
-        const completed = readGeneration(payload, pending.settings, pending.id);
-        setCreations(current => appendCreations(current, completed, pinned.current));
-        setNotice('Your images are ready. Download them or reuse the prompt.');
-        save(`${key}:pending`, null); save(`${key}:unconfirmed`, null); setPending(null); setPolling(false); refresh();
+        if (activeTasks.current.size === 0) {
+          setPolling(false);
+          return null;
+        }
+        if (serverDelay) return imageStatusDelay(attempt++, serverDelay);
+        return attempt++ < 3 ? 1600 : imageStatusDelay(attempt, null);
       } catch {
         if (!active || !alive.current) return null;
         setPolling(false); setError('The status check was interrupted. Check again to resume this generation.');
@@ -162,8 +210,9 @@ export function useImageStudio(owner: string | null, token?: string, libraryActi
   }, [headers, key, owner, pending, polling, refresh]);
 
   async function generate() {
-    if (!owner || !settings.prompt.trim() || submitting || pending || uncertain || submitLock.current || Date.now() < retryAt) return;
+    if (!owner || !settings.prompt.trim() || submitting || submitLock.current || Date.now() < retryAt) return;
     submitLock.current = true; setSubmitting(true); setError(''); setNotice('');
+    setUncertain(false); save(`${key}:unconfirmed`, null);
     const controller = new AbortController(); submitController.current = controller;
     const timeout = setTimeout(() => controller.abort(), 180_000);
     const snapshot = readSettings(settings);
@@ -191,6 +240,7 @@ export function useImageStudio(owner: string | null, token?: string, libraryActi
       if (response.status === 202) {
         const request = readPending({ id: payload.id, startedAt: Date.now(), settings: snapshot });
         if (!request) throw new Error('Invalid request receipt');
+        activeTasks.current.set(request.id, request);
         save(`${key}:pending`, request); save(`${key}:unconfirmed`, null); setPending(request); setPolling(true);
       } else {
         const completed = readGeneration(payload, snapshot, id);
@@ -227,17 +277,21 @@ export function useImageStudio(owner: string | null, token?: string, libraryActi
     finally { assetLock.current = false; if (alive.current) setBusyAsset(null); }
   }
   function clearPending() {
+    activeTasks.current.clear();
     setPolling(false); setPending(null); setUncertain(false); setError(''); save(`${key}:pending`, null); save(`${key}:unconfirmed`, null);
     setNotice('Ready for a new generation. Earlier images may still appear in your library.');
   }
 
   async function cancelPending() {
-    if (pending && owner) {
-      const targetId = pending.id;
-      void workspaceFetch(owner, `/v1/images/requests/${encodeURIComponent(targetId)}`, {
-        method: 'DELETE',
-        headers: headers(),
-      }).catch(() => { /* best-effort cancel */ });
+    if (owner) {
+      const taskIds = Array.from(activeTasks.current.keys());
+      if (pending && !taskIds.includes(pending.id)) taskIds.push(pending.id);
+      for (const targetId of taskIds) {
+        void workspaceFetch(owner, `/v1/images/requests/${encodeURIComponent(targetId)}`, {
+          method: 'DELETE',
+          headers: headers(),
+        }).catch(() => { /* best-effort cancel */ });
+      }
     }
     clearPending();
   }

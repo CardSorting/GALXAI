@@ -40,7 +40,6 @@ function StudioWorkspace({ owner, token, authLoading }: { owner: string | null; 
   const [downloading, setDownloading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [previous, setPrevious] = useState<StudioSettings | null>(null);
-  const [confirmNew, setConfirmNew] = useState(false);
   const promptRef = useRef<HTMLTextAreaElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
@@ -283,9 +282,9 @@ function StudioWorkspace({ owner, token, authLoading }: { owner: string | null; 
           </div>
           <div className="studio-submit-area">
             {owner && <GenerationGateNotice kind="images" quantity={settings.count}/>}
-            {!owner && !authLoading ? <Link className="studio-primary" href={authEntryPath(pathname)}><Sparkles aria-hidden="true" />Sign in to generate<ArrowRight aria-hidden="true" /></Link> : <button className="studio-primary" type="submit" disabled={gate.blocked || !studio.ready || authLoading || !settings.prompt.trim() || busy || Boolean(studio.pending) || studio.uncertain || studio.retryIn > 0}>
-              {busy ? <LoaderCircle className="studio-spin" aria-hidden="true" /> : <Sparkles aria-hidden="true" />}
-              {authLoading ? 'Loading…' : studio.submitting ? 'Submitting…' : studio.polling ? 'Generating…' : studio.retryIn > 0 ? `Try again in ${studio.retryIn}s` : `Generate ${settings.count === 1 ? 'image' : `${settings.count} images`}`}
+            {!owner && !authLoading ? <Link className="studio-primary" href={authEntryPath(pathname)}><Sparkles aria-hidden="true" />Sign in to generate<ArrowRight aria-hidden="true" /></Link> : <button className="studio-primary" type="submit" disabled={gate.blocked || !studio.ready || authLoading || !settings.prompt.trim() || studio.submitting || studio.uncertain || studio.retryIn > 0}>
+              {studio.submitting ? <LoaderCircle className="studio-spin" aria-hidden="true" /> : <Sparkles aria-hidden="true" />}
+              {authLoading ? 'Loading…' : studio.submitting ? 'Submitting…' : studio.retryIn > 0 ? `Try again in ${studio.retryIn}s` : `Generate ${settings.count === 1 ? 'image' : `${settings.count} images`}`}
             </button>}
             <p>{owner ? <>Uses your account’s image allowance. <span className="studio-shortcut">⌘ / Ctrl + Enter</span></> : 'Your prompt stays here while you sign in.'}</p>
           </div>
@@ -296,14 +295,14 @@ function StudioWorkspace({ owner, token, authLoading }: { owner: string | null; 
 
         <div className="studio-canvas-body" ref={canvasRef} tabIndex={-1}>
           <div className="studio-announcement" role="status" aria-live="polite">{studio.notice}</div>
-          {studio.error && <div className="studio-alert" role="alert"><p>{studio.error}</p><div><button className="studio-text-button" onClick={() => { showLibrary(); studio.refresh(); }}>Check my images<ArrowRight aria-hidden="true" /></button>{studio.error.includes('Sign in') && <Link className="studio-text-button" href={authEntryPath(pathname)}>Sign in</Link>}</div></div>}
-          {(studio.pending || studio.submitting || studio.uncertain) && <section className="studio-progress" aria-label="Generation status">
+          {studio.error && <div className="studio-alert" role="alert"><p>{studio.error}</p><div className="studio-alert-actions"><button className="studio-text-button" onClick={() => { showLibrary(); studio.refresh(); studio.clearPending(); }}>Check my images<ArrowRight aria-hidden="true" /></button>{studio.uncertain && <button className="studio-text-button" onClick={() => studio.clearPending()}>Dismiss & create</button>}{studio.error.includes('Sign in') && <Link className="studio-text-button" href={authEntryPath(pathname)}>Sign in</Link>}</div></div>}
+          {(studio.pending || studio.submitting) && <section className="studio-progress" aria-label="Generation status">
             <div className="studio-progress-top">
               <div className="studio-progress-heading">
                 {busy ? <LoaderCircle className="studio-spin" aria-hidden="true" /> : <ImageIcon aria-hidden="true" />}
                 <div>
                   <h2 aria-live="polite" aria-atomic="true">
-                    {studio.submitting ? 'Submitting your prompt' : studio.polling ? studio.progress : studio.pending ? 'Updates paused' : 'Your generation'}
+                    {studio.submitting ? 'Submitting your prompt' : studio.polling ? studio.progress : (studio.progress || 'Creating your images…')}
                   </h2>
                   <p className="studio-progress-meta">
                     {studio.pending ? (
@@ -351,10 +350,9 @@ function StudioWorkspace({ owner, token, authLoading }: { owner: string | null; 
             {studio.pending && <p className="studio-progress-prompt">{studio.pending.settings.prompt}</p>}
             <p className="studio-progress-reassurance">✨ Safe to navigate: your images continue generating in the background.</p>
 
-            <details className="studio-progress-options" open={!busy}><summary>Generation options</summary><div className="studio-progress-actions">{studio.pending && (studio.polling ? <button className="studio-secondary" onClick={() => { studio.setPolling(false); studio.setNotice('Updates paused. Your generation may continue.'); }}>Pause updates</button> : <button className="studio-secondary" onClick={() => studio.setPolling(true)}>Resume updates</button>)}
-              {!busy && <button className="studio-text-button" onClick={() => setConfirmNew(true)}>Start a new generation</button>}</div>
+            <details className="studio-progress-options"><summary>Generation options</summary><div className="studio-progress-actions">{studio.pending && (studio.polling ? <button className="studio-secondary" onClick={() => { studio.setPolling(false); studio.setNotice('Updates paused. Your generation may continue.'); }}>Pause updates</button> : <button className="studio-secondary" onClick={() => studio.setPolling(true)}>Resume updates</button>)}
+              <button className="studio-text-button" onClick={() => { studio.clearPending(); focusPrompt(); }}>Start a new generation</button></div>
             <p>Pausing updates doesn’t cancel your generation.</p></details>
-            {confirmNew && <div className="studio-confirm"><p>The earlier request may still finish. Starting again can use more of your allowance.</p><button className="studio-secondary" onClick={() => { studio.clearPending(); setConfirmNew(false); focusPrompt(); }}>Continue with a new generation</button><button className="studio-text-button" onClick={() => setConfirmNew(false)}>Keep waiting</button></div>}
           </section>}
 
           {view === 'create' ? <GenerationCanvas images={studio.creations} request={studio.pending?.settings || studio.submission}

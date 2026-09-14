@@ -48,9 +48,9 @@
   },
   "images": {
     "reviewer": "Product/API maintainer",
-    "note": "Reviewed Image Studio UX refactor, time estimation formulas and multi-phase loading stepper; customer error allowlists and boundary contracts preserved.",
+    "note": "Streamlined user flow for high throughput: unblocked composer authority, concurrent task tracking, optimized polling cadence, and removed pause/cancel clutter.",
     "reviewed_at": "2026-09-14",
-    "review_by": "2026-09-21",
+    "review_by": "2026-09-28",
     "evidence": {
       "post-mortem/incidents/2026/2026-09-13-image-generation/controller-recovery-verification-20260914.json": "9186271c949f763e0c5d50d8e62c3bcbb1a05243fd7c127d4385ccf45d1749b8"
     },
@@ -93,12 +93,12 @@
       "src/app/v1/images/sessions/[sessionId]/route.ts": "3571f44b6fb521942a0a2b8b3fc7b7e9196488d68ea5d5261de5d92edf771dc7",
       "src/components/dashboard/GenerationGateNotice.tsx": "435013796b565f458365f8397bef585bec48d01f982c93e0bd0b0fb665a2d224",
       "src/components/dashboard/generation-gate.module.css": "efd8526722ca0ad42aec319a56bc2ea7e638185f30c35cea9b445dfb69bba4a4",
-      "src/components/images/GenerationCanvas.tsx": "2d959c40274d2c206bbd2f54a0baacb8905e3d5af05a57ce35999da92d3bf94a",
-      "src/components/images/ImageStudio.tsx": "7d6f548e7925ce8ac6c61c2eae9317e10e9fc2c86ea28f01528649ce82abb37a",
+      "src/components/images/GenerationCanvas.tsx": "4341702fc0842c20a7d860b8241a4bf55780919b73254f54915a61cd09269473",
+      "src/components/images/ImageStudio.tsx": "5ad7f37a6471d1cb4eb5f7867e3ba620348cf4f3826ead81273f43c2dddc9ece",
       "src/components/images/StudioArtwork.tsx": "427128b4f3ea300222b74fdfe132564237030507f1d40c20093c89ef52e26229",
       "src/components/images/studio-contract.ts": "cbe272da86f7af1ec6279856cb4c13aa8f4de939384284fbaf0c80ae3f70188d",
-      "src/components/images/studio.css": "17b1dc233dee67e36dd1f9af0d7ef184838f323da3a9b223fa27fc62d595fcb7",
-      "src/components/images/use-image-studio.ts": "ee0baac1501544161ae800564781fcb574fc8083b8a410b6f973e37364f95829",
+      "src/components/images/studio.css": "6c6a152d700fec3c7cd96d6ebe6e4d59a1c919fb9e2ee0165af0871e07bc1263",
+      "src/components/images/use-image-studio.ts": "49c062625ae17467e30bc7da6bbe6ad7994e5206bd44ba77fba5f680ebdf0b46",
       "src/contexts/GenerationAllowanceContext.tsx": "d73875872f3814131bfc18029e69a72091993d906af63058ca37282f2c261a7c",
       "src/core/broccolidb/BroccoliImageLibraryBuffer.ts": "840d2e9fd075d314e196c056564b911b7a1d2b63ff0569f5ee16fb7604d81915",
       "src/core/contracts/GalxContracts.ts": "8f38c428f004a323d0f90b679f3fd0bf5737118ea724154edd6ffe84d001907f",
@@ -1184,9 +1184,9 @@
   },
   "client-efficiency": {
     "reviewer": "Product/performance maintainer",
-    "note": "Reviewed Image Studio layout transitions and GPU-accelerated stepper; client efficiency, zero layout thrash and public boundaries preserved.",
+    "note": "Streamlined high-throughput generation flow: unblocked composer, eliminated pause/cancel friction, client I/O execution authority preserved.",
     "reviewed_at": "2026-09-14",
-    "review_by": "2026-09-21",
+    "review_by": "2026-09-28",
     "evidence": {
       "post-mortem/incidents/2026/2026-09-13-image-generation/recovery-acceptance-audit-20260914.json": "3ad01fb443d8fb7a2bdb4c0b3e45556806219598cc2ce93732d91274db32afd3"
     },
@@ -1261,8 +1261,8 @@
       "src/components/home/public-home.module.css": "e7e697b7e6dcbe2b393e179901eb9f4f365f7e6fb75fd6e114b67e0ea44868a1",
       "src/components/home/use-galaxy-interactions.ts": "0a654c3abd4d7f562172df5d79afd94ee3b1c86509693dbc69d993920497d348",
       "src/components/home/use-story-entrance.ts": "8e3d8a6634a4b67456cff4d17ef76e2d450b136a4b844b86c21b4ec6b6b24a67",
-      "src/components/images/ImageStudio.tsx": "7d6f548e7925ce8ac6c61c2eae9317e10e9fc2c86ea28f01528649ce82abb37a",
-      "src/components/images/use-image-studio.ts": "ee0baac1501544161ae800564781fcb574fc8083b8a410b6f973e37364f95829",
+      "src/components/images/ImageStudio.tsx": "5ad7f37a6471d1cb4eb5f7867e3ba620348cf4f3826ead81273f43c2dddc9ece",
+      "src/components/images/use-image-studio.ts": "49c062625ae17467e30bc7da6bbe6ad7994e5206bd44ba77fba5f680ebdf0b46",
       "src/components/public-content/DESIGN.json": "d8594db0bdf0f53295e4a7cb9cb7f770f47e54498d93489d2349cabb14373d61",
       "src/components/public-content/DESIGN.md": "5690bd552b364e0c2f353e2e4d50e0b0ce983605b589f42a3bdf5bdde4c22236",
       "src/components/public-content/KnowledgeSearch.tsx": "485027842c5ca930fed7b440387676f04891ee8efe6d9d2d822073256b43a04d",
