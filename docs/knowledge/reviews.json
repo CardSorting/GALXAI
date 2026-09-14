@@ -48,11 +48,11 @@
   },
   "images": {
     "reviewer": "Codex",
-    "note": "Reviewed sync/async admission, weighted aggregate limits, claim/pause ordering, owned completion, quota/capacity release, retained uncertainty and public HTTP allowlists against image/queue/quota guides. Browser and HTTP fixtures are local only.",
+    "note": "Reviewed the quota fixture clock boundary, independent race accounts, strict rejection reasons, and canonical quota/fairness contracts. Runtime authority and limits are unchanged; retained local and hosted-failure evidence distinguishes their scope.",
     "reviewed_at": "2026-09-14",
     "review_by": "2026-09-20",
     "evidence": {
-      "docs/knowledge/audits/2026-09-14-free-admission-gate.json": "311848419564b9b9050da6d82cbca26f0229f2d8a17a8220d1c1c6d83d129e97"
+      "docs/knowledge/audits/2026-09-14-free-gate-ci-fixture.json": "f92e62f6a8584210f5ddd0135498759f858fca20835c68a2e0dafac2b2748c95"
     },
     "files": {
       "docs/QUEUE_SPECIFICATION.md": "2406ed769b2813e2e0c2d94249aa637e623651183b448ee01af667f9f49c0173",
@@ -61,7 +61,7 @@
       "docs/maintainers/image-public-boundary.md": "d2946b74f907dd9f076125019fe9b732849bd51ca7f71a8b5b66a75f5d91d7ba",
       "docs/maintainers/readable-urls.md": "ea1fed2e15baa2097f0c1a906c98c66ab3343cd25aba9613151cd9f9480abb60",
       "post-mortem/runbooks/image-generation.md": "fd924e15945b8965bab815b44a15e0b631e61a84beafe30ececa658985837b1c",
-      "scripts/test-free-generation-gate-db.ts": "55e3bccca8dbbb6eefdad4600a774c61fe21a204fdb2df86b1f5becf0d35bb66",
+      "scripts/test-free-generation-gate-db.ts": "2919f39490203795965f494f61b288305ea7136e544515cc504d9e8a0ff7e037",
       "scripts/test-free-generation-quota-db.ts": "26d3381b0a90285cce6d954b954601fb7a5a4596998389ac7091cfb7b49d9b04",
       "scripts/test-free-generation-quota.ts": "cbf7034c6f10ecfcf6176718f693a2636af775899e05552b5d7c53c58f142fb3",
       "scripts/test-image-library-api.ts": "e29b96a2542534a2aad54fc5ecb6481829a238fdf78b55f900dc17824e9e479c",
@@ -128,11 +128,11 @@
   },
   "access": {
     "reviewer": "Codex",
-    "note": "Reviewed current account/Pro authority, required server tier, missing-policy denial, no client priority grant, private role denial and quota/availability allowlists. Operator commands are private direct-database actions; no paid or staff authority change.",
+    "note": "Reviewed the quota fixture clock boundary, independent race accounts, strict rejection reasons, and canonical quota/fairness contracts. Runtime authority and limits are unchanged; retained local and hosted-failure evidence distinguishes their scope.",
     "reviewed_at": "2026-09-14",
     "review_by": "2026-09-20",
     "evidence": {
-      "docs/knowledge/audits/2026-09-14-free-admission-gate.json": "311848419564b9b9050da6d82cbca26f0229f2d8a17a8220d1c1c6d83d129e97"
+      "docs/knowledge/audits/2026-09-14-free-gate-ci-fixture.json": "f92e62f6a8584210f5ddd0135498759f858fca20835c68a2e0dafac2b2748c95"
     },
     "files": {
       "docs/SECURITY_POSTURE_AND_THREAT_MODEL.md": "69e35e1344f7d5812bf26a2cec7cf45f0b27911e461432d0a8537e41532ddc89",
@@ -149,7 +149,7 @@
       "scripts/test-auth-entry.ts": "21ddab9a5ae2aa036c392a98202c41ef4de48a8c46309bff276f23430dfec130",
       "scripts/test-auth-identity-boundary.ts": "7a4c8de24a4c82869d1adeb4c57567a574d206116b16df37681e8569bffefe93",
       "scripts/test-developer-preview.ts": "a4bdcbd3308a4694ce53a910dbd9cd2f0e8a8252674f39186ef7caa9e65076ec",
-      "scripts/test-free-generation-gate-db.ts": "55e3bccca8dbbb6eefdad4600a774c61fe21a204fdb2df86b1f5becf0d35bb66",
+      "scripts/test-free-generation-gate-db.ts": "2919f39490203795965f494f61b288305ea7136e544515cc504d9e8a0ff7e037",
       "scripts/test-free-generation-quota-db.ts": "26d3381b0a90285cce6d954b954601fb7a5a4596998389ac7091cfb7b49d9b04",
       "scripts/test-free-generation-quota.ts": "cbf7034c6f10ecfcf6176718f693a2636af775899e05552b5d7c53c58f142fb3",
       "scripts/test-preview-admin.ts": "a6684f6d601eb1666b5fc212216e3ca98e1f5e49ae0133b8727d9a9bdb7306db",
@@ -271,11 +271,11 @@
   },
   "sites": {
     "reviewer": "Codex",
-    "note": "Reviewed verified tier, prior quota reservation, paid room/flow protection, pause-at-start, workspace refund and unknown recovery against complete current Sites and quota guides. Retained local evidence distinguishes synthetic acceptance from pending production.",
+    "note": "Reviewed the quota fixture clock boundary, independent race accounts, strict rejection reasons, and canonical quota/fairness contracts. Runtime authority and limits are unchanged; retained local and hosted-failure evidence distinguishes their scope.",
     "reviewed_at": "2026-09-14",
     "review_by": "2026-09-20",
     "evidence": {
-      "docs/knowledge/audits/2026-09-14-free-admission-gate.json": "311848419564b9b9050da6d82cbca26f0229f2d8a17a8220d1c1c6d83d129e97"
+      "docs/knowledge/audits/2026-09-14-free-gate-ci-fixture.json": "f92e62f6a8584210f5ddd0135498759f858fca20835c68a2e0dafac2b2748c95"
     },
     "files": {
       "docs/SITES_CONTENT.md": "f98ca011a897c22f6a54f078d973b94de0930110edb76f9c64c5a58b34f950de",
@@ -289,11 +289,11 @@
       "docs/maintainers/SITES_OPERATIONS.md": "06cb6972ca8dc7d1d0402d04621fc4fcf728968092e86ffa2385c9c44a95577d",
       "docs/maintainers/SITES_WORKSPACE.md": "edfb4a2a29efb83bf56239fce59aa67f1c0c73bb6b46fb11bae685b05a9c0741",
       "scripts/manage-pro-access.ts": "1ebddafc9bfcc287daf63cfab41d7fd20825b51840fd697dcb41a873fa1d2dbb",
-      "scripts/test-free-generation-gate-db.ts": "55e3bccca8dbbb6eefdad4600a774c61fe21a204fdb2df86b1f5becf0d35bb66",
+      "scripts/test-free-generation-gate-db.ts": "2919f39490203795965f494f61b288305ea7136e544515cc504d9e8a0ff7e037",
       "scripts/test-free-generation-quota-db.ts": "26d3381b0a90285cce6d954b954601fb7a5a4596998389ac7091cfb7b49d9b04",
       "scripts/test-free-generation-quota.ts": "cbf7034c6f10ecfcf6176718f693a2636af775899e05552b5d7c53c58f142fb3",
       "scripts/test-sites-fair-db.ts": "81c54900423732529355f40b450ab354edee2b24a705e6a95e19e97faba01b92",
-      "scripts/test-sites-fair.ts": "ad6db13e635ee5c7367c4ce556bf33773ff8722eca01c281a20d5bb23e2b129c",
+      "scripts/test-sites-fair.ts": "bc3b0e6173bf6b32568f4a78486f558a0b296df8a465afd810477b5510db4cbf",
       "scripts/test-sites-plans-db.ts": "ef3bb836a5f42b3cd9bc0eaa07c8338ec634f76fa844dfedd76630c1a8886672",
       "src/app/api/billing/generation-quota/route.ts": "9886f0b6132866ea12dcd80ba3301b9e6ccb8bc9eeac9ae3aca9a2ef1d64621f",
       "src/app/api/sites/content/route.ts": "b99c87335b9f2772b9ef423bb8e577b71357d89d3b2c0e3b5b0a8a95bc05aae4",

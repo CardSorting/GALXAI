@@ -7,7 +7,7 @@ import { ImageRequestRepository } from '../src/lib/images/request-repository';
 import { ImageRequestService } from '../src/lib/images/request-service';
 import { SitesWorkspaceRepository } from '../src/lib/sites/workspace-repository';
 import { SitesFairStore, type PaidAccess, type FairPolicy } from '../src/lib/sites/fair-store';
-import { readFairLimits } from '../src/lib/sites/fair-policy';
+import { FairUsageError, readFairLimits } from '../src/lib/sites/fair-policy';
 import { readFreeGenerationQuota } from '../src/lib/billing/free-generation-quota';
 import { FreeGenerationGateError, readFreeAvailability, settleFreeCapacity } from '../src/lib/billing/free-generation-gate';
 import { changeFreePolicy } from '../src/lib/billing/free-generation-policy';
@@ -16,7 +16,7 @@ export async function runFreeGateChecks(pool:Pool) {
   let checks=0;
   const cold=new Pool({connectionString:process.env.DATABASE_URL,max:8});
   const images=new ImageRequestRepository(pool),otherImages=new ImageRequestRepository(cold),sites=new SitesWorkspaceRepository(pool);
-  const users=Array.from({length:16},()=>randomUUID());
+  const users=Array.from({length:20},()=>randomUUID());
   for(const owner of users)await pool.query('INSERT INTO auth.users(id,email,email_confirmed_at) VALUES($1,$2,now())',[owner,`${owner}@gate.invalid`]);
   const payload={prompt:'Fixture',model:'image',n:1,size:'1024x1024',quality:'standard' as const};
   const policy=async(kind='image')=>(await pool.query('SELECT * FROM private.galx_free_generation_policy WHERE kind=$1',[kind])).rows[0];
@@ -88,14 +88,20 @@ export async function runFreeGateChecks(pool:Pool) {
     const limits=readFairLimits({...fixture.policy,snapshot_ttl_seconds:60,admission_deadline_milliseconds:5000,dispatch_grant_expiry_milliseconds:5000});
     const p:FairPolicy={mode:'enforce',pool_id:'gate-fixture',revision:1,limits,paid_price_ids:['price_fixture']};
     await pool.query("UPDATE private.galx_sites_fair_policy SET mode='enforce',pool_id=$1,revision=1,limits=$2,paid_price_ids=$3",[p.pool_id,p.limits,p.paid_price_ids]);
-    await pool.query('INSERT INTO private.galx_sites_fair_pools(pool_id,revision,snapshot) VALUES($1,1,$2)',[p.pool_id,{pool_id:p.pool_id,revision:1,observed_at:Date.now(),valid_until:Date.now()+60000,readiness:'READY',signal_basis:'shared-local-admission',local_concurrency_limit:8}]);
+    // One database timestamp keeps the interval exact and avoids host/DB clock skew.
+    const observedAt=Number((await pool.query('SELECT floor(extract(epoch FROM clock_timestamp())*1000)::float8 AS ms')).rows[0].ms);
+    await pool.query('INSERT INTO private.galx_sites_fair_pools(pool_id,revision,snapshot) VALUES($1,1,$2)',[p.pool_id,{pool_id:p.pool_id,revision:1,observed_at:observedAt,valid_until:observedAt+60000,readiness:'READY',signal_basis:'shared-local-admission',local_concurrency_limit:8}]);
     const store=new SitesFairStore(pool,undefined,()=>{}),second=new SitesFairStore(cold,undefined,()=>{});
     const authority=(owner:string,tier:'pro'|'free'):PaidAccess=>({accountId:owner,tier,validUntil:Date.now()+15000,policyRevision:1});
-    const operations=await Promise.all(users.slice(5,9).map(async owner=>{
+    // Fresh identities prevent earlier race winners from retaining a Site allocation.
+    const operations=await Promise.all(users.slice(16,20).map(async owner=>{
       const row=await sites.create(owner,randomUUID(),'Free gate',true),op=randomUUID();
       await sites.begin(owner,row.id,row.revision,op,'Fixture','build',true);return{owner,id:`${row.id}:${op}`,row,op};
     }));
     const admissions=await Promise.allSettled(operations.map((op,i)=>(i%2?store:second).admit(p,authority(op.owner,'free'),op.id,'a'.repeat(64),Date.now()+5000)));
+    for(const result of admissions)if(result.status==='rejected'){
+      assert(result.reason instanceof FairUsageError);assert.equal(result.reason.reason,'free_capacity');
+    }
     assert.equal(admissions.filter(r=>r.status==='fulfilled').length,2);checks++;
     for(let i=0;i<6;i++)assert((await store.admit(p,authority(`paid-${i}`,'pro'),randomUUID(),'a'.repeat(64),Date.now()+5000)).dispatch);checks++;
     await assert.rejects(store.admit(p,{...authority('forged','pro'),tier:undefined} as any,randomUUID(),'a'.repeat(64),Date.now()+5000));checks++;

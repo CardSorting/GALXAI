@@ -1,0 +1,47 @@
+{
+  "observed_at": "2026-09-14T04:24:23.738901+00:00",
+  "base_revision": "cd4585fb4c24ee5e6a33922a71f50a3cbcf576c6",
+  "scope": "Test-only correction after hosted quota preflight failure; production admission source unchanged.",
+  "hosted_failure": {
+    "run": 34805660762,
+    "check": "free quota disposable PostgreSQL",
+    "assertion": "Expected 2 free Site admissions; observed 0.",
+    "inference": "Code review found two Date.now() calls could construct a snapshot interval greater than its exact 60000ms bound; hosted result alone did not log the private rejection reason."
+  },
+  "corrections": [
+    "Use one authoritative database timestamp for snapshot observation and expiry.",
+    "Use separate fixture accounts for the Sites race so earlier arbitrary image winners cannot retain a conflicting Site allocation.",
+    "Require all rejected Site race attempts to report free_capacity, preserving the expected two winners.",
+    "Add exact-boundary unit coverage rejecting an expiry one millisecond beyond the limit."
+  ],
+  "reviewed_sources": [
+    "scripts/test-free-generation-gate-db.ts",
+    "scripts/test-sites-fair.ts"
+  ],
+  "reviewed_guides": [
+    "docs/maintainers/FREE_GENERATION_QUOTA.md",
+    "docs/maintainers/SITES_FAIR_USAGE.md"
+  ],
+  "source_sha256": {
+    "scripts/test-free-generation-gate-db.ts": "2919f39490203795965f494f61b288305ea7136e544515cc504d9e8a0ff7e037",
+    "scripts/test-sites-fair.ts": "bc3b0e6173bf6b32568f4a78486f558a0b296df8a465afd810477b5510db4cbf"
+  },
+  "validation": {
+    "quota_database": {
+      "checks": 86,
+      "failed": 0,
+      "environment": "disposable PostgreSQL 17, 107 migrations; no external service calls"
+    },
+    "sites_fair_unit": {
+      "tests": 9,
+      "failed": 0
+    },
+    "typescript": "passed",
+    "diff_check": "passed"
+  },
+  "limits": [
+    "Hosted corrected rerun not yet observed.",
+    "No runtime admission limit, pause, grant, usage or deployed application source changed by this correction.",
+    "Earlier local audit is retained as dated evidence, not rewritten."
+  ]
+}

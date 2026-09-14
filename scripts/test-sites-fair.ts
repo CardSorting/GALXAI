@@ -24,6 +24,13 @@ test('T14,T15: current demand contracts share and completed work retains rolling
   assert.throws(()=>decideFairAdmission(p,snapshot,{...zero,messages:3,accountContinuationAttempts:2,activeDemand:2},now,'test'),(e:any)=>e.status===429);
   assert.throws(()=>decideFairAdmission(p,snapshot,{...zero,attempts:12},now,'test'),(e:any)=>e.reason==='pool_flow');
 });
+test('snapshot expiry accepts the exact limit and rejects a one-millisecond extension',()=>{
+  const limits={...p,snapshot_ttl_seconds:60};
+  const exact={...snapshot,valid_until:snapshot.observed_at+60000};
+  assert.equal(decideFairAdmission(limits,exact,zero,now,'test','free'),'BASELINE');
+  assert.throws(()=>decideFairAdmission(limits,{...exact,valid_until:exact.valid_until+1},zero,now,'test','free'),
+    (error:unknown)=>error instanceof FairUsageError && error.reason==='snapshot');
+});
 test('No missing/default production policy, extra knobs, or unsupported provider retry loops',()=>{
   for(const v of [undefined,{}, {...p,baseline_protected_slots:8},{...p,provider_max_attempts_per_logical_invocation:2},{...p,refresh_timeout_milliseconds:201},{...p,quotaTokens:999}])assert.throws(()=>readFairLimits(v));
 });
