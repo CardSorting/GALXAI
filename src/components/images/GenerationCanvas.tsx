@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { ArrowDownToLine, ArrowLeft, ArrowRight, ImageIcon, LayoutGrid, Maximize2, Pause, Play, RefreshCw } from 'lucide-react';
-import type { StudioImage, StudioSettings } from './studio-contract';
+import { ArrowDownToLine, ArrowLeft, ArrowRight, ImageIcon, LayoutGrid, Maximize2, Pause, Play, RefreshCw, Sparkles } from 'lucide-react';
+import { STARTER_TEMPLATES, type StarterTemplate, type StudioImage, type StudioSettings } from './studio-contract';
 import { StudioArtwork } from './StudioArtwork';
 
 /** Decorative simulation only: no partial image, progress estimate, or provider data. */
@@ -64,12 +64,16 @@ function DenoisingSimulation({ running, seed }: { running: boolean; seed: number
   return <canvas ref={canvasRef} className="studio-denoising" aria-hidden="true" />;
 }
 
-export function GenerationCanvas({ images, request, animating, onOpen, onDownload, onReuse, downloading, layout, onLayout, selectedId, onSelect, onLibrary }: {
+export function GenerationCanvas({ images, request, animating, onOpen, onDownload, onReuse, downloading, layout, onLayout, selectedId, onSelect, onLibrary,
+  remainingSeconds = 0, activePhaseLabel, onSelectTemplate }: {
   images: StudioImage[]; request: StudioSettings | null; animating: boolean;
   onOpen: (image: StudioImage) => void; onDownload: (image: StudioImage) => void; onReuse: (image: StudioImage) => void; downloading: boolean;
   layout: 'image' | 'grid'; onLayout: (layout: 'image' | 'grid') => void;
   onLibrary: () => void;
   selectedId: string | null; onSelect: (id: string | null) => void;
+  remainingSeconds?: number;
+  activePhaseLabel?: string;
+  onSelectTemplate?: (template: StarterTemplate) => void;
 }) {
   const [paused, setPaused] = useState(false);
   const stripRef = useRef<HTMLOListElement>(null);
@@ -78,17 +82,27 @@ export function GenerationCanvas({ images, request, animating, onOpen, onDownloa
   const selectedIndex = selected ? images.findIndex(image => image.id === selected.id) : -1;
   const showingPending = Boolean(request && !selectedId);
   const running = animating && !paused;
+
   useEffect(() => {
     const strip = stripRef.current;
     const item = strip?.querySelector<HTMLElement>('[aria-pressed="true"]');
     if (strip && item) strip.scrollLeft = item.offsetLeft - (strip.clientWidth - item.clientWidth) / 2;
   }, [selected?.id, showingPending, layout]);
+
   function move(direction: number) {
     const image = images[selectedIndex + direction];
     if (image) onSelect(image.id);
   }
+
   const pending = (index: number) => <div className="studio-generation-placeholder" role="img" aria-label={`Image ${index + 1} is pending. Generation animation, not an image preview.`}>
     <DenoisingSimulation running={running} seed={index} />
+    <div className="studio-pending-hud" aria-hidden="true">
+      <div className="studio-hud-badge">
+        <span className="studio-hud-pulse" />
+        <span>{activePhaseLabel || 'Synthesizing artwork…'}</span>
+      </div>
+      {remainingSeconds > 0 && <span className="studio-hud-eta">~{remainingSeconds}s remaining</span>}
+    </div>
   </div>;
 
   return <section className="studio-creations" aria-labelledby="studio-creations-title">
@@ -121,7 +135,12 @@ export function GenerationCanvas({ images, request, animating, onOpen, onDownloa
     }}>
       {showingPending ? pending(0) : selected ? <button type="button" className="studio-focused-image" onClick={() => onOpen(selected)} aria-label={`Open image: ${selected.prompt.slice(0, 100)}`}>
         <StudioArtwork key={selected.id} image={selected} large reveal={!selectedId} /><span className="studio-expand"><Maximize2 aria-hidden="true" />Open image</span>
-      </button> : <span className="sr-only">No images generated yet.</span>}
+      </button> : <div className="studio-canvas-empty-state">
+        <div className="studio-canvas-empty-icon"><Sparkles aria-hidden="true" /></div>
+        <h3>Your creative canvas</h3>
+        <p>Describe what you imagine in the composer, or pick a starter template below to begin.</p>
+        <span className="sr-only">No images generated yet.</span>
+      </div>}
     </div>}
     {layout === 'image' && images.length > 1 && <ol ref={stripRef} className="studio-filmstrip" aria-label="Choose a generated image">
       {images.map((image, index) => <li key={image.id}><button type="button" aria-label={`Show image ${index + 1}: ${image.prompt.slice(0, 100)}`} aria-pressed={!showingPending && selected?.id === image.id} onClick={() => onSelect(image.id)}>
@@ -136,6 +155,45 @@ export function GenerationCanvas({ images, request, animating, onOpen, onDownloa
     </div> : selected && layout === 'image' ? <div className="studio-canvas-caption studio-result-caption">
       <p className="studio-canvas-prompt">{selected.prompt}</p><div className="studio-selected-actions"><button type="button" className="studio-text-button" onClick={() => onReuse(selected)}><RefreshCw aria-hidden="true" />Reuse prompt</button><button type="button" className="studio-icon-button" aria-label="Download selected image" disabled={downloading} onClick={() => onDownload(selected)}><ArrowDownToLine aria-hidden="true" /></button></div>
     </div> : null}
+
+    {images.length === 0 && !request && <div className="studio-starter-section" aria-label="Inspiration starters">
+      <div className="studio-starter-header">
+        <div className="studio-starter-title">
+          <Sparkles aria-hidden="true" />
+          <h3>Need an idea? Try an inspiration starter</h3>
+        </div>
+        <p>Click any card to populate its prompt and ideal aspect ratio into the composer</p>
+      </div>
+      <div className="studio-starter-grid">
+        {STARTER_TEMPLATES.map(template => (
+          <button
+            key={template.id}
+            type="button"
+            className="studio-starter-card"
+            onClick={() => onSelectTemplate?.(template)}
+          >
+            <div className="studio-starter-card-top">
+              <span className="studio-starter-category">{template.category}</span>
+              <span className="studio-starter-ratio">{template.ratio}</span>
+            </div>
+            <h4>{template.title}</h4>
+            <p>{template.prompt}</p>
+          </button>
+        ))}
+      </div>
+      <div className="studio-guide-banner">
+        <div>
+          <h4>Tips for stunning artwork</h4>
+          <p>Combine subject, environment, lighting, and mood for the most expressive renders.</p>
+        </div>
+        <div className="studio-guide-chips">
+          <span>✨ 16:9 for banners</span>
+          <span>✨ 9:16 for mobile stories</span>
+          <span>✨ 1:1 for avatars</span>
+        </div>
+      </div>
+    </div>}
+
     {images.length > 0 && <p className="studio-session-note">Recent creations stay here. <button className="studio-text-button" onClick={onLibrary}>Browse all saved images<ArrowRight aria-hidden="true" /></button></p>}
   </section>;
 }

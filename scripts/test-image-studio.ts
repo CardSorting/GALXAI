@@ -55,3 +55,26 @@ test('permission denial never tells an authenticated user to sign in again', () 
   for (const status of [403, 429, 500, 503]) assert.doesNotMatch(studioError(status), /expired|sign in/i);
   assert.match(studioError(403), /account/);
 });
+
+test('time estimation and progress calculation provide predictable bounds and phases', async () => {
+  const { estimateGenerationSeconds, calculateGenerationProgress } = await import('../src/components/images/studio-contract');
+  const standardEstimate = estimateGenerationSeconds({ prompt: 'test', ratio: '1:1', quality: 'standard', count: 1 });
+  const hdEstimate = estimateGenerationSeconds({ prompt: 'test', ratio: '16:9', quality: 'hd', count: 2 });
+  assert(standardEstimate >= 14 && standardEstimate <= 16);
+  assert(hdEstimate > standardEstimate);
+
+  const start = calculateGenerationProgress(1, standardEstimate, 'queued');
+  assert.equal(start.phase.key, 'queued');
+  assert(start.percent >= 5 && start.percent <= 20);
+  assert.equal(start.remainingSeconds, standardEstimate - 1);
+
+  const mid = calculateGenerationProgress(5, standardEstimate);
+  assert.equal(mid.phase.key, 'synthesizing');
+  assert(mid.percent > start.percent && mid.percent < 90);
+
+  const late = calculateGenerationProgress(standardEstimate + 5, standardEstimate);
+  assert(late.percent >= 92 && late.percent <= 98);
+  assert.equal(late.remainingSeconds, 0);
+  assert.match(late.statusText, /almost ready/i);
+});
+

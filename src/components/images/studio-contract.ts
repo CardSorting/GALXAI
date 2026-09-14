@@ -5,11 +5,11 @@ export const LIBRARY_PAGE_SIZE = 36;
 export const RECENT_IMAGE_LIMIT = 120;
 const RECENT_TEXT_BUDGET = 16 * 1024 * 1024;
 export const RATIOS = [
-  { value: '1:1', label: 'Square', size: '1024x1024', width: 20, height: 20 },
-  { value: '3:2', label: 'Landscape', size: '1536x1024', width: 26, height: 18 },
-  { value: '9:16', label: 'Portrait', size: '1024x1792', width: 14, height: 25 },
-  { value: '16:9', label: 'Wide', size: '1792x1024', width: 28, height: 16 },
-  { value: '4:3', label: 'Classic', size: '1024x768', width: 24, height: 18 },
+  { value: '1:1', label: 'Square', size: '1024x1024', width: 20, height: 20, useCase: 'Social · Avatar' },
+  { value: '3:2', label: 'Landscape', size: '1536x1024', width: 26, height: 18, useCase: 'Photography' },
+  { value: '9:16', label: 'Portrait', size: '1024x1792', width: 14, height: 25, useCase: 'Stories · Reels' },
+  { value: '16:9', label: 'Wide', size: '1792x1024', width: 28, height: 16, useCase: 'Desktop · Banner' },
+  { value: '4:3', label: 'Classic', size: '1024x768', width: 24, height: 18, useCase: 'Standard Photo' },
 ] as const;
 export type Ratio = typeof RATIOS[number]['value'];
 export interface StudioSettings { prompt: string; ratio: Ratio; quality: 'standard' | 'hd'; count: number }
@@ -20,6 +20,159 @@ export interface StudioImage {
 }
 export interface PendingGeneration { id: string; startedAt: number; settings: StudioSettings }
 export const DEFAULT_SETTINGS: StudioSettings = { prompt: '', ratio: '1:1', quality: 'standard', count: 1 };
+
+export interface StylePreset {
+  id: string;
+  name: string;
+  tag: string;
+}
+
+export const STYLE_PRESETS: StylePreset[] = [
+  { id: 'photoreal', name: 'Photorealistic', tag: 'photorealistic, highly detailed 8k photography' },
+  { id: 'cinematic', name: 'Cinematic', tag: 'cinematic lighting, dramatic atmosphere, 35mm film look' },
+  { id: 'digital_art', name: 'Digital Art', tag: 'vibrant digital art, concept illustration, detailed rendering' },
+  { id: 'anime', name: 'Anime', tag: 'anime aesthetic, expressive studio key visual, crisp cel shaded' },
+  { id: '3d_render', name: '3D Render', tag: '3D octane render, raytraced reflections, Unreal Engine 5' },
+  { id: 'vintage', name: 'Vintage Film', tag: 'vintage analog film photography, authentic grain, 1970s tones' },
+  { id: 'cyberpunk', name: 'Cyberpunk', tag: 'cyberpunk aesthetic, vibrant neon reflections, night rain' },
+  { id: 'minimalist', name: 'Minimalist', tag: 'minimalist composition, clean geometric form, quiet negative space' },
+];
+
+export interface StarterTemplate {
+  id: string;
+  title: string;
+  category: string;
+  prompt: string;
+  ratio: Ratio;
+}
+
+export const STARTER_TEMPLATES: StarterTemplate[] = [
+  {
+    id: 'architecture',
+    title: 'Alpine Glass Pavilion',
+    category: 'Architecture',
+    prompt: 'A sleek modern glass pavilion nestled on the tranquil shore of an alpine mountain lake at dusk, warm interior glow, misty water surface, cinematic lighting',
+    ratio: '16:9',
+  },
+  {
+    id: 'wildlife',
+    title: 'Himalayan Snow Leopard',
+    category: 'Wildlife',
+    prompt: 'A majestic snow leopard resting gracefully atop a frosted Himalayan mountain cliff, golden morning sunrise backlight, ultra-sharp fur detail, ethereal peaks',
+    ratio: '3:2',
+  },
+  {
+    id: 'futuristic',
+    title: 'Neon Tokyo Concept Vehicle',
+    category: 'Concept Design',
+    prompt: 'An aerodynamic concept electric sports car parked in a neon-lit Tokyo street after rain, reflections of magenta and cyan signage, sleek matte finish, 8k',
+    ratio: '16:9',
+  },
+];
+
+export const INSPIRATION_PROMPTS = [
+  'A luminous botanical glasshouse floating in a tranquil twilight forest, fireflies casting emerald light, ultra-detailed foliage',
+  'An editorial high-fashion portrait with sculpted botanical headwear, dramatic chiaroscuro studio lighting, textured linen backdrop',
+  'A cozy retro coffee roastery in Kyoto with warm morning sunlight slanting through wooden blinds, copper espresso machine, rising steam',
+  'A peaceful futuristic floating garden overlooking the ocean at sunset, curving white bridges, calm reflecting pools, pastel clouds',
+  'An ancient enchanted sandstone library carved into canyon walls with towering book stacks and floating brass lanterns, cinematic',
+];
+
+export type GenerationPhaseKey = 'queued' | 'synthesizing' | 'refining' | 'finalizing';
+
+export interface GenerationPhaseInfo {
+  key: GenerationPhaseKey;
+  stepNumber: number;
+  label: string;
+  shortLabel: string;
+  description: string;
+}
+
+export const GENERATION_PHASES: Record<GenerationPhaseKey, GenerationPhaseInfo> = {
+  queued: {
+    key: 'queued',
+    stepNumber: 1,
+    label: 'Preparing request',
+    shortLabel: 'Setup',
+    description: 'Scheduling request and preparing image pipeline…',
+  },
+  synthesizing: {
+    key: 'synthesizing',
+    stepNumber: 2,
+    label: 'Composing artwork',
+    shortLabel: 'Composing',
+    description: 'Synthesizing scene layout, composition, and forms…',
+  },
+  refining: {
+    key: 'refining',
+    stepNumber: 3,
+    label: 'Refining details',
+    shortLabel: 'Detailing',
+    description: 'Refining lighting, textures, color balance, and clarity…',
+  },
+  finalizing: {
+    key: 'finalizing',
+    stepNumber: 4,
+    label: 'Finalizing asset',
+    shortLabel: 'Finalizing',
+    description: 'Encoding high-resolution image and preparing preview…',
+  },
+};
+
+/** Calculate realistic baseline duration in seconds based on request parameters. */
+export function estimateGenerationSeconds(settings: StudioSettings): number {
+  const base = settings.quality === 'hd' ? 22 : 14;
+  const ratioExtra = ['16:9', '9:16', '3:2'].includes(settings.ratio) ? 2 : 0;
+  const countExtra = (settings.count - 1) * 3;
+  return base + ratioExtra + countExtra;
+}
+
+/** Compute dynamic progress percentage, remaining seconds, and active phase. */
+export function calculateGenerationProgress(elapsedSeconds: number, estimatedTotal: number, serverStatus?: string): {
+  percent: number;
+  remainingSeconds: number;
+  phase: GenerationPhaseInfo;
+  statusText: string;
+} {
+  const isQueued = serverStatus === 'queued';
+  const remainingSeconds = Math.max(0, estimatedTotal - elapsedSeconds);
+
+  let phaseKey: GenerationPhaseKey = 'queued';
+  if (isQueued || elapsedSeconds < 3) {
+    phaseKey = 'queued';
+  } else if (elapsedSeconds < Math.round(estimatedTotal * 0.55)) {
+    phaseKey = 'synthesizing';
+  } else if (elapsedSeconds < Math.round(estimatedTotal * 0.88)) {
+    phaseKey = 'refining';
+  } else {
+    phaseKey = 'finalizing';
+  }
+
+  let percent: number;
+  if (isQueued && elapsedSeconds < 4) {
+    percent = Math.min(18, 5 + elapsedSeconds * 3);
+  } else if (elapsedSeconds <= estimatedTotal) {
+    const ratio = elapsedSeconds / Math.max(1, estimatedTotal);
+    percent = Math.round(15 + (1 - (1 - ratio) ** 1.6) * 77);
+  } else {
+    const overTime = elapsedSeconds - estimatedTotal;
+    const extra = (1 - Math.exp(-overTime / 12)) * 5;
+    percent = Math.min(97, Math.round(92 + extra));
+  }
+
+  const phase = GENERATION_PHASES[phaseKey];
+  let statusText = phase.description;
+  if (elapsedSeconds > estimatedTotal) {
+    statusText = 'Taking a few extra seconds to polish details… almost ready!';
+  }
+
+  return {
+    percent,
+    remainingSeconds,
+    phase,
+    statusText,
+  };
+}
 
 /** Keep completion order without duplicating a receipt observed more than once. */
 export function appendCreations(current: StudioImage[], completed: StudioImage[], pinnedId?: string | null): StudioImage[] {

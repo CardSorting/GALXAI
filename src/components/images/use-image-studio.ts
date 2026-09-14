@@ -5,6 +5,7 @@ import { GENERATION_QUOTA_CHANGED } from '@/lib/billing/free-generation-contract
 import { workspaceFetch } from '@/lib/auth/workspace-client';
 import { startActivityPolling, imageStatusDelay } from '@/lib/resilience/activity-polling';
 import { DEFAULT_SETTINGS, appendCreations, generationBody, readGeneration, readLibrary, readImageDetail, readPending, readSettings, studioError,
+  estimateGenerationSeconds, calculateGenerationProgress,
   type PendingGeneration, type StudioImage, type StudioSettings } from './studio-contract';
 
 function stored(key: string): unknown {
@@ -229,11 +230,31 @@ export function useImageStudio(owner: string | null, token?: string, libraryActi
     setPolling(false); setPending(null); setUncertain(false); setError(''); save(`${key}:pending`, null); save(`${key}:unconfirmed`, null);
     setNotice('Ready for a new generation. Earlier images may still appear in your library.');
   }
+
+  async function cancelPending() {
+    if (pending && owner) {
+      const targetId = pending.id;
+      void workspaceFetch(owner, `/v1/images/requests/${encodeURIComponent(targetId)}`, {
+        method: 'DELETE',
+        headers: headers(),
+      }).catch(() => { /* best-effort cancel */ });
+    }
+    clearPending();
+  }
+
+  const elapsed = pending ? Math.max(0, Math.floor((now - pending.startedAt) / 1000)) : submitting ? 1 : 0;
+  const activeSettings = pending?.settings || submission || settings;
+  const estimatedTotal = estimateGenerationSeconds(activeSettings);
+  const progressMetrics = calculateGenerationProgress(elapsed, estimatedTotal, pending ? (progress.includes('Waiting') ? 'queued' : 'processing') : 'queued');
+
   return { settings, setSettings, ready, pending, polling, setPolling, submitting, submission, uncertain, progress, error, notice, setNotice,
-    retryIn: Math.max(0, Math.ceil((retryAt - now) / 1000)), elapsed: pending ? Math.max(0, Math.floor((now - pending.startedAt) / 1000)) : 0,
+    retryIn: Math.max(0, Math.ceil((retryAt - now) / 1000)), elapsed,
+    estimatedTotal, remainingSeconds: progressMetrics.remainingSeconds, progressPercent: progressMetrics.percent,
+    generationPhase: progressMetrics.phase, phaseStatusText: progressMetrics.statusText,
     creations, images, total, cursor, previousCursor, page, getDetails, libraryLoading: libraryLoading || Boolean(owner && libraryActive && !libraryView.current), libraryError, search, setSearch, favorites, sort, setSort,
     generate, refresh, retryLibrary: () => { if (!libraryLoading) void fetchLibrary(libraryRetry.current.cursor, libraryRetry.current.page); },
     firstPage: () => { if (!libraryLoading) void fetchLibrary(); },
     nextPage: () => { if (cursor && !libraryLoading) void fetchLibrary(cursor, page + 1); },
-    previousPage: () => { if (previousCursor && !libraryLoading) void fetchLibrary(previousCursor, Math.max(1, page - 1)); }, toggleFavorite, busyAsset, clearPending };
+    previousPage: () => { if (previousCursor && !libraryLoading) void fetchLibrary(previousCursor, Math.max(1, page - 1)); },
+    toggleFavorite, busyAsset, clearPending, cancelPending };
 }

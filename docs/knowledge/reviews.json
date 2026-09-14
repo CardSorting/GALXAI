@@ -47,10 +47,10 @@
     }
   },
   "images": {
-    "reviewer": "Codex",
-    "note": "Reviewed the queue and image recovery guidance affected by the admission tombstone semantics and current controller recovery evidence; the image domain remains within its documented privacy and replay limits.",
+    "reviewer": "Product/API maintainer",
+    "note": "Reviewed Image Studio UX refactor, time estimation formulas and multi-phase loading stepper; customer error allowlists and boundary contracts preserved.",
     "reviewed_at": "2026-09-14",
-    "review_by": "2026-09-20",
+    "review_by": "2026-09-21",
     "evidence": {
       "post-mortem/incidents/2026/2026-09-13-image-generation/controller-recovery-verification-20260914.json": "9186271c949f763e0c5d50d8e62c3bcbb1a05243fd7c127d4385ccf45d1749b8"
     },
@@ -71,7 +71,7 @@
       "scripts/test-image-public-http.ts": "9339419b81996015666aa18c8c7e5fa38e58c1ad3dd665ad868d34819b600164",
       "scripts/test-image-requests-db.ts": "04c727c232bd555757381eb6ebfd6a4ff3e6ff381e63890e7f16ce309a6bd516",
       "scripts/test-image-retry-contract.ts": "2dd9ae9d1e5b4c3ce132961cf05e37c3f983209a0a0c148abfdd870be92da292",
-      "scripts/test-image-studio.ts": "0bde9c97c823f8bae75027cf0a8558bdfea781979f20768e241a7d4bbc8cf7dd",
+      "scripts/test-image-studio.ts": "cd7d275578467f1c0ce4c421d71aabcae18153968831e3be970dbc41bf539af5",
       "scripts/test-relay-image-generation.ts": "d66f497b893ed0026806fbc928dbafff65be90b2e505e86c7da32b4df9d67140",
       "scripts/verify-image-library-scale-ui.ts": "0e7003e1f256f99f28c953537b16044b50678c700b496c53d47f1b0104ff23cc",
       "scripts/verify-image-public-http.ts": "c4b1e12705a2dae186551817cf4c2bd8351efe91c9883cd8e7936a3fee7a409f",
@@ -93,12 +93,12 @@
       "src/app/v1/images/sessions/[sessionId]/route.ts": "3571f44b6fb521942a0a2b8b3fc7b7e9196488d68ea5d5261de5d92edf771dc7",
       "src/components/dashboard/GenerationGateNotice.tsx": "435013796b565f458365f8397bef585bec48d01f982c93e0bd0b0fb665a2d224",
       "src/components/dashboard/generation-gate.module.css": "efd8526722ca0ad42aec319a56bc2ea7e638185f30c35cea9b445dfb69bba4a4",
-      "src/components/images/GenerationCanvas.tsx": "d72eb5935b6388bbe46b42a662b3d1dc94a4da242cbbaf89b450e94bf4cc40e0",
-      "src/components/images/ImageStudio.tsx": "2484445b06ef8d0426aa6c1108199f3865ddd0edea679565f409ee9b7bc6cf90",
+      "src/components/images/GenerationCanvas.tsx": "2d959c40274d2c206bbd2f54a0baacb8905e3d5af05a57ce35999da92d3bf94a",
+      "src/components/images/ImageStudio.tsx": "7d6f548e7925ce8ac6c61c2eae9317e10e9fc2c86ea28f01528649ce82abb37a",
       "src/components/images/StudioArtwork.tsx": "427128b4f3ea300222b74fdfe132564237030507f1d40c20093c89ef52e26229",
-      "src/components/images/studio-contract.ts": "4ebf39fe97f225f9f666701d786078399654777bc7e8505cc1a12317c95ea673",
-      "src/components/images/studio.css": "f6cb661a47bb87833b98f296c186c0e7c11ae93da0127f484782b41b70739e9a",
-      "src/components/images/use-image-studio.ts": "e42785dbc52a93e785992bb400d8e0b77daa16b319b5640b2fbf3728db893d68",
+      "src/components/images/studio-contract.ts": "cbe272da86f7af1ec6279856cb4c13aa8f4de939384284fbaf0c80ae3f70188d",
+      "src/components/images/studio.css": "17b1dc233dee67e36dd1f9af0d7ef184838f323da3a9b223fa27fc62d595fcb7",
+      "src/components/images/use-image-studio.ts": "ee0baac1501544161ae800564781fcb574fc8083b8a410b6f973e37364f95829",
       "src/contexts/GenerationAllowanceContext.tsx": "d73875872f3814131bfc18029e69a72091993d906af63058ca37282f2c261a7c",
       "src/core/broccolidb/BroccoliImageLibraryBuffer.ts": "840d2e9fd075d314e196c056564b911b7a1d2b63ff0569f5ee16fb7604d81915",
       "src/core/contracts/GalxContracts.ts": "8f38c428f004a323d0f90b679f3fd0bf5737118ea724154edd6ffe84d001907f",
@@ -351,7 +351,7 @@
     "reviewed_at": "2026-09-14",
     "review_by": "2026-09-27",
     "evidence": {
-      "post-mortem/incidents/2026/2026-09-13-image-generation/act019-deployment-acceptance-20260914.json": "f19ca0b236a5cd3e8ce0fadbcbb793275575794039b87a471657669e8709c79d",
+      "post-mortem/incidents/2026/2026-09-13-image-generation/act019-deployment-acceptance-20260914.json": "291e5811ae82e1f33cd5bc80cea34b7edbaf659a4dcbd6732d6895cf7578ec04",
       "post-mortem/incidents/2026/2026-09-13-image-generation/act018-isolated-drills-20260914.json": "c6b1d525ffdd6be6c89fba32de68ae1e9adfb1e61d9c57336360f9e46a531319"
     },
     "files": {
@@ -1183,10 +1183,10 @@
     }
   },
   "client-efficiency": {
-    "reviewer": "relay maintainer",
-    "note": "Reviewed the committed bounded browser and SDK retry contract and explicit unknown/accepted no-replay behavior against the private acceptance audit.",
+    "reviewer": "Product/performance maintainer",
+    "note": "Reviewed Image Studio layout transitions and GPU-accelerated stepper; client efficiency, zero layout thrash and public boundaries preserved.",
     "reviewed_at": "2026-09-14",
-    "review_by": "2026-09-20",
+    "review_by": "2026-09-21",
     "evidence": {
       "post-mortem/incidents/2026/2026-09-13-image-generation/recovery-acceptance-audit-20260914.json": "3ad01fb443d8fb7a2bdb4c0b3e45556806219598cc2ce93732d91274db32afd3"
     },
@@ -1261,8 +1261,8 @@
       "src/components/home/public-home.module.css": "e7e697b7e6dcbe2b393e179901eb9f4f365f7e6fb75fd6e114b67e0ea44868a1",
       "src/components/home/use-galaxy-interactions.ts": "0a654c3abd4d7f562172df5d79afd94ee3b1c86509693dbc69d993920497d348",
       "src/components/home/use-story-entrance.ts": "8e3d8a6634a4b67456cff4d17ef76e2d450b136a4b844b86c21b4ec6b6b24a67",
-      "src/components/images/ImageStudio.tsx": "2484445b06ef8d0426aa6c1108199f3865ddd0edea679565f409ee9b7bc6cf90",
-      "src/components/images/use-image-studio.ts": "e42785dbc52a93e785992bb400d8e0b77daa16b319b5640b2fbf3728db893d68",
+      "src/components/images/ImageStudio.tsx": "7d6f548e7925ce8ac6c61c2eae9317e10e9fc2c86ea28f01528649ce82abb37a",
+      "src/components/images/use-image-studio.ts": "ee0baac1501544161ae800564781fcb574fc8083b8a410b6f973e37364f95829",
       "src/components/public-content/DESIGN.json": "d8594db0bdf0f53295e4a7cb9cb7f770f47e54498d93489d2349cabb14373d61",
       "src/components/public-content/DESIGN.md": "5690bd552b364e0c2f353e2e4d50e0b0ce983605b589f42a3bdf5bdde4c22236",
       "src/components/public-content/KnowledgeSearch.tsx": "485027842c5ca930fed7b440387676f04891ee8efe6d9d2d822073256b43a04d",

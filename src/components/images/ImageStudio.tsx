@@ -10,7 +10,7 @@ import { ArrowDownToLine, ArrowLeft, ArrowRight, Check, ChevronDown, Copy, Image
 import { useAuth } from '@/contexts/AuthContext';
 import { WorkspaceSessionBoundary } from '@/components/auth/WorkspaceSessionBoundary';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
-import { DEFAULT_SETTINGS, IMAGE_MODEL, MAX_PROMPT, RATIOS, readSettings, type StudioImage, type StudioSettings } from './studio-contract';
+import { DEFAULT_SETTINGS, GENERATION_PHASES, IMAGE_MODEL, INSPIRATION_PROMPTS, MAX_PROMPT, RATIOS, STYLE_PRESETS, readSettings, type StarterTemplate, type StudioImage, type StudioSettings } from './studio-contract';
 import { useImageStudio } from './use-image-studio';
 import { GenerationCanvas } from './GenerationCanvas';
 import { StudioArtwork as Artwork } from './StudioArtwork';
@@ -207,14 +207,77 @@ function StudioWorkspace({ owner, token, authLoading }: { owner: string | null; 
           <div className="studio-composer-heading"><h2>Create an image</h2><SlidersHorizontal aria-hidden="true" />{studio.creations.length > 0 && <button type="button" className="studio-text-button studio-return-results" onClick={() => { setComposerOpen(false); canvasRef.current?.focus({ preventScroll: true }); canvasRef.current?.scrollIntoView({ block: 'start' }); }}>Back to images<ArrowRight aria-hidden="true" /></button>}</div>
           <p className="studio-scroll-hint">Scroll for more settings<ChevronDown aria-hidden="true" /></p>
           <div className="studio-controls">
-          <div className="studio-prompt-label"><label className="studio-label" htmlFor="studio-prompt">Prompt</label>{settings.prompt && <button type="button" className="studio-text-button" onClick={() => { setPrevious(settings); setSettings(current => ({ ...current, prompt: '' })); promptRef.current?.focus(); }}>Clear</button>}</div>
-          <textarea id="studio-prompt" ref={promptRef} value={settings.prompt} maxLength={MAX_PROMPT} rows={7} placeholder={"Describe what you imagine…\n\nTry a subject, a setting, and a mood."} aria-describedby="studio-prompt-hint" onChange={event => setSettings(current => ({ ...current, prompt: event.target.value }))} />
+          <div className="studio-prompt-label">
+            <label className="studio-label" htmlFor="studio-prompt">Prompt</label>
+            <div className="studio-prompt-actions">
+              <button
+                type="button"
+                className="studio-text-button studio-inspiration-button"
+                onClick={() => {
+                  setPrevious(settings);
+                  const next = INSPIRATION_PROMPTS[Math.floor(Math.random() * INSPIRATION_PROMPTS.length)];
+                  setSettings(current => ({ ...current, prompt: next }));
+                  studio.setNotice('Inspiration prompt loaded.');
+                  promptRef.current?.focus();
+                }}
+              >
+                <Sparkles aria-hidden="true" />
+                <span>Try an example</span>
+              </button>
+              {settings.prompt && <button type="button" className="studio-text-button" onClick={() => { setPrevious(settings); setSettings(current => ({ ...current, prompt: '' })); promptRef.current?.focus(); }}>Clear</button>}
+            </div>
+          </div>
+          <textarea id="studio-prompt" ref={promptRef} value={settings.prompt} maxLength={MAX_PROMPT} rows={6} placeholder={"Describe what you imagine…\n\nTry a subject, a setting, and a mood."} aria-describedby="studio-prompt-hint" onChange={event => setSettings(current => ({ ...current, prompt: event.target.value }))} />
           <div className="studio-prompt-hint" id="studio-prompt-hint"><span>Be specific about light, color, and composition.</span>{settings.prompt.length > 28_000 && <span>{settings.prompt.length.toLocaleString()} / {MAX_PROMPT.toLocaleString()}</span>}</div>
+          
+          <div className="studio-styles-bar" aria-label="Style presets">
+            <span className="studio-styles-label">Style inspiration:</span>
+            <div className="studio-styles-pills">
+              {STYLE_PRESETS.map(preset => {
+                const isActive = settings.prompt.toLowerCase().includes(preset.name.toLowerCase());
+                return (
+                  <button
+                    key={preset.id}
+                    type="button"
+                    className="studio-style-chip"
+                    aria-pressed={isActive}
+                    onClick={() => {
+                      setPrevious(settings);
+                      setSettings(current => {
+                        const currentPrompt = current.prompt.trim();
+                        if (isActive) {
+                          const cleaned = currentPrompt.replace(new RegExp(`,?\\s*${preset.tag}`, 'gi'), '').replace(new RegExp(`,?\\s*${preset.name}`, 'gi'), '').trim();
+                          return { ...current, prompt: cleaned };
+                        } else {
+                          const updated = currentPrompt ? `${currentPrompt}, ${preset.tag}` : preset.tag;
+                          return { ...current, prompt: updated };
+                        }
+                      });
+                    }}
+                  >
+                    {preset.name}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           {previous && <button type="button" className="studio-text-button studio-undo" onClick={() => { setSettings(previous); setPrevious(null); studio.setNotice('Previous prompt restored.'); }}>Undo prompt change</button>}
 
-          <fieldset className="studio-fieldset"><legend>Aspect ratio</legend><div className="studio-ratios">{RATIOS.map(ratio => <button type="button" key={ratio.value} aria-label={`${ratio.label} ${ratio.value}`} aria-pressed={settings.ratio === ratio.value} title={ratio.label} onClick={() => setSettings(current => ({ ...current, ratio: ratio.value }))}>
-            <span className="studio-ratio-icon"><span style={{ width: ratio.width, height: ratio.height }} /></span><span>{ratio.value}</span>
-          </button>)}</div><p className="studio-field-hint">{RATIOS.find(ratio => ratio.value === settings.ratio)?.label} · {RATIOS.find(ratio => ratio.value === settings.ratio)?.size.replace('x', ' × ')} px requested</p></fieldset>
+          <fieldset className="studio-fieldset"><legend>Aspect ratio</legend><div className="studio-ratios">{RATIOS.map(ratio => <button type="button" key={ratio.value} aria-label={`${ratio.label} ${ratio.value}`} aria-pressed={settings.ratio === ratio.value} title={`${ratio.label} (${ratio.useCase})`} onClick={() => setSettings(current => ({ ...current, ratio: ratio.value }))}>
+            <span className="studio-ratio-icon"><span style={{ width: ratio.width, height: ratio.height }} /></span>
+            <span className="studio-ratio-value">{ratio.value}</span>
+            <span className="studio-ratio-tag">{ratio.label}</span>
+          </button>)}</div><p className="studio-field-hint">{RATIOS.find(ratio => ratio.value === settings.ratio)?.label} ({RATIOS.find(ratio => ratio.value === settings.ratio)?.useCase}) · {RATIOS.find(ratio => ratio.value === settings.ratio)?.size.replace('x', ' × ')} px</p></fieldset>
+
+          <fieldset className="studio-fieldset studio-quality"><legend>Detail quality</legend><div className="studio-quality-options">
+            <button type="button" aria-pressed={settings.quality === 'standard'} onClick={() => setSettings(current => ({ ...current, quality: 'standard' }))}>
+              <span className="studio-quality-title">Standard</span><span className="studio-quality-meta">Fast (~14s)</span>
+            </button>
+            <button type="button" aria-pressed={settings.quality === 'hd'} onClick={() => setSettings(current => ({ ...current, quality: 'hd' }))}>
+              <span className="studio-quality-title">High detail</span><span className="studio-quality-meta">Enhanced (~22s)</span>
+            </button>
+          </div></fieldset>
 
           <fieldset className="studio-fieldset studio-count"><legend>Number of images</legend><div>{[1, 2, 3, 4].map(count => <button type="button" key={count} aria-pressed={settings.count === count} aria-label={`${count} ${count === 1 ? 'image' : 'images'}`} onClick={() => setSettings(current => ({ ...current, count }))}>{count}</button>)}</div></fieldset>
           </div>
@@ -235,8 +298,59 @@ function StudioWorkspace({ owner, token, authLoading }: { owner: string | null; 
           <div className="studio-announcement" role="status" aria-live="polite">{studio.notice}</div>
           {studio.error && <div className="studio-alert" role="alert"><p>{studio.error}</p><div><button className="studio-text-button" onClick={() => { showLibrary(); studio.refresh(); }}>Check my images<ArrowRight aria-hidden="true" /></button>{studio.error.includes('Sign in') && <Link className="studio-text-button" href={authEntryPath(pathname)}>Sign in</Link>}</div></div>}
           {(studio.pending || studio.submitting || studio.uncertain) && <section className="studio-progress" aria-label="Generation status">
-            <div className="studio-progress-heading">{busy ? <LoaderCircle className="studio-spin" aria-hidden="true" /> : <ImageIcon aria-hidden="true" />}<div><h2 aria-live="polite" aria-atomic="true">{studio.submitting ? 'Submitting your prompt' : studio.polling ? studio.progress : studio.pending ? 'Updates paused' : 'Your generation'}</h2><p>{studio.pending ? `${studio.pending.settings.count} ${studio.pending.settings.count === 1 ? 'image' : 'images'} · ${studio.pending.settings.ratio} · ${Math.floor(studio.elapsed / 60)}:${String(studio.elapsed % 60).padStart(2, '0')} elapsed` : 'Sending your request…'}</p></div></div>
+            <div className="studio-progress-top">
+              <div className="studio-progress-heading">
+                {busy ? <LoaderCircle className="studio-spin" aria-hidden="true" /> : <ImageIcon aria-hidden="true" />}
+                <div>
+                  <h2 aria-live="polite" aria-atomic="true">
+                    {studio.submitting ? 'Submitting your prompt' : studio.polling ? studio.progress : studio.pending ? 'Updates paused' : 'Your generation'}
+                  </h2>
+                  <p className="studio-progress-meta">
+                    {studio.pending ? (
+                      <>
+                        <span>{studio.pending.settings.count} {studio.pending.settings.count === 1 ? 'image' : 'images'} · {studio.pending.settings.ratio} · {studio.pending.settings.quality === 'hd' ? 'HD' : 'Standard'}</span>
+                        <span className="studio-progress-divider">·</span>
+                        <span>{Math.floor(studio.elapsed / 60)}:{String(studio.elapsed % 60).padStart(2, '0')} elapsed</span>
+                        <span className="studio-progress-divider">·</span>
+                        <span className="studio-progress-eta">{studio.remainingSeconds > 0 ? `~${studio.remainingSeconds}s remaining` : 'Almost ready…'}</span>
+                      </>
+                    ) : 'Sending your request…'}
+                  </p>
+                </div>
+              </div>
+
+              {studio.pending && (
+                <div className="studio-progress-bar-wrap" aria-hidden="true">
+                  <div className="studio-progress-bar">
+                    <div className="studio-progress-fill" style={{ transform: `scaleX(${Math.max(0.01, studio.progressPercent / 100)})` }} />
+                  </div>
+                  <div className="studio-progress-step-info">
+                    <span>{studio.phaseStatusText}</span>
+                    <span className="studio-progress-percent">{studio.progressPercent}%</span>
+                  </div>
+                </div>
+              )}
+
+              {studio.pending && (
+                <div className="studio-progress-stepper" aria-hidden="true">
+                  {(['queued', 'synthesizing', 'refining', 'finalizing'] as const).map((stageKey, idx) => {
+                    const phase = GENERATION_PHASES[stageKey];
+                    const isCurrent = studio.generationPhase.key === stageKey;
+                    const isPassed = phase.stepNumber < studio.generationPhase.stepNumber;
+                    return (
+                      <div key={stageKey} className={`studio-phase-step ${isCurrent ? 'studio-phase-active' : isPassed ? 'studio-phase-done' : ''}`}>
+                        <span className="studio-phase-dot" />
+                        <span>{idx + 1}. {phase.shortLabel}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
             {studio.pending && <p className="studio-progress-prompt">{studio.pending.settings.prompt}</p>}
+            <p className="studio-progress-reassurance">✨ Safe to navigate: your images continue generating in the background.</p>
+
             <details className="studio-progress-options" open={!busy}><summary>Generation options</summary><div className="studio-progress-actions">{studio.pending && (studio.polling ? <button className="studio-secondary" onClick={() => { studio.setPolling(false); studio.setNotice('Updates paused. Your generation may continue.'); }}>Pause updates</button> : <button className="studio-secondary" onClick={() => studio.setPolling(true)}>Resume updates</button>)}
               {!busy && <button className="studio-text-button" onClick={() => setConfirmNew(true)}>Start a new generation</button>}</div>
             <p>Pausing updates doesn’t cancel your generation.</p></details>
@@ -245,7 +359,8 @@ function StudioWorkspace({ owner, token, authLoading }: { owner: string | null; 
 
           {view === 'create' ? <GenerationCanvas images={studio.creations} request={studio.pending?.settings || studio.submission}
             animating={busy && !studio.error} onOpen={image => openImage(image, 'create')} onDownload={image => void download(image)} downloading={downloading}
-            onReuse={image => applyPrompt(image.prompt, image.ratio, image.quality)} layout={layout} onLayout={setLayout} selectedId={selectedId} onSelect={setSelectedId} onLibrary={() => showLibrary()} />
+            onReuse={image => applyPrompt(image.prompt, image.ratio, image.quality)} layout={layout} onLayout={setLayout} selectedId={selectedId} onSelect={setSelectedId} onLibrary={() => showLibrary()}
+            remainingSeconds={studio.remainingSeconds} activePhaseLabel={studio.generationPhase.label} onSelectTemplate={template => { applyPrompt(template.prompt, template.ratio, 'standard'); }} />
           : <section className="studio-library" aria-label={studio.favorites ? 'Favorite images' : 'Your images'}>
             <div className="studio-section-heading"><div><h2 ref={libraryHeading} tabIndex={-1}>{studio.favorites ? 'Your favorites' : 'Your images'}</h2><p>{owner ? 'A little inspiration, saved for later.' : 'Sign in to see the images you’ve made.'}</p></div><button className="studio-icon-button" aria-label="Refresh library" disabled={studio.libraryLoading || !owner} onClick={studio.refresh}><RefreshCw className={studio.libraryLoading ? 'studio-spin' : undefined} aria-hidden="true" /></button></div>
             {owner ? <><div className="studio-library-toolbar"><div className="studio-search"><Search aria-hidden="true" /><input aria-label="Search your images" type="search" value={studio.search} onChange={event => studio.setSearch(event.target.value)} placeholder="Search by prompt…" maxLength={200} /></div><div className="studio-select-wrap"><select aria-label="Sort images" value={studio.sort} onChange={event => studio.setSort(event.target.value)}><option value="newest">Newest first</option><option value="oldest">Oldest first</option></select><ChevronDown aria-hidden="true" /></div></div>
