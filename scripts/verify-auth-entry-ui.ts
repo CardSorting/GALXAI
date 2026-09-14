@@ -132,7 +132,7 @@ try {
   {
     const { context, page } = await setup(1440, 'valid');
     await page.goto(base + '/auth/signin?next=%2Fimages%3Fview%3Dlibrary');
-    await page.waitForURL('**/images?view=library'); await page.locator('.studio').waitFor();
+    await page.waitForURL('**/images/library'); await page.locator('.studio').waitFor();
     await context.close();
     const stale = await setup();
     await stale.context.addInitScript(() => localStorage.setItem('galx_custom_auth_user', JSON.stringify({ id: 'stale', token: 'forged', provider: 'fixture' })));
@@ -146,21 +146,21 @@ try {
     await page.goto(base + '/images'); await page.locator('.studio').waitFor();
     await page.getByLabel('Prompt', { exact: true }).fill('Keep this draft through sign-in');
     state.libraryStatus = 401;
-    await page.getByRole('button', { name: 'My images', exact: true }).click();
+    await page.getByRole('link', { name: 'My images', exact: true }).click();
     await page.getByRole('heading', { name: 'Sign in to continue', exact: true }).waitFor();
     await page.waitForFunction(() => document.activeElement?.id === 'workspace-signin-heading');
     assert.equal(await page.locator('.studio').count(), 0, 'private editor unmounted');
     assert.equal(await page.getByRole('heading', { name: 'Sign in to continue' }).evaluate((el: HTMLElement) => el === document.activeElement), true);
-    assert.equal(new URL(await page.getByRole('link', { name: 'Sign in again' }).getAttribute('href'), base).searchParams.get('next'), '/images?view=library');
+    assert.equal(new URL(await page.getByRole('link', { name: 'Sign in again' }).getAttribute('href'), base).searchParams.get('next'), '/images/library');
     assert.equal(await page.evaluate(() => Object.values(sessionStorage).some(value => value.includes('Keep this draft through sign-in'))), true);
     assert.deepEqual(state.posts, [], 'no generation/replay');
     await inspect(page, `expired-${width}`, 'section[aria-labelledby="workspace-signin-heading"]');
     await context.close();
     const outage = await setup(width, 'unavailable');
-    const response = await outage.page.goto(base + '/images?view=library&token=discard-me');
+    const response = await outage.page.goto(base + '/images/library?token=discard-me');
     assert.equal(response.status(), 503);
     await outage.page.getByRole('heading', { name: 'We couldn’t check your session', exact: true }).waitFor();
-    assert.equal(await outage.page.getByRole('link', { name: 'Try again' }).getAttribute('href'), '/images?view=library');
+    assert.equal(await outage.page.getByRole('link', { name: 'Try again' }).getAttribute('href'), '/images/library');
     await inspect(outage.page, `unavailable-${width}`);
     await outage.context.close();
   }
@@ -170,7 +170,7 @@ try {
     assert.equal(await denied.page.locator('.sites-workspace').count(), 0);
     await denied.context.close();
     const allowed = await setup(390, 'valid'); allowed.state.libraryStatus = 403;
-    await allowed.page.goto(base + '/images?view=library');
+    await allowed.page.goto(base + '/images/library');
     await allowed.page.getByRole('heading', { name: 'Your images couldn’t be loaded' }).waitFor();
     assert.equal(await allowed.page.getByRole('heading', { name: 'Sign in to continue' }).count(), 0);
     await allowed.context.close();

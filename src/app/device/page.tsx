@@ -1,4 +1,5 @@
 'use client';
+import { authEntryPath } from '@/lib/auth/redirects';
 
 import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -165,7 +166,7 @@ function DeviceContent() {
 
               <div className="pt-2 font-mono">
                 <Link
-                  href={`/auth/signin?next=${encodeURIComponent(code ? `/device?code=${code}` : '/device')}`}
+                  href={authEntryPath(code ? `/device?${new URLSearchParams({ code })}` : '/device')}
                   className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black font-bold text-xs uppercase text-center flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg shadow-amber-500/20"
                 >
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -214,7 +215,7 @@ function DeviceContent() {
           {/* Back to regular login */}
           <div className="pt-2 border-t border-white/5 text-center">
             <Link
-              href="/auth/signin"
+              href="/login"
               className="inline-flex items-center gap-1 text-xs text-zinc-400 hover:text-zinc-200 transition-colors py-1 cursor-pointer"
             >
               <ArrowLeft className="w-3.5 h-3.5" />

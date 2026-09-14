@@ -1,5 +1,6 @@
 'use client';
 
+import { authEntryPath } from '@/lib/auth/redirects';
 import { useTransition } from 'react';
 import { useLinkStatus } from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -10,7 +11,7 @@ import { PUBLIC_NAVIGATION, isPublicReadingPath } from '@/lib/public-content/rou
 import styles from './navigation.module.css';
 
 const links = PUBLIC_NAVIGATION;
-const isProductRoute = (pathname: string) => pathname === '/' || pathname === '/images' || /^\/sites(?:\/|$)/.test(pathname) || isPublicReadingPath(pathname);
+const isProductRoute = (pathname: string) => pathname === '/' || /^\/images(?:\/|$)/.test(pathname) || /^\/sites(?:\/|$)/.test(pathname) || isPublicReadingPath(pathname);
 
 function NavigationFeedback({ label }: { label: string }) {
   const { pending } = useLinkStatus();
@@ -51,7 +52,7 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
             onClick={() => startChecking(async () => { await retrySession(); })}>{checking ? 'Checking account…' : 'Retry account'}</button>
           : status === 'signout_failed' ? <span className={styles.accountStatus}>Sign-out incomplete</span>
           : isLoading ? <span className={styles.accountPlaceholder} role="status" aria-label="Loading account" />
-          : <Link href={`/auth/signin?next=${encodeURIComponent(returnTo)}`} className={styles.signIn}>Sign in</Link>}
+          : <Link href={authEntryPath(returnTo)} className={styles.signIn}>Sign in</Link>}
       </div>
     </div>
   </header>;

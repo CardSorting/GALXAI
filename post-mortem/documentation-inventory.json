@@ -1827,6 +1827,12 @@
       "title": "Image workspace UX investigation — September 13, 2026"
     },
     {
+      "path": "docs/maintainers/readable-urls.md",
+      "scope": "current-guide",
+      "category": "docs",
+      "title": "Readable product URLs"
+    },
+    {
       "path": "docs/manifesto/PRODUCT_VISION_AND_NORTH_STAR.md",
       "scope": "commercial-draft",
       "category": "docs",

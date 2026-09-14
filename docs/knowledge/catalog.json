@@ -3089,6 +3089,20 @@
       "decision": null
     },
     {
+      "path": "docs/maintainers/readable-urls.md",
+      "title": "Readable product URLs",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [
+        "images",
+        "access",
+        "client-efficiency"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": null
+    },
+    {
       "path": "docs/manifesto/PRODUCT_VISION_AND_NORTH_STAR.md",
       "title": "🌟 PRODUCT VISION & THE NORTH STAR",
       "scope": "commercial-draft",

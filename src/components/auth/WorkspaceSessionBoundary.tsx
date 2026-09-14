@@ -4,7 +4,8 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { WORKSPACE_SESSION_REJECTED } from '@/lib/auth/workspace-client';
-import { workspaceSignInPath } from '@/lib/security/workspace-policy';
+import { authEntryPath } from '@/lib/auth/redirects';
+import { workspaceReturnPath } from '@/lib/security/workspace-policy';
 import styles from './auth-entry.module.css';
 import { WorkspaceLoading } from '@/components/common/WorkspaceLoading';
 
@@ -27,9 +28,9 @@ export function WorkspaceSessionBoundary({ children }: { children: ReactNode }) 
   }, [owner]);
   if (user && rejected !== owner) return children;
   if (isLoading && !rejected) return <WorkspaceLoading product={pathname.startsWith('/sites') ? 'Sites' : 'Images'} />;
-  const next = workspaceSignInPath(pathname, new URLSearchParams(search.toString()));
+  const next = authEntryPath(workspaceReturnPath(pathname, new URLSearchParams(search.toString())), 'login', 'session_expired');
   return <section className={styles.locked} aria-labelledby="workspace-signin-heading"><div className={styles.panel}>
     <div className={styles.intro}><h1 ref={heading} tabIndex={-1} id="workspace-signin-heading">Sign in to continue</h1><p>Your session has ended. Sign in again to return to this workspace.</p></div>
-    <a className={`${styles.button} ${styles.primary}`} href={`${next}&error=session_expired`}>Sign in again</a>
+    <a className={`${styles.button} ${styles.primary}`} href={next}>Sign in again</a>
   </div></section>;
 }

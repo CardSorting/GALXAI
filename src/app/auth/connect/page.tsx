@@ -13,9 +13,9 @@ function AuthConnectRedirect() {
     const query = queryString ? `?${queryString}` : '';
 
     if (mode === 'signup' || mode === 'register' || mode === 'create') {
-      router.replace(`/auth/signup${query}`);
+      router.replace(`/signup${query}`);
     } else {
-      router.replace(`/auth/signin${query}`);
+      router.replace(`/login${query}`);
     }
   }, [searchParams, router]);
 

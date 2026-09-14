@@ -9,7 +9,7 @@ import { workspaceFetch, WORKSPACE_SESSION_REJECTED } from '../src/lib/auth/work
 
 test('return destinations reject external URLs and recursive auth while preserving workspace context', () => {
   for (const path of ['/auth/signin', '/auth/signup?next=/auth/signin', '/%61uth/signin', '/auth%252fsignin', '//evil.test', 'javascript:alert(1)', '/\\evil.test', '/%2f%2fevil.test']) assert.equal(safeAuthRedirect(path), '/images', path);
-  assert.equal(workspaceReturnPath('/images', new URLSearchParams('view=library&token=private&prompt=private')), '/images?view=library');
+  assert.equal(workspaceReturnPath('/images', new URLSearchParams('view=library&token=private&prompt=private')), '/images/library');
   assert.equal(workspaceReturnPath('/sites', new URLSearchParams('starter=portfolio&refine=1&key=private')), '/sites?starter=portfolio&refine=1');
   assert.equal(workspaceReturnPath('/sites', new URLSearchParams('starter=private&refine=private')), '/sites');
   assert.equal(workspaceReturnPath('/sites/owned', new URLSearchParams('token=private')), '/sites/owned');

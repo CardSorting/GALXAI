@@ -77,13 +77,16 @@
         "supabase/migrations/20260913071757_image_library_bounded_pages.sql",
         "supabase/rollbacks/20260913071757_image_library_bounded_pages.down.sql",
         "scripts/verify-image-public-http.ts",
-        "scripts/test-relay-image-generation.ts"
+        "scripts/test-relay-image-generation.ts",
+        "src/app/images/**/*.tsx",
+        "scripts/verify-url-navigation.mjs"
       ],
       "guides": [
         "docs/QUEUE_SPECIFICATION.md",
         "docs/maintainers/image-public-boundary.md",
         "post-mortem/runbooks/image-generation.md",
-        "docs/maintainers/image-library-scale.md"
+        "docs/maintainers/image-library-scale.md",
+        "docs/maintainers/readable-urls.md"
       ],
       "checks": [
         "npm run test:image:security",
@@ -142,7 +145,19 @@
         "src/app/library/page.tsx",
         "scripts/verify-workspace-cache-http.mjs",
         "src/components/auth/WorkspacePageGate.tsx",
-        "src/components/auth/AuthSessionContent.tsx"
+        "src/components/auth/AuthSessionContent.tsx",
+        "src/app/login/**/*.tsx",
+        "src/app/signup/**/*.tsx",
+        "scripts/test-url-navigation.ts",
+        "scripts/verify-url-navigation.mjs",
+        "src/app/admin/page.tsx",
+        "src/app/auth/connect/page.tsx",
+        "src/app/device/page.tsx",
+        "src/app/settings/page.tsx",
+        "src/components/admin/PreviewAdminWorkspace.tsx",
+        "src/components/billing/BillingClient.tsx",
+        "src/components/developers/DeveloperPreview.tsx",
+        "src/components/keys/QuickTopUpClient.tsx"
       ],
       "guides": [
         "docs/operations/developer-preview.md",
@@ -152,7 +167,8 @@
         "docs/operations/workspace-auth.md",
         "docs/STANDARDIZED_OAUTH_AND_INGESTION_ARCHITECTURE.md",
         "docs/SECURITY_POSTURE_AND_THREAT_MODEL.md",
-        "docs/adr/0147-verified-account-and-session-authority.md"
+        "docs/adr/0147-verified-account-and-session-authority.md",
+        "docs/maintainers/readable-urls.md"
       ],
       "checks": [
         "npm run test:preview-admin",
@@ -330,12 +346,17 @@
         "src/components/common/RouteRecovery.tsx",
         "src/components/common/WorkspaceLoading.tsx",
         "src/components/common/workspace-route.module.css",
-        "scripts/verify-workspace-navigation.mjs"
+        "scripts/verify-workspace-navigation.mjs",
+        "src/lib/images/navigation.ts",
+        "src/components/common/FloatingActionDock.tsx",
+        "src/app/robots.ts",
+        "scripts/verify-url-navigation.mjs"
       ],
       "guides": [
         "docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md",
         "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md",
-        "docs/maintainers/PUBLIC_DISCOVERY.md"
+        "docs/maintainers/PUBLIC_DISCOVERY.md",
+        "docs/maintainers/readable-urls.md"
       ],
       "checks": [
         "npm run test:egress:transport",
@@ -422,7 +443,13 @@
     },
     "docs/knowledge/audits/2026-09-14-workspace-recovery-ux.md": {
       "kind": "evidence",
-      "keywords": ["workspace", "recovery", "navigation", "ux", "audit"]
+      "keywords": [
+        "workspace",
+        "recovery",
+        "navigation",
+        "ux",
+        "audit"
+      ]
     },
     "docs/knowledge/audits/2026-09-13-workspace-auth-ux.md": {
       "kind": "evidence",

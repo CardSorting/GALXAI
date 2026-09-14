@@ -150,7 +150,7 @@ try {
   assert.equal(await page.locator('#site-prompt').inputValue(),'Keep my Site draft through navigation');
 
   state.profileDelay=0;state.libraryStatus=403;
-  await page.goto(base+'/images?view=library');
+  await page.goto(base+'/images/library');
   await page.getByRole('heading',{name:'Your images couldn’t be loaded'}).waitFor();
   await page.getByText('This action isn’t available for your account.',{exact:true}).waitFor();
   assert.equal(await page.getByRole('link',{name:'Sign in again'}).count(),0,'403 never suggests expired credentials');

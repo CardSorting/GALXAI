@@ -19,7 +19,7 @@ export function prefetchOnIntent(router: PrefetchRouter, href: string) {
   if (connection?.saveData || /^(slow-)?2g$/.test(connection?.effectiveType || '')) return;
   if (!href.startsWith('/') || href.startsWith('//') || href.includes('\\')) return;
   const target = new URL(href, window.location.origin);
-  if (/^\/(?:api|v1|auth|admin)(?:\/|$)/.test(target.pathname)) return;
+  if (/^\/(?:api|v1|auth|login|signup|admin)(?:\/|$)/.test(target.pathname)) return;
   if (target.pathname === window.location.pathname && target.search === window.location.search) return;
   const route = target.pathname + target.search;
   if (claim(route, Date.now())) { try { router.prefetch(route); } catch { /* Navigation remains available. */ } }

@@ -4,7 +4,7 @@ import { safeAuthRedirect } from './redirects';
 export function authDestinationLabel(destination: string): string {
   const path = new URL(safeAuthRedirect(destination), 'https://galx.invalid').pathname;
   if (/^\/sites(?:\/|$)/.test(path)) return 'Sites';
-  if (path === '/images' || path === '/library') return 'Images';
+  if (/^\/images(?:\/|$)/.test(path) || path === '/library') return 'Images';
   if (/^\/billing(?:\/|$)/.test(path)) return 'your account';
   if (/^\/admin(?:\/|$)/.test(path)) return 'your workspace';
   if (path === '/developers') return 'developer preview';

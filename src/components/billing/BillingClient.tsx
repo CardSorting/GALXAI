@@ -19,7 +19,7 @@ const types: Record<string, string> = { deposit: 'Top-up', auto_reload: 'Auto-re
 export function BillingClient() {
   const { user, isLoading } = useAuth();
   if (isLoading) return <p role="status" className="py-8 text-sm text-zinc-400">Loading account…</p>;
-  if (!user) return <div className="space-y-4 py-8"><p className="text-sm text-zinc-400">Sign in to view your balance, transactions, and invoices.</p><Link href="/auth/signin?next=%2Fbilling" className={link}>Sign in</Link></div>;
+  if (!user) return <div className="space-y-4 py-8"><p className="text-sm text-zinc-400">Sign in to view your balance, transactions, and invoices.</p><Link href="/login?next=/billing" className={link}>Sign in</Link></div>;
   return <AccountBilling key={user.id} accountId={user.id} token={user.token} email={user.email || 'Signed-in account'} />;
 }
 

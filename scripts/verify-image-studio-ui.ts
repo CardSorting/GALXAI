@@ -105,7 +105,7 @@ try {
     assert.equal(await page.getByRole('button', { name: 'Landscape 3:2' }).getAttribute('aria-pressed'), 'true');
     await page.reload({ waitUntil: 'networkidle' });
     assert.match(await page.getByLabel('Prompt', { exact: true }).inputValue(), /terracotta/);
-    await page.getByRole('button', { name: 'My images', exact: true }).click();
+    await page.getByRole('link', { name: 'My images', exact: true }).click();
     await page.getByRole('heading', { name: 'Your own space to create' }).waitFor();
     assert.equal(state.posts, 0); assert.deepEqual(pageErrors, []);
     await context.close();
@@ -151,9 +151,9 @@ try {
   await page.keyboard.press('Escape');
   assert.equal(await page.getByRole('dialog').count(), 0);
   assert(await page.getByRole('button', { name: 'Open image: A cinematic blue desert lake' }).evaluate((el: HTMLElement) => el === document.activeElement));
-  await page.getByRole('button', { name: 'My images', exact: true }).click();
+  await page.getByRole('link', { name: 'My images', exact: true }).click();
   await page.getByRole('button', { name: 'Add to favorites', exact: true }).click();
-  await page.getByRole('button', { name: 'Favorites', exact: true }).click();
+  await page.getByRole('link', { name: 'Favorites', exact: true }).click();
   await page.getByRole('button', { name: 'Open image: A cinematic blue desert lake' }).waitFor();
   assert.equal(state.patches, 1);
   await page.getByRole('button', { name: 'Open image: A cinematic blue desert lake' }).click();
@@ -161,7 +161,7 @@ try {
   await page.getByRole('dialog').getByRole('button', { name: 'Add to favorites' }).waitFor();
   await page.keyboard.press('Escape');
   await page.getByRole('heading', { name: 'Keep your favorites close' }).waitFor();
-  await page.getByRole('button', { name: 'My images', exact: true }).click();
+  await page.getByRole('link', { name: 'My images', exact: true }).click();
   await page.getByRole('searchbox', { name: 'Search your images' }).fill('no match');
   await page.getByRole('heading', { name: 'No images match your search' }).waitFor();
   await page.getByRole('button', { name: 'Clear search' }).click();
@@ -200,8 +200,8 @@ try {
   state.libraryMode = 'unauthorized'; await page.getByRole('button', { name: 'Refresh library' }).click();
   await page.getByRole('link', { name: 'Sign in again', exact: true }).waitFor();
   assert.equal(await page.getByRole('button', { name: /^Open image:/ }).count(), 0, 'authorization failure clears the library');
-  assert.equal(await page.getByRole('link', { name: 'Sign in again', exact: true }).getAttribute('href'), '/auth/signin?next=%2Fimages');
-  await page.getByRole('button', { name: 'Create', exact: true }).click();
+  assert.equal(await page.getByRole('link', { name: 'Sign in again', exact: true }).getAttribute('href'), '/login?next=/images/library&error=session_expired');
+  await page.getByRole('link', { name: 'Create', exact: true }).click();
   state.mode = 'limited';
   await page.getByRole('button', { name: 'Generate 2 images', exact: true }).click();
   await page.getByRole('alert').filter({ hasText: 'Your request limit' }).waitFor();
@@ -254,8 +254,8 @@ try {
     await inspect(run.page, `browse-inspector-${width}`);
     await run.page.keyboard.press('Escape');
     assert(await thumb.evaluate((el: HTMLElement) => el === document.activeElement), 'lightbox restores focus to the thumbnail');
-    await run.page.getByRole('button', { name: 'My images', exact: true }).click();
-    await run.page.getByRole('button', { name: 'Create', exact: true }).click();
+    await run.page.getByRole('link', { name: 'My images', exact: true }).click();
+    await run.page.getByRole('link', { name: 'Create', exact: true }).click();
     assert.equal(await run.page.getByRole('button', { name: 'Grid', exact: true }).getAttribute('aria-pressed'), 'true', 'view survives library navigation');
     await run.page.getByRole('button', { name: 'Image', exact: true }).click();
     await run.page.getByRole('button', { name: 'Show image 1: Two blue landscapes', exact: true }).click();

@@ -114,9 +114,9 @@ function PreviewFlow({ user, isLoading }: Pick<ReturnType<typeof useAuth>, 'user
     {isLoading || status === 'loading' ? <p role="status">Checking your preview access…</p> : !user ? <>
       <h2>Apply for the private preview</h2><p>Start with a verified GALX account. Then share a short introduction, a profile, and what you’d like to build.</p>
       <p>We read each application and invite builders as space opens. Applying doesn’t grant API access.</p>
-      <div className={styles.actions}><Link className={styles.primary} href="/auth/signup?next=%2Fdevelopers">Sign up to apply <ArrowRight size={16} aria-hidden="true" /></Link><Link className={styles.textLink} href="/auth/signin?next=%2Fdevelopers">Already have an account? Sign in</Link></div>
+      <div className={styles.actions}><Link className={styles.primary} href="/signup?next=/developers">Sign up to apply <ArrowRight size={16} aria-hidden="true" /></Link><Link className={styles.textLink} href="/login?next=/developers">Already have an account? Sign in</Link></div>
     </> : status === 'session_required' ? <>
-      <h2>Sign in to check your access</h2><p>Use your verified account to apply or view your current status. Your saved application will be waiting for you.</p><Link className={styles.primary} href="/auth/signin?next=%2Fdevelopers">Sign in again</Link>
+      <h2>Sign in to check your access</h2><p>Use your verified account to apply or view your current status. Your saved application will be waiting for you.</p><Link className={styles.primary} href="/login?next=/developers">Sign in again</Link>
     </> : status === 'error' ? <>
       <h2>We couldn’t check your access</h2><p role="alert">Please try again. Your saved application is unchanged.</p><button className={styles.primary} onClick={() => setRefresh(n => n + 1)}>Try again</button>
     </> : showForm ? <>

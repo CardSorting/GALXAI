@@ -5,6 +5,8 @@ import { publishedSiteProxy } from '@/lib/sites/published-proxy';
 import { previewMiddleware } from '@/lib/security/preview-middleware';
 import { isPublicProductPath } from '@/lib/security/preview-policy';
 import { isWorkspacePath } from '@/lib/security/workspace-policy';
+import { legacyAuthPath } from '@/lib/auth/redirects';
+import { legacyImagePath } from '@/lib/images/navigation';
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
@@ -12,6 +14,12 @@ export async function middleware(request: NextRequest) {
   if (/^[a-z0-9-]+\.[a-z0-9-]+\.galx\.ai$/.test(host)) {
     if (!['GET','HEAD'].includes(request.method) || pathname !== '/') return new NextResponse('Site unavailable.',{status:404,headers:{'Cache-Control':'private, no-store'}});
     return publishedSiteProxy(request,host);
+  }
+  // Migrate bookmarks before rendering; only finite public fields reach Location.
+  const canonical = legacyAuthPath(pathname, request.nextUrl.searchParams) ?? legacyImagePath(pathname, request.nextUrl.searchParams);
+  if (canonical && ['GET', 'HEAD'].includes(request.method)) {
+    return NextResponse.redirect(new URL(canonical, request.url), { status: 308,
+      headers: { 'Cache-Control': 'private, no-store', 'X-Robots-Tag': 'noindex, nofollow' } });
   }
   // Account workspaces require a session before any preview or asset exemption.
   if (isWorkspacePath(pathname)) return updateSession(request);

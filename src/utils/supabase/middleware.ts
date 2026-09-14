@@ -79,7 +79,7 @@ function applySecurityHeaders(response: NextResponse, pathname: string): NextRes
 
   // Route security classification & zero-cache enforcement for private workspace surfaces
   const isProtectedPath = 
-    isWorkspacePath(pathname) || pathname.startsWith('/auth/') ||
+    isWorkspacePath(pathname) || pathname === '/login' || pathname === '/signup' || pathname.startsWith('/auth/') ||
     pathname.startsWith('/teams') ||
     pathname.startsWith('/billing') ||
     pathname.startsWith('/keys') ||
@@ -89,7 +89,7 @@ function applySecurityHeaders(response: NextResponse, pathname: string): NextRes
     pathname === '/models/routing';
 
   if (isProtectedPath) {
-    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+    response.headers.set('Cache-Control', 'private, no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
     response.headers.set('Pragma', 'no-cache');
   }
 

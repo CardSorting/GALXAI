@@ -11,7 +11,7 @@ export async function previewMiddleware(req: NextRequest): Promise<NextResponse 
     if (!denied) return null;
     if (path.startsWith('/admin') && ['GET', 'HEAD'].includes(req.method)) {
       if (denied.status === 401) {
-        const url = new URL('/auth/signin?next=%2Fadmin', req.url);
+        const url = new URL('/login?next=/admin', req.url);
         return NextResponse.redirect(url, { headers: { 'Cache-Control': 'private, no-store', 'X-Robots-Tag': 'noindex, nofollow' } });
       }
       return new NextResponse('This page is unavailable.', { status: denied.status === 403 ? 404 : 503,

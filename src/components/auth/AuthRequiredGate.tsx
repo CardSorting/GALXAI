@@ -1,4 +1,5 @@
 'use client';
+import { authEntryPath } from '@/lib/auth/redirects';
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -16,7 +17,7 @@ export function AuthRequiredGate({ title = 'Sign in to continue', description = 
   if (user) return <>{children}</>;
   return <section className={styles.locked} aria-label="Sign in required"><div className={styles.panel}>
     <div className={styles.intro}><h1>{title}</h1><p>{description}</p></div>
-    <Link className={`${styles.button} ${styles.primary}`} href={`/auth/signin?${new URLSearchParams({ next })}`}>Sign in</Link>
-    <p className={styles.signup}>New to GALX? <Link className={styles.link} href={`/auth/signup?${new URLSearchParams({ next })}`}>Create an account</Link></p>
+    <Link className={`${styles.button} ${styles.primary}`} href={authEntryPath(next)}>Sign in</Link>
+    <p className={styles.signup}>New to GALX? <Link className={styles.link} href={authEntryPath(next, 'signup')}>Create an account</Link></p>
   </div></section>;
 }

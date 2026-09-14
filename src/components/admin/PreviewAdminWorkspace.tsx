@@ -133,7 +133,7 @@ export function PreviewAdminWorkspace({ initialActor }: { initialActor: AdminAct
     <div className={styles.line}><time dateTime={item.created_at} title={time(item.created_at)}>{date(item.created_at)}</time>
       {canReview && <button className={styles.secondary} disabled={busy} onClick={() => void save({ action: 'feedback', id: item.id, revision: item.revision, resolved: !item.resolved_at }, item.resolved_at ? 'Feedback reopened.' : 'Feedback marked as resolved.')}>{item.resolved_at ? 'Reopen' : 'Mark resolved'}</button>}</div>
   </article>;
-  if (locked) return <main className={styles.locked}><ShieldCheck size={28} /><h1>Staff access required</h1><p>Your session or permissions changed. Sign in with an authorized staff account to continue.</p><Link href="/auth/signin?next=%2Fadmin">Sign in again</Link><Link href="/images">Go to Images</Link></main>;
+  if (locked) return <main className={styles.locked}><ShieldCheck size={28} /><h1>Staff access required</h1><p>Your session or permissions changed. Sign in with an authorized staff account to continue.</p><Link href="/login?next=/admin">Sign in again</Link><Link href="/images">Go to Images</Link></main>;
   return <div className={styles.workspace}>
     <a href="#admin-content" className={styles.skip}>Skip to workspace</a>
     <aside className={styles.sidebar}>

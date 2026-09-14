@@ -1,6 +1,9 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { IMAGE_PATHS, imageView, type ImageView } from '@/lib/images/navigation';
+import { authEntryPath } from '@/lib/auth/redirects';
 import { useEffect, useRef, useState } from 'react';
 import { ArrowDownToLine, ArrowLeft, ArrowRight, Check, ChevronDown, Copy, ImageIcon, LoaderCircle, Plus, RefreshCw, Search, SlidersHorizontal, Sparkles, Star, X } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -18,13 +21,15 @@ export function ImageStudio() {
 }
 
 function StudioWorkspace({ owner, token, authLoading }: { owner: string | null; token?: string; authLoading: boolean }) {
-  const [view, setView] = useState<'create' | 'library'>('create');
+  const pathname = usePathname();
+  const selectedView = imageView(pathname);
+  const view = selectedView === 'create' ? 'create' : 'library';
   const [active, setActive] = useState<StudioImage | null>(null);
   const [activeCollection, setActiveCollection] = useState<StudioImage[]>([]);
   const [activeSource, setActiveSource] = useState<'create' | 'library'>('create');
   const [layout, setLayout] = useState<'image' | 'grid'>('image');
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const studio = useImageStudio(owner, token, view === 'library', selectedId);
+  const studio = useImageStudio(owner, token, view === 'library', selectedId, selectedView === 'favorites');
   const [detailError, setDetailError] = useState('');
   const [detailRevision, setDetailRevision] = useState(0);
   const [reusing, setReusing] = useState<string | null>(null);
@@ -71,9 +76,9 @@ function StudioWorkspace({ owner, token, authLoading }: { owner: string | null; 
   useEffect(() => { if (studio.libraryError.includes('Sign in')) { setActive(null); setActiveCollection([]); } }, [studio.libraryError]);
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('view') === 'library') setView('library');
-  }, []);
+    document.title = `${selectedView === 'create' ? 'Image Studio' : selectedView === 'favorites' ? 'Favorites' : 'My images'} | GALX`;
+    setActive(null);
+  }, [selectedView]);
   useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialogOpen || !dialog) return;
@@ -100,12 +105,10 @@ function StudioWorkspace({ owner, token, authLoading }: { owner: string | null; 
     }
   }, [composerOpen]);
 
-  function changeView(next: 'create' | 'library') {
-    setView(next);
-    const url = new URL(window.location.href);
-    if (next === 'library') url.searchParams.set('view', 'library');
-    else url.searchParams.delete('view');
-    window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
+  function changeView(next: ImageView) {
+    const path = IMAGE_PATHS[next];
+    // Next integrates native history with usePathname. Keep this workspace alive.
+    if (window.location.pathname !== path) window.history.pushState(null, '', path);
   }
   function focusPrompt() {
     changeView('create'); setComposerOpen(true);
@@ -126,7 +129,7 @@ function StudioWorkspace({ owner, token, authLoading }: { owner: string | null; 
     } catch { if (!controller.signal.aborted) studio.setNotice('The prompt couldn’t be loaded. Try again.'); }
     finally { if (!controller.signal.aborted) setReusing(null); }
   }
-  function showLibrary(favorites = false) { changeView('library'); studio.setFavorites(favorites); }
+  function showLibrary(favorites = false) { changeView(favorites ? 'favorites' : 'library'); }
   function openImage(image: StudioImage, source: 'create' | 'library') {
     setActiveCollection(source === 'create' ? studio.creations : studio.images);
     setActiveSource(source); setActive(image); setCopied(false);
@@ -189,9 +192,9 @@ function StudioWorkspace({ owner, token, authLoading }: { owner: string | null; 
     </div>
     <div className="studio-workspace">
         <nav className="studio-view-nav" aria-label="Studio views">
-          <div><button aria-current={view === 'create' ? 'page' : undefined} onClick={() => changeView('create')}><Sparkles aria-hidden="true" />Create</button>
-            <button aria-current={view === 'library' && !studio.favorites ? 'page' : undefined} onClick={() => showLibrary()}><ImageIcon aria-hidden="true" />My images</button>
-            <button aria-current={view === 'library' && studio.favorites ? 'page' : undefined} onClick={() => showLibrary(true)}><Star aria-hidden="true" />Favorites</button></div>
+          <div>{([{ view: 'create', label: 'Create', Icon: Sparkles }, { view: 'library', label: 'My images', Icon: ImageIcon }, { view: 'favorites', label: 'Favorites', Icon: Star }] as const).map(({ view: target, label, Icon }) =>
+            <Link key={target} href={IMAGE_PATHS[target]} prefetch={false} aria-current={selectedView === target ? 'page' : undefined}
+              onNavigate={event => { event.preventDefault(); changeView(target); }}><Icon aria-hidden="true" />{label}</Link>)}</div>
           <button className="studio-icon-button" aria-label="New prompt" onClick={() => { setPrevious(settings); setSettings(DEFAULT_SETTINGS); focusPrompt(); }}><Plus aria-hidden="true" /></button>
         </nav>
       <aside className={`studio-composer ${view === 'library' ? 'studio-composer-library' : ''} ${!composerOpen ? 'studio-composer-collapsed' : ''}`} aria-label="Image creation settings">
@@ -214,7 +217,7 @@ function StudioWorkspace({ owner, token, authLoading }: { owner: string | null; 
           <fieldset className="studio-fieldset studio-count"><legend>Number of images</legend><div>{[1, 2, 3, 4].map(count => <button type="button" key={count} aria-pressed={settings.count === count} aria-label={`${count} ${count === 1 ? 'image' : 'images'}`} onClick={() => setSettings(current => ({ ...current, count }))}>{count}</button>)}</div></fieldset>
           </div>
           <div className="studio-submit-area">
-            {!owner && !authLoading ? <Link className="studio-primary" href="/auth/signin?next=%2Fimages"><Sparkles aria-hidden="true" />Sign in to generate<ArrowRight aria-hidden="true" /></Link> : <button className="studio-primary" type="submit" disabled={!studio.ready || authLoading || !settings.prompt.trim() || busy || Boolean(studio.pending) || studio.uncertain || studio.retryIn > 0}>
+            {!owner && !authLoading ? <Link className="studio-primary" href={authEntryPath(pathname)}><Sparkles aria-hidden="true" />Sign in to generate<ArrowRight aria-hidden="true" /></Link> : <button className="studio-primary" type="submit" disabled={!studio.ready || authLoading || !settings.prompt.trim() || busy || Boolean(studio.pending) || studio.uncertain || studio.retryIn > 0}>
               {busy ? <LoaderCircle className="studio-spin" aria-hidden="true" /> : <Sparkles aria-hidden="true" />}
               {authLoading ? 'Loading…' : studio.submitting ? 'Submitting…' : studio.polling ? 'Generating…' : studio.retryIn > 0 ? `Try again in ${studio.retryIn}s` : `Generate ${settings.count === 1 ? 'image' : `${settings.count} images`}`}
             </button>}
@@ -227,7 +230,7 @@ function StudioWorkspace({ owner, token, authLoading }: { owner: string | null; 
 
         <div className="studio-canvas-body" ref={canvasRef} tabIndex={-1}>
           <div className="studio-announcement" role="status" aria-live="polite">{studio.notice}</div>
-          {studio.error && <div className="studio-alert" role="alert"><p>{studio.error}</p><div><button className="studio-text-button" onClick={() => { showLibrary(); studio.refresh(); }}>Check my images<ArrowRight aria-hidden="true" /></button>{studio.error.includes('Sign in') && <Link className="studio-text-button" href="/auth/signin?next=%2Fimages">Sign in</Link>}</div></div>}
+          {studio.error && <div className="studio-alert" role="alert"><p>{studio.error}</p><div><button className="studio-text-button" onClick={() => { showLibrary(); studio.refresh(); }}>Check my images<ArrowRight aria-hidden="true" /></button>{studio.error.includes('Sign in') && <Link className="studio-text-button" href={authEntryPath(pathname)}>Sign in</Link>}</div></div>}
           {(studio.pending || studio.submitting || studio.uncertain) && <section className="studio-progress" aria-label="Generation status">
             <div className="studio-progress-heading">{busy ? <LoaderCircle className="studio-spin" aria-hidden="true" /> : <ImageIcon aria-hidden="true" />}<div><h2 aria-live="polite" aria-atomic="true">{studio.submitting ? 'Submitting your prompt' : studio.polling ? studio.progress : studio.pending ? 'Updates paused' : 'Your generation'}</h2><p>{studio.pending ? `${studio.pending.settings.count} ${studio.pending.settings.count === 1 ? 'image' : 'images'} · ${studio.pending.settings.ratio} · ${Math.floor(studio.elapsed / 60)}:${String(studio.elapsed % 60).padStart(2, '0')} elapsed` : 'Sending your request…'}</p></div></div>
             {studio.pending && <p className="studio-progress-prompt">{studio.pending.settings.prompt}</p>}
@@ -246,11 +249,11 @@ function StudioWorkspace({ owner, token, authLoading }: { owner: string | null; 
               {libraryPagination('top')}
               {studio.libraryError && <div className={studio.images.length ? 'studio-alert' : 'studio-empty'} role="alert">
                 {studio.images.length ? <p>Couldn’t update your library. Your loaded images are still here.</p> : <><h3>Your images couldn’t be loaded</h3><p>{studio.libraryError}</p></>}
-                <div className="studio-empty-actions"><button className="studio-secondary" disabled={studio.libraryLoading} onClick={studio.retryLibrary}>Try again</button>{studio.libraryError.includes('Sign in') && <Link className="studio-primary" href="/auth/signin?next=%2Fimages">Sign in again</Link>}</div>
+                <div className="studio-empty-actions"><button className="studio-secondary" disabled={studio.libraryLoading} onClick={studio.retryLibrary}>Try again</button>{studio.libraryError.includes('Sign in') && <Link className="studio-primary" href={authEntryPath(pathname)}>Sign in again</Link>}</div>
               </div>}
               {studio.libraryLoading && !studio.images.length ? <div className="studio-results-grid" aria-label="Loading images" aria-busy="true">{[0, 1, 2].map(index => <div key={index} className="studio-skeleton" />)}</div> : studio.images.length ? <><div className="studio-library-count" role="status">{studio.libraryLoading ? 'Updating images…' : `${studio.images.length} ${studio.images.length === 1 ? 'image' : 'images'} on this page`}</div><div className="studio-results-grid">{studio.images.map(imageCard)}</div></> : !studio.libraryError && <div className="studio-empty"><ImageIcon aria-hidden="true" /><h3>{studio.page > 1 ? 'No images on this page' : studio.search ? 'No images match your search' : studio.favorites ? 'Keep your favorites close' : 'Your next idea belongs here'}</h3><p>{studio.page > 1 ? 'Your library may have changed. Return to the first page to keep browsing.' : studio.search ? 'Try a different word from your prompt.' : studio.favorites ? 'Star an image in your library to find it here.' : 'Generate your first image to start your collection.'}</p><button className="studio-secondary" onClick={() => studio.page > 1 ? studio.firstPage() : studio.search ? studio.setSearch('') : studio.favorites ? showLibrary() : focusPrompt()}>{studio.page > 1 ? 'Back to first page' : studio.search ? 'Clear search' : studio.favorites ? 'Browse my images' : 'Create an image'}</button></div>}
               {libraryPagination('bottom')}
-            </> : <div className="studio-empty"><ImageIcon aria-hidden="true" /><h3>Your own space to create</h3><p>Generate images, save your favorites, and pick up where you left off.</p><Link href="/auth/signin?next=%2Fimages" className="studio-primary">Sign in to get started<ArrowRight aria-hidden="true" /></Link></div>}
+            </> : <div className="studio-empty"><ImageIcon aria-hidden="true" /><h3>Your own space to create</h3><p>Generate images, save your favorites, and pick up where you left off.</p><Link href={authEntryPath(pathname)} className="studio-primary">Sign in to get started<ArrowRight aria-hidden="true" /></Link></div>}
           </section>}
         </div>
       </section>

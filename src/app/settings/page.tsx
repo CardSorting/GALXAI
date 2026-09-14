@@ -190,7 +190,7 @@ export default function SettingsPage() {
 
           {!isAuthenticated && (
             <Link
-              href="/auth/signin?next=/settings"
+              href="/login?next=/settings"
               className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-bold text-xs shadow-md shadow-cyan-500/20 transition-all cursor-pointer"
             >
               <LogIn className="w-3.5 h-3.5" />
@@ -234,7 +234,7 @@ export default function SettingsPage() {
                     <span className="text-xs text-zinc-300 font-medium">Not Signed In</span>
                   </div>
                   <Link
-                    href="/auth/signin?next=/settings"
+                    href="/login?next=/settings"
                     className="text-xs text-cyan-400 hover:text-cyan-300 font-bold"
                   >
                     Sign In
@@ -517,7 +517,7 @@ export default function SettingsPage() {
                   </p>
                 </div>
                 <Link
-                  href="/auth/signin?next=/settings?tab=seats"
+                  href="/login?next=/settings?tab=seats"
                   className="px-5 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-bold text-xs cursor-pointer shadow-md shadow-cyan-500/20"
                 >
                   Sign In

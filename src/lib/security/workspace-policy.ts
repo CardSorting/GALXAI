@@ -1,5 +1,7 @@
 import { normalizedPath } from './preview-policy';
 import { resolveSiteStarter } from '@/lib/sites/starters';
+import { legacyImagePath } from '@/lib/images/navigation';
+import { authEntryPath } from '@/lib/auth/redirects';
 
 /** Product availability never grants anonymous access to account workspaces. */
 export function isWorkspacePath(pathname: string): boolean {
@@ -16,10 +18,11 @@ export function workspaceReturnPath(pathname: string, search = new URLSearchPara
     const starter = resolveSiteStarter(search.get('starter'), search.get('refine'));
     if (starter) return starter.href;
   }
-  if (path === '/images' && search.get('view') === 'library') target.searchParams.set('view', 'library');
+  const legacy = legacyImagePath(path, search);
+  if (legacy) return legacy;
   return target.pathname + target.search;
 }
 
 export function workspaceSignInPath(pathname: string, search = new URLSearchParams()): string {
-  return `/auth/signin?${new URLSearchParams({ next: workspaceReturnPath(pathname, search) })}`;
+  return authEntryPath(workspaceReturnPath(pathname, search));
 }

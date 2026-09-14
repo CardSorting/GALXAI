@@ -51,7 +51,7 @@ try {
     });
     const page = await context.newPage(); page.on('pageerror', (error: Error) => errors.push(error.message));
     await page.goto(base + '/images', { waitUntil: 'networkidle' }); assert.equal(pages, 0, 'Create does not hydrate the saved library');
-    await page.getByRole('button', { name: 'My images', exact: true }).click();
+    await page.getByRole('link', { name: 'My images', exact: true }).click();
     await page.waitForFunction(() => document.querySelectorAll('.studio-result').length === 36);
     const pagination = page.getByRole('navigation', { name: 'Image library pages', exact: true });
     const next = pagination.getByRole('button', { name: 'Next', exact: true });
@@ -66,8 +66,8 @@ try {
     }
     await previous.click(); await pagination.getByText(`Page ${loops}`, { exact: true }).waitFor();
     const before = await page.locator('.studio-result-preview').first().getAttribute('aria-label');
-    await page.getByRole('button', { name: 'Create', exact: true }).click();
-    await page.getByRole('button', { name: 'My images', exact: true }).click();
+    await page.getByRole('link', { name: 'Create', exact: true }).click();
+    await page.getByRole('link', { name: 'My images', exact: true }).click();
     await page.waitForFunction(() => !document.querySelector<HTMLButtonElement>('[aria-label="Refresh library"]')?.disabled);
     assert.equal(await page.locator('.studio-result-preview').first().getAttribute('aria-label'), before, 'switching views preserves the current page');
     mode = 'error'; await next.click(); await page.getByRole('alert').waitFor();
@@ -89,7 +89,7 @@ try {
     detailMode = 'success'; await page.getByRole('button', { name: 'Reuse prompt', exact: true }).click();
     await page.waitForFunction(() => document.querySelector<HTMLTextAreaElement>('#studio-prompt')?.value.startsWith('Full prompt 9999.'));
     assert((await page.getByLabel('Prompt', { exact: true }).inputValue()).length > 300, 'reuse receives the full saved prompt');
-    await page.getByRole('button', { name: 'My images', exact: true }).click(); await page.getByRole('searchbox', { name: 'Search your images' }).fill('');
+    await page.getByRole('link', { name: 'My images', exact: true }).click(); await page.getByRole('searchbox', { name: 'Search your images' }).fill('');
     await page.waitForFunction(() => document.querySelectorAll('.studio-result').length === 36);
     await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth);

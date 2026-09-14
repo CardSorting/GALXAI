@@ -48,9 +48,9 @@ try {
     assert.match(await page.getByRole('heading', { level: 1 }).innerText(), /Your idea,\s*ready to share/);
     const main = page.locator('main');
     assert.equal(await main.getByRole('link', { name: 'Start with Sites' }).first().getAttribute('href'), '/sites');
-    assert.equal(await main.getByRole('link', { name: 'Continue with GALX Pro' }).getAttribute('href'), '/auth/signin?next=%2Fbilling%23plan');
+    assert.equal(await main.getByRole('link', { name: 'Continue with GALX Pro' }).getAttribute('href'), '/login?next=/billing%23plan');
     assert.equal(await page.getByRole('navigation', { name: 'Main navigation', exact: true }).getByRole('link').first().innerText(), 'Sites');
-    assert.equal(await page.getByRole('link', { name: 'Sign in', exact: true }).getAttribute('href'), '/auth/signin?next=%2Fsites');
+    assert.equal(await page.getByRole('link', { name: 'Sign in', exact: true }).getAttribute('href'), '/login?next=/sites');
     assert.equal(await page.getByRole('navigation', { name: 'Footer', exact: true }).getByRole('link').first().innerText(), 'Sites');
     assert.match(await page.locator('#pricing').innerText(), /\$20/);
     assert.equal(await page.locator('#pricing table').count(), 1);
@@ -106,7 +106,7 @@ try {
     checks.push({ width, overflow, axeViolations: violations.length, pageErrors: errors.length, versions: 'passed', keyboard: 'passed', copy: 'passed', pricing: 'passed', skipLink: 'passed', exampleHeights });
     if (width === 1440) {
       await main.getByRole('link', { name: 'Continue with GALX Pro' }).click();
-      await page.waitForURL('**/auth/signin?next=%2Fbilling%23plan');
+      await page.waitForURL('**/login?next=/billing%23plan');
       assert.equal(new URL(page.url()).searchParams.get('next'), '/billing#plan');
       await page.locator('input[type="email"]').first().waitFor();
       await page.goto(base, { waitUntil: 'networkidle' });
@@ -119,8 +119,8 @@ try {
       assert.match(await prompt.inputValue(), /independent brand designer/);
       const idea = await prompt.inputValue();
       const signIn = page.getByRole('link', { name: 'Sign in to create', exact: true });
-      assert.equal(await signIn.getAttribute('href'), '/auth/signin?next=%2Fsites%3Fstarter%3Dportfolio%26refine%3D1');
-      await signIn.click(); await page.waitForURL('**/auth/signin?next=**');
+      assert.equal(await signIn.getAttribute('href'), '/login?next=/sites%3Fstarter%3Dportfolio%26refine%3D1');
+      await signIn.click(); await page.waitForURL('**/login?next=**');
       assert.equal(new URL(page.url()).searchParams.get('next'), '/sites?starter=portfolio&refine=1');
       await page.locator('input[type="email"]').first().waitFor();
       await page.goBack({ waitUntil: 'networkidle' });

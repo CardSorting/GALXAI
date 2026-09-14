@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
 import { cookies } from 'next/headers';
-import { DEFAULT_POST_AUTH_PATH, safeAuthRedirect } from '@/lib/auth/redirects';
+import { DEFAULT_POST_AUTH_PATH, safeAuthRedirect, authEntryPath } from '@/lib/auth/redirects';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -22,11 +22,7 @@ export async function GET(request: Request) {
 
   // Handle upstream OAuth provider denial or cancellation
   if (errorParam) {
-    const errorQuery = new URLSearchParams({
-      error: 'auth_cancelled',
-      next,
-    }).toString();
-    return NextResponse.redirect(`${origin}/auth/signin?${errorQuery}`);
+    return NextResponse.redirect(`${origin}${authEntryPath(next, 'login', 'auth_cancelled')}`);
   }
 
   if (code) {
@@ -63,14 +59,10 @@ export async function GET(request: Request) {
 
     if (error) {
       console.error('[OAuth Callback] Code exchange error:', error.message);
-      const errParams = new URLSearchParams({
-        error: 'auth_exchange_failed',
-        next
-      });
-      return NextResponse.redirect(`${origin}/auth/signin?${errParams.toString()}`);
+      return NextResponse.redirect(`${origin}${authEntryPath(next, 'login', 'auth_exchange_failed')}`);
     }
   }
 
   // Return the user to the sign in page with an exchange failure notice
-  return NextResponse.redirect(`${origin}/auth/signin?error=no_auth_code_provided&next=${encodeURIComponent(next)}`);
+  return NextResponse.redirect(`${origin}${authEntryPath(next, 'login', 'no_auth_code_provided')}`);
 }

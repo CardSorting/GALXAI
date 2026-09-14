@@ -1,4 +1,5 @@
 'use client';
+import { authEntryPath } from '@/lib/auth/redirects';
 
 import React, { useState, useRef } from 'react';
 import Link from 'next/link';
@@ -869,7 +870,7 @@ export function ArtisanalSignalSection() {
             </div>
 
             <Link
-              href={`/auth/signup?next=${encodeURIComponent(DEFAULT_POST_AUTH_PATH)}`}
+              href={authEntryPath(DEFAULT_POST_AUTH_PATH, 'signup')}
               className="w-full sm:w-auto px-7 py-3.5 rounded-2xl bg-gradient-to-r from-cyan-400 via-teal-300 to-indigo-500 hover:from-cyan-300 hover:to-indigo-400 text-black font-black text-xs uppercase tracking-wider shadow-xl shadow-cyan-500/25 flex items-center justify-center gap-2 hover:scale-[1.03] active:scale-[0.97] transition-all cursor-pointer font-mono"
             >
               <span>Start Building Free ($10 Credit)</span>
@@ -1482,7 +1483,7 @@ export function ArtisanalSignalSection() {
 
           <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link
-              href="/auth/signup?next=/keys"
+              href="/signup?next=/keys"
               className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-white hover:bg-zinc-200 text-black font-black text-xs sm:text-sm uppercase tracking-wider shadow-xl hover:scale-[1.04] active:scale-[0.96] transition-all cursor-pointer flex items-center justify-center gap-2"
             >
               <KeyRound className="w-4 h-4 text-black" />

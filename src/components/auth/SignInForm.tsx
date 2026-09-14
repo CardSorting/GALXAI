@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, type FormEvent } from 'react';
 import Link from 'next/link';
 import { ArrowRight, Eye, EyeOff, Github } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { safeAuthRedirect } from '@/lib/auth/redirects';
+import { safeAuthRedirect, authEntryPath } from '@/lib/auth/redirects';
 import { authDestinationLabel, signInErrorMessage } from '@/lib/auth/signin';
 import { AuthEntryShell } from './AuthEntryShell';
 import styles from './auth-entry.module.css';
@@ -110,7 +110,7 @@ export function SignInForm({ destination, notice }: { destination: string; notic
         <button type="submit" className={`${styles.button} ${styles.primary}`} disabled={Boolean(busy) || (method === 'link' && cooldown > 0)}>{busy === 'password' ? 'Signing in…' : busy === 'link' ? 'Sending link…' : method === 'link' ? cooldown ? `Send link in ${cooldown}s` : 'Email me a sign-in link' : 'Sign in'}{!busy && <ArrowRight aria-hidden="true" />}</button>
       </form>
       <div className={styles.switch}><button className={`${styles.link} ${styles.textButton}`} disabled={Boolean(busy)} onClick={() => { setMethod(value => value === 'password' ? 'link' : 'password'); setError(''); setFieldErrors({}); }}>{method === 'password' ? 'Use an email link instead' : 'Use your password instead'}</button></div>
-      <p className={styles.signup}>New to GALX? <Link prefetch={false} className={styles.link} href={`/auth/signup?${new URLSearchParams({ next: returnTo })}`}>Create an account</Link></p>
+      <p className={styles.signup}>New to GALX? <Link prefetch={false} className={styles.link} href={authEntryPath(returnTo, 'signup')}>Create an account</Link></p>
     </>}
   </AuthEntryShell>;
 }

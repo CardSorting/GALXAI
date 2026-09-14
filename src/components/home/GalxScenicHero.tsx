@@ -1,4 +1,5 @@
 'use client';
+import { authEntryPath } from '@/lib/auth/redirects';
 
 import React, { useState } from 'react';
 import Link from 'next/link';
@@ -107,13 +108,13 @@ export function GalxScenicHero() {
           ) : (
             <>
               <Link
-                href={`/auth/signup?next=${encodeURIComponent(DEFAULT_POST_AUTH_PATH)}`}
+                href={authEntryPath(DEFAULT_POST_AUTH_PATH, 'signup')}
                 className="px-4 sm:px-5 py-2 sm:py-2.5 rounded-full bg-white text-black hover:bg-zinc-200 text-xs sm:text-sm font-bold shadow-md transition-all cursor-pointer"
               >
                 Enter the Galaxy
               </Link>
               <Link
-                href={`/auth/signin?next=${encodeURIComponent(DEFAULT_POST_AUTH_PATH)}`}
+                href={authEntryPath(DEFAULT_POST_AUTH_PATH)}
                 className="px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-full bg-white/10 hover:bg-white/15 border border-white/10 text-white text-xs sm:text-sm font-semibold transition-all cursor-pointer"
               >
                 Login

@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import { AsyncLocalStorage } from 'node:async_hooks';
 import { readFileSync } from 'node:fs';
 import { NextRequest } from 'next/server';
+import { authEntryPath } from '../src/lib/auth/redirects';
 import { middleware } from '../src/middleware';
 import { verifyWorkspaceSession } from '../src/lib/auth/workspace-session';
 import { GalxAuthEngine } from '../src/core/auth/GalxAuthEngine';
@@ -13,7 +14,7 @@ process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_test_only';
 const jwt = `${Buffer.from('{"alg":"HS256"}').toString('base64url')}.${Buffer.from(JSON.stringify({ sub: 'forged', exp: 4102444800 })).toString('base64url')}.forged`;
 const cookie = (expires = 4102444800) => `base64-${Buffer.from(JSON.stringify({ access_token: jwt, refresh_token: 'fixture-refresh', expires_at: expires, user: { id: 'forged' } })).toString('base64url')}`;
 const sessionCookie = `sb-auth-auth-token=${cookie()}`;
-const paths = ['/images', '/images/', '/%69mages', '/images/future', '/sites', '/sites/', '/%73ites', '/sites/00000000-0000-4000-8000-000000000000', '/sites/draft.js', '/sites/deep/path', '/library'];
+const paths = ['/images/library', '/images/favorites', '/images', '/images/', '/%69mages', '/images/future', '/sites', '/sites/', '/%73ites', '/sites/00000000-0000-4000-8000-000000000000', '/sites/draft.js', '/sites/deep/path', '/library'];
 
 test('anonymous navigation, RSC, prefetch and misleading paths never pass the workspace gate', async () => {
   const originalFetch = globalThis.fetch;
@@ -23,7 +24,7 @@ test('anonymous navigation, RSC, prefetch and misleading paths never pass the wo
       const response = await middleware(new NextRequest(`https://galx.ai${path}`, { headers }));
       assert.equal(response.status, 307, path);
       const redirect = new URL(response.headers.get('location')!);
-      assert.equal(redirect.pathname, '/auth/signin');
+      assert.equal(redirect.pathname, '/login');
       assert.equal(redirect.origin, 'https://galx.ai');
       assert.equal(response.headers.get('cache-control'), 'private, no-store');
       assert.equal(response.headers.get('x-robots-tag'), 'noindex, nofollow');
@@ -37,7 +38,7 @@ test('anonymous navigation, RSC, prefetch and misleading paths never pass the wo
     const response = await middleware(new NextRequest('https://galx.ai/sites?starter=portfolio&refine=1&token=PRIVATE_SENTINEL&next=https://evil.test'));
     assert.equal(new URL(response.headers.get('location')!).searchParams.get('next'), '/sites?starter=portfolio&refine=1');
     assert(!response.headers.get('location')!.includes('PRIVATE_SENTINEL'));
-    for (const path of ['/', '/auth/signin', '/images/studio/desert.webp', '/images/studio/glass.webp', '/images/studio/paper.webp', '/api/sites/published/example', '/v1/images/assets/invalid', '/api/sites/workspace']) {
+    for (const path of ['/', '/login', '/images/studio/desert.webp', '/images/studio/glass.webp', '/images/studio/paper.webp', '/api/sites/published/example', '/v1/images/assets/invalid', '/api/sites/workspace']) {
       assert.equal((await middleware(new NextRequest(`https://galx.ai${path}`))).headers.get('x-middleware-next'), '1', path);
     }
   } finally { globalThis.fetch = originalFetch; }
@@ -129,10 +130,10 @@ test('server page guard independently denies anonymous entry when middleware did
   const store = { type: 'request', phase: 'render', cookies: new NextRequest('https://galx.ai/images').cookies };
   await workAsyncStorage.run({} as any, () => workUnitAsyncStorage.run(store as any, async () => {
     for (const path of ['/images', '/sites', '/sites/00000000-0000-4000-8000-000000000000']) {
-      await assert.rejects(requireWorkspaceSession(path), error => (error as any).digest === `NEXT_REDIRECT;replace;/auth/signin?next=${encodeURIComponent(path)};307;`);
+      await assert.rejects(requireWorkspaceSession(path), error => (error as any).digest === `NEXT_REDIRECT;replace;${authEntryPath(path)};307;`);
     }
   }));
-  for (const path of ['src/app/images/page.tsx', 'src/app/sites/page.tsx', 'src/app/sites/[id]/page.tsx']) {
+  for (const path of ['src/app/images/library/page.tsx', 'src/app/images/favorites/page.tsx', 'src/app/images/page.tsx', 'src/app/sites/page.tsx', 'src/app/sites/[id]/page.tsx']) {
     const page = readFileSync(path, 'utf8');
     assert.match(page, /<WorkspacePageGate pathname=/, path);
     assert.match(page, /export const dynamic = 'force-dynamic'/, path);

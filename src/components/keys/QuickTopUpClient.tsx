@@ -9,7 +9,7 @@ import { CheckoutStatus } from '@/components/billing/CheckoutStatus';
 export function QuickTopUpClient() {
   const { user, isLoading } = useAuth();
   if (isLoading) return <p role="status" className="text-sm text-zinc-400">Loading account…</p>;
-  if (!user) return <div className="space-y-4 text-sm"><p className="text-zinc-400">Sign in to add credit to your account.</p><Link href="/auth/signin?next=%2Fkeys%2Ftop-up" className="text-indigo-300 underline underline-offset-4">Sign in</Link></div>;
+  if (!user) return <div className="space-y-4 text-sm"><p className="text-zinc-400">Sign in to add credit to your account.</p><Link href="/login?next=/keys/top-up" className="text-indigo-300 underline underline-offset-4">Sign in</Link></div>;
   return <AccountTopUp key={user.id} accountId={user.id} token={user.token} email={user.email} />;
 }
 

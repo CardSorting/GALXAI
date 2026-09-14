@@ -15,7 +15,7 @@ The September 13 results and ergonomics refinements extend the existing GALX ide
 
 ## Direction and first viewport
 
-The [shared product header](src-components-dashboard-navigation-tsx.md) lives in the root layout and keeps its position through Home, Images and Sites navigation. Studio navigation below it remains Create / My images / Favorites. Leaving `/images` still unmounts the workspace and its in-memory session results; header continuity does not add durable history.
+The [shared product header](src-components-dashboard-navigation-tsx.md) lives in the root layout and keeps its position through Home, Images and Sites navigation. Studio navigation below it remains Create / My images / Favorites, using `/images`, `/images/library` and `/images/favorites`. Native links preserve new-tab behavior; same-tab history updates keep the studio mounted. Back/Forward derives view and Favorites from the pathname. Each address supports guarded direct entry and refresh. Leaving the Images product still unmounts the workspace and its in-memory session results; header continuity does not add durable history.
 
 The workspace leads with composition at the left and a blank results canvas at the right. A compact title and persistent Create / My images / Favorites navigation establish the workflow. The creation pane groups prompt, aspect ratio, and count in that order. Controls scroll independently on desktop while Generate remains available at the bottom.
 

@@ -13,7 +13,7 @@ function save(key: string, value: unknown) {
   try { if (value === null) sessionStorage.removeItem(key); else sessionStorage.setItem(key, JSON.stringify(value)); } catch { /* Private browsing may disable storage. */ }
 }
 
-export function useImageStudio(owner: string | null, token?: string, libraryActive = true, pinnedId?: string | null) {
+export function useImageStudio(owner: string | null, token?: string, libraryActive = true, pinnedId?: string | null, favorites = false) {
   const pinned = useRef(pinnedId); pinned.current = pinnedId;
   const key = `galx-image-studio:${owner || 'guest'}`;
   const [settings, setSettings] = useState<StudioSettings>(DEFAULT_SETTINGS);
@@ -37,7 +37,6 @@ export function useImageStudio(owner: string | null, token?: string, libraryActi
   const [previousCursor, setPreviousCursor] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
-  const [favorites, setFavorites] = useState(false);
   const [sort, setSort] = useState('newest');
   const [filter, setFilter] = useState('');
   const [revision, setRevision] = useState(0);
@@ -227,7 +226,7 @@ export function useImageStudio(owner: string | null, token?: string, libraryActi
   }
   return { settings, setSettings, ready, pending, polling, setPolling, submitting, submission, uncertain, progress, error, notice, setNotice,
     retryIn: Math.max(0, Math.ceil((retryAt - now) / 1000)), elapsed: pending ? Math.max(0, Math.floor((now - pending.startedAt) / 1000)) : 0,
-    creations, images, total, cursor, previousCursor, page, getDetails, libraryLoading: libraryLoading || Boolean(owner && libraryActive && !libraryView.current), libraryError, search, setSearch, favorites, setFavorites, sort, setSort,
+    creations, images, total, cursor, previousCursor, page, getDetails, libraryLoading: libraryLoading || Boolean(owner && libraryActive && !libraryView.current), libraryError, search, setSearch, favorites, sort, setSort,
     generate, refresh, retryLibrary: () => { if (!libraryLoading) void fetchLibrary(libraryRetry.current.cursor, libraryRetry.current.page); },
     firstPage: () => { if (!libraryLoading) void fetchLibrary(); },
     nextPage: () => { if (cursor && !libraryLoading) void fetchLibrary(cursor, page + 1); },

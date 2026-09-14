@@ -43,6 +43,7 @@ Owner role: **Product/API maintainer**. Domain: `images`.
 - [Image public boundary verification](../../docs/maintainers/image-public-boundary.md)
 - [Image generation and library recovery](../../post-mortem/runbooks/image-generation.md)
 - [Large image libraries](../../docs/maintainers/image-library-scale.md)
+- [Readable product URLs](../../docs/maintainers/readable-urls.md)
 
 Relevant checks (select for the change; impact discovery never executes these): `npm run test:image:security`, `npm run test:image:db`, `npm run test:image:scale`, `npm run test:image:library-db`, `npm run test:relay:image`.
 
@@ -58,6 +59,7 @@ Owner role: **Security/access maintainer**. Domain: `access`.
 - [Authentication and credential ingestion boundaries](../../docs/STANDARDIZED_OAUTH_AND_INGESTION_ARCHITECTURE.md)
 - [Authentication security posture and threat model](../../docs/SECURITY_POSTURE_AND_THREAT_MODEL.md)
 - [ADR 0147: Verified account and session authority](../../docs/adr/0147-verified-account-and-session-authority.md)
+- [Readable product URLs](../../docs/maintainers/readable-urls.md)
 
 Relevant checks (select for the change; impact discovery never executes these): `npm run test:preview-admin`, `npm run test:image:security`, `npm run test:auth:sessions`.
 
@@ -124,5 +126,6 @@ Owner role: **Product/performance maintainer**. Domain: `client-efficiency`.
 - [Vercel quota efficiency](../../docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md)
 - [Navigation and request intent](../../docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md)
 - [Public navigation, pricing and knowledge base](../../docs/maintainers/PUBLIC_DISCOVERY.md)
+- [Readable product URLs](../../docs/maintainers/readable-urls.md)
 
 Relevant checks (select for the change; impact discovery never executes these): `npm run test:egress:transport`, `npm run test:image:security`, `npm run build`.

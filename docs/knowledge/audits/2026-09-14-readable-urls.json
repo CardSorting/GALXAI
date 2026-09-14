@@ -1,0 +1,227 @@
+{
+  "observed_at": "2026-09-14T01:22:35.684711+00:00",
+  "scope": "Local URL/navigation refinement; no deployment, live account operations, production generation or database change.",
+  "base_revision": "e0adc82bdeed351acc370360637d2d7024104e68",
+  "result": {
+    "canonical_paths": [
+      "/images",
+      "/images/library",
+      "/images/favorites",
+      "/login",
+      "/signup"
+    ],
+    "simple_return": "/login?next=/sites",
+    "compatibility": "Private 308 redirects for old auth/view bookmarks; existing /library management and /auth/callback retained."
+  },
+  "reviewed_contracts": [
+    "src/lib/auth/redirects.ts",
+    "src/lib/auth/signin.ts",
+    "src/lib/security/workspace-policy.ts",
+    "src/lib/security/preview-policy.ts",
+    "src/lib/security/preview-middleware.ts",
+    "src/middleware.ts",
+    "src/utils/supabase/middleware.ts",
+    "src/app/login/page.tsx",
+    "src/app/signup/page.tsx",
+    "src/app/auth/callback/route.ts",
+    "src/components/auth/SignInForm.tsx",
+    "src/components/auth/WorkspaceSessionBoundary.tsx",
+    "src/contexts/AuthContext.tsx",
+    "src/components/images/ImageStudio.tsx",
+    "src/components/images/use-image-studio.ts",
+    "src/lib/images/navigation.ts",
+    "src/components/dashboard/Navigation.tsx",
+    "src/components/dashboard/MobileBottomNav.tsx",
+    "src/lib/resilience/intent-prefetch.ts"
+  ],
+  "guides_reviewed": [
+    "docs/DOCUMENTATION_POLICY.md",
+    "docs/how-to/change-with-documentation.md",
+    "docs/reference/knowledge-commands.md",
+    "docs/knowledge/README.md",
+    "docs/operations/workspace-auth.md",
+    "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md",
+    "docs/maintainers/readable-urls.md",
+    "docs/maintainers/image-library-scale.md",
+    "docs/maintainers/image-studio-review.md",
+    "docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md",
+    "docs/maintainers/SITES_WORKSPACE.md",
+    "docs/maintainers/PUBLIC_DISCOVERY.md",
+    "docs/runbooks/release-readiness.md"
+  ],
+  "semantic_review": "Reconciled full affected auth/navigation/library guide bodies, preserved historical studio observations, mapped new route boundaries, checked all changed entry links and independent account/staff gates. Shared library guide changes also affect the BroccoliDB fingerprint; no cache/database behavior changed. Delivery scope is the canonical-route cache acceptance fixture. Broader unchanged fingerprint inventory is drift detection, not an exhaustive new audit. ADR statuses and incident delivery evidence remain unchanged.",
+  "checks": [
+    {
+      "command": "node --import tsx --test scripts/test-url-navigation.ts scripts/test-workspace-auth.ts",
+      "result": "passed; nested redirects, encoded loops, finite legacy aliases, private headers and independent workspace gates"
+    },
+    {
+      "command": "npm run test:image:security",
+      "result": "39 tests passed on final source"
+    },
+    {
+      "command": "npm run test:auth:sessions",
+      "result": "33 tests passed"
+    },
+    {
+      "command": "npm run test:preview-admin",
+      "result": "6 tests passed"
+    },
+    {
+      "command": "npm run test:developer-preview",
+      "result": "14 tests passed"
+    },
+    {
+      "command": "npm run test:image:scale",
+      "result": "16 tests passed"
+    },
+    {
+      "command": "npm run test:sites:workspace",
+      "result": "16 tests passed"
+    },
+    {
+      "command": "node --import tsx --test scripts/test-auth-entry.ts scripts/test-workspace-auth.ts scripts/test-image-studio.ts scripts/test-request-efficiency.ts",
+      "result": "27 tests passed"
+    },
+    {
+      "command": "node --import tsx --test scripts/test-public-reading.ts scripts/test-url-navigation.ts",
+      "result": "10 tests passed"
+    },
+    {
+      "command": "npx tsc --noEmit",
+      "result": "passed; final header-only edit also typechecked by production build"
+    },
+    {
+      "command": "ESLint over changed src TS/TSX files",
+      "result": "zero errors; one pre-existing SitesWorkspace effect-dependency warning"
+    },
+    {
+      "command": "CI=true node scripts/build-ci.mjs in isolated source copy without dotenv/real service authority",
+      "result": "final production build passed",
+      "build_id": "uW31tZJ4XB4_iwi13-5oT"
+    },
+    {
+      "command": "node scripts/verify-workspace-auth-http.mjs",
+      "result": "136 HTTP and browser-asset checks passed; 35 linked assets; final build"
+    },
+    {
+      "command": "node scripts/verify-workspace-cache-http.mjs http://localhost:3427",
+      "result": "34 local cache checks passed; final build, despite legacy script output saying live"
+    },
+    {
+      "command": "node scripts/verify-url-navigation.mjs",
+      "result": [
+        {
+          "width": 1440,
+          "violations": [],
+          "generationRequests": 1,
+          "checks": "canonical views, state retention, Back/Forward, refresh, keyboard, new tab, old bookmarks, expiry, no overflow"
+        },
+        {
+          "width": 390,
+          "violations": [],
+          "generationRequests": 1,
+          "checks": "canonical views, state retention, Back/Forward, refresh, keyboard, new tab, old bookmarks, expiry, no overflow"
+        },
+        {
+          "width": 320,
+          "violations": [],
+          "generationRequests": 1,
+          "checks": "canonical views, state retention, Back/Forward, refresh, keyboard, new tab, old bookmarks, expiry, no overflow"
+        }
+      ]
+    },
+    {
+      "command": "node --import tsx scripts/verify-auth-entry-ui.ts",
+      "result": {
+        "passed": true,
+        "visual_states": 15,
+        "coverage": "password/provider-entry/email-link UI, session recovery and current-browser sign-out across reload/tabs"
+      }
+    },
+    {
+      "command": "scripts/verify-post-mortem.py validate_build against isolated final build",
+      "result": "667 browser/rendered assets and runtime trace paths checked; no selected private markers"
+    },
+    {
+      "command": "npm run test:docs",
+      "result": "37 fixture tests passed"
+    },
+    {
+      "command": "git diff --check",
+      "result": "passed"
+    }
+  ],
+  "corrections_and_environment": [
+    "Sandbox blocked fixture listeners and font downloads; rerun with approved access passed.",
+    "Local cache check found no-store without explicit private on account entry. Added private and reran final production build, contract/security HTTP and compiled scans.",
+    "Full docs:check:build could not run directly in copy lacking .gitignore; invoked its unmodified validate_build function against the final isolated build.",
+    "Desktop/390px screenshots visually inspected; automated 320px check passed with no overflow or Axe violations.",
+    "Browser checks use identical final client sources; they preceded the server-only private cache-header correction."
+  ],
+  "limits": [
+    "Not deployed or live-site cleanliness acceptance.",
+    "Synthetic Auth/API/browser data; no real OAuth redirects, email delivery, payments or publication.",
+    "No new database schema/persistence behavior; database suite not rerun.",
+    "Existing legacy studio/navigation fixtures need the documented verified-session adaptation; selector updates do not certify those entire legacy fixtures.",
+    "Search, sort, pagination and full recent result history are not URL-persisted across reload.",
+    "Physical devices and full assistive-technology acceptance remain separate."
+  ],
+  "changed_source_sha256": {
+    "scripts/test-auth-entry.ts": "21ddab9a5ae2aa036c392a98202c41ef4de48a8c46309bff276f23430dfec130",
+    "scripts/test-url-navigation.ts": "9afc19e5e32166f292d3859b287b3a6747c2f3179e75e62e845b64bbc03d06ae",
+    "scripts/test-workspace-auth.ts": "88f111f18705446ed6a38a10129b8d180b48f12e0f388c5ac05ea1c4b481acd5",
+    "scripts/verify-auth-entry-ui.ts": "b44ced51e9f8144f13e7697a3de9772a4c5444d2cd3f0d239aad0c69f5637a50",
+    "scripts/verify-homepage-ui.mjs": "dcf1efa03636a337ba192cca1c3947f72923a4a564e2340246237af4d6c7888d",
+    "scripts/verify-image-library-scale-ui.ts": "0e7003e1f256f99f28c953537b16044b50678c700b496c53d47f1b0104ff23cc",
+    "scripts/verify-image-studio-ui.ts": "21555c294e1f08ea20bfcb22e2b250633e369b96561f39ab0da8850d25d10691",
+    "scripts/verify-navigation-ui.ts": "a6942cca3fd9221dd7bd02a49da47149652b772ebd63ececf01950c7598ca957",
+    "scripts/verify-public-reading-ui.mjs": "0e986a7ea6066a6e50f7e2b4edf1e056fc146da43b7835d597ee0d32b68a0f18",
+    "scripts/verify-url-navigation.mjs": "129685c1a8d30ee36d2bfbfa3a2369d945aad24ebde602289a94c9a061b46c07",
+    "scripts/verify-workspace-auth-http.mjs": "0738f9b2eb8b0643f26265db294195ce968276da5d77527d8b8ea67c638eb288",
+    "scripts/verify-workspace-cache-http.mjs": "05c2e5d7dae80925862e7879172982ddcaf196cfedd8e796e924dfa48e693d8c",
+    "scripts/verify-workspace-navigation.mjs": "3ff8db77291998532eed3e84028e683b63d71c81bc8882dec818afe563a13394",
+    "src/app/admin/page.tsx": "d337d893d86c3544f7cde2043ae38298d9adee808a95f327f0bfc128bd71cf27",
+    "src/app/auth/callback/route.ts": "f2d5402e72c55616899952dc18be71a1725fca69e9ec8787974ee9f4890d5611",
+    "src/app/auth/connect/page.tsx": "ff3d0ad353c984582393b66ed2f767fd09606c1578ea26c7631f32a9aa91f7c4",
+    "src/app/auth/signin/page.tsx": "e78c899bc1ea8c496c2553a8bdf2a443c2aa092540cf587aa5d673aecc2d9036",
+    "src/app/auth/signup/page.tsx": "2872c1c7818a6d0ba3ee54bebcfdb12c727a0b7701f72263268c3ad0f634f434",
+    "src/app/device/page.tsx": "1f784b8f48fa3ccee643e47743ae06bf8395ad62fe5c66b8dbb018d0bcef1fec",
+    "src/app/images/favorites/page.tsx": "e21af30f53a56aac76adf07efdd72563ad05bda28ea5084abccd67dd11dd47f1",
+    "src/app/images/library/page.tsx": "3b558a98fd285f8941fa5420caf4a6098c126a5445dddc55d692087fabd9e877",
+    "src/app/login/page.tsx": "4450e94177df5323ae1ef4780f1f54cfb9f49ecbbeab213f3a79e6d9431afd24",
+    "src/app/robots.ts": "c59c2f34c73a5f697bb9b3804b967ec153c8e281bb44a3fe76087a52aa1608b3",
+    "src/app/settings/page.tsx": "f3efab5b80a28ac29ac168213e2b7c9cc7eb0d2fe9dd3b465b0688fbe7d5811b",
+    "src/app/signup/layout.tsx": "8be40956bf752390f9481942301f310cebf4ee00569d5c20c673360d7d42de04",
+    "src/app/signup/page.tsx": "bf6fadb37ed18152b4b3574fa0730bc186864dd3805e2f794d4de3e3fccde5e5",
+    "src/components/admin/PreviewAdminWorkspace.tsx": "449f2a1a8089d9267213a8b46e550502b58274c14b495c38a58defd9826e8aca",
+    "src/components/auth/AuthRequiredGate.tsx": "c985fd860db40aa8f643b375a844b12c4effe01c8154b14b9685d74db54dc92d",
+    "src/components/auth/SignInForm.tsx": "286dab04c41148ac3c91130cb976a576d4c02fd8656f38f99715f06fbcc16bfc",
+    "src/components/auth/WorkspaceSessionBoundary.tsx": "aa664cce3260cb7850f6b61cb6cfe92ce1c6ffd56be9241337b7bb26024c0d56",
+    "src/components/billing/BillingClient.tsx": "ccd86eba9f8cb4c290f13f89e35ffdb6fe04721f013d2e1ca22b62ca44a9e192",
+    "src/components/common/FloatingActionDock.tsx": "3b5e850304affc1531c2bedd0cb597f04574e19facef9d2744dd6d8939f0e0ba",
+    "src/components/dashboard/Footer.tsx": "008b6388f9e09a772a1371f3da83c7b24a36aa78d430aed5b2a8a154851441a4",
+    "src/components/dashboard/MobileBottomNav.tsx": "c65e2f37e3050791f5f17296769a609ad94dbb9a56f0bfb42e2bf0f6c66dc120",
+    "src/components/dashboard/Navigation.tsx": "eb76ffe1ee90a293eb06ac20c9f10f1b9e3b80018f9940d775abecff0bf396c8",
+    "src/components/developers/DeveloperPreview.tsx": "d9e1d1989e1ac21c2e72b96b7f5ced0554013954285e9090616d102435add15f",
+    "src/components/home/ArtisanalSignalSection.tsx": "35bd389dfa74ec6113d6046afd9966b53af09826f3ad81f67627e2d6e8c6bb85",
+    "src/components/home/DESIGN.md": "858a1b97d46f60987d4572af8a45e16cacba4d67ce00ee2599249c1ce31c5889",
+    "src/components/home/GalxScenicHero.tsx": "0c618852979b89e9930a557ae099fe3b3ef1bb1629418b89ec01f3d3d93bb5bd",
+    "src/components/home/PlanAction.tsx": "e1a3b85b12a431ac6293eb62f13563274a9b6f84a1fcb133d56247b724f705b1",
+    "src/components/images/ImageStudio.tsx": "d99f435a7a5244c6d6aa46cba6b1c12a94daa792f0f8544e5b08dc91199805e2",
+    "src/components/images/studio.css": "f6cb661a47bb87833b98f296c186c0e7c11ae93da0127f484782b41b70739e9a",
+    "src/components/images/use-image-studio.ts": "4cc8635638a6154f94ca7f6a41b1d410d0ca935771dc3aa5fd7ebb493d3983cd",
+    "src/components/keys/QuickTopUpClient.tsx": "1a5ac2e43a6cc279a8ca6b92ffd4fb79967925bdf053b89a91480581f43948df",
+    "src/components/sites/SitesWorkspace.tsx": "56272ac370be8d494c168a5abb1a1d4c2841dcc04d5913a0379f77cc43f48df9",
+    "src/contexts/AuthContext.tsx": "9dda146491eba8f5f44f400bdb3ee73a6552bbc2a34c9282ddcf3349c8e70f66",
+    "src/lib/auth/redirects.ts": "1296d3046e26a5d918c4bc48b0684f4baabf71e7663d6f53e4b8fd3cc1b35a21",
+    "src/lib/auth/signin.ts": "edc77280f2da3de09d44aa48e608751f01843947f77acb5fdc62247dcd2cf39f",
+    "src/lib/images/navigation.ts": "827b7f91ef06422452aa03f66721e866be9755399c4514393230ce4fdcfc8e5c",
+    "src/lib/resilience/intent-prefetch.ts": "62757c1efa0eac5edf811d322fc30608852a3277669be87a2ae9fe63fd3e9c19",
+    "src/lib/security/preview-middleware.ts": "ea577ad1118ca166c882cd8a5d335221a2a1a5b65b4cfa7b0078daa76572229d",
+    "src/lib/security/preview-policy.ts": "b8df23ea7cf60bc3fce41a973e443a321116ffdb396a3dbcf275423bb2c41719",
+    "src/lib/security/workspace-policy.ts": "39f699630702c9272ddecbab35f4f72a2ad75b38ab6c969969d08f6f10963ca4",
+    "src/middleware.ts": "8fe713a2aa1c65c49d87d7a2cfa693d9d430bb6a7ea433d788e4d8682be2d1e5",
+    "src/utils/supabase/middleware.ts": "9447e435ff3c15b89987bcb1e0da006afcaffed1b9f6229a5f140dfa04a1fa3b"
+  }
+}

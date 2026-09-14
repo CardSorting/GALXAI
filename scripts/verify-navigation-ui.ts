@@ -98,7 +98,7 @@ try {
       await page.waitForURL(base + '/faq');
       assert.equal(await nav.locator('[href="/faq"]').getAttribute('aria-current'), 'page');
     }
-    if (!signedIn && new URL(page.url()).pathname === '/sites') assert.equal(await header.getByRole('link', { name: 'Sign in', exact: true }).getAttribute('href'), '/auth/signin?next=%2Fsites');
+    if (!signedIn && new URL(page.url()).pathname === '/sites') assert.equal(await header.getByRole('link', { name: 'Sign in', exact: true }).getAttribute('href'), '/login?next=/sites');
     if (width < 1100) {
       await nav.locator('[href="/knowledge-base"]').focus();
       await page.keyboard.press('Tab');

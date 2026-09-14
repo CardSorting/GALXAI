@@ -166,13 +166,13 @@ Three native buttons select Landing page, Portfolio, or Event page in equal colu
 
 Below the sheet, a separate pressed button toggles “See a revision” and “Back to first draft.” The request and displayed result change together; the active result uses a polite, atomic live region. Both this control and “Use this idea” have a minimum height of 44px. They use underlined text with amber hover states.
 
-“Use this idea” opens the selected first or revised brief as an editable, unsent draft in Sites. Existing unsent work takes precedence. The Sites sign-in step retains that destination through `/auth/signin?next=…`. Keep the explanatory caption adjacent to the action; choosing an example does not generate or publish a Site.
+“Use this idea” opens the selected first or revised brief as an editable, unsent draft in Sites. Existing unsent work takes precedence. The Sites sign-in step retains that destination through `/login?next=…`. Keep the explanatory caption adjacent to the action; choosing an example does not generate or publish a Site.
 
 ### Pricing table
 
 The four-row table uses a screen-reader caption, column and row header scopes, thin row dividers, and no outer shell. Inclusion checks are decorative icons accompanying full text. Header and body columns preserve their gutters as copy wraps. The plan name and tabular price sit above; the action and supporting terms follow in normal document flow. Plan name and price come from [PRO_PLAN](../../lib/billing/pro-plan.ts), including the price cue near the hero action.
 
-The plan action leads signed-in visitors to `/billing#plan` and guests to `/auth/signin?next=%2Fbilling%23plan`. Its adjacent copy describes plan review before subscribing, monthly renewal, and cancellation. Preserve that visible next-step explanation; the action itself does not charge the visitor.
+The plan action leads signed-in visitors to `/billing#plan` and guests to `/login?next=/billing%23plan`. Its adjacent copy describes plan review before subscribing, monthly renewal, and cancellation. Preserve that visible next-step explanation; the action itself does not charge the visitor.
 
 ### FAQ disclosures
 

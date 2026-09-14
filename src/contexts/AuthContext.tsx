@@ -4,7 +4,7 @@ import React, { createContext, useCallback, useContext, useEffect, useRef, useSt
 import type { Provider, Session, User } from '@supabase/supabase-js';
 import { createClient } from '@/utils/supabase/client';
 import { registerAccount, type SignupCredentials } from '@/lib/auth/signup';
-import { safeAuthRedirect } from '@/lib/auth/redirects';
+import { safeAuthRedirect, authEntryPath } from '@/lib/auth/redirects';
 import { LOGOUT_STATE_KEY, SessionRequestFence, logoutState, markLogout, readSessionProfile, rememberOwner } from '@/lib/auth/browser-session';
 
 export interface AuthUser { id: string; email?: string; name?: string; avatarUrl?: string; provider?: string; token?: string; role?: string; company?: string; }
@@ -24,7 +24,7 @@ interface AuthContextType {
 }
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const returnPath = () => safeAuthRedirect(location.pathname + location.search);
-const signInPath = () => `/auth/signin?${new URLSearchParams({ next: returnPath(), error: 'signed_out' })}`;
+const signInPath = () => authEntryPath(returnPath(), 'login', 'signed_out');
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [supabase] = useState(createClient);
@@ -137,7 +137,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     finally { logoutLock.current = false; }
   };
   const retrySession = async () => { if (!verifying.current && !logoutState()) await verify(candidate.current); };
-  const value: AuthContextType = { status, retrySession, user, session, supabaseUser: session?.user ?? null, isAuthenticated: Boolean(user), isLoading: status === 'loading' || status === 'signing_out', signInWithOAuth, signInWithPassword, signUp, signInWithOtp, signInWithSSO, signOut, logout: signOut, loginWithOAuth: provider => signInWithOAuth(provider as Provider), signInWithDemo: () => location.assign('/auth/signin'), signInWithProviderKey: async () => ({ success: false, error: 'Sign in to your GALX account to manage connections.' }) };
+  const value: AuthContextType = { status, retrySession, user, session, supabaseUser: session?.user ?? null, isAuthenticated: Boolean(user), isLoading: status === 'loading' || status === 'signing_out', signInWithOAuth, signInWithPassword, signUp, signInWithOtp, signInWithSSO, signOut, logout: signOut, loginWithOAuth: provider => signInWithOAuth(provider as Provider), signInWithDemo: () => location.assign('/login'), signInWithProviderKey: async () => ({ success: false, error: 'Sign in to your GALX account to manage connections.' }) };
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 
 }
