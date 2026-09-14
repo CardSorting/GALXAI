@@ -1,0 +1,70 @@
+{
+  "version": 1,
+  "classification": "private",
+  "prepared_at": "2026-09-14T19:18:00Z",
+  "target_source_revision": "d228ed4c3857e5ee7343eeb391535fce676cc2b4",
+  "scope": "single-host launchd federation controller and its retained Docker workers",
+  "preflight_observed": {
+    "launchd_label": "com.galxai.federation.production",
+    "launchd_state": "running",
+    "installed_plist": "/Users/bozoegg/Library/LaunchAgents/com.galxai.federation.production.plist",
+    "installed_plist_sha256": "d1e5a7c623a5f60d2bef304ba463156aba25d84b9e262e53dc9462d97430d23f",
+    "effective_keepalive": true,
+    "effective_launcher": "direct node scripts/run-relay-federation.ts wrapper",
+    "legacy_marker": ".relay/federation-production/controller.lock",
+    "legacy_marker_sha256": "51a9b5d4bbff3d43a103b3b8c9b4ffcf4c837bd4685e1be3bbb2fa53a0b31c89",
+    "legacy_marker_contents": "PID marker for the currently observed old controller; preserve as an archived migration record",
+    "new_guard_present": false,
+    "docker_context": "desktop-linux",
+    "docker_server": "Docker Desktop Linux VM, Engine 29.7.2, live-restore=false",
+    "retained_worker_restart_policy": "unless-stopped",
+    "retained_worker_image_tag": "galxai-relay:sites-fixed-20260912-2b72afd",
+    "retained_worker_image_digest": "sha256:39f0361c2c4492158362ce603c6fdaddfad40c99f120afb4760ea0e1ed51bbbf",
+    "candidate_worker_image_tag": "galxai-relay:act019-d228ed4",
+    "candidate_worker_image_digest": "sha256:92c1eb8ee6ba30391f0da9c51abeb48f961299a76b089dfaf3f2fb7c2dc13cba",
+    "candidate_worker_image_built_at": "2026-09-14T19:12:53.088611845Z",
+    "worker_image_rollout_boundary": "The retained container cannot change image in place. The guardian cutover adopts the existing worker and migrates only its restart policy; the d228 worker image remains a separately guarded replacement step and must not be claimed as deployed until its preserved-volume replacement is completed.",
+    "retained_worker_state_volume": "galx-shard-a5bb38581ffb74fe21b0-state:/app/.broccolidb",
+    "active_work": "not established by the old health endpoint; rollout must use graceful drain and verify process/port before migration"
+  },
+  "rollout_sequence": [
+    "Capture a fresh redacted launchd, process-group, listener, worker, image-digest, restart-policy and state-volume snapshot; abort if it differs from this preflight or if active work cannot be safely drained.",
+    "Create a mode-600 rollback copy of the installed legacy plist and a mode-600 archive copy of the legacy controller.lock under the ignored incident evidence/raw directory; do not delete the marker or state volume.",
+    "Boot out the existing launchd job and wait for its controller process group and Docker CLI descendants to terminate; verify port 3001 is unowned and the old lock descriptor is closed.",
+    "Move the unchanged legacy marker into the ignored migration archive only after the final process/listener/file-identity recheck; retain its bytes and checksum.",
+    "Generate the new plist from commit d228 with RELAY_FEDERATION_NAMESPACE=production, port 3001, the existing worker image tag for the adoption cutover, and RELAY_SUPERVISOR_PYTHON=python3; validate it with plutil without installing first. Keep the d228 candidate image available for the separately guarded worker replacement and do not claim worker-side receipt changes until that replacement is complete.",
+    "Install and bootstrap the new plist through launchd; do not start a second ad-hoc controller. The guardian creates controller.guard and the exact compatibility marker, then owns the controller descriptor.",
+    "Wait for authority_established, capability readiness and a stable authenticated health/ready response; verify one controller, retained-worker adoption, unchanged generation/state volume, restart policy no and no restart storm. Record the retained worker image digest separately from the controller source revision.",
+    "Run one bounded, low-risk request using a stable request identity only after readiness; record the result and no-duplicate evidence from the independent request recorder where available.",
+    "If the gates fail, boot out the new job, prove its process group and descendants are gone, restore the archived plist, restore the legacy marker only if the old wrapper is intentionally being resumed, and fail closed for admissions until ownership and state are rechecked. Never force-unlock or delete state."
+  ],
+  "rollback_sequence": [
+    "Stop admissions and record the current generation, worker ID, image digest, policy and state volume.",
+    "Boot out the new launchd job; wait for guardian, controller and descendants to terminate and verify port 3001 is unowned.",
+    "Restore the backed-up plist atomically and bootstrap it only after the new guard descriptor is closed; preserve the new guard/journals and legacy archive for review.",
+    "Do not restore the legacy marker into the active path automatically. If the old wrapper requires it, use the archived unchanged bytes only after an operator rechecks that no new guardian/owner remains and records the compatibility decision.",
+    "Verify old-worker adoption and policy before admitting work; if the old path cannot interpret new journals or policy, leave admissions blocked and use manual reconciliation rather than deleting recovery state."
+  ],
+  "abort_conditions": [
+    "Any process, listener or descriptor identity differs during the final recheck.",
+    "A controller or descendant cannot be proven terminated.",
+    "The guard, marker, journal or retained volume is missing, malformed, inaccessible or unexpectedly changed.",
+    "Required capability does not return within the bounded startup budget.",
+    "A retained worker cannot be adopted or safely migrated to restart policy no.",
+    "The retained worker image does not match the reviewed candidate and a safe preserved-volume replacement has not been explicitly scheduled; in that case keep ACT-019 open for the worker boundary and do not claim the full worker recovery contract.",
+    "A request outcome is unknown or the independent recorder indicates duplicate execution.",
+    "launchd does not show the guardian wrapper or begins a restart storm."
+  ],
+  "validation_record": {
+    "plan_validation": "passed",
+    "validated_at": "2026-09-14T19:16:00Z",
+    "preflight_capture": "post-mortem/incidents/2026/2026-09-13-image-generation/evidence/raw/act019-preflight-1789413344688.json (sha256 cfe5a5758b764c9544cc598fb024f93cea17fdc44c5969d4ca8d3d7866705c02)",
+    "disposable_plist_check": "passed: .relay/federation-act019-preflight/com.galxai.federation.act019-preflight.plist; plutil OK; mode 0600; guardian env, production KeepAlive policy and existing worker image were verified",
+    "candidate_image_check": "passed: galxai-relay:act019-d228ed4 built from the reviewed checkout; digest sha256:92c1eb8ee6ba30391f0da9c51abeb48f961299a76b089dfaf3f2fb7c2dc13cba",
+    "active_work_check": "passed: authenticated preflight telemetry reported pending=0, trackedJobs=0, desired=1, running=1, draining=0, retries=0",
+    "production_change_authorized": true,
+    "production_change_performed": false,
+    "worker_image_deployed": false,
+    "act018_destructive_drills": "not part of this rollout"
+  }
+}

@@ -1,8 +1,8 @@
 {
   "version": 1,
   "reviewer": "relay maintainer",
-  "reviewed_at": "2026-09-14T18:54:46.600899Z",
-  "note": "Reviewed the final recovery acceptance guidance, launchd/Docker deployment mismatch, guardian ownership runbook, permanent unknown tombstones and bounded client retry behavior against the committed tested revision and private audit evidence.",
+  "reviewed_at": "2026-09-14T19:16:50.045646Z",
+  "note": "Reviewed the ACT-019 state-compatible guardian cutover, legacy marker migration, worker image boundary and conditional rollback gates against the current launcher and deployment preflight.",
   "files": {
     ".dockerignore": "fb4dc7ef84e7f36c5bfed0f267187a022bbb61e66dd26060295b133e08fa74c5",
     ".github/workflows/vercel-preflight.yml": "124587ef1b14fe558513720535d613a30f4dd2f384e28b2f6d70d3b5c24ae2ef",
@@ -48,7 +48,7 @@
     "post-mortem/failure-modes/deployment.md": "8bd515438f638abc96045faa6fd4833db036b17dbdd3486c6f0f553b4898b0ef",
     "post-mortem/failure-modes/identity.md": "071fb0e84e23e20366b5ff0955e5f0ac233c5db74f1fbc212b66faa2496cc55c",
     "post-mortem/failure-modes/images.md": "29806e139c64cce91569d35ede99961612c6f7e9dbe50fab23c60252b05f522c",
-    "post-mortem/runbooks/controller-lock.md": "cc35088be3945aa90ce69ab9a8a601c24c2afd71dedfafb8f5b504d8ef9130e8",
+    "post-mortem/runbooks/controller-lock.md": "78b94c730974d49d15ef9a5fecade941972838c7af32a7934a565255c80762ed",
     "post-mortem/runbooks/deployment-storage.md": "056e84c5fa65ddbaeae5cbe9a09bf64a0f04cf6548fc30abe519de60028fdd3f",
     "post-mortem/runbooks/documentation.md": "fd746dabbf007657e9aca7e0ba0a81e4fc8a6b9559ec35bb2847d2061ce542bc",
     "post-mortem/runbooks/image-generation.md": "fd924e15945b8965bab815b44a15e0b631e61a84beafe30ececa658985837b1c",
