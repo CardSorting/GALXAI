@@ -331,14 +331,14 @@ function toggleRelationship(open = $('relationship-panel').hidden) {
 function renderRelationship() {
   const d = current(), r = linkedShard(); $('relationship').hidden = !d; if (!d) return;
   const stale = !!failure || !r?.registryFresh;
-  const summary = !d.relayId ? 'Link a shard to see its health and traffic.' : !r ? 'This shard is no longer registered. Choose a current shard.' : stale ? 'Shard status delayed · refresh before changing traffic' : `${healthLabels[r.health]} · ${r.paused ? 'New work paused' : r.eligibleModels ? `${r.eligibleModels} models eligible` : 'No new work'}${r.activeStreams === null ? '' : ` · ${r.activeStreams} active`}`;
+  const summary = !d.relayId ? 'Sign in here, then enroll this account.' : !r ? ['current','updated'].includes(d.credentialSync?.state) ? 'Enrollment saved · waiting for worker status' : 'Confirm enrollment or repair the saved sign-in.' : stale ? 'Shard status delayed · refresh before changing traffic' : `${healthLabels[r.health]} · ${r.paused ? 'New work paused' : r.eligibleModels ? `${r.eligibleModels} models eligible` : 'No new work'}${r.activeStreams === null ? '' : ` · ${r.activeStreams} active`}`;
   $('relationship-label').textContent = d.relayId ? `Shard · ${d.relayId}` : 'No linked shard'; $('relationship-summary').textContent = summary;
-  $('relationship-toggle').textContent = d.credentialSync?.state === 'error' ? 'Review sign-in' : d.relayId ? 'Inspect shard' : 'Link shard';
-  $('zen-shard').textContent = r ? `${r.paused ? 'Work paused' : stale ? 'Status delayed' : healthLabels[r.health]} · Shard` : 'Link shard';
+  $('relationship-toggle').textContent = d.credentialSync?.state === 'error' ? 'Review sign-in' : d.relayId ? 'Inspect shard' : 'Set up shard';
+  $('zen-shard').textContent = r ? `${r.paused ? 'Work paused' : stale ? 'Status delayed' : healthLabels[r.health]} · Shard` : 'Set up shard';
   const select = $('shard-link'), previous = select.value, changed = linkSelection !== d.id; linkSelection = d.id;
   if (changed) $('link-editor').open = !d.relayId;
   const options = [{ id: '', label: 'Unlinked workspace' }, ...snapshot.relays.map(s => ({ id: s.id, label: `${s.id} · ${s.paused ? 'Work paused' : healthLabels[s.health]}` }))];
-  if (d.relayId && !r) options.push({ id: d.relayId, label: d.relayId + ' · No longer registered' });
+  if (d.relayId && !r) options.push({ id: d.relayId, label: d.relayId + ' · Enrollment or repair required' });
   const signature = JSON.stringify(options);
   if (signature !== select.dataset.options || changed) {
     select.replaceChildren(...options.map(o => { const el = n('option', o.label); el.value = o.id; return el; })); select.dataset.options = signature;
@@ -404,14 +404,26 @@ const credentialMessages = {
   credential_conflict: 'The workspace or credential changed during this check. Refresh before trying again.',
   credential_superseded: 'Another sign-in updated this account. Its credential is preserved; this desktop’s older saved login will not replace it. Sign in here again when you want to update the account.',
   credential_checkpoint_unavailable: 'Sync could not save its recovery record. Check the controller’s storage, then retry. An interrupted update will be reconciled before another write.',
-  credential_account_unregistered: 'This saved account has no eligible registered shard. Enroll it separately as an administrator, then return here to link it. The current shard is unchanged.',
+  credential_account_unregistered: 'This saved account is not registered. Choose Enroll shard in this desktop.',
   credential_account_ambiguous: 'More than one eligible shard uses this account. Review the registered shards and choose the intended link.',
   credential_not_allowed: 'The linked shard is unavailable or its permission was withdrawn. Review its registry status first.'
 };
 function renderCredentialSync(d, r) {
   const sync = d.credentialSync, pending = credentialPending.has(d.id) || sync?.busy;
-  $('credential-panel').hidden = !r;
-  if (!r) return;
+  $('credential-panel').hidden = false;
+  $('credential-enroll').disabled = pending || !sync?.canEnroll || !d.canConnect || !!failure;
+  $('credential-enroll').textContent = credentialPending.get(d.id) === 'enroll' ? 'Enrolling…' : 'Enroll shard';
+  $('credential-enroll').hidden = ['current', 'updated'].includes(sync?.state);
+  if (!r) {
+    renderDeviceLogin(d);
+    $('credential-state').textContent = ['updated','current'].includes(sync?.state) ? 'Enrollment saved · waiting for worker status' : 'Enrollment required';
+    $('credential-guidance').textContent = 'Sign in inside this desktop, then choose Enroll shard. Sessions that expire must be renewed here manually.';
+    $('credential-observed').textContent = '';
+    $('credential-signin').disabled = pending || !d.canConnect || !!failure;
+    $('credential-done').hidden = true;
+    $('credential-check').disabled = pending || !d.relayId || !d.canConnect; $('credential-auto').disabled = pending || !d.relayId;
+    return;
+  }
   renderDeviceLogin(d);
   const saved = ['updated', 'current'].includes(sync?.state), fresh = r.registryFresh && !failure;
   const awaitingProvider = !saved && ['starting', 'waiting'].includes(d.login?.state);
@@ -442,10 +454,10 @@ async function credentialAction(toggle) {
 $('credential-check').onclick = () => void credentialAction(false);
 $('credential-auto').onclick = () => void credentialAction(true);
 async function openSignIn(method) {
-  const d = current(); if (!d?.relayId || credentialPending.has(d.id)) return;
+  const d = current(); if (!d || credentialPending.has(d.id)) return;
   const id = d.id; credentialPending.set(id, 'signin'); workspaceErrors.delete(id); renderRelationship();
   try {
-    await api(`${id}/signin`, { shardId: d.relayId, method });
+    await api(`${id}/signin`, { shardId: d.relayId ?? null, method });
     if (method === 'browser') {
       if (selected === id) { toggleRelationship(false); rfb?.focus(); }
       tell('Sign-in window opened. Complete the account login in this desktop’s Chrome, then inspect the shard for verification.');
@@ -475,8 +487,8 @@ $('device-copy').onclick = async () => {
   catch { code.focus(); code.select(); tell('Copy the selected sign-in code.'); }
 };
 $('device-cancel').onclick = async () => {
-  const d = current(); if (!d?.relayId) return;
-  try { await api(`${d.id}/signin-cancel`, { shardId: d.relayId }); tell('Cancellation requested.'); await refresh(); }
+  const d = current(); if (!d) return;
+  try { await api(`${d.id}/signin-cancel`, { shardId: d.relayId ?? null }); tell('Cancellation requested.'); await refresh(); }
   catch (error) { workspaceErrors.set(d.id, error.message); render(); }
 };
 async function matchSavedAccount() {
@@ -499,3 +511,14 @@ $('find-shard').onclick = matchSavedAccount;
 $('credential-done').onclick = () => { toggleRelationship(false); $('relationship-toggle').focus(); tell('Setup closed. Desktop apps and shard traffic are unchanged.'); };
 const organizer = new DesktopOrganizer({ api, refresh, openDesktop: choose, createDesktop: showCreate, currentId: () => selected,
   releaseInput: () => { hideKeyboard(); rfb?.blur(); } });
+
+$('credential-enroll').onclick = async () => {
+  const d = current(); if (!d || credentialPending.has(d.id)) return;
+  const id = d.id; credentialPending.set(id, 'enroll'); workspaceErrors.delete(id); renderRelationship();
+  try {
+    await api(`${id}/enroll`, { expectedShardId: d.relayId ?? null });
+    if (selected === id) linkSelection = undefined;
+    tell('Enrollment saved. Check sign-in and worker health before sending work.'); await refresh();
+  } catch (error) { workspaceErrors.set(id, error.message); }
+  finally { credentialPending.delete(id); render(); }
+};

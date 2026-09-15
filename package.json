@@ -291,8 +291,8 @@
     "vercel:deploy": "vercel",
     "vercel:deploy:prod": "vercel --prod",
     "relay:federation": "node --env-file-if-exists=.env.local --import tsx scripts/run-relay-federation.ts",
-    "test:relay:capabilities": "node --import tsx --test scripts/test-federation-admission.ts scripts/test-relay-capabilities.ts scripts/test-relay-lifecycle-recovery.ts scripts/test-relay-desktops.ts scripts/test-desktop-organization.ts scripts/test-desktop-credentials.ts scripts/test-shard-maintenance.ts scripts/test-relay-monitor.ts scripts/test-federation-telemetry.ts scripts/test-relay-federation-http.ts scripts/test-relay-hardening.ts scripts/test-relay-adaptive-quota.ts scripts/test-relay-telemetry.ts",
-  "test:relay:recovery": "node --import tsx --test scripts/test-relay-docker-recovery.ts scripts/test-relay-admission-durability.ts scripts/test-relay-durable-receipts.ts scripts/test-federation-admission.ts scripts/test-client-recovery.ts scripts/test-relay-launcher-worker-recovery.ts",
+    "test:relay:capabilities": "node --import tsx --test scripts/test-desktop-enrollment.ts scripts/test-codex-image-tool.ts scripts/test-federation-admission.ts scripts/test-relay-capabilities.ts scripts/test-relay-lifecycle-recovery.ts scripts/test-relay-desktops.ts scripts/test-desktop-organization.ts scripts/test-desktop-credentials.ts scripts/test-shard-maintenance.ts scripts/test-relay-monitor.ts scripts/test-federation-telemetry.ts scripts/test-relay-federation-http.ts scripts/test-relay-hardening.ts scripts/test-relay-adaptive-quota.ts scripts/test-relay-telemetry.ts",
+    "test:relay:recovery": "node --import tsx --test scripts/test-relay-docker-recovery.ts scripts/test-relay-admission-durability.ts scripts/test-relay-durable-receipts.ts scripts/test-federation-admission.ts scripts/test-client-recovery.ts scripts/test-relay-launcher-worker-recovery.ts",
     "test:relay:guardian": "python3 scripts/test-relay-controller-supervisor.py",
     "test:relay:launcher": "python3 scripts/test-relay-launcher-recovery.py",
     "test:relay:docker": "node --import tsx scripts/test-relay-federation-docker.ts",
@@ -339,7 +339,8 @@
     "docs:impact": "python3 scripts/docs-kb.py impact",
     "docs:status": "python3 scripts/docs-kb.py status",
     "docs:audit": "npm run docs:check && python3 scripts/docs-kb.py status --fail-on-due --fail-on-unreviewed",
-    "test:auth:sessions": "node --import tsx --test scripts/test-session-lifecycle.ts scripts/test-workspace-auth.ts scripts/test-auth-entry.ts scripts/test-auth-identity-boundary.ts"
+    "test:auth:sessions": "node --import tsx --test scripts/test-session-lifecycle.ts scripts/test-workspace-auth.ts scripts/test-auth-entry.ts scripts/test-auth-identity-boundary.ts",
+    "test:relay:manual-db": "node --import tsx scripts/run-supabase-integration.ts --manual-shards"
   },
   "dependencies": {
     "@eslint/eslintrc": "^3",

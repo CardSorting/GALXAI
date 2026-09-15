@@ -1,0 +1,63 @@
+{
+  "classification": "private",
+  "observed_at": "2026-09-14T23:06:37.395077Z",
+  "source_base": "aa48b334b89bb77841c3317fb98c291429a39650",
+  "source_scope": "reviewed working tree; no commit, push or deployment",
+  "implementation": [
+    "Enabled image alias now uses the standalone Images backend implemented by the Codex image-generation extension, rather than a Responses chat tool.",
+    "Assigned credential only; one request, no redirects/retries/fallback, byte-bounded JSON, one base64 artifact, full decode and re-encoding.",
+    "Fresh inventory plus fenced standalone image evidence; chat-model removal does not invalidate standalone capability. Old chat-era evidence cannot enable the new backend.",
+    "Internal application execution projection recognizes standalone and legacy records explicitly. Public aliases, outage flow, receipts and library contract unchanged.",
+    "Worker image contains pinned Sharp decoder; no Codex agent subprocess is introduced."
+  ],
+  "live_diagnostics": {
+    "standalone_generation_request": {
+      "status": 403,
+      "elapsed_ms": 251,
+      "response_bytes": 22,
+      "artifact_count": 0
+    },
+    "invalid_empty_request": {
+      "status": 403,
+      "category": "Forbidden",
+      "response_bytes": 22
+    },
+    "runtime_experiment": "Isolated Codex 0.154.0 app-server with the assigned external token exposed no imagegen entry in its actual tool inventory. Earlier failed local tool lookups dispatched no image request.",
+    "interpretation": "Endpoint access is rejected for the tested connection; the underlying authorization cause is not established. Feature flags and chat inventory do not prove image permission.",
+    "credential_mutations": false,
+    "receipt_replays": false
+  },
+  "validation": {
+    "focused_transport_capability_client_tests": 27,
+    "relay_suite": 160,
+    "image_security_tests": 42,
+    "typescript_and_production_build": "passed",
+    "eslint": "passed",
+    "worker_image_build": "passed",
+    "container_decoder": "passed in read-only network-none container, 16x16 PNG",
+    "compiled_http": "passed on local port 3427, 27 rendered-page assets",
+    "compiled_asset_scan": "669 browser/rendered assets checked by post-mortem build verifier; new tool/endpoint markers absent from static JS/CSS"
+  },
+  "initial_failures": [
+    "Sandbox denied fixture HTTP listeners; reran outside sandbox.",
+    "Legacy image fixture expected WebSocket chat-tool frames; replaced with actual local HTTP Images fixture.",
+    "Build required optional revised_prompt return typing; corrected and production build passed.",
+    "Ordinary-key administrator probe fixture expected 401 but actual intended denial is 403; corrected."
+  ],
+  "candidate_image": "galxai-relay:codex-image-tool-local-20260914",
+  "not_performed": [
+    "Production worker replacement or controller restart",
+    "Successful real image synthesis or signed-in generation/library/download acceptance",
+    "Credential enrollment/rotation or permission widening",
+    "Paid settlement, sustained load or schema changes"
+  ],
+  "next_step": "Identify an explicitly approved Codex connection whose standalone image endpoint succeeds; qualify and roll out compatible controller/worker and complete frontend/library/download acceptance under ACT-020.",
+  "review": {
+    "relay": "Reviewed changed transport, capability dependency and fencing, internal adapter projection, candidate Docker decoder/deployment excludes, full federation contract/runbook/hardening guide. Unchanged telemetry and controller ownership contracts remain in force.",
+    "knowledge": "Reviewed new ADR proposed/local metadata, exact source/test/Docker domain mapping, and full documentation policy/change/ADR lifecycle and command guidance. No automatic acceptance or generated review attestation.",
+    "critical": "Reviewed changed image runbook against existing receipt/no-replay/authorization/public projection contracts. No image persistence, database, public route or UI behavior changed.",
+    "design_hook": "Suppressed only #abcdef in the PNG transport fixture; no product visual design changed.",
+    "images": "Reviewed the complete image recovery runbook and public-boundary guide against the changed transport; receipt, storage, auth, no-replay, GET-only availability and library contracts unchanged. HTTP/auth/artifact fixtures passed; no new database or frontend generation acceptance is implied.",
+    "unmapped": "Reviewed fixture-only design ignore, dated incident/current-state records, ADR/catalog entries and existing capability fixture. They do not introduce additional runtime surfaces."
+  }
+}

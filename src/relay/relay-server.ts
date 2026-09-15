@@ -49,6 +49,7 @@ import { EventEmitter } from 'node:events';
 import WebSocket from 'ws';
 import { classifyUpstreamError, cooldownDeadline, parseProviderLimits, retryDeadline, type ProviderLimit } from './quota-policy.js';
 import { CODEX_IMAGE_ALIAS, IMAGE_TOOL_EVIDENCE_TTL_MS, imageExecution } from './image-compatibility.js';
+import { generateCodexToolImage } from './codex-image-tool.js';
 import { CapabilityRegistry, classifyCapabilityFailure } from './capability-registry.js';
 import { CapabilityDiscoveryError, discoverOpenAIModels, type DiscoveryShard } from './capability-discovery.js';
 import { registryConfig, readShardRegistry, decryptRegistryShard } from './shard-registry.js';
@@ -880,7 +881,7 @@ export class GalxaiRelayServer extends EventEmitter {
   constructor(config: Partial<RelayConfig> = {}) {
     super();
     this.config = { ...DEFAULT_CONFIG, ...config };
-    if (this.config.discoverHostCredentials) throw new Error('Host credential discovery is retired. Use an explicitly assigned credential or the authoritative registry.');
+    if (this.config.discoverHostCredentials) throw new Error('Host credential discovery is retired. Enroll manually in Relay Desktops.');
     if (this.config.testOnlyMultiShard && process.env.NODE_ENV === 'production') throw new Error('Production relays must own exactly one shard');
     if (this.config.assignedShard) {
       if (!this.config.assignedShardId || this.config.assignedShard.id !== this.config.assignedShardId
@@ -1127,6 +1128,7 @@ export class GalxaiRelayServer extends EventEmitter {
   private loadShardFleet(): void {
     if (this.config.assignedShard) { this.installFleet([{ ...this.config.assignedShard }]); return; }
     if (this.config.registryEnabled) return;
+    if (!this.config.testOnlyMultiShard) { this.installFleet([]); return; }
     const items: Array<Partial<ShardRecord> & { accessToken: string; accountId: string }> = [];
     const add = (item: any, source: string) => {
       if (!item || item.permissionRetracted || ['revoked', 'disabled', 'expired'].includes(item.status)) return;
@@ -1173,7 +1175,7 @@ export class GalxaiRelayServer extends EventEmitter {
         const rows = await readShardRegistry();
         const items: Array<Partial<ShardRecord> & { accessToken: string; accountId: string }> = [];
         for (const row of rows) {
-          if (row.provider !== 'openai' || row.permission_retracted || !['active', 'healthy', 'warming_up', 'half_open', 'cooldown', 'exhausted', 'rate_limited'].includes(row.status)) continue;
+          if (!row.managed_desktop_id || !row.desktop_enrolled_at || row.provider !== 'openai' || row.permission_retracted || !['active', 'healthy', 'warming_up', 'half_open', 'cooldown', 'exhausted', 'rate_limited'].includes(row.status)) continue;
           const secret = decryptRegistryShard(row);
           if (!secret?.accessToken || !secret?.accountId) continue;
           items.push({ id: row.id, accessToken: secret.accessToken, accountId: secret.accountId,
@@ -1227,7 +1229,7 @@ export class GalxaiRelayServer extends EventEmitter {
     if (!this.config.codexImageToolAlias || shard.accessToken.startsWith('sk-') || this.imageCapabilityProbe || this.isDraining || Date.now() < this.nextImageProbeAt) return;
     if (this.shardReadyAt(shard) > Date.now() || shard.inFlight >= this.config.shardConcurrency || this.imageControllers.size) return;
     const record = this.capabilities.get(shard.id);
-    if (!record?.models.some(m => m.model === CODEX_IMAGE_ALIAS.executionModel && m.state === 'AVAILABLE' && m.expiresAtMs > Date.now())) return;
+    if (!record || record.lastCapabilityRefreshMs + this.config.capabilityTtlMs <= Date.now()) return;
     const alias = record.models.find(m => m.model === `image:${CODEX_IMAGE_ALIAS.requestedModel}`);
     if (alias?.state === 'AVAILABLE' && alias.expiresAtMs > Date.now() + 600000) return;
     // One paid verification at startup, then at most once per 50 minutes when idle.
@@ -1243,7 +1245,8 @@ export class GalxaiRelayServer extends EventEmitter {
     if (this.isDraining || !shard || this.shardReadyAt(shard) > Date.now() || shard.inFlight >= this.config.shardConcurrency || this.imageControllers.size) throw new RequestError(503, 'probe_busy', 'Shard is not ready for an image probe.');
     const execution = imageExecution(model, shard.accessToken.startsWith('sk-'), this.config.codexImageToolAlias);
     const alias = execution.routingMode === 'codex_image_tool_alias';
-    if (alias && !this.capabilities.eligibleShardIds(execution.executionModel).includes(shard.id)) throw new RequestError(503, 'model_temporarily_unavailable', 'The compatibility execution model is unavailable.');
+    const inventory = this.capabilities.get(shard.id);
+    if (alias && (!inventory || inventory.lastCapabilityRefreshMs + this.config.capabilityTtlMs <= Date.now())) throw new RequestError(503, 'model_temporarily_unavailable', 'Fresh capability inventory is required.');
     const ticket = this.capabilities.beginObservation(shard.id, `image:${model}`)!;
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 90000);
@@ -1252,6 +1255,7 @@ export class GalxaiRelayServer extends EventEmitter {
     try {
       const result = shard.accessToken.startsWith('sk-')
         ? await this.synthesizeImageViaOpenAiRest(prompt, {model}, shard.accessToken, controller.signal)
+        : alias ? await generateCodexToolImage(prompt, shard, controller.signal, this.config.maxImagePayloadBytes)
         : await this.synthesizeImageViaCodex(prompt, execution.executionModel, shard, undefined, controller.signal);
       const bytes = Buffer.from(result.b64_json, 'base64');
       const valid = bytes.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10]))
@@ -2016,11 +2020,13 @@ export class GalxaiRelayServer extends EventEmitter {
     if (!shard) throw new Error('all_shards_unavailable');
     const capabilityTicket = this.capabilities.beginObservation(shard.id, `image:${body.model || model}`);
     const execution = imageExecution(model, shard.accessToken.startsWith('sk-'), this.config.codexImageToolAlias);
-    this.telemetry.attempt(traceId, shard.id, shard.accessToken.startsWith('sk-') ? 'http' : 'websocket');
+    const alias = execution.routingMode === 'codex_image_tool_alias';
+    this.telemetry.attempt(traceId, shard.id, shard.accessToken.startsWith('sk-') || alias ? 'http' : 'websocket');
     this.telemetry.model(traceId, model, execution.executionModel);
     try {
       const result = shard.accessToken.startsWith('sk-')
         ? await this.synthesizeImageViaOpenAiRest(prompt, body, shard.accessToken, signal)
+        : alias ? await generateCodexToolImage(prompt, shard, signal, this.config.maxImagePayloadBytes)
         : await this.synthesizeImageViaCodex(prompt, execution.executionModel, shard, traceId, signal);
       if (capabilityTicket) this.capabilities.observe(capabilityTicket, `image:${body.model || model}`, 'AVAILABLE', undefined, execution.routingMode === 'codex_image_tool_alias');
       this.releaseShard(shard.id, true);
@@ -3627,9 +3633,9 @@ export class GalxaiRelayServer extends EventEmitter {
   }
 
   private async handleEnrollShard(_req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
-    res.writeHead(409, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ error: { code: 'registry_enrollment_required',
-      message: 'Enroll credentials with npm run shards:import, then sync the relay fleet.',
+    res.writeHead(410, { 'Content-Type': 'application/json', 'Cache-Control': 'private, no-store' });
+    res.end(JSON.stringify({ error: { code: 'connection_unavailable',
+      message: 'Provider connections are unavailable.',
     } }));
   }
 

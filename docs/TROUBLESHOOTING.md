@@ -34,7 +34,11 @@ Start with [incident triage](../post-mortem/runbooks/triage.md), [current state]
 | Monitor asks to reconnect | Relaunch from the host; do not paste an admin key into the page |
 | Many rejected records but few workers | Inspect source/revision evidence; registry count is not serving capacity; only exact known fixtures qualify for targeted cleanup |
 | Cold start repeatedly fails | Inspect preflight classification/backoff; 401 suppresses a revision, while 403/5xx/timeouts are transient |
-| Login saved but old credential still used | Review link, safe file source, validation, checkpoint and worker-applied state separately |
+| Login saved but old credential still used | Confirm explicit enrollment and owning-desktop binding, then review safe file, validation, checkpoint and worker-applied state |
+| External connection returns 410 / CLI add or import is rejected | Intentional closure; use manual desktop sign-in and Enroll shard |
+| Unexpired registry record has no worker | Check enrollment provenance first; retained legacy records require explicit confirmation |
+| Provider session expired | Renew manually in its owning desktop; Check now/saved-file sync cannot renew the session |
+| Desktop binding conflict or lost home | Preserve authority and inspect recovery; changing a link cannot transfer ownership |
 | Wrong account or updated elsewhere | Preserve current authority; review matching/link or complete the intended account sign-in |
 | Credential checkpoint error | Keep the recoverable intent; retry after storage recovery without overwriting a newer revision |
 | Healthy desktop, unavailable shard | Desktop connection is independent; inspect hold, credential and model evidence |
@@ -43,7 +47,7 @@ Start with [incident triage](../post-mortem/runbooks/triage.md), [current state]
 
 ## Recovery boundaries
 
-Use the [linked desktop](maintainers/RELAY_DESKTOPS.md) for existing-account repair, or [validated enrollment](maintainers/RELAY_CREDENTIAL_ENROLLMENT.md) for a new account. A maintenance hold preserves an existing worker while blocking new admissions and replacements; registry removal, revocation, expiry or rotation still wins. Changing task IDs, clearing rejection/quota state or manually setting healthy is not recovery. Empty capabilities alone do not require a container restart. A newer credential revision and authoritative discovery restore normal eligibility.
+Use the [owning desktop](maintainers/RELAY_DESKTOPS.md) for manual provider renewal. New and unconfirmed legacy accounts both require explicit **Enroll shard** through [manual enrollment](maintainers/RELAY_CREDENTIAL_ENROLLMENT.md). API, CLI and credential-file imports are closed; do not reopen them or automatically backfill bindings during recovery. A maintenance hold preserves an existing worker while blocking new admissions and replacements; registry removal, revocation, expiry or rotation still wins. Changing task IDs, clearing rejection/quota state or manually setting healthy is not recovery. Empty capabilities alone do not require a container restart. Confirmed desktop provenance, a newer valid credential revision, authoritative discovery and applicable traffic state are all required for normal eligibility.
 
 Database checkout saturation and query-specific errors must not become global cooldown evidence. Observation-only telemetry cannot clear or extend authoritative cooldowns. Preserve current lease and generation fences during diagnosis.
 

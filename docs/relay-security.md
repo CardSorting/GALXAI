@@ -1,14 +1,13 @@
-# Relay access and containment
+# Relay security reference
 
 <!-- docs-scope: current-guide -->
-> Private relay policy. See [security boundaries](SECURITY.md) and [the contract](FEDERATION_STRATEGY.md).
 
-Only the controller holds registry/vault and Docker authority. Workers receive one assigned credential and scoped internal keys; desktops have separate guest homes/profiles without host, source, Docker socket or registry/vault mounts. Containers do not establish hardware isolation or an egress firewall.
+Private navigation to [security boundaries](SECURITY.md), [manual enrollment](maintainers/RELAY_CREDENTIAL_ENROLLMENT.md) and [ADR 0152](adr/0152-manual-desktop-only-shard-authority.md).
 
-Inference keys cannot administer the controller or issue browser grants. Host launchers delegate separate loopback monitor and desktop sessions through one-use tickets. Operational assets/data require server authorization. Origin, Host, forwarding-header and WebSocket checks enforce the local boundary. No browser admin-key storage.
+Only explicit enrollment from a manually created Relay Desktop can establish managed shard authority. The operator signs in inside it; the host validates the saved login and commits the unique binding. External API/CLI/file ingestion is closed. Service-role insertion and credential replacement are denied, and unconfirmed records cannot receive new leases or enter the controller's eligible projection.
 
-Explicit enrollment validates and creates without overwriting an existing account. Desktop sync safely reads an owned guest file, checks the linked account and conditionally replaces current authority after durable intent. It cannot export host keyrings, enroll unknown accounts or claim success after checkpoint failure.
+Renew expired provider sessions manually in the same bound desktop. Saved-file sync only validates and persists that login with revision checks and a recoverable checkpoint. It cannot renew the provider session, enroll another account or transfer a binding. Preserve the owning home; revoked and ambiguous accounts remain blocked.
 
-Holds block new work/replacements while allowing inspection; they cannot override removed, revoked, expired or rotated authority. Rejection is revision-specific. Preserve private signing/journal state and scope cleanup by ownership.
+Read-only monitor sessions, desktop administrator sessions, application accounts and inference keys have separate authority. Hosts and origins are checked; token uploads are not an enrollment contract. Holds do not override expiry, revocation or changed authority. Keep private journals and uncertain receipts through recovery.
 
-Public application responses use explicit allowlists and sanitized images. Keep internal execution metadata, topology and upstream diagnostics out of public bodies, headers, streams and assets. Guest homes and job checkpoints are sensitive retention surfaces. These controls are not compliance certification.
+Public responses expose allowed customer fields and sanitized images. Operational topology, upstream diagnostics and credential sources remain private. Consult [current state](../post-mortem/CURRENT_STATE.md) for actual deployment and acceptance; security fixtures do not prove live provider capability.

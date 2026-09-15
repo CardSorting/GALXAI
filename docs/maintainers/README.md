@@ -7,7 +7,7 @@ Use the [federation contract](../FEDERATION_STRATEGY.md) and [vNext runbook](../
 
 Start with [parent/subagent execution](AI_AGENT_PAIR_PROGRAMMING_AND_GOVERNANCE.md), [hardening checks](RELAY_HARDENING.md), and [ADR lifecycle](ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md). Keep evidence dated, I/O bounded, and shared mutations serialized.
 
-Public-facing guidance follows [ADR 0129](../adr/0129-public-image-artifacts-and-verified-identity.md) and the [image boundary guide](image-public-boundary.md). Repository operations must not be copied into site content. See [September 9 verification](RELAY_SESSION_VERIFICATION_20260909.md) for dated component rollout, and [enrollment](RELAY_CREDENTIAL_ENROLLMENT.md) / [desktops](RELAY_DESKTOPS.md) for current workflows.
+Public-facing guidance follows [ADR 0129](../adr/0129-public-image-artifacts-and-verified-identity.md) and the [image boundary guide](image-public-boundary.md). Repository operations must not be copied into site content. [ADR 0152](../adr/0152-manual-desktop-only-shard-authority.md) governs manual desktop-only enrollment and manual provider renewal; [enrollment](RELAY_CREDENTIAL_ENROLLMENT.md) and [desktops](RELAY_DESKTOPS.md) contain the complete current workflows, including the Desktop shortcut. [September 9 verification](RELAY_SESSION_VERIFICATION_20260909.md) is historical rollout evidence and does not authorize its former external enrollment path.
 
 Start incidents in [post-mortem](../../post-mortem/README.md). Use its [current state](../../post-mortem/CURRENT_STATE.md), [rolling log](../../post-mortem/ROLLING_LOG.md) and [known failure modes](../../post-mortem/failure-modes/README.md). Historical component verification remains dated evidence.
 

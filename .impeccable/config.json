@@ -349,6 +349,15 @@
         ],
         "createdAt": "2026-09-13T21:12:11.965Z",
         "reason": "Codex: deliberate indigo tonal states and neutral input boundary for the scoped public reading surface; retains GALX dark identity. Desktop Pricing, FAQ, knowledge-base and guide Axe checks passed. Limited to this stylesheet."
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#abcdef",
+        "files": [
+          "scripts/test-relay-federation-http.ts"
+        ],
+        "createdAt": "2026-09-14T23:04:32.730Z",
+        "reason": "Codex: deterministic non-UI PNG transport fixture; the color tests artifact decoding and is not product design."
       }
     ]
   },

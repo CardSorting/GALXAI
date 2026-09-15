@@ -11,7 +11,7 @@ The broad `npm run db:test` suite creates its own disposable Docker database and
 
 ## Start the host controller
 
-Provision the encrypted registry, vault keys and separate inference/admin keys privately. Enroll intended accounts explicitly. Bulk import and host-login discovery are retired.
+Provision the encrypted registry, vault keys and separate inference/admin keys privately. Create each desktop manually, complete provider sign-in and choose Enroll shard. Apply the manual-enrollment migration before the compatible controller/application. Legacy records stay retained but cannot serve until confirmed. CLI/API ingestion and independent provider-session renewal are disabled.
 
 ```sh
 npm run relay:federation
@@ -49,6 +49,8 @@ Empty capability state retains a worker for recovery. A rejected credential revi
 
 Authenticated inference callers can read `/v1/images/availability?model=...` for a boolean advisory capability result. The read does not probe or reserve capacity and exposes no inventory or diagnostics. Deploy this additive controller endpoint before the compatible application; older controllers yield unknown availability in the app.
 
+The September 14 standalone transport correction is local until separate deployment and generation evidence is recorded. The current connection returned HTTP 403 from that endpoint; the runtime feature flag and successful chat inventory do not prove permission. An empty invalid image request also returned the same Forbidden category. Do not reinterpret generic HTTP 403 as a proven account-plan restriction, widen permissions, import ambient host credentials or replay earlier receipts. Identify an approved connection through explicit enrollment and qualify it before worker rollout.
+
 Inventory does not prove tool support. Internal image-operation keys use `image:<model>`; callers send the model ID without that prefix. Chat and image eligibility are independent.
 
 An administrator can intentionally POST `/api/capabilities/probe-image` on the assigned worker with an exact model and small prompt. This performs real upstream generation and can incur usage. Publication requires valid image output and current observation fences. Enabled compatibility workers also have the bounded paid cadence below.
@@ -72,7 +74,7 @@ The shared-to-federation cutover was performed on September 7; it is not a pendi
 3. Review existing holds. Apply a hold when an existing worker must survive controller reload; verify it before stopping the controller.
 4. Stop admissions and allow accepted work to settle. Graceful stop drains/removes unheld workers; held workers can be adopted after restart.
 5. Start one supervised controller for the namespace. Verify registry authority, ownership/generations, capabilities, desktop links and restored holds.
-6. Replace workers or desktop containers deliberately when their image/configuration must change; a controller restart alone does not upgrade them.
+6. Replace workers or desktop containers deliberately when their image/configuration must change; a controller restart alone does not upgrade them. For the standalone image correction, build `Dockerfile.relay` with its pinned Sharp decoder, qualify artifact decoding inside the candidate, and load the compatible capability registry in the controller before replacing workers. Preserve state volumes; require a new decoded image probe rather than importing chat-era proof.
 7. Verify the affected downstream behavior, then explicitly resume appropriate holds. Resume does not clear rejection or cooldown.
 
 For a first migration from a shared relay, drain and stop that process before assigning its credentials to workers. `docker-compose.relay.yml` is a legacy shared launcher and cannot substitute for the federation launcher.
@@ -109,9 +111,9 @@ Shutdown rejects new admissions and bounds accepted front-door I/O. Maintenance 
 
 ## Explicit Codex image-tool compatibility alias
 
-The canonical customer capability is `openai-gpt-image-latest`; legacy aliases are compatibility names for it. Internally, enabled OAuth workers execute `gpt-image-2` through `gpt-5.6-terra` with `image_generation`. The provider selects the image model. Native API-key execution remains exact.
+The canonical customer capability is `openai-gpt-image-latest`; legacy aliases are compatibility names for it. The repaired worker sends the standalone Images request used by Codex's `image_gen.imagegen` extension, with protocol model `gpt-image-2` and auto rendering parameters, using the assigned account. The provider selects the image model. Native API-key execution remains exact.
 
-Fresh inventory and successful image evidence are required. Evidence expires after one hour; real success renews it. Idle enabled workers perform a paid startup probe and successful renewal no more often than every 50 minutes, with failed probes backing off 10, 20, then 40 minutes. Use spare capacity. See [the full contract](FEDERATION_STRATEGY.md#explicit-codex-image-tool-compatibility).
+Fresh authenticated inventory and successful decoded image evidence are required. A chat-model listing is neither a dependency nor proof of image capability; old chat-era evidence cannot enable the new backend. Evidence expires after one hour; real success renews it. Idle enabled workers perform a paid startup probe and successful renewal no more often than every 50 minutes, with failed probes backing off 10, 20, then 40 minutes. Use spare capacity. See [the full contract](FEDERATION_STRATEGY.md#explicit-codex-image-tool-compatibility).
 
 Execution identifiers and diagnostics remain in internal transport and administrator records. Public gateway responses must strip them from bodies and headers and sanitize image artifacts.
 

@@ -1,134 +1,101 @@
-# Maintainer Runbook: Shard Authority and Key Rotation
+# Maintainer runbook: shard authority and key rotation
 
 <!-- docs-scope: domain-reference -->
-> **Reading scope:** Subsystem reference retained for its own domain; not re-certified by the federation documentation refactor. Older routing, deployment, compatibility, or performance descriptions do not override the current relay contract. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
 
-> Audience: security engineering, platform engineering, and shard-fleet on-call.
-> Authority: ADR 0115 and `public.galx_shard_accounts` in Supabase PostgreSQL.
+Private reference for security, platform and relay operators, reconciled September 15, 2026. [ADR 0152](../adr/0152-manual-desktop-only-shard-authority.md) controls enrollment and provider renewal; the encrypted registry and fenced leases retain the database authority established by ADR 0115. Use [current state](../../post-mortem/CURRENT_STATE.md) for deployment evidence.
 
 ## 1. Operational model
 
-PostgreSQL is the only durable credential and work-lease authority. BroccoliDB is a disposable process-local routing projection. The registry journal is a secret-free transactional outbox. Local JSON, browser storage, queues, logs, and edge KV are not approved credential stores.
+Only a manually created Relay Desktop can supply a new managed account through explicit **Enroll shard**. The host validates its saved login and commits encrypted authority and the desktop binding. A matching eligible legacy record requires the same confirmation. PostgreSQL is the durable registry and lease authority; routing caches, queues and logs cannot establish it.
 
-```text
-operator/OAuth -> validate + encrypt -> PostgreSQL registry + journal
-                                           |
-                                           +-> bounded worker projection
-                                           +-> fenced, renewable work leases
-```
+Provider expiry requires manual sign-in in the owning desktop. Saved-file synchronization validates and persists that login; vault rotation re-encrypts the same plaintext. Neither operation is external enrollment or an automatic provider refresh-token service.
 
-The queue delivers authorized intent, a socket carries a live projection, and neither can register, revoke, or lease a credential by itself.
+The registry journal commits with its database mutation. Desktop link and sync checkpoints are a separate private recoverable store. Guest homes and assigned worker configuration necessarily hold credentials within their own private boundaries; they do not replace database admission authority.
 
-## 2. Required production configuration
+## 2. Configuration and preflight
 
-Inject these through the deployment secret manager, never through committed files or command-line arguments:
+Inject configuration through the existing private secret mechanism; never put tokens in argv, browser controls or committed files.
 
-- `DATABASE_URL`: pooled backend PostgreSQL connection.
-- `SUPABASE_SERVICE_ROLE_KEY` or `SUPABASE_SECRET_KEY`: optional Data API failover; it must be an `sb_secret_…` key or a legacy JWT with role `service_role`.
-- `GALX_VAULT_KEY_V1`, `GALX_VAULT_KEY_V2`: versioned vault root slots during rotation.
-- `GALX_VAULT_ACTIVE_KEY_VERSION`: version used for new ciphertext.
-- `GALX_SHARD_ID_SECRET`: HMAC key for stable, non-reversible shard IDs.
-- `GALX_AUDIT_SIGNING_SECRET`: domain-separated evidence and attestation signing root.
+| Setting | Role |
+| --- | --- |
+| `DATABASE_URL` | Host administrator SQL connection permitted to call private enrollment/refresh functions; controlled rewrap also requires the writer role |
+| `SUPABASE_SERVICE_ROLE_KEY` or `SUPABASE_SECRET_KEY` | Optional privileged registry-read fallback; no credential-write fallback or enrollment permission |
+| `GALX_VAULT_KEY_V1`, `GALX_VAULT_KEY_V2` | Versioned vault roots during a reviewed transition |
+| `GALX_VAULT_ACTIVE_KEY_VERSION` | Slot used for new ciphertext |
+| `GALX_SHARD_ID_SECRET` | Stable opaque account-ID derivation |
+| `GALX_AUDIT_SIGNING_SECRET` | Separate evidence signing authority |
 
-`GALX_VAULT_MASTER_SECRET` and `GALX_VAULT_KEY` are legacy v1 inputs. New deployments should use versioned slots. A durable-authority process refuses to synthesize a missing key slot.
+`GALX_VAULT_MASTER_SECRET` and `GALX_VAULT_KEY` remain legacy v1 inputs. Do not change an existing identity or vault root to repair a login. Versioned-only deployments must configure the separate shard-ID key. Workers and desktops receive no database or vault roots.
 
-Run the non-secret-printing preflight:
+For read-only inventory use:
 
-```bash
+```sh
 npm run shards:doctor
-npm run shards:verify-authority
-npm run shards:test-authority
+node --env-file-if-exists=.env.local --import tsx scripts/apply-manual-desktop-enrollment.ts
 ```
 
-Healthy output requires no JSON cache, no remediation candidates, no decryption failures, and an admin Data API fallback only when a genuine service credential is configured.
+Inspect decryption failures, legacy-cache presence, migration state, confirmation counts and denied external privileges separately. A retained unconfirmed record is expected during manual confirmation, not proof of corruption. `npm run shards:verify-authority` is a historical mutating harness and refuses the new schema; do not restore its old upsert grants. Use `npm run test:relay:manual-db`, `npm run db:test` and `npm run shards:test-authority` for isolated regression coverage.
 
-The live verifier also inventories the complete shard SQL surface. It fails if a client role can execute a shard-touching routine, if a retired lease table has runtime grants, if a legacy gateway/vault routine becomes callable, or if the v2 gateway stops delegating to the fenced lease authority. Do not repair such a failure by granting direct table access.
+## 3. Enrollment, renewal and revocation
 
-## 3. Credential enrollment and revocation
+Follow **Relay Desktops → New or existing workspace → Sign in → Enroll shard** and the [complete enrollment guide](RELAY_CREDENTIAL_ENROLLMENT.md). Only an eligible same-account record can be confirmed. Database binding cannot be transferred by editing a local link; revoked, dead, quarantined or ambiguous matches cannot be revived through enrollment.
 
-Use secret-manager-injected environment variables for one credential at a time:
+Renew provider sessions manually in the bound desktop, then verify **Check now**, saved authority and worker readiness. Expired managed rows remain repairable and are excluded from routine expired-record revocation. The administrator CLI retains deliberate `--remove --shard-id <opaque_id>` revocation, preserving encrypted evidence. Revocation is not the routine expiry-repair operation.
 
-```bash
-# GALX_SHARD_ACCESS_TOKEN and GALX_SHARD_ACCOUNT_ID must already be injected.
-# GALX_SHARD_REFRESH_TOKEN and GALX_SHARD_EMAIL are optional.
-node --env-file-if-exists=.env.local --import tsx scripts/manage-shards.ts --add
+## 4. Vault rotation
 
-# Reversible revocation; this does not hard-delete evidence.
-node --env-file-if-exists=.env.local --import tsx scripts/manage-shards.ts --remove <opaque_shard_id>
-```
-
-New enrollment validates account/expiry and authenticated inventory before create-only persistence. Existing accounts must refresh through their linked desktop; re-enrollment cannot overwrite authority or reset counters. Bulk cache import and host discovery are retired. See [enrollment and recovery](RELAY_CREDENTIAL_ENROLLMENT.md).
-
-The CLI rejects token, refresh-token, account, and email command-line flags because argv and shell history are observable. Output uses opaque IDs or hashes and never prints provider credentials or raw account identifiers.
-
-## 4. Zero-downtime vault rotation
-
-Rotation follows the familiar deploy–rewrap–prune pattern. Never change a single unversioned master secret in place: doing so makes existing ciphertext undecryptable.
+Use a staged deploy–rewrap–prune transition. Inventory readers and backups first. The rewrap takes row locks, so assess contention and the rollback window; this procedure does not promise zero interruption.
 
 ### Phase A — dual-read, old-write
 
-1. Generate an independent v2 root in the secret manager.
-2. Configure the current root as `GALX_VAULT_KEY_V1` and the new root as `GALX_VAULT_KEY_V2`.
-3. Keep `GALX_VAULT_ACTIVE_KEY_VERSION=v1` and deploy everywhere.
-4. Verify every registry-authority process can read v1 and has the v2 slot before rewrapping. Inference workers and desktops do not receive vault roots.
+1. Prepare the new independent root in the secret manager while retaining the current slot.
+2. Configure both slots on authorized registry readers/writers, keeping the current active version.
+3. Reload those consumers through their component runbooks and verify old ciphertext is still readable. Worker/desktop images do not receive the roots.
 
 ### Phase B — transactional rewrap
 
-Dry-run first. The command locks matching registry rows, decrypts and re-encrypts each payload with unchanged AAD, executes the updates, then rolls the transaction back:
+The private administrator command locks selected rows, decrypts and re-encrypts with the same associated identity data, and explicitly assumes `galx_desktop_writer` for the protected update. It preserves plaintext, ownership, enrollment binding and operational counters. Its default transaction rolls back:
 
-```bash
+```sh
 npm run shards:rotate-vault -- --from v1 --to v2
 ```
 
-Apply only after the dry-run reports every selected row rewrapped and zero failures:
+After reviewing a successful dry-run and the authorized target, the explicit apply command is:
 
-```bash
+```sh
 npm run shards:rotate-vault -- --from v1 --to v2 --apply
-npm run shards:doctor
-npm run shards:verify-authority
 ```
 
-The rewrap transaction advances each registry resource version and writes a corresponding secret-free journal fact. It never prints shard identities or plaintext.
+Verify key-version inventory and decryption with `shards:doctor`, and read the manual-policy inventory again. Do not use the obsolete live upsert verifier. The database journal records changed registry revisions; no plaintext or credential identity should be emitted in the command result.
 
 ### Phase C — new-write, dual-read, then prune
 
-1. Set `GALX_VAULT_ACTIVE_KEY_VERSION=v2` and deploy everywhere.
-2. Observe authentication, lease, decryption, and journal error rates through a full rollback window.
-3. Confirm `keyVersions.v1` is zero in `npm run shards:doctor`.
-4. Remove the v1 slot only after all v1 session-token lifetimes and backup-retention requirements have elapsed.
+Set the active write slot to the new version and reload the affected consumers. Observe decryption, credential-write and lease results through a rollback window. Confirm no current rows use the old slot before considering removal, and retain it as long as old signed/encrypted session data or backups require it.
 
-Rollback before pruning is configuration-only: restore `GALX_VAULT_ACTIVE_KEY_VERSION=v1`. If rows were rewrapped, run the same transactional command from v2 to v1 while both slots still exist.
+Before pruning, rollback can restore the prior active slot while both roots remain. Already rewrapped rows require the same reviewed reverse rewrap if old ciphertext is needed; changing the active slot alone does not rewrite them. Never roll back provider credentials or desktop provenance as part of vault recovery.
 
 ## 5. Database password and service-key rotation
 
-Treat any credential committed to source history as compromised even after deleting it from the current tree.
+Inventory all consumers and update paths before rotating either credential. Update private configuration, reload connection pools, and verify registry reads plus the manual-policy privilege inventory. Rotate service credentials independently from the database password. A publishable key cannot replace a service credential. Retain a coordinated rollback and retire obsolete secret-bearing deployments under the applicable release policy.
 
-1. Rotate the database password in Supabase Database Settings or the approved management API.
-2. Update `DATABASE_URL` in every runtime and operator secret store.
-3. Restart/redeploy pooled clients and run `npm run shards:verify-authority`.
-4. Rotate the service/secret key independently if it was exposed; never place a publishable key in the service-role variable.
-5. Invalidate old deployment revisions and CI artifacts that still contain superseded secrets.
+These are separate administrative changes. The documentation procedure does not authorize credential rotation during ordinary troubleshooting or manual provider sign-in.
 
-Do not rotate the live database password until all consumers and their secret-update paths are inventoried; an incomplete rotation is an avoidable outage.
+## 6. Legacy cache or exposed credential incident
 
-## 6. Legacy JSON or fallback-key incident
+Stop the affected producer and retain minimal private evidence. Do not import `.galx-shards.json`, host login caches or token environment variables into the managed fleet. Inspect `shards:doctor` and the CLI's reversible legacy-cache quarantine before any cleanup. Preserve necessary forensic evidence and never publish the source file.
 
-If `.galx-shards.json` reappears or credentials were encrypted with a compiled/shared fallback:
+Repair eligible accounts through manual sign-in/enrollment in their desktops. Revoke exposed provider sessions through the approved account process and coordinate any required database/vault rotation separately. Do not copy a root secret to another store or re-enable external insertion to restore service.
 
-1. Stop ingestion from the affected producer.
-2. Preserve only the minimum forensic hash/metadata required by incident policy; do not attach the file to tickets or logs.
-3. Enroll confirmed new accounts through validated create-only authority; refresh existing accounts through the linked desktop. Do not replay the legacy cache.
-4. Run `npm run shards:doctor`, then use `--quarantine-legacy` for reversible isolation.
-5. Remove the local file and verify `legacyJsonCachePresent=false`.
-6. Rotate affected provider refresh/access credentials and any exposed database or vault root.
-7. Re-run typecheck, authority verification, and the router forensic suite before restoring traffic.
+## 7. Admission and recovery
 
-## 7. Lease incidents
+| Result | Response |
+| --- | --- |
+| Unconfirmed desktop provenance / `SHARD_NOT_AVAILABLE` | Use explicit manual enrollment; do not backfill bindings or source labels |
+| `AUTHORITY_UNAVAILABLE` | Restore authoritative access; no cached production grant |
+| Quota or concurrency refusal | Respect the database decision; inspect work and policy rather than resetting counters |
+| `FENCING_TOKEN_MISMATCH` | Stop the stale attempt; never mutate with its old fence |
+| Expired lease or failed heartbeat | Cancel according to the original execution contract and preserve uncertain work |
+| Saved login but write/checkpoint failure | Repair SQL or local journal access, then retry the same desktop operation |
+| Bound home lost or wrong-desktop conflict | Preserve registry and receipts; investigate administrator recovery before any transfer |
 
-- `AUTHORITY_UNAVAILABLE`: fail closed; do not enable process-local production leases.
-- `SHARD_TOKEN_QUOTA_EXHAUSTED`, `SHARD_REQUEST_QUOTA_EXHAUSTED`, or `SHARD_CONCURRENCY_EXHAUSTED`: treat the database decision as authoritative even if the local scorer disagrees.
-- `FENCING_TOKEN_MISMATCH`: terminate the stale attempt; never retry mutation under the old token.
-- `LEASE_EXPIRED` or failed heartbeat: cancel the transport and let the supervised execution decide whether a new authorized attempt is permitted.
-- Rising reclaimed leases: inspect worker crashes, heartbeat latency, connection-pool saturation, and lease TTLs before increasing limits.
-
-The emergency rule is simple: restore availability by issuing new bounded authority, never by copying the root credential into another store.
+The paired manual-enrollment rollback reopens old grants and is not an availability shortcut. Follow [database recovery](POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md), [controller recovery](../RESILIENCE_AND_DISASTER_RECOVERY.md) and original-operation reconciliation before resuming traffic.

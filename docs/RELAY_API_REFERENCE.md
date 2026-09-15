@@ -40,18 +40,33 @@ These routes are loopback-only and enforce host, origin and forwarding-header re
 | `GET /desktops/assets/*` | Desktop session, except generic login script |
 | `GET /api/desktops/state` | Desktop session; refreshed workspace and linked shard state |
 | `POST /api/desktops/organization` | Desktop session plus same origin; revision-checked custom tabs, membership and ordering |
-| `POST /api/desktops/create` | Desktop session plus same origin; bounded creation with caller-generated workspace ID |
+| `POST /api/desktops/create` | Desktop session plus same origin; bounded creation with caller-generated workspace ID; does not enroll an account |
 | `POST /api/desktops/:id/start`, `stop`, `delete` | Desktop session; delete requires the exact workspace name as confirmation |
 | `POST /api/desktops/:id/launch` | Allowlisted Terminal or Chrome |
 | `POST /api/desktops/:id/clipboard` | Explicit bounded text read/write |
-| `POST /api/desktops/:id/link` | Existing shard or null; expected previous link required |
+| `POST /api/desktops/:id/link` | Existing shard or null; expected previous local link required; no change to durable desktop ownership |
 | `POST /api/desktops/:id/traffic` | Linked shard and generation checked; pause/resume admissions |
-| `POST /api/desktops/:id/credential-sync` | Configure sync or check saved login; no token-upload contract |
+| `POST /api/desktops/:id/enroll` | Desktop session and exact origin; explicitly validate/enroll the saved login or confirm an eligible legacy record |
+| `POST /api/desktops/:id/credential-sync` | Configure saved-file sync or check an enrolled account in its bound desktop; never renew a provider session or accept token upload |
 | `POST /api/desktops/:id/signin`, `signin-cancel` | Begin browser/device sign-in or cancel it |
 | `POST /api/desktops/:id/credential-match` | Match saved account to existing eligible authority; link still requires review/save |
 | WebSocket `/api/desktops/:id/display` | Same-origin desktop session, bounded connections and backpressure |
 
 Monitor and desktop sessions are independent, process-local grants. Renewing a session invalidates its previous cookie. Session expiry/revocation closes display access. The page removes ticket fragments; admin keys and provider credentials do not enter browser storage. See [desktop operations](maintainers/RELAY_DESKTOPS.md).
+
+## Manual credential authority
+
+`POST /api/desktops/:id/enroll` is the private action behind **Enroll shard**, not an external ingestion API. Its body contains only `expectedShardId`: the current linked shard ID, or null for an unlinked workspace. Credential fields and all unknown fields are rejected. Success returns only `{ "shardId": "<opaque id>" }`; it means enrollment/link persistence, not worker or image readiness.
+
+The action requires a valid desktop session, exact local origin, a saved running workspace and a safely readable guest login. A raw administrator bearer or read-only monitor cookie is not a substitute for that desktop session. The host rechecks the expected link, file and operation before writing. Database rules require a unique owning-desktop binding and a current encrypted revision; existing eligible accounts retain owner, counters, holds and history. Wrong-account, wrong-desktop, ambiguous and revoked/dead/quarantined records cannot be enrolled.
+
+Anonymous, inference-only, raw-admin-bearer and monitor-session enrollment calls return 401. A wrong origin returns 403. Credential/unknown JSON fields return 400. Account/link/file conflicts and credential validation failures return bounded private errors; storage/inventory failures do not claim a saved enrollment. Repair the reported stage before an explicit retry. A lost response or failed local link checkpoint can be reconciled by retrying enrollment in the same desktop after storage recovery.
+
+`signin` can begin an unlinked workspace's sign-in using a null expected shard. `credential-match` only proposes a matching retained account; `link` updates the local association and cannot transfer the database binding or confirm legacy authority. `credential-sync` requires the owning enrolled desktop. Its automatic setting checks saved logins; the operator still renews expired provider sessions manually.
+
+Retired application routes are a separate boundary on the GALX application: POST `/api/auth/openai`, `/api/auth/ingest`, `/api/ingest`, `/api/auth/oauth/par`, `/api/auth/oauth/refresh`, GET `/api/auth/oauth/url`, and GET/POST `/api/auth/oauth/callback` return 410 with `{ "error": "Provider connections are unavailable." }`, private no-store caching and no account-cookie mutation. They never process credentials or start provider authentication. GALX account `/auth/callback`, account session endpoints and device grants remain distinct. See [the authentication reference](STANDARDIZED_OAUTH_AND_INGESTION_ARCHITECTURE.md).
+
+## Workspace organization
 
 The private state response includes `organization: { available, revision, maxGroups, groups, ungrouped }`. Each group has `id`, `name` and ordered `desktopIds`; `ungrouped` is an ordered desktop-ID array. Organization mutations return that same allowlisted shape and require `expectedRevision` from the latest snapshot. Each action accepts only these additional fields:
 

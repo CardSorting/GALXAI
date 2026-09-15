@@ -13,10 +13,10 @@
 | Build guest image | `npm run relay:desktops:build` |
 | Start host controller | `npm run relay:federation` |
 | Inspect registry categories | `npm run shards:doctor` |
-| Enroll one new account | `node --env-file-if-exists=.env.local --import tsx scripts/manage-shards.ts --add` |
+| Enroll or confirm an account | Open Relay Desktops, manually sign in inside its running workspace, then choose **Enroll shard** |
 | Preview exact legacy fixture quarantine | `node --env-file-if-exists=.env.local --import tsx scripts/quarantine-fixture-shards.ts` |
 
-The controller command reads configured authority; its canary namespace default does not make real credentials disposable. Do not start a second owner. Supply enrollment tokens through private environment injection, never argv. Bulk import is retired; refresh existing accounts through linked-desktop sign-in. Cleanup defaults to dry-run; review before explicit apply.
+The controller command reads configured authority; its canary namespace default does not make real credentials disposable. Do not start a second owner. CLI add/import and external provider ingestion are closed. Renew expired provider sessions manually inside the bound desktop; saved-file synchronization validates that login without renewing the provider session. Cleanup defaults to dry-run; review before explicit apply.
 
 ## Local validation
 
@@ -38,10 +38,13 @@ Use [hardening checks](RELAY_HARDENING.md) for enrollment, public-response, stor
 | Static integrity audit | `npm run db:verify` |
 | Broad integration suite | `npm run db:test`; automatically creates and removes a disposable Docker database |
 | Local authority boundary | `npm run shards:test-authority` |
-| Live authority verifier | `npm run shards:verify-authority`; inspect its target and behavior first |
+| Manual enrollment role/rollback tests | `npm run test:relay:manual-db`; disposable database only |
+| Target policy inventory | `node --env-file-if-exists=.env.local --import tsx scripts/apply-manual-desktop-enrollment.ts`; read-only without flags |
 | Vault rewrap preview | `npm run shards:rotate-vault -- --from v1 --to v2`; apply is a separate explicit option |
 
 The broad integration guard rejects production settings and strips inherited Data API configuration before repository imports. Do not bypass it. Billing/storage harnesses have their own disposable environments. See [test isolation](RELAY_CREDENTIAL_ENROLLMENT.md#isolated-integration-tests) and [key rotation](MULTI_TENANT_SHARD_AND_KEY_ROTATION.md).
+
+The historical `shards:verify-authority` harness predates the closed-upsert policy and is not current acceptance. It refuses a migrated target. Use the policy inventory and isolated manual enrollment tests above; do not restore old grants to satisfy an obsolete assertion.
 
 Database migrations, service restarts, live provider requests, deployment and billing changes are different mutations. Use their component runbooks and existing task authorization; a command's presence in this table is not a blanket production procedure.
 

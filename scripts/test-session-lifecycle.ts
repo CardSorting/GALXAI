@@ -26,6 +26,8 @@ import { providerConnectionDTO } from '../src/lib/auth/provider-connection-route
 import { SessionAccessError } from '../src/lib/auth/session-http';
 import { verifyWorkspaceSession } from '../src/lib/auth/workspace-session';
 import { GalxInternalAuthGuard } from '../src/core/auth/GalxInternalAuthGuard';
+import { middleware } from '../src/middleware';
+import { isClosedProviderPath } from '../src/lib/auth/provider-connection-route';
 
 process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://auth.example.test';
 process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_fixture';
@@ -38,6 +40,21 @@ const req = (method = 'GET', token?: string, body?: unknown, extra: Record<strin
 });
 const native = (sub = 'user-a', id = 'sess_a', extra = {}) => ({ valid: true, claims: { sub, accountVerified: true, scopes: ['*'], exp: Date.now() + 60000, email: 'verified@example.test', name: 'Verified', shardId: sentinel, ...extra }, session: { id, userId: sub, scopes: ['*'], expiresAtMs: Date.now() + 60000, shardId: sentinel } });
 const clean = async (response: Response, status: number) => { assert.equal(response.status, status); assert.match(response.headers.get('cache-control') || '', /private.*no-store/); const raw = await response.text(); assert(!raw.includes(sentinel)); return JSON.parse(raw); };
+
+test('retired provider endpoints reach their terminal denial without preview or session work', async () => {
+  const original = globalThis.fetch;
+  globalThis.fetch = async () => { throw new Error('A closed endpoint must not authenticate or contact a provider'); };
+  try {
+    for (const path of ['/api/auth/openai', '/api/auth/ingest', '/api/ingest', '/api/auth/oauth/url', '/api/auth/oauth/callback', '/api/auth/oauth/par', '/api/auth/oauth/refresh']) {
+      for (const method of ['GET', 'POST', 'OPTIONS']) {
+        const response = await middleware(new NextRequest('https://galx.ai' + path, { method, headers: { cookie: 'galx_session=forged', authorization: 'Bearer forged' } }));
+        assert.equal(response.headers.get('x-middleware-next'), '1');
+        assert.equal(response.headers.get('set-cookie'), null);
+      }
+    }
+    for (const path of ['/auth/callback', '/api/auth/session', '/api/auth/oauth/introspect', '/api/auth/openai/child', '/api/ingestion']) assert.equal(isClosedProviderPath(path), false);
+  } finally { globalThis.fetch = original; }
+});
 
 test('copied JWTs fail immediately after logout across profile, workspace and API authority while other sessions continue', async () => {
   const original = globalThis.fetch;
@@ -92,9 +109,10 @@ test('session endpoints reject anonymous credentials, IDs, API keys and forged a
   GalxAuthEngine.getInstance = () => { throw new Error('No session storage should be reached'); };
   try {
     for (const token of [undefined, 'sess_victim', '00000000-0000-4000-8000-000000000001', 'galx_key_fake', 'sso_saml_bearer_fake']) {
+      for (const handler of [connect, ingest, refresh]) await clean(await handler(req('POST',token,{accessToken:sentinel})),410);
       await clean(await profile(req('GET', token)), 401);
       await clean(await logout(req('DELETE', token, undefined, { origin: 'https://galx.ai' })), 401);
-      for (const handler of [elevate, revoke, introspect, restricted, connect, ingest]) await clean(await handler(req('POST', token, { token: 'sess_victim' }, { origin: 'https://galx.ai' })), 401);
+      for (const handler of [elevate, revoke, introspect, restricted]) await clean(await handler(req('POST', token, { token: 'sess_victim' }, { origin: 'https://galx.ai' })), 401);
     }
   } finally { GalxAuthEngine.getInstance = original; }
 });
@@ -186,7 +204,7 @@ test('engine revocation rejects plain IDs and verifies session ownership and acc
     assert.equal((await engine.verifySession('galx_sess_fixture',false)).valid,true);
     userId='user-b'; assert.equal((await engine.verifySession('galx_sess_fixture',false)).valid,false);
     userId='user-a'; claims.accountVerified=false; assert.equal((await engine.verifySession('galx_sess_fixture',false)).valid,false);
-    await assert.rejects(engine.authenticateProviderUser('openai',{apiKey:'sk_fake'}),/VERIFIED_ACCOUNT_REQUIRED/);
+    await assert.rejects(engine.authenticateProviderUser('openai',{apiKey:'sk_fake'}),/Provider connections are unavailable/);
   } finally { GalxCryptoVault.verifySessionToken = original; }
 });
 
@@ -196,7 +214,7 @@ test('provider refresh resolves only the verified account’s connection; public
   let refreshed=''; OAuthRepository.getInstance=()=>({findIdentityByProvider:async(id:string)=>{assert.equal(id,'user-a');return {userId:id,shardId:'owned-connection'};}}) as any;
   GalxAuthEngine.getInstance=()=>({refreshProviderShardTokens:async(id:string)=>{refreshed=id;return true;}}) as any;
   try {
-    await clean(await refresh(req('POST',jwt,{connectionId:'foreign',shardId:'foreign',sessionAffinity:'foreign'})),200); assert.equal(refreshed,'owned-connection');
+    await clean(await refresh(req('POST',jwt,{connectionId:'foreign',shardId:'foreign',sessionAffinity:'foreign'})),410); assert.equal(refreshed,'');
     const dto=providerConnectionDTO({success:true,user:{id:'user-a',name:'Verified',token:'opaque-credential',shardId:sentinel,shardMode:sentinel,scopes:['admin:*']},extra:sentinel} as any);
     assert(!JSON.stringify(dto).includes(sentinel)); assert.equal((dto as any).user.scopes,undefined);
   } finally {globalThis.fetch=originalFetch;OAuthRepository.getInstance=originalRepo;GalxAuthEngine.getInstance=originalEngine;}
@@ -287,7 +305,7 @@ test('logout preserves rotated refresh cookies when revocation is temporarily un
   } finally {admin.signOut=original;globalThis.fetch=originalFetch;resetSupabaseClients();}
 });
 
-test('provider callback keeps the canonical account cookie and returns only the explicit connection DTO',async()=>{
+test('provider callback is closed before exchanging any provider credential',async()=>{
   const { POST: callback }=await import('../src/app/api/auth/oauth/callback/route');
   const { GalxOAuthManager }=await import('../src/core/auth/GalxOAuthManager');
   const originalFetch=globalThis.fetch, originalEngine=GalxAuthEngine.getInstance, originalManager=GalxOAuthManager.getInstance, originalRepo=OAuthRepository.getInstance;
@@ -298,7 +316,7 @@ test('provider callback keeps the canonical account cookie and returns only the 
   try {
     const response=await callback(req('POST',jwt,{code:'fixture',codeVerifier:'fixture',email:'foreign@example.test'}));
     assert.equal(response.cookies.get('galx_session'),undefined);
-    const body=await clean(response,200);assert.equal(body.user.id,'user-a');assert.equal(body.user.email,'a@example.test');assert.equal(body.user.shardId,undefined);
+    const body=await clean(response,410);assert.equal(body.user,undefined);
   } finally {globalThis.fetch=originalFetch;GalxAuthEngine.getInstance=originalEngine;GalxOAuthManager.getInstance=originalManager;OAuthRepository.getInstance=originalRepo;}
 });
 

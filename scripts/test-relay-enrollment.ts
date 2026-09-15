@@ -8,6 +8,9 @@ import { validateOperatorCredential } from '../src/relay/operator-enrollment.js'
 import { isolatedIntegrationEnvironment } from './lib/integration-test-environment.js';
 import { GalxCredentialSubstrate } from '../src/core/substrate/GalxCredentialSubstrate.js';
 import { GalxaiRelayServer } from '../src/relay/relay-server.js';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 
 const candidate: DesiredShard = { id: 'fixture', provider: 'openai', accountId: 'test', accessToken: 'sk-synthetic', credentialRevision: 'v1' };
 test('invalid candidates are checked before any Docker allocation; temporary errors stay temporary', async t => {
@@ -92,7 +95,16 @@ test('ambient import paths fail before accessing authority or host credentials',
   await assert.rejects(GalxCredentialSubstrate.prototype.seedMultiAccountFleet.call({} as any),/discovery is retired/);
   assert.throws(()=>new GalxaiRelayServer({discoverHostCredentials:true}),/discovery is retired/);
   const result=spawnSync(process.execPath,['--import','tsx','scripts/manage-shards.ts','--import'],{encoding:'utf8',env:{PATH:process.env.PATH}});
-  assert.equal(result.status,1); assert.match(result.stderr,/Bulk credential import is retired/); assert(!result.stderr.includes('not configured'));
+  assert.equal(result.status,1); assert.match(result.stderr,/External shard enrollment is disabled/); assert(!result.stderr.includes('not configured'));
+});
+test('configured credential files cannot admit shards outside the isolated test mode', async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'galx-closed-file-ingest-'));
+  const filename = path.join(dir, 'credentials.json');
+  fs.writeFileSync(filename, JSON.stringify([{ id: 'outside', accountId: 'fixture', accessToken: 'unapproved' }]));
+  const relay = new GalxaiRelayServer({ registryEnabled: false, discoverHostCredentials: false, shardsJsonPath: filename,
+    stateSnapshotPath: path.join(dir, 'state.json'), port: 0, host: '127.0.0.1', capabilityDiscovery: async () => assert.fail('No provider check allowed') });
+  try { assert.equal((relay as any).shardsTable.count(), 0); }
+  finally { await relay.stop(); fs.rmSync(dir, { recursive: true, force: true }); }
 });
 test('integration suite refuses production and strips inherited Data API authority before imports', () => {
   for(const value of [undefined,'postgres://user:secret@cloud.example/galx_integration_test','postgres://localhost/galx_integration_test',

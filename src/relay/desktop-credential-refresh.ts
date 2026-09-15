@@ -4,7 +4,7 @@ import { CapabilityDiscoveryError, discoverOpenAIModels } from './capability-dis
 import { createHash } from 'node:crypto';
 
 export interface CredentialRefreshResult { outcome: 'updated' | 'current' }
-export interface CredentialTransaction { expectedRevision?: string; prepare: (revision: string) => void }
+export interface CredentialTransaction { expectedRevision?: string; desktopId?: string; prepare: (revision: string) => void }
 export type RefreshDesktopCredential = (shardId: string, candidate: DesktopCredential, current: () => boolean | Promise<boolean>, checkOnly?: boolean, transaction?: CredentialTransaction) => Promise<CredentialRefreshResult>;
 interface Dependencies {
   read: typeof readShardRegistry;
@@ -34,7 +34,7 @@ export function createDesktopCredentialRefresh(overrides: Partial<Dependencies> 
     let row: Record<string, any> | undefined;
     try { row = (await deps.read()).find(r => r.id === shardId); }
     catch { throw new DesktopCredentialError('credential_registry_unavailable'); }
-    if (!row || row.provider !== 'openai' || row.permission_retracted || ['revoked', 'dead', 'quarantined'].includes(row.status)) throw new DesktopCredentialError('credential_not_allowed');
+    if (!row || !row.managed_desktop_id || row.managed_desktop_id !== transaction?.desktopId || row.provider !== 'openai' || row.permission_retracted || ['revoked', 'dead', 'quarantined'].includes(row.status)) throw new DesktopCredentialError('credential_not_allowed');
     const previous = deps.decrypt(row);
     if (!previous || typeof previous.accountId !== 'string') throw new DesktopCredentialError('credential_registry_unavailable');
     if (previous.accountId !== candidate.accountId) throw new DesktopCredentialError('credential_account_mismatch');

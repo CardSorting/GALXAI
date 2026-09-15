@@ -10,6 +10,7 @@ import WebSocket from 'ws';
 import { DesktopManager, DockerDesktopDriver, type DesktopDriver, type DesktopContainer } from '../src/relay/desktop-manager.js';
 import { RelayFederationLifecycle } from '../src/relay/federation-lifecycle.js';
 import { RelayFederationServer } from '../src/relay/federation-server.js';
+import type { EnrollDesktopCredential } from '../src/relay/desktop-enrollment.js';
 import type { RefreshDesktopCredential } from '../src/relay/desktop-credential-refresh.js';
 import { DesktopCredentialError, type DesktopCredentialFile } from '../src/relay/desktop-credentials.js';
 import { CapabilityRegistry } from '../src/relay/capability-registry.js';
@@ -28,10 +29,10 @@ class Driver implements DesktopDriver {
   async destroy(id: string) { this.calls.push('delete:' + id); if (this.fail === 'delete') throw Error('PRIVATE_DAEMON_SECRET'); this.items.delete(id); }
   async launch(id: string, app: 'terminal' | 'chrome' | 'signin') { this.calls.push(app + ':' + id); }
 }
-function fixture(t: any, refresh?: RefreshDesktopCredential) {
+function fixture(t: any, refresh?: RefreshDesktopCredential, enroll?: EnrollDesktopCredential) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'desktop-test-')), driver = new Driver(), file = path.join(dir, 'desktops.json');
   t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
-  return { dir, driver, file, manager: new DesktopManager(file, driver, Date.now, refresh) };
+  return { dir, driver, file, manager: new DesktopManager(file, driver, Date.now, refresh, undefined, enroll) };
 }
 
 test('retries and concurrent creates have one identity; restarts never spawn a desktop', async t => {
@@ -94,11 +95,11 @@ test('Docker driver confines resources and never treats failed ownership inspect
   await assert.rejects(driver.create(id), /ownership mismatch/);
 });
 
-async function httpFixture(t: any, withShard = false, refresh?: RefreshDesktopCredential, expired = false) {
+async function httpFixture(t: any, withShard = false, refresh?: RefreshDesktopCredential, expired = false, enroll?: EnrollDesktopCredential) {
   const shard = { id: 'fixture-shard', provider: 'openai', accountId: 'PRIVATE_ACCOUNT', accessToken: 'PRIVATE_TOKEN', credentialRevision: 'PRIVATE_REVISION', ...(expired ? { expiresAtMs: Date.now() - 60000 } : {}) };
   const handle = { id: 'fixture-relay', shardId: shard.id, generation: 'fixture-generation', credentialRevision: shard.credentialRevision, endpoint: 'http://127.0.0.1:1', adminKey: 'PRIVATE_WORKER_ADMIN', inferenceKey: 'PRIVATE_WORKER_KEY', running: true };
   const records = new CapabilityRegistry(); records.register(shard.id, handle.id, handle.generation, 'openai'); records.publishInventory(records.beginRefresh(shard.id)!, ['A']);
-  const f = fixture(t, refresh), lifecycle = new RelayFederationLifecycle(async () => withShard ? [shard] : [], { list: async () => withShard ? [handle] : [], start: async () => { throw Error('No serving worker'); }, inspect: async () => { records.heartbeat(shard.id, {}); return { record: records.get(shard.id) }; }, remove: async () => {} });
+  const f = fixture(t, refresh, enroll), lifecycle = new RelayFederationLifecycle(async () => withShard ? [shard] : [], { list: async () => withShard ? [handle] : [], start: async () => { throw Error('No serving worker'); }, inspect: async () => { records.heartbeat(shard.id, {}); return { record: records.get(shard.id) }; }, remove: async () => {} });
   await lifecycle.reconcile();
   const server = new RelayFederationServer(lifecycle, { secret: 's'.repeat(32), apiKeys: ['ordinary-user'], adminKeys: ['PRIVATE_ADMIN_CANARY'], port: 0, desktops: f.manager });
   await server.start(); const base = 'http://127.0.0.1:' + (server.server.address() as net.AddressInfo).port;
@@ -522,4 +523,26 @@ test('device sign-in, cancellation and account matching retain administrator, or
   assert.equal(manager.linkedShard(id), 'fixture-shard');
   const state = await (await fetch(base + '/api/desktops/state', { headers: { cookie } })).text();
   assert(state.includes('ABCD-12345')); assert.doesNotMatch(state, /PRIVATE_DEVICE|device_code|evil\.example|"pid"/);
+});
+
+
+test('manual enrollment reads only the saved desktop login and requires its administrator session', async t => {
+  let writes=0;
+  const enroll: EnrollDesktopCredential = async (_id,candidate,_expected,current) => { assert(await current()); assert.equal(candidate.accountId,'account-1'); writes++; return 'new-shard'; };
+  const {base,login,manager,driver}=await httpFixture(t,false,undefined,false,enroll), id=randomUUID();
+  const now=Date.now(), token='header.'+Buffer.from(JSON.stringify({iat:Math.floor(now/1000)-10,exp:Math.floor(now/1000)+3600,'https://api.openai.com/auth':{chatgpt_account_id:'account-1'}})).toString('base64url')+'.signature';
+  driver.credentialFiles=[{source:'codex',modifiedAt:now,data:{tokens:{account_id:'account-1',access_token:token}}}];
+  await manager.create({id,name:'Manual account'});
+  assert.equal(writes,0); await manager.pollCredentialSync(); assert.equal(writes,0);
+  const cookie=await login(), monitor=await login('monitor');
+  for(const headers of [{},{Authorization:'Bearer ordinary-user'},{cookie:monitor},{cookie,Origin:'https://evil.example'}]) {
+    const r=await fetch(`${base}/api/desktops/${id}/enroll`,{method:'POST',headers:{Origin:base,'Content-Type':'application/json',...headers},body:JSON.stringify({expectedShardId:null})});
+    assert([401,403].includes(r.status)); assert(!(await r.text()).includes(token));
+  }
+  const send=(body:unknown)=>fetch(`${base}/api/desktops/${id}/enroll`,{method:'POST',headers:{cookie,Origin:base,'Content-Type':'application/json'},body:JSON.stringify(body)});
+  assert.equal((await send({expectedShardId:null,accessToken:token})).status,400);
+  assert.equal((await send({expectedShardId:'stale-link'})).status,409);assert.equal(writes,0);
+  const response=await send({expectedShardId:null});assert.equal(response.status,200);
+  assert.deepEqual(await response.json(),{shardId:'new-shard'});assert.equal(writes,1);assert.equal(manager.linkedShard(id),'new-shard');
+  await manager.action(id,'stop');assert.equal((await send({expectedShardId:'new-shard'})).status,409);assert.equal(writes,1);
 });

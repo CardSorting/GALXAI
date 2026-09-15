@@ -19,6 +19,14 @@ The shared-to-federation cutover occurred September 7. For any remaining legacy 
 
 Run `npm run docs:check`, appropriate [hardening checks](maintainers/RELAY_HARDENING.md), production build, public-response tests and rendered/browser-asset scans. Separate canary cleanup from production workspaces. Validate actual downstream behavior for changed transport; paid entry and entitlement remain separate acceptance.
 
+## Manual desktop authority release boundary
+
+Apply migration `20260914231914_manual_desktop_shard_enrollment.sql` before starting the compatible controller/application. Inventory the target and preserve registry ciphertext, ownership, quota/counters, desktop homes and manifests, signing state, holds and receipts. Existing rows remain unconfirmed and cannot receive new work; neither a valid token nor an existing local link can backfill provenance. Use [the database procedure](maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md#manual-desktop-policy-inventory-and-rollout) and record schema, controller and application evidence separately.
+
+After the schema and software agree, an operator signs in in the owning desktop and explicitly chooses **Enroll shard**, then verifies worker readiness. Provider expiry requires manual sign-in there; automatic saved-file sync and worker lifecycle continue independently. External API/CLI/file ingestion remains closed during outage recovery. A healthy controller with zero confirmed accounts can correctly admit no work.
+
+Use isolated manual-enrollment database, route/authorization and credential-recovery tests before release. Verify the terminal external HTTP denials and absence of cookie changes through the target application, preserve public sanitation, and keep actual manual enrollment plus capability acceptance separate from release readiness. The policy DOWN migration intentionally restores old credential-write grants/functions and therefore reopens the retired boundary; it is not a routine capacity fix.
+
 ## Image and access release boundaries
 
 The image request migration must be applied before the application relies on durable async receipts. Configure Auth, database, server-only storage and reachable generation dependencies in the target environment; local credentials and a Ready deployment do not verify those dependencies. Follow [application configuration](VERCEL_DEPLOYMENT.md) and [image acceptance](../post-mortem/runbooks/image-generation.md).

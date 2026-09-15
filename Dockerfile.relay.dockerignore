@@ -6,3 +6,6 @@
 !src/core/
 !src/core/broccolidb/
 !src/core/broccolidb/**
+!src/lib/
+!src/lib/security/
+!src/lib/security/image-artifact.ts

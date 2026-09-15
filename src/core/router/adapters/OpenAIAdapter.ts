@@ -485,7 +485,9 @@ export class OpenAIAdapter {
             throw new RelayDispatchError('invalid_image_response');
           }
           return { created: result.created || Math.floor(Date.now() / 1000), data: result.data, modelUsed: modelSpec.id, shardId,
-            ...(result.execution?.routingMode === 'codex_image_tool_alias' && result.execution?.executionModel === 'gpt-5.6-terra'
+            ...(result.execution?.routingMode === 'codex_image_tool_alias' && result.execution?.executionModel === 'gpt-image-2' && result.execution?.tool === 'image_gen.imagegen'
+              ? { execution: { requestedModel: modelSpec.id, executionModel: 'gpt-image-2', routingMode: 'codex_image_tool_alias' as const, tool: 'image_gen.imagegen', imageModelSelection: 'provider_managed' } }
+              : result.execution?.routingMode === 'codex_image_tool_alias' && result.execution?.executionModel === 'gpt-5.6-terra'
               ? { execution: { requestedModel: modelSpec.id, executionModel: 'gpt-5.6-terra', routingMode: 'codex_image_tool_alias' as const, tool: 'image_generation', imageModelSelection: 'provider_managed' } } : {}) };
         } catch (error) {
           if (error instanceof RelayDispatchError) throw error;

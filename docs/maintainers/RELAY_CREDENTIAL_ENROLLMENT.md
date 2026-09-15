@@ -1,39 +1,39 @@
 # Relay credential enrollment and recovery
 
 <!-- docs-scope: current-guide -->
-> Private operator guide. [ADR 0133](../adr/0133-explicit-validated-enrollment-and-test-isolation.md) retains automatic workers and retires bulk credential discovery.
+> Private operator guide. [ADR 0152](../adr/0152-manual-desktop-only-shard-authority.md) requires manual desktop enrollment while retaining automatic worker reconciliation.
 
-## Supported paths
+## Sole enrollment path
 
-| Intent | Action |
-| --- | --- |
-| Register a new operator-owned OAuth account | Explicit environment input, validated before create-only persistence |
-| Refresh an existing account | Sign in within its linked desktop; verify and sync the saved login |
-| Select a custom guest login home | `CODEX_HOME=/home/operator/path/to/codex-home galx-relay use-login` |
-| Use a keyring-only login | Reauthenticate with `galx-relay login` using file-backed storage |
-| Use a different saved account | Match an existing eligible account, review, then explicitly save the link |
-| Scale workers | Let the controller reconcile validated authority and model capacity |
+A shard must originate from a desktop manually created in **Relay Desktops**, opened with **GALX Relay Monitor.app** on the Desktop or `npm run relay:desktops`. The administrator completes provider sign-in there and explicitly chooses **Enroll shard**. Creating a desktop, saving a link, starting the controller and polling credentials never enroll an account.
 
-`npm run shards:import`, `--import`, `seedMultiAccountFleet()` and `RELAY_DISCOVER_HOST_CREDENTIALS=true` are retired compatibility entrypoints that fail with migration guidance. Do not restore host-cache scanning or reset existing account rows.
+1. Reuse the account's existing manually created desktop, or choose **New**, name a workspace and create it. Keep one account per desktop; do not create a replacement for an already bound account.
+2. Open **Set up shard** for an unlinked desktop or **Inspect shard** for a linked one, then choose **Sign in** or **Sign in with a code**. Complete the provider interaction yourself.
+3. Choose **Enroll shard**. The controller reads the saved guest login; the HTTP request accepts only the expected existing shard link, never credentials.
+4. Enrollment validates account identity, expiry and authenticated inventory, encrypts the login, and commits its unique desktop binding. The controller then saves the local link. A lost response or failed local checkpoint is recoverable by explicitly retrying enrollment from the same desktop; no other account or desktop may replace it.
+5. Choose **Check now** and wait for saved authority, the applied worker revision and fresh capability evidence. Inventory acceptance alone does not prove inference or image support.
 
-## Enroll one account
+Unknown accounts are created only by this action. An existing eligible account can be confirmed from its matching manually created desktop without changing ownership, traffic holds, quota, counters or history. Revoked/dead accounts are rejected, duplicate account matches fail closed, and an existing desktop binding cannot be transferred by changing a link. A stopped workspace must be started first. Keep the enrolled workspace and its saved home for future sign-in repair; do not delete it as an account-recovery shortcut.
 
-Configure the intended database/vault authority and stable ID secret in the operator environment. Inject `GALX_SHARD_ACCESS_TOKEN` and `GALX_SHARD_ACCOUNT_ID` privately; `GALX_SHARD_REFRESH_TOKEN` and `GALX_SHARD_EMAIL` are optional. ID derivation uses `GALX_SHARD_ID_SECRET` or the configured vault secret. Never put credentials in argv, screenshots, tickets or documentation.
+## Sealed external paths
 
-```sh
-node --env-file-if-exists=.env.local --import tsx scripts/manage-shards.ts --add
-npm run shards:doctor
-```
+`shards -- --add`, `shards:import`, `--import`, host-cache discovery and application provider ingestion are disabled. `/api/auth/openai`, `/api/auth/ingest`, `/api/ingest` and provider OAuth URL/PAR/callback/refresh routes return a finite unavailable response before credential processing. Ordinary GALX account login, logout, session refresh and device grants retain their separate contracts.
 
-The CLI refreshes authority, rejects an existing account, checks token/account consistency and expiry, and validates authenticated inventory before encrypting and saving. SQL and privileged Data API creation reject a conflicting ID rather than upserting it. A collision cannot reset credentials, ownership, quota, revocation or compliance flags. New records do not assert unverified HIPAA, ZDR, BAA or PII assurances.
+General repository saves update allowlisted policy metadata only. Database triggers reject direct credential creation/replacement and desktop-binding edits outside the private no-login writer role. The Data API service role cannot insert shards or call the retired upsert/private enrollment functions. The controller administrator uses SQL-only private enrollment and refresh functions; it has no credential-write REST fallback. Database owners remain trusted administrators and can deliberately change schema/roles; this does not claim protection from a malicious database owner.
 
-Inventory acceptance is only a precondition. Observe actual worker capability evidence before declaring readiness. Cold allocation also has a bounded inventory check; existing owned workers can be adopted without repeating that cold-start check.
+## Existing records and schema rollout
 
-This command accepts the OAuth input above. Registry projection can also read explicit encrypted API-key records. This does not mean every application registration path was rewritten or that a desktop auto-enrolls unknown accounts.
+Migration `20260914231914_manual_desktop_shard_enrollment.sql` adds nullable `managed_desktop_id` and `desktop_enrolled_at`, a paired-state constraint, a unique desktop binding, protected credential writes and a durable lease-admission check. Existing rows retain their original source label, ciphertext, counters and revocation history. No legacy label or valid token is automatically promoted to manual enrollment. Until explicitly confirmed from its desktop, a row cannot receive new work through either the controller projection or database admission.
+
+Run `npm run test:relay:manual-db`, `npm run db:test`, `npm run db:verify`, relay authorization tests and the production build before rollout. Run `node --env-file-if-exists=.env.local --import tsx scripts/apply-manual-desktop-enrollment.ts` without a mode flag for read-only policy inventory. On an unapplied target, `--dry-run` validates the exact migration inside a transaction and rolls it back; `--apply` applies and records that version after review. An already-applied target returns inventory without reapplying or exercising the migration. Then load the compatible controller and application. Existing desktop sessions must reconnect after controller restart. Qualify accounts through the explicit UI flow; never backfill bindings from inferred email, host caches or operator-import labels.
+
+The DOWN migration restores the prior functions/grants and leaves enrollment columns as historical evidence. It reopens the older ingestion boundary and must be paired with deliberately reviewed software rollback; do not use it as a routine availability fix. Full rollback/reapply is tested in a disposable database. See [database operations](POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md#manual-desktop-policy-inventory-and-rollout) for rollout ordering and [current state](../../post-mortem/CURRENT_STATE.md) for deployed evidence and pending manual acceptance.
 
 ## Refresh an existing account
 
-1. Open `npm run relay:desktops` and review the selected workspace's shard link.
+Provider-session renewal is manual. Open the Desktop shortcut for the same workspace used at enrollment; a local link alone is insufficient authority.
+
+1. Open `npm run relay:desktops` and review the selected workspace's shard link and enrollment. An unconfirmed legacy account must first complete the explicit enrollment action above.
 2. Pause new work if repair requires a hold. Accepted work can finish.
 3. Complete sign-in through the device-code panel or `galx-relay login` in Terminal.
 4. Select an existing custom guest home with `CODEX_HOME=/home/operator/path/to/codex-home galx-relay use-login` if needed. Set `CODEX_HOME` to the directory containing `auth.json`; the helper accepts no path argument.
@@ -42,7 +42,7 @@ This command accepts the OAuth input above. Registry projection can also read ex
 
 The bridge also considers the private OAuth setup written by `galx-relay setup`, subject to the same account/expiry/validation checks. If multiple sources exist, it selects by saved-file evidence rather than assuming that local process startup synchronized authority.
 
-The bridge polls saved credentials; it is not an independent provider refresh daemon. Reads reject unsafe paths, symlinks, unexpected ownership, malformed or expired tokens, conflicting account hints and stale credential families. An unrelated login cannot overwrite a linked account. Matching suggests an existing eligible account for review; it does not create one.
+The bridge synchronizes credentials saved in the bound desktop; it never independently renews the provider session. Expiry requires manual provider sign-in in that desktop. Managed records are excluded from expired-credential revocation cleanup so they remain repairable. Reads reject unsafe paths, symlinks, unexpected ownership, malformed or expired tokens, conflicting account hints and stale credential families. An unrelated login cannot overwrite a linked account. Matching suggests an existing account for review; it neither enrolls it nor transfers its binding.
 
 The helper requests file-backed provider CLI credentials; it does not export keyrings. The operator must finish provider sign-in. A challenge, saved file or successful fixture is not proof of live account authentication.
 

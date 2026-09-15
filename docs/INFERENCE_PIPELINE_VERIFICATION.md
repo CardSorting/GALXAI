@@ -1,11 +1,11 @@
 # Inference verification
 
 <!-- docs-scope: current-guide -->
-> Private verification procedure. [The runbook](RELAY_VNEXT_RUNBOOK.md) and [dated session record](maintainers/RELAY_SESSION_VERIFICATION_20260909.md) separate source, fixtures and deployment.
+> Private verification procedure. [The runbook](RELAY_VNEXT_RUNBOOK.md) and [current state](../post-mortem/CURRENT_STATE.md) separate source, fixtures, deployed policy and actual inference. The [September 9 session record](maintainers/RELAY_SESSION_VERIFICATION_20260909.md) remains historical evidence.
 
 ## Preconditions
 
-Use explicitly enrolled authority; the inference verification script awaits registry initialization and no longer falls back to bulk seeding. Confirm intended environment, model entitlement and worker capability before live requests. Inventory acceptance is not a successful inference handshake.
+Use manually enrolled, desktop-bound authority. Legacy rows require explicit **Enroll shard** confirmation even when their tokens remain valid. The inference verification script awaits registry initialization and cannot restore capacity through bulk seeding. Confirm intended environment, model entitlement and worker capability before live requests. Inventory acceptance is not a successful inference handshake. Renew expired provider sessions manually in the owning desktop and verify the saved/applied revision first; automatic sync is not provider renewal.
 
 Run [targeted regressions](maintainers/RELAY_HARDENING.md) first. `npm run db:test` creates a disposable Docker database and strips inherited credentials before synthetic account creation. Explicit database overrides remain restricted to initialized loopback fixtures.
 

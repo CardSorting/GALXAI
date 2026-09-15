@@ -27,6 +27,10 @@ Run `npm run test:free-quota`, `npm run test:free-quota:db`, `npm run test:image
 
 The studio preserves a bounded collection of receipt IDs across reload and navigation. Recover request uses the saved exact POST key and payload after an acknowledgement loss. Check status/Resume updates only retrieves accepted work. Transient status failures must not remove receipts; known non-start failures stop observation and trigger an advisory availability read. A confirmed capability outage disables new submissions and offers Check availability (GET only), while existing receipt recovery remains available. An unknown read does not erase the last known outage. Inspect private logs to correlate historical generic failures; do not rewrite old receipts solely from a library page being empty.
 
+## Codex image tool transport
+
+For a Codex-tool repair, verify the standalone image backend independently from Responses tool support. A missing Responses `image_generation` tool does not itself establish whether the separate `image_gen.imagegen` backend is available. Follow [relay image verification](../../docs/RELAY_VNEXT_RUNBOOK.md#image-verification); require a decoded image before publishing capability. A generic HTTP 403 is a request rejection, not proof of its account-plan cause. Keep the existing GET-only outage flow and owned library while access is unresolved. Any replacement managed-fleet account must be signed in manually inside a Relay Desktop and explicitly enrolled under [the sole enrollment procedure](../../docs/maintainers/RELAY_CREDENTIAL_ENROLLMENT.md). A legacy record or inventory response alone is not eligible capacity. Renew an expired provider session manually in its bound desktop; do not accept externally supplied tokens or reopen API/CLI ingestion to repair image availability. Verify a decoded image only after enrollment and compatible worker rollout; this guide does not establish a working connection.
+
 ## Live acceptance
 
 1. Use an existing authorized signed-in browser session. Open My images and Favorites without signing out; verify the expected owned data or honest empty states.

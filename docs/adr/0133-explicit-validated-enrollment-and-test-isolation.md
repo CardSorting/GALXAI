@@ -13,7 +13,11 @@ Separately, bulk import scanned host login caches without provider validation an
 
 The rejection journal records credential revisions, not original HTTP exchanges. Historical handshake statuses cannot be reconstructed from it. The evidence therefore does not establish that genuine accounts require manual-only workers.
 
-## Decision
+## September 14 successor
+
+[ADR 0152](0152-manual-desktop-only-shard-authority.md) replaces the external enrollment policy below with manual desktop-only enrollment and schema enforcement. This record preserves the September 9 decision and fixture findings; its CLI recipe is historical, not current instructions. Use the [current enrollment guide](../maintainers/RELAY_CREDENTIAL_ENROLLMENT.md).
+
+## Original September 9 decision
 
 Retain automatic reconciliation, capability refresh, bounded recovery, drains and ownership cleanup for registered authority. Retire ambient/bulk discovery. `shards:import`, `--import`, `seedMultiAccountFleet()` and enabled host discovery now fail with migration guidance before their former discovery work.
 

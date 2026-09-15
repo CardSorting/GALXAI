@@ -5,7 +5,11 @@
 
 The active deployment guide is the [capability-aware federation runbook](RELAY_VNEXT_RUNBOOK.md). This retained URL replaces the historical shared-container instructions so existing bookmarks lead to the current procedure.
 
-The deployment is a supervised host controller plus at most one isolated worker per eligible shard. Repair desktops are separate environments; enrollment is explicit, while worker lifecycle remains automatic. Capability discovery gates routing. Enabling the documented Codex image-tool alias requires explicit worker configuration and successful image verification.
+The deployment is a supervised host controller plus at most one isolated worker per eligible shard. Repair desktops are separate environments and the sole manual enrollment source. The operator signs in there and chooses **Enroll shard**; the schema requires that unique desktop binding before admission. External API/CLI/file ingestion is closed, including for retained legacy rows until explicit confirmation. Worker lifecycle remains automatic, while expired provider sessions require manual renewal in the owning desktop. Capability discovery gates routing. Enabling the documented Codex image-tool alias requires explicit worker configuration and successful image verification.
+
+## Manual policy rollout
+
+Apply the reviewed manual-enrollment migration before compatible controller/application readers. Preserve homes, links, signing state, holds and uncertain receipts during the supervised reload. See [the migration guide](MIGRATION_GUIDE.md) and [ADR 0152](adr/0152-manual-desktop-only-shard-authority.md). A rollback that reopens old insertion privileges is a deliberate policy rollback, not routine availability repair. Use [current state](../post-mortem/CURRENT_STATE.md) for actual activation and remaining provider acceptance.
 
 ## Legacy boundary
 

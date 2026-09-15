@@ -1,6 +1,6 @@
 /**
  * GALXAI: Enterprise Hardened "Provider as Auth" Engine (V3)
- * 1-Click Zero-Friction Provider Ingestion, AES-256-GCM Envelope Vaulting,
+ * Session verification, AES-256-GCM Envelope Vaulting,
  * JWE-grade Encrypted Bearer Tokens, OAuth 2.0 Token Rotation with Reuse Cascades,
  * Client Fingerprint Binding (DPoP), Step-Up SUDO Mode, Token Scoping,
  * Adaptive Behavioral Risk Scoring, and KMS Key Re-Wrapping.
@@ -13,14 +13,11 @@ import { GalxCryptoVault, PRIMARY_KEY_VERSION } from '../vault/GalxCryptoVault';
 import { galxRouter } from '../router/GalxModelRouter';
 import { GalxPersistence } from '../../lib/storage/GalxPersistence';
 import { SessionRepository } from '../../lib/supabase/repositories/SessionRepository';
-import { OAuthRepository } from '../../lib/supabase/repositories/OAuthRepository';
 import { BroccoliDbTable } from '../broccolidb/broccolidb-table';
 import { BroccoliNaturalQueryParser } from '../broccolidb/broccolidb-natural-query';
 import type { DbAggregateQuery, DbAggregateResult } from '../broccolidb/broccolidb.contracts';
 import type {
   ProviderType,
-  ShardIsolationMode,
-  GalxShardAccount,
   GalxUserSession,
   AuthSessionClaims,
   AuthIdentityResult,
@@ -35,8 +32,6 @@ import type {
   SessionRiskEvaluation
 } from '../contracts/GalxContracts';
 
-import { GalxOAuthManager } from './GalxOAuthManager';
-import { GalxPreflightValidator } from '../validator/GalxPreflightValidator';
 
 export class GalxAuthEngine {
   private static instance: GalxAuthEngine;
@@ -66,348 +61,14 @@ export class GalxAuthEngine {
     return GalxAuthEngine.instance;
   }
 
-  /**
-   * 1-Click Provider Ingestion & Hardened Authentication Flow ("Provider IS Auth").
-   * Ingests upstream OAuth 2.0 authentication tokens or validated developer API keys,
-   * vaults credentials with AES-256-GCM + AAD envelope binding, provisions a Substrate shard,
-   * encrypts a JWE-grade bearer session token, and records session in Supabase PostgreSQL.
-   */
-  async authenticateProviderUser(
-    provider: ProviderType,
-    params: ProviderAuthParams = {},
-    account?: { id: string; email: string; name: string }
-  ): Promise<ProviderAuthResult> {
-    if (!account?.id || !account.email) throw new Error('VERIFIED_ACCOUNT_REQUIRED');
-    const {
-      apiKey,
-      accessToken,
-      refreshToken,
-      accountId: explicitAccountId,
-      idToken,
-      expiresAtMs: explicitExpiresAtMs,
-      authType: explicitAuthType,
-      mode = 'pooled',
-      ipAddress,
-      userAgent,
-      workspaceId,
-      scopes = ['*']
-    } = params;
-
-    const effectiveProvider: ProviderType = 'openai';
-    const uid = account.id;
-    const familyId = `fam_${Date.now()}_${crypto.randomBytes(8).toString('hex')}`;
-    const fingerprint = GalxCryptoVault.generateClientFingerprint(ipAddress, userAgent);
-    const oauthManager = GalxOAuthManager.getInstance();
-
-    // =========================================================================
-    // 2. Real Credential Ingestion & Verification (OAuth Tokens vs API Keys)
-    // =========================================================================
-    let rawTokenSecret: string | undefined = undefined;
-    let authType: 'oauth' | 'api_key' = (explicitAuthType === 'oauth' || explicitAuthType === 'api_key')
-      ? explicitAuthType
-      : (accessToken ? 'oauth' : 'api_key');
-    let email = account.email;
-    let displayName = account.name;
-    let accountId = explicitAccountId;
-    let expiresAtMs = explicitExpiresAtMs;
-
-    if (accessToken || idToken || explicitAuthType === 'oauth') {
-      authType = 'oauth';
-      rawTokenSecret = accessToken || idToken;
-
-      if (!rawTokenSecret || rawTokenSecret.trim().length < 10) {
-        throw new Error('INVALID_OAUTH_TOKEN: Provided access token is invalid or too short');
-      }
-
-      // Parse claims from id_token or access_token
-      const tokenSource = idToken || accessToken || '';
-      if (!accountId) {
-        accountId = oauthManager.extractAccountId(tokenSource);
-      }
-      if (!email) {
-        email = oauthManager.extractEmail(tokenSource) || 'user@openai.oauth';
-      }
-      if (!displayName) {
-        displayName = oauthManager.extractName(tokenSource) || 'OpenAI OAuth User';
-      }
-      if (!expiresAtMs) {
-        const parsedExp = oauthManager.extractExpiryMs(accessToken || '');
-        expiresAtMs = parsedExp || (Date.now() + 3600 * 1000);
-      }
-    } else if (apiKey) {
-      authType = 'api_key';
-      const preflight = GalxPreflightValidator.validateKeyFormat(apiKey, effectiveProvider);
-      if (!preflight.isValid) {
-        throw new Error(preflight.error || 'INVALID_API_KEY_FORMAT: Key does not match provider specifications');
-      }
-      rawTokenSecret = apiKey.trim();
-      if (!email) {
-        email = 'creator@openai.user';
-      }
-      if (!displayName) {
-        displayName = 'OpenAI Creator';
-      }
-    } else {
-      throw new Error('MISSING_PROVIDER_CREDENTIALS');
-    }
-
-    // =========================================================================
-    // 3. Vault credential with AES-256-GCM Envelope Encryption & AAD Binding
-    // =========================================================================
-    const allowEphemeralTestIdentity =
-      process.env.NODE_ENV === 'test' &&
-      process.env.GALX_ALLOW_EPHEMERAL_SHARDS_FOR_TESTS === 'true';
-    const shardIdSecret =
-      process.env.GALX_SHARD_ID_SECRET ||
-      process.env.GALX_VAULT_MASTER_SECRET ||
-      (allowEphemeralTestIdentity ? 'test-only-ephemeral-shard-identity' : undefined);
-    if (!shardIdSecret) {
-      throw new Error('GALX_SHARD_ID_SECRET is required for stable, non-reversible shard identifiers');
-    }
-    const shardIdentity = accountId || rawTokenSecret!;
-    const shardId = `codex_sh_${crypto
-      .createHmac('sha256', shardIdSecret)
-      .update(`${uid}:${effectiveProvider}:${shardIdentity}`)
-      .digest('hex')
-      .slice(0, 24)}`;
-    const encrypted = GalxCryptoVault.encryptSecret(
-      {
-        apiKey: authType === 'api_key' ? rawTokenSecret : undefined,
-        accessToken: authType === 'oauth' ? rawTokenSecret : undefined,
-        refreshToken,
-        expiresAtMs,
-        accountId: accountId || `acc_${uid.slice(-8)}`,
-        email,
-        name: displayName
-      },
-      uid,
-      shardId,
-      effectiveProvider
-    );
-
-    // 4. Create Rate Governor Continuous Bucket
-    const bucket = galxRouter.rateGovernor.createDefaultBucket(
-      400000,
-      400000,
-      800
-    );
-
-    // 5. Provision Shard Account
-    const shard: GalxShardAccount = {
-      id: shardId,
-      userId: uid,
-      accountLabel: displayName ? `${displayName}'s OpenAI Vault` : 'Personal AI Shard',
-      provider: effectiveProvider,
-      authType,
-      shardMode: mode === 'private' ? 'private' : 'pooled',
-      status: 'healthy',
-      priority: mode === 'private' ? 50 : 10,
-      weight: 1,
-      fencingToken: 1,
-      apiKeyMasked: GalxCryptoVault.maskApiKey(rawTokenSecret!),
-      encryptedSecrets: encrypted,
-      encryptedPayload: encrypted,
-      tokenBucket: bucket,
-      stats: {
-        totalRequestsServed: 0,
-        totalTokensConsumed: 0,
-        consecutiveFailures: 0
-      },
-      permissionRetracted: false,
-      registrySource: authType === 'oauth' ? 'oauth' : 'api',
-      expiresAtMs,
-      accountId,
-      createdAtMs: Date.now(),
-      updatedAtMs: Date.now()
-    };
-
-    await galxRouter.substrate.addAccountAsync(shard, { requireRemote: true });
-
-    // 5a. Persist OAuth Provider Identity in OAuthRepository (Sovereign Identity Linking)
-    if (authType === 'oauth' || accessToken) {
-      try {
-        const oauthRepo = OAuthRepository.getInstance();
-        const identityId = `oauth_${effectiveProvider}_${accountId || uid}`;
-        oauthRepo.saveOAuthIdentity({
-          id: identityId,
-          userId: uid,
-          provider: effectiveProvider,
-          providerAccountId: accountId || uid,
-          email: email || `${effectiveProvider}@user.ai`,
-          displayName,
-          shardId,
-          encryptedAccessToken: encrypted,
-          encryptedRefreshToken: refreshToken ? GalxCryptoVault.encryptSecret({ refreshToken }, uid, shardId, effectiveProvider) : undefined,
-          idTokenClaims: idToken ? GalxOAuthManager.getInstance().parseJwtClaims(idToken) : undefined,
-          scopes,
-          expiresAtMs,
-          lastRefreshedAtMs: Date.now(),
-          status: 'active',
-          createdAtMs: Date.now(),
-          updatedAtMs: Date.now()
-        }).catch(() => {});
-      } catch {}
-    }
-
-    // 6. Provider connection never grants administrative or step-up authority.
-    const sessionId = `sess_${Date.now()}_${crypto.randomBytes(8).toString('hex')}`;
-
-    const tokenResult = GalxCryptoVault.generateEncryptedSessionToken({
-      userId: uid,
-      accountVerified: true,
-      provider: effectiveProvider,
-      shardId,
-      shardMode: shard.shardMode,
-      email: email || `${effectiveProvider}@user.ai`,
-      displayName: displayName || 'Developer',
-      workspaceId,
-      role: 'developer',
-      scopes,
-      familyId,
-      sequenceNumber: 1,
-      fingerprint,
-      ttlMs: 30 * 24 * 60 * 60 * 1000
-    });
-
-    const sessionRecord: GalxUserSession = {
-      id: sessionId,
-      userId: uid,
-      provider: effectiveProvider,
-      shardId,
-      sessionFamilyId: familyId,
-      sequenceNumber: 1,
-      scopes,
-      riskScore: 0,
-      tokenHash: tokenResult.tokenHash,
-      fingerprintHash: fingerprint,
-      workspaceId,
-      ipAddress,
-      userAgent,
-      isRevoked: false,
-      issuedAtMs: tokenResult.claims.iat,
-      expiresAtMs: tokenResult.expiresAtMs,
-      lastActiveAtMs: Date.now(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-
-    // 7. Persist Session to Supabase PostgreSQL & Cache
-    await this.sessionRepo.createSession(sessionRecord);
-
-    // 8. Security Audit Event
-    this.persistence.logAudit(
-      'PROVIDER_AUTH_LOGIN',
-      {
-        provider: effectiveProvider,
-        authType,
-        shardId,
-        shardMode: shard.shardMode,
-        email,
-        sessionId,
-        familyId,
-        scopes,
-        tokenIssuedAt: tokenResult.claims.iat,
-        expiresAt: tokenResult.expiresAtMs
-      },
-      shardId,
-      uid
-    );
-
-      this.persistence.logAudit('OAUTH_PROVIDER_AUTHENTICATED', { provider: effectiveProvider, shardMode: shard.shardMode, scopes }, shardId, uid);
-
-      return {
-        success: true,
-        user: {
-          id: uid,
-          email: email || `${effectiveProvider}@user.ai`,
-          name: displayName || 'Developer',
-          provider: effectiveProvider,
-          shardId,
-          shardMode: shard.shardMode || 'pooled',
-          token: tokenResult.token,
-          scopes,
-          expiresAtMs: tokenResult.expiresAtMs
-        }
-      };
-    }
-
-  /**
-   * Refreshes upstream OAuth provider tokens for a specific shard account using single-flight mutex.
-   */
-  async refreshProviderShardTokens(shardId: string): Promise<boolean> {
-    try {
-      await galxRouter.substrate.ensureFreshFromAuthority();
-    } catch {
-      return false;
-    }
-    const shard = galxRouter.substrate.getAccount(shardId);
-    if (!shard || shard.permissionRetracted || shard.status === 'revoked') {
-      return false;
-    }
-
-    try {
-      const encrypted = shard.encryptedPayload || shard.encryptedSecrets;
-      if (!encrypted) return false;
-
-      const decrypted = GalxCryptoVault.decryptSecret(encrypted, shard.userId, shard.id, shard.provider);
-      if (!decrypted.refreshToken) {
-        return false;
-      }
-
-      const refreshed = await GalxOAuthManager.getInstance().refreshAccessToken(shard.provider, decrypted.refreshToken);
-      const newEncrypted = GalxCryptoVault.encryptSecret(
-        {
-          ...decrypted,
-          accessToken: refreshed.accessToken,
-          refreshToken: refreshed.refreshToken || decrypted.refreshToken,
-          expiresAtMs: refreshed.expiresAtMs,
-          accountId: refreshed.accountId || decrypted.accountId
-        },
-        shard.userId,
-        shard.id,
-        shard.provider
-      );
-
-      const updatedShard: GalxShardAccount = {
-        ...shard,
-        status: 'healthy',
-        cooldownUntilTimestampMs: undefined,
-        stats: {
-          ...shard.stats,
-          consecutiveFailures: 0
-        },
-        apiKeyMasked: GalxCryptoVault.maskApiKey(refreshed.accessToken),
-        encryptedSecrets: newEncrypted,
-        encryptedPayload: newEncrypted,
-        expiresAtMs: refreshed.expiresAtMs,
-        accountId: refreshed.accountId || decrypted.accountId,
-        updatedAtMs: Date.now()
-      };
-
-      await galxRouter.substrate.updateAccountAsync(updatedShard, { requireRemote: true });
-      this.persistence.logAudit('OAUTH_TOKEN_ROTATED', { provider: shard.provider, expiresAtMs: refreshed.expiresAtMs }, shardId, shard.userId);
-
-      // Update identity record in OAuthRepository
-      try {
-        const oauthRepo = OAuthRepository.getInstance();
-        const identity = await oauthRepo.findIdentityByProvider(shard.userId, shard.provider);
-        if (identity) {
-          await oauthRepo.saveOAuthIdentity({
-            ...identity,
-            encryptedAccessToken: newEncrypted,
-            expiresAtMs: refreshed.expiresAtMs,
-            lastRefreshedAtMs: Date.now(),
-            status: 'active',
-            updatedAtMs: Date.now()
-          });
-        }
-      } catch {}
-
-      return true;
-    } catch {
-      return false;
-    }
+  /** Retired: only the private Relay Desktops registrar may enroll credentials. */
+  async authenticateProviderUser(_provider: ProviderType, _params: ProviderAuthParams = {},
+    _account?: { id: string; email: string; name: string }): Promise<ProviderAuthResult> {
+    throw new Error('Provider connections are unavailable.');
   }
+
+  /** Provider sessions are renewed manually in their owning desktop. */
+  async refreshProviderShardTokens(_shardId: string): Promise<boolean> { return false; }
 
   /**
    * Verifies an incoming session bearer token cryptographically and checks PostgreSQL state.
@@ -659,41 +320,9 @@ export class GalxAuthEngine {
     return this.sessionRepo.getUserSecurityPosture(userId, currentSessionId);
   }
 
-  /**
-   * Re-encrypts all vaulted credentials under a new target KMS keyring version with zero downtime.
-   */
-  async reencryptVaultShards(targetKeyVersion = PRIMARY_KEY_VERSION): Promise<{ total: number; reencrypted: number }> {
-    await galxRouter.substrate.ensureFreshFromAuthority();
-    const shards = galxRouter.substrate.listAccounts();
-    let reencrypted = 0;
-
-    for (const shard of shards) {
-      try {
-        if (shard.encryptedSecrets) {
-          const newSecrets = GalxCryptoVault.reencryptSecret(
-            shard.encryptedSecrets,
-            shard.userId,
-            shard.id,
-            shard.provider,
-            targetKeyVersion
-          );
-          const updatedShard: GalxShardAccount = {
-            ...shard,
-            encryptedSecrets: newSecrets,
-            encryptedPayload: newSecrets,
-            updatedAtMs: Date.now()
-          };
-          await galxRouter.substrate.updateAccountAsync(updatedShard, { requireRemote: true });
-          reencrypted++;
-        }
-      } catch {
-        // Continue
-      }
-    }
-
-
-    this.persistence.logAudit('KMS_VAULT_KEYS_REWRAPPED', { targetKeyVersion, reencrypted });
-    return { total: shards.length, reencrypted };
+  /** Credential rewrap is confined to the transactional administrator CLI. */
+  async reencryptVaultShards(_targetKeyVersion = PRIMARY_KEY_VERSION): Promise<{ total: number; reencrypted: number }> {
+    throw new Error('Use the private transactional vault rotation command.');
   }
 
   /**

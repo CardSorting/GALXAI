@@ -52,7 +52,7 @@ export class GalxCredentialSubstrate {
 
     this.accountTable.clear();
     for (const shard of persistedShards) {
-      if (!shard.permissionRetracted && shard.status !== 'revoked') {
+      if (shard.managedDesktopId && shard.desktopEnrolledAt && !shard.permissionRetracted && shard.status !== 'revoked') {
         this.accountTable.put(shard.id, shard);
       }
     }
@@ -90,7 +90,7 @@ export class GalxCredentialSubstrate {
       const shards = await this.persistence.getShardsAsync(undefined, { requireRemote: true });
       this.accountTable.clear();
       for (const shard of shards) {
-        if (!shard.permissionRetracted && shard.status !== 'revoked') {
+        if (shard.managedDesktopId && shard.desktopEnrolledAt && !shard.permissionRetracted && shard.status !== 'revoked') {
           this.accountTable.put(shard.id, shard);
         }
       }

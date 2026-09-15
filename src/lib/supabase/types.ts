@@ -168,7 +168,10 @@ export interface Database {
       };
     };
     Views: { [_ in never]: never };
-    Functions: { [_ in never]: never };
+    Functions: {
+      enroll_desktop_shard: { Args: { p_desktop_id: string; p_row: Json; p_expected?: Json }; Returns: string };
+      refresh_desktop_shard: { Args: { p_desktop_id: string; p_id: string; p_expected: Json; p_next: Json }; Returns: boolean };
+    };
     Enums: { [_ in never]: never };
     CompositeTypes: { [_ in never]: never };
   };
@@ -543,6 +546,7 @@ export interface Database {
           supported_models: string[] | null;
           unsupported_models: string[] | null;
           registry_source: string;
+          managed_desktop_id: string | null; desktop_enrolled_at: string | null;
           registry_revision: number;
           tier_pool: string;
           max_concurrency_ceiling: number;

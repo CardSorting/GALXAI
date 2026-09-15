@@ -1,7 +1,7 @@
 /** Explicit opt-in compatibility contract: this is a tool route, not an exact GPT Image model guarantee. */
 export const CODEX_IMAGE_ALIAS = Object.freeze({
-  requestedModel: 'gpt-image-2', executionModel: 'gpt-5.6-terra',
-  routingMode: 'codex_image_tool_alias', tool: 'image_generation',
+  requestedModel: 'gpt-image-2', executionModel: 'gpt-image-2',
+  routingMode: 'codex_image_tool_alias', tool: 'image_gen.imagegen',
   imageModelSelection: 'provider_managed',
 });
 export const IMAGE_TOOL_EVIDENCE_TTL_MS = 3600000;

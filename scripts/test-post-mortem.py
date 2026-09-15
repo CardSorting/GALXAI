@@ -63,6 +63,15 @@ class IncidentGuardTests(unittest.TestCase):
         self.events.append(deepcopy(self.events[0]))
         self.assertTrue(any('Invalid event ID' in error for error in self.errors()))
 
+    def test_utc_timestamps_accept_equivalent_offsets_without_rewriting_events(self):
+        for timestamp in ('2026-09-15T00:00:00Z', '2026-09-15T00:00:00+00:00'):
+            self.events[0]['observed_at'] = timestamp
+            self.assertEqual(self.errors(), [])
+            self.assertEqual(self.events[0]['observed_at'], timestamp)
+        for timestamp in ('2026-09-15T00:00:00', '2026-09-14T18:00:00-06:00'):
+            self.events[0]['observed_at'] = timestamp
+            self.assertTrue(any('timestamp must be UTC' in error for error in self.errors()))
+
     def test_correction_must_reference_prior_event(self):
         self.events[0]['supersedes'] = 'EVT-future'
         self.assertTrue(any('earlier event' in error for error in self.errors()))

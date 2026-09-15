@@ -191,7 +191,7 @@ GALXAI employs a high-density, mission-critical cyberpunk command center aesthet
 ## Components
 
 - **API Request Inspector**: A bounded, single-request diagnostic with request JSON, response envelope, headers, latency, and copyable integration snippets. It must not grow conversation history, personas, sharing, creative projects, or generated-content libraries.
-- **Shard Vault Card**: Provider status indicator (OpenAI, Anthropic, Gemini), active token count, endpoint health ping, and key revocation actions.
+- **Private operator account status**: Within authorized Relay Desktops, distinguish saved login, manual enrollment, applied credential revision and verified capability. Direct expired-session repair to manual sign-in in the owning desktop. Public product cards expose only customer-relevant availability; they do not collect provider tokens or show operational shard details.
 - **Ledger Bar**: Real-time balance chip, deposit match incentive tag, and instant Stripe/Crypto top-up trigger.
 
 ## Do's and Don'ts

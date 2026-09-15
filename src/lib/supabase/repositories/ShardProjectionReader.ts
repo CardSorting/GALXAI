@@ -17,7 +17,7 @@ export const SHARD_PROJECTION_COLUMNS = [
   'consecutive_failures', 'consecutive_successes', 'average_latency_ms', 'last_latency_ms',
   'fencing_token', 'permission_retracted', 'cooldown_until_ms', 'credential_expires_at_ms',
   'privacy_capabilities', 'sliding_window_quota', 'supported_models', 'unsupported_models',
-  'registry_source', 'registry_revision', 'created_at_ms', 'updated_at_ms', 'created_at', 'updated_at',
+  'managed_desktop_id', 'desktop_enrolled_at', 'registry_source', 'registry_revision', 'created_at_ms', 'updated_at_ms', 'created_at', 'updated_at',
 ] as const satisfies readonly (keyof Database['public']['Tables']['galx_shard_accounts']['Row'])[];
 export type ShardProjectionRow = Pick<Database['public']['Tables']['galx_shard_accounts']['Row'], typeof SHARD_PROJECTION_COLUMNS[number]>;
 

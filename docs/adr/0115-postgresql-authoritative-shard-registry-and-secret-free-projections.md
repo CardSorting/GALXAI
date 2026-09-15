@@ -14,24 +14,30 @@
 * **Impact**: credential custody, multi-worker consistency, revocation, auditability
 * **Migrations**: `20260904150000` through `20260904210000`
 
-## Current implementation scope (reconciled 2026-09-09)
+## Current implementation scope (reconciled 2026-09-15)
 
-The durable lease requirements below describe the platform pool's database-backed dispatch path. The standalone `src/relay/relay-server.ts` reads the PostgreSQL credential registry but does **not** acquire a database lease for each upstream attempt. The federation's slots remain process-local; its admission identity tombstones, rejection revisions and maintenance holds have private durable journals, while response bodies remain process-local. Opted-in Sites text completion receipts persist separately on worker volumes under [ADR 0135](0135-durable-sites-receipts-and-local-admission.md); those receipts do not turn federation slots into database leases. Rejection does not automatically revoke a registry row or provide multi-host propagation. [ADR 0126](0126-capability-aware-shard-relay-federation.md) defines federation ownership; [ADRs 0131–0133](README.md) govern holds, desktop handoff and explicit enrollment.
+The durable lease requirements below describe the platform pool's database-backed dispatch path. The standalone `src/relay/relay-server.ts` reads the PostgreSQL credential registry but does **not** acquire a database lease for each upstream attempt. The federation's slots remain process-local; its admission identity tombstones, rejection revisions and maintenance holds have private durable journals, while response bodies remain process-local. Opted-in Sites text completion receipts persist separately on worker volumes under [ADR 0135](0135-durable-sites-receipts-and-local-admission.md); those receipts do not turn federation slots into database leases. Rejection does not automatically revoke a registry row or provide multi-host propagation. [ADR 0126](0126-capability-aware-shard-relay-federation.md) defines federation ownership; [ADR 0131](0131-private-operator-desktops-and-maintenance.md) governs holds; [ADR 0132](0132-recoverable-desktop-credential-handoff.md) and [ADR 0152](0152-manual-desktop-only-shard-authority.md) govern bound desktop handoff and manual enrollment.
 
 “Secret-free” refers to credential projections/journals excluding provider secrets. Relay job checkpoints can still contain unfinished prompt/messages; it is not a zero-retention promise. The Docker deployment disables personal credential discovery and stores relay state in a dedicated named volume.
 
-## 1. Context
+### September 14 partial supersession
+
+[ADR 0152](0152-manual-desktop-only-shard-authority.md) preserves PostgreSQL registry authority, encrypted custody, revision fencing and secret-free projections. It replaces OAuth callbacks, CLI add/import, generic upsert and Data API credential writes with explicit enrollment from a manually created Relay Desktop. The paired `managed_desktop_id` / `desktop_enrolled_at` fields and unique desktop binding gate controller and database lease admission. Existing rows retain ciphertext, ownership, source labels, counters and history but cannot serve until explicitly confirmed; no automatic backfill is permitted.
+
+Only private SQL enrollment/refresh functions and the trusted vault-rewrap CLI may write through the no-login writer role. Ordinary repository saves update policy metadata only. Expired provider sessions are renewed manually in the owning desktop; automatic saved-file synchronization persists an already completed login. These changes do not turn local federation slots into multi-host database leases. Current procedures are in [enrollment](../maintainers/RELAY_CREDENTIAL_ENROLLMENT.md) and [key rotation](../maintainers/MULTI_TENANT_SHARD_AND_KEY_ROTATION.md).
+
+## 1. Original context
 
 The shard fleet was previously persisted to `.galx-shards.json` and mirrored to PostgreSQL with fire-and-forget writes. That design created two competing realities: a process could route from a stale local file after a remote revocation, and a failed database write could still appear successful locally. A repository-embedded fallback encryption secret also made historical local ciphertext recoverable by anyone with source access. Automatic edge synchronization created a third credential store by copying long-lived provider tokens into edge KV.
 
 This violates the authority doctrine in ADR 0114. A cache, transport, queue, or edge projection cannot decide which credentials exist or remain authorized.
 
-## 2. Decision
+## 2. Original September 4 decision
 
 Supabase PostgreSQL is the sole shard registry authority:
 
 ```text
-Operator / OAuth callback proposes registration or rotation
+Historical operator / OAuth callback registration or rotation
                          │
                          ▼
              Credential registry service
@@ -89,7 +95,7 @@ The high-speed pool still scores candidates and maintains per-process scheduling
 
 Every acquisition through this database-backed lease path requires an idempotency key. Lease procedures use a consistent shard-before-lease lock order to avoid acquisition/release/scavenger deadlocks. Long-lived streams renew their lease by heartbeat; renewal requires the current fencing token and transport is cancelled if authority can no longer be proven. Synchronous pool methods remain available only for simulations and operator diagnostics; they must never be described as cross-worker ownership.
 
-Generic registry updates through the service-role Data API use a database-owned registry upsert function. New operator enrollment instead uses create-only SQL/REST persistence under ADR 0133; duplicate creation must not overwrite existing authority. The desktop bridge performs conditional credential replacement under ADR 0132. Its conflict path updates only control-plane fields and cannot overwrite live reservation, usage, concurrency, or fencing counters from a stale worker projection.
+The September 4 implementation used a service-role Data API registry upsert, followed by create-only SQL/REST operator enrollment under ADR 0133 and conditional desktop credential replacement under ADR 0132. Those credential-write paths are superseded by ADR 0152. The surviving counter-safety requirement is unchanged: stale control-plane projections must not overwrite live reservation, usage, concurrency or fencing counters.
 
 Legacy tier leases and composite gateway RPCs previously formed competing authority paths. Their client/runtime grants are revoked and their tables remain owner-only forensics. Versioned gateway v2 RPCs accept a request idempotency key, serialize duplicate admissions before shard selection, and delegate to the same authoritative acquire/release functions. The L1 gateway cache is keyed by request ID; it can replay one request's decision but cannot lend the same lease to unrelated work. Wallet settlement is guarded by a unique lease receipt so ambiguous postflight retries cannot double-charge.
 
@@ -97,7 +103,7 @@ Universal QoS admission remains a policy proposal, not shard ownership. Its runt
 
 The adjacent LUMI/community compute-authority repositories follow the same failure rule. Their acquisition, heartbeat, settlement, sweep, and grant RPCs are service-only capabilities; runtime roles cannot mutate their lease/quota tables directly. A configured direct PostgreSQL pool is preferred, the privileged Data API is a fallback, and loss of both authorities produces an explicit rejection rather than a locally minted lease or grant.
 
-## 3. Industry pattern mapping
+## 3. Original industry pattern mapping
 
 | Established pattern | GALXAI application |
 | :--- | :--- |
@@ -108,7 +114,7 @@ The adjacent LUMI/community compute-authority repositories follow the same failu
 | Vault leases | renewable, fenced work leases; future edge access is short-lived and revocable, never a root-credential copy |
 | Temporal service separation | durable authority, task delivery, and worker execution remain distinct concerns |
 
-## 4. Failure policy
+## 4. Original failure policy
 
 | Failure | Required behavior |
 | :--- | :--- |
@@ -124,42 +130,41 @@ The adjacent LUMI/community compute-authority repositories follow the same failu
 | Duplicate operator enrollment | Create-only conflict; preserve credentials, ownership, revocation and counters |
 | Legacy/synthetic entries | Reversible quarantine before deletion |
 
-## 5. Security boundary
+## 5. Original security boundary
 
 - `galx_shard_accounts` and `galx_shard_registry_events` have RLS enabled and forced.
 - `PUBLIC`, `anon`, and `authenticated` have no table privileges on either table.
-- Registry upsert and lease mutation procedures are service-only and pin `search_path` to `public, pg_temp`.
+- The original registry upsert and lease mutation procedures were service-only and pinned `search_path` to `public, pg_temp`. ADR 0152 closes the generic upsert and separates credential writers from service-role lease authority.
 - Superseded `SECURITY DEFINER` shard, vault-rewrap, and gateway routines are owner-only; no runtime role can execute them.
 - Legacy shard lease/telemetry tables are forced-RLS, owner-only forensic records rather than writable fallbacks.
 - The privileged Supabase client requires a service-role/secret key and never substitutes a publishable key.
 - Admin-key detection accepts only `sb_secret_…` credentials or legacy JWTs whose role is `service_role`; a misplaced publishable key fails closed.
-- CLI credential input comes from environment or an interactive secret channel, never command-line arguments.
+- The original CLI input policy excluded command-line secrets. CLI credential ingestion itself is now closed under ADR 0152.
 - Direct database credentials and vault master keys must never have source-code defaults.
 
-## 6. Operations
+## 6. Current operations and historical command disposition
 
-```bash
-# Explicit validated enrollment; inject operator OAuth input privately first
-node --env-file-if-exists=.env.local --import tsx scripts/manage-shards.ts --add
+Use **GALX Relay Monitor.app** on the Desktop or `npm run relay:desktops`, sign in inside the account's manually created desktop, and explicitly choose **Enroll shard**. Keep that desktop for manual session renewal. Existing eligible legacy accounts require explicit confirmation; changing their local link alone cannot enroll or transfer them. Follow [the complete enrollment runbook](../maintainers/RELAY_CREDENTIAL_ENROLLMENT.md).
 
-# Inspect counts and remediation categories without printing identities/secrets
+The former `manage-shards.ts --add` recipe and credential environment inputs are retired. The historical `shards:verify-authority` harness exercised the former upsert and now refuses the new schema; do not restore grants to satisfy it. Preserve its dated test results as evidence of that earlier implementation.
+
+```sh
+# Read-only policy inventory; no enrollment or token renewal
+node --env-file-if-exists=.env.local --import tsx scripts/apply-manual-desktop-enrollment.ts
+
+# Inspect counts and remediation categories without identities or secrets
 npm run shards:doctor
 
-# Verify live RLS, grants, journal hygiene, counter-safe upsert, capacity,
-# idempotency, fenced renewal, and no JSON cache
-npm run shards:verify-authority
-
-# Verify fail-closed and memory-only local behavior
+# Isolated policy and authority regression coverage
+npm run test:relay:manual-db
 npm run shards:test-authority
 ```
 
-`--quarantine-legacy` is a reversible remediation: it sets `status = revoked` and `permission_retracted = true`. Deletion is a separate, explicit operation after retention and incident review.
+An unconfirmed retained record is expected during migration and is not grounds for broad quarantine. The targeted legacy-quarantine operation preserves evidence but revokes authority; use only the reviewed incident procedure for confirmed contamination. Deletion remains a separate retention decision. Managed expiry instead requires manual renewal in the bound desktop.
 
-Bulk cache import is retired. Refresh existing accounts through the linked-desktop bridge; validation and recovery rules are in [the enrollment guide](../maintainers/RELAY_CREDENTIAL_ENROLLMENT.md). The create-only policy does not retroactively change every legacy application ingestion path.
+[Shard authority and key rotation](../maintainers/MULTI_TENANT_SHARD_AND_KEY_ROTATION.md) owns vault rewrap, database-password rotation and legacy-cache incidents. [Database operations](../maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md) owns migration ordering and rollback; [current state](../../post-mortem/CURRENT_STATE.md) owns deployment and actual acceptance.
 
-Key and incident procedures are defined in [Shard Authority and Key Rotation](../maintainers/MULTI_TENANT_SHARD_AND_KEY_ROTATION.md), including transactional dry-run rewrap, database-password rotation, and legacy JSON response.
-
-## 7. Consequences and follow-ups
+## 7. Original consequences and follow-ups
 
 ### Positive
 

@@ -199,6 +199,21 @@
       "recovery_evidence": [
         "post-mortem/releases/2026-09-14-free-generation-gate.json"
       ]
+    },
+    {
+      "id": "INC-20260914-ENROLLMENT",
+      "category": "relay",
+      "severity": "SEV-2",
+      "status": "contained",
+      "title": "External enrollment retired after provider-session instability",
+      "owner": "relay maintainer",
+      "record": "post-mortem/incidents/2026/2026-09-14-enrollment/README.md",
+      "evidence": [
+        "post-mortem/releases/2026-09-14-manual-desktop-enrollment.json",
+        "post-mortem/releases/2026-09-15-manual-desktop-enrollment-activation.json",
+        "post-mortem/releases/2026-09-15-manual-enrollment-documentation-review.json"
+      ],
+      "failure_modes": []
     }
   ],
   "actions": [
@@ -451,8 +466,36 @@
       "owner": "image maintainer",
       "review_by": "2026-09-16",
       "status": "open",
-      "next_step": "Connect an approved image-capable upstream and verify one bounded frontend image plus library/download. Source f39d2db advisory availability and outage UX is deployed and verified; connection clarification remains pending. No revoked connection was re-enabled.",
-      "closure": "Retain regression, deployment and signed-in generation/library evidence; distinguish local throughput fixtures from live capacity."
+      "next_step": "Qualify a Codex account through manual sign-in inside its owning Relay Desktop and explicit Enroll shard, then verify standalone image-backend access. External token/API-key ingestion and automatic provider renewal remain closed. The local transport correction, container decoder, HTTP/security tests and production build passed; the tested endpoint returned 403. Compatible controller/worker rollout and one signed-in generation plus library/download remain pending; preserve unknown receipts.",
+      "closure": "Retain regression, deployment and signed-in generation/library evidence; distinguish local throughput fixtures from live capacity.",
+      "evidence": [
+        "post-mortem/releases/2026-09-14-codex-image-tool-local.json"
+      ]
+    },
+    {
+      "id": "ACT-021",
+      "incident": "INC-20260914-ENROLLMENT",
+      "owner": "relay maintainer",
+      "review_by": "2026-09-21",
+      "status": "completed",
+      "next_step": "Keep external API/CLI and service-role rejection checks with future enrollment changes; ACT-022 owns manual account acceptance.",
+      "closure": "Migration and compatible controller/application deployed; retained records, administrator boundary, sanitized closed routes and public/browser assets verified. Manual provider sign-in was not simulated as production success.",
+      "evidence": [
+        "post-mortem/releases/2026-09-15-manual-desktop-enrollment-activation.json",
+        "post-mortem/releases/2026-09-14-manual-desktop-enrollment.json"
+      ]
+    },
+    {
+      "id": "ACT-022",
+      "incident": "INC-20260914-ENROLLMENT",
+      "owner": "relay operator",
+      "review_by": "2026-09-16",
+      "status": "open",
+      "next_step": "Use the desktop shortcut, sign in inside the owning desktop, explicitly Enroll shard, and inspect fresh worker readiness. Renew expired sessions manually there.",
+      "closure": "Retain a successful real manual enrollment and subsequent verified serving readiness without external ingestion, credential import or replay of unknown work.",
+      "evidence": [
+        "post-mortem/releases/2026-09-15-manual-desktop-enrollment-activation.json"
+      ]
     }
   ]
 }

@@ -1,16 +1,29 @@
 # Federation fleet and quota
 
 <!-- docs-scope: current-guide -->
-> Private fleet operations. [The contract](../FEDERATION_STRATEGY.md) is authoritative.
 
-Count registered authority, desired eligible shards, running workers and repair desktops separately. One registered row does not guarantee one serving container. A worker serves only its fresh eligible model capabilities; unrelated idle capacity cannot relieve an exhausted model pool.
+Private fleet operations under [the contract](../FEDERATION_STRATEGY.md) and [manual desktop authority](../adr/0152-manual-desktop-only-shard-authority.md).
 
-Automatic worker reconciliation remains supported. Enrollment is explicit and validated; bulk cache population is retired. Cold-start inventory preflight occurs before Docker allocation. Revision-specific 401 rejection prevents repeated starts; transient failures back off.
+## Count the right state
 
-Empty capability state retains a worker for rediscovery. Manual holds stop new admissions/replacement and preserve existing workers for intervention. Authority removal, revocation, expiry or rotation still retires old authority. Resume does not reset quota or health.
+Count retained registry records, manually confirmed accounts, desired eligible shards, running workers and repair desktops separately. An unexpired legacy record remains unavailable until explicit desktop confirmation. A running desktop is not inference capacity. A worker serves only its fresh eligible capabilities; unrelated idle models cannot relieve an exhausted pool.
 
-Provider cooldowns, local concurrency, model evidence and database-backed application lease limits are different controls. Do not clear counters or mark healthy to create capacity. Inspect active work and receipts before changing limits.
+## Add or restore capacity
 
-The September 9 fixture cleanup left one healthy worker at that observation, not a target fleet size. Use the [monitor](../TELEMETRY_AND_OBSERVABILITY.md), [enrollment guide](RELAY_CREDENTIAL_ENROLLMENT.md) and [dated evidence](RELAY_SESSION_VERIFICATION_20260909.md).
+Manually create a Relay Desktop, complete provider sign-in and choose **Enroll shard**. Confirm an eligible existing account from its matching desktop through the same action. The database binding and enrollment timestamp are required before controller and lease admission. External APIs, CLI imports and credential files cannot add managed capacity.
 
-Sites uses the shared paid-plan admission policy in [the fair-use runbook](SITES_FAIR_USAGE.md). The initial daily baseline transitions to continuation rather than imposing a hard daily maximum. Shared outstanding, rolling-attempt and account limits are explicit local operating controls, not inferred supplier quota. Fresh readiness and normal delivery eligibility still apply. Retain unresolved receipts and reservations until authoritative recovery; neither a rollout change nor a billing renewal clears unknown work.
+Worker reconciliation remains automatic after enrollment. Cold inventory preflight precedes allocation. Revision-specific 401 rejection prevents repeated starts; transient inventory failures back off. An empty capability result retains the worker for rediscovery, but grants no requested-model eligibility.
+
+Provider expiry requires manual sign-in in the bound desktop. Enabled saved-file sync or **Check now** validates and persists the replacement login. Neither sync nor worker restart renews provider sessions. Keep the owning desktop home available for repair.
+
+## Holds and quota
+
+Manual holds block admissions and replacement starts while preserving an existing worker for inspection. Revocation, removal, expiry or changed authority still retires the old credential. After a verified refresh, review the hold before explicitly permitting replacement. Resume does not clear quota, rejection or health state.
+
+Provider cooldowns, local concurrency, model evidence and database lease limits are distinct controls. Inspect active work and receipts before changing policy. Never clear counters, manually mark healthy or reopen ingestion to manufacture capacity. Enrollment preserves an existing account's owner, limits, counters, holds and history.
+
+Sites retains its [shared paid-plan policy](SITES_FAIR_USAGE.md). Its daily baseline transitions to continuation, and local outstanding/rolling-attempt limits are not inferred supplier quota. Preserve unresolved receipts and reservations; enrollment, deployment and billing renewal do not erase unknown work.
+
+## Verification
+
+Use [the monitor](../TELEMETRY_AND_OBSERVABILITY.md), [enrollment procedure](RELAY_CREDENTIAL_ENROLLMENT.md) and [current state](../../post-mortem/CURRENT_STATE.md). Historical cleanup counts are observations, not fleet targets. Confirm saved authority, worker application, requested capability and completed inference separately. The September 15 policy rollout did not perform a new manual provider enrollment or restore image generation.

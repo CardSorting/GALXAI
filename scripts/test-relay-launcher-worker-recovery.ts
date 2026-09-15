@@ -31,7 +31,7 @@ test('actual launcher adopts surviving worker, recovers active receipt and requi
     socket.send(JSON.stringify({ type: 'response.completed', response: { status: 'completed' } }));
   }));
   await new Promise<void>(resolve => upstream.listen(0, '127.0.0.1', resolve));
-  const shard = desiredShard({ id: 'fixture-a', provider: 'openai', status: 'active' }, { accessToken: 'fixture-only-token', accountId: 'fixture-account' })!;
+  const shard = desiredShard({ id: 'fixture-a', provider: 'openai', status: 'active', managed_desktop_id: 'fixture', desktop_enrolled_at: '2026-09-14' }, { accessToken: 'fixture-only-token', accountId: 'fixture-account' })!;
   const worker = new GalxaiRelayServer({ port: 0, host: '127.0.0.1', assignedShard: shard, assignedShardId: shard.id,
     relayId: 'fixture-worker', generation: 'retained-generation', apiKeys: ['fixture-internal'], adminApiKeys: ['fixture-worker-admin'],
     registryEnabled: false, discoverHostCredentials: false, stateSnapshotPath: path.join(directory, 'worker-state.json'),

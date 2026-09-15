@@ -174,45 +174,22 @@ export class ShardRepository {
       throw new Error('Shard credentials must be envelope-encrypted before registration');
     }
 
-    const insertColumns = [
-      'id', 'user_id', 'provider', 'auth_type', 'account_label', 'api_key_masked',
-      'encrypted_ciphertext', 'encrypted_iv', 'encrypted_tag', 'key_version',
-      'shard_mode', 'priority', 'weight', 'status', 'max_tokens', 'remaining_tokens',
-      'reserved_tokens', 'refill_rate_per_minute', 'max_requests', 'remaining_requests',
-      'last_refill_timestamp_ms', 'total_requests_served', 'total_tokens_consumed',
-      'consecutive_failures', 'consecutive_successes', 'average_latency_ms',
-      'last_latency_ms', 'fencing_token', 'permission_retracted', 'cooldown_until_ms',
-      'created_at_ms', 'updated_at_ms', 'credential_expires_at_ms',
-      'privacy_capabilities', 'sliding_window_quota', 'supported_models',
-      'unsupported_models', 'registry_source'
-    ] as const;
-    const updateColumns = [
-      'user_id', 'provider', 'auth_type', 'account_label', 'api_key_masked',
-      'encrypted_ciphertext', 'encrypted_iv', 'encrypted_tag', 'key_version',
-      'shard_mode', 'priority', 'weight', 'status', 'permission_retracted',
-      'cooldown_until_ms', 'updated_at_ms', 'credential_expires_at_ms',
-      'privacy_capabilities', 'sliding_window_quota', 'supported_models',
-      'unsupported_models', 'registry_source'
-    ] as const;
-    const values = insertColumns.map(column => (row as any)[column] ?? null);
-    const placeholders = insertColumns.map((_, index) => `$${index + 1}`).join(', ');
-    const assignments = updateColumns.map(column => `${column} = EXCLUDED.${column}`).join(', ');
-
-    // 1. Atomic PostgreSQL upsert. Dynamic SQL is assembled only from static column constants.
+    if (options.createOnly) throw new Error('External shard enrollment is disabled. Use Relay Desktops.');
+    // General persistence can maintain policy only. Creation and credential
+    // replacement are exclusively owned by the private desktop registrar.
+    const updateColumns = ['account_label', 'priority', 'weight', 'status', 'permission_retracted',
+      'cooldown_until_ms', 'updated_at_ms', 'privacy_capabilities', 'sliding_window_quota',
+      'supported_models', 'unsupported_models'] as const;
+    const updates = Object.fromEntries(updateColumns.map(column => [column, row[column] ?? null])) as Pick<Database['public']['Tables']['galx_shard_accounts']['Update'], typeof updateColumns[number]>;
     const res = await executePostgresQuery(
-      `INSERT INTO public.galx_shard_accounts (${insertColumns.join(', ')})
-       VALUES (${placeholders})
-       ON CONFLICT (id) ${options.createOnly ? 'DO NOTHING' : `DO UPDATE SET ${assignments}, updated_at = NOW()`}
-       RETURNING *;`,
-      values
-    );
-
+      `UPDATE public.galx_shard_accounts SET ${updateColumns.map((c,i) => `${c} = $${i+2}`).join(', ')}, updated_at = NOW()
+       WHERE id = $1 RETURNING *;`, [shard.id, ...Object.values(updates)]);
     if (res?.rows[0]) {
       const durableShard = this.mapRowToShard(res.rows[0]);
       this.cacheShards([durableShard], false);
       return durableShard;
     }
-    if (res && options.createOnly) throw new Error('Account already enrolled. Refresh credentials through its linked desktop.');
+    if (res && !res.rows.length) throw new Error('External shard enrollment is disabled. Use Relay Desktops.');
     if (process.env.DATABASE_URL) failures.push('pooled SQL upsert failed');
 
     // 2. Privileged PostgREST fallback through a server-side, counter-safe RPC.
@@ -221,9 +198,7 @@ export class ShardRepository {
     if (isSupabaseAdminConfigured()) {
       try {
         const supabase = getSupabaseAdmin();
-        const { data, error } = options.createOnly
-          ? await supabase.from('galx_shard_accounts').insert(row).select().single()
-          : await supabase.rpc('fn_upsert_shard_registry', { p_row: row });
+        const { data, error } = await supabase.from('galx_shard_accounts').update(updates).eq('id', shard.id).select().single();
         if (error) throw error;
         if (!data) throw new Error('upsert returned no durable row');
         const durableShard = this.mapRowToShard(data as any);
@@ -767,6 +742,8 @@ export class ShardRepository {
       supportedModels: data.supported_models || undefined,
       unsupportedModels: data.unsupported_models || undefined,
       registryRevision: Number(data.registry_revision || 1),
+      managedDesktopId: data.managed_desktop_id ?? undefined,
+      desktopEnrolledAt: data.desktop_enrolled_at ?? undefined,
       registrySource: data.registry_source as GalxShardAccount['registrySource'],
       cooldownUntilMs: data.cooldown_until_ms ? Number(data.cooldown_until_ms) : undefined,
       cooldownUntilTimestampMs: data.cooldown_until_ms ? Number(data.cooldown_until_ms) : undefined,

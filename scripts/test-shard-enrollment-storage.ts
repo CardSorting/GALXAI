@@ -47,19 +47,14 @@ function isolatedRepository(t: TestContext) {
   const query=pool.query.bind(pool);t.mock.method(pg.Pool.prototype,'query',query);
   return new ShardRepository();
 }
-test('concurrent create-only enrollment cannot reset ownership, credentials, quotas or revocation',async t=>{
-  // Execute the repository's actual SQL on a disposable cluster, never ambient credentials.
-  const repo=isolatedRepository(t), input=shard('concurrent');
-  const results=await Promise.allSettled([repo.saveShard(input,{requireRemote:true,createOnly:true}),repo.saveShard(input,{requireRemote:true,createOnly:true})]);
-  assert.equal(results.filter(r=>r.status==='fulfilled').length,1);
-  await pool.query("UPDATE galx_shard_accounts SET permission_retracted=true,status='revoked',remaining_tokens=9 WHERE id=$1",[input.id]);
-  await assert.rejects(repo.saveShard({...input,userId:'different-owner'},{requireRemote:true,createOnly:true}),/already enrolled/);
-  const row=(await pool.query('SELECT * FROM galx_shard_accounts WHERE id=$1',[input.id])).rows[0];
-  assert.equal(row.user_id,input.userId);assert.equal(row.encrypted_ciphertext,'encrypted-fixture');assert.equal(row.status,'revoked');
-  assert.equal(Number(row.remaining_tokens),9);assert.equal(Number(row.fencing_token),7);assert.equal(Number(row.total_requests_served),3);
+test('general repository refuses external enrollment before touching SQL',async t=>{
+  const repo=isolatedRepository(t);
+  await assert.rejects(repo.saveShard(shard('concurrent'),{requireRemote:true,createOnly:true}),/External shard enrollment is disabled/);
+  await assert.rejects(repo.saveShard(shard('concurrent'),{requireRemote:true}),/External shard enrollment is disabled/);
+  assert.equal((await pool.query('SELECT count(*) n FROM galx_shard_accounts')).rows[0].n,'0');
 });
 test('fixture cleanup requires exact identity and credentials and preserves evidence',async t=>{
-  const repo=isolatedRepository(t);await repo.saveShard(shard('shard_1788618090167_oai'),{requireRemote:true,createOnly:true});
+  isolatedRepository(t);await pool.query("INSERT INTO galx_shard_accounts(id,user_id,provider,auth_type,account_label,api_key_masked,encrypted_ciphertext,encrypted_iv,encrypted_tag,created_at_ms,updated_at_ms) VALUES('shard_1788618090167_oai','usr_tenant_888','openai','api_key','Fixture','masked','encrypted-fixture','iv','tag',1,1)");
   const row=(await pool.query("SELECT * FROM galx_shard_accounts WHERE id='shard_1788618090167_oai'")).rows[0];
   assert(isLegacyIntegrationFixture(row,secret));
   for(const [r,s] of [[{...row,user_id:'real-owner'},secret],[{...row,id:'real-shard'},secret],[row,{apiKey:'sk-real'}]]) {
@@ -76,22 +71,9 @@ test('fixture cleanup requires exact identity and credentials and preserves evid
   assert.equal(final.remaining_tokens,row.remaining_tokens);assert.equal(final.total_requests_served,row.total_requests_served);
 });
 
-test('Data API enrollment uses insert-only semantics and cannot fall back to an upsert on conflict',async t=>{
-  const keys=['DATABASE_URL','SUPABASE_URL','NEXT_PUBLIC_SUPABASE_URL','SUPABASE_SERVICE_ROLE_KEY','SUPABASE_SECRET_KEY'] as const;
-  const previous=new Map(keys.map(key=>[key,process.env[key]]));
-  delete process.env.DATABASE_URL;delete process.env.NEXT_PUBLIC_SUPABASE_URL;
-  process.env.SUPABASE_URL='https://enrollment-test.invalid';process.env.SUPABASE_SERVICE_ROLE_KEY='sb_secret_synthetic';
-  resetSupabaseClients();
-  t.after(()=>{resetSupabaseClients();for(const [key,value]of previous){if(value===undefined)delete process.env[key];else process.env[key]=value;}});
-  const existing=(await pool.query("SELECT * FROM galx_shard_accounts WHERE id='concurrent'")).rows[0];
-  let conflict=false,calls=0;
-  t.mock.method(globalThis,'fetch',async(input:RequestInfo|URL,init?:RequestInit)=>{
-    const url=new URL(String(input));assert.equal(url.origin,'https://enrollment-test.invalid');assert.equal(url.pathname,'/rest/v1/galx_shard_accounts');
-    assert.equal(init?.method,'POST');assert(!new Headers(init?.headers).get('prefer')?.includes('resolution=merge-duplicates'));calls++;
-    return Response.json(conflict?{code:'23505',message:'duplicate fixture'}:existing,{status:conflict?409:201});
-  });
-  const repo=new ShardRepository();
-  await repo.saveShard(shard('concurrent'),{requireRemote:true,createOnly:true});
-  conflict=true;await assert.rejects(repo.saveShard(shard('concurrent'),{requireRemote:true,createOnly:true}),/persist registry mutation/);
-  assert.equal(calls,2);
+test('general Data API credentials cannot enable enrollment',async t=>{
+  const previous=process.env.SUPABASE_URL; process.env.SUPABASE_URL='https://enrollment-test.invalid';
+  t.after(()=>{if(previous===undefined)delete process.env.SUPABASE_URL;else process.env.SUPABASE_URL=previous;resetSupabaseClients();});
+  t.mock.method(globalThis,'fetch',async()=>assert.fail('Enrollment must not send credentials'));
+  await assert.rejects(new ShardRepository().saveShard(shard('new'),{requireRemote:true,createOnly:true}),/External shard enrollment is disabled/);
 });

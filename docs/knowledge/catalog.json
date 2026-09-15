@@ -219,8 +219,10 @@
       "title": "Inference verification",
       "scope": "current-guide",
       "kind": "reference",
-      "domains": [],
-      "curation": "unreviewed",
+      "domains": [
+        "relay"
+      ],
+      "curation": "assigned",
       "keywords": [],
       "decision": null
     },
@@ -246,11 +248,14 @@
     },
     {
       "path": "docs/MIGRATION_GUIDE.md",
-      "title": "Migrating to capability-aware GALX",
+      "title": "Migrating to manual desktop authority and capability-aware GALX",
       "scope": "current-guide",
       "kind": "reference",
-      "domains": [],
-      "curation": "unreviewed",
+      "domains": [
+        "relay",
+        "database"
+      ],
+      "curation": "assigned",
       "keywords": [],
       "decision": null
     },
@@ -281,8 +286,10 @@
       "title": "OAuth and token lifecycle boundaries",
       "scope": "domain-reference",
       "kind": "reference",
-      "domains": [],
-      "curation": "unreviewed",
+      "domains": [
+        "access"
+      ],
+      "curation": "assigned",
       "keywords": [],
       "decision": null
     },
@@ -313,8 +320,10 @@
       "title": "Provider credentials and application identity",
       "scope": "domain-reference",
       "kind": "reference",
-      "domains": [],
-      "curation": "unreviewed",
+      "domains": [
+        "access"
+      ],
+      "curation": "assigned",
       "keywords": [],
       "decision": null
     },
@@ -387,8 +396,10 @@
       "title": "Federation relay API",
       "scope": "current-guide",
       "kind": "reference",
-      "domains": [],
-      "curation": "unreviewed",
+      "domains": [
+        "relay"
+      ],
+      "curation": "assigned",
       "keywords": [],
       "decision": null
     },
@@ -409,8 +420,10 @@
       "title": "Resilience and recovery",
       "scope": "current-guide",
       "kind": "reference",
-      "domains": [],
-      "curation": "unreviewed",
+      "domains": [
+        "relay"
+      ],
+      "curation": "assigned",
       "keywords": [],
       "decision": null
     },
@@ -449,8 +462,10 @@
       "title": "Security boundaries",
       "scope": "current-guide",
       "kind": "reference",
-      "domains": [],
-      "curation": "unreviewed",
+      "domains": [
+        "access"
+      ],
+      "curation": "assigned",
       "keywords": [],
       "decision": null
     },
@@ -512,7 +527,7 @@
     },
     {
       "path": "docs/STANDARDIZED_OAUTH_AND_INGESTION_ARCHITECTURE.md",
-      "title": "Authentication and credential ingestion boundaries",
+      "title": "Authentication and credential enrollment boundaries",
       "scope": "domain-reference",
       "kind": "reference",
       "domains": [
@@ -559,8 +574,10 @@
       "title": "System topology and maintainer onboarding",
       "scope": "current-guide",
       "kind": "reference",
-      "domains": [],
-      "curation": "unreviewed",
+      "domains": [
+        "relay"
+      ],
+      "curation": "assigned",
       "keywords": [],
       "decision": null
     },
@@ -591,8 +608,10 @@
       "title": "Troubleshooting",
       "scope": "current-guide",
       "kind": "reference",
-      "domains": [],
-      "curation": "unreviewed",
+      "domains": [
+        "relay"
+      ],
+      "curation": "assigned",
       "keywords": [],
       "decision": null
     },
@@ -613,8 +632,11 @@
       "title": "Relay deployment: vNext migration and legacy reference",
       "scope": "current-guide",
       "kind": "reference",
-      "domains": [],
-      "curation": "unreviewed",
+      "domains": [
+        "relay",
+        "delivery"
+      ],
+      "curation": "assigned",
       "keywords": [],
       "decision": null
     },
@@ -2225,6 +2247,52 @@
       }
     },
     {
+      "path": "docs/adr/0151-codex-standalone-image-tool.md",
+      "title": "ADR 0151: Standalone Codex image tool transport",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": {
+        "status": "proposed",
+        "delivery": "local",
+        "domain": "relay",
+        "owner": "Relay operator",
+        "date": "2026-09-14",
+        "evidence": [
+          "post-mortem/releases/2026-09-14-codex-image-tool-local.json"
+        ],
+        "supersedes": []
+      }
+    },
+    {
+      "path": "docs/adr/0152-manual-desktop-only-shard-authority.md",
+      "title": "ADR 0152: Manual desktop-only shard authority",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [
+        "relay"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": {
+        "status": "accepted",
+        "delivery": "deployed",
+        "domain": "relay",
+        "owner": "Relay operator",
+        "date": "2026-09-14",
+        "evidence": [
+          "post-mortem/releases/2026-09-14-manual-desktop-enrollment.json",
+          "post-mortem/releases/2026-09-15-manual-desktop-enrollment-activation.json"
+        ],
+        "supersedes": [],
+        "target": "PostgreSQL registry, production host controller and galx.ai",
+        "revision": "aa48b334b89bb77841c3317fb98c291429a39650 + recorded working-tree hashes; dpl_cFYtKU8tF7mfaBQkrYy5nPvEjuvw",
+        "observed_at": "2026-09-15T00:07:16.197985+00:00"
+      }
+    },
+    {
       "path": "docs/adr/README.md",
       "title": "Architecture decision records",
       "scope": "current-guide",
@@ -2869,8 +2937,10 @@
       "title": "Maintainer CLI reference",
       "scope": "current-guide",
       "kind": "reference",
-      "domains": [],
-      "curation": "unreviewed",
+      "domains": [
+        "relay"
+      ],
+      "curation": "assigned",
       "keywords": [],
       "decision": null
     },
@@ -2898,11 +2968,14 @@
     },
     {
       "path": "docs/maintainers/MULTI_TENANT_SHARD_AND_KEY_ROTATION.md",
-      "title": "Maintainer Runbook: Shard Authority and Key Rotation",
+      "title": "Maintainer runbook: shard authority and key rotation",
       "scope": "domain-reference",
       "kind": "reference",
-      "domains": [],
-      "curation": "unreviewed",
+      "domains": [
+        "relay",
+        "database"
+      ],
+      "curation": "assigned",
       "keywords": [],
       "decision": null
     },
@@ -2945,8 +3018,10 @@
       "title": "Maintainer guides",
       "scope": "current-guide",
       "kind": "navigation",
-      "domains": [],
-      "curation": "unreviewed",
+      "domains": [
+        "relay"
+      ],
+      "curation": "assigned",
       "keywords": [],
       "decision": null
     },
@@ -2954,20 +3029,40 @@
       "path": "docs/maintainers/RELAY_CREDENTIAL_ENROLLMENT.md",
       "title": "Relay credential enrollment and recovery",
       "scope": "current-guide",
-      "kind": "reference",
-      "domains": [],
-      "curation": "unreviewed",
-      "keywords": [],
+      "kind": "how-to",
+      "domains": [
+        "relay"
+      ],
+      "curation": "assigned",
+      "keywords": [
+        "manual",
+        "enroll",
+        "shard",
+        "desktop",
+        "token",
+        "renew",
+        "expired",
+        "shortcut"
+      ],
       "decision": null
     },
     {
       "path": "docs/maintainers/RELAY_DESKTOPS.md",
       "title": "Relay desktops and manual repair",
       "scope": "current-guide",
-      "kind": "reference",
-      "domains": [],
-      "curation": "unreviewed",
-      "keywords": [],
+      "kind": "how-to",
+      "domains": [
+        "relay"
+      ],
+      "curation": "assigned",
+      "keywords": [
+        "relay",
+        "monitor",
+        "desktop",
+        "shortcut",
+        "manual",
+        "sign in"
+      ],
       "decision": null
     },
     {
@@ -2987,8 +3082,10 @@
       "title": "Federation fleet and quota",
       "scope": "current-guide",
       "kind": "reference",
-      "domains": [],
-      "curation": "unreviewed",
+      "domains": [
+        "relay"
+      ],
+      "curation": "assigned",
       "keywords": [],
       "decision": null
     },
@@ -3387,8 +3484,10 @@
       "title": "Provisioning and preflight",
       "scope": "current-guide",
       "kind": "reference",
-      "domains": [],
-      "curation": "unreviewed",
+      "domains": [
+        "relay"
+      ],
+      "curation": "assigned",
       "keywords": [],
       "decision": null
     },
@@ -3407,8 +3506,10 @@
       "title": "Traffic and model-specific scaling",
       "scope": "current-guide",
       "kind": "reference",
-      "domains": [],
-      "curation": "unreviewed",
+      "domains": [
+        "relay"
+      ],
+      "curation": "assigned",
       "keywords": [],
       "decision": null
     },
@@ -3538,11 +3639,13 @@
     },
     {
       "path": "docs/relay-security.md",
-      "title": "Relay access and containment",
+      "title": "Relay security reference",
       "scope": "current-guide",
       "kind": "reference",
-      "domains": [],
-      "curation": "unreviewed",
+      "domains": [
+        "access"
+      ],
+      "curation": "assigned",
       "keywords": [],
       "decision": null
     },
@@ -3952,6 +4055,16 @@
     {
       "path": "post-mortem/incidents/2026/2026-09-13-workspace-render/README.md",
       "title": "Workspace server-render failure and navigation recovery",
+      "scope": "operational-record",
+      "kind": "navigation",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-09-14-enrollment/README.md",
+      "title": "Manual desktop enrollment policy change",
       "scope": "operational-record",
       "kind": "navigation",
       "domains": [],

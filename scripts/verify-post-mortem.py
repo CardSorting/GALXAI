@@ -192,9 +192,9 @@ def validate_records(root, register, events):
         if len(timestamp) == 10:
             date.fromisoformat(timestamp)
         else:
-            if not timestamp.endswith('Z'):
+            parsed = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
+            if parsed.utcoffset() is None or parsed.utcoffset().total_seconds() != 0:
                 errors.append(f"{row['id']}: timestamp must be UTC")
-            datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
         if row['kind'] not in {'observation', 'containment', 'recovery', 'verification', 'follow-up', 'correction'}:
             errors.append(f"{row['id']}: invalid event kind")
         if not all(row.get(k) for k in ('observation', 'action', 'result', 'next_step')):

@@ -181,7 +181,8 @@
         "src/components/dashboard/GenerationGateNotice.tsx",
         "src/components/dashboard/generation-gate.module.css",
         "src/contexts/GenerationAllowanceContext.tsx",
-        "scripts/manage-free-generation.ts"
+        "scripts/manage-free-generation.ts",
+        "scripts/verify-manual-enrollment-http.ts"
       ],
       "guides": [
         "docs/operations/developer-preview.md",
@@ -193,7 +194,11 @@
         "docs/SECURITY_POSTURE_AND_THREAT_MODEL.md",
         "docs/adr/0147-verified-account-and-session-authority.md",
         "docs/maintainers/readable-urls.md",
-        "docs/maintainers/FREE_GENERATION_QUOTA.md"
+        "docs/maintainers/FREE_GENERATION_QUOTA.md",
+        "docs/OAUTH_AND_TOKEN_LIFECYCLE_SPECIFICATION.md",
+        "docs/PROVIDER_AS_AUTH_SPECIFICATION.md",
+        "docs/SECURITY.md",
+        "docs/relay-security.md"
       ],
       "checks": [
         "npm run test:preview-admin",
@@ -267,7 +272,25 @@
         "scripts/test-relay-launcher-worker-recovery.ts",
         "scripts/test-relay-lifecycle-docker.ts",
         "src/app/api/internal/telemetry/route.ts",
-        "src/core/telemetry/**/*.ts"
+        "src/core/telemetry/**/*.ts",
+        "src/core/router/adapters/OpenAIAdapter.ts",
+        "scripts/test-codex-image-tool.ts",
+        "scripts/test-relay-client-auth.ts",
+        "scripts/test-relay-federation-http.ts",
+        "Dockerfile.relay",
+        "Dockerfile.relay.dockerignore",
+        "src/relay/desktops.html",
+        "src/relay/desktops.js",
+        "scripts/manage-shards.ts",
+        "scripts/rotate-shard-vault-keys.ts",
+        "scripts/test-desktop-enrollment.ts",
+        "scripts/test-desktop-credentials.ts",
+        "scripts/test-relay-desktops.ts",
+        "scripts/test-relay-enrollment.ts",
+        "scripts/test-shard-enrollment-storage.ts",
+        "src/core/substrate/GalxCredentialSubstrate.ts",
+        "scripts/test-relay-capabilities.ts",
+        ".env.example"
       ],
       "guides": [
         "docs/ARCHITECTURE.md",
@@ -277,7 +300,23 @@
         "docs/maintainers/TELEMETRY_AND_METRICS_OBSERVABILITY.md",
         "docs/maintainers/RELAY_TELEMETRY.md",
         "docs/maintainers/RELAY_HARDENING.md",
-        "post-mortem/runbooks/controller-lock.md"
+        "post-mortem/runbooks/controller-lock.md",
+        "docs/maintainers/RELAY_CREDENTIAL_ENROLLMENT.md",
+        "docs/maintainers/RELAY_DESKTOPS.md",
+        "docs/maintainers/MULTI_TENANT_SHARD_AND_KEY_ROTATION.md",
+        "docs/maintainers/MAINTAINER_CLI_CHEATSHEET.md",
+        "docs/RELAY_API_REFERENCE.md",
+        "docs/MIGRATION_GUIDE.md",
+        "docs/SYSTEM_TOPOLOGY_AND_MAINTENANCE_ONBOARDING.md",
+        "docs/maintainers/RELAY_QUOTA_AND_FLEET.md",
+        "docs/playbooks/01-provisioning-and-preflight.md",
+        "docs/playbooks/03-live-traffic-and-fleet-scaling.md",
+        "docs/INFERENCE_PIPELINE_VERIFICATION.md",
+        "docs/VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md",
+        "docs/RESILIENCE_AND_DISASTER_RECOVERY.md",
+        "docs/TROUBLESHOOTING.md",
+        "docs/maintainers/README.md",
+        "docs/adr/0152-manual-desktop-only-shard-authority.md"
       ],
       "checks": [
         "npm run test:relay:capabilities",
@@ -299,16 +338,22 @@
         "scripts/test-account-session-db.ts",
         "scripts/test-supabase-integration.ts",
         "scripts/manage-free-generation.ts",
-        "src/lib/billing/free-generation-policy.ts"
+        "src/lib/billing/free-generation-policy.ts",
+        "scripts/test-manual-desktop-shards-db.ts",
+        "scripts/apply-manual-desktop-enrollment.ts",
+        "scripts/verify-shard-authority-live.ts"
       ],
       "guides": [
         "docs/SUPABASE_PARANOID_ARCHITECTURE_SPEC.md",
         "docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md",
-        "docs/maintainers/FREE_GENERATION_QUOTA.md"
+        "docs/maintainers/FREE_GENERATION_QUOTA.md",
+        "docs/maintainers/MULTI_TENANT_SHARD_AND_KEY_ROTATION.md",
+        "docs/MIGRATION_GUIDE.md"
       ],
       "checks": [
         "npm run db:verify",
-        "npm run db:test"
+        "npm run db:test",
+        "npm run test:relay:manual-db"
       ]
     },
     "delivery": {
@@ -326,13 +371,15 @@
         "workers/sites-domains/index.ts",
         "scripts/test-cloudflare-workers.ts",
         "scripts/lib/require-isolated-worker-env.ts",
-        "scripts/verify-workspace-cache-http.mjs"
+        "scripts/verify-workspace-cache-http.mjs",
+        ".env.example"
       ],
       "guides": [
         "docs/DEPLOYMENT.md",
         "docs/VERCEL_DEPLOYMENT.md",
         "docs/runbooks/release-readiness.md",
-        "post-mortem/runbooks/deployment-storage.md"
+        "post-mortem/runbooks/deployment-storage.md",
+        "docs/VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md"
       ],
       "checks": [
         "npm run docs:check",
@@ -549,6 +596,30 @@
         "ux",
         "audit"
       ]
+    },
+    "docs/maintainers/RELAY_CREDENTIAL_ENROLLMENT.md": {
+      "kind": "how-to",
+      "keywords": [
+        "manual",
+        "enroll",
+        "shard",
+        "desktop",
+        "token",
+        "renew",
+        "expired",
+        "shortcut"
+      ]
+    },
+    "docs/maintainers/RELAY_DESKTOPS.md": {
+      "kind": "how-to",
+      "keywords": [
+        "relay",
+        "monitor",
+        "desktop",
+        "shortcut",
+        "manual",
+        "sign in"
+      ]
     }
   },
   "runbooks": [
@@ -649,6 +720,32 @@
       "target": "galx.ai account generation gate",
       "revision": "d19e4ee1ad4b446e689bb4b85db48ec3a6f08fb0",
       "observed_at": "2026-09-14T04:36:11.300721Z"
+    },
+    "docs/adr/0151-codex-standalone-image-tool.md": {
+      "status": "proposed",
+      "delivery": "local",
+      "domain": "relay",
+      "owner": "Relay operator",
+      "date": "2026-09-14",
+      "evidence": [
+        "post-mortem/releases/2026-09-14-codex-image-tool-local.json"
+      ],
+      "supersedes": []
+    },
+    "docs/adr/0152-manual-desktop-only-shard-authority.md": {
+      "status": "accepted",
+      "delivery": "deployed",
+      "domain": "relay",
+      "owner": "Relay operator",
+      "date": "2026-09-14",
+      "evidence": [
+        "post-mortem/releases/2026-09-14-manual-desktop-enrollment.json",
+        "post-mortem/releases/2026-09-15-manual-desktop-enrollment-activation.json"
+      ],
+      "supersedes": [],
+      "target": "PostgreSQL registry, production host controller and galx.ai",
+      "revision": "aa48b334b89bb77841c3317fb98c291429a39650 + recorded working-tree hashes; dpl_cFYtKU8tF7mfaBQkrYy5nPvEjuvw",
+      "observed_at": "2026-09-15T00:07:16.197985+00:00"
     }
   },
   "managed_adr_from": 145,

@@ -1,10 +1,15 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { DesktopCredentialError, parseDesktopCredential } from '../src/relay/desktop-credentials.js';
-import { createDesktopCredentialRefresh, createDesktopCredentialMatch } from '../src/relay/desktop-credential-refresh.js';
+import { createDesktopCredentialRefresh as createHostRefresh, createDesktopCredentialMatch } from '../src/relay/desktop-credential-refresh.js';
 import { CapabilityDiscoveryError } from '../src/relay/capability-discovery.js';
 import { encryptRegistryShard, decryptRegistryShard, replaceRegistryCredential } from '../src/relay/shard-registry.js';
 
+const desktopId = '00000000-0000-4000-8000-000000000001';
+const createDesktopCredentialRefresh = (...args: Parameters<typeof createHostRefresh>) => {
+  const refresh = createHostRefresh(...args);
+  return (...input: Parameters<typeof refresh>) => refresh(input[0], input[1], input[2], input[3], { desktopId, prepare: () => {}, ...input[4] });
+};
 const now = 1800000000000;
 const token = (account = 'account-1', iat = now / 1000 - 10, exp = now / 1000 + 3600) => 'eyJhbGciOiJub25lIn0.' + Buffer.from(JSON.stringify({ iat, exp, 'https://api.openai.com/auth': { chatgpt_account_id: account } })).toString('base64url') + '.PRIVATE_SIGNATURE';
 const file = (access = token(), refresh = 'PRIVATE_REFRESH') => ({ source: 'codex' as const, modifiedAt: now, data: { tokens: { account_id: 'account-1', access_token: access, refresh_token: refresh }, secret: 'PRIVATE_UNRELATED' } });
@@ -30,7 +35,7 @@ test('missing, partial, expired, mismatched and unsupported logins fail before u
 });
 
 function refreshFixture() {
-  const row = { id: 'shard-1', user_id: 'owner-1', provider: 'openai', permission_retracted: false, status: 'healthy' };
+  const row = { id: 'shard-1', user_id: 'owner-1', provider: 'openai', managed_desktop_id: desktopId, permission_retracted: false, status: 'healthy' };
   let previous: any = { accessToken: token('account-1', now / 1000 - 100), accountId: 'account-1', refreshToken: 'OLD_REFRESH', apiKey: 'OLD_API_KEY' };
   let writes = 0, checks = 0, saved: any;
   const deps = { read: async () => [row], decrypt: () => previous,
@@ -126,41 +131,26 @@ test('credential encryption uses the existing tenant envelope and the update tou
   const oldSeed = process.env.GALX_VAULT_KEY_V1, oldVersion = process.env.GALX_VAULT_ACTIVE_KEY_VERSION;
   process.env.GALX_VAULT_KEY_V1 = 'fixture-vault-key'; process.env.GALX_VAULT_ACTIVE_KEY_VERSION = 'v1';
   t.after(() => { if (oldSeed === undefined) delete process.env.GALX_VAULT_KEY_V1; else process.env.GALX_VAULT_KEY_V1 = oldSeed; if (oldVersion === undefined) delete process.env.GALX_VAULT_ACTIVE_KEY_VERSION; else process.env.GALX_VAULT_ACTIVE_KEY_VERSION = oldVersion; });
-  const row = { id: 'shard-1', user_id: 'owner-1', provider: 'openai', status: 'healthy', encrypted_iv: 'old-iv', encrypted_tag: 'old-tag', key_version: 'v1' };
+  const row = { id: 'shard-1', user_id: 'owner-1', provider: 'openai', managed_desktop_id: desktopId, status: 'healthy', encrypted_iv: 'old-iv', encrypted_tag: 'old-tag', key_version: 'v1' };
   const secret = { accessToken: 'PRIVATE_ACCESS', refreshToken: 'PRIVATE_REFRESH', accountId: 'account-1' }, encrypted = encryptRegistryShard(row, secret);
   assert(!JSON.stringify(encrypted).includes('PRIVATE_')); assert.deepEqual(decryptRegistryShard({ ...row, ...encrypted }), secret);
   assert.equal(decryptRegistryShard({ ...row, ...encrypted, user_id: 'other-owner' }), null);
   let sql = '', params: any[] = [];
-  const db: any = { query: async (statement: string, values: any[]) => { sql = statement; params = values; return { rows: [{ id: row.id }] }; } };
+  const db: any = { query: async (statement: string, values: any[]) => { sql = statement; params = values; return { rows: [{ updated: true }] }; } };
   assert(await replaceRegistryCredential(row, encrypted, now, db));
   assert(!sql.split('WHERE')[0].match(/status\s*=|permission_retracted\s*=|remaining_tokens\s*=|fencing_token\s*=/));
-  assert(sql.includes('encrypted_tag = $10')); assert(sql.includes('permission_retracted = false'));
-  assert.deepEqual(params.slice(5), ['shard-1', 'owner-1', 'openai', 'old-iv', 'old-tag', 'v1']);
+  assert(sql.includes('private.refresh_desktop_shard'));
+  assert.equal(params[0],desktopId); assert.equal(params[1],row.id);
+  assert.equal(JSON.parse(params[2]).encrypted_tag,'old-tag');
   assert(!JSON.stringify(params).includes('PRIVATE_'));
 });
 
-test('admin API fallback retains the same compare-and-swap after an uncertain SQL write', async t => {
-  const names = ['SUPABASE_URL', 'NEXT_PUBLIC_SUPABASE_URL', 'SUPABASE_SECRET_KEY', 'SUPABASE_SERVICE_ROLE_KEY'] as const;
-  const saved = Object.fromEntries(names.map(name => [name, process.env[name]]));
-  const previousFetch = globalThis.fetch;
-  t.after(() => { globalThis.fetch = previousFetch; for (const name of names) { if (saved[name] === undefined) delete process.env[name]; else process.env[name] = saved[name]; } });
-  process.env.SUPABASE_URL = 'https://fixture.supabase.test'; process.env.SUPABASE_SECRET_KEY = 'PRIVATE_ADMIN_KEY';
-  const row = { id: 'shard-1', user_id: 'owner-1', provider: 'openai', status: 'healthy', encrypted_iv: 'old-iv', encrypted_tag: 'old-tag', key_version: null };
+test('credential refresh has no general Data API fallback after SQL failure', async t => {
+  t.mock.method(globalThis, 'fetch', async () => assert.fail('No external credential write'));
+  const row = { id: 'shard-1', managed_desktop_id: desktopId, user_id: 'owner-1', provider: 'openai', status: 'healthy' };
   const encrypted = { encrypted_ciphertext: 'cipher', encrypted_iv: 'iv', encrypted_tag: 'tag', key_version: 'v1' };
-  let calls = 0;
-  globalThis.fetch = (async (input, init) => {
-    calls++; const url = new URL(String(input)); assert.equal(url.hostname, 'fixture.supabase.test');
-    assert.equal(url.searchParams.get('encrypted_tag'), 'eq.old-tag'); assert.equal(url.searchParams.get('key_version'), 'is.null');
-    assert.equal(url.searchParams.get('permission_retracted'), 'eq.false'); assert.equal(url.searchParams.get('user_id'), 'eq.owner-1');
-    assert.equal(url.searchParams.get('status'), 'eq.healthy');
-    assert.equal(url.searchParams.get('select'), 'id'); assert.equal(init?.redirect, 'error');
-    assert.deepEqual(Object.keys(JSON.parse(init!.body as string)).sort(), ['credential_expires_at_ms','encrypted_ciphertext','encrypted_iv','encrypted_tag','key_version','updated_at']);
-    return Response.json([]); // The SQL write may already have changed the envelope.
-  }) as typeof fetch;
-  const database: any = { query: async () => { throw Error('PRIVATE_DATABASE_FAILURE'); } };
-  assert.equal(await replaceRegistryCredential(row, encrypted, now, database), false); assert.equal(calls, 1);
-  for (const changed of [{ status: 'revoked' }, { status: 'dead' }, { status: 'quarantined' }, { status: undefined }, { permission_retracted: true }]) {
+  const database: any = { query: async () => { throw Error('Database unavailable'); } };
+  await assert.rejects(replaceRegistryCredential(row, encrypted, now, database), /Database unavailable/);
+  for (const changed of [{ managed_desktop_id: null }, { status: 'revoked' }, { permission_retracted: true }])
     assert.equal(await replaceRegistryCredential({ ...row, ...changed }, encrypted, now, database), false);
-  }
-  assert.equal(calls, 1, 'Ineligible rows must never reach the fallback');
 });

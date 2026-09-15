@@ -7,14 +7,16 @@
 
 ```sh
 npm run test:relay:capabilities
-node --import tsx --test scripts/test-relay-enrollment.ts
+node --import tsx --test scripts/test-codex-image-tool.ts scripts/test-relay-client-auth.ts
+node --import tsx --test scripts/test-relay-enrollment.ts scripts/test-desktop-enrollment.ts
+npm run test:relay:manual-db
 node --import tsx --test scripts/test-public-information-boundary.ts scripts/test-image-public-http.ts scripts/test-relay-client-auth.ts
 npm run test:relay:desktop-login
 npx tsc --noEmit
 python3 scripts/verify-docs.py
 ```
 
-The capability suite covers lifecycle, desktop/credential recovery, maintenance, monitor authorization, telemetry and HTTP/adaptive-quota behavior. Enrollment tests cover retired entrypoints, validation and isolation. Public-boundary tests inspect adversarial bodies, headers, errors and artifacts. Guest tests exercise CLI/source handling without a real account sign-in.
+The capability suite covers lifecycle, desktop/credential recovery, maintenance, monitor authorization, telemetry and HTTP/adaptive-quota behavior. The image transport fixture tests the exact standalone Codex request, metadata re-encoding, response bounds, malformed artifacts, denial, cancellation and single dispatch. The HTTP fixture exercises image verification, ordinary-key probe denial and delivery without a chat-model dependency. These use local fixtures, never production tokens. Enrollment tests cover retired entrypoints, validation and isolation. Explicit enrollment also needs desktop-session and exact-Origin checks, unknown-field rejection, expected-link fencing, stopped/missing workspace denial, repeated requests, wrong-desktop/account rejection and preservation of revoked or unconfirmed authority. Automatic sync must never enroll an unknown account or independently renew its provider session. Public-boundary tests inspect adversarial bodies, headers, errors and artifacts. Guest tests exercise CLI/source handling without a real account sign-in.
 
 ## Controller recovery drills
 
@@ -37,7 +39,7 @@ npm run test:relay:docker
 node --import tsx scripts/test-relay-lifecycle-docker.ts
 ```
 
-The storage harness uses disposable PostgreSQL plus mocked REST tests. Read its prerequisites before running. The broad `npm run db:test` creates its own disposable Docker database and rejects production connection overrides; see [test isolation](RELAY_CREDENTIAL_ENROLLMENT.md#isolated-integration-tests).
+The storage harness starts disposable PostgreSQL with local `initdb`/`pg_ctl` and verifies that generic SQL/Data API saves cannot enroll, plus targeted fixture quarantine. Its Data API rejection test asserts that no HTTP request occurs. It does not replay the complete production schema; `npm run test:relay:manual-db` supplies migration replay, role/trigger/function denial, provenance constraints, bound renewal and rollback/reapply coverage in a separate disposable database. The broad `npm run db:test` creates its own disposable Docker database and rejects production connection overrides; see [test isolation](RELAY_CREDENTIAL_ENROLLMENT.md#isolated-integration-tests).
 
 Docker canaries use synthetic inventories/credentials. The federation canary removes containers but retains checkpoint volumes under its existing driver behavior. The lifecycle canary removes its containers and checkpoint volumes. Desktop previews use a scoped test manifest for retryable cleanup. Never expand cleanup to normal production workspaces.
 

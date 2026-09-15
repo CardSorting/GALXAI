@@ -39,6 +39,7 @@ export async function clearExpiredCredentials(
   if (options.excludeShardIds !== undefined && (!Array.isArray(options.excludeShardIds) || options.excludeShardIds.some(id => typeof id !== 'string' || !id))) throw new TypeError('excludeShardIds must contain nonempty strings');
   const eligible = `credential_expires_at_ms > 0
     AND credential_expires_at_ms <= (EXTRACT(EPOCH FROM statement_timestamp()) * 1000)::bigint
+    AND managed_desktop_id IS NULL
     AND permission_retracted = false AND status <> 'revoked'
     AND COALESCE(active_in_flight_count, 0) = 0
     AND ($1::text IS NULL OR user_id = $1)
@@ -162,51 +163,22 @@ export function encryptRegistryShard(row: Record<string, any>, credential: Recor
   return { encrypted_ciphertext: ciphertext.toString('hex'), encrypted_iv: iv.toString('hex'), encrypted_tag: cipher.getAuthTag().toString('hex'), key_version: keyVersion };
 }
 
-// Fence the credential envelope, not the frequently updated lease/counter revision.
-// Preserve traffic policy, cooldown, owner, shard ID and live quota/lease counters.
-// Compare status as text so denied labels absent from an older enum cannot abort the UPDATE.
-export const REPLACE_REGISTRY_CREDENTIAL_SQL = `UPDATE public.galx_shard_accounts
-  SET encrypted_ciphertext = $1, encrypted_iv = $2, encrypted_tag = $3, key_version = $4,
-      credential_expires_at_ms = $5, updated_at = statement_timestamp()
-  WHERE id = $6 AND user_id = $7 AND provider = $8
-    AND encrypted_iv = $9 AND encrypted_tag = $10
-    AND key_version IS NOT DISTINCT FROM $11
-    AND permission_retracted = false AND status::text NOT IN ('revoked', 'dead', 'quarantined')
-  RETURNING id`;
+/** SQL-only administrator authority. No service-key/REST ingestion fallback. */
+export async function enrollRegistryDesktop(desktopId: string, row: Record<string, unknown>, expected?: Record<string, unknown>,
+  database?: Pick<pg.PoolClient, 'query'>): Promise<string> {
+  const result = await (database ?? getRegistryPool()).query(
+    'SELECT private.enroll_desktop_shard($1::uuid,$2::jsonb,$3::jsonb) AS id',
+    [desktopId, JSON.stringify(row), expected ? JSON.stringify(expected) : null]);
+  if (result.rows[0]?.id !== row.id) throw new Error('Desktop enrollment not confirmed');
+  return result.rows[0].id;
+}
+
+export const REPLACE_REGISTRY_CREDENTIAL_SQL =
+  'SELECT private.refresh_desktop_shard($1::uuid,$2::text,$3::jsonb,$4::jsonb) AS updated';
 export async function replaceRegistryCredential(row: Record<string, any>, encrypted: ReturnType<typeof encryptRegistryShard>, expiresAtMs: number,
   database?: Pick<pg.PoolClient, 'query'>): Promise<boolean> {
-  if (typeof row.status !== 'string' || ['revoked', 'dead', 'quarantined'].includes(row.status) || row.permission_retracted) return false;
-  const config = registryConfig();
-  if (database || config.databaseUrl) {
-    try {
-      const result = await (database ?? getRegistryPool()).query(REPLACE_REGISTRY_CREDENTIAL_SQL, [
-        encrypted.encrypted_ciphertext, encrypted.encrypted_iv, encrypted.encrypted_tag, encrypted.key_version, expiresAtMs,
-        row.id, row.user_id, row.provider, row.encrypted_iv, row.encrypted_tag, row.key_version ?? null,
-      ]);
-      return result.rows.length === 1;
-    } catch {
-      // The same envelope fence makes an uncertain SQL commit safe to check via
-      // the admin API. It cannot replace a credential already changed by SQL.
-      if (!config.url || !config.key) throw new Error('Credential authority unavailable');
-    }
-  }
-  if (!config.url || !config.key) throw new Error('Credential authority unavailable');
-  const url = new URL('/rest/v1/galx_shard_accounts', config.url);
-  for (const name of ['id', 'user_id', 'provider', 'encrypted_iv', 'encrypted_tag']) url.searchParams.set(name, 'eq.' + row[name]);
-  url.searchParams.set('key_version', row.key_version == null ? 'is.null' : 'eq.' + row.key_version);
-  // Match an observed enum value: older schemas may not define every denied status.
-  // A concurrent policy change must be reread before this fallback can retry.
-  url.searchParams.set('permission_retracted', 'eq.false'); url.searchParams.set('status', 'eq.' + row.status); url.searchParams.set('select', 'id');
-  const response = await fetch(url, { method: 'PATCH', redirect: 'error', signal: AbortSignal.timeout(5000),
-    headers: { apikey: config.key, Authorization: `Bearer ${config.key}`, 'Content-Type': 'application/json', Prefer: 'return=representation' },
-    body: JSON.stringify({ ...encrypted, credential_expires_at_ms: expiresAtMs, updated_at: new Date().toISOString() }) });
-  if (!response.ok) { await response.body?.cancel(); throw new Error('Credential authority unavailable'); }
-  const reader = response.body?.getReader(); if (!reader) throw new Error('Credential authority unavailable');
-  const chunks: Uint8Array[] = []; let size = 0;
-  try { while (true) { const { value, done } = await reader.read(); if (done) break; size += value.length;
-    if (size > 4096) throw new Error('Credential authority unavailable'); chunks.push(value); }
-    const result = JSON.parse(Buffer.concat(chunks).toString('utf8'));
-    if (!Array.isArray(result) || result.length > 1) throw new Error('Credential authority unavailable');
-    return result.length === 1 && result[0].id === row.id;
-  } finally { await reader.cancel().catch(() => {}); }
+  if (!row.managed_desktop_id || typeof row.status !== 'string' || ['revoked', 'dead', 'quarantined'].includes(row.status) || row.permission_retracted) return false;
+  const result = await (database ?? getRegistryPool()).query(REPLACE_REGISTRY_CREDENTIAL_SQL,
+    [row.managed_desktop_id, row.id, JSON.stringify(row), JSON.stringify({ ...encrypted, credential_expires_at_ms: expiresAtMs })]);
+  return result.rows[0]?.updated === true;
 }

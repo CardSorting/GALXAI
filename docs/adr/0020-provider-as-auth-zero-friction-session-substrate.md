@@ -7,13 +7,17 @@
 
 > September 13, 2026 delivery correction: account/session behavior is governed by [workspace authentication](../operations/workspace-auth.md). Provider credentials do not establish account identity; implicit sudo, credential IDs as authentication and process-local connection replay guarantees are retired. The proposed topic-specific successor is [ADR 0147](0147-verified-account-and-session-authority.md). This dated precedence note preserves the original decision status and does not claim production delivery.
 
-## Status
+## Original recorded status
 **Accepted & Implemented**
 
-## Context
+## September 14 enrollment successor
+
+[ADR 0152](0152-manual-desktop-only-shard-authority.md) replaces the provider-ingestion decision: GALX account authentication is separate, all external provider connection routes are closed, and managed shards require manual sign-in inside a Relay Desktop followed by explicit **Enroll shard**. Expired provider sessions are renewed manually in that owning desktop. The original rationale and claimed benefits below are historical statements, not current onboarding, security certification or performance guarantees. Use [the current identity reference](../PROVIDER_AS_AUTH_SPECIFICATION.md) and [enrollment runbook](../maintainers/RELAY_CREDENTIAL_ENROLLMENT.md).
+
+## Original context
 Traditional AI proxy architectures require users to create dedicated platform accounts, verify emails, set passwords, and then paste third-party API keys into separate dashboard forms. This multi-step onboarding creates high cognitive friction and security risks. We required a zero-friction authentication model where the user's upstream provider credentials (OpenAI / xAI Grok) *act directly* as their identity and cryptographic trust anchor ("Provider IS Auth").
 
-## Decision
+## Original decision
 1. **1-Click Zero-Friction Provider Ingestion**:
    - The user signs in directly with their provider API key or OAuth session token.
    - The backend instantaneously resolves identity, executes preflight upstream connectivity checks, and provisions an isolated Substrate shard.
@@ -23,7 +27,7 @@ Traditional AI proxy architectures require users to create dedicated platform ac
 3. **Dual Identity Resolution**:
    - `GalxAuthEngine.resolveAuthIdentity` uniformly authenticates both developer gateway keys (`galx_live_...`) and session bearer tokens (`galx_sess_...`) across Next.js API routes, WebSocket connections, and Cloudflare Workers.
 
-## Consequences
+## Original consequences
 ### Positive
 - **Instant Time-to-Value**: Developers start streaming LLM completions and generating images in < 10 seconds.
 - **Zero-Knowledge Security**: Platform operators cannot inspect user upstream API keys without authorized cryptographic vault decryption.

@@ -1,7 +1,7 @@
 # Federation contract
 
 <!-- docs-scope: current-guide -->
-> Private maintainer contract, reconciled September 11, 2026. Public documentation follows [ADR 0129](adr/0129-public-image-artifacts-and-verified-identity.md).
+> Private maintainer contract, reconciled September 15, 2026. Public documentation follows [ADR 0129](adr/0129-public-image-artifacts-and-verified-identity.md).
 
 ## Ownership and capability are separate
 
@@ -11,7 +11,7 @@ The controller reads the encrypted PostgreSQL registry and reconciles owned cont
 
 Kubernetes could add pod restart and capability probes, but it would not repair the single-host stale-marker failure or prove that an uncertain Docker mutation and its descendants have ended. Kubernetes leader election also does not by itself fence a paused old controller. The current single-host strategy therefore keeps the local kernel guard, external guardian and one launchd restart authority; a Kubernetes migration is not part of this repair. Reconsider orchestration only with a multi-host ownership lease, durable state contract and fencing at the resource-management boundary.
 
-**Automatic worker lifecycle remains supported. Ambient credential population is retired.** Starting a controller or creating a desktop must not scan host logins or enroll an unknown account. Use [explicit enrollment](maintainers/RELAY_CREDENTIAL_ENROLLMENT.md); refresh an existing account through its [linked desktop](maintainers/RELAY_DESKTOPS.md).
+**Only manually created Relay Desktops can enroll shards. Automatic worker lifecycle remains supported.** Starting a controller or creating a desktop must not scan host logins or enroll an unknown account. After manual provider sign-in, explicitly choose Enroll shard under [desktop enrollment](maintainers/RELAY_CREDENTIAL_ENROLLMENT.md). The application API, CLI add/import and host discovery paths are closed. The database requires a unique saved desktop binding before new admissions; legacy records are retained but excluded until confirmed. Renew an expired provider session manually in its [owning desktop](maintainers/RELAY_DESKTOPS.md); automatic saved-file sync validates and persists that completed login without renewing the provider session.
 
 ## Eligibility before load
 
@@ -48,11 +48,11 @@ The database-backed application pool retains its separate lease authority. Feder
 
 The canonical public capability is `openai-gpt-image-latest`. Legacy application image aliases resolve to it, not independent fallback providers. The internal protocol ID remains `gpt-image-2`.
 
-With `RELAY_CODEX_IMAGE_TOOL_ALIAS=true`, eligible OAuth workers use `gpt-5.6-terra` with `image_generation` for that internal ID. Image-model selection is provider-managed; exact GPT-Image-2 identity, dimensions and Image API quality semantics are not guaranteed. API-key workers request their exact image model. This explicit compatibility route does not authorize other substitutions.
+With `RELAY_CODEX_IMAGE_TOOL_ALIAS=true`, the repaired OAuth worker calls the standalone Images backend used by Codex's `image_gen.imagegen` extension. It sends the extension's `gpt-image-2` protocol ID and auto background, quality and size, using only its assigned credential. It does not request a chat model or a Responses `image_generation` tool. Image-model selection remains provider-managed for the public contract; exact underlying identity and rendering dimensions are not promised. The direct API-key transport remains code compatibility for isolated workers; API-key shards cannot enter the managed fleet under manual OAuth desktop enrollment. No alternate account, endpoint or model is tried after failure. [ADR 0151](adr/0151-codex-standalone-image-tool.md) records the source correction; [current state](../post-mortem/CURRENT_STATE.md) separately identifies the serving implementation and the unresolved HTTP 403.
 
-Fresh execution-model inventory and real image evidence are required. Evidence lasts one hour; generation success renews it. Idle enabled workers perform a paid startup probe and successful renewal no more frequently than every 50 minutes, with failure backoff of 10, 20, then 40 minutes and spare-capacity checks. Inventory alone never proves image support.
+Fresh authenticated inventory and real image evidence are required. Removing a chat model does not invalidate standalone image evidence; stale inventory, unavailable health, expired image evidence and current credential authority still block admission. Chat-era compatibility evidence cannot authorize the new backend. Evidence lasts one hour; generation success renews it. Idle enabled workers perform a paid startup probe and successful renewal no more frequently than every 50 minutes, with failure backoff of 10, 20, then 40 minutes and spare-capacity checks. Inventory alone never proves image support.
 
-Internal transport and administrator records preserve execution identifiers. Public bodies, headers, errors, streams and artifacts must not expose them. Binary images are sanitized by default; explicit JSON uses an allowlisted contract. See [the image boundary guide](maintainers/image-public-boundary.md).
+The standalone response is byte-bounded, requires exactly one base64 image and is decoded/re-encoded before success can publish capability. Upstream URLs, generation IDs, response metadata and arbitrary error bodies are discarded. Internal transport and administrator records preserve allowlisted execution identifiers; the application recognizes both dated chat-era records and the standalone tool contract. Public bodies, headers, errors, streams and artifacts must not expose them. Binary images are sanitized by default; explicit JSON uses an allowlisted contract. See [the image boundary guide](maintainers/image-public-boundary.md).
 
 ## Parent and subagent execution
 
@@ -80,6 +80,6 @@ Read capability, traffic hold, worker health and desktop connection separately. 
 
 ## Verification and deployment boundary
 
-[ADRs 0131–0133](adr/README.md) govern access, handoff and enrollment. [The runbook](RELAY_VNEXT_RUNBOOK.md) defines operations; [the session record](maintainers/RELAY_SESSION_VERIFICATION_20260909.md) dates verification and deployment.
+[ADRs 0131–0133](adr/README.md) retain historical access/handoff decisions; [ADR 0152](adr/0152-manual-desktop-only-shard-authority.md) replaces external enrollment and automatic provider-session renewal. [The runbook](RELAY_VNEXT_RUNBOOK.md) defines operations; [the session record](maintainers/RELAY_SESSION_VERIFICATION_20260909.md) dates verification and deployment.
 
 Actual provider sign-in remains an operator action. Keyring extraction, cross-store atomic transactions, physical phone input, semantic accessibility within streamed pixels and a complete paid-entry transaction are not established by synthetic tests.

@@ -22,7 +22,7 @@ Private operational records. Start here during a failure; do not publish this di
 
 ## Working rules
 
-1. Record the observation before intervention: UTC time or explicitly date-only evidence, customer impact, component, operation identity, and evidence location. Separate observed facts from hypotheses.
+1. Record the observation before intervention: UTC time (`Z` or explicit `+00:00`) or explicitly date-only evidence, customer impact, component, operation identity, and evidence location. Separate observed facts from hypotheses. Naive timestamps and nonzero offsets are rejected; equivalent UTC encodings do not require rewriting journal entries.
 2. Contain the smallest affected scope. Preserve accepted work, tenant authority, storage and rollback state. A retry must not repeat an uncertain generation or payment.
 3. Record every action, its result, and the next decision in the rolling journal. Append corrections with the original event ID; do not rewrite observations to make a timeline look successful.
 4. Restore and verify the real customer path. A health response, successful build or deployment marked Ready is insufficient evidence of generation, download, persistence or settlement.

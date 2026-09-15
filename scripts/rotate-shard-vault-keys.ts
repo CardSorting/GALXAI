@@ -42,6 +42,9 @@ async function main(): Promise<void> {
   let rewrapped = 0;
   try {
     await client.query('BEGIN');
+    // Explicit offline vault rewrap preserves plaintext, ownership and enrollment.
+    // This role is unavailable to the Data API and cannot log in directly.
+    await client.query('SET LOCAL ROLE galx_desktop_writer');
     const result = await client.query<EncryptedShardRow>(
       `SELECT id, user_id, provider::text, encrypted_ciphertext,
               encrypted_iv, encrypted_tag, key_version

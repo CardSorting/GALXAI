@@ -1,51 +1,51 @@
 # Security boundaries
 
 <!-- docs-scope: current-guide -->
-> **Reading scope:** Current guidance. The federation contract governs relay behavior; source and dated verification define implementation evidence. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
 
-This guide describes the current federation boundary, not a compliance certification. Vulnerability reporting remains in the [root security policy](../SECURITY.md).
+Private current guidance for the [federation contract](FEDERATION_STRATEGY.md) and [manual enrollment decision](adr/0152-manual-desktop-only-shard-authority.md). Vulnerability reporting remains in the [root security policy](../SECURITY.md). These controls are not compliance certification.
 
-| Boundary | Authority |
+## Authority map
+
+| Boundary | Required authority |
 | --- | --- |
-| User to application | Application authentication and tenant authorization |
+| User to application | Verified account/session, resource ownership and the operation's access rules |
 | Application to controller | Configured inference credential and trusted tenant mapping |
-| Operator to controller | Host-held administrator credential delegates separate local monitor/desktop sessions |
-| Desktop to credential authority | Safe guest file read, validation, durable intent and revision-conditional replacement |
-| Controller to worker | Scoped internal inference/admin credentials and authenticated delegation |
-| Worker to provider | Its one assigned upstream credential |
-| Registry and account health | Backend database policies, current leases, credential revisions |
+| Operator to read-only monitor | Host-issued monitor browser session |
+| Operator to Relay Desktops | Separate host-issued desktop session and exact local origin for mutations |
+| Desktop to new registry authority | Explicit Enroll shard on a persisted running workspace with a validated saved login |
+| Desktop to replacement credential | Matching durable desktop binding, account and current encrypted revision |
+| Controller to worker | Scoped private inference/admin transport and one assigned eligible credential |
+| Registry to admission | Confirmed desktop provenance plus current permissions, expiry, leases and quota |
 | Agent to tools | Consuming runtime's explicit execution controls |
 
-Task IDs, prompts, model output, and caller-supplied tenant headers grant no authority. Signed job identity binds tenant and worker generation. Administrator access does not bypass job ownership.
+Ordinary authentication, preview approval, task IDs, prompts, model output and caller-provided tenant hints do not grant administrator authority. Job ownership remains enforced independently.
 
-## Containment and custody
+## Enrollment and credential custody
 
-Each shard worker is a non-root isolated container with a read-only root, dropped capabilities, resource limits, bounded temporary storage, and a private checkpoint volume. Workers receive no database/vault keys, repository, host home, or Docker socket mounts. They hold their assigned provider credential in memory and configuration.
+Manually create the workspace, complete provider sign-in inside it and choose **Enroll shard**. API/CLI/file ingestion and ambient host discovery are closed. Retired application provider routes return a fixed uncached 410 before processing credentials or starting authentication. The exact endpoint list is in [the connection boundary](STANDARDIZED_OAUTH_AND_INGESTION_ARCHITECTURE.md).
 
-The host controller holds registry decryption and Docker authority. Its host-process boundary is different from worker isolation. Protect the supervisor, persistent signing secret, lock, and ignored configuration directory. Single-host ownership does not provide multi-host consensus. Container settings do not establish an egress firewall or isolate application-side tools.
+The database requires paired enrollment fields and a unique desktop binding. Protected-field triggers and the private no-login writer role restrict credential, owner and binding changes. The service role has no shard insert or private enrollment/refresh authority. General repository saves update allowlisted policy metadata. Both controller projection and durable leases exclude unconfirmed legacy records. Existing records, revocations, counters and history are retained.
 
-Each repair desktop has an independent guest home, browser profile and network, with bounded resources and explicit deletion. It is a Linux container, not hardware isolation. Guest login files can contain provider credentials; custom sources must remain within the owned guest home and pass path/ownership checks. Keyrings are not exported.
+The host validates saved guest files, account identity, expiry and inventory before writing. Enrollment cannot revive revoked/dead/quarantined rows, choose an ambiguous account or steal another desktop's binding. Local links do not change database ownership. A database owner remains trusted and can alter schema/roles; these controls do not claim to contain a malicious owner.
 
-Explicit operator enrollment validates before create-only persistence. Bulk host-cache discovery is retired. Existing-account sync uses a flushed private intent and conditional registry update, not a distributed atomic transaction. Checkpoint failure must remain explicit. Mutating integration tests require a dedicated loopback database before repository imports and strip inherited Data API credentials.
+## Renewal, retention and isolation
 
-## Request and observation controls
+Expired provider sessions require manual sign-in in the owning desktop. Automatic saved-file sync validates and transfers a login already present there; it never renews the provider session. Its durable intent and revision-conditional write recover across failures without overwriting newer authority. Database mutation and local checkpoint are separate commits. A failed checkpoint cannot report success.
 
-Controller operational data requires server-side administrator authority or the appropriate delegated local session. Anonymous monitor/desktop entrypoints expose generic connection guidance only; operational HTML, scripts, noVNC modules and data are authorized. Host launchers issue short-lived one-use tickets and HttpOnly sessions. Ordinary inference keys cannot issue grants. Admin keys never belong in browser storage. Foreign origins, nonlocal clients and forwarding headers are rejected; display connections are rechecked on expiry/revocation. Product browser clients use their application backend. Input sizes, read deadlines, concurrency, receipts, polling, and shutdown are bounded.
+Each worker is an isolated non-root container with a read-only root, reduced capabilities, bounded resources and a private checkpoint volume. It receives one assigned provider credential, no database/vault root, host home, repository or Docker socket. The host controller holds registry decryption and Docker authority; this trusted host boundary differs from worker isolation and does not supply multi-host consensus.
 
-Health is changed only under current authority. Stale generation/inventory/health observations cannot restore routing. Telemetry is observation-only. Capability denial removes that pair; it does not authorize deleting the account or cancelling otherwise valid streams.
+Each desktop has its own guest home, profile and network. Safe reads reject inappropriate paths, ownership and files; keyrings are not exported. Homes, backups and worker checkpoints are sensitive. Keep the bound home for manual repair; deletion does not release or transfer the database binding. Container settings do not establish hardware isolation or a network egress firewall.
 
-Execution metadata belongs only in internal transport and administrator-authorized records. Public image responses contain sanitized artifacts or allowlisted JSON, with generic errors and opaque request IDs. Model aliases do not establish an exact underlying model or authorize replay of ambiguous work. See [ADR 0129](adr/0129-public-image-artifacts-and-verified-identity.md) and the [image boundary guide](maintainers/image-public-boundary.md).
+## Requests, visibility and recovery
 
-JWT identity is verified by the authentication service; decoded claims, bare UUIDs, and developer/session identifiers are not credentials. Verification failures deny access. Browser cookie chunks are reassembled before verification. Ordinary sessions do not acquire priority or sudo from user-editable claims, and ordinary authentication never grants operational administrator access.
+Operator diagnostics remain behind server administrator or purpose-specific local session checks. Desktop sessions, monitor sessions and inference credentials are distinct. Ticket fragments are removed after exchange, and provider/admin credentials do not enter browser storage. Cross-origin and nonlocal requests are rejected.
 
-## Retention
+Public responses use explicit field allowlists and re-encoded image artifacts. Keep topology, credential sources, internal identifiers and execution diagnostics out of public bodies, headers, streams, metadata and browser assets. Errors must not expose upstream payloads. Preserve tenant-bound operation identity after uncertain acknowledgement; a retry is not automatically safe.
 
-Sanitized telemetry is separate from job/checkpoint storage, which may contain unfinished request content. Bounded receipts may contain response bytes. Provider retention, application assets, and consuming agent storage are separate policies. Do not claim universal zero retention, zero knowledge, HIPAA compliance, or SOC 2 certification from these mechanisms.
+Holds stop new work and replacement starts while allowing accepted work to finish. Revocation, expiry, removal and changed authority still control eligibility. Repair by restoring verified authority in the owning desktop, never by clearing rejection/quota, reviving records or reopening ingress. Vault rewrap is a separate [private administrator procedure](maintainers/MULTI_TENANT_SHARD_AND_KEY_ROTATION.md).
 
-Keep credentials, raw runtime environments, prompts, and private operational identifiers out of logs and shared incident reports. For implementation scope and dated deployment evidence, use the [contract](FEDERATION_STRATEGY.md), [runbook](RELAY_VNEXT_RUNBOOK.md), and [ADR catalog](adr/README.md).
+## Verification and limitations
 
-## Sites content and receipts
+Use [hardening](maintainers/RELAY_HARDENING.md) for anonymous, ordinary-key, monitor-session, origin, malformed-body, race, wrong-desktop, rollback and public-artifact tests. Mutating integration uses guarded disposable databases with synthetic credentials. Production builds and raw HTTP/browser-asset checks are separate from real provider login and generation acceptance.
 
-The Sites application API requires an explicit verified account session bearer. It scopes operation IDs to that account and accepts neither caller identity/model/rates nor token usage and relay references. New quotes/generation also need an exact cohort membership and a fresh server-only administrator contract check. Ordinary account or inference authentication never grants that operational access.
-
-Fixed pricing uses a matching durable completed receipt, never a customer claim or guessed usage. Database authority and wallet locks protect the reservation/settlement transaction. Public output contains only the content schema, operation identity, quote and opaque financial receipt; transport identities, origins, usage objects and configuration stay private. Customer-owned Site publication validates separate account ownership and exact saved artifacts. See [ADRs 0134–0136](adr/README.md).
+[Current state](../post-mortem/CURRENT_STATE.md) links the deployed closure evidence and open acceptance work. A running desktop, successful inventory, historical image result or Ready application does not prove the requested capability is currently usable.

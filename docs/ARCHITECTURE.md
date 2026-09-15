@@ -33,9 +33,9 @@ Original fixed/metered operations retain their historical receipt and settlement
 
 ## Reconciliation and recovery
 
-Explicit validated enrollment creates authority. Cold-start inventory validation precedes allocation. Workers maintain fresh capability evidence; empty evidence does not trigger deletion. A 401 suppresses that revision, while transient discovery failures back off.
+Explicit **Enroll shard** after manual sign-in in a saved Relay Desktop creates or confirms its durable owning-desktop authority. Cold-start inventory validation precedes allocation. Workers maintain fresh capability evidence; empty evidence does not trigger deletion. A 401 suppresses that revision, while transient discovery failures back off.
 
-Manual holds stop admissions and replacement starts, preserving an existing worker for repair. Registry removal, revocation, expiry and rotation still control authority. Desktop sign-in can supply a refreshed credential for the linked account; it cannot silently enroll another account or resume traffic.
+Manual holds stop admissions and replacement starts, preserving an existing worker for repair. Registry removal, revocation, expiry and rotation still control authority. Only manually created desktops with explicit enrollment contribute shard authority. External API/CLI ingestion is closed and database admission requires the unique desktop binding. Desktop sign-in can supply a refreshed credential for its bound account; it cannot silently enroll another account or resume traffic.
 
 Application database-backed leases remain distinct from federation's local reservations. Private journals support recovery but are not cross-store atomic transactions.
 
@@ -47,6 +47,6 @@ Application database-backed leases remain distinct from federation's local reser
 | Controller and sessions | [federation-server.ts](../src/relay/federation-server.ts), [monitor-sessions.ts](../src/relay/monitor-sessions.ts) |
 | Desktop access and state | [desktop-gateway.ts](../src/relay/desktop-gateway.ts), [desktop-manager.ts](../src/relay/desktop-manager.ts) |
 | Credential handoff | [desktop-credential-refresh.ts](../src/relay/desktop-credential-refresh.ts), [desktop-journal.ts](../src/relay/desktop-journal.ts) |
-| Explicit enrollment | [manage-shards.ts](../scripts/manage-shards.ts), [operator-enrollment.ts](../src/relay/operator-enrollment.ts) |
+| Explicit enrollment | [desktop-enrollment.ts](../src/relay/desktop-enrollment.ts), [manual enrollment migration](../supabase/migrations/20260914231914_manual_desktop_shard_enrollment.sql) |
 
 See [operations](RELAY_VNEXT_RUNBOOK.md), [security](SECURITY.md) and [dated verification](maintainers/RELAY_SESSION_VERIFICATION_20260909.md).

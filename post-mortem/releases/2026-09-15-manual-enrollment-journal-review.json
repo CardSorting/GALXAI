@@ -1,0 +1,19 @@
+{
+  "classification": "private",
+  "observed_at": "2026-09-15T00:08:00.912914Z",
+  "scope": "Incident timestamp validation during manual enrollment activation",
+  "observation": "New append-only events use explicit +00:00 UTC offsets. The guard formerly required only the equivalent Z suffix.",
+  "change": "Validate the parsed zero UTC offset, retaining rejection of naive and nonzero-offset timestamps. Original events remain unchanged.",
+  "inspected": [
+    "scripts/verify-post-mortem.py",
+    "scripts/test-post-mortem.py",
+    "post-mortem/README.md"
+  ],
+  "validation": "Regression covers Z and +00:00 acceptance, naive and -06:00 rejection, and unchanged event values. Full documentation suite run for this correction.",
+  "limits": "Documentation validation only; no application/runtime/schema changes and no runtime acceptance inferred.",
+  "sha256": {
+    "scripts/verify-post-mortem.py": "82732c2ce75c49f2c8d61842f8a64c63cfe70f84d6890f0113de65bb71a70a64",
+    "scripts/test-post-mortem.py": "c4dbb8c575760a2110eb1ad01575fb55b2f96da28da2bd57101dc630adaa464f",
+    "post-mortem/README.md": "109e413d0323577f935e1b911356db7ca1f48da6e394639a6ec81fc253025dee"
+  }
+}

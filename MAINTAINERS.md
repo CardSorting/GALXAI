@@ -8,6 +8,8 @@ The application, gateway, controller, worker, storage and database have separate
 
 For incidents use [triage](post-mortem/runbooks/triage.md), [image recovery](post-mortem/runbooks/image-generation.md), [controller ownership](post-mortem/runbooks/controller-lock.md) and [storage containment](post-mortem/runbooks/deployment-storage.md). Keep accepted work, tenant ownership, signing state and rollback evidence intact. Never use stale telemetry, cached approval or a missing acknowledgement to authorize a new side effect.
 
+For shard onboarding and renewal, use [manual desktop enrollment](docs/maintainers/RELAY_CREDENTIAL_ENROLLMENT.md) and [desktop operations](docs/maintainers/RELAY_DESKTOPS.md). The desktop shortcut is the operator entry point. External ingestion is closed; provider expiry requires manual sign-in in the owning desktop. Refer to current state for activation and remaining acceptance rather than maintaining another deployment summary here.
+
 ## Verification and release
 
 Use declared runtime requirements and inspect project scripts before executing them. Database integration uses disposable fixtures; production credentials must fail the test guard. [Database operations](docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md) separates inventory, test, migration and rollback actions.

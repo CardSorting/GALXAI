@@ -14,6 +14,7 @@ WORKDIR /build
 COPY package.json ./
 COPY src/relay ./src/relay
 COPY src/core/broccolidb ./src/core/broccolidb
+COPY src/lib/security/image-artifact.ts ./src/lib/security/image-artifact.ts
 
 # Bundle into single zero-dependency ESM binary using esbuild
 RUN npx --yes esbuild src/relay/relay-server.ts \
@@ -32,7 +33,7 @@ WORKDIR /app
 
 # Install wget for container healthcheck probe
 RUN apk add --no-cache wget
-RUN npm install --omit=dev --ignore-scripts --no-audit --no-fund ws@8.21.0 pg@8.23.0
+RUN npm install --omit=dev --ignore-scripts --no-audit --no-fund ws@8.21.0 pg@8.23.0 sharp@0.35.4
 
 # Set environment
 ENV NODE_ENV=production

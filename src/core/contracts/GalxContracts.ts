@@ -391,6 +391,8 @@ export interface GalxShardAccount {
   readonly adaptiveInFlightLimit?: number;
   /** Monotonic PostgreSQL control-plane version; never synthesized by a transport. */
   readonly registryRevision?: number;
+  readonly managedDesktopId?: string;
+  readonly desktopEnrolledAt?: string;
   readonly registrySource?: 'api' | 'oauth' | 'operator_import' | 'environment_bootstrap' | 'legacy_migration';
   readonly createdAtMs: number;
   readonly updatedAtMs: number;

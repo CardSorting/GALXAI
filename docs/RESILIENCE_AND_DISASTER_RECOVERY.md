@@ -9,7 +9,10 @@
 | Stopped controller with old lock | New launcher/guardian recovers after process-group termination; legacy or ambiguous marker follows [guarded ownership recovery](../post-mortem/runbooks/controller-lock.md); never remove a live/ambiguous owner |
 | Auth transport unavailable | Keep it distinct from invalid credentials; no cached identity grant or forced sign-out workaround |
 | Empty/stale model evidence | Remove admission eligibility; retain worker and rediscover |
-| Credential 401 | Persist revision rejection; repair authority before starting again |
+| Credential 401 | Persist revision rejection; manually sign in in the owning desktop and verify a new saved/applied revision |
+| Unconfirmed legacy account | Explicitly Enroll shard from its matching desktop; a valid token or source label is insufficient |
+| Expired managed provider session | Start/open its bound desktop and complete manual sign-in; keep the retained record for repair |
+| Lost bound desktop home | Preserve registry and receipts; investigate administrator recovery without automatic rebinding/import |
 | Inventory timeout, 403 or 5xx | Back off; do not permanently reject from this evidence alone |
 | Federation worker stopped or disappeared | Controller-only replacement with exponential backoff; five attempts in ten minutes then `worker_restart_budget_exhausted` and operator inspection |
 | Worker/controller operation stalls | Per-operation deadlines and external guardian escalation; retain uncertain mutation/receipt evidence and never replay blindly |
@@ -32,9 +35,11 @@ Preserve the controller signing secret, rejection/maintenance journals, desktop 
 
 Establish one controller owner, restore compatible private state and reconnect through the host launcher. Graceful stop removes unheld workers, so do not assume every restart preserves container identity. Verify ownership and generation before resuming.
 
-Credential sync uses a durable intent and compare-and-swap: finalize an already committed replacement or retry unchanged authority, never overwrite a newer external revision. Separate journal and registry stores are not atomically committed together.
+Confirm the manual-enrollment schema and unique owning-desktop binding before restoring admission. Keep external API/CLI/file ingestion sealed. Restoring an old registry backup does not authorize grandfathering unconfirmed rows or renewing provider sessions automatically.
 
-Closing a desktop viewer is safe for ongoing processes. Stop preserves home; deletion requires explicit confirmation and removes owned resources. Preview cleanup must not select production desktops by a broad name pattern.
+Credential sync transfers a manually completed sign-in from the bound desktop and uses a durable intent and compare-and-swap: finalize an already committed replacement or retry unchanged authority, never overwrite a newer external revision. Separate journal and registry stores are not atomically committed together.
+
+Closing a desktop viewer is safe for ongoing processes. Stop preserves home; deletion requires explicit confirmation and removes owned resources without releasing the database binding. Preview cleanup must not select production desktops by a broad name pattern.
 
 ## Sites financial and delivery recovery
 

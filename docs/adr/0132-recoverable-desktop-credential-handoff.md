@@ -9,7 +9,11 @@ Audience: private maintainers. Extends [ADR 0115](0115-postgresql-authoritative-
 
 Signing in through a guest terminal previously left the controller using the old credential. A successful local file write is not registry synchronization, and a registry update can succeed before a private checkpoint write fails. Custom login homes, keyring-only storage and unrelated accounts need distinct handling.
 
-## Decision
+## September 14 authority extension
+
+[ADR 0152](0152-manual-desktop-only-shard-authority.md) retains the recoverable saved-file handoff while requiring explicit manual enrollment and the immutable owning-desktop binding first. Linking or matching cannot confer authority. Credential writes now use private SQL functions under the no-login writer role; the older Data API fallback described in the September 9 implementation is retired. Provider-session renewal still requires manual sign-in in that bound desktop. See the [current procedure](../maintainers/RELAY_CREDENTIAL_ENROLLMENT.md); the original decision and measurements below remain dated evidence.
+
+## September 9 decision
 
 Watch the linked workspace's saved file-backed provider login. The operator signs in through the installed CLI, an accessible device-code panel or the guest browser. Helpers create and verify a private owned login directory before invoking the CLI and explicitly request file-backed storage.
 
@@ -21,7 +25,7 @@ Unlinked desktops expose the same read-only matching action in the link editor. 
 
 Before mutation, durably flush an intent containing candidate fingerprint and expected encrypted-registry revision. Replace the credential using compare-and-swap. Finish the private checkpoint only after success. Recovery confirms an already-applied result or retries unchanged original authority; an external newer revision wins. Previously applied unchanged files cannot restore old credential families.
 
-SQL compares denied status names against `status::text`: deployed enum versions need not contain every defensive denial label. Comparing the enum directly to an absent label aborts the whole update with `22P02`, even for a healthy account. The Data API fallback rejects ineligible observed rows and fences the exact observed status as well as the credential envelope; a concurrent status change requires rereading authority. No enum migration or broader privileges are required. See [PostgreSQL enum type safety](https://www.postgresql.org/docs/current/datatype-enum.html#DATATYPE-ENUM-TYPE-SAFETY).
+SQL compares denied status names against `status::text`: deployed enum versions need not contain every defensive denial label. Comparing the enum directly to an absent label aborts the whole update with `22P02`, even for a healthy account. The September 9 Data API fallback rejected ineligible observed rows and fenced the exact observed status as well as the credential envelope; a concurrent status change required rereading authority. That enum fix needed no enum migration or broader privileges. The fallback is historical; ADR 0152 now requires SQL-only credential writes. See [PostgreSQL enum type safety](https://www.postgresql.org/docs/current/datatype-enum.html#DATATYPE-ENUM-TYPE-SAFETY).
 
 Polling is coalesced, bounded and backed off on transient failures; operators have a manual retry. It watches completed CLI sign-in rather than independently exchanging refresh tokens. UI states separate sign-in, validation, registry save, worker application and traffic readiness.
 
@@ -42,7 +46,7 @@ Journal and PostgreSQL are separate stores, not a distributed ACID transaction. 
 
 Blindly copying a terminal file could replace the wrong account or resurrect stale tokens. Exporting keyrings would expand credential custody. A fully distributed transaction would require different storage architecture. Conditional authority plus durable intent provides bounded recovery while retaining the existing encrypted registry.
 
-Administrator DTOs exclude raw tokens and private checkpoint internals. This is existing-account recovery; new accounts use [ADR 0133](0133-explicit-validated-enrollment-and-test-isolation.md).
+Administrator DTOs exclude raw tokens and private checkpoint internals. The September 9 choice separated existing-account recovery from the then-current enrollment decision in [ADR 0133](0133-explicit-validated-enrollment-and-test-isolation.md). New accounts and legacy confirmations now use [ADR 0152](0152-manual-desktop-only-shard-authority.md).
 
 ## Evidence and remaining acceptance
 

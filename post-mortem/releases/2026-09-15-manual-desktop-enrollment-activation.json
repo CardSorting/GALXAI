@@ -1,0 +1,109 @@
+{
+  "classification": "private",
+  "observed_at": "2026-09-15T00:07:16.197985+00:00",
+  "scope": "Manual desktop-only shard authority activation",
+  "source": {
+    "base_revision": "aa48b334b89bb77841c3317fb98c291429a39650",
+    "working_tree": "dirty, includes previously reviewed separate local Codex image candidate",
+    "sha256": {
+      "src/relay/desktop-enrollment.ts": "6763acc8447c48744d3ff28befa68da58d60e8591fd3d0ab727467f3d4d9a29b",
+      "src/relay/desktop-manager.ts": "56f34c5fcf06ecf46439c45112470c2586bfdc0b66eaf6ad7708b69a7c47412a",
+      "src/relay/desktop-gateway.ts": "299595a75f4a44fc57a1b27245bb30d0eefdd428d416dcc76a7b0da1f959b4b7",
+      "src/relay/desktop-credential-refresh.ts": "2cb9a548f169ad5b00a630b18c00fa45ed5c6211984b7c6e17c99abbb745fba3",
+      "src/relay/shard-registry.ts": "9200020de15bda1309c978911db45ae8a96feada856c0a031d32adbe3ae81955",
+      "src/relay/shard-registry-sync.ts": "5b0d72ee9d9a451c2e9f6849afd4e531d656e8ab366365d7a0f54b0ab4455e52",
+      "src/relay/desired-shards.ts": "13844d8aa37c7b69c2f1ae08e75a065678d201a6fc440a71738fa05e1b2100a2",
+      "src/relay/relay-server.ts": "dc6429b46b396026c9eb685f8923f2310ea6372a26b22368fb23bb83afc1d673",
+      "src/core/substrate/GalxCredentialSubstrate.ts": "6b58a16f985e7d25d51d3f76fac35e245bcf8de8214192d48d91d56d0746b88b",
+      "src/lib/supabase/repositories/ShardRepository.ts": "caccf1828aded7dc71982c9fe82bc476984a849c18755b890049196cd3518bf5",
+      "src/core/auth/GalxAuthEngine.ts": "0f03a805b48838694510eb98bb2b3eb6996ba3198ae21f10a9437b6d80e8def9",
+      "src/lib/auth/provider-connection-route.ts": "366fdc7e011313fd174f092e5ebb015709a7a1ad01dbcf9925e73323cd6ac564",
+      "src/middleware.ts": "2d8f341ca4b1d393c401954d737f9ee4ef9f2062b7a41298168259360b61e28d",
+      "src/relay/desktops.html": "f659b19c4e3ef9aa932a63819b1f40ed0ab95a2aad474f03e14b5df9a8c86c96",
+      "src/relay/desktops.js": "dfe110f6f87d7b113ba597e3fab349243c61f53200a0bfb317164f691e761752",
+      "scripts/manage-shards.ts": "60c75322e2785a4be62cc24bb99b92465d9ca0e9c40c9107edb9df89b67c7406",
+      "scripts/rotate-shard-vault-keys.ts": "f70786732706b28b5ffc72d3c730710273149421461c6e46a529c4c08151cacb",
+      "scripts/apply-manual-desktop-enrollment.ts": "97f5ef7377b6eaca4760fe0e2a02f5f611bdcffb2cd46800313b710665bc4975",
+      "scripts/verify-shard-authority-live.ts": "6fd08d5cba01a2b8e9d9cce5121fbb7d77e7be145e379edfd024bc6403624bf8",
+      "supabase/migrations/20260914231914_manual_desktop_shard_enrollment.sql": "9281aece1e5709ff28bc020c7c66a3b64541231084d6867715791e4ee982ddc9",
+      "supabase/rollbacks/20260914231914_manual_desktop_shard_enrollment.down.sql": "edbeb1bef4abb1bed75842c1c5630a32c518a7cb89a0268936456d23990e0be1"
+    }
+  },
+  "local_evidence": "post-mortem/releases/2026-09-14-manual-desktop-enrollment.json",
+  "database": {
+    "migration": "20260914231914",
+    "applied": true,
+    "record_count_before": 56,
+    "record_count_after": 56,
+    "confirmed": 0,
+    "service_insert": false,
+    "service_enroll": false,
+    "service_refresh": false,
+    "service_writer_membership": false,
+    "rollback_reapply_tested": true
+  },
+  "controller": {
+    "target": "launchd gui/501/com.galxai.federation.production",
+    "old_process_group_ended": true,
+    "pid_after": 31454,
+    "preserved_exact_files": [
+      "desktops.json",
+      "signing-secret",
+      "maintenance.json",
+      "admissions.json"
+    ],
+    "desktop_count_before": 2,
+    "desktop_count_after": 2,
+    "recovery_receipts_retained": 6,
+    "unknown_receipts_retained": 6,
+    "registry_fresh": true,
+    "desired_shards": 0,
+    "admitted_workers": 0,
+    "authorization": {
+      "observed_at": "2026-09-15T00:03:19.049Z",
+      "desktop_count": 2,
+      "inventory_fresh": true,
+      "can_enroll": true,
+      "anonymous_inference_raw_admin_monitor_session_denied": true,
+      "wrong_origin_denied": true,
+      "credential_body_denied": true,
+      "private_asset_denied": true,
+      "updated_controls_served": true,
+      "actual_enrollment_attempted": false
+    },
+    "shortcut": "/Users/bozoegg/Desktop/GALX Relay Monitor.app",
+    "shortcut_reopened": true
+  },
+  "application": {
+    "deployment_id": "dpl_cFYtKU8tF7mfaBQkrYy5nPvEjuvw",
+    "url": "https://galxai-anr3p65ag-cardsortings-projects.vercel.app",
+    "canonical": "https://galx.ai",
+    "status": "Ready",
+    "rollback_id": "dpl_G8xQDq1rRUUtCjGn5h9i2wAqM7Ae",
+    "canonical_alias_verified": true,
+    "verification": {
+      "external_closed_requests": 16,
+      "public_http_authorization": "passed",
+      "rendered_pages": "passed",
+      "page_linked_browser_assets": 27,
+      "new_generation_attempted": false
+    }
+  },
+  "limitations": [
+    "Operator must sign in/enroll in the owning desktop; no live provider credential was enrolled during rollout",
+    "Image generation remains unavailable; this release does not qualify or deploy the standalone worker candidate",
+    "Retained unknown receipts were not replayed",
+    "No new database/provider credentials or secrets created"
+  ],
+  "review": {
+    "scope": "Deployment acceptance and source/current-guide reconciliation for the manual enrollment boundary; broader domain inventory remains a drift check.",
+    "guides_reconciled": [
+      "docs/adr/0152-manual-desktop-only-shard-authority.md",
+      "post-mortem/CURRENT_STATE.md",
+      "post-mortem/incidents/2026/2026-09-14-enrollment/README.md",
+      "docs/knowledge/registry.json"
+    ],
+    "tests": "Local evidence contains database role/race/rollback, relay, account middleware, public HTTP/assets, build/types and desktop/mobile fixture checks."
+  },
+  "delivery": "deployed"
+}

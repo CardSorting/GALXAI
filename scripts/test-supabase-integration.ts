@@ -159,7 +159,7 @@ async function runTests() {
     // 5. Shard Repository (AES-256-GCM encrypted ingestion)
     const shardRepo = ShardRepository.getInstance();
     const tenantUid = `integration_${randomUUID()}`;
-    const shardId = `integration_${randomUUID()}`;
+    const shardId = 'codex_sh_' + randomUUID().replaceAll('-','').slice(0,24);
     fixtureShardId = shardId;
     const encryptedSecret = GalxCryptoVault.encryptSecret(
       { apiKey: 'sk-openai-live-secret-test-key-12345' },
@@ -169,11 +169,11 @@ async function runTests() {
       'v1'
     );
 
-    await shardRepo.saveShard({
+    const fixtureShard: Parameters<typeof shardRepo.saveShard>[0] = {
       id: shardId,
       userId: tenantUid,
       provider: 'openai',
-      authType: 'api_key',
+      authType: 'oauth',
       accountLabel: 'OpenAI Tier 5 Master Shard',
       apiKeyMasked: 'sk-...12345',
       encryptedPayload: encryptedSecret,
@@ -200,7 +200,14 @@ async function runTests() {
       fencingToken: 1,
       createdAtMs: Date.now(),
       updatedAtMs: Date.now()
-    });
+    };
+    await executePostgresQuery('SELECT private.enroll_desktop_shard($1,$2,NULL)', [randomUUID(), JSON.stringify({
+      id: shardId, user_id: tenantUid, encrypted_ciphertext: encryptedSecret.ciphertext,
+      encrypted_iv: encryptedSecret.iv, encrypted_tag: encryptedSecret.tag, key_version: encryptedSecret.keyVersion,
+      credential_expires_at_ms: Date.now()+3600000
+    })]);
+    await executePostgresQuery('UPDATE public.galx_shard_accounts SET max_tokens=10000000,remaining_tokens=10000000,refill_rate_per_minute=10000000,max_requests=10000,remaining_requests=10000 WHERE id=$1',[shardId]);
+    await shardRepo.saveShard(fixtureShard);
 
     const savedShard = await shardRepo.getShardById(shardId);
     assert(

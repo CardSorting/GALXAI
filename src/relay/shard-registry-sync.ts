@@ -1,6 +1,6 @@
 /** Server-only registry projection. Every read checks authority; only changes cross the wire. */
 export const REGISTRY_COLUMNS = [
-  'id', 'user_id', 'provider', 'status', 'permission_retracted',
+  'id', 'user_id', 'provider', 'status', 'permission_retracted', 'managed_desktop_id', 'desktop_enrolled_at',
   'encrypted_ciphertext', 'encrypted_iv', 'encrypted_tag', 'key_version',
   'credential_expires_at_ms', 'cooldown_until_ms', 'registry_revision', 'created_at',
 ] as const;

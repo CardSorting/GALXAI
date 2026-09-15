@@ -7,8 +7,7 @@
  *
  * Usage:
  *   npx tsx scripts/manage-shards.ts --list
- *   --import is retired; enrollment requires an explicitly supplied, validated account.
- *   GALX_SHARD_ACCESS_TOKEN=... GALX_SHARD_ACCOUNT_ID=... npm run shards -- --add
+ *   --import is retired; enrollment is only available in Relay Desktops.
  *   npx tsx scripts/manage-shards.ts --test
  *   npx tsx scripts/manage-shards.ts --cycle [count]
  *   npm run shards:doctor
@@ -110,7 +109,7 @@ async function listShards(substrate: GalxCredentialSubstrate) {
 
   if (shards.length === 0) {
     console.log('No shards currently registered. Run:');
-    console.log('  npx tsx scripts/manage-shards.ts --import');
+    console.log('  npm run relay:desktops — create a workspace, sign in, then Enroll shard');
     return;
   }
 
@@ -145,92 +144,6 @@ async function listShards(substrate: GalxCredentialSubstrate) {
     );
   });
   console.log('========================================================================================================\n');
-}
-
-async function addSingleShard(substrate: GalxCredentialSubstrate, args: CliArgs) {
-  if (!args.token || !args.account) {
-    console.error('[-] Error: GALX_SHARD_ACCESS_TOKEN and GALX_SHARD_ACCOUNT_ID are required to add a shard.');
-    process.exit(1);
-  }
-
-  const shardIdSecret = process.env.GALX_SHARD_ID_SECRET || process.env.GALX_VAULT_MASTER_SECRET;
-  if (!shardIdSecret) {
-    throw new Error('GALX_SHARD_ID_SECRET or GALX_VAULT_MASTER_SECRET is required for stable shard IDs');
-  }
-  const shardId = `codex_sh_${crypto
-    .createHmac('sha256', shardIdSecret)
-    .update(`openai:${args.account}`)
-    .digest('hex')
-    .slice(0, 24)}`;
-  // A fresh read gives useful feedback; createOnly below fences a concurrent enrollment.
-  await substrate.refreshFromAuthority();
-  if (substrate.getAccount(shardId)) throw new Error('Account already enrolled. Use its linked desktop to refresh the login.');
-  const candidate = await validateOperatorCredential({ accessToken: args.token, accountId: args.account, refreshToken: args.refresh });
-  const accountFingerprint = crypto.createHash('sha256').update(args.account).digest('hex').slice(0, 12);
-  const encrypted = GalxCryptoVault.encryptSecret(
-    {
-      accessToken: candidate.accessToken,
-      refreshToken: candidate.refreshToken,
-      accountId: candidate.accountId,
-      expiresAtMs: candidate.expiresAtMs,
-      email: args.email || 'operator@galx.ai',
-      name: 'Operator-Managed OpenAI OAuth Shard'
-    },
-    'system_admin',
-    shardId,
-    'openai'
-  );
-
-  const shard: GalxShardAccount = {
-    id: shardId,
-    userId: 'system_admin',
-    accountLabel: 'Operator-Managed OpenAI OAuth Shard',
-    provider: 'openai',
-    authType: 'oauth',
-    shardMode: 'pooled',
-    status: 'healthy',
-    priority: args.priority || 10,
-    weight: args.weight || 1,
-    fencingToken: 1,
-    accountId: args.account,
-    apiKeyMasked: 'oauth_********',
-    encryptedSecrets: encrypted,
-    encryptedPayload: encrypted,
-    privacyCapabilities: {
-      hipaaCompliant: false,
-      zdrCertified: false,
-      dataResidency: 'global',
-      baaSigned: false,
-      piiFiltering: false
-    },
-    tokenBucket: {
-      maxTokens: 500000,
-      remainingTokens: 500000,
-      refillRatePerMinute: 50000,
-      maxRequests: 40,
-      remainingRequests: 40,
-      lastRefillTimestampMs: Date.now()
-    },
-    slidingWindowQuota: {
-      windowDurationMs: 3 * 3600 * 1000,
-      maxRequestsPerWindow: 40,
-      usedRequestsInWindow: 0,
-      windowStartTimestampMs: Date.now(),
-      requestHistoryTimestampsMs: []
-    },
-    stats: {
-      totalRequestsServed: 0,
-      totalTokensConsumed: 0,
-      consecutiveFailures: 0
-    },
-    permissionRetracted: false,
-    expiresAtMs: candidate.expiresAtMs,
-    createdAtMs: Date.now(),
-    updatedAtMs: Date.now()
-  };
-
-  await substrate.addAccountAsync({ ...shard, registrySource: 'operator_import' }, { requireRemote: true, createOnly: true });
-  console.log(`[✓] Successfully enrolled shard ${shardId} (account sha256:${accountFingerprint}) into GALXAI pool!`);
 }
 
 async function testShards(substrate: GalxCredentialSubstrate) {
@@ -472,15 +385,12 @@ async function doctorShards(applyQuarantine: boolean): Promise<void> {
 
 async function main() {
   const args = parseArgs();
-  if (args.action === 'import') throw new Error('Bulk credential import is retired. Use npm run relay:desktops for sign-in and repair; use shards -- --add for explicit validated enrollment.');
+  if (args.action === 'import' || args.action === 'add') throw new Error('External shard enrollment is disabled. Open Relay Desktops, create a workspace, sign in, and choose Enroll shard.');
   const substrate = await getSubstrate();
 
   switch (args.action) {
     case 'list':
       await listShards(substrate);
-      break;
-    case 'add':
-      await addSingleShard(substrate, args);
       break;
     case 'test':
       await testShards(substrate);

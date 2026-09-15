@@ -1,0 +1,222 @@
+{
+  "observed_at": "2026-09-15T00:22:35.498248Z",
+  "scope": "Private workspace documentation reconciliation for ADR 0152; no runtime source, applied schema, deployment, provider session or production record mutation in this pass.",
+  "revision": "aa48b334b89bb77841c3317fb98c291429a39650",
+  "working_tree": "Includes earlier uncommitted implementation and deployment documentation. The changed-document hashes below identify this documentation follow-through separately from those earlier edits.",
+  "authority": [
+    "docs/adr/0152-manual-desktop-only-shard-authority.md",
+    "post-mortem/releases/2026-09-15-manual-desktop-enrollment-activation.json",
+    "post-mortem/releases/2026-09-14-manual-desktop-enrollment.json"
+  ],
+  "discovery": {
+    "inventory_authored_markdown_files": 443,
+    "extra_examples": [
+      ".env.example",
+      ".impeccable/surfaces/src-relay-desktops-html.md"
+    ],
+    "terms": [
+      "ingest/enroll/import with shard or credential",
+      "provider-as-auth / BYOQ",
+      "OAuth URL, callback, PAR and refresh",
+      "automatic provider renewal and host discovery",
+      "CLI --add and token environment inputs",
+      "fn_upsert_shard_registry and shards:verify-authority",
+      "manual desktop binding, deletion and legacy confirmation"
+    ],
+    "method": "Repository ripgrep discovery, current/reference guide reads, source-contract checks, full affected guide-body reconciliation, then follow-up searches and local link/script checks.",
+    "historical_disposition": "Preserved original ADR status/rationale and dated September 9/11/14 measurements. Added precise successor sections to ADRs 0020, 0115, 0127, 0131 and 0132; ADR 0133 already identifies its September 14 successor. Replaced obsolete actionable commands in ADR 0115 with current operations. Archived handovers and dated release JSON remain unchanged.",
+    "unrelated_matches": "Training data shards, account signup allowances/session renewal, Sites companion enrollment and private dated research are separate contracts and do not enroll managed relay shards.",
+    "unmapped_review": "Root handovers covered by critical review; DESIGN change limited to obsolete credential-card description; private UI brief reconciled with dated history retained. Generated catalogs/reviews are maintenance outputs; incident records and release evidence remain private. Existing image implementation/ADR0151 and release records are prior-turn work, not new delivery in this pass.",
+    "limit": "Search and full affected-guide review do not certify an exhaustive semantic/security audit of all 443 inventory entries or every fingerprinted runtime module."
+  },
+  "corrections": [
+    "Manual guest sign-in and explicit Enroll shard are the only enrollment path; same action confirms eligible legacy rows.",
+    "Creation, matching, links and polling do not enroll or transfer the immutable database binding.",
+    "Provider renewal is manual in the owning desktop; automatic sync persists an already saved guest login.",
+    "Closed HTTP methods/paths, fixed 410 body/no-cookie behavior, desktop-session/origin/expected-link boundary and allowlisted response documented.",
+    "Schema paired fields, unique desktop binding, SQL-only writer functions, protected updates and exclusion from controller/database admission reconciled.",
+    "Legacy ciphertext, ownership, source labels, counters, revocations and holds retained; no backfill or automatic rebind.",
+    "Migration ordering, applied-target no-op inventory, policy rollback risk and retired live-upsert verifier reconciled.",
+    "Removed obsolete credential input/OAuth callback environment examples and host-discovery opt-in; linked Desktop shortcut and manual recovery throughout navigation.",
+    "Image acceptance explicitly depends on manual enrollment and fresh image evidence; ACT-020 and ACT-022 remain open."
+  ],
+  "semantic_review": {
+    "full_affected_guides": [
+      "HANDOVER.md",
+      "MAINTAINERS.md",
+      "context.md",
+      "docs/ARCHITECTURE.md",
+      "docs/DEPLOYMENT.md",
+      "docs/FEDERATION_STRATEGY.md",
+      "docs/INFERENCE_PIPELINE_VERIFICATION.md",
+      "docs/MIGRATION_GUIDE.md",
+      "docs/OAUTH_AND_TOKEN_LIFECYCLE_SPECIFICATION.md",
+      "docs/PROVIDER_AS_AUTH_SPECIFICATION.md",
+      "docs/README.md",
+      "docs/RELAY_API_REFERENCE.md",
+      "docs/RESILIENCE_AND_DISASTER_RECOVERY.md",
+      "docs/SECURITY.md",
+      "docs/STANDARDIZED_OAUTH_AND_INGESTION_ARCHITECTURE.md",
+      "docs/SUPABASE_PARANOID_ARCHITECTURE_SPEC.md",
+      "docs/SYSTEM_TOPOLOGY_AND_MAINTENANCE_ONBOARDING.md",
+      "docs/TROUBLESHOOTING.md",
+      "docs/VERCEL_DEPLOYMENT.md",
+      "docs/VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md",
+      "docs/adr/0020-provider-as-auth-zero-friction-session-substrate.md",
+      "docs/adr/0115-postgresql-authoritative-shard-registry-and-secret-free-projections.md",
+      "docs/adr/0127-codex-image-tool-alias-production-cutover.md",
+      "docs/adr/0131-private-operator-desktops-and-maintenance.md",
+      "docs/adr/0132-recoverable-desktop-credential-handoff.md",
+      "docs/how-to/README.md",
+      "docs/maintainers/MULTI_TENANT_SHARD_AND_KEY_ROTATION.md",
+      "docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md",
+      "docs/maintainers/README.md",
+      "docs/maintainers/RELAY_CREDENTIAL_ENROLLMENT.md",
+      "docs/maintainers/RELAY_DESKTOPS.md",
+      "docs/maintainers/RELAY_HARDENING.md",
+      "docs/maintainers/RELAY_QUOTA_AND_FLEET.md",
+      "docs/playbooks/01-provisioning-and-preflight.md",
+      "docs/playbooks/03-live-traffic-and-fleet-scaling.md",
+      "docs/relay-security.md",
+      "post-mortem/CURRENT_STATE.md",
+      "post-mortem/incidents/2026/2026-09-14-enrollment/README.md",
+      "post-mortem/runbooks/controller-lock.md",
+      "post-mortem/runbooks/image-generation.md"
+    ],
+    "bounded_section_reviews": {
+      "DESIGN.md": "Shard credential-card description only; other product design is outside this policy change.",
+      ".impeccable/surfaces/src-relay-desktops-html.md": "Current lifecycle/credential/deletion description reconciled; dated September 9 design and measurements preserved with an explicit historical boundary."
+    },
+    "source_contracts": {
+      "src/relay/desktop-enrollment.ts": "6763acc8447c48744d3ff28befa68da58d60e8591fd3d0ab727467f3d4d9a29b",
+      "src/relay/desktop-manager.ts": "56f34c5fcf06ecf46439c45112470c2586bfdc0b66eaf6ad7708b69a7c47412a",
+      "src/relay/desktop-gateway.ts": "299595a75f4a44fc57a1b27245bb30d0eefdd428d416dcc76a7b0da1f959b4b7",
+      "src/relay/desktop-credential-refresh.ts": "2cb9a548f169ad5b00a630b18c00fa45ed5c6211984b7c6e17c99abbb745fba3",
+      "src/relay/desired-shards.ts": "13844d8aa37c7b69c2f1ae08e75a065678d201a6fc440a71738fa05e1b2100a2",
+      "src/lib/supabase/repositories/ShardRepository.ts": "caccf1828aded7dc71982c9fe82bc476984a849c18755b890049196cd3518bf5",
+      "src/core/auth/GalxAuthEngine.ts": "0f03a805b48838694510eb98bb2b3eb6996ba3198ae21f10a9437b6d80e8def9",
+      "src/lib/auth/provider-connection-route.ts": "366fdc7e011313fd174f092e5ebb015709a7a1ad01dbcf9925e73323cd6ac564",
+      "src/middleware.ts": "2d8f341ca4b1d393c401954d737f9ee4ef9f2062b7a41298168259360b61e28d",
+      "scripts/manage-shards.ts": "60c75322e2785a4be62cc24bb99b92465d9ca0e9c40c9107edb9df89b67c7406",
+      "scripts/apply-manual-desktop-enrollment.ts": "97f5ef7377b6eaca4760fe0e2a02f5f611bdcffb2cd46800313b710665bc4975",
+      "scripts/rotate-shard-vault-keys.ts": "f70786732706b28b5ffc72d3c730710273149421461c6e46a529c4c08151cacb",
+      "scripts/verify-shard-authority-live.ts": "6fd08d5cba01a2b8e9d9cce5121fbb7d77e7be145e379edfd024bc6403624bf8",
+      "scripts/test-shard-enrollment-storage.ts": "9fec2353a1579d6e7fff3b816161f64561e4462673e81168625369c9131970f4",
+      "supabase/migrations/20260914231914_manual_desktop_shard_enrollment.sql": "9281aece1e5709ff28bc020c7c66a3b64541231084d6867715791e4ee982ddc9",
+      "supabase/rollbacks/20260914231914_manual_desktop_shard_enrollment.down.sql": "edbeb1bef4abb1bed75842c1c5630a32c518a7cb89a0268936456d23990e0be1"
+    },
+    "source_review_scope": "Inspected enrollment, saved-file renewal, privilege/admission, route closure, migration helper and retained verifier/rewrap contracts relevant to the guide changes. File hashes identify whole files and do not imply exhaustive review of unrelated methods.",
+    "runtime_source_drift_since_previous_domain_reviews": {
+      "knowledge": [],
+      "images": [],
+      "access": [],
+      "sites": [],
+      "relay": [],
+      "database": [],
+      "delivery": [],
+      "broccolidb": [],
+      "client-efficiency": []
+    },
+    "domains": [
+      "knowledge",
+      "images",
+      "access",
+      "relay",
+      "database",
+      "delivery"
+    ],
+    "new_mappings": "Added OAuth/identity/security, API, onboarding, migration, quota, deployment/recovery guides and .env.example to owning domains; manual enrollment/desktop search keywords added."
+  },
+  "checks_before_attestation": [
+    {
+      "command": "npm run docs:impact",
+      "result": "Reviewed mapped domains and all unmapped path categories; output includes earlier working-tree changes."
+    },
+    {
+      "command": "npm run docs:sync",
+      "result": "Passed; navigation regenerated without refreshing reviews."
+    },
+    {
+      "command": "python3 scripts/verify-docs.py",
+      "result": "Passed: 345 guides, 33 incident documents, 152 ADRs; scopes, coverage, local targets and current-guide anchors."
+    },
+    {
+      "command": "npm run test:docs",
+      "result": "Passed: 21 incident guard tests and 17 knowledge guard tests."
+    },
+    {
+      "command": "node --import tsx --test scripts/test-desktop-enrollment.ts scripts/test-relay-enrollment.ts scripts/test-session-lifecycle.ts scripts/test-public-information-boundary.ts",
+      "result": "Passed: 38 tests; local synthetic authorization/enrollment/session/public-boundary contracts; no production provider authentication."
+    },
+    {
+      "command": "npm run build",
+      "result": "Passed: Next.js 15.5.25 production compile, type validation and prerender/build completion. Lint is not part of this build."
+    },
+    {
+      "command": "Modified-guide npm command reference check",
+      "result": "All referenced npm run names exist in package.json."
+    },
+    {
+      "command": "git diff --check",
+      "result": "Passed before attestation."
+    },
+    {
+      "command": "npm run docs:check (before semantic attestation)",
+      "result": "Link/scope validation passed; expected source/guide review fingerprints are stale. This is not reported as a full pass. Three existing overdue incident follow-ups remain open without date/status changes."
+    }
+  ],
+  "final_validation": "After this immutable review evidence is written, refresh only the reviewed domain/critical fingerprints, regenerate navigation, run docs:check, docs:audit and docs:check:build, and append their actual result to the incident journal.",
+  "limits": [
+    "No new production rollout or database migration.",
+    "No real manual account enrollment, provider renewal or image generation performed.",
+    "No live-site clean claim; local compiled scan and prior deployed evidence have separate scopes.",
+    "Unrelated ACT-001, ACT-015 and ACT-016 remain overdue; this documentation repair does not close or reschedule their operational work."
+  ],
+  "changed_document_hashes": {
+    "DESIGN.md": "14d5638fcba3437e79fa8b7366ade4579b5673085da380b7131921d260c7c912",
+    "HANDOVER.md": "9ba6908f08915fded3001eaf6d248ba5daea0f6d07c652dc43f58eecfec4492e",
+    "MAINTAINERS.md": "e952181e0ad38dad504d0ac212395e65829b64c273a62b1644e7616ee53f4b48",
+    "context.md": "ede89c08900565ecd970b529623204efa8274998d4a79c974da0571873c0daa7",
+    "docs/ARCHITECTURE.md": "4382f0c1dab8a0c31d1fd06f0b91e0b7e7787d52b9e9252a6f46495d377988d5",
+    "docs/DEPLOYMENT.md": "3e297b8d22b1e3ccc50fa36541095799e6623f4791c01cad83104bc60c4dd386",
+    "docs/FEDERATION_STRATEGY.md": "e2b61208f122d16da9eaaa47d3e27cecba3bfd5527cc55402eb934e0f5a0a92c",
+    "docs/INFERENCE_PIPELINE_VERIFICATION.md": "2f11d079bd14435c6f9e3079fa321a8c0a60a05fa81de31ae1a0c55a1d35f37d",
+    "docs/MIGRATION_GUIDE.md": "2276f4a3b03de4ec185e3f76de6bf68e4f7fba4c905004ff0e99ebc4bdac1b34",
+    "docs/OAUTH_AND_TOKEN_LIFECYCLE_SPECIFICATION.md": "30986c9e0c6752d7e7879b90ec9d060538c745677c88e0620f70941995c96161",
+    "docs/PROVIDER_AS_AUTH_SPECIFICATION.md": "9148b77448b0e9781817d41866c90a9ccf748ec85d15ad08700cc6f6956b82d4",
+    "docs/README.md": "0e1cd27bc094fd98af2db63c2b3c0018c0359f2e2039033f5b089c0aaf9a3934",
+    "docs/RELAY_API_REFERENCE.md": "05b9796fcfdac434db81f8e05fcd3065585e58a3f2b134686c1cb8f0722dd86a",
+    "docs/RESILIENCE_AND_DISASTER_RECOVERY.md": "53aec72975a8aedb7704ed75653fd509ec945575ad23b33ac2dce62416eaa352",
+    "docs/SECURITY.md": "f16ae19b91f58cab5f080047c1e2954f30f3450ac642629eb50f7244182b4993",
+    "docs/STANDARDIZED_OAUTH_AND_INGESTION_ARCHITECTURE.md": "9f37ac4fc4ac9c50dfad33f95cae41f9b27d7ca186b5b23358cc5739e9c856a8",
+    "docs/SUPABASE_PARANOID_ARCHITECTURE_SPEC.md": "46669fd78e4e5ee2d327b963311bddf63d52a3ef0131e3023e7dc6d4a8759e94",
+    "docs/SYSTEM_TOPOLOGY_AND_MAINTENANCE_ONBOARDING.md": "66f627cdf825125eab6d00ed561810aee18d4681b4ae2c001bd4f8b2f6de5c1b",
+    "docs/TROUBLESHOOTING.md": "2ebdc1b46989fe3ec62c1553bc2edcf7271cdb1a221afc1c4fa8b255bf99869a",
+    "docs/VERCEL_DEPLOYMENT.md": "7fedce827b8bcc60ff5a2107090f1c9a52967dbf3b97c0f019a41c0c946e2c94",
+    "docs/VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md": "2c7d52fd2494c3ae2ac1f0751615c075c9a70071ec4685d7776d170b7fd1c53d",
+    "docs/adr/0020-provider-as-auth-zero-friction-session-substrate.md": "8c49cc92312059d789598c5b1efad4431b7bcfbde8f8b5b4c7072f350ed45d0c",
+    "docs/adr/0115-postgresql-authoritative-shard-registry-and-secret-free-projections.md": "6f584337a11c98be790e55bbc784a8108cc07ce8d5b49b2ee4240a9d87c6c8fa",
+    "docs/adr/0127-codex-image-tool-alias-production-cutover.md": "d06662fb6972182aaa5f73ab7d0326412b0330622076d56693b318ecf33078a3",
+    "docs/adr/0131-private-operator-desktops-and-maintenance.md": "ca9bf1f27bbd7b537e5cd84f454b0c10a0c1c849311df7e7ab6893f5ca5128e2",
+    "docs/adr/0132-recoverable-desktop-credential-handoff.md": "e454f5c62b9ee700e390b075380ac77bf6289d89a00a5805d5be4eace47b9b2d",
+    "docs/how-to/README.md": "2b33e621e378c69b02333e4956136b84a3899826558dd34cf2d0227c2750b001",
+    "docs/maintainers/MULTI_TENANT_SHARD_AND_KEY_ROTATION.md": "b63ba6e45d52b06fd386054c558932c5fe9e4fc64e9edcdbcae994a5b0c4266c",
+    "docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md": "37bda52b297568e91239e2b3529e14b91f5f9550356e84b859295b0c5c0e433a",
+    "docs/maintainers/README.md": "29ca600e2eb8c8ffb4bade1a24529152b7e7427595ee17b92adcf91c59ec5f4c",
+    "docs/maintainers/RELAY_CREDENTIAL_ENROLLMENT.md": "18eea93f58371d66ca78792be16247ce17951b75bbdf8c78fffaf1a8ff236a7f",
+    "docs/maintainers/RELAY_DESKTOPS.md": "4abc82e33017bc876f4cc89d39d157330993254dcfff4614e127aeea696843ff",
+    "docs/maintainers/RELAY_HARDENING.md": "ba435324992157adfd8833c227e3a05a2ce65a24437a3f97ec608b1a0d403145",
+    "docs/maintainers/RELAY_QUOTA_AND_FLEET.md": "f1d2dd6b6158745782eaf5e27cfd44f0bd9890178718dc18d1f8d39ffe930301",
+    "docs/playbooks/01-provisioning-and-preflight.md": "74c6072b03874ab656e9401a25b4fe6803633831e5e6baca07022df259cd893b",
+    "docs/playbooks/03-live-traffic-and-fleet-scaling.md": "7bd166fad3893681c7dfd335a0aaf55301d9c1117f481b701b3e55fcd069cfc4",
+    "docs/relay-security.md": "b8f86cf47e171122545ee1626e293c7e0d695518295571627f59a1fdfaea0239",
+    "post-mortem/CURRENT_STATE.md": "189a25f11ac98c42eb4f5855f8a5156521bbccd8accdc9bfd7a7fcf03fe2ccf9",
+    "post-mortem/incidents/2026/2026-09-14-enrollment/README.md": "59137bc3b20b131c795db45122e1c9d9ab5af86c182a4d2a308cb4fcb51b263b",
+    "post-mortem/runbooks/controller-lock.md": "67967d01172e536b60334da3267420bfd201487dd84f85ab5e4225bc4397c89a",
+    "post-mortem/runbooks/image-generation.md": "c8637c8a7a7b27d045e80cd83e3ba58ff9dedd5eb3f00d82688971a7b6201770",
+    ".env.example": "0f2ec6b2823f842f2a78ad28e1b846b907564fe2ca42bcc73904dc4faacf1f73",
+    "docs/knowledge/registry.json": "ca096fb0cc8dca7913880ec2294dfa4cd36c8f300aeae1cab45b1e36b76e2404",
+    "post-mortem/register.json": "1d830b3099eb673c40216a73234e5c78cf6bbe1b7e91b576448ab3b51dcd13d7",
+    ".impeccable/surfaces/src-relay-desktops-html.md": "c467eed470e606a8feb09b6e11e9e2b86c334570b6deb67b1b3b441f941a6359"
+  }
+}

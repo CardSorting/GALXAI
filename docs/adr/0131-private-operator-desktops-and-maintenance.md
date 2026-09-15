@@ -25,6 +25,10 @@ Workspace organization has a separate full-width view. **By health** derives att
 
 Names, membership and order are controller-wide private presentation metadata in a separate mode-0600 `<desktop-journal>.organization.json` file. Atomic journal replacement and revision preconditions prevent partial saves and stale-window overwrites. A removed tab returns its workspaces to Ungrouped; newly created desktops appear there and deleted identities are pruned from snapshots. Missing organization metadata starts empty; malformed or unconfirmed storage disables organization changes without changing desktop records or claiming saved state. Organizing never changes account identity, credentials, links, traffic policy or worker lifecycle. The API, HTML and organizer assets require the existing desktop administrator session and exact-origin mutation checks.
 
+## September 14 enrollment extension
+
+[ADR 0152](0152-manual-desktop-only-shard-authority.md) retains desktop/session isolation and maintenance holds while making the manually created desktop the sole enrollment source. Explicit **Enroll shard** after guest sign-in creates or confirms a unique durable binding. Matching, linking, creation and polling cannot enroll. Saved-file sync requires the bound desktop and follows manual provider renewal. Deletion does not release the database binding; preserve the home for repair and use [the current enrollment procedure](../maintainers/RELAY_CREDENTIAL_ENROLLMENT.md). The September 9 acceptance below remains historical.
+
 ## Lifecycle and security consequences
 
 Closing a viewer leaves the workspace running. Stop preserves home; deletion requires the exact workspace name and removes owned resources. A graceful controller stop removes unheld workers; preservation across reload requires an existing hold. Session renewal invalidates the old cookie and expiry/revocation closes display sockets.

@@ -7,6 +7,7 @@ import { isPublicProductPath } from '@/lib/security/preview-policy';
 import { isWorkspacePath } from '@/lib/security/workspace-policy';
 import { legacyAuthPath } from '@/lib/auth/redirects';
 import { legacyImagePath } from '@/lib/images/navigation';
+import { isClosedProviderPath } from '@/lib/auth/provider-connection-route';
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
@@ -15,6 +16,9 @@ export async function middleware(request: NextRequest) {
     if (!['GET','HEAD'].includes(request.method) || pathname !== '/') return new NextResponse('Site unavailable.',{status:404,headers:{'Cache-Control':'private, no-store'}});
     return publishedSiteProxy(request,host);
   }
+  // Retired handlers return a terminal denial without parsing input or starting
+  // an account/preview authentication flow. This is an exact route allowlist.
+  if (isClosedProviderPath(pathname)) return NextResponse.next();
   // Migrate bookmarks before rendering; only finite public fields reach Location.
   const canonical = legacyAuthPath(pathname, request.nextUrl.searchParams) ?? legacyImagePath(pathname, request.nextUrl.searchParams);
   if (canonical && ['GET', 'HEAD'].includes(request.method)) {

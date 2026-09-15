@@ -6,6 +6,7 @@ import { Duplex } from 'node:stream';
 import { RequestError } from './request-policy.js';
 import { createHash, randomUUID } from 'node:crypto';
 import { DesktopCredentialError, parseDesktopCredential, type DesktopCredentialFile, type CredentialSource } from './desktop-credentials.js';
+import type { EnrollDesktopCredential } from './desktop-enrollment.js';
 import type { RefreshDesktopCredential, MatchDesktopCredential } from './desktop-credential-refresh.js';
 import { saveDesktopJournal } from './desktop-journal.js';
 import { desktopLoginState, type DesktopLoginState } from './desktop-login-state.js';
@@ -185,7 +186,7 @@ export class DesktopManager {
   readonly maxRunning = 3;
   readonly maxDesktops = 12;
   constructor(private readonly file: string, readonly driver: DesktopDriver, private readonly now = Date.now,
-    private readonly refreshCredential?: RefreshDesktopCredential, private readonly matchCredential?: MatchDesktopCredential) {
+    private readonly refreshCredential?: RefreshDesktopCredential, private readonly matchCredential?: MatchDesktopCredential, private readonly enrollCredential?: EnrollDesktopCredential) {
     this.activityStartedAt = now();
     fs.mkdirSync(path.dirname(file), { recursive: true, mode: 0o700 });
     try {
@@ -239,7 +240,7 @@ export class DesktopManager {
           state: operation ? operation.phase === 'queued' ? 'queued' : operation.action : (this.inventoryError ? 'unknown' : c?.running ? c.healthy ? 'running' : c.unhealthy ? 'unhealthy' : 'starting' : c ? 'stopped' : r.error ? 'error' : 'missing'),
           operation: operation ? { action: operation.action, phase: operation.phase, enqueuedAt: operation.enqueuedAt, startedAt: operation.startedAt } : undefined,
           credentialSync: { enabled: r.credentialSync !== false, available: !!this.refreshCredential && !!this.driver.credentials,
-            canMatch: !!this.matchCredential,
+            canEnroll: !!this.enrollCredential, canMatch: !!this.matchCredential,
             applied: !!r.relayId && !!this.credentialRevisions.get(r.id) && applied(r.relayId, this.credentialRevisions.get(r.id)!),
             operation: this.credentialJobKinds.get(r.id),
             retryAt: Number.isFinite(this.credentialAttempts.get(r.id)?.retryAt) && (this.credentialAttempts.get(r.id)?.retryAt ?? 0) > this.now() ? this.credentialAttempts.get(r.id)!.retryAt : undefined,
@@ -395,7 +396,7 @@ export class DesktopManager {
     this.accepting();
     const r = this.record(id);
     if (!['browser', 'device'].includes(method)) throw new RequestError(400, 'invalid_signin', 'Choose a supported sign-in method.');
-    if (!r.relayId || shardId !== r.relayId) throw new RequestError(409, 'desktop_link_changed', 'Refresh and review the linked shard.');
+    if (shardId !== (r.relayId ?? null)) throw new RequestError(409, 'desktop_link_changed', 'Refresh and review the linked shard.');
     if (!this.refreshCredential || !this.driver.credentials) throw new RequestError(503, 'credential_sync_unavailable', 'Terminal sign-in sync is unavailable on this controller.');
     if (this.corrupt || this.inventoryError || this.operations.has(id) || this.credentialJobs.has(id) || this.active + this.credentialJobs.size >= this.maxOperations) throw new RequestError(409, 'desktop_busy', 'Wait for the current desktop operation to finish.');
     const event = this.beginActivity(id, 'opening_signin'); this.updateActivity(event, 'running');
@@ -412,7 +413,7 @@ export class DesktopManager {
   }
   cancelSignIn(id: string, shardId: unknown) {
     const r = this.record(id);
-    if (shardId !== r.relayId) throw new RequestError(409, 'desktop_link_changed', 'Refresh and review the linked shard.');
+    if (shardId !== (r.relayId ?? null)) throw new RequestError(409, 'desktop_link_changed', 'Refresh and review the linked shard.');
     return this.input(id, 'cancel-signin', () => this.driver.launch(id, 'signin-cancel'));
   }
   matchSavedCredential(id: string, shardId: unknown): Promise<string> {
@@ -425,6 +426,28 @@ export class DesktopManager {
       if (this.records.get(id) !== r) throw new RequestError(409, 'desktop_link_changed', 'Refresh and review the linked shard.');
       return matched;
     });
+  }
+  async enroll(id: string, expectedShardId: unknown): Promise<string> {
+    this.accepting();
+    const r = this.record(id);
+    if (expectedShardId !== (r.relayId ?? null)) throw new RequestError(409, 'desktop_link_changed', 'Refresh and review this workspace.');
+    if (!this.enrollCredential || !this.driver.credentials) throw new RequestError(503, 'desktop_enrollment_unavailable', 'Enrollment is unavailable. Check the controller connection and retry.');
+    // schedule serializes enrollment with link, sign-in, sync, stop and deletion.
+    return this.schedule(id, JSON.stringify(['enroll', expectedShardId]), 'enrolling', async () => {
+      await this.refresh(true);
+      const container = this.containers.get(id);
+      if (this.corrupt || this.inventoryError || !container?.running || !container.healthy) throw new RequestError(409, 'desktop_not_running', 'Start this desktop before enrollment.');
+      const candidate = parseDesktopCredential(await this.driver.credentials!(id), this.now());
+      const current = async () => !this.credentialClosing && this.records.get(id) === r &&
+        this.containers.get(id)?.running === true && parseDesktopCredential(await this.driver.credentials!(id), this.now()).fingerprint === candidate.fingerprint;
+      const shardId = await this.enrollCredential!(id, candidate, r.relayId ?? null, current);
+      if (!await current()) throw new DesktopCredentialError('credential_conflict');
+      this.records.set(id, { ...r, relayId: shardId, syncedFingerprint: undefined, credentialIntent: undefined, updatedAt: this.now() });
+      try { this.save(); } catch { this.records.set(id, r); throw new RequestError(503, 'desktop_journal_unavailable', 'Enrollment may be saved. Restore workspace storage, then retry Enroll shard to recover the link.'); }
+      this.credentialAttempts.delete(id);
+      this.credentialStates.set(id, { state: 'updated', source: candidate.source, checkedAt: this.now(), syncedAt: this.now() });
+      return shardId;
+    }) as Promise<string>;
   }
   configureCredentialSync(id: string, shardId: unknown, enabled: unknown) {
     this.accepting();
@@ -481,7 +504,7 @@ export class DesktopManager {
           try { const latest = parseDesktopCredential(await this.driver.credentials!(id), this.now()); return current() && latest.fingerprint === candidate.fingerprint; }
           catch { return false; }
         }, r.syncedFingerprint === candidate.fingerprint, {
-          expectedRevision: r.credentialIntent?.fingerprint === candidate.fingerprint ? r.credentialIntent.expectedRevision : undefined,
+          desktopId: id, expectedRevision: r.credentialIntent?.fingerprint === candidate.fingerprint ? r.credentialIntent.expectedRevision : undefined,
           prepare: expectedRevision => {
             const previousIntent = r.credentialIntent;
             r.credentialIntent = { fingerprint: candidate.fingerprint, expectedRevision };

@@ -230,7 +230,8 @@ test('invalid credential draining does not block healthy shard reconciliation; s
 
 test('registry projection supports API-key and OAuth credentials without inventing OAuth identity', async () => {
   const { desiredShard } = await import('../src/relay/desired-shards.js');
-  const row = { id: 'a', provider: 'openai', status: 'healthy' };
+  const row = { id: 'a', provider: 'openai', status: 'healthy', managed_desktop_id: 'fixture-desktop', desktop_enrolled_at: '2026-09-14' };
+  assert.equal(desiredShard({ ...row, managed_desktop_id: null }, { apiKey: 'sk-fixture' }), undefined);
   const api = desiredShard(row, { apiKey: 'sk-fixture' })!;
   assert.equal(api.accessToken, 'sk-fixture'); assert(api.accountId.startsWith('acc_'));
   assert.equal(api.credentialRevision, desiredShard(row, { accessToken: 'sk-fixture' })!.credentialRevision);
@@ -242,21 +243,26 @@ test('registry projection supports API-key and OAuth credentials without inventi
   assert.equal(desiredShard({ ...row, credential_expires_at_ms: 200000 }, { accessToken: jwt, accountId: 'account' })!.expiresAtMs, 100000);
 });
 
-test('opt-in image alias requires fresh execution capability and bounded verified tool evidence', async () => {
+test('standalone Codex image alias requires fresh inventory and bounded real image evidence', async () => {
   const { imageExecution, CODEX_IMAGE_ALIAS } = await import('../src/relay/image-compatibility.js');
   assert.equal(imageExecution('gpt-image-2', false, false).routingMode, 'exact');
   assert.equal(imageExecution('gpt-image-2', true, true).routingMode, 'exact');
   assert.equal(imageExecution('gpt-image-1', false, true).routingMode, 'exact');
-  assert.equal(imageExecution('gpt-image-2', false, true).executionModel, 'gpt-5.6-terra');
+  assert.equal(imageExecution('gpt-image-2', false, true).executionModel, 'gpt-image-2');
   let now = 1000000; const r = new CapabilityRegistry(() => now);
   r.register('a','relay-a','g','openai'); r.publishInventory(r.beginRefresh('a')!,['gpt-5.6-terra']); r.heartbeat('a',{});
   const model = `image:${CODEX_IMAGE_ALIAS.requestedModel}`;
   assert.equal(r.select(model),undefined);
   r.observe(r.beginObservation('a',model)!,model,'AVAILABLE','verified',true);
   assert(r.select(model)); assert.equal(r.get('a')!.models.find(m=>m.model===model)!.routingMode,'codex_image_tool_alias');
+  const old = structuredClone(r.get('a')!); const legacy = old.models.find(m=>m.model===model)!;
+  legacy.executionModel = 'gpt-5.6-terra'; legacy.expiresAtMs = now + 60000;
+  const replica = new CapabilityRegistry(() => now); replica.register('a','relay-a','g','openai');
+  assert(replica.receive(old)); assert.equal(replica.select(model),undefined, 'chat-era proof cannot enable a different backend');
   now += 60000; r.publishInventory(r.beginRefresh('a')!,['gpt-5.6-terra']); r.heartbeat('a',{});
   assert(r.select(model));
-  r.publishInventory(r.beginRefresh('a')!,[]); assert.equal(r.select(model),undefined);
+  r.publishInventory(r.beginRefresh('a')!,[]); assert(r.select(model), 'chat-model removal does not invalidate standalone image evidence');
+  now += 120001; r.heartbeat('a',{}); assert.equal(r.select(model),undefined, 'stale inventory still blocks images');
   now += 3600001; r.publishInventory(r.beginRefresh('a')!,['gpt-5.6-terra']); r.heartbeat('a',{}); assert.equal(r.select(model),undefined);
   r.observe(r.beginObservation('a',model)!,model,'AVAILABLE','reverified',true);
   r.publishInventory(r.beginRefresh('a')!,['gpt-5.6-terra']); assert(r.select(model));

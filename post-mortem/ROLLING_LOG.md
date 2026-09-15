@@ -873,3 +873,87 @@ Incident: `INC-20260913-IMAGES`. Kind: `verification`.
 **Next step:** Keep ACT-020 open for actual generation restoration and acceptance.
 
 Evidence: [2026-09-14-image-availability-second-pass.json](releases/2026-09-14-image-availability-second-pass.json).
+
+## EVT-20260914-codex-image-runtime-investigation — 2026-09-14T22:56:26.753530Z
+
+Incident: `INC-20260913-IMAGES`. Kind: `observation`.
+
+**Observation:** Owner requested the actual Codex image generation tool in the relay. The deployed worker sends Responses image_generation directly and does not contain the Codex runtime. Installed Codex 0.154.0 exposes an image_generation extension and documented external-token app-server authentication. Prior direct-tool rejection does not establish whether that separate runtime tool works.
+
+**Action:** Read source, current guides and installed protocol; started an isolated bounded app-server canary using only the currently assigned connection. No credential rotation, revoked connection activation, budget edit or receipt replay.
+
+**Result:** Initial configuration completed without an image tool call; correcting the extension-host configuration. No generation recovery is claimed.
+
+**Next step:** Establish tool execution and artifact evidence before implementing and qualifying the relay adapter.
+
+Evidence: [relay-server.ts](../src/relay/relay-server.ts), [2026-09-14-image-availability-second-pass.json](releases/2026-09-14-image-availability-second-pass.json).
+
+## EVT-20260914-codex-image-backend-local — 2026-09-14T23:06:37.395077Z
+
+Incident: `INC-20260913-IMAGES`. Kind: `verification`.
+
+**Observation:** Codex image extension source uses a standalone Images backend, distinct from the deployed chat Responses image tool. The assigned connection received HTTP 403; an empty invalid request returned the same Forbidden category.
+
+**Action:** Implemented bounded single-dispatch backend integration, decoded/re-encoded artifacts, independent image capability proof and explicit internal metadata projection. Built the candidate worker and production app; retained production worker/state and the GET-only outage flow.
+
+**Result:** Transport/capability/client, relay HTTP and image security regressions pass; production build, container decoder and local compiled HTTP/assets pass. No real image or production deployment is claimed.
+
+**Next step:** Identify an explicitly approved Codex connection whose standalone image endpoint succeeds; qualify and roll out compatible controller/worker and complete frontend/library/download acceptance under ACT-020.
+
+Evidence: [2026-09-14-codex-image-tool-local.json](releases/2026-09-14-codex-image-tool-local.json).
+
+## EVT-20260914-manual-enrollment-local — 2026-09-14T23:32:32.365917Z
+
+Incident: `INC-20260914-ENROLLMENT`. Kind: `verification`.
+
+**Observation:** Owner requires desktop-only manual enrollment after externally sourced session instability. Read-only inventory: 56 retained rows, three not revoked, one unexpired.
+
+**Action:** Closed external application/CLI paths, implemented explicit desktop enrollment and protected SQL writer/admission boundaries; preserved records.
+
+**Result:** 108 migrations replayed; 28 targeted role/race/rollback checks and 94 broad database tests pass. Runtime and release checks continue.
+
+**Next step:** Complete local verification before applying the exact migration and compatible releases.
+
+Evidence: [2026-09-14-manual-desktop-enrollment.json](releases/2026-09-14-manual-desktop-enrollment.json).
+
+## EVT-20260915-manual-enrollment-schema — 2026-09-15T00:02:48.045966+00:00
+
+Incident: `INC-20260914-ENROLLMENT`. Kind: `containment`.
+
+**Observation:** Unconfirmed external credentials must no longer enter admission. Read-only preflight found no active, queued, pending or tracked work.
+
+**Action:** Applied migration 20260914231914; gracefully stopped the existing launchd job and verified its old process group ended before kickstart.
+
+**Result:** 56 registry records retained, zero silently enrolled. Service insert, private enrollment/refresh and writer membership denied. Controller replacement started; application deployment in progress.
+
+**Next step:** Verify preserved state, local administrator boundary and production closed routes.
+
+Evidence: [20260914231914_manual_desktop_shard_enrollment.sql](../supabase/migrations/20260914231914_manual_desktop_shard_enrollment.sql), [2026-09-14-manual-desktop-enrollment.json](releases/2026-09-14-manual-desktop-enrollment.json).
+
+## EVT-20260915-manual-enrollment-activation — 2026-09-15T00:07:16.197985+00:00
+
+Incident: `INC-20260914-ENROLLMENT`. Kind: `verification`.
+
+**Observation:** Production schema and controller closure are active; first real manual account confirmation is intentionally pending.
+
+**Action:** Deployed dpl_cFYtKU8tF7mfaBQkrYy5nPvEjuvw to galx.ai; verified local desktop administrator/session/origin/body guards and live raw external routes/public assets. Reopened the existing desktop shortcut.
+
+**Result:** 16 external requests return the same sanitized uncached 410. Public authorization/rendered pages and 27 browser assets pass. Both desktops, saved links, holds, signing state and six unknown receipts retained; no unconfirmed shard admitted. ACT-021 completed; incident contained.
+
+**Next step:** ACT-022: operator manually signs in and enrolls in the bound desktop, then verifies serving readiness. Image capability remains separate under ACT-020.
+
+Evidence: [2026-09-15-manual-desktop-enrollment-activation.json](releases/2026-09-15-manual-desktop-enrollment-activation.json), [2026-09-14-manual-desktop-enrollment.json](releases/2026-09-14-manual-desktop-enrollment.json).
+
+## EVT-20260915-manual-enrollment-documentation — 2026-09-15T00:23:23.386591Z
+
+Incident: `INC-20260914-ENROLLMENT`. Kind: `verification`.
+
+**Observation:** Current workspace guides still described provider-as-auth enrollment, external credential inputs, linked-only refresh and the retired live upsert verifier after manual-only policy activation.
+
+**Action:** Reconciled 42 authored Markdown entries plus example configuration and knowledge mappings; replaced stale current instructions, clarified historical ADR/rollout evidence, and linked the canonical manual desktop procedure. Reviewed six affected domains and the critical guide set against source contracts before updating fingerprints.
+
+**Result:** Documentation synchronization, full documentation audit and all nine domain freshness checks passed. All 38 documentation guard tests and 38 focused enrollment/session/public-boundary tests passed. Production build passed; compiled boundary scan checked 669 browser/rendered assets and runtime traces with no selected private marker or private-document trace findings. No production deployment, database write, provider sign-in or image generation occurred in this documentation pass.
+
+**Next step:** Use the canonical manual desktop flow for ACT-022 real enrollment/serving acceptance and ACT-020 image qualification. ACT-001, ACT-015 and ACT-016 remain overdue operational follow-ups; their dates/status were not changed.
+
+Evidence: [2026-09-15-manual-enrollment-documentation-review.json](releases/2026-09-15-manual-enrollment-documentation-review.json), [RELAY_CREDENTIAL_ENROLLMENT.md](../docs/maintainers/RELAY_CREDENTIAL_ENROLLMENT.md), [POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md](../docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md).

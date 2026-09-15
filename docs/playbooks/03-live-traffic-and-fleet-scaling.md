@@ -1,12 +1,17 @@
 # Traffic and model-specific scaling
 
 <!-- docs-scope: current-guide -->
-> **Reading scope:** Current guidance. The federation contract governs relay behavior; source and dated verification define implementation evidence. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
 
-Inspect eligible shard count per model, capability freshness, streams, and local capacity. Scale the scarce requested capability, not just total worker count. Heterogeneous capabilities are expected; do not force every shard to expose every model.
+Private procedure under [the federation contract](../FEDERATION_STRATEGY.md) and [manual desktop authority](../adr/0152-manual-desktop-only-shard-authority.md).
 
-Preserve model-first selection, generation-scoped reservations, bounded polling, and separate worker control traffic. Empty capability workers remain for rediscovery. Unheld invalid worker drain must not block healthy pools. A manual hold preserves an existing worker for repair and blocks replacements without overriding registry authority. Add capacity through explicit validated enrollment, not ambient cache import.
+Inspect requested-model eligibility, evidence freshness, active streams, queue depth, holds and local capacity. Retained records and running desktops are not serving capacity. Heterogeneous model support is expected; adding an unrelated account may not help the unavailable capability.
 
-Measure queue/admission delay and completion latency with workload and revision. Synthetic scheduler results are not a production throughput claim. Add multi-host ownership authority before horizontal controller deployment.
+Add accounts only through manual **Relay Desktops → Sign in → Enroll shard**. Confirm eligible legacy accounts explicitly. External APIs, CLI imports, token files and host caches cannot populate the managed fleet. Each account retains its unique owning desktop for future manual sign-in; a local relink does not transfer that ownership.
 
-Use the [current contract](../FEDERATION_STRATEGY.md), [operator runbook](../RELAY_VNEXT_RUNBOOK.md), [request recovery table](../RELAY_API_REFERENCE.md#request-recovery), and [maintainer execution guide](../maintainers/AI_AGENT_PAIR_PROGRAMMING_AND_GOVERNANCE.md).
+Preserve model-first admission, generation-scoped reservations, bounded polling and separate worker control traffic. Automatic reconciliation can allocate a confirmed eligible account after inventory preflight, but it cannot renew an expired provider session. Saved-file sync only verifies and persists a manually completed login.
+
+Empty capability workers remain for rediscovery. Unheld invalid-worker drain must not block healthy pools. Holds retain an existing worker while blocking new work and replacements; registry revocation, expiry, removal and rotation still win. After repair, explicitly review/resume the hold and verify the new applied revision. Do not clear counters or replay unknown requests to measure capacity.
+
+Measure admission delay and completed-result latency against the observed workload and source revision. Synthetic scheduling results are not production throughput guarantees. Multi-host control requires its own ownership/fencing design before horizontal deployment.
+
+Use [enrollment/recovery](../maintainers/RELAY_CREDENTIAL_ENROLLMENT.md), [the operator runbook](../RELAY_VNEXT_RUNBOOK.md), [request recovery](../RELAY_API_REFERENCE.md#request-recovery) and [current state](../../post-mortem/CURRENT_STATE.md).

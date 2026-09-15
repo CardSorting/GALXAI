@@ -12,3 +12,5 @@ Generated metadata, separate from [the full ADR catalog](../adr/README.md). Unre
 | [ADR 0148: Explicit complimentary Pro access](../../docs/adr/0148-complimentary-pro-access.md) | accepted | verified | Product/API maintainer |
 | [ADR 0149: One-time free generation allowance](../../docs/adr/0149-one-time-free-generation.md) | proposed | deployed | Product/API maintainer |
 | [ADR 0150: Bounded free admission and paid capacity protection](../../docs/adr/0150-free-generation-admission-gate.md) | proposed | deployed | Product/API maintainer |
+| [ADR 0151: Standalone Codex image tool transport](../../docs/adr/0151-codex-standalone-image-tool.md) | proposed | local | Relay operator |
+| [ADR 0152: Manual desktop-only shard authority](../../docs/adr/0152-manual-desktop-only-shard-authority.md) | accepted | deployed | Relay operator |

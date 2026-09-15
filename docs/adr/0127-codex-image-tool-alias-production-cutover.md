@@ -9,7 +9,11 @@ Date: 2026-09-07. Status: deployed and verified.
 
 > Reconciled September 9: [ADR 0129](0129-public-image-artifacts-and-verified-identity.md) requires private execution evidence and a capability-based public alias. The original September 7 deployment facts below remain dated history. [ADRs 0131–0133](README.md) extend access, maintenance and enrollment.
 
-## Decision
+## September 14 transport correction
+
+[ADR 0151](0151-codex-standalone-image-tool.md) proposes replacing the chat-tool transport and chat-model dependency with the standalone backend used by the Codex image tool. Its implementation and checks are local; HTTP 403 prevents live generation acceptance. The alias authorization, public-boundary rules and September 7 evidence below remain historical facts. Current source behavior and rollout instructions belong to the [federation contract](../FEDERATION_STRATEGY.md) and [runbook](../RELAY_VNEXT_RUNBOOK.md).
+
+## Original September 7 decision
 
 The operator explicitly authorized the existing generic Codex image-tool route as a documented compatibility alias. With `RELAY_CODEX_IMAGE_TOOL_ALIAS=true`, OAuth requests for relay model `gpt-image-2` (canonical public capability now `openai-gpt-image-latest`; `openai-gpt-image-2` is a legacy application alias) use `gpt-5.6-terra` with `image_generation`. The upstream selects the image model. This does not promise exact GPT-Image-2, nor does it apply to other requested models. Native API-key image requests remain exact.
 
@@ -55,4 +59,4 @@ At the September 7 observation, every observed model pool had one eligible shard
 
 Use the [current runbook](../RELAY_VNEXT_RUNBOOK.md#production-cutover-checklist) for rollback. The saved shared-container/tunnel artifacts above are historical evidence, not an instruction to restore that topology. Review holds and accepted work, preserve signing/journal state, and stop competing ownership before any replacement.
 
-On September 9 the 11 rejected rows were identified as exact leaked integration fixtures and conditionally revoked; the original September 7 no-registry-mutation statement remains true for that earlier rollout. The current enrollment strategy retains automatic workers and retires bulk import. See [ADR 0133](0133-explicit-validated-enrollment-and-test-isolation.md) and [the later verification record](../maintainers/RELAY_SESSION_VERIFICATION_20260909.md).
+On September 9 the 11 rejected rows were identified as exact leaked integration fixtures and conditionally revoked; the original September 7 no-registry-mutation statement remains true for that earlier rollout. The September 9 strategy retained automatic workers and retired bulk import; [ADR 0133](0133-explicit-validated-enrollment-and-test-isolation.md) and [the later verification record](../maintainers/RELAY_SESSION_VERIFICATION_20260909.md) preserve that stage. [ADR 0152](0152-manual-desktop-only-shard-authority.md) subsequently closed all external enrollment, requiring explicit manual desktop enrollment and manual provider renewal. Neither earlier image acceptance nor a retained account bypasses that policy.

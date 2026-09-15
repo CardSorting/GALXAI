@@ -57,11 +57,15 @@ Owner role: **Security/access maintainer**. Domain: `access`.
 - [Private preview activation — 2026-09-12](../../docs/operations/preview-activation.md)
 - [Developer preview reads and hybrid sync](../../docs/operations/preview-hybrid-sync.md)
 - [Workspace authentication and recovery](../../docs/operations/workspace-auth.md)
-- [Authentication and credential ingestion boundaries](../../docs/STANDARDIZED_OAUTH_AND_INGESTION_ARCHITECTURE.md)
+- [Authentication and credential enrollment boundaries](../../docs/STANDARDIZED_OAUTH_AND_INGESTION_ARCHITECTURE.md)
 - [Authentication security posture and threat model](../../docs/SECURITY_POSTURE_AND_THREAT_MODEL.md)
 - [ADR 0147: Verified account and session authority](../../docs/adr/0147-verified-account-and-session-authority.md)
 - [Readable product URLs](../../docs/maintainers/readable-urls.md)
 - [Free generation quota operations](../../docs/maintainers/FREE_GENERATION_QUOTA.md)
+- [OAuth and token lifecycle boundaries](../../docs/OAUTH_AND_TOKEN_LIFECYCLE_SPECIFICATION.md)
+- [Provider credentials and application identity](../../docs/PROVIDER_AS_AUTH_SPECIFICATION.md)
+- [Security boundaries](../../docs/SECURITY.md)
+- [Relay security reference](../../docs/relay-security.md)
 
 Relevant checks (select for the change; impact discovery never executes these): `npm run test:preview-admin`, `npm run test:image:security`, `npm run test:auth:sessions`, `npm run test:free-quota`, `npm run test:free-quota:db`.
 
@@ -94,6 +98,22 @@ Owner role: **Relay operator**. Domain: `relay`.
 - [Federation request telemetry](../../docs/maintainers/RELAY_TELEMETRY.md)
 - [Federation hardening checks](../../docs/maintainers/RELAY_HARDENING.md)
 - [Controller ownership and stale-lock recovery](../../post-mortem/runbooks/controller-lock.md)
+- [Relay credential enrollment and recovery](../../docs/maintainers/RELAY_CREDENTIAL_ENROLLMENT.md)
+- [Relay desktops and manual repair](../../docs/maintainers/RELAY_DESKTOPS.md)
+- [Maintainer runbook: shard authority and key rotation](../../docs/maintainers/MULTI_TENANT_SHARD_AND_KEY_ROTATION.md)
+- [Maintainer CLI reference](../../docs/maintainers/MAINTAINER_CLI_CHEATSHEET.md)
+- [Federation relay API](../../docs/RELAY_API_REFERENCE.md)
+- [Migrating to manual desktop authority and capability-aware GALX](../../docs/MIGRATION_GUIDE.md)
+- [System topology and maintainer onboarding](../../docs/SYSTEM_TOPOLOGY_AND_MAINTENANCE_ONBOARDING.md)
+- [Federation fleet and quota](../../docs/maintainers/RELAY_QUOTA_AND_FLEET.md)
+- [Provisioning and preflight](../../docs/playbooks/01-provisioning-and-preflight.md)
+- [Traffic and model-specific scaling](../../docs/playbooks/03-live-traffic-and-fleet-scaling.md)
+- [Inference verification](../../docs/INFERENCE_PIPELINE_VERIFICATION.md)
+- [Relay deployment: vNext migration and legacy reference](../../docs/VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md)
+- [Resilience and recovery](../../docs/RESILIENCE_AND_DISASTER_RECOVERY.md)
+- [Troubleshooting](../../docs/TROUBLESHOOTING.md)
+- [Maintainer guides](../../docs/maintainers/README.md)
+- [ADR 0152: Manual desktop-only shard authority](../../docs/adr/0152-manual-desktop-only-shard-authority.md)
 
 Relevant checks (select for the change; impact discovery never executes these): `npm run test:relay:capabilities`, `npm run test:relay:desktop-login`.
 
@@ -104,8 +124,10 @@ Owner role: **Database operator**. Domain: `database`.
 - [Supabase authority and operational boundaries](../../docs/SUPABASE_PARANOID_ARCHITECTURE_SPEC.md)
 - [PostgreSQL migration and recovery operations](../../docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md)
 - [Free generation quota operations](../../docs/maintainers/FREE_GENERATION_QUOTA.md)
+- [Maintainer runbook: shard authority and key rotation](../../docs/maintainers/MULTI_TENANT_SHARD_AND_KEY_ROTATION.md)
+- [Migrating to manual desktop authority and capability-aware GALX](../../docs/MIGRATION_GUIDE.md)
 
-Relevant checks (select for the change; impact discovery never executes these): `npm run db:verify`, `npm run db:test`.
+Relevant checks (select for the change; impact discovery never executes these): `npm run db:verify`, `npm run db:test`, `npm run test:relay:manual-db`.
 
 ## Release and deployment boundaries
 
@@ -115,6 +137,7 @@ Owner role: **Release operator**. Domain: `delivery`.
 - [Application deployment and configuration](../../docs/VERCEL_DEPLOYMENT.md)
 - [Prepare and verify a release](../../docs/runbooks/release-readiness.md)
 - [Deployment storage containment](../../post-mortem/runbooks/deployment-storage.md)
+- [Relay deployment: vNext migration and legacy reference](../../docs/VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md)
 
 Relevant checks (select for the change; impact discovery never executes these): `npm run docs:check`, `npm run build`, `npm run docs:check:build`.
 

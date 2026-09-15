@@ -43,6 +43,8 @@ async function main(): Promise<void> {
   await client.connect();
 
   try {
+    const manualPolicy = await client.query("SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='galx_shard_accounts' AND column_name='managed_desktop_id'");
+    if (manualPolicy.rowCount) throw new Error('This historical verifier predates manual desktop enrollment. Use test:relay:manual-db and the read-only apply-manual-desktop-enrollment.ts inventory; do not reopen generic upsert.');
     await client.query('BEGIN');
     if (migrationPath) {
       await client.query(fs.readFileSync(path.resolve(migrationPath), 'utf8'));

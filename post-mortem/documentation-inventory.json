@@ -216,7 +216,7 @@
       "path": "docs/MIGRATION_GUIDE.md",
       "scope": "current-guide",
       "category": "docs",
-      "title": "Migrating to capability-aware GALX"
+      "title": "Migrating to manual desktop authority and capability-aware GALX"
     },
     {
       "path": "docs/MODEL_CATALOG.md",
@@ -366,7 +366,7 @@
       "path": "docs/STANDARDIZED_OAUTH_AND_INGESTION_ARCHITECTURE.md",
       "scope": "domain-reference",
       "category": "docs",
-      "title": "Authentication and credential ingestion boundaries"
+      "title": "Authentication and credential enrollment boundaries"
     },
     {
       "path": "docs/STREAMING_AND_SSE_PROTOCOL.md",
@@ -1329,6 +1329,18 @@
       "title": "ADR 0150: Bounded free admission and paid capacity protection"
     },
     {
+      "path": "docs/adr/0151-codex-standalone-image-tool.md",
+      "scope": "decision-record",
+      "category": "docs",
+      "title": "ADR 0151: Standalone Codex image tool transport"
+    },
+    {
+      "path": "docs/adr/0152-manual-desktop-only-shard-authority.md",
+      "scope": "decision-record",
+      "category": "docs",
+      "title": "ADR 0152: Manual desktop-only shard authority"
+    },
+    {
       "path": "docs/adr/README.md",
       "scope": "current-guide",
       "category": "docs",
@@ -1692,7 +1704,7 @@
       "path": "docs/maintainers/MULTI_TENANT_SHARD_AND_KEY_ROTATION.md",
       "scope": "domain-reference",
       "category": "docs",
-      "title": "Maintainer Runbook: Shard Authority and Key Rotation"
+      "title": "Maintainer runbook: shard authority and key rotation"
     },
     {
       "path": "docs/maintainers/PERFORMANCE_BENCHMARKING_AND_SLOS.md",
@@ -2040,7 +2052,7 @@
       "path": "docs/relay-security.md",
       "scope": "current-guide",
       "category": "docs",
-      "title": "Relay access and containment"
+      "title": "Relay security reference"
     },
     {
       "path": "docs/runbooks/README.md",
@@ -2533,6 +2545,12 @@
       "scope": "operational-record",
       "category": "post-mortem",
       "title": "Workspace server-render failure and navigation recovery"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-09-14-enrollment/README.md",
+      "scope": "operational-record",
+      "category": "post-mortem",
+      "title": "Manual desktop enrollment policy change"
     },
     {
       "path": "post-mortem/incidents/2026/2026-09-14-generation-quota-access/README.md",

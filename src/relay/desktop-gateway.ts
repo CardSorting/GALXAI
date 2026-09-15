@@ -79,8 +79,14 @@ export class DesktopGateway {
       if (body.relayId !== undefined && !this.relays().some(r => r.id === body.relayId)) throw new RequestError(400, 'invalid_relay', 'Select an existing relay or create an unlinked desktop.');
       const id = await manager.create({ id: body.id, name: body.name, relayId: body.relayId }); this.json(res, { id }, 201); return true;
     }
-    const match = name.match(/^\/api\/desktops\/([a-f0-9-]+)\/(start|stop|delete|launch|clipboard|link|traffic|credential-sync|signin|signin-cancel|credential-match)$/);
+    const match = name.match(/^\/api\/desktops\/([a-f0-9-]+)\/(start|stop|delete|launch|clipboard|link|traffic|credential-sync|signin|signin-cancel|credential-match|enroll)$/);
     if (!match || !desktopId(match[1])) throw new RequestError(404, 'desktop_not_found', 'Desktop not found.');
+    if (match[2] === 'enroll') {
+      if (Object.keys(body).some(key => key !== 'expectedShardId')) throw new RequestError(400, 'invalid_enrollment', 'Use the saved login in this desktop.');
+      try { const shardId = await manager.enroll(match[1], body.expectedShardId); this.json(res, { shardId }); }
+      catch (error) { if (error instanceof DesktopCredentialError) throw new RequestError(409, error.code, 'Enrollment could not be confirmed. Check the saved login and account link, then retry.'); throw error; }
+      return true;
+    }
     if (match[2] === 'signin') {
       if (Object.keys(body).some(key => !['shardId', 'method'].includes(key)) || body.method !== undefined && !['browser', 'device'].includes(body.method)) throw new RequestError(400, 'invalid_signin', 'Open sign-in for the linked shard.');
       await manager.signIn(match[1], body.shardId, body.method); this.json(res, { opened: true }); return true;

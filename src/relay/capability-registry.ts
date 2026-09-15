@@ -174,9 +174,14 @@ export class CapabilityRegistry {
     return [...(this.byModel.get(model) ?? [])].flatMap(id => {
       const shard = this.shards.get(id)!;
       const capability = shard.models.find(m => m.model === model);
+      const standaloneImage = model === `image:${CODEX_IMAGE_ALIAS.requestedModel}`
+        && capability?.routingMode === CODEX_IMAGE_ALIAS.routingMode
+        && capability.executionModel === CODEX_IMAGE_ALIAS.executionModel
+        && capability.source === 'response';
       return !this.admissionPaused.has(id) && shard.lifecycle === 'HEALTHY' && shard.health === 'healthy' && shard.heartbeatExpiresAtMs > now
         && capability?.state === 'AVAILABLE' && capability.expiresAtMs > now
-        && (!capability.executionModel || shard.models.some(m => m.model === capability.executionModel && m.state === 'AVAILABLE' && m.expiresAtMs > now)) ? [shard] : [];
+        && (capability.routingMode === CODEX_IMAGE_ALIAS.routingMode ? standaloneImage && shard.lastCapabilityRefreshMs + this.ttlMs > now
+          : !capability.executionModel || shard.models.some(m => m.model === capability.executionModel && m.state === 'AVAILABLE' && m.expiresAtMs > now)) ? [shard] : [];
     });
   }
   eligible(model: string): RelayCapabilityRecord[] { return this.eligibleRecords(model).map(s => structuredClone(s)); }
