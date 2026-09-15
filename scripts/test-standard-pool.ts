@@ -11,6 +11,9 @@ import { StandardPoolScheduler } from '../src/relay/standard-pool-scheduler.js';
 import { PoolRuntime } from '../src/relay/pool-runtime.js';
 import { PoolExecution, type AssignedAccount } from '../src/relay/pool-execution.js';
 import { CentralClient, hash, type PoolId } from '../src/relay/pool-protocol.js';
+import { AgentRuntime } from '../src/sdk/agent.js';
+import { ChatCompletionStream } from '../src/sdk/stream.js';
+import { executeRelayChat } from '../src/core/router/adapters/RelayChatTransport.js';
 import { GalxaiRelayServer } from '../src/relay/relay-server.js';
 
 async function until(predicate: () => boolean) {
@@ -24,8 +27,8 @@ async function fixture(count=3,pool:PoolId='standard') {
   const directory=await mkdtemp(path.join(tmpdir(),'standard-rotation-'));
   const upstream=http.createServer(), wss=new WebSocketServer({server:upstream}), upstreamOrigin=await listen(upstream);
   const calls:Array<{accountId:string;socket:WebSocket}>=[], records=new Map<string,any>();
-  const control={deny:false,acquisitions:0,finishFails:false,holdLookup:undefined as Promise<void>|undefined,behavior:(_socket:WebSocket)=>{}};
-  wss.on('connection',(socket,req)=>socket.on('message',()=>{calls.push({accountId:String(req.headers['chatgpt-account-id']),socket});control.behavior(socket);}));
+  const control={deny:false,acquisitions:0,finishFails:false,holdLookup:undefined as Promise<void>|undefined,behavior:(_socket:WebSocket,_payload:any)=>{}};
+  wss.on('connection',(socket,req)=>socket.on('message',raw=>{calls.push({accountId:String(req.headers['chatgpt-account-id']),socket});control.behavior(socket,JSON.parse(String(raw)));}));
   const accounts:AssignedAccount[]=Array.from({length:count},(_,i)=>({id:`codex_sh_${i.toString(16).padStart(24,'0')}`,revision:1,assignmentRevision:1,credentialRevision:hash(`revision-${i}`),state:'enabled',desktopId:randomUUID(),models:['fixture-a','fixture-b'],expiresAtMs:Date.now()+600000,credential:{accessToken:`synthetic-token-${i}`,accountId:`account-${i}`}}));
   const store={call:async(action:string,b:any={})=>{
     if(action==='lookup'){await control.holdLookup;return records.get(b.requestKey)??[...records.values()].find(r=>r.executionId===b.executionId&&r.tenantSha256===b.tenantSha256)??null;}
@@ -304,11 +307,76 @@ test('readiness is rechecked after a delayed lookup and future heartbeats do not
   }finally{await f.cleanup();}
 });
 
-test('Standard rejects tools before selection; Premium retains overlapping admission',async()=>{
+test('Standard rejects hosted tools before selection; Premium retains overlapping admission',async()=>{
   const standard=await fixture(1);
-  try{assert.equal((await standard.post('forbidden',{tools:[]})).status,403);assert.equal(standard.control.acquisitions,0);assert.equal(standard.calls.length,0);}
+  try{assert.equal((await standard.post('forbidden',{tools:[{type:'image_generation'}]})).status,403);assert.equal(standard.control.acquisitions,0);assert.equal(standard.calls.length,0);}
   finally{await standard.cleanup();}
   const premium=await fixture(1,'premium');
   try{assert.deepEqual((await Promise.all([premium.post('one'),premium.post('two')])).map(r=>r.status),[202,202]);assert.equal(premium.control.acquisitions,2);}
   finally{await premium.cleanup();}
+});
+
+
+for (const pool of ['standard','premium'] as const) for (const streaming of [false,true]) {
+  test(`${pool} automatically completes a function-tool chain over ${streaming?'streaming':'JSON'} relay transport`,async()=>{
+    const f=await fixture(2,pool), payloads:any[]=[], wires:string[]=[], executed:string[]=[];
+    try {
+      f.control.behavior=(socket,payload)=>{
+        payloads.push(payload);
+        const results=payload.input.filter((x:any)=>x.type==='function_call_output');
+        const step=results.length;
+        assert.equal(payload.tool_choice,'auto');
+        assert.deepEqual(payload.tools.map((x:any)=>x.name),['lookup','combine']);
+        assert(payload.instructions.includes('authorized for automatic execution'));
+        if(step<2){
+          socket.send(JSON.stringify({type:'response.function_call_arguments.delta',delta:'PARTIAL_ARGUMENT_SENTINEL'}));
+          socket.send(JSON.stringify({type:'response.completed',response:{status:'completed',output:[{type:'function_call',call_id:`call_${step}`,name:step?'combine':'lookup',arguments:JSON.stringify({value:step+1}),credential:'PRIVATE_TOOL_METADATA'}]}}));
+        }else{
+          assert.deepEqual(results.map((x:any)=>x.call_id),['call_0','call_1']);
+          assert.deepEqual(results.map((x:any)=>JSON.parse(x.output)),[{value:2},{value:3}]);
+          socket.send(JSON.stringify({type:'response.output_text.delta',delta:'Completed automatically'}));
+          socket.send(JSON.stringify({type:'response.completed',response:{status:'completed',output:[]}}));
+        }
+      };
+      const send=async(request:any)=>{
+        const result=await executeRelayChat({url:f.origin,key:hash('inference'),tenant:'tenant',idempotencyKey:request.turn_id,payload:request,ttftTimeoutMs:3000});
+        const wire=await result.response.text();wires.push(wire);return wire;
+      };
+      const completions={
+        create:async(request:any)=>JSON.parse(await send(request)),
+        stream:(request:any)=>new ChatCompletionStream((async function*(){
+          const wire=await send({...request,stream:true});
+          for(const frame of wire.split('\n\n'))if(frame.startsWith('data: ')&&frame!=='data: [DONE]')yield JSON.parse(frame.slice(6));
+        })()),
+      };
+      const agent=new AgentRuntime(completions as any,{model:'fixture-a',maxSteps:4,tools:Object.fromEntries(['lookup','combine'].map(name=>[name,{parameters:{type:'object',properties:{value:{type:'number'}},required:['value']},execute:({value}:any)=>{executed.push(name);return {value:value+1};}}]))});
+      let final:any;
+      if(streaming){for await(const event of agent.stream('Finish the task'))if(event.type==='finish')final=event.result;}
+      else final=await agent.run('Finish the task');
+      assert.equal(final.text,'Completed automatically');assert.equal(final.stepsCount,3);assert.deepEqual(executed,['lookup','combine']);
+      assert.equal(payloads.length,3);assert.equal(f.control.acquisitions,3);
+      assert(!wires.join('').includes('PRIVATE_TOOL_METADATA'));assert(!wires.join('').includes('PARTIAL_ARGUMENT_SENTINEL'));
+      if(pool==='standard')assert.notEqual(f.calls[0].accountId,f.calls[1].accountId,'tool continuation still uses Standard fair admission');
+    }finally{await f.cleanup();}
+  });
+}
+
+test('tool contracts reject orphan results, hosted tools and incomplete output before callback execution',async()=>{
+  const f=await fixture(1);
+  const tools=[{type:'function',function:{name:'lookup',parameters:{type:'object',properties:{}}}}];
+  try {
+    for(const body of [{tools,messages:[{role:'tool',content:'x',tool_call_id:'orphan'}]},{tools:[{type:'mcp',server_url:'https://private.invalid'}]},{tools,tool_choice:{type:'function',function:{name:'missing'}}}])assert([400,403].includes((await f.post(randomUUID(),body)).status));
+    assert.equal(f.control.acquisitions,0);assert.equal(f.calls.length,0);
+    for(const output of [
+      {status:'incomplete',output:[{type:'function_call',call_id:'call_1',name:'lookup',arguments:'{}'}]},
+      {status:'completed',output:[{type:'function_call',call_id:'call_1',name:'unregistered',arguments:'{}'}]},
+      {status:'completed',output:[{type:'mcp_approval_request',approval_request_id:'PRIVATE_APPROVAL'}]},
+    ]){
+      f.control.behavior=socket=>socket.send(JSON.stringify({type:'response.completed',response:output}));
+      const result=await f.post(randomUUID(),{tools});assert.equal(result.status,202);const job=await result.json();
+      const stream=await (await fetch(f.origin+job.streamUrl,{headers:f.headers})).text();
+      assert(!stream.includes('tool_calls'));assert(!stream.includes('PRIVATE_APPROVAL'));assert(stream.includes('request_failed'));
+      await until(()=>f.execution.standardAvailable(f.accounts[0].id));
+    }
+  }finally{await f.cleanup();}
 });

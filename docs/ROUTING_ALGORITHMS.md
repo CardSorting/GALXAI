@@ -8,7 +8,7 @@ Private routing contract for [central account authority and isolated pools](ARCH
 
 1. The application verifies customer identity, product permission and owner scope.
 2. With `GALX_ISOLATED_RELAYS_ENABLED=1`, deployment policy chooses `GALX_TEXT_RELAY_POOL` for text, default Standard. Sites and images choose Premium. Distinct origins and keys are required.
-3. The runtime rejects forbidden workloads before provider admission. Standard rejects Sites, images and generic tool/image aliases; a Premium failure cannot create Standard work.
+3. The runtime rejects forbidden workloads before provider admission. Standard accepts client-owned function calling as text inference and rejects Sites, images and provider-hosted tool/image aliases; a Premium failure cannot create Standard work.
 4. Fresh central projection and execution permission determine which assigned account engines can run. Premium retains a rotating cursor among matching models. Standard uses [health-aware rotation](reference/standard-relay-scheduling.md): select the least recently selected eligible account across model subsets, skip current cooldowns/busy engines and allow one ongoing job per account. These are separate from the legacy load-weighted capability index.
 5. The engine persists an execution reservation, acquires the existing central account lease and binds the lease before provider I/O. Assignment, revisions, epoch, workload, cooldown and budgets must pass centrally.
 6. Renewal remains bound to that exact grant. No peer account, legacy transport, alternate model or automatically retried provider request is selected after failure.
@@ -28,6 +28,10 @@ The runtime has bounded concurrent request bookkeeping and per-engine execution 
 Standard's live rotation order is independent of wall-clock timestamps; checkpoints seed first selection only. A pool-wide monotonic budget spaces new recovery selections by at least five seconds while healthy traffic remains available. Repeated quota frames count once per job, fresh reset evidence can extend the wait, and confirmed recovery is checkpointed. After lookup, disconnected callers are discarded before selection and new dispatch rechecks projection freshness. A stale release cannot free a later reservation. These rules do not move or repeat an accepted operation.
 
 Retain the original request key, payload, tenant, origin and epoch. A replay can return an existing text job only when its required original runtime/account context is still available. Images and unavailable original contexts return an unconfirmed result rather than dispatching again. Receipt settlement may retry; synthesis does not.
+
+## Automatic agent tool turns
+
+The [function-tool contract](reference/automatic-agent-tools.md) forwards bounded definitions and correlated tool results, and returns complete allowlisted calls only after successful model completion. Registered callbacks execute in the SDK caller. Every follow-up inference retains its own request identity and normal quota/account admission; an automatic tool loop cannot create relay-host shell access, widen a pool or repeat uncertain work.
 
 ## Retained legacy routing
 

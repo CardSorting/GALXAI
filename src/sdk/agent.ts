@@ -8,7 +8,6 @@
 import type { ChatMessage, ChatCompletionResponse } from '../core/contracts/GalxContracts';
 import type { CompletionsResource } from './resources/chat';
 import { APIError } from './errors';
-import { safeParseJSON } from './json-repair';
 import { zodToJsonSchema } from './structured';
 import { createChatResourceId, type ChatSessionMode } from '../core/chat/GalxChatRequestNormalizer';
 
@@ -73,6 +72,8 @@ export interface AgentExecutionResult {
 }
 
 export interface AgentRunOptions {
+  /** Stops future model steps and tool starts; an already-running callback owns its cancellation. */
+  signal?: AbortSignal;
   conversationId?: string;
   sessionId?: string;
   turnId?: string;
@@ -109,6 +110,54 @@ interface NormalizedTool {
   execute: (params: any) => Promise<any> | any;
 }
 
+const AUTOMATIC_TOOL_INSTRUCTIONS = 'The function tools registered for this run are authorized for automatic execution. Call them as needed and continue with their actual results until the task is complete, without asking for permission for each tool call or next step. Do not invent tool results or missing user information.';
+
+function requireExecutor(value: unknown): NormalizedTool['execute'] {
+  if (typeof value !== 'function') throw new APIError('Each agent tool must provide an execute, call, or run callback.', 400, 'invalid_agent_tool');
+  return value as NormalizedTool['execute'];
+}
+
+function prepareToolBatch(calls: any[], registry: Map<string, NormalizedTool>, seen: Set<string>) {
+  const ids = new Set<string>();
+  if (calls.length > 32) throw new APIError('Too many tool calls in one step.', 502, 'invalid_tool_calls');
+  // Validate the whole batch before any callback can have a side effect.
+  for (const c of calls) {
+    if (c?.type !== 'function' || typeof c.id !== 'string' || !/^[A-Za-z0-9_.:-]{1,128}$/.test(c.id)
+      || typeof c.function?.name !== 'string' || !/^[A-Za-z0-9_-]{1,64}$/.test(c.function.name)
+      || ids.has(c.id) || seen.has(c.id)) throw new APIError('Invalid or repeated tool call identity.', 502, 'invalid_tool_calls');
+    ids.add(c.id);
+  }
+  for (const id of ids) seen.add(id);
+  return calls.map(tc => {
+    const fnName = tc.function.name, toolDef = registry.get(fnName);
+    let parsedArgs: any = {}, argumentError: string | undefined;
+    try {
+      if (typeof tc.function.arguments !== 'string' || tc.function.arguments.length > 262144) throw Error();
+      parsedArgs = JSON.parse(tc.function.arguments);
+      if (!parsedArgs || typeof parsedArgs !== 'object' || Array.isArray(parsedArgs)) throw Error();
+      if (toolDef?.zodSchema?.safeParse) {
+        const parsed = toolDef.zodSchema.safeParse(parsedArgs);
+        if (!parsed.success) throw Error();
+        parsedArgs = parsed.data;
+      }
+    } catch { argumentError = 'Tool arguments did not match the required schema. Correct them before calling again.'; }
+    return { tc, fnName, parsedArgs, toolDef, argumentError };
+  });
+}
+
+async function executeTool(t: ReturnType<typeof prepareToolBatch>[number], signal?: AbortSignal) {
+  signal?.throwIfAborted();
+  let toolResult: any;
+  if (t.argumentError) toolResult = { error: t.argumentError };
+  else if (!t.toolDef) toolResult = { error: 'Tool is not registered for this run.' };
+  else try {
+    toolResult = await t.toolDef.execute(t.parsedArgs);
+    // Always return a real JSON-compatible result, including callbacks returning void.
+    toolResult = typeof toolResult === 'string' ? toolResult : JSON.parse(JSON.stringify(toolResult ?? null));
+  } catch { toolResult = { error: 'Tool execution failed.' }; }
+  return { ...t, toolResult };
+}
+
 export class AgentRuntime {
   private readonly completions: CompletionsResource;
   private readonly config: AgentConfig;
@@ -133,6 +182,9 @@ export class AgentRuntime {
 
     if (this.config.systemPrompt && !messages.some((message) => message.role === 'system')) {
       messages.unshift({ role: 'system', content: this.config.systemPrompt });
+    }
+    if (this.config.tools && Object.keys(this.config.tools).length && !messages.some(m => m.role === 'system' && m.content === AUTOMATIC_TOOL_INSTRUCTIONS)) {
+      messages.unshift({ role: 'system', content: AUTOMATIC_TOOL_INSTRUCTIONS });
     }
     return messages;
   }
@@ -220,7 +272,7 @@ export class AgentRuntime {
             description: fn.description || `Execute ${fn.name}`,
             parameters: params,
             zodSchema,
-            execute: fn.execute || (async () => ({ success: true }))
+            execute: requireExecutor(fn.execute)
           });
         } else if (typeof item === 'object') {
           const name = (item as any).name || 'custom_tool';
@@ -229,7 +281,7 @@ export class AgentRuntime {
             (item as any).parameters || (item as any).input_schema,
             (item as any).schema
           );
-          const execute = (item as any).execute || (item as any).call || (item as any).run || (async () => ({ success: true }));
+          const execute = requireExecutor((item as any).execute || (item as any).call || (item as any).run);
           registry.set(name, {
             name,
             description,
@@ -255,16 +307,16 @@ export class AgentRuntime {
         if ('type' in def && def.type === 'function' && def.function) {
           const fn = def.function;
           const { params, zodSchema } = resolveParameters(fn.parameters, (fn as any).schema);
-          registry.set(name, {
+          registry.set(fn.name || name, {
             name: fn.name || name,
             description: fn.description || `Execute tool ${name}`,
             parameters: params,
             zodSchema,
-            execute: fn.execute || (async () => ({ success: true }))
+            execute: requireExecutor(fn.execute)
           });
         } else {
           const toolObj = def as AgentToolDefinition;
-          const execute = toolObj.execute || toolObj.call || toolObj.run || (async () => ({ success: true }));
+          const execute = requireExecutor(toolObj.execute || toolObj.call || toolObj.run);
           const { params, zodSchema } = resolveParameters(
             toolObj.parameters || toolObj.input_schema,
             toolObj.schema
@@ -306,10 +358,13 @@ export class AgentRuntime {
     const toolCallsExecuted: AgentExecutionResult['toolCallsExecuted'] = [];
     let stepNumber = 0;
     const maxSteps = this.config.maxSteps ?? 10;
+    if (!Number.isSafeInteger(maxSteps) || maxSteps < 1) throw new APIError('maxSteps must be a positive integer.', 400, 'invalid_agent_config');
+    const seenCalls = new Set(messages.flatMap(m => (m.tool_calls ?? []).map((c: any) => c.id)));
     let totalPromptTokens = 0;
     let totalCompletionTokens = 0;
 
     while (stepNumber < maxSteps) {
+      options.signal?.throwIfAborted();
       stepNumber++;
 
       const res: ChatCompletionResponse = await this.completions.create({
@@ -325,7 +380,7 @@ export class AgentRuntime {
           : `${identity.turnId.slice(0, 52)}:s${stepNumber}`,
         user_message_id: identity.turnId,
         assistant_message_id: `${identity.turnId.slice(0, 52)}:a`,
-      });
+      }, { signal: options.signal });
 
       if (res.usage) {
         totalPromptTokens += res.usage.prompt_tokens || 0;
@@ -350,52 +405,12 @@ export class AgentRuntime {
 
         this.config.onStep?.({ stepNumber, toolCalls, output: message.content || undefined });
 
-        // Execute tools (concurrently or sequentially based on parallelToolExecution config)
-        const executeOneTool = async (tc: any) => {
-          const fnName = tc.function?.name;
-          const fnArgsStr = tc.function?.arguments || '{}';
-          let parsedArgs: any = {};
-          try {
-            parsedArgs = typeof fnArgsStr === 'string' ? safeParseJSON(fnArgsStr) : fnArgsStr;
-          } catch {
-            parsedArgs = { raw: fnArgsStr };
-          }
-
-          const toolDef = toolMap.get(fnName);
-          let toolResult: any;
-
-          if (toolDef) {
-            try {
-              if (toolDef.zodSchema && typeof toolDef.zodSchema.safeParse === 'function') {
-                const parsed = toolDef.zodSchema.safeParse(parsedArgs);
-                if (parsed.success) {
-                  parsedArgs = parsed.data;
-                }
-              }
-              toolResult = await toolDef.execute(parsedArgs);
-            } catch (err: any) {
-              toolResult = { error: err.message || 'Tool execution failed' };
-            }
-          } else {
-            toolResult = { error: `Tool '${fnName}' not found in agent registry` };
-          }
-
-          return {
-            tc,
-            fnName,
-            parsedArgs,
-            toolResult
-          };
-        };
-
-        const results = this.config.parallelToolExecution !== false
-          ? await Promise.all(toolCalls.map(executeOneTool))
-          : [];
-
-        if (this.config.parallelToolExecution === false) {
-          for (const tc of toolCalls) {
-            results.push(await executeOneTool(tc));
-          }
+        const prepared = prepareToolBatch(toolCalls, toolMap, seenCalls);
+        const results = [];
+        if (this.config.parallelToolExecution !== false) {
+          results.push(...await Promise.all(prepared.map(t => executeTool(t, options.signal))));
+        } else {
+          for (const t of prepared) results.push(await executeTool(t, options.signal));
         }
 
         for (const r of results) {
@@ -467,10 +482,13 @@ export class AgentRuntime {
     const toolCallsExecuted: AgentExecutionResult['toolCallsExecuted'] = [];
     let stepNumber = 0;
     const maxSteps = this.config.maxSteps ?? 10;
+    if (!Number.isSafeInteger(maxSteps) || maxSteps < 1) throw new APIError('maxSteps must be a positive integer.', 400, 'invalid_agent_config');
+    const seenCalls = new Set(messages.flatMap(m => (m.tool_calls ?? []).map((c: any) => c.id)));
     let totalPromptTokens = 0;
     let totalCompletionTokens = 0;
 
     while (stepNumber < maxSteps) {
+      options.signal?.throwIfAborted();
       stepNumber++;
 
       const stream = this.completions.stream({
@@ -486,7 +504,7 @@ export class AgentRuntime {
           : `${identity.turnId.slice(0, 52)}:s${stepNumber}`,
         user_message_id: identity.turnId,
         assistant_message_id: `${identity.turnId.slice(0, 52)}:a`,
-      });
+      }, { signal: options.signal });
 
       for await (const chunk of stream) {
         const delta = chunk.choices?.[0]?.delta?.content;
@@ -517,51 +535,20 @@ export class AgentRuntime {
           ...({ tool_calls: toolCalls } as any)
         });
 
-        for (const tc of toolCalls) {
-          const fnName = tc.function?.name;
-          const fnArgsStr = tc.function?.arguments || '{}';
-          const parsedArgs = safeParseJSON(fnArgsStr);
-
-          yield {
-            type: 'tool_call',
-            toolName: fnName,
-            toolCallId: tc.id,
-            arguments: parsedArgs
-          };
-
-          const toolDef = toolMap.get(fnName);
-          let toolResult: any;
-
-          if (toolDef) {
-            try {
-              toolResult = await toolDef.execute(parsedArgs);
-            } catch (err: any) {
-              toolResult = { error: err.message || 'Tool execution failed' };
-            }
-          } else {
-            toolResult = { error: `Tool '${fnName}' not found in agent registry` };
-          }
-
-          yield {
-            type: 'tool_result',
-            toolName: fnName,
-            toolCallId: tc.id,
-            result: toolResult
-          };
-
-          toolCallsExecuted.push({
-            toolName: fnName,
-            toolCallId: tc.id,
-            arguments: parsedArgs,
-            result: toolResult
-          });
-
-          messages.push({
-            role: 'tool' as any,
-            tool_call_id: tc.id,
-            content: typeof toolResult === 'string' ? toolResult : JSON.stringify(toolResult),
-            name: fnName
-          } as any);
+        const prepared = prepareToolBatch(toolCalls, toolMap, seenCalls);
+        this.config.onStep?.({ stepNumber, toolCalls, output: message.content || undefined });
+        for (const t of prepared) yield { type: 'tool_call', toolName: t.fnName, toolCallId: t.tc.id, arguments: t.parsedArgs };
+        const results = [];
+        if (this.config.parallelToolExecution !== false) {
+          results.push(...await Promise.all(prepared.map(t => executeTool(t, options.signal))));
+        } else {
+          for (const t of prepared) results.push(await executeTool(t, options.signal));
+        }
+        for (const r of results) {
+          yield { type: 'tool_result', toolName: r.fnName, toolCallId: r.tc.id, result: r.toolResult };
+          toolCallsExecuted.push({ toolName: r.fnName, toolCallId: r.tc.id, arguments: r.parsedArgs, result: r.toolResult });
+          messages.push({ role: 'tool', tool_call_id: r.tc.id, name: r.fnName,
+            content: typeof r.toolResult === 'string' ? r.toolResult : JSON.stringify(r.toolResult) } as any);
         }
 
         yield { type: 'step', stepNumber };

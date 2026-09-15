@@ -357,6 +357,7 @@
     "relay:monitor:open": "tsx scripts/open-pool-monitor.ts",
     "verify:relay:hosts": "tsx scripts/verify-relay-hosts.ts",
     "verify:relay:service-images": "node scripts/verify-relay-service-images.mjs",
+    "test:agent:tools": "node --import tsx --test scripts/test-agent-automatic-tools.ts scripts/test-agent-session-isolation.ts",
     "test:relay:services": "node --import tsx --test scripts/test-relay-services.ts scripts/test-standard-pool.ts",
     "test:relay:authorization-db": "tsx scripts/run-supabase-integration.ts --relay-authorization",
     "verify:relay:monitors": "tsx scripts/verify-relay-pool-monitor.ts"

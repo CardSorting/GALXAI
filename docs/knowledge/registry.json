@@ -326,7 +326,10 @@
         "scripts/test-relay-local-access.mjs",
         "scripts/install-relay-monitor-apps.py",
         "scripts/macos/RelayMonitors.swift",
-        "scripts/test-relay-monitor-model.mjs"
+        "scripts/test-relay-monitor-model.mjs",
+        "src/sdk/agent.ts",
+        "scripts/test-agent-automatic-tools.ts",
+        "scripts/test-agent-session-isolation.ts"
       ],
       "guides": [
         "docs/ARCHITECTURE.md",
@@ -377,7 +380,8 @@
         "docs/maintainers/UPSTREAM_PROVIDER_OUTAGE_AND_DEGRADATION.md",
         "docs/playbooks/README.md",
         "docs/playbooks/07-zero-hesitation-developer-ergonomics-and-api-governance.md",
-        "docs/playbooks/08-unframed-developer-observation-protocol.md"
+        "docs/playbooks/08-unframed-developer-observation-protocol.md",
+        "docs/reference/automatic-agent-tools.md"
       ],
       "checks": [
         "npm run test:relay:capabilities",
@@ -385,7 +389,8 @@
         "npm run test:relay:pool-images",
         "npm run verify:relay:pool-images",
         "npm run test:relay:services",
-        "npm run verify:relay:service-images"
+        "npm run verify:relay:service-images",
+        "npm run test:agent:tools"
       ]
     },
     "database": {
@@ -783,6 +788,18 @@
         "installation",
         "activation",
         "accounts"
+      ]
+    },
+    "docs/reference/automatic-agent-tools.md": {
+      "kind": "reference",
+      "keywords": [
+        "agent",
+        "function",
+        "tools",
+        "automatic",
+        "turns",
+        "approval",
+        "SDK"
       ]
     }
   },

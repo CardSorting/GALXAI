@@ -1,0 +1,191 @@
+{
+  "recordedAt": "2026-09-15T22:13:47.799734+00:00",
+  "scope": "Local GALX SDK/function transport implementation and both runtime replacements; no serving activation",
+  "baseCommit": "0c60b462b9e4bd95b98486fa33ea0006fb1d1d02",
+  "revisionScope": "Working tree with exact source hashes below; not yet committed",
+  "sourceSha256": {
+    "src/relay/function-tools.ts": "669a1aa8a4704b76ca4cca842b47a65b6287e4a5c670904bf10d98e3beb0dd9c",
+    "src/relay/request-policy.ts": "6545ce0ce2e8d3e81ef8f997cc4c06de08809e53e7dec4e9d42b02632ea2da1b",
+    "src/relay/pool-protocol.ts": "fca285868f1fcda7db2755bf4d261a1d148144b35538c12b40fb77501561f2d2",
+    "src/relay/relay-server.ts": "6cf0804329a354e64258f276e006fd9543cd1f9144b00ff7a03fbf67dde8c421",
+    "src/relay/completion-usage.ts": "b4b2b7c6715a3febd7a0d80ab67426aa20d8cba15c95d98b5204e5eae140925d",
+    "src/relay/pool-runtime.ts": "225df6070e893c89d6ab00f787f0294a08e4a68c122ce48411819502427fe561",
+    "src/core/router/adapters/RelayChatTransport.ts": "8f0927e8f0bb9a46e8d25146abbab47d8b487b29c158e00a53227bd49f3f6891",
+    "src/sdk/agent.ts": "3d7600e79dfa09b4b70966d4593eac82bc97dee7ef961378244395981e45ab5b",
+    "scripts/test-agent-automatic-tools.ts": "feecf58a523bdf08c7b91ba7277ec1bb49c80876d6130fc9c50c08a3f04246eb",
+    "scripts/test-agent-session-isolation.ts": "0b7ef148dade97dfa9d6afd95c197141fee3b56a70ee3fa23e9fd9dc0a3a7511",
+    "scripts/test-standard-pool.ts": "a07e36fbabf61bb68c8de7acfe1a409bf7d5c9c0b713a807645d3a556354cbfb",
+    "package.json": "870f23fa6d9f21ec64eeaff84382ccb8816595b56792999a43df3b97f7e0892f",
+    "docker/relay-pools/local/images.json": "279d6b81a45e8389b9de000fcada0f8df87c8713f2ea5bf2723542de1bc0c0d7"
+  },
+  "behavior": [
+    "SDK automatically executes registered real callbacks and supplies their results to subsequent model steps in run and stream.",
+    "Both pool contracts transport bounded function definitions and correlated results; complete successful output calls are rebuilt through explicit nested allowlists.",
+    "Invalid arguments produce fixed tool errors for correction without execution; duplicate IDs reject a complete batch; abort prevents future model/callback starts.",
+    "Provider-hosted and approval output types fail closed, partial argument deltas are never text, and function requests do not use legacy upstream retries."
+  ],
+  "checks": [
+    {
+      "command": "npm run test:relay:services",
+      "passed": 35
+    },
+    {
+      "command": "npm run test:agent:tools",
+      "passed": 11
+    },
+    {
+      "command": "node --import tsx --test scripts/test-relay-adaptive-quota.ts scripts/test-relay-hardening.ts scripts/test-public-information-boundary.ts scripts/test-auth-identity-boundary.ts scripts/test-relay-chat-transport.ts scripts/test-relay-completion-usage.ts",
+      "passed": 66
+    },
+    {
+      "command": "npx tsc --noEmit",
+      "result": "passed"
+    },
+    {
+      "command": "npm run build",
+      "result": "passed",
+      "staticPages": 285
+    },
+    {
+      "command": "npm run test:docs",
+      "passed": 38
+    },
+    {
+      "command": "npm run docs:check:build and focused function marker scan",
+      "browserAndRenderedAssets": 669,
+      "result": "Compiled private-marker/runtime-trace checks clean; first full command also reported expected stale guide/registry fingerprints pending explicit semantic review."
+    },
+    {
+      "command": "npm run relay:local -- verify",
+      "passed": 69
+    }
+  ],
+  "compiledFunctionMarkers": [
+    "Invalid function tool contract.",
+    "completedFunctionCalls",
+    "PRIVATE_TOOL_METADATA",
+    "tools-20260915"
+  ],
+  "exploratoryScan": "A broader search also matched the existing public Supabase Auth origin in a browser chunk. Inspection identified public client configuration, not new function metadata; no global project-identifier absence claim or scan ignore was introduced.",
+  "images": {
+    "images": [
+      {
+        "tag": "galxai-relay-central:management-20260915",
+        "id": "sha256:4f848110b24290945f742a936e6f4fcd21c923ca1c0be359d2b1240227e43a4f",
+        "architecture": "arm64",
+        "component": "central"
+      },
+      {
+        "tag": "galxai-relay-premium:tools-20260915",
+        "id": "sha256:f760c58f0107c527eca262786d6aaa56c2986dc195e3365fb2f63142e0c5fe71",
+        "architecture": "arm64",
+        "component": "runtime",
+        "pool": "premium"
+      },
+      {
+        "tag": "galxai-relay-standard:tools-20260915",
+        "id": "sha256:2da12e33665691a1e2d857c79d5f3eb6463eb955da7ad47141c792f97b2354cc",
+        "architecture": "arm64",
+        "component": "runtime",
+        "pool": "standard"
+      },
+      {
+        "tag": "galxai-monitor-premium:management-20260915",
+        "id": "sha256:39735a31ac1179def573ee482fb780f5ce47c9813807e258a50bd2f55b8a4b1d",
+        "architecture": "arm64",
+        "component": "monitor",
+        "pool": "premium"
+      },
+      {
+        "tag": "galxai-monitor-standard:management-20260915",
+        "id": "sha256:d49a8f13d4f3ed9ed2a8ffa20c2efa0b6e0ddf15bdfc1cce95aa64e1a636f319",
+        "architecture": "arm64",
+        "component": "monitor",
+        "pool": "standard"
+      }
+    ]
+  },
+  "previousRuntimeImages": [
+    {
+      "tag": "galxai-relay-premium:candidate-20260915",
+      "id": "sha256:22ef2426f2509fee7fc33d77d49abb8f02ed981b66b8766a3deed7892d3f6e68",
+      "architecture": "arm64",
+      "component": "runtime",
+      "pool": "premium"
+    },
+    {
+      "tag": "galxai-relay-standard:recovery-20260915",
+      "id": "sha256:0f15cf6d50c5bef901f1a5f934d1249f1e333d760353570ae50516782e2e8dd1",
+      "architecture": "arm64",
+      "component": "runtime",
+      "pool": "standard"
+    }
+  ],
+  "localAcceptance": {
+    "at": "2026-09-15T22:10:21.691Z",
+    "checks": 69,
+    "scope": "local VM separation on one trusted Mac; no provider generation or cloud deployment",
+    "records": [
+      {
+        "pool": "premium",
+        "address": "192.168.105.1",
+        "installationId": "cdbf6081-b947-45f1-b3c7-5c4b992a951c",
+        "registrationAllowed": true,
+        "executionAllowed": false,
+        "accounts": 0,
+        "machineSha256": "706d57f0db2059f3f707a601d67d91e591639b380e4500ac2fb133ca59d5cc0b",
+        "daemonSha256": "d9a2e6dd4b797ec1fb9bcbc2a1282948e74e3ab6ffb0fa5c28fbcd1d429bfa95"
+      },
+      {
+        "pool": "standard",
+        "address": "192.168.105.3",
+        "installationId": "c3f00fc7-d199-4431-969c-66d492eba38e",
+        "registrationAllowed": true,
+        "executionAllowed": false,
+        "accounts": 0,
+        "machineSha256": "a434cf391eb62970b1269bc04b13d7146d5296167ffb2de3a9e9188e71628269",
+        "daemonSha256": "212a2e51978e2246536443fed52029d4ac1a134811b1bbb08258da007728d732"
+      }
+    ]
+  },
+  "localAcceptanceSha256": "1684edf9fdc1d0d2792d7b371c6069266cfc7c89ff41b069d4dc75f8b44e3f5e",
+  "installation": {
+    "workflow": "Built both final tools-20260915 images, inspected and loaded each into its own VM; updated manifest and installed overlay; confirmed zero accounts and closed execution; stopped only both runtime containers; normal up waited for central ownership handoff; inspected actual running image IDs and retained state mounts; passed 69 checks.",
+    "runtimes": [
+      {
+        "pool": "premium",
+        "container": "galx-premium-relay-1",
+        "stateVolume": "galx-premium_premium_execution"
+      },
+      {
+        "pool": "standard",
+        "container": "galx-standard-relay-1",
+        "stateVolume": "galx-standard_standard_execution"
+      }
+    ],
+    "otherImagesUnchanged": true
+  },
+  "rollback": "Restore Premium candidate-20260915 and Standard recovery-20260915 own-pool pins with execution closed. Reinstall overlay, preserve state and ownership waits, restore compatible caller behavior and requalify. No quota reset, cross-pool transfer or replay of unknown work.",
+  "research": [
+    {
+      "url": "https://developers.openai.com/api/docs/guides/function-calling",
+      "use": "Application-owned function execution, matching call/output IDs, automatic continuation and explicit strict false for optional Chat-style parameters."
+    },
+    {
+      "url": "https://learn.chatgpt.com/docs/app-server",
+      "use": "Distinguish Codex thread/turn approvals from the active Responses relay; no app-server approval responder or application permission modification was added."
+    }
+  ],
+  "limits": [
+    "No real provider sign-in, quota spend or function/image/Sites generation was performed. Synthetic provider acceptance and empty-pool local checks do not establish real account capability.",
+    "Callbacks execute in the application consuming the SDK, never on the relay host. Registration authorizes only those callbacks; owner checks and any external application approval requirements remain the caller responsibility.",
+    "Only GALX automatic function execution and model continuation were changed. The active Responses transport does not use Codex app-server approval requests; Codex application, managed sandbox and global approval settings were not changed.",
+    "The default remains ten model steps, including final synthesis. Positive maxSteps and AbortSignal control duration; no unlimited loop or automatic retry of uncertain work is provided.",
+    "Duplicate call IDs are blocked within a run and supplied history. New IDs are new actions; callback side effects need domain idempotency. Restarting an SDK process has no durable exactly-once callback guarantee.",
+    "Executable safeParse schemas validate locally when supplied. Plain JSON schemas constrain the provider request but do not themselves implement local callback validation.",
+    "Both relays accept client-owned functions as text inference. Standard still rejects Sites, images and provider-hosted tools; cross-pool discovery, fallback and credentials remain prohibited.",
+    "Both runtime images were replaced locally with execution closed, preserving named state volumes and central ownership waits. Central and monitor images, database schema, assignments, quotas and activation flags were unchanged.",
+    "The workspace SDK source is updated; no external SDK package was published and no public application or cloud runtime was deployed.",
+    "The compiled scan covered 669 browser/rendered assets and named private markers. It is not live authenticated UI acceptance or a claim that every public configuration identifier is absent."
+  ]
+}

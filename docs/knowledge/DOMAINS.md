@@ -145,8 +145,9 @@ Owner role: **Relay operator**. Domain: `relay`.
 - [Operational playbooks](../../docs/playbooks/README.md)
 - [Developer ergonomics and execution authority](../../docs/playbooks/07-zero-hesitation-developer-ergonomics-and-api-governance.md)
 - [Developer and operator observation protocol](../../docs/playbooks/08-unframed-developer-observation-protocol.md)
+- [Automatic agent tools and turns](../../docs/reference/automatic-agent-tools.md)
 
-Relevant checks (select for the change; impact discovery never executes these): `npm run test:relay:capabilities`, `npm run test:relay:desktop-login`, `npm run test:relay:pool-images`, `npm run verify:relay:pool-images`, `npm run test:relay:services`, `npm run verify:relay:service-images`.
+Relevant checks (select for the change; impact discovery never executes these): `npm run test:relay:capabilities`, `npm run test:relay:desktop-login`, `npm run test:relay:pool-images`, `npm run verify:relay:pool-images`, `npm run test:relay:services`, `npm run verify:relay:service-images`, `npm run test:agent:tools`.
 
 ## Database authority and migrations
 

@@ -33,12 +33,13 @@ export function assertProjectDatabase(value: string, project: string) {
   const u = new URL(value);
   if (!['postgres:', 'postgresql:'].includes(u.protocol) || !(u.hostname === `db.${project}.supabase.co` || u.hostname.endsWith('.pooler.supabase.com') && decodeURIComponent(u.username).endsWith(`.${project}`))) throw Error('Database project mismatch.');
 }
-/** Standard accepts text contracts only. Tool aliases cannot bypass the workload boundary. */
+/** Client-owned functions are text inference. Provider-hosted tools cannot bypass pool scope. */
 export function requestWorkload(pool: PoolId, pathname: string, body: Record<string, any>): Workload {
   const image = pathname.includes('/images/') || /^(image:|gpt-image|dall-e)/i.test(body.model ?? '');
   const sites = body.sites_profile !== undefined || body.require_output_limit !== undefined;
-  if (pool === 'standard' && (image || sites || ['tools','tool_choice','functions','function_call','modalities','image','images','response_format'].some(key => body[key] !== undefined)
-    || body.messages?.some((m: any) => typeof m?.content !== 'string'))) throw new RequestError(403, 'capability_unavailable', 'This request is not supported.');
+  if (pool === 'standard' && (image || sites || ['functions','function_call','modalities','image','images','response_format'].some(key => body[key] !== undefined)
+    || body.tools !== undefined && (!Array.isArray(body.tools) || body.tools.some((t: any) => t?.type !== 'function'))
+    || body.messages?.some((m: any) => typeof m?.content !== 'string' && !(m?.role === 'assistant' && m.content === null && Array.isArray(m.tool_calls) && m.tool_calls.length)))) throw new RequestError(403, 'capability_unavailable', 'This request is not supported.');
   return image ? 'images' : sites ? 'sites' : 'text';
 }
 export interface PoolIdentity { pool: PoolId; installationId: string; }

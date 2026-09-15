@@ -2067,6 +2067,12 @@
       "title": "Reference"
     },
     {
+      "path": "docs/reference/automatic-agent-tools.md",
+      "scope": "current-guide",
+      "category": "docs",
+      "title": "Automatic agent tools and turns"
+    },
+    {
       "path": "docs/reference/knowledge-commands.md",
       "scope": "current-guide",
       "category": "docs",

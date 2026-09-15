@@ -11,6 +11,7 @@ import { CODEX_IMAGE_ALIAS } from './image-compatibility.js';
 import { publicJob, publicUsage, boundedJson } from './pool-public-response.js';
 import { sitesContractRequest, sitesContractReply } from './sites-contract.js';
 import { StandardPoolScheduler } from './standard-pool-scheduler.js';
+import { functionCalls } from './function-tools.js';
 
 type Worker = {account:AssignedAccount;engine:GalxaiRelayServer;key:string;port:number};
 export class PoolRuntime {
@@ -173,7 +174,7 @@ export class PoolRuntime {
       let boundary;while((boundary=buffer.indexOf('\n\n'))>=0){const frame=buffer.slice(0,boundary);buffer=buffer.slice(boundary+2);const raw=frame.split('\n').filter(l=>l.startsWith('data:')).map(l=>l.slice(5).trim()).join('\n');
         if(raw==='[DONE]'){res.write('data: [DONE]\n\n');continue;}if(!raw)continue;
         const d=JSON.parse(raw);if(d.error){res.write('data: {"error":{"code":"request_failed","message":"The request could not complete."}}\n\n');continue;}
-        const safe={id:typeof d.id==='string'&&/^[-\w.:]{1,128}$/.test(d.id)?d.id:undefined,object:'chat.completion.chunk',choices:Array.isArray(d.choices)?d.choices.slice(0,16).map((c:any,index:number)=>({index,delta:{...(typeof c.delta?.content==='string'?{content:c.delta.content}:{}),...(c.delta?.role==='assistant'?{role:'assistant'}:{})},finish_reason:['stop','length','content_filter'].includes(c.finish_reason)?c.finish_reason:null})):[],
+        const safe={id:typeof d.id==='string'&&/^[-\w.:]{1,128}$/.test(d.id)?d.id:undefined,object:'chat.completion.chunk',choices:Array.isArray(d.choices)?d.choices.slice(0,16).map((c:any,index:number)=>({index,delta:{...(typeof c.delta?.content==='string'?{content:c.delta.content}:{}),...(c.delta?.role==='assistant'?{role:'assistant'}:{}),...(c.delta?.tool_calls!==undefined?{tool_calls:functionCalls(c.delta.tool_calls).map((call,index)=>({index,...call}))}:{})},finish_reason:['stop','length','content_filter','tool_calls'].includes(c.finish_reason)?c.finish_reason:null})):[],
           ...(publicUsage(d.usage)?{usage:publicUsage(d.usage)}:{})};
         const id=/^id: (\d{1,16})$/m.exec(frame)?.[1];if(!res.write(`${id?`id: ${id}\n`:''}data: ${JSON.stringify(safe)}\n\n`))await once(res,'drain',{signal:AbortSignal.any([closed.signal,AbortSignal.timeout(10000)])});
       }}res.end();

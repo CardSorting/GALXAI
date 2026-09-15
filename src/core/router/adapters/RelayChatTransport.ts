@@ -1,3 +1,4 @@
+import { functionCalls, type FunctionCall } from '../../../relay/function-tools';
 import { createHash } from 'node:crypto';
 const tenantHeader=(tenant?:string):Record<string,string>=>tenant?{'x-galx-tenant':createHash('sha256').update(tenant).digest('hex')}:{};
 export interface RelayFailureDetails {
@@ -197,10 +198,15 @@ export async function executeRelayChat(options: RelayChatOptions) {
       return { response: new Response(stream, { headers: responseHeaders }), headers: responseHeaders };
     }
     let text = '', reasoning = '', finishReason = 'stop', usage;
+    let toolCalls: FunctionCall[] = [];
     for await (const data of iterator) {
       if (data === '[DONE]') break;
       const event = JSON.parse(data);
       const choice = event.choices?.[0];
+      if (choice?.delta?.tool_calls !== undefined) {
+        if (toolCalls.length) throw new RelayDispatchError('duplicate_tool_response');
+        toolCalls = functionCalls(choice.delta.tool_calls);
+      }
       text += choice?.delta?.content || '';
       reasoning += choice?.delta?.reasoning_content || '';
       if (choice?.finish_reason) finishReason = choice.finish_reason;
@@ -209,7 +215,7 @@ export async function executeRelayChat(options: RelayChatOptions) {
     }
     await reader.cancel(); cleanup();
     const result = { id: job.id, object: 'chat.completion', created: Math.floor(Date.now() / 1000), model: options.payload.model,
-      choices: [{ index: 0, message: { role: 'assistant', content: text, ...(reasoning ? { reasoning_content: reasoning } : {}) }, finish_reason: finishReason }],
+      choices: [{ index: 0, message: { role: 'assistant', content: text, ...(toolCalls.length ? { tool_calls: toolCalls } : {}), ...(reasoning ? { reasoning_content: reasoning } : {}) }, finish_reason: finishReason }],
       ...(usage ? { usage } : {}) };
     return { response: Response.json(result), headers: { 'content-type': 'application/json' } };
   } catch (error) {

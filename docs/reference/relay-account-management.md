@@ -11,7 +11,7 @@ Private implementation reference for the installed Premium and Standard services
 | Premium | Paid, verified during manual review | Text, Sites, images | `mazhcjisettrzbqhorvp` | `prgjcyokylzcsqrjmkaa` |
 | Standard | Free, verified during manual review | Text only | `mazhcjisettrzbqhorvp` | `enbtzuxkguehtnrhuvlu` |
 
-Both pools have the same intended text catalog, subject to the account's verified access. GALX customer billing tiers do not select or classify provider accounts. Standard rejects Sites/images and generic tool/image aliases before provider calls. No peer discovery, account borrowing, shared sessions or cross-pool retry exists, including for text.
+Both pools have the same intended text catalog, subject to the account's verified access. GALX customer billing tiers do not select or classify provider accounts. Standard accepts client-owned function calling as text inference and rejects Sites/images and provider-hosted tool/image aliases before provider calls. No peer discovery, account borrowing, shared sessions or cross-pool retry exists, including for text.
 
 Pool and installation scope derive from the authenticated central principal. A request body, UI filter or database session variable cannot grant another destination. An account has one retained assignment and one owning desktop; moving it across pools is unsupported. Existing unassigned accounts remain separate and cannot be silently promoted.
 

@@ -4,7 +4,7 @@
 
 Private incident procedure. Start with [current state](../../post-mortem/CURRENT_STATE.md), [triage](../../post-mortem/runbooks/triage.md) and the actual owning deployment.
 
-Determine whether the failure concerns the product, central authority, own runtime, account credential, capability or provider. Generic 403/404, timeout and 5xx are not sufficient evidence of permanent account failure. Standard Sites/image/tool denial is intentional and occurs before provider I/O.
+Determine whether the failure concerns the product, central authority, own runtime, account credential, capability or provider. Generic 403/404, timeout and 5xx are not sufficient evidence of permanent account failure. Standard Sites/image/provider-hosted-tool denial is intentional and occurs before provider I/O.
 
 Open the fixed monitor and inspect health reason, expiry/cooldown, execution gate, saved/applied revision and epoch. Lost connection means unknown health. Central outage denies grants and renewal; cached projections cannot restore authorization. Preserve peer isolation and model intent. There is no cross-pool or legacy dispatch fallback.
 

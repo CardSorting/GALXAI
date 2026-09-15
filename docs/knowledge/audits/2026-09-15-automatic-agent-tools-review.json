@@ -1,0 +1,76 @@
+{
+  "reviewedAt": "2026-09-15T22:13:47.799734+00:00",
+  "reviewer": "Codex automatic agent tool implementation and semantic review",
+  "scope": "Delta review against retained relay strategy, account-management and scheduler evidence. Changed contracts and full affected guide bodies were inspected; broader review fingerprints are drift detection, not a fresh certification of unrelated modules.",
+  "baselineEvidence": [
+    "docs/knowledge/audits/2026-09-15-standard-relay-recovery-review.json",
+    "post-mortem/releases/2026-09-15-relay-account-management.json"
+  ],
+  "releaseEvidence": "post-mortem/releases/2026-09-15-automatic-agent-tools.json",
+  "releaseEvidenceSha256": "71678b600b3112d950cc65c72281199eb5d4891b6e47e91300561d1b851faabb",
+  "sourceSha256": {
+    "src/relay/function-tools.ts": "669a1aa8a4704b76ca4cca842b47a65b6287e4a5c670904bf10d98e3beb0dd9c",
+    "src/relay/request-policy.ts": "6545ce0ce2e8d3e81ef8f997cc4c06de08809e53e7dec4e9d42b02632ea2da1b",
+    "src/relay/pool-protocol.ts": "fca285868f1fcda7db2755bf4d261a1d148144b35538c12b40fb77501561f2d2",
+    "src/relay/relay-server.ts": "6cf0804329a354e64258f276e006fd9543cd1f9144b00ff7a03fbf67dde8c421",
+    "src/relay/completion-usage.ts": "b4b2b7c6715a3febd7a0d80ab67426aa20d8cba15c95d98b5204e5eae140925d",
+    "src/relay/pool-runtime.ts": "225df6070e893c89d6ab00f787f0294a08e4a68c122ce48411819502427fe561",
+    "src/core/router/adapters/RelayChatTransport.ts": "8f0927e8f0bb9a46e8d25146abbab47d8b487b29c158e00a53227bd49f3f6891",
+    "src/sdk/agent.ts": "3d7600e79dfa09b4b70966d4593eac82bc97dee7ef961378244395981e45ab5b",
+    "scripts/test-agent-automatic-tools.ts": "feecf58a523bdf08c7b91ba7277ec1bb49c80876d6130fc9c50c08a3f04246eb",
+    "scripts/test-agent-session-isolation.ts": "0b7ef148dade97dfa9d6afd95c197141fee3b56a70ee3fa23e9fd9dc0a3a7511",
+    "scripts/test-standard-pool.ts": "a07e36fbabf61bb68c8de7acfe1a409bf7d5c9c0b713a807645d3a556354cbfb",
+    "package.json": "870f23fa6d9f21ec64eeaff84382ccb8816595b56792999a43df3b97f7e0892f",
+    "docker/relay-pools/local/images.json": "279d6b81a45e8389b9de000fcada0f8df87c8713f2ea5bf2723542de1bc0c0d7"
+  },
+  "canonicalGuideSha256": {
+    "docs/reference/automatic-agent-tools.md": "4cf23995973409dd27792064a16f9687e1b9fe407013aedd883ade918f6c1969",
+    "docs/ARCHITECTURE.md": "12e289727bee402332512950b63181583ca0564d3f3936b75fe878b59bcf2124",
+    "docs/FEDERATION_STRATEGY.md": "59ec6f134d015c18083df39b7c9800eb7c9acffbb8ae90a0f6f2bcf7ab2c6343",
+    "docs/ROUTING_ALGORITHMS.md": "a8474863c4d0545ddb8de17516005e51b5c615645da71610c92365d3628d1e7c",
+    "docs/QUEUE_SPECIFICATION.md": "9367d554817961eca43e78d6c248e32260f8177617b0dc46af56309e5ab0b7a4",
+    "docs/RELAY_API_REFERENCE.md": "c9a5fe4f1fb4a985ca8ceed42b96ffdcbf0e658312ca4b5c0540c46f7466032b",
+    "docs/reference/relay-account-management.md": "a2f88b2f45a097adac5cc14d825a340bb645023f51b0d625152e92eb0f54a511",
+    "docs/reference/standard-relay-scheduling.md": "3a100c2ebf7ba9e8a5fb982323c09eea1bfe5fd79d6c445a87049efbdef90a47",
+    "docs/maintainers/RELAY_HARDENING.md": "0b07cc6c28a6eec473f4582c029c9132bb1dbafe16d3de15ee9d1c897316f9f6",
+    "docs/maintainers/UPSTREAM_PROVIDER_OUTAGE_AND_DEGRADATION.md": "1d36e2a194f9d62a4ec7b8cb4daf09cbd82f0d9c7df4ae648cebdbd7c95e5687",
+    "docs/adr/0153-central-account-authority-isolated-relays.md": "2d97f1888a65ca1e8af112872450f9f23e94a70d8b2ec320545557e536f3ad3e",
+    "docs/runbooks/relay-pool-services.md": "af5cf376a3d881b0fc9491061126b64af6e36bfa9148bed2d250a928cbe59a8a",
+    "docs/knowledge/registry.json": "a1eca48afb31935fe85b72ad4d1d5cc921d975d719e73c8fc4e2dca69da8c7ce",
+    "docs/DOCUMENTATION_POLICY.md": "ab2030f9d15010634b9a2d9cf2bc680fdf4ae961c2ee3f9f7ad567e99d49d40c",
+    "docs/how-to/change-with-documentation.md": "abcf6bfb2f0aadcf8cfc2fdae18ac8f3f84565f127c34f7453d50e7283006e40",
+    "docs/reference/knowledge-commands.md": "3ae9092ea941ebc459a2895b8c2eebb4c1c8d59659d718a2c353a1a6be6e8379",
+    "post-mortem/CURRENT_STATE.md": "e413db2745bbffb698c690e0a1d8ccc358f7ad232aa169ff4859c730dca14445"
+  },
+  "domainReview": {
+    "relay": "Traced SDK registry and run/stream loops, per-step identity, aborts, validation, duplicate prevention, both pool admission contracts, terminal-only output, nested DTO allowlists, transport aggregation and retained replay. Reconciled all changed owning guide bodies, examples, bounds, qualification, rollout and rollback. Reviewed synthetic full chains and actual local runtime pins/ownership/volume acceptance.",
+    "images": "Reviewed the complete shared queue guide and relevant engine/public-boundary changes. Only client-owned text functions were added; durable Sites tool requests and hosted outputs remain rejected. Image receipt ownership, artifact sanitation and uncertain replay retain their baseline. Shared engine/auth/public tests passed; no new image generation is claimed.",
+    "database": "The only affected database-domain guide is relay-account-management.md, reviewed in full. Its workload paragraph now distinguishes client-owned functions from provider-hosted tools. Canonical custody, immutable assignment, grants, registration/lifecycle and existing quota authority remain unchanged. No SQL, migration, database API implementation or role/RLS change occurred, so previous database evidence is retained rather than reported as rerun.",
+    "knowledge": "Reviewed documentation policy/change workflow and command reference, package script addition, new reference classification, source/guide mapping and test registration. New SDK and tests are mapped to relay; impact initially reported no unmapped files. Dated release/review records and current-state changes are operational evidence, not unowned runtime source."
+  },
+  "criticalReview": "Reviewed full QUEUE_SPECIFICATION.md and package.json changed contracts against their retained baseline, including dedicated tool/session test registration and compiled private-boundary result. Explicit critical attestation follows this retained semantic review.",
+  "unmappedReview": "After evidence/index generation, unmapped current-state, dated release/audit records and generated catalog/inventory/review metadata are expected private operational or generated paths. All new runtime and SDK test paths are explicitly mapped.",
+  "research": [
+    {
+      "url": "https://developers.openai.com/api/docs/guides/function-calling",
+      "use": "Application-owned function execution, matching call/output IDs, automatic continuation and explicit strict false for optional Chat-style parameters."
+    },
+    {
+      "url": "https://learn.chatgpt.com/docs/app-server",
+      "use": "Distinguish Codex thread/turn approvals from the active Responses relay; no app-server approval responder or application permission modification was added."
+    }
+  ],
+  "documentationGuardTests": 38,
+  "limitations": [
+    "No real provider sign-in, quota spend or function/image/Sites generation was performed. Synthetic provider acceptance and empty-pool local checks do not establish real account capability.",
+    "Callbacks execute in the application consuming the SDK, never on the relay host. Registration authorizes only those callbacks; owner checks and any external application approval requirements remain the caller responsibility.",
+    "Only GALX automatic function execution and model continuation were changed. The active Responses transport does not use Codex app-server approval requests; Codex application, managed sandbox and global approval settings were not changed.",
+    "The default remains ten model steps, including final synthesis. Positive maxSteps and AbortSignal control duration; no unlimited loop or automatic retry of uncertain work is provided.",
+    "Duplicate call IDs are blocked within a run and supplied history. New IDs are new actions; callback side effects need domain idempotency. Restarting an SDK process has no durable exactly-once callback guarantee.",
+    "Executable safeParse schemas validate locally when supplied. Plain JSON schemas constrain the provider request but do not themselves implement local callback validation.",
+    "Both relays accept client-owned functions as text inference. Standard still rejects Sites, images and provider-hosted tools; cross-pool discovery, fallback and credentials remain prohibited.",
+    "Both runtime images were replaced locally with execution closed, preserving named state volumes and central ownership waits. Central and monitor images, database schema, assignments, quotas and activation flags were unchanged.",
+    "The workspace SDK source is updated; no external SDK package was published and no public application or cloud runtime was deployed.",
+    "The compiled scan covered 669 browser/rendered assets and named private markers. It is not live authenticated UI acceptance or a claim that every public configuration identifier is absent."
+  ]
+}

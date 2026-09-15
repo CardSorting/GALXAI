@@ -32,7 +32,7 @@ Healthy candidates remain available while the recovery interval is closed. When 
 
 ## Identity and operator workflow
 
-Original-key lookup precedes selection. Replaying an accepted text request uses its original job/account/epoch; changed payloads conflict. A duplicate in progress cannot remove the first request's lock. Engine failure, lost acknowledgements, missing engines and old epochs never cause redispatch. Images, Sites and generic tools remain forbidden before Standard selection.
+Original-key lookup precedes selection. Replaying an accepted text request uses its original job/account/epoch; changed payloads conflict. A duplicate in progress cannot remove the first request's lock. Engine failure, lost acknowledgements, missing engines and old epochs never cause redispatch. Images, Sites and provider-hosted tools remain forbidden before Standard selection. Client-owned function calling is text inference; each model continuation receives normal scheduling and central authorization.
 
 After a delayed lookup, the runtime rechecks that its central projection is non-future and younger than 20 seconds before dispatching new work. If the caller disconnected during lookup, it releases request bookkeeping without selecting an account, taking a recovery turn or reserving execution. A disconnect after forwarding remains uncertain accepted work and follows the original identity/settlement contract; it is not permission to cancel and redispatch.
 

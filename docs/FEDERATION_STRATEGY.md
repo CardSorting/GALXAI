@@ -41,7 +41,7 @@ Runtime grants last 30 seconds and renew every eight seconds with independent ex
 
 ## Explicit Codex image-tool compatibility
 
-The public capability alias does not promise an unverified underlying model. The assigned Premium engine uses the standalone image contract implemented in the shared engine with its own central image grant. No startup or periodic paid image probe runs in isolated execution. Standard cannot issue image or Sites calls, including through aliases or generic tools. A Premium label and chat inventory do not verify image support; the first real image trial remains explicit.
+The public capability alias does not promise an unverified underlying model. The assigned Premium engine uses the standalone image contract implemented in the shared engine with its own central image grant. No startup or periodic paid image probe runs in isolated execution. Standard cannot issue image or Sites calls, including through aliases or provider-hosted tools. Client-owned function calls return arguments to the caller and do not execute on the provider or relay host. A Premium label and chat inventory do not verify image support; the first real image trial remains explicit.
 
 Availability reads are advisory and do not generate or reserve capacity. Successful artifacts are decoded/re-encoded; upstream URLs, identifiers, arbitrary errors and metadata stay out of public output. The legacy standalone-image candidate has its own older probe configuration and unresolved acceptance in current state; do not transfer that cadence or historical success to the pool contract.
 

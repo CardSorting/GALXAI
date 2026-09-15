@@ -7,15 +7,15 @@
       "component": "central"
     },
     {
-      "tag": "galxai-relay-premium:candidate-20260915",
-      "id": "sha256:22ef2426f2509fee7fc33d77d49abb8f02ed981b66b8766a3deed7892d3f6e68",
+      "tag": "galxai-relay-premium:tools-20260915",
+      "id": "sha256:f760c58f0107c527eca262786d6aaa56c2986dc195e3365fb2f63142e0c5fe71",
       "architecture": "arm64",
       "component": "runtime",
       "pool": "premium"
     },
     {
-      "tag": "galxai-relay-standard:recovery-20260915",
-      "id": "sha256:0f15cf6d50c5bef901f1a5f934d1249f1e333d760353570ae50516782e2e8dd1",
+      "tag": "galxai-relay-standard:tools-20260915",
+      "id": "sha256:2da12e33665691a1e2d857c79d5f3eb6463eb955da7ad47141c792f97b2354cc",
       "architecture": "arm64",
       "component": "runtime",
       "pool": "standard"

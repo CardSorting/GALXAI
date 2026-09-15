@@ -43,6 +43,7 @@ import { monitorEventLoopDelay } from 'node:perf_hooks';
 import { readJsonBody, validateModelRequest, RequestError, RetryBudget } from './request-policy.js';
 import { AdmissionReceipts } from './admission-receipts.js';
 import { completionUsage, completionFrame, type CompletionUsage } from './completion-usage.js';
+import { functionInput, functionToolContract, completedFunctionCalls, type FunctionCall } from './function-tools.js';
 import { DurableReceipts } from './durable-receipts.js';
 import { upstreamDiagnostic, type UpstreamDiagnostic } from './upstream-diagnostic.js';
 import { RelayTelemetry } from './telemetry.js';
@@ -218,6 +219,8 @@ export interface JobRecord extends Record<string, unknown> {
   usage?: CompletionUsage;
   durableReceipt?: boolean;
   messagesJson: string;
+  functionContract?: ReturnType<typeof functionToolContract>;
+  outputToolCalls?: FunctionCall[];
   reasoningEffort?: string;
   retryCount?: number;
   failoverCount?: number;
@@ -1814,7 +1817,9 @@ export class GalxaiRelayServer extends EventEmitter {
         // Atomic Idempotent Stream Attachment via BroccoliDB
         const operationKey = req.headers['idempotency-key'];
         if (operationKey !== undefined && (typeof operationKey !== 'string' || !/^[\x21-\x7e]{1,128}$/.test(operationKey))) throw new RequestError(400, 'invalid_request', 'Invalid request key.');
-        const identity = [tenantId, model, reasoningEffort, body.max_tokens ?? 3500, messages];
+        const functionContract = functionToolContract(body);
+        const identity: unknown[] = [tenantId, model, reasoningEffort, body.max_tokens ?? 3500, messages];
+        if (functionContract.tools.length) identity.push(functionContract);
         if (operationKey !== undefined || body.durable_receipt === true) identity.push(operationKey ?? null, body.durable_receipt === true);
         if (body.require_output_limit === true) identity.push('bounded-output-v1');
         if (body.sites_profile === 'local-v1') identity.push('sites-local-v1');
@@ -1874,6 +1879,7 @@ export class GalxaiRelayServer extends EventEmitter {
           promptHash,
           tenantId,
           messagesJson: JSON.stringify(messages),
+          ...(functionContract.tools.length ? { functionContract } : {}),
           reasoningEffort,
           status: 'queued',
           createdAtMs: Date.now(),
@@ -2543,26 +2549,7 @@ export class GalxaiRelayServer extends EventEmitter {
       return;
     }
 
-    const messages: Array<{ role: string; content: any }> = JSON.parse(job.messagesJson || '[]');
-    const inputList: Array<{ type: string; role: string; content: Array<{ type: string; text: string }> }> = [];
-    let instructions = '';
-    for (const msg of messages) {
-      const textContent = typeof msg.content === 'string'
-        ? msg.content
-        : Array.isArray(msg.content)
-        ? msg.content.map((c: any) => (typeof c === 'string' ? c : c?.text || JSON.stringify(c))).join('\n')
-        : (msg.content ? JSON.stringify(msg.content) : '');
-
-      if (msg.role === 'system' || msg.role === 'developer') {
-        instructions = instructions ? `${instructions}\n\n${textContent}` : textContent;
-      } else {
-        inputList.push({
-          type: 'message',
-          role: msg.role === 'assistant' ? 'assistant' : 'user',
-          content: [{ type: 'input_text', text: textContent }],
-        });
-      }
-    }
+    const { input: inputList, instructions } = functionInput(JSON.parse(job.messagesJson || '[]'));
 
     const wsHeaders: Record<string, string> = {
       Authorization: `Bearer ${shard.accessToken}`,
@@ -2737,6 +2724,11 @@ export class GalxaiRelayServer extends EventEmitter {
         stream: true,
       };
       if (instructions) createPayload.instructions = instructions;
+      if (job.functionContract?.tools.length) {
+        createPayload.tools = job.functionContract.tools;
+        createPayload.tool_choice = job.functionContract.toolChoice;
+        if (job.functionContract.parallelToolCalls !== undefined) createPayload.parallel_tool_calls = job.functionContract.parallelToolCalls;
+      }
       // Supplier compatibility is qualified separately for durable Site jobs.
       // Opting that path in must not change ordinary chat payloads during rollout.
       if (this.config.forwardOutputTokenLimit && job.durableReceipt && job.maxOutputTokens !== undefined) createPayload.max_output_tokens = job.maxOutputTokens;
@@ -2821,10 +2813,14 @@ export class GalxaiRelayServer extends EventEmitter {
           return;
         }
 
-        // Output Token Chunk Arrival (Text, Audio, Tool Arguments)
-        const isOutputDelta = data.type === 'response.output_text.delta' ||
-          data.type === 'response.audio.delta' ||
-          data.type === 'response.function_call_arguments.delta';
+        // Tool arguments are executable data. Publish complete validated calls only
+        // after terminal success, never partial argument text or approval frames.
+        if (data.type === 'response.function_call_arguments.delta' || data.type === 'response.function_call_arguments.done') {
+          if (!attempt.hasReceivedFirstToken) resetTtftTimer(this.config.reasoningActivityExtensionMs);
+          refreshChunkTimer();
+          return;
+        }
+        const isOutputDelta = data.type === 'response.output_text.delta' || data.type === 'response.audio.delta';
 
         if (isOutputDelta && data.delta) {
           let chunkText = typeof data.delta === 'string' ? data.delta : (data.delta.text || '');
@@ -2985,6 +2981,15 @@ export class GalxaiRelayServer extends EventEmitter {
     if (!session || session.activeAttemptId !== event.attemptId) return;
     const job = this.jobsTable.get(event.jobId);
     if (!job || ['failed', 'cancelled', 'completed'].includes(job.status)) return;
+    try {
+      const outputToolCalls = completedFunctionCalls(event.response, job.functionContract);
+      if (outputToolCalls.length) this.jobsTable.put(job.id, { ...job, outputToolCalls });
+    } catch {
+      this.jobQueue.markFailed(job.id, 'invalid_tool_response');
+      this.releaseShard(event.shardId); session.currentShardId = undefined;
+      this.safeCloseSocket(session.upstreamWs); session.upstreamWs = undefined;
+      return;
+    }
     if (job?.durableReceipt) {
       try {
         // Commit evidence before announcing completion to any subscriber.
@@ -3045,7 +3050,7 @@ export class GalxaiRelayServer extends EventEmitter {
       return;
     }
 
-    if (session.retryCount >= this.config.maxUpstreamRetries) {
+    if (job.functionContract?.tools.length || session.retryCount >= this.config.maxUpstreamRetries) {
       if (this.jobQueue.markFailed(event.jobId, `retries_exhausted_${event.reason}`)) {
         this.metrics.totalJobsFailed++;
       }

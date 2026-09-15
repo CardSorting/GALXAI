@@ -15,10 +15,14 @@ export function completionUsage(response: unknown, retries = 0, failovers = 0): 
   return { prompt_tokens: input, completion_tokens: output, total_tokens: total };
 }
 
-export function completionFrame(job: { id: string; usage?: CompletionUsage }): string {
+import { functionCalls, type FunctionCall } from './function-tools.js';
+
+export function completionFrame(job: { id: string; usage?: CompletionUsage; outputToolCalls?: FunctionCall[] }): string {
   // Explicit allowlist also protects snapshot replay from extra stored fields.
-  if (!job.usage) return '';
+  const calls = job.outputToolCalls?.length ? functionCalls(job.outputToolCalls) : [];
+  const toolFrame = calls.length ? `data: ${JSON.stringify({ id: job.id, object: 'chat.completion.chunk', choices: [{ index: 0, delta: { tool_calls: calls.map((c, index) => ({ index, ...c })) }, finish_reason: 'tool_calls' }] })}\n\n` : '';
+  if (!job.usage) return toolFrame;
   const { prompt_tokens, completion_tokens, total_tokens } = job.usage;
   const usage = completionUsage({ status: 'completed', usage: { input_tokens: prompt_tokens, output_tokens: completion_tokens, total_tokens } });
-  return usage ? `data: ${JSON.stringify({ id: job.id, object: 'chat.completion.chunk', choices: [], usage })}\n\n` : '';
+  return toolFrame + (usage ? `data: ${JSON.stringify({ id: job.id, object: 'chat.completion.chunk', choices: [], usage })}\n\n` : '');
 }

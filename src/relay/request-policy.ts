@@ -1,5 +1,6 @@
 import type { IncomingMessage } from 'node:http';
 import { performance } from 'node:perf_hooks';
+import { functionInput, functionToolContract } from './function-tools.js';
 
 export class RequestError extends Error {
   constructor(public status: number, public code: string, message: string) { super(message); }
@@ -38,9 +39,12 @@ export function validateModelRequest(body: Record<string, any>, image = false) {
   }
   if (!Array.isArray(body.messages) || !body.messages.length || body.messages.length > 1000) invalid('messages must contain between 1 and 1000 messages.');
   for (const message of body.messages) {
-    if (!message || !['system','developer','user','assistant'].includes(message.role)) invalid('Each message must have a supported role.');
-    if (typeof message.content !== 'string' && !Array.isArray(message.content)) invalid('Each message must contain text or an array of content parts.');
+    if (!message || !['system','developer','user','assistant','tool'].includes(message.role)) invalid('Each message must have a supported role.');
+    if (typeof message.content !== 'string' && !Array.isArray(message.content) && !(message.role === 'assistant' && message.content === null && message.tool_calls?.length)) invalid('Each message must contain text or an array of content parts.');
   }
+  try { functionToolContract(body); functionInput(body.messages); }
+  catch { invalid('Provide valid function definitions and matching tool call results.'); }
+  if (body.durable_receipt === true && (body.tools?.length || body.messages.some((m: any) => m.role === 'tool' || m.tool_calls !== undefined))) invalid('Function calls require the chat completion contract.');
   const effort = body.reasoning_effort ?? body.reasoningEffort;
   if (effort !== undefined && !['none','minimal','low','medium','high','xhigh','max'].includes(effort)) invalid('reasoning_effort is not supported.');
   if (body.max_tokens !== undefined && (!Number.isSafeInteger(body.max_tokens) || body.max_tokens < 1)) invalid('max_tokens must be a positive integer.');

@@ -64,6 +64,10 @@ An existing matching text operation may return its original job in the current e
 
 The old controller's `X-Galx-Idempotency-Scope`, signed URLs and ten-minute process-local response cache belong to [legacy request identity](reference/legacy-federation-api.md#request-identity-and-bounds). They are not an additional promise made by the new runtime.
 
+## Function calling
+
+Both relays accept client-owned OpenAI-style function definitions and `tool_choice` (`auto`, `none`, `required`, or a declared function). Assistant `tool_calls` and `role: tool` results retain their original call IDs. Orphan, repeated or incomplete input pairs fail before engine admission. Completed responses carry bounded, nested-allowlisted `tool_calls` and `finish_reason: tool_calls`, preserved through JSON aggregation and SSE replay. Arguments are delivered only after terminal model success; partial argument frames are never text output. The relay does not execute callbacks or run an approval UI. Use the SDK agent loop for automatic execution and continuation. See [automatic agent tools](reference/automatic-agent-tools.md) for bounds, cancellation, errors and qualification. Durable Sites receipts remain text-output-only; use the chat contract for functions.
+
 ## Request recovery
 
 | Response/state | Interpretation | Action |

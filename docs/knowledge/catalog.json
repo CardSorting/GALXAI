@@ -3748,6 +3748,26 @@
       "decision": null
     },
     {
+      "path": "docs/reference/automatic-agent-tools.md",
+      "title": "Automatic agent tools and turns",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [
+        "relay"
+      ],
+      "curation": "assigned",
+      "keywords": [
+        "agent",
+        "function",
+        "tools",
+        "automatic",
+        "turns",
+        "approval",
+        "SDK"
+      ],
+      "decision": null
+    },
+    {
       "path": "docs/reference/knowledge-commands.md",
       "title": "Knowledge commands and metadata",
       "scope": "current-guide",
