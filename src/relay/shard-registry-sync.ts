@@ -17,7 +17,7 @@ export const REGISTRY_DELTA_SQL = `
   WITH registry AS MATERIALIZED (
     SELECT ${REGISTRY_COLUMNS.map(column => `s.${column}`).join(', ')},
       encode(sha256(convert_to(ROW(${REGISTRY_COLUMNS.map(column => `s.${column}`).join(', ')})::text, 'UTF8')), 'hex') AS fingerprint
-    FROM public.galx_shard_accounts AS s ORDER BY s.id LIMIT ${MAX_REGISTRY_ROWS + 1}
+    FROM public.galx_shard_accounts AS s WHERE s.relay_pool_id IS NULL ORDER BY s.id LIMIT ${MAX_REGISTRY_ROWS + 1}
   ), delta AS MATERIALIZED (
   SELECT COALESCE((
     SELECT jsonb_agg(jsonb_build_object('fingerprint', r.fingerprint, 'row', to_jsonb(r) - 'fingerprint') ORDER BY r.id)

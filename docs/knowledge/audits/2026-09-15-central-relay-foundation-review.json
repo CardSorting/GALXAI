@@ -1,0 +1,92 @@
+{
+  "date": "2026-09-15",
+  "scope": "Bounded semantic review of central relay foundation implementation, database/relay guide changes, knowledge command/mapping deltas and critical source-review delta.",
+  "authority": "Owner requested another implementation/audit pass after central-account-only requirement and prior migration authorization.",
+  "source_contracts_reviewed": [
+    "supabase/migrations/20260915073601_central_relay_account_foundation.sql",
+    "supabase/rollbacks/20260915073601_central_relay_account_foundation.down.sql",
+    "src/lib/supabase/types.ts",
+    "src/lib/supabase/repositories/RelayAccountInventoryRepository.ts",
+    "scripts/check-relay-account-foundation.ts",
+    "scripts/test-relay-account-foundation-db.ts",
+    "scripts/test-relay-account-inventory.ts",
+    "scripts/lib/sql-migration-safety.ts",
+    "scripts/test-sql-migration-safety.ts",
+    "scripts/verify-supabase-integrity.ts",
+    "scripts/run-supabase-integration.ts",
+    "package.json",
+    "docs/knowledge/registry.json"
+  ],
+  "complete_relevant_guides_reviewed": [
+    "docs/SUPABASE_PARANOID_ARCHITECTURE_SPEC.md",
+    "docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md",
+    "docs/maintainers/MULTI_TENANT_SHARD_AND_KEY_ROTATION.md",
+    "docs/MIGRATION_GUIDE.md",
+    "docs/adr/0153-central-account-authority-isolated-relays.md",
+    "docs/AGENTS.md",
+    "docs/DOCUMENTATION_POLICY.md",
+    "docs/how-to/change-with-documentation.md",
+    "docs/knowledge/README.md",
+    "docs/reference/knowledge-commands.md",
+    "docs/maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md"
+  ],
+  "additional_evidence_reviewed": [
+    "post-mortem/CURRENT_STATE.md component delta and retained deployment authority",
+    "post-mortem/releases/2026-09-15-central-relay-foundation.json",
+    "internal/dual-relay-design-2026-09-15/central-account-control.md",
+    "internal/dual-relay-design-2026-09-15/delivery-plan.md",
+    "internal/dual-relay-design-2026-09-15/production-audit-2026-09-15.md"
+  ],
+  "baseline": "Existing unrelated source/guide fingerprints and retained prior evidence are reused for change detection, not re-certified as a fresh exhaustive review.",
+  "domains": {
+    "database": "New private tables, fixed capabilities, closed gate, immutable history, circular deferred exact-receipt relationship, explicit privileges, no registration API/lease or credential changes; inventory binds a dedicated validated main-project connection; linter correction narrowly exempts trigger event syntax. Four affected canonical guide bodies reconciled.",
+    "relay": "Runtime source unchanged in this pass. Two shared canonical guides now distinguish existing single-controller credential configuration from future restricted services and dormant central schema. No scoped runtime or monitor delivery claimed.",
+    "knowledge": "Package adds only read-only inventory and isolated foundation-test commands. Registry maps all new source/tests to database, adds its test command and records ADR0153 partial local implementation with retained foundation evidence; proposed decision status retained.",
+    "critical": "Reviewed changed package commands, isolated runner dispatch, current-state component row and complete affected database specification/runbook; no unrelated incident action or runtime acceptance changed."
+  },
+  "checks": {
+    "database_foundation": 58,
+    "database_regression": 94,
+    "manual_desktop": 28,
+    "node_tests": 14,
+    "documentation_tests": 38,
+    "db_verify": "109 paired files, zero fatal/warning",
+    "production_build": "passed, Next15.5.25, 285 pages; lint skip unchanged",
+    "asset_scan": "1331 generated HTML/JS files, seven private markers, zero matches",
+    "live_verification": "109 applied; 56 accounts retained; zero assigned/enabled/installations/results; four forced-RLS tables; zero exposed table-role pairs",
+    "docs_check_before_attestation": "Scopes, coverage, links and ADR validation passed; explicit source/guide fingerprint updates are required for reviewed changes."
+  },
+  "remaining": [
+    "Complete runtime split and production pool enrollment are not delivered.",
+    "Separate host targets remain requested and unresolved.",
+    "Central scoped registrar/projection/lease protocols, execution-only schemas, authorization and real peer/expiry/probe checks remain pending.",
+    "Unrelated Auth leaked-password warning and overdue ACT-001/015/016 remain unchanged.",
+    "Existing evidence files were not overwritten; no review deadline extended."
+  ],
+  "sha256": {
+    "supabase/migrations/20260915073601_central_relay_account_foundation.sql": "d0da924aac9407419b284613431ab118c489bd502589177155f7b904e19fe595",
+    "supabase/rollbacks/20260915073601_central_relay_account_foundation.down.sql": "c5fe20cbc1eee8d52d5a162d2e1eb298323cb31d71ef77b1e646dccadfe62336",
+    "src/lib/supabase/types.ts": "278d393be03a02d5a70a20d0b515b43d270e89f3c1f48797d0eca4506c397a13",
+    "src/lib/supabase/repositories/RelayAccountInventoryRepository.ts": "a04443d4944464a2e4080abfca8e888a66698ed2a1fffccaa025e147d58d761f",
+    "scripts/check-relay-account-foundation.ts": "fe3666b9b4a2c7c3b9fd9ecd24123e2d7323d1ad97ba1a6786fe3d8ddceaf2c8",
+    "scripts/test-relay-account-foundation-db.ts": "c2d569655707055b780dd12c691d9c46928acb08b839d59d8fe742773cda9caa",
+    "scripts/test-relay-account-inventory.ts": "3b7e22dc3cbb24b0424a7d7f695ae601c8c5a45cbcd254a0db13defe7429710c",
+    "scripts/lib/sql-migration-safety.ts": "574c3984ffced9b8cc614fd99f387afb2d8a95de3eab82573f33f21b052ed520",
+    "scripts/test-sql-migration-safety.ts": "8a671b7a5083e774e6ea4efdcb4203a4c476dafa6174273a606badb6f4292a51",
+    "scripts/verify-supabase-integrity.ts": "31bb1c7fc64ea74fc7621cee17edeffa7528550ce381b5a7db8d2b6d2998d786",
+    "scripts/run-supabase-integration.ts": "bd0c2d2ced7ec5e9dbfbc277b336331c5ecbfa5a6d2bb9aaf1ef7699280d6abc",
+    "package.json": "7b80f0a2ee26e30a68143c405ede607549f3d6e962445a6917fdefef91cb57c8",
+    "docs/knowledge/registry.json": "187d71cacd337244b87398eee409f231a6714a7a1ae2f561978abee6e7ceb960",
+    "docs/SUPABASE_PARANOID_ARCHITECTURE_SPEC.md": "a06056d814b99f340aa623440fe2c91034bd720bd46bc42d545507ed748bfa53",
+    "docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md": "55afac5c2ae65454ee3f93624feb0be3cc0aea3aa1e504ead7a1f875234d69fd",
+    "docs/maintainers/MULTI_TENANT_SHARD_AND_KEY_ROTATION.md": "de1869cd5f088c11fc77c442fc9d79e631075490807f9387dbe606eb967d2074",
+    "docs/MIGRATION_GUIDE.md": "b657252c26b47d0a9bbabc60de5706ef1eeb226d78592ad6aa9256831be7503c",
+    "docs/adr/0153-central-account-authority-isolated-relays.md": "4b02f59d8b996e21c43608bee4f9133f1197eae8537e5f079fad4ec4710617ef",
+    "docs/AGENTS.md": "0a1e687ab43a1e6c2266720e175de60cd6f10958cdf3456690c1f743c4784044",
+    "docs/DOCUMENTATION_POLICY.md": "ab2030f9d15010634b9a2d9cf2bc680fdf4ae961c2ee3f9f7ad567e99d49d40c",
+    "docs/how-to/change-with-documentation.md": "abcf6bfb2f0aadcf8cfc2fdae18ac8f3f84565f127c34f7453d50e7283006e40",
+    "docs/knowledge/README.md": "5ad219aeee44a9c065db2ca69e5a6498966fed42e2d8c74773dbc055d0220931",
+    "docs/reference/knowledge-commands.md": "3ae9092ea941ebc459a2895b8c2eebb4c1c8d59659d718a2c353a1a6be6e8379",
+    "docs/maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md": "b7df75535611c14aabe599764a6f6c2a4f0f1461d068929602c68e39d8ce850d"
+  }
+}

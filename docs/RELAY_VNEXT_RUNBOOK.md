@@ -1,148 +1,87 @@
-# Capability-aware relay vNext
+# Relay operations and implementation entry point
 
 <!-- docs-scope: current-guide -->
-> Private operating guide. Follow the [federation contract](FEDERATION_STRATEGY.md), [desktop guide](maintainers/RELAY_DESKTOPS.md) and [enrollment guide](maintainers/RELAY_CREDENTIAL_ENROLLMENT.md). Dated results belong in the [verification record](maintainers/RELAY_SESSION_VERIFICATION_20260909.md).
+
+Private operator navigation for the implemented central authority and isolated Premium/Standard relays. Use [current state](../post-mortem/CURRENT_STATE.md) before intervention. The complete installation, gates and rollback procedure is [relay pool services](runbooks/relay-pool-services.md); the full account/health protocol is [central management](reference/relay-account-management.md).
 
 ## Validate the implementation
 
-Run the [hardening checks](maintainers/RELAY_HARDENING.md) appropriate to the change. Synthetic tests do not authenticate a real account, certify production capacity or authorize paid probes.
-
-The broad `npm run db:test` suite creates its own disposable Docker database and rejects production connection overrides before repository initialization. See [test isolation](maintainers/RELAY_CREDENTIAL_ENROLLMENT.md#isolated-integration-tests).
+Run `test:relay:services`, `test:relay:authorization-db`, `node --test scripts/test-relay-monitor-model.mjs` and the synthetic monitor browser verifier for affected source changes. Database changes also require `db:verify` and `db:test` in disposable fixtures. `npm run relay:local -- verify` checks installed image pins, own-pool authorization, TLS and peer denial. It performs no provider generation. Keep build, installation and actual acceptance separate.
 
 ## Start the host controller
 
-Provision the encrypted registry, vault keys and separate inference/admin keys privately. Create each desktop manually, complete provider sign-in and choose Enroll shard. Apply the manual-enrollment migration before the compatible controller/application. Legacy records stay retained but cannot serve until confirmed. CLI/API ingestion and independent provider-session renewal are disabled.
+The new installation uses `npm run relay:local -- up`, not `relay:federation`. Central/TLS runs on Docker Desktop; each pool has its own Colima VM, runtime and monitor. Open **GALX Monitors**, **GALX Premium** or **GALX Standard**, or use `npm run relay:local -- open premium` / `open standard`.
 
-```sh
-npm run relay:federation
-```
+Native openers start only the requested pool and shared central dependency, verify saved identities/isolation/images and issue a scoped one-use ticket. A stopped runtime waits for the central ownership handoff interval before claiming a new epoch. Never delete identities or disable the fence to accelerate startup.
 
-The launcher defaults to namespace `vnext-canary`, loopback port 3301 and image `galxai-relay:vnext`. These defaults do not isolate registry credentials: never start a second controller against credentials already owned by production. Use synthetic fixtures for a disposable canary.
-
-The controller persists its signing secret, kernel-held ownership guard, compatibility marker, rejection revisions, maintenance holds, desktop journal, Docker mutation journal, admission receipt journal and egress state beneath `.relay/federation-<namespace>/`. Preserve this private directory across restarts. The launcher delegates one authority to [the local guardian](../scripts/relay-controller-supervisor.py), which uses an OS-managed `flock`, inherits the guard into the controller and Docker subprocesses, and lets launchd perform the only controller restart. A crash is recovered after the old process group is proven gone; a paused, ambiguous or legacy owner fails closed with a bounded private alert. Use [guarded lock recovery](../post-mortem/runbooks/controller-lock.md) for a one-time old-marker migration. Never delete `controller.guard`, force-unlock, or run the old and new launchers together.
-
-Use `npm run relay:open` and `npm run relay:desktops` on the host. The launcher delegates an authorized session; do not enter the admin key into a browser. `/health` is liveness only. `/health/ready`, `/api/capabilities` and controller `/api/telemetry` require admin authorization.
+The retained single-controller service still uses its existing guardian and launchd boundary. Its complete procedure is [legacy federation operations](maintainers/legacy-federation-operations.md#start-the-host-controller). Never start it against assigned pool accounts or point it at the new service images.
 
 ## Configuration and bounds
 
-| Setting/bound | Default or behavior |
+| Component | Current configuration authority |
 | --- | --- |
-| `RELAY_FEDERATION_NAMESPACE` | `vnext-canary`; production uses an explicit namespace |
-| `RELAY_FEDERATION_PORT` | 3301, loopback |
-| `RELAY_FEDERATION_IMAGE` | `galxai-relay:vnext` |
-| `RELAY_DESKTOP_IMAGE` | `galxai-relay-desktop:v1` |
-| `RELAY_CODEX_IMAGE_TOOL_ALIAS` | Enabled only by explicit `true` |
-| Capability refresh / TTL | 60 seconds with 80–100% jitter / 120 seconds |
-| Cold-start inventory deadline | 10 seconds, before Docker allocation |
-| Worker shard concurrency | 4 by default |
-| Request body / image frame | 2 MiB / 32 MiB |
-| Reconciliation starts and retirements | Bounded to three concurrent operations |
-| Federation worker restart authority | Controller only; Docker workers use `--restart no`, five attempts per ten minutes, then an operator alert |
-| Guardian ownership wait / heartbeat / startup-reconcile progress | 5 seconds / 15 seconds / 300 seconds by default; set explicit environment budgets for a deployment with slower measured startup |
-| Guardian shutdown / termination verification | 180 seconds graceful shutdown / 5 seconds after escalation before `termination_unproven` retains the guard |
+| Local image set | [Reviewed manifest](../docker/relay-pools/local/images.json), verified by exact image ID |
+| Central | Its own private main-project/vault config and local HTTPS proxy |
+| Premium runtime/monitor | Only Premium execution/principal/desktop config in its VM |
+| Standard runtime/monitor | Only Standard execution/principal/desktop config in its VM |
+| Application integration | Server-only isolated mode, distinct Premium/Standard origins/keys, configured text pool |
 
-Host environment settings are not all automatically propagated into workers. Inspect [driver configuration](../src/relay/docker-shard-driver.ts) and effective capability snapshots before tuning. An image build or config edit does not update a running container.
-
-Empty capability state retains a worker for recovery. A rejected credential revision suppresses repeated cold starts. Transient failures back off. A maintenance hold blocks new work and replacement starts while retaining an existing worker; authority removal, revocation, expiry or rotation can still retire it.
+The account contract records ownership/grant/health timing. Runtime engines execute in-process inside a fixed pool container; per-account Docker workers and `RELAY_FEDERATION_*` settings belong to the [legacy configuration](maintainers/legacy-federation-operations.md#configuration-and-bounds). Historical `staged-20260915` images are permanently closed; the service baseline and later management images have separately reviewed pins.
 
 ## Image verification
 
-Authenticated inference callers can read `/v1/images/availability?model=...` for a boolean advisory capability result. The read does not probe or reserve capacity and exposes no inventory or diagnostics. Deploy this additive controller endpoint before the compatible application; older controllers yield unknown availability in the app.
-
-The September 14 standalone transport correction is local until separate deployment and generation evidence is recorded. The current connection returned HTTP 403 from that endpoint; the runtime feature flag and successful chat inventory do not prove permission. An empty invalid image request also returned the same Forbidden category. Do not reinterpret generic HTTP 403 as a proven account-plan restriction, widen permissions, import ambient host credentials or replay earlier receipts. Identify an approved connection through explicit enrollment and qualify it before worker rollout.
-
-Inventory does not prove tool support. Internal image-operation keys use `image:<model>`; callers send the model ID without that prefix. Chat and image eligibility are independent.
-
-An administrator can intentionally POST `/api/capabilities/probe-image` on the assigned worker with an exact model and small prompt. This performs real upstream generation and can incur usage. Publication requires valid image output and current observation fences. Enabled compatibility workers also have the bounded paid cadence below.
-
-For actual-client verification, configure the intended DreamBees checkout and its server environment:
-
-```sh
-DREAMBEES_ROOT=/path/to/DreamBees-Rooms \
-DREAMBEES_IMAGE_OUTPUT=/tmp/dreambees-verified.png \
-node --env-file=/path/to/DreamBees-Rooms/.env.local --import tsx scripts/verify-dreambees-image.ts
-```
-
-This invokes the real client. Validate bytes, decode and visually inspect the artifact; test public metadata removal and response allowlists separately. Keep output and operational evidence private. Successful delivery does not verify application asset persistence or a paid-entry transaction.
+Only Premium can handle image requests. Registration verifies account class and inventory; neither guarantees an image result. Availability checks are non-consuming. Perform a separately authorized, small real image request after manual registration, activation and account enablement, then decode/inspect the sanitized artifact and verify its owned product persistence. No automatic paid probe runs in isolated execution. Standard must make zero provider calls for images/Sites. Keep the existing HTTP 403 incident separate from a claim that all paid accounts are qualified.
 
 ## Production cutover checklist
 
-The shared-to-federation cutover was performed on September 7; it is not a pending setup step. For an existing federation deployment:
+1. Inspect the exact central migration history, component image pins, installation identities and original-operation state.
+2. Install only reviewed, destination-specific configurations and images; preserve TLS trust, homes, keys and state.
+3. Verify both local VM boundaries and monitors. Local hosting is already implemented; do not fabricate SSH evidence.
+4. Manually register a paid Premium account and free Standard account. Both save paused.
+5. Use the explicit `relay:services:gates -- serve-local` procedure, which reruns local acceptance and requires registrations. Enable intended accounts separately and wait for matching confirmation.
+6. Qualify Standard text and Premium text/Sites/images through their own endpoints. Preserve unknown outcomes.
+7. Point the application at reachable, authenticated service origins only in a deliberate compatible cutover. A deployed application cannot use this Mac's loopback URLs.
 
-1. Record source revision, configured images, running image IDs, ingress, holds and current workload.
-2. Validate the candidate and retain known-good rollback images and private state.
-3. Review existing holds. Apply a hold when an existing worker must survive controller reload; verify it before stopping the controller.
-4. Stop admissions and allow accepted work to settle. Graceful stop drains/removes unheld workers; held workers can be adopted after restart.
-5. Start one supervised controller for the namespace. Verify registry authority, ownership/generations, capabilities, desktop links and restored holds.
-6. Replace workers or desktop containers deliberately when their image/configuration must change; a controller restart alone does not upgrade them. For the standalone image correction, build `Dockerfile.relay` with its pinned Sharp decoder, qualify artifact decoding inside the candidate, and load the compatible capability registry in the controller before replacing workers. Preserve state volumes; require a new decoded image probe rather than importing chat-era proof.
-7. Verify the affected downstream behavior, then explicitly resume appropriate holds. Resume does not clear rejection or cooldown.
-
-For a first migration from a shared relay, drain and stop that process before assigning its credentials to workers. `docker-compose.relay.yml` is a legacy shared launcher and cannot substitute for the federation launcher.
-
-Rollback uses the saved compatible source/image/configuration and private state after stopping competing ownership. Inspect current holds and accepted work first. Do not blindly restart a historical shared container, clear rejection journals or run two topologies with the same credentials. Billing and entitlement changes remain separate from deployment.
+The external-host `serve` mode remains a separate optional procedure with actual SSH targets and private HTTPS. Local installation does not change public traffic. Use [deployment boundaries](DEPLOYMENT.md) for component acceptance and rollback.
 
 ## Sites generation rollout and recovery
 
-[Sites operations](maintainers/SITES_OPERATIONS.md) owns current included generation, paid eligibility, shared fair admission, fresh local-profile checks and retained receipt recovery. Original fixed/metered operations keep their historical settlement contract only. Opaque supplier quota is accepted in this mode; no supplier ceiling assertion is required. Build and replace compatible workers before enabling application admissions. The forwarding option remains relevant to explicitly selected legacy metered jobs.
-
-Preserve signing state and receipt volumes. The durable text receipt endpoint can survive worker replacement; stream and cancellation still target the admitting generation. Pause new content work before incompatible rollback, and retain application code capable of settling previously accepted fixed holds.
+Sites chooses Premium only in isolated mode. Product inclusion, fair usage and historical settlement remain in [Sites operations](maintainers/SITES_OPERATIONS.md). Keep original origin, request identity and receipt reader. No epoch/account loss permits resubmission through another pool. Legacy retained-volume receipt behavior is documented separately and is not a new-runtime guarantee.
 
 ## Parent and subagent request contract
 
-Use one idempotency key per logical operation and preserve payload, principal and returned scope. Save signed job URLs after acceptance; poll, stream or cancel that job instead of submitting new inference. `X-Galx-Task-Id` correlates parent/child work without granting authority.
-
-The [API recovery table](RELAY_API_REFERENCE.md#request-recovery) governs conflicts, uncertain admission and generation loss. Admission response bodies remain process-local within the 32 MiB aggregate and 8 MiB per-response cache for ten minutes; after that, completed identities remain permanent `unknown` tombstones across controller restart. The journal holds at most 1,000 keys and never evicts uncertain evidence, so capacity exhaustion fails closed pending operator reconciliation. These are not durable exactly-once execution. Image synthesis is not automatically replayed after an uncertain outcome.
+Preserve one idempotency key per logical operation, its payload, verified owner and original destination. Task IDs do not grant authority. Settlement retry is distinct from execution retry. Use [API recovery](RELAY_API_REFERENCE.md#request-recovery); never evade an unknown result with a new key.
 
 ## Recovery supervision and failure isolation
 
-The guardian emits private, redacted events for `authority_established`, `event_loop_stalled`, `controller_progress_stalled`, `ownership_wait_exceeded`, `restart_budget_exhausted`, `termination_unproven` and missing required capabilities. Process liveness, controller progress and capability readiness are separate signals. A provider outage or an empty capability snapshot is a readiness failure and does not by itself restart the controller. The guardian applies a five-attempt ten-minute restart budget and bounded termination escalation; inspect the blocked stage before raising a budget or restarting manually.
+Central grants expire independently when renewal fails. Local startup uses saved VM identities and central epoch handoff; runtime containers use restart policy `no`. Restore the dependency and reopen through the local launcher after inspection. Preserve unresolved execution rows and leases. New pool runtimes do not use the legacy guardian, Docker mutation journal or per-worker restart budget.
 
-Every federation worker Docker CLI has a bounded deadline and returns only after the child and its pipes close. A timeout or output overflow terminates the subprocess; if cleanup cannot be proven, the controller reports `command_cleanup_unproven` and the guardian retains ownership while containing the process group. Docker-daemon mutations are recorded before `run`, `stop` or `rm`; a pending entry blocks conflicting work until a later inventory read proves the safe outcome. Generation and immutable container-ID checks prevent delayed commands from affecting a replacement worker.
-
-Federation worker containers are created with Docker restart policy `no`; the lifecycle controller owns stop, removal and replacement. Unexpected stopped or missing workers use exponential backoff and a five-attempt ten-minute budget. `worker_restart_budget_exhausted` is a bounded outage requiring private worker and dependency inspection; it does not silently turn into an endless restart loop. Desktop containers are a separate resource with their own desktop-manager policy.
-
-Admission receipts persist only a hash, expiry and state. A pending receipt becomes `unknown` after controller loss; an expired completed receipt is converted to the same permanent unknown tombstone, and neither state authorizes replay. Completed response bodies remain process-local. If receipt storage is missing, malformed, read-only or full, new admissions fail closed with `admission_storage_unavailable`; live and uncertain entries are never evicted. A retained worker is adopted after controller restart before any replacement is considered. The [deployed acceptance record](../post-mortem/incidents/2026/2026-09-13-image-generation/act019-deployment-acceptance-20260914.json) records the fresh worker artifact, launcher/guardian/controller chain and production canaries; the [isolated ACT-018 record](../post-mortem/incidents/2026/2026-09-13-image-generation/act018-isolated-drills-20260914.json) lists the remaining daemon, reboot and storage drills.
+For an incident in the still-running legacy controller, use [legacy recovery supervision](maintainers/legacy-federation-operations.md#recovery-supervision-and-failure-isolation) and [guarded lock recovery](../post-mortem/runbooks/controller-lock.md). Never apply legacy marker repair to Colima ownership or central epochs.
 
 ## Throughput and failure isolation
 
-Job polling uses bounded batches, per-worker fairness and per-job backoff. Job recovery has a separate rate bucket from new inference. Reservations from stale generations do not consume replacement capacity. Docker inventory reads, telemetry bodies, starts and drains have bounds so one failed worker does not block the entire fleet.
-
-Shutdown rejects new admissions and bounds accepted front-door I/O. Maintenance holds deliberately change worker retirement behavior. Observation fencing prevents stale success, inventory or health replay from clearing a newer denial. These tests establish correctness and bounded scheduling, not a production throughput SLA.
+Standard and Premium cannot lend capacity or call each other. Each runtime has bounded local admission bookkeeping and own account engines; central leases govern account usage. Unknown terminal persistence blocks new admission. Local acceptance proves tested boundaries, not a throughput SLA or physically independent availability.
 
 ## Explicit Codex image-tool compatibility alias
 
-The canonical customer capability is `openai-gpt-image-latest`; legacy aliases are compatibility names for it. The repaired worker sends the standalone Images request used by Codex's `image_gen.imagegen` extension, with protocol model `gpt-image-2` and auto rendering parameters, using the assigned account. The provider selects the image model. Native API-key execution remains exact.
-
-Fresh authenticated inventory and successful decoded image evidence are required. A chat-model listing is neither a dependency nor proof of image capability; old chat-era evidence cannot enable the new backend. Evidence expires after one hour; real success renews it. Idle enabled workers perform a paid startup probe and successful renewal no more often than every 50 minutes, with failed probes backing off 10, 20, then 40 minutes. Use spare capacity. See [the full contract](FEDERATION_STRATEGY.md#explicit-codex-image-tool-compatibility).
-
-Execution identifiers and diagnostics remain in internal transport and administrator records. Public gateway responses must strip them from bodies and headers and sanitize image artifacts.
+The public image alias remains a capability name, with provider-managed underlying identity. Only assigned Premium execution can perform its explicit centrally granted image trial. The shared engine sanitizes bytes; public DTOs omit operational identifiers. [The contract](FEDERATION_STRATEGY.md#explicit-codex-image-tool-compatibility) defines current behavior; the legacy candidate's probe cadence is not enabled in the new runtime.
 
 ## Supervised macOS deployment
 
-`node --import tsx scripts/install-federation-service.ts` prepares and validates a launchd plist in the ignored state directory. Its explicit `--install` option installs the service; it refuses to overwrite an existing installed plist. The plist reads server configuration from the repository environment without embedding credentials.
-
-The installer preflights Python `fcntl`/`selectors` support and configures launchd to retry only unsuccessful exits. A healthy intentional stop does not create a restart loop. The guardian itself never retries a child, and its restart budget emits a bounded alert when repeated failures exhaust the window. Keep `controller.guard`, the compatibility marker and all journals in the same private local filesystem; a network or unsupported filesystem fails closed.
-
-The September 9 deployment used `com.galxai.federation.production`, namespace `production`, loopback port 3001 and worker image tag `galxai-relay:image-frame-fix`. These are dated deployment observations; inspect the active supervisor before changing it.
+**GALX Monitors** is the native menu launcher for the new local services; `relay:monitors:install` installs its fixed apps. Open-at-login starts the menu only, and quitting it leaves services running. `relay:local -- stop` stops the local pools and central stack while retaining disks/homes/state. The legacy launchd installer remains [separately scoped](maintainers/legacy-federation-operations.md#supervised-macos-deployment).
 
 ## Guardian rollout and rollback
 
-Treat the ownership change as a staged deployment. First run the guardian, actual-launcher and retained-worker drills in a disposable namespace, then prepare the launchd plist without installing it. For an existing namespace, stop admissions, record the private state and worker generations, stop the old job, and verify its controller and descendants have ended, the listener is unowned and the legacy `controller.lock` contents are unchanged. Archive that exact legacy marker in private evidence only after the final recheck; never run old and new launchers together.
-
-Start the new job with the same namespace and state directory. Confirm `authority_established`, a stable listener, registry freshness, required capability readiness, unchanged worker generations and one real test request before widening traffic. Keep the old plist, compatible controller build, private state backup and worker images available until that acceptance completes. If the new job fails, stop it and prove its process group and inherited descriptors are gone before archiving its marker; restore the prior plist/build and let the old launcher create its own marker. Do not force-unlock or delete a guard. A rollback that cannot prove exclusive ownership is a bounded outage requiring operator intervention.
-
-The September 14 deployed guardian/worker acceptance is retained in the dated record linked above. That earlier acceptance does not establish current registry readiness or completion of the remaining isolated host/daemon/storage drills; use current-state evidence before intervention.
+Guardian rollout applies only to the retained legacy federation. Follow its [complete procedure](maintainers/legacy-federation-operations.md#guardian-rollout-and-rollback) when that exact component is affected. New-service rollback closes gates, preserves central assignments and journal/history, and restores compatible reviewed image pins without reviving removed accounts.
 
 ## September 8 image-frame repair
 
-A real client image larger than the former frame limit succeeded after the separate 32 MiB response-frame repair. The exact request, artifact digest and component deployment evidence are retained in [the session verification record](maintainers/RELAY_SESSION_VERIFICATION_20260909.md#september-8-image-frame-evidence).
+The [dated legacy evidence](maintainers/RELAY_SESSION_VERIFICATION_20260909.md#september-8-image-frame-evidence) remains historical. It does not establish new-pool image access or current production image health.
 
 ## Image resilience follow-up
 
-[ADR 0130](adr/0130-image-receipts-and-uncertain-outcomes.md) defines single-dispatch images and uncertain-result recovery. The September 9 controller reload and worker-image build do not prove deployment of every application or DreamBees change, nor replacement of a retained worker. Check the dated component matrix before claiming rollout.
+Image receipts, library persistence and public sanitation remain separate product contracts. The new local installation has no real provider-generation acceptance yet. Use [current state](../post-mortem/CURRENT_STATE.md) and the [image incident runbook](../post-mortem/runbooks/image-generation.md) rather than replaying an earlier successful request.
 
 ## Registry reservation recovery
 
-Registry I/O must reserve the complete requested response bound plus protocol overhead before sending. An insufficient byte or request balance refuses locally without spending either token balance. Failed dispatched reads retain their full reservation; complete responses refund only measured unused bytes. This prevents a cold registry refresh from repeatedly spending partial refills that cannot carry its response. Persistent counters, budget policy and credentials survive restart unchanged. A full reservation may take several minutes to replenish under the existing hourly budget; readiness remains unavailable until an authoritative refresh and capability checks succeed. Never clear the journal or increase budget merely to hide the outage.
-
-Use authenticated `/api/egress` and `/api/capabilities` to distinguish budget refusal from provider failures. During a source-only repair, verify no accepted work, restart through the existing supervised launchd boundary, retain worker volumes and journals, and observe the original counter continuity plus fresh capability readiness. The local guard regression exercises repeated thirty-second checks after failed reads; it does not establish provider capacity or live load behavior.
+The retained broad-registry controller has the [existing egress reservation procedure](maintainers/legacy-federation-operations.md#registry-reservation-recovery). New runtimes instead use narrow central projection/grants and their own execution database; never distribute main-project/vault authority to repair a projection failure. Central outage requires restored authorization, not local account creation or counter resets.

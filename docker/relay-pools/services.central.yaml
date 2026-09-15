@@ -1,0 +1,18 @@
+name: galx-relay-authority
+services:
+  authority:
+    image: galxai-relay-central:candidate-20260915
+    user: '1000:1000'
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    ports: ['127.0.0.1:13300:3000']
+    secrets: [{source: authority_config, target: component-config}]
+    tmpfs: ['/tmp:rw,noexec,nosuid,size=16m,uid=1000,gid=1000,mode=0700']
+    restart: 'no'
+    mem_limit: 384m
+    pids_limit: 128
+    logging: {driver: json-file, options: {max-size: 10m, max-file: '3'}}
+secrets:
+  authority_config:
+    file: ${GALX_CENTRAL_CONFIG_FILE:?Set the private central configuration path}

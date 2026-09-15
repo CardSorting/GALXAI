@@ -1,0 +1,39 @@
+# Linux Premium host only. Standard uses a different VM and Docker daemon.
+name: galx-premium
+services:
+  relay:
+    image: galxai-relay-premium:candidate-20260915
+    user: '1000:1000'
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    ports: ['127.0.0.1:13301:3001']
+    volumes: [premium_execution:/state]
+    secrets: [{source: runtime_config, target: component-config}]
+    tmpfs: ['/tmp:rw,noexec,nosuid,size=32m,uid=1000,gid=1000,mode=0700']
+    restart: 'no'
+    stop_grace_period: 35s
+    mem_limit: 2g
+    pids_limit: 256
+    logging: {driver: json-file, options: {max-size: 10m, max-file: '3'}}
+  monitor:
+    image: galxai-monitor-premium:candidate-20260915
+    user: '1000:1000'
+    group_add: ['${GALX_DOCKER_SOCKET_GID:?Set the dedicated host Docker socket group}']
+    network_mode: host
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    volumes: [premium_desktops:/state, /var/run/docker.sock:/var/run/docker.sock]
+    secrets: [{source: monitor_config, target: component-config}]
+    tmpfs: ['/tmp:rw,noexec,nosuid,size=32m,uid=1000,gid=1000,mode=0700']
+    restart: 'no'
+    mem_limit: 384m
+    pids_limit: 128
+    logging: {driver: json-file, options: {max-size: 10m, max-file: '3'}}
+volumes:
+  premium_execution:
+  premium_desktops:
+secrets:
+  runtime_config: {file: '${GALX_PREMIUM_RUNTIME_CONFIG_FILE:?Set the Premium runtime configuration path}'}
+  monitor_config: {file: '${GALX_PREMIUM_MONITOR_CONFIG_FILE:?Set the Premium monitor configuration path}'}

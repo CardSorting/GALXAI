@@ -1,12 +1,13 @@
 # Security and key rotation
 
 <!-- docs-scope: current-guide -->
-> **Reading scope:** Current guidance. The federation contract governs relay behavior; source and dated verification define implementation evidence. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
 
-Identify the authority being rotated: product credential, controller inference/admin key, worker internal key, upstream shard credential, or registry encryption key. Their scopes and rotation procedures differ.
+Private maintainer procedure.
 
-Follow the registry rotation runbook for encrypted credential changes. A new credential revision drives worker lifecycle and fresh discovery; a task ID or local cache cannot authorize it. Preserve accepted-job ownership and document any access loss caused by principal changes.
+Identify the authority first: GALX customer identity, pool inference key, monitor operator/viewer principal, registrar, runtime, main database/vault root or provider login. Their scopes and rotation procedures differ. Only central services receive main-project account authority; each pool keeps its own execution credentials and state.
 
-Verify worker isolation and controller secret custody. Do not print environments or place keys in browser bundles. Security controls and signed evidence are not compliance certification; any compliance claim needs its own reviewed evidence.
+Use [key rotation](../maintainers/MULTI_TENANT_SHARD_AND_KEY_ROTATION.md) for deliberate vault/database changes and [manual registration](../maintainers/RELAY_CREDENTIAL_ENROLLMENT.md) for provider renewal. Re-encryption preserves identity, plaintext, provenance and assignment; it cannot transfer or revive an account. Central removal retains evidence and does not invalidate an upstream session remotely.
 
-Use the [current contract](../FEDERATION_STRATEGY.md), [operator runbook](../RELAY_VNEXT_RUNBOOK.md), [request recovery table](../RELAY_API_REFERENCE.md#request-recovery), and [maintainer execution guide](../maintainers/AI_AGENT_PAIR_PROGRAMMING_AND_GOVERNANCE.md).
+Verify scoped authorization, peer denial, own-daemon custody and fixed installation identity. Keep tokens out of browser bundles, argv and evidence. Preserve accepted-operation references when changing principals. Close execution before incompatible rollback; never restore broad writers or peer fallback for availability.
+
+The shared Mac/admin remains trusted; local VM isolation is not physical-machine independence or compliance certification. Use [security](../SECURITY.md), [service acceptance](../runbooks/relay-pool-services.md) and [current state](../../post-mortem/CURRENT_STATE.md).

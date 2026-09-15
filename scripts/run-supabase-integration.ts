@@ -24,7 +24,7 @@ let ownedContainer = false, pool: Pool | undefined;
 const workspace = await mkdtemp(path.join(tmpdir(), 'galx-integration-'));
 try {
   const args = process.argv.slice(2);
-  if (args.length && (args.length !== 1 || !['--manual-shards', '--free-quota', '--billing', '--domains', '--workspace', '--fair', '--plans', '--preview', '--admin', '--admin-ui', '--images', '--image-library', '--image-assets', '--auth-sessions'].includes(args[0]))) throw new Error('Supported options: --free-quota, --billing, --domains, --workspace, --fair, --plans, --preview, --admin, --admin-ui, --images, --image-library, --image-assets');
+  if (args.length && (args.length !== 1 || !['--relay-authorization', '--relay-foundation', '--manual-shards', '--free-quota', '--billing', '--domains', '--workspace', '--fair', '--plans', '--preview', '--admin', '--admin-ui', '--images', '--image-library', '--image-assets', '--auth-sessions'].includes(args[0]))) throw new Error('Supported options: --free-quota, --billing, --domains, --workspace, --fair, --plans, --preview, --admin, --admin-ui, --images, --image-library, --image-assets');
   let url = process.env.GALX_INTEGRATION_DATABASE_URL;
   if (url) isolatedIntegrationEnvironment({ GALX_INTEGRATION_DATABASE_URL: url });
   else {
@@ -49,7 +49,10 @@ try {
     }
     if (!ready) throw new Error('Disposable PostgreSQL did not become ready');
     await pool.query(await readFile(path.join(root, 'scripts/fixtures/integration-bootstrap.sql'), 'utf8'));
-    const migrations = (await readdir(path.join(root, 'supabase/migrations'))).filter(f => /^\d+_.+\.sql$/.test(f)).sort();
+    // Historical rollback suites replay their own migration boundary. Later
+    // scoped wrappers depend on those functions and are covered by authorization.
+    const boundary=args[0]==='--relay-foundation'?'20260915073601':args[0]==='--manual-shards'?'20260914231914':null;
+    const migrations = (await readdir(path.join(root, 'supabase/migrations'))).filter(f => /^\d+_.+\.sql$/.test(f) && (!boundary || f.slice(0,14)<=boundary)).sort();
     for (const filename of migrations) {
       controller.signal.throwIfAborted();
       const client = await pool.connect();
@@ -59,7 +62,7 @@ try {
         await client.query('COMMIT');
       } catch (error: any) {
         await client.query('ROLLBACK');
-        throw new Error(`Fixture migration ${filename}: ${error.message}`);
+        throw new Error(`Fixture migration ${filename}: ${error.message}${error.position ? ` (SQL position ${error.position})` : ''}${error.where ? ` [${error.where}]` : ''}`);
       } finally { client.release(); }
     }
     console.log(`Applied ${migrations.length} migrations to the disposable fixture.`);
@@ -78,8 +81,8 @@ try {
     let spawnError: Error | undefined;
     const child = spawn(process.execPath, ['--import', import.meta.resolve('tsx'),
       '--import', path.join(root, 'scripts/lib/integration-no-network.ts'),
-      path.join(root, args[0] === '--manual-shards' ? 'scripts/test-manual-desktop-shards-db.ts' : args[0] === '--free-quota' ? 'scripts/test-free-generation-quota-db.ts' : args[0] === '--auth-sessions' ? 'scripts/test-account-session-db.ts' : args[0] === '--image-assets' ? 'scripts/test-relay-image-generation.ts' : args[0] === '--image-library' ? 'scripts/test-image-library-scale-db.ts' : args[0] === '--images' ? 'scripts/test-image-requests-db.ts' : args[0] === '--admin-ui' ? 'scripts/verify-preview-admin-ui.ts' : args[0] === '--admin' ? 'scripts/test-preview-admin-db.ts' : args[0] === '--preview' ? 'scripts/test-developer-preview-db.ts' : args[0] === '--plans' ? 'scripts/test-sites-plans-db.ts' : args[0] === '--fair' ? 'scripts/test-sites-fair-db.ts' : args[0] === '--domains' ? 'scripts/test-sites-domains-db.ts' : args[0] === '--workspace' ? 'scripts/test-sites-workspace-db.ts' : 'scripts/test-supabase-integration.ts'),
-      ...(['--manual-shards', '--free-quota','--domains','--workspace', '--fair', '--plans', '--preview', '--admin', '--admin-ui', '--images', '--image-library', '--image-assets', '--auth-sessions'].includes(args[0]) ? [] : args)],
+      path.join(root, args[0] === '--relay-authorization' ? 'scripts/test-relay-authorization-db.ts' : args[0] === '--relay-foundation' ? 'scripts/test-relay-account-foundation-db.ts' : args[0] === '--manual-shards' ? 'scripts/test-manual-desktop-shards-db.ts' : args[0] === '--free-quota' ? 'scripts/test-free-generation-quota-db.ts' : args[0] === '--auth-sessions' ? 'scripts/test-account-session-db.ts' : args[0] === '--image-assets' ? 'scripts/test-relay-image-generation.ts' : args[0] === '--image-library' ? 'scripts/test-image-library-scale-db.ts' : args[0] === '--images' ? 'scripts/test-image-requests-db.ts' : args[0] === '--admin-ui' ? 'scripts/verify-preview-admin-ui.ts' : args[0] === '--admin' ? 'scripts/test-preview-admin-db.ts' : args[0] === '--preview' ? 'scripts/test-developer-preview-db.ts' : args[0] === '--plans' ? 'scripts/test-sites-plans-db.ts' : args[0] === '--fair' ? 'scripts/test-sites-fair-db.ts' : args[0] === '--domains' ? 'scripts/test-sites-domains-db.ts' : args[0] === '--workspace' ? 'scripts/test-sites-workspace-db.ts' : 'scripts/test-supabase-integration.ts'),
+      ...(['--relay-authorization', '--relay-foundation', '--manual-shards', '--free-quota','--domains','--workspace', '--fair', '--plans', '--preview', '--admin', '--admin-ui', '--images', '--image-library', '--image-assets', '--auth-sessions'].includes(args[0]) ? [] : args)],
     { cwd: workspace, env, stdio: 'inherit', timeout: args[0] === '--admin-ui' ? 300000 : 180000, signal: controller.signal });
     child.on('error', error => { spawnError = error; });
     child.on('close', code => spawnError ? reject(spawnError) : resolve(code ?? 1));

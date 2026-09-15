@@ -1,31 +1,37 @@
 # Deployment boundaries
 
 <!-- docs-scope: current-guide -->
-> Private release guide. Use [current state](../post-mortem/CURRENT_STATE.md) for latest recorded component evidence and [the runbook](RELAY_VNEXT_RUNBOOK.md) for controller operations. Earlier matrices remain dated history.
 
-| Component | Deployment action |
+Private release guide. [Current state](../post-mortem/CURRENT_STATE.md) owns the latest dated component evidence. [Service installation](runbooks/relay-pool-services.md) owns the complete local procedure and the separate optional external-host procedure.
+
+| Component | Deployment and acceptance boundary |
 | --- | --- |
-| Application | Build/deploy its server and public assets; verify customer authorization and response boundary |
-| Controller | Reload supervised source with private registry/signing/journal state preserved |
-| Worker | Build candidate image, then deliberately replace through owned lifecycle when required |
-| Desktop | Build guest image and deliberately update the selected environment without losing needed home data |
-| Ingress | Verify its intended authenticated server-to-server origin independently |
+| Central service and HTTPS proxy | Main-project account authority, protocol and lifecycle journal; reviewed image and private state on Docker Desktop |
+| Premium runtime and monitor | Premium Colima VM, own daemon/disk/secrets, execution database and manual desktops |
+| Standard runtime and monitor | Standard Colima VM, own daemon/disk/secrets, execution database and manual desktops |
+| Native monitor launchers | Fixed local destinations and scoped ticket access; no account or inference authority |
+| Application/gateway | Separate server/assets release, customer authorization and sanitized responses |
+| Retained federation | Existing controller/worker deployment and original jobs; [legacy operations](maintainers/legacy-federation-operations.md) |
 
-Source on disk, a built image and a running image are different states. Record all relevant revisions. Do not claim an application deploy from a controller reload or a worker upgrade from an image build.
+Source, built image, installed image, open execution and successful provider work are distinct states. The local pool services and account-management release are installed. Latest acceptance records registration open, execution closed and zero registered accounts. Manual paid/free sign-ins, capability qualification and public application cutover remain pending. Missing external SSH targets are not blockers for the chosen local installation.
 
-Preserve rollback configuration, private state and accepted-operation evidence. Hold a shard before reload if preserving its existing worker is required; graceful stop removes unheld workers. A hold blocks replacements, so plan explicit resume/replacement for upgrades. Verify new generation and capabilities before declaring ready.
+## Local pool release
 
-The shared-to-federation cutover occurred September 7. For any remaining legacy host, drain and stop shared ownership before federation assignment; `docker-compose.relay.yml` is not a federation launcher. Multi-host ownership needs a shared lease beyond the current single-host implementation.
+Preserve the exact image manifest, VM/daemon identities, peer-denial rules, desktop homes and central/execution state. Do not copy main-project credentials into either runtime or use one pool's secrets in the other. A runtime hosts account engines inside its own container; it does not use the retained controller's one-worker-container-per-account deployment procedure.
 
-Run `npm run docs:check`, appropriate [hardening checks](maintainers/RELAY_HARDENING.md), production build, public-response tests and rendered/browser-asset scans. Separate canary cleanup from production workspaces. Validate actual downstream behavior for changed transport; paid entry and entitlement remain separate acceptance.
+Use `npm run relay:local -- status` and `npm run relay:local -- verify` for installed acceptance. Build/release only affected component images and update their reviewed pins through the service runbook. Opening a monitor or starting a VM cannot open execution. The explicit `serve-local` gate requires both registrations and reruns local acceptance. Enable intended accounts individually, wait for matching applied revisions and qualify the provider operations. Standard must reject Sites/images/tool requests before provider I/O.
+
+The public application cutover requires its separately configured isolated transport, reachable private endpoints and distinct inference keys. Mac loopback addresses are not reachable from a hosted application. Preserve original-operation readers through cutover; there is no peer or legacy dispatch fallback. Account leases remain central and are acquired by the runtime, while product usage policy remains independent.
+
+Run the relevant [hardening checks](maintainers/RELAY_HARDENING.md), production build, raw public-response/authorization tests and rendered/browser-asset scans for changed runtime boundaries. Record scope and limitations, including actual provider and customer-path acceptance.
 
 ## Manual desktop authority release boundary
 
-Apply migration `20260914231914_manual_desktop_shard_enrollment.sql` before starting the compatible controller/application. Inventory the target and preserve registry ciphertext, ownership, quota/counters, desktop homes and manifests, signing state, holds and receipts. Existing rows remain unconfirmed and cannot receive new work; neither a valid token nor an existing local link can backfill provenance. Use [the database procedure](maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md#manual-desktop-policy-inventory-and-rollout) and record schema, controller and application evidence separately.
+The base manual policy migration `20260914231914` precedes the central foundation, authorization, legacy-assignment guard and management migrations. All account authority stays in the main project; execution-only migrations belong to their two separate targets. Use [database rollout](maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md) rather than applying the main migration directory to an execution project.
 
-After the schema and software agree, an operator signs in in the owning desktop and explicitly chooses **Enroll shard**, then verifies worker readiness. Provider expiry requires manual sign-in there; automatic saved-file sync and worker lifecycle continue independently. External API/CLI/file ingestion remains closed during outage recovery. A healthy controller with zero confirmed accounts can correctly admit no work.
+Current registration is **Register account → manual sign-in → Review access → register paused** in the fixed pool monitor. Later renewal uses explicit **Update saved sign-in → Save new sign-in**. Rename/remove/restore are central, revision-aware operations. Removal retains files and history; a registered account cannot be restored. The [complete lifecycle contract](reference/relay-account-management.md) owns these behaviors.
 
-Use isolated manual-enrollment database, route/authorization and credential-recovery tests before release. Verify the terminal external HTTP denials and absence of cookie changes through the target application, preserve public sanitation, and keep actual manual enrollment plus capability acceptance separate from release readiness. The policy DOWN migration intentionally restores old credential-write grants/functions and therefore reopens the retired boundary; it is not a routine capacity fix.
+The retained controller's **Enroll shard**, saved-file synchronization and maintenance holds apply only to unassigned legacy accounts. Its [legacy rollout](maintainers/legacy-desktop-enrollment.md) remains available for existing deployment recovery. Assigned accounts cannot return to legacy admission. Close gates before rollback; retain grants, leases and original execution evidence. A management rollback does not restore removed accounts, and the older manual-policy DOWN migration reopens retired credential privileges rather than providing an availability shortcut.
 
 ## Image and access release boundaries
 

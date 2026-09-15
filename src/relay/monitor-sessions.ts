@@ -10,7 +10,7 @@ interface Grant { origin: string; expires: number }
 export class MonitorSessions {
   private readonly tickets = new Map<string, Grant>();
   private readonly sessions = new Map<string, Grant>();
-  constructor(private readonly now: () => number = Date.now, private readonly purpose: 'monitor' | 'desktop' = 'monitor') {}
+  constructor(private readonly now: () => number = Date.now, private readonly purpose: 'monitor' | 'desktop' | 'pool-operator' | 'pool-viewer' = 'monitor') {}
   private prune() {
     for (const entries of [this.tickets, this.sessions]) for (const [key, grant] of entries) if (grant.expires <= this.now()) entries.delete(key);
   }

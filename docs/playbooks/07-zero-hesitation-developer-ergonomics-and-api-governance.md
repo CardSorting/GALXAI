@@ -5,7 +5,7 @@
 
 Support familiar documented SDK shapes and give users an explicit model and a clear next action. Resolve harmless input variation at the application boundary. Do not make users understand shard topology to submit a request.
 
-Preserve model intent and tenant authority after normalization. The Codex image-tool alias is explicit, verified, and disclosed; unknown model strings are not permission to substitute another model. A cascade or race is an intentional application policy with additional execution/cost implications.
+Preserve model intent and tenant authority after normalization. Image compatibility is explicit and verified privately; public model names cannot promise an unverified underlying model. Unknown strings cannot authorize substitution. The isolated relay transport has no peer or legacy dispatch fallback. Any application orchestration remains separately authorized and cannot bypass that boundary.
 
 Parents own operation identity and integration. Children receive bounded tasks, deadlines, and independent keys when delegation is authorized. Batch independent I/O within limits, serialize shared mutations, and retain signed job URLs. Accepted or uncertain execution requires reconciliation before replacement work.
 

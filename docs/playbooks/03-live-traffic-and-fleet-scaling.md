@@ -1,17 +1,15 @@
-# Traffic and model-specific scaling
+# Traffic and pool-specific capacity
 
 <!-- docs-scope: current-guide -->
 
-Private procedure under [the federation contract](../FEDERATION_STRATEGY.md) and [manual desktop authority](../adr/0152-manual-desktop-only-shard-authority.md).
+Private maintainer procedure.
 
-Inspect requested-model eligibility, evidence freshness, active streams, queue depth, holds and local capacity. Retained records and running desktops are not serving capacity. Heterogeneous model support is expected; adding an unrelated account may not help the unavailable capability.
+Inspect the fixed owning monitor: connection freshness, execution gate, account state, health reason, applied revision and epoch. Registration count, stopped/running desktops and catalog entries are not serving capacity. Both pools intend the same text catalog, but access is observed per account.
 
-Add accounts only through manual **Relay Desktops → Sign in → Enroll shard**. Confirm eligible legacy accounts explicitly. External APIs, CLI imports, token files and host caches cannot populate the managed fleet. Each account retains its unique owning desktop for future manual sign-in; a local relink does not transfer that ownership.
+Add capacity only through **Register account → manual sign-in → Review access → register paused**. Premium uses paid accounts and permits Sites/images; Standard uses free accounts and permits text only. Assignments are exclusive and immutable. Accounts, credentials and the existing lease/budget ledger remain central; execution projects contain no second capacity ledger.
 
-Preserve model-first admission, generation-scoped reservations, bounded polling and separate worker control traffic. Automatic reconciliation can allocate a confirmed eligible account after inventory preflight, but it cannot renew an expired provider session. Saved-file sync only verifies and persists a manually completed login.
+The runtime selects among its own eligible in-process engines. No peer discovery, account borrowing, model substitution or dispatch failover is allowed. Central grants and account limits remain authoritative; do not reset counters or replay unknown operations to measure throughput.
 
-Empty capability workers remain for rediscovery. Unheld invalid-worker drain must not block healthy pools. Holds retain an existing worker while blocking new work and replacements; registry revocation, expiry, removal and rotation still win. After repair, explicitly review/resume the hold and verify the new applied revision. Do not clear counters or replay unknown requests to measure capacity.
+Renew sessions explicitly in the owning desktop and save the new sign-in. Pause/removal stops that engine and renewal; historical records remain. Use [account management](../reference/relay-account-management.md) for health and cleanup and [routing](../ROUTING_ALGORITHMS.md) for exact selection/recovery.
 
-Measure admission delay and completed-result latency against the observed workload and source revision. Synthetic scheduling results are not production throughput guarantees. Multi-host control requires its own ownership/fencing design before horizontal deployment.
-
-Use [enrollment/recovery](../maintainers/RELAY_CREDENTIAL_ENROLLMENT.md), [the operator runbook](../RELAY_VNEXT_RUNBOOK.md), [request recovery](../RELAY_API_REFERENCE.md#request-recovery) and [current state](../../post-mortem/CURRENT_STATE.md).
+The retained controller's weighted model routing, maintenance holds and container lifecycle are [legacy operations](../maintainers/legacy-federation-operations.md). Do not generalize them to the new runtime. Measured completed-result latency and workload-specific throughput are evidence; synthetic scheduling is not a capacity guarantee.

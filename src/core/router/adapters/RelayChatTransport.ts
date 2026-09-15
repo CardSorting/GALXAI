@@ -1,3 +1,5 @@
+import { createHash } from 'node:crypto';
+const tenantHeader=(tenant?:string):Record<string,string>=>tenant?{'x-galx-tenant':createHash('sha256').update(tenant).digest('hex')}:{};
 export interface RelayFailureDetails {
   status?: number; upstreamCode?: string; retryAfterMs?: number; shouldRetry?: boolean;
   executionState?: 'unknown' | 'accepted' | 'not_accepted'; requestId?: string; idempotencyScope?: string;
@@ -18,6 +20,8 @@ export class RelayDispatchError extends Error implements RelayFailureDetails {
 }
 
 export interface RelayChatOptions {
+  /** Trusted authenticated owner, never a caller-selected pool or credential. */
+  tenant?: string;
   taskId?: string;
   idempotencyKey?: string;
   idempotencyScope?: string;
@@ -42,7 +46,7 @@ export interface RelayReceipt {
 
 /** A bounded, authenticated read of committed evidence. Never starts work or
  * follows redirects, and never treats a missing receipt as proof of zero usage. */
-export async function readRelayReceipt(options: { url: string; key: string; jobId: string; signal: AbortSignal }): Promise<RelayReceipt> {
+export async function readRelayReceipt(options: { url: string; key: string; jobId: string; signal: AbortSignal; tenant?:string }): Promise<RelayReceipt> {
   const origin = new URL(options.url);
   if (!options.key?.trim() || !/^[a-zA-Z0-9_.:-]{1,4096}$/.test(options.jobId) || origin.username || origin.password ||
       origin.pathname !== '/' || origin.search || origin.hash ||
@@ -50,7 +54,7 @@ export async function readRelayReceipt(options: { url: string; key: string; jobI
   let reader: ReadableStreamDefaultReader<Uint8Array> | undefined;
   try {
     const response = await fetch(new URL(`/v1/jobs/${encodeURIComponent(options.jobId)}/receipt`, origin), {
-      headers: { Authorization: `Bearer ${options.key}` }, redirect: 'error',
+      headers: { Authorization: `Bearer ${options.key}`, ...tenantHeader(options.tenant) }, redirect: 'error',
       signal: AbortSignal.any([options.signal, AbortSignal.timeout(10000)]) });
     if (!response.ok || !response.headers.get('content-type')?.includes('application/json') || !response.body) throw new Error('Receipt unavailable');
     reader = response.body.getReader(); const chunks: Uint8Array[] = []; let bytes = 0;
@@ -112,6 +116,7 @@ export async function executeRelayChat(options: RelayChatOptions) {
   const wall = setTimeout(() => controller.abort(new RelayDispatchError('request_deadline')), options.wallTimeoutMs ?? 120000);
   const cleanup = () => { clearTimeout(timer); clearTimeout(wall); options.signal?.removeEventListener('abort', abort); };
   const headers = { Authorization: `Bearer ${options.key}`, 'Content-Type': 'application/json',
+    ...tenantHeader(options.tenant),
     ...(options.taskId ? { 'X-Galx-Task-Id': options.taskId } : {}),
     ...(options.idempotencyKey ? { 'Idempotency-Key': options.idempotencyKey } : {}),
     ...(options.idempotencyScope ? { 'X-Galx-Idempotency-Scope': options.idempotencyScope } : {}) };

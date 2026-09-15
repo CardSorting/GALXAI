@@ -42,7 +42,11 @@
         "docs/knowledge/templates/adr.md",
         "docs/knowledge/templates/runbook.md",
         "docs/adr/0145-maintained-knowledge-and-decision-lifecycle.md",
-        "docs/runbooks/weekly-knowledge-audit.md"
+        "docs/runbooks/weekly-knowledge-audit.md",
+        "MAINTAINERS.md",
+        "HANDOVER.md",
+        "context.md",
+        "docs/DEVELOPER_GUIDE.md"
       ],
       "checks": [
         "npm run docs:audit",
@@ -198,7 +202,8 @@
         "docs/OAUTH_AND_TOKEN_LIFECYCLE_SPECIFICATION.md",
         "docs/PROVIDER_AS_AUTH_SPECIFICATION.md",
         "docs/SECURITY.md",
-        "docs/relay-security.md"
+        "docs/relay-security.md",
+        "docs/playbooks/05-security-key-rotation-and-compliance.md"
       ],
       "checks": [
         "npm run test:preview-admin",
@@ -242,7 +247,8 @@
         "docs/adr/0149-one-time-free-generation.md",
         "docs/SITES_WORKSPACE.md",
         "docs/SITES_CONTENT.md",
-        "docs/adr/0150-free-generation-admission-gate.md"
+        "docs/adr/0150-free-generation-admission-gate.md",
+        "docs/API_BASE_URL.md"
       ],
       "checks": [
         "npm run test:sites:fair",
@@ -290,7 +296,36 @@
         "scripts/test-shard-enrollment-storage.ts",
         "src/core/substrate/GalxCredentialSubstrate.ts",
         "scripts/test-relay-capabilities.ts",
-        ".env.example"
+        ".env.example",
+        "Dockerfile.relay-pools",
+        "Dockerfile.relay-pools.dockerignore",
+        "docker/relay-pools/*",
+        "scripts/test-relay-pool-images.ts",
+        "scripts/verify-relay-pool-images.mjs",
+        "Dockerfile.relay-services",
+        "Dockerfile.relay-services.dockerignore",
+        "src/relay/pool-*.html",
+        "src/relay/pool-*.js",
+        "src/relay/pool-*.css",
+        "src/core/router/GalxModelRouter.ts",
+        "src/core/router/adapters/RelayChatTransport.ts",
+        "src/core/router/adapters/IsolatedRelayTransport.ts",
+        "scripts/setup-relay-services.ts",
+        "scripts/export-relay-services.ts",
+        "scripts/set-relay-service-gates.ts",
+        "scripts/open-pool-monitor.ts",
+        "scripts/install-relay-peer-isolation.py",
+        "scripts/install-relay-local-isolation.py",
+        "scripts/relay-local.mjs",
+        "scripts/verify-relay-hosts.ts",
+        "scripts/verify-relay-service-images.mjs",
+        "scripts/verify-relay-pool-monitor.ts",
+        "scripts/test-relay-services.ts",
+        "scripts/lib/relay-local-access.mjs",
+        "scripts/test-relay-local-access.mjs",
+        "scripts/install-relay-monitor-apps.py",
+        "scripts/macos/RelayMonitors.swift",
+        "scripts/test-relay-monitor-model.mjs"
       ],
       "guides": [
         "docs/ARCHITECTURE.md",
@@ -316,11 +351,39 @@
         "docs/RESILIENCE_AND_DISASTER_RECOVERY.md",
         "docs/TROUBLESHOOTING.md",
         "docs/maintainers/README.md",
-        "docs/adr/0152-manual-desktop-only-shard-authority.md"
+        "docs/adr/0152-manual-desktop-only-shard-authority.md",
+        "docs/runbooks/relay-pool-images.md",
+        "docs/runbooks/relay-pool-services.md",
+        "docs/reference/relay-account-management.md",
+        "docs/reference/legacy-federation-api.md",
+        "docs/maintainers/legacy-federation-operations.md",
+        "docs/maintainers/legacy-desktop-enrollment.md",
+        "docs/maintainers/legacy-desktop-operations.md",
+        "docs/ROUTING_ALGORITHMS.md",
+        "docs/QUEUE_SPECIFICATION.md",
+        "docs/RATE_LIMITS_AND_QUOTAS.md",
+        "docs/MODEL_CATALOG.md",
+        "docs/SECURITY.md",
+        "docs/relay-security.md",
+        "docs/maintainers/RELAY_TELEMETRY_UX.md",
+        "docs/maintainers/SUBSYSTEM_INTERNALS_AND_DEPENDENCY_GRAPH.md",
+        "docs/maintainers/MAINTAINER_GLOSSARY_AND_LEXICON.md",
+        "docs/FAQS.md",
+        "docs/adr/0153-central-account-authority-isolated-relays.md",
+        "docs/maintainers/AI_AGENT_PAIR_PROGRAMMING_AND_GOVERNANCE.md",
+        "docs/maintainers/DEBUGGING_AND_DIAGNOSTIC_RUNBOOKS.md",
+        "docs/maintainers/UPSTREAM_PROVIDER_OUTAGE_AND_DEGRADATION.md",
+        "docs/playbooks/README.md",
+        "docs/playbooks/07-zero-hesitation-developer-ergonomics-and-api-governance.md",
+        "docs/playbooks/08-unframed-developer-observation-protocol.md"
       ],
       "checks": [
         "npm run test:relay:capabilities",
-        "npm run test:relay:desktop-login"
+        "npm run test:relay:desktop-login",
+        "npm run test:relay:pool-images",
+        "npm run verify:relay:pool-images",
+        "npm run test:relay:services",
+        "npm run verify:relay:service-images"
       ]
     },
     "database": {
@@ -341,19 +404,33 @@
         "src/lib/billing/free-generation-policy.ts",
         "scripts/test-manual-desktop-shards-db.ts",
         "scripts/apply-manual-desktop-enrollment.ts",
-        "scripts/verify-shard-authority-live.ts"
+        "scripts/verify-shard-authority-live.ts",
+        "scripts/check-relay-account-foundation.ts",
+        "scripts/test-relay-account-foundation-db.ts",
+        "scripts/test-relay-account-inventory.ts",
+        "scripts/lib/sql-migration-safety.ts",
+        "scripts/test-sql-migration-safety.ts",
+        "deploy/relay-execution/supabase/migrations/*.sql",
+        "deploy/relay-execution/supabase/rollbacks/*.sql",
+        "scripts/test-relay-authorization-db.ts",
+        "scripts/test-relay-execution-db.ts",
+        "scripts/setup-relay-services.ts",
+        "scripts/set-relay-service-gates.ts"
       ],
       "guides": [
         "docs/SUPABASE_PARANOID_ARCHITECTURE_SPEC.md",
         "docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md",
         "docs/maintainers/FREE_GENERATION_QUOTA.md",
         "docs/maintainers/MULTI_TENANT_SHARD_AND_KEY_ROTATION.md",
-        "docs/MIGRATION_GUIDE.md"
+        "docs/MIGRATION_GUIDE.md",
+        "docs/reference/relay-account-management.md"
       ],
       "checks": [
         "npm run db:verify",
         "npm run db:test",
-        "npm run test:relay:manual-db"
+        "npm run test:relay:manual-db",
+        "npm run test:relay:foundation-db",
+        "npm run test:relay:authorization-db"
       ]
     },
     "delivery": {
@@ -379,7 +456,10 @@
         "docs/VERCEL_DEPLOYMENT.md",
         "docs/runbooks/release-readiness.md",
         "post-mortem/runbooks/deployment-storage.md",
-        "docs/VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md"
+        "docs/VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md",
+        "docs/CLOUDFLARE_STRATEGY.md",
+        "docs/maintainers/CLOUDFLARE_EDGE_MESH_MAINTAINER_RUNBOOK.md",
+        "docs/playbooks/02-deployment-and-release.md"
       ],
       "checks": [
         "npm run docs:check",
@@ -620,13 +700,97 @@
         "manual",
         "sign in"
       ]
+    },
+    "docs/runbooks/relay-pool-images.md": {
+      "kind": "runbook",
+      "keywords": [
+        "docker",
+        "premium",
+        "standard",
+        "relay",
+        "build",
+        "staging"
+      ]
+    },
+    "docs/reference/relay-account-management.md": {
+      "kind": "reference",
+      "keywords": [
+        "relay",
+        "accounts",
+        "registration",
+        "management",
+        "health",
+        "rename",
+        "remove",
+        "restore",
+        "premium",
+        "standard",
+        "central",
+        "isolation"
+      ]
+    },
+    "docs/reference/legacy-federation-api.md": {
+      "kind": "reference",
+      "keywords": [
+        "legacy",
+        "retained",
+        "controller",
+        "federation",
+        "unassigned"
+      ]
+    },
+    "docs/maintainers/legacy-federation-operations.md": {
+      "kind": "how-to",
+      "keywords": [
+        "legacy",
+        "retained",
+        "controller",
+        "federation",
+        "unassigned"
+      ]
+    },
+    "docs/maintainers/legacy-desktop-enrollment.md": {
+      "kind": "how-to",
+      "keywords": [
+        "legacy",
+        "retained",
+        "controller",
+        "federation",
+        "unassigned"
+      ]
+    },
+    "docs/maintainers/legacy-desktop-operations.md": {
+      "kind": "how-to",
+      "keywords": [
+        "legacy",
+        "retained",
+        "controller",
+        "federation",
+        "unassigned"
+      ]
+    },
+    "docs/runbooks/relay-pool-services.md": {
+      "kind": "runbook",
+      "keywords": [
+        "relay",
+        "local",
+        "docker",
+        "premium",
+        "standard",
+        "monitors",
+        "installation",
+        "activation",
+        "accounts"
+      ]
     }
   },
   "runbooks": [
     "docs/runbooks/knowledge-maintenance.md",
     "docs/runbooks/release-readiness.md",
     "docs/runbooks/weekly-knowledge-audit.md",
-    "docs/operations/workspace-auth.md"
+    "docs/operations/workspace-auth.md",
+    "docs/runbooks/relay-pool-images.md",
+    "docs/runbooks/relay-pool-services.md"
   ],
   "decisions": {
     "docs/adr/0145-maintained-knowledge-and-decision-lifecycle.md": {
@@ -746,6 +910,23 @@
       "target": "PostgreSQL registry, production host controller and galx.ai",
       "revision": "aa48b334b89bb77841c3317fb98c291429a39650 + recorded working-tree hashes; dpl_cFYtKU8tF7mfaBQkrYy5nPvEjuvw",
       "observed_at": "2026-09-15T00:07:16.197985+00:00"
+    },
+    "docs/adr/0153-central-account-authority-isolated-relays.md": {
+      "status": "proposed",
+      "delivery": "local",
+      "domain": "relay",
+      "owner": "Relay operator",
+      "date": "2026-09-15",
+      "evidence": [
+        "post-mortem/releases/2026-09-15-central-relay-foundation.json",
+        "post-mortem/releases/2026-09-15-relay-pool-images.json",
+        "post-mortem/releases/2026-09-15-relay-services.json",
+        "post-mortem/releases/2026-09-15-relay-local.json",
+        "post-mortem/releases/2026-09-15-relay-monitor-access.json",
+        "post-mortem/releases/2026-09-15-relay-monitor-console.json",
+        "post-mortem/releases/2026-09-15-relay-account-management.json"
+      ],
+      "supersedes": []
     }
   },
   "managed_adr_from": 145,

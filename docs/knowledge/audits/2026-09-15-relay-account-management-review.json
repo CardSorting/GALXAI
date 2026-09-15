@@ -1,0 +1,88 @@
+{
+  "reviewedAt": "2026-09-15T19:38:20.357079+00:00",
+  "reviewer": "Codex relay account management implementation review",
+  "scope": "Incremental relay/database source and complete owning-guide reconciliation; prior release reviews remain baseline for unchanged subsystem behavior.",
+  "sourcesInspected": [
+    "src/relay/pool-monitor.html",
+    "src/relay/pool-monitor.js",
+    "src/relay/pool-monitor-model.js",
+    "src/relay/pool-monitor.css",
+    "src/relay/pool-monitor-server.ts",
+    "src/relay/pool-central.ts",
+    "src/relay/pool-protocol.ts",
+    "src/relay/desktop-gateway.ts",
+    "src/lib/supabase/types.ts",
+    "scripts/test-relay-services.ts",
+    "scripts/test-relay-authorization-db.ts",
+    "scripts/test-relay-monitor-model.mjs",
+    "scripts/verify-relay-pool-monitor.ts",
+    "supabase/migrations/20260915191404_relay_account_management.sql",
+    "supabase/rollbacks/20260915191404_relay_account_management.down.sql",
+    "docker/relay-pools/local/images.json",
+    "docker/relay-pools/local/central.yaml"
+  ],
+  "completeGuidesInspected": [
+    "docs/runbooks/relay-pool-services.md",
+    "docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md",
+    "docs/adr/0153-central-account-authority-isolated-relays.md",
+    "docs/DOCUMENTATION_POLICY.md",
+    "docs/how-to/change-with-documentation.md",
+    ".impeccable/surfaces/src-relay-pool-monitor-html.md"
+  ],
+  "baselineEvidence": [
+    "docs/knowledge/audits/2026-09-15-relay-monitor-console-review.json",
+    "docs/knowledge/audits/2026-09-15-relay-services-review.json",
+    "docs/knowledge/audits/2026-09-15-relay-local-database-review.json"
+  ],
+  "evidence": [
+    "post-mortem/releases/2026-09-15-relay-account-management.json"
+  ],
+  "decisions": [
+    "Central-only retained lifecycle state; no second account registry or execution-project schema change.",
+    "Own-pool operator management, immutable audit, expected revisions, ticket invalidation and terminal account revocation.",
+    "Unknown evidence does not imply unhealthy account; stopped desktop does not imply failed registered account.",
+    "Consistent Primer-style management/removal and Cloudscape icon-plus-text status within existing graphite/silver tokens.",
+    "ADR 0153 remains proposed; manual sign-ins, activation and provider qualification remain separate.",
+    "Whole owning guide updated for procedures, outcomes, recovery, installation and rollback; changed source paths map to relay/database with no unmapped source.",
+    "Bounded visual review inspected desktop/mobile rows and dialogs; final interaction rerun only for desktop denial. No new palette values or hook ignores."
+  ],
+  "findingsResolved": [
+    "The first isolated SQL fixture exposed an enum-literal assumption; health mapping now compares text values and the full fixture passed.",
+    "Browser fixture now respects preserved disclosure state when opening Manage.",
+    "An extra HTTP fixture incorrectly treated permitted central scope fields as unknown; the unknown-field test uses a desktop ID, with peer denial covered in the database and monitor suites.",
+    "The read-only catalog check initially joined no pool identity; corrected to join the installation table. No mutation occurred.",
+    "Final review closed old direct-desktop controls and new display connections for removed registrations, and disconnects existing desktop sessions before stop. Rebuilt and reinstalled all affected images, reran browser interactions, HTTP/desktop tests and live acceptance.",
+    "Sandbox and local-tool access used scoped approved retries."
+  ],
+  "checks": {
+    "centralAuthorizationLifecycleChecks": 154,
+    "executionDatabaseChecks": 50,
+    "generalDatabaseTests": 94,
+    "staticMigrationRollbackPairs": 112,
+    "httpSecurityTests": 12,
+    "desktopGatewayTests": 27,
+    "presentationBehaviorTests": 6,
+    "responsiveAccessibilityVariants": 28,
+    "axeViolations": 0,
+    "documentOverflow": 0,
+    "browserPageErrors": 0,
+    "typescript": "passed",
+    "productionBuild": "passed; existing lint skip",
+    "publicBuildAssetsScanned": 669,
+    "documentationToolTests": 38
+  },
+  "limits": [
+    "No real provider account was registered; both pools have zero accounts, registration open and execution closed.",
+    "Provider sign-in, generation, physical phones, screen readers and streamed-desktop accessibility remain unqualified.",
+    "Health is derived from current metadata and confirmation, not an automatic provider test.",
+    "Removed accounts retain operational records and credentials; removal is not data erasure or remote provider session invalidation.",
+    "No execution-project migration, cloud service deployment or public application cutover.",
+    "The VMs remain on one trusted Mac and share its physical host and administrator."
+  ],
+  "references": [
+    "https://www.primer.style/product/scenario-patterns/delete/",
+    "https://cloudscape.design/components/status-indicator/",
+    "https://cloudscape.design/patterns/resource-management/delete/",
+    "https://supabase.com/docs/guides/database/postgres/row-level-security"
+  ]
+}

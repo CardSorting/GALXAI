@@ -1,14 +1,15 @@
-# Capability and recovery UX
+# Account health and management UX
 
 <!-- docs-scope: current-guide -->
-> Private operator UX contract. Applies to the monitor, activity feed and desktop quick views.
 
-Lead with what needs attention, its last observed reason and the next safe action. Keep model capability, worker process, traffic hold and desktop connection separate. A green desktop cannot imply ready capacity; saved login cannot imply registry sync or worker application.
+Private contract for the two fixed pool monitors. Each uses Accounts, Registration and Activity with persistent destination identity and independent authorization. [The complete account reference](../reference/relay-account-management.md) owns state definitions and [the surface brief](../../.impeccable/surfaces/src-relay-pool-monitor-html.md) owns measured design choices.
 
-Use stable activity codes, timestamps, concise outcome labels and copyable opaque correlation IDs. Filtering, selected-row quick views and retained selection should reduce navigation. Keep raw diagnostics, guest output, tokens and prompt content out of the feed, even for administrator views.
+Lead with attention count, recognizable name, health label/reason and next action. Pair icons with text. Keep saved state, relay confirmation, sign-in and desktop connection separate. Unknown connectivity is not a failed account; an intentionally paused account and a stopped completed-registration desktop are not failures.
 
-Present pause as stopping new admissions, with accepted work allowed to finish. Present resume as removing the hold without clearing rejection/cooldown. Make linking an explicit reviewed action. Show checkpoint failures and updated-elsewhere outcomes without claiming successful save.
+Combine account search, status and health with Issues first/Name A–Z sorting. Registration gets its own search/status filters. Preserve filters, disclosure state and useful focus through refresh; announce result counts and provide Clear filters. Removed records stay out of active counts but remain available under Removed.
 
-Connect through host-launched sessions. Expiry/disconnect clears private state and offers reconnect, never an API-key paste field. Label stale/partial data and preserve meaningful status during slow refresh. Native status announcements should avoid repeating identical messages.
+Use a consistent **Manage** disclosure. Rename preselects the existing name and retains drafts on failure. Removal names the record, explains permanent account revocation versus restorable unfinished registration, preserves history/files and initially focuses Cancel. Disable duplicate submission; stale revision conflicts require review after refresh. Exact explicit retries retain intent identity when available.
 
-Use keyboard-operable controls, clear focus, bounded text composition and guest-input escape. Phone-sized tests cover layout, not physical devices. Streamed pixels do not provide guest semantic accessibility. See [desktops](RELAY_DESKTOPS.md), [credential recovery](RELAY_CREDENTIAL_ENROLLMENT.md) and [dated acceptance](RELAY_SESSION_VERIFICATION_20260909.md).
+Central save and desktop cleanup have distinct outcomes. A failed stop keeps the removal saved and offers Removed → Stop desktop. Registered-account removal has no restore; unfinished restoration requires new review. Pool Pause stops old authorization and is not the legacy keep-worker maintenance hold.
+
+Connect with native fixed-pool launchers, never token-paste forms. Refresh does not sign in or generate. Operational fields remain private; activity omits raw provider errors, prompts and guest output. Keyboard focus, dialogs and phone layouts have synthetic acceptance; physical phones, screen readers and streamed-pixel accessibility remain separate. Legacy organizer/hold semantics remain [scoped here](legacy-desktop-operations.md).

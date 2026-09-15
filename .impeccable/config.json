@@ -358,6 +358,24 @@
         ],
         "createdAt": "2026-09-14T23:04:32.730Z",
         "reason": "Codex: deterministic non-UI PNG transport fixture; the color tests artifact decoding and is not product design."
+      },
+      {
+        "rule": "overused-font",
+        "value": "inter",
+        "files": [
+          "internal/dual-relay-design-2026-09-15/prototype/style.css"
+        ],
+        "createdAt": "2026-09-15T05:54:31.521Z",
+        "reason": "Codex: this private relay interaction prototype inherits the existing Relay monitor typography from DESIGN.md and src/relay/federation.html; Operate mode prioritizes familiar controls and one readable sans family."
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#171b21",
+        "files": [
+          "src/relay/pool-monitor.css"
+        ],
+        "createdAt": "2026-09-15T16:56:50.251Z",
+        "reason": "Agent: the reviewed private monitor palette explicitly documents --panel #171b21 in .impeccable/surfaces/src-relay-pool-monitor-html.md; this scoped operator surface preserves its graphite panel treatment."
       }
     ]
   },

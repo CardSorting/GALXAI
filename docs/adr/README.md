@@ -169,3 +169,4 @@ Use the [authoring guide](../maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md) f
 | 0150 | [ADR 0150: Bounded free admission and paid capacity protection](0150-free-generation-admission-gate.md) | Proposed; expiring aggregate gate and composer stop states, local delivery only |
 | 0151 | [ADR 0151: Standalone Codex image tool transport](0151-codex-standalone-image-tool.md) | Proposed; local transport correction, live access unresolved |
 | 0152 | [ADR 0152: Manual desktop-only shard authority](0152-manual-desktop-only-shard-authority.md) | Owner-approved policy; explicit desktop enrollment, schema enforcement and manual session repair |
+| 0153 | [ADR 0153: Central account authority with isolated relay execution](0153-central-account-authority-isolated-relays.md) | Proposed implementation; sole account management in GALXAI, two execution pools; delivery not started |

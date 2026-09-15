@@ -1,0 +1,66 @@
+{
+  "reviewedAt": "2026-09-15T18:19:33.971162+00:00",
+  "reviewer": "Codex local Docker setup review",
+  "scope": "Incremental source/guide review for the owner-requested local runtime deployment; earlier service evidence remains the baseline outside this delta.",
+  "sourcesInspected": [
+    "scripts/relay-local.mjs",
+    "scripts/install-relay-local-isolation.py",
+    "scripts/export-relay-services.ts",
+    "scripts/set-relay-service-gates.ts",
+    "docker/relay-pools/local/authority-proxy.mjs",
+    "docker/relay-pools/local/central.yaml",
+    "docker/relay-pools/local/pool.yaml",
+    "package.json",
+    "docs/knowledge/registry.json",
+    "src/relay/pool-entry.ts",
+    "src/relay/pool-protocol.ts",
+    "src/relay/pool-runtime.ts",
+    "src/relay/pool-monitor-server.ts",
+    "src/relay/monitor-sessions.ts",
+    "src/relay/desktop-manager.ts"
+  ],
+  "guidesReadAndReconciled": [
+    "docs/runbooks/relay-pool-services.md",
+    "docs/adr/0153-central-account-authority-isolated-relays.md",
+    "post-mortem/CURRENT_STATE.md",
+    "docs/DOCUMENTATION_POLICY.md",
+    "docs/how-to/change-with-documentation.md",
+    "docs/reference/knowledge-commands.md"
+  ],
+  "evidence": [
+    "post-mortem/releases/2026-09-15-relay-local.json"
+  ],
+  "decisions": [
+    "Local execution uses separate VM kernels/daemons and private component configs; Mac administrator remains trusted.",
+    "Registration is open but execution requires own-pool manual registration and fresh local verification.",
+    "No fabricated external SSH host proof, no shared Docker daemon, no root environment copied into pool VMs.",
+    "Local scripts and overlays mapped to relay knowledge domain.",
+    "ADR status remains proposed; local evidence is distinct from provider acceptance."
+  ],
+  "checks": {
+    "local": 69,
+    "httpSecurityRegression": 12,
+    "productionBuild": "passed; existing lint skip",
+    "documentationToolTests": 38,
+    "browserBoundaryAssets": 669,
+    "emptyLocalActivation": "Refused before gate update because both monitors have zero registered accounts."
+  },
+  "limits": [
+    "The Mac administrator, physical host and central authority are shared trust boundaries.",
+    "No account credentials were imported or provider accounts signed in by the agent.",
+    "Both pools have zero registered accounts at this observation; execution remains disabled.",
+    "No provider text, Sites or image generation, public application cutover or customer billing acceptance.",
+    "Manual sign-in and provider qualification remain required; external-host acceptance is a separate deployment mode."
+  ],
+  "sourceSha256": {
+    "scripts/relay-local.mjs": "6fd74b84a324aa33448c27863fbb62065f9eca0a3ea2d55ab24e16995f160317",
+    "scripts/install-relay-local-isolation.py": "75367aa15afb11a7b4e243c4eb419b5e24b044e710efeee13f3c7b37b56b8177",
+    "scripts/export-relay-services.ts": "b974a585dea1a2704e93e5003ae4ac7e3b88d8359679d0a31fa88bfc3bb18431",
+    "scripts/set-relay-service-gates.ts": "b63a73176270b6cc15ec903814830d16d72725a245d6dbfb44190e483960461e",
+    "docker/relay-pools/local/authority-proxy.mjs": "c3252bdde6bc691fbaa2f17b7c25586e83ea22719ffbfc71e1bdee98bffd443a",
+    "docker/relay-pools/local/central.yaml": "721da26489c6ac098829646c3dfb1a97b321c48824c723171b0bad5229e90388",
+    "docker/relay-pools/local/pool.yaml": "0a97cbfcc00c1b8642d80520f13b17406fb5edf2a3eb3142c7c1f70f5d5291ba",
+    "package.json": "cbf0412034c50a7b9d10268323274f2c77f878eedde812b4d9bda182c4b8c8e6",
+    "docs/knowledge/registry.json": "3bb7cba5f8dc2ac510882ecad26f2064eb359e1043a1e3c3c1ae0f9bccb6a8dc"
+  }
+}

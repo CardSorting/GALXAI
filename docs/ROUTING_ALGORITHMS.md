@@ -1,33 +1,34 @@
-# Capability-first routing
+# Relay selection and admission
 
 <!-- docs-scope: current-guide -->
-> **Reading scope:** Current guidance. The federation contract governs relay behavior; source and dated verification define implementation evidence. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
 
-The [federation contract](FEDERATION_STRATEGY.md) is authoritative. Model eligibility precedes load selection; shards are heterogeneous.
+Private routing contract for [central account authority and isolated pools](ARCHITECTURE.md). Source behavior and [dated acceptance](../post-mortem/CURRENT_STATE.md) are separate from rollout intent.
 
 ## Selection
 
-1. Require an explicit model and distinguish chat from image operations.
-2. Read that capability's reverse index; do not scan or borrow unrelated pools.
-3. Require fresh available evidence, valid ownership, eligible credential state, and healthy non-draining relay state.
-4. Apply dependencies, including fresh execution-model access for the verified Codex image alias.
-5. Compare recent upstream errors, active streams, latency, queue depth, and remaining capacity among eligible candidates.
-6. Reserve the selected worker's capacity while admission is acknowledged and until fresh health accounts for the job.
+1. The application verifies customer identity, product permission and owner scope.
+2. With `GALX_ISOLATED_RELAYS_ENABLED=1`, deployment policy chooses `GALX_TEXT_RELAY_POOL` for text, default Standard. Sites and images choose Premium. Distinct origins and keys are required.
+3. The runtime rejects forbidden workloads before provider admission. Standard rejects Sites, images and generic tool/image aliases; a Premium failure cannot create Standard work.
+4. Fresh central projection and execution permission determine which assigned account engines can run. The runtime filters those engines by reported model access, then uses a rotating cursor among matching candidates. This implementation is not the legacy load-weighted capability index.
+5. The engine persists an execution reservation, acquires the existing central account lease and binds the lease before provider I/O. Assignment, revisions, epoch, workload, cooldown and budgets must pass centrally.
+6. Renewal remains bound to that exact grant. No peer account, legacy transport, alternate model or automatically retried provider request is selected after failure.
 
-An empty eligible pool produces `model_temporarily_unavailable`; a full eligible pool produces `model_capacity_exhausted`. Both use HTTP 503. There is no silent model substitution, federation-wide overflow queue, or machine-learning scheduler.
+The intended text catalog is the same across pools; a free or paid label does not establish actual access. Premium's first image trial requires its own explicit request and central image grant. Availability reads perform no generation.
 
 ## Changes during traffic
 
-Authenticated inventory refreshes and authoritative provider observations update the index. A denied model disappears from new routing without destroying the worker. Empty inventory remains alive for rediscovery. Active streams and generation-bound job URLs retain their existing lifecycle.
+A current central projection drives account engine lifecycle. Pause, revocation, removal, expiry or revision changes stop old engines; grant renewal also checks current authority. New work needs current authorization. Saved state and monitor health are observations, not grants.
 
-Generic route errors, throttling, and transport failures do not prove absent model permission. A restoration hold limits flapping; newer inventory and per-model observation versions fence stale successes and failures. Worker process restarts invalidate old health even when Docker container identity stays the same.
+A central failure invalidates freshness and stops new admission; already issued grants have an independent expiry. Generic transport failure or a 403 does not prove every model on an account is unavailable. Never manually mark health successful to bypass central admission.
 
 ## Capacity and fairness
 
-Reservations are generation-scoped. An unknown acknowledgement retains a conservative bounded reservation instead of replaying synthesis. Completed admission-receipt retrieval precedes eligibility checks. Durable Sites completion reads use their saved original-shard identity and retained receipt store; they do not select a new execution worker by model eligibility. Bounded per-worker job polling and independent control traffic protect unrelated pools from a busy shard.
+The runtime has bounded concurrent request bookkeeping and per-engine execution bounds. The existing central lease/budget ledger owns account capacity; execution-project rows record work and outcomes without reserving a second capacity balance. Product free quotas and Sites fair usage remain separate from provider account class.
 
-For fixed-price Sites, the federation checks the local receipt profile on all eligible workers during administrator readiness and on the selected worker after reserving capacity, before dispatch. A selected-worker failure releases that pre-dispatch reservation. The local profile permits one provider attempt and no automatic retry; general SDK retry policies cannot widen that contract. See [ADR 0135](adr/0135-durable-sites-receipts-and-local-admission.md).
+Retain the original request key, payload, tenant, origin and epoch. A replay can return an existing text job only when its required original runtime/account context is still available. Images and unavailable original contexts return an unconfirmed result rather than dispatching again. Receipt settlement may retry; synthesis does not.
 
-Application SDK `fallbackCascade` and `race` are explicit multi-model policies with separate execution/cost implications. They do not change this federation contract or make ambiguous retries safe.
+## Retained legacy routing
 
-See [rate limits](RATE_LIMITS_AND_QUOTAS.md), [queues](QUEUE_SPECIFICATION.md), and the [runbook](RELAY_VNEXT_RUNBOOK.md) for effective bounds.
+The existing single-controller federation retains capability-first eligibility, its reverse index, load comparison, local reservations and generation-bound job references. These rules apply only to its unassigned accounts and original jobs. Its detailed contract is in [legacy API recovery](reference/legacy-federation-api.md#request-recovery) and [legacy operations](maintainers/legacy-federation-operations.md). SDK race/fallback policies do not widen either relay's replay or pool boundary.
+
+See [rate limits](RATE_LIMITS_AND_QUOTAS.md), [queues](QUEUE_SPECIFICATION.md), [API recovery](RELAY_API_REFERENCE.md#request-recovery) and [service operation](runbooks/relay-pool-services.md).

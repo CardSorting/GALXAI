@@ -1,27 +1,31 @@
-# Model catalog and live availability
+# Model catalog and observed availability
 
 <!-- docs-scope: current-guide -->
-> **Reading scope:** Current guidance. The federation contract governs relay behavior; source and dated verification define implementation evidence. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
 
-A catalog describes public model IDs and product metadata. It does not prove that any current shard can execute them. The federation represents the union of live shard capabilities; each request still requires fresh eligible capacity and application entitlement.
+Private reference. A catalog describes public IDs and product metadata; it does not certify provider identity, account access or current capacity. [Routing](ROUTING_ALGORITHMS.md) and [account management](reference/relay-account-management.md) own the execution contract.
 
-| View | Answers |
+| View | Meaning |
 | --- | --- |
-| Application `/v1/models` | Which public models the product catalog describes |
-| Controller `/v1/models` | Which chat models currently have eligible shard evidence |
-| Administrator `/api/capabilities` | Which chat/image pools are eligible, fragile, unavailable, stale, or saturated |
-| Private administrator execution evidence | Which internal model/route handled the operation; not a customer response contract |
+| Product `/v1/models` | Public model descriptions under product access policy |
+| Own isolated runtime model/capability projection | Models observed on eligible accounts in that fixed pool, with workload gates |
+| Fixed monitor Accounts/Health | Saved/applied lifecycle and observed issues; not proof of successful generation |
+| Retained controller model/capability endpoints | Eligible evidence only for its unassigned legacy federation |
+| Private execution records | Actual internal route/model evidence, never a public model promise |
+
+## Premium and Standard
+
+Both pools intend the same text catalog. Premium uses paid provider accounts and alone accepts Sites/images. Standard uses free accounts and rejects Sites/images/tool aliases before provider I/O. Provider account class is separate from GALX customer plan. A label or paid account is not evidence that every intended model works.
+
+Text selects the configured deployment pool before account selection and cannot fall back to the peer or legacy dispatch. Capacity counts are meaningful only within the selected pool, requested capability and current authority. Zero eligible accounts is unavailable; a positive count is not an SLA or measured throughput guarantee.
 
 ## Image compatibility
 
-Canonical public capability `openai-gpt-image-latest` corresponds to internal relay `gpt-image-2`; older application image aliases resolve to the same capability. Native API-key shards request the exact image model. OAuth shards can serve the explicitly enabled, verified Codex image-tool alias using `gpt-5.6-terra` and `image_generation`. The provider selects the image model; exact GPT-Image-2, dimensions, and quality are not guaranteed.
+Canonical public capability `openai-gpt-image-latest` retains its explicitly supported internal alias contract. OAuth image execution uses the configured Codex image tool; the provider chooses its image implementation. Exact underlying GPT-Image identity, dimensions and quality are not guaranteed merely by the public name. See [the private alias contract](FEDERATION_STRATEGY.md#explicit-codex-image-tool-compatibility).
 
-Inspect execution identifiers only in private administrator records. Public responses must strip them and use sanitized binary images or allowlisted JSON. Fresh chat inventory alone cannot make this image route available. See the [full alias contract](FEDERATION_STRATEGY.md#explicit-codex-image-tool-compatibility).
+Premium image qualification is an explicit requested trial under its own central image grant. The isolated runtime does not perform automatic background paid probes. Fresh chat inventory alone cannot establish image availability. The retained federation's alias configuration and periodic verification remain separately documented in [legacy operations](maintainers/legacy-federation-operations.md).
 
-Other image IDs are not automatically mapped to this alias. Names such as Midjourney, Flux, and DALL-E must not be presented as equivalent upstream execution. Familiar application aliases, where supported, are an input compatibility feature; they cannot authorize federation substitution.
+Public image responses use sanitized binary artifacts or explicit allowlisted JSON. Keep internal execution identifiers private. Unsupported names cannot silently map to a different provider/model; compatibility normalization does not grant substitution.
 
-## Availability and economics
+## Evidence and economics
 
-Zero eligible shards means unavailable, one means fragile, and two or more means redundant capacity. These counts change as evidence expires, permissions change, or credentials are replaced. A model may exist in the catalog while unavailable for the caller's requested operation.
-
-Use current product pricing and authenticated entitlement responses for commercial decisions. Historical price tables, output resolutions, and percentage discounts are not a live API guarantee. The September 7 deployment evidence in ADR 0127 observed one usable shard; the [September 9 record](maintainers/RELAY_SESSION_VERIFICATION_20260909.md) records later fixture cleanup and retained worker state. Do not hard-code dated counts into routing or an SLA.
+Use [current state](../post-mortem/CURRENT_STATE.md) for deployment and dated capacity observations. Installed schemas, passing fixtures and monitor readiness do not prove manual provider sign-in or inference. Use current product pricing/entitlement contracts for customer policy; historical discounts, model counts and benchmark results are not live guarantees.

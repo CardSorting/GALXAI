@@ -2,26 +2,28 @@
 
 <!-- docs-scope: current-guide -->
 
-Private onboarding. Read [current state](../post-mortem/CURRENT_STATE.md), [architecture](ARCHITECTURE.md), [the federation contract](FEDERATION_STRATEGY.md) and [ADR 0152](adr/0152-manual-desktop-only-shard-authority.md). Deployment observations and accepted strategy have separate authority.
+Start with [current state](../post-mortem/CURRENT_STATE.md), [architecture](ARCHITECTURE.md), [central management](reference/relay-account-management.md) and [local service operations](runbooks/relay-pool-services.md). This guide is private. Installation, execution activation, real provider qualification and public application cutover are distinct checkpoints.
 
 ## Follow a request
 
-Trace verified product identity and entitlement through the server adapter, requested-capability admission, assigned worker and original recovery reference. Public responses expose allowlisted customer fields and sanitized artifacts. Prompts, task IDs, model output and caller-provided account hints cannot grant permission. Uncertain outcomes retain their original identity.
+Trace verified customer identity and entitlement to one server-selected destination. Text uses the configured pool; Sites/images use Premium. Each runtime receives only its assigned accounts and persists execution state in its own project. A central account lease is acquired and bound before provider I/O. No cross-pool or legacy failover occurs. Retain original operation identity during recovery; public output contains allowlisted fields and sanitized artifacts only.
 
 ## Follow an account
 
-Start with a manually created Relay Desktop. The operator signs in inside it and explicitly chooses **Enroll shard**. The host validates saved credentials and commits a unique owning-desktop binding to the encrypted registry. An eligible legacy record needs the same explicit confirmation. Creating, polling, matching and linking do not enroll; API/CLI/file ingestion and host-cache import are closed.
+Accounts, credentials, assignments and lifecycle history live only in `mazhcjisettrzbqhorvp`. Open **GALX Monitors**, then the fixed Premium or Standard monitor. Premium requires a paid provider account; Standard requires a free one. Create a named registration, sign in manually in its desktop, review access and register. It saves paused; Enable is separate. Customer subscription is not provider classification.
 
-The controller and database admission both reject unconfirmed authority. Cold inventory preflight precedes allocation; fresh requested-model evidence gates routing. One registered row, one running desktop and one eligible worker are different counts. Worker reconciliation remains automatic.
+Use **Manage** to rename or remove. Rename updates linked account/registration names together. Removing a registered account permanently revokes access and retains history; unfinished registrations can be restored from Removed with a new review. Stale revisions require refresh, and a lost response requires inspecting the saved outcome.
 
 ## Follow a repair
 
-Open the owning desktop through the host shortcut. Start it if stopped, review the link and any maintenance hold, then manually renew the provider sign-in. Saved-file sync validates and conditionally persists the new login for that bound account. It cannot renew the provider session, enroll another account, move a database binding or resume traffic.
+Use account Health and Registration filters to locate the issue. Sign-in expiry, cooldown, repeated failure, unconfirmed updates and unknown connectivity have different actions. Open the matching registration and owning desktop for manual sign-in, then explicitly review/save the new sign-in. A stopped desktop does not mean the registered account is unhealthy.
 
-Inspect saved authority, worker application and requested capability independently. A hold blocks replacement starts; review before resuming. Preserve the desktop home and private journals, and investigate a lost home or conflicting binding as a recovery incident rather than importing elsewhere.
+A removal that could not stop its desktop offers **Removed → Stop desktop**. Never delete homes, clear central records, reassign an account across pools or import credentials as a shortcut. Registry and retained request history survive recovery.
 
 ## Practice and evidence
 
-Host launchers issue separate monitor and desktop sessions. Ordinary GALX sessions, preview approval and inference keys do not authorize desktop administration. Use synthetic fixtures and the [manual database tests](maintainers/RELAY_HARDENING.md) for practice; never start a second controller against production authority.
+The central authority is on Docker Desktop; each pool has its own Colima VM, Docker daemon and execution database. The two VMs share a trusted physical Mac. The runtime has no daemon socket or main database/vault authority. The owning monitor has the daemon access required for its desktops. Run `npm run relay:local -- verify` for actual local isolation checks; it does not generate content or activate execution.
 
-Use [enrollment/recovery](maintainers/RELAY_CREDENTIAL_ENROLLMENT.md), [desktop operations](maintainers/RELAY_DESKTOPS.md), [API recovery](RELAY_API_REFERENCE.md#request-recovery) and [security](SECURITY.md) for complete procedures. Historical ADRs and September 9 measurements remain dated evidence. ACT-022 tracks real manual account acceptance; the image incident remains separate in current state.
+Use disposable database and synthetic monitor tests for mutations. Ordinary GALX authentication, preview approval and inference keys do not authorize monitor administration. Existing legacy controller/desktops remain governed by [legacy operations](maintainers/legacy-federation-operations.md) and cannot administer assigned pool accounts.
+
+Read the [registration guide](maintainers/RELAY_CREDENTIAL_ENROLLMENT.md), [desktop guide](maintainers/RELAY_DESKTOPS.md), [request recovery](RELAY_API_REFERENCE.md#request-recovery) and [security](SECURITY.md) before changing their boundaries.

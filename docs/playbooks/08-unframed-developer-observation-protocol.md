@@ -1,12 +1,13 @@
-# Developer observation protocol
+# Developer and operator observation protocol
 
 <!-- docs-scope: current-guide -->
-> **Reading scope:** Current guidance. The federation contract governs relay behavior; source and dated verification define implementation evidence. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
 
-Observe users attempting a real task with their familiar client before teaching internal terminology. Record the intended model, request shape, first blocking moment, error interpretation, and recovery action without collecting secrets or prompt content unnecessarily.
+Private maintainer procedure.
 
-Test whether users distinguish a catalog entry from live availability, unavailable from saturated capacity, and accepted from completed work. Check whether image execution metadata makes provider-managed compatibility understandable. An interface should not invite duplicate generation after uncertain admission.
+Observe the intended user task before teaching internal terminology. For product clients, test model selection, unavailable/accepted/uncertain states and recovery without exposing execution topology or provider diagnostics. Internal execution metadata is administrator-only evidence.
 
-Compare time to first valid result, unnecessary confirmations, repeated requests, and recovery success using a stated sample and environment. Small observations are product evidence, not universal usability or throughput claims. Patch the highest-impact friction while preserving explicit model, tenant, and execution authority.
+For operators, use the fixed Premium/Standard monitor. Test finding an unhealthy account, distinguishing registration from an enabled account, renaming, handling a concurrent update, removing the intended record, and finding failed desktop cleanup under Removed. Check that users understand saved versus applied changes, unknown health, permanent account removal and restorable unfinished registration.
 
-Use the [current contract](../FEDERATION_STRATEGY.md), [operator runbook](../RELAY_VNEXT_RUNBOOK.md), [request recovery table](../RELAY_API_REFERENCE.md#request-recovery), and [maintainer execution guide](../maintainers/AI_AGENT_PAIR_PROGRAMMING_AND_GOVERNANCE.md).
+Test keyboard access, initial Cancel focus in destructive dialogs, text-plus-icon status, responsive filtering, preserved search/focus on refresh and viewer restrictions. Familiar management patterns should reduce unnecessary confirmations while retaining an explicit consequence for removal.
+
+Record sample, environment, task completion, first blocking moment, repeated requests and recovery success without secrets or unnecessary user data. Small studies are bounded evidence, not universal UX scores. See [monitor UX](../maintainers/RELAY_TELEMETRY_UX.md), [account contract](../reference/relay-account-management.md) and [verification](../maintainers/RELAY_HARDENING.md).

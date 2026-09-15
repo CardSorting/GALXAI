@@ -174,7 +174,7 @@
       "path": "docs/FEDERATION_STRATEGY.md",
       "scope": "current-guide",
       "category": "docs",
-      "title": "Federation contract"
+      "title": "Relay execution and account authority contract"
     },
     {
       "path": "docs/FORENSIC_PAYLOAD_DISSECTION_AND_CAUSAL_ANALYSIS.md",
@@ -216,13 +216,13 @@
       "path": "docs/MIGRATION_GUIDE.md",
       "scope": "current-guide",
       "category": "docs",
-      "title": "Migrating to manual desktop authority and capability-aware GALX"
+      "title": "Migration to central accounts and isolated relays"
     },
     {
       "path": "docs/MODEL_CATALOG.md",
       "scope": "current-guide",
       "category": "docs",
-      "title": "Model catalog and live availability"
+      "title": "Model catalog and observed availability"
     },
     {
       "path": "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md",
@@ -264,7 +264,7 @@
       "path": "docs/QUEUE_SPECIFICATION.md",
       "scope": "current-guide",
       "category": "docs",
-      "title": "Application queues and relay jobs"
+      "title": "Application queues and relay execution"
     },
     {
       "path": "docs/QUICKSTART.md",
@@ -276,7 +276,7 @@
       "path": "docs/RATE_LIMITS_AND_QUOTAS.md",
       "scope": "current-guide",
       "category": "docs",
-      "title": "Rate limits, concurrency, and quota"
+      "title": "Rate limits, concurrency and quota"
     },
     {
       "path": "docs/README.md",
@@ -294,13 +294,13 @@
       "path": "docs/RELAY_API_REFERENCE.md",
       "scope": "current-guide",
       "category": "docs",
-      "title": "Federation relay API"
+      "title": "Isolated relay and account management API"
     },
     {
       "path": "docs/RELAY_VNEXT_RUNBOOK.md",
       "scope": "current-guide",
       "category": "docs",
-      "title": "Capability-aware relay vNext"
+      "title": "Relay operations and implementation entry point"
     },
     {
       "path": "docs/RESILIENCE_AND_DISASTER_RECOVERY.md",
@@ -312,7 +312,7 @@
       "path": "docs/ROUTING_ALGORITHMS.md",
       "scope": "current-guide",
       "category": "docs",
-      "title": "Capability-first routing"
+      "title": "Relay selection and admission"
     },
     {
       "path": "docs/SDK_CHEATSHEET.md",
@@ -366,7 +366,7 @@
       "path": "docs/STANDARDIZED_OAUTH_AND_INGESTION_ARCHITECTURE.md",
       "scope": "domain-reference",
       "category": "docs",
-      "title": "Authentication and credential enrollment boundaries"
+      "title": "Authentication and credential registration boundaries"
     },
     {
       "path": "docs/STREAMING_AND_SSE_PROTOCOL.md",
@@ -396,7 +396,7 @@
       "path": "docs/TELEMETRY_AND_OBSERVABILITY.md",
       "scope": "current-guide",
       "category": "docs",
-      "title": "Telemetry and observability"
+      "title": "Relay health and operational visibility"
     },
     {
       "path": "docs/TRAINING_ROADMAP_AND_EXECUTION_PLAN.md",
@@ -420,7 +420,7 @@
       "path": "docs/VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md",
       "scope": "current-guide",
       "category": "docs",
-      "title": "Relay deployment: vNext migration and legacy reference"
+      "title": "Relay deployment and transport recovery"
     },
     {
       "path": "docs/WALLET_AND_BILLING_STRATEGY.md",
@@ -1341,6 +1341,12 @@
       "title": "ADR 0152: Manual desktop-only shard authority"
     },
     {
+      "path": "docs/adr/0153-central-account-authority-isolated-relays.md",
+      "scope": "decision-record",
+      "category": "docs",
+      "title": "ADR 0153: Central account authority with isolated relay execution"
+    },
+    {
       "path": "docs/adr/README.md",
       "scope": "current-guide",
       "category": "docs",
@@ -1692,7 +1698,7 @@
       "path": "docs/maintainers/MAINTAINER_GLOSSARY_AND_LEXICON.md",
       "scope": "domain-reference",
       "category": "docs",
-      "title": "📖 Maintainer Glossary & Architectural Lexicon"
+      "title": "Maintainer glossary"
     },
     {
       "path": "docs/maintainers/MAINTAINER_ONBOARDING_ASSESSMENT.md",
@@ -1734,25 +1740,25 @@
       "path": "docs/maintainers/RELAY_CREDENTIAL_ENROLLMENT.md",
       "scope": "current-guide",
       "category": "docs",
-      "title": "Relay credential enrollment and recovery"
+      "title": "Relay account registration and manual sign-in recovery"
     },
     {
       "path": "docs/maintainers/RELAY_DESKTOPS.md",
       "scope": "current-guide",
       "category": "docs",
-      "title": "Relay desktops and manual repair"
+      "title": "Pool sign-in desktops and account repair"
     },
     {
       "path": "docs/maintainers/RELAY_HARDENING.md",
       "scope": "current-guide",
       "category": "docs",
-      "title": "Federation hardening checks"
+      "title": "Relay hardening checks"
     },
     {
       "path": "docs/maintainers/RELAY_QUOTA_AND_FLEET.md",
       "scope": "current-guide",
       "category": "docs",
-      "title": "Federation fleet and quota"
+      "title": "Isolated account capacity and quota"
     },
     {
       "path": "docs/maintainers/RELAY_SESSION_VERIFICATION_20260909.md",
@@ -1764,13 +1770,13 @@
       "path": "docs/maintainers/RELAY_TELEMETRY.md",
       "scope": "current-guide",
       "category": "docs",
-      "title": "Federation request telemetry"
+      "title": "Relay request and account telemetry"
     },
     {
       "path": "docs/maintainers/RELAY_TELEMETRY_UX.md",
       "scope": "current-guide",
       "category": "docs",
-      "title": "Capability and recovery UX"
+      "title": "Account health and management UX"
     },
     {
       "path": "docs/maintainers/RELEASE_ENGINEERING_AND_VERSIONING.md",
@@ -1818,7 +1824,7 @@
       "path": "docs/maintainers/SUBSYSTEM_INTERNALS_AND_DEPENDENCY_GRAPH.md",
       "scope": "domain-reference",
       "category": "docs",
-      "title": "🏛️ Subsystem Internals & Dependency DAG"
+      "title": "Subsystem ownership and dependencies"
     },
     {
       "path": "docs/maintainers/SUBSYSTEM_MAINTAINER_MATRIX.md",
@@ -1867,6 +1873,24 @@
       "scope": "operational-record",
       "category": "docs",
       "title": "Image workspace UX investigation — September 13, 2026"
+    },
+    {
+      "path": "docs/maintainers/legacy-desktop-enrollment.md",
+      "scope": "current-guide",
+      "category": "docs",
+      "title": "Legacy desktop enrollment"
+    },
+    {
+      "path": "docs/maintainers/legacy-desktop-operations.md",
+      "scope": "current-guide",
+      "category": "docs",
+      "title": "Legacy desktop operations"
+    },
+    {
+      "path": "docs/maintainers/legacy-federation-operations.md",
+      "scope": "current-guide",
+      "category": "docs",
+      "title": "Legacy federation operations"
     },
     {
       "path": "docs/maintainers/readable-urls.md",
@@ -1974,7 +1998,7 @@
       "path": "docs/playbooks/03-live-traffic-and-fleet-scaling.md",
       "scope": "current-guide",
       "category": "docs",
-      "title": "Traffic and model-specific scaling"
+      "title": "Traffic and pool-specific capacity"
     },
     {
       "path": "docs/playbooks/04-incident-response-and-sev-triage.md",
@@ -2004,7 +2028,7 @@
       "path": "docs/playbooks/08-unframed-developer-observation-protocol.md",
       "scope": "current-guide",
       "category": "docs",
-      "title": "Developer observation protocol"
+      "title": "Developer and operator observation protocol"
     },
     {
       "path": "docs/playbooks/09-continuous-learning-and-training-runbook.md",
@@ -2049,6 +2073,18 @@
       "title": "Knowledge commands and metadata"
     },
     {
+      "path": "docs/reference/legacy-federation-api.md",
+      "scope": "current-guide",
+      "category": "docs",
+      "title": "Legacy federation API"
+    },
+    {
+      "path": "docs/reference/relay-account-management.md",
+      "scope": "current-guide",
+      "category": "docs",
+      "title": "Central account management and isolated relay contract"
+    },
+    {
       "path": "docs/relay-security.md",
       "scope": "current-guide",
       "category": "docs",
@@ -2065,6 +2101,18 @@
       "scope": "current-guide",
       "category": "docs",
       "title": "Reconcile stale knowledge"
+    },
+    {
+      "path": "docs/runbooks/relay-pool-images.md",
+      "scope": "current-guide",
+      "category": "docs",
+      "title": "Build and inspect the two relay images"
+    },
+    {
+      "path": "docs/runbooks/relay-pool-services.md",
+      "scope": "current-guide",
+      "category": "docs",
+      "title": "Install the central authority and isolated relay services"
     },
     {
       "path": "docs/runbooks/release-readiness.md",
@@ -2143,6 +2191,114 @@
       "scope": "current-guide",
       "category": "docs",
       "title": "Make your first safe change"
+    },
+    {
+      "path": "internal/dual-relay-design-2026-09-15/README.md",
+      "scope": "research-reference",
+      "category": "internal",
+      "title": "Premium and Standard relay implementation"
+    },
+    {
+      "path": "internal/dual-relay-design-2026-09-15/central-account-control.md",
+      "scope": "research-reference",
+      "category": "internal",
+      "title": "Central account management with isolated execution"
+    },
+    {
+      "path": "internal/dual-relay-design-2026-09-15/delivery-plan.md",
+      "scope": "research-reference",
+      "category": "internal",
+      "title": "Delivery status: central accounts and isolated execution"
+    },
+    {
+      "path": "internal/dual-relay-design-2026-09-15/history/autonomous-registries-2026-09-15.md",
+      "scope": "research-reference",
+      "category": "internal",
+      "title": "Historical proposal: autonomous relay registries"
+    },
+    {
+      "path": "internal/dual-relay-design-2026-09-15/history/initial-design-2026-09-15.md",
+      "scope": "research-reference",
+      "category": "internal",
+      "title": "Separate Premium and Standard relays: architecture and operator design"
+    },
+    {
+      "path": "internal/dual-relay-design-2026-09-15/history/logical-pools-2026-09-15.md",
+      "scope": "research-reference",
+      "category": "internal",
+      "title": "Historical proposal: logical database pool isolation"
+    },
+    {
+      "path": "internal/dual-relay-design-2026-09-15/history/pre-service-audit-2026-09-15.md",
+      "scope": "research-reference",
+      "category": "internal",
+      "title": "Production audit: central foundation and activation barriers"
+    },
+    {
+      "path": "internal/dual-relay-design-2026-09-15/history/prototype-v1-verification-2026-09-15.md",
+      "scope": "research-reference",
+      "category": "internal",
+      "title": "Historical two-console prototype: first verification"
+    },
+    {
+      "path": "internal/dual-relay-design-2026-09-15/initial-design-2026-09-15.md",
+      "scope": "research-reference",
+      "category": "internal",
+      "title": "Initial relay design research — historical checkpoint"
+    },
+    {
+      "path": "internal/dual-relay-design-2026-09-15/isolation-proof/README.md",
+      "scope": "research-reference",
+      "category": "internal",
+      "title": "Separate-network and separate-database proof"
+    },
+    {
+      "path": "internal/dual-relay-design-2026-09-15/pool-isolation.md",
+      "scope": "research-reference",
+      "category": "internal",
+      "title": "Relay pool isolation"
+    },
+    {
+      "path": "internal/dual-relay-design-2026-09-15/pre-service-audit-2026-09-15.md",
+      "scope": "research-reference",
+      "category": "internal",
+      "title": "Pre-service foundation audit — historical checkpoint"
+    },
+    {
+      "path": "internal/dual-relay-design-2026-09-15/production-audit-2026-09-15.md",
+      "scope": "operational-record",
+      "category": "internal",
+      "title": "Relay service implementation audit — September 15, 2026"
+    },
+    {
+      "path": "internal/dual-relay-design-2026-09-15/prototype/AUDIT.md",
+      "scope": "research-reference",
+      "category": "internal",
+      "title": "Central account console: technical audit and improvements"
+    },
+    {
+      "path": "internal/dual-relay-design-2026-09-15/prototype/README.md",
+      "scope": "research-reference",
+      "category": "internal",
+      "title": "Central accounts, two relay consoles: interaction prototype"
+    },
+    {
+      "path": "internal/dual-relay-design-2026-09-15/provisioning-status.md",
+      "scope": "operational-record",
+      "category": "internal",
+      "title": "Supabase relay project provisioning"
+    },
+    {
+      "path": "internal/dual-relay-design-2026-09-15/schema-proof/README.md",
+      "scope": "research-reference",
+      "category": "internal",
+      "title": "Executable relay pool schema proof"
+    },
+    {
+      "path": "internal/dual-relay-design-2026-09-15/strict-isolation.md",
+      "scope": "research-reference",
+      "category": "internal",
+      "title": "Relay trust and isolation boundaries"
     },
     {
       "path": "internal/operations/README.md",

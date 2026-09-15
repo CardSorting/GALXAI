@@ -1,9 +1,25 @@
-# Federation hardening checks
+# Relay hardening checks
 
 <!-- docs-scope: current-guide -->
 > Private validation guide. Choose checks for the changed boundary; record revision, environment and results rather than treating historical test counts as a gate.
 
-## Fast regressions
+## Isolated services and account management
+
+```sh
+npm run test:relay:services
+npm run test:relay:authorization-db
+npm run test:relay:access
+node --test scripts/test-relay-monitor-model.mjs
+npx tsx scripts/verify-relay-pool-monitor.ts
+```
+
+The service/central database suites cover fixed principal scope, peer denial, account class, central-only custody, exclusive assignment, legacy writer/lease exclusion, runtime grants/epochs, operation replay and revision conflicts. Management coverage includes rename synchronization, permanent account removal, unfinished-registration restore, review/ticket invalidation, retained history, failed desktop cleanup and denial of removed desktop controls. Standard Sites/image/tool requests must make zero provider calls. Execution persistence is verified against its separate disposable schema; it cannot create an account ledger.
+
+The browser fixture exercises both monitors, search/status/health filters, issue ordering, empty/unavailable states, rename conflict, removal dialogs, failed-stop cleanup, restore, viewers and sign-out. Inspect responsive layout, keyboard focus and accessibility, not only screenshots. Launcher tests verify fixed destinations and ticket handling. These fixtures do not perform real provider sign-in.
+
+`npm run relay:local -- verify` is separate actual-installation acceptance: VM/daemon identities, no host mounts, reviewed running images, peer firewalls, TLS, scoped roles and Standard denial. It writes private evidence and does not open execution. Current acceptance and image IDs are linked from [current state](../../post-mortem/CURRENT_STATE.md). For exact service bounds, rollout and rollback use [service installation](../runbooks/relay-pool-services.md).
+
+## Retained federation regressions
 
 ```sh
 npm run test:relay:capabilities
@@ -18,7 +34,7 @@ python3 scripts/verify-docs.py
 
 The capability suite covers lifecycle, desktop/credential recovery, maintenance, monitor authorization, telemetry and HTTP/adaptive-quota behavior. The image transport fixture tests the exact standalone Codex request, metadata re-encoding, response bounds, malformed artifacts, denial, cancellation and single dispatch. The HTTP fixture exercises image verification, ordinary-key probe denial and delivery without a chat-model dependency. These use local fixtures, never production tokens. Enrollment tests cover retired entrypoints, validation and isolation. Explicit enrollment also needs desktop-session and exact-Origin checks, unknown-field rejection, expected-link fencing, stopped/missing workspace denial, repeated requests, wrong-desktop/account rejection and preservation of revoked or unconfirmed authority. Automatic sync must never enroll an unknown account or independently renew its provider session. Public-boundary tests inspect adversarial bodies, headers, errors and artifacts. Guest tests exercise CLI/source handling without a real account sign-in.
 
-## Controller recovery drills
+## Legacy controller recovery drills
 
 ```sh
 npm run test:relay:guardian
@@ -31,7 +47,7 @@ These use real guardian, launcher, controller, HTTP and WebSocket processes in d
 
 Federation workers use Docker restart policy `no`; the lifecycle controller is their sole restart authority. Unexpected exits or inventory disappearance are retried with backoff, capped at five attempts in ten minutes, and then surface `worker_restart_budget_exhausted` for operator action. Provider capability loss remains a readiness signal and does not trigger worker or controller restart.
 
-## Storage and real containers
+## Legacy storage and real containers
 
 ```sh
 node --import tsx --test scripts/test-shard-enrollment-storage.ts

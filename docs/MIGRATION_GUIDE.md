@@ -1,44 +1,48 @@
-# Migrating to manual desktop authority and capability-aware GALX
+# Migration to central accounts and isolated relays
 
 <!-- docs-scope: current-guide -->
 
-Private integration and operations guide. [Current state](../post-mortem/CURRENT_STATE.md) records which components are deployed; [ADR 0152](adr/0152-manual-desktop-only-shard-authority.md) defines the current enrollment policy.
+Private migration guide. [Current state](../post-mortem/CURRENT_STATE.md) records delivery; [ADR 0153](adr/0153-central-account-authority-isolated-relays.md) records the decision separately from acceptance. The full target contract is [account management](reference/relay-account-management.md).
 
 ## Application clients
 
-Use `https://galx.ai/v1` with the intended application credentials and an entitled public model ID. Developer approval, account identity and plan access retain their own contracts. Clients do not upload provider credentials or enroll shards. Retired connection endpoints return 410; changing authentication or retrying them cannot enable enrollment.
+Clients keep the entitled public model/API contracts and their application credentials. They never upload provider credentials, choose an internal account or enroll a relay. GALX customer plan and provider account class are separate. Retired connection endpoints return 410. Catalog presence does not establish availability; canonical image capability remains `openai-gpt-image-latest`, without an unverified provider-model promise.
 
-Catalog presence does not prove availability. Preserve operation identity and recovery URLs across uncertain outcomes. Canonical image capability is `openai-gpt-image-latest`; legacy aliases are not independent fallback providers. Default successful image responses are sanitized binary artifacts; explicit JSON uses its allowlisted contract. Verify chat, images, streaming, storage and billing separately, and never automatically repeat uncertain image synthesis.
+Preserve operation identity and original recovery URLs. Default image responses are sanitized binary artifacts; explicit JSON uses allowlisted fields. Verify chat, images, streaming, persistence, ownership and billing independently. An uncertain response is not permission to repeat synthesis.
 
-## Replace external enrollment
+## Target authority and ownership
 
-Remove API connection calls, CLI add/import recipes, token environment injection and ambient credential discovery from onboarding scripts. Do not replace them with direct inserts or private function calls from general application code.
+The main project `mazhcjisettrzbqhorvp` alone owns canonical accounts, encrypted credentials, exclusive pool assignment, lifecycle history and the existing account lease ledger. Premium's `prgjcyokylzcsqrjmkaa` and Standard's `enbtzuxkguehtnrhuvlu` hold only fixed execution identity and execution records. There is no copied registry or second account budget.
 
-1. Use the host's **GALX Relay Monitor** desktop shortcut or `npm run relay:desktops`.
-2. Manually create a workspace for a new account, or open the existing account's owning desktop.
-3. Complete provider sign-in inside that desktop and explicitly choose **Enroll shard**.
-4. Review successful authority persistence, the worker-applied revision and fresh requested-capability evidence before sending work.
-
-For an existing eligible record, the same action confirms its account and binding without resetting owner, quota, counters, holds or history. No source label, unexpired token, saved link or workspace name is a grandfathering rule. A record remains excluded until confirmed. Revoked, dead, quarantined, ambiguous and differently bound accounts fail closed.
+Premium contains paid provider accounts and supports text, Sites and images. Standard contains free provider accounts and supports text only. Both intend the same text catalog, subject to observed access. Separate VMs, daemons, disks, monitors and scoped secrets prevent peer use; the local Mac administrator remains trusted. Legacy admission/writers reject assigned accounts. No automatic classification, transfer, borrowing or failover is supported.
 
 ## Schema and component sequencing
 
-For a target that has not received the policy, follow [the database runbook](maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md) and [enrollment rollout](maintainers/RELAY_CREDENTIAL_ENROLLMENT.md#existing-records-and-schema-rollout). Validate migration `20260914231914` and its rollback on a disposable database, inspect the exact target, then apply only the reviewed version. It preserves records, adds paired enrollment fields and a unique binding, closes external credential writes and gates durable lease admission.
+Follow [database operations](maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md#central-relay-authorization-and-execution-projects). Central foundation, authorization, legacy-assignment guard and account-management migrations are applied centrally; each execution project has only its execution schema. The manual-desktop policy remains the base provenance boundary. Do not reapply dated migrations or restore broad credential writers to make an older tool work.
 
-Load compatible controller and application source after the schema. Preserve desktop homes, signing state, holds and admission receipts; establish one supervised controller owner and reconnect browser sessions through the launcher. Application deployment does not upgrade worker or guest images. The [September 15 activation](../post-mortem/releases/2026-09-15-manual-desktop-enrollment-activation.json) is dated evidence for the existing target, not an instruction to reapply it.
+Use [service installation](runbooks/relay-pool-services.md) for exact image pins, component secret files, local verification and gates. The installed local layout uses Docker Desktop for central HTTPS and separate Colima profiles for execution. No cloud deployment is needed for this selected layout. Preserve homes, assignments, journals, leases, execution rows and signing state across updates.
+
+## Replace external enrollment
+
+Remove token imports, ambient credential discovery, application connection calls and direct registry insert recipes. For the new services:
+
+1. Open the intended fixed **GALX Premium** or **GALX Standard** monitor.
+2. Choose **Register account**, prepare its desktop and manually sign in with the appropriate paid/free provider account.
+3. Choose **Review access**, inspect the result and explicitly register. The central account starts paused.
+4. Follow execution acceptance and gates, then enable intended accounts and wait for a fresh matching applied revision. Verify actual requested capabilities separately.
+
+No label, existing token or desktop file establishes assignment. A conflicting, removed or differently bound account cannot be revived or moved by registration. Use [manual registration](maintainers/RELAY_CREDENTIAL_ENROLLMENT.md) for the full procedure.
 
 ## Renew sessions manually
 
-After enrollment, expired provider sessions require fresh sign-in in the same bound desktop. **Check now** and enabled automatic sync validate and persist the saved login; they do not independently renew provider sessions. Changing a local link cannot transfer database ownership. A hold may prevent replacement after credential rotation; review authority before explicitly resuming. Keep the bound desktop home for later repair.
+In the owning monitor open the account's desktop, complete fresh provider sign-in, then choose **Update saved sign-in → Save new sign-in**. Review and commit are explicit; the new services do not use the legacy background saved-file bridge. A saved revision, a matching runtime acknowledgment and successful inference are separate observations. Monitor reconnection and GALX account-session renewal do not refresh provider credentials.
 
-GALX account-session refresh and local administrator browser-session renewal remain independent. Reopening a monitor after controller restart does not refresh the provider credential.
+Rename, health filtering and removal use the central revision-aware management contract. Unfinished removed registrations can be restored with a new review. Removed registered accounts remain revoked and cannot be restored; files and historical authority are retained. See [account management](reference/relay-account-management.md).
 
-## Migrate a historical shared relay
+## Application cutover and recovery
 
-Drain and stop shared ownership before using the supervised federation launcher. Preserve accepted work and private state; do not run two topologies with the same account. `docker-compose.relay.yml` and arbitrary credential-file workers are not managed enrollment paths. Multi-host ownership requires its own fencing design.
+The latest local acceptance records registration open, execution closed and zero registered accounts. Real manual sign-ins, capability qualification, activation and public application cutover remain pending. The existing public deployment still uses its retained federation path; its [legacy enrollment procedure](maintainers/legacy-desktop-enrollment.md) applies only to eligible unassigned records.
 
-## Verification and recovery
+After local qualification, configure the server-only isolated transport and distinct endpoints/keys using the service runbook. Text stays in the selected pool; Sites/images use Premium. The isolated path bypasses application credential selection and duplicate account lease acquisition, while customer quota/fair usage remains independent. A cloud-hosted application cannot reach the Mac's loopback endpoints directly.
 
-Run [hardening checks](maintainers/RELAY_HARDENING.md), including manual enrollment role/race/rollback and administrator boundary tests, then the production build and applicable raw HTTP/asset checks. Use isolated fixtures for synthetic mutations. Real provider sign-in and completed inference need separate acceptance.
-
-Prefer fixing the restricted path. The manual enrollment DOWN migration restores old grants/functions while retaining provenance columns; it intentionally reopens the earlier boundary and requires a reviewed matching software rollback. Preserve receipts and revocations through any rollback. Do not restore external ingestion merely to make old CLI tools or a historical verifier pass.
+Keep original receipt origins/readers for accepted legacy work. Close the new gates before rollback; preserve central records and execution evidence. Management rollback does not undo revocation. Never reopen external ingestion, borrow an account or redispatch uncertain work to restore availability. Run the relevant [hardening checks](maintainers/RELAY_HARDENING.md), production build and public authorization/response checks for any runtime cutover; documentation changes alone are not deployment evidence.

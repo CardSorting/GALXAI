@@ -20,6 +20,7 @@ import { TokenCostCalculator } from '../pricing/TokenCostCalculator';
 import { GalxEdgeBatchBuffer } from '../../workers/cloudflare/GalxEdgeBatchBuffer';
 import { OpenAIAdapter } from './adapters/OpenAIAdapter';
 import { RelayDispatchError } from './adapters/RelayChatTransport';
+import { isolatedRelaysEnabled, isolatedChat, isolatedImage } from './adapters/IsolatedRelayTransport';
 import { ImageCapacityError } from './ImageCapacityError';
 import { GalxPreflightValidator } from '../validator/GalxPreflightValidator';
 import { GalxMetricsEngine } from '../telemetry/GalxMetricsEngine';
@@ -86,6 +87,7 @@ export class GalxModelRouter {
    * Proactively pre-warms DNS and HTTP keep-alive socket connections to OpenAI.
    */
   public prewarmUpstreamSockets(): void {
+    if(isolatedRelaysEnabled())return;
     OpenAIAdapter.prewarmConnection();
   }
 
@@ -241,7 +243,7 @@ export class GalxModelRouter {
     modelUsed: string;
     provider: ProviderType;
   }> {
-    await this.substrate.ensureFreshFromAuthority();
+    if(!isolatedRelaysEnabled())await this.substrate.ensureFreshFromAuthority();
     const { userId, requestId, isPriorityUser, headers: incomingHeaders } = options;
     const modelSpec = ModelCatalog.resolveModel(options.request.model);
     if (!modelSpec) {
@@ -251,6 +253,21 @@ export class GalxModelRouter {
 
     // 1. Resolve Privacy Policy & Compliance Directives
     const privacyPolicy = this.privacyEngine.resolvePrivacyPolicy(incomingHeaders, options.request.privacy);
+
+    if(isolatedRelaysEnabled()) {
+      // No account acquisition/decryption in the application. The chosen relay is authoritative.
+      // Specialized privacy profiles require separate supplier qualification.
+      if(provider!=='openai'||privacyPolicy.profile!=='standard'||privacyPolicy.hipaaEnabled||privacyPolicy.zdrEnabled||privacyPolicy.gdprEnabled||privacyPolicy.dataResidency!=='global'||privacyPolicy.piiMasking||privacyPolicy.deidentifyPhi)throw new RelayDispatchError('unsupported_policy');
+      const started=Date.now();
+      const response=await isolatedChat({...options.request,model:modelSpec.upstreamId||modelSpec.id},userId,this.extractHeaderValue(incomingHeaders,'idempotency-key')||requestId,usage=>{
+        if(!usage||!['prompt_tokens','completion_tokens','total_tokens'].every(k=>Number.isSafeInteger(usage[k])&&usage[k]>=0))return;
+        const cost=TokenCostCalculator.calculateCost(modelSpec,{promptTokens:usage.prompt_tokens,completionTokens:usage.completion_tokens,cachedTokens:0});
+        GalxEdgeBatchBuffer.getInstance().enqueueTokenDraw({userId,costUsd:cost.totalCostUsd,description:`API Chat: ${modelSpec.name}`,model:modelSpec.id,promptTokens:usage.prompt_tokens,completionTokens:usage.completion_tokens,cachedTokens:0,metadata:{requestId,latencyMs:Date.now()-started}});
+        void GalxSeatTierEngine.getInstance().recordSeatTokenDraw(userId,cost.totalCostUsd).catch(()=>{});
+        GalxSeatTierEngine.getInstance().recordSeatUsage(userId,modelSpec.id,usage.total_tokens,requestId);
+      });
+      return {body:options.request.stream?response.body!:await response.text(),isStream:options.request.stream===true,headers:new Headers({'Content-Type':options.request.stream?'text/event-stream':'application/json','Cache-Control':'no-store'}),statusCode:200,shardId:'',modelUsed:modelSpec.id,provider};
+    }
 
     // 2. Real-time In-Memory Sanitization (Safe Harbor 18 PHI & European GDPR PII)
     const { sanitizedRequest, redactionSummary } = this.privacyEngine.sanitizeChatRequest(
@@ -888,7 +905,7 @@ export class GalxModelRouter {
    * Dispatches visual synthesis request with HIPAA/ZDR/GDPR compliance and ephemeral zeroization.
    */
   async routeImageGeneration(options: RouteImageOptions): Promise<ImageGenerationResponse> {
-    await this.substrate.ensureFreshFromAuthority();
+    if(!isolatedRelaysEnabled())await this.substrate.ensureFreshFromAuthority();
     const { userId, requestId, isPriorityUser, headers: incomingHeaders, signal } = options;
     const modelSpec = ModelCatalog.resolveModel(options.request.model || 'openai-gpt-image-latest');
     if (!modelSpec) {
@@ -897,6 +914,15 @@ export class GalxModelRouter {
     const provider = modelSpec.provider;
 
     const privacyPolicy = this.privacyEngine.resolvePrivacyPolicy(incomingHeaders, options.request.privacy);
+    if(isolatedRelaysEnabled()) {
+      if(provider!=='openai'||privacyPolicy.profile!=='standard'||privacyPolicy.hipaaEnabled||privacyPolicy.zdrEnabled||privacyPolicy.gdprEnabled||privacyPolicy.dataResidency!=='global'||privacyPolicy.piiMasking||privacyPolicy.deidentifyPhi)throw new RelayDispatchError('unsupported_policy');
+      const result=await isolatedImage({...options.request,model:modelSpec.upstreamId||modelSpec.id},userId,options.request.idempotencyKey||requestId,signal);
+      const cost=TokenCostCalculator.calculateCost(modelSpec,{promptTokens:1000,imagesCount:1,quality:options.request.quality});
+      GalxEdgeBatchBuffer.getInstance().enqueueTokenDraw({userId,costUsd:cost.totalCostUsd,description:`Visual Synthesis: ${modelSpec.name}`,model:modelSpec.id,promptTokens:1000,completionTokens:0,cachedTokens:0,metadata:{requestId,imagesCount:1}});
+      void GalxSeatTierEngine.getInstance().recordSeatTokenDraw(userId,cost.totalCostUsd).catch(()=>{});
+      GalxSeatTierEngine.getInstance().recordSeatUsage(userId,modelSpec.id,1000,requestId);
+      return {...result,modelUsed:modelSpec.id,shardId:''};
+    }
     const { sanitizedRequest, redactionResult } = this.privacyEngine.sanitizeImageRequest(
       options.request,
       privacyPolicy

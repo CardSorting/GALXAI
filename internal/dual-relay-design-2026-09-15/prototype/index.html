@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Relay console prototype · GALX</title><link rel="stylesheet" href="/style.css"><script src="/app.js" defer></script></head>
+<body>
+<a class="skip" href="#content">Skip to content</a>
+<div class="prototype"><strong>Interaction prototype</strong><span>Simulated accounts. No provider calls.</span><button id="demo-toggle" aria-expanded="false" aria-controls="demo-controls">Prototype controls</button></div>
+<div id="demo-controls" class="demo-controls" hidden>
+  <label>Preview role<select id="demo-role"><option value="operator">Operator</option><option value="viewer">Read only</option></select></label>
+  <label>Verification result<select id="demo-result"><option value="success">All permitted workloads succeed</option><option value="images-denied">Image permission denied</option></select></label>
+  <label class="checkbox"><input id="demo-lost" type="checkbox">Interrupt the registration reply</label>
+  <label class="checkbox"><input id="demo-duplicate" type="checkbox">Use the shared fictional identity at sign-in</label>
+  <label class="checkbox"><input id="demo-relay" type="checkbox">Relay offline</label>
+  <button id="demo-outage">Simulate central outage</button><button id="demo-restore">Restore central connection</button>
+  <button id="demo-empty">Load empty relay</button><button id="demo-reset">Restore example accounts</button>
+</div>
+<header class="masthead"><a class="brand" href="/" aria-label="GALX relay home"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7 12 3l8 4v10l-8 4-8-4V7Z M4 7l8 4 8-4 M12 11v10" stroke="currentColor" stroke-width="1.5"/></svg>GALX <span>Relay console</span></a><div class="header-meta"><span id="relay-label" class="identity">Loading relay…</span><span id="role-label">Operator</span></div></header>
+<div class="shell"><aside class="sidebar"><div class="instance"><span class="instance-mark" aria-hidden="true">P</span><div><strong id="instance-name">Connecting…</strong><span id="account-type"></span></div></div><nav aria-label="Relay navigation"><a href="#overview" data-nav="overview">Overview</a><a href="#accounts" data-nav="accounts">Accounts <span id="account-count"></span></a><a href="#activity" data-nav="activity">Activity</a><a href="#settings" data-nav="settings">Settings</a></nav><div class="sidebar-note">One relay per console.<br>Accounts managed centrally.</div></aside>
+<main id="content" tabindex="-1"><div class="status-line"><span id="connection" role="status">Reading saved state…</span><div><button id="pause-updates">Pause live updates</button><button id="refresh">Refresh status</button></div></div><div id="notice" class="notice" role="status" hidden></div><div id="view"></div></main></div>
+<div id="announcement" class="sr-only" aria-live="polite"></div>
+</body></html>

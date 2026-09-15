@@ -1,52 +1,60 @@
 # GALX architecture
 
 <!-- docs-scope: current-guide -->
-> Private architecture guide. The [federation contract](FEDERATION_STRATEGY.md) defines relay behavior; customer content follows [ADR 0129](adr/0129-public-image-artifacts-and-verified-identity.md).
 
-| Component | Responsibility | Authority boundary |
+Private maintainer guide. The implemented relay strategy has one central account authority and two isolated local execution pools. [Current state](../post-mortem/CURRENT_STATE.md) records installation and activation; [ADR 0153](adr/0153-central-account-authority-isolated-relays.md) retains decision status separately. Customer documentation describes capability and access, never this topology.
+
+## Authority and topology
+
+| Component | Responsibility | Boundary |
 | --- | --- | --- |
-| Product application | Customer authentication, entitlements, allowed response contracts | Keeps internal operations out of public output |
-| PostgreSQL registry | Encrypted credential/control-plane state | Authoritative; projections cannot restore removed rows |
-| Host controller | Reconcile owned workers, capabilities, admissions and recovery | Single host; external guardian holds the kernel namespace guard and launchd is the restart authority |
-| Shard worker | One assigned credential and inference lifecycle | At most one active managed worker per eligible shard |
-| Desktop manager | Isolated operator workspaces and explicit links | Desktop session required; not serving capacity |
-| Credential bridge | Validate saved guest login and conditionally replace authority | Recoverable private intent plus registry compare-and-swap |
-| Browser monitor | Read-only capability, health and activity views | Delegated local session; no browser admin key |
+| Product application | Verified customer identity, entitlements, owned resources, durable product receipts and public responses | Server-only relay selection; customers cannot select provider accounts |
+| Central account service | Manual registration, account names, encrypted credentials, exclusive assignments, lifecycle history and existing account leases/budgets | Supabase `mazhcjisettrzbqhorvp` only; no Docker socket |
+| Premium runtime | Assigned paid accounts; text, Sites and images | Own Colima VM/daemon, execution project `prgjcyokylzcsqrjmkaa`, keys and state |
+| Standard runtime | Assigned free accounts; text only | Own Colima VM/daemon, execution project `enbtzuxkguehtnrhuvlu`, keys and state |
+| Two monitors | Fixed-pool operator/viewer access, account management and manual sign-in desktops | Separate localhost origins and sessions; central authorization on privileged requests |
+| Sign-in desktops | Manual provider sign-in and retained guest homes | Created only on the owning monitor's daemon; never copied between pools |
+
+The central service and TLS proxy run on Docker Desktop. Premium and Standard use separate Linux kernels, daemons and disks; persistent rules deny direct and Mac-forwarded peer access. Both retain a common trusted Mac administrator and physical host. Two Compose networks or schema labels alone are not this boundary.
+
+Each pool runtime hosts one in-process relay engine per eligible assigned account inside its own runtime container. It does **not** create a Docker worker container per account or use the legacy federation guardian. The monitor alone has its own daemon socket to manage desktops. The two execution databases hold installation identity and execution reservations/outcomes; they hold no account registry, credential table or second account-capacity ledger.
 
 ## Request path
 
-Product clients use `https://galx.ai/v1`. The server adapter chooses the explicit internal capability and calls the authenticated controller. Eligibility precedes load selection. Signed jobs preserve original principal/generation. Uncertain admission is reconciled without automatic replay.
+With the isolated-relay application mode enabled, server deployment policy selects one text pool, default Standard; Sites and images select Premium. Both pools have the same intended text catalog, subject to verified account access. Account class is independent of GALX customer billing tier. No request borrows another pool or falls back to the legacy transport after failure.
 
-The public image capability is `openai-gpt-image-latest`. Its internal compatibility semantics are [documented privately](FEDERATION_STRATEGY.md#explicit-codex-image-tool-compatibility); public aliases cannot promise unverified model identity.
+The selected runtime filters its assigned running engines for the requested model and rotates among matching candidates. Before provider I/O it persists an execution reservation, obtains a destination-bound central lease and binds that lease to the reservation. Central authorization checks assignment, account/credential revision, installation epoch, workload and existing budget policy. Short grants renew while work is authorized and expire independently if central renewal fails.
+
+The application delegates customer identity but does not decrypt assigned accounts or acquire a second account lease. Product quota and Sites fair usage remain separate admission layers. See [routing](ROUTING_ALGORITHMS.md), [queues](QUEUE_SPECIFICATION.md) and [the protocol reference](RELAY_API_REFERENCE.md).
+
+## Account lifecycle
+
+Open the fixed monitor, name a registration, manually sign in, review paid/free access and **Register account**. Registration commits centrally in paused state. Enable is separate and remains unavailable until execution is activated and prerequisites are met. Rename synchronizes the account and linked registration. Removal retains history and revokes a registered account permanently; only unfinished registrations can be restored with a fresh review. Every change uses expected revision and durable operation identity.
+
+Health, saved state, relay confirmation and desktop connection are separate facts. Unknown health is not a failed account; a stopped sign-in desktop is normal for a registered account. See [account management](reference/relay-account-management.md) and [manual operations](maintainers/RELAY_CREDENTIAL_ENROLLMENT.md).
 
 ## Product identity and durable images
 
-Account-facing routes verify the session and owned resource. Developer inference access additionally follows the private preview policy; staff administration requires its separate server-side authority. Images and Sites remain public products subject to their own account and entitlement contracts.
-
-Application async image requests commit an owner-scoped durable receipt before acknowledgement and claim a single dispatch. Unknown outcomes retain original identity; a timeout is not permission to synthesize again. Completion depends on owned stored artifacts. History and Favorites acknowledge durable persistence, and public image responses follow the sanitized artifact/DTO boundary. See [ADR 0144](adr/0144-durable-images-and-incident-documentation.md) and [image recovery](../post-mortem/runbooks/image-generation.md).
+Account-facing routes verify session and ownership; developer inference also requires private preview approval, while staff access has independent authority. Product image receipts commit before async acknowledgement and claim one dispatch. Completion requires owned stored artifacts. Public JSON uses explicit allowlists; image artifacts are re-encoded and stripped of upstream metadata. The public image alias does not promise an unverified underlying model. See [image boundaries](maintainers/image-public-boundary.md).
 
 ## Sites content and delivery
 
-The account-session workspace and `/api/sites/content` use included generation for eligible paid plans with shared fair usage. New work does not quote or debit per-generation wallet charges. Private drafts, conversation state, versioned publication snapshots and managed hosting preserve account ownership. Publication and addresses have their own durable recovery paths.
-
-Original fixed/metered operations retain their historical receipt and settlement contract; they are not the entry point for new work. The optional native companion remains a separate workflow. [Sites operations](maintainers/SITES_OPERATIONS.md), [workspace](maintainers/SITES_WORKSPACE.md) and [fair usage](maintainers/SITES_FAIR_USAGE.md) own current procedures; ADRs 0139–0143 describe the later product decisions.
+Current Sites generation uses the account-owned workspace, paid eligibility and the configured fair-usage/free-allowance rules. It is independent of provider account class. Publication, domains and conversation storage have their own durable contracts. Historical fixed/metered work retains its original settlement and recovery readers; accepted work never moves to a replacement pool. See [Sites operations](maintainers/SITES_OPERATIONS.md).
 
 ## Reconciliation and recovery
 
-Explicit **Enroll shard** after manual sign-in in a saved Relay Desktop creates or confirms its durable owning-desktop authority. Cold-start inventory validation precedes allocation. Workers maintain fresh capability evidence; empty evidence does not trigger deletion. A 401 suppresses that revision, while transient discovery failures back off.
+Central outage stops new registration and grants; active grants expire without silently extending authority. Failed terminal writes retain pending settlement and stop new admission. A restart recovers unfinished execution as unknown, never permission to redispatch. Saved records alone do not guarantee that an old artifact, stream or receipt remains retrievable after runtime epoch replacement.
 
-Manual holds stop admissions and replacement starts, preserving an existing worker for repair. Registry removal, revocation, expiry and rotation still control authority. Only manually created desktops with explicit enrollment contribute shard authority. External API/CLI ingestion is closed and database admission requires the unique desktop binding. Desktop sign-in can supply a refreshed credential for its bound account; it cannot silently enroll another account or resume traffic.
-
-Application database-backed leases remain distinct from federation's local reservations. Private journals support recovery but are not cross-store atomic transactions.
+The retained legacy federation still has separate operating duties for the existing deployment and historical work. It reads broad registry authority only within that trusted legacy controller, excludes centrally assigned accounts, and retains its own per-shard Docker workers, guardian, holds and receipt rules. Those mechanisms are not the new pool runtime. No public application cutover is implied by local installation.
 
 ## Source map
 
-| Area | Source |
+| Contract | Source |
 | --- | --- |
-| Lifecycle and ownership | [federation-lifecycle.ts](../src/relay/federation-lifecycle.ts), [docker-shard-driver.ts](../src/relay/docker-shard-driver.ts) |
-| Controller and sessions | [federation-server.ts](../src/relay/federation-server.ts), [monitor-sessions.ts](../src/relay/monitor-sessions.ts) |
-| Desktop access and state | [desktop-gateway.ts](../src/relay/desktop-gateway.ts), [desktop-manager.ts](../src/relay/desktop-manager.ts) |
-| Credential handoff | [desktop-credential-refresh.ts](../src/relay/desktop-credential-refresh.ts), [desktop-journal.ts](../src/relay/desktop-journal.ts) |
-| Explicit enrollment | [desktop-enrollment.ts](../src/relay/desktop-enrollment.ts), [manual enrollment migration](../supabase/migrations/20260914231914_manual_desktop_shard_enrollment.sql) |
+| Central authorization and management | [pool-central.ts](../src/relay/pool-central.ts), [management migration](../supabase/migrations/20260915191404_relay_account_management.sql) |
+| Scoped execution and recovery | [pool-runtime.ts](../src/relay/pool-runtime.ts), [pool-execution.ts](../src/relay/pool-execution.ts) |
+| Monitor and health presentation | [pool-monitor-server.ts](../src/relay/pool-monitor-server.ts), [pool-monitor-model.js](../src/relay/pool-monitor-model.js) |
+| Server application selection | [IsolatedRelayTransport.ts](../src/core/router/adapters/IsolatedRelayTransport.ts) |
+| Local installation and access | [relay-local.mjs](../scripts/relay-local.mjs), [reviewed image manifest](../docker/relay-pools/local/images.json) |
 
-See [operations](RELAY_VNEXT_RUNBOOK.md), [security](SECURITY.md) and [dated verification](maintainers/RELAY_SESSION_VERIFICATION_20260909.md).
+Use [service operations](runbooks/relay-pool-services.md), [security](SECURITY.md) and the explicitly scoped [legacy operations](maintainers/legacy-federation-operations.md).

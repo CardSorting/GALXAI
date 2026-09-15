@@ -18,8 +18,10 @@
       "title": "GALXAI",
       "scope": "current-guide",
       "kind": "reference",
-      "domains": [],
-      "curation": "unreviewed",
+      "domains": [
+        "sites"
+      ],
+      "curation": "assigned",
       "keywords": [],
       "decision": null
     },
@@ -93,8 +95,10 @@
       "title": "Cloudflare implementation and deployment boundaries",
       "scope": "current-guide",
       "kind": "reference",
-      "domains": [],
-      "curation": "unreviewed",
+      "domains": [
+        "delivery"
+      ],
+      "curation": "assigned",
       "keywords": [],
       "decision": null
     },
@@ -135,8 +139,10 @@
       "title": "Developer and contributor guide",
       "scope": "current-guide",
       "kind": "reference",
-      "domains": [],
-      "curation": "unreviewed",
+      "domains": [
+        "knowledge"
+      ],
+      "curation": "assigned",
       "keywords": [],
       "decision": null
     },
@@ -167,14 +173,16 @@
       "title": "Frequently asked questions",
       "scope": "domain-reference",
       "kind": "reference",
-      "domains": [],
-      "curation": "unreviewed",
+      "domains": [
+        "relay"
+      ],
+      "curation": "assigned",
       "keywords": [],
       "decision": null
     },
     {
       "path": "docs/FEDERATION_STRATEGY.md",
-      "title": "Federation contract",
+      "title": "Relay execution and account authority contract",
       "scope": "current-guide",
       "kind": "reference",
       "domains": [
@@ -248,7 +256,7 @@
     },
     {
       "path": "docs/MIGRATION_GUIDE.md",
-      "title": "Migrating to manual desktop authority and capability-aware GALX",
+      "title": "Migration to central accounts and isolated relays",
       "scope": "current-guide",
       "kind": "reference",
       "domains": [
@@ -261,11 +269,13 @@
     },
     {
       "path": "docs/MODEL_CATALOG.md",
-      "title": "Model catalog and live availability",
+      "title": "Model catalog and observed availability",
       "scope": "current-guide",
       "kind": "reference",
-      "domains": [],
-      "curation": "unreviewed",
+      "domains": [
+        "relay"
+      ],
+      "curation": "assigned",
       "keywords": [],
       "decision": null
     },
@@ -339,11 +349,12 @@
     },
     {
       "path": "docs/QUEUE_SPECIFICATION.md",
-      "title": "Application queues and relay jobs",
+      "title": "Application queues and relay execution",
       "scope": "current-guide",
       "kind": "reference",
       "domains": [
-        "images"
+        "images",
+        "relay"
       ],
       "curation": "assigned",
       "keywords": [],
@@ -361,11 +372,13 @@
     },
     {
       "path": "docs/RATE_LIMITS_AND_QUOTAS.md",
-      "title": "Rate limits, concurrency, and quota",
+      "title": "Rate limits, concurrency and quota",
       "scope": "current-guide",
       "kind": "reference",
-      "domains": [],
-      "curation": "unreviewed",
+      "domains": [
+        "relay"
+      ],
+      "curation": "assigned",
       "keywords": [],
       "decision": null
     },
@@ -393,7 +406,7 @@
     },
     {
       "path": "docs/RELAY_API_REFERENCE.md",
-      "title": "Federation relay API",
+      "title": "Isolated relay and account management API",
       "scope": "current-guide",
       "kind": "reference",
       "domains": [
@@ -405,7 +418,7 @@
     },
     {
       "path": "docs/RELAY_VNEXT_RUNBOOK.md",
-      "title": "Capability-aware relay vNext",
+      "title": "Relay operations and implementation entry point",
       "scope": "current-guide",
       "kind": "reference",
       "domains": [
@@ -429,11 +442,13 @@
     },
     {
       "path": "docs/ROUTING_ALGORITHMS.md",
-      "title": "Capability-first routing",
+      "title": "Relay selection and admission",
       "scope": "current-guide",
       "kind": "reference",
-      "domains": [],
-      "curation": "unreviewed",
+      "domains": [
+        "relay"
+      ],
+      "curation": "assigned",
       "keywords": [],
       "decision": null
     },
@@ -463,7 +478,8 @@
       "scope": "current-guide",
       "kind": "reference",
       "domains": [
-        "access"
+        "access",
+        "relay"
       ],
       "curation": "assigned",
       "keywords": [],
@@ -527,7 +543,7 @@
     },
     {
       "path": "docs/STANDARDIZED_OAUTH_AND_INGESTION_ARCHITECTURE.md",
-      "title": "Authentication and credential enrollment boundaries",
+      "title": "Authentication and credential registration boundaries",
       "scope": "domain-reference",
       "kind": "reference",
       "domains": [
@@ -583,7 +599,7 @@
     },
     {
       "path": "docs/TELEMETRY_AND_OBSERVABILITY.md",
-      "title": "Telemetry and observability",
+      "title": "Relay health and operational visibility",
       "scope": "current-guide",
       "kind": "reference",
       "domains": [
@@ -629,7 +645,7 @@
     },
     {
       "path": "docs/VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md",
-      "title": "Relay deployment: vNext migration and legacy reference",
+      "title": "Relay deployment and transport recovery",
       "scope": "current-guide",
       "kind": "reference",
       "domains": [
@@ -2293,6 +2309,34 @@
       }
     },
     {
+      "path": "docs/adr/0153-central-account-authority-isolated-relays.md",
+      "title": "ADR 0153: Central account authority with isolated relay execution",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [
+        "relay"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": {
+        "status": "proposed",
+        "delivery": "local",
+        "domain": "relay",
+        "owner": "Relay operator",
+        "date": "2026-09-15",
+        "evidence": [
+          "post-mortem/releases/2026-09-15-central-relay-foundation.json",
+          "post-mortem/releases/2026-09-15-relay-pool-images.json",
+          "post-mortem/releases/2026-09-15-relay-services.json",
+          "post-mortem/releases/2026-09-15-relay-local.json",
+          "post-mortem/releases/2026-09-15-relay-monitor-access.json",
+          "post-mortem/releases/2026-09-15-relay-monitor-console.json",
+          "post-mortem/releases/2026-09-15-relay-account-management.json"
+        ],
+        "supersedes": []
+      }
+    },
+    {
       "path": "docs/adr/README.md",
       "title": "Architecture decision records",
       "scope": "current-guide",
@@ -2825,8 +2869,10 @@
       "title": "Parent and subagent execution guide",
       "scope": "current-guide",
       "kind": "reference",
-      "domains": [],
-      "curation": "unreviewed",
+      "domains": [
+        "relay"
+      ],
+      "curation": "assigned",
       "keywords": [],
       "decision": null
     },
@@ -2851,8 +2897,10 @@
       "title": "Cloudflare maintainer runbook",
       "scope": "domain-reference",
       "kind": "reference",
-      "domains": [],
-      "curation": "unreviewed",
+      "domains": [
+        "delivery"
+      ],
+      "curation": "assigned",
       "keywords": [],
       "decision": null
     },
@@ -2885,8 +2933,10 @@
       "title": "Maintainer debugging and diagnostics",
       "scope": "current-guide",
       "kind": "reference",
-      "domains": [],
-      "curation": "unreviewed",
+      "domains": [
+        "relay"
+      ],
+      "curation": "assigned",
       "keywords": [],
       "decision": null
     },
@@ -2946,11 +2996,13 @@
     },
     {
       "path": "docs/maintainers/MAINTAINER_GLOSSARY_AND_LEXICON.md",
-      "title": "📖 Maintainer Glossary & Architectural Lexicon",
+      "title": "Maintainer glossary",
       "scope": "domain-reference",
       "kind": "reference",
-      "domains": [],
-      "curation": "unreviewed",
+      "domains": [
+        "relay"
+      ],
+      "curation": "assigned",
       "keywords": [],
       "decision": null
     },
@@ -3027,7 +3079,7 @@
     },
     {
       "path": "docs/maintainers/RELAY_CREDENTIAL_ENROLLMENT.md",
-      "title": "Relay credential enrollment and recovery",
+      "title": "Relay account registration and manual sign-in recovery",
       "scope": "current-guide",
       "kind": "how-to",
       "domains": [
@@ -3048,7 +3100,7 @@
     },
     {
       "path": "docs/maintainers/RELAY_DESKTOPS.md",
-      "title": "Relay desktops and manual repair",
+      "title": "Pool sign-in desktops and account repair",
       "scope": "current-guide",
       "kind": "how-to",
       "domains": [
@@ -3067,7 +3119,7 @@
     },
     {
       "path": "docs/maintainers/RELAY_HARDENING.md",
-      "title": "Federation hardening checks",
+      "title": "Relay hardening checks",
       "scope": "current-guide",
       "kind": "reference",
       "domains": [
@@ -3079,7 +3131,7 @@
     },
     {
       "path": "docs/maintainers/RELAY_QUOTA_AND_FLEET.md",
-      "title": "Federation fleet and quota",
+      "title": "Isolated account capacity and quota",
       "scope": "current-guide",
       "kind": "reference",
       "domains": [
@@ -3101,7 +3153,7 @@
     },
     {
       "path": "docs/maintainers/RELAY_TELEMETRY.md",
-      "title": "Federation request telemetry",
+      "title": "Relay request and account telemetry",
       "scope": "current-guide",
       "kind": "reference",
       "domains": [
@@ -3113,11 +3165,13 @@
     },
     {
       "path": "docs/maintainers/RELAY_TELEMETRY_UX.md",
-      "title": "Capability and recovery UX",
+      "title": "Account health and management UX",
       "scope": "current-guide",
       "kind": "reference",
-      "domains": [],
-      "curation": "unreviewed",
+      "domains": [
+        "relay"
+      ],
+      "curation": "assigned",
       "keywords": [],
       "decision": null
     },
@@ -3201,11 +3255,13 @@
     },
     {
       "path": "docs/maintainers/SUBSYSTEM_INTERNALS_AND_DEPENDENCY_GRAPH.md",
-      "title": "🏛️ Subsystem Internals & Dependency DAG",
+      "title": "Subsystem ownership and dependencies",
       "scope": "domain-reference",
       "kind": "reference",
-      "domains": [],
-      "curation": "unreviewed",
+      "domains": [
+        "relay"
+      ],
+      "curation": "assigned",
       "keywords": [],
       "decision": null
     },
@@ -3238,8 +3294,10 @@
       "title": "Upstream outage response",
       "scope": "current-guide",
       "kind": "reference",
-      "domains": [],
-      "curation": "unreviewed",
+      "domains": [
+        "relay"
+      ],
+      "curation": "assigned",
       "keywords": [],
       "decision": null
     },
@@ -3305,6 +3363,60 @@
       "domains": [],
       "curation": "unreviewed",
       "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/maintainers/legacy-desktop-enrollment.md",
+      "title": "Legacy desktop enrollment",
+      "scope": "current-guide",
+      "kind": "how-to",
+      "domains": [
+        "relay"
+      ],
+      "curation": "assigned",
+      "keywords": [
+        "legacy",
+        "retained",
+        "controller",
+        "federation",
+        "unassigned"
+      ],
+      "decision": null
+    },
+    {
+      "path": "docs/maintainers/legacy-desktop-operations.md",
+      "title": "Legacy desktop operations",
+      "scope": "current-guide",
+      "kind": "how-to",
+      "domains": [
+        "relay"
+      ],
+      "curation": "assigned",
+      "keywords": [
+        "legacy",
+        "retained",
+        "controller",
+        "federation",
+        "unassigned"
+      ],
+      "decision": null
+    },
+    {
+      "path": "docs/maintainers/legacy-federation-operations.md",
+      "title": "Legacy federation operations",
+      "scope": "current-guide",
+      "kind": "how-to",
+      "domains": [
+        "relay"
+      ],
+      "curation": "assigned",
+      "keywords": [
+        "legacy",
+        "retained",
+        "controller",
+        "federation",
+        "unassigned"
+      ],
       "decision": null
     },
     {
@@ -3496,14 +3608,16 @@
       "title": "Deployment and release",
       "scope": "current-guide",
       "kind": "reference",
-      "domains": [],
-      "curation": "unreviewed",
+      "domains": [
+        "delivery"
+      ],
+      "curation": "assigned",
       "keywords": [],
       "decision": null
     },
     {
       "path": "docs/playbooks/03-live-traffic-and-fleet-scaling.md",
-      "title": "Traffic and model-specific scaling",
+      "title": "Traffic and pool-specific capacity",
       "scope": "current-guide",
       "kind": "reference",
       "domains": [
@@ -3528,8 +3642,10 @@
       "title": "Security and key rotation",
       "scope": "current-guide",
       "kind": "reference",
-      "domains": [],
-      "curation": "unreviewed",
+      "domains": [
+        "access"
+      ],
+      "curation": "assigned",
       "keywords": [],
       "decision": null
     },
@@ -3548,18 +3664,22 @@
       "title": "Developer ergonomics and execution authority",
       "scope": "current-guide",
       "kind": "reference",
-      "domains": [],
-      "curation": "unreviewed",
+      "domains": [
+        "relay"
+      ],
+      "curation": "assigned",
       "keywords": [],
       "decision": null
     },
     {
       "path": "docs/playbooks/08-unframed-developer-observation-protocol.md",
-      "title": "Developer observation protocol",
+      "title": "Developer and operator observation protocol",
       "scope": "current-guide",
       "kind": "reference",
-      "domains": [],
-      "curation": "unreviewed",
+      "domains": [
+        "relay"
+      ],
+      "curation": "assigned",
       "keywords": [],
       "decision": null
     },
@@ -3578,8 +3698,10 @@
       "title": "Operational playbooks",
       "scope": "current-guide",
       "kind": "navigation",
-      "domains": [],
-      "curation": "unreviewed",
+      "domains": [
+        "relay"
+      ],
+      "curation": "assigned",
       "keywords": [],
       "decision": null
     },
@@ -3638,12 +3760,57 @@
       "decision": null
     },
     {
+      "path": "docs/reference/legacy-federation-api.md",
+      "title": "Legacy federation API",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [
+        "relay"
+      ],
+      "curation": "assigned",
+      "keywords": [
+        "legacy",
+        "retained",
+        "controller",
+        "federation",
+        "unassigned"
+      ],
+      "decision": null
+    },
+    {
+      "path": "docs/reference/relay-account-management.md",
+      "title": "Central account management and isolated relay contract",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [
+        "relay",
+        "database"
+      ],
+      "curation": "assigned",
+      "keywords": [
+        "relay",
+        "accounts",
+        "registration",
+        "management",
+        "health",
+        "rename",
+        "remove",
+        "restore",
+        "premium",
+        "standard",
+        "central",
+        "isolation"
+      ],
+      "decision": null
+    },
+    {
       "path": "docs/relay-security.md",
       "title": "Relay security reference",
       "scope": "current-guide",
       "kind": "reference",
       "domains": [
-        "access"
+        "access",
+        "relay"
       ],
       "curation": "assigned",
       "keywords": [],
@@ -3671,6 +3838,47 @@
       ],
       "curation": "assigned",
       "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/runbooks/relay-pool-images.md",
+      "title": "Build and inspect the two relay images",
+      "scope": "current-guide",
+      "kind": "runbook",
+      "domains": [
+        "relay"
+      ],
+      "curation": "assigned",
+      "keywords": [
+        "docker",
+        "premium",
+        "standard",
+        "relay",
+        "build",
+        "staging"
+      ],
+      "decision": null
+    },
+    {
+      "path": "docs/runbooks/relay-pool-services.md",
+      "title": "Install the central authority and isolated relay services",
+      "scope": "current-guide",
+      "kind": "runbook",
+      "domains": [
+        "relay"
+      ],
+      "curation": "assigned",
+      "keywords": [
+        "relay",
+        "local",
+        "docker",
+        "premium",
+        "standard",
+        "monitors",
+        "installation",
+        "activation",
+        "accounts"
+      ],
       "decision": null
     },
     {

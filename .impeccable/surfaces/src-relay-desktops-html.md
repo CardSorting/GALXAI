@@ -7,6 +7,9 @@ related_targets: ["src/relay/desktops.js", "src/relay/desktop-organizer.js", "sr
 
 # Relay desktops — private operator design brief
 
+
+**Retained controller surface.** This brief and its dated captures describe the existing single-controller deployment. New Premium/Standard account management uses the [fixed monitor brief](src-relay-pool-monitor-html.md) and [central account contract](../../docs/reference/relay-account-management.md). Legacy workspace groups, background saved-file synchronization and maintenance holds are not the new pool workflow.
+
 ## Scope and mode
 
 Operate. A local administrator creates and resumes independent setup workspaces with a real Terminal and Google Chrome. This is private operator documentation; neither this brief nor its review captures belong in public documentation or browser assets. PRODUCT.md and DESIGN.md retain their existing authority. This surface extends GALX's dark operator interface without changing the global design system or relay monitor.

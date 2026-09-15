@@ -1,12 +1,13 @@
 # Deployment and release
 
 <!-- docs-scope: current-guide -->
-> **Reading scope:** Current guidance. The federation contract governs relay behavior; source and dated verification define implementation evidence. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
 
-Follow the current vNext runbook. Build and validate the changed application/controller/worker components separately. Save revision, image, ingress, and rollback evidence.
+Private maintainer procedure.
 
-Review maintenance holds and accepted work before transferring shard ownership. A hold preserves an existing worker but blocks replacements; unheld workers are drained/removed during graceful controller stop. Start the supervised controller, verify at most one owned worker per eligible shard and fresh model pools, then verify the actual public client path. A model listing, matching credential alias, or 202 acknowledgement is not successful inference.
+Follow [deployment boundaries](../DEPLOYMENT.md) and the complete [service runbook](../runbooks/relay-pool-services.md). Build, install and verify each changed central/runtime/monitor component separately; record immutable image IDs and preserve its private state. The native launchers are a separate access component.
 
-Record chat and image results separately with execution metadata. Paid feature activation and entitlement changes remain separate from deployment verification. Do not use the legacy Compose file as a federation launcher.
+Rerun actual local isolation acceptance before gates permit execution. Register manually in the fixed monitors, then enable intended accounts and qualify text/Sites/images in their allowed pools. The latest checkpoint still has execution closed and no registered accounts. A monitor response or matching revision is not provider completion.
 
-Use the [current contract](../FEDERATION_STRATEGY.md), [operator runbook](../RELAY_VNEXT_RUNBOOK.md), [request recovery table](../RELAY_API_REFERENCE.md#request-recovery), and [maintainer execution guide](../maintainers/AI_AGENT_PAIR_PROGRAMMING_AND_GOVERNANCE.md).
+Public application cutover is separate and requires reachable distinct private origins/keys, correct fixed-pool selection, original receipt readers and customer response/authorization acceptance. Mac loopback origins are not cloud deployment endpoints. Never borrow a peer or use legacy dispatch fallback.
+
+For the existing controller only, follow [legacy operations](../maintainers/legacy-federation-operations.md) for holds, per-account container replacement and retained jobs. New-pool Pause stops engines/grant renewal; it is not the legacy worker-preserving hold. Close gates for rollback and retain assignments, revocations, leases and execution evidence.

@@ -1,85 +1,70 @@
-# Federation contract
+# Relay execution and account authority contract
 
 <!-- docs-scope: current-guide -->
-> Private maintainer contract, reconciled September 15, 2026. Public documentation follows [ADR 0129](adr/0129-public-image-artifacts-and-verified-identity.md).
+
+Private current strategy. The implemented central/Premium/Standard services are defined by [the account contract](reference/relay-account-management.md), [architecture](ARCHITECTURE.md) and [service procedure](runbooks/relay-pool-services.md). [Current state](../post-mortem/CURRENT_STATE.md) distinguishes local installation from serving activation and the retained legacy deployment.
 
 ## Ownership and capability are separate
 
-A shard is registered credential authority; an inference worker executes requests; a repair desktop is an independent operator workspace. An eligible shard can own **at most one active managed worker** on a Docker host. Registered, rejected, expired, paused or unavailable records are not a count of serving containers. A desktop link does not enroll an account or add capacity.
+Canonical accounts, encrypted credentials, manual registration, exclusive assignments, lifecycle commands and account leases/budgets live only in `mazhcjisettrzbqhorvp`. Premium uses paid provider accounts and can handle text/Sites/images. Standard uses free accounts and text only. Intended text models match, but actual account access must be reviewed. GALX customer billing is independent.
 
-The controller reads the encrypted PostgreSQL registry and reconciles owned containers. Each worker receives one assigned credential, separate internal inference/admin keys and its own checkpoint volume. Workers receive no registry access, vault root, host home or Docker socket. Deterministic shard container names, ownership labels, generation checks and the launcher's external kernel-held local guard enforce single-host ownership. A permanent compatibility marker blocks an incompatible old launcher during rollout; ambiguous legacy ownership fails closed. Multiple Docker hosts require a distributed ownership lease and a fencing-capable resource boundary before sharing credentials.
+Premium and Standard have separate local VMs, Docker daemons, runtime/monitor containers, execution projects, profiles, keys and state. Each runtime hosts its assigned account engines in-process and has no daemon socket or central database/vault authority. Its monitor has only its own daemon authority for manual desktops. Persistent network policy denies peers; the physical Mac remains shared and trusted. Separate labels or two networks on one daemon are insufficient.
 
-Kubernetes could add pod restart and capability probes, but it would not repair the single-host stale-marker failure or prove that an uncertain Docker mutation and its descendants have ended. Kubernetes leader election also does not by itself fence a paused old controller. The current single-host strategy therefore keeps the local kernel guard, external guardian and one launchd restart authority; a Kubernetes migration is not part of this repair. Reconsider orchestration only with a multi-host ownership lease, durable state contract and fencing at the resource-management boundary.
-
-**Only manually created Relay Desktops can enroll shards. Automatic worker lifecycle remains supported.** Starting a controller or creating a desktop must not scan host logins or enroll an unknown account. After manual provider sign-in, explicitly choose Enroll shard under [desktop enrollment](maintainers/RELAY_CREDENTIAL_ENROLLMENT.md). The application API, CLI add/import and host discovery paths are closed. The database requires a unique saved desktop binding before new admissions; legacy records are retained but excluded until confirmed. Renew an expired provider session manually in its [owning desktop](maintainers/RELAY_DESKTOPS.md); automatic saved-file sync validates and persists that completed login without renewing the provider session.
+No account belongs to both pools, moves pools in v1, or enters either pool through host discovery. The central registrar validates the manual saved login and commits registration/assignment atomically. Legacy enrollment, refresh and lease wrappers reject assigned accounts.
 
 ## Eligibility before load
 
-Cold starts validate authenticated model inventory before Docker allocation. A 401 rejects that credential revision; transport errors, timeouts, 403 and 5xx responses do not permanently reject credentials. Inventory acceptance proves inventory access, not an inference handshake or image tool.
+The application chooses one destination before dispatch: configured text pool, Premium for Sites/images. The runtime verifies its execution gate and fresh scoped projection, filters its own running engines by model access, and rotates among matching candidates. It does not use the legacy load-weighted reverse index.
 
-A worker starts in `DISCOVERING_CAPABILITIES`. Only fresh, verified capabilities with usable health and capacity admit work. The reverse index selects within the requested model pool before considering recent errors, streams, latency, queue depth and spare capacity. An unavailable pool returns `model_temporarily_unavailable`; a saturated eligible pool returns `model_capacity_exhausted`, both HTTP 503.
-
-There is no federation-wide waiting queue or implicit cross-model fallback. A catalog entry or live process is not proof of present capability.
+The engine reserves durable execution identity, acquires the existing central lease and binds it before provider I/O. Assignment, installation epoch, revision, credential, workload, permission, expiry and budget checks are central. Standard also rejects forbidden workloads at its request boundary before provider calls. There is no cross-pool, legacy, alternate-model or uncertain-execution fallback.
 
 ## Dynamic evidence and lifecycle
 
-| Condition | Behavior |
+| State/change | New pool behavior |
 | --- | --- |
-| Fresh eligible capability | Admit within that model's capacity |
-| Unknown, stale, degraded or empty capability | Stop new admissions; retain worker for rediscovery |
-| Authoritative credential 401 | Persist revision-specific rejection; suppress repeated starts |
-| Transient discovery/start failure | Retry with bounded backoff |
-| Unexpected worker stop or disappearance | The controller is the only federation-worker restart authority; it waits with exponential backoff and pauses after five attempts in ten minutes with a private restart-budget alert |
-| Operator maintenance hold | Block admissions and replacement starts; preserve an existing worker, including a rejected one |
-| Credential removed, revoked, expired or changed | Retire old authority; a hold cannot override registry authority |
-| Explicit resume | Remove hold; rejection, cooldown and capability checks still apply |
+| Named registration with saved login | Requires explicit Review access and Register account; not serving capacity |
+| Registered account | Saved paused; explicit Enable after execution activation |
+| Enabled, current assigned account | Own runtime can start an in-process engine and acknowledge its revision |
+| Pause, revocation, removal or revision change | Stop old engine/authorization; do not assume legacy hold/drain semantics |
+| Expired sign-in | Repair manually in the bound desktop, then explicitly save reviewed sign-in |
+| Unknown or stale connection | No healthy claim or new authorization from cached data |
+| Removed unfinished registration | Retained history/files; Restore requires registration gate and new review |
+| Removed registered account | Access revoked permanently; no restore or re-enable |
 
-Empty capability state alone never deletes a worker, including after 120 seconds. Rotation permits validation of the new revision; stale failures cannot poison it. Journal failures must not be reported as saved state.
-
-Desktop connection, saved home, account link, sign-in and serving status are independent. Closing the viewer keeps the workspace running; stopping it preserves its home; deletion is explicit. See [desktop operations](maintainers/RELAY_DESKTOPS.md).
+Rename updates account and linked registration labels without changing identity. Management requires an own-pool operator, expected revision and immutable request identity. Exact explicit replay returns its original saved outcome; concurrent edits cannot overwrite a newer revision. Removal commits centrally, disconnects desktop sessions and attempts stop; incomplete cleanup stays actionable under Removed.
 
 ## Health authority and stale results
 
-Observations are fenced by credential revision, worker generation and inventory revision. Success cannot erase a concurrent authoritative denial. Equal-revision health replay cannot clear a local failure. Generic transport errors, throttling and route failures are insufficient evidence of model permission loss.
+The monitor separates saved state, relay confirmation and health. Applied needs matching revision/epoch and a fresh non-future heartbeat. Health labels distinguish expiry, access denial, cooldown, repeated failures and overdue application from unknown connectivity. A registered account's stopped desktop is not a failure. No issues detected describes observed metadata, not a provider canary.
 
-The database-backed application pool retains its separate lease authority. Federation uses local reservations and signed worker jobs; it does not acquire a database lease per upstream attempt.
+Runtime grants last 30 seconds and renew every eight seconds with independent expiry. Central ownership uses epoch fencing and a greater-than-60-second stale-owner handoff. These are different from the UI's 45-second confirmation freshness. Observation-only health cannot mint a grant, clear cooldowns or widen account authority.
 
 ## Explicit Codex image-tool compatibility
 
-The canonical public capability is `openai-gpt-image-latest`. Legacy application image aliases resolve to it, not independent fallback providers. The internal protocol ID remains `gpt-image-2`.
+The public capability alias does not promise an unverified underlying model. The assigned Premium engine uses the standalone image contract implemented in the shared engine with its own central image grant. No startup or periodic paid image probe runs in isolated execution. Standard cannot issue image or Sites calls, including through aliases or generic tools. A Premium label and chat inventory do not verify image support; the first real image trial remains explicit.
 
-With `RELAY_CODEX_IMAGE_TOOL_ALIAS=true`, the repaired OAuth worker calls the standalone Images backend used by Codex's `image_gen.imagegen` extension. It sends the extension's `gpt-image-2` protocol ID and auto background, quality and size, using only its assigned credential. It does not request a chat model or a Responses `image_generation` tool. Image-model selection remains provider-managed for the public contract; exact underlying identity and rendering dimensions are not promised. The direct API-key transport remains code compatibility for isolated workers; API-key shards cannot enter the managed fleet under manual OAuth desktop enrollment. No alternate account, endpoint or model is tried after failure. [ADR 0151](adr/0151-codex-standalone-image-tool.md) records the source correction; [current state](../post-mortem/CURRENT_STATE.md) separately identifies the serving implementation and the unresolved HTTP 403.
-
-Fresh authenticated inventory and real image evidence are required. Removing a chat model does not invalidate standalone image evidence; stale inventory, unavailable health, expired image evidence and current credential authority still block admission. Chat-era compatibility evidence cannot authorize the new backend. Evidence lasts one hour; generation success renews it. Idle enabled workers perform a paid startup probe and successful renewal no more frequently than every 50 minutes, with failure backoff of 10, 20, then 40 minutes and spare-capacity checks. Inventory alone never proves image support.
-
-The standalone response is byte-bounded, requires exactly one base64 image and is decoded/re-encoded before success can publish capability. Upstream URLs, generation IDs, response metadata and arbitrary error bodies are discarded. Internal transport and administrator records preserve allowlisted execution identifiers; the application recognizes both dated chat-era records and the standalone tool contract. Public bodies, headers, errors, streams and artifacts must not expose them. Binary images are sanitized by default; explicit JSON uses an allowlisted contract. See [the image boundary guide](maintainers/image-public-boundary.md).
+Availability reads are advisory and do not generate or reserve capacity. Successful artifacts are decoded/re-encoded; upstream URLs, identifiers, arbitrary errors and metadata stay out of public output. The legacy standalone-image candidate has its own older probe configuration and unresolved acceptance in current state; do not transfer that cadence or historical success to the pool contract.
 
 ## Parent and subagent execution
 
-Each logical operation gets an idempotency key, reused only for the same payload and principal. Task IDs correlate work; they do not grant authority. Accepted jobs return signed tenant- and generation-bound recovery URLs. Status, cancellation and stream recovery target the original worker even after capability removal; streams and cancellation cannot attach to a replacement. Durable text receipt reads have the retained-volume exception below.
+Each logical request carries its original idempotency key, payload and verified tenant identity. Task IDs only correlate. The execution project records reservation, lease binding and outcome; it does not own a second account-capacity balance. Replayed image requests and unavailable original contexts are reported unconfirmed instead of redispatched.
 
-The supervised controller retains a private admission tombstone journal across restart: completed responses are cached for ten minutes, then their identity is retained permanently as `unknown`; the journal holds at most 1,000 keys, with 32 MiB aggregate and 8 MiB per retained response in memory. Prompts, credentials and response bodies are never persisted. A pending or expired completed record becomes `unknown` and never authorizes replay; completed response bodies remain process-local and may return an explicit non-retained result after restart. A full or unavailable journal rejects new keyed admissions rather than guessing, and uncertain tombstones are never evicted to make room. Preserve the returned scope; changed scope or unknown admission requires reconciliation, not blind replay. Images dispatch once. This is not durable exactly-once execution.
-
-See [request recovery](RELAY_API_REFERENCE.md#request-recovery) and [ADR 0130](adr/0130-image-receipts-and-uncertain-outcomes.md).
+Terminal persistence and original lease settlement may retry. An unconfirmed terminal write blocks new local admission. Restart recovers incomplete records as unknown. A retained record does not guarantee stream/artifact recovery after epoch replacement or account removal. See [request recovery](RELAY_API_REFERENCE.md#request-recovery). This is not exactly-once upstream execution.
 
 ## Sites content and durable recovery
 
-Current application Sites work uses eligible paid-plan inclusion and shared fair admission under [ADR 0140](adr/0140-paid-sites-and-shared-fair-usage.md). The application does not quote or debit new per-generation wallet charges. The local execution profile verifies byte, wall-time, attempt and receipt readiness across eligible workers and again at dispatch; it does not invent supplier quota or token-usage evidence.
+The product's included generation, free allowance where applicable, paid access and shared fair usage remain separate from provider account class. Isolated Sites selects Premium and retains its original request/receipt context. It never borrows Standard or repeats generation to settle an uncertain result.
 
-Durable text receipts are separate from the controller admission tombstones. A receipt can be read after replacement of its original worker using that shard's retained volume and the original tenant-bound signed reference. Streams and cancellation stay on the admitting generation. Missing references, expired signatures or lost volumes do not authorize replay or release uncertain occupancy. [Sites operations](maintainers/SITES_OPERATIONS.md) and [fair usage](maintainers/SITES_FAIR_USAGE.md) own current admission, retention, rollout and recovery.
-
-Earlier fixed/metered operations retain their accepted tariff, hold and settlement semantics. Confirmed durable completion can settle an original fixed charge without fabricating token usage; uncertain completion retains the hold. Those contracts do not apply to new included work. The legacy metered profile retains its own ceiling/usage requirements.
-
-The public browser workspace owns private drafts and versioned managed publication. The optional native companion remains a distinct workflow; neither application admission nor a relay receipt proves native-host publication, direct CLI upload support or a completed customer billing interaction. See [workspace operations](maintainers/SITES_WORKSPACE.md).
+Historical fixed/metered work keeps its original pricing, occupancy and receipt reader. Legacy signed receipt references may support retained-volume reads under their own contract; the new runtime does not inherit that recovery guarantee across epochs. Publication, domains and native delivery remain independent of relay completion. See [Sites operations](maintainers/SITES_OPERATIONS.md).
 
 ## Operational visibility
 
-Run `npm run relay:open` or `npm run relay:desktops` on the controller host. The launcher delegates a browser session without exposing the admin API key. Monitor sessions are read-only; desktop sessions separately authorize actions. Anonymous pages provide generic connection guidance; operational assets and data require server authorization.
+Open **GALX Monitors** or the fixed Premium/Standard apps. Each console has Accounts, Registration and Activity with separate operator/viewer sessions and central authorization. Name/status/health filters, issues-first ordering and Manage dialogs affect only its own authorized snapshot. Registration is manual; refresh does not sign in or generate content. Operational records and assets remain private.
 
-Read capability, traffic hold, worker health and desktop connection separately. Structured activity provides safe event codes, timestamps and correlation identifiers. Prompts, tokens, raw provider errors and login contents stay out of the feed. Stale or partial telemetry is labelled.
+The older `relay:open` and `relay:desktops` commands address only the retained single-controller federation. Its per-shard Docker workers, guardian, holds, reverse index and signed jobs remain documented in [legacy operations](maintainers/legacy-federation-operations.md) and [legacy API](reference/legacy-federation-api.md), not as the new pool runtime.
 
 ## Verification and deployment boundary
 
-[ADRs 0131–0133](adr/README.md) retain historical access/handoff decisions; [ADR 0152](adr/0152-manual-desktop-only-shard-authority.md) replaces external enrollment and automatic provider-session renewal. [The runbook](RELAY_VNEXT_RUNBOOK.md) defines operations; [the session record](maintainers/RELAY_SESSION_VERIFICATION_20260909.md) dates verification and deployment.
+Central migrations, separate execution schemas and local service images are installed and tested. At the [management acceptance](../post-mortem/releases/2026-09-15-relay-account-management.json), registration was open, execution closed and both pools had zero accounts. Manual paid/free sign-ins, provider qualification and public application cutover remain separate. Hosted SSH targets are optional future deployment inputs, not missing prerequisites for the installed local setup.
 
-Actual provider sign-in remains an operator action. Keyring extraction, cross-store atomic transactions, physical phone input, semantic accessibility within streamed pixels and a complete paid-entry transaction are not established by synthetic tests.
+Keep earlier ADRs and dated fixtures as history. They do not certify physical-host separation, real provider capability, screen readers or production throughput. Use the [service runbook](runbooks/relay-pool-services.md) for activation and retention-preserving rollback.

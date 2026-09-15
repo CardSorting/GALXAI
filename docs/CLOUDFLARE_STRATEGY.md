@@ -11,9 +11,11 @@ Reviewed against repository configuration on 2026-09-07. Cloudflare components a
 
 The application API at `https://galx.ai/v1` is a separate contract. The Worker is not an interchangeable DNS alias for the application or the Node relay. Its provider REST paths use Worker configuration; do not assume it shares the relay's PostgreSQL projection, job protocol, or process-local retry state.
 
-## Federation ingress
+## Relay ingress
 
-The relay topology is a supervised host controller and at most one isolated worker per eligible shard. The current [runbook](RELAY_VNEXT_RUNBOOK.md) replaces the legacy shared Compose deployment. Ingress targets the controller, not an arbitrary worker.
+The implemented Premium/Standard services run locally in separate Colima VMs with a central HTTPS service on Docker Desktop. Their monitor/runtime ports are loopback-only on the Mac; no Cloudflare publication or hosted application cutover is implied. [Service installation](runbooks/relay-pool-services.md) owns the local boundary and a separate optional external-host procedure. No tunnel may connect the pools to each other or bypass their scoped authorization.
+
+The retained public application path uses a supervised host controller and one Docker worker per eligible unassigned account. Its ingress targets that controller; see [legacy operations](maintainers/legacy-federation-operations.md). This topology differs from the new in-process account engines inside each fixed pool runtime.
 
 [ADR 0127](adr/0127-codex-image-tool-alias-production-cutover.md) records the September 7 public tunnel cutover to `http://host.docker.internal:3001` and successful DreamBees image verification. This is dated deployment evidence, not a current reachability assertion. Preserve authentication, streaming, cancellation, and ownership during a new ingress change.
 

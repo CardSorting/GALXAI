@@ -38,10 +38,11 @@ uncertain; check an asynchronous request before submitting another generation.
 
 ## Site content generation
 
-Eligible accounts can use the [Site content contract](SITES_CONTENT.md) for quoted, bounded
+GALX Pro accounts can use the [Site content contract](SITES_CONTENT.md) for bounded
 text drafts and recovery by operation ID. It uses an account session bearer at
-`/api/sites/content`. The guide covers fixed pricing, allowances, repairs and
-settlement; availability depends on account eligibility.
+`/api/sites/content`. New updates are included subject to fair usage; the free
+Site allowance is available in the browser workspace. Historical operations
+retain their original receipts and recovery behavior.
 
 ## Documentation
 

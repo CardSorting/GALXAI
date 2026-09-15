@@ -1,0 +1,70 @@
+{
+  "date": "2026-09-15",
+  "scope": "Bounded documentation/decision registration correction for GALXAI-only account management. No runtime, migration, production account or hosted resource mutation in this pass.",
+  "revision": "a32df491881ca68e01ea13569fb986a29da7c6b7",
+  "authority": "Owner instruction: accounts need to be managed from mazhcjisettrzbqhorvp project only.",
+  "knowledge_source_delta": [
+    "docs/knowledge/registry.json"
+  ],
+  "registry_review": "Exact diff adds only ADR 0153 as proposed/not-started in the existing relay domain. No domain patterns, existing decisions, review requirements, deployment evidence or acceptance status changed.",
+  "baseline": "All other knowledge-domain source/guide fingerprints match the preceding review. Its retained evidence remains linked; this is a bounded delta review, not a fresh exhaustive corpus/security audit.",
+  "full_relevant_guides_read": [
+    "docs/AGENTS.md",
+    "docs/DOCUMENTATION_POLICY.md",
+    "docs/how-to/change-with-documentation.md",
+    "docs/maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md",
+    "docs/knowledge/README.md",
+    "docs/reference/knowledge-commands.md",
+    "docs/knowledge/templates/adr.md",
+    "docs/adr/0152-manual-desktop-only-shard-authority.md"
+  ],
+  "bounded_reads": [
+    "docs/adr/README.md catalog scope and new entry",
+    "scripts/docs-kb.py decision validation, fingerprint comparison and explicit review implementation",
+    "src/relay/desktop-enrollment.ts central manual-registration contract",
+    "central account/projection/lease and installer source paths identified in the plan; unrelated implementation not audited"
+  ],
+  "corrections": [
+    "Canonical accounts, credentials, registration, assignment, lifecycle and account leases remain in the main project.",
+    "Two new projects are reserved for execution state; monitors submit account actions centrally.",
+    "Central uniqueness replaces the former external allocation ledger.",
+    "Central outage, revision acknowledgement, authorization expiry and provider-credential fencing limits are explicit.",
+    "Former autonomous-registry proposal retained as dated history; current guide bodies and proof limitations reconciled."
+  ],
+  "checks_before_attestation": [
+    {
+      "command": "npm run docs:impact",
+      "result": "Knowledge registry metadata is the only changed monitored source; new proposed ADR and private research are explicitly inspected unmapped documentation."
+    },
+    {
+      "command": "npm run test:docs",
+      "result": "38 passed: 21 incident guard and 17 knowledge tests."
+    },
+    {
+      "command": "git diff --check",
+      "result": "Passed."
+    },
+    {
+      "command": "npm run docs:check",
+      "result": "Guide/link/ADR and incident validation passed; knowledge fingerprint stale only for the reviewed registry addition. Final check follows explicit attestation and synchronization."
+    }
+  ],
+  "content_sha256": {
+    "docs/knowledge/registry.json": "e6a256c4ad4865844970205b86fb12b8796b1a0e38cc925eea9e6d4095b15aed",
+    "docs/adr/0153-central-account-authority-isolated-relays.md": "e3c6a9ac3bba258039df5879be83d6a24d092a7d72bdbaf179bf05301bebcb01",
+    "internal/dual-relay-design-2026-09-15/central-account-control.md": "992f78950ebfea652af99a951cb40a6d5f50cd4f6f04e47669bc48a9545b233f",
+    "internal/dual-relay-design-2026-09-15/delivery-plan.md": "6279e46c38fd50da24e82873003da6c527f134036edd14c9e192c2fd4ae90836",
+    "internal/dual-relay-design-2026-09-15/README.md": "4c15d7109124faa52e242655a363430845024eeffd924c5eb958dd82f85b2888",
+    "internal/dual-relay-design-2026-09-15/strict-isolation.md": "c51ebffb25b1226865b2417f39c6f6c7935183f01440d2d515f70c908eb168b4",
+    "internal/dual-relay-design-2026-09-15/provisioning-status.md": "c75d6aff4d3c147b988ab18af32be2d8d9531e433b3a14bb7092bb26e595ce8e",
+    "internal/dual-relay-design-2026-09-15/schema-proof/README.md": "51bb4275943725089dc08a84790cd5d2909e3b8d95de051cdf2d2245fd2c4cd3",
+    "internal/dual-relay-design-2026-09-15/isolation-proof/README.md": "bf68715991ce09d50383c7073519e53bcb4eff010cc6df9d53d4c541a3f36902",
+    "internal/dual-relay-design-2026-09-15/prototype/README.md": "cf07566a7b3a8afb578df35406f2ef5ac4284c4929f17718d8d28698f0e1243a"
+  },
+  "limits": [
+    "No database migration or production behavior was implemented or verified.",
+    "Prior 69 SQL and 43 network proof results retain their original scope.",
+    "No ADR accepted automatically; existing review deadline 2026-09-22 is retained.",
+    "Existing overdue ACT-001, ACT-015 and ACT-016 remain open."
+  ]
+}

@@ -1,0 +1,37 @@
+name: galx-local-authority
+services:
+  authority:
+    image: galxai-relay-central:management-20260915
+    user: '1000:1000'
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    secrets: [{source: authority_config, target: component-config}]
+    tmpfs: ['/tmp:rw,noexec,nosuid,size=16m,uid=1000,gid=1000,mode=0700']
+    restart: 'no'
+    mem_limit: 384m
+    pids_limit: 128
+    networks: [authority, egress]
+    logging: {driver: json-file, options: {max-size: 10m, max-file: '3'}}
+  tls:
+    image: galxai-relay-central:management-20260915
+    entrypoint: [node, /local/authority-proxy.mjs]
+    user: '1000:1000'
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    ports: ['127.0.0.1:13443:8443']
+    volumes: ['./authority-proxy.mjs:/local/authority-proxy.mjs:ro']
+    secrets: [{source: tls_key, target: tls-key}, {source: tls_cert, target: tls-cert}]
+    networks: [authority, egress]
+    restart: 'no'
+    mem_limit: 96m
+    pids_limit: 64
+    logging: {driver: json-file, options: {max-size: 10m, max-file: '3'}}
+networks:
+  authority: {internal: true}
+  egress: {}
+secrets:
+  authority_config: {file: '${GALX_CENTRAL_CONFIG_FILE:?Set the central config path}'}
+  tls_key: {file: '${GALX_LOCAL_TLS_KEY:?Set the local TLS key path}'}
+  tls_cert: {file: '${GALX_LOCAL_TLS_CERT:?Set the local TLS certificate path}'}

@@ -5,6 +5,7 @@
 import { createHash } from 'node:crypto';
 import type { Pool, PoolClient } from 'pg';
 import { executeRelayChat, readRelayReceipt, type RelayChatOptions } from '../../core/router/adapters/RelayChatTransport';
+import { isolatedRelaysEnabled, receiptRelay } from '../../core/router/adapters/IsolatedRelayTransport';
 
 export class SitesBillingError extends Error {
   constructor(readonly code: string) { super(code); this.name = 'SitesBillingError'; }
@@ -272,7 +273,7 @@ export function createBilledRelayGenerator(billing: PostgresSitesBilling, relay:
   check(!url.username && !url.password && !url.search && !url.hash && url.pathname === '/' &&
     (url.protocol === 'https:' || (url.protocol === 'http:' && ['127.0.0.1', '[::1]', 'localhost'].includes(url.hostname))) &&
     typeof relay.key === 'string' && relay.key.trim().length > 0, 'invalid_relay_configuration');
-  const configured = Object.freeze({ ...relay });
+  const configured = Object.freeze({ ...relay, tenant: isolatedRelaysEnabled()?billing.relayOperationId('tenant'):undefined });
   return async (input: SitesGenerationInput): Promise<SitesGenerationReply> => {
     check(!input.signal.aborted, 'generation_interrupted');
     // Snapshot before any await: caller mutation must not change a billed request.
@@ -308,15 +309,16 @@ export async function reconcileBilledRelayGeneration(billing: PostgresSitesBilli
   relay: { url: string; key: string }, signal: AbortSignal, transport = executeRelayChat): Promise<SitesGenerationReply> {
   const reference = await billing.pendingReference(operation);
   if (!reference) return billing.lookup(operation);
-  check(new URL(relay.url).origin === reference.origin, 'billing_needs_reconciliation');
+  const source=receiptRelay(reference.origin,relay,billing.relayOperationId('tenant'));
+  check(source, 'billing_needs_reconciliation');
   try {
     if (reference.durable) {
-      const receipt = await readRelayReceipt({ ...relay, signal, jobId: reference.jobId });
+      const receipt = await readRelayReceipt({ ...source!, signal, jobId: reference.jobId });
       if (receipt.status === 'not_started') return await billing.confirmNotStarted(operation, receipt.id);
       if (receipt.status !== 'completed' || receipt.output === null) return billing.lookup(operation);
       return await billing.complete(operation, receipt.output, receipt.usage, receipt.id, true);
     }
-    const result = await transport({ ...relay, signal, resumeJobId: reference.jobId, payload: { model: reference.model, stream: false },
+    const result = await transport({ ...source!, signal, resumeJobId: reference.jobId, payload: { model: reference.model, stream: false },
       ttftTimeoutMs: 10000, idleTimeoutMs: 10000, wallTimeoutMs: 15000 });
     const response = await result.response.json();
     check(response.id === reference.jobId, 'billing_evidence_conflict');

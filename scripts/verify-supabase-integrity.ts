@@ -11,6 +11,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
+import { containsTruncateStatement } from './lib/sql-migration-safety';
 
 interface AuditViolation {
   level: 'FATAL' | 'WARNING' | 'INFO';
@@ -179,7 +180,7 @@ class SupabaseParanoiaLinter {
           });
         }
 
-        if (/\bTRUNCATE\s+TABLE\b/i.test(trimmed) || /\bTRUNCATE\s+[a-z_]+/i.test(trimmed)) {
+        if (containsTruncateStatement(trimmed)) {
           this.violations.push({
             level: 'FATAL',
             category: 'DESTRUCTIVE_DDL',

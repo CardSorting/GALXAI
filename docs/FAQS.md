@@ -1,50 +1,49 @@
 # Frequently asked questions
 
 <!-- docs-scope: domain-reference -->
-> **Reading scope:** Subsystem reference retained for its own domain; not re-certified by the federation documentation refactor. Older routing, deployment, compatibility, or performance descriptions do not override the current relay contract. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
 
-Reviewed 2026-09-07. See [architecture](ARCHITECTURE.md) for component ownership and [API base URLs](API_BASE_URL.md) before choosing an endpoint.
+Private maintainer answers, reconciled September 15, 2026. [Architecture](ARCHITECTURE.md), [account management](reference/relay-account-management.md) and [current state](../post-mortem/CURRENT_STATE.md) own the complete contracts and latest evidence.
 
 ## Is the relay the product API?
 
-No. The product has application/SDK routes and separate authorization. The standalone relay acknowledges chat with HTTP 202 and returns job status/stream URLs. Its endpoint and parameter coverage is narrower. The app adapter translates its transport for callers.
+No. Product APIs have their own identity, entitlement, ownership and response contracts. Relay administration and transport are private. Use [API base URLs](API_BASE_URL.md) before choosing an endpoint; never forward internal status objects or upstream headers to customers.
 
-## Can users still run agents?
+## How are Premium and Standard different?
 
-User applications can use inference and tool-call output in their own runtimes. The relay does not execute model-selected tools or create user workspaces on the operator's device. Its existing protocol handling is preserved; full tool-protocol compatibility is not implied.
+Premium hosts paid provider accounts and handles text, Sites and images. Standard hosts free provider accounts and handles text only. Both intend the same text catalog subject to observed access. GALX customer plans are separate. Each pool has a separate local VM, daemon, runtime, monitor, disk and scoped credentials; the physical Mac/admin remains shared trusted infrastructure. Neither pool borrows, queries or fails over to the other.
+
+## Where are accounts managed?
+
+Only main project `mazhcjisettrzbqhorvp` stores canonical account authority, credentials, assignments, lifecycle history and account leases. The two execution projects store fixed execution identity/reservations/outcomes only. Open **GALX Monitors → Open Premium / Open Standard** for its fixed management view.
+
+## How do registration and repair work?
+
+Manually sign in inside the owning monitor's desktop, review access and register paused. Later renewal uses explicit **Update saved sign-in → Save new sign-in**. Search, status/health filters and issue ordering identify records that need attention. Rename/remove are central revision-aware commands. Removed unfinished registrations can be restored with new review; removed registered accounts cannot. Files, assignments and history remain retained. See [the operator procedure](maintainers/RELAY_CREDENTIAL_ENROLLMENT.md).
 
 ## Which key belongs where?
 
-Use a product API key for the product, a relay inference key for relay jobs, an administrator key for relay operations, and backend registry credentials for provider dispatch. The app uses `VM_RELAY_API_KEY`. Do not substitute a provider OAuth token for a relay key or expose administrator keys in public frontend configuration.
+Product keys, own-pool inference keys, operator/viewer/registrar/runtime principals and main-project database/vault authority have distinct scopes. The native launcher uses a one-use ticket; browsers do not receive long-lived service keys. Only central services hold main-project credential authority. Use the [service configuration](runbooks/relay-pool-services.md), not a copied broad controller environment.
 
-## Does no local cap mean unlimited inference?
+## Do healthy status and enabled state mean generation works?
 
-No. The default three-hour usage window is observational. Provider quota can be unknown, depleted, or revoked independently. Local concurrency, admission, optional caps, and deadlines still apply.
+No. Saved state, fresh matching runtime acknowledgment, observed account health and completed provider work are different. Connection loss is unknown health. No issues detected describes available metadata. Latest local acceptance records registration open, execution closed and no registered accounts; real sign-ins and capability qualification remain pending.
 
-## What happens when credentials expire or are revoked?
+## Can work retry or move after failure?
 
-Expired/rejected credentials are excluded locally. Sign in or rotate through the registry and sync. Resetting history does not repair authentication. Local rejection checkpoints do not broadcast revocation to other processes.
+An isolated runtime persists execution identity and binds the central lease before provider I/O. Incomplete work recovered after restart becomes unknown and never redispatches. Receipt/artifact access can be lost with the original engine/epoch even when records remain. Preserve the original operation; no peer or legacy dispatch fallback is permitted. Customer quota/settlement follows its own contract. See [recovery](RELAY_API_REFERENCE.md#request-recovery).
 
-## Are retries endless or seamless?
+## What happens to the previous controller?
 
-No. Attempts, retry credits, backoff, and wall time are bounded. A failed request stops. Mid-stream continuation can fail or alter output. Inspect partial output before explicitly submitting another request.
+The existing public deployment and original jobs retain their separately documented [legacy operations](maintainers/legacy-federation-operations.md). Its per-account worker containers, maintenance holds, background saved-file bridge and retained-volume receipt exception apply only there. Assigned accounts are excluded from its writers and leases. Local service installation does not claim public application cutover.
 
-## Can a stream resume after restart?
+## Can users still run agents?
 
-Only retained in-memory output supports SSE replay. Checkpoints do not restore sockets or replay buffers; interrupted jobs recover as failed and are not automatically resent.
-
-## Does cancellation refund the request?
-
-The relay performs no wallet transaction. It reports cancellation separately and sets refund status to `not_managed_by_relay`. Application accounting has a separate owner.
-
-## What was deployed?
-
-A non-root/read-only Docker relay on loopback port 3001 with private checkpoint storage and no personal/source host mounts. The 2026-09-07 rollout verified local canary and production inference, authentication, registry, and isolation. It did not establish remote app deployment, public ingress availability, an egress firewall, or a service-level guarantee.
+User applications may orchestrate inference and tool-call output under their own authority. The relay does not grant arbitrary model-selected tool execution or create customer workspaces on the operator's device. Preserve public model intent and original operation identity; inspect actual supported client contracts.
 
 ## Does BroccoliDB guarantee cheaper or lossless inference?
 
-Representation selection and runtime projections have separate scopes and tests. Savings and task quality require measured workloads; they cannot be inferred from a compression feature, historical benchmark, or relay health. See [BroccoliDB documentation](broccolidb/README.md).
+Representation selection and projections have their own scope and tests. Savings and quality require measured workloads; relay health or a historical benchmark cannot establish them. See [BroccoliDB guidance](broccolidb/README.md).
 
-## Where are setup and incident procedures?
+## Where are incident procedures?
 
-Use the [relay runbook](VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md), [troubleshooting](TROUBLESHOOTING.md), [security](relay-security.md), and [verification guide](INFERENCE_PIPELINE_VERIFICATION.md).
+Use [troubleshooting](TROUBLESHOOTING.md), [security](relay-security.md), [inference verification](INFERENCE_PIPELINE_VERIFICATION.md) and the private [incident system](../post-mortem/README.md). Keep dated observations separate from current instructions.

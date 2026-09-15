@@ -1,22 +1,27 @@
-# Relay deployment: vNext migration and legacy reference
+# Relay deployment and transport recovery
 
 <!-- docs-scope: current-guide -->
-> **Reading scope:** Current guidance. The federation contract governs relay behavior; source and dated verification define implementation evidence. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
 
-The active deployment guide is the [capability-aware federation runbook](RELAY_VNEXT_RUNBOOK.md). This retained URL replaces the historical shared-container instructions so existing bookmarks lead to the current procedure.
+Private navigation guide. [Current state](../post-mortem/CURRENT_STATE.md) owns deployment evidence; [service installation](runbooks/relay-pool-services.md) owns the complete installation and acceptance procedure.
 
-The deployment is a supervised host controller plus at most one isolated worker per eligible shard. Repair desktops are separate environments and the sole manual enrollment source. The operator signs in there and chooses **Enroll shard**; the schema requires that unique desktop binding before admission. External API/CLI/file ingestion is closed, including for retained legacy rows until explicit confirmation. Worker lifecycle remains automatic, while expired provider sessions require manual renewal in the owning desktop. Capability discovery gates routing. Enabling the documented Codex image-tool alias requires explicit worker configuration and successful image verification.
+## Current installation
 
-## Manual policy rollout
+Premium and Standard run locally in separate Colima Linux VMs with separate Docker daemons, disks, runtimes, monitors and credentials. Central authorization and its HTTPS proxy run on Docker Desktop. The Mac and its administrator remain shared trusted infrastructure. Persistent peer-denial rules cover direct and Mac-forwarded paths; separate Compose networks alone do not establish this boundary.
 
-Apply the reviewed manual-enrollment migration before compatible controller/application readers. Preserve homes, links, signing state, holds and uncertain receipts during the supervised reload. See [the migration guide](MIGRATION_GUIDE.md) and [ADR 0152](adr/0152-manual-desktop-only-shard-authority.md). A rollback that reopens old insertion privileges is a deliberate policy rollback, not routine availability repair. Use [current state](../post-mortem/CURRENT_STATE.md) for actual activation and remaining provider acceptance.
+Only project `mazhcjisettrzbqhorvp` manages accounts, encrypted credentials, assignments, registration, lifecycle operations and account leases. Premium and Standard projects contain execution identity/reservations/outcomes only. Each runtime runs an in-process engine per eligible account inside its own runtime container. Monitors create manual sign-in desktops using only their own VM's Docker daemon.
 
-## Legacy boundary
+Open **GALX Monitors → Open Premium / Open Standard**, or use `npm run relay:local -- open premium` and `npm run relay:local -- open standard`. The launcher verifies the installed boundary and obtains a scoped one-use browser ticket. See [account management](reference/relay-account-management.md) for registration, health, rename, removal and renewal.
 
-`docker-compose.relay.yml` and the retained `galxai-relay` container describe the former shared deployment. They are not the vNext fleet launcher. Rebuilding that layout with the current worker will fail the one-shard guard.
+## Release and activation
 
-Before any migration or rollback, pause new admissions, drain the active topology, and confirm the same credentials cannot execute in both topologies. Review maintenance holds: unheld workers are removed on graceful controller stop, while held workers can survive reload. Preserve checkpoint volumes, signing state and private journals. A checkpoint is not permission to replay unfinished inference.
+The local installation and management release are installed and tested. Latest dated acceptance records registration open, execution closed and no registered accounts. Manual paid/free sign-ins, provider qualification, execution activation and public application cutover remain pending. SSH targets and an externally hosted central origin are prerequisites only for a separately selected external installation.
 
-[ADR 0122](adr/0122-isolated-authenticated-relay-and-bounded-recovery.md) preserves the earlier containment decision. [ADR 0126](adr/0126-capability-aware-shard-relay-federation.md) replaces its shared lifecycle, and [ADR 0127](adr/0127-codex-image-tool-alias-production-cutover.md) records production cutover and saved rollback evidence.
+Use the reviewed component images, preserve private state, rerun local acceptance and follow the explicit gates in the service runbook. A successful image build or monitor response does not prove provider capability. Standard always rejects Sites/images/tool aliases before provider I/O; text failures never borrow the other pool.
 
-For transport failures use the [request recovery table](RELAY_API_REFERENCE.md#request-recovery), not a larger timeout or blind retry. The [resilience guide](RESILIENCE_AND_DISASTER_RECOVERY.md) distinguishes lost acknowledgements, stream interruption, capability loss, and worker replacement.
+## Transport recovery
+
+Use [request recovery](RELAY_API_REFERENCE.md#request-recovery). Execution identity is persisted before provider work. A restart marks incomplete old work unknown; it cannot be redispatched. Central grant renewal failure stops upstream work. Retained rows do not guarantee artifact retrieval after an engine is removed or its epoch changes. Increasing timeouts cannot repair authority, capability or uncertain execution.
+
+## Retained deployments
+
+The existing public application still retains the single-controller federation path. Its one-container-per-account lifecycle, maintenance holds and original signed receipt recovery remain documented in [legacy operations](maintainers/legacy-federation-operations.md) and [legacy API](reference/legacy-federation-api.md). Assigned accounts are excluded from its writers and leases. The earlier shared `docker-compose.relay.yml` layout is not a launcher for either replacement. Do not run an account under two execution owners or move accepted work between deployments.

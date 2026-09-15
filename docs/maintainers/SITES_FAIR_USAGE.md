@@ -13,7 +13,7 @@ Private maintainer runbook for [ADR 0140](../adr/0140-paid-sites-and-shared-fair
 | Chat and content dispatch | Workspace and content routes both call `included-configuration.ts` and `included-generation.ts` |
 | Policy and actual accounting scope | One private `galx_sites_fair_policy` row names the shared delivery pool for all Sites callers; routing aliases never supply this ID |
 | Cross-worker state | `SitesFairStore` uses existing pooled PostgreSQL; no new service, queue, daemon or reconciliation scheduler |
-| Readiness source | Existing private Sites contract preflight, plus the shared local concurrency authority; existing federation/worker limits remain in force |
+| Readiness source | Private Sites contract preflight, plus shared local concurrency; explicit isolated mode uses only Premium and its separate capability key, while existing rollout/access gates remain in force |
 | Durable outcome | Existing receipt transport; saved grant/job/origin/output identifies the original request |
 | Publication | Existing workspace snapshots and DNS outbox/worker; new publications require Pro eligibility or the allocated free workspace |
 | Historical billing | Persisted workspace mode and original content receipts retain legacy settlement; never submit new work through that adapter |

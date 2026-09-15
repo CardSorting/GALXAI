@@ -1,0 +1,678 @@
+{
+  "reviewedAt": "2026-09-15T20:04:03.594290+00:00",
+  "reviewer": "Codex implemented relay strategy documentation reconciliation",
+  "scope": "Documentation-only full affected-guide reconciliation against installed relay source and prior dated release evidence. This review does not re-certify every unrelated subsystem or historical sentence.",
+  "strategy": {
+    "accountAuthority": "mazhcjisettrzbqhorvp only; canonical encrypted accounts, manual registration, assignments, lifecycle history and existing account leases",
+    "executionProjects": {
+      "premium": "prgjcyokylzcsqrjmkaa",
+      "standard": "enbtzuxkguehtnrhuvlu"
+    },
+    "runtime": "Own-pool in-process account engines inside separate local VM/runtime containers; independent daemons, disks, monitors and secrets",
+    "workloads": "Premium paid provider accounts: text/Sites/images. Standard free provider accounts: text only. No peer discovery, borrowing, transfer or dispatch failover. Customer plans are separate.",
+    "management": "Central revision-aware rename/remove, unfinished registration restore, explicit same-desktop sign-in save, health filters, unknown freshness and independently recoverable desktop cleanup",
+    "latestRecordedAcceptance": "Registration open, execution closed, zero registered accounts; no new installation or provider test in this documentation turn"
+  },
+  "canonicalGuides": [
+    "docs/reference/relay-account-management.md",
+    "docs/runbooks/relay-pool-services.md",
+    "docs/maintainers/RELAY_CREDENTIAL_ENROLLMENT.md",
+    "docs/RELAY_API_REFERENCE.md",
+    "docs/ARCHITECTURE.md",
+    "docs/ROUTING_ALGORITHMS.md",
+    "docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md",
+    "post-mortem/CURRENT_STATE.md"
+  ],
+  "sourcesInspected": [
+    "src/relay/pool-runtime.ts",
+    "src/relay/pool-execution.ts",
+    "src/relay/pool-central.ts",
+    "src/relay/pool-monitor-server.ts",
+    "src/relay/pool-monitor-model.js",
+    "src/relay/pool-monitor.js",
+    "src/relay/pool-monitor.html",
+    "src/relay/pool-protocol.ts",
+    "src/relay/pool-image-policy.ts",
+    "src/relay/desktop-gateway.ts",
+    "src/core/router/adapters/IsolatedRelayTransport.ts",
+    "src/core/router/adapters/RelayChatTransport.ts",
+    "src/core/router/GalxModelRouter.ts",
+    "scripts/relay-local.mjs",
+    "scripts/set-relay-service-gates.ts",
+    "docker/relay-pools/local/images.json",
+    "supabase/migrations/20260915081527_central_relay_authorization.sql",
+    "supabase/migrations/20260915191404_relay_account_management.sql",
+    "supabase/rollbacks/20260915191404_relay_account_management.down.sql",
+    "deploy/relay-execution/supabase/migrations/20260915082628_relay_execution.sql",
+    "package.json",
+    "scripts/docs-kb.py",
+    "scripts/verify-post-mortem.py"
+  ],
+  "baselineEvidence": [
+    "docs/knowledge/audits/2026-09-15-relay-account-management-review.json",
+    "docs/knowledge/audits/2026-09-15-relay-services-review.json",
+    "docs/knowledge/audits/2026-09-15-relay-local-review.json",
+    "docs/knowledge/audits/2026-09-15-relay-local-database-review.json",
+    "post-mortem/releases/2026-09-15-relay-account-management.json"
+  ],
+  "findingsResolved": [
+    "Main guides no longer present retained single-controller allocation, maintenance holds or saved-file synchronization as new-pool behavior.",
+    "Canonical reference documents central schema, fixed own-pool protocol, health freshness, expected revisions, replay, removal retention and explicit renewal in full.",
+    "Local installation is documented as installed; SSH/origin requirements are scoped to optional external hosting. Manual sign-ins, execution activation and application cutover remain pending.",
+    "Runtime per-account in-process engines are distinguished from legacy per-account Docker workers; rotating model selection differs from the retained load-weighted reverse index.",
+    "New runtime unknown/epoch recovery does not inherit legacy retained-volume receipt retrieval; original legacy readers remain retrieval-only.",
+    "Authentication, migration, release, incident navigation, CLI, metrics, playbooks, FAQ, glossary, architecture and design indexes now link the implemented strategy.",
+    "Initial design and pre-service foundation audit retain complete original bodies in dated history with stable entry URLs. Later service/provisioning checkpoints preserve original observations.",
+    "Legacy API, operations, desktop enrollment and desktop operations remain complete, explicitly scoped guides for the existing public deployment and unassigned accounts.",
+    "Cross-reference audit corrected an obsolete fixed-price Sites summary and authentication acceptance wording using their owning current guides/evidence.",
+    "Knowledge registry maps new references and affected current guides; ADR 0153 remains proposed and delivery evidence is separate."
+  ],
+  "changedDocumentation": [
+    {
+      "path": ".impeccable/surfaces/src-relay-desktops-html.md",
+      "classification": "authored-document",
+      "beforeSha256": "c467eed470e606a8feb09b6e11e9e2b86c334570b6deb67b1b3b441f941a6359",
+      "afterSha256": "7b5d27461278d7d1e8147da44e1ad4e22fbaf70163888627dfa8973fb54d0904"
+    },
+    {
+      "path": ".impeccable/surfaces/src-relay-federation-html.md",
+      "classification": "authored-document",
+      "beforeSha256": "7528c5bf60e98ab52699a17d6ce5720e5667be7afc287afd10c4a69d3fce5020",
+      "afterSha256": "5f7c5b1c6b3f06d3cb920866b506c2b1edfa34683651961d2ae6e13c601c6767"
+    },
+    {
+      "path": ".impeccable/surfaces/src-relay-pool-monitor-html.md",
+      "classification": "authored-document",
+      "beforeSha256": "1f16a3cf42a9a7a12675608afc1454459f8620656a0e7241036b67af29ef77a2",
+      "afterSha256": "b7b69b76ff4ed0d36dd2ce3b82f765c7d88c60a6930e971bac93317713f3bd3b"
+    },
+    {
+      "path": "DESIGN.md",
+      "classification": "authored-document",
+      "beforeSha256": "14d5638fcba3437e79fa8b7366ade4579b5673085da380b7131921d260c7c912",
+      "afterSha256": "af50c641c633655faf77a68a7f98a04e62f61b278a39176d8d2c9c1f4981bde3"
+    },
+    {
+      "path": "HANDOVER.md",
+      "classification": "authored-document",
+      "beforeSha256": "9ba6908f08915fded3001eaf6d248ba5daea0f6d07c652dc43f58eecfec4492e",
+      "afterSha256": "65499cdba27c6a58d7e1e536c714298195698413013742beeaaa4fa75791d733"
+    },
+    {
+      "path": "MAINTAINERS.md",
+      "classification": "authored-document",
+      "beforeSha256": "e952181e0ad38dad504d0ac212395e65829b64c273a62b1644e7616ee53f4b48",
+      "afterSha256": "4760685c57abd3e10aad8a575638834a96b1a5cdda9d7ff16e772b62e8ce24ce"
+    },
+    {
+      "path": "context.md",
+      "classification": "authored-document",
+      "beforeSha256": "ede89c08900565ecd970b529623204efa8274998d4a79c974da0571873c0daa7",
+      "afterSha256": "dddeb18a51a86abc421e1c58f21890f7501066bfae9d736d374f406bc3dd6134"
+    },
+    {
+      "path": "docs/API_BASE_URL.md",
+      "classification": "authored-document",
+      "beforeSha256": "bdeed9bdaae4e00fe13cde010e2774a76dad45de910d6cb2594e459668ef4eaf",
+      "afterSha256": "19e4b534e72165ee0943fd4e9dd2a79dc01cecad30abed739ed0c1be537a9dca"
+    },
+    {
+      "path": "docs/ARCHITECTURE.md",
+      "classification": "authored-document",
+      "beforeSha256": "4382f0c1dab8a0c31d1fd06f0b91e0b7e7787d52b9e9252a6f46495d377988d5",
+      "afterSha256": "bda8ad7c240547613a4b8f3e5c5a068a4e9b57a775a831fb1e0c764dc0d3e221"
+    },
+    {
+      "path": "docs/CATALOG.md",
+      "classification": "generated-navigation",
+      "beforeSha256": "ecda08dae9fde00633f0414e1ce48488099a5b11380ce27b5fa2a12b07b4d3a2",
+      "afterSha256": "bd07b0c1e8942d7b557340da41e4c7670d76beda1f42ae4f252657a037004229"
+    },
+    {
+      "path": "docs/CLOUDFLARE_STRATEGY.md",
+      "classification": "authored-document",
+      "beforeSha256": "fee72ae1271f8823752661fa0e1f0298a8be0b074066261cdbfb552045148d6e",
+      "afterSha256": "ad10a4f66300e05c56321cde7844e272d1a7812338d6732e361a7f26c27c4cef"
+    },
+    {
+      "path": "docs/DEPLOYMENT.md",
+      "classification": "authored-document",
+      "beforeSha256": "3e297b8d22b1e3ccc50fa36541095799e6623f4791c01cad83104bc60c4dd386",
+      "afterSha256": "a3dbed9f37b398cb7212944538b5404b9d87e1aee25200992a50536dd3dc534d"
+    },
+    {
+      "path": "docs/DEVELOPER_GUIDE.md",
+      "classification": "authored-document",
+      "beforeSha256": "758420bb01643a161526dcd437923f4b7d964a7b138763c7f05ad2980e286f95",
+      "afterSha256": "f8670e55cd94143b98701e9185eb6657a6cab4fb85e5077b126f4ddffbe68784"
+    },
+    {
+      "path": "docs/FAQS.md",
+      "classification": "authored-document",
+      "beforeSha256": "09a2008ec3af0387dc07f9a2b79abf912e7c86de1f610274273df0786a6a417f",
+      "afterSha256": "d5a05c2a68a72e319ab834dec6d38525b1cfc1eaabbad8211862b585757801c3"
+    },
+    {
+      "path": "docs/FEDERATION_STRATEGY.md",
+      "classification": "authored-document",
+      "beforeSha256": "e2b61208f122d16da9eaaa47d3e27cecba3bfd5527cc55402eb934e0f5a0a92c",
+      "afterSha256": "65efd9431f7b05349ed5c3fb2506d4c9c7314c8d1cf018b604504a9884251063"
+    },
+    {
+      "path": "docs/INFERENCE_PIPELINE_VERIFICATION.md",
+      "classification": "authored-document",
+      "beforeSha256": "2f11d079bd14435c6f9e3079fa321a8c0a60a05fa81de31ae1a0c55a1d35f37d",
+      "afterSha256": "8fa57463b970ad16045c27787e79fb522242a539ec25ec0853cde500c8f6ea88"
+    },
+    {
+      "path": "docs/MIGRATION_GUIDE.md",
+      "classification": "authored-document",
+      "beforeSha256": "8a4aa2ad7ec1370d33037086aec83e085581322ebc0193a5962529dc5117929f",
+      "afterSha256": "19d8c84b869376d40130dcabe9951a145e5d50eea3cb2b257af2361dac5f13d6"
+    },
+    {
+      "path": "docs/MODEL_CATALOG.md",
+      "classification": "authored-document",
+      "beforeSha256": "b3b70f85ab4de206ff95a3e2dcf70427370df14e76bf62a71fa3528a6c5c9dfc",
+      "afterSha256": "0854759f5192fed3cf14d2d6a3536d2fcbfbdd21615038862ecc129dd58fb18a"
+    },
+    {
+      "path": "docs/OAUTH_AND_TOKEN_LIFECYCLE_SPECIFICATION.md",
+      "classification": "authored-document",
+      "beforeSha256": "30986c9e0c6752d7e7879b90ec9d060538c745677c88e0620f70941995c96161",
+      "afterSha256": "76aba5404267d5427e1eae28ac44564141944b21834ef75ab926cf9119885448"
+    },
+    {
+      "path": "docs/PROVIDER_AS_AUTH_SPECIFICATION.md",
+      "classification": "authored-document",
+      "beforeSha256": "9148b77448b0e9781817d41866c90a9ccf748ec85d15ad08700cc6f6956b82d4",
+      "afterSha256": "30c8fb9964680d066de61b5399bd33e24956f26fff07dea8ac9d8a0905c13435"
+    },
+    {
+      "path": "docs/QUEUE_SPECIFICATION.md",
+      "classification": "authored-document",
+      "beforeSha256": "1128aaa7784959e883e82bb91ca8ac2bd74502b5fb601ea7195d6cea411e30f3",
+      "afterSha256": "44895c93e337de7f99a8910f2cd5373e306c29be8c603600f9f0e51f16e16fbb"
+    },
+    {
+      "path": "docs/RATE_LIMITS_AND_QUOTAS.md",
+      "classification": "authored-document",
+      "beforeSha256": "e236bb6213bfacbb2ca1e13b8de177a0d2a2d3c8dc1a73b108cd0d3419529085",
+      "afterSha256": "640126622e09e019b9591c3a5df01b6390c2ee85c6999451a3e6fbd369fc0402"
+    },
+    {
+      "path": "docs/README.md",
+      "classification": "authored-document",
+      "beforeSha256": "3268fe44db65b323a23a1d3f33e760cd8e3b8d092c00e5c88972040f76778d07",
+      "afterSha256": "e4cbbb6d19c867cf347a68c7bb2aef71217cadea15172d4c4d940f6ce111c885"
+    },
+    {
+      "path": "docs/RELAY_API_REFERENCE.md",
+      "classification": "authored-document",
+      "beforeSha256": "05b9796fcfdac434db81f8e05fcd3065585e58a3f2b134686c1cb8f0722dd86a",
+      "afterSha256": "cbedc67da4dbd76ec2bed60a1129418fe2fe08bb55f14b676ff2146241b2a8c1"
+    },
+    {
+      "path": "docs/RELAY_VNEXT_RUNBOOK.md",
+      "classification": "authored-document",
+      "beforeSha256": "ff5b7675883c4c4b6e1b00ca49af890ab2100b67b031e79efc80ac47aa7a2b4b",
+      "afterSha256": "a6359ee6821709cc1a8c90e1758456eaaaa6b0a25f19236d5688c3f674f1576a"
+    },
+    {
+      "path": "docs/RESILIENCE_AND_DISASTER_RECOVERY.md",
+      "classification": "authored-document",
+      "beforeSha256": "53aec72975a8aedb7704ed75653fd509ec945575ad23b33ac2dce62416eaa352",
+      "afterSha256": "c8e2ab18db013329a6d90b74fbb1efd2df5f1cc5344756ea894fa28562f63500"
+    },
+    {
+      "path": "docs/ROUTING_ALGORITHMS.md",
+      "classification": "authored-document",
+      "beforeSha256": "b054e30cbb394fc5dbd9df15af3eb0ace4057483c647ad4d17baf23ff5fad27a",
+      "afterSha256": "25deef9cb6204447fea173ef740d305277186f00dd727f6fc65853fffd75fd56"
+    },
+    {
+      "path": "docs/SECURITY.md",
+      "classification": "authored-document",
+      "beforeSha256": "f16ae19b91f58cab5f080047c1e2954f30f3450ac642629eb50f7244182b4993",
+      "afterSha256": "64ad8dffce8bc896cec3d46088b84a6e08e1fbdeb1351ba9052aba6b90215ab1"
+    },
+    {
+      "path": "docs/SECURITY_POSTURE_AND_THREAT_MODEL.md",
+      "classification": "authored-document",
+      "beforeSha256": "bded609c8e3104c24ec3e6fd6dccc12dd72b9ac9c3fd6945687ddcaa0a9a6297",
+      "afterSha256": "e86373b3f94578d34e76485514c9781361ef3035359b84b11c9336269303419c"
+    },
+    {
+      "path": "docs/STANDARDIZED_OAUTH_AND_INGESTION_ARCHITECTURE.md",
+      "classification": "authored-document",
+      "beforeSha256": "9f37ac4fc4ac9c50dfad33f95cae41f9b27d7ca186b5b23358cc5739e9c856a8",
+      "afterSha256": "5503c6d028002c4b0f511cd88ca2bd30317eb08200266faae449200db290ad04"
+    },
+    {
+      "path": "docs/SUPABASE_PARANOID_ARCHITECTURE_SPEC.md",
+      "classification": "authored-document",
+      "beforeSha256": "6f8433babeac2ffe0d916ef00952e74121824e44190fcb22819034e76d731d0c",
+      "afterSha256": "8213e0775e678d7121157e7d73d8bf3ace7f097ab6a70a71d853d52fdd25db8a"
+    },
+    {
+      "path": "docs/SYSTEM_TOPOLOGY_AND_MAINTENANCE_ONBOARDING.md",
+      "classification": "authored-document",
+      "beforeSha256": "66f627cdf825125eab6d00ed561810aee18d4681b4ae2c001bd4f8b2f6de5c1b",
+      "afterSha256": "9a2733d1d22bba96a45981a56dc8c6ffe3a29b5c65009f0af080837c9bd4179d"
+    },
+    {
+      "path": "docs/TELEMETRY_AND_OBSERVABILITY.md",
+      "classification": "authored-document",
+      "beforeSha256": "e46a148ae3ed55f818f5e45362559b0074bb1f975b3782978e3e815941e9812e",
+      "afterSha256": "7e2bc7c840f2de869abda2700a343e3cad3139ca6fedfa2c68f72e10eb80f110"
+    },
+    {
+      "path": "docs/TROUBLESHOOTING.md",
+      "classification": "authored-document",
+      "beforeSha256": "2ebdc1b46989fe3ec62c1553bc2edcf7271cdb1a221afc1c4fa8b255bf99869a",
+      "afterSha256": "361ddcbd1ad289ecf7e4ec4fc270fe09c8c803f068d18e4eb6ec02cc2e0539d8"
+    },
+    {
+      "path": "docs/VERCEL_DEPLOYMENT.md",
+      "classification": "authored-document",
+      "beforeSha256": "7fedce827b8bcc60ff5a2107090f1c9a52967dbf3b97c0f019a41c0c946e2c94",
+      "afterSha256": "8948d5be8d2d055b0bacf54ce4dd3335deb5e80a0046dcc960baa683dfcb4a9a"
+    },
+    {
+      "path": "docs/VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md",
+      "classification": "authored-document",
+      "beforeSha256": "2c7d52fd2494c3ae2ac1f0751615c075c9a70071ec4685d7776d170b7fd1c53d",
+      "afterSha256": "372aaf2d9e58313565985c44731e876608873670cebbb9d342d5e47883c0e3b1"
+    },
+    {
+      "path": "docs/adr/0153-central-account-authority-isolated-relays.md",
+      "classification": "authored-document",
+      "beforeSha256": "f076d2bbfc4c464ea96cbb74cd398c53e501322f361dad10ec85187542e3324c",
+      "afterSha256": "5ff0fc320dbd231729d6375ce4165904b56af834870e44cc5bde073181801449"
+    },
+    {
+      "path": "docs/how-to/README.md",
+      "classification": "authored-document",
+      "beforeSha256": "2b33e621e378c69b02333e4956136b84a3899826558dd34cf2d0227c2750b001",
+      "afterSha256": "eedaf7b8188a8f6b0d1b3fbe578356c2cb2d5c0a2411254a7c14292da5cd3531"
+    },
+    {
+      "path": "docs/knowledge/DOMAINS.md",
+      "classification": "generated-navigation",
+      "beforeSha256": "2eae02128c568a0e22577ffa89570f0930f756bb450fa205c178e558185bae90",
+      "afterSha256": "0d956d9cd1939eecbab821f26707c818a81315f1d8820e06381edc721d6d9e14"
+    },
+    {
+      "path": "docs/maintainers/AI_AGENT_PAIR_PROGRAMMING_AND_GOVERNANCE.md",
+      "classification": "authored-document",
+      "beforeSha256": "7f7f6d85715050a42e00f7eb5e3f0c95ce7b68b569761e51adfd2c885975a0a9",
+      "afterSha256": "7c6b8be1a95a73f416ab3b5efec0cc66c56c49b5efce7dbbed9ee9d0b727fef3"
+    },
+    {
+      "path": "docs/maintainers/CLOUDFLARE_EDGE_MESH_MAINTAINER_RUNBOOK.md",
+      "classification": "authored-document",
+      "beforeSha256": "a679c1b7295d0e02bf41be78427d96524c7eed912fec8b5c6f4c90d549efeb8c",
+      "afterSha256": "15571a03c6ce52400aea457f4797ca0ebc273892563c81c4c137074a6a822aa0"
+    },
+    {
+      "path": "docs/maintainers/DEBUGGING_AND_DIAGNOSTIC_RUNBOOKS.md",
+      "classification": "authored-document",
+      "beforeSha256": "eca7754e93d68e46b298c782d774f968a136372bfb7913cb0d8b29622a4a766f",
+      "afterSha256": "a22910cebb0d77bc25b266416c5373ad1dbafbdf448e0532a24578114cb445e6"
+    },
+    {
+      "path": "docs/maintainers/MAINTAINER_CLI_CHEATSHEET.md",
+      "classification": "authored-document",
+      "beforeSha256": "b1b4d43f24718b27b2dd00031169716f2d68c8b13ab753895eaa4a39be1dbc5c",
+      "afterSha256": "8abcf56d6465fa4c48884576e4259719be2830844fc1c75c2fa07af4962776c7"
+    },
+    {
+      "path": "docs/maintainers/MAINTAINER_GLOSSARY_AND_LEXICON.md",
+      "classification": "authored-document",
+      "beforeSha256": "9da308e1c11cff6f27cf487da6ebd81482011c150645b046a08dc4770cecc314",
+      "afterSha256": "9e3838d6492eb913e8a1bb149f984116e63a8456f8447c8936a2ae05f765841e"
+    },
+    {
+      "path": "docs/maintainers/MULTI_TENANT_SHARD_AND_KEY_ROTATION.md",
+      "classification": "authored-document",
+      "beforeSha256": "e606e4bafa0b1fe2c99fc9a8ddeb2b7071486f6bb26985cd99a34877c86d89ab",
+      "afterSha256": "82c0705760f1f38632b5f695ab993763fc06ec1b878d49e195ecb91fa521169e"
+    },
+    {
+      "path": "docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md",
+      "classification": "authored-document",
+      "beforeSha256": "15b5532f94f3f5d6bf02ab59b0b2ac89245a23782ba3a2ca1d9e3fde9646e870",
+      "afterSha256": "3dacee63013b503b1604510990035f44c9ff340413afb1d8bef4b489ec336c67"
+    },
+    {
+      "path": "docs/maintainers/README.md",
+      "classification": "authored-document",
+      "beforeSha256": "29ca600e2eb8c8ffb4bade1a24529152b7e7427595ee17b92adcf91c59ec5f4c",
+      "afterSha256": "19b6dfe449ade52a3e85cde13edf0c95d58b68989c12ee9078e54479bf0c0f76"
+    },
+    {
+      "path": "docs/maintainers/RELAY_CREDENTIAL_ENROLLMENT.md",
+      "classification": "authored-document",
+      "beforeSha256": "18eea93f58371d66ca78792be16247ce17951b75bbdf8c78fffaf1a8ff236a7f",
+      "afterSha256": "eab2840dea69ffc149e92ae8a4e87d53d8838e587b2d9c76bf13b074e0fe1cf5"
+    },
+    {
+      "path": "docs/maintainers/RELAY_DESKTOPS.md",
+      "classification": "authored-document",
+      "beforeSha256": "4abc82e33017bc876f4cc89d39d157330993254dcfff4614e127aeea696843ff",
+      "afterSha256": "169f34dd08709b7baef42ef5cba1bead23c7235e866f90a04c07ebd9db979ce3"
+    },
+    {
+      "path": "docs/maintainers/RELAY_HARDENING.md",
+      "classification": "authored-document",
+      "beforeSha256": "ba435324992157adfd8833c227e3a05a2ce65a24437a3f97ec608b1a0d403145",
+      "afterSha256": "e3c64af0e79d1b68323779f1989da58a904c67f1fadc0ee88e8dc54e4b77d016"
+    },
+    {
+      "path": "docs/maintainers/RELAY_QUOTA_AND_FLEET.md",
+      "classification": "authored-document",
+      "beforeSha256": "f1d2dd6b6158745782eaf5e27cfd44f0bd9890178718dc18d1f8d39ffe930301",
+      "afterSha256": "3fabfd753569955bfdcc5aed183802b35ce55c73b635fc2d01250b0f6465d2d7"
+    },
+    {
+      "path": "docs/maintainers/RELAY_TELEMETRY.md",
+      "classification": "authored-document",
+      "beforeSha256": "f02e84a73fb2a6242ea55410f7f852e35c225dff85d978c75c8a9d1ccd1765ea",
+      "afterSha256": "73eece50d7c4ca33944da17c64eedb60bc02fe98781618d304b017dc4602eb0f"
+    },
+    {
+      "path": "docs/maintainers/RELAY_TELEMETRY_UX.md",
+      "classification": "authored-document",
+      "beforeSha256": "b042a24a473f9e1b4ac668a46dc2a413cefc4e5fa4a5cc29175fdf6b5f03c9ed",
+      "afterSha256": "ce8770ed8aea7a2826b3c9b82809f11f2d1e82b33d2a84089bf22b9748303b8c"
+    },
+    {
+      "path": "docs/maintainers/SUBSYSTEM_INTERNALS_AND_DEPENDENCY_GRAPH.md",
+      "classification": "authored-document",
+      "beforeSha256": "148307496e13b19e3224cc7bec5324d0286552beb4948cb7723c9e6e3f830611",
+      "afterSha256": "22d1a489e3f34c4ba640e3921c6afc6df99bbb502e406b35bba8f602a54393e9"
+    },
+    {
+      "path": "docs/maintainers/TELEMETRY_AND_METRICS_OBSERVABILITY.md",
+      "classification": "authored-document",
+      "beforeSha256": "88aabb0e760cc1820ade69d60ab3b02a1cf290d9f12c8b6f2381ba34f9ff6009",
+      "afterSha256": "43686faedb7cd76625e8a3117835c13384f5c71858c7765f7347ee6882224871"
+    },
+    {
+      "path": "docs/maintainers/UPSTREAM_PROVIDER_OUTAGE_AND_DEGRADATION.md",
+      "classification": "authored-document",
+      "beforeSha256": "5e91727c9808526b4d7e8c9f409da7e2091d50cf3e2dd3d68a5116cca086ccb3",
+      "afterSha256": "f9a5023b9134576864cdf319eae6d128934f95e738e1b2556db8d862bb3d81fe"
+    },
+    {
+      "path": "docs/maintainers/image-public-boundary.md",
+      "classification": "authored-document",
+      "beforeSha256": "cdeae0cb3cfc01ab501db9527c35519058fb3c3de720f5656780727a3a4b2472",
+      "afterSha256": "128dc12947509402437c8813dd2c1781504cca3ca91d47ba2af865109e66480c"
+    },
+    {
+      "path": "docs/maintainers/legacy-desktop-enrollment.md",
+      "classification": "authored-document",
+      "beforeSha256": null,
+      "afterSha256": "b41ea617841a470c5d49582e0727cb4dcb2bc3e05531e4d740455827552f4b52"
+    },
+    {
+      "path": "docs/maintainers/legacy-desktop-operations.md",
+      "classification": "authored-document",
+      "beforeSha256": null,
+      "afterSha256": "fbc4bc8455e13f5fbe1038371b4555d68c49ac9246a94eb2a03c5e2c641baf33"
+    },
+    {
+      "path": "docs/maintainers/legacy-federation-operations.md",
+      "classification": "authored-document",
+      "beforeSha256": null,
+      "afterSha256": "2041f1e6dcb5017a953d7cdc07147796b6523619aa1e0e2a9612cff21be75337"
+    },
+    {
+      "path": "docs/operations/workspace-auth.md",
+      "classification": "authored-document",
+      "beforeSha256": "c580b390353b340a7b92a6c3f8bd2ca0f8510920479b299780b84806b35e3169",
+      "afterSha256": "b8bdce9d8893035f04518641f5f57333b00354bf9dd6f97eadd8db47b7177b1c"
+    },
+    {
+      "path": "docs/playbooks/01-provisioning-and-preflight.md",
+      "classification": "authored-document",
+      "beforeSha256": "74c6072b03874ab656e9401a25b4fe6803633831e5e6baca07022df259cd893b",
+      "afterSha256": "9bb91a9e7ccc21b4392499dc1b521891eb608d4e7688fbc590d528cce882601e"
+    },
+    {
+      "path": "docs/playbooks/02-deployment-and-release.md",
+      "classification": "authored-document",
+      "beforeSha256": "a149fdb684cc8f03b9e5d0c0dd823fcfe2ffa3e6329479edbdfb682866acd79d",
+      "afterSha256": "81e9a3764f54d92b728b18e6bc91864b9d45a9edf1371250f76a9ff6bc640246"
+    },
+    {
+      "path": "docs/playbooks/03-live-traffic-and-fleet-scaling.md",
+      "classification": "authored-document",
+      "beforeSha256": "7bd166fad3893681c7dfd335a0aaf55301d9c1117f481b701b3e55fcd069cfc4",
+      "afterSha256": "723c8193d85954b6b1890e717194285d5268d7bcafb0964a2e7c0d4d3d441c39"
+    },
+    {
+      "path": "docs/playbooks/05-security-key-rotation-and-compliance.md",
+      "classification": "authored-document",
+      "beforeSha256": "79eed0a8b00b71798f34b1f6e6005a3c0589dbe897a5288a5b0096427d201170",
+      "afterSha256": "586381c97e8128eb9cf56d92b8ca987ff443f397a0ccdef0f9835bd68537a522"
+    },
+    {
+      "path": "docs/playbooks/07-zero-hesitation-developer-ergonomics-and-api-governance.md",
+      "classification": "authored-document",
+      "beforeSha256": "22fce4b421a33b124546312268db0ff2973065de4f4ab0261cb794f5e8216855",
+      "afterSha256": "f4767b1462d6e3aca1414fb4e6eafb4ac5a4abe060d65d5d45e6cb320af0d813"
+    },
+    {
+      "path": "docs/playbooks/08-unframed-developer-observation-protocol.md",
+      "classification": "authored-document",
+      "beforeSha256": "3567a6bfc62b64818826578b42917dbbb9f5366984e95dee7daf7803feaf6c0a",
+      "afterSha256": "28ef1da94980b5e4cd5e36e74f56ac27d46085e79d30e0d508fcd820a66a8adc"
+    },
+    {
+      "path": "docs/playbooks/README.md",
+      "classification": "authored-document",
+      "beforeSha256": "3f2fb6c7a03727aeb788e86e3fc6d3da0c9923dee09132b89d1dd677484dd250",
+      "afterSha256": "71d6346d00fe17cf22dc9c330c80eecde2c9496e618cb7d03e705c35784607d1"
+    },
+    {
+      "path": "docs/reference/README.md",
+      "classification": "authored-document",
+      "beforeSha256": "c167fef4c6de6eedd8e05eb0306d8bff5ab8a4ba2d59ca4b84a0f3cbf6f3a0aa",
+      "afterSha256": "ff719874f69a8df0ed25e617f9c7e121006009d8c42ee3330c59e0aaa3f9be56"
+    },
+    {
+      "path": "docs/reference/legacy-federation-api.md",
+      "classification": "authored-document",
+      "beforeSha256": null,
+      "afterSha256": "68bf09b6003c52f980eff7ca972011bab769e82f13669b5e2a093878cc9c8ffe"
+    },
+    {
+      "path": "docs/reference/relay-account-management.md",
+      "classification": "authored-document",
+      "beforeSha256": null,
+      "afterSha256": "9d1522de27ce4395a7b8158a2b234ccb6c96c4edd90efcb6bf274f17fa89268a"
+    },
+    {
+      "path": "docs/relay-security.md",
+      "classification": "authored-document",
+      "beforeSha256": "b8f86cf47e171122545ee1626e293c7e0d695518295571627f59a1fdfaea0239",
+      "afterSha256": "baa6aa93c8d8b7f161bebec297e2a6d0e62ced5e81d63d9df62f1d8e160f0b23"
+    },
+    {
+      "path": "docs/runbooks/README.md",
+      "classification": "authored-document",
+      "beforeSha256": "b6fdecd2f34f10965655ad2bd5c020e7f1651eb8470c4e2954b2edc0bdca47a5",
+      "afterSha256": "11b9033cbe79fc550457c436a76f3d832160c586db2cd66f3311f0e6301041a4"
+    },
+    {
+      "path": "docs/runbooks/relay-pool-images.md",
+      "classification": "authored-document",
+      "beforeSha256": "bfcc37eccadf8f7c32cd094b8ed4cbeb792c34c474e3470f675943630481c71d",
+      "afterSha256": "20e014400b15d2c35502a9d6dcc07485b713c12ffa9487e03d8ebba66ba0c04e"
+    },
+    {
+      "path": "docs/runbooks/relay-pool-services.md",
+      "classification": "authored-document",
+      "beforeSha256": "99de70bc0f5c10175749f462dd9b579bd7ca7bc90b67de8d2e22c01f4a5282f6",
+      "afterSha256": "0a0766abfc53d4fe9c2627534adba9aafd5f0c8119181a1d3ed3dad86e047949"
+    },
+    {
+      "path": "docs/runbooks/release-readiness.md",
+      "classification": "authored-document",
+      "beforeSha256": "47a3842f9f185da0aacd551bfc753d8f11a992e6682bf792cd239e07a2a53635",
+      "afterSha256": "585c381a14592b9c682beb56d4117a0afd123e26433669ab1688ebae19ddfb01"
+    },
+    {
+      "path": "internal/dual-relay-design-2026-09-15/README.md",
+      "classification": "authored-document",
+      "beforeSha256": "ec271b7bb4f8fb14879d25ef986ab02f566da60050172dd2d494ad97732d237b",
+      "afterSha256": "99c99c77bd70fb80c1bf91ab0c37624794ee00142aaf153d336d5e2afdd63efd"
+    },
+    {
+      "path": "internal/dual-relay-design-2026-09-15/central-account-control.md",
+      "classification": "authored-document",
+      "beforeSha256": "a9937c2d8b417f8d8befda710b7cc34e26010b663c465d0d21786303ca8e0528",
+      "afterSha256": "a3b146c09ab4711f0d6f31ddc10fd380f4e4ba165c181f95e8b657e10e272fd8"
+    },
+    {
+      "path": "internal/dual-relay-design-2026-09-15/delivery-plan.md",
+      "classification": "authored-document",
+      "beforeSha256": "7834a55cf8276dd8c17b1a2ce8bb621c38874bc85affce09919f28bab02c21aa",
+      "afterSha256": "19773f53f6931a6732926ca75b0c493f08f0a0f72c3d9aa6b14ef175ffe824a5"
+    },
+    {
+      "path": "internal/dual-relay-design-2026-09-15/history/initial-design-2026-09-15.md",
+      "classification": "historical-archive",
+      "beforeSha256": null,
+      "afterSha256": "3f508f2d9ca903db920c42c1e214159b46629595ff6e664793232938152a902a"
+    },
+    {
+      "path": "internal/dual-relay-design-2026-09-15/history/pre-service-audit-2026-09-15.md",
+      "classification": "historical-archive",
+      "beforeSha256": null,
+      "afterSha256": "86e336b304c19a399aa0bf0ee4dc978f0a24547ec9874814959fe097295ce961"
+    },
+    {
+      "path": "internal/dual-relay-design-2026-09-15/initial-design-2026-09-15.md",
+      "classification": "authored-document",
+      "beforeSha256": "12f7a0e3719ec141671a8a892eeed4bcb6182ae915b00bf2a0d706065fca8666",
+      "afterSha256": "fdded769f90dd0e9bb1f4d41246be9acf2518a15a17a6892bf6e7c0a7b84f149"
+    },
+    {
+      "path": "internal/dual-relay-design-2026-09-15/isolation-proof/README.md",
+      "classification": "authored-document",
+      "beforeSha256": "bf68715991ce09d50383c7073519e53bcb4eff010cc6df9d53d4c541a3f36902",
+      "afterSha256": "4bec33f2d2c8907901f6cd5236075454682e3eb04d45bb12fefb0801c991175f"
+    },
+    {
+      "path": "internal/dual-relay-design-2026-09-15/pool-isolation.md",
+      "classification": "authored-document",
+      "beforeSha256": "566dc553ef96f089d02c358545a66757a37be590c2a1f67abc5eed864552ed2c",
+      "afterSha256": "89bfccbd2f6dfb733a6734913c0473a8034adfa8c9e2edf5c80bbd678820cbba"
+    },
+    {
+      "path": "internal/dual-relay-design-2026-09-15/pre-service-audit-2026-09-15.md",
+      "classification": "authored-document",
+      "beforeSha256": "9069f010cd4179c8efd36ac604cf89d544aba3788dcffd07a1b10bb40f020ff8",
+      "afterSha256": "f274bf4025ef1c62e9bc3d85453e74557ee933fcd4eb6d5e405814458fee1d83"
+    },
+    {
+      "path": "internal/dual-relay-design-2026-09-15/production-audit-2026-09-15.md",
+      "classification": "authored-document",
+      "beforeSha256": "b54c7375dad85e11d32e6e12d34899642e44b56e4158afd46bea91a92676c135",
+      "afterSha256": "e609c47d2eab2b80dede80c71e2d8219d19097a15b0df377d8c440c136159b47"
+    },
+    {
+      "path": "internal/dual-relay-design-2026-09-15/prototype/AUDIT.md",
+      "classification": "authored-document",
+      "beforeSha256": "77abe339d908da4074fd6bf68f840f3ff3aaab02e031603d8e7e5ccdb574a9d1",
+      "afterSha256": "93cfecf25838ff55ab0ae3fdff6323bf842e38c25e297354f63def027a8f4074"
+    },
+    {
+      "path": "internal/dual-relay-design-2026-09-15/prototype/README.md",
+      "classification": "authored-document",
+      "beforeSha256": "9066d3b6706809b08138c704c7aa6727d3688d6a140699beb8a7ddcfe55894bf",
+      "afterSha256": "111874661dceb5ea0bc134dcf0ff58b32ebf939b12e3ccbe899bcf7bd66fdcda"
+    },
+    {
+      "path": "internal/dual-relay-design-2026-09-15/provisioning-status.md",
+      "classification": "authored-document",
+      "beforeSha256": "5a6847e26971112570e560b11aa57f39d23c6997c0fafe88fc019b7035913489",
+      "afterSha256": "33a85c32ed77d28186db5f52b5ee4e26c4209969c6609747eed01341df89cddc"
+    },
+    {
+      "path": "internal/dual-relay-design-2026-09-15/schema-proof/README.md",
+      "classification": "authored-document",
+      "beforeSha256": "51bb4275943725089dc08a84790cd5d2909e3b8d95de051cdf2d2245fd2c4cd3",
+      "afterSha256": "44508b2cb621f1dabeeb25d25f8d960d709f5d1075b51c2fcad726c46609d4e0"
+    },
+    {
+      "path": "internal/dual-relay-design-2026-09-15/strict-isolation.md",
+      "classification": "authored-document",
+      "beforeSha256": "c51ebffb25b1226865b2417f39c6f6c7935183f01440d2d515f70c908eb168b4",
+      "afterSha256": "77f54eb44cace6e2752ed0b7ad71aabb24d7497b41780c571ddb172e18adec69"
+    },
+    {
+      "path": "post-mortem/CURRENT_STATE.md",
+      "classification": "authored-document",
+      "beforeSha256": "f01fe54485e7c5e6331fb8a2e0ce052538637d766794a22a435ee960fac6bd90",
+      "afterSha256": "8ec51ac9468155b9ccd840b946a3b545ecfe92fae9f757d44b6b85a29fbcf77b"
+    }
+  ],
+  "counts": {
+    "changedOrAddedMarkdown": 92,
+    "authoredCurrentOrScopedDocuments": 88,
+    "preservedNewHistoricalArchives": 2,
+    "generatedNavigation": 2
+  },
+  "checks": [
+    {
+      "command": "python3 scripts/verify-docs.py",
+      "result": "passed: 353 guides, 33 incident documents, 153 ADRs; scope, coverage, local targets and current-guide anchors at first reconciliation check"
+    },
+    {
+      "command": "npm run docs:impact",
+      "result": "reviewed all mapped domains and unmapped paths; prior implementation, dated research/proofs, surface briefs and generated evidence classified separately"
+    },
+    {
+      "command": "npm run test:docs",
+      "result": "passed: 38 tests (21 incident guard, 17 knowledge guard)"
+    },
+    {
+      "command": "node --import tsx --test scripts/test-public-information-boundary.ts scripts/test-image-public-http.ts scripts/test-relay-client-auth.ts",
+      "result": "passed: 19 adversarial HTTP/response/artifact, ordinary-admin denial and relay credential-boundary tests"
+    },
+    {
+      "command": "npm run build",
+      "result": "passed: TypeScript and 285 generated static pages; existing configured lint skip and edge/static warning"
+    },
+    {
+      "command": "npm run docs:check:build",
+      "result": "669 rendered/browser assets scanned with no selected private-marker/runtime-trace findings; initial overall command awaited semantic-review fingerprints"
+    },
+    {
+      "command": "git diff --check",
+      "result": "passed at reconciliation checkpoint"
+    }
+  ],
+  "reviewMethod": "Read the affected owning guide bodies, compare implementation-specific lifecycle/authorization/recovery contracts, rewrite contradictory procedures, preserve valid unrelated sections, classify historical evidence, scan the full docs tree for residual old relay instructions, and validate links/scopes. Prior reviews remain baseline for unchanged runtime and unrelated domain source. Fingerprints are change detection, not exhaustive certification.",
+  "unmappedDisposition": {
+    "rootAndCurrentGuides": "Mapped relevant ongoing relay, access, delivery, Sites and knowledge guides; root handovers also retain critical review guard",
+    "surfaceBriefsAndDesign": "Private design documentation, reconciled current/legacy scope; no palette, source or suppression changed",
+    "researchAndProofs": "Historical, synthetic and non-serving artifacts; current research entrypoints link canonical installed contract",
+    "priorImplementationFiles": "Existing session source/configuration changes remain intact and are not new changes by this documentation turn",
+    "generatedAndEvidence": "Generated navigation/inventory and immutable dated evidence, not independent runtime instructions"
+  },
+  "limits": [
+    "No migrations, remote deployment, image installation, credential mutation, account registration or activation performed.",
+    "No real provider generation or live site acceptance performed. Fresh build scan is local and selected-marker based.",
+    "Unrelated subsystem reviews remain their prior bounded attestations; research/decision/incident evidence is preserved rather than converted into current instructions.",
+    "Existing overdue incident actions ACT-001, ACT-015 and ACT-016 remain open; documentation review does not complete operational prevention.",
+    "Final docs sync/check/audit and review fingerprints are recorded after this evidence is fixed; generated views do not imply semantic approval."
+  ],
+  "evidence": [
+    "post-mortem/releases/2026-09-15-relay-strategy-documentation-review.json"
+  ]
+}

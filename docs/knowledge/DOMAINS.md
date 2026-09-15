@@ -32,6 +32,10 @@ Owner role: **Documentation maintainer**. Domain: `knowledge`.
 - [Runbook template](../../docs/knowledge/templates/runbook.md)
 - [ADR 0145: Maintain knowledge with source changes](../../docs/adr/0145-maintained-knowledge-and-decision-lifecycle.md)
 - [Operate the weekly knowledge audit](../../docs/runbooks/weekly-knowledge-audit.md)
+- [MAINTAINERS](../../MAINTAINERS.md)
+- [HANDOVER](../../HANDOVER.md)
+- [context](../../context.md)
+- [Developer and contributor guide](../../docs/DEVELOPER_GUIDE.md)
 
 Relevant checks (select for the change; impact discovery never executes these): `npm run docs:audit`, `npm run test:docs`.
 
@@ -39,7 +43,7 @@ Relevant checks (select for the change; impact discovery never executes these): 
 
 Owner role: **Product/API maintainer**. Domain: `images`.
 
-- [Application queues and relay jobs](../../docs/QUEUE_SPECIFICATION.md)
+- [Application queues and relay execution](../../docs/QUEUE_SPECIFICATION.md)
 - [Image public boundary verification](../../docs/maintainers/image-public-boundary.md)
 - [Image generation and library recovery](../../post-mortem/runbooks/image-generation.md)
 - [Large image libraries](../../docs/maintainers/image-library-scale.md)
@@ -57,7 +61,7 @@ Owner role: **Security/access maintainer**. Domain: `access`.
 - [Private preview activation — 2026-09-12](../../docs/operations/preview-activation.md)
 - [Developer preview reads and hybrid sync](../../docs/operations/preview-hybrid-sync.md)
 - [Workspace authentication and recovery](../../docs/operations/workspace-auth.md)
-- [Authentication and credential enrollment boundaries](../../docs/STANDARDIZED_OAUTH_AND_INGESTION_ARCHITECTURE.md)
+- [Authentication and credential registration boundaries](../../docs/STANDARDIZED_OAUTH_AND_INGESTION_ARCHITECTURE.md)
 - [Authentication security posture and threat model](../../docs/SECURITY_POSTURE_AND_THREAT_MODEL.md)
 - [ADR 0147: Verified account and session authority](../../docs/adr/0147-verified-account-and-session-authority.md)
 - [Readable product URLs](../../docs/maintainers/readable-urls.md)
@@ -66,6 +70,7 @@ Owner role: **Security/access maintainer**. Domain: `access`.
 - [Provider credentials and application identity](../../docs/PROVIDER_AS_AUTH_SPECIFICATION.md)
 - [Security boundaries](../../docs/SECURITY.md)
 - [Relay security reference](../../docs/relay-security.md)
+- [Security and key rotation](../../docs/playbooks/05-security-key-rotation-and-compliance.md)
 
 Relevant checks (select for the change; impact discovery never executes these): `npm run test:preview-admin`, `npm run test:image:security`, `npm run test:auth:sessions`, `npm run test:free-quota`, `npm run test:free-quota:db`.
 
@@ -83,6 +88,7 @@ Owner role: **Sites maintainer**. Domain: `sites`.
 - [Create and manage Sites](../../docs/SITES_WORKSPACE.md)
 - [Site content generation](../../docs/SITES_CONTENT.md)
 - [ADR 0150: Bounded free admission and paid capacity protection](../../docs/adr/0150-free-generation-admission-gate.md)
+- [GALXAI](../../docs/API_BASE_URL.md)
 
 Relevant checks (select for the change; impact discovery never executes these): `npm run test:sites:fair`, `npm run test:sites:workspace`, `npm run test:sites:conversation`, `npm run test:sites:fair:db`, `npm run test:sites:workspace:db`, `npm run test:sites:plans:db`, `npm run test:free-quota`, `npm run test:free-quota:db`.
 
@@ -91,31 +97,55 @@ Relevant checks (select for the change; impact discovery never executes these): 
 Owner role: **Relay operator**. Domain: `relay`.
 
 - [GALX architecture](../../docs/ARCHITECTURE.md)
-- [Federation contract](../../docs/FEDERATION_STRATEGY.md)
-- [Capability-aware relay vNext](../../docs/RELAY_VNEXT_RUNBOOK.md)
-- [Telemetry and observability](../../docs/TELEMETRY_AND_OBSERVABILITY.md)
+- [Relay execution and account authority contract](../../docs/FEDERATION_STRATEGY.md)
+- [Relay operations and implementation entry point](../../docs/RELAY_VNEXT_RUNBOOK.md)
+- [Relay health and operational visibility](../../docs/TELEMETRY_AND_OBSERVABILITY.md)
 - [Telemetry sources and interpretation](../../docs/maintainers/TELEMETRY_AND_METRICS_OBSERVABILITY.md)
-- [Federation request telemetry](../../docs/maintainers/RELAY_TELEMETRY.md)
-- [Federation hardening checks](../../docs/maintainers/RELAY_HARDENING.md)
+- [Relay request and account telemetry](../../docs/maintainers/RELAY_TELEMETRY.md)
+- [Relay hardening checks](../../docs/maintainers/RELAY_HARDENING.md)
 - [Controller ownership and stale-lock recovery](../../post-mortem/runbooks/controller-lock.md)
-- [Relay credential enrollment and recovery](../../docs/maintainers/RELAY_CREDENTIAL_ENROLLMENT.md)
-- [Relay desktops and manual repair](../../docs/maintainers/RELAY_DESKTOPS.md)
+- [Relay account registration and manual sign-in recovery](../../docs/maintainers/RELAY_CREDENTIAL_ENROLLMENT.md)
+- [Pool sign-in desktops and account repair](../../docs/maintainers/RELAY_DESKTOPS.md)
 - [Maintainer runbook: shard authority and key rotation](../../docs/maintainers/MULTI_TENANT_SHARD_AND_KEY_ROTATION.md)
 - [Maintainer CLI reference](../../docs/maintainers/MAINTAINER_CLI_CHEATSHEET.md)
-- [Federation relay API](../../docs/RELAY_API_REFERENCE.md)
-- [Migrating to manual desktop authority and capability-aware GALX](../../docs/MIGRATION_GUIDE.md)
+- [Isolated relay and account management API](../../docs/RELAY_API_REFERENCE.md)
+- [Migration to central accounts and isolated relays](../../docs/MIGRATION_GUIDE.md)
 - [System topology and maintainer onboarding](../../docs/SYSTEM_TOPOLOGY_AND_MAINTENANCE_ONBOARDING.md)
-- [Federation fleet and quota](../../docs/maintainers/RELAY_QUOTA_AND_FLEET.md)
+- [Isolated account capacity and quota](../../docs/maintainers/RELAY_QUOTA_AND_FLEET.md)
 - [Provisioning and preflight](../../docs/playbooks/01-provisioning-and-preflight.md)
-- [Traffic and model-specific scaling](../../docs/playbooks/03-live-traffic-and-fleet-scaling.md)
+- [Traffic and pool-specific capacity](../../docs/playbooks/03-live-traffic-and-fleet-scaling.md)
 - [Inference verification](../../docs/INFERENCE_PIPELINE_VERIFICATION.md)
-- [Relay deployment: vNext migration and legacy reference](../../docs/VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md)
+- [Relay deployment and transport recovery](../../docs/VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md)
 - [Resilience and recovery](../../docs/RESILIENCE_AND_DISASTER_RECOVERY.md)
 - [Troubleshooting](../../docs/TROUBLESHOOTING.md)
 - [Maintainer guides](../../docs/maintainers/README.md)
 - [ADR 0152: Manual desktop-only shard authority](../../docs/adr/0152-manual-desktop-only-shard-authority.md)
+- [Build and inspect the two relay images](../../docs/runbooks/relay-pool-images.md)
+- [Install the central authority and isolated relay services](../../docs/runbooks/relay-pool-services.md)
+- [Central account management and isolated relay contract](../../docs/reference/relay-account-management.md)
+- [Legacy federation API](../../docs/reference/legacy-federation-api.md)
+- [Legacy federation operations](../../docs/maintainers/legacy-federation-operations.md)
+- [Legacy desktop enrollment](../../docs/maintainers/legacy-desktop-enrollment.md)
+- [Legacy desktop operations](../../docs/maintainers/legacy-desktop-operations.md)
+- [Relay selection and admission](../../docs/ROUTING_ALGORITHMS.md)
+- [Application queues and relay execution](../../docs/QUEUE_SPECIFICATION.md)
+- [Rate limits, concurrency and quota](../../docs/RATE_LIMITS_AND_QUOTAS.md)
+- [Model catalog and observed availability](../../docs/MODEL_CATALOG.md)
+- [Security boundaries](../../docs/SECURITY.md)
+- [Relay security reference](../../docs/relay-security.md)
+- [Account health and management UX](../../docs/maintainers/RELAY_TELEMETRY_UX.md)
+- [Subsystem ownership and dependencies](../../docs/maintainers/SUBSYSTEM_INTERNALS_AND_DEPENDENCY_GRAPH.md)
+- [Maintainer glossary](../../docs/maintainers/MAINTAINER_GLOSSARY_AND_LEXICON.md)
+- [Frequently asked questions](../../docs/FAQS.md)
+- [ADR 0153: Central account authority with isolated relay execution](../../docs/adr/0153-central-account-authority-isolated-relays.md)
+- [Parent and subagent execution guide](../../docs/maintainers/AI_AGENT_PAIR_PROGRAMMING_AND_GOVERNANCE.md)
+- [Maintainer debugging and diagnostics](../../docs/maintainers/DEBUGGING_AND_DIAGNOSTIC_RUNBOOKS.md)
+- [Upstream outage response](../../docs/maintainers/UPSTREAM_PROVIDER_OUTAGE_AND_DEGRADATION.md)
+- [Operational playbooks](../../docs/playbooks/README.md)
+- [Developer ergonomics and execution authority](../../docs/playbooks/07-zero-hesitation-developer-ergonomics-and-api-governance.md)
+- [Developer and operator observation protocol](../../docs/playbooks/08-unframed-developer-observation-protocol.md)
 
-Relevant checks (select for the change; impact discovery never executes these): `npm run test:relay:capabilities`, `npm run test:relay:desktop-login`.
+Relevant checks (select for the change; impact discovery never executes these): `npm run test:relay:capabilities`, `npm run test:relay:desktop-login`, `npm run test:relay:pool-images`, `npm run verify:relay:pool-images`, `npm run test:relay:services`, `npm run verify:relay:service-images`.
 
 ## Database authority and migrations
 
@@ -125,9 +155,10 @@ Owner role: **Database operator**. Domain: `database`.
 - [PostgreSQL migration and recovery operations](../../docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md)
 - [Free generation quota operations](../../docs/maintainers/FREE_GENERATION_QUOTA.md)
 - [Maintainer runbook: shard authority and key rotation](../../docs/maintainers/MULTI_TENANT_SHARD_AND_KEY_ROTATION.md)
-- [Migrating to manual desktop authority and capability-aware GALX](../../docs/MIGRATION_GUIDE.md)
+- [Migration to central accounts and isolated relays](../../docs/MIGRATION_GUIDE.md)
+- [Central account management and isolated relay contract](../../docs/reference/relay-account-management.md)
 
-Relevant checks (select for the change; impact discovery never executes these): `npm run db:verify`, `npm run db:test`, `npm run test:relay:manual-db`.
+Relevant checks (select for the change; impact discovery never executes these): `npm run db:verify`, `npm run db:test`, `npm run test:relay:manual-db`, `npm run test:relay:foundation-db`, `npm run test:relay:authorization-db`.
 
 ## Release and deployment boundaries
 
@@ -137,7 +168,10 @@ Owner role: **Release operator**. Domain: `delivery`.
 - [Application deployment and configuration](../../docs/VERCEL_DEPLOYMENT.md)
 - [Prepare and verify a release](../../docs/runbooks/release-readiness.md)
 - [Deployment storage containment](../../post-mortem/runbooks/deployment-storage.md)
-- [Relay deployment: vNext migration and legacy reference](../../docs/VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md)
+- [Relay deployment and transport recovery](../../docs/VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md)
+- [Cloudflare implementation and deployment boundaries](../../docs/CLOUDFLARE_STRATEGY.md)
+- [Cloudflare maintainer runbook](../../docs/maintainers/CLOUDFLARE_EDGE_MESH_MAINTAINER_RUNBOOK.md)
+- [Deployment and release](../../docs/playbooks/02-deployment-and-release.md)
 
 Relevant checks (select for the change; impact discovery never executes these): `npm run docs:check`, `npm run build`, `npm run docs:check:build`.
 

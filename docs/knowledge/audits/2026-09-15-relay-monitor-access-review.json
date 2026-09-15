@@ -1,0 +1,72 @@
+{
+  "reviewedAt": "2026-09-15T18:47:13.002738+00:00",
+  "reviewer": "Codex local monitor access review",
+  "scope": "Incremental access and startup review; prior relay service/local installation reviews remain the baseline outside this delta.",
+  "sourcesInspected": [
+    "scripts/relay-local.mjs",
+    "scripts/lib/relay-local-access.mjs",
+    "scripts/test-relay-local-access.mjs",
+    "scripts/install-relay-monitor-apps.py",
+    "scripts/macos/RelayMonitors.swift",
+    "src/relay/pool-monitor-server.ts",
+    "src/relay/pool-monitor-login.html",
+    "src/relay/pool-monitor-login.js",
+    "src/relay/pool-monitor-access.css",
+    "src/relay/pool-monitor.html",
+    "src/relay/pool-monitor.js",
+    "scripts/verify-relay-pool-monitor.ts",
+    "Dockerfile.relay-services",
+    "docker/relay-pools/local/pool.yaml",
+    "docker/relay-pools/local/images.json",
+    "package.json",
+    "docs/knowledge/registry.json"
+  ],
+  "completeGuidesInspected": [
+    "docs/runbooks/relay-pool-services.md",
+    "docs/README.md",
+    "docs/knowledge/README.md",
+    "docs/reference/knowledge-commands.md",
+    "docs/DOCUMENTATION_POLICY.md",
+    "docs/how-to/change-with-documentation.md"
+  ],
+  "baselineEvidence": [
+    "docs/knowledge/audits/2026-09-15-relay-local-review.json",
+    "docs/knowledge/audits/2026-09-15-relay-local-database-review.json"
+  ],
+  "evidence": [
+    "post-mortem/releases/2026-09-15-relay-monitor-access.json"
+  ],
+  "findingsResolved": [
+    "Automatic ticket exchange handles existing sessions and same-document hash changes.",
+    "Viewer exchange revokes the preceding operator session.",
+    "The first cold-start observation missed a runtime stopped by the existing ownership fence; startup now waits for a centrally observed handoff and verifies runtime liveness.",
+    "Early sandbox attempts could not bind test servers, access Docker builder state or generate icons; approved local operations completed."
+  ],
+  "decisions": [
+    "Native fixed-destination shortcuts and an optional menu login item; no shared account manager or new network listener.",
+    "Session bootstrap remains scoped and short-lived; central authorization and separate browser cookies remain enforced.",
+    "Cold startup respects the existing SQL ownership fence without schema changes.",
+    "Local image manifest pins the tested monitor update while preserving prior image evidence.",
+    "Reconciled the complete owning runbook, recovery, uninstall guidance and knowledge entry point; new code paths map to relay.",
+    "ADR 0153 remains proposed and execution activation/provider acceptance remain separate."
+  ],
+  "checks": {
+    "httpSecurityTests": 12,
+    "launcherTests": 6,
+    "browserVariants": 8,
+    "axeViolations": 0,
+    "documentOverflow": 0,
+    "browserPageErrors": 0,
+    "documentationToolTests": 38,
+    "typescript": "passed",
+    "productionBuild": "passed; existing lint skip",
+    "publicBuildAssetsScanned": 669
+  },
+  "limits": [
+    "Mac administrator and physical host remain shared trust boundaries.",
+    "Native screenshot capture failed because the display could not be captured; native rendered appearance and VoiceOver were not independently verified.",
+    "No physical-phone acceptance; phone layout uses browser emulation.",
+    "Registration remains open, execution closed, zero registered accounts at the local acceptance observation.",
+    "Next-login persistence is implemented as an opt-in LaunchAgent and was not enabled or exercised."
+  ]
+}

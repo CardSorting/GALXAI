@@ -3,6 +3,7 @@ import type { DesiredShard } from './federation-lifecycle.js';
 
 /** Both persisted credential formats participate in the same 1:1 lifecycle. */
 export function desiredShard(row: Record<string, any>, credential: Record<string, any> | null): DesiredShard | undefined {
+  if (row.relay_pool_id != null) return;
   if (!row.managed_desktop_id || !row.desktop_enrolled_at || row.provider !== 'openai' || row.permission_retracted || !['active', 'healthy', 'warming_up', 'half_open', 'cooldown', 'exhausted', 'rate_limited'].includes(row.status)) return;
   const accessToken = credential?.accessToken || credential?.apiKey;
   if (typeof accessToken !== 'string' || !accessToken) throw new Error('Cannot decrypt an active shard credential');

@@ -1,0 +1,9 @@
+{
+  "centralOrigin": "https://REPLACE_WITH_PRIVATE_CENTRAL_ORIGIN",
+  "desktopImage": "galxai-shard-desktop@sha256:REPLACE_WITH_VERIFIED_DIGEST",
+  "databases": {
+    "central": {"url": "postgresql://galx_control_service@db.mazhcjisettrzbqhorvp.supabase.co:5432/postgres", "caFile": "/private/path/central.crt"},
+    "premium": {"url": "postgresql://galx_execution_service@db.prgjcyokylzcsqrjmkaa.supabase.co:5432/postgres", "caFile": "/private/path/premium.crt"},
+    "standard": {"url": "postgresql://galx_execution_service@db.enbtzuxkguehtnrhuvlu.supabase.co:5432/postgres", "caFile": "/private/path/standard.crt"}
+  }
+}

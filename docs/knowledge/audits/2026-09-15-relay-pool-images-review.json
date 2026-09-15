@@ -1,0 +1,82 @@
+{
+  "reviewed_at": "2026-09-15T08:08:27.832Z",
+  "reviewer": "Codex relay image packaging review",
+  "scope": "Bounded delta from the existing September 15 central-foundation review; not an exhaustive review of unrelated relay or documentation modules.",
+  "sourcesInspected": [
+    "Dockerfile.relay-pools",
+    "Dockerfile.relay-pools.dockerignore",
+    "docker/relay-pools/package.json",
+    "docker/relay-pools/package-lock.json",
+    "docker/relay-pools/docker-bake.hcl",
+    "docker/relay-pools/entrypoint.mjs",
+    "docker/relay-pools/premium.json",
+    "docker/relay-pools/standard.json",
+    "docker/relay-pools/compose.premium.yaml",
+    "docker/relay-pools/compose.standard.yaml",
+    "src/relay/pool-image-policy.ts",
+    "src/relay/relay-server.ts",
+    "scripts/test-relay-pool-images.ts",
+    "scripts/verify-relay-pool-images.mjs",
+    "package.json"
+  ],
+  "guidesReadInFull": [
+    "docs/RELAY_VNEXT_RUNBOOK.md",
+    "docs/runbooks/relay-pool-images.md",
+    "docs/adr/0153-central-account-authority-isolated-relays.md",
+    "docs/DOCUMENTATION_POLICY.md",
+    "docs/how-to/change-with-documentation.md",
+    "docs/knowledge/README.md",
+    "docs/reference/knowledge-commands.md",
+    "internal/dual-relay-design-2026-09-15/delivery-plan.md"
+  ],
+  "criticalDeltaReviewed": [
+    "package.json",
+    "post-mortem/CURRENT_STATE.md"
+  ],
+  "decisions": [
+    "Preserve existing active controller behavior when stagedPool is absent.",
+    "Entrypoint always passes a staged pool and refuses account-bearing input; all staged HTTP routes stop before provider handlers.",
+    "No additional monitor image wraps the broad-privileged current controller.",
+    "New runbook owns image commands, private readiness, file permission caveats, cleanup and activation limits.",
+    "Registry maps new build/config/test paths and registers the runbook; ADR remains proposed/local."
+  ],
+  "evidence": [
+    "post-mortem/releases/2026-09-15-relay-pool-images.json"
+  ],
+  "checks": {
+    "imageChecks": 41,
+    "poolHttpTests": 3,
+    "existingRegressionTests": 61,
+    "typescript": "passed",
+    "productionBuild": "passed; existing lint skip",
+    "browserAndRenderedAssetsScanned": 671,
+    "newPrivateMarkerMatches": 0,
+    "docsTests": 38,
+    "cleanup": "Both owned verification containers and temporary synthetic secret files removed successfully"
+  },
+  "remaining": [
+    "Images tested on Linux ARM64 through local Docker Desktop; no AMD64 execution verification.",
+    "No image registry publication or persistent staging stack.",
+    "Compose configuration validated; runtime smoke uses network none. No separate-host or peer-network acceptance claimed.",
+    "Account eligibility, central scoped services, leases, execution-project schemas and monitor separation remain pending.",
+    "All model, image, Sites, probe, registration and recovery requests remain unavailable.",
+    "No production process, credentials, database, worker or monitor changed."
+  ],
+  "sourceSha256": {
+    "Dockerfile.relay-pools": "631813b1e6398a9d762a57344361ef904a44957b3f408f79d601ce6c4c66d684",
+    "Dockerfile.relay-pools.dockerignore": "7989b9768fa61bcae0cb23e26b0a17b85bb9967880a5501713ed830fda4ade3e",
+    "docker/relay-pools/package.json": "d68c072d5e1b3691118a8f8b8f7e6499edf128fe2babab8636f4da04dfe76fc3",
+    "docker/relay-pools/package-lock.json": "63cb2421bff908531f68ba2da647a7b6f0634ec7dc933be94297448b68f35ab9",
+    "docker/relay-pools/docker-bake.hcl": "06a98a1d6310901bff789b61e8aef5e478e0c8b4c94825e5b634da9766478a63",
+    "docker/relay-pools/entrypoint.mjs": "a56e2afe5b4d8c087d711a15e68a4ddece78a6afa288bc4838fb33778f75b8f1",
+    "docker/relay-pools/premium.json": "9b7ac427b455bb83ce1ea29fffcdf7fb11e6c3a9fbfc8514b440a7fecf12e111",
+    "docker/relay-pools/standard.json": "9cd5fff2f1ef5ccc6251cda8606798b54cc7fb9bed7374fbb5b8d349ac6e101c",
+    "docker/relay-pools/compose.premium.yaml": "a313540d44bcf3f9a3cc1b07f9e1f3c98c70db652944702a3bab27a44849f315",
+    "docker/relay-pools/compose.standard.yaml": "4281b22e28ec9d5b8463f6222a151a925b91213bf4cbd504241f6a44ec435cd3",
+    "src/relay/pool-image-policy.ts": "1be67ff36e2dfcd103d16d7007443e399f761824e3c336b11d86fc234ecbf749",
+    "src/relay/relay-server.ts": "cfe91d547d798a87da9373e2b1dab89cdb114c6cbe9a55cd8a9a9b3edc48ae1d",
+    "scripts/test-relay-pool-images.ts": "f5d96ad1bc90e19d4a4f7a6f8b24cd97048a7566c94cd0bcbf9f0de044346a97",
+    "scripts/verify-relay-pool-images.mjs": "5aba9eb33f8df92c8dc5287fb5999683d567b7383072a5f54f6a9fdf4e5eb486",
+    "package.json": "98e2f96a5ddded7d083b73b01f09a5abb56e00449e7796bca37c264f6a8257e9"
+  }
+}

@@ -31,6 +31,7 @@
  */
 
 import * as http from 'node:http';
+import { imagePool, stagedPoolRequest, type RelayImagePool } from './pool-image-policy.js';
 import { sitesContractRequest, sitesContractReply } from './sites-contract.js';
 import type { Socket } from 'node:net';
 import * as url from 'node:url';
@@ -54,13 +55,18 @@ import { CapabilityRegistry, classifyCapabilityFailure } from './capability-regi
 import { CapabilityDiscoveryError, discoverOpenAIModels, type DiscoveryShard } from './capability-discovery.js';
 import { registryConfig, readShardRegistry, decryptRegistryShard } from './shard-registry.js';
 import { BroccoliDbTable } from '../core/broccolidb/broccolidb-table.js';
+import { requestWorkload } from './pool-protocol.js';
+import type { ExecutionPolicy, ExecutionGrant } from './pool-execution.js';
 
 // ============================================================================
 // CONFIGURATION & TIMEOUT TAXONOMY (Layer 0 through Layer 6)
 // ============================================================================
 
 export interface RelayConfig {
+  executionPolicy?: ExecutionPolicy;
   assignedShardId?: string;
+  /** Dormant pool-image packaging. No environment switch can activate this mode. */
+  stagedPool?: RelayImagePool;
   relayId?: string;
   generation?: string;
   assignedShard?: DiscoveryShard;
@@ -838,6 +844,7 @@ export class GalxaiRelayServer extends EventEmitter {
 
   // Ephemeral In-Flight Sessions
   private readonly sessions = new Map<string, TransientJobSession>();
+  private readonly executionGrants = new Map<string, ExecutionGrant>();
   private isDraining = false;
   private admittedRequests = 0;
   private stopping?: Promise<void>;
@@ -881,6 +888,16 @@ export class GalxaiRelayServer extends EventEmitter {
   constructor(config: Partial<RelayConfig> = {}) {
     super();
     this.config = { ...DEFAULT_CONFIG, ...config };
+    if (this.config.stagedPool !== undefined) {
+      imagePool(this.config.stagedPool);
+      if (this.config.assignedShard || this.config.assignedShardId || this.config.registryEnabled || this.config.testOnlyMultiShard) {
+        throw new Error('Staged pool images cannot receive account authority');
+      }
+      if (!this.config.apiKeys?.length || !this.config.adminApiKeys?.length
+        || this.config.apiKeys.some(key => this.config.adminApiKeys!.includes(key))) {
+        throw new Error('Staged pool images require separate inference and administrator keys');
+      }
+    }
     if (this.config.discoverHostCredentials) throw new Error('Host credential discovery is retired. Enroll manually in Relay Desktops.');
     if (this.config.testOnlyMultiShard && process.env.NODE_ENV === 'production') throw new Error('Production relays must own exactly one shard');
     if (this.config.assignedShard) {
@@ -889,6 +906,7 @@ export class GalxaiRelayServer extends EventEmitter {
       this.config.registryEnabled = false;
       this.config.discoverHostCredentials = false;
     }
+    if (this.config.executionPolicy && (!this.config.assignedShard || this.config.stagedPool || this.config.testOnlyMultiShard || this.config.maxUpstreamRetries !== 0)) throw Error('Pool execution requires one assigned account and no account failover.');
     if (!Number.isSafeInteger(this.config.capabilityRefreshMs) || this.config.capabilityRefreshMs < 1000
       || this.config.capabilityRefreshMs > this.config.capabilityTtlMs) throw new Error('Invalid capability refresh interval');
     this.capabilities = new CapabilityRegistry(Date.now, this.config.capabilityTtlMs);
@@ -989,6 +1007,8 @@ export class GalxaiRelayServer extends EventEmitter {
     // Subscribe to BroccoliDB CDC Stream for Reactive Job Lifecycle Logging
     this.jobsTable.subscribe((change) => {
       if (change.after && ['completed', 'failed', 'cancelled'].includes(change.after.status)) {
+        const grant = this.executionGrants.get(change.after.id);
+        if (grant) { this.executionGrants.delete(change.after.id); void grant.complete(change.after.status === 'completed',change.after.usage?.total_tokens).catch(()=>{}); }
         this.telemetry.finish(change.after.id, change.after.status as 'completed' | 'failed' | 'cancelled', change.after.error);
         const session = this.sessions.get(change.after.id);
         if (session) {
@@ -1226,6 +1246,7 @@ export class GalxaiRelayServer extends EventEmitter {
   }
 
   private maybeRefreshImageAlias(shard: ShardRecord): void {
+    if (this.config.executionPolicy) return; // Probes also require explicit central admission.
     if (!this.config.codexImageToolAlias || shard.accessToken.startsWith('sk-') || this.imageCapabilityProbe || this.isDraining || Date.now() < this.nextImageProbeAt) return;
     if (this.shardReadyAt(shard) > Date.now() || shard.inFlight >= this.config.shardConcurrency || this.imageControllers.size) return;
     const record = this.capabilities.get(shard.id);
@@ -1241,6 +1262,7 @@ export class GalxaiRelayServer extends EventEmitter {
   }
 
   private async verifyImageCapability(model: string, prompt: string) {
+    if (this.config.executionPolicy) throw new RequestError(403,'capability_unavailable','This action is unavailable.');
     const shard = this.shardsTable.getAll()[0];
     if (this.isDraining || !shard || this.shardReadyAt(shard) > Date.now() || shard.inFlight >= this.config.shardConcurrency || this.imageControllers.size) throw new RequestError(503, 'probe_busy', 'Shard is not ready for an image probe.');
     const execution = imageExecution(model, shard.accessToken.startsWith('sk-'), this.config.codexImageToolAlias);
@@ -1356,10 +1378,14 @@ export class GalxaiRelayServer extends EventEmitter {
     return deadlines.length ? Math.max(1, Math.ceil((Math.min(...deadlines) - now) / 1000)) : null;
   }
 
-  private acquireHealthyShard(exclude?: string | Set<string>, model?: string): ShardRecord | null {
-    if (!model) return null;
+  private acquireHealthyShard(exclude?: string | Set<string>, model?: string, authorizedImageTrial = false): ShardRecord | null {
+    if (!model || authorizedImageTrial && this.config.executionPolicy?.pool !== 'premium') return null;
     this.updateCapabilityHealth();
     const eligibleIds = new Set(this.capabilities.eligibleShardIds(model));
+    if (authorizedImageTrial && this.config.assignedShardId) {
+      const previous = this.capabilities.get(this.config.assignedShardId)?.models.find(m=>m.model===model);
+      if (!previous || previous.state === 'AVAILABLE' || previous.expiresAtMs <= Date.now()) eligibleIds.add(this.config.assignedShardId);
+    }
     const now = Date.now();
     if (this.config.registryEnabled && (this.registryError || now - this.registryRefreshedAtMs > 5000)) return null;
     const all = [...eligibleIds].map(id => this.shardsTable.get(id)!).filter(Boolean);
@@ -1460,6 +1486,9 @@ export class GalxaiRelayServer extends EventEmitter {
   }
 
   private async handleHttpRequest(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
+    if (this.config.stagedPool !== undefined) {
+      return stagedPoolRequest(req, res, this.config.stagedPool, () => this.verifyAuthorization(req, true));
+    }
     const parsedUrl = url.parse(req.url || '', true);
     const pathname = parsedUrl.pathname || '';
     const method = req.method?.toUpperCase() || 'GET';
@@ -1730,8 +1759,10 @@ export class GalxaiRelayServer extends EventEmitter {
   // --------------------------------------------------------------------------
 
   private async handleChatCompletions(req: http.IncomingMessage, res: http.ServerResponse, tenantId: string): Promise<void> {
+    let pendingGrant: ExecutionGrant | undefined;
     try {
         const body = await readJsonBody(req, this.config.maxPayloadBytes, this.config.httpBodyTimeoutMs);
+        if (this.config.executionPolicy) requestWorkload(this.config.executionPolicy.pool,req.url ?? '',body);
         if (this.isDraining) throw new RequestError(503, 'server_draining', 'Relay is restarting. Submit the request again after it is ready.');
         validateModelRequest(body, false);
         if (body.durable_receipt !== undefined && typeof body.durable_receipt !== 'boolean') throw new RequestError(400, 'invalid_request', 'Invalid receipt request.');
@@ -1804,6 +1835,8 @@ export class GalxaiRelayServer extends EventEmitter {
 
         // Register Fresh Job in BroccoliDB
         const jobId = `job_${Date.now().toString(36)}_${crypto.randomBytes(4).toString('hex')}`;
+        pendingGrant = await this.config.executionPolicy?.admit(req,body,tenantId,jobId);
+        pendingGrant?.assert();
         const jobRecord: JobRecord = {
           id: jobId,
           model,
@@ -1857,6 +1890,15 @@ export class GalxaiRelayServer extends EventEmitter {
         }, jobRecord.durableReceipt ? Math.min(30000, this.config.jobMaxWallTimeMs) : this.config.jobMaxWallTimeMs);
 
         this.sessions.set(jobId, session);
+        if (pendingGrant) {
+          const grant = pendingGrant; this.executionGrants.set(jobId,grant); pendingGrant = undefined;
+          grant.signal.addEventListener('abort',()=>{
+            session.abortController.abort(); this.safeCloseSocket(session.upstreamWs);
+            if (session.currentShardId) { this.releaseShard(session.currentShardId); session.currentShardId=undefined; }
+            this.jobQueue.markFailed(jobId,'execution_authorization_expired');
+          },{once:true});
+          if (grant.signal.aborted) this.jobQueue.markFailed(jobId,'execution_authorization_expired');
+        }
 
         this.metrics.totalJobsSubmitted++;
         this.dispatchJobToUpstream(jobId);
@@ -1885,6 +1927,7 @@ export class GalxaiRelayServer extends EventEmitter {
           createdAt: Math.floor(jobRecord.createdAtMs / 1000),
         }));
       } catch (err: unknown) {
+        await pendingGrant?.complete(false).catch(()=>{});
         if (res.writableEnded || res.destroyed) return;
         const failure = err instanceof RequestError ? err : new RequestError(500, 'internal_error', 'Relay could not process this request. Use the trace ID to investigate.');
         res.writeHead(failure.status, { 'Content-Type': 'application/json' });
@@ -1901,8 +1944,10 @@ export class GalxaiRelayServer extends EventEmitter {
     res: http.ServerResponse,
     tenantId: string
   ): Promise<void> {
+    let grant: ExecutionGrant | undefined, completed = false;
     try {
         const body = await readJsonBody(req, this.config.maxPayloadBytes, this.config.httpBodyTimeoutMs);
+        if (this.config.executionPolicy) requestWorkload(this.config.executionPolicy.pool,req.url ?? '',body);
         if (this.isDraining) throw new RequestError(503, 'server_draining', 'Relay is restarting. Submit the request again after it is ready.');
         validateModelRequest(body, true);
         const prompt = typeof body.prompt === 'string' ? body.prompt.trim() : '';
@@ -1939,17 +1984,21 @@ export class GalxaiRelayServer extends EventEmitter {
         }
 
         this.updateCapabilityHealth();
-        if (!this.capabilities.select(imageCapability)) {
+        const authorizedAlias = this.config.executionPolicy?.pool === 'premium' && this.config.codexImageToolAlias && requestedModel === CODEX_IMAGE_ALIAS.requestedModel;
+        if (!authorizedAlias && !this.capabilities.select(imageCapability)) {
           if (keyed) this.imageReceipts.forget(keyed.id);
           this.rejectModelCapacity(res, imageCapability); return;
         }
 
         const traceId = this.requestTraces.get(req);
+        grant = await this.config.executionPolicy?.admit(req,body,tenantId,`image_${crypto.randomUUID()}`);
+        grant?.assert();
         this.telemetry.model(traceId, requestedModel, model);
         this.metrics.totalImageJobsSubmitted++;
 
         let shardId: string;
         const controller = new AbortController();
+        grant?.signal.addEventListener('abort',()=>controller.abort(),{once:true});
         this.imageControllers.add(controller);
         const deadline = setTimeout(() => controller.abort(new Error('image_wall_time_exceeded')), this.config.jobMaxWallTimeMs);
         const onClose = () => { if (!res.writableFinished) controller.abort(new Error('client_disconnect')); };
@@ -1960,6 +2009,7 @@ export class GalxaiRelayServer extends EventEmitter {
           shardId = dispatched.shardId;
           if (res.destroyed || controller.signal.aborted) return;
           this.metrics.totalImageJobsCompleted++;
+          completed = true;
           if (traceId) this.telemetry.finish(traceId, 'completed');
 
           const responseData = {
@@ -2009,14 +2059,15 @@ export class GalxaiRelayServer extends EventEmitter {
         const failure = err instanceof RequestError ? err : new RequestError(500, 'internal_error', 'Relay could not process this request. Use the trace ID to investigate.');
         res.writeHead(failure.status, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ error: { message: failure.message, code: failure.code } }));
-      }
+      } finally { await grant?.complete(completed).catch(()=>{}); }
   }
 
   private async synthesizeImageWithFailover(prompt: string, body: Record<string, unknown>, model: string, traceId?: string, signal: AbortSignal = AbortSignal.timeout(this.config.jobMaxWallTimeMs)) {
     signal.throwIfAborted();
     await this.refreshShardRegistry();
     signal.throwIfAborted();
-    const shard = this.acquireHealthyShard(new Set(), `image:${body.model || model}`);
+    const authorizedAlias = this.config.executionPolicy?.pool === 'premium' && this.config.codexImageToolAlias && model === CODEX_IMAGE_ALIAS.requestedModel;
+    const shard = this.acquireHealthyShard(new Set(), `image:${body.model || model}`, authorizedAlias);
     if (!shard) throw new Error('all_shards_unavailable');
     const capabilityTicket = this.capabilities.beginObservation(shard.id, `image:${body.model || model}`);
     const execution = imageExecution(model, shard.accessToken.startsWith('sk-'), this.config.codexImageToolAlias);
@@ -2393,6 +2444,8 @@ export class GalxaiRelayServer extends EventEmitter {
     if (session.abortController.signal.aborted) return;
     const queuedJob = this.jobsTable.get(jobId);
     if (!queuedJob) return;
+    try { if (this.config.executionPolicy) { const grant = this.executionGrants.get(jobId); if (!grant) throw Error(); grant.assert(); } }
+    catch { this.jobQueue.markFailed(jobId,'execution_authorization_expired'); return; }
 
     try { await this.refreshShardRegistry(); } catch {
       if (this.jobQueue.markFailed(jobId, 'shard_registry_unavailable')) this.metrics.totalJobsFailed++;
@@ -2437,6 +2490,8 @@ export class GalxaiRelayServer extends EventEmitter {
   ): Promise<void> {
     const session = this.sessions.get(job.id);
     if (!session || session.abortController.signal.aborted || session.activeAttemptId !== attempt.id) return;
+    try { if (this.config.executionPolicy) this.executionGrants.get(job.id)!.assert(); }
+    catch { this.jobQueue.markFailed(job.id,'execution_authorization_expired'); return; }
 
     const capabilityTicket = this.capabilities.beginObservation(shard.id, job.model);
     this.telemetry.attempt(job.id, shard.id);
@@ -3677,6 +3732,8 @@ export class GalxaiRelayServer extends EventEmitter {
       });
     });
   }
+
+  public listeningPort(): number { const address = this.server.address(); if (!address || typeof address === 'string') throw Error('Relay is not listening.'); return address.port; }
 
   public stop(): Promise<void> {
     this.stopping ??= this.drainAndStop();

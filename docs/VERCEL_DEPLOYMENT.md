@@ -2,7 +2,7 @@
 
 <!-- docs-scope: current-guide -->
 
-Private application release guide. The application, gateway, controller, workers and database are separate components. [Current state](../post-mortem/CURRENT_STATE.md) contains the latest dated observations; a prior release record is not proof of the current target.
+Private application release guide. The application, gateway, central authority, isolated runtimes/monitors, retained controller and databases are separate components. [Current state](../post-mortem/CURRENT_STATE.md) contains the latest dated observations; a prior release record is not proof of the current target.
 
 ## Configuration preflight
 
@@ -10,7 +10,11 @@ Use [package.json](../package.json), [.env.example](../.env.example) and the exi
 
 Account Auth verification needs its configured Auth URL, public credential and the applied active-session lookup migration; administrator clients still require privileged credentials and fail closed otherwise. Image persistence needs the configured database and the private image migration, plus `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY` and `R2_ASSETS_BUCKET_NAME` on the server. Required values remain encrypted/server-only; no public key is elevated into administration.
 
-`VM_RELAY_URL` must be reachable from the deployment with an inference credential accepted by that service. Keep application inference and controller administration keys separate. Do not copy localhost or an expired development tunnel into production. Never rotate vault/signing roots just to make a build pass. Provider credentials are entered only through manually created Relay Desktops and explicit enrollment; application environment values, account sign-in and the retired provider HTTP routes cannot enroll or renew them. Do not restore the removed `GALX_SHARD_*` credential inputs from older examples.
+The isolated transport is opt-in through server-only `GALX_ISOLATED_RELAYS_ENABLED=1`, distinct `GALX_PREMIUM_RELAY_URL/KEY` and `GALX_STANDARD_RELAY_URL/KEY`, and `GALX_TEXT_RELAY_POOL=standard|premium` (default Standard). Sites/images select Premium; text remains in the configured pool with no peer or legacy dispatch fallback. Premium's capability key configures the separate Sites preflight. Follow [service installation](runbooks/relay-pool-services.md#6-connect-the-application-deliberately) for the complete contract. Runtime central account leases replace application account selection/decryption and duplicate account leases, while product usage policy remains separate.
+
+The installed pool endpoints are Mac loopback services. They are not reachable from a hosted application without a separately reviewed private transport/deployment. Local installation is not evidence of public application cutover. Keep original receipt origins/readers for already accepted operations; changing the configured dispatch origin cannot move old jobs.
+
+The retained deployment uses `VM_RELAY_URL` and its own inference credential. Keep inference and administration keys separate; do not substitute localhost or an expired development tunnel. Its eligible unassigned accounts use [legacy enrollment](maintainers/legacy-desktop-enrollment.md). New pools use [manual registration](maintainers/RELAY_CREDENTIAL_ENROLLMENT.md). Application environment values, account login and retired provider routes cannot enroll or renew provider accounts. Never restore `GALX_SHARD_*` token inputs or rotate vault/signing roots to make a build pass.
 
 The generic [Dockerfile](../Dockerfile) uses Node.js 22 for both build and runtime, consistent with the repository engine requirement and CI. Docker configuration review is separate from building and running that image; Vercel acceptance does not certify the Docker path.
 

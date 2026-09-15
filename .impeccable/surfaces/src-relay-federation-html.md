@@ -7,6 +7,9 @@ related_targets: ["src/relay/federation.js", "src/relay/monitor-login.html", "sr
 
 # Relay operations monitor
 
+
+**Retained controller surface.** This brief and its dated captures describe the existing single-controller deployment. New Premium/Standard account management uses the [fixed monitor brief](src-relay-pool-monitor-html.md) and [central account contract](../../docs/reference/relay-account-management.md). Legacy workspace groups, background saved-file synchronization and maintenance holds are not the new pool workflow.
+
 ## Scope and mode
 
 Operate. A private, local administrator surface using GALX's existing dark operator palette and compact tables. PRODUCT.md and DESIGN.md remain the product and visual authorities. The user requested familiar monitoring patterns and explanations of actual fleet and request behavior.

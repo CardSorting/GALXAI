@@ -1,26 +1,24 @@
-# Rate limits, concurrency, and quota
+# Rate limits, concurrency and quota
 
 <!-- docs-scope: current-guide -->
-> **Reading scope:** Current guidance. The federation contract governs relay behavior; source and dated verification define implementation evidence. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
 
-Capacity belongs to an eligible model pool. A fleet can have idle relays while a scarce model is saturated. See [routing](ROUTING_ALGORITHMS.md) and the [runbook configuration table](RELAY_VNEXT_RUNBOOK.md#configuration-and-bounds).
+Private reference. [Account management](reference/relay-account-management.md) owns central admission; [routing](ROUTING_ALGORITHMS.md) owns fixed-pool selection.
 
-| Signal | Meaning |
+| Signal | Authority and meaning |
 | --- | --- |
-| Model eligibility | Fresh evidence that the shard can serve this operation |
-| Local concurrency | Worker execution slots, including admission reservations |
-| Provider quota/backoff | Upstream-reported restrictions and deadlines |
-| Credential cooldown | Attributable health decision under the owning authority |
-| Application entitlement | Product key, tier, and billing authorization |
-| Model redundancy | Number of healthy eligible shards; one is fragile |
+| Pool assignment | Exclusive central assignment; paid provider accounts in Premium, free provider accounts in Standard |
+| Account eligibility | Enabled state, current credentials and access, matching runtime ownership/revision |
+| Account quota/concurrency | Existing central account lease/budget ledger; no duplicate ledger in execution projects |
+| Execution reservation | Own-pool durable identity before provider I/O; not a second account budget |
+| Provider cooldown | Attributable upstream/account evidence; empty local slots cannot clear it |
+| Product entitlement/fair usage | GALX customer policy, independent of provider account class |
+| Health display | Observation with freshness and reason; not permission or throughput certification |
 
-Do not infer provider allowance from a local usage window. Do not clear cooldowns because local slots are empty. A generic 429 or timeout does not prove missing model permission. An expired explicit database cooldown allows a serialized recovery probe, not unlimited admissions.
+Text uses the configured pool, with no peer fallback. Sites/images always select Premium. Standard's rejection is a capability boundary, not temporary saturation. Premium image capability requires explicitly requested observation; the isolated runtime does not run background paid image probes.
 
-The controller rejects unavailable/saturated pools explicitly. Callers honor execution state, `Retry-After`, and `X-Should-Retry`; they do not automatically replay ambiguous failures. Live receipt capacity is bounded and rejects new keyed work rather than evicting active deduplication evidence.
+Central grants are short-lived and must renew; failed renewal stops upstream work. Central outage denies new grants and renewal. An unconfirmed terminal write blocks new local admission while original settlement retries. Do not reset counters, clear authoritative cooldowns or change operation IDs to bypass admission. Generic timeouts/403s do not establish permanent account failure, and uncertain work is never automatically repeated.
 
-Image-alias probes consume quota and spare capacity. Successful image evidence has a bounded lifetime; failure backoff prevents probe storms. Disabling the alias requires configuration rollout, not a manual capability assertion.
-
-Worker status/control traffic has a separate tenant bucket from inference. Bounded polling, Docker inspection, reconciliation, and shutdown prevent one slow shard from becoming a fleet-wide blocker. Current numeric limits live in the runbook and source; synthetic concurrency checks are not production throughput guarantees.
+The retained federation's model-pool capacity errors, image probe cadence, control buckets and signed job limits remain documented in [legacy operations](maintainers/legacy-federation-operations.md). Those numeric bounds and maintenance semantics do not define the new pool runtime. Product response headers are allowlisted; internal retry diagnostics are not forwarded wholesale.
 
 ## Sites fair usage
 

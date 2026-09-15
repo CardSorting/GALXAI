@@ -1,0 +1,62 @@
+{
+  "observedAt": "2026-09-15T08:05:50.080Z",
+  "stage": "staged-images-only",
+  "images": [
+    {
+      "tag": "galxai-relay-premium:staged-20260915",
+      "id": "sha256:932b266d49fa84022cb7cbe67a440d255b73b3b4f8750580228d86b1c281f123",
+      "platform": "linux/arm64",
+      "sizeBytes": 71563416,
+      "bundleSha256": "1d494596fd4e8d3ef82c2269f2af2005747ea9f6c299a23843be20af183b5222"
+    },
+    {
+      "tag": "galxai-relay-standard:staged-20260915",
+      "id": "sha256:d652b4bd0dd04b51fdca989461e70669b94f77a0da8ec6bb2fa592f2a1593a49",
+      "platform": "linux/arm64",
+      "sizeBytes": 71563412,
+      "bundleSha256": "1d494596fd4e8d3ef82c2269f2af2005747ea9f6c299a23843be20af183b5222"
+    }
+  ],
+  "checks": 41,
+  "scope": "Local image packaging and dormant engine only. No serving or monitor activation.",
+  "sourceSha256": {
+    "Dockerfile.relay-pools": "631813b1e6398a9d762a57344361ef904a44957b3f408f79d601ce6c4c66d684",
+    "Dockerfile.relay-pools.dockerignore": "7989b9768fa61bcae0cb23e26b0a17b85bb9967880a5501713ed830fda4ade3e",
+    "docker/relay-pools/package.json": "d68c072d5e1b3691118a8f8b8f7e6499edf128fe2babab8636f4da04dfe76fc3",
+    "docker/relay-pools/package-lock.json": "63cb2421bff908531f68ba2da647a7b6f0634ec7dc933be94297448b68f35ab9",
+    "docker/relay-pools/docker-bake.hcl": "06a98a1d6310901bff789b61e8aef5e478e0c8b4c94825e5b634da9766478a63",
+    "docker/relay-pools/entrypoint.mjs": "a56e2afe5b4d8c087d711a15e68a4ddece78a6afa288bc4838fb33778f75b8f1",
+    "docker/relay-pools/premium.json": "9b7ac427b455bb83ce1ea29fffcdf7fb11e6c3a9fbfc8514b440a7fecf12e111",
+    "docker/relay-pools/standard.json": "9cd5fff2f1ef5ccc6251cda8606798b54cc7fb9bed7374fbb5b8d349ac6e101c",
+    "docker/relay-pools/compose.premium.yaml": "a313540d44bcf3f9a3cc1b07f9e1f3c98c70db652944702a3bab27a44849f315",
+    "docker/relay-pools/compose.standard.yaml": "4281b22e28ec9d5b8463f6222a151a925b91213bf4cbd504241f6a44ec435cd3",
+    "src/relay/pool-image-policy.ts": "1be67ff36e2dfcd103d16d7007443e399f761824e3c336b11d86fc234ecbf749",
+    "src/relay/relay-server.ts": "cfe91d547d798a87da9373e2b1dab89cdb114c6cbe9a55cd8a9a9b3edc48ae1d",
+    "scripts/test-relay-pool-images.ts": "f5d96ad1bc90e19d4a4f7a6f8b24cd97048a7566c94cd0bcbf9f0de044346a97",
+    "scripts/verify-relay-pool-images.mjs": "5aba9eb33f8df92c8dc5287fb5999683d567b7383072a5f54f6a9fdf4e5eb486",
+    "package.json": "98e2f96a5ddded7d083b73b01f09a5abb56e00449e7796bca37c264f6a8257e9"
+  },
+  "validation": {
+    "imageChecks": 41,
+    "poolHttpTests": 3,
+    "existingRegressionTests": 61,
+    "typescript": "passed",
+    "productionBuild": "passed; existing lint skip",
+    "browserAndRenderedAssetsScanned": 671,
+    "newPrivateMarkerMatches": 0,
+    "docsTests": 38,
+    "cleanup": "Both owned verification containers and temporary synthetic secret files removed successfully"
+  },
+  "limits": [
+    "Images tested on Linux ARM64 through local Docker Desktop; no AMD64 execution verification.",
+    "No image registry publication or persistent staging stack.",
+    "Compose configuration validated; runtime smoke uses network none. No separate-host or peer-network acceptance claimed.",
+    "Account eligibility, central scoped services, leases, execution-project schemas and monitor separation remain pending.",
+    "All model, image, Sites, probe, registration and recovery requests remain unavailable.",
+    "No production process, credentials, database, worker or monitor changed."
+  ],
+  "sources": [
+    "https://docs.docker.com/build/building/best-practices/",
+    "https://docs.docker.com/compose/how-tos/use-secrets/"
+  ]
+}

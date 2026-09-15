@@ -1,62 +1,60 @@
 # Troubleshooting
 
 <!-- docs-scope: current-guide -->
-> **Reading scope:** Current guidance. The federation contract governs relay behavior; source and dated verification define implementation evidence. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
 
-Start with [incident triage](../post-mortem/runbooks/triage.md), [current state](../post-mortem/CURRENT_STATE.md) and the component/execution state. Record observations and containment in [the rolling log](../post-mortem/ROLLING_LOG.md). Product gateway keys, controller keys, worker administration, database authority, and provider credentials are separate. See [API boundaries](API_BASE_URL.md).
+Start production incidents with [triage](../post-mortem/runbooks/triage.md) and [current state](../post-mortem/CURRENT_STATE.md). Append observations, containment, results and next steps to the private incident journal. Identify the actual deployed component before applying a procedure.
 
 ## Diagnostic order
 
-1. Identify the affected route, existing operation, deployment and identity/access result. Use [image recovery](../post-mortem/runbooks/image-generation.md) for Images/Favorites; do not replace a valid session or resubmit an uncertain generation. Check controller `/health` for reachability only when that dependency is relevant.
-2. Open `npm run relay:open` on the controller host, or use server admin authorization for `/api/capabilities`, and inspect the requested model's eligible pool, evidence freshness, cooldown, and worker generation.
-3. Distinguish unavailable capability from saturated capacity. Idle unrelated models do not resolve either condition.
-4. Find the request ID, execution state, receipt scope, and any signed job URLs.
-5. Follow the [request recovery table](RELAY_API_REFERENCE.md#request-recovery) before submitting more inference.
+1. Identify the affected product route, owner, operation ID and original execution origin. For Images/Favorites start with [image recovery](../post-mortem/runbooks/image-generation.md); preserve uncertain requests.
+2. For the new local services, open the owning fixed monitor through **GALX Monitors**. Inspect connection, execution gate, runtime freshness, account state and the specific health reason. Use `npm run relay:local -- status` and `npm run relay:local -- verify` when installation is in question.
+3. Filter **Accounts → Needs attention**, then inspect the affected account and linked registration. Registration health and running account health are distinct. Search and filters never query the peer pool.
+4. Check saved versus applied revision and the owning execution epoch. A saved command or listening monitor is not runtime or provider acceptance.
+5. Follow [request recovery](RELAY_API_REFERENCE.md#request-recovery); never replay uncertain work or borrow the peer pool.
 
-| Symptom | Interpretation and action |
+## Accounts, registration and monitors
+
+| Symptom | Meaning and next action |
 | --- | --- |
-| Images/Favorites report expired session | Separate rejected credentials from Auth unavailability and administrator misconfiguration; [identity failure modes](../post-mortem/failure-modes/identity.md) |
-| Async image accepted then missing | Verify durable owner-scoped receipt and migration/deployment; [image recovery](../post-mortem/runbooks/image-generation.md) |
-| Favorite disappears after reload | Verify durable mutation acknowledgement, not just optimistic UI; [image persistence](../post-mortem/failure-modes/images.md) |
-| Controller supervisor cannot acquire its lock | Prove process/listener/file ownership before a bounded archive; [lock recovery](../post-mortem/runbooks/controller-lock.md) |
-| Deployment storage quota blocks release | Inventory aliases and compatible rollback, then [storage containment](../post-mortem/runbooks/deployment-storage.md) |
-| `model_temporarily_unavailable` | Inspect that operation's capability evidence, credential state, and refresh failures |
-| `model_capacity_exhausted` | Honor retry guidance for the eligible pool; inspect active streams/reservations |
-| `route`, generic 403/404, or timeout | Insufficient evidence of model permission loss; inspect sanitized upstream classification |
-| Image unavailable while chat works | Chat inventory does not verify image tools; inspect image evidence and alias dependency |
-| Unexpected image dimensions/model | Inspect private administrator evidence; the public capability does not promise exact provider model/dimensions |
-| `relay_admission_unknown` | Work may have executed; reconcile instead of blindly replaying |
-| `job_transport_unavailable` | Retry the original job URL, not inference admission |
-| `relay_generation_gone` | Stream/cancel generation is gone; use the original durable text receipt if present, never reattach execution |
-| Stale dashboard | Retained snapshot is not routing authority; restore authenticated refresh |
-| Controller admin 401 | Use the controller administrator credential; worker admin errors are separate |
-| Browser origin rejected | Operator pages require the host launcher and local origin; product clients use their application backend |
-| Monitor asks to reconnect | Relaunch from the host; do not paste an admin key into the page |
-| Many rejected records but few workers | Inspect source/revision evidence; registry count is not serving capacity; only exact known fixtures qualify for targeted cleanup |
-| Cold start repeatedly fails | Inspect preflight classification/backoff; 401 suppresses a revision, while 403/5xx/timeouts are transient |
-| Login saved but old credential still used | Confirm explicit enrollment and owning-desktop binding, then review safe file, validation, checkpoint and worker-applied state |
-| External connection returns 410 / CLI add or import is rejected | Intentional closure; use manual desktop sign-in and Enroll shard |
-| Unexpired registry record has no worker | Check enrollment provenance first; retained legacy records require explicit confirmation |
-| Provider session expired | Renew manually in its owning desktop; Check now/saved-file sync cannot renew the session |
-| Desktop binding conflict or lost home | Preserve authority and inspect recovery; changing a link cannot transfer ownership |
-| Wrong account or updated elsewhere | Preserve current authority; review matching/link or complete the intended account sign-in |
-| Credential checkpoint error | Keep the recoverable intent; retry after storage recovery without overwriting a newer revision |
-| Healthy desktop, unavailable shard | Desktop connection is independent; inspect hold, credential and model evidence |
-| Paused shard will not replace worker | Hold intentionally blocks replacements; review authority and explicitly resume when appropriate |
-| `db:test` rejects environment | Supply a dedicated loopback test database, never disable the production guard |
+| Monitor asks to reconnect | Open its fixed native app for a new scoped ticket; do not paste a key |
+| Launcher refuses changed identity/isolation | Inspect the owning VM, daemon, image and firewall; do not bypass the check |
+| Connection unavailable / retained snapshot | Restore central/monitor access and Refresh; stale data disables management and is not account failure |
+| Execution closed | Expected at latest local checkpoint; finish manual registration and qualification through [service gates](runbooks/relay-pool-services.md) |
+| No accounts | Register manually in that monitor; inventory counts cannot infer enrolled capacity |
+| Sign-in expired | Open the owning desktop, sign in again, then **Update saved sign-in → Save new sign-in** |
+| Access unavailable / cooldown / repeated failures | Inspect the stated reason and current provider access; do not clear policy or infer permission from chat alone |
+| Change unconfirmed | Inspect fresh matching account/credential revision and runtime epoch; saved is not applied |
+| `record_changed` | Another update won; keep input, close the dialog, refresh and explicitly retry after review |
+| Action response lost | Reconcile the same intent/operation; there is no automatic mutation retry |
+| Registration needs attention | Inspect sign-in/review expiry and desktop state; review again after repair |
+| Registered account's desktop is stopped | Normally acceptable; start it only for manual sign-in/repair |
+| Removed registration still has a desktop running | Removal is saved; use **Removed → Stop desktop** to finish cleanup |
+| Removed unfinished registration is needed again | **Removed → Manage → Restore registration**, followed by a fresh review |
+| Removed registered account is needed again | It cannot be restored or enabled; do not bypass retained revocation/assignment |
+| Standard rejects Sites/images/tool aliases | Intentional pre-provider boundary; submit only supported operations through the appropriate product path |
+| Premium text works but images do not | Text does not certify image capability; qualify an explicit Premium request without background probes |
+| External connection endpoint returns 410 | Intentional closure; use manual registration, not token imports or a direct database write |
 
-## Recovery boundaries
+Removal retains files, encrypted authority and audit/lease history; it is not data erasure or upstream session revocation. Pause stops new-pool account execution and renewal as its revision changes. The legacy hold that preserves a worker is a different operation.
 
-Use the [owning desktop](maintainers/RELAY_DESKTOPS.md) for manual provider renewal. New and unconfirmed legacy accounts both require explicit **Enroll shard** through [manual enrollment](maintainers/RELAY_CREDENTIAL_ENROLLMENT.md). API, CLI and credential-file imports are closed; do not reopen them or automatically backfill bindings during recovery. A maintenance hold preserves an existing worker while blocking new admissions and replacements; registry removal, revocation, expiry or rotation still wins. Changing task IDs, clearing rejection/quota state or manually setting healthy is not recovery. Empty capabilities alone do not require a container restart. Confirmed desktop provenance, a newer valid credential revision, authoritative discovery and applicable traffic state are all required for normal eligibility.
+## Execution and product recovery
 
-Database checkout saturation and query-specific errors must not become global cooldown evidence. Observation-only telemetry cannot clear or extend authoritative cooldowns. Preserve current lease and generation fences during diagnosis.
+Central outage or failed grant renewal stops authorization; cached projections cannot restore it. A runtime restart recovers old incomplete work as unknown, never redispatchable. Retained execution records may outlive the original engine's ability to serve artifacts. Resolve the original operation privately and use [resilience guidance](RESILIENCE_AND_DISASTER_RECOVERY.md).
 
-`docker-compose.relay.yml` and old shared-relay CLI commands are not the federation launcher. Use the supervised controller and [vNext runbook](RELAY_VNEXT_RUNBOOK.md). Confirm image and process generation after deployment; code on disk does not prove the running image changed.
+| Product or retained deployment issue | Owning procedure |
+| --- | --- |
+| Images/Favorites session failure | [Identity failure modes](../post-mortem/failure-modes/identity.md) |
+| Accepted image missing / lost acknowledgement | [Image recovery](../post-mortem/runbooks/image-generation.md) |
+| Favorite missing after reload | [Image persistence](../post-mortem/failure-modes/images.md) |
+| Unexpected model/dimensions | Inspect private execution evidence; public capability does not promise an unverified provider model |
+| Existing controller lock, capability pool, held worker or signed job failure | [Legacy operations](maintainers/legacy-federation-operations.md), [legacy API recovery](reference/legacy-federation-api.md#request-recovery) |
+| Deployment storage blocks release | [Storage containment](../post-mortem/runbooks/deployment-storage.md) |
+| Database test rejects environment | Use a disposable initialized loopback fixture; never disable its production guard |
 
-Use [dated incident evidence](../post-mortem/INCIDENTS.md), including the September 13 existing-session image recovery, rather than treating an older client success as current acceptance. Reproduce through the actual affected client before claiming a new incident resolved. Billing, asset persistence, and tool execution require their own checks.
+Database query errors are not global account cooldown evidence. Observation-only telemetry cannot grant admission. Preserve fences, leases, receipts and signing state. Verify actual affected customer behavior before claiming recovery; source, installation and provider acceptance are separate.
 
 ## Sites content
 
-Use the [Sites recovery runbook](maintainers/SITES_FAIR_USAGE.md#admission-flow-and-recovery). Diagnose disabled policy, paid-plan mapping, stale readiness and unavailable authority privately. Customers receive only paid-plan, retry or temporary-unavailability guidance.
+Use [Sites recovery](maintainers/SITES_FAIR_USAGE.md#admission-flow-and-recovery). Customer eligibility and fair usage remain separate from Premium provider assignment. Diagnose disabled policy, paid-plan mapping, stale readiness and unavailable authority privately. Customers receive finite plan/retry/unavailability guidance without topology.
 
-New `rate_limited` responses do not consume a message or disable existing-operation GET recovery. Pending operations recover their original receipt without submitting again. Historical wallet receipts retain their accepted contract; unknown execution is never proof of non-dispatch. Do not resolve a readiness failure by inventing supplier quota or repeatedly regenerating content.
+A new `rate_limited` response does not consume a message or disable existing-operation recovery. Recover the original receipt; unknown execution is never proof of non-dispatch. Historical wallet receipts retain their accepted contract. Do not invent supplier quota or repeatedly regenerate content to fix readiness.

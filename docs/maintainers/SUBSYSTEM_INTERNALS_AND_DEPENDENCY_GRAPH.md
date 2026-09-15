@@ -1,122 +1,62 @@
-# 🏛️ Subsystem Internals & Dependency DAG
+# Subsystem ownership and dependencies
 
 <!-- docs-scope: domain-reference -->
-> **Reading scope:** Subsystem reference retained for its own domain; not re-certified by the federation documentation refactor. Older routing, deployment, compatibility, or performance descriptions do not override the current relay contract. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
 
-> **Target Audience**: Core Maintainers, Performance Engineers, and Security Architects.  
-> **Purpose**: Formal specification of internal module dependencies, memory limits, and runtime dataflows across Serverless and Cloudflare Edge runtimes.
-
----
+Private source-navigation reference. [Architecture](../ARCHITECTURE.md) owns the system contract; [current state](../../post-mortem/CURRENT_STATE.md) owns deployment evidence. Component presence in source is not evidence that every deployment invokes it.
 
 ## 1. Top-Level Architectural Dependency DAG
 
 ```mermaid
 flowchart TD
-    subgraph ClientPerimeter["Client Perimeter & Ingress"]
-        ControlPlane["GALXAI Web Control Plane<br/>model catalog · keys · billing · governance"]
-        SDK["Downstream @galxai/sdk integrations"]
-        CLI["npx galxai CLI"]
-        GatewayAPI["POST /v1/chat/completions"]
-    end
-
-    subgraph EdgeLayer["Cloudflare Edge Mesh (V8 Isolates)"]
-        EdgeGate["GalxEdgeGateway"]
-        RateKV["RATE_LIMIT_KV (Sliding-Window Token Bucket)"]
-        EdgeAuth["Edge JWE Decryption Enclave"]
-        EdgeGate --> RateKV --> EdgeAuth
-    end
-
-    subgraph CoreEngine["GALXAI Core Engine (Pure TypeScript)"]
-        AuthEngine["GalxAuthEngine & JWE Session Manager"]
-        Vault["GalxCryptoVault (AES-256-GCM + AAD)"]
-        
-        CompactionFacade["BroccoliCompactionFacade (19 Modes)"]
-        CompactionSafety["BroccoliCompactionSafety (Fail-Closed)"]
-        DomainOptimizer["BroccoliDomainSpendOptimizer (180 Domains)"]
-        HighVelocityPipe["BroccoliHighVelocityPipeline (Aho-Corasick + L1 LRU)"]
-        Cascader["BroccoliMegaIncidentStreamCascader"]
-        Pyramid["BroccoliMegaDocumentPyramidCompactor"]
-        
-        RollingEngine["GalxRollingContextEngine (5-Level Pyramid + RRF)"]
-        ElasticGov["GalxElasticContextGovernor (Dynamic 1M Context Sizing)"]
-        SeatEngine["GalxSeatTierEngine (5-Hour & Weekly Dual Windows)"]
-        
-        Pool["GalxCredentialPool (P-AHT Headroom Calculus)"]
-        Circuit["GalxCircuitBreaker (4-State FSM)"]
-        Router["GalxModelRouter (Zero-Hesitation Aliasing)"]
-        StreamPipe["Zero-Copy Binary Stream Passthrough"]
-
-        AuthEngine --> Vault
-        CompactionFacade --> CompactionSafety
-        CompactionFacade --> DomainOptimizer
-        CompactionFacade --> HighVelocityPipe
-        CompactionFacade --> Cascader
-        CompactionFacade --> Pyramid
-        
-        Router --> RollingEngine
-        Router --> ElasticGov
-        Router --> SeatEngine
-        Router --> CompactionFacade
-        Router --> Pool
-        Router --> Circuit
-        Router --> StreamPipe
-    end
-
-    subgraph StorageSubstrate["Authoritative Data Substrate"]
-        PgPool["Supabase Transaction Pooler (Port 6543)"]
-        Postgres["PostgreSQL 16 (RLS, Double-Entry Ledgers, 53 Migrations)"]
-        BroccoliL1["BroccoliDB In-Memory RAM Tables (<0.08ms)"]
-
-        RollingEngine --> BroccoliL1
-        SeatEngine --> Postgres
-    end
-
-    ClientPerimeter --> EdgeLayer
-    EdgeLayer --> CoreEngine
-    CoreEngine --> StorageSubstrate
+  Client[Product client] --> App[Application identity and product policy]
+  App --> Router[GalxModelRouter / product generation service]
+  Router --> Mode{Configured transport}
+  Mode --> Isolated[IsolatedRelayTransport]
+  Isolated --> Premium[Premium runtime]
+  Isolated --> Standard[Standard runtime: text only]
+  Mode --> Legacy[Retained federation transport]
+  Premium --> Central[Private central account service]
+  Standard --> Central
+  Central --> Main[(Main account and lease authority)]
+  Premium --> PremiumDB[(Premium execution records)]
+  Standard --> StandardDB[(Standard execution records)]
+  PM[Premium monitor] --> Central
+  SM[Standard monitor] --> Central
+  PM --> PD[Premium manual desktops]
+  SM --> SD[Standard manual desktops]
 ```
 
----
+The mode branch is deliberate server configuration, not failure fallback. Text stays in its selected pool; Sites/images use Premium. Pools cannot query or borrow the peer. Isolated dispatch bypasses application account selection/decryption and a duplicate account lease; runtime admission uses the existing central ledger. Product quota and shared Sites fair usage remain separate.
+
+Premium and Standard occupy separate local VMs/daemons/disks; central HTTPS runs on Docker Desktop. Engines run in-process per account inside each runtime container. Only each monitor has its own VM's Docker socket for desktops. The shared physical Mac/admin remains trusted. The public deployment still retains the legacy path until a separately qualified cutover.
+
+The configured Cloudflare Worker has an independent entrypoint/bindings and is not automatically a hop before the application. R2 storage, native hosting and gateway deployment retain separate contracts. See [Cloudflare boundaries](../CLOUDFLARE_STRATEGY.md).
 
 ## 2. Memory & Buffer Allocation Invariants
 
-| Subsystem | Memory Allocation Model | Hard Cap / Boundary | Failure Behavior |
-| :--- | :--- | :--- | :--- |
-| **`BroccoliCompactionFacade`** | Contiguous typed arrays (`Uint8Array`) | 2,000,000 characters (~2MB) / payload | `RangeError: String length exceeds limit` |
-| **`BroccoliRingBufferStreamPool`** | Pre-allocated 64KB TypedArray slots | 32MB Volatile RAM slab | Spills to `.data/spillover/` private files |
-| **`GalxCryptoVault`** | Ephemeral `Buffer.alloc` with deterministic 2-pass zeroization | Scoped to active function execution | `zeroizeBuffer` runs unconditionally in `finally` |
-| **`BroccoliHighVelocityPipeline`** | L1 LRU in-memory hash cache | 10,000 entries (sliding-window eviction) | Evicts oldest entries on watermark breach |
-| **`RATE_LIMIT_KV`** | Cloudflare Edge KV V8 memory store | 100-event sliding window / key | Fails open on transient edge KV degradation |
+Read each owning implementation for actual bounds; do not infer them from an architecture diagram or benchmark. Process-local caches, rate observations and compaction representations cannot replace database identity, account grants, quota decisions or durable receipts.
 
----
+| Subsystem | Owning reference | Boundary |
+| --- | --- | --- |
+| Central lifecycle and execution | [Account management](../reference/relay-account-management.md) | Revision/epoch checks, central leases, durable operation identity, no uncertain redispatch |
+| Image requests/assets | [Image recovery](../../post-mortem/runbooks/image-generation.md), [library scale](image-library-scale.md) | Owner-scoped durable acknowledgment; bounded metadata/write buffers |
+| Sites generation | [Sites operations](SITES_OPERATIONS.md) | Customer admission, original outcome and publication are separate |
+| BroccoliDB/compaction | [Component guide](../BROCCOLIDB_COMPACTION_ONBOARDING_GUIDE.md), [domain index](../broccolidb/README.md) | Representation/performance evidence does not grant authorization or prove universal fidelity |
+| Account sessions | [Workspace authentication](../operations/workspace-auth.md) | Server-verified identity and current authoritative session checks |
+| Telemetry | [Metrics reference](TELEMETRY_AND_METRICS_OBSERVABILITY.md) | Bounded observations with units/freshness, not billing or health authority |
 
 ## 3. Subsystem Lifecycle & Finite State Machines
 
-### The 4-State Circuit Breaker State Machine (`GalxCircuitBreaker`):
-```text
-  ┌────────────────────────────────────────────────────────┐
-  ▼                                                        │
-┌───────────┐   3 Consecutive Timeouts / 5xx  ┌────────────┐   Canary Probe Pass (3/3)
-│  CLOSED   │ ──────────────────────────────► │  DEGRADED  │ ──────────────────────┘
-└───────────┘                                 └────────────┘
-      ▲                                             │
-      │                                             ▼ Sustained Error Wave (>15%)
-┌───────────┐                                 ┌────────────┐
-│ HALF-OPEN │ ◄────────────────────────────── │    OPEN    │
-└───────────┘        Cooldown Window Expired  └────────────┘
-```
+New pool account state is centrally saved; fresh matching runtime acknowledgment is separate. Registration is manual and paused initially. Remove permanently revokes registered accounts with retained evidence; unfinished registrations may restore with new review. Pause stops engines/grant renewal and does not use the legacy hold semantics.
 
----
+Execution reservation precedes central lease binding and provider I/O. Failed grant renewal aborts work; unconfirmed terminal writes stop new local admission. Old incomplete rows recover unknown after restart. Circuit-breaker or retry utilities cannot override those outcomes or select a peer pool. Use [resilience](../RESILIENCE_AND_DISASTER_RECOVERY.md), not an illustrative generic state machine, for recovery.
 
 ## 4. Barrel Export Hygiene & Boundary Rules
 
-To prevent ungrounded bypass bugs and accidental leakages of generated compactors:
-1. **Rule 1**: Public code MUST import from `@/core/broccolidb` (which exports `BroccoliCompactionFacade` and `BroccoliCompactionSafety`).
-2. **Rule 2**: Individual generated domain compactors (`BroccoliInterrogatoryCompactor`, `BroccoliPathologyCompactor`, etc.) are **private internal implementation details**. Never export them from the master barrel.
-3. **Rule 3**: `src/core/` must NEVER import React, Next.js routing, or browser DOM types.
-4. **Rule 4**: GALXAI-hosted UI stops at discovery, configuration, metering, and governance. Chat and image-generation composers belong to downstream applications; compatible inference APIs and SDK contracts remain platform scope.
-5. **Rule 5**: Default authentication completion resolves to `/models`. Explicit protected-route return paths may override it, but no auth flow may default to a retired client surface.
+Keep private operational modules, docs, credentials, execution identifiers and diagnostics out of customer bundles and DTOs. Public field allowlists and re-encoded image artifacts are required; importing an internal object wholesale is not a response contract.
 
----
+Use the owning BroccoliDB public facade and [contribution guidance](../../CONTRIBUTING.md) rather than exporting generated implementation modules by convenience. Inspect actual dependency/runtime constraints before moving code between Node, browser and Worker entrypoints.
 
-*For maintainer debugging runbooks, see [DEBUGGING_AND_DIAGNOSTIC_RUNBOOKS.md](DEBUGGING_AND_DIAGNOSTIC_RUNBOOKS.md).* 🥦🛡️
+Product scope includes current Images/Sites workspaces under their own access/ownership rules; historical claims that all hosted composition is retired are not current guidance. [Product strategy](../PRODUCT_SURFACE_STRATEGY.md) and [workspace authentication](../operations/workspace-auth.md) own route and return-path behavior.
+
+Use [debugging procedures](DEBUGGING_AND_DIAGNOSTIC_RUNBOOKS.md) for incidents and [documentation workflow](../how-to/change-with-documentation.md) for changes. Fixed historical migration counts, memory latencies and unsupported global topology claims have been removed from this reference.

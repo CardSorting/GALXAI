@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { isolatedRelaysEnabled, receiptRelay } from '../../core/router/adapters/IsolatedRelayTransport';
 import { executeRelayChat,readRelayReceipt,RelayDispatchError } from '../../core/router/adapters/RelayChatTransport';
 import type { SitesGenerationInput } from '../billing/sites-generation';
 import { FairUsageError } from './fair-policy';
@@ -18,9 +19,9 @@ export async function recoverIncludedGeneration(store:SitesFairStore,account:str
     await store.cancelReserved(account,operation,true);row=(await store.lookup(account,operation))!;
   }
   if(!row.job_id||!row.origin||view(row).completed)return view(row);
-  if(new URL(relay.url).origin!==row.origin)return view(row);
+  const source=receiptRelay(row.origin,relay,account);if(!source)return view(row);
   try {
-    const receipt=await reader({...relay,jobId:row.job_id,signal});
+    const receipt=await reader({...source,jobId:row.job_id,signal});
     if(receipt.id!==row.job_id)return view(row);
     if(receipt.status==='completed'&&receipt.output!==null)row=await store.terminal(account,operation,receipt.id,'completed',receipt.output);
     else if(receipt.status==='not_started')row=await store.terminal(account,operation,receipt.id,'not_started',null);
@@ -52,7 +53,7 @@ export function createIncludedGenerator(options:{store:SitesFairStore;policy:Fai
     const signal=AbortSignal.any([input.signal,AbortSignal.timeout(policy.limits.request_deadline_seconds*1000)]);
     let accepted=false;
     try {
-      await transport({...relay,signal,taskId:operation,idempotencyKey:operation,
+      await transport({...relay,tenant:isolatedRelaysEnabled()?access.accountId:undefined,signal,taskId:operation,idempotencyKey:operation,
         onAccepted:job=>{accepted=true;return store.accepted(access.accountId,input.operationId,job,url.origin);},
         payload:{model:input.requestedModel,messages:structuredClone(input.messages),stream:false,durable_receipt:true,reasoning_effort:'none',sites_profile:'local-v1'},
         ttftTimeoutMs:Math.min(45000,policy.limits.request_deadline_seconds*1000),idleTimeoutMs:20000,wallTimeoutMs:policy.limits.request_deadline_seconds*1000});

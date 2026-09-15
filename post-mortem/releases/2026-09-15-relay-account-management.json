@@ -1,0 +1,232 @@
+{
+  "at": "2026-09-15T19:38:20.357079+00:00",
+  "scope": "Private central account management and two isolated local monitor installations.",
+  "sourceSha256": {
+    "src/relay/pool-monitor.html": "b4c8459f71eb026cc0bc9dd251a24cfebf65c0f5739fb31406d2e2de316b0dda",
+    "src/relay/pool-monitor.js": "5f03d07a7727b5d1cc292ae22ade617b986b71076a50cd0e4f7a84f5ddecc12c",
+    "src/relay/pool-monitor-model.js": "f4153ce59abb32a3975c5d61decce38607feac58fe702c71292d5893a2e91d4c",
+    "src/relay/pool-monitor.css": "21b6cbfdbb5ff1f1d6b07bef02e0e00ea54c94570b0156cda1aeae98875c0244",
+    "src/relay/pool-monitor-server.ts": "d4faca0abd21d96ff13f8dce83e601f1ae9337870f8186b03785ed11ea75b7fa",
+    "src/relay/pool-central.ts": "535128338a2249a5a2431e65cbd16f75ede94d71f77d463697501df21e8359a8",
+    "src/relay/pool-protocol.ts": "446e506d98d52b5a1a944ff51cda6189ce9e53579d744836fcb730ed9a3fbf4e",
+    "src/relay/desktop-gateway.ts": "ef1071499b7cdfc160f66fde0fbc71965cc1c6a9cacebf955968f38723a27e13",
+    "src/lib/supabase/types.ts": "489e73c5e1726ae470738b801a8f688b4d285768ca5bc9bc8d59bf52f77f846f",
+    "scripts/test-relay-services.ts": "ee7555060f14de9dfcfca551cc41ccd2ba95da2d7ee2757044f0849f4957fd31",
+    "scripts/test-relay-authorization-db.ts": "aa341e621b22e158079d66ca7dee77815398111f382a0533272042cb8339d96d",
+    "scripts/test-relay-monitor-model.mjs": "74777bdb62022310ad62ab215c19e82a935ea3cd2286217914971dd6ea017e8a",
+    "scripts/verify-relay-pool-monitor.ts": "99549ae269006903a6a8bde51ba40e821c442485f2a684b3168636be27f9e7a9",
+    "supabase/migrations/20260915191404_relay_account_management.sql": "f78688d0e7951e22647ad153c66129c7ec391a678714d30c0da1831e2abba35b",
+    "supabase/rollbacks/20260915191404_relay_account_management.down.sql": "c03560cecc80ba4411b63a96fac8dc8377ad28c16fa1538b582167b21be0d33d",
+    "docker/relay-pools/local/images.json": "6084d9c3eafec123a0c49b709953dce6a13214a621e20ffc7fb0510eda9e7b7b",
+    "docker/relay-pools/local/central.yaml": "7ea96f350e7d2c0850098bdf03efa71f39661ce2d356d64ec9b0099f9128c365"
+  },
+  "images": {
+    "images": [
+      {
+        "tag": "galxai-relay-central:management-20260915",
+        "id": "sha256:4f848110b24290945f742a936e6f4fcd21c923ca1c0be359d2b1240227e43a4f",
+        "architecture": "arm64",
+        "component": "central"
+      },
+      {
+        "tag": "galxai-relay-premium:candidate-20260915",
+        "id": "sha256:22ef2426f2509fee7fc33d77d49abb8f02ed981b66b8766a3deed7892d3f6e68",
+        "architecture": "arm64",
+        "component": "runtime",
+        "pool": "premium"
+      },
+      {
+        "tag": "galxai-relay-standard:candidate-20260915",
+        "id": "sha256:a1cf2bd6bdee7aab3cd8b4baa281f3e8e9b401ef400c62000bbe026f48a4629a",
+        "architecture": "arm64",
+        "component": "runtime",
+        "pool": "standard"
+      },
+      {
+        "tag": "galxai-monitor-premium:management-20260915",
+        "id": "sha256:39735a31ac1179def573ee482fb780f5ce47c9813807e258a50bd2f55b8a4b1d",
+        "architecture": "arm64",
+        "component": "monitor",
+        "pool": "premium"
+      },
+      {
+        "tag": "galxai-monitor-standard:management-20260915",
+        "id": "sha256:d49a8f13d4f3ed9ed2a8ffa20c2efa0b6e0ddf15bdfc1cce95aa64e1a636f319",
+        "architecture": "arm64",
+        "component": "monitor",
+        "pool": "standard"
+      }
+    ]
+  },
+  "database": {
+    "at": "2026-09-15T19:32:31.405Z",
+    "project": "mazhcjisettrzbqhorvp",
+    "migration": "20260915191404",
+    "scope": "Read-only catalog, privilege and aggregate checks; no credential or account contents read",
+    "forcedRls": true,
+    "directTableRolesDenied": [
+      "authenticated",
+      "anon",
+      "service_role",
+      "galx_relay_control",
+      "galx_desktop_writer",
+      "galx_control_service"
+    ],
+    "columns": [
+      {
+        "table_name": "galx_relay_registrations",
+        "column_name": "removed_at"
+      },
+      {
+        "table_name": "galx_relay_registrations",
+        "column_name": "management_revision"
+      },
+      {
+        "table_name": "galx_relay_account_control",
+        "column_name": "removed_at"
+      }
+    ],
+    "triggers": [
+      {
+        "tgname": "relay_registration_revision"
+      },
+      {
+        "tgname": "relay_management_operations_immutable"
+      }
+    ],
+    "protocol": {
+      "management": true,
+      "prosecdef": true
+    },
+    "pools": [
+      {
+        "pool": "premium",
+        "registration_allowed": true,
+        "execution_allowed": false,
+        "accounts": 0
+      },
+      {
+        "pool": "standard",
+        "registration_allowed": true,
+        "execution_allowed": false,
+        "accounts": 0
+      }
+    ]
+  },
+  "migrationApplication": {
+    "version": "20260915191404",
+    "project": "mazhcjisettrzbqhorvp",
+    "method": "Supabase CLI linked exact-target dry run followed by db push --skip-vault",
+    "pendingBefore": 1,
+    "pendingAfter": 0,
+    "appliedAfter": 112,
+    "executionProjectsChanged": false,
+    "securityAdvisorWarnings": [
+      "Existing auth_leaked_password_protection; no new database finding"
+    ]
+  },
+  "localAcceptance": {
+    "at": "2026-09-15T19:37:44.760Z",
+    "checks": 69,
+    "scope": "local VM separation on one trusted Mac; no provider generation or cloud deployment",
+    "records": [
+      {
+        "pool": "premium",
+        "address": "192.168.105.1",
+        "installationId": "cdbf6081-b947-45f1-b3c7-5c4b992a951c",
+        "registrationAllowed": true,
+        "executionAllowed": false,
+        "accounts": 0,
+        "machineSha256": "706d57f0db2059f3f707a601d67d91e591639b380e4500ac2fb133ca59d5cc0b",
+        "daemonSha256": "d9a2e6dd4b797ec1fb9bcbc2a1282948e74e3ab6ffb0fa5c28fbcd1d429bfa95"
+      },
+      {
+        "pool": "standard",
+        "address": "192.168.105.3",
+        "installationId": "c3f00fc7-d199-4431-969c-66d492eba38e",
+        "registrationAllowed": true,
+        "executionAllowed": false,
+        "accounts": 0,
+        "machineSha256": "a434cf391eb62970b1269bc04b13d7146d5296167ffb2de3a9e9188e71628269",
+        "daemonSha256": "212a2e51978e2246536443fed52029d4ac1a134811b1bbb08258da007728d732"
+      }
+    ]
+  },
+  "browserAcceptance": {
+    "at": "2026-09-15T19:37:30.692Z",
+    "scope": "Installed local monitors; no account mutation or provider sign-in",
+    "records": [
+      {
+        "pool": "premium",
+        "automaticConnection": true,
+        "privateAssets": true,
+        "views": true,
+        "manualRegistrationForm": true,
+        "managementDialog": true,
+        "healthAndRemovedFilters": true,
+        "signOut": true,
+        "pageErrors": 0
+      },
+      {
+        "pool": "standard",
+        "automaticConnection": true,
+        "privateAssets": true,
+        "views": true,
+        "manualRegistrationForm": true,
+        "managementDialog": true,
+        "healthAndRemovedFilters": true,
+        "signOut": true,
+        "pageErrors": 0
+      }
+    ]
+  },
+  "checks": {
+    "centralAuthorizationLifecycleChecks": 154,
+    "executionDatabaseChecks": 50,
+    "generalDatabaseTests": 94,
+    "staticMigrationRollbackPairs": 112,
+    "httpSecurityTests": 12,
+    "desktopGatewayTests": 27,
+    "presentationBehaviorTests": 6,
+    "responsiveAccessibilityVariants": 28,
+    "axeViolations": 0,
+    "documentOverflow": 0,
+    "browserPageErrors": 0,
+    "typescript": "passed",
+    "productionBuild": "passed; existing lint skip",
+    "publicBuildAssetsScanned": 669,
+    "documentationToolTests": 38
+  },
+  "behavior": [
+    "Consistent Manage menus and accessible rename/removal dialogs with named consequences, Cancel focus and retained drafts on conflict.",
+    "Account status/health/search filters, issues-first sorting, issue summaries, explicit reasons and unknown health.",
+    "Separate registration search/status filters, removed history and restoration for unfinished registrations only.",
+    "Central account rename synchronizes linked registration; removal revokes account access and invalidates registration review/tickets.",
+    "Removal commits before desktop cleanup; cleanup failures have an explicit recovery action. Old desktop controls and new display connections reject removed registrations.",
+    "Expected revisions, immutable operation identity and scoped actor/destination constraints protect concurrent edits and explicit retries."
+  ],
+  "corrections": [
+    "The first isolated SQL fixture exposed an enum-literal assumption; health mapping now compares text values and the full fixture passed.",
+    "Browser fixture now respects preserved disclosure state when opening Manage.",
+    "An extra HTTP fixture incorrectly treated permitted central scope fields as unknown; the unknown-field test uses a desktop ID, with peer denial covered in the database and monitor suites.",
+    "The read-only catalog check initially joined no pool identity; corrected to join the installation table. No mutation occurred.",
+    "Final review closed old direct-desktop controls and new display connections for removed registrations, and disconnects existing desktop sessions before stop. Rebuilt and reinstalled all affected images, reran browser interactions, HTTP/desktop tests and live acceptance.",
+    "Sandbox and local-tool access used scoped approved retries."
+  ],
+  "limits": [
+    "No real provider account was registered; both pools have zero accounts, registration open and execution closed.",
+    "Provider sign-in, generation, physical phones, screen readers and streamed-desktop accessibility remain unqualified.",
+    "Health is derived from current metadata and confirmation, not an automatic provider test.",
+    "Removed accounts retain operational records and credentials; removal is not data erasure or remote provider session invalidation.",
+    "No execution-project migration, cloud service deployment or public application cutover.",
+    "The VMs remain on one trusted Mac and share its physical host and administrator."
+  ],
+  "references": [
+    "https://www.primer.style/product/scenario-patterns/delete/",
+    "https://cloudscape.design/components/status-indicator/",
+    "https://cloudscape.design/patterns/resource-management/delete/",
+    "https://supabase.com/docs/guides/database/postgres/row-level-security"
+  ],
+  "rollbackEvidence": "post-mortem/releases/2026-09-15-relay-monitor-console.json",
+  "rollbackContract": "Close gates and protocol; preserve columns, assignments, removed markers and journals. No access revival or automatic replay."
+}

@@ -1,0 +1,79 @@
+{
+  "reviewedAt": "2026-09-15T19:06:55.315115+00:00",
+  "reviewer": "Codex relay console implementation review",
+  "scope": "Incremental private console/source/guide review; prior local and monitor-access reviews remain the baseline outside this delta.",
+  "sourcesInspected": [
+    "src/relay/pool-monitor.html",
+    "src/relay/pool-monitor.js",
+    "src/relay/pool-monitor-model.js",
+    "src/relay/pool-monitor.css",
+    "src/relay/pool-monitor-server.ts",
+    "src/relay/pool-monitor-login.js",
+    "src/relay/pool-desktop.html",
+    "src/relay/pool-desktop.js",
+    "src/relay/desktop-manager.ts",
+    "src/relay/desktop-gateway.ts",
+    "src/relay/pool-protocol.ts",
+    "scripts/verify-relay-pool-monitor.ts",
+    "scripts/test-relay-monitor-model.mjs",
+    "scripts/test-relay-services.ts",
+    "Dockerfile.relay-services",
+    "docker/relay-pools/local/images.json",
+    "docs/knowledge/registry.json"
+  ],
+  "completeGuidesInspected": [
+    "docs/runbooks/relay-pool-services.md",
+    "docs/README.md",
+    "docs/knowledge/README.md",
+    "docs/reference/knowledge-commands.md",
+    "docs/DOCUMENTATION_POLICY.md",
+    "docs/how-to/change-with-documentation.md"
+  ],
+  "baselineEvidence": [
+    "docs/knowledge/audits/2026-09-15-relay-monitor-access-review.json"
+  ],
+  "evidence": [
+    "post-mortem/releases/2026-09-15-relay-monitor-console.json"
+  ],
+  "findingsResolved": [
+    "Installed-browser acceptance exposed hash navigation stealing registration field focus; corrected and rebuilt both images, then verified the installed form retains focus.",
+    "An installed browser test initially asserted before hash navigation completed; the test now waits for the selected view.",
+    "Sandbox prevented temporary listeners, Docker/VM access and configured font downloads; scoped approved retries completed."
+  ],
+  "decisions": [
+    "Preserve the existing graphite/silver private console identity and fixed destinations.",
+    "Use Primer filter/empty-result conventions and Cloudscape resource creation guidance without a cross-pool account manager.",
+    "Start/stop use the centrally scoped saved registration and existing desktop manager; no new shared session or account authority.",
+    "Browser-only enable availability explains execution and sign-in prerequisites without claiming it replaces server authorization.",
+    "Reconciled the complete console operations, recovery, activation and rollback guidance; mapped the new behavioral test to relay.",
+    "ADR 0153 remains proposed; no schema or activation change."
+  ],
+  "checks": {
+    "httpSecurityTests": 12,
+    "presentationBehaviorTests": 3,
+    "responsiveAccessibilityVariants": 22,
+    "additionalRegistrationFormVariants": 2,
+    "axeViolations": 0,
+    "documentOverflow": 0,
+    "browserPageErrors": 0,
+    "typescript": "passed",
+    "productionBuild": "passed; existing lint skip",
+    "publicBuildAssetsScanned": 669,
+    "documentationToolTests": 38
+  },
+  "limits": [
+    "Provider sign-in, review and registration flows are exercised with synthetic services; no real account was registered.",
+    "Execution remains closed; zero registered accounts in both local pools at acceptance.",
+    "No provider generation, cloud deployment, database migration or public application cutover.",
+    "Browser emulation does not qualify physical phones, VoiceOver or accessibility within streamed desktop pixels.",
+    "Automatic desktop ticket consumption is implemented; real provider desktop connection and sign-in remain manual acceptance work.",
+    "The two VMs retain a shared trusted Mac administrator and physical host."
+  ],
+  "references": [
+    "https://primer.style/product/scenario-patterns/filter/",
+    "https://primer.style/product/scenario-patterns/search/",
+    "https://cloudscape.design/patterns/resource-management/create/",
+    "https://cloudscape.design/patterns/resource-management/view/",
+    "https://carbondesignsystem.com/patterns/empty-states-pattern/"
+  ]
+}

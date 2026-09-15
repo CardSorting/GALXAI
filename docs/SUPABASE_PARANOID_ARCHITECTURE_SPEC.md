@@ -16,26 +16,27 @@ Use explicit privileges and owner/tenant predicates with RLS appropriate to each
 
 Financial, audit and accepted-operation state must commit atomically at their defined boundary. Image receipts commit before async acknowledgement, claims arbitrate dispatch, and success requires owned committed assets. Favorites commit before acknowledgement. Keep record identity across uncertainty rather than manufacturing success from local memory. Native session creation, lookup, rotation and revocation and device-grant approval/polling require authoritative results. No cache may restore a denied/revoked session or acknowledge a failed write. Native account provenance and previous-token grace are enforced in the authentication engine; [workspace auth](operations/workspace-auth.md) owns the source contract and rollout limitations.
 
-## Manual shard authority
+## Central relay account and execution authority
 
-Migration `20260914231914` enforces [manual desktop-only enrollment](maintainers/RELAY_CREDENTIAL_ENROLLMENT.md). The host validates the persisted running desktop and saved provider login before calling its SQL-only registrar; ordinary application persistence cannot create authority.
+The implemented authority is [central account management](reference/relay-account-management.md). Only `mazhcjisettrzbqhorvp` owns canonical encrypted accounts, manual desktop provenance, exclusive immutable assignments, registration/review state, account revisions, lifecycle operations, runtime principals/epochs and bindings to the existing account lease/budget ledger. The central private tables force RLS and have no customer/service-role table grants. A restricted login executes the private protocol; hashed principal lookup determines role, pool and installation. Request JSON cannot broaden that scope.
 
-| Schema boundary | Enforcement |
-| --- | --- |
-| `managed_desktop_id uuid` | Unique when non-null; one bound account per desktop |
-| `desktop_enrolled_at timestamptz` | Paired with the binding; preserved first-enrollment time, not a unique timestamp |
-| Binding constraint | Both fields absent or both present on an OpenAI OAuth record |
-| Protected-field trigger | Credentials, credential expiry, identity/owner and binding changes require the private writer role |
-| `galx_desktop_writer` | No-login, non-inheriting function owner; not granted to service, anonymous or authenticated roles |
-| Private enrollment/refresh functions | Controlled administrator SQL callers, pinned search path, account/binding checks and conditional revision replacement |
-| Generic upsert and service insert | Disabled; `ShardRepository.saveShard` only updates allowlisted policy metadata |
-| Controller and database admission | Both reject records without confirmed desktop provenance |
+Premium `prgjcyokylzcsqrjmkaa` and Standard `enbtzuxkguehtnrhuvlu` each hold only fixed installation identity and execution reservations/outcomes. Restricted runtime logins cannot manage accounts, read credential tables or obtain the main vault key. Runtime projections carry only own-account access under central authorization. No registry, credential copy or second capacity ledger is deployed there.
 
-Existing ciphertext, source labels, ownership, quotas, counters, holds and history remain retained. Source labels are historical data, not enrollment evidence. Matching eligible legacy accounts need explicit confirmation; no backfill infers bindings from identity hints or files. Revoked/dead/quarantined and differently bound accounts cannot be revived or reassigned by enrollment.
+Management migration `20260915191404` is applied only centrally. Rename/remove/restore require expected revision and immutable operation identity tied to actor, pool, installation, record and request hash. Every registration mutation advances revision, including review/ticket updates. Concurrent changes cannot overwrite newer state. Registered-account rename synchronizes the linked registration. Account removal retains canonical identity, assignment, ciphertext, leases and immutable operation history, revokes access and cannot be undone through restore. Unfinished registration removal permits restoration only with fresh review.
 
-Expired managed records remain available for manual same-desktop repair. Saved-file sync never independently renews a provider session, and there is no credential-write Data API fallback. Deliberate vault rewrap uses the trusted administrator writer role while preserving plaintext and provenance. Database owners can change schema/roles and remain outside this application's denial boundary.
+Central removal commits before monitor desktop cleanup; a failed stop is reported separately. These transactions cannot promise upstream session revocation or file erasure. Management rollback closes gates/protocol while retaining columns/history; it does not restore removed accounts. See [database operations](maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md#central-relay-authorization-and-execution-projects) for exact schema, roles, migration pairing and evidence.
 
-The [database runbook](maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md) owns rollout, privilege inventory and rollback. Private function names and these columns must not appear in public DTOs or client bundles.
+## Manual desktop provenance and retained writers
+
+Base migration `20260914231914` pairs `managed_desktop_id uuid` with `desktop_enrolled_at timestamptz`, uniquely binds non-null desktops and protects credential/identity/provenance fields with a private no-login writer role. Generic upsert/service inserts are disabled; ordinary repository saves allow only policy metadata. Source labels and existing ciphertext do not establish provenance.
+
+New pool registration is explicit manual sign-in, scoped review and central registration in paused state. Renewal is explicit **Update saved sign-in → Save new sign-in** in the owning monitor; no background bridge establishes authority. Legacy **Enroll shard** and conditional saved-file synchronization remain only for eligible unassigned accounts in [legacy enrollment](maintainers/legacy-desktop-enrollment.md). Legacy readers, credential writers and acquire/renew/release functions reject assigned accounts or bound leases. No account is automatically classified, copied or reassigned.
+
+Revoked/dead/conflicting records cannot be revived by enrollment. Deliberate [vault rewrap](maintainers/MULTI_TENANT_SHARD_AND_KEY_ROTATION.md) preserves plaintext, identity and binding under reviewed administrator authority. Database owners can change schema and remain trusted; application-role denial is not protection from the owner.
+
+## Installation and acceptance
+
+The schemas and local central/Premium/Standard services are installed and tested. Separate Colima VMs provide separate daemons, disks and peer-denial rules; the Mac/admin remains shared infrastructure. Latest [current state](../post-mortem/CURRENT_STATE.md) records registration open, execution closed and zero registered accounts. Manual sign-ins, actual provider capabilities and public application cutover remain pending. [ADR 0153](adr/0153-central-account-authority-isolated-relays.md) retains its own decision status rather than deriving acceptance from schema installation.
 
 ## Optional admission policy projection
 

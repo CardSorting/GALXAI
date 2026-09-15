@@ -1,0 +1,55 @@
+{
+  "observedAt": "2026-09-15T20:05:24.197908+00:00",
+  "kind": "documentation-validation",
+  "target": "local private repository documentation and local production build",
+  "review": "docs/knowledge/audits/2026-09-15-relay-strategy-documentation-review.json",
+  "reviewSha256": "d8c2f1321e155b8400658795a9bdbbacc78a3c0a844e0d66e3a9308279be5b36",
+  "reconciliation": "post-mortem/releases/2026-09-15-relay-strategy-documentation-review.json",
+  "results": {
+    "docsSync": "passed; generated indexes and inventory; no implicit reviews",
+    "docsAudit": "passed, including docs:check and due/unreviewed domain gates",
+    "guideValidation": {
+      "guides": 353,
+      "incidentDocuments": 33,
+      "adrs": 153,
+      "scopeCoverageLocalTargetsCurrentGuideAnchors": "passed"
+    },
+    "knowledgeValidation": {
+      "documents": 386,
+      "domains": 9,
+      "allDomainReviews": "reviewed"
+    },
+    "incidentValidation": {
+      "incidents": 12,
+      "events": 68,
+      "actions": 22,
+      "result": "passed"
+    },
+    "documentationTests": {
+      "passed": 38,
+      "failed": 0
+    },
+    "publicResponseAndAuthorizationTests": {
+      "passed": 19,
+      "failed": 0
+    },
+    "productionBuild": "passed, including TypeScript and 285 generated static pages; existing lint skip/edge-static warning",
+    "compiledBoundaryScan": {
+      "assets": 669,
+      "selectedMarkerOrPrivateTraceFindings": 0,
+      "overallCommand": "passed"
+    },
+    "gitDiffCheck": "passed",
+    "searchAcceptance": {
+      "account management": "canonical central account reference is first",
+      "relay local": "installed service runbook is first"
+    }
+  },
+  "scope": "Confirms final local validation after the explicit semantic reviews. It does not alter or retroactively promote earlier deployment/test observations.",
+  "remaining": [
+    "Manual provider sign-ins, execution activation, provider qualification and public application cutover remain pending in the latest operational evidence.",
+    "Existing overdue incident actions ACT-001, ACT-015 and ACT-016 remain open.",
+    "No production migration, account mutation, image installation, live generation or live-site scan in this documentation pass."
+  ],
+  "mutations": "Documentation, navigation, registry and review evidence only; prior implementation changes retained."
+}

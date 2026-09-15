@@ -1,0 +1,28 @@
+{
+  "reviewedAt": "2026-09-15",
+  "reviewer": "Codex local Docker setup review",
+  "scope": "Incremental database and shared relay guide reconciliation for local hosting; prior service and local reviews remain the baseline.",
+  "sourcesInspected": ["scripts/set-relay-service-gates.ts"],
+  "completeGuideBodiesInspected": [
+    "docs/SUPABASE_PARANOID_ARCHITECTURE_SPEC.md",
+    "docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md",
+    "docs/maintainers/MULTI_TENANT_SHARD_AND_KEY_ROTATION.md",
+    "docs/MIGRATION_GUIDE.md"
+  ],
+  "evidence": [
+    "docs/knowledge/audits/2026-09-15-relay-services-review.json",
+    "docs/knowledge/audits/2026-09-15-relay-local-review.json",
+    "post-mortem/releases/2026-09-15-relay-local.json"
+  ],
+  "findingsResolved": [
+    "Replaced stale current closed-registration assertions with the dated local registration-open/execution-closed checkpoint and current-state links.",
+    "Documented the fresh local acceptance and registration prerequisites in the existing gate transition; external-host verification remains a separate mode.",
+    "Central account authority, existing execution databases, scoped grants, manual account enablement and proposed ADR status remain unchanged.",
+    "No SQL schema changed and no database regression suite was rerun for documentation edits; prior database service evidence remains applicable."
+  ],
+  "validation": {
+    "emptyRegistrationActivation": "Fresh local verification passed; serve-local refused before any gate mutation with zero accounts in both pools.",
+    "scope": "69 live local checks and existing 12 HTTP security regressions, TypeScript check and production build are recorded in the linked local evidence. Provider sign-ins and qualification remain outstanding."
+  },
+  "impactReview": "Local source paths are mapped to relay. Shared database guide bodies and the gate script are explicitly reviewed here. Generated views, private dated evidence and pre-existing unrelated changes in docs:impact are not new runtime changes."
+}

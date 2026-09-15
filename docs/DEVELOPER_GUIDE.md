@@ -14,7 +14,8 @@ Private implementation guide. Start with [contribution workflow](../CONTRIBUTING
 | Identity and repositories | `src/core/auth`, `src/lib/supabase`, `src/lib/db` | [Identity failure modes](../post-mortem/failure-modes/identity.md), [database runbook](maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md) |
 | BroccoliDB optimizations | `src/core/broccolidb` | [Component reference](BROCCOLIDB_COMPACTION_ONBOARDING_GUIDE.md) |
 | Developer preview and staff | `src/lib/security/developer-access.ts`, `src/lib/admin`, `src/app/admin` | [Preview operations](operations/developer-preview.md), [admin](operations/preview-admin.md) |
-| Controller and workers | `src/relay`, `scripts/run-relay-federation.ts` | [Federation contract](FEDERATION_STRATEGY.md), [runbook](RELAY_VNEXT_RUNBOOK.md) |
+| Central accounts and isolated runtimes/monitors | `src/relay/pool-*`, `scripts/relay-local.mjs` | [Account contract](reference/relay-account-management.md), [service runbook](runbooks/relay-pool-services.md) |
+| Retained controller and workers | `src/relay`, `scripts/run-relay-federation.ts` | [Legacy operations](maintainers/legacy-federation-operations.md) |
 | Incident evidence | `post-mortem` | [Rolling operations](../post-mortem/README.md) |
 
 Use source and package scripts for exact interfaces. Example code in historical SDK/research documents is not proof that a route exists or is publicly accessible. Confirm ownership and API contract before implementing an integration.
@@ -28,6 +29,8 @@ Public image responses default to re-encoded binary artifacts. Explicit JSON use
 For async images, persist the receipt before returning 202 and claim dispatch atomically. Store completed owned assets before marking success. Preserve the original operation across retries, and never redispatch an ambiguous generation automatically. Favorites must commit before successful acknowledgement. BroccoliDB improves batching and repeated reads without becoming durable state or authorization authority.
 
 Provider adapters retain explicit capability selection, bounded I/O, cancellation and sanitized errors. A transport error is not permission for silent fallback or a second side effect. Use the owning component's regression suite and actual downstream contract.
+
+The new relay strategy keeps account authority and the existing account lease ledger in the main project, with separate execution-only projects and local VMs/daemons for Premium and Standard. Runtime engines are in-process per account. Standard rejects Sites/images/tool requests before provider I/O; the isolated transport never falls back to the peer or legacy dispatch. Account lifecycle uses explicit manual registration, central revisions and immutable operation identity. The [full contract](reference/relay-account-management.md) defines removal retention, health freshness and renewal. Do not apply retained controller hold/background-sync semantics to these services.
 
 ## Local verification and release
 

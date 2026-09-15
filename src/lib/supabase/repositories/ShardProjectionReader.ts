@@ -29,7 +29,7 @@ export const SHARD_PROJECTION_DELTA_SQL = `
       encode(sha256(convert_to(ROW(${projection})::text, 'UTF8')), 'hex') || ':' || ${credentialHash} AS fingerprint,
       ${credentialHash} AS credential_fingerprint
     FROM public.galx_shard_accounts AS s
-    WHERE ($3::text IS NULL OR s.user_id = $3)
+    WHERE s.relay_pool_id IS NULL AND ($3::text IS NULL OR s.user_id = $3)
     ORDER BY s.id LIMIT 2049
   ), delta AS MATERIALIZED (
     SELECT COALESCE((SELECT jsonb_agg(jsonb_build_object('fingerprint', r.fingerprint,

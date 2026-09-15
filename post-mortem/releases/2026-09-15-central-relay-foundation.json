@@ -1,0 +1,71 @@
+{
+  "observed_at": "2026-09-15T07:50:09.316645+00:00",
+  "scope": "Applied dormant central relay schema only; full scoped services and runtime/monitor isolation are not delivered.",
+  "target": "mazhcjisettrzbqhorvp",
+  "migration": "20260915073601_central_relay_account_foundation",
+  "base_revision": "a32df491881ca68e01ea13569fb986a29da7c6b7",
+  "working_tree_sha256": {
+    "supabase/migrations/20260915073601_central_relay_account_foundation.sql": "d0da924aac9407419b284613431ab118c489bd502589177155f7b904e19fe595",
+    "supabase/rollbacks/20260915073601_central_relay_account_foundation.down.sql": "c5fe20cbc1eee8d52d5a162d2e1eb298323cb31d71ef77b1e646dccadfe62336",
+    "src/lib/supabase/types.ts": "278d393be03a02d5a70a20d0b515b43d270e89f3c1f48797d0eca4506c397a13",
+    "src/lib/supabase/repositories/RelayAccountInventoryRepository.ts": "a04443d4944464a2e4080abfca8e888a66698ed2a1fffccaa025e147d58d761f",
+    "scripts/check-relay-account-foundation.ts": "fe3666b9b4a2c7c3b9fd9ecd24123e2d7323d1ad97ba1a6786fe3d8ddceaf2c8",
+    "scripts/test-relay-account-foundation-db.ts": "c2d569655707055b780dd12c691d9c46928acb08b839d59d8fe742773cda9caa",
+    "scripts/test-relay-account-inventory.ts": "3b7e22dc3cbb24b0424a7d7f695ae601c8c5a45cbcd254a0db13defe7429710c",
+    "scripts/lib/sql-migration-safety.ts": "574c3984ffced9b8cc614fd99f387afb2d8a95de3eab82573f33f21b052ed520",
+    "scripts/test-sql-migration-safety.ts": "8a671b7a5083e774e6ea4efdcb4203a4c476dafa6174273a606badb6f4292a51",
+    "scripts/verify-supabase-integrity.ts": "31bb1c7fc64ea74fc7621cee17edeffa7528550ce381b5a7db8d2b6d2998d786",
+    "scripts/run-supabase-integration.ts": "bd0c2d2ced7ec5e9dbfbc277b336331c5ecbfa5a6d2bb9aaf1ef7699280d6abc",
+    "package.json": "7b80f0a2ee26e30a68143c405ede607549f3d6e962445a6917fdefef91cb57c8"
+  },
+  "before": {
+    "applied_migrations": 108,
+    "accounts": 56,
+    "manually_bound_accounts": 0,
+    "open_leases": 0,
+    "foundation_tables": 0
+  },
+  "after": {
+    "applied_migrations": 109,
+    "assigned_accounts": 0,
+    "enabled_pools": 0,
+    "exposed_table_role_pairs": 0,
+    "forced_rls_tables": 4,
+    "foundation_version": 1,
+    "installations": 0,
+    "manually_bound_accounts": 0,
+    "registration_results": 0,
+    "retained_accounts": 56
+  },
+  "application": {
+    "cli": "Supabase 2.116.0",
+    "postgres": "17.6",
+    "dry_run": "exactly one migration; no seeds or roles",
+    "apply": "supabase db push --linked --project-ref mazhcjisettrzbqhorvp --skip-vault --yes",
+    "history_recorded": true,
+    "root_link_preserved": true,
+    "execution_projects_modified": false
+  },
+  "validation": {
+    "foundation_database_checks": 58,
+    "full_database_checks": 94,
+    "manual_desktop_database_checks": 28,
+    "node_tests": 14,
+    "db_verify": "109 pairs; 0 fatal, 0 warning",
+    "typescript": "passed",
+    "production_build": "Next.js 15.5.25; passed; existing lint skip",
+    "security_advisor_findings": [
+      "auth_leaked_password_protection: WARN; unrelated Auth setting unchanged"
+    ],
+    "read_only_inventory": "both pools; registration false; no installations or assignments"
+  },
+  "rollback": "Safe disable with retained schema/identities/receipts; refuses a later active gate until its activation rollback is performed.",
+  "limits": [
+    "No registration API or runtime grants introduced.",
+    "No accounts assigned or credentials copied.",
+    "No pool-bound lease integration or real workload isolation acceptance.",
+    "No controller, worker, monitor, application deployment or host provisioning.",
+    "Registration remains constrained off; a future reviewed migration is required.",
+    "No incident or prevention action was closed."
+  ]
+}

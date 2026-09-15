@@ -1,0 +1,34 @@
+# Staging only. Use its own host/daemon for eventual production execution.
+name: galx-relay-standard-staged
+services:
+  relay:
+    image: galxai-relay-standard:staged-20260915
+    init: true
+    restart: "no"
+    read_only: true
+    user: "1000:1000"
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    pids_limit: 128
+    mem_limit: 512m
+    cpus: 1.0
+    stop_grace_period: 10s
+    tmpfs: ["/tmp:rw,noexec,nosuid,nodev,size=32m,uid=1000,gid=1000,mode=0700"]
+    ports: ["127.0.0.1:13302:3001"]
+    networks: [runtime]
+    secrets:
+      - source: inference
+        target: relay-inference-key
+      - source: administrator
+        target: relay-admin-key
+    logging:
+      driver: json-file
+      options: {max-size: "5m", max-file: "2"}
+networks:
+  runtime:
+    internal: true
+secrets:
+  inference:
+    file: ${GALX_STANDARD_INFERENCE_KEY_FILE:?Provide a dedicated Standard inference key file}
+  administrator:
+    file: ${GALX_STANDARD_ADMIN_KEY_FILE:?Provide a dedicated Standard administrator key file}

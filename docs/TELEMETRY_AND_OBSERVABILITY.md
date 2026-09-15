@@ -1,28 +1,29 @@
-# Telemetry and observability
+# Relay health and operational visibility
 
 <!-- docs-scope: current-guide -->
-> Private operations. See [the contract](FEDERATION_STRATEGY.md) and [activity UX](maintainers/RELAY_TELEMETRY_UX.md).
+
+Private operations for [the implemented account/runtime contract](reference/relay-account-management.md). Read [current state](../post-mortem/CURRENT_STATE.md) for actual acceptance rather than treating telemetry as deployment proof.
 
 ## Controller view
 
-Open `npm run relay:open` on the host. A delegated read-only session loads the private interface without a browser admin key. The session reads `/api/monitor/state`; server-side administrators can read aggregated `/api/telemetry` or `/api/capabilities`. Anonymous pages contain generic connection guidance only.
+Open **GALX Monitors** or a fixed Premium/Standard app. Each console has Accounts, Registration and Activity under its own operator/viewer session. The authorized `/api/status` combines scoped central state and own desktop observations. Ordinary GALX sign-in does not grant this access.
 
-Read the requested model's eligible count, evidence freshness, capacity and traffic state before overall process health. Zero eligible workers means unavailable, one means fragile redundancy, and two or more means redundant eligibility. None is a throughput or latency SLA.
-
-`/health` is liveness; admin `/health/ready` means some capacity is routable, not that every model works. Chat inventory and image evidence are separate.
+Accounts show saved state, relay confirmation and Health separately. Search, Status and Health combine with issues-first/name sorting. Registration has separate progress/attention/unknown/removed filters. Default active views exclude removed records; history remains inspectable. The UI does not combine both pools or download peer accounts.
 
 ## Worker view
 
-Controller telemetry aggregates bounded worker observations with explicit freshness/partial state. It does not proxy every worker route. Worker metrics, detailed traces and real image probes remain private administrator surfaces.
+A pool runtime hosts account engines inside its container. Minimal liveness/ready endpoints reveal no operational inventory. Readiness requires recent reconciliation and running engines; it does not prove every requested model or image operation. Central grants, account class, model inventory, provider evidence and product entitlement remain separate.
 
-Trace safe event code, timestamp, request/task ID, shard/worker generation, operation phase, outcome and retry state as available. A 202 is acceptance, not completion. Chunk counts are not tokenizer tokens; first-output timing is not client display latency. Overlapping durations cannot be summed into wall time.
+The retained legacy controller has aggregated `/api/telemetry`, `/api/capabilities` and delegated `/api/monitor/state`; `relay:open` opens that older surface. Its per-worker metrics and reverse index are not endpoints provided by the new pool front door. See [legacy API](reference/legacy-federation-api.md).
 
 ## Activity and quick views
 
-Activity provides structured reasons and safe next actions. Filter and correlate a request or workspace without exposing prompts, output, tokens, provider payloads or guest terminal contents. Desktop connection, shard capability, traffic hold, saved login and synchronized authority have distinct states. Quick views preserve this separation.
+Health pairs icon, label and reason: sign-in expiry, unavailable access, cooldown, repeated failures, applying/unconfirmed changes or unknown connection. A stopped desktop is normal for a registered account. No issues detected means no issue in available metadata; it is not a background generation test.
+
+Activity reports saved rename, pause/enable, removal and restore outcomes from central records. It does not prove runtime application or upstream success. Removal cleanup can remain incomplete after the central save; inspect Removed registrations for Stop desktop. Registration progress and available model inspection are separate from account health.
 
 ## Staleness and retention
 
-Label retained snapshots stale after refresh failure and clear privileged state on disconnect. Stop authorization retries until the operator reconnects. Missing/partial data must not become zero activity or healthy capacity.
+Polling runs every ten seconds while visible, preserves filters/disclosures/focus and disables mutations after refresh failure. Applied requires matching revision/epoch and a non-future heartbeat under 45 seconds old. Unknown connectivity is not zero activity or a failed account. Overdue application becomes attention after 90 seconds when execution is allowed.
 
-Telemetry is observation-only; it cannot mutate authoritative account health. Sanitized traces are separate from job checkpoints, guest homes and receipts, which can contain sensitive content. Record environment, revision, date and request ID for live verification. Historical samples do not prove current capacity.
+Telemetry is observation-only. It cannot clear cooldowns, revive removed accounts or grant execution. Retain only allowlisted diagnostic evidence; exclude credentials, prompts, output, raw provider errors and guest contents. Central management journals and execution outcomes have separate durable roles; browser views are not another account registry. See [source interpretation](maintainers/TELEMETRY_AND_METRICS_OBSERVABILITY.md) and [activity UX](maintainers/RELAY_TELEMETRY_UX.md).

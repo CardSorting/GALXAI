@@ -1,3 +1,4 @@
+import { isolatedRelay, isolatedRelaysEnabled } from '../../core/router/adapters/IsolatedRelayTransport';
 import { getPostgresPool } from '@/lib/db/postgres';
 import { requireSitesActivation, requireSitesCohort } from '@/lib/billing/sites-activation';
 import { requireSitesRelayPreflight } from '@/lib/billing/sites-relay-preflight';
@@ -6,8 +7,9 @@ import { sitesRateCard } from '@/lib/billing/sites-generation';
 export function sitesContentConfiguration() {
     const pool = getPostgresPool();
     const rate = sitesRateCard(process.env.GALX_SITES_RATE_CARD);
-    const url = process.env.VM_RELAY_URL || process.env.GALXAI_RELAY_URL || process.env.RELAY_URL;
-    const key = process.env.VM_RELAY_API_KEY || process.env.RELAY_API_KEYS?.split(',')[0]?.trim();
+    const selected = isolatedRelaysEnabled() ? isolatedRelay('sites') : undefined;
+    const url = selected?.url || process.env.VM_RELAY_URL || process.env.GALXAI_RELAY_URL || process.env.RELAY_URL;
+    const key = selected?.key || process.env.VM_RELAY_API_KEY || process.env.RELAY_API_KEYS?.split(',')[0]?.trim();
     if (!pool || pool.waitingCount >= 25 || !rate || !url || !key) throw new Error('Unavailable');
     return { pool, rate, relay: { url, key }, authorizeGeneration: async (signal: AbortSignal, accountId: string) => {
       requireSitesCohort(process.env.GALX_SITES_COHORT_ACCOUNT_IDS, accountId);

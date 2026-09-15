@@ -1,0 +1,27 @@
+{
+  "reviewedAt": "2026-09-15T20:07:31.984486+00:00",
+  "scope": "Pre-commit whitespace-only cleanup of one blank test line and an extra migration EOF newline; no SQL statements, tests, behavior or applied database state changed.",
+  "changes": [
+    {
+      "path": "scripts/verify-relay-pool-monitor.ts",
+      "beforeSha256": "99549ae269006903a6a8bde51ba40e821c442485f2a684b3168636be27f9e7a9",
+      "afterSha256": "c9181d6662c1f8e8c379a55c00e19341e640945a2ae6f999df8b8f8b8b78caee",
+      "nonWhitespaceBytesUnchanged": true
+    },
+    {
+      "path": "supabase/migrations/20260915191404_relay_account_management.sql",
+      "beforeSha256": "f78688d0e7951e22647ad153c66129c7ec391a678714d30c0da1831e2abba35b",
+      "afterSha256": "b8dd9fbe88e1463ab24c5b361bd4b66bf1b4d3af3de4f034a7c87053568f6e8f",
+      "nonWhitespaceBytesUnchanged": true
+    }
+  ],
+  "baselineEvidence": [
+    "docs/knowledge/audits/2026-09-15-relay-strategy-documentation-review.json",
+    "docs/knowledge/audits/2026-09-15-relay-account-management-review.json"
+  ],
+  "verification": "Compared all non-whitespace bytes before/after; identical. Staged diff whitespace check follows. Existing build, database, authorization and documentation acceptance remain the baseline.",
+  "limits": [
+    "No migration reapplied and no database contacted.",
+    "This bounded review does not replace the prior semantic implementation review."
+  ]
+}

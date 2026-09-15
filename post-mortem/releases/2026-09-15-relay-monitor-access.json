@@ -1,0 +1,157 @@
+{
+  "at": "2026-09-15T18:47:13.002738+00:00",
+  "scope": "Local monitor access refinement; no provider registration, generation, database migration or cloud deployment.",
+  "sourceSha256": {
+    "scripts/relay-local.mjs": "38a1f2869d3e1a4a02848e08afafff3db47ed1442ab7a47f3862af5d04eea63b",
+    "scripts/lib/relay-local-access.mjs": "b3929eb7964202f41a57cf0fec1c2a0ed7758a871063bbda9a0993a5872a2a0f",
+    "scripts/test-relay-local-access.mjs": "ad762e5518e3afc560baeeb9b0ec20427e71dccabd81acb4c9198b553fdc4eb6",
+    "scripts/install-relay-monitor-apps.py": "514160dd3c402e7ec35b7ff6d786828865a890ed16404577569d7cd59d6a8738",
+    "scripts/macos/RelayMonitors.swift": "443dff59bb4aed32caf4f941d0b2dd45079d8290fee641b2c440184eecb4409d",
+    "src/relay/pool-monitor-server.ts": "2405b23e08191229c59d6a16f233080d6fc34f38d5aeaa2c0d98bbd274a9fd2c",
+    "src/relay/pool-monitor-login.html": "2f329765fc1b2f85a1a0004ab082ff821b31b7107ff9f3e4120c98f749c2b0a3",
+    "src/relay/pool-monitor-login.js": "ef1ef168a7f29297c9fe9df3787c0f89279a5c91b5d510fd862a7f072f28aabf",
+    "src/relay/pool-monitor-access.css": "f78ec2d197a4d600db18a2ca7770904ba84c35ff1328c2dee159e7cb879b81bb",
+    "src/relay/pool-monitor.html": "92a2ea863a0785936ce6877ee0f07e96423da727a5e48068fa33553635b5a775",
+    "src/relay/pool-monitor.js": "87b0d55ddd8884e3a89e6c5971ba622d2a20efa45c9d170496aa1d2075a06b01",
+    "scripts/verify-relay-pool-monitor.ts": "42a1fe33581bdc8ea9cb1d9a7cdfc9c9543a0fb5c158771d2f5d09f2a4fef988",
+    "Dockerfile.relay-services": "580c76e5084248ea6374f04c24bf1a7e5263d8212b0943bc39468ebca0d62d49",
+    "docker/relay-pools/local/pool.yaml": "0f27d07e1b09b5c31d91caa620f2d1935a2ba26e717922ae5e29c7591e6e090a",
+    "docker/relay-pools/local/images.json": "343eb13a7cd91bbca83e8d7b09b0a12e0bbce64a188e50a59620cd042e04ff70",
+    "package.json": "256637a56a1a38d7ea5041d889729e16c6128a96a7846088562166d121281e61",
+    "docs/knowledge/registry.json": "348dd7003f15558823aaeabfa923305fbba38c947267545a559a7d39078faf53"
+  },
+  "images": {
+    "images": [
+      {
+        "tag": "galxai-relay-central:candidate-20260915",
+        "id": "sha256:ded139435453a59814b1a91a42cae89bf3ec819be3697fdff21bc4cd87f0f3f7",
+        "architecture": "arm64",
+        "component": "central"
+      },
+      {
+        "tag": "galxai-relay-premium:candidate-20260915",
+        "id": "sha256:22ef2426f2509fee7fc33d77d49abb8f02ed981b66b8766a3deed7892d3f6e68",
+        "architecture": "arm64",
+        "component": "runtime",
+        "pool": "premium"
+      },
+      {
+        "tag": "galxai-relay-standard:candidate-20260915",
+        "id": "sha256:a1cf2bd6bdee7aab3cd8b4baa281f3e8e9b401ef400c62000bbe026f48a4629a",
+        "architecture": "arm64",
+        "component": "runtime",
+        "pool": "standard"
+      },
+      {
+        "tag": "galxai-monitor-premium:local-access-20260915",
+        "id": "sha256:cb040d052cb3936d915229761c3cf7a76e8c77c18e03946c8e7f9830b9201bca",
+        "architecture": "arm64",
+        "component": "monitor",
+        "pool": "premium"
+      },
+      {
+        "tag": "galxai-monitor-standard:local-access-20260915",
+        "id": "sha256:447d74ecd0ac0128eb36bf1742a730b27d3507db6c7072a58960ee41cb3c984f",
+        "architecture": "arm64",
+        "component": "monitor",
+        "pool": "standard"
+      }
+    ]
+  },
+  "localAcceptance": {
+    "at": "2026-09-15T18:46:20.861Z",
+    "checks": 69,
+    "scope": "local VM separation on one trusted Mac; no provider generation or cloud deployment",
+    "records": [
+      {
+        "pool": "premium",
+        "address": "192.168.105.1",
+        "installationId": "cdbf6081-b947-45f1-b3c7-5c4b992a951c",
+        "registrationAllowed": true,
+        "executionAllowed": false,
+        "accounts": 0,
+        "machineSha256": "706d57f0db2059f3f707a601d67d91e591639b380e4500ac2fb133ca59d5cc0b",
+        "daemonSha256": "d9a2e6dd4b797ec1fb9bcbc2a1282948e74e3ab6ffb0fa5c28fbcd1d429bfa95"
+      },
+      {
+        "pool": "standard",
+        "address": "192.168.105.3",
+        "installationId": "c3f00fc7-d199-4431-969c-66d492eba38e",
+        "registrationAllowed": true,
+        "executionAllowed": false,
+        "accounts": 0,
+        "machineSha256": "a434cf391eb62970b1269bc04b13d7146d5296167ffb2de3a9e9188e71628269",
+        "daemonSha256": "212a2e51978e2246536443fed52029d4ac1a134811b1bbb08258da007728d732"
+      }
+    ]
+  },
+  "browserAcceptance": {
+    "at": "2026-09-15T18:42:49.352Z",
+    "records": [
+      {
+        "pool": "premium",
+        "automaticConnection": true,
+        "ticketRemoved": true,
+        "signOutDeniedStatus": true
+      },
+      {
+        "pool": "standard",
+        "automaticConnection": true,
+        "ticketRemoved": true,
+        "signOutDeniedStatus": true
+      }
+    ]
+  },
+  "nativeRecovery": {
+    "at": "2026-09-15T18:45:58Z",
+    "standardColdStart": true,
+    "runtimeRunningAfterHandoff": true,
+    "premiumNotRestarted": true,
+    "centralDependencyRepair": true,
+    "coldStartSeconds": 52.5,
+    "correction": "Initial monitor-only observation missed runtime ownership fencing; corrected ordering waits for handoff and verifies runtime liveness.",
+    "scope": "zero-account installations with execution closed; no provider requests"
+  },
+  "nativeApps": [
+    "GALX Monitors",
+    "GALX Premium",
+    "GALX Standard"
+  ],
+  "nativeChecks": [
+    "Three application bundles built and installed in user Applications.",
+    "Ad-hoc code signatures verified with codesign --verify --strict.",
+    "Both app shortcuts dispatched their own browser launch request.",
+    "Malformed query-bearing deep links were ignored.",
+    "Opt-in launch-at-login is off; its next-login behavior was not exercised."
+  ],
+  "checks": {
+    "httpSecurityTests": 12,
+    "launcherTests": 6,
+    "browserVariants": 8,
+    "axeViolations": 0,
+    "documentOverflow": 0,
+    "browserPageErrors": 0,
+    "documentationToolTests": 38,
+    "typescript": "passed",
+    "productionBuild": "passed; existing lint skip",
+    "publicBuildAssetsScanned": 669
+  },
+  "corrections": [
+    "Automatic ticket exchange handles existing sessions and same-document hash changes.",
+    "Viewer exchange revokes the preceding operator session.",
+    "The first cold-start observation missed a runtime stopped by the existing ownership fence; startup now waits for a centrally observed handoff and verifies runtime liveness.",
+    "Early sandbox attempts could not bind test servers, access Docker builder state or generate icons; approved local operations completed."
+  ],
+  "limits": [
+    "Mac administrator and physical host remain shared trust boundaries.",
+    "Native screenshot capture failed because the display could not be captured; native rendered appearance and VoiceOver were not independently verified.",
+    "No physical-phone acceptance; phone layout uses browser emulation.",
+    "Registration remains open, execution closed, zero registered accounts at the local acceptance observation.",
+    "Next-login persistence is implemented as an opt-in LaunchAgent and was not enabled or exercised."
+  ],
+  "references": [
+    "https://docs.docker.com/desktop/use-desktop/#the-docker-menu",
+    "https://developer.apple.com/documentation/xcode/defining-a-custom-url-scheme-for-your-app",
+    "https://supabase.com/docs/guides/observability/logs"
+  ]
+}

@@ -162,5 +162,10 @@ export class DesktopGateway {
     } catch { upstream?.destroy(); reject(); }
     finally { if (reserved) { const count = (this.pending.get(id) ?? 1) - 1; if (count) this.pending.set(id, count); else this.pending.delete(id); } }
   }
+  disconnect(id: string) {
+    for (const [ws, client] of this.clients) if (client.id === id) {
+      this.clients.delete(ws); client.upstream.destroy(); ws.close(1001, 'Desktop disconnected');
+    }
+  }
   close() { this.stopped = true; clearInterval(this.timer); for (const [ws, c] of this.clients) { ws.close(1001, 'Controller restarting'); c.upstream.destroy(); } this.clients.clear(); this.wss.close(); return this.manager?.settle() ?? Promise.resolve(); }
 }

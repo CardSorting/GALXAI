@@ -2,12 +2,12 @@
 
 <!-- docs-scope: current-guide -->
 
-Private navigation to [security boundaries](SECURITY.md), [manual enrollment](maintainers/RELAY_CREDENTIAL_ENROLLMENT.md) and [ADR 0152](adr/0152-manual-desktop-only-shard-authority.md).
+Use [security boundaries](SECURITY.md), [central account management](reference/relay-account-management.md) and [manual registration](maintainers/RELAY_CREDENTIAL_ENROLLMENT.md) for the installed strategy.
 
-Only explicit enrollment from a manually created Relay Desktop can establish managed shard authority. The operator signs in inside it; the host validates the saved login and commits the unique binding. External API/CLI/file ingestion is closed. Service-role insertion and credential replacement are denied, and unconfirmed records cannot receive new leases or enter the controller's eligible projection.
+Canonical accounts, credentials, assignments, management history and account leases live only in the main project. Premium and Standard have distinct VM/daemon/session/execution-database boundaries and cannot borrow accounts or fail over. The runtime has no central database/vault or Docker authority; the monitor has only its owning daemon authority. A common trusted physical Mac remains.
 
-Renew expired provider sessions manually in the same bound desktop. Saved-file sync only validates and persists that login with revision checks and a recoverable checkpoint. It cannot renew the provider session, enroll another account or transfer a binding. Preserve the owning home; revoked and ambiguous accounts remain blocked.
+Manual provider sign-in plus central Review/Register creates a paused account. Renewal is manual sign-in and explicit save in the same registration. Operator revisions and immutable operation IDs protect changes. Removing a registered account revokes permanently; restoring an unfinished registration requires new review. History/files remain retained and failed desktop cleanup stays visible.
 
-Read-only monitor sessions, desktop administrator sessions, application accounts and inference keys have separate authority. Hosts and origins are checked; token uploads are not an enrollment contract. Holds do not override expiry, revocation or changed authority. Keep private journals and uncertain receipts through recovery.
+Ordinary customer sessions, operational viewers, operators, registrars and runtimes have separate authority. Unknown health grants no permission. Central grants expire independently when renewal fails. Standard rejects Sites/images before provider calls; no uncertain generation retries automatically.
 
-Public responses expose allowed customer fields and sanitized images. Operational topology, upstream diagnostics and credential sources remain private. Consult [current state](../post-mortem/CURRENT_STATE.md) for actual deployment and acceptance; security fixtures do not prove live provider capability.
+Public contracts expose capability and sanitized output only. Use [current state](../post-mortem/CURRENT_STATE.md) for delivery evidence. The retained single-controller workflows are [legacy operations](maintainers/legacy-federation-operations.md), not pool administration.

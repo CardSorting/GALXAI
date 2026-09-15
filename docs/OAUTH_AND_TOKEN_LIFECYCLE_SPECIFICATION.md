@@ -2,52 +2,46 @@
 
 <!-- docs-scope: domain-reference -->
 
-Private source reference, reconciled September 15, 2026 against [ADR 0152](adr/0152-manual-desktop-only-shard-authority.md). [Current state](../post-mortem/CURRENT_STATE.md) records deployment and acceptance separately.
+Private reference. [Account management](reference/relay-account-management.md) owns the implemented pool lifecycle; [workspace authentication](operations/workspace-auth.md) owns GALX sessions. [Current state](../post-mortem/CURRENT_STATE.md) separates installation from real provider acceptance.
 
 ## Lifecycle map
 
-| Credential or session | How it is established and renewed | Authority |
+| Credential or session | Establishment and renewal | Authority |
 | --- | --- | --- |
-| GALX account session | Verified account login and the account session renewal flow | Application identity and current account permissions |
-| Local monitor session | Host launcher exchanges a one-use ticket; reopen after expiry or restart | Read-only local operational view |
-| Relay Desktops session | Separate host-issued desktop ticket and browser session | Local desktop administration; ordinary accounts and monitor sessions cannot enroll |
-| Provider CLI login | Operator completes sign-in inside a manually created desktop | Saved guest login; not yet registry authority |
-| Managed shard | Explicit **Enroll shard** validates the saved login and binds it to that desktop | Encrypted PostgreSQL record with confirmed desktop provenance |
-| Replacement provider credential | Operator signs in again in the same desktop; **Check now** or enabled saved-file sync verifies and saves it | Conditional replacement of the bound account's current encrypted revision |
-| Worker access | Controller assigns scoped transport credentials and one eligible provider credential | Private worker execution, not enrollment authority |
+| GALX account session | Verified application login and account session flow | Current customer identity/permissions only |
+| Pool monitor session | Fixed native launcher exchanges a scoped one-use ticket; relaunch after expiry | Own-pool viewer or operator privileges checked centrally |
+| Registrar principal | Private monitor configuration, separate from viewer/operator | Narrow saved-login review/registration handoff for its fixed installation |
+| Provider login | Manual sign-in inside the owning registration desktop | Candidate guest credential, not yet central account authority |
+| Registered account | Explicit access review and registration | Encrypted main-project account, exclusive assignment and paused lifecycle state |
+| Replacement sign-in | Manual same-desktop sign-in, then **Update saved sign-in → Save new sign-in** | Revision-checked central credential replacement |
+| Runtime projection/grant | Scoped runtime principal, current epoch/revisions and existing central account lease | Own-pool execution for a bounded renewable interval |
 
-Provider-session renewal, account-session renewal, browser reconnection and vault re-encryption are separate operations. The relay does not run an independent provider refresh-token daemon. A provider token retained in encrypted historical data does not authorize an automated renewal path.
+Provider renewal, browser reconnection, GALX session renewal and vault re-encryption are separate. Opening a monitor never signs in to a provider or reviews credentials. The new monitor has no legacy background saved-file synchronization bridge. No independent provider refresh-token daemon establishes managed authority.
 
-## Initial enrollment and existing-record confirmation
+## Registration and renewal
 
-Create the desktop manually in Relay Desktops, finish provider sign-in there, and choose **Enroll shard**. The request carries only the expected existing link, never a token. The host validates the persisted running desktop, saved-file identity and expiry, current registry state and authenticated inventory before the private SQL write. It then persists the local link.
+Open the intended fixed Premium/Standard monitor, choose **Register account**, prepare its desktop and manually sign in. Premium requires a paid provider account; Standard requires a free provider account. Choose **Review access**, inspect the result and register explicitly. The browser submits references/revisions rather than provider token contents; the scoped registrar reads the saved guest login and central authorization validates its authority. The account starts paused.
 
-The same explicit action can confirm a matching eligible legacy account while preserving its owner, quotas, counters, holds and history. Records without both enrollment fields remain excluded even if their credentials are unexpired. Creation, polling, matching, linking, API calls to retired provider routes and CLI imports cannot silently confirm them. Revoked, dead, quarantined, ambiguous or differently bound accounts fail closed.
+Review tickets last two minutes and review evidence five minutes. Every registration update changes its revision, including ticket/review updates. Stale review or a changed record requires fresh inspection. Assignment cannot be edited or transferred by changing a desktop link. Revoked/removed or conflicting accounts cannot be revived through registration.
 
-## Manual renewal and saved-file synchronization
+For renewal, use the owning desktop and explicit save flow above. Saved authority, applied runtime revision and actual requested capability are separate checkpoints. The full [manual procedure](maintainers/RELAY_CREDENTIAL_ENROLLMENT.md) covers safe saved-file validation, wrong-account rejection, expiry and recovery.
 
-When a provider session expires, open its owning desktop and complete sign-in again. Start a stopped desktop first. Saved-file synchronization only transfers a login that already exists there; enabling it is not consent or capability for background provider renewal.
+## Lifecycle commands and recovery
 
-Reads validate owned guest paths and reject symlinks, special or oversized files, missing selected homes, malformed or expired tokens and inconsistent account hints. Custom login homes require explicit selection within the guest home. Keyring-only credentials require file-backed reauthentication.
+Rename, pause, enable, remove and unfinished-registration restore use immutable operation identity, expected revision and actor/pool/installation scope. Registered-account rename also updates the linked registration. `record_changed` preserves current authority; refresh and explicitly retry after review. Lost responses are reconciled as the same intent, not automatically repeated.
 
-For an already enrolled account, the bridge validates the candidate against the current owner, desktop binding and encrypted revision. It flushes a private write intent, performs compare-and-swap replacement and checkpoints the accepted fingerprint. A newer revision wins over stale work. Recovery can finalize an already committed replacement or retry unchanged authority; the local journal and database are separate stores, not one distributed transaction.
-
-A saved login, committed credential, applied worker revision and ready requested capability are distinct checkpoints. A hold can prevent worker replacement even after a successful save. Follow the [complete enrollment and recovery procedure](maintainers/RELAY_CREDENTIAL_ENROLLMENT.md).
+Removing a registered account permanently revokes it and removes its linked registration from active results. Removing an unfinished registration cancels tickets/review and permits later restoration with fresh review. Central removal commits before desktop disconnection/stop. Failed stop remains visible as pending cleanup. Removal retains files, credentials, assignments, leases and history; it is not upstream logout or data erasure.
 
 ## Closed application provider paths
 
-The OpenAI/ingest aliases and provider OAuth URL, PAR, callback and refresh handlers return the terminal 410 contract in [the route reference](STANDARDIZED_OAUTH_AND_INGESTION_ARCHITECTURE.md). They do not parse credentials, contact a provider, establish a GALX session or change cookies. Middleware sends these exact retired routes to their denial handlers without preview or account sign-in work.
+[The exact retired routes](STANDARDIZED_OAUTH_AND_INGESTION_ARCHITECTURE.md#closed-application-and-cli-paths) return 410 without parsing credentials, contacting a provider, changing cookies or creating a GALX session. `GalxAuthEngine.authenticateProviderUser` rejects provider connections; `refreshProviderShardTokens` does not renew provider families. Retained exchange utilities do not reopen enrollment. Account login/callback, logout and device grants retain their own verified-user contracts.
 
-`GalxAuthEngine.authenticateProviderUser` rejects provider connections; `refreshProviderShardTokens` returns false without renewing a provider token family. Retained `GalxOAuthManager` exchange helpers and process-local coalescing structures do not reopen registry enrollment. GALX account login/callback, logout, session management and device grants retain their independently verified contracts in [workspace authentication](operations/workspace-auth.md).
+## Durable custody and legacy scope
 
-## Durable authority and privilege boundary
+Only the central service holds the main-project database/vault authority. Runtime and registrar principals are separate and installation-bound. Execution databases cannot store or manage accounts. Base manual-desktop provenance, protected writer rules and the existing account lease ledger remain central; generic registry upsert and external credential insertion stay closed. Database owners remain trusted schema administrators.
 
-`managed_desktop_id` and `desktop_enrolled_at` are paired nullable fields; a unique non-null desktop binding permits one managed account per desktop. Confirmed rows must be OpenAI OAuth accounts. The private writer role owns enrollment/refresh functions, and protected-field triggers reject other credential or binding mutations. Service-role ingestion and generic registry upsert are closed. Ordinary repository saves change allowlisted policy metadata only.
+The retained single controller supports **Enroll shard** and conditional saved-file synchronization only for eligible unassigned legacy accounts. Its separate recoverable local journal and maintenance holds remain documented in [legacy enrollment](maintainers/legacy-desktop-enrollment.md). Assigned accounts and bound leases are denied by that path. Those synchronization semantics are not the new pool renewal contract.
 
-Both registry projection and durable lease admission reject unconfirmed rows. Existing source labels are historical data, not proof of manual enrollment. Database owners remain trusted; the separately reviewed [vault rewrap procedure](maintainers/MULTI_TENANT_SHARD_AND_KEY_ROTATION.md) can preserve plaintext and binding while changing ciphertext.
+## Verification and limits
 
-## Failure and evidence
-
-Expired sign-in requires manual renewal; wrong account or desktop requires review; transient inventory/storage failures require bounded recovery; a failed checkpoint cannot claim success. A credential 401 is revision-specific. A generic 403 or timeout alone is not permanent rejection and does not prove image support.
-
-Use the isolated role/race/rollback tests and authorization suites in [hardening](maintainers/RELAY_HARDENING.md). [September 15 activation](../post-mortem/releases/2026-09-15-manual-desktop-enrollment-activation.json) verifies policy closure, not a completed manual provider enrollment or restored image generation. Older device-flow and throughput results remain dated evidence, not current conformance guarantees.
+Use [hardening checks](maintainers/RELAY_HARDENING.md) for role/race/replay/rollback and HTTP isolation coverage. Central outage denies new grants and renewal; uncertain work never redispatches. A fresh health label or expired cooldown is not provider acceptance. Latest installed evidence records registration open, execution closed and zero registered accounts; manual sign-ins and real generation remain pending. Keep account material and diagnostics out of public DTOs and browser assets.

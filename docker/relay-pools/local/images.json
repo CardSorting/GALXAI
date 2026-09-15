@@ -1,0 +1,38 @@
+{
+  "images": [
+    {
+      "tag": "galxai-relay-central:management-20260915",
+      "id": "sha256:4f848110b24290945f742a936e6f4fcd21c923ca1c0be359d2b1240227e43a4f",
+      "architecture": "arm64",
+      "component": "central"
+    },
+    {
+      "tag": "galxai-relay-premium:candidate-20260915",
+      "id": "sha256:22ef2426f2509fee7fc33d77d49abb8f02ed981b66b8766a3deed7892d3f6e68",
+      "architecture": "arm64",
+      "component": "runtime",
+      "pool": "premium"
+    },
+    {
+      "tag": "galxai-relay-standard:candidate-20260915",
+      "id": "sha256:a1cf2bd6bdee7aab3cd8b4baa281f3e8e9b401ef400c62000bbe026f48a4629a",
+      "architecture": "arm64",
+      "component": "runtime",
+      "pool": "standard"
+    },
+    {
+      "tag": "galxai-monitor-premium:management-20260915",
+      "id": "sha256:39735a31ac1179def573ee482fb780f5ce47c9813807e258a50bd2f55b8a4b1d",
+      "architecture": "arm64",
+      "component": "monitor",
+      "pool": "premium"
+    },
+    {
+      "tag": "galxai-monitor-standard:management-20260915",
+      "id": "sha256:d49a8f13d4f3ed9ed2a8ffa20c2efa0b6e0ddf15bdfc1cce95aa64e1a636f319",
+      "architecture": "arm64",
+      "component": "monitor",
+      "pool": "standard"
+    }
+  ]
+}

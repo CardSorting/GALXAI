@@ -1,0 +1,154 @@
+{
+  "at": "2026-09-15T19:06:55.315115+00:00",
+  "scope": "Local relay console refinement and installation; existing account authority and VM boundaries retained.",
+  "sourceSha256": {
+    "src/relay/pool-monitor.html": "91939b5da23a2c4d968823422da35d2ae783cdaad5ad5114ec0103de51e7d06b",
+    "src/relay/pool-monitor.js": "37063e60e572db350e520ec59e5339a5113dca36632a41fb1fba047a5beec601",
+    "src/relay/pool-monitor-model.js": "4c3b3b70b190b9d0dae50c2bb0205de98eef80a0e89f8a89f41dbad93017b279",
+    "src/relay/pool-monitor.css": "d09daba5c2c399ab052a93d3744462cc73255a85ca94055192b60d665e3ec084",
+    "src/relay/pool-monitor-server.ts": "bbfdec832fe628105b5f6e28ba0d95e50bea34c2f09caf1aba42de2666448fa9",
+    "src/relay/pool-monitor-login.js": "ef1ef168a7f29297c9fe9df3787c0f89279a5c91b5d510fd862a7f072f28aabf",
+    "src/relay/pool-desktop.html": "f03e05da438466f6f6a25a42ea8ad790157f0c1f9fe09b08b6d8bff8e53cb3ba",
+    "src/relay/pool-desktop.js": "fd1c2f804eb47e14bf16e08f0c0e2203d1c9d1642b2501408d3332297aefc61d",
+    "src/relay/desktop-manager.ts": "56f34c5fcf06ecf46439c45112470c2586bfdc0b66eaf6ad7708b69a7c47412a",
+    "src/relay/desktop-gateway.ts": "299595a75f4a44fc57a1b27245bb30d0eefdd428d416dcc76a7b0da1f959b4b7",
+    "src/relay/pool-protocol.ts": "e03e5cb6d45a1e094ee4878db4d902cd22692750008d5245b49c6932fcaa248c",
+    "scripts/verify-relay-pool-monitor.ts": "ac95ae60989720a8103f484f8cc48cdd38ca704a9ba1149fc7cabd84977d0a7c",
+    "scripts/test-relay-monitor-model.mjs": "01be664c9361b562be630a8a1681fdd98d14ff6a66d40311a8e791f9394537ff",
+    "scripts/test-relay-services.ts": "79f7672cbfd95d78bf41475ebb38ec900a9768957fc1cc02ad768d605bbd0058",
+    "Dockerfile.relay-services": "d0445158cbaf2eb8ac430c6236de87003bdf639a0e22b71a834a02bd577f67a1",
+    "docker/relay-pools/local/images.json": "711516a127020553b341a5d86bedeefef2cf37a88067919d6dc7f4c8e6b185c4",
+    "docs/knowledge/registry.json": "caf44e88ad1ff09ce9f8fbb707cbcb708b490b62765804584eb8f09b775e18e2"
+  },
+  "images": {
+    "images": [
+      {
+        "tag": "galxai-relay-central:candidate-20260915",
+        "id": "sha256:ded139435453a59814b1a91a42cae89bf3ec819be3697fdff21bc4cd87f0f3f7",
+        "architecture": "arm64",
+        "component": "central"
+      },
+      {
+        "tag": "galxai-relay-premium:candidate-20260915",
+        "id": "sha256:22ef2426f2509fee7fc33d77d49abb8f02ed981b66b8766a3deed7892d3f6e68",
+        "architecture": "arm64",
+        "component": "runtime",
+        "pool": "premium"
+      },
+      {
+        "tag": "galxai-relay-standard:candidate-20260915",
+        "id": "sha256:a1cf2bd6bdee7aab3cd8b4baa281f3e8e9b401ef400c62000bbe026f48a4629a",
+        "architecture": "arm64",
+        "component": "runtime",
+        "pool": "standard"
+      },
+      {
+        "tag": "galxai-monitor-premium:local-console-20260915",
+        "id": "sha256:aed1dd9c7fd3684f0d18eba59a396bdd908640b81785d6a8477bdf3d93d0af9c",
+        "architecture": "arm64",
+        "component": "monitor",
+        "pool": "premium"
+      },
+      {
+        "tag": "galxai-monitor-standard:local-console-20260915",
+        "id": "sha256:e7b96138da65898244cbce077b3414471d54ce661af44d10027d173519bfc3ee",
+        "architecture": "arm64",
+        "component": "monitor",
+        "pool": "standard"
+      }
+    ]
+  },
+  "localAcceptance": {
+    "at": "2026-09-15T19:06:01.987Z",
+    "checks": 69,
+    "scope": "local VM separation on one trusted Mac; no provider generation or cloud deployment",
+    "records": [
+      {
+        "pool": "premium",
+        "address": "192.168.105.1",
+        "installationId": "cdbf6081-b947-45f1-b3c7-5c4b992a951c",
+        "registrationAllowed": true,
+        "executionAllowed": false,
+        "accounts": 0,
+        "machineSha256": "706d57f0db2059f3f707a601d67d91e591639b380e4500ac2fb133ca59d5cc0b",
+        "daemonSha256": "d9a2e6dd4b797ec1fb9bcbc2a1282948e74e3ab6ffb0fa5c28fbcd1d429bfa95"
+      },
+      {
+        "pool": "standard",
+        "address": "192.168.105.3",
+        "installationId": "c3f00fc7-d199-4431-969c-66d492eba38e",
+        "registrationAllowed": true,
+        "executionAllowed": false,
+        "accounts": 0,
+        "machineSha256": "a434cf391eb62970b1269bc04b13d7146d5296167ffb2de3a9e9188e71628269",
+        "daemonSha256": "212a2e51978e2246536443fed52029d4ac1a134811b1bbb08258da007728d732"
+      }
+    ]
+  },
+  "browserAcceptance": {
+    "at": "2026-09-15T19:06:13.146Z",
+    "scope": "Installed local monitors; no account mutation or provider sign-in",
+    "records": [
+      {
+        "pool": "premium",
+        "automaticConnection": true,
+        "privateAssets": true,
+        "views": true,
+        "manualRegistrationForm": true,
+        "signOut": true,
+        "pageErrors": 0
+      },
+      {
+        "pool": "standard",
+        "automaticConnection": true,
+        "privateAssets": true,
+        "views": true,
+        "manualRegistrationForm": true,
+        "signOut": true,
+        "pageErrors": 0
+      }
+    ]
+  },
+  "checks": {
+    "httpSecurityTests": 12,
+    "presentationBehaviorTests": 3,
+    "responsiveAccessibilityVariants": 22,
+    "additionalRegistrationFormVariants": 2,
+    "axeViolations": 0,
+    "documentOverflow": 0,
+    "browserPageErrors": 0,
+    "typescript": "passed",
+    "productionBuild": "passed; existing lint skip",
+    "publicBuildAssetsScanned": 669,
+    "documentationToolTests": 38
+  },
+  "behavior": [
+    "Separate Accounts, Registration and Activity views with selected navigation and hash history.",
+    "Combined account name/status filters, announced count and explicit empty-search recovery.",
+    "Per-registration current step, verified model disclosure, contextual primary action and collapsed completed registrations.",
+    "Scoped desktop start/stop resolved from central registration; one-use desktop links automatically connect.",
+    "Stable record action locks, bounded fetch waits, retained same-intent IDs, disabled mutations on outage, truthful saved/applied/sign-in states.",
+    "Enable UI guard requires activated execution, current sign-in and a fresh heartbeat; server authority remains unchanged."
+  ],
+  "corrections": [
+    "Installed-browser acceptance exposed hash navigation stealing registration field focus; corrected and rebuilt both images, then verified the installed form retains focus.",
+    "An installed browser test initially asserted before hash navigation completed; the test now waits for the selected view.",
+    "Sandbox prevented temporary listeners, Docker/VM access and configured font downloads; scoped approved retries completed."
+  ],
+  "limits": [
+    "Provider sign-in, review and registration flows are exercised with synthetic services; no real account was registered.",
+    "Execution remains closed; zero registered accounts in both local pools at acceptance.",
+    "No provider generation, cloud deployment, database migration or public application cutover.",
+    "Browser emulation does not qualify physical phones, VoiceOver or accessibility within streamed desktop pixels.",
+    "Automatic desktop ticket consumption is implemented; real provider desktop connection and sign-in remain manual acceptance work.",
+    "The two VMs retain a shared trusted Mac administrator and physical host."
+  ],
+  "references": [
+    "https://primer.style/product/scenario-patterns/filter/",
+    "https://primer.style/product/scenario-patterns/search/",
+    "https://cloudscape.design/patterns/resource-management/create/",
+    "https://cloudscape.design/patterns/resource-management/view/",
+    "https://carbondesignsystem.com/patterns/empty-states-pattern/"
+  ],
+  "rollbackEvidence": "post-mortem/releases/2026-09-15-relay-monitor-access.json"
+}

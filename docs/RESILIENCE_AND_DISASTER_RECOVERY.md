@@ -1,52 +1,46 @@
 # Resilience and recovery
 
 <!-- docs-scope: current-guide -->
-> Private recovery guidance. Use [incident operations](../post-mortem/README.md), [current state](../post-mortem/CURRENT_STATE.md), the [federation contract](FEDERATION_STRATEGY.md) and [runbook](RELAY_VNEXT_RUNBOOK.md).
+
+Identify the affected component in [current state](../post-mortem/CURRENT_STATE.md), then use [incident operations](../post-mortem/README.md) and the owning runbook. New pool services and the retained legacy controller have different recovery contracts.
 
 | Failure | Recovery boundary |
 | --- | --- |
-| Application async image process changes | Retrieve the durable owner-scoped PostgreSQL receipt; a queued unclaimed request can resume, a claimed uncertain attempt cannot redispatch |
-| Stopped controller with old lock | New launcher/guardian recovers after process-group termination; legacy or ambiguous marker follows [guarded ownership recovery](../post-mortem/runbooks/controller-lock.md); never remove a live/ambiguous owner |
-| Auth transport unavailable | Keep it distinct from invalid credentials; no cached identity grant or forced sign-out workaround |
-| Empty/stale model evidence | Remove admission eligibility; retain worker and rediscover |
-| Credential 401 | Persist revision rejection; manually sign in in the owning desktop and verify a new saved/applied revision |
-| Unconfirmed legacy account | Explicitly Enroll shard from its matching desktop; a valid token or source label is insufficient |
-| Expired managed provider session | Start/open its bound desktop and complete manual sign-in; keep the retained record for repair |
-| Lost bound desktop home | Preserve registry and receipts; investigate administrator recovery without automatic rebinding/import |
-| Inventory timeout, 403 or 5xx | Back off; do not permanently reject from this evidence alone |
-| Federation worker stopped or disappeared | Controller-only replacement with exponential backoff; five attempts in ten minutes then `worker_restart_budget_exhausted` and operator inspection |
-| Worker/controller operation stalls | Per-operation deadlines and external guardian escalation; retain uncertain mutation/receipt evidence and never replay blindly |
-| Registry unavailable | Fail authority checks; never populate from host caches |
-| Held worker needs repair | Preserve it and accepted work; pause new admissions/replacement |
-| Revoked, removed, expired or changed authority | Retire old worker even if held |
-| Lost acknowledgement | Reconcile same receipt/job; do not repeat synthesis blindly |
-| Controller restart | The guardian recovers one owner; admission identity tombstones persist while response bodies and browser sessions remain process-local; preserve durable text receipts and private signing/state |
-| Worker generation gone | Stream/cancel cannot move; opted-in receipt reads can use the original retained volume |
-| Credential checkpoint failure | Report explicit error; recover private intent without overwriting newer authority |
-| Desktop inventory failure | Retain record, report unavailable; do not infer deletion or recreate blindly |
+| Local monitor unavailable | Open the fixed native app; inspect its owning VM, reviewed images and central dependency |
+| Runtime cannot claim ownership | Respect the greater-than-60-second central stale-owner interval; never override epoch/identity |
+| Central unavailable | Stop new registration/grants; active grants expire independently; restore central authority |
+| Own execution database unavailable | Retain reservation/terminal intent, block unsafe new admission, settle original leases after recovery |
+| Account sign-in expired | Manually sign in in its bound desktop and explicitly save through the registrar |
+| Saved update not confirmed | Inspect owning runtime, revision and heartbeat; do not mark applied from the database write alone |
+| Account or registration removed | Keep history; registered accounts cannot restore, unfinished registrations require fresh review after Restore |
+| Removed desktop failed to stop | Registration → Removed → Stop desktop; central revocation remains saved |
+| Lost bound home or conflicting assignment | Preserve authority and investigate; no automatic rebind, credential import or pool move |
+| Unknown admission or old epoch | Preserve original record/tenant/destination; never redispatch to the peer or legacy transport |
+| Application image process changes | Read the durable owner receipt; claimed uncertainty does not authorize redispatch |
+| Legacy controller lock/worker failure | Use its guardian/namespace procedure; do not apply it to pool epochs or Colima identity |
 
 ## Preserve before repair
 
-Record the affected shard revision, worker generation, request ID and structured event privately. Pause the linked shard if preserving its worker is needed. A pause blocks new work and replacement starts; accepted work can complete. It does not override registry revocation, expiry or rotation.
+Record the original operation, pool/installation, account revision and safe error classification privately. Preserve main-project accounts, assignments, removed markers, immutable journals, leases, execution rows, component keys, TLS trust, guest homes and state volumes. Backups can contain credentials or unfinished content.
 
-Preserve the controller signing secret, rejection/maintenance journals, desktop journal, guest home volumes and worker checkpoints according to their data sensitivity. Worker checkpoints can contain unfinished prompts; guest homes can contain login credentials. A backup is sensitive even when registry tokens are encrypted.
+Pool Pause saves central state and blocks old authorization; it does not promise the legacy behavior of preserving a held worker while all accepted work drains. Inspect active work before intervention. Do not clear cooldowns, counters or records to manufacture capacity.
 
 ## Restore and verify
 
-Establish one controller owner, restore compatible private state and reconnect through the host launcher. Graceful stop removes unheld workers, so do not assume every restart preserves container identity. Verify ownership and generation before resuming.
+Restore the same local identities/configuration, use reviewed image pins and start through `relay:local`. Verify own-pool sessions, TLS, peer denial and fresh central authorization before opening execution. Startup must not replace immutable installation identity or borrow another pool's config.
 
-Confirm the manual-enrollment schema and unique owning-desktop binding before restoring admission. Keep external API/CLI/file ingestion sealed. Restoring an old registry backup does not authorize grandfathering unconfirmed rows or renewing provider sessions automatically.
+Registration, execution gate, account Enable and successful provider qualification are separate checkpoints. Keep external ingestion closed. Account refresh uses manual sign-in and explicit central save; it never restores another account or a removed registered account. A stopped sign-in desktop can be normal for a healthy registered account.
 
-Credential sync transfers a manually completed sign-in from the bound desktop and uses a durable intent and compare-and-swap: finalize an already committed replacement or retry unchanged authority, never overwrite a newer external revision. Separate journal and registry stores are not atomically committed together.
-
-Closing a desktop viewer is safe for ongoing processes. Stop preserves home; deletion requires explicit confirmation and removes owned resources without releasing the database binding. Preview cleanup must not select production desktops by a broad name pattern.
+Removal commits before local stop. Retained files are not an active registration, and Restore does not reinstate old tickets/review. New display connections/direct actions deny removed records; Stop remains for cleanup. Missing homes require explicit recovery, not generic Delete/recreate.
 
 ## Sites financial and delivery recovery
 
-Keep original invocation identity, grant, relay origin/reference, receipt volume and federation signing authority. Included Sites recovery reads the original outcome without payment or repeat generation. Confirmed non-dispatch can release a grant once; unknown or missing evidence retains occupancy. Historical wallet holds retain their accepted pricing/reconciliation records. Disabling new admission or losing paid entitlement must not disable existing-operation recovery.
+Keep original invocation, owner, grant, origin and receipt identity. Isolated Sites stays on Premium. New-runtime epoch/account loss may prevent result retrieval even when execution records remain; there is no receipt relocation to Standard. Historical legacy signed receipts have their own retained-volume exception, documented in [legacy API](reference/legacy-federation-api.md#durable-sites-text-contract).
 
-The companion independently retains immutable archives, upload intent, saved-version acknowledgement and publication locks. Recovery must observe the original external effect. A missing upload/deployment acknowledgement cannot be repaired by publishing another version. See [Sites operations](maintainers/SITES_FAIR_USAGE.md#rollback) for retained-state limits and compatible rollback.
+Included generation recovery does not charge or generate again. Proven non-dispatch can release the corresponding grant under its product policy; unknown completion retains occupancy. Historical wallet holds and native publication intents keep their original settlement/external-effect contracts. See [Sites rollback](maintainers/SITES_FAIR_USAGE.md#rollback).
 
 ## Limits
 
-Relay admission identity tombstones survive controller restart, while response bodies and the in-memory response cache do not; response bodies have a ten-minute cache window, then completed identities remain as permanent `unknown` tombstones. Their window and scope are separate from the application's durable image receipts. Pending entries become unknown, and losing a relay acknowledgement never permits another image dispatch. Missing artifacts are not recovered merely by polling. Keep uncertain outcomes explicit. Physical phone input, guest semantic accessibility and live provider sign-in require their own verification. Use [current state and linked dated records](../post-mortem/CURRENT_STATE.md), not old test counts, to assess deployment.
+Central and execution writes are ordered with retained uncertainty, not one cross-database transaction or exactly-once provider execution. Short grants and local network checks do not prove physical-machine independence. Keep unknown outcomes explicit and record actual acceptance separately from fixtures.
+
+The retained [legacy operations](maintainers/legacy-federation-operations.md) document kernel guards, guardian restart budgets, per-shard Docker workers, hold/adoption and admission tombstones. Those services remain separate from the new pool setup and historical requests must keep their original readers. Use [service rollback](runbooks/relay-pool-services.md#recovery-and-rollback) for the installed pools.

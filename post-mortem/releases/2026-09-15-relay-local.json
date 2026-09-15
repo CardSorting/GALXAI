@@ -1,0 +1,83 @@
+{
+  "observedAt": "2026-09-15T18:19:33.971162+00:00",
+  "scope": "Local Docker operation on the owner Mac; existing Supabase projects retained; no cloud compute provisioned or public application cutover",
+  "accountAuthority": "mazhcjisettrzbqhorvp",
+  "localAcceptance": {
+    "at": "2026-09-15T18:18:49.341Z",
+    "checks": 69,
+    "scope": "local VM separation on one trusted Mac; no provider generation or cloud deployment",
+    "records": [
+      {
+        "pool": "premium",
+        "address": "192.168.105.1",
+        "installationId": "cdbf6081-b947-45f1-b3c7-5c4b992a951c",
+        "registrationAllowed": true,
+        "executionAllowed": false,
+        "accounts": 0,
+        "machineSha256": "706d57f0db2059f3f707a601d67d91e591639b380e4500ac2fb133ca59d5cc0b",
+        "daemonSha256": "d9a2e6dd4b797ec1fb9bcbc2a1282948e74e3ab6ffb0fa5c28fbcd1d429bfa95"
+      },
+      {
+        "pool": "standard",
+        "address": "192.168.105.3",
+        "installationId": "c3f00fc7-d199-4431-969c-66d492eba38e",
+        "registrationAllowed": true,
+        "executionAllowed": false,
+        "accounts": 0,
+        "machineSha256": "a434cf391eb62970b1269bc04b13d7146d5296167ffb2de3a9e9188e71628269",
+        "daemonSha256": "212a2e51978e2246536443fed52029d4ac1a134811b1bbb08258da007728d732"
+      }
+    ]
+  },
+  "restart": "Clean relay-local stop/up cycle completed for both VMs and central stack, then local acceptance repeated successfully.",
+  "artifacts": "Five service image IDs matched the dated reviewed service release. Each VM also received the existing verified ARM64 desktop image.",
+  "tls": "Scoped clients use the official Supabase CA and hostname verification. Client socket encryption/authorization checked in each runtime; pg_stat_ssl behind Supavisor reports its separate backend socket, not this client boundary. Local authority uses a private CA with per-service trust.",
+  "changes": [
+    "Added local TLS proxy, Compose overlay and local lifecycle/acceptance commands.",
+    "Installed two Colima VMs with distinct machine and Docker identities, no Mac filesystem mounts or SSH-agent forwarding.",
+    "Installed persistent local network policy after connection tracking, including direct peer and Mac-forwarded peer denial.",
+    "Replaced missing dotenv import in the exporter with Node parseEnv.",
+    "Opened manual registration only. Local execution command requires fresh isolation evidence and a registered account in both fixed installations.",
+    "Opened both operator monitor windows via one-use tickets."
+  ],
+  "checks": {
+    "local": 69,
+    "httpSecurityRegression": 12,
+    "productionBuild": "passed; existing lint skip",
+    "documentationToolTests": 38,
+    "browserBoundaryAssets": 669,
+    "emptyLocalActivation": "Refused before gate update because both monitors have zero registered accounts."
+  },
+  "corrections": [
+    {
+      "observation": "Standard first-start DNS referenced a conflicting custom gateway.",
+      "resolution": "Reconciled the saved and generated settings to the actual Colima shared user network; explicit peer firewall remains the local network boundary."
+    },
+    {
+      "observation": "Draft nft priority -210 interrupted Premium SSH before credentials were delivered.",
+      "resolution": "Moved connection-state chains to -150; recovered through early boot, then passed clean restart and live peer-denial checks."
+    },
+    {
+      "observation": "TLS proxy port was not reachable while attached only to the internal Docker bridge.",
+      "resolution": "Attached the proxy to the local egress bridge and kept its only publication on 127.0.0.1:13443."
+    }
+  ],
+  "limits": [
+    "The Mac administrator, physical host and central authority are shared trust boundaries.",
+    "No account credentials were imported or provider accounts signed in by the agent.",
+    "Both pools have zero registered accounts at this observation; execution remains disabled.",
+    "No provider text, Sites or image generation, public application cutover or customer billing acceptance.",
+    "Manual sign-in and provider qualification remain required; external-host acceptance is a separate deployment mode."
+  ],
+  "sourceSha256": {
+    "scripts/relay-local.mjs": "6fd74b84a324aa33448c27863fbb62065f9eca0a3ea2d55ab24e16995f160317",
+    "scripts/install-relay-local-isolation.py": "75367aa15afb11a7b4e243c4eb419b5e24b044e710efeee13f3c7b37b56b8177",
+    "scripts/export-relay-services.ts": "b974a585dea1a2704e93e5003ae4ac7e3b88d8359679d0a31fa88bfc3bb18431",
+    "scripts/set-relay-service-gates.ts": "b63a73176270b6cc15ec903814830d16d72725a245d6dbfb44190e483960461e",
+    "docker/relay-pools/local/authority-proxy.mjs": "c3252bdde6bc691fbaa2f17b7c25586e83ea22719ffbfc71e1bdee98bffd443a",
+    "docker/relay-pools/local/central.yaml": "721da26489c6ac098829646c3dfb1a97b321c48824c723171b0bad5229e90388",
+    "docker/relay-pools/local/pool.yaml": "0a97cbfcc00c1b8642d80520f13b17406fb5edf2a3eb3142c7c1f70f5d5291ba",
+    "package.json": "cbf0412034c50a7b9d10268323274f2c77f878eedde812b4d9bda182c4b8c8e6",
+    "docs/knowledge/registry.json": "3bb7cba5f8dc2ac510882ecad26f2064eb359e1043a1e3c3c1ae0f9bccb6a8dc"
+  }
+}

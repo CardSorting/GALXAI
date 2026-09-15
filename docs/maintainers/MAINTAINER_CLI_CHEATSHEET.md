@@ -3,20 +3,27 @@
 <!-- docs-scope: current-guide -->
 > Private command navigation. [package.json](../../package.json) defines scripts; read each harness before running commands that can mutate state or call live providers.
 
-## Relay operations
+## Local isolated relay operations
 
-| Task | Command |
+| Task | Command or action |
 | --- | --- |
-| HTML monitor | `npm run relay:open` |
-| Terminal HUD | `npm run relay:monitor`; press `o` to open HTML |
-| Operator desktops | `npm run relay:desktops` |
-| Build guest image | `npm run relay:desktops:build` |
-| Start host controller | `npm run relay:federation` |
-| Inspect registry categories | `npm run shards:doctor` |
-| Enroll or confirm an account | Open Relay Desktops, manually sign in inside its running workspace, then choose **Enroll shard** |
-| Preview exact legacy fixture quarantine | `node --env-file-if-exists=.env.local --import tsx scripts/quarantine-fixture-shards.ts` |
+| Everyday monitor access | **GALX Monitors → Open Premium / Open Standard**, or the separate apps |
+| Open a fixed monitor | `npm run relay:local -- open premium` / `npm run relay:local -- open standard` |
+| Start installed local services | `npm run relay:local -- up` |
+| Inspect installed services | `npm run relay:local -- status` |
+| Verify actual local isolation | `npm run relay:local -- verify` |
+| Read central account inventory | `npm run relay:accounts:status` |
+| Install native launchers | `npm run relay:monitors:install` |
+| Build service candidates | `npm run relay:services:build`; building does not install or activate them |
+| Register/renew/manage accounts | Use the fixed monitor and [manual procedure](RELAY_CREDENTIAL_ENROLLMENT.md) |
 
-The controller command reads configured authority; its canary namespace default does not make real credentials disposable. Do not start a second owner. CLI add/import and external provider ingestion are closed. Renew expired provider sessions manually inside the bound desktop; saved-file synchronization validates that login without renewing the provider session. Cleanup defaults to dry-run; review before explicit apply.
+[Service installation](../runbooks/relay-pool-services.md) owns secrets, reviewed image pins and explicit registration/execution gates. Current local operation needs no external SSH target. Gate changes and provider requests are deliberate mutations; `serve-local` is not a troubleshooting command. Rename/remove use expected revisions and retained central history. Account removal is permanent revocation, not file deletion.
+
+## Retained controller operations
+
+Only for the existing single-controller deployment and eligible unassigned accounts: `relay:open`, `relay:monitor`, `relay:desktops`, `relay:desktops:build` and `relay:federation`. See [legacy operations](legacy-federation-operations.md) and [legacy enrollment](legacy-desktop-enrollment.md). Do not start a second controller owner or use these commands for new pool registration. Assigned accounts are excluded from legacy writers/leases. The old **Check now** and saved-file bridge are not new-pool renewal controls.
+
+`shards:doctor` reads retained registry categories. Fixture quarantine defaults to dry-run and is scoped by its exact historical evidence; it is not account management. CLI add/import and external credential ingestion remain closed.
 
 ## Local validation
 
@@ -24,7 +31,9 @@ The controller command reads configured authority; its canary namespace default 
 npx tsc --noEmit
 python3 scripts/verify-docs.py
 node --import tsx scripts/test-docs.ts
-npm run test:relay:capabilities
+npm run test:relay:services
+npm run test:relay:access
+node --test scripts/test-relay-monitor-model.mjs
 npm run test:relay:desktop-login
 npm run build
 ```
@@ -38,6 +47,7 @@ Use [hardening checks](RELAY_HARDENING.md) for enrollment, public-response, stor
 | Static integrity audit | `npm run db:verify` |
 | Broad integration suite | `npm run db:test`; automatically creates and removes a disposable Docker database |
 | Local authority boundary | `npm run shards:test-authority` |
+| Central management/authorization tests | `npm run test:relay:authorization-db`; disposable database only |
 | Manual enrollment role/rollback tests | `npm run test:relay:manual-db`; disposable database only |
 | Target policy inventory | `node --env-file-if-exists=.env.local --import tsx scripts/apply-manual-desktop-enrollment.ts`; read-only without flags |
 | Vault rewrap preview | `npm run shards:rotate-vault -- --from v1 --to v2`; apply is a separate explicit option |

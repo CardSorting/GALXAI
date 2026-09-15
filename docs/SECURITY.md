@@ -2,50 +2,51 @@
 
 <!-- docs-scope: current-guide -->
 
-Private current guidance for the [federation contract](FEDERATION_STRATEGY.md) and [manual enrollment decision](adr/0152-manual-desktop-only-shard-authority.md). Vulnerability reporting remains in the [root security policy](../SECURITY.md). These controls are not compliance certification.
+Private current guidance for [central account authority and isolated pools](reference/relay-account-management.md). Vulnerability reporting remains in the [root security policy](../SECURITY.md). Controls and local acceptance are not compliance certification.
 
 ## Authority map
 
 | Boundary | Required authority |
 | --- | --- |
-| User to application | Verified account/session, resource ownership and the operation's access rules |
-| Application to controller | Configured inference credential and trusted tenant mapping |
-| Operator to read-only monitor | Host-issued monitor browser session |
-| Operator to Relay Desktops | Separate host-issued desktop session and exact local origin for mutations |
-| Desktop to new registry authority | Explicit Enroll shard on a persisted running workspace with a validated saved login |
-| Desktop to replacement credential | Matching durable desktop binding, account and current encrypted revision |
-| Controller to worker | Scoped private inference/admin transport and one assigned eligible credential |
-| Registry to admission | Confirmed desktop provenance plus current permissions, expiry, leases and quota |
-| Agent to tools | Consuming runtime's explicit execution controls |
+| Customer to application | Verified session, owned resource and operation-specific access |
+| Application to runtime | Distinct destination inference key plus server-derived tenant identity |
+| Operator/viewer to monitor | Own-pool host-issued session, centrally authorized role |
+| Monitor to registrar | Narrow pool/installation principal and short-lived purpose ticket |
+| Registrar to account authority | Validated saved desktop login, identity/class, revision and exclusive binding |
+| Runtime to central | Own installation runtime principal and epoch; assigned accounts/grants only |
+| Runtime to execution database | Own restricted project login; identity/reservations/outcomes only |
+| Monitor to desktops | Own VM's daemon and centrally scoped saved registration |
 
-Ordinary authentication, preview approval, task IDs, prompts, model output and caller-provided tenant hints do not grant administrator authority. Job ownership remains enforced independently.
+Ordinary authentication, preview approval, task IDs, model output and tenant hints do not grant administration. Viewer access is a separately authorized operational role, not every signed-in GALX user.
 
 ## Enrollment and credential custody
 
-Manually create the workspace, complete provider sign-in inside it and choose **Enroll shard**. API/CLI/file ingestion and ambient host discovery are closed. Retired application provider routes return a fixed uncached 410 before processing credentials or starting authentication. The exact endpoint list is in [the connection boundary](STANDARDIZED_OAUTH_AND_INGESTION_ARCHITECTURE.md).
+All canonical accounts, encrypted credentials, assignments, lifecycle history and account leases live in `mazhcjisettrzbqhorvp`. Manual sign-in happens in the owning pool's desktop, followed by Review access and Register account. It saves paused; enabling is separate. Premium requires paid provider class and Standard free class. A GALX customer subscription does not prove provider classification or model access.
 
-The database requires paired enrollment fields and a unique desktop binding. Protected-field triggers and the private no-login writer role restrict credential, owner and binding changes. The service role has no shard insert or private enrollment/refresh authority. General repository saves update allowlisted policy metadata. Both controller projection and durable leases exclude unconfirmed legacy records. Existing records, revocations, counters and history are retained.
+Only central holds the main database/vault configuration. Pool runtimes receive own execution credentials and narrow assigned execution material; neither execution database stores an account registry or second capacity balance. The monitor's registrar channel does not grant broad table access. Application/service/ordinary roles cannot directly write credentials, assignments or immutable management journals. Private functions use fixed search paths and check caller scope; database owners remain trusted.
 
-The host validates saved guest files, account identity, expiry and inventory before writing. Enrollment cannot revive revoked/dead/quarantined rows, choose an ambiguous account or steal another desktop's binding. Local links do not change database ownership. A database owner remains trusted and can alter schema/roles; these controls do not claim to contain a malicious owner.
+External provider API/CLI/file ingestion and ambient host discovery remain closed. Legacy enrollment/refresh/leases reject centrally assigned accounts. Retained unassigned legacy records require their own explicit manual confirmation. Do not copy browser homes, tokens or controller environment across pools.
 
 ## Renewal, retention and isolation
 
-Expired provider sessions require manual sign-in in the owning desktop. Automatic saved-file sync validates and transfers a login already present there; it never renews the provider session. Its durable intent and revision-conditional write recover across failures without overwriting newer authority. Database mutation and local checkpoint are separate commits. A failed checkpoint cannot report success.
+Pool credential renewal is manual sign-in in the same bound desktop followed by an explicit central save/review. The legacy controller's automatic saved-file bridge is separately scoped and never renews provider sessions. Neither a name change nor local link change transfers account ownership.
 
-Each worker is an isolated non-root container with a read-only root, reduced capabilities, bounded resources and a private checkpoint volume. It receives one assigned provider credential, no database/vault root, host home, repository or Docker socket. The host controller holds registry decryption and Docker authority; this trusted host boundary differs from worker isolation and does not supply multi-host consensus.
+Each pool has its own Linux VM, daemon, runtime/monitor state and persistent peer-denial rules. The central service has no daemon socket; runtime containers have no daemon socket or main registry/vault authority. Each monitor has powerful access to its own daemon for desktops. Each runtime hosts its own account engines in-process; it does not create isolated per-account Docker workers. Per-account engine separation must not be described as hardware isolation.
 
-Each desktop has its own guest home, profile and network. Safe reads reject inappropriate paths, ownership and files; keyrings are not exported. Homes, backups and worker checkpoints are sensitive. Keep the bound home for manual repair; deletion does not release or transfer the database binding. Container settings do not establish hardware isolation or a network egress firewall.
+The two VMs share one trusted Mac administrator and physical host. No Mac directory mounts or peer credentials are supplied. Guest homes/checkpoints may contain sensitive data and must be retained privately. Local VM/daemon isolation does not certify resilience to a malicious Mac owner.
 
 ## Requests, visibility and recovery
 
-Operator diagnostics remain behind server administrator or purpose-specific local session checks. Desktop sessions, monitor sessions and inference credentials are distinct. Ticket fragments are removed after exchange, and provider/admin credentials do not enter browser storage. Cross-origin and nonlocal requests are rejected.
+Management commands require an operator, exact fields, same origin, expected revision and immutable operation identity. Exact replay is scoped to original actor/destination/record/body. Rename preserves identity. Removal revokes registered accounts permanently and invalidates pending tickets; only unfinished registrations can be restored with fresh review. Forced RLS, grants and immutable history guard direct database access.
 
-Public responses use explicit field allowlists and re-encoded image artifacts. Keep topology, credential sources, internal identifiers and execution diagnostics out of public bodies, headers, streams, metadata and browser assets. Errors must not expose upstream payloads. Preserve tenant-bound operation identity after uncertain acknowledgement; a retry is not automatically safe.
+Central removal commits before desktop disconnection/stop. Failed stop remains an explicit cleanup task; it never restores account permission. Removed records reject new direct desktop actions and display connections, while Stop remains allowed. Removal retains operational history and credentials; it is neither data erasure nor remote provider session invalidation.
 
-Holds stop new work and replacement starts while allowing accepted work to finish. Revocation, expiry, removal and changed authority still control eligibility. Repair by restoring verified authority in the owning desktop, never by clearing rejection/quota, reviving records or reopening ingress. Vault rewrap is a separate [private administrator procedure](maintainers/MULTI_TENANT_SHARD_AND_KEY_ROTATION.md).
+New work requires a destination-bound central lease; renewal and independent expiry limit old authorization. Central outage denies new grants and renewal. Pause stops old engine authorization and differs from a legacy maintenance hold. No cross-pool or legacy fallback occurs; uncertain execution never redispatches automatically. Preserve original epoch, tenant and receipt context.
+
+Operational assets and diagnostics require server administrator/purpose-specific session authority. Public bodies, headers, errors, streams and images use explicit allowlists and re-encoding. Never publish topology, credential sources, raw provider data or private audit objects. Local launcher links contain no long-lived key; tickets are removed after exchange.
 
 ## Verification and limitations
 
-Use [hardening](maintainers/RELAY_HARDENING.md) for anonymous, ordinary-key, monitor-session, origin, malformed-body, race, wrong-desktop, rollback and public-artifact tests. Mutating integration uses guarded disposable databases with synthetic credentials. Production builds and raw HTTP/browser-asset checks are separate from real provider login and generation acceptance.
+Use [hardening](maintainers/RELAY_HARDENING.md) for roles, peer denial, exact fields, stale revisions, removed tickets, races, rollback, image sanitation and session tests. Mutation suites use disposable databases and synthetic credentials. Local acceptance verifies installed boundaries separately from source tests and production builds.
 
-[Current state](../post-mortem/CURRENT_STATE.md) links the deployed closure evidence and open acceptance work. A running desktop, successful inventory, historical image result or Ready application does not prove the requested capability is currently usable.
+[Current state](../post-mortem/CURRENT_STATE.md) retains actual release/acceptance and outstanding manual sign-ins, execution activation and provider qualification. Legacy controller security/recovery remains in [its scoped guide](maintainers/legacy-federation-operations.md). Never infer current capability from an old successful image or a live desktop.

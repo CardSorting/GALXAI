@@ -1,0 +1,57 @@
+{
+  "recordedAt": "2026-09-15T20:04:03.594290+00:00",
+  "kind": "documentation-reconciliation",
+  "target": "private repository documentation; no production mutation",
+  "review": "docs/knowledge/audits/2026-09-15-relay-strategy-documentation-review.json",
+  "canonicalReference": "docs/reference/relay-account-management.md",
+  "counts": {
+    "changedOrAddedMarkdown": 92,
+    "authoredCurrentOrScopedDocuments": 88,
+    "preservedNewHistoricalArchives": 2,
+    "generatedNavigation": 2
+  },
+  "checks": [
+    {
+      "command": "python3 scripts/verify-docs.py",
+      "result": "passed: 353 guides, 33 incident documents, 153 ADRs; scope, coverage, local targets and current-guide anchors at first reconciliation check"
+    },
+    {
+      "command": "npm run docs:impact",
+      "result": "reviewed all mapped domains and unmapped paths; prior implementation, dated research/proofs, surface briefs and generated evidence classified separately"
+    },
+    {
+      "command": "npm run test:docs",
+      "result": "passed: 38 tests (21 incident guard, 17 knowledge guard)"
+    },
+    {
+      "command": "node --import tsx --test scripts/test-public-information-boundary.ts scripts/test-image-public-http.ts scripts/test-relay-client-auth.ts",
+      "result": "passed: 19 adversarial HTTP/response/artifact, ordinary-admin denial and relay credential-boundary tests"
+    },
+    {
+      "command": "npm run build",
+      "result": "passed: TypeScript and 285 generated static pages; existing configured lint skip and edge/static warning"
+    },
+    {
+      "command": "npm run docs:check:build",
+      "result": "669 rendered/browser assets scanned with no selected private-marker/runtime-trace findings; initial overall command awaited semantic-review fingerprints"
+    },
+    {
+      "command": "git diff --check",
+      "result": "passed at reconciliation checkpoint"
+    }
+  ],
+  "limits": [
+    "No migrations, remote deployment, image installation, credential mutation, account registration or activation performed.",
+    "No real provider generation or live site acceptance performed. Fresh build scan is local and selected-marker based.",
+    "Unrelated subsystem reviews remain their prior bounded attestations; research/decision/incident evidence is preserved rather than converted into current instructions.",
+    "Existing overdue incident actions ACT-001, ACT-015 and ACT-016 remain open; documentation review does not complete operational prevention.",
+    "Final docs sync/check/audit and review fingerprints are recorded after this evidence is fixed; generated views do not imply semantic approval."
+  ],
+  "deployment": "unchanged; latest central/monitor runtime evidence remains 2026-09-15-relay-account-management.json",
+  "remainingAcceptance": [
+    "manual paid/free sign-ins",
+    "local execution activation",
+    "provider qualification",
+    "public application cutover"
+  ]
+}

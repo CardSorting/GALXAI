@@ -14,7 +14,7 @@ Identify the authorized target, component, migration dependencies and known-good
 
 1. Run `npm run docs:impact` and inspect the affected guides and outstanding [prevention actions](../../post-mortem/OPEN_ITEMS.md). Establish acceptance criteria before changing the target.
 2. Complete applicable source, authorization, adversarial response and isolated database checks. Run the production build and private asset check when application/public behavior changes. Resolve stale source reviews; run `npm run docs:sync` and `npm run docs:check`.
-3. Inspect the component's deployment guide for sequencing. Application, gateway, controller/worker and database state are distinct. Apply only the migrations/configuration and deployment already authorized for the change.
+3. Inspect the component's deployment guide for sequencing. Application, gateway, central authority, isolated runtime/monitor, retained controller/worker and database state are distinct. Apply only the migrations/configuration and deployment already authorized for the change.
 4. Record each actual target/revision and deployment result. Exercise the changed experience using the intended authorization level. For public information claims, inspect live rendered pages, assets, raw responses and relevant artifacts.
 5. Update dated current-state evidence with what passed and what was not exercised. Move decision delivery metadata only to the stage supported by evidence. Update incident recovery separately from prevention closure.
 

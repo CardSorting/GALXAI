@@ -1,0 +1,190 @@
+{
+  "observedAt": "2026-09-15T16:49:57.778854+00:00",
+  "scope": "working tree, applied databases, local Linux ARM64 images and synthetic interfaces; no production runtime/application cutover",
+  "accountAuthority": "mazhcjisettrzbqhorvp",
+  "databases": {
+    "central": {
+      "accounts": 56,
+      "assigned": 0,
+      "external_direct_reads": 0,
+      "forced_rls_tables": 10,
+      "installations": 2,
+      "manual": 0,
+      "migrations": 111,
+      "open_gates": 0,
+      "principals": 8,
+      "service_direct_read": false,
+      "service_execute": true
+    },
+    "premium": {
+      "account_tables": 0,
+      "executions": 0,
+      "forced_rls_tables": 2,
+      "migrations": 1,
+      "pool": "premium",
+      "project": "prgjcyokylzcsqrjmkaa",
+      "service_direct_read": false,
+      "service_execute": true
+    },
+    "standard": {
+      "account_tables": 0,
+      "executions": 0,
+      "forced_rls_tables": 2,
+      "migrations": 1,
+      "pool": "standard",
+      "project": "enbtzuxkguehtnrhuvlu",
+      "service_direct_read": false,
+      "service_execute": true
+    }
+  },
+  "images": {
+    "at": "2026-09-15T16:54:00.757Z",
+    "checks": 50,
+    "images": [
+      {
+        "tag": "galxai-relay-central:candidate-20260915",
+        "id": "sha256:ded139435453a59814b1a91a42cae89bf3ec819be3697fdff21bc4cd87f0f3f7",
+        "architecture": "arm64",
+        "component": "central"
+      },
+      {
+        "tag": "galxai-relay-premium:candidate-20260915",
+        "id": "sha256:22ef2426f2509fee7fc33d77d49abb8f02ed981b66b8766a3deed7892d3f6e68",
+        "architecture": "arm64",
+        "component": "runtime",
+        "pool": "premium"
+      },
+      {
+        "tag": "galxai-relay-standard:candidate-20260915",
+        "id": "sha256:a1cf2bd6bdee7aab3cd8b4baa281f3e8e9b401ef400c62000bbe026f48a4629a",
+        "architecture": "arm64",
+        "component": "runtime",
+        "pool": "standard"
+      },
+      {
+        "tag": "galxai-monitor-premium:candidate-20260915",
+        "id": "sha256:5640a32749e86208779d8cd671c2cf96f62ae48f17d7b1d1fb1b370bdfe4f2c1",
+        "architecture": "arm64",
+        "component": "monitor",
+        "pool": "premium"
+      },
+      {
+        "tag": "galxai-monitor-standard:candidate-20260915",
+        "id": "sha256:ed46c0b5aa1fc7e27ad5caf7dbb98443443d32b759d29f9bd61655fa0972b309",
+        "architecture": "arm64",
+        "component": "monitor",
+        "pool": "standard"
+      }
+    ],
+    "scope": "native image packaging, dependency load, unsafe environment and cross-pool rejection, Compose configuration; no serving or host acceptance"
+  },
+  "checks": {
+    "centralAuthorizationDatabase": 123,
+    "executionDatabase": 50,
+    "fullDatabaseRegression": 94,
+    "historicalManualEnrollment": 28,
+    "relaySitesAndPublicHttp": 56,
+    "staticDatabaseIntegrity": "passed, zero warnings",
+    "typescript": "passed after final service changes",
+    "productionBuild": "passed after final application changes; existing lint skip",
+    "monitor": {
+      "fixture": "synthetic only",
+      "checks": [
+        {
+          "pool": "premium",
+          "viewport": "desktop",
+          "width": 1440,
+          "height": 1100,
+          "overflow": false,
+          "axeViolations": 0
+        },
+        {
+          "pool": "premium",
+          "viewport": "mobile",
+          "width": 390,
+          "height": 844,
+          "overflow": false,
+          "axeViolations": 0
+        },
+        {
+          "pool": "standard",
+          "viewport": "desktop",
+          "width": 1440,
+          "height": 1100,
+          "overflow": false,
+          "axeViolations": 0
+        },
+        {
+          "pool": "standard",
+          "viewport": "mobile",
+          "width": 390,
+          "height": 844,
+          "overflow": false,
+          "axeViolations": 0
+        }
+      ]
+    },
+    "uiReviewer": "ship at four-fix scope; every scored fix resolved",
+    "securityAdvisors": {
+      "premium": "no issues",
+      "standard": "no issues",
+      "central": "existing auth_leaked_password_protection warning only"
+    },
+    "privateBuildMarkerScan": {
+      "assets": 677,
+      "markers": [
+        "prgjcyokylzcsqrjmkaa",
+        "enbtzuxkguehtnrhuvlu",
+        "galx_relay_lease_bindings",
+        "GALX_PREMIUM_RELAY_KEY",
+        "galx_control_service",
+        "pool-monitor"
+      ],
+      "matches": 0,
+      "scope": "local compiled browser JS/CSS and rendered HTML; no live deployment claim"
+    },
+    "documentationTests": 38
+  },
+  "corrections": [
+    "Container smoke found browser/server monitor module collision; server module renamed and actual images rechecked.",
+    "Historical manual rollback fixture pinned to its own migration boundary; current-schema tests additionally verify legacy unassigned compatibility and assigned denial.",
+    "Terminal execution writes retained across database outage; new admission blocks until reconciled.",
+    "Original configured receipt origin retained across application cutover; no replay or tenant-scope change for legacy reads."
+  ],
+  "remaining": [
+    "Separate Premium/Standard host targets and private central HTTPS origin not supplied.",
+    "Component secret export and actual host installation await real endpoint, CA files and verified desktop image digest.",
+    "Persistent firewall/route/reboot and distinct host/daemon acceptance not run on production hosts.",
+    "No manual provider sign-in, pool assignment or real text/Sites/image qualification.",
+    "No application deployment, new production service, registry publication or traffic activation.",
+    "Local Docker checks are ARM64 only; destination-platform acceptance required.",
+    "Specialized privacy profiles require separate supplier qualification; no automatic cross-pool fallback.",
+    "Existing image incident and unrelated overdue prevention reviews remain open."
+  ],
+  "sourceSha256": {
+    "Dockerfile.relay-services": "5f43109b060ff559724fc04d41ed16b06c5a1d3d1f97b5883a91e5a1ae7473fc",
+    "Dockerfile.relay-services.dockerignore": "b0812265bd47901059ac2c168e7444303cc319a42ef4ca9f6c3b8bcf8134cfce",
+    "deploy/relay-execution/supabase/migrations/20260915082628_relay_execution.sql": "fc61d7c30bdd57706ffb4212788741302760722e7285c25c9b4cb93d629b137e",
+    "src/core/router/GalxModelRouter.ts": "2ce191f8c8303678ca690f69c2a20e5e34d18fc1eced99d12ef7268aa9a9933e",
+    "src/core/router/adapters/IsolatedRelayTransport.ts": "7094aee0faf3bfe7fb76ab9ca01d4cfbdcb4fcda065c392c1abf8394c0f7a675",
+    "src/core/router/adapters/RelayChatTransport.ts": "bc2796f5e93b5d446a4c9430680d9a129d24ab0901fdfab8038d50b40dcee891",
+    "src/relay/pool-central.ts": "a02fac7580da86d619375c3f17a7a39cea28ad038124f344d1572bd62937f2d1",
+    "src/relay/pool-desktop.html": "9dd9879c608cdec5fd5f3a032134d8dd52930198518c418472ade623d6da4023",
+    "src/relay/pool-desktop.js": "efd051a57bf75388f8fa584bd63a72556678ce2bde4628cfae9eacba608bf94a",
+    "src/relay/pool-entry.ts": "2f12d1c25c4442c494d6195b8fcf4e850fa59b629cce13466f1eca3dc3f88330",
+    "src/relay/pool-execution.ts": "b3b944c0de45a8bfb08b4fdc052dc091c4aadf4a08a33ee823897c95280496a5",
+    "src/relay/pool-image-policy.ts": "1be67ff36e2dfcd103d16d7007443e399f761824e3c336b11d86fc234ecbf749",
+    "src/relay/pool-monitor-login.html": "b98bfdee9af3cb5ac6341997893b91de3ed4c3343f15d866f447a5a43262de22",
+    "src/relay/pool-monitor-login.js": "dfb5708f953a8697f4d59fc2fbe7c70026943e34a82b94da88df2e566c00028c",
+    "src/relay/pool-monitor-server.ts": "d04ea861ece69d6a9cfb2a39b92493e360465b34dccd43dd979c6b07b8a8c807",
+    "src/relay/pool-monitor.css": "91ef97ff877b9b674893a0db2604ee2dec73fa451c13a309dc13d4aecacd77bc",
+    "src/relay/pool-monitor.html": "9112fdd427060c918eb342371aed2b1a4248d199137ecc2c031d29f3aad623da",
+    "src/relay/pool-monitor.js": "8563c6d571d9845a9859d0547e035dc733af9fae383e106fd88dbd4203c55563",
+    "src/relay/pool-protocol.ts": "e03e5cb6d45a1e094ee4878db4d902cd22692750008d5245b49c6932fcaa248c",
+    "src/relay/pool-public-response.ts": "3e16cec346748926c653c7bfa16e54a9d75a1902abaf39256ee9dd4c20e8e748",
+    "src/relay/pool-runtime.ts": "4f876c9755362517023870b70cd29a1b1d195e9f698306e02129e07777b7b1b5",
+    "src/relay/relay-server.ts": "b01ee27636ae567cc8935307d4651d3219091cc1e163d7a711b9e2a3fedf0c6b",
+    "supabase/migrations/20260915081527_central_relay_authorization.sql": "c235192fbae0cc81f3ec39d46c64beae6f22ae1fce4fb87318b56aa76cd68407",
+    "supabase/migrations/20260915163434_relay_legacy_assignment_guard.sql": "f2ef4c60fa18911f3bd086f232c6c3fe1f56d0de56a60d9a3e52eeb48a445907"
+  }
+}

@@ -1,19 +1,18 @@
-# Application queues and relay jobs
+# Application queues and relay execution
 
 <!-- docs-scope: current-guide -->
-> **Reading scope:** Current guidance. The federation contract governs relay behavior; source and dated verification define implementation evidence. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
 
-The federation has no global waiting queue that lends unrelated model capacity. Admission is specific to the requested capability pool. See the [routing contract](FEDERATION_STRATEGY.md#eligibility-before-load).
+Private contract. Queue, account admission, customer usage and execution recovery are separate systems. [Routing](ROUTING_ALGORITHMS.md) fixes the selected pool before account admission; idle peer capacity cannot satisfy an unavailable request.
 
 ## Accepted relay work
 
-A chat `202` returns signed job identity, status, and stream URLs. Keep those URLs and attach to the original worker generation. Existing worker jobs retain model identity. Capability removal prevents new work but does not cancel accepted jobs.
+An isolated runtime persists a scoped execution reservation, acquires the existing central account lease and binds it locally before provider I/O. Central grants expire unless renewed. Unconfirmed terminal writes stop new local admission while original writes/settlements retry. Restarted incomplete executions become unknown and are never redispatched. An execution record is not a transferable queue item or a promise of artifact retrieval after engine/epoch loss.
 
-Parent agents assign one key per logical operation and preserve the same payload when recovering acknowledgement. Children have independent operation keys and bounded concurrency; task IDs are correlation only. An unknown acknowledgement must not become another queued synthesis attempt.
+The new runtimes host in-process account engines and select among their own reported eligible models. They have no global queue, cross-pool discovery or fallback. Text remains in the selected deployment pool; Sites and images use Premium. Standard rejects unsupported workloads before provider I/O. Exact status/replay behavior is in [request recovery](RELAY_API_REFERENCE.md#request-recovery).
 
-Admission receipts provide bounded acknowledgement recovery through a private identity tombstone journal. A controller restart converts pending entries to unknown and never permits replay; completed response bodies remain process-local and may be unavailable after replacement. Separately, opted-in Sites text jobs persist completion receipts on the original worker volume. Their signed receipt references can reach a replacement worker on that retained volume, while stream/status/cancel URLs retain generation binding. This does not create a distributed queue or permit another execution after uncertainty. See [ADR 0135](adr/0135-durable-sites-receipts-and-local-admission.md) and the [recovery table](RELAY_API_REFERENCE.md#request-recovery).
+The retained federation has separate signed job URLs, generation-bound status/stream/cancel and opted-in durable text receipts on original worker volumes. Its identity tombstones and retained-volume receipt exception do not apply to isolated runtime recovery. Use [legacy API recovery](reference/legacy-federation-api.md#request-recovery) only for operations accepted under that contract.
 
-Current Sites admission follows Pro inclusion or the limited free workspace allowance and shared fair usage. The standalone content API stays Pro-only. Historical fixed/metered receipts retain their original contract and reconciliation; wallet reservation is not the requirement for every new Sites operation. Account admission is independent of federation execution capacity. Queue time is included in the worker's local wall-time bound. See [Sites operations](maintainers/SITES_OPERATIONS.md).
+Current Sites admission follows its customer plan/free allowance and shared fair usage independently of provider-account pool. Historical wallet receipts keep their original settlement rules. See [Sites operations](maintainers/SITES_OPERATIONS.md).
 
 ## Application image requests
 
@@ -31,6 +30,6 @@ The image studio retains up to four accepted requests per tab, with one bounded 
 
 ## Throughput isolation
 
-Status polling has per-worker limits, a bounded concurrent batch, fair rotation, and per-job backoff. Worker control/status requests use a separate rate bucket from inference admission. Reservations are generation-scoped, so stale jobs do not consume replacement-worker capacity.
+The owning runtime's central grants and existing lease/concurrency limits govern new execution. Durable execution records do not introduce another account budget. Monitor polling is observation, not a work queue or liveness grant. The retained federation's bounded status batches, generation reservations and separate control buckets remain scoped to that deployment.
 
-Application task tables, SDK queues, edge coordinators, and billing leases are separate systems. Their scheduling, persistence, retries, cancellation, and settlement guarantees do not transfer to relay jobs. Any future federation queue must retain model tags, tenant identity, deadline, bounded storage, and original execution authority; it must not silently substitute models.
+Application task tables, SDK queues, edge coordinators and billing leases keep their own scheduling, persistence, retries and cancellation contracts. None authorizes replay or model substitution after uncertain execution. Preserve owner, deadline, operation identity and original execution authority in any future queue change.

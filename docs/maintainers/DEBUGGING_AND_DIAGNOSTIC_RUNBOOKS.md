@@ -6,9 +6,13 @@ Private incident entry point. Follow [triage](../../post-mortem/runbooks/triage.
 
 | Symptom | Diagnostic boundary | Procedure |
 | --- | --- | --- |
+| Pool monitor inaccessible or identity check fails | Fixed launcher, owning VM/daemon, TLS and peer firewall | [Service installation](../runbooks/relay-pool-services.md) |
+| Account needs attention or saved change unconfirmed | Health reason, current sign-in, gate, applied revision and epoch | [Account management](../reference/relay-account-management.md) |
+| Rename/remove response conflicts or is lost | Central expected revision and same-intent operation identity | [Management recovery](../reference/relay-account-management.md) |
+| Removed desktop still running | Central removal is retained; stop cleanup independently | [Monitor operations](RELAY_DESKTOPS.md) |
 | Images/Favorites say session expired | Verified Auth rejection vs transport/configuration failure | [Identity failures](../../post-mortem/failure-modes/identity.md) |
 | Accepted image disappears or fails | Durable receipt, claim, storage and serving generation path | [Image recovery](../../post-mortem/runbooks/image-generation.md) |
-| Controller will not start | Supervisor, exact process identity, listener and kernel-held namespace guard | [Controller ownership](../../post-mortem/runbooks/controller-lock.md) |
+| Retained controller will not start | Supervisor, exact process identity, listener and kernel-held namespace guard | [Controller ownership](../../post-mortem/runbooks/controller-lock.md) |
 | Deployment storage exhausted | Complete deployment inventory, aliases and accounting window | [Storage containment](../../post-mortem/runbooks/deployment-storage.md) |
 | Database saturation | Owning pool, bounded concurrency, query/error classification | [Database operations](POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md), [egress evidence](../../post-mortem/incidents/2026/2026-09-09-egress/README.md) |
 | Credential/capability unavailable | Current authority revision and fresh attributable evidence | [Enrollment](RELAY_CREDENTIAL_ENROLLMENT.md), [fleet](RELAY_QUOTA_AND_FLEET.md) |

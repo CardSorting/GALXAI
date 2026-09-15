@@ -1,29 +1,27 @@
-# Federation fleet and quota
+# Isolated account capacity and quota
 
 <!-- docs-scope: current-guide -->
 
-Private fleet operations under [the contract](../FEDERATION_STRATEGY.md) and [manual desktop authority](../adr/0152-manual-desktop-only-shard-authority.md).
+Private fleet operations for [central management](../reference/relay-account-management.md) and [fixed-pool execution](../FEDERATION_STRATEGY.md). The main account lease/budget ledger remains the sole account-capacity authority.
 
 ## Count the right state
 
-Count retained registry records, manually confirmed accounts, desired eligible shards, running workers and repair desktops separately. An unexpired legacy record remains unavailable until explicit desktop confirmation. A running desktop is not inference capacity. A worker serves only its fresh eligible capabilities; unrelated idle models cannot relieve an exhausted pool.
+Count retained accounts, active registrations, registered assignments, enabled accounts, confirmed engines and sign-in desktops separately. Removed records retain history but leave active counts. A running desktop is not execution capacity; a stopped registered-account desktop is not an account failure. Intended model catalogs do not prove account access.
 
 ## Add or restore capacity
 
-Manually create a Relay Desktop, complete provider sign-in and choose **Enroll shard**. Confirm an eligible existing account from its matching desktop through the same action. The database binding and enrollment timestamp are required before controller and lease admission. External APIs, CLI imports and credential files cannot add managed capacity.
+Open the correct native monitor, create a named registration, manually sign in, Review access and Register account. Premium requires paid provider accounts, Standard free accounts. Registration saves paused. Execution activation and Enable are separate; wait for matching confirmation and qualify workloads. No account can be moved/borrowed between pools.
 
-Worker reconciliation remains automatic after enrollment. Cold inventory preflight precedes allocation. Revision-specific 401 rejection prevents repeated starts; transient inventory failures back off. An empty capability result retains the worker for rediscovery, but grants no requested-model eligibility.
-
-Provider expiry requires manual sign-in in the bound desktop. Enabled saved-file sync or **Check now** validates and persists the replacement login. Neither sync nor worker restart renews provider sessions. Keep the owning desktop home available for repair.
+Expired sign-in requires manual repair in its bound desktop and explicit central save. Restore applies only to removed unfinished registrations and needs new review. Removing a registered account permanently revokes access; it is not a reversible pause. External ingestion, copied profiles and legacy refresh cannot create assigned capacity.
 
 ## Holds and quota
 
-Manual holds block admissions and replacement starts while preserving an existing worker for inspection. Revocation, removal, expiry or changed authority still retires the old credential. After a verified refresh, review the hold before explicitly permitting replacement. Resume does not clear quota, rejection or health state.
+New pool Pause saves a new central revision and invalidates old authorization; the runtime stops the old engine. Legacy maintenance holds instead preserve an existing Docker worker while blocking admissions/replacement and apply only to the retained controller. Do not substitute one semantic for the other.
 
-Provider cooldowns, local concurrency, model evidence and database lease limits are distinct controls. Inspect active work and receipts before changing policy. Never clear counters, manually mark healthy or reopen ingestion to manufacture capacity. Enrollment preserves an existing account's owner, limits, counters, holds and history.
+Provider cooldowns, local engine limits, central account leases and product entitlement/fair usage are different controls. Each execution database records identity/outcomes without a second account budget. Standard's idle capacity cannot satisfy Premium work, including during outage. Never clear counters or assert healthy status to bypass a denial.
 
-Sites retains its [shared paid-plan policy](SITES_FAIR_USAGE.md). Its daily baseline transitions to continuation, and local outstanding/rolling-attempt limits are not inferred supplier quota. Preserve unresolved receipts and reservations; enrollment, deployment and billing renewal do not erase unknown work.
+Sites retains its configured [product fair-usage policy](SITES_FAIR_USAGE.md), separate from provider paid/free class. Preserve uncertain receipts and leases; enrollment, image replacement or billing renewal does not erase accepted work. No automatic image probe runs in isolated mode.
 
 ## Verification
 
-Use [the monitor](../TELEMETRY_AND_OBSERVABILITY.md), [enrollment procedure](RELAY_CREDENTIAL_ENROLLMENT.md) and [current state](../../post-mortem/CURRENT_STATE.md). Historical cleanup counts are observations, not fleet targets. Confirm saved authority, worker application, requested capability and completed inference separately. The September 15 policy rollout did not perform a new manual provider enrollment or restore image generation.
+Use [health interpretation](../TELEMETRY_AND_OBSERVABILITY.md), [registration](RELAY_CREDENTIAL_ENROLLMENT.md), `relay:local -- verify` and [current state](../../post-mortem/CURRENT_STATE.md). Local boundary checks do not generate content or prove supplier balance. The latest recorded setup had both pools empty with execution closed; manual sign-in and workload acceptance remain separate.

@@ -55,6 +55,7 @@ export function createRegistryApiPageReader(guard: RegistryEgressGuard, options:
       target.searchParams.set('order', 'id.asc');
       target.searchParams.set('offset', String(offset));
       target.searchParams.set('limit', '64');
+      target.searchParams.set('relay_pool_id', 'is.null');
       if (userId !== undefined) target.searchParams.set('user_id', `eq.${userId}`);
       if (ids) target.searchParams.set('id', `in.(${ids.map(id => JSON.stringify(id)).join(',')})`);
       const response = await (options.fetch ?? fetch)(target, {

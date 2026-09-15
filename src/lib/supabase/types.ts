@@ -13,6 +13,11 @@ export type Json =
 
 export type GalxProviderType = 'openai';
 export type GalxAuthType = 'api_key' | 'oauth';
+export type GalxRelayPoolId = 'premium' | 'standard';
+// Private relay protocol DTOs; no browser Data API grants or public-schema table additions.
+export type RelayRegistrationManagementCommand = 'rename' | 'remove' | 'restore';
+export type RelayAccountManagementCommand = 'enabled' | 'paused' | 'revoked' | 'rename' | 'remove';
+export interface RelayManagementResult { id: string; desktopId: string; savedRevision: number; replayed: boolean; registrationId?: string; accountId?: string; removedAt?: string | null; }
 export type GalxShardMode = 'pooled' | 'private';
 export type GalxCredentialStatus =
   | 'healthy'
@@ -53,6 +58,47 @@ export type GalxIdempotencyState = 'IN_FLIGHT' | 'COMMITTED' | 'FAILED';
 export interface Database {
   private: {
     Tables: {
+      galx_relay_principals: {
+        Row: { id: string; actor_id: string; pool_id: GalxRelayPoolId; installation_id: string; kind: 'runtime' | 'registrar' | 'operator' | 'viewer'; token_sha256: string; disabled: boolean; created_at: string };
+        Insert: never; Update: never; Relationships: [];
+      };
+      galx_relay_installation_runtime: {
+        Row: { installation_id: string; registration_allowed: boolean; execution_allowed: boolean; owner_epoch: string | null; owner_generation: number; last_seen_at: string | null; isolation_evidence_sha256: string | null };
+        Insert: never; Update: never; Relationships: [];
+      };
+      galx_relay_registrations: {
+        Row: { id: string; pool_id: GalxRelayPoolId; installation_id: string; desktop_id: string; actor_id: string; name: string; state: 'prepared' | 'reviewed' | 'registered'; fingerprint: string | null; account_class: 'paid' | 'free' | null; models: Json; reviewed_at: string | null; ticket_sha256: string | null; ticket_purpose: 'review' | 'register' | 'refresh' | null; ticket_expires_at: string | null; account_id: string | null; created_at: string; updated_at: string };
+        Insert: never; Update: never; Relationships: [];
+      };
+      galx_relay_account_control: {
+        Row: { account_id: string; account_class: 'paid' | 'free'; desired_state: 'enabled' | 'paused' | 'revoked'; desired_revision: number; acknowledged_revision: number | null; acknowledged_epoch: string | null; acknowledged_at: string | null; credential_revision: string; models: Json; updated_at: string };
+        Insert: never; Update: never; Relationships: [];
+      };
+      galx_relay_control_operations: {
+        Row: { id: string; actor_id: string; pool_id: GalxRelayPoolId; installation_id: string; account_id: string; command: 'enabled' | 'paused' | 'revoked' | 'rename'; request_sha256: string; saved_revision: number; created_at: string };
+        Insert: never; Update: never; Relationships: [];
+      };
+      galx_relay_lease_bindings: {
+        Row: { lease_id: string; pool_id: GalxRelayPoolId; installation_id: string; account_id: string; owner_epoch: string; assignment_revision: number; control_revision: number; credential_revision: string; workload: 'text' | 'sites' | 'images'; request_key: string; request_sha256: string; tenant_sha256: string; deadline_at: string; created_at: string };
+        Insert: never; Update: never; Relationships: [];
+      };
+      galx_relay_pools: {
+        Row: { id: GalxRelayPoolId; account_class: 'paid' | 'free'; workloads: string[]; registration_enabled: boolean; created_at: string };
+        Insert: never; Update: never; Relationships: [];
+      };
+      galx_relay_installations: {
+        Row: { id: string; pool_id: GalxRelayPoolId; host_id: string; generation: number; state: 'reserved' | 'retired'; created_at: string };
+        Insert: never; Update: never; Relationships: [];
+      };
+      galx_relay_account_assignments: {
+        Row: { account_id: string; pool_id: GalxRelayPoolId; installation_id: string; managed_desktop_id: string; registration_operation_id: string; assignment_revision: number; created_at: string };
+        Insert: never; Update: never; Relationships: [];
+      };
+      galx_relay_registration_operations: {
+        Row: { id: string; account_id: string; pool_id: GalxRelayPoolId; installation_id: string; actor_id: string; request_sha256: string; outcome: 'registered'; created_at: string };
+        Insert: never; Update: never; Relationships: [];
+      };
+
       galx_free_generation_policy: {
         Row: { kind:'site'|'image';enabled:boolean;revision:number;valid_until:string|null;max_outstanding:number;max_hour_units:number;max_day_units:number;max_total_units:number;admitted_units:number;updated_at:string };
         Insert: {kind:'site'|'image'};Update: {enabled?:boolean;revision?:number;valid_until?:string;max_outstanding?:number;max_hour_units?:number;max_day_units?:number;max_total_units?:number;updated_at?:string};Relationships: [];
@@ -169,6 +215,7 @@ export interface Database {
     };
     Views: { [_ in never]: never };
     Functions: {
+      guard_relay_foundation: { Args: Record<string, never>; Returns: unknown };
       enroll_desktop_shard: { Args: { p_desktop_id: string; p_row: Json; p_expected?: Json }; Returns: string };
       refresh_desktop_shard: { Args: { p_desktop_id: string; p_id: string; p_expected: Json; p_next: Json }; Returns: boolean };
     };
@@ -509,6 +556,7 @@ export interface Database {
       };
       galx_shard_accounts: {
         Row: {
+          relay_pool_id: GalxRelayPoolId | null;
           id: string;
           workspace_id: string | null;
           user_id: string;
@@ -562,6 +610,7 @@ export interface Database {
           updated_at: string;
         };
         Insert: {
+          relay_pool_id?: never;
           id: string;
           workspace_id?: string | null;
           user_id: string;
@@ -614,6 +663,7 @@ export interface Database {
           updated_at?: string;
         };
         Update: {
+          relay_pool_id?: never;
           id?: string;
           workspace_id?: string | null;
           user_id?: string;

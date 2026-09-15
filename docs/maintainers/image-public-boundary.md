@@ -27,9 +27,9 @@ Free sync/async creation passes the aggregate admission gate in [quota operation
 
 ## Capability availability
 
-`GET /api/images/availability` requires a verified active account and returns only `status: available | unavailable | unknown` with private, no-store headers. The server reads the configured controller using its existing inference credential, accepts at most 1 KiB, refuses redirects and times out after five seconds. No upstream objects, diagnostics, model inventory or headers reach the browser. A missing/older endpoint or failed read is unknown, never proof of readiness. The exact route is exempt from developer approval, not account verification.
+`GET /api/images/availability` requires a verified active account and returns only `status: available | unavailable | unknown` with private, no-store headers. The server reads the configured controller using its inference credential (only Premium when explicit isolated mode is enabled), accepts at most 1 KiB, refuses redirects and times out after five seconds. No upstream objects, diagnostics, model inventory or headers reach the browser. A missing/older endpoint or failed read is unknown, never proof of readiness. The exact route is exempt from developer approval, not account verification.
 
-The controller’s authenticated `GET /v1/images/availability?model=...` projects one boolean from fresh image capability. It performs no paid probe, reservation, generation or quota mutation. Availability is advisory; authoritative admission still runs for every generation.
+The controller’s authenticated `GET /v1/images/availability?model=...` projects one boolean from fresh image capability. It performs no paid probe, reservation, generation or quota mutation. Availability is advisory; authoritative admission still runs for every generation. The isolated Premium runtime reads its own in-process account engines’ observed image capability without probing the provider; Standard reports unavailable without consulting any worker. See [isolated service operations](../runbooks/relay-pool-services.md) for configuration and separate first-image qualification.
 
 ## Free generation admission
 

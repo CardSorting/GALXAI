@@ -1,92 +1,61 @@
-# 📖 Maintainer Glossary & Architectural Lexicon
+# Maintainer glossary
 
 <!-- docs-scope: domain-reference -->
-> **Reading scope:** Subsystem reference retained for its own domain; not re-certified by the federation documentation refactor. Older routing, deployment, compatibility, or performance descriptions do not override the current relay contract. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
 
-> **Target Audience**: New Maintainers, Subsystem Engineers, and Systems Reviewers.  
-> **Purpose**: Definitive definitions of all proprietary terms, mathematical algorithms, security primitives, and mental models in GALXAI.
+Private terminology reference. Definitions point to owning contracts; they do not promise performance, provider identity or compliance. [Architecture](../ARCHITECTURE.md) and [account management](../reference/relay-account-management.md) own current relay behavior.
 
----
+## Accounts and execution
 
-## 🥦 1. Representation & Compaction Lexicon
+| Term | Meaning |
+| --- | --- |
+| Central account authority | Main project `mazhcjisettrzbqhorvp` and its private service; canonical credentials, assignment, lifecycle and existing account lease ledger |
+| Premium pool | Exclusive paid provider accounts; text, Sites and images |
+| Standard pool | Exclusive free provider accounts; text only; unsupported workloads rejected before provider I/O |
+| Customer plan | GALX product access/usage policy, independent of provider paid/free account class |
+| Registration | Centrally saved manual setup/review flow bound to one pool, installation and desktop; not an enabled account |
+| Assignment | Exclusive immutable central ownership relation; no account transfer or peer borrowing |
+| Runtime engine | In-process execution engine for an eligible account inside its fixed pool runtime container |
+| Legacy worker | Separate per-account container managed by the retained single controller; different lifecycle/recovery contract |
+| Monitor | Fixed pool operator/viewer interface using scoped central authorization; no combined browser registry |
+| Saved revision | Version committed centrally by a lifecycle/credential operation |
+| Applied revision | Matching account/credential revision reported by the current runtime epoch with fresh evidence |
+| Health | Observed issue/freshness classification; missing contact is unknown, and No issues detected is not inference proof |
+| Remove account | Permanent central revocation with retained assignment, credentials, leases, files and history; not upstream logout |
+| Restore registration | Restore an unfinished removed registration with new review; never restore a removed registered account |
+| Execution epoch | Current central runtime ownership generation that fences stale execution/acknowledgments |
+| Grant | Short-lived renewable central permission bound to the existing account lease and execution scope |
+| Execution reservation | Durable own-pool operation identity before provider I/O; not a second account budget |
+| Uncertain outcome | Work cannot be proven unstarted or completed; preserve identity and never automatically redispatch |
+| Legacy maintenance hold | Blocks new work/replacement while preserving an existing legacy worker; distinct from new-pool Pause |
 
-### **BroccoliDB**
-The core pre-inference representation transformation substrate of GALXAI. Rather than compressing prompts destructively, BroccoliDB transforms raw data payloads (ASTs, court transcripts, eBPF logs, time series) into dense, task-relevant representations that preserve semantic invariants while eliminating redundant boilerplate.
+## Representation and compaction
 
-### **Representation Redundancy vs Task-Relevant Invariant**
-- **Representation Redundancy**: Structural repetition, formatting syntax, verbose boilerplate, and static preamble noise inherent to human-readable or serialization formats (e.g. repeated XML tags, baseline equilibrium logs, repeated objection preambles).
-- **Task-Relevant Invariant**: The irreducible operational facts required for accurate inference (e.g. security vulnerability signatures, exact financial figures, anomaly timestamps, BIC codes).
+**BroccoliDB** names the repository's representation, buffering and compaction components. Use the [domain index](../broccolidb/README.md) and [component guide](../BROCCOLIDB_COMPACTION_ONBOARDING_GUIDE.md) for actual supported paths and validation. It is not database authorization or durable receipt authority.
 
-### **Fail-Closed Factual Grounding (`BroccoliCompactionSafety`)**
-The non-negotiable provenance firewall in `src/core/broccolidb/BroccoliCompactionSafety.ts`. Compaction output is parsed for high-risk entities (currencies, numbers, dates, identifiers, percentages). If any extracted entity cannot be grounded in the source text, the system fails closed: abandoning compaction and returning unmodified raw text with `fidelityStatus: 'fallback'`.
+**Representation redundancy** is repeated structure or formatting that may be reduced for a particular task. **Task-relevant invariants** are facts that the transformation must preserve. Claims of quality or savings require measured workloads and the owning checks.
 
-### **Megaincident Stream Cascader (`BroccoliMegaIncidentStreamCascader`)**
-A multi-stage streaming pipeline that ingests multi-thousand-page incident logs, partitions them into micro-digests, scores anomaly signals at $T_0$, and cascades them into a compact budget representation ($<8192$ tokens).
+**Compaction safety** refers to validation/fallback mechanisms in the owning implementation. The existence of a safety component does not establish universal losslessness, exact numerical preservation or a throughput guarantee.
 
-### **Mega-Document Pyramid (`BroccoliMegaDocumentPyramidCompactor`)**
-A hierarchical summarizer that extracts structural section digests from multi-hundred-page corporate or legal filings (e.g. 10-Ks, MSAs) into a layered query-aware executive summary.
+**Stream cascader**, **document pyramid** and **rolling context** name different representation/context-processing modules. Their retention, token budgets, dependency support and measured performance are component-specific; do not copy dated numeric claims into routing or customer promises.
 
----
+## Security and custody
 
-## 🔒 2. Security & Cryptographic Lexicon
+**Envelope encryption / AES-GCM** protects stored credential material under the configured vault and authenticated context. **Authenticated associated data (AAD)** binds ciphertext to its intended identity/context; use [key rotation](MULTI_TENANT_SHARD_AND_KEY_ROTATION.md) for preserving that association during rewrap.
 
-### **Envelope Encryption with AES-256-GCM**
-The cryptographic standard used in `src/core/vault/GalxCryptoVault.ts`. Every secret is encrypted with a unique 96-bit random IV and 128-bit authentication tag.
+**Buffer zeroization** overwrites selected mutable buffers. It does not certify erasure of immutable strings, provider copies, guest files, backups or garbage-collected memory.
 
-### **Authenticated Associated Data (AAD)**
-Cryptographic data bound to the AES-256-GCM ciphertext that is authenticated but not encrypted. In GALXAI, AAD is explicitly formatted as `${tenantUid}:${shardId}:${provider}` to mathematically prevent cross-tenant shard transplantation.
+**Principal** is a centrally authenticated role/pool/installation identity. A caller-supplied identifier or ordinary GALX session cannot select a more privileged principal. **Fail closed** means missing required authority refuses the operation rather than substituting cached permission or broader credentials.
 
-### **ZeroizeBuffer Memory Scrubbing**
-A deterministic 2-pass RAM scrubbing technique (`0xAA` $\to$ `0x00`) executed in `finally` blocks for all decrypted API credentials to prevent secret retention in V8 heap memory.
+## Routing and accounting
 
----
+**Model eligibility** means the owning route has the required current access/capability evidence. It is evaluated inside the fixed destination, not across both pools. The new runtime uses a rotating cursor over its eligible own engines; historical weighted/headroom utilities do not define that algorithm. See [routing](../ROUTING_ALGORITHMS.md).
 
-## ⚙️ 3. Routing & Hydraulic Capacity Lexicon
+**Alias** is an explicitly supported input mapping. It cannot promise an unverified underlying model, provision an account, grant tool access or authorize fallback. **Circuit breaker** is a component-specific temporary admission/failure mechanism; it cannot overwrite central lifecycle authority or permit replay after uncertainty.
 
-### **Predictive Adaptive Headroom Tracking (P-AHT)**
-The dynamic mathematical algorithm in `src/core/pool/GalxCredentialPool.ts` that calculates the real-time hydraulic capacity of each upstream shard based on token velocity, soft reservations, and Tier-5 provider ceilings:
-$$H_i(t) = \max\left(0, \frac{\text{TPM}_{\max, i} - R_i(t)}{\text{TPM}_{\max, i}}\right)$$
+**Account lease** reserves provider-account capacity centrally. **Customer usage/fair usage** governs product access separately. **Receipt** retains the original operation/outcome under its owning protocol; it does not imply exactly-once upstream execution or transferable recovery.
 
-### **Smooth Weighted Round-Robin (SWRR)**
-Nginx-inspired deterministic load balancing with zero floating-point accumulation drift used to distribute load across healthy peer shards.
+## Evidence
 
-### **4-State Circuit Breaker (`GalxCircuitBreaker`)**
-The resilience finite state machine with states: `CLOSED` (healthy), `DEGRADED` (shedding load), `OPEN` (cooldown quarantine), and `HALF-OPEN` (canary recovery probe).
+**Inference boundary** identifies the actual provider call when measuring execution. Transport chunks are not tokenizer usage, and completed output alone does not certify persistence, publication or billing. **A/B evaluation** compares stated workloads under an explicit method; one benchmark does not establish general quality or economics.
 
-### **Zero-Hesitation Aliasing**
-The SDK paradigm where developers write intuitive aliases (`gpt-5`, `gpt-4o`, `grok-3`) and GALXAI automatically routes, provisions, compacts, and streams the response without runtime configuration friction.
-
----
-
-## 📊 4. Benchmarking & Empirical Lexicon
-
-### **Inference Boundary**
-The physical network perimeter between GALXAI and the upstream foundation model provider (e.g. OpenAI). All token accounting, billed dollars, and latencies are measured exactly at this boundary.
-
-### **Randomized Branch-Blinded A/B Evaluation**
-The empirical evaluation protocol in `BroccoliInferenceBoundaryBenchmarker.ts` where Branch Alpha and Branch Beta identities are randomly decoupled from the task evaluator and revealed only post-hoc to eliminate confirmation bias.
-
----
-
-## ⚡ 5. Rolling Context & Seat Governance Lexicon
-
-### **5-Level Multi-Resolution Context Pyramid**
-The hierarchical context structuring model implemented in `GalxRollingContextEngine` (ADR 0069):
-- **Level 1 (Workspace Anchors)**: Global compliance, architecture schemas, and immutable system directives.
-- **Level 2 (Thematic Episodes)**: Chronological conversational milestones clustered into 10-turn bounded blocks.
-- **Level 3 (Temporal Decision Graph)**: Knowledge graph edges (`depends_on`, `configures`, `fixes`, `references`) traversed via recursive in-memory search.
-- **Level 4 (Reciprocal Rank Fusion RAG)**: Sub-millisecond BM25 keyword and token proximity ranking over multi-page document chunks in RAM (`<0.5ms`).
-- **Level 5 (Atomic Sliding Verbatim Buffer)**: Uncompressed recent conversation turns (default 8 turns).
-
-### **Atomic Tool Turn-Pair Inseparability**
-The invariant rule ensuring that assistant messages containing `tool_calls` and their corresponding `tool` result messages are never split across compaction boundaries, eliminating provider HTTP 400 validation crashes.
-
-### **Dual Rolling Window Seat Quotas**
-The human-centric capacity governance model providing a fast-replenishing **5-Hour burst window** and a durable **7-Day weekly window** with natural language refresh countdowns.
-
-### **Expiring Idempotent Seat Request Leases (`galx_seat_request_leases`)**
-Distributed concurrency reservations with automatic TTL expiration (`180s`) managed via single-hop composite stored procedures (`fn_evaluate_and_acquire_seat_gate_v2`, `fn_settle_seat_stream_completion_composite_v2`), preventing orphaned concurrency locks on dropped client connections.
-
----
-
-*Preserve terminological precision across all specifications.* 🥦📖🛡️
+**Installed**, **registration open**, **execution open**, **applied** and **provider qualified** describe different checkpoints. [Current state](../../post-mortem/CURRENT_STATE.md) owns dated observations; ADR status records a decision independently of delivery. Historical proofs and prototypes remain scoped evidence.

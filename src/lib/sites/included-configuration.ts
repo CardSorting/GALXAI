@@ -1,3 +1,4 @@
+import { isolatedRelay, isolatedRelaysEnabled } from '../../core/router/adapters/IsolatedRelayTransport';
 import { getPostgresPool } from '../db/postgres';
 import { StripeEngine } from '../stripe/stripe';
 import { requireSitesRelayPreflight } from '../billing/sites-relay-preflight';
@@ -11,7 +12,7 @@ export function includedSitesConfiguration(){
   const pool=getPostgresPool();
   if(!pool||pool.waitingCount>=25)throw new FairUsageError(503,'authority');
   const store=new SitesFairStore(pool);
-  const relay={url:process.env.VM_RELAY_URL||process.env.GALXAI_RELAY_URL||process.env.RELAY_URL||'',key:process.env.VM_RELAY_API_KEY||process.env.RELAY_API_KEYS?.split(',')[0]?.trim()||''};
+  const relay=isolatedRelaysEnabled()?isolatedRelay('sites'):{url:process.env.VM_RELAY_URL||process.env.GALXAI_RELAY_URL||process.env.RELAY_URL||'',key:process.env.VM_RELAY_API_KEY||process.env.RELAY_API_KEYS?.split(',')[0]?.trim()||''};
   const model='gpt-5.6-luna';
   const membership=async(owner:string,allowFree=false)=>{
     const policy=await store.policy();
