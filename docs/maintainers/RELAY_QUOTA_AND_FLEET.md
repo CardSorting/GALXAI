@@ -20,6 +20,10 @@ New pool Pause saves a new central revision and invalidates old authorization; t
 
 Provider cooldowns, local engine limits, central account leases and product entitlement/fair usage are different controls. Each execution database records identity/outcomes without a second account budget. Standard's idle capacity cannot satisfy Premium work, including during outage. Never clear counters or assert healthy status to bypass a denial.
 
+Standard [rotates across idle eligible accounts](../reference/standard-relay-scheduling.md), retaining one slot per account through completion. It skips live provider cooldowns, rejected/expired credentials and stale model evidence. Repeated central denials back off for 60 seconds up to 30 minutes; an elapsed provider cooldown permits one recovery job per account, subject to the pool's recovery interval. A busy response is backpressure, not a reason to remove or re-register an account. The monitor displays central health observations, not a live inventory of local idle slots or denial timers. Preserve original request identity and wait before retrying a proven pre-dispatch busy response.
+
+Recovery is gradual: new recovery selections start at least five seconds apart across Standard, even if many cooldowns expire together. Healthy accounts keep serving. Repeated quota notices within one job count as one escalation; fresh notices can extend the deadline. Successful recovery clears and checkpoints the failure state only if no newer cooldown remains. Do not treat the probe budget as a provider quota, manually reset it or restart to skip waiting.
+
 Sites retains its configured [product fair-usage policy](SITES_FAIR_USAGE.md), separate from provider paid/free class. Preserve uncertain receipts and leases; enrollment, image replacement or billing renewal does not erase accepted work. No automatic image probe runs in isolated mode.
 
 ## Verification

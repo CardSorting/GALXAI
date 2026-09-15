@@ -1,0 +1,65 @@
+{
+  "reviewedAt": "2026-09-15T21:36:23.273663+00:00",
+  "reviewer": "Codex Standard scheduler follow-up implementation and semantic review",
+  "scope": "Delta review against the retained Standard scheduling and glossary baseline. Changed source contracts and entire affected guide bodies were inspected; broad fingerprints detect future drift and do not certify unrelated modules anew.",
+  "baselineEvidence": [
+    "docs/knowledge/audits/2026-09-15-standard-relay-scheduling-review.json",
+    "docs/knowledge/audits/2026-09-15-standard-relay-glossary-review.json"
+  ],
+  "releaseEvidence": "post-mortem/releases/2026-09-15-standard-relay-recovery.json",
+  "releaseEvidenceSha256": "2ef19fd935a22f06604420c77333666651e001532aa7f6a4f6267ec7bd6f9759",
+  "sourceSha256": {
+    "src/relay/standard-pool-scheduler.ts": "006362eb736b5d2739a79b11d97274220b5ce88150046b5bdce7be66b3df75b8",
+    "src/relay/pool-runtime.ts": "797fd490b60ef63cd2a4c78115756dc9759bffe056461789dccbd5bb4c6fcca2",
+    "src/relay/pool-execution.ts": "b1c87b5e18eac90bb93d128066e38963bcb0072f10631ee8a77975cb932a694c",
+    "src/relay/relay-server.ts": "137b8b51dff91081065b4a363760dc416765ba5c8ad77f485088216494f207ea",
+    "scripts/test-standard-pool.ts": "c7308eb79a2900976bb52df3c756bf6f8fc8c53c7eeae7890123f12d9e1594b1",
+    "scripts/relay-local.mjs": "288cf0e12ca506a9807ee7c4ea9a13e6e97e4f6d015cd63f829c99f91d8dc430",
+    "docker/relay-pools/local/pool.yaml": "c9680f39032e529591c6b6db2c4a987959c6a01c4eb4fd90fd58cf106b536e04",
+    "docker/relay-pools/local/images.json": "a9912866ccd20e4d91bcd209beb9d66a754f2feef13241f52691644f6b967693",
+    "package.json": "6b25c5de7ab35548d8570d17fe6fd6e389e506343c672a1e5c037384663a617d"
+  },
+  "canonicalGuideSha256": {
+    "docs/reference/standard-relay-scheduling.md": "0db8f9e2362eca1cf1fe245c27eae7ffa6a1ce12f8f6b71555641e5cabb41bac",
+    "docs/ROUTING_ALGORITHMS.md": "406de7aa1308c44b343efb91ffd5c7991cde2087a30d6dcdf1c1113830c90bb3",
+    "docs/QUEUE_SPECIFICATION.md": "2cbcf0160f51b7f90f946fb8a0e2490e1b5fe5ae43fe74bd745bebbd34ac7786",
+    "docs/RATE_LIMITS_AND_QUOTAS.md": "e5c2d5e13848025e0d272913509b253b1578e1952d1126b49bde59f11c6b2c27",
+    "docs/RELAY_API_REFERENCE.md": "86645a86d8fd58315f41da2e0d9c8492045e179707e6dae0ccccc63610213acd",
+    "docs/maintainers/RELAY_QUOTA_AND_FLEET.md": "a61b61f2537744c775e044aabb3487d90bf8a6e852423d92deb6e5ef337884b8",
+    "docs/maintainers/RELAY_HARDENING.md": "d767c14ccca772ed2c2093352c2d2ab6635d03da178d0c16f39204ed27966413",
+    "docs/runbooks/relay-pool-services.md": "6078a5508eb44703e013d3033208da1d9895b670d71a0bf78ad4e1e7ba789586",
+    "docs/adr/0153-central-account-authority-isolated-relays.md": "d3900f51dc0e4e5421fa65d2041162c27125252ba07a346c557ce1081144a552",
+    "post-mortem/CURRENT_STATE.md": "addd03d2664657c2435a6483bc605e0352e3199e25075be3bdbdbc36c0f0baf2"
+  },
+  "domainReview": {
+    "relay": "Traced ordered first/live selection, reservation ownership, monotonic recovery gating, per-job quota notices/deadlines, reset-less observation retirement, completion/abort ordering, checkpoint recovery and delayed-lookup cancellation/freshness. Reviewed all changed guide bodies, rollout/rollback, actual running image, retained volume, 69 local checks and closed gates. Central custody, fixed-pool assignment, provider authorization, original request identity and Premium policy retain their existing contracts.",
+    "images": "Reviewed the complete shared queue guide against its baseline and the Standard-only scheduling delta. Application image receipts, free allowance, binary artifact publication and uncertain image replay are unchanged. Shared engine and public/auth regressions passed; no new database behavior or real provider image acceptance is claimed."
+  },
+  "research": [
+    {
+      "url": "https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/upstream/outlier",
+      "use": "Per-host exclusion and bounded recovery pattern; no peer fallback or panic exception adopted."
+    },
+    {
+      "url": "https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/upstream/load_balancing/slow_start",
+      "use": "Gradual return of traffic after recovery; adapted as a bounded local recovery-start rate, not Envoy weight ramping."
+    },
+    {
+      "url": "https://www.haproxy.com/documentation/haproxy-configuration-tutorials/proxying-essentials/configuration-basics/backends/",
+      "use": "Rotation among available servers; adapted to account eligibility and one ongoing job per Standard account."
+    }
+  ],
+  "criticalReview": "The changed critical watched input since the preceding review is QUEUE_SPECIFICATION.md. Inspected the whole queue contract and compiled boundary scan; package test-script changes retain their prior review. Explicit attestation and sync/check follow this retained review.",
+  "unmappedReview": "Impact unmapped paths are generated navigation/catalog/inventory/review metadata, current-state operational index, and dated evidence records. No new unowned runtime source is present; Standard scheduler and fixtures are mapped in the existing relay domain.",
+  "documentationGuardTests": 38,
+  "limitations": [
+    "No real provider sign-in, quota spend, generation, throughput measurement or public application deployment. Local empty-pool acceptance does not establish provider readiness.",
+    "Five seconds bounds new local recovery selections, not a provider quota. Long recovery jobs on different accounts can overlap if their selections are spaced by the interval.",
+    "The recovery budget, live rotation and central-denial history are process-local. Restart starts a new local budget; central ownership/grants and persisted provider cooldowns remain authoritative.",
+    "Checkpoint writes are best effort. Successful filesystem persistence is not an execution grant; no PostgreSQL schema, role, RLS policy or central budget change was made.",
+    "Request fairness does not imply equal token consumption. A sole healthy eligible account can receive consecutive completed jobs.",
+    "Monitor health remains centrally observed metadata, not live scheduler capacity. No browser UI or operator telemetry feed was added.",
+    "Cancellation avoidance applies before forwarding. Once forwarded, uncertain work retains its original key/account/epoch and cannot be repeated or moved.",
+    "Only Standard runtime was replaced. Premium, central and monitor image IDs retain their preceding pins. The trusted Mac remains the common physical host."
+  ]
+}

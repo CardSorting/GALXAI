@@ -1,0 +1,10 @@
+{
+  "reviewedAt": "2026-09-15T21:06:25.587156+00:00",
+  "scope": "Final glossary reconciliation after the Standard scheduling implementation review; documentation only.",
+  "baselineEvidence": "docs/knowledge/audits/2026-09-15-standard-relay-scheduling-review.json",
+  "path": "docs/maintainers/MAINTAINER_GLOSSARY_AND_LEXICON.md",
+  "sha256": "f7db4883a2b9a364e1d246705beee022e6cff67684c6b31f51b78286a2a8336e",
+  "finding": "Final terminology scan found the general runtime cursor definition still covered Standard. Replaced it with distinct Premium cursor and Standard health-aware one-job rotation, linking the canonical scheduling guide.",
+  "review": "Read the complete glossary and checked account authority, lifecycle, uncertainty and security definitions against the reviewed relay contract; unrelated definitions remain intact. No source, test, image or database changes after acceptance.",
+  "verification": "Full docs audit and all nine domain freshness checks passed before this final prose correction; compiled boundary scan passed for 669 assets. Re-sync and docs audit follow this explicit review."
+}

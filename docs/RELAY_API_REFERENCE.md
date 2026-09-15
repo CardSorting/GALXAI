@@ -73,6 +73,7 @@ The old controller's `X-Galx-Idempotency-Scope`, signed URLs and ten-minute proc
 | `409 idempotency_conflict` | Key has a different saved payload | Reconcile original intent |
 | `409 result_unconfirmed` | Original image/result/epoch/account context unavailable | Preserve uncertainty; never redispatch to another pool |
 | `403 capability_unavailable` | Workload is prohibited at this destination | Correct the deployment/request policy; no peer fallback |
+| `503 service_busy`, `Retry-After: 5` | Standard found no eligible idle account or its recovery-start budget is waiting, before any engine attempt | Wait before resubmitting the same intent/key; the hint is not a provider reset promise |
 | `503 service_unavailable` / `request_unavailable` | Readiness, authorization, admission or original context unavailable | Inspect the owning dependency and retained operation before retry |
 | `409 record_changed` on management | Displayed account/registration revision is stale | Keep draft, close dialog, refresh and review before explicit retry |
 | Saved removal with `desktopStopped:false` | Central removal committed; local cleanup failed | Registration → Removed → Stop desktop |

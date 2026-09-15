@@ -1,0 +1,75 @@
+{
+  "reviewedAt": "2026-09-15T21:05:35.527177+00:00",
+  "reviewer": "Codex Standard scheduling implementation and operational review",
+  "scope": "Semantic review of changed scheduling/runtime contracts and complete affected guide behavior against the prior central-account strategy baseline. Broad domain fingerprints detect future drift; they do not certify unrelated modules anew.",
+  "baselineEvidence": [
+    "docs/knowledge/audits/2026-09-15-relay-strategy-documentation-review.json",
+    "docs/knowledge/audits/2026-09-15-relay-account-management-review.json"
+  ],
+  "releaseEvidence": "post-mortem/releases/2026-09-15-standard-relay-rotation.json",
+  "sourceSha256": {
+    "src/relay/standard-pool-scheduler.ts": "95d63086ec6654c28c82b36afcd84decae284f89ad5f276939932a05a296bacf",
+    "src/relay/pool-runtime.ts": "5332ceecc6de67394c12d061937c40f209e0a7d27957bdba0aa41c505fe7653e",
+    "src/relay/pool-execution.ts": "847b2713b3c6e381586dcfaa130108733257a68cb6e18c646ffc86fe5d9aaa8a",
+    "src/relay/relay-server.ts": "cdfbfc5ff1e32009cb5e9046c1b8839aac66ccfefb4c77e32f1ab26f2e444d6e",
+    "scripts/test-standard-pool.ts": "2ade686306711f8235bc5e0d38c90cd21f5e0a7f267df34fc6a933b66947824e",
+    "scripts/relay-local.mjs": "288cf0e12ca506a9807ee7c4ea9a13e6e97e4f6d015cd63f829c99f91d8dc430",
+    "docker/relay-pools/local/pool.yaml": "c9680f39032e529591c6b6db2c4a987959c6a01c4eb4fd90fd58cf106b536e04",
+    "docker/relay-pools/local/images.json": "3c28560fd9458cb00231d303e6f6123762d0f2251ee5b8f0cf9b0cb0527d3cdc",
+    "package.json": "6b25c5de7ab35548d8570d17fe6fd6e389e506343c672a1e5c037384663a617d"
+  },
+  "canonicalGuideSha256": {
+    "docs/reference/standard-relay-scheduling.md": "6f8db99d63fdf0d3ec8d5ba96e6abdf6adad1055c509426e84221302f088ef4c",
+    "docs/ROUTING_ALGORITHMS.md": "57e5bd6b3346f48cdbe7c0abb6fb5cbc40bf8e3e42f70a7fc5583459b0c3df20",
+    "docs/FEDERATION_STRATEGY.md": "759a808bb21b61d87f273729142702a2fdc4204a7144b4d4b9f1a78f4398907d",
+    "docs/ARCHITECTURE.md": "2af5e3e6c46e13ee2ad508530948b93c139480b75e03824dfa35429e31b55170",
+    "docs/QUEUE_SPECIFICATION.md": "2565bbd9a20bd12db2a1cfb1b49ea8c05bd418016a84155c2bf39bb2a8c0181e",
+    "docs/RATE_LIMITS_AND_QUOTAS.md": "77306985223547faf6b54d84f2812149aacce5cf776d30b899c210bd15e1eed2",
+    "docs/RELAY_API_REFERENCE.md": "ed9079d800e4c379c348c6ec6324d9f2d03c4422db3261c3bd66b3402ed9b207",
+    "docs/reference/relay-account-management.md": "61dba4858eb381463a439e6b5e1e5f48dfd05a0fb4375bf6ed92c6c4ebaca1d7",
+    "docs/maintainers/RELAY_QUOTA_AND_FLEET.md": "b9bda7e94fcdf51dcfd2fb06cb516eac6ffffc8492777a2ba4e15f0fc722d208",
+    "docs/maintainers/RELAY_HARDENING.md": "a6dbd16ddd97e27aa8edb57fef81229ce77f8cd10f8bcb4b1aef17822e257628",
+    "docs/RESILIENCE_AND_DISASTER_RECOVERY.md": "87ad4fc3c0291dac8910f851ec8fede69c8860d00b37d0287b5a8ddb8769bee9",
+    "docs/runbooks/relay-pool-services.md": "db40cf0ad72301e9616a063efcccdce0219d01d2a1a688a18b0a2e7412b26e94",
+    "docs/adr/0153-central-account-authority-isolated-relays.md": "ddbe05c088bb31dbbbf7f351b178cd513881c6c8e185e014ef7245921c817be5",
+    "post-mortem/CURRENT_STATE.md": "28a224c41c4f0977efc1efecd3b2996fd2807bd90f9258cb53437013f30c1931"
+  },
+  "domainReview": {
+    "relay": "Traced outer eligibility, pending selection, full grant lifecycle, engine cooldown/model health, checkpoint recovery, revised same-revision projection, replay and HTTP allowlists. Reconciled routing, quota, management, queue, API, recovery, image rollout and rollback guides.",
+    "images": "Reviewed complete queue guide; Standard-only text backpressure does not change Premium image routing, durable product claims, uncertain-image replay, allowance or artifact contracts. Shared engine image/public regressions passed.",
+    "database": "Reviewed central account management schema/authority sections and runtime acquisition/binding calls against current central function. Scheduling restrictions remain local; no registry/budget replica, new DB objects or permission changes. Existing scoped lease authority and previous DB acceptance retained.",
+    "knowledge": "Reviewed package service-test command, new source/guide mapping, documentation policy/change workflow and evidence linkage. Added current guide; preserved dated records and ADR proposed status."
+  },
+  "research": [
+    {
+      "url": "https://nginx.org/en/docs/http/ngx_http_upstream_module.html",
+      "use": "Round-robin distribution with upstream concurrency/failure limits."
+    },
+    {
+      "url": "https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/upstream/load_balancing/load_balancers.html",
+      "use": "Least-request load balancing pattern."
+    },
+    {
+      "url": "https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/upstream/outlier",
+      "use": "Bounded host exclusion/recovery pattern; no adoption of peer failover or panic availability exceptions."
+    },
+    {
+      "url": "https://supabase.com/changelog.md",
+      "use": "Reviewed breaking-change tags; none require a schema/API change for this local scheduler refinement."
+    },
+    {
+      "url": "https://supabase.com/docs/guides/api/securing-your-api",
+      "use": "Rechecked central/private schema, grants and RLS boundary; no new Data API exposure."
+    }
+  ],
+  "limitations": [
+    "No real provider sign-in, quota spend, generation, throughput measurement or public application deployment.",
+    "Checkpoint saves are best effort; local central-denial backoff and forwarding order are process-local. Central authority still governs after restart.",
+    "Request fairness is not token fairness; busy accounts are skipped and a sole eligible account can serve successive completed requests.",
+    "Monitor health remains central metadata, not a live feed of local scheduler capacity.",
+    "Initial unprivileged fixture run hit local-listener EPERM and a Node assertion; rerun with local networking passed.",
+    "No PostgreSQL schemas, policies or grants changed; retained database acceptance is baseline evidence."
+  ],
+  "documentationGuardTests": 38,
+  "criticalReview": "Changed watched inputs are package.json and QUEUE_SPECIFICATION.md; inspected test-script-only package change and complete queue/recovery scope. Build scan clean. Documentation sync/check follows explicit attestations."
+}

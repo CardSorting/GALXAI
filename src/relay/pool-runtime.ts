@@ -10,6 +10,7 @@ import { sanitizeImageArtifact } from '../lib/security/image-artifact.js';
 import { CODEX_IMAGE_ALIAS } from './image-compatibility.js';
 import { publicJob, publicUsage, boundedJson } from './pool-public-response.js';
 import { sitesContractRequest, sitesContractReply } from './sites-contract.js';
+import { StandardPoolScheduler } from './standard-pool-scheduler.js';
 
 type Worker = {account:AssignedAccount;engine:GalxaiRelayServer;key:string;port:number};
 export class PoolRuntime {
@@ -17,6 +18,11 @@ export class PoolRuntime {
   private workers = new Map<string,Worker>();
   private refreshedAt = 0; private stopped = false; private timer?: NodeJS.Timeout;
   private cursor = 0; private syncing?: Promise<void>; private pending = new Set<string>();
+  private readonly standard = new StandardPoolScheduler();
+  private ready() {
+    const age=Date.now()-this.refreshedAt;
+    return !this.stopped && age>=0 && age<20000 && this.workers.size>0;
+  }
   constructor(readonly execution: PoolExecution, private readonly inferenceKey: string, private readonly stateDirectory: string, private readonly capabilityKey?: string) {
     this.server = http.createServer((req,res)=>void this.route(req,res).catch(error=>{ if (!res.headersSent) failure(res,error); else res.destroy(); }));
     this.server.requestTimeout=15000; this.server.maxHeadersCount=40;
@@ -39,11 +45,12 @@ export class PoolRuntime {
     const projection=await central.call('/runtime/projection',{epoch:this.execution.epoch});
     if (projection.pool!==central.identity.pool || projection.installationId!==central.identity.installationId || projection.epoch!==this.execution.epoch || !Array.isArray(projection.accounts) || projection.accounts.length>128) throw Error('Invalid projection.');
     const next=new Map<string,AssignedAccount>(projection.accounts.map((a:AssignedAccount)=>[a.id,a]));
+    this.standard.reconcile(new Set(next.keys())); this.execution.reconcileAccounts(new Set(next.keys()));
     for (const [id,worker] of this.workers) {
       const a=next.get(id);
       if (!projection.executionAllowed || !a?.credential || a.state!=='enabled' || a.revision!==worker.account.revision || a.credentialRevision!==worker.account.credentialRevision || a.expiresAtMs<=Date.now()+30000) {
         this.workers.delete(id); await worker.engine.stop();
-      }
+      } else worker.account=a; // Cooldown and capability observations can change without a control revision.
     }
     for (const a of next.values()) {
       if (!/^codex_sh_[a-f0-9]{24}$/.test(a.id) || !Number.isSafeInteger(a.revision) || !/^[a-f0-9]{64}$/.test(a.credentialRevision)) throw Error('Invalid account projection.');
@@ -54,6 +61,7 @@ export class PoolRuntime {
           registryEnabled:false,discoverHostCredentials:false,masterSecret:undefined,shardsJsonPath:undefined,testOnlyMultiShard:false,
           relayId:central.identity.installationId,generation:this.execution.epoch,allowedOrigins:[],maxUpstreamRetries:0,
           codexImageToolAlias:central.identity.pool==='premium',forwardOutputTokenLimit:true,drainTimeoutMs:100,
+          ...(central.identity.pool==='standard'?{shardConcurrency:1}:{}),
           stateSnapshotPath:path.join(this.stateDirectory,a.id,'relay.json')});
         try { await engine.start(); this.workers.set(a.id,{account:a,engine,key,port:engine.listeningPort()}); }
         catch { await engine.stop().catch(()=>{}); throw Error('Worker unavailable.'); }
@@ -67,7 +75,7 @@ export class PoolRuntime {
   }
   private async route(req:http.IncomingMessage,res:http.ServerResponse) {
     const pathname=new URL(req.url ?? '/','http://local').pathname;
-    const ready=!this.stopped && this.refreshedAt>Date.now()-20000 && this.workers.size>0;
+    const ready=this.ready();
     if (req.method==='GET' && ['/health/live','/health/ready','/health'].includes(pathname)) return json(res,pathname==='/health/ready'&&!ready?503:200,{ok:pathname==='/health/ready'?ready:true});
     if (pathname==='/api/sites/contract' && req.method==='GET') {
       if(req.headers.origin || !this.capabilityKey || !equalSecret(bearer(req),this.capabilityKey))throw new RequestError(401,'unauthorized','Provide valid authorization.');
@@ -98,6 +106,7 @@ export class PoolRuntime {
     const job=/^\/v1\/jobs\/([\w-]{1,96})(?:\/(stream|receipt|cancel))?$/.exec(pathname);
     if (!generation && !(job && (req.method==='GET' || req.method==='POST' && job[2]==='cancel'))) throw new RequestError(404,'not_found','Not found.');
     let worker:Worker|undefined, body:Record<string,any>|undefined, lock:string|undefined;
+    let releaseSelection: (() => unknown) | undefined, ownsLock=false;
     try {
       if (generation) {
         body=await readJsonBody(req,1024*1024,10000); const workload=requestWorkload(this.execution.central.identity.pool,pathname,body);
@@ -107,16 +116,33 @@ export class PoolRuntime {
         lock=hash(JSON.stringify([tenantSha256,workload,key]));
         if (this.pending.has(lock)) throw new RequestError(409,'request_in_progress','Check the existing request.');
         if (this.pending.size>=128) throw new RequestError(429,'busy','Try again shortly.');
-        this.pending.add(lock);
+        this.pending.add(lock); ownsLock=true;
         const previous:ExecutionRecord|null=await this.execution.store.call('lookup',{requestKey:lock,tenantSha256});
+        // Lookup can outlive the caller or the projection. Do not spend a new grant
+        // for abandoned work, or use a readiness decision made before this await.
+        if (req.aborted || res.destroyed) return;
         if (previous) {
           if (previous.requestSha256!==hash(JSON.stringify(body))) throw new RequestError(409,'idempotency_conflict','This request key was already used.');
           if (previous.epoch!==this.execution.epoch || previous.workload==='images' || !this.workers.has(previous.accountId)) throw new RequestError(409,'result_unconfirmed','The original result is unavailable. Do not repeat this request.');
           return json(res,202,{id:previous.executionId,status:previous.state==='running'?'running':previous.state==='completed'?'completed':'failed',statusUrl:`/v1/jobs/${previous.executionId}`,streamUrl:`/v1/jobs/${previous.executionId}/stream`});
         }
+        if (!this.ready()) throw new RequestError(503,'service_unavailable','This service is temporarily unavailable.');
         const model=body.model ?? 'gpt-5.6-terra'; const capability=workload==='images'?`image:${model}`:model;
         const candidates=[...this.workers.values()].filter(w=>w.account.models.includes(capability) || workload==='images' && this.execution.central.identity.pool==='premium' && model===CODEX_IMAGE_ALIAS.requestedModel);
-        worker=candidates[this.cursor++%candidates.length];
+        if (this.execution.central.identity.pool==='standard') {
+          const now=Date.now();
+          const eligible=candidates.flatMap(w=>{
+            if (w.account.expiresAtMs<=now+30000 || (w.account.cooldownUntilMs??0)>now || !this.execution.standardAvailable(w.account.id,now)) return [];
+            const state=w.engine.standardAvailability(model);
+            return state.eligible?[{id:w.account.id,lastUsedAtMs:state.lastUsedAtMs,recovering:state.recovering||this.execution.standardRecovering(w.account.id),worker:w}]:[];
+          });
+          const selection=this.standard.reserve(eligible);
+          worker=selection?.candidate.worker; releaseSelection=selection?.release;
+          if (!worker) {
+            res.setHeader('Retry-After','5');
+            throw new RequestError(503,'service_busy','This service is busy. Try again shortly.');
+          }
+        } else worker=candidates[this.cursor++%candidates.length];
       } else {
         const saved:ExecutionRecord|null=await this.execution.store.call('lookup',{executionId:job![1],tenantSha256});
         if (!saved) throw new RequestError(404,'not_found','Request not found.');
@@ -137,7 +163,7 @@ export class PoolRuntime {
         res.writeHead(200,{'Content-Type':artifact.contentType,'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});res.end(artifact.bytes);return;
       }
       return json(res,response.status,publicJob(data));
-    } finally { if (lock) this.pending.delete(lock); }
+    } finally { releaseSelection?.(); if (ownsLock && lock) this.pending.delete(lock); }
   }
   private async stream(response:Response,res:http.ServerResponse) {
     res.writeHead(200,{'Content-Type':'text/event-stream','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});

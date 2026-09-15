@@ -298,6 +298,7 @@ export interface ShardRecord extends Record<string, unknown> {
   lastDripRefillMs?: number;
   cooldownUntilMs?: number;
   quotaFailures?: number;
+  lastQuotaFailureJobId?: string;
   probeInFlight?: boolean;
   providerLimits?: ProviderLimit[];
   source?: string;
@@ -1303,6 +1304,21 @@ export class GalxaiRelayServer extends EventEmitter {
     });
   }
 
+  /** In-process scheduling observation only; never an HTTP response or an execution grant. */
+  standardAvailability(model: string) {
+    const shard = this.config.executionPolicy?.pool === 'standard' && this.config.assignedShardId
+      ? this.shardsTable.get(this.config.assignedShardId) : undefined;
+    if (!shard) return { eligible: false, lastUsedAtMs: 0, recovering: false };
+    this.updateCapabilityHealth();
+    return {
+      eligible: !this.isDraining && this.shardReadyAt(shard) <= Date.now() && !shard.probeInFlight && shard.inFlight === 0
+        && !this.jobsTable.getAll().some(j => ['queued','running','streaming'].includes(j.status))
+        && this.capabilities.eligibleShardIds(model).includes(shard.id),
+      lastUsedAtMs: shard.lastUsedAtMs,
+      recovering: Boolean(shard.quotaFailures || shard.consecutiveFailures >= 3),
+    };
+  }
+
   private capabilitySnapshot() {
     this.updateCapabilityHealth();
     // Rejection survives checkpoint recovery and can also originate in inference.
@@ -1378,7 +1394,7 @@ export class GalxaiRelayServer extends EventEmitter {
     return deadlines.length ? Math.max(1, Math.ceil((Math.min(...deadlines) - now) / 1000)) : null;
   }
 
-  private acquireHealthyShard(exclude?: string | Set<string>, model?: string, authorizedImageTrial = false): ShardRecord | null {
+  private acquireHealthyShard(exclude?: string | Set<string>, model?: string, authorizedImageTrial = false, jobId?: string): ShardRecord | null {
     if (!model || authorizedImageTrial && this.config.executionPolicy?.pool !== 'premium') return null;
     this.updateCapabilityHealth();
     const eligibleIds = new Set(this.capabilities.eligibleShardIds(model));
@@ -1407,7 +1423,10 @@ export class GalxaiRelayServer extends EventEmitter {
       ...candidate, status: 'active', probeInFlight: probe,
       inFlight: candidate.inFlight + 1, lastUsedAtMs: now,
       slidingWindowTimestamps: [...candidate.slidingWindowTimestamps.filter(t => t > now - this.currentQuotaProfile.windowDurationMs), now],
-      providerLimits: (candidate.providerLimits ?? []).filter(l => !l.resetAtMs || l.resetAtMs > now).map(l => ({
+      providerLimits: (candidate.providerLimits ?? []).filter(l => (!l.resetAtMs || l.resetAtMs > now)
+        // An elapsed fallback permits a real probe. Old zero observations without a reset
+        // must not immediately reopen the same cooldown before that probe can run.
+        && !(this.config.executionPolicy?.pool === 'standard' && probe && !l.resetAtMs && l.remaining === 0)).map(l => ({
         ...l, remaining: /request/i.test(l.name) ? Math.max(0, l.remaining - 1) : l.remaining,
       })),
     };
@@ -1416,20 +1435,28 @@ export class GalxaiRelayServer extends EventEmitter {
       updated.cooldownUntilMs = Math.max(updated.cooldownUntilMs ?? 0, ...depleted.map(l => l.resetAtMs ?? now + 60_000));
       updated.status = 'cooldown';
       updated.quotaFailures = Math.max(1, updated.quotaFailures ?? 0);
+      if (this.config.executionPolicy?.pool === 'standard' && jobId) updated.lastQuotaFailureJobId = jobId;
     }
     this.shardsTable.put(updated.id, updated);
+    if (this.config.executionPolicy?.pool === 'standard') this.saveStateSnapshot();
     return updated;
   }
 
-  private recordQuotaFailure(shardId: string, providerDeadline?: number, release = true): void {
+  private recordQuotaFailure(shardId: string, providerDeadline?: number, release = true, jobId?: string): void {
     const shard = this.shardsTable.get(shardId);
     if (!shard) return;
-    const failures = (shard.quotaFailures ?? 0) + 1;
+    const standardJob = this.config.executionPolicy?.pool === 'standard' ? jobId : undefined;
+    const repeatedObservation = standardJob !== undefined && shard.lastQuotaFailureJobId === standardJob;
+    const failures = Math.max(1, (shard.quotaFailures ?? 0) + (repeatedObservation ? 0 : 1));
+    // New evidence can extend the wait; multiple frames cannot multiply the same job's backoff.
+    const deadline = cooldownDeadline(failures, Date.now(), providerDeadline);
     this.shardsTable.put(shardId, { ...shard,
       status: shard.status === 'disabled' ? 'disabled' : 'cooldown', quotaFailures: failures, probeInFlight: false,
+      ...(standardJob ? {lastQuotaFailureJobId: standardJob} : {}),
       inFlight: Math.max(0, shard.inFlight - (release ? 1 : 0)),
-      cooldownUntilMs: Math.max(shard.cooldownUntilMs ?? 0, cooldownDeadline(failures, Date.now(), providerDeadline)),
+      cooldownUntilMs: Math.max(shard.cooldownUntilMs ?? 0, deadline),
     });
+    if (this.config.executionPolicy?.pool === 'standard') this.saveStateSnapshot();
   }
 
   private recordShardFailure(shardId: string, unauthorized = false): void {
@@ -1447,10 +1474,13 @@ export class GalxaiRelayServer extends EventEmitter {
 
   private releaseShard(shardId: string, succeeded = false): void {
     const shard = this.shardsTable.get(shardId);
-    if (shard && shard.inFlight > 0) this.shardsTable.put(shardId, { ...shard,
+    if (!shard || shard.inFlight <= 0) return;
+    const recovered = succeeded && (shard.cooldownUntilMs ?? 0) <= Date.now();
+    this.shardsTable.put(shardId, { ...shard,
       inFlight: shard.inFlight - 1, probeInFlight: false,
-      ...(succeeded && (shard.cooldownUntilMs ?? 0) <= Date.now() ? { consecutiveFailures: 0, quotaFailures: 0, status: shard.status === 'disabled' ? 'disabled' as const : 'active' as const } : {}),
+      ...(recovered ? { consecutiveFailures: 0, quotaFailures: 0, status: shard.status === 'disabled' ? 'disabled' as const : 'active' as const } : {}),
     });
+    if (this.config.executionPolicy?.pool === 'standard' && recovered && (shard.quotaFailures || shard.consecutiveFailures >= 3)) this.saveStateSnapshot();
   }
 
   private getRateLimitHeaders(): Record<string, string> {
@@ -1894,7 +1924,9 @@ export class GalxaiRelayServer extends EventEmitter {
           const grant = pendingGrant; this.executionGrants.set(jobId,grant); pendingGrant = undefined;
           grant.signal.addEventListener('abort',()=>{
             session.abortController.abort(); this.safeCloseSocket(session.upstreamWs);
-            if (session.currentShardId) { this.releaseShard(session.currentShardId); session.currentShardId=undefined; }
+            // Terminal CDC can settle/abort synchronously before the completion
+            // handler releases the shard. Preserve Standard's confirmed recovery.
+            if (session.currentShardId) { this.releaseShard(session.currentShardId,this.config.executionPolicy?.pool==='standard' && this.jobsTable.get(jobId)?.status==='completed'); session.currentShardId=undefined; }
             this.jobQueue.markFailed(jobId,'execution_authorization_expired');
           },{once:true});
           if (grant.signal.aborted) this.jobQueue.markFailed(jobId,'execution_authorization_expired');
@@ -2453,7 +2485,7 @@ export class GalxaiRelayServer extends EventEmitter {
     }
     if (session.abortController.signal.aborted || this.sessions.get(jobId) !== session) return;
     // Acquire healthy shard (exclude every previously attempted account)
-    const shard = this.acquireHealthyShard(session.attemptedShardIds, queuedJob.model);
+    const shard = this.acquireHealthyShard(session.attemptedShardIds, queuedJob.model, false, queuedJob.id);
     if (!shard) {
       if (this.jobQueue.markFailed(jobId, 'all_shards_exhausted')) this.metrics.totalJobsFailed++;
       return;
@@ -2776,7 +2808,7 @@ export class GalxaiRelayServer extends EventEmitter {
           const exhausted = limits.filter(l => l.remaining === 0);
           if (exhausted.length) {
             this.metrics.totalProactiveRateLimitCooldowns++;
-            this.recordQuotaFailure(shard.id, Math.max(...exhausted.map(l => l.resetAtMs ?? 0)), false);
+            this.recordQuotaFailure(shard.id, Math.max(...exhausted.map(l => l.resetAtMs ?? 0)), false, job.id);
           }
           return;
         }
@@ -3002,7 +3034,7 @@ export class GalxaiRelayServer extends EventEmitter {
     }
     if (event.isQuotaError) {
       this.metrics.totalShardCooldownEjections++;
-      this.recordQuotaFailure(event.shardId, event.retryAtMs);
+      this.recordQuotaFailure(event.shardId, event.retryAtMs, true, event.jobId);
     } else {
       this.recordShardFailure(event.shardId, event.unauthorized);
     }
@@ -3086,7 +3118,7 @@ export class GalxaiRelayServer extends EventEmitter {
     // A cancellation or deadline may have finished the job while refresh awaited I/O.
     if (session.abortController.signal.aborted || this.sessions.get(jobId) !== session) return;
     // 1. Acquire alternative healthy shard
-    const newShard = this.acquireHealthyShard(session.attemptedShardIds, currentJob.model);
+    const newShard = this.acquireHealthyShard(session.attemptedShardIds, currentJob.model, false, currentJob.id);
     if (!newShard) {
       console.warn(`[AntiFragileRelay] In-flight failover failed: No alternate healthy shards available.`);
       if (session.downstreamFailoverKeepaliveTimer) {

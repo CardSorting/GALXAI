@@ -2085,6 +2085,12 @@
       "title": "Central account management and isolated relay contract"
     },
     {
+      "path": "docs/reference/standard-relay-scheduling.md",
+      "scope": "current-guide",
+      "category": "docs",
+      "title": "Standard relay rotation"
+    },
+    {
       "path": "docs/relay-security.md",
       "scope": "current-guide",
       "category": "docs",

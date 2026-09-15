@@ -113,6 +113,7 @@ function poolCompose(pool, args) {
   return guest(pool, ['sudo', '-n', 'env', `GALX_${upper}_RUNTIME_CONFIG_FILE=/opt/galx/config/runtime.json`,
     `GALX_${upper}_MONITOR_CONFIG_FILE=/opt/galx/config/monitor.json`, `GALX_DOCKER_SOCKET_GID=${gid}`, `GALX_LOCAL_GATEWAY=${gateway}`,
     `GALX_LOCAL_MONITOR_IMAGE=${reviewedImages.find(image => image.component === 'monitor' && image.pool === pool).tag}`,
+    `GALX_LOCAL_RUNTIME_IMAGE=${reviewedImages.find(image => image.component === 'runtime' && image.pool === pool).tag}`,
     'docker', 'compose', '--env-file', '/dev/null', '-f', '/opt/galx/services.yaml', '-f', '/opt/galx/local.yaml', ...args]);
 }
 function certificates() {

@@ -14,8 +14,8 @@
       "pool": "premium"
     },
     {
-      "tag": "galxai-relay-standard:candidate-20260915",
-      "id": "sha256:a1cf2bd6bdee7aab3cd8b4baa281f3e8e9b401ef400c62000bbe026f48a4629a",
+      "tag": "galxai-relay-standard:recovery-20260915",
+      "id": "sha256:0f15cf6d50c5bef901f1a5f934d1249f1e333d760353570ae50516782e2e8dd1",
       "architecture": "arm64",
       "component": "runtime",
       "pool": "standard"

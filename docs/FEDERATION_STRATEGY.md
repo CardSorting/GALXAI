@@ -14,7 +14,7 @@ No account belongs to both pools, moves pools in v1, or enters either pool throu
 
 ## Eligibility before load
 
-The application chooses one destination before dispatch: configured text pool, Premium for Sites/images. The runtime verifies its execution gate and fresh scoped projection, filters its own running engines by model access, and rotates among matching candidates. It does not use the legacy load-weighted reverse index.
+The application chooses one destination before dispatch: configured text pool, Premium for Sites/images. The runtime verifies its execution gate and fresh scoped projection. Premium rotates among matching engines. Standard checks live model/health/cooldown evidence and rotates across idle eligible accounts, with one ongoing job per account and bounded denial backoff. Its [scheduling contract](reference/standard-relay-scheduling.md) spans model subsets and preserves original-job identity. These runtimes do not use the legacy load-weighted reverse index.
 
 The engine reserves durable execution identity, acquires the existing central lease and binds it before provider I/O. Assignment, installation epoch, revision, credential, workload, permission, expiry and budget checks are central. Standard also rejects forbidden workloads at its request boundary before provider calls. There is no cross-pool, legacy, alternate-model or uncertain-execution fallback.
 

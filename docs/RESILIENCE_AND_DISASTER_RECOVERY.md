@@ -10,6 +10,7 @@ Identify the affected component in [current state](../post-mortem/CURRENT_STATE.
 | Runtime cannot claim ownership | Respect the greater-than-60-second central stale-owner interval; never override epoch/identity |
 | Central unavailable | Stop new registration/grants; active grants expire independently; restore central authority |
 | Own execution database unavailable | Retain reservation/terminal intent, block unsafe new admission, settle original leases after recovery |
+| Standard returns `service_busy` | Respect the polling hint; [rotation](reference/standard-relay-scheduling.md) excludes busy/cooling accounts. No peer borrowing or account removal solely for saturation |
 | Account sign-in expired | Manually sign in in its bound desktop and explicitly save through the registrar |
 | Saved update not confirmed | Inspect owning runtime, revision and heartbeat; do not mark applied from the database write alone |
 | Account or registration removed | Keep history; registered accounts cannot restore, unfinished registrations require fresh review after Restore |

@@ -1,0 +1,150 @@
+{
+  "at": "2026-09-15T21:05:35.527177+00:00",
+  "baseCommit": "b820848cbf0fb4b8cdaa76bbc27290422596b3e5",
+  "scope": "Standard runtime scheduling and local image replacement; private operational evidence. Source hashes identify the uncommitted working-tree artifact.",
+  "sourceSha256": {
+    "src/relay/standard-pool-scheduler.ts": "95d63086ec6654c28c82b36afcd84decae284f89ad5f276939932a05a296bacf",
+    "src/relay/pool-runtime.ts": "5332ceecc6de67394c12d061937c40f209e0a7d27957bdba0aa41c505fe7653e",
+    "src/relay/pool-execution.ts": "847b2713b3c6e381586dcfaa130108733257a68cb6e18c646ffc86fe5d9aaa8a",
+    "src/relay/relay-server.ts": "cdfbfc5ff1e32009cb5e9046c1b8839aac66ccfefb4c77e32f1ab26f2e444d6e",
+    "scripts/test-standard-pool.ts": "2ade686306711f8235bc5e0d38c90cd21f5e0a7f267df34fc6a933b66947824e",
+    "scripts/relay-local.mjs": "288cf0e12ca506a9807ee7c4ea9a13e6e97e4f6d015cd63f829c99f91d8dc430",
+    "docker/relay-pools/local/pool.yaml": "c9680f39032e529591c6b6db2c4a987959c6a01c4eb4fd90fd58cf106b536e04",
+    "docker/relay-pools/local/images.json": "3c28560fd9458cb00231d303e6f6123762d0f2251ee5b8f0cf9b0cb0527d3cdc",
+    "package.json": "6b25c5de7ab35548d8570d17fe6fd6e389e506343c672a1e5c037384663a617d"
+  },
+  "policy": {
+    "selection": "Least recently selected eligible account across models; synchronous forwarding reservation; checkpointed engine last use seeds ordering.",
+    "concurrency": "One Standard account slot from admission start through completion/settlement attempt; engine concurrency one; acknowledgement alone never releases running work.",
+    "quota": "Immediate provider-feedback exclusion and checkpoint; reported reset respected, otherwise existing exponential 60s to 30min cooldown; one real recovery request. Explicit central denials have process-local 60s to 30min backoff.",
+    "authority": "Existing central account assignment/lease/budget ledger unchanged. Execution DB remains identity/outcomes only. No new migration.",
+    "identity": "Lookup precedes selection; no retry/failover after uncertainty. Duplicate cannot clear original pending lock.",
+    "public": "New pre-dispatch 503 service_busy uses an allowlisted fixed body and Retry-After 5. No account diagnostics returned."
+  },
+  "verification": [
+    {
+      "command": "npm run test:relay:services",
+      "passed": 22,
+      "scope": "Real local HTTP/WebSocket engines, synthetic central and execution stores; includes ten Standard policy tests."
+    },
+    {
+      "command": "node --import tsx --test scripts/test-relay-adaptive-quota.ts scripts/test-relay-hardening.ts scripts/test-public-information-boundary.ts scripts/test-auth-identity-boundary.ts",
+      "passed": 52
+    },
+    {
+      "command": "npm run test:relay:access",
+      "passed": 6
+    },
+    {
+      "command": "npx tsc --noEmit",
+      "result": "passed"
+    },
+    {
+      "command": "npm run build",
+      "result": "passed",
+      "staticPages": 285
+    },
+    {
+      "command": "npm run docs:check:build and focused scheduler-marker scan",
+      "browserAndRenderedAssets": 669,
+      "result": "No compiled private markers or private runtime trace paths; initial command also reported expected stale documentation fingerprints pending explicit review."
+    },
+    {
+      "command": "npm run test:docs",
+      "passed": 38
+    },
+    {
+      "command": "npm run relay:local -- verify",
+      "passed": 69
+    }
+  ],
+  "images": {
+    "images": [
+      {
+        "tag": "galxai-relay-central:management-20260915",
+        "id": "sha256:4f848110b24290945f742a936e6f4fcd21c923ca1c0be359d2b1240227e43a4f",
+        "architecture": "arm64",
+        "component": "central"
+      },
+      {
+        "tag": "galxai-relay-premium:candidate-20260915",
+        "id": "sha256:22ef2426f2509fee7fc33d77d49abb8f02ed981b66b8766a3deed7892d3f6e68",
+        "architecture": "arm64",
+        "component": "runtime",
+        "pool": "premium"
+      },
+      {
+        "tag": "galxai-relay-standard:rotation-20260915",
+        "id": "sha256:d7364a982d853d08fded9fbee98bbeabefa86520b033c60c72eda1e89f28b25b",
+        "architecture": "arm64",
+        "component": "runtime",
+        "pool": "standard"
+      },
+      {
+        "tag": "galxai-monitor-premium:management-20260915",
+        "id": "sha256:39735a31ac1179def573ee482fb780f5ce47c9813807e258a50bd2f55b8a4b1d",
+        "architecture": "arm64",
+        "component": "monitor",
+        "pool": "premium"
+      },
+      {
+        "tag": "galxai-monitor-standard:management-20260915",
+        "id": "sha256:d49a8f13d4f3ed9ed2a8ffa20c2efa0b6e0ddf15bdfc1cce95aa64e1a636f319",
+        "architecture": "arm64",
+        "component": "monitor",
+        "pool": "standard"
+      }
+    ]
+  },
+  "previousStandardImage": {
+    "tag": "galxai-relay-standard:candidate-20260915",
+    "id": "sha256:a1cf2bd6bdee7aab3cd8b4baa281f3e8e9b401ef400c62000bbe026f48a4629a",
+    "architecture": "arm64",
+    "component": "runtime",
+    "pool": "standard"
+  },
+  "localAcceptance": {
+    "at": "2026-09-15T21:00:27.419Z",
+    "checks": 69,
+    "scope": "local VM separation on one trusted Mac; no provider generation or cloud deployment",
+    "records": [
+      {
+        "pool": "premium",
+        "address": "192.168.105.1",
+        "installationId": "cdbf6081-b947-45f1-b3c7-5c4b992a951c",
+        "registrationAllowed": true,
+        "executionAllowed": false,
+        "accounts": 0,
+        "machineSha256": "706d57f0db2059f3f707a601d67d91e591639b380e4500ac2fb133ca59d5cc0b",
+        "daemonSha256": "d9a2e6dd4b797ec1fb9bcbc2a1282948e74e3ab6ffb0fa5c28fbcd1d429bfa95"
+      },
+      {
+        "pool": "standard",
+        "address": "192.168.105.3",
+        "installationId": "c3f00fc7-d199-4431-969c-66d492eba38e",
+        "registrationAllowed": true,
+        "executionAllowed": false,
+        "accounts": 0,
+        "machineSha256": "a434cf391eb62970b1269bc04b13d7146d5296167ffb2de3a9e9188e71628269",
+        "daemonSha256": "212a2e51978e2246536443fed52029d4ac1a134811b1bbb08258da007728d732"
+      }
+    ]
+  },
+  "localAcceptanceSha256": "2f9d4399f2325ed0f6eb5f2e817b2d482b646d2cdd5d991ca1daaa5f167fa847",
+  "installation": {
+    "newImage": "sha256:d7364a982d853d08fded9fbee98bbeabefa86520b033c60c72eda1e89f28b25b",
+    "architecture": "arm64",
+    "runtime": "galx-standard-relay-1",
+    "stateVolume": "galx-standard_standard_execution",
+    "workflow": "Built under new tag, inspected and loaded only into Standard VM; reinstalled reviewed overlay; confirmed empty/closed Standard via viewer status; stopped Standard runtime; normal up waited for previous owner heartbeat; verified both pools.",
+    "otherImagesUnchanged": true
+  },
+  "limits": [
+    "No real provider sign-in, quota spend, generation, throughput measurement or public application deployment.",
+    "Checkpoint saves are best effort; local central-denial backoff and forwarding order are process-local. Central authority still governs after restart.",
+    "Request fairness is not token fairness; busy accounts are skipped and a sole eligible account can serve successive completed requests.",
+    "Monitor health remains central metadata, not a live feed of local scheduler capacity.",
+    "Initial unprivileged fixture run hit local-listener EPERM and a Node assertion; rerun with local networking passed.",
+    "No PostgreSQL schemas, policies or grants changed; retained database acceptance is baseline evidence."
+  ]
+}

@@ -128,6 +128,7 @@ Owner role: **Relay operator**. Domain: `relay`.
 - [Legacy desktop enrollment](../../docs/maintainers/legacy-desktop-enrollment.md)
 - [Legacy desktop operations](../../docs/maintainers/legacy-desktop-operations.md)
 - [Relay selection and admission](../../docs/ROUTING_ALGORITHMS.md)
+- [Standard relay rotation](../../docs/reference/standard-relay-scheduling.md)
 - [Application queues and relay execution](../../docs/QUEUE_SPECIFICATION.md)
 - [Rate limits, concurrency and quota](../../docs/RATE_LIMITS_AND_QUOTAS.md)
 - [Model catalog and observed availability](../../docs/MODEL_CATALOG.md)

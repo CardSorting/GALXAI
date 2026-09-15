@@ -3,6 +3,7 @@ import type { Pool } from 'pg';
 import { randomUUID } from 'node:crypto';
 import { CentralClient, hash, requestWorkload, type PoolId, type Workload } from './pool-protocol.js';
 import { RequestError } from './request-policy.js';
+import { cooldownDeadline } from './quota-policy.js';
 
 export interface ExecutionGrant {
   signal: AbortSignal;
@@ -16,6 +17,7 @@ export interface ExecutionPolicy {
 export interface AssignedAccount {
   id: string; revision: number; assignmentRevision: number; credentialRevision: string;
   state: 'enabled' | 'paused' | 'revoked'; desktopId: string; models: string[]; expiresAtMs: number;
+  cooldownUntilMs?: number;
   credential?: { accessToken: string; accountId: string };
 }
 export interface ExecutionRecord {
@@ -36,6 +38,8 @@ export class PostgresExecutionStore implements ExecutionStore {
 export class PoolExecution {
   private grants = new Set<ExecutionGrant>();
   private finishes = new Map<string, Record<string, unknown>>();
+  private readonly activeAccounts = new Set<string>();
+  private readonly admissionDenials = new Map<string, { failures: number; until: number }>();
   constructor(readonly central: CentralClient, readonly store: ExecutionStore, readonly epoch = randomUUID()) {}
   async settlePending() {
     // A database outage at completion retains the terminal intent for this process.
@@ -54,10 +58,24 @@ export class PoolExecution {
     }
   }
   stop() { for (const grant of this.grants) void grant.complete(false).catch(()=>{}); }
-  policy(account: AssignedAccount): ExecutionPolicy {
-    return {pool:this.central.identity.pool,admit:(req,body,tenant,executionId)=>this.admit(account,req,body,tenant,executionId)};
+  standardAvailable(accountId: string, now = Date.now()) {
+    return !this.activeAccounts.has(accountId) && (this.admissionDenials.get(accountId)?.until ?? 0) <= now;
   }
-  private async admit(account: AssignedAccount, req: IncomingMessage, body: Record<string, any>, tenant: string, executionId: string): Promise<ExecutionGrant> {
+  standardRecovering(accountId: string) { return this.admissionDenials.has(accountId); }
+  reconcileAccounts(ids: ReadonlySet<string>) {
+    for (const id of this.admissionDenials.keys()) if (!ids.has(id) && !this.activeAccounts.has(id)) this.admissionDenials.delete(id);
+  }
+  policy(account: AssignedAccount): ExecutionPolicy {
+    return {pool:this.central.identity.pool,admit:async(req,body,tenant,executionId)=>{
+      const standard = this.central.identity.pool === 'standard';
+      if (standard && !this.standardAvailable(account.id)) throw new RequestError(503,'service_unavailable','This service is temporarily unavailable.');
+      if (standard) this.activeAccounts.add(account.id);
+      const release = () => { if (standard) this.activeAccounts.delete(account.id); };
+      try { return await this.admit(account,req,body,tenant,executionId,release); }
+      catch (error) { release(); throw error; }
+    }};
+  }
+  private async admit(account: AssignedAccount, req: IncomingMessage, body: Record<string, any>, tenant: string, executionId: string, release: () => void): Promise<ExecutionGrant> {
     if (this.finishes.size) throw new RequestError(503,'service_unavailable','This service is temporarily unavailable.');
     const workload = requestWorkload(this.central.identity.pool,req.url ?? '',body);
     const key = req.headers['idempotency-key'];
@@ -71,9 +89,14 @@ export class PoolExecution {
     try {
       authorization = await this.central.call('/runtime/acquire',{...common,workload,requestKey,requestSha256,tenantSha256,
         estimatedTokens:Math.min(1_000_000,Math.max(2000,Math.ceil(Buffer.byteLength(JSON.stringify(body))/3)+(Number.isSafeInteger(body.max_tokens)?body.max_tokens:3500)))});
+      if (authorization.denied === true && this.central.identity.pool === 'standard') {
+        const failures = (this.admissionDenials.get(account.id)?.failures ?? 0) + 1;
+        this.admissionDenials.set(account.id,{failures,until:cooldownDeadline(failures,Date.now())});
+      }
       if (authorization.denied || typeof authorization.leaseId !== 'string') throw Error('Admission unavailable.');
       // Bind before any upstream I/O. A crash between acquisition and binding leaves a reserved identity, never permission to repeat.
       await this.store.call('bind',{requestKey,executionId,leaseId:authorization.leaseId});
+      this.admissionDenials.delete(account.id);
     } catch {
       this.finishes.set(requestKey,{requestKey,executionId,success:false});
       // Acquisition may have succeeded before the execution database became unavailable.
@@ -93,7 +116,7 @@ export class PoolExecution {
       complete:async(success,actualTokens)=>{
         if (done) return; done=true; clearTimeout(deadline); clearTimeout(renewal); this.grants.delete(grant); abort.abort();
         this.finishes.set(requestKey,{requestKey,executionId,success,...(actualTokens !== undefined ? {actualTokens}: {})});
-        await this.settlePending();
+        try { await this.settlePending(); } finally { release(); }
       },
     };
     try { update(authorization); } catch { await grant.complete(false); throw new RequestError(503,'service_unavailable','This request could not be authorized.'); }

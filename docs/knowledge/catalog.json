@@ -3804,6 +3804,18 @@
       "decision": null
     },
     {
+      "path": "docs/reference/standard-relay-scheduling.md",
+      "title": "Standard relay rotation",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [
+        "relay"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": null
+    },
+    {
       "path": "docs/relay-security.md",
       "title": "Relay security reference",
       "scope": "current-guide",

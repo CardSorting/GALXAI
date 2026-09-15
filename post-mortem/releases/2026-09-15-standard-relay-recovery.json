@@ -1,0 +1,154 @@
+{
+  "at": "2026-09-15T21:36:23.273663+00:00",
+  "baseCommit": "b820848cbf0fb4b8cdaa76bbc27290422596b3e5",
+  "scope": "Follow-up Standard scheduler audit and local runtime replacement; private operational evidence. Source hashes identify the uncommitted working-tree artifact.",
+  "baselineEvidence": "post-mortem/releases/2026-09-15-standard-relay-rotation.json",
+  "sourceSha256": {
+    "src/relay/standard-pool-scheduler.ts": "006362eb736b5d2739a79b11d97274220b5ce88150046b5bdce7be66b3df75b8",
+    "src/relay/pool-runtime.ts": "797fd490b60ef63cd2a4c78115756dc9759bffe056461789dccbd5bb4c6fcca2",
+    "src/relay/pool-execution.ts": "b1c87b5e18eac90bb93d128066e38963bcb0072f10631ee8a77975cb932a694c",
+    "src/relay/relay-server.ts": "137b8b51dff91081065b4a363760dc416765ba5c8ad77f485088216494f207ea",
+    "scripts/test-standard-pool.ts": "c7308eb79a2900976bb52df3c756bf6f8fc8c53c7eeae7890123f12d9e1594b1",
+    "scripts/relay-local.mjs": "288cf0e12ca506a9807ee7c4ea9a13e6e97e4f6d015cd63f829c99f91d8dc430",
+    "docker/relay-pools/local/pool.yaml": "c9680f39032e529591c6b6db2c4a987959c6a01c4eb4fd90fd58cf106b536e04",
+    "docker/relay-pools/local/images.json": "a9912866ccd20e4d91bcd209beb9d66a754f2feef13241f52691644f6b967693",
+    "package.json": "6b25c5de7ab35548d8570d17fe6fd6e389e506343c672a1e5c037384663a617d"
+  },
+  "auditFindings": [
+    "Engine wall-clock last use and a local selection counter could distort live fairness; checkpoint data now seeds first use only.",
+    "Stale reservation callbacks could release a newer selection; releases now require their ownership token.",
+    "Multiple cooled accounts could begin recovery together; new recovery selections now share a monotonic five-second interval while healthy work continues.",
+    "Repeated quota frames could multiply backoff within one job; escalation now counts the job once while fresh notices retain or extend its deadline.",
+    "Expired reset-less zero observations could reopen cooldown before a permitted probe; the old observations retire at probe admission and new observations still exclude.",
+    "Synchronous grant cleanup could erase the success signal before recovery reset; confirmed recovery now survives cleanup and is checkpointed.",
+    "A delayed lookup could dispatch abandoned work or rely on old readiness; both caller presence and projection freshness are checked before new selection."
+  ],
+  "verification": [
+    {
+      "command": "npm run test:relay:services",
+      "passed": 30,
+      "scope": "Real local HTTP/WebSocket engines with synthetic central/store dependencies; 18 Standard cases including eight new follow-up cases."
+    },
+    {
+      "command": "node --import tsx --test scripts/test-relay-adaptive-quota.ts scripts/test-relay-hardening.ts scripts/test-public-information-boundary.ts scripts/test-auth-identity-boundary.ts",
+      "passed": 52
+    },
+    {
+      "command": "npm run build",
+      "result": "passed",
+      "staticPages": 285
+    },
+    {
+      "command": "npm run docs:check:build and focused scheduler-marker scan",
+      "browserAndRenderedAssets": 669,
+      "result": "Compiled private-marker/runtime-trace scan clean; zero occurrences of the five new recovery markers. Initial command reported expected stale queue review pending explicit attestation."
+    },
+    {
+      "command": "npm run test:docs",
+      "passed": 38
+    },
+    {
+      "command": "npm run relay:local -- verify",
+      "passed": 69
+    }
+  ],
+  "compiledRecoveryMarkers": [
+    "STANDARD_RECOVERY_INTERVAL_MS",
+    "lastQuotaFailureJobId",
+    "nextRecoveryAt",
+    "standardRecovering",
+    "recovery-20260915"
+  ],
+  "images": {
+    "images": [
+      {
+        "tag": "galxai-relay-central:management-20260915",
+        "id": "sha256:4f848110b24290945f742a936e6f4fcd21c923ca1c0be359d2b1240227e43a4f",
+        "architecture": "arm64",
+        "component": "central"
+      },
+      {
+        "tag": "galxai-relay-premium:candidate-20260915",
+        "id": "sha256:22ef2426f2509fee7fc33d77d49abb8f02ed981b66b8766a3deed7892d3f6e68",
+        "architecture": "arm64",
+        "component": "runtime",
+        "pool": "premium"
+      },
+      {
+        "tag": "galxai-relay-standard:recovery-20260915",
+        "id": "sha256:0f15cf6d50c5bef901f1a5f934d1249f1e333d760353570ae50516782e2e8dd1",
+        "architecture": "arm64",
+        "component": "runtime",
+        "pool": "standard"
+      },
+      {
+        "tag": "galxai-monitor-premium:management-20260915",
+        "id": "sha256:39735a31ac1179def573ee482fb780f5ce47c9813807e258a50bd2f55b8a4b1d",
+        "architecture": "arm64",
+        "component": "monitor",
+        "pool": "premium"
+      },
+      {
+        "tag": "galxai-monitor-standard:management-20260915",
+        "id": "sha256:d49a8f13d4f3ed9ed2a8ffa20c2efa0b6e0ddf15bdfc1cce95aa64e1a636f319",
+        "architecture": "arm64",
+        "component": "monitor",
+        "pool": "standard"
+      }
+    ]
+  },
+  "previousStandardImage": {
+    "tag": "galxai-relay-standard:rotation-20260915",
+    "id": "sha256:d7364a982d853d08fded9fbee98bbeabefa86520b033c60c72eda1e89f28b25b",
+    "architecture": "arm64",
+    "component": "runtime",
+    "pool": "standard"
+  },
+  "localAcceptance": {
+    "at": "2026-09-15T21:35:04.598Z",
+    "checks": 69,
+    "scope": "local VM separation on one trusted Mac; no provider generation or cloud deployment",
+    "records": [
+      {
+        "pool": "premium",
+        "address": "192.168.105.1",
+        "installationId": "cdbf6081-b947-45f1-b3c7-5c4b992a951c",
+        "registrationAllowed": true,
+        "executionAllowed": false,
+        "accounts": 0,
+        "machineSha256": "706d57f0db2059f3f707a601d67d91e591639b380e4500ac2fb133ca59d5cc0b",
+        "daemonSha256": "d9a2e6dd4b797ec1fb9bcbc2a1282948e74e3ab6ffb0fa5c28fbcd1d429bfa95"
+      },
+      {
+        "pool": "standard",
+        "address": "192.168.105.3",
+        "installationId": "c3f00fc7-d199-4431-969c-66d492eba38e",
+        "registrationAllowed": true,
+        "executionAllowed": false,
+        "accounts": 0,
+        "machineSha256": "a434cf391eb62970b1269bc04b13d7146d5296167ffb2de3a9e9188e71628269",
+        "daemonSha256": "212a2e51978e2246536443fed52029d4ac1a134811b1bbb08258da007728d732"
+      }
+    ]
+  },
+  "localAcceptanceSha256": "ac6bb60dfc05e6c24b9948d9ce135ba68ee28b13bed82a5ef7276e18e6c8b7b6",
+  "installation": {
+    "newImage": "sha256:0f15cf6d50c5bef901f1a5f934d1249f1e333d760353570ae50516782e2e8dd1",
+    "architecture": "arm64",
+    "runtime": "galx-standard-relay-1",
+    "stateVolume": "galx-standard_standard_execution",
+    "workflow": "Built final source under recovery-20260915, inspected and loaded only into Standard VM; updated reviewed manifest and reinstalled component overlay; confirmed Standard empty/execution-closed via scoped viewer; stopped only Standard runtime; normal up respected the central ownership wait; inspected running image and preserved volume; passed local acceptance.",
+    "otherImagesUnchanged": true
+  },
+  "rollback": "Restore preceding rotation-20260915 Standard pin with execution closed, preserve state and ownership fence, and requalify. The preceding image lacks this follow-up recovery/fairness protection; rollback does not clear quotas or authorize unknown work.",
+  "limits": [
+    "No real provider sign-in, quota spend, generation, throughput measurement or public application deployment. Local empty-pool acceptance does not establish provider readiness.",
+    "Five seconds bounds new local recovery selections, not a provider quota. Long recovery jobs on different accounts can overlap if their selections are spaced by the interval.",
+    "The recovery budget, live rotation and central-denial history are process-local. Restart starts a new local budget; central ownership/grants and persisted provider cooldowns remain authoritative.",
+    "Checkpoint writes are best effort. Successful filesystem persistence is not an execution grant; no PostgreSQL schema, role, RLS policy or central budget change was made.",
+    "Request fairness does not imply equal token consumption. A sole healthy eligible account can receive consecutive completed jobs.",
+    "Monitor health remains centrally observed metadata, not live scheduler capacity. No browser UI or operator telemetry feed was added.",
+    "Cancellation avoidance applies before forwarding. Once forwarded, uncertain work retains its original key/account/epoch and cannot be repeated or moved.",
+    "Only Standard runtime was replaced. Premium, central and monitor image IDs retain their preceding pins. The trusted Mac remains the common physical host."
+  ]
+}

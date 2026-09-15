@@ -1,6 +1,7 @@
 # Overlay for each pool's own Colima VM. All source paths are inside that VM.
 services:
   relay:
+    image: ${GALX_LOCAL_RUNTIME_IMAGE:?Set the reviewed local runtime image}
     environment: {NODE_EXTRA_CA_CERTS: /run/secrets/local-ca}
     extra_hosts: ['host.lima.internal:${GALX_LOCAL_GATEWAY:?Set this VM gateway}']
     secrets: [{source: local_ca, target: local-ca}]
