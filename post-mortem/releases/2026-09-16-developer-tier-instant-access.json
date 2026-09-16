@@ -1,0 +1,39 @@
+{
+  "reviewed_at": "2026-09-16T19:35:00.000000+00:00",
+  "reviewer": "maintainer / access, billing, images, client-efficiency, database, sites",
+  "scope": "Introduction of $10 Developer Tier providing instant pay-as-you-go API access for image generation and frontier OpenAI models upon Stripe fulfillment without requiring manual /developers waitlist application.",
+  "sources_inspected": [
+    "src/lib/supabase/repositories/DeveloperAccessRepository.ts",
+    "src/lib/billing/fulfillment.ts",
+    "src/lib/stripe/config.ts",
+    "src/lib/stripe/products.ts",
+    "src/components/developers/DeveloperPreview.tsx",
+    "src/components/developers/developer-preview.module.css",
+    "src/app/developers/page.tsx",
+    "src/lib/public-content/content.ts",
+    "docs/operations/developer-preview.md"
+  ],
+  "guides_inspected": [
+    "docs/operations/developer-preview.md",
+    "docs/maintainers/FREE_GENERATION_QUOTA.md",
+    "docs/PRODUCT_SURFACE_STRATEGY.md"
+  ],
+  "domain_conclusions": {
+    "access": "Developer Tier purchase automatically marks private.developer_access_requests approved upon payment fulfillment with durable cache invalidation in PreviewReadSync. Free waitlist cohort application remains available.",
+    "billing": "Stripe fulfillment recognizes compute / developer tier payments and atomically grants access in private.developer_access_requests alongside ledger updates.",
+    "images": "Developer tier grants pay-as-you-go API generation for images and frontier OpenAI models with zero markup.",
+    "client-efficiency": "Developer portal and public content clearly present both instant $10 Developer Tier option and free waitlist application.",
+    "database": "Developer access queries and grants use parameterized queries with atomic UPSERT and row-level security.",
+    "sites": "Sites creation and revisions remain protected under GALX Pro fair use, unaffected by developer tier grants."
+  },
+  "actual_validation": [
+    "npx tsx scripts/test-developer-preview.ts (10 passed)",
+    "npm run test:billing:lifecycle (18 passed)",
+    "npm run test:image:security",
+    "npm run docs:sync && npm run docs:check",
+    "npm run deploy:check"
+  ],
+  "remaining_limits": [
+    "Developer API calls are subject to rate limiting and account balance verification."
+  ]
+}

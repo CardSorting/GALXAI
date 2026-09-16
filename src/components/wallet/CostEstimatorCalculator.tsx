@@ -72,7 +72,7 @@ const PRESETS: WorkloadPreset[] = [
     name: 'Autonomous Agent Fleet',
     description: 'Multi-agent LangChain / AutoGPT fleet running autonomous research and tool loops.',
     icon: Bot,
-    modelId: 'gpt-5.6-sol',
+    modelId: 'gpt-6-astra',
     dailyRequests: 1200,
     avgPromptTokens: 4500,
     avgCompletionTokens: 850,
@@ -101,7 +101,7 @@ export function CostEstimatorCalculator({
   currentBalance = 114.59,
   onSelectTopUp
 }: CostEstimatorCalculatorProps) {
-  const [selectedModelId, setSelectedModelId] = useState<string>('gpt-5.6-sol');
+  const [selectedModelId, setSelectedModelId] = useState<string>('gpt-6-astra');
   const [dailyRequests, setDailyRequests] = useState<number>(600);
   const [promptTokens, setPromptTokens] = useState<number>(2500);
   const [completionTokens, setCompletionTokens] = useState<number>(450);

@@ -5,6 +5,7 @@ import { randomUUID } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { Pool } from 'pg';
 import { createProCheckout, fulfillPlanStripeEvent, isProPaymentAdjustment, proPrice } from '../src/lib/billing/plan-subscription';
+import { PRO_PLAN } from '../src/lib/billing/pro-plan';
 import { fulfillStripeEvent } from '../src/lib/billing/fulfillment';
 import type { FairPolicy } from '../src/lib/sites/fair-store';
 import { SiteDomainRegistry } from '../src/lib/sites/domain-registry';
@@ -17,7 +18,7 @@ const check=async(name:string,run:()=>Promise<void>)=>{await run();checks++;cons
 function fake(){
   const sessions=new Map<string,any>(),params=new Map<string,any>();let calls=0,customerCalls=0,lost=false,delay=0;
   let subscription:any[]=[];let beforeReply:((session:any)=>Promise<void>)|undefined;
-  const stripe:any={prices:{list:async()=>({data:[{id:'price_pro',currency:'usd',unit_amount:2000,recurring:{interval:'month',interval_count:1,usage_type:'licensed'}}]})},
+  const stripe:any={prices:{list:async()=>({data:[{id:'price_pro',currency:'usd',unit_amount:PRO_PLAN.monthlyPriceUsd*100,recurring:{interval:'month',interval_count:1,usage_type:'licensed'}}]})},
     customers:{create:async()=>{customerCalls++;return{id:'cus_'+randomUUID().replaceAll('-','')};}},
     subscriptions:{list:async()=>({data:subscription,has_more:false})},checkout:{sessions:{
       retrieve:async(id:string)=>sessions.get(id),
@@ -28,7 +29,7 @@ function fake(){
         if(params.has(options.idempotencyKey))assert.deepEqual(input,params.get(options.idempotencyKey));else params.set(options.idempotencyKey,structuredClone(input));
         const id='cs_test_'+options.idempotencyKey.replaceAll(':','');
         let session=sessions.get(id);if(!session){session={id,status:'open',mode:'subscription',customer:input.customer,client_reference_id:input.client_reference_id,
-          metadata:input.metadata,currency:'usd',amount_subtotal:2000,payment_status:'unpaid',url:'https://checkout.stripe.com/c/pay/'+id};sessions.set(id,session);}
+          metadata:input.metadata,currency:'usd',amount_subtotal:PRO_PLAN.monthlyPriceUsd*100,payment_status:'unpaid',url:'https://checkout.stripe.com/c/pay/'+id};sessions.set(id,session);}
         if(delay)await new Promise(r=>setTimeout(r,delay));if(beforeReply)await beforeReply(session);
         if(lost){lost=false;throw Error('Lost provider acknowledgement');}return session;
       }}}};
@@ -121,7 +122,7 @@ try{
   await check('verified subscription adjustments never debit a prepaid wallet',async()=>{
     const f=fake(),i=input();await createProCheckout(pool,f.stripe,policy,i);const session=[...f.sessions.values()][0];
     f.stripe.invoicePayments={list:async()=>({data:[{invoice:{id:'in_pro',customer:session.customer,parent:{subscription_details:{metadata:{galxPlan:'pro-v1',userId:i.userId}}}}}],has_more:false})};
-    const e=event('charge.refunded',{payment_intent:'pi_pro',amount_refunded:2000,customer:session.customer});assert.equal(await isProPaymentAdjustment(pool,f.stripe,e),true);
+    const e=event('charge.refunded',{payment_intent:'pi_pro',amount_refunded:PRO_PLAN.monthlyPriceUsd*100,customer:session.customer});assert.equal(await isProPaymentAdjustment(pool,f.stripe,e),true);
     await fulfillStripeEvent(pool,e,JSON.stringify(e),{planAdjustment:true});assert.equal((await pool.query('SELECT count(*) FROM galx_wallet_transactions WHERE user_id=$1',[i.userId])).rows[0].count,'0');
   });
   await check('active, unpaid and incomplete existing plans prevent another checkout',async()=>{

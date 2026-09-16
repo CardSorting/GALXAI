@@ -158,8 +158,7 @@ function Workspace({owner,token,authLoading,initialId,initialStarter}: {owner:st
               <div className="sites-composer-actions"><div className="sites-modes" aria-label="Message mode"><button type="button" aria-pressed={intent==='build'} onClick={()=>remember(prompt,'build')}>Build</button><button type="button" aria-pressed={intent==='discuss'} onClick={()=>remember(prompt,'discuss')}>Discuss</button></div>{owner?<button className="sites-send" type="submit" disabled={gate.blocked||studio.connection==='offline'||authLoading||studio.loading||openingSite||busy||Boolean(checkpoint)||site?.generating||!['included','free'].includes(studio.access)||!prompt.trim()||new TextEncoder().encode(prompt).length>2000} aria-label="Send message"><ArrowUp aria-hidden="true" /></button>:<Link className="sites-primary" href={`/login?next=${encodeURIComponent(initialStarter?.href || "/sites")}`}>Sign in to create<ArrowUpRight aria-hidden="true" /></Link>}</div>
             </form>}
             <p className="sites-composer-hint">{new TextEncoder().encode(prompt).length>2000?'Shorten your message to send it.':intent==='discuss'?'Explore ideas without changing your draft.':'Build applies your request to the current draft.'} <span>Shift + Enter for a new line.</span></p>
-            {owner && <GenerationGateNotice kind="sites" knownFree={studio.access==='free'}/>}
-            <p className="sites-help sites-plan-note">{studio.access==='free'?'Your free site includes 3 turns total.':studio.access==='included'?'Included with your plan.':`Create with ${PRO_PLAN.name} for $${PRO_PLAN.monthlyPriceUsd}/month.`} Fair use applies; you may need to pause between updates.</p>
+            <p className="sites-help sites-plan-note">{studio.access==='included'?'Included with your plan.':`Create with ${PRO_PLAN.name} for $${PRO_PLAN.monthlyPriceUsd}/month.`} Fair use applies; you may need to pause between updates.</p>
           </div>
         </>}
       </section>

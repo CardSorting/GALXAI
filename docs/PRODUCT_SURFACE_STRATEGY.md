@@ -10,7 +10,7 @@ Private product authority, reconciled September 13, 2026. [PRODUCT.md](../PRODUC
 | --- | --- |
 | Homepage | Sites-first idea, prototype, revision and public-address pitch; pricing followed by FAQ; extremely early public beta expectations |
 | Public guidance | Dedicated `/pricing`, `/faq`, `/knowledge-base` and eight authored guides, with capability-only copy and no workspace access grant |
-| Sites | Public product with authenticated owned drafts, continuing conversations, preview/version history and explicit managed publication; one free Site with three total turns, or Pro access under fair usage |
+| Sites | Public product with authenticated owned drafts, continuing conversations, preview/version history and explicit managed publication under GALX Pro fair usage |
 | Images | Public product with a one-time five-image allowance and existing Pro account/usage requirements, creation, durable async receipts, owned library, Favorites and sanitized download |
 | Developer preview | Signup, project introduction, GitHub/LinkedIn profiles and cohort interest; individual approval before private API/tool access |
 | Staff administration | Independent owner/reviewer/viewer membership, approval inbox, activity history and private feedback |

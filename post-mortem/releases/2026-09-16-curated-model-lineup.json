@@ -1,0 +1,17 @@
+{
+  "release": "2026-09-16-curated-model-lineup",
+  "title": "Configured Official 5-Model Lineup and Premium Relay Routing Authority",
+  "timestamp": "2026-09-16T19:56:00Z",
+  "author": "maintainer",
+  "description": "Standardized the official curated OpenAI model lineup strictly to 5 verified text/code models plus image synthesis: 1) gpt-6-astra (default flagship for complex, demanding work - Premium Relay only); 2) gpt-5.6-sol (reliable agentic workhorse for everyday tasks - Premium Relay only); 3) gpt-5.6-terra (balanced agentic coding model for everyday work); 4) gpt-5.6-luna (current fast and affordable agentic coding model); 5) gpt-5.5 (proven previous-generation model for coding and general work); 6) openai-gpt-image-latest (image generation suite). o3 and 4o are removed from active model catalogs. All pricing calculators, pSEO comparison matrices, navigation mega-menus, and Developer Tier pass descriptions have been reconciled.",
+  "verification": {
+    "typecheck": "npx tsc --noEmit (0 errors)",
+    "lint": "npm run lint (0 errors)",
+    "unit_tests": [
+      "npm run test:billing:lifecycle",
+      "npm run test:egress:transport",
+      "npm run test:image:security",
+      "scripts/test-developer-preview.ts"
+    ]
+  }
+}

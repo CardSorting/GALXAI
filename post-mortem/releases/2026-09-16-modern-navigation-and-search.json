@@ -1,0 +1,17 @@
+{
+  "release": "2026-09-16-modern-navigation-and-search",
+  "title": "World-Class Modern Navigation System with Flyout Mega-Menus, Quick Search (⌘K), and Mobile Ergonomics",
+  "timestamp": "2026-09-16T19:48:00Z",
+  "author": "maintainer",
+  "description": "Upgraded GALXAI's global navigation architecture to match modern industry leaders (Stripe, Vercel, Linear, GitHub). Features include: 1) Glassmorphic sticky top navigation bar with radial glow and hairline border; 2) Categorized flyout mega-menus for Platform (Sites, Images, Model Arena, Playground, Library), Developers (Developer Hub, Pricing & Catalog, API Keys, Tools), Pricing (Overview, Developer Tier, GALX Pro, Fair Use), and Resources (Knowledge Base, FAQ, Security, Status); 3) Omnipresent Quick Search trigger with global ⌘K/Ctrl+K keyboard integration to BroccoliOmniSearch; 4) Authenticated profile popover with quick links to Account Overview, API Keys, Invoices, Settings, and Sign Out; 5) Accessible, responsive slide-out mobile drawer with categorized accordions and bottom touch navigation bar; 6) Zero public information boundary leaks per AGENTS.md.",
+  "verification": {
+    "typecheck": "npx tsc --noEmit (0 errors)",
+    "lint": "npm run lint (0 errors)",
+    "unit_tests": [
+      "npm run test:public-reading",
+      "npm run test:egress:transport",
+      "npm run test:billing:lifecycle",
+      "scripts/test-developer-preview.ts"
+    ]
+  }
+}

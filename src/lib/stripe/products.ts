@@ -29,31 +29,58 @@ export interface StripeProductTier {
 }
 
 export const STRIPE_PRODUCT_TIERS: Record<string, StripeProductTier> = {
-  lumi_10: {
-    id: 'lumi_10',
-    name: 'GALXAI LUMI Stellar Pass — OpenAI Monthly Subscription',
-    statementDescriptor: 'GALXAI LUMI $10',
-    description: 'Flat $10/month micro-pass for OpenAI frontier reasoning and coding models with generous rolling 5-hour warp limits and Zero Data Retention.',
+  developer_10: {
+    id: 'developer_10',
+    name: 'GALXAI Developer Tier — Images & Frontier OpenAI Models Pass',
+    statementDescriptor: 'GALXAI DEV $10',
+    description: 'Instant Developer Tier activation with $10 base deposit + $5.00 welcome grant + $5.00 match ($20.00 total compute credit). Pay-as-you-go API access for image generation and frontier OpenAI models.',
     depositAmountUsd: 10,
     welcomeGrantUsd: 5.0,
     matchBonusUsd: 5.00,
     totalCreditUsd: 20.00,
     multiplier: 1.50,
-    badge: 'LUMI $10/MO ✨',
+    badge: 'DEV TIER ⚡',
     taxCode: 'txcd_10000000',
     features: [
-      'OpenAI Flagship Curated Lineup (GPT-5.6 Sol, Terra, Luna, o3, 4o)',
-      'Rolling 5-Hour Warp Burst Windows',
-      'Zero Data Retention (ZDR) Enclave Protection',
-      'Universal Drop-In for Cursor, Windsurf & Agents'
+      'Instant Developer Tier & API Key Unlock (No waitlist application needed)',
+      'Pay-As-You-Go API access for Images & Frontier OpenAI Models',
+      'OpenAI Flagship Curated Lineup (GPT-6 Astra, GPT-5.6 Sol, Terra, Luna, GPT-5.5)',
+      'Zero Data Retention (ZDR) Enclave Protection & Universal SDK'
     ],
     metadata: {
-      galxai_tier_key: 'lumi_10',
+      galxai_tier_key: 'developer_10',
       deposit_amount_usd: '10.00',
       total_credit_usd: '20.00',
       match_percentage: '50%',
       rate_lock: 'guaranteed',
-      sla_priority: 'lumi_standard'
+      sla_priority: 'developer_standard'
+    }
+  },
+  lumi_10: {
+    id: 'lumi_10',
+    name: 'GALXAI Developer Tier — Images & Frontier OpenAI Models Pass',
+    statementDescriptor: 'GALXAI DEV $10',
+    description: 'Instant Developer Tier activation with $10 base deposit + $5.00 welcome grant + $5.00 match ($20.00 total compute credit). Pay-as-you-go API access for image generation and frontier OpenAI models.',
+    depositAmountUsd: 10,
+    welcomeGrantUsd: 5.0,
+    matchBonusUsd: 5.00,
+    totalCreditUsd: 20.00,
+    multiplier: 1.50,
+    badge: 'DEV TIER ⚡',
+    taxCode: 'txcd_10000000',
+    features: [
+      'Instant Developer Tier & API Key Unlock (No waitlist application needed)',
+      'Pay-As-You-Go API access for Images & Frontier OpenAI Models',
+      'OpenAI Flagship Curated Lineup (GPT-6 Astra, GPT-5.6 Sol, Terra, Luna, GPT-5.5)',
+      'Zero Data Retention (ZDR) Enclave Protection & Universal SDK'
+    ],
+    metadata: {
+      galxai_tier_key: 'developer_10',
+      deposit_amount_usd: '10.00',
+      total_credit_usd: '20.00',
+      match_percentage: '50%',
+      rate_lock: 'guaranteed',
+      sla_priority: 'developer_standard'
     }
   },
   starter_25: {

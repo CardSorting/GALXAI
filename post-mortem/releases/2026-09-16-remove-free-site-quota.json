@@ -1,0 +1,39 @@
+{
+  "reviewed_at": "2026-09-16T19:24:00.000000+00:00",
+  "reviewer": "maintainer / sites, access, images, client-efficiency, database",
+  "scope": "Removal of the 1 free site allocation on the welcome quota; Sites creation and publishing require GALX Pro under fair use, while the 5 free images one-time quota is preserved.",
+  "sources_inspected": [
+    "src/lib/billing/free-generation-quota.ts",
+    "src/lib/billing/free-generation-contract.ts",
+    "src/components/dashboard/FreeGenerationQuota.tsx",
+    "src/components/sites/SitesWorkspace.tsx",
+    "src/lib/public-content/content.ts",
+    "docs/maintainers/PUBLIC_DISCOVERY.md",
+    "docs/maintainers/FREE_GENERATION_QUOTA.md",
+    "docs/SITES_WORKSPACE.md",
+    "docs/PRODUCT_SURFACE_STRATEGY.md"
+  ],
+  "guides_inspected": [
+    "docs/maintainers/FREE_GENERATION_QUOTA.md",
+    "docs/maintainers/PUBLIC_DISCOVERY.md",
+    "docs/SITES_WORKSPACE.md",
+    "docs/PRODUCT_SURFACE_STRATEGY.md"
+  ],
+  "domain_conclusions": {
+    "sites": "Sites workspace and content require GALX Pro. Free site allocation is removed (0 sites / 0 site turns), and public docs reflect that Sites creation requires GALX Pro under fair use.",
+    "images": "Welcome image quota remains 5 free images per verified account with bounded admissions and artifact sanitation.",
+    "access": "Dashboard header quota indicator displays remaining free images only. Workspace entry and member authority checks verified.",
+    "client-efficiency": "Public reading guides, FAQs, and navigation updated without broken links or invalid allowance promises.",
+    "database": "Quota resolution and capacity settlement fail closed on free site operations while maintaining image request durability."
+  },
+  "actual_validation": [
+    "npm run test:free-quota (4 passed)",
+    "npm run test:image:security (45 passed)",
+    "npm run test:egress:transport (43 passed)",
+    "npm run test:sites (54 passed)",
+    "npm run test:billing:lifecycle (18 passed)"
+  ],
+  "remaining_limits": [
+    "Existing free sites created in historical test databases remain read-only or fail closed on new generation attempts without Pro."
+  ]
+}

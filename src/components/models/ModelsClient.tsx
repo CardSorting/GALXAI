@@ -50,18 +50,28 @@ interface ModelCuratedMetadata {
 }
 
 const MODEL_METADATA: Record<string, ModelCuratedMetadata> = {
-  'gpt-5.6-sol': {
-    roleBadge: 'Flagship Reasoning & Architecture',
-    speedTier: 'Comprehensive Reasoning',
+  'gpt-6-astra': {
+    roleBadge: 'Apex Frontier Reasoning & Complex Systems',
+    speedTier: 'Highest Capability Frontier (~400ms)',
     bestFor: [
-      'Multi-file codebase refactoring',
+      'Complex multi-agent reasoning & systems',
+      'Challenging mathematical & algorithmic synthesis',
+      'Enterprise-grade full-stack architecture',
+    ],
+    cacheDiscountPercent: 90,
+  },
+  'gpt-5.6-sol': {
+    roleBadge: 'Reliable Agentic Workhorse',
+    speedTier: 'Comprehensive Reasoning (~300ms)',
+    bestFor: [
+      'Everyday agentic workflow execution',
       'Complex algorithmic design & math',
-      'Deep system architecture planning',
+      'Multi-file codebase refactoring',
     ],
     cacheDiscountPercent: 90,
   },
   'gpt-5.6-terra': {
-    roleBadge: 'Balanced Agentic Workhorse',
+    roleBadge: 'Balanced Agentic Coding',
     speedTier: 'Balanced & High Throughput (~250ms)',
     bestFor: [
       'Daily agentic development loops',
@@ -71,12 +81,22 @@ const MODEL_METADATA: Record<string, ModelCuratedMetadata> = {
     cacheDiscountPercent: 90,
   },
   'gpt-5.6-luna': {
-    roleBadge: 'Ultra-Low Latency & High Velocity',
+    roleBadge: 'Fast & Affordable Coding',
     speedTier: 'Sub-Second Real-Time (~65ms)',
     bestFor: [
       'Real-time IDE autocomplete',
       'Instant-response streaming chat',
       'High-frequency triage & classification',
+    ],
+    cacheDiscountPercent: 90,
+  },
+  'gpt-5.5': {
+    roleBadge: 'Proven Previous-Generation Model',
+    speedTier: 'Proven General Execution (~280ms)',
+    bestFor: [
+      'Baseline code analysis & migrations',
+      'Cost-effective structured data processing',
+      'Standard conversational assistant workflows',
     ],
     cacheDiscountPercent: 90,
   },
@@ -103,10 +123,10 @@ const openai = new OpenAI({
 });
 
 const response = await openai.chat.completions.create({
-  model: 'gpt-5.6-sol',
+  model: 'gpt-6-astra',
   messages: [
     { role: 'system', content: 'You are an expert systems architect.' },
-    { role: 'user', content: 'Refactor this concurrent cache pool for zero drops.' },
+    { role: 'user', content: 'Architect an enterprise high-throughput event fabric.' },
   ],
 });
 
@@ -124,10 +144,10 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="gpt-5.6-sol",
+    model="gpt-6-astra",
     messages=[
         {"role": "system", "content": "You are an expert systems architect."},
-        {"role": "user", "content": "Refactor this concurrent cache pool for zero drops."}
+        {"role": "user", "content": "Architect an enterprise high-throughput event fabric."}
     ]
 )
 
@@ -139,9 +159,9 @@ print(response.choices[0].message.content)`,
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer $GALXAI_API_KEY" \\
   -d '{
-    "model": "gpt-5.6-sol",
+    "model": "gpt-6-astra",
     "messages": [
-      {"role": "user", "content": "Refactor this concurrent cache pool for zero drops."}
+      {"role": "user", "content": "Architect an enterprise high-throughput event fabric."}
     ]
   }'`,
   },
@@ -479,7 +499,7 @@ console.log(res.choices[0].message.content);`;
               <p className="text-sm sm:text-base text-zinc-300 leading-relaxed max-w-xl">
                 Direct, low-latency API access to modern reasoning, coding, and visual synthesis models.
                 Point your existing OpenAI SDK to our GALX API to unlock automatic prompt caching,
-                rate-limit pooling, and multi-region failover with zero code rewrites.
+                rate-limit absorption, and multi-region failover with zero code rewrites.
               </p>
 
               {/* Endpoint Pill */}

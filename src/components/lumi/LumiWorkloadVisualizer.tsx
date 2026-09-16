@@ -1,20 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import {
-  Sparkles,
-  Zap,
-  Flame,
-  ShieldCheck,
-  Cpu,
-  Bot,
-  Laptop,
-  MessageSquare,
-  Layers,
-  ArrowRight,
-  Check,
-  Coins
-} from 'lucide-react';
+import { Cpu, Zap, Sparkles, Layers, ShieldCheck, Database, Check } from 'lucide-react';
 
 interface OpenAIModelQuota {
   id: string;
@@ -30,98 +17,59 @@ interface OpenAIModelQuota {
 
 const OPENAI_LUMI_MODELS: OpenAIModelQuota[] = [
   {
-    id: 'gpt-5.6-luna',
-    name: 'GPT-5.6 Luna',
-    category: 'Ultra-Fast Agentic Code Synthesis',
-    baseReqs: 2050,
-    contextWindow: '200k tokens',
-    cacheSavings: '75% Active',
-    latency: '< 15ms Anycast',
-    badge: 'STELLAR CHOICE 🌟',
-    color: 'from-amber-400 to-orange-500'
+    id: 'gpt-6-astra',
+    name: 'GPT-6 Astra (Default Flagship)',
+    category: 'Our most capable model for complex, demanding work',
+    baseReqs: 800,
+    contextWindow: '2M tokens',
+    cacheSavings: '90% Active',
+    latency: '< 20ms',
+    badge: 'DEFAULT APEX 👑',
+    color: 'from-indigo-400 to-sky-500'
   },
   {
     id: 'gpt-5.6-sol',
     name: 'GPT-5.6 Sol',
-    category: 'Apex Architectural Reasoning',
+    category: 'Reliable agentic workhorse for everyday tasks',
     baseReqs: 1250,
-    contextWindow: '200k tokens',
-    cacheSavings: '75% Active',
+    contextWindow: '1M tokens',
+    cacheSavings: '90% Active',
     latency: '< 25ms',
-    badge: 'APEX REASONING',
+    badge: 'WORKHORSE ⚡',
     color: 'from-cyan-400 to-blue-500'
   },
   {
     id: 'gpt-5.6-terra',
     name: 'GPT-5.6 Terra',
-    category: 'Deep Systems & Full-Stack Refactoring',
-    baseReqs: 850,
-    contextWindow: '200k tokens',
-    cacheSavings: '75% Active',
-    latency: '< 30ms',
+    category: 'Balanced agentic coding model for everyday work',
+    baseReqs: 2500,
+    contextWindow: '1M tokens',
+    cacheSavings: '90% Active',
+    latency: '< 20ms',
+    badge: 'BALANCED',
     color: 'from-emerald-400 to-teal-500'
   },
   {
-    id: 'o3-mini',
-    name: 'o3-mini',
-    category: 'Rapid Step-by-Step Problem Solving',
-    baseReqs: 5400,
-    contextWindow: '200k tokens',
-    cacheSavings: '75% Active',
-    latency: '< 20ms',
-    badge: 'HIGH EFFICIENCY',
-    color: 'from-purple-400 to-indigo-500'
+    id: 'gpt-5.6-luna',
+    name: 'GPT-5.6 Luna',
+    category: 'Fast and affordable agentic coding model',
+    baseReqs: 15000,
+    contextWindow: '1M tokens',
+    cacheSavings: '90% Active',
+    latency: '< 15ms Anycast',
+    badge: 'FAST & AFFORDABLE 🌟',
+    color: 'from-amber-400 to-orange-500'
   },
   {
-    id: 'o3',
-    name: 'o3 (Frontier Reasoning)',
-    category: 'Maximum Complexity Frontier Reasoning',
-    baseReqs: 920,
-    contextWindow: '200k tokens',
-    cacheSavings: '75% Active',
-    latency: '< 35ms',
-    color: 'from-rose-400 to-pink-500'
-  },
-  {
-    id: 'gpt-4.5-preview',
-    name: 'GPT-4.5 Preview',
-    category: 'Frontier World Knowledge & Synthesis',
-    baseReqs: 640,
-    contextWindow: '128k tokens',
-    cacheSavings: '75% Active',
-    latency: '< 28ms',
-    color: 'from-fuchsia-400 to-purple-500'
-  },
-  {
-    id: 'gpt-4o',
-    name: 'GPT-4o (Omni)',
-    category: 'Multimodal Vision & Real-Time Code',
-    baseReqs: 4300,
-    contextWindow: '128k tokens',
-    cacheSavings: '75% Active',
+    id: 'gpt-5.5',
+    name: 'GPT-5.5',
+    category: 'Proven previous-generation model for coding and general work',
+    baseReqs: 5000,
+    contextWindow: '500k tokens',
+    cacheSavings: '90% Active',
     latency: '< 18ms',
-    color: 'from-sky-400 to-cyan-500'
-  },
-  {
-    id: 'gpt-4o-mini',
-    name: 'GPT-4o Mini',
-    category: 'Hyper-Velocity Autonomous Swarms',
-    baseReqs: 30100,
-    contextWindow: '128k tokens',
-    cacheSavings: '75% Active',
-    latency: '< 10ms',
-    badge: 'HYPER-SWARM 🚀',
-    color: 'from-emerald-300 to-green-500'
-  },
-  {
-    id: 'text-embedding-3-large',
-    name: 'Text-Embedding-3-Large',
-    category: 'Dense Galactic Vector Search & RAG',
-    baseReqs: 45000,
-    contextWindow: '8,192 dims',
-    cacheSavings: 'Pass-Through',
-    latency: '< 8ms',
-    color: 'from-teal-300 to-emerald-400'
+    badge: 'PROVEN',
+    color: 'from-purple-400 to-indigo-500'
   }
 ];
 
@@ -129,135 +77,127 @@ const MULTIPLIERS = [1, 10, 25, 50, 100, 250];
 
 export function LumiWorkloadVisualizer() {
   const [multiplier, setMultiplier] = useState<number>(1);
-  const [filterCategory, setFilterCategory] = useState<'all' | 'reasoning' | 'fast' | 'multimodal'>('all');
+  const [filterCategory, setFilterCategory] = useState<'all' | 'flagship' | 'agentic'>('all');
 
   const filteredModels = OPENAI_LUMI_MODELS.filter(m => {
-    if (filterCategory === 'reasoning') return m.id.includes('o3') || m.id.includes('sol') || m.id.includes('4.5');
-    if (filterCategory === 'fast') return m.id.includes('luna') || m.id.includes('mini') || m.id.includes('embedding');
-    if (filterCategory === 'multimodal') return m.id.includes('4o') || m.id.includes('terra');
+    if (filterCategory === 'flagship') return m.id === 'gpt-6-astra' || m.id === 'gpt-5.6-sol';
+    if (filterCategory === 'agentic') return m.id === 'gpt-5.6-terra' || m.id === 'gpt-5.6-luna' || m.id === 'gpt-5.5';
     return true;
   });
 
   return (
-    <div className="space-y-6">
-      {/* Multiplier Warp Selector Toolbar */}
-      <div className="p-4 sm:p-6 rounded-3xl bg-black/60 border border-amber-500/30 backdrop-blur-2xl shadow-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping" />
-            <span className="text-xs font-mono font-bold uppercase tracking-wider text-amber-300">
-              Cosmic Warp Multiplier:
-            </span>
+    <div className="rounded-3xl border border-indigo-500/20 bg-[#07090e]/90 p-6 sm:p-8 backdrop-blur-xl shadow-2xl relative overflow-hidden">
+      {/* Background Accent */}
+      <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-600/10 rounded-full blur-[100px] pointer-events-none" />
+
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-white/10">
+        <div>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 text-xs font-semibold mb-3">
+            <Cpu className="w-3.5 h-3.5" />
+            Curated OpenAI Compute Capacity Matrix
           </div>
-          <p className="text-xs text-zinc-400 font-sans">
-            Scale your rolling 5-hour burst capacity across autonomous swarms and enterprise pipelines.
+          <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+            Select Your Monthly Deposit Level
+          </h3>
+          <p className="text-xs sm:text-sm text-zinc-400 mt-1 max-w-xl">
+            See how many wholesale API requests you unlock with each compute match level across OpenAI flagship models.
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-2xl bg-black/80 border border-white/10 text-xs font-mono">
+        {/* Tier Buttons */}
+        <div className="flex flex-wrap gap-2 p-1.5 rounded-2xl bg-white/5 border border-white/10 shrink-0">
           {MULTIPLIERS.map((m) => {
             const isSelected = multiplier === m;
             return (
               <button
                 key={m}
-                type="button"
                 onClick={() => setMultiplier(m)}
-                className={`px-3.5 py-1.5 rounded-xl font-bold transition-all cursor-pointer ${
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
                   isSelected
-                    ? 'bg-gradient-to-r from-amber-400 to-orange-500 text-black shadow-lg shadow-amber-500/25 scale-105'
+                    ? 'bg-gradient-to-r from-indigo-500 to-sky-500 text-white shadow-lg shadow-indigo-500/25 scale-105'
                     : 'text-zinc-400 hover:text-white hover:bg-white/5'
                 }`}
               >
-                {m}x
+                ${m} USD
               </button>
             );
           })}
         </div>
       </div>
 
-      {/* Model Category Filters */}
-      <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-3">
-        <div className="flex items-center gap-2 text-xs font-mono text-zinc-400">
-          <Sparkles className="w-4 h-4 text-amber-400" />
-          <span className="uppercase font-bold text-white">OpenAI Model Lineup:</span>
-        </div>
-
-        <div className="flex gap-1">
-          {(['all', 'reasoning', 'fast', 'multimodal'] as const).map((cat) => (
-            <button
-              key={cat}
-              type="button"
-              onClick={() => setFilterCategory(cat)}
-              className={`px-3 py-1 rounded-xl text-xs font-mono capitalize transition-all cursor-pointer ${
-                filterCategory === cat
-                  ? 'bg-white/15 text-white font-bold border border-white/20'
-                  : 'text-zinc-500 hover:text-zinc-300'
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
+      {/* Category Filter Pills */}
+      <div className="flex items-center gap-2 pt-6 pb-4 overflow-x-auto">
+        {(['all', 'flagship', 'agentic'] as const).map((cat) => (
+          <button
+            key={cat}
+            onClick={() => setFilterCategory(cat)}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold capitalize whitespace-nowrap transition-colors ${
+              filterCategory === cat
+                ? 'bg-indigo-500/20 border border-indigo-500/50 text-indigo-300'
+                : 'bg-white/5 border border-white/5 text-zinc-400 hover:text-zinc-200'
+            }`}
+          >
+            {cat === 'all' ? 'All Models' : cat === 'flagship' ? 'Flagship Frontier (GPT-6 Astra & Sol)' : 'Agentic & Fast (Terra, Luna, 5.5)'}
+          </button>
+        ))}
       </div>
 
-      {/* Model Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {/* Cards Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-2">
         {filteredModels.map((model) => {
-          const scaledReqs = model.baseReqs * multiplier;
+          const totalRequests = Math.round(model.baseReqs * multiplier);
           return (
             <div
               key={model.id}
-              className="p-5 rounded-3xl bg-gradient-to-b from-zinc-950/80 via-black/90 to-[#07080d] border border-white/10 hover:border-amber-500/40 transition-all duration-200 group flex flex-col justify-between space-y-4 shadow-xl hover:shadow-amber-500/10 hover:scale-[1.01]"
+              className="relative p-5 rounded-2xl border border-white/10 bg-white/[0.02] hover:bg-white/[0.04] transition-all hover:border-indigo-500/40 group flex flex-col justify-between"
             >
-              <div className="space-y-2">
-                <div className="flex items-start justify-between gap-2">
+              <div>
+                <div className="flex items-start justify-between gap-2 mb-2">
                   <div>
-                    <h3 className="text-base font-black text-white group-hover:text-amber-300 transition-colors">
+                    <span className="text-xs font-mono text-zinc-500">{model.id}</span>
+                    <h4 className="text-base font-bold text-white group-hover:text-indigo-300 transition-colors">
                       {model.name}
-                    </h3>
-                    <p className="text-[11px] text-zinc-400 font-sans leading-tight mt-0.5">
-                      {model.category}
-                    </p>
+                    </h4>
                   </div>
                   {model.badge && (
-                    <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold uppercase bg-amber-400/15 text-amber-300 border border-amber-400/30 shrink-0">
+                    <span className="px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
                       {model.badge}
                     </span>
                   )}
                 </div>
 
-                {/* Live Output Highlight */}
-                <div className="p-3.5 rounded-2xl bg-black/60 border border-white/5 space-y-1 font-mono">
-                  <div className="flex items-baseline justify-between">
-                    <span className="text-xl sm:text-2xl font-black text-white">
-                      {scaledReqs.toLocaleString()}
-                    </span>
-                    <span className="text-[10px] text-zinc-400 uppercase font-sans">
-                      Reqs / 5 Hours
+                <p className="text-xs text-zinc-400 mb-4 min-h-[32px]">
+                  {model.category}
+                </p>
+
+                <div className="space-y-2 py-3 border-y border-white/5 text-xs">
+                  <div className="flex items-center justify-between">
+                    <span className="text-zinc-400">Monthly Capacity:</span>
+                    <span className="font-mono font-bold text-emerald-400 text-sm">
+                      ~{totalRequests.toLocaleString()} requests
                     </span>
                   </div>
-                  <div className="w-full h-1.5 rounded-full bg-white/10 overflow-hidden">
-                    <div
-                      className={`h-full bg-gradient-to-r ${model.color} rounded-full`}
-                      style={{ width: `${Math.min(100, Math.max(15, (scaledReqs / (45000 * multiplier)) * 100))}%` }}
-                    />
+                  <div className="flex items-center justify-between">
+                    <span className="text-zinc-400">Context Window:</span>
+                    <span className="font-mono text-zinc-300">{model.contextWindow}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-zinc-400">Prompt Caching:</span>
+                    <span className="font-mono text-indigo-300">{model.cacheSavings}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-zinc-400">Edge Gateway TTFT:</span>
+                    <span className="font-mono text-sky-300">{model.latency}</span>
                   </div>
                 </div>
               </div>
 
-              {/* Technical Specs Strip */}
-              <div className="pt-2 border-t border-white/5 grid grid-cols-3 gap-1 text-center font-mono text-[10px] text-zinc-400">
-                <div className="p-1.5 rounded-lg bg-white/5">
-                  <span className="text-zinc-500 block">Context</span>
-                  <span className="text-zinc-200 font-bold">{model.contextWindow}</span>
-                </div>
-                <div className="p-1.5 rounded-lg bg-white/5">
-                  <span className="text-zinc-500 block">Cache</span>
-                  <span className="text-emerald-400 font-bold">{model.cacheSavings}</span>
-                </div>
-                <div className="p-1.5 rounded-lg bg-white/5">
-                  <span className="text-zinc-500 block">Latency</span>
-                  <span className="text-cyan-300 font-bold">{model.latency}</span>
+              <div className="mt-4 pt-2">
+                <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full bg-gradient-to-r ${model.color} rounded-full`}
+                    style={{ width: `${Math.min(100, (multiplier / 250) * 100 + 10)}%` }}
+                  />
                 </div>
               </div>
             </div>

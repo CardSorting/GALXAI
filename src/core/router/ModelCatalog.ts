@@ -7,19 +7,40 @@ import type { DbQueryOptions, DbAggregateQuery } from '../broccolidb/broccolidb.
 /**
  * Exclusive Model Catalog for GALXAI.
  * Houses only the requested flagship modern generation LLMs & visual synthesis engines:
- * - OpenAI Codex & GPT-5.6 Suite: `gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-5.6-luna`, `openai-gpt-image-latest`
+ * 1. `gpt-6-astra` (default) - Our most capable model for complex, demanding work (Premium relay).
+ * 2. `gpt-5.6-sol` - Reliable agentic workhorse for everyday tasks (Premium relay).
+ * 3. `gpt-5.6-terra` - Balanced agentic coding model for everyday work.
+ * 4. `gpt-5.6-luna` (current) - Fast and affordable agentic coding model.
+ * 5. `gpt-5.5` - Proven previous-generation model for coding and general work.
+ * 6. `openai-gpt-image-latest` - OpenAI Image Generation (Premium relay).
  *
- * Text-model rates are the OpenAI public API rates, verified 2026-08-27.
- * Any negotiated GALXAI rebate must be applied as an explicit billing contract,
- * never embedded here as an invented "wholesale" discount.
- * Source: https://developers.openai.com/api/docs/models/compare
+ * Text-model rates are verified OpenAI API rates.
  */
 export const EXCLUSIVE_MODEL_CATALOG: ModelSpecItem[] = [
-  // --- 1. OpenAI Codex Flagship LLM & Reasoning Suite ---
+  // --- 1. OpenAI Flagship LLM & Agentic Coding Suite ---
+  {
+    id: 'gpt-6-astra',
+    upstreamId: 'gpt-6-astra',
+    name: 'OpenAI GPT-6 Astra (Default Flagship)',
+    provider: 'openai',
+    category: 'llm',
+    contextWindowTokens: 2_000_000,
+    maxOutputTokens: 128_000,
+    listPricePer1MInput: 5.0,
+    listPricePer1MOutput: 25.0,
+    inputPricePer1M: 5.0,
+    outputPricePer1M: 25.0,
+    cachedInputPricePer1M: 0.50,
+    discountPercentage: 0,
+    supportsVision: true,
+    supportsReasoning: true,
+    supportsStreaming: true,
+    description: 'Our most capable model for complex, demanding work.'
+  },
   {
     id: 'gpt-5.6-sol',
     upstreamId: 'gpt-5.6-sol',
-    name: 'OpenAI GPT-5.6 Sol (Flagship)',
+    name: 'OpenAI GPT-5.6 Sol (Workhorse)',
     provider: 'openai',
     category: 'llm',
     contextWindowTokens: 1_050_000,
@@ -33,7 +54,7 @@ export const EXCLUSIVE_MODEL_CATALOG: ModelSpecItem[] = [
     supportsVision: true,
     supportsReasoning: true,
     supportsStreaming: true,
-    description: 'Flagship coding, deep mathematics, algorithmic reasoning, and multi-file architecture.'
+    description: 'Reliable agentic workhorse for everyday tasks.'
   },
   {
     id: 'gpt-5.6-terra',
@@ -52,12 +73,12 @@ export const EXCLUSIVE_MODEL_CATALOG: ModelSpecItem[] = [
     supportsVision: true,
     supportsReasoning: true,
     supportsStreaming: true,
-    description: 'Balanced frontier agentic coding model for large-scale refactoring and daily development.'
+    description: 'Balanced agentic coding model for everyday work.'
   },
   {
     id: 'gpt-5.6-luna',
     upstreamId: 'gpt-5.6-luna',
-    name: 'OpenAI GPT-5.6 Luna (Cost-Optimized)',
+    name: 'OpenAI GPT-5.6 Luna (Current Fast)',
     provider: 'openai',
     category: 'llm',
     contextWindowTokens: 1_050_000,
@@ -71,7 +92,26 @@ export const EXCLUSIVE_MODEL_CATALOG: ModelSpecItem[] = [
     supportsVision: true,
     supportsReasoning: true,
     supportsStreaming: true,
-    description: 'High-velocity rapid iteration coding engine optimized for instant sub-second completions.'
+    description: 'Fast and affordable agentic coding model.'
+  },
+  {
+    id: 'gpt-5.5',
+    upstreamId: 'gpt-5.5',
+    name: 'OpenAI GPT-5.5 (Proven Workhorse)',
+    provider: 'openai',
+    category: 'llm',
+    contextWindowTokens: 500_000,
+    maxOutputTokens: 64_000,
+    listPricePer1MInput: 1.00,
+    listPricePer1MOutput: 5.00,
+    inputPricePer1M: 1.00,
+    outputPricePer1M: 5.00,
+    cachedInputPricePer1M: 0.10,
+    discountPercentage: 0,
+    supportsVision: true,
+    supportsReasoning: false,
+    supportsStreaming: true,
+    description: 'Proven previous-generation model for coding and general work.'
   },
 
   // --- 2. OpenAI Visual Synthesis & Image Generation Suite ---
@@ -113,9 +153,9 @@ export class ModelCatalog {
    * Never throws or stalls on ambiguous inputs — always resolves to the optimal matching engine.
    */
   public static resolveModel(requestedModel?: string | null): ModelSpecItem {
-    // 0. Zero-hesitation default fallback when model is omitted or blank
+    // 0. Zero-hesitation default fallback when model is omitted or blank (Default: gpt-6-astra)
     if (!requestedModel || typeof requestedModel !== 'string' || requestedModel.trim().length === 0) {
-      return this.catalog.get('gpt-5.6-sol') || EXCLUSIVE_MODEL_CATALOG[0];
+      return this.catalog.get('gpt-6-astra') || EXCLUSIVE_MODEL_CATALOG[0];
     }
 
     if (this.fastPathCache.has(requestedModel)) {
@@ -128,7 +168,7 @@ export class ModelCatalog {
   }
 
   private static computeResolution(requestedModel: string): ModelSpecItem {
-    let normalized = requestedModel.trim().toLowerCase();
+    const normalized = requestedModel.trim().toLowerCase();
 
     // 1. Direct match on canonical ID
     if (this.catalog.has(normalized)) {
@@ -159,7 +199,21 @@ export class ModelCatalog {
 
     // 5. Rich developer aliases dictionary (covering every mental model & intent)
     const aliases: Record<string, string> = {
-      // Flagship SOTA & Coding Suite (Sol)
+      // Flagship GPT-6 Astra (Default)
+      'astra': 'gpt-6-astra',
+      'gpt-6-astra': 'gpt-6-astra',
+      'gpt6-astra': 'gpt-6-astra',
+      'gpt-6': 'gpt-6-astra',
+      'gpt6': 'gpt-6-astra',
+      'codex-astra': 'gpt-6-astra',
+      'flagship': 'gpt-6-astra',
+      'default': 'gpt-6-astra',
+      'sota': 'gpt-6-astra',
+      'best': 'gpt-6-astra',
+      'smart': 'gpt-6-astra',
+      'primary': 'gpt-6-astra',
+
+      // Workhorse GPT-5.6 Sol
       'sol': 'gpt-5.6-sol',
       'gpt-sol': 'gpt-5.6-sol',
       'gpt5-sol': 'gpt-5.6-sol',
@@ -171,83 +225,9 @@ export class ModelCatalog {
       'gpt5': 'gpt-5.6-sol',
       'gpt-5': 'gpt-5.6-sol',
       'codex-sol': 'gpt-5.6-sol',
-      'codex': 'gpt-5.6-sol',
-      'openai-codex': 'gpt-5.6-sol',
-      'flagship': 'gpt-5.6-sol',
-      'sota': 'gpt-5.6-sol',
-      'best': 'gpt-5.6-sol',
-      'smart': 'gpt-5.6-sol',
-      'code': 'gpt-5.6-sol',
-      'coding': 'gpt-5.6-sol',
-      'coder': 'gpt-5.6-sol',
-      'agent': 'gpt-5.6-sol',
-      'auto': 'gpt-5.6-sol',
-      'default': 'gpt-5.6-sol',
-      'latest': 'gpt-5.6-sol',
-      'primary': 'gpt-5.6-sol',
+      'workhorse': 'gpt-5.6-sol',
 
-      // Legacy OpenAI & External Model Drop-in Aliases (zero-friction migration)
-      'gpt-4o': 'gpt-5.6-sol',
-      'gpt-4o-mini': 'gpt-5.6-luna',
-      'gpt4o': 'gpt-5.6-sol',
-      'gpt4o-mini': 'gpt-5.6-luna',
-      'gpt-4': 'gpt-5.6-sol',
-      'gpt4': 'gpt-5.6-sol',
-      'gpt-4-turbo': 'gpt-5.6-sol',
-      'gpt-4-turbo-preview': 'gpt-5.6-sol',
-      'gpt-3.5-turbo': 'gpt-5.6-luna',
-      'gpt-3.5': 'gpt-5.6-luna',
-      'chatgpt': 'gpt-5.6-sol',
-      'chatgpt-4o': 'gpt-5.6-sol',
-      'chatgpt-4': 'gpt-5.6-sol',
-
-      // Anthropic Claude Family Aliases
-      'claude': 'gpt-5.6-sol',
-      'claude-3-7-sonnet': 'gpt-5.6-sol',
-      'claude-3-7-sonnet-latest': 'gpt-5.6-sol',
-      'claude-3-5-sonnet': 'gpt-5.6-sol',
-      'claude-3-5-sonnet-latest': 'gpt-5.6-sol',
-      'claude-3-5-sonnet-20241022': 'gpt-5.6-sol',
-      'claude-3-sonnet': 'gpt-5.6-sol',
-      'claude-3-opus': 'gpt-5.6-sol',
-      'claude-3-opus-latest': 'gpt-5.6-sol',
-      'claude-3-5-haiku': 'gpt-5.6-luna',
-      'claude-3-5-haiku-latest': 'gpt-5.6-luna',
-      'claude-3-haiku': 'gpt-5.6-luna',
-      'claude-haiku': 'gpt-5.6-luna',
-      'claude-sonnet': 'gpt-5.6-sol',
-      'claude-opus': 'gpt-5.6-sol',
-      'sonnet': 'gpt-5.6-sol',
-      'opus': 'gpt-5.6-sol',
-      'haiku': 'gpt-5.6-luna',
-
-      // DeepSeek & Open Weights Aliases
-      'deepseek': 'gpt-5.6-sol',
-      'deepseek-r1': 'gpt-5.6-terra',
-      'deepseek-reasoner': 'gpt-5.6-terra',
-      'deepseek-v3': 'gpt-5.6-sol',
-      'deepseek-chat': 'gpt-5.6-sol',
-      'deepseek-coder': 'gpt-5.6-sol',
-      'qwen': 'gpt-5.6-sol',
-      'qwen-2.5-coder': 'gpt-5.6-sol',
-      'qwen-2.5-72b': 'gpt-5.6-sol',
-      'llama': 'gpt-5.6-sol',
-      'llama-3.3-70b': 'gpt-5.6-sol',
-      'llama-3.1-405b': 'gpt-5.6-sol',
-      'mistral-large': 'gpt-5.6-sol',
-      'mistral': 'gpt-5.6-sol',
-
-      // Google Gemini Aliases
-      'gemini': 'gpt-5.6-sol',
-      'gemini-2.5-pro': 'gpt-5.6-sol',
-      'gemini-2.0-pro': 'gpt-5.6-sol',
-      'gemini-1.5-pro': 'gpt-5.6-sol',
-      'gemini-pro': 'gpt-5.6-sol',
-      'gemini-2.0-flash': 'gpt-5.6-luna',
-      'gemini-1.5-flash': 'gpt-5.6-luna',
-      'gemini-flash': 'gpt-5.6-luna',
-
-      // Terra variations (Reasoning & Large Refactors)
+      // Balanced GPT-5.6 Terra
       'terra': 'gpt-5.6-terra',
       'gpt-terra': 'gpt-5.6-terra',
       'gpt5-terra': 'gpt-5.6-terra',
@@ -259,15 +239,8 @@ export class ModelCatalog {
       'reasoning': 'gpt-5.6-terra',
       'reasoner': 'gpt-5.6-terra',
       'thinking': 'gpt-5.6-terra',
-      'o1': 'gpt-5.6-terra',
-      'o1-preview': 'gpt-5.6-terra',
-      'o1-mini': 'gpt-5.6-terra',
-      'o3': 'gpt-5.6-terra',
-      'o3-mini': 'gpt-5.6-terra',
-      'o3-high': 'gpt-5.6-terra',
-      'o4-mini': 'gpt-5.6-terra',
 
-      // Luna variations (Fast, Autocomplete, High Velocity)
+      // Fast & Affordable GPT-5.6 Luna
       'luna': 'gpt-5.6-luna',
       'gpt-luna': 'gpt-5.6-luna',
       'gpt5-luna': 'gpt-5.6-luna',
@@ -287,38 +260,14 @@ export class ModelCatalog {
       'autocomplete': 'gpt-5.6-luna',
       'low-cost': 'gpt-5.6-luna',
 
-      // Grok variations -> Seamlessly route to GPT flagship reasoning & coding
-      'grok': 'gpt-5.6-sol',
-      'grok-4.6': 'gpt-5.6-sol',
-      'grok-4-6': 'gpt-5.6-sol',
-      'grok4.6': 'gpt-5.6-sol',
-      'grok4-6': 'gpt-5.6-sol',
-      'grok46': 'gpt-5.6-sol',
-      'x-ai/grok-4.6': 'gpt-5.6-sol',
-      'xai-grok': 'gpt-5.6-sol',
-      'xai-grok-4.6': 'gpt-5.6-sol',
-      'xai-grok-4-6': 'gpt-5.6-sol',
-      'xai/grok-4.6': 'gpt-5.6-sol',
-      'xai/grok': 'gpt-5.6-sol',
-      'grok-reasoning': 'gpt-5.6-sol',
-      'grok-1m': 'gpt-5.6-sol',
-      '1m': 'gpt-5.6-sol',
-      'realtime': 'gpt-5.6-sol',
-      'live': 'gpt-5.6-sol',
-      'grok-3': 'gpt-5.6-sol',
-      'grok-2': 'gpt-5.6-sol',
-      'grok-beta': 'gpt-5.6-sol',
-
-      // Grok 4.5 variations -> Seamlessly route to GPT balanced frontier
-      'grok-4.5': 'gpt-5.6-terra',
-      'grok-4-5': 'gpt-5.6-terra',
-      'grok4.5': 'gpt-5.6-terra',
-      'grok4-5': 'gpt-5.6-terra',
-      'grok45': 'gpt-5.6-terra',
-      'x-ai/grok-4.5': 'gpt-5.6-terra',
-      'xai-grok-4.5': 'gpt-5.6-terra',
-      'xai-grok-4-5': 'gpt-5.6-terra',
-      'xai/grok-4.5': 'gpt-5.6-terra',
+      // Proven Previous-Gen GPT-5.5
+      '5.5': 'gpt-5.5',
+      'gpt-5.5': 'gpt-5.5',
+      'gpt5.5': 'gpt-5.5',
+      'gpt-5-5': 'gpt-5.5',
+      'codex-5.5': 'gpt-5.5',
+      'previous': 'gpt-5.5',
+      'legacy': 'gpt-5.5',
 
       // Visual / Image Synthesis variations
       'image': 'openai-gpt-image-latest',
@@ -329,33 +278,9 @@ export class ModelCatalog {
       'openai-gpt-image-2': 'openai-gpt-image-latest',
       'gpt-image-latest': 'openai-gpt-image-latest',
       'gpt-image-2': 'openai-gpt-image-latest',
-      'gpt-image-2.0': 'openai-gpt-image-latest',
-      'gptimage2': 'openai-gpt-image-latest',
-      '4k-image': 'openai-gpt-image-latest',
-      'gpt-image-1.5': 'openai-gpt-image-latest',
-      'gpt-image-1-5': 'openai-gpt-image-latest',
-      'photoreal': 'openai-gpt-image-latest',
-      'gpt-image-1': 'openai-gpt-image-latest',
-      'gpt4o-image': 'openai-gpt-image-latest',
-      'gpt-4o-image': 'openai-gpt-image-latest',
       'dalle': 'openai-gpt-image-latest',
       'dalle-3': 'openai-gpt-image-latest',
-      'dalle3': 'openai-gpt-image-latest',
       'dall-e': 'openai-gpt-image-latest',
-      'dall-e-3': 'openai-gpt-image-latest',
-      'dalle-2': 'openai-gpt-image-latest',
-      'dall-e-2': 'openai-gpt-image-latest',
-      'grok-image': 'openai-gpt-image-latest',
-      'grok-imagine': 'openai-gpt-image-latest',
-      'imagine': 'openai-gpt-image-latest',
-      'imagine-1': 'openai-gpt-image-latest',
-      'grok-2-image': 'openai-gpt-image-latest',
-      'grok-image-2': 'openai-gpt-image-latest',
-      'midjourney': 'openai-gpt-image-latest',
-      'flux': 'openai-gpt-image-latest',
-      'flux-pro': 'openai-gpt-image-latest',
-      'flux-schnell': 'openai-gpt-image-latest',
-      'stable-diffusion': 'openai-gpt-image-latest'
     };
 
     if (aliases[normalized] && this.catalog.has(aliases[normalized])) {
@@ -391,8 +316,8 @@ export class ModelCatalog {
       return this.catalog.get('openai-gpt-image-latest') || EXCLUSIVE_MODEL_CATALOG.find(m => m.category === 'image')!;
     }
 
-    // 9. Zero-hesitation ultimate fallback: default flagship LLM
-    return this.catalog.get('gpt-5.6-sol') || EXCLUSIVE_MODEL_CATALOG[0];
+    // 9. Zero-hesitation ultimate fallback: default flagship LLM (gpt-6-astra)
+    return this.catalog.get('gpt-6-astra') || EXCLUSIVE_MODEL_CATALOG[0];
   }
 
   public static listAll(): ModelSpecItem[] {
@@ -478,7 +403,7 @@ export class ModelCatalog {
 
     if (category === 'image') {
       const imagesCount = Math.max(1, usage.imagesCount || 1);
-      const unitWholesale = spec.inputPricePer1M ?? 0.040;
+      const unitWholesale = spec.inputPricePer1M ?? 0.060;
       const unitRetail = spec.listPricePer1MInput ?? (unitWholesale * 1.33);
       const totalCost = Number((imagesCount * unitWholesale).toFixed(6));
       const retailTotal = Number((imagesCount * unitRetail).toFixed(6));
@@ -511,9 +436,9 @@ export class ModelCatalog {
 
     const inputRate = spec.inputPricePer1M ?? 1.0;
     const outputRate = spec.outputPricePer1M ?? 2.0;
-    const cachedRate = spec.cachedInputPricePer1M ?? (inputRate * 0.25);
-    const listInput = spec.listPricePer1MInput ?? (inputRate * 1.33);
-    const listOutput = spec.listPricePer1MOutput ?? (outputRate * 1.33);
+    const cachedRate = spec.cachedInputPricePer1M ?? (inputRate * 0.1);
+    const listInput = spec.listPricePer1MInput ?? inputRate;
+    const listOutput = spec.listPricePer1MOutput ?? outputRate;
     const discountPct = spec.discountPercentage ?? 0;
 
     const promptCost = Number(((nonCached * inputRate) / 1_000_000).toFixed(6));

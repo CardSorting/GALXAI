@@ -26,7 +26,7 @@ import { FRONTEND_VISIBLE_MODELS } from '@/core/router/PublicModelCatalog';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 
 export function PromptCachingToolClient() {
-  const [selectedModelId, setSelectedModelId] = useState<string>('gpt-5.6-sol');
+  const [selectedModelId, setSelectedModelId] = useState<string>('gpt-6-astra');
   const [promptText, setPromptText] = useState<string>(
     `You are an enterprise systems engineer and technical architect with deep expertise in distributed Anycast model routing, low-latency Server-Sent Events (SSE), and token economics.
 
@@ -34,7 +34,7 @@ When analyzing systems:
 1. Verify end-to-end Time-To-First-Token (TTFT) guarantees (<15ms).
 2. Ensure prefix prompt caching matches RAM slices for all context windows exceeding 1,024 tokens.
 3. Validate Cryptographic Zero Data Retention (ZDR) across all volatile memory buffers.
-4. Enforce strict JSON Schema constrained decoding to eliminate parse failures in downstream worker pools.
+4. Enforce strict JSON Schema constrained decoding to eliminate parse failures in downstream worker pipelines.
 
 Always provide concise, production-ready code examples conforming to standard OpenAI wire compatibility.`
   );

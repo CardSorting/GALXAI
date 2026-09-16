@@ -1,0 +1,37 @@
+{
+  "reviewed_at": "2026-09-16T19:17:00.000000+00:00",
+  "reviewer": "maintainer / billing, sites and product",
+  "scope": "GALX Pro price adjustment from $20/month to $200/month to ensure long-term maintenance, availability expectations, and unlimited revisions sustainability under fair use.",
+  "sources_inspected": [
+    "src/lib/billing/pro-plan.ts",
+    "src/lib/billing/plan-subscription.ts",
+    "src/components/billing/PlanPanel.tsx",
+    "src/components/sites/SitesWorkspace.tsx",
+    "src/components/home/PublicHome.tsx",
+    "src/lib/public-content/content.ts",
+    "src/lib/data/pricingSummary.ts",
+    "src/app/pricing/page.tsx",
+    "scripts/provision-sites-pro.ts",
+    "scripts/test-sites-plans-db.ts",
+    "scripts/verify-homepage-ui.mjs"
+  ],
+  "guides_inspected": [
+    "docs/maintainers/SITES_FAIR_USAGE.md",
+    "docs/DOCUMENTATION_POLICY.md",
+    "docs/PRODUCT_SURFACE_STRATEGY.md"
+  ],
+  "domain_conclusions": {
+    "billing": "PRO_PLAN monthlyPriceUsd updated to 200 ($200 USD/month). Unit amount, subscription verification, and refund calculation logic dynamically scale with PRO_PLAN.monthlyPriceUsd * 100 (20,000 cents). All billing lifecycle tests pass.",
+    "sites": "Sites workspaces, pricing pages, and fair-use guidance reflect $200/month rate for GALX Pro. Unlimited revisions under fair use are preserved. Tests and DB fixtures updated to match new plan amount.",
+    "client-efficiency": "Public UI assertions, pricing cards, FAQ sections, and static page generation verified. Next.js production build succeeds with all pricing terms updated."
+  },
+  "actual_validation": [
+    "npm run test:billing:lifecycle (18 passed)",
+    "npm run test:sites (54 passed)",
+    "npm run lint (0 errors)",
+    "npm run build (Next.js optimized production build clean)"
+  ],
+  "remaining_limits": [
+    "Stripe production price catalog provisioning requires running `npm run sites:provision` with production Stripe credentials when deploying."
+  ]
+}

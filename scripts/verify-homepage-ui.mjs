@@ -52,7 +52,7 @@ try {
     assert.equal(await page.getByRole('navigation', { name: 'Main navigation', exact: true }).getByRole('link').first().innerText(), 'Sites');
     assert.equal(await page.getByRole('link', { name: 'Sign in', exact: true }).getAttribute('href'), '/login?next=/sites');
     assert.equal(await page.getByRole('navigation', { name: 'Footer', exact: true }).getByRole('link').first().innerText(), 'Sites');
-    assert.match(await page.locator('#pricing').innerText(), /\$20/);
+    assert.match(await page.locator('#pricing').innerText(), /\$200/);
     assert.equal(await page.locator('#pricing table').count(), 1);
     assert.equal(await page.locator('#faq details').count(), 6);
     assert(await page.evaluate(() => document.querySelector('#pricing').compareDocumentPosition(document.querySelector('#faq')) & Node.DOCUMENT_POSITION_FOLLOWING));

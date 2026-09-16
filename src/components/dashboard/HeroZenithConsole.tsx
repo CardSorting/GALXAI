@@ -256,7 +256,7 @@ impl AtomicTokenBucket {
 
 When autonomous agent loops (Cursor, Windsurf, Claude Code) run high-volume concurrency, direct provider rate limits cause sudden halts.
 
-- **Sub-1ms Anycast Failover:** Traffic is instantly shifted across redundant high-capacity pools.
+- **Sub-1ms Anycast Failover:** Traffic is instantly shifted across redundant edge channels.
 - **Zero Code Rewrites:** Applications avoid 429 backoff stalls and dropped streams.
 - **High Concurrency:** Consistent high-speed generation for mission-critical agent swarms.
 

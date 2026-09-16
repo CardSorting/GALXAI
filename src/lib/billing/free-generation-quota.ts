@@ -34,26 +34,23 @@ async function grant(db: PoolClient, owner: string): Promise<Grant | null> {
   return row;
 }
 export async function assignFreeSite(db: PoolClient, owner: string, id: string) {
-  const row = await grant(db, owner);
-  if (!row || (row.site_id && row.site_id !== id)) throw new FreeQuotaError('free_site_limit');
-  await db.query('UPDATE private.galx_free_generation_grants SET site_id=$2 WHERE user_id=$1', [owner,id]);
+  throw new FreeQuotaError('free_site_limit');
 }
 export async function requireAssignedFreeSite(db: PoolClient, owner: string, id: string) {
-  const row = await grant(db,owner);
-  if (!row || row.site_id !== id) throw new FreeQuotaError('free_site_limit');
+  throw new FreeQuotaError('free_site_limit');
 }
 export async function consumeFreeGeneration(db: PoolClient, owner: string, kind: 'site' | 'image', operation: string, quantity: number, siteId?: string) {
-  if (!Number.isSafeInteger(quantity) || quantity < 1 || quantity > (kind === 'site' ? 1 : 4)) throw new FreeQuotaError();
+  if (kind === 'site') throw new FreeQuotaError('free_quota_exhausted');
+  if (!Number.isSafeInteger(quantity) || quantity < 1 || quantity > 4) throw new FreeQuotaError();
   const row = await grant(db, owner);
   if (!row) throw new FreeQuotaError();
-  if (kind === 'site' && row.site_id !== siteId) throw new FreeQuotaError('free_site_limit');
   const previous = (await db.query('SELECT quantity,released FROM private.galx_free_generation_usage WHERE user_id=$1 AND kind=$2 AND operation_id=$3', [owner,kind,operation])).rows[0];
   if (previous) {
     if (previous.quantity !== quantity || previous.released) throw new FreeQuotaError();
     return;
   }
   const used = Number((await db.query('SELECT coalesce(sum(quantity),0) AS used FROM private.galx_free_generation_usage WHERE user_id=$1 AND kind=$2 AND NOT released', [owner,kind])).rows[0].used);
-  if (used + quantity > (kind === 'site' ? 3 : 5)) throw new FreeQuotaError();
+  if (used + quantity > 5) throw new FreeQuotaError();
   await reserveFreeCapacity(db,owner,kind,quantity);
   await db.query('INSERT INTO private.galx_free_generation_usage(user_id,kind,operation_id,quantity) VALUES($1,$2,$3,$4)', [owner,kind,operation,quantity]);
 }
@@ -69,8 +66,8 @@ export async function readFreeGenerationQuota(pool: Pick<Pool,'connect'>, owner:
     const row = await grant(db,owner);
     const usage = (await db.query('SELECT kind,sum(quantity)::int AS used FROM private.galx_free_generation_usage WHERE user_id=$1 AND NOT released GROUP BY kind', [owner])).rows;
     await db.query('COMMIT');
-    return { sites: row && !row.site_id ? 1 : 0,
+    return { sites: 0,
       images: row ? Math.max(0,5-(usage.find(r=>r.kind==='image')?.used || 0)) : 0,
-      siteTurns: row ? Math.max(0,3-(usage.find(r=>r.kind==='site')?.used || 0)) : 0 };
+      siteTurns: 0 };
   } catch(error) { await db.query('ROLLBACK'); throw error; } finally { db.release(); }
 }

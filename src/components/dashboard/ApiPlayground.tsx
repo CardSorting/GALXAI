@@ -42,6 +42,25 @@ interface PromptPreset {
 
 const PRESETS: PromptPreset[] = [
   {
+    id: 'astra-arch',
+    label: '✨ GPT-6 Astra Architecture',
+    category: 'reasoning',
+    model: 'gpt-6-astra',
+    prompt: 'Architect an ultra-resilient, distributed AI model router with sub-15ms Time-To-First-Token, automated KV prompt caching, and zero-data-retention cryptographic guarantees.',
+    simulatedReply: `### Enterprise AI Gateway & Routing Architecture:
+
+1. **⚡ Anycast Global Ingress & Health Steering**:
+   - Ingress edge nodes terminate TLS within 5ms of client endpoints.
+   - Dynamic health checks steer traffic seamlessly with zero dropped connections.
+
+2. **🔒 Zero Data Retention (ZDR) Memory Fabric**:
+   - Volatile, cryptographically isolated memory buffers enforce in-flight streaming without disk persistence.
+   - Automatic KV prompt caching reuses mathematical attention matrices for prefixes >1,024 tokens.
+
+3. **🛡️ 429 Burst Immunity & Fair-Share Queues**:
+   - Concurrency token buckets absorb downstream rate spikes with instant graceful failover.`
+  },
+  {
     id: 'refactor',
     label: '⚡ Next.js Route Refactor',
     category: 'code',
@@ -77,47 +96,9 @@ export async function POST(req: NextRequest) {
 }`
   },
   {
-    id: 'luna-rate-limiter',
-    label: '🚀 Concurrency Rate Limiter Audit',
-    category: 'code',
-    model: 'gpt-5.6-sol',
-    prompt: 'Audit this distributed token-bucket rate limiter for race conditions under high concurrency:\n\nclass DistributedLimiter {\n  private buckets = new Map<string, number>();\n  async take(key: string, cost: number) {\n    const current = this.buckets.get(key) || 100;\n    if (current < cost) return false;\n    this.buckets.set(key, current - cost);\n    return true;\n  }\n}',
-    simulatedReply: `### Concurrency & Consistency Audit:
-
-1. **🚨 Check-Then-Act Race Condition**:
-   - In concurrent Node.js microtask loops or distributed multi-instance clusters, two concurrent requests can both read \`current = 100\` before either calls \`this.buckets.set()\`, resulting in double-spending tokens.
-   - **Fix**: Use atomic compare-and-swap (CAS) primitives or Redis Lua scripts.
-
-2. **⚠️ Unbounded Memory Leak**:
-   - \`this.buckets\` grows indefinitely as unique keys arrive.
-   - **Fix**: Implement an active LRU cache with TTL eviction wheels.
-
-3. **✅ Hardened Implementation**:
-\`\`\`typescript
-export class HardenedLimiter {
-  private buckets = new Map<string, { tokens: number; lastRefillMs: number }>();
-  
-  tryConsume(key: string, cost: number, capacity: number, refillPerSec: number): boolean {
-    const now = Date.now();
-    const entry = this.buckets.get(key) || { tokens: capacity, lastRefillMs: now };
-    
-    // Continuous dynamic refill calculation
-    const elapsedSec = (now - entry.lastRefillMs) / 1000;
-    entry.tokens = Math.min(capacity, entry.tokens + (elapsedSec * refillPerSec));
-    entry.lastRefillMs = now;
-    
-    if (entry.tokens < cost) return false;
-    entry.tokens -= cost;
-    this.buckets.set(key, entry);
-    return true;
-  }
-}
-\`\`\``
-  },
-  {
     id: 'sql',
     label: '📊 SQL Index & Plan Optimizer',
-    category: 'reasoning',
+    category: 'code',
     model: 'gpt-5.6-terra',
     prompt: 'Optimize this slow PostgreSQL analytical query scanning 10M rows:\n\nSELECT user_id, SUM(amount_cents), COUNT(*)\nFROM billing_events\nWHERE status = "completed" AND created_at >= NOW() - INTERVAL "30 days"\nGROUP BY user_id\nORDER BY SUM(amount_cents) DESC\nLIMIT 20;',
     simulatedReply: `### PostgreSQL Query Plan Optimization:
@@ -144,15 +125,17 @@ WHERE status = 'completed';
 ];
 
 const MENTAL_MODELS = [
-  { id: 'sol', name: '⚡ SOTA Coding', model: 'gpt-5.6-sol', icon: Zap, badge: '-25%' },
-  { id: 'terra', name: '🧠 Deep Logic', model: 'gpt-5.6-terra', icon: Brain, badge: '-25%' },
-  { id: 'luna', name: '🚀 Fast Velocity', model: 'gpt-5.6-luna', icon: Flame, badge: '-36%' },
+  { id: 'astra', name: '✨ Astra Apex', model: 'gpt-6-astra', icon: Sparkles, badge: '-25%' },
+  { id: 'sol', name: '⚡ Sol Workhorse', model: 'gpt-5.6-sol', icon: Zap, badge: '-25%' },
+  { id: 'terra', name: '🧠 Terra Coding', model: 'gpt-5.6-terra', icon: Brain, badge: '-25%' },
+  { id: 'luna', name: '🚀 Luna Speed', model: 'gpt-5.6-luna', icon: Flame, badge: '-36%' },
+  { id: '5.5', name: '📦 GPT-5.5 Proven', model: 'gpt-5.5', icon: Layers, badge: '-25%' },
   { id: 'image', name: '🎨 Visual Studio', model: 'openai-gpt-image-latest', icon: ImageIcon, badge: '-25%' }
 ];
 
 function BaseApiPlayground() {
   const { user } = useAuth();
-  const [modelInput, setModelInput] = useState<string>('gpt-5.6-sol');
+  const [modelInput, setModelInput] = useState<string>('gpt-6-astra');
   const [prompt, setPrompt] = useState<string>(PRESETS[0].prompt);
   const [streamingOutput, setStreamingOutput] = useState<string>('');
   const [isStreaming, setIsStreaming] = useState<boolean>(false);

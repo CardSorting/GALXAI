@@ -2,6 +2,7 @@ import { createHash, randomUUID } from 'node:crypto';
 import type { Pool, PoolClient } from 'pg';
 import type Stripe from 'stripe';
 import { fulfillPlanStripeEvent } from './plan-subscription';
+import { PreviewReadSync } from '../supabase/repositories/PreviewReadSync';
 
 type Session = { session_id: string; user_id: string; customer_id: string | null; amount_usd: string; total_credited_usd: string; payment_intent_id: string | null; metadata: Record<string, any> };
 const id = (value: unknown): string | undefined => typeof value === 'string' ? value : value && typeof value === 'object' && 'id' in value ? String(value.id) : undefined;
@@ -64,6 +65,18 @@ export async function fulfillStripeEvent(pool: Pool, event: Stripe.Event, rawBod
           if (previous.rows.some(row => row.metadata.checkout_session && row.metadata.checkout_session !== session.session_id)) throw new Error('Payment already fulfilled another checkout');
           if (!session.metadata.fulfilledAt && !previous.rowCount) {
             await ledger(db, session, Number(session.total_credited_usd), Number(session.amount_usd), 'deposit', event.id);
+            const userEmail = session.metadata?.email || object.customer_details?.email || 'developer@galx.ai';
+            await db.query(`INSERT INTO private.developer_access_requests
+              (user_id, email, use_case, expected_traffic, status, reviewed_at, reviewed_by, expires_at)
+              VALUES ($1, $2, 'Developer tier purchased via checkout for images and frontier models API access', 'over_1000_daily', 'approved', now(), 'stripe-fulfillment', NULL)
+              ON CONFLICT (user_id) DO UPDATE SET
+                status = 'approved',
+                reviewed_at = now(),
+                reviewed_by = 'stripe-fulfillment',
+                expires_at = NULL,
+                revision = COALESCE(private.developer_access_requests.revision, 1) + 1`,
+              [session.user_id, userEmail]);
+            try { PreviewReadSync.for(db).invalidate(session.user_id); } catch {}
             changedUser = session.user_id;
           }
           await db.query(`UPDATE galx_stripe_checkout_sessions SET status='complete',payment_status='paid',payment_intent_id=$2,

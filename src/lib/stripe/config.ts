@@ -16,11 +16,11 @@ export interface StripeTierConfig {
 export const STRIPE_CHECKOUT_PACKS: Record<number, StripeTierConfig> = {
   10: {
     amount: 10,
-    label: 'LUMI Stellar Pass (Monthly)',
-    badge: 'LUMI $10/MO ✨',
+    label: 'Developer Tier (Pay-As-You-Go API & Images)',
+    badge: 'DEV TIER ⚡',
     multiplier: 1.50,
     welcomeGrant: 5.0,
-    perks: ['OpenAI Flagship Curated Lineup', 'Rolling 5-Hour Warp Quotas (~$60/mo compute)', 'Zero Data Retention (ZDR) Enclave']
+    perks: ['Instant Developer Tier & API Keys Unlock', 'Pay-as-you-go for Images & Frontier OpenAI Models', 'Zero waitlist application required']
   },
   25: {
     amount: 25,

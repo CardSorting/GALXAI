@@ -184,7 +184,7 @@ export function AuditClient() {
   const [playgroundPrompt, setPlaygroundPrompt] = useState<string>(
     'Please classify the following support ticket into billing, tech_support, or feature_request: "My credit card was charged twice for invoice #4920."'
   );
-  const [playgroundTargetModel, setPlaygroundTargetModel] = useState<string>('gpt-5.6-sol');
+  const [playgroundTargetModel, setPlaygroundTargetModel] = useState<string>('gpt-6-astra');
   const [playgroundAnalyzing, setPlaygroundAnalyzing] = useState<boolean>(false);
   const [playgroundResult, setPlaygroundResult] = useState<{
     workloadClass: string;
@@ -793,9 +793,11 @@ Audit generated via: https://galx.ai/audit
                     onChange={(e) => setPlaygroundTargetModel(e.target.value)}
                     className="w-full p-3 rounded-xl bg-black/60 border border-white/15 text-white font-mono text-xs focus:outline-none focus:border-cyan-500 cursor-pointer"
                   >
-                    <option value="gpt-5.6-sol">gpt-5.6-sol (Flagship - $4.00 In / $20.00 Out)</option>
-                    <option value="gpt-5.6-terra">gpt-5.6-terra (Balanced - $2.00 In / $12.00 Out)</option>
-                    <option value="gpt-5.6-luna">gpt-5.6-luna (Fast - $0.20 In / $1.20 Out)</option>
+                    <option value="gpt-6-astra">gpt-6-astra (Apex - $7.50 In / $30.00 Out)</option>
+                    <option value="gpt-5.6-sol">gpt-5.6-sol (Workhorse - $3.75 In / $15.00 Out)</option>
+                    <option value="gpt-5.6-terra">gpt-5.6-terra (Balanced - $2.25 In / $9.00 Out)</option>
+                    <option value="gpt-5.6-luna">gpt-5.6-luna (Fast - $0.95 In / $3.80 Out)</option>
+                    <option value="gpt-5.5">gpt-5.5 (Proven - $1.88 In / $7.50 Out)</option>
                   </select>
                 </div>
 

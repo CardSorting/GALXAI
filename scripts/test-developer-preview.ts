@@ -158,7 +158,7 @@ test('authorization probes validate keys without charging request quota or usage
     tokenHashCache:new Map(), findGatewayKeyByHash:async()=>key,
     checkRateLimit:()=>{slots++;return {allowed:true,remaining:10,resetMs:1000};},
     incrementUsage:async()=>{writes++;},
-  }) as InstanceType<typeof ApiKeyRepository>;
+  }) as unknown as import('../src/lib/supabase/repositories/ApiKeyRepository').ApiKeyRepository;
   const {apiKey}=GalxCryptoVault.generateGatewayApiKey({environment:'test'});
   for(let i=0;i<3;i++) assert.equal((await repo.validateGatewayKey(apiKey,{countRequest:false})).valid,true);
   assert.equal(slots,0);assert.equal(writes,0);
@@ -166,4 +166,31 @@ test('authorization probes validate keys without charging request quota or usage
   key.revoked=true;assert.equal((await repo.validateGatewayKey(apiKey,{countRequest:false})).valid,false);
   key.revoked=false;
   assert.equal((await repo.validateGatewayKey(apiKey)).valid,true);assert.equal(slots,1);assert.equal(writes,1);
+});
+
+test('grantDeveloperTier activates approved access upon developer tier purchase', async () => {
+  let executedQuery = '';
+  let queryParams: unknown[] = [];
+  const fakeDb = {
+    query: async <T>(sql: string, params: unknown[]): Promise<{ rows: T[]; rowCount: number }> => {
+      executedQuery = sql;
+      queryParams = params;
+      return {
+        rows: [{
+          user_id: params[0] as string, email: params[1] as string, use_case: 'Developer tier purchased via checkout for images and frontier models API access',
+          expected_traffic: 'over_1000_daily', status: 'approved' as const, requested_at: new Date(), reviewed_at: new Date(),
+          expires_at: null, revision: 1,
+        }] as unknown as T[],
+        rowCount: 1,
+      };
+    },
+  };
+  const repo = new DeveloperAccessRepository(fakeDb as any);
+  const granted = await repo.grantDeveloperTier('test-user-id', 'test-user@example.com');
+  assert.equal(granted?.status, 'approved');
+  assert.equal(granted?.user_id, 'test-user-id');
+  assert.match(executedQuery, /INSERT INTO private\.developer_access_requests/);
+  assert.match(executedQuery, /ON CONFLICT \(user_id\) DO UPDATE SET/);
+  assert.equal(queryParams[0], 'test-user-id');
+  assert.equal(queryParams[1], 'test-user@example.com');
 });

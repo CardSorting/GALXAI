@@ -7,10 +7,28 @@ export type { ProviderType } from '../contracts/GalxContracts';
 
 // Browser-safe public model descriptors. No upstream routing configuration.
 export const EXCLUSIVE_MODEL_CATALOG: ModelSpecItem[] = [
-  // --- 1. OpenAI Flagship LLM & Reasoning Suite ---
+  // --- 1. OpenAI Flagship LLM & Agentic Coding Suite ---
+  {
+    id: 'gpt-6-astra',
+    name: 'OpenAI GPT-6 Astra (Default Flagship)',
+    provider: 'openai',
+    category: 'llm',
+    contextWindowTokens: 2_000_000,
+    maxOutputTokens: 128_000,
+    listPricePer1MInput: 5.0,
+    listPricePer1MOutput: 25.0,
+    inputPricePer1M: 5.0,
+    outputPricePer1M: 25.0,
+    cachedInputPricePer1M: 0.50,
+    discountPercentage: 0,
+    supportsVision: true,
+    supportsReasoning: true,
+    supportsStreaming: true,
+    description: 'Our most capable model for complex, demanding work.'
+  },
   {
     id: 'gpt-5.6-sol',
-    name: 'OpenAI GPT-5.6 Sol (Flagship)',
+    name: 'OpenAI GPT-5.6 Sol (Workhorse)',
     provider: 'openai',
     category: 'llm',
     contextWindowTokens: 1_050_000,
@@ -24,7 +42,7 @@ export const EXCLUSIVE_MODEL_CATALOG: ModelSpecItem[] = [
     supportsVision: true,
     supportsReasoning: true,
     supportsStreaming: true,
-    description: 'Flagship coding, deep mathematics, algorithmic reasoning, and multi-file architecture.'
+    description: 'Reliable agentic workhorse for everyday tasks.'
   },
   {
     id: 'gpt-5.6-terra',
@@ -42,11 +60,11 @@ export const EXCLUSIVE_MODEL_CATALOG: ModelSpecItem[] = [
     supportsVision: true,
     supportsReasoning: true,
     supportsStreaming: true,
-    description: 'Balanced frontier agentic coding model for large-scale refactoring and daily development.'
+    description: 'Balanced agentic coding model for everyday work.'
   },
   {
     id: 'gpt-5.6-luna',
-    name: 'OpenAI GPT-5.6 Luna (Cost-Optimized)',
+    name: 'OpenAI GPT-5.6 Luna (Current Fast)',
     provider: 'openai',
     category: 'llm',
     contextWindowTokens: 1_050_000,
@@ -60,7 +78,25 @@ export const EXCLUSIVE_MODEL_CATALOG: ModelSpecItem[] = [
     supportsVision: true,
     supportsReasoning: true,
     supportsStreaming: true,
-    description: 'High-velocity rapid iteration coding engine optimized for instant sub-second completions.'
+    description: 'Fast and affordable agentic coding model.'
+  },
+  {
+    id: 'gpt-5.5',
+    name: 'OpenAI GPT-5.5 (Proven Workhorse)',
+    provider: 'openai',
+    category: 'llm',
+    contextWindowTokens: 500_000,
+    maxOutputTokens: 64_000,
+    listPricePer1MInput: 1.00,
+    listPricePer1MOutput: 5.00,
+    inputPricePer1M: 1.00,
+    outputPricePer1M: 5.00,
+    cachedInputPricePer1M: 0.10,
+    discountPercentage: 0,
+    supportsVision: true,
+    supportsReasoning: false,
+    supportsStreaming: true,
+    description: 'Proven previous-generation model for coding and general work.'
   },
 
   // --- 2. OpenAI Visual Synthesis & Image Generation Suite ---
@@ -125,12 +161,11 @@ export class ModelCatalog {
     return this.getTable().query(options) as ModelSpecItem[];
   }
 
-
   static resolveModel(value: string): ModelSpecItem {
     const query = value.trim().toLowerCase();
     return EXCLUSIVE_MODEL_CATALOG.find(m => m.id === query || m.name.toLowerCase() === query)
       || EXCLUSIVE_MODEL_CATALOG.find(m => query.includes('image') && m.category === 'image')
-      || EXCLUSIVE_MODEL_CATALOG.find(m => ['sol', 'terra', 'luna'].some(name => query.includes(name) && m.id.endsWith(name)))
+      || EXCLUSIVE_MODEL_CATALOG.find(m => ['astra', 'sol', 'terra', 'luna', '5.5'].some(name => query.includes(name) && m.id.includes(name)))
       || EXCLUSIVE_MODEL_CATALOG[0];
   }
 }

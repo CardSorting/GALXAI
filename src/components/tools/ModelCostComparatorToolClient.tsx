@@ -29,7 +29,7 @@ export function ModelCostComparatorToolClient() {
   const [monthlyInputMillions, setMonthlyInputMillions] = useState<number>(20);
   const [monthlyOutputMillions, setMonthlyOutputMillions] = useState<number>(5);
   const [cacheHitPercentage, setCacheHitPercentage] = useState<number>(50);
-  const [selectedModelId, setSelectedModelId] = useState<string>('gpt-5.6-sol');
+  const [selectedModelId, setSelectedModelId] = useState<string>('gpt-6-astra');
   const [copiedCode, setCopiedCode] = useState<boolean>(false);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
   const [inboundEmail, setInboundEmail] = useState('');
@@ -145,7 +145,7 @@ print(response.choices[0].message.content)`;
     },
     {
       q: 'Can I switch between OpenAI models and visual models using the same API key?',
-      a: 'Yes. A single GALXAI API key unlocks unified routing across GPT-5.6 Sol, GPT-5.6 Terra, GPT-5.6 Luna, OpenAI Image Generation, and Vector Embeddings.',
+      a: 'Yes. A single GALXAI API key unlocks unified routing across GPT-6 Astra, GPT-5.6 Sol, GPT-5.6 Terra, GPT-5.6 Luna, GPT-5.5, and OpenAI Image Generation.',
     },
   ];
 
@@ -180,7 +180,7 @@ print(response.choices[0].message.content)`;
             Model Cost Comparator Studio
           </h1>
           <p className="text-sm sm:text-base text-zinc-300 leading-relaxed max-w-3xl font-sans">
-            Compare real-world monthly token costs across GPT-5.6 Sol, GPT-5.6 Terra, and GPT-5.6 Luna with automated 75% prompt caching and wholesale volume rebates.
+            Compare real-world monthly token costs across GPT-6 Astra, GPT-5.6 Sol, GPT-5.6 Terra, GPT-5.6 Luna, and GPT-5.5 with automated 75% prompt caching and wholesale volume rebates.
           </p>
         </section>
 

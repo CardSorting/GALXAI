@@ -6,7 +6,7 @@ Private maintainer guide for [ADR 0149](../adr/0149-one-time-free-generation.md)
 
 ## Contract and authority
 
-Verified active email accounts receive one workspace, three total Site turns and five total images, once. Build and Discuss each use one turn; image batches consume their requested quantity, up to four per request. Current paid-subscription or explicit complimentary Pro authority bypasses this welcome allowance and its extra admission gate. Pro still observes ordinary image limits, Sites fairness and ownership. An authority outage never establishes free eligibility.
+Verified active email accounts receive five total images, once. Image batches consume their requested quantity, up to four per request. Sites creation requires GALX Pro. Current paid-subscription or explicit complimentary Pro authority bypasses this welcome allowance and its extra admission gate. Pro still observes ordinary image limits, Sites fairness and ownership. An authority outage never establishes free eligibility.
 
 The browser workspace supports free eligibility; standalone `/api/sites/content` remains Pro-only. Only the allocated free workspace may generate or publish through the allowance. Pro workspaces remain readable after downgrade but do not automatically become free Sites. Archive, restore, unpublish, another browser and another API key cannot reset a grant. Image aliases delegate to the same authenticated sync/async handler; generic queue mutation endpoints require internal authorization.
 
