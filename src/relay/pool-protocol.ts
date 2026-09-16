@@ -24,6 +24,20 @@ export function failure(res: ServerResponse, error: unknown) {
 export function exactKeys(body: Record<string, unknown>, keys: readonly string[]) {
   if (Object.keys(body).some(key => !keys.includes(key))) throw new RequestError(400, 'invalid_request', 'The request contains unsupported fields.');
 }
+/** Fixed recovery messages for authenticated registration controls; never forward upstream text. */
+export const registrationErrors: Record<string, { status: number; message: string }> = {
+  credential_account_ambiguous: { status: 409, message: 'Multiple saved account records match this sign-in. An administrator must reconcile them before registration.' },
+  credential_not_allowed: { status: 409, message: 'This account cannot be registered here. Ask an administrator to review its existing access and registration.' },
+  credential_account_mismatch: { status: 409, message: 'This sign-in does not match the saved account. Sign in to the intended account, then connect again.' },
+  credential_missing: { status: 422, message: 'No saved sign-in was found. Complete sign-in in this desktop, then connect again.' },
+  credential_invalid: { status: 422, message: 'The saved sign-in could not be read. Start sign-in again, then save the new sign-in.' },
+  credential_expired: { status: 422, message: 'The saved sign-in has expired. Sign in again, then save the new sign-in.' },
+  credential_older: { status: 409, message: 'A newer sign-in is already saved for this account. Sign in again in this desktop, then save the new sign-in.' },
+  credential_rejected: { status: 422, message: 'The saved sign-in was not accepted. Sign in again, then save the new sign-in.' },
+  credential_check_unavailable: { status: 503, message: 'Account access could not be checked. Keep the saved sign-in and try connecting later.' },
+  credential_registry_unavailable: { status: 503, message: 'The account update could not be confirmed. Refresh its status before retrying.' },
+  credential_conflict: { status: 409, message: 'The saved sign-in changed during review. Refresh, then connect again.' },
+};
 export function serviceOrigin(value: string) {
   const u = new URL(value);
   if (u.username || u.password || u.search || u.hash || u.pathname !== '/' || (u.protocol !== 'https:' && !(u.protocol === 'http:' && ['127.0.0.1', '[::1]'].includes(u.hostname)))) throw Error('An exact HTTPS service origin is required.');
@@ -59,14 +73,17 @@ export class CentralClient {
     finally { await reader?.cancel().catch(() => {}); }
     if (!response.ok) {
       let code:string|undefined;try{code=JSON.parse(Buffer.concat(chunks).toString('utf8'))?.error?.code;}catch{}
-      const registrationErrors:Record<string,string>={
+      if(code && Object.hasOwn(registrationErrors,code)) {
+        const known=registrationErrors[code];throw new RequestError(known.status,code,known.message);
+      }
+      const reviewErrors:Record<string,string>={
         account_type_mismatch:`Sign in with a ${this.identity.pool==='premium'?'paid':'free'} account for this registration.`,
         account_type_unverified:'The account type could not be verified. Sign in again, then review the account.',
         models_unverified:'Model access could not be verified. Review the account after its connection is restored.',
         account_check_unavailable:'Account review is unavailable. Restore the central account service before retrying.',
       };
       if(code==='record_changed')throw new RequestError(409,code,'This item changed while you were editing. Close this dialog, refresh, and try again.');
-      if(code&&Object.hasOwn(registrationErrors,code))throw new RequestError(response.status===422?422:503,code,registrationErrors[code]);
+      if(code&&Object.hasOwn(reviewErrors,code))throw new RequestError(response.status===422?422:503,code,reviewErrors[code]);
       throw new RequestError([400,401,403,404,409,429].includes(response.status) ? response.status : 503, 'control_unavailable', 'The action could not be confirmed. Refresh its status before retrying.');
     }
     try { return JSON.parse(Buffer.concat(chunks).toString('utf8')); } catch { throw Error('Invalid service response.'); }

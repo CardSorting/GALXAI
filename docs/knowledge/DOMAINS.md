@@ -146,8 +146,13 @@ Owner role: **Relay operator**. Domain: `relay`.
 - [Developer ergonomics and execution authority](../../docs/playbooks/07-zero-hesitation-developer-ergonomics-and-api-governance.md)
 - [Developer and operator observation protocol](../../docs/playbooks/08-unframed-developer-observation-protocol.md)
 - [Automatic agent tools and turns](../../docs/reference/automatic-agent-tools.md)
+- [ADR 0154: Stable relay connections and irreversible legacy credential retirement](../../docs/adr/0154-relay-connection-lifecycle-and-legacy-retirement.md)
+- [Shared quota and bounded continuation](../../docs/reference/shared-quota-recovery.md)
+- [ADR 0155: Shared quota containment and bounded agent continuation](../../docs/adr/0155-shared-quota-containment-and-bounded-continuation.md)
+- [ADR 0156: Verified automatic relay activation](../../docs/adr/0156-verified-automatic-relay-activation.md)
+- [ADR 0157: Compatible relay requests and honest output budgets](../../docs/adr/0157-compatible-relay-output-budgets.md)
 
-Relevant checks (select for the change; impact discovery never executes these): `npm run test:relay:capabilities`, `npm run test:relay:desktop-login`, `npm run test:relay:pool-images`, `npm run verify:relay:pool-images`, `npm run test:relay:services`, `npm run verify:relay:service-images`, `npm run test:agent:tools`.
+Relevant checks (select for the change; impact discovery never executes these): `npm run test:relay:capabilities`, `npm run test:relay:desktop-login`, `npm run test:relay:pool-images`, `npm run verify:relay:pool-images`, `npm run test:relay:services`, `npm run verify:relay:service-images`, `npm run test:agent:tools`, `npm run test:relay:activation-db`.
 
 ## Database authority and migrations
 
@@ -160,7 +165,7 @@ Owner role: **Database operator**. Domain: `database`.
 - [Migration to central accounts and isolated relays](../../docs/MIGRATION_GUIDE.md)
 - [Central account management and isolated relay contract](../../docs/reference/relay-account-management.md)
 
-Relevant checks (select for the change; impact discovery never executes these): `npm run db:verify`, `npm run db:test`, `npm run test:relay:manual-db`, `npm run test:relay:foundation-db`, `npm run test:relay:authorization-db`.
+Relevant checks (select for the change; impact discovery never executes these): `npm run db:verify`, `npm run db:test`, `npm run test:relay:manual-db`, `npm run test:relay:foundation-db`, `npm run test:relay:authorization-db`, `npm run test:relay:activation-db`.
 
 ## Release and deployment boundaries
 

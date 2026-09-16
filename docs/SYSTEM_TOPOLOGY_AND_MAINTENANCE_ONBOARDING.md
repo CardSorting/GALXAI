@@ -10,7 +10,7 @@ Trace verified customer identity and entitlement to one server-selected destinat
 
 ## Follow an account
 
-Accounts, credentials, assignments and lifecycle history live only in `mazhcjisettrzbqhorvp`. Open **GALX Monitors**, then the fixed Premium or Standard monitor. Premium requires a paid provider account; Standard requires a free one. Create a named registration, sign in manually in its desktop, review access and register. It saves paused; Enable is separate. Customer subscription is not provider classification.
+Accounts, credentials, assignments and lifecycle history live only in `mazhcjisettrzbqhorvp`. Open **GALX Monitors**, then the fixed Premium or Standard monitor. Premium requires a paid provider account; Standard requires a free one. Create a named registration, sign in manually in its desktop, then **Connect account**. The verified automatic policy enables the new connection and activates its own ready relay. Existing deliberate pauses and installation holds are preserved. Customer subscription is not provider classification.
 
 Use **Manage** to rename or remove. Rename updates linked account/registration names together. Removing a registered account permanently revokes access and retains history; unfinished registrations can be restored from Removed with a new review. Stale revisions require refresh, and a lost response requires inspecting the saved outcome.
 

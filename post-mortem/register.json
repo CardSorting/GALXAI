@@ -237,6 +237,47 @@
         "post-mortem/incidents/2026/2026-09-15-stripe-test-webhook/endpoint-retirement.json",
         "post-mortem/incidents/2026/2026-09-15-stripe-test-webhook/verification.json"
       ]
+    },
+    {
+      "id": "INC-20260916-REGISTRATION",
+      "category": "relay",
+      "severity": "SEV-3",
+      "status": "recovered",
+      "title": "Manual registration blocked by historical identity duplicates",
+      "owner": "Codex in owner session",
+      "record": "post-mortem/incidents/2026/2026-09-16-relay-registration/README.md",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-09-16-relay-registration/README.md",
+        "post-mortem/releases/2026-09-16-relay-execution-activation.json",
+        "post-mortem/releases/2026-09-16-relay-automatic-activation.json"
+      ],
+      "failure_modes": [
+        "FM-ACCESS-001"
+      ],
+      "recovery_evidence": [
+        "post-mortem/incidents/2026/2026-09-16-relay-registration/connection-lifecycle.json"
+      ]
+    },
+    {
+      "id": "INC-20260916-SHAREDQUOTA",
+      "category": "relay",
+      "severity": "SEV-3",
+      "status": "contained",
+      "title": "Shared account exhaustion amplifies interrupted session recovery",
+      "owner": "Relay and SDK maintainer",
+      "record": "post-mortem/incidents/2026/2026-09-16-shared-quota/README.md",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-09-16-shared-quota/README.md",
+        "post-mortem/incidents/2026/2026-09-16-shared-quota/verification.json",
+        "post-mortem/incidents/2026/2026-09-16-shared-quota/second-pass-verification.json",
+        "post-mortem/releases/2026-09-16-relay-execution-activation.json",
+        "post-mortem/releases/2026-09-16-relay-account-canaries.json",
+        "post-mortem/releases/2026-09-16-relay-generation-recovery.json",
+        "post-mortem/releases/2026-09-16-relay-generation-recovery-final.json"
+      ],
+      "failure_modes": [
+        "FM-CTRL-002"
+      ]
     }
   ],
   "actions": [
@@ -533,6 +574,65 @@
         "post-mortem/incidents/2026/2026-09-15-stripe-test-webhook/verification.json",
         "scripts/test-stripe-webhook-target.ts",
         "docs/runbooks/stripe-webhook-delivery.md"
+      ]
+    },
+    {
+      "id": "ACT-024",
+      "incident": "INC-20260916-REGISTRATION",
+      "owner": "relay maintainer",
+      "review_by": "2026-09-18",
+      "status": "completed",
+      "next_step": "Registration recovery and lifecycle prevention remain verified. Later owner-requested local execution activation is recorded separately; use the same-account reconnect flow for rejected credentials.",
+      "closure": "Scoped legacy retirement preserves operational history; atomic Connect/replay and rejected-token reconnect regressions pass; the original manual sign-in is connected once and paused with retained live evidence.",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-09-16-relay-registration/connection-lifecycle.json",
+        "docs/knowledge/audits/2026-09-16-relay-connections.md",
+        "post-mortem/releases/2026-09-16-relay-execution-activation.json"
+      ]
+    },
+    {
+      "id": "ACT-025",
+      "incident": "INC-20260916-SHAREDQUOTA",
+      "owner": "Relay and SDK maintainer",
+      "review_by": "2026-09-23",
+      "status": "open",
+      "next_step": "Both installed accounts now complete real text generation with observed usage and settled receipts. Provider token-cap forwarding is unsupported; conservative local output overflow is fixture verified and does not cap hidden reasoning. Complete compatible caller distribution and deliberate continuation with owner-scoped revision-aware checkpoint storage; do not infer hard provider spending bounds from short canaries.",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-09-16-shared-quota/README.md",
+        "post-mortem/incidents/2026/2026-09-16-shared-quota/verification.json",
+        "post-mortem/incidents/2026/2026-09-16-shared-quota/second-pass-verification.json",
+        "post-mortem/releases/2026-09-16-relay-execution-activation.json",
+        "post-mortem/releases/2026-09-16-relay-account-canaries.json",
+        "post-mortem/releases/2026-09-16-relay-generation-recovery.json",
+        "post-mortem/releases/2026-09-16-relay-generation-recovery-final.json"
+      ],
+      "closure": "Retain verified real text completion/usage and local overflow evidence, then record deliberate-resume acceptance with compatible owner-scoped caller persistence. Preserve no replay on unknown outcomes and explicitly distinguish local budgets from provider-enforced caps."
+    },
+    {
+      "id": "ACT-026",
+      "incident": "INC-20260916-REGISTRATION",
+      "owner": "Relay maintainer",
+      "review_by": "2026-09-23",
+      "status": "completed",
+      "next_step": "Keep automatic connection, hold/race, replay, paused-reconnect and role-denial regression coverage with future relay changes; provider/caller qualification remains ACT-025.",
+      "closure": "Verified installer policy persists in both actual local installations; new verified connection enablement and heartbeat activation pass disposable database tests, while pause/close/replay restrictions remain. Final monitors and readiness pass live acceptance.",
+      "evidence": [
+        "post-mortem/releases/2026-09-16-relay-automatic-activation.json",
+        "scripts/test-relay-activation-db.ts",
+        "docs/adr/0156-verified-automatic-relay-activation.md"
+      ]
+    },
+    {
+      "id": "ACT-027",
+      "incident": "INC-20260916-SHAREDQUOTA",
+      "owner": "Relay maintainer",
+      "review_by": "2026-09-23",
+      "status": "completed",
+      "next_step": "Keep provider-parameter compatibility, local overflow, private diagnostics and no-retry regression coverage; use fresh per-account canaries for future transport changes.",
+      "closure": "Corrected runtimes installed; both new text jobs completed with matching output, actual usage and acknowledged settlement; activation and isolation remain verified.",
+      "evidence": [
+        "post-mortem/releases/2026-09-16-relay-generation-recovery.json",
+        "post-mortem/releases/2026-09-16-relay-generation-recovery-final.json"
       ]
     }
   ]

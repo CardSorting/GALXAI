@@ -1,0 +1,106 @@
+{
+  "reviewer": "Codex relay and documentation maintainer",
+  "reviewed_at": "2026-09-16T04:43:59.939753+00:00",
+  "scope": "Generation compatibility correction, local observed-output limits, private diagnostics and dated live acceptance. Other dirty work retains prior review evidence.",
+  "domains": [
+    "relay",
+    "knowledge"
+  ],
+  "sources_inspected": [
+    "src/relay/pool-runtime.ts",
+    "src/relay/relay-server.ts",
+    "src/relay/output-budget.ts",
+    "src/relay/upstream-diagnostic.ts",
+    "scripts/test-standard-pool.ts",
+    "scripts/test-relay-completion-usage.ts",
+    "docker/relay-pools/local/images.json",
+    "src/relay/pool-execution.ts",
+    "src/relay/pool-public-response.ts",
+    "src/relay/completion-usage.ts",
+    "src/relay/function-tools.ts",
+    "docs/knowledge/registry.json",
+    "scripts/test-relay-services.ts"
+  ],
+  "complete_guides_inspected": [
+    "docs/runbooks/relay-pool-services.md",
+    "docs/reference/shared-quota-recovery.md",
+    "docs/RELAY_API_REFERENCE.md",
+    "docs/reference/automatic-agent-tools.md",
+    "docs/adr/0155-shared-quota-containment-and-bounded-continuation.md",
+    "docs/adr/0157-compatible-relay-output-budgets.md",
+    "docs/DOCUMENTATION_POLICY.md",
+    "docs/how-to/change-with-documentation.md",
+    "post-mortem/CURRENT_STATE.md",
+    "post-mortem/failure-modes/controller.md"
+  ],
+  "corrections": [
+    "Removed the false provider token-cap assumption from active guidance, documented conservative local units and hidden-reasoning limits.",
+    "Reconciled runtime installation, maintenance, diagnostics and known-broken rollback behavior.",
+    "Corrected stale always-paused Connect prose to the existing automatic-activation policy.",
+    "Preserved old failed evidence, linked new recovery, kept ADR proposed and caller acceptance open.",
+    "Final source and installed preflight deny unavailable strict caps; permanent pre-forward errors veto retries. Prior failed and successful operations are retained across image replacement."
+  ],
+  "tests": {
+    "relay_regressions": 71,
+    "receipt_boundary_authorization_tests": 17,
+    "typescript": "passed",
+    "production_build": "passed; 272 pages",
+    "installed_local_checks": 69,
+    "image_checks": 55,
+    "images_verified": 5,
+    "compiled_boundary": {
+      "at": "2026-09-16T04:41:03.474909+00:00",
+      "compiledBoundaryErrors": [],
+      "renderedAndBrowserAssets": 894,
+      "privateMarkerHits": [],
+      "markersChecked": [
+        "relay_upstream_rejected",
+        "unsupported_parameter",
+        "codex_sh_2c5baf5f09e78318d9ad06f2",
+        "codex_sh_834707761bf76510dd70d6a7",
+        "INC-20260916-SHAREDQUOTA",
+        "GALX_CENTRAL_RUNTIME_TOKEN",
+        "private.galx_account_execution_leases"
+      ],
+      "scope": "Final local production browser JS, rendered HTML/RSC and runtime traces; not a live public site scan."
+    },
+    "documentation_tests": 38
+  },
+  "evidence": [
+    "post-mortem/releases/2026-09-16-relay-generation-recovery.json",
+    "post-mortem/releases/2026-09-16-relay-generation-recovery-final.json"
+  ],
+  "limits": [
+    "One successful short text request per account/model is not sustained load, every model, Sites, image or real function-calling qualification.",
+    "The local output budget is conservative and can stop earlier than a tokenizer; it cannot cap unreported provider reasoning or guarantee total remote spending.",
+    "Actual terminal usage is authoritative; unknown outcomes retain unknown usage and are never treated as zero-cost.",
+    "Original failed jobs remain retained and were not replayed; replacement epochs retain the existing old-job retrieval limitations.",
+    "ACT-025 remains open for caller/SDK distribution and owner-scoped durable checkpoint/continuation acceptance."
+  ],
+  "unmapped_paths_reviewed": "Ignored canary/install helpers remain private; new output-budget source belongs to the existing relay source glob. New ADR mapped explicitly. Incident/release records and generated navigation remain private evidence.",
+  "hashes": {
+    "src/relay/pool-runtime.ts": "ffe42fc97bd330e1a9fe817b6a79eaa31d995418603e062fe7a5d1c277f920d8",
+    "src/relay/relay-server.ts": "05d799d27fed0e1495acc586eadcdd6e72246926c8bf9ec403b778299de7b0c6",
+    "src/relay/output-budget.ts": "7cf08edbefa50f071534bda73c84f1b6fa8bc96025858fb66a4163dc3d84cbad",
+    "src/relay/upstream-diagnostic.ts": "a522c5c068a18846566ae94e2cc5d73df44a706aa2b4bb030c9b9452426e022d",
+    "scripts/test-standard-pool.ts": "37b050874303c56768ca83b6038a5d5e3d32588e80acd26f44c78b0fdd5d16f6",
+    "scripts/test-relay-completion-usage.ts": "ae1c4baf81de654ffcdbf595dd217a9f768586217c1c1ebd8ba69e0aeb2b3cba",
+    "docker/relay-pools/local/images.json": "c300c84646fc03fdad54d9f88e273a89a5984bbb6b9629b217dce23e9851d92c",
+    "src/relay/pool-execution.ts": "8fb09f6b7eded1173e24c7855a402e2a937f34c4ce1605fa1b44c5191c9f454f",
+    "src/relay/pool-public-response.ts": "3e16cec346748926c653c7bfa16e54a9d75a1902abaf39256ee9dd4c20e8e748",
+    "src/relay/completion-usage.ts": "4ab513682b2867a572986f233181063de0d2781bb4aafec17b09d5fee3d9a4f2",
+    "src/relay/function-tools.ts": "669a1aa8a4704b76ca4cca842b47a65b6287e4a5c670904bf10d98e3beb0dd9c",
+    "docs/knowledge/registry.json": "cd59b51478de08d64fecff92ed461e814b1d50ecf54ff47a9ac6de1edd847ccb",
+    "scripts/test-relay-services.ts": "ba02e8570c9903a97973e11c315131a7e9cc48906d5afb867f6de8daac9eeb6c",
+    "docs/runbooks/relay-pool-services.md": "3325a6301776151d68ade1f7b8e373de745dfaab4f292293a1896a059e9bc1dc",
+    "docs/reference/shared-quota-recovery.md": "767fae0db17b94333aa9377abab1d061c795890cd1e3a1c52f6770b853a415a5",
+    "docs/RELAY_API_REFERENCE.md": "04f09f259bcdbc0e6f6a161e66ee8feefe6599bff4e4a0a1595cbaad3f391bd0",
+    "docs/reference/automatic-agent-tools.md": "a5ec32f216881c0dadf645aa7482edbc541b8720764dfc83a46b87318e8d1ef5",
+    "docs/adr/0155-shared-quota-containment-and-bounded-continuation.md": "e749064de6fba0b842bad4730c7d11d5bbe6735f9eec6445fedf2ec49d68c747",
+    "docs/adr/0157-compatible-relay-output-budgets.md": "328a2797f7b9c471df96ffabadd839c78e5d2c92beb0afb478a7047a22b9505f",
+    "docs/DOCUMENTATION_POLICY.md": "ab2030f9d15010634b9a2d9cf2bc680fdf4ae961c2ee3f9f7ad567e99d49d40c",
+    "docs/how-to/change-with-documentation.md": "abcf6bfb2f0aadcf8cfc2fdae18ac8f3f84565f127c34f7453d50e7283006e40",
+    "post-mortem/CURRENT_STATE.md": "3285c5910af85d8215c775bd111809aa75c5570ef2a186383a276d881a82c443",
+    "post-mortem/failure-modes/controller.md": "73b6796fcc8edaa183d2529724ac14810710d37503df7a9006808095a436dfdf"
+  }
+}

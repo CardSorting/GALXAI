@@ -21,21 +21,24 @@ Start production incidents with [triage](../post-mortem/runbooks/triage.md) and 
 | Connection unavailable / retained snapshot | Restore central/monitor access and Refresh; stale data disables management and is not account failure |
 | Execution closed | Expected at latest local checkpoint; finish manual registration and qualification through [service gates](runbooks/relay-pool-services.md) |
 | No accounts | Register manually in that monitor; inventory counts cannot infer enrolled capacity |
-| Sign-in expired | Open the owning desktop, sign in again, then **Update saved sign-in → Save new sign-in** |
+| Sign-in expired or rejected | Open the owning desktop, sign in again, then **Reconnect → Save new sign-in** |
 | Access unavailable / cooldown / repeated failures | Inspect the stated reason and current provider access; do not clear policy or infer permission from chat alone |
 | Change unconfirmed | Inspect fresh matching account/credential revision and runtime epoch; saved is not applied |
 | `record_changed` | Another update won; keep input, close the dialog, refresh and explicitly retry after review |
 | Action response lost | Reconcile the same intent/operation; there is no automatic mutation retry |
-| Registration needs attention | Inspect sign-in/review expiry and desktop state; review again after repair |
+| Registration needs attention | Inspect sign-in and desktop state; use Connect account after repair |
+| Multiple saved account records match this sign-in | Preserve the desktop/login and registration. Inspect active bindings. Use the owner-authorized legacy retirement procedure only for unused, unbound records; never bypass an assigned or removed account |
 | Registered account's desktop is stopped | Normally acceptable; start it only for manual sign-in/repair |
 | Removed registration still has a desktop running | Removal is saved; use **Removed → Stop desktop** to finish cleanup |
-| Removed unfinished registration is needed again | **Removed → Manage → Restore registration**, followed by a fresh review |
+| Removed unfinished registration is needed again | **Removed → Manage → Restore registration**, followed by a fresh connection check |
 | Removed registered account is needed again | It cannot be restored or enabled; do not bypass retained revocation/assignment |
 | Standard rejects Sites/images/tool aliases | Intentional pre-provider boundary; submit only supported operations through the appropriate product path |
 | Premium text works but images do not | Text does not certify image capability; qualify an explicit Premium request without background probes |
 | External connection endpoint returns 410 | Intentional closure; use manual registration, not token imports or a direct database write |
 
-Removal retains files, encrypted authority and audit/lease history; it is not data erasure or upstream session revocation. Pause stops new-pool account execution and renewal as its revision changes. The legacy hold that preserves a worker is a different operation.
+Explicit legacy retirement purges only eligible obsolete credential material and leaves immutable tombstones; see [the retirement contract](reference/relay-account-management.md#retire-obsolete-legacy-credentials). Normal reconnect keeps the same account and its enabled/paused setting. A late rejection of an older credential cannot invalidate a fresh sign-in.
+
+Account removal retains files, encrypted authority and audit/lease history; it is not data erasure or upstream session revocation. Pause stops new-pool account execution and renewal as its revision changes. The legacy hold that preserves a worker is a different operation.
 
 ## Execution and product recovery
 

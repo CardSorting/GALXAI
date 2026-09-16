@@ -1,4 +1,4 @@
-import { accountHealth, registrationHealth, filterRegistrations, accountApplied, filterAccounts, needsSignIn, registrationStep, relayFresh } from '/assets/monitor-model.js';
+import { accountHealth, registrationHealth, filterRegistrations, accountApplied, filterAccounts, needsSignIn, registrationStep, relayFresh, executionStatus } from '/assets/monitor-model.js';
 
 const $ = id => document.getElementById(id);
 const node = (tag, text, className) => {
@@ -56,6 +56,7 @@ function button(label, key, action, primary = false, disabled = false) {
 }
 async function run(key, action) {
   if (busy.has(key) || !connected) return;
+  if (noticeKind === 'action') notice('');
   busy.add(key);
   errors.delete(key);
   // Keep the original node mounted through the user gesture (desktop popup permission).
@@ -66,7 +67,7 @@ async function run(key, action) {
     await action();
   } catch (error) {
     errors.set(key, error.message);
-    notice(error.message);
+    if (key === 'prepare') notice(error.message);
   } finally {
     busy.delete(key);
     await refresh();
@@ -80,15 +81,16 @@ function chooseView(focus = false) {
     if (link.hash === '#' + view) link.setAttribute('aria-current', 'page');
     else link.removeAttribute('aria-current');
   });
-  const titles = { accounts: 'Accounts', registrations: 'Registration', activity: 'Activity' };
+  const titles = { accounts: 'Accounts', registrations: 'Connections', activity: 'Activity' };
   $('page-title').textContent = titles[view];
   if (state) {
     document.title = $('pool').textContent + ' — ' + titles[view];
     $('summary').textContent = view === 'accounts'
       ? state.accounts.filter(a => !a.removedAt).length + ' registered · ' + state.accounts.filter(a => !a.removedAt && a.state === 'enabled').length + ' enabled'
-      : view === 'registrations' ? 'Sign in manually, review access, then save the account.'
+      : view === 'registrations' ? 'Sign in, then connect. Reconnect here when access expires.'
       : 'A history of saved account changes.';
-    $('new').textContent = view === 'registrations' ? 'Add account' : 'Register account';
+    $('new').textContent = 'Connect account';
+    $('gate-note').hidden = state.executionAllowed || view !== 'accounts';
     $('new').hidden = state.role !== 'operator' || (!state.accounts.length && view === 'accounts');
   }
   if (focus) $('page-title').focus({ preventScroll: true });
@@ -132,13 +134,14 @@ function renderAccounts() {
   $('rows').closest('.table-wrap').hidden = !accounts.length;
   $('empty').hidden = state.accounts.length > 0;
   $('no-results').hidden = !state.accounts.length || accounts.length > 0;
-  const count = accounts.length + ' of ' + state.accounts.length + ' accounts';
+  const total = state.accounts.filter(a => Boolean(a.removedAt) === ($('filter').value === 'removed')).length;
+  const count = accounts.length + ' of ' + total + ' accounts';
   if ($('result-count').textContent !== count) $('result-count').textContent = count;
   const operator = state.role === 'operator';
   $('first-account').hidden = !operator;
   $('first-account').disabled = !connected || !state.registrationAllowed;
   $('empty-copy').textContent = operator
-    ? 'Register a ' + (state.pool === 'premium' ? 'paid' : 'free') + ' account to get started. You’ll review its access before saving it. New accounts start paused.'
+    ? 'Connect a ' + (state.pool === 'premium' ? 'paid' : 'free') + ' account to get started. ' + (state.automaticActivation ? 'We’ll verify its access and enable it automatically.' : 'New accounts stay paused until execution is resumed.')
     : 'An operator can register accounts here. You can review account status and recent changes.';
   $('rows').replaceChildren();
   for (const account of accounts) {
@@ -158,16 +161,17 @@ function renderAccounts() {
     if (operator && !account.removedAt && account.state !== 'revoked') {
       const enabled = account.state === 'enabled';
       const toggle = button(enabled ? 'Pause' : 'Enable', account.id, () => accountAction(account, enabled ? 'paused' : 'enabled'),
-        false, !enabled && (!state.executionAllowed || expired || condition.attention || !relayFresh(state)));
-      if (!enabled && toggle.disabled) toggle.title = !state.executionAllowed ? 'Execution must be activated before enabling accounts.' :
+        false, !enabled && ((!state.executionAllowed && !state.automaticActivation) || expired || condition.attention || !relayFresh(state)));
+      if (!enabled && toggle.disabled) toggle.title = !state.executionAllowed && !state.automaticActivation ? 'Execution is paused for this relay.' :
         expired ? 'Update the sign-in before enabling this account.' : 'Wait for the relay to reconnect.';
       actions.append(toggle);
       if (state.registrations.some(r => r.accountId === account.id)) {
-        actions.append(button(expired ? 'Update sign-in' : 'Sign-in settings', account.id, () => goToRegistration(account.id)));
+        actions.append(button(expired ? 'Reconnect' : 'Connection settings', account.id, () => goToRegistration(account.id)));
       }
     }
     if (operator && !account.removedAt) actions.append(managementActions('account', account));
     if (operator && account.removedAt && state.registrations.some(r => r.accountId === account.id)) actions.append(button('View registration',account.id,()=>goToRegistration(account.id)));
+    if (errors.has(account.id)) { const error = node('p', errors.get(account.id), 'inline-error'); error.setAttribute('role','alert'); actions.append(error); }
     row.append(identity, saved, confirmation, signIn, actions);
     $('rows').append(row);
   }
@@ -183,104 +187,87 @@ async function openDesktop(registration) {
 }
 function registrationRow(registration) {
   const desktop = state.desktops.find(d => d.id === registration.desktopId);
-  const step = registrationStep(registration, desktop);
+  const step = registrationStep(registration, desktop), saved = step === 3;
+  const account = state.accounts.find(a => a.id === registration.accountId);
+  const reconnect = account && needsSignIn(account);
   const row = node('article', undefined, 'registration-row');
   row.dataset.record = registration.id;
   const heading = node('div', undefined, 'registration-heading');
-  heading.append(node('h3', registration.name), node('span', step === 4 ? 'Registered' : 'Step ' + step + ' of 3', 'badge'));
+  heading.append(node('h3', registration.name), node('span', saved ? (reconnect ? 'Action required' : 'Connected') : 'Step ' + step + ' of 2', 'badge'));
   row.append(heading);
   const condition = registrationHealth(registration,state,connected);
   const conditionLine = node('div',undefined,'registration-health');
   conditionLine.append(healthBadge(condition), node('p',condition.detail,'hint'));
   row.append(conditionLine);
-  if (registration.removedAt || condition.code === 'revoked') {
-    heading.querySelector('.badge').textContent = registration.removedAt ? 'Removed' : 'Revoked';
-    const removedActions = node('div',undefined,'actions');
-    if (state.role === 'operator') {
-      if (condition.code === 'cleanup') removedActions.append(button('Stop desktop',registration.id,()=>api('/api/registrations/stop',{id:registration.id}),true));
-      if (!registration.accountId || !registration.removedAt) removedActions.append(managementActions('registration',registration));
-    }
-    row.append(removedActions); return row;
-  }
-  if (step < 4) {
-    const steps = node('ol', undefined, 'steps');
-    steps.setAttribute('aria-label', 'Registration progress');
-    ['Sign in', 'Review access', 'Register'].forEach((label, index) => {
-      const item = node('li', label, index + 1 < step ? 'done' : index + 1 === step ? 'current' : '');
-      if (index + 1 === step) item.setAttribute('aria-current', 'step');
-      steps.append(item);
-    });
-    row.append(steps);
-  }
-  let description = step === 4 ? 'Saved centrally. Use this desktop when the account needs a new sign-in.' :
-    step === 3 ? 'Access reviewed. Check the account type and models, then save this account in a paused state.' :
-    step === 2 ? 'Sign-in saved on the desktop. Review access to verify the account type and available models.' :
-    'Start sign-in, then complete it in this account’s desktop.';
-  if (!desktop?.canConnect) {
-    description = !state.desktopAvailable ? 'Desktop service unavailable. Restore the local desktop service, then refresh.' :
-      !desktop ? 'The registration is saved. Create its desktop to continue.' :
-      ['stopped', 'missing', 'error', 'unhealthy'].includes(desktop.state)
-        ? 'The desktop is not ready. Start it to continue with this saved registration.'
-        : 'The desktop is starting. This page updates automatically.';
-  } else if (step === 1 && desktop.login?.state === 'waiting') {
-    description = 'Sign-in is waiting for you. Open the desktop to complete it, then review access.';
-  } else if (step === 1 && ['expired', 'failed', 'cancelled'].includes(desktop.login?.state)) {
-    description = 'The previous sign-in did not finish. Start sign-in again to continue.';
-  }
-  if (!condition.attention && condition.code !== 'unknown') row.append(node('p', description, 'muted'));
-  if (step === 3) {
-    row.append(node('p', (registration.accountClass === 'paid' ? 'Paid' : 'Free') + ' account verified', 'verified'));
-    const details = node('details', undefined, 'models'), summary = node('summary', 'Available models (' + (registration.models ?? []).length + ')');
-    summary.dataset.action = 'models';
-    const list = node('ul');
-    for (const model of registration.models ?? []) list.append(node('li', model));
-    details.append(summary, list);
-    row.append(details);
-  }
+  if (account?.connectionCheckedAt) row.append(node('p', 'Last verified ' + date(account.connectionCheckedAt), 'hint'));
   const actions = node('div', undefined, 'actions');
   const call = async (action, message) => {
     await api('/api/registrations/' + action, { id: registration.id });
     if (message) notice(message);
   };
-  if (state.role === 'operator') {
-    const closed = !state.registrationAllowed;
-    if (!desktop && state.desktopAvailable) {
-      actions.append(button('Create desktop', registration.id, () => api('/api/registrations/prepare',
-        { id: registration.id, desktopId: registration.desktopId, name: registration.name }), true, closed));
-    } else if (desktop && !desktop.canConnect && state.desktopAvailable &&
-      ['stopped', 'missing', 'error', 'unhealthy'].includes(desktop.state)) {
-      actions.append(button('Start desktop', registration.id, () => call('start'), true));
-    } else if (desktop?.canConnect) {
-      if (step === 3) {
-        actions.append(button('Register account', registration.id, async () => {
-          await call('register', 'Account registered and paused. You can find it in Accounts.');
-          location.hash = 'accounts';
-        }, true, closed));
-      } else if (step === 2) {
-        actions.append(button('Review access', registration.id, () => call('review', 'Access reviewed. Check the verified models before registering.'), true, closed));
-      } else if (step === 1 && desktop.login?.state !== 'waiting') {
-        actions.append(button(desktop.login?.state === 'starting' ? 'Starting sign-in…' : 'Start sign-in', registration.id,
-          () => call('signin', 'Sign-in started. Open the desktop to complete it.'), true, closed || desktop.login?.state === 'starting'));
-      }
-      actions.append(button('Open desktop', registration.id, () => openDesktop(registration), step === 4 || (step === 1 && desktop.login?.state === 'waiting')));
-      const tools = node('details', undefined, 'registration-tools'), summary = node('summary', step === 4 ? 'Update saved sign-in' : 'More options');
-      summary.dataset.action = 'registration-options';
-      tools.append(summary);
-      const secondary = node('div', undefined, 'actions');
-      if (step !== 1 || desktop.login?.state === 'waiting') secondary.append(button('Start sign-in again', registration.id, () => call('signin'), false, closed));
-      if (step !== 2) secondary.append(button(step === 4 ? 'Save new sign-in' : 'Review access again', registration.id,
-        () => call(step === 4 ? 'refresh' : 'review', step === 4 ? 'Sign-in saved. Check Accounts for relay confirmation.' : 'Access reviewed. Check the verified account before registering.'), false, closed));
-      secondary.append(button('Stop desktop', registration.id, async () => {
-        if (confirm('Stop the desktop for ' + registration.name + '? Any open sign-in will disconnect. Saved account access is retained.')) await call('stop', 'Desktop stopped. You can start it again from this registration.');
-      }));
-      tools.append(node('p', step === 4 ? 'Complete a new sign-in in this desktop before saving it.' : 'Already signed in manually? Review access to check the saved desktop credentials.', 'hint'), secondary);
-      actions.append(tools);
+  if (registration.removedAt || condition.code === 'revoked') {
+    heading.querySelector('.badge').textContent = registration.removedAt ? 'Removed' : 'Revoked';
+    if (state.role === 'operator') {
+      if (condition.code === 'cleanup') actions.append(button('Stop desktop',registration.id,()=>call('stop'),true));
+      if (!registration.accountId || !registration.removedAt) actions.append(managementActions('registration',registration));
     }
-    if (closed) row.append(node('p', 'Registration is closed. Existing desktops remain available.', 'hint'));
+  } else {
+    if (!saved) {
+      const steps = node('ol', undefined, 'steps');
+      steps.setAttribute('aria-label', 'Connection progress');
+      ['Sign in', 'Connect'].forEach((label, index) => {
+        const item = node('li', label, index + 1 < step ? 'done' : index + 1 === step ? 'current' : '');
+        if (index + 1 === step) item.setAttribute('aria-current', 'step');
+        steps.append(item);
+      });
+      row.append(steps);
+    }
+    if (registration.models?.length && !saved) {
+      const details = node('details', undefined, 'models'), summary = node('summary', 'Verified models (' + registration.models.length + ')');
+      summary.dataset.action = 'models';
+      const list = node('ul');
+      for (const model of registration.models) list.append(node('li', model));
+      details.append(summary, list); row.append(details);
+    }
+    if (state.role === 'operator') {
+      const closed = !state.registrationAllowed;
+      if (!desktop && state.desktopAvailable) {
+        actions.append(button('Create desktop', registration.id, () => api('/api/registrations/prepare',
+          { id: registration.id, desktopId: registration.desktopId, name: registration.name }), true, closed));
+      } else if (desktop && !desktop.canConnect && state.desktopAvailable && ['stopped','missing','error','unhealthy'].includes(desktop.state)) {
+        actions.append(button('Start desktop', registration.id, () => call('start'), true, closed));
+      } else if (desktop?.canConnect) {
+        if (!saved) {
+          // Always available after manual login, even if the desktop's launcher status is stale.
+          actions.append(button('Connect account', registration.id, async () => {
+            await call('connect', state.automaticActivation ? 'Account connected. Activation is automatic; confirmation appears in Accounts.' : 'Account connected and paused. View it in Accounts.');
+            location.hash = 'accounts';
+          }, step === 2, closed));
+          if (step === 1 && desktop.login?.state !== 'waiting') actions.append(button('Start sign-in', registration.id,
+            () => call('signin', 'Sign-in started. Open the desktop to finish, then choose Connect account.'), true, closed || desktop.login?.state === 'starting'));
+          row.append(node('p', 'Already signed in manually? Choose Connect account to verify and save it.', 'hint'));
+        }
+        actions.append(button('Open desktop', registration.id, () => openDesktop(registration), !saved && step === 1 && desktop.login?.state === 'waiting'));
+        const tools = node('details', undefined, 'registration-tools'), summary = node('summary', saved ? 'Reconnect' : 'Sign-in options');
+        summary.dataset.action = 'registration-options';
+        tools.open = Boolean(reconnect);
+        tools.append(summary, node('p', saved ? 'Sign in to the same account in this desktop, then save the new sign-in. Your account and settings stay in place.' : 'Use this desktop to complete sign-in. Connecting verifies its saved credentials.', 'hint'));
+        const secondary = node('div', undefined, 'actions');
+        secondary.append(button('Start sign-in again', registration.id, () => call('signin', 'Sign-in started. Open the desktop to finish.'), false, closed || desktop.login?.state === 'starting'));
+        if (saved) secondary.append(button('Save new sign-in', registration.id, () => call('refresh', 'Connection verified. Check Accounts for its current status.'), true, closed));
+        secondary.append(button('Stop desktop', registration.id, async () => {
+          if (confirm('Stop the desktop for ' + registration.name + '? Any open sign-in will disconnect. Saved account access is retained.')) await call('stop', 'Desktop stopped. Start it again here when needed.');
+        }));
+        tools.append(secondary); actions.append(tools);
+      }
+      if (closed) row.append(node('p', 'New connections and sign-in changes are temporarily closed.', 'hint'));
+      actions.append(managementActions('registration',registration));
+    }
   }
-  if (state.role === 'operator') actions.append(managementActions('registration',registration));
   row.append(actions);
-  if (errors.has(registration.id)) row.append(node('p', errors.get(registration.id), 'inline-error'));
+  if (errors.has(registration.id)) {
+    const error = node('p', errors.get(registration.id), 'inline-error'); error.setAttribute('role','alert'); row.append(error);
+  }
   return row;
 }
 function renderRegistrations() {
@@ -291,14 +278,15 @@ function renderRegistrations() {
   const issues = state.registrations.filter(r => !r.removedAt && registrationHealth(r,state,connected).attention).length;
   $('registration-attention').hidden = !issues;
   $('registration-attention-copy').textContent = issues + (issues === 1 ? ' registration needs attention' : ' registrations need attention');
-  $('registration-result-count').textContent = matches.length + ' of ' + state.registrations.length + ' registrations';
+  $('registration-result-count').textContent = matches.length + ' of ' + state.registrations.filter(r => Boolean(r.removedAt) === ($('registration-filter').value === 'removed')).length + ' connections';
   $('registration-no-results').hidden = !state.registrations.length || matches.length > 0;
-  const pending = matches.filter(r => r.state !== 'registered' || r.removedAt || $('registration-filter').value !== 'all');
-  const completed = matches.filter(r => r.state === 'registered' && !r.removedAt && $('registration-filter').value === 'all');
+  const inProgress = r => r.state !== 'registered' || r.removedAt || $('registration-filter').value !== 'all' || registrationHealth(r,state,connected).attention;
+  const pending = matches.filter(inProgress);
+  const completed = matches.filter(r => !inProgress(r));
   for (const registration of pending) $('pending').append(registrationRow(registration));
   for (const registration of completed) $('completed-rows').append(registrationRow(registration));
   $('completed').hidden = !completed.length;
-  $('completed-label').textContent = 'Registered accounts (' + completed.length + ')';
+  $('completed-label').textContent = 'Connected accounts (' + completed.length + ')';
   if (!state.registrations.length && $('prepare').hidden) {
     const empty = node('div', undefined, 'empty');
     empty.append(node('h3', 'No registrations in progress'),
@@ -316,16 +304,17 @@ function render() {
   $('scope').textContent = state.pool === 'premium' ? 'Paid accounts · Text, sites and images' : 'Free accounts · Text';
   $('role').textContent = operator ? 'Operator access' : 'Read-only access';
   $('new').disabled = !connected || !state.registrationAllowed;
-  $('prepare-copy').textContent = 'Use a ' + (state.pool === 'premium' ? 'paid' : 'free') + ' account for this relay. Registration saves it in a paused state.';
+  $('prepare-copy').textContent = 'Use a ' + (state.pool === 'premium' ? 'paid' : 'free') + ' account for this relay. ' + (state.automaticActivation ? 'Connecting verifies access and enables the account automatically. You can pause it in Accounts.' : 'New connections stay paused while execution is paused for this relay.');
   $('prepare').querySelector('[type=submit]').disabled = !connected || !state.registrationAllowed || busy.has('prepare');
   if (!operator) $('prepare').hidden = true;
   $('connection').textContent = connected ? (relayFresh(state) ? 'Connected' : 'Awaiting relay') : 'Connection interrupted';
   $('connection').className = connected && relayFresh(state) ? 'ok' : 'waiting';
-  $('execution').textContent = state.executionAllowed ? 'Allowed' : 'Not activated';
+  const execution = executionStatus(state);
+  $('execution').textContent = execution.label;
   $('registration').textContent = state.registrationAllowed ? 'Open' : 'Closed';
   $('updated').textContent = (connected ? 'Updated ' : 'Last update ') + lastUpdated.toLocaleTimeString();
   $('gate-note').hidden = state.executionAllowed;
-  $('gate-note').textContent = 'Execution is not activated. You can register accounts and review access; enabling becomes available after activation.';
+  $('gate-note').textContent = execution.detail;
   $('account-count').textContent = state.accounts.filter(a => !a.removedAt).length;
   $('registration-count').textContent = state.registrations.filter(r => !r.removedAt && r.state !== 'registered').length || '';
   chooseView();
@@ -365,7 +354,19 @@ async function refresh() {
   $('refresh').disabled = true;
   $('main').setAttribute('aria-busy', 'true');
   try {
-    state = await api('/api/status');
+    const next = await api('/api/status');
+    for (const registration of next.registrations) {
+      const previous = state?.registrations.find(r => r.id === registration.id);
+      const account = next.accounts.find(a => a.id === registration.accountId);
+      const oldAccount = state?.accounts.find(a => a.id === registration.accountId);
+      const connectedNow = registration.state === 'registered' && previous?.state !== 'registered';
+      const refreshedNow = account?.connectionState === 'connected' && account.connectionCheckedAt && account.connectionCheckedAt !== oldAccount?.connectionCheckedAt;
+      if (errors.has(registration.id) && (connectedNow || refreshedNow)) {
+        errors.delete(registration.id);
+        notice(connectedNow ? 'Account connected. View its current state in Accounts.' : 'Connection verified. The latest sign-in is saved.');
+      }
+    }
+    state = next;
     connected = true;
     lastUpdated = new Date();
     if (noticeKind === 'connection') notice('');

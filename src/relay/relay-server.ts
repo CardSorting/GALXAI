@@ -46,6 +46,7 @@ import { completionUsage, completionFrame, type CompletionUsage } from './comple
 import { functionInput, functionToolContract, completedFunctionCalls, type FunctionCall } from './function-tools.js';
 import { DurableReceipts } from './durable-receipts.js';
 import { upstreamDiagnostic, type UpstreamDiagnostic } from './upstream-diagnostic.js';
+import { OutputBudget } from './output-budget.js';
 import { RelayTelemetry } from './telemetry.js';
 import { EventEmitter } from 'node:events';
 import WebSocket from 'ws';
@@ -115,7 +116,7 @@ export interface RelayConfig {
   /** Enable only after this upstream has qualified max_output_tokens support. */
   forwardOutputTokenLimit?: boolean;
   /** In-process operator observer only. Never accepts or returns raw error data. */
-  onUpstreamDiagnostic?: (diagnostic: UpstreamDiagnostic) => void;
+  onUpstreamDiagnostic?: (diagnostic: UpstreamDiagnostic, context: { jobId: string }) => void;
   retryBaseDelayMs: number;            // Base backoff delay for retries (500ms)
   retryMaxDelayMs: number;             // Backoff ceiling for full jitter (5000ms)
   deDuplicationOverlapWindowChars: number; // Suffix window length for overlap reconciliation (128 chars)
@@ -311,6 +312,8 @@ export interface ShardRecord extends Record<string, unknown> {
 
 interface TransientJobSession {
   abortController: AbortController;
+  outputBudget?: OutputBudget;
+  quotaFailureObserved?: boolean;
   receiptText?: string;
   graceTimer?: NodeJS.Timeout;
   upstreamWs?: any;
@@ -511,7 +514,8 @@ class JobEventBus extends EventEmitter {
       return;
     }
     if (event.type === 'job:error') {
-      this.fanOut(event.jobId, `event: error\ndata: ${JSON.stringify({ error: event.reason })}\n\n`, true);
+      this.fanOut(event.jobId, `event: error\ndata: ${JSON.stringify({ error: event.reason,
+        execution_state: this.jobsTable.get(event.jobId)?.continuationAllowed === true ? 'failed' : 'unknown' })}\n\n`, true);
       return;
     }
     if (event.type === 'job:cancelled') {
@@ -1309,17 +1313,31 @@ export class GalxaiRelayServer extends EventEmitter {
 
   /** In-process scheduling observation only; never an HTTP response or an execution grant. */
   standardAvailability(model: string) {
-    const shard = this.config.executionPolicy?.pool === 'standard' && this.config.assignedShardId
+    return this.accountAvailability(model);
+  }
+
+  accountAvailability(model: string, authorizedImageTrial = false) {
+    const shard = this.config.executionPolicy && this.config.assignedShardId
       ? this.shardsTable.get(this.config.assignedShardId) : undefined;
-    if (!shard) return { eligible: false, lastUsedAtMs: 0, recovering: false };
+    if (!shard) return { eligible: false, lastUsedAtMs: 0, recovering: false, availableSlots: 0 };
     this.updateCapabilityHealth();
+    const recovering = Boolean(shard.quotaFailures || shard.consecutiveFailures >= 3);
+    const active = Math.max(shard.inFlight, this.jobsTable.getAll().filter(j => ['queued','running','streaming'].includes(j.status)).length);
+    const previous = this.capabilities.get(shard.id)?.models.find(m => m.model === model);
+    const trial = authorizedImageTrial && this.config.executionPolicy?.pool === 'premium'
+      && (!previous || previous.state === 'AVAILABLE' || previous.expiresAtMs <= Date.now());
+    const availableSlots = Math.max(0, (recovering ? 1 : this.config.shardConcurrency) - active);
     return {
-      eligible: !this.isDraining && this.shardReadyAt(shard) <= Date.now() && !shard.probeInFlight && shard.inFlight === 0
-        && !this.jobsTable.getAll().some(j => ['queued','running','streaming'].includes(j.status))
-        && this.capabilities.eligibleShardIds(model).includes(shard.id),
+      eligible: !this.isDraining && this.shardReadyAt(shard) <= Date.now() && !shard.probeInFlight && availableSlots > 0
+        && (trial || this.capabilities.eligibleShardIds(model).includes(shard.id)),
       lastUsedAtMs: shard.lastUsedAtMs,
-      recovering: Boolean(shard.quotaFailures || shard.consecutiveFailures >= 3),
+      recovering, availableSlots,
     };
+  }
+
+  /** Private, revision-scoped observation for the owning pool; never revokes account permission. */
+  credentialRejected() {
+    return Boolean(this.config.assignedShardId && this.shardsTable.get(this.config.assignedShardId)?.status === 'disabled');
   }
 
   private capabilitySnapshot() {
@@ -1429,7 +1447,7 @@ export class GalxaiRelayServer extends EventEmitter {
       providerLimits: (candidate.providerLimits ?? []).filter(l => (!l.resetAtMs || l.resetAtMs > now)
         // An elapsed fallback permits a real probe. Old zero observations without a reset
         // must not immediately reopen the same cooldown before that probe can run.
-        && !(this.config.executionPolicy?.pool === 'standard' && probe && !l.resetAtMs && l.remaining === 0)).map(l => ({
+        && !(this.config.executionPolicy && probe && !l.resetAtMs && l.remaining === 0)).map(l => ({
         ...l, remaining: /request/i.test(l.name) ? Math.max(0, l.remaining - 1) : l.remaining,
       })),
     };
@@ -1438,18 +1456,23 @@ export class GalxaiRelayServer extends EventEmitter {
       updated.cooldownUntilMs = Math.max(updated.cooldownUntilMs ?? 0, ...depleted.map(l => l.resetAtMs ?? now + 60_000));
       updated.status = 'cooldown';
       updated.quotaFailures = Math.max(1, updated.quotaFailures ?? 0);
-      if (this.config.executionPolicy?.pool === 'standard' && jobId) updated.lastQuotaFailureJobId = jobId;
+      if (this.config.executionPolicy && jobId) {
+        updated.lastQuotaFailureJobId = jobId;
+        const session = this.sessions.get(jobId); if (session) session.quotaFailureObserved = true;
+      }
     }
     this.shardsTable.put(updated.id, updated);
-    if (this.config.executionPolicy?.pool === 'standard') this.saveStateSnapshot();
+    if (this.config.executionPolicy) this.saveStateSnapshot();
     return updated;
   }
 
   private recordQuotaFailure(shardId: string, providerDeadline?: number, release = true, jobId?: string): void {
     const shard = this.shardsTable.get(shardId);
     if (!shard) return;
-    const standardJob = this.config.executionPolicy?.pool === 'standard' ? jobId : undefined;
-    const repeatedObservation = standardJob !== undefined && shard.lastQuotaFailureJobId === standardJob;
+    const standardJob = this.config.executionPolicy ? jobId : undefined;
+    const session = standardJob ? this.sessions.get(standardJob) : undefined;
+    const repeatedObservation = session?.quotaFailureObserved || (standardJob !== undefined && shard.lastQuotaFailureJobId === standardJob);
+    if (session) session.quotaFailureObserved = true;
     const failures = Math.max(1, (shard.quotaFailures ?? 0) + (repeatedObservation ? 0 : 1));
     // New evidence can extend the wait; multiple frames cannot multiply the same job's backoff.
     const deadline = cooldownDeadline(failures, Date.now(), providerDeadline);
@@ -1459,7 +1482,7 @@ export class GalxaiRelayServer extends EventEmitter {
       inFlight: Math.max(0, shard.inFlight - (release ? 1 : 0)),
       cooldownUntilMs: Math.max(shard.cooldownUntilMs ?? 0, deadline),
     });
-    if (this.config.executionPolicy?.pool === 'standard') this.saveStateSnapshot();
+    if (this.config.executionPolicy) this.saveStateSnapshot();
   }
 
   private recordShardFailure(shardId: string, unauthorized = false): void {
@@ -1472,18 +1495,20 @@ export class GalxaiRelayServer extends EventEmitter {
       status: unauthorized || shard.status === 'disabled' ? 'disabled' : failures >= 3 ? 'cooldown' : shard.status,
       cooldownUntilMs: failures >= 3 ? Math.max(shard.cooldownUntilMs ?? 0, cooldownDeadline(failures - 2, Date.now())) : shard.cooldownUntilMs,
     });
-    if (unauthorized) this.saveStateSnapshot();
+    if (unauthorized || this.config.executionPolicy) this.saveStateSnapshot();
   }
 
   private releaseShard(shardId: string, succeeded = false): void {
     const shard = this.shardsTable.get(shardId);
     if (!shard || shard.inFlight <= 0) return;
-    const recovered = succeeded && (shard.cooldownUntilMs ?? 0) <= Date.now();
+    const needsProbe = this.config.executionPolicy && Boolean(shard.quotaFailures || shard.consecutiveFailures >= 3);
+    // A pre-exhaustion sibling finishing late is not evidence that a recovery probe succeeded.
+    const recovered = succeeded && (shard.cooldownUntilMs ?? 0) <= Date.now() && (!needsProbe || shard.probeInFlight);
     this.shardsTable.put(shardId, { ...shard,
       inFlight: shard.inFlight - 1, probeInFlight: false,
       ...(recovered ? { consecutiveFailures: 0, quotaFailures: 0, status: shard.status === 'disabled' ? 'disabled' as const : 'active' as const } : {}),
     });
-    if (this.config.executionPolicy?.pool === 'standard' && recovered && (shard.quotaFailures || shard.consecutiveFailures >= 3)) this.saveStateSnapshot();
+    if (this.config.executionPolicy && recovered && (shard.quotaFailures || shard.consecutiveFailures >= 3)) this.saveStateSnapshot();
   }
 
   private getRateLimitHeaders(): Record<string, string> {
@@ -1795,7 +1820,7 @@ export class GalxaiRelayServer extends EventEmitter {
     let pendingGrant: ExecutionGrant | undefined;
     try {
         const body = await readJsonBody(req, this.config.maxPayloadBytes, this.config.httpBodyTimeoutMs);
-        if (this.config.executionPolicy) requestWorkload(this.config.executionPolicy.pool,req.url ?? '',body);
+        const poolWorkload = this.config.executionPolicy ? requestWorkload(this.config.executionPolicy.pool,req.url ?? '',body) : undefined;
         if (this.isDraining) throw new RequestError(503, 'server_draining', 'Relay is restarting. Submit the request again after it is ready.');
         validateModelRequest(body, false);
         if (body.durable_receipt !== undefined && typeof body.durable_receipt !== 'boolean') throw new RequestError(400, 'invalid_request', 'Invalid receipt request.');
@@ -1887,7 +1912,7 @@ export class GalxaiRelayServer extends EventEmitter {
           isDetached: false,
           estimatedTokens: body.max_tokens || 3500,
           durableReceipt: body.durable_receipt === true,
-          ...(body.max_tokens !== undefined ? { maxOutputTokens: body.max_tokens } : {}),
+          ...(body.max_tokens !== undefined ? { maxOutputTokens: body.max_tokens } : poolWorkload === 'text' ? { maxOutputTokens: 4096 } : {}),
         };
 
         const traceId = this.requestTraces.get(req);
@@ -1901,6 +1926,8 @@ export class GalxaiRelayServer extends EventEmitter {
 
         const session: TransientJobSession = {
           abortController: new AbortController(),
+          ...(poolWorkload === 'text' && !this.config.forwardOutputTokenLimit
+            ? { outputBudget: new OutputBudget(jobRecord.maxOutputTokens!) } : {}),
           lastChunkAtMs: 0,
           ewmaItlMs: 0,
           consecutiveItlStalls: 0,
@@ -1931,8 +1958,8 @@ export class GalxaiRelayServer extends EventEmitter {
           grant.signal.addEventListener('abort',()=>{
             session.abortController.abort(); this.safeCloseSocket(session.upstreamWs);
             // Terminal CDC can settle/abort synchronously before the completion
-            // handler releases the shard. Preserve Standard's confirmed recovery.
-            if (session.currentShardId) { this.releaseShard(session.currentShardId,this.config.executionPolicy?.pool==='standard' && this.jobsTable.get(jobId)?.status==='completed'); session.currentShardId=undefined; }
+            // handler releases the shard. Preserve confirmed recovery in either pool.
+            if (session.currentShardId) { this.releaseShard(session.currentShardId,!!this.config.executionPolicy && this.jobsTable.get(jobId)?.status==='completed'); session.currentShardId=undefined; }
             this.jobQueue.markFailed(jobId,'execution_authorization_expired');
           },{once:true});
           if (grant.signal.aborted) this.jobQueue.markFailed(jobId,'execution_authorization_expired');
@@ -2415,7 +2442,7 @@ export class GalxaiRelayServer extends EventEmitter {
       this.jobBus.sendToSubscriber(
         jobId,
         res,
-        `event: error\ndata: ${JSON.stringify({ error: job.error || job.status })}\n\n`,
+        `event: error\ndata: ${JSON.stringify({ error: job.error || job.status, execution_state: job.continuationAllowed === true ? 'failed' : 'unknown' })}\n\n`,
         true,
       );
       return;
@@ -2618,6 +2645,7 @@ export class GalxaiRelayServer extends EventEmitter {
       session.upstreamWs = ws;
       ws.on('unexpected-response', (_request: unknown, response: http.IncomingMessage) => {
         response.resume();
+        try { this.config.onUpstreamDiagnostic?.(upstreamDiagnostic({ status: response.statusCode }), { jobId: job.id }); } catch { /* Diagnostics never affect execution. */ }
         triggerFailover(`upstream_http_${response.statusCode}`, response.statusCode === 429, 1006,
           retryDeadline(response.headers['retry-after']), response.statusCode === 401, ![400, 404, 405, 413, 422].includes(response.statusCode || 0));
       });
@@ -2729,9 +2757,9 @@ export class GalxaiRelayServer extends EventEmitter {
         createPayload.tool_choice = job.functionContract.toolChoice;
         if (job.functionContract.parallelToolCalls !== undefined) createPayload.parallel_tool_calls = job.functionContract.parallelToolCalls;
       }
-      // Supplier compatibility is qualified separately for durable Site jobs.
-      // Opting that path in must not change ordinary chat payloads during rollout.
-      if (this.config.forwardOutputTokenLimit && job.durableReceipt && job.maxOutputTokens !== undefined) createPayload.max_output_tokens = job.maxOutputTokens;
+      // Only qualified transports receive this provider parameter. Other
+      // isolated text uses its conservative local observed-output budget.
+      if (this.config.forwardOutputTokenLimit && (job.durableReceipt || this.config.executionPolicy) && job.maxOutputTokens !== undefined) createPayload.max_output_tokens = job.maxOutputTokens;
       if (job.reasoningEffort) {
         createPayload.reasoning = { effort: job.reasoningEffort };
       }
@@ -2745,7 +2773,7 @@ export class GalxaiRelayServer extends EventEmitter {
 
     ws.onmessage = (event: any) => {
       try {
-        if (session.activeAttemptId !== attempt.id) return;
+        if (session.activeAttemptId !== attempt.id || session.abortController.signal.aborted || failoverTriggered) return;
         session.lastSeenAliveMs = Date.now();
         // Clear pending heartbeat on ANY frame arrival from upstream
         attempt.heartbeatPending = false;
@@ -2778,7 +2806,11 @@ export class GalxaiRelayServer extends EventEmitter {
         }
 
         // Dynamic Reasoning / Thinking Delta Handling
-        if (data.type === 'response.reasoning.delta' || data.type === 'response.reasoning_text.delta') {
+        if (data.type === 'response.reasoning.delta' || data.type === 'response.reasoning_text.delta' ||
+            data.type === 'response.reasoning_summary_text.delta') {
+          if (typeof data.delta === 'string' && session.outputBudget && !session.outputBudget.observe(data.delta)) {
+            this.stopForOutputBudget(job.id); return;
+          }
           this.metrics.totalReasoningChunksReceived++;
           // Active thinking in progress -> extend TTFT deadlock timer dynamically
           if (!attempt.hasReceivedFirstToken) {
@@ -2816,6 +2848,10 @@ export class GalxaiRelayServer extends EventEmitter {
         // Tool arguments are executable data. Publish complete validated calls only
         // after terminal success, never partial argument text or approval frames.
         if (data.type === 'response.function_call_arguments.delta' || data.type === 'response.function_call_arguments.done') {
+          if (data.type === 'response.function_call_arguments.delta' && typeof data.delta === 'string' &&
+              session.outputBudget && !session.outputBudget.observe(data.delta, true)) {
+            this.stopForOutputBudget(job.id); return;
+          }
           if (!attempt.hasReceivedFirstToken) resetTtftTimer(this.config.reasoningActivityExtensionMs);
           refreshChunkTimer();
           return;
@@ -2824,6 +2860,7 @@ export class GalxaiRelayServer extends EventEmitter {
 
         if (isOutputDelta && data.delta) {
           let chunkText = typeof data.delta === 'string' ? data.delta : (data.delta.text || '');
+          if (session.outputBudget && !session.outputBudget.observe(chunkText)) { this.stopForOutputBudget(job.id); return; }
 
           // Figma / Liveblocks Suffix-Prefix Overlap Reconciliation
           if (attempt.isFirstChunkAfterFailover && attempt.priorFailoverSuffix) {
@@ -2904,7 +2941,7 @@ export class GalxaiRelayServer extends EventEmitter {
 
         // Upstream Error Frame (429 Rate Limit / 5xx Overloaded)
         if (data.type === 'error' || data.type === 'response.failed' || data.response?.status === 'failed') {
-          try { this.config.onUpstreamDiagnostic?.(upstreamDiagnostic(data)); } catch { /* Observability cannot change retry/settlement policy. */ }
+          try { this.config.onUpstreamDiagnostic?.(upstreamDiagnostic(data), { jobId: job.id }); } catch { /* Observability cannot change retry/settlement policy. */ }
           const negative = classifyCapabilityFailure(data);
           if (negative && capabilityTicket) this.capabilities.observe(capabilityTicket, job.model, negative.state, negative.reason);
           const failure = classifyUpstreamError(data);
@@ -2947,6 +2984,14 @@ export class GalxaiRelayServer extends EventEmitter {
   // ANTI-FRAGILE MID-STREAM SHARD FAILOVER & CONTEXT CONTINUATION
   // --------------------------------------------------------------------------
 
+  private stopForOutputBudget(jobId: string): void {
+    const session = this.sessions.get(jobId);
+    if (!session || !this.jobQueue.markFailed(jobId, 'output_limit_exceeded')) return;
+    this.metrics.totalJobsFailed++;
+    session.abortController.abort(); this.safeCloseSocket(session.upstreamWs);
+    if (session.currentShardId) { this.releaseShard(session.currentShardId); session.currentShardId = undefined; }
+  }
+
   private handleTransportToken(event: JobBusEventOf<'job:transport_token'>): void {
     const session = this.sessions.get(event.jobId);
     if (!session || session.abortController.signal.aborted || session.activeAttemptId !== event.attemptId) return;
@@ -2983,6 +3028,7 @@ export class GalxaiRelayServer extends EventEmitter {
     if (!job || ['failed', 'cancelled', 'completed'].includes(job.status)) return;
     try {
       const outputToolCalls = completedFunctionCalls(event.response, job.functionContract);
+      if (session.outputBudget && !session.outputBudget.finishTools(outputToolCalls)) { this.stopForOutputBudget(job.id); return; }
       if (outputToolCalls.length) this.jobsTable.put(job.id, { ...job, outputToolCalls });
     } catch {
       this.jobQueue.markFailed(job.id, 'invalid_tool_response');
@@ -3051,6 +3097,9 @@ export class GalxaiRelayServer extends EventEmitter {
     }
 
     if (job.functionContract?.tools.length || session.retryCount >= this.config.maxUpstreamRetries) {
+      if (event.isQuotaError && this.config.executionPolicy && !job.durableReceipt) {
+        this.jobsTable.put(job.id, { ...this.jobsTable.get(job.id)!, continuationAllowed: true });
+      }
       if (this.jobQueue.markFailed(event.jobId, `retries_exhausted_${event.reason}`)) {
         this.metrics.totalJobsFailed++;
       }

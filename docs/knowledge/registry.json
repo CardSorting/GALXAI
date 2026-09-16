@@ -321,6 +321,7 @@
         "scripts/verify-relay-service-images.mjs",
         "scripts/verify-relay-pool-monitor.ts",
         "scripts/test-relay-services.ts",
+        "scripts/test-relay-registration-errors.ts",
         "scripts/test-standard-pool.ts",
         "scripts/lib/relay-local-access.mjs",
         "scripts/test-relay-local-access.mjs",
@@ -329,7 +330,18 @@
         "scripts/test-relay-monitor-model.mjs",
         "src/sdk/agent.ts",
         "scripts/test-agent-automatic-tools.ts",
-        "scripts/test-agent-session-isolation.ts"
+        "scripts/test-agent-session-isolation.ts",
+        "scripts/test-relay-connections-db.ts",
+        "src/sdk/client.ts",
+        "src/sdk/stream.ts",
+        "src/sdk/errors.ts",
+        "src/sdk/index.ts",
+        "src/app/v1/chat/completions/route.ts",
+        "scripts/test-agent-continuation.ts",
+        "scripts/test-relay-chat-transport.ts",
+        "src/relay/request-bulkhead.ts",
+        "scripts/test-relay-overload.ts",
+        "scripts/test-relay-activation-db.ts"
       ],
       "guides": [
         "docs/ARCHITECTURE.md",
@@ -381,7 +393,12 @@
         "docs/playbooks/README.md",
         "docs/playbooks/07-zero-hesitation-developer-ergonomics-and-api-governance.md",
         "docs/playbooks/08-unframed-developer-observation-protocol.md",
-        "docs/reference/automatic-agent-tools.md"
+        "docs/reference/automatic-agent-tools.md",
+        "docs/adr/0154-relay-connection-lifecycle-and-legacy-retirement.md",
+        "docs/reference/shared-quota-recovery.md",
+        "docs/adr/0155-shared-quota-containment-and-bounded-continuation.md",
+        "docs/adr/0156-verified-automatic-relay-activation.md",
+        "docs/adr/0157-compatible-relay-output-budgets.md"
       ],
       "checks": [
         "npm run test:relay:capabilities",
@@ -390,7 +407,8 @@
         "npm run verify:relay:pool-images",
         "npm run test:relay:services",
         "npm run verify:relay:service-images",
-        "npm run test:agent:tools"
+        "npm run test:agent:tools",
+        "npm run test:relay:activation-db"
       ]
     },
     "database": {
@@ -422,7 +440,9 @@
         "scripts/test-relay-authorization-db.ts",
         "scripts/test-relay-execution-db.ts",
         "scripts/setup-relay-services.ts",
-        "scripts/set-relay-service-gates.ts"
+        "scripts/set-relay-service-gates.ts",
+        "scripts/test-relay-connections-db.ts",
+        "scripts/test-relay-activation-db.ts"
       ],
       "guides": [
         "docs/SUPABASE_PARANOID_ARCHITECTURE_SPEC.md",
@@ -437,7 +457,8 @@
         "npm run db:test",
         "npm run test:relay:manual-db",
         "npm run test:relay:foundation-db",
-        "npm run test:relay:authorization-db"
+        "npm run test:relay:authorization-db",
+        "npm run test:relay:activation-db"
       ]
     },
     "delivery": {
@@ -913,6 +934,17 @@
         "invoices",
         "audit"
       ]
+    },
+    "docs/knowledge/audits/2026-09-16-relay-connections.md": {
+      "kind": "evidence",
+      "keywords": [
+        "relay",
+        "connection",
+        "registration",
+        "reconnect",
+        "retirement",
+        "audit"
+      ]
     }
   },
   "runbooks": [
@@ -1057,6 +1089,51 @@
         "post-mortem/releases/2026-09-15-relay-monitor-access.json",
         "post-mortem/releases/2026-09-15-relay-monitor-console.json",
         "post-mortem/releases/2026-09-15-relay-account-management.json"
+      ],
+      "supersedes": []
+    },
+    "docs/adr/0154-relay-connection-lifecycle-and-legacy-retirement.md": {
+      "status": "proposed",
+      "delivery": "local",
+      "domain": "relay",
+      "owner": "Relay operator",
+      "date": "2026-09-16",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-09-16-relay-registration/connection-lifecycle.json"
+      ],
+      "supersedes": []
+    },
+    "docs/adr/0155-shared-quota-containment-and-bounded-continuation.md": {
+      "status": "proposed",
+      "delivery": "local",
+      "domain": "relay",
+      "owner": "Relay and SDK maintainer",
+      "date": "2026-09-16",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-09-16-shared-quota/README.md"
+      ],
+      "supersedes": []
+    },
+    "docs/adr/0156-verified-automatic-relay-activation.md": {
+      "status": "proposed",
+      "delivery": "local",
+      "domain": "relay",
+      "owner": "Relay operator",
+      "date": "2026-09-16",
+      "evidence": [
+        "post-mortem/releases/2026-09-16-relay-automatic-activation.json"
+      ],
+      "supersedes": []
+    },
+    "docs/adr/0157-compatible-relay-output-budgets.md": {
+      "status": "proposed",
+      "delivery": "local",
+      "domain": "relay",
+      "owner": "Relay maintainer",
+      "date": "2026-09-16",
+      "evidence": [
+        "post-mortem/releases/2026-09-16-relay-generation-recovery.json",
+        "post-mortem/releases/2026-09-16-relay-generation-recovery-final.json"
       ],
       "supersedes": []
     }

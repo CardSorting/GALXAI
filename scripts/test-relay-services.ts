@@ -63,9 +63,9 @@ test('execution admission persists first, fails closed and retains settlement wh
     if(!available)throw Error('offline');if(String(url).endsWith('/acquire')){assert.equal([...records.values()][0].state,'reserved');return Response.json({leaseId:'lease',fencingToken:1,expiresAtMs:Date.now()+30000});}
     if(String(url).endsWith('/settle')){settleCalls++;return Response.json({success:true});}throw Error();
   }) as typeof fetch);
-  const execution=new PoolExecution(central,store),account={id:'codex_sh_'+key('a').slice(0,24),revision:1,assignmentRevision:1,credentialRevision:key('c'),state:'enabled' as const,desktopId:randomUUID(),models:['fixture'],expiresAtMs:Date.now()+600000};
+  let recoveryNow=0;const execution=new PoolExecution(central,store,undefined,{now:()=>recoveryNow,random:()=>0}),account={id:'codex_sh_'+key('a').slice(0,24),revision:1,assignmentRevision:1,credentialRevision:key('c'),state:'enabled' as const,desktopId:randomUUID(),models:['fixture'],expiresAtMs:Date.now()+600000};
   const req={url:'/v1/chat/completions',headers:{'idempotency-key':'one'}} as any;
-  const grant=await execution.policy(account).admit(req,{messages:[{role:'user',content:'hello'}]},'tenant','job_one');grant.assert();available=false;await grant.complete(true,10);assert(grant.signal.aborted);assert.equal(settleCalls,0);assert.equal([...records.values()][0].state,'completed');available=true;await execution.settlePending();assert.equal(settleCalls,1);
+  const grant=await execution.policy(account).admit(req,{messages:[{role:'user',content:'hello'}]},'tenant','job_one');grant.assert();available=false;await grant.complete(true,10);assert(grant.signal.aborted);assert.equal(settleCalls,0);assert.equal([...records.values()][0].state,'completed');available=true;await execution.settlePending();recoveryNow=2000;await execution.settlePending();assert.equal(settleCalls,1);
   await assert.rejects(execution.policy(account).admit(req,{messages:[{role:'user',content:'hello'}]},'tenant','job_repeat'));
   available=false;await assert.rejects(execution.policy(account).admit({...req,headers:{'idempotency-key':'two'}},{messages:[{role:'user',content:'hello'}]},'tenant','job_two'));assert.equal([...records.values()][1].state,'unknown');execution.stop();
 });
@@ -146,11 +146,24 @@ test('runtime HTTP gateway rebuilds job, receipt and stream bodies without priva
  const upstream=http.createServer((req,res)=>{res.setHeader('x-private-secret','never-export');if(req.url?.endsWith('/stream')){res.setHeader('Content-Type','text/event-stream');res.end('data: '+JSON.stringify({id:'job_fixture',private:'never-export',choices:[{delta:{content:'hello',private:'never-export'}}],usage:{prompt_tokens:1,completion_tokens:2,total_tokens:3,private:'never-export'}})+'\n\ndata: [DONE]\n\n');}else{res.setHeader('Content-Type','application/json');res.end(JSON.stringify({id:'job_fixture',status:'completed',output:'hello',retainedUntil:Date.now()+600000,private:'never-export',usage:{prompt_tokens:1,completion_tokens:2,total_tokens:3,private:'never-export'}}));}});
  const port=Number(new URL(await listen(upstream)).port),record={executionId:'job_fixture',epoch:'epoch',accountId:'own',state:'completed',workload:'text'};
  const execution={epoch:'epoch',central:{identity:{pool:'standard'}},store:{call:async()=>record}};
- const runtime=new PoolRuntime(execution as any,key('wire'),'/unused');(runtime as any).refreshedAt=Date.now();(runtime as any).workers.set('own',{port,key:key('inner'),account:{models:['fixture']}});
+ const runtime=new PoolRuntime(execution as any,key('wire'),'/unused');(runtime as any).refreshedAt=Date.now();(runtime as any).workers.set('own',{port,key:key('inner'),engine:{credentialRejected:()=>false},account:{models:['fixture']}});
  const origin=await listen(runtime.server);
  try{for(const route of ['/v1/jobs/job_fixture','/v1/jobs/job_fixture/receipt','/v1/jobs/job_fixture/stream']){const response=await fetch(origin+route,{headers:{Authorization:`Bearer ${key('wire')}`,'x-galx-tenant':hash('owner')}});assert.equal(response.status,200);assert.equal(response.headers.get('x-private-secret'),null);assert(!(await response.text()).includes('never-export'));}
  const denied=await fetch(origin+'/api/sites/contract',{headers:{Authorization:`Bearer ${key('wire')}`}});assert.equal(denied.status,401);
  }finally{await close(runtime.server);await close(upstream);}
+});
+
+test('Premium private preflight never advertises an unsupported provider output ceiling',async()=>{
+ const {PoolRuntime}=await import('../src/relay/pool-runtime.js');
+ const runtime=new PoolRuntime({central:{identity:{pool:'premium'}}} as any,key('wire'),'/unused',key('capability'));
+ (runtime as any).refreshedAt=Date.now();(runtime as any).workers.set('own',{engine:{credentialRejected:()=>false},account:{models:['fixture']}});
+ const origin=await listen(runtime.server),query=`?model=fixture&maxOutputTokens=64&nonce=${randomUUID()}`;
+ try{
+  for(const token of [key('wire'),key('wrong')])assert.equal((await fetch(origin+'/api/sites/contract'+query,{headers:{Authorization:`Bearer ${token}`}})).status,401);
+  const headers={Authorization:`Bearer ${key('capability')}`};
+  const strict=await fetch(origin+'/api/sites/contract'+query,{headers});assert.equal(strict.status,503);assert(!(await strict.text()).includes('outputLimitForwarded'));
+  const local=await fetch(origin+'/api/sites/contract'+query+'&profile=sites-local-v1',{headers});assert.equal(local.status,200);const contract=await local.json();assert.equal(contract.profile,'sites-local-v1');assert.equal('outputLimitForwarded' in contract,false);
+ }finally{await close(runtime.server);}
 });
 
 test('grant expires without another request and terminal database failures block new admission until reconciled',async()=>{

@@ -74,7 +74,9 @@ test('relay failures, malformed frames, cancellation and partial EOF cannot beco
   }
   await fixture(delta('partial') + 'event: error\ndata: {"error":"failed"}\n\n', async () => {
     const result = await executeRelayChat({ ...options, payload: { ...options.payload, stream: true } });
-    await assert.rejects(result.response.text(), RelayDispatchError);
+    const wire = await result.response.text();
+    assert(wire.includes('"execution_state":"unknown"'));
+    assert(!wire.includes('[DONE]'), 'failed stream must not claim successful completion');
   });
 });
 
@@ -188,4 +190,14 @@ test('relay failures preserve retry authority and task identity without replay o
     });
     assert.equal(calls, 1);
   } finally { globalThis.fetch = original; }
+});
+
+test('confirmed quota stop is actionable while arbitrary diagnostics stay out of public recovery', async () => {
+  const { publicRelayChatFailure } = await import('../src/core/router/adapters/RelayChatTransport');
+  const error=new RelayDispatchError('PRIVATE_TOPOLOGY upstream credential',{executionState:'failed',upstreamCode:'PRIVATE_TOKEN',requestId:'PRIVATE_ACCOUNT',retryAfterMs:123456});
+  const safe=publicRelayChatFailure(error);
+  assert.equal(safe.error.execution_state,'failed');assert(!JSON.stringify(safe).includes('PRIVATE'));
+  await fixture('data: {"error":{"execution_state":"failed","message":"private detail"}}\n\n',async()=>{
+    await assert.rejects(executeRelayChat(options),(e:any)=>e.executionState==='failed'&&e.shouldRetry===false&&!e.message.includes('private detail'));
+  });
 });

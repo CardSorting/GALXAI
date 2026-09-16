@@ -403,7 +403,7 @@ export class GalxAIClientCore {
 
     const executionState = errorData?.error?.execution_state;
     const noReplay = res.headers.get('x-should-retry') === 'false'
-      || executionState === 'unknown' || executionState === 'accepted';
+      || executionState === 'unknown' || executionState === 'accepted' || executionState === 'failed';
     if (noReplay) {
       // Preserve the relay's safety classification on the typed error so
       // model fallback helpers cannot turn it into a fresh request.
@@ -546,16 +546,19 @@ export class GalxAIClientCore {
           if (trimmed.startsWith('data: ')) {
             const jsonStr = trimmed.substring(6).trim();
             if (jsonStr === '[DONE]') return;
-            try {
-              const parsed = JSON.parse(jsonStr);
-              yield parsed as T;
-            } catch {}
+            let parsed: any;
+            try { parsed = JSON.parse(jsonStr); }
+            catch { throw new APIError('The response stream was interrupted. Check its status before continuing.',502,'invalid_stream'); }
+            if (parsed.error) throw APIError.fromResponse(503, parsed);
+            yield parsed as T;
+            if (path === '/v1/messages' && parsed.type === 'message_stop') return;
           }
         }
       }
+      throw new APIError('The response stream ended before completion. Check its status before continuing.',502,'incomplete_stream');
     } finally {
-      reader.releaseLock();
       await reader.cancel().catch(() => {});
+      reader.releaseLock();
     }
   }
 

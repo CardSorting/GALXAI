@@ -1,0 +1,261 @@
+{
+  "classification": "private",
+  "observed_at": "2026-09-16T04:01:07.934Z",
+  "scope": "Owner-requested local execution activation after manual connection of one account per pool. No application or SDK deployment and no provider generation.",
+  "cause": "Both registrations were complete, but the independent central execution gates were still closed and accounts remained paused.",
+  "authorization": "Owner explicitly requested resolution of Execution Not activated on both local monitors after adding separate accounts.",
+  "activation": {
+    "command": "npm run relay:services:gates -- serve-local",
+    "result": "Central transition confirmed",
+    "preactivation_checks": 69,
+    "preactivation_at": "2026-09-16T04:00:25.477Z",
+    "evidence_sha256": "2672dbf064e4dbb93dca197de9e84e9af0e8fe566be685eefa6c30024c61d5ff",
+    "identity_and_registration_checks": "Two matching installation identities and one registered account in each pool; VM isolation, image pins, authorization and TLS checks passed."
+  },
+  "before": [
+    {
+      "pool": "premium",
+      "at": "2026-09-16T03:59:56.301Z",
+      "executionAllowed": false,
+      "registrationAllowed": true,
+      "epoch": "e4cfdb5c-c270-4b28-adb5-b83bc877f412",
+      "lastSeenAt": "2026-09-16T03:59:53.726236+00:00",
+      "accounts": [
+        {
+          "id": "codex_sh_2c5baf5f09e78318d9ad06f2",
+          "state": "paused",
+          "connectionState": "connected",
+          "healthSignal": "none",
+          "revision": 1,
+          "acknowledgedRevision": 1,
+          "epochMatches": true,
+          "modelsCount": 4,
+          "credentialCurrent": true,
+          "removed": false
+        }
+      ],
+      "registrations": [
+        {
+          "id": "d4a7cdf0-f039-436d-9e57-a90919154799",
+          "state": "registered",
+          "accountId": "codex_sh_2c5baf5f09e78318d9ad06f2"
+        }
+      ],
+      "changes": []
+    },
+    {
+      "pool": "standard",
+      "at": "2026-09-16T03:59:56.723Z",
+      "executionAllowed": false,
+      "registrationAllowed": true,
+      "epoch": "dd0951be-6539-4954-afc8-4980aa33f01a",
+      "lastSeenAt": "2026-09-16T03:59:46.154226+00:00",
+      "accounts": [
+        {
+          "id": "codex_sh_834707761bf76510dd70d6a7",
+          "state": "paused",
+          "connectionState": "connected",
+          "healthSignal": "none",
+          "revision": 1,
+          "acknowledgedRevision": 1,
+          "epochMatches": true,
+          "modelsCount": 3,
+          "credentialCurrent": true,
+          "removed": false
+        }
+      ],
+      "registrations": [
+        {
+          "id": "a7cfb7df-2f81-404e-b54b-a2f2081ab80f",
+          "state": "registered",
+          "accountId": "codex_sh_834707761bf76510dd70d6a7"
+        }
+      ],
+      "changes": []
+    }
+  ],
+  "after": [
+    {
+      "pool": "premium",
+      "at": "2026-09-16T04:00:37.646Z",
+      "executionAllowed": true,
+      "registrationAllowed": true,
+      "epoch": "e4cfdb5c-c270-4b28-adb5-b83bc877f412",
+      "lastSeenAt": "2026-09-16T04:00:35.793405+00:00",
+      "accounts": [
+        {
+          "id": "codex_sh_2c5baf5f09e78318d9ad06f2",
+          "state": "enabled",
+          "connectionState": "connected",
+          "healthSignal": "none",
+          "revision": 2,
+          "acknowledgedRevision": 2,
+          "epochMatches": true,
+          "modelsCount": 4,
+          "credentialCurrent": true,
+          "removed": false
+        }
+      ],
+      "registrations": [
+        {
+          "id": "d4a7cdf0-f039-436d-9e57-a90919154799",
+          "state": "registered",
+          "accountId": "codex_sh_2c5baf5f09e78318d9ad06f2"
+        }
+      ],
+      "changes": [
+        {
+          "id": "9e43ee4d-61d1-4d15-af29-b9cc7e9bc89e",
+          "command": "enabled",
+          "accountId": "codex_sh_2c5baf5f09e78318d9ad06f2"
+        }
+      ]
+    },
+    {
+      "pool": "standard",
+      "at": "2026-09-16T04:00:40.448Z",
+      "executionAllowed": true,
+      "registrationAllowed": true,
+      "epoch": "dd0951be-6539-4954-afc8-4980aa33f01a",
+      "lastSeenAt": "2026-09-16T04:00:39.136424+00:00",
+      "accounts": [
+        {
+          "id": "codex_sh_834707761bf76510dd70d6a7",
+          "state": "enabled",
+          "connectionState": "connected",
+          "healthSignal": "none",
+          "revision": 2,
+          "acknowledgedRevision": 2,
+          "epochMatches": true,
+          "modelsCount": 3,
+          "credentialCurrent": true,
+          "removed": false
+        }
+      ],
+      "registrations": [
+        {
+          "id": "a7cfb7df-2f81-404e-b54b-a2f2081ab80f",
+          "state": "registered",
+          "accountId": "codex_sh_834707761bf76510dd70d6a7"
+        }
+      ],
+      "changes": [
+        {
+          "id": "e84a9646-fb70-4130-ab19-434d42f4f51c",
+          "command": "enabled",
+          "accountId": "codex_sh_834707761bf76510dd70d6a7"
+        }
+      ]
+    }
+  ],
+  "live_browser_and_runtime_acceptance": [
+    {
+      "pool": "premium",
+      "executionLabel": "Allowed",
+      "accountState": "enabled",
+      "confirmation": "Applied",
+      "revision": 2,
+      "acknowledgedRevision": 2,
+      "epochMatches": true,
+      "readyStatus": 200,
+      "modelInventoryStatus": 200,
+      "modelCount": 4,
+      "pageErrors": 0,
+      "oldActivationNotice": false
+    },
+    {
+      "pool": "standard",
+      "executionLabel": "Allowed",
+      "accountState": "enabled",
+      "confirmation": "Applied",
+      "revision": 2,
+      "acknowledgedRevision": 2,
+      "epochMatches": true,
+      "readyStatus": 200,
+      "modelInventoryStatus": 200,
+      "modelCount": 3,
+      "pageErrors": 0,
+      "oldActivationNotice": false
+    }
+  ],
+  "image_manifest": {
+    "images": [
+      {
+        "tag": "galxai-relay-central:connections-20260916",
+        "id": "sha256:e7a4c80fa704d4abb7b423a48a66afad4d809c70dd5df3592eb772e823284bb3",
+        "architecture": "arm64",
+        "component": "central"
+      },
+      {
+        "tag": "galxai-relay-premium:quota-20260916-r2",
+        "id": "sha256:19b8588bc2c0439c66fcb8cd65149ac8a6df2a3a6b12dac5ce29db214d876e4d",
+        "architecture": "arm64",
+        "component": "runtime",
+        "pool": "premium"
+      },
+      {
+        "tag": "galxai-relay-standard:quota-20260916-r2",
+        "id": "sha256:fd72bc488465e9f1b8d4938fa035aeed3f994c067e9e46a05d96011c46d3bc5a",
+        "architecture": "arm64",
+        "component": "runtime",
+        "pool": "standard"
+      },
+      {
+        "tag": "galxai-monitor-premium:connections-20260916-r2",
+        "id": "sha256:084b947419c6a4611c6172a6ef3b5dc82f5a95f5aa34511e0c211531ec7de5c8",
+        "architecture": "arm64",
+        "component": "monitor",
+        "pool": "premium"
+      },
+      {
+        "tag": "galxai-monitor-standard:connections-20260916-r2",
+        "id": "sha256:896d483a1b98c1b9e2c148cf87d9f67c5f6ac9a57a6610ff2b143b15c206d263",
+        "architecture": "arm64",
+        "component": "monitor",
+        "pool": "standard"
+      }
+    ]
+  },
+  "limits": [
+    "Readiness and model inventory are not provider generation acceptance.",
+    "Real text/Sites/image qualification remains separate.",
+    "ACT-025 remains open for actual provider output-bound qualification and compatible caller/checkpoint-store acceptance.",
+    "No account purge, quota reset, credential rotation, container restart or public application cutover."
+  ],
+  "semantic_review": {
+    "reviewed_at": "2026-09-16T04:02:36.693222+00:00",
+    "reviewer": "Codex relay operator in owner session",
+    "scope": "Incremental operational activation review; no runtime or database schema code changed. Complete installation runbook and current-state reconciliation inspected against activation command, monitor control/readback and runtime readiness. Earlier broader source/test reviews retain their original scope.",
+    "changed_guides": [
+      "docs/runbooks/relay-pool-services.md",
+      "post-mortem/CURRENT_STATE.md"
+    ],
+    "contract_paths_inspected": [
+      "scripts/set-relay-service-gates.ts",
+      "scripts/relay-local.mjs",
+      "src/relay/pool-monitor-server.ts",
+      "src/relay/pool-monitor.js",
+      "src/relay/pool-monitor-model.js",
+      "src/relay/pool-runtime.ts",
+      "docs/runbooks/relay-pool-services.md",
+      "post-mortem/CURRENT_STATE.md"
+    ],
+    "sha256": {
+      "scripts/set-relay-service-gates.ts": "b63a73176270b6cc15ec903814830d16d72725a245d6dbfb44190e483960461e",
+      "scripts/relay-local.mjs": "288cf0e12ca506a9807ee7c4ea9a13e6e97e4f6d015cd63f829c99f91d8dc430",
+      "src/relay/pool-monitor-server.ts": "8b18b8ba9a1c6e058b8098d10873397c03f1c65bac5d5ed81cf5d1d253a7236c",
+      "src/relay/pool-monitor.js": "d063ac138c7a5dc720f07e349967f297bfe92b55d92746355823d9fb74812c46",
+      "src/relay/pool-monitor-model.js": "0732a6d48c6665f9cc903effdf5b4013fb82bf6b88a130f836d043a84eb3c38f",
+      "src/relay/pool-runtime.ts": "a1656e2d0ac847078e21a1c3ee0795374a3a4e4cfafa5435364bb6f90c751b5f",
+      "docs/runbooks/relay-pool-services.md": "ba8bd8eb52a211f8f9e26871780d2481cc8bee7bf55b9452dc361a88b4d5093f",
+      "post-mortem/CURRENT_STATE.md": "3fd25004d9a37223d1e2ae782101bc228afba7bcf5d4afc02cc1ad2d557db8c9"
+    },
+    "checks": [
+      "serve-local: 69 fresh installation checks",
+      "Both account changes acknowledged at revision 2",
+      "Two actual browser monitor pages show Allowed and Enabled/Applied without errors",
+      "Both runtime ready checks and authenticated model catalogs return HTTP 200"
+    ],
+    "unmapped_paths": "Dated release evidence, incident journal/register/current-state and generated discovery views reviewed; no public application source changed."
+  }
+}

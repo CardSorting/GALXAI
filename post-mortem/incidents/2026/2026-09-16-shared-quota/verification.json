@@ -1,0 +1,228 @@
+{
+  "at": "2026-09-16T03:19:10.972341+00:00",
+  "classification": "private",
+  "incident": "INC-20260916-SHAREDQUOTA",
+  "source": {
+    "baseCommit": "b8eb43f97f79707c36b29106cfe206cf41889047",
+    "scope": "Uncommitted shared-quota changes on top of the separately verified registration work; no commit, push or application deployment",
+    "sha256": {
+      "src/relay/standard-pool-scheduler.ts": "f850feb4274b038d05636975a9d7fda9aeba31a88ba88e94fbd3b940a476e58c",
+      "src/relay/pool-runtime.ts": "2bbebfa06b362e39b28eb99eafe70ca68c555fee3afc61aaa06d85352ae20ffe",
+      "src/relay/pool-execution.ts": "3091ad83e3e7810296359cf9d0f17938c5a3a09cdaf6350cdf8bd1d03abbe6d9",
+      "src/relay/relay-server.ts": "3669e3be2c56e5d091c754b8e013053913de1314521ec63c0ce3a4c8a9014d50",
+      "src/relay/completion-usage.ts": "4ab513682b2867a572986f233181063de0d2781bb4aafec17b09d5fee3d9a4f2",
+      "src/core/router/adapters/RelayChatTransport.ts": "73ed95076c9641b6db0f5c5b7c90f9aeb57fe6e88cff72fac3b1828f18ba95b2",
+      "src/app/v1/chat/completions/route.ts": "88b4b02daba44020973efda0cd1084c67182a1bcf145ffc3cba13febc24e04b0",
+      "src/sdk/agent.ts": "af93a2d622c3e96d7a4087022730ee1c7810e08083a484cadd3e2d78a553c3c0",
+      "src/sdk/client.ts": "90443b67be3bd0ae3c05f68f2490a15251cc049e71d1de5af2eb0861908e6bcc",
+      "src/sdk/errors.ts": "ea3314609b6058b37e6bd8b9ded072b9760291734a3d8997b9b2bdb00a5763a0",
+      "src/sdk/stream.ts": "d7e47c466b8a4c2e168eaa2a081ef843374464d4d7d0b05c977e994898c4f177",
+      "src/sdk/index.ts": "b55cbc1a4118ff6c944caf9522760eeca6fee673a560ee10dc6aaa8804d170b2",
+      "src/lib/resilience/ResilientClient.ts": "02f0b3dc1d931cb01730e6dd5b40c0daf9ded5470558b9eecc80a33d78576f75",
+      "scripts/test-agent-continuation.ts": "fc435e049053c3ea8bce8d847043308b2684edb5dd0ddcf67f686482375506ff",
+      "scripts/test-standard-pool.ts": "e0d323633c5aa24d41cbc19aba473d6ba111609ca4cdb40d406b87fd0585604f",
+      "scripts/test-relay-chat-transport.ts": "2fe6ec249660468e47747ac5196ee02fb7593ba7da65873b630d777f019d75d8",
+      "scripts/verify-relay-service-images.mjs": "e0de1f0d906061998b03244662bac75142800944c6fe7e16840ef1ba0681483b",
+      "package.json": "1b569c26e22e613aebcde286e3f2fb3e6467e3073bc4a0a54d5ac25d61296729"
+    }
+  },
+  "checks": [
+    {
+      "command": "npm run test:relay:services",
+      "passed": 53,
+      "scope": "Synthetic local HTTP/WebSocket providers; shared owners, quota recovery, JSON/SSE SDK continuation, account authority"
+    },
+    {
+      "command": "npm run test:agent:tools",
+      "passed": 23,
+      "scope": "Tool callbacks, isolation, bounded continuation, checkpoint revision conflicts and failed-save recovery"
+    },
+    {
+      "command": "node --import tsx --test scripts/test-relay-chat-transport.ts scripts/test-client-recovery.ts scripts/test-relay-adaptive-quota.ts scripts/test-relay-client-auth.ts scripts/test-public-information-boundary.ts scripts/test-shard-authority-boundary.ts",
+      "passed": 38,
+      "scope": "Transport, retries, quota, public error allowlists and authorization"
+    },
+    {
+      "command": "node --import tsx --test scripts/test-relay-completion-usage.ts",
+      "passed": 6
+    },
+    {
+      "command": "npm run test:image:security",
+      "passed": 42,
+      "scope": "Raw HTTP, image sanitization, retrieval, error fields and owner boundaries"
+    },
+    {
+      "command": "npm run test:billing:lifecycle",
+      "passed": 18,
+      "additional": "Webhook invalid-signature, wrong-mode and oversized-body boundaries passed"
+    },
+    {
+      "command": "npx tsc --noEmit --pretty false",
+      "result": "passed after final production build"
+    },
+    {
+      "command": "npm run build",
+      "result": "passed",
+      "renderedPages": 272
+    },
+    {
+      "command": "npm run test:docs",
+      "passed": 38,
+      "scope": "21 incident and 17 knowledge-guard tests; final validation repeated after evidence generation"
+    },
+    {
+      "command": "git diff --check",
+      "result": "passed"
+    }
+  ],
+  "buildScan": {
+    "at": "2026-09-16T03:18:33.684099+00:00",
+    "compiledBoundaryErrors": [],
+    "renderedAndBrowserAssets": 894,
+    "privateMarkerHits": [],
+    "markersChecked": [
+      "INC-20260916-SHAREDQUOTA",
+      "runtime_credential_failed",
+      "galx_private_execution_acquire",
+      "GALX_CENTRAL_RUNTIME_TOKEN",
+      "private.galx_account_execution_leases",
+      "credentialRevision"
+    ],
+    "scope": "Local production build JS, rendered HTML/RSC and private-directory output traces; not a live-site scan"
+  },
+  "installation": {
+    "at": "2026-09-16T03:05:35.722Z",
+    "before": [
+      {
+        "pool": "premium",
+        "executionAllowed": false,
+        "registrationAllowed": true,
+        "accounts": 1,
+        "paused": 1,
+        "applied": true
+      },
+      {
+        "pool": "standard",
+        "executionAllowed": false,
+        "registrationAllowed": true,
+        "accounts": 0,
+        "paused": 0,
+        "applied": true
+      }
+    ],
+    "after": [
+      {
+        "pool": "premium",
+        "executionAllowed": false,
+        "registrationAllowed": true,
+        "accounts": 1,
+        "paused": 1,
+        "applied": true
+      },
+      {
+        "pool": "standard",
+        "executionAllowed": false,
+        "registrationAllowed": true,
+        "accounts": 0,
+        "paused": 0,
+        "applied": true
+      }
+    ],
+    "images": [
+      {
+        "tag": "galxai-relay-premium:quota-20260916",
+        "id": "sha256:c055a808e074526366028a1e6738a6401c1b19ce9fca624edfa6d9d9d54142e1",
+        "architecture": "arm64",
+        "component": "runtime",
+        "pool": "premium"
+      },
+      {
+        "tag": "galxai-relay-standard:quota-20260916",
+        "id": "sha256:4d92cef0dc19594635b243cd811b70993a7958aff12eeb2bb1634f7fa6be7dfa",
+        "architecture": "arm64",
+        "component": "runtime",
+        "pool": "standard"
+      }
+    ],
+    "centralAndMonitorsUnchanged": true,
+    "gatesChanged": false,
+    "providerCalls": 0
+  },
+  "imageVerification": {
+    "at": "2026-09-16T03:07:34.253Z",
+    "checks": 55,
+    "images": [
+      {
+        "tag": "galxai-relay-central:connections-20260916",
+        "id": "sha256:e7a4c80fa704d4abb7b423a48a66afad4d809c70dd5df3592eb772e823284bb3",
+        "architecture": "arm64",
+        "component": "central"
+      },
+      {
+        "tag": "galxai-relay-premium:quota-20260916",
+        "id": "sha256:c055a808e074526366028a1e6738a6401c1b19ce9fca624edfa6d9d9d54142e1",
+        "architecture": "arm64",
+        "component": "runtime",
+        "pool": "premium"
+      },
+      {
+        "tag": "galxai-relay-standard:quota-20260916",
+        "id": "sha256:4d92cef0dc19594635b243cd811b70993a7958aff12eeb2bb1634f7fa6be7dfa",
+        "architecture": "arm64",
+        "component": "runtime",
+        "pool": "standard"
+      },
+      {
+        "tag": "galxai-monitor-premium:connections-20260916-r2",
+        "id": "sha256:084b947419c6a4611c6172a6ef3b5dc82f5a95f5aa34511e0c211531ec7de5c8",
+        "architecture": "arm64",
+        "component": "monitor",
+        "pool": "premium"
+      },
+      {
+        "tag": "galxai-monitor-standard:connections-20260916-r2",
+        "id": "sha256:896d483a1b98c1b9e2c148cf87d9f67c5f6ac9a57a6610ff2b143b15c206d263",
+        "architecture": "arm64",
+        "component": "monitor",
+        "pool": "standard"
+      }
+    ],
+    "scope": "native image packaging, dependency load, unsafe environment and cross-pool rejection, Compose configuration; no serving or host acceptance"
+  },
+  "installedAcceptance": {
+    "at": "2026-09-16T03:07:12.909Z",
+    "checks": 69,
+    "scope": "local VM separation on one trusted Mac; no provider generation or cloud deployment",
+    "pools": [
+      {
+        "pool": "premium",
+        "registrationAllowed": true,
+        "executionAllowed": false,
+        "accounts": 1
+      },
+      {
+        "pool": "standard",
+        "registrationAllowed": true,
+        "executionAllowed": false,
+        "accounts": 0
+      }
+    ]
+  },
+  "observedCorrections": [
+    "Regression fixtures exposed ordinary isolated text dropping its output bound and missing terminal stream evidence; corrected before runtime image build.",
+    "Final SDK audit corrected failed initial/final saves, stale restored callers and retention of parallel callback results after a failed checkpoint write.",
+    "Local HTTP fixtures initially failed with sandbox EPERM and passed when authorized to bind fixture ports.",
+    "One TypeScript run raced Next build generated-type replacement; rerun sequentially after build. Final build also caught closure narrowing in the new storage-state guard; corrected and all checks rerun."
+  ],
+  "limits": [
+    "No real provider request, measured provider balance, induced real exhaustion or production blast-radius claim.",
+    "Runtime images are installed locally; public chat application and SDK publication are not performed.",
+    "Both execution gates remain closed. Premium retains one paused connected account; Standard has none.",
+    "Crash-safe cross-process continuation requires caller-owned authenticated persistence with atomic expected-revision checks.",
+    "No exactly-once external callback guarantee, automatic unknown-request replay or cross-pool failover.",
+    "Conservative per-turn reservations do not replace aggregate customer concurrency/spend policy.",
+    "No database schema or data changes in the quota task; prior registration cleanup remains separately evidenced.",
+    "Compiled scans cover this local build, not the live public site. No new graphical chat UX or browser acceptance claimed."
+  ],
+  "remainingAction": "ACT-025"
+}

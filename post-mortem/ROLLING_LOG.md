@@ -1027,3 +1027,243 @@ Incident: `INC-20260915-STRIPE`. Kind: `verification`.
 **Next step:** Commit and push the reviewed billing work. Hosted application and real payment acceptance remain separate from schema acceptance; rollback must retain both return readers.
 
 Evidence: [2026-09-16-billing-migration.json](releases/2026-09-16-billing-migration.json).
+
+## EVT-20260916-relay-registration-diagnosis — 2026-09-16T01:30:52.366054+00:00
+
+Incident: `INC-20260916-REGISTRATION`. Kind: `observation`.
+
+**Observation:** Saved manual login is valid but access review returns generic 503; 32 matching historical identity records include 31 retracted and one active, all unbound.
+
+**Action:** Inspected exact installed services, refreshed original registration, validated saved token inventory and ran a restricted central-protocol diagnostic in a rolled-back transaction.
+
+**Result:** Confirmed credential_account_ambiguous before enrollment; no account writes, generation or execution gate changes.
+
+**Next step:** Preserve a specific allowlisted error and obtain owner choice before reconciling historical authorization.
+
+Evidence: [README.md](incidents/2026/2026-09-16-relay-registration/README.md).
+
+## EVT-20260916-relay-registration-count-correction — 2026-09-16T01:34:36.209528+00:00
+
+Incident: `INC-20260916-REGISTRATION`. Kind: `correction`.
+
+**Observation:** Machine recount found 31 matching historical identities: one active and 30 retracted, all unbound. The earlier manually counted 32/31 was incorrect.
+
+**Action:** Recounted the restricted registration context without persisting changes and corrected the current incident narrative.
+
+**Result:** Diagnosis remains credential_account_ambiguous; login is valid and every record is retained.
+
+**Next step:** Use the verified count for the proposed owner-selected reconciliation.
+
+Evidence: [verification.json](incidents/2026/2026-09-16-relay-registration/verification.json).
+
+Corrects `EVT-20260916-relay-registration-diagnosis`; the original entry remains retained.
+
+## EVT-20260916-relay-registration-rehearsal — 2026-09-16T01:34:36.209528+00:00
+
+Incident: `INC-20260916-REGISTRATION`. Kind: `verification`.
+
+**Observation:** An explicit proposed selection of the sole active matching record can pass the existing central review/register protocol.
+
+**Action:** Rehearsed inside a serializable transaction and rolled back; added fixed registration error mappings and adversarial HTTP/authorization regressions locally.
+
+**Result:** Rehearsal registered the same account as paused; rollback restored prepared registration with no account binding. 48 relay/enrollment tests, 38 documentation tests and production build passed; 643 local rendered/browser assets scanned. Error fix not deployed.
+
+**Next step:** Await owner selection before committing reconciliation; execution activation remains separate.
+
+Evidence: [verification.json](incidents/2026/2026-09-16-relay-registration/verification.json).
+
+## EVT-20260916-relay-connection-lifecycle — 2026-09-16T02:02:53.646318+00:00
+
+Incident: `INC-20260916-REGISTRATION`. Kind: `containment`.
+
+**Observation:** Owner requested purge of obsolete records and stable reconnect after credential rejection; this supersedes the earlier pending historical-record selection. Tests also found the management migration accidentally reinstated the legacy assignment guard inside scoped refresh.
+
+**Action:** Implemented atomic Connect, revision-fenced reconnect, fixed scoped refresh, applied migration 20260916013944, installed five reviewed local images, and retired the exact owner-authorized unused legacy set.
+
+**Result:** All 56 old records retain their operational IDs with credential material erased, permission retracted and immutable retirement markers. Tests and preview found no binding, assignment, live lease or in-flight use. Gates remain registration open and execution closed.
+
+**Next step:** Verify the original manual registration and installed monitor UX; keep provider generation and activation separate.
+
+Evidence: [connection-lifecycle.json](incidents/2026/2026-09-16-relay-registration/connection-lifecycle.json).
+
+## EVT-20260916-relay-registration-recovered — 2026-09-16T02:08:28.590791+00:00
+
+Incident: `INC-20260916-REGISTRATION`. Kind: `recovery`.
+
+**Observation:** The original manual sign-in connects successfully after obsolete credential retirement and local service update.
+
+**Action:** Verified one paused Premium account with four models, original desktop retained, replay returning the same connection, matching relay acknowledgment, and both installed monitor UIs. Final monitor refinement clears stale success notices before another action.
+
+**Result:** Registration recovered; ACT-024 prevention and local acceptance complete. Standard has no connected account; execution remains closed in both pools. Final browser checks found zero Axe violations, overflow, visible row errors or page errors.
+
+**Next step:** Use the separate manual Standard onboarding, activation and provider-qualification procedures; no inference or public application cutover was performed.
+
+Evidence: [connection-lifecycle.json](incidents/2026/2026-09-16-relay-registration/connection-lifecycle.json), [2026-09-16-relay-connections.md](../docs/knowledge/audits/2026-09-16-relay-connections.md).
+
+## EVT-20260916-shared-quota-diagnosis — 2026-09-16T03:06:07.284420+00:00
+
+Incident: `INC-20260916-SHAREDQUOTA`. Kind: `observation`.
+
+**Observation:** Owner reported correlated session failure after shared-account quota exhaustion. Source audit found Premium recovery gaps, whole-turn-only SDK history, unbounded context and swallowed stream errors. Actual production impact is unmeasured.
+
+**Action:** Reproduced with synthetic concurrent owners and interrupted tool chains; implemented bounded recovery and caller checkpoints without provider generation.
+
+**Result:** Focused relay and SDK tests reproduce and address the failure. Local runtime installation and final checks are in progress.
+
+**Next step:** Verify installed closed-gate services and compiled public boundary; retain separate real provider and caller-rollout acceptance.
+
+Evidence: [README.md](incidents/2026/2026-09-16-shared-quota/README.md).
+
+## EVT-20260916-shared-quota-local-acceptance — 2026-09-16T03:19:10.972341+00:00
+
+Incident: `INC-20260916-SHAREDQUOTA`. Kind: `verification`.
+
+**Observation:** Synthetic shared-account exhaustion and checkpoint-storage failures were reproduced; production impact remains unmeasured.
+
+**Action:** Installed both bounded-recovery runtime images preserving existing volumes and closed gates; verified SDK/API continuation, failure boundaries and compiled assets.
+
+**Result:** 53 relay, 23 agent, 38 transport/boundary, 6 usage, 42 image/security and 18 billing tests passed; 272-page build and TypeScript passed. Installed isolation/authorization passed 69 checks and five image pins passed 55 packaging/scope checks.
+
+**Next step:** Keep ACT-025 open for real provider output-bound qualification and compatible caller deployment with owner-scoped revision-aware checkpoint storage.
+
+Evidence: [verification.json](incidents/2026/2026-09-16-shared-quota/verification.json), [2026-09-16-shared-quota.md](../docs/knowledge/audits/2026-09-16-shared-quota.md).
+
+## EVT-20260916-shared-quota-second-audit — 2026-09-16T03:26:58.433211+00:00
+
+Incident: `INC-20260916-SHAREDQUOTA`. Kind: `observation`.
+
+**Observation:** A second source audit found overlapping completion settlement sweeps, unbounded callback fan-out within a batch and immediate explicit continuation after capacity rejection. Lookup admission also lacks per-owner isolation.
+
+**Action:** Reproduce amplification with deterministic stalled-dependency, concurrent-completion and repeated-resume fixtures; implement bounded work and retained wait state.
+
+**Result:** Existing local quota images and closed gates remain unchanged during investigation; no real provider request.
+
+**Next step:** Verify corrected source, SDK recovery states, installed runtime artifacts and documentation, retaining ACT025 for real provider/caller acceptance.
+
+Evidence: [shared-quota-recovery.md](../docs/reference/shared-quota-recovery.md).
+
+## EVT-20260916-shared-quota-second-acceptance — 2026-09-16T03:42:43.586105+00:00
+
+Incident: `INC-20260916-SHAREDQUOTA`. Kind: `verification`.
+
+**Observation:** Second-pass fixtures confirmed recovery work itself could amplify failures, and older sibling success could prematurely reopen capacity.
+
+**Action:** Installed revised runtime images with serialized terminal writes, bounded paced settlement, owner admission limits and recovery fencing; added bounded SDK callbacks and retained explicit waits.
+
+**Result:** 60 relay, 25 agent, 44 transport/quota/authorization and 42 image/security tests passed, alongside TypeScript, 272-page production build and private-marker scans. Installed services passed 69 checks and pinned images passed 55 checks. Gates and account state were preserved; no provider generation.
+
+**Next step:** Retain ACT025 for real provider output-bound verification, compatible caller distribution and owner-scoped checkpoint-store acceptance; do not infer production throughput from fixture bounds.
+
+Evidence: [second-pass-verification.json](incidents/2026/2026-09-16-shared-quota/second-pass-verification.json), [2026-09-16-shared-quota-second-pass.md](../docs/knowledge/audits/2026-09-16-shared-quota-second-pass.md).
+
+## EVT-20260916-relay-execution-activation-observation — 2026-09-16T04:00:04.889396+00:00
+
+Incident: `INC-20260916-REGISTRATION`. Kind: `observation`.
+
+**Observation:** Owner reports one manually connected account in each pool, but both monitors still display execution not activated. Fresh authenticated reads confirm both accounts are connected, paused, current, and revision/epoch acknowledged; both central execution gates remain false.
+
+**Action:** Use the supported serve-local transition after fresh installation acceptance, then enable the two intended accounts through their revision-checked monitor operations.
+
+**Result:** Registration is complete; the activation gate is the observed remaining blocker. No provider request has been submitted.
+
+**Next step:** Verify both execution gates, enabled-account acknowledgments and runtime readiness; retain separate provider/caller qualification work.
+
+Evidence: [relay-pool-services.md](../docs/runbooks/relay-pool-services.md).
+
+## EVT-20260916-relay-execution-activated — 2026-09-16T04:01:44.125064+00:00
+
+Incident: `INC-20260916-REGISTRATION`. Kind: `verification`.
+
+**Observation:** Fresh local checks confirmed one connected, current account per pool with matching revision and epoch; the central execution gates were still closed.
+
+**Action:** Ran serve-local with 69 fresh isolation/authorization/TLS checks, then enabled each account using its own monitor operation ID and expected revision.
+
+**Result:** Both live browser pages display Execution Allowed and Enabled/Applied at revision 2. Both runtime readiness and authenticated model inventory return HTTP 200; four Premium models and three Standard models observed. No browser errors.
+
+**Next step:** Preserve separate provider/caller qualification tracked by ACT-025; do not repeat registration or reset quotas to activate execution.
+
+Evidence: [2026-09-16-relay-execution-activation.json](releases/2026-09-16-relay-execution-activation.json).
+
+## EVT-20260916-relay-automatic-activation-design — 2026-09-16T04:11:11.980778+00:00
+
+Incident: `INC-20260916-REGISTRATION`. Kind: `observation`.
+
+**Observation:** Owner requests persistent automatic activation instead of separate manual gate and account enable transitions after successful sign-in. The current installation is manually active with one enabled account per pool.
+
+**Action:** Implement a verified-installation policy, atomic new-account enablement and own-runtime reconciliation; preserve explicit account pauses, manual gate shutdown and registration authentication.
+
+**Result:** Disposable PostgreSQL activation/rollback, existing authorization and relay service checks pass. Existing installed state remains unchanged before migration.
+
+**Next step:** Apply only the reviewed migration, install matching monitor copy, configure automatic policy after fresh isolation acceptance and verify actual readiness.
+
+Evidence: [test-relay-activation-db.ts](../scripts/test-relay-activation-db.ts), [20260916040459_relay_automatic_activation.sql](../supabase/migrations/20260916040459_relay_automatic_activation.sql).
+
+## EVT-20260916-relay-automatic-activation-accepted — 2026-09-16T04:18:49.978581+00:00
+
+Incident: `INC-20260916-REGISTRATION`. Kind: `verification`.
+
+**Observation:** Registration previously required independent owner gate activation and account Enable, despite verified manual sign-in.
+
+**Action:** Applied the single private automatic-activation migration, installed corrected monitor images and configured persistent policy after fresh local verification.
+
+**Result:** Both actual monitors report automatic policy true, Execution Allowed and Enabled/Applied at unchanged revision 2; both readiness/model reads return 200. 67 activation, 69 connection, 155 authorization, 50 execution and 94 general database checks pass; 60 service, 16 boundary, 8 model tests and 34 browser variants pass. Build, 69 local and 55 image checks pass.
+
+**Next step:** Future new verified connections enable and activate automatically. Preserve explicit account pauses and installation holds; ACT-025 retains real provider/caller qualification.
+
+Evidence: [2026-09-16-relay-automatic-activation.json](releases/2026-09-16-relay-automatic-activation.json).
+
+## EVT-20260916-relay-live-account-canaries-failed — 2026-09-16T04:26:33.421258+00:00
+
+Incident: `INC-20260916-SHAREDQUOTA`. Kind: `verification`.
+
+**Observation:** Both local relays reported ready with automatic execution allowed and one enabled, acknowledged account each. Owner requested real end-to-end account tests.
+
+**Action:** Sent one short 64-token-capped text request through each relay under a distinct persisted idempotency key. Read the original status, receipt, error stream and narrow read-only execution record; checked missing-authentication and wrong-owner receipt access.
+
+**Result:** Both admitted requests failed without output. Both receipts/execution outcomes remain unknown, actual usage is null, settlement is acknowledged with success false. No automatic upstream retries or quota cooldown ejections were recorded. Authorization checks returned 401/404. Detailed failure reason was not retained in available diagnostics.
+
+**Next step:** Do not replay unknown jobs. ACT-025 remains open: diagnose and correct the actual generation failure before new provider/output-bound qualification; complete caller/checkpoint acceptance separately.
+
+Evidence: [2026-09-16-relay-account-canaries.json](releases/2026-09-16-relay-account-canaries.json).
+
+## EVT-20260916-relay-generation-diagnosis — 2026-09-16T04:28:39.236286+00:00
+
+Incident: `INC-20260916-SHAREDQUOTA`. Kind: `observation`.
+
+**Observation:** Owner requests repair after both real text canaries failed. Live gates and acknowledgments are correct, but retained public error responses intentionally omit private diagnostics. The isolated runtime unconditionally enables a provider output-limit parameter whose compatibility has not passed real acceptance.
+
+**Action:** Inspect request construction and add an allowlisted job-associated diagnostic to private container logs; qualify a new independent short request without replaying previous unknown operations.
+
+**Result:** Root cause remains a hypothesis until a new private diagnostic is captured. No original receipt or account is altered.
+
+**Next step:** Test diagnostic privacy, install the instrumented runtime, identify the actual provider rejection, then implement and verify the compatible request contract.
+
+Evidence: [2026-09-16-relay-account-canaries.json](releases/2026-09-16-relay-account-canaries.json).
+
+## EVT-20260916-relay-generation-recovered — 2026-09-16T04:37:54.496676+00:00
+
+Incident: `INC-20260916-SHAREDQUOTA`. Kind: `verification`.
+
+**Observation:** A fresh private diagnostic confirmed the common provider request included an unsupported max_output_tokens field.
+
+**Action:** Removed unqualified forwarding, added conservative local observed-output bounds and private allowlisted job diagnostics, tested and installed both runtime images with accounts/state/gates retained.
+
+**Result:** Premium and Standard each returned RELAY_OK on a new request with completed receipt/stream and successful settlement of 29 actual tokens; no upstream retries. Both actual monitors show automatic activation and Enabled/Applied. Seventy relay, 17 boundary/usage/authorization, 69 local and 55 image checks pass; TypeScript, production build and compiled private scan pass.
+
+**Next step:** ACT-027 complete. ACT-025 retains compatible caller and durable-checkpoint continuation acceptance. Do not claim hard hidden-reasoning/provider spending limits, other-model/Sites/image qualification or public application cutover.
+
+Evidence: [2026-09-16-relay-generation-recovery.json](releases/2026-09-16-relay-generation-recovery.json).
+
+## EVT-20260916-relay-generation-final-accepted — 2026-09-16T04:43:59.939753+00:00
+
+Incident: `INC-20260916-SHAREDQUOTA`. Kind: `verification`.
+
+**Observation:** Final audit found private strict-cap preflight could still advertise unsupported forwarding and permanent request rejections needed an explicit retry veto.
+
+**Action:** Corrected both contracts, expanded tests to 71, rebuilt and installed new final runtime pins, and repeated one independently identified short request per account.
+
+**Result:** Both final jobs completed with expected output, terminal stream, completed receipt and settled actual usage of 29 tokens. Strict-cap preflight returns 503 in Premium and 403 in Standard without advertising support. Both accounts retain automatic activation/acknowledgment; earlier unknown and completed operations remain retained. Build, 17 boundary/authorization/usage, 69 local, 55 image and compiled asset checks pass.
+
+**Next step:** Keep ACT-027 complete and ACT-025 open for caller/checkpoint acceptance. Preserve original outcomes and distinguish conservative local output limits from unobservable provider reasoning or spending.
+
+Evidence: [2026-09-16-relay-generation-recovery-final.json](releases/2026-09-16-relay-generation-recovery-final.json).

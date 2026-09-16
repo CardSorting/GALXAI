@@ -1,0 +1,49 @@
+{
+  "classification": "private",
+  "observed_at": "2026-09-16T01:34:36.209528+00:00",
+  "baseline_revision": "b8eb43f97f79707c36b29106cfe206cf41889047",
+  "live_diagnosis": {
+    "pool": "premium",
+    "saved_sign_in": "accepted by provider",
+    "inventory_http_status": 200,
+    "accessible_models": 4,
+    "registration_state": "prepared",
+    "registry_records": 56,
+    "undecryptable_records": 0,
+    "matching_records": 31,
+    "matching_active_unbound_records": 1,
+    "matching_retracted_unbound_records": 30,
+    "typed_failure": "credential_account_ambiguous",
+    "installed_http_status": 503,
+    "execution_allowed": false
+  },
+  "rehearsal": {
+    "mode": "serializable transaction rolled back",
+    "scope": "Explicit proposed selection of sole active matching identity; existing scoped ticket/review/register functions",
+    "result": "registered",
+    "existing_account_id_preserved": true,
+    "saved_state": "paused",
+    "execution_allowed": false,
+    "models": 4,
+    "after_rollback": {
+      "state": "prepared",
+      "account_id": null,
+      "revision": 9
+    },
+    "initial_attempt": "Stopped before writes when exact count assertion used the initial incorrect manual count of 32; recount was 31."
+  },
+  "local_patch": {
+    "scope": "Allowlisted typed registration errors in central and monitor client only; enrollment authority unchanged",
+    "tests": 48,
+    "documentation_tests": 38,
+    "production_build": "passed, 272 generated pages; existing lint skip",
+    "compiled_assets_scanned": 643,
+    "deployed": false
+  },
+  "limitations": [
+    "Owner identity selection pending; no account reconciliation committed.",
+    "No relay or site deployment, execution activation, provider generation or public customer acceptance.",
+    "Execution activation remains an independent installation gate.",
+    "Existing unrelated overdue incident follow-ups retained."
+  ]
+}

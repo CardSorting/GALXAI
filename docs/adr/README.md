@@ -169,4 +169,9 @@ Use the [authoring guide](../maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md) f
 | 0150 | [ADR 0150: Bounded free admission and paid capacity protection](0150-free-generation-admission-gate.md) | Proposed; expiring aggregate gate and composer stop states, local delivery only |
 | 0151 | [ADR 0151: Standalone Codex image tool transport](0151-codex-standalone-image-tool.md) | Proposed; local transport correction, live access unresolved |
 | 0152 | [ADR 0152: Manual desktop-only shard authority](0152-manual-desktop-only-shard-authority.md) | Owner-approved policy; explicit desktop enrollment, schema enforcement and manual session repair |
-| 0153 | [ADR 0153: Central account authority with isolated relay execution](0153-central-account-authority-isolated-relays.md) | Proposed implementation; sole account management in GALXAI, two execution pools; delivery not started |
+| 0153 | [ADR 0153: Central account authority with isolated relay execution](0153-central-account-authority-isolated-relays.md) | Proposed implementation; sole account management in GALXAI, two execution pools; local services installed, serving qualification separate |
+| 0154 | [Stable relay connections and irreversible legacy credential retirement](0154-relay-connection-lifecycle-and-legacy-retirement.md) | Proposed; atomic Connect, same-account reconnect and owner-scoped cleanup; delivery evidence separate |
+
+- [0155: Shared quota containment and bounded agent continuation](0155-shared-quota-containment-and-bounded-continuation.md)
+- [0156: Verified automatic relay activation](0156-verified-automatic-relay-activation.md)
+- [0157: Compatible relay requests and honest output budgets](0157-compatible-relay-output-budgets.md)

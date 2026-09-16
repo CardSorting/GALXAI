@@ -2339,6 +2339,95 @@
       }
     },
     {
+      "path": "docs/adr/0154-relay-connection-lifecycle-and-legacy-retirement.md",
+      "title": "ADR 0154: Stable relay connections and irreversible legacy credential retirement",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [
+        "relay"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": {
+        "status": "proposed",
+        "delivery": "local",
+        "domain": "relay",
+        "owner": "Relay operator",
+        "date": "2026-09-16",
+        "evidence": [
+          "post-mortem/incidents/2026/2026-09-16-relay-registration/connection-lifecycle.json"
+        ],
+        "supersedes": []
+      }
+    },
+    {
+      "path": "docs/adr/0155-shared-quota-containment-and-bounded-continuation.md",
+      "title": "ADR 0155: Shared quota containment and bounded agent continuation",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [
+        "relay"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": {
+        "status": "proposed",
+        "delivery": "local",
+        "domain": "relay",
+        "owner": "Relay and SDK maintainer",
+        "date": "2026-09-16",
+        "evidence": [
+          "post-mortem/incidents/2026/2026-09-16-shared-quota/README.md"
+        ],
+        "supersedes": []
+      }
+    },
+    {
+      "path": "docs/adr/0156-verified-automatic-relay-activation.md",
+      "title": "ADR 0156: Verified automatic relay activation",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [
+        "relay"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": {
+        "status": "proposed",
+        "delivery": "local",
+        "domain": "relay",
+        "owner": "Relay operator",
+        "date": "2026-09-16",
+        "evidence": [
+          "post-mortem/releases/2026-09-16-relay-automatic-activation.json"
+        ],
+        "supersedes": []
+      }
+    },
+    {
+      "path": "docs/adr/0157-compatible-relay-output-budgets.md",
+      "title": "ADR 0157: Compatible relay requests and honest output budgets",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [
+        "relay"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": {
+        "status": "proposed",
+        "delivery": "local",
+        "domain": "relay",
+        "owner": "Relay maintainer",
+        "date": "2026-09-16",
+        "evidence": [
+          "post-mortem/releases/2026-09-16-relay-generation-recovery.json",
+          "post-mortem/releases/2026-09-16-relay-generation-recovery-final.json"
+        ],
+        "supersedes": []
+      }
+    },
+    {
       "path": "docs/adr/README.md",
       "title": "Architecture decision records",
       "scope": "current-guide",
@@ -2851,6 +2940,43 @@
         "invoices",
         "audit"
       ],
+      "decision": null
+    },
+    {
+      "path": "docs/knowledge/audits/2026-09-16-relay-connections.md",
+      "title": "Relay connections: lifecycle and recovery audit",
+      "scope": "operational-record",
+      "kind": "evidence",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [
+        "relay",
+        "connection",
+        "registration",
+        "reconnect",
+        "retirement",
+        "audit"
+      ],
+      "decision": null
+    },
+    {
+      "path": "docs/knowledge/audits/2026-09-16-shared-quota-second-pass.md",
+      "title": "Shared quota resilience — second audit",
+      "scope": "operational-record",
+      "kind": "evidence",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/knowledge/audits/2026-09-16-shared-quota.md",
+      "title": "Shared quota and continuation audit — September 16, 2026",
+      "scope": "operational-record",
+      "kind": "evidence",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
       "decision": null
     },
     {
@@ -3885,6 +4011,18 @@
       "decision": null
     },
     {
+      "path": "docs/reference/shared-quota-recovery.md",
+      "title": "Shared quota and bounded continuation",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [
+        "relay"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": null
+    },
+    {
       "path": "docs/reference/standard-relay-scheduling.md",
       "title": "Standard relay rotation",
       "scope": "current-guide",
@@ -4405,6 +4543,26 @@
     {
       "path": "post-mortem/incidents/2026/2026-09-15-stripe-test-webhook/README.md",
       "title": "Separate test-account Stripe webhook failure",
+      "scope": "operational-record",
+      "kind": "navigation",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-09-16-relay-registration/README.md",
+      "title": "Manual relay registration blocked by historical identities",
+      "scope": "operational-record",
+      "kind": "navigation",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-09-16-shared-quota/README.md",
+      "title": "Shared-account quota exhaustion and costly continuation",
       "scope": "operational-record",
       "kind": "navigation",
       "domains": [],

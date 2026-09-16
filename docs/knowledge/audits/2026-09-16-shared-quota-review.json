@@ -1,0 +1,154 @@
+{
+  "reviewed_at": "2026-09-16T03:19:41.506336+00:00",
+  "reviewer": "Codex shared-quota source and canonical-guide review",
+  "scope": "Incremental semantic review of changed relay/SDK, shared retry, queue-guide and error contracts; not broad subsystem recertification or a live provider acceptance",
+  "domains": {
+    "relay": "Shared admission, quota feedback, terminal evidence, output limits, SDK checkpoint/revision/budget semantics and local runtime delivery. Complete owning guides reconciled.",
+    "images": "Complete queue guide inspected; changed shared scheduling paragraph remains separate from durable image receipts. Public image HTTP/auth/artifact regressions pass. No image schema or receipt mutation.",
+    "client-efficiency": "Complete request-efficiency guide reconciled with failed-state replay veto in ResilientClient; no polling cadence, navigation or measured-savings changes.",
+    "billing": "Complete billing page contract inspected alongside SDK typed-error changes; balance-recovery destinations and payment/entitlement authority unchanged. Billing and webhook regressions pass.",
+    "knowledge": "Source/guide maps, proposed ADR status, delivery evidence, incident lifecycle and publication boundary reconciled; generated views do not accept decisions or renew reviews."
+  },
+  "sources_inspected": [
+    "src/relay/standard-pool-scheduler.ts",
+    "src/relay/pool-runtime.ts",
+    "src/relay/pool-execution.ts",
+    "src/relay/relay-server.ts",
+    "src/relay/completion-usage.ts",
+    "src/core/router/adapters/RelayChatTransport.ts",
+    "src/app/v1/chat/completions/route.ts",
+    "src/sdk/agent.ts",
+    "src/sdk/client.ts",
+    "src/sdk/errors.ts",
+    "src/sdk/stream.ts",
+    "src/sdk/index.ts",
+    "src/lib/resilience/ResilientClient.ts",
+    "scripts/test-agent-continuation.ts",
+    "scripts/test-standard-pool.ts",
+    "scripts/test-relay-chat-transport.ts",
+    "scripts/verify-relay-service-images.mjs",
+    "package.json",
+    "docs/knowledge/registry.json",
+    "docker/relay-pools/local/images.json"
+  ],
+  "complete_guides_inspected": [
+    "docs/reference/shared-quota-recovery.md",
+    "docs/reference/automatic-agent-tools.md",
+    "docs/reference/standard-relay-scheduling.md",
+    "docs/ROUTING_ALGORITHMS.md",
+    "docs/RATE_LIMITS_AND_QUOTAS.md",
+    "docs/maintainers/RELAY_QUOTA_AND_FLEET.md",
+    "docs/QUEUE_SPECIFICATION.md",
+    "docs/RELAY_API_REFERENCE.md",
+    "docs/runbooks/relay-pool-services.md",
+    "docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md",
+    "docs/reference/billing-pages.md",
+    "docs/DOCUMENTATION_POLICY.md",
+    "docs/how-to/change-with-documentation.md",
+    "docs/reference/knowledge-commands.md",
+    "docs/maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md"
+  ],
+  "unmapped_paths_reviewed": [
+    ".impeccable/surfaces/src-relay-pool-monitor-html.md",
+    "docs/CATALOG.md",
+    "docs/adr/README.md",
+    "docs/knowledge/DECISIONS.md",
+    "docs/knowledge/DOMAINS.md",
+    "docs/knowledge/audits/2026-09-16-relay-connection-review.json",
+    "docs/knowledge/audits/2026-09-16-relay-connections.md",
+    "docs/knowledge/audits/2026-09-16-relay-registration-review.json",
+    "docs/knowledge/audits/2026-09-16-shared-quota.md",
+    "docs/knowledge/catalog.json",
+    "docs/knowledge/reviews.json",
+    "post-mortem/CURRENT_STATE.md",
+    "post-mortem/INCIDENTS.md",
+    "post-mortem/OPEN_ITEMS.md",
+    "post-mortem/ROLLING_LOG.md",
+    "post-mortem/documentation-inventory.json",
+    "post-mortem/events.jsonl",
+    "post-mortem/failure-modes/README.md",
+    "post-mortem/failure-modes/controller.md",
+    "post-mortem/incidents/2026/2026-09-16-relay-registration/README.md",
+    "post-mortem/incidents/2026/2026-09-16-relay-registration/connection-lifecycle.json",
+    "post-mortem/incidents/2026/2026-09-16-relay-registration/verification.json",
+    "post-mortem/incidents/2026/2026-09-16-shared-quota/README.md",
+    "post-mortem/incidents/2026/2026-09-16-shared-quota/verification.json",
+    "post-mortem/register.json",
+    "post-mortem/review.json"
+  ],
+  "findings": [
+    "Removed Standard-only assumptions from quota selection, persistence and admission-denial recovery while retaining central authority and selected-pool isolation.",
+    "Corrected actual output-limit forwarding and terminal stream completion; no fixture-only expectation change substitutes for runtime behavior.",
+    "Unified run/stream checkpoint logic; retained callback results, original usage/attempt budget, display-only partial output and explicit bounded compaction.",
+    "Added expected-revision persistence fencing; failed initial/final and parallel callback saves retain local evidence and prevent automatic continuation.",
+    "Kept private diagnostics out of public JSON/SSE, distinguished failed streams from successful persistence, and maintained no-replay classification across SDK/browser helpers.",
+    "Reconciled current local delivery with unchanged closed gates; prior registration, database and image evidence remain separately dated.",
+    "Retained ADR0155 as proposed and ACT025 open; no auto-acceptance, provider readiness or published SDK claim."
+  ],
+  "checks": [
+    {
+      "command": "npm run test:relay:services",
+      "passed": 53,
+      "scope": "Synthetic local HTTP/WebSocket providers; shared owners, quota recovery, JSON/SSE SDK continuation, account authority"
+    },
+    {
+      "command": "npm run test:agent:tools",
+      "passed": 23,
+      "scope": "Tool callbacks, isolation, bounded continuation, checkpoint revision conflicts and failed-save recovery"
+    },
+    {
+      "command": "node --import tsx --test scripts/test-relay-chat-transport.ts scripts/test-client-recovery.ts scripts/test-relay-adaptive-quota.ts scripts/test-relay-client-auth.ts scripts/test-public-information-boundary.ts scripts/test-shard-authority-boundary.ts",
+      "passed": 38,
+      "scope": "Transport, retries, quota, public error allowlists and authorization"
+    },
+    {
+      "command": "node --import tsx --test scripts/test-relay-completion-usage.ts",
+      "passed": 6
+    },
+    {
+      "command": "npm run test:image:security",
+      "passed": 42,
+      "scope": "Raw HTTP, image sanitization, retrieval, error fields and owner boundaries"
+    },
+    {
+      "command": "npm run test:billing:lifecycle",
+      "passed": 18,
+      "additional": "Webhook invalid-signature, wrong-mode and oversized-body boundaries passed"
+    },
+    {
+      "command": "npx tsc --noEmit --pretty false",
+      "result": "passed after final production build"
+    },
+    {
+      "command": "npm run build",
+      "result": "passed",
+      "renderedPages": 272
+    },
+    {
+      "command": "npm run test:docs",
+      "passed": 38,
+      "scope": "21 incident and 17 knowledge-guard tests; final validation repeated after evidence generation"
+    },
+    {
+      "command": "git diff --check",
+      "result": "passed"
+    }
+  ],
+  "evidence": [
+    "post-mortem/incidents/2026/2026-09-16-shared-quota/verification.json",
+    "docs/knowledge/audits/2026-09-16-shared-quota.md"
+  ],
+  "limits": [
+    "No real provider request, measured provider balance, induced real exhaustion or production blast-radius claim.",
+    "Runtime images are installed locally; public chat application and SDK publication are not performed.",
+    "Both execution gates remain closed. Premium retains one paused connected account; Standard has none.",
+    "Crash-safe cross-process continuation requires caller-owned authenticated persistence with atomic expected-revision checks.",
+    "No exactly-once external callback guarantee, automatic unknown-request replay or cross-pool failover.",
+    "Conservative per-turn reservations do not replace aggregate customer concurrency/spend policy.",
+    "No database schema or data changes in the quota task; prior registration cleanup remains separately evidenced.",
+    "Compiled scans cover this local build, not the live public site. No new graphical chat UX or browser acceptance claimed.",
+    "Broader fingerprint inventories detect drift but do not certify every unchanged module or guide.",
+    "Database changes belong to the prior connection task and its retained review; no new database review stamped.",
+    "Unrelated overdue ACT001/015/016 remain open."
+  ]
+}

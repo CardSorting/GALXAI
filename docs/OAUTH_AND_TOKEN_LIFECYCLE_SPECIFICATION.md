@@ -12,15 +12,15 @@ Private reference. [Account management](reference/relay-account-management.md) o
 | Pool monitor session | Fixed native launcher exchanges a scoped one-use ticket; relaunch after expiry | Own-pool viewer or operator privileges checked centrally |
 | Registrar principal | Private monitor configuration, separate from viewer/operator | Narrow saved-login review/registration handoff for its fixed installation |
 | Provider login | Manual sign-in inside the owning registration desktop | Candidate guest credential, not yet central account authority |
-| Registered account | Explicit access review and registration | Encrypted main-project account, exclusive assignment and paused lifecycle state |
-| Replacement sign-in | Manual same-desktop sign-in, then **Update saved sign-in → Save new sign-in** | Revision-checked central credential replacement |
+| Registered account | Explicit **Connect account** | Encrypted main-project account and exclusive assignment; new connections enable under the verified automatic policy |
+| Replacement sign-in | Manual same-desktop sign-in, then **Reconnect → Save new sign-in** | Revision-checked central credential replacement |
 | Runtime projection/grant | Scoped runtime principal, current epoch/revisions and existing central account lease | Own-pool execution for a bounded renewable interval |
 
 Provider renewal, browser reconnection, GALX session renewal and vault re-encryption are separate. Opening a monitor never signs in to a provider or reviews credentials. The new monitor has no legacy background saved-file synchronization bridge. No independent provider refresh-token daemon establishes managed authority.
 
 ## Registration and renewal
 
-Open the intended fixed Premium/Standard monitor, choose **Register account**, prepare its desktop and manually sign in. Premium requires a paid provider account; Standard requires a free provider account. Choose **Review access**, inspect the result and register explicitly. The browser submits references/revisions rather than provider token contents; the scoped registrar reads the saved guest login and central authorization validates its authority. The account starts paused.
+Open the intended fixed Premium/Standard monitor, choose **Connect account**, prepare its desktop and manually sign in. Premium requires a paid provider account; Standard requires a free provider account. Choose **Connect account** to verify access and register atomically. The browser submits references/revisions rather than provider token contents; the scoped registrar reads the saved guest login and central authorization validates its authority. A verified automatic-activation policy enables the new connection and activates its own ready relay; manual holds leave it paused. Reconnect and replay preserve the existing enabled/paused setting.
 
 Review tickets last two minutes and review evidence five minutes. Every registration update changes its revision, including ticket/review updates. Stale review or a changed record requires fresh inspection. Assignment cannot be edited or transferred by changing a desktop link. Revoked/removed or conflicting accounts cannot be revived through registration.
 
@@ -44,4 +44,4 @@ The retained single controller supports **Enroll shard** and conditional saved-f
 
 ## Verification and limits
 
-Use [hardening checks](maintainers/RELAY_HARDENING.md) for role/race/replay/rollback and HTTP isolation coverage. Central outage denies new grants and renewal; uncertain work never redispatches. A fresh health label or expired cooldown is not provider acceptance. Latest installed evidence records registration open, execution closed and zero registered accounts; manual sign-ins and real generation remain pending. Keep account material and diagnostics out of public DTOs and browser assets.
+Use [hardening checks](maintainers/RELAY_HARDENING.md) for role/race/replay/rollback and HTTP isolation coverage. Central outage denies new grants and renewal; uncertain work never redispatches. A fresh health label or expired cooldown is not provider acceptance. [Current state](../post-mortem/CURRENT_STATE.md) records the later automatic-activation release and live account/readiness checks. Provider generation qualification remains separate. Keep account material and diagnostics out of public DTOs and browser assets.

@@ -2,19 +2,19 @@
 import http from 'node:http';
 import { randomBytes } from 'node:crypto';
 import type { Pool } from 'pg';
-import { bearer, exactKeys, failure, hash, json, type PoolId } from './pool-protocol.js';
+import { bearer, exactKeys, failure, hash, json, registrationErrors, type PoolId } from './pool-protocol.js';
 import { readJsonBody, RequestError } from './request-policy.js';
-import { parseDesktopCredential, credentialClaims, type DesktopCredential } from './desktop-credentials.js';
+import { DesktopCredentialError, parseDesktopCredential, credentialClaims, type DesktopCredential } from './desktop-credentials.js';
 import { decryptRegistryShard, encryptRegistryShard } from './shard-registry.js';
 import { createDesktopEnrollment } from './desktop-enrollment.js';
 import { createDesktopCredentialRefresh } from './desktop-credential-refresh.js';
-import { discoverOpenAIModels } from './capability-discovery.js';
+import { CapabilityDiscoveryError, discoverOpenAIModels } from './capability-discovery.js';
 
 type Query = (tokenHash: string, action: string, body: Record<string, any>) => Promise<any>;
 export function centralQuery(pool: Pick<Pool, 'query'>): Query {
   return async (token, action, body) => {
     try { return (await pool.query('SELECT private.relay_control($1,$2,$3::jsonb) AS result', [token, action, JSON.stringify(body)])).rows[0].result; }
-    catch (error: any) { if(error.code==='40001')throw new RequestError(409,'record_changed','This item changed. Refresh before trying again.'); throw new RequestError(error.code === '42501' ? 403 : error.code === 'P0002' ? 404 : ['23505','40001','55P03'].includes(error.code) ? 409 : ['22023','22P02','23502','23514'].includes(error.code) ? 400 : 503, 'action_not_confirmed', 'The action could not be confirmed. Refresh its status before retrying.'); }
+    catch (error: any) { if(error.code==='GR001')throw new DesktopCredentialError('credential_rejected'); if(error.code==='40001')throw new RequestError(409,'record_changed','This item changed. Refresh before trying again.'); throw new RequestError(error.code === '42501' ? 403 : error.code === 'P0002' ? 404 : ['23505','40001','55P03'].includes(error.code) ? 409 : ['22023','22P02','23502','23514'].includes(error.code) ? 400 : 503, 'action_not_confirmed', 'The action could not be confirmed. Refresh its status before retrying.'); }
   };
 }
 export function accountClass(candidate: DesktopCredential): 'free' | 'paid' {
@@ -23,7 +23,7 @@ export function accountClass(candidate: DesktopCredential): 'free' | 'paid' {
   if (['go','plus','pro','team','business','enterprise','edu'].includes(plan)) return 'paid';
   throw new RequestError(422, 'account_type_unverified', 'The account type could not be verified. Sign in again and retry.');
 }
-const projectionFields = ['id','desktopId','assignmentRevision','revision','state','credentialRevision','models','expiresAtMs','cooldownUntilMs'] as const;
+const projectionFields = ['id','desktopId','assignmentRevision','revision','state','credentialRevision','models','expiresAtMs','cooldownUntilMs','connectionState'] as const;
 const select = (row: any, fields: readonly string[]) => Object.fromEntries(fields.filter(k => row[k] !== undefined).map(k => [k,row[k]]));
 const routes: Record<string, readonly string[]> = {
   '/operator/status': [], '/operator/operation': ['id'], '/operator/prepare': ['id','desktopId','name'],
@@ -31,10 +31,12 @@ const routes: Record<string, readonly string[]> = {
   '/operator/ticket': ['id','purpose'], '/operator/set_account': ['id','accountId','expectedRevision','command','name'],
   '/runtime/claim': ['epoch'], '/runtime/heartbeat': ['epoch'], '/runtime/projection': ['epoch'],
   '/runtime/acknowledge': ['epoch','accountId','revision','credentialRevision'],
+  '/runtime/credential_failed': ['epoch','accountId','revision','credentialRevision'],
   '/runtime/acquire': ['epoch','accountId','revision','credentialRevision','workload','requestKey','requestSha256','tenantSha256','estimatedTokens'],
   '/runtime/renew': ['epoch','accountId','revision','credentialRevision','leaseId','fencingToken'],
   '/runtime/settle': ['epoch','leaseId','actualTokens','latencyMs','success'],
   '/registrar/review': ['id','ticket','files'], '/registrar/register': ['id','ticket','files'], '/registrar/refresh': ['id','ticket','files'],
+  '/registrar/connect': ['id','ticket','files'],
 };
 export function centralServer(deps: { query: Query; identitySecret: string; decrypt?: typeof decryptRegistryShard; encrypt?: typeof encryptRegistryShard; validate?: (candidate: DesktopCredential) => Promise<string[]> }) {
   const decrypt = deps.decrypt ?? decryptRegistryShard, encrypt = deps.encrypt ?? encryptRegistryShard;
@@ -71,11 +73,12 @@ export function centralServer(deps: { query: Query; identitySecret: string; decr
           const refresh = createDesktopCredentialRefresh({ ...common, replace: async (expected, encrypted, expiresAtMs) => {
             result = await deps.query(token,'refresh',{...values,expected,row:{...encrypted,credential_expires_at_ms:expiresAtMs}}); return true;
           } });
-          const outcome = await refresh(context.accountId,candidate,async()=>true,false,{desktopId:context.desktopId,prepare:()=>{}});
-          result ??= {accountId:context.accountId,state:outcome.outcome};
+          await refresh(context.accountId,candidate,async()=>true,false,{desktopId:context.desktopId,prepare:()=>{}});
+          // Even an unchanged token must pass the locked connection-state check.
+          result ??= await deps.query(token,'refresh',values);
         } else {
           // The established enrollment matcher rejects duplicate, revoked and mismatched accounts, including legacy rows.
-          await createDesktopEnrollment({ ...common, identitySecret:()=>deps.identitySecret, write: async (_desktop,row,expected) => {
+          await createDesktopEnrollment({ ...common, identitySecret:()=>deps.identitySecret + ':central-connections-v1', write: async (_desktop,row,expected) => {
             result = await deps.query(token,action,{...values,row,expected}); return String(row.id);
           } })(context.desktopId,candidate,context.accountId,async()=>true);
         }
@@ -100,5 +103,11 @@ export function centralServer(deps: { query: Query; identitySecret: string; decr
       // All other procedure branches construct explicit DTOs in SQL; no table rows are returned.
       return json(res,200,result);
     } finally { active--; }
-  })().catch(error => { if (!res.headersSent) failure(res,error); else res.destroy(); }); });
+  })().catch(error => {
+    if (error instanceof CapabilityDiscoveryError) error = new DesktopCredentialError(error.code === 'invalid_credential' ? 'credential_rejected' : 'credential_check_unavailable');
+    if (error instanceof DesktopCredentialError && Object.hasOwn(registrationErrors,error.code)) {
+      const known = registrationErrors[error.code]; error = new RequestError(known.status,error.code,known.message);
+    }
+    if (!res.headersSent) failure(res,error); else res.destroy();
+  }); });
 }

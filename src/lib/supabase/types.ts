@@ -63,7 +63,7 @@ export interface Database {
         Insert: never; Update: never; Relationships: [];
       };
       galx_relay_installation_runtime: {
-        Row: { installation_id: string; registration_allowed: boolean; execution_allowed: boolean; owner_epoch: string | null; owner_generation: number; last_seen_at: string | null; isolation_evidence_sha256: string | null };
+        Row: { installation_id: string; registration_allowed: boolean; execution_allowed: boolean; automatic_activation: boolean; owner_epoch: string | null; owner_generation: number; last_seen_at: string | null; isolation_evidence_sha256: string | null };
         Insert: never; Update: never; Relationships: [];
       };
       galx_relay_registrations: {
@@ -71,7 +71,7 @@ export interface Database {
         Insert: never; Update: never; Relationships: [];
       };
       galx_relay_account_control: {
-        Row: { account_id: string; account_class: 'paid' | 'free'; desired_state: 'enabled' | 'paused' | 'revoked'; desired_revision: number; acknowledged_revision: number | null; acknowledged_epoch: string | null; acknowledged_at: string | null; credential_revision: string; models: Json; updated_at: string };
+        Row: { account_id: string; account_class: 'paid' | 'free'; desired_state: 'enabled' | 'paused' | 'revoked'; desired_revision: number; acknowledged_revision: number | null; acknowledged_epoch: string | null; acknowledged_at: string | null; credential_revision: string; connection_state: 'connected' | 'sign_in_required'; rejected_credential_revision: string | null; connection_checked_at: string | null; models: Json; updated_at: string };
         Insert: never; Update: never; Relationships: [];
       };
       galx_relay_control_operations: {
@@ -556,6 +556,7 @@ export interface Database {
       };
       galx_shard_accounts: {
         Row: {
+          credential_retired_at: string | null;
           relay_pool_id: GalxRelayPoolId | null;
           id: string;
           workspace_id: string | null;

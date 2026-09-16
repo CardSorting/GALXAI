@@ -20,7 +20,8 @@ import { functionCalls, type FunctionCall } from './function-tools.js';
 export function completionFrame(job: { id: string; usage?: CompletionUsage; outputToolCalls?: FunctionCall[] }): string {
   // Explicit allowlist also protects snapshot replay from extra stored fields.
   const calls = job.outputToolCalls?.length ? functionCalls(job.outputToolCalls) : [];
-  const toolFrame = calls.length ? `data: ${JSON.stringify({ id: job.id, object: 'chat.completion.chunk', choices: [{ index: 0, delta: { tool_calls: calls.map((c, index) => ({ index, ...c })) }, finish_reason: 'tool_calls' }] })}\n\n` : '';
+  const toolFrame = `data: ${JSON.stringify({ id: job.id, object: 'chat.completion.chunk', choices: [{ index: 0,
+    delta: calls.length ? { tool_calls: calls.map((c, index) => ({ index, ...c })) } : {}, finish_reason: calls.length ? 'tool_calls' : 'stop' }] })}\n\n`;
   if (!job.usage) return toolFrame;
   const { prompt_tokens, completion_tokens, total_tokens } = job.usage;
   const usage = completionUsage({ status: 'completed', usage: { input_tokens: prompt_tokens, output_tokens: completion_tokens, total_tokens } });

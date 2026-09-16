@@ -1,0 +1,342 @@
+{
+  "classification": "private",
+  "observed_at": "2026-09-16T04:37:54.496676+00:00",
+  "scope": "Owner-requested repair and live text generation verification on the installed Premium and Standard accounts. No public application or SDK deployment.",
+  "cause": "The common runtime enabled an unqualified max_output_tokens provider parameter. A fresh Premium diagnostic request confirmed HTTP 400 unsupported_parameter; both original accounts failed with the common payload, and both succeed after the corrected request construction.",
+  "diagnostic": {
+    "jobId": "job_mu3ls3m4_7002aa92",
+    "pool": "premium",
+    "status": 400,
+    "code": "unclassified",
+    "parameter": "max_output_tokens",
+    "reason": "unsupported_parameter",
+    "originalFailedJobsReplayed": false
+  },
+  "fix": [
+    "Disable unqualified token-ceiling forwarding in both pool runtimes, on the first and only attempt.",
+    "Bound observed text, reasoning/summary, tool argument deltas and complete call envelopes by a conservative UTF-8 byte budget. Overflow closes the socket and fails without replay or fabricated usage.",
+    "Explicit provider-enforced ceiling requests fail before new reservation/provider I/O.",
+    "Capture job-associated allowlisted rejection categories only in private container logs; observer failure cannot change execution.",
+    "Retain account slots, central grants, input/turn reservations, wall deadlines, quota cooldowns, original receipts and no cross-pool fallback."
+  ],
+  "installation": {
+    "at": "2026-09-16T04:35:14.679Z",
+    "updated": [
+      {
+        "pool": "premium",
+        "previous": {
+          "tag": "galxai-relay-premium:diagnostic-20260916",
+          "id": "sha256:8550e13c8d37866fec97bb65d4da97ba7dd82c4992e084b6380392a0424d3009",
+          "architecture": "arm64",
+          "component": "runtime",
+          "pool": "premium"
+        },
+        "beforeContainerId": "da288d4f7f9983b571a0f40c8ef62b45ee2b4622c1cd00e0b6cedca58cffe534",
+        "image": {
+          "tag": "galxai-relay-premium:generation-20260916",
+          "id": "sha256:17a3b0bc79891dd4cba1f2590a4351f6197807de4fecf57678d6e77fa06d329c",
+          "architecture": "arm64",
+          "component": "runtime",
+          "pool": "premium"
+        },
+        "afterContainerId": "bc12b3ae2c6224af40d4b1c4211959e1f6358fc18b82a86f5e1624b8e0ec9cb1"
+      },
+      {
+        "pool": "standard",
+        "previous": {
+          "tag": "galxai-relay-standard:quota-20260916-r2",
+          "id": "sha256:fd72bc488465e9f1b8d4938fa035aeed3f994c067e9e46a05d96011c46d3bc5a",
+          "architecture": "arm64",
+          "component": "runtime",
+          "pool": "standard"
+        },
+        "beforeContainerId": "eeffd66453211d7585c71e68d77b74479f084707834f2ab25725f21a5b6f3a64",
+        "image": {
+          "tag": "galxai-relay-standard:generation-20260916",
+          "id": "sha256:1ef381a9348c8bf35d92e6edeff819bce334735219b87afeb5980637351b511e",
+          "architecture": "arm64",
+          "component": "runtime",
+          "pool": "standard"
+        },
+        "afterContainerId": "1a76b212dd14c20a8ba7a67e38753f8e35797acef9c8c437539d3178c9ea9454"
+      }
+    ],
+    "volumesRetained": true,
+    "gatesChanged": false
+  },
+  "monitor": {
+    "at": "2026-09-16T04:36:10.682Z",
+    "results": [
+      {
+        "pool": "premium",
+        "automaticActivation": true,
+        "executionLabel": "Allowed",
+        "accountState": "enabled",
+        "confirmation": "Applied",
+        "revision": 2,
+        "acknowledgedRevision": 2,
+        "epochMatches": true,
+        "readyStatus": 200,
+        "modelInventoryStatus": 200,
+        "modelCount": 4,
+        "pageErrors": 0,
+        "oldActivationNotice": false
+      },
+      {
+        "pool": "standard",
+        "automaticActivation": true,
+        "executionLabel": "Allowed",
+        "accountState": "enabled",
+        "confirmation": "Applied",
+        "revision": 2,
+        "acknowledgedRevision": 2,
+        "epochMatches": true,
+        "readyStatus": 200,
+        "modelInventoryStatus": 200,
+        "modelCount": 3,
+        "pageErrors": 0,
+        "oldActivationNotice": false
+      }
+    ]
+  },
+  "requests": {
+    "fresh_diagnostic_requests": 1,
+    "fresh_final_requests": 2,
+    "per_pool_final": 1,
+    "model": "gpt-5.6-luna",
+    "max_tokens_local_units": 64,
+    "expected_output": "RELAY_OK",
+    "automatic_upstream_retries": 0
+  },
+  "results": [
+    {
+      "pool": "premium",
+      "at": "2026-09-16T04:35:33.947Z",
+      "before": {
+        "at": "2026-09-16T04:35:33.938Z",
+        "executionAllowed": true,
+        "automaticActivation": true,
+        "heartbeatAgeMs": 1996,
+        "accounts": [
+          {
+            "id": "codex_sh_2c5baf5f09e78318d9ad06f2",
+            "state": "enabled",
+            "connectionState": "connected",
+            "revision": 2,
+            "acknowledgedRevision": 2,
+            "epochMatches": true
+          }
+        ]
+      },
+      "readiness": 200,
+      "model": "gpt-5.6-luna",
+      "status": "completed",
+      "jobId": "job_mu3lxxr5_f2ebe3da",
+      "admissionStatus": 202,
+      "admissionMs": 228,
+      "jobStatus": "completed",
+      "completionMs": 2333,
+      "receipt": {
+        "httpStatus": 200,
+        "status": "completed",
+        "outputMatches": true,
+        "outputBytes": 8,
+        "usage": {
+          "prompt_tokens": 22,
+          "completion_tokens": 7,
+          "total_tokens": 29
+        }
+      },
+      "wrongTenantStatus": 404,
+      "unauthenticatedStatus": 401,
+      "after": {
+        "at": "2026-09-16T04:35:36.551Z",
+        "executionAllowed": true,
+        "automaticActivation": true,
+        "heartbeatAgeMs": 4608,
+        "accounts": [
+          {
+            "id": "codex_sh_2c5baf5f09e78318d9ad06f2",
+            "state": "enabled",
+            "connectionState": "connected",
+            "revision": 2,
+            "acknowledgedRevision": 2,
+            "epochMatches": true
+          }
+        ]
+      },
+      "execution": {
+        "state": "completed",
+        "success": true,
+        "actualTokens": 29,
+        "settled": true,
+        "accountMatches": true,
+        "hasLease": true,
+        "jobMatches": true,
+        "tlsVerified": true
+      },
+      "stream": {
+        "httpStatus": 200,
+        "errorCodes": [],
+        "executionStates": [],
+        "hasSuccessfulFinish": true,
+        "hasDone": true
+      },
+      "runtime": {
+        "snapshotAt": 1789533370829,
+        "metrics": {
+          "totalJobsSubmitted": 1,
+          "totalJobsCompleted": 1,
+          "totalJobsFailed": 0,
+          "totalTokensEmitted": 3,
+          "totalUpstreamRetries": 0,
+          "totalShardCooldownEjections": 0,
+          "totalAuthFailures": 0
+        },
+        "accounts": [
+          {
+            "status": "active",
+            "failures": 0,
+            "quotaFailures": 0,
+            "cooldownUntilMs": 0
+          }
+        ]
+      }
+    },
+    {
+      "pool": "standard",
+      "at": "2026-09-16T04:35:36.773Z",
+      "before": {
+        "at": "2026-09-16T04:35:36.740Z",
+        "executionAllowed": true,
+        "automaticActivation": true,
+        "heartbeatAgeMs": 2074,
+        "accounts": [
+          {
+            "id": "codex_sh_834707761bf76510dd70d6a7",
+            "state": "enabled",
+            "connectionState": "connected",
+            "revision": 2,
+            "acknowledgedRevision": 2,
+            "epochMatches": true
+          }
+        ]
+      },
+      "readiness": 200,
+      "model": "gpt-5.6-luna",
+      "status": "completed",
+      "jobId": "job_mu3lxzyb_3e956701",
+      "admissionStatus": 202,
+      "admissionMs": 278,
+      "jobStatus": "completed",
+      "completionMs": 2391,
+      "receipt": {
+        "httpStatus": 200,
+        "status": "completed",
+        "outputMatches": true,
+        "outputBytes": 8,
+        "usage": {
+          "prompt_tokens": 22,
+          "completion_tokens": 7,
+          "total_tokens": 29
+        }
+      },
+      "wrongTenantStatus": 404,
+      "unauthenticatedStatus": 401,
+      "after": {
+        "at": "2026-09-16T04:35:39.599Z",
+        "executionAllowed": true,
+        "automaticActivation": true,
+        "heartbeatAgeMs": 4933,
+        "accounts": [
+          {
+            "id": "codex_sh_834707761bf76510dd70d6a7",
+            "state": "enabled",
+            "connectionState": "connected",
+            "revision": 2,
+            "acknowledgedRevision": 2,
+            "epochMatches": true
+          }
+        ]
+      },
+      "execution": {
+        "state": "completed",
+        "success": true,
+        "actualTokens": 29,
+        "settled": true,
+        "accountMatches": true,
+        "hasLease": true,
+        "jobMatches": true,
+        "tlsVerified": true
+      },
+      "stream": {
+        "httpStatus": 200,
+        "errorCodes": [],
+        "executionStates": [],
+        "hasSuccessfulFinish": true,
+        "hasDone": true
+      },
+      "runtime": {
+        "snapshotAt": 1789533373556,
+        "metrics": {
+          "totalJobsSubmitted": 1,
+          "totalJobsCompleted": 1,
+          "totalJobsFailed": 0,
+          "totalTokensEmitted": 3,
+          "totalUpstreamRetries": 0,
+          "totalShardCooldownEjections": 0,
+          "totalAuthFailures": 0
+        },
+        "accounts": [
+          {
+            "status": "active",
+            "failures": 0,
+            "quotaFailures": 0,
+            "cooldownUntilMs": 0
+          }
+        ]
+      }
+    }
+  ],
+  "validation": {
+    "relay_regressions": 70,
+    "receipt_boundary_authorization_tests": 17,
+    "typescript": "passed",
+    "production_build": "passed; 272 pages",
+    "installed_local_checks": 69,
+    "image_checks": 55,
+    "images_verified": 5,
+    "compiled_boundary": {
+      "at": "2026-09-16T04:36:42.304539+00:00",
+      "compiledBoundaryErrors": [],
+      "renderedAndBrowserAssets": 894,
+      "privateMarkerHits": [],
+      "markersChecked": [
+        "relay_upstream_rejected",
+        "unsupported_parameter",
+        "codex_sh_2c5baf5f09e78318d9ad06f2",
+        "codex_sh_834707761bf76510dd70d6a7",
+        "INC-20260916-SHAREDQUOTA",
+        "GALX_CENTRAL_RUNTIME_TOKEN",
+        "private.galx_account_execution_leases"
+      ],
+      "scope": "Local production browser JS, rendered HTML/RSC and runtime traces; not a live public site scan."
+    }
+  },
+  "source_sha256": {
+    "src/relay/pool-runtime.ts": "1857ada3f21d80a338e0c8d8a5092c0972933cbb67959364b69c29a6e64ae5f4",
+    "src/relay/relay-server.ts": "05d799d27fed0e1495acc586eadcdd6e72246926c8bf9ec403b778299de7b0c6",
+    "src/relay/output-budget.ts": "7cf08edbefa50f071534bda73c84f1b6fa8bc96025858fb66a4163dc3d84cbad",
+    "src/relay/upstream-diagnostic.ts": "a522c5c068a18846566ae94e2cc5d73df44a706aa2b4bb030c9b9452426e022d",
+    "scripts/test-standard-pool.ts": "89ed4c81c31f754f9cdfc348ec5b9f881d7d82f5cbf21f92a008cfa816aef555",
+    "scripts/test-relay-completion-usage.ts": "ae1c4baf81de654ffcdbf595dd217a9f768586217c1c1ebd8ba69e0aeb2b3cba",
+    "docker/relay-pools/local/images.json": "372027e20ea0b28824160215dd5897c98d0bc969ea54182a78bab050a3e9ee7d"
+  },
+  "limitations": [
+    "One successful short text request per account/model is not sustained load, every model, Sites, image or real function-calling qualification.",
+    "The local output budget is conservative and can stop earlier than a tokenizer; it cannot cap unreported provider reasoning or guarantee total remote spending.",
+    "Actual terminal usage is authoritative; unknown outcomes retain unknown usage and are never treated as zero-cost.",
+    "Original failed jobs remain retained and were not replayed; replacement epochs retain the existing old-job retrieval limitations.",
+    "ACT-025 remains open for caller/SDK distribution and owner-scoped durable checkpoint/continuation acceptance."
+  ]
+}

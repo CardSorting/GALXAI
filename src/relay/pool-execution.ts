@@ -4,6 +4,7 @@ import { randomUUID } from 'node:crypto';
 import { CentralClient, hash, requestWorkload, type PoolId, type Workload } from './pool-protocol.js';
 import { RequestError } from './request-policy.js';
 import { cooldownDeadline } from './quota-policy.js';
+import { performance } from 'node:perf_hooks';
 
 export interface ExecutionGrant {
   signal: AbortSignal;
@@ -38,28 +39,65 @@ export class PostgresExecutionStore implements ExecutionStore {
 export class PoolExecution {
   private grants = new Set<ExecutionGrant>();
   private finishes = new Map<string, Record<string, unknown>>();
-  private readonly activeAccounts = new Set<string>();
+  private readonly activeAccounts = new Map<string, number>();
   private readonly admissionDenials = new Map<string, { failures: number; until: number }>();
-  constructor(readonly central: CentralClient, readonly store: ExecutionStore, readonly epoch = randomUUID()) {}
-  async settlePending() {
+  private flushing?: Promise<void>;
+  private settling?: Promise<void>;
+  private settlementRetryAt = 0;
+  private settlementFailures = 0;
+  private readonly unboundLeases = new Map<string, Record<string, unknown>>();
+  constructor(readonly central: CentralClient, readonly store: ExecutionStore, readonly epoch = randomUUID(),
+    private readonly clock = { now: () => performance.now(), random: () => Math.random() }) {}
+  private async flushFinishes(): Promise<void> {
+    const flush = async () => {
     // A database outage at completion retains the terminal intent for this process.
     // A crash is recovered as unknown from the previously persisted reservation.
     for (const [key, body] of this.finishes) {
       await this.store.call('finish',body);
-      this.finishes.delete(key);
+      if (this.finishes.get(key) === body) this.finishes.delete(key);
+    }
+    };
+    while (this.finishes.size) {
+      if (!this.flushing) this.flushing = flush().finally(() => { this.flushing = undefined; });
+      await this.flushing;
+      // Include completions added while the previous pass was finishing its final await.
+    }
+  }
+  settlePending(): Promise<void> {
+    if (this.settling) return this.settling;
+    this.settling = this.settleBatch().finally(() => { this.settling = undefined; });
+    return this.settling;
+  }
+  private async settleBatch() {
+    await this.flushFinishes();
+    if (this.clock.now() < this.settlementRetryAt) return;
+    // Completion bursts share one bounded sweep. A stalled settlement cannot fan out.
+    this.settlementRetryAt = this.clock.now() + 1000;
+    try {
+    let remaining = 8;
+    for (const [leaseId,body] of this.unboundLeases) {
+      if (!remaining--) break;
+      const result = await this.central.call('/runtime/settle',body);
+      if (result.success !== true) throw Error('Settlement unconfirmed.');
+      this.unboundLeases.delete(leaseId);
     }
     const pending: ExecutionRecord[] = await this.store.call('pending');
-    for (const row of pending) {
-      if (!row.leaseId) continue;
-      try {
+    for (const row of pending.filter(row => row.leaseId).slice(0,Math.max(0,remaining))) {
         const result = await this.central.call('/runtime/settle',{epoch:row.epoch,leaseId:row.leaseId,success:row.success === true,actualTokens:row.actualTokens ?? null});
-        if (result.success === true) await this.store.call('settled',{requestKey:row.requestKey,leaseId:row.leaseId});
-      } catch { /* Preserve the original receipt and retry settlement, never execution. */ }
+        if (result.success !== true) throw Error('Settlement unconfirmed.');
+        await this.store.call('settled',{requestKey:row.requestKey,leaseId:row.leaseId});
+    }
+    this.settlementFailures = 0;
+    } catch {
+      this.settlementFailures = Math.min(10,this.settlementFailures + 1);
+      this.settlementRetryAt = this.clock.now() + Math.min(60000,1000 * 2 ** (this.settlementFailures - 1)) + this.clock.random() * 1000;
+      // Preserve original receipts. A dependency failure ends the batch, never retries execution.
     }
   }
   stop() { for (const grant of this.grants) void grant.complete(false).catch(()=>{}); }
   standardAvailable(accountId: string, now = Date.now()) {
-    return !this.activeAccounts.has(accountId) && (this.admissionDenials.get(accountId)?.until ?? 0) <= now;
+    return (this.activeAccounts.get(accountId) ?? 0) < (this.central.identity.pool === 'standard' ? 1 : 4)
+      && (this.admissionDenials.get(accountId)?.until ?? 0) <= now;
   }
   standardRecovering(accountId: string) { return this.admissionDenials.has(accountId); }
   reconcileAccounts(ids: ReadonlySet<string>) {
@@ -67,16 +105,20 @@ export class PoolExecution {
   }
   policy(account: AssignedAccount): ExecutionPolicy {
     return {pool:this.central.identity.pool,admit:async(req,body,tenant,executionId)=>{
-      const standard = this.central.identity.pool === 'standard';
-      if (standard && !this.standardAvailable(account.id)) throw new RequestError(503,'service_unavailable','This service is temporarily unavailable.');
-      if (standard) this.activeAccounts.add(account.id);
-      const release = () => { if (standard) this.activeAccounts.delete(account.id); };
+      if (!this.standardAvailable(account.id)) throw new RequestError(503,'service_unavailable','This service is temporarily unavailable.');
+      this.activeAccounts.set(account.id, (this.activeAccounts.get(account.id) ?? 0) + 1);
+      let released = false;
+      const release = () => {
+        if (released) return; released = true;
+        const remaining = (this.activeAccounts.get(account.id) ?? 1) - 1;
+        if (remaining) this.activeAccounts.set(account.id, remaining); else this.activeAccounts.delete(account.id);
+      };
       try { return await this.admit(account,req,body,tenant,executionId,release); }
       catch (error) { release(); throw error; }
     }};
   }
   private async admit(account: AssignedAccount, req: IncomingMessage, body: Record<string, any>, tenant: string, executionId: string, release: () => void): Promise<ExecutionGrant> {
-    if (this.finishes.size) throw new RequestError(503,'service_unavailable','This service is temporarily unavailable.');
+    if (this.finishes.size || this.unboundLeases.size) throw new RequestError(503,'service_unavailable','This service is temporarily unavailable.');
     const workload = requestWorkload(this.central.identity.pool,req.url ?? '',body);
     const key = req.headers['idempotency-key'];
     if (typeof key !== 'string' || !/^[\x21-\x7e]{1,128}$/.test(key)) throw new RequestError(400,'request_key_required','Supply an Idempotency-Key for this request.');
@@ -86,21 +128,24 @@ export class PoolExecution {
     if (reserved.executionId !== executionId || reserved.state !== 'reserved') throw new RequestError(409,'request_already_recorded','This request has already been recorded. Check its existing result.');
     const common = {epoch:this.epoch,accountId:account.id,revision:account.revision,credentialRevision:account.credentialRevision};
     let authorization: any;
+    const previousDenial = this.admissionDenials.get(account.id);
     try {
       authorization = await this.central.call('/runtime/acquire',{...common,workload,requestKey,requestSha256,tenantSha256,
-        estimatedTokens:Math.min(1_000_000,Math.max(2000,Math.ceil(Buffer.byteLength(JSON.stringify(body))/3)+(Number.isSafeInteger(body.max_tokens)?body.max_tokens:3500)))});
-      if (authorization.denied === true && this.central.identity.pool === 'standard') {
+        estimatedTokens:Math.min(1_000_000,Math.max(2000,Buffer.byteLength(JSON.stringify(body))+1024+(Number.isSafeInteger(body.max_tokens)?body.max_tokens:4096)))});
+      if (authorization.denied === true) {
         const failures = (this.admissionDenials.get(account.id)?.failures ?? 0) + 1;
         this.admissionDenials.set(account.id,{failures,until:cooldownDeadline(failures,Date.now())});
       }
       if (authorization.denied || typeof authorization.leaseId !== 'string') throw Error('Admission unavailable.');
       // Bind before any upstream I/O. A crash between acquisition and binding leaves a reserved identity, never permission to repeat.
       await this.store.call('bind',{requestKey,executionId,leaseId:authorization.leaseId});
-      this.admissionDenials.delete(account.id);
+      // A success started before a concurrent denial cannot clear that newer evidence.
+      if (this.admissionDenials.get(account.id) === previousDenial) this.admissionDenials.delete(account.id);
     } catch {
       this.finishes.set(requestKey,{requestKey,executionId,success:false});
       // Acquisition may have succeeded before the execution database became unavailable.
-      if (authorization?.leaseId) await this.central.call('/runtime/settle',{epoch:this.epoch,leaseId:authorization.leaseId,success:false,actualTokens:null}).catch(()=>{});
+      // If binding failed, retain the exact acquired lease for the shared paced settlement path.
+      if (authorization?.leaseId) this.unboundLeases.set(authorization.leaseId, { epoch:this.epoch,leaseId:authorization.leaseId,success:false,actualTokens:null });
       await this.settlePending().catch(()=>{});
       throw new RequestError(503,'service_unavailable','This request could not be authorized. Check its status before retrying.');
     }
@@ -116,7 +161,9 @@ export class PoolExecution {
       complete:async(success,actualTokens)=>{
         if (done) return; done=true; clearTimeout(deadline); clearTimeout(renewal); this.grants.delete(grant); abort.abort();
         this.finishes.set(requestKey,{requestKey,executionId,success,...(actualTokens !== undefined ? {actualTokens}: {})});
-        try { await this.settlePending(); } finally { release(); }
+        try { await this.flushFinishes(); } finally { release(); }
+        // Remote settlement is recoverable maintenance, not a dependency of delivering a completed result.
+        void this.settlePending().catch(()=>{});
       },
     };
     try { update(authorization); } catch { await grant.complete(false); throw new RequestError(503,'service_unavailable','This request could not be authorized.'); }

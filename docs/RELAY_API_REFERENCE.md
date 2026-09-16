@@ -18,7 +18,7 @@ The new runtime is a fixed Premium or Standard service, with its own inference k
 | `GET /v1/images/availability` | Own inference key; advisory boolean, no probe; Standard reports unavailable |
 | `GET /v1/jobs/:id`, `/stream`, `/receipt` | Original tenant, account and epoch; no worker/pool migration |
 | `POST /v1/jobs/:id/cancel` | Original request context; does not establish refund or final settlement |
-| `GET /api/sites/contract` | Premium's distinct private capability key; challenged profile readiness, no generation |
+| `GET /api/sites/contract` | Premium's distinct private capability key; challenged local-profile readiness, strict provider-ceiling profile unavailable; no generation |
 
 The new runtime does not expose the legacy controller's `/api/capabilities`, `/api/telemetry` or `/federation` interface. Exact route and payload authority is [pool-runtime.ts](../src/relay/pool-runtime.ts).
 
@@ -36,7 +36,7 @@ Premium and Standard have separate loopback monitor origins and purpose-specific
 | `POST /api/registrations/prepare` | Operator; exact `id`, `desktopId`, `name`; save central intent before creating own desktop |
 | `POST /api/registrations/manage` | Operator; exact `id`, `registrationId`, `expectedRevision`, `command`, optional `name` |
 | `POST /api/accounts/action` | Operator; exact `id`, `accountId`, `expectedRevision`, `command`, optional `name` |
-| `POST /api/registrations/signin`, `/desktop`, `/review`, `/register`, `/refresh`, `/start`, `/stop` | Operator; only saved registration `id`; centrally resolve owning desktop |
+| `POST /api/registrations/signin`, `/desktop`, `/connect`, `/review`, `/register`, `/refresh`, `/start`, `/stop` | Operator; only saved registration `id`; centrally resolve owning desktop |
 | `GET /desktops` | Private manual sign-in page |
 | `/api/desktops/access`, `/session`, `/state` | Additional desktop-session exchange and bounded status |
 | `POST /api/desktops/:id/launch`, `/clipboard`, `/signin`, `/signin-cancel`, `/start`, `/stop` | Allowlisted desktop actions on a centrally scoped registration; removed records allow stop only |
@@ -46,21 +46,23 @@ The generic desktop create/delete/link/enroll/credential-sync/organization route
 
 ## Manual credential authority
 
-The monitor's operator route never accepts browser-supplied provider tokens. It reads the saved login only from the resolved owning desktop and hands a bounded candidate to the central registrar with a short-lived purpose ticket. Central validates identity, expiry, inventory and paid/free class. Register saves enrollment and assignment atomically, paused. Refresh requires the same assigned account/desktop and current revision. Removed or revoked authority cannot be bypassed by ticket replay or the legacy writer.
+The monitor's operator route never accepts browser-supplied provider tokens. It reads the saved login only from the resolved owning desktop and hands a bounded candidate to the central registrar with a short-lived purpose ticket. Central validates identity, expiry, inventory and paid/free class. Connect reviews access and saves enrollment/assignment atomically; a verified automatic-activation policy enables a new connection, while a deliberate installation hold leaves it paused. Reconnect and exact replay preserve existing paused intent. The separate review/register endpoints remain compatibility contracts. Refresh requires the same assigned account/desktop and current revision. Removed or revoked authority cannot be bypassed by ticket replay or the legacy writer.
 
-Central server routes use separate scoped principals: `/operator/status`, `/operation`, `/prepare`, `/manage_registration`, `/ticket`, `/set_account`; registrar `/review`, `/register`, `/refresh`; runtime `/claim`, `/heartbeat`, `/projection`, `/acknowledge`, `/acquire`, `/renew`, `/settle`. Viewer principals can read status/operation but cannot mutate. A runtime cannot perform registrar/operator actions. Every scope assertion is checked against authenticated principal identity. See [pool-central.ts](../src/relay/pool-central.ts) and [the schema contract](reference/relay-account-management.md#durable-schema).
+Central server routes use separate scoped principals: `/operator/status`, `/operation`, `/prepare`, `/manage_registration`, `/ticket`, `/set_account`; registrar `/connect`, `/review`, `/register`, `/refresh`; runtime `/claim`, `/heartbeat`, `/projection`, `/credential_failed`, `/acknowledge`, `/acquire`, `/renew`, `/settle`. Viewer principals can read status/operation but cannot mutate. A runtime cannot perform registrar/operator actions. Every scope assertion is checked against authenticated principal identity. See [pool-central.ts](../src/relay/pool-central.ts) and [the schema contract](reference/relay-account-management.md#durable-schema).
 
 External provider ingestion routes remain closed under [the authentication boundary](STANDARDIZED_OAUTH_AND_INGESTION_ARCHITECTURE.md). GALX customer login/session refresh is a separate feature.
 
 ## Workspace organization
 
-Pool monitors organize accounts and registrations with search/status/health filters and retained Removed views. They do not implement legacy custom tabs, drag/drop groups or editable pool selection. Rename affects labels only. Account removal revokes permanently; unfinished registration restoration requires a new review. The [management contract](reference/relay-account-management.md#account-and-registration-management) defines revision/idempotency rules and desktop cleanup.
+Pool monitors organize accounts and registrations with search/status/health filters and retained Removed views. They do not implement legacy custom tabs, drag/drop groups or editable pool selection. Rename affects labels only. Account removal revokes permanently; unfinished registration restoration requires a new Connect check. The [management contract](reference/relay-account-management.md#account-and-registration-management) defines revision/idempotency rules and desktop cleanup.
 
 ## Request identity and bounds
 
 New runtime generation requires a printable 1–128-character `Idempotency-Key`, verified delegated tenant and bounded JSON body. The front door caps generation input at 1 MiB with a ten-second body read; engine/profile limits also apply. Request fingerprint, tenant, workload, account and epoch are bound to durable execution identity. No upstream automatic retry runs.
 
 An existing matching text operation may return its original job in the current epoch while its account engine exists. Image replay, epoch replacement or unavailable original context returns `result_unconfirmed`; it does not generate again. A changed payload under the same key conflicts. Internal jobs and streams are rebuilt into allowlisted public shapes, without upstream headers or operational objects.
+
+Ordinary isolated text also limits message/tool input to 262,144 bytes. `max_tokens` accepts 1–16,384, defaulting to 4,096, as a conservative local observed-output budget: one UTF-8 byte consumes one unit across text, observed reasoning and function arguments/envelopes. Overflow stops work without a successful terminal frame, retry or invented usage. The assigned transport omits its unsupported provider token-ceiling parameter; local units do not bound hidden provider reasoning or guarantee remote token spending. Explicit `require_output_limit: true` requests fail before new reservation. See [shared quota recovery](reference/shared-quota-recovery.md#bound-the-cost-of-resuming) for the complete limits. Input/range bounds apply before a new reservation; original accepted identities remain retained.
 
 The old controller's `X-Galx-Idempotency-Scope`, signed URLs and ten-minute process-local response cache belong to [legacy request identity](reference/legacy-federation-api.md#request-identity-and-bounds). They are not an additional promise made by the new runtime.
 
@@ -76,13 +78,15 @@ Both relays accept client-owned OpenAI-style function definitions and `tool_choi
 | `409 request_in_progress` | Same runtime admission is in progress | Inspect the original operation; no new key to bypass it |
 | `409 idempotency_conflict` | Key has a different saved payload | Reconcile original intent |
 | `409 result_unconfirmed` | Original image/result/epoch/account context unavailable | Preserve uncertainty; never redispatch to another pool |
-| `403 capability_unavailable` | Workload is prohibited at this destination | Correct the deployment/request policy; no peer fallback |
-| `503 service_busy`, `Retry-After: 5` | Standard found no eligible idle account or its recovery-start budget is waiting, before any engine attempt | Wait before resubmitting the same intent/key; the hint is not a provider reset promise |
+| `400/403 capability_unavailable` | Requested capability is unavailable or prohibited at this destination | Correct the deployment/request policy; no peer fallback |
+| `503 service_busy`, `Retry-After: 5` | No eligible account slot, paced recovery, or a full request allowance before an engine attempt | Follow `execution_state`: wait on a proven non-start, inspect the original outcome when unknown; the hint is not a provider reset promise |
 | `503 service_unavailable` / `request_unavailable` | Readiness, authorization, admission or original context unavailable | Inspect the owning dependency and retained operation before retry |
 | `409 record_changed` on management | Displayed account/registration revision is stale | Keep draft, close dialog, refresh and review before explicit retry |
 | Saved removal with `desktopStopped:false` | Central removal committed; local cleanup failed | Registration → Removed → Stop desktop |
 
-Central grants expire independently if renewal fails. Terminal persistence and original lease settlement can retry; execution cannot. Old incomplete records recover as unknown. Stored state alone does not guarantee retained artifact retrieval after epoch replacement. Product receipt recovery and legacy signed-job recovery remain separate contracts.
+Confirmed pre-forward rejections carry `execution_state: not_accepted`; explicit quota-stopped ordinary text streams carry `failed`. Unknown outcomes carry `unknown`, while existing accepted-work readers retain their separate contract. These allowlisted states never reveal provider diagnostics. SDK continuation is explicit and retains original turn budgets and completed tools; see [shared quota recovery](reference/shared-quota-recovery.md). SSE success now carries a terminal `stop` or `tool_calls` frame before DONE, independently of usage availability.
+
+Central grants expire independently if renewal fails. Terminal persistence and original lease settlement can retry; execution cannot. Terminal writes are serialized, and remote settlements share one bounded pass with backoff; a successfully persisted completion releases local capacity without waiting for remote settlement. Stream delivery itself does not prove either persistence or settlement; terminal-write failure blocks new admission. Per-owner request admission keeps distinct submission, observation and subscription budgets. A rejection before original-key lookup stays unknown. The [dependency contract](reference/shared-quota-recovery.md#keep-recovery-dependencies-bounded) owns bounds and limitations. Old incomplete records recover as unknown. Stored state alone does not guarantee retained artifact retrieval after epoch replacement. Product receipt recovery and legacy signed-job recovery remain separate contracts.
 
 ## Durable Sites text contract
 

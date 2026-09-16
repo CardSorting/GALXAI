@@ -1,6 +1,19 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { accountHealth, registrationHealth, filterRegistrations, accountApplied, filterAccounts, needsSignIn, registrationStep, relayFresh } from '../src/relay/pool-monitor-model.js';
+import { accountHealth, registrationHealth, filterRegistrations, accountApplied, filterAccounts, needsSignIn, registrationStep, relayFresh, executionStatus } from '../src/relay/pool-monitor-model.js';
+
+test('automatic activation explains readiness without overriding intentional pauses', () => {
+ const now=Date.now(), a={state:'enabled',credentialExpiresAt:now+60000};
+ const s={automaticActivation:true,executionAllowed:false,accounts:[],lastSeenAt:new Date(now).toISOString()};
+ assert.equal(executionStatus(s,now).label,'Waiting for account');
+ s.accounts=[a];assert.equal(executionStatus(s,now).label,'Activating');
+ assert.equal(executionStatus({...s,lastSeenAt:new Date(now-60000).toISOString()},now).label,'Waiting for relay');
+ assert.equal(executionStatus({...s,accounts:[{...a,state:'paused'}]},now).label,'Accounts paused');
+ assert.equal(executionStatus({...s,accounts:[{...a,connectionState:'sign_in_required'}]},now).label,'Reconnect required');
+ assert.equal(executionStatus({...s,accounts:[{...a,state:'revoked'}]},now).label,'Waiting for account');
+ assert.equal(executionStatus({...s,automaticActivation:false},now).label,'Paused');
+ assert.equal(executionStatus({...s,executionAllowed:true},now).label,'Allowed');
+});
 
 test('confirmation needs a fresh non-future heartbeat and matching revision and epoch', () => {
   const now = Date.now(), state = { lastSeenAt: new Date(now - 1000).toISOString(), epoch: 'current' };
@@ -30,8 +43,8 @@ test('account filters combine name and state, keeping revoked accounts out of si
 test('desktop login completion does not imply reviewed or registered central access', () => {
   assert.equal(registrationStep({ state: 'prepared' }, { login: { state: 'waiting' } }), 1);
   assert.equal(registrationStep({ state: 'prepared' }, { login: { state: 'saved' } }), 2);
-  assert.equal(registrationStep({ state: 'reviewed' }, { login: { state: 'saved' } }), 3);
-  assert.equal(registrationStep({ state: 'registered' }, undefined), 4);
+  assert.equal(registrationStep({ state: 'reviewed' }, { login: { state: 'saved' } }), 2);
+  assert.equal(registrationStep({ state: 'registered' }, undefined), 3);
 });
 
 
@@ -66,4 +79,12 @@ test('a stopped desktop is normal for a registered account with current access',
   assert.equal(registrationHealth({accountId:'a',desktopId:'desk',state:'registered'},state,true,now).code,'ok');
   assert.equal(registrationHealth({desktopId:'desk',state:'prepared'},state,true,now).code,'desktop');
   assert.equal(filterRegistrations([{name:'Draft',desktopId:'desk',state:'prepared'}],'draft','attention',state,true,now).length,1);
+});
+
+test('rejected credentials require reconnect even before expiry and keep the saved account state', () => {
+  const now=Date.now(),account={name:'Studio',state:'enabled',connectionState:'sign_in_required',credentialExpiresAt:now+3600000};
+  assert.equal(needsSignIn(account,now),true);
+  assert.equal(accountHealth(account,{lastSeenAt:new Date(now).toISOString()},true,now).code,'signin');
+  assert.deepEqual(filterAccounts([account],'','attention',now),[account]);
+  assert.equal(account.state,'enabled');
 });

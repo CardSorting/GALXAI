@@ -49,7 +49,7 @@ async function main(): Promise<void> {
       `SELECT id, user_id, provider::text, encrypted_ciphertext,
               encrypted_iv, encrypted_tag, key_version
        FROM public.galx_shard_accounts
-       WHERE key_version = $1
+       WHERE credential_retired_at IS NULL AND key_version = $1
        ORDER BY id
        FOR UPDATE`,
       [fromVersion]
@@ -96,11 +96,11 @@ async function main(): Promise<void> {
     }
 
     const remaining = await client.query<{ count: string }>(
-      'SELECT COUNT(*)::text AS count FROM public.galx_shard_accounts WHERE key_version = $1',
+      'SELECT COUNT(*)::text AS count FROM public.galx_shard_accounts WHERE credential_retired_at IS NULL AND key_version = $1',
       [fromVersion]
     );
     const target = await client.query<{ count: string }>(
-      'SELECT COUNT(*)::text AS count FROM public.galx_shard_accounts WHERE key_version = $1',
+      'SELECT COUNT(*)::text AS count FROM public.galx_shard_accounts WHERE credential_retired_at IS NULL AND key_version = $1',
       [toVersion]
     );
 

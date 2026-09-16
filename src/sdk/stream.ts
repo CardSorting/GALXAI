@@ -9,6 +9,7 @@ import type {
   ChatCompletionResponse,
   ChatMessage
 } from '../core/contracts/GalxContracts';
+import { APIError } from './errors';
 
 type StreamEventListener<T = any> = (data: T) => void;
 type ContentEventListener = (delta: string, snapshot: string) => void;
@@ -52,6 +53,8 @@ export class ChatCompletionStream implements AsyncIterable<ChatCompletionChunk>,
   private isConsumed = false;
   private isDone = false;
   private consumptionPromise?: Promise<ChatCompletionResponse>;
+  private completionObserved = false;
+  private failure?: Error;
 
   constructor(sourceStream: AsyncIterable<ChatCompletionChunk>, abortController?: AbortController) {
     this.sourceStream = sourceStream;
@@ -135,6 +138,9 @@ export class ChatCompletionStream implements AsyncIterable<ChatCompletionChunk>,
   }
 
   private ensureConsuming(): Promise<ChatCompletionResponse> {
+    if (this.failure) return Promise.reject(this.failure);
+    if (this.isDone) return Promise.resolve(this.buildFinalResponse());
+    if (this.isConsumed && !this.consumptionPromise) return Promise.reject(new APIError('The response stream is incomplete.',502,'incomplete_stream'));
     if (!this.consumptionPromise) {
       this.consumptionPromise = this.consumeAll();
     }
@@ -142,15 +148,18 @@ export class ChatCompletionStream implements AsyncIterable<ChatCompletionChunk>,
   }
 
   private async consumeAll(): Promise<ChatCompletionResponse> {
+    this.isConsumed = true;
     try {
       for await (const chunk of this.sourceStream) {
         this.processChunk(chunk);
       }
+      this.assertCompletion();
       this.endTimeMs = Date.now();
       this.isDone = true;
       this.listeners.end.forEach(fn => fn());
       return this.buildFinalResponse();
     } catch (err: any) {
+      this.failure = err;
       this.endTimeMs = Date.now();
       this.listeners.error.forEach(fn => fn(err));
       throw err;
@@ -158,6 +167,8 @@ export class ChatCompletionStream implements AsyncIterable<ChatCompletionChunk>,
   }
 
   private processChunk(chunk: ChatCompletionChunk): void {
+    if ((chunk as any).error) throw APIError.fromResponse(503,chunk);
+    if (['stop','length','content_filter','tool_calls'].includes(chunk.choices?.[0]?.finish_reason ?? '')) this.completionObserved = true;
     this.chunks.push(chunk);
     this.listeners.chunk.forEach(fn => fn(chunk));
 
@@ -235,7 +246,9 @@ export class ChatCompletionStream implements AsyncIterable<ChatCompletionChunk>,
    * Async iterator support for `for await (const chunk of stream)`.
    */
   public async *[Symbol.asyncIterator](): AsyncIterator<ChatCompletionChunk> {
+    if (this.failure) throw this.failure;
     if (this.isConsumed) {
+      if (!this.isDone) throw new APIError('The response stream is already being consumed or was interrupted.',409,'incomplete_stream');
       for (const chunk of this.chunks) {
         yield chunk;
       }
@@ -248,12 +261,18 @@ export class ChatCompletionStream implements AsyncIterable<ChatCompletionChunk>,
         this.processChunk(chunk);
         yield chunk;
       }
+      this.assertCompletion();
       this.isDone = true;
       this.listeners.end.forEach(fn => fn());
     } catch (err: any) {
+      this.failure = err;
       this.listeners.error.forEach(fn => fn(err));
       throw err;
     }
+  }
+
+  private assertCompletion() {
+    if (!this.completionObserved) throw new APIError('The response stream ended before completion. Check its status before continuing.',502,'incomplete_stream');
   }
 
   /**

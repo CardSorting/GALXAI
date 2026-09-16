@@ -1,0 +1,224 @@
+{
+  "at": "2026-09-16T03:42:43.586105+00:00",
+  "classification": "private",
+  "incident": "INC-20260916-SHAREDQUOTA",
+  "source": {
+    "baseCommit": "b8eb43f97f79707c36b29106cfe206cf41889047",
+    "scope": "Uncommitted second-pass changes on top of the separately retained registration and first quota pass; no commit or push",
+    "sha256": {
+      "src/relay/pool-execution.ts": "8fb09f6b7eded1173e24c7855a402e2a937f34c4ce1605fa1b44c5191c9f454f",
+      "src/relay/pool-runtime.ts": "a1656e2d0ac847078e21a1c3ee0795374a3a4e4cfafa5435364bb6f90c751b5f",
+      "src/relay/relay-server.ts": "63d91c2dcad34f3579387e05496c433f9fc578b08c9ded4ac2075f556d9ee848",
+      "src/relay/request-bulkhead.ts": "188b195b83197257dbf1448c56b9cb0a5aadd214607db322bc39a5b793464763",
+      "src/sdk/agent.ts": "9739ff70663393815e20fea82f880c19879f4f2c72086b757220acbe0b57ee83",
+      "scripts/test-agent-continuation.ts": "434cf01d11fb79c9bb6310a6406521b75301401289102fd81b0d202019670c43",
+      "scripts/test-relay-services.ts": "5283d6d47718dc71d1a214ec8b639cd6ebaa1bd76dfc7ebbe836ecd592ff8959",
+      "scripts/test-standard-pool.ts": "cd22a3b2b4096e9b5a9eb8bd060690de6ef0c904c340eb4bdeb690290642ed72",
+      "scripts/test-relay-overload.ts": "9ce619054d355e804ed2635f65a5d18a62383fb1878e1c6822aa2483ca85ae29",
+      "package.json": "72098b5181f51a8836d2ef53445187702a9e458f883933565a1688937ae751a3"
+    }
+  },
+  "checks": [
+    {
+      "command": "npm run test:relay:services",
+      "passed": 60,
+      "scope": "Synthetic HTTP/WebSocket fixtures plus deterministic settlement and admission isolation faults"
+    },
+    {
+      "command": "npm run test:agent:tools",
+      "passed": 25,
+      "scope": "Bounded callbacks, retained wait deadlines, early-click suppression, checkpoint fences and session isolation"
+    },
+    {
+      "command": "node --import tsx --test scripts/test-relay-chat-transport.ts scripts/test-client-recovery.ts scripts/test-relay-adaptive-quota.ts scripts/test-relay-client-auth.ts scripts/test-public-information-boundary.ts scripts/test-shard-authority-boundary.ts scripts/test-relay-completion-usage.ts",
+      "passed": 44
+    },
+    {
+      "command": "npm run test:image:security",
+      "passed": 42,
+      "scope": "Raw HTTP, artifact sanitation and owner/authorization boundaries"
+    },
+    {
+      "command": "npx tsc --noEmit --pretty false",
+      "result": "passed after final build"
+    },
+    {
+      "command": "npm run build",
+      "result": "passed",
+      "renderedPages": 272
+    },
+    {
+      "command": "npm run test:docs",
+      "passed": 38
+    },
+    {
+      "command": "git diff --check",
+      "result": "passed"
+    }
+  ],
+  "buildScan": {
+    "at": "2026-09-16T03:39:46.873046+00:00",
+    "compiledBoundaryErrors": [],
+    "renderedAndBrowserAssets": 894,
+    "privateMarkerHits": [],
+    "markersChecked": [
+      "INC-20260916-SHAREDQUOTA",
+      "runtime_credential_failed",
+      "GALX_CENTRAL_RUNTIME_TOKEN",
+      "settlementRetryAt",
+      "RequestBulkhead",
+      "private.galx_account_execution_leases"
+    ],
+    "scope": "Local production JS, HTML/RSC and runtime traces; not a live site scan"
+  },
+  "installation": {
+    "at": "2026-09-16T03:38:59.277Z",
+    "before": [
+      {
+        "pool": "premium",
+        "executionAllowed": false,
+        "registrationAllowed": true,
+        "accounts": 1,
+        "paused": 1,
+        "applied": true
+      },
+      {
+        "pool": "standard",
+        "executionAllowed": false,
+        "registrationAllowed": true,
+        "accounts": 0,
+        "paused": 0,
+        "applied": true
+      }
+    ],
+    "after": [
+      {
+        "pool": "premium",
+        "executionAllowed": false,
+        "registrationAllowed": true,
+        "accounts": 1,
+        "paused": 1,
+        "applied": true
+      },
+      {
+        "pool": "standard",
+        "executionAllowed": false,
+        "registrationAllowed": true,
+        "accounts": 0,
+        "paused": 0,
+        "applied": true
+      }
+    ],
+    "images": [
+      {
+        "tag": "galxai-relay-premium:quota-20260916-r2",
+        "id": "sha256:19b8588bc2c0439c66fcb8cd65149ac8a6df2a3a6b12dac5ce29db214d876e4d",
+        "architecture": "arm64",
+        "component": "runtime",
+        "pool": "premium"
+      },
+      {
+        "tag": "galxai-relay-standard:quota-20260916-r2",
+        "id": "sha256:fd72bc488465e9f1b8d4938fa035aeed3f994c067e9e46a05d96011c46d3bc5a",
+        "architecture": "arm64",
+        "component": "runtime",
+        "pool": "standard"
+      }
+    ],
+    "centralAndMonitorsUnchanged": true,
+    "gatesChanged": false,
+    "providerCalls": 0
+  },
+  "imageVerification": {
+    "at": "2026-09-16T03:39:30.218Z",
+    "checks": 55,
+    "images": [
+      {
+        "tag": "galxai-relay-central:connections-20260916",
+        "id": "sha256:e7a4c80fa704d4abb7b423a48a66afad4d809c70dd5df3592eb772e823284bb3",
+        "architecture": "arm64",
+        "component": "central"
+      },
+      {
+        "tag": "galxai-relay-premium:quota-20260916-r2",
+        "id": "sha256:19b8588bc2c0439c66fcb8cd65149ac8a6df2a3a6b12dac5ce29db214d876e4d",
+        "architecture": "arm64",
+        "component": "runtime",
+        "pool": "premium"
+      },
+      {
+        "tag": "galxai-relay-standard:quota-20260916-r2",
+        "id": "sha256:fd72bc488465e9f1b8d4938fa035aeed3f994c067e9e46a05d96011c46d3bc5a",
+        "architecture": "arm64",
+        "component": "runtime",
+        "pool": "standard"
+      },
+      {
+        "tag": "galxai-monitor-premium:connections-20260916-r2",
+        "id": "sha256:084b947419c6a4611c6172a6ef3b5dc82f5a95f5aa34511e0c211531ec7de5c8",
+        "architecture": "arm64",
+        "component": "monitor",
+        "pool": "premium"
+      },
+      {
+        "tag": "galxai-monitor-standard:connections-20260916-r2",
+        "id": "sha256:896d483a1b98c1b9e2c148cf87d9f67c5f6ac9a57a6610ff2b143b15c206d263",
+        "architecture": "arm64",
+        "component": "monitor",
+        "pool": "standard"
+      }
+    ],
+    "scope": "native image packaging, dependency load, unsafe environment and cross-pool rejection, Compose configuration; no serving or host acceptance"
+  },
+  "installedAcceptance": {
+    "at": "2026-09-16T03:39:45.871Z",
+    "checks": 69,
+    "scope": "local VM separation on one trusted Mac; no provider generation or cloud deployment",
+    "pools": [
+      {
+        "pool": "premium",
+        "registrationAllowed": true,
+        "executionAllowed": false,
+        "accounts": 1
+      },
+      {
+        "pool": "standard",
+        "registrationAllowed": true,
+        "executionAllowed": false,
+        "accounts": 0
+      }
+    ]
+  },
+  "faultEvidence": [
+    "One hundred concurrent settlement requests share one stalled sweep; durable completion resolves before that remote dependency.",
+    "One failed settlement stops the batch; repeated triggers during backoff make no further dependency calls. Successful batches drain no more than eight retained leases.",
+    "An acquired-but-unbound lease retains its original identity and fences new admission until settled.",
+    "Sixteen same-owner stalled submissions admit eight lookups; excess calls are rejected, while another owner and original-owner recovery lookup retain separate admission.",
+    "A pre-exhaustion sibling success after the deadline does not reopen full capacity; a real post-cooldown probe does.",
+    "Transient failure cooldown survives restored engine state.",
+    "One hundred early Continue calls after restoration make no model request or step/reservation change; Retry-After remains a lower bound.",
+    "Two configured tool workers never exceed that count; failed persistence stops queued starts and retains both in-flight results."
+  ],
+  "correctedFixtureFailures": [
+    "Two JSON/SSE continuation integration tests initially resumed before the new retained deadline. They now assert the wait and advance only the synthetic clock before continuation; all 60 tests pass."
+  ],
+  "limits": [
+    "No real provider generation, induced real quota exhaustion, production traffic benchmark or public application cutover.",
+    "Runtime images are installed locally; SDK/client application publication and authenticated checkpoint-store integration remain separate.",
+    "Process-local request and per-batch tool limits do not provide distributed tenant fairness, RPS control or aggregate downstream concurrency guarantees.",
+    "Observation and submission allowances share the existing database pool; a database outage can deny both.",
+    "Caller-owned callbacks and persistence still require their own domain deadlines, access control and idempotency.",
+    "Unknown writes/side effects remain subject to reconciliation; no automatic replay or exactly-once guarantee.",
+    "Both execution gates remain closed. Premium retains one paused connected account; Standard has none.",
+    "No schema, permission, credential, account or quota-counter change in this pass. Existing schema contract inspected read-only; installed boundary checks retain that authority.",
+    "The local build scan checks selected markers and runtime traces, not all possible data disclosure or the live public site.",
+    "No new graphical chat UI, visual score or browser acceptance.",
+    "The engine initiates terminal persistence asynchronously from its lifecycle event. Completed stream delivery does not prove terminal-write or lease-settlement commit; failed writes continue to block new admission."
+  ],
+  "research": [
+    "https://sre.google/sre-book/handling-overload/",
+    "https://sre.google/sre-book/addressing-cascading-failures/",
+    "https://docs.github.com/en/rest/using-the-rest-api/best-practices-for-using-the-rest-api"
+  ],
+  "remainingAction": "ACT-025"
+}

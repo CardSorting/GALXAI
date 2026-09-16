@@ -3,14 +3,14 @@ import { createHash } from 'node:crypto';
 const tenantHeader=(tenant?:string):Record<string,string>=>tenant?{'x-galx-tenant':createHash('sha256').update(tenant).digest('hex')}:{};
 export interface RelayFailureDetails {
   status?: number; upstreamCode?: string; retryAfterMs?: number; shouldRetry?: boolean;
-  executionState?: 'unknown' | 'accepted' | 'not_accepted'; requestId?: string; idempotencyScope?: string;
+  executionState?: 'unknown' | 'accepted' | 'not_accepted' | 'failed'; requestId?: string; idempotencyScope?: string;
 }
 export class RelayDispatchError extends Error implements RelayFailureDetails {
   readonly status?: number; readonly upstreamCode?: string; readonly retryAfterMs?: number; readonly shouldRetry?: boolean;
-  readonly executionState?: 'unknown' | 'accepted' | 'not_accepted'; readonly requestId?: string; readonly idempotencyScope?: string;
+  readonly executionState?: 'unknown' | 'accepted' | 'not_accepted' | 'failed'; readonly requestId?: string; readonly idempotencyScope?: string;
   readonly code = 'relay_unavailable';
   constructor(readonly reason: string, details: RelayFailureDetails = {}) {
-    super(details.shouldRetry === false || details.executionState === 'unknown'
+    super(details.executionState === 'failed' ? 'The request stopped. Saved progress can be continued explicitly.' : details.shouldRetry === false || details.executionState === 'unknown'
       ? 'Execution may have started. Check the existing request before submitting new work.'
       : details.executionState === 'accepted'
         ? 'The request was accepted. Reconnect using its existing job URL.'
@@ -18,6 +18,24 @@ export class RelayDispatchError extends Error implements RelayFailureDetails {
     this.name = 'RelayDispatchError';
     Object.assign(this, details);
   }
+}
+
+/** Public capability and recovery evidence only; never serialize the internal error. */
+export function publicRelayChatFailure(error: RelayDispatchError) {
+  const state = error.executionState === 'not_accepted' ? 'not_accepted' : error.executionState === 'failed' ? 'failed' : 'unknown';
+  if (state === 'not_accepted' && error.upstreamCode === 'context_budget_exceeded') return { error: {
+    code: 'context_budget_exceeded', message: 'Shorten this conversation before continuing.', execution_state: state,
+  } };
+  if (state === 'not_accepted' && error.upstreamCode === 'output_budget_exceeded') return { error: {
+    code: 'output_budget_exceeded', message: 'Choose an output limit between 1 and 16384 tokens.', execution_state: state,
+  } };
+  return { error: {
+    code: state === 'not_accepted' ? 'service_busy' : 'request_failed',
+    message: state === 'not_accepted' ? 'This service is busy. Try continuing later.'
+      : state === 'failed' ? 'The request stopped. Continue from your saved progress when ready.'
+      : 'The request outcome is not confirmed. Check its status before continuing.',
+    execution_state: state,
+  } };
 }
 
 export interface RelayChatOptions {
@@ -95,7 +113,7 @@ export async function relayFailure(response: Response, reason: string): Promise<
     upstreamCode: typeof code === 'string' && /^[\w.-]{1,128}$/.test(code) ? code : undefined,
     retryAfterMs: Number.isFinite(retryAfterMs) ? retryAfterMs : undefined,
     shouldRetry: response.headers.get('x-should-retry') === 'true' ? true : response.headers.get('x-should-retry') === 'false' ? false : undefined,
-    executionState: ['unknown', 'accepted', 'not_accepted'].includes(state) ? state : undefined,
+    executionState: ['unknown', 'accepted', 'not_accepted', 'failed'].includes(state) ? state : undefined,
     requestId: response.headers.get('x-request-id') ?? undefined, idempotencyScope: response.headers.get('x-galx-idempotency-scope') ?? undefined });
 }
 
@@ -129,6 +147,7 @@ export async function executeRelayChat(options: RelayChatOptions) {
     return response;
   };
   let reader: ReadableStreamDefaultReader<Uint8Array> | undefined;
+  let accepted = false;
   try {
     let job: { id: string; streamUrl: string };
     if (options.resumeJobId !== undefined) {
@@ -140,6 +159,7 @@ export async function executeRelayChat(options: RelayChatOptions) {
       job = await admitted.json();
     }
     const streamUrl = new URL(job.streamUrl, origin);
+    accepted = true;
     if (typeof job.id !== 'string' || !/^[a-zA-Z0-9_.:-]{1,4096}$/.test(job.id) || streamUrl.origin !== origin.origin || streamUrl.pathname !== `/v1/jobs/${encodeURIComponent(job.id)}/stream` || streamUrl.search || streamUrl.hash || streamUrl.username || streamUrl.password) {
       throw new RelayDispatchError('invalid_job_stream');
     }
@@ -162,12 +182,13 @@ export async function executeRelayChat(options: RelayChatOptions) {
           const lines = frame.split(/\r?\n/);
           const event = lines.find(line => line.startsWith('event:'))?.slice(6).trim();
           const data = lines.filter(line => line.startsWith('data:')).map(line => line.slice(5).trimStart()).join('\n');
-          if (event === 'error' || event === 'cancelled') throw new RelayDispatchError(`job_${event}`);
           if (!data) continue;
           if (data === '[DONE]') { yield data; return; }
           let parsed;
           try { parsed = JSON.parse(data); } catch { throw new RelayDispatchError('malformed_stream_event'); }
-          if (parsed.error) throw new RelayDispatchError('job_failed');
+          if (parsed.error || event === 'error' || event === 'cancelled') throw new RelayDispatchError('job_failed', {
+            executionState: parsed.error?.execution_state === 'failed' ? 'failed' : 'unknown', shouldRetry: false,
+          });
           arm(options.idleTimeoutMs ?? 45000, 'stream_idle_timeout');
           yield data;
         }
@@ -187,9 +208,11 @@ export async function executeRelayChat(options: RelayChatOptions) {
             target.enqueue(encoder.encode(`data: ${data}\n\n`));
             if (data === '[DONE]') { cleanup(); await reader?.cancel(); target.close(); return; }
             next = await iterator.next();
-          } catch {
+          } catch (error) {
             cleanup(); await reader?.cancel().catch(() => {});
-            target.error(new RelayDispatchError('stream_failed'));
+            const state = error instanceof RelayDispatchError && error.executionState === 'failed' ? 'failed' : 'unknown';
+            target.enqueue(encoder.encode(`data: ${JSON.stringify({error:{code:'request_failed',message:'The request could not complete.',execution_state:state}})}\n\n`));
+            target.close();
           }
         },
         async cancel() { controller.abort(); cleanup(); await reader?.cancel().catch(() => {}); }
@@ -220,7 +243,10 @@ export async function executeRelayChat(options: RelayChatOptions) {
     return { response: Response.json(result), headers: { 'content-type': 'application/json' } };
   } catch (error) {
     controller.abort(); cleanup(); await reader?.cancel().catch(() => {});
-    if (error instanceof RelayDispatchError) throw error;
-    throw new RelayDispatchError('relay_transport_failed');
+    if (error instanceof RelayDispatchError) {
+      if (!error.executionState) Object.assign(error, { executionState: accepted ? 'accepted' : 'unknown', shouldRetry: false });
+      throw error;
+    }
+    throw new RelayDispatchError('relay_transport_failed', { executionState: accepted ? 'accepted' : 'unknown', shouldRetry: false });
   }
 }

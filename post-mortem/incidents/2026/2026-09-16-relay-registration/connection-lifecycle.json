@@ -1,0 +1,217 @@
+{
+  "classification": "private",
+  "at": "2026-09-16T02:02:53.646318+00:00",
+  "baseline_revision": "b8eb43f97f79707c36b29106cfe206cf41889047",
+  "scope": "owner-requested registration/reconnect lifecycle and legacy credential purge",
+  "implementation": {
+    "atomic_connect": true,
+    "same_account_reconnect": true,
+    "rejection_revision_fenced": true,
+    "legacy_tombstones_immutable": true,
+    "scoped_refresh_guard_regression_fixed": true
+  },
+  "verification": {
+    "source_tests": 58,
+    "boundary_tests": 6,
+    "connection_database_checks": 69,
+    "authorization_database_checks": 155,
+    "execution_database_checks": 50,
+    "general_database_checks": 94,
+    "static_migration_pairs": 114,
+    "browser_variants": 30,
+    "service_image_checks": 50,
+    "production_build": "passed, 272 pages; configured lint skip",
+    "rejection_checkpoint_tests": "25 runtime tests passed, including same-token rejection and fresh-token recovery across restart",
+    "documentation_tests": 38
+  },
+  "migration": {
+    "version": "20260916013944",
+    "target": "main only",
+    "applied": true,
+    "total_applied": 114,
+    "initial_failure": "Ownership transfer required temporarily granting private-schema CREATE to the no-login writer; first transaction rolled back fully. Corrected migration revokes the temporary privilege and passed the hardened fixture.",
+    "live_privileges": {
+      "writer_schema_create": false,
+      "control_base_protocol": false,
+      "service_retirement": false,
+      "runtime_retirement": false,
+      "scoped_protocol": true
+    }
+  },
+  "retirement": {
+    "at": "2026-09-16T02:00:24.851Z",
+    "mode": "committed",
+    "target": "main",
+    "before": {
+      "total": 56,
+      "retired": 0,
+      "managed": 0,
+      "assigned": 0,
+      "busy": 0
+    },
+    "retired": 56,
+    "after": {
+      "total": 56,
+      "retired": 56,
+      "remaining_material": 0,
+      "permitted": 0
+    },
+    "historyRetained": true
+  },
+  "images": {
+    "at": "2026-09-16T01:56:07.909Z",
+    "checks": 50,
+    "images": [
+      {
+        "tag": "galxai-relay-central:connections-20260916",
+        "id": "sha256:e7a4c80fa704d4abb7b423a48a66afad4d809c70dd5df3592eb772e823284bb3",
+        "architecture": "arm64",
+        "component": "central"
+      },
+      {
+        "tag": "galxai-relay-premium:connections-20260916",
+        "id": "sha256:5e3e04168c80744c5da303f7057a7e033cc123acbfb51393ca1c415467203bd8",
+        "architecture": "arm64",
+        "component": "runtime",
+        "pool": "premium"
+      },
+      {
+        "tag": "galxai-relay-standard:connections-20260916",
+        "id": "sha256:02f73ea2eccef4485cfaebdbeab8b991b4865c4f4e57c71de74329a051df3f6a",
+        "architecture": "arm64",
+        "component": "runtime",
+        "pool": "standard"
+      },
+      {
+        "tag": "galxai-monitor-premium:connections-20260916",
+        "id": "sha256:1a7856d5cd5e8e4b0cad539b1c9ed421bdd8ec8b40e7901801673dc5d21e6642",
+        "architecture": "arm64",
+        "component": "monitor",
+        "pool": "premium"
+      },
+      {
+        "tag": "galxai-monitor-standard:connections-20260916",
+        "id": "sha256:c28332f73be3d8f479eb77286693856025799f9e77e66ed72fede03a6aea2e3e",
+        "architecture": "arm64",
+        "component": "monitor",
+        "pool": "standard"
+      }
+    ],
+    "scope": "native image packaging, dependency load, unsafe environment and cross-pool rejection, Compose configuration; no serving or host acceptance"
+  },
+  "compiled_boundary": {
+    "assets_scanned": 915,
+    "private_connection_markers_found": 0,
+    "scope": "local compiled browser assets and rendered pages; not a live public-site claim",
+    "preexisting_public_auth_configuration_matches": 1,
+    "explanation": "Only the existing NEXT_PUBLIC Supabase project identifier matched. No lifecycle marker, private table/function, peer project or post-mortem path was present."
+  },
+  "live_connection": {
+    "at": "2026-09-16T02:02:54.357Z",
+    "pool": "premium",
+    "registrationState": "registered",
+    "accountCount": 1,
+    "accountState": "paused",
+    "connectionState": "connected",
+    "verifiedAt": "2026-09-16T02:02:54.18196+00:00",
+    "models": 4,
+    "originalDesktopPreserved": true,
+    "replaySameAccount": true,
+    "executionAllowed": false,
+    "registrationAllowed": true,
+    "scope": "Existing manually saved login verified and connected; no new provider sign-in or generation submitted"
+  },
+  "limitations": [
+    "No inference or image generation trial.",
+    "Execution remains a separate closed gate; Standard has no manually connected account.",
+    "No public application deployment or live public-site cleanliness claim.",
+    "Physical mobile/screen-reader and streamed-desktop accessibility remain outside browser emulation."
+  ],
+  "installed_browser": {
+    "at": "2026-09-16T02:07:53.232Z",
+    "scope": "Installed local monitors after credential retirement and saved-login connection; read-only UI acceptance",
+    "records": [
+      {
+        "pool": "premium",
+        "accountCount": 1,
+        "registered": 1,
+        "paused": true,
+        "relayApplied": true,
+        "privateAssets": true,
+        "views": 2,
+        "viewports": 2,
+        "axeViolations": 0,
+        "overflow": false,
+        "pageErrors": 0,
+        "executionAllowed": false
+      },
+      {
+        "pool": "standard",
+        "accountCount": 0,
+        "registered": 0,
+        "paused": true,
+        "relayApplied": true,
+        "privateAssets": true,
+        "views": 2,
+        "viewports": 2,
+        "axeViolations": 0,
+        "overflow": false,
+        "pageErrors": 0,
+        "executionAllowed": false
+      }
+    ]
+  },
+  "local_isolation": {
+    "at": "2026-09-16T02:08:50.536Z",
+    "checks": 69,
+    "scope": "local VM separation on one trusted Mac; no provider generation or cloud deployment",
+    "accounts": {
+      "premium": 1,
+      "standard": 0
+    }
+  },
+  "finalized_at": "2026-09-16T02:08:28.590791+00:00",
+  "final_installed_images": {
+    "images": [
+      {
+        "tag": "galxai-relay-central:connections-20260916",
+        "id": "sha256:e7a4c80fa704d4abb7b423a48a66afad4d809c70dd5df3592eb772e823284bb3",
+        "architecture": "arm64",
+        "component": "central"
+      },
+      {
+        "tag": "galxai-relay-premium:connections-20260916",
+        "id": "sha256:5e3e04168c80744c5da303f7057a7e033cc123acbfb51393ca1c415467203bd8",
+        "architecture": "arm64",
+        "component": "runtime",
+        "pool": "premium"
+      },
+      {
+        "tag": "galxai-relay-standard:connections-20260916",
+        "id": "sha256:02f73ea2eccef4485cfaebdbeab8b991b4865c4f4e57c71de74329a051df3f6a",
+        "architecture": "arm64",
+        "component": "runtime",
+        "pool": "standard"
+      },
+      {
+        "tag": "galxai-monitor-premium:connections-20260916-r2",
+        "id": "sha256:084b947419c6a4611c6172a6ef3b5dc82f5a95f5aa34511e0c211531ec7de5c8",
+        "architecture": "arm64",
+        "component": "monitor",
+        "pool": "premium"
+      },
+      {
+        "tag": "galxai-monitor-standard:connections-20260916-r2",
+        "id": "sha256:896d483a1b98c1b9e2c148cf87d9f67c5f6ac9a57a6610ff2b143b15c206d263",
+        "architecture": "arm64",
+        "component": "monitor",
+        "pool": "standard"
+      }
+    ]
+  },
+  "final_monitor_refinement": {
+    "change": "Clear stale success notice when starting a subsequent action",
+    "tag": "connections-20260916-r2",
+    "validation": "30 browser variants repeated; both new monitor images inspected/imported with no network; final installed browser acceptance repeated; runtime/desktop unchanged"
+  }
+}

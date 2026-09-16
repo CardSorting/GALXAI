@@ -42,8 +42,18 @@ export interface AgentConfig {
   systemPrompt?: string;
   tools?: Record<string, ForgivingToolInput> | Array<ForgivingToolInput & { name?: string }>;
   maxSteps?: number;
+  /** Conservative per-turn input/output reservation, retained across continuation. Default 131072. */
+  maxTotalTokens?: number;
+  /** Serialized message and tool-definition bytes per model request. Default 65536. */
+  maxInputBytes?: number;
+  /** Per-step completion limit, forwarded to inference. Default 2048. */
+  maxOutputTokens?: number;
+  /** Persist owner-scoped checkpoints before side effects; a rejected write stops execution. */
+  onCheckpoint?: (checkpoint: AgentCheckpoint, expectedRevision: number) => void | Promise<void>;
   temperature?: number;
   parallelToolExecution?: boolean;
+  /** Maximum callbacks in flight in one batch. Default 4; sequential mode always uses 1. */
+  maxConcurrentTools?: number;
   onStep?: (step: { stepNumber: number; toolCalls?: any[]; output?: string }) => void;
   /** Long-term associative memory store backed by BroccoliDB */
   memory?: AgentMemoryStore;
@@ -72,6 +82,8 @@ export interface AgentExecutionResult {
 }
 
 export interface AgentRunOptions {
+  checkpoint?: AgentCheckpoint;
+  onCheckpoint?: (checkpoint: AgentCheckpoint, expectedRevision: number) => void | Promise<void>;
   /** Stops future model steps and tool starts; an already-running callback owns its cancellation. */
   signal?: AbortSignal;
   conversationId?: string;
@@ -88,6 +100,37 @@ export interface AgentSessionOptions {
 export interface AgentSessionState {
   id: string;
   messages: ChatMessage[];
+  checkpoint?: AgentCheckpoint;
+}
+
+export interface AgentCheckpoint {
+  version: 1;
+  revision: number;
+  turnId: string;
+  conversationId?: string;
+  sessionMode: ChatSessionMode;
+  status: 'ready' | 'model_pending' | 'tools_pending' | 'complete';
+  messages: ChatMessage[];
+  steps: number;
+  chargedTokens: number;
+  maxSteps: number;
+  maxTotalTokens: number;
+  toolCallsExecuted: AgentExecutionResult['toolCallsExecuted'];
+  usage: { promptTokens: number; completionTokens: number };
+  /** Display-only, incomplete output. Never submitted as completed conversation history. */
+  partialText?: string;
+  pauseReason?: 'capacity' | 'context_limit' | 'turn_limit' | 'storage';
+  /** Earliest explicit continuation after capacity feedback; never schedules a request. */
+  retryAtMs?: number;
+  capacityFailures?: number;
+}
+
+export class AgentContinuationError extends APIError {
+  constructor(message: string, code: string, readonly checkpoint: AgentCheckpoint,
+    readonly recovery: 'wait' | 'continue' | 'review' | 'reduce_context' | 'budget_exhausted') {
+    super(message, 409, code);
+    this.name = 'AgentContinuationError';
+  }
 }
 
 export type AgentStreamEvent =
@@ -226,12 +269,12 @@ export class AgentRuntime {
     options?: { messages: ChatMessage[] }
   ): AgentSession {
     const state = typeof idOrState === 'string'
-      ? { id: idOrState, messages: options?.messages }
+      ? { id: idOrState, messages: options?.messages, checkpoint: undefined }
       : idOrState;
     if (!state.messages) {
       throw new Error('Resuming an agent session requires its exported message history.');
     }
-    return new AgentSession(this, { id: state.id, messages: state.messages }, 'continue');
+    return new AgentSession(this, { id: state.id, messages: state.messages }, 'continue', state.checkpoint);
   }
 
   /**
@@ -335,251 +378,209 @@ export class AgentRuntime {
     return registry;
   }
 
-  /**
-   * Runs the autonomous agent tool loop on a given user prompt.
-   */
-  public async run(
-    userInput: string | ChatMessage[],
-    options: AgentRunOptions = {}
-  ): Promise<AgentExecutionResult> {
-    const messages = this.initializeMessages(userInput);
-    const identity = this.resolveRunIdentity(options);
-
-    const toolMap = this.normalizeTools();
-    const formattedTools = Array.from(toolMap.values()).map(t => ({
-      type: 'function' as const,
-      function: {
-        name: t.name,
-        description: t.description,
-        parameters: t.parameters
-      }
-    }));
-
-    const toolCallsExecuted: AgentExecutionResult['toolCallsExecuted'] = [];
-    let stepNumber = 0;
-    const maxSteps = this.config.maxSteps ?? 10;
-    if (!Number.isSafeInteger(maxSteps) || maxSteps < 1) throw new APIError('maxSteps must be a positive integer.', 400, 'invalid_agent_config');
-    const seenCalls = new Set(messages.flatMap(m => (m.tool_calls ?? []).map((c: any) => c.id)));
-    let totalPromptTokens = 0;
-    let totalCompletionTokens = 0;
-
-    while (stepNumber < maxSteps) {
-      options.signal?.throwIfAborted();
-      stepNumber++;
-
-      const res: ChatCompletionResponse = await this.completions.create({
-        model: this.config.model || 'gpt-5.6-sol',
-        messages,
-        temperature: this.config.temperature,
-        tools: formattedTools.length > 0 ? formattedTools : undefined,
-        tool_choice: formattedTools.length > 0 ? 'auto' : undefined,
-        conversation_id: identity.conversationId,
-        session_mode: stepNumber === 1 ? identity.sessionMode : (identity.conversationId ? 'continue' : 'stateless'),
-        turn_id: stepNumber === 1
-          ? identity.turnId
-          : `${identity.turnId.slice(0, 52)}:s${stepNumber}`,
-        user_message_id: identity.turnId,
-        assistant_message_id: `${identity.turnId.slice(0, 52)}:a`,
-      }, { signal: options.signal });
-
-      if (res.usage) {
-        totalPromptTokens += res.usage.prompt_tokens || 0;
-        totalCompletionTokens += res.usage.completion_tokens || 0;
-      }
-
-      const choice = res.choices[0];
-      const message = choice?.message;
-
-      if (!message) {
-        throw new APIError('Empty response received from model during agent execution', 500);
-      }
-
-      // Check for tool calls
-      const toolCalls = message.tool_calls;
-      if (toolCalls && toolCalls.length > 0) {
-        messages.push({
-          role: 'assistant',
-          content: message.content || '',
-          ...({ tool_calls: toolCalls } as any)
-        });
-
-        this.config.onStep?.({ stepNumber, toolCalls, output: message.content || undefined });
-
-        const prepared = prepareToolBatch(toolCalls, toolMap, seenCalls);
-        const results = [];
-        if (this.config.parallelToolExecution !== false) {
-          results.push(...await Promise.all(prepared.map(t => executeTool(t, options.signal))));
-        } else {
-          for (const t of prepared) results.push(await executeTool(t, options.signal));
-        }
-
-        for (const r of results) {
-          toolCallsExecuted.push({
-            toolName: r.fnName,
-            toolCallId: r.tc.id,
-            arguments: r.parsedArgs,
-            result: r.toolResult
-          });
-
-          // Conforms to standard LLM protocol: role: 'tool', tool_call_id: id
-          messages.push({
-            role: 'tool' as any,
-            tool_call_id: r.tc.id,
-            content: typeof r.toolResult === 'string' ? r.toolResult : JSON.stringify(r.toolResult),
-            name: r.fnName
-          } as any);
-        }
-
-        // Continue next loop turn with tool outputs attached
-        continue;
-      }
-
-      // Final answer reached
-      const finalContent = message.content || '';
-      messages.push({ role: 'assistant', content: finalContent });
-
-      this.config.onStep?.({ stepNumber, output: finalContent });
-
-      return {
-        conversationId: identity.conversationId,
-        turnId: identity.turnId,
-        text: finalContent,
-        stepsCount: stepNumber,
-        toolCallsExecuted,
-        finalMessage: { role: 'assistant', content: finalContent },
-        messages,
-        usage: {
-          promptTokens: totalPromptTokens,
-          completionTokens: totalCompletionTokens,
-          totalTokens: totalPromptTokens + totalCompletionTokens
-        }
-      };
+  /** Runs a bounded turn. Continuation is explicit and preserves its original budget. */
+  public async run(userInput: string | ChatMessage[], options: AgentRunOptions = {}): Promise<AgentExecutionResult> {
+    for await (const event of this.execute(userInput, options, false)) {
+      if (event.type === 'finish') return event.result;
     }
-
-    throw new APIError(`Agent exceeded maximum execution steps (${maxSteps}) without reaching a final answer`, 400, 'max_steps_exceeded');
+    throw new APIError('The turn stopped before completion.', 409, 'turn_incomplete');
   }
 
-  /**
-   * Runs the autonomous agent and yields real-time streaming events (tokens, tool calls, and results).
-   */
-  public async *stream(
-    userInput: string | ChatMessage[],
-    options: AgentRunOptions = {}
-  ): AsyncIterable<AgentStreamEvent> {
-    const messages = this.initializeMessages(userInput);
-    const identity = this.resolveRunIdentity(options);
+  public async *stream(userInput: string | ChatMessage[], options: AgentRunOptions = {}): AsyncIterable<AgentStreamEvent> {
+    yield* this.execute(userInput, options, true);
+  }
 
+  public resume(checkpoint: AgentCheckpoint, options: Omit<AgentRunOptions, 'checkpoint'> = {}) {
+    return this.run([], { ...options, checkpoint });
+  }
+
+  public resumeStream(checkpoint: AgentCheckpoint, options: Omit<AgentRunOptions, 'checkpoint'> = {}) {
+    return this.stream([], { ...options, checkpoint });
+  }
+
+  private async *execute(input: string | ChatMessage[], options: AgentRunOptions, streaming: boolean): AsyncIterable<AgentStreamEvent> {
+    const positive = (value: number | undefined, fallback: number) => {
+      const n = value ?? fallback;
+      if (!Number.isSafeInteger(n) || n < 1) throw new APIError('Agent limits must be positive integers.', 400, 'invalid_agent_config');
+      return n;
+    };
+    const maxSteps = positive(this.config.maxSteps, 10), maxTotalTokens = positive(this.config.maxTotalTokens, 131072);
+    const maxInputBytes = positive(this.config.maxInputBytes, 65536), maxOutputTokens = positive(this.config.maxOutputTokens, 2048);
+    const maxConcurrentTools = Math.min(32, positive(this.config.maxConcurrentTools, 4));
     const toolMap = this.normalizeTools();
-    const formattedTools = Array.from(toolMap.values()).map(t => ({
-      type: 'function' as const,
-      function: {
-        name: t.name,
-        description: t.description,
-        parameters: t.parameters
+    const tools = Array.from(toolMap.values()).map(t => ({ type: 'function' as const,
+      function: { name: t.name, description: t.description, parameters: t.parameters } }));
+    const identity = this.resolveRunIdentity(options);
+    const state: AgentCheckpoint = options.checkpoint ? structuredClone(options.checkpoint) : {
+      version: 1, revision: 0, ...identity, status: 'ready', messages: this.initializeMessages(input), steps: 0,
+      chargedTokens: 0, maxSteps, maxTotalTokens, toolCallsExecuted: [], usage: { promptTokens: 0, completionTokens: 0 },
+    };
+    if (state.version !== 1 || !['ready','model_pending','tools_pending','complete'].includes(state.status)
+      || !Array.isArray(state.messages) || !Array.isArray(state.toolCallsExecuted)
+      || typeof state.turnId !== 'string' || !/^[A-Za-z0-9_.:-]{1,128}$/.test(state.turnId)
+      || ![state.revision,state.steps,state.chargedTokens,state.usage?.promptTokens,state.usage?.completionTokens].every(n => Number.isSafeInteger(n) && n >= 0)
+      || ![state.retryAtMs ?? 0,state.capacityFailures ?? 0].every(n => Number.isSafeInteger(n) && n >= 0)
+      || ![state.maxSteps,state.maxTotalTokens].every(n => Number.isSafeInteger(n) && n > 0)) {
+      throw new APIError('Invalid agent checkpoint.', 400, 'invalid_checkpoint');
+    }
+    this.resolveRunIdentity({ conversationId: state.conversationId, sessionMode: state.sessionMode, turnId: state.turnId });
+    state.maxSteps = Math.min(state.maxSteps, maxSteps);
+    state.maxTotalTokens = Math.min(state.maxTotalTokens, maxTotalTokens);
+    const fail = (message: string, code: string, recovery: AgentContinuationError['recovery']) =>
+      new AgentContinuationError(message, code, structuredClone(state), recovery);
+    const requiresReview = () => state.status !== 'ready' || state.pauseReason === 'storage';
+    const budgetSpent = () => state.steps >= state.maxSteps || state.chargedTokens >= state.maxTotalTokens;
+    const capacityWait = () => !budgetSpent() && state.pauseReason === 'capacity' && (state.retryAtMs ?? 0) > Date.now();
+    if (requiresReview()) throw fail('Check the previous request, tool outcome, or saved progress before continuing.', 'checkpoint_not_ready', 'review');
+    if (capacityWait()) {
+      throw fail('Capacity is still recovering. Your progress is retained; wait before continuing.', 'continuation_wait', 'wait');
+    }
+    const save = async () => {
+      const expectedRevision = state.revision;
+      const next = { ...structuredClone(state), revision: expectedRevision + 1 };
+      try {
+        await this.config.onCheckpoint?.(structuredClone(next), expectedRevision);
+        await options.onCheckpoint?.(structuredClone(next), expectedRevision);
+      } catch {
+        state.pauseReason = 'storage';
+        throw new APIError('Progress could not be saved. Check the saved turn before continuing.',503,'checkpoint_unconfirmed');
       }
-    }));
-
-    const toolCallsExecuted: AgentExecutionResult['toolCallsExecuted'] = [];
-    let stepNumber = 0;
-    const maxSteps = this.config.maxSteps ?? 10;
-    if (!Number.isSafeInteger(maxSteps) || maxSteps < 1) throw new APIError('maxSteps must be a positive integer.', 400, 'invalid_agent_config');
-    const seenCalls = new Set(messages.flatMap(m => (m.tool_calls ?? []).map((c: any) => c.id)));
-    let totalPromptTokens = 0;
-    let totalCompletionTokens = 0;
-
-    while (stepNumber < maxSteps) {
-      options.signal?.throwIfAborted();
-      stepNumber++;
-
-      const stream = this.completions.stream({
-        model: this.config.model || 'gpt-5.6-sol',
-        messages,
-        temperature: this.config.temperature,
-        tools: formattedTools.length > 0 ? formattedTools : undefined,
-        tool_choice: formattedTools.length > 0 ? 'auto' : undefined,
-        conversation_id: identity.conversationId,
-        session_mode: stepNumber === 1 ? identity.sessionMode : (identity.conversationId ? 'continue' : 'stateless'),
-        turn_id: stepNumber === 1
-          ? identity.turnId
-          : `${identity.turnId.slice(0, 52)}:s${stepNumber}`,
-        user_message_id: identity.turnId,
-        assistant_message_id: `${identity.turnId.slice(0, 52)}:a`,
-      }, { signal: options.signal });
-
-      for await (const chunk of stream) {
-        const delta = chunk.choices?.[0]?.delta?.content;
-        if (delta) {
-          yield { type: 'token', content: delta };
+      // Advance only after persistence. A failed CAS cannot authorize a later write over its winner.
+      state.revision = next.revision;
+    };
+    const seen = new Set(state.messages.flatMap(m => (m.tool_calls ?? []).map((c: any) => c.id)));
+    try {
+      await save();
+      while (state.steps < state.maxSteps) {
+        options.signal?.throwIfAborted();
+        const inputBytes = new TextEncoder().encode(JSON.stringify({ messages: state.messages, tools })).byteLength;
+        if (inputBytes > maxInputBytes) {
+          state.pauseReason = 'context_limit'; await save();
+          throw fail('This conversation is too large to continue. Save a concise summary, then continue.', 'context_budget_exceeded', 'reduce_context');
         }
-      }
-
-      const res = await stream.finalChatCompletion();
-
-      if (res.usage) {
-        totalPromptTokens += res.usage.prompt_tokens || 0;
-        totalCompletionTokens += res.usage.completion_tokens || 0;
-      }
-
-      const choice = res.choices[0];
-      const message = choice?.message;
-
-      if (!message) {
-        throw new APIError('Empty response received from model during agent streaming', 500);
-      }
-
-      const toolCalls = message.tool_calls;
-      if (toolCalls && toolCalls.length > 0) {
-        messages.push({
-          role: 'assistant',
-          content: message.content || '',
-          ...({ tool_calls: toolCalls } as any)
-        });
-
-        const prepared = prepareToolBatch(toolCalls, toolMap, seenCalls);
-        this.config.onStep?.({ stepNumber, toolCalls, output: message.content || undefined });
-        for (const t of prepared) yield { type: 'tool_call', toolName: t.fnName, toolCallId: t.tc.id, arguments: t.parsedArgs };
-        const results = [];
-        if (this.config.parallelToolExecution !== false) {
-          results.push(...await Promise.all(prepared.map(t => executeTool(t, options.signal))));
-        } else {
-          for (const t of prepared) results.push(await executeTool(t, options.signal));
+        // Byte-based conservative reservation, including framing margin. Not a tokenizer or a billing balance.
+        const reservation = inputBytes + 1024 + maxOutputTokens;
+        if (reservation > state.maxTotalTokens - state.chargedTokens) {
+          state.pauseReason = 'turn_limit'; await save();
+          throw fail('This turn reached its usage limit. Review the saved progress before starting a new turn.', 'turn_budget_exceeded', 'budget_exhausted');
         }
-        for (const r of results) {
-          yield { type: 'tool_result', toolName: r.fnName, toolCallId: r.tc.id, result: r.toolResult };
-          toolCallsExecuted.push({ toolName: r.fnName, toolCallId: r.tc.id, arguments: r.parsedArgs, result: r.toolResult });
-          messages.push({ role: 'tool', tool_call_id: r.tc.id, name: r.fnName,
-            content: typeof r.toolResult === 'string' ? r.toolResult : JSON.stringify(r.toolResult) } as any);
+        state.steps++; state.chargedTokens += reservation; state.status = 'model_pending'; state.partialText = '';
+        delete state.pauseReason;
+        await save(); // A failed persistence write must precede, and prevent, inference.
+        const request = {
+          model: this.config.model || 'gpt-5.6-sol', messages: structuredClone(state.messages), temperature: this.config.temperature,
+          max_tokens: maxOutputTokens, tools: tools.length ? tools : undefined, tool_choice: tools.length ? 'auto' as const : undefined,
+          conversation_id: state.conversationId, session_mode: state.sessionMode,
+          turn_id: state.steps === 1 ? state.turnId : `${state.turnId.slice(0,52)}:s${state.steps}`,
+          user_message_id: state.turnId, assistant_message_id: `${state.turnId.slice(0,52)}:a`,
+        };
+        let res: ChatCompletionResponse;
+        try {
+          if (streaming) {
+            const stream = this.completions.stream(request, { signal: options.signal, maxRetries: 0 });
+            try {
+              for await (const chunk of stream) {
+                const delta = chunk.choices?.[0]?.delta?.content;
+                if (delta) { state.partialText = (state.partialText + delta).slice(-16384); yield { type: 'token', content: delta }; }
+              }
+              res = await stream.finalChatCompletion();
+            } finally { stream.abort(); await save(); }
+          } else res = await this.completions.create(request, { signal: options.signal, maxRetries: 0 });
+        } catch (error: any) {
+          // Only explicit admission rejection or a confirmed terminal model failure permits a new step.
+          // Lost responses and interrupted tools remain blocked. Failed attempts retain their reservation.
+          if (error?.executionState === 'not_accepted' || error?.executionState === 'failed') {
+            state.status = 'ready'; state.pauseReason = 'capacity';
+            state.capacityFailures = Math.min(16, (state.capacityFailures ?? 0) + 1);
+            const header = typeof error.headers?.get === 'function' ? error.headers.get('retry-after')
+              : Object.entries(error.headers ?? {}).find(([key]) => key.toLowerCase() === 'retry-after')?.[1];
+            const now = Date.now(), seconds = Number(header);
+            const hinted = typeof header === 'string' && header.trim()
+              ? Number.isFinite(seconds) && seconds >= 0 ? now + seconds * 1000 : Date.parse(header) : 0;
+            const backoff = Math.min(60000, 5000 * 2 ** (state.capacityFailures - 1));
+            // Positive jitter never shortens the server's requested wait. No timer dispatches work.
+            state.retryAtMs = Math.ceil(Math.max(now + backoff, Number.isSafeInteger(hinted) ? hinted : 0) + Math.random() * 1000);
+          }
+          if (error?.executionState === 'not_accepted' && error?.code === 'context_budget_exceeded') state.pauseReason = 'context_limit';
+          if (error?.executionState === 'failed' && state.conversationId) state.sessionMode = 'continue';
+          await save();
+          throw error;
         }
-
-        yield { type: 'step', stepNumber };
-        continue;
-      }
-
-      const finalContent = message.content || '';
-      messages.push({ role: 'assistant', content: finalContent });
-
-      yield {
-        type: 'finish',
-        result: {
-          conversationId: identity.conversationId,
-          turnId: identity.turnId,
-          text: finalContent,
-          stepsCount: stepNumber,
-          toolCallsExecuted,
-          finalMessage: { role: 'assistant', content: finalContent },
-          messages,
-          usage: {
-            promptTokens: totalPromptTokens,
-            completionTokens: totalCompletionTokens,
-            totalTokens: totalPromptTokens + totalCompletionTokens
+        state.sessionMode = state.conversationId ? 'continue' : 'stateless';
+        delete state.retryAtMs; delete state.capacityFailures;
+        if (res.usage) {
+          const prompt = res.usage.prompt_tokens, completion = res.usage.completion_tokens;
+          if ([prompt,completion].every(n => Number.isSafeInteger(n) && n >= 0)) {
+            state.usage.promptTokens += prompt; state.usage.completionTokens += completion;
+            // Never refund an unknown estimate; observed overage also consumes the remaining budget.
+            state.chargedTokens += Math.max(0, prompt + completion - reservation);
           }
         }
-      };
-
-      return;
+        const message = res.choices[0]?.message;
+        if (!message) throw new APIError('Empty response received from model during agent execution', 502, 'invalid_response');
+        const calls = message.tool_calls;
+        if (calls?.length) {
+          const prepared = prepareToolBatch(calls, toolMap, seen);
+          state.messages.push({ role: 'assistant', content: message.content || '', tool_calls: calls });
+          state.status = 'tools_pending'; delete state.partialText;
+          await save(); // Persist intent before any caller-owned side effect.
+          this.config.onStep?.({ stepNumber: state.steps, toolCalls: calls, output: message.content || undefined });
+          for (const t of prepared) yield { type: 'tool_call', toolName: t.fnName, toolCallId: t.tc.id, arguments: t.parsedArgs };
+          let persistence = Promise.resolve();
+          const completed: Awaited<ReturnType<typeof executeTool>>[] = [];
+          const execute = async (t: ReturnType<typeof prepareToolBatch>[number]) => {
+            const r = await executeTool(t, options.signal);
+            // Serialize checkpoint writes even when callbacks complete concurrently.
+            const record = () => {
+              state.toolCallsExecuted.push({ toolName: r.fnName, toolCallId: r.tc.id, arguments: r.parsedArgs, result: r.toolResult });
+              state.messages.push({ role: 'tool', tool_call_id: r.tc.id, name: r.fnName,
+                content: typeof r.toolResult === 'string' ? r.toolResult : JSON.stringify(r.toolResult) });
+              completed.push(r);
+            };
+            persistence = persistence.then(async () => { record(); await save(); }, error => {
+              // Retain every completed callback locally without writing past a failed persistence fence.
+              record(); throw error;
+            });
+            await persistence;
+          };
+          if (this.config.parallelToolExecution !== false) {
+            let cursor = 0, failed = false;
+            const worker = async () => {
+              while (!failed && cursor < prepared.length) {
+                const tool = prepared[cursor++];
+                try { await execute(tool); } catch (error) { failed = true; throw error; }
+              }
+            };
+            const results = await Promise.allSettled(Array.from({ length: Math.min(maxConcurrentTools, prepared.length) }, worker));
+            const rejected = results.find((r): r is PromiseRejectedResult => r.status === 'rejected');
+            if (rejected) throw rejected.reason;
+          } else for (const t of prepared) await execute(t);
+          state.status = 'ready'; await save();
+          for (const r of completed) {
+            yield { type: 'tool_result', toolName: r.fnName, toolCallId: r.tc.id, result: r.toolResult };
+          }
+          yield { type: 'step', stepNumber: state.steps };
+          continue;
+        }
+        const text = message.content || '';
+        state.messages.push({ role: 'assistant', content: text }); state.status = 'complete'; delete state.partialText;
+        await save();
+        this.config.onStep?.({ stepNumber: state.steps, output: text });
+        yield { type: 'finish', result: { conversationId: state.conversationId, turnId: state.turnId, text,
+          stepsCount: state.steps, toolCallsExecuted: structuredClone(state.toolCallsExecuted), finalMessage: { role: 'assistant', content: text },
+          messages: structuredClone(state.messages), usage: { ...state.usage, totalTokens: state.usage.promptTokens + state.usage.completionTokens } } };
+        return;
+      }
+      state.pauseReason = 'turn_limit'; await save();
+      throw fail(`Agent exceeded maximum execution steps (${state.maxSteps}) without reaching a final answer`, 'max_steps_exceeded', 'budget_exhausted');
+    } catch (error: any) {
+      if (error instanceof AgentContinuationError) throw error;
+      if (options.signal?.aborted) throw error;
+      const recovery = requiresReview() ? 'review'
+        : budgetSpent() ? 'budget_exhausted' : capacityWait() ? 'wait'
+        : state.pauseReason === 'context_limit' ? 'reduce_context' : 'continue';
+      throw fail(error instanceof Error ? error.message : 'This turn could not complete.', 'agent_paused', recovery);
     }
-
-    throw new APIError(`Agent exceeded maximum execution steps (${maxSteps}) without reaching a final answer`, 400, 'max_steps_exceeded');
   }
 }
 
@@ -596,10 +597,13 @@ export class AgentSession {
   constructor(
     private readonly runtime: AgentRuntime,
     options: Required<Pick<AgentSessionOptions, 'id'>> & Omit<AgentSessionOptions, 'id'>,
-    mode: Extract<ChatSessionMode, 'new' | 'continue'>
+    mode: Extract<ChatSessionMode, 'new' | 'continue'>,
+    private checkpoint?: AgentCheckpoint,
   ) {
     this.id = options.id;
-    this.messages = [...(options.messages || [])];
+    this.messages = structuredClone(options.messages || []);
+    this.checkpoint = checkpoint ? structuredClone(checkpoint) : undefined;
+    if (checkpoint && checkpoint.conversationId !== options.id) throw new APIError('Checkpoint belongs to another session.',400,'invalid_checkpoint');
     this.nextMode = mode;
   }
 
@@ -608,7 +612,7 @@ export class AgentSession {
   }
 
   public getHistory(): ChatMessage[] {
-    return [...this.messages];
+    return structuredClone(this.messages);
   }
 
   private appendInput(input: string | ChatMessage[]): ChatMessage[] {
@@ -617,29 +621,43 @@ export class AgentSession {
       : [...this.messages, ...input];
   }
 
-  public async run(input: string | ChatMessage[]): Promise<AgentExecutionResult> {
+  private retainFailure(error: unknown): never {
+    if (error instanceof AgentContinuationError) {
+      this.checkpoint = structuredClone(error.checkpoint);
+      this.messages = structuredClone(error.checkpoint.messages);
+    }
+    throw error;
+  }
+
+  public async run(input: string | ChatMessage[], options: Pick<AgentRunOptions, 'signal'> = {}): Promise<AgentExecutionResult> {
     if (this.activeTurn) throw new Error(`Agent session ${this.id} already has an active turn.`);
+    if (this.checkpoint && (this.checkpoint.status !== 'complete' || this.checkpoint.pauseReason === 'storage')) throw new APIError('This session has an unfinished turn. Continue or review its saved progress first.',409,'unfinished_turn');
     this.activeTurn = true;
     try {
       const result = await this.runtime.run(this.appendInput(input), {
+        signal: options.signal,
         conversationId: this.id,
         sessionMode: this.nextMode,
+        onCheckpoint: state => { this.checkpoint = structuredClone(state); this.messages = structuredClone(state.messages); },
       });
       this.messages = [...result.messages];
       this.nextMode = 'continue';
       return result;
-    } finally {
+    } catch (error) { this.retainFailure(error); } finally {
       this.activeTurn = false;
     }
   }
 
-  public async *stream(input: string | ChatMessage[]): AsyncIterable<AgentStreamEvent> {
+  public async *stream(input: string | ChatMessage[], options: Pick<AgentRunOptions, 'signal'> = {}): AsyncIterable<AgentStreamEvent> {
     if (this.activeTurn) throw new Error(`Agent session ${this.id} already has an active turn.`);
+    if (this.checkpoint && (this.checkpoint.status !== 'complete' || this.checkpoint.pauseReason === 'storage')) throw new APIError('This session has an unfinished turn. Continue or review its saved progress first.',409,'unfinished_turn');
     this.activeTurn = true;
     try {
       for await (const event of this.runtime.stream(this.appendInput(input), {
+        signal: options.signal,
         conversationId: this.id,
         sessionMode: this.nextMode,
+        onCheckpoint: state => { this.checkpoint = structuredClone(state); this.messages = structuredClone(state.messages); },
       })) {
         if (event.type === 'finish') {
           this.messages = [...event.result.messages];
@@ -647,13 +665,78 @@ export class AgentSession {
         }
         yield event;
       }
-    } finally {
+    } catch (error) { this.retainFailure(error); } finally {
       this.activeTurn = false;
     }
   }
 
   public export(): AgentSessionState {
-    return { id: this.id, messages: [...this.messages] };
+    return structuredClone({ id: this.id, messages: this.messages, ...(this.checkpoint ? { checkpoint: this.checkpoint } : {}) });
+  }
+
+  /** Stable presentation contract for a caller's Continue / Review / Shorten controls. */
+  public getRecovery() {
+    if (this.activeTurn) return { action: 'wait' as const, label: 'Working', message: 'This turn is still running.' };
+    if (this.checkpoint?.pauseReason === 'storage') return { action: 'review' as const, label: 'Check saved progress', message: 'The latest save is not confirmed. Check the saved turn before continuing.' };
+    if (!this.checkpoint || this.checkpoint.status === 'complete') return { action: 'none' as const, label: 'Ready', message: 'Start a new turn when ready.' };
+    if (this.checkpoint.status !== 'ready') return { action: 'review' as const, label: 'Check status', message: 'The previous outcome is not confirmed. Review it before starting more work.' };
+    if (this.checkpoint.pauseReason === 'turn_limit' || this.checkpoint.steps >= this.checkpoint.maxSteps || this.checkpoint.chargedTokens >= this.checkpoint.maxTotalTokens) return { action: 'review' as const, label: 'Review progress', message: 'This turn reached its limit. Continuing will not reset its budget.' };
+    if (this.checkpoint.pauseReason === 'context_limit') return { action: 'compact' as const, label: 'Shorten context', message: 'Progress is saved. Provide a concise summary to reduce the next request.' };
+    if (this.checkpoint.pauseReason === 'capacity' && (this.checkpoint.retryAtMs ?? 0) > Date.now()) return {
+      action: 'wait' as const, label: 'Waiting for capacity', message: 'Your progress is retained. Continue will become available after the wait; nothing restarts automatically.',
+      retryAtMs: this.checkpoint.retryAtMs,
+    };
+    return { action: 'continue' as const, label: 'Continue', message: 'Progress is saved. Continue when capacity is available.' };
+  }
+
+  /** Continues only from confirmed progress; never repeats a completed callback. */
+  public async resume(options: Pick<AgentRunOptions, 'signal'> = {}): Promise<AgentExecutionResult> {
+    if (this.activeTurn) throw new Error(`Agent session ${this.id} already has an active turn.`);
+    if (!this.checkpoint) throw new APIError('There is no unfinished turn to continue.',409,'checkpoint_required');
+    this.activeTurn = true;
+    try {
+      const result = await this.runtime.resume(this.checkpoint, { ...options,
+        onCheckpoint: state => { this.checkpoint = structuredClone(state); this.messages = structuredClone(state.messages); },
+      });
+      this.nextMode = 'continue'; return result;
+    } catch (error) { this.retainFailure(error); } finally { this.activeTurn = false; }
+  }
+
+  public async *resumeStream(options: Pick<AgentRunOptions, 'signal'> = {}): AsyncIterable<AgentStreamEvent> {
+    if (this.activeTurn) throw new Error(`Agent session ${this.id} already has an active turn.`);
+    if (!this.checkpoint) throw new APIError('There is no unfinished turn to continue.',409,'checkpoint_required');
+    this.activeTurn = true;
+    try {
+      for await (const event of this.runtime.resumeStream(this.checkpoint, { ...options,
+        onCheckpoint: state => { this.checkpoint = structuredClone(state); this.messages = structuredClone(state.messages); },
+      })) {
+        if (event.type === 'finish') this.nextMode = 'continue';
+        yield event;
+      }
+    } catch (error) { this.retainFailure(error); } finally { this.activeTurn = false; }
+  }
+
+  /** Explicit context reduction. Return the full previous snapshot for caller-owned archival. */
+  public compact(summary: string, keepLastTurns = 2): AgentSessionState {
+    if (this.activeTurn || this.checkpoint && (!['ready','complete'].includes(this.checkpoint.status) || this.checkpoint.pauseReason === 'storage')) {
+      throw new APIError('Review the unfinished request or tool before changing context.',409,'checkpoint_not_ready');
+    }
+    if (!summary.trim() || new TextEncoder().encode(summary).byteLength > 8192 || !Number.isSafeInteger(keepLastTurns) || keepLastTurns < 1) {
+      throw new APIError('Provide a summary of at most 8192 bytes and retain at least one recent turn.',400,'invalid_summary');
+    }
+    const before = this.export();
+    const starts = this.messages.flatMap((m,i) => m.role === 'user' ? [i] : []);
+    const start = starts[Math.max(0,starts.length-keepLastTurns)] ?? 0;
+    const instructions = this.messages.filter(m => m.role === 'system' || m.role === 'developer');
+    this.messages = structuredClone([...instructions,
+      { role: 'user' as const, content: `Earlier conversation summary supplied by the application:\n${summary}` },
+      ...this.messages.slice(start).filter(m => m.role !== 'system' && m.role !== 'developer')]);
+    this.id = createChatResourceId('agent'); this.nextMode = 'new';
+    if (this.checkpoint) {
+      this.checkpoint = { ...this.checkpoint, conversationId: this.id, sessionMode: 'new', messages: structuredClone(this.messages) };
+      if (this.checkpoint.pauseReason === 'context_limit') delete this.checkpoint.pauseReason;
+    }
+    return before;
   }
 
   /** Clears context by rotating identity; old durable history cannot bleed back in. */
@@ -661,6 +744,7 @@ export class AgentSession {
     if (this.activeTurn) throw new Error(`Cannot clear agent session ${this.id} during an active turn.`);
     this.id = createChatResourceId('agent');
     this.messages = [];
+    this.checkpoint = undefined;
     this.nextMode = 'new';
     return this;
   }

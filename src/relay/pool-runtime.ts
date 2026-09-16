@@ -12,17 +12,21 @@ import { publicJob, publicUsage, boundedJson } from './pool-public-response.js';
 import { sitesContractRequest, sitesContractReply } from './sites-contract.js';
 import { StandardPoolScheduler } from './standard-pool-scheduler.js';
 import { functionCalls } from './function-tools.js';
+import { RequestBulkhead } from './request-bulkhead.js';
 
 type Worker = {account:AssignedAccount;engine:GalxaiRelayServer;key:string;port:number};
 export class PoolRuntime {
   readonly server: http.Server;
   private workers = new Map<string,Worker>();
   private refreshedAt = 0; private stopped = false; private timer?: NodeJS.Timeout;
-  private cursor = 0; private syncing?: Promise<void>; private pending = new Set<string>();
+  private syncing?: Promise<void>; private pending = new Set<string>();
   private readonly standard = new StandardPoolScheduler();
+  private readonly submissions = new RequestBulkhead();
+  private readonly observations = new RequestBulkhead();
+  private readonly streams = new RequestBulkhead(64,8);
   private ready() {
     const age=Date.now()-this.refreshedAt;
-    return !this.stopped && age>=0 && age<20000 && this.workers.size>0;
+    return !this.stopped && age>=0 && age<20000 && [...this.workers.values()].some(w=>!w.engine.credentialRejected());
   }
   constructor(readonly execution: PoolExecution, private readonly inferenceKey: string, private readonly stateDirectory: string, private readonly capabilityKey?: string) {
     this.server = http.createServer((req,res)=>void this.route(req,res).catch(error=>{ if (!res.headersSent) failure(res,error); else res.destroy(); }));
@@ -43,6 +47,11 @@ export class PoolRuntime {
   private async reconcile() {
     const central=this.execution.central;
     await central.call('/runtime/heartbeat',{epoch:this.execution.epoch});
+    for (const worker of this.workers.values()) {
+      if (worker.engine.credentialRejected()) await central.call('/runtime/credential_failed', {
+        epoch:this.execution.epoch,accountId:worker.account.id,revision:worker.account.revision,credentialRevision:worker.account.credentialRevision,
+      });
+    }
     const projection=await central.call('/runtime/projection',{epoch:this.execution.epoch});
     if (projection.pool!==central.identity.pool || projection.installationId!==central.identity.installationId || projection.epoch!==this.execution.epoch || !Array.isArray(projection.accounts) || projection.accounts.length>128) throw Error('Invalid projection.');
     const next=new Map<string,AssignedAccount>(projection.accounts.map((a:AssignedAccount)=>[a.id,a]));
@@ -61,14 +70,17 @@ export class PoolRuntime {
           executionPolicy:this.execution.policy(a),host:'127.0.0.1',port:0,apiKeys:[key],adminApiKeys:[randomBytes(32).toString('base64url')],
           registryEnabled:false,discoverHostCredentials:false,masterSecret:undefined,shardsJsonPath:undefined,testOnlyMultiShard:false,
           relayId:central.identity.installationId,generation:this.execution.epoch,allowedOrigins:[],maxUpstreamRetries:0,
-          codexImageToolAlias:central.identity.pool==='premium',forwardOutputTokenLimit:true,drainTimeoutMs:100,
-          ...(central.identity.pool==='standard'?{shardConcurrency:1}:{}),
+          codexImageToolAlias:central.identity.pool==='premium',forwardOutputTokenLimit:false,drainTimeoutMs:100,
+          // Container logs are private operator evidence, never inference DTOs.
+          onUpstreamDiagnostic:(d,context)=>console.warn(JSON.stringify({event:'relay_upstream_rejected',
+            pool:central.identity.pool,jobId:context.jobId,status:d.status,code:d.code,parameter:d.parameter,reason:d.reason})),
+          shardConcurrency:central.identity.pool==='standard'?1:4,
           stateSnapshotPath:path.join(this.stateDirectory,a.id,'relay.json')});
         try { await engine.start(); this.workers.set(a.id,{account:a,engine,key,port:engine.listeningPort()}); }
         catch { await engine.stop().catch(()=>{}); throw Error('Worker unavailable.'); }
       }
       // Disabled accounts are acknowledged only once the old engine is stopped. Enabled accounts require a running engine.
-      if (a.state!=='enabled' && !this.workers.has(a.id) || this.workers.get(a.id)?.account.revision===a.revision) {
+      if ((a.state!=='enabled' || !a.credential) && !this.workers.has(a.id) || this.workers.get(a.id)?.account.revision===a.revision) {
         await central.call('/runtime/acknowledge',{epoch:this.execution.epoch,accountId:a.id,revision:a.revision,credentialRevision:a.credentialRevision});
       }
     }
@@ -82,6 +94,7 @@ export class PoolRuntime {
       if(req.headers.origin || !this.capabilityKey || !equalSecret(bearer(req),this.capabilityKey))throw new RequestError(401,'unauthorized','Provide valid authorization.');
       if(this.execution.central.identity.pool!=='premium')throw new RequestError(403,'capability_unavailable','This request is not supported.');
       const requested=sitesContractRequest(new URL(req.url!,'http://local').searchParams);
+      if(requested.profile!=='sites-local-v1')throw new RequestError(503,'capability_unavailable','This request requires an unavailable capability.');
       if(!ready||![...this.workers.values()].some(w=>w.account.models.includes(requested.model)))throw new RequestError(503,'service_unavailable','This service is temporarily unavailable.');
       return json(res,200,sitesContractReply(requested));
     }
@@ -100,7 +113,7 @@ export class PoolRuntime {
     const tenantSha256=hash(delegated);
     if (pathname==='/v1/models' && req.method==='GET') {
       if (!ready) throw new RequestError(503,'service_unavailable','This service is temporarily unavailable.');
-      const models=[...new Set([...this.workers.values()].flatMap(w=>w.account.models).filter(m=>!m.startsWith('image:')))];
+      const models=[...new Set([...this.workers.values()].filter(w=>!w.engine.credentialRejected()).flatMap(w=>w.account.models).filter(m=>!m.startsWith('image:')))];
       return json(res,200,{object:'list',data:models.map(id=>({id,object:'model',owned_by:'galx'}))});
     }
     const generation=req.method==='POST' && ['/v1/chat/completions','/v1/images/generations'].includes(pathname);
@@ -108,7 +121,21 @@ export class PoolRuntime {
     if (!generation && !(job && (req.method==='GET' || req.method==='POST' && job[2]==='cancel'))) throw new RequestError(404,'not_found','Not found.');
     let worker:Worker|undefined, body:Record<string,any>|undefined, lock:string|undefined;
     let releaseSelection: (() => unknown) | undefined, ownsLock=false;
+    let releaseRequest: (() => void) | undefined;
+    let releaseStream: (() => void) | undefined;
+    let provenNew = false, forwarded = false;
     try {
+      // Bound body parsing and dependency lookups before allocating their buffers/queries.
+      // Recovery reads/cancel have a separate allowance from new submissions.
+      releaseRequest = (generation ? this.submissions : this.observations).reserve(tenantSha256);
+      if (!releaseRequest) {
+        res.setHeader('Retry-After','5');
+        throw new RequestError(503,'service_busy','This service is busy. Try again shortly.');
+      }
+      if (job?.[2] === 'stream') {
+        releaseStream = this.streams.reserve(tenantSha256);
+        if (!releaseStream) { res.setHeader('Retry-After','5'); throw new RequestError(503,'service_busy','This service is busy. Try again shortly.'); }
+      }
       if (generation) {
         body=await readJsonBody(req,1024*1024,10000); const workload=requestWorkload(this.execution.central.identity.pool,pathname,body);
         if (!ready) throw new RequestError(503,'service_unavailable','This service is temporarily unavailable.');
@@ -127,15 +154,23 @@ export class PoolRuntime {
           if (previous.epoch!==this.execution.epoch || previous.workload==='images' || !this.workers.has(previous.accountId)) throw new RequestError(409,'result_unconfirmed','The original result is unavailable. Do not repeat this request.');
           return json(res,202,{id:previous.executionId,status:previous.state==='running'?'running':previous.state==='completed'?'completed':'failed',statusUrl:`/v1/jobs/${previous.executionId}`,streamUrl:`/v1/jobs/${previous.executionId}/stream`});
         }
+        provenNew = true;
+        if (body.require_output_limit === true) throw new RequestError(400,'capability_unavailable','This request requires an unavailable capability.');
+        if (workload === 'text') {
+          if (Buffer.byteLength(JSON.stringify({messages:body.messages,tools:body.tools})) > 262144)
+            throw new RequestError(400,'context_budget_exceeded','Shorten this conversation before continuing.');
+          if (body.max_tokens !== undefined && (!Number.isSafeInteger(body.max_tokens) || body.max_tokens < 1 || body.max_tokens > 16384))
+            throw new RequestError(400,'output_budget_exceeded','Choose an output limit between 1 and 16384 tokens.');
+        }
         if (!this.ready()) throw new RequestError(503,'service_unavailable','This service is temporarily unavailable.');
         const model=body.model ?? 'gpt-5.6-terra'; const capability=workload==='images'?`image:${model}`:model;
-        const candidates=[...this.workers.values()].filter(w=>w.account.models.includes(capability) || workload==='images' && this.execution.central.identity.pool==='premium' && model===CODEX_IMAGE_ALIAS.requestedModel);
-        if (this.execution.central.identity.pool==='standard') {
+        const candidates=[...this.workers.values()].filter(w=>!w.engine.credentialRejected() && (w.account.models.includes(capability) || workload==='images' && this.execution.central.identity.pool==='premium' && model===CODEX_IMAGE_ALIAS.requestedModel));
+        {
           const now=Date.now();
           const eligible=candidates.flatMap(w=>{
             if (w.account.expiresAtMs<=now+30000 || (w.account.cooldownUntilMs??0)>now || !this.execution.standardAvailable(w.account.id,now)) return [];
-            const state=w.engine.standardAvailability(model);
-            return state.eligible?[{id:w.account.id,lastUsedAtMs:state.lastUsedAtMs,recovering:state.recovering||this.execution.standardRecovering(w.account.id),worker:w}]:[];
+            const state=w.engine.accountAvailability(capability, workload==='images' && model===CODEX_IMAGE_ALIAS.requestedModel);
+            return state.eligible?[{id:w.account.id,lastUsedAtMs:state.lastUsedAtMs,availableSlots:state.availableSlots,recovering:state.recovering||this.execution.standardRecovering(w.account.id),worker:w}]:[];
           });
           const selection=this.standard.reserve(eligible);
           worker=selection?.candidate.worker; releaseSelection=selection?.release;
@@ -143,7 +178,7 @@ export class PoolRuntime {
             res.setHeader('Retry-After','5');
             throw new RequestError(503,'service_busy','This service is busy. Try again shortly.');
           }
-        } else worker=candidates[this.cursor++%candidates.length];
+        }
       } else {
         const saved:ExecutionRecord|null=await this.execution.store.call('lookup',{executionId:job![1],tenantSha256});
         if (!saved) throw new RequestError(404,'not_found','Request not found.');
@@ -151,12 +186,16 @@ export class PoolRuntime {
         worker=this.workers.get(saved.accountId);
       }
       if (!worker) throw new RequestError(503,'service_unavailable','This service is temporarily unavailable.');
+      forwarded = true;
       const response=await fetch(`http://127.0.0.1:${worker.port}${pathname}`,{method:req.method,redirect:'error',signal:AbortSignal.timeout(310000),
         headers:{Authorization:`Bearer ${worker.key}`,'Content-Type':'application/json','x-galx-tenant':delegated,
           ...(typeof req.headers['idempotency-key']==='string'?{'idempotency-key':req.headers['idempotency-key']}:{}),
           ...(typeof req.headers['last-event-id']==='string'?{'last-event-id':req.headers['last-event-id']}: {})},body:body?JSON.stringify(body):req.method==='POST'?'{}':undefined});
       if (!response.ok) { await response.body?.cancel(); throw new RequestError([400,403,404,409,429].includes(response.status)?response.status:503,'request_unavailable','The request could not be completed. Check its status before retrying.'); }
-      if (response.headers.get('content-type')?.includes('text/event-stream')) return await this.stream(response,res);
+      if (response.headers.get('content-type')?.includes('text/event-stream')) {
+        releaseRequest?.(); releaseRequest=undefined;
+        return await this.stream(response,res);
+      }
       const data=await boundedJson(response,pathname.includes('/images/')?32*1024*1024:18*1024*1024);
       if (pathname.includes('/images/')) {
         const artifact=await sanitizeImageArtifact(Buffer.from(data.data?.[0]?.b64_json ?? '','base64'));
@@ -164,7 +203,16 @@ export class PoolRuntime {
         res.writeHead(200,{'Content-Type':artifact.contentType,'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});res.end(artifact.bytes);return;
       }
       return json(res,response.status,publicJob(data));
-    } finally { releaseSelection?.(); if (ownsLock && lock) this.pending.delete(lock); }
+    } catch (error) {
+      if (!generation || res.headersSent) throw error;
+      const state = provenNew && !forwarded ? 'not_accepted' : 'unknown';
+      res.setHeader('X-Should-Retry', state === 'not_accepted' &&
+        (!(error instanceof RequestError) || [429,503].includes(error.status)) ? 'true' : 'false');
+      return json(res,error instanceof RequestError ? error.status : 503,{error:{
+        code:error instanceof RequestError ? error.code : 'request_unavailable',
+        message:error instanceof RequestError ? error.message : 'Check the existing request before continuing.',execution_state:state,
+      }});
+    } finally { releaseStream?.(); releaseRequest?.(); releaseSelection?.(); if (ownsLock && lock) this.pending.delete(lock); }
   }
   private async stream(response:Response,res:http.ServerResponse) {
     res.writeHead(200,{'Content-Type':'text/event-stream','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});
@@ -173,7 +221,7 @@ export class PoolRuntime {
     try { for (;;) { const chunk=await reader.read();if(chunk.done)break;buffer+=decoder.decode(chunk.value,{stream:true});if(buffer.length>2*1024*1024)throw Error('Frame too large.');
       let boundary;while((boundary=buffer.indexOf('\n\n'))>=0){const frame=buffer.slice(0,boundary);buffer=buffer.slice(boundary+2);const raw=frame.split('\n').filter(l=>l.startsWith('data:')).map(l=>l.slice(5).trim()).join('\n');
         if(raw==='[DONE]'){res.write('data: [DONE]\n\n');continue;}if(!raw)continue;
-        const d=JSON.parse(raw);if(d.error){res.write('data: {"error":{"code":"request_failed","message":"The request could not complete."}}\n\n');continue;}
+        const d=JSON.parse(raw);if(d.error){res.write(`data: ${JSON.stringify({error:{code:'request_failed',message:'The request could not complete.',execution_state:d.execution_state==='failed'?'failed':'unknown'}})}\n\n`);continue;}
         const safe={id:typeof d.id==='string'&&/^[-\w.:]{1,128}$/.test(d.id)?d.id:undefined,object:'chat.completion.chunk',choices:Array.isArray(d.choices)?d.choices.slice(0,16).map((c:any,index:number)=>({index,delta:{...(typeof c.delta?.content==='string'?{content:c.delta.content}:{}),...(c.delta?.role==='assistant'?{role:'assistant'}:{}),...(c.delta?.tool_calls!==undefined?{tool_calls:functionCalls(c.delta.tool_calls).map((call,index)=>({index,...call}))}:{})},finish_reason:['stop','length','content_filter','tool_calls'].includes(c.finish_reason)?c.finish_reason:null})):[],
           ...(publicUsage(d.usage)?{usage:publicUsage(d.usage)}:{})};
         const id=/^id: (\d{1,16})$/m.exec(frame)?.[1];if(!res.write(`${id?`id: ${id}\n`:''}data: ${JSON.stringify(safe)}\n\n`))await once(res,'drain',{signal:AbortSignal.any([closed.signal,AbortSignal.timeout(10000)])});

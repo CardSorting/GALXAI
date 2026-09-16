@@ -1,0 +1,178 @@
+{
+  "classification": "private",
+  "observed_at": "2026-09-16T04:16:04.358Z",
+  "scope": "Persistent automatic activation on the existing local Premium and Standard installations; manual sign-in remains explicit.",
+  "authorization": "Owner requested automatic activation without repeated manual gate approvals.",
+  "migration": {
+    "version": "20260916040459",
+    "sha256": "04974bd334a8d11ec64dbb967a8d8b2b29a30d23f4019690d7e9727b22674218",
+    "applied": true,
+    "applied_count": 115,
+    "pending": 0,
+    "remote_only": 0,
+    "dry_run": "Exactly one reviewed migration; vault changes skipped.",
+    "privileges": "anon, authenticated, service_role and galx_relay_control denied direct configuration and reconciliation helper execution.",
+    "security_advisors": [
+      {
+        "name": "auth_leaked_password_protection",
+        "level": "WARN",
+        "scope": "Pre-existing independent Auth configuration; no new activation-related finding."
+      }
+    ]
+  },
+  "policy": {
+    "automatic_activation": true,
+    "new_connection": "Atomic enable on first verified Connect/Register only.",
+    "replay_reconnect_existing_pause": "Preserved.",
+    "manual_gate_close": "Disarms automation and survives runtime heartbeats/restarts.",
+    "readiness": "Own installation evidence, fresh non-future runtime ownership and eligible enabled connection. No peer-account dependency.",
+    "owner_credentials_on_runtime_or_monitor": false
+  },
+  "installation": {
+    "at": "2026-09-16T04:15:22.783Z",
+    "images": [
+      {
+        "tag": "galxai-relay-central:connections-20260916",
+        "id": "sha256:e7a4c80fa704d4abb7b423a48a66afad4d809c70dd5df3592eb772e823284bb3",
+        "architecture": "arm64",
+        "component": "central"
+      },
+      {
+        "tag": "galxai-relay-premium:quota-20260916-r2",
+        "id": "sha256:19b8588bc2c0439c66fcb8cd65149ac8a6df2a3a6b12dac5ce29db214d876e4d",
+        "architecture": "arm64",
+        "component": "runtime",
+        "pool": "premium"
+      },
+      {
+        "tag": "galxai-relay-standard:quota-20260916-r2",
+        "id": "sha256:fd72bc488465e9f1b8d4938fa035aeed3f994c067e9e46a05d96011c46d3bc5a",
+        "architecture": "arm64",
+        "component": "runtime",
+        "pool": "standard"
+      },
+      {
+        "tag": "galxai-monitor-premium:automatic-20260916-r2",
+        "id": "sha256:f98c1b99682338b9a03f1c49b66640c23a7075449fd11184a537ae393ac16a29",
+        "architecture": "arm64",
+        "component": "monitor",
+        "pool": "premium"
+      },
+      {
+        "tag": "galxai-monitor-standard:automatic-20260916-r2",
+        "id": "sha256:2b41e9f8846b0eeb0dfcada0ec54d45acd6d4368c046644259df5897d860fe4e",
+        "architecture": "arm64",
+        "component": "monitor",
+        "pool": "standard"
+      }
+    ],
+    "runtimesPreserved": [
+      {
+        "pool": "premium",
+        "runtimeId": "250c9e8a01dc87d4cea8e88324c62402aec68a4f582f7f21dc1b47af848dfd40",
+        "startedAt": "2026-09-16T03:38:54.878350506Z",
+        "image": "sha256:19b8588bc2c0439c66fcb8cd65149ac8a6df2a3a6b12dac5ce29db214d876e4d"
+      },
+      {
+        "pool": "standard",
+        "runtimeId": "eeffd66453211d7585c71e68d77b74479f084707834f2ab25725f21a5b6f3a64",
+        "startedAt": "2026-09-16T03:38:57.61944966Z",
+        "image": "sha256:fd72bc488465e9f1b8d4938fa035aeed3f994c067e9e46a05d96011c46d3bc5a"
+      }
+    ]
+  },
+  "acceptance": {
+    "at": "2026-09-16T04:16:04.358Z",
+    "results": [
+      {
+        "pool": "premium",
+        "automaticActivation": true,
+        "executionLabel": "Allowed",
+        "accountState": "enabled",
+        "confirmation": "Applied",
+        "revision": 2,
+        "acknowledgedRevision": 2,
+        "epochMatches": true,
+        "readyStatus": 200,
+        "modelInventoryStatus": 200,
+        "modelCount": 4,
+        "pageErrors": 0,
+        "oldActivationNotice": false
+      },
+      {
+        "pool": "standard",
+        "automaticActivation": true,
+        "executionLabel": "Allowed",
+        "accountState": "enabled",
+        "confirmation": "Applied",
+        "revision": 2,
+        "acknowledgedRevision": 2,
+        "epochMatches": true,
+        "readyStatus": 200,
+        "modelInventoryStatus": 200,
+        "modelCount": 3,
+        "pageErrors": 0,
+        "oldActivationNotice": false
+      }
+    ]
+  },
+  "local_checks": {
+    "at": "2026-09-16T04:16:42.291Z",
+    "checks": 69,
+    "scope": "local VM separation on one trusted Mac; no provider generation or cloud deployment",
+    "records": [
+      {
+        "pool": "premium",
+        "address": "192.168.105.1",
+        "installationId": "cdbf6081-b947-45f1-b3c7-5c4b992a951c",
+        "registrationAllowed": true,
+        "executionAllowed": true,
+        "accounts": 1,
+        "machineSha256": "706d57f0db2059f3f707a601d67d91e591639b380e4500ac2fb133ca59d5cc0b",
+        "daemonSha256": "d9a2e6dd4b797ec1fb9bcbc2a1282948e74e3ab6ffb0fa5c28fbcd1d429bfa95"
+      },
+      {
+        "pool": "standard",
+        "address": "192.168.105.3",
+        "installationId": "c3f00fc7-d199-4431-969c-66d492eba38e",
+        "registrationAllowed": true,
+        "executionAllowed": true,
+        "accounts": 1,
+        "machineSha256": "a434cf391eb62970b1269bc04b13d7146d5296167ffb2de3a9e9188e71628269",
+        "daemonSha256": "212a2e51978e2246536443fed52029d4ac1a134811b1bbb08258da007728d732"
+      }
+    ]
+  },
+  "verification": {
+    "activation_database_checks": 67,
+    "rollback": "Retained data and denied protocol verified.",
+    "connection_database_checks": 69,
+    "central_authorization_checks": 155,
+    "execution_database_checks": 50,
+    "general_database_tests": 94,
+    "relay_service_tests": 60,
+    "monitor_model_tests": 8,
+    "public_boundary_registration_tests": 16,
+    "browser_variants": 34,
+    "browser_axe_violations": 0,
+    "browser_overflow": false,
+    "browser_page_errors": 0,
+    "typescript": "passed",
+    "static_migration_integrity": "passed; 115 migration/rollback pairs",
+    "production_build": "passed; 272 pages",
+    "installed_image_checks": 55,
+    "installed_images": 5,
+    "local_isolation_checks": 69
+  },
+  "limits": [
+    "No provider generation submitted; readiness and inventory are not generation qualification.",
+    "No public application or SDK publication.",
+    "No runtime/central image replacement, account creation/deletion, credential rotation or quota reset.",
+    "New-registration automation is covered with disposable database fixtures; existing actual connections retain revision 2.",
+    "Installation policy is persistent intent, not continuous external isolation attestation."
+  ],
+  "research": [
+    "https://supabase.com/docs/guides/database/functions",
+    "https://www.postgresql.org/docs/current/explicit-locking.html"
+  ]
+}

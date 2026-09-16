@@ -1,0 +1,54 @@
+{
+  "reviewed_at": "2026-09-16T01:34:36.209528+00:00",
+  "reviewer": "Codex relay registration incident review",
+  "scope": "Incremental source and complete affected guide review; no broader subsystem recertification",
+  "sources_inspected": [
+    "src/relay/pool-central.ts",
+    "src/relay/pool-protocol.ts",
+    "src/relay/desktop-enrollment.ts",
+    "src/relay/desktop-credentials.ts",
+    "src/relay/desktop-credential-refresh.ts",
+    "src/relay/pool-monitor-server.ts",
+    "scripts/test-relay-registration-errors.ts",
+    "scripts/test-relay-services.ts",
+    "scripts/test-desktop-enrollment.ts",
+    "supabase/migrations/20260915191404_relay_account_management.sql",
+    "supabase/migrations/20260914231914_manual_desktop_shard_enrollment.sql",
+    "docs/knowledge/registry.json",
+    "package.json"
+  ],
+  "complete_guides_inspected": [
+    "docs/reference/relay-account-management.md",
+    "docs/runbooks/relay-pool-services.md",
+    "docs/maintainers/RELAY_CREDENTIAL_ENROLLMENT.md",
+    "docs/TROUBLESHOOTING.md",
+    "docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md",
+    "docs/DOCUMENTATION_POLICY.md",
+    "docs/how-to/change-with-documentation.md",
+    "docs/reference/knowledge-commands.md",
+    "docs/knowledge/README.md",
+    "docs/runbooks/knowledge-maintenance.md"
+  ],
+  "findings": [
+    "Authenticated control errors now map specific credential failures to fixed messages; unknown errors remain generic.",
+    "No enrollment matcher, revocation rule, schema, provider-authentication check or gate was relaxed.",
+    "New regression test is in the service test command and relay domain mapping.",
+    "Affected guide recovery instructions preserve the saved login and explicitly separate identity conflicts from expiry, inventory failure and execution activation.",
+    "Private incident records include exact count correction and rollback-only rehearsal; no source presence is claimed as deployment."
+  ],
+  "evidence": [
+    "post-mortem/incidents/2026/2026-09-16-relay-registration/verification.json"
+  ],
+  "checks": {
+    "relay_and_enrollment_tests": 48,
+    "documentation_tests": 38,
+    "build": "passed",
+    "asset_scan": 643
+  },
+  "limits": [
+    "Owner identity selection pending; no account reconciliation committed.",
+    "No relay or site deployment, execution activation, provider generation or public customer acceptance.",
+    "Execution activation remains an independent installation gate.",
+    "Existing unrelated overdue incident follow-ups retained."
+  ]
+}

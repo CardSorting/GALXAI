@@ -115,6 +115,8 @@ export { BatchEvaluator, batch, type BatchMapOptions, type BatchResultItem } fro
 export {
   AgentRuntime,
   AgentSession,
+  AgentContinuationError,
+  type AgentCheckpoint,
   type AgentConfig,
   type AgentRunOptions,
   type AgentSessionOptions,

@@ -1,0 +1,142 @@
+{
+  "reviewed_at": "2026-09-16T03:44:07.656531+00:00",
+  "reviewer": "Codex second-pass recovery maintainer",
+  "scope": "Incremental source-contract and complete owning-guide review for the second quota audit; not an exhaustive recertification of broader fingerprint inventories",
+  "domains": {
+    "relay": "Bounded request/settlement/callback work, late-success fencing, transient snapshots, explicit waits and local image delivery reconciled with complete owning guides.",
+    "images": "Complete queue guide and shared runtime admission inspected without altering image receipt/artifact authority; 42 raw HTTP/security regressions passed.",
+    "knowledge": "New source/test mappings, proposed ADR0155 refinements, append-only incident events and separately retained installation/acceptance evidence reviewed."
+  },
+  "sources_inspected": [
+    "src/relay/pool-execution.ts",
+    "src/relay/pool-runtime.ts",
+    "src/relay/relay-server.ts",
+    "src/relay/request-bulkhead.ts",
+    "src/sdk/agent.ts",
+    "scripts/test-agent-continuation.ts",
+    "scripts/test-relay-services.ts",
+    "scripts/test-standard-pool.ts",
+    "scripts/test-relay-overload.ts",
+    "package.json",
+    "src/relay/pool-entry.ts",
+    "src/relay/pool-protocol.ts",
+    "src/relay/quota-policy.ts",
+    "docker/relay-pools/local/images.json",
+    "docs/knowledge/registry.json",
+    "deploy/relay-execution/supabase/migrations/20260915082628_relay_execution.sql",
+    "supabase/migrations/20260915081527_central_relay_authorization.sql"
+  ],
+  "complete_guides_inspected": [
+    "docs/reference/shared-quota-recovery.md",
+    "docs/reference/automatic-agent-tools.md",
+    "docs/reference/standard-relay-scheduling.md",
+    "docs/QUEUE_SPECIFICATION.md",
+    "docs/RATE_LIMITS_AND_QUOTAS.md",
+    "docs/ROUTING_ALGORITHMS.md",
+    "docs/RELAY_API_REFERENCE.md",
+    "docs/maintainers/RELAY_QUOTA_AND_FLEET.md",
+    "docs/runbooks/relay-pool-services.md",
+    "docs/DOCUMENTATION_POLICY.md",
+    "docs/how-to/change-with-documentation.md",
+    "docs/reference/knowledge-commands.md"
+  ],
+  "unmapped_paths_reviewed": [
+    ".impeccable/surfaces/src-relay-pool-monitor-html.md",
+    "docs/CATALOG.md",
+    "docs/adr/README.md",
+    "docs/knowledge/DECISIONS.md",
+    "docs/knowledge/DOMAINS.md",
+    "docs/knowledge/audits/2026-09-16-relay-connection-review.json",
+    "docs/knowledge/audits/2026-09-16-relay-connections.md",
+    "docs/knowledge/audits/2026-09-16-relay-registration-review.json",
+    "docs/knowledge/audits/2026-09-16-shared-quota-review.json",
+    "docs/knowledge/audits/2026-09-16-shared-quota-second-pass.md",
+    "docs/knowledge/audits/2026-09-16-shared-quota.md",
+    "docs/knowledge/catalog.json",
+    "docs/knowledge/reviews.json",
+    "post-mortem/CURRENT_STATE.md",
+    "post-mortem/INCIDENTS.md",
+    "post-mortem/OPEN_ITEMS.md",
+    "post-mortem/ROLLING_LOG.md",
+    "post-mortem/documentation-inventory.json",
+    "post-mortem/events.jsonl",
+    "post-mortem/failure-modes/README.md",
+    "post-mortem/failure-modes/controller.md",
+    "post-mortem/incidents/2026/2026-09-16-relay-registration/README.md",
+    "post-mortem/incidents/2026/2026-09-16-relay-registration/connection-lifecycle.json",
+    "post-mortem/incidents/2026/2026-09-16-relay-registration/verification.json",
+    "post-mortem/incidents/2026/2026-09-16-shared-quota/README.md",
+    "post-mortem/incidents/2026/2026-09-16-shared-quota/second-pass-verification.json",
+    "post-mortem/incidents/2026/2026-09-16-shared-quota/verification.json",
+    "post-mortem/register.json",
+    "post-mortem/review.json"
+  ],
+  "findings": [
+    "Serialized terminal writes and coalesced settlement avoid overlapping sweeps; failures stop a bounded batch and use monotonic backoff.",
+    "Failed binding retains the exact acquired lease; new admission remains fenced while that lease is unresolved.",
+    "Request work is bounded before parsing/lookup, with per-owner limits and separate observation/subscription allowances. Before-lookup overload retains unknown classification.",
+    "Late pre-exhaustion sibling success cannot substitute for a post-cooldown probe; transient-failure state is checkpointed.",
+    "SDK tool starts are bounded and stop after save failure/cancellation; capacity deadlines survive restoration and early clicks do not spend another attempt.",
+    "Error and presentation contracts both expose wait; exhausted turn budget takes precedence over a wait/compaction hint.",
+    "Clarified asynchronous engine terminal persistence: a completed stream does not prove the receipt/settlement committed. New admission still blocks while terminal writes are unconfirmed.",
+    "Preserved original first-pass evidence; installed r2 runtimes retain closed gates and account state, with SDK/public application rollout separate.",
+    "Read-only schema authority review confirms old-epoch settlement remains tied to the original lease binding. No SQL or privilege changes were made. Supabase changelog/connection guidance inspected; no applicable connection/API migration was introduced."
+  ],
+  "checks": [
+    {
+      "command": "npm run test:relay:services",
+      "passed": 60,
+      "scope": "Synthetic HTTP/WebSocket fixtures plus deterministic settlement and admission isolation faults"
+    },
+    {
+      "command": "npm run test:agent:tools",
+      "passed": 25,
+      "scope": "Bounded callbacks, retained wait deadlines, early-click suppression, checkpoint fences and session isolation"
+    },
+    {
+      "command": "node --import tsx --test scripts/test-relay-chat-transport.ts scripts/test-client-recovery.ts scripts/test-relay-adaptive-quota.ts scripts/test-relay-client-auth.ts scripts/test-public-information-boundary.ts scripts/test-shard-authority-boundary.ts scripts/test-relay-completion-usage.ts",
+      "passed": 44
+    },
+    {
+      "command": "npm run test:image:security",
+      "passed": 42,
+      "scope": "Raw HTTP, artifact sanitation and owner/authorization boundaries"
+    },
+    {
+      "command": "npx tsc --noEmit --pretty false",
+      "result": "passed after final build"
+    },
+    {
+      "command": "npm run build",
+      "result": "passed",
+      "renderedPages": 272
+    },
+    {
+      "command": "npm run test:docs",
+      "passed": 38
+    },
+    {
+      "command": "git diff --check",
+      "result": "passed"
+    }
+  ],
+  "evidence": [
+    "post-mortem/incidents/2026/2026-09-16-shared-quota/second-pass-verification.json",
+    "docs/knowledge/audits/2026-09-16-shared-quota-second-pass.md"
+  ],
+  "limits": [
+    "No real provider generation, induced real quota exhaustion, production traffic benchmark or public application cutover.",
+    "Runtime images are installed locally; SDK/client application publication and authenticated checkpoint-store integration remain separate.",
+    "Process-local request and per-batch tool limits do not provide distributed tenant fairness, RPS control or aggregate downstream concurrency guarantees.",
+    "Observation and submission allowances share the existing database pool; a database outage can deny both.",
+    "Caller-owned callbacks and persistence still require their own domain deadlines, access control and idempotency.",
+    "Unknown writes/side effects remain subject to reconciliation; no automatic replay or exactly-once guarantee.",
+    "Both execution gates remain closed. Premium retains one paused connected account; Standard has none.",
+    "No schema, permission, credential, account or quota-counter change in this pass. Existing schema contract inspected read-only; installed boundary checks retain that authority.",
+    "The local build scan checks selected markers and runtime traces, not all possible data disclosure or the live public site.",
+    "No new graphical chat UI, visual score or browser acceptance.",
+    "The engine initiates terminal persistence asynchronously from its lifecycle event. Completed stream delivery does not prove terminal-write or lease-settlement commit; failed writes continue to block new admission.",
+    "No new database, billing or client-efficiency attestation; those unchanged reviewed boundaries retain their prior evidence.",
+    "ACT025 remains open; unrelated overdue ACT001/015/016 remain unchanged."
+  ]
+}

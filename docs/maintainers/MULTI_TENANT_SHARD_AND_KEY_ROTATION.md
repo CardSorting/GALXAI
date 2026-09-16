@@ -8,13 +8,13 @@ Private reference for security, platform and relay operators, reconciled Septemb
 
 Only project `mazhcjisettrzbqhorvp` owns canonical accounts, encrypted credentials, exclusive pool assignments, lifecycle history and account leases. The [central account contract](../reference/relay-account-management.md) governs the new services. Premium paid provider accounts support text/Sites/images; Standard free accounts support text only. Execution projects contain identity/reservations/outcomes, not accounts or another budget ledger.
 
-Manual sign-in takes place in the owning pool monitor's desktop. **Review access → register** saves paused authority centrally. Later renewal is explicit **Update saved sign-in → Save new sign-in**. Labels, files and valid tokens alone cannot establish assignment. The new monitor does not use the legacy background saved-file bridge. Rename, removal and unfinished-registration restoration use central revisions and immutable operation identity. Removal is revocation with retained evidence, not erasure or upstream logout.
+Manual sign-in takes place in the owning pool monitor's desktop. **Connect account** verifies and saves authority centrally, enabling new connections under the verified automatic-activation policy. Existing pauses and manual installation holds remain in effect. Later renewal is explicit **Reconnect → Save new sign-in**. Labels, files and valid tokens alone cannot establish assignment. The new monitor does not use the legacy background saved-file bridge. Rename, removal and unfinished-registration restoration use central revisions and immutable operation identity. Removal is revocation with retained evidence, not erasure or upstream logout.
 
 ## 2. Configuration and preflight
 
 Use component-specific secret files from [service installation](../runbooks/relay-pool-services.md). Only the central service receives the main-project database login and vault/identity configuration. Each runtime has only its own restricted execution login and runtime principal; each monitor has its own operator/viewer/registrar principals. Do not clone a broad controller environment into a pool VM. Pool hosts do not receive peer keys or state. The local Mac/admin remains trusted.
 
-`npm run relay:accounts:status` reads central inventory without granting mutation/readiness. `npm run relay:local -- status` and `npm run relay:local -- verify` inspect installed services and isolation. Latest dated acceptance records registration open and execution closed; see [current state](../../post-mortem/CURRENT_STATE.md) for later evidence. Inventory is not provider qualification.
+`npm run relay:accounts:status` reads central inventory without granting mutation/readiness. `npm run relay:local -- status` and `npm run relay:local -- verify` inspect installed services and isolation. Earlier acceptance retained closed gates; see [current state](../../post-mortem/CURRENT_STATE.md) for later evidence. Inventory is not provider qualification.
 
 ### Vault configuration for authorized central consumers
 
@@ -32,11 +32,13 @@ Use component-specific secret files from [service installation](../runbooks/rela
 
 ## 3. Registration, renewal and revocation
 
-Use the [current manual procedure](RELAY_CREDENTIAL_ENROLLMENT.md) in the fixed Premium/Standard monitor. Review account class, identity and current access, then register paused. A different desktop or pool cannot take over a binding. Saved revision, applied runtime revision and capability acceptance are separate. Account removal cannot be reversed; unfinished registration restoration requires new review and preserves history.
+Use the [current manual procedure](RELAY_CREDENTIAL_ENROLLMENT.md) in the fixed Premium/Standard monitor. Connect verifies account class, identity and current access atomically before applying the installation policy to the new connection. A different desktop or pool cannot take over a binding. Saved revision, applied runtime revision and capability acceptance are separate. Account removal cannot be reversed; unfinished registration restoration requires new review and preserves history.
 
 Central removal precedes desktop disconnection/stop. If cleanup fails, use **Removed → Stop desktop**; do not restore authority to stop a container. Keep homes and canonical evidence. Hard upstream revocation needs the provider's own session process; database removal does not claim to perform it.
 
 For eligible unassigned accounts in the retained single-controller deployment only, use [legacy enrollment](legacy-desktop-enrollment.md). Its **Enroll shard**, **Check now**, saved-file bridge and maintenance holds are scoped legacy behavior. Legacy writers/leases reject assigned accounts. Historical CLI revocation is not the new pool management interface or routine expiry repair.
+
+Retired legacy rows contain no usable ciphertext and must be excluded from decryption/rewrap inventories. Their retirement marker and empty credential fields are immutable; do not restore them from a backup to repair a connection. The [owner-only retirement contract](../reference/relay-account-management.md#retire-obsolete-legacy-credentials) preserves operational history. Reconnect for a rejected token preserves its bound account; it is not a vault or identity-key rotation.
 
 ## 4. Vault rotation
 

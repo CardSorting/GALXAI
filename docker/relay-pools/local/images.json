@@ -1,35 +1,35 @@
 {
   "images": [
     {
-      "tag": "galxai-relay-central:management-20260915",
-      "id": "sha256:4f848110b24290945f742a936e6f4fcd21c923ca1c0be359d2b1240227e43a4f",
+      "tag": "galxai-relay-central:connections-20260916",
+      "id": "sha256:e7a4c80fa704d4abb7b423a48a66afad4d809c70dd5df3592eb772e823284bb3",
       "architecture": "arm64",
       "component": "central"
     },
     {
-      "tag": "galxai-relay-premium:tools-20260915",
-      "id": "sha256:f760c58f0107c527eca262786d6aaa56c2986dc195e3365fb2f63142e0c5fe71",
+      "tag": "galxai-relay-premium:generation-20260916-r2",
+      "id": "sha256:064da651cfdcd62c97245092ea1d949848138a56b58a63cb1b9771169ed9a1f0",
       "architecture": "arm64",
       "component": "runtime",
       "pool": "premium"
     },
     {
-      "tag": "galxai-relay-standard:tools-20260915",
-      "id": "sha256:2da12e33665691a1e2d857c79d5f3eb6463eb955da7ad47141c792f97b2354cc",
+      "tag": "galxai-relay-standard:generation-20260916-r2",
+      "id": "sha256:b1d5be42c09f448bc4e5d3a297ddbd315205255d353c586eeb5173deee1ed2b7",
       "architecture": "arm64",
       "component": "runtime",
       "pool": "standard"
     },
     {
-      "tag": "galxai-monitor-premium:management-20260915",
-      "id": "sha256:39735a31ac1179def573ee482fb780f5ce47c9813807e258a50bd2f55b8a4b1d",
+      "tag": "galxai-monitor-premium:automatic-20260916-r2",
+      "id": "sha256:f98c1b99682338b9a03f1c49b66640c23a7075449fd11184a537ae393ac16a29",
       "architecture": "arm64",
       "component": "monitor",
       "pool": "premium"
     },
     {
-      "tag": "galxai-monitor-standard:management-20260915",
-      "id": "sha256:d49a8f13d4f3ed9ed2a8ffa20c2efa0b6e0ddf15bdfc1cce95aa64e1a636f319",
+      "tag": "galxai-monitor-standard:automatic-20260916-r2",
+      "id": "sha256:2b41e9f8846b0eeb0dfcada0ec54d45acd6d4368c046644259df5897d860fe4e",
       "architecture": "arm64",
       "component": "monitor",
       "pool": "standard"

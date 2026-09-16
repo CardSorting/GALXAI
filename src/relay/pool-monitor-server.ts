@@ -92,10 +92,12 @@ export function poolMonitor(deps:{operator:CentralClient;viewer:CentralClient;re
       exactKeys(body,['id','desktopId','name']);const saved=await central.call('/operator/prepare',body);
       await deps.desktops.create({id:saved.desktopId,name:saved.name});return json(res,201,saved);
     }
-    const registration=/^\/api\/registrations\/(review|register|refresh|signin|desktop|start|stop)$/.exec(route);
+    const registration=/^\/api\/registrations\/(connect|review|register|refresh|signin|desktop|start|stop)$/.exec(route);
     if(registration){
       exactKeys(body,['id']);const saved=await central.call('/operator/operation',{id:body.id});
       if(saved.removedAt&&registration[1]!=='stop')throw new RequestError(409,'registration_removed','This registration was removed. Restore it before continuing.');
+      // An explicit retry after a lost connect response returns the already committed operation.
+      if(registration[1]==='connect'&&saved.state==='registered')return json(res,200,{id:saved.id,state:'registered',accountId:saved.accountId,replayed:true});
       if(busy.has(saved.id))throw new RequestError(409,'action_in_progress','Wait for the current action to finish.');busy.add(saved.id);
       try {
         // Resolve the desktop through the centrally scoped registration, never a browser-supplied desktop ID.

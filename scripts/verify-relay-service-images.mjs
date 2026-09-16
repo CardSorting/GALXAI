@@ -1,15 +1,21 @@
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
-import { mkdtemp,writeFile,rm,mkdir } from 'node:fs/promises';
+import { mkdtemp,writeFile,rm,mkdir,readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import assert from 'node:assert/strict';
+const releaseTag=process.env.GALX_RELAY_SERVICE_TAG ?? 'candidate-20260915';
+if(!/^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,127}$/.test(releaseTag))throw Error('Invalid service image tag');
+const pinned=process.env.GALX_RELAY_IMAGE_MANIFEST?JSON.parse(await readFile(process.env.GALX_RELAY_IMAGE_MANIFEST,'utf8')).images:undefined;
+if(pinned&&(!Array.isArray(pinned)||pinned.length!==5))throw Error('Invalid image manifest');
 const exec=promisify(execFile),directory=await mkdtemp(path.join(tmpdir(),'galx-service-images-'));let checks=0;const images=[];
 const run=async(args)=>(await exec('docker',args,{timeout:60000,maxBuffer:2097152})).stdout;
 const check=(condition)=>{assert(condition);checks++;};
 try{
  for(const [name,component,pool] of [['galxai-relay-central','central'],['galxai-relay-premium','runtime','premium'],['galxai-relay-standard','runtime','standard'],['galxai-monitor-premium','monitor','premium'],['galxai-monitor-standard','monitor','standard']]){
-  const tag=name+':candidate-20260915',metadata=JSON.parse(await run(['image','inspect',tag]))[0];check(metadata.Config.User==='1000:1000');check(metadata.Config.Labels['io.galx.component']===component);if(pool)check(metadata.Config.Labels['io.galx.pool']===pool);
+  const pin=pinned?.find(i=>i.component===component&&i.pool===pool);
+  if(pinned&&(!pin||!new RegExp('^'+name+':[a-zA-Z0-9][a-zA-Z0-9_.-]{0,127}$').test(pin.tag)))throw Error('Manifest image mismatch');
+  const tag=pin?.tag??name+':'+releaseTag,metadata=JSON.parse(await run(['image','inspect',tag]))[0];if(pin)check(metadata.Id===pin.id);check(metadata.Config.User==='1000:1000');check(metadata.Config.Labels['io.galx.component']===component);if(pool)check(metadata.Config.Labels['io.galx.pool']===pool);
   const output=await run(['run','--rm','--network','none','--read-only','--cap-drop','ALL','--entrypoint','node',tag,'--input-type=module','-e',"import fs from 'node:fs';import sharp from 'sharp';import pg from 'pg';import '/app/service.mjs';const p=JSON.parse(fs.readFileSync('/app/component.json'));if(fs.existsSync('/app/.env.local')||fs.existsSync('/app/post-mortem')||process.getuid()===0)throw Error();await sharp({create:{width:2,height:2,channels:3,background:'white'}}).png().toBuffer();console.log(JSON.stringify(p));"]);const policy=JSON.parse(output);check(policy.component===component);if(pool)check(policy.pool===pool);
   let failed=false;try{await run(['run','--rm','--network','none','--read-only','--cap-drop','ALL','--env','DATABASE_URL=synthetic-forbidden',tag]);}catch(e){failed=true;check(!String(e.stdout).includes('synthetic-forbidden')&&!String(e.stderr).includes('synthetic-forbidden'));}check(failed);
   if(pool){const file=path.join(directory,pool+'-'+component+'.json');await writeFile(file,JSON.stringify({pool:pool==='premium'?'standard':'premium',installationId:'11111111-1111-4111-8111-111111111111'}),{mode:0o644});let denied=false;try{await run(['run','--rm','--network','none','--read-only','--cap-drop','ALL','--mount',`type=bind,src=${file},dst=/run/secrets/component-config,readonly`,tag]);}catch{denied=true;}check(denied);}

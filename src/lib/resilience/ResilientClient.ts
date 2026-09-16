@@ -20,11 +20,11 @@ export class GalxError extends Error {
   public code?: string;
   public isRetryable: boolean;
   /** Relay execution classification. Unknown/accepted work must not be replayed. */
-  public executionState?: 'unknown' | 'accepted' | 'not_accepted';
+  public executionState?: 'unknown' | 'accepted' | 'not_accepted' | 'failed';
   public shouldRetry?: boolean;
 
   constructor(message: string, options?: { status?: number; code?: string; isRetryable?: boolean;
-    executionState?: 'unknown' | 'accepted' | 'not_accepted'; shouldRetry?: boolean }) {
+    executionState?: 'unknown' | 'accepted' | 'not_accepted' | 'failed'; shouldRetry?: boolean }) {
     super(message);
     this.name = 'GalxError';
     this.status = options?.status;
@@ -115,7 +115,7 @@ export async function safeJsonParse<T = any>(res: Response): Promise<{ data: T |
 
 /** Read only the public recovery fields from an error response without consuming the caller's body. */
 async function readRecoveryClassification(res: Response): Promise<{
-  executionState?: 'unknown' | 'accepted' | 'not_accepted';
+  executionState?: 'unknown' | 'accepted' | 'not_accepted' | 'failed';
   shouldRetry?: boolean;
 }> {
   const header = res.headers.get('x-should-retry');
@@ -123,9 +123,9 @@ async function readRecoveryClassification(res: Response): Promise<{
   try {
     const parsed = await safeJsonParse<{ error?: { execution_state?: unknown } }>(res.clone());
     const state = parsed.data?.error?.execution_state;
-    const executionState = ['unknown', 'accepted', 'not_accepted'].includes(String(state))
-      ? state as 'unknown' | 'accepted' | 'not_accepted' : undefined;
-    return { executionState, shouldRetry: executionState === 'unknown' || executionState === 'accepted' ? false : shouldRetry };
+    const executionState = ['unknown', 'accepted', 'not_accepted', 'failed'].includes(String(state))
+      ? state as 'unknown' | 'accepted' | 'not_accepted' | 'failed' : undefined;
+    return { executionState, shouldRetry: executionState === 'unknown' || executionState === 'accepted' || executionState === 'failed' ? false : shouldRetry };
   } catch {
     return { shouldRetry };
   }
@@ -329,7 +329,7 @@ async function executeResilientFetch<T = any>(
       }
 
       const noReplay = recovery.shouldRetry === false
-        || recovery.executionState === 'unknown' || recovery.executionState === 'accepted';
+        || recovery.executionState === 'unknown' || recovery.executionState === 'accepted' || recovery.executionState === 'failed';
       if (!res.ok && noReplay) {
         await res.body?.cancel();
         throw new GalxError('This request cannot be retried automatically.', { status: res.status,

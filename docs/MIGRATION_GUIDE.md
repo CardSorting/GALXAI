@@ -26,16 +26,16 @@ Use [service installation](runbooks/relay-pool-services.md) for exact image pins
 
 Remove token imports, ambient credential discovery, application connection calls and direct registry insert recipes. For the new services:
 
-1. Open the intended fixed **GALX Premium** or **GALX Standard** monitor.
-2. Choose **Register account**, prepare its desktop and manually sign in with the appropriate paid/free provider account.
-3. Choose **Review access**, inspect the result and explicitly register. The central account starts paused.
-4. Follow execution acceptance and gates, then enable intended accounts and wait for a fresh matching applied revision. Verify actual requested capabilities separately.
+1. Configure verified automatic activation once through the [installation procedure](runbooks/relay-pool-services.md), before onboarding.
+2. Open the intended fixed **GALX Premium** or **GALX Standard** monitor, choose **Connect account**, prepare its desktop and manually sign in with the appropriate paid/free provider account.
+3. Choose **Connect account** to verify and register. A new connection enables atomically and its own ready relay activates automatically; manual holds preserve paused state.
+4. Wait for a fresh matching applied revision. Existing deliberately paused accounts still require Enable; new connections activate automatically. Verify actual requested capabilities separately.
 
 No label, existing token or desktop file establishes assignment. A conflicting, removed or differently bound account cannot be revived or moved by registration. Use [manual registration](maintainers/RELAY_CREDENTIAL_ENROLLMENT.md) for the full procedure.
 
 ## Renew sessions manually
 
-In the owning monitor open the account's desktop, complete fresh provider sign-in, then choose **Update saved sign-in → Save new sign-in**. Review and commit are explicit; the new services do not use the legacy background saved-file bridge. A saved revision, a matching runtime acknowledgment and successful inference are separate observations. Monitor reconnection and GALX account-session renewal do not refresh provider credentials.
+In the owning monitor open the account's desktop, complete fresh provider sign-in, then choose **Reconnect → Save new sign-in**. Review and commit are explicit; the new services do not use the legacy background saved-file bridge. A saved revision, a matching runtime acknowledgment and successful inference are separate observations. Monitor reconnection and GALX account-session renewal do not refresh provider credentials.
 
 Rename, health filtering and removal use the central revision-aware management contract. Unfinished removed registrations can be restored with a new review. Removed registered accounts remain revoked and cannot be restored; files and historical authority are retained. See [account management](reference/relay-account-management.md).
 

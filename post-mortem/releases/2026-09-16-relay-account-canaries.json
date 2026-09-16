@@ -1,0 +1,239 @@
+{
+  "classification": "private",
+  "observed_at": "2026-09-16T04:26:33.421258+00:00",
+  "scope": "Owner-requested end-to-end account tests against the two installed local relays. One real bounded text submission per account; no application cutover or image trial.",
+  "authorization": "Owner requested: run end to end tests of the relays to test the accounts.",
+  "result": "FAILED: both requests were accepted, then failed without output; neither account passed live generation acceptance.",
+  "request": {
+    "count": 2,
+    "per_pool": 1,
+    "workload": "text",
+    "model": "gpt-5.6-luna",
+    "reasoning_effort": "low",
+    "max_tokens": 64,
+    "durable_receipt": true,
+    "expected_output": "RELAY_OK",
+    "distinct_persisted_idempotency_keys": true,
+    "automatic_resubmissions": 0
+  },
+  "results": [
+    {
+      "pool": "premium",
+      "at": "2026-09-16T04:24:21.866Z",
+      "before": {
+        "at": "2026-09-16T04:24:21.854Z",
+        "executionAllowed": true,
+        "automaticActivation": true,
+        "heartbeatAgeMs": 2299,
+        "accounts": [
+          {
+            "id": "codex_sh_2c5baf5f09e78318d9ad06f2",
+            "state": "enabled",
+            "connectionState": "connected",
+            "revision": 2,
+            "acknowledgedRevision": 2,
+            "epochMatches": true
+          }
+        ]
+      },
+      "readiness": 200,
+      "models": [
+        "gpt-5.6-sol",
+        "gpt-5.6-terra",
+        "gpt-5.6-luna",
+        "gpt-5.5"
+      ],
+      "model": "gpt-5.6-luna",
+      "status": "not_confirmed",
+      "jobId": "job_mu3ljj68_3e8af0df",
+      "admissionStatus": 202,
+      "admissionMs": 438,
+      "jobStatus": "failed",
+      "completionMs": 2539,
+      "receipt": {
+        "httpStatus": 200,
+        "status": "unknown",
+        "outputMatches": false,
+        "outputBytes": 0,
+        "usage": null
+      },
+      "wrongTenantStatus": 404,
+      "unauthenticatedStatus": 401,
+      "after": {
+        "at": "2026-09-16T04:24:24.852Z",
+        "executionAllowed": true,
+        "automaticActivation": true,
+        "heartbeatAgeMs": 5295,
+        "accounts": [
+          {
+            "id": "codex_sh_2c5baf5f09e78318d9ad06f2",
+            "state": "enabled",
+            "connectionState": "connected",
+            "revision": 2,
+            "acknowledgedRevision": 2,
+            "epochMatches": true
+          }
+        ]
+      },
+      "execution": {
+        "state": "unknown",
+        "success": false,
+        "actualTokens": null,
+        "settled": true,
+        "accountMatches": true,
+        "hasLease": true,
+        "jobMatches": true,
+        "tlsVerified": true
+      },
+      "stream": {
+        "httpStatus": 200,
+        "errorCodes": [
+          "request_failed"
+        ],
+        "executionStates": [
+          "unknown"
+        ],
+        "hasSuccessfulFinish": false,
+        "hasDone": false
+      },
+      "runtime": {
+        "snapshotAt": 1789532735972,
+        "metrics": {
+          "totalJobsSubmitted": 1,
+          "totalJobsCompleted": 0,
+          "totalJobsFailed": 1,
+          "totalTokensEmitted": 0,
+          "totalUpstreamRetries": 0,
+          "totalShardCooldownEjections": 0,
+          "totalAuthFailures": 0
+        },
+        "accounts": [
+          {
+            "status": "active",
+            "failures": 0,
+            "quotaFailures": 0,
+            "cooldownUntilMs": 0
+          }
+        ]
+      }
+    },
+    {
+      "pool": "standard",
+      "at": "2026-09-16T04:24:25.363Z",
+      "before": {
+        "at": "2026-09-16T04:24:25.349Z",
+        "executionAllowed": true,
+        "automaticActivation": true,
+        "heartbeatAgeMs": 4295,
+        "accounts": [
+          {
+            "id": "codex_sh_834707761bf76510dd70d6a7",
+            "state": "enabled",
+            "connectionState": "connected",
+            "revision": 2,
+            "acknowledgedRevision": 2,
+            "epochMatches": true
+          }
+        ]
+      },
+      "readiness": 200,
+      "models": [
+        "gpt-5.6-terra",
+        "gpt-5.6-luna",
+        "gpt-5.5"
+      ],
+      "model": "gpt-5.6-luna",
+      "status": "not_confirmed",
+      "jobId": "job_mu3ljlvg_bde2ef40",
+      "admissionStatus": 202,
+      "admissionMs": 261,
+      "jobStatus": "failed",
+      "completionMs": 2353,
+      "receipt": {
+        "httpStatus": 200,
+        "status": "unknown",
+        "outputMatches": false,
+        "outputBytes": 0,
+        "usage": null
+      },
+      "wrongTenantStatus": 404,
+      "unauthenticatedStatus": 401,
+      "after": {
+        "at": "2026-09-16T04:24:28.003Z",
+        "executionAllowed": true,
+        "automaticActivation": true,
+        "heartbeatAgeMs": 6949,
+        "accounts": [
+          {
+            "id": "codex_sh_834707761bf76510dd70d6a7",
+            "state": "enabled",
+            "connectionState": "connected",
+            "revision": 2,
+            "acknowledgedRevision": 2,
+            "epochMatches": true
+          }
+        ]
+      },
+      "execution": {
+        "state": "unknown",
+        "success": false,
+        "actualTokens": null,
+        "settled": true,
+        "accountMatches": true,
+        "hasLease": true,
+        "jobMatches": true,
+        "tlsVerified": true
+      },
+      "stream": {
+        "httpStatus": 200,
+        "errorCodes": [
+          "request_failed"
+        ],
+        "executionStates": [
+          "unknown"
+        ],
+        "hasSuccessfulFinish": false,
+        "hasDone": false
+      },
+      "runtime": {
+        "snapshotAt": 1789532739330,
+        "metrics": {
+          "totalJobsSubmitted": 1,
+          "totalJobsCompleted": 0,
+          "totalJobsFailed": 1,
+          "totalTokensEmitted": 0,
+          "totalUpstreamRetries": 0,
+          "totalShardCooldownEjections": 0,
+          "totalAuthFailures": 0
+        },
+        "accounts": [
+          {
+            "status": "active",
+            "failures": 0,
+            "quotaFailures": 0,
+            "cooldownUntilMs": 0
+          }
+        ]
+      }
+    }
+  ],
+  "interpretation": {
+    "activation": "Automatic policy and execution gates remained open; both enabled accounts retained matching revision/epoch acknowledgments.",
+    "generation": "HTTP 202 was admission only. Job status failed, receipt unknown, error stream request_failed with unknown execution state, no success terminal frame.",
+    "settlement": "Each execution record names its expected account and lease, success=false, state=unknown, actualTokens=null, settled=true. Settled indicates central settlement acknowledgment, not successful generation or proof of zero provider usage.",
+    "containment": "Each runtime recorded one submitted/failed job and zero completed jobs, output events, upstream retries, authentication failures or quota cooldown ejections. These counters do not establish the provider rejection reason.",
+    "authorization": "Both job receipt routes rejected missing authentication with 401 and a different tenant with 404.",
+    "diagnostic_limit": "Private runtime logs and durable records did not retain the detailed provider failure reason. Do not infer revocation, exhaustion, unsupported model or request incompatibility as a confirmed root cause.",
+    "preservation": "No gates, accounts, credentials, runtime images, databases or accepted operation identities were changed or purged. Original jobs were read without replay."
+  },
+  "remaining": [
+    "Recover a bounded private diagnostic for the failure and correct the confirmed cause before new qualification requests.",
+    "Qualify successful text completion and actual provider output-limit behavior on both accounts.",
+    "Sites, image generation, other models, sustained/concurrent load and shared-account exhaustion were not exercised.",
+    "ACT-025 caller distribution and owner-scoped durable checkpoint acceptance remain open."
+  ],
+  "scripts_sha256": {
+    ".relay/account-canary-20260916.mjs": "3a2863c4fdaf7089b71c205b68aa0db6f52beb3a67d6e391f6c9a8477914d2d8",
+    ".relay/account-canary-20260916/readback.mjs": "5f8e7ba672e958583012bc991ace6d3c65e67090f682062e8dad90c1a2e8ef31"
+  }
+}

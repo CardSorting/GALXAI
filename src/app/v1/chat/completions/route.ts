@@ -1,3 +1,4 @@
+import { RelayDispatchError, publicRelayChatFailure } from '@/core/router/adapters/RelayChatTransport';
 import { withDeveloperAccess } from '@/lib/security/developer-access';
 import crypto from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
@@ -592,6 +593,7 @@ async function previewPOST(req: NextRequest) {
       let accumulatedContent = '';
       let accumulatedThinking = '';
       let finalized = false;
+      let streamFailed = false;
 
       const consumeSseLines = (flush = false) => {
         const lines = sseBuffer.split('\n');
@@ -603,6 +605,7 @@ async function previewPOST(req: NextRequest) {
           if (!payload || payload === '[DONE]') continue;
           try {
             const json = JSON.parse(payload);
+            if (json.error) streamFailed = true;
             const delta = json.choices?.[0]?.delta;
             if (typeof delta?.content === 'string') accumulatedContent += delta.content;
             if (typeof delta?.thinking === 'string') accumulatedThinking += delta.thinking;
@@ -709,7 +712,7 @@ async function previewPOST(req: NextRequest) {
                 sseBuffer += '\n';
                 consumeSseLines(true);
               }
-              await finalizeStream(true);
+              await finalizeStream(!streamFailed);
               controller.close();
               return;
             }
@@ -848,6 +851,14 @@ async function previewPOST(req: NextRequest) {
       }
       if (acquiredRequest.localStream) seatEngine.releaseSeatStreamSlot(acquiredRequest.userId);
       GalxLumiQoSPoolGovernor.getInstance().releaseStreamSlot(acquiredRequest.userId, true);
+    }
+    if (error instanceof RelayDispatchError) {
+      const publicFailure = publicRelayChatFailure(error);
+      const needsEdit = ['context_budget_exceeded','output_budget_exceeded'].includes(publicFailure.error.code);
+      return NextResponse.json(publicFailure, { status: needsEdit ? 400 : 503, headers: {
+        'Cache-Control': 'no-store', 'Access-Control-Allow-Origin': '*', 'X-Should-Retry': 'false',
+        ...(error.executionState === 'not_accepted' && !needsEdit ? { 'Retry-After': '5' } : {}),
+      } });
     }
     if (error instanceof ChatRequestValidationError) {
       return NextResponse.json(

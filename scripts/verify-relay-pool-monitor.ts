@@ -19,7 +19,7 @@ try{
     const data:any={pool,installationId:identity.installationId,epoch,registrationAllowed:true,executionAllowed:true,lastSeenAt:new Date().toISOString(),accounts:pool==='premium'?[{id:accountId,desktopId,name:'Synthetic · Design studio',state:'enabled',revision:2,acknowledgedRevision:2,acknowledgedEpoch:epoch,acknowledgedAt:new Date().toISOString(),models:['fixture-text-a','fixture-text-b'],accountClass:'paid',credentialExpiresAt:Date.now()+86400000},{id:'codex_sh_'+hash('second').slice(0,24),desktopId:randomUUID(),name:'Synthetic · Research team',state:'paused',revision:3,acknowledgedRevision:2,acknowledgedEpoch:epoch,models:['fixture-text-a'],accountClass:'paid',credentialExpiresAt:Date.now()-1000}]:[],registrations:pool==='premium'?[{id:randomUUID(),desktopId,name:'Synthetic · New account',state:'reviewed',revision:1,accountClass:'paid',models:['fixture-text-a','fixture-text-b']}]:[],activity:pool==='premium'?[{id:randomUUID(),accountId,command:'enabled',revision:2,at:new Date().toISOString()}]:[]};
     if(pool==='premium')data.accounts[0].updatedAt=new Date(Date.now()-120000).toISOString();
     const tokens=['operator','viewer','registrar'].map(role=>hash(pool+role));
-    let offline=false, mutationCount=0, stopFails=false;
+    let offline=false, mutationCount=0, stopFails=false, connectWrites=0, connectError=false, lostConnect=false, refreshError=false;
     const clients=tokens.map(token=>new CentralClient('http://127.0.0.1:1',token,identity,(async(url:any,options:any)=>{
       if(offline)throw Error('synthetic offline');
       const route=new URL(url).pathname, body=JSON.parse(options.body);
@@ -44,7 +44,8 @@ try{
       if(route==='/operator/operation'){const saved=data.registrations.find((r:any)=>r.id===body.id);if(!saved)return Response.json({error:{code:'not_found',message:'Registration not found.'}},{status:404});return Response.json(saved);}
       if(route==='/operator/ticket')return Response.json({ticket:'synthetic'});
       if(route==='/registrar/review'){const saved=data.registrations.find((r:any)=>r.id===body.id);Object.assign(saved,{state:'reviewed',accountClass:pool==='premium'?'paid':'free',models:['fixture-text-a']});return Response.json(saved);}
-      if(route==='/registrar/register'){const saved=data.registrations.find((r:any)=>r.id===body.id);saved.state='registered';saved.accountId='codex_sh_'+hash(saved.id).slice(0,24);data.accounts.push({id:saved.accountId,desktopId:saved.desktopId,name:saved.name,state:'paused',revision:1,models:saved.models,accountClass:saved.accountClass,credentialExpiresAt:Date.now()+86400000});return Response.json(saved);}
+      if(route==='/registrar/connect'){if(connectError)return Response.json({error:{code:'credential_missing'}},{status:422});connectWrites++;const saved=data.registrations.find((r:any)=>r.id===body.id);Object.assign(saved,{state:'registered',accountClass:pool==='premium'?'paid':'free',models:['fixture-text-a']});saved.accountId='codex_sh_'+hash(saved.id).slice(0,24);data.accounts.push({id:saved.accountId,desktopId:saved.desktopId,name:saved.name,state:'paused',revision:1,models:saved.models,accountClass:saved.accountClass,credentialExpiresAt:Date.now()+86400000,connectionState:'connected',connectionCheckedAt:new Date().toISOString()});return lostConnect?Response.json({error:{code:'control_unavailable'}},{status:503}):Response.json(saved);}
+      if(route==='/registrar/refresh'){if(refreshError)return Response.json({error:{code:'credential_rejected'}},{status:422});const saved=data.registrations.find((r:any)=>r.id===body.id);const account=data.accounts.find((a:any)=>a.id===saved.accountId);Object.assign(account,{connectionState:'connected',connectionCheckedAt:new Date().toISOString(),credentialExpiresAt:Date.now()+86400000});return Response.json({accountId:account.id,state:'updated'});}
       return Response.json(data);
     }) as typeof fetch));
     const running=new Set([desktopId]);
@@ -81,8 +82,26 @@ try{
     await page.waitForFunction(()=>!location.hash&&document.querySelector('#role')?.textContent.includes('access'));
     assert.equal((await fetch(origin+'/session',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json'},body:JSON.stringify({role,ticket:renewal.ticket})})).status,401,'reopening an authenticated monitor consumes the ticket');
     assert.equal(await page.locator('#role').textContent(),pool==='premium'?'Operator access':'Read-only access');
+    // Automatic activation communicates a useful pending state in both fixed monitors.
+    data.automaticActivation=true;data.executionAllowed=false;
+    const savedAccounts=data.accounts;data.accounts=[];
+    await page.locator('nav a[href="#accounts"]').click();
+    await page.getByRole('button',{name:'Refresh',exact:true}).click();
+    await page.locator('#execution').filter({hasText:'Waiting for account'}).waitFor();
+    assert.match(await page.locator('#gate-note').innerText(),/automatically/);
+    assert.equal((await page.locator('body').innerText()).includes('New accounts start paused'),false);
+    for(const [name,width,height] of [['desktop',1440,1000],['mobile',390,844]] as const){
+      await page.setViewportSize({width,height});
+      await page.screenshot({path:path.join(shots,`${pool}-automatic-${name}.png`),fullPage:true});
+      assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+      assert.deepEqual((await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa']).analyze()).violations.map((v:any)=>v.id),[]);
+      report.push({pool,surface:'automatic-activation',viewport:name,axeViolations:0,overflow:false});
+    }
+    data.accounts=savedAccounts;data.executionAllowed=true;data.automaticActivation=false;
+    await page.getByRole('button',{name:'Refresh',exact:true}).click();
+    await page.locator('#execution').filter({hasText:'Allowed'}).waitFor();
     if(pool==='premium'){
-      await page.getByRole('link',{name:/^Registration/}).click();
+      await page.getByRole('link',{name:/^Connections/}).click();
 
       await page.locator('#pending .models summary').click();
       await page.locator('#pending .models summary').focus();
@@ -98,8 +117,8 @@ try{
       await page.getByText('Change saved.',{exact:false}).waitFor();assert.equal(mutationCount,1);
       offline=true;await page.getByRole('button',{name:'Refresh',exact:true}).click();await page.getByText('Connection interrupted',{exact:true}).waitFor();
       assert.equal(await page.locator('#rows button:enabled').count(),0);
-      offline=false;await page.getByRole('button',{name:'Refresh',exact:true}).click();await page.getByText('Connected',{exact:true}).waitFor();
-      data.executionAllowed=false;await page.getByRole('button',{name:'Refresh',exact:true}).click();await page.getByText('Not activated',{exact:true}).waitFor();
+      offline=false;await page.getByRole('button',{name:'Refresh',exact:true}).click();await page.locator('#connection').filter({hasText:/^Connected$/}).waitFor();
+      data.executionAllowed=false;await page.getByRole('button',{name:'Refresh',exact:true}).click();await page.locator('#execution').filter({hasText:'Paused'}).waitFor();
       assert.equal(await page.getByRole('button',{name:'Enable',exact:true}).first().isEnabled(),false);
       data.executionAllowed=true;
     } else assert.equal(await page.locator('#new').isVisible(),false);
@@ -163,14 +182,35 @@ try{
       }
       await page.getByRole('button',{name:'Create sign-in desktop'}).click();
       const registration=page.locator('#pending article').filter({hasText:'Synthetic · Added account'});
-      await registration.getByText('Step 1 of 3',{exact:true}).waitFor();
-      await registration.getByText('More options',{exact:true}).click();
-      await registration.getByRole('button',{name:'Review access again'}).click();
-      await registration.getByText('Step 3 of 3',{exact:true}).waitFor();
-      await registration.getByRole('button',{name:'Register account',exact:true}).click();
+      await registration.getByText('Step 1 of 2',{exact:true}).waitFor();
+      connectError=true;await registration.getByRole('button',{name:'Connect account',exact:true}).click();
+      await registration.getByRole('alert').waitFor();assert.equal(await page.locator('#notice').textContent(),'');
+      assert.equal(connectWrites,0);
+      connectError=false;lostConnect=true;await registration.getByRole('button',{name:'Connect account',exact:true}).click();
+      await page.getByText('Account connected. View its current state in Accounts.',{exact:true}).waitFor();
+      assert.equal(await page.locator('.registration-row .inline-error').count(),0);
+      const replay=await page.request.post(origin+'/api/registrations/connect',{headers:{Origin:origin},data:{id:data.registrations[0].id}});assert.equal((await replay.json()).replayed,true);assert.equal(connectWrites,1);lostConnect=false;
+      await page.locator('nav a[href="#accounts"]').click();
       await page.locator('#rows').getByText('Synthetic · Added account',{exact:false}).waitFor();
       assert.equal(data.accounts.at(-1).state,'paused');
       const added=page.locator('#rows tr').filter({hasText:'Synthetic · Added account'});
+      const sameId=data.accounts.at(-1).id;data.accounts.at(-1).connectionState='sign_in_required';
+      await page.locator('#refresh').click();await added.getByRole('button',{name:'Reconnect',exact:true}).click();
+      const reconnectRow=page.locator('#pending article').filter({hasText:'Synthetic · Added account'});
+      await reconnectRow.getByRole('button',{name:'Save new sign-in',exact:true}).waitFor();
+      refreshError=true;await reconnectRow.getByRole('button',{name:'Save new sign-in',exact:true}).click();
+      await reconnectRow.getByRole('alert').waitFor();
+      for(const [name,width,height] of [['desktop',1440,1000],['narrow',320,844]] as const){
+        await page.setViewportSize({width,height});await page.screenshot({path:path.join(shots,`premium-reconnect-${name}.png`),fullPage:true});
+        assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+        assert.deepEqual((await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa']).analyze()).violations.map((v:any)=>v.id),[]);
+        report.push({pool,surface:'reconnect-error',viewport:name,axeViolations:0,overflow:false});
+      }
+      refreshError=false;await reconnectRow.getByRole('button',{name:'Save new sign-in',exact:true}).click();
+      await page.getByText('Connection verified. Check Accounts for its current status.',{exact:true}).waitFor();
+      assert.equal(data.accounts.at(-1).id,sameId);assert.equal(data.accounts.at(-1).state,'paused');assert.equal(data.accounts.length,3);
+      await page.locator('nav a[href="#accounts"]').click();
+
       if(await added.locator('.record-menu').getAttribute('open')===null)await added.getByText('Manage',{exact:true}).click();await added.getByRole('button',{name:'Remove account',exact:true}).click();
       await page.locator('#manage-submit').click();await page.locator('#manage-dialog').waitFor({state:'hidden'});
       await page.locator('#filter').selectOption('removed');assert.equal(await page.locator('#rows tr').count(),1);
@@ -182,7 +222,7 @@ try{
       await page.getByRole('button',{name:'Open desktop',exact:true}).first().waitFor();
       assert.equal(running.has(desktopId),true);
       const recovered=page.locator('#pending article').filter({hasText:'Synthetic · New account'});
-      await recovered.getByText('More options',{exact:true}).click();
+      await recovered.getByText('Sign-in options',{exact:true}).click();
       page.once('dialog',(dialog:any)=>dialog.accept());
       await recovered.getByRole('button',{name:'Stop desktop',exact:true}).click();
       await recovered.getByRole('button',{name:'Start desktop',exact:true}).waitFor();

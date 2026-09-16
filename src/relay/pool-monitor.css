@@ -179,3 +179,10 @@ dialog .inline-error{margin-top:12px;font-size:14px}
   .form-line input,.search input{font-size:16px}
   dialog{padding:22px}
 }
+
+/* Make primary connection actions comfortable without changing the console palette. */
+.registration-row button,.registration-row summary{min-height:44px}
+.registration-heading h3{overflow-wrap:anywhere}
+.registration-tools{max-width:100%}
+.registration-tools .actions{margin-top:12px}
+.registration-row .inline-error{max-width:65ch}

@@ -15,3 +15,7 @@ Generated metadata, separate from [the full ADR catalog](../adr/README.md). Unre
 | [ADR 0151: Standalone Codex image tool transport](../../docs/adr/0151-codex-standalone-image-tool.md) | proposed | local | Relay operator |
 | [ADR 0152: Manual desktop-only shard authority](../../docs/adr/0152-manual-desktop-only-shard-authority.md) | accepted | deployed | Relay operator |
 | [ADR 0153: Central account authority with isolated relay execution](../../docs/adr/0153-central-account-authority-isolated-relays.md) | proposed | local | Relay operator |
+| [ADR 0154: Stable relay connections and irreversible legacy credential retirement](../../docs/adr/0154-relay-connection-lifecycle-and-legacy-retirement.md) | proposed | local | Relay operator |
+| [ADR 0155: Shared quota containment and bounded agent continuation](../../docs/adr/0155-shared-quota-containment-and-bounded-continuation.md) | proposed | local | Relay and SDK maintainer |
+| [ADR 0156: Verified automatic relay activation](../../docs/adr/0156-verified-automatic-relay-activation.md) | proposed | local | Relay operator |
+| [ADR 0157: Compatible relay requests and honest output budgets](../../docs/adr/0157-compatible-relay-output-budgets.md) | proposed | local | Relay maintainer |

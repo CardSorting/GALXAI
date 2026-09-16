@@ -8,11 +8,11 @@ Private operator guide for the installed Premium and Standard monitors. [Service
 
 Open **GALX Monitors** and select Premium or Standard, or use the fixed Spotlight/Dock apps. The launcher starts the selected local services when needed and requests a one-use scoped session. Signed-out pages offer the corresponding app link. Visiting a plain URL does not automatically grant access; do not paste long-lived keys.
 
-In Registration, choose **Open desktop** for the saved registration. The valid desktop ticket connects automatically. **Back to registration** returns to the fixed monitor. Each pool has its own monitor and desktop sessions, separate from customer authentication and inference keys. Expiry or restart requires reconnecting.
+In Connections, choose **Open desktop** for the saved registration. The valid desktop ticket connects automatically. **Back to registration** returns to the fixed monitor. Each pool has its own monitor and desktop sessions, separate from customer authentication and inference keys. Expiry or restart requires reconnecting.
 
 ## Organize workspaces
 
-Accounts and Registration are separate views with name/status filters. Accounts adds Health and Issues first/Name A–Z sorting; Registration adds in-progress, ready, registered, attention, unknown and removed views. Completed registrations collapse in the default list. Clear filters recovers an empty search.
+Accounts and Connections are separate views with name/status filters. Accounts adds Health and Issues first/Name A–Z sorting; Connections adds in-progress, ready, registered, attention, unknown and removed views. Healthy completed connections collapse in the default list. Reconnect-required connections remain visible with repair controls open. Clear filters recovers an empty search.
 
 Use **Manage → Rename** for recognizable labels and **Remove** for retained lifecycle removal. A registered account's name stays synchronized with its registration. Pool monitors do not provide legacy custom groups, drag/drop ordering, cross-pool pickers or generic desktop deletion.
 
@@ -30,15 +30,15 @@ A running desktop does not establish account health or execution readiness. A st
 
 ## Enroll a new or unconfirmed account
 
-For the new pools, the action is **Register account**: create a named registration, manually sign in, Review access, then register centrally in paused state. Premium verifies paid class; Standard verifies free class. Enable is separate after execution activation. The old **Enroll shard** inspector belongs only to legacy unassigned accounts and cannot assign them to a pool.
+For the new pools, the action is **Connect account**: create a named connection, manually sign in, then connect to verify and save centrally in paused state. Premium verifies paid class; Standard verifies free class. Enable is separate after execution activation. The old **Enroll shard** inspector belongs only to legacy unassigned accounts and cannot assign them to a pool.
 
 Use the full [manual registration procedure](RELAY_CREDENTIAL_ENROLLMENT.md). Existing pool accounts must reuse their bound registration and home. Neither matching a label nor copying a browser profile transfers ownership.
 
 ## Repair flow
 
-1. Filter Accounts or Registration by attention and read the health reason.
-2. For expired sign-in, open the matching registration; start the desktop if needed.
-3. Complete manual provider sign-in inside it, then explicitly review/save the new sign-in through the monitor.
+1. Filter Accounts or Connections by attention and read the health reason.
+2. For expired or rejected sign-in, choose Reconnect for the matching account; start the desktop if needed.
+3. Complete manual provider sign-in inside it, then choose Reconnect → Save new sign-in through the monitor.
 4. Inspect central saved state and matching relay confirmation. Current metadata is not a successful generation test.
 5. For cooldown/failures, respect the reported state and inspect the owning account; do not clear policy/counters or borrow another pool.
 6. For unknown connectivity, restore the owning service and refresh rather than labeling the account failed.
@@ -67,6 +67,6 @@ Keep guest screenshots and clipboard contents private. Browser emulation does no
 | Remove unfinished registration | Save removal centrally, cancel review/tickets, disconnect sessions and attempt stop; restorable with new review |
 | Remove registered account | Permanently revoke central access, remove linked registration from active results, disconnect sessions and attempt stop |
 
-No pool monitor action deletes desktop files or transfers the account binding. Removal is saved before stop, so a stop failure appears as incomplete cleanup. Filter Registration by Removed and choose **Stop desktop**. Old direct controls and new display connections reject removed registrations. Restore is offered only for unfinished registrations while registration is open.
+No pool monitor action deletes desktop files or transfers the account binding. Removal is saved before stop, so a stop failure appears as incomplete cleanup. Filter Connections by Removed and choose **Stop desktop**. Old direct controls and new display connections reject removed registrations. Restore is offered only for unfinished registrations while registration is open.
 
 A missing bound home needs administrator recovery; preserve central records and original operations instead of importing credentials elsewhere. The destructive legacy Delete desktop action remains scoped to [legacy operations](legacy-desktop-operations.md#stop-disconnect-and-delete), never a pool health-repair recipe.

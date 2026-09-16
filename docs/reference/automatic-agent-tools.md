@@ -40,7 +40,7 @@ const result = await agent.run('Find my order and summarize its status', {
 });
 ```
 
-`readOwnedOrder` belongs to the calling application and must enforce its verified owner's access. Registration authorizes a callback; model-generated arguments do not grant additional account access. `parallelToolExecution` defaults to true; false executes each returned batch in order. Both `run` and `stream` honor it. A stream must be consumed for its generator to advance.
+`readOwnedOrder` belongs to the calling application and must enforce its verified owner's access. Registration authorizes a callback; model-generated arguments do not grant additional account access. `parallelToolExecution` defaults to true with at most four callbacks in flight per batch. `maxConcurrentTools` can adjust that positive bound up to 32; false executes each returned batch in order. Persistence failure or cancellation stops queued callback starts while already-started callbacks are awaited. Both `run` and `stream` honor it. A stream must be consumed for its generator to advance. Stream errors, malformed data and missing terminal completion cannot become a final answer. Stopping consumption preserves incomplete model/tool intent and does not authorize replay.
 
 ## Wire contract
 
@@ -57,9 +57,11 @@ const result = await agent.run('Find my order and summarize its status', {
 | Replay | Original job/account/tenant/epoch only; replaying a retained stream can redeliver call data, never execute a callback on the relay |
 | Unsupported | Provider-hosted/MCP/app-server approval protocols, legacy `functions` aliases, and function calls under the durable Sites receipt contract |
 
+The isolated text output budget also constrains observed argument bytes and completed call envelopes, so its configured limit can be lower than these protocol maxima. Overflow fails before calls reach a callback; no tool executes and usage remains unconfirmed. This local budget does not cap hidden provider reasoning.
+
 Unknown nested provider fields are removed from delivered calls. Tool arguments and outputs are application data and retain their content. Approval request IDs, credential metadata and provider objects are not forwarded as callable work.
 
-Every model continuation uses a distinct step identity under its original logical agent turn. It must pass the selected pool's normal admission, quota and account checks. Standard retains one ongoing model job per account, fair rotation and paced recovery. There is no automatic peer fallback or replay after uncertainty; a busy or failed inference can end the agent run with its existing error.
+Every model continuation uses a distinct step identity under its original logical agent turn. It must pass the selected pool's normal admission, quota and account checks. Both pools retain fair rotation and paced recovery; Standard permits one ongoing job per account and healthy Premium accounts up to four. There is no automatic peer fallback or replay after uncertainty. A stopped inference preserves an owner-scoped checkpoint and ends the run with an actionable continuation error; see [shared quota and bounded continuation](shared-quota-recovery.md).
 
 ## Errors, cancellation and limits
 
@@ -68,7 +70,8 @@ Every model continuation uses a distinct step identity under its original logica
 - Unknown function names return a tool error and cannot invoke an arbitrary application property. Invalid/repeated call IDs reject the entire batch before any callback in it begins. Prior history and earlier steps count toward duplicate detection.
 - Callback failures and unserializable results become bounded-shape tool errors; successful `undefined` results become JSON null. Tools are not retried automatically. A new call ID is a new model-requested action, so callbacks performing side effects still need their own domain idempotency.
 - `signal` stops model requests and future callback starts. An already-running callback owns cancellation of its underlying work. Stopping a stream is not a guarantee that previously started parallel callbacks were cancelled.
-- `maxSteps` remains a positive integer, default 10. It bounds model steps, not permissions, and includes the final answer step. Increase it deliberately for a longer task. Automatic continuation does not remove central budgets, timeouts or application access checks.
+- `maxSteps` is a positive integer, default 10, counting attempted model steps including failed attempts and the final answer. Context, output and cumulative conservative turn budgets also apply. Explicit resume retains the original limits, completed tool results and attempt count.
+- `onCheckpoint` is an awaited owner-storage hook; without it, the session retains progress only in memory/export. Unconfirmed tools or requests require reconciliation. `session.getRecovery()` provides action labels and a retained capacity-wait deadline; early Continue clicks spend no new attempt or budget. `session.resume()` continues confirmed progress after that wait, and explicit `session.compact()` can reduce older context without an extra model call. The [continuation contract](shared-quota-recovery.md) owns defaults, example, privacy, cancellation, persistence and rollback limits.
 
 The SDK does not fabricate responses to missing-information questions. It cannot change approval rules inside a caller-provided callback or an external application. Provider sign-in, MFA, central registration, account Enable and serving activation retain their explicit workflows.
 

@@ -113,6 +113,48 @@ test('operator error diagnostics allowlist values, never provider strings or cre
   assert.equal(upstreamDiagnostic({ error: { message: 'Unsupported parameter: max_output_tokens' } }).parameter, 'max_output_tokens');
 });
 
+test('private rejection diagnostics identify the job without changing failure or replay policy', async () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'galx-private-rejection-'));
+  const upstream = http.createServer(), ws = new WebSocketServer({ noServer: true });
+  let mode = 'frame', attempts = 0;
+  const diagnostics: any[] = [];
+  upstream.on('upgrade', (req, socket, head) => {
+    attempts++;
+    if (mode === 'http') { socket.end('HTTP/1.1 400 Bad Request\r\nContent-Length: 0\r\n\r\n'); return; }
+    ws.handleUpgrade(req, socket, head, client => client.on('message', () => client.send(JSON.stringify({
+      type: 'error', status: 400, error: { code: 'invalid_request_error', param: 'max_output_tokens',
+        message: 'Unsupported parameter: max_output_tokens. Bearer private-secret' },
+    }))));
+  });
+  await new Promise<void>(r => upstream.listen(0, '127.0.0.1', r));
+  const relay = new GalxaiRelayServer({ port: 0, host: '127.0.0.1', assignedShard: { id: 'a', accountId: 'a', accessToken: 'fixture' },
+    assignedShardId: 'a', apiKeys: ['client'], adminApiKeys: ['admin'], registryEnabled: false, discoverHostCredentials: false,
+    stateSnapshotPath: path.join(directory, 'state.json'), shardsJsonPath: path.join(directory, 'absent'), drainTimeoutMs: 20,
+    capabilityDiscovery: async () => ['test'], wsEndpoint: `ws://127.0.0.1:${(upstream.address() as any).port}`,
+    onUpstreamDiagnostic: (diagnostic, context) => { diagnostics.push({ diagnostic, context }); throw Error('Observer unavailable'); } });
+  try {
+    await relay.start(); const url = `http://127.0.0.1:${relay.listeningPort()}`;
+    for (mode of ['frame', 'http']) {
+      let id = '';
+      await assert.rejects(executeRelayChat({ url, key: 'client', idempotencyKey: mode,
+        payload: { model: 'test', messages: [{ role: 'user', content: mode }], durable_receipt: true, stream: false },
+        ttftTimeoutMs: 5000, onAccepted: async jobId => { id = jobId; } }));
+      assert.equal(diagnostics.at(-1).context.jobId, id);
+      assert.equal(diagnostics.at(-1).diagnostic.status, 400);
+      assert.equal((await readRelayReceipt({ url, key: 'client', jobId: id, signal: AbortSignal.timeout(5000) })).status, 'unknown');
+      const denied = await fetch(url + '/api/telemetry', { headers: { Authorization: 'Bearer client' } });
+      assert.equal(denied.status, 403);
+    }
+    assert.equal(attempts, 2); assert.equal(diagnostics.length, 2);
+    assert.equal(diagnostics[0].diagnostic.parameter, 'max_output_tokens');
+    assert(!JSON.stringify(diagnostics).includes('private-secret'));
+  } finally {
+    await relay.stop(); for (const socket of ws.clients) socket.terminate();
+    await new Promise<void>(r => ws.close(() => r())); await new Promise<void>(r => upstream.close(() => r()));
+    fs.rmSync(directory, { recursive: true, force: true });
+  }
+});
+
 test('required output ceiling rejects disabled forwarding before queueing or opening a provider connection', async () => {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'galx-limit-admission-'));
   const relay = new GalxaiRelayServer({ port: 0, host: '127.0.0.1', assignedShard: { id: 'a', accountId: 'a', accessToken: 'fixture' },

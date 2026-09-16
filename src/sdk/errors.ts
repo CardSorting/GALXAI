@@ -15,7 +15,7 @@ export class GalxError extends Error {
   readonly headers?: Headers | Record<string, string>;
   readonly requestId?: string;
   /** Relay recovery classification. Ambiguous/accepted work must not be replayed. */
-  readonly executionState?: 'unknown' | 'accepted' | 'not_accepted';
+  readonly executionState?: 'unknown' | 'accepted' | 'not_accepted' | 'failed';
   readonly shouldRetry?: boolean;
 
   constructor(
@@ -110,10 +110,11 @@ export class APIError extends GalxError {
       ? (headers as Headers).get('x-should-retry')
       : Object.entries((headers ?? {}) as Record<string, string>).find(([key]) => key.toLowerCase() === 'x-should-retry')?.[1];
     Object.assign(error, {
-      executionState: ['unknown', 'accepted', 'not_accepted'].includes(executionState) ? executionState : undefined,
+      ...(typeof code === 'string' && /^[a-zA-Z0-9_.:-]{1,128}$/.test(code) ? { code } : {}),
+      executionState: ['unknown', 'accepted', 'not_accepted', 'failed'].includes(executionState) ? executionState : undefined,
       // Ambiguous or already accepted work is never safe to replay, even if a
       // gateway omitted the explicit veto header.
-      shouldRetry: executionState === 'unknown' || executionState === 'accepted'
+      shouldRetry: executionState === 'unknown' || executionState === 'accepted' || executionState === 'failed'
         ? false : header === 'true' ? true : header === 'false' ? false : undefined,
     });
     return error;
@@ -124,7 +125,7 @@ export class APIError extends GalxError {
 export function isNonReplayableError(error: unknown): boolean {
   const value = error as { executionState?: string; shouldRetry?: boolean; headers?: Headers | Record<string, string> } | null;
   if (!value) return false;
-  if (value.executionState === 'unknown' || value.executionState === 'accepted' || value.shouldRetry === false) return true;
+  if (value.executionState === 'unknown' || value.executionState === 'accepted' || value.executionState === 'failed' || value.shouldRetry === false) return true;
   const headers = value.headers;
   const retry = typeof (headers as any)?.get === 'function'
     ? (headers as Headers).get('x-should-retry')

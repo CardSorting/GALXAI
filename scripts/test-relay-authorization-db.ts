@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { randomUUID, createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import pg from 'pg';
+import { connectionDatabaseChecks } from './test-relay-connections-db.js';
 import { executionDatabaseChecks } from './test-relay-execution-db.js';
 
 const database = new pg.Pool({ connectionString: process.env.DATABASE_URL, max: 4 });
@@ -158,8 +159,12 @@ try {
       if(role!=='galx_relay_control') await denied(c.query("SELECT private.relay_control($1,'authenticate','{}')",[scopes.premium.keys.runtime]));
     }finally{await c.query('RESET ROLE');c.release();}
   }
+  await connectionDatabaseChecks(database,scopes,call);
+  await database.query(await readFile(new URL('../supabase/rollbacks/20260916040459_relay_automatic_activation.down.sql',import.meta.url),'utf8'));
   const before=(await database.query('SELECT count(*)::integer n FROM private.galx_relay_account_assignments')).rows[0].n;
   await executionDatabaseChecks(database);
+  await database.query(await readFile(new URL('../supabase/rollbacks/20260916013944_relay_connection_lifecycle.down.sql',import.meta.url),'utf8'));
+  await denied(call('premium','operator','status'));
   await database.query(await readFile(new URL('../supabase/rollbacks/20260915191404_relay_account_management.down.sql',import.meta.url),'utf8'));
   equal((await database.query('SELECT count(*)::integer n FROM private.galx_relay_management_operations')).rows[0].n,4);
   await denied(call('premium','operator','status'));
