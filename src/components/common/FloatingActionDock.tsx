@@ -1,4 +1,5 @@
 'use client';
+import { BILLING_PATHS } from '@/lib/billing/navigation';
 
 import React, { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
@@ -22,7 +23,7 @@ function BaseFloatingActionDock() {
   const [shareOpen, setShareOpen] = useState(false);
 
   useEffect(() => {
-    if ((pathname === '/' || pathname === '/images' || pathname?.startsWith('/images/') || pathname === '/sites' || pathname?.startsWith('/sites/') || pathname === '/signup' || pathname === '/login' || pathname === '/keys/top-up' || pathname === '/billing' || pathname === '/pricing' || pathname === '/docs' || pathname?.startsWith('/docs/'))) return;
+    if ((pathname === '/' || pathname === '/images' || pathname?.startsWith('/images/') || pathname === '/sites' || pathname?.startsWith('/sites/') || pathname === '/signup' || pathname === '/login' || (pathname === BILLING_PATHS.overview || pathname?.startsWith('/billing/')) || pathname === '/pricing' || pathname === '/docs' || pathname?.startsWith('/docs/'))) return;
 
     let ticking = false;
     const handleScroll = () => {
@@ -40,7 +41,7 @@ function BaseFloatingActionDock() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [pathname]);
 
-  if ((pathname === '/' || pathname === '/images' || pathname?.startsWith('/images/') || pathname === '/sites' || pathname?.startsWith('/sites/') || pathname === '/signup' || pathname === '/login' || pathname === '/keys/top-up' || pathname === '/billing' || pathname === '/pricing' || pathname === '/docs' || pathname?.startsWith('/docs/'))) {
+  if ((pathname === '/' || pathname === '/images' || pathname?.startsWith('/images/') || pathname === '/sites' || pathname?.startsWith('/sites/') || pathname === '/signup' || pathname === '/login' || (pathname === BILLING_PATHS.overview || pathname?.startsWith('/billing/')) || pathname === '/pricing' || pathname === '/docs' || pathname?.startsWith('/docs/'))) {
     return null;
   }
 

@@ -11,6 +11,7 @@ Look up a contract or tool without following an operational procedure.
 - [Central account and registration management](relay-account-management.md)
 - [Isolated relay and monitor API](../RELAY_API_REFERENCE.md)
 - [Retained federation API and original-job recovery](legacy-federation-api.md)
+- [Billing pages and payment paths](billing-pages.md)
 - [Product API boundaries](../API_BASE_URL.md)
 - [CI implementation](../maintainers/CI_PIPELINE_AND_AUTOMATION_SPEC.md)
 - [Telemetry sources and interpretation](../maintainers/TELEMETRY_AND_METRICS_OBSERVABILITY.md)

@@ -1,3 +1,4 @@
+import { BILLING_PATHS } from '../billing/navigation';
 /**
  * GALXAI: BroccoliDB OmniSearch & Natural Navigation Engine
  * High-performance in-memory semantic indexing for non-technical and power users alike.
@@ -130,12 +131,12 @@ const ACRONYM_MAP: Record<string, string> = {
   api: '/keys',
   key: '/keys',
   ui: '/playground',
-  tax: '/billing/invoices',
-  sub: '/queues',
+  tax: BILLING_PATHS.invoices,
+  sub: BILLING_PATHS.plan,
   bpe: '/docs/prompt-caching',
   pci: '/compliance',
-  vat: '/billing/invoices',
-  usd: '/billing',
+  vat: BILLING_PATHS.invoices,
+  usd: BILLING_PATHS.credits,
   llm: '/models',
 };
 
@@ -187,21 +188,39 @@ const BASE_CATALOG_ITEMS: CatalogItem[] = [
   },
 
   {
-    title: 'Developer Wallet & Wholesale Billing',
-    description: 'Top up compute balance, configure auto-reload, view transparent invoices, and export CSVs.',
-    category: 'Navigation',
-    href: '/billing',
-    shortcutKey: 'G B',
-    keywords: ['billing', 'wallet', 'deposit', 'funds', 'receipt', 'invoice', 'credit card', 'stripe', 'crypto', 'balance', 'pay', 'usdt', 'btc', 'solana'],
-    intentPhrases: ['add funds', 'how do i pay', 'top up wallet', 'where is my invoice', 'billing receipt', 'check balance', 'deposit money', 'add credit card', 'can i pay with crypto', 'usdt deposit', 'bitcoin payment', 'solana compute', 'minimum deposit', 'how to check remaining balance'],
+    title: 'Billing overview', description: 'Your plan, prepaid credit and payment activity.',
+    category: 'Navigation', href: BILLING_PATHS.overview, shortcutKey: 'G B',
+    keywords: ['billing', 'account billing', 'overview'], intentPhrases: ['open billing', 'manage billing'],
   },
   {
-    title: 'Business Tax Invoices & Receipts',
-    description: 'Download corporate PDF invoices, tax breakdowns, and automated accounting receipts.',
-    category: 'Documentation',
-    href: '/billing/invoices',
+    title: 'Plan and subscription', description: 'Review Pro access, renewal details and your subscription.',
+    category: 'Navigation', href: BILLING_PATHS.plan,
+    keywords: ['plan', 'subscription', 'pro', 'renewal', 'cancel subscription', 'upgrade'],
+    intentPhrases: ['manage my subscription', 'cancel my plan', 'upgrade to pro', 'when does my plan renew'],
+  },
+  {
+    title: 'Credits and top-up', description: 'Review prepaid credit and add a one-time top-up.',
+    category: 'Navigation', href: BILLING_PATHS.credits,
+    keywords: ['wallet', 'balance', 'credits', 'top up', 'deposit', 'funds', 'usd'],
+    intentPhrases: ['add funds', 'top up wallet', 'check balance', 'deposit money', 'minimum deposit', 'how to check remaining balance'],
+  },
+  {
+    title: 'Transactions', description: 'Review credit added, usage and balance adjustments.',
+    category: 'Navigation', href: BILLING_PATHS.transactions,
+    keywords: ['transactions', 'history', 'credit history', 'usage', 'ledger', 'export csv'],
+    intentPhrases: ['view transactions', 'export credit history', 'where did my credit go'],
+  },
+  {
+    title: 'Billing invoices', description: 'View and download invoices for your payments.',
+    category: 'Navigation', href: BILLING_PATHS.invoices,
     keywords: ['invoice', 'receipt', 'tax', 'pdf', 'bills', 'accounting', 'vat', 'expenses'],
     intentPhrases: ['where is my invoice', 'download tax receipt', 'billing invoice pdf', 'accounting receipt', 'corporate invoice', 'vat invoice'],
+  },
+  {
+    title: 'Payment settings', description: 'Manage your saved payment methods securely with Stripe.',
+    category: 'Navigation', href: BILLING_PATHS.payments,
+    keywords: ['payment methods', 'credit card', 'debit card', 'stripe', 'payment settings'],
+    intentPhrases: ['update my credit card', 'add credit card', 'change payment method', 'how do i pay'],
   },
   {
     title: 'Live System Status & Operational Health',

@@ -188,7 +188,7 @@ Primary links and recovery buttons are centered inline-flex controls with a 10px
 
 All local links, buttons, inputs, and summaries have a pale indigo focus-visible outline (2px), a 4px offset, and the focus radius. The search field provides its own focus-within outline with a 3px offset; its input suppresses the duplicate outline. Reduced motion disables local transitions and smooth scrolling while keeping immediate focus and state feedback.
 
-[PlanAction](../home/PlanAction.tsx) accepts both wrapper and action classes so pricing surfaces use this family's indigo treatment. The wrapper stacks its action and explanation with a 16px gap; supporting text uses .8125rem and 1.7 leading. Signed-in visitors continue to `/billing#plan`; guests continue through sign-in with that destination retained. Its adjacent copy explains plan review, monthly renewal, and cancellation. The link does not itself subscribe or charge the visitor.
+[PlanAction](../home/PlanAction.tsx) accepts both wrapper and action classes so pricing surfaces use this family's indigo treatment. The wrapper stacks its action and explanation with a 16px gap; supporting text uses .8125rem and 1.7 leading. Signed-in visitors continue to `/billing/plan`; guests continue through sign-in with that destination retained. Its adjacent copy explains plan review, monthly renewal, and cancellation. The link does not itself subscribe or charge the visitor.
 
 ### Search and topic filters
 

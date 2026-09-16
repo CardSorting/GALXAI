@@ -1,8 +1,9 @@
 'use client';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { clearCreditCheckoutAttempt } from '@/lib/billing/checkout-attempt';
 
 /** Redirect parameters only identify a checkout; only the account API confirms it. */
-export function CheckoutStatus({ token, onConfirmed, accountId, onPending }: { token?: string; onConfirmed: () => void; accountId: string; onPending: (pending: boolean) => void }) {
+export function CheckoutStatus({ token, onConfirmed, accountId, onPending, returnSearch }: { token?: string; onConfirmed: () => void; accountId: string; onPending: (pending: boolean) => void; returnSearch?: string }) {
   const callback = useRef(onConfirmed);
   callback.current = onConfirmed;
   const pendingCallback = useRef(onPending);
@@ -12,7 +13,8 @@ export function CheckoutStatus({ token, onConfirmed, accountId, onPending }: { t
   const [revision, setRevision] = useState(0);
   const refresh = useCallback(() => setRevision(n => n + 1), []);
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
+    const current = new URLSearchParams(window.location.search);
+    const params = current.has('session_id') || current.has('checkout') ? current : new URLSearchParams(returnSearch || window.location.search);
     const session = params.get('session_id');
     if (!session) {
       pendingCallback.current(false);
@@ -32,7 +34,7 @@ export function CheckoutStatus({ token, onConfirmed, accountId, onPending }: { t
         if (!response.ok) { setMessage(result.error || 'Could not check this payment.'); setRetry(true); if ([400,404].includes(response.status)) pendingCallback.current(false); return; }
         if (result.session.verified) {
           pendingCallback.current(false);
-          try { sessionStorage.removeItem(`galx_checkout:${accountId}:${window.location.pathname.startsWith('/keys') ? 'keys' : 'billing'}:${result.session.amountTotalUsd}`); } catch { /* Optional retry storage. */ }
+          try { clearCreditCheckoutAttempt(sessionStorage, accountId, result.session.amountTotalUsd); } catch { /* Optional retry storage. */ }
           setMessage(`Payment confirmed. $${Number(result.session.creditUsd).toFixed(2)} credit added.`);
           callback.current(); window.dispatchEvent(new Event('galx_wallet_update'));
           // Keep the receipt identifier in the URL for refreshes and support.
@@ -46,7 +48,7 @@ export function CheckoutStatus({ token, onConfirmed, accountId, onPending }: { t
     void check();
     const timeout = setTimeout(() => { if (!stopped) { controller.abort(); } }, 35000);
     return () => { stopped = true; controller.abort(); clearTimeout(timer); clearTimeout(timeout); };
-  }, [token, revision, accountId]);
+  }, [token, revision, accountId, returnSearch]);
   if (!message) return null;
-  return <div className="space-y-2 border-l-2 border-indigo-400/60 pl-4 text-sm leading-6 text-zinc-300"><p role="status" aria-live="polite">{message}</p>{retry && <button type="button" onClick={refresh} className="text-indigo-300 underline underline-offset-4">Check payment status</button>}</div>;
+  return <div className="space-y-2 border-y border-white/10 py-4 text-sm leading-6 text-zinc-300"><p role="status" aria-live="polite">{message}</p>{retry && <button type="button" onClick={refresh} className="min-h-11 text-indigo-300 underline underline-offset-4 focus-visible:outline-indigo-300">Check payment status</button>}</div>;
 }

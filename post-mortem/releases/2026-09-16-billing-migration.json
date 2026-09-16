@@ -1,0 +1,141 @@
+{
+  "observed_at": "2026-09-16T00:57:56.683Z",
+  "authorization": "User explicitly requested migration application, then a Git commit and push.",
+  "target": "Linked application database; verified against the configured PostgreSQL project identity before reading or applying.",
+  "migration": "supabase/migrations/20260916003207_billing_canonical_returns.sql",
+  "sha256": "c9623a431e8cf114b8aceea6a33ed95ab52460d52ea22f639a4901010ed2bcf0",
+  "dry_run": {
+    "pending": [
+      "20260916003207_billing_canonical_returns.sql"
+    ],
+    "other_pending": 0,
+    "skip_vault": true
+  },
+  "application": {
+    "command": "supabase db push --linked --skip-vault --yes",
+    "exit_code": 0,
+    "applied": 113,
+    "pending": 0,
+    "remote_only": 0
+  },
+  "before": {
+    "observed_at": "2026-09-16T00:57:30.141Z",
+    "mode": "before",
+    "linked_application_target_verified": true,
+    "version": "20260916003207",
+    "applied": false,
+    "table": {
+      "rls": true,
+      "forced_rls": true
+    },
+    "column": [],
+    "constraints": [],
+    "privileges": [
+      {
+        "role": "anon",
+        "read": false,
+        "insert": false,
+        "update": false,
+        "delete": false
+      },
+      {
+        "role": "authenticated",
+        "read": false,
+        "insert": false,
+        "update": false,
+        "delete": false
+      },
+      {
+        "role": "service_role",
+        "read": false,
+        "insert": false,
+        "update": false,
+        "delete": false
+      }
+    ],
+    "rows": 2,
+    "returns": null
+  },
+  "after": {
+    "observed_at": "2026-09-16T00:57:56.683Z",
+    "mode": "after",
+    "linked_application_target_verified": true,
+    "version": "20260916003207",
+    "applied": true,
+    "table": {
+      "rls": true,
+      "forced_rls": true
+    },
+    "column": [
+      {
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      }
+    ],
+    "constraints": [
+      {
+        "definition": "CHECK ((return_path = '/billing/plan'::text))",
+        "validated": true
+      }
+    ],
+    "privileges": [
+      {
+        "role": "anon",
+        "read": false,
+        "insert": false,
+        "update": false,
+        "delete": false
+      },
+      {
+        "role": "authenticated",
+        "read": false,
+        "insert": false,
+        "update": false,
+        "delete": false
+      },
+      {
+        "role": "service_role",
+        "read": false,
+        "insert": false,
+        "update": false,
+        "delete": false
+      }
+    ],
+    "rows": 2,
+    "returns": {
+      "original_contract": 2,
+      "canonical_contract": 0,
+      "invalid_contract": 0
+    }
+  },
+  "column_privilege_checks": {
+    "roles": [
+      "anon",
+      "authenticated",
+      "service_role"
+    ],
+    "privileges": [
+      "SELECT",
+      "INSERT",
+      "UPDATE"
+    ],
+    "all_denied": true
+  },
+  "security_advisors": {
+    "unchanged": true,
+    "before_count": 1,
+    "after_count": 1,
+    "existing_finding_names": [
+      "auth_leaked_password_protection"
+    ],
+    "affected_table_findings": 0
+  },
+  "local_validation": "See 2026-09-16-billing-modernization.json for the production build, 113-pair verification, isolated database/payment tests and browser checks. Runtime source unchanged since that validation.",
+  "limits": [
+    "Migration application only; no payment, refund, cancellation, price, privilege or Stripe setting change.",
+    "Application push and hosted deployment acceptance are distinct; no hosted app acceptance is claimed by this migration record.",
+    "The existing leaked-password-protection advisory is unchanged and unrelated to this additive private column."
+  ],
+  "rollback": "Preserve the new column and both return readers. Presentation rollback must retain existing payment input and issued return URLs."
+}

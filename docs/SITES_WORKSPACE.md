@@ -6,7 +6,7 @@ Sign in to open [Sites](https://galx.ai/sites) and create a simple website throu
 
 A verified account includes one free Site with three conversation turns in total. Build and Discuss each use a turn. Check the header for your remaining free Sites, turns and images. Archiving a Site does not reset this one-time allowance. Free creation can be busy or temporarily paused even with turns left. Check availability beside the composer; your prompt and saved work stay available.
 
-To continue beyond the allowance, activate GALX Pro in [Billing](https://galx.ai/billing#plan). After payment is confirmed, return to Sites. You can manage or cancel the subscription from Billing; cancellation takes effect at the end of the paid period. API and image usage remain separate.
+To continue beyond the allowance, activate GALX Pro in [Billing](https://galx.ai/billing/plan). After payment is confirmed, return to Sites. You can manage or cancel the subscription from Billing; cancellation takes effect at the end of the paid period. API and image usage remain separate.
 
 ## Start with an idea
 

@@ -1,60 +1,147 @@
 'use client';
+import { BILLING_PATHS } from '@/lib/billing/navigation';
+
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { PRO_PLAN } from '@/lib/billing/pro-plan';
+import { parsePlanStatus, type PlanStatus } from '@/lib/billing/plan-status';
 
-// Local extension of the existing billing surface: plan terms, current access,
-// then one checkout action. Existing dark surfaces, type and controls are retained.
-const control='rounded-md border border-white/15 px-4 py-2.5 text-sm text-zinc-100 hover:bg-white/5 focus-visible:outline-indigo-300 disabled:cursor-not-allowed disabled:opacity-50';
-type Status={access:'included'|'paid_plan_required'|'unavailable';checkoutAvailable:boolean;hasPaymentProfile:boolean};
-export function PlanPanel({token,accountId}:{token?:string;accountId:string}) {
-  const [status,setStatus]=useState<Status|null>(null),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[error,setError]=useState('');
-  const alive=useRef(true),inFlight=useRef(false),attempt=useRef<string|null>(null);
-  const authorization=useCallback(():Record<string,string>=>token?{Authorization:`Bearer ${token}`}:{},[token]);
-  const load=useCallback(async()=>{
-    setLoading(true);setError('');
+const control = 'min-h-11 rounded-md border border-white/15 px-4 py-2.5 text-sm text-zinc-100 hover:bg-white/5 focus-visible:outline-indigo-300 disabled:cursor-not-allowed disabled:opacity-50';
+const primary = `${control} border-indigo-400/40 bg-indigo-500/20 text-indigo-100`;
+const date = (value: string) => new Date(value).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+
+export function PlanPanel({ token, accountId, compact = false, returnSearch, refreshKey = 0 }: { token?: string; accountId: string; compact?: boolean; returnSearch?: string; refreshKey?: number }) {
+  const [status, setStatus] = useState<PlanStatus | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState<'checkout' | 'portal' | null>(null);
+  const [error, setError] = useState('');
+  const [actionError, setActionError] = useState('');
+  const [returned, setReturned] = useState<'returned' | 'canceled' | null>(null);
+  const [waiting, setWaiting] = useState(false);
+  const alive = useRef(true), inFlight = useRef(false), attempt = useRef<string | null>(null);
+  const confirmed = useRef(false);
+  const read = useRef<AbortController | null>(null), actionRequest = useRef<AbortController | null>(null);
+  const authorization = useCallback((): Record<string, string> => token ? { Authorization: `Bearer ${token}` } : {}, [token]);
+  const load = useCallback(async () => {
+    read.current?.abort();
+    const controller = new AbortController();
+    read.current = controller;
+    setLoading(true);
+    setError('');
     try {
-      const response=await fetch('/api/billing/plan',{cache:'no-store',credentials:'same-origin',headers:authorization(),signal:AbortSignal.timeout(15000)});
-      const body=await response.json();if(!response.ok)throw Error(body.error||'Could not load your plan. Try refreshing.');
-      if(!['included','paid_plan_required','unavailable'].includes(body.access)||typeof body.checkoutAvailable!=='boolean')throw Error('Could not load your plan. Try refreshing.');
-      if(alive.current)setStatus({access:body.access,checkoutAvailable:body.checkoutAvailable,hasPaymentProfile:body.hasPaymentProfile===true});
-    }catch(e){if(alive.current){setStatus(null);setError((e as Error).name==='TimeoutError'?'Your plan took too long to load. Try refreshing.':(e as Error).message);}}
-    finally{if(alive.current)setLoading(false);}
-  },[authorization]);
-  useEffect(()=>{
-    alive.current=true;void load();
-    const returned=new URLSearchParams(window.location.search).get('plan_checkout')==='returned';
-    const timers=returned?[4000,10000,20000].map(ms=>setTimeout(()=>void load(),ms)):[];
-    const focus=()=>void load();window.addEventListener('focus',focus);
-    return()=>{alive.current=false;timers.forEach(clearTimeout);window.removeEventListener('focus',focus);};
-  },[load]);
-  async function action(kind:'checkout'|'portal'){
-    if(inFlight.current)return;inFlight.current=true;setBusy(true);setError('');
-    const key=`galx-pro-checkout:${accountId}`;
+      const response = await fetch('/api/billing/plan', { cache: 'no-store', credentials: 'same-origin', headers: authorization(), signal: AbortSignal.any([controller.signal, AbortSignal.timeout(15000)]) });
+      const body = await response.json();
+      const next = parsePlanStatus(body);
+      if (!response.ok || !next) throw new Error('Could not refresh your plan. Please try again.');
+      if (!alive.current || controller.signal.aborted) return;
+      setStatus(next);
+      confirmed.current = next.access === 'included';
+      if (next.access === 'included') {
+        setWaiting(false);
+        attempt.current = null;
+        try { sessionStorage.removeItem(`galx-pro-checkout:${accountId}`); } catch { /* Optional retry storage. */ }
+      }
+    } catch (error) {
+      if (alive.current && !controller.signal.aborted) setError((error as Error).name === 'TimeoutError' ? 'Checking your plan took too long. Please try again.' : 'Could not refresh your plan. Please try again.');
+    } finally {
+      if (alive.current && !controller.signal.aborted) setLoading(false);
+    }
+  }, [authorization, accountId]);
+
+  useEffect(() => {
+    alive.current = true;
+    const value = new URLSearchParams(window.location.search).get('plan_checkout') || new URLSearchParams(returnSearch).get('plan_checkout');
+    setReturned(value === 'returned' || value === 'canceled' ? value : null);
+    setWaiting(value === 'returned');
+    void load();
+    // Only read status after a return. Never repeat checkout creation automatically.
+    const timers = value === 'returned' ? [4000, 10000, 20000].map(ms => setTimeout(() => { if (!confirmed.current) void load(); }, ms)) : [];
+    const stopWaiting = value === 'returned' ? setTimeout(() => setWaiting(false), 22000) : undefined;
+    const focus = () => { if (document.visibilityState === 'visible') void load(); };
+    window.addEventListener('focus', focus);
+    return () => {
+      alive.current = false;
+      read.current?.abort(); actionRequest.current?.abort();
+      timers.forEach(clearTimeout); clearTimeout(stopWaiting);
+      window.removeEventListener('focus', focus);
+    };
+  }, [load, returnSearch, refreshKey]);
+
+  async function action(kind: 'checkout' | 'portal') {
+    if (inFlight.current) return;
+    inFlight.current = true; setBusy(kind); setActionError('');
+    const key = `galx-pro-checkout:${accountId}`;
+    const controller = new AbortController(); actionRequest.current = controller;
     try {
-      if(kind==='checkout'&&!attempt.current){try{attempt.current=sessionStorage.getItem(key);}catch{}attempt.current ||= crypto.randomUUID();try{sessionStorage.setItem(key,attempt.current);}catch{}}
-      const response=await fetch('/api/billing/plan',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json',...authorization()},
-        signal:AbortSignal.timeout(45000),body:JSON.stringify(kind==='checkout'?{action:kind,requestId:attempt.current}:{action:kind})});
-      const body=await response.json().catch(()=>({}));
-      if(!response.ok){if(response.status===409){attempt.current=null;try{sessionStorage.removeItem(key);}catch{}}throw Error(body.error||'Could not open payment settings. Try again.');}
-      const url=new URL(body.url),host=kind==='checkout'?'checkout.stripe.com':'billing.stripe.com';
-      if(url.protocol!=='https:'||url.hostname!==host||url.port||url.username||url.password)throw Error('Could not open a secure payment page. Try again.');
-      if(alive.current)window.location.assign(url.href);
-    }catch(e){if(alive.current)setError((e as Error).name==='TimeoutError'?'The request took too long. Retry to resume the same checkout.':(e as Error).message);}
-    finally{inFlight.current=false;if(alive.current)setBusy(false);}
+      if (kind === 'checkout' && !attempt.current) {
+        try { attempt.current = sessionStorage.getItem(key); } catch { /* Optional retry storage. */ }
+        attempt.current ||= crypto.randomUUID();
+        try { sessionStorage.setItem(key, attempt.current); } catch { /* Keep the in-memory identity. */ }
+      }
+      const response = await fetch('/api/billing/plan', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json', ...authorization() },
+        signal: AbortSignal.any([controller.signal, AbortSignal.timeout(45000)]), body: JSON.stringify(kind === 'checkout' ? { action: kind, requestId: attempt.current } : { action: kind }) });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        if (response.status === 409) {
+          attempt.current = null; try { sessionStorage.removeItem(key); } catch { /* Optional storage. */ }
+          void load();
+        }
+        throw new Error(typeof body.error === 'string' ? body.error : 'Could not open billing. Please try again.');
+      }
+      const url = new URL(body.url), host = kind === 'checkout' ? 'checkout.stripe.com' : 'billing.stripe.com';
+      if (url.protocol !== 'https:' || url.hostname !== host || url.port || url.username || url.password) throw new Error('Could not open a secure payment page. Please try again.');
+      if (alive.current && !controller.signal.aborted) window.location.assign(url.href);
+    } catch (error) {
+      if (alive.current && !controller.signal.aborted) setActionError((error as Error).name === 'TimeoutError' ? 'The request took too long. Try again to resume the same checkout.' : (error as Error).message);
+    } finally {
+      inFlight.current = false;
+      if (alive.current && !controller.signal.aborted) setBusy(null);
+    }
   }
-  return <section id="plan" className="scroll-mt-24 border-b border-white/10 pb-8" aria-labelledby="plan-heading">
+
+  const subscription = status?.subscription;
+  const included = status?.access === 'included';
+  const paymentRequired = subscription?.state === 'payment_required';
+  const canManage = status?.hasPaymentProfile || !status || Boolean(error);
+  // A return URL is a hint to check; it never proves payment or permits another purchase.
+  const confirming = returned === 'returned' && !included && !['payment_required', 'paused', 'canceled'].includes(subscription?.state || '');
+  let title = 'Your plan';
+  let detail = 'Checking your plan…';
+  if (status) {
+    title = included || ['active', 'ending', 'payment_required', 'paused', 'processing'].includes(subscription?.state || '') ? PRO_PLAN.name : 'Your plan';
+    detail = included ? 'Pro access is active. Sites creation and publishing are included.' : 'Choose Pro for continuing Sites creation and publishing.';
+    if (subscription?.state === 'ending') detail = included ? 'Your subscription is set to end. Pro access is still active.' : 'Your subscription is set to end. Check billing for your current access.';
+    else if (paymentRequired) detail = 'Your subscription needs a payment update. Review it in billing to continue.';
+    else if (subscription?.state === 'paused') detail = 'Your subscription is paused. Review it in billing.';
+    else if (subscription?.state === 'processing') detail = 'Your subscription is being confirmed. Check billing before starting another checkout.';
+    else if (subscription?.state === 'canceled' && !included) detail = 'Your previous subscription has ended. You can choose Pro again.';
+    else if (subscription?.state === 'active' && !included) detail = 'Your subscription is active, but Pro access could not be confirmed. Review billing before paying again.';
+    else if (status.access === 'unavailable' || (subscription?.state === 'unavailable' && !included)) detail = 'Your plan could not be confirmed. Please refresh before starting a checkout.';
+  } else if (!loading) detail = 'Your plan is temporarily unavailable. You can still open billing management.';
+
+  if (compact) return <section aria-labelledby="plan-summary-heading" className="border-b border-white/10 pb-7"><div className="flex flex-wrap items-center justify-between gap-3"><h2 id="plan-summary-heading" className="text-xl font-semibold">{title}</h2><Link href={BILLING_PATHS.plan} className={paymentRequired ? primary : control}>{paymentRequired ? 'Review payment' : 'View plan'}</Link></div><p role="status" className={`mt-3 max-w-2xl text-sm leading-6 ${paymentRequired ? 'text-amber-200' : 'text-zinc-400'}`}>{detail}</p>{loading && status && <p role="status" className="mt-2 text-sm text-zinc-400">Refreshing your plan…</p>}{(subscription?.endsAt || subscription?.periodEnd) && <p className="mt-3 text-sm text-zinc-300">{subscription.endsAt ? 'Subscription ends' : 'Current billing period ends'} {date(subscription.endsAt || subscription.periodEnd!)} · UTC</p>}{error && <p role="alert" className="mt-3 text-sm leading-6 text-red-300">{status ? 'Showing your last checked plan. ' : ''}{error} <button type="button" disabled={loading} onClick={() => void load()} className="min-h-11 text-indigo-300 underline underline-offset-4">Refresh plan</button></p>}</section>;
+
+  return <section id="plan" className="scroll-mt-24" aria-labelledby="plan-heading">
     <div className="flex flex-wrap items-start justify-between gap-4">
-      <div><h2 id="plan-heading" className="text-xl font-semibold">Your plan</h2><p className="mt-2 text-sm leading-6 text-zinc-400">{status?.access==='included'?PRO_PLAN.name: `Available plan: ${PRO_PLAN.name} · $${PRO_PLAN.monthlyPriceUsd}/month for one account.`}</p></div>
-      <button type="button" className={control} disabled={loading||busy} onClick={()=>void load()}>Refresh plan</button>
+      <div className="min-w-0"><h2 id="plan-heading" className="text-xl font-semibold">{title}</h2><p role="status" className={`mt-2 max-w-2xl text-sm leading-6 ${paymentRequired ? 'text-amber-200' : included ? 'text-emerald-300' : 'text-zinc-300'}`}>{detail}</p></div>
+      <button type="button" className={control} disabled={loading || Boolean(busy)} onClick={() => void load()}>{loading && status ? 'Refreshing…' : 'Refresh plan'}</button>
     </div>
-    <p className="mt-4 max-w-2xl text-sm leading-6 text-zinc-300">Create and publish Sites with fair usage included. There is no per-update charge. API and image usage remain separate.</p>
-    <p className="mt-2 text-sm leading-6 text-zinc-400">Paid subscriptions renew monthly. Cancel anytime in Manage subscription; access continues through your paid period.</p>
-    {loading?<p role="status" className="mt-4 text-sm text-zinc-400">Checking your plan…</p>:status?.access==='included'?<p role="status" className="mt-4 text-sm text-emerald-300">Your Pro access is active. Sites is included.</p>:status?.access==='paid_plan_required'?<p role="status" className="mt-4 text-sm text-zinc-300">You do not have an active paid plan for Sites. Choose Pro to get started.</p>:status?.access==='unavailable'?<p role="status" className="mt-4 text-sm text-zinc-400">Your plan could not be confirmed. Refresh before starting an update.</p>:null}
+    <dl className="mt-5 grid gap-4 text-sm sm:grid-cols-2">
+      <div><dt className="text-zinc-400">{included ? 'Included with Pro' : ['none', 'canceled'].includes(subscription?.state || '') ? 'Available plan' : 'Plan'}</dt><dd className="mt-1 leading-6 text-zinc-100">{included ? 'Sites creation and publishing · one account' : `${PRO_PLAN.name} · $${PRO_PLAN.monthlyPriceUsd} / month · one account`}</dd></div>
+      {subscription?.endsAt ? <div><dt className="text-zinc-400">Subscription ends</dt><dd className="mt-1 leading-6 text-zinc-100">{date(subscription.endsAt)} · UTC</dd></div> : subscription?.periodEnd ? <div><dt className="text-zinc-400">Current billing period ends</dt><dd className="mt-1 leading-6 text-zinc-100">{date(subscription.periodEnd)} · UTC</dd></div> : null}
+    </dl>
+    <p className="mt-4 max-w-2xl text-sm leading-6 text-zinc-400">Sites includes fair usage with no per-update charge. API and image usage are billed separately.</p>
+    <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">{subscription?.state === 'ending' ? 'Renewal is canceled. Review your subscription in billing; access continues through the paid period.' : 'Paid subscriptions renew monthly. Cancel in Manage subscription; access continues through the paid period.'}</p>
+    {returned === 'canceled' && <p role="status" className="mt-4 text-sm leading-6 text-zinc-300">Checkout was closed. You can resume when you’re ready.</p>}
+    {confirming && <p role="status" className="mt-4 text-sm leading-6 text-zinc-300">{waiting ? 'Confirming your subscription… This can take a moment.' : 'Your subscription is still being confirmed. Refresh your plan or open billing before paying again.'}</p>}
     <div className="mt-5 flex flex-wrap items-center gap-3">
-      {status?.access==='included'?<Link href="/sites" className={`${control} border-indigo-400/40 bg-indigo-500/20 text-indigo-100`}>Open Sites</Link>:<button type="button" className={`${control} border-indigo-400/40 bg-indigo-500/20 text-indigo-100`} disabled={busy||loading||!status?.checkoutAvailable} onClick={()=>void action('checkout')}>{busy?'Opening…':'Continue to secure checkout'}</button>}
-      {(status?.hasPaymentProfile||!status)&&<button type="button" className={control} disabled={busy||loading} onClick={()=>void action('portal')}>Manage subscription</button>}
+      {paymentRequired ? <button type="button" className={primary} disabled={Boolean(busy)} onClick={() => void action('portal')}>{busy === 'portal' ? 'Opening billing…' : 'Review payment'}</button> : included ? <Link href="/sites" className={primary}>Open Sites</Link> : <button type="button" className={primary} disabled={Boolean(busy) || loading || Boolean(error) || confirming || !status?.checkoutAvailable} onClick={() => void action('checkout')}>{busy === 'checkout' ? 'Opening checkout…' : returned === 'canceled' ? 'Resume checkout' : `Choose Pro · $${PRO_PLAN.monthlyPriceUsd}/month`}</button>}
+      {included && paymentRequired && <Link href="/sites" className={control}>Open Sites</Link>}
+      {canManage && !paymentRequired && <button type="button" className={control} disabled={Boolean(busy)} onClick={() => void action('portal')}>{busy === 'portal' ? 'Opening billing…' : 'Manage subscription'}</button>}
+      <Link href="/pricing/galx-pro" className="inline-flex min-h-11 items-center text-sm text-indigo-300 underline underline-offset-4">View plan details</Link>
     </div>
-    {error&&<p role="alert" className="mt-4 max-w-2xl text-sm leading-6 text-red-300">{error}</p>}
+    {status && !included && !status.checkoutAvailable && !confirming && ['none', 'canceled'].includes(subscription?.state || '') && <p className="mt-3 text-sm text-zinc-400">Plan checkout is temporarily unavailable. Please try again later.</p>}
+    {error && <p role="alert" className="mt-4 max-w-2xl text-sm leading-6 text-red-300">{status ? 'Showing your last checked plan. ' : ''}{error}</p>}
+    {actionError && <p role="alert" className="mt-4 max-w-2xl text-sm leading-6 text-red-300">{actionError}</p>}
   </section>;
 }

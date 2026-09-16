@@ -658,11 +658,13 @@
     },
     {
       "path": "docs/WALLET_AND_BILLING_STRATEGY.md",
-      "title": "💳 GALXAI Developer Compute Wallet & Micro-Billing Architecture",
+      "title": "Billing strategy and customer paths",
       "scope": "domain-reference",
       "kind": "reference",
-      "domains": [],
-      "curation": "unreviewed",
+      "domains": [
+        "billing"
+      ],
+      "curation": "assigned",
       "keywords": [],
       "decision": null
     },
@@ -2815,6 +2817,43 @@
       "decision": null
     },
     {
+      "path": "docs/knowledge/audits/2026-09-15-billing-second-pass.md",
+      "title": "Billing and Stripe — second audit and implementation pass",
+      "scope": "operational-record",
+      "kind": "evidence",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/knowledge/audits/2026-09-16-billing-modernization.md",
+      "title": "Billing navigation modernization — September 16, 2026",
+      "scope": "operational-record",
+      "kind": "evidence",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/knowledge/audits/2026-09-16-billing-pages.md",
+      "title": "Billing pages — navigation and recovery audit",
+      "scope": "operational-record",
+      "kind": "evidence",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [
+        "billing",
+        "navigation",
+        "ux",
+        "stripe",
+        "invoices",
+        "audit"
+      ],
+      "decision": null
+    },
+    {
       "path": "docs/knowledge/templates/adr.md",
       "title": "ADR template",
       "scope": "domain-reference",
@@ -3223,7 +3262,8 @@
       "scope": "current-guide",
       "kind": "reference",
       "domains": [
-        "sites"
+        "sites",
+        "billing"
       ],
       "curation": "assigned",
       "keywords": [],
@@ -3768,6 +3808,27 @@
       "decision": null
     },
     {
+      "path": "docs/reference/billing-pages.md",
+      "title": "Billing pages and navigation",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [
+        "billing"
+      ],
+      "curation": "assigned",
+      "keywords": [
+        "billing",
+        "stripe",
+        "plan",
+        "credits",
+        "invoices",
+        "transactions",
+        "navigation",
+        "checkout"
+      ],
+      "decision": null
+    },
+    {
       "path": "docs/reference/knowledge-commands.md",
       "title": "Knowledge commands and metadata",
       "scope": "current-guide",
@@ -3924,6 +3985,25 @@
       ],
       "curation": "assigned",
       "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/runbooks/stripe-webhook-delivery.md",
+      "title": "Recover Stripe webhook delivery",
+      "scope": "current-guide",
+      "kind": "runbook",
+      "domains": [
+        "delivery",
+        "billing"
+      ],
+      "curation": "assigned",
+      "keywords": [
+        "stripe",
+        "billing",
+        "webhooks",
+        "test mode",
+        "delivery"
+      ],
       "decision": null
     },
     {
@@ -4315,6 +4395,16 @@
     {
       "path": "post-mortem/incidents/2026/2026-09-14-generation-quota-access/README.md",
       "title": "Generation quota read blocked by developer approval",
+      "scope": "operational-record",
+      "kind": "navigation",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-09-15-stripe-test-webhook/README.md",
+      "title": "Separate test-account Stripe webhook failure",
       "scope": "operational-record",
       "kind": "navigation",
       "domains": [],

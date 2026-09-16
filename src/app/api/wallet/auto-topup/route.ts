@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 function unavailable() {
-  return NextResponse.json({ error: 'Automatic top-ups are unavailable. Add credit at /keys/top-up.' }, { status: 410, headers: { 'Cache-Control': 'no-store' } });
+  return NextResponse.json({ error: 'Automatic top-ups are unavailable. Add credit at /billing/credits.' }, { status: 410, headers: { 'Cache-Control': 'no-store' } });
 }
 export const GET = unavailable;
 export const POST = unavailable;

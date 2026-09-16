@@ -1,5 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { BillingError } from './account';
+import { BILLING_PATHS } from './navigation';
 
 export function depositAmount(value: unknown) {
   const amount = typeof value === 'number' || typeof value === 'string' ? Number(value) : NaN;
@@ -43,6 +44,9 @@ export async function readPaymentBody(req: NextRequest) {
   } catch { throw new BillingError('Invalid payment request.'); }
 }
 
-export function checkoutReturnPath(surface: unknown) {
-  return surface === 'keys' ? '/keys/top-up' : '/billing';
+/** New checkouts use Credits. Existing attempts retain their exact provider input. */
+export function checkoutReturnPath(stored?: unknown) {
+  if (stored === '/keys/top-up' || stored === '/billing') return stored;
+  if (stored == null || stored === BILLING_PATHS.credits) return BILLING_PATHS.credits;
+  throw new BillingError('This payment attempt needs review. Contact billing support.', 503);
 }

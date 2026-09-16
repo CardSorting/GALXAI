@@ -235,6 +235,7 @@
     "stripe:trigger:checkout": "stripe trigger checkout.session.completed",
     "stripe:trigger:invoice": "stripe trigger invoice.payment_succeeded",
     "test:stripe": "tsx scripts/test-stripe-integration.ts",
+    "test:billing:lifecycle": "node --import tsx --test scripts/test-billing-lifecycle.ts scripts/test-billing-navigation.ts scripts/test-billing-public-boundary.ts scripts/test-stripe-webhook-target.ts && node --import tsx scripts/test-stripe-webhook-endpoint.ts",
     "test:router": "tsx scripts/validate-galxai-router.ts",
     "test:relay:image": "node --import tsx scripts/run-supabase-integration.ts --image-assets",
     "test:chat:hardening": "node --import tsx scripts/test-chat-context-hardening.ts",

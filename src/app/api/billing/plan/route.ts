@@ -10,6 +10,8 @@ import { PRO_PLAN } from '@/lib/billing/pro-plan';
 import { SitesFairStore } from '@/lib/sites/fair-store';
 import { requirePaidSitesAccess } from '@/lib/sites/paid-access';
 import { FairUsageError } from '@/lib/sites/fair-policy';
+import { billingPortalConfiguration } from '@/lib/billing/portal';
+import { readSubscriptionSummary } from '@/lib/billing/subscription-summary';
 export const runtime='nodejs';
 export const dynamic='force-dynamic';
 export const maxDuration=60;
@@ -25,20 +27,23 @@ async function handle(req:NextRequest) {
     // Cancellation and payment management remain accessible during a Sites pause.
     const body=req.method==='POST'?await readPaymentBody(req):null;
     if(body?.action==='portal'&&Object.keys(body).join()==='action') {
-      if(!customer)throw new BillingError('No subscription to manage yet.',404);
-      const configurations=await stripe.billingPortal.configurations.list({active:true,limit:100},{timeout:4000,maxNetworkRetries:0});
-      const portal=configurations.data.find(p=>p.metadata?.galxPlan==='pro-v1');
-      if(!portal||!portal.features.subscription_cancel.enabled)throw new BillingError('Subscription management is temporarily unavailable.',503);
-      const session=await stripe.billingPortal.sessions.create({customer,configuration:portal.id,return_url:`${paymentOrigin(config.appUrl)}/billing#plan`},{timeout:8000,maxNetworkRetries:0});
+      if(!customer||customer.startsWith('cus_mock_'))throw new BillingError('Your billing profile becomes available when you start a checkout.',404);
+      const configuration=await billingPortalConfiguration(stripe);
+      const session=await stripe.billingPortal.sessions.create({customer,configuration,return_url:`${paymentOrigin(config.appUrl)}/billing/plan`},{timeout:8000,maxNetworkRetries:0});
       return NextResponse.json({url:hostedPaymentUrl(session.url,'billing.stripe.com')},{headers});
     }
     const policy=await new SitesFairStore(pool).policy();
     if(req.method==='GET') {
+      const summary=readSubscriptionSummary(stripe,customer,policy.paid_price_ids);
       let access:'included'|'paid_plan_required'|'unavailable'='unavailable';
       try { await requirePaidSitesAccess(pool,stripe,actor.id,policy);access='included'; }
       catch(e){if(e instanceof FairUsageError&&e.status===403)access='paid_plan_required';}
-      let checkoutAvailable=false;try{await proPrice(stripe,policy);checkoutAvailable=true;}catch{}
-      return NextResponse.json({plan:PRO_PLAN,access,checkoutAvailable,hasPaymentProfile:Boolean(customer)},{headers});
+      const subscription=await summary;
+      let checkoutAvailable=false;
+      if(access==='paid_plan_required'&&['none','canceled'].includes(subscription.state)) {
+        try{await proPrice(stripe,policy);checkoutAvailable=true;}catch{}
+      }
+      return NextResponse.json({plan:PRO_PLAN,access,checkoutAvailable,hasPaymentProfile:Boolean(customer&&!customer.startsWith('cus_mock_')),subscription},{headers});
     }
     if(!body||Object.keys(body).sort().join()!=='action,requestId'||body.action!=='checkout'||typeof body.requestId!=='string')throw new BillingError('Invalid plan request.');
     return NextResponse.json(await createProCheckout(pool,stripe,policy,{userId:actor.id,requestId:body.requestId,origin:paymentOrigin(config.appUrl)}),{headers});

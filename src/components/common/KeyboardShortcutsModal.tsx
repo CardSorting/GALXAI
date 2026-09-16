@@ -1,4 +1,5 @@
 'use client';
+import { BILLING_PATHS } from '@/lib/billing/navigation';
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -63,7 +64,7 @@ function BaseKeyboardShortcutsModal() {
         if (e.key === 'm') router.push('/models');
         if (e.key === 'd') router.push('/docs');
         if (e.key === 'k') router.push('/keys');
-        if (e.key === 'b') router.push('/billing');
+        if (e.key === 'b') router.push(BILLING_PATHS.overview);
         if (e.key === 'q') router.push('/queues');
         if (e.key === 's') router.push('/status');
         if (e.key === 'p') router.push('/playground');

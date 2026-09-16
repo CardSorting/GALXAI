@@ -1,0 +1,21 @@
+{
+  "observed_at": "2026-09-15T23:20:41.616631+00:00",
+  "action": "Disable the obsolete test endpoint; retain its history",
+  "endpoint_id": "we_1U8EqbPiwsQkTwlTwDIqxe0y",
+  "account": "acct_1U88yCPiwsQkTwlT",
+  "provider_update": "success",
+  "independent_list_readback": {
+    "status": "disabled",
+    "livemode": false,
+    "url": "https://api.galx.ai/api/stripe/webhook",
+    "has_more": false
+  },
+  "production_changed": false,
+  "application_deployed": false,
+  "database_changed": false,
+  "limits": [
+    "Pending test events were not fulfilled or replayed.",
+    "No new real payment or refund was submitted.",
+    "No isolated test environment was provisioned."
+  ]
+}

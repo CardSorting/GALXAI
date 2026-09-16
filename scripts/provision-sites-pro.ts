@@ -28,7 +28,7 @@ const portals=await stripe.billingPortal.configurations.list({active:true,limit:
 if(portals.has_more)throw Error('Portal catalogue needs review');
 let portal=portals.data.find(p=>p.metadata?.galxPlan==='pro-v1');
 if(!portal)portal=await stripe.billingPortal.configurations.create({business_profile:{headline:'Manage your GALX Pro subscription',privacy_policy_url:'https://galx.ai/privacy',terms_of_service_url:'https://galx.ai/terms'},
-  features:{invoice_history:{enabled:true},payment_method_update:{enabled:true},subscription_cancel:{enabled:true,mode:'at_period_end'},subscription_update:{enabled:false}},metadata:{galxPlan:'pro-v1'},default_return_url:'https://galx.ai/billing#plan'},
+  features:{invoice_history:{enabled:true},payment_method_update:{enabled:true},subscription_cancel:{enabled:true,mode:'at_period_end'},subscription_update:{enabled:false}},metadata:{galxPlan:'pro-v1'},default_return_url:'https://galx.ai/billing/plan'},
   {idempotencyKey:'galx-pro-portal-v1'});
 if(!portal.features.subscription_cancel.enabled||portal.features.subscription_cancel.mode!=='at_period_end'||portal.features.subscription_update.enabled)throw Error('Portal does not preserve launch terms');
 const limits=readFairLimits({

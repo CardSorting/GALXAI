@@ -12,6 +12,8 @@ The workflow runs documentation/incident validation and guard tests; image/ident
 
 It does not run every repository test, a paid inference benchmark, or automatically merge a PR. Select additional component tests from the [domain map](../knowledge/DOMAINS.md). Record real inference acceptance separately when authorized and relevant.
 
+The credential-free billing lifecycle step covers current subscription display states, ambiguous and cross-account provider responses, the restricted cancellation portal, invoice-link validation, required subscription webhook events, malformed/oversized webhook requests and safe test-mode provisioning. The separate synthetic browser runner verifies billing draft/retry continuity and responsive recovery; it is a local acceptance command and is not silently included in CI.
+
 ## Documentation workflow
 
 [documentation.yml](../../.github/workflows/documentation.yml) runs the offline docs guards on pushes, PRs, manual dispatch and Mondays at 09:17 UTC. Every event requires a review for each registered domain, retained evidence with matching hashes, matching source/guide fingerprints and a current review date. It exercises the incident/knowledge guard fixtures, including rejection of Git-ignored navigation/evidence targets that cannot survive a clean checkout. A readable owner/deadline table and status artifact are produced even on failure; artifact retention is 14 days. The workflow needs no application dependencies, service credentials or model access.

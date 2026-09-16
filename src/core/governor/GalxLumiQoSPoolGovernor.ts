@@ -232,7 +232,7 @@ export class GalxLumiQoSPoolGovernor {
           message: `LUMI 5-hour rolling limit (${LUMI_5HOUR_DEFAULT_REQUEST_QUOTA} requests) reached. Your quota recovers continuously or top-up for unmetered VIP bursts.`,
           retryAfterSeconds: resetInSeconds,
           resetAt: new Date(userRecord.windowStartMs + FIVE_HOURS_MS).toISOString(),
-          upgradeUrl: 'https://galx.ai/checkout?amount=25'
+          upgradeUrl: 'https://galx.ai/billing/credits?amount=25'
         }
       };
     }

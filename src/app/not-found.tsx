@@ -1,3 +1,4 @@
+import { BILLING_PATHS } from '@/lib/billing/navigation';
 import React from 'react';
 import { IntentLink as Link } from '@/components/common/IntentLink';
 import { Navigation } from '@/components/dashboard/Navigation';
@@ -67,7 +68,7 @@ export default function NotFound() {
             </Link>
 
             <Link
-              href="/billing"
+              href={BILLING_PATHS.overview}
               className="p-3.5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 hover:text-white flex flex-col items-center justify-center gap-1.5 transition-all group"
             >
               <CreditCard className="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform" />

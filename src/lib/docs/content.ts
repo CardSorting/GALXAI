@@ -1,3 +1,4 @@
+import { BILLING_PATHS } from '@/lib/billing/navigation';
 import { GALX_API_BASE_URL } from '@/sdk/base-url';
 
 export const DOC_MODEL = 'gpt-5.6-sol';
@@ -185,7 +186,7 @@ const response = await client.chat.completions.create({
         ['402', 'Check the account balance and billing requirements.'], ['403', 'Check permissions, key scopes, and account access.'],
         ['404', 'Use https://galx.ai/v1 and a documented endpoint. Avoid /v1/v1.'], ['429', 'Honor Retry-After, lower concurrency, and use bounded retries.'],
         ['5xx', 'Check service status. Retry transient failures with backoff; report persistent failures.'],
-      ] }, links: [{ href: '/keys', label: 'Manage keys' }, { href: '/billing', label: 'Check billing' }, { href: '/status', label: 'Service status' }] },
+      ] }, links: [{ href: '/keys', label: 'Manage keys' }, { href: BILLING_PATHS.credits, label: 'Review credit' }, { href: '/status', label: 'Service status' }] },
       { id: 'retries', title: 'Retry deliberately', body: ['Bound the number of attempts and add jitter to delays. Do not retry authentication or validation errors without fixing their cause. A timeout does not prove that the provider did no work.', 'After displaying part of a streamed response, do not restart it silently. Tell the user it was interrupted or use an explicit recovery flow.'] },
       { id: 'security', title: 'Keep credentials on the server', steps: ['Load the key from an environment variable or secret manager.', 'Do not expose it through public frontend variables or client-side requests.', 'If a key leaks, revoke it and update the affected application with a new one.'], links: [{ href: '/keys', label: 'Create or revoke a key' }] },
       { id: 'routing', title: 'Use the application API', body: ['Use https://galx.ai/v1 as the API base URL for customer requests.'] },

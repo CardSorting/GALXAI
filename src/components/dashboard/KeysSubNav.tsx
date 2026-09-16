@@ -1,4 +1,5 @@
 'use client';
+import { BILLING_PATHS } from '@/lib/billing/navigation';
 
 import React from 'react';
 import Link from 'next/link';
@@ -21,7 +22,7 @@ export function KeysSubNav() {
       icon: Key,
       exact: true
     },
-    { name: 'Top up', href: '/keys/top-up', icon: Wallet },
+    { name: 'Credits', href: BILLING_PATHS.credits, icon: Wallet },
     {
       name: 'Scopes & Policies',
       href: '/keys/permissions',

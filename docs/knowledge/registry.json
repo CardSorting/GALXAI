@@ -175,7 +175,6 @@
         "src/components/admin/PreviewAdminWorkspace.tsx",
         "src/components/billing/BillingClient.tsx",
         "src/components/developers/DeveloperPreview.tsx",
-        "src/components/keys/QuickTopUpClient.tsx",
         "src/lib/billing/free-generation*.ts",
         "src/lib/billing/generation-*.ts",
         "src/app/api/billing/generation-quota/**/*.ts",
@@ -186,7 +185,8 @@
         "src/components/dashboard/generation-gate.module.css",
         "src/contexts/GenerationAllowanceContext.tsx",
         "scripts/manage-free-generation.ts",
-        "scripts/verify-manual-enrollment-http.ts"
+        "scripts/verify-manual-enrollment-http.ts",
+        "src/components/billing/BillingProvider.tsx"
       ],
       "guides": [
         "docs/operations/developer-preview.md",
@@ -456,7 +456,10 @@
         "scripts/test-cloudflare-workers.ts",
         "scripts/lib/require-isolated-worker-env.ts",
         "scripts/verify-workspace-cache-http.mjs",
-        ".env.example"
+        ".env.example",
+        "scripts/provision-stripe-all.ts",
+        "scripts/lib/stripe-webhook-target.ts",
+        "scripts/test-stripe-webhook-target.ts"
       ],
       "guides": [
         "docs/DEPLOYMENT.md",
@@ -466,7 +469,8 @@
         "docs/VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md",
         "docs/CLOUDFLARE_STRATEGY.md",
         "docs/maintainers/CLOUDFLARE_EDGE_MESH_MAINTAINER_RUNBOOK.md",
-        "docs/playbooks/02-deployment-and-release.md"
+        "docs/playbooks/02-deployment-and-release.md",
+        "docs/runbooks/stripe-webhook-delivery.md"
       ],
       "checks": [
         "npm run docs:check",
@@ -564,6 +568,80 @@
       "checks": [
         "npm run test:egress:transport",
         "npm run test:image:security",
+        "npm run build"
+      ]
+    },
+    "billing": {
+      "title": "Billing, subscriptions and payment recovery",
+      "owner": "Billing maintainer",
+      "sources": [
+        "src/lib/billing/account.ts",
+        "src/lib/billing/checkout.ts",
+        "src/lib/billing/fulfillment.ts",
+        "src/lib/billing/payment.ts",
+        "src/lib/billing/plan-*.ts",
+        "src/lib/billing/portal.ts",
+        "src/lib/billing/pro-plan.ts",
+        "src/lib/billing/quote.ts",
+        "src/lib/billing/subscription-summary.ts",
+        "src/lib/billing/webhookEvents.ts",
+        "src/lib/stripe/*.ts",
+        "src/app/api/billing/plan/**/*.ts",
+        "src/app/api/billing/route.ts",
+        "src/app/api/billing/quote/**/*.ts",
+        "src/app/api/stripe/**/*.ts",
+        "src/app/api/internal/credits/stripe/**/*.ts",
+        "src/components/billing/*.tsx",
+        "scripts/*stripe*.ts",
+        "scripts/lib/stripe-webhook-target.ts",
+        "scripts/test-billing*.ts",
+        "scripts/verify-billing-ux.mjs",
+        "scripts/test-sites-plans-db.ts",
+        "src/lib/billing/navigation.ts",
+        "src/app/billing/**/*.tsx",
+        "src/components/dashboard/GenerationGateNotice.tsx",
+        "src/components/pricing/PricingClient.tsx",
+        "src/components/home/PlanAction.tsx",
+        ".impeccable/surfaces/src-app-billing-page-tsx.md",
+        "src/app/keys/page.tsx",
+        "src/components/billing/.impeccable/design.json",
+        "src/lib/billing/compatibility.ts",
+        "src/lib/billing/checkout-attempt.ts",
+        "src/components/dashboard/KeysSubNav.tsx",
+        "src/components/dashboard/DeveloperGatewayKeys.tsx",
+        "src/components/teams/TeamsSubNav.tsx",
+        "src/components/grants/GrantsClient.tsx",
+        "src/components/common/KeyboardShortcutsModal.tsx",
+        "src/lib/hooks/useDepositVerification.ts",
+        "src/lib/data/pricingData.ts",
+        "src/lib/data/securityData.ts",
+        "src/lib/docs/content.ts",
+        "src/lib/resilience/BroccoliOmniSearch.ts",
+        "src/app/api/wallet/auto-topup/route.ts",
+        "src/app/keys/error.tsx",
+        "src/app/grants/error.tsx",
+        "src/cli/index.ts",
+        "src/sdk/errors.ts",
+        "scripts/provision-sites-pro.ts",
+        "scripts/verify-live-checkout.ts",
+        "scripts/test-top-up.ts",
+        "scripts/verify-hybrid-broccolidb-omnisearch.ts",
+        "supabase/migrations/*billing_canonical_returns.sql",
+        "supabase/rollbacks/*billing_canonical_returns.down.sql",
+        "next.config.ts"
+      ],
+      "guides": [
+        "docs/runbooks/stripe-webhook-delivery.md",
+        "docs/maintainers/SITES_FAIR_USAGE.md",
+        "src/components/billing/DESIGN.md",
+        "docs/reference/billing-pages.md",
+        "docs/WALLET_AND_BILLING_STRATEGY.md",
+        "src/components/home/DESIGN.md",
+        "src/components/public-content/DESIGN.md"
+      ],
+      "checks": [
+        "npm run test:billing:lifecycle",
+        "npm run test:sites:plans:db",
         "npm run build"
       ]
     }
@@ -801,6 +879,40 @@
         "approval",
         "SDK"
       ]
+    },
+    "docs/runbooks/stripe-webhook-delivery.md": {
+      "kind": "runbook",
+      "keywords": [
+        "stripe",
+        "billing",
+        "webhooks",
+        "test mode",
+        "delivery"
+      ]
+    },
+    "docs/reference/billing-pages.md": {
+      "kind": "reference",
+      "keywords": [
+        "billing",
+        "stripe",
+        "plan",
+        "credits",
+        "invoices",
+        "transactions",
+        "navigation",
+        "checkout"
+      ]
+    },
+    "docs/knowledge/audits/2026-09-16-billing-pages.md": {
+      "kind": "evidence",
+      "keywords": [
+        "billing",
+        "navigation",
+        "ux",
+        "stripe",
+        "invoices",
+        "audit"
+      ]
     }
   },
   "runbooks": [
@@ -809,7 +921,8 @@
     "docs/runbooks/weekly-knowledge-audit.md",
     "docs/operations/workspace-auth.md",
     "docs/runbooks/relay-pool-images.md",
-    "docs/runbooks/relay-pool-services.md"
+    "docs/runbooks/relay-pool-services.md",
+    "docs/runbooks/stripe-webhook-delivery.md"
   ],
   "decisions": {
     "docs/adr/0145-maintained-knowledge-and-decision-lifecycle.md": {

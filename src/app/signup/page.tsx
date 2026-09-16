@@ -1,4 +1,5 @@
 'use client';
+import { BILLING_PATHS } from '@/lib/billing/navigation';
 
 import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -232,10 +233,10 @@ function SignUpContent() {
                     Sites
                   </Link>
                   <Link
-                    href="/billing"
+                    href={BILLING_PATHS.credits}
                     className="py-2.5 px-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-emerald-300 transition-all text-center"
                   >
-                    Compute Wallet
+                    Credits
                   </Link>
                   <Link
                     href="/developers"

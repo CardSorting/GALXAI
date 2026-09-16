@@ -1,4 +1,5 @@
 'use client';
+import { BILLING_PATHS } from '@/lib/billing/navigation';
 
 import React, { useEffect } from 'react';
 import { RouteErrorBoundaryCard } from '@/components/common/RouteErrorBoundaryCard';
@@ -28,8 +29,8 @@ export default function GrantsError({
           badge="DEVELOPER COMPUTE GRANTS"
           icon={Gift}
           accentColor="amber"
-          primaryLinkHref="/billing"
-          primaryLinkLabel="Go to Wallet"
+          primaryLinkHref={BILLING_PATHS.credits}
+          primaryLinkLabel="View credits"
           autoRetrySeconds={8}
         />
       </main>

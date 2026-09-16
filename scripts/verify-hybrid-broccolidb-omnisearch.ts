@@ -89,9 +89,9 @@ async function runHybridBroccoliOmniSearchAudit() {
   console.log('\n📌 Testing Non-Technical Conversational Intent Resolution...');
 
   const intentQueries = [
-    { query: 'how do i buy credits', targetHref: '/billing', label: 'Buy Credits' },
-    { query: 'add funds to account', targetHref: '/billing', label: 'Add Funds' },
-    { query: 'top up wallet', targetHref: '/billing', label: 'Top Up Wallet' },
+    { query: 'how do i buy credits', targetHref: '/billing/credits', label: 'Buy Credits' },
+    { query: 'add funds to account', targetHref: '/billing/credits', label: 'Add Funds' },
+    { query: 'top up wallet', targetHref: '/billing/credits', label: 'Top Up Wallet' },
     { query: 'where is my invoice', targetHref: '/billing/invoices', label: 'Invoices' },
     { query: 'download tax receipt', targetHref: '/billing/invoices', label: 'Tax Receipt' },
     { query: 'cheapest model', targetHref: '/models', label: 'Cheapest Model' },
@@ -118,7 +118,7 @@ async function runHybridBroccoliOmniSearchAudit() {
     { query: 'apply for grants', targetHref: '/grants', label: 'Startup Grants' },
     { query: 'link my openai account', targetHref: '/vault', label: 'Linked Vault Shards' },
     { query: 'simulate traffic failover', targetHref: '/vault/simulator', label: 'Traffic Simulator' },
-    { query: 'can i pay with crypto', targetHref: '/billing', label: 'Crypto Payment' },
+    { query: 'update my credit card', targetHref: '/billing/payment-methods', label: 'Payment settings' },
     { query: 'how do refunds work', targetHref: '/faq', label: 'Refunds' },
     { query: 'how to setup langchain', targetHref: '/docs/agents', label: 'LangChain Setup' },
     { query: 'what is the base url', targetHref: '/docs', label: 'Base URL' },

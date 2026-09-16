@@ -3,6 +3,7 @@ import { StripeEngine } from '../src/lib/stripe/stripe';
 import { getStripeConfig } from '../src/lib/stripe/config';
 import { paymentOrigin } from '../src/lib/billing/payment';
 import { BILLING_WEBHOOK_EVENTS } from '../src/lib/billing/webhookEvents';
+import { billingPortalConfiguration } from '../src/lib/billing/portal';
 const config = getStripeConfig();
 try {
   const origin = paymentOrigin(process.argv[2] || config.appUrl);
@@ -10,8 +11,7 @@ try {
   const stripe = StripeEngine.getInstance().getClient()!;
   const account = await stripe.accounts.retrieve();
   if (!account.charges_enabled) throw new Error('Stripe has not enabled payments on this account');
-  const portals = await stripe.billingPortal.configurations.list({ is_default: true, active: true, limit: 1 });
-  if (!portals.data.length) throw new Error('No active default billing portal configuration');
+  await billingPortalConfiguration(stripe);
   const endpoints = await stripe.webhookEndpoints.list({ limit: 100 });
   const required = BILLING_WEBHOOK_EVENTS;
   const enabled = endpoints.data.filter(endpoint => endpoint.status === 'enabled' && [`${origin}/api/stripe/webhook`,`${origin}/api/internal/credits/stripe`].includes(endpoint.url));

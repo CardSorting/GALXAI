@@ -1,4 +1,5 @@
 'use client';
+import { BILLING_PATHS } from '@/lib/billing/navigation';
 
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
@@ -87,13 +88,17 @@ const PLATFORM_PAGES: PlatformPage[] = [
     description: 'Generate and manage universal gateway API access keys'
   },
 
+  { label: 'Billing overview', href: BILLING_PATHS.overview, icon: DollarSign, category: 'Finance', keywords: ['billing', 'account'], description: 'Your plan and prepaid credit' },
+  { label: 'Plan and subscription', href: BILLING_PATHS.plan, icon: DollarSign, category: 'Finance', keywords: ['pro', 'plan', 'subscription', 'renewal', 'cancel'], description: 'Review and manage your Pro subscription' },
+  { label: 'Transactions', href: BILLING_PATHS.transactions, icon: FileText, category: 'Finance', keywords: ['history', 'ledger', 'usage', 'export'], description: 'Credit added, usage and balance adjustments' },
+  { label: 'Payment settings', href: BILLING_PATHS.payments, icon: DollarSign, category: 'Finance', keywords: ['card', 'stripe', 'payment method'], description: 'Manage saved payment methods' },
   {
-    label: 'Wallet & Compute Balance',
-    href: '/billing',
+    label: 'Credit balance and top-up',
+    href: BILLING_PATHS.credits,
     icon: DollarSign,
     category: 'Finance',
     keywords: ['wallet', 'balance', 'deposit', 'add money', 'add funds', 'billing', 'credits', 'pay'],
-    description: 'View balance, top up credits with 50% match grant'
+    description: 'Review prepaid credit and add a one-time top-up'
   },
   {
     label: 'Enterprise AI Spend Forensic & Governance',
@@ -240,12 +245,12 @@ const PLATFORM_PAGES: PlatformPage[] = [
     description: 'Calculate net annual savings across team seats and wholesale compute'
   },
   {
-    label: 'Business Tax Invoices & Receipts',
-    href: '/billing#payments',
+    label: 'Billing invoices',
+    href: BILLING_PATHS.invoices,
     icon: FileText,
     category: 'Finance',
     keywords: ['invoices', 'receipts', 'tax', 'pdf', 'bills', 'accounting'],
-    description: 'Download PDF invoices with corporate tax details'
+    description: 'View invoices and available downloads'
   },
   {
     label: 'SOC2 & Zero-Retention Compliance',
@@ -481,7 +486,7 @@ function BaseCommandMenu({ isOpen, onClose }: CommandMenuProps) {
           router.push('/keys');
         } else if (e.key === 'b') {
           e.preventDefault();
-          router.push('/billing');
+          router.push(BILLING_PATHS.overview);
         } else if (e.key === 'q') {
           e.preventDefault();
           router.push('/queues');

@@ -35,6 +35,7 @@ Search locally with `npm run docs:find -- "image"` or `npm run docs:find -- "fav
 
 ## Product and operations entry points
 
+- **Billing:** [pages and payment paths](reference/billing-pages.md), [Stripe webhook recovery](runbooks/stripe-webhook-delivery.md).
 - **Sites:** [workspace](maintainers/SITES_WORKSPACE.md), [paid access and fair usage](maintainers/SITES_FAIR_USAGE.md), [addresses](maintainers/SITES_DOMAINS.md). Earlier tariffs apply only to historical operations.
 - **Images and identity:** [image boundary](maintainers/image-public-boundary.md), [durable image decision](adr/0144-durable-images-and-incident-documentation.md), [incident runbook](../post-mortem/runbooks/image-generation.md).
 - **Private developer preview:** [access policy](operations/developer-preview.md), [admin approvals](operations/preview-admin.md), [activation](operations/preview-activation.md), [hybrid synchronization](operations/preview-hybrid-sync.md).

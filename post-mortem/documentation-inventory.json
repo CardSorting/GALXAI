@@ -426,7 +426,7 @@
       "path": "docs/WALLET_AND_BILLING_STRATEGY.md",
       "scope": "domain-reference",
       "category": "docs",
-      "title": "💳 GALXAI Developer Compute Wallet & Micro-Billing Architecture"
+      "title": "Billing strategy and customer paths"
     },
     {
       "path": "docs/adr/0001-unified-pooled-quota-cycling-substrate.md",
@@ -1611,6 +1611,24 @@
       "title": "Workspace recovery and navigation — second audit"
     },
     {
+      "path": "docs/knowledge/audits/2026-09-15-billing-second-pass.md",
+      "scope": "operational-record",
+      "category": "docs",
+      "title": "Billing and Stripe — second audit and implementation pass"
+    },
+    {
+      "path": "docs/knowledge/audits/2026-09-16-billing-modernization.md",
+      "scope": "operational-record",
+      "category": "docs",
+      "title": "Billing navigation modernization — September 16, 2026"
+    },
+    {
+      "path": "docs/knowledge/audits/2026-09-16-billing-pages.md",
+      "scope": "operational-record",
+      "category": "docs",
+      "title": "Billing pages — navigation and recovery audit"
+    },
+    {
       "path": "docs/knowledge/templates/adr.md",
       "scope": "domain-reference",
       "category": "docs",
@@ -2073,6 +2091,12 @@
       "title": "Automatic agent tools and turns"
     },
     {
+      "path": "docs/reference/billing-pages.md",
+      "scope": "current-guide",
+      "category": "docs",
+      "title": "Billing pages and navigation"
+    },
+    {
       "path": "docs/reference/knowledge-commands.md",
       "scope": "current-guide",
       "category": "docs",
@@ -2131,6 +2155,12 @@
       "scope": "current-guide",
       "category": "docs",
       "title": "Prepare and verify a release"
+    },
+    {
+      "path": "docs/runbooks/stripe-webhook-delivery.md",
+      "scope": "current-guide",
+      "category": "docs",
+      "title": "Recover Stripe webhook delivery"
     },
     {
       "path": "docs/runbooks/weekly-knowledge-audit.md",
@@ -2727,6 +2757,12 @@
       "title": "Generation quota read blocked by developer approval"
     },
     {
+      "path": "post-mortem/incidents/2026/2026-09-15-stripe-test-webhook/README.md",
+      "scope": "operational-record",
+      "category": "post-mortem",
+      "title": "Separate test-account Stripe webhook failure"
+    },
+    {
       "path": "post-mortem/runbooks/controller-lock.md",
       "scope": "current-guide",
       "category": "post-mortem",
@@ -2802,7 +2838,7 @@
       "path": "src/components/billing/DESIGN.md",
       "scope": "supporting-reference-unreviewed",
       "category": "src",
-      "title": "Design System: GALX Billing — local Pro extension"
+      "title": "Design System: GALX Billing — local account workspace"
     },
     {
       "path": "src/components/home/DESIGN.md",

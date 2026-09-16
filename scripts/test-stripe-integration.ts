@@ -1,7 +1,7 @@
 /** Isolated PostgreSQL + simulated provider tests. Never contacts Stripe or charges money. */
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { Pool } from 'pg';
 import Stripe from 'stripe';
 import { createAccountCheckout } from '../src/lib/billing/checkout';
@@ -44,6 +44,8 @@ try {
   checks++;
   const [a,b] = await Promise.all([createAccountCheckout(pool,stripe,input),createAccountCheckout(pool,stripe,input)]);
   assert.equal(a.sessionId,b.sessionId); assert.equal(creates,1); checks++;
+  assert.equal([...sessions.values()][0].params.success_url,'https://galx.ai/billing/credits?checkout=returned&session_id={CHECKOUT_SESSION_ID}');
+  assert.equal([...sessions.values()][0].params.cancel_url,'https://galx.ai/billing/credits?checkout=canceled');checks++;
   await assert.rejects(createAccountCheckout(pool,stripe,{ ...input, amount: 50 }),/different amount/); checks++;
   await assert.rejects(createAccountCheckout(pool,stripe,{ ...input, requestId: 'invalid' }),/Refresh/); checks++;
   const paid = { id: a.sessionId, mode: 'payment', client_reference_id: 'owner', customer: 'cus_owner', currency: 'usd', amount_total: 2500, payment_status: 'paid', payment_intent: 'pi_owner' };
@@ -128,6 +130,19 @@ try {
   await deliver(refundSnapshot('failed'));
   await deliver(refundSnapshot('succeeded'));
   assert.equal(Number((await pool.query("SELECT balance_usd FROM galx_wallets WHERE user_id='newcomer'")).rows[0].balance_usd),newcomerCredit); checks++;
+  for (const returnPath of ['/keys/top-up','/billing']) {
+    const old = { ...input, userId: 'old_'+randomUUID(), requestId: randomUUID() };
+    const key = createHash('sha256').update(`${old.userId}:${old.requestId}`).digest('hex');
+    await pool.query(`INSERT INTO galx_stripe_checkout_sessions(session_id,user_id,amount_usd,match_grant_usd,total_credited_usd,metadata)
+      VALUES($1,$2,25,0,25,$3)`,['pending_'+key,old.userId,JSON.stringify({requestId:old.requestId,returnPath,origin:old.origin,email:old.email,key,fulfillmentVersion:2})]);
+    await pool.query(`CREATE TRIGGER reject_session_binding BEFORE UPDATE ON galx_stripe_checkout_sessions FOR EACH ROW EXECUTE FUNCTION reject_session_binding()`);
+    await assert.rejects(createAccountCheckout(pool,stripe,old),/forced session save failure/);
+    await pool.query('DROP TRIGGER reject_session_binding ON galx_stripe_checkout_sessions');
+    const count=creates;
+    await createAccountCheckout(pool,stripe,{...old,surface:undefined});
+    assert.equal(creates,count,'Old and canonical surfaces resume the same provider session');
+    assert.equal(sessions.get('checkout:'+key).params.success_url,`https://galx.ai${returnPath}?checkout=returned&session_id={CHECKOUT_SESSION_ID}`);checks++;
+  }
   const sdk = new Stripe('sk_test_localfixture');
   const raw = JSON.stringify(completed); const secret = 'whsec_localfixture';
   const signature = sdk.webhooks.generateTestHeaderString({ payload:raw,secret });

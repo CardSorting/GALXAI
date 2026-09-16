@@ -280,7 +280,7 @@ Claim Grant: https://galx.ai/grants`;
                   </div>
 
                   <Link
-                    href={tier.id === 'enterprise' ? '/billing/enterprise' : '/keys'}
+                    href={tier.id === 'enterprise' ? 'mailto:support@galx.ai?subject=Team%20billing' : '/keys'}
                     className={`w-full py-3.5 rounded-2xl font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 font-mono transition-all ${
                       isSelected
                         ? 'bg-gradient-to-r from-amber-400 to-orange-500 text-black shadow-lg shadow-amber-500/20'

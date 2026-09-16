@@ -1,4 +1,5 @@
 'use client';
+import { BILLING_PATHS } from '@/lib/billing/navigation';
 
 import React, { useEffect } from 'react';
 import { RouteErrorBoundaryCard } from '@/components/common/RouteErrorBoundaryCard';
@@ -28,8 +29,8 @@ export default function KeysError({
           badge="KEY VAULT ISOLATION ACTIVE"
           icon={Key}
           accentColor="indigo"
-          primaryLinkHref="/billing"
-          primaryLinkLabel="View Billing"
+          primaryLinkHref={BILLING_PATHS.credits}
+          primaryLinkLabel="View credits"
           autoRetrySeconds={6}
         />
       </main>

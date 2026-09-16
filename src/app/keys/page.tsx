@@ -1,4 +1,5 @@
 'use client';
+import { BILLING_PATHS } from '@/lib/billing/navigation';
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
@@ -652,7 +653,7 @@ console.log(completion.choices[0].message.content);`
               <div className="flex items-center gap-2">
                 <span className="font-mono font-bold text-white">${walletBalance.toFixed(2)}</span>
                 <Link
-                  href="/billing"
+                  href={BILLING_PATHS.credits}
                   className="text-[11px] text-indigo-400 hover:text-indigo-300 transition-colors"
                 >
                   Manage

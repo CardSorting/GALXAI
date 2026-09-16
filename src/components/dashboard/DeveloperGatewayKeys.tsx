@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { Key, Plus, Trash2, Copy, Check, ShieldCheck, AlertCircle } from 'lucide-react';
 import { formatTimeAgo } from '@/lib/utils';
 import { useDepositVerification } from '@/lib/hooks/useDepositVerification';
-import { KeyActivationPaywallModal } from '@/components/keys/KeyActivationPaywallModal';
 import { resilientFetch } from '@/lib/resilience/ResilientClient';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 import { SafeStorage } from '@/lib/resilience/SafeStorage';
@@ -15,14 +14,13 @@ function BaseDeveloperGatewayKeys() {
   const { user } = useAuth();
   const [keys, setKeys] = useState<any[]>([]);
   const [isOpenModal, setIsOpenModal] = useState(false);
-  const [isPaywallOpen, setIsPaywallOpen] = useState(false);
   const [newKeyName, setNewKeyName] = useState('');
   const [createdSecretKey, setCreatedSecretKey] = useState<string | null>(null);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [snippetTab, setSnippetTab] = useState<'env' | 'python' | 'curl'>('env');
   const [isLoading, setIsLoading] = useState(false);
 
-  const { hasVerifiedDeposit, walletBalance, depositAndUnlock } = useDepositVerification();
+  const { hasVerifiedDeposit, walletBalance } = useDepositVerification();
 
   const getStorageKey = (uid: string) => `galx_cached_developer_keys_${uid}`;
 
@@ -109,12 +107,6 @@ function BaseDeveloperGatewayKeys() {
     await createKeyDirectly(newKeyName, walletBalance);
   };
 
-  const handlePaywallSuccess = async (depositAmt: number, totalCredit: number) => {
-    const { totalCredited } = depositAndUnlock(depositAmt);
-    setIsPaywallOpen(false);
-    setIsOpenModal(true);
-    await createKeyDirectly(newKeyName || 'Developer Gateway Key', walletBalance + totalCredited);
-  };
 
   const handleRevokeKey = async (keyId: string) => {
     try {
@@ -357,13 +349,6 @@ function BaseDeveloperGatewayKeys() {
         </div>
       )}
 
-      {/* Key Activation Paywall Modal */}
-      <KeyActivationPaywallModal
-        isOpen={isPaywallOpen}
-        onClose={() => setIsPaywallOpen(false)}
-        onSuccess={handlePaywallSuccess}
-        keyLabel={newKeyName || 'Developer API Key'}
-      />
     </div>
   );
 }

@@ -1,0 +1,466 @@
+{
+  "observed_at": "2026-09-16T00:53:49.933653+00:00",
+  "scope": "Local billing navigation modernization after the six-page split; working tree is not deployed.",
+  "environment": {
+    "build": "disposable copy without dotenv; synthetic authority only",
+    "database": "disposable PostgreSQL 17 / pgvector with all 113 root migrations; fake Stripe and blocked external network",
+    "browser": "local production Next build, synthetic auth and payment responses, real Chrome with Playwright/Axe"
+  },
+  "changes": [
+    "Canonical destinations shared across UI navigation, metadata, both search catalogs and billing task links. CLI and SDK balance links go to Credits; CLI requires signed-in quote review.",
+    "Retired billing/checkout/Lumi page implementations and duplicate purchase components removed. Middleware-only bookmark/issued-return compatibility remains.",
+    "New credit returns persist Credits in existing attempt metadata; new plan attempts persist Plan in a constrained nullable private column. Old provider input is retained exactly.",
+    "Account/amount-scoped API-key retry hints promote into the single Credits form, retaining request identity. Confirmation/completed-attempt recovery clears both namespaces.",
+    "Vault deposit excluded from the older broad framework redirect so the allowlisted billing handler runs.",
+    "Current navigation, billing, deployment and database guides reconciled; obsolete native checkout and key-unlock claims removed from the wallet strategy guide."
+  ],
+  "removed_presentation_files": [
+    "src/app/billing/audit-logs/page.tsx",
+    "src/app/billing/auto-reload/page.tsx",
+    "src/app/billing/budget-alerts/page.tsx",
+    "src/app/billing/enterprise/page.tsx",
+    "src/app/billing/expenses/page.tsx",
+    "src/app/billing/invoices/[id]/error.tsx",
+    "src/app/billing/invoices/[id]/page.tsx",
+    "src/app/billing/promo/page.tsx",
+    "src/app/billing/reports/page.tsx",
+    "src/app/billing/seats/page.tsx",
+    "src/app/billing/tax/page.tsx",
+    "src/app/billing/teams/[id]/error.tsx",
+    "src/app/billing/teams/[id]/page.tsx",
+    "src/app/billing/teams/page.tsx",
+    "src/app/billing/webhooks/page.tsx",
+    "src/app/checkout/error.tsx",
+    "src/app/checkout/page.tsx",
+    "src/app/checkout/success/page.tsx",
+    "src/app/keys/top-up/page.tsx",
+    "src/app/lumi/page.tsx",
+    "src/app/vault/deposit/page.tsx",
+    "src/components/dashboard/BillingSubNav.tsx",
+    "src/components/keys/KeyActivationPaywallBlocker.tsx",
+    "src/components/keys/KeyActivationPaywallModal.tsx",
+    "src/components/keys/QuickTopUpClient.tsx",
+    "src/components/wallet/WalletQuickPeekPopover.tsx",
+    "src/components/wallet/WalletTopUpModal.tsx"
+  ],
+  "migration": {
+    "file": "supabase/migrations/20260916003207_billing_canonical_returns.sql",
+    "applied_to_production": false,
+    "initial_readonly_target_inventory": "112 applied, 0 pending before creating this local migration",
+    "target": "application database only",
+    "impact": "nullable constrained private return_path, no backfill, privilege or financial-state change; lock timeout 2s, statement timeout 10s",
+    "rollback": "retain additive field, both readers and all payment evidence; presentation rollback only"
+  },
+  "validation": {
+    "billing_tests": 18,
+    "webhook_signature_mode_body_checks": "pass",
+    "top_up_path_validation": "pass",
+    "auth_session_tests": 34,
+    "url_tests": 5,
+    "static_migration_pairs": 113,
+    "static_migration_violations": 0,
+    "general_db_checks": 94,
+    "credit_payment_checks": 29,
+    "plan_db_scenarios": 17,
+    "plan_role_denials": 24,
+    "production_build": "pass including TypeScript; 272 generated pages",
+    "source_parity": {
+      "source_files_compared": 1404,
+      "mismatches": []
+    },
+    "compiled_boundary_assets": 643,
+    "scoped_lint": "0 errors; 4 existing neighboring-source warnings and 3 ignored-script notices; focused changed billing/config scope has no warnings",
+    "documentation_fixture_tests": 38,
+    "cli": "37.25 prints canonical credit URL; 10001 rejects with exit 1"
+  },
+  "browser": {
+    "http": [
+      {
+        "route": "/api/billing/plan",
+        "auth": "absent",
+        "status": 401
+      },
+      {
+        "route": "/api/billing/plan",
+        "auth": "forged",
+        "status": 401
+      },
+      {
+        "route": "/api/billing",
+        "auth": "absent",
+        "status": 401
+      },
+      {
+        "route": "/api/billing",
+        "auth": "forged",
+        "status": 401
+      },
+      {
+        "route": "/api/stripe/portal",
+        "auth": "absent",
+        "status": 401
+      },
+      {
+        "route": "/api/stripe/portal",
+        "auth": "forged",
+        "status": 401
+      },
+      {
+        "route": "/billing",
+        "auth": "absent",
+        "status": 200,
+        "privateCache": true
+      },
+      {
+        "route": "/billing/plan",
+        "auth": "absent",
+        "status": 200,
+        "privateCache": true
+      },
+      {
+        "route": "/billing/credits",
+        "auth": "absent",
+        "status": 200,
+        "privateCache": true
+      },
+      {
+        "route": "/billing/transactions",
+        "auth": "absent",
+        "status": 200,
+        "privateCache": true
+      },
+      {
+        "route": "/billing/invoices",
+        "auth": "absent",
+        "status": 200,
+        "privateCache": true
+      },
+      {
+        "route": "/billing/payment-methods",
+        "auth": "absent",
+        "status": 200,
+        "privateCache": true
+      },
+      {
+        "route": "/billing?plan_checkout=returned",
+        "status": 307,
+        "destination": "/billing/plan?plan_checkout=returned"
+      },
+      {
+        "route": "/billing?checkout=returned&session_id=cs_test_fixture",
+        "status": 307,
+        "destination": "/billing/credits?checkout=returned&session_id=cs_test_fixture"
+      },
+      {
+        "route": "/billing/reports",
+        "status": 307,
+        "destination": "/billing/transactions"
+      },
+      {
+        "route": "/billing/invoices/old",
+        "status": 307,
+        "destination": "/billing/invoices"
+      },
+      {
+        "route": "/keys/top-up?amount=37.25&token=PRIVATE_SENTINEL",
+        "status": 307,
+        "destination": "/billing/credits?amount=37.25"
+      },
+      {
+        "route": "/checkout?amount=50",
+        "status": 307,
+        "destination": "/billing/credits?amount=50"
+      },
+      {
+        "route": "/checkout?plan=pro",
+        "status": 307,
+        "destination": "/billing/plan"
+      },
+      {
+        "route": "/checkout?plan=lumi",
+        "status": 307,
+        "destination": "/pricing"
+      },
+      {
+        "route": "/checkout/success?session_id=cs_test_fixture",
+        "status": 307,
+        "destination": "/billing/credits?checkout=returned&session_id=cs_test_fixture"
+      },
+      {
+        "route": "/lumi",
+        "status": 307,
+        "destination": "/pricing"
+      },
+      {
+        "route": "/vault/deposit?amount=25&token=PRIVATE_SENTINEL",
+        "status": 307,
+        "destination": "/billing/credits?amount=25"
+      }
+    ],
+    "layouts": [
+      {
+        "state": "overview",
+        "width": 390,
+        "overflow": false,
+        "axeViolations": 0
+      },
+      {
+        "state": "plan",
+        "width": 390,
+        "overflow": false,
+        "axeViolations": 0
+      },
+      {
+        "state": "credits",
+        "width": 390,
+        "overflow": false,
+        "axeViolations": 0
+      },
+      {
+        "state": "transactions",
+        "width": 390,
+        "overflow": false,
+        "axeViolations": 0
+      },
+      {
+        "state": "invoices",
+        "width": 390,
+        "overflow": false,
+        "axeViolations": 0
+      },
+      {
+        "state": "payment-settings",
+        "width": 390,
+        "overflow": false,
+        "axeViolations": 0
+      },
+      {
+        "state": "overview-refreshed",
+        "width": 390,
+        "overflow": false,
+        "axeViolations": 0
+      },
+      {
+        "state": "ending",
+        "width": 390,
+        "overflow": false,
+        "axeViolations": 0
+      },
+      {
+        "state": "payment-required",
+        "width": 390,
+        "overflow": false,
+        "axeViolations": 0
+      },
+      {
+        "state": "empty-transactions",
+        "width": 390,
+        "overflow": false,
+        "axeViolations": 0
+      },
+      {
+        "state": "overview",
+        "width": 320,
+        "overflow": false,
+        "axeViolations": 0
+      },
+      {
+        "state": "plan",
+        "width": 320,
+        "overflow": false,
+        "axeViolations": 0
+      },
+      {
+        "state": "credits",
+        "width": 320,
+        "overflow": false,
+        "axeViolations": 0
+      },
+      {
+        "state": "transactions",
+        "width": 320,
+        "overflow": false,
+        "axeViolations": 0
+      },
+      {
+        "state": "invoices",
+        "width": 320,
+        "overflow": false,
+        "axeViolations": 0
+      },
+      {
+        "state": "payment-settings",
+        "width": 320,
+        "overflow": false,
+        "axeViolations": 0
+      },
+      {
+        "state": "overview-refreshed",
+        "width": 320,
+        "overflow": false,
+        "axeViolations": 0
+      },
+      {
+        "state": "ending",
+        "width": 320,
+        "overflow": false,
+        "axeViolations": 0
+      },
+      {
+        "state": "payment-required",
+        "width": 320,
+        "overflow": false,
+        "axeViolations": 0
+      },
+      {
+        "state": "empty-transactions",
+        "width": 320,
+        "overflow": false,
+        "axeViolations": 0
+      },
+      {
+        "state": "overview",
+        "width": 1440,
+        "overflow": false,
+        "axeViolations": 0
+      },
+      {
+        "state": "plan",
+        "width": 1440,
+        "overflow": false,
+        "axeViolations": 0
+      },
+      {
+        "state": "credits",
+        "width": 1440,
+        "overflow": false,
+        "axeViolations": 0
+      },
+      {
+        "state": "transactions",
+        "width": 1440,
+        "overflow": false,
+        "axeViolations": 0
+      },
+      {
+        "state": "invoices",
+        "width": 1440,
+        "overflow": false,
+        "axeViolations": 0
+      },
+      {
+        "state": "payment-settings",
+        "width": 1440,
+        "overflow": false,
+        "axeViolations": 0
+      },
+      {
+        "state": "overview-refreshed",
+        "width": 1440,
+        "overflow": false,
+        "axeViolations": 0
+      },
+      {
+        "state": "ending",
+        "width": 1440,
+        "overflow": false,
+        "axeViolations": 0
+      },
+      {
+        "state": "payment-required",
+        "width": 1440,
+        "overflow": false,
+        "axeViolations": 0
+      },
+      {
+        "state": "empty-transactions",
+        "width": 1440,
+        "overflow": false,
+        "axeViolations": 0
+      }
+    ],
+    "interactions": [
+      {
+        "width": 390,
+        "separateDestinations": true,
+        "overviewRefreshesPlanAndCredit": true,
+        "draftAndRetryAcrossPages": true,
+        "retiredKeyRetryPreserved": true,
+        "lastKnownBilling": true,
+        "managementAfterFailure": true,
+        "returnDoesNotGrantAccess": true,
+        "complimentaryDateAbsent": true,
+        "staleReadIgnored": true,
+        "pendingReceiptNavigation": true,
+        "emptyStates": true,
+        "legacyAnchors": true,
+        "textReflow200": true
+      },
+      {
+        "width": 320,
+        "separateDestinations": true,
+        "overviewRefreshesPlanAndCredit": true,
+        "draftAndRetryAcrossPages": true,
+        "retiredKeyRetryPreserved": true,
+        "lastKnownBilling": true,
+        "managementAfterFailure": true,
+        "returnDoesNotGrantAccess": true,
+        "complimentaryDateAbsent": true,
+        "staleReadIgnored": true,
+        "pendingReceiptNavigation": true,
+        "emptyStates": true,
+        "legacyAnchors": true,
+        "textReflow200": true
+      },
+      {
+        "width": 1440,
+        "separateDestinations": true,
+        "overviewRefreshesPlanAndCredit": true,
+        "draftAndRetryAcrossPages": true,
+        "retiredKeyRetryPreserved": true,
+        "lastKnownBilling": true,
+        "managementAfterFailure": true,
+        "returnDoesNotGrantAccess": true,
+        "complimentaryDateAbsent": true,
+        "staleReadIgnored": true,
+        "pendingReceiptNavigation": true,
+        "emptyStates": true,
+        "legacyAnchors": true,
+        "textReflow200": true
+      }
+    ],
+    "external_requests": [],
+    "text_reflow_checks": 18,
+    "captures": 48,
+    "capture_directory": ".impeccable/review/billing-modern"
+  },
+  "visual_review": {
+    "inspected": [
+      "overview-1440.png",
+      "credits-390.png",
+      "plan-390.png",
+      "payment-settings-320.png",
+      "reflow-transactions-320.png"
+    ],
+    "finding": "Existing six-task hierarchy and typography retained; narrow and enlarged-text task content fits. Captured fixed product navigation remains scroll-accessible. The actual redirect conflict found in HTTP testing was corrected before final acceptance.",
+    "scope": "Bounded consolidation/polish, no new visual identity and no fresh independent-agent review."
+  },
+  "failed_attempts": [
+    "Sandbox prevented tsx IPC, Docker access, Google Fonts fetch and local server bind; exact required commands reran with approved escalation.",
+    "Workspace tsc found stale generated types for deleted routes; clean isolated production build regenerated route types and passed.",
+    "First production HTTP run showed /vault/deposit intercepted by the broad 308 framework redirect; exact deposit exclusion added, rebuilt, full browser rerun passed.",
+    "Initial docs sync identified now-empty deleted-file source patterns; removed those patterns and retained their ownership in this deletion record."
+  ],
+  "limits": [
+    "No deployment, live database migration, Stripe configuration write, real payment, refund, cancellation or provider message in this pass.",
+    "Hosted signed-in navigation and Stripe settlement require separate post-release acceptance.",
+    "Compiled private-marker and fixture HTTP scans do not certify the whole live site. Axe scoped to main/aside, no physical device or screen-reader certification.",
+    "No claims about new commercial terms, tax readiness or reduced transaction lock duration. Earlier follow-ups remain separate.",
+    "Existing unrelated overdue incident actions remain open."
+  ],
+  "references": [
+    "https://docs.stripe.com/api/idempotent_requests",
+    "https://www.postgresql.org/docs/current/ddl-alter.html",
+    "https://supabase.com/docs/guides/database/postgres/row-level-security"
+  ]
+}

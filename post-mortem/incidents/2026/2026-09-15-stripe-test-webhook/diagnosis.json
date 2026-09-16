@@ -1,0 +1,41 @@
+{
+  "observed_at": "2026-09-15T23:13:04.129571+00:00",
+  "scope": "Read-only diagnosis; no provider configuration changed",
+  "reported_account": "acct_1U88yCPiwsQkTwlT",
+  "endpoint": {
+    "id": "we_1U8EqbPiwsQkTwlTwDIqxe0y",
+    "url": "https://api.galx.ai/api/stripe/webhook",
+    "livemode": false,
+    "status": "enabled"
+  },
+  "unsigned_http": {
+    "https://api.galx.ai/api/stripe/webhook": 401,
+    "https://galx.ai/api/stripe/webhook": 400
+  },
+  "failed_test_events": {
+    "count": 4,
+    "has_more": false,
+    "types": [
+      "invoice.payment_succeeded",
+      "payment_intent.succeeded"
+    ],
+    "pending_webhooks_each": 1
+  },
+  "production": {
+    "account": "acct_1QUxquIA2zQnWbn5",
+    "mode": "live",
+    "enabled_endpoints": 2,
+    "origin": "https://galx.ai",
+    "events_since_reported_failure": 3,
+    "events_with_pending_delivery": 0,
+    "event_types": {
+      "checkout.session.expired": 2,
+      "customer.created": 1
+    }
+  },
+  "limits": [
+    "Raw Stripe delivery-attempt error logs were not inspected; current HTTP probes reproduce rejection.",
+    "No successful payment or refund was initiated.",
+    "No isolated hosted test receiver was identified."
+  ]
+}

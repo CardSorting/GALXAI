@@ -158,7 +158,7 @@ export class AuthenticationError extends APIError {
 export class PaymentRequiredError extends APIError {
   constructor(
     message = 'Insufficient funds, quota exhausted, or payment required',
-    suggestedFix = 'Fund your balance or upgrade spend caps at https://galx.ai/billing',
+    suggestedFix = 'Review your credit balance at https://galx.ai/billing/credits',
     headers?: Headers | Record<string, string>
   ) {
     super(message, 402, 'payment_required', undefined, suggestedFix, headers);

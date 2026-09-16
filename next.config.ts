@@ -193,7 +193,8 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
-        source: "/vault/:path*",
+        // Deposit bookmarks need the allowlisted billing redirect in middleware.
+        source: "/vault/:path((?!deposit$).*)",
         destination: "/keys",
         permanent: true,
       },

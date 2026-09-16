@@ -1,4 +1,5 @@
 'use client';
+import { BILLING_PATHS } from '@/lib/billing/navigation';
 import Link from 'next/link';
 import { useGenerationAllowance } from '@/contexts/GenerationAllowanceContext';
 import styles from './generation-gate.module.css';
@@ -25,6 +26,6 @@ export function GenerationGateNotice({kind,knownFree=false,quantity=1}:{kind:'si
         : status==='exhausted'?'Your saved work is still here. Explore Pro to keep creating.'
         : 'Your prompt stays here. Check availability later, or explore Pro.'}</p></div>
     <div className={styles.actions}>{!['available','exhausted'].includes(status) && <button type="button" disabled={checking} onClick={refresh}>{checking?'Checking…':'Check availability'}</button>}
-      <Link href="/billing#plan">Explore Pro</Link></div>
+      <Link href={BILLING_PATHS.plan}>Explore Pro</Link></div>
   </div>;
 }

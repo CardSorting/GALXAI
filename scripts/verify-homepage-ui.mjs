@@ -107,7 +107,7 @@ try {
     if (width === 1440) {
       await main.getByRole('link', { name: 'Continue with GALX Pro' }).click();
       await page.waitForURL('**/login?next=/billing%23plan');
-      assert.equal(new URL(page.url()).searchParams.get('next'), '/billing#plan');
+      assert.equal(new URL(page.url()).searchParams.get('next'), '/billing/plan');
       await page.locator('input[type="email"]').first().waitFor();
       await page.goto(base, { waitUntil: 'networkidle' });
       await page.getByRole('group', { name: 'Choose an example' }).getByRole('button', { name: 'Portfolio', exact: true }).click();

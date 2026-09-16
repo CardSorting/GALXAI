@@ -59,7 +59,7 @@ export async function readBillingTransactions(db: Db, userId: string, params: UR
 
 export function stripeInvoiceUrl(value: unknown) {
   if (typeof value !== 'string') return null;
-  try { const url = new URL(value); return url.protocol === 'https:' && ['invoice.stripe.com', 'pay.stripe.com'].includes(url.hostname) && !url.username && !url.password ? url.href : null; } catch { return null; }
+  try { const url = new URL(value); return url.protocol === 'https:' && ['invoice.stripe.com', 'pay.stripe.com'].includes(url.hostname) && !url.port && !url.username && !url.password ? url.href : null; } catch { return null; }
 }
 
 export async function readBilling(db: Db, userId: string, params: URLSearchParams) {

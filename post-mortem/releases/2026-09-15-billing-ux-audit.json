@@ -1,0 +1,206 @@
+{
+  "observed_at": "2026-09-15T23:50:02.997140+00:00",
+  "scope": "Local second-pass billing audit and implementation, plus read-only live Stripe configuration checks. No application deployment or payment mutation.",
+  "base_revision": "d07015a35051b2c109bee3d3ba01de11ec6a38a1",
+  "source_hashes": {
+    "src/app/api/billing/plan/route.ts": "ac0b921e412399d9fb473c9d167b61d5e97e9f1b13e2b64bde0d0cd55d05a745",
+    "src/app/api/stripe/portal/route.ts": "6ef413b25cf2605993a8726e6231c7ab0690b964b4a1fbe50db4639315ef824b",
+    "src/components/billing/BillingClient.tsx": "b16413717635af46e7522ad3c533bc6097c437e1b54c2142e9ad1866d9e81e67",
+    "src/components/billing/PlanPanel.tsx": "f52030a050a009fda40156db7bf6b97ddb7c6272394b5b95f44cafd2be92130d",
+    "src/components/billing/TopUpForm.tsx": "c71d1fd2b3d9b095a6b31c1d5619ae5db523a1f8562bf2d32f1c421ef7a50edd",
+    "src/components/billing/CheckoutStatus.tsx": "38ca74a4e75f577f1ea33b8be3a95c89a31d34e1a8528896a58392f99b1f1320",
+    "src/lib/billing/account.ts": "26e21dde64a4893bad469c7eb9933a62fc641dbee62155c90dbeeaff0f288250",
+    "src/lib/billing/portal.ts": "0c873967bccbf178b40723f2be93fe87e4d12dccd228b845bfb6a5896a775eee",
+    "src/lib/billing/plan-status.ts": "2b39191582d14463cd02887674870fe8da00285318cddb6b51aa10436bac9519",
+    "src/lib/billing/subscription-summary.ts": "3e2ac9b31b14ed86f6b615960b0d9e21b80df3da6a790a859826b3670d95d947",
+    "src/lib/billing/webhookEvents.ts": "40caeb9ce80dd4656e6505499ce4bcbd48014521d9fb64226e764f29ce91668a"
+  },
+  "build": {
+    "kind": "isolated production build",
+    "result": "passed",
+    "public_configuration": "synthetic .invalid services; no dotenv or live credentials",
+    "runtime_source_hashes_match": true,
+    "assets_scanned": 670,
+    "private_marker_or_trace_findings": 0
+  },
+  "tests": {
+    "billing_lifecycle": "11 tests plus both webhook route boundary suites passed",
+    "sites_paid_access": "9 tests passed",
+    "subscription_database": {
+      "checks": 16,
+      "browser_role_denials": 24,
+      "migrations_replayed": 112,
+      "external_provider_calls": 0,
+      "fixture_cleanup": "completed"
+    },
+    "typescript": "passed",
+    "eslint": "passed on changed runtime files",
+    "browser": {
+      "http": [
+        {
+          "route": "/api/billing/plan",
+          "auth": "absent",
+          "status": 401
+        },
+        {
+          "route": "/api/billing/plan",
+          "auth": "forged",
+          "status": 401
+        },
+        {
+          "route": "/api/billing",
+          "auth": "absent",
+          "status": 401
+        },
+        {
+          "route": "/api/billing",
+          "auth": "forged",
+          "status": 401
+        },
+        {
+          "route": "/api/stripe/portal",
+          "auth": "absent",
+          "status": 401
+        },
+        {
+          "route": "/api/stripe/portal",
+          "auth": "forged",
+          "status": 401
+        }
+      ],
+      "layouts": [
+        {
+          "state": "free",
+          "width": 1440,
+          "overflow": false,
+          "axeViolations": 0
+        },
+        {
+          "state": "ending",
+          "width": 1440,
+          "overflow": false,
+          "axeViolations": 0
+        },
+        {
+          "state": "payment-required",
+          "width": 1440,
+          "overflow": false,
+          "axeViolations": 0
+        },
+        {
+          "state": "free",
+          "width": 390,
+          "overflow": false,
+          "axeViolations": 0
+        },
+        {
+          "state": "ending",
+          "width": 390,
+          "overflow": false,
+          "axeViolations": 0
+        },
+        {
+          "state": "payment-required",
+          "width": 390,
+          "overflow": false,
+          "axeViolations": 0
+        },
+        {
+          "state": "free",
+          "width": 320,
+          "overflow": false,
+          "axeViolations": 0
+        },
+        {
+          "state": "ending",
+          "width": 320,
+          "overflow": false,
+          "axeViolations": 0
+        },
+        {
+          "state": "payment-required",
+          "width": 320,
+          "overflow": false,
+          "axeViolations": 0
+        }
+      ],
+      "interactions": [
+        {
+          "width": 1440,
+          "draftAndRetryPreserved": true,
+          "lastKnownBilling": true,
+          "managementAfterFailure": true,
+          "returnDoesNotGrantAccess": true,
+          "complimentaryDateAbsent": true,
+          "staleReadIgnored": true,
+          "textReflow200": true
+        },
+        {
+          "width": 390,
+          "draftAndRetryPreserved": true,
+          "lastKnownBilling": true,
+          "managementAfterFailure": true,
+          "returnDoesNotGrantAccess": true,
+          "complimentaryDateAbsent": true,
+          "staleReadIgnored": true,
+          "textReflow200": true
+        },
+        {
+          "width": 320,
+          "draftAndRetryPreserved": true,
+          "lastKnownBilling": true,
+          "managementAfterFailure": true,
+          "returnDoesNotGrantAccess": true,
+          "complimentaryDateAbsent": true,
+          "staleReadIgnored": true,
+          "textReflow200": true
+        }
+      ],
+      "externalRequests": []
+    },
+    "design_detector": "0 findings before and after; not a substitute for visual inspection"
+  },
+  "live_stripe_read_only": {
+    "mode": "live",
+    "required_endpoints": 2,
+    "missing_events": [],
+    "dedicated_portal": {
+      "invoice_history": true,
+      "payment_method_update": true,
+      "cancellation_mode": "at_period_end",
+      "subscription_update": false
+    },
+    "default_portal_subscription_update": true,
+    "active_tax_registration_present": false
+  },
+  "earlier_failures": [
+    {
+      "test": "isolated build",
+      "result": "Sandbox could not fetch Google Fonts; explicit network-enabled rebuild passed."
+    },
+    {
+      "test": "browser harness setup",
+      "result": "Started before build completed; reran against finished build."
+    },
+    {
+      "test": "anonymous portal probe",
+      "result": "Fixture omitted JSON content type and received expected 415; corrected fixture verifies unauthorized JSON POST."
+    },
+    {
+      "test": "initial complete visual/browser pass",
+      "result": "320px / 200% text reflow failed; stacked summary amounts and wrapped invoice actions; final full pass succeeded."
+    },
+    {
+      "test": "local database fixture",
+      "result": "Sandbox denied Docker socket; scoped escalation ran and cleaned disposable database successfully."
+    }
+  ],
+  "limits": [
+    "No hosted application release or live signed-in billing UI acceptance.",
+    "No real checkout, charge, refund, cancellation, provider email or dunning mutation.",
+    "No broad live-site cleanliness claim; compiled/local rendered artifacts and synthetic interactions were checked.",
+    "The independent two-agent design critique was not run while its required permission question remained unanswered.",
+    "Existing top-up code still holds account/row locks during bounded Stripe calls; redesign needs dedicated concurrency and migration review.",
+    "Tax registrations require an explicit business/jurisdiction decision; no automatic tax change."
+  ]
+}

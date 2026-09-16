@@ -1,0 +1,47 @@
+{
+  "reviewed_at": "2026-09-15T23:21:56.797662+00:00",
+  "reviewer": "Codex / billing and release maintainer",
+  "scope": "Semantic review of changed provisioning/account-mode boundary and complete affected recovery/deployment guides; broader domain fingerprints retain change detection, not an exhaustive new audit.",
+  "sources_inspected": [
+    "scripts/provision-stripe-all.ts",
+    "scripts/lib/stripe-webhook-target.ts",
+    "scripts/test-stripe-webhook-target.ts",
+    "src/app/api/stripe/webhook/route.ts",
+    "src/app/api/internal/credits/stripe/route.ts",
+    "src/lib/stripe/config.ts",
+    "src/lib/billing/webhookEvents.ts",
+    "scripts/sync-billing-webhooks.ts",
+    "scripts/verify-stripe-readiness.ts",
+    "docs/knowledge/registry.json",
+    "scripts/verify-post-mortem.py",
+    "scripts/docs-kb.py"
+  ],
+  "guides_inspected": [
+    "docs/runbooks/stripe-webhook-delivery.md",
+    "docs/DEPLOYMENT.md",
+    "docs/runbooks/release-readiness.md",
+    "docs/DOCUMENTATION_POLICY.md",
+    "docs/how-to/change-with-documentation.md",
+    "docs/reference/knowledge-commands.md",
+    "docs/knowledge/README.md",
+    "post-mortem/CURRENT_STATE.md",
+    "post-mortem/runbooks/triage.md",
+    "post-mortem/failure-modes/deployment.md"
+  ],
+  "conclusions": [
+    "Preflight executes before Stripe client creation and any provider mutation; invalid/local origin no longer silently maps to production.",
+    "Production API/redirect hosts cannot be configured; known production application host is refused for test keys.",
+    "Account identities differ. Retiring the exact test endpoint does not imply pending test fulfillment; this distinction appears in all current incident/recovery guidance.",
+    "Source and canonical runbook are mapped to delivery; registry change follows existing knowledge schema; no ADR decision or runtime acceptance was auto-advanced.",
+    "Incident files are private; current state links dated evidence; provider and local outcomes are separate."
+  ],
+  "validation_at_review": [
+    "3 provisioning tests, route signature/mode/body checks, 2 DTO tests, 6 live negative HTTP probes, live provider readiness, production build and 38 docs tests passed.",
+    "Local compiled scan reported 669 assets without selected private-marker/trace findings; final documentation synchronization follows this explicit review."
+  ],
+  "limits": [
+    "No new settlement, refund, test fulfillment, new isolated test environment, remote CI or runtime release.",
+    "Custom hostname isolation is an operator responsibility.",
+    "Existing unrelated incident actions and domain deadlines remain unchanged."
+  ]
+}

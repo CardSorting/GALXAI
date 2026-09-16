@@ -185,7 +185,7 @@ export class GalxCommunityPoolGovernor {
           message: `You have utilized your $${FREE_MONTHLY_GRANT_USD.toFixed(2)} monthly free compute grant. Top up your compute wallet to continue running requests with dedicated priority.`,
           resetAt,
           resetInSeconds: dailyMetrics.resetsInSeconds,
-          upgradeUrl: '/billing'
+          upgradeUrl: '/billing/credits'
         }
       };
     }
@@ -207,7 +207,7 @@ export class GalxCommunityPoolGovernor {
           message: `Daily free community compute capacity has reached its daily ceiling across shared ingestion shards. Resets automatically at 00:00 UTC (in ${hoursLeft}h ${minsLeft}m). To bypass shared capacity limits with dedicated priority routing and zero queueing, top up your compute wallet.`,
           resetAt,
           resetInSeconds: dailyMetrics.resetsInSeconds,
-          upgradeUrl: '/billing'
+          upgradeUrl: '/billing/credits'
         }
       };
     }

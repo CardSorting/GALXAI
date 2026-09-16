@@ -1,16 +1,20 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
+import { clearCreditCheckoutAttempt, creditCheckoutAttempt } from '@/lib/billing/checkout-attempt';
 
 const money = (value: number) => value.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
 /** Shared hosted checkout. A retry keeps the same durable payment attempt. */
-export function TopUpForm({ token, available, surface = 'billing', accountId }: { token?: string; available: boolean; surface?: 'billing' | 'keys'; accountId: string }) {
-  const [amount, setAmount] = useState('25');
+export function TopUpForm({ token, available, accountId, draft }: { token?: string; available: boolean; accountId: string; draft?: { amount: string; onChange: (value: string) => void } }) {
+  const [localAmount, setLocalAmount] = useState('25');
+  const amount = draft?.amount ?? localAmount;
+  const setAmount = draft?.onChange ?? setLocalAmount;
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [quote, setQuote] = useState<{ amountUsd: number; creditUsd: number; bonusUsd: number } | null>(null);
   const [quoteRevision, setQuoteRevision] = useState(0);
   const [quoteError, setQuoteError] = useState('');
   const active = useRef(true);
+  const amountId = 'topup-amount';
   const attempt = useRef<{ amount: number; id: string } | null>(null);
   const inFlight = useRef(false);
   useEffect(() => { active.current = true; return () => { active.current = false; }; }, []);
@@ -18,7 +22,7 @@ export function TopUpForm({ token, available, surface = 'billing', accountId }: 
     const requested = new URLSearchParams(window.location.search).get('amount');
     const value = Number(requested);
     if (requested && Number.isFinite(value) && value >= 1 && value <= 10000 && Math.abs(value*100-Math.round(value*100)) < 0.000001) setAmount(String(value));
-  }, []);
+  }, [setAmount]);
   const valid = amount.trim() !== '' && Number.isFinite(Number(amount)) && Number(amount) >= 1 && Number(amount) <= 10000 && Math.abs(Number(amount) * 100 - Math.round(Number(amount) * 100)) < 0.000001;
   useEffect(() => {
     setQuote(null); setQuoteError('');
@@ -38,19 +42,16 @@ export function TopUpForm({ token, available, surface = 'billing', accountId }: 
   async function checkout() {
     if (!valid || !available || inFlight.current || !quote || quote.amountUsd !== Number(amount)) return;
     inFlight.current = true; setBusy(true); setError('');
-    const storageKey = `galx_checkout:${accountId}:${surface}:${Number(amount)}`;
     try {
       if (!attempt.current || attempt.current.amount !== Number(amount)) {
-        let saved: { id: string; created: number } | null = null;
-        try { saved = JSON.parse(sessionStorage.getItem(storageKey) || 'null'); } catch { /* Storage can be disabled. */ }
-        const id = saved && Date.now() - saved.created < 90 * 60_000 ? saved.id : crypto.randomUUID();
+        let id: string;
+        try { id = creditCheckoutAttempt(sessionStorage, accountId, Number(amount)); } catch { id = crypto.randomUUID(); }
         attempt.current = { amount: Number(amount), id };
-        try { sessionStorage.setItem(storageKey, JSON.stringify({ id, created: saved?.id === id ? saved.created : Date.now() })); } catch { /* In-memory retry remains available. */ }
       }
-      const response = await fetch('/api/stripe/checkout', { method: 'POST', credentials: 'same-origin', signal: AbortSignal.timeout(45000), headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) }, body: JSON.stringify({ amount: Number(amount), surface, requestId: attempt.current.id }) });
+      const response = await fetch('/api/stripe/checkout', { method: 'POST', credentials: 'same-origin', signal: AbortSignal.timeout(45000), headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) }, body: JSON.stringify({ amount: Number(amount), requestId: attempt.current.id }) });
       const result = await response.json().catch(() => ({}));
       if (!response.ok) {
-        if (response.status === 409) { attempt.current = null; try { sessionStorage.removeItem(storageKey); } catch { /* Optional storage. */ } }
+        if (response.status === 409) { attempt.current = null; try { clearCreditCheckoutAttempt(sessionStorage, accountId, Number(amount)); } catch { /* Optional storage. */ } }
         throw new Error(result.error || 'Could not open checkout. Try again.');
       }
       const target = new URL(result.url);
@@ -60,12 +61,15 @@ export function TopUpForm({ token, available, surface = 'billing', accountId }: 
   }
   return <form className="mt-6 space-y-4" onSubmit={event => { event.preventDefault(); void checkout(); }}>
     <fieldset disabled={busy || !available} className="space-y-3"><legend className="mb-2 text-sm text-zinc-300">Top-up amount (USD)</legend>
-      <div className="flex flex-wrap gap-2">{[25,50,100].map(value => <button key={value} type="button" aria-pressed={Number(amount) === value} onClick={() => { setAmount(String(value)); setError(''); }} className={`rounded-md border px-4 py-2 text-sm focus-visible:outline-indigo-300 ${Number(amount) === value ? 'border-indigo-400/60 bg-indigo-500/15 text-indigo-100' : 'border-white/15 text-zinc-100 hover:bg-white/5'}`}>${value}</button>)}</div>
-      <label className="block text-sm text-zinc-400">Custom amount<input className="mt-2 block w-full rounded-md border border-white/15 bg-[#090b10] px-3 py-2 text-sm text-zinc-100 focus-visible:outline-indigo-300 sm:w-48" type="number" min="1" max="10000" step="0.01" required value={amount} onChange={event => { setAmount(event.target.value); setError(''); }} /></label>
+      <div className="flex flex-wrap gap-2">{[25,50,100].map(value => <button key={value} type="button" aria-pressed={Number(amount) === value} onClick={() => { setAmount(String(value)); setError(''); }} className={`min-h-11 rounded-md border px-4 py-2 text-sm focus-visible:outline-indigo-300 ${Number(amount) === value ? 'border-indigo-400/60 bg-indigo-500/15 text-indigo-100' : 'border-white/15 text-zinc-100 hover:bg-white/5'}`}>${value}</button>)}</div>
+      <label htmlFor={amountId} className="block text-sm text-zinc-400">Custom amount</label>
+      <input id={amountId} aria-describedby={`${amountId}-help`} aria-invalid={!valid} className="block min-h-11 w-full rounded-md border border-white/15 bg-[#090b10] px-3 py-2 text-base text-zinc-100 focus-visible:outline-indigo-300 sm:w-48" type="number" inputMode="decimal" min="1" max="10000" step="0.01" required value={amount} onChange={event => { setAmount(event.target.value); setError(''); }} />
+      <p id={`${amountId}-help`} className={`text-sm ${valid ? 'text-zinc-400' : 'text-red-300'}`}>Enter $1–$10,000, with up to two decimal places.</p>
     </fieldset>
     {quote && quote.amountUsd === Number(amount) && <dl className="max-w-sm space-y-2 text-sm"><div className="flex justify-between gap-4"><dt className="text-zinc-400">You pay once</dt><dd>{money(quote.amountUsd)}</dd></div><div className="flex justify-between gap-4"><dt className="text-zinc-400">Credit added{quote.bonusUsd > 0 ? ' · includes bonus' : ''}</dt><dd className="font-medium text-zinc-100">{money(quote.creditUsd)}</dd></div></dl>}
     {quoteError && <p role="alert" className="text-sm text-red-300">{quoteError} <button type="button" onClick={() => setQuoteRevision(n => n + 1)} className="underline">Retry</button></p>}
-    <button type="submit" disabled={!valid || busy || !available || !quote || quote.amountUsd !== Number(amount)} className="w-full rounded-md border border-indigo-400/40 bg-indigo-500/20 px-4 py-2.5 text-sm font-medium text-indigo-100 hover:bg-indigo-500/30 focus-visible:outline-indigo-300 disabled:opacity-50 sm:w-auto">{busy ? 'Opening checkout…' : 'Continue to checkout'}</button>
+    {valid && available && !quote && !quoteError && <p role="status" className="text-sm text-zinc-400">Calculating your credit…</p>}
+    <button type="submit" disabled={!valid || busy || !available || !quote || quote.amountUsd !== Number(amount)} className="min-h-11 w-full rounded-md border border-indigo-400/40 bg-indigo-500/20 px-4 py-2.5 text-sm font-medium text-indigo-100 hover:bg-indigo-500/30 focus-visible:outline-indigo-300 disabled:opacity-50 sm:w-auto">{busy ? 'Opening checkout…' : 'Continue to checkout'}</button>
     <p className="text-xs leading-6 text-zinc-400">{available ? 'Pay securely with Stripe. No subscription or automatic reload. Credit is added after payment confirmation.' : 'Online payments are currently unavailable. Please try again later.'}</p>
     {error && <p role="alert" className="text-sm text-red-300">{error}</p>}
   </form>;

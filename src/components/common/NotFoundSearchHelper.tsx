@@ -1,4 +1,5 @@
 'use client';
+import { BILLING_PATHS } from '@/lib/billing/navigation';
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
@@ -11,7 +12,7 @@ const publicPages = [
   { id: 'images', title: 'Images', href: '/images', category: 'Product', description: 'Create images from a prompt.' },
   { id: 'sites', title: 'Sites', href: '/sites', category: 'Product', description: 'Build and publish a website.' },
   { id: 'developers', title: 'Developer preview', href: '/developers', category: 'Access', description: 'Request API access and check your waitlist status.' },
-  { id: 'billing', title: 'Account and billing', href: '/billing', category: 'Account', description: 'Your credits, plan and payments.' },
+  { id: 'billing', title: 'Account and billing', href: BILLING_PATHS.overview, category: 'Account', description: 'Your credits, plan and payments.' },
 ];
 
 export function NotFoundSearchHelper() {

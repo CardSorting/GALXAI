@@ -174,6 +174,7 @@ Owner role: **Release operator**. Domain: `delivery`.
 - [Cloudflare implementation and deployment boundaries](../../docs/CLOUDFLARE_STRATEGY.md)
 - [Cloudflare maintainer runbook](../../docs/maintainers/CLOUDFLARE_EDGE_MESH_MAINTAINER_RUNBOOK.md)
 - [Deployment and release](../../docs/playbooks/02-deployment-and-release.md)
+- [Recover Stripe webhook delivery](../../docs/runbooks/stripe-webhook-delivery.md)
 
 Relevant checks (select for the change; impact discovery never executes these): `npm run docs:check`, `npm run build`, `npm run docs:check:build`.
 
@@ -198,3 +199,17 @@ Owner role: **Product/performance maintainer**. Domain: `client-efficiency`.
 - [GALX product surface strategy](../../docs/PRODUCT_SURFACE_STRATEGY.md)
 
 Relevant checks (select for the change; impact discovery never executes these): `npm run test:egress:transport`, `npm run test:image:security`, `npm run build`.
+
+## Billing, subscriptions and payment recovery
+
+Owner role: **Billing maintainer**. Domain: `billing`.
+
+- [Recover Stripe webhook delivery](../../docs/runbooks/stripe-webhook-delivery.md)
+- [Sites paid access and fair usage](../../docs/maintainers/SITES_FAIR_USAGE.md)
+- [DESIGN](../../src/components/billing/DESIGN.md)
+- [Billing pages and navigation](../../docs/reference/billing-pages.md)
+- [Billing strategy and customer paths](../../docs/WALLET_AND_BILLING_STRATEGY.md)
+- [DESIGN](../../src/components/home/DESIGN.md)
+- [DESIGN](../../src/components/public-content/DESIGN.md)
+
+Relevant checks (select for the change; impact discovery never executes these): `npm run test:billing:lifecycle`, `npm run test:sites:plans:db`, `npm run build`.

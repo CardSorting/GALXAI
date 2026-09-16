@@ -6,4 +6,5 @@ export const BILLING_WEBHOOK_EVENTS = [
   'charge.dispute.funds_withdrawn', 'charge.dispute.funds_reinstated',
   'invoice.paid', 'invoice.payment_succeeded', 'invoice.payment_failed',
   'invoice.finalized', 'invoice.voided', 'invoice.marked_uncollectible',
+  'customer.subscription.created', 'customer.subscription.updated', 'customer.subscription.deleted',
 ] as const;

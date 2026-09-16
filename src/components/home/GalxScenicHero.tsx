@@ -1,4 +1,5 @@
 'use client';
+import { BILLING_PATHS } from '@/lib/billing/navigation';
 import { authEntryPath } from '@/lib/auth/redirects';
 
 import React, { useState } from 'react';
@@ -558,9 +559,9 @@ export function GalxScenicHero() {
               </h4>
               <ul className="space-y-2 text-zinc-400 text-xs">
                 <li>
-                  <Link href="/billing/audit-logs" className="hover:text-white transition-colors flex items-center justify-between">
-                    <span>SOC 2 Type II Audit</span>
-                    <span className="text-[10px] font-mono text-zinc-500">Tamper-Proof</span>
+                  <Link href={BILLING_PATHS.transactions} className="hover:text-white transition-colors flex items-center justify-between">
+                    <span>Transactions</span>
+                    <span className="text-[10px] font-mono text-zinc-500">Account activity</span>
                   </Link>
                 </li>
                 <li>

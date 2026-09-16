@@ -5,6 +5,7 @@ import { randomUUID } from 'node:crypto';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { getPostgresPool, closePostgresPool } from '../src/lib/db/postgres';
 import { StripeEngine } from '../src/lib/stripe/stripe';
+import { billingPortalConfiguration } from '../src/lib/billing/portal';
 import { createAccountCheckout } from '../src/lib/billing/checkout';
 const path = '/tmp/galx-live-checkout-probe.json';
 const pool = getPostgresPool();
@@ -13,12 +14,13 @@ assert(pool && stripe,'Billing configuration is required');
 try {
   if (process.argv.includes('--create')) {
     const userId = `billing_release_probe_${randomUUID()}`;
-    const result = await createAccountCheckout(pool,stripe,{userId,email:'billing-release-probe@example.invalid',amount:1,requestId:randomUUID(),surface:'keys',origin:'https://galx.ai'});
+    const result = await createAccountCheckout(pool,stripe,{userId,email:'billing-release-probe@example.invalid',amount:1,requestId:randomUUID(),origin:'https://galx.ai'});
     writeFileSync(path,JSON.stringify({userId,...result}),{mode:0o600});
     const checkout = await stripe.checkout.sessions.retrieve(result.sessionId);
     const customer = typeof checkout.customer === 'string' ? checkout.customer : checkout.customer?.id;
     assert(customer);
-    const portal = await stripe.billingPortal.sessions.create({ customer, return_url: 'https://galx.ai/billing' });
+    const configuration = await billingPortalConfiguration(stripe);
+    const portal = await stripe.billingPortal.sessions.create({ customer, configuration, return_url: 'https://galx.ai/billing/payment-methods' });
     assert.equal(new URL(portal.url).hostname,'billing.stripe.com');
     console.log('Real Stripe checkout and customer portal sessions created successfully.');
     console.log('Created an unpaid $1 checkout for an isolated release probe. No payment was submitted.');

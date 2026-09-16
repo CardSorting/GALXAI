@@ -5,6 +5,10 @@
 
 > Decision scope: Historical decision record. Its original status and measurements describe its own scope. For current relay ownership, capability routing, retry authority, and deployment, ADRs [0126](0126-capability-aware-shard-relay-federation.md) and [0127](0127-codex-image-tool-alias-production-cutover.md) take precedence. Shared-relay selection, implicit model fallback, and simulation performance do not define the current federation. Unrelated subsystem decisions are not superseded by this note.
 
+## September 16, 2026 navigation qualification
+
+The original route list and native checkout decision below are historical. Current billing task addresses, public sign-in shell, independently authenticated APIs and retired-route redirects are specified by the [billing page contract](../reference/billing-pages.md). This qualification does not re-accept the original perimeter decision or claim a production deployment.
+
 ## Status
 **Accepted & Implemented**
 

@@ -6,10 +6,10 @@ import { checkoutReturnPath, hostedPaymentUrl } from './payment';
 import { readTopUpQuote } from './quote';
 
 export async function createAccountCheckout(pool: Pool, stripe: Stripe, input: {
-  userId: string; email: string; amount: number; requestId: string; surface: unknown; origin: string;
+  userId: string; email: string; amount: number; requestId: string; surface?: unknown; origin: string;
 }) {
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(input.requestId)) throw new BillingError('Refresh this page and try again.');
-  const returnPath = checkoutReturnPath(input.surface);
+  const returnPath = checkoutReturnPath();
   const key = createHash('sha256').update(`${input.userId}:${input.requestId}`).digest('hex');
   const db = await pool.connect();
   try {
@@ -28,7 +28,8 @@ export async function createAccountCheckout(pool: Pool, stripe: Stripe, input: {
         VALUES ($1,$2,$3,$4,$5,$6) RETURNING *`, [`pending_${key}`, input.userId, input.amount, quote.bonusUsd, quote.creditUsd,
         JSON.stringify({ requestId: input.requestId, returnPath, origin: input.origin, email: input.email, key, welcomeGrant: quote.welcomeGrant, fulfillmentVersion: 2 })])).rows[0];
     }
-    if (Number(row.amount_usd) !== input.amount || row.metadata.returnPath !== returnPath) throw new BillingError('This checkout attempt already has a different amount. Refresh to start again.', 409);
+    if (Number(row.amount_usd) !== input.amount) throw new BillingError('This checkout attempt already has a different amount. Refresh to start again.', 409);
+    checkoutReturnPath(row.metadata.returnPath ?? '');
     await db.query('COMMIT');
 
     await db.query('BEGIN');
@@ -63,8 +64,8 @@ export async function createAccountCheckout(pool: Pool, stripe: Stripe, input: {
       invoice_creation: { enabled: true, invoice_data: { metadata: { userId: input.userId } } },
       metadata: { userId: input.userId, requestId: input.requestId },
       payment_intent_data: { metadata: { userId: input.userId, requestId: input.requestId } },
-      success_url: `${row.metadata.origin}${returnPath}?checkout=returned&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${row.metadata.origin}${returnPath}?checkout=canceled`,
+      success_url: `${row.metadata.origin}${checkoutReturnPath(row.metadata.returnPath ?? '')}?checkout=returned&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${row.metadata.origin}${checkoutReturnPath(row.metadata.returnPath ?? '')}?checkout=canceled`,
       expires_at: Math.floor(new Date(row.created_at).getTime() / 1000) + 7200,
     }, { idempotencyKey: `checkout:${key}` });
     const url = hostedPaymentUrl(session.url, 'checkout.stripe.com');

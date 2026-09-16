@@ -40,7 +40,7 @@ The header remains mounted across all exact reading routes. Active parent links 
 
 The initial guide order begins with creation, revision and publication. Search is case-insensitive, trims whitespace and matches all query terms across titles, summaries, categories and article bodies. Topic filtering combines with the query. The count is announced politely; no results offers a reset. Clear, Escape and reset have explicit behavior, and the reset returns focus to the search field. Queries stay in memory and are not new indexable URLs. All guide links are rendered on initial HTML. Native FAQ disclosures and chapter anchors work with client bundles blocked; inline framework stream completion remains necessary where Next.js streams the page.
 
-Pricing actions reuse `PlanAction`, preserving `/billing#plan` for an authenticated account and the encoded sign-in continuation for guests. The action only opens account review; this work does not subscribe, cancel, pay, generate or publish. Support is a normal mailto link, with no new message service.
+Pricing actions reuse `PlanAction`, preserving `/billing/plan` for an authenticated account and the encoded sign-in continuation for guests. The action only opens account review; this work does not subscribe, cancel, pay, generate or publish. Support is a normal mailto link, with no new message service.
 
 ## Verification and rollback
 

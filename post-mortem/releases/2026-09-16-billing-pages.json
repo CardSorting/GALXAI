@@ -1,0 +1,447 @@
+{
+  "observed_at": "2026-09-16T00:25:38.948518+00:00",
+  "scope": "Local billing page split, navigation/recovery audit and final review; no deployment, database/Stripe mutation or real payment.",
+  "base_revision": "d07015a35051b2c109bee3d3ba01de11ec6a38a1",
+  "source_hashes": {
+    "src/app/api/billing/plan/route.ts": "c78dd5cf91321f638a83b91a0deee1e4ad47c4157a0e90cdc50d22ad830db669",
+    "src/app/api/stripe/portal/route.ts": "6d3bb9c5b51775f6e096be783910d1ab2040244189e259f513e33947bcb6a38f",
+    "src/app/billing/audit-logs/page.tsx": "464fda4b65509fd1290a9bc5b3c94500b8cbb5651dad71c9e126ab033ac564d7",
+    "src/app/billing/auto-reload/page.tsx": "32e7d472157c1dbcb2b7c3842c1ee1ec6e530563de3aa1a73c964fb0f546ce53",
+    "src/app/billing/budget-alerts/page.tsx": "32e7d472157c1dbcb2b7c3842c1ee1ec6e530563de3aa1a73c964fb0f546ce53",
+    "src/app/billing/credits/page.tsx": "ec829f478bb49f7db94382d788a70e72618c1036bee3066e90ea7b06fbc7f92e",
+    "src/app/billing/error.tsx": "faa97b4d1e3175576e744eb325cc0a5805d5ec2dfb795c500dc24f93f17e107b",
+    "src/app/billing/expenses/page.tsx": "464fda4b65509fd1290a9bc5b3c94500b8cbb5651dad71c9e126ab033ac564d7",
+    "src/app/billing/invoices/[id]/error.tsx": "3f86e6cf93aa55e0462e407025fc29e1a201579db8acdcc65f1b4fd7a4f52b88",
+    "src/app/billing/invoices/[id]/page.tsx": "f1c726f17e40c7700c98e2ae8eb3e20f28bfbe198a7d7fe55ea740f968cb9d12",
+    "src/app/billing/invoices/page.tsx": "f52c6e10e290c42c39b557dfb27a3a0db67e3b3ce7d5dc2efb27ba6a7970837a",
+    "src/app/billing/layout.tsx": "25baf18b3c81425f610dd4af1a9fe28335f6b2d96135a97bd58a65594ca7c310",
+    "src/app/billing/loading.tsx": "4b9ad4b366dcee39c158cc21139348c5d1fd2ef39342390d7ab66d55e426e17a",
+    "src/app/billing/opengraph-image.tsx": "1e14402a1625823953a6c1cd2b4009f34219e5fea0265b99704bebb7ab1097c0",
+    "src/app/billing/page.tsx": "a8450b69c0dffea2b24ecde0f1a53cc5a21ae1fffd3ce5a51cee65cbf9695b46",
+    "src/app/billing/payment-methods/page.tsx": "29d735d8d2adb51a778531f1f31d0d670f92054efd01eaa455b3a2b6c2e08890",
+    "src/app/billing/plan/page.tsx": "1cf911dac7726fccf3bd3af30226d22fb0fe6b2613a4042e49d91d4af4f83923",
+    "src/app/billing/promo/page.tsx": "464fda4b65509fd1290a9bc5b3c94500b8cbb5651dad71c9e126ab033ac564d7",
+    "src/app/billing/reports/page.tsx": "464fda4b65509fd1290a9bc5b3c94500b8cbb5651dad71c9e126ab033ac564d7",
+    "src/app/billing/tax/page.tsx": "32e7d472157c1dbcb2b7c3842c1ee1ec6e530563de3aa1a73c964fb0f546ce53",
+    "src/app/billing/teams/[id]/error.tsx": "3f86e6cf93aa55e0462e407025fc29e1a201579db8acdcc65f1b4fd7a4f52b88",
+    "src/app/billing/transactions/page.tsx": "234ae70ea3c7a672ade2258f45871be10b2b53873d14a701fa28baff23866938",
+    "src/app/billing/webhooks/page.tsx": "32e7d472157c1dbcb2b7c3842c1ee1ec6e530563de3aa1a73c964fb0f546ce53",
+    "src/app/checkout/success/page.tsx": "a55cbb8f10f05d8dd74e96237d2eec1167169a19fbffe29dc400d92332d39fef",
+    "src/app/keys/page.tsx": "a4693d601d3dd170a067c8d7159f1e09b0c04ea8b1c93aa19f525e32670a83cf",
+    "src/app/vault/deposit/page.tsx": "d5bb3e709e989579412c35970525d60679ab18862d9e079fe6666aa7946f26b5",
+    "src/components/billing/BillingClient.tsx": "9f673994bf32b76b587cd3fa395ab52d75981f0a2283f3c05e3e534cd0338149",
+    "src/components/billing/BillingProvider.tsx": "f4a6d57d6f6be050c260c3ca227f13f4789374410e9e1b721bc1272e7d88f4c0",
+    "src/components/billing/BillingWorkspace.tsx": "88d4308ffb3b5f001a874ea8fb5c4669f59980afbaab1e60f01592dd5d11a540",
+    "src/components/billing/CheckoutStatus.tsx": "cefcec9996ceb547836d86b03234f5c02c04ea2746292d44cb01f8213b8e981c",
+    "src/components/billing/PlanPanel.tsx": "c84a20d04601bd261951346326f03652db7b099f8763d0c6499a97eff08b616a",
+    "src/components/billing/TopUpForm.tsx": "a431ec799f5c40d6712627a7264bf505b080196f16941b94b3e731cddcf42e86",
+    "src/components/common/CommandMenu.tsx": "a5f2b698657b87ed9350e1541abe268aafedff954b01e9e746e343990e705510",
+    "src/components/common/FloatingActionDock.tsx": "22cc12453e8307901974e7b2291269d9dc8d2b950ff896f47b8c852fab5c0705",
+    "src/components/dashboard/BillingSubNav.tsx": "b027c933515a8bd33c08ed8dcf5ba4a698eb2efd38d20f71711786d58d0a1dd9",
+    "src/components/dashboard/GenerationGateNotice.tsx": "1a5f8c52f4f6b1b3807a2eaa0fa2e28df04227badc671b805275d83a5357fe4a",
+    "src/components/home/PlanAction.tsx": "f07f9ec05a6d21c836e8bbc8e68ed1a82deb0647b58b85b42a5dc41b49ff3ac0",
+    "src/components/pricing/PricingClient.tsx": "ffa82eef85da21c0375f19bde640a92265dded0a63e35d2abcba04934ba8e3a8",
+    "src/components/sites/SitesWorkspace.tsx": "8ffbcd0a05b0df4e3688fb7eb7745423df29e3f9f8849cfa7c6488dad8b053e7",
+    "src/lib/billing/account.ts": "26e21dde64a4893bad469c7eb9933a62fc641dbee62155c90dbeeaff0f288250",
+    "src/lib/billing/navigation.ts": "c7c3cc6e8ef41e81084b5f8343414522799e385485d90e1c7dc423d9639651be",
+    "src/lib/billing/plan-status.ts": "2b39191582d14463cd02887674870fe8da00285318cddb6b51aa10436bac9519",
+    "src/lib/billing/portal.ts": "0c873967bccbf178b40723f2be93fe87e4d12dccd228b845bfb6a5896a775eee",
+    "src/lib/billing/subscription-summary.ts": "3e2ac9b31b14ed86f6b615960b0d9e21b80df3da6a790a859826b3670d95d947",
+    "src/lib/billing/webhookEvents.ts": "40caeb9ce80dd4656e6505499ce4bcbd48014521d9fb64226e764f29ce91668a",
+    "src/middleware.ts": "180ecfa1dd429b4e5114cf14a79b48f155681741b9fb0e9580734f89f0a7e74b"
+  },
+  "fixture_source_hashes": {
+    "scripts/verify-billing-ux.mjs": "7e2d727e869942a61ab9c9342ecac6fabdbab43793bdfc30667a7d308a2208bf",
+    "scripts/verify-auth-entry-server.cjs": "7d2feba2a30fa4f89cd9b2055156dc4462d4ab2dd9b9118b7fef3c31048f9468",
+    "scripts/test-billing-navigation.ts": "1c78def0cd55cae336cc5f347ee0272b273132a80d676dcfa1bd70b61ae3e254"
+  },
+  "build": {
+    "kind": "isolated production build",
+    "command": "CI=true node scripts/build-ci.mjs",
+    "result": "passed",
+    "configuration": "synthetic .invalid services, no dotenv or live credentials; never deploy this fixture",
+    "runtime_source_hashes_match": true,
+    "runtime_files_compared": 46,
+    "assets_scanned": 678,
+    "private_marker_or_trace_findings": 0
+  },
+  "checks": {
+    "billing_lifecycle": "14 tests plus webhook signature/mode/body route suites passed",
+    "url_navigation": "5 tests passed",
+    "account_sessions": "34 tests passed",
+    "typescript": "passed",
+    "eslint": "changed runtime sources passed; final correction batch passed",
+    "browser": {
+      "complete": true,
+      "http": [
+        {
+          "route": "/api/billing/plan",
+          "auth": "absent",
+          "status": 401
+        },
+        {
+          "route": "/api/billing/plan",
+          "auth": "forged",
+          "status": 401
+        },
+        {
+          "route": "/api/billing",
+          "auth": "absent",
+          "status": 401
+        },
+        {
+          "route": "/api/billing",
+          "auth": "forged",
+          "status": 401
+        },
+        {
+          "route": "/api/stripe/portal",
+          "auth": "absent",
+          "status": 401
+        },
+        {
+          "route": "/api/stripe/portal",
+          "auth": "forged",
+          "status": 401
+        },
+        {
+          "route": "/billing",
+          "auth": "absent",
+          "status": 200,
+          "privateCache": true
+        },
+        {
+          "route": "/billing/plan",
+          "auth": "absent",
+          "status": 200,
+          "privateCache": true
+        },
+        {
+          "route": "/billing/credits",
+          "auth": "absent",
+          "status": 200,
+          "privateCache": true
+        },
+        {
+          "route": "/billing/transactions",
+          "auth": "absent",
+          "status": 200,
+          "privateCache": true
+        },
+        {
+          "route": "/billing/invoices",
+          "auth": "absent",
+          "status": 200,
+          "privateCache": true
+        },
+        {
+          "route": "/billing/payment-methods",
+          "auth": "absent",
+          "status": 200,
+          "privateCache": true
+        },
+        {
+          "route": "/billing?plan_checkout=returned",
+          "status": 307,
+          "destination": "/billing/plan?plan_checkout=returned"
+        },
+        {
+          "route": "/billing?checkout=returned&session_id=cs_test_fixture",
+          "status": 307,
+          "destination": "/billing/credits?checkout=returned&session_id=cs_test_fixture"
+        },
+        {
+          "route": "/billing/reports",
+          "status": 307,
+          "destination": "/billing/transactions"
+        },
+        {
+          "route": "/billing/invoices/old",
+          "status": 307,
+          "destination": "/billing/invoices"
+        }
+      ],
+      "layouts": [
+        {
+          "state": "overview",
+          "width": 390,
+          "overflow": false,
+          "axeViolations": 0
+        },
+        {
+          "state": "plan",
+          "width": 390,
+          "overflow": false,
+          "axeViolations": 0
+        },
+        {
+          "state": "credits",
+          "width": 390,
+          "overflow": false,
+          "axeViolations": 0
+        },
+        {
+          "state": "transactions",
+          "width": 390,
+          "overflow": false,
+          "axeViolations": 0
+        },
+        {
+          "state": "invoices",
+          "width": 390,
+          "overflow": false,
+          "axeViolations": 0
+        },
+        {
+          "state": "payment-settings",
+          "width": 390,
+          "overflow": false,
+          "axeViolations": 0
+        },
+        {
+          "state": "overview-refreshed",
+          "width": 390,
+          "overflow": false,
+          "axeViolations": 0
+        },
+        {
+          "state": "ending",
+          "width": 390,
+          "overflow": false,
+          "axeViolations": 0
+        },
+        {
+          "state": "payment-required",
+          "width": 390,
+          "overflow": false,
+          "axeViolations": 0
+        },
+        {
+          "state": "empty-transactions",
+          "width": 390,
+          "overflow": false,
+          "axeViolations": 0
+        },
+        {
+          "state": "overview",
+          "width": 320,
+          "overflow": false,
+          "axeViolations": 0
+        },
+        {
+          "state": "plan",
+          "width": 320,
+          "overflow": false,
+          "axeViolations": 0
+        },
+        {
+          "state": "credits",
+          "width": 320,
+          "overflow": false,
+          "axeViolations": 0
+        },
+        {
+          "state": "transactions",
+          "width": 320,
+          "overflow": false,
+          "axeViolations": 0
+        },
+        {
+          "state": "invoices",
+          "width": 320,
+          "overflow": false,
+          "axeViolations": 0
+        },
+        {
+          "state": "payment-settings",
+          "width": 320,
+          "overflow": false,
+          "axeViolations": 0
+        },
+        {
+          "state": "overview-refreshed",
+          "width": 320,
+          "overflow": false,
+          "axeViolations": 0
+        },
+        {
+          "state": "ending",
+          "width": 320,
+          "overflow": false,
+          "axeViolations": 0
+        },
+        {
+          "state": "payment-required",
+          "width": 320,
+          "overflow": false,
+          "axeViolations": 0
+        },
+        {
+          "state": "empty-transactions",
+          "width": 320,
+          "overflow": false,
+          "axeViolations": 0
+        },
+        {
+          "state": "overview",
+          "width": 1440,
+          "overflow": false,
+          "axeViolations": 0
+        },
+        {
+          "state": "plan",
+          "width": 1440,
+          "overflow": false,
+          "axeViolations": 0
+        },
+        {
+          "state": "credits",
+          "width": 1440,
+          "overflow": false,
+          "axeViolations": 0
+        },
+        {
+          "state": "transactions",
+          "width": 1440,
+          "overflow": false,
+          "axeViolations": 0
+        },
+        {
+          "state": "invoices",
+          "width": 1440,
+          "overflow": false,
+          "axeViolations": 0
+        },
+        {
+          "state": "payment-settings",
+          "width": 1440,
+          "overflow": false,
+          "axeViolations": 0
+        },
+        {
+          "state": "overview-refreshed",
+          "width": 1440,
+          "overflow": false,
+          "axeViolations": 0
+        },
+        {
+          "state": "ending",
+          "width": 1440,
+          "overflow": false,
+          "axeViolations": 0
+        },
+        {
+          "state": "payment-required",
+          "width": 1440,
+          "overflow": false,
+          "axeViolations": 0
+        },
+        {
+          "state": "empty-transactions",
+          "width": 1440,
+          "overflow": false,
+          "axeViolations": 0
+        }
+      ],
+      "interactions": [
+        {
+          "width": 390,
+          "separateDestinations": true,
+          "overviewRefreshesPlanAndCredit": true,
+          "draftAndRetryAcrossPages": true,
+          "lastKnownBilling": true,
+          "managementAfterFailure": true,
+          "returnDoesNotGrantAccess": true,
+          "complimentaryDateAbsent": true,
+          "staleReadIgnored": true,
+          "pendingReceiptNavigation": true,
+          "emptyStates": true,
+          "legacyAnchors": true,
+          "textReflow200": true
+        },
+        {
+          "width": 320,
+          "separateDestinations": true,
+          "overviewRefreshesPlanAndCredit": true,
+          "draftAndRetryAcrossPages": true,
+          "lastKnownBilling": true,
+          "managementAfterFailure": true,
+          "returnDoesNotGrantAccess": true,
+          "complimentaryDateAbsent": true,
+          "staleReadIgnored": true,
+          "pendingReceiptNavigation": true,
+          "emptyStates": true,
+          "legacyAnchors": true,
+          "textReflow200": true
+        },
+        {
+          "width": 1440,
+          "separateDestinations": true,
+          "overviewRefreshesPlanAndCredit": true,
+          "draftAndRetryAcrossPages": true,
+          "lastKnownBilling": true,
+          "managementAfterFailure": true,
+          "returnDoesNotGrantAccess": true,
+          "complimentaryDateAbsent": true,
+          "staleReadIgnored": true,
+          "pendingReceiptNavigation": true,
+          "emptyStates": true,
+          "legacyAnchors": true,
+          "textReflow200": true
+        }
+      ],
+      "externalRequests": []
+    },
+    "reflow": "all six pages at 320/390/1440px with 200% text passed; 18 checks",
+    "documentation_tests": "passed; separate generated-view checks follow semantic review"
+  },
+  "independent_finish_review": {
+    "initial_disposition": "fix",
+    "scope": "Six normal pages at 1440/390, six 390 reflow pages, ending/payment-required/empty states, supplemental 320 captures and sampled client source; no independent backend/payment audit",
+    "material_findings": [
+      "320px/200% Transactions heading overflow",
+      "Overview Refresh could leave visible plan stale"
+    ],
+    "final_disposition": "ship",
+    "verdict_scope": "Both listed fixes scored resolved. No new whole-surface review claim.",
+    "initial_review": "disposition: fix\n\nProvenance: actual independent finish-review agent, using `.agents/skills/impeccable/reference/degraded/finish-reviewer.md` as the available shipped contract; its inline-runtime preamble does not describe this run. No approved comp, QUALITY BAR card, generated art or concept seed applies to this bounded extension of the established billing world. Supplemental 320px Invoices and Payment settings captures were not yet available and were not required inputs. This review covers synthetic local production-build evidence, not live payment acceptance.\n\n## persistence\n\nPass for the established visual world: `PRODUCT.md`, the local billing `DESIGN.md`, and the billing surface brief exist. The implemented neutral canvas, Inter hierarchy, flat sections and restrained indigo controls follow the local design authority. The existing design document's single-page layout and anchor prose predates this split; reconcile those bodies after the final correction, as the parent has already scheduled.\n\nEvidence pass: opened all six normal destinations at both 1440px and 390px; `ending-390.png`, `payment-required-390.png`, `empty-transactions-390.png`; and all six `reflow-{page}-390.png` captures. The document tops, routes and displayed states match their names. Also opened `transactions-320.png` and the available 320px Overview, Plan, Credits and Transactions reflow captures. `reflow-transactions-320.png` is valid evidence of an implementation overflow, not a malformed capture. The shared fixed mobile product bar appears at the viewport boundary in full-page captures; that alone is not evidence that content is permanently unreachable.\n\nSource sampled: `BillingWorkspace`, `BillingProvider`, `BillingClient`, `PlanPanel`, `TopUpForm`, `CheckoutStatus`, billing layout/loading/error, and billing navigation mapping. Broader server/payment implementation and real-device acceptance were not independently audited in this finish pass. No second detector was run.\n\n## fidelity\n\n| Element or promise | Result | Evidence |\n| --- | --- | --- |\n| TYPE | match | Existing Inter/sans hierarchy, restrained weights, sentence-case actions and tabular financial values continue the local system. |\n| MATERIAL | match | Flat divided sections and ordinary controls match the established Operate surface; no simulated physical material or omitted raster obligation. |\n| GROUND | match | The near-black field follows the local `#090b10` authority; source and captures show no replacement palette. |\n| One task per address | match | Overview, Plan, Credits, Transactions, Invoices and Payment settings are distinct native-link destinations with matching titles and active navigation. |\n| Desktop rail and phone navigation | adaptation | The surface brief explicitly requires a desktop rail that becomes wrapping navigation; all six phone destinations remain visible without a hidden billing menu. |\n| Overview summary and task entry | match | Compact plan and credit summaries link to the full tasks; purchase forms are confined to their destinations. |\n| Page-level Overview refresh | contradicted | `BillingClient.tsx:25` presents an unqualified Refresh above both summaries but reloads only shared wallet data. `PlanPanel` does not subscribe to the emitted wallet event; its plan read runs on mount, focus or its own refresh. |\n| Narrow enlarged-text heading | contradicted | `reflow-transactions-320.png` visibly places the unbroken Transactions heading outside the content width. `BillingWorkspace.tsx:34` supplies no emergency word wrapping. The parent's browser check independently reports document overflow in this state. |\n| State and recovery presentation | match within reviewed scope | Ending and payment-required captures use explicit status and next actions; the empty transaction capture explains what appears and links to Add credit. Source retains drafts, identifies stale data, provides manual retry and rejects stale reads. |\n| Keyboard and action semantics | match within reviewed scope | Native anchors/buttons, active-page attributes, labeled amount/filter controls, status/alert regions and visible-focus styles are present; invoice links disclose a new tab to assistive technology. |\n| Commercial and public truth | match | Pro and prepaid credit remain distinct, checkout confirmation is server-derived in the reviewed client flow, and screenshots use `fixture@example.test` synthetic account data. No new identity or commercial claim is introduced. |\n\n## ceiling\n\nReached for the fixed established-world scope after the two listed corrections. Familiar settings navigation, flat financial summaries, native forms, a desktop transaction table and phone transaction rows use the appropriate devices for this Operate surface. Additional ornament, motion or artwork would not advance the stated task. Repeating Your plan as the page heading and unpaid-plan section heading is optional copy/spacing polish, not a material defect. The functional Billing breadcrumb is wayfinding, not a decorative eyebrow.\n\n## material_fixes\n\n1. **P2 \u2014 narrow reflow:** Add safe emergency wrapping to the shared page heading in `BillingWorkspace.tsx:34`, preserving its ordinary scale; recapture `reflow-transactions-320.png` and confirm that 320px/200% text no longer creates document overflow. This repairs the surface brief's responsive and enlarged-text promise.\n2. **P2 \u2014 refresh scope:** Make Overview's Refresh update both the displayed plan and credit summaries, or explicitly label and position it as a credit-only refresh; the preferred familiar page-level behavior refreshes both. Verify a changed plan response becomes visible after that action while drafts and retry identity remain intact. This repairs the craft-floor requirement that controls name their actual action and prevents stale plan information after an apparent page refresh.\n\n## keep\n\nKeep the six direct destinations, fully exposed phone billing navigation, flat incumbent palette, separation of Pro from prepaid credit, explicit payment uncertainty, account-scoped drafts and recoverable retry paths.\n",
+    "final_verdict": "disposition: ship\n\nScope: the independent reviewer scored both material fixes resolved. This ship verdict covers the scored fixes, not a new whole-surface review or live payment acceptance. The requested five-section format is retained; no broader hunt or optional-polish review was performed.\n\n## persistence\n\nThe original `finish-review.md` is preserved. Opened the refreshed `reflow-transactions-{320,390,1440}.png` and `overview-refreshed-{320,390,1440}.png` captures. They are valid route/state evidence. Reviewed only the related heading/refresh changes and their focused browser verification. The fixture record is `complete: true`, with 30 layouts reporting no overflow or Axe violations and all three widths recording successful overview refresh, 200% reflow and draft/retry preservation.\n\n## fidelity\n\n| Original material fix | Score | Evidence |\n| --- | --- | --- |\n| Transactions heading escapes the 320px column at 200% text | resolved | The refreshed 320px capture visibly wraps the heading within the column. The 390px capture also reflows; the 1440px capture retains the ordinary single-line heading. `BillingWorkspace.tsx` adds `break-words`; the fixture's six-destination doubled-text overflow assertions complete at all three widths. |\n| Overview Refresh reloads credit but leaves its plan summary stale | resolved | All three refreshed Overview captures visibly show the changed GALX Pro ending state and end date. `BillingClient.tsx` reloads wallet data and increments `planRefresh`; compact `PlanPanel` observes `refreshKey` and has its own refresh status. The focused fixture changes plan data, clicks Refresh, waits for the changed plan text, and asserts that wallet read count also increased. |\n\n## ceiling\n\nNo fix-induced material regression identified in the bounded recaptures and related source changes. The emergency heading break preserves readable enlarged text without shrinking it; the refresh correction preserves the established summary structure.\n\n## material_fixes\n\nClear. Both original material findings are resolved; no additional correction is owed by this verdict pass.\n\n## keep\n\nKeep the six direct destinations, exposed mobile billing navigation, existing visual system, shared credit drafts and retry identity, and explicit plan-versus-credit status.\n"
+  },
+  "detector_triage": {
+    "real_fixes": "Return redirect conflict, narrow heading reflow and Overview refresh scope corrected",
+    "suppressed_false_positives": [
+      "src/components/billing/PlanPanel.tsx",
+      "src/app/billing/error.tsx",
+      "src/components/billing/BillingClient.tsx"
+    ],
+    "reason": "ai-color-palette warnings conflict with established local dark/indigo action/link vocabulary; rule-value scopes limited to exact files, no blanket rule/file ignore",
+    "unresolved_warnings": 0,
+    "second_detector_run": false
+  },
+  "earlier_attempts": [
+    {
+      "kind": "fixture expectations",
+      "result": "Corrected streamed redirect and escaped query expectations; compiled Next middleware may use its allowlisted Location as response body; added explicit wait for client navigation before URL assertion."
+    },
+    {
+      "kind": "implementation failure",
+      "result": "Reproduced React error 310 when server-page redirect competed with client compatibility transition. Moved supported GET/HEAD redirects before rendering; full rerun passed."
+    },
+    {
+      "kind": "implementation failure",
+      "result": "320px/200% Transactions heading overflow. Safe word wrapping added; full rerun passed."
+    },
+    {
+      "kind": "independent review",
+      "result": "Overview Refresh omitted plan status read. Added explicit compact-plan refresh signal and loading status; changed-plan browser check passed on all three widths."
+    }
+  ],
+  "limits": [
+    "Local fixture evidence only; no hosted release or live signed-in Billing acceptance.",
+    "External fixture requests blocked; no real checkout, charge, refund, cancellation, tax change or provider message.",
+    "Axe scope is main and aside; no comprehensive screen-reader certification or physical-device acceptance.",
+    "Existing top-up database lock-duration and tax-registration follow-ups remain outside this page split.",
+    "Prior disposable-database suite belongs to September 15 lifecycle evidence; not rerun for page-only changes.",
+    "No claim of full live-site cleanliness; compiled browser/rendered and synthetic HTTP boundaries were checked."
+  ]
+}

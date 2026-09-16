@@ -1,0 +1,62 @@
+{
+  "observed_at": "2026-09-15T23:21:56.797662+00:00",
+  "revision": "d07015a35051b2c109bee3d3ba01de11ec6a38a1",
+  "scope": "Working-tree operator-provisioner correction and test-account Stripe configuration; no application release",
+  "checks": [
+    {
+      "command": "node --import tsx --test scripts/test-stripe-webhook-target.ts",
+      "result": "passed: 3 tests"
+    },
+    {
+      "command": "node --import tsx scripts/test-stripe-webhook-endpoint.ts",
+      "result": "passed: both routes deny missing/invalid signatures, mode mismatch and oversized bodies"
+    },
+    {
+      "command": "node --import tsx --test scripts/test-billing-public-boundary.ts",
+      "result": "passed: 2 adversarial DTO tests"
+    },
+    {
+      "command": "npm run build",
+      "result": "passed"
+    },
+    {
+      "command": "npm run test:docs",
+      "result": "passed: 38 tests"
+    },
+    {
+      "command": "live HTTP negative probes",
+      "result": "passed: 6 requests across both billing routes; 400 allowlisted error bodies; no injected marker in headers/body"
+    },
+    {
+      "command": "live Stripe readiness after endpoint retirement",
+      "result": "passed: live mode, charges enabled, portal configured, both expected receivers enabled, no missing event subscriptions"
+    }
+  ],
+  "intermediate_failures": [
+    {
+      "check": "npm run docs:check:build before index/review refresh",
+      "result": "compiled scan checked 669 assets; overall command failed on expected stale new-document indexes and deployment-guide review"
+    },
+    {
+      "check": "one sandboxed live Stripe readiness retry",
+      "result": "connection error; explicit escalated read-only retry passed"
+    }
+  ],
+  "final_documentation_checks": {
+    "docs_sync": "passed; navigation only",
+    "docs_check": "passed",
+    "docs_check_build": "passed; 669 local browser/rendered assets and runtime traces scanned",
+    "git_diff_check": "passed",
+    "existing_unrelated_overdue_actions": [
+      "ACT-001",
+      "ACT-015",
+      "ACT-016"
+    ]
+  },
+  "limits": [
+    "No successful payment, refund or test-event fulfillment was initiated.",
+    "No hosted application or gateway release was needed or performed.",
+    "The guard covers known GALX production hosts; arbitrary custom origins require operator verification.",
+    "Compiled assets were scanned locally; no claim of fresh whole-live-site render/asset cleanliness."
+  ]
+}

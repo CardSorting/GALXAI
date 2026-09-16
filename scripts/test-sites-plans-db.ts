@@ -73,6 +73,9 @@ try{
   await check('fresh checkout uses owned customer, one plan, hosted URL and short transactions',async()=>{
     const f=fake(),i=input();f.before(async()=>{const idle=await pool.query("SELECT count(*) FROM pg_stat_activity WHERE datname=current_database() AND state='idle in transaction'");assert.equal(Number(idle.rows[0].count),0);});
     const r=await createProCheckout(pool,f.stripe,policy,i);assert.deepEqual(Object.keys(r),['url']);assert(r.url.startsWith('https://checkout.stripe.com/'));
+    assert.equal([...f.params.values()][0].success_url,'https://galx.ai/billing/plan?plan_checkout=returned');
+    assert.equal([...f.params.values()][0].cancel_url,'https://galx.ai/billing/plan?plan_checkout=canceled');
+    assert.equal((await pool.query('SELECT return_path FROM private.galx_plan_checkouts WHERE user_id=$1',[i.userId])).rows[0].return_path,'/billing/plan');
     assert.deepEqual(f.counts(),{calls:1,customerCalls:1});assert.equal((await pool.query('SELECT count(*) FROM galx_wallet_transactions WHERE user_id=$1',[i.userId])).rows[0].count,'0');
   });
   await check('same and new browser identities resume the one open checkout',async()=>{
@@ -91,6 +94,17 @@ try{
     const f=fake(),i=input();f.before(async session=>{const e=event('checkout.session.completed',{...session,status:'complete',payment_status:'paid'});await fulfillStripeEvent(pool,e,JSON.stringify(e));assert.equal((await fulfillStripeEvent(pool,e,JSON.stringify(e))).duplicate,true);});
     await createProCheckout(pool,f.stripe,policy,i);assert.equal((await pool.query('SELECT state FROM private.galx_plan_checkouts WHERE user_id=$1',[i.userId])).rows[0].state,'complete');
     assert.equal((await pool.query('SELECT count(*) FROM galx_wallet_transactions WHERE user_id=$1',[i.userId])).rows[0].count,'0');
+  });
+  await check('pre-migration attempts retain old provider parameters across an uncertain acknowledgement',async()=>{
+    const f=fake(),i=input();
+    // Older application inserts omit the additive column. NULL is the old contract.
+    await pool.query('INSERT INTO private.galx_plan_checkouts(user_id,request_id,price_id) VALUES($1,$2,$3)',[i.userId,i.requestId,'price_pro']);
+    f.lose();await assert.rejects(createProCheckout(pool,f.stripe,policy,i),/Lost provider acknowledgement/);
+    assert.equal([...f.params.values()][0].success_url,'https://galx.ai/billing?plan_checkout=returned#plan');
+    assert.equal([...f.params.values()][0].cancel_url,'https://galx.ai/billing?plan_checkout=canceled#plan');
+    await createProCheckout(pool,f.stripe,policy,{...i,requestId:randomUUID()});
+    assert.equal(f.sessions.size,1);assert.equal(f.params.size,1);assert.equal(f.counts().calls,2);
+    await assert.rejects(pool.query("UPDATE private.galx_plan_checkouts SET return_path='https://evil.test' WHERE user_id=$1",[i.userId]),(e:any)=>e.code==='23514');
   });
   await check('checkout ownership and amount mismatch roll back',async()=>{
     const f=fake(),i=input();await createProCheckout(pool,f.stripe,policy,i);const session=[...f.sessions.values()][0];
@@ -144,6 +158,9 @@ try{
     assert.equal((await registry.claimDue([owner],4,false)).length,3);
   });
   await check('rollback preserves checkout and subscription evidence',async()=>{
+    const paths=(await pool.query('SELECT user_id,request_id,return_path FROM private.galx_plan_checkouts ORDER BY user_id,request_id')).rows;
+    await pool.query(await readFile(new URL('../supabase/rollbacks/20260916003207_billing_canonical_returns.down.sql',import.meta.url),'utf8'));
+    assert.deepEqual((await pool.query('SELECT user_id,request_id,return_path FROM private.galx_plan_checkouts ORDER BY user_id,request_id')).rows,paths);
     const before=(await pool.query('SELECT count(*) FROM private.galx_plan_checkouts')).rows[0].count;await pool.query(await readFile(new URL('../supabase/rollbacks/20260912041351_sites_pro_subscription.down.sql',import.meta.url),'utf8'));
     assert.equal((await pool.query('SELECT count(*) FROM private.galx_plan_checkouts')).rows[0].count,before);
   });

@@ -134,8 +134,8 @@ export interface Database {
         Insert: { actor_id: string; actor_email: string; action: string; subject: string; previous_state?: string | null; next_state?: string | null; reason?: string; expires_at?: string | null }; Update: never; Relationships: [];
       };
       galx_plan_checkouts: {
-        Row: { user_id:string; request_id:string; price_id:string; customer_id:string|null; session_id:string|null; checkout_url:string|null; lease_token:string|null; lease_until:string|null; state:'pending'|'open'|'complete'|'expired'; created_at:string; expires_at:string };
-        Insert: { user_id:string; request_id:string; price_id:string }; Update: { customer_id?:string; session_id?:string; checkout_url?:string; lease_token?:string|null; lease_until?:string|null; state?:'pending'|'open'|'complete'|'expired' }; Relationships: [];
+        Row: { user_id:string; request_id:string; price_id:string; customer_id:string|null; session_id:string|null; checkout_url:string|null; return_path:string|null; lease_token:string|null; lease_until:string|null; state:'pending'|'open'|'complete'|'expired'; created_at:string; expires_at:string };
+        Insert: { user_id:string; request_id:string; price_id:string; return_path?:string|null }; Update: { customer_id?:string; session_id?:string; checkout_url?:string; lease_token?:string|null; lease_until?:string|null; state?:'pending'|'open'|'complete'|'expired' }; Relationships: [];
       };
       galx_plan_subscriptions: {
         Row: { subscription_id:string; user_id:string; customer_id:string; price_id:string; status:string; cancel_at_period_end:boolean; period_end:string|null; event_created:number; updated_at:string };

@@ -1,4 +1,5 @@
 'use client';
+import { BILLING_PATHS } from '@/lib/billing/navigation';
 import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowUp, ArrowUpRight, Plus, Globe2, Monitor, Smartphone, RefreshCw, Check, ChevronDown, MessageSquare, PanelsTopLeft, Search, Download, X, Archive, Pencil, LoaderCircle, LockKeyhole, History, NotebookPen, ArrowDown, RotateCcw, Copy, List, WifiOff } from 'lucide-react';
@@ -149,7 +150,7 @@ function Workspace({owner,token,authLoading,initialId,initialStarter}: {owner:st
           <div className="sites-compose-area">
             {unread && !historicalWindow && <button className="sites-jump sites-button" onClick={()=>{stick.current=true;messagesRef.current?.scrollTo({top:messagesRef.current.scrollHeight,behavior:'instant'});setUnread(false);}}>Latest message<ArrowDown aria-hidden="true"/></button>}
             {checkpoint && <p className="sites-help">You’re previewing version {checkpoint.version}. <button className="sites-text-button" onClick={()=>setCheckpoint(null)}>Return to current draft to chat</button></p>}
-            {owner && !studio.setupLoading && studio.access==='paid_plan_required' && <p className="sites-help" role="status">Create and update Sites with {PRO_PLAN.name}. <Link href="/billing#plan">View your plan<ArrowUpRight aria-hidden="true" size={14}/></Link></p>}
+            {owner && !studio.setupLoading && studio.access==='paid_plan_required' && <p className="sites-help" role="status">Create and update Sites with {PRO_PLAN.name}. <Link href={BILLING_PATHS.plan}>View your plan<ArrowUpRight aria-hidden="true" size={14}/></Link></p>}
             {owner && !studio.setupLoading && studio.access==='unavailable' && <p className="sites-help" role="status">Site updates are unavailable right now. Your saved Sites are still here. Try again shortly.</p>}
             {site?.archived ? <div className="sites-archived"><p>This Site is archived.</p><button className="sites-button" onClick={()=>void studio.change({action:'archive',archived:false})}>Restore Site</button></div> : <form className="sites-composer" onSubmit={e=>{e.preventDefault();void submit();}}>
               <label className="sr-only" htmlFor="site-prompt">Describe your Site or ask for a change</label>

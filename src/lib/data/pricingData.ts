@@ -147,8 +147,8 @@ export const SEAT_TIERS: SeatTier[] = [
       { title: 'Priority 1-Hour SLA Triage', description: 'Direct Slack / Discord private team bridge', included: true },
       { title: 'SAML 2.0 Single Sign-On (SSO)', description: 'Okta, Google Workspace, Azure AD, SCIM', included: false },
     ],
-    ctaText: 'Provision Team Workspace',
-    ctaHref: '/billing/seats?tier=small-business',
+    ctaText: 'Discuss team needs',
+    ctaHref: 'mailto:support@galx.ai?subject=Team%20billing',
   },
   {
     id: 'enterprise',
@@ -173,8 +173,8 @@ export const SEAT_TIERS: SeatTier[] = [
       { title: 'Dedicated Private VPC Peering', description: 'Sub-millisecond direct connect and 99.99% uptime SLA', included: true },
       { title: '24/7 Dedicated Solutions Architect', description: 'Direct phone & priority incident response bridge', included: true },
     ],
-    ctaText: 'Schedule Architecture Review',
-    ctaHref: '/billing/enterprise',
+    ctaText: 'Contact support',
+    ctaHref: 'mailto:support@galx.ai?subject=Enterprise%20billing',
   },
 ];
 

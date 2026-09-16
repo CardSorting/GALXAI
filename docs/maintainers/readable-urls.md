@@ -11,11 +11,12 @@ Private maintainer guide. This contract is implemented locally; [current operati
 | Create an image | `/images` | Legacy `view=create`, unknown or duplicate `view` resolves here |
 | My images | `/images/library` | `/images?view=library` permanently redirects here |
 | Favorite images | `/images/favorites` | `/images?view=favorites` permanently redirects here |
+| Billing tasks | `/billing`, `/billing/plan`, `/billing/credits`, `/billing/transactions`, `/billing/invoices`, `/billing/payment-methods` | [Billing page contract](../reference/billing-pages.md) retains old checkout URLs and section bookmarks |
 | Sign in | `/login` | `/auth/signin` permanently redirects here |
 | Create an account | `/signup` | `/auth/signup` permanently redirects here |
 | Sign in and continue to Sites | `/login?next=/sites` | Encoded legacy return targets normalize through the shared builder |
 
-Keep `/library` as the separate existing management dashboard: moving it into the studio would remove bulk organization/deletion functionality. Keep `/auth/callback` unchanged so existing OAuth/email redirect configuration continues to target the same endpoint. Site identifiers, starter choices and billing/device destinations retain their existing contracts.
+Keep `/library` as the separate existing management dashboard: moving it into the studio would remove bulk organization/deletion functionality. Keep `/auth/callback` unchanged so existing OAuth/email redirect configuration continues to target the same endpoint. Site identifiers, starter choices and device destinations retain their existing contracts. Billing adds canonical task pages while preserving previously issued checkout return parameters.
 
 Stable destinations belong in paths. Query parameters carry optional state: simple return paths are readable; nested query delimiters and hashes remain encoded so they cannot become sibling parameters. For example, `/login?next=/sites%3Fstarter%3Dportfolio%26refine%3D1` is intentionally encoded. Do not globally decode query strings or move return context into one shared cookie: that can corrupt delimiters or let simultaneous tabs overwrite each other's destination. The current default remains Images; a direct `/login` omits a redundant default return parameter.
 
@@ -29,7 +30,7 @@ Each canonical page independently uses `WorkspacePageGate`. Middleware verifies 
 
 `authEntryPath` validates local return targets before serialization and rejects external origins, protocol-relative paths, backslashes, control characters and encoded login/signup/auth loops. It preserves valid nested destination delimiters through URLSearchParams while leaving slash separators readable. Sign-in, signup, logout, callback failure and recovery use this contract. Notices are mapped to a finite set of public codes and authored copy.
 
-Legacy GET/HEAD aliases return 308 with an empty body, `private, no-store` and noindex headers. They project only supported return/notice fields and discard unrelated outer query fields. Legacy image views map to finite paths and discard unrelated query fields. Canonical workspace entry and APIs retain their independent session, owner and administrator gates. Mutation requests do not receive alias navigation redirects. Published Site hostname handling precedes application URL migration.
+Legacy image/auth GET/HEAD aliases return 308 with an empty body, `private, no-store` and noindex headers. They project only supported return/notice fields and discard unrelated outer query fields. Legacy image views map to finite paths and discard unrelated query fields. Canonical workspace entry and APIs retain their independent session, owner and administrator gates. Mutation requests do not receive alias navigation redirects. Published Site hostname handling precedes application URL migration. Billing compatibility resolves GET/HEAD returns and retired routes before rendering with private 307 redirects, and uses client forwarding for fragments; supported query values are allowlisted and tested separately.
 
 ## Verification and rollout
 
@@ -37,7 +38,7 @@ Run `node --import tsx --test scripts/test-url-navigation.ts`, the existing auth
 
 Start the isolated production fixture described in [workspace authentication](../operations/workspace-auth.md). Run `node scripts/verify-workspace-auth-http.mjs`, `node scripts/verify-url-navigation.mjs` and `scripts/verify-auth-entry-ui.ts` with the documented Playwright/Axe module paths. The dedicated URL browser fixture covers 1440/390/320px, direct entry, history, refresh, keyboard/new tabs, retained draft/results, Favorites filter, stale-session return, no automatic generation replay, overflow and accessibility. Inspect its screenshots under `.impeccable/review/url-navigation/`. Scan rendered responses and linked assets, and run the compiled private-content guard. These synthetic local checks are not live login, email delivery, image generation or production acceptance.
 
-Ship the canonical pages, link builders, policy changes and aliases together. No database migration, provider callback reconfiguration or dependency upgrade is needed. For rollback, retain aliases and resolvable new addresses while reverting presentation/interaction as needed; never restore cookie-only authorization or public caching. Existing bookmarks and independent tabs must continue to resolve. Do not claim the live site is clean before testing actual rendered pages and browser assets after an authorized deployment.
+Ship the canonical pages, link builders, policy changes and aliases together. Image/auth URL changes alone need no database migration or callback reconfiguration. Canonical billing Checkout returns additionally require the private return-path migration before the new writer; follow the [billing release contract](../reference/billing-pages.md#verification-and-release). For rollback, retain aliases and resolvable new addresses while reverting presentation/interaction as needed; never restore cookie-only authorization or public caching. Existing bookmarks and independent tabs must continue to resolve. Do not claim the live site is clean before testing actual rendered pages and browser assets after an authorized deployment.
 
 ## Familiar precedents and limits
 

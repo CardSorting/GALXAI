@@ -33,6 +33,10 @@ Current registration is **Register account → manual sign-in → Review access 
 
 The retained controller's **Enroll shard**, saved-file synchronization and maintenance holds apply only to unassigned legacy accounts. Its [legacy rollout](maintainers/legacy-desktop-enrollment.md) remains available for existing deployment recovery. Assigned accounts cannot return to legacy admission. Close gates before rollback; retain grants, leases and original execution evidence. A management rollback does not restore removed accounts, and the older manual-policy DOWN migration reopens retired credential privileges rather than providing an availability shortcut.
 
+## Billing release boundary
+
+Stripe billing has an account/mode boundary. Use [webhook recovery](runbooks/stripe-webhook-delivery.md) to verify the receiver, signing secret and event mode together. Test events require isolated storage; the API host is not a billing receiver. Provisioning validates an explicit HTTPS application origin before provider writes and refuses known production hosts for test delivery.
+
 ## Image and access release boundaries
 
 The image request migration must be applied before the application relies on durable async receipts. Configure Auth, database, server-only storage and reachable generation dependencies in the target environment; local credentials and a Ready deployment do not verify those dependencies. Follow [application configuration](VERCEL_DEPLOYMENT.md) and [image acceptance](../post-mortem/runbooks/image-generation.md).
@@ -50,3 +54,7 @@ For storage pressure, use [bounded deployment cleanup](../post-mortem/runbooks/d
 The paid Sites policy in ADR 0140 is a separate cutover from earlier fixed/metered deployments. Follow [Sites rollout](maintainers/SITES_FAIR_USAGE.md#verification-and-rollout): apply the additive private migration, deploy the included generation path with admission disabled, verify current paid-plan mapping and operator-approved limits, then qualify a controlled rollout. Preserve receipt volumes, signing authority and original-operation readers.
 
 Earlier feature flags do not enable the replacement policy. Keep historical wallet reconciliation and current included recovery available during rollback. [Managed publication](maintainers/SITES_WORKSPACE.md) and native delivery retain their separate hosting and verification requirements.
+
+## Billing return-path prerequisite
+
+The [billing page contract](reference/billing-pages.md#verification-and-release) requires `20260916003207_billing_canonical_returns.sql` before deploying canonical Checkout returns. Verify the application database target and apply only reviewed pending migrations. The nullable private field preserves the original provider input for existing attempts; no backfill or grant change is needed. Deploy the canonical routes, middleware aliases and compatible readers together. Presentation rollback retains the column and both return contracts. The [September 16 migration acceptance](../post-mortem/releases/2026-09-16-billing-migration.json) records application of this prerequisite and readback verification. Application source push and hosted signed-in/payment acceptance remain separate events.

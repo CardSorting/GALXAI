@@ -957,3 +957,73 @@ Incident: `INC-20260914-ENROLLMENT`. Kind: `verification`.
 **Next step:** Use the canonical manual desktop flow for ACT-022 real enrollment/serving acceptance and ACT-020 image qualification. ACT-001, ACT-015 and ACT-016 remain overdue operational follow-ups; their dates/status were not changed.
 
 Evidence: [2026-09-15-manual-enrollment-documentation-review.json](releases/2026-09-15-manual-enrollment-documentation-review.json), [RELAY_CREDENTIAL_ENROLLMENT.md](../docs/maintainers/RELAY_CREDENTIAL_ENROLLMENT.md), [POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md](../docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md).
+
+## EVT-20260915-stripe-test-diagnosis — 2026-09-15T23:13:04.129571+00:00
+
+Incident: `INC-20260915-STRIPE`. Kind: `observation`.
+
+**Observation:** Owner reports six failed test deliveries. Current test endpoint uses the API hostname; production uses a different Stripe account.
+
+**Action:** Read endpoint metadata and failed-event summaries; probe both hosts without signatures and inspect receiver mode isolation.
+
+**Result:** API URL returns 401; application URL returns 400 for missing signature. Four pending test events; three recent live events have zero pending deliveries. No provider mutation.
+
+**Next step:** Resolve owner preference and prevent test-mode production provisioning.
+
+Evidence: [diagnosis.json](incidents/2026/2026-09-15-stripe-test-webhook/diagnosis.json).
+
+## EVT-20260915-stripe-test-retired — 2026-09-15T23:20:41.616631+00:00
+
+Incident: `INC-20260915-STRIPE`. Kind: `containment`.
+
+**Observation:** Separate test endpoint has no identified isolated receiver; production is live mode on a different account.
+
+**Action:** Disabled only we_1U8EqbPiwsQkTwlTwDIqxe0y through Stripe, preserving endpoint configuration and event history.
+
+**Result:** Update succeeded and independent list readback confirms disabled test endpoint. No live endpoint, payment, database or deployment changed.
+
+**Next step:** Finish provisioning prevention, local verification and current recovery documentation. Test-event fulfillment remains unperformed.
+
+Evidence: [endpoint-retirement.json](incidents/2026/2026-09-15-stripe-test-webhook/endpoint-retirement.json).
+
+## EVT-20260915-stripe-test-closure — 2026-09-15T23:22:17.067385+00:00
+
+Incident: `INC-20260915-STRIPE`. Kind: `recovery`.
+
+**Observation:** Disabled endpoint readback resolves the obsolete test delivery destination; both live billing receivers remain configured.
+
+**Action:** Added a pre-write provisioning origin/mode guard, isolated tests, canonical recovery runbook and knowledge mapping; semantically reviewed affected guides before refreshing fingerprints.
+
+**Result:** 3 provisioning tests, signature/mode/body route checks, 2 DTO tests, 6 deployed negative requests, live Stripe readiness, production build, 38 docs tests, docs synchronization/checks and 669-asset compiled scan passed. ACT-023 complete; incident closed by retirement, not test fulfillment.
+
+**Next step:** Only restore test delivery to an independently verified isolated receiver. Pending test events were not replayed. Existing unrelated incident work remains open.
+
+Evidence: [endpoint-retirement.json](incidents/2026/2026-09-15-stripe-test-webhook/endpoint-retirement.json), [verification.json](incidents/2026/2026-09-15-stripe-test-webhook/verification.json), [semantic-review.json](incidents/2026/2026-09-15-stripe-test-webhook/semantic-review.json).
+
+## EVT-20260916-billing-modernization-local — 2026-09-16T00:53:49.933653+00:00
+
+Incident: `INC-20260915-STRIPE`. Kind: `verification`.
+
+**Observation:** Follow-up billing navigation audit found retired purchase entry points and a conflicting vault deposit redirect. The original endpoint incident remains closed by retirement.
+
+**Action:** Consolidated navigation and purchase UI, added canonical return contracts with old-attempt preservation, and tested in isolated builds and databases.
+
+**Result:** Local database, authorization, payment retry, build, browser and documentation fixture checks passed. No target migration, deployment, Stripe configuration write or payment occurred.
+
+**Next step:** Apply the reviewed additive return-path migration before any authorized application release, retain compatible readers on presentation rollback, and separately verify hosted signed-in/payment acceptance.
+
+Evidence: [2026-09-16-billing-modernization.json](releases/2026-09-16-billing-modernization.json), [2026-09-16-billing-modernization.md](../docs/knowledge/audits/2026-09-16-billing-modernization.md).
+
+## EVT-20260916-billing-migration-applied — 2026-09-16T00:57:56.683Z
+
+Incident: `INC-20260915-STRIPE`. Kind: `verification`.
+
+**Observation:** User authorized applying the reviewed billing return-path migration before committing and pushing the application changes. The linked application database had exactly one pending migration.
+
+**Action:** Applied only 20260916003207 with vault updates skipped; read back schema history, nullable constraint, retained attempts, forced RLS and denied table/column privileges. Compared security advisors before and after.
+
+**Result:** 113 migrations applied, none pending; two existing attempts retain original return contracts; privilege protections and advisors unchanged. No payment or Stripe setting change. Original test-endpoint incident remains closed by retirement.
+
+**Next step:** Commit and push the reviewed billing work. Hosted application and real payment acceptance remain separate from schema acceptance; rollback must retain both return readers.
+
+Evidence: [2026-09-16-billing-migration.json](releases/2026-09-16-billing-migration.json).

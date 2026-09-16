@@ -4,13 +4,14 @@ import type Stripe from 'stripe';
 import { BillingError } from './account';
 import { hostedPaymentUrl } from './payment';
 import { PRO_PLAN } from './pro-plan';
+import { BILLING_PATHS } from './navigation';
 import type { FairPolicy } from '../sites/fair-store';
 
 export const PRO_LOOKUP_KEY = 'galx_pro_monthly_v1';
 const objectId = (value: any): string | undefined => typeof value === 'string' ? value : value?.id;
 const requestOptions = { timeout: 8000, maxNetworkRetries: 0 };
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-type Checkout = { user_id: string; request_id: string; price_id: string; customer_id: string | null; session_id: string | null; checkout_url: string | null; state: string; created_at: Date; expires_at: Date };
+type Checkout = { user_id: string; request_id: string; price_id: string; customer_id: string | null; session_id: string | null; checkout_url: string | null; return_path: string | null; state: string; created_at: Date; expires_at: Date };
 
 export async function proPrice(stripe: Stripe, policy: FairPolicy) {
   if (policy.mode !== 'enforce') throw new BillingError('Plan checkout is temporarily unavailable.', 503);
@@ -39,7 +40,7 @@ export async function createProCheckout(pool: Pool, stripe: Stripe, policy: Fair
     if (!row) {
       const recent = (await db.query("SELECT count(*) FROM private.galx_plan_checkouts WHERE user_id=$1 AND created_at>now()-interval '10 minutes'", [input.userId])).rows[0];
       if (Number(recent.count) >= 5) throw new BillingError('Too many checkout attempts. Try again in a few minutes.', 429);
-      row = (await db.query('INSERT INTO private.galx_plan_checkouts(user_id,request_id,price_id) VALUES($1,$2,$3) RETURNING *', [input.userId,input.requestId,price.id])).rows[0] as Checkout;
+      row = (await db.query('INSERT INTO private.galx_plan_checkouts(user_id,request_id,price_id,return_path) VALUES($1,$2,$3,$4) RETURNING *', [input.userId,input.requestId,price.id,BILLING_PATHS.plan])).rows[0] as Checkout;
     }
     const claimed = await db.query(`UPDATE private.galx_plan_checkouts SET lease_token=$3,lease_until=now()+interval '60 seconds'
       WHERE user_id=$1 AND request_id=$2 AND (lease_until IS NULL OR lease_until<=now()) RETURNING request_id`, [input.userId,row.request_id,lease]);
@@ -78,12 +79,15 @@ export async function createProCheckout(pool: Pool, stripe: Stripe, policy: Fair
     }
     if (row.customer_id && row.customer_id !== customer) throw new BillingError('Your payment profile needs review. Contact support.', 503);
     await db.query('UPDATE private.galx_plan_checkouts SET customer_id=$3 WHERE user_id=$1 AND request_id=$2', [input.userId,row.request_id,customer]);
+    if (row.return_path !== null && row.return_path !== BILLING_PATHS.plan) throw new BillingError('This payment attempt needs review. Contact billing support.', 503);
+    const returnPath = row.return_path || BILLING_PATHS.overview;
+    const returnHash = row.return_path ? '' : '#plan';
     const session = await stripe.checkout.sessions.create({ mode: 'subscription', customer, client_reference_id: input.userId,
       line_items: [{ price: row.price_id, quantity: 1 }], allow_promotion_codes: false,
       integration_identifier: `galx_pro_${key.slice(0,8).split('').map(c=>String.fromCharCode(97+parseInt(c,16))).join('')}`,
       metadata: { galxPlan: 'pro-v1', userId: input.userId, requestId: row.request_id },
       subscription_data: { metadata: { galxPlan: 'pro-v1', userId: input.userId } },
-      success_url: `${input.origin}/billing?plan_checkout=returned#plan`, cancel_url: `${input.origin}/billing?plan_checkout=canceled#plan`,
+      success_url: `${input.origin}${returnPath}?plan_checkout=returned${returnHash}`, cancel_url: `${input.origin}${returnPath}?plan_checkout=canceled${returnHash}`,
       expires_at: Math.floor(row.expires_at.getTime()/1000),
     }, { ...requestOptions, idempotencyKey: `pro-checkout:${key}` });
     const url = hostedPaymentUrl(session.url,'checkout.stripe.com');

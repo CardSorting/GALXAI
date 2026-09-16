@@ -376,6 +376,33 @@
         ],
         "createdAt": "2026-09-15T16:56:50.251Z",
         "reason": "Agent: the reviewed private monitor palette explicitly documents --panel #171b21 in .impeccable/surfaces/src-relay-pool-monitor-html.md; this scoped operator surface preserves its graphite panel treatment."
+      },
+      {
+        "rule": "ai-color-palette",
+        "value": "*",
+        "files": [
+          "src/components/billing/PlanPanel.tsx"
+        ],
+        "createdAt": "2026-09-16T00:00:44.368Z",
+        "reason": "Existing Billing DESIGN.md explicitly preserves restrained indigo controls and the dark canvas; this page split inherits that established palette."
+      },
+      {
+        "rule": "ai-color-palette",
+        "value": "*",
+        "files": [
+          "src/app/billing/error.tsx"
+        ],
+        "createdAt": "2026-09-16T00:02:58.193Z",
+        "reason": "Billing inherits the established dark canvas and restrained indigo action palette documented in src/components/billing/DESIGN.md; this recovery link follows it."
+      },
+      {
+        "rule": "ai-color-palette",
+        "value": "*",
+        "files": [
+          "src/components/billing/BillingClient.tsx"
+        ],
+        "createdAt": "2026-09-16T00:10:03.920Z",
+        "reason": "The reported indigo text is an actionable link in the inherited Billing palette, not a decorative heading or gradient; retain the established action semantics."
       }
     ]
   },

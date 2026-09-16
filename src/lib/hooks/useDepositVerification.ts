@@ -26,7 +26,5 @@ export function useDepositVerification() {
     return () => { window.removeEventListener('galx_wallet_update', refresh); window.removeEventListener('focus', refresh); };
   }, [refresh]);
   const current = snapshot?.userId === user?.id ? snapshot : null;
-  // Legacy callers may request verification, but cannot mint client-side credit.
-  const depositAndUnlock = useCallback((_amount: number) => { refresh(); return { totalCredited: 0, bonus: 0 }; }, [refresh]);
-  return { walletBalance: current?.balance ?? 0, hasVerifiedDeposit: current?.verified ?? false, isLoaded: Boolean(current), depositAndUnlock, resetDepositState: refresh };
+  return { walletBalance: current?.balance ?? 0, hasVerifiedDeposit: current?.verified ?? false, isLoaded: Boolean(current), resetDepositState: refresh };
 }

@@ -55,6 +55,9 @@ jobs:
       - name: Verify account session lifecycle and immediate revocation
         run: npm run test:auth:sessions
 
+      - name: Verify billing lifecycle, portal safety and webhook boundaries
+        run: npm run test:billing:lifecycle
+
       - name: Verify active-session authority in isolated PostgreSQL
         run: npm run test:auth:db
 

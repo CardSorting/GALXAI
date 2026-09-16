@@ -214,6 +214,29 @@
         "post-mortem/releases/2026-09-15-manual-enrollment-documentation-review.json"
       ],
       "failure_modes": []
+    },
+    {
+      "id": "INC-20260915-STRIPE",
+      "category": "billing",
+      "severity": "SEV-3",
+      "status": "closed",
+      "title": "Separate test-account Stripe endpoint targets production API host",
+      "owner": "Codex / billing maintainer",
+      "record": "post-mortem/incidents/2026/2026-09-15-stripe-test-webhook/README.md",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-09-15-stripe-test-webhook/diagnosis.json",
+        "post-mortem/incidents/2026/2026-09-15-stripe-test-webhook/endpoint-retirement.json",
+        "post-mortem/incidents/2026/2026-09-15-stripe-test-webhook/verification.json",
+        "post-mortem/releases/2026-09-16-billing-modernization.json",
+        "post-mortem/releases/2026-09-16-billing-migration.json"
+      ],
+      "failure_modes": [
+        "FM-DEPLOY-002"
+      ],
+      "recovery_evidence": [
+        "post-mortem/incidents/2026/2026-09-15-stripe-test-webhook/endpoint-retirement.json",
+        "post-mortem/incidents/2026/2026-09-15-stripe-test-webhook/verification.json"
+      ]
     }
   ],
   "actions": [
@@ -495,6 +518,21 @@
       "closure": "Retain a successful real manual enrollment and subsequent verified serving readiness without external ingestion, credential import or replay of unknown work.",
       "evidence": [
         "post-mortem/releases/2026-09-15-manual-desktop-enrollment-activation.json"
+      ]
+    },
+    {
+      "id": "ACT-023",
+      "incident": "INC-20260915-STRIPE",
+      "owner": "billing maintainer",
+      "review_by": "2026-09-22",
+      "status": "completed",
+      "next_step": "Use the account/mode recovery runbook for future alerts; restoring test delivery requires a separately verified isolated receiver.",
+      "closure": "Exact obsolete test endpoint disabled and independently read back. Both live receiver configurations and six live rejection checks pass. Operator provisioner now rejects known incorrect hosts and implicit production fallback before writes; three regressions, route/DTO checks, production build, local compiled scan and documentation checks pass. No test-event fulfillment or runtime deployment is claimed.",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-09-15-stripe-test-webhook/endpoint-retirement.json",
+        "post-mortem/incidents/2026/2026-09-15-stripe-test-webhook/verification.json",
+        "scripts/test-stripe-webhook-target.ts",
+        "docs/runbooks/stripe-webhook-delivery.md"
       ]
     }
   ]

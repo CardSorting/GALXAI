@@ -140,7 +140,7 @@ try {
   assert(await summary.evaluate(el => el.parentElement.open));
   await page.locator('nav[aria-label="FAQ topics"] a[href="#plans-and-billing"]').click(); await page.waitForURL('**/faq#plans-and-billing');
   await nav.getByRole('link', { name: 'Pricing', exact: true }).click(); await page.waitForURL(base + '/pricing');
-  assert.equal(await page.getByRole('link', { name: 'Continue with GALX Pro' }).getAttribute('href'), '/login?next=/billing%23plan');
+  assert.equal(await page.getByRole('link', { name: 'Continue with GALX Pro' }).getAttribute('href'), '/login?next=/billing/plan');
   await page.goBack(); await page.waitForURL('**/faq#plans-and-billing');
   await page.goForward(); await page.waitForURL(base + '/pricing');
   await page.getByRole('link', { name: /What’s included in GALX Pro/ }).click(); await page.waitForURL(base + '/pricing/galx-pro');

@@ -1,3 +1,4 @@
+import { BILLING_PATHS } from '@/lib/billing/navigation';
 import Link from 'next/link';
 import { PricingEstimator } from './PricingEstimator';
 import { Navigation } from '@/components/dashboard/Navigation';
@@ -48,7 +49,7 @@ export function PricingClient() {
                 {plan.id === 'developer' ? (
                   <Link href="/keys" className="w-fit sm:justify-self-end rounded-md border border-indigo-400/40 bg-indigo-500/20 px-4 py-2.5 text-sm font-medium text-indigo-100 hover:bg-indigo-500/30 focus-visible:outline-indigo-300">Create API key</Link>
                 ) : plan.id==='pro' ? (
-                  <Link href="/billing#plan" className="w-fit sm:justify-self-end rounded-md border border-indigo-400/40 bg-indigo-500/20 px-4 py-2.5 text-sm font-medium text-indigo-100 hover:bg-indigo-500/30 focus-visible:outline-indigo-300">Choose Pro</Link>
+                  <Link href={BILLING_PATHS.plan} className="w-fit sm:justify-self-end rounded-md border border-indigo-400/40 bg-indigo-500/20 px-4 py-2.5 text-sm font-medium text-indigo-100 hover:bg-indigo-500/30 focus-visible:outline-indigo-300">Choose Pro</Link>
                 ) : (
                   <a href={`${supportHref}%20-%20${plan.name}`} className="w-fit sm:justify-self-end rounded-md border border-white/15 px-4 py-2.5 text-sm text-zinc-200 hover:bg-white/5 focus-visible:outline-indigo-300">Ask about {plan.name}</a>
                 )}
@@ -99,7 +100,7 @@ export function PricingClient() {
           </div>
         </section>
         <footer className="mt-8 flex flex-wrap gap-x-5 gap-y-3 text-sm">
-          <Link href="/billing" className={linkStyle}>Billing dashboard</Link>
+          <Link href={BILLING_PATHS.overview} className={linkStyle}>Billing overview</Link>
           <Link href="/docs" className={linkStyle}>API quickstart</Link>
           <a href={supportHref} className={linkStyle}>Contact support</a>
         </footer>

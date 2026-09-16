@@ -15,6 +15,7 @@ import Stripe from 'stripe';
 import { STRIPE_PRODUCT_TIERS, StripeProductTier } from '../src/lib/stripe/products';
 import { getStripeConfig } from '../src/lib/stripe/config';
 import { BILLING_WEBHOOK_EVENTS } from '../src/lib/billing/webhookEvents';
+import { stripeWebhookProvisioningOrigin } from './lib/stripe-webhook-target';
 
 interface ProvisioningReport {
   timestamp: string;
@@ -94,6 +95,10 @@ async function runMasterStripeProvisioner() {
     return;
   }
 
+  // Fail before product, portal or endpoint writes. Never default test delivery to production.
+  const webhookOrigin = stripeWebhookProvisioningOrigin(
+    process.env.NEXT_PUBLIC_APP_URL || '', report.isLiveOrTest === 'live' ? 'live' : 'test',
+  );
   const stripe = new Stripe(config.secretKey, {
     apiVersion: '2025-02-24.acacia' as any,
     appInfo: {
@@ -236,14 +241,13 @@ async function runMasterStripeProvisioner() {
   // STEP 3: Webhook Endpoint Configuration
   // ===========================================================================
   console.log('\n--- 3. Provisioning Webhook Endpoints ---');
-  const liveBaseUrl = config.appUrl.startsWith('https://') ? config.appUrl : 'https://galx.ai';
   const targetEndpoints = [
     {
-      url: `${liveBaseUrl}/api/internal/credits/stripe`,
+      url: `${webhookOrigin}/api/internal/credits/stripe`,
       description: 'GALXAI Live Compute Credit & Double-Entry Ingestion Webhook'
     },
     {
-      url: `${liveBaseUrl}/api/stripe/webhook`,
+      url: `${webhookOrigin}/api/stripe/webhook`,
       description: 'GALXAI Apex Billing & Lifecycle Webhook'
     }
   ];
@@ -254,9 +258,6 @@ async function runMasterStripeProvisioner() {
     'payment_intent.payment_failed',
     'charge.dispute.created',
     'charge.dispute.closed',
-    'customer.subscription.created',
-    'customer.subscription.updated',
-    'customer.subscription.deleted',
     'payout.paid',
     'payout.failed'
   ];

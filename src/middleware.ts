@@ -8,6 +8,7 @@ import { isWorkspacePath } from '@/lib/security/workspace-policy';
 import { legacyAuthPath } from '@/lib/auth/redirects';
 import { legacyImagePath } from '@/lib/images/navigation';
 import { isClosedProviderPath } from '@/lib/auth/provider-connection-route';
+import { billingCompatibilityPath } from '@/lib/billing/compatibility';
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
@@ -19,6 +20,11 @@ export async function middleware(request: NextRequest) {
   // Retired handlers return a terminal denial without parsing input or starting
   // an account/preview authentication flow. This is an exact route allowlist.
   if (isClosedProviderPath(pathname)) return NextResponse.next();
+  const billingDestination = billingCompatibilityPath(pathname, request.nextUrl.searchParams);
+  if (billingDestination && ['GET', 'HEAD'].includes(request.method)) {
+    return NextResponse.redirect(new URL(billingDestination, request.url), { status: 307,
+      headers: { 'Cache-Control': 'private, no-store', 'X-Robots-Tag': 'noindex, nofollow' } });
+  }
   // Migrate bookmarks before rendering; only finite public fields reach Location.
   const canonical = legacyAuthPath(pathname, request.nextUrl.searchParams) ?? legacyImagePath(pathname, request.nextUrl.searchParams);
   if (canonical && ['GET', 'HEAD'].includes(request.method)) {

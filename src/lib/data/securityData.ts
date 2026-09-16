@@ -39,12 +39,11 @@ export const SECURITY_SPECIFICATIONS_DATA: SecuritySpecificationItem[] = [
     ],
     systemVerificationSnippet: {
       language: 'python',
-      title: 'Verify Tokenized Balance Receipt',
-      code: `import requests
+      title: 'Open your billing invoices',
+      code: `import webbrowser
 
-headers = {"Authorization": f"Bearer {GALXAI_API_KEY}"}
-resp = requests.get("https://galx.ai/billing/invoices/latest", headers=headers)
-print("PCI-Isolated Invoice Hash:", resp.json().get("audit_hash"))`,
+# Sign in to view invoices for your account.
+webbrowser.open("https://galx.ai/billing/invoices")`,
     },
     faqs: [
       {
