@@ -1,0 +1,57 @@
+{
+  "classification": "private",
+  "observed_at": "2026-09-16T16:42:36.111860+00:00",
+  "scope": "Premium image connection preflight; application deployment still pending",
+  "causes": [
+    "Production legacy image relay URL/key empty",
+    "Existing tunnel disconnected",
+    "Premium availability requested an absent inner-worker route",
+    "Isolated image branch returned bytes without shared owned image persistence"
+  ],
+  "validation": {
+    "relay_tests": 72,
+    "image_security_tests": 45,
+    "image_database_checks": 43,
+    "quota_database_checks": 86,
+    "free_quota_tests": 4,
+    "developer_preview_tests": 15,
+    "typescript": "passed",
+    "lint": "passed",
+    "production_build": "passed isolated validation only",
+    "compiled_assets": 643,
+    "service_image_checks": 55
+  },
+  "canary": {
+    "classification": "private",
+    "at": "2026-09-16T16:34:23.533Z",
+    "requestId": "premium-image-f5060ccf-4eac-4c90-a516-143e7459718a",
+    "automaticRetries": 0,
+    "origin": "local-premium",
+    "prompt": "A small orange paper boat floating on a calm blue pond, simple flat illustration, no text.",
+    "model": "gpt-image-2",
+    "status": 200,
+    "elapsedMs": 17432,
+    "contentType": "image/png",
+    "bytes": 1418596,
+    "artifact": {
+      "format": "png",
+      "width": 1536,
+      "height": 1024,
+      "hasExif": false,
+      "hasXmp": false,
+      "hasIcc": false,
+      "sha256": "d91621973b6b32f62c3dd5342d9f42770592a3fa09413cefefcf2c81eeb1a5ae"
+    }
+  },
+  "reviews": {
+    "images": "Reviewed receipt/no-replay, availability DTO, artifact sanitation, shared owned storage/manifest/flush and complete recovery/public-boundary guides. No auth or DB schema change.",
+    "relay": "Reviewed selective routing, observed capability expiry and explicit trial, runtime packaging/installation/ownership and complete application-connection/rollback guidance. Standard, central grants and credential policy unchanged.",
+    "knowledge": "Mapped the new routing regression and reviewed test command addition against documentation impact/attestation workflow. No ADR status change.",
+    "unmapped": "Reviewed private evidence and installed connector records; no public diagnostic content."
+  },
+  "limitations": [
+    "Public app cutover and browser generation/library/download acceptance pending",
+    "One local image proves the tested account at this time, not sustained capacity or all models",
+    "No provider/session enrollment or database mutation; original uncertain outcomes retained"
+  ]
+}

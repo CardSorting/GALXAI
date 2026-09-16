@@ -113,12 +113,16 @@
       "owner": "maintainer",
       "record": "post-mortem/incidents/2026/2026-09-13-image-generation/README.md",
       "evidence": [
-        "post-mortem/incidents/2026/2026-09-13-image-generation/README.md"
+        "post-mortem/incidents/2026/2026-09-13-image-generation/README.md",
+        "post-mortem/releases/2026-09-16-premium-image-preflight.json",
+        "post-mortem/releases/2026-09-16-premium-image-connection.json"
       ],
       "failure_modes": [
         "FM-IMG-001",
         "FM-IMG-002",
         "FM-IMG-003",
+        "FM-IMG-004",
+        "FM-IMG-005",
         "FM-CTRL-001",
         "FM-DEPLOY-002"
       ],
@@ -283,7 +287,7 @@
       "id": "INC-20260916-SESSION",
       "category": "identity",
       "severity": "SEV-2",
-      "status": "investigating",
+      "status": "recovered",
       "title": "Session recovery blocks account entry",
       "owner": "Security/access maintainer",
       "record": "post-mortem/incidents/2026/2026-09-16-session-recovery/README.md",
@@ -291,10 +295,17 @@
         "post-mortem/incidents/2026/2026-09-16-session-recovery/README.md",
         "post-mortem/incidents/2026/2026-09-16-session-recovery/local-verification.json",
         "post-mortem/incidents/2026/2026-09-16-session-recovery/second-pass-verification.json",
-        "post-mortem/incidents/2026/2026-09-16-session-recovery/entry-refresh-verification.json"
+        "post-mortem/incidents/2026/2026-09-16-session-recovery/entry-refresh-verification.json",
+        "post-mortem/incidents/2026/2026-09-16-session-recovery/permission-diagnosis.json",
+        "post-mortem/incidents/2026/2026-09-16-session-recovery/recovery-release.json",
+        "post-mortem/incidents/2026/2026-09-16-session-recovery/permission-release.json",
+        "post-mortem/incidents/2026/2026-09-16-session-recovery/sites-cookie-live-http.json"
       ],
       "failure_modes": [
         "FM-AUTH-004"
+      ],
+      "recovery_evidence": [
+        "post-mortem/incidents/2026/2026-09-16-session-recovery/recovery-release.json"
       ]
     }
   ],
@@ -303,7 +314,7 @@
       "id": "ACT-001",
       "incident": "INC-20260912-STORAGE",
       "owner": "deployment maintainer",
-      "review_by": "2026-09-14",
+      "review_by": "2026-09-23",
       "status": "open",
       "next_step": "Recheck both storage metrics and current deployment inventory in the same team/date range.",
       "closure": "Record actual totals and whether deployment capacity is available; retain compatible rollback and active aliases."
@@ -507,7 +518,7 @@
       "id": "ACT-015",
       "incident": "INC-20260913-WORKSPACE",
       "owner": "security/account maintainer",
-      "review_by": "2026-09-14",
+      "review_by": "2026-09-23",
       "status": "open",
       "next_step": "Follow the nonreproduced refreshed-profile availability observation. If it recurs, retain allowlisted HTTP status/timing and correlate private Auth/lookup diagnostics; distinguish temporary verification failure from invalid credentials. Do not infer a cause from the original status-only assertion.",
       "closure": "The failure is diagnosed and corrected with a reproducing check, or the maintainer explicitly records an evidence-backed nonrecurrence/monitoring disposition; no cached authorization fallback is introduced.",
@@ -519,7 +530,7 @@
       "id": "ACT-016",
       "incident": "INC-20260913-RENDER",
       "owner": "application/release maintainer",
-      "review_by": "2026-09-14",
+      "review_by": "2026-09-23",
       "status": "open",
       "next_step": "The September 14 complimentary Pro release includes the reviewed recovery source and verifies normal signed-in Sites entry for the requested account. Keep this action open: correlate the reported digest privately and complete the original authenticated Images/Sites recovery acceptance matrix.",
       "closure": "Retain local regression/build/asset evidence and deployed authenticated acceptance; establish the production cause or explicitly retain an evidence-backed unresolved diagnosis.",
@@ -546,12 +557,14 @@
       "id": "ACT-020",
       "incident": "INC-20260913-IMAGES",
       "owner": "image maintainer",
-      "review_by": "2026-09-16",
+      "review_by": "2026-09-23",
       "status": "open",
-      "next_step": "Qualify a Codex account through manual sign-in inside its owning Relay Desktop and explicit Enroll shard, then verify standalone image-backend access. External token/API-key ingestion and automatic provider renewal remain closed. The local transport correction, container decoder, HTTP/security tests and production build passed; the tested endpoint returned 403. Compatible controller/worker rollout and one signed-in generation plus library/download remain pending; preserve unknown receipts.",
+      "next_step": "Install the verified independent Premium image connection and tunnel; complete signed-in production generation, durable library/Favorites and download acceptance. Local synthesis canary, in-process availability reads and BroccoliDB persistence wiring passed preflight.",
       "closure": "Retain regression, deployment and signed-in generation/library evidence; distinguish local throughput fixtures from live capacity.",
       "evidence": [
-        "post-mortem/releases/2026-09-14-codex-image-tool-local.json"
+        "post-mortem/releases/2026-09-14-codex-image-tool-local.json",
+        "post-mortem/releases/2026-09-16-premium-image-preflight.json",
+        "post-mortem/releases/2026-09-16-premium-image-connection.json"
       ]
     },
     {
@@ -659,14 +672,27 @@
       "owner": "Security/access maintainer",
       "review_by": "2026-09-23",
       "status": "open",
-      "next_step": "Deploy the verified recovery/lifecycle fixes, then verify the originally affected browser, provider/email callback, safe destination, account switching, history restoration, refreshed-session continuity and failed/completed revocation; correlate the original service/transport failure if evidence becomes available.",
+      "next_step": "Account entry, original-browser Images/library/Sites and isolated live refresh/revocation are recovered. Complete real provider/email callback, account-switching, physical history restoration and failed-revocation browser acceptance separately; do not infer them from the repaired permission or cookie transport.",
       "evidence": [
         "post-mortem/incidents/2026/2026-09-16-session-recovery/README.md",
         "post-mortem/incidents/2026/2026-09-16-session-recovery/local-verification.json",
         "post-mortem/incidents/2026/2026-09-16-session-recovery/second-pass-verification.json",
-        "post-mortem/incidents/2026/2026-09-16-session-recovery/entry-refresh-verification.json"
+        "post-mortem/incidents/2026/2026-09-16-session-recovery/entry-refresh-verification.json",
+        "post-mortem/incidents/2026/2026-09-16-session-recovery/recovery-release.json"
       ],
       "closure": "Recorded deployed verification of original-browser recovery, callback/destination retention, account/history races, refreshed-session continuity and revoked-token denial, with rendered/browser response scan evidence."
+    },
+    {
+      "id": "ACT-029",
+      "incident": "INC-20260916-SESSION",
+      "owner": "Security/database maintainer",
+      "review_by": "2026-09-23",
+      "status": "completed",
+      "next_step": "Retain final-chain auth checks before historical migration replay and the cookie-only Sites API/CSRF/refresh regression in existing CI suites.",
+      "closure": "Dedicated helper schema deployed with unchanged account/session predicates and operational denial; existing browser and owned live session acceptance pass.",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-09-16-session-recovery/recovery-release.json"
+      ]
     }
   ]
 }

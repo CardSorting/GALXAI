@@ -1316,6 +1316,16 @@ export class GalxaiRelayServer extends EventEmitter {
     return this.accountAvailability(model);
   }
 
+  /** Read-only observation for the owning Premium runtime; never starts a probe. */
+  imageAvailability(): boolean | null {
+    if (this.config.executionPolicy?.pool !== 'premium' || !this.config.codexImageToolAlias || this.isDraining || this.credentialRejected()) return false;
+    const observed = this.capabilities.get(this.config.assignedShardId!)?.models.find(m => m.model === `image:${CODEX_IMAGE_ALIAS.requestedModel}`);
+    // Chat inventory cannot authorize or deny the separate image tool. Expired
+    // evidence permits a centrally authorized explicit trial, not an availability claim.
+    if (!observed || observed.source !== 'response' || observed.expiresAtMs <= Date.now() || observed.state === 'UNKNOWN') return null;
+    return observed.state === 'AVAILABLE' && observed.routingMode === CODEX_IMAGE_ALIAS.routingMode;
+  }
+
   accountAvailability(model: string, authorizedImageTrial = false) {
     const shard = this.config.executionPolicy && this.config.assignedShardId
       ? this.shardsTable.get(this.config.assignedShardId) : undefined;
@@ -1325,7 +1335,7 @@ export class GalxaiRelayServer extends EventEmitter {
     const active = Math.max(shard.inFlight, this.jobsTable.getAll().filter(j => ['queued','running','streaming'].includes(j.status)).length);
     const previous = this.capabilities.get(shard.id)?.models.find(m => m.model === model);
     const trial = authorizedImageTrial && this.config.executionPolicy?.pool === 'premium'
-      && (!previous || previous.state === 'AVAILABLE' || previous.expiresAtMs <= Date.now());
+      && (!previous || previous.source !== 'response' || previous.state === 'AVAILABLE' || previous.expiresAtMs <= Date.now());
     const availableSlots = Math.max(0, (recovering ? 1 : this.config.shardConcurrency) - active);
     return {
       eligible: !this.isDraining && this.shardReadyAt(shard) <= Date.now() && !shard.probeInFlight && availableSlots > 0

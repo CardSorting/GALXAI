@@ -20,7 +20,7 @@ import { TokenCostCalculator } from '../pricing/TokenCostCalculator';
 import { GalxEdgeBatchBuffer } from '../../workers/cloudflare/GalxEdgeBatchBuffer';
 import { OpenAIAdapter } from './adapters/OpenAIAdapter';
 import { RelayDispatchError } from './adapters/RelayChatTransport';
-import { isolatedRelaysEnabled, isolatedChat, isolatedImage } from './adapters/IsolatedRelayTransport';
+import { isolatedRelaysEnabled, isolatedImagesEnabled, isolatedChat, isolatedImage } from './adapters/IsolatedRelayTransport';
 import { ImageCapacityError } from './ImageCapacityError';
 import { GalxPreflightValidator } from '../validator/GalxPreflightValidator';
 import { GalxMetricsEngine } from '../telemetry/GalxMetricsEngine';
@@ -905,7 +905,7 @@ export class GalxModelRouter {
    * Dispatches visual synthesis request with HIPAA/ZDR/GDPR compliance and ephemeral zeroization.
    */
   async routeImageGeneration(options: RouteImageOptions): Promise<ImageGenerationResponse> {
-    if(!isolatedRelaysEnabled())await this.substrate.ensureFreshFromAuthority();
+    if(!isolatedImagesEnabled())await this.substrate.ensureFreshFromAuthority();
     const { userId, requestId, isPriorityUser, headers: incomingHeaders, signal } = options;
     const modelSpec = ModelCatalog.resolveModel(options.request.model || 'openai-gpt-image-latest');
     if (!modelSpec) {
@@ -914,13 +914,14 @@ export class GalxModelRouter {
     const provider = modelSpec.provider;
 
     const privacyPolicy = this.privacyEngine.resolvePrivacyPolicy(incomingHeaders, options.request.privacy);
-    if(isolatedRelaysEnabled()) {
+    if(isolatedImagesEnabled()) {
       if(provider!=='openai'||privacyPolicy.profile!=='standard'||privacyPolicy.hipaaEnabled||privacyPolicy.zdrEnabled||privacyPolicy.gdprEnabled||privacyPolicy.dataResidency!=='global'||privacyPolicy.piiMasking||privacyPolicy.deidentifyPhi)throw new RelayDispatchError('unsupported_policy');
-      const result=await isolatedImage({...options.request,model:modelSpec.upstreamId||modelSpec.id},userId,options.request.idempotencyKey||requestId,signal);
+      const result: ImageGenerationResponse={...await isolatedImage({...options.request,model:modelSpec.upstreamId||modelSpec.id},userId,options.request.idempotencyKey||requestId,signal),modelUsed:modelSpec.id};
       const cost=TokenCostCalculator.calculateCost(modelSpec,{promptTokens:1000,imagesCount:1,quality:options.request.quality});
       GalxEdgeBatchBuffer.getInstance().enqueueTokenDraw({userId,costUsd:cost.totalCostUsd,description:`Visual Synthesis: ${modelSpec.name}`,model:modelSpec.id,promptTokens:1000,completionTokens:0,cachedTokens:0,metadata:{requestId,imagesCount:1}});
       void GalxSeatTierEngine.getInstance().recordSeatTokenDraw(userId,cost.totalCostUsd).catch(()=>{});
       GalxSeatTierEngine.getInstance().recordSeatUsage(userId,modelSpec.id,1000,requestId);
+      await this.persistImageGeneration(result, options.request, userId, requestId, modelSpec.id, incomingHeaders);
       return {...result,modelUsed:modelSpec.id,shardId:''};
     }
     const { sanitizedRequest, redactionResult } = this.privacyEngine.sanitizeImageRequest(
@@ -1124,77 +1125,7 @@ export class GalxModelRouter {
         statusCode: 200
       });
 
-      // Mirror sanitized image payloads into private storage.
-      const effectiveSessionId =
-        sanitizedRequest.sessionId ||
-        this.extractHeaderValue(incomingHeaders, 'x-galx-session-id') ||
-        this.extractHeaderValue(incomingHeaders, 'x-session-id') ||
-        'default';
-
-      const r2Adapter = GalxR2AssetAdapter.getInstance();
-      const mirroredImages = [];
-      for (const item of result.data) {
-        try {
-          let imageSource: Buffer | string | undefined;
-          if (item.b64_json) {
-            imageSource = Buffer.from(item.b64_json, 'base64');
-          } else if (item.url && !item.url.startsWith('https://assets.galx.ai')) {
-            imageSource = item.url;
-          }
-
-          if (imageSource) {
-            const uploaded = await r2Adapter.uploadUserSessionImage({
-              userId: userId || 'anonymous',
-              sessionId: effectiveSessionId,
-              data: imageSource,
-              contentType: item.content_type || 'image/png',
-              prompt: sanitizedRequest.prompt || '',
-              revisedPrompt: item.revised_prompt,
-              model: modelSpec.id,
-              size: sanitizedRequest.size || '1024x1024',
-              quality: sanitizedRequest.quality || 'standard',
-              deferManifestUpdate: true,
-              metadata: {
-                prompt: sanitizedRequest.prompt || '',
-                revisedPrompt: item.revised_prompt || '',
-                model: modelSpec.id,
-                dimensions: sanitizedRequest.size || '1024x1024',
-                quality: sanitizedRequest.quality || 'standard',
-                requestId,
-              },
-            });
-            mirroredImages.push(uploaded);
-
-            item.asset_id = uploaded.assetId;
-            item.r2_key = uploaded.key;
-            item.r2_url = uploaded.publicUrl;
-            item.user_id = userId || 'anonymous';
-            item.session_id = effectiveSessionId;
-            item.content_type = 'image/png';
-            item.size_bytes = uploaded.sizeBytes;
-            item.sha256 = uploaded.sha256;
-            item.lqip = uploaded.lqipDataUri;
-
-            // Default to permanent CDN URL unless caller specifically required b64_json
-            if (sanitizedRequest.response_format !== 'b64_json') {
-              item.url = uploaded.publicUrl;
-              // Retain sanitized bytes for the HTTP normalization boundary.
-            }
-          }
-        } catch (r2Err: any) {
-          logImageFailure(requestId, r2Err);
-        }
-      }
-
-      // One manifest read/write for the whole generation response instead of one per image.
-      if (mirroredImages.length > 0) {
-        await r2Adapter.updateSessionManifestBatch(userId, effectiveSessionId, mirroredImages)
-          .catch((manifestErr: any) => logImageFailure(requestId, manifestErr));
-        // Drain once for the entire generation so short-lived/serverless runtimes do not
-        // depend on a timer to persist gallery metadata.
-        await r2Adapter.flushImageLibraryBuffer()
-          .catch((flushErr: any) => logImageFailure(requestId, flushErr));
-      }
+      await this.persistImageGeneration(result, sanitizedRequest, userId, requestId, modelSpec.id, incomingHeaders);
 
       // Return private diagnostics to the public normalization boundary.
       return result;
@@ -1236,6 +1167,81 @@ export class GalxModelRouter {
         this.privacyEngine['redactor'].zeroizeTokenMap(redactionResult.tokenMap);
       }
     }
+  }
+
+  private async persistImageGeneration(result: ImageGenerationResponse, sanitizedRequest: ImageGenerationRequest, userId: string, requestId: string, modelId: string, incomingHeaders?: RouteImageOptions["headers"]) {
+      // Mirror sanitized image payloads into private storage.
+      const effectiveSessionId =
+        sanitizedRequest.sessionId ||
+        this.extractHeaderValue(incomingHeaders, 'x-galx-session-id') ||
+        this.extractHeaderValue(incomingHeaders, 'x-session-id') ||
+        'default';
+
+      const r2Adapter = GalxR2AssetAdapter.getInstance();
+      const mirroredImages = [];
+      for (const item of result.data) {
+        try {
+          let imageSource: Buffer | string | undefined;
+          if (item.b64_json) {
+            imageSource = Buffer.from(item.b64_json, 'base64');
+          } else if (item.url && !item.url.startsWith('https://assets.galx.ai')) {
+            imageSource = item.url;
+          }
+
+          if (imageSource) {
+            const uploaded = await r2Adapter.uploadUserSessionImage({
+              userId: userId || 'anonymous',
+              sessionId: effectiveSessionId,
+              data: imageSource,
+              contentType: item.content_type || 'image/png',
+              prompt: sanitizedRequest.prompt || '',
+              revisedPrompt: item.revised_prompt,
+              model: modelId,
+              size: sanitizedRequest.size || '1024x1024',
+              quality: sanitizedRequest.quality || 'standard',
+              deferManifestUpdate: true,
+              metadata: {
+                prompt: sanitizedRequest.prompt || '',
+                revisedPrompt: item.revised_prompt || '',
+                model: modelId,
+                dimensions: sanitizedRequest.size || '1024x1024',
+                quality: sanitizedRequest.quality || 'standard',
+                requestId,
+              },
+            });
+            mirroredImages.push(uploaded);
+
+            item.asset_id = uploaded.assetId;
+            item.r2_key = uploaded.key;
+            item.r2_url = uploaded.publicUrl;
+            item.user_id = userId || 'anonymous';
+            item.session_id = effectiveSessionId;
+            item.content_type = 'image/png';
+            item.size_bytes = uploaded.sizeBytes;
+            item.sha256 = uploaded.sha256;
+            item.lqip = uploaded.lqipDataUri;
+
+            // Default to permanent CDN URL unless caller specifically required b64_json
+            if (sanitizedRequest.response_format !== 'b64_json') {
+              item.url = uploaded.publicUrl;
+              // Retain sanitized bytes for the HTTP normalization boundary.
+            }
+          }
+        } catch (r2Err: any) {
+          logImageFailure(requestId, r2Err);
+        }
+      }
+
+      // One manifest read/write for the whole generation response instead of one per image.
+      if (mirroredImages.length > 0) {
+        await r2Adapter.updateSessionManifestBatch(userId, effectiveSessionId, mirroredImages)
+          .catch((manifestErr: any) => logImageFailure(requestId, manifestErr));
+        // Drain once for the entire generation so short-lived/serverless runtimes do not
+        // depend on a timer to persist gallery metadata.
+        await r2Adapter.flushImageLibraryBuffer()
+          .catch((flushErr: any) => logImageFailure(requestId, flushErr));
+      }
+
   }
 
   private extractHeaderValue(headers: Headers | Record<string, string | null | undefined> | undefined, key: string): string | undefined {

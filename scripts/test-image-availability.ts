@@ -38,3 +38,27 @@ test('image availability allows only a bounded boolean and never submits work', 
     if (saved.key === undefined) delete process.env.VM_RELAY_API_KEY; else process.env.VM_RELAY_API_KEY=saved.key;
   }
 });
+
+test('image-only cutover uses Premium for both observation and dispatch and fails closed', async () => {
+  const { isolatedImagesEnabled, isolatedRelaysEnabled, isolatedImage } = await import('../src/core/router/adapters/IsolatedRelayTransport');
+  const { default: sharp } = await import('sharp');
+  const names=['GALX_PREMIUM_IMAGES_ENABLED','GALX_ISOLATED_RELAYS_ENABLED','GALX_PREMIUM_RELAY_URL','GALX_PREMIUM_RELAY_KEY','GALX_STANDARD_RELAY_URL','GALX_STANDARD_RELAY_KEY','VM_RELAY_URL','VM_RELAY_API_KEY'];
+  const saved=names.map(name=>process.env[name]); const original=globalThis.fetch;
+  const bytes=await sharp({create:{width:2,height:2,channels:3,background:'white'}}).png().toBuffer();
+  try {
+    Object.assign(process.env,{GALX_PREMIUM_IMAGES_ENABLED:'1',GALX_ISOLATED_RELAYS_ENABLED:'0',GALX_PREMIUM_RELAY_URL:'https://premium.invalid',GALX_PREMIUM_RELAY_KEY:'p'.repeat(64),VM_RELAY_URL:'https://legacy.invalid',VM_RELAY_API_KEY:'legacy'});
+    delete process.env.GALX_STANDARD_RELAY_URL; delete process.env.GALX_STANDARD_RELAY_KEY;
+    assert.equal(isolatedImagesEnabled(),true); assert.equal(isolatedRelaysEnabled(),false);
+    let reads=0,posts=0;
+    globalThis.fetch=async(url,init)=>{
+      assert.equal(new URL(String(url)).origin,'https://premium.invalid');
+      assert.equal(new Headers(init?.headers).get('authorization'),'Bearer '+'p'.repeat(64));
+      if(init?.method==='POST') {posts++;assert.match(new Headers(init.headers).get('x-galx-tenant')!,/^[a-f0-9]{64}$/);assert.match(new Headers(init.headers).get('idempotency-key')!,/^[a-f0-9]{64}$/);return Response.json({private:'private-sentinel',data:[{b64_json:bytes.toString('base64'),private:'private-sentinel'}]});}
+      reads++;return Response.json({available:reads===1?null:true,private:'private-sentinel'});
+    };
+    assert.equal(await readImageAvailability(),'unknown'); assert.equal(await readImageAvailability(),'available');assert.equal(posts,0);
+    const output=await isolatedImage({model:'gpt-image-2',prompt:'test'},'owner','request'); assert.equal(posts,1);assert(!JSON.stringify(output).includes('private-sentinel'));await sharp(Buffer.from(output.data[0].b64_json,'base64')).raw().toBuffer();
+    process.env.GALX_PREMIUM_RELAY_URL='https://premium.invalid/unsafe';
+    assert.equal(await readImageAvailability(),'unknown');await assert.rejects(isolatedImage({prompt:'test'},'owner','request'));assert.equal(posts,1);assert.equal(reads,2);
+  } finally {globalThis.fetch=original;names.forEach((name,i)=>{if(saved[i]===undefined)delete process.env[name];else process.env[name]=saved[i];});}
+});

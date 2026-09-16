@@ -1337,3 +1337,73 @@ Incident: `INC-20260916-SESSION`. Kind: `verification`.
 **Next step:** Finish documentation checks and retain ACT-028 for deployed acceptance; no production recovery claim.
 
 Evidence: [entry-refresh-verification.json](incidents/2026/2026-09-16-session-recovery/entry-refresh-verification.json).
+
+## EVT-20260916-session-permission-diagnosis — 2026-09-16T16:14:00.546704+00:00
+
+Incident: `INC-20260916-SESSION`. Kind: `observation`.
+
+**Observation:** Production reconnect failure reproduced on current deployment; authenticated session lookup raises 42501 because later migrations revoked private-schema USAGE.
+
+**Action:** Compared actual grants and history, reproduced the complete-chain failure locally, and prepared a separate schema for the unchanged claim-bound lookup.
+
+**Result:** Targeted repair passes 45 isolated auth database checks and 94 full database checks; production dry run contains only the repair migration.
+
+**Next step:** Complete response/build checks, apply the reviewed migration, verify original browser and live authority, and retain callback/device acceptance as separate scope.
+
+Evidence: [permission-diagnosis.json](incidents/2026/2026-09-16-session-recovery/permission-diagnosis.json).
+
+## EVT-20260916-session-permission-repaired — 2026-09-16T16:21:03.622789+00:00
+
+Incident: `INC-20260916-SESSION`. Kind: `verification`.
+
+**Observation:** Reviewed migration applied alone; current signed-in Image Studio and library recover in original Chrome session.
+
+**Action:** Verified live privileges, history, security advisors and 63 HTTP/asset/refresh/revocation checks using an owned temporary account; test account removed.
+
+**Result:** Operational schema remains denied; live authenticated entry, copied-token denial and independent refresh pass. Sites API has a separate bearer-only browser mismatch, now fixed locally with CSRF and cookie propagation tests.
+
+**Next step:** Deploy and verify the Sites browser cookie-auth correction, then reconcile incident recovery and retain untested provider/history flows separately.
+
+Evidence: [permission-release.json](incidents/2026/2026-09-16-session-recovery/permission-release.json), [permission-live-http.json](incidents/2026/2026-09-16-session-recovery/permission-live-http.json).
+
+## EVT-20260916-session-recovery-live — 2026-09-16T16:27:46.603477+00:00
+
+Incident: `INC-20260916-SESSION`. Kind: `recovery`.
+
+**Observation:** Existing Chrome account now opens Images, owned library and Sites after the session permission repair and cookie-compatible workspace API release.
+
+**Action:** Applied the single reviewed migration and deployed the reviewed auth correction, then verified original-browser recovery, live cookie-only Sites bootstrap, origin denial, refresh, revoked-token rejection and rendered/browser privacy boundaries.
+
+**Result:** 68 final live HTTP/asset checks pass; temporary owned account removed. Incident recovered; final-chain and cookie-route regressions retained under completed ACT-029.
+
+**Next step:** Keep ACT-028 open for remaining real provider/email, account-switching, physical-history and failed-revocation browser acceptance; generation availability stays separate.
+
+Evidence: [recovery-release.json](incidents/2026/2026-09-16-session-recovery/recovery-release.json).
+
+## EVT-20260916-premium-image-connection-diagnosis — 2026-09-16T16:34:24.603322+00:00
+
+Incident: `INC-20260913-IMAGES`. Kind: `observation`.
+
+**Observation:** Owner requests image generation and availability connected to GALX Relay Premium. Local Premium readiness is HTTP 200, observed image availability false. Existing production tunnel reports down with zero connections; application has no isolated pool settings.
+
+**Action:** Inspecting deployed configuration and authorizing one bounded Premium image qualification through its own runtime and central grant. Existing receipts and account enrollment remain unchanged.
+
+**Result:** No application cutover yet; availability and real synthesis must be verified independently.
+
+**Next step:** Qualify the current Premium account, establish authenticated server reachability, route only images to Premium and verify public response and artifact contracts.
+
+Evidence: [2026-09-16-premium-image-preflight.json](releases/2026-09-16-premium-image-preflight.json).
+
+## EVT-20260916-premium-image-connection-verified — 2026-09-16T16:45:38.885845+00:00
+
+Incident: `INC-20260913-IMAGES`. Kind: `verification`.
+
+**Observation:** Legacy VM_RELAY_URL/KEY are sensitive Vercel fields. Empty values returned by API/CLI do not establish absent production values. Earlier preflight inference of empty settings is superseded; legacy tunnel down and zero connections were directly observed. Premium application settings were not configured before this change.
+
+**Action:** Installed reviewed Premium availability repair and private authenticated image tunnel, preserving Standard, accounts, gates and original executions. Configured an independent image-only application cutover.
+
+**Result:** Local real image decoded; 69 local checks and external unauthorized/unrelated-path denials pass. Public deployment is building.
+
+**Next step:** Verify one signed-in production generation, durable library/Favorites/download and raw HTTP/privacy boundaries.
+
+Evidence: [2026-09-16-premium-image-connection.json](releases/2026-09-16-premium-image-connection.json).

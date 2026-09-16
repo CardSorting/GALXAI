@@ -8,9 +8,10 @@ import { conversationMessages, readConversationResult, ConversationInputError, t
 import { FairUsageError } from './fair-policy';
 import type { IncludedGenerationReply } from './included-generation';
 import { SitesWorkspaceRepository, WorkspaceError, workspaceView } from './workspace-repository';
+import { requireSessionMutation, sessionBearer, SessionAccessError, withSessionCookies, type SessionCookie } from '../auth/session-http';
 
 export interface WorkspaceDependencies {
-  authenticate(request: Request): Promise<{ id: string }>;
+  authenticate(request: Request): Promise<{ id: string; cookies?: SessionCookie[] }>;
   repository(): SitesWorkspaceRepository;
   requireAccess(owner: string): Promise<void | 'pro' | 'free'>;
   prepare(owner: string, signal: AbortSignal): Promise<{ free?: boolean; generate(operation: string, brief: string, document: SiteDocument | null, context?: ConversationContext): Promise<IncludedGenerationReply> }>;
@@ -25,8 +26,15 @@ const keys = (v: Record<string, unknown>, names: string) => Object.keys(v).sort(
 const title = (v: unknown): v is string => typeof v === 'string' && v.trim().length > 0 && v.length <= 90 && !/[\u0000-\u001f\u007f]/.test(v);
 export function sitesWorkspaceRoute(deps: WorkspaceDependencies) {
   return async (request: Request): Promise<Response> => {
-    if (!/^Bearer [^\s]{1,8192}$/.test(request.headers.get('authorization') || '')) return fail(401);
-    let owner: string; try { owner = (await deps.authenticate(request)).id; } catch { return fail(401); }
+    let owner: string, cookies: SessionCookie[];
+    try {
+      sessionBearer(request); // Reject malformed explicit credentials; verified cookies are also supported.
+      if (!['GET', 'HEAD'].includes(request.method)) requireSessionMutation(request);
+      const actor = await deps.authenticate(request); owner = actor.id; cookies = actor.cookies || [];
+    } catch (error) {
+      return withSessionCookies(fail(error instanceof SessionAccessError ? error.status : 503), error instanceof SessionAccessError ? error.cookies : []);
+    }
+    const response = await (async () => {
     try {
       const url = new URL(request.url), repo = deps.repository();
       const reply = (row: Parameters<typeof workspaceView>[0]) => Response.json({ site: workspaceView(row) }, { headers });
@@ -136,5 +144,7 @@ export function sitesWorkspaceRoute(deps: WorkspaceDependencies) {
       if (error instanceof SiteDomainError && ['username_unavailable','username_conflict','address_unavailable'].includes(error.code)) return fail(409,'username_unavailable');
       return fail(error instanceof WorkspaceError ? error.status : 503);
     }
+    })();
+    return withSessionCookies(response, cookies);
   };
 }

@@ -1,0 +1,69 @@
+{
+  "observed_at": "2026-09-16T16:27:46.603477+00:00",
+  "target": "https://galx.ai",
+  "deployment": "dpl_ANUiRkHxr59cKvNYAAz7BgEG16At",
+  "deployment_url": "https://galxai-msepfpr8y-cardsortings-projects.vercel.app",
+  "source_base": "b7de3874a058495d687835acd1d2611bd258a2c2",
+  "source_state": "Reviewed working-tree repair deployed directly; source remains uncommitted",
+  "source_sha256": {
+    "src/lib/auth/session-http.ts": "a4f28b771129b4ece6868421fe391af77eda2fbc20a3127f31e8102c4e1b9fcb",
+    "src/lib/auth/accountIdentity.ts": "fa72bba44489e6497d28f9e12827d11488035e98a79592e4ab967cb6e9148720",
+    "src/lib/sites/workspace-route.ts": "11b0ca56d9bbada14235207a1b0132c6dce6751c0c8e37d2dda52bada9448572",
+    "src/app/api/sites/workspace/route.ts": "8170dd751d58fd369fc4870f530b1343108bd4f5b95116c093b2433d711bfa80",
+    "scripts/test-sites-workspace.ts": "08af95908269446e4fe6590619e7180d5b41575deb0a3c2a6797c2127c873899",
+    "scripts/test-account-session-db.ts": "e0fd7cae653565106f331f45471292564d09b944bc28f473e0e267732a3f453f",
+    "supabase/migrations/20260916161120_isolate_account_session_lookup.sql": "7b50f46b7fca6b75f2bf996e108696c033fe9365fdc10485381793a17a88e171",
+    "supabase/rollbacks/20260916161120_isolate_account_session_lookup.down.sql": "6c42297624aaad9942fb0589e46baf9bb1b71239218df041f8a1aa97511e52b2"
+  },
+  "migration": "20260916161120_isolate_account_session_lookup",
+  "checks": {
+    "auth_database": 45,
+    "general_database": 94,
+    "auth_sessions": 43,
+    "sites_workspace": 19,
+    "sites_conversation": 15,
+    "public_boundary": 43,
+    "staff_authorization": 6,
+    "typescript": "passed",
+    "scoped_runtime_eslint": "passed",
+    "isolated_production_build": "passed",
+    "hosted_production_build": "passed",
+    "compiled_assets_scanned": 643,
+    "live_http_checks": 68,
+    "live_assets_scanned": 34,
+    "owned_canary_cleanup": true,
+    "browser": {
+      "observed_at": "2026-09-16T16:27:46.547301+00:00",
+      "browser": "Existing Chrome account session; CUA verification",
+      "image_studio": true,
+      "owned_library": true,
+      "sites_workspace": true,
+      "observations": [
+        "Before repair /images rendered the reconnect document.",
+        "After migration Try again loaded signed-in Image Studio and the existing owned library without credential replacement.",
+        "Sites then reproduced an expired-session prompt from its bearer-only API precheck.",
+        "After deployment reload showed Account, Sign out, Sites workspace, composer and preview with no expired-session prompt.",
+        "Navigation back to Images retained the signed-in account; the recovered Image Studio remains open."
+      ],
+      "limits": [
+        "No customer sign-out, credentials, generation or publication changed",
+        "Image generation availability still shows its separately tracked unavailable state",
+        "Library was observed after the database repair; the final deployment received additional owned HTTP entry/asset checks"
+      ]
+    }
+  },
+  "evidence": [
+    "permission-diagnosis.json",
+    "permission-preflight.json",
+    "permission-release.json",
+    "permission-live-http.json",
+    "sites-cookie-preflight.json",
+    "sites-cookie-live-http.json",
+    "sites-cookie-browser.json"
+  ],
+  "limits": [
+    "No real provider/email callback, physical history-cache restoration or real account switching acceptance; ACT-028 remains open for those flows",
+    "No image/Sites generation, publication, payment or customer-session revocation",
+    "Existing image-generation availability remains separately tracked; authentication recovery does not establish generation capability"
+  ]
+}

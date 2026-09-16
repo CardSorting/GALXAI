@@ -1,12 +1,11 @@
 {
   "knowledge": {
-    "reviewer": "Codex security/access maintainer",
-    "note": "Reviewed final source/guide contracts for callback isolation, synchronous fencing, resume lifecycle and ordinary-login cookie propagation. Prior dated evidence is retained; broad fingerprints do not certify unrelated modules or live acceptance.",
+    "reviewer": "image and relay maintainer",
+    "note": "Reviewed Premium image-only selection, engine availability evidence, shared owned persistence, runtime pins, tunnel exposure and complete connection/recovery guides; preflight evidence separates local tests from pending public acceptance.",
     "reviewed_at": "2026-09-16",
     "review_by": "2026-09-23",
     "evidence": {
-      "post-mortem/incidents/2026/2026-09-16-session-recovery/second-pass-verification.json": "e7401a7c9906b72e4087ee366143c6223a1306dc702deb1cb39cb9c7e2d857be",
-      "post-mortem/incidents/2026/2026-09-16-session-recovery/entry-refresh-verification.json": "f23950cddbcca6d0b765d4bbca31d2773c5a467667bd1cb0087defcca41ef2d8"
+      "post-mortem/releases/2026-09-16-premium-image-preflight.json": "a78125c76af0749f7be50647b99c2d6ff8aa368cdfa5780222c81fb4c14023d1"
     },
     "files": {
       ".github/CODEOWNERS": "ef2f416d15f027dc8f197ad844289c9a44c8e843d3214d1590a3a380e939d13f",
@@ -27,7 +26,7 @@
       "docs/how-to/change-with-documentation.md": "abcf6bfb2f0aadcf8cfc2fdae18ac8f3f84565f127c34f7453d50e7283006e40",
       "docs/knowledge/DESIGN_RATIONALE.md": "edd3cf9b49ed794fbe8bf14448fd0c56cb4d8df832bab81cdf07e9ea2e2204a1",
       "docs/knowledge/README.md": "5ad219aeee44a9c065db2ca69e5a6498966fed42e2d8c74773dbc055d0220931",
-      "docs/knowledge/registry.json": "5b3b3f57903d2996ac88f98cfda7cfeab19444444b9575442b8d3e90ae2beda3",
+      "docs/knowledge/registry.json": "abcef77fea5943e5413748d178af7abee86fcc45905aea716fa2bea0fe792ae8",
       "docs/knowledge/templates/adr.md": "28773b3cbdb53ad34f08d0362e87b6dba24b6fd76ddb6c85db8ad63d99ad1331",
       "docs/knowledge/templates/runbook.md": "19679a7eb8c1a3aafd87852fa93817e7bf9ef4696772c8deb1617366c290abc1",
       "docs/maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md": "b7df75535611c14aabe599764a6f6c2a4f0f1461d068929602c68e39d8ce850d",
@@ -43,7 +42,7 @@
       "docs/runbooks/weekly-knowledge-audit.md": "ade4fc2133306e1b544d8783f647bc4c5b8a85e3a89ce769d36f586a91c36169",
       "docs/tutorials/README.md": "7cc84f00412108e1c8ec84ef127b15027b606bd16c2dc290f6efc607b9ca5268",
       "docs/tutorials/first-change.md": "06b7c9501cfe62893978e1da6556d6d4fc0d88f4e36b484d05dad4ad72d9fd60",
-      "package.json": "8a505a22289137568755d936cfe6c96a766ae3b28ff4d589959b871cba6e7068",
+      "package.json": "fa61d680d5ff49a1c5e1ca36c17730529b2075194b5ec094ea04fc44b653b9db",
       "scripts/docs-kb.py": "57642bcce6edcdec6b14dc285e973c1c7ba43d9b8908903826befcba6e992d88",
       "scripts/test-docs-kb.py": "83aa914e66cc04d866fd4c77554760748f8e1d07378326c49ac1738f12851856",
       "scripts/test-post-mortem.py": "c4dbb8c575760a2110eb1ad01575fb55b2f96da28da2bd57101dc630adaa464f",
@@ -52,28 +51,29 @@
     }
   },
   "images": {
-    "reviewer": "Codex maintainer",
-    "note": "Reviewed the changed auth recovery contracts, shared navigation/URL guides, fixture expectations and documentation mappings. Unrelated module and deployed acceptance limits are explicit in the retained review evidence; no ADR decision accepted.",
+    "reviewer": "Product/API maintainer",
+    "note": "Reviewed Premium routing, observed availability, queue spec and complete owned persistence/public boundary and recovery guides with actual preflight evidence.",
     "reviewed_at": "2026-09-16",
     "review_by": "2026-09-23",
     "evidence": {
-      "post-mortem/incidents/2026/2026-09-16-session-recovery/local-verification.json": "6a2cb35d106c0fb9ad3852cb0d28c4b45113ba792c60cdfc8f0e04df69a2eaeb"
+      "post-mortem/releases/2026-09-16-premium-image-preflight.json": "a78125c76af0749f7be50647b99c2d6ff8aa368cdfa5780222c81fb4c14023d1"
     },
     "files": {
-      "docs/QUEUE_SPECIFICATION.md": "a3cfec51eeb2715aa5ff6f7ba36363ee84e5f02f2a965b6aa9cd49e2c570a27e",
+      "docs/QUEUE_SPECIFICATION.md": "301d293b23327bf065202322e0a7554cf581740f28d0d5ab9fb827e73beed6ba",
       "docs/maintainers/FREE_GENERATION_QUOTA.md": "e43d24867079c13c8437b7002d8730a6bb954c321437716b4185f8c94c6d6249",
       "docs/maintainers/image-library-scale.md": "1d392194b33c69dcb3f0e470477f4ef8e31f38a177769f577c3bc9a9224d8683",
-      "docs/maintainers/image-public-boundary.md": "128dc12947509402437c8813dd2c1781504cca3ca91d47ba2af865109e66480c",
+      "docs/maintainers/image-public-boundary.md": "d59453c434b21c29a639012d3e4aca4ce25b3c59bbdc7422b3f86ff0195297d7",
       "docs/maintainers/readable-urls.md": "f04fe2f7d2752ceef765feb24a2f2a29fedee3b526a3291d114dbfdaceae1a40",
-      "post-mortem/runbooks/image-generation.md": "c8637c8a7a7b27d045e80cd83e3ba58ff9dedd5eb3f00d82688971a7b6201770",
+      "post-mortem/runbooks/image-generation.md": "cafd2ecd11bd89d4fce8a48e646980d32dcc021fddcc0b9f697ccd9fd0dd8532",
       "scripts/test-free-generation-gate-db.ts": "2919f39490203795965f494f61b288305ea7136e544515cc504d9e8a0ff7e037",
       "scripts/test-free-generation-quota-db.ts": "26d3381b0a90285cce6d954b954601fb7a5a4596998389ac7091cfb7b49d9b04",
       "scripts/test-free-generation-quota.ts": "cbf7034c6f10ecfcf6176718f693a2636af775899e05552b5d7c53c58f142fb3",
-      "scripts/test-image-availability.ts": "a1a6e18cea9ba2664d94fd82affbe3316ea4879ec290da4b5901275c3a9debef",
+      "scripts/test-image-availability.ts": "ffb8320efba9ec77be5b9231f2bac83303be02149b087660990d78c749e54cc0",
       "scripts/test-image-library-api.ts": "e29b96a2542534a2aad54fc5ecb6481829a238fdf78b55f900dc17824e9e479c",
       "scripts/test-image-library-http.ts": "f889bc632c6ccd33aa5f1f40f321ce75bd2167e7758fdde602db230f5d524f84",
       "scripts/test-image-library-scale-db.ts": "131e2decca645d22522ffbd90170a3e47f81b6db068d93f6429d3c5d30ee02b7",
       "scripts/test-image-library-scale.ts": "1d4aeade107bc2d715654f4853bdc1be660bded657ca8cabd0fd34a67423389e",
+      "scripts/test-image-premium-routing.ts": "c0a5dadd3c966f39e620a902e1cfca5e598cfb9455ff10de24a1d2cbc4363946",
       "scripts/test-image-public-http.ts": "b5d812f3daf27df33ccb27fe5936f84b56d0880a05bc309a89c5b8c9ba95f39f",
       "scripts/test-image-requests-db.ts": "a42635ad7fb9432c23d79e715784085690742efcfd1b252df34856bcf0488037",
       "scripts/test-image-retry-contract.ts": "2dd9ae9d1e5b4c3ce132961cf05e37c3f983209a0a0c148abfdd870be92da292",
@@ -117,7 +117,7 @@
       "src/lib/billing/free-generation-quota.ts": "b84c0d1be9c595067cafe738efbc9d1976889dcdfd025b22114860e9e3d79683",
       "src/lib/billing/generation-access.ts": "7d0f05c6a9ea2c7e4b4fc532eb264215c4ca57be2633187a564f02d44116fb26",
       "src/lib/billing/generation-quota-route.ts": "f35bd7b7f55b7b43d3d43de3a1103e081cb82a50355b6f2e1f31d2233129de49",
-      "src/lib/images/availability.ts": "5d7c714514d8a3209eb27d1ae4a62615e5629a90e80f74376213373a7173bf6d",
+      "src/lib/images/availability.ts": "9b2d701600fb46f3e864f285394c144e74e31a9016bc6e61ab4e8b6df1476345",
       "src/lib/images/library-cursor.ts": "53d3e327e5e3ee57de4d045c62b73b8cfd1c69cb048013052c4af9f461bce798",
       "src/lib/images/navigation.ts": "827b7f91ef06422452aa03f66721e866be9755399c4514393230ce4fdcfc8e5c",
       "src/lib/images/read-image-artifact.ts": "af490bc9ccfa13d3e341574936f0929725ff2d1c9f042f53a48e0a45e8e7cb8b",
@@ -135,13 +135,12 @@
     }
   },
   "access": {
-    "reviewer": "Codex security/access maintainer",
-    "note": "Reviewed final source/guide contracts for callback isolation, synchronous fencing, resume lifecycle and ordinary-login cookie propagation. Prior dated evidence is retained; broad fingerprints do not certify unrelated modules or live acceptance.",
+    "reviewer": "Codex security maintainer",
+    "note": "Reviewed cookie-capable Sites workspace authentication, same-origin mutations, cookie propagation, error semantics and complete affected workspace auth guide.",
     "reviewed_at": "2026-09-16",
     "review_by": "2026-09-23",
     "evidence": {
-      "post-mortem/incidents/2026/2026-09-16-session-recovery/second-pass-verification.json": "e7401a7c9906b72e4087ee366143c6223a1306dc702deb1cb39cb9c7e2d857be",
-      "post-mortem/incidents/2026/2026-09-16-session-recovery/entry-refresh-verification.json": "f23950cddbcca6d0b765d4bbca31d2773c5a467667bd1cb0087defcca41ef2d8"
+      "post-mortem/incidents/2026/2026-09-16-session-recovery/sites-cookie-preflight.json": "c452adace907cdef30cbe66fcef96ab7f2162f557a33dd76c4dc07c6677736a5"
     },
     "files": {
       "docs/OAUTH_AND_TOKEN_LIFECYCLE_SPECIFICATION.md": "1e8004f6dc024322356e5494b099b7c38ed00e4a62e22434b020fd43c9470183",
@@ -156,7 +155,7 @@
       "docs/operations/preview-activation.md": "d724da3eefe8b52d2557f0f4be91a70ed3562f56e7586e17fe0c2dc06c824e44",
       "docs/operations/preview-admin.md": "d7e854fdd3ff3d1aadbee97d0163c1a38cf3a7626a2907c540093003f5064b40",
       "docs/operations/preview-hybrid-sync.md": "1ac7ce76537660cfc507a595c942d4da2324060b8a3f15ddf9ab96d993ff38e9",
-      "docs/operations/workspace-auth.md": "3373eea41b063d27dce2649a8ac33e10c2316f01dab97ac3107e7d86c307d90a",
+      "docs/operations/workspace-auth.md": "58f0a796e0ddc3c3180eb33f77590305ee13ec6318adb3b1fe0e005c903267c9",
       "docs/playbooks/05-security-key-rotation-and-compliance.md": "586381c97e8128eb9cf56d92b8ca987ff443f397a0ccdef0f9835bd68537a522",
       "docs/relay-security.md": "baa6aa93c8d8b7f161bebec297e2a6d0e62ced5e81d63d9df62f1d8e160f0b23",
       "scripts/manage-free-generation.ts": "7a1f786789e9507e758c13db2e750c5edc982fec2b714e646d7e0bf9526fbb2b",
@@ -244,7 +243,7 @@
       "src/lib/admin/errors.ts": "c271817d74bdb2544fe87235d5a77ed89fad7e747bcb67f6db9f24d17d77d1e7",
       "src/lib/admin/preview-contract.ts": "81270c1d45db26fee9ed872d801d327a284b0ed7c9a7e1d6cfdb5a4998071b2e",
       "src/lib/admin/preview-route.ts": "d80a072b42ec34c6d78fbd7439b4dc656fc345ccbb266ef89c634089dc357ed2",
-      "src/lib/auth/accountIdentity.ts": "50d6d29940052e60c3edccf723bb641fdd194d9b7246a78d0667a9a04d1d3275",
+      "src/lib/auth/accountIdentity.ts": "fa72bba44489e6497d28f9e12827d11488035e98a79592e4ab967cb6e9148720",
       "src/lib/auth/active-account-session.ts": "94de4efc8ac82b983ac35ef030258879668ec3f3dd3a612deb53aaedc9cee5d9",
       "src/lib/auth/browser-session.ts": "97c4fcc2f795964a188d8ca3c64beb66f5737004add1a5a08e1fc34b39807cb2",
       "src/lib/auth/browser-verification.ts": "2eba0544c2da486f5ad258d2b99d1b62e46c6044b46b46efe567dafd1b94ec52",
@@ -254,7 +253,7 @@
       "src/lib/auth/request-session.ts": "f5980d7f521819040a36ded03fdcf592d4d66faebfc62dc987a1a5298511f749",
       "src/lib/auth/require-workspace-session.ts": "6bdeaafe20fff2ff98e6ef767e6d9b20ae9319dbea818e3e8f044a66f12f104c",
       "src/lib/auth/server.ts": "dea933025e0cd96b11117711f95df43b6670c7ddae70555827f09293ee622405",
-      "src/lib/auth/session-http.ts": "9ec0cbf468e12793bf0e51d0766713222423b7f7ba919f87e25617a35bf1ec73",
+      "src/lib/auth/session-http.ts": "a4f28b771129b4ece6868421fe391af77eda2fbc20a3127f31e8102c4e1b9fcb",
       "src/lib/auth/session-profile.ts": "76f08b5ee4b6f15f690a0020ca96214119bc635a1bd5c6f0f1df430b1a2bfba5",
       "src/lib/auth/signin.ts": "edc77280f2da3de09d44aa48e608751f01843947f77acb5fdc62247dcd2cf39f",
       "src/lib/auth/signup.ts": "57b4ad3fcd323626cc006d314736375318500cca61d6d3ffe1e3b5cea05b0f54",
@@ -291,13 +290,12 @@
     }
   },
   "sites": {
-    "reviewer": "Codex / billing modernization review",
-    "note": "Paid proof and fair-use authority unchanged. Upgrade/navigation entries use Plan, new checkout returns persist Plan; paid-access guide reconciled. Plan DB suite including entitlement and lifecycle tests passes.",
+    "reviewer": "Codex product maintainer",
+    "note": "Reviewed workspace server authentication, browser cookie transport, full Sites workspace guide, owner boundaries, unavailable recovery and rollback; standalone API bearer contracts unchanged.",
     "reviewed_at": "2026-09-16",
     "review_by": "2026-09-23",
     "evidence": {
-      "post-mortem/releases/2026-09-16-billing-modernization-semantic-review.json": "5f5dea07a824a7b0de64ff4ee8ce1276efcc91861ac8428aa00f429079684e6d",
-      "post-mortem/releases/2026-09-16-billing-modernization.json": "acde60424cd8fade9fb72648de648c2ef703cc5e56502a9af859b25868d4ca92"
+      "post-mortem/incidents/2026/2026-09-16-session-recovery/sites-cookie-preflight.json": "c452adace907cdef30cbe66fcef96ab7f2162f557a33dd76c4dc07c6677736a5"
     },
     "files": {
       "docs/API_BASE_URL.md": "19e4b534e72165ee0943fd4e9dd2a79dc01cecad30abed739ed0c1be537a9dca",
@@ -310,7 +308,7 @@
       "docs/maintainers/SITES_DOMAINS.md": "f52a50eb38cda71d7ff08ad09bf0a13d5b60ee661eec5cf36e08734580c6c3e2",
       "docs/maintainers/SITES_FAIR_USAGE.md": "9637f99d9837d1c5e2686f9286f632a3231f21751b3535f09bed97056e343a7a",
       "docs/maintainers/SITES_OPERATIONS.md": "44beddd5212e06583346afbd4a221bd8cff2f71b18a8e89c43018c46fcc1af0f",
-      "docs/maintainers/SITES_WORKSPACE.md": "edfb4a2a29efb83bf56239fce59aa67f1c0c73bb6b46fb11bae685b05a9c0741",
+      "docs/maintainers/SITES_WORKSPACE.md": "3719850870966227392c12e5be6fd0fd48cbff2f8f0f65ec5f9976f65382ab8e",
       "scripts/manage-pro-access.ts": "1ebddafc9bfcc287daf63cfab41d7fd20825b51840fd697dcb41a873fa1d2dbb",
       "scripts/test-free-generation-gate-db.ts": "2919f39490203795965f494f61b288305ea7136e544515cc504d9e8a0ff7e037",
       "scripts/test-free-generation-quota-db.ts": "26d3381b0a90285cce6d954b954601fb7a5a4596998389ac7091cfb7b49d9b04",
@@ -322,7 +320,7 @@
       "src/app/api/sites/content/route.ts": "b99c87335b9f2772b9ef423bb8e577b71357d89d3b2c0e3b5b0a8a95bc05aae4",
       "src/app/api/sites/domains/route.ts": "04a78970e61861898a5066b36cd760ed9224a368adf33562bf6bb2a0762ab2c7",
       "src/app/api/sites/published/[hostname]/route.ts": "d652aa4a54dc2e80070068d08462ccc331c545385ff80dad3baf050bd2a536dc",
-      "src/app/api/sites/workspace/route.ts": "c6db0ab4de0d484ff2b90b253ff8f9a1172cd308da8710bd1d6a8a5a8e3eea74",
+      "src/app/api/sites/workspace/route.ts": "8170dd751d58fd369fc4870f530b1343108bd4f5b95116c093b2433d711bfa80",
       "src/app/sites/[id]/page.tsx": "b3bac5436139d92b3ead98523d5dd36c057682f4d818fabbe27afe0d928ce63d",
       "src/app/sites/error.tsx": "f2d40e7c5567e92746b18fc489099f7ab1331393859d7fae9a34db13f2bc4736",
       "src/app/sites/loading.tsx": "652066b8b7a8a11a586f6fb795a198f3168a752cad03f187a45ac9014bf61aad",
@@ -365,16 +363,17 @@
       "src/lib/sites/starters.ts": "ef6a6f61eb2177b23f4f3281c1b5f4ada18d9a5137aad733ae09286b25ba6a2d",
       "src/lib/sites/workspace-contract.ts": "6eb762c8d6695c6d9b00c86c81f14662a846f07e40a8929284ae7b10a7dce809",
       "src/lib/sites/workspace-repository.ts": "79f041050100b05a6b251731eeeb65e244712d06bb751be820ad61f54c0a4608",
-      "src/lib/sites/workspace-route.ts": "b03ea8af720cf2b368c4f90d567eba25cb471e7bcdb86a9a1a5b017eb240f98b"
+      "src/lib/sites/workspace-route.ts": "11b0ca56d9bbada14235207a1b0132c6dce6751c0c8e37d2dda52bada9448572"
     }
   },
   "relay": {
-    "reviewer": "Codex relay maintainer",
-    "note": "Reviewed request construction, conservative output accounting, overflow shutdown, private diagnostic redaction, strict-cap preflight, permanent-error retry veto, complete affected API/tool/quota/install guides, final image pins and real per-account completion/settlement. Earlier failed receipts and proposed ADR status are preserved.",
+    "reviewer": "Relay operator",
+    "note": "Reconciled complete API, routing, architecture and queue references with tri-state direct-engine availability, independent image-only cutover and shared persistence.",
     "reviewed_at": "2026-09-16",
     "review_by": "2026-09-23",
     "evidence": {
-      "docs/knowledge/audits/2026-09-16-relay-generation-review.json": "b42f0e8adfb144aee96bde031367902d6d4675279a74dcf2cdb4ae2a697f81b7"
+      "post-mortem/releases/2026-09-16-premium-image-preflight.json": "a78125c76af0749f7be50647b99c2d6ff8aa368cdfa5780222c81fb4c14023d1",
+      "post-mortem/releases/2026-09-16-premium-image-connection.json": "c842c18db56580e63462f4db26d6729647ded802cc3b8dceb96f10a783751ff9"
     },
     "files": {
       ".env.example": "0f2ec6b2823f842f2a78ad28e1b846b907564fe2ca42bcc73904dc4faacf1f73",
@@ -404,18 +403,18 @@
       "docker/relay-pools/standard-monitor.json": "8825480cafb45498cfd12a2d6da429bb0598fbfe130e542066cd3068d1076f49",
       "docker/relay-pools/standard-runtime.json": "4c8d356325c5a592807d43e3e5c2ce4224cfed65dcf93209533e770045adae28",
       "docker/relay-pools/standard.json": "9cd5fff2f1ef5ccc6251cda8606798b54cc7fb9bed7374fbb5b8d349ac6e101c",
-      "docs/ARCHITECTURE.md": "12e289727bee402332512950b63181583ca0564d3f3936b75fe878b59bcf2124",
+      "docs/ARCHITECTURE.md": "6db72202039b5a94fe2bfaaf29aff8f5a0592697affd90a54fb36f194ba9818e",
       "docs/FAQS.md": "d5a05c2a68a72e319ab834dec6d38525b1cfc1eaabbad8211862b585757801c3",
-      "docs/FEDERATION_STRATEGY.md": "59ec6f134d015c18083df39b7c9800eb7c9acffbb8ae90a0f6f2bcf7ab2c6343",
+      "docs/FEDERATION_STRATEGY.md": "386a7f7531f3801491722eca22e2164a4723d339e6b98d3c4aebbc0a718085c6",
       "docs/INFERENCE_PIPELINE_VERIFICATION.md": "8fa57463b970ad16045c27787e79fb522242a539ec25ec0853cde500c8f6ea88",
       "docs/MIGRATION_GUIDE.md": "5eda22f2dd90f91d8859d14b0c857ba11ed7babc28c0709e81376160c46d3c59",
       "docs/MODEL_CATALOG.md": "0854759f5192fed3cf14d2d6a3536d2fcbfbdd21615038862ecc129dd58fb18a",
-      "docs/QUEUE_SPECIFICATION.md": "a3cfec51eeb2715aa5ff6f7ba36363ee84e5f02f2a965b6aa9cd49e2c570a27e",
+      "docs/QUEUE_SPECIFICATION.md": "301d293b23327bf065202322e0a7554cf581740f28d0d5ab9fb827e73beed6ba",
       "docs/RATE_LIMITS_AND_QUOTAS.md": "aa0c0c2f44bf8dc847a213bb4cb2235a1c797d9f5c7569c8393a232e9f1d336c",
-      "docs/RELAY_API_REFERENCE.md": "04f09f259bcdbc0e6f6a161e66ee8feefe6599bff4e4a0a1595cbaad3f391bd0",
-      "docs/RELAY_VNEXT_RUNBOOK.md": "a6359ee6821709cc1a8c90e1758456eaaaa6b0a25f19236d5688c3f674f1576a",
+      "docs/RELAY_API_REFERENCE.md": "ec22b9ae92d67e66e1e45532b1ca267043dea0f1e76315b9d3beb6913057ace9",
+      "docs/RELAY_VNEXT_RUNBOOK.md": "6faf4590c4d3f634981159b4c5f236cc10ab8ff955dc0eff0e4ece8fe30c3fb2",
       "docs/RESILIENCE_AND_DISASTER_RECOVERY.md": "87ad4fc3c0291dac8910f851ec8fede69c8860d00b37d0287b5a8ddb8769bee9",
-      "docs/ROUTING_ALGORITHMS.md": "930823cd523527f788f89e2a91c94d31939900404ef3e6aa4410c5dec24b0bc7",
+      "docs/ROUTING_ALGORITHMS.md": "efbe2f3304a3f9d8683c4ea1c7b5b0ae9ccf90f25354d840cca74a98c6db9b94",
       "docs/SECURITY.md": "4e3bd43b6de8c2a9eb19dcd0c543f6c8d3616a81528b263046ebec549760afc6",
       "docs/SYSTEM_TOPOLOGY_AND_MAINTENANCE_ONBOARDING.md": "00d62febd6e1fa614a5f72a762abe03b32ff22b4ae42f3bae4282eaa2b4deec2",
       "docs/TELEMETRY_AND_OBSERVABILITY.md": "7e2bc7c840f2de869abda2700a343e3cad3139ca6fedfa2c68f72e10eb80f110",
@@ -457,7 +456,7 @@
       "docs/reference/standard-relay-scheduling.md": "c40b137d02b4ae0af0b7bacafe36db07ef9a85e5f66a2336d228311a38db6670",
       "docs/relay-security.md": "baa6aa93c8d8b7f161bebec297e2a6d0e62ced5e81d63d9df62f1d8e160f0b23",
       "docs/runbooks/relay-pool-images.md": "20e014400b15d2c35502a9d6dcc07485b713c12ffa9487e03d8ebba66ba0c04e",
-      "docs/runbooks/relay-pool-services.md": "3325a6301776151d68ade1f7b8e373de745dfaab4f292293a1896a059e9bc1dc",
+      "docs/runbooks/relay-pool-services.md": "2db8c4ccaacb534ecea62646108c78990e0d805c7249b0a66a04d24fe92103dd",
       "post-mortem/runbooks/controller-lock.md": "67967d01172e536b60334da3267420bfd201487dd84f85ab5e4225bc4397c89a",
       "scripts/export-relay-services.ts": "b974a585dea1a2704e93e5003ae4ac7e3b88d8359679d0a31fa88bfc3bb18431",
       "scripts/install-federation-service.ts": "05ec9c28d24ee2389a835234758d01f3fa33480f6b62acb91f78cbd80d5f19d7",
@@ -501,7 +500,7 @@
       "scripts/test-relay-overload.ts": "9ce619054d355e804ed2635f65a5d18a62383fb1878e1c6822aa2483ca85ae29",
       "scripts/test-relay-pool-images.ts": "f5d96ad1bc90e19d4a4f7a6f8b24cd97048a7566c94cd0bcbf9f0de044346a97",
       "scripts/test-relay-registration-errors.ts": "50a58133ab9a77c75abfe28312e7a227715a7062ba91b2aaf79690c8dbab45a6",
-      "scripts/test-relay-services.ts": "ba02e8570c9903a97973e11c315131a7e9cc48906d5afb867f6de8daac9eeb6c",
+      "scripts/test-relay-services.ts": "58ee7c423a639b0a7dd02c49fbb016953a405df4c65c796d4fc56746a7733c4b",
       "scripts/test-shard-enrollment-storage.ts": "9fec2353a1579d6e7fff3b816161f64561e4462673e81168625369c9131970f4",
       "scripts/test-standard-pool.ts": "37b050874303c56768ca83b6038a5d5e3d32588e80acd26f44c78b0fdd5d16f6",
       "scripts/verify-relay-hosts.ts": "fb0cb3a76f6cdc84f3db385a4b5610b40b4727400b8ece92968a760bf0183390",
@@ -510,8 +509,8 @@
       "scripts/verify-relay-service-images.mjs": "e0de1f0d906061998b03244662bac75142800944c6fe7e16840ef1ba0681483b",
       "src/app/api/internal/telemetry/route.ts": "839fb768dbc22a6619eef9aa7160c854cfb2676bd20df2161ab8c18e0f1c8a77",
       "src/app/v1/chat/completions/route.ts": "88b4b02daba44020973efda0cd1084c67182a1bcf145ffc3cba13febc24e04b0",
-      "src/core/router/GalxModelRouter.ts": "2ce191f8c8303678ca690f69c2a20e5e34d18fc1eced99d12ef7268aa9a9933e",
-      "src/core/router/adapters/IsolatedRelayTransport.ts": "7094aee0faf3bfe7fb76ab9ca01d4cfbdcb4fcda065c392c1abf8394c0f7a675",
+      "src/core/router/GalxModelRouter.ts": "c89668587e207dd53f5e524a2d06ee2a72f208bbe892fd1d24caa34b94832999",
+      "src/core/router/adapters/IsolatedRelayTransport.ts": "75a2fc50cad1c89fab8b7296c0a91738d51b7ca5e86057dce2ee777ba02e4bfc",
       "src/core/router/adapters/OpenAIAdapter.ts": "4ace6c71c0cf494a5dcf18dcbd59da93e3000e41ebab774985ce722b40d3f623",
       "src/core/router/adapters/RelayChatTransport.ts": "73ed95076c9641b6db0f5c5b7c90f9aeb57fe6e88cff72fac3b1828f18ba95b2",
       "src/core/substrate/GalxCredentialSubstrate.ts": "6b58a16f985e7d25d51d3f76fac35e245bcf8de8214192d48d91d56d0746b88b",
@@ -568,11 +567,11 @@
       "src/relay/pool-monitor.js": "19520a252d9354cae8b9fac102c275bd6e1fc07f40f0380c88d168449de8ea17",
       "src/relay/pool-protocol.ts": "c2adca4b8be88ed88a3ac23d18e9b08da515f900f7234ded362d946788291603",
       "src/relay/pool-public-response.ts": "3e16cec346748926c653c7bfa16e54a9d75a1902abaf39256ee9dd4c20e8e748",
-      "src/relay/pool-runtime.ts": "ffe42fc97bd330e1a9fe817b6a79eaa31d995418603e062fe7a5d1c277f920d8",
+      "src/relay/pool-runtime.ts": "827289c0affd67363878cd47354b24ce5d99f85d619ab36936d2ea1a0afb5006",
       "src/relay/quota-policy.ts": "2e5af1cfcb4dadbe0a03dafb3b0b417dfb35f49e36bfc39b1edf779b3bd09ed0",
       "src/relay/registry-api-reader.ts": "34d9e3f466b117f00ae5c95534c9deaa96ec61110edac7af91854e41bc245839",
       "src/relay/registry-egress-guard.ts": "693524a9a7a388bd7172d07168bf8a70ef41cf82cdde65d2abb8c2d4d1efed10",
-      "src/relay/relay-server.ts": "05d799d27fed0e1495acc586eadcdd6e72246926c8bf9ec403b778299de7b0c6",
+      "src/relay/relay-server.ts": "06561c10b491e250e48bea0eaa6a4426697104cd981909268eea4621404b2ad1",
       "src/relay/request-bulkhead.ts": "188b195b83197257dbf1448c56b9cb0a5aadd214607db322bc39a5b793464763",
       "src/relay/request-policy.ts": "6545ce0ce2e8d3e81ef8f997cc4c06de08809e53e7dec4e9d42b02632ea2da1b",
       "src/relay/shard-maintenance-store.ts": "3b7e18bf84af004f406eebe868d71c8371d5d1821454a471ec0e0615505811e4",
@@ -591,21 +590,20 @@
   },
   "database": {
     "reviewer": "Codex database maintainer",
-    "note": "Reviewed additive private activation policy, lock ordering and denied helper privileges with 115-migration fixture/apply evidence and full affected database guides.",
+    "note": "Reviewed final-chain auth regression, unchanged helper relocation, operational-schema denial, migration rollback and complete affected database/auth procedures.",
     "reviewed_at": "2026-09-16",
     "review_by": "2026-09-23",
     "evidence": {
-      "docs/knowledge/audits/2026-09-16-relay-automatic-activation-review.json": "c873b8535390f48a7031cd5d2725817d8c74285c587f98cd42baabf1b75b6ccc",
-      "post-mortem/releases/2026-09-16-relay-automatic-activation.json": "38532b6b436881c5114b3e9e424d84ba93e6937d8225755e9e04807ff2554c18"
+      "post-mortem/incidents/2026/2026-09-16-session-recovery/permission-preflight.json": "eb6c7cd4eac4ac9efd705d62886348046764eb1a23f5cb0125c14e4c56bed3df"
     },
     "files": {
       "deploy/relay-execution/supabase/migrations/20260915082628_relay_execution.sql": "fc61d7c30bdd57706ffb4212788741302760722e7285c25c9b4cb93d629b137e",
       "deploy/relay-execution/supabase/rollbacks/20260915082628_relay_execution.down.sql": "303c01dd288472cccc9eeee706be45c3c93da44fb98393b7bbe86429a85a2b45",
       "docs/MIGRATION_GUIDE.md": "5eda22f2dd90f91d8859d14b0c857ba11ed7babc28c0709e81376160c46d3c59",
-      "docs/SUPABASE_PARANOID_ARCHITECTURE_SPEC.md": "66534573ac954318c87f02fa4299f5caefae40a9650ac08594f339201a211b72",
+      "docs/SUPABASE_PARANOID_ARCHITECTURE_SPEC.md": "652e51cdd6ce0f2b8d87825cb4f224744dc83f5ef755d7b4b8b4f7bcb83574d5",
       "docs/maintainers/FREE_GENERATION_QUOTA.md": "e43d24867079c13c8437b7002d8730a6bb954c321437716b4185f8c94c6d6249",
       "docs/maintainers/MULTI_TENANT_SHARD_AND_KEY_ROTATION.md": "47c4456689c07175b566a9813ff75e9b707a124c44082b7b602dad059b769a52",
-      "docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md": "8331409f32a4a87d8103d5656d62aa9d91ff5c630ab9ed4213481320bd5b572a",
+      "docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md": "468dedfb3231410bd5f7ee88a4a57dbe08aff5fa0e99cf113a19df30846988bb",
       "docs/reference/relay-account-management.md": "44fbf4cb10bae4e85d1dbcaea32512fbd17eb483c17bbe1196eb3dd4938cd4bb",
       "scripts/apply-manual-desktop-enrollment.ts": "97f5ef7377b6eaca4760fe0e2a02f5f611bdcffb2cd46800313b710665bc4975",
       "scripts/check-relay-account-foundation.ts": "e9beb3e6f400269583c64ff265801778f25b04f6a3021ffe9734f41986014c12",
@@ -616,7 +614,7 @@
       "scripts/run-supabase-integration.ts": "500a2830ee068af3d0e23e9c191e61fd7ef72c075479aae78cde6418abcb0b47",
       "scripts/set-relay-service-gates.ts": "18ce55ca864eebe1a0f5ef13a0c0416e28548e2f300be2b04d6bb811b80c46df",
       "scripts/setup-relay-services.ts": "7c592c0b38d6be2b72ff16e2c504a76ef0ce90cf0ec488202554b5bdb6ce5916",
-      "scripts/test-account-session-db.ts": "436c1540c1fd23b5ca4feb11f826d6c2a69d89698843eb3b1b9066d86b4dcab3",
+      "scripts/test-account-session-db.ts": "e0fd7cae653565106f331f45471292564d09b944bc28f473e0e267732a3f453f",
       "scripts/test-manual-desktop-shards-db.ts": "fb1568130b55effb1db774851033934e0039b2256adf1be593bae9657093bd50",
       "scripts/test-relay-account-foundation-db.ts": "c2d569655707055b780dd12c691d9c46928acb08b839d59d8fe742773cda9caa",
       "scripts/test-relay-account-inventory.ts": "3b7e22dc3cbb24b0424a7d7f695ae601c8c5a45cbcd254a0db13defe7429710c",
@@ -781,6 +779,7 @@
       "supabase/migrations/20260916003207_billing_canonical_returns.sql": "c9623a431e8cf114b8aceea6a33ed95ab52460d52ea22f639a4901010ed2bcf0",
       "supabase/migrations/20260916013944_relay_connection_lifecycle.sql": "367e42543e8eb790873a5708a5bee9126a2407b64ea6ba1a6977ef672282a5fc",
       "supabase/migrations/20260916040459_relay_automatic_activation.sql": "04974bd334a8d11ec64dbb967a8d8b2b29a30d23f4019690d7e9727b22674218",
+      "supabase/migrations/20260916161120_isolate_account_session_lookup.sql": "7b50f46b7fca6b75f2bf996e108696c033fe9365fdc10485381793a17a88e171",
       "supabase/rollbacks/20260822000001_galxai_schema_core.down.sql": "d1267f3f89a7a0af12716a70167f615be1e904bf933e348a1173305cd5f2fe83",
       "supabase/rollbacks/20260822000002_galxai_schema_apex.down.sql": "df36655d564c6d6557d4461294ed2a502ad57adf799037c00a68481b809ffed9",
       "supabase/rollbacks/20260822000003_galxai_user_sessions_auth.down.sql": "4f3012db038b48387290b8d64638fe7aded774d8bdde88cfe683f01f1988adbc",
@@ -895,17 +894,17 @@
       "supabase/rollbacks/20260915191404_relay_account_management.down.sql": "c03560cecc80ba4411b63a96fac8dc8377ad28c16fa1538b582167b21be0d33d",
       "supabase/rollbacks/20260916003207_billing_canonical_returns.down.sql": "5008b35e2f90db19b9be2a1cdfe4d9289080031d8e3b48693cccd3ee45ed241a",
       "supabase/rollbacks/20260916013944_relay_connection_lifecycle.down.sql": "27936e9044f391c12a8bb8b8817348e3a44e0c0b75c7146f70e5571ffa44b338",
-      "supabase/rollbacks/20260916040459_relay_automatic_activation.down.sql": "4fedbf26f9c051c3bf46dff91f20a9d4d92eb58eb3a7675f86348a3bed284479"
+      "supabase/rollbacks/20260916040459_relay_automatic_activation.down.sql": "4fedbf26f9c051c3bf46dff91f20a9d4d92eb58eb3a7675f86348a3bed284479",
+      "supabase/rollbacks/20260916161120_isolate_account_session_lookup.down.sql": "6c42297624aaad9942fb0589e46baf9bb1b71239218df041f8a1aa97511e52b2"
     }
   },
   "delivery": {
-    "reviewer": "Codex / billing migration acceptance",
-    "note": "Reviewed the updated deployment guide against exact-target migration application and readback: schema prerequisite applied, original payment contracts and permissions retained, hosted application acceptance still separate. Runtime source and prior local validation are unchanged.",
+    "reviewer": "Release operator",
+    "note": "Reviewed deployment configuration guide for independent Premium image connection and tunnel settings alongside full isolated relay mode.",
     "reviewed_at": "2026-09-16",
     "review_by": "2026-09-23",
     "evidence": {
-      "post-mortem/releases/2026-09-16-billing-migration.json": "ad608d4a7d9e2727d65b36939e62c4dce3d92bb8ef239191e54f905e3b3683ff",
-      "post-mortem/releases/2026-09-16-billing-modernization-semantic-review.json": "5f5dea07a824a7b0de64ff4ee8ce1276efcc91861ac8428aa00f429079684e6d"
+      "post-mortem/releases/2026-09-16-premium-image-connection.json": "c842c18db56580e63462f4db26d6729647ded802cc3b8dceb96f10a783751ff9"
     },
     "files": {
       ".dockerignore": "fb4dc7ef84e7f36c5bfed0f267187a022bbb61e66dd26060295b133e08fa74c5",
@@ -917,7 +916,7 @@
       "Dockerfile": "29d2a98ee3575fad57064b78b5e3a383a0ab6f2bef203d9e8f10901f8440a603",
       "docs/CLOUDFLARE_STRATEGY.md": "ad10a4f66300e05c56321cde7844e272d1a7812338d6732e361a7f26c27c4cef",
       "docs/DEPLOYMENT.md": "3ba1bfb1276b3f1b7133dc181bb1d8a143bf676107a84c0820d82e4f507de60a",
-      "docs/VERCEL_DEPLOYMENT.md": "8948d5be8d2d055b0bacf54ce4dd3335deb5e80a0046dcc960baa683dfcb4a9a",
+      "docs/VERCEL_DEPLOYMENT.md": "354498bf36ccf02ad91b1e647af7bca611827bb887231ce7a928f150013453c4",
       "docs/VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md": "372aaf2d9e58313565985c44731e876608873670cebbb9d342d5e47883c0e3b1",
       "docs/maintainers/CLOUDFLARE_EDGE_MESH_MAINTAINER_RUNBOOK.md": "15571a03c6ce52400aea457f4797ca0ebc273892563c81c4c137074a6a822aa0",
       "docs/playbooks/02-deployment-and-release.md": "81e9a3764f54d92b728b18e6bc91864b9d45a9edf1371250f76a9ff6bc640246",
@@ -1401,13 +1400,12 @@
     }
   },
   "client-efficiency": {
-    "reviewer": "Codex security/access maintainer",
-    "note": "Reviewed final source/guide contracts for callback isolation, synchronous fencing, resume lifecycle and ordinary-login cookie propagation. Prior dated evidence is retained; broad fingerprints do not certify unrelated modules or live acceptance.",
+    "reviewer": "Codex product maintainer",
+    "note": "Reviewed shared workspace regression test and complete request-efficiency guide against unchanged one-authentication bootstrap and browser scheduler; no budget changes.",
     "reviewed_at": "2026-09-16",
     "review_by": "2026-09-23",
     "evidence": {
-      "post-mortem/incidents/2026/2026-09-16-session-recovery/second-pass-verification.json": "e7401a7c9906b72e4087ee366143c6223a1306dc702deb1cb39cb9c7e2d857be",
-      "post-mortem/incidents/2026/2026-09-16-session-recovery/entry-refresh-verification.json": "f23950cddbcca6d0b765d4bbca31d2773c5a467667bd1cb0087defcca41ef2d8"
+      "post-mortem/incidents/2026/2026-09-16-session-recovery/sites-cookie-efficiency-review.json": "c446e6d09d887419b0b48644ed55a73e4f28d39ea4972b27241e3e15392a0a47"
     },
     "files": {
       "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md": "5eb65f39a725934f807a7373995b33399893cad2a8a5455e74d6195aadd8a57b",
@@ -1417,7 +1415,7 @@
       "docs/maintainers/readable-urls.md": "f04fe2f7d2752ceef765feb24a2f2a29fedee3b526a3291d114dbfdaceae1a40",
       "scripts/test-public-reading.ts": "652b7b210a1d79d83c8bc9e6c38468410ad6a8f36c1f2f778c0f9a55192ca4d3",
       "scripts/test-request-efficiency.ts": "2a004bc34569fb72e40b2dde1e9567674bea10365fe7134459bfa275eb56a591",
-      "scripts/test-sites-workspace.ts": "89fc880ca7e6fb211ac2214ed75bd1a222d03dc33dae9344731641fee8e3ff6c",
+      "scripts/test-sites-workspace.ts": "08af95908269446e4fe6590619e7180d5b41575deb0a3c2a6797c2127c873899",
       "scripts/verify-free-generation-ui.mjs": "a03011864866e4d172a07d67f185fcbd996df3c5347fc9338825719793ddbdbd",
       "scripts/verify-homepage-ui.mjs": "3b02e03cbdd299ed58b82ad9c947140e389e4eb5925bab30660bfaf517caaa07",
       "scripts/verify-image-library-scale-ui.ts": "0e7003e1f256f99f28c953537b16044b50678c700b496c53d47f1b0104ff23cc",

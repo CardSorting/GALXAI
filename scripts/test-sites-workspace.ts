@@ -11,6 +11,9 @@ import { FreeGenerationGateError } from '../src/lib/billing/free-generation-gate
 import { FreeQuotaError } from '../src/lib/billing/free-generation-quota';
 import { SiteDomainError } from '../src/lib/sites/domains';
 import { publishedSiteProxy, PUBLISHED_SITE_HEADERS } from '../src/lib/sites/published-proxy';
+import { SessionAccessError, type SessionCookie } from '../src/lib/auth/session-http';
+import { NextRequest } from 'next/server';
+import { requireAccountIdentity } from '../src/lib/auth/accountIdentity';
 const id='e6581c35-7a8d-4c01-a630-a3c8e6f9531b',operation='93cf1b29-93f8-4a1c-84d4-a39fe9534d43';
 const document={schema_version:1 as const,title:'Daylight',summary:'A calmer week.',sections:[{heading:'Plan together',body:'Make room for focused work.'}]};
 const row=():WorkspaceRow=>({id,user_id:'alice',title:'Daylight',revision:0,document:null,messages:[],archived:false,updated_at:new Date(),operation_id:null,operation_brief:null,operation_started_at:null});
@@ -22,7 +25,7 @@ function fixture(){
     begin:async(owner:string,site:string,revision:number,op:string,brief:string)=>{await repo.get(owner,site);if(current.operation_id||revision!==current.revision)throw new WorkspaceError(409);current={...current,operation_id:op,operation_brief:brief,operation_started_at:new Date()};return current;},
     finish:async(_owner:string,_id:string,op:string,doc:any,message:string)=>{if(current.operation_id===op)current={...current,document:doc||current.document,operation_id:null,operation_brief:null,operation_started_at:null,revision:current.revision+1,messages:[{id:op,role:'assistant',text:message}]};return current;},
     create:async()=>current,update:async()=>current};
-  const handle=sitesWorkspaceRoute({authenticate:async request=>{const bearer=request.headers.get('authorization');if(bearer!=='Bearer alice'&&bearer!=='Bearer bob')throw new Error('private credentials');return{id:bearer.slice(7)};},repository:()=>repo as any,
+  const handle=sitesWorkspaceRoute({authenticate:async request=>{const bearer=request.headers.get('authorization');if(bearer!=='Bearer alice'&&bearer!=='Bearer bob')throw new SessionAccessError(401);return{id:bearer.slice(7)};},repository:()=>repo as any,
     requireAccess:async()=>{},prepare:async()=>({generate:async(op,brief,previous)=>{dispatches++;assert.equal(op,`${id}:${operation}`);assert.equal(brief,'Build a page');assert.equal(previous,current.document);
       if(mode==='uncertain')throw new Error('upstream private diagnostics');if(mode==='funds')throw new FairUsageError(429,'account_share',10);
       return{text:JSON.stringify(mode==='invalid'?{...document,internal:'private'}:document),completed:true};}}),
@@ -30,6 +33,41 @@ function fixture(){
   return{handle,repo,current:()=>current,dispatches:()=>dispatches,reads:()=>reads,setMode:(next:string)=>mode=next};
 }
 function request(body?:unknown,authorization='Bearer alice',query=''){return new Request('https://galx.ai/api/sites/workspace'+query,{method:body?'POST':'GET',headers:{authorization,'Content-Type':'application/json',cookie:'admin=true'},...(body?{body:JSON.stringify(body)}:{})});}
+
+test('verified cookie workspace entry and mutations preserve refresh, origin checks and unavailable status',async()=>{
+  process.env.NEXT_PUBLIC_SUPABASE_URL='https://auth.example.test';
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY='sb_publishable_fixture';
+  const originalFetch=globalThis.fetch, f=fixture();let active:boolean|null=true, writes=0, authCalls=0;
+  const token=`eyJhbGciOiJIUzI1NiJ9.${Buffer.from(JSON.stringify({sub:'alice',exp:4102444800})).toString('base64url')}.fixture`;
+  const cookie=`sb-auth-auth-token=base64-${Buffer.from(JSON.stringify({access_token:token,refresh_token:'fixture',expires_at:1,user:{id:'alice'}})).toString('base64url')}`;
+  globalThis.fetch=async input=>{
+    authCalls++;const url=String(input);
+    if(url.includes('/auth/v1/token'))return Response.json({access_token:token,refresh_token:'rotated',expires_in:3600,token_type:'bearer',user:{id:'alice'}});
+    if(url.includes('/auth/v1/user'))return Response.json({id:'alice',email:'alice@example.test',email_confirmed_at:'2026-09-16'});
+    assert(url.endsWith('/fn_account_session_active'));
+    return active===null?Response.json({error:'PRIVATE_AUTH_DIAGNOSTIC'},{status:503}):Response.json(active);
+  };
+  const handle=sitesWorkspaceRoute({
+    authenticate:async request=>{let cookies:SessionCookie[]=[];const identity=await requireAccountIdentity(request as NextRequest,changes=>{cookies=changes;});return{id:identity.id,cookies};},
+    repository:()=>({...f.repo,create:async()=>{writes++;return row();}}) as any,
+    requireAccess:async()=>{},prepare:async()=>({generate:async()=>({text:'',completed:false})}),recover:async()=>({text:'',completed:false}),
+  });
+  const req=(method='GET',headers:Record<string,string>={},query='')=>new NextRequest('https://galx.ai/api/sites/workspace'+query,{method,headers:{cookie,...headers},...(method==='POST'?{body:JSON.stringify({action:'create',id,title:'Saved Site'})}:{})});
+  try {
+    const success=await handle(req());assert.equal(success.status,200);assert.match(success.headers.get('set-cookie')||'',/sb-auth-auth-token=base64-/);
+    assert.doesNotMatch(await success.text(),/PRIVATE_AUTH|access_token|refresh_token/);
+    for(const headers of [{},{origin:'https://evil.test'},{origin:'https://galx.ai','sec-fetch-site':'same-site'}]){
+      const calls=authCalls;assert.equal((await handle(req('POST',{'content-type':'application/json',...headers}))).status,403);assert.equal(authCalls,calls);
+    }
+    assert.equal(writes,0);
+    assert.equal((await handle(req('POST',{'content-type':'application/json',origin:'https://galx.ai'}))).status,200);assert.equal(writes,1);
+    const ownerDenial=await handle(req('GET',{},'?id=00000000-0000-4000-8000-000000000000'));assert.equal(ownerDenial.status,404);assert.match(ownerDenial.headers.get('set-cookie')||'',/sb-auth-auth-token/);
+    active=null;const unavailable=await handle(req());assert.equal(unavailable.status,503);assert.deepEqual(await unavailable.json(),{error:{code:'site_unavailable'}});assert.match(unavailable.headers.get('set-cookie')||'',/sb-auth-auth-token/);
+    active=false;assert.equal((await handle(req())).status,401);
+    assert.equal((await handle(new NextRequest('https://galx.ai/api/sites/workspace'))).status,401);
+    assert.equal((await handle(req('GET',{authorization:'invalid'}))).status,401);
+  } finally {globalThis.fetch=originalFetch;}
+});
 
 test('free workspace admission enforces quota before dispatch and preserves ambiguous work',async()=>{
   for(const mode of ['quota','paused','busy','deferred','unknown','not_started']){

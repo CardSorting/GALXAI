@@ -27,3 +27,9 @@ Evidence: [September 13 recovery](../incidents/2026/2026-09-13-image-generation/
 An empty optional sliding-window object must project as absent; otherwise undefined arithmetic denies otherwise usable accounts. Expired credentials must not win selection ahead of usable candidates. The database remains authoritative for the resulting lease and all configured limits. A proven pre-dispatch rejection persists only `generation_not_started`; generic failed historical receipts are not retroactively reclassified.
 
 If application admission is repaired but generation is still unavailable, inspect the independent registry/capability boundary. Partial I/O reservations can starve cold-read recovery by consuming every small refill. The guard now requires the complete reservation before I/O; see [registry recovery](../../docs/RELAY_VNEXT_RUNBOOK.md#registry-reservation-recovery). Never reset counters, remove journals or widen permissions as a workaround.
+
+## FM-IMG-005 — Premium connection or observation missing
+
+A ready Premium runtime does not connect the hosted application. Empty production origin/key settings produce unknown availability; a disconnected tunnel blocks reachability. The former pool check called a worker availability path that was absent, so it reported false even after successful synthesis. Read in-process image evidence directly and preserve unknown for absent/expired evidence. The independent application image switch must select Premium for both observation and dispatch without a legacy/Standard fallback.
+
+Transport success is not durable image completion. The Premium branch must share the existing owned image persistence and library flush before completing its receipt. Regression coverage includes direct engine evidence, no GET generation, image-only routing with no Standard config, invalid configuration, sanitation, legacy-admission bypass and persisted owned asset IDs. Preserve original ambiguous receipts.

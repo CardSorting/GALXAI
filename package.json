@@ -297,7 +297,7 @@
     "test:relay:guardian": "python3 scripts/test-relay-controller-supervisor.py",
     "test:relay:launcher": "python3 scripts/test-relay-launcher-recovery.py",
     "test:relay:docker": "node --import tsx scripts/test-relay-federation-docker.ts",
-    "test:image:security": "node --import tsx --test scripts/test-image-public-http.ts scripts/test-image-availability.ts scripts/test-image-library-http.ts scripts/test-public-information-boundary.ts scripts/test-image-retry-contract.ts scripts/test-auth-identity-boundary.ts scripts/test-workspace-auth.ts scripts/test-auth-entry.ts",
+    "test:image:security": "node --import tsx --test scripts/test-image-public-http.ts scripts/test-image-availability.ts scripts/test-image-premium-routing.ts scripts/test-image-library-http.ts scripts/test-public-information-boundary.ts scripts/test-image-retry-contract.ts scripts/test-auth-identity-boundary.ts scripts/test-workspace-auth.ts scripts/test-auth-entry.ts",
     "test:yaml:security": "node --test scripts/test-yaml-security.mjs",
     "test:egress:transport": "node --import tsx --test scripts/test-registry-api-egress.ts scripts/test-ci-build.mjs scripts/test-request-efficiency.ts scripts/test-sites-workspace.ts",
     "free:policy": "node --env-file-if-exists=.env.local --import tsx scripts/manage-free-generation.ts",

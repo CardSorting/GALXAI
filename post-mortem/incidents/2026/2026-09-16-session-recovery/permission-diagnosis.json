@@ -1,0 +1,24 @@
+{
+  "observed_at": "2026-09-16T16:14:00.546704+00:00",
+  "deployment": "dpl_351gC1moJY555kDfF9Lv9nhHgVqW",
+  "revision": "b7de3874a058495d687835acd1d2611bd258a2c2",
+  "browser": "Existing Chrome session reaches the exact reconnect document at /images. No credentials read or changed.",
+  "configuration": "Production public Auth keys pass the read-only settings check.",
+  "migration_history": {
+    "applied": 115,
+    "pending_before_repair": 0
+  },
+  "database": {
+    "authenticated_private_schema_usage": false,
+    "authenticated_public_lookup_execute": true,
+    "authenticated_private_lookup_execute": true,
+    "authenticated_session_table_select": false,
+    "lookup_error_code": "42501",
+    "lookup_error": "permission denied for schema private"
+  },
+  "cause": "Manual-desktop and central-foundation migrations revoked authenticated private-schema usage required by the earlier account-session invoker wrapper.",
+  "test_gap": "The session database fixture replayed the historical liveness migration before its first assertion, restoring the lost grant and masking the final-chain regression.",
+  "reproduction": "Removed the masking replay: disposable complete-chain lookup fails with the same 42501.",
+  "repair": "Move the unchanged owner-bound definer into a dedicated non-exposed galx_account_auth schema; retarget the public invoker wrapper and preserve operational schema denial.",
+  "scope": "No account/session records, credentials, function owner/body, app assets or authorization predicates changed."
+}

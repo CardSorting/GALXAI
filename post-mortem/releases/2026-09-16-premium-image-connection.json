@@ -1,0 +1,53 @@
+{
+  "classification": "private",
+  "observed_at": "2026-09-16T16:45:38.885845+00:00",
+  "correction": "Legacy VM_RELAY_URL/KEY are sensitive Vercel fields. Empty values returned by API/CLI do not establish absent production values. Earlier preflight inference of empty settings is superseded; legacy tunnel down and zero connections were directly observed. Premium application settings were not configured before this change.",
+  "verified": [
+    "New Premium image origin/key and independent flag configured for production",
+    "Premium local image succeeded; fresh runtime reports unobserved capability null after restart",
+    "Image tunnel live; invalid credentials denied and unrelated paths return404",
+    "69 installed VM/TLS/authorization checks passed",
+    "Original Premium two unknown settled executions retained; no active jobs at replacement; Standard container unchanged"
+  ],
+  "runtime_installation": {
+    "classification": "private",
+    "at": "2026-09-16T16:41:26.620Z",
+    "beforeContainer": "feefc65bd219d59b78f660346e212fa398a1416b913fd5897d191c0067a0ff38",
+    "standardContainer": "5d8a708314baa787b3ce0ee2731ddb9b835e7161852ba941effd0361514d20b8",
+    "executionsBefore": [
+      {
+        "count": 3,
+        "settled": true,
+        "state": "completed",
+        "success": true
+      },
+      {
+        "count": 2,
+        "settled": true,
+        "state": "unknown",
+        "success": false
+      }
+    ],
+    "volumesRetained": true,
+    "accountsChanged": false,
+    "gatesChanged": false,
+    "afterContainer": "6fef86631c60f34bbfca78dbfff7f117b4fc4ba9c744ead0e425ed69e14e3b52",
+    "standardUnchanged": true,
+    "completedAt": "2026-09-16T16:42:28.489Z"
+  },
+  "tunnel": {
+    "classification": "private",
+    "at": "2026-09-16T16:36:15.912Z",
+    "hostname": "images-service.galx.ai",
+    "tunnelId": "3df90220-304b-4771-8be8-4569bc147b4e",
+    "connector": "galx-image-tunnel",
+    "image": "sha256:51c9cefcb4569df44e1ad403ab1d3d8065aa8e84339bcfc6aee75502e1140339",
+    "paths": [
+      "/v1/images/availability",
+      "/v1/images/generations"
+    ],
+    "inferenceAuthorizationRequired": true,
+    "legacyIngressPreserved": true,
+    "monitorExposure": false
+  }
+}

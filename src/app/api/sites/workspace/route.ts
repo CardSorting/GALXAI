@@ -1,5 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { requireAccountIdentity } from '@/lib/auth/accountIdentity';
+import type { SessionCookie } from '@/lib/auth/session-http';
 import { getPostgresPool } from '@/lib/db/postgres';
 import { SitesWorkspaceRepository, WorkspaceError } from '@/lib/sites/workspace-repository';
 import { sitesWorkspaceRoute } from '@/lib/sites/workspace-route';
@@ -27,7 +28,11 @@ const handle = sitesWorkspaceRoute({
     const domain=await new SiteDomainRegistry(pool).reserve(owner,id,username,row.title);
     return repo.publish(owner,id,revision,managedDomainPlan(domain.hostname,id,process.env.GALX_SITES_HOSTING_CNAME || ''));
   },
-  authenticate: request => requireAccountIdentity(request as NextRequest),
+  authenticate: async request => {
+    let cookies: SessionCookie[] = [];
+    const identity = await requireAccountIdentity(request as NextRequest, changes => { cookies = changes; });
+    return { id: identity.id, cookies };
+  },
   repository: () => { const pool = getPostgresPool(); if (!pool || pool.waitingCount >= 25) throw new WorkspaceError(); return new SitesWorkspaceRepository(pool); },
   prepare: async (owner, signal) => {
     const config = includedSitesConfiguration();

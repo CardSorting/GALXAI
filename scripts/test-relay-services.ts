@@ -126,7 +126,9 @@ test('Premium image alias needs a grant and performs no background image probe',
   globalThis.fetch=(async(url:any,options:any)=>{if(String(url).startsWith('https://chatgpt.com/')){assert.equal(admitted,1);providerCalls++;return Response.json({data:[{b64_json:image.toString('base64'),private:'must-disappear'}]});}return original(url,options);}) as typeof fetch;
   const directory=await mkdtemp(path.join(tmpdir(),'premium-engine-'));
   const engine=new GalxaiRelayServer({host:'127.0.0.1',port:0,assignedShardId:'own',assignedShard:{id:'own',accessToken:'fixture-token',accountId:'fixture-account'},registryEnabled:false,discoverHostCredentials:false,apiKeys:[key('premium-inference')],adminApiKeys:[key('premium-admin')],maxUpstreamRetries:0,drainTimeoutMs:100,capabilityDiscovery:async()=>['fixture'],codexImageToolAlias:true,stateSnapshotPath:path.join(directory,'state.json'),executionPolicy:{pool:'premium',admit:async()=>{admitted++;return{signal:new AbortController().signal,assert:()=>{},complete:async()=>{settled++;}};}}});
-  try{await engine.start();assert.equal(providerCalls,0);const response=await original(`http://127.0.0.1:${engine.listeningPort()}/v1/images/generations`,{method:'POST',headers:{Authorization:`Bearer ${key('premium-inference')}`,'Content-Type':'application/json','Idempotency-Key':'image-one'},body:JSON.stringify({model:'gpt-image-2',prompt:'test',response_format:'b64_json'})});assert.equal(response.status,200,await response.clone().text());assert.equal(providerCalls,1);assert.equal(admitted,1);assert.equal(settled,1);assert(!(await response.text()).includes('must-disappear'));}
+  try{await engine.start();assert.equal(engine.imageAvailability(),null);assert.equal(providerCalls,0);const response=await original(`http://127.0.0.1:${engine.listeningPort()}/v1/images/generations`,{method:'POST',headers:{Authorization:`Bearer ${key('premium-inference')}`,'Content-Type':'application/json','Idempotency-Key':'image-one'},body:JSON.stringify({model:'gpt-image-2',prompt:'test',response_format:'b64_json'})});assert.equal(response.status,200,await response.clone().text());assert.equal(providerCalls,1);assert.equal(admitted,1);assert.equal(settled,1);assert(!(await response.text()).includes('must-disappear'));assert.equal(engine.imageAvailability(),true);
+    const registry=(engine as any).capabilities; const ticket=registry.beginObservation('own','image:gpt-image-2');registry.observe(ticket,'image:gpt-image-2','NOT_AUTHORIZED');assert.equal(engine.imageAvailability(),false);assert.equal(engine.accountAvailability('image:gpt-image-2',true).eligible,false);
+    const record=registry.shards.get('own');record.models.find((m:any)=>m.model==='image:gpt-image-2').expiresAtMs=Date.now()-1;assert.equal(engine.imageAvailability(),null);assert.equal(engine.accountAvailability('image:gpt-image-2',true).eligible,true);assert.equal(providerCalls,1);}
   finally{globalThis.fetch=original;await engine.stop();await rm(directory,{recursive:true,force:true});}
 });
 
@@ -193,4 +195,19 @@ test('application router delegates without reading account credentials or acquir
 test('manual registration reports the required account class without forwarding remote error text',async()=>{
  const central=new CentralClient('http://127.0.0.1:1',key('review'),{pool:'standard',installationId:randomUUID()},(async()=>Response.json({error:{code:'account_type_mismatch',message:'private-provider-secret'}},{status:422})) as typeof fetch);
  await assert.rejects(central.call('/registrar/review'),(error:any)=>error.status===422&&error.message.includes('free account')&&!error.message.includes('private-provider-secret'));
+});
+
+
+test('Premium availability reads actual engine evidence without worker HTTP or provider calls',async()=>{
+ const {PoolRuntime}=await import('../src/relay/pool-runtime.js');
+ const runtime=new PoolRuntime({central:{identity:{pool:'premium'}}} as any,key('availability'),'/unused');
+ let observed:boolean|null=null;
+ (runtime as any).refreshedAt=Date.now();(runtime as any).workers.set('own',{engine:{credentialRejected:()=>false,imageAvailability:()=>observed},account:{models:['fixture']}});
+ const origin=await listen(runtime.server);
+ try {
+  for(const value of [null,true,false] as const){observed=value;const response=await fetch(origin+'/v1/images/availability',{headers:{Authorization:`Bearer ${key('availability')}`}});assert.equal(response.status,200);assert.deepEqual(await response.json(),{available:value});}
+  assert.equal((await fetch(origin+'/v1/images/availability')).status,401);
+  assert.equal((await fetch(origin+'/v1/images/availability',{headers:{Authorization:`Bearer ${key('availability')}`,Origin:'https://customer.invalid'}})).status,401);
+  (runtime as any).refreshedAt=0;const stopped=await fetch(origin+'/v1/images/availability',{headers:{Authorization:`Bearer ${key('availability')}`}});assert.deepEqual(await stopped.json(),{available:false});
+ }finally{await close(runtime.server);}
 });

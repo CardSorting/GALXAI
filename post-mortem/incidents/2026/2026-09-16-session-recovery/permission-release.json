@@ -1,0 +1,24 @@
+{
+  "observed_at": "2026-09-16T16:21:03.622789+00:00",
+  "migration": "20260916161120_isolate_account_session_lookup",
+  "target": "main application project",
+  "deployment_unchanged": "dpl_351gC1moJY555kDfF9Lv9nhHgVqW",
+  "history": {
+    "applied": 116,
+    "pending": 0,
+    "remote_only": 0
+  },
+  "grants": {
+    "authenticated_private_usage": false,
+    "anonymous_private_usage": false,
+    "authenticated_lookup_execute": true,
+    "authenticated_isolated_usage": true,
+    "authenticated_isolated_create": false,
+    "anonymous_lookup_execute": false,
+    "authenticated_session_table_select": false
+  },
+  "security_advisors": "No error-level issues before or after",
+  "live_http_evidence": "post-mortem/incidents/2026/2026-09-16-session-recovery/permission-live-http.json",
+  "browser": "Existing session recovered with Try again; Image Studio and owned library rendered with Account and Sign out. No credentials replaced.",
+  "remaining_finding": "Sites workspace API rejected browser cookie authentication with an unconditional bearer precheck; separately corrected and awaiting application deployment."
+}

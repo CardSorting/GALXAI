@@ -15,7 +15,7 @@ The new runtime is a fixed Premium or Standard service, with its own inference k
 | `GET /v1/models` | Own inference key and delegated tenant; available assigned text model IDs |
 | `POST /v1/chat/completions` | Own inference key, tenant and idempotency key; fixed-pool admission |
 | `POST /v1/images/generations` | Premium only; explicit central image grant, sanitized artifact |
-| `GET /v1/images/availability` | Own inference key; advisory boolean, no probe; Standard reports unavailable |
+| `GET /v1/images/availability` | Own inference key; true/false observed availability, null for absent/expired image evidence, no probe; Standard reports unavailable |
 | `GET /v1/jobs/:id`, `/stream`, `/receipt` | Original tenant, account and epoch; no worker/pool migration |
 | `POST /v1/jobs/:id/cancel` | Original request context; does not establish refund or final settlement |
 | `GET /api/sites/contract` | Premium's distinct private capability key; challenged local-profile readiness, strict provider-ceiling profile unavailable; no generation |

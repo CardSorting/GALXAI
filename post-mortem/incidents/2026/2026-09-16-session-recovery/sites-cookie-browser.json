@@ -1,0 +1,19 @@
+{
+  "observed_at": "2026-09-16T16:27:46.547301+00:00",
+  "browser": "Existing Chrome account session; CUA verification",
+  "image_studio": true,
+  "owned_library": true,
+  "sites_workspace": true,
+  "observations": [
+    "Before repair /images rendered the reconnect document.",
+    "After migration Try again loaded signed-in Image Studio and the existing owned library without credential replacement.",
+    "Sites then reproduced an expired-session prompt from its bearer-only API precheck.",
+    "After deployment reload showed Account, Sign out, Sites workspace, composer and preview with no expired-session prompt.",
+    "Navigation back to Images retained the signed-in account; the recovered Image Studio remains open."
+  ],
+  "limits": [
+    "No customer sign-out, credentials, generation or publication changed",
+    "Image generation availability still shows its separately tracked unavailable state",
+    "Library was observed after the database repair; the final deployment received additional owned HTTP entry/asset checks"
+  ]
+}

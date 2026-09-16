@@ -94,7 +94,8 @@
         "scripts/verify-image-public-http.ts",
         "src/components/dashboard/GenerationGateNotice.tsx",
         "src/components/dashboard/generation-gate.module.css",
-        "src/contexts/GenerationAllowanceContext.tsx"
+        "src/contexts/GenerationAllowanceContext.tsx",
+        "scripts/test-image-premium-routing.ts"
       ],
       "guides": [
         "docs/QUEUE_SPECIFICATION.md",

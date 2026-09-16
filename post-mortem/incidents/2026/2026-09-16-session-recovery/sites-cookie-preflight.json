@@ -1,0 +1,46 @@
+{
+  "observed_at": "2026-09-16T16:21:28.097363+00:00",
+  "scope": "Browser Sites API correction; deployment pending",
+  "finding": "After database repair, the original browser authenticated successfully but Sites workspace API unconditionally rejected the cookie-only request before authenticating.",
+  "changes": "Accept server-verified cookies; retain explicit bearers and confirmed-email requirement; require same-origin mutation intent; propagate refreshed cookies; classify auth outages as 503. No public profile gains credentials.",
+  "source_sha256": {
+    "src/lib/auth/accountIdentity.ts": "fa72bba44489e6497d28f9e12827d11488035e98a79592e4ab967cb6e9148720",
+    "src/lib/auth/session-http.ts": "a4f28b771129b4ece6868421fe391af77eda2fbc20a3127f31e8102c4e1b9fcb",
+    "src/lib/sites/workspace-route.ts": "11b0ca56d9bbada14235207a1b0132c6dce6751c0c8e37d2dda52bada9448572",
+    "src/app/api/sites/workspace/route.ts": "8170dd751d58fd369fc4870f530b1343108bd4f5b95116c093b2433d711bfa80",
+    "scripts/test-sites-workspace.ts": "08af95908269446e4fe6590619e7180d5b41575deb0a3c2a6797c2127c873899",
+    "docs/maintainers/SITES_WORKSPACE.md": "3719850870966227392c12e5be6fd0fd48cbff2f8f0f65ec5f9976f65382ab8e",
+    "docs/operations/workspace-auth.md": "58f0a796e0ddc3c3180eb33f77590305ee13ec6318adb3b1fe0e005c903267c9"
+  },
+  "checks": {
+    "sites_workspace": 19,
+    "sites_conversation": 15,
+    "auth_sessions": 43,
+    "public_boundary": 43,
+    "typescript": "passed",
+    "scoped_eslint": "passed"
+  },
+  "semantic_review": {
+    "inspected": [
+      "src/lib/auth/accountIdentity.ts",
+      "src/lib/auth/session-http.ts",
+      "src/lib/sites/workspace-route.ts",
+      "src/app/api/sites/workspace/route.ts",
+      "scripts/test-sites-workspace.ts",
+      "docs/maintainers/SITES_WORKSPACE.md",
+      "docs/operations/workspace-auth.md",
+      "src/contexts/AuthContext.tsx",
+      "src/components/sites/use-sites-workspace.ts",
+      "src/lib/auth/request-session.ts",
+      "src/lib/auth/active-account-session.ts",
+      "docs/VERCEL_DEPLOYMENT.md"
+    ],
+    "conclusion": "The same account verifier remains authority; cookie presence grants nothing. Malformed bearers and cross-origin mutations fail before storage. Unknown verification errors remain unavailable and cannot trigger an expired-session recovery. Source/guide bodies, rollback and standalone bearer-only API scope are reconciled.",
+    "limits": "Bounded Sites workspace and auth contract review, not unrelated domain reimplementation."
+  },
+  "limits": [
+    "No real generation, purchase, publication or customer-session revocation",
+    "Production deployment and browser Sites acceptance pending",
+    "Standalone content/domain API contracts unchanged"
+  ]
+}

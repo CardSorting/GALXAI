@@ -7,7 +7,7 @@ Private routing contract for [central account authority and isolated pools](ARCH
 ## Selection
 
 1. The application verifies customer identity, product permission and owner scope.
-2. With `GALX_ISOLATED_RELAYS_ENABLED=1`, deployment policy chooses `GALX_TEXT_RELAY_POOL` for text, default Standard. Sites and images choose Premium. Distinct origins and keys are required.
+2. With `GALX_ISOLATED_RELAYS_ENABLED=1`, deployment policy chooses `GALX_TEXT_RELAY_POOL` for text, default Standard. Sites and images choose Premium. Distinct origins and keys are required. Alternatively, `GALX_PREMIUM_IMAGES_ENABLED=1` routes image availability and generation to Premium independently (requiring only `GALX_PREMIUM_RELAY_URL` and `GALX_PREMIUM_RELAY_KEY`) without requiring Standard or full isolated relays.
 3. The runtime rejects forbidden workloads before provider admission. Standard accepts client-owned function calling as text inference and rejects Sites, images and provider-hosted tool/image aliases; a Premium failure cannot create Standard work.
 4. Fresh central projection and execution permission determine which assigned account engines can run. Both pools use [health-aware rotation](reference/standard-relay-scheduling.md): select the least recently selected eligible account across model subsets and skip current cooldowns/full engines. Healthy Premium accounts have four slots, Standard one; recovering accounts have one probe. These are separate from the legacy load-weighted capability index.
 5. The engine persists an execution reservation, acquires the existing central account lease and binds the lease before provider I/O. Assignment, revisions, epoch, workload, cooldown and budgets must pass centrally.

@@ -3,6 +3,8 @@ import { executeRelayChat, RelayDispatchError, relayFailure } from './RelayChatT
 import { sanitizeImageArtifact, decodeImageBase64 } from '../../../lib/security/image-artifact';
 
 export const isolatedRelaysEnabled=()=>process.env.GALX_ISOLATED_RELAYS_ENABLED==='1';
+/** Images may be cut over independently, without changing text or Sites. */
+export const isolatedImagesEnabled=()=>isolatedRelaysEnabled()||process.env.GALX_PREMIUM_IMAGES_ENABLED==='1';
 /** Retrieval only: an old accepted job keeps its original configured origin and key. */
 export function receiptRelay(origin:string,current:{url:string;key:string},tenant:string) {
   if(new URL(current.url).origin===origin)return {...current,tenant:isolatedRelaysEnabled()?tenant:undefined};
@@ -16,14 +18,15 @@ const digest=(value:string)=>createHash('sha256').update(value).digest('hex');
 export function isolatedRelay(workload:'text'|'sites'|'images') {
   const selected=workload==='text'?(process.env.GALX_TEXT_RELAY_POOL||'standard'):'premium';
   if(!['premium','standard'].includes(selected))throw new RelayDispatchError('invalid_configuration');
-  const endpoints=['PREMIUM','STANDARD'].map(pool=>{
+  const pools=workload==='images'&&!isolatedRelaysEnabled()&&isolatedImagesEnabled()?['PREMIUM']:['PREMIUM','STANDARD'];
+  const endpoints=pools.map(pool=>{
     try{
       const url=new URL(process.env[`GALX_${pool}_RELAY_URL`]||'');const key=process.env[`GALX_${pool}_RELAY_KEY`]||'';
       if(url.username||url.password||url.pathname!=='/'||url.search||url.hash||!(url.protocol==='https:'||url.protocol==='http:'&&['127.0.0.1','[::1]'].includes(url.hostname))||!/^[A-Za-z0-9_-]{32,256}$/.test(key))throw Error();
       return {url:url.origin,key};
     }catch{throw new RelayDispatchError('invalid_configuration');}
   });
-  if(endpoints[0].url===endpoints[1].url||endpoints[0].key===endpoints[1].key)throw new RelayDispatchError('invalid_configuration');
+  if(endpoints[1]&&(endpoints[0].url===endpoints[1].url||endpoints[0].key===endpoints[1].key))throw new RelayDispatchError('invalid_configuration');
   return endpoints[selected==='premium'?0:1];
 }
 export async function isolatedChat(payload:Record<string,any>,tenant:string,requestKey:string,onUsage:(usage:any)=>void) {

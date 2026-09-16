@@ -24,13 +24,13 @@ The retained single-controller service still uses its existing guardian and laun
 | Central | Its own private main-project/vault config and local HTTPS proxy |
 | Premium runtime/monitor | Only Premium execution/principal/desktop config in its VM |
 | Standard runtime/monitor | Only Standard execution/principal/desktop config in its VM |
-| Application integration | Server-only isolated mode, distinct Premium/Standard origins/keys, configured text pool |
+| Application integration | Server-only full isolated mode, or independent Premium image switch; distinct pool credentials |
 
 The account contract records ownership/grant/health timing. Runtime engines execute in-process inside a fixed pool container; per-account Docker workers and `RELAY_FEDERATION_*` settings belong to the [legacy configuration](maintainers/legacy-federation-operations.md#configuration-and-bounds). Historical `staged-20260915` images are permanently closed; the service baseline and later management images have separately reviewed pins.
 
 ## Image verification
 
-Only Premium can handle image requests. Registration verifies account class and inventory; neither guarantees an image result. Availability checks are non-consuming. Perform a separately authorized, small real image request after manual registration, activation and account enablement, then decode/inspect the sanitized artifact and verify its owned product persistence. No automatic paid probe runs in isolated execution. Standard must make zero provider calls for images/Sites. Keep the existing HTTP 403 incident separate from a claim that all paid accounts are qualified.
+Only Premium can handle image requests. Registration verifies account class and inventory; neither guarantees an image result. Availability checks are non-consuming and read actual in-process evidence. Missing or expired image evidence is unknown; chat inventory does not prove denial. Perform a separately authorized, small real image request after manual registration, activation and account enablement, then decode/inspect the sanitized artifact and verify its owned product persistence. No automatic paid probe runs in isolated execution. Standard must make zero provider calls for images/Sites. Keep the existing HTTP 403 incident separate from a claim that all paid accounts are qualified.
 
 ## Production cutover checklist
 
@@ -80,7 +80,7 @@ The [dated legacy evidence](maintainers/RELAY_SESSION_VERIFICATION_20260909.md#s
 
 ## Image resilience follow-up
 
-Image receipts, library persistence and public sanitation remain separate product contracts. The new local installation has no real provider-generation acceptance yet. Use [current state](../post-mortem/CURRENT_STATE.md) and the [image incident runbook](../post-mortem/runbooks/image-generation.md) rather than replaying an earlier successful request.
+Image receipts, library persistence and public sanitation remain separate product contracts. The September 16 text qualification and subsequent Premium image qualification are separate dated observations. App routing, owned library persistence and downloads require their own release acceptance. Use [current state](../post-mortem/CURRENT_STATE.md) and the [image incident runbook](../post-mortem/runbooks/image-generation.md) rather than replaying an earlier successful request.
 
 ## Registry reservation recovery
 

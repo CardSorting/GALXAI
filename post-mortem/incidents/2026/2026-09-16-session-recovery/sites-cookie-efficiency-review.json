@@ -1,0 +1,15 @@
+{
+  "observed_at": "2026-09-16T16:21:51.027620+00:00",
+  "inspected": [
+    "scripts/test-sites-workspace.ts",
+    "src/lib/sites/workspace-route.ts",
+    "src/components/sites/use-sites-workspace.ts",
+    "docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md",
+    "docs/maintainers/SITES_WORKSPACE.md"
+  ],
+  "conclusion": "Only the existing workspace test file changes in the efficiency domain. One bootstrap and one server authentication remain; no scheduler, request budget, prefetch, mutation retry or authorization-cache changes. Existing bootstrap ownership/DTO tests and new cookie regression pass in the 19-test suite. The request-efficiency guide remains accurate.",
+  "build": "Isolated production build passed; 643 compiled/browser assets pass private-boundary scan.",
+  "limits": [
+    "No claim of quota or performance improvement; no exhaustive review of unrelated efficiency sources"
+  ]
+}

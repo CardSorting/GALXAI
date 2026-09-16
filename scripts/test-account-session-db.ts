@@ -7,7 +7,7 @@ import { SessionRepository } from '../src/lib/supabase/repositories/SessionRepos
 const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 3 });
 globalThis.__galx_pg_pool = pool;
 const owner = randomUUID(), other = randomUUID(), session = randomUUID(), second = randomUUID();
-const migration = '20260913201023_account_session_liveness';
+const migration = '20260916161120_isolate_account_session_lookup';
 let checks = 0;
 const active = async (role = 'authenticated', claims: Record<string, unknown> = { sub: owner, session_id: session, role: 'authenticated' }) => {
   const db = await pool.connect();
@@ -19,9 +19,32 @@ const active = async (role = 'authenticated', claims: Record<string, unknown> = 
 };
 try {
   const up = readFileSync(new URL(`../supabase/migrations/${migration}.sql`, import.meta.url), 'utf8');
-  await pool.query(up); await pool.query(up); checks++;
+  // Exercise the final migration chain before replaying any older migration:
+  // replaying the original liveness migration here hid later schema revocations.
   await pool.query('INSERT INTO auth.users(id) VALUES ($1),($2)', [owner, other]);
   await pool.query('INSERT INTO auth.sessions(id,user_id) VALUES ($1,$2),($3,$2)', [session, owner, second]);
+  assert.equal(await active(), true); checks++;
+  const beforeMove = (await pool.query("SELECT oid,prosrc,proowner FROM pg_proc WHERE oid='galx_account_auth.galx_account_session_active()'::regprocedure")).rows[0];
+  const migrate = async (sql: string) => {
+    const db = await pool.connect();
+    try { await db.query('BEGIN'); await db.query(sql); await db.query('COMMIT'); }
+    catch (error) { await db.query('ROLLBACK'); throw error; }
+    finally { db.release(); }
+  };
+  await migrate(up); await migrate(up); assert.equal(await active(), true); checks++;
+  for (const role of ['authenticated', 'anon']) {
+    assert.equal((await pool.query("SELECT has_schema_privilege($1,'private','USAGE') AS allowed", [role])).rows[0].allowed, false); checks++;
+  }
+  for (const role of ['authenticated', 'anon', 'service_role']) {
+    assert.equal((await pool.query("SELECT has_schema_privilege($1,'galx_account_auth','CREATE') AS allowed", [role])).rows[0].allowed, false); checks++;
+    assert.equal((await pool.query("SELECT has_table_privilege($1,'auth.sessions','SELECT') AS allowed", [role])).rows[0].allowed, false); checks++;
+  }
+  for (const role of ['anon', 'service_role']) {
+    assert.equal((await pool.query("SELECT has_schema_privilege($1,'galx_account_auth','USAGE') AS allowed", [role])).rows[0].allowed, false); checks++;
+    assert.equal((await pool.query("SELECT has_function_privilege($1,'galx_account_auth.galx_account_session_active()','EXECUTE') AS allowed", [role])).rows[0].allowed, false); checks++;
+  }
+  // Later operator hardening may revoke private schema access again.
+  await pool.query('REVOKE ALL ON SCHEMA private FROM PUBLIC, anon, authenticated');
   assert.equal(await active(), true); checks++;
   for (const claims of [{}, { sub: owner, role: 'authenticated' }, { sub: other, session_id: session, role: 'authenticated' }, { sub: owner, session_id: 'invalid', role: 'authenticated' }, { sub: owner, session_id: session, role: 'service_role' }, { sub: owner, session_id: session, role: 'authenticated', is_anonymous: true }]) {
     assert.equal(await active('authenticated', claims), false); checks++;
@@ -43,9 +66,12 @@ try {
   const functions = (await pool.query("SELECT n.nspname,p.proname,p.prosecdef,p.proconfig FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE p.proname IN ('galx_account_session_active','fn_account_session_active')")).rows;
   assert.equal(functions.length, 2); assert(functions.every(r => r.proconfig.includes('search_path=""'))); checks++;
   assert.equal(functions.find(r => r.nspname === 'public').prosecdef, false); checks++;
-  await pool.query(readFileSync(new URL(`../supabase/rollbacks/${migration}.down.sql`, import.meta.url), 'utf8'));
+  assert.equal(functions.find(r => r.nspname === 'galx_account_auth').prosecdef, true); checks++;
+  await migrate(readFileSync(new URL(`../supabase/rollbacks/${migration}.down.sql`, import.meta.url), 'utf8'));
   assert.equal((await pool.query('SELECT count(*)::int n FROM auth.sessions WHERE id=$1', [second])).rows[0].n, 1); checks++;
-  await pool.query(up); assert.equal(await active('authenticated', { sub: owner, session_id: second, role: 'authenticated' }), true); checks++;
+  await assert.rejects(active(), (error: any) => error.code === '42501'); checks++;
+  await migrate(up); assert.equal(await active('authenticated', { sub: owner, session_id: second, role: 'authenticated' }), true); checks++;
+  assert.deepEqual((await pool.query("SELECT oid,prosrc,proowner FROM pg_proc WHERE oid='galx_account_auth.galx_account_session_active()'::regprocedure")).rows[0], beforeMove); checks++;
   const native = new SessionRepository(), cold = new SessionRepository();
   const now = Date.now(), id = `sess_${randomUUID()}`, family = randomUUID();
   const record = { id, userId: owner, provider: 'openai' as const, tokenHash: 'a'.repeat(64), scopes: ['images:*'], sessionFamilyId: family, isRevoked: false, issuedAtMs: now, expiresAtMs: now + 60000, lastActiveAtMs: now, createdAt: new Date(now).toISOString(), updatedAt: new Date(now).toISOString() };

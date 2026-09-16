@@ -100,11 +100,10 @@ export class PoolRuntime {
     }
     if (req.headers.origin || !equalSecret(bearer(req),this.inferenceKey)) throw new RequestError(401,'unauthorized','Provide valid authorization.');
     if(pathname==='/v1/images/availability' && req.method==='GET') {
-      let available=false;
+      let available:boolean|null=false;
       if(this.execution.central.identity.pool==='premium'&&ready) {
-        const checks=await Promise.all([...this.workers.values()].map(async w=>{
-          try{const result=await fetch(`http://127.0.0.1:${w.port}/v1/images/availability?model=${CODEX_IMAGE_ALIAS.requestedModel}`,{headers:{Authorization:`Bearer ${w.key}`},redirect:'error',signal:AbortSignal.timeout(3000)});return result.ok&&(await boundedJson(result,1024)).available===true;}catch{return false;}
-        }));available=checks.some(Boolean);
+        const checks=[...this.workers.values()].map(w=>w.engine.imageAvailability());
+        available=checks.includes(true)?true:checks.includes(null)?null:false;
       }
       return json(res,200,{available});
     }

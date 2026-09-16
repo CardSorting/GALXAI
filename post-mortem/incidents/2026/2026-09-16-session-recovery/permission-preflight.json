@@ -1,0 +1,54 @@
+{
+  "observed_at": "2026-09-16T16:15:44.197224+00:00",
+  "scope": "Reviewed repair and isolated verification before production application",
+  "source_sha256": {
+    "scripts/test-account-session-db.ts": "e0fd7cae653565106f331f45471292564d09b944bc28f473e0e267732a3f453f",
+    "supabase/migrations/20260916161120_isolate_account_session_lookup.sql": "7b50f46b7fca6b75f2bf996e108696c033fe9365fdc10485381793a17a88e171",
+    "supabase/rollbacks/20260916161120_isolate_account_session_lookup.down.sql": "6c42297624aaad9942fb0589e46baf9bb1b71239218df041f8a1aa97511e52b2",
+    "docs/operations/workspace-auth.md": "f0707caa8d05b15c67e9f2dcdf6e2cd559cb533176a8046bb150f31de989ca5c",
+    "docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md": "468dedfb3231410bd5f7ee88a4a57dbe08aff5fa0e99cf113a19df30846988bb",
+    "docs/SUPABASE_PARANOID_ARCHITECTURE_SPEC.md": "652e51cdd6ce0f2b8d87825cb4f224744dc83f5ef755d7b4b8b4f7bcb83574d5",
+    "post-mortem/failure-modes/identity.md": "12dc716e98741f6d0c958ac013a58d4f9048ca9f34a047634cc944005e6a31f3"
+  },
+  "checks": {
+    "regression_before": "42501 reproduced on final migration chain with historical replay removed",
+    "auth_database": 45,
+    "general_database": 94,
+    "auth_sessions": 43,
+    "public_authorization_boundary": 43,
+    "static_database_integrity": "passed; zero warnings/fatal violations",
+    "production_build": "passed in isolated no-secret workspace",
+    "security_advisors_before": "No error-level findings",
+    "pending_production_migrations": [
+      "20260916161120_isolate_account_session_lookup.sql"
+    ]
+  },
+  "semantic_review": {
+    "inspected": [
+      "scripts/test-account-session-db.ts",
+      "supabase/migrations/20260916161120_isolate_account_session_lookup.sql",
+      "supabase/rollbacks/20260916161120_isolate_account_session_lookup.down.sql",
+      "docs/operations/workspace-auth.md",
+      "docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md",
+      "docs/SUPABASE_PARANOID_ARCHITECTURE_SPEC.md",
+      "post-mortem/failure-modes/identity.md",
+      "src/lib/auth/workspace-session.ts",
+      "src/lib/auth/request-session.ts",
+      "src/lib/auth/active-account-session.ts",
+      "supabase/migrations/20260913201023_account_session_liveness.sql",
+      "supabase/migrations/20260914231914_manual_desktop_shard_enrollment.sql",
+      "supabase/migrations/20260915073601_central_relay_account_foundation.sql",
+      "scripts/run-supabase-integration.ts",
+      "docs/DOCUMENTATION_POLICY.md",
+      "docs/how-to/change-with-documentation.md",
+      "docs/reference/knowledge-commands.md"
+    ],
+    "conclusion": "Same function identity, owner, body and account/session claims; no data changes or operational grants; public wrapper remains invoker. Current auth/database guide bodies cover rollout, deliberate unavailable rollback and final-chain test prevention.",
+    "limits": "Bounded auth contract review; broader fingerprint inventory is not an exhaustive audit of unrelated billing, relay or database functions."
+  },
+  "limits": [
+    "Production repair and original-browser recovery still pending",
+    "Real provider/email callbacks, physical history restoration and account switching not exercised",
+    "Initial sandbox test-server/Docker/font-fetch denials were rerun with required access; no application failures from those denials"
+  ]
+}
