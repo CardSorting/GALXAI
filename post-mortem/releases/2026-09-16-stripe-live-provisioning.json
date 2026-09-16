@@ -1,0 +1,17 @@
+{
+  "id": "2026-09-16-stripe-live-provisioning",
+  "title": "Stripe Live Infrastructure Provisioning for Developer Tier & Compute Catalog",
+  "timestamp": "2026-09-16T20:18:23Z",
+  "actor": "Release Operator",
+  "changes": [
+    "Provisioned Developer Tier ($10 USD) with $5 welcome grant + $5 match in Stripe Live mode (prod_VGxC36EN0xAnvY, price_1UGPHdIA2zQnWbn5S4U4zuO2)",
+    "Verified and synchronized all 5 prepaid compute tiers in Stripe Live mode",
+    "Updated Customer Billing Portal and production webhook subscriptions (we_1UCvKoIA2zQnWbn5HaBkRV3p)",
+    "Updated Pro plan terms validation in provision-sites-pro.ts for $200 USD ($200.00 / mo)"
+  ],
+  "verification": {
+    "test_billing_lifecycle": "18/18 passed",
+    "test_developer_preview": "10/10 passed",
+    "stripe_live_provisioning": "7 products, 7 prices provisioned/verified in live mode"
+  }
+}

@@ -1,62 +1,51 @@
 {
+  "developer_10": {
+    "productId": "prod_VGxC36EN0xAnvY",
+    "productName": "GALXAI Developer Tier — Images & Frontier OpenAI Models Pass",
+    "priceId": "price_1UGPHdIA2zQnWbn5S4U4zuO2",
+    "amountUsd": 10,
+    "totalCreditUsd": 20
+  },
   "lumi_10": {
-    "tierKey": "lumi_10",
-    "depositAmount": 10,
-    "totalCredit": 20,
-    "productId": "prod_mock_lumi_10",
-    "productName": "GALXAI LUMI Stellar Pass — OpenAI Monthly Subscription",
-    "priceId": "price_mock_lumi_10",
-    "currency": "usd",
-    "unitAmount": 1000
+    "productId": "prod_VGxC9JPRmDlmaq",
+    "productName": "GALXAI Developer Tier — Images & Frontier OpenAI Models Pass",
+    "priceId": "price_1UGPHdIA2zQnWbn5dn0ywADJ",
+    "amountUsd": 10,
+    "totalCreditUsd": 20
   },
   "starter_25": {
-    "tierKey": "starter_25",
-    "depositAmount": 25,
-    "totalCredit": 42.5,
-    "productId": "prod_mock_starter_25",
+    "productId": "prod_V9tvNOYriT9X2g",
     "productName": "GALXAI Prepaid Compute — Starter Builder Pack",
-    "priceId": "price_mock_starter_25",
-    "currency": "usd",
-    "unitAmount": 2500
+    "priceId": "price_1U9a7bIA2zQnWbn5PAtSACkj",
+    "amountUsd": 25,
+    "totalCreditUsd": 42.5
   },
   "growth_50": {
-    "tierKey": "growth_50",
-    "depositAmount": 50,
-    "totalCredit": 85,
-    "productId": "prod_mock_growth_50",
+    "productId": "prod_V9tvoq8YU3h6gr",
     "productName": "GALXAI Prepaid Compute — Growth VIP Priority Pack",
-    "priceId": "price_mock_growth_50",
-    "currency": "usd",
-    "unitAmount": 5000
+    "priceId": "price_1U9a7cIA2zQnWbn5DZLpbm6l",
+    "amountUsd": 50,
+    "totalCreditUsd": 85
   },
   "fleet_100": {
-    "tierKey": "fleet_100",
-    "depositAmount": 100,
-    "totalCredit": 180,
-    "productId": "prod_mock_fleet_100",
+    "productId": "prod_V9tvtnaGgIzEWy",
     "productName": "GALXAI Prepaid Compute — Fleet Scale Pack",
-    "priceId": "price_mock_fleet_100",
-    "currency": "usd",
-    "unitAmount": 10000
+    "priceId": "price_1U9a7cIA2zQnWbn5xuXLzGbl",
+    "amountUsd": 100,
+    "totalCreditUsd": 180
   },
   "sovereign_250": {
-    "tierKey": "sovereign_250",
-    "depositAmount": 250,
-    "totalCredit": 505,
-    "productId": "prod_mock_sovereign_250",
+    "productId": "prod_V9tvZvWXmiRwHg",
     "productName": "GALXAI Prepaid Compute — Enterprise Sovereign Pack",
-    "priceId": "price_mock_sovereign_250",
-    "currency": "usd",
-    "unitAmount": 25000
+    "priceId": "price_1U9a7dIA2zQnWbn5EapFGsYi",
+    "amountUsd": 250,
+    "totalCreditUsd": 505
   },
   "hyperscale_500": {
-    "tierKey": "hyperscale_500",
-    "depositAmount": 500,
-    "totalCredit": 1005,
-    "productId": "prod_mock_hyperscale_500",
+    "productId": "prod_V9tvtqgBuw6px9",
     "productName": "GALXAI Prepaid Compute — Hyperscale Infrastructure Pack",
-    "priceId": "price_mock_hyperscale_500",
-    "currency": "usd",
-    "unitAmount": 50000
+    "priceId": "price_1U9a7dIA2zQnWbn5N36bM3Gl",
+    "amountUsd": 500,
+    "totalCreditUsd": 1005
   }
 }

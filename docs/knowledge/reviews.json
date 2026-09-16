@@ -899,12 +899,12 @@
     }
   },
   "delivery": {
-    "reviewer": "Release operator",
-    "note": "Reviewed deployment configuration guide for independent Premium image connection and tunnel settings alongside full isolated relay mode.",
+    "reviewer": "Release Operator",
+    "note": "Stripe live infrastructure provisioned for developer tier and compute catalog",
     "reviewed_at": "2026-09-16",
-    "review_by": "2026-09-23",
+    "review_by": "2026-10-16",
     "evidence": {
-      "post-mortem/releases/2026-09-16-premium-image-connection.json": "c842c18db56580e63462f4db26d6729647ded802cc3b8dceb96f10a783751ff9"
+      "post-mortem/releases/2026-09-16-stripe-live-provisioning.json": "4b49f2cfb8e5e8b15b51ed2a4201ce805e1c32647d5f6b520ea2fdb28facd861"
     },
     "files": {
       ".dockerignore": "fb4dc7ef84e7f36c5bfed0f267187a022bbb61e66dd26060295b133e08fa74c5",
@@ -925,7 +925,7 @@
       "post-mortem/runbooks/deployment-storage.md": "056e84c5fa65ddbaeae5cbe9a09bf64a0f04cf6548fc30abe519de60028fdd3f",
       "scripts/lib/require-isolated-worker-env.ts": "0d53a207db93e611839175b68520824b8f97753607cf05d8f0bf25929c362127",
       "scripts/lib/stripe-webhook-target.ts": "a849c2441e61d6573a9fe7a9b6cad3e24bf86919cd1b5ebeeac2e5b97ab9e2db",
-      "scripts/provision-stripe-all.ts": "c9e9dc06e82dd85ef17f101cc42444117e989c5c3404590e7645afff3f7da988",
+      "scripts/provision-stripe-all.ts": "0f3bbd42d91fb80fd0f7ee77b79ac9b26ec6c178e4596627fad9aaf760c275b5",
       "scripts/test-cloudflare-workers.ts": "f3828c542d4c8010f65da62c2293da4348f6535bd4eb327d166907bb8c913e84",
       "scripts/test-stripe-webhook-target.ts": "12e7e32acacb0343d5598ca1c0569751deb4b31841f1e7668e039d7ea9b165fa",
       "scripts/verify-workspace-cache-http.mjs": "05c2e5d7dae80925862e7879172982ddcaf196cfedd8e796e924dfa48e693d8c",
@@ -1501,12 +1501,12 @@
     }
   },
   "billing": {
-    "reviewer": "maintainer",
-    "note": "Reconciled official 5-model lineup and developer access",
+    "reviewer": "Billing Maintainer",
+    "note": "Stripe live products and pro plan terms synchronized",
     "reviewed_at": "2026-09-16",
     "review_by": "2026-10-16",
     "evidence": {
-      "post-mortem/releases/2026-09-16-curated-model-lineup.json": "25c61a6bc95db00e2ea5785e210d9357e5150f6ea62ab4410d33d6005d329be2"
+      "post-mortem/releases/2026-09-16-stripe-live-provisioning.json": "4b49f2cfb8e5e8b15b51ed2a4201ce805e1c32647d5f6b520ea2fdb28facd861"
     },
     "files": {
       ".impeccable/surfaces/src-app-billing-page-tsx.md": "7b6165eb4b5c85cac4900e9070cc20da30c96d06ff12ccd21f4c0450b817bc31",
@@ -1516,8 +1516,8 @@
       "docs/runbooks/stripe-webhook-delivery.md": "84ab4f8bcca20f8fd7b422e5e8f55e41810c42e55285e68f6c818b639d70cf95",
       "next.config.ts": "732d62c008282def48f59639c1fa7b3b96a0b476156d3001ba5984f03421811a",
       "scripts/lib/stripe-webhook-target.ts": "a849c2441e61d6573a9fe7a9b6cad3e24bf86919cd1b5ebeeac2e5b97ab9e2db",
-      "scripts/provision-sites-pro.ts": "ec5c18845b35523e01282b1004b0cc09e9393ac75c49b7d4289afabe3b45c4d2",
-      "scripts/provision-stripe-all.ts": "c9e9dc06e82dd85ef17f101cc42444117e989c5c3404590e7645afff3f7da988",
+      "scripts/provision-sites-pro.ts": "74535498dac5b9f2af492d289148172d9b6e3811dd87617f640a01ad13417f84",
+      "scripts/provision-stripe-all.ts": "0f3bbd42d91fb80fd0f7ee77b79ac9b26ec6c178e4596627fad9aaf760c275b5",
       "scripts/seed-stripe-products.ts": "93f96d9fca20623981f5dcfe67b58450f1ce61678781bf0c0d5671ac41b8ad08",
       "scripts/setup-stripe-cli.ts": "bf7922cc201e5eda6c87e657cb7ad84f09cd37b3092506c4ccf38eb6b3b30be4",
       "scripts/test-billing-lifecycle.ts": "ab6a04b244a8ece0e745513efa5640fd39ad732ae8689549ab7809b6a1313d06",

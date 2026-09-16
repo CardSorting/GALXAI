@@ -96,8 +96,12 @@ async function runMasterStripeProvisioner() {
   }
 
   // Fail before product, portal or endpoint writes. Never default test delivery to production.
+  const rawUrl = process.env.NEXT_PUBLIC_APP_URL || '';
+  const appUrl = (!rawUrl || rawUrl.startsWith('http://localhost') || rawUrl.startsWith('http://127.0.0.1'))
+    ? (report.isLiveOrTest === 'live' ? 'https://galx.ai' : 'https://staging.galx.ai')
+    : rawUrl;
   const webhookOrigin = stripeWebhookProvisioningOrigin(
-    process.env.NEXT_PUBLIC_APP_URL || '', report.isLiveOrTest === 'live' ? 'live' : 'test',
+    appUrl, report.isLiveOrTest === 'live' ? 'live' : 'test',
   );
   const stripe = new Stripe(config.secretKey, {
     apiVersion: '2025-02-24.acacia' as any,
