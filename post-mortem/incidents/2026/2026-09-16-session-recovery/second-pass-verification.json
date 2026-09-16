@@ -1,0 +1,152 @@
+{
+  "observed_at": "2026-09-16T15:56:47.468815+00:00",
+  "scope": "Follow-up local working-tree audit and isolated synthetic production build; no deployment or live account mutation",
+  "base_revision": "4fc69dd72ac487a502e160f5fb5aa5a740ec2291",
+  "build_id": "reW98Xz8Q4jW2IL1b-q72",
+  "source_sha256": {
+    "src/contexts/AuthContext.tsx": "925072632aef4a44e915fb04b479b1891bcc97343072e866231f37a5127916b0",
+    "src/app/auth/callback/route.ts": "fec7f02e2f9c1933e2a82687fc4010d03cef0e7175f080ed4effe839e0c507e9",
+    "src/utils/supabase/middleware.ts": "2c66ffad4432a5f6e27d1d4d9f21da2513089fe91e71d1e4d2f1d28e11942353",
+    "scripts/test-auth-callback.ts": "9e702847fa1bb813feb9e4cf67e8ce8d96b5e50fd59430698b913f39186ac0cc",
+    "scripts/test-auth-provider-recovery.ts": "b97fb5e6c21e01fe830752e580b26208a2d96b219a8b773f1aba4702c63f83fe",
+    "scripts/verify-auth-entry-server.cjs": "71d4360267676e164301312f4c3fe2de757085cd217b4a33c79496ea094e739a",
+    "scripts/verify-workspace-auth-http.mjs": "60762ac7b192bb816834be5a96714eb45d1521bce52d9b324ad6d54add6d1e76"
+  },
+  "confirmed_findings": [
+    {
+      "severity": "P1",
+      "finding": "Old account remained visible until the deferred SDK verification timer; an old read could settle in that gap.",
+      "correction": "Credential events synchronously abort and fence old reads; different owners clear immediately.",
+      "evidence": "New old-owner-before-next-timer DOM assertion failed on the prior implementation and passes after the change."
+    },
+    {
+      "severity": "P1",
+      "finding": "PKCE exchange shared unrelated data-query circuit/rate limits and lacked an overall deadline.",
+      "correction": "Request-scoped uncached exchange under ten seconds; direct cookie-bearing redirect; no automatic mutation replay."
+    },
+    {
+      "severity": "P1",
+      "finding": "Entry middleware refreshed old credentials before callback or explicit recovery; it overwrote the callback no-referrer policy.",
+      "correction": "Exact login/signup/callback middleware bypasses old-account refresh; callback handler and middleware agree on no-referrer.",
+      "evidence": "Raw compiled HTTP exposed the referrer-policy override after route tests passed; final compiled checks pass."
+    },
+    {
+      "severity": "P1",
+      "finding": "Persisted history restoration lacked forced verification and could miss cross-tab logout markers.",
+      "correction": "Cancel reads on persisted pagehide; recheck markers and verify on pageshow, retaining the requirement while hidden."
+    },
+    {
+      "severity": "P2",
+      "finding": "Failed focus verification did not update the freshness clock, allowing repeated focus events to amplify outages.",
+      "correction": "Thirty-second focus/visibility cooldown from the last attempt; actual offline recovery can recheck immediately."
+    },
+    {
+      "severity": "P2",
+      "finding": "SDK SIGNED_OUT after failed server revocation could remove the explicit failed-sign-out recovery state.",
+      "correction": "Pending revocation retains signout_failed until explicit server-confirmed completion."
+    }
+  ],
+  "checks": [
+    {
+      "command": "npm run test:auth:sessions",
+      "passed": 43,
+      "includes": "4 callback/middleware tests, existing revocation and adversarial identity contracts"
+    },
+    {
+      "command": "GALX_JSDOM_MODULE=<isolated module> npm run test:auth:recovery",
+      "passed": 1,
+      "cases": [
+        "Strict Mode",
+        "SDK-independent hydration",
+        "shared concurrent reads",
+        "synchronous account switching",
+        "old success after account switch",
+        "old 401 after refresh",
+        "same-owner outage retention",
+        "focus burst cooldown",
+        "offline/online recovery",
+        "hidden persisted history",
+        "missed pending-logout marker",
+        "duplicate sign-out prevention",
+        "late response and SDK event after failed sign-out"
+      ]
+    },
+    {
+      "command": "npm run test:image:security",
+      "passed": 43
+    },
+    {
+      "command": "npm run test:preview-admin",
+      "passed": 6
+    },
+    {
+      "command": "npm run test:developer-preview",
+      "passed": 15
+    },
+    {
+      "command": "npx tsc --noEmit",
+      "result": "passed"
+    },
+    {
+      "command": "npx eslint src/app/auth/callback/route.ts src/contexts/AuthContext.tsx src/utils/supabase/middleware.ts",
+      "result": "passed"
+    },
+    {
+      "command": "CI=true node scripts/build-ci.mjs",
+      "result": "passed, isolated synthetic config without dotenv files"
+    },
+    {
+      "command": "node scripts/verify-workspace-auth-http.mjs http://localhost:3427",
+      "passed": 146,
+      "linked_browser_assets": 35
+    },
+    {
+      "command": "verify-post-mortem.py validate_build on isolated output",
+      "result": "passed",
+      "browser_and_rendered_assets": 643
+    }
+  ],
+  "browser_inspection": {
+    "tool": "CUA Chrome",
+    "widths": [
+      1440,
+      320
+    ],
+    "verified": [
+      "Existing synthetic valid session plus cancelled callback remains on sign-in after hydration",
+      "Safe /images/library destination retained",
+      "Authored cancellation guidance and provider/password/email entry remain available",
+      "Email-link toggle works without submission",
+      "No horizontal overflow; all inspected sign-in controls at least 44px",
+      "Rendered DOM contains no selected private markers"
+    ],
+    "screenshots": "Inspected in task conversation; no standalone screenshot artifacts retained"
+  },
+  "semantic_review": {
+    "guides": [
+      "docs/operations/workspace-auth.md",
+      "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md",
+      "docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md",
+      "docs/OAUTH_AND_TOKEN_LIFECYCLE_SPECIFICATION.md",
+      "docs/DOCUMENTATION_POLICY.md",
+      "docs/how-to/change-with-documentation.md",
+      "docs/reference/knowledge-commands.md",
+      "post-mortem/failure-modes/identity.md",
+      "post-mortem/CURRENT_STATE.md"
+    ],
+    "domains": [
+      "access",
+      "client-efficiency",
+      "knowledge"
+    ],
+    "scope": "Changed source contracts, full owning runbook, affected navigation/efficiency bodies, registry mapping and incident evidence. Unmapped impact paths are generated knowledge/incident inventories or reviewed private incident records. Broad fingerprints do not imply exhaustive unrelated-module review. ADR acceptance and prior dated evidence remain unchanged."
+  },
+  "limits": [
+    "Original initiating production service/transport failure remains uncorrelated",
+    "No deployment, database migration, provider setting change, real OAuth/email submission or account mutation",
+    "History/focus/race cases use DOM events and synthetic services; physical browser back-forward-cache eligibility, screen readers and real multi-tab provider flows require hosted acceptance",
+    "Legacy Playwright UI scripts not executed; actual UI inspection used CUA",
+    "No generation, payment or publishing"
+  ],
+  "followup": "ACT-028"
+}

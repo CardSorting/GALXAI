@@ -33,6 +33,12 @@ export function authEntryPath(destination?: string | null, mode: 'login' | 'sign
   return `/${mode}${suffix ? `?${suffix}` : ''}`;
 }
 
+/** Explicit recovery must reach the form even if an existing server session is valid. */
+export function authRecoveryPath(destination?: string | null, error?: string): string {
+  const path = authEntryPath(destination, 'login', error);
+  return `${path}${path.includes('?') ? '&' : '?'}reauth=1`;
+}
+
 function publicAuthNoticeCode(code: string): string {
   return ['session_replaced', 'signed_out', 'session_expired', 'auth_cancelled', 'auth_exchange_failed', 'no_auth_code_provided'].includes(code) ? code : 'auth_failed';
 }

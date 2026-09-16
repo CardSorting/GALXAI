@@ -305,6 +305,21 @@ test('logout preserves rotated refresh cookies when revocation is temporarily un
   } finally {admin.signOut=original;globalThis.fetch=originalFetch;resetSupabaseClients();}
 });
 
+test('profile preserves refreshed cookies when the subsequent active-session check fails', async () => {
+  const original = globalThis.fetch;
+  globalThis.fetch = async input => String(input).endsWith('/fn_account_session_active')
+    ? Response.json({ error: sentinel }, { status: 503 })
+    : String(input).includes('/auth/v1/token')
+      ? Response.json({ access_token: jwt, refresh_token: 'rotated-fixture', expires_in: 3600, token_type: 'bearer', user: { id: 'user-a' } })
+      : Response.json({ id: 'user-a', is_anonymous: false });
+  const value = 'base64-' + Buffer.from(JSON.stringify({ access_token: jwt, refresh_token: 'old-fixture', expires_at: 1, user: { id: 'user-a' } })).toString('base64url');
+  try {
+    const response = await profile(req('GET', undefined, undefined, { cookie: 'sb-auth-auth-token=' + value }));
+    assert(response.cookies.getAll().some(cookie => cookie.name.startsWith('sb-auth-auth-token') && cookie.value && cookie.value !== value));
+    await clean(response, 503);
+  } finally { globalThis.fetch = original; }
+});
+
 test('provider callback is closed before exchanging any provider credential',async()=>{
   const { POST: callback }=await import('../src/app/api/auth/oauth/callback/route');
   const { GalxOAuthManager }=await import('../src/core/auth/GalxOAuthManager');

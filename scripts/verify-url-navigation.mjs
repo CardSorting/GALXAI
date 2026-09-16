@@ -80,7 +80,7 @@ try {
     state.status = 401;
     await nav.getByRole('link', { name: 'Favorites', exact: true }).click();
     const signin = page.getByRole('link', { name: 'Sign in again', exact: true });
-    await signin.waitFor(); assert.equal(await signin.getAttribute('href'), '/login?next=/images/favorites&error=session_expired');
+    await signin.waitFor(); assert.equal(await signin.getAttribute('href'), '/login?next=/images/favorites&error=session_expired&reauth=1');
     assert.doesNotMatch(await page.locator('body').innerText(), /PRIVATE_CANARY/);
     assert.equal(state.generations, 1, 'navigation never repeats generation');
     assert.deepEqual(state.errors, []);

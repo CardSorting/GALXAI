@@ -74,7 +74,7 @@ function applySecurityHeaders(response: NextResponse, pathname: string): NextRes
   // Standard enterprise defense-in-depth headers
   response.headers.set('X-Content-Type-Options', 'nosniff');
   response.headers.set('X-Frame-Options', 'SAMEORIGIN');
-  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  response.headers.set('Referrer-Policy', pathname === '/auth/callback' ? 'no-referrer' : 'strict-origin-when-cross-origin');
   response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
 
   // Route security classification & zero-cache enforcement for private workspace surfaces
@@ -131,6 +131,13 @@ export const updateSession = async (request: NextRequest) => {
     result.headers.set('Cache-Control', 'private, no-store');
     result.headers.set('X-Robots-Tag', 'noindex, nofollow');
     return result;
+  }
+
+  // Do not refresh the old account before callback exchange or explicit recovery.
+  // Ordinary login still persists refreshed cookies before its server-page read.
+  const explicitRecovery = request.nextUrl.searchParams.getAll('reauth').length === 1 && request.nextUrl.searchParams.get('reauth') === '1';
+  if ((pathname === '/login' && explicitRecovery) || pathname === '/signup' || pathname === '/auth/callback') {
+    return applySecurityHeaders(NextResponse.next({ request }), pathname);
   }
 
   // Public API-key endpoints may be called cross-origin. First-party /api routes

@@ -1,68 +1,50 @@
-import { NextResponse } from 'next/server';
-import { createClient } from '@/utils/supabase/server';
-import { cookies } from 'next/headers';
-import { DEFAULT_POST_AUTH_PATH, safeAuthRedirect, authEntryPath } from '@/lib/auth/redirects';
+import { NextResponse, type NextRequest } from 'next/server';
+import { createServerClient, type CookieOptions } from '@supabase/ssr';
+import { getSupabaseConfig } from '@/lib/supabase/config';
+import { DEFAULT_POST_AUTH_PATH, safeAuthRedirect, authRecoveryPath } from '@/lib/auth/redirects';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-/**
- * Standard Supabase SSR OAuth Callback Route Handler.
- * Exchanges authorization code for Supabase session and sets secure auth cookies.
- * Supports Google & GitHub OAuth PKCE exchange, sanitization, and Edge session hydration.
- */
-export async function GET(request: Request) {
+/** Request-scoped PKCE exchange, independent of the application's data-query circuit. */
+export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
-  const code = searchParams.get('code');
-  const rawNext = searchParams.get('next') || searchParams.get('redirect') || searchParams.get('returnUrl') || DEFAULT_POST_AUTH_PATH;
-  const errorParam = searchParams.get('error');
+  const next = safeAuthRedirect(searchParams.get('next') || searchParams.get('redirect') || searchParams.get('returnUrl') || DEFAULT_POST_AUTH_PATH);
+  const changes: { name: string; value: string; options: CookieOptions }[] = [];
+  const redirect = (path: string) => {
+    const response = NextResponse.redirect(`${origin}${path}`);
+    response.headers.set('Cache-Control', 'private, no-store');
+    response.headers.set('Pragma', 'no-cache');
+    response.headers.set('Referrer-Policy', 'no-referrer');
+    for (const cookie of changes) response.cookies.set(cookie.name, cookie.value, cookie.options);
+    return response;
+  };
+  // Only authored notice codes reach the URL; provider errors and codes stay private.
+  if (searchParams.has('error')) return redirect(authRecoveryPath(next, 'auth_cancelled'));
+  const code = searchParams.getAll('code');
+  if (code.length !== 1 || !code[0] || code[0].length > 8192) return redirect(authRecoveryPath(next, 'no_auth_code_provided'));
 
-  // Sanitize next destination: prevent open redirects or protocol injection
-  const next = safeAuthRedirect(rawNext);
-
-  // Handle upstream OAuth provider denial or cancellation
-  if (errorParam) {
-    return NextResponse.redirect(`${origin}${authEntryPath(next, 'login', 'auth_cancelled')}`);
-  }
-
-  if (code) {
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
-    const { data, error } = await supabase.auth.exchangeCodeForSession(code)
-      .catch(() => ({ data: null, error: new Error('Session exchange unavailable') }));
-
-    if (!error && data?.session) {
-      // Supabase SSR cookies are canonical. Retire legacy token and role aliases.
-      const isHttps = origin.startsWith('https:');
-
-      try {
-        cookieStore.set('galx_session', '', {
-          path: '/',
-          maxAge: 0,
-          sameSite: 'lax',
-          secure: isHttps,
-          httpOnly: true,
-        });
-        cookieStore.set('galx_user_role', '', {
-          path: '/',
-          maxAge: 0,
-          sameSite: 'lax',
-          secure: isHttps,
-          httpOnly: true,
-        });
-      } catch {
-        // Fallback if cookieStore write encounters a restricted context
-      }
-
-      return NextResponse.redirect(`${origin}${next}`);
+  try {
+    const config = getSupabaseConfig();
+    if (!config.hasDataApiCredential) throw new Error('Sign-in unavailable');
+    const deadline = AbortSignal.any([request.signal, AbortSignal.timeout(10_000)]);
+    const supabase = createServerClient(config.supabaseUrl, config.supabaseAnonKey, {
+      cookies: { getAll: () => request.cookies.getAll(), setAll: values => { changes.push(...values); } },
+      global: { fetch: (input, init) => {
+        const signal = init?.signal ? AbortSignal.any([init.signal, deadline]) : deadline;
+        signal.throwIfAborted();
+        return fetch(input, { ...init, cache: 'no-store', signal });
+      } },
+    });
+    // This mutation is never automatically replayed by application recovery.
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code[0]);
+    if (error || !data.session) return redirect(authRecoveryPath(next, 'auth_exchange_failed'));
+    const response = redirect(next);
+    for (const name of ['galx_session', 'galx_user_role']) {
+      response.cookies.set(name, '', { path: '/', maxAge: 0, sameSite: 'lax', secure: request.nextUrl.protocol === 'https:', httpOnly: true });
     }
-
-    if (error) {
-      console.error('[OAuth Callback] Code exchange error:', error.message);
-      return NextResponse.redirect(`${origin}${authEntryPath(next, 'login', 'auth_exchange_failed')}`);
-    }
+    return response;
+  } catch {
+    return redirect(authRecoveryPath(next, 'auth_exchange_failed'));
   }
-
-  // Return the user to the sign in page with an exchange failure notice
-  return NextResponse.redirect(`${origin}${authEntryPath(next, 'login', 'no_auth_code_provided')}`);
 }

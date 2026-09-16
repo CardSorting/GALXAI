@@ -1267,3 +1267,73 @@ Incident: `INC-20260916-SHAREDQUOTA`. Kind: `verification`.
 **Next step:** Keep ACT-027 complete and ACT-025 open for caller/checkpoint acceptance. Preserve original outcomes and distinguish conservative local output limits from unobservable provider reasoning or spending.
 
 Evidence: [2026-09-16-relay-generation-recovery-final.json](releases/2026-09-16-relay-generation-recovery-final.json).
+
+## EVT-20260916-session-recovery-investigation — 2026-09-16T15:31:29.157808+00:00
+
+Incident: `INC-20260916-SESSION`. Kind: `observation`.
+
+**Observation:** User-reported session error reproduced at the live login page; anonymous HTTP profile request returns private/no-store 401. Initiating transport/service cause remains uncorrelated.
+
+**Action:** Reviewed session entry, browser hydration, cookie refresh, retry and sign-out paths; implemented bounded local recovery and regression fixtures.
+
+**Result:** Confirmed entry-page lockout, stale bearer precedence, duplicate cancellation and lost-refresh-cookie recovery defects. Initial auth and DOM regressions pass; full build/boundary checks in progress.
+
+**Next step:** Finish compiled validation, review source and guides, and retain deployed acceptance as ACT-028.
+
+Evidence: [README.md](incidents/2026/2026-09-16-session-recovery/README.md).
+
+## EVT-20260916-session-recovery-local-verified — 2026-09-16T15:40:24.891583+00:00
+
+Incident: `INC-20260916-SESSION`. Kind: `verification`.
+
+**Observation:** The compiled browser pass exposed an additional loop: a valid server session could redirect an explicit recovery action back to the failing workspace.
+
+**Action:** Added destination-safe explicit reauthentication, rebuilt, verified with CUA desktop/mobile and compiled HTTP fixtures, and reconciled the complete affected guide contracts.
+
+**Result:** 39 auth tests, one DOM lifecycle matrix, 42 boundary, six staff, 15 developer tests, TypeScript/lint, production build, 139 HTTP/asset checks and 643 compiled browser/rendered asset scans pass. Browser recovery returns to the Library destination and explicit sign-in remains on the form.
+
+**Next step:** ACT-028 remains open for authorized deployment and actual affected-browser acceptance; the initiating live service/transport cause is still uncorrelated.
+
+Evidence: [local-verification.json](incidents/2026/2026-09-16-session-recovery/local-verification.json).
+
+## EVT-20260916-session-lifecycle-second-pass — 2026-09-16T15:52:25.440609+00:00
+
+Incident: `INC-20260916-SESSION`. Kind: `observation`.
+
+**Observation:** Follow-up source and DOM audit reproduced an account-change timer gap and identified callback coupling to the unrelated data circuit, missing persisted-history revalidation, focus retry amplification, and a failed-sign-out state overwritten by SDK SIGNED_OUT.
+
+**Action:** Added synchronous credential fencing, attempt-based focus cooldown, retained visibility-triggered recovery, persisted history/logout reconciliation, and request-scoped bounded uncached PKCE exchange with explicit failure entry.
+
+**Result:** The old-owner-before-next-timer regression failed before correction and passes afterward. Expanded DOM lifecycle and three callback tests pass locally; compiled and browser acceptance is pending.
+
+**Next step:** Complete isolated production build, raw callback/private-response checks, browser inspection and documentation review; retain separate hosted acceptance under ACT-028.
+
+Evidence: [test-auth-provider-recovery.ts](../scripts/test-auth-provider-recovery.ts), [test-auth-callback.ts](../scripts/test-auth-callback.ts).
+
+## EVT-20260916-session-lifecycle-second-pass-verified — 2026-09-16T15:56:47.468815+00:00
+
+Incident: `INC-20260916-SESSION`. Kind: `verification`.
+
+**Observation:** Expanded race, history and callback tests exercise the follow-up recovery contract. Compiled testing exposed an entry middleware referrer-policy override and preceding old-session refresh.
+
+**Action:** Aligned callback middleware headers, bypassed old-account refresh on exact entry routes, and repeated affected authorization suites, final build, raw HTTP, browser and private-content verification.
+
+**Result:** 43 auth, one multi-scenario DOM test, 43 boundary, 6 staff and 15 developer tests pass; TypeScript/lint/build pass; 146 HTTP/asset checks and 643-asset scan pass. Chrome 1440/320px preserves safe callback recovery with valid prior cookies.
+
+**Next step:** ACT-028 remains open for deployed original-browser recovery and real callback/history/session acceptance; the initiating production failure is still uncorrelated.
+
+Evidence: [second-pass-verification.json](incidents/2026/2026-09-16-session-recovery/second-pass-verification.json).
+
+## EVT-20260916-session-entry-refresh-verified — 2026-09-16T16:01:08.805829+00:00
+
+Incident: `INC-20260916-SESSION`. Kind: `verification`.
+
+**Observation:** Final review identified that ordinary login must retain middleware refresh cookie propagation before its server page. Prior broad entry-bypass evidence is retained as a dated intermediate state.
+
+**Action:** Narrowed bypass to signup/callback and explicit reauthentication, added an expired-cookie compiled regression, and rebuilt/reran affected authorization and raw HTTP checks.
+
+**Result:** 43 auth, 43 boundary, 6 staff and 15 developer tests pass; TypeScript/lint/build pass. Final raw suite passes 147 HTTP/asset checks; 643-asset private scan passes. Chrome confirms stable final callback recovery.
+
+**Next step:** Finish documentation checks and retain ACT-028 for deployed acceptance; no production recovery claim.
+
+Evidence: [entry-refresh-verification.json](incidents/2026/2026-09-16-session-recovery/entry-refresh-verification.json).

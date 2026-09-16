@@ -186,7 +186,12 @@
         "src/contexts/GenerationAllowanceContext.tsx",
         "scripts/manage-free-generation.ts",
         "scripts/verify-manual-enrollment-http.ts",
-        "src/components/billing/BillingProvider.tsx"
+        "src/components/billing/BillingProvider.tsx",
+        "scripts/test-auth-provider-recovery.ts",
+        "scripts/test-browser-session.ts",
+        "src/components/auth/SessionConnectionNotice.tsx",
+        "scripts/verify-session-recovery-server.cjs",
+        "scripts/test-auth-callback.ts"
       ],
       "guides": [
         "docs/operations/developer-preview.md",

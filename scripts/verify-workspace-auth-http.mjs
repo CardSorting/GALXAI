@@ -6,6 +6,31 @@ assert(['localhost','127.0.0.1'].includes(new URL(origin).hostname));
 const forbidden=/PRIVATE_AUTH_SENTINEL|GALX_VAULT_|verifyWorkspaceSession|GALX_PRIVATE_POST_MORTEM_CONTENT|shardId|relayId|executionModel|routingMode|VM_RELAY_URL/;
 const session=(suffix)=>{const jwt=`${Buffer.from('{"alg":"HS256"}').toString('base64url')}.${Buffer.from(JSON.stringify({sub:'attacker',exp:4102444800})).toString('base64url')}.${suffix}`; return `sb-supabase-auth-token=base64-${Buffer.from(JSON.stringify({access_token:jwt,refresh_token:'fixture',expires_at:4102444800,user:{id:'attacker'}})).toString('base64url')}`};
 let checks=0; const assets=new Set();
+{
+ const jwt=`${Buffer.from('{"alg":"HS256"}').toString('base64url')}.${Buffer.from(JSON.stringify({sub:'expired-owner',exp:1})).toString('base64url')}.expired`;
+ const cookie=`sb-supabase-auth-token=base64-${Buffer.from(JSON.stringify({access_token:jwt,refresh_token:'fixture',expires_at:1,user:{id:'expired-owner'}})).toString('base64url')}`;
+ const r=await fetch(origin+'/login?next=/images/library',{headers:{cookie},redirect:'manual'});
+ const body=await r.text(); assert([200,307].includes(r.status)); assert.match(r.headers.get('set-cookie')||'',/sb-supabase-auth-token=base64-/);
+ const location=r.headers.get('location') || body.match(/content="[01];url=([^"]+)"/)?.[1]?.replaceAll('&amp;','&');
+ assert(location); assert.equal(new URL(location,origin).pathname,'/images/library'); assert(!body.includes('<form')); assert.doesNotMatch(body,forbidden); checks++;
+}
+for (const [query, destination] of [
+ ['code=fixture-success&next=/images/library', '/images/library'],
+ ['code=fixture-failure&next=/sites/project', '/login?next=/sites/project&error=auth_exchange_failed&reauth=1'],
+ ['error=PRIVATE_AUTH_SENTINEL&next=//evil.test', '/login?error=auth_cancelled&reauth=1'],
+ ['code=one&code=two', '/login?error=no_auth_code_provided&reauth=1'],
+]) {
+ const verifier = `sb-supabase-auth-token-code-verifier=base64-${Buffer.from(JSON.stringify('fixture-verifier')).toString('base64url')}`;
+ const r=await fetch(origin+'/auth/callback?'+query,{headers:{cookie:verifier+'; '+session('valid')},redirect:'manual'});
+ assert.equal(r.status,307); assert.equal(r.headers.get('location'),origin+destination);
+ assert.match(r.headers.get('cache-control'),/private.*no-store/); assert.equal(r.headers.get('referrer-policy'),'no-referrer');
+ assert.doesNotMatch(await r.text(),forbidden); checks++;
+ if(query.startsWith('code=fixture-success')) { assert.match(r.headers.get('set-cookie')||'',/sb-supabase-auth-token=base64-/); assert.match(r.headers.get('set-cookie')||'',/galx_session=;/); }
+ else {
+  const page=await fetch(origin+destination,{headers:{cookie:session('valid')},redirect:'manual'});
+  assert.equal(page.status,200); const body=await page.text(); assert.match(body,/<form/); assert.doesNotMatch(body,forbidden); checks++;
+ }
+}
 for(const path of ['/images','/images/library','/images/favorites','/sites','/sites/00000000-0000-4000-8000-000000000000','/%69mages','/%73ites','/sites/draft.js','/images/future','/sites/nested/page']) {
  for(const extra of [{},{rsc:'1','next-router-prefetch':'1'},{'x-middleware-subrequest':'src/middleware:src/middleware:src/middleware:src/middleware:src/middleware'},{cookie:'admin=true; sb-pretend=true'}]) {
   const response=await fetch(origin+path,{headers:extra,redirect:'manual'}); assert.equal(response.status,307,path); assert.equal(new URL(response.headers.get('location'),origin).pathname,'/login'); assert.equal(response.headers.get('cache-control'),'private, no-store'); const body=await response.text(); assert(!body.includes('image-studio-page'));assert(!body.includes('sites-workspace'));assert.doesNotMatch(body,forbidden);checks++;
@@ -20,6 +45,17 @@ for(const path of ['/images','/images/library','/images/favorites','/sites','/si
  for(const method of ['HEAD','POST','OPTIONS']) {const response=await fetch(origin+path,{method,redirect:'manual'});assert.equal(response.status,method==='HEAD'?307:401);checks++;}
 }
 for(const path of ['/','/login','/images/studio/desert.webp','/images/studio/glass.webp','/images/studio/paper.webp']) {const r=await fetch(origin+path);assert.equal(r.status,200,path);checks++;}
+for (const suffix of ['unavailable', 'lookup-unavailable']) {
+ const r=await fetch(origin+'/login?next=/images/library',{headers:{cookie:session(suffix)},redirect:'manual'});
+ assert.equal(r.status,200); assert.match(r.headers.get('cache-control'),/private.*no-store/);
+ const body=await r.text(); assert.match(body,/<form/); assert.match(body,/Continue with Google/); assert.match(body,/Use an email link instead/);
+ assert.doesNotMatch(body,forbidden); checks++;
+}
+{
+ const r=await fetch(origin+'/login?next=/images/library&reauth=1',{headers:{cookie:session('valid')},redirect:'manual'});
+ assert.equal(r.status,200); const body=await r.text(); assert.match(body,/<form/); assert.match(body,/Continue with Google/);
+ assert(!r.headers.get('location')); assert.doesNotMatch(body,forbidden); checks++;
+}
 for(const [next,destination] of [['/images?view=library','/images/library'],['/sites/owned','/sites/owned'],['//evil.test','/images'],['/auth/signin?next=/auth/signin','/images']]) {
  const r=await fetch(origin+'/login?'+new URLSearchParams({next}),{headers:{cookie:session('valid')},redirect:'manual'});
  const body=await r.text();assert([200,307].includes(r.status));

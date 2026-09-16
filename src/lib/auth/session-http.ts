@@ -1,7 +1,8 @@
 import { NextResponse, type NextRequest } from 'next/server';
+import type { CookieOptions } from '@supabase/ssr';
 
 export class SessionAccessError extends Error {
-  constructor(readonly status: 400 | 401 | 403 | 503) { super(status === 503 ? 'Session verification is unavailable. Try again.' : status === 403 ? 'This request is not allowed.' : status === 400 ? 'Check the request and try again.' : 'Sign in again to continue.'); }
+  constructor(readonly status: 400 | 401 | 403 | 503, readonly cookies: { name: string; value: string; options: CookieOptions }[] = []) { super(status === 503 ? 'Session verification is unavailable. Try again.' : status === 403 ? 'This request is not allowed.' : status === 400 ? 'Check the request and try again.' : 'Sign in again to continue.'); }
 }
 export async function readSessionBody(request: NextRequest): Promise<Record<string, unknown>> {
   const reader = request.body?.getReader();
@@ -24,7 +25,9 @@ export function sessionResponse(body: unknown, status = 200) {
 }
 export function sessionFailure(error: unknown) {
   const failure = error instanceof SessionAccessError ? error : new SessionAccessError(503);
-  return sessionResponse({ valid: false, error: failure.message }, failure.status);
+  const response = sessionResponse({ valid: false, error: failure.message }, failure.status);
+  for (const cookie of failure.cookies) response.cookies.set(cookie.name, cookie.value, cookie.options);
+  return response;
 }
 export function sessionBearer(request: NextRequest): string | undefined {
   const header = request.headers.get('authorization');

@@ -25,6 +25,7 @@ export async function requireRequestSession(request: NextRequest) {
   const client = createServerClient(config.supabaseUrl, config.supabaseAnonKey, { cookies: { getAll: () => request.cookies.getAll(), setAll: values => { changes.push(...values); } },
     global: { fetch: (input, init) => fetch(input, { ...init, cache: 'no-store', signal: init?.signal ? AbortSignal.any([init.signal, AbortSignal.timeout(8000)]) : AbortSignal.timeout(8000) }) } });
   const credential = explicit ?? (hasCookie ? undefined : native);
+  try {
   const { data, error } = await client.auth.getUser(credential);
   if (error) throw new SessionAccessError(!error.status || error.status === 429 || error.status >= 500 ? 503 : 401);
   if (!data.user?.id || data.user.is_anonymous) throw new SessionAccessError(401);
@@ -32,6 +33,10 @@ export async function requireRequestSession(request: NextRequest) {
   if (!token) throw new SessionAccessError(401);
   if (!await isAccountSessionActive(token)) throw new SessionAccessError(401);
   return { kind: 'supabase' as const, token, session: undefined, emailConfirmed: Boolean(data.user.email_confirmed_at), user: sessionProfile({ id: data.user.id, email: data.user.email, name: data.user.user_metadata?.name || data.user.user_metadata?.full_name }), cookies: changes };
+  } catch (error) {
+    // A completed refresh is retained even when the subsequent authority read fails.
+    throw new SessionAccessError(error instanceof SessionAccessError ? error.status : 503, changes);
+  }
 }
 
 export async function requireNativeSession(request: NextRequest) {

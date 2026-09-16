@@ -113,7 +113,7 @@ try {
   await page.reload({waitUntil:'domcontentloaded'});
   await page.locator('[data-workspace-loading="Images"]').waitFor();
   await page.evaluate(()=>window.__workspaceHeader=document.querySelector('header'));
-  await page.getByRole('heading',{name:'We couldn’t check your session',exact:true}).waitFor();
+  await page.getByRole('heading',{name:'Let’s get you reconnected',exact:true}).waitFor();
   assert.equal(await page.locator('.studio,.sites-workspace').count(),0,'unverified private content withheld');
   assert(await page.evaluate(()=>window.__workspaceHeader===document.querySelector('header')),'header survives browser verification failure');
   await page.waitForFunction(()=>document.activeElement?.id==='route-recovery-heading');
@@ -124,7 +124,7 @@ try {
   await page.waitForFunction(()=>document.querySelector('main button')?.getAttribute('aria-disabled')==='true');
   await page.locator('main button').evaluate(button=>{button.click();button.click();});
   await page.getByRole('status').filter({hasText:'Your session is still unavailable.'}).waitFor();
-  assert.equal(state.profileCalls,beforeRetry+1,'repeated activation issues one session check');
+  assert.equal(state.profileCalls,beforeRetry+2,'repeated activation joins one bounded two-read verification');
   assert.equal(await page.locator('main button').evaluate(button=>button===document.activeElement),true,'retry keeps focus');
   assert.equal(await page.locator('main [role="status"]').evaluate(el=>Boolean(el.closest('[aria-busy="true"]'))),false,'status is not suppressed by busy content');
   await inspect(page,`profile-retry-${width}`);
@@ -135,13 +135,13 @@ try {
   assert.equal(state.profileCalls,beforeOffline,'offline retry does not issue a request');
   await context.setOffline(false);
   // The existing online listener may coalesce a fresh account check. Wait for it.
-  await page.waitForTimeout(1500);
+  await page.waitForTimeout(3500);
   await page.getByRole('link',{name:'Return home',exact:true}).click();
   await page.locator('#homepage-content').waitFor();
   assert(await page.evaluate(()=>window.__workspaceHeader===document.querySelector('header')),'home preserves shell during outage');
   await page.getByRole('button',{name:'Retry account',exact:true}).waitFor();
   await nav('Images');
-  await page.getByRole('heading',{name:'We couldn’t check your session',exact:true}).waitFor();
+  await page.getByRole('heading',{name:'Let’s get you reconnected',exact:true}).waitFor();
   state.profileStatus=200;
   await page.getByRole('button',{name:'Try again',exact:true}).click();
   await page.locator('.studio').waitFor();
@@ -171,7 +171,7 @@ try {
    await page.locator('.studio').waitFor();
    state.profileDelay=0;state.profileStatus=503;
    await page.reload();
-   await page.getByRole('heading',{name:'We couldn’t check your session',exact:true}).waitFor();
+   await page.getByRole('heading',{name:'Let’s get you reconnected',exact:true}).waitFor();
    await page.setViewportSize({width:320,height:900});
    for(const theme of ['contrast','emerald']) {
     await page.evaluate(theme=>document.documentElement.dataset.theme=theme,theme);

@@ -2817,6 +2817,12 @@
       "title": "Manual relay registration blocked by historical identities"
     },
     {
+      "path": "post-mortem/incidents/2026/2026-09-16-session-recovery/README.md",
+      "scope": "operational-record",
+      "category": "post-mortem",
+      "title": "Session recovery blocks account entry"
+    },
+    {
       "path": "post-mortem/incidents/2026/2026-09-16-shared-quota/README.md",
       "scope": "operational-record",
       "category": "post-mortem",

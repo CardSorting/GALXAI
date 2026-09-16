@@ -278,6 +278,24 @@
       "failure_modes": [
         "FM-CTRL-002"
       ]
+    },
+    {
+      "id": "INC-20260916-SESSION",
+      "category": "identity",
+      "severity": "SEV-2",
+      "status": "investigating",
+      "title": "Session recovery blocks account entry",
+      "owner": "Security/access maintainer",
+      "record": "post-mortem/incidents/2026/2026-09-16-session-recovery/README.md",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-09-16-session-recovery/README.md",
+        "post-mortem/incidents/2026/2026-09-16-session-recovery/local-verification.json",
+        "post-mortem/incidents/2026/2026-09-16-session-recovery/second-pass-verification.json",
+        "post-mortem/incidents/2026/2026-09-16-session-recovery/entry-refresh-verification.json"
+      ],
+      "failure_modes": [
+        "FM-AUTH-004"
+      ]
     }
   ],
   "actions": [
@@ -634,6 +652,21 @@
         "post-mortem/releases/2026-09-16-relay-generation-recovery.json",
         "post-mortem/releases/2026-09-16-relay-generation-recovery-final.json"
       ]
+    },
+    {
+      "id": "ACT-028",
+      "incident": "INC-20260916-SESSION",
+      "owner": "Security/access maintainer",
+      "review_by": "2026-09-23",
+      "status": "open",
+      "next_step": "Deploy the verified recovery/lifecycle fixes, then verify the originally affected browser, provider/email callback, safe destination, account switching, history restoration, refreshed-session continuity and failed/completed revocation; correlate the original service/transport failure if evidence becomes available.",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-09-16-session-recovery/README.md",
+        "post-mortem/incidents/2026/2026-09-16-session-recovery/local-verification.json",
+        "post-mortem/incidents/2026/2026-09-16-session-recovery/second-pass-verification.json",
+        "post-mortem/incidents/2026/2026-09-16-session-recovery/entry-refresh-verification.json"
+      ],
+      "closure": "Recorded deployed verification of original-browser recovery, callback/destination retention, account/history races, refreshed-session continuity and revoked-token denial, with rendered/browser response scan evidence."
     }
   ]
 }

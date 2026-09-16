@@ -60,3 +60,8 @@
 @media (max-width: 480px) { .header { flex-wrap: wrap; gap: .5rem 1rem; padding: .75rem 1.25rem; } .main { align-items: start; padding-top: 2rem; } }
 @media (prefers-reduced-motion: reduce) { .button { transition: none; } }
 @media (forced-colors: active) { .button, .field input, .error, .notice { border-color: ButtonText; } }
+.connection { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px 20px; padding: 12px 20px; color: var(--foreground); background: var(--background); border-block-end: 1px solid color-mix(in srgb, var(--foreground) 20%, transparent); }
+.connection p { flex: 1 1 240px; margin: 0; font-size: 14px; line-height: 1.6; overflow-wrap: anywhere; }
+.connection button { flex-shrink: 0; min-height: 44px; padding: 8px 0; color: inherit; background: none; border: 0; font: inherit; text-decoration: underline; text-underline-offset: 4px; cursor: pointer; }
+.connection button[aria-disabled="true"] { opacity: .65; cursor: default; }
+.connection button:focus-visible { outline: 2px solid var(--accent-primary); outline-offset: 4px; }

@@ -4561,6 +4561,16 @@
       "decision": null
     },
     {
+      "path": "post-mortem/incidents/2026/2026-09-16-session-recovery/README.md",
+      "title": "Session recovery blocks account entry",
+      "scope": "operational-record",
+      "kind": "navigation",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
       "path": "post-mortem/incidents/2026/2026-09-16-shared-quota/README.md",
       "title": "Shared-account quota exhaustion and costly continuation",
       "scope": "operational-record",

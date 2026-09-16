@@ -1,0 +1,50 @@
+{
+  "observed_at": "2026-09-16T16:01:08.805829+00:00",
+  "scope": "Final local entry-refresh refinement; synthetic build and services, no deployment",
+  "previous_phase": "post-mortem/incidents/2026/2026-09-16-session-recovery/second-pass-verification.json",
+  "reason": "Final review preserved normal-login middleware refresh so rotated cookies reach the browser before server-page verification. Bypass is restricted to exact signup/callback and login with one reauth=1; all previous callback privacy and race fixes remain.",
+  "build_id": "qNd1joeQ-cVkOc5RYrXUQ",
+  "source_sha256": {
+    "src/contexts/AuthContext.tsx": "925072632aef4a44e915fb04b479b1891bcc97343072e866231f37a5127916b0",
+    "src/app/auth/callback/route.ts": "fec7f02e2f9c1933e2a82687fc4010d03cef0e7175f080ed4effe839e0c507e9",
+    "src/utils/supabase/middleware.ts": "2038083061059920df7f9bf0d3c640d94ed6a97f2ae5a1e40550267ce042dfb6",
+    "scripts/test-auth-callback.ts": "9e702847fa1bb813feb9e4cf67e8ce8d96b5e50fd59430698b913f39186ac0cc",
+    "scripts/test-auth-provider-recovery.ts": "b97fb5e6c21e01fe830752e580b26208a2d96b219a8b773f1aba4702c63f83fe",
+    "scripts/verify-auth-entry-server.cjs": "598d88ba9e781042126b4725944d2e3834324b6bed7b3465aa1d8f272d14e932",
+    "scripts/verify-workspace-auth-http.mjs": "2c22f50cd5286d21b8aad8f1aaf526c27b181e5d1200cc4f1160038581bb3579"
+  },
+  "checks": {
+    "auth_session_tests": 43,
+    "public_boundary_tests": 43,
+    "staff_tests": 6,
+    "developer_tests": 15,
+    "typescript": "passed",
+    "scoped_runtime_eslint": "passed",
+    "isolated_production_build": "passed",
+    "compiled_http_and_assets": 147,
+    "linked_assets": 35,
+    "compiled_private_scan": 643,
+    "new_raw_regression": "An expired normal-login cookie is refreshed, Set-Cookie reaches the response, and the verified destination remains /images/library. Explicit recovery and callback failures still retain the form.",
+    "browser": "CUA Chrome confirmed the final compiled cancelled-callback destination and sign-in methods remain stable after hydration. The prior phase retains desktop/mobile reflow and control-size observations; presentation is unchanged.",
+    "unchanged_dom_contract": "The passing multi-scenario provider lifecycle test from the prior phase has identical final source; the final refinement changes only entry middleware and synthetic HTTP fixtures."
+  },
+  "semantic_review": {
+    "guides": [
+      "docs/operations/workspace-auth.md",
+      "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md",
+      "docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md",
+      "docs/DOCUMENTATION_POLICY.md",
+      "docs/how-to/change-with-documentation.md",
+      "docs/reference/knowledge-commands.md",
+      "post-mortem/CURRENT_STATE.md",
+      "post-mortem/incidents/2026/2026-09-16-session-recovery/README.md"
+    ],
+    "scope": "Final source/guide reconciliation narrows the previous phase entry-refresh wording. Registry mapping, incident evidence and rollout/rollback limits inspected; unrelated domain modules and ADR acceptance remain outside this review."
+  },
+  "limits": [
+    "Local verification only; original initiating production failure remains uncorrelated",
+    "No real OAuth/email submission, hosted session acceptance, database mutation, deployment, payment, generation or publishing",
+    "Physical back-forward-cache and real provider multi-tab flows remain ACT-028 acceptance; DOM tests exercise their state transitions"
+  ],
+  "followup": "ACT-028"
+}

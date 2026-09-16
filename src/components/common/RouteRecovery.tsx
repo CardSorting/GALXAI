@@ -8,9 +8,11 @@ import styles from './workspace-route.module.css';
 /** Authored public copy only; no raw exceptions, traces or automatic replay. */
 export function RouteRecovery({ title = 'This page could not be opened', description = 'Try again in a moment, or return home.', reset, onRetry,
   busy = false, retryLabel = 'Try again', pendingLabel = 'Opening page…', failureMessage = 'This page is still unavailable. Try again in a moment.',
+  secondaryHref = '/', secondaryLabel = 'Return home',
 }: {
   title?: string; description?: string; reset?: () => void; onRetry?: () => Promise<void>; busy?: boolean;
   retryLabel?: string; pendingLabel?: string; failureMessage?: string;
+  secondaryHref?: string; secondaryLabel?: string;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -42,7 +44,8 @@ export function RouteRecovery({ title = 'This page could not be opened', descrip
       <p>{description}</p>
       <div className={styles.actions}>
         <button aria-disabled={working || offline} onClick={retry}>{working ? pendingLabel : retryLabel}</button>
-        <IntentLink href="/">Return home</IntentLink>
+        <IntentLink href={secondaryHref}>{secondaryLabel}</IntentLink>
+        {secondaryHref !== '/' && <IntentLink href="/">Return home</IntentLink>}
       </div>
       <p className={styles.status} role="status" aria-live="polite" aria-atomic="true">{message}</p>
     </div>

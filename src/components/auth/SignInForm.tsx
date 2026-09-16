@@ -8,9 +8,10 @@ import { safeAuthRedirect, authEntryPath } from '@/lib/auth/redirects';
 import { authDestinationLabel, signInErrorMessage } from '@/lib/auth/signin';
 import { AuthEntryShell } from './AuthEntryShell';
 import styles from './auth-entry.module.css';
+import { SessionConnectionNotice } from './SessionConnectionNotice';
 
-export function SignInForm({ destination, notice }: { destination: string; notice: string | null }) {
-  const { signInWithPassword, signInWithOAuth, signInWithOtp } = useAuth();
+export function SignInForm({ destination, notice, reauthenticate = false }: { destination: string; notice: string | null; reauthenticate?: boolean }) {
+  const { signInWithPassword, signInWithOAuth, signInWithOtp, status, user } = useAuth();
   const returnTo = safeAuthRedirect(destination);
   const label = authDestinationLabel(returnTo);
   const [email, setEmail] = useState(''), [password, setPassword] = useState('');
@@ -29,6 +30,9 @@ export function SignInForm({ destination, notice }: { destination: string; notic
     window.addEventListener('pageshow', resumed);
     return () => { alive.current = false; window.removeEventListener('pageshow', resumed); };
   }, []);
+  useEffect(() => {
+    if (!reauthenticate && status === 'ready' && user && !navigating.current) { navigating.current = true; window.location.replace(returnTo); }
+  }, [status, user, returnTo, reauthenticate]);
   useEffect(() => { if (error) errorRef.current?.focus(); }, [error]);
   useEffect(() => { if (sentTo) headingRef.current?.focus(); }, [sentTo]);
   useEffect(() => {
@@ -81,6 +85,7 @@ export function SignInForm({ destination, notice }: { destination: string; notic
         : <p>Continue to your workspace with your GALX account.</p>}
     </div>
     {notice && !error && !sentTo && <p className={styles.notice}>{notice}</p>}
+    {(status === 'unavailable' || status === 'reconnecting') && <SessionConnectionNotice />}
     {error && <div className={styles.error} role="alert" ref={errorRef} tabIndex={-1}>{error}</div>}
     {sentTo ? <div className={styles.actions}>
       <p className={styles.status}>If you don’t see it, check your spam folder or try another sign-in method.</p>

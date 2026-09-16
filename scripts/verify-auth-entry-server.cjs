@@ -21,6 +21,17 @@ if (require.main === module) {
   globalThis.fetch = async (input, init) => {
     const url = new URL(typeof input === 'string' ? input : input.url || String(input));
     const credential = new Headers(init?.headers || input.headers).get('authorization') || '';
+    if (url.hostname === 'supabase.invalid' && url.pathname === '/auth/v1/token' && url.searchParams.get('grant_type') === 'refresh_token') {
+      if (JSON.parse(init.body).refresh_token !== 'fixture') return Response.json({ code: 'bad_token', msg: 'PRIVATE_AUTH_SENTINEL' }, { status: 400 });
+      const access_token = `${Buffer.from('{"alg":"HS256"}').toString('base64url')}.${Buffer.from(JSON.stringify({ sub: 'refreshed-owner', exp: 4102444800 })).toString('base64url')}.valid`;
+      return Response.json({ access_token, refresh_token: 'fixture-rotated', expires_in: 3600, token_type: 'bearer', user: { id: '00000000-0000-4000-8000-000000000001' } });
+    }
+    if (url.hostname === 'supabase.invalid' && url.pathname === '/auth/v1/token' && url.searchParams.get('grant_type') === 'pkce') {
+      const body = JSON.parse(init.body);
+      if (body.auth_code !== 'fixture-success' || body.code_verifier !== 'fixture-verifier') return Response.json({ code: 'bad_code', msg: 'PRIVATE_AUTH_SENTINEL' }, { status: 400 });
+      const access_token = `${Buffer.from('{"alg":"HS256"}').toString('base64url')}.${Buffer.from(JSON.stringify({ sub: 'callback-owner', exp: 4102444800 })).toString('base64url')}.valid`;
+      return Response.json({ access_token, refresh_token: 'fixture', expires_in: 3600, token_type: 'bearer', user: { id: '00000000-0000-4000-8000-000000000001' } });
+    }
     if (url.hostname === 'supabase.invalid' && url.pathname === '/auth/v1/logout') { revoked.add(credential); return new Response(null, { status: 204 }); }
     if (url.hostname === 'supabase.invalid' && url.pathname === '/rest/v1/rpc/fn_account_session_active') {
       if (credential.endsWith('.render-unavailable')) {

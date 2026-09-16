@@ -159,7 +159,7 @@ try {
     const outage = await setup(width, 'unavailable');
     const response = await outage.page.goto(base + '/images/library?token=discard-me');
     assert.equal(response.status(), 503);
-    await outage.page.getByRole('heading', { name: 'We couldn’t check your session', exact: true }).waitFor();
+    await outage.page.getByRole('heading', { name: 'Let’s get you reconnected', exact: true }).waitFor();
     assert.equal(await outage.page.getByRole('link', { name: 'Try again' }).getAttribute('href'), '/images/library');
     await inspect(outage.page, `unavailable-${width}`);
     await outage.context.close();

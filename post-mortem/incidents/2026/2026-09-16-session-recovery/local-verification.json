@@ -1,0 +1,137 @@
+{
+  "observed_at": "2026-09-16T15:40:24.872174+00:00",
+  "scope": "Local working tree and isolated synthetic production build; no production deployment or account mutation",
+  "base_revision": "4fc69dd72ac487a502e160f5fb5aa5a740ec2291",
+  "build_id": "BvbJ0zwVjL3AXIb55cI8e",
+  "source_sha256": {
+    "src/contexts/AuthContext.tsx": "f53a3111e965492c99bd96b06b190777423d89558998428ea716d32c07309e3f",
+    "src/lib/auth/browser-verification.ts": "2eba0544c2da486f5ad258d2b99d1b62e46c6044b46b46efe567dafd1b94ec52",
+    "src/lib/auth/browser-session.ts": "97c4fcc2f795964a188d8ca3c64beb66f5737004add1a5a08e1fc34b39807cb2",
+    "src/lib/auth/redirects.ts": "b4b385d2240c19b0ba7edcd559db89746f895d74512c7c23134232898f3091eb",
+    "src/lib/auth/request-session.ts": "f5980d7f521819040a36ded03fdcf592d4d66faebfc62dc987a1a5298511f749",
+    "src/lib/auth/session-http.ts": "9ec0cbf468e12793bf0e51d0766713222423b7f7ba919f87e25617a35bf1ec73",
+    "src/app/login/page.tsx": "0b556e39fbf622400b8b70e397f4e83706e5e702971dde3c37aeb6c627f4c791",
+    "src/components/auth/AuthSessionContent.tsx": "d1f9c0421a4192294271a4054cbe49d9f4f238bb39a7cf3c6b7e91efaffa4eeb",
+    "src/components/auth/SignInForm.tsx": "ed3080da241b280b51d0fc25232574e7a32a671079d3b3eaee63e85cf666b382",
+    "src/components/auth/SessionConnectionNotice.tsx": "9afefad338eb78a343b6f5ad6bcea7e6dbe778f707ef4527a7d5248f4c3cae95",
+    "src/components/auth/WorkspaceSessionBoundary.tsx": "866e9a8f9af618abb291ae5797a323a3e94c04dd849129e2a883f2b11d733ee1",
+    "src/components/common/RouteRecovery.tsx": "02f126f82df14daf04a9085d2fc72034beddb3493485841dd0f6a97f25461736",
+    "src/lib/security/workspace-unavailable.ts": "b9a0b7ed20661ac625ec5bc4e9fa066da3f09f36bc8ba7b81decf7efb8d69efe"
+  },
+  "confirmed_defects": [
+    "Login/signup hidden during browser verification failure; login also withheld form on server outage",
+    "Browser bearer snapshots overrode newer cookies",
+    "Identical verification requests cancelled earlier reads and SDK startup blocked hydration",
+    "Rotated cookies were lost if a later active-session check failed",
+    "Recovery sign-in could bounce back to a workspace because a still-valid server session redirected it"
+  ],
+  "changes": [
+    "Exact entry-page exceptions and explicit reauthentication flag",
+    "Cookie-only first-party profile and account requests",
+    "SDK-independent, coalesced verification with one transient read retry under 25 seconds; no mutation replay",
+    "Refresh cookies retained on verification failure",
+    "Previously verified same-account editors remain mounted with scoped connection feedback"
+  ],
+  "checks": [
+    {
+      "name": "auth/session/redirect/transport",
+      "command": "npm run test:auth:sessions",
+      "passed": 39
+    },
+    {
+      "name": "DOM provider lifecycle",
+      "command": "GALX_JSDOM_MODULE=<isolated jsdom module> npm run test:auth:recovery",
+      "passed": 1,
+      "cases": [
+        "Strict Mode",
+        "SDK initialization independence",
+        "duplicate retry joins",
+        "owner change",
+        "same-owner outage retention",
+        "late success after logout",
+        "revocation"
+      ]
+    },
+    {
+      "name": "public information, image and authorization boundary",
+      "command": "npm run test:image:security",
+      "passed": 42
+    },
+    {
+      "name": "staff authorization",
+      "command": "npm run test:preview-admin",
+      "passed": 6
+    },
+    {
+      "name": "developer authorization",
+      "command": "npm run test:developer-preview",
+      "passed": 15
+    },
+    {
+      "name": "TypeScript and scoped ESLint",
+      "result": "passed"
+    },
+    {
+      "name": "isolated production build",
+      "command": "CI=true node scripts/build-ci.mjs",
+      "result": "passed; synthetic credentials, no dotenv files"
+    },
+    {
+      "name": "compiled HTTP and linked assets",
+      "command": "node scripts/verify-workspace-auth-http.mjs http://localhost:3427",
+      "passed": 139,
+      "browser_assets": 35
+    },
+    {
+      "name": "compiled private-content boundary",
+      "result": "passed",
+      "browser_and_rendered_assets": 643
+    }
+  ],
+  "browser_inspection": {
+    "tool": "CUA Chrome",
+    "widths": [
+      1440,
+      390
+    ],
+    "verified": [
+      "Outage leaves Google/GitHub/password/email-link methods usable",
+      "Failed retry has pending feedback without replacing the form",
+      "Recovery control 44px, one status region, no horizontal overflow",
+      "Full recovery focuses heading and preserves navigation",
+      "Restored synthetic service plus Try again returns to /images/library",
+      "Final Sign in again reaches /login?reauth=1 without bouncing back to the workspace"
+    ],
+    "screenshots": "Visually inspected in the task conversation; no standalone screenshot artifact retained"
+  },
+  "semantic_review": {
+    "guides": [
+      "docs/operations/workspace-auth.md",
+      "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md",
+      "docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md",
+      "docs/maintainers/readable-urls.md",
+      "docs/DOCUMENTATION_POLICY.md",
+      "docs/how-to/change-with-documentation.md",
+      "docs/reference/knowledge-commands.md",
+      "docs/adr/0147-verified-account-and-session-authority.md",
+      "post-mortem/failure-modes/identity.md",
+      "post-mortem/failure-modes/README.md",
+      "post-mortem/CURRENT_STATE.md"
+    ],
+    "domains": [
+      "access",
+      "client-efficiency",
+      "images",
+      "knowledge"
+    ],
+    "limits": "Review covers changed source contracts, shared canonical guides, fixture expectations and registry/scripts mappings; broad domain fingerprints do not imply an exhaustive audit of unrelated modules. ADR acceptance and old release evidence remain unchanged."
+  },
+  "limits": [
+    "The initiating production transport/service failure remains uncorrelated",
+    "Production recovery and full live OAuth/email delivery remain unverified",
+    "No database changes, new account creation, generation, billing, publication or deployment",
+    "Updated legacy Playwright scripts were not executed in this pass; CUA handled actual browser interaction",
+    "No full Axe or physical screen-reader acceptance in this pass"
+  ],
+  "followup": "ACT-028"
+}

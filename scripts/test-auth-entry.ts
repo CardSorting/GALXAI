@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { NextRequest } from 'next/server';
-import { safeAuthRedirect } from '../src/lib/auth/redirects';
+import { safeAuthRedirect, authRecoveryPath } from '../src/lib/auth/redirects';
 import { authDestinationLabel, authNotice, signInErrorMessage } from '../src/lib/auth/signin';
 import { workspaceReturnPath } from '../src/lib/security/workspace-policy';
 import { workspaceUnavailableResponse } from '../src/lib/security/workspace-unavailable';
@@ -16,6 +16,13 @@ test('return destinations reject external URLs and recursive auth while preservi
   assert.equal(authDestinationLabel('/sites/owned'), 'Sites');
   assert.equal(authDestinationLabel('/images?view=library'), 'Images');
   assert.equal(authDestinationLabel('https://evil.test'), 'Images');
+});
+
+test('explicit sign-in recovery preserves only safe destinations and bypasses existing-session redirects', () => {
+  assert.equal(authRecoveryPath('/images/library'), '/login?next=/images/library&reauth=1');
+  assert.equal(authRecoveryPath('//evil.test'), '/login?reauth=1');
+  assert.equal(authRecoveryPath('/login?reauth=1'), '/login?reauth=1');
+  assert.equal(authRecoveryPath('/sites/owned', 'session_expired'), '/login?next=/sites/owned&error=session_expired&reauth=1');
 });
 
 test('sign-in notices and failures use finite public copy, never account existence or diagnostics', () => {
