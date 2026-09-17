@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useTransition } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useLinkStatus } from 'next/link';
 import { IntentLink as Link } from '@/components/common/IntentLink';
 import { useAuth } from '@/contexts/AuthContext';
@@ -16,26 +16,12 @@ import {
   ChevronDown,
   Search,
   Sparkles,
-  Layout,
-  Cpu,
-  Terminal,
-  Code2,
+  Compass,
+  CreditCard,
+  User,
   Key,
   Sliders,
-  DollarSign,
-  CreditCard,
-  Zap,
-  ShieldCheck,
-  FileText,
-  BookOpen,
-  HelpCircle,
-  Shield,
-  Activity,
-  Building2,
-  User,
   LogOut,
-  Compass,
-  ArrowRight,
   Menu,
   X
 } from 'lucide-react';
@@ -68,17 +54,14 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
   const { user, isLoading, logout, status, retrySession } = useAuth();
   const [checking, startChecking] = useTransition();
   const pathname = usePathname();
-  const router = useRouter();
 
-  // Navigation Dropdown & Menu State
-  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  // Navigation State
   const [isAccountOpen, setIsAccountOpen] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isCommandOpen, setIsCommandOpen] = useState(false);
   const [osShortcut, setOsShortcut] = useState('⌘K');
 
   const navRef = useRef<HTMLElement>(null);
-  const dropdownTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // OS detection for keyboard shortcut
   useEffect(() => {
@@ -97,7 +80,6 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
         setIsCommandOpen((prev) => !prev);
       }
       if (e.key === 'Escape') {
-        setActiveDropdown(null);
         setIsAccountOpen(false);
         setIsMobileOpen(false);
       }
@@ -113,7 +95,6 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
 
   // Close menus on route change
   useEffect(() => {
-    setActiveDropdown(null);
     setIsAccountOpen(false);
     setIsMobileOpen(false);
   }, [pathname]);
@@ -122,7 +103,6 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (navRef.current && !navRef.current.contains(e.target as Node)) {
-        setActiveDropdown(null);
         setIsAccountOpen(false);
       }
     };
@@ -130,29 +110,20 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleDropdownEnter = (menuKey: string) => {
-    if (dropdownTimeoutRef.current) {
-      clearTimeout(dropdownTimeoutRef.current);
-    }
-    setActiveDropdown(menuKey);
-  };
-
-  const handleDropdownLeave = () => {
-    dropdownTimeoutRef.current = setTimeout(() => {
-      setActiveDropdown(null);
-    }, 150);
-  };
-
   // Legacy error/not-found surfaces can still include Navigation themselves.
   if (!inLayout && isProductRoute(pathname)) return null;
   const returnTo = pathname === '/' ? '/images' : pathname;
+
+  const isImageActive = pathname === '/images' || pathname.startsWith('/images/');
+  const isExploreActive = pathname === '/explore' || pathname.startsWith('/explore/');
+  const isPricingActive = pathname === '/pricing' || pathname.startsWith('/pricing/');
 
   return (
     <>
       <header ref={navRef} className={styles.header}>
         <div className={styles.glowLine} />
         <div className={styles.inner}>
-          {/* Brand Logo & Tag */}
+          {/* Brand Logo & Version Tag */}
           <div className={styles.brandWrapper}>
             <Link href="/" aria-label="GALX home" className={styles.brand}>
               <GalxGalaxyLogo size={28} textClassName="text-xl font-bold tracking-tight text-white" />
@@ -163,336 +134,34 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
             </span>
           </div>
 
-          {/* Desktop Navigation Links & Mega Dropdowns */}
+          {/* Desktop Navigation Links: Exactly 3 minimalist links (Image, Explore, Pricing) */}
           <nav aria-label="Main navigation" className={styles.desktopNav}>
-            {/* 1. Platform Mega Menu */}
-            <div
-              className={styles.navItem}
-              onMouseEnter={() => handleDropdownEnter('platform')}
-              onMouseLeave={handleDropdownLeave}
+            <Link
+              href="/images"
+              className={styles.navLink}
+              aria-current={isImageActive ? 'page' : undefined}
             >
-              <button
-                type="button"
-                className={styles.navButton}
-                aria-expanded={activeDropdown === 'platform'}
-                aria-haspopup="true"
-                onClick={() => setActiveDropdown(activeDropdown === 'platform' ? null : 'platform')}
-              >
-                <span>Platform</span>
-                <ChevronDown size={14} className={styles.navChevron} />
-              </button>
+              <span>Image</span>
+              <NavigationFeedback label="Image" />
+            </Link>
 
-              {activeDropdown === 'platform' && (
-                <div className={styles.flyoutMenu} role="menu">
-                  <div className={styles.flyoutGrid}>
-                    <Link href="/explore" className={styles.flyoutItem} role="menuitem">
-                      <div className={`${styles.iconBox} ${styles.iconIndigo}`}>
-                        <Compass size={18} />
-                      </div>
-                      <div className={styles.flyoutContent}>
-                        <div className={styles.flyoutTitle}>
-                          Community Explore
-                          <span className={styles.badgeMini}>Live</span>
-                        </div>
-                        <span className={styles.flyoutDesc}>
-                          Explore public community stream of generative diffusion creations.
-                        </span>
-                      </div>
-                    </Link>
-
-                    <Link href="/images" className={styles.flyoutItem} role="menuitem">
-                      <div className={`${styles.iconBox} ${styles.iconSky}`}>
-                        <Sparkles size={18} />
-                      </div>
-                      <div className={styles.flyoutContent}>
-                        <div className={styles.flyoutTitle}>Image Studio</div>
-                        <span className={styles.flyoutDesc}>
-                          Generative diffusion canvas & floating prompt composer.
-                        </span>
-                      </div>
-                    </Link>
-
-                    <Link href="/models" className={styles.flyoutItem} role="menuitem">
-                      <div className={`${styles.iconBox} ${styles.iconEmerald}`}>
-                        <Cpu size={18} />
-                      </div>
-                      <div className={styles.flyoutContent}>
-                        <div className={styles.flyoutTitle}>Frontier Model Arena</div>
-                        <span className={styles.flyoutDesc}>
-                          OpenAI GPT-5.6 Luna Low &amp; Image Generation.
-                        </span>
-                      </div>
-                    </Link>
-
-                    <Link href="/playground" className={styles.flyoutItem} role="menuitem">
-                      <div className={`${styles.iconBox} ${styles.iconAmber}`}>
-                        <Terminal size={18} />
-                      </div>
-                      <div className={styles.flyoutContent}>
-                        <div className={styles.flyoutTitle}>Interactive Playground</div>
-                        <span className={styles.flyoutDesc}>
-                          Live streaming inference sandbox with parameter controls.
-                        </span>
-                      </div>
-                    </Link>
-                  </div>
-
-                  <div className={styles.flyoutFooter}>
-                    <Link href="/library" className={styles.flyoutBanner} role="menuitem">
-                      <div className="flex items-center gap-2">
-                        <Compass size={14} className="text-indigo-400" />
-                        <span>Visual Archetype & Design Library</span>
-                      </div>
-                      <ArrowRight size={13} />
-                    </Link>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Direct Explore Link */}
-            <div className={styles.navItem}>
-              <Link
-                href="/explore"
-                className={styles.navButton}
-                aria-current={pathname === '/explore' ? 'page' : undefined}
-              >
-                <Compass size={14} className="text-indigo-400" />
-                <span>Explore</span>
-              </Link>
-            </div>
-
-            {/* 2. Developers Mega Menu */}
-            <div
-              className={styles.navItem}
-              onMouseEnter={() => handleDropdownEnter('developers')}
-              onMouseLeave={handleDropdownLeave}
+            <Link
+              href="/explore"
+              className={styles.navLink}
+              aria-current={isExploreActive ? 'page' : undefined}
             >
-              <button
-                type="button"
-                className={styles.navButton}
-                aria-expanded={activeDropdown === 'developers'}
-                aria-haspopup="true"
-                onClick={() => setActiveDropdown(activeDropdown === 'developers' ? null : 'developers')}
-              >
-                <span>Developers</span>
-                <ChevronDown size={14} className={styles.navChevron} />
-              </button>
+              <span>Explore</span>
+              <NavigationFeedback label="Explore" />
+            </Link>
 
-              {activeDropdown === 'developers' && (
-                <div className={styles.flyoutMenu} role="menu">
-                  <div className={styles.flyoutGrid}>
-                    <Link href="/developers" className={styles.flyoutItem} role="menuitem">
-                      <div className={`${styles.iconBox} ${styles.iconIndigo}`}>
-                        <Code2 size={18} />
-                      </div>
-                      <div className={styles.flyoutContent}>
-                        <div className={styles.flyoutTitle}>
-                          Developer Hub
-                          <span className={styles.badgeMini}>$10 Tier</span>
-                        </div>
-                        <span className={styles.flyoutDesc}>
-                          Instant unlock, zero waitlist, pay-as-you-go OpenAI SDK drop-in.
-                        </span>
-                      </div>
-                    </Link>
-
-                    <Link href="/developers/pricing" className={styles.flyoutItem} role="menuitem">
-                      <div className={`${styles.iconBox} ${styles.iconSky}`}>
-                        <DollarSign size={18} />
-                      </div>
-                      <div className={styles.flyoutContent}>
-                        <div className={styles.flyoutTitle}>Compute Rates & Catalog</div>
-                        <span className={styles.flyoutDesc}>
-                          Wholesale token rates, prompt cache discounts & live cost estimator.
-                        </span>
-                      </div>
-                    </Link>
-
-                    <Link href="/keys" className={styles.flyoutItem} role="menuitem">
-                      <div className={`${styles.iconBox} ${styles.iconEmerald}`}>
-                        <Key size={18} />
-                      </div>
-                      <div className={styles.flyoutContent}>
-                        <div className={styles.flyoutTitle}>API Key Management</div>
-                        <span className={styles.flyoutDesc}>
-                          Create, rotate, and manage granular project secret keys.
-                        </span>
-                      </div>
-                    </Link>
-
-                    <Link href="/tools" className={styles.flyoutItem} role="menuitem">
-                      <div className={`${styles.iconBox} ${styles.iconPurple}`}>
-                        <Sliders size={18} />
-                      </div>
-                      <div className={styles.flyoutContent}>
-                        <div className={styles.flyoutTitle}>Developer Tools</div>
-                        <span className={styles.flyoutDesc}>
-                          15+ utilities: Token counter, prompt compressor, schema generator.
-                        </span>
-                      </div>
-                    </Link>
-                  </div>
-
-                  <div className={styles.flyoutFooter}>
-                    <Link href="/developers/pricing" className={styles.flyoutBanner} role="menuitem">
-                      <div className="flex items-center gap-2">
-                        <Zap size={14} className="text-amber-400" />
-                        <span>$10 Developer Tier: $20 Usable Compute Credit + Instant API Keys</span>
-                      </div>
-                      <ArrowRight size={13} />
-                    </Link>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* 3. Pricing Menu */}
-            <div
-              className={styles.navItem}
-              onMouseEnter={() => handleDropdownEnter('pricing')}
-              onMouseLeave={handleDropdownLeave}
+            <Link
+              href="/pricing"
+              className={styles.navLink}
+              aria-current={isPricingActive ? 'page' : undefined}
             >
-              <button
-                type="button"
-                className={styles.navButton}
-                aria-expanded={activeDropdown === 'pricing'}
-                aria-haspopup="true"
-                onClick={() => setActiveDropdown(activeDropdown === 'pricing' ? null : 'pricing')}
-              >
-                <span>Pricing</span>
-                <ChevronDown size={14} className={styles.navChevron} />
-              </button>
-
-              {activeDropdown === 'pricing' && (
-                <div className={`${styles.flyoutMenu} ${styles.flyoutMenuNarrow}`} role="menu">
-                  <div className={styles.flyoutGridSingle}>
-                    <Link href="/pricing" className={styles.flyoutItem} role="menuitem">
-                      <div className={`${styles.iconBox} ${styles.iconIndigo}`}>
-                        <CreditCard size={18} />
-                      </div>
-                      <div className={styles.flyoutContent}>
-                        <div className={styles.flyoutTitle}>Pricing Overview</div>
-                        <span className={styles.flyoutDesc}>
-                          Compare Free, Pro ($200/mo unlimited image generations), and Developer compute.
-                        </span>
-                      </div>
-                    </Link>
-
-                    <Link href="/developers/pricing" className={styles.flyoutItem} role="menuitem">
-                      <div className={`${styles.iconBox} ${styles.iconSky}`}>
-                        <Zap size={18} />
-                      </div>
-                      <div className={styles.flyoutContent}>
-                        <div className={styles.flyoutTitle}>
-                          Developer Compute Tiers
-                          <span className={styles.badgeMini}>New</span>
-                        </div>
-                        <span className={styles.flyoutDesc}>
-                          $10 Developer Tier to $500 Hyperscale pay-as-you-go packages.
-                        </span>
-                      </div>
-                    </Link>
-
-                    <Link href="/pricing/galx-pro" className={styles.flyoutItem} role="menuitem">
-                      <div className={`${styles.iconBox} ${styles.iconAmber}`}>
-                        <ShieldCheck size={18} />
-                      </div>
-                      <div className={styles.flyoutContent}>
-                        <div className={styles.flyoutTitle}>GALX Pro ($200/mo)</div>
-                        <span className={styles.flyoutDesc}>
-                          Truly unlimited image generations, priority queues & enterprise models.
-                        </span>
-                      </div>
-                    </Link>
-
-                    <Link href="/pricing/fair-use" className={styles.flyoutItem} role="menuitem">
-                      <div className={`${styles.iconBox} ${styles.iconPurple}`}>
-                        <FileText size={18} />
-                      </div>
-                      <div className={styles.flyoutContent}>
-                        <div className={styles.flyoutTitle}>Fair Use & SLAs</div>
-                        <span className={styles.flyoutDesc}>
-                          100% transparent billing, refund policy & fair usage guidelines.
-                        </span>
-                      </div>
-                    </Link>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* 4. Resources Menu */}
-            <div
-              className={styles.navItem}
-              onMouseEnter={() => handleDropdownEnter('resources')}
-              onMouseLeave={handleDropdownLeave}
-            >
-              <button
-                type="button"
-                className={styles.navButton}
-                aria-expanded={activeDropdown === 'resources'}
-                aria-haspopup="true"
-                onClick={() => setActiveDropdown(activeDropdown === 'resources' ? null : 'resources')}
-              >
-                <span>Resources</span>
-                <ChevronDown size={14} className={styles.navChevron} />
-              </button>
-
-              {activeDropdown === 'resources' && (
-                <div className={`${styles.flyoutMenu} ${styles.flyoutMenuNarrow}`} role="menu">
-                  <div className={styles.flyoutGridSingle}>
-                    <Link href="/knowledge-base" className={styles.flyoutItem} role="menuitem">
-                      <div className={`${styles.iconBox} ${styles.iconIndigo}`}>
-                        <BookOpen size={18} />
-                      </div>
-                      <div className={styles.flyoutContent}>
-                        <div className={styles.flyoutTitle}>Knowledge Base</div>
-                        <span className={styles.flyoutDesc}>
-                          Comprehensive architecture, image generation workflows & quickstarts.
-                        </span>
-                      </div>
-                    </Link>
-
-                    <Link href="/faq" className={styles.flyoutItem} role="menuitem">
-                      <div className={`${styles.iconBox} ${styles.iconSky}`}>
-                        <HelpCircle size={18} />
-                      </div>
-                      <div className={styles.flyoutContent}>
-                        <div className={styles.flyoutTitle}>Frequently Asked Questions</div>
-                        <span className={styles.flyoutDesc}>
-                          Answers about unlimited image creation, token billing & developer access.
-                        </span>
-                      </div>
-                    </Link>
-
-                    <Link href="/security" className={styles.flyoutItem} role="menuitem">
-                      <div className={`${styles.iconBox} ${styles.iconEmerald}`}>
-                        <Shield size={18} />
-                      </div>
-                      <div className={styles.flyoutContent}>
-                        <div className={styles.flyoutTitle}>Security & Compliance</div>
-                        <span className={styles.flyoutDesc}>
-                          PCI DSS, EU AI Act, FedRAMP readiness & zero-retention guarantee.
-                        </span>
-                      </div>
-                    </Link>
-
-                    <Link href="/status" className={styles.flyoutItem} role="menuitem">
-                      <div className={`${styles.iconBox} ${styles.iconAmber}`}>
-                        <Activity size={18} />
-                      </div>
-                      <div className={styles.flyoutContent}>
-                        <div className={styles.flyoutTitle}>System Status</div>
-                        <span className={styles.flyoutDesc}>
-                          Real-time 99.99% uptime, API SLOs & live incident monitoring.
-                        </span>
-                      </div>
-                    </Link>
-                  </div>
-                </div>
-              )}
-            </div>
+              <span>Pricing</span>
+              <NavigationFeedback label="Pricing" />
+            </Link>
           </nav>
 
           {/* Quick Search Trigger Pill (⌘K) */}
@@ -690,71 +359,36 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
                 <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-xs font-mono text-zinc-400">⌘K</kbd>
               </button>
 
-              {/* Platform Category */}
+              {/* Minimalist Navigation */}
               <div>
-                <div className={styles.drawerSectionTitle}>Platform</div>
+                <div className={styles.drawerSectionTitle}>Navigation</div>
                 <div className={styles.drawerList}>
-                  <Link href="/explore" className={styles.drawerLink} onClick={() => setIsMobileOpen(false)}>
-                    <Compass size={16} className="text-indigo-400" />
-                    <span>Community Explore (Live)</span>
+                  <Link
+                    href="/images"
+                    className={styles.drawerLink}
+                    aria-current={isImageActive ? 'page' : undefined}
+                    onClick={() => setIsMobileOpen(false)}
+                  >
+                    <Sparkles size={18} className="text-sky-400" />
+                    <span>Image</span>
                   </Link>
-                  <Link href="/images" className={styles.drawerLink} onClick={() => setIsMobileOpen(false)}>
-                    <Sparkles size={16} className="text-sky-400" />
-                    <span>Image Studio</span>
+                  <Link
+                    href="/explore"
+                    className={styles.drawerLink}
+                    aria-current={isExploreActive ? 'page' : undefined}
+                    onClick={() => setIsMobileOpen(false)}
+                  >
+                    <Compass size={18} className="text-indigo-400" />
+                    <span>Explore</span>
                   </Link>
-                  <Link href="/models" className={styles.drawerLink} onClick={() => setIsMobileOpen(false)}>
-                    <Cpu size={16} className="text-emerald-400" />
-                    <span>Frontier Models Arena</span>
-                  </Link>
-                  <Link href="/playground" className={styles.drawerLink} onClick={() => setIsMobileOpen(false)}>
-                    <Terminal size={16} className="text-amber-400" />
-                    <span>Interactive Playground</span>
-                  </Link>
-                </div>
-              </div>
-
-              {/* Developers Category */}
-              <div>
-                <div className={styles.drawerSectionTitle}>Developers</div>
-                <div className={styles.drawerList}>
-                  <Link href="/developers" className={styles.drawerLink} onClick={() => setIsMobileOpen(false)}>
-                    <Code2 size={16} className="text-indigo-400" />
-                    <span>Developer Hub ($10 Unlock)</span>
-                  </Link>
-                  <Link href="/developers/pricing" className={styles.drawerLink} onClick={() => setIsMobileOpen(false)}>
-                    <DollarSign size={16} className="text-sky-400" />
-                    <span>Wholesale Pricing & Catalog</span>
-                  </Link>
-                  <Link href="/keys" className={styles.drawerLink} onClick={() => setIsMobileOpen(false)}>
-                    <Key size={16} className="text-emerald-400" />
-                    <span>API Secret Keys</span>
-                  </Link>
-                  <Link href="/tools" className={styles.drawerLink} onClick={() => setIsMobileOpen(false)}>
-                    <Sliders size={16} className="text-purple-400" />
-                    <span>Developer Utilities</span>
-                  </Link>
-                </div>
-              </div>
-
-              {/* Pricing & Resources */}
-              <div>
-                <div className={styles.drawerSectionTitle}>Pricing & Resources</div>
-                <div className={styles.drawerList}>
-                  <Link href="/pricing" className={styles.drawerLink} onClick={() => setIsMobileOpen(false)}>
-                    <CreditCard size={16} className="text-indigo-400" />
-                    <span>Pricing Plans Overview</span>
-                  </Link>
-                  <Link href="/knowledge-base" className={styles.drawerLink} onClick={() => setIsMobileOpen(false)}>
-                    <BookOpen size={16} className="text-sky-400" />
-                    <span>Knowledge Base</span>
-                  </Link>
-                  <Link href="/faq" className={styles.drawerLink} onClick={() => setIsMobileOpen(false)}>
-                    <HelpCircle size={16} className="text-amber-400" />
-                    <span>Frequently Asked Questions</span>
-                  </Link>
-                  <Link href="/status" className={styles.drawerLink} onClick={() => setIsMobileOpen(false)}>
-                    <Activity size={16} className="text-emerald-400" />
-                    <span>System Status & SLOs</span>
+                  <Link
+                    href="/pricing"
+                    className={styles.drawerLink}
+                    aria-current={isPricingActive ? 'page' : undefined}
+                    onClick={() => setIsMobileOpen(false)}
+                  >
+                    <CreditCard size={18} className="text-emerald-400" />
+                    <span>Pricing</span>
                   </Link>
                 </div>
               </div>

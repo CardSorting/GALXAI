@@ -17,7 +17,7 @@ const readingPaths = new Set<string>(PUBLIC_READING_PATHS);
 export function isPublicReadingPath(pathname: string) { return readingPaths.has(pathname); }
 
 export const PUBLIC_NAVIGATION = [
-  { label: 'Stream', href: '/#stream' },
+  { label: 'Explore', href: '/explore' },
   { label: 'Images', href: '/images' },
   { label: 'Pricing', href: '/pricing' },
   { label: 'FAQ', href: '/faq' },
