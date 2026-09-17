@@ -17,59 +17,26 @@ interface OpenAIModelQuota {
 
 const OPENAI_LUMI_MODELS: OpenAIModelQuota[] = [
   {
-    id: 'gpt-6-astra',
-    name: 'GPT-6 Astra (Default Flagship)',
-    category: 'Our most capable model for complex, demanding work',
-    baseReqs: 800,
-    contextWindow: '2M tokens',
+    id: 'gpt-5-6-luna-low',
+    name: 'OpenAI GPT-5.6 Luna Low',
+    category: 'Ultra-fast frontier text & code inference engine',
+    baseReqs: 15000,
+    contextWindow: '1.05M tokens',
     cacheSavings: '90% Active',
-    latency: '< 20ms',
-    badge: 'DEFAULT APEX 👑',
-    color: 'from-indigo-400 to-sky-500'
-  },
-  {
-    id: 'gpt-5.6-sol',
-    name: 'GPT-5.6 Sol',
-    category: 'Reliable agentic workhorse for everyday tasks',
-    baseReqs: 1250,
-    contextWindow: '1M tokens',
-    cacheSavings: '90% Active',
-    latency: '< 25ms',
-    badge: 'WORKHORSE ⚡',
+    latency: '< 15ms Anycast',
+    badge: 'FLAGSHIP INFERENCE ⚡',
     color: 'from-cyan-400 to-blue-500'
   },
   {
-    id: 'gpt-5.6-terra',
-    name: 'GPT-5.6 Terra',
-    category: 'Balanced agentic coding model for everyday work',
-    baseReqs: 2500,
-    contextWindow: '1M tokens',
-    cacheSavings: '90% Active',
-    latency: '< 20ms',
-    badge: 'BALANCED',
-    color: 'from-emerald-400 to-teal-500'
-  },
-  {
-    id: 'gpt-5.6-luna',
-    name: 'GPT-5.6 Luna',
-    category: 'Fast and affordable agentic coding model',
-    baseReqs: 15000,
-    contextWindow: '1M tokens',
-    cacheSavings: '90% Active',
-    latency: '< 15ms Anycast',
-    badge: 'FAST & AFFORDABLE 🌟',
-    color: 'from-amber-400 to-orange-500'
-  },
-  {
-    id: 'gpt-5.5',
-    name: 'GPT-5.5',
-    category: 'Proven previous-generation model for coding and general work',
-    baseReqs: 5000,
-    contextWindow: '500k tokens',
-    cacheSavings: '90% Active',
-    latency: '< 18ms',
-    badge: 'PROVEN',
-    color: 'from-purple-400 to-indigo-500'
+    id: 'openai-gpt-image-latest',
+    name: 'OpenAI Visual Synthesis',
+    category: 'Production-grade visual and image generation engine',
+    baseReqs: 250,
+    contextWindow: 'Sanitized Binaries',
+    cacheSavings: 'Edge Cached',
+    latency: 'Sub-second',
+    badge: 'VISUAL SYNTHESIS 🎨',
+    color: 'from-purple-400 to-pink-500'
   }
 ];
 
@@ -77,11 +44,11 @@ const MULTIPLIERS = [1, 10, 25, 50, 100, 250];
 
 export function LumiWorkloadVisualizer() {
   const [multiplier, setMultiplier] = useState<number>(1);
-  const [filterCategory, setFilterCategory] = useState<'all' | 'flagship' | 'agentic'>('all');
+  const [filterCategory, setFilterCategory] = useState<'all' | 'text' | 'image'>('all');
 
   const filteredModels = OPENAI_LUMI_MODELS.filter(m => {
-    if (filterCategory === 'flagship') return m.id === 'gpt-6-astra' || m.id === 'gpt-5.6-sol';
-    if (filterCategory === 'agentic') return m.id === 'gpt-5.6-terra' || m.id === 'gpt-5.6-luna' || m.id === 'gpt-5.5';
+    if (filterCategory === 'text') return m.id === 'gpt-5-6-luna-low';
+    if (filterCategory === 'image') return m.id === 'openai-gpt-image-latest';
     return true;
   });
 
@@ -127,7 +94,7 @@ export function LumiWorkloadVisualizer() {
 
       {/* Category Filter Pills */}
       <div className="flex items-center gap-2 pt-6 pb-4 overflow-x-auto">
-        {(['all', 'flagship', 'agentic'] as const).map((cat) => (
+        {(['all', 'text', 'image'] as const).map((cat) => (
           <button
             key={cat}
             onClick={() => setFilterCategory(cat)}
@@ -137,7 +104,7 @@ export function LumiWorkloadVisualizer() {
                 : 'bg-white/5 border border-white/5 text-zinc-400 hover:text-zinc-200'
             }`}
           >
-            {cat === 'all' ? 'All Models' : cat === 'flagship' ? 'Flagship Frontier (GPT-6 Astra & Sol)' : 'Agentic & Fast (Terra, Luna, 5.5)'}
+            {cat === 'all' ? 'All Models' : cat === 'text' ? 'Text & Code (GPT-5.6 Luna Low)' : 'Visual Synthesis (Image Generation)'}
           </button>
         ))}
       </div>

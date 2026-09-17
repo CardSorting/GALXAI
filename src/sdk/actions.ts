@@ -58,7 +58,7 @@ export async function chatAction(
       : promptOrMessages;
 
     const completion = await serverClient.chat.completions.create({
-      model: options.model || 'gpt-5.6-sol',
+      model: options.model || 'gpt-5-6-luna-low',
       messages: messages as any,
       temperature: options.temperature
     });
@@ -88,8 +88,8 @@ export async function listModelsAction() {
     return {
       success: true,
       data: [
-        { id: 'openai-gpt-image-latest', name: 'OpenAI Image Generation', description: 'Generate images from text prompts' },
-        { id: 'gpt-5.6-sol', name: 'GPT-5.6 Sol', description: 'Flagship reasoning & text generation' }
+        { id: 'gpt-5-6-luna-low', name: 'OpenAI GPT-5.6 Luna Low', description: 'Ultra-fast text & code inference engine' },
+        { id: 'openai-gpt-image-latest', name: 'OpenAI Image Generation', description: 'Generate images from text prompts' }
       ]
     };
   }

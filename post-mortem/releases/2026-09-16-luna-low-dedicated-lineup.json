@@ -1,0 +1,17 @@
+{
+  "release": "2026-09-16-luna-low-dedicated-lineup",
+  "title": "Dedicated GPT-5.6 Luna Low and Image Generation Lineup",
+  "timestamp": "2026-09-16T23:42:00Z",
+  "author": "maintainer",
+  "description": "Refactored the workspace to exclusively offer gpt-5-6-luna-low as the sole text/code model alongside openai-gpt-image-latest for image generation. Updated ModelCatalog, PublicModelCatalog, GalxEdgeGateway, seat tiers, calculators, UI dashboards, and SDK/CLI defaults. All legacy and alias queries seamlessly resolve to gpt-5-6-luna-low in 0ms trie resolution.",
+  "verification": {
+    "typecheck": "npx tsc --noEmit (0 errors)",
+    "lint": "npm run lint (0 errors)",
+    "unit_tests": [
+      "scripts/test-developer-preview.ts",
+      "npm run test:billing:lifecycle",
+      "npm run test:image:security",
+      "npm run test:egress:transport"
+    ]
+  }
+}

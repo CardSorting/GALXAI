@@ -42,10 +42,10 @@ interface PromptPreset {
 
 const PRESETS: PromptPreset[] = [
   {
-    id: 'astra-arch',
-    label: '✨ GPT-6 Astra Architecture',
+    id: 'luna-arch',
+    label: '✨ Luna Architecture & Edge Routing',
     category: 'reasoning',
-    model: 'gpt-6-astra',
+    model: 'gpt-5-6-luna-low',
     prompt: 'Architect an ultra-resilient, distributed AI model router with sub-15ms Time-To-First-Token, automated KV prompt caching, and zero-data-retention cryptographic guarantees.',
     simulatedReply: `### Enterprise AI Gateway & Routing Architecture:
 
@@ -64,7 +64,7 @@ const PRESETS: PromptPreset[] = [
     id: 'refactor',
     label: '⚡ Next.js Route Refactor',
     category: 'code',
-    model: 'gpt-5.6-sol',
+    model: 'gpt-5-6-luna-low',
     prompt: 'Refactor this Express route handler into a Next.js App Router route.ts with Zod payload validation:\n\napp.post("/api/auth/login", (req, res) => {\n  const { email, password } = req.body;\n  if (!email || !password) return res.status(400).send("Missing credentials");\n  // ...\n});',
     simulatedReply: `import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
@@ -96,46 +96,25 @@ export async function POST(req: NextRequest) {
 }`
   },
   {
-    id: 'sql',
-    label: '📊 SQL Index & Plan Optimizer',
-    category: 'code',
-    model: 'gpt-5.6-terra',
-    prompt: 'Optimize this slow PostgreSQL analytical query scanning 10M rows:\n\nSELECT user_id, SUM(amount_cents), COUNT(*)\nFROM billing_events\nWHERE status = "completed" AND created_at >= NOW() - INTERVAL "30 days"\nGROUP BY user_id\nORDER BY SUM(amount_cents) DESC\nLIMIT 20;',
-    simulatedReply: `### PostgreSQL Query Plan Optimization:
-
-1. **🚨 Bottleneck**: Full table scan on \`billing_events\` (10M rows) filtering by \`status\` and \`created_at\`.
-2. **✅ Composite Partial Index**:
-\`\`\`sql
-CREATE INDEX CONCURRENTLY idx_billing_events_recent_completed
-ON billing_events (created_at DESC, user_id, amount_cents)
-WHERE status = 'completed';
-\`\`\`
-3. **⚡ Result**: Transforms slow Sequential Scan into a fast **Index-Only Scan**, reducing query execution time from 2,450ms to **4.2ms** (99.8% reduction).`
-  },
-  {
     id: 'fast-summary',
     label: '🏎️ Instant Luna Summarizer',
     category: 'fast',
-    model: 'gpt-5.6-luna',
+    model: 'gpt-5-6-luna-low',
     prompt: 'Summarize the core architectural benefits of an enterprise AI gateway with prompt caching in 3 bullet points.',
-    simulatedReply: `• **25-36% Direct Cost Savings**: Bypasses retail API markups through consolidated enterprise volume tiers.
+    simulatedReply: `• **Direct Cost Savings**: Low-overhead agentic coding with verified OpenAI API rates ($0.20 in / $1.20 out).
 • **Sub-15ms Global Edge Routing**: Intelligent latency-optimized anycast routing with automatic health failover.
-• **Zero Downtime Rate-Limit Smoothing**: Absorbs burst traffic spikes with 75% prompt cache pass-through and active resilience.`
+• **Zero Downtime Rate-Limit Smoothing**: Absorbs burst traffic spikes with prompt cache pass-through and active resilience.`
   }
 ];
 
 const MENTAL_MODELS = [
-  { id: 'astra', name: '✨ Astra Apex', model: 'gpt-6-astra', icon: Sparkles, badge: '-25%' },
-  { id: 'sol', name: '⚡ Sol Workhorse', model: 'gpt-5.6-sol', icon: Zap, badge: '-25%' },
-  { id: 'terra', name: '🧠 Terra Coding', model: 'gpt-5.6-terra', icon: Brain, badge: '-25%' },
-  { id: 'luna', name: '🚀 Luna Speed', model: 'gpt-5.6-luna', icon: Flame, badge: '-36%' },
-  { id: '5.5', name: '📦 GPT-5.5 Proven', model: 'gpt-5.5', icon: Layers, badge: '-25%' },
+  { id: 'luna', name: '🚀 GPT-5.6 Luna Low', model: 'gpt-5-6-luna-low', icon: Flame, badge: '-36%' },
   { id: 'image', name: '🎨 Visual Studio', model: 'openai-gpt-image-latest', icon: ImageIcon, badge: '-25%' }
 ];
 
 function BaseApiPlayground() {
   const { user } = useAuth();
-  const [modelInput, setModelInput] = useState<string>('gpt-6-astra');
+  const [modelInput, setModelInput] = useState<string>('gpt-5-6-luna-low');
   const [prompt, setPrompt] = useState<string>(PRESETS[0].prompt);
   const [streamingOutput, setStreamingOutput] = useState<string>('');
   const [isStreaming, setIsStreaming] = useState<boolean>(false);

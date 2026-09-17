@@ -194,7 +194,7 @@ function PreviewFlow({ user, isLoading }: Pick<ReturnType<typeof useAuth>, 'user
         <div className={styles.actions}><button className={styles.primary}>Review application <ArrowRight size={16} aria-hidden="true" /></button>{editing && <button className={styles.secondary} type="button" onClick={() => { setEditing(false); setErrors({}); setNotice(''); focusHeading(); }}>Cancel</button>}</div>
       </form>}
     </> : status === 'approved' ? <>
-      <h2 ref={heading} tabIndex={-1}>Your Developer Tier access is active</h2>{expiresAt && <p>Your access is available until {new Date(expiresAt).toLocaleString()}.</p>}<p>Your account is unlocked for pay-as-you-go API usage across Images generation and Frontier OpenAI Models (GPT-6 Astra, GPT-5.6 Sol, Terra, Luna, GPT-5.5).</p>
+      <h2 ref={heading} tabIndex={-1}>Your Developer Tier access is active</h2>{expiresAt && <p>Your access is available until {new Date(expiresAt).toLocaleString()}.</p>}<p>Your account is unlocked for pay-as-you-go API usage across Images generation and OpenAI GPT-5.6 Luna Low.</p>
       <div className={styles.actions}><Link className={styles.primary} href="/keys">Manage API keys</Link><Link className={styles.textLink} href="/docs">Read the API docs</Link><Link className={styles.textLink} href="/playground">Open playground</Link></div>
       <form className={styles.feedbackForm} onSubmit={e => { e.preventDefault(); void save('feedback'); }}><label htmlFor="preview-feedback">Share private feedback</label><p id="feedback-hint" className={styles.helper}>Tell us what happened and what you expected. Only the GALX team can read your feedback. Leave out credentials and sensitive data.</p><textarea id="preview-feedback" aria-describedby="feedback-hint" rows={5} minLength={10} maxLength={4000} required value={feedback} onChange={e => setFeedback(e.target.value)} /><button className={styles.primary} disabled={busy}>{busy ? 'Sending…' : 'Send private feedback'}</button></form>
     </> : <>
@@ -202,7 +202,7 @@ function PreviewFlow({ user, isLoading }: Pick<ReturnType<typeof useAuth>, 'user
       <div className={styles.tierCard}>
         <span className={styles.tierBadge}>Skip the Waitlist ⚡</span>
         <h3 className={styles.tierTitle}>Get Instant Developer Tier ($10)</h3>
-        <p className={styles.tierDesc}>Unlock pay-as-you-go API access immediately for Images and Frontier OpenAI Models without waiting for manual cohort review.</p>
+        <p className={styles.tierDesc}>Unlock pay-as-you-go API access immediately for Images and OpenAI GPT-5.6 Luna Low without waiting for manual cohort review.</p>
         <button className={styles.primary} disabled={busy} onClick={() => void purchaseDeveloperTier()}>
           {busy ? 'Opening checkout…' : 'Purchase Developer Tier ($10)'} <ArrowRight size={16} aria-hidden="true" />
         </button>

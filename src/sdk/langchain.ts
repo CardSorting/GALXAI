@@ -26,7 +26,7 @@ export class ChatGalxAI {
 
   constructor(fields: ChatGalxAIParams = {}) {
     const { modelName, model, temperature, maxTokens, streaming, ...clientOpts } = fields;
-    this.modelName = model || modelName || 'gpt-5.6-sol';
+    this.modelName = model || modelName || 'gpt-5-6-luna-low';
     this.temperature = temperature ?? 0.7;
     this.maxTokens = maxTokens;
     this.streaming = streaming ?? false;

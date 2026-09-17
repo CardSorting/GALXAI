@@ -26,7 +26,7 @@ import { FRONTEND_VISIBLE_MODELS } from '@/core/router/PublicModelCatalog';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 
 export function PromptCachingToolClient() {
-  const [selectedModelId, setSelectedModelId] = useState<string>('gpt-6-astra');
+  const [selectedModelId, setSelectedModelId] = useState<string>('gpt-5-6-luna-low');
   const [promptText, setPromptText] = useState<string>(
     `You are an enterprise systems engineer and technical architect with deep expertise in distributed Anycast model routing, low-latency Server-Sent Events (SSE), and token economics.
 

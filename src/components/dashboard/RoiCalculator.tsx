@@ -36,7 +36,7 @@ function BaseRoiCalculator({
   showTitle = true
 }: RoiCalculatorProps) {
   const [monthlySpend, setMonthlySpend] = useState(initialMonthlySpend);
-  const [selectedModelId, setSelectedModelId] = useState('gpt-6-astra');
+  const [selectedModelId, setSelectedModelId] = useState('gpt-5-6-luna-low');
   const [cachedPromptPct, setCachedPromptPct] = useState(60);
   const [isOffPeakMode, setIsOffPeakMode] = useState(true);
   const [copiedAudit, setCopiedAudit] = useState(false);

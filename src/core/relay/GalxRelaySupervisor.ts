@@ -612,7 +612,7 @@ export class GalxRelaySupervisor {
       };
     }
 
-    if (health.data.shards.total === 0) {
+    if (health.data.shards && health.data.shards.total === 0) {
       return {
         success: false,
         rttMs: health.rttMs,

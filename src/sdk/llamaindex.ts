@@ -23,7 +23,7 @@ export class GalxLLM {
 
   constructor(params: GalxLLMParams = {}) {
     const { model, temperature, maxTokens, ...clientOpts } = params;
-    this.model = model || 'gpt-5.6-sol';
+    this.model = model || 'gpt-5-6-luna-low';
     this.temperature = temperature ?? 0.2;
     this.maxTokens = maxTokens;
     this.client = new GalxAI(clientOpts);

@@ -181,7 +181,7 @@ export class PermissionDeniedError extends APIError {
 export class NotFoundError extends APIError {
   constructor(
     message = 'Requested resource not found',
-    suggestedFix = 'Check the model ID or endpoint URI. Try "gpt-5.6-sol" for flagship coding.',
+    suggestedFix = 'Check the model ID or endpoint URI. Try "gpt-5-6-luna-low" for high-velocity text & code.',
     headers?: Headers | Record<string, string>
   ) {
     super(message, 404, 'resource_not_found', undefined, suggestedFix, headers);

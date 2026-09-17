@@ -72,7 +72,7 @@ export function createExpressChatHandler(options: ExpressAdapterOptions = {}) {
         res.setHeader('Transfer-Encoding', 'chunked');
 
         const responseStream = await client.chat.completions.create({
-          model: model || options.defaultModel || 'gpt-5.6-sol',
+          model: model || options.defaultModel || 'gpt-5-6-luna-low',
           messages,
           temperature,
           stream: true
@@ -88,7 +88,7 @@ export function createExpressChatHandler(options: ExpressAdapterOptions = {}) {
       }
 
       const completion = await client.chat.completions.create({
-        model: model || options.defaultModel || 'gpt-5.6-sol',
+        model: model || options.defaultModel || 'gpt-5-6-luna-low',
         messages,
         temperature
       });

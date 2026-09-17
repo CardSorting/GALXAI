@@ -60,7 +60,7 @@ export class ChatCompletionBuilder implements PromiseLike<ChatCompletionResponse
   private _requestOptions?: RequestOptions;
   private _asyncParams?: Partial<ChatCompletionAsyncParams>;
 
-  constructor(completions: CompletionsResource, model = 'gpt-5.6-sol') {
+  constructor(completions: CompletionsResource, model = 'gpt-5-6-luna-low') {
     this.completions = completions;
     this._model = model;
   }

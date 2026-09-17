@@ -29,7 +29,7 @@ export function ModelCostComparatorToolClient() {
   const [monthlyInputMillions, setMonthlyInputMillions] = useState<number>(20);
   const [monthlyOutputMillions, setMonthlyOutputMillions] = useState<number>(5);
   const [cacheHitPercentage, setCacheHitPercentage] = useState<number>(50);
-  const [selectedModelId, setSelectedModelId] = useState<string>('gpt-6-astra');
+  const [selectedModelId, setSelectedModelId] = useState<string>('gpt-5-6-luna-low');
   const [copiedCode, setCopiedCode] = useState<boolean>(false);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
   const [inboundEmail, setInboundEmail] = useState('');

@@ -50,53 +50,13 @@ interface ModelCuratedMetadata {
 }
 
 const MODEL_METADATA: Record<string, ModelCuratedMetadata> = {
-  'gpt-6-astra': {
-    roleBadge: 'Apex Frontier Reasoning & Complex Systems',
-    speedTier: 'Highest Capability Frontier (~400ms)',
-    bestFor: [
-      'Complex multi-agent reasoning & systems',
-      'Challenging mathematical & algorithmic synthesis',
-      'Enterprise-grade full-stack architecture',
-    ],
-    cacheDiscountPercent: 90,
-  },
-  'gpt-5.6-sol': {
-    roleBadge: 'Reliable Agentic Workhorse',
-    speedTier: 'Comprehensive Reasoning (~300ms)',
-    bestFor: [
-      'Everyday agentic workflow execution',
-      'Complex algorithmic design & math',
-      'Multi-file codebase refactoring',
-    ],
-    cacheDiscountPercent: 90,
-  },
-  'gpt-5.6-terra': {
-    roleBadge: 'Balanced Agentic Coding',
-    speedTier: 'Balanced & High Throughput (~250ms)',
-    bestFor: [
-      'Daily agentic development loops',
-      'Automated test generation & CI/CD',
-      'Full-stack feature implementation',
-    ],
-    cacheDiscountPercent: 90,
-  },
-  'gpt-5.6-luna': {
-    roleBadge: 'Fast & Affordable Coding',
+  'gpt-5-6-luna-low': {
+    roleBadge: 'Fast & Affordable Agentic Coding',
     speedTier: 'Sub-Second Real-Time (~65ms)',
     bestFor: [
-      'Real-time IDE autocomplete',
-      'Instant-response streaming chat',
-      'High-frequency triage & classification',
-    ],
-    cacheDiscountPercent: 90,
-  },
-  'gpt-5.5': {
-    roleBadge: 'Proven Previous-Generation Model',
-    speedTier: 'Proven General Execution (~280ms)',
-    bestFor: [
-      'Baseline code analysis & migrations',
-      'Cost-effective structured data processing',
-      'Standard conversational assistant workflows',
+      'Real-time IDE autocomplete & agentic loops',
+      'Instant-response streaming completions',
+      'High-frequency triage & reasoning tasks',
     ],
     cacheDiscountPercent: 90,
   },
@@ -123,10 +83,10 @@ const openai = new OpenAI({
 });
 
 const response = await openai.chat.completions.create({
-  model: 'gpt-6-astra',
+  model: 'gpt-5-6-luna-low',
   messages: [
-    { role: 'system', content: 'You are an expert systems architect.' },
-    { role: 'user', content: 'Architect an enterprise high-throughput event fabric.' },
+    { role: 'system', content: 'You are an expert agentic engineer.' },
+    { role: 'user', content: 'Implement an ultra-resilient distributed streaming loop.' },
   ],
 });
 
@@ -144,10 +104,10 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="gpt-6-astra",
+    model="gpt-5-6-luna-low",
     messages=[
-        {"role": "system", "content": "You are an expert systems architect."},
-        {"role": "user", "content": "Architect an enterprise high-throughput event fabric."}
+        {"role": "system", "content": "You are an expert agentic engineer."},
+        {"role": "user", "content": "Implement an ultra-resilient distributed streaming loop."}
     ]
 )
 
@@ -159,9 +119,9 @@ print(response.choices[0].message.content)`,
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer $GALXAI_API_KEY" \\
   -d '{
-    "model": "gpt-6-astra",
+    "model": "gpt-5-6-luna-low",
     "messages": [
-      {"role": "user", "content": "Architect an enterprise high-throughput event fabric."}
+      {"role": "user", "content": "Implement an ultra-resilient distributed streaming loop."}
     ]
   }'`,
   },

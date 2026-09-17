@@ -83,7 +83,7 @@ export function inferIntent(input: string): InferredIntent {
     return {
       type: 'code',
       prompt: input,
-      model: 'gpt-5.6-luna'
+      model: 'gpt-5-6-luna-low'
     };
   }
 
@@ -91,7 +91,7 @@ export function inferIntent(input: string): InferredIntent {
   return {
     type: 'chat',
     prompt: input,
-    model: 'gpt-5.6-sol'
+    model: 'gpt-5-6-luna-low'
   };
 }
 

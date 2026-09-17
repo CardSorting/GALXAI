@@ -150,7 +150,7 @@ async function previewPOST(req: NextRequest) {
     const rawBody = await parseChatJsonBody(req);
     const requestedModel = typeof rawBody.model === 'string' && rawBody.model.trim()
       ? rawBody.model.trim()
-      : 'gpt-5.6-sol';
+      : 'gpt-5-6-luna-low';
 
     // Enforce Dual Rolling Window Seat Limits (5-Hour & Weekly Limits)
     try {
@@ -972,7 +972,7 @@ async function previewPOST(req: NextRequest) {
 async function previewGET(req: NextRequest) {
   const url = new URL(req.url);
   const prompt = url.searchParams.get('prompt') || url.searchParams.get('q') || url.searchParams.get('message') || url.searchParams.get('input') || 'Hello GALXAI';
-  const model = url.searchParams.get('model') || 'gpt-5.6-sol';
+  const model = url.searchParams.get('model') || 'gpt-5-6-luna-low';
   const stream = url.searchParams.get('stream') === 'true';
 
   const syntheticReq = new NextRequest(req.url, {

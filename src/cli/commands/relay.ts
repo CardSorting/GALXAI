@@ -104,9 +104,9 @@ export async function handleRelayCommand(args: string[]): Promise<void> {
       const testRes = await GalxRelaySupervisor.smokeTest();
       if (testRes.success) {
         console.log(`  \x1b[32m✔\x1b[0m Relay wire verification \x1b[1mPASSED\x1b[0m in \x1b[1m${testRes.rttMs}ms\x1b[0m`);
-        console.log(`  \x1b[32m✔\x1b[0m Version: ${testRes.health?.version}`);
-        console.log(`  \x1b[32m✔\x1b[0m Active Shards: ${testRes.health?.shards.active}`);
-        console.log(`  \x1b[32m✔\x1b[0m Storage Engine: ${testRes.health?.storageEngine}\n`);
+        console.log(`  \x1b[32m✔\x1b[0m Version: ${testRes.health?.version ?? 'vnext'}`);
+        console.log(`  \x1b[32m✔\x1b[0m Active Shards: ${testRes.health?.shards?.active ?? 'Active'}`);
+        console.log(`  \x1b[32m✔\x1b[0m Storage Engine: ${testRes.health?.storageEngine ?? 'Federation'}\n`);
       } else {
         console.error(`  \x1b[31m✖\x1b[0m Smoke test \x1b[1mFAILED\x1b[0m: ${testRes.error}\n`);
         process.exit(1);

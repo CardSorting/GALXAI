@@ -44,9 +44,8 @@ import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 
 export function CompareClient() {
   const [selectedIds, setSelectedIds] = useState<string[]>([
-    'gpt-5.6-sol',
-    'gpt-5.6-terra',
-    'gpt-5.6-luna',
+    'gpt-5-6-luna-low',
+    'openai-gpt-image-latest',
   ]);
   const [highlightDiffs, setHighlightDiffs] = useState<boolean>(false);
   const [copiedAction, setCopiedAction] = useState<string | null>(null);
@@ -233,28 +232,27 @@ export function CompareClient() {
           <div className="flex flex-wrap items-center gap-2 font-mono text-xs">
             <button
               type="button"
-              onClick={() => setSelectedIds(['gpt-5.6-sol', 'gpt-5.6-terra', 'gpt-5.6-luna'])}
-              className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white border border-white/5 transition-all cursor-pointer"
-            >
-              <span>GPT Suite (Sol / Terra / Luna)</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setSelectedIds(['gpt-5.6-sol', 'gpt-5.6-terra'])}
+              onClick={() => setSelectedIds(['gpt-5-6-luna-low', 'openai-gpt-image-latest'])}
               className="px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 transition-all cursor-pointer"
             >
-              <span>SOTA Coding vs Reasoning (Sol vs Terra)</span>
+              <span>Full Lineup (Luna Low vs Visual Synthesis)</span>
             </button>
 
             <button
               type="button"
-              onClick={() => setSelectedIds(['gpt-5.6-sol', 'gpt-5.6-luna'])}
+              onClick={() => setSelectedIds(['gpt-5-6-luna-low'])}
               className="px-3 py-1.5 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 transition-all cursor-pointer"
             >
-              <span>Flagship vs High-Velocity (Sol vs Luna)</span>
+              <span>Text & Code (GPT-5.6 Luna Low)</span>
             </button>
 
+            <button
+              type="button"
+              onClick={() => setSelectedIds(['openai-gpt-image-latest'])}
+              className="px-3 py-1.5 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/30 transition-all cursor-pointer"
+            >
+              <span>Visual Synthesis (Image Generation)</span>
+            </button>
           </div>
         </section>
 
@@ -865,39 +863,29 @@ export function CompareClient() {
           <div className="space-y-1 border-b border-white/10 pb-4">
             <h2 className="text-lg font-bold text-white flex items-center gap-2 font-mono">
               <Cpu className="w-5 h-5 text-amber-400" />
-              <span>Architectural Decision Guide: Sol vs Terra vs Luna</span>
+              <span>Architectural Decision Guide: Luna Low & Visual Synthesis</span>
             </h2>
             <p className="text-xs text-zinc-400">Deep comparative guidance based on token throughput, reasoning depth, and cost efficiency.</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-sans">
-            <div className="p-5 rounded-2xl bg-black/40 border border-white/5 space-y-2">
-              <div className="flex items-center justify-between text-amber-300 font-mono font-bold">
-                <span>OpenAI GPT-5.6 Sol</span>
-                <span className="text-[10px] bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">Deep SOTA Reasoning</span>
-              </div>
-              <p className="text-zinc-300 leading-relaxed">
-                Choose Sol for mission-critical architectural refactoring, multi-file code review, complex financial modeling, and recursive agentic reasoning loops where output precision outweighs token velocity.
-              </p>
-            </div>
-
-            <div className="p-5 rounded-2xl bg-black/40 border border-white/5 space-y-2">
-              <div className="flex items-center justify-between text-indigo-300 font-mono font-bold">
-                <span>OpenAI GPT-5.6 Terra</span>
-                <span className="text-[10px] bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20">Balanced Workhorse</span>
-              </div>
-              <p className="text-zinc-300 leading-relaxed">
-                Choose Terra as the daily workhorse for production SaaS backend APIs, autonomous workflow logic, and general generation with a 900K context window and optimal cost-to-throughput efficiency.
-              </p>
-            </div>
-
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-sans">
             <div className="p-5 rounded-2xl bg-black/40 border border-white/5 space-y-2">
               <div className="flex items-center justify-between text-cyan-300 font-mono font-bold">
-                <span>OpenAI GPT-5.6 Luna</span>
-                <span className="text-[10px] bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">140 tok/sec Velocity</span>
+                <span>OpenAI GPT-5.6 Luna Low</span>
+                <span className="text-[10px] bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">Ultra-Fast Text & Code</span>
               </div>
               <p className="text-zinc-300 leading-relaxed">
-                Choose Luna for inline code autocompletion, conversational customer chat, classification pipelines, and real-time streaming interfaces requiring sub-15ms Time-To-First-Token (TTFT).
+                Choose Luna Low for high-velocity inference, inline coding, autonomous agentic loops, classification pipelines, and real-time streaming interfaces at $0.20/1M input and $1.20/1M output.
+              </p>
+            </div>
+
+            <div className="p-5 rounded-2xl bg-black/40 border border-white/5 space-y-2">
+              <div className="flex items-center justify-between text-purple-300 font-mono font-bold">
+                <span>OpenAI Visual Synthesis</span>
+                <span className="text-[10px] bg-purple-500/10 px-2 py-0.5 rounded border border-purple-500/20">Image Generation</span>
+              </div>
+              <p className="text-zinc-300 leading-relaxed">
+                Choose Visual Synthesis (openai-gpt-image-latest) for generating high-definition images, visual assets, creative mockups, and multimodal assets with sanitized binary artifact delivery.
               </p>
             </div>
           </div>
@@ -916,8 +904,8 @@ export function CompareClient() {
 }
 
 function SideBySideArena({ availableModels }: { availableModels: ModelSpecItem[] }) {
-  const [leftModelId, setLeftModelId] = useState<string>(availableModels[0]?.id || 'gpt-5.6-sol');
-  const [rightModelId, setRightModelId] = useState<string>(availableModels[1]?.id || 'gpt-5.6-terra');
+  const [leftModelId, setLeftModelId] = useState<string>(availableModels[0]?.id || 'gpt-5-6-luna-low');
+  const [rightModelId, setRightModelId] = useState<string>(availableModels[1]?.id || 'openai-gpt-image-latest');
   const [isBlindMode, setIsBlindMode] = useState<boolean>(false);
   const [revealed, setRevealed] = useState<boolean>(false);
   const [showParameters, setShowParameters] = useState<boolean>(false);

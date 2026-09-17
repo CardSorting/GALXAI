@@ -61,7 +61,7 @@ export class WorkflowsResource {
           type: 'INTERNAL_MODEL',
           taskKind: 'chat_completion',
           chatPayload: {
-            model: s.model || 'gpt-5.6-sol',
+            model: s.model || 'gpt-5-6-luna-low',
             messages: s.messages || [{ role: 'user', content: s.prompt || 'Process step' }]
           }
         }

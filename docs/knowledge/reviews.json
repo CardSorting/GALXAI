@@ -51,12 +51,12 @@
     }
   },
   "images": {
-    "reviewer": "maintainer",
-    "note": "Developer tier instant access implementation and verification",
-    "reviewed_at": "2026-09-16",
+    "reviewer": "Antigravity",
+    "note": "Verified GALX Images homepage prompt composer cockpit, aspect ratio shapes, community showcase thumbnails and stream categories",
+    "reviewed_at": "2026-09-17",
     "review_by": "2026-10-16",
     "evidence": {
-      "post-mortem/releases/2026-09-16-developer-tier-instant-access.json": "066992e5d62f991c35e0bec03946b6484a5a9a592549a54c1a626bd658fbe7c5"
+      "post-mortem/releases/2026-09-16-galx-images-masonry-stream.json": "a8ce663c9c9cd19930d9757114d13c1e4244b0c9351ddd76109e8de03d7ec38b"
     },
     "files": {
       "docs/QUEUE_SPECIFICATION.md": "301d293b23327bf065202322e0a7554cf581740f28d0d5ab9fb827e73beed6ba",
@@ -101,10 +101,12 @@
       "src/components/dashboard/GenerationGateNotice.tsx": "0c905274ce933e0247d4a05f4174c9c13377bcb02e0d833c3927cfce62701bac",
       "src/components/dashboard/generation-gate.module.css": "efd8526722ca0ad42aec319a56bc2ea7e638185f30c35cea9b445dfb69bba4a4",
       "src/components/images/GenerationCanvas.tsx": "4341702fc0842c20a7d860b8241a4bf55780919b73254f54915a61cd09269473",
-      "src/components/images/ImageStudio.tsx": "58201072e7330eaf5ae8be66fac70a29a1c72b318cd10321fc20098a48aea6bc",
+      "src/components/images/ImageStudio.tsx": "d64041b6f5d9bbf1223380b4850c9f3921929b11267a1685c26cad31db7c7130",
+      "src/components/images/PublicImageMasonryStream.tsx": "d7889189dce302d702c7bd4fe9d71d95ed5b81a1b2157935fe490dfbcdc42504",
       "src/components/images/StudioArtwork.tsx": "427128b4f3ea300222b74fdfe132564237030507f1d40c20093c89ef52e26229",
+      "src/components/images/masonry-stream.css": "0bcdd9df469c472f11c80925b8de39fe843242f811f6f6acee640dd86263704e",
       "src/components/images/studio-contract.ts": "cfa22ffc7df750e747c805a7a8ee394dfb76fdc9adcd2beabcb9872536f0d5bb",
-      "src/components/images/studio.css": "8448bc4018a22090fb103c9c533bc947a64759e70f6486a067845d175a8f8d3d",
+      "src/components/images/studio.css": "d04bce6d6f0eb817815b5dfbefc962221e8865fb68eb74bdb23bce881da87492",
       "src/components/images/use-image-studio.ts": "22b3ac9a41f10bceb777942da4c63ea84e079e7c85aff5d7027d019f0f1b8ff1",
       "src/contexts/GenerationAllowanceContext.tsx": "d73875872f3814131bfc18029e69a72091993d906af63058ca37282f2c261a7c",
       "src/core/broccolidb/BroccoliImageLibraryBuffer.ts": "840d2e9fd075d314e196c056564b911b7a1d2b63ff0569f5ee16fb7604d81915",
@@ -136,11 +138,11 @@
   },
   "access": {
     "reviewer": "maintainer",
-    "note": "Reconciled official 5-model lineup (gpt-6-astra, gpt-5.6-sol/terra/luna, gpt-5.5) and developer access",
+    "note": "Consolidated text model to gpt-5-6-luna-low with hyper-forgiving aliases while retaining visual synthesis image generation",
     "reviewed_at": "2026-09-16",
     "review_by": "2026-10-16",
     "evidence": {
-      "post-mortem/releases/2026-09-16-curated-model-lineup.json": "25c61a6bc95db00e2ea5785e210d9357e5150f6ea62ab4410d33d6005d329be2"
+      "post-mortem/releases/2026-09-16-luna-low-dedicated-lineup.json": "0a64d760bceafaea2950a9d78f2e58468c0890e3c9f7ca324c04fbd71a5a97f0"
     },
     "files": {
       "docs/OAUTH_AND_TOKEN_LIFECYCLE_SPECIFICATION.md": "1e8004f6dc024322356e5494b099b7c38ed00e4a62e22434b020fd43c9470183",
@@ -233,7 +235,7 @@
       "src/components/dashboard/FreeGenerationQuota.tsx": "419a52433d2b3baece49b2ada8b96f819da2e535d49104e40b22c8dae82fb89d",
       "src/components/dashboard/GenerationGateNotice.tsx": "0c905274ce933e0247d4a05f4174c9c13377bcb02e0d833c3927cfce62701bac",
       "src/components/dashboard/generation-gate.module.css": "efd8526722ca0ad42aec319a56bc2ea7e638185f30c35cea9b445dfb69bba4a4",
-      "src/components/developers/DeveloperPreview.tsx": "0df4b155fb674fccc17e5dfd00ada6ed1cfa40d462e7f06695c6fc9972782a52",
+      "src/components/developers/DeveloperPreview.tsx": "d4b3b3c5ba0d8c164de27031f33fb8971bb7e0d49a977071237f225341ea1de3",
       "src/contexts/AuthContext.tsx": "925072632aef4a44e915fb04b479b1891bcc97343072e866231f37a5127916b0",
       "src/contexts/GenerationAllowanceContext.tsx": "d73875872f3814131bfc18029e69a72091993d906af63058ca37282f2c261a7c",
       "src/core/auth/GalxAuthEngine.ts": "0f03a805b48838694510eb98bb2b3eb6996ba3198ae21f10a9437b6d80e8def9",
@@ -290,12 +292,12 @@
     }
   },
   "sites": {
-    "reviewer": "maintainer",
-    "note": "Developer tier instant access implementation and verification",
-    "reviewed_at": "2026-09-16",
+    "reviewer": "Antigravity",
+    "note": "Deprecate sites navigation and links in favor of GALX Images",
+    "reviewed_at": "2026-09-17",
     "review_by": "2026-10-16",
     "evidence": {
-      "post-mortem/releases/2026-09-16-developer-tier-instant-access.json": "066992e5d62f991c35e0bec03946b6484a5a9a592549a54c1a626bd658fbe7c5"
+      "post-mortem/releases/2026-09-16-galx-images-masonry-stream.json": "a8ce663c9c9cd19930d9757114d13c1e4244b0c9351ddd76109e8de03d7ec38b"
     },
     "files": {
       "docs/API_BASE_URL.md": "19e4b534e72165ee0943fd4e9dd2a79dc01cecad30abed739ed0c1be537a9dca",
@@ -321,11 +323,11 @@
       "src/app/api/sites/domains/route.ts": "04a78970e61861898a5066b36cd760ed9224a368adf33562bf6bb2a0762ab2c7",
       "src/app/api/sites/published/[hostname]/route.ts": "d652aa4a54dc2e80070068d08462ccc331c545385ff80dad3baf050bd2a536dc",
       "src/app/api/sites/workspace/route.ts": "8170dd751d58fd369fc4870f530b1343108bd4f5b95116c093b2433d711bfa80",
-      "src/app/sites/[id]/page.tsx": "b3bac5436139d92b3ead98523d5dd36c057682f4d818fabbe27afe0d928ce63d",
+      "src/app/sites/[id]/page.tsx": "0cfcb7349fc03e380f6a0a21377991057e162aa8893692b2a7f2340f029cbf46",
       "src/app/sites/error.tsx": "f2d40e7c5567e92746b18fc489099f7ab1331393859d7fae9a34db13f2bc4736",
       "src/app/sites/loading.tsx": "652066b8b7a8a11a586f6fb795a198f3168a752cad03f187a45ac9014bf61aad",
-      "src/app/sites/page.tsx": "cabbb9f20b8699a2033c8e43f41db94cb01e256067ad92a34d005680551efa39",
-      "src/components/billing/PlanPanel.tsx": "2700e35a5c5ac4c1eccbfadb8c384a09358ff2a11b628e6968451a0149eb57dc",
+      "src/app/sites/page.tsx": "d0d249c52a5343b3f166810511408c61b87f14badc1a4318d4cc7970fbbc86d1",
+      "src/components/billing/PlanPanel.tsx": "8c385698359410925fad974a92eba32e51119e6c9bf93674375a801627b42fad",
       "src/components/dashboard/GenerationGateNotice.tsx": "0c905274ce933e0247d4a05f4174c9c13377bcb02e0d833c3927cfce62701bac",
       "src/components/dashboard/generation-gate.module.css": "efd8526722ca0ad42aec319a56bc2ea7e638185f30c35cea9b445dfb69bba4a4",
       "src/components/sites/SitesWorkspace.tsx": "941aaeaa82706182ba1615ef2a58ffa77be0de729e333724fc65b8a462f9c36b",
@@ -367,13 +369,12 @@
     }
   },
   "relay": {
-    "reviewer": "Relay operator",
-    "note": "Reconciled complete API, routing, architecture and queue references with tri-state direct-engine availability, independent image-only cutover and shared persistence.",
+    "reviewer": "maintainer",
+    "note": "Consolidated text model to gpt-5-6-luna-low in router and SDK fallbacks",
     "reviewed_at": "2026-09-16",
-    "review_by": "2026-09-23",
+    "review_by": "2026-10-16",
     "evidence": {
-      "post-mortem/releases/2026-09-16-premium-image-preflight.json": "a78125c76af0749f7be50647b99c2d6ff8aa368cdfa5780222c81fb4c14023d1",
-      "post-mortem/releases/2026-09-16-premium-image-connection.json": "c842c18db56580e63462f4db26d6729647ded802cc3b8dceb96f10a783751ff9"
+      "post-mortem/releases/2026-09-16-luna-low-dedicated-lineup.json": "0a64d760bceafaea2950a9d78f2e58468c0890e3c9f7ca324c04fbd71a5a97f0"
     },
     "files": {
       ".env.example": "0f2ec6b2823f842f2a78ad28e1b846b907564fe2ca42bcc73904dc4faacf1f73",
@@ -508,7 +509,7 @@
       "scripts/verify-relay-pool-monitor.ts": "e3f1065d3d6671a7533693f10be707b22aa623f0a5b376e2ff8a5f48726ea056",
       "scripts/verify-relay-service-images.mjs": "e0de1f0d906061998b03244662bac75142800944c6fe7e16840ef1ba0681483b",
       "src/app/api/internal/telemetry/route.ts": "839fb768dbc22a6619eef9aa7160c854cfb2676bd20df2161ab8c18e0f1c8a77",
-      "src/app/v1/chat/completions/route.ts": "88b4b02daba44020973efda0cd1084c67182a1bcf145ffc3cba13febc24e04b0",
+      "src/app/v1/chat/completions/route.ts": "a078343ae02a740294afe48f340bdb8bbc55eb62941250295db83f5ae84ce877",
       "src/core/router/GalxModelRouter.ts": "c89668587e207dd53f5e524a2d06ee2a72f208bbe892fd1d24caa34b94832999",
       "src/core/router/adapters/IsolatedRelayTransport.ts": "75a2fc50cad1c89fab8b7296c0a91738d51b7ca5e86057dce2ee777ba02e4bfc",
       "src/core/router/adapters/OpenAIAdapter.ts": "4ace6c71c0cf494a5dcf18dcbd59da93e3000e41ebab774985ce722b40d3f623",
@@ -581,11 +582,11 @@
       "src/relay/standard-pool-scheduler.ts": "f850feb4274b038d05636975a9d7fda9aeba31a88ba88e94fbd3b940a476e58c",
       "src/relay/telemetry.ts": "c49aced101c5656161f3dc97c5543ffb9e3e616cbd7ac78b66922e86a43adcc2",
       "src/relay/upstream-diagnostic.ts": "a522c5c068a18846566ae94e2cc5d73df44a706aa2b4bb030c9b9452426e022d",
-      "src/sdk/agent.ts": "9739ff70663393815e20fea82f880c19879f4f2c72086b757220acbe0b57ee83",
-      "src/sdk/client.ts": "90443b67be3bd0ae3c05f68f2490a15251cc049e71d1de5af2eb0861908e6bcc",
-      "src/sdk/errors.ts": "ea3314609b6058b37e6bd8b9ded072b9760291734a3d8997b9b2bdb00a5763a0",
-      "src/sdk/index.ts": "b55cbc1a4118ff6c944caf9522760eeca6fee673a560ee10dc6aaa8804d170b2",
-      "src/sdk/stream.ts": "d7e47c466b8a4c2e168eaa2a081ef843374464d4d7d0b05c977e994898c4f177"
+      "src/sdk/agent.ts": "431d31ab0216caebc8712659bd141f543c5915887dcfc4cd54e2526888d13587",
+      "src/sdk/client.ts": "3f0625e7f68bbc5ef9b74d0c4041cfbdd63e016a9bdca1911ad0a0af2f6456e6",
+      "src/sdk/errors.ts": "5adcd559411c5afbd998a96e163fbc738bf67fdb4db3cc7d42207cd467804a1e",
+      "src/sdk/index.ts": "f5c2d0d1d82ecfb17c2f312323e6da157ceeb64e7abcb0a67516bc4771c65dc6",
+      "src/sdk/stream.ts": "5838416d65ba89fa6ec6630b4b726f2ec301ae1a90a1e755b7c9164a68b37072"
     }
   },
   "database": {
@@ -899,12 +900,12 @@
     }
   },
   "delivery": {
-    "reviewer": "Release Operator",
-    "note": "Stripe live infrastructure provisioned for developer tier and compute catalog",
+    "reviewer": "maintainer",
+    "note": "Edge gateway fallback aligned to gpt-5-6-luna-low and image model",
     "reviewed_at": "2026-09-16",
     "review_by": "2026-10-16",
     "evidence": {
-      "post-mortem/releases/2026-09-16-stripe-live-provisioning.json": "4b49f2cfb8e5e8b15b51ed2a4201ce805e1c32647d5f6b520ea2fdb28facd861"
+      "post-mortem/releases/2026-09-16-luna-low-dedicated-lineup.json": "0a64d760bceafaea2950a9d78f2e58468c0890e3c9f7ca324c04fbd71a5a97f0"
     },
     "files": {
       ".dockerignore": "fb4dc7ef84e7f36c5bfed0f267187a022bbb61e66dd26060295b133e08fa74c5",
@@ -932,7 +933,7 @@
       "src/workers/cloudflare/GalxEdgeBatchBuffer.ts": "f7cb56bf5ad809150e4e7c84749a17c4aee59790d60375201bcff3d2b3016cfd",
       "src/workers/cloudflare/GalxEdgeCache.ts": "1f2e0128247a60dd8462c043abe52ba0986b36f1ab423d69ea211f3f977e1baa",
       "src/workers/cloudflare/GalxEdgeConnectionPool.ts": "24f5748052b40364d55272e42c0edce726a5d305b6a7fa2a73909ac1f89a02b1",
-      "src/workers/cloudflare/GalxEdgeGateway.ts": "cdb3d7ed18c0ae24aab92687f53018182977bc44e9ed9435ac528a2818d2c863",
+      "src/workers/cloudflare/GalxEdgeGateway.ts": "b83220acbcd3b412b30cace0a6124260bf09226d2c9ca49584fddb43db1c25fb",
       "src/workers/cloudflare/GalxEdgeQueueWorker.ts": "635a8ad2014ebfaccc78669bc5efe160221f6070d759e73c1f168a16952d0b69",
       "src/workers/cloudflare/GalxEdgeRouter.ts": "1f9c9f6ba8d5fb9cb2a080de712d620e97cebe6df5bb9dedbf8eafeeb4bf88db",
       "src/workers/cloudflare/GalxEdgeSpeculativeEngine.ts": "2f919607e7ac2e909161354d9c79aae2dbb9f7a6758b0a4c29172640c2082efb",
@@ -1400,12 +1401,12 @@
     }
   },
   "client-efficiency": {
-    "reviewer": "maintainer",
-    "note": "Reconciled official 5-model lineup and developer access",
-    "reviewed_at": "2026-09-16",
+    "reviewer": "Antigravity",
+    "note": "Verified native AI-generated image assets in PublicHome and feed route with local thumbnails",
+    "reviewed_at": "2026-09-17",
     "review_by": "2026-10-16",
     "evidence": {
-      "post-mortem/releases/2026-09-16-curated-model-lineup.json": "25c61a6bc95db00e2ea5785e210d9357e5150f6ea62ab4410d33d6005d329be2"
+      "post-mortem/releases/2026-09-16-galx-images-masonry-stream.json": "a8ce663c9c9cd19930d9757114d13c1e4244b0c9351ddd76109e8de03d7ec38b"
     },
     "files": {
       "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md": "5eb65f39a725934f807a7373995b33399893cad2a8a5455e74d6195aadd8a57b",
@@ -1455,15 +1456,15 @@
       "src/components/common/CommandMenu.tsx": "cfca2e721378b0fc3a47e679aec2211a68596c949b4359b52442714361084df3",
       "src/components/common/FloatingActionDock.tsx": "82a21751b0ad7ee8f7233ad59ba892f28622bc0dcd63bb4a387027a686028b7f",
       "src/components/common/IntentLink.tsx": "c866bc13acbbc81829c9f4ec1be5736bfb064c7a039c3d43ab5c524dd5d6e201",
-      "src/components/common/NotFoundSearchHelper.tsx": "2a7dfaf4e1f277a2610160e5477b2910878c8ff237e45613e3e075bd82e01800",
+      "src/components/common/NotFoundSearchHelper.tsx": "a05dca9a4ae7eed641e3f63d89d3ce0e9027a126d938da14f211c87c14ddd0de",
       "src/components/common/RouteRecovery.tsx": "02f126f82df14daf04a9085d2fc72034beddb3493485841dd0f6a97f25461736",
       "src/components/common/WorkspaceLoading.tsx": "fcc220850cf2a7280d3cbb9d46a3f579da1f4fb8c298f0b37b54e6d7c1d84820",
       "src/components/common/workspace-route.module.css": "6654e288040f2196747f08319a9cad95916f086708d14b4cdafaabe40db88523",
       "src/components/dashboard/Footer.tsx": "008b6388f9e09a772a1371f3da83c7b24a36aa78d430aed5b2a8a154851441a4",
       "src/components/dashboard/FreeGenerationQuota.tsx": "419a52433d2b3baece49b2ada8b96f819da2e535d49104e40b22c8dae82fb89d",
       "src/components/dashboard/GenerationGateNotice.tsx": "0c905274ce933e0247d4a05f4174c9c13377bcb02e0d833c3927cfce62701bac",
-      "src/components/dashboard/MobileBottomNav.tsx": "2df2902954562c5e3492eed762da0f7bd26b2c7e0ffa28b063b5594075a5d78c",
-      "src/components/dashboard/Navigation.tsx": "d0b2e8dcff2499d0ab597319a6e2bae068dfeeda2e48411de37a5c4a17471f7d",
+      "src/components/dashboard/MobileBottomNav.tsx": "464bdf7d8d9c08beb7fe05358fae02b217226f3afc0cb923a45c9d10a78c1832",
+      "src/components/dashboard/Navigation.tsx": "d7ded222d0e46a7ca8ad48c855ee0dece06416585caacdef8862b0b992bf3b97",
       "src/components/dashboard/generation-gate.module.css": "efd8526722ca0ad42aec319a56bc2ea7e638185f30c35cea9b445dfb69bba4a4",
       "src/components/dashboard/navigation.module.css": "75bfa5c7649b5dbeaf72f73bf43a52104a0b8488dc8d4312eb53a3b72bec43da",
       "src/components/home/ArtisanalSignalSection.tsx": "35bd389dfa74ec6113d6046afd9966b53af09826f3ad81f67627e2d6e8c6bb85",
@@ -1472,27 +1473,27 @@
       "src/components/home/GalaxyScene.tsx": "b28c5df148385d2699cae46534b21426c0be8fbaa02533670298a6f3dfdfae35",
       "src/components/home/GalxScenicHero.tsx": "f40bb10af1cec7fa6f1197311f13a949c13b56c279eb662d641fdc3996707879",
       "src/components/home/HomeClient.tsx": "0a14d774e3f73d72614d102e903d9cf0e928de16395bf52bd525e4dce4336a6c",
-      "src/components/home/HomeMotion.tsx": "7df83b8ceece3f1d9a0385a6b46550e813ec8ad5ad2a18d94355688d762754da",
+      "src/components/home/HomeMotion.tsx": "2367776ba2956cdb92a3f0e1e18fbc9169a94e106ab36aa1d10b7a9053bdff1b",
       "src/components/home/PlanAction.tsx": "c624af95fac166dfaddc9c6fccc6fd9a1314b1ea397c1bc16471ac790f72222b",
-      "src/components/home/PublicHome.tsx": "aefca9cd83a56c62c87c551d7b352fe455f3c3fa060a814821ee40b3df7d347a",
+      "src/components/home/PublicHome.tsx": "9f2674d3c8b86b81bea696706bf2308de85c3b3b88033cfa27c0a04d867c85b0",
       "src/components/home/SitesExample.tsx": "4fe7f9f61198aacc2f88486a4d19ad061da308c73df7f5f4549f6559af1bad5b",
-      "src/components/home/public-home.module.css": "e7e697b7e6dcbe2b393e179901eb9f4f365f7e6fb75fd6e114b67e0ea44868a1",
+      "src/components/home/public-home.module.css": "edd80d5451d68eec9c679780f03f359b920b79c3e55bd80af043fe0e9459fff6",
       "src/components/home/use-galaxy-interactions.ts": "0a654c3abd4d7f562172df5d79afd94ee3b1c86509693dbc69d993920497d348",
       "src/components/home/use-story-entrance.ts": "8e3d8a6634a4b67456cff4d17ef76e2d450b136a4b844b86c21b4ec6b6b24a67",
-      "src/components/images/ImageStudio.tsx": "58201072e7330eaf5ae8be66fac70a29a1c72b318cd10321fc20098a48aea6bc",
+      "src/components/images/ImageStudio.tsx": "d64041b6f5d9bbf1223380b4850c9f3921929b11267a1685c26cad31db7c7130",
       "src/components/images/use-image-studio.ts": "22b3ac9a41f10bceb777942da4c63ea84e079e7c85aff5d7027d019f0f1b8ff1",
       "src/components/public-content/DESIGN.json": "d8594db0bdf0f53295e4a7cb9cb7f770f47e54498d93489d2349cabb14373d61",
       "src/components/public-content/DESIGN.md": "1070795a25fc6075d9bceaaf8f77ee8033ff942a507d55196e0c39b4a4470d83",
       "src/components/public-content/KnowledgeSearch.tsx": "485027842c5ca930fed7b440387676f04891ee8efe6d9d2d822073256b43a04d",
-      "src/components/public-content/ReadingPage.tsx": "962dac46e108bbf1a4666eddc62f296735d38fdc1b53de5e4dec302094a0d515",
+      "src/components/public-content/ReadingPage.tsx": "fc0faa94abe22b5037f11f6f32b92390858c08b10d0ebe2bfa7f8b76ed6d16e4",
       "src/components/public-content/public-content.module.css": "c1c6a99a77563ae5afcca6f46b34216afd7f16c3fdb671139f01109e88bc48a6",
       "src/components/sites/sites.css": "c0bae18b97b929439551d3252d6aeca9f05539e445bd6f79737388d31edf3859",
       "src/components/sites/use-sites-workspace.ts": "47714d686d824d498dfe3ec88e6797426f24e41ffed896f934950c06b63cf00b",
       "src/contexts/AuthContext.tsx": "925072632aef4a44e915fb04b479b1891bcc97343072e866231f37a5127916b0",
       "src/contexts/GenerationAllowanceContext.tsx": "d73875872f3814131bfc18029e69a72091993d906af63058ca37282f2c261a7c",
       "src/lib/images/navigation.ts": "827b7f91ef06422452aa03f66721e866be9755399c4514393230ce4fdcfc8e5c",
-      "src/lib/public-content/content.ts": "a4a7d8f3cda12adc2a38bc1da6cfafa496f38a39f7e211ba488a4ee64eb70948",
-      "src/lib/public-content/routes.ts": "4fc0e78c5faa3d9e6005416d03e03232744536ade21452338aff44caf8582bd3",
+      "src/lib/public-content/content.ts": "e655e2a2071811c95a67e41bf3ce400a4d1180455c8a18f5bb51964ed196956b",
+      "src/lib/public-content/routes.ts": "0b110dda7dcc166d27718feea0490ef9dab37db1d0f1e091b111f89edf32df5a",
       "src/lib/resilience/ResilientClient.ts": "02f0b3dc1d931cb01730e6dd5b40c0daf9ded5470558b9eecc80a33d78576f75",
       "src/lib/resilience/activity-polling.ts": "8018eef80ba6c49a401721f3607aef14aaa773bac1c1f108bc55f99f4b0fac7a",
       "src/lib/resilience/intent-prefetch.ts": "62757c1efa0eac5edf811d322fc30608852a3277669be87a2ae9fe63fd3e9c19",
@@ -1501,12 +1502,12 @@
     }
   },
   "billing": {
-    "reviewer": "Billing Maintainer",
-    "note": "Stripe live products and pro plan terms synchronized",
-    "reviewed_at": "2026-09-16",
+    "reviewer": "Antigravity",
+    "note": "Update PlanPanel to link to Image Studio",
+    "reviewed_at": "2026-09-17",
     "review_by": "2026-10-16",
     "evidence": {
-      "post-mortem/releases/2026-09-16-stripe-live-provisioning.json": "4b49f2cfb8e5e8b15b51ed2a4201ce805e1c32647d5f6b520ea2fdb28facd861"
+      "post-mortem/releases/2026-09-16-galx-images-masonry-stream.json": "a8ce663c9c9cd19930d9757114d13c1e4244b0c9351ddd76109e8de03d7ec38b"
     },
     "files": {
       ".impeccable/surfaces/src-app-billing-page-tsx.md": "7b6165eb4b5c85cac4900e9070cc20da30c96d06ff12ccd21f4c0450b817bc31",
@@ -1556,14 +1557,14 @@
       "src/app/grants/error.tsx": "9db39af2d7e0d07baebbb054f54332bdbf05b58cee1b8283055348eef4ca3de2",
       "src/app/keys/error.tsx": "46c66f94d870a03511adcbcea3734f909bb38a5893cf8341480c843477851edb",
       "src/app/keys/page.tsx": "22023a7163579126db23649bf5d6bb0b28d50b72ae15f12eda36733b854a484f",
-      "src/cli/index.ts": "396fde78dbc11f084e9a27cd06f561981769ff288d2a3eab9a98d194486df47b",
+      "src/cli/index.ts": "107b25d4ea89c4d8323b73cccb652c321523fa0e96b2ccdf2fdcbd610edbe0b6",
       "src/components/billing/.impeccable/design.json": "ad4a1c072dce58f57e5aec81db712b77f2831ac7612c099423c2103af6d48452",
       "src/components/billing/BillingClient.tsx": "97b1d46f5beaef69ba3d19a84bc1306a3ef038d1ca5ed5d2b4c9a80e351573f9",
       "src/components/billing/BillingProvider.tsx": "73f5e63384cf96624f8111cf801783decdb650148e0b445fd0092bef886049de",
       "src/components/billing/BillingWorkspace.tsx": "dd50bbbbd1a041aed1bf10d99081abf04c13328e199471d33773ef3812e24cad",
       "src/components/billing/CheckoutStatus.tsx": "140fe0f8456d2fe6f921b09102b859f782575f17f64db0cec4e0c76285222f9a",
       "src/components/billing/DESIGN.md": "1260ab97f6c2a6b0d2934078b962650769d1356e69f18c3ae155d2a2c9be3e42",
-      "src/components/billing/PlanPanel.tsx": "2700e35a5c5ac4c1eccbfadb8c384a09358ff2a11b628e6968451a0149eb57dc",
+      "src/components/billing/PlanPanel.tsx": "8c385698359410925fad974a92eba32e51119e6c9bf93674375a801627b42fad",
       "src/components/billing/SeatsManagementClient.tsx": "4392f9525163626cbdee73ac28c73dbcf69d46d3c7cd37b86baa6ce659d91814",
       "src/components/billing/TopUpForm.tsx": "32ab8062aefe088fcb689b6ab6d4a837a3e0b36d45797ba1570c92b405dda730",
       "src/components/common/KeyboardShortcutsModal.tsx": "6553a9fe6afd0c6809602d44d8997424668d2285ba1bd71bc3df01357ead9d35",
@@ -1598,7 +1599,7 @@
       "src/lib/stripe/config.ts": "0014a5f2c9b2c70d45dbf5f7b9879e43cba98c05754d25ab2c3ffa652293880d",
       "src/lib/stripe/products.ts": "637aeeba52356671da44b411bf71b7862d167e6fd9a6e25754eac20485b3a171",
       "src/lib/stripe/stripe.ts": "ca744350db314ba1ec139962b4917498747a9d59beb6d6e6fdddae3d878a6062",
-      "src/sdk/errors.ts": "ea3314609b6058b37e6bd8b9ded072b9760291734a3d8997b9b2bdb00a5763a0",
+      "src/sdk/errors.ts": "5adcd559411c5afbd998a96e163fbc738bf67fdb4db3cc7d42207cd467804a1e",
       "supabase/migrations/20260916003207_billing_canonical_returns.sql": "c9623a431e8cf114b8aceea6a33ed95ab52460d52ea22f639a4901010ed2bcf0",
       "supabase/rollbacks/20260916003207_billing_canonical_returns.down.sql": "5008b35e2f90db19b9be2a1cdfe4d9289080031d8e3b48693cccd3ee45ed241a"
     }

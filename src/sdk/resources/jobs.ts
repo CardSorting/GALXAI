@@ -33,7 +33,7 @@ export class JobsResource {
    * ```ts
    * const job = await galx.jobs.submit({
    *   prompt: 'Generate an executive summary of market trends',
-   *   model: 'gpt-5.6-sol'
+   *   model: 'gpt-5-6-luna-low'
    * });
    * const result = await job.result();
    * ```
@@ -67,7 +67,7 @@ export class JobsResource {
         type: 'INTERNAL_MODEL',
         taskKind: 'chat_completion',
         chatPayload: {
-          model: params.model || 'gpt-5.6-sol',
+          model: params.model || 'gpt-5-6-luna-low',
           messages: params.messages || [{ role: 'user', content: params.prompt || '' }]
         }
       };

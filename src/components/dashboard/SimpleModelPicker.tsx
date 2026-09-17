@@ -34,74 +34,18 @@ interface SimpleCategory {
 
 const CATEGORIES: SimpleCategory[] = [
   {
-    id: 'apex',
-    label: 'Apex Intelligence & Frontier Reasoning',
-    sublabel: 'Our most capable model for complex, demanding work',
-    icon: Sparkles,
-    recommendedModelId: 'gpt-6-astra',
-    plainUseCases: [
-      'High-stakes multi-system reasoning and enterprise architecture',
-      'Complex algorithmic design, research, and deep analysis',
-      'Autonomous multi-agent execution and orchestration'
-    ],
-    retailComparison: '$10.00 in / $40.00 out per 1M tokens retail',
-    galxDiscount: 'Save 25% ($7.50 in / $30.00 out wholesale)'
-  },
-  {
-    id: 'sol',
-    label: 'Reliable Agentic Workhorse',
-    sublabel: 'Reliable agentic workhorse for everyday tasks',
-    icon: Zap,
-    recommendedModelId: 'gpt-5.6-sol',
-    plainUseCases: [
-      'Everyday agentic workflow execution and tool calling',
-      'Automated email draft generation and summarization',
-      'High-speed document reading and structured data extraction'
-    ],
-    retailComparison: '$5.00 in / $20.00 out per 1M tokens retail',
-    galxDiscount: 'Save 25% ($3.75 in / $15.00 out wholesale)'
-  },
-  {
-    id: 'reasoning',
-    label: 'Balanced Agentic Coding',
-    sublabel: 'Balanced agentic coding model for everyday work',
-    icon: Brain,
-    recommendedModelId: 'gpt-5.6-terra',
-    plainUseCases: [
-      'Full-stack code generation, debugging, and refactoring',
-      'Automated test generation and CI/CD pipelines',
-      'API integrations and schema validation'
-    ],
-    retailComparison: '$3.00 in / $12.00 out per 1M tokens retail',
-    galxDiscount: 'Save 25% ($2.25 in / $9.00 out wholesale)'
-  },
-  {
     id: 'velocity',
-    label: 'Fast & Affordable Coding',
-    sublabel: 'Fast and affordable agentic coding model',
+    label: 'Fast & Affordable Agentic Coding',
+    sublabel: 'Fast and affordable agentic coding model with low reasoning overhead',
     icon: Flame,
-    recommendedModelId: 'gpt-5.6-luna',
+    recommendedModelId: 'gpt-5-6-luna-low',
     plainUseCases: [
-      'Real-time inline code autocomplete and refactoring',
-      'High-throughput background data extraction pipelines',
-      'Instant sub-second conversational agent turns'
+      'Real-time inline code autocomplete and full refactoring',
+      'High-throughput agentic workflows and tool-use swarms',
+      'Instant sub-second conversational agent turns and triage'
     ],
-    retailComparison: '$6.00 / 1M tokens retail',
-    galxDiscount: 'Save 36% ($0.95 in / $3.80 out)'
-  },
-  {
-    id: 'proven',
-    label: 'Proven Previous-Generation',
-    sublabel: 'Proven previous-generation model for coding and general work',
-    icon: Layers,
-    recommendedModelId: 'gpt-5.5',
-    plainUseCases: [
-      'Reliable baseline code analysis and migration scripts',
-      'Cost-effective structured data processing',
-      'Standard conversational assistant workflows'
-    ],
-    retailComparison: '$2.50 in / $10.00 out per 1M tokens retail',
-    galxDiscount: 'Save 25% ($1.88 in / $7.50 out wholesale)'
+    retailComparison: '$0.20 in / $1.20 out per 1M tokens',
+    galxDiscount: 'Verified OpenAI API wholesale rates with sub-15ms TTFT'
   },
   {
     id: 'visuals',
@@ -120,7 +64,7 @@ const CATEGORIES: SimpleCategory[] = [
 ];
 
 function BaseSimpleModelPicker() {
-  const [selectedCatId, setSelectedCatId] = useState<string>('apex');
+  const [selectedCatId, setSelectedCatId] = useState<string>('velocity');
   const [naturalQuery, setNaturalQuery] = useState<string>('');
 
   // Ambiguity-absorbing intent query
@@ -130,26 +74,14 @@ function BaseSimpleModelPicker() {
 
     const resolved = ModelCatalog.resolveModel(text);
     if (resolved) {
-      if (resolved.id.includes('astra') || resolved.id.includes('gpt-6')) setSelectedCatId('apex');
-      else if (resolved.category === 'image') setSelectedCatId('visuals');
-      else if (resolved.id.includes('luna')) setSelectedCatId('velocity');
-      else if (resolved.id.includes('terra')) setSelectedCatId('reasoning');
-      else if (resolved.id.includes('5.5')) setSelectedCatId('proven');
-      else setSelectedCatId('sol');
+      if (resolved.category === 'image') setSelectedCatId('visuals');
+      else setSelectedCatId('velocity');
     } else {
       const lower = text.toLowerCase();
       if (lower.includes('photo') || lower.includes('real') || lower.includes('art') || lower.includes('image') || lower.includes('render') || lower.includes('4k')) {
         setSelectedCatId('visuals');
-      } else if (lower.includes('astra') || lower.includes('gpt-6') || lower.includes('flagship') || lower.includes('complex') || lower.includes('demanding')) {
-        setSelectedCatId('apex');
-      } else if (lower.includes('code') || lower.includes('refactor') || lower.includes('terra') || lower.includes('coding')) {
-        setSelectedCatId('reasoning');
-      } else if (lower.includes('luna') || lower.includes('speed') || lower.includes('velocity') || lower.includes('fast')) {
+      } else {
         setSelectedCatId('velocity');
-      } else if (lower.includes('5.5') || lower.includes('proven') || lower.includes('legacy') || lower.includes('previous')) {
-        setSelectedCatId('proven');
-      } else if (lower.includes('chat') || lower.includes('support') || lower.includes('sol') || lower.includes('workhorse')) {
-        setSelectedCatId('sol');
       }
     }
   };
@@ -187,18 +119,16 @@ function BaseSimpleModelPicker() {
             type="text"
             value={naturalQuery}
             onChange={(e) => handleQueryChange(e.target.value)}
-            placeholder="Type your use case or alias in plain English (e.g. 'refactor full repo', 'sub-second chat', 'extract invoices', 'sol')..."
+            placeholder="Type your use case or alias in plain English (e.g. 'code autocomplete', 'generate visual', 'luna')..."
             className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-black/60 border border-white/10 text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-amber-400 font-mono"
           />
         </div>
         <div className="flex flex-wrap items-center gap-2 text-[11px] font-mono text-zinc-400">
           <span className="text-zinc-500">Quick Mental Models:</span>
           {[
-            { label: 'Astra Flagship', query: 'astra flagship' },
-            { label: 'Sol Workhorse', query: 'sol workhorse' },
-            { label: 'Terra Coding', query: 'terra reasoning' },
-            { label: 'Luna Speed', query: 'luna fast' },
-            { label: '4K Images', query: 'openai-gpt-image-latest' }
+            { label: 'GPT-5.6 Luna Low', query: 'gpt-5-6-luna-low' },
+            { label: 'Luna Fast', query: 'luna fast' },
+            { label: 'OpenAI Image Generation', query: 'openai-gpt-image-latest' }
           ].map((tag) => (
             <button
               key={tag.label}
@@ -211,8 +141,8 @@ function BaseSimpleModelPicker() {
         </div>
       </div>
 
-      {/* 6 Grid Category Selectors */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+      {/* Grid Category Selectors */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {CATEGORIES.map((cat) => {
           const isSelected = cat.id === selectedCatId;
           const Icon = cat.icon;

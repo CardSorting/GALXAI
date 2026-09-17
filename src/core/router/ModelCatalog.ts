@@ -6,79 +6,18 @@ import type { DbQueryOptions, DbAggregateQuery } from '../broccolidb/broccolidb.
 
 /**
  * Exclusive Model Catalog for GALXAI.
- * Houses only the requested flagship modern generation LLMs & visual synthesis engines:
- * 1. `gpt-6-astra` (default) - Our most capable model for complex, demanding work (Premium relay).
- * 2. `gpt-5.6-sol` - Reliable agentic workhorse for everyday tasks (Premium relay).
- * 3. `gpt-5.6-terra` - Balanced agentic coding model for everyday work.
- * 4. `gpt-5.6-luna` (current) - Fast and affordable agentic coding model.
- * 5. `gpt-5.5` - Proven previous-generation model for coding and general work.
- * 6. `openai-gpt-image-latest` - OpenAI Image Generation (Premium relay).
+ * Houses only the requested model of choice & visual synthesis engine:
+ * 1. `gpt-5-6-luna-low` (default) - Fast and affordable agentic coding model with low reasoning overhead.
+ * 2. `openai-gpt-image-latest` - OpenAI Image Generation.
  *
  * Text-model rates are verified OpenAI API rates.
  */
 export const EXCLUSIVE_MODEL_CATALOG: ModelSpecItem[] = [
-  // --- 1. OpenAI Flagship LLM & Agentic Coding Suite ---
+  // --- 1. OpenAI Agentic Coding Engine ---
   {
-    id: 'gpt-6-astra',
-    upstreamId: 'gpt-6-astra',
-    name: 'OpenAI GPT-6 Astra (Default Flagship)',
-    provider: 'openai',
-    category: 'llm',
-    contextWindowTokens: 2_000_000,
-    maxOutputTokens: 128_000,
-    listPricePer1MInput: 5.0,
-    listPricePer1MOutput: 25.0,
-    inputPricePer1M: 5.0,
-    outputPricePer1M: 25.0,
-    cachedInputPricePer1M: 0.50,
-    discountPercentage: 0,
-    supportsVision: true,
-    supportsReasoning: true,
-    supportsStreaming: true,
-    description: 'Our most capable model for complex, demanding work.'
-  },
-  {
-    id: 'gpt-5.6-sol',
-    upstreamId: 'gpt-5.6-sol',
-    name: 'OpenAI GPT-5.6 Sol (Workhorse)',
-    provider: 'openai',
-    category: 'llm',
-    contextWindowTokens: 1_050_000,
-    maxOutputTokens: 128_000,
-    listPricePer1MInput: 4.0,
-    listPricePer1MOutput: 20.0,
-    inputPricePer1M: 4.0,
-    outputPricePer1M: 20.0,
-    cachedInputPricePer1M: 0.40,
-    discountPercentage: 0,
-    supportsVision: true,
-    supportsReasoning: true,
-    supportsStreaming: true,
-    description: 'Reliable agentic workhorse for everyday tasks.'
-  },
-  {
-    id: 'gpt-5.6-terra',
-    upstreamId: 'gpt-5.6-terra',
-    name: 'OpenAI GPT-5.6 Terra (Balanced)',
-    provider: 'openai',
-    category: 'llm',
-    contextWindowTokens: 1_050_000,
-    maxOutputTokens: 128_000,
-    listPricePer1MInput: 2.0,
-    listPricePer1MOutput: 12.0,
-    inputPricePer1M: 2.0,
-    outputPricePer1M: 12.0,
-    cachedInputPricePer1M: 0.20,
-    discountPercentage: 0,
-    supportsVision: true,
-    supportsReasoning: true,
-    supportsStreaming: true,
-    description: 'Balanced agentic coding model for everyday work.'
-  },
-  {
-    id: 'gpt-5.6-luna',
+    id: 'gpt-5-6-luna-low',
     upstreamId: 'gpt-5.6-luna',
-    name: 'OpenAI GPT-5.6 Luna (Current Fast)',
+    name: 'OpenAI GPT-5.6 Luna Low',
     provider: 'openai',
     category: 'llm',
     contextWindowTokens: 1_050_000,
@@ -92,26 +31,7 @@ export const EXCLUSIVE_MODEL_CATALOG: ModelSpecItem[] = [
     supportsVision: true,
     supportsReasoning: true,
     supportsStreaming: true,
-    description: 'Fast and affordable agentic coding model.'
-  },
-  {
-    id: 'gpt-5.5',
-    upstreamId: 'gpt-5.5',
-    name: 'OpenAI GPT-5.5 (Proven Workhorse)',
-    provider: 'openai',
-    category: 'llm',
-    contextWindowTokens: 500_000,
-    maxOutputTokens: 64_000,
-    listPricePer1MInput: 1.00,
-    listPricePer1MOutput: 5.00,
-    inputPricePer1M: 1.00,
-    outputPricePer1M: 5.00,
-    cachedInputPricePer1M: 0.10,
-    discountPercentage: 0,
-    supportsVision: true,
-    supportsReasoning: false,
-    supportsStreaming: true,
-    description: 'Proven previous-generation model for coding and general work.'
+    description: 'Fast and affordable agentic coding model with low reasoning overhead.'
   },
 
   // --- 2. OpenAI Visual Synthesis & Image Generation Suite ---
@@ -153,9 +73,9 @@ export class ModelCatalog {
    * Never throws or stalls on ambiguous inputs — always resolves to the optimal matching engine.
    */
   public static resolveModel(requestedModel?: string | null): ModelSpecItem {
-    // 0. Zero-hesitation default fallback when model is omitted or blank (Default: gpt-6-astra)
+    // 0. Zero-hesitation default fallback when model is omitted or blank (Default: gpt-5-6-luna-low)
     if (!requestedModel || typeof requestedModel !== 'string' || requestedModel.trim().length === 0) {
-      return this.catalog.get('gpt-6-astra') || EXCLUSIVE_MODEL_CATALOG[0];
+      return this.catalog.get('gpt-5-6-luna-low') || EXCLUSIVE_MODEL_CATALOG[0];
     }
 
     if (this.fastPathCache.has(requestedModel)) {
@@ -185,7 +105,19 @@ export class ModelCatalog {
     );
     if (upstreamMatch) return upstreamMatch;
 
-    // 4. Strip common provider / framework / routing prefixes and version suffixes
+    // 4. Visual / Image Synthesis Intent Detection
+    if (
+      normalized.includes('image') ||
+      normalized.includes('draw') ||
+      normalized.includes('photo') ||
+      normalized.includes('art') ||
+      normalized.includes('dall') ||
+      normalized.includes('visual')
+    ) {
+      return this.catalog.get('openai-gpt-image-latest') || EXCLUSIVE_MODEL_CATALOG.find(m => m.category === 'image')!;
+    }
+
+    // 5. Strip common provider / framework / routing prefixes and version suffixes
     const cleanId = normalized
       .replace(/^(openai|x-ai|xai|anthropic|google|meta|deepseek|mistral|galx|galxai|models|router|gateway)[/:_]/, '')
       .replace(/^@(openai|anthropic|google|deepseek)\//, '')
@@ -197,77 +129,77 @@ export class ModelCatalog {
       return this.catalog.get(cleanId)!;
     }
 
-    // 5. Rich developer aliases dictionary (covering every mental model & intent)
+    // 6. Developer aliases dictionary (maps all mental models to gpt-5-6-luna-low or image)
     const aliases: Record<string, string> = {
-      // Flagship GPT-6 Astra (Default)
-      'astra': 'gpt-6-astra',
-      'gpt-6-astra': 'gpt-6-astra',
-      'gpt6-astra': 'gpt-6-astra',
-      'gpt-6': 'gpt-6-astra',
-      'gpt6': 'gpt-6-astra',
-      'codex-astra': 'gpt-6-astra',
-      'flagship': 'gpt-6-astra',
-      'default': 'gpt-6-astra',
-      'sota': 'gpt-6-astra',
-      'best': 'gpt-6-astra',
-      'smart': 'gpt-6-astra',
-      'primary': 'gpt-6-astra',
+      // Primary Choice: gpt-5-6-luna-low
+      'gpt-5-6-luna-low': 'gpt-5-6-luna-low',
+      'gpt-5.6-luna-low': 'gpt-5-6-luna-low',
+      'gpt5-6-luna-low': 'gpt-5-6-luna-low',
+      'gpt5.6-luna-low': 'gpt-5-6-luna-low',
+      'luna-low': 'gpt-5-6-luna-low',
+      'luna': 'gpt-5-6-luna-low',
+      'gpt-luna': 'gpt-5-6-luna-low',
+      'gpt5-luna': 'gpt-5-6-luna-low',
+      'gpt5.6-luna': 'gpt-5-6-luna-low',
+      'gpt-5.6-luna': 'gpt-5-6-luna-low',
+      'gpt-5-6-luna': 'gpt-5-6-luna-low',
+      'codex-luna': 'gpt-5-6-luna-low',
+      'fast': 'gpt-5-6-luna-low',
+      'flash': 'gpt-5-6-luna-low',
+      'speed': 'gpt-5-6-luna-low',
+      'turbo': 'gpt-5-6-luna-low',
+      'mini': 'gpt-5-6-luna-low',
+      'small': 'gpt-5-6-luna-low',
+      'cheap': 'gpt-5-6-luna-low',
+      'velocity': 'gpt-5-6-luna-low',
+      'instant': 'gpt-5-6-luna-low',
+      'autocomplete': 'gpt-5-6-luna-low',
+      'low-cost': 'gpt-5-6-luna-low',
+      'default': 'gpt-5-6-luna-low',
+      'primary': 'gpt-5-6-luna-low',
 
-      // Workhorse GPT-5.6 Sol
-      'sol': 'gpt-5.6-sol',
-      'gpt-sol': 'gpt-5.6-sol',
-      'gpt5-sol': 'gpt-5.6-sol',
-      'gpt5.6-sol': 'gpt-5.6-sol',
-      'gpt-5.6-sol': 'gpt-5.6-sol',
-      'gpt-5-6-sol': 'gpt-5.6-sol',
-      'gpt5.6': 'gpt-5.6-sol',
-      'gpt-5.6': 'gpt-5.6-sol',
-      'gpt5': 'gpt-5.6-sol',
+      // Backward compatibility aliases map to gpt-5-6-luna-low
+      'astra': 'gpt-5-6-luna-low',
+      'gpt-6-astra': 'gpt-5-6-luna-low',
+      'gpt6-astra': 'gpt-5-6-luna-low',
+      'gpt-6': 'gpt-5-6-luna-low',
+      'gpt6': 'gpt-5-6-luna-low',
+      'codex-astra': 'gpt-5-6-luna-low',
+      'flagship': 'gpt-5-6-luna-low',
+      'sota': 'gpt-5-6-luna-low',
+      'best': 'gpt-5-6-luna-low',
+      'smart': 'gpt-5-6-luna-low',
+      'sol': 'gpt-5-6-luna-low',
+      'gpt-sol': 'gpt-5-6-luna-low',
+      'gpt5-sol': 'gpt-5-6-luna-low',
+      'gpt5.6-sol': 'gpt-5-6-luna-low',
+      'gpt-5.6-sol': 'gpt-5-6-luna-low',
+      'gpt-5-6-sol': 'gpt-5-6-luna-low',
+      'gpt5.6': 'gpt-5-6-luna-low',
+      'gpt-5.6': 'gpt-5-6-luna-low',
+      'gpt5': 'gpt-5-6-luna-low',
       'gpt-5': 'gpt-5.6-sol',
-      'codex-sol': 'gpt-5.6-sol',
-      'workhorse': 'gpt-5.6-sol',
-
-      // Balanced GPT-5.6 Terra
-      'terra': 'gpt-5.6-terra',
-      'gpt-terra': 'gpt-5.6-terra',
-      'gpt5-terra': 'gpt-5.6-terra',
-      'gpt5.6-terra': 'gpt-5.6-terra',
-      'gpt-5.6-terra': 'gpt-5.6-terra',
-      'gpt-5-6-terra': 'gpt-5.6-terra',
-      'codex-terra': 'gpt-5.6-terra',
-      'balanced': 'gpt-5.6-terra',
-      'reasoning': 'gpt-5.6-terra',
-      'reasoner': 'gpt-5.6-terra',
-      'thinking': 'gpt-5.6-terra',
-
-      // Fast & Affordable GPT-5.6 Luna
-      'luna': 'gpt-5.6-luna',
-      'gpt-luna': 'gpt-5.6-luna',
-      'gpt5-luna': 'gpt-5.6-luna',
-      'gpt5.6-luna': 'gpt-5.6-luna',
-      'gpt-5.6-luna': 'gpt-5.6-luna',
-      'gpt-5-6-luna': 'gpt-5.6-luna',
-      'codex-luna': 'gpt-5.6-luna',
-      'fast': 'gpt-5.6-luna',
-      'flash': 'gpt-5.6-luna',
-      'speed': 'gpt-5.6-luna',
-      'turbo': 'gpt-5.6-luna',
-      'mini': 'gpt-5.6-luna',
-      'small': 'gpt-5.6-luna',
-      'cheap': 'gpt-5.6-luna',
-      'velocity': 'gpt-5.6-luna',
-      'instant': 'gpt-5.6-luna',
-      'autocomplete': 'gpt-5.6-luna',
-      'low-cost': 'gpt-5.6-luna',
-
-      // Proven Previous-Gen GPT-5.5
-      '5.5': 'gpt-5.5',
-      'gpt-5.5': 'gpt-5.5',
-      'gpt5.5': 'gpt-5.5',
-      'gpt-5-5': 'gpt-5.5',
-      'codex-5.5': 'gpt-5.5',
-      'previous': 'gpt-5.5',
-      'legacy': 'gpt-5.5',
+      'codex-sol': 'gpt-5-6-luna-low',
+      'workhorse': 'gpt-5-6-luna-low',
+      'terra': 'gpt-5-6-luna-low',
+      'gpt-terra': 'gpt-5-6-luna-low',
+      'gpt5-terra': 'gpt-5-6-luna-low',
+      'gpt5.6-terra': 'gpt-5-6-luna-low',
+      'gpt-5.6-terra': 'gpt-5-6-luna-low',
+      'gpt-5-6-terra': 'gpt-5-6-luna-low',
+      'codex-terra': 'gpt-5-6-luna-low',
+      'balanced': 'gpt-5-6-luna-low',
+      'reasoning': 'gpt-5-6-luna-low',
+      'reasoner': 'gpt-5-6-luna-low',
+      'thinking': 'gpt-5-6-luna-low',
+      '5.5': 'gpt-5-6-luna-low',
+      'gpt-5.5': 'gpt-5-6-luna-low',
+      'gpt5.5': 'gpt-5-6-luna-low',
+      'gpt-5-5': 'gpt-5-6-luna-low',
+      'codex-5.5': 'gpt-5-6-luna-low',
+      'previous': 'gpt-5-6-luna-low',
+      'legacy': 'gpt-5-6-luna-low',
+      'embedding': 'gpt-5-6-luna-low',
 
       // Visual / Image Synthesis variations
       'image': 'openai-gpt-image-latest',
@@ -281,6 +213,7 @@ export class ModelCatalog {
       'dalle': 'openai-gpt-image-latest',
       'dalle-3': 'openai-gpt-image-latest',
       'dall-e': 'openai-gpt-image-latest',
+      'dall-e-3': 'openai-gpt-image-latest',
     };
 
     if (aliases[normalized] && this.catalog.has(aliases[normalized])) {
@@ -291,7 +224,7 @@ export class ModelCatalog {
       return this.catalog.get(aliases[cleanId])!;
     }
 
-    // 6. Dot / dash version normalization: replace gpt-5-6 with gpt-5.6
+    // 7. Dot / dash version normalization: replace gpt-5-6 with gpt-5.6
     const dotNormalized = normalized.replace(/(\d+)-(\d+)/g, '$1.$2');
     if (this.catalog.has(dotNormalized)) {
       return this.catalog.get(dotNormalized)!;
@@ -300,24 +233,8 @@ export class ModelCatalog {
       return this.catalog.get(aliases[dotNormalized])!;
     }
 
-    // 7. Fuzzy search fallback: keyword containment in ID or Name
-    const sanitizedQuery = normalized.replace(/[^a-z0-9]/g, '');
-    if (sanitizedQuery.length >= 2) {
-      const fuzzyFound = EXCLUSIVE_MODEL_CATALOG.find(m => {
-        const cleanModelId = m.id.replace(/[^a-z0-9]/g, '').toLowerCase();
-        const cleanName = m.name.replace(/[^a-z0-9]/g, '').toLowerCase();
-        return cleanModelId.includes(sanitizedQuery) || sanitizedQuery.includes(cleanModelId) || cleanName.includes(sanitizedQuery);
-      });
-      if (fuzzyFound) return fuzzyFound;
-    }
-
-    // 8. Intent Category Detection: If developer requested an image term, route to that category
-    if (normalized.includes('image') || normalized.includes('draw') || normalized.includes('photo') || normalized.includes('art') || normalized.includes('dall')) {
-      return this.catalog.get('openai-gpt-image-latest') || EXCLUSIVE_MODEL_CATALOG.find(m => m.category === 'image')!;
-    }
-
-    // 9. Zero-hesitation ultimate fallback: default flagship LLM (gpt-6-astra)
-    return this.catalog.get('gpt-6-astra') || EXCLUSIVE_MODEL_CATALOG[0];
+    // 8. Zero-hesitation ultimate fallback: default choice LLM (gpt-5-6-luna-low)
+    return this.catalog.get('gpt-5-6-luna-low') || EXCLUSIVE_MODEL_CATALOG[0];
   }
 
   public static listAll(): ModelSpecItem[] {

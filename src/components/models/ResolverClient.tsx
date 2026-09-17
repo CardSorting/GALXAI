@@ -32,25 +32,21 @@ interface PresetGroup {
 
 const PRESET_GROUPS: PresetGroup[] = [
   {
-    group: 'Frontier Reasoning & Coding',
-    items: ['sol', 'gpt-5', 'claude-3-7-sonnet', 'deepseek-r1', 'coding'],
-  },
-  {
-    group: 'High Throughput & Low Latency',
-    items: ['terra', 'luna', 'o3-mini', 'fast', 'cheap'],
+    group: 'OpenAI GPT-5.6 Luna Low',
+    items: ['luna-low', 'gpt-5-6-luna-low', 'luna', 'fast', 'coding', 'default'],
   },
   {
     group: 'Visual & Multimodal',
-    items: ['image', 'dalle-3', 'openai-gpt-image-latest'],
+    items: ['image', 'dalle-3', 'openai-gpt-image-latest', 'visual'],
   },
   {
-    group: 'Namespaced & Legacy Aliases',
-    items: ['openai/gpt-5.6-sol:latest', '@anthropic/claude-3-5-sonnet'],
+    group: 'Legacy & Cross-Provider Resolution',
+    items: ['sol', 'terra', 'gpt-5', 'claude-3-7-sonnet', 'deepseek-r1', 'openai/gpt-5.6-sol:latest'],
   },
 ];
 
 export function ResolverClient() {
-  const [query, setQuery] = useState('sol');
+  const [query, setQuery] = useState('luna-low');
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [activeCodeTab, setActiveCodeTab] = useState<'curl' | 'python' | 'ts'>('curl');
 
@@ -241,7 +237,7 @@ console.log(res.choices[0].message.content);`;
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Type an alias (e.g. sol, terra, luna, gpt-5, dalle, fast)..."
+                placeholder="Type an alias (e.g. luna-low, luna, fast, sol, dalle, image)..."
                 className="w-full pl-11 pr-24 py-3.5 rounded-xl bg-black/60 border border-white/10 text-white font-mono text-sm focus:outline-none focus:border-cyan-500 transition-colors placeholder:text-zinc-600"
               />
               {query && (
@@ -454,7 +450,7 @@ console.log(res.choices[0].message.content);`;
           <div className="glass-panel rounded-3xl p-8 text-center space-y-2 border border-rose-500/20 bg-rose-500/5">
             <p className="text-sm text-zinc-300 font-mono">No direct match for &quot;{query}&quot;.</p>
             <p className="text-xs text-zinc-500">
-              Try shorthand aliases like <strong className="text-zinc-300 font-mono">sol</strong>, <strong className="text-zinc-300 font-mono">terra</strong>, <strong className="text-zinc-300 font-mono">luna</strong>, or <strong className="text-zinc-300 font-mono">dalle</strong>.
+              Try shorthand aliases like <strong className="text-zinc-300 font-mono">luna-low</strong>, <strong className="text-zinc-300 font-mono">luna</strong>, <strong className="text-zinc-300 font-mono">fast</strong>, or <strong className="text-zinc-300 font-mono">image</strong>.
             </p>
           </div>
         )}

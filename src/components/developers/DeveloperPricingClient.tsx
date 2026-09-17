@@ -62,14 +62,14 @@ console.log(completion.choices[0].message.content);`,
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer galx_live_..." \\
   -d '{
-    "model": "gpt-5.6-sol",
-    "messages": [{"role": "user", "content": "Hello, frontier reasoning world!"}]
+    "model": "gpt-5-6-luna-low",
+    "messages": [{"role": "user", "content": "Hello, agentic coding world!"}]
   }'`,
 
   cursor: `// In Cursor / Windsurf Settings -> OpenAI API:
 // Base URL: https://api.galx.ai/v1
 // API Key:  galx_live_your_api_key_here
-// Override Models: gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna`,
+// Override Models: gpt-5-6-luna-low`,
 };
 
 export function DeveloperPricingClient() {
@@ -82,7 +82,7 @@ export function DeveloperPricingClient() {
   // Interactive Calculator State
   const [monthlyTokensMillions, setMonthlyTokensMillions] = useState<number>(50);
   const [cacheHitPercent, setCacheHitPercent] = useState<number>(60);
-  const [selectedModelId, setSelectedModelId] = useState<string>('gpt-5.6-sol');
+  const [selectedModelId, setSelectedModelId] = useState<string>('gpt-5-6-luna-low');
 
   // Model filter state
   const [searchQuery, setSearchQuery] = useState('');
@@ -199,7 +199,7 @@ export function DeveloperPricingClient() {
       perks: [
         'Instant API Key minting (/keys) with zero waitlist',
         'Drop-in OpenAI SDK & Cursor/Windsurf compatibility',
-        'OpenAI Flagship Models (GPT-6 Astra, GPT-5.6 Sol, Terra, Luna, GPT-5.5)',
+        'OpenAI GPT-5.6 Luna Low & Image Generation',
         'Images API generation (/v1/images/generations)',
         'Zero Data Retention (ZDR) Privacy Enclaves',
       ],

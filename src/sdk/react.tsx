@@ -273,7 +273,7 @@ export function useChat(options: UseChatOptions = {}): UseChatHelpers {
             body: JSON.stringify({
               messages: updatedMessages,
               stream: true,
-              model: options.defaultModel || context.defaultModel || 'gpt-5.6-sol',
+              model: options.defaultModel || context.defaultModel || 'gpt-5-6-luna-low',
               conversation_id: sessionId,
               session_mode: sessionModeRef.current,
               turn_id: turnId,
@@ -451,7 +451,7 @@ export function useCompletion(options: { endpoint?: string; defaultModel?: strin
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           messages: [{ role: 'user', content: text }],
-          model: options.defaultModel || 'gpt-5.6-sol',
+          model: options.defaultModel || 'gpt-5-6-luna-low',
           stream: true
         }),
         signal: controller.signal
@@ -505,7 +505,7 @@ export function useObject<T = any>(options: { endpoint?: string; schema?: any; d
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           messages: [{ role: 'user', content: prompt }],
-          model: options.defaultModel || 'gpt-5.6-sol',
+          model: options.defaultModel || 'gpt-5-6-luna-low',
           schema: options.schema
         })
       });
@@ -563,8 +563,8 @@ export function useModels(options: { endpoint?: string } = {}) {
         // Fallback models
         if (isMounted) {
           setModels([
-            { id: 'openai-gpt-image-latest', name: 'OpenAI Image Generation', description: 'Generate images from text prompts' },
-            { id: 'gpt-5.6-sol', name: 'GPT-5.6 Sol', description: 'Flagship reasoning & text generation' }
+            { id: 'gpt-5-6-luna-low', name: 'OpenAI GPT-5.6 Luna Low', description: 'Ultra-fast text & code inference engine' },
+            { id: 'openai-gpt-image-latest', name: 'OpenAI Image Generation', description: 'Generate images from text prompts' }
           ]);
         }
       } catch (err: any) {
