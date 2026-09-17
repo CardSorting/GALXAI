@@ -51,12 +51,12 @@
     }
   },
   "images": {
-    "reviewer": "Antigravity",
-    "note": "Verified GALX Images homepage prompt composer cockpit, aspect ratio shapes, community showcase thumbnails and stream categories",
+    "reviewer": "Product/API maintainer",
+    "note": "Upgraded public community masonry stream UX, like counters, toast notifications, and modal navigation",
     "reviewed_at": "2026-09-17",
     "review_by": "2026-10-16",
     "evidence": {
-      "post-mortem/releases/2026-09-16-galx-images-masonry-stream.json": "a8ce663c9c9cd19930d9757114d13c1e4244b0c9351ddd76109e8de03d7ec38b"
+      "post-mortem/releases/2026-09-16-public-image-feed-and-schema.json": "3f2a34c2941f777978eebea0db34ab079b9b83e0b418d3b2df601b438d8c25a1"
     },
     "files": {
       "docs/QUEUE_SPECIFICATION.md": "301d293b23327bf065202322e0a7554cf581740f28d0d5ab9fb827e73beed6ba",
@@ -102,9 +102,9 @@
       "src/components/dashboard/generation-gate.module.css": "efd8526722ca0ad42aec319a56bc2ea7e638185f30c35cea9b445dfb69bba4a4",
       "src/components/images/GenerationCanvas.tsx": "4341702fc0842c20a7d860b8241a4bf55780919b73254f54915a61cd09269473",
       "src/components/images/ImageStudio.tsx": "d64041b6f5d9bbf1223380b4850c9f3921929b11267a1685c26cad31db7c7130",
-      "src/components/images/PublicImageMasonryStream.tsx": "d7889189dce302d702c7bd4fe9d71d95ed5b81a1b2157935fe490dfbcdc42504",
+      "src/components/images/PublicImageMasonryStream.tsx": "c5f8331947bd90f9ba2565955a59decbca3c302c33be7d56831140d6753874bc",
       "src/components/images/StudioArtwork.tsx": "427128b4f3ea300222b74fdfe132564237030507f1d40c20093c89ef52e26229",
-      "src/components/images/masonry-stream.css": "0bcdd9df469c472f11c80925b8de39fe843242f811f6f6acee640dd86263704e",
+      "src/components/images/masonry-stream.css": "7c83c0f695487cf7ad3659dac00612cab81bfe9506359522af8ae8ecbc08f839",
       "src/components/images/studio-contract.ts": "cfa22ffc7df750e747c805a7a8ee394dfb76fdc9adcd2beabcb9872536f0d5bb",
       "src/components/images/studio.css": "d04bce6d6f0eb817815b5dfbefc962221e8865fb68eb74bdb23bce881da87492",
       "src/components/images/use-image-studio.ts": "22b3ac9a41f10bceb777942da4c63ea84e079e7c85aff5d7027d019f0f1b8ff1",
@@ -137,12 +137,12 @@
     }
   },
   "access": {
-    "reviewer": "Antigravity",
-    "note": "Reconciled signup page to link to community stream and updated copy",
+    "reviewer": "Security/access maintainer",
+    "note": "Added /api/images/feed and /images/showcase/ to preview exemption policy and updated test assertions",
     "reviewed_at": "2026-09-17",
     "review_by": "2026-10-16",
     "evidence": {
-      "post-mortem/releases/2026-09-16-luna-low-dedicated-lineup.json": "0a64d760bceafaea2950a9d78f2e58468c0890e3c9f7ca324c04fbd71a5a97f0"
+      "post-mortem/releases/2026-09-16-public-image-feed-and-schema.json": "3f2a34c2941f777978eebea0db34ab079b9b83e0b418d3b2df601b438d8c25a1"
     },
     "files": {
       "docs/OAUTH_AND_TOKEN_LIFECYCLE_SPECIFICATION.md": "1e8004f6dc024322356e5494b099b7c38ed00e4a62e22434b020fd43c9470183",
@@ -153,7 +153,7 @@
       "docs/adr/0147-verified-account-and-session-authority.md": "5c97eaabc0faa667f329c44ed0366125c96cb0cbd4625f7cf84649b882e57a96",
       "docs/maintainers/FREE_GENERATION_QUOTA.md": "239c0c173e05cbba23f74818e712b1ad217e2e0d3a1c69f86b0de8504f06f42b",
       "docs/maintainers/readable-urls.md": "f04fe2f7d2752ceef765feb24a2f2a29fedee3b526a3291d114dbfdaceae1a40",
-      "docs/operations/developer-preview.md": "e0c671496123847a7f6845eb1e1339334eb8bd0c75cb36b4033e808a63705c3c",
+      "docs/operations/developer-preview.md": "7e8f6efad1da424b851ad1a849943b8e2c93706d08894e62d2d1588e5f0a11fc",
       "docs/operations/preview-activation.md": "d724da3eefe8b52d2557f0f4be91a70ed3562f56e7586e17fe0c2dc06c824e44",
       "docs/operations/preview-admin.md": "d7e854fdd3ff3d1aadbee97d0163c1a38cf3a7626a2907c540093003f5064b40",
       "docs/operations/preview-hybrid-sync.md": "1ac7ce76537660cfc507a595c942d4da2324060b8a3f15ddf9ab96d993ff38e9",
@@ -166,7 +166,7 @@
       "scripts/test-auth-identity-boundary.ts": "7a4c8de24a4c82869d1adeb4c57567a574d206116b16df37681e8569bffefe93",
       "scripts/test-auth-provider-recovery.ts": "b97fb5e6c21e01fe830752e580b26208a2d96b219a8b773f1aba4702c63f83fe",
       "scripts/test-browser-session.ts": "2bcb16b82cc74f011dfa8c7d4d799145e084520b0d43b96addc552f4de9230e1",
-      "scripts/test-developer-preview.ts": "c45beb2ba5972084c811a5f67edfd60a8867a441712b957308d7dd1bfa7b602b",
+      "scripts/test-developer-preview.ts": "6bd1edf25679d45032580e5527b1798313b77820799dd464edea5b660eb96c68",
       "scripts/test-free-generation-gate-db.ts": "2919f39490203795965f494f61b288305ea7136e544515cc504d9e8a0ff7e037",
       "scripts/test-free-generation-quota-db.ts": "26d3381b0a90285cce6d954b954601fb7a5a4596998389ac7091cfb7b49d9b04",
       "scripts/test-free-generation-quota.ts": "cbf7034c6f10ecfcf6176718f693a2636af775899e05552b5d7c53c58f142fb3",
@@ -273,7 +273,7 @@
       "src/lib/security/internal-access.ts": "ea9c2c0f280b819e285b04bb1c82b8e1669c8498ec1e05a6560a34d27a25d11c",
       "src/lib/security/normalize-image-output.ts": "205920bbb0a1df05c955211edc4d738b21cabefbe04bd0a5386ac5e0ac0af4bd",
       "src/lib/security/preview-middleware.ts": "ea577ad1118ca166c882cd8a5d335221a2a1a5b65b4cfa7b0078daa76572229d",
-      "src/lib/security/preview-policy.ts": "9890966e0fbe2e9aaf1290e2afa9ee79dd2b634a1ff7dc01e736b1fc655667f9",
+      "src/lib/security/preview-policy.ts": "ef8d056a76437113192f3ee71db6c5c69d94bde62a918f82d551bd516b8f2187",
       "src/lib/security/private-image-diagnostics.ts": "b2f34531192d580a86ff2bfe9cc65df9586ec28abb5648e0fc5cace2aba40255",
       "src/lib/security/public-image-http.ts": "793b1a19ed4a704439544df062e6921f1f0e9862503a4e6dc38f01246e90584d",
       "src/lib/security/public-image-record.ts": "777deaa9a0ce4a75aae539ae21a90b3ec8c1c11e19997f8664b8a35de91b1f9e",
@@ -590,12 +590,12 @@
     }
   },
   "database": {
-    "reviewer": "maintainer",
-    "note": "Developer tier instant access implementation and verification",
-    "reviewed_at": "2026-09-16",
+    "reviewer": "Database operator",
+    "note": "Applied 20260917040000_public_image_stream_schema_and_rls UP/DOWN migration, RLS select policy, and atomic counter RPCs",
+    "reviewed_at": "2026-09-17",
     "review_by": "2026-10-16",
     "evidence": {
-      "post-mortem/releases/2026-09-16-developer-tier-instant-access.json": "066992e5d62f991c35e0bec03946b6484a5a9a592549a54c1a626bd658fbe7c5"
+      "post-mortem/releases/2026-09-16-public-image-feed-and-schema.json": "3f2a34c2941f777978eebea0db34ab079b9b83e0b418d3b2df601b438d8c25a1"
     },
     "files": {
       "deploy/relay-execution/supabase/migrations/20260915082628_relay_execution.sql": "fc61d7c30bdd57706ffb4212788741302760722e7285c25c9b4cb93d629b137e",
@@ -664,7 +664,7 @@
       "src/lib/supabase/repositories/TelemetryRepository.ts": "1887a04aa51424e44d6ac9d499fc24248edd2aa9c64c559cf1f307773dd252e5",
       "src/lib/supabase/repositories/WalletRepository.ts": "14ac2f53fd2600e698efac4b9fa0150c4fbc14bc2ab2539922926ee0e9794565",
       "src/lib/supabase/repositories/WorkspaceRepository.ts": "b9f6d1d09610760b172c6d1981a06e6ab97d4f5a9a58139377ade89df56a4ed8",
-      "src/lib/supabase/types.ts": "40d9e36a29b0bca4bd34565bd622ca8b54def0a5053f15a4bbdc6898738f4d67",
+      "src/lib/supabase/types.ts": "37af855bcdd44ea636f56bc132eaf2de89a75069f5e2f4c1fd4ec298604e1b46",
       "supabase/migrations/20260822000001_galxai_schema_core.sql": "084520c8cb3ab4e057ec788ea90605bb43e1373a28230e40696271f6a8476f77",
       "supabase/migrations/20260822000002_galxai_schema_apex.sql": "62b4fdc606104700d14eb3b80a7a7063a5152db9ed1afefe63a72315d586f539",
       "supabase/migrations/20260822000003_galxai_user_sessions_auth.sql": "ab2ec033c41bb147aa476acceb4d5dca3991f83f017a7cc41fddd01c6b8e75c4",
@@ -781,6 +781,7 @@
       "supabase/migrations/20260916013944_relay_connection_lifecycle.sql": "367e42543e8eb790873a5708a5bee9126a2407b64ea6ba1a6977ef672282a5fc",
       "supabase/migrations/20260916040459_relay_automatic_activation.sql": "04974bd334a8d11ec64dbb967a8d8b2b29a30d23f4019690d7e9727b22674218",
       "supabase/migrations/20260916161120_isolate_account_session_lookup.sql": "7b50f46b7fca6b75f2bf996e108696c033fe9365fdc10485381793a17a88e171",
+      "supabase/migrations/20260917040000_public_image_stream_schema_and_rls.sql": "4c0e0048ab49ab11d565eabaedf802b9c90c5c63d2b0899f6b2a4718ec41fd2a",
       "supabase/rollbacks/20260822000001_galxai_schema_core.down.sql": "d1267f3f89a7a0af12716a70167f615be1e904bf933e348a1173305cd5f2fe83",
       "supabase/rollbacks/20260822000002_galxai_schema_apex.down.sql": "df36655d564c6d6557d4461294ed2a502ad57adf799037c00a68481b809ffed9",
       "supabase/rollbacks/20260822000003_galxai_user_sessions_auth.down.sql": "4f3012db038b48387290b8d64638fe7aded774d8bdde88cfe683f01f1988adbc",
@@ -896,7 +897,8 @@
       "supabase/rollbacks/20260916003207_billing_canonical_returns.down.sql": "5008b35e2f90db19b9be2a1cdfe4d9289080031d8e3b48693cccd3ee45ed241a",
       "supabase/rollbacks/20260916013944_relay_connection_lifecycle.down.sql": "27936e9044f391c12a8bb8b8817348e3a44e0c0b75c7146f70e5571ffa44b338",
       "supabase/rollbacks/20260916040459_relay_automatic_activation.down.sql": "4fedbf26f9c051c3bf46dff91f20a9d4d92eb58eb3a7675f86348a3bed284479",
-      "supabase/rollbacks/20260916161120_isolate_account_session_lookup.down.sql": "6c42297624aaad9942fb0589e46baf9bb1b71239218df041f8a1aa97511e52b2"
+      "supabase/rollbacks/20260916161120_isolate_account_session_lookup.down.sql": "6c42297624aaad9942fb0589e46baf9bb1b71239218df041f8a1aa97511e52b2",
+      "supabase/rollbacks/20260917040000_public_image_stream_schema_and_rls.down.sql": "53189d794aebf929174b534cbaade198f766c7eaf57373c8e656122a7ed44b4c"
     }
   },
   "delivery": {

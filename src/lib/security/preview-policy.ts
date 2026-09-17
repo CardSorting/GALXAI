@@ -5,7 +5,7 @@ const publicPages = new Set(['/', '/home', '/images', '/images/library', '/image
 const publicApis = new Set(['/api/health', '/api/openapi.json', '/api/auth/signup-offer', '/api/auth/session',
   '/api/developer-access', '/api/developer-access/feedback', '/api/developer-access/check',
   '/api/sites/workspace', '/api/sites/content', '/api/sites/domains',
-  '/api/images/availability', '/api/images/library', '/api/images/library/batch', '/v1/images/generations',
+  '/api/images/availability', '/api/images/feed', '/api/images/library', '/api/images/library/batch', '/v1/images/generations',
   '/api/billing', '/api/billing/plan', '/api/billing/quote', '/api/billing/generation-quota', '/api/wallet/summary',
   '/api/wallet/usage', '/api/wallet/transactions', '/api/wallet/deposit', '/api/wallet/estimate', '/api/wallet/auto-topup',
   '/api/stripe/config', '/api/stripe/checkout', '/api/stripe/session', '/api/stripe/portal', '/api/stripe/webhook']);
@@ -23,7 +23,7 @@ export function isPublicProductPath(pathname: string): boolean {
   if (/^\/v1\/images\/(?:requests\/[^/]+(?:\/stream)?|assets\/[^/]+(?:\/thumbnail)?|sessions\/[^/]+)$/.test(p)) return true;
   if (/^\/api\/images\/library\/[^/]+$/.test(p) || /^\/api\/sites\/published\/[^/]+$/.test(p)) return true;
   if (/^\/sites\/[^/]+$/.test(p) || /^\/billing(?:\/|$)/.test(p)) return true;
-  if (/^\/(?:brand|fonts|inspiration)\//.test(p) || /^\/images\/studio\/(?:desert|glass|paper)\.webp$/.test(p)) return true;
+  if (/^\/(?:brand|fonts|inspiration|images\/showcase)\//.test(p) || /^\/images\/studio\/(?:desert|glass|paper)\.webp$/.test(p)) return true;
   if (/^\/(?:google[^/]+\.html|yandex_[^/]+\.html)$/.test(p)) return true;
   return false;
 }

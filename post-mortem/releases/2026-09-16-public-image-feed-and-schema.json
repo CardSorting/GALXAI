@@ -1,0 +1,14 @@
+{
+  "release": "2026-09-16-public-image-feed-and-schema",
+  "title": "Public Community Image Stream Schema, Permissions and Ergonomics",
+  "timestamp": "2026-09-17T04:06:00Z",
+  "author": "maintainer",
+  "description": "Resolved feed preview policy exemption, added is_public, visibility, likes_count, remix_count, and views_count to user_image_library under paranoid governance. Enabled public community select policy for completed generations. Upgraded public feed route with trending sorting and showcase fallback. Implemented world-class masonry stream UX with trending tabs, like counters, toast notifications, and lightbox modal navigation.",
+  "verification": {
+    "db_verify": "npm run db:verify (0 violations across 117 paired migrations)",
+    "preview_tests": "npx tsx --test scripts/test-developer-preview.ts (10/10 passing)",
+    "security_tests": "npm run test:image:security (45/45 passing)",
+    "type_check": "npx tsc --noEmit (0 errors)",
+    "lint": "npm run lint (0 errors)"
+  }
+}

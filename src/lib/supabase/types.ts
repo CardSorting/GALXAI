@@ -3497,6 +3497,11 @@ export interface Database {
           latency_ms: number;
           cost_usd: number;
           is_favorite: boolean;
+          is_public: boolean;
+          visibility: 'public' | 'unlisted' | 'private';
+          likes_count: number;
+          remix_count: number;
+          views_count: number;
           tags: string[];
           metadata: Json;
           created_at: string;
@@ -3523,6 +3528,11 @@ export interface Database {
           latency_ms?: number;
           cost_usd?: number;
           is_favorite?: boolean;
+          is_public?: boolean;
+          visibility?: 'public' | 'unlisted' | 'private';
+          likes_count?: number;
+          remix_count?: number;
+          views_count?: number;
           tags?: string[];
           metadata?: Json;
           created_at?: string;
