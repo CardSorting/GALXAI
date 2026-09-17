@@ -509,7 +509,7 @@
     },
     {
       "path": "docs/SITES_CONTENT.md",
-      "title": "Site content generation",
+      "title": "Site content generation (Retired)",
       "scope": "current-guide",
       "kind": "reference",
       "domains": [
@@ -521,7 +521,7 @@
     },
     {
       "path": "docs/SITES_WORKSPACE.md",
-      "title": "Create and manage Sites",
+      "title": "Create and manage Sites (Retired)",
       "scope": "current-guide",
       "kind": "reference",
       "domains": [
@@ -3362,7 +3362,7 @@
     },
     {
       "path": "docs/maintainers/SITES_CONVERSATIONS.md",
-      "title": "Continuous Sites conversation operations",
+      "title": "Continuous Sites conversation operations (Retired)",
       "scope": "current-guide",
       "kind": "reference",
       "domains": [],
@@ -3372,7 +3372,7 @@
     },
     {
       "path": "docs/maintainers/SITES_DOMAINS.md",
-      "title": "Sites address operations",
+      "title": "Sites address operations (Retired)",
       "scope": "current-guide",
       "kind": "reference",
       "domains": [
@@ -3384,7 +3384,7 @@
     },
     {
       "path": "docs/maintainers/SITES_FAIR_USAGE.md",
-      "title": "Sites paid access and fair usage",
+      "title": "Sites paid access and fair usage (Retired)",
       "scope": "current-guide",
       "kind": "reference",
       "domains": [
@@ -3397,7 +3397,7 @@
     },
     {
       "path": "docs/maintainers/SITES_OPERATIONS.md",
-      "title": "Sites generation and delivery operations",
+      "title": "Sites generation and delivery operations (Retired)",
       "scope": "current-guide",
       "kind": "reference",
       "domains": [
@@ -3409,7 +3409,7 @@
     },
     {
       "path": "docs/maintainers/SITES_WORKSPACE.md",
-      "title": "Sites workspace operations",
+      "title": "Sites workspace operations (Retired)",
       "scope": "current-guide",
       "kind": "reference",
       "domains": [

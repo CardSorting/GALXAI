@@ -4,8 +4,7 @@ import { IntentLink as Link } from '@/components/common/IntentLink';
 import { Navigation } from '@/components/dashboard/Navigation';
 import {
   Compass,
-  PanelsTopLeft,
-  Image,
+  ImageIcon,
   Code2,
   CreditCard,
   Home
@@ -52,18 +51,18 @@ export default function NotFound() {
             </Link>
 
             <Link
-              href="/sites"
+              href="/#stream"
               className="p-3.5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 hover:text-white flex flex-col items-center justify-center gap-1.5 transition-all group"
             >
-              <PanelsTopLeft className="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform" />
-              <span className="font-bold">Sites</span>
+              <Compass className="w-4 h-4 text-purple-400 group-hover:scale-110 transition-transform" />
+              <span className="font-bold">Stream</span>
             </Link>
 
             <Link
               href="/images"
               className="p-3.5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 hover:text-white flex flex-col items-center justify-center gap-1.5 transition-all group"
             >
-              <Image className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
+              <ImageIcon className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
               <span className="font-bold">Images</span>
             </Link>
 

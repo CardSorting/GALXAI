@@ -7,9 +7,9 @@ export const SITE_CONFIG = {
   name: 'GALXAI',
   legalName: 'GALXAI Technologies Inc.',
   alternateName: ['GALX AI'],
-  tagline: 'Your idea, ready to share',
+  tagline: 'Hyper-Dimensional Visual Generation & Live Stream',
   description:
-    'Turn an idea into a website with GALX Sites. Make a first version, keep refining it, and publish at your own public GALX address. Explore our very early public beta.',
+    'Generate stunning visual assets with GALX Images. Explore the live community stream, remix prompts across 5 aspect ratios, and create with state-of-the-art diffusion models.',
   // Discovery always identifies the public origin, including local/preview builds.
   // Runtime callback and request origins have their own configuration.
   url: 'https://galx.ai',
@@ -64,7 +64,7 @@ export const SITE_CONFIG = {
       status: 'Verified Zero PHI Storage',
     },
   ],
-  keywords: ['GALX', 'GALX Sites', 'website builder', 'prototyping', 'public beta'],
+  keywords: ['GALX', 'GALX Images', 'AI image generator', 'masonry stream', 'prompt studio', 'diffusion models', 'public beta'],
   authors: [
     {
       name: 'GALXAI Systems & AI Security Architecture Group',

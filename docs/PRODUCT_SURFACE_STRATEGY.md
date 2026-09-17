@@ -2,32 +2,32 @@
 
 <!-- docs-scope: current-guide -->
 
-Private product authority, reconciled September 13, 2026. [PRODUCT.md](../PRODUCT.md) summarizes the experience; [current state](../post-mortem/CURRENT_STATE.md) records deployment evidence. Earlier inference-first and customer-local-only strategies are historical, superseded for the public Images/Sites surfaces.
+Private product authority, reconciled September 16, 2026. [PRODUCT.md](../PRODUCT.md) summarizes the experience; [current state](../post-mortem/CURRENT_STATE.md) records deployment evidence. Earlier inference-first, customer-local-only, and conversational website (Sites) strategies are historical, superseded by the public GALX Images surface.
 
 ## Product and access boundaries
 
 | Surface | Current scope |
 | --- | --- |
-| Homepage | Sites-first idea, prototype, revision and public-address pitch; pricing followed by FAQ; extremely early public beta expectations |
-| Public guidance | Dedicated `/pricing`, `/faq`, `/knowledge-base` and eight authored guides, with capability-only copy and no workspace access grant |
-| Sites | Public product with authenticated owned drafts, continuing conversations, preview/version history and explicit managed publication under GALX Pro fair usage |
-| Images | Public product with a one-time five-image allowance and existing Pro account/usage requirements, creation, durable async receipts, owned library, Favorites and sanitized download |
-| Developer preview | Signup, project introduction, GitHub/LinkedIn profiles and cohort interest; individual approval before private API/tool access |
+| Homepage | Images-first prompt cockpit, instant prompt inspiration chips, live infinite masonry community stream, model & aspect ratio selector, pricing followed by FAQ |
+| Public guidance | Dedicated `/pricing`, `/faq`, `/knowledge-base` guides with capability-only copy, explaining visual synthesis, aspect ratios, community streams, and account tiers |
+| Images | Flagship public product: public-by-default visual generation, Pinterest-style live community masonry feed, prompt remixing across 5 aspect ratios, durable async receipts, owned library, Favorites and sanitized PNG downloads |
+| Sites (Retired) | Retired product surface; decommissioned September 2026 due to unsustainable quota consumption and technical setup overhead. Legacy `/sites` routes gracefully redirect to `/images` |
+| Developer preview | Signup, project introduction, GitHub/LinkedIn profiles and cohort interest; instant access via $10 Developer Tier ($20 compute credit) or cohort approval before private API access |
 | Staff administration | Independent owner/reviewer/viewer membership, approval inbox, activity history and private feedback |
-| Destination chat and arbitrary execution | Not introduced by the image studio or bounded Sites workspace; downstream and other proposals retain their own scope |
+| Destination chat and arbitrary execution | Not introduced by the Image Studio; downstream and other proposals retain their own scope |
 
-Public means users can discover and engage with Images and Sites without developer-preview approval. Sign-in is required before opening the Images or Sites workspaces, including saved-Site routes. It does not mean anonymous workspace access or generation, free unlimited compute, public drafts or unrestricted data access. Preserve ownership and entitlement checks.
+Public means users can discover, explore the live stream, and generate visuals in Images without developer-preview approval. Sign-in is required before opening the full Image Studio or accessing owned library history. It does not mean unrestricted abuse or unmetered server compute: free welcome allowances and Pro plans are governed by fair use and rate limiting.
 
 ## Positioning and commercial contract
 
-Explain the pain removed: arranging development, producing an early prototype, revising it and publishing a shareable version. Explain user outcomes and the early beta's purpose, not implementation. Homepage content and metadata omit provider/model names. “Unlimited revisions and turns” must retain the established fair-use meaning, without promising unlimited concurrent capacity or abuse tolerance.
+Explain the creative friction removed: crafting complex visual assets, testing compositions across aspect ratios, and discovering prompt inspirations. Explain user outcomes and visual diffusion fidelity, not internal relay mechanics. Homepage content and metadata follow public-facing model naming and omit upstream backend topology.
 
-The one-time free allowance is defined in [quota operations](maintainers/FREE_GENERATION_QUOTA.md); it is not wallet credit or unlimited free use. Remaining allowance does not guarantee immediate availability: free creation has an aggregate stop gate, and Sites back off for paid demand. A pause keeps saved work and unsent prompts available. Current Pro pricing and eligible plan mappings come from the maintained billing/product configuration and [Sites fair usage](maintainers/SITES_FAIR_USAGE.md), not historical fixed-price draft documents. Images/API usage and prepaid credits retain separate terms. Existing per-generation Sites receipts retain their originally accepted contract and recovery path; do not reprice history.
+The one-time welcome allowance provides five free image generations under [quota operations](maintainers/FREE_GENERATION_QUOTA.md); it is not an unlimited free pass. Current Pro pricing ($29/month) includes priority GPU queues, high-resolution rendering, unlimited 1-click prompt remixes, and community stream participation under fair use. Developer API compute carries separate pay-as-you-go credit terms ($10 Developer Tier with $20 usable credit).
 
-Small developer cohorts support controlled demand and a trustworthy first experience. Participant savings reports are observations requiring attribution and bounded claims, not guaranteed inference discounts. Signup/payment never substitutes for approval.
+The conversational website builder (Sites) has been completely sunset. Existing Sites assets and historical per-generation billing records retain their originally accepted contract and recovery path without repricing history.
 
 ## Execution and evidence
 
 Public documentation uses capability contracts and explicit response fields. Operational topology, credential sources, readiness mechanics and diagnostics stay private under [AGENTS.md](../AGENTS.md). Keep server-verified identity, independent staff authority, durable ownership and uncertain-operation recovery intact.
 
-Measure completed user journeys, durable revisions/images, publication readiness, feedback and repeat use. Distinguish implementation, local tests, component deployment and real customer acceptance. [Incident records](../post-mortem/INCIDENTS.md) retain failed attempts and verification limits; a successful image test does not qualify checkout or Sites publication.
+Measure completed user journeys, durable image generations, prompt remix engagement, stream discovery, and repeat use. Distinguish implementation, local tests, component deployment and real customer acceptance. [Incident records](../post-mortem/INCIDENTS.md) retain failed attempts and verification limits; a successful image test does not qualify checkout or third-party integrations.

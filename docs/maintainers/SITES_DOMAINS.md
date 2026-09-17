@@ -1,8 +1,12 @@
-# Sites address operations
+# Sites address operations (Retired)
 
 <!-- docs-scope: current-guide -->
 
-Private maintainer runbook. [ADR 0137](../adr/0137-account-owned-sites-subdomains.md) defines address ownership; [ADR 0138](../adr/0138-automatic-sites-domain-provisioning.md) defines automatic discovery and reconciliation. [Site addresses](../SITE_ADDRESSES.md) is the public capability contract. Never bundle this guide, native registrations or queue rows into product output.
+> [!NOTE]
+> **Status: Retired / Sunset (September 2026)**
+> Automatic Sites domain provisioning and subdomain binding have been sunset alongside the retirement of the Sites product. DNS workers and background schedulers are preserved for historical audit only.
+
+Private maintainer runbook. [ADR 0137](../adr/0137-account-owned-sites-subdomains.md) defines address ownership; [ADR 0138](../adr/0138-automatic-sites-domain-provisioning.md) defines automatic discovery and reconciliation. [Site addresses](../SITE_ADDRESSES.md) is the historical capability contract. Never bundle this guide, native registrations or queue rows into product output.
 
 New browser-created Sites use [workspace-managed publishing](SITES_WORKSPACE.md), which needs no customer companion. The discovery lifecycle below remains the separate path for customer-native Sites.
 

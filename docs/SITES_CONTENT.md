@@ -1,14 +1,14 @@
-# Site content generation
+# Site content generation (Retired)
 
 <!-- docs-scope: current-guide -->
 
-Create a simple page or revise its content through [Sites](https://galx.ai/sites). Creating, updating and publishing Sites is included with GALX Pro, subject to fair usage. New updates do not carry a separate generation charge.
+> [!NOTE]
+> **Status: Retired / Sunset (September 2026)**
+> The Sites content generation API has been sunset. Conversational site generation was decommissioned in September 2026 due to unsustainable quota usage and infrastructure overhead. GALX's primary user-facing creation surface is [GALX Images](https://galx.ai/images). Existing Sites endpoints are kept for historical receipt and draft retrieval only.
 
-The free Site allowance is available in the browser workspace. The standalone API described here requires Pro access. Browser free creation also depends on availability; its composer preserves your prompt during a temporary pause.
+Historical draft creation and content updates through [Sites](https://galx.ai/sites) were included with GALX Pro under fair usage.
 
-This API produces structured text for a static information page. It does not create a working store, account system or custom application. Publishing is a separate action; your conversation and unpublished changes stay private.
-
-Activate GALX Pro in [Billing](https://galx.ai/billing/plan). After payment is confirmed, return to Sites. You can manage or cancel the subscription from Billing; cancellation takes effect at the end of the paid period. API and image usage remain separate.
+The free Site allowance in the browser workspace has ended. Standalone generation is closed. New product visual generation takes place in the GALX Image Studio.
 
 ## Authentication and access
 

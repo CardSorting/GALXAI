@@ -1,10 +1,12 @@
-# Sites generation and delivery operations
+# Sites generation and delivery operations (Retired)
 
 <!-- docs-scope: current-guide -->
 
-Private maintainer guide. [ADR 0140](../adr/0140-paid-sites-and-shared-fair-usage.md) supersedes new per-generation pricing with eligible paid-plan access and shared fair usage; [ADR 0148](../adr/0148-complimentary-pro-access.md) adds explicit operator-provisioned complimentary Pro access. The [fair-use runbook](SITES_FAIR_USAGE.md) defines current configuration, admission, membership and rollout. Public documentation describes only [the capability and access contract](../SITES_CONTENT.md).
+> [!NOTE]
+> **Status: Retired / Sunset (September 2026)**
+> The Sites product line has been retired in favor of GALX Images. Heavy infrastructure requirements, custom domain worker overhead, and high inference quota usage motivated sunsetting Sites. Generation endpoints are disabled and client workspace URLs (`/sites`, `/sites/[id]`) redirect to `/images`. This guide is retained for historical traceability, billing audit, and legacy data recovery.
 
-Free workspace generation additionally requires the separate expiring aggregate budget and paid-capacity protection in [quota operations](FREE_GENERATION_QUOTA.md). Both free resources seed paused; the current two-slot paid launch policy also keeps free Sites paused. Pausing this budget leaves Pro admission and saved-work recovery available. Apply both quota migrations before releasing dependent handlers.
+Private maintainer guide. [ADR 0140](../adr/0140-paid-sites-and-shared-fair-usage.md) supersedes new per-generation pricing with eligible paid-plan access and shared fair usage; [ADR 0148](../adr/0148-complimentary-pro-access.md) adds explicit operator-provisioned complimentary Pro access. The [fair-use runbook](SITES_FAIR_USAGE.md) defines historical configuration, admission, membership and rollout. Public documentation describes only [the capability and access contract](../SITES_CONTENT.md).
 
 
 ## Current path

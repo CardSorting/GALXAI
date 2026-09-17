@@ -1,8 +1,12 @@
-# Sites paid access and fair usage
+# Sites paid access and fair usage (Retired)
 
 <!-- docs-scope: current-guide -->
 
-Private maintainer runbook for [ADR 0140](../adr/0140-paid-sites-and-shared-fair-usage.md). Never expose this page, policy objects, private diagnostics or the supplied handoff/fixture in public assets. The user contract is [Sites content](../SITES_CONTENT.md).
+> [!NOTE]
+> **Status: Retired / Sunset (September 2026)**
+> Sites generation and fair usage admission policies have been retired. GALX Pro has been repositioned around GALX Images (priority GPU inference queues, high-resolution generation across 5 aspect ratios, 1-click prompt remixing, and community stream access).
+
+Private maintainer runbook for [ADR 0140](../adr/0140-paid-sites-and-shared-fair-usage.md). Never expose this page, policy objects, private diagnostics or the supplied handoff/fixture in public assets. The historical user contract was [Sites content](../SITES_CONTENT.md).
 
 ## Integration map
 

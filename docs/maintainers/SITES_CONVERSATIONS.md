@@ -1,8 +1,12 @@
-# Continuous Sites conversation operations
+# Continuous Sites conversation operations (Retired)
 
 <!-- docs-scope: current-guide -->
 
-Private maintainer documentation. [ADR 0142](../adr/0142-continuous-sites-conversations.md) and [ADR 0143](../adr/0143-hybrid-sites-memory-and-review.md) own the decisions; [public Sites guide](../SITES_WORKSPACE.md) describes supported behavior. Do not expose this document in application routes, browser assets or public errors.
+> [!NOTE]
+> **Status: Retired / Sunset (September 2026)**
+> Sites conversation sessions and turn engines have been retired as part of the sunset of the Sites product. Turn and version history tables remain preserved in private database schemas for archival integrity, but new turn operations are decommissioned.
+
+Private maintainer documentation. [ADR 0142](../adr/0142-continuous-sites-conversations.md) and [ADR 0143](../adr/0143-hybrid-sites-memory-and-review.md) own the decisions; [public Sites guide](../SITES_WORKSPACE.md) describes historical behavior. Do not expose this document in application routes, browser assets or public errors.
 
 ## Data and request flow
 

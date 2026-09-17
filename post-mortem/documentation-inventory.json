@@ -348,13 +348,13 @@
       "path": "docs/SITES_CONTENT.md",
       "scope": "current-guide",
       "category": "docs",
-      "title": "Site content generation"
+      "title": "Site content generation (Retired)"
     },
     {
       "path": "docs/SITES_WORKSPACE.md",
       "scope": "current-guide",
       "category": "docs",
-      "title": "Create and manage Sites"
+      "title": "Create and manage Sites (Retired)"
     },
     {
       "path": "docs/SITE_ADDRESSES.md",
@@ -1854,31 +1854,31 @@
       "path": "docs/maintainers/SITES_CONVERSATIONS.md",
       "scope": "current-guide",
       "category": "docs",
-      "title": "Continuous Sites conversation operations"
+      "title": "Continuous Sites conversation operations (Retired)"
     },
     {
       "path": "docs/maintainers/SITES_DOMAINS.md",
       "scope": "current-guide",
       "category": "docs",
-      "title": "Sites address operations"
+      "title": "Sites address operations (Retired)"
     },
     {
       "path": "docs/maintainers/SITES_FAIR_USAGE.md",
       "scope": "current-guide",
       "category": "docs",
-      "title": "Sites paid access and fair usage"
+      "title": "Sites paid access and fair usage (Retired)"
     },
     {
       "path": "docs/maintainers/SITES_OPERATIONS.md",
       "scope": "current-guide",
       "category": "docs",
-      "title": "Sites generation and delivery operations"
+      "title": "Sites generation and delivery operations (Retired)"
     },
     {
       "path": "docs/maintainers/SITES_WORKSPACE.md",
       "scope": "current-guide",
       "category": "docs",
-      "title": "Sites workspace operations"
+      "title": "Sites workspace operations (Retired)"
     },
     {
       "path": "docs/maintainers/SUBSYSTEM_INTERNALS_AND_DEPENDENCY_GRAPH.md",

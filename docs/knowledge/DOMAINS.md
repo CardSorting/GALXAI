@@ -78,15 +78,15 @@ Relevant checks (select for the change; impact discovery never executes these): 
 
 Owner role: **Sites maintainer**. Domain: `sites`.
 
-- [Sites generation and delivery operations](../../docs/maintainers/SITES_OPERATIONS.md)
-- [Sites paid access and fair usage](../../docs/maintainers/SITES_FAIR_USAGE.md)
-- [Sites workspace operations](../../docs/maintainers/SITES_WORKSPACE.md)
-- [Sites address operations](../../docs/maintainers/SITES_DOMAINS.md)
+- [Sites generation and delivery operations (Retired)](../../docs/maintainers/SITES_OPERATIONS.md)
+- [Sites paid access and fair usage (Retired)](../../docs/maintainers/SITES_FAIR_USAGE.md)
+- [Sites workspace operations (Retired)](../../docs/maintainers/SITES_WORKSPACE.md)
+- [Sites address operations (Retired)](../../docs/maintainers/SITES_DOMAINS.md)
 - [ADR 0148: Explicit complimentary Pro access](../../docs/adr/0148-complimentary-pro-access.md)
 - [Free generation quota operations](../../docs/maintainers/FREE_GENERATION_QUOTA.md)
 - [ADR 0149: One-time free generation allowance](../../docs/adr/0149-one-time-free-generation.md)
-- [Create and manage Sites](../../docs/SITES_WORKSPACE.md)
-- [Site content generation](../../docs/SITES_CONTENT.md)
+- [Create and manage Sites (Retired)](../../docs/SITES_WORKSPACE.md)
+- [Site content generation (Retired)](../../docs/SITES_CONTENT.md)
 - [ADR 0150: Bounded free admission and paid capacity protection](../../docs/adr/0150-free-generation-admission-gate.md)
 - [GALXAI](../../docs/API_BASE_URL.md)
 
@@ -210,7 +210,7 @@ Relevant checks (select for the change; impact discovery never executes these): 
 Owner role: **Billing maintainer**. Domain: `billing`.
 
 - [Recover Stripe webhook delivery](../../docs/runbooks/stripe-webhook-delivery.md)
-- [Sites paid access and fair usage](../../docs/maintainers/SITES_FAIR_USAGE.md)
+- [Sites paid access and fair usage (Retired)](../../docs/maintainers/SITES_FAIR_USAGE.md)
 - [DESIGN](../../src/components/billing/DESIGN.md)
 - [Billing pages and navigation](../../docs/reference/billing-pages.md)
 - [Billing strategy and customer paths](../../docs/WALLET_AND_BILLING_STRATEGY.md)

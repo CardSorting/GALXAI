@@ -1,8 +1,12 @@
-# Create and manage Sites
+# Create and manage Sites (Retired)
 
 <!-- docs-scope: current-guide -->
 
-Sign in to open [Sites](https://galx.ai/sites) and create a simple website through conversation. Sign-in is required before accessing the workspace or a saved Site. Your chat appears on the left and your page preview on the right. On a phone, use the Chat and Preview tabs to switch between them.
+> [!NOTE]
+> **Status: Retired / Sunset (September 2026)**
+> The Sites website builder has been sunset as a primary product. Conversational website generation and custom hosting imposed unsustainable quota consumption and technical maintenance overhead. All user-facing workspace routes (`/sites`, `/sites/[id]`) gracefully redirect to [GALX Images](https://galx.ai/images). The instructions below are preserved as historical reference for saved draft retrieval and standalone HTML export.
+
+Sign in to open [Sites](https://galx.ai/sites) and access archived drafts. Sign-in is required before accessing the workspace or a saved Site. Your chat appears on the left and your page preview on the right. On a phone, use the Chat and Preview tabs to switch between them.
 
 Creating, revising, and publishing Sites is included with GALX Pro under fair use. Activate GALX Pro in [Billing](https://galx.ai/billing/plan). After payment is confirmed, return to Sites to start creating. You can manage or cancel the subscription from Billing; cancellation takes effect at the end of the paid period. API and image usage remain separate.
 

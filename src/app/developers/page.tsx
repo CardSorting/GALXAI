@@ -17,7 +17,7 @@ export default function DevelopersPage() {
       <section><h2>Developer Tier ($10 USD)</h2><p>Unlock pay-as-you-go API access immediately with a $10 deposit ($20 usable credit). No manual review or waitlist application needed.</p><p><Link href="/developers/pricing" style={{ color: '#a5b4fc', textDecoration: 'underline' }}>Explore all compute packs and model token rates &rarr;</Link></p></section>
       <section><h2>What builders are reporting</h2><p>Current cohort members report <strong>30–60% lower token and inference spend.</strong></p><p>These are participant-reported results. Savings vary by workload and aren’t guaranteed.</p></section>
       <section><h2>Free Preview Cohort</h2><ol className={styles.steps}><li><strong>Share your application</strong>An introduction, a profile, and your project.</li><li><strong>We review it personally</strong>We consider your project and the room in the next cohort.</li><li><strong>Check your access here</strong>Your status and next steps appear on this page. There’s no fixed invitation date.</li></ol></section>
-      <section><h2>Ready to make something today?</h2><p>Images and Sites are open now. No developer waitlist needed.</p><div className={styles.publicLinks}><Link href="/images">Create images</Link><Link href="/sites">Build a site</Link></div></section>
+      <section><h2>Ready to make something today?</h2><p>GALX Images is open now. No developer waitlist needed.</p><div className={styles.publicLinks}><Link href="/images">Launch Image Studio</Link><Link href="/#stream">Explore Stream</Link></div></section>
     </aside></div>
   </main></>;
 }

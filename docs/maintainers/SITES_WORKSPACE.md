@@ -1,8 +1,12 @@
-# Sites workspace operations
+# Sites workspace operations (Retired)
 
 <!-- docs-scope: current-guide -->
 
-Private maintainer runbook. [ADR 0139](../adr/0139-browser-sites-workspace-and-managed-publishing.md) defines the browser-first path. [Public workflow](../SITES_WORKSPACE.md) contains the user-facing contract. This document must never be shipped as application content.
+> [!NOTE]
+> **Status: Retired / Sunset (September 2026)**
+> The Sites workspace has been retired in favor of the flagship GALX Image Studio and live community masonry stream. Navigation routes `/sites` and `/sites/[id]` redirect to `/images`. This runbook describes the historical implementation for reference and draft extraction.
+
+Private maintainer runbook. [ADR 0139](../adr/0139-browser-sites-workspace-and-managed-publishing.md) defines the browser-first path. [Public workflow](../SITES_WORKSPACE.md) contains the historical user-facing contract. This document must never be shipped as application content.
 
 ## End-to-end flow
 

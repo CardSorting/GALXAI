@@ -8,33 +8,31 @@ web
 
 ## Overview
 
-GALX helps builders turn an early idea into a site they can revise, preview and share at a public GALX address. Sites leads the homepage. Image generation remains an accessible public product. The developer API is a private preview with individual approval and small cohorts.
+GALX helps creators and builders turn imagination into visual reality. GALX Images is the primary user-facing product. Every generated image is public by default, streamed into a live community masonry discovery gallery. Image Studio provides high-resolution generative diffusion across 5 native aspect ratios with a floating composer dock, one-click prompt remixing, and lossless PNG downloads. The developer API provides access to the curated 5-model lineup via instant developer tier access ($10 deposit / $20 usable credit) or free preview cohorts. Legacy Sites has been retired due to technical quota and maintenance overhead.
 
 ## Primary Users & Jobs to Be Done
 
-- Builders move from an idea to an early site without arranging development, prototyping and publication separately.
-- Creators generate images, download them and maintain their own image library and Favorites.
-- Approved developers try integrations, report private feedback and help validate reliability before broader access.
-- Authorized staff review cohort applications, manage time-bounded access and inspect private operational evidence.
+- Creators prompt, synthesize, and remix high-resolution visual artwork with zero waitlist.
+- Community members explore the live public masonry stream, discover proven prompts, and fork creative styles with one click.
+- Pro subscribers enjoy priority GPU inference queues, high-resolution multi-aspect ratio generation, and unlimited prompt remixing.
+- Developers integrate the curated 5-model lineup through standard SDK and REST endpoints.
+- Authorized staff inspect private operational evidence, monitor capacity, and review developer cohorts.
 
 ## Core Capabilities
 
-The Sites workspace supports conversations, draft versions, previews and explicit managed publication. A verified account has a one-time allowance of one Site with three turns and five images, subject to availability. Temporary free-creation pauses preserve prompts and saved work; the composer offers a manual recheck and plan link. GALX Pro includes continuing Sites creation under fair usage; revisions and conversation turns follow that policy. Images and API usage retain separate account/billing contracts. Follow [Sites operations](docs/maintainers/SITES_OPERATIONS.md) and the customer [Sites guide](docs/SITES_WORKSPACE.md) for the implemented scope. Do not imply arbitrary application execution beyond the actual product contract.
-
-The image studio supports creation, owned library retrieval, Favorites and downloads. Accepted async image requests have durable owner-scoped receipts, while execution remains bounded and uncertain attempts are not automatically repeated.
+The Image Studio supports fast prompt synthesis, 5 dynamic aspect ratios (`1:1`, `16:9`, `9:16`, `3:2`, `4:3`), an options popover dock, live progress capsules, owned library retrieval, Favorites, and direct binary downloads. Generated images are automatically published to the community masonry feed with key generation metadata (prompt, seed, model, aspect ratio) for public collective discovery. Accepted async image requests have durable owner-scoped receipts, while execution remains bounded and uncertain attempts are not automatically repeated. Legacy Sites has been sunset, with `/sites` routes redirecting to `/images`.
 
 ## Constraints & Invariants
 
-- Public positioning explains the idea-to-site experience, revisions, included public address, pricing and the purpose of an extremely early public beta. Homepage copy, metadata and FAQ omit provider/model names and implementation details.
-- Images and Sites remain public products with sign-in required before workspace entry and their existing entitlement and ownership requirements. Other developer APIs require verified signup and individual approval; signup, payment and existing keys are not grants.
-- Small cohorts support controlled demand, better performance and private feedback. Participant-reported savings are observations, not guaranteed savings or a promise of uniform outcomes.
-- `/admin` uses independent staff authorization: owners manage staff; owners/reviewers manage access; viewers are read-only. Customer approval and editable metadata never grant administration.
-- Preserve explicit return destinations during authentication. Do not infer product priority from a legacy default redirect.
-- Authorization and persistence are server-enforced. Caches optimize reads and batches; they do not grant access, fabricate successful saves or make accepted work durable by themselves.
-- Public responses use explicit allowlists and sanitized artifacts. Keep credential sources, topology, routing and diagnostics private.
+- Public positioning explains the image generation experience, prompt remixing, public stream discovery, pricing, and capabilities. Homepage copy, metadata, and FAQ omit internal provider/model details and implementation diagnostics.
+- GALX Images is a public product. Image Studio and generation require sign-in; the public masonry stream is discoverable by all visitors. Developer APIs require developer tier enrollment or verified cohort approval.
+- Public responses use explicit allowlists and sanitized artifacts. Keep credential sources, topology, routing, and operational diagnostics private per [AGENTS.md](AGENTS.md).
+- `/admin` uses independent server-side staff authorization. Customer approval and editable metadata never grant administration.
+- Preserve explicit return destinations during authentication.
+- Authorization and persistence are server-enforced. Caches optimize reads and batches; they do not grant access, fabricate successful saves, or make accepted work durable by themselves.
 - Recovery preserves original operation identity. Acceptance is not completion, a timeout is not proof of non-dispatch, and cancellation does not promise a refund.
-- Do not claim guaranteed availability, exact supplier quotas, unverified model identity, universal savings or compliance certification.
+- Do not claim guaranteed availability, exact supplier quotas, unverified model identity, universal savings, or compliance certification.
 
 ## Current Strategy and Evidence
 
-[Product surface strategy](docs/PRODUCT_SURFACE_STRATEGY.md) is the maintained scope. [Current operating state](post-mortem/CURRENT_STATE.md) records dated activation and acceptance evidence. ADRs retain topic-specific history; the original inference-first retirement in ADR 0119 does not override later restored Images, public Sites or the developer waitlist.
+[Product surface strategy](docs/PRODUCT_SURFACE_STRATEGY.md) is the maintained scope. [Current operating state](post-mortem/CURRENT_STATE.md) records dated activation and acceptance evidence. Legacy Sites documentation and ADRs are preserved as dated historical records; the live product is GALX Images.

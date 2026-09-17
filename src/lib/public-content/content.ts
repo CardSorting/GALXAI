@@ -20,23 +20,23 @@ export type Guide = {
 export const GUIDES: Guide[] = [
   {
     path: '/pricing/galx-pro', title: 'What’s included in GALX Pro',
-    description: 'Understand the Sites plan, what you can explore first, and which products are priced separately.',
+    description: 'Understand the GALX Images Pro plan, priority GPU queues, and developer credits.',
     category: 'Plans and billing',
     sections: [
-      { id: 'the-plan', title: 'One monthly plan for Sites', paragraphs: [`${PRO_PLAN.name} costs $${PRO_PLAN.monthlyPriceUsd} USD per month for one account. It includes creating Sites, saved versions, publishing, and a public GALX address.`, 'Revisions and conversation turns are unlimited under fair use, with no charge for each change. Sites is in an extremely early public beta, so availability may vary.'] },
-      { id: 'before-subscribing', title: 'Explore before you subscribe', paragraphs: ['Sign in to open Sites, look around the workspace, and write down your idea. Your account includes a one-time free allowance: one Site with three conversation turns and five images. The header shows what remains. Free creation may pause during busy periods; your saved work stays available. Upgrade to GALX Pro to create more Sites or continue beyond the free turns.', 'The plan action takes you to your account, where you can review your plan before subscribing. Signing in does not start a subscription.'] },
-      { id: 'included', title: 'From first version to public link', paragraphs: ['Start with a landing page, portfolio, event page, or simple early product idea. Describe what you want, review a first version, and keep refining.', 'Your draft stays private until you choose to publish. Publishing includes a public GALX address, so you do not need to buy a domain or arrange separate hosting to share your Site.'] },
-      { id: 'other-products', title: 'Images and developer access', paragraphs: ['Your account includes five free images as a one-time allowance. Check the header for what remains. Image usage beyond the allowance is separate from Sites; review Images and your account before creating.', 'Developer API access is available instantly via the $10 Developer Tier (includes $20 usable pay-as-you-go compute credit for Images and Frontier OpenAI Models) or through the free preview cohort. A Sites subscription does not include API access.'] },
+      { id: 'the-plan', title: 'One monthly plan for high-velocity creation', paragraphs: [`${PRO_PLAN.name} costs $${PRO_PLAN.monthlyPriceUsd} USD per month for one account. It includes priority GPU inference queues, high-resolution generation across 5 standard aspect ratios, unlimited 1-click prompt remixing, and public stream discovery.`, 'Images generated are public by default and published to the live masonry stream. The legacy Sites workspace has been retired due to quota and maintenance complexity.'] },
+      { id: 'before-subscribing', title: 'Explore before you subscribe', paragraphs: ['Sign in to open the Image Studio, explore the community stream, and experiment with prompt variations. Your account includes five free welcome images as a one-time allowance. The header shows what remains.', 'Upgrade to GALX Pro for unlimited high-velocity generation and priority dispatch. Signing in does not start a subscription until you confirm in Billing.'] },
+      { id: 'included', title: 'From prompt to infinite stream', paragraphs: ['Start with any idea: cinematic lighting, anime characters, isometric pixel art, editorial fashion, or surreal landscapes. Choose your aspect ratio and dispatch to the synthesis pipeline.', 'Your generations appear immediately in your studio library and flow into the community stream. Download lossless raw PNGs whenever you are ready.'] },
+      { id: 'other-products', title: 'Developer API access', paragraphs: ['Developer API access is available instantly via the $10 Developer Tier (which includes $20 in usable pay-as-you-go compute credit for Images and Frontier OpenAI Models) or through the free preview cohort. Pro subscriptions and API usage remain separate.'] },
     ], related: ['/pricing/fair-use', '/pricing/billing-and-cancellation', '/knowledge-base/getting-started'],
   },
   {
-    path: '/pricing/fair-use', title: 'Revisions and fair use',
-    description: 'How unlimited revisions and conversation turns work during the Sites public beta.',
+    path: '/pricing/fair-use', title: 'Generation and fair use',
+    description: 'How high-throughput image generation and queue pacing operate on GALX Pro.',
     category: 'Plans and billing',
     sections: [
-      { id: 'revisions', title: 'Keep shaping your idea', paragraphs: ['GALX Pro includes unlimited Sites revisions and conversation turns under fair use. You do not pay a separate charge for each change.', 'Ask for clearer copy, a different layout, or a new direction. You can review saved versions as your idea develops.'] },
-      { id: 'waiting', title: 'When you need to wait', paragraphs: ['Unlimited revisions do not promise uninterrupted availability. During this very early beta, you may occasionally need to wait before continuing.', 'If Sites asks you to wait, follow the guidance shown in the workspace and return when it says you can continue. A delay does not mean you should submit the same change repeatedly.'] },
-      { id: 'scope', title: 'What this applies to', paragraphs: ['These terms describe revisions and conversation turns in Sites with GALX Pro. Image creation and developer API access have separate pricing and options.', 'Start with a small project you can review and improve. The product is still taking shape, and beta availability may vary.'] },
+      { id: 'revisions', title: 'Unlimited prompt iterations', paragraphs: ['GALX Pro includes unlimited image generations and prompt remixing under fair use. You do not pay a per-turn charge in the studio.', 'Experiment with styling, aspect ratios, and seeds freely. Every image is rendered with optimal diffusion fidelity.'] },
+      { id: 'waiting', title: 'Queue pacing and availability', paragraphs: ['Unlimited generations do not promise zero queue latency during peak global traffic bursts. If the GPU pipeline experiences high load, requests are smoothly paced.', 'When queue pacing is active, follow the in-studio indicators. Pacing ensures equitable throughput for all creators without dropping jobs.'] },
+      { id: 'scope', title: 'What this applies to', paragraphs: ['These terms apply to visual generation in the GALX Image Studio with GALX Pro. Developer API calls follow separate token/compute metering.', 'The legacy Sites builder is retired; remaining accounts and links redirect to the Image Studio.'] },
     ], related: ['/pricing/galx-pro', '/knowledge-base/revising-your-site', '/knowledge-base/public-beta'],
   },
   {
@@ -44,61 +44,61 @@ export const GUIDES: Guide[] = [
     description: 'Review monthly pricing, find your plan, and understand access after cancellation.',
     category: 'Plans and billing',
     sections: [
-      { id: 'monthly-billing', title: 'Monthly billing', paragraphs: [`${PRO_PLAN.name} is $${PRO_PLAN.monthlyPriceUsd} USD per month and renews monthly. Review the plan in your account before subscribing.`, 'Sites revisions and conversation turns are included under fair use. Image creation has separate pricing.'] },
-      { id: 'manage-plan', title: 'Find your plan', paragraphs: ['Sign in to the account you use for Sites, then open Account and the plan section. This is where you can review your current plan and the available subscription controls.', 'If something about your plan is unclear, contact support before making another purchase. Do not send payment card details or passwords.'] },
-      { id: 'cancel', title: 'Cancel anytime', paragraphs: ['You can cancel your subscription at any time. After cancellation, access continues through the period you have already paid for.', 'Review your account for the status of your subscription. Contact support if you need help finding or managing your plan.'] },
+      { id: 'monthly-billing', title: 'Monthly billing', paragraphs: [`${PRO_PLAN.name} is $${PRO_PLAN.monthlyPriceUsd} USD per month and renews monthly. Review the plan in your account before subscribing.`, 'Visual synthesis, remixing, and community stream participation are included under fair use. Developer API compute carries separate usage terms.'] },
+      { id: 'manage-plan', title: 'Find your plan', paragraphs: ['Sign in to your GALX account, then open Account and the plan section. This is where you can review your current plan and active subscription controls.', 'If something about your subscription is unclear, contact support before making another purchase. Do not send payment card details or passwords.'] },
+      { id: 'cancel', title: 'Cancel anytime', paragraphs: ['You can cancel your subscription at any time. After cancellation, Pro access continues through the remainder of your paid billing period.', 'Your created images and library history remain safely stored in your account.'] },
     ], related: ['/pricing/galx-pro', '/pricing/fair-use', '/faq'],
   },
   {
-    path: '/knowledge-base/getting-started', title: 'Create your first Site',
-    description: 'Turn a small idea into a first version you can preview, revise, and share.',
+    path: '/knowledge-base/getting-started', title: 'Synthesize your first image',
+    description: 'Turn an idea into a high-resolution visual with GALX Images and the studio cockpit.',
     category: 'Getting started',
     sections: [
-      { id: 'start-small', title: 'Choose a small idea', paragraphs: ['Sites helps you make a landing page, portfolio, event page, or simple page for an early product idea. No coding is needed. Start with one audience and one thing you want visitors to do.', 'A first version gives you something concrete to react to. It does not have to contain everything your project might eventually become.'] },
-      { id: 'describe', title: 'Describe what you want', paragraphs: ['Tell Sites who the page is for, what it should say, and the main action visitors should take. Add the details you already know; you can revise the rest later.'], example: 'Make a landing page for my weekend pottery class. Include a short introduction, what beginners will learn, and a section with the date and location. Keep the tone welcoming.' },
-      { id: 'first-version', title: 'Make your first version', paragraphs: ['Sign in with a verified account and subscribe to GALX Pro to create, revise, and publish Sites under fair use. Both Build and Discuss are included.'], steps: ['Open Sites and sign in to your account.', 'Describe your idea, or adapt a starting idea from the homepage.', 'Choose GALX Pro, then create your first version.', 'Preview the result and decide what to change next.'] },
-      { id: 'next', title: 'Review before sharing', paragraphs: ['Read the copy, check important details, and ask for changes. Your draft stays private until you choose to publish.', 'When you are ready, publish and share your public GALX address. You can keep revising and publish another update later.'] },
+      { id: 'start-small', title: 'Start with an imaginative prompt', paragraphs: ['GALX Images transforms natural language prompts into stunning visual art. You can specify art styles, lighting, color palettes, camera lenses, and mood.', 'A great prompt balances subject, setting, and aesthetic texture. Use our homepage prompt chips or type your own concept in the cockpit.'] },
+      { id: 'describe', title: 'Choose your aspect ratio', paragraphs: ['Select from 5 standard aspect ratios tailored for modern platforms: 1:1 Square (Instagram/Avatars), 16:9 Landscape (Desktop/Cinematic), 9:16 Portrait (Mobile/Stories), 4:3 Classic, and 3:4 Editorial.', 'Aspect ratios shape the composition natively during the diffusion process, preventing awkward cropping.'], example: 'cyberpunk street market at dusk, neon rain puddles, holographic vendor signs, cinematic 35mm photography, volumetric mist, photorealistic' },
+      { id: 'first-version', title: 'Generate and remix', paragraphs: ['Sign in to access your library, or start with your 5 free welcome generations. Press Synthesize to launch the inference pipeline.'], steps: ['Open the Image Studio or use the homepage prompt cockpit.', 'Type your prompt and choose your desired aspect ratio and model.', 'Click Synthesize to submit your request to the GPU queue.', 'Preview the generated image, remix the prompt, or download the lossless binary.'] },
+      { id: 'next', title: 'Explore the community stream', paragraphs: ['Every generated image is public by default and appears in the infinite community stream. See what others are creating in real time and remix any prompt with a single click.', 'The former Sites website builder has been sunset in favor of this visual creation platform.'] },
     ], related: ['/knowledge-base/revising-your-site', '/knowledge-base/publishing-your-site', '/pricing/galx-pro'],
   },
   {
-    path: '/knowledge-base/revising-your-site', title: 'Revise and revisit your Site',
-    description: 'Ask for useful changes, review saved versions, and keep control of what you publish.',
+    path: '/knowledge-base/revising-your-site', title: 'Remix and iterate on prompts',
+    description: 'Refine compositions, iterate styles, and leverage 1-click prompt remixing.',
     category: 'Creating and publishing',
     sections: [
-      { id: 'specific-changes', title: 'Ask for a specific change', paragraphs: ['Use your Sites conversation to explain what should change and what you want to keep. A focused request makes the next version easier to review.'], example: 'Keep the layout and colors. Shorten the introduction to two sentences and make the main button say “See the workshop dates”.' },
-      { id: 'review', title: 'Review the result', paragraphs: ['Preview the revised page before making another request. Check the part you asked to change, then read the surrounding content to make sure it still works together.', 'You can explore another direction or return to an earlier saved version as your idea evolves.'] },
-      { id: 'included-turns', title: 'Revisions are included', paragraphs: ['GALX Pro includes unlimited revisions and conversation turns under fair use, with no per-change charge. During this very early beta, you may occasionally need to wait before continuing.'] },
-      { id: 'publish-update', title: 'Publish when the update is ready', paragraphs: ['Editing a draft does not immediately change your public Site. After reviewing your changes, choose to publish an update to make the new version public.'] },
+      { id: 'specific-changes', title: 'Iterate and remix', paragraphs: ['Click Remix on any community card or library image to immediately load its prompt, aspect ratio, and model settings into your studio composer.', 'Modify details such as lighting, atmosphere, color grade, or perspective to create fresh variations.'] },
+      { id: 'review', title: 'Compare variations in your library', paragraphs: ['All your generations are saved to your private studio library. Compare different prompt iterations, mark Favorites with the heart icon, and track your visual ideas.', 'Downloading provides pristine binary artifacts with zero intrusive watermarks.'] },
+      { id: 'included-turns', title: 'High-velocity synthesis', paragraphs: ['GALX Pro includes unlimited generations and prompt remixing under fair use. Queues are optimized for rapid iteration and creative flow.'] },
+      { id: 'sites-retirement', title: 'Retirement of the Sites builder', paragraphs: ['The interactive website builder (Sites) was retired in September 2026 due to disproportionate infrastructure quota and technical overhead. All legacy `/sites` URLs gracefully redirect to `/images`.'] },
     ], related: ['/knowledge-base/publishing-your-site', '/pricing/fair-use', '/knowledge-base/getting-started'],
   },
   {
-    path: '/knowledge-base/publishing-your-site', title: 'Publish and share your Site',
-    description: 'Move from a private draft to a public GALX address, then publish updates when you are ready.',
+    path: '/knowledge-base/publishing-your-site', title: 'Public stream and community showcase',
+    description: 'How public-by-default image generation and the live masonry stream work.',
     category: 'Creating and publishing',
     sections: [
-      { id: 'private-draft', title: 'Your draft starts private', paragraphs: ['Creating or revising a Site does not publish it. Your draft stays private until you choose to publish.', 'Before publishing, check your copy, contact details, dates, and links. Include only information you intend to make public.'] },
-      { id: 'publish', title: 'Publish a version you have reviewed', paragraphs: ['Publishing and a public GALX address are included for Sites in GALX Pro. You do not need to buy a domain or arrange separate hosting to share your page.'], steps: ['Open your Site and preview the version you want to share.', 'Choose to publish and follow the steps in the workspace.', 'Once publication succeeds, open the public GALX address and review the page.', 'Share the link with the people whose feedback matters.'] },
-      { id: 'updates', title: 'Keep improving after publication', paragraphs: ['You can continue refining your Site after you publish. The public page changes when you publish an update, so you can review revisions before sharing them.', 'If publication does not complete, follow the message in the workspace. Do not assume a draft or an unfinished publication is available to visitors.'] },
+      { id: 'public-default', title: 'Public by default', paragraphs: ['GALX Images operates on an open creative commons ethos: every image synthesized is public by default and enters the live community feed.', 'Other creators can discover your visuals, inspect your prompt recipe, and remix it for further inspiration.'] },
+      { id: 'publish', title: 'The Pinterest-style masonry stream', paragraphs: ['The public stream dynamically populates images in a responsive multi-column masonry layout reminiscent of Pinterest.', 'Hover over any image card to inspect the aspect ratio, model, and prompt, or click Remix to immediately adapt the idea in your Image Studio.'] },
+      { id: 'updates', title: 'Downloading and sharing', paragraphs: ['Download sanitized, high-resolution PNG binaries directly from the studio or stream card. No extra compression or lossy transcoding is applied.', 'Share direct image links with your audience or import assets into your design workflows.'] },
     ], related: ['/knowledge-base/revising-your-site', '/knowledge-base/public-beta', '/pricing/galx-pro'],
   },
   {
     path: '/knowledge-base/public-beta', title: 'What to expect in the public beta',
-    description: 'Start with a small project, understand the early experience, and share useful feedback.',
+    description: 'Explore the GALX Images beta, understand system throughput, and share feedback.',
     category: 'Getting started',
     sections: [
-      { id: 'early', title: 'An extremely early public beta', paragraphs: ['Sites is available early so people can try real ideas and help shape what comes next. Expect rough edges and a product that is still developing.', 'A landing page, portfolio, event page, or simple early product concept is a useful place to start. Review the result carefully before sharing it.'] },
-      { id: 'availability', title: 'Leave room for interruptions', paragraphs: ['Availability may vary, and you may occasionally need to wait before continuing. Unlimited revisions and conversation turns with GALX Pro remain subject to fair use. Check availability in the composer; your prompt stays there.', 'If something does not work as expected, read the message in the workspace and check the result before trying again.'] },
-      { id: 'feedback', title: 'Share feedback we can act on', paragraphs: ['Tell support what you were trying to do, what you expected, and what happened instead. Include the visible message if it helps explain the problem.', 'Keep passwords, payment details, and other sensitive information out of your feedback. Your observations help us understand where the experience needs to improve.'] },
+      { id: 'early', title: 'A focused, high-throughput visual platform', paragraphs: ['GALX has transitioned to focus entirely on visual AI generation. We retired the heavy Sites website builder to concentrate 100% of our compute and infrastructure on world-class image diffusion.', 'Expect rapid feature additions, model upgrades, and expanding community stream capabilities.'] },
+      { id: 'availability', title: 'Inference speed and queue stability', paragraphs: ['During peak usage bursts, queue pacing maintains system reliability. Free welcome generations and Pro requests are processed smoothly without data loss.', 'If an image generation takes longer than expected, the studio automatically maintains your task state and displays live progress.'] },
+      { id: 'feedback', title: 'Share feedback we can act on', paragraphs: ['Tell our team what prompts, aspect ratios, or model controls you want to see next. We welcome suggestions on stream discovery and composer ergonomics.', 'Contact support with your feedback or join the developer preview to build on the raw API.'] },
     ], related: ['/knowledge-base/getting-started', '/pricing/fair-use', '/faq'],
   },
   {
-    path: '/knowledge-base/images-and-developer-access', title: 'Sites, Images, and developer access',
-    description: 'Find the right starting point and understand the separate access and pricing for each product.',
+    path: '/knowledge-base/images-and-developer-access', title: 'GALX Images and developer access',
+    description: 'Find the right starting point: web Image Studio vs. raw developer API access.',
     category: 'Getting started',
     sections: [
-      { id: 'sites', title: 'Sites for your next idea', paragraphs: ['Use Sites to describe an idea, make a first version, keep refining it, and publish a page at a public GALX address. Sign in to explore the workspace and create with GALX Pro under fair use.'] },
-      { id: 'images', title: 'Images for visual creation', paragraphs: ['Use Images to create images from prompts, keep your work in your library, mark Favorites, and download your images. Sign in to enter the workspace.', 'Start with five free images as a one-time account allowance. The header shows what remains. Review Images and your account for access beyond the free allowance.'] },
-      { id: 'developers', title: 'Developer API and Developer Tier', paragraphs: ['Developer API access is available instantly through the $10 Developer Tier, which provides pay-as-you-go access to Images API generation and Frontier OpenAI Models with zero waitlist delay.', 'Builders may also apply to the free developer preview cohort from the Developer preview page. Sites and Images workspaces do not require developer-preview approval.'] },
+      { id: 'images', title: 'GALX Images web studio', paragraphs: ['The flagship web experience for creators and designers. Synthesize images from natural language, remix community prompts, choose across 5 aspect ratios, and curate your favorites.', 'Start with 5 free welcome images, or subscribe to GALX Pro for high-velocity unlimited creation under fair use.'] },
+      { id: 'developers', title: 'Developer API and Developer Tier', paragraphs: ['Developer API access is available instantly through the $10 Developer Tier, providing $20 in usable pay-as-you-go compute credits for programmatic image generation and Frontier OpenAI Models.', 'Developers can also apply to the free developer preview cohort from the Developer preview page.'] },
+      { id: 'sites-status', title: 'Notice: Sites builder retired', paragraphs: ['The previous Sites product has been decommissioned. Sites required unsustainable quota allocations and complex custom runtime setup. All web creation efforts are now unified under GALX Images.'] },
     ], related: ['/pricing/galx-pro', '/knowledge-base/getting-started', '/faq'],
   },
 ];
@@ -106,23 +106,23 @@ export const GUIDES: Guide[] = [
 export const FAQ_GROUPS = [
   { id: 'getting-started', title: 'Getting started' },
   { id: 'plans-and-billing', title: 'Plans and billing' },
-  { id: 'publishing-and-access', title: 'Publishing and access' },
+  { id: 'publishing-and-access', title: 'Stream & generation' },
 ] as const;
 
 export const FAQS = [
-  { id: 'explore', group: 'getting-started', question: 'Can I explore before choosing a plan?', answer: `Yes. A verified account includes five free images as a one-time allowance. Check the header for your remaining allowance. Free creation is subject to availability; a temporary pause does not renew or use your allowance. GALX Pro is $${PRO_PLAN.monthlyPriceUsd} USD per month to create, revise, and publish Sites under fair use.`, guide: '/knowledge-base/getting-started' },
-  { id: 'what-can-i-make', group: 'getting-started', question: 'What can I make in this early preview?', answer: 'A landing page, a portfolio, an event page, or a simple page for an early product idea. No coding needed. Start with something small that you can share, learn from, and keep improving.', guide: '/knowledge-base/getting-started' },
-  { id: 'public-beta', group: 'getting-started', question: 'What does “extremely early public beta” mean?', answer: 'We’re sharing Sites early because we believe a real first version teaches you more than an idea left in your notes. Expect rough edges and a product that is still taking shape. Try a small idea, tell us where you get stuck, and help us understand what is worth building next.', guide: '/knowledge-base/public-beta' },
-  { id: 'revisions', group: 'plans-and-billing', question: 'Are revisions and conversation turns unlimited?', answer: 'Yes. GALX Pro includes unlimited revisions and conversation turns under fair use, with no charge for each change. During this very early beta, you may occasionally need to wait before continuing.', guide: '/pricing/fair-use' },
-  { id: 'plan-price', group: 'plans-and-billing', question: 'How much does GALX Pro cost?', answer: `GALX Pro is $${PRO_PLAN.monthlyPriceUsd} USD per month for one account. Sites includes creation, revisions under fair use, saved versions, publishing, and a public GALX address. The plan renews monthly.`, guide: '/pricing/galx-pro' },
-  { id: 'cancellation', group: 'plans-and-billing', question: 'Can I cancel my subscription?', answer: 'Yes. You can cancel anytime. Access continues through the period you have already paid for. Sign in and open your account to review your plan.', guide: '/pricing/billing-and-cancellation' },
-  { id: 'images', group: 'plans-and-billing', question: 'Is image creation included in the Sites plan?', answer: 'Your account includes five free images as a one-time allowance. Image usage beyond that has a separate account contract from Sites; review Images and your account before creating.', guide: '/knowledge-base/images-and-developer-access' },
-  { id: 'domain', group: 'publishing-and-access', question: 'Do I need to buy a domain?', answer: 'No. Publishing includes a public GALX address for your Site. You can send people a link without buying a domain or arranging separate hosting.', guide: '/knowledge-base/publishing-your-site' },
-  { id: 'private-drafts', group: 'publishing-and-access', question: 'Do my changes go public straight away?', answer: 'No. Your draft stays private until you choose to publish. After that, you can keep refining it and return to earlier versions. Your public Site changes when you publish an update.', guide: '/knowledge-base/publishing-your-site' },
-  { id: 'developer-access', group: 'publishing-and-access', question: 'Does GALX Pro include developer API access?', answer: 'No. Developer API access is available instantly through the $10 Developer Tier (pay-as-you-go for images and frontier OpenAI models) or by applying to the free developer preview cohort. Sites subscriptions are separate.', guide: '/knowledge-base/images-and-developer-access' },
+  { id: 'explore', group: 'getting-started', question: 'Can I explore before choosing a plan?', answer: `Yes. A verified account includes five free images as a welcome allowance. Explore the Image Studio and community stream freely. GALX Pro is $${PRO_PLAN.monthlyPriceUsd} USD per month for unlimited high-velocity visual generation under fair use.`, guide: '/knowledge-base/getting-started' },
+  { id: 'what-can-i-make', group: 'getting-started', question: 'What can I generate with GALX Images?', answer: 'Photorealistic photography, anime art, digital concept art, UI assets, fashion editorials, surreal landscapes, 3D renders, and graphic design in 5 standard aspect ratios (1:1, 16:9, 9:16, 4:3, 3:4).', guide: '/knowledge-base/getting-started' },
+  { id: 'public-beta', group: 'getting-started', question: 'Are generated images public?', answer: 'Yes! Every image generated on GALX is public by default and flows into the live community stream. Creators can discover each other’s work and remix prompts with a single click.', guide: '/knowledge-base/publishing-your-site' },
+  { id: 'revisions', group: 'plans-and-billing', question: 'Are generations and remixes unlimited with Pro?', answer: 'Yes. GALX Pro includes unlimited generations and 1-click prompt remixes under fair use. Peak traffic may experience queue pacing to ensure equitable throughput.', guide: '/pricing/fair-use' },
+  { id: 'plan-price', group: 'plans-and-billing', question: 'How much does GALX Pro cost?', answer: `GALX Pro is $${PRO_PLAN.monthlyPriceUsd} USD per month for one account. It includes priority GPU queue access, high-resolution generation across all 5 aspect ratios, unlimited remixes, and stream discovery. The plan renews monthly.`, guide: '/pricing/galx-pro' },
+  { id: 'cancellation', group: 'plans-and-billing', question: 'Can I cancel my subscription?', answer: 'Yes. You can cancel anytime directly from your account billing page. Pro access continues through the end of your prepaid period.', guide: '/pricing/billing-and-cancellation' },
+  { id: 'sites-sunset', group: 'plans-and-billing', question: 'What happened to GALX Sites?', answer: 'Sites was retired in September 2026. The technical setup and quota overhead of maintaining conversational websites became unsustainable. GALX is now fully dedicated to high-performance visual generation with GALX Images.', guide: '/knowledge-base/images-and-developer-access' },
+  { id: 'aspect-ratios', group: 'publishing-and-access', question: 'Which aspect ratios are supported?', answer: 'We support 5 native diffusion aspect ratios: 1:1 Square, 16:9 Landscape, 9:16 Portrait (Stories/Reels), 4:3 Classic, and 3:4 Editorial.', guide: '/knowledge-base/getting-started' },
+  { id: 'remix-prompt', group: 'publishing-and-access', question: 'How does prompt remixing work?', answer: 'Hover over any image card in the community stream or your library and click Remix. The prompt, model, and aspect ratio will automatically populate in your studio composer, ready for tweaking.', guide: '/knowledge-base/revising-your-site' },
+  { id: 'developer-access', group: 'publishing-and-access', question: 'Does GALX Pro include developer API access?', answer: 'No. Developer API access is available instantly through the $10 Developer Tier (pay-as-you-go for images and frontier OpenAI models) or by applying to the free developer preview cohort. Pro studio subscriptions are separate.', guide: '/knowledge-base/images-and-developer-access' },
 ];
 
-export const HOME_FAQS = ['explore', 'what-can-i-make', 'revisions', 'domain', 'private-drafts', 'public-beta']
+export const HOME_FAQS = ['explore', 'what-can-i-make', 'public-beta', 'aspect-ratios', 'remix-prompt', 'sites-sunset']
   .map(id => FAQS.find(faq => faq.id === id)!);
 
 export function getGuide(path: string) { return GUIDES.find(guide => guide.path === path); }

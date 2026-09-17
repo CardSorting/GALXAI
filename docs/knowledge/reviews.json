@@ -1,9 +1,9 @@
 {
   "knowledge": {
-    "reviewer": "image and relay maintainer",
-    "note": "Reviewed Premium image-only selection, engine availability evidence, shared owned persistence, runtime pins, tunnel exposure and complete connection/recovery guides; preflight evidence separates local tests from pending public acceptance.",
-    "reviewed_at": "2026-09-16",
-    "review_by": "2026-09-23",
+    "reviewer": "Antigravity",
+    "note": "Reconciled README.md with GALX Images flagship strategy and Sites retirement",
+    "reviewed_at": "2026-09-17",
+    "review_by": "2026-10-16",
     "evidence": {
       "post-mortem/releases/2026-09-16-premium-image-preflight.json": "a78125c76af0749f7be50647b99c2d6ff8aa368cdfa5780222c81fb4c14023d1"
     },
@@ -19,7 +19,7 @@
       "docs/AGENTS.md": "0a1e687ab43a1e6c2266720e175de60cd6f10958cdf3456690c1f743c4784044",
       "docs/DEVELOPER_GUIDE.md": "f8670e55cd94143b98701e9185eb6657a6cab4fb85e5077b126f4ddffbe68784",
       "docs/DOCUMENTATION_POLICY.md": "ab2030f9d15010634b9a2d9cf2bc680fdf4ae961c2ee3f9f7ad567e99d49d40c",
-      "docs/README.md": "ce244dde1a90152960c0c89192e89fcf62e200ab31bd1dc5e4bee46eeca4da39",
+      "docs/README.md": "da21691e72578a29792352dbecc282f7d411656e1dfe668f0cf11411d74d22bf",
       "docs/adr/0145-maintained-knowledge-and-decision-lifecycle.md": "6fae04f9767dc698da73123151fdc6aa4f61f40786f176a9e5f9db336188d47a",
       "docs/explanations/README.md": "da413b402cb2a1ca0543e7f04f3bf51dbe77b7d23461d02303f77a40b19e0928",
       "docs/how-to/README.md": "eedaf7b8188a8f6b0d1b3fbe578356c2cb2d5c0a2411254a7c14292da5cd3531",
@@ -137,9 +137,9 @@
     }
   },
   "access": {
-    "reviewer": "maintainer",
-    "note": "Consolidated text model to gpt-5-6-luna-low with hyper-forgiving aliases while retaining visual synthesis image generation",
-    "reviewed_at": "2026-09-16",
+    "reviewer": "Antigravity",
+    "note": "Reconciled signup page to link to community stream and updated copy",
+    "reviewed_at": "2026-09-17",
     "review_by": "2026-10-16",
     "evidence": {
       "post-mortem/releases/2026-09-16-luna-low-dedicated-lineup.json": "0a64d760bceafaea2950a9d78f2e58468c0890e3c9f7ca324c04fbd71a5a97f0"
@@ -218,7 +218,7 @@
       "src/app/login/page.tsx": "0b556e39fbf622400b8b70e397f4e83706e5e702971dde3c37aeb6c627f4c791",
       "src/app/settings/page.tsx": "f3efab5b80a28ac29ac168213e2b7c9cc7eb0d2fe9dd3b465b0688fbe7d5811b",
       "src/app/signup/layout.tsx": "8be40956bf752390f9481942301f310cebf4ee00569d5c20c673360d7d42de04",
-      "src/app/signup/page.tsx": "c8b995028012b662effa28635ccdfe60a6ffb77cc18c04ef964f047a61ee6b57",
+      "src/app/signup/page.tsx": "48a6e4847368a7fdc9063256f98173f1a7ee6f353d2794d4a96e8e9cd44b6726",
       "src/components/admin/PreviewAdminWorkspace.tsx": "449f2a1a8089d9267213a8b46e550502b58274c14b495c38a58defd9826e8aca",
       "src/components/auth/AuthEntryShell.tsx": "9f9d85196eb207718069f38a7825db0730339001dd0f3fa0cf1f8a81b9d85390",
       "src/components/auth/AuthRequiredGate.tsx": "c985fd860db40aa8f643b375a844b12c4effe01c8154b14b9685d74db54dc92d",
@@ -293,7 +293,7 @@
   },
   "sites": {
     "reviewer": "Antigravity",
-    "note": "Deprecate sites navigation and links in favor of GALX Images",
+    "note": "Reconciled Sites guides with retirement notices and redirected to GALX Images",
     "reviewed_at": "2026-09-17",
     "review_by": "2026-10-16",
     "evidence": {
@@ -301,16 +301,16 @@
     },
     "files": {
       "docs/API_BASE_URL.md": "19e4b534e72165ee0943fd4e9dd2a79dc01cecad30abed739ed0c1be537a9dca",
-      "docs/SITES_CONTENT.md": "22cbf93da0ae3919c3589bd59718da3adeb1980c84290c42126052dafa23b002",
-      "docs/SITES_WORKSPACE.md": "09e09d34df0a1b227bc4bf2b6486563ef20a249859ab939fe960dc9d7e9ce8d9",
+      "docs/SITES_CONTENT.md": "cbb15cbb1961ee539a4ee77d070f440b1a5fb5168a3fffbb2c8c25098a59b69a",
+      "docs/SITES_WORKSPACE.md": "25bc8b58f78fed467fde5332c1d466c0a70be91ece119127919f279d6ab48af8",
       "docs/adr/0148-complimentary-pro-access.md": "4d454694d9a03c11485d32a428c9b7bb1de635f00e62f60ed51ac86619ad6922",
       "docs/adr/0149-one-time-free-generation.md": "c6de81c42fec045d765b8768d7f8d7f0d1afef9c771a248e6a95ac8197e471d5",
       "docs/adr/0150-free-generation-admission-gate.md": "23c6220cad7a15f262e05e9fc9c134622551c218e474da1a8ed262e9a95563a8",
       "docs/maintainers/FREE_GENERATION_QUOTA.md": "239c0c173e05cbba23f74818e712b1ad217e2e0d3a1c69f86b0de8504f06f42b",
-      "docs/maintainers/SITES_DOMAINS.md": "f52a50eb38cda71d7ff08ad09bf0a13d5b60ee661eec5cf36e08734580c6c3e2",
-      "docs/maintainers/SITES_FAIR_USAGE.md": "ce7f737e0b662026cae06b70377430b645fd76fc2b50a4d24cce30b4411cf4bc",
-      "docs/maintainers/SITES_OPERATIONS.md": "44beddd5212e06583346afbd4a221bd8cff2f71b18a8e89c43018c46fcc1af0f",
-      "docs/maintainers/SITES_WORKSPACE.md": "3719850870966227392c12e5be6fd0fd48cbff2f8f0f65ec5f9976f65382ab8e",
+      "docs/maintainers/SITES_DOMAINS.md": "99e64a33d4a55c03cc0dc59a2cf4b1b91beb38429911fd90f1e938e3bcc9f59a",
+      "docs/maintainers/SITES_FAIR_USAGE.md": "84392929dcae33d315c91e340e55ecbe0fb9ad789003498a7425eb5531aa2e19",
+      "docs/maintainers/SITES_OPERATIONS.md": "8e6fac83fea19c7bbcf4b64a2b11ff2d511cfddd81db7666b2c4b41e409842ba",
+      "docs/maintainers/SITES_WORKSPACE.md": "f09934fe65973d944cd5eaff361405a2c0ea83ebc7a0b2950ba62bcd746b93bb",
       "scripts/manage-pro-access.ts": "1ebddafc9bfcc287daf63cfab41d7fd20825b51840fd697dcb41a873fa1d2dbb",
       "scripts/test-free-generation-gate-db.ts": "2919f39490203795965f494f61b288305ea7136e544515cc504d9e8a0ff7e037",
       "scripts/test-free-generation-quota-db.ts": "26d3381b0a90285cce6d954b954601fb7a5a4596998389ac7091cfb7b49d9b04",
@@ -1402,7 +1402,7 @@
   },
   "client-efficiency": {
     "reviewer": "Antigravity",
-    "note": "Verified native AI-generated image assets in PublicHome and feed route with local thumbnails",
+    "note": "Reconciled public reading guides, FAQ, pricing, and not-found icon for GALX Images stream and prompt studio",
     "reviewed_at": "2026-09-17",
     "review_by": "2026-10-16",
     "evidence": {
@@ -1410,7 +1410,7 @@
     },
     "files": {
       "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md": "5eb65f39a725934f807a7373995b33399893cad2a8a5455e74d6195aadd8a57b",
-      "docs/PRODUCT_SURFACE_STRATEGY.md": "bbcfddcc2eb0b11c3ec584601853e3fb201d4ebc722929209fda92eda3652bce",
+      "docs/PRODUCT_SURFACE_STRATEGY.md": "4c577c39731053cbf4c09534bc0351701186ecd75baa4bf908cfcfb59b6ad4f7",
       "docs/maintainers/PUBLIC_DISCOVERY.md": "d489c2950b13d259c0f88c9ece526b250fa5d6d996db6993ac567b416aa9d873",
       "docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md": "e7eb3ac5660d0882b832be22d127b303e278bf7b78aeca40932967e4b2814ff0",
       "docs/maintainers/readable-urls.md": "f04fe2f7d2752ceef765feb24a2f2a29fedee3b526a3291d114dbfdaceae1a40",
@@ -1429,19 +1429,19 @@
       "src/app/error.tsx": "e3a2bef2077e69d2d090e7602a4fc98c8cbf2bf55194b5c84b6fa4b38b2424d8",
       "src/app/faq/error.tsx": "388071ac8d82dc1e625b830e39d602725a4579b2974297d3f84ec27f54b4a24b",
       "src/app/faq/opengraph-image.tsx": "ed9e0656e5efd70f94b6a5ac902a11ac065a5e37fbf9443cecb1d37639f70d95",
-      "src/app/faq/page.tsx": "62c4bba1774ae3b3836be682c46413752a15f0607d8398d8c52f335db696ee3f",
+      "src/app/faq/page.tsx": "f02b9c02e5e4d8482e8a1641a9658697e1c0b852a45e6a9794c3c72c9c4cdbe0",
       "src/app/globals.css": "aef642880793b1fe4ab83421a48f3a6072b79ee04bc2dd5c1220737e658381bb",
       "src/app/images/error.tsx": "0b2a04890cd8de8ea6adf8eb58541aae5409033c49b28d90a51cb386af1d1097",
       "src/app/images/loading.tsx": "7874f6730a73d1b21ce1c8d0f957f6ac3a7368adbc38e9467c05db9236279223",
       "src/app/knowledge-base/getting-started/page.tsx": "aa36e2768fcbbe6a2f8dc43cbe5a41ddd1ede9f624b40fe940a3b26e4ea05f2d",
       "src/app/knowledge-base/images-and-developer-access/page.tsx": "73551d4dd4a7b5159a0ef9a952a812fb840a085d956099e956cb2e24cb4457cd",
-      "src/app/knowledge-base/page.tsx": "9bb007091aa76da056587780f5b1e586daae5d1e73a84642467dfb28e4470547",
+      "src/app/knowledge-base/page.tsx": "e2d3a2204b3ac4262cc5f87c6ddb8fe10cc9dfb7cff29bdfd8e5cee83f6ccf25",
       "src/app/knowledge-base/public-beta/page.tsx": "c7b943461d394e83cfe88c51090b60077571acadabed7c61dae63d5fddce64f6",
       "src/app/knowledge-base/publishing-your-site/page.tsx": "7c0b728c3d94b3382c1df286a74b9e02379f44a75b41c5986892c0e97adb5cf2",
       "src/app/knowledge-base/revising-your-site/page.tsx": "ef3e66cccaced5cf0141e3fa82127a8fbea604d4dbfaf1b8e11ffe9afc659014",
       "src/app/layout.tsx": "a41022bb87ace85a678554bab5aa51579bc4f12e96a602f87cfa5bb606d9e6bb",
       "src/app/loading.tsx": "79d916c532377cf08b9af7452e710fd3422a7a9bc7a03f2082bc197b53b0f006",
-      "src/app/not-found.tsx": "6301ef502c8aaa5f34a8a98870deb717417c7df3b32ec97e02bb475afb59c06a",
+      "src/app/not-found.tsx": "fe5c091319940eeb060616a428169c5e79f0dfae75bd7b8159ed7d347104fd99",
       "src/app/pricing/billing-and-cancellation/page.tsx": "93a6dfab3306657b5647ad82093e4396effde413ed41e2c88b7609ecb57e7a6b",
       "src/app/pricing/calculator/page.tsx": "1332e0e084d521264b00e53099f826de14fea2288974486726694a045722b592",
       "src/app/pricing/developer/page.tsx": "239bd986c7f408e30dc5d255820adad7a4611648ce6040132af6d7c4c8b459fd",
@@ -1449,10 +1449,10 @@
       "src/app/pricing/fair-use/page.tsx": "f9d18d3e9438c1b5e849a124b6a0bfd5198b19a544634ca519e8fae53bf94539",
       "src/app/pricing/galx-pro/page.tsx": "271f7ff923562055c204241d1380cf05920837323a4ec69d6f092cde96f48e47",
       "src/app/pricing/opengraph-image.tsx": "4f8c84ace1805eee9479afdbfd567784627a9e0e2017a1e4ae1024d045df3595",
-      "src/app/pricing/page.tsx": "032f0945a2b00366f4817f79dfdf3307eea7bfb30cc98ce1deda4a5741908046",
+      "src/app/pricing/page.tsx": "bd79e875889fea251419de4e775e5505cc2118453005450ac50b40f167877e29",
       "src/app/pricing/seats/page.tsx": "d0f7e15a799ac07c96be793655b6468f5e6445db9eedca128634302b9bc90904",
-      "src/app/robots.ts": "c59c2f34c73a5f697bb9b3804b967ec153c8e281bb44a3fe76087a52aa1608b3",
-      "src/app/sitemap.ts": "da050325f22e7d981225552679f47794c6f1478726125e18295e1889c1b188c7",
+      "src/app/robots.ts": "b91a7b6448c76e59a849a61aa3ab9841c4ee859024c2ac413bf9c1d9e0ae37d3",
+      "src/app/sitemap.ts": "144c79b46205f0e12e946288b264aefb13d2b5c5b231667dfa752c9e146ecd43",
       "src/components/common/CommandMenu.tsx": "cfca2e721378b0fc3a47e679aec2211a68596c949b4359b52442714361084df3",
       "src/components/common/FloatingActionDock.tsx": "82a21751b0ad7ee8f7233ad59ba892f28622bc0dcd63bb4a387027a686028b7f",
       "src/components/common/IntentLink.tsx": "c866bc13acbbc81829c9f4ec1be5736bfb064c7a039c3d43ab5c524dd5d6e201",
@@ -1492,18 +1492,18 @@
       "src/contexts/AuthContext.tsx": "925072632aef4a44e915fb04b479b1891bcc97343072e866231f37a5127916b0",
       "src/contexts/GenerationAllowanceContext.tsx": "d73875872f3814131bfc18029e69a72091993d906af63058ca37282f2c261a7c",
       "src/lib/images/navigation.ts": "827b7f91ef06422452aa03f66721e866be9755399c4514393230ce4fdcfc8e5c",
-      "src/lib/public-content/content.ts": "e655e2a2071811c95a67e41bf3ce400a4d1180455c8a18f5bb51964ed196956b",
+      "src/lib/public-content/content.ts": "716fc2b700e6c869f71779bf60f9329c0e111df373e4a3b388b83e3b46cfadda",
       "src/lib/public-content/routes.ts": "0b110dda7dcc166d27718feea0490ef9dab37db1d0f1e091b111f89edf32df5a",
       "src/lib/resilience/ResilientClient.ts": "02f0b3dc1d931cb01730e6dd5b40c0daf9ded5470558b9eecc80a33d78576f75",
       "src/lib/resilience/activity-polling.ts": "8018eef80ba6c49a401721f3607aef14aaa773bac1c1f108bc55f99f4b0fac7a",
       "src/lib/resilience/intent-prefetch.ts": "62757c1efa0eac5edf811d322fc30608852a3277669be87a2ae9fe63fd3e9c19",
       "src/lib/seo/metadata.ts": "cacce49c9f6890b89abeb545f0fda395fc8c4afa29900f2aa5753cc225951fd0",
-      "src/lib/seo/siteConfig.ts": "1cdd6d0284271362577ee17fab2d7ad88d14950b593a0d57ea36e22dc46cb105"
+      "src/lib/seo/siteConfig.ts": "ec1b1413035b306cd3eda9a8d10cef032017cd62a68ff0aea84e7e8d6fc72c80"
     }
   },
   "billing": {
     "reviewer": "Antigravity",
-    "note": "Update PlanPanel to link to Image Studio",
+    "note": "Reconciled Sites fair usage guide retirement notice with GALX Images Pro focus",
     "reviewed_at": "2026-09-17",
     "review_by": "2026-10-16",
     "evidence": {
@@ -1512,7 +1512,7 @@
     "files": {
       ".impeccable/surfaces/src-app-billing-page-tsx.md": "7b6165eb4b5c85cac4900e9070cc20da30c96d06ff12ccd21f4c0450b817bc31",
       "docs/WALLET_AND_BILLING_STRATEGY.md": "4b7b3737a60819a029a49f66ff71093e74da7663668b7f91ec26ab827f5be8d5",
-      "docs/maintainers/SITES_FAIR_USAGE.md": "ce7f737e0b662026cae06b70377430b645fd76fc2b50a4d24cce30b4411cf4bc",
+      "docs/maintainers/SITES_FAIR_USAGE.md": "84392929dcae33d315c91e340e55ecbe0fb9ad789003498a7425eb5531aa2e19",
       "docs/reference/billing-pages.md": "0de80123b662e07a1cf5773defa528265192bb90fe381793228d2f9a988b0146",
       "docs/runbooks/stripe-webhook-delivery.md": "84ab4f8bcca20f8fd7b422e5e8f55e41810c42e55285e68f6c818b639d70cf95",
       "next.config.ts": "732d62c008282def48f59639c1fa7b3b96a0b476156d3001ba5984f03421811a",
