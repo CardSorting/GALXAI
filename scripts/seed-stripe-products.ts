@@ -15,6 +15,8 @@ interface SeededPriceRecord {
   tierKey: string;
   depositAmount: number;
   totalCredit: number;
+  amountUsd?: number;
+  totalCreditUsd?: number;
   productId: string;
   productName: string;
   priceId: string;
@@ -40,6 +42,8 @@ async function seedStripeProducts() {
         tierKey: key,
         depositAmount: tier.depositAmountUsd,
         totalCredit: tier.totalCreditUsd,
+        amountUsd: tier.depositAmountUsd,
+        totalCreditUsd: tier.totalCreditUsd,
         productId: `prod_mock_${key}`,
         productName: tier.name,
         priceId: `price_mock_${key}`,
@@ -50,6 +54,14 @@ async function seedStripeProducts() {
     }
 
     const outputPath = path.resolve(process.cwd(), 'src/lib/stripe/stripe-products.generated.json');
+    if (fs.existsSync(outputPath)) {
+      const existing = fs.readFileSync(outputPath, 'utf8');
+      if ((existing.includes('price_1') || existing.includes('prod_V')) && !process.argv.includes('--force')) {
+        console.log(`\n✓ Existing live Stripe catalog preserved at ${outputPath} (use --force to overwrite)`);
+        console.log('======================================================================\n');
+        return;
+      }
+    }
     fs.writeFileSync(outputPath, JSON.stringify(generatedMap, null, 2), 'utf8');
     console.log(`\n✓ Generated Product Catalog saved to: ${outputPath}`);
     console.log('======================================================================\n');
@@ -128,6 +140,8 @@ async function seedStripeProducts() {
       tierKey: key,
       depositAmount: tier.depositAmountUsd,
       totalCredit: tier.totalCreditUsd,
+      amountUsd: tier.depositAmountUsd,
+      totalCreditUsd: tier.totalCreditUsd,
       productId: product.id,
       productName: tier.name,
       priceId: price.id,
@@ -139,7 +153,7 @@ async function seedStripeProducts() {
   const outputPath = path.resolve(process.cwd(), 'src/lib/stripe/stripe-products.generated.json');
   fs.writeFileSync(outputPath, JSON.stringify(generatedMap, null, 2), 'utf8');
   console.log(`\n======================================================================`);
-  console.log(`✨ ALL 5 COMPUTE PACKS SEEDED & SYNCED IN STRIPE!`);
+  console.log(`✨ ALL ${Object.keys(STRIPE_PRODUCT_TIERS).length} COMPUTE PACKS SEEDED & SYNCED IN STRIPE!`);
   console.log(`   Saved authoritative catalog to: ${outputPath}`);
   console.log(`======================================================================\n`);
 }

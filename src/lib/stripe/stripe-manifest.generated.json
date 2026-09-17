@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-16T20:18:20.393Z",
+  "timestamp": "2026-09-17T17:14:44.119Z",
   "isLiveOrTest": "live",
   "productsProvisioned": 7,
   "pricesProvisioned": 7,
@@ -13,9 +13,9 @@
       "totalCreditUsd": 10
     },
     "lumi_10": {
-      "productId": "prod_VGxC9JPRmDlmaq",
+      "productId": "prod_VHHSomgdvhGgj8",
       "productName": "GALXAI Developer Tier — Images & Frontier OpenAI Models Pass",
-      "priceId": "price_1UGPHdIA2zQnWbn5dn0ywADJ",
+      "priceId": "price_1UGitUIA2zQnWbn5JGDHtWJk",
       "amountUsd": 10,
       "totalCreditUsd": 10
     },

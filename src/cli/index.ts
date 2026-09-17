@@ -385,7 +385,7 @@ ${agentMarkdown}
       const rpm = tier.depositAmountUsd >= 500 ? 'Unlimited' : tier.depositAmountUsd >= 250 ? '1,200 RPM' : tier.depositAmountUsd >= 100 ? '600 RPM' : tier.depositAmountUsd >= 50 ? '300 RPM' : '120 RPM';
       console.log(`  \x1b[1m${key.padEnd(16)}\x1b[0m $${tier.depositAmountUsd.toString().padEnd(8)} ${matchPct.padEnd(9)} +$${(tier.matchBonusUsd + tier.welcomeGrantUsd).toFixed(2).padEnd(11)} \x1b[32m$${tier.totalCreditUsd.toFixed(2).padEnd(13)}\x1b[0m ${rpm.padEnd(10)} ${tier.badge}`);
     }
-    console.log(`\n  \x1b[90mIncludes $5.00 introductory welcome grant on all tiers. 100% refundable unspent balances.\x1b[0m`);
+    console.log(`\n  \x1b[90mIncludes $5.00 introductory welcome grant on tiers $25 and above. 100% refundable unspent balances.\x1b[0m`);
     console.log(`  \x1b[90mRun \x1b[1mnpx galxai checkout <amount>\x1b[0m\x1b[90m to review a credit top-up.\x1b[0m\n`);
     return;
   }
@@ -416,12 +416,21 @@ ${agentMarkdown}
           productName: tier.name,
           priceId: `price_galxai_${key}`,
           currency: 'usd',
-          unitAmount: tier.depositAmountUsd * 100
+          unitAmount: tier.depositAmountUsd * 100,
+          amountUsd: tier.depositAmountUsd,
+          totalCreditUsd: tier.totalCreditUsd
         };
         console.log(`  ✓ Synced Tier [\x1b[1m${key.padEnd(15)}\x1b[0m]: $${tier.depositAmountUsd.toString().padEnd(3)} deposit -> \x1b[32m$${tier.totalCreditUsd.toFixed(2)} compute\x1b[0m (Price ID: price_galxai_${key})`);
       }
 
       const outputPath = path.resolve(process.cwd(), 'src/lib/stripe/stripe-products.generated.json');
+      if (fs.existsSync(outputPath)) {
+        const existing = fs.readFileSync(outputPath, 'utf8');
+        if (existing.includes('price_1') || existing.includes('prod_V')) {
+          console.log(`\n  \x1b[32m✓ Existing live Stripe catalog preserved at src/lib/stripe/stripe-products.generated.json\x1b[0m\n`);
+          return;
+        }
+      }
       fs.writeFileSync(outputPath, JSON.stringify(generatedMap, null, 2), 'utf8');
       console.log(`\n  \x1b[32m✓ Success: Generated Stripe product catalog written to src/lib/stripe/stripe-products.generated.json\x1b[0m\n`);
       return;

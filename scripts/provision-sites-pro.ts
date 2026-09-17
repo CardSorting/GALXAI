@@ -18,12 +18,13 @@ if(!endpoints.data.some(e=>e.url==='https://galx.ai/api/stripe/webhook'&&e.statu
 let product:Stripe.Product;
 try{product=await stripe.products.retrieve('galx_pro_v1');}
 catch(e){if((e as any).statusCode!==404)throw e;product=await stripe.products.create({id:'galx_pro_v1',name:PRO_PLAN.name,
-  description:'Sites creation and publishing for one account, with fair usage included. API and image usage billed separately.',metadata:{galxPlan:'pro-v1'}},{idempotencyKey:'galx-pro-product-v1'});}
+  description:'Image Studio creation and high-velocity synthesis for one account, with fair usage included. API usage billed separately.',metadata:{galxPlan:'pro-v1'}},{idempotencyKey:'galx-pro-product-v1'});}
 if(!product.active||product.name!==PRO_PLAN.name||product.metadata.galxPlan!=='pro-v1')throw Error('Existing Pro product needs review');
-const prices=await stripe.prices.list({lookup_keys:[PRO_LOOKUP_KEY],limit:2});
-if(prices.has_more||prices.data.length>1)throw Error('Ambiguous Pro price');
-const price=prices.data[0]||await stripe.prices.create({product:product.id,unit_amount:PRO_PLAN.monthlyPriceUsd*100,currency:'usd',recurring:{interval:'month'},lookup_key:PRO_LOOKUP_KEY,metadata:{galxPlan:'pro-v1'}},{idempotencyKey:'galx-pro-price-v1'});
-if(!price.active||!price.livemode||price.product!==product.id||price.unit_amount!==20000||price.currency!=='usd'||price.recurring?.interval!=='month'||price.recurring.interval_count!==1)throw Error('Existing Pro price does not match approved launch terms');
+const targetUnitAmount=PRO_PLAN.monthlyPriceUsd*100;
+const prices=await stripe.prices.list({lookup_keys:[PRO_LOOKUP_KEY],limit:10});
+let price=prices.data.find(p=>p.active&&p.unit_amount===targetUnitAmount&&p.currency==='usd'&&p.recurring?.interval==='month');
+if(!price)price=await stripe.prices.create({product:product.id,unit_amount:targetUnitAmount,currency:'usd',recurring:{interval:'month'},lookup_key:PRO_LOOKUP_KEY,transfer_lookup_key:true,metadata:{galxPlan:'pro-v1'}},{idempotencyKey:`galx-pro-price-v${PRO_PLAN.monthlyPriceUsd}`});
+if(!price.active||!price.livemode||price.product!==product.id||price.unit_amount!==targetUnitAmount||price.currency!=='usd'||price.recurring?.interval!=='month'||price.recurring.interval_count!==1)throw Error('Existing Pro price does not match approved launch terms');
 const portals=await stripe.billingPortal.configurations.list({active:true,limit:100});
 if(portals.has_more)throw Error('Portal catalogue needs review');
 let portal=portals.data.find(p=>p.metadata?.galxPlan==='pro-v1');
@@ -40,5 +41,5 @@ const limits=readFairLimits({
 });
 await writeFile(file,JSON.stringify({mode:'enforce',pool_id:'sites-shared-delivery',paid_price_ids:[price.id],limits},null,2)+'\n',{mode:0o600});
 const tax=await stripe.tax.registrations.list({status:'active',limit:100});
-console.log(JSON.stringify({product:product.id,price:price.id,monthlyUsd:200,portal:portal.id,webhookReady:true,contractReady:true,policyFile:file,
+console.log(JSON.stringify({product:product.id,price:price.id,monthlyUsd:PRO_PLAN.monthlyPriceUsd,portal:portal.id,webhookReady:true,contractReady:true,policyFile:file,
   productionPolicyActivated:false,customersCreated:0,paymentsCreated:0,activeTaxRegistrations:tax.data.length,automaticTaxEnabled:false}));

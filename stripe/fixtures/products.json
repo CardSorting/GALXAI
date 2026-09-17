@@ -4,19 +4,85 @@
   },
   "fixtures": [
     {
+      "name": "prod_developer_10",
+      "path": "/v1/products",
+      "method": "post",
+      "params": {
+        "name": "GALXAI Developer Tier — Images & Frontier OpenAI Models Pass",
+        "statement_descriptor": "GALXAI DEV $10",
+        "description": "Instant Developer Tier activation with $10 base prepaid compute credit. Pay-as-you-go API access for image generation and frontier OpenAI models with zero waitlist delay.",
+        "tax_code": "txcd_10000000",
+        "metadata": {
+          "galxai_tier_key": "developer_10",
+          "deposit_amount_usd": "10.00",
+          "total_credit_usd": "10.00",
+          "match_percentage": "0%",
+          "rate_lock": "guaranteed",
+          "sla_priority": "developer_standard"
+        }
+      }
+    },
+    {
+      "name": "price_developer_10",
+      "path": "/v1/prices",
+      "method": "post",
+      "params": {
+        "product": "${prod_developer_10:id}",
+        "unit_amount": 1000,
+        "currency": "usd",
+        "tax_behavior": "exclusive",
+        "metadata": {
+          "galxai_tier_key": "developer_10"
+        }
+      }
+    },
+    {
+      "name": "prod_lumi_10",
+      "path": "/v1/products",
+      "method": "post",
+      "params": {
+        "name": "GALXAI Developer Tier — Images & Frontier OpenAI Models Pass",
+        "statement_descriptor": "GALXAI DEV $10",
+        "description": "Instant Developer Tier activation with $10 base prepaid compute credit. Pay-as-you-go API access for image generation and frontier OpenAI models with zero waitlist delay.",
+        "tax_code": "txcd_10000000",
+        "metadata": {
+          "galxai_tier_key": "developer_10",
+          "deposit_amount_usd": "10.00",
+          "total_credit_usd": "10.00",
+          "match_percentage": "0%",
+          "rate_lock": "guaranteed",
+          "sla_priority": "developer_standard"
+        }
+      }
+    },
+    {
+      "name": "price_lumi_10",
+      "path": "/v1/prices",
+      "method": "post",
+      "params": {
+        "product": "${prod_lumi_10:id}",
+        "unit_amount": 1000,
+        "currency": "usd",
+        "tax_behavior": "exclusive",
+        "metadata": {
+          "galxai_tier_key": "developer_10"
+        }
+      }
+    },
+    {
       "name": "prod_starter_25",
       "path": "/v1/products",
       "method": "post",
       "params": {
         "name": "GALXAI Prepaid Compute — Starter Builder Pack",
         "statement_descriptor": "GALXAI COMPUTE $25",
-        "description": "Includes $25 USD base deposit + $5.00 welcome grant + $2.50 match ($32.50 total compute credit). Micro-billed per token with zero markups.",
+        "description": "Includes $25 USD base deposit + $5.00 welcome grant + $12.50 match ($42.50 total compute credit). Micro-billed per token with zero markups.",
         "tax_code": "txcd_10000000",
         "metadata": {
           "galxai_tier_key": "starter_25",
           "deposit_amount_usd": "25.00",
-          "total_credit_usd": "32.50",
-          "match_percentage": "10%"
+          "total_credit_usd": "42.50",
+          "match_percentage": "50%"
         }
       }
     },
@@ -41,13 +107,13 @@
       "params": {
         "name": "GALXAI Prepaid Compute — Growth VIP Priority Pack",
         "statement_descriptor": "GALXAI COMPUTE $50",
-        "description": "Includes $50 USD base deposit + $5.00 welcome grant + $12.50 match ($67.50 total compute credit). Sub-15ms VIP priority routing included.",
+        "description": "Includes $50 USD base deposit + $5.00 welcome grant + $30.00 match ($85.00 total compute credit). Sub-15ms VIP priority routing included.",
         "tax_code": "txcd_10000000",
         "metadata": {
           "galxai_tier_key": "growth_50",
           "deposit_amount_usd": "50.00",
-          "total_credit_usd": "67.50",
-          "match_percentage": "25%"
+          "total_credit_usd": "85.00",
+          "match_percentage": "60%"
         }
       }
     },
@@ -72,13 +138,13 @@
       "params": {
         "name": "GALXAI Prepaid Compute — Fleet Scale Pack",
         "statement_descriptor": "GALXAI COMPUTE $100",
-        "description": "Includes $100 USD base deposit + $5.00 welcome grant + $50.00 match ($155.00 total compute credit). Maximum 50% match grant applied.",
+        "description": "Includes $100 USD base deposit + $5.00 welcome grant + $75.00 match ($180.00 total compute credit). Maximum 75% match grant applied.",
         "tax_code": "txcd_10000000",
         "metadata": {
           "galxai_tier_key": "fleet_100",
           "deposit_amount_usd": "100.00",
-          "total_credit_usd": "155.00",
-          "match_percentage": "50%"
+          "total_credit_usd": "180.00",
+          "match_percentage": "75%"
         }
       }
     },
@@ -103,13 +169,13 @@
       "params": {
         "name": "GALXAI Prepaid Compute — Enterprise Sovereign Pack",
         "statement_descriptor": "GALXAI COMPUTE $250",
-        "description": "Includes $250 USD base deposit + $5.00 welcome grant + $125.00 match ($380.00 total compute credit). Dedicated VPC private lane access.",
+        "description": "Includes $250 USD base deposit + $5.00 welcome grant + $250.00 match ($505.00 total compute credit). Dedicated VPC private lane access.",
         "tax_code": "txcd_10000000",
         "metadata": {
           "galxai_tier_key": "sovereign_250",
           "deposit_amount_usd": "250.00",
-          "total_credit_usd": "380.00",
-          "match_percentage": "50%"
+          "total_credit_usd": "505.00",
+          "match_percentage": "100%"
         }
       }
     },
@@ -134,13 +200,13 @@
       "params": {
         "name": "GALXAI Prepaid Compute — Hyperscale Infrastructure Pack",
         "statement_descriptor": "GALXAI COMPUTE $500",
-        "description": "Includes $500 USD base deposit + $5.00 welcome grant + $250.00 match ($755.00 total compute credit). Custom Enterprise SLA and dedicated engineer.",
+        "description": "Includes $500 USD base deposit + $5.00 welcome grant + $500.00 match ($1,005.00 total compute credit). Custom Enterprise SLA and dedicated engineer.",
         "tax_code": "txcd_10000000",
         "metadata": {
           "galxai_tier_key": "hyperscale_500",
           "deposit_amount_usd": "500.00",
-          "total_credit_usd": "755.00",
-          "match_percentage": "50%"
+          "total_credit_usd": "1005.00",
+          "match_percentage": "100%"
         }
       }
     },
@@ -155,6 +221,37 @@
         "tax_behavior": "exclusive",
         "metadata": {
           "galxai_tier_key": "hyperscale_500"
+        }
+      }
+    },
+    {
+      "name": "prod_galx_pro_v1",
+      "path": "/v1/products",
+      "method": "post",
+      "params": {
+        "name": "GALX Pro",
+        "statement_descriptor": "GALX PRO $10",
+        "description": "Image Studio creation and high-velocity synthesis for one account, with fair usage included. API usage billed separately.",
+        "tax_code": "txcd_10000000",
+        "metadata": {
+          "galxPlan": "pro-v1"
+        }
+      }
+    },
+    {
+      "name": "price_galx_pro_v1",
+      "path": "/v1/prices",
+      "method": "post",
+      "params": {
+        "product": "${prod_galx_pro_v1:id}",
+        "unit_amount": 1000,
+        "currency": "usd",
+        "recurring": {
+          "interval": "month"
+        },
+        "lookup_key": "galx_pro_monthly_v1",
+        "metadata": {
+          "galxPlan": "pro-v1"
         }
       }
     }

@@ -90,6 +90,16 @@ async function runMasterStripeProvisioner() {
     report.webhookEndpointId = 'we_mock_webhook_galxai_dev';
     report.taxConfigured = true;
 
+    const jsonPath = path.resolve(process.cwd(), 'src/lib/stripe/stripe-products.generated.json');
+    if (fs.existsSync(jsonPath)) {
+      const existing = fs.readFileSync(jsonPath, 'utf8');
+      if ((existing.includes('price_1') || existing.includes('prod_V')) && !process.argv.includes('--force')) {
+        console.log(`\n✓ Existing live Stripe catalog preserved at ${jsonPath} (use --force to overwrite)`);
+        printSuccessSummary(report);
+        return;
+      }
+    }
+
     saveArtifacts(report);
     printSuccessSummary(report);
     return;

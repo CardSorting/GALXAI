@@ -1,0 +1,20 @@
+{
+  "id": "2026-09-17-stripe-backend-packages",
+  "title": "Stripe Backend Packages & Infrastructure Synchronization for $10 Anchor Strategy",
+  "timestamp": "2026-09-17T17:15:00Z",
+  "actor": "Release Operator",
+  "changes": [
+    "Synchronized Stripe Live mode catalog across 7 discrete products and prices with Developer Tier $10 (100% usable balance, 0% match)",
+    "Updated provision-sites-pro.ts to validate and provision GALX Pro at $10.00/mo ($10 USD, 1000 cents) with automated lookup key transfer support",
+    "Updated Stripe CLI products.json fixtures with developer_10, lumi_10, updated match grants, and galx_pro_v1 at $10/mo",
+    "Protected authoritative live Stripe product and manifest artifacts from accidental offline simulation overwrites in CLI and provisioning scripts",
+    "Updated CLI tiers summary to clarify introductory welcome grants on builder tiers ($25+)"
+  ],
+  "verification": {
+    "test_billing_lifecycle": "18/18 passed",
+    "test_sites_plans_db": "17/17 checks passed, 24 role denials verified",
+    "test_free_quota": "4/4 passed",
+    "test_preview_admin": "6/6 passed",
+    "stripe_live_provisioning": "7 products, 7 prices provisioned/verified in live mode"
+  }
+}
