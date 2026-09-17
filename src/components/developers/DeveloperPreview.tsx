@@ -138,10 +138,11 @@ function PreviewFlow({ user, isLoading }: Pick<ReturnType<typeof useAuth>, 'user
       <div className={styles.tierCard}>
         <span className={styles.tierBadge}>Instant Access ⚡</span>
         <h3 className={styles.tierTitle}>Developer Tier ($10 USD)</h3>
-        <p className={styles.tierDesc}>Instant API access for image generation and frontier OpenAI models. Micro-metered token and generation pricing with zero markup.</p>
+        <p className={styles.tierDesc}>Instant API access for image generation and frontier OpenAI models. 100% pay-as-you-go micro-metered token pricing.</p>
         <ul className={styles.tierFeatures}>
-          <li>Includes $20 total usable compute credit ($10 deposit + $5 welcome + $5 match)</li>
+          <li>Includes $10.00 usable Pay-As-You-Go compute balance (never expires)</li>
           <li>Instant API Key minting & full access to OpenAI Frontier models and Images API</li>
+          <li>Standard Tier 1 developer throughput (60 RPM / 40k TPM) with safety spend caps</li>
           <li>No waitlist application or review delay required</li>
         </ul>
         <div className={styles.actions}>
@@ -160,11 +161,12 @@ function PreviewFlow({ user, isLoading }: Pick<ReturnType<typeof useAuth>, 'user
       {!editing && <div className={styles.tierCard}>
         <span className={styles.tierBadge}>Instant Access ⚡</span>
         <h3 className={styles.tierTitle}>Get Instant Developer Tier ($10)</h3>
-        <p className={styles.tierDesc}>Skip the waitlist and unlock pay-as-you-go API access immediately for Images and Frontier OpenAI Models.</p>
+        <p className={styles.tierDesc}>Skip the waitlist and unlock pay-as-you-go API access immediately for Images and Frontier models.</p>
         <ul className={styles.tierFeatures}>
-          <li>Includes $20 total usable credit ($10 deposit + $5 welcome + $5 match)</li>
+          <li>Includes $10.00 usable Pay-As-You-Go compute balance</li>
           <li>Instant API Key minting (`/keys`) and drop-in OpenAI compatible endpoints</li>
-          <li>Instant activation without manual review</li>
+          <li>Standard Tier 1 developer throughput with safety spend caps</li>
+          <li>Instant activation without manual review delay</li>
         </ul>
         <button className={styles.primary} disabled={busy} onClick={() => void purchaseDeveloperTier()}>
           {busy ? 'Opening checkout…' : 'Purchase Developer Tier ($10)'} <ArrowRight size={16} aria-hidden="true" />
@@ -202,7 +204,7 @@ function PreviewFlow({ user, isLoading }: Pick<ReturnType<typeof useAuth>, 'user
       <div className={styles.tierCard}>
         <span className={styles.tierBadge}>Skip the Waitlist ⚡</span>
         <h3 className={styles.tierTitle}>Get Instant Developer Tier ($10)</h3>
-        <p className={styles.tierDesc}>Unlock pay-as-you-go API access immediately for Images and OpenAI GPT-5.6 Luna without waiting for manual cohort review.</p>
+        <p className={styles.tierDesc}>Unlock pay-as-you-go API access immediately with a $10 usable balance for Images and frontier models with Tier 1 throughput without waiting for manual cohort review.</p>
         <button className={styles.primary} disabled={busy} onClick={() => void purchaseDeveloperTier()}>
           {busy ? 'Opening checkout…' : 'Purchase Developer Tier ($10)'} <ArrowRight size={16} aria-hidden="true" />
         </button>

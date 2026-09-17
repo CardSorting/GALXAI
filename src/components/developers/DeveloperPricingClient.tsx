@@ -191,17 +191,17 @@ export function DeveloperPricingClient() {
       tagline: 'Instant API Access Pass',
       badge: 'INSTANT UNLOCK ⚡',
       isPopular: true,
-      concurrency: '120 RPM Burst',
-      welcome: '$5.00',
-      match: '$5.00 (50%)',
-      totalUsable: '$20.00',
-      description: 'Instant Developer Tier activation. Pay-as-you-go API access for Images & Frontier OpenAI models without waitlist delay.',
+      concurrency: '60 RPM / 40k TPM',
+      welcome: '$0.00',
+      match: '$0.00',
+      totalUsable: '$10.00',
+      description: 'Instant Developer Tier activation. 100% pay-as-you-go prepaid credit for Images & Frontier models without waitlist delay.',
       perks: [
         'Instant API Key minting (/keys) with zero waitlist',
         'Drop-in OpenAI SDK & Cursor/Windsurf compatibility',
-        'OpenAI GPT-5.6 Luna & Image Generation',
+        'Full $10.00 Pay-As-You-Go compute balance',
         'Images API generation (/v1/images/generations)',
-        'Zero Data Retention (ZDR) Privacy Enclaves',
+        'Standard Tier 1 throughput with safety spend caps',
       ],
       buttonLabel: 'Get Developer Tier ($10)',
     },
@@ -391,7 +391,7 @@ export function DeveloperPricingClient() {
               <p className="mt-1 text-sm text-zinc-400">One-time deposits with non-expiring compute balances. Zero hidden subscriptions.</p>
             </div>
             <div className="text-xs text-zinc-400">
-              Looking for unlimited Sites website building? <Link href="/pricing" className="text-indigo-400 underline hover:text-indigo-300">View GALX Pro ($200/mo)</Link>
+              Looking for unlimited Image Studio creation? <Link href="/pricing" className="text-indigo-400 underline hover:text-indigo-300">View GALX Pro ($10/mo)</Link>
             </div>
           </div>
 
@@ -759,14 +759,14 @@ export function DeveloperPricingClient() {
                 <tr>
                   <td className="px-4 py-3.5 font-medium text-white">Usable Compute Credit</td>
                   <td className="px-4 py-3.5">$0.00 (Trial limits)</td>
-                  <td className="px-4 py-3.5 text-emerald-400 font-bold">$20.00 (50% match)</td>
+                  <td className="px-4 py-3.5 text-emerald-400 font-bold">$10.00 (100% usable)</td>
                   <td className="px-4 py-3.5 text-emerald-400 font-bold">$85.00 (60% match)</td>
                   <td className="px-4 py-3.5 text-emerald-400 font-bold">$505.00 - $1,005.00 (100% Double Match)</td>
                 </tr>
                 <tr>
                   <td className="px-4 py-3.5 font-medium text-white">Concurrency Limit</td>
                   <td className="px-4 py-3.5">20 RPM</td>
-                  <td className="px-4 py-3.5">120 RPM</td>
+                  <td className="px-4 py-3.5">60 RPM</td>
                   <td className="px-4 py-3.5 text-sky-400 font-semibold">300 RPM (VIP Lane)</td>
                   <td className="px-4 py-3.5 text-sky-400 font-semibold">1,200+ RPM / Unlimited</td>
                 </tr>
@@ -803,6 +803,51 @@ export function DeveloperPricingClient() {
           </div>
         </section>
 
+        {/* Architecture & Consumption Controls */}
+        <section className="scroll-mt-24 pt-16">
+          <div className="text-center max-w-2xl mx-auto">
+            <h2 className="text-2xl font-bold text-white sm:text-3xl">Predictable Developer Economics</h2>
+            <p className="mt-2 text-sm text-zinc-400">
+              Built on the proven billing patterns of Twilio, OpenAI, and Stripe. No unbacked loans, zero negative overdrafts, and no surprise postpaid invoices.
+            </p>
+          </div>
+
+          <div className="mt-10 grid gap-6 sm:grid-cols-3">
+            <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6 backdrop-blur-sm">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                <Layers size={20} />
+              </div>
+              <h3 className="mt-4 text-base font-semibold text-white">1. Prepaid Balance</h3>
+              <p className="mt-1 text-xs text-indigo-400 font-medium uppercase tracking-wider">Runway Control</p>
+              <p className="mt-3 text-xs leading-relaxed text-zinc-400">
+                Your wallet holds non-expiring usage credits. Deposits purchase immediate API runway without locking you into monthly recurring seat fees.
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6 backdrop-blur-sm">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                <SlidersHorizontal size={20} />
+              </div>
+              <h3 className="mt-4 text-base font-semibold text-white">2. Spend Velocity Cap</h3>
+              <p className="mt-1 text-xs text-emerald-400 font-medium uppercase tracking-wider">Safety Control</p>
+              <p className="mt-3 text-xs leading-relaxed text-zinc-400">
+                Developer-configured daily spend limits act as an automated circuit breaker. If an autonomous agent enters an unexpected loop, execution safely pauses at your limit.
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6 backdrop-blur-sm">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-sky-500/10 text-sky-400 border border-sky-500/20">
+                <Cpu size={20} />
+              </div>
+              <h3 className="mt-4 text-base font-semibold text-white">3. Throughput Tiers</h3>
+              <p className="mt-1 text-xs text-sky-400 font-medium uppercase tracking-wider">Capacity Control</p>
+              <p className="mt-3 text-xs leading-relaxed text-zinc-400">
+                RPM and TPM concurrency limits are governed by account maturity and verified usage. Adding funds increases your runway, protecting all developers from noisy neighbors.
+              </p>
+            </div>
+          </div>
+        </section>
+
         {/* Developer FAQ */}
         <section id="faq" className="scroll-mt-24 pt-16">
           <h2 className="text-2xl font-bold text-white">Developer Pricing FAQ</h2>
@@ -812,7 +857,31 @@ export function DeveloperPricingClient() {
                 How does the $10 Developer Tier unlock work?
               </summary>
               <p className="mt-2 text-sm leading-relaxed text-zinc-400">
-                When you make a $10 deposit for the Developer Tier, your account is immediately verified and approved in our developer database. You can generate API keys right away at <Link href="/keys" className="text-indigo-400 underline">/keys</Link> and start calling endpoints for images and frontier OpenAI models with zero waitlist delay.
+                When you make a $10 deposit for the Developer Tier, your account is immediately verified and approved in our developer database with $10.00 of usable pay-as-you-go credit. You can generate API keys right away at <Link href="/keys" className="text-indigo-400 underline">/keys</Link> and start calling endpoints for images and frontier OpenAI models with zero waitlist delay.
+              </p>
+            </details>
+            <details className="group py-4">
+              <summary className="cursor-pointer text-sm font-semibold text-zinc-200 hover:text-indigo-300">
+                Does depositing more money increase my RPM/TPM throughput limits?
+              </summary>
+              <p className="mt-2 text-sm leading-relaxed text-zinc-400">
+                No. Concurrency limits (RPM and TPM) are governed by your account Tier (Tier 1 starts at 60 RPM / 40k TPM). Adding funds increases your prepaid runway, not your instantaneous burst velocity. Higher throughput tiers unlock automatically as your account matures and completes verified billing cycles.
+              </p>
+            </details>
+            <details className="group py-4">
+              <summary className="cursor-pointer text-sm font-semibold text-zinc-200 hover:text-indigo-300">
+                Can an infinite loop or runaway agent cause unexpected debts?
+              </summary>
+              <p className="mt-2 text-sm leading-relaxed text-zinc-400">
+                No. GALX enforces strict zero-negative-balance guarantees. Every streaming request uses atomic two-phase reservations (auth-and-capture) clamped to 1,024-token chunks. Furthermore, your configured Daily Spend Limit acts as a hard stop, completely preventing surprise bills.
+              </p>
+            </details>
+            <details className="group py-4">
+              <summary className="cursor-pointer text-sm font-semibold text-zinc-200 hover:text-indigo-300">
+                How does Auto-Recharge work?
+              </summary>
+              <p className="mt-2 text-sm leading-relaxed text-zinc-400">
+                You can configure an optional Auto-Recharge rule (e.g., recharge $10 or $25 when balance drops below $4.00) with a mandatory monthly recharge ceiling. This ensures autonomous agents never halt due to empty wallets while keeping your financial exposure strictly bounded.
               </p>
             </details>
             <details className="group py-4">
@@ -825,10 +894,10 @@ export function DeveloperPricingClient() {
             </details>
             <details className="group py-4">
               <summary className="cursor-pointer text-sm font-semibold text-zinc-200 hover:text-indigo-300">
-                Is GALX Pro for Sites included in the Developer Tier?
+                Is GALX Pro included in the Developer Tier?
               </summary>
               <p className="mt-2 text-sm leading-relaxed text-zinc-400">
-                No. GALX Pro ($200/mo) is a dedicated subscription for unlimited Sites website building, revisions, and public hosting. Developer API compute is a separate pay-as-you-go credit pool.
+                No. GALX Pro ($10/mo) is a dedicated subscription for high-velocity Image Studio creation, priority GPU queues, and unlimited prompt remixes. Developer API compute is a separate pay-as-you-go credit pool.
               </p>
             </details>
             <details className="group py-4">

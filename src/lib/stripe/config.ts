@@ -18,9 +18,14 @@ export const STRIPE_CHECKOUT_PACKS: Record<number, StripeTierConfig> = {
     amount: 10,
     label: 'Developer Tier (Pay-As-You-Go API & Images)',
     badge: 'DEV TIER ⚡',
-    multiplier: 1.50,
-    welcomeGrant: 5.0,
-    perks: ['Instant Developer Tier & API Keys Unlock', 'Pay-as-you-go for Images & Frontier OpenAI Models', 'Zero waitlist application required']
+    multiplier: 1.00,
+    welcomeGrant: 0.0,
+    perks: [
+      'Instant Developer Tier & API Keys Unlock',
+      'Full $10.00 Pay-As-You-Go compute balance',
+      'Tier 1 throughput (60 RPM / 40k TPM) with safety spend caps',
+      'Zero waitlist application required'
+    ]
   },
   25: {
     amount: 25,
@@ -141,7 +146,7 @@ export function calculateComputeCredit(amountUsd: number) {
     perks: ['Instant micro-metered token credit', '75% prompt caching pass-through']
   };
 
-  const welcomeGrant = 5.0;
+  const welcomeGrant = deposit >= 25 ? 5.0 : 0.0;
   const matchBonus = deposit >= 25 ? Number((deposit * (tier.multiplier - 1)).toFixed(2)) : 0;
   const totalCredit = Number((deposit + welcomeGrant + matchBonus).toFixed(2));
 

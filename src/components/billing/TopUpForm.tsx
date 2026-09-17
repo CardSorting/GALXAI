@@ -61,7 +61,7 @@ export function TopUpForm({ token, available, accountId, draft }: { token?: stri
   }
   return <form className="mt-6 space-y-4" onSubmit={event => { event.preventDefault(); void checkout(); }}>
     <fieldset disabled={busy || !available} className="space-y-3"><legend className="mb-2 text-sm text-zinc-300">Top-up amount (USD)</legend>
-      <div className="flex flex-wrap gap-2">{[25,50,100].map(value => <button key={value} type="button" aria-pressed={Number(amount) === value} onClick={() => { setAmount(String(value)); setError(''); }} className={`min-h-11 rounded-md border px-4 py-2 text-sm focus-visible:outline-indigo-300 ${Number(amount) === value ? 'border-indigo-400/60 bg-indigo-500/15 text-indigo-100' : 'border-white/15 text-zinc-100 hover:bg-white/5'}`}>${value}</button>)}</div>
+      <div className="flex flex-wrap gap-2">{[10, 25, 50, 100].map(value => <button key={value} type="button" aria-pressed={Number(amount) === value} onClick={() => { setAmount(String(value)); setError(''); }} className={`min-h-11 rounded-md border px-4 py-2 text-sm focus-visible:outline-indigo-300 ${Number(amount) === value ? 'border-indigo-400/60 bg-indigo-500/15 text-indigo-100' : 'border-white/15 text-zinc-100 hover:bg-white/5'}`}>${value}</button>)}</div>
       <label htmlFor={amountId} className="block text-sm text-zinc-400">Custom amount</label>
       <input id={amountId} aria-describedby={`${amountId}-help`} aria-invalid={!valid} className="block min-h-11 w-full rounded-md border border-white/15 bg-[#090b10] px-3 py-2 text-base text-zinc-100 focus-visible:outline-indigo-300 sm:w-48" type="number" inputMode="decimal" min="1" max="10000" step="0.01" required value={amount} onChange={event => { setAmount(event.target.value); setError(''); }} />
       <p id={`${amountId}-help`} className={`text-sm ${valid ? 'text-zinc-400' : 'text-red-300'}`}>Enter $1–$10,000, with up to two decimal places.</p>
@@ -70,7 +70,7 @@ export function TopUpForm({ token, available, accountId, draft }: { token?: stri
     {quoteError && <p role="alert" className="text-sm text-red-300">{quoteError} <button type="button" onClick={() => setQuoteRevision(n => n + 1)} className="underline">Retry</button></p>}
     {valid && available && !quote && !quoteError && <p role="status" className="text-sm text-zinc-400">Calculating your credit…</p>}
     <button type="submit" disabled={!valid || busy || !available || !quote || quote.amountUsd !== Number(amount)} className="min-h-11 w-full rounded-md border border-indigo-400/40 bg-indigo-500/20 px-4 py-2.5 text-sm font-medium text-indigo-100 hover:bg-indigo-500/30 focus-visible:outline-indigo-300 disabled:opacity-50 sm:w-auto">{busy ? 'Opening checkout…' : 'Continue to checkout'}</button>
-    <p className="text-xs leading-6 text-zinc-400">{available ? 'Pay securely with Stripe. No subscription or automatic reload. Credit is added after payment confirmation.' : 'Online payments are currently unavailable. Please try again later.'}</p>
+    <p className="text-xs leading-6 text-zinc-400">{available ? 'Pay securely with Stripe. Non-expiring compute credits. Micro-metered token billing with zero negative overdrafts.' : 'Online payments are currently unavailable. Please try again later.'}</p>
     {error && <p role="alert" className="text-sm text-red-300">{error}</p>}
   </form>;
 }

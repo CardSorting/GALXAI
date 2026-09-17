@@ -109,7 +109,7 @@ export function PlanPanel({ token, accountId, compact = false, returnSearch, ref
   let detail = 'Checking your plan…';
   if (status) {
     title = included || ['active', 'ending', 'payment_required', 'paused', 'processing'].includes(subscription?.state || '') ? PRO_PLAN.name : 'Your plan';
-    detail = included ? 'Pro access is active. Sites creation and publishing are included.' : 'Choose Pro for continuing Sites creation and publishing.';
+    detail = included ? 'Pro access is active. High-resolution image synthesis and priority GPU queues are active.' : 'Choose Pro for high-resolution image generation and priority GPU queues.';
     if (subscription?.state === 'ending') detail = included ? 'Your subscription is set to end. Pro access is still active.' : 'Your subscription is set to end. Check billing for your current access.';
     else if (paymentRequired) detail = 'Your subscription needs a payment update. Review it in billing to continue.';
     else if (subscription?.state === 'paused') detail = 'Your subscription is paused. Review it in billing.';

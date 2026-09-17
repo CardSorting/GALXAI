@@ -115,7 +115,7 @@ export function Footer() {
               </li>
               <li>
                 <Link href="/pricing/galx-pro" className={styles.footerLink}>
-                  <span>GALX Pro ($200/mo)</span>
+                  <span>GALX Pro ($10/mo)</span>
                 </Link>
               </li>
               <li>
