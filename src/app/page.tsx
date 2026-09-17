@@ -1,4 +1,14 @@
 import { PublicHome } from '@/components/home/PublicHome';
 import { constructMetadata } from '@/lib/seo/metadata';
-export const metadata = constructMetadata({ title: 'Your idea, ready to share', description: 'Turn an idea into a website with GALX Sites. Make a first version, keep refining it, and publish at your own public GALX address. Explore our very early public beta.', keywords: ['GALX Sites', 'website builder', 'prototyping', 'public beta'], canonicalPath: '/' });
-export default function HomePage() { return <PublicHome />; }
+
+export const metadata = constructMetadata({
+  title: 'GALX Images — Generative Visual Studio & Public Stream',
+  description: 'Turn ideas into high-resolution visuals with GALX Images. Explore an endless real-time stream of public community creations, generate imagery from prompts, and remix any style.',
+  keywords: ['GALX Images', 'AI image generator', 'generative images', 'prompt to image', 'image stream', 'pinterest masonry'],
+  canonicalPath: '/',
+});
+
+export default function HomePage() {
+  return <PublicHome />;
+}
+
