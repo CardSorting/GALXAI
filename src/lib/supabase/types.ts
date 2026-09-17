@@ -1101,6 +1101,11 @@ export interface Database {
           auto_reload_payment_method_id: string | null;
           proof_of_deposit_verified: boolean;
           verified_at: string | null;
+          /** Durable tier snapshot: auto-updated by trigger on deposit */
+          compute_tier_key: 'free' | 'developer_10' | 'starter_25' | 'growth_50' | 'fleet_100' | 'sovereign_250' | 'hyperscale_500';
+          compute_tier_rpm: number;
+          compute_tier_tpm: number;
+          compute_tier_updated_at: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -1119,6 +1124,10 @@ export interface Database {
           auto_reload_payment_method_id?: string | null;
           proof_of_deposit_verified?: boolean;
           verified_at?: string | null;
+          compute_tier_key?: string;
+          compute_tier_rpm?: number;
+          compute_tier_tpm?: number;
+          compute_tier_updated_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -1137,6 +1146,10 @@ export interface Database {
           auto_reload_payment_method_id?: string | null;
           proof_of_deposit_verified?: boolean;
           verified_at?: string | null;
+          compute_tier_key?: string;
+          compute_tier_rpm?: number;
+          compute_tier_tpm?: number;
+          compute_tier_updated_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };

@@ -15,11 +15,17 @@ async function ledger(db: PoolClient, session: Session, amount: number, deposit:
     deposited_total_usd=GREATEST(0,deposited_total_usd+$3),promotional_match_usd=GREATEST(0,promotional_match_usd+$2-$3),
     proof_of_deposit_verified=true,verified_at=COALESCE(verified_at,now()),updated_at=now()
     WHERE user_id=$1 RETURNING id,balance_usd,payment_debt_usd`, [session.user_id, amount, deposit])).rows[0];
-  // Debt retains money owed after a refund of already-consumed credit.
+  const tierLabel: string = (session.metadata as any)?.tierLabel || 'Compute Credit';
+  const tierRpm: number | undefined = (session.metadata as any)?.tierRpm;
+  const depositDesc =
+    type === 'deposit'
+      ? `${tierLabel}${tierRpm ? ` | ${tierRpm >= 10000 ? 'Unlimited' : tierRpm + ' RPM'}` : ''} — prepaid API credit`
+      : type === 'refund'
+      ? amount > 0 ? 'Refund failed; credit restored' : 'Payment refund'
+      : 'Payment dispute adjustment';
   await db.query(`INSERT INTO galx_wallet_transactions (wallet_id,user_id,transaction_type,amount_usd,balance_after_usd,description,metadata)
-    VALUES ($1,$2,$3,$4,$5,$6,$7)`, [wallet.id, session.user_id, type, amount, wallet.balance_usd,
-    type === 'deposit' ? 'Compute credit top-up' : type === 'refund' ? amount > 0 ? 'Refund failed; credit restored' : 'Payment refund' : 'Payment dispute adjustment',
-    JSON.stringify({ payment_ref: session.payment_intent_id, checkout_session: session.session_id, event_id: reference, payment_debt_usd: wallet.payment_debt_usd, fulfillmentVersion: 2 })]);
+    VALUES ($1,$2,$3,$4,$5,$6,$7)`, [wallet.id, session.user_id, type, amount, wallet.balance_usd, depositDesc,
+    JSON.stringify({ payment_ref: session.payment_intent_id, checkout_session: session.session_id, event_id: reference, payment_debt_usd: wallet.payment_debt_usd, tierKey: (session.metadata as any)?.tierKey, tierRpm, fulfillmentVersion: 2 })]);
 }
 
 async function sessionForPayment(db: PoolClient, payment: string): Promise<Session | undefined> {
@@ -68,14 +74,15 @@ export async function fulfillStripeEvent(pool: Pool, event: Stripe.Event, rawBod
             const userEmail = session.metadata?.email || object.customer_details?.email || 'developer@galx.ai';
             await db.query(`INSERT INTO private.developer_access_requests
               (user_id, email, use_case, expected_traffic, status, reviewed_at, reviewed_by, expires_at)
-              VALUES ($1, $2, 'Developer tier purchased via checkout for images and frontier models API access', 'over_1000_daily', 'approved', now(), 'stripe-fulfillment', NULL)
+              VALUES ($1, $2, $3, 'over_1000_daily', 'approved', now(), 'stripe-fulfillment', NULL)
               ON CONFLICT (user_id) DO UPDATE SET
                 status = 'approved',
                 reviewed_at = now(),
                 reviewed_by = 'stripe-fulfillment',
                 expires_at = NULL,
                 revision = COALESCE(private.developer_access_requests.revision, 1) + 1`,
-              [session.user_id, userEmail]);
+              [session.user_id, userEmail,
+               `Compute tier purchased via checkout: ${(session.metadata as any)?.tierKey ?? 'developer_10'} — ${(session.metadata as any)?.tierLabel ?? 'Developer Tier'}`]);
             try { PreviewReadSync.for(db).invalidate(session.user_id); } catch {}
             changedUser = session.user_id;
           }

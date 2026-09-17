@@ -4,6 +4,18 @@ import type Stripe from 'stripe';
 import { BillingError } from './account';
 import { checkoutReturnPath, hostedPaymentUrl } from './payment';
 import { readTopUpQuote } from './quote';
+import { calculateComputeCredit } from '../stripe/config';
+
+/** Returns the canonical tier_key string for a deposit amount. */
+function resolveTierKey(depositUsd: number): { tierKey: string; tierRpm: number } {
+  if (depositUsd >= 500) return { tierKey: 'hyperscale_500', tierRpm: 10000 };
+  if (depositUsd >= 250) return { tierKey: 'sovereign_250', tierRpm: 1200 };
+  if (depositUsd >= 100) return { tierKey: 'fleet_100', tierRpm: 600 };
+  if (depositUsd >= 50)  return { tierKey: 'growth_50', tierRpm: 300 };
+  if (depositUsd >= 25)  return { tierKey: 'starter_25', tierRpm: 120 };
+  if (depositUsd >= 10)  return { tierKey: 'developer_10', tierRpm: 60 };
+  return { tierKey: 'developer_10', tierRpm: 60 };
+}
 
 export async function createAccountCheckout(pool: Pool, stripe: Stripe, input: {
   userId: string; email: string; amount: number; requestId: string; surface?: unknown; origin: string;
@@ -23,10 +35,12 @@ export async function createAccountCheckout(pool: Pool, stripe: Stripe, input: {
       const count = await db.query(`SELECT count(*) FROM galx_stripe_checkout_sessions WHERE user_id=$1 AND created_at > now()-interval '10 minutes'`, [input.userId]);
       if (Number(count.rows[0].count) >= 5) throw new BillingError('Too many checkout attempts. Please wait a few minutes.', 429);
       const quote = await readTopUpQuote(db, input.userId, input.amount);
+      const computed = calculateComputeCredit(input.amount);
+      const { tierKey, tierRpm } = resolveTierKey(input.amount);
       row = (await db.query(`INSERT INTO galx_stripe_checkout_sessions
-        (session_id,user_id,amount_usd,match_grant_usd,total_credited_usd,metadata)
-        VALUES ($1,$2,$3,$4,$5,$6) RETURNING *`, [`pending_${key}`, input.userId, input.amount, quote.bonusUsd, quote.creditUsd,
-        JSON.stringify({ requestId: input.requestId, returnPath, origin: input.origin, email: input.email, key, welcomeGrant: quote.welcomeGrant, fulfillmentVersion: 2 })])).rows[0];
+        (session_id,user_id,amount_usd,match_grant_usd,total_credited_usd,tier_key,tier_rpm,metadata)
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`, [`pending_${key}`, input.userId, input.amount, quote.bonusUsd, quote.creditUsd, tierKey, tierRpm,
+        JSON.stringify({ requestId: input.requestId, returnPath, origin: input.origin, email: input.email, key, welcomeGrant: quote.welcomeGrant, tierKey, tierRpm, tierLabel: computed.tier.label, fulfillmentVersion: 2 })])).rows[0];
     }
     if (Number(row.amount_usd) !== input.amount) throw new BillingError('This checkout attempt already has a different amount. Refresh to start again.', 409);
     checkoutReturnPath(row.metadata.returnPath ?? '');
@@ -57,7 +71,8 @@ export async function createAccountCheckout(pool: Pool, stripe: Stripe, input: {
       mode: 'payment', customer, client_reference_id: input.userId,
       integration_identifier: `galx_topup_${key.slice(0,8).split('').map(char => String.fromCharCode(97 + parseInt(char,16))).join('')}`,
       line_items: [{ quantity: 1, price_data: { currency: 'usd', unit_amount: Math.round(input.amount * 100), product_data: {
-        name: 'GALXAI compute credit', description: `$${Number(row.total_credited_usd).toFixed(2)} compute credit added after payment. One-time payment.`,
+        name: `GALXAI ${row.metadata?.tierLabel || 'Compute Credit'} — Prepaid API Pass`,
+        description: `$${Number(row.total_credited_usd).toFixed(2)} non-expiring compute credit added on payment. One-time charge, no subscription.`,
       } } }],
       // Discounts change the collected amount and cannot silently change credit terms.
       allow_promotion_codes: false,
