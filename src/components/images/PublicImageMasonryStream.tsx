@@ -56,6 +56,28 @@ const STYLE_PRESETS = [
   { label: 'Minimalist', value: 'minimalist' },
 ] as const;
 
+const SKELETON_ITEMS = [
+  { id: 'sk-1', ratio: '1 / 1' },
+  { id: 'sk-2', ratio: '9 / 16' },
+  { id: 'sk-3', ratio: '16 / 9' },
+  { id: 'sk-4', ratio: '3 / 2' },
+  { id: 'sk-5', ratio: '1 / 1' },
+  { id: 'sk-6', ratio: '4 / 3' },
+  { id: 'sk-7', ratio: '9 / 16' },
+  { id: 'sk-8', ratio: '1 / 1' },
+  { id: 'sk-9', ratio: '16 / 9' },
+  { id: 'sk-10', ratio: '3 / 2' },
+  { id: 'sk-11', ratio: '1 / 1' },
+  { id: 'sk-12', ratio: '9 / 16' },
+] as const;
+
+const PAGINATION_SKELETON_ITEMS = [
+  { id: 'pag-sk-1', ratio: '1 / 1' },
+  { id: 'pag-sk-2', ratio: '9 / 16' },
+  { id: 'pag-sk-3', ratio: '16 / 9' },
+  { id: 'pag-sk-4', ratio: '3 / 2' },
+] as const;
+
 function ratioToCss(ratio: string): string {
   switch (ratio) {
     case '16:9': return '16 / 9';
@@ -104,6 +126,7 @@ export function PublicImageMasonryStream({
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
   const [likedMap, setLikedMap] = useState<Record<string, boolean>>({});
   const [likesCountMap, setLikesCountMap] = useState<Record<string, number>>({});
+  const [likedPopId, setLikedPopId] = useState<string | null>(null);
   const [fetchError, setFetchError] = useState<string | null>(null);
 
   const observerTarget = useRef<HTMLDivElement>(null);
@@ -351,6 +374,8 @@ export function PublicImageMasonryStream({
     });
 
     if (nextLiked) {
+      setLikedPopId(item.id);
+      setTimeout(() => setLikedPopId(null), 500);
       showToast('Liked creation');
     }
 
@@ -690,7 +715,7 @@ export function PublicImageMasonryStream({
 
                     <button
                       type="button"
-                      className={`masonry-like-btn ${isLiked ? 'liked' : ''}`}
+                      className={`masonry-like-btn ${isLiked ? 'liked' : ''} ${likedPopId === item.id ? 'pop' : ''}`}
                       onClick={(e) => handleToggleLike(e, item)}
                       title={isLiked ? 'Unlike' : 'Like'}
                       aria-label="Like creation"
@@ -741,8 +766,39 @@ export function PublicImageMasonryStream({
               </article>
             );
           })}
+
+          {/* Append Skeleton Cards during Infinite Pagination */}
+          {loading &&
+            PAGINATION_SKELETON_ITEMS.map((sk) => (
+              <div key={sk.id} className="masonry-card masonry-skeleton-card" aria-hidden="true">
+                <div className="masonry-media-wrap" style={{ aspectRatio: sk.ratio }}>
+                  <div className="masonry-skeleton-shimmer" />
+                  <div className="masonry-skeleton-badge" />
+                  <div className="masonry-skeleton-footer">
+                    <div className="masonry-skeleton-line" style={{ width: '75%' }} />
+                    <div className="masonry-skeleton-line" style={{ width: '45%' }} />
+                  </div>
+                </div>
+              </div>
+            ))}
         </div>
-      ) : !loading ? (
+      ) : loading ? (
+        /* Initial Loading Skeleton Grid (12 items) */
+        <div className={`masonry-grid ${density}`} aria-label="Loading stream creations">
+          {SKELETON_ITEMS.map((sk) => (
+            <div key={sk.id} className="masonry-card masonry-skeleton-card" aria-hidden="true">
+              <div className="masonry-media-wrap" style={{ aspectRatio: sk.ratio }}>
+                <div className="masonry-skeleton-shimmer" />
+                <div className="masonry-skeleton-badge" />
+                <div className="masonry-skeleton-footer">
+                  <div className="masonry-skeleton-line" style={{ width: '80%' }} />
+                  <div className="masonry-skeleton-line" style={{ width: '50%' }} />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
         <div className="masonry-empty">
           <Layers className="masonry-empty-icon" />
           <h3>No creations match your filter</h3>
@@ -760,11 +816,11 @@ export function PublicImageMasonryStream({
             <span>Create with GALX Images</span>
           </Link>
         </div>
-      ) : null}
+      )}
 
       {/* --- Infinite Scroll Sentinel & Loading indicator --- */}
       <div ref={observerTarget} className="masonry-sentinel">
-        {loading ? (
+        {loading && items.length === 0 ? null : loading ? (
           <div className="masonry-loading-indicator">
             <span className="masonry-loading-spinner" />
             <span>Streaming community creations…</span>
@@ -886,7 +942,7 @@ export function PublicImageMasonryStream({
 
                 <button
                   type="button"
-                  className={`masonry-modal-like-btn ${likedMap[activeModalItem.id] ? 'liked' : ''}`}
+                  className={`masonry-modal-like-btn ${likedMap[activeModalItem.id] ? 'liked' : ''} ${likedPopId === activeModalItem.id ? 'pop' : ''}`}
                   onClick={(e) => handleToggleLike(e, activeModalItem)}
                   title="Like creation"
                 >

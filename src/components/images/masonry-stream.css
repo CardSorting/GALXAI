@@ -463,21 +463,56 @@
   margin-bottom: 22px;
   border-radius: 18px;
   overflow: hidden;
-  background: #151824;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: #141724;
+  border: 1px solid rgba(255, 255, 255, 0.06);
   position: relative;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
 .masonry-skeleton-shimmer {
   position: absolute;
   inset: 0;
   transform: translateX(-100%);
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.04), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
   animation: masonry-shimmer 1.6s infinite;
+}
+
+.masonry-skeleton-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  width: 44px;
+  height: 20px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.masonry-skeleton-footer {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 2;
+}
+
+.masonry-skeleton-line {
+  height: 11px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
 }
 
 @keyframes masonry-shimmer {
   100% { transform: translateX(100%); }
+}
+
+@keyframes heart-pop {
+  0% { transform: scale(1); }
+  45% { transform: scale(1.35); filter: drop-shadow(0 0 8px rgba(244, 63, 94, 0.8)); }
+  75% { transform: scale(0.92); }
+  100% { transform: scale(1); }
 }
 
 /* Empty State */
@@ -882,6 +917,10 @@
   color: #fda4af;
 }
 
+.masonry-like-btn.pop {
+  animation: heart-pop 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
 /* --- Floating Modal Prev/Next Navigation --- */
 .masonry-modal-nav {
   position: absolute;
@@ -972,6 +1011,10 @@
   background: rgba(244, 63, 94, 0.25);
   border-color: rgba(244, 63, 94, 0.5);
   color: #fda4af;
+}
+
+.masonry-modal-like-btn.pop {
+  animation: heart-pop 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .masonry-modal-shortcuts {

@@ -51,12 +51,12 @@
     }
   },
   "images": {
-    "reviewer": "Image studio maintainer",
-    "note": "Resolve image stream public URLs to secure /v1/images/assets tokens with WebP thumbnails and filter test stubs",
+    "reviewer": "Product/API maintainer",
+    "note": "Enhanced explore feed with 12-item skeleton grid, append-skeletons, heart-pop animations, and canonical feed view",
     "reviewed_at": "2026-09-17",
     "review_by": "2026-09-24",
     "evidence": {
-      "docs/knowledge/audits/2026-09-17-public-explore-page-review.json": "dbc8f3a64928f8bfc5bcdd9c1ab4ba34607272dfd997b15e96ea6e7113122b9a"
+      "src/components/images/PublicImageMasonryStream.tsx": "f430901e79dadae81b84269096263651263d7e341818162411624444837e1608"
     },
     "files": {
       "docs/QUEUE_SPECIFICATION.md": "301d293b23327bf065202322e0a7554cf581740f28d0d5ab9fb827e73beed6ba",
@@ -102,9 +102,9 @@
       "src/components/dashboard/generation-gate.module.css": "efd8526722ca0ad42aec319a56bc2ea7e638185f30c35cea9b445dfb69bba4a4",
       "src/components/images/GenerationCanvas.tsx": "4341702fc0842c20a7d860b8241a4bf55780919b73254f54915a61cd09269473",
       "src/components/images/ImageStudio.tsx": "d64041b6f5d9bbf1223380b4850c9f3921929b11267a1685c26cad31db7c7130",
-      "src/components/images/PublicImageMasonryStream.tsx": "ac80abe171bbf274e4569d0e42b18dcbcfd5876262041a5c5462fe2cc5011e90",
+      "src/components/images/PublicImageMasonryStream.tsx": "f430901e79dadae81b84269096263651263d7e341818162411624444837e1608",
       "src/components/images/StudioArtwork.tsx": "427128b4f3ea300222b74fdfe132564237030507f1d40c20093c89ef52e26229",
-      "src/components/images/masonry-stream.css": "50d637817ec8502b81f8a677a60601288007b8b7b9baae42f767cd090a249f66",
+      "src/components/images/masonry-stream.css": "b7a5f4251b803a10b3d105a52cd4f9f72f7be0376c36f8e7482c638ff766a99b",
       "src/components/images/studio-contract.ts": "cfa22ffc7df750e747c805a7a8ee394dfb76fdc9adcd2beabcb9872536f0d5bb",
       "src/components/images/studio.css": "d04bce6d6f0eb817815b5dfbefc962221e8865fb68eb74bdb23bce881da87492",
       "src/components/images/use-image-studio.ts": "22b3ac9a41f10bceb777942da4c63ea84e079e7c85aff5d7027d019f0f1b8ff1",
@@ -591,11 +591,11 @@
   },
   "database": {
     "reviewer": "Database operator",
-    "note": "Applied 20260917050000_anti_locking_image_stats_and_interactions UP/DOWN migration, fillfactor=85 HOT tables, and non-blocking RPCs",
+    "note": "Audited explore permissions, verified like idempotency with ROW_COUNT and community_creations_feed view",
     "reviewed_at": "2026-09-17",
-    "review_by": "2026-10-16",
+    "review_by": "2026-09-24",
     "evidence": {
-      "post-mortem/releases/2026-09-16-anti-locking-stats-and-stream-ux.json": "ed69f00dbd299bfe2b63ee59668321a02e58acfedfbc94f1a6e3279cce4857a0"
+      "supabase/migrations/20260917060000_audit_explore_permissions_and_idempotent_likes.sql": "9485a4bfdaa14f72eb8510f2759e887b327a03a156af9aee14052c35c4495320"
     },
     "files": {
       "deploy/relay-execution/supabase/migrations/20260915082628_relay_execution.sql": "fc61d7c30bdd57706ffb4212788741302760722e7285c25c9b4cb93d629b137e",
@@ -783,6 +783,7 @@
       "supabase/migrations/20260916161120_isolate_account_session_lookup.sql": "7b50f46b7fca6b75f2bf996e108696c033fe9365fdc10485381793a17a88e171",
       "supabase/migrations/20260917040000_public_image_stream_schema_and_rls.sql": "4c0e0048ab49ab11d565eabaedf802b9c90c5c63d2b0899f6b2a4718ec41fd2a",
       "supabase/migrations/20260917050000_anti_locking_image_stats_and_interactions.sql": "1954a046371829f8fce4049a404e2e74c9ced899232bbb9a3279dff89028c79c",
+      "supabase/migrations/20260917060000_audit_explore_permissions_and_idempotent_likes.sql": "9485a4bfdaa14f72eb8510f2759e887b327a03a156af9aee14052c35c4495320",
       "supabase/rollbacks/20260822000001_galxai_schema_core.down.sql": "d1267f3f89a7a0af12716a70167f615be1e904bf933e348a1173305cd5f2fe83",
       "supabase/rollbacks/20260822000002_galxai_schema_apex.down.sql": "df36655d564c6d6557d4461294ed2a502ad57adf799037c00a68481b809ffed9",
       "supabase/rollbacks/20260822000003_galxai_user_sessions_auth.down.sql": "4f3012db038b48387290b8d64638fe7aded774d8bdde88cfe683f01f1988adbc",

@@ -206,32 +206,27 @@ export async function GET(req: NextRequest) {
   let nextCursor: string | null = null;
 
   try {
-    const conditions: string[] = [
-      "l.status = 'completed'",
-      "l.is_public = true",
-      "l.visibility = 'public'",
-      "(l.user_id NOT LIKE 'usr_test_%' AND (l.size_bytes IS NULL OR l.size_bytes > 1000))"
-    ];
+    const conditions: string[] = ['1=1'];
     const params: any[] = [];
     let paramIndex = 1;
 
     // Filter by aspect ratio
     if (aspectRatio && ALLOWED_ASPECT_RATIOS.has(aspectRatio)) {
-      conditions.push(`l.aspect_ratio = $${paramIndex++}`);
+      conditions.push(`aspect_ratio = $${paramIndex++}`);
       params.push(aspectRatio);
     }
 
     // Filter by prompt search
     if (q && q.length <= 100) {
       const sanitized = q.replace(/[%_\\]/g, '\\$&');
-      conditions.push(`l.prompt ILIKE $${paramIndex++}`);
+      conditions.push(`prompt ILIKE $${paramIndex++}`);
       params.push(`%${sanitized}%`);
     }
 
     // Filter by style tag
     if (tag && tag !== 'all') {
       const sanitizedTag = tag.replace(/[%_\\]/g, '\\$&');
-      conditions.push(`l.prompt ILIKE $${paramIndex++}`);
+      conditions.push(`prompt ILIKE $${paramIndex++}`);
       params.push(`%${sanitizedTag}%`);
     }
 
@@ -241,7 +236,7 @@ export async function GET(req: NextRequest) {
         const decoded = Buffer.from(cursor, 'base64').toString('utf8');
         const [cursorTime, cursorId] = decoded.split(',');
         if (cursorTime && cursorId && !isNaN(Date.parse(cursorTime))) {
-          conditions.push(`(l.created_at, l.id) < ($${paramIndex++}::timestamptz, $${paramIndex++})`);
+          conditions.push(`(created_at, id) < ($${paramIndex++}::timestamptz, $${paramIndex++})`);
           params.push(cursorTime, cursorId);
         }
       } catch {
@@ -253,26 +248,25 @@ export async function GET(req: NextRequest) {
     const limitIndex = paramIndex++;
 
     const orderBy = sort === 'trending'
-      ? 'COALESCE(s.likes_count, l.likes_count, 0) DESC, l.created_at DESC, l.id DESC'
-      : 'l.created_at DESC, l.id DESC';
+      ? 'likes_count DESC, created_at DESC, id DESC'
+      : 'created_at DESC, id DESC';
 
     const query = `
       SELECT
-        l.id,
-        l.user_id,
-        l.prompt,
-        l.aspect_ratio,
-        l.dimensions,
-        l.public_url,
-        l.created_at,
-        l.lqip,
-        l.seed,
-        l.model,
-        COALESCE(s.likes_count, l.likes_count, 0) AS likes_count,
-        COALESCE(s.remix_count, l.remix_count, 0) AS remix_count,
-        COALESCE(s.views_count, l.views_count, 0) AS views_count
-      FROM public.user_image_library l
-      LEFT JOIN public.user_image_stats s ON s.image_id = l.id
+        id,
+        user_id,
+        prompt,
+        aspect_ratio,
+        dimensions,
+        public_url,
+        created_at,
+        lqip,
+        seed,
+        model,
+        likes_count,
+        remix_count,
+        views_count
+      FROM public.community_creations_feed
       WHERE ${conditions.join(' AND ')}
       ORDER BY ${orderBy}
       LIMIT $${limitIndex}
