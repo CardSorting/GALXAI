@@ -52,7 +52,41 @@ function BalanceSummary({ compact = false }: { compact?: boolean }) {
   const { data } = useBilling();
   if (!data) return null;
   const figures = [['Available credit', data.summary.balanceUsd], ['Usage this month · UTC', data.summary.currentMonthSpendUsd], ...(!compact ? [['Total deposited', data.summary.depositedTotalUsd]] : [])] as [string, number][];
-  return <><dl className={`mt-5 grid grid-cols-1 gap-6 min-[400px]:grid-cols-2 ${compact ? '' : 'lg:grid-cols-3'}`}>{figures.map(([label, value]) => <div key={label} className="min-w-0"><dt className="text-sm leading-6 text-zinc-400">{label}</dt><dd className="mt-2 break-words text-2xl font-medium tabular-nums">{money(value)}</dd></div>)}</dl>{data.summary.paymentDebtUsd > 0 && <p className="mt-4 text-sm leading-6 text-amber-200">{money(data.summary.paymentDebtUsd)} outstanding from a payment adjustment. Your next top-up covers this first.</p>}</>;
+  const tierName = data.summary.tierName || 'Developer Tier';
+  const tierRpm = data.summary.tierRpm || 20;
+  const tierTpm = data.summary.tierTpm || 20000;
+  const tpmDisplay = tierTpm >= 1000000 ? `${(tierTpm / 1000000).toLocaleString()}M TPM` : `${(tierTpm / 1000).toLocaleString()}k TPM`;
+
+  return (
+    <>
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/[0.02] px-4 py-3">
+        <div className="flex flex-wrap items-center gap-2.5">
+          <span className="inline-flex items-center rounded-md border border-indigo-500/30 bg-indigo-500/10 px-2.5 py-1 text-xs font-semibold uppercase tracking-wider text-indigo-300">
+            {tierName}
+          </span>
+          <span className="text-xs text-zinc-400">
+            Throughput: <strong className="font-medium text-zinc-200">{tierRpm === 10000 ? 'Unlimited' : `${tierRpm} RPM`}</strong> · <span className="text-zinc-300">{tpmDisplay}</span>
+          </span>
+        </div>
+        <Link href="/developers/pricing" className="text-xs text-indigo-300 underline underline-offset-4 hover:text-indigo-200">
+          Tier limits & perks →
+        </Link>
+      </div>
+      <dl className={`mt-5 grid grid-cols-1 gap-6 min-[400px]:grid-cols-2 ${compact ? '' : 'lg:grid-cols-3'}`}>
+        {figures.map(([label, value]) => (
+          <div key={label} className="min-w-0">
+            <dt className="text-sm leading-6 text-zinc-400">{label}</dt>
+            <dd className="mt-2 break-words text-2xl font-medium tabular-nums">{money(value)}</dd>
+          </div>
+        ))}
+      </dl>
+      {data.summary.paymentDebtUsd > 0 && (
+        <p className="mt-4 text-sm leading-6 text-amber-200">
+          {money(data.summary.paymentDebtUsd)} outstanding from a payment adjustment. Your next top-up covers this first.
+        </p>
+      )}
+    </>
+  );
 }
 
 function Transactions() {
