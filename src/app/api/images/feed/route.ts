@@ -17,6 +17,7 @@ export interface PublicFeedItem {
   likes_count?: number;
   remix_count?: number;
   views_count?: number;
+  tags?: string[];
 }
 
 const ALLOWED_ASPECT_RATIOS = new Set(['1:1', '16:9', '9:16', '3:2', '4:3', '2:3', '3:4']);
@@ -34,7 +35,8 @@ const SHOWCASE_ITEMS: PublicFeedItem[] = [
     model: 'openai-gpt-image-latest',
     likes_count: 384,
     remix_count: 62,
-    views_count: 2190
+    views_count: 2190,
+    tags: ['photorealistic', 'animals']
   },
   {
     id: 'showcase-blonde-elf',
@@ -48,7 +50,8 @@ const SHOWCASE_ITEMS: PublicFeedItem[] = [
     model: 'openai-gpt-image-latest',
     likes_count: 512,
     remix_count: 94,
-    views_count: 3410
+    views_count: 3410,
+    tags: ['anime', 'fantasy']
   },
   {
     id: 'showcase-cinematic-sky',
@@ -62,7 +65,8 @@ const SHOWCASE_ITEMS: PublicFeedItem[] = [
     model: 'openai-gpt-image-latest',
     likes_count: 279,
     remix_count: 41,
-    views_count: 1840
+    views_count: 1840,
+    tags: ['cinematic', 'anime']
   },
   {
     id: 'showcase-shadow-monarch',
@@ -76,7 +80,8 @@ const SHOWCASE_ITEMS: PublicFeedItem[] = [
     model: 'openai-gpt-image-latest',
     likes_count: 420,
     remix_count: 87,
-    views_count: 2950
+    views_count: 2950,
+    tags: ['anime', 'action']
   },
   {
     id: 'showcase-render-3d',
@@ -90,7 +95,8 @@ const SHOWCASE_ITEMS: PublicFeedItem[] = [
     model: 'openai-gpt-image-latest',
     likes_count: 195,
     remix_count: 29,
-    views_count: 1320
+    views_count: 1320,
+    tags: ['3d', 'cyberpunk']
   },
   {
     id: 'showcase-cyber-akira',
@@ -104,7 +110,8 @@ const SHOWCASE_ITEMS: PublicFeedItem[] = [
     model: 'openai-gpt-image-latest',
     likes_count: 641,
     remix_count: 112,
-    views_count: 4290
+    views_count: 4290,
+    tags: ['cyberpunk', 'anime']
   },
   {
     id: 'showcase-frieren-fantasy',
@@ -118,7 +125,8 @@ const SHOWCASE_ITEMS: PublicFeedItem[] = [
     model: 'openai-gpt-image-latest',
     likes_count: 388,
     remix_count: 53,
-    views_count: 2470
+    views_count: 2470,
+    tags: ['fantasy', 'anime']
   },
   {
     id: 'showcase-cinematic-portrait',
@@ -132,7 +140,8 @@ const SHOWCASE_ITEMS: PublicFeedItem[] = [
     model: 'openai-gpt-image-latest',
     likes_count: 310,
     remix_count: 38,
-    views_count: 1980
+    views_count: 1980,
+    tags: ['photorealistic', 'cinematic']
   },
   {
     id: 'showcase-fine-art-oil',
@@ -146,7 +155,8 @@ const SHOWCASE_ITEMS: PublicFeedItem[] = [
     model: 'openai-gpt-image-latest',
     likes_count: 247,
     remix_count: 31,
-    views_count: 1620
+    views_count: 1620,
+    tags: ['fantasy', 'art']
   },
   {
     id: 'showcase-minimal-vector',
@@ -160,14 +170,15 @@ const SHOWCASE_ITEMS: PublicFeedItem[] = [
     model: 'openai-gpt-image-latest',
     likes_count: 182,
     remix_count: 22,
-    views_count: 1190
+    views_count: 1190,
+    tags: ['minimalist']
   }
 ];
 
 /**
  * GET /api/images/feed
- * Public stream of completed generated images for the masonry feed.
- * Fully compliant with the public information boundary.
+ * High-concurrency anti-locking public stream of completed generated images.
+ * Queries user_image_library joined with HOT user_image_stats.
  */
 export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams;
@@ -177,26 +188,34 @@ export async function GET(req: NextRequest) {
   const aspectRatio = searchParams.get('aspect_ratio');
   const q = searchParams.get('q')?.trim();
   const sort = searchParams.get('sort') || 'recent';
+  const tag = searchParams.get('tag')?.toLowerCase().trim();
 
   let items: PublicFeedItem[] = [];
   let nextCursor: string | null = null;
 
   try {
-    const conditions: string[] = ["status = 'completed'"];
+    const conditions: string[] = ["l.status = 'completed'", "l.is_public = true", "l.visibility = 'public'"];
     const params: any[] = [];
     let paramIndex = 1;
 
     // Filter by aspect ratio
     if (aspectRatio && ALLOWED_ASPECT_RATIOS.has(aspectRatio)) {
-      conditions.push(`aspect_ratio = $${paramIndex++}`);
+      conditions.push(`l.aspect_ratio = $${paramIndex++}`);
       params.push(aspectRatio);
     }
 
     // Filter by prompt search
     if (q && q.length <= 100) {
       const sanitized = q.replace(/[%_\\]/g, '\\$&');
-      conditions.push(`prompt ILIKE $${paramIndex++}`);
+      conditions.push(`l.prompt ILIKE $${paramIndex++}`);
       params.push(`%${sanitized}%`);
+    }
+
+    // Filter by style tag
+    if (tag && tag !== 'all') {
+      const sanitizedTag = tag.replace(/[%_\\]/g, '\\$&');
+      conditions.push(`l.prompt ILIKE $${paramIndex++}`);
+      params.push(`%${sanitizedTag}%`);
     }
 
     // Keyset pagination cursor
@@ -205,7 +224,7 @@ export async function GET(req: NextRequest) {
         const decoded = Buffer.from(cursor, 'base64').toString('utf8');
         const [cursorTime, cursorId] = decoded.split(',');
         if (cursorTime && cursorId && !isNaN(Date.parse(cursorTime))) {
-          conditions.push(`(created_at, id) < ($${paramIndex++}::timestamptz, $${paramIndex++})`);
+          conditions.push(`(l.created_at, l.id) < ($${paramIndex++}::timestamptz, $${paramIndex++})`);
           params.push(cursorTime, cursorId);
         }
       } catch {
@@ -217,24 +236,25 @@ export async function GET(req: NextRequest) {
     const limitIndex = paramIndex++;
 
     const orderBy = sort === 'trending'
-      ? 'COALESCE(likes_count, 0) DESC, created_at DESC, id DESC'
-      : 'created_at DESC, id DESC';
+      ? 'COALESCE(s.likes_count, l.likes_count, 0) DESC, l.created_at DESC, l.id DESC'
+      : 'l.created_at DESC, l.id DESC';
 
     const query = `
       SELECT
-        id,
-        prompt,
-        aspect_ratio,
-        dimensions,
-        public_url,
-        created_at,
-        lqip,
-        seed,
-        model,
-        COALESCE(likes_count, 0) AS likes_count,
-        COALESCE(remix_count, 0) AS remix_count,
-        COALESCE(views_count, 0) AS views_count
-      FROM public.user_image_library
+        l.id,
+        l.prompt,
+        l.aspect_ratio,
+        l.dimensions,
+        l.public_url,
+        l.created_at,
+        l.lqip,
+        l.seed,
+        l.model,
+        COALESCE(s.likes_count, l.likes_count, 0) AS likes_count,
+        COALESCE(s.remix_count, l.remix_count, 0) AS remix_count,
+        COALESCE(s.views_count, l.views_count, 0) AS views_count
+      FROM public.user_image_library l
+      LEFT JOIN public.user_image_stats s ON s.image_id = l.id
       WHERE ${conditions.join(' AND ')}
       ORDER BY ${orderBy}
       LIMIT $${limitIndex}
@@ -271,6 +291,10 @@ export async function GET(req: NextRequest) {
     let filteredShowcase = SHOWCASE_ITEMS.filter(it => {
       if (aspectRatio && it.aspect_ratio !== aspectRatio) return false;
       if (q && !it.prompt.toLowerCase().includes(q.toLowerCase())) return false;
+      if (tag && tag !== 'all') {
+        const matchesTag = it.tags?.some(t => t.toLowerCase() === tag) || it.prompt.toLowerCase().includes(tag);
+        if (!matchesTag) return false;
+      }
       return true;
     });
 
@@ -298,35 +322,68 @@ export async function GET(req: NextRequest) {
 
 /**
  * POST /api/images/feed
- * Handles lightweight atomic interactions (likes, view counting)
+ * Non-blocking interaction dispatching with HOT-update buffering and ledgering
  */
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { action, imageId, increment = true } = body || {};
+    const { action, imageId, increment = true, sessionHash: rawHash, imageIds } = body || {};
 
-    if (!imageId || typeof imageId !== 'string') {
-      return NextResponse.json({ success: false, error: 'Invalid image identifier' }, { status: 400 });
-    }
+    const sessionHash = String(
+      rawHash ||
+      req.headers.get('x-session-id') ||
+      req.headers.get('x-forwarded-for')?.split(',')[0] ||
+      'anon-client'
+    ).slice(0, 160);
 
     if (action === 'like') {
+      if (!imageId || typeof imageId !== 'string') {
+        return NextResponse.json({ success: false, error: 'Invalid image identifier' }, { status: 400 });
+      }
+
       try {
-        const query = `SELECT public.fn_toggle_image_like($1, $2) AS likes;`;
-        const result = await executePostgresQuery<{ likes: number }>(query, [imageId, Boolean(increment)]);
-        const newLikes = result?.rows?.[0]?.likes;
-        return NextResponse.json({ success: true, likes: typeof newLikes === 'number' ? newLikes : null });
+        const query = `SELECT public.fn_record_image_like($1, $2, $3) AS result;`;
+        const result = await executePostgresQuery<{ result: { likes_count: number; is_liked: boolean } }>(query, [
+          imageId,
+          sessionHash,
+          Boolean(increment)
+        ]);
+        const data = result?.rows?.[0]?.result;
+        return NextResponse.json({
+          success: true,
+          likes: data?.likes_count ?? null,
+          isLiked: data?.is_liked ?? Boolean(increment)
+        });
       } catch {
         // Fallback for showcase or offline items
-        return NextResponse.json({ success: true, likes: null });
+        return NextResponse.json({ success: true, likes: null, isLiked: Boolean(increment) });
       }
     }
 
-    if (action === 'view') {
-      try {
-        const query = `SELECT public.fn_increment_image_view($1) AS views;`;
-        await executePostgresQuery(query, [imageId]);
-      } catch {
-        // Ignore offline view increment
+    if (action === 'view_batch') {
+      const ids = Array.isArray(imageIds)
+        ? imageIds.filter((id): id is string => typeof id === 'string' && id.length > 0).slice(0, 50)
+        : [];
+
+      if (ids.length > 0) {
+        try {
+          const query = `SELECT public.fn_record_image_view_batch($1, $2) AS count;`;
+          await executePostgresQuery(query, [ids, sessionHash]);
+        } catch {
+          // Ignore offline errors for view telemetry
+        }
+      }
+      return NextResponse.json({ success: true });
+    }
+
+    if (action === 'remix') {
+      if (imageId && typeof imageId === 'string') {
+        try {
+          const query = `SELECT public.fn_increment_image_remix($1);`;
+          await executePostgresQuery(query, [imageId]);
+        } catch {
+          // Ignore offline errors for remix telemetry
+        }
       }
       return NextResponse.json({ success: true });
     }

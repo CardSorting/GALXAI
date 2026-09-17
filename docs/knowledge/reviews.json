@@ -52,11 +52,11 @@
   },
   "images": {
     "reviewer": "Product/API maintainer",
-    "note": "Upgraded public community masonry stream UX, like counters, toast notifications, and modal navigation",
+    "note": "Implemented style preset filters, density toggle, 1:1 lightbox zoom, and persistent likes",
     "reviewed_at": "2026-09-17",
     "review_by": "2026-10-16",
     "evidence": {
-      "post-mortem/releases/2026-09-16-public-image-feed-and-schema.json": "3f2a34c2941f777978eebea0db34ab079b9b83e0b418d3b2df601b438d8c25a1"
+      "post-mortem/releases/2026-09-16-anti-locking-stats-and-stream-ux.json": "ed69f00dbd299bfe2b63ee59668321a02e58acfedfbc94f1a6e3279cce4857a0"
     },
     "files": {
       "docs/QUEUE_SPECIFICATION.md": "301d293b23327bf065202322e0a7554cf581740f28d0d5ab9fb827e73beed6ba",
@@ -102,9 +102,9 @@
       "src/components/dashboard/generation-gate.module.css": "efd8526722ca0ad42aec319a56bc2ea7e638185f30c35cea9b445dfb69bba4a4",
       "src/components/images/GenerationCanvas.tsx": "4341702fc0842c20a7d860b8241a4bf55780919b73254f54915a61cd09269473",
       "src/components/images/ImageStudio.tsx": "d64041b6f5d9bbf1223380b4850c9f3921929b11267a1685c26cad31db7c7130",
-      "src/components/images/PublicImageMasonryStream.tsx": "c5f8331947bd90f9ba2565955a59decbca3c302c33be7d56831140d6753874bc",
+      "src/components/images/PublicImageMasonryStream.tsx": "9a0ed4c688009ce19b83be08204223dde9d2c3c10528862eb52eb9ed8b6eb600",
       "src/components/images/StudioArtwork.tsx": "427128b4f3ea300222b74fdfe132564237030507f1d40c20093c89ef52e26229",
-      "src/components/images/masonry-stream.css": "7c83c0f695487cf7ad3659dac00612cab81bfe9506359522af8ae8ecbc08f839",
+      "src/components/images/masonry-stream.css": "a6fd0ac8083a1d851e20a0c73eafa2e15952fa352825ad7edfc8df0ccce8a35a",
       "src/components/images/studio-contract.ts": "cfa22ffc7df750e747c805a7a8ee394dfb76fdc9adcd2beabcb9872536f0d5bb",
       "src/components/images/studio.css": "d04bce6d6f0eb817815b5dfbefc962221e8865fb68eb74bdb23bce881da87492",
       "src/components/images/use-image-studio.ts": "22b3ac9a41f10bceb777942da4c63ea84e079e7c85aff5d7027d019f0f1b8ff1",
@@ -591,11 +591,11 @@
   },
   "database": {
     "reviewer": "Database operator",
-    "note": "Applied 20260917040000_public_image_stream_schema_and_rls UP/DOWN migration, RLS select policy, and atomic counter RPCs",
+    "note": "Applied 20260917050000_anti_locking_image_stats_and_interactions UP/DOWN migration, fillfactor=85 HOT tables, and non-blocking RPCs",
     "reviewed_at": "2026-09-17",
     "review_by": "2026-10-16",
     "evidence": {
-      "post-mortem/releases/2026-09-16-public-image-feed-and-schema.json": "3f2a34c2941f777978eebea0db34ab079b9b83e0b418d3b2df601b438d8c25a1"
+      "post-mortem/releases/2026-09-16-anti-locking-stats-and-stream-ux.json": "ed69f00dbd299bfe2b63ee59668321a02e58acfedfbc94f1a6e3279cce4857a0"
     },
     "files": {
       "deploy/relay-execution/supabase/migrations/20260915082628_relay_execution.sql": "fc61d7c30bdd57706ffb4212788741302760722e7285c25c9b4cb93d629b137e",
@@ -664,7 +664,7 @@
       "src/lib/supabase/repositories/TelemetryRepository.ts": "1887a04aa51424e44d6ac9d499fc24248edd2aa9c64c559cf1f307773dd252e5",
       "src/lib/supabase/repositories/WalletRepository.ts": "14ac2f53fd2600e698efac4b9fa0150c4fbc14bc2ab2539922926ee0e9794565",
       "src/lib/supabase/repositories/WorkspaceRepository.ts": "b9f6d1d09610760b172c6d1981a06e6ab97d4f5a9a58139377ade89df56a4ed8",
-      "src/lib/supabase/types.ts": "37af855bcdd44ea636f56bc132eaf2de89a75069f5e2f4c1fd4ec298604e1b46",
+      "src/lib/supabase/types.ts": "9e1f7d74e0af0eac1ae3e7a3493e8a561fa9bd386680381a4e3505e6b25a1385",
       "supabase/migrations/20260822000001_galxai_schema_core.sql": "084520c8cb3ab4e057ec788ea90605bb43e1373a28230e40696271f6a8476f77",
       "supabase/migrations/20260822000002_galxai_schema_apex.sql": "62b4fdc606104700d14eb3b80a7a7063a5152db9ed1afefe63a72315d586f539",
       "supabase/migrations/20260822000003_galxai_user_sessions_auth.sql": "ab2ec033c41bb147aa476acceb4d5dca3991f83f017a7cc41fddd01c6b8e75c4",
@@ -782,6 +782,7 @@
       "supabase/migrations/20260916040459_relay_automatic_activation.sql": "04974bd334a8d11ec64dbb967a8d8b2b29a30d23f4019690d7e9727b22674218",
       "supabase/migrations/20260916161120_isolate_account_session_lookup.sql": "7b50f46b7fca6b75f2bf996e108696c033fe9365fdc10485381793a17a88e171",
       "supabase/migrations/20260917040000_public_image_stream_schema_and_rls.sql": "4c0e0048ab49ab11d565eabaedf802b9c90c5c63d2b0899f6b2a4718ec41fd2a",
+      "supabase/migrations/20260917050000_anti_locking_image_stats_and_interactions.sql": "1954a046371829f8fce4049a404e2e74c9ced899232bbb9a3279dff89028c79c",
       "supabase/rollbacks/20260822000001_galxai_schema_core.down.sql": "d1267f3f89a7a0af12716a70167f615be1e904bf933e348a1173305cd5f2fe83",
       "supabase/rollbacks/20260822000002_galxai_schema_apex.down.sql": "df36655d564c6d6557d4461294ed2a502ad57adf799037c00a68481b809ffed9",
       "supabase/rollbacks/20260822000003_galxai_user_sessions_auth.down.sql": "4f3012db038b48387290b8d64638fe7aded774d8bdde88cfe683f01f1988adbc",
@@ -898,7 +899,8 @@
       "supabase/rollbacks/20260916013944_relay_connection_lifecycle.down.sql": "27936e9044f391c12a8bb8b8817348e3a44e0c0b75c7146f70e5571ffa44b338",
       "supabase/rollbacks/20260916040459_relay_automatic_activation.down.sql": "4fedbf26f9c051c3bf46dff91f20a9d4d92eb58eb3a7675f86348a3bed284479",
       "supabase/rollbacks/20260916161120_isolate_account_session_lookup.down.sql": "6c42297624aaad9942fb0589e46baf9bb1b71239218df041f8a1aa97511e52b2",
-      "supabase/rollbacks/20260917040000_public_image_stream_schema_and_rls.down.sql": "53189d794aebf929174b534cbaade198f766c7eaf57373c8e656122a7ed44b4c"
+      "supabase/rollbacks/20260917040000_public_image_stream_schema_and_rls.down.sql": "53189d794aebf929174b534cbaade198f766c7eaf57373c8e656122a7ed44b4c",
+      "supabase/rollbacks/20260917050000_anti_locking_image_stats_and_interactions.down.sql": "052b516c27de383ddda97be798ebdb7383dc938262321ce7b8a4d7a0582608a5"
     }
   },
   "delivery": {

@@ -1,0 +1,14 @@
+{
+  "release": "2026-09-16-anti-locking-stats-and-stream-ux",
+  "title": "Anti-Locking HOT Stats, Append-Only Ledger, and World-Class Stream Ergonomics",
+  "timestamp": "2026-09-17T04:15:00Z",
+  "author": "maintainer",
+  "description": "Audited and hardened community stream schema to prevent row-locking under concurrent interactions. Created user_image_stats with fillfactor = 85 (enabling Heap-Only Tuple zero-amplification in-place updates) and user_image_interactions append-only ledger for double-vote prevention. Implemented non-blocking lock timeouts (200ms) and batch view impression telemetry. Upgraded stream UX with style preset chips, density switch (comfortable vs compact), persistent likes in localStorage, 1:1 zoom inspection, and mobile touch swipe navigation.",
+  "verification": {
+    "db_verify": "npm run db:verify (0 violations across 118 paired migrations)",
+    "preview_tests": "npx tsx --test scripts/test-developer-preview.ts (10/10 passing)",
+    "security_tests": "npm run test:image:security (45/45 passing)",
+    "type_check": "npx tsc --noEmit (0 errors)",
+    "lint": "npm run lint (0 errors)"
+  }
+}

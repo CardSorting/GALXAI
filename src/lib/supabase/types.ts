@@ -3541,6 +3541,40 @@ export interface Database {
         Update: Partial<Database['public']['Tables']['user_image_library']['Insert']>;
         Relationships: [];
       };
+      user_image_stats: {
+        Row: {
+          image_id: string;
+          likes_count: number;
+          remix_count: number;
+          views_count: number;
+          updated_at: string;
+        };
+        Insert: {
+          image_id: string;
+          likes_count?: number;
+          remix_count?: number;
+          views_count?: number;
+          updated_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['user_image_stats']['Insert']>;
+        Relationships: [];
+      };
+      user_image_interactions: {
+        Row: {
+          image_id: string;
+          session_hash: string;
+          interaction_type: 'like' | 'remix' | 'view';
+          created_at: string;
+        };
+        Insert: {
+          image_id: string;
+          session_hash: string;
+          interaction_type: 'like' | 'remix' | 'view';
+          created_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['user_image_interactions']['Insert']>;
+        Relationships: [];
+      };
       image_library_gc_outbox: {
         Row: {
           r2_key: string;

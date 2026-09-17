@@ -12,6 +12,7 @@ import {
   X,
   RefreshCw,
   Maximize2,
+  Minimize2,
   ChevronLeft,
   ChevronRight,
   Heart,
@@ -19,6 +20,9 @@ import {
   Clock,
   Layers,
   Eye,
+  Grid,
+  LayoutGrid,
+  Hash,
 } from 'lucide-react';
 import type { PublicFeedItem } from '@/app/api/images/feed/route';
 import './masonry-stream.css';
@@ -33,12 +37,23 @@ interface PublicImageMasonryStreamProps {
 }
 
 const FILTER_PILLS = [
-  { label: 'All', value: null },
+  { label: 'All Ratios', value: null },
   { label: 'Square 1:1', value: '1:1' },
   { label: 'Wide 16:9', value: '16:9' },
   { label: 'Portrait 9:16', value: '9:16' },
   { label: 'Classic 3:2', value: '3:2' },
   { label: 'Standard 4:3', value: '4:3' },
+] as const;
+
+const STYLE_PRESETS = [
+  { label: 'All Styles', value: 'all' },
+  { label: 'Photorealistic', value: 'photorealistic' },
+  { label: 'Anime & Manga', value: 'anime' },
+  { label: 'Cinematic', value: 'cinematic' },
+  { label: 'Cyberpunk', value: 'cyberpunk' },
+  { label: '3D Render', value: '3d' },
+  { label: 'Fantasy', value: 'fantasy' },
+  { label: 'Minimalist', value: 'minimalist' },
 ] as const;
 
 function ratioToCss(ratio: string): string {
@@ -77,9 +92,13 @@ export function PublicImageMasonryStream({
   const [hasMore, setHasMore] = useState(true);
   const [sortMode, setSortMode] = useState<'recent' | 'trending'>('trending');
   const [selectedRatio, setSelectedRatio] = useState<string | null>(null);
+  const [selectedStyle, setSelectedStyle] = useState<string>('all');
+  const [density, setDensity] = useState<'comfortable' | 'compact'>('comfortable');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeModalIndex, setActiveModalIndex] = useState<number | null>(null);
+  const [isZoomed, setIsZoomed] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [copiedSeed, setCopiedSeed] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [loadedImages, setLoadedImages] = useState<Record<string, boolean>>({});
   const [likedMap, setLikedMap] = useState<Record<string, boolean>>({});
@@ -89,6 +108,8 @@ export function PublicImageMasonryStream({
   const observerTarget = useRef<HTMLDivElement>(null);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const pendingImpressionsRef = useRef<Set<string>>(new Set());
+  const touchStartCoordRef = useRef<{ x: number; y: number } | null>(null);
 
   const showToast = useCallback((msg: string) => {
     if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
@@ -96,12 +117,51 @@ export function PublicImageMasonryStream({
     toastTimeoutRef.current = setTimeout(() => setToastMessage(null), 2400);
   }, []);
 
+  // Hydrate persistent likes and density preference from localStorage
+  useEffect(() => {
+    try {
+      const storedLikes = localStorage.getItem('galx_liked_images');
+      if (storedLikes) {
+        const parsed = JSON.parse(storedLikes);
+        if (typeof parsed === 'object' && parsed !== null) {
+          setLikedMap(parsed);
+        }
+      }
+      const storedDensity = localStorage.getItem('galx_stream_density');
+      if (storedDensity === 'compact' || storedDensity === 'comfortable') {
+        setDensity(storedDensity);
+      }
+    } catch {
+      // Ignore storage errors in private modes
+    }
+  }, []);
+
+  // Save likedMap to localStorage
+  const persistLikes = useCallback((updated: Record<string, boolean>) => {
+    try {
+      localStorage.setItem('galx_liked_images', JSON.stringify(updated));
+    } catch {
+      // Ignore
+    }
+  }, []);
+
+  // Toggle density
+  const handleToggleDensity = (d: 'comfortable' | 'compact') => {
+    setDensity(d);
+    try {
+      localStorage.setItem('galx_stream_density', d);
+    } catch {
+      // Ignore
+    }
+  };
+
   // Fetch feed items with resilient error catching
   const fetchFeed = useCallback(
     async (
       nextCursor: string | null = null,
       reset = false,
       ratio: string | null = selectedRatio,
+      style: string = selectedStyle,
       query: string = searchQuery,
       sort: 'recent' | 'trending' = sortMode
     ) => {
@@ -115,11 +175,11 @@ export function PublicImageMasonryStream({
         params.set('sort', sort);
         if (nextCursor) params.set('cursor', nextCursor);
         if (ratio) params.set('aspect_ratio', ratio);
+        if (style && style !== 'all') params.set('tag', style);
         if (query.trim()) params.set('q', query.trim());
 
         const res = await fetch(`/api/images/feed?${params.toString()}`);
         if (!res.ok) {
-          // If server error occurs, do not throw unhandled exception
           setFetchError('Transient stream error; serving curated collection.');
           return;
         }
@@ -148,7 +208,7 @@ export function PublicImageMasonryStream({
         setRefreshing(false);
       }
     },
-    [loading, selectedRatio, searchQuery, sortMode]
+    [loading, selectedRatio, selectedStyle, searchQuery, sortMode]
   );
 
   // Initial load if no initial items supplied
@@ -163,23 +223,52 @@ export function PublicImageMasonryStream({
     if (externalQuery !== undefined && externalQuery !== searchQuery) {
       setSearchQuery(externalQuery);
       setCursor(null);
-      void fetchFeed(null, true, selectedRatio, externalQuery, sortMode);
+      void fetchFeed(null, true, selectedRatio, selectedStyle, externalQuery, sortMode);
     }
   }, [externalQuery]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Batch impression flush every 5 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (pendingImpressionsRef.current.size === 0) return;
+      const ids = Array.from(pendingImpressionsRef.current);
+      pendingImpressionsRef.current.clear();
+
+      void fetch('/api/images/feed', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'view_batch', imageIds: ids }),
+      }).catch(() => {});
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Track card view impression
+  const registerCardImpression = useCallback((id: string) => {
+    pendingImpressionsRef.current.add(id);
+  }, []);
 
   // Handle sort change
   const handleSortChange = (sort: 'recent' | 'trending') => {
     if (sort === sortMode) return;
     setSortMode(sort);
     setCursor(null);
-    void fetchFeed(null, true, selectedRatio, searchQuery, sort);
+    void fetchFeed(null, true, selectedRatio, selectedStyle, searchQuery, sort);
   };
 
   // Handle ratio filter change
   const handleRatioChange = (ratio: string | null) => {
     setSelectedRatio(ratio);
     setCursor(null);
-    void fetchFeed(null, true, ratio, searchQuery, sortMode);
+    void fetchFeed(null, true, ratio, selectedStyle, searchQuery, sortMode);
+  };
+
+  // Handle style preset change
+  const handleStyleChange = (style: string) => {
+    setSelectedStyle(style);
+    setCursor(null);
+    void fetchFeed(null, true, selectedRatio, style, searchQuery, sortMode);
   };
 
   // Handle search with debounce
@@ -193,20 +282,20 @@ export function PublicImageMasonryStream({
 
     searchTimeoutRef.current = setTimeout(() => {
       setCursor(null);
-      void fetchFeed(null, true, selectedRatio, value, sortMode);
+      void fetchFeed(null, true, selectedRatio, selectedStyle, value, sortMode);
     }, 350);
   };
 
   const handleClearSearch = () => {
     setSearchQuery('');
     setCursor(null);
-    void fetchFeed(null, true, selectedRatio, '', sortMode);
+    void fetchFeed(null, true, selectedRatio, selectedStyle, '', sortMode);
   };
 
   const handleRefresh = () => {
     setRefreshing(true);
     setCursor(null);
-    void fetchFeed(null, true, selectedRatio, searchQuery, sortMode);
+    void fetchFeed(null, true, selectedRatio, selectedStyle, searchQuery, sortMode);
   };
 
   // Infinite scroll intersection observer
@@ -236,13 +325,25 @@ export function PublicImageMasonryStream({
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  // Like toggle with optimistic UI and server sync
+  // Copy seed helper
+  const handleCopySeed = (e: React.MouseEvent, seed: string) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(seed);
+    setCopiedSeed(seed);
+    showToast(`Seed #${seed} copied`);
+    setTimeout(() => setCopiedSeed(null), 2000);
+  };
+
+  // Like toggle with optimistic UI, local persistence, and server sync
   const handleToggleLike = (e: React.MouseEvent, item: PublicFeedItem) => {
     e.stopPropagation();
     const currentlyLiked = Boolean(likedMap[item.id]);
     const nextLiked = !currentlyLiked;
 
-    setLikedMap((prev) => ({ ...prev, [item.id]: nextLiked }));
+    const updatedMap = { ...likedMap, [item.id]: nextLiked };
+    setLikedMap(updatedMap);
+    persistLikes(updatedMap);
+
     setLikesCountMap((prev) => {
       const current = prev[item.id] ?? item.likes_count ?? 0;
       return { ...prev, [item.id]: Math.max(0, current + (nextLiked ? 1 : -1)) };
@@ -252,7 +353,6 @@ export function PublicImageMasonryStream({
       showToast('Liked creation');
     }
 
-    // Fire-and-forget sync to API
     void fetch('/api/images/feed', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -264,7 +364,6 @@ export function PublicImageMasonryStream({
   const handleRemix = (e: React.MouseEvent, item: PublicFeedItem) => {
     e.stopPropagation();
 
-    // Fire remix telemetry
     void fetch('/api/images/feed', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -305,6 +404,7 @@ export function PublicImageMasonryStream({
 
   const handlePrevImage = useCallback((e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
+    setIsZoomed(false);
     setActiveModalIndex((prev) => {
       if (prev === null || items.length === 0) return null;
       return prev > 0 ? prev - 1 : items.length - 1;
@@ -313,23 +413,27 @@ export function PublicImageMasonryStream({
 
   const handleNextImage = useCallback((e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
+    setIsZoomed(false);
     setActiveModalIndex((prev) => {
       if (prev === null || items.length === 0) return null;
       return prev < items.length - 1 ? prev + 1 : 0;
     });
   }, [items.length]);
 
-  // Modal keyboard handling (Esc to close, Left/Right arrows to navigate, C to copy)
+  // Modal keyboard handling (Esc to close, Left/Right arrows to navigate, C to copy, Z to zoom)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!activeModalItem) return;
 
       if (e.key === 'Escape') {
+        setIsZoomed(false);
         setActiveModalIndex(null);
       } else if (e.key === 'ArrowLeft') {
         handlePrevImage();
       } else if (e.key === 'ArrowRight') {
         handleNextImage();
+      } else if (e.key === 'z' || e.key === 'Z') {
+        setIsZoomed((prev) => !prev);
       } else if (e.key === 'c' || e.key === 'C') {
         if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
         navigator.clipboard.writeText(activeModalItem.prompt);
@@ -342,8 +446,30 @@ export function PublicImageMasonryStream({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [activeModalItem, handlePrevImage, handleNextImage, showToast]);
 
+  // Touch swipe support for mobile lightbox navigation
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    touchStartCoordRef.current = { x: touch.clientX, y: touch.clientY };
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (!touchStartCoordRef.current) return;
+    const touch = e.changedTouches[0];
+    const deltaX = touch.clientX - touchStartCoordRef.current.x;
+    const deltaY = touch.clientY - touchStartCoordRef.current.y;
+    touchStartCoordRef.current = null;
+
+    if (Math.abs(deltaX) > 48 && Math.abs(deltaY) < 70) {
+      if (deltaX > 0) {
+        handlePrevImage();
+      } else {
+        handleNextImage();
+      }
+    }
+  };
+
   return (
-    <div className={`masonry-stream-container ${className}`}>
+    <div className={`masonry-stream-container ${className} density-${density}`}>
       {/* Toast Notification */}
       {toastMessage && (
         <div className="masonry-toast" role="status" aria-live="polite">
@@ -352,7 +478,7 @@ export function PublicImageMasonryStream({
         </div>
       )}
 
-      {/* --- Toolbar --- */}
+      {/* --- Primary Toolbar --- */}
       {showToolbar && (
         <div className="masonry-toolbar">
           <div className="masonry-toolbar-left">
@@ -399,6 +525,28 @@ export function PublicImageMasonryStream({
           </div>
 
           <div className="masonry-toolbar-right">
+            {/* Density switch */}
+            <div className="masonry-density-switch" role="group" aria-label="Grid density">
+              <button
+                type="button"
+                className={`masonry-density-btn ${density === 'comfortable' ? 'active' : ''}`}
+                onClick={() => handleToggleDensity('comfortable')}
+                title="Comfortable layout"
+                aria-label="Comfortable view"
+              >
+                <LayoutGrid size={15} />
+              </button>
+              <button
+                type="button"
+                className={`masonry-density-btn ${density === 'compact' ? 'active' : ''}`}
+                onClick={() => handleToggleDensity('compact')}
+                title="Compact layout"
+                aria-label="Compact view"
+              >
+                <Grid size={15} />
+              </button>
+            </div>
+
             <div className="masonry-search">
               <Search size={15} aria-hidden="true" />
               <input
@@ -433,6 +581,26 @@ export function PublicImageMasonryStream({
         </div>
       )}
 
+      {/* --- Style / Aesthetics Preset Chips Bar --- */}
+      {showToolbar && (
+        <div className="masonry-styles-bar" role="tablist" aria-label="Filter by art style">
+          <span className="masonry-styles-label">Style:</span>
+          <div className="masonry-styles-scroll">
+            {STYLE_PRESETS.map((preset) => (
+              <button
+                key={preset.value}
+                type="button"
+                className={`masonry-style-chip ${selectedStyle === preset.value ? 'active' : ''}`}
+                onClick={() => handleStyleChange(preset.value)}
+                aria-pressed={selectedStyle === preset.value}
+              >
+                {preset.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Optional gentle offline/fetch alert */}
       {fetchError && (
         <div className="masonry-status-banner">
@@ -445,7 +613,7 @@ export function PublicImageMasonryStream({
 
       {/* --- Pinterest-Style Masonry Grid --- */}
       {items.length > 0 ? (
-        <div className="masonry-grid" aria-label="Image creations stream">
+        <div className={`masonry-grid ${density}`} aria-label="Image creations stream">
           {items.map((item, idx) => {
             const isLoaded = loadedImages[item.id];
             const isCopied = copiedId === item.id;
@@ -457,13 +625,17 @@ export function PublicImageMasonryStream({
               <article
                 key={item.id}
                 className="masonry-card"
-                onClick={() => setActiveModalIndex(idx)}
+                onClick={() => {
+                  setIsZoomed(false);
+                  setActiveModalIndex(idx);
+                }}
                 tabIndex={0}
                 role="button"
                 aria-label={`View image: ${item.prompt}`}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
+                    setIsZoomed(false);
                     setActiveModalIndex(idx);
                   }
                 }}
@@ -482,13 +654,16 @@ export function PublicImageMasonryStream({
                     />
                   )}
 
-                  {/* High-res Image */}
+                  {/* High-res Image with impression trigger */}
                   <img
                     src={item.public_url}
                     alt={item.prompt}
                     loading="lazy"
                     className={`masonry-image ${isLoaded ? 'loaded' : ''}`}
-                    onLoad={() => setLoadedImages((prev) => ({ ...prev, [item.id]: true }))}
+                    onLoad={() => {
+                      setLoadedImages((prev) => ({ ...prev, [item.id]: true }));
+                      registerCardImpression(item.id);
+                    }}
                   />
 
                   {/* Top Floating Badges & Like Button */}
@@ -586,11 +761,14 @@ export function PublicImageMasonryStream({
         )}
       </div>
 
-      {/* --- World-Class Lightbox Modal --- */}
+      {/* --- World-Class Lightbox Modal with Zoom & Mobile Swipe --- */}
       {activeModalItem && (
         <div
           className="masonry-modal-backdrop"
-          onClick={() => setActiveModalIndex(null)}
+          onClick={() => {
+            setIsZoomed(false);
+            setActiveModalIndex(null);
+          }}
           role="dialog"
           aria-modal="true"
           aria-labelledby="modal-prompt-title"
@@ -598,18 +776,23 @@ export function PublicImageMasonryStream({
           <div
             className="masonry-modal-dialog"
             onClick={(e) => e.stopPropagation()}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
           >
             <button
               type="button"
               className="masonry-modal-close"
-              onClick={() => setActiveModalIndex(null)}
+              onClick={() => {
+                setIsZoomed(false);
+                setActiveModalIndex(null);
+              }}
               aria-label="Close dialog"
             >
               <X size={18} />
             </button>
 
-            {/* Media side with floating Prev/Next navigators */}
-            <div className="masonry-modal-media">
+            {/* Media side with floating Prev/Next navigators and Zoom */}
+            <div className={`masonry-modal-media ${isZoomed ? 'zoomed' : ''}`}>
               <button
                 type="button"
                 className="masonry-modal-nav prev"
@@ -620,11 +803,17 @@ export function PublicImageMasonryStream({
                 <ChevronLeft size={22} />
               </button>
 
-              <img
-                src={activeModalItem.public_url}
-                alt={activeModalItem.prompt}
-                className="masonry-modal-img"
-              />
+              <div
+                className="masonry-modal-img-container"
+                onClick={() => setIsZoomed((prev) => !prev)}
+                title={isZoomed ? 'Click to fit view' : 'Click to zoom 1:1'}
+              >
+                <img
+                  src={activeModalItem.public_url}
+                  alt={activeModalItem.prompt}
+                  className={`masonry-modal-img ${isZoomed ? 'zoomed' : ''}`}
+                />
+              </div>
 
               <button
                 type="button"
@@ -636,8 +825,21 @@ export function PublicImageMasonryStream({
                 <ChevronRight size={22} />
               </button>
 
-              <div className="masonry-modal-counter">
-                {((activeModalIndex ?? 0) + 1)} / {items.length}
+              <div className="masonry-modal-media-controls">
+                <button
+                  type="button"
+                  className="masonry-modal-ctrl-btn"
+                  onClick={() => setIsZoomed((prev) => !prev)}
+                  title={isZoomed ? 'Fit view (Z)' : 'Zoom 1:1 (Z)'}
+                  aria-label="Toggle zoom"
+                >
+                  {isZoomed ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
+                  <span>{isZoomed ? 'Fit' : '1:1'}</span>
+                </button>
+
+                <div className="masonry-modal-counter">
+                  {((activeModalIndex ?? 0) + 1)} / {items.length}
+                </div>
               </div>
             </div>
 
@@ -693,10 +895,18 @@ export function PublicImageMasonryStream({
                   </div>
                 </div>
                 {activeModalItem.seed && (
-                  <div className="masonry-meta-item">
+                  <div
+                    className="masonry-meta-item clickable"
+                    onClick={(e) => handleCopySeed(e, activeModalItem.seed!)}
+                    title="Click to copy seed"
+                  >
                     <div className="masonry-meta-label">Seed</div>
-                    <div className="masonry-meta-value">
-                      #{activeModalItem.seed}
+                    <div className="masonry-meta-value seed-val">
+                      <Hash size={12} />
+                      <span>{activeModalItem.seed}</span>
+                      {copiedSeed === activeModalItem.seed ? (
+                        <Check size={11} className="text-emerald-400 ml-1" />
+                      ) : null}
                     </div>
                   </div>
                 )}
@@ -757,7 +967,8 @@ export function PublicImageMasonryStream({
               <div className="masonry-modal-shortcuts">
                 <span><kbd>Esc</kbd> Close</span>
                 <span><kbd>←</kbd> <kbd>→</kbd> Navigate</span>
-                <span><kbd>C</kbd> Copy prompt</span>
+                <span><kbd>Z</kbd> Zoom 1:1</span>
+                <span><kbd>C</kbd> Copy</span>
               </div>
             </div>
           </div>
