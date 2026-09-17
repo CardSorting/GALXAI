@@ -3541,6 +3541,26 @@ export interface Database {
         Update: Partial<Database['public']['Tables']['user_image_library']['Insert']>;
         Relationships: [];
       };
+      image_moderation_events: {
+        Row: {
+          id: string;
+          asset_id: string;
+          moderator_id: string | null;
+          action: string;
+          reason: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          asset_id: string;
+          moderator_id?: string | null;
+          action?: string;
+          reason?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['image_moderation_events']['Insert']>;
+        Relationships: [];
+      };
       user_image_stats: {
         Row: {
           image_id: string;
@@ -3635,6 +3655,14 @@ export interface Database {
           p_visibility?: string;
           p_search?: string;
           p_sort?: 'newest' | 'oldest';
+        };
+        Returns: Json;
+      };
+      fn_moderate_hide_community_image: {
+        Args: {
+          p_asset_id: string;
+          p_moderator_id?: string;
+          p_reason?: string;
         };
         Returns: Json;
       };

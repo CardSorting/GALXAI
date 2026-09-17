@@ -764,9 +764,9 @@
   z-index: 200;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 20px;
-  background: rgba(18, 20, 29, 0.9);
+  gap: 12px;
+  padding: 10px 18px;
+  background: rgba(18, 20, 29, 0.95);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(168, 85, 247, 0.35);
@@ -776,7 +776,28 @@
   font-size: 13px;
   font-weight: 500;
   animation: masonry-toast-in 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  pointer-events: none;
+}
+
+.masonry-toast-undo-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  background: rgba(99, 102, 241, 0.25);
+  border: 1px solid rgba(99, 102, 241, 0.45);
+  border-radius: 9999px;
+  color: #c7d2fe;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.masonry-toast-undo-btn:hover {
+  background: rgba(99, 102, 241, 0.4);
+  color: #ffffff;
+  border-color: rgba(99, 102, 241, 0.6);
 }
 
 @keyframes masonry-toast-in {
@@ -878,6 +899,108 @@
 
 .masonry-card-topbar > * {
   pointer-events: auto;
+}
+
+.masonry-card-actions-top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.masonry-hide-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  background: rgba(15, 18, 29, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 9999px;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+.masonry-card:hover .masonry-hide-btn {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.masonry-hide-btn:hover {
+  background: rgba(245, 158, 11, 0.2);
+  border-color: rgba(245, 158, 11, 0.4);
+  color: #fbbf24;
+}
+
+/* Card Hiding Animation */
+.masonry-card.hiding {
+  opacity: 0;
+  transform: scale(0.92);
+  filter: blur(4px);
+  transition: opacity 0.28s ease, transform 0.28s ease, filter 0.28s ease;
+  pointer-events: none;
+}
+
+/* Moderation Card in Lightbox Modal */
+.masonry-moderation-card {
+  margin-top: 20px;
+  padding: 14px 16px;
+  background: rgba(245, 158, 11, 0.04);
+  border: 1px solid rgba(245, 158, 11, 0.18);
+  border-radius: 14px;
+}
+
+.masonry-moderation-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.masonry-moderation-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.masonry-modal-hide-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 8px;
+  color: #fbbf24;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.masonry-modal-hide-btn:hover {
+  background: rgba(245, 158, 11, 0.22);
+  border-color: rgba(245, 158, 11, 0.5);
+  color: #fef08a;
+}
+
+.masonry-moderation-desc {
+  margin-top: 8px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #94a3b8;
+}
+
+.masonry-moderation-desc strong {
+  color: #fbbf24;
+  font-weight: 600;
 }
 
 .masonry-like-btn {

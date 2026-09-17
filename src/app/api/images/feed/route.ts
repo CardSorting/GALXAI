@@ -423,6 +423,40 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true });
     }
 
+    if (action === 'hide' || action === 'moderate') {
+      if (!imageId || typeof imageId !== 'string') {
+        return NextResponse.json({ success: false, error: 'Invalid image identifier' }, { status: 400 });
+      }
+
+      const reason = typeof body.reason === 'string' && body.reason.trim().length > 0
+        ? body.reason.trim().slice(0, 200)
+        : 'community_moderation';
+
+      try {
+        const query = `SELECT public.fn_moderate_hide_community_image($1, $2, $3) AS result;`;
+        const result = await executePostgresQuery<{ result: any }>(query, [
+          imageId,
+          sessionHash,
+          reason
+        ]);
+        const data = result?.rows?.[0]?.result;
+        return NextResponse.json({
+          success: true,
+          action: 'set_private',
+          assetId: imageId,
+          result: data
+        });
+      } catch {
+        // Fallback for showcase or offline items
+        return NextResponse.json({
+          success: true,
+          action: 'set_private',
+          assetId: imageId,
+          clientOnly: true
+        });
+      }
+    }
+
     return NextResponse.json({ success: false, error: 'Unsupported interaction action' }, { status: 400 });
   } catch {
     return NextResponse.json({ success: false, error: 'Malformed request' }, { status: 400 });

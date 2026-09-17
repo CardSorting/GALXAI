@@ -23,6 +23,9 @@ import {
   Grid,
   LayoutGrid,
   Hash,
+  EyeOff,
+  ShieldAlert,
+  RotateCcw,
 } from 'lucide-react';
 import type { PublicFeedItem } from '@/app/api/images/feed/route';
 import './masonry-stream.css';
@@ -122,26 +125,35 @@ export function PublicImageMasonryStream({
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [copiedSeed, setCopiedSeed] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [toastUndoable, setToastUndoable] = useState(false);
   const [loadedImages, setLoadedImages] = useState<Record<string, boolean>>({});
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
   const [likedMap, setLikedMap] = useState<Record<string, boolean>>({});
   const [likesCountMap, setLikesCountMap] = useState<Record<string, number>>({});
   const [likedPopId, setLikedPopId] = useState<string | null>(null);
   const [fetchError, setFetchError] = useState<string | null>(null);
+  const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
+  const [hidingIds, setHidingIds] = useState<Set<string>>(new Set());
+  const [lastHiddenItem, setLastHiddenItem] = useState<{ item: PublicFeedItem; index: number } | null>(null);
 
   const observerTarget = useRef<HTMLDivElement>(null);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const pendingImpressionsRef = useRef<Set<string>>(new Set());
   const touchStartCoordRef = useRef<{ x: number; y: number } | null>(null);
+  const hiddenIdsRef = useRef<Set<string>>(new Set());
 
-  const showToast = useCallback((msg: string) => {
+  const showToast = useCallback((msg: string, undoable: boolean = false) => {
     if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
     setToastMessage(msg);
-    toastTimeoutRef.current = setTimeout(() => setToastMessage(null), 2400);
+    setToastUndoable(undoable);
+    toastTimeoutRef.current = setTimeout(() => {
+      setToastMessage(null);
+      setToastUndoable(false);
+    }, undoable ? 4500 : 2400);
   }, []);
 
-  // Hydrate persistent likes and density preference from localStorage
+  // Hydrate persistent likes, hidden items and density preference from localStorage
   useEffect(() => {
     try {
       const storedLikes = localStorage.getItem('galx_liked_images');
@@ -149,6 +161,16 @@ export function PublicImageMasonryStream({
         const parsed = JSON.parse(storedLikes);
         if (typeof parsed === 'object' && parsed !== null) {
           setLikedMap(parsed);
+        }
+      }
+      const storedHidden = localStorage.getItem('galx_hidden_images');
+      if (storedHidden) {
+        const parsed = JSON.parse(storedHidden);
+        if (Array.isArray(parsed)) {
+          const set = new Set<string>(parsed);
+          setHiddenIds(set);
+          hiddenIdsRef.current = set;
+          setItems((prev) => prev.filter((it) => !set.has(it.id)));
         }
       }
       const storedDensity = localStorage.getItem('galx_stream_density');
@@ -210,7 +232,8 @@ export function PublicImageMasonryStream({
 
         const data = await res.json();
         if (data.success && Array.isArray(data.items)) {
-          setItems((prev) => (reset ? data.items : [...prev, ...data.items]));
+          const visible = data.items.filter((it: PublicFeedItem) => !hiddenIdsRef.current.has(it.id));
+          setItems((prev) => (reset ? visible : [...prev, ...visible]));
           setCursor(data.nextCursor);
           setHasMore(Boolean(data.nextCursor));
 
@@ -425,6 +448,83 @@ export function PublicImageMasonryStream({
     }
   };
 
+  // Hide / moderate artwork: immediate removal and conversion to creator's private library
+  const handleHideItem = async (e: React.MouseEvent, item: PublicFeedItem, reason: string = 'community_moderation') => {
+    e.stopPropagation();
+
+    // 1. Mark as hiding for smooth CSS exit animation
+    setHidingIds((prev) => new Set(prev).add(item.id));
+
+    // Save for undo
+    const itemIndex = items.findIndex((i) => i.id === item.id);
+    setLastHiddenItem({ item, index: itemIndex >= 0 ? itemIndex : 0 });
+
+    // 2. Persist to local hidden set
+    const updatedHidden = new Set(hiddenIds);
+    updatedHidden.add(item.id);
+    setHiddenIds(updatedHidden);
+    hiddenIdsRef.current = updatedHidden;
+    try {
+      localStorage.setItem('galx_hidden_images', JSON.stringify([...updatedHidden]));
+    } catch {}
+
+    // 3. Remove from stream after smooth transition
+    setTimeout(() => {
+      setItems((prev) => prev.filter((i) => i.id !== item.id));
+      setHidingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(item.id);
+        return next;
+      });
+      if (activeModalIndex !== null && items[activeModalIndex]?.id === item.id) {
+        setActiveModalIndex(null);
+      }
+    }, 260);
+
+    // 4. Show toast with undo
+    showToast('Artwork hidden and returned to creator\'s private library.', true);
+
+    // 5. Fire backend moderation request
+    try {
+      void fetch('/api/images/moderate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ assetId: item.id, reason }),
+      }).catch(() => {});
+    } catch {}
+  };
+
+  // Undo hide action
+  const handleUndoHide = () => {
+    if (!lastHiddenItem) return;
+    const { item, index } = lastHiddenItem;
+
+    // Restore to items
+    setItems((prev) => {
+      const copy = [...prev];
+      if (index >= 0 && index <= copy.length) {
+        copy.splice(index, 0, item);
+      } else {
+        copy.unshift(item);
+      }
+      return copy;
+    });
+
+    // Remove from hiddenIds
+    const updatedHidden = new Set(hiddenIds);
+    updatedHidden.delete(item.id);
+    setHiddenIds(updatedHidden);
+    hiddenIdsRef.current = updatedHidden;
+    try {
+      localStorage.setItem('galx_hidden_images', JSON.stringify([...updatedHidden]));
+    } catch {}
+
+    setLastHiddenItem(null);
+    setToastMessage(null);
+    setToastUndoable(false);
+    showToast('Artwork restored to Explore stream.');
+  };
+
   // Modal navigation helpers
   const activeModalItem = activeModalIndex !== null && items[activeModalIndex] ? items[activeModalIndex] : null;
 
@@ -501,6 +601,17 @@ export function PublicImageMasonryStream({
         <div className="masonry-toast" role="status" aria-live="polite">
           <Sparkles size={14} className="masonry-toast-icon" />
           <span>{toastMessage}</span>
+          {toastUndoable && lastHiddenItem && (
+            <button
+              type="button"
+              className="masonry-toast-undo-btn"
+              onClick={handleUndoHide}
+              title="Undo hide and restore creation"
+            >
+              <RotateCcw size={12} />
+              <span>Undo</span>
+            </button>
+          )}
         </div>
       )}
 
@@ -650,7 +761,7 @@ export function PublicImageMasonryStream({
             return (
               <article
                 key={item.id}
-                className="masonry-card"
+                className={`masonry-card ${hidingIds.has(item.id) ? 'hiding' : ''}`}
                 onClick={() => {
                   setIsZoomed(false);
                   setActiveModalIndex(idx);
@@ -707,22 +818,34 @@ export function PublicImageMasonryStream({
                     </>
                   )}
 
-                  {/* Top Floating Badges & Like Button */}
+                  {/* Top Floating Badges & Action Buttons */}
                   <div className="masonry-card-topbar">
                     <span className="masonry-badge masonry-badge-ratio">
                       {item.aspect_ratio || '1:1'}
                     </span>
 
-                    <button
-                      type="button"
-                      className={`masonry-like-btn ${isLiked ? 'liked' : ''} ${likedPopId === item.id ? 'pop' : ''}`}
-                      onClick={(e) => handleToggleLike(e, item)}
-                      title={isLiked ? 'Unlike' : 'Like'}
-                      aria-label="Like creation"
-                    >
-                      <Heart size={14} className={isLiked ? 'fill-current text-rose-500' : ''} />
-                      {likesCount > 0 && <span>{formatCount(likesCount)}</span>}
-                    </button>
+                    <div className="masonry-card-actions-top">
+                      <button
+                        type="button"
+                        className="masonry-hide-btn"
+                        onClick={(e) => handleHideItem(e, item)}
+                        title="Hide from Explore (Set to Private)"
+                        aria-label="Hide from Explore and set to private"
+                      >
+                        <EyeOff size={13} />
+                      </button>
+
+                      <button
+                        type="button"
+                        className={`masonry-like-btn ${isLiked ? 'liked' : ''} ${likedPopId === item.id ? 'pop' : ''}`}
+                        onClick={(e) => handleToggleLike(e, item)}
+                        title={isLiked ? 'Unlike' : 'Like'}
+                        aria-label="Like creation"
+                      >
+                        <Heart size={14} className={isLiked ? 'fill-current text-rose-500' : ''} />
+                        {likesCount > 0 && <span>{formatCount(likesCount)}</span>}
+                      </button>
+                    </div>
                   </div>
 
                   {/* Hover Overlay */}
@@ -749,6 +872,16 @@ export function PublicImageMasonryStream({
                         aria-label="Download image"
                       >
                         <Download size={13} />
+                      </button>
+
+                      <button
+                        type="button"
+                        className="masonry-action-btn masonry-action-icon-only"
+                        onClick={(e) => handleHideItem(e, item)}
+                        title="Hide from Explore (Set to Private)"
+                        aria-label="Hide from Explore and set to private"
+                      >
+                        <EyeOff size={13} />
                       </button>
 
                       <button
@@ -1036,6 +1169,26 @@ export function PublicImageMasonryStream({
                 >
                   <Download size={15} />
                   <span>Download High-Resolution Image</span>
+                </button>
+              </div>
+
+              {/* Community Safety & Moderation Card */}
+              <div className="masonry-moderation-card">
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-rose-400">
+                  <ShieldAlert size={14} />
+                  <span>Community Safety & Moderation</span>
+                </div>
+                <p className="masonry-moderation-desc">
+                  Notice inappropriate or sensitive content? Hiding this item immediately removes it from Explore and resets its status to private in the creator's personal library.
+                </p>
+                <button
+                  type="button"
+                  className="masonry-modal-hide-btn"
+                  onClick={(e) => handleHideItem(e, activeModalItem)}
+                  title="Hide from Explore and set to private"
+                >
+                  <EyeOff size={13} />
+                  <span>Hide from Explore (Set to Private)</span>
                 </button>
               </div>
 

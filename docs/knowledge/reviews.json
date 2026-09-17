@@ -51,12 +51,12 @@
     }
   },
   "images": {
-    "reviewer": "Product/API maintainer",
-    "note": "Image library visibility contracts, batch mutations and dashboard UX",
+    "reviewer": "Product, Safety and Security maintainer",
+    "note": "Community Explore moderation: 1-click hide to private, audit logging, feed exclusion, and undo toast UX",
     "reviewed_at": "2026-09-17",
     "review_by": "2026-09-24",
     "evidence": {
-      "docs/knowledge/audits/2026-09-17-user-library-privacy-and-permissions-review.json": "31db07c9ef11a6e314e3908adcab9847e8526ef43f00df9d66d2b81943f2be04"
+      "docs/knowledge/audits/2026-09-17-community-explore-moderation-review.json": "29e3f7e47ce9c8076b46bff059648e3279aa8782bdbaa9234cd2740017ef91a1"
     },
     "files": {
       "docs/QUEUE_SPECIFICATION.md": "301d293b23327bf065202322e0a7554cf581740f28d0d5ab9fb827e73beed6ba",
@@ -102,9 +102,9 @@
       "src/components/dashboard/generation-gate.module.css": "efd8526722ca0ad42aec319a56bc2ea7e638185f30c35cea9b445dfb69bba4a4",
       "src/components/images/GenerationCanvas.tsx": "4341702fc0842c20a7d860b8241a4bf55780919b73254f54915a61cd09269473",
       "src/components/images/ImageStudio.tsx": "d64041b6f5d9bbf1223380b4850c9f3921929b11267a1685c26cad31db7c7130",
-      "src/components/images/PublicImageMasonryStream.tsx": "f430901e79dadae81b84269096263651263d7e341818162411624444837e1608",
+      "src/components/images/PublicImageMasonryStream.tsx": "001253d604a39b1e18216ea664c718161ca974476e8a85288f31ed41a9fad3e0",
       "src/components/images/StudioArtwork.tsx": "427128b4f3ea300222b74fdfe132564237030507f1d40c20093c89ef52e26229",
-      "src/components/images/masonry-stream.css": "b7a5f4251b803a10b3d105a52cd4f9f72f7be0376c36f8e7482c638ff766a99b",
+      "src/components/images/masonry-stream.css": "e75f14e74486f2ab51f092c40c243e169ca52ee1c3ac685434e53dcab8e64282",
       "src/components/images/studio-contract.ts": "cfa22ffc7df750e747c805a7a8ee394dfb76fdc9adcd2beabcb9872536f0d5bb",
       "src/components/images/studio.css": "d04bce6d6f0eb817815b5dfbefc962221e8865fb68eb74bdb23bce881da87492",
       "src/components/images/use-image-studio.ts": "22b3ac9a41f10bceb777942da4c63ea84e079e7c85aff5d7027d019f0f1b8ff1",
@@ -137,12 +137,12 @@
     }
   },
   "access": {
-    "reviewer": "Security/access maintainer",
-    "note": "User image library permissions audit and hardened WITH CHECK RLS policy",
+    "reviewer": "Product, Safety and Security maintainer",
+    "note": "Public preview policy includes /api/images/moderate; security definer moderation pattern maintains strict library tenant update restrictions",
     "reviewed_at": "2026-09-17",
     "review_by": "2026-09-24",
     "evidence": {
-      "docs/knowledge/audits/2026-09-17-user-library-privacy-and-permissions-review.json": "31db07c9ef11a6e314e3908adcab9847e8526ef43f00df9d66d2b81943f2be04"
+      "docs/knowledge/audits/2026-09-17-community-explore-moderation-review.json": "29e3f7e47ce9c8076b46bff059648e3279aa8782bdbaa9234cd2740017ef91a1"
     },
     "files": {
       "docs/OAUTH_AND_TOKEN_LIFECYCLE_SPECIFICATION.md": "1e8004f6dc024322356e5494b099b7c38ed00e4a62e22434b020fd43c9470183",
@@ -273,7 +273,7 @@
       "src/lib/security/internal-access.ts": "ea9c2c0f280b819e285b04bb1c82b8e1669c8498ec1e05a6560a34d27a25d11c",
       "src/lib/security/normalize-image-output.ts": "205920bbb0a1df05c955211edc4d738b21cabefbe04bd0a5386ac5e0ac0af4bd",
       "src/lib/security/preview-middleware.ts": "ea577ad1118ca166c882cd8a5d335221a2a1a5b65b4cfa7b0078daa76572229d",
-      "src/lib/security/preview-policy.ts": "db756f8cf58c8a93ec3356caa32fc387411fd8ddfc16dcab9a2f7260aa4f0b76",
+      "src/lib/security/preview-policy.ts": "146e70fa0eba0afd815a363940ef7ee98503a5d90a9ebc8ffbe07ea9746f3203",
       "src/lib/security/private-image-diagnostics.ts": "b2f34531192d580a86ff2bfe9cc65df9586ec28abb5648e0fc5cace2aba40255",
       "src/lib/security/public-image-http.ts": "793b1a19ed4a704439544df062e6921f1f0e9862503a4e6dc38f01246e90584d",
       "src/lib/security/public-image-record.ts": "2aefe48eaf3da1e0efbcbbfd1f663167d0c5cbd020dc551a7dfc3cb2af914e74",
@@ -590,12 +590,12 @@
     }
   },
   "database": {
-    "reviewer": "Database operator",
-    "note": "Applied migration granting authenticated role table permissions and visibility batch RPC",
+    "reviewer": "Product, Safety and Security maintainer",
+    "note": "Migration 20260917080000_community_explore_moderation_hide.sql applied: audit log table and SECURITY DEFINER moderation function created",
     "reviewed_at": "2026-09-17",
     "review_by": "2026-09-24",
     "evidence": {
-      "docs/knowledge/audits/2026-09-17-user-library-privacy-and-permissions-review.json": "31db07c9ef11a6e314e3908adcab9847e8526ef43f00df9d66d2b81943f2be04"
+      "docs/knowledge/audits/2026-09-17-community-explore-moderation-review.json": "29e3f7e47ce9c8076b46bff059648e3279aa8782bdbaa9234cd2740017ef91a1"
     },
     "files": {
       "deploy/relay-execution/supabase/migrations/20260915082628_relay_execution.sql": "fc61d7c30bdd57706ffb4212788741302760722e7285c25c9b4cb93d629b137e",
@@ -664,7 +664,7 @@
       "src/lib/supabase/repositories/TelemetryRepository.ts": "1887a04aa51424e44d6ac9d499fc24248edd2aa9c64c559cf1f307773dd252e5",
       "src/lib/supabase/repositories/WalletRepository.ts": "14ac2f53fd2600e698efac4b9fa0150c4fbc14bc2ab2539922926ee0e9794565",
       "src/lib/supabase/repositories/WorkspaceRepository.ts": "b9f6d1d09610760b172c6d1981a06e6ab97d4f5a9a58139377ade89df56a4ed8",
-      "src/lib/supabase/types.ts": "54147d64a39effa0090b68121a3c5ca5db8552c42f12f44b7686beabc9ff4e1c",
+      "src/lib/supabase/types.ts": "617ee9336bef2da3edd8b715c1a5105ca3f28f317d8a21279020198011676a72",
       "supabase/migrations/20260822000001_galxai_schema_core.sql": "084520c8cb3ab4e057ec788ea90605bb43e1373a28230e40696271f6a8476f77",
       "supabase/migrations/20260822000002_galxai_schema_apex.sql": "62b4fdc606104700d14eb3b80a7a7063a5152db9ed1afefe63a72315d586f539",
       "supabase/migrations/20260822000003_galxai_user_sessions_auth.sql": "ab2ec033c41bb147aa476acceb4d5dca3991f83f017a7cc41fddd01c6b8e75c4",
@@ -785,6 +785,7 @@
       "supabase/migrations/20260917050000_anti_locking_image_stats_and_interactions.sql": "1954a046371829f8fce4049a404e2e74c9ced899232bbb9a3279dff89028c79c",
       "supabase/migrations/20260917060000_audit_explore_permissions_and_idempotent_likes.sql": "9485a4bfdaa14f72eb8510f2759e887b327a03a156af9aee14052c35c4495320",
       "supabase/migrations/20260917070000_user_image_library_permissions_and_visibility.sql": "c133349f449df8bb43d8f8f5f389c70119de668cdd88fe139ddb2a9320e5400e",
+      "supabase/migrations/20260917080000_community_explore_moderation_hide.sql": "f78e11bcf2b4f8d65f2007e66f2be0918ace55e09153a193eddcce87789783a1",
       "supabase/rollbacks/20260822000001_galxai_schema_core.down.sql": "d1267f3f89a7a0af12716a70167f615be1e904bf933e348a1173305cd5f2fe83",
       "supabase/rollbacks/20260822000002_galxai_schema_apex.down.sql": "df36655d564c6d6557d4461294ed2a502ad57adf799037c00a68481b809ffed9",
       "supabase/rollbacks/20260822000003_galxai_user_sessions_auth.down.sql": "4f3012db038b48387290b8d64638fe7aded774d8bdde88cfe683f01f1988adbc",

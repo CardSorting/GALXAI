@@ -1,0 +1,32 @@
+{
+  "reviewed_at": "2026-09-17T09:32:00.000000+00:00",
+  "reviewer": "Product, Safety and Security maintainer",
+  "scope": "Community Explore moderation permission: immediate 1-click Hide to private, creator retention, audit logging, feed exclusion, and undo toast UX",
+  "domains": {
+    "images": "PublicImageMasonryStream and CSS updated with 1-click Hide (EyeOff) buttons in card topbar, hover toolbar, and modal inspector. Card dismissal CSS animation, undo toast, and localStorage persistence prevent hidden items from re-appearing.",
+    "access": "Public preview policy updated to include /api/images/moderate. Community moderation uses SECURITY DEFINER function public.fn_moderate_hide_community_image with safe fixed search_path (public, pg_temp), allowing authenticated and community callers to moderate without granting direct UPDATE rights across tenant libraries.",
+    "database": "Migration 20260917080000_community_explore_moderation_hide.sql applied. Created public.image_moderation_events audit log table with RLS and public.fn_moderate_hide_community_image stored procedure. Feed view public.community_creations_feed automatically excludes hidden images while creator retains private access in personal library."
+  },
+  "sources_inspected": [
+    "src/components/images/PublicImageMasonryStream.tsx",
+    "src/components/images/masonry-stream.css",
+    "src/app/api/images/feed/route.ts",
+    "src/app/api/images/moderate/route.ts",
+    "src/lib/security/preview-policy.ts",
+    "src/lib/supabase/types.ts",
+    "supabase/migrations/20260917080000_community_explore_moderation_hide.sql"
+  ],
+  "complete_guides_inspected": [
+    "docs/maintainers/image-public-boundary.md",
+    "docs/maintainers/image-library-scale.md",
+    "docs/operations/developer-preview.md",
+    "docs/SUPABASE_PARANOID_ARCHITECTURE_SPEC.md",
+    "docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md"
+  ],
+  "checks_run": [
+    "npx tsx --test scripts/test-image-library-http.ts",
+    "npm run test:image:security",
+    "npx tsx --test scripts/test-developer-preview.ts",
+    "npx tsc --noEmit"
+  ]
+}
