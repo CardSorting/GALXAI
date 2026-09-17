@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "reviewer": "Product, Safety and Security maintainer",
-  "reviewed_at": "2026-09-17T15:31:39.282845Z",
-  "note": "Community Explore moderation hide permission",
+  "reviewer": "Product maintainer",
+  "reviewed_at": "2026-09-17T20:05:30.953129Z",
+  "note": "Mask OpenAI underlying models behind GALX Nova and GALX Nova-image public abstraction boundary",
   "files": {
     ".dockerignore": "fb4dc7ef84e7f36c5bfed0f267187a022bbb61e66dd26060295b133e08fa74c5",
     ".github/workflows/vercel-preflight.yml": "60856940957e45075d1c54de644d3ba0268fad16b35b3ed5eb8005bc40a5b4b3",
@@ -66,7 +66,7 @@
     "src/app/api/images/library/route.ts": "954b062d5ee0725326b563508812b8b44020c534252901d672df3a828db3a829",
     "src/app/v1/images/assets/[token]/route.ts": "044fa9a26b97f227e4d920e2cd2d58892e430b4f073656afe76e027093b79168",
     "src/app/v1/images/assets/[token]/thumbnail/route.ts": "e505a1372b026e66e2555c13b6b2fa406ec1e198588800896de05d9d953d73f2",
-    "src/app/v1/images/generations/route.ts": "f805349641364e3caea2a83275040558cf7d05db595d75450331409e54e20e85",
+    "src/app/v1/images/generations/route.ts": "096f1eb2d793186a2f9fc2bb06e987ae18d17a5d310d6855fa88b838aaebc491",
     "src/app/v1/images/requests/[id]/route.ts": "0bf6cfb29e706629565c90e2efbf3e601109820a3d92bfb8a83af70c1c1210f5",
     "src/app/v1/images/requests/[id]/stream/route.ts": "721bcb68476feeed8aa1ae6508bae784c4a5be77b067597a479c5ccafe827a84",
     "src/app/v1/images/sessions/[sessionId]/route.ts": "3571f44b6fb521942a0a2b8b3fc7b7e9196488d68ea5d5261de5d92edf771dc7",

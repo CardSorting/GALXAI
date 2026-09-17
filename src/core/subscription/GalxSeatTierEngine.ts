@@ -118,6 +118,10 @@ const TIER_CAPACITIES: Record<SeatTierType, { fiveHourLimit: number; weeklyLimit
 
 const TIER_MODEL_WHITELIST: Record<SeatTierType, string[]> = {
   developer: [
+    'galx-nova',
+    'galx-nova-image',
+    'nova',
+    'nova-image',
     'gpt-5-6-luna-low',
     'gpt-5.6-luna-low',
     'luna-low',
@@ -128,6 +132,10 @@ const TIER_MODEL_WHITELIST: Record<SeatTierType, string[]> = {
     'auto-router'
   ],
   'small-business': [
+    'galx-nova',
+    'galx-nova-image',
+    'nova',
+    'nova-image',
     'gpt-5-6-luna-low',
     'gpt-5.6-luna-low',
     'luna-low',
@@ -142,6 +150,10 @@ const TIER_MODEL_WHITELIST: Record<SeatTierType, string[]> = {
     'codex-v3'
   ],
   enterprise: [
+    'galx-nova',
+    'galx-nova-image',
+    'nova',
+    'nova-image',
     'gpt-5-6-luna-low',
     'gpt-5.6-luna-low',
     'luna-low',
@@ -157,6 +169,10 @@ const TIER_MODEL_WHITELIST: Record<SeatTierType, string[]> = {
     'codex-v3'
   ],
   apex: [
+    'galx-nova',
+    'galx-nova-image',
+    'nova',
+    'nova-image',
     'gpt-5-6-luna-low',
     'gpt-5.6-luna-low',
     'luna-low',

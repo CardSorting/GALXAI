@@ -763,7 +763,7 @@ export class ShardRepository {
     return {
       id: shard.id,
       user_id: shard.userId,
-      provider: shard.provider,
+      provider: shard.provider as Database['public']['Tables']['galx_shard_accounts']['Insert']['provider'],
       auth_type: shard.authType || 'api_key',
       account_label: shard.accountLabel,
       api_key_masked: shard.apiKeyMasked,

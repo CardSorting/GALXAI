@@ -27,9 +27,12 @@ export async function OPTIONS() {
   } });
 }
 
-const imageAliases = new Set(['openai-gpt-image-latest', 'gpt-image-latest', 'image', 'images',
+const imageAliases = new Set([
+  'galx-nova-image', 'galx-nova', 'nova-image', 'nova', 'galx_nova_image', 'galx_nova',
+  'openai-gpt-image-latest', 'gpt-image-latest', 'image', 'images',
   'openai-gpt-image-2', 'gpt-image-2', 'gpt-image-2.0', 'openai-gpt-image-1.5', 'gpt-image-1.5',
-  'openai-gpt-image-1', 'gpt-image-1', 'dall-e-2', 'dall-e-3', 'dalle-3', 'photoreal']);
+  'openai-gpt-image-1', 'gpt-image-1', 'dall-e-2', 'dall-e-3', 'dalle-3', 'photoreal'
+]);
 
 /** Public image contract. Internal dispatch results must pass private normalization. */
 export async function POST(req: NextRequest) {
@@ -46,7 +49,7 @@ export async function POST(req: NextRequest) {
     } catch { return imageError('invalid_request', requestId); }
     const prompt = raw.prompt ?? raw.text ?? raw.description ?? raw.input ?? raw.image_prompt;
     if (typeof prompt !== 'string' || !prompt.trim() || prompt.length > 32_000) return imageError('invalid_request', requestId);
-    const requested = raw.model ?? 'openai-gpt-image-latest';
+    const requested = raw.model ?? 'galx-nova-image';
     if (typeof requested !== 'string' || !imageAliases.has(requested.toLowerCase())) return imageError('unsupported_input', requestId);
     const model = ModelCatalog.resolveModel(requested);
     const format = raw.response_format ?? raw.responseFormat ?? (req.headers.get('accept')?.includes('application/json') ? 'b64_json' : 'binary');

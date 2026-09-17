@@ -150,7 +150,7 @@ async function previewPOST(req: NextRequest) {
     const rawBody = await parseChatJsonBody(req);
     const requestedModel = typeof rawBody.model === 'string' && rawBody.model.trim()
       ? rawBody.model.trim()
-      : 'gpt-5-6-luna-low';
+      : 'galx-nova';
 
     // Enforce Dual Rolling Window Seat Limits (5-Hour & Weekly Limits)
     try {
@@ -707,18 +707,22 @@ async function previewPOST(req: NextRequest) {
           try {
             const { done, value } = await upstreamReader.read();
             if (done) {
-              sseBuffer += decoder.decode();
-              if (sseBuffer) {
-                sseBuffer += '\n';
+              const remaining = decoder.decode();
+              if (remaining) {
+                sseBuffer += remaining + '\n';
                 consumeSseLines(true);
+                const sanitizedRemaining = remaining.replace(/"model"\s*:\s*"[^"]+"/g, `"model":"${result.modelUsed}"`);
+                controller.enqueue(new TextEncoder().encode(sanitizedRemaining));
               }
               await finalizeStream(!streamFailed);
               controller.close();
               return;
             }
-            sseBuffer += decoder.decode(value, { stream: true });
+            const decodedChunk = decoder.decode(value, { stream: true });
+            sseBuffer += decodedChunk;
             consumeSseLines();
-            controller.enqueue(value);
+            const sanitizedChunk = decodedChunk.replace(/"model"\s*:\s*"[^"]+"/g, `"model":"${result.modelUsed}"`);
+            controller.enqueue(new TextEncoder().encode(sanitizedChunk));
           } catch (streamError) {
             await finalizeStream(false);
             controller.error(streamError);
@@ -733,7 +737,6 @@ async function previewPOST(req: NextRequest) {
         },
       });
 
-      headers.set('Galx-Transport-Engine', 'zero-copy-v3-zenith');
       return new Response(managedStream, { status: result.statusCode, headers });
     }
 
@@ -801,6 +804,7 @@ async function previewPOST(req: NextRequest) {
           parsed.conversation_id = conversationId;
           parsed.turn_id = chatIdentity.turnId;
           parsed.session_mode = chatIdentity.mode;
+          parsed.model = result.modelUsed;
           nonStreamContent = parsed.choices?.[0]?.message?.content || '';
           if (parsed.usage) {
             parsed.usage.prompt_tokens_details = {
@@ -929,9 +933,9 @@ async function previewPOST(req: NextRequest) {
           message,
           type: errorType,
           code: isRelayUnavailable
-            ? 'relay_unavailable'
+            ? 'service_unavailable'
             : isAuthError
-            ? 'upstream_auth_failed'
+            ? 'authentication_error'
             : isUsageLimit
             ? 'usage_limit_exceeded'
             : isCapacityConstrained
@@ -939,15 +943,15 @@ async function previewPOST(req: NextRequest) {
             : isRateLimited
             ? 'rate_limit_exceeded'
             : isUnavailable
-            ? 'compute_capacity_unavailable'
-            : 'router_dispatch_failed'
+            ? 'service_unavailable'
+            : 'service_unavailable'
         }
       },
       {
         status,
         headers: {
           'Access-Control-Allow-Origin': '*',
-          'Access-Control-Expose-Headers': 'Retry-After, RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset, X-RateLimit-Reset, X-Galx-Request-Id, X-Galx-Router, X-Galx-Session-Affinity',
+          'Access-Control-Expose-Headers': 'Retry-After, RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset, X-RateLimit-Reset, X-Galx-Request-Id, X-Galx-Session-Affinity',
           ...(isRateLimited || isCapacityConstrained
             ? {
                 'Retry-After': '2',
@@ -972,7 +976,7 @@ async function previewPOST(req: NextRequest) {
 async function previewGET(req: NextRequest) {
   const url = new URL(req.url);
   const prompt = url.searchParams.get('prompt') || url.searchParams.get('q') || url.searchParams.get('message') || url.searchParams.get('input') || 'Hello GALXAI';
-  const model = url.searchParams.get('model') || 'gpt-5-6-luna-low';
+  const model = url.searchParams.get('model') || 'galx-nova';
   const stream = url.searchParams.get('stream') === 'true';
 
   const syntheticReq = new NextRequest(req.url, {

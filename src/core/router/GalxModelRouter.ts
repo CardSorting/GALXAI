@@ -108,7 +108,7 @@ export class GalxModelRouter {
 
     // Classify capacity codes before the identifier scrubber consumes SHARD_*.
     if (/^SHARD_(?:NOT_HEALTHY|COOLDOWN|CONCURRENCY_EXHAUSTED|REQUEST_QUOTA_EXHAUSTED|TOKEN_QUOTA_EXHAUSTED|SLIDING_WINDOW_EXHAUSTED)$/.test(rawMessage)) {
-      return 'No healthy compute capacity is currently available. Please retry shortly.';
+      return 'GALX Nova could not complete this request. Please retry shortly.';
     }
 
     let sanitized = rawMessage
@@ -140,29 +140,27 @@ export class GalxModelRouter {
       sanitized.toLowerCase().includes('temporarily saturated') ||
       sanitized.toLowerCase().includes('shards available')
     ) {
-      return 'Compute capacity is temporarily constrained for this model. Automatic failover active. Please retry shortly.';
+      return 'GALX Nova could not complete this request due to temporary capacity constraints. Automatic failover active. Please retry shortly.';
     }
 
     if (sanitized.toLowerCase().includes('usage limit') || sanitized.toLowerCase().includes('resets at') || sanitized.toLowerCase().includes('try again at')) {
-      return 'Request could not be completed. Please retry or contact support with your request ID.';
+      return 'GALX Nova could not complete this request. Please retry or contact support with your request ID.';
     }
     if (sanitized.includes('429') || sanitized.toLowerCase().includes('rate limit')) {
-      return 'Capacity allocation currently saturated. Automatic retry buffer activated.';
+      return 'GALX Nova capacity allocation currently saturated. Automatic retry buffer activated.';
     }
     if (sanitized.includes('503') || sanitized.includes('502') || sanitized.includes('504') || sanitized.toLowerCase().includes('overloaded')) {
-      return 'Compute origin is temporarily overloaded. Please back off and retry.';
+      return 'GALX Nova compute service is temporarily overloaded. Please back off and retry.';
     }
 
-    // Clean any remaining internal routing artifacts or infrastructure terminology
-    sanitized = sanitized
-      .replace(/\[gateway-route\]/g, 'route')
-      .replace(/\bmatching shard\b/gi, 'matching route')
-      .replace(/\b(?:credential shards?|compliant shards?)\b/gi, 'compute capacity')
-      .replace(/\b(?:shard|shards)\b/gi, 'route')
-      .replace(/\s+/g, ' ')
-      .trim();
+    // Clean any remaining provider / model / infrastructure terminology
+    if (
+      /openai|codex|gpt|luna|terra|sol|dall-?e/i.test(sanitized)
+    ) {
+      return 'GALX Nova could not complete this request. Please retry.';
+    }
 
-    return 'Request could not be completed. Please retry or contact support with your request ID.';
+    return 'GALX Nova could not complete this request. Please retry.';
   }
 
   /**
@@ -257,7 +255,7 @@ export class GalxModelRouter {
     if(isolatedRelaysEnabled()) {
       // No account acquisition/decryption in the application. The chosen relay is authoritative.
       // Specialized privacy profiles require separate supplier qualification.
-      if(provider!=='openai'||privacyPolicy.profile!=='standard'||privacyPolicy.hipaaEnabled||privacyPolicy.zdrEnabled||privacyPolicy.gdprEnabled||privacyPolicy.dataResidency!=='global'||privacyPolicy.piiMasking||privacyPolicy.deidentifyPhi)throw new RelayDispatchError('unsupported_policy');
+      if((provider!=='openai'&&provider!=='galx')||privacyPolicy.profile!=='standard'||privacyPolicy.hipaaEnabled||privacyPolicy.zdrEnabled||privacyPolicy.gdprEnabled||privacyPolicy.dataResidency!=='global'||privacyPolicy.piiMasking||privacyPolicy.deidentifyPhi)throw new RelayDispatchError('unsupported_policy');
       const started=Date.now();
       const response=await isolatedChat({...options.request,model:modelSpec.upstreamId||modelSpec.id},userId,this.extractHeaderValue(incomingHeaders,'idempotency-key')||requestId,usage=>{
         if(!usage||!['prompt_tokens','completion_tokens','total_tokens'].every(k=>Number.isSafeInteger(usage[k])&&usage[k]>=0))return;
@@ -915,7 +913,7 @@ export class GalxModelRouter {
 
     const privacyPolicy = this.privacyEngine.resolvePrivacyPolicy(incomingHeaders, options.request.privacy);
     if(isolatedImagesEnabled()) {
-      if(provider!=='openai'||privacyPolicy.profile!=='standard'||privacyPolicy.hipaaEnabled||privacyPolicy.zdrEnabled||privacyPolicy.gdprEnabled||privacyPolicy.dataResidency!=='global'||privacyPolicy.piiMasking||privacyPolicy.deidentifyPhi)throw new RelayDispatchError('unsupported_policy');
+      if((provider!=='openai'&&provider!=='galx')||privacyPolicy.profile!=='standard'||privacyPolicy.hipaaEnabled||privacyPolicy.zdrEnabled||privacyPolicy.gdprEnabled||privacyPolicy.dataResidency!=='global'||privacyPolicy.piiMasking||privacyPolicy.deidentifyPhi)throw new RelayDispatchError('unsupported_policy');
       const result: ImageGenerationResponse={...await isolatedImage({...options.request,model:modelSpec.upstreamId||modelSpec.id},userId,options.request.idempotencyKey||requestId,signal),modelUsed:modelSpec.id};
       const cost=TokenCostCalculator.calculateCost(modelSpec,{promptTokens:1000,imagesCount:1,quality:options.request.quality});
       GalxEdgeBatchBuffer.getInstance().enqueueTokenDraw({userId,costUsd:cost.totalCostUsd,description:`Visual Synthesis: ${modelSpec.name}`,model:modelSpec.id,promptTokens:1000,completionTokens:0,cachedTokens:0,metadata:{requestId,imagesCount:1}});

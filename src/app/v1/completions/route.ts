@@ -17,7 +17,7 @@ export async function OPTIONS() {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-api-key, x-galx-session-affinity, X-Galx-Session-Affinity',
-      'Access-Control-Expose-Headers': 'X-Galx-Session-Affinity, X-Galx-Model-Resolved, X-Galx-Router, Retry-After',
+      'Access-Control-Expose-Headers': 'X-Galx-Session-Affinity, X-Galx-Model-Resolved, Retry-After',
       'Access-Control-Max-Age': '86400'
     }
   });
@@ -40,7 +40,7 @@ async function previewPOST(req: NextRequest) {
     }
 
     const rawBody = (await req.json().catch(() => ({}))) as any;
-    const requestedModel = rawBody.model || 'gpt-5.6-sol';
+    const requestedModel = rawBody.model || 'galx-nova';
     const modelSpec = ModelCatalog.resolveModel(requestedModel);
     const promptStr = rawBody.prompt ?? rawBody.input ?? rawBody.text ?? 'Hello';
     const promptArray = Array.isArray(promptStr) ? promptStr.join('\n') : String(promptStr);
@@ -67,9 +67,8 @@ async function previewPOST(req: NextRequest) {
 
     const resHeaders: Record<string, string> = {
       'Access-Control-Allow-Origin': '*',
-      'Access-Control-Expose-Headers': 'X-Galx-Session-Affinity, X-Galx-Model-Resolved, X-Galx-Router, Retry-After',
-      'X-Galx-Model-Resolved': modelSpec.id,
-      'X-Galx-Router': 'apex-v2'
+      'Access-Control-Expose-Headers': 'X-Galx-Session-Affinity, X-Galx-Model-Resolved, Retry-After',
+      'X-Galx-Model-Resolved': modelSpec.id
     };
     if (result.shardId) {
       const affinityTicket = GalxCryptoVault.sealAffinityTicket(result.shardId);
@@ -124,7 +123,7 @@ async function previewPOST(req: NextRequest) {
           status: 429,
           headers: {
             'Access-Control-Allow-Origin': '*',
-            'Access-Control-Expose-Headers': 'Retry-After, RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset, X-RateLimit-Reset, X-Galx-Request-Id, X-Galx-Router, X-Galx-Session-Affinity',
+            'Access-Control-Expose-Headers': 'Retry-After, RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset, X-RateLimit-Reset, X-Galx-Request-Id, X-Galx-Session-Affinity',
             'Retry-After': '2',
             'RateLimit-Limit': '60',
             'RateLimit-Remaining': '0',

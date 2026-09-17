@@ -3,7 +3,7 @@
  * High-concurrency routing, cryptographic secret vaulting, and circuit governance.
  */
 
-export type ProviderType = 'openai';
+export type ProviderType = 'openai' | 'galx';
 export type ShardIsolationMode = 'private' | 'pooled';
 export type CredentialStatus =
   | 'healthy'

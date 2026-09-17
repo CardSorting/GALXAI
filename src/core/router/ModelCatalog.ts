@@ -13,12 +13,12 @@ import type { DbQueryOptions, DbAggregateQuery } from '../broccolidb/broccolidb.
  * Text-model rates are verified OpenAI API rates.
  */
 export const EXCLUSIVE_MODEL_CATALOG: ModelSpecItem[] = [
-  // --- 1. OpenAI Agentic Coding Engine ---
+  // --- 1. GALX Nova Managed Intelligence Engine ---
   {
-    id: 'gpt-5-6-luna',
+    id: 'galx-nova',
     upstreamId: 'gpt-5.6-luna',
-    name: 'OpenAI GPT-5.6 Luna',
-    provider: 'openai',
+    name: 'GALX Nova',
+    provider: 'galx',
     category: 'llm',
     contextWindowTokens: 1_050_000,
     maxOutputTokens: 128_000,
@@ -31,34 +31,15 @@ export const EXCLUSIVE_MODEL_CATALOG: ModelSpecItem[] = [
     supportsVision: true,
     supportsReasoning: true,
     supportsStreaming: true,
-    description: 'Fast and affordable agentic coding and reasoning model.'
-  },
-  {
-    id: 'gpt-5-6-luna-low',
-    upstreamId: 'gpt-5.6-luna',
-    name: 'OpenAI GPT-5.6 Luna',
-    provider: 'openai',
-    category: 'llm',
-    contextWindowTokens: 1_050_000,
-    maxOutputTokens: 128_000,
-    listPricePer1MInput: 0.20,
-    listPricePer1MOutput: 1.20,
-    inputPricePer1M: 0.20,
-    outputPricePer1M: 1.20,
-    cachedInputPricePer1M: 0.02,
-    discountPercentage: 0,
-    supportsVision: true,
-    supportsReasoning: true,
-    supportsStreaming: true,
-    description: 'Fast and affordable agentic coding and reasoning model.'
+    description: 'Sustainable Intelligence Engine for high-velocity reasoning, coding, and generation.'
   },
 
-  // --- 2. OpenAI Visual Synthesis & Image Generation Suite ---
+  // --- 2. GALX Nova Image Synthesis Suite ---
   {
-    id: 'openai-gpt-image-latest',
+    id: 'galx-nova-image',
     upstreamId: 'gpt-image-2',
-    name: 'OpenAI Image Generation',
-    provider: 'openai',
+    name: 'GALX Nova-image',
+    provider: 'galx',
     category: 'image',
     contextWindowTokens: 128_000,
     maxOutputTokens: 4_096,
@@ -70,7 +51,7 @@ export const EXCLUSIVE_MODEL_CATALOG: ModelSpecItem[] = [
     supportsVision: true,
     supportsReasoning: false,
     supportsStreaming: false,
-    description: 'Generate images from text prompts for illustrations, product concepts, and marketing assets.'
+    description: 'Visual synthesis engine for creative generation, diagrams, and illustrations.'
   },
 ];
 
@@ -92,9 +73,9 @@ export class ModelCatalog {
    * Never throws or stalls on ambiguous inputs — always resolves to the optimal matching engine.
    */
   public static resolveModel(requestedModel?: string | null): ModelSpecItem {
-    // 0. Zero-hesitation default fallback when model is omitted or blank (Default: gpt-5-6-luna)
+    // 0. Zero-hesitation default fallback when model is omitted or blank (Default: galx-nova)
     if (!requestedModel || typeof requestedModel !== 'string' || requestedModel.trim().length === 0) {
-      return this.catalog.get('gpt-5-6-luna') || this.catalog.get('gpt-5-6-luna-low') || EXCLUSIVE_MODEL_CATALOG[0];
+      return this.catalog.get('galx-nova') || EXCLUSIVE_MODEL_CATALOG[0];
     }
 
     if (this.fastPathCache.has(requestedModel)) {
@@ -133,7 +114,7 @@ export class ModelCatalog {
       normalized.includes('dall') ||
       normalized.includes('visual')
     ) {
-      return this.catalog.get('openai-gpt-image-latest') || EXCLUSIVE_MODEL_CATALOG.find(m => m.category === 'image')!;
+      return this.catalog.get('galx-nova-image') || EXCLUSIVE_MODEL_CATALOG.find(m => m.category === 'image')!;
     }
 
     // 5. Strip common provider / framework / routing prefixes and version suffixes
@@ -148,91 +129,101 @@ export class ModelCatalog {
       return this.catalog.get(cleanId)!;
     }
 
-    // 6. Developer aliases dictionary (maps all mental models to gpt-5-6-luna-low or image)
+    // 6. Developer aliases dictionary (maps all mental models to galx-nova or galx-nova-image)
     const aliases: Record<string, string> = {
-      // Primary Choice: gpt-5-6-luna-low
-      'gpt-5-6-luna-low': 'gpt-5-6-luna-low',
-      'gpt-5.6-luna-low': 'gpt-5-6-luna-low',
-      'gpt5-6-luna-low': 'gpt-5-6-luna-low',
-      'gpt5.6-luna-low': 'gpt-5-6-luna-low',
-      'luna-low': 'gpt-5-6-luna-low',
-      'luna': 'gpt-5-6-luna-low',
-      'gpt-luna': 'gpt-5-6-luna-low',
-      'gpt5-luna': 'gpt-5-6-luna-low',
-      'gpt5.6-luna': 'gpt-5-6-luna-low',
-      'gpt-5.6-luna': 'gpt-5-6-luna-low',
-      'gpt-5-6-luna': 'gpt-5-6-luna-low',
-      'codex-luna': 'gpt-5-6-luna-low',
-      'fast': 'gpt-5-6-luna-low',
-      'flash': 'gpt-5-6-luna-low',
-      'speed': 'gpt-5-6-luna-low',
-      'turbo': 'gpt-5-6-luna-low',
-      'mini': 'gpt-5-6-luna-low',
-      'small': 'gpt-5-6-luna-low',
-      'cheap': 'gpt-5-6-luna-low',
-      'velocity': 'gpt-5-6-luna-low',
-      'instant': 'gpt-5-6-luna-low',
-      'autocomplete': 'gpt-5-6-luna-low',
-      'low-cost': 'gpt-5-6-luna-low',
-      'default': 'gpt-5-6-luna-low',
-      'primary': 'gpt-5-6-luna-low',
+      // Primary Public Models
+      'galx-nova': 'galx-nova',
+      'galx_nova': 'galx-nova',
+      'nova': 'galx-nova',
+      'galx-nova-image': 'galx-nova-image',
+      'galx_nova_image': 'galx-nova-image',
+      'nova-image': 'galx-nova-image',
+      'nova_image': 'galx-nova-image',
 
-      // Backward compatibility aliases map to gpt-5-6-luna-low
-      'astra': 'gpt-5-6-luna-low',
-      'gpt-6-astra': 'gpt-5-6-luna-low',
-      'gpt6-astra': 'gpt-5-6-luna-low',
-      'gpt-6': 'gpt-5-6-luna-low',
-      'gpt6': 'gpt-5-6-luna-low',
-      'codex-astra': 'gpt-5-6-luna-low',
-      'flagship': 'gpt-5-6-luna-low',
-      'sota': 'gpt-5-6-luna-low',
-      'best': 'gpt-5-6-luna-low',
-      'smart': 'gpt-5-6-luna-low',
-      'sol': 'gpt-5-6-luna-low',
-      'gpt-sol': 'gpt-5-6-luna-low',
-      'gpt5-sol': 'gpt-5-6-luna-low',
-      'gpt5.6-sol': 'gpt-5-6-luna-low',
-      'gpt-5.6-sol': 'gpt-5-6-luna-low',
-      'gpt-5-6-sol': 'gpt-5-6-luna-low',
-      'gpt5.6': 'gpt-5-6-luna-low',
-      'gpt-5.6': 'gpt-5-6-luna-low',
-      'gpt5': 'gpt-5-6-luna-low',
-      'gpt-5': 'gpt-5.6-sol',
-      'codex-sol': 'gpt-5-6-luna-low',
-      'workhorse': 'gpt-5-6-luna-low',
-      'terra': 'gpt-5-6-luna-low',
-      'gpt-terra': 'gpt-5-6-luna-low',
-      'gpt5-terra': 'gpt-5-6-luna-low',
-      'gpt5.6-terra': 'gpt-5-6-luna-low',
-      'gpt-5.6-terra': 'gpt-5-6-luna-low',
-      'gpt-5-6-terra': 'gpt-5-6-luna-low',
-      'codex-terra': 'gpt-5-6-luna-low',
-      'balanced': 'gpt-5-6-luna-low',
-      'reasoning': 'gpt-5-6-luna-low',
-      'reasoner': 'gpt-5-6-luna-low',
-      'thinking': 'gpt-5-6-luna-low',
-      '5.5': 'gpt-5-6-luna-low',
-      'gpt-5.5': 'gpt-5-6-luna-low',
-      'gpt5.5': 'gpt-5-6-luna-low',
-      'gpt-5-5': 'gpt-5-6-luna-low',
-      'codex-5.5': 'gpt-5-6-luna-low',
-      'previous': 'gpt-5-6-luna-low',
-      'legacy': 'gpt-5-6-luna-low',
-      'embedding': 'gpt-5-6-luna-low',
+      // Text and reasoning execution aliases
+      'gpt-5-6-luna-low': 'galx-nova',
+      'gpt-5.6-luna-low': 'galx-nova',
+      'gpt5-6-luna-low': 'galx-nova',
+      'gpt5.6-luna-low': 'galx-nova',
+      'luna-low': 'galx-nova',
+      'luna': 'galx-nova',
+      'gpt-luna': 'galx-nova',
+      'gpt5-luna': 'galx-nova',
+      'gpt5.6-luna': 'galx-nova',
+      'gpt-5.6-luna': 'galx-nova',
+      'gpt-5-6-luna': 'galx-nova',
+      'codex-luna': 'galx-nova',
+      'fast': 'galx-nova',
+      'flash': 'galx-nova',
+      'speed': 'galx-nova',
+      'turbo': 'galx-nova',
+      'mini': 'galx-nova',
+      'small': 'galx-nova',
+      'cheap': 'galx-nova',
+      'velocity': 'galx-nova',
+      'instant': 'galx-nova',
+      'autocomplete': 'galx-nova',
+      'low-cost': 'galx-nova',
+      'default': 'galx-nova',
+      'primary': 'galx-nova',
+
+      // Backward compatibility aliases map to galx-nova
+      'astra': 'galx-nova',
+      'gpt-6-astra': 'galx-nova',
+      'gpt6-astra': 'galx-nova',
+      'gpt-6': 'galx-nova',
+      'gpt6': 'galx-nova',
+      'codex-astra': 'galx-nova',
+      'flagship': 'galx-nova',
+      'sota': 'galx-nova',
+      'best': 'galx-nova',
+      'smart': 'galx-nova',
+      'sol': 'galx-nova',
+      'gpt-sol': 'galx-nova',
+      'gpt5-sol': 'galx-nova',
+      'gpt5.6-sol': 'galx-nova',
+      'gpt-5.6-sol': 'galx-nova',
+      'gpt-5-6-sol': 'galx-nova',
+      'gpt5.6': 'galx-nova',
+      'gpt-5.6': 'galx-nova',
+      'gpt5': 'galx-nova',
+      'gpt-5': 'galx-nova',
+      'codex-sol': 'galx-nova',
+      'workhorse': 'galx-nova',
+      'terra': 'galx-nova',
+      'gpt-terra': 'galx-nova',
+      'gpt5-terra': 'galx-nova',
+      'gpt5.6-terra': 'galx-nova',
+      'gpt-5.6-terra': 'galx-nova',
+      'gpt-5-6-terra': 'galx-nova',
+      'codex-terra': 'galx-nova',
+      'balanced': 'galx-nova',
+      'reasoning': 'galx-nova',
+      'reasoner': 'galx-nova',
+      'thinking': 'galx-nova',
+      '5.5': 'galx-nova',
+      'gpt-5.5': 'galx-nova',
+      'gpt5.5': 'galx-nova',
+      'gpt-5-5': 'galx-nova',
+      'codex-5.5': 'galx-nova',
+      'previous': 'galx-nova',
+      'legacy': 'galx-nova',
+      'embedding': 'galx-nova',
 
       // Visual / Image Synthesis variations
-      'image': 'openai-gpt-image-latest',
-      'images': 'openai-gpt-image-latest',
-      'generate-image': 'openai-gpt-image-latest',
-      'image-generation': 'openai-gpt-image-latest',
-      'gpt-image': 'openai-gpt-image-latest',
-      'openai-gpt-image-2': 'openai-gpt-image-latest',
-      'gpt-image-latest': 'openai-gpt-image-latest',
-      'gpt-image-2': 'openai-gpt-image-latest',
-      'dalle': 'openai-gpt-image-latest',
-      'dalle-3': 'openai-gpt-image-latest',
-      'dall-e': 'openai-gpt-image-latest',
-      'dall-e-3': 'openai-gpt-image-latest',
+      'image': 'galx-nova-image',
+      'images': 'galx-nova-image',
+      'generate-image': 'galx-nova-image',
+      'image-generation': 'galx-nova-image',
+      'gpt-image': 'galx-nova-image',
+      'openai-gpt-image-latest': 'galx-nova-image',
+      'openai-gpt-image-2': 'galx-nova-image',
+      'gpt-image-latest': 'galx-nova-image',
+      'gpt-image-2': 'galx-nova-image',
+      'dalle': 'galx-nova-image',
+      'dalle-3': 'galx-nova-image',
+      'dall-e': 'galx-nova-image',
+      'dall-e-3': 'galx-nova-image',
     };
 
     if (aliases[normalized] && this.catalog.has(aliases[normalized])) {
@@ -252,8 +243,8 @@ export class ModelCatalog {
       return this.catalog.get(aliases[dotNormalized])!;
     }
 
-    // 8. Zero-hesitation ultimate fallback: default choice LLM (gpt-5-6-luna-low)
-    return this.catalog.get('gpt-5-6-luna-low') || EXCLUSIVE_MODEL_CATALOG[0];
+    // 8. Zero-hesitation ultimate fallback: default choice LLM (galx-nova)
+    return this.catalog.get('galx-nova') || EXCLUSIVE_MODEL_CATALOG[0];
   }
 
   public static listAll(): ModelSpecItem[] {

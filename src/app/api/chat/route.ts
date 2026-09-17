@@ -82,7 +82,7 @@ async function previewPOST(req: NextRequest) {
     const rawBody = await parseChatJsonBody(req);
     const requestedModel = typeof rawBody.model === 'string' && rawBody.model.trim()
       ? rawBody.model.trim()
-      : 'gpt-5.6-sol';
+      : 'galx-nova';
     const userId = authResult.userId || 'anonymous_developer';
 
     try {

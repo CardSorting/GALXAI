@@ -52,9 +52,9 @@
   },
   "images": {
     "reviewer": "Product, Safety and Security maintainer",
-    "note": "Community Explore moderation: 1-click hide to private, audit logging, feed exclusion, and undo toast UX",
+    "note": "Mask OpenAI underlying models behind GALX Nova and GALX Nova-image public abstraction boundary",
     "reviewed_at": "2026-09-17",
-    "review_by": "2026-09-24",
+    "review_by": "2026-10-17",
     "evidence": {
       "docs/knowledge/audits/2026-09-17-community-explore-moderation-review.json": "29e3f7e47ce9c8076b46bff059648e3279aa8782bdbaa9234cd2740017ef91a1"
     },
@@ -94,7 +94,7 @@
       "src/app/images/page.tsx": "8ef73a8fe0c2a6e0a223c7b992f5d4138c1e877d835db96b5740813fe5ab36f8",
       "src/app/v1/images/assets/[token]/route.ts": "044fa9a26b97f227e4d920e2cd2d58892e430b4f073656afe76e027093b79168",
       "src/app/v1/images/assets/[token]/thumbnail/route.ts": "e505a1372b026e66e2555c13b6b2fa406ec1e198588800896de05d9d953d73f2",
-      "src/app/v1/images/generations/route.ts": "f805349641364e3caea2a83275040558cf7d05db595d75450331409e54e20e85",
+      "src/app/v1/images/generations/route.ts": "096f1eb2d793186a2f9fc2bb06e987ae18d17a5d310d6855fa88b838aaebc491",
       "src/app/v1/images/requests/[id]/route.ts": "0bf6cfb29e706629565c90e2efbf3e601109820a3d92bfb8a83af70c1c1210f5",
       "src/app/v1/images/requests/[id]/stream/route.ts": "721bcb68476feeed8aa1ae6508bae784c4a5be77b067597a479c5ccafe827a84",
       "src/app/v1/images/sessions/[sessionId]/route.ts": "3571f44b6fb521942a0a2b8b3fc7b7e9196488d68ea5d5261de5d92edf771dc7",
@@ -110,7 +110,7 @@
       "src/components/images/use-image-studio.ts": "22b3ac9a41f10bceb777942da4c63ea84e079e7c85aff5d7027d019f0f1b8ff1",
       "src/contexts/GenerationAllowanceContext.tsx": "d73875872f3814131bfc18029e69a72091993d906af63058ca37282f2c261a7c",
       "src/core/broccolidb/BroccoliImageLibraryBuffer.ts": "328e1ee0411c1da2408527010836ef0a0fc4f3b1c10370c2d2ab5b700036e7d2",
-      "src/core/contracts/GalxContracts.ts": "1d06cea3dda929f6e3766fba62532e308a02ee73c2299875780357a890aadcaa",
+      "src/core/contracts/GalxContracts.ts": "5d38a00a4aa436cde9cf8ef5a47d754c68423b6181719ae83125248668751c2b",
       "src/core/storage/GalxUnifiedR2StorageManager.ts": "6ddf189a26e68f37a1109b416d6b5137df0288476cbe34801f0721845d349bf4",
       "src/core/storage/bounded-object-body.ts": "f2edc7ee66b0a76a19dc3cd46868654158113833f2c123b8b42a3600bb47bbb2",
       "src/lib/billing/free-generation-contract.ts": "dc21e2e396feafb371e64be27c68c62ac29e1a748c4d521003f67ac6286bca6a",

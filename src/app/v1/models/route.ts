@@ -36,8 +36,8 @@ async function previewGET(req: NextRequest) {
     );
 
     let requiredTier = 'developer';
-    if (m.id.includes('codex') || m.id.includes('terra')) {
-      requiredTier = 'small-business';
+    if (m.category === 'image') {
+      requiredTier = 'enterprise';
     }
 
     return {

@@ -17,7 +17,7 @@ export async function OPTIONS() {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-api-key, anthropic-version, anthropic-beta, x-galx-session-affinity, X-Galx-Session-Affinity',
-      'Access-Control-Expose-Headers': 'X-Galx-Session-Affinity, X-Galx-Model-Resolved, X-Galx-Router, Retry-After',
+      'Access-Control-Expose-Headers': 'X-Galx-Session-Affinity, X-Galx-Model-Resolved, Retry-After',
       'Access-Control-Max-Age': '86400'
     }
   });
@@ -113,7 +113,7 @@ async function previewPOST(req: NextRequest) {
       }));
     }
 
-    const requestedModel = body.model || 'claude-3-7-sonnet';
+    const requestedModel = body.model || 'galx-nova';
     const isStream = body.stream === true || body.stream === 'true' || body.stream === 1;
 
     const chatRequest: ChatCompletionRequest = {
@@ -238,9 +238,8 @@ async function previewPOST(req: NextRequest) {
         'Cache-Control': 'no-cache, no-transform',
         'Connection': 'keep-alive',
         'X-Galx-Model-Resolved': requestedModel,
-        'X-Galx-Router': 'apex-v2',
         'Access-Control-Allow-Origin': '*',
-        'Access-Control-Expose-Headers': 'X-Galx-Session-Affinity, X-Galx-Model-Resolved, X-Galx-Router, Retry-After'
+        'Access-Control-Expose-Headers': 'X-Galx-Session-Affinity, X-Galx-Model-Resolved, Retry-After'
       };
       if (result.shardId) {
         const affinityTicket = GalxCryptoVault.sealAffinityTicket(result.shardId);
@@ -296,9 +295,8 @@ async function previewPOST(req: NextRequest) {
 
     const resHeaders: Record<string, string> = {
       'X-Galx-Model-Resolved': requestedModel,
-      'X-Galx-Router': 'apex-v2',
       'Access-Control-Allow-Origin': '*',
-      'Access-Control-Expose-Headers': 'X-Galx-Session-Affinity, X-Galx-Model-Resolved, X-Galx-Router, Retry-After'
+      'Access-Control-Expose-Headers': 'X-Galx-Session-Affinity, X-Galx-Model-Resolved, Retry-After'
     };
     if (result.shardId) {
       const affinityTicket = GalxCryptoVault.sealAffinityTicket(result.shardId);
@@ -340,7 +338,7 @@ async function previewPOST(req: NextRequest) {
           status: 429,
           headers: {
             'Access-Control-Allow-Origin': '*',
-            'Access-Control-Expose-Headers': 'Retry-After, RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset, X-RateLimit-Reset, X-Galx-Request-Id, X-Galx-Router, X-Galx-Session-Affinity',
+            'Access-Control-Expose-Headers': 'Retry-After, RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset, X-RateLimit-Reset, X-Galx-Request-Id, X-Galx-Session-Affinity',
             'Retry-After': '2',
             'RateLimit-Limit': '60',
             'RateLimit-Remaining': '0',
