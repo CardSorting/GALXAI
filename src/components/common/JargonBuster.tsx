@@ -12,7 +12,7 @@ export interface JargonTerm {
 
 export const JARGON_GLOSSARY: Record<string, JargonTerm> = {
   'sla-9999': {
-    title: 'High-Availability Anycast Routing',
+    title: 'High-Availability Edge Routing',
     shortDesc: 'Multi-region automated failover ensuring requests are continuously routed to responsive compute clusters.',
     plainEnglishAnalogy: 'Like having an enterprise electrical backup generator that immediately kicks in if a main power line flickers.',
     category: 'Reliability'

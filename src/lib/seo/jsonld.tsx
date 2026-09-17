@@ -196,7 +196,7 @@ export function createSoftwareAppSchema(props?: {
           '@type': 'Review',
           author: { '@type': 'Person', name: 'Sarah Lindqvist' },
           datePublished: '2026-03-01',
-          reviewBody: 'The 75% prompt caching rebate plus sub-15ms Anycast TTFT solved all our rate limit spikes under high concurrency.',
+          reviewBody: 'The 75% prompt caching rebate plus low-latency edge routing solved all our rate limit spikes under high concurrency.',
           reviewRating: {
             '@type': 'Rating',
             ratingValue: '5',

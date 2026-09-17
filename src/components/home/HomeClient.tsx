@@ -147,9 +147,9 @@ export function HomeClient() {
               <div className="w-7 h-7 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
                 <Coins className="w-3.5 h-3.5" />
               </div>
-              <h3 className="text-sm font-bold text-white">25%–40% Wholesale Rates</h3>
+              <h3 className="text-sm font-bold text-white">Sustainable Rates</h3>
               <p className="text-xs text-zinc-400 leading-relaxed font-sans">
-                0% platform markup on GPT-5.6 and Claude frontier models.
+                Predictable, low-overhead developer rates on GALX Nova and Nova-image.
               </p>
             </div>
 
@@ -159,7 +159,7 @@ export function HomeClient() {
               </div>
               <h3 className="text-sm font-bold text-white">Zero 429 Stalls</h3>
               <p className="text-xs text-zinc-400 leading-relaxed font-sans">
-                Automatic Anycast failover prevents agent loops from hitting rate limits.
+                Automatic high-availability failover prevents agent loops from hitting rate limits.
               </p>
             </div>
 
@@ -304,7 +304,7 @@ export function HomeClient() {
                   <span className="text-emerald-400 font-bold bg-emerald-500/10 px-1.5 py-0.5 rounded">Managed</span>
                 </div>
                 <p className="text-[11px] text-zinc-400 font-sans leading-relaxed">
-                  Managed sub-15ms Anycast edge with automatic failover vs self-hosted proxy ops.
+                  Managed edge routing with automatic failover vs self-hosted proxy operations.
                 </p>
               </div>
               <span className="text-[10px] text-amber-400 group-hover:translate-x-0.5 transition-transform flex items-center gap-1">

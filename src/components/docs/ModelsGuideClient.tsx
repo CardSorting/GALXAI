@@ -26,7 +26,7 @@ export function ModelsGuideClient() {
         <header className="max-w-3xl pb-8 pt-6">
           <h1 className="text-3xl font-semibold tracking-[-0.03em] sm:text-5xl">Choose a model</h1>
           <p className="mt-4 max-w-2xl text-base leading-7 text-zinc-300">
-            GALXAI provides OpenAI GPT-5.6 Luna for high-velocity text, coding, and reasoning workloads, alongside OpenAI Visual Synthesis for image generation capabilities.
+            GALXAI provides GALX Nova for sustainable intelligence across high-velocity text, coding, and reasoning workloads, alongside GALX Nova-image for high-fidelity visual synthesis.
           </p>
           <Link href="/models" className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-indigo-200 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300">
             Open the model catalog

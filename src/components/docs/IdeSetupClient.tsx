@@ -26,7 +26,7 @@ export function IdeSetupClient() {
         'Navigate to Models > OpenAI API Key.',
         'Toggle "Override OpenAI Base URL" and enter https://galx.ai/v1.',
         'Paste your API key (galx_live_...).',
-        'Add model names: gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna.',
+        'Add model names: galx-nova, galx-nova-image.',
       ],
       snippet: `// In Cursor Settings -> Models:
 Override Base URL: https://galx.ai/v1
@@ -34,7 +34,7 @@ API Key: galx_live_your_gateway_key
 
 // In your project root as .cursorrules:
 {
-  "default_model": "gpt-5.6-sol",
+  "default_model": "galx-nova",
   "base_url": "https://galx.ai/v1",
   "caching": true,
   "reasoning_effort": "high"
@@ -47,13 +47,13 @@ API Key: galx_live_your_gateway_key
         'Select OpenAI Compatible Provider.',
         'Set Endpoint URL: https://galx.ai/v1/chat/completions.',
         'Set API Key: galx_live_your_gateway_key.',
-        'Set Preferred Model: gpt-5.6-sol.',
+        'Set Preferred Model: galx-nova.',
       ],
       snippet: `// .windsurfrules in your project root:
 {
   "provider": "openai-compatible",
   "api_base": "https://galx.ai/v1",
-  "model": "gpt-5.6-sol",
+  "model": "galx-nova",
   "temperature": 0.2,
   "max_tokens": 8192
 }`,
@@ -82,16 +82,9 @@ claude "Refactor this module with full test coverage"`,
       snippet: `{
   "models": [
     {
-      "title": "GALXAI GPT-5.6 Sol (Flagship)",
+      "title": "GALX Nova (Sustainable Intelligence)",
       "provider": "openai",
-      "model": "gpt-5.6-sol",
-      "apiBase": "https://galx.ai/v1",
-      "apiKey": "galx_live_your_gateway_key"
-    },
-    {
-      "title": "GALXAI GPT-5.6 Terra (Balanced)",
-      "provider": "openai",
-      "model": "gpt-5.6-terra",
+      "model": "galx-nova",
       "apiBase": "https://galx.ai/v1",
       "apiKey": "galx_live_your_gateway_key"
     }
@@ -105,13 +98,14 @@ claude "Refactor this module with full test coverage"`,
         'Select API Provider: "OpenAI Compatible".',
         'Enter Base URL: https://galx.ai/v1.',
         'Enter API Key: galx_live_your_gateway_key.',
-        'Enter Model ID: gpt-5.6-sol.',
+        'Enter Model ID: galx-nova.',
       ],
       snippet: `// Cline Provider Settings:
 API Provider: OpenAI Compatible
 Base URL: https://galx.ai/v1
 API Key: galx_live_your_gateway_key
-Model ID: gpt-5.6-sol
+Model ID: galx-nova
+Context Window: 200000
 Context Window: 200000
 Max Output: 16384`,
     },

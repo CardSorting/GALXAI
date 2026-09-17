@@ -39,29 +39,9 @@ interface ModelOption {
 
 const ROI_MODELS: ModelOption[] = [
   {
-    id: 'gpt-5.6-sol',
-    name: 'OpenAI GPT-5.6 Sol (Reasoning & Code)',
-    provider: 'OpenAI',
-    inputCost1M: 3.75,
-    outputCost1M: 15.0,
-    cachedInputCost1M: 1.25,
-    retailInput1M: 5.0,
-    retailOutput1M: 20.0,
-  },
-  {
-    id: 'gpt-5.6-terra',
-    name: 'OpenAI GPT-5.6 Terra (Balanced Production)',
-    provider: 'OpenAI',
-    inputCost1M: 2.25,
-    outputCost1M: 9.0,
-    cachedInputCost1M: 0.75,
-    retailInput1M: 3.0,
-    retailOutput1M: 12.0,
-  },
-  {
-    id: 'gpt-5.6-luna',
-    name: 'OpenAI GPT-5.6 Luna (High-Velocity)',
-    provider: 'OpenAI',
+    id: 'galx-nova',
+    name: 'GALX Nova (Sustainable Intelligence)',
+    provider: 'GALX',
     inputCost1M: 0.75,
     outputCost1M: 3.0,
     cachedInputCost1M: 0.25,
@@ -76,7 +56,7 @@ export function RoiCalculatorClient() {
   const [avgPromptTokens, setAvgPromptTokens] = useState<number>(1200);
   const [avgOutputTokens, setAvgOutputTokens] = useState<number>(350);
   const [cacheHitRate, setCacheHitRate] = useState<number>(65); // 65% hit rate
-  const [selectedModelId, setSelectedModelId] = useState<string>('gpt-5.6-terra');
+  const [selectedModelId, setSelectedModelId] = useState<string>('galx-nova');
   const [copiedReport, setCopiedReport] = useState<boolean>(false);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
   const [inboundEmail, setInboundEmail] = useState('');

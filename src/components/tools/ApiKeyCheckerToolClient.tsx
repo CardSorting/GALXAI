@@ -165,7 +165,7 @@ export function ApiKeyCheckerToolClient() {
             API Key Validator &amp; Health Tester
           </h1>
           <p className="text-sm sm:text-base text-zinc-300 leading-relaxed max-w-3xl font-sans">
-            Verify API key format entropy, active model permissions, and Anycast edge response latency with 100% client-side privacy guarantees.
+            Verify API key format entropy, active model permissions, and edge response latency with 100% client-side privacy guarantees.
           </p>
 
           <div className="p-3.5 rounded-2xl bg-black/60 border border-white/10 flex items-center gap-2 text-zinc-400 font-mono text-xs">
@@ -242,7 +242,7 @@ export function ApiKeyCheckerToolClient() {
                       <span className="text-white font-bold block">{testResult.keyType}</span>
                     </div>
                     <div className="p-3 rounded-xl bg-black/50 border border-white/5 space-y-1">
-                      <span className="text-[10px] text-zinc-400 block">Anycast Ping:</span>
+                      <span className="text-[10px] text-zinc-400 block">Edge Ping:</span>
                       <span className="text-cyan-300 font-bold block">{testResult.simulatedLatencyMs}ms TTFT</span>
                     </div>
                     <div className="p-3 rounded-xl bg-black/50 border border-white/5 space-y-1">

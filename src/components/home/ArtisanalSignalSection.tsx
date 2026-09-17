@@ -150,7 +150,7 @@ export function ArtisanalSignalSection() {
     setTimeout(() => {
       setIsVerifyingEnclave(false);
       setEnclaveAuditLog(
-        `✅ [CRYPTOGRAPHIC AUDIT PASSED] GPT-5.6 ${tier.toUpperCase()} Enclave Verified\n✔ Data Retention: 0 Days (Strict ZDR Policy)\n✔ Customer Prompt Training: 100% Exemption Guaranteed\n✔ Egress / Ingress Transfer Fee: $0.00 / GB\n✔ Latency: 5ms Local Anycast Edge Handshake`
+        `✅ [CRYPTOGRAPHIC AUDIT PASSED] GALX Nova Enclave Verified\n✔ Data Retention: 0 Days (Strict ZDR Policy)\n✔ Customer Prompt Training: 100% Exemption Guaranteed\n✔ Egress / Ingress Transfer Fee: $0.00 / GB\n✔ High-Availability Edge Verified`
       );
     }, 600);
   };
@@ -221,7 +221,7 @@ export function ArtisanalSignalSection() {
     setTokensCounter(0);
 
     const targetOutput = customText
-      ? `⚡ GALXAI v5.6 [Anycast Edge Gateway • Sub-15ms Dynamic Route]\n✔ Wholesale Tier-5 Applied (-38% Retail List)\n✔ Prefix Cache Hit 100%\n\n"Simulated response for: '${customText}'. Zero backend proxies needed. 100% cache pass-through active. Profit on user #1."`
+      ? `⚡ GALX Nova [Managed Edge Ingress]\n✔ Sustainable Tier Applied\n✔ Prefix Cache Active\n\n"Simulated response for: '${customText}'. Clean execution without infrastructure overhead."`
       : CLI_PRESETS[idx].output;
 
     let currentLength = 0;
@@ -791,7 +791,7 @@ export function ArtisanalSignalSection() {
                     <span className="text-[10px] font-bold uppercase">Dedicated VPC</span>
                     <span className={`w-2 h-2 rounded-full ${enclaveVpcActive ? 'bg-cyan-400 animate-pulse' : 'bg-zinc-600'}`} />
                   </div>
-                  <span className="text-xs font-bold block">Private Anycast</span>
+                  <span className="text-xs font-bold block">Private Edge Route</span>
                   <span className="text-[10px] text-zinc-400 font-sans block">Sub-15ms edge routing</span>
                 </div>
 
@@ -1035,10 +1035,10 @@ export function ArtisanalSignalSection() {
                 <span>INCREASE PERFORMANCE</span>
               </div>
               <h4 className="text-xl font-bold text-white leading-snug">
-                Sub-15ms Anycast Routing &amp; Continuous Cache
+                High-Availability Edge Routing &amp; Continuous Cache
               </h4>
               <p className="text-zinc-400 text-xs sm:text-sm leading-relaxed font-sans">
-                Maximize the speed and efficiency of your AI projects with our high-performance edge infrastructure. Multi-tiered continuous prefix caching cuts token latency by 75% on Frontier GPT models.
+                Maximize the speed and efficiency of your AI projects with our high-performance edge infrastructure. Multi-tiered continuous prefix caching cuts token latency by 75% on GALX Nova.
               </p>
             </div>
 
@@ -1268,7 +1268,7 @@ export function ArtisanalSignalSection() {
                 Add 1 line. Instantly cut your OpenAI bill by 30%–40%.
               </h4>
               <p className="text-zinc-400 text-sm sm:text-base leading-relaxed font-sans">
-                Keep your existing codebase 100% untouched. Add a single import at the top of your app to automatically route all OpenAI calls through GALXAI with wholesale pricing, Anycast edge failover, and prompt caching.
+                Keep your existing codebase 100% untouched. Add a single import at the top of your app to automatically route all inference calls through GALXAI with sustainable pricing, high-availability edge failover, and prompt caching.
               </p>
 
               <div className="flex items-center gap-4 pt-2 text-xs font-mono text-zinc-400">
@@ -1453,7 +1453,7 @@ export function ArtisanalSignalSection() {
                 <tr className="hover:bg-white/[0.02] transition-colors">
                   <td className="py-4 px-6 font-medium text-white">Traffic spike behavior</td>
                   <td className="py-4 px-6 text-zinc-400">HTTP 429 Rate Limit crashes</td>
-                  <td className="py-4 px-6 font-bold text-emerald-300 bg-emerald-500/5">Instant Anycast Edge Failover</td>
+                  <td className="py-4 px-6 font-bold text-emerald-300 bg-emerald-500/5">Instant High-Availability Edge Failover</td>
                 </tr>
               </tbody>
             </table>

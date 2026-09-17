@@ -51,7 +51,7 @@ export function BenchmarksClient() {
   }, [selectedCategory, sortBy]);
 
   const handleCopyCitation = async () => {
-    const citation = `GALXAI Universal AI Gateway: Real-Time LLM Latency & Throughput Benchmark Leaderboard (Sub-15ms Anycast TTFT, 75% Prompt Caching Rebates). Source: https://galx.ai/benchmarks`;
+    const citation = `GALXAI: Real-Time LLM Latency & Throughput Benchmark Leaderboard (Sub-15ms Edge TTFT, 75% Prompt Caching Rebates). Source: https://galx.ai/benchmarks`;
     const ok = await safeCopyToClipboard(citation);
     if (ok) {
       setCopiedCitation(true);
@@ -107,7 +107,7 @@ export function BenchmarksClient() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 text-xs font-mono font-bold">
               <Activity className="w-3.5 h-3.5" />
-              <span>GLOBAL ANYCAST TELEMETRY LEADERBOARD</span>
+              <span>GLOBAL EDGE TELEMETRY LEADERBOARD</span>
             </div>
             <div className="flex items-center gap-2">
               <button
@@ -121,7 +121,7 @@ export function BenchmarksClient() {
                 variant="pill"
                 label="Share"
                 title="GALXAI LLM Latency & Throughput Benchmark Leaderboard"
-                description="Live Time-To-First-Token, tokens/sec throughput, and prompt cache hit latency across GPT-5.6 Sol, Terra, and Luna."
+                description="Live Time-To-First-Token, tokens/sec throughput, and prompt cache hit latency across GALX Nova."
               />
             </div>
           </div>
@@ -130,12 +130,12 @@ export function BenchmarksClient() {
             Real-Time LLM Latency &amp; Speed Leaderboard
           </h1>
           <p className="text-sm sm:text-base text-zinc-300 leading-relaxed max-w-3xl font-sans">
-            Authoritative, end-to-end telemetry measuring Time-To-First-Token (TTFT), generation velocity (tokens/second), and prompt caching acceleration across OpenAI models on the GALXAI Anycast edge.
+            Authoritative, end-to-end telemetry measuring Time-To-First-Token (TTFT), generation velocity (tokens/second), and prompt caching acceleration across GALX Nova on the global edge.
           </p>
 
           {/* Inverted Pyramid AEO Quick Summary */}
           <div className="p-4 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-200 text-xs leading-relaxed font-sans font-medium">
-            <strong>Key Finding:</strong> GPT-5.6 Luna achieves the fastest raw speed (11.8ms TTFT, 145.2 tok/s), while warm prompt cache hits reduce TTFT to 6.4ms–7.8ms across all models with a 75% token cost reduction.
+            <strong>Key Finding:</strong> GALX Nova achieves high-velocity speed (11.8ms TTFT, 145.2 tok/s), while warm prompt cache hits reduce TTFT to 6.4ms–7.8ms with a 75% token cost reduction.
           </div>
         </section>
 
@@ -197,7 +197,7 @@ export function BenchmarksClient() {
                 <Clock className="w-4 h-4 text-cyan-400" />
                 <span>Verified Gateway Telemetry Matrix</span>
               </h2>
-              <p className="text-xs text-zinc-400">Sorted by live Anycast edge response benchmarks.</p>
+              <p className="text-xs text-zinc-400">Sorted by live edge response benchmarks.</p>
             </div>
 
             {/* Filter & Sort Controls */}
@@ -318,7 +318,7 @@ export function BenchmarksClient() {
               <HelpCircle className="w-4 h-4 text-amber-400" />
               <span>Direct Answer Benchmark Knowledge Base</span>
             </h2>
-            <p className="text-xs text-zinc-400">Telemetry methodology, TTFT measurement, and Anycast architecture.</p>
+            <p className="text-xs text-zinc-400">Telemetry methodology, TTFT measurement, and edge architecture.</p>
           </div>
 
           <div className="space-y-3 pt-2">

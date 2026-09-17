@@ -26,7 +26,7 @@ import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 
 export function TokenCounterToolClient() {
   const [inputText, setInputText] = useState<string>(
-    'The GALXAI Anycast Edge Proxy routes inference requests with sub-15ms Time-To-First-Token and automated 75% prompt caching discounts across frontier models.'
+    'GALX Nova provides sustainable intelligence with low-latency Time-To-First-Token and automated 75% prompt caching discounts across managed models.'
   );
   const [selectedTokenizer, setSelectedTokenizer] = useState<'o200k_base' | 'cl100k_base'>('o200k_base');
   const [selectedLang, setSelectedLang] = useState<'python' | 'typescript'>('python');

@@ -143,8 +143,8 @@ Session ID: \${crypto.randomUUID()}
     id: 'agent_recursion',
     title: 'Runaway Autonomous Agent Cycles',
     sharePercent: 16.0,
-    currentModel: 'gpt-5.6-terra (Unbounded Loop)',
-    remediatedModel: 'gpt-5.6-terra (Circuit Breaker Clamped)',
+    currentModel: 'galx-nova (Unbounded Loop)',
+    remediatedModel: 'galx-nova (Circuit Breaker Clamped)',
     rootCause: 'Autonomous subagent stuck in 48-turn recursive loop on unhandled linter exception, burning $120+ in 4 minutes.',
     galxAction: 'A deterministic turn ceiling blocks additional calls and returns a structured policy error.',
     sampleBeforeCode: `// Unbounded Agent Loop

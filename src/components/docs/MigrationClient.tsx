@@ -46,12 +46,12 @@ Models: gpt-4o, claude-3-5-sonnet`,
       after: `// GALXAI Cursor settings override:
 Override Base URL: https://galx.ai/v1
 API Key: galx_live_your_gateway_key
-Models: gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna`,
+Models: galx-nova, galx-nova-image`,
       env: `// In .cursorrules or .vscode/settings.json:
 {
   "openai.baseUrl": "https://galx.ai/v1",
   "openai.apiKey": "galx_live_your_gateway_key",
-  "openai.model": "gpt-5.6-sol"
+  "openai.model": "galx-nova"
 }`,
     },
     openrouter: {
@@ -93,7 +93,7 @@ const galxai = createOpenAI({
 });
 
 const result = streamText({
-  model: galxai("gpt-5.6-sol"),
+  model: galxai("galx-nova"),
   prompt: "Build a responsive header",
 });`,
       env: `GALXAI_API_KEY="galx_live_your_gateway_key"`,
@@ -111,7 +111,7 @@ llm = ChatOpenAI(
 from langchain_openai import ChatOpenAI
 
 llm = ChatOpenAI(
-    model="gpt-5.6-sol",
+    model="galx-nova",
     openai_api_base="https://galx.ai/v1",
     openai_api_key="galx_live_your_gateway_key"
 )`,
@@ -131,7 +131,7 @@ response = litellm.completion(
 import litellm
 
 response = litellm.completion(
-    model="openai/gpt-5.6-sol",
+    model="openai/galx-nova",
     api_base="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key",
     messages=[{"role": "user", "content": "Hello!"}]
@@ -149,7 +149,7 @@ llm = OpenAI(model="gpt-4o")`,
 from llama_index.llms.openai import OpenAI
 
 llm = OpenAI(
-    model="gpt-5.6-sol",
+    model="galx-nova",
     api_base="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )`,
@@ -164,7 +164,7 @@ Headers:  Authorization: Bearer sk-proj-...`,
       after: `// GALXAI High-Throughput Wholesale Endpoint
 Endpoint: https://galx.ai/v1/chat/completions
 Headers:  Authorization: Bearer galx_live_your_gateway_key
-Payload:  { "model": "gpt-5.6-sol", "messages": [...] }`,
+Payload:  { "model": "galx-nova", "messages": [...] }`,
       env: `URL: https://galx.ai/v1/chat/completions
 HEADER: Authorization: Bearer galx_live_your_gateway_key`,
     },

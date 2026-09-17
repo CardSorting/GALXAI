@@ -19,17 +19,8 @@ export function ModelArchitectView({ model }: ModelArchitectViewProps) {
   const isImage = model.category === 'image';
 
   const benchmarkScores = React.useMemo(() => {
-    if (model.id === 'gpt-5.6-sol') {
-      return { humanEval: 94.8, sweBench: 59.2, math500: 93.6, gpqaDiamond: 72.1, multilingualMmlu: 91.4 };
-    }
-    if (model.id === 'gpt-5.6-terra') {
-      return { humanEval: 90.4, sweBench: 51.6, math500: 88.2, gpqaDiamond: 64.8, multilingualMmlu: 88.0 };
-    }
-    if (model.id === 'gpt-5.6-luna') {
-      return { humanEval: 84.2, sweBench: 42.1, math500: 81.0, gpqaDiamond: 54.2, multilingualMmlu: 82.5 };
-    }
     return { humanEval: 88.0, sweBench: 48.0, math500: 85.0, gpqaDiamond: 60.0, multilingualMmlu: 85.0 };
-  }, [model.id]);
+  }, []);
 
   const imageBenchmarks = {
     genEval: 88.4,

@@ -17,20 +17,20 @@ interface OpenAIModelQuota {
 
 const OPENAI_LUMI_MODELS: OpenAIModelQuota[] = [
   {
-    id: 'gpt-5-6-luna',
-    name: 'OpenAI GPT-5.6 Luna',
-    category: 'Ultra-fast frontier text & code inference engine',
+    id: 'galx-nova',
+    name: 'GALX Nova',
+    category: 'Sustainable intelligence for high-velocity text, reasoning, and code',
     baseReqs: 15000,
     contextWindow: '1.05M tokens',
     cacheSavings: '90% Active',
-    latency: '< 15ms Anycast',
+    latency: '< 15ms Edge Route',
     badge: 'FLAGSHIP INFERENCE ⚡',
     color: 'from-cyan-400 to-blue-500'
   },
   {
-    id: 'openai-gpt-image-latest',
-    name: 'OpenAI Visual Synthesis',
-    category: 'Production-grade visual and image generation engine',
+    id: 'galx-nova-image',
+    name: 'GALX Nova-image',
+    category: 'Production-grade visual and image generation suite',
     baseReqs: 250,
     contextWindow: 'Sanitized Binaries',
     cacheSavings: 'Edge Cached',
@@ -61,13 +61,13 @@ export function LumiWorkloadVisualizer() {
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 text-xs font-semibold mb-3">
             <Cpu className="w-3.5 h-3.5" />
-            Curated OpenAI Compute Capacity Matrix
+            Curated GALX Compute Capacity Matrix
           </div>
           <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
             Select Your Monthly Deposit Level
           </h3>
           <p className="text-xs sm:text-sm text-zinc-400 mt-1 max-w-xl">
-            See how many wholesale API requests you unlock with each compute match level across OpenAI flagship models.
+            See how many developer requests you unlock with each compute match level across GALX Nova and Nova-image.
           </p>
         </div>
 
@@ -104,7 +104,7 @@ export function LumiWorkloadVisualizer() {
                 : 'bg-white/5 border border-white/5 text-zinc-400 hover:text-zinc-200'
             }`}
           >
-            {cat === 'all' ? 'All Models' : cat === 'text' ? 'Text & Code (GPT-5.6 Luna)' : 'Visual Synthesis (Image Generation)'}
+            {cat === 'all' ? 'All Models' : cat === 'text' ? 'Text & Code (GALX Nova)' : 'Visual Synthesis (GALX Nova-image)'}
           </button>
         ))}
       </div>

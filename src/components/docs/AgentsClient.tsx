@@ -27,7 +27,7 @@ export function AgentsClient() {
 
 # Configure GALXAI Gateway as drop-in LLM for CrewAI
 galx_llm = LLM(
-    model="gpt-5.6-sol",
+    model="galx-nova",
     base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key",
     temperature=0.2
@@ -70,7 +70,7 @@ def calculate_cache_savings(input_tokens: int, requests: int, input_rate: float,
 
 # Initialize LangChain LLM connected to GALXAI
 llm = ChatOpenAI(
-    model="gpt-5.6-sol",
+    model="galx-nova",
     openai_api_base="https://galx.ai/v1",
     openai_api_key="galx_live_your_gateway_key"
 )
@@ -90,7 +90,7 @@ from autogen_ext.models.openai import OpenAIChatCompletionClient
 async def main():
     # Connect AutoGen client to GALXAI Gateway
     model_client = OpenAIChatCompletionClient(
-        model="gpt-5.6-sol",
+        model="galx-nova",
         base_url="https://galx.ai/v1",
         api_key="galx_live_your_gateway_key"
     )
@@ -121,7 +121,7 @@ const galxai = openai({
 // Autonomous Multi-Step Swarm Execution with maxSteps
 export async function runAgentWorkflow(task: string) {
   const result = await generateText({
-    model: galxai("gpt-5.6-sol"),
+    model: galxai("galx-nova"),
     maxSteps: 10,
     tools: {
       fetchOrder: tool({

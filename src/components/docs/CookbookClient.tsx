@@ -26,7 +26,7 @@ interface Recipe {
 const RECIPES: Recipe[] = [
   {
     id: 'agent_swarm',
-    title: 'Autonomous Multi-Agent Coding Swarm (LangGraph & CrewAI)',
+    title: 'Multi-Role Agent Swarm Orchestration',
     category: 'Agent Orchestration',
     badge: 'LangGraph',
     description: 'Coordinate planner, coder, and reviewer roles with isolated sessions and streamed results.',
@@ -40,7 +40,7 @@ client = OpenAI(
 
 def run_agent_turn(role: str, system_prompt: str, task: str) -> str:
     response = client.chat.completions.create(
-        model="gpt-5.6-sol",
+        model="galx-nova",
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": task}
@@ -82,7 +82,7 @@ with open("combined_codebase.txt", "r") as f:
     entire_repo_text = f.read()
 
 response = client.chat.completions.create(
-    model="gpt-5.6-sol",
+    model="galx-nova",
     messages=[
         {"role": "system", "content": "You have full visibility into the entire enterprise codebase."},
         {"role": "user", "content": f"Repo Context:\\n{entire_repo_text}\\n\\nFind all potential SQL injection vulnerabilities across all controllers."}
@@ -113,7 +113,7 @@ async def process_item(item_id: int, prompt: str):
     async with semaphore:
         try:
             res = await client.chat.completions.create(
-                model="gpt-5.6-terra",
+                model="galx-nova",
                 messages=[{"role": "user", "content": prompt}]
             )
             return {"id": item_id, "status": "success", "tokens": res.usage.total_tokens}
@@ -148,7 +148,7 @@ def anonymize_and_prompt(raw_prompt: str) -> str:
     
     # 2. Dispatch through zero-retention memory gateway
     response = client.chat.completions.create(
-        model="gpt-5.6-sol",
+        model="galx-nova",
         messages=[
             {"role": "system", "content": "You are a HIPAA-compliant medical records assistant."},
             {"role": "user", "content": scrubbed}

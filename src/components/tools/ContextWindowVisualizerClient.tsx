@@ -51,15 +51,12 @@ interface ModelContextProfile {
 }
 
 const MODEL_PROFILES: ModelContextProfile[] = [
-  { name: 'OpenAI GPT-5.6 Sol', id: 'gpt-5.6-sol', contextLimit: 900000, inputCost1M: 3.75, cachedCost1M: 1.25, provider: 'OpenAI' },
-  { name: 'OpenAI GPT-5.6 Terra', id: 'gpt-5.6-terra', contextLimit: 750000, inputCost1M: 2.25, cachedCost1M: 0.75, provider: 'OpenAI' },
-  { name: 'OpenAI GPT-5.6 Luna', id: 'gpt-5.6-luna', contextLimit: 500000, inputCost1M: 0.75, cachedCost1M: 0.25, provider: 'OpenAI' },
-  { name: 'OpenAI GPT-4o (Legacy)', id: 'gpt-4o', contextLimit: 128000, inputCost1M: 5.00, cachedCost1M: 2.50, provider: 'OpenAI' },
+  { name: 'GALX Nova', id: 'galx-nova', contextLimit: 500000, inputCost1M: 0.75, cachedCost1M: 0.25, provider: 'GALX' },
 ];
 
 export function ContextWindowVisualizerClient() {
   const [tokenCount, setTokenCount] = useState<number>(180000);
-  const [selectedModel, setSelectedModel] = useState<string>('gpt-5.6-sol');
+  const [selectedModel, setSelectedModel] = useState<string>('galx-nova');
   const [copiedCode, setCopiedCode] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
@@ -339,7 +336,7 @@ print(response.choices[0].message.content)`;
             {[
               {
                 q: 'What is the largest context window available on GALXAI?',
-                a: 'OpenAI GPT-5.6 Sol offers a 900,000 (900K) token context window with sub-15ms Anycast TTFT and 75% prompt caching pass-through.',
+                a: 'GALX Nova offers up to a 1,050,000 (1.05M) token context window with low-latency edge TTFT and 75% prompt caching pass-through.',
               },
               {
                 q: 'How does prompt caching work on 900K token contexts?',

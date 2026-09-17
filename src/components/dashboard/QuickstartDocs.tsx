@@ -13,16 +13,16 @@ function BaseQuickstartDocs() {
 
   const snippets = {
     cli: `# Zero-Install Instant Terminal Execution (No npm install Needed):
-# 1. Immediate streaming prompt execution (GPT-5.6 Sol):
+# 1. Immediate streaming prompt execution (GALX Nova):
 npx galxai "Explain continuous token caching in 10 words"
 
-# 2. Run target reasoning model:
-npx galxai run "Audit distributed lock implementation" --model terra
+# 2. Run target model:
+npx galxai run "Audit distributed lock implementation" --model galx-nova
 
 # 3. List active models, context windows, and token rates:
 npx galxai models
 
-# 4. Measure sub-15ms Anycast edge gateway latency:
+# 4. Measure edge gateway ping latency:
 npx galxai ping
 
 # 5. Start interactive terminal chat REPL:
@@ -32,12 +32,10 @@ npx galxai chat`,
 {
   "openai.baseUrl": "https://galx.ai/v1",
   "openai.apiKey": "galx_live_your_gateway_key",
-  "openai.model": "gpt-5.6-sol",
+  "openai.model": "galx-nova",
   "openai.customModels": [
-    "gpt-5.6-sol",
-    "gpt-5.6-terra",
-    "gpt-5.6-luna",
-    "openai-gpt-image-latest"
+    "galx-nova",
+    "galx-nova-image"
   ]
 }`,
 
@@ -49,9 +47,9 @@ client = OpenAI(
     api_key="galx_live_your_gateway_key"
 )
 
-# Stream with sustainable rates & 75% prompt cache pass-through on GPT-5.6 Luna
+# Stream with sustainable rates & 75% prompt cache pass-through on GALX Nova
 response = client.chat.completions.create(
-    model="gpt-5-6-luna-low",
+    model="galx-nova",
     messages=[
         {"role": "system", "content": "You are a software architect."},
         {"role": "user", "content": "Write an atomic lease manager in Python."}
@@ -73,7 +71,7 @@ const openai = new OpenAI({
 
 async function main() {
   const stream = await openai.chat.completions.create({
-    model: "gpt-5.6-sol", // Accepts aliases: 'gpt-5', 'sol', 'terra', 'luna', 'fast'
+    model: "galx-nova",
     messages: [{ role: "user", content: "Implement a distributed circuit breaker." }],
     stream: true,
   });
@@ -130,7 +128,7 @@ curl https://galx.ai/api/generate \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer galx_live_your_gateway_key" \\
   -d '{
-    "model": "gpt-5.6-sol",
+    "model": "galx-nova",
     "messages": [
       { "role": "system", "content": "You are an elite coding architect." },
       { "role": "user", "content": "Explain zero-downtime database migrations." }
@@ -140,14 +138,14 @@ curl https://galx.ai/api/generate \\
 
     litellm: `# LiteLLM Proxy / LangChain / LlamaIndex Configuration (config.yaml)
 model_list:
-  - model_name: galx-flagship
+  - model_name: galx-nova
     litellm_params:
-      model: openai/gpt-5.6-sol
+      model: galx-nova
       api_base: https://galx.ai/v1
       api_key: os.environ/GALX_API_KEY
-  - model_name: galx-terra
+  - model_name: galx-nova-image
     litellm_params:
-      model: openai/gpt-5.6-terra
+      model: galx-nova-image
       api_base: https://galx.ai/v1
       api_key: os.environ/GALX_API_KEY`
   };
@@ -235,7 +233,7 @@ model_list:
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
         <div className="p-4 rounded-2xl bg-black/30 border border-white/5 space-y-1">
           <div className="text-[11px] font-bold text-amber-300 font-mono">POST /v1/chat/completions</div>
-          <p className="text-[11px] text-zinc-400">Streaming SSE &amp; JSON completions for Sol, Terra, Luna &amp; Visual models.</p>
+          <p className="text-[11px] text-zinc-400">Streaming SSE &amp; JSON completions for GALX Nova.</p>
         </div>
         <div className="p-4 rounded-2xl bg-black/30 border border-white/5 space-y-1">
           <div className="text-[11px] font-bold text-violet-300 font-mono">POST /v1/messages</div>

@@ -15,7 +15,7 @@ interface ShareButtonProps {
 
 export function ShareButton({
   title = 'GALXAI — Generative Playground & Frontier Intelligence',
-  description = 'A generative creative playground with community creators and sustainable serving of GPT-5.6 Luna for developers.',
+  description = 'Sustainable AI access for developers and creators. Build what you want, GALX handles the intelligence layer with GALX Nova.',
   url,
   variant = 'pill',
   label = 'Share',

@@ -172,7 +172,7 @@ export function CareersClient() {
       <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="p-6 rounded-2xl bg-zinc-900/40 border border-white/10 text-center space-y-1">
           <div className="text-2xl sm:text-3xl font-black text-cyan-400 font-mono">40+ Edge PoPs</div>
-          <div className="text-xs text-zinc-400 font-semibold">Sub-15ms Anycast Network</div>
+          <div className="text-xs text-zinc-400 font-semibold">Sub-15ms Global Edge</div>
         </div>
         <div className="p-6 rounded-2xl bg-zinc-900/40 border border-white/10 text-center space-y-1">
           <div className="text-2xl sm:text-3xl font-black text-emerald-400 font-mono">100% Remote</div>
@@ -180,7 +180,7 @@ export function CareersClient() {
         </div>
         <div className="p-6 rounded-2xl bg-zinc-900/40 border border-white/10 text-center space-y-1">
           <div className="text-2xl sm:text-3xl font-black text-amber-400 font-mono">75% Cache Pass</div>
-          <div className="text-xs text-zinc-400 font-semibold">Wholesale Caching Substrate</div>
+          <div className="text-xs text-zinc-400 font-semibold">Prompt Caching Substrate</div>
         </div>
         <div className="p-6 rounded-2xl bg-zinc-900/40 border border-white/10 text-center space-y-1">
           <div className="text-2xl sm:text-3xl font-black text-purple-400 font-mono">99.99% SOTA</div>
@@ -202,7 +202,7 @@ export function CareersClient() {
 
         <div className="space-y-4 text-xs sm:text-sm text-zinc-300 leading-relaxed max-w-4xl">
           <p>
-            The intelligence landscape is undergoing a once-in-a-generation shift. Compute consumption is exploding exponentially, reasoning models like OpenAI GPT-5.6 are becoming the default engine for software creation, and developers require a zero-friction, zero-markup substrate to orchestrate autonomous agents.
+            We believe developers and creators should be able to experiment with powerful AI without needing to understand or manage the increasingly complicated infrastructure underneath it. GALX is building toward a future of sustainable AI access, giving builders abundant access to useful intelligence so they can experiment, build, and share without having to manage the complexity underneath it.
           </p>
           <p>
             Large corporations slow top engineers down with endless middle management, multi-week PR reviews, and political silos. At GALX AI, we maintain a small, high-density team where every single person owns foundational infrastructure that handles billions of tokens daily.

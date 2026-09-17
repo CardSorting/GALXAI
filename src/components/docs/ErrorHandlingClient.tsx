@@ -70,7 +70,7 @@ client = OpenAI(
 
 try:
     response = client.chat.completions.create(
-        model="gpt-5.6-sol",
+        model="galx-nova",
         messages=[{"role": "user", "content": "Execute idempotent task."}]
     )
     print(response.choices[0].message.content)
@@ -90,7 +90,7 @@ const client = new OpenAI({
 
 try {
   const response = await client.chat.completions.create({
-    model: "gpt-5.6-sol",
+    model: "galx-nova",
     messages: [{ role: "user", content: "Execute resilient TypeScript call." }],
   });
   console.log(response.choices[0].message.content);
@@ -111,7 +111,7 @@ curl --retry 5 \\
      -H "Authorization: Bearer galx_live_your_gateway_key" \\
      -H "Content-Type: application/json" \\
      -d '{
-       "model": "gpt-5.6-sol",
+       "model": "galx-nova",
        "messages": [{"role": "user", "content": "Resilient cURL request."}]
      }'`,
     },

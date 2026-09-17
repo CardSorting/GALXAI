@@ -245,12 +245,12 @@ echo $result->choices[0]->message->content;`;
     const modelName = selectedModel ? selectedModel.name : selectedModelId;
     const estLatency = selectedModel ? (selectedModel.id.includes('luna') ? '8.4ms' : '14.2ms') : '12.0ms';
 
-    const fullResponse = `[GALXAI Anycast Edge Stream - ${estLatency} TTFT]\n` +
+    const fullResponse = `[GALX Stream - ${estLatency} TTFT]\n` +
       `Model: ${modelName} (${selectedModelId})\n` +
-      `Routing: Cloudflare PoP Zero-Egress Proxy -> Upstream Provider\n` +
-      `Prompt Caching: ACTIVE (75% wholesale rebate credited to compute balance)\n\n` +
+      `Routing: Managed Edge Ingress\n` +
+      `Prompt Caching: ACTIVE (75% rebate credited to compute balance)\n\n` +
       `Response Payload:\n` +
-      `"Architectural verification confirmed for prompt: \\"${userPrompt.slice(0, 40)}${userPrompt.length > 40 ? '...' : ''}\\"\n` +
+      `"Execution confirmed for prompt: \\"${userPrompt.slice(0, 40)}${userPrompt.length > 40 ? '...' : ''}\\"\n` +
       `Generated with temperature=${temperature}, max_tokens=${maxTokens}, stream=${isStreaming}."\n\n` +
       `Status: 200 OK • Completed in ${estLatency}`;
 
@@ -312,7 +312,7 @@ echo $result->choices[0]->message->content;`;
             API Request Builder &amp; Code Studio
           </h1>
           <p className="text-sm sm:text-base text-zinc-300 leading-relaxed max-w-3xl font-sans">
-            Interactively build OpenAI wire-compatible inference requests and export ready-to-run code across 7 major programming languages with sub-15ms Anycast routing.
+            Interactively build OpenAI wire-compatible inference requests and export ready-to-run code across 7 major programming languages with sub-15ms edge routing.
           </p>
         </section>
 
@@ -479,7 +479,7 @@ echo $result->choices[0]->message->content;`;
               <HelpCircle className="w-4 h-4 text-amber-400" />
               <span>Frequently Asked Questions (API Request Construction)</span>
             </h2>
-            <p className="text-xs text-zinc-400">SDK wire parity, streaming SSE, and Anycast authentication.</p>
+            <p className="text-xs text-zinc-400">SDK wire parity, streaming SSE, and edge authentication.</p>
           </div>
 
           <div className="space-y-3 pt-2">

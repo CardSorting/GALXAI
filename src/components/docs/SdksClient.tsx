@@ -37,7 +37,7 @@ export function SdksClient() {
 npx galxai "Explain continuous token caching in 10 words"
 
 # 2. Or start an interactive chat session:
-npx galxai chat --model gpt-5.6-sol`,
+npx galxai chat --model galx-nova`,
     },
     galx_sdk: {
       pkg: 'npm install galxai',
@@ -54,8 +54,8 @@ for await (const progress of galx.image.stream("A neon cyber samurai")) {
 }
 
 // 3. Touchless Model Resolution & Inspection (zero hardcoded strings)
-const defaultModel = await galx.model();            // Resolves 'gpt-5.6-sol'
-const isAvailable  = await galx.model.has("gpt-5.6-sol");
+const defaultModel = await galx.model();            // Resolves 'galx-nova'
+const isAvailable  = await galx.model.has("galx-nova");
 const allNames     = await galx.model.names();
 
 // 4. Touchless 1-Line Text Completion with string coercion
@@ -81,7 +81,7 @@ client = OpenAI(
 
 # Stream an OpenAI-compatible response
 response = client.chat.completions.create(
-    model="gpt-5.6-sol",  # or "gpt-5.6-terra", "gpt-5.6-luna"
+    model="galx-nova",
     messages=[{"role": "user", "content": "Refactor this async pipeline in Python."}],
     stream=True
 )
@@ -100,7 +100,7 @@ const openai = new OpenAI({
 });
 
 const stream = await openai.chat.completions.create({
-  model: "gpt-5.6-sol",
+  model: "galx-nova",
   messages: [{ role: "user", content: "Optimize this TypeScript type definition." }],
   stream: true,
 });
@@ -124,7 +124,7 @@ export async function POST(req: Request) {
   const { messages } = await req.json();
 
   const result = streamText({
-    model: galxai("gpt-5.6-sol"),
+    model: galxai("galx-nova"),
     messages,
   });
 
@@ -136,7 +136,7 @@ export async function POST(req: Request) {
       code: `from langchain_openai import ChatOpenAI
 
 llm = ChatOpenAI(
-    model="gpt-5.6-sol",
+    model="galx-nova",
     openai_api_base="https://galx.ai/v1",
     openai_api_key="galx_live_your_gateway_key",
     temperature=0.2
@@ -151,7 +151,7 @@ print(response.content)`,
 from llama_index.core import Settings
 
 Settings.llm = OpenAI(
-    model="gpt-5.6-sol",
+    model="galx-nova",
     api_base="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
@@ -177,7 +177,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let client = Client::with_config(config);
 
     let request = CreateChatCompletionRequestArgs::default()
-        .model("gpt-5.6-sol")
+        .model("galx-nova")
         .messages([ChatCompletionRequestUserMessageArgs::default()
             .content("Write a lock-free ring buffer in Rust.")
             .build()?
@@ -221,7 +221,7 @@ func main() {
 	resp, err := client.CreateChatCompletion(
 		context.Background(),
 		openai.ChatCompletionRequest{
-			Model: "gpt-5.6-sol",
+			Model: "galx-nova",
 			Messages: []openai.ChatCompletionMessage{
 				{
 					Role:    openai.ChatMessageRoleUser,
@@ -245,7 +245,7 @@ func main() {
   -H "Authorization: Bearer galx_live_your_gateway_key" \\
   -H "Content-Type: application/json" \\
   -d '{
-    "model": "gpt-5.6-sol",
+    "model": "galx-nova",
     "messages": [
       {
         "role": "user",

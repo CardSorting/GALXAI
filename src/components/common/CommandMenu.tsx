@@ -121,8 +121,8 @@ const PLATFORM_PAGES: PlatformPage[] = [
     href: '/pricing',
     icon: DollarSign,
     category: 'Finance',
-    keywords: ['pricing', 'cost', 'rates', 'luna', 'gpt-5.6', 'developer', 'sustainable'],
-    description: 'Direct developer rates on GPT-5.6 Luna and Image Studio'
+    keywords: ['pricing', 'cost', 'rates', 'nova', 'developer', 'sustainable'],
+    description: 'Direct developer rates on GALX Nova and GALX Nova-image'
   },
   {
     label: 'Model Comparison Matrix',
@@ -130,7 +130,7 @@ const PLATFORM_PAGES: PlatformPage[] = [
     icon: GitCompare,
     category: 'Tools',
     keywords: ['compare', 'matrix', 'benchmark', 'side by side', 'difference', 'which model'],
-    description: 'Side-by-side benchmark comparison of OpenAI GPT models'
+    description: 'Side-by-side capability matrix across GALX managed models'
   },
   {
     label: 'SDK and IDE integrations',

@@ -33,7 +33,7 @@ export const STRIPE_CHECKOUT_PACKS: Record<number, StripeTierConfig> = {
     concurrency: '60 RPM / 40k TPM',
     concurrencyRpm: 60,
     tpmLimit: '40k TPM',
-    routingLane: 'Standard Anycast Routing',
+    routingLane: 'Standard Edge Routing',
     supportTier: 'Community Discord Support',
     promptCacheDiscount: 'Standard',
     perks: [
@@ -55,7 +55,7 @@ export const STRIPE_CHECKOUT_PACKS: Record<number, StripeTierConfig> = {
     concurrency: '120 RPM Concurrency',
     concurrencyRpm: 120,
     tpmLimit: '80k TPM',
-    routingLane: 'Standard Anycast Routing',
+    routingLane: 'Standard Edge Routing',
     supportTier: 'Standard Email & Community Discord Support',
     promptCacheDiscount: '75% Prompt Cache pass-through discount',
     perks: [
@@ -84,7 +84,7 @@ export const STRIPE_CHECKOUT_PACKS: Record<number, StripeTierConfig> = {
       'Sub-15ms VIP Priority Routing Lane',
       '300 RPM Burst Concurrency Capacity',
       '$85.00 total usable compute credit (60% Match)',
-      'Automatic Failover Anycast Routing',
+      'High-Availability Automated Failover',
       'Priority Technical Support Lane'
     ]
   },
@@ -235,7 +235,7 @@ export function calculateComputeCredit(amountUsd: number) {
     concurrency: deposit >= 500 ? 'Unlimited Burst' : deposit >= 250 ? '1,200 RPM Concurrency' : deposit >= 100 ? '600 RPM Concurrency' : deposit >= 50 ? '300 RPM Concurrency' : deposit >= 25 ? '120 RPM Concurrency' : '60 RPM / 40k TPM',
     concurrencyRpm: deposit >= 500 ? 'Unlimited' : deposit >= 250 ? 1200 : deposit >= 100 ? 600 : deposit >= 50 ? 300 : deposit >= 25 ? 120 : 60,
     tpmLimit: deposit >= 500 ? 'Unlimited' : deposit >= 250 ? '1,000k TPM' : deposit >= 100 ? '500k TPM' : deposit >= 50 ? '200k TPM' : deposit >= 25 ? '80k TPM' : '40k TPM',
-    routingLane: deposit >= 500 ? 'Unlimited Concurrency Burst & Dedicated Route' : deposit >= 250 ? 'Dedicated VPC Private Lane & Vault' : deposit >= 100 ? 'Priority Global Edge Ingestion' : deposit >= 50 ? 'Sub-15ms VIP Priority Routing Lane' : 'Standard Anycast Routing',
+    routingLane: deposit >= 500 ? 'Unlimited Concurrency Burst & Dedicated Route' : deposit >= 250 ? 'Dedicated VPC Private Lane & Vault' : deposit >= 100 ? 'Priority Global Edge Ingestion' : deposit >= 50 ? 'Sub-15ms VIP Priority Routing Lane' : 'Standard Edge Routing',
     supportTier: deposit >= 500 ? 'Direct Private Slack Channel with Core Team' : deposit >= 250 ? 'Dedicated Account Infrastructure Engineer' : deposit >= 100 ? 'Direct Discord Architect Support Channel' : deposit >= 50 ? 'Priority Technical Support Lane' : 'Standard Email & Community Discord Support',
     promptCacheDiscount: deposit >= 10 ? '75% Prompt Cache pass-through discount' : 'Standard',
     perks: ['Instant micro-metered token credit', '75% prompt caching pass-through']

@@ -5,7 +5,7 @@ import { DocsSubNav } from '@/components/dashboard/DocsSubNav';
 import { FRONTEND_VISIBLE_MODELS } from '@/core/router/PublicModelCatalog';
 
 export function StreamingClient() {
-  const defaultModel = FRONTEND_VISIBLE_MODELS.find((model) => model.category === 'llm')?.id ?? 'gpt-5.6-sol';
+  const defaultModel = FRONTEND_VISIBLE_MODELS.find((model) => model.category === 'llm')?.id ?? 'galx-nova';
 
   return (
     <div className="min-h-screen bg-[#07080d] text-white">

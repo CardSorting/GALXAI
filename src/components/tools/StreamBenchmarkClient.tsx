@@ -43,40 +43,16 @@ interface BenchmarkModel {
 
 const BENCHMARK_MODELS: BenchmarkModel[] = [
   {
-    id: 'gpt-5.6-luna',
-    name: 'OpenAI GPT-5.6 Luna',
-    provider: 'OpenAI',
+    id: 'galx-nova',
+    name: 'GALX Nova',
+    provider: 'GALX',
     tokensPerSec: 142,
     ttftMs: 11.8,
     inputCost1M: 0.75,
     outputCost1M: 3.0,
     retailInput1M: 1.0,
     retailOutput1M: 4.0,
-    badge: 'Lightning Velocity (142 tok/s)',
-  },
-  {
-    id: 'gpt-5.6-terra',
-    name: 'OpenAI GPT-5.6 Terra',
-    provider: 'OpenAI',
-    tokensPerSec: 92,
-    ttftMs: 13.5,
-    inputCost1M: 2.25,
-    outputCost1M: 9.0,
-    retailInput1M: 3.0,
-    retailOutput1M: 12.0,
-    badge: 'Balanced Workhorse (92 tok/s)',
-  },
-  {
-    id: 'gpt-5.6-sol',
-    name: 'OpenAI GPT-5.6 Sol',
-    provider: 'OpenAI',
-    tokensPerSec: 68,
-    ttftMs: 14.5,
-    inputCost1M: 3.75,
-    outputCost1M: 15.0,
-    retailInput1M: 5.0,
-    retailOutput1M: 20.0,
-    badge: 'Deep Reasoning SOTA (68 tok/s)',
+    badge: 'Sustainable Intelligence (142 tok/s)',
   },
 ];
 
@@ -90,7 +66,7 @@ const PROMPT_PRESETS = [
 const SAMPLE_TEXT_CORPUS = `Streaming delivers generated text incrementally. Read each event, collect the text deltas, and handle completion or errors. Use request IDs when contacting support. Measure latency in your application under representative workloads. `;
 
 export function StreamBenchmarkClient() {
-  const [selectedModelId, setSelectedModelId] = useState<string>('gpt-5.6-luna');
+  const [selectedModelId, setSelectedModelId] = useState<string>('galx-nova');
   const [targetTokenCount, setTargetTokenCount] = useState<number>(600);
   const [isStreaming, setIsStreaming] = useState<boolean>(false);
   const [streamedTokens, setStreamedTokens] = useState<number>(0);
@@ -164,7 +140,7 @@ client = OpenAI(
     api_key="galx_live_your_gateway_key"
 )
 
-# Stream tokens at ${activeModel.tokensPerSec} tok/s with sub-${Math.ceil(activeModel.ttftMs)}ms Anycast TTFT
+# Stream tokens at ${activeModel.tokensPerSec} tok/s with sub-${Math.ceil(activeModel.ttftMs)}ms Edge TTFT
 stream = client.chat.completions.create(
     model="${activeModel.id}",
     messages=[{"role": "user", "content": "Execute high-velocity inference"}],
@@ -397,7 +373,7 @@ for chunk in stream:
               <span className="text-zinc-500 block text-[10px] uppercase font-bold">Time-To-First-Token</span>
               <div className="text-xl font-black text-cyan-300">{activeModel.ttftMs} ms</div>
               <p className="text-[11px] text-zinc-400 font-sans">
-                Sub-15ms Anycast edge TLS termination with pre-warmed origin tunnels.
+                Sub-15ms edge TLS termination with pre-warmed origin tunnels.
               </p>
             </div>
 
@@ -455,11 +431,11 @@ for chunk in stream:
             {[
               {
                 q: 'Which model provides the fastest token generation speed on GALXAI?',
-                a: 'OpenAI GPT-5.6 Luna is the fastest model in the catalog, delivering 142 tokens/second with an average Time-To-First-Token (TTFT) of 11.8ms at $0.75/1M input tokens.',
+                a: 'GALX Nova is the flagship high-velocity engine, delivering over 140 tokens/second with an average Time-To-First-Token (TTFT) of ~11.8ms.',
               },
               {
-                q: 'How does Anycast routing achieve sub-15ms TTFT?',
-                a: 'GALXAI terminates client TLS connections at the closest global edge Point of Presence (PoP) in <5ms and streams data over pre-warmed persistent fiber tunnels directly to origin GPU clusters.',
+                q: 'How does edge routing achieve sub-15ms TTFT?',
+                a: 'GALXAI terminates client TLS connections at the closest global edge Point of Presence (PoP) in <5ms and streams data over pre-warmed persistent tunnels.',
               },
               {
                 q: 'Does streaming token generation qualify for the 75% prompt caching discount?',

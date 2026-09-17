@@ -27,7 +27,7 @@ client = AsyncOpenAI(
 
 async def generate_summary(prompt: str):
     response = await client.chat.completions.create(
-        model="gpt-5.6-sol",
+        model="galx-nova",
         messages=[{"role": "user", "content": prompt}]
     )
     return response.choices[0].message.content
@@ -55,7 +55,7 @@ client = OpenAI(
 )
 
 completion = client.beta.chat.completions.parse(
-    model="gpt-5.6-sol",
+    model="galx-nova",
     messages=[{"role": "user", "content": "Review this distributed KV-store design."}],
     response_format=ArchitectureReview
 )

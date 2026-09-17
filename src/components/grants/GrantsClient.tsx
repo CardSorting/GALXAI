@@ -109,7 +109,7 @@ Instant 50% Compute Match Bonus: +$${calculatedMatchDollars.toLocaleString()} Fr
 Total Usable Balance: $${totalUsableCompute.toLocaleString()} USD
 Projected Net Annual Token Savings: $${estimatedAnnualSavings.toLocaleString()} USD / yr (-35% Wholesale Margin)
 Prompt Caching Pass-Through: 75% Automated Rebate
-SLA: Multi-Region Sub-15ms Anycast Failover
+SLA: High-Availability Multi-Region Failover
 Claim Grant: https://galx.ai/grants`;
 
     await safeCopyToClipboard(summary);

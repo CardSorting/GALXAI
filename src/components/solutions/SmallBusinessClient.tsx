@@ -117,9 +117,9 @@ export function SmallBusinessClient() {
             <div className="w-10 h-10 rounded-2xl bg-emerald-400/20 text-emerald-400 flex items-center justify-center font-bold">
               <Coins className="w-5 h-5" />
             </div>
-            <h3 className="text-base font-bold text-white">25%–40% Wholesale Compute</h3>
+            <h3 className="text-base font-bold text-white">Sustainable Developer Compute</h3>
             <p className="text-xs text-zinc-300 leading-relaxed">
-              Eliminate retail API markups. Enjoy 75% prompt caching pass-through and sub-15ms Anycast failover routing.
+              Predictable, low-overhead access. Enjoy 75% prompt caching savings and high-availability edge routing.
             </p>
           </div>
         </section>

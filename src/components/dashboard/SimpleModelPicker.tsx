@@ -35,24 +35,24 @@ interface SimpleCategory {
 const CATEGORIES: SimpleCategory[] = [
   {
     id: 'velocity',
-    label: 'Fast & Affordable Agentic Coding',
-    sublabel: 'Fast and affordable agentic coding model with low reasoning overhead',
+    label: 'Managed Reasoning & Coding (GALX Nova)',
+    sublabel: 'Sustainable Intelligence Engine for high-velocity execution',
     icon: Flame,
-    recommendedModelId: 'gpt-5-6-luna-low',
+    recommendedModelId: 'galx-nova',
     plainUseCases: [
       'Real-time inline code autocomplete and full refactoring',
       'High-throughput agentic workflows and tool-use swarms',
       'Instant sub-second conversational agent turns and triage'
     ],
     retailComparison: '$0.20 in / $1.20 out per 1M tokens',
-    galxDiscount: 'Best Performance / $ for Developers'
+    galxDiscount: 'Sustainable Performance for Developers'
   },
   {
     id: 'visuals',
-    label: 'Visual Synthesis Studio',
+    label: 'Visual Synthesis Studio (GALX Nova-image)',
     sublabel: 'Photorealistic 4K Visuals & Assets',
     icon: ImageIcon,
-    recommendedModelId: 'openai-gpt-image-latest',
+    recommendedModelId: 'galx-nova-image',
     plainUseCases: [
       'Studio-quality 4K product photography and renders',
       'High-converting social media ad visual assets',
@@ -101,7 +101,7 @@ function BaseSimpleModelPicker() {
             Which Model Fits Your Application?
           </h2>
           <p className="text-xs text-zinc-400">
-            Tell us what you want to build or choose a category below. We serve GPT-5.6 Luna for the highest performance per dollar so you can build without constraints.
+            Tell us what you want to build or choose a category below. GALX Nova is our managed intelligence layer — GALX handles underlying execution automatically.
           </p>
         </div>
 
@@ -119,16 +119,16 @@ function BaseSimpleModelPicker() {
             type="text"
             value={naturalQuery}
             onChange={(e) => handleQueryChange(e.target.value)}
-            placeholder="Type your use case or alias in plain English (e.g. 'code autocomplete', 'generate visual', 'luna')..."
+            placeholder="Type your use case or alias in plain English (e.g. 'code autocomplete', 'generate visual', 'nova')..."
             className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-black/60 border border-white/10 text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-amber-400 font-mono"
           />
         </div>
         <div className="flex flex-wrap items-center gap-2 text-[11px] font-mono text-zinc-400">
           <span className="text-zinc-500">Quick Mental Models:</span>
           {[
-            { label: 'GPT-5.6 Luna', query: 'gpt-5-6-luna' },
-            { label: 'Luna Fast', query: 'luna fast' },
-            { label: 'OpenAI Image Generation', query: 'openai-gpt-image-latest' }
+            { label: 'GALX Nova', query: 'galx-nova' },
+            { label: 'Nova Fast', query: 'nova fast' },
+            { label: 'GALX Nova-image', query: 'galx-nova-image' }
           ].map((tag) => (
             <button
               key={tag.label}
@@ -203,7 +203,7 @@ function BaseSimpleModelPicker() {
                 </span>
               </h3>
               <p className="text-xs text-zinc-300 leading-relaxed font-sans pt-1">
-                {modelSpecs?.description || 'Frontier performance serving GPT-5.6 Luna with maximum efficiency per dollar.'}
+                {modelSpecs?.description || 'Frontier performance powered by GALX Nova with maximum efficiency.'}
               </p>
             </div>
 

@@ -43,7 +43,7 @@ const NAV_GROUPS: NavGroup[] = [
     category: 'SDKs & Tools',
     items: [
       { href: '/docs/sdks', title: 'SDKs & IDE Setup', badge: 'Cursor/Py', icon: Code2 },
-      { href: '/models', title: 'Curated Models', badge: 'GPT-5.6', icon: Sparkles },
+      { href: '/models', title: 'Curated Models', badge: 'Nova', icon: Sparkles },
     ],
   },
   {

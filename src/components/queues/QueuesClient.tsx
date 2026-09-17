@@ -67,7 +67,7 @@ function getAgentContextSnippet(task: GalxTask): string {
   return `### [GALXAI Autonomous Agent Context]
 Task ID: ${task.id}
 User Prompt: ${p}
-Model: ${task.result?.modelUsed || 'gpt-5.6-sol'}
+Model: ${task.result?.modelUsed || 'galx-nova'}
 Status: ${task.status}
 
 === RESULT OUTPUT ===
@@ -85,7 +85,7 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="${task.result?.modelUsed || 'gpt-5.6-sol'}",
+    model="${task.result?.modelUsed || 'galx-nova'}",
     messages=[{"role": "user", "content": ${JSON.stringify(p)}}]
 )
 print(response.choices[0].message.content)`;
@@ -186,7 +186,7 @@ const client = new OpenAI({
 });
 
 const response = await client.chat.completions.create({
-  model: 'gpt-5.6-sol',
+  model: 'galx-nova',
   messages: [{ role: 'user', content: ${JSON.stringify(p)} }]
 });
 
@@ -199,7 +199,7 @@ console.log(response.choices[0].message.content);`;
   -H "Authorization: Bearer $GALX_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
-    "model": "gpt-5.6-sol",
+    "model": "galx-nova",
     "messages": [{"role": "user", "content": ${JSON.stringify(p)}}]
   }'`;
   };
@@ -371,7 +371,7 @@ console.log(response.choices[0].message.content);`;
 
                           <div className="flex items-center justify-between text-[10px] font-mono text-zinc-500 pt-1">
                             <span>{t.id.slice(0, 14)}...</span>
-                            <span className="text-cyan-400/80">{t.result?.modelUsed || 'gpt-5.6-sol'}</span>
+                            <span className="text-cyan-400/80">{t.result?.modelUsed || 'galx-nova'}</span>
                           </div>
                         </button>
                       );
@@ -500,7 +500,7 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="gpt-5.6-sol",
+    model="galx-nova",
     messages=[{"role": "user", "content": "Hello from Python SDK!"}]
 )
 print(response.choices[0].message.content)`)}
@@ -512,7 +512,7 @@ const client = new OpenAI({
 });
 
 const response = await client.chat.completions.create({
-  model: 'gpt-5.6-sol',
+  model: 'galx-nova',
   messages: [{ role: 'user', content: 'Hello from TypeScript!' }]
 });
 console.log(response.choices[0].message.content);`)}
@@ -520,7 +520,7 @@ console.log(response.choices[0].message.content);`)}
   -H "Authorization: Bearer $GALX_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
-    "model": "gpt-5.6-sol",
+    "model": "galx-nova",
     "messages": [{"role": "user", "content": "Hello via cURL!"}]
   }'`)}
                       </code>
@@ -529,10 +529,10 @@ console.log(response.choices[0].message.content);`)}
                     <button
                       onClick={() => {
                         const code = activeCodeTab === 'python'
-                          ? (selectedTask ? getPythonAgentSnippet(selectedTask) : `from openai import OpenAI\n\nclient = OpenAI(base_url="https://galx.ai/v1", api_key="galx_live_...")\nresponse = client.chat.completions.create(model="gpt-5.6-sol", messages=[{"role": "user", "content": "Hello!"}])\nprint(response.choices[0].message.content)`)
+                          ? (selectedTask ? getPythonAgentSnippet(selectedTask) : `from openai import OpenAI\n\nclient = OpenAI(base_url="https://galx.ai/v1", api_key="galx_live_...")\nresponse = client.chat.completions.create(model="galx-nova", messages=[{"role": "user", "content": "Hello!"}])\nprint(response.choices[0].message.content)`)
                           : activeCodeTab === 'ts'
-                          ? (selectedTask ? getTSAgentSnippet(selectedTask) : `import { OpenAI } from 'openai';\nconst client = new OpenAI({ baseURL: 'https://galx.ai/v1', apiKey: 'galx_live_...' });\nconst response = await client.chat.completions.create({ model: 'gpt-5.6-sol', messages: [{ role: 'user', content: 'Hello!' }] });`)
-                          : (selectedTask ? getCurlSnippet(selectedTask) : `curl -X POST https://galx.ai/v1/chat/completions -H "Authorization: Bearer $GALX_API_KEY" -H "Content-Type: application/json" -d '{"model":"gpt-5.6-sol","messages":[{"role":"user","content":"Hello!"}]}'`);
+                          ? (selectedTask ? getTSAgentSnippet(selectedTask) : `import { OpenAI } from 'openai';\nconst client = new OpenAI({ baseURL: 'https://galx.ai/v1', apiKey: 'galx_live_...' });\nconst response = await client.chat.completions.create({ model: 'galx-nova', messages: [{ role: 'user', content: 'Hello!' }] });`)
+                          : (selectedTask ? getCurlSnippet(selectedTask) : `curl -X POST https://galx.ai/v1/chat/completions -H "Authorization: Bearer $GALX_API_KEY" -H "Content-Type: application/json" -d '{"model":"galx-nova","messages":[{"role":"user","content":"Hello!"}]}'`);
                         handleCopy(code, 'bottom-code-snippet', 'Snippet Copied');
                       }}
                       className="absolute top-3 right-3 px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-zinc-300 text-[10px] font-mono flex items-center gap-1 transition-all cursor-pointer"

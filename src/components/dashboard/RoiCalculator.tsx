@@ -36,7 +36,7 @@ function BaseRoiCalculator({
   showTitle = true
 }: RoiCalculatorProps) {
   const [monthlySpend, setMonthlySpend] = useState(initialMonthlySpend);
-  const [selectedModelId, setSelectedModelId] = useState('gpt-5-6-luna-low');
+  const [selectedModelId, setSelectedModelId] = useState('galx-nova');
   const [cachedPromptPct, setCachedPromptPct] = useState(60);
   const [isOffPeakMode, setIsOffPeakMode] = useState(true);
   const [copiedAudit, setCopiedAudit] = useState(false);
@@ -85,7 +85,7 @@ Net Annualized Savings: $${annualSavingsDollars.toLocaleString()} USD / year
 Founding Builder Deposit Match Grant: +$${matchGrantBonus} USD in Free Inference Credits
 Active Volume Tier: ${tierName} (+${tierExtraPct}% Volume Rebate)
 Prompt Caching Pass-Through: ${cachedPromptPct}% Context (75% Rebate)
-Latency & Health: Sub-15ms Anycast Failover Routing
+Latency & Health: High-Availability Failover Routing
 Switch in 30 Seconds: https://galx.ai/keys`;
 
     const success = await safeCopyToClipboard(auditText);

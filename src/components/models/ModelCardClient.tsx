@@ -59,10 +59,8 @@ function BaseModelCardClient({ model, siblingModels }: ModelCardClientProps) {
     });
 
     const orderMap: Record<string, number> = {
-      'gpt-5.6-sol': 1,
-      'gpt-5.6-terra': 2,
-      'gpt-5.6-luna': 3,
-      'openai-gpt-image-latest': 1,
+      'galx-nova': 1,
+      'galx-nova-image': 2,
     };
 
     return unique.sort((a, b) => (orderMap[a.id] ?? 99) - (orderMap[b.id] ?? 99));
@@ -166,17 +164,8 @@ function BaseModelCardClient({ model, siblingModels }: ModelCardClientProps) {
                 <div className="inline-flex items-center gap-1.5 p-1 rounded-xl bg-black/60 border border-white/10 flex-wrap">
                   {siblingFamilyList.map((sib) => {
                     const isActive = sib.id === model.id;
-                    const shortName = sib.id.replace('openai-', '').replace('gpt-5.6-', '').toUpperCase();
-                    const subtitle =
-                      sib.id === 'gpt-5.6-sol'
-                        ? 'Flagship'
-                        : sib.id === 'gpt-5.6-terra'
-                        ? 'Balanced'
-                        : sib.id === 'gpt-5.6-luna'
-                        ? 'Fast'
-                        : sib.id.includes('image-2')
-                        ? 'Pro'
-                        : 'Standard';
+                    const shortName = sib.name;
+                    const subtitle = sib.category === 'image' ? 'Visual' : 'Intelligence';
                     return (
                       <Link
                         key={sib.id}

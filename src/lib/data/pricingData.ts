@@ -114,7 +114,7 @@ export const SEAT_TIERS: SeatTier[] = [
       { title: '$30 Monthly Free Compute Allowance', description: 'Instant access to shared community compute pool', included: true },
       { title: 'Curated Developer Rates', description: '25%–36% savings with 0% gateway markup', included: true },
       { title: '75% Prompt Caching Pass-Through', description: 'Automatic cache rebate on repeat context', included: true },
-      { title: 'Sub-15ms Anycast Routing', description: 'Automated 429 failover to backup providers', included: true },
+      { title: 'High-Availability Edge Routing', description: 'Automated failover with zero dropped requests', included: true },
       { title: 'Shared Team API Keys', description: 'Multi-tenant key encryption and squad sharing', included: false },
       { title: 'Role-Based Access Control (RBAC)', description: 'Owner, Admin, Developer, FinOps permissions', included: false },
       { title: 'SAML 2.0 Single Sign-On (SSO)', description: 'Okta, Google Workspace, Azure AD, SCIM', included: false },

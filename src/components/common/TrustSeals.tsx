@@ -71,7 +71,7 @@ export function TrustSeals({ className = '', variant = 'grid' }: TrustSealsProps
       <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1.5 font-mono">
         <div className="flex items-center gap-2 text-indigo-400">
           <Zap className="w-4 h-4" />
-          <span className="font-bold text-xs">Multi-Region Anycast</span>
+          <span className="font-bold text-xs">High-Availability Edge</span>
         </div>
         <p className="text-[11px] text-zinc-400 font-sans leading-relaxed">
           Check current service availability on the status page.

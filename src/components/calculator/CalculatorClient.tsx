@@ -47,7 +47,7 @@ const PRESET_ARCHETYPES: PresetArchetype[] = [
     name: 'AI Startup / Scaleup',
     badge: 'High-Velocity MVP',
     iconType: 'rocket',
-    modelId: 'gpt-5.6-terra',
+    modelId: 'galx-nova',
     inputTokensM: 40,
     outputTokensM: 15,
     cacheHitPercent: 65,
@@ -59,31 +59,31 @@ const PRESET_ARCHETYPES: PresetArchetype[] = [
     name: 'Dev Studio / Agency',
     badge: 'Multi-Client Apps',
     iconType: 'building',
-    modelId: 'gpt-5.6-sol',
+    modelId: 'galx-nova',
     inputTokensM: 20,
     outputTokensM: 8,
     cacheHitPercent: 55,
     teamEngineers: 4,
-    description: 'Zero client API key leakage. OpenAI-compatible routing with clean billing.',
+    description: 'Zero client API key leakage. Fully managed model routing with clean billing.',
   },
   {
     id: 'enterprise',
     name: 'Mid-Market SaaS Team',
     badge: 'Production Scale',
     iconType: 'landmark',
-    modelId: 'gpt-5.6-sol',
+    modelId: 'galx-nova',
     inputTokensM: 120,
     outputTokensM: 40,
     cacheHitPercent: 80,
     teamEngineers: 6,
-    description: 'Replaces $100k+ OpenAI invoices with net spend reduction and automated governance.',
+    description: 'Replaces bespoke infrastructure with net spend reduction and automated governance.',
   },
   {
     id: 'microservice',
     name: 'Agentic Microservices',
     badge: 'Autonomous Loops',
     iconType: 'zap',
-    modelId: 'gpt-5.6-luna',
+    modelId: 'galx-nova',
     inputTokensM: 80,
     outputTokensM: 25,
     cacheHitPercent: 85,
@@ -93,7 +93,7 @@ const PRESET_ARCHETYPES: PresetArchetype[] = [
 ];
 
 export function CalculatorClient() {
-  const [selectedModelId, setSelectedModelId] = useState<string>('gpt-5.6-sol');
+  const [selectedModelId, setSelectedModelId] = useState<string>('galx-nova');
   const [inputTokensM, setInputTokensM] = useState<number>(25); // 25M input/mo
   const [outputTokensM, setOutputTokensM] = useState<number>(10); // 10M output/mo
   const [cacheHitPercent, setCacheHitPercent] = useState<number>(60); // 60% cache hit
@@ -150,8 +150,8 @@ export function CalculatorClient() {
     const galxaiCachedInputCost =
       uncachedTokensM * selectedModel.inputPricePer1M + cachedTokensM * cachedInputRate;
     
-    // Intelligent Tier Cascading (Auto-route 25% of simple tasks away from Sol to Terra/Luna)
-    const cascadingRebateMonthly = preventMisallocation && selectedModel.id === 'gpt-5.6-sol'
+    // Intelligent Efficiency Optimization
+    const cascadingRebateMonthly = preventMisallocation && (selectedModel.id === 'galx-nova' || selectedModel.id === 'gpt-5.6-sol')
       ? (inputTokensM * 0.25 * (3.75 - 2.25) + outputTokensM * 0.25 * (15.0 - 9.0))
       : 0;
 
@@ -229,8 +229,8 @@ Simulate live: https://galx.ai/calculator
       a: 'Engineering teams typically waste 15+ hours per month per developer debugging inference edge cases, maintaining custom proxy servers, and fixing streaming socket failures. GALXAI provides pre-built, hardened infrastructure so your team avoids paying that operational and engineering tuition.',
     },
     {
-      q: 'How does Intelligent Tier Cascading prevent frontier model overspend?',
-      a: 'Many teams accidentally use flagship reasoning models (like gpt-5.6-sol) for simple classification, routing, or formatting tasks. Intelligent Tier Cascading automatically identifies simple workloads and routes them to high-velocity tiers (like gpt-5.6-terra or gpt-5.6-luna), unlocking an additional 20%–40% cost reduction without quality degradation.',
+      q: 'How does GALX optimize workload efficiency?',
+      a: 'GALX handles the underlying execution so developers can focus on building. Workloads are matched to appropriate execution paths automatically, unlocking substantial cost and latency reductions without quality degradation.',
     },
     {
       q: 'How is the 75% prompt caching savings calculated?',

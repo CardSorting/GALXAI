@@ -51,7 +51,7 @@ tools = [
 messages = [{"role": "user", "content": "What are current prices for NVDA and AAPL?"}]
 
 response = client.chat.completions.create(
-    model="gpt-5.6-sol",
+    model="galx-nova",
     messages=messages,
     tools=tools,
     tool_choice="auto"
@@ -72,7 +72,7 @@ if tool_calls:
         })
 
     final = client.chat.completions.create(
-        model="gpt-5.6-sol",
+        model="galx-nova",
         messages=messages
     )
     print("Final Agent Response:\\n", final.choices[0].message.content)`,
@@ -106,7 +106,7 @@ const messages: OpenAI.ChatCompletionMessageParam[] = [
 ];
 
 const runner = await client.beta.chat.completions.runTools({
-  model: "gpt-5.6-sol",
+  model: "galx-nova",
   messages,
   tools: [
     {
@@ -145,7 +145,7 @@ export async function POST(req: Request) {
   const { prompt } = await req.json();
 
   const { text, steps } = await generateText({
-    model: galxai("gpt-5.6-sol"),
+    model: galxai("galx-nova"),
     maxSteps: 5,
     tools: {
       weather: tool({
@@ -171,7 +171,7 @@ def multiply(a: int, b: int) -> int:
     return a * b
 
 llm = ChatOpenAI(
-    model="gpt-5.6-sol",
+    model="galx-nova",
     openai_api_base="https://galx.ai/v1",
     openai_api_key="galx_live_your_gateway_key"
 )

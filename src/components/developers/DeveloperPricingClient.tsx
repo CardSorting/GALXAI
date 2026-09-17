@@ -39,7 +39,7 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="gpt-5.6-sol",
+    model="galx-nova",
     messages=[{"role": "user", "content": "Architect a high-performance streaming pipeline."}]
 )
 print(response.choices[0].message.content)`,
@@ -53,7 +53,7 @@ const openai = new OpenAI({
 });
 
 const completion = await openai.chat.completions.create({
-  model: 'gpt-5.6-sol',
+  model: 'galx-nova',
   messages: [{ role: 'user', content: 'Design an event-driven microservices schema.' }],
 });
 console.log(completion.choices[0].message.content);`,
@@ -240,7 +240,7 @@ export function DeveloperPricingClient() {
         'Sub-15ms VIP Priority Routing Lane',
         '300 RPM Burst Concurrency Capacity',
         '$85.00 total usable compute credit (60% Match)',
-        'Automatic Failover Anycast Routing',
+        'High-Availability Automated Failover',
         'Priority Technical Support Lane',
       ],
       buttonLabel: 'Get Growth VIP ($50)',
@@ -327,7 +327,7 @@ export function DeveloperPricingClient() {
               </span>
             </h1>
             <p className="mt-4 text-base leading-relaxed text-zinc-300 sm:text-lg">
-              A creative playground and sustainable developer platform serving OpenAI GPT-5.6 Luna. Private internal testing confirmed GPT-5.6 Luna delivers the highest performance per dollar so developers can test, build, and reach their goals without being constrained by quality, price, or exploration.
+              GALX is building toward a future of sustainable AI access, giving developers and creators abundant access to useful intelligence so they can experiment, build, and share without having to manage the complexity underneath it.
             </p>
             <div className="mt-6 flex flex-wrap items-center gap-4">
               <a href="#tiers" className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-600/20 transition-all hover:bg-indigo-500 hover:shadow-indigo-500/30">
@@ -600,9 +600,9 @@ export function DeveloperPricingClient() {
         <section id="catalog" className="scroll-mt-24 pt-16">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="text-2xl font-bold text-white sm:text-3xl">Frontier Model & Visual Synthesis Catalog</h2>
+              <h2 className="text-2xl font-bold text-white sm:text-3xl">Managed Model & Visual Synthesis Catalog</h2>
               <p className="mt-1 text-sm text-zinc-400">
-                Curated around GPT-5.6 Luna and Image Studio — benchmarked for the highest performance per dollar with zero artificial markups.
+                Centered around GALX Nova and GALX Nova-image — engineered for predictable, sustainable developer access.
               </p>
             </div>
 
@@ -771,7 +771,7 @@ export function DeveloperPricingClient() {
                   <td className="px-4 py-3.5 text-sky-400 font-semibold">1,200+ RPM / Unlimited</td>
                 </tr>
                 <tr>
-                  <td className="px-4 py-3.5 font-medium text-white">OpenAI Frontier Models (GPT-5.6)</td>
+                  <td className="px-4 py-3.5 font-medium text-white">GALX Nova (Sustainable Intelligence)</td>
                   <td className="px-4 py-3.5"><Check size={16} className="text-emerald-400" /></td>
                   <td className="px-4 py-3.5"><Check size={16} className="text-emerald-400" /></td>
                   <td className="px-4 py-3.5"><Check size={16} className="text-emerald-400" /></td>

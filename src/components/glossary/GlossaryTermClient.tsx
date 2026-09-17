@@ -45,9 +45,9 @@ client = OpenAI(
     api_key="galx_live_your_gateway_key"
 )
 
-# Automated 25%-40% wholesale pricing and 75% prompt caching
+# Automated sustainable developer pricing and 75% prompt caching
 response = client.chat.completions.create(
-    model="gpt-5.6-sol",
+    model="galx-nova",
     messages=[{"role": "user", "content": "Execute high-throughput inference with ${term.term}"}]
 )
 print(response.choices[0].message.content)`;

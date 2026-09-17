@@ -37,9 +37,9 @@ console.log(img.url); // Direct property (no data[0].url digging)
 await img.save('./himalayas.png'); // Built-in Node.js file writer
 
 // 2. One-line model resolution (zero hardcoded model strings)
-const defaultModel = await galx.model();            // Resolves 'gpt-5.6-sol'
-const isAvailable  = await galx.model.has('gpt-5.6-sol');
-const allNames     = await galx.model.names();      // ['gpt-5.6-sol', ...]
+const defaultModel = await galx.model();            // Resolves 'galx-nova'
+const isAvailable  = await galx.model.has('galx-nova');
+const allNames     = await galx.model.names();      // ['galx-nova', 'galx-nova-image']
 
 // 3. One-line text completion with string coercion
 const answer = await galx.complete('Explain quantum computing in 1 sentence');
@@ -83,7 +83,7 @@ console.log(myImages[0].urls);`,
     models: `import { galx } from 'galxai';
 
 // 1. Side-by-Side Pricing & Capability Matrix
-const comparison = await galx.models.compare('gpt-5.6-sol', 'gpt-5.6-terra');
+const comparison = await galx.models.compare('galx-nova', 'galx-nova-image');
 console.log(\`Cheaper Input Model: \${comparison.cheaperInputModel}\`);
 console.log(\`Input Savings: \${comparison.inputSavingsPercentage}%\`);
 console.log(\`Context Window Delta: \${comparison.contextWindowDelta} tokens\`);
@@ -93,7 +93,7 @@ const candidates = await galx.models.optimal({
   minContextWindow: 128000,
   reasoningRequired: true,
   maxCostPer1kInputTokens: 0.005,
-  provider: 'openai'
+  provider: 'galx'
 });
 console.log(\`Recommended Flagship: \${candidates[0].id}\`);
 
@@ -103,7 +103,7 @@ const visionModels = await galx.models.search('vision');`,
     streaming: `import { galx } from 'galxai';
 
 const stream = galx.chat.completions.stream({
-  model: 'gpt-5.6-sol',
+  model: 'galx-nova',
   messages: [{ role: 'user', content: 'Explain thermodynamics' }]
 });
 
@@ -164,7 +164,7 @@ const BugReportSchema = z.object({
 
 const openai = new OpenAI();
 const completion = await openai.beta.chat.completions.parse({
-  model: 'gpt-5.6-sol',
+  model: 'galx-nova',
   messages: [{ role: 'user', content: 'Analyze this memory leak.' }],
   response_format: zodResponseFormat(BugReportSchema, 'bug_report')
 });
@@ -175,7 +175,7 @@ import { Anthropic } from 'galxai';
 
 const anthropic = new Anthropic();
 const message = await anthropic.messages.create({
-  model: 'gpt-5.6-sol',
+  model: 'galx-nova',
   max_tokens: 1024,
   messages: [{ role: 'user', content: 'Hello from Anthropic SDK!' }]
 });

@@ -85,14 +85,14 @@ export const BENCHMARKS_DATA: ModelBenchmarkItem[] = [
 export const BENCHMARK_FAQS = [
   {
     q: 'Which LLM model provides the lowest Time-To-First-Token (TTFT)?',
-    a: 'OpenAI GPT-5.6 Luna delivers the lowest latency with an average TTFT of 11.8ms (6.4ms on warm prompt cache hits) and a streaming generation velocity of 145.2 tokens/second on GALXAI Anycast edge nodes.',
+    a: 'GALX Nova delivers low latency with an average TTFT of 11.8ms (6.4ms on warm prompt cache hits) and a streaming generation velocity exceeding 140 tokens/second on GALXAI edge nodes.',
   },
   {
     q: 'How much latency does prompt caching eliminate?',
-    a: 'Prompt caching reduces TTFT by up to 55% (from 14.2ms down to 7.8ms on GPT-5.6 Sol) by skipping prefill KV recomputation on prefixes exceeding 1,024 tokens.',
+    a: 'Prompt caching reduces TTFT by up to 55% by skipping prefill computation on prefixes exceeding 1,024 tokens.',
   },
   {
     q: 'Are these benchmarks measured at the gateway edge or origin server?',
-    a: 'These metrics represent true end-to-end client latency terminating at GALXAI Anycast edge proxies across North America, Europe, and Asia.',
+    a: 'These metrics represent true end-to-end client latency terminating at GALXAI global edge nodes across North America, Europe, and Asia.',
   },
 ];

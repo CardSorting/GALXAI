@@ -134,7 +134,7 @@ export function ComplianceClient() {
             </div>
             <div className="p-3.5 rounded-2xl bg-black/40 border border-white/5 space-y-1">
               <span className="text-zinc-500 text-[10px] uppercase">Infrastructure</span>
-              <div className="text-base font-bold text-amber-300">Anycast Failover</div>
+              <div className="text-base font-bold text-amber-300">High-Availability Failover</div>
             </div>
             <div className="p-3.5 rounded-2xl bg-black/40 border border-white/5 space-y-1">
               <span className="text-zinc-500 text-[10px] uppercase">Model Isolation</span>

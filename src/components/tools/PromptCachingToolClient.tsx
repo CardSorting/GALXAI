@@ -26,9 +26,9 @@ import { FRONTEND_VISIBLE_MODELS } from '@/core/router/PublicModelCatalog';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 
 export function PromptCachingToolClient() {
-  const [selectedModelId, setSelectedModelId] = useState<string>('gpt-5-6-luna-low');
+  const [selectedModelId, setSelectedModelId] = useState<string>('galx-nova');
   const [promptText, setPromptText] = useState<string>(
-    `You are an enterprise systems engineer and technical architect with deep expertise in distributed Anycast model routing, low-latency Server-Sent Events (SSE), and token economics.
+    `You are an enterprise systems engineer and technical architect with deep expertise in high-availability edge routing, low-latency Server-Sent Events (SSE), and token economics.
 
 When analyzing systems:
 1. Verify end-to-end Time-To-First-Token (TTFT) guarantees (<15ms).

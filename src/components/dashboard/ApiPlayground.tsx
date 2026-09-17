@@ -42,29 +42,29 @@ interface PromptPreset {
 
 const PRESETS: PromptPreset[] = [
   {
-    id: 'luna-arch',
-    label: '✨ Luna Architecture & Edge Routing',
+    id: 'nova-arch',
+    label: '✨ GALX Nova Architecture & Design',
     category: 'reasoning',
-    model: 'gpt-5-6-luna',
-    prompt: 'Architect an ultra-resilient, distributed AI model router with sub-15ms Time-To-First-Token, automated KV prompt caching, and zero-data-retention cryptographic guarantees.',
-    simulatedReply: `### Enterprise AI Gateway & Routing Architecture:
+    model: 'galx-nova',
+    prompt: 'Design a clean, resilient AI application architecture with high-availability edge routing, automated prompt caching, and zero-data-retention guarantees.',
+    simulatedReply: `### Resilient AI Application Architecture:
 
-1. **⚡ Anycast Global Ingress & Health Steering**:
-   - Ingress edge nodes terminate TLS within 5ms of client endpoints.
-   - Dynamic health checks steer traffic seamlessly with zero dropped connections.
+1. **⚡ Global High-Availability Ingress**:
+   - Edge endpoints terminate requests nearest to clients for minimum wire latency.
+   - Intelligent health routing provides seamless failover with zero dropped requests.
 
 2. **🔒 Zero Data Retention (ZDR) Memory Fabric**:
-   - Volatile, cryptographically isolated memory buffers enforce in-flight streaming without disk persistence.
-   - Automatic KV prompt caching reuses mathematical attention matrices for prefixes >1,024 tokens.
+   - Ephemeral memory buffers stream results without persistent disk writes.
+   - Automated prompt caching accelerates repeated prompts while lowering latency.
 
-3. **🛡️ 429 Burst Immunity & Fair-Share Queues**:
-   - Concurrency token buckets absorb downstream rate spikes with instant graceful failover.`
+3. **🛡️ Burst Smoothing & Resilience**:
+   - Adaptive request handling absorbs traffic spikes with clean failover.`
   },
   {
     id: 'refactor',
     label: '⚡ Next.js Route Refactor',
     category: 'code',
-    model: 'gpt-5-6-luna-low',
+    model: 'galx-nova',
     prompt: 'Refactor this Express route handler into a Next.js App Router route.ts with Zod payload validation:\n\napp.post("/api/auth/login", (req, res) => {\n  const { email, password } = req.body;\n  if (!email || !password) return res.status(400).send("Missing credentials");\n  // ...\n});',
     simulatedReply: `import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
@@ -97,24 +97,24 @@ export async function POST(req: NextRequest) {
   },
   {
     id: 'fast-summary',
-    label: '🏎️ Instant Luna Summarizer',
+    label: '🏎️ Instant Nova Summarizer',
     category: 'fast',
-    model: 'gpt-5-6-luna-low',
-    prompt: 'Summarize the core architectural benefits of an enterprise AI gateway with prompt caching in 3 bullet points.',
-    simulatedReply: `• **Direct Cost Savings**: Low-overhead agentic coding with verified OpenAI API rates ($0.20 in / $1.20 out).
-• **Sub-15ms Global Edge Routing**: Intelligent latency-optimized anycast routing with automatic health failover.
-• **Zero Downtime Rate-Limit Smoothing**: Absorbs burst traffic spikes with prompt cache pass-through and active resilience.`
+    model: 'galx-nova',
+    prompt: 'Summarize the core benefits of building on GALX Nova with automated prompt caching in 3 bullet points.',
+    simulatedReply: `• **Sustainable Intelligence**: Low-overhead managed intelligence via GALX Nova with predictable developer rates.
+• **High-Availability Edge Routing**: Latency-optimized global edge routing with automatic health failover.
+• **Zero Downtime Resilience**: Absorbs burst traffic spikes with prompt caching and active failure mitigation.`
   }
 ];
 
 const MENTAL_MODELS = [
-  { id: 'luna', name: '🚀 GPT-5.6 Luna', model: 'gpt-5-6-luna', icon: Flame, badge: '-36%' },
-  { id: 'image', name: '🎨 Visual Studio', model: 'openai-gpt-image-latest', icon: ImageIcon, badge: '-25%' }
+  { id: 'nova', name: '🚀 GALX Nova', model: 'galx-nova', icon: Flame, badge: 'Engine' },
+  { id: 'image', name: '🎨 GALX Nova-image', model: 'galx-nova-image', icon: ImageIcon, badge: '-25%' }
 ];
 
 function BaseApiPlayground() {
   const { user } = useAuth();
-  const [modelInput, setModelInput] = useState<string>('gpt-5-6-luna');
+  const [modelInput, setModelInput] = useState<string>('galx-nova');
   const [prompt, setPrompt] = useState<string>(PRESETS[0].prompt);
   const [streamingOutput, setStreamingOutput] = useState<string>('');
   const [isStreaming, setIsStreaming] = useState<boolean>(false);
@@ -365,7 +365,7 @@ const res = await galx.chat.completions.create({
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-white">Model Playground &amp; Inference Sandbox</h1>
           <p className="text-xs sm:text-sm text-zinc-300">
-            Test live streaming completions, optimal $/perf on GPT-5.6 Luna, 429 burst immunity, and 75% prompt caching live in your browser.
+            Test live streaming completions powered by GALX Nova, 429 burst immunity, and 75% prompt caching live in your browser.
           </p>
         </div>
 
@@ -440,7 +440,7 @@ const res = await galx.chat.completions.create({
                 type="text"
                 value={modelInput}
                 onChange={(e) => setModelInput(e.target.value)}
-                placeholder="gpt-5, sol, terra, luna, fast..."
+                placeholder="galx-nova, galx-nova-image, nova..."
                 className="w-full py-2.5 px-3 rounded-xl bg-black/60 border border-white/10 text-amber-300 font-bold focus:outline-none focus:border-amber-400/50"
               />
             </div>

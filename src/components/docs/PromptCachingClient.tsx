@@ -30,7 +30,7 @@ export function PromptCachingClient() {
           </div>
           <pre className="overflow-x-auto rounded-xl bg-black/40 p-4 text-sm leading-6 text-cyan-200 ring-1 ring-white/10">
             <code>{`const response = await client.chat.completions.create({
-  model: "${languageModels[0]?.id ?? 'gpt-5.6-sol'}",
+  model: "${languageModels[0]?.id ?? 'galx-nova'}",
   messages: [
     { role: "system", content: STABLE_INSTRUCTIONS },
     { role: "user", content: variableInput },

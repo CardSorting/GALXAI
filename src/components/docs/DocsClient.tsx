@@ -5,7 +5,7 @@ import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 import { DocsSubNav } from '@/components/dashboard/DocsSubNav';
 import { FRONTEND_VISIBLE_MODELS } from '@/core/router/PublicModelCatalog';
 
-const DEFAULT_MODEL_ID = FRONTEND_VISIBLE_MODELS.find((model) => model.category === 'llm')?.id ?? 'gpt-5.6-sol';
+const DEFAULT_MODEL_ID = FRONTEND_VISIBLE_MODELS.find((model) => model.category === 'llm')?.id ?? 'galx-nova';
 
 const GUIDE_GROUPS = [
   {

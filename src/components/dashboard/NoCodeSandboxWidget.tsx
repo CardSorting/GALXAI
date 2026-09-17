@@ -83,40 +83,25 @@ interface SimModel {
 
 const SIM_MODELS: SimModel[] = [
   {
-    id: 'gpt-5.6-sol',
-    name: 'GPT-5.6 Sol (2M Context)',
-    badge: 'Optimal $/perf',
+    id: 'galx-nova',
+    name: 'GALX Nova (Sustainable Intelligence)',
+    badge: 'Managed Engine',
     discountPct: 25,
     promptTokens: 420,
     completionTokens: 284,
     cachedTokens: 210,
-    sampleText: `GALXAI's sub-15ms router routes requests dynamically across high-concurrency enterprise infrastructure:
+    sampleText: `GALX Nova is our managed intelligence layer, delivering ultra-low-latency execution:
 
-1. **Best Performance Per $**: Verified in private internal testing to deliver the highest capability per dollar for unrestricted developer exploration.
-2. **Zero Quality Loss**: Requests hit authentic GPT-5.6 Sol model weights with identical latency and deterministic output.
+1. **Managed Execution**: GALX handles underlying capability routing and execution automatically.
+2. **Sub-15ms Gateway Overhead**: Low-latency edge routing with instant connection management.
 3. **75% Prompt Caching Rebate**: Repeated system prompts automatically trigger prefix caching rebates.
-4. **1-Line Switch**: Simply update your Base URL in Cursor, LibreChat, or your existing OpenAI SDK.`
-  },
-  {
-    id: 'gpt-5.6-luna',
-    name: 'GPT-5.6 Luna (Sub-Second Velocity)',
-    badge: 'Best $/perf',
-    discountPct: 36,
-    promptTokens: 380,
-    completionTokens: 240,
-    cachedTokens: 150,
-    sampleText: `OpenAI GPT-5.6 Luna on GALXAI delivers sub-15ms Time-To-First-Token and rapid inline generation:
-
-• **Sub-15ms Gateway Overhead**: Edge routing proxies with instant TCP connection pooling.
-• **High-Throughput Global Gateway**: Zero queueing, jitter-free streaming, and no 429 stalls.
-• **ZDR-100 Privacy Guarantee**: Ephemeral in-memory handling with cryptographic zero-retention.
-• **Drop-in Compatible**: Point your baseURL to https://galx.ai/v1 with your live key.`
+4. **1-Line Switch**: Update your Base URL to https://galx.ai/v1 with your live key.`
   }
 ];
 
 function BaseNoCodeSandboxWidget() {
   const [selectedTool, setSelectedTool] = useState<string>('cursor');
-  const [selectedModelId, setSelectedModelId] = useState<string>('gpt-5.6-sol');
+  const [selectedModelId, setSelectedModelId] = useState<string>('galx-nova');
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamedText, setStreamedText] = useState('');
   const [streamProgress, setStreamProgress] = useState(0);
@@ -212,7 +197,7 @@ function BaseNoCodeSandboxWidget() {
           variant="pill"
           label="Share Simulator"
           title="Try GALXAI Zero-Code Simulator"
-          description="Interactive prompt simulator testing GPT-5.6 Luna with live sustainable token savings."
+          description="Interactive prompt simulator testing GALX Nova with live sustainable token savings."
         />
       </div>
 
@@ -311,7 +296,7 @@ function BaseNoCodeSandboxWidget() {
             ) : (
               <span className="text-zinc-500 italic flex items-center gap-2 py-4">
                 <Terminal className="w-4 h-4 text-zinc-600 shrink-0" />
-                <span>Click &quot;Run Simulation&quot; to test sub-15ms streaming and compare token throughput on GPT-5.6 Luna...</span>
+                <span>Click &quot;Run Simulation&quot; to test sub-15ms streaming and compare token throughput on GALX Nova...</span>
               </span>
             )}
             {isStreaming && <span className="inline-block w-2 h-4 bg-cyan-400 ml-1 animate-pulse" />}

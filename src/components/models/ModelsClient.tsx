@@ -453,11 +453,11 @@ console.log(res.choices[0].message.content);`;
               </div>
 
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-[1.15]">
-                Curated Frontier Intelligence
+                Sustainable Managed Intelligence
               </h1>
 
               <p className="text-sm sm:text-base text-zinc-300 leading-relaxed max-w-xl">
-                A creative playground and sustainable developer platform serving OpenAI GPT-5.6 Luna. Through rigorous private internal testing, we verified that GPT-5.6 Luna delivers the absolute best performance per dollar—allowing developers to test, build, and explore without being constrained by quality, price, or exploration limits.
+                GALX provides a deliberately small set of managed models through a simple API. Build what you want. GALX handles the intelligence layer.
               </p>
 
               {/* Endpoint Pill */}
@@ -510,7 +510,7 @@ console.log(res.choices[0].message.content);`;
                   variant="pill"
                   label="Share Catalog"
                   title="GALXAI Model Catalog & API Specifications"
-                  description="Explore frontier models including GPT-5.6 Sol, Terra, and Luna with automatic prompt caching."
+                  description="Explore managed models including GALX Nova and GALX Nova-image with automatic prompt caching."
                 />
               </div>
 

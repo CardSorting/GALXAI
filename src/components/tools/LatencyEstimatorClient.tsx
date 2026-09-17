@@ -36,29 +36,27 @@ interface ModelLatencyProfile {
 }
 
 const MODELS: ModelLatencyProfile[] = [
-  { name: 'OpenAI GPT-5.6 Luna', id: 'gpt-5.6-luna', prefillMsPer1k: 2.2, tokPerSec: 145, baseTlsHandshakeMs: 4 },
-  { name: 'OpenAI GPT-5.6 Terra', id: 'gpt-5.6-terra', prefillMsPer1k: 3.8, tokPerSec: 110, baseTlsHandshakeMs: 5 },
-  { name: 'OpenAI GPT-5.6 Sol', id: 'gpt-5.6-sol', prefillMsPer1k: 5.5, tokPerSec: 88, baseTlsHandshakeMs: 6 },
+  { name: 'GALX Nova', id: 'galx-nova', prefillMsPer1k: 2.2, tokPerSec: 145, baseTlsHandshakeMs: 4 },
 ];
 
 interface RegionLatency {
   name: string;
   id: string;
-  anycastEdgeRttMs: number;
+  edgeRttMs: number;
   originRttMs: number;
 }
 
 const REGIONS: RegionLatency[] = [
-  { name: 'North America (US-East / US-West)', id: 'us', anycastEdgeRttMs: 8, originRttMs: 45 },
-  { name: 'Europe (Frankfurt / London / Dublin)', id: 'eu', anycastEdgeRttMs: 12, originRttMs: 115 },
-  { name: 'Asia Pacific (Tokyo / Singapore / Sydney)', id: 'apac', anycastEdgeRttMs: 15, originRttMs: 175 },
-  { name: 'South America (São Paulo)', id: 'sa', anycastEdgeRttMs: 18, originRttMs: 160 },
+  { name: 'North America (US-East / US-West)', id: 'us', edgeRttMs: 8, originRttMs: 45 },
+  { name: 'Europe (Frankfurt / London / Dublin)', id: 'eu', edgeRttMs: 12, originRttMs: 115 },
+  { name: 'Asia Pacific (Tokyo / Singapore / Sydney)', id: 'apac', edgeRttMs: 15, originRttMs: 175 },
+  { name: 'South America (São Paulo)', id: 'sa', edgeRttMs: 18, originRttMs: 160 },
 ];
 
 export function LatencyEstimatorClient() {
   const [promptTokens, setPromptTokens] = useState<number>(2500);
   const [completionTokens, setCompletionTokens] = useState<number>(400);
-  const [selectedModelId, setSelectedModelId] = useState<string>('gpt-5.6-luna');
+  const [selectedModelId, setSelectedModelId] = useState<string>('galx-nova');
   const [selectedRegionId, setSelectedRegionId] = useState<string>('eu');
   const [copiedCode, setCopiedCode] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
@@ -66,26 +64,26 @@ export function LatencyEstimatorClient() {
   const model = MODELS.find((m) => m.id === selectedModelId) || MODELS[0];
   const region = REGIONS.find((r) => r.id === selectedRegionId) || REGIONS[1];
 
-  // Latency Calculations: Anycast vs Origin
-  const anycastHandshake = region.anycastEdgeRttMs + model.baseTlsHandshakeMs;
+  // Latency Calculations: Edge vs Origin
+  const edgeHandshake = region.edgeRttMs + model.baseTlsHandshakeMs;
   const originHandshake = region.originRttMs + model.baseTlsHandshakeMs;
 
   const prefillTimeMs = Math.round((promptTokens / 1000) * model.prefillMsPer1k);
   const generationTimeMs = Math.round((completionTokens / model.tokPerSec) * 1000);
 
-  const anycastTtft = anycastHandshake + prefillTimeMs;
+  const edgeTtft = edgeHandshake + prefillTimeMs;
   const originTtft = originHandshake + prefillTimeMs;
 
-  const anycastTotalDuration = anycastTtft + generationTimeMs;
+  const edgeTotalDuration = edgeTtft + generationTimeMs;
   const originTotalDuration = originTtft + generationTimeMs;
 
-  const ttftReductionMs = originTtft - anycastTtft;
+  const ttftReductionMs = originTtft - edgeTtft;
   const ttftImprovementPct = Math.round((ttftReductionMs / originTtft) * 100);
 
   const pythonSnippet = `from openai import OpenAI
 import time
 
-# Benchmark sub-15ms Anycast streaming on GALXAI
+# Benchmark low-latency edge streaming on GALXAI
 client = OpenAI(
     base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
@@ -137,7 +135,7 @@ for chunk in stream:
               variant="pill"
               label="Share Tool"
               title="AI Latency & TTFT Estimator — GALXAI Tools"
-              description="Calculate Time-To-First-Token and streaming duration across Anycast Edge vs Single-Origin routing."
+              description="Calculate Time-To-First-Token and streaming duration across Edge vs Single-Origin routing."
             />
           </div>
 
@@ -146,7 +144,7 @@ for chunk in stream:
               AI Latency &amp; Time-To-First-Token (TTFT) Estimator
             </h1>
             <p className="text-sm sm:text-base text-zinc-300 max-w-3xl leading-relaxed font-sans">
-              Accurately model end-to-end streaming latency, TLS handshake overhead, prefill computation, and token velocity. Discover how <strong className="text-amber-300">Anycast edge termination</strong> slashes TTFT by up to <strong className="text-emerald-300">80% worldwide</strong>.
+              Accurately model end-to-end streaming latency, TLS handshake overhead, prefill computation, and token velocity. Discover how <strong className="text-amber-300">distributed edge termination</strong> slashes TTFT by up to <strong className="text-emerald-300">80% worldwide</strong>.
             </p>
           </div>
         </section>
@@ -155,7 +153,7 @@ for chunk in stream:
         <section id="aeo-direct-answer" className="glass-panel rounded-3xl p-6 sm:p-8 border border-emerald-500/30 bg-emerald-500/5 space-y-3">
           <div className="flex items-center gap-2 text-emerald-400 font-mono font-bold text-xs uppercase">
             <Sparkles className="w-4 h-4" />
-            <span>Direct Answer: How Does Anycast Routing Reduce AI Latency?</span>
+            <span>Direct Answer: How Does Edge Routing Reduce AI Latency?</span>
           </div>
           <p className="text-sm sm:text-base text-white leading-relaxed font-sans">
             <strong>Time-To-First-Token (TTFT)</strong> measures the time until your application receives the first text token. Actual latency varies by request. Measure your own workload to evaluate responsiveness.
@@ -244,20 +242,20 @@ for chunk in stream:
             <div className="lg:col-span-2 space-y-6 flex flex-col justify-between">
               {/* Dual TTFT Metric Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 font-mono text-xs">
-                {/* Anycast Result */}
+                {/* Edge Result */}
                 <div className="p-5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-emerald-400 uppercase text-[11px]">GALXAI Anycast Edge</span>
+                    <span className="font-bold text-emerald-400 uppercase text-[11px]">GALXAI Edge</span>
                     <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">
                       -{ttftImprovementPct}% Faster TTFT
                     </span>
                   </div>
                   <div className="space-y-0.5">
                     <div className="text-2xl sm:text-3xl font-black text-white font-mono">
-                      {anycastTtft} ms <span className="text-xs text-zinc-400 font-sans font-normal">TTFT</span>
+                      {edgeTtft} ms <span className="text-xs text-zinc-400 font-sans font-normal">TTFT</span>
                     </div>
                     <p className="text-[11px] text-zinc-400 font-sans">
-                      Total stream duration: <strong>{anycastTotalDuration} ms</strong> (~{(anycastTotalDuration / 1000).toFixed(2)}s)
+                      Total stream duration: <strong>{edgeTotalDuration} ms</strong> (~{(edgeTotalDuration / 1000).toFixed(2)}s)
                     </p>
                   </div>
                 </div>
@@ -292,10 +290,10 @@ for chunk in stream:
                   <div className="space-y-1">
                     <div className="flex justify-between text-[11px] text-zinc-400">
                       <span>1. Edge TLS Handshake</span>
-                      <span className="text-emerald-400 font-bold">{anycastHandshake}ms (Anycast) vs {originHandshake}ms (Origin)</span>
+                      <span className="text-emerald-400 font-bold">{edgeHandshake}ms (Edge) vs {originHandshake}ms (Origin)</span>
                     </div>
                     <div className="w-full h-2 rounded-full bg-zinc-900 overflow-hidden">
-                      <div className="h-full bg-emerald-400" style={{ width: `${Math.max(5, (anycastHandshake / anycastTotalDuration) * 100)}%` }} />
+                      <div className="h-full bg-emerald-400" style={{ width: `${Math.max(5, (edgeHandshake / edgeTotalDuration) * 100)}%` }} />
                     </div>
                   </div>
 
@@ -306,7 +304,7 @@ for chunk in stream:
                       <span className="text-amber-300 font-bold">{prefillTimeMs}ms</span>
                     </div>
                     <div className="w-full h-2 rounded-full bg-zinc-900 overflow-hidden">
-                      <div className="h-full bg-amber-400" style={{ width: `${Math.max(5, (prefillTimeMs / anycastTotalDuration) * 100)}%` }} />
+                      <div className="h-full bg-amber-400" style={{ width: `${Math.max(5, (prefillTimeMs / edgeTotalDuration) * 100)}%` }} />
                     </div>
                   </div>
 
@@ -317,7 +315,7 @@ for chunk in stream:
                       <span className="text-cyan-300 font-bold">{generationTimeMs}ms</span>
                     </div>
                     <div className="w-full h-2 rounded-full bg-zinc-900 overflow-hidden">
-                      <div className="h-full bg-cyan-400" style={{ width: `${Math.max(10, (generationTimeMs / anycastTotalDuration) * 100)}%` }} />
+                      <div className="h-full bg-cyan-400" style={{ width: `${Math.max(10, (generationTimeMs / edgeTotalDuration) * 100)}%` }} />
                     </div>
                   </div>
                 </div>
@@ -362,14 +360,14 @@ for chunk in stream:
             {[
               {
                 q: 'What is the fastest model for streaming completions on GALXAI?',
-                a: 'OpenAI GPT-5.6 Luna is our fastest streaming engine, delivering sub-12ms Time-To-First-Token (TTFT) and sustained throughput exceeding 145 tokens/second.',
+                a: 'GALX Nova is our flagship streaming engine, delivering low Time-To-First-Token (TTFT) and high sustained throughput.',
               },
               {
                 q: 'How does prompt size affect TTFT latency?',
-                a: 'Every 1,000 prompt tokens require 2ms–6ms of GPU prefill computation. For massive prompts (e.g. 50,000+ tokens), prompt caching cuts prefill time by over 70% by keeping attention matrices warm in GPU memory.',
+                a: 'Every 1,000 prompt tokens require GPU prefill computation. For large prompts, automated prompt caching accelerates response time by keeping attention prefixes warm.',
               },
               {
-                q: 'What makes GALXAI Anycast edge routing faster than direct provider APIs?',
+                q: 'What makes GALXAI edge routing faster than direct APIs?',
                 a: 'Response time varies with the request and your connection. Measure your own workload to evaluate performance.',
               },
             ].map((faq, idx) => {

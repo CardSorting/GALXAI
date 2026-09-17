@@ -71,7 +71,7 @@ export function FloatingConversionDock() {
             50% Match
           </span>
           <span className="hidden md:inline-block text-zinc-400 text-[10px]">
-            • GPT-5.6 Luna
+            • GALX Nova
           </span>
         </div>
 

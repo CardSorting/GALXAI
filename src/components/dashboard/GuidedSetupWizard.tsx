@@ -49,7 +49,7 @@ const SETUP_PROFILES: SetupProfile[] = [
 npx galxai "Explain continuous token caching in 10 words"
 
 # 2. Or start an interactive chat session:
-npx galxai chat --model gpt-5.6-sol`
+npx galxai chat --model galx-nova`
   },
   {
     id: 'cursor',
@@ -66,7 +66,7 @@ npx galxai chat --model gpt-5.6-sol`
     snippet: `// Cursor / Windsurf Settings -> Models:
 Override Base URL: https://galx.ai/v1
 API Key:           galx_live_your_key_here
-Models:            gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna`
+Models:            galx-nova, galx-nova-image`
   },
   {
     id: 'python',
@@ -78,7 +78,7 @@ Models:            gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna`
     steps: [
       'Keep standard pip install openai (no extra packages)',
       'Set base_url="https://galx.ai/v1" and supply your key',
-      'Run completions with optimal $/perf on GPT-5.6 Luna'
+      'Run completions with optimal performance on GALX Nova'
     ],
     snippet: `from openai import OpenAI
 
@@ -88,7 +88,7 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="gpt-5.6-sol",
+    model="galx-nova",
     messages=[{"role": "user", "content": "Explain caching"}],
     stream=True
 )
@@ -120,7 +120,7 @@ const galxai = createOpenAI({
 export async function POST(req: Request) {
   const { messages } = await req.json();
   const result = streamText({
-    model: galxai("gpt-5.6-sol"),
+    model: galxai("galx-nova"),
     messages,
   });
   return result.toDataStreamResponse();
@@ -161,7 +161,7 @@ claude "Refactor auth pipeline and write unit tests"`
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer galx_live_your_key_here" \\
   -d '{
-    "model": "gpt-5.6-sol",
+    "model": "galx-nova",
     "messages": [{"role": "user", "content": "Explain prompt caching"}],
     "stream": true
   }'`

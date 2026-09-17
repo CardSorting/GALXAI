@@ -155,10 +155,10 @@ export function GalxScenicHero() {
               {/* Card Title & Single-Line Value Prop */}
               <div className="space-y-1.5">
                 <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-zinc-900 leading-tight">
-                  Get access to Frontier AI
+                  Sustainable AI Access
                 </h1>
                 <p className="text-xs sm:text-sm text-zinc-500 font-medium leading-relaxed">
-                  Route, observe, and optimize OpenAI GPT-5.6 inference.
+                  Experiment and build with powerful AI. GALX handles the intelligence layer.
                 </p>
               </div>
 
@@ -372,7 +372,7 @@ export function GalxScenicHero() {
                 className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-mono font-medium hover:bg-emerald-500/20 transition-all shadow-sm"
               >
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                <span>All Systems Operational • Sub-15ms Anycast SLA</span>
+                <span>All Systems Operational • High-Availability SLA</span>
               </Link>
             </div>
           </div>
@@ -388,27 +388,15 @@ export function GalxScenicHero() {
               </h4>
               <ul className="space-y-2 text-zinc-400 font-mono text-[11px]">
                 <li>
-                  <Link href="/models/gpt-5.6-sol" className="hover:text-cyan-300 transition-colors block">
-                    <span className="text-zinc-200 font-semibold block">GPT-5.6 Sol</span>
-                    <span className="text-[10px] text-zinc-500 font-sans">Reasoning &amp; Coding SOTA</span>
+                  <Link href="/models/galx-nova" className="hover:text-cyan-300 transition-colors block">
+                    <span className="text-zinc-200 font-semibold block">GALX Nova</span>
+                    <span className="text-[10px] text-zinc-500 font-sans">Sustainable Intelligence</span>
                   </Link>
                 </li>
                 <li>
-                  <Link href="/models/gpt-5.6-terra" className="hover:text-cyan-300 transition-colors block">
-                    <span className="text-zinc-200 font-semibold block">GPT-5.6 Terra</span>
-                    <span className="text-[10px] text-zinc-500 font-sans">Balanced Frontier</span>
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/models/gpt-5.6-luna" className="hover:text-cyan-300 transition-colors block">
-                    <span className="text-zinc-200 font-semibold block">GPT-5.6 Luna</span>
-                    <span className="text-[10px] text-zinc-500 font-sans">Sub-second Speed</span>
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/models/openai-gpt-image-latest" className="hover:text-cyan-300 transition-colors block">
-                    <span className="text-zinc-200 font-semibold block">OpenAI Image Generation</span>
-                    <span className="text-[10px] text-zinc-500 font-sans">Text-to-image generation</span>
+                  <Link href="/models/galx-nova-image" className="hover:text-cyan-300 transition-colors block">
+                    <span className="text-zinc-200 font-semibold block">GALX Nova-image</span>
+                    <span className="text-[10px] text-zinc-500 font-sans">Visual Intelligence</span>
                   </Link>
                 </li>
                 <li className="pt-1">

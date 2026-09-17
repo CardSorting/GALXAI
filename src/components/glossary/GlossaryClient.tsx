@@ -70,7 +70,7 @@ export function GlossaryClient() {
               variant="pill"
               label="Share"
               title="GALXAI AI Gateway Technical Glossary"
-              description="Official definitions and architecture guides for TTFT, prompt caching, Anycast routing, and zero data retention."
+              description="Official definitions and guides for TTFT, prompt caching, distributed edge infrastructure, and zero data retention."
             />
           </div>
 
@@ -79,7 +79,7 @@ export function GlossaryClient() {
               AI Routing &amp; Gateway Engineering Glossary
             </h1>
             <p className="text-sm sm:text-base text-zinc-300 leading-relaxed max-w-2xl mx-auto font-sans">
-              Authoritative, citation-ready definitions of foundational AI inference, prompt caching economics, Anycast routing, and zero-data-retention security protocols.
+              Authoritative, citation-ready definitions of foundational AI inference, prompt caching economics, distributed edge infrastructure, and zero-data-retention protocols.
             </p>
           </div>
 
@@ -211,7 +211,7 @@ export function GlossaryClient() {
             <span>Ready to Test in Real Code?</span>
           </h2>
           <p className="text-xs text-zinc-400">
-            See how prompt caching, sub-15ms Anycast routing, and wire compatibility work in production with our 1-line developer quickstarts.
+            See how prompt caching, high-availability edge routing, and wire compatibility work in production with our 1-line developer quickstarts.
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">

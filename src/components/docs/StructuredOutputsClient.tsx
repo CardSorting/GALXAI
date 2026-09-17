@@ -38,7 +38,7 @@ class ProductCatalog(BaseModel):
 
 # Validate a schema-constrained response
 completion = client.beta.chat.completions.parse(
-    model="gpt-5.6-sol",
+    model="galx-nova",
     messages=[
         {"role": "system", "content": "Extract structured product catalog specifications."},
         {"role": "user", "content": "Acme AI Gateway supports streaming, prompt caching, and stateless inference."}
@@ -68,7 +68,7 @@ const ExtractionSchema = z.object({
 });
 
 const completion = await client.beta.chat.completions.parse({
-  model: "gpt-5.6-sol",
+  model: "galx-nova",
   messages: [
     { role: "system", content: "Extract support ticket classification." },
     { role: "user", content: "Our production cluster timed out on query #4492! We need this fixed ASAP." }
@@ -94,7 +94,7 @@ export async function POST(req: Request) {
   const { resumeText } = await req.json();
 
   const { object: candidate } = await generateObject({
-    model: galxai("gpt-5.6-sol"),
+    model: galxai("galx-nova"),
     schema: z.object({
       fullName: z.string(),
       yearsExperience: z.number(),
@@ -113,7 +113,7 @@ export async function POST(req: Request) {
   -H "Authorization: Bearer galx_live_your_gateway_key" \\
   -H "Content-Type: application/json" \\
   -d '{
-    "model": "gpt-5.6-sol",
+    "model": "galx-nova",
     "messages": [
       {"role": "system", "content": "Extract entity data."},
       {"role": "user", "content": "Acme Corp is located in San Francisco with 450 employees."}

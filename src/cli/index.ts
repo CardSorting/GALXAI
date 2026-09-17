@@ -333,14 +333,14 @@ ${agentMarkdown}
     const client = new GalxAI();
     try {
       await client.chat.completions.create({
-        model: 'gpt-5-6-luna-low',
+        model: 'galx-nova',
         messages: [{ role: 'user', content: 'ping' }],
         max_tokens: 1
       });
       const latency = Date.now() - start;
-      console.log(`\n\x1b[32m✔ Anycast Gateway Ping:\x1b[0m \x1b[1m${latency}ms\x1b[0m (Sub-15ms Wire TTFT)\n`);
+      console.log(`\n\x1b[32m✔ Edge Gateway Ping:\x1b[0m \x1b[1m${latency}ms\x1b[0m (Sub-15ms Wire TTFT)\n`);
     } catch {
-      console.log(`\n\x1b[32m✔ Local Substrate Ping:\x1b[0m \x1b[1m1.2ms\x1b[0m (Zero-Friction In-Memory Mirror)\n`);
+      console.log(`\n\x1b[32m✔ Local Gateway Ping:\x1b[0m \x1b[1m1.2ms\x1b[0m (Zero-Friction In-Memory Mirror)\n`);
     }
     process.exit(0);
   }

@@ -44,48 +44,26 @@ interface ModelPreset {
 
 const HERO_MODELS: ModelPreset[] = [
   {
-    id: 'gpt-5.6-sol',
-    name: 'GPT-5.6 Sol',
-    provider: 'OpenAI',
-    retailPrice: 5.00,
-    wholesalePrice: 3.75,
-    discountPct: 25,
-    contextK: 900,
-    specialty: 'Code & Architecture',
+    id: 'galx-nova',
+    name: 'GALX Nova',
+    provider: 'Engine',
+    retailPrice: 1.20,
+    wholesalePrice: 1.20,
+    discountPct: 0,
+    contextK: 1050,
+    specialty: 'Sustainable Intelligence',
     accentColor: 'from-amber-400 to-orange-500'
   },
   {
-    id: 'gpt-5.6-terra',
-    name: 'GPT-5.6 Terra',
-    provider: 'Reasoning',
-    retailPrice: 3.00,
-    wholesalePrice: 2.25,
-    discountPct: 25,
-    contextK: 900,
-    specialty: 'Frontier Reasoning',
-    accentColor: 'from-orange-400 to-amber-500'
-  },
-  {
-    id: 'gpt-5.6-luna',
-    name: 'GPT-5.6 Luna',
-    provider: 'Flash',
-    retailPrice: 1.50,
-    wholesalePrice: 0.95,
-    discountPct: 36,
-    contextK: 900,
-    specialty: 'Fast Agent Loops',
-    accentColor: 'from-emerald-400 to-teal-500'
-  },
-  {
-    id: 'openai-gpt-image-latest',
-    name: 'OpenAI Image Generation',
+    id: 'galx-nova-image',
+    name: 'GALX Nova-image',
     provider: 'Visual',
     retailPrice: 0.08,
     wholesalePrice: 0.06,
     discountPct: 25,
     contextK: 128,
-    specialty: 'Image Synthesis',
-    accentColor: 'from-white via-zinc-200 to-zinc-400'
+    specialty: 'Visual Synthesis',
+    accentColor: 'from-purple-400 to-indigo-500'
   }
 ];
 
@@ -169,9 +147,9 @@ export function HeroZenithConsole() {
     if (lower.includes('caching') || lower.includes('arbitrage') || lower.includes('explain')) {
       return `### ⚡ Continuous Token Caching & Pricing Arbitrage
 
-1. **Warm Prefix Matching (<1ms):** Prompts with matching system instructions and context prefixes are instantly recognized in Anycast RAM.
-2. **75% Cache Rebate:** Cached prefix tokens cost **$0.75 / 1M** instead of standard retail **$5.00 / 1M** (100% rebate pass-through).
-3. **Wholesale Routing:** 0% platform markup delivers a direct **${model.discountPct}% instant discount** on generation tokens.
+1. **Warm Prefix Matching (<1ms):** Prompts with matching system instructions and context prefixes are instantly recognized in ephemeral edge memory.
+2. **75% Cache Rebate:** Cached prefix tokens provide maximum pass-through savings.
+3. **Sustainable Routing:** Zero platform markup delivers predictable, low-overhead generation.
 
 \`\`\`typescript
 const stats = {
@@ -256,7 +234,7 @@ impl AtomicTokenBucket {
 
 When autonomous agent loops (Cursor, Windsurf, Claude Code) run high-volume concurrency, direct provider rate limits cause sudden halts.
 
-- **Sub-1ms Anycast Failover:** Traffic is instantly shifted across redundant edge channels.
+- **High-Availability Edge Failover:** Traffic is seamlessly shifted across redundant edge channels.
 - **Zero Code Rewrites:** Applications avoid 429 backoff stalls and dropped streams.
 - **High Concurrency:** Consistent high-speed generation for mission-critical agent swarms.
 
@@ -276,8 +254,8 @@ export const resilience = {
 
 > *"${prompt}"*
 
-1. **Anycast Routing:** Handled nearest to your origin in **12ms TTFT**.
-2. **Wholesale Rate Applied:** **$${model.wholesalePrice.toFixed(2)} / 1M tokens** (saved **${model.discountPct}%** vs retail $${model.retailPrice.toFixed(2)}).
+1. **Edge Routing:** Handled nearest to your origin for minimal wire latency.
+2. **Predictable Rate Applied:** **$${model.wholesalePrice.toFixed(2)} / 1M tokens**.
 3. **Prompt Cache:** Warm prefix buffers matched in non-persisted RAM.
 
 \`\`\`typescript
@@ -486,7 +464,7 @@ npx galxai chat --model ${selectedModel.id}`;
         return `// Cursor / Windsurf -> Settings -> Models:
 Override Base URL: https://galx.ai/v1
 API Key:           galx_live_your_key_here
-Models:            ${selectedModel.id}, gpt-5.6-sol, gpt-5.6-luna`;
+Models:            ${selectedModel.id}, galx-nova, galx-nova-image`;
       case 'claude_code':
         return `# Point Claude Code to GALXAI Gateway:
 export ANTHROPIC_BASE_URL="https://galx.ai/v1"
@@ -547,7 +525,7 @@ const res = await client.chat.completions.create({
             <div className="flex items-center gap-2 font-mono text-xs">
               <span className="text-white font-bold tracking-wider uppercase">Global Edge Router</span>
               <span className="text-zinc-500">•</span>
-              <span className="text-emerald-400 font-semibold">&lt;15ms Anycast</span>
+              <span className="text-emerald-400 font-semibold">&lt;15ms Edge Route</span>
             </div>
           </div>
 

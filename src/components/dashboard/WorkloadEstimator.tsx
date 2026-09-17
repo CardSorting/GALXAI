@@ -51,7 +51,7 @@ const WORKLOAD_PRESETS: WorkloadPreset[] = [
     minVolume: 500,
     maxVolume: 50000,
     step: 500,
-    modelName: 'GPT-5.6 Sol (Turbo 128k)',
+    modelName: 'GALX Nova (Sustainable Intelligence)',
     upstreamCostPerUnit: 0.045, // $0.045 per support chat on retail
     galxCostPerUnit: 0.027     // $0.027 on wholesale
   },
@@ -66,7 +66,7 @@ const WORKLOAD_PRESETS: WorkloadPreset[] = [
     minVolume: 20,
     maxVolume: 3000,
     step: 20,
-    modelName: 'GPT-5.6 Terra (Reasoning Engine)',
+    modelName: 'GALX Nova (Deep Reasoning)',
     upstreamCostPerUnit: 0.85, // $0.85 per article retail
     galxCostPerUnit: 0.51      // $0.51 on wholesale
   },
@@ -81,7 +81,7 @@ const WORKLOAD_PRESETS: WorkloadPreset[] = [
     minVolume: 1,
     maxVolume: 50,
     step: 1,
-    modelName: 'GPT-5.6 Sol & Luna',
+    modelName: 'GALX Nova',
     upstreamCostPerUnit: 40.0, // $40/dev/mo on retail tokens
     galxCostPerUnit: 24.0      // $24/dev/mo on wholesale
   },

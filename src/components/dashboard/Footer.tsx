@@ -34,7 +34,7 @@ export function Footer() {
             </Link>
 
             <p className={styles.tagline}>
-              A generative creative playground for community creators paired with sustainable frontier-level intelligence. Serving GPT-5.6 Luna — proven in private internal testing to deliver the highest performance per dollar so developers can build and explore without constraints.
+              A generative creative playground for community creators paired with sustainable frontier-level intelligence. Powered by GALX Nova — our managed intelligence layer delivering state-of-the-art reasoning and generation.
             </p>
 
             <Link href="/status" className={styles.statusPill}>
@@ -60,7 +60,7 @@ export function Footer() {
               </li>
               <li>
                 <Link href="/models" className={styles.footerLink}>
-                  <span>Frontier Model (GPT-5.6 Luna)</span>
+                  <span>Managed Intelligence (GALX Nova)</span>
                 </Link>
               </li>
               <li>
