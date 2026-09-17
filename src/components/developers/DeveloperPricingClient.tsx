@@ -321,13 +321,13 @@ export function DeveloperPricingClient() {
               <span>Developer API & Pay-As-You-Go Tiers</span>
             </div>
             <h1 className="mt-4 text-3xl font-bold tracking-tight text-white sm:text-5xl">
-              Wholesale Compute. <br />
+              Frontier Intelligence. <br />
               <span className="bg-gradient-to-r from-indigo-300 via-sky-300 to-indigo-100 bg-clip-text text-transparent">
-                Instant Developer Tier Unlock.
+                Sustainable Developer Compute.
               </span>
             </h1>
             <p className="mt-4 text-base leading-relaxed text-zinc-300 sm:text-lg">
-              Unlock the Developer Tier with a single $10 deposit for instant API keys, zero-markup frontier OpenAI models, and image generation. Enjoy up to 100% double compute matching with no subscription lock-in.
+              A creative playground and sustainable developer platform serving OpenAI GPT-5.6 Luna. Private internal testing confirmed GPT-5.6 Luna delivers the highest performance per dollar so developers can test, build, and reach their goals without being constrained by quality, price, or exploration.
             </p>
             <div className="mt-6 flex flex-wrap items-center gap-4">
               <a href="#tiers" className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-600/20 transition-all hover:bg-indigo-500 hover:shadow-indigo-500/30">
@@ -600,9 +600,9 @@ export function DeveloperPricingClient() {
         <section id="catalog" className="scroll-mt-24 pt-16">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="text-2xl font-bold text-white sm:text-3xl">Model Catalog & Token Rates</h2>
+              <h2 className="text-2xl font-bold text-white sm:text-3xl">Frontier Model & Visual Synthesis Catalog</h2>
               <p className="mt-1 text-sm text-zinc-400">
-                Transparent wholesale pricing per 1 million tokens. Zero markups on cached prompts.
+                Curated around GPT-5.6 Luna and Image Studio — benchmarked for the highest performance per dollar with zero artificial markups.
               </p>
             </div>
 

@@ -453,13 +453,11 @@ console.log(res.choices[0].message.content);`;
               </div>
 
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-[1.15]">
-                Frontier Model Catalog
+                Curated Frontier Intelligence
               </h1>
 
               <p className="text-sm sm:text-base text-zinc-300 leading-relaxed max-w-xl">
-                Direct, low-latency API access to modern reasoning, coding, and visual synthesis models.
-                Point your existing OpenAI SDK to our GALX API to unlock automatic prompt caching,
-                rate-limit absorption, and multi-region failover with zero code rewrites.
+                A creative playground and sustainable developer platform serving OpenAI GPT-5.6 Luna. Through rigorous private internal testing, we verified that GPT-5.6 Luna delivers the absolute best performance per dollar—allowing developers to test, build, and explore without being constrained by quality, price, or exploration limits.
               </p>
 
               {/* Endpoint Pill */}

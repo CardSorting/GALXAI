@@ -31,8 +31,8 @@ interface ShareModalProps {
 function BaseShareModal({
   isOpen,
   onClose,
-  title = 'GALXAI — Universal AI Model Router & Gateway',
-  description = 'One unified API for OpenAI and frontier models with sub-15ms routing and 25%–40% wholesale token savings.',
+  title = 'GALXAI — Generative Playground & Frontier Intelligence',
+  description = 'A generative creative playground with community creators and sustainable serving of GPT-5.6 Luna for developers.',
   url
 }: ShareModalProps) {
   const [activeTab, setActiveTab] = useState<'social' | 'qr' | 'markdown' | 'badge'>('social');
@@ -128,7 +128,7 @@ function BaseShareModal({
     ctx.stroke();
     ctx.font = 'bold 16px sans-serif';
     ctx.fillStyle = '#34d399';
-    ctx.fillText('Save 25%–40% Wholesale', 875, 93);
+    ctx.fillText('Optimal Performance / $', 860, 93);
 
     // Card Title
     ctx.font = '900 48px sans-serif';

@@ -78,7 +78,7 @@ Models:            gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna`
     steps: [
       'Keep standard pip install openai (no extra packages)',
       'Set base_url="https://galx.ai/v1" and supply your key',
-      'Run completions with wholesale pricing'
+      'Run completions with optimal $/perf on GPT-5.6 Luna'
     ],
     snippet: `from openai import OpenAI
 
@@ -131,7 +131,7 @@ export async function POST(req: Request) {
     name: 'Claude Code',
     badge: 'Agent CLI',
     icon: Bot,
-    description: 'Route Claude Code agent loops with wholesale rates and zero 429 stalls.',
+    description: 'Route agent loops with sustainable rates and zero 429 stalls.',
     language: 'bash',
     steps: [
       'Export ANTHROPIC_BASE_URL="https://galx.ai/v1"',

@@ -85,14 +85,14 @@ const SIM_MODELS: SimModel[] = [
   {
     id: 'gpt-5.6-sol',
     name: 'GPT-5.6 Sol (2M Context)',
-    badge: '-25% Wholesale',
+    badge: 'Optimal $/perf',
     discountPct: 25,
     promptTokens: 420,
     completionTokens: 284,
     cachedTokens: 210,
     sampleText: `GALXAI's sub-15ms router routes requests dynamically across high-concurrency enterprise infrastructure:
 
-1. **Wholesale Rate Arbitrage**: Aggregates billions of enterprise tokens, passing 25%–40% bulk discounts directly to you with zero markups.
+1. **Best Performance Per $**: Verified in private internal testing to deliver the highest capability per dollar for unrestricted developer exploration.
 2. **Zero Quality Loss**: Requests hit authentic GPT-5.6 Sol model weights with identical latency and deterministic output.
 3. **75% Prompt Caching Rebate**: Repeated system prompts automatically trigger prefix caching rebates.
 4. **1-Line Switch**: Simply update your Base URL in Cursor, LibreChat, or your existing OpenAI SDK.`
@@ -100,7 +100,7 @@ const SIM_MODELS: SimModel[] = [
   {
     id: 'gpt-5.6-luna',
     name: 'GPT-5.6 Luna (Sub-Second Velocity)',
-    badge: '-36% Wholesale',
+    badge: 'Best $/perf',
     discountPct: 36,
     promptTokens: 380,
     completionTokens: 240,
@@ -212,7 +212,7 @@ function BaseNoCodeSandboxWidget() {
           variant="pill"
           label="Share Simulator"
           title="Try GALXAI Zero-Code Simulator"
-          description="Interactive prompt simulator testing GPT-5.6 Sol and Luna with live wholesale token savings."
+          description="Interactive prompt simulator testing GPT-5.6 Luna with live sustainable token savings."
         />
       </div>
 
@@ -311,7 +311,7 @@ function BaseNoCodeSandboxWidget() {
             ) : (
               <span className="text-zinc-500 italic flex items-center gap-2 py-4">
                 <Terminal className="w-4 h-4 text-zinc-600 shrink-0" />
-                <span>Click &quot;Run Simulation&quot; to test sub-15ms streaming and compare wholesale token throughput...</span>
+                <span>Click &quot;Run Simulation&quot; to test sub-15ms streaming and compare token throughput on GPT-5.6 Luna...</span>
               </span>
             )}
             {isStreaming && <span className="inline-block w-2 h-4 bg-cyan-400 ml-1 animate-pulse" />}
@@ -332,7 +332,7 @@ function BaseNoCodeSandboxWidget() {
                 <TrendingDown className="w-3.5 h-3.5" />
                 <span>Discount:</span>
               </div>
-              <strong className="text-emerald-300 font-bold">-{simCost.savingsPercentage}% Wholesale</strong>
+              <strong className="text-emerald-300 font-bold">Optimal $/perf</strong>
             </div>
 
             <div className="p-2.5 rounded-xl bg-black/40 border border-white/5 flex items-center justify-between">

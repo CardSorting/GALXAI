@@ -117,12 +117,12 @@ const PLATFORM_PAGES: PlatformPage[] = [
     description: 'Calculate exact savings with 75% prompt caching and avoided engineering tuition'
   },
   {
-    label: 'Wholesale Pricing & Token Rates',
+    label: 'Developer Pricing & Token Rates',
     href: '/pricing',
     icon: DollarSign,
     category: 'Finance',
-    keywords: ['pricing', 'cost', 'cheapest', 'cheap', 'rates', 'discount', 'wholesale', 'savings'],
-    description: 'Wholesale rates: 25%–40% below retail token prices'
+    keywords: ['pricing', 'cost', 'rates', 'luna', 'gpt-5.6', 'developer', 'sustainable'],
+    description: 'Direct developer rates on GPT-5.6 Luna and Image Studio'
   },
   {
     label: 'Model Comparison Matrix',
@@ -242,7 +242,7 @@ const PLATFORM_PAGES: PlatformPage[] = [
     icon: Sliders,
     category: 'Finance',
     keywords: ['calculator', 'roi', 'seat savings', 'compare', 'team cost', 'estimate', 'savings'],
-    description: 'Calculate net annual savings across team seats and wholesale compute'
+    description: 'Calculate net annual savings across team seats and developer compute'
   },
   {
     label: 'Billing invoices',
@@ -693,7 +693,7 @@ function BaseCommandMenu({ isOpen, onClose }: CommandMenuProps) {
                     <Zap className="w-3 h-3 text-amber-400 fill-amber-400" />
                     <span>Resolved Model for "{query}":</span>
                   </span>
-                  <span>-{resolvedFromQuery.discountPercentage}% Wholesale</span>
+                  <span>Optimal Performance / $</span>
                 </div>
                 <button
                   onClick={() => navigateTo(`/models/${resolvedFromQuery.id}`, resolvedFromQuery.name, 'Models & Engines')}

@@ -7,9 +7,9 @@ export const SITE_CONFIG = {
   name: 'GALXAI',
   legalName: 'GALXAI Technologies Inc.',
   alternateName: ['GALX AI'],
-  tagline: 'Hyper-Dimensional Visual Generation & Live Stream',
+  tagline: 'Generative Creative Playground & Sustainable Frontier Intelligence',
   description:
-    'Generate stunning visual assets with GALX Images. Explore the live community stream, remix prompts across 5 aspect ratios, and create with state-of-the-art diffusion models.',
+    'A generative creative playground with community creators and sustainable serving of frontier-level intelligence. Serving OpenAI GPT-5.6 Luna for the highest performance per dollar so developers can build and explore without constraints.',
   // Discovery always identifies the public origin, including local/preview builds.
   // Runtime callback and request origins have their own configuration.
   url: 'https://galx.ai',

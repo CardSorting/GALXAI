@@ -14,8 +14,8 @@ interface ShareButtonProps {
 }
 
 export function ShareButton({
-  title = 'GALXAI — Universal AI Model Router & Universal Gateway',
-  description = 'One unified API for OpenAI and frontier models with sub-15ms routing and 25%–40% wholesale token savings.',
+  title = 'GALXAI — Generative Playground & Frontier Intelligence',
+  description = 'A generative creative playground with community creators and sustainable serving of GPT-5.6 Luna for developers.',
   url,
   variant = 'pill',
   label = 'Share',

@@ -58,9 +58,9 @@ function BaseRoiCalculator({
   const offPeakMultiplier = isOffPeakMode ? 0.90 : 1.00;
 
   // Blended discount calculations
-  const baseWholesaleDiscountPct = Math.round((1 - (galxIn + galxOut) / (listIn + listOut)) * 100);
+  const baseDiscountPct = Math.round((1 - (galxIn + galxOut) / (listIn + listOut)) * 100);
   const promptCacheSavingsMultiplier = (cachedPromptPct / 100) * 0.75 * 0.5; // ~50% of input is cached
-  const effectiveTotalDiscountPct = Math.min(68, Math.round(baseWholesaleDiscountPct + (promptCacheSavingsMultiplier * 100) + (isOffPeakMode ? 5 : 0) + tierExtraPct));
+  const effectiveTotalDiscountPct = Math.min(68, Math.round(baseDiscountPct + (promptCacheSavingsMultiplier * 100) + (isOffPeakMode ? 5 : 0) + tierExtraPct));
 
   // Dollar savings
   const monthlySavingsDollars = Math.round(monthlySpend * (effectiveTotalDiscountPct / 100));
@@ -78,7 +78,7 @@ Target Model: ${selectedModel.id} (${selectedModel.name})
 Current Monthly AI Spend: $${monthlySpend.toLocaleString()} USD / month
 Estimated Retail / Direct Upstream Cost: $${monthlySpend.toLocaleString()} / mo
 Surcharged Aggregator Cost (OpenRouter): $${openRouterSurchargeCost.toLocaleString()} / mo (+5% fee)
-GALXAI Direct Wholesale Cost: $${galxDirectCost.toLocaleString()} / mo
+GALXAI Direct Cost: $${galxDirectCost.toLocaleString()} / mo
 -------------------------------------------------------------
 Net Monthly Cost Reduction: $${monthlySavingsDollars.toLocaleString()} / month (-${effectiveTotalDiscountPct}%)
 Net Annualized Savings: $${annualSavingsDollars.toLocaleString()} USD / year
@@ -108,7 +108,7 @@ Switch in 30 Seconds: https://galx.ai/keys`;
               Calculate Your Monthly Savings
             </h2>
             <p className="text-xs text-zinc-400 max-w-xl">
-              Model wholesale discounts and 75% prompt caching rebates across frontier models.
+              Sustainable direct rates and 75% prompt caching rebates across frontier models.
             </p>
           </div>
 
@@ -128,7 +128,7 @@ Switch in 30 Seconds: https://galx.ai/keys`;
           <div className="space-y-2">
             <div className="flex justify-between items-center text-xs font-bold text-zinc-300 uppercase font-mono">
               <span>1. Target Model</span>
-              <span className="text-emerald-400">-{selectedModel.discountPercentage}% Wholesale Base</span>
+              <span className="text-emerald-400">Optimal $/perf Base</span>
             </div>
             <select
               value={selectedModelId}
@@ -229,7 +229,7 @@ Switch in 30 Seconds: https://galx.ai/keys`;
                 <span className="line-through">${openRouterSurchargeCost.toLocaleString()} / mo</span>
               </div>
               <div className="flex justify-between items-center text-white font-bold text-sm">
-                <span className="text-emerald-400">GALXAI Wholesale Cost:</span>
+                <span className="text-emerald-400">GALXAI Direct Cost:</span>
                 <span className="text-emerald-300 text-lg font-black">${galxDirectCost.toLocaleString()} / mo</span>
               </div>
             </div>
@@ -294,5 +294,5 @@ Switch in 30 Seconds: https://galx.ai/keys`;
 }
 
 export const RoiCalculator = withErrorBoundary(BaseRoiCalculator, {
-  name: 'ROI & Wholesale Savings Calculator'
+  name: 'ROI & Efficiency Calculator'
 });

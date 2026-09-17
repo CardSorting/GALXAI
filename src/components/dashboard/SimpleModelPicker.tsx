@@ -45,7 +45,7 @@ const CATEGORIES: SimpleCategory[] = [
       'Instant sub-second conversational agent turns and triage'
     ],
     retailComparison: '$0.20 in / $1.20 out per 1M tokens',
-    galxDiscount: 'Verified OpenAI API wholesale rates with sub-15ms TTFT'
+    galxDiscount: 'Best Performance / $ for Developers'
   },
   {
     id: 'visuals',
@@ -59,7 +59,7 @@ const CATEGORIES: SimpleCategory[] = [
       'Website hero banners and graphic design'
     ],
     retailComparison: '$0.080 / img retail',
-    galxDiscount: 'Save 25% ($0.060 direct wholesale)'
+    galxDiscount: 'Direct Creative Studio ($0.060 / img)'
   }
 ];
 
@@ -101,7 +101,7 @@ function BaseSimpleModelPicker() {
             Which Model Fits Your Application?
           </h2>
           <p className="text-xs text-zinc-400">
-            Tell us what you want to build or choose a category below. We route directly to the optimal engine with wholesale savings.
+            Tell us what you want to build or choose a category below. We serve GPT-5.6 Luna for the highest performance per dollar so you can build without constraints.
           </p>
         </div>
 
@@ -203,7 +203,7 @@ function BaseSimpleModelPicker() {
                 </span>
               </h3>
               <p className="text-xs text-zinc-300 leading-relaxed font-sans pt-1">
-                {modelSpecs?.description || 'Frontier performance with direct wholesale margins and sub-15ms automated failover.'}
+                {modelSpecs?.description || 'Frontier performance serving GPT-5.6 Luna with maximum efficiency per dollar.'}
               </p>
             </div>
 
@@ -226,7 +226,7 @@ function BaseSimpleModelPicker() {
                 <span className="text-rose-400 line-through">{currentCat.retailComparison}</span>
               </div>
               <div className="flex justify-between items-center text-[11px] pb-2 border-b border-white/10">
-                <span className="text-zinc-400">GALXAI Wholesale:</span>
+                <span className="text-zinc-400">GALX Rate:</span>
                 <span className="text-emerald-300 font-bold">{currentCat.galxDiscount}</span>
               </div>
               <div className="flex justify-between items-center text-[11px]">

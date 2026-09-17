@@ -108,7 +108,7 @@ function BaseSavingsJackpotReel() {
             Calculate Your Compute Winnings &amp; Unlock 2.0x Boosters
           </h2>
           <p className="text-xs sm:text-sm text-zinc-300 max-w-2xl leading-relaxed font-sans">
-            Every dollar redirected from retail markups into wholesale capacity is money won back for your bottom line. Pick a deposit tier to lock in instant multiplier credits.
+            Every dollar redirected from retail markups into high-performance frontier capacity is money won back for your bottom line. Pick a deposit tier to lock in instant multiplier credits.
           </p>
         </div>
 

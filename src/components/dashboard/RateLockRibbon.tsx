@@ -36,7 +36,7 @@ export function RateLockRibbon({
           </div>
 
           <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight">
-            Lock In Wholesale Rates Forever
+            Lock In Sustainable Rates Forever
           </h3>
 
           <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed">

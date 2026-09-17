@@ -19,6 +19,7 @@ import {
   Share2,
   X,
   SlidersHorizontal,
+  Cpu,
 } from 'lucide-react';
 import { PLAN_INCLUSIONS as inclusions, HOME_FAQS as questions } from '@/lib/public-content/content';
 import { PRO_PLAN } from '@/lib/billing/pro-plan';
@@ -243,11 +244,10 @@ export function PublicHome() {
               Create without limits.<br />Explore without end.
             </h1>
             <p className={styles.lede}>
-              Turn imagination into visual reality with <strong>GALX Images.</strong> Prompt, generate,
-              and discover an endless public stream of community creations.
+              A generative creative playground for community creators paired with sustainable frontier-level intelligence. Prompt, remix, and build without constraints.
             </p>
             <p className={styles.heroNote}>
-              Every creation is public by default. Remix any prompt, download in high-resolution, or bring your own vision to life.
+              Every creation is public by default. Powered by high-speed visual diffusion and OpenAI GPT-5.6 Luna—curated for the highest performance per dollar.
             </p>
 
             {/* Fast Prompt Composer Cockpit */}
@@ -750,6 +750,29 @@ export function PublicHome() {
               <h3>Floating Studio Composer</h3>
               <p>
                 Switch aspect ratios, counts, and creative inspirations seamlessly in our floating bottom dock with instant keyboard shortcut execution and lossless raw PNG downloads.
+              </p>
+            </article>
+            <article data-home-reveal="step">
+              <div
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '3px 8px',
+                  borderRadius: '6px',
+                  background: 'rgba(16, 185, 129, 0.15)',
+                  color: '#34d399',
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  marginBottom: '10px',
+                }}
+              >
+                <Cpu size={12} />
+                <span>FRONTIER INTELLIGENCE &middot; OPTIMAL $/PERF</span>
+              </div>
+              <h3>Curated Developer Foundation: GPT-5.6 Luna</h3>
+              <p>
+                We believe developers reach their goals faster with unconstrained exploration. Based on extensive private internal testing, we exclusively serve OpenAI GPT-5.6 Luna for text and reasoning—delivering the highest performance per dollar so you can test, iterate, and build without artificial markups or quality compromises.
               </p>
             </article>
           </div>

@@ -24,15 +24,15 @@ function BaseSpendAuditTool() {
   const [monthlySpend, setMonthlySpend] = useState<number>(500);
   const [isCopied, setIsCopied] = useState(false);
 
-  // Calculations based on 33.3% average direct wholesale margin
-  const wholesaleCost = monthlySpend * 0.667;
-  const monthlySaved = monthlySpend - wholesaleCost;
+  // Calculations based on 33.3% average direct efficiency margin
+  const optimizedCost = monthlySpend * 0.667;
+  const monthlySaved = monthlySpend - optimizedCost;
   const annualSaved = monthlySaved * 12;
-  const matchBonus = Math.min(2500, Math.round(wholesaleCost * 0.5));
+  const matchBonus = Math.min(2500, Math.round(optimizedCost * 0.5));
   const freeTokensEquivalent = Math.round((monthlySaved / 3.75) * 1000000);
 
   const handleCopyAudit = async () => {
-    const text = `GALXAI Spend Audit Summary:\nCurrent Monthly Retail AI Spend: $${monthlySpend.toLocaleString()} USD/mo\nGALXAI Direct Wholesale Cost: $${wholesaleCost.toFixed(2)} USD/mo\nMonthly Net Savings: $${monthlySaved.toFixed(2)} USD/mo (33.3% reduction)\nAnnualized Cashflow Kept: $${annualSaved.toFixed(2)} USD/yr\n50% Compute Match Bonus: +$${matchBonus.toLocaleString()} USD in free compute\nFree Token Mileage: ~${(freeTokensEquivalent / 1000000).toFixed(1)}M free tokens/mo`;
+    const text = `GALXAI Spend Audit Summary:\nCurrent Monthly Retail AI Spend: $${monthlySpend.toLocaleString()} USD/mo\nGALXAI Direct Optimized Cost: $${optimizedCost.toFixed(2)} USD/mo\nMonthly Net Savings: $${monthlySaved.toFixed(2)} USD/mo (33.3% reduction)\nAnnualized Cashflow Kept: $${annualSaved.toFixed(2)} USD/yr\n50% Compute Match Bonus: +$${matchBonus.toLocaleString()} USD in free compute\nFree Token Mileage: ~${(freeTokensEquivalent / 1000000).toFixed(1)}M free tokens/mo`;
     const success = await safeCopyToClipboard(text);
     if (success) {
       setIsCopied(true);

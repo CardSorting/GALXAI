@@ -124,7 +124,7 @@ function BaseWorkloadEstimator() {
   const bonusGrantValue = Math.min(2500, Math.round(galxDirectCost * 0.5));
 
   const handleCopyReport = async () => {
-    const reportText = `GALXAI Executive Spend Assessment:\nWorkload: ${currentPreset.title} (${volume.toLocaleString()} ${currentPreset.volumeUnit})\nStandard Retail Cost: $${retailCost.toFixed(2)}/mo\nGALXAI Direct Wholesale: $${galxDirectCost.toFixed(2)}/mo\nMonthly Net Savings: $${monthlySavings.toFixed(2)}/mo (${savingsPct}% saved)\nAnnualized Savings: $${annualSavings.toFixed(2)}/yr\n50% Compute Match Bonus: +$${bonusGrantValue.toFixed(2)} free compute`;
+    const reportText = `GALXAI Executive Spend Assessment:\nWorkload: ${currentPreset.title} (${volume.toLocaleString()} ${currentPreset.volumeUnit})\nStandard Retail Cost: $${retailCost.toFixed(2)}/mo\nGALXAI Direct Cost: $${galxDirectCost.toFixed(2)}/mo\nMonthly Net Savings: $${monthlySavings.toFixed(2)}/mo (${savingsPct}% saved)\nAnnualized Savings: $${annualSavings.toFixed(2)}/yr\n50% Compute Match Bonus: +$${bonusGrantValue.toFixed(2)} free compute`;
     const success = await safeCopyToClipboard(reportText);
     if (success) {
       setCopiedSummary(true);
@@ -240,10 +240,10 @@ function BaseWorkloadEstimator() {
           <div className="p-5 rounded-2xl bg-white/5 border border-white/10 space-y-1">
             <span className="text-[11px] text-zinc-400 font-sans uppercase font-semibold">1. Standard Retail Cost</span>
             <div className="text-2xl sm:text-3xl font-black text-rose-400">${retailCost.toFixed(2)}</div>
-            <p className="text-[10px] text-zinc-500 font-sans">Full upstream pricing without wholesale discount</p>
+            <p className="text-[10px] text-zinc-500 font-sans">Standard list pricing without caching pass-through</p>
           </div>
 
-          {/* GALXAI Wholesale Direct */}
+          {/* GALXAI Direct Cost */}
           <div className="p-5 rounded-2xl bg-amber-500/10 border border-amber-500/40 space-y-1 relative overflow-hidden">
             <span className="text-[11px] text-amber-300 font-sans uppercase font-bold flex items-center justify-center gap-1">
               <Zap className="w-3.5 h-3.5 text-amber-400" />

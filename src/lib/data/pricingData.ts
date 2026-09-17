@@ -19,7 +19,7 @@ export const VOLUME_TIERS: VolumeTier[] = [
     badge: 'Standard',
     description: 'Instant access for individual developers, side projects, and early-stage prototyping.',
     features: [
-      '25%–36% wholesale discounts',
+      '25%–36% developer discounts',
       '75% prompt caching pass-through',
       'Community Slack & Discord support',
       '20 max concurrent streams',
@@ -99,7 +99,7 @@ export const SEAT_TIERS: SeatTier[] = [
   {
     id: 'developer',
     name: 'Solo Developer',
-    tagline: 'Pay-as-you-go wholesale compute for individual engineers & founders.',
+    tagline: 'Pay-as-you-go sustainable compute for individual engineers & founders.',
     audience: 'Solo creators, hackathons, open-source projects',
     basePriceUsd: 0,
     billingPeriod: 'month',
@@ -112,7 +112,7 @@ export const SEAT_TIERS: SeatTier[] = [
     features: [
       { title: '1 Personal Seat', description: 'Dedicated personal sandbox workspace', included: true },
       { title: '$30 Monthly Free Compute Allowance', description: 'Instant access to shared community compute pool', included: true },
-      { title: 'Wholesale Token Rates', description: '25%–36% savings with 0% gateway markup', included: true },
+      { title: 'Curated Developer Rates', description: '25%–36% savings with 0% gateway markup', included: true },
       { title: '75% Prompt Caching Pass-Through', description: 'Automatic cache rebate on repeat context', included: true },
       { title: 'Sub-15ms Anycast Routing', description: 'Automated 429 failover to backup providers', included: true },
       { title: 'Shared Team API Keys', description: 'Multi-tenant key encryption and squad sharing', included: false },
@@ -165,7 +165,7 @@ export const SEAT_TIERS: SeatTier[] = [
     highlightColor: 'border-cyan-500/40 bg-cyan-500/5 shadow-2xl shadow-cyan-500/10',
     features: [
       { title: '25 Base Seats Included (Scale to 10k+)', description: 'Unlimited pooled seats at volume discounts', included: true },
-      { title: '$600 Monthly Compute Credits Included', description: 'High-volume wholesale liquidity pool', included: true },
+      { title: '$600 Monthly Compute Credits Included', description: 'High-volume frontier compute pool', included: true },
       { title: 'SAML 2.0 SSO & SCIM Sync', description: 'Auto-provision and de-provision via Okta, Azure, Google', included: true },
       { title: 'Company Domain Capture (@acme.com)', description: 'Automatic team enrollment and SSO enforcement', included: true },
       { title: 'Consolidated Net-30 / ACH Invoicing', description: 'Custom PO codes, wire terms, and multi-entity billing', included: true },
@@ -289,7 +289,7 @@ export const SEAT_BENCHMARKS: SeatBenchmarkComparison[] = [
     perSeatCostMonthly: 25.00,
     tokenMarkupPct: 0,
     monthlyCostFor10SeatsAnd1kSpend: 250 + 1000, // $1,250
-    galxaiMonthlyCostForSame: 75 + (10 - 5) * 15 + 750, // $150 seats + $750 tokens (25% wholesale savings) = $900
+    galxaiMonthlyCostForSame: 75 + (10 - 5) * 15 + 750, // $150 seats + $750 tokens (25% developer savings) = $900
     monthlySavings: 350,
     annualSavings: 4200,
     keyLimitation: 'Locked to single provider, zero prompt caching pass-through on external apps',
@@ -400,7 +400,7 @@ export const PLAN_COMPARISONS: FeatureComparisonRow[] = [
   },
   {
     category: 'API Gateway & Compute',
-    feature: 'Wholesale Token Discount',
+    feature: 'Direct Developer Token Discount',
     description: 'Direct discount off OpenAI retail prices',
     developer: '25%–36%',
     smallBusiness: '30%–41%',

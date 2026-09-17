@@ -34,7 +34,7 @@ export function Footer() {
             </Link>
 
             <p className={styles.tagline}>
-              High-throughput generative image synthesis and frontier inference network. Built for rapid creation and developer scalability.
+              A generative creative playground for community creators paired with sustainable frontier-level intelligence. Serving GPT-5.6 Luna — proven in private internal testing to deliver the highest performance per dollar so developers can build and explore without constraints.
             </p>
 
             <Link href="/status" className={styles.statusPill}>
@@ -60,7 +60,7 @@ export function Footer() {
               </li>
               <li>
                 <Link href="/models" className={styles.footerLink}>
-                  <span>Frontier Models</span>
+                  <span>Frontier Model (GPT-5.6 Luna)</span>
                 </Link>
               </li>
               <li>
@@ -88,7 +88,7 @@ export function Footer() {
               </li>
               <li>
                 <Link href="/developers/pricing" className={styles.footerLink}>
-                  <span>Wholesale Compute</span>
+                  <span>Developer Compute</span>
                 </Link>
               </li>
               <li>

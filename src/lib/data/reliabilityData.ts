@@ -114,7 +114,7 @@ print(f"Successfully executed {len(results)} concurrent tasks.")`,
     faqs: [
       {
         q: 'How does GALXAI prevent 429 errors during sudden traffic surges?',
-        a: 'GALXAI pools multiple enterprise wholesale quotas and uses dynamic token bucket load-balancing to distribute bursts across active clusters.',
+        a: 'GALXAI utilizes dynamic token bucket load-balancing across resilient edge compute clusters to smoothly distribute high-concurrency bursts.',
       },
     ],
   },

@@ -19,7 +19,7 @@ npx galxai "Explain continuous token caching in 10 words"
 # 2. Run target reasoning model:
 npx galxai run "Audit distributed lock implementation" --model terra
 
-# 3. List active models, context windows, and wholesale rates:
+# 3. List active models, context windows, and token rates:
 npx galxai models
 
 # 4. Measure sub-15ms Anycast edge gateway latency:
@@ -49,9 +49,9 @@ client = OpenAI(
     api_key="galx_live_your_gateway_key"
 )
 
-# Stream with 25%–40% wholesale discount & 75% prompt cache pass-through
+# Stream with sustainable rates & 75% prompt cache pass-through on GPT-5.6 Luna
 response = client.chat.completions.create(
-    model="gpt-5.6-sol",  # or "gpt-5.6-terra", "gpt-5.6-luna"
+    model="gpt-5-6-luna-low",
     messages=[
         {"role": "system", "content": "You are a software architect."},
         {"role": "user", "content": "Write an atomic lease manager in Python."}

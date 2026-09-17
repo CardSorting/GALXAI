@@ -52,7 +52,7 @@ export const CURATED_MATCHUPS: ModelMatchup[] = [
       },
       {
         q: 'How does image generation billing work?',
-        a: 'Visual synthesis requests are billed per sanitized binary artifact at wholesale rates ($0.040 per standard image).',
+        a: 'Visual synthesis requests are billed per sanitized binary artifact at direct developer rates ($0.040 per standard image).',
       },
     ],
   },
