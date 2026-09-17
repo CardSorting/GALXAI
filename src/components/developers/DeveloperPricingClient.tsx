@@ -865,7 +865,7 @@ export function DeveloperPricingClient() {
                 Does depositing more money increase my RPM/TPM throughput limits?
               </summary>
               <p className="mt-2 text-sm leading-relaxed text-zinc-400">
-                No. Concurrency limits (RPM and TPM) are governed by your account Tier (Tier 1 starts at 60 RPM / 40k TPM). Adding funds increases your prepaid runway, not your instantaneous burst velocity. Higher throughput tiers unlock automatically as your account matures and completes verified billing cycles.
+                Yes — each compute tier unlocks a higher concurrency envelope based on your total deposited balance. The Developer Tier ($10) starts at 60 RPM / 40k TPM. Starter Builder ($25) unlocks 120 RPM / 80k TPM. Growth VIP ($50) opens a Sub-15ms VIP Priority Lane at 300 RPM / 200k TPM. Fleet Scale ($100) grants 600 RPM / 500k TPM. Enterprise Sovereign ($250) reaches 1,200 RPM / 1M TPM. Hyperscale Infra ($500) removes concurrency limits entirely. These limits are enforced at the account level and apply across all your API keys.
               </p>
             </details>
             <details className="group py-4">

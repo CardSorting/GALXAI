@@ -7,6 +7,7 @@ import { getPostgresPool } from '@/lib/db/postgres';
 import { ensureWallet } from '@/lib/billing/wallet';
 import { ApiKeyRepository } from '@/lib/supabase/repositories/ApiKeyRepository';
 import type { DeveloperGatewayKey } from '@/core/contracts/GalxContracts';
+import { getTierLimitsForDeposit } from '@/lib/stripe/products';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -28,6 +29,16 @@ async function accountIsPaid(userId: string) {
   if (!pool) throw new Error('Wallet storage unavailable');
   const wallet = await ensureWallet(pool, userId);
   return wallet.proof_of_deposit_verified && Number(wallet.deposited_total_usd) > 0;
+}
+
+async function getAccountTier(userId: string) {
+  const pool = getPostgresPool();
+  if (!pool) return { tierKey: 'free', rpm: 60, tpm: '20k TPM', name: 'Free Tier', isPaid: false };
+  const wallet = await ensureWallet(pool, userId);
+  const isPaid = Boolean(wallet.proof_of_deposit_verified && Number(wallet.deposited_total_usd) > 0);
+  const deposited = Number(wallet.deposited_total_usd || 0);
+  const limits = getTierLimitsForDeposit(deposited);
+  return { ...limits, isPaid };
 }
 function keyFailure(error: unknown) {
   return NextResponse.json({ error: error instanceof AccountIdentityError ? 'Sign in with a verified account to manage API keys.' : 'API keys are unavailable. Please try again.' },
@@ -208,9 +219,11 @@ async function previewPOST(req: NextRequest) {
     }
 
     // Welcome credit is spendable balance, never proof of a paid deposit.
-    const isPaid = await accountIsPaid(userId);
-    const computePool: 'shared_community' | 'priority_dedicated' = isPaid ? 'priority_dedicated' : 'shared_community';
-    const effectiveRpm = isPaid ? cleanRpm : Math.min(cleanRpm, 60);
+    const tier = await getAccountTier(userId);
+    const computePool: 'shared_community' | 'priority_dedicated' = tier.isPaid ? 'priority_dedicated' : 'shared_community';
+    const effectiveRpm = rateLimitPerMinute !== undefined
+      ? Math.min(cleanRpm, tier.isPaid ? Math.max(tier.rpm, 60) : 60)
+      : (tier.isPaid ? tier.rpm : 60);
 
     const { apiKey, keyPrefix, keyHash, checksum } = GalxCryptoVault.generateGatewayKey(cleanName, userId, { environment: cleanEnv });
     const keyId = `key_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
@@ -295,10 +308,13 @@ async function previewPATCH(req: NextRequest) {
       return NextResponse.json({ error: 'Forbidden: Cannot modify an API key belonging to another user' }, { status: 403 });
     }
 
+    const tier = await getAccountTier(actor.id);
     const updatedKey: DeveloperGatewayKey = {
       ...existing,
       name: name !== undefined ? sanitizeKeyName(name) : existing.name,
-      rateLimitPerMinute: rateLimitPerMinute !== undefined ? Math.min(sanitizeRateLimit(rateLimitPerMinute), await accountIsPaid(actor.id) ? 10000 : 60) : existing.rateLimitPerMinute,
+      rateLimitPerMinute: rateLimitPerMinute !== undefined
+        ? Math.min(sanitizeRateLimit(rateLimitPerMinute), tier.isPaid ? Math.max(tier.rpm, 60) : 60)
+        : existing.rateLimitPerMinute,
       scopes: scopes !== undefined ? sanitizeScopes(scopes) : existing.scopes,
       defaultCompactionMode: defaultCompactionMode !== undefined ? (defaultCompactionMode === 'raw' ? 'raw' : 'auto') : existing.defaultCompactionMode,
     };

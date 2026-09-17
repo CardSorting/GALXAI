@@ -382,7 +382,7 @@ ${agentMarkdown}
     console.log(`  ---------------------------------------------------------------------------------------`);
     for (const [key, tier] of Object.entries(STRIPE_PRODUCT_TIERS)) {
       const matchPct = `${Math.round((tier.multiplier - 1) * 100)}%`;
-      const rpm = tier.depositAmountUsd >= 500 ? 'Unlimited' : tier.depositAmountUsd >= 250 ? '1,200 RPM' : tier.depositAmountUsd >= 100 ? '600 RPM' : tier.depositAmountUsd >= 50 ? '300 RPM' : '120 RPM';
+      const rpm = tier.depositAmountUsd >= 500 ? 'Unlimited' : tier.depositAmountUsd >= 250 ? '1,200 RPM' : tier.depositAmountUsd >= 100 ? '600 RPM' : tier.depositAmountUsd >= 50 ? '300 RPM' : tier.depositAmountUsd >= 25 ? '120 RPM' : '60 RPM';
       console.log(`  \x1b[1m${key.padEnd(16)}\x1b[0m $${tier.depositAmountUsd.toString().padEnd(8)} ${matchPct.padEnd(9)} +$${(tier.matchBonusUsd + tier.welcomeGrantUsd).toFixed(2).padEnd(11)} \x1b[32m$${tier.totalCreditUsd.toFixed(2).padEnd(13)}\x1b[0m ${rpm.padEnd(10)} ${tier.badge}`);
     }
     console.log(`\n  \x1b[90mIncludes $5.00 introductory welcome grant on tiers $25 and above. 100% refundable unspent balances.\x1b[0m`);

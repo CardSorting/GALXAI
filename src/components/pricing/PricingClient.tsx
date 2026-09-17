@@ -25,6 +25,7 @@ export function PricingClient() {
           </p>
           <nav aria-label="Pricing sections" className="mt-5 flex flex-wrap gap-5 text-sm">
             <a href="#plans" className={linkStyle}>Plans</a>
+            <a href="#compute-tiers" className={linkStyle}>Developer API compute</a>
             <a href="#rates" className={linkStyle}>Model rates</a>
             <a href="#billing-questions" className={linkStyle}>Billing questions</a>
           </nav>
@@ -59,6 +60,38 @@ export function PricingClient() {
           <div className="mt-4 flex flex-wrap items-start justify-between gap-3 text-sm leading-6">
             <p className="max-w-xl text-zinc-400">Team and Enterprise show published plan terms. Confirm availability and activation with support.</p>
             <Link href="/teams/seats" className={linkStyle}>Manage team members</Link>
+          </div>
+        </section>
+
+        {/* Developer API Compute Tiers — one-time deposits */}
+        <section id="compute-tiers" className="scroll-mt-24 pt-10">
+          <div className="rounded-xl border border-indigo-500/20 bg-gradient-to-b from-indigo-950/30 to-transparent p-6 sm:p-8">
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <span className="text-xs font-semibold uppercase tracking-wider text-indigo-400">Prepaid Compute · One-Time Deposits</span>
+                <h2 className="mt-1 text-xl font-semibold text-white">Developer API Compute Tiers</h2>
+                <p className="mt-2 max-w-xl text-sm leading-6 text-zinc-400">
+                  Six tiers from $10 to $500. Each deposit is a non-expiring compute balance with no monthly subscription. Tiers $25 and above receive 50%–100% compute match bonuses. Higher tiers unlock greater RPM and TPM concurrency.
+                </p>
+              </div>
+              <Link href="/developers/pricing" className="inline-flex items-center gap-1.5 rounded-md border border-indigo-400/40 bg-indigo-500/20 px-4 py-2.5 text-sm font-medium text-indigo-100 hover:bg-indigo-500/30 focus-visible:outline-indigo-300 whitespace-nowrap">
+                View all tiers &amp; rates
+              </Link>
+            </div>
+            <dl className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4 text-sm">
+              {[
+                { label: 'Entry deposit', value: '$10', sub: 'Instant API unlock ⚡' },
+                { label: 'Max match bonus', value: '100%', sub: 'Up to $500 free compute' },
+                { label: 'Credits expire', value: 'Never', sub: 'Non-expiring balance' },
+                { label: 'Top concurrency', value: 'Unlimited', sub: '$500 Hyperscale tier' },
+              ].map(({ label, value, sub }) => (
+                <div key={label} className="rounded-lg border border-white/10 bg-white/[0.03] p-3">
+                  <dt className="text-xs text-zinc-500">{label}</dt>
+                  <dd className="mt-1 text-lg font-bold text-white">{value}</dd>
+                  <p className="mt-0.5 text-[11px] text-zinc-500">{sub}</p>
+                </div>
+              ))}
+            </dl>
           </div>
         </section>
 

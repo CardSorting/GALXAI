@@ -5,7 +5,7 @@ import { clearCreditCheckoutAttempt, creditCheckoutAttempt } from '@/lib/billing
 const money = (value: number) => value.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
 /** Shared hosted checkout. A retry keeps the same durable payment attempt. */
 export function TopUpForm({ token, available, accountId, draft }: { token?: string; available: boolean; accountId: string; draft?: { amount: string; onChange: (value: string) => void } }) {
-  const [localAmount, setLocalAmount] = useState('25');
+  const [localAmount, setLocalAmount] = useState('10');
   const amount = draft?.amount ?? localAmount;
   const setAmount = draft?.onChange ?? setLocalAmount;
   const [busy, setBusy] = useState(false);
@@ -59,18 +59,41 @@ export function TopUpForm({ token, available, accountId, draft }: { token?: stri
       if (active.current) window.location.assign(target.href);
     } catch (e) { if (active.current) { setError((e as Error).name === 'TimeoutError' ? 'Checkout took too long. Retry to resume the same payment attempt.' : (e as Error).message); setBusy(false); } inFlight.current = false; }
   }
-  return <form className="mt-6 space-y-4" onSubmit={event => { event.preventDefault(); void checkout(); }}>
-    <fieldset disabled={busy || !available} className="space-y-3"><legend className="mb-2 text-sm text-zinc-300">Top-up amount (USD)</legend>
-      <div className="flex flex-wrap gap-2">{[10, 25, 50, 100].map(value => <button key={value} type="button" aria-pressed={Number(amount) === value} onClick={() => { setAmount(String(value)); setError(''); }} className={`min-h-11 rounded-md border px-4 py-2 text-sm focus-visible:outline-indigo-300 ${Number(amount) === value ? 'border-indigo-400/60 bg-indigo-500/15 text-indigo-100' : 'border-white/15 text-zinc-100 hover:bg-white/5'}`}>${value}</button>)}</div>
-      <label htmlFor={amountId} className="block text-sm text-zinc-400">Custom amount</label>
-      <input id={amountId} aria-describedby={`${amountId}-help`} aria-invalid={!valid} className="block min-h-11 w-full rounded-md border border-white/15 bg-[#090b10] px-3 py-2 text-base text-zinc-100 focus-visible:outline-indigo-300 sm:w-48" type="number" inputMode="decimal" min="1" max="10000" step="0.01" required value={amount} onChange={event => { setAmount(event.target.value); setError(''); }} />
-      <p id={`${amountId}-help`} className={`text-sm ${valid ? 'text-zinc-400' : 'text-red-300'}`}>Enter $1–$10,000, with up to two decimal places.</p>
+  const PRESET_TIERS: { amount: number; label: string; badge?: string }[] = [
+    { amount: 10,  label: 'Developer Tier',       badge: '⚡ Instant Unlock' },
+    { amount: 25,  label: 'Starter Builder',       badge: '50% Match' },
+    { amount: 50,  label: 'Growth VIP',            badge: '60% Match' },
+    { amount: 100, label: 'Fleet Scale',           badge: '75% Match' },
+    { amount: 250, label: 'Enterprise Sovereign',  badge: '100% Double Match' },
+    { amount: 500, label: 'Hyperscale Infra',      badge: '100% Double Match' },
+  ];
+
+  return <form className="mt-6 space-y-5" onSubmit={event => { event.preventDefault(); void checkout(); }}>
+    <fieldset disabled={busy || !available} className="space-y-4"><legend className="mb-3 text-sm font-medium text-zinc-300">Select compute tier (USD one-time deposit)</legend>
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">{PRESET_TIERS.map(({ amount: value, label, badge }) => {
+        const active = Number(amount) === value;
+        return (
+          <button key={value} type="button" aria-pressed={active} onClick={() => { setAmount(String(value)); setError(''); }}
+            className={`flex flex-col items-start rounded-lg border px-3 py-2.5 text-left text-sm transition-all focus-visible:outline-indigo-300 ${
+              active ? 'border-indigo-400/60 bg-indigo-500/15 text-indigo-100' : 'border-white/10 text-zinc-100 hover:border-white/20 hover:bg-white/[0.04]'
+            }`}>
+            <span className="font-semibold tabular-nums">${value}</span>
+            <span className={`mt-0.5 truncate text-[11px] ${active ? 'text-indigo-300' : 'text-zinc-500'}`}>{label}</span>
+            {badge && <span className={`mt-1 text-[10px] font-medium ${active ? 'text-indigo-300' : 'text-zinc-600'}`}>{badge}</span>}
+          </button>
+        );
+      })}</div>
+      <div className="pt-1">
+        <label htmlFor={amountId} className="block text-sm text-zinc-400">Custom amount</label>
+        <input id={amountId} aria-describedby={`${amountId}-help`} aria-invalid={!valid} className="mt-1.5 block min-h-11 w-full rounded-md border border-white/15 bg-[#090b10] px-3 py-2 text-base text-zinc-100 focus-visible:outline-indigo-300 sm:w-48" type="number" inputMode="decimal" min="1" max="10000" step="0.01" required value={amount} onChange={event => { setAmount(event.target.value); setError(''); }} />
+        <p id={`${amountId}-help`} className={`mt-1 text-xs ${valid ? 'text-zinc-500' : 'text-red-300'}`}>Enter $1–$10,000. Credits are non-expiring.</p>
+      </div>
     </fieldset>
-    {quote && quote.amountUsd === Number(amount) && <dl className="max-w-sm space-y-2 text-sm"><div className="flex justify-between gap-4"><dt className="text-zinc-400">You pay once</dt><dd>{money(quote.amountUsd)}</dd></div><div className="flex justify-between gap-4"><dt className="text-zinc-400">Credit added{quote.bonusUsd > 0 ? ' · includes bonus' : ''}</dt><dd className="font-medium text-zinc-100">{money(quote.creditUsd)}</dd></div></dl>}
+    {quote && quote.amountUsd === Number(amount) && <dl className="rounded-lg border border-white/10 bg-white/[0.03] p-3 space-y-1.5 text-sm"><div className="flex justify-between gap-4"><dt className="text-zinc-400">You pay once</dt><dd>{money(quote.amountUsd)}</dd></div><div className="flex justify-between gap-4"><dt className="text-zinc-400">Credit added{quote.bonusUsd > 0 ? ' · includes match bonus' : ''}</dt><dd className="font-semibold text-zinc-100">{money(quote.creditUsd)}</dd></div>{quote.bonusUsd > 0 && <div className="flex justify-between gap-4"><dt className="text-emerald-400">Match bonus</dt><dd className="font-medium text-emerald-400">+{money(quote.bonusUsd)}</dd></div>}</dl>}
     {quoteError && <p role="alert" className="text-sm text-red-300">{quoteError} <button type="button" onClick={() => setQuoteRevision(n => n + 1)} className="underline">Retry</button></p>}
     {valid && available && !quote && !quoteError && <p role="status" className="text-sm text-zinc-400">Calculating your credit…</p>}
     <button type="submit" disabled={!valid || busy || !available || !quote || quote.amountUsd !== Number(amount)} className="min-h-11 w-full rounded-md border border-indigo-400/40 bg-indigo-500/20 px-4 py-2.5 text-sm font-medium text-indigo-100 hover:bg-indigo-500/30 focus-visible:outline-indigo-300 disabled:opacity-50 sm:w-auto">{busy ? 'Opening checkout…' : 'Continue to checkout'}</button>
-    <p className="text-xs leading-6 text-zinc-400">{available ? 'Pay securely with Stripe. Non-expiring compute credits. Micro-metered token billing with zero negative overdrafts.' : 'Online payments are currently unavailable. Please try again later.'}</p>
+    <p className="text-xs leading-6 text-zinc-400">{available ? 'Paid securely via Stripe. Non-expiring compute credits — no subscriptions, no negative overdrafts, no hidden fees.' : 'Online payments are currently unavailable. Please try again later.'}</p>
     {error && <p role="alert" className="text-sm text-red-300">{error}</p>}
   </form>;
 }
