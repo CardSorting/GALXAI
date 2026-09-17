@@ -256,6 +256,48 @@
   transform: scale(1.04);
 }
 
+/* Fallback visual for network drops or offline previews */
+.masonry-fallback-visual {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #111422 0%, #1a1630 50%, #0d101a 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 16px;
+  overflow: hidden;
+}
+
+.masonry-fallback-art {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  z-index: 1;
+}
+
+.masonry-fallback-tag {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #a5b4fc;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(99, 102, 241, 0.15);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+.masonry-fallback-pattern {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(168, 85, 247, 0.15) 1px, transparent 1px);
+  background-size: 16px 16px;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
 /* LQIP blur placeholder */
 .masonry-lqip {
   position: absolute;

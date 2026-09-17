@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { executePostgresQuery } from '@/lib/db/postgres';
+import { GalxCryptoVault } from '@/core/vault/GalxCryptoVault';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -10,6 +11,7 @@ export interface PublicFeedItem {
   aspect_ratio: string;
   dimensions: string;
   public_url: string;
+  thumbnail_url?: string;
   created_at: string;
   lqip: string | null;
   seed: string | null;
@@ -29,6 +31,7 @@ const SHOWCASE_ITEMS: PublicFeedItem[] = [
     aspect_ratio: '1:1',
     dimensions: '1024x1024',
     public_url: '/images/showcase/cafe_cat.jpg',
+    thumbnail_url: '/images/showcase/cafe_cat_thumb.jpg',
     created_at: new Date(Date.now() - 1000 * 60 * 12).toISOString(),
     lqip: null,
     seed: '48291',
@@ -44,6 +47,7 @@ const SHOWCASE_ITEMS: PublicFeedItem[] = [
     aspect_ratio: '9:16',
     dimensions: '768x1376',
     public_url: '/images/showcase/elf_princess.jpg',
+    thumbnail_url: '/images/showcase/elf_princess_thumb.jpg',
     created_at: new Date(Date.now() - 1000 * 60 * 25).toISOString(),
     lqip: null,
     seed: '91823',
@@ -59,6 +63,7 @@ const SHOWCASE_ITEMS: PublicFeedItem[] = [
     aspect_ratio: '16:9',
     dimensions: '1024x576',
     public_url: '/images/showcase/cinematic_sky_16_9.jpg',
+    thumbnail_url: '/images/showcase/cinematic_sky_16_9_thumb.jpg',
     created_at: new Date(Date.now() - 1000 * 60 * 40).toISOString(),
     lqip: null,
     seed: '77215',
@@ -74,6 +79,7 @@ const SHOWCASE_ITEMS: PublicFeedItem[] = [
     aspect_ratio: '9:16',
     dimensions: '576x1024',
     public_url: '/images/showcase/shadow_monarch_9_16.jpg',
+    thumbnail_url: '/images/showcase/shadow_monarch_9_16_thumb.jpg',
     created_at: new Date(Date.now() - 1000 * 60 * 55).toISOString(),
     lqip: null,
     seed: '63810',
@@ -89,6 +95,7 @@ const SHOWCASE_ITEMS: PublicFeedItem[] = [
     aspect_ratio: '1:1',
     dimensions: '1024x1024',
     public_url: '/images/showcase/render_3d.jpg',
+    thumbnail_url: '/images/showcase/render_3d_thumb.jpg',
     created_at: new Date(Date.now() - 1000 * 60 * 70).toISOString(),
     lqip: null,
     seed: '51294',
@@ -104,6 +111,7 @@ const SHOWCASE_ITEMS: PublicFeedItem[] = [
     aspect_ratio: '16:9',
     dimensions: '1024x576',
     public_url: '/images/showcase/cyber_akira_16_9.jpg',
+    thumbnail_url: '/images/showcase/cyber_akira_16_9_thumb.jpg',
     created_at: new Date(Date.now() - 1000 * 60 * 85).toISOString(),
     lqip: null,
     seed: '34912',
@@ -119,6 +127,7 @@ const SHOWCASE_ITEMS: PublicFeedItem[] = [
     aspect_ratio: '1:1',
     dimensions: '1024x1024',
     public_url: '/images/showcase/frieren_fantasy.jpg',
+    thumbnail_url: '/images/showcase/frieren_fantasy_thumb.jpg',
     created_at: new Date(Date.now() - 1000 * 60 * 98).toISOString(),
     lqip: null,
     seed: '18204',
@@ -134,6 +143,7 @@ const SHOWCASE_ITEMS: PublicFeedItem[] = [
     aspect_ratio: '4:3',
     dimensions: '1024x768',
     public_url: '/images/showcase/cinematic_portrait_4_3.jpg',
+    thumbnail_url: '/images/showcase/cinematic_portrait_4_3_thumb.jpg',
     created_at: new Date(Date.now() - 1000 * 60 * 110).toISOString(),
     lqip: null,
     seed: '29481',
@@ -149,6 +159,7 @@ const SHOWCASE_ITEMS: PublicFeedItem[] = [
     aspect_ratio: '3:2',
     dimensions: '1024x682',
     public_url: '/images/showcase/fine_art_oil_3_2.jpg',
+    thumbnail_url: '/images/showcase/fine_art_oil_3_2_thumb.jpg',
     created_at: new Date(Date.now() - 1000 * 60 * 130).toISOString(),
     lqip: null,
     seed: '99120',
@@ -164,6 +175,7 @@ const SHOWCASE_ITEMS: PublicFeedItem[] = [
     aspect_ratio: '1:1',
     dimensions: '1024x1024',
     public_url: '/images/showcase/minimal_vector.jpg',
+    thumbnail_url: '/images/showcase/minimal_vector_thumb.jpg',
     created_at: new Date(Date.now() - 1000 * 60 * 145).toISOString(),
     lqip: null,
     seed: '84019',
@@ -194,7 +206,12 @@ export async function GET(req: NextRequest) {
   let nextCursor: string | null = null;
 
   try {
-    const conditions: string[] = ["l.status = 'completed'", "l.is_public = true", "l.visibility = 'public'"];
+    const conditions: string[] = [
+      "l.status = 'completed'",
+      "l.is_public = true",
+      "l.visibility = 'public'",
+      "(l.user_id NOT LIKE 'usr_test_%' AND (l.size_bytes IS NULL OR l.size_bytes > 1000))"
+    ];
     const params: any[] = [];
     let paramIndex = 1;
 
@@ -242,6 +259,7 @@ export async function GET(req: NextRequest) {
     const query = `
       SELECT
         l.id,
+        l.user_id,
         l.prompt,
         l.aspect_ratio,
         l.dimensions,
@@ -260,7 +278,7 @@ export async function GET(req: NextRequest) {
       LIMIT $${limitIndex}
     `;
 
-    const result = await executePostgresQuery<PublicFeedItem>(query, params);
+    const result = await executePostgresQuery<any>(query, params);
     const rows = result?.rows || [];
 
     if (rows.length === limit) {
@@ -268,26 +286,42 @@ export async function GET(req: NextRequest) {
       nextCursor = Buffer.from(`${new Date(last.created_at).toISOString()},${last.id}`).toString('base64');
     }
 
-    items = rows.map(r => ({
-      id: r.id,
-      prompt: r.prompt,
-      aspect_ratio: r.aspect_ratio || '1:1',
-      dimensions: r.dimensions || '1024x1024',
-      public_url: r.public_url,
-      created_at: new Date(r.created_at).toISOString(),
-      lqip: r.lqip || null,
-      seed: r.seed || null,
-      model: r.model || 'openai-gpt-image-latest',
-      likes_count: Number(r.likes_count || 0),
-      remix_count: Number(r.remix_count || 0),
-      views_count: Number(r.views_count || 0),
-    }));
+    items = rows.map((r: any) => {
+      let publicUrl = r.public_url;
+      let thumbnailUrl = r.public_url;
+
+      if (r.user_id && r.id) {
+        try {
+          const token = GalxCryptoVault.sealImageDownload(r.user_id, r.id);
+          publicUrl = `/v1/images/assets/${token}`;
+          thumbnailUrl = `/v1/images/assets/${token}/thumbnail`;
+        } catch {
+          // Keep original
+        }
+      }
+
+      return {
+        id: r.id,
+        prompt: r.prompt,
+        aspect_ratio: r.aspect_ratio || '1:1',
+        dimensions: r.dimensions || '1024x1024',
+        public_url: publicUrl,
+        thumbnail_url: thumbnailUrl,
+        created_at: new Date(r.created_at).toISOString(),
+        lqip: r.lqip || null,
+        seed: r.seed || null,
+        model: r.model || 'openai-gpt-image-latest',
+        likes_count: Number(r.likes_count || 0),
+        remix_count: Number(r.remix_count || 0),
+        views_count: Number(r.views_count || 0),
+      };
+    });
   } catch {
     // Database connection or table not yet populated; proceed gracefully to showcase fallback
   }
 
-  // Gracefully provide showcase items if database has no items matching the query
-  if (items.length === 0 && !cursor) {
+  // On first page, combine live community creations with curated showcase items
+  if (!cursor) {
     let filteredShowcase = SHOWCASE_ITEMS.filter(it => {
       if (aspectRatio && it.aspect_ratio !== aspectRatio) return false;
       if (q && !it.prompt.toLowerCase().includes(q.toLowerCase())) return false;
@@ -302,7 +336,14 @@ export async function GET(req: NextRequest) {
       filteredShowcase = [...filteredShowcase].sort((a, b) => (b.likes_count || 0) - (a.likes_count || 0));
     }
 
-    items = filteredShowcase;
+    const existingPrompts = new Set(items.map(it => it.prompt.trim().toLowerCase()));
+    const additionalShowcase = filteredShowcase.filter(it => !existingPrompts.has(it.prompt.trim().toLowerCase()));
+
+    if (sort === 'trending') {
+      items = [...items, ...additionalShowcase].sort((a, b) => (b.likes_count || 0) - (a.likes_count || 0));
+    } else {
+      items = [...items, ...additionalShowcase];
+    }
   }
 
   return NextResponse.json(

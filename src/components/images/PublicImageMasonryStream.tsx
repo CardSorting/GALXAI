@@ -101,6 +101,7 @@ export function PublicImageMasonryStream({
   const [copiedSeed, setCopiedSeed] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [loadedImages, setLoadedImages] = useState<Record<string, boolean>>({});
+  const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
   const [likedMap, setLikedMap] = useState<Record<string, boolean>>({});
   const [likesCountMap, setLikesCountMap] = useState<Record<string, number>>({});
   const [fetchError, setFetchError] = useState<string | null>(null);
@@ -644,27 +645,42 @@ export function PublicImageMasonryStream({
                   className="masonry-media-wrap"
                   style={{ aspectRatio: ratioCss }}
                 >
-                  {/* LQIP Placeholder */}
-                  {item.lqip && !isLoaded && (
-                    <img
-                      src={item.lqip}
-                      alt=""
-                      aria-hidden="true"
-                      className="masonry-lqip"
-                    />
-                  )}
+                  {imageErrors[item.id] ? (
+                    <div className="masonry-fallback-visual">
+                      <div className="masonry-fallback-art">
+                        <Sparkles size={24} className="text-indigo-400 opacity-70" />
+                        <span className="masonry-fallback-tag">{item.aspect_ratio || '1:1'}</span>
+                      </div>
+                      <div className="masonry-fallback-pattern" />
+                    </div>
+                  ) : (
+                    <>
+                      {/* LQIP Placeholder */}
+                      {item.lqip && !isLoaded && (
+                        <img
+                          src={item.lqip}
+                          alt=""
+                          aria-hidden="true"
+                          className="masonry-lqip"
+                        />
+                      )}
 
-                  {/* High-res Image with impression trigger */}
-                  <img
-                    src={item.public_url}
-                    alt={item.prompt}
-                    loading="lazy"
-                    className={`masonry-image ${isLoaded ? 'loaded' : ''}`}
-                    onLoad={() => {
-                      setLoadedImages((prev) => ({ ...prev, [item.id]: true }));
-                      registerCardImpression(item.id);
-                    }}
-                  />
+                      {/* High-res Image with impression trigger & error fallback */}
+                      <img
+                        src={item.thumbnail_url || item.public_url}
+                        alt={item.prompt}
+                        loading="lazy"
+                        className={`masonry-image ${isLoaded ? 'loaded' : ''}`}
+                        onLoad={() => {
+                          setLoadedImages((prev) => ({ ...prev, [item.id]: true }));
+                          registerCardImpression(item.id);
+                        }}
+                        onError={() => {
+                          setImageErrors((prev) => ({ ...prev, [item.id]: true }));
+                        }}
+                      />
+                    </>
+                  )}
 
                   {/* Top Floating Badges & Like Button */}
                   <div className="masonry-card-topbar">
@@ -748,17 +764,16 @@ export function PublicImageMasonryStream({
 
       {/* --- Infinite Scroll Sentinel & Loading indicator --- */}
       <div ref={observerTarget} className="masonry-sentinel">
-        {loading && (
+        {loading ? (
           <div className="masonry-loading-indicator">
             <span className="masonry-loading-spinner" />
             <span>Streaming community creations…</span>
           </div>
-        )}
-        {!hasMore && items.length > 0 && (
+        ) : !hasMore && items.length > 0 ? (
           <p className="masonry-end-message">
             ✦ You’ve explored the entire community stream. Bring your imagination into reality!
           </p>
-        )}
+        ) : null}
       </div>
 
       {/* --- World-Class Lightbox Modal with Zoom & Mobile Swipe --- */}
@@ -812,6 +827,11 @@ export function PublicImageMasonryStream({
                   src={activeModalItem.public_url}
                   alt={activeModalItem.prompt}
                   className={`masonry-modal-img ${isZoomed ? 'zoomed' : ''}`}
+                  onError={(e) => {
+                    if (activeModalItem.thumbnail_url && e.currentTarget.src !== activeModalItem.thumbnail_url) {
+                      e.currentTarget.src = activeModalItem.thumbnail_url;
+                    }
+                  }}
                 />
               </div>
 

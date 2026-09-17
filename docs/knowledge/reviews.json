@@ -51,12 +51,12 @@
     }
   },
   "images": {
-    "reviewer": "Product/API maintainer",
-    "note": "Implemented style preset filters, density toggle, 1:1 lightbox zoom, and persistent likes",
+    "reviewer": "Image studio maintainer",
+    "note": "Resolve image stream public URLs to secure /v1/images/assets tokens with WebP thumbnails and filter test stubs",
     "reviewed_at": "2026-09-17",
-    "review_by": "2026-10-16",
+    "review_by": "2026-09-24",
     "evidence": {
-      "post-mortem/releases/2026-09-16-anti-locking-stats-and-stream-ux.json": "ed69f00dbd299bfe2b63ee59668321a02e58acfedfbc94f1a6e3279cce4857a0"
+      "docs/knowledge/audits/2026-09-17-public-explore-page-review.json": "dbc8f3a64928f8bfc5bcdd9c1ab4ba34607272dfd997b15e96ea6e7113122b9a"
     },
     "files": {
       "docs/QUEUE_SPECIFICATION.md": "301d293b23327bf065202322e0a7554cf581740f28d0d5ab9fb827e73beed6ba",
@@ -102,9 +102,9 @@
       "src/components/dashboard/generation-gate.module.css": "efd8526722ca0ad42aec319a56bc2ea7e638185f30c35cea9b445dfb69bba4a4",
       "src/components/images/GenerationCanvas.tsx": "4341702fc0842c20a7d860b8241a4bf55780919b73254f54915a61cd09269473",
       "src/components/images/ImageStudio.tsx": "d64041b6f5d9bbf1223380b4850c9f3921929b11267a1685c26cad31db7c7130",
-      "src/components/images/PublicImageMasonryStream.tsx": "9a0ed4c688009ce19b83be08204223dde9d2c3c10528862eb52eb9ed8b6eb600",
+      "src/components/images/PublicImageMasonryStream.tsx": "ac80abe171bbf274e4569d0e42b18dcbcfd5876262041a5c5462fe2cc5011e90",
       "src/components/images/StudioArtwork.tsx": "427128b4f3ea300222b74fdfe132564237030507f1d40c20093c89ef52e26229",
-      "src/components/images/masonry-stream.css": "a6fd0ac8083a1d851e20a0c73eafa2e15952fa352825ad7edfc8df0ccce8a35a",
+      "src/components/images/masonry-stream.css": "50d637817ec8502b81f8a677a60601288007b8b7b9baae42f767cd090a249f66",
       "src/components/images/studio-contract.ts": "cfa22ffc7df750e747c805a7a8ee394dfb76fdc9adcd2beabcb9872536f0d5bb",
       "src/components/images/studio.css": "d04bce6d6f0eb817815b5dfbefc962221e8865fb68eb74bdb23bce881da87492",
       "src/components/images/use-image-studio.ts": "22b3ac9a41f10bceb777942da4c63ea84e079e7c85aff5d7027d019f0f1b8ff1",
@@ -142,7 +142,7 @@
     "reviewed_at": "2026-09-17",
     "review_by": "2026-09-24",
     "evidence": {
-      "docs/knowledge/audits/2026-09-17-public-explore-page-review.json": "f7779636768149bc136729b42f30df90ccdb0ab070f13d3ea84b03b6a44863f3"
+      "docs/knowledge/audits/2026-09-17-public-explore-page-review.json": "dbc8f3a64928f8bfc5bcdd9c1ab4ba34607272dfd997b15e96ea6e7113122b9a"
     },
     "files": {
       "docs/OAUTH_AND_TOKEN_LIFECYCLE_SPECIFICATION.md": "1e8004f6dc024322356e5494b099b7c38ed00e4a62e22434b020fd43c9470183",
@@ -1410,7 +1410,7 @@
     "reviewed_at": "2026-09-17",
     "review_by": "2026-09-24",
     "evidence": {
-      "docs/knowledge/audits/2026-09-17-public-explore-page-review.json": "f7779636768149bc136729b42f30df90ccdb0ab070f13d3ea84b03b6a44863f3"
+      "docs/knowledge/audits/2026-09-17-public-explore-page-review.json": "dbc8f3a64928f8bfc5bcdd9c1ab4ba34607272dfd997b15e96ea6e7113122b9a"
     },
     "files": {
       "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md": "5eb65f39a725934f807a7373995b33399893cad2a8a5455e74d6195aadd8a57b",
