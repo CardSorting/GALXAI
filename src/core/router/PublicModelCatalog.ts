@@ -9,8 +9,8 @@ export type { ProviderType } from '../contracts/GalxContracts';
 export const EXCLUSIVE_MODEL_CATALOG: ModelSpecItem[] = [
   // --- 1. OpenAI Agentic Coding Engine ---
   {
-    id: 'gpt-5-6-luna-low',
-    name: 'OpenAI GPT-5.6 Luna Low',
+    id: 'gpt-5-6-luna',
+    name: 'OpenAI GPT-5.6 Luna',
     provider: 'openai',
     category: 'llm',
     contextWindowTokens: 1_050_000,
@@ -24,7 +24,7 @@ export const EXCLUSIVE_MODEL_CATALOG: ModelSpecItem[] = [
     supportsVision: true,
     supportsReasoning: true,
     supportsStreaming: true,
-    description: 'Fast and affordable agentic coding model with low reasoning overhead.'
+    description: 'Fast and affordable agentic coding and reasoning model.'
   },
 
   // --- 2. OpenAI Visual Synthesis & Image Generation Suite ---

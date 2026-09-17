@@ -232,18 +232,18 @@ export function CompareClient() {
           <div className="flex flex-wrap items-center gap-2 font-mono text-xs">
             <button
               type="button"
-              onClick={() => setSelectedIds(['gpt-5-6-luna-low', 'openai-gpt-image-latest'])}
+              onClick={() => setSelectedIds(['gpt-5-6-luna', 'openai-gpt-image-latest'])}
               className="px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 transition-all cursor-pointer"
             >
-              <span>Full Lineup (Luna Low vs Visual Synthesis)</span>
+              <span>Full Lineup (Luna vs Visual Synthesis)</span>
             </button>
 
             <button
               type="button"
-              onClick={() => setSelectedIds(['gpt-5-6-luna-low'])}
+              onClick={() => setSelectedIds(['gpt-5-6-luna'])}
               className="px-3 py-1.5 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 transition-all cursor-pointer"
             >
-              <span>Text & Code (GPT-5.6 Luna Low)</span>
+              <span>Text & Code (GPT-5.6 Luna)</span>
             </button>
 
             <button
@@ -863,7 +863,7 @@ export function CompareClient() {
           <div className="space-y-1 border-b border-white/10 pb-4">
             <h2 className="text-lg font-bold text-white flex items-center gap-2 font-mono">
               <Cpu className="w-5 h-5 text-amber-400" />
-              <span>Architectural Decision Guide: Luna Low & Visual Synthesis</span>
+              <span>Architectural Decision Guide: Luna & Visual Synthesis</span>
             </h2>
             <p className="text-xs text-zinc-400">Deep comparative guidance based on token throughput, reasoning depth, and cost efficiency.</p>
           </div>
@@ -871,11 +871,11 @@ export function CompareClient() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-sans">
             <div className="p-5 rounded-2xl bg-black/40 border border-white/5 space-y-2">
               <div className="flex items-center justify-between text-cyan-300 font-mono font-bold">
-                <span>OpenAI GPT-5.6 Luna Low</span>
+                <span>OpenAI GPT-5.6 Luna</span>
                 <span className="text-[10px] bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">Ultra-Fast Text & Code</span>
               </div>
               <p className="text-zinc-300 leading-relaxed">
-                Choose Luna Low for high-velocity inference, inline coding, autonomous agentic loops, classification pipelines, and real-time streaming interfaces at $0.20/1M input and $1.20/1M output.
+                Choose Luna for high-velocity inference, inline coding, autonomous agentic loops, classification pipelines, and real-time streaming interfaces at $0.20/1M input and $1.20/1M output.
               </p>
             </div>
 

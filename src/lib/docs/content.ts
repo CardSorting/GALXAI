@@ -1,7 +1,7 @@
 import { BILLING_PATHS } from '@/lib/billing/navigation';
 import { GALX_API_BASE_URL } from '@/sdk/base-url';
 
-export const DOC_MODEL = 'gpt-5-6-luna-low';
+export const DOC_MODEL = 'gpt-5-6-luna';
 export const DOC_IMAGE_MODEL = 'openai-gpt-image-latest';
 
 export const DOC_NAV = [
@@ -141,7 +141,7 @@ Integrate GALXAI into the existing application. Inspect its language, framework,
 - API base URL: ${GALX_API_BASE_URL}
 - Authentication: Authorization: Bearer <GALXAI_API_KEY>
 - Secret environment variable: GALXAI_API_KEY
-- Curated Flagship Model: ${DOC_MODEL} (OpenAI GPT-5.6 Luna Low)
+- Curated Flagship Model: ${DOC_MODEL} (OpenAI GPT-5.6 Luna)
 - Visual Synthesis Model: ${DOC_IMAGE_MODEL} (OpenAI Image Generation)
 - Model catalog: GET ${GALX_API_BASE_URL}/models
 - Chat endpoint: POST ${GALX_API_BASE_URL}/chat/completions
@@ -582,7 +582,7 @@ print("Image artifact URL:", image_resp.data[0].url)`,
           rows: [
             ['OpenAI Base URL', GALX_API_BASE_URL, 'Do not add trailing slash or duplicate /v1'],
             ['API Key', '$GALXAI_API_KEY', 'Use your generated secret key'],
-            ['Model Name / ID', DOC_MODEL, 'OpenAI GPT-5.6 Luna Low'],
+            ['Model Name / ID', DOC_MODEL, 'OpenAI GPT-5.6 Luna'],
             ['Context Window', '1,050,000 tokens', 'Full long-context support'],
           ],
         },
@@ -599,7 +599,7 @@ print("Image artifact URL:", image_resp.data[0].url)`,
           'Keep your existing OpenAI Python or TypeScript SDK code.',
           'Set OPENAI_BASE_URL="https://galx.ai/v1" in your environment.',
           'Replace your API key with your GALXAI API key.',
-          'Switch your model parameter to gpt-5-6-luna-low.',
+          'Switch your model parameter to gpt-5-6-luna.',
         ],
         links: [{ href: '/models', label: 'Review Curated Model Catalog' }],
       },

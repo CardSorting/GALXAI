@@ -15,9 +15,9 @@ import type { DbQueryOptions, DbAggregateQuery } from '../broccolidb/broccolidb.
 export const EXCLUSIVE_MODEL_CATALOG: ModelSpecItem[] = [
   // --- 1. OpenAI Agentic Coding Engine ---
   {
-    id: 'gpt-5-6-luna-low',
+    id: 'gpt-5-6-luna',
     upstreamId: 'gpt-5.6-luna',
-    name: 'OpenAI GPT-5.6 Luna Low',
+    name: 'OpenAI GPT-5.6 Luna',
     provider: 'openai',
     category: 'llm',
     contextWindowTokens: 1_050_000,
@@ -31,7 +31,26 @@ export const EXCLUSIVE_MODEL_CATALOG: ModelSpecItem[] = [
     supportsVision: true,
     supportsReasoning: true,
     supportsStreaming: true,
-    description: 'Fast and affordable agentic coding model with low reasoning overhead.'
+    description: 'Fast and affordable agentic coding and reasoning model.'
+  },
+  {
+    id: 'gpt-5-6-luna-low',
+    upstreamId: 'gpt-5.6-luna',
+    name: 'OpenAI GPT-5.6 Luna',
+    provider: 'openai',
+    category: 'llm',
+    contextWindowTokens: 1_050_000,
+    maxOutputTokens: 128_000,
+    listPricePer1MInput: 0.20,
+    listPricePer1MOutput: 1.20,
+    inputPricePer1M: 0.20,
+    outputPricePer1M: 1.20,
+    cachedInputPricePer1M: 0.02,
+    discountPercentage: 0,
+    supportsVision: true,
+    supportsReasoning: true,
+    supportsStreaming: true,
+    description: 'Fast and affordable agentic coding and reasoning model.'
   },
 
   // --- 2. OpenAI Visual Synthesis & Image Generation Suite ---
@@ -73,9 +92,9 @@ export class ModelCatalog {
    * Never throws or stalls on ambiguous inputs — always resolves to the optimal matching engine.
    */
   public static resolveModel(requestedModel?: string | null): ModelSpecItem {
-    // 0. Zero-hesitation default fallback when model is omitted or blank (Default: gpt-5-6-luna-low)
+    // 0. Zero-hesitation default fallback when model is omitted or blank (Default: gpt-5-6-luna)
     if (!requestedModel || typeof requestedModel !== 'string' || requestedModel.trim().length === 0) {
-      return this.catalog.get('gpt-5-6-luna-low') || EXCLUSIVE_MODEL_CATALOG[0];
+      return this.catalog.get('gpt-5-6-luna') || this.catalog.get('gpt-5-6-luna-low') || EXCLUSIVE_MODEL_CATALOG[0];
     }
 
     if (this.fastPathCache.has(requestedModel)) {

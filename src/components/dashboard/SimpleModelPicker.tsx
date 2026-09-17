@@ -126,7 +126,7 @@ function BaseSimpleModelPicker() {
         <div className="flex flex-wrap items-center gap-2 text-[11px] font-mono text-zinc-400">
           <span className="text-zinc-500">Quick Mental Models:</span>
           {[
-            { label: 'GPT-5.6 Luna Low', query: 'gpt-5-6-luna-low' },
+            { label: 'GPT-5.6 Luna', query: 'gpt-5-6-luna' },
             { label: 'Luna Fast', query: 'luna fast' },
             { label: 'OpenAI Image Generation', query: 'openai-gpt-image-latest' }
           ].map((tag) => (

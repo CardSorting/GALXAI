@@ -17,8 +17,8 @@ interface OpenAIModelQuota {
 
 const OPENAI_LUMI_MODELS: OpenAIModelQuota[] = [
   {
-    id: 'gpt-5-6-luna-low',
-    name: 'OpenAI GPT-5.6 Luna Low',
+    id: 'gpt-5-6-luna',
+    name: 'OpenAI GPT-5.6 Luna',
     category: 'Ultra-fast frontier text & code inference engine',
     baseReqs: 15000,
     contextWindow: '1.05M tokens',
@@ -104,7 +104,7 @@ export function LumiWorkloadVisualizer() {
                 : 'bg-white/5 border border-white/5 text-zinc-400 hover:text-zinc-200'
             }`}
           >
-            {cat === 'all' ? 'All Models' : cat === 'text' ? 'Text & Code (GPT-5.6 Luna Low)' : 'Visual Synthesis (Image Generation)'}
+            {cat === 'all' ? 'All Models' : cat === 'text' ? 'Text & Code (GPT-5.6 Luna)' : 'Visual Synthesis (Image Generation)'}
           </button>
         ))}
       </div>

@@ -563,7 +563,7 @@ export function useModels(options: { endpoint?: string } = {}) {
         // Fallback models
         if (isMounted) {
           setModels([
-            { id: 'gpt-5-6-luna-low', name: 'OpenAI GPT-5.6 Luna Low', description: 'Ultra-fast text & code inference engine' },
+            { id: 'gpt-5-6-luna-low', name: 'OpenAI GPT-5.6 Luna', description: 'Ultra-fast text & code inference engine' },
             { id: 'openai-gpt-image-latest', name: 'OpenAI Image Generation', description: 'Generate images from text prompts' }
           ]);
         }

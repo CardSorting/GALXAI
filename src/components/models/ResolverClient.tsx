@@ -32,8 +32,8 @@ interface PresetGroup {
 
 const PRESET_GROUPS: PresetGroup[] = [
   {
-    group: 'OpenAI GPT-5.6 Luna Low',
-    items: ['luna-low', 'gpt-5-6-luna-low', 'luna', 'fast', 'coding', 'default'],
+    group: 'OpenAI GPT-5.6 Luna',
+    items: ['luna', 'gpt-5-6-luna', 'fast', 'coding', 'default'],
   },
   {
     group: 'Visual & Multimodal',

@@ -34,7 +34,7 @@ export const SOLUTION_GUIDES: SolutionGuide[] = [
     description:
       'Power autonomous coding agents, multi-file refactoring swarms, and Cursor/Windsurf IDE instances with 25%–40% wholesale rates and zero rate-limit stalls.',
     targetWorkload: 'Multi-turn code editing, automated test generation, repo-level refactoring.',
-    primaryModelId: 'gpt-5-6-luna-low',
+    primaryModelId: 'gpt-5-6-luna',
     estimatedSavingsPct: 45,
     keyBenefits: [
       {
@@ -61,7 +61,7 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="gpt-5-6-luna-low",
+    model="gpt-5-6-luna",
     messages=[
         {"role": "system", "content": "You are a senior software architect with zero data retention."},
         {"role": "user", "content": "Refactor this concurrent Rust worker pool with atomic primitives."}
@@ -72,11 +72,11 @@ print(response.choices[0].message.content)`,
     faqs: [
       {
         q: 'How does GALXAI handle large multi-file codebase contexts in coding agents?',
-        a: 'GALXAI supports up to 1,050,000 token context windows on OpenAI GPT-5.6 Luna Low, allowing entire repositories to be ingested in a single inference call.',
+        a: 'GALXAI supports up to 1,050,000 token context windows on OpenAI GPT-5.6 Luna, allowing entire repositories to be ingested in a single inference call.',
       },
       {
         q: 'Can I route high-velocity and image generation models under the same account?',
-        a: 'Yes. You can use GPT-5.6 Luna Low for code execution and openai-gpt-image-latest for visual synthesis with the same API key and wallet.',
+        a: 'Yes. You can use GPT-5.6 Luna for code execution and openai-gpt-image-latest for visual synthesis with the same API key and wallet.',
       },
     ],
   },
@@ -89,12 +89,12 @@ print(response.choices[0].message.content)`,
     description:
       'Slash recurring context costs by up to 70% on document question-answering, PDF parsing, and enterprise vector search pipelines with automatic 75% prompt caching.',
     targetWorkload: 'Retrieval-Augmented Generation, legal document analysis, semantic customer search.',
-    primaryModelId: 'gpt-5-6-luna-low',
+    primaryModelId: 'gpt-5-6-luna',
     estimatedSavingsPct: 65,
     keyBenefits: [
       {
         title: 'Massive 1M+ Context Window',
-        description: 'Ingest hundreds of PDF pages simultaneously on GPT-5.6 Luna Low without chunk truncation.',
+        description: 'Ingest hundreds of PDF pages simultaneously on GPT-5.6 Luna without chunk truncation.',
       },
       {
         title: 'Compound 75% Prompt Caching',
@@ -116,7 +116,7 @@ client = OpenAI(
 
 # 100K+ token document chunk automatically receives 75% prompt cache pass-through
 response = client.chat.completions.create(
-    model="gpt-5-6-luna-low",
+    model="gpt-5-6-luna",
     messages=[
         {"role": "system", "content": "You are an enterprise research analyst. Reference document below:\\n" + large_pdf_text},
         {"role": "user", "content": "Extract all compliance liability clauses."}
@@ -139,12 +139,12 @@ response = client.chat.completions.create(
     description:
       'Deliver instant, human-like conversational responses with sub-15ms TTFT, continuous rate limit pooling, and 25%–40% wholesale token savings.',
     targetWorkload: 'Interactive chat widgets, AI phone assistants, conversational routing.',
-    primaryModelId: 'gpt-5-6-luna-low',
+    primaryModelId: 'gpt-5-6-luna',
     estimatedSavingsPct: 50,
     keyBenefits: [
       {
         title: '140+ Tokens/Sec Velocity',
-        description: 'GPT-5.6 Luna Low streams responses in under 12ms, ideal for real-time speech and chat.',
+        description: 'GPT-5.6 Luna streams responses in under 12ms, ideal for real-time speech and chat.',
       },
       {
         title: 'Zero Dropped Connections',
@@ -166,7 +166,7 @@ const client = new OpenAI({
 
 // Stream interactive customer response in <15ms TTFT
 const stream = await client.chat.completions.create({
-  model: "gpt-5-6-luna-low",
+  model: "gpt-5-6-luna",
   stream: true,
   messages: [
     { role: "system", content: "You are a helpful customer concierge." },
@@ -190,7 +190,7 @@ const stream = await client.chat.completions.create({
     description:
       'Execute high-stakes financial analysis, contract review, and quantitative modeling with SOTA reasoning engines and verified Zero Data Retention (ZDR).',
     targetWorkload: 'M&A contract review, risk modeling, automated algorithmic audits.',
-    primaryModelId: 'gpt-5-6-luna-low',
+    primaryModelId: 'gpt-5-6-luna',
     estimatedSavingsPct: 35,
     keyBenefits: [
       {
@@ -199,7 +199,7 @@ const stream = await client.chat.completions.create({
       },
       {
         title: 'SOTA Formal Reasoning',
-        description: 'GPT-5.6 Luna Low provides highest precision and speed on complex logic and numerical constraints.',
+        description: 'GPT-5.6 Luna provides highest precision and speed on complex logic and numerical constraints.',
       },
       {
         title: 'Audit-Ready Logging',
@@ -216,7 +216,7 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="gpt-5-6-luna-low",
+    model="gpt-5-6-luna",
     messages=[
         {"role": "system", "content": "You are a financial quantitative risk analyst with ZDR security."},
         {"role": "user", "content": "Audit this portfolio VAR exposure model under 3-sigma volatility."}
@@ -239,7 +239,7 @@ response = client.chat.completions.create(
     description:
       'Process millions of asynchronous background tasks, data transformations, and embeddings with an extra 10% off-peak floating rebate and pooled throughput.',
     targetWorkload: 'Asynchronous catalog tagging, dataset synthetic generation, offline embedding pipelines.',
-    primaryModelId: 'gpt-5-6-luna-low',
+    primaryModelId: 'gpt-5-6-luna',
     estimatedSavingsPct: 55,
     keyBenefits: [
       {
@@ -267,7 +267,7 @@ client = OpenAI(
 # Batch processing with automatic volume discounts
 for batch_chunk in dataset_chunks:
     resp = client.chat.completions.create(
-        model="gpt-5-6-luna-low",
+        model="gpt-5-6-luna",
         messages=[{"role": "user", "content": batch_chunk}]
     )`,
     },
@@ -334,9 +334,9 @@ print(response.data[0].url)`,
     title: 'Low-Latency Voice Agent Architecture with Sub-12ms Anycast Streaming',
     headline: 'Power Conversational Voice Agents with Sub-12ms TTFT',
     description:
-      'Deploy human-paced conversational voice bots with instant streaming Time-To-First-Token (TTFT), zero edge buffering, and 25% wholesale token savings on GPT-5.6 Luna Low.',
+      'Deploy human-paced conversational voice bots with instant streaming Time-To-First-Token (TTFT), zero edge buffering, and 25% wholesale token savings on GPT-5.6 Luna.',
     targetWorkload: 'Interactive telephone customer care, live AI interviewers, in-game NPC dialogue.',
-    primaryModelId: 'gpt-5-6-luna-low',
+    primaryModelId: 'gpt-5-6-luna',
     estimatedSavingsPct: 35,
     keyBenefits: [
       {
@@ -363,7 +363,7 @@ client = OpenAI(
 
 # Stream immediate conversational response for TTS synthesis (<12ms TTFT)
 stream = client.chat.completions.create(
-    model="gpt-5-6-luna-low",
+    model="gpt-5-6-luna",
     messages=[
         {"role": "system", "content": "You are a concise voice assistant. Respond in short, speakable sentences."},
         {"role": "user", "content": "Book an appointment for tomorrow at 2 PM."}
@@ -376,8 +376,8 @@ for chunk in stream:
     },
     faqs: [
       {
-        q: 'Why is GPT-5.6 Luna Low optimal for real-time voice agents?',
-        a: 'GPT-5.6 Luna Low delivers sub-12ms Anycast TTFT and 140+ tokens/second at wholesale rates, preventing user conversation lag.',
+        q: 'Why is GPT-5.6 Luna optimal for real-time voice agents?',
+        a: 'GPT-5.6 Luna delivers sub-12ms Anycast TTFT and 140+ tokens/second at wholesale rates, preventing user conversation lag.',
       },
     ],
   },
@@ -390,7 +390,7 @@ for chunk in stream:
     description:
       'Extract nested, strongly-typed JSON records from complex documents, web HTML, and receipts with 100% schema compliance and 75% prompt caching savings.',
     targetWorkload: 'Invoice processing, financial filings parsing, automated web scraping ingestion.',
-    primaryModelId: 'gpt-5-6-luna-low',
+    primaryModelId: 'gpt-5-6-luna',
     estimatedSavingsPct: 30,
     keyBenefits: [
       {
@@ -416,7 +416,7 @@ const client = new OpenAI({
 });
 
 const response = await client.chat.completions.create({
-  model: "gpt-5-6-luna-low",
+  model: "gpt-5-6-luna",
   messages: [
     { role: "system", content: "Extract line items and tax totals into valid JSON." },
     { role: "user", content: "Invoice #9842: 5x Server Shards @ $120.00, Tax: $60.00, Total: $660.00" }
@@ -442,7 +442,7 @@ console.log(JSON.parse(response.choices[0].message.content || "{}"));`,
     description:
       'Orchestrate dozens of parallel autonomous agents (CrewAI, AutoGen, LangGraph) without hitting rate limit walls, saving 25%–40% on recursive loop tokens.',
     targetWorkload: 'Multi-agent software engineering, market research swarms, automated bug hunting.',
-    primaryModelId: 'gpt-5-6-luna-low',
+    primaryModelId: 'gpt-5-6-luna',
     estimatedSavingsPct: 40,
     keyBenefits: [
       {
@@ -469,7 +469,7 @@ client = OpenAI(
 
 # Multi-agent swarm loops execute with continuous token governance
 response = client.chat.completions.create(
-    model="gpt-5-6-luna-low",
+    model="gpt-5-6-luna",
     messages=[
         {"role": "system", "content": "You are Agent 01: Systems Architect. Coordinate with Agent 02."},
         {"role": "user", "content": "Design a resilient event-driven microservices topology."}

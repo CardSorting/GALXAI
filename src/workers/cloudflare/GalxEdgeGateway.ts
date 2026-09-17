@@ -587,7 +587,7 @@ export class GalxEdgeGateway {
     // deliberately strict: a typo must not silently become a different model.
     const requestedModelId = typeof rawBody.model === 'string' && rawBody.model.trim()
       ? rawBody.model.trim()
-      : 'gpt-5-6-luna-low';
+      : 'gpt-5-6-luna';
     const requestedModelSpec = ModelCatalog.listAll().find(model =>
       model.id === requestedModelId && model.category === 'llm'
     );
@@ -921,6 +921,7 @@ export class GalxEdgeGateway {
     }
 
     const models = [
+      { id: 'gpt-5-6-luna', object: 'model', owned_by: 'openai', pricing_tier: 'provider_public' },
       { id: 'gpt-5-6-luna-low', object: 'model', owned_by: 'openai', pricing_tier: 'provider_public' },
       { id: 'openai-gpt-image-latest', object: 'model', owned_by: 'openai', pricing_tier: 'provider_public' },
     ];

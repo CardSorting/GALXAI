@@ -45,7 +45,7 @@ const PRESETS: PromptPreset[] = [
     id: 'luna-arch',
     label: '✨ Luna Architecture & Edge Routing',
     category: 'reasoning',
-    model: 'gpt-5-6-luna-low',
+    model: 'gpt-5-6-luna',
     prompt: 'Architect an ultra-resilient, distributed AI model router with sub-15ms Time-To-First-Token, automated KV prompt caching, and zero-data-retention cryptographic guarantees.',
     simulatedReply: `### Enterprise AI Gateway & Routing Architecture:
 
@@ -108,13 +108,13 @@ export async function POST(req: NextRequest) {
 ];
 
 const MENTAL_MODELS = [
-  { id: 'luna', name: '🚀 GPT-5.6 Luna Low', model: 'gpt-5-6-luna-low', icon: Flame, badge: '-36%' },
+  { id: 'luna', name: '🚀 GPT-5.6 Luna', model: 'gpt-5-6-luna', icon: Flame, badge: '-36%' },
   { id: 'image', name: '🎨 Visual Studio', model: 'openai-gpt-image-latest', icon: ImageIcon, badge: '-25%' }
 ];
 
 function BaseApiPlayground() {
   const { user } = useAuth();
-  const [modelInput, setModelInput] = useState<string>('gpt-5-6-luna-low');
+  const [modelInput, setModelInput] = useState<string>('gpt-5-6-luna');
   const [prompt, setPrompt] = useState<string>(PRESETS[0].prompt);
   const [streamingOutput, setStreamingOutput] = useState<string>('');
   const [isStreaming, setIsStreaming] = useState<boolean>(false);

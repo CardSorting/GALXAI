@@ -58,18 +58,18 @@ const completion = await openai.chat.completions.create({
 });
 console.log(completion.choices[0].message.content);`,
 
-  curl: `curl https://api.galx.ai/v1/chat/completions \\
+  curl: `curl https://galx.ai/v1/chat/completions \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer galx_live_..." \\
   -d '{
-    "model": "gpt-5-6-luna-low",
+    "model": "gpt-5-6-luna",
     "messages": [{"role": "user", "content": "Hello, agentic coding world!"}]
   }'`,
 
   cursor: `// In Cursor / Windsurf Settings -> OpenAI API:
-// Base URL: https://api.galx.ai/v1
+// Base URL: https://galx.ai/v1
 // API Key:  galx_live_your_api_key_here
-// Override Models: gpt-5-6-luna-low`,
+// Override Models: gpt-5-6-luna`,
 };
 
 export function DeveloperPricingClient() {
@@ -82,7 +82,7 @@ export function DeveloperPricingClient() {
   // Interactive Calculator State
   const [monthlyTokensMillions, setMonthlyTokensMillions] = useState<number>(50);
   const [cacheHitPercent, setCacheHitPercent] = useState<number>(60);
-  const [selectedModelId, setSelectedModelId] = useState<string>('gpt-5-6-luna-low');
+  const [selectedModelId, setSelectedModelId] = useState<string>('gpt-5-6-luna');
 
   // Model filter state
   const [searchQuery, setSearchQuery] = useState('');
@@ -199,7 +199,7 @@ export function DeveloperPricingClient() {
       perks: [
         'Instant API Key minting (/keys) with zero waitlist',
         'Drop-in OpenAI SDK & Cursor/Windsurf compatibility',
-        'OpenAI GPT-5.6 Luna Low & Image Generation',
+        'OpenAI GPT-5.6 Luna & Image Generation',
         'Images API generation (/v1/images/generations)',
         'Zero Data Retention (ZDR) Privacy Enclaves',
       ],
