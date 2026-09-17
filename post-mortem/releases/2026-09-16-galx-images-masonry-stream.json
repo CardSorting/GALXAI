@@ -1,0 +1,15 @@
+{
+  "release": "2026-09-16-galx-images-masonry-stream",
+  "title": "Transition from Sites to GALX Images with Public Masonry Stream",
+  "timestamp": "2026-09-17T03:09:00Z",
+  "author": "maintainer",
+  "description": "Elevated GALX Images as primary flagship product due to high technical and quota overhead of Sites. Images are public by default. Created Pinterest-style public masonry stream with keyset pagination (/api/images/feed), interactive card overlays, prompt copying, download, and lightbox modal. Redesigned homepage hero with fast prompt composer, updated navigation and mobile bottom nav, and redirected legacy /sites routes to /images.",
+  "verification": {
+    "feed_api": "GET /api/images/feed (HTTP 200, valid keyset pagination and public allowlist DTO)",
+    "lint": "npm run lint (0 errors)",
+    "tests": [
+      "npm run test:image:security",
+      "npm run test:egress:transport"
+    ]
+  }
+}

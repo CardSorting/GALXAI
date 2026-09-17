@@ -2,10 +2,10 @@ import { PRO_PLAN } from '@/lib/billing/pro-plan';
 
 /** Authored customer guidance only. No runtime configuration or private document imports. */
 export const PLAN_INCLUSIONS = [
-  ['Create', 'Sites for your ideas, projects, and early product concepts'],
-  ['Refine', 'Unlimited revisions and conversation turns, under fair use. No per-change charge.'],
-  ['Revisit', 'Saved versions to return to as your idea evolves'],
-  ['Publish', 'Publishing and a public GALX address included'],
+  ['Generate', 'High-resolution images across 5 standard aspect ratios'],
+  ['Speed', 'Priority GPU inference queues with sub-second dispatch'],
+  ['Remix', 'Unlimited 1-click prompt reuse & studio iterations'],
+  ['Explore', 'Full-access public stream with lossless raw PNG egress'],
 ] as const;
 
 export type Guide = {

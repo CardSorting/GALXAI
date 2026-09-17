@@ -43,7 +43,6 @@ import {
 const isProductRoute = (pathname: string) =>
   pathname === '/' ||
   /^\/images(?:\/|$)/.test(pathname) ||
-  /^\/sites(?:\/|$)/.test(pathname) ||
   isPublicReadingPath(pathname);
 
 function NavigationFeedback({ label }: { label: string }) {
@@ -145,7 +144,7 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
 
   // Legacy error/not-found surfaces can still include Navigation themselves.
   if (!inLayout && isProductRoute(pathname)) return null;
-  const returnTo = pathname === '/' ? '/sites' : pathname;
+  const returnTo = pathname === '/' ? '/images' : pathname;
 
   return (
     <>
@@ -185,17 +184,17 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
               {activeDropdown === 'platform' && (
                 <div className={styles.flyoutMenu} role="menu">
                   <div className={styles.flyoutGrid}>
-                    <Link href="/sites" className={styles.flyoutItem} role="menuitem">
+                    <Link href="/#stream" className={styles.flyoutItem} role="menuitem">
                       <div className={`${styles.iconBox} ${styles.iconIndigo}`}>
-                        <Layout size={18} />
+                        <Compass size={18} />
                       </div>
                       <div className={styles.flyoutContent}>
                         <div className={styles.flyoutTitle}>
-                          Sites Engine
-                          <span className={styles.badgeMini}>Unlimited</span>
+                          Public Image Stream
+                          <span className={styles.badgeMini}>Live</span>
                         </div>
                         <span className={styles.flyoutDesc}>
-                          Real-time AI website builder with deterministic unlimited revisions.
+                          Pinterest-style real-time community stream of generative images.
                         </span>
                       </div>
                     </Link>
@@ -205,9 +204,9 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
                         <Sparkles size={18} />
                       </div>
                       <div className={styles.flyoutContent}>
-                        <div className={styles.flyoutTitle}>Images Studio</div>
+                        <div className={styles.flyoutTitle}>Image Studio</div>
                         <span className={styles.flyoutDesc}>
-                          Instant generative diffusion canvas & high-res prompt-to-pixel engine.
+                          Generative diffusion canvas & floating prompt composer.
                         </span>
                       </div>
                     </Link>
@@ -219,7 +218,7 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
                       <div className={styles.flyoutContent}>
                         <div className={styles.flyoutTitle}>Frontier Model Arena</div>
                         <span className={styles.flyoutDesc}>
-                          GPT-6 Astra, GPT-5.6 Sol, Terra, Luna & GPT-5.5 arena.
+                          OpenAI GPT-5.6 Luna Low &amp; Image Generation.
                         </span>
                       </div>
                     </Link>
@@ -362,7 +361,7 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
                       <div className={styles.flyoutContent}>
                         <div className={styles.flyoutTitle}>Pricing Overview</div>
                         <span className={styles.flyoutDesc}>
-                          Compare Free, Pro ($200/mo unlimited revisions), and Developer compute.
+                          Compare Free, Pro ($200/mo unlimited image generations), and Developer compute.
                         </span>
                       </div>
                     </Link>
@@ -389,7 +388,7 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
                       <div className={styles.flyoutContent}>
                         <div className={styles.flyoutTitle}>GALX Pro ($200/mo)</div>
                         <span className={styles.flyoutDesc}>
-                          Truly unlimited revisions, priority queues & enterprise generation.
+                          Truly unlimited image generations, priority queues & enterprise models.
                         </span>
                       </div>
                     </Link>
@@ -401,7 +400,7 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
                       <div className={styles.flyoutContent}>
                         <div className={styles.flyoutTitle}>Fair Use & SLAs</div>
                         <span className={styles.flyoutDesc}>
-                          100% transparent billing, refund policy & revision guidelines.
+                          100% transparent billing, refund policy & fair usage guidelines.
                         </span>
                       </div>
                     </Link>
@@ -437,7 +436,7 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
                       <div className={styles.flyoutContent}>
                         <div className={styles.flyoutTitle}>Knowledge Base</div>
                         <span className={styles.flyoutDesc}>
-                          Comprehensive architecture, revision workflows & quickstarts.
+                          Comprehensive architecture, image generation workflows & quickstarts.
                         </span>
                       </div>
                     </Link>
@@ -449,7 +448,7 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
                       <div className={styles.flyoutContent}>
                         <div className={styles.flyoutTitle}>Frequently Asked Questions</div>
                         <span className={styles.flyoutDesc}>
-                          Answers about unlimited revisions, token billing & developer access.
+                          Answers about unlimited image creation, token billing & developer access.
                         </span>
                       </div>
                     </Link>
@@ -682,13 +681,13 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
               <div>
                 <div className={styles.drawerSectionTitle}>Platform</div>
                 <div className={styles.drawerList}>
-                  <Link href="/sites" className={styles.drawerLink} onClick={() => setIsMobileOpen(false)}>
-                    <Layout size={16} className="text-indigo-400" />
-                    <span>Sites (Unlimited Revisions)</span>
+                  <Link href="/#stream" className={styles.drawerLink} onClick={() => setIsMobileOpen(false)}>
+                    <Compass size={16} className="text-indigo-400" />
+                    <span>Public Image Stream (Live)</span>
                   </Link>
                   <Link href="/images" className={styles.drawerLink} onClick={() => setIsMobileOpen(false)}>
                     <Sparkles size={16} className="text-sky-400" />
-                    <span>Images Canvas</span>
+                    <span>Image Studio</span>
                   </Link>
                   <Link href="/models" className={styles.drawerLink} onClick={() => setIsMobileOpen(false)}>
                     <Cpu size={16} className="text-emerald-400" />

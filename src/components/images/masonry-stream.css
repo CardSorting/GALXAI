@@ -1,0 +1,679 @@
+/* ==========================================================================
+   GALX Images — Pinterest-Style Public Masonry Stream
+   ========================================================================== */
+
+.masonry-stream-container {
+  width: 100%;
+  max-width: 1720px;
+  margin: 0 auto;
+  padding: 0 16px 80px;
+  box-sizing: border-box;
+}
+
+/* --- Stream Header & Toolbar --- */
+.masonry-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 28px;
+  padding: 16px 20px;
+  background: rgba(18, 20, 29, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+}
+
+.masonry-toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.masonry-live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: rgba(168, 85, 247, 0.12);
+  border: 1px solid rgba(168, 85, 247, 0.28);
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #c084fc;
+  letter-spacing: 0.02em;
+}
+
+.masonry-live-pulse {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #a855f7;
+  box-shadow: 0 0 10px #a855f7;
+  animation: masonry-pulse 2s infinite ease-in-out;
+}
+
+@keyframes masonry-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.4); opacity: 0.6; }
+}
+
+.masonry-filters {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.masonry-filter-pill {
+  padding: 6px 14px;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  color: #94a3b8;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+
+.masonry-filter-pill:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #f8fafc;
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+.masonry-filter-pill.active {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.3), rgba(59, 130, 246, 0.3));
+  border-color: rgba(168, 85, 247, 0.5);
+  color: #ffffff;
+  box-shadow: 0 0 16px rgba(168, 85, 247, 0.2);
+}
+
+.masonry-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-grow: 1;
+  max-width: 400px;
+  justify-content: flex-end;
+}
+
+.masonry-search {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.masonry-search svg {
+  position: absolute;
+  left: 12px;
+  color: #64748b;
+  pointer-events: none;
+}
+
+.masonry-search input {
+  width: 100%;
+  padding: 8px 36px 8px 36px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: #f1f5f9;
+  font-size: 13px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.masonry-search input:focus {
+  border-color: #a855f7;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.15);
+}
+
+.masonry-search-clear {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.masonry-refresh-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.masonry-refresh-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.masonry-refresh-btn.spinning svg {
+  animation: masonry-spin 1s linear infinite;
+}
+
+@keyframes masonry-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* --- Pinterest-Style Masonry Grid Columns --- */
+.masonry-grid {
+  column-gap: 20px;
+  column-count: 1;
+  width: 100%;
+}
+
+@media (min-width: 560px) {
+  .masonry-grid {
+    column-count: 2;
+  }
+}
+
+@media (min-width: 900px) {
+  .masonry-grid {
+    column-count: 3;
+    column-gap: 22px;
+  }
+}
+
+@media (min-width: 1250px) {
+  .masonry-grid {
+    column-count: 4;
+    column-gap: 24px;
+  }
+}
+
+@media (min-width: 1620px) {
+  .masonry-grid {
+    column-count: 5;
+    column-gap: 24px;
+  }
+}
+
+/* --- Masonry Card --- */
+.masonry-card {
+  break-inside: avoid;
+  margin-bottom: 22px;
+  position: relative;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #111420;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.28s ease;
+  transform: translateZ(0);
+}
+
+.masonry-card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(168, 85, 247, 0.4);
+  box-shadow: 0 16px 36px -6px rgba(0, 0, 0, 0.6), 0 0 24px -4px rgba(168, 85, 247, 0.2);
+}
+
+.masonry-media-wrap {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  background: #090b11;
+}
+
+.masonry-image {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+  opacity: 0;
+}
+
+.masonry-image.loaded {
+  opacity: 1;
+}
+
+.masonry-card:hover .masonry-image {
+  transform: scale(1.04);
+}
+
+/* LQIP blur placeholder */
+.masonry-lqip {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(12px);
+  transform: scale(1.1);
+  opacity: 0.7;
+}
+
+/* Card Top Badges */
+.masonry-card-badges {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  display: flex;
+  gap: 6px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.masonry-badge {
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: rgba(10, 12, 18, 0.75);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #e2e8f0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.masonry-badge-ratio {
+  color: #38bdf8;
+  background: rgba(14, 165, 233, 0.15);
+  border-color: rgba(56, 189, 248, 0.3);
+}
+
+/* Hover Overlay */
+.masonry-card-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(7, 9, 15, 0.95) 0%, rgba(7, 9, 15, 0.4) 45%, rgba(7, 9, 15, 0.05) 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 16px;
+  opacity: 0;
+  transition: opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 3;
+}
+
+.masonry-card:hover .masonry-card-overlay {
+  opacity: 1;
+}
+
+.masonry-prompt-snippet {
+  color: #ffffff;
+  font-size: 13px;
+  line-height: 1.45;
+  font-weight: 500;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-bottom: 12px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
+}
+
+/* Card Action Buttons */
+.masonry-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.masonry-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  background: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.masonry-action-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-1px);
+}
+
+.masonry-action-btn.remix {
+  background: linear-gradient(135deg, #9333ea, #3b82f6);
+  border-color: rgba(168, 85, 247, 0.4);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(147, 51, 234, 0.35);
+  margin-left: auto;
+}
+
+.masonry-action-btn.remix:hover {
+  background: linear-gradient(135deg, #a855f7, #60a5fa);
+  box-shadow: 0 6px 18px rgba(147, 51, 234, 0.5);
+}
+
+.masonry-action-icon-only {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* --- Infinite Scroll & Loading States --- */
+.masonry-sentinel {
+  width: 100%;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 30px;
+}
+
+.masonry-loading-indicator {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #94a3b8;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.masonry-loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(168, 85, 247, 0.2);
+  border-top-color: #a855f7;
+  border-radius: 50%;
+  animation: masonry-spin 0.8s linear infinite;
+}
+
+.masonry-end-message {
+  text-align: center;
+  color: #64748b;
+  font-size: 13px;
+  padding: 24px 0;
+}
+
+/* Skeleton placeholder */
+.masonry-skeleton-card {
+  break-inside: avoid;
+  margin-bottom: 22px;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #151824;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  position: relative;
+}
+
+.masonry-skeleton-shimmer {
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.04), transparent);
+  animation: masonry-shimmer 1.6s infinite;
+}
+
+@keyframes masonry-shimmer {
+  100% { transform: translateX(100%); }
+}
+
+/* Empty State */
+.masonry-empty {
+  text-align: center;
+  padding: 80px 20px;
+  background: rgba(18, 20, 29, 0.5);
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  margin: 30px 0;
+}
+
+.masonry-empty-icon {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 16px;
+  color: #64748b;
+}
+
+.masonry-empty h3 {
+  font-size: 18px;
+  color: #f1f5f9;
+  margin: 0 0 8px;
+}
+
+.masonry-empty p {
+  color: #94a3b8;
+  font-size: 14px;
+  max-width: 440px;
+  margin: 0 auto 20px;
+}
+
+/* --- Lightbox Modal --- */
+.masonry-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 6, 12, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: masonry-modal-fade 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes masonry-modal-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.masonry-modal-dialog {
+  position: relative;
+  background: #0f121d;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 24px;
+  max-width: 1060px;
+  width: 100%;
+  max-height: 90vh;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 1fr;
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 35px rgba(168, 85, 247, 0.15);
+  animation: masonry-modal-pop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (min-width: 860px) {
+  .masonry-modal-dialog {
+    grid-template-columns: 1.25fr 1fr;
+  }
+}
+
+@keyframes masonry-modal-pop {
+  from { transform: scale(0.96) translateY(8px); opacity: 0; }
+  to { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+.masonry-modal-media {
+  position: relative;
+  background: #07090f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  overflow: hidden;
+  min-height: 320px;
+}
+
+.masonry-modal-img {
+  max-width: 100%;
+  max-height: 75vh;
+  object-fit: contain;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.masonry-modal-info {
+  display: flex;
+  flex-direction: column;
+  padding: 32px 28px;
+  overflow-y: auto;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+@media (min-width: 860px) {
+  .masonry-modal-info {
+    border-top: none;
+    border-left: 1px solid rgba(255, 255, 255, 0.08);
+  }
+}
+
+.masonry-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.masonry-modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  color: #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  z-index: 10;
+}
+
+.masonry-modal-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  transform: scale(1.05);
+}
+
+.masonry-modal-section-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #a855f7;
+  font-weight: 700;
+  margin: 0 0 8px;
+}
+
+.masonry-modal-prompt {
+  font-size: 15px;
+  line-height: 1.55;
+  color: #f8fafc;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 20px;
+  user-select: text;
+}
+
+.masonry-modal-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.masonry-meta-item {
+  background: rgba(255, 255, 255, 0.03);
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.masonry-meta-label {
+  font-size: 11px;
+  color: #64748b;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.masonry-meta-value {
+  font-size: 13px;
+  color: #e2e8f0;
+  font-weight: 600;
+}
+
+.masonry-modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: auto;
+}
+
+.masonry-modal-primary-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #a855f7 0%, #3b82f6 100%);
+  border: none;
+  border-radius: 12px;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(168, 85, 247, 0.3);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.masonry-modal-primary-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(168, 85, 247, 0.45);
+}
+
+.masonry-modal-secondary-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  color: #e2e8f0;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.masonry-modal-secondary-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}

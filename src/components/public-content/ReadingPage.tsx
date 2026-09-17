@@ -35,7 +35,7 @@ export function GuidePage({ guide }: { guide: Guide }) {
           {section.steps && <ol>{section.steps.map(step => <li key={step}>{step}</li>)}</ol>}
           {section.example && <div className={styles.example}><span>Example request</span><blockquote>{section.example}</blockquote></div>}
         </section>)}
-        {isPricing ? <PlanAction className={styles.planAction} actionClassName={styles.primary} /> : <Link href="/sites" className={styles.primary}>Open Sites<ArrowRight size={18} aria-hidden="true" /></Link>}
+        {isPricing ? <PlanAction className={styles.planAction} actionClassName={styles.primary} /> : <Link href="/images" className={styles.primary}>Open Image Studio<ArrowRight size={18} aria-hidden="true" /></Link>}
         <section className={styles.section} aria-labelledby="related-guides"><h2 id="related-guides" className={styles.sectionHead}>Keep reading</h2><GuideList guides={related} /><Link href="/faq" className={styles.textLink}>Browse frequently asked questions <ArrowRight size={16} aria-hidden="true" /></Link></section>
       </article>
     </div>

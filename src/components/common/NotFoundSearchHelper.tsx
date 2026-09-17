@@ -9,8 +9,8 @@ import { Search, ArrowRight, Sparkles } from 'lucide-react';
 import { recordRecentVisit } from '@/lib/resilience/recent-navigation';
 
 const publicPages = [
-  { id: 'images', title: 'Images', href: '/images', category: 'Product', description: 'Create images from a prompt.' },
-  { id: 'sites', title: 'Sites', href: '/sites', category: 'Product', description: 'Build and publish a website.' },
+  { id: 'images', title: 'Image Studio', href: '/images', category: 'Product', description: 'Create generative images with floating composer.' },
+  { id: 'stream', title: 'Community Stream', href: '/#stream', category: 'Product', description: 'Explore live public masonry stream of community creations.' },
   { id: 'developers', title: 'Developer preview', href: '/developers', category: 'Access', description: 'Request API access and check your waitlist status.' },
   { id: 'billing', title: 'Account and billing', href: BILLING_PATHS.overview, category: 'Account', description: 'Your credits, plan and payments.' },
 ];

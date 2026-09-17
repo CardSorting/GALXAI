@@ -3,7 +3,7 @@
 import { IntentLink as Link } from '@/components/common/IntentLink';
 import { usePathname } from 'next/navigation';
 import { isPublicReadingPath } from '@/lib/public-content/routes';
-import { Layout, Sparkles, Code2, CreditCard, Search } from 'lucide-react';
+import { Compass, Sparkles, Code2, CreditCard, Search } from 'lucide-react';
 
 export function MobileBottomNav() {
   const pathname = usePathname();
@@ -21,8 +21,8 @@ export function MobileBottomNav() {
   }
 
   const navItems = [
-    { label: 'Sites', href: '/sites', icon: Layout },
-    { label: 'Images', href: '/images', icon: Sparkles },
+    { label: 'Stream', href: '/#stream', icon: Compass },
+    { label: 'Studio', href: '/images', icon: Sparkles },
     { label: 'Developers', href: '/developers', icon: Code2 },
     { label: 'Pricing', href: '/pricing', icon: CreditCard },
   ];
