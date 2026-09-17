@@ -1,8 +1,8 @@
 {
   "version": 1,
   "reviewer": "Security maintainer",
-  "reviewed_at": "2026-09-17T04:07:12.062376Z",
-  "note": "Exempt /api/images/feed and showcase assets in preview policy",
+  "reviewed_at": "2026-09-17T04:25:25.097553Z",
+  "note": "Exempt public community explore route /explore from developer preview gates and verify public image stream security boundaries",
   "files": {
     ".dockerignore": "fb4dc7ef84e7f36c5bfed0f267187a022bbb61e66dd26060295b133e08fa74c5",
     ".github/workflows/vercel-preflight.yml": "60856940957e45075d1c54de644d3ba0268fad16b35b3ed5eb8005bc40a5b4b3",
@@ -80,7 +80,7 @@
     "src/lib/images/request-service.ts": "8873301571d260bbb185591e7192337538e2087c48e0be6074d0d916fcfcd6e8",
     "src/lib/security/developer-access.ts": "4591764b2c3fa5472e73460079bf066291abf610bba68ba3cb12fbc328a0c872",
     "src/lib/security/preview-middleware.ts": "ea577ad1118ca166c882cd8a5d335221a2a1a5b65b4cfa7b0078daa76572229d",
-    "src/lib/security/preview-policy.ts": "ef8d056a76437113192f3ee71db6c5c69d94bde62a918f82d551bd516b8f2187",
+    "src/lib/security/preview-policy.ts": "db756f8cf58c8a93ec3356caa32fc387411fd8ddfc16dcab9a2f7260aa4f0b76",
     "src/lib/security/public-image-http.ts": "793b1a19ed4a704439544df062e6921f1f0e9862503a4e6dc38f01246e90584d",
     "src/lib/supabase/client.ts": "db451b92ca18d9d4b3aa1b5803008e61b4672591b6f236882177572b149afc40",
     "src/lib/supabase/repositories/ImageLibraryRepository.ts": "0ab87ab48cf9abc21cf80214818742b9d89c8ce168ddb5a4358e5397314323d7",

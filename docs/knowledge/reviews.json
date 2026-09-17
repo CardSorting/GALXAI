@@ -138,11 +138,11 @@
   },
   "access": {
     "reviewer": "Security/access maintainer",
-    "note": "Added /api/images/feed and /images/showcase/ to preview exemption policy and updated test assertions",
+    "note": "Exempt /explore in preview policy and verify security boundaries",
     "reviewed_at": "2026-09-17",
-    "review_by": "2026-10-16",
+    "review_by": "2026-09-24",
     "evidence": {
-      "post-mortem/releases/2026-09-16-public-image-feed-and-schema.json": "3f2a34c2941f777978eebea0db34ab079b9b83e0b418d3b2df601b438d8c25a1"
+      "docs/knowledge/audits/2026-09-17-public-explore-page-review.json": "f7779636768149bc136729b42f30df90ccdb0ab070f13d3ea84b03b6a44863f3"
     },
     "files": {
       "docs/OAUTH_AND_TOKEN_LIFECYCLE_SPECIFICATION.md": "1e8004f6dc024322356e5494b099b7c38ed00e4a62e22434b020fd43c9470183",
@@ -166,7 +166,7 @@
       "scripts/test-auth-identity-boundary.ts": "7a4c8de24a4c82869d1adeb4c57567a574d206116b16df37681e8569bffefe93",
       "scripts/test-auth-provider-recovery.ts": "b97fb5e6c21e01fe830752e580b26208a2d96b219a8b773f1aba4702c63f83fe",
       "scripts/test-browser-session.ts": "2bcb16b82cc74f011dfa8c7d4d799145e084520b0d43b96addc552f4de9230e1",
-      "scripts/test-developer-preview.ts": "6bd1edf25679d45032580e5527b1798313b77820799dd464edea5b660eb96c68",
+      "scripts/test-developer-preview.ts": "a2f0d09611e3cab472ba8a5b0b4fac1276e1df7ea33e5d6d9ee80a287cfcb711",
       "scripts/test-free-generation-gate-db.ts": "2919f39490203795965f494f61b288305ea7136e544515cc504d9e8a0ff7e037",
       "scripts/test-free-generation-quota-db.ts": "26d3381b0a90285cce6d954b954601fb7a5a4596998389ac7091cfb7b49d9b04",
       "scripts/test-free-generation-quota.ts": "cbf7034c6f10ecfcf6176718f693a2636af775899e05552b5d7c53c58f142fb3",
@@ -273,7 +273,7 @@
       "src/lib/security/internal-access.ts": "ea9c2c0f280b819e285b04bb1c82b8e1669c8498ec1e05a6560a34d27a25d11c",
       "src/lib/security/normalize-image-output.ts": "205920bbb0a1df05c955211edc4d738b21cabefbe04bd0a5386ac5e0ac0af4bd",
       "src/lib/security/preview-middleware.ts": "ea577ad1118ca166c882cd8a5d335221a2a1a5b65b4cfa7b0078daa76572229d",
-      "src/lib/security/preview-policy.ts": "ef8d056a76437113192f3ee71db6c5c69d94bde62a918f82d551bd516b8f2187",
+      "src/lib/security/preview-policy.ts": "db756f8cf58c8a93ec3356caa32fc387411fd8ddfc16dcab9a2f7260aa4f0b76",
       "src/lib/security/private-image-diagnostics.ts": "b2f34531192d580a86ff2bfe9cc65df9586ec28abb5648e0fc5cace2aba40255",
       "src/lib/security/public-image-http.ts": "793b1a19ed4a704439544df062e6921f1f0e9862503a4e6dc38f01246e90584d",
       "src/lib/security/public-image-record.ts": "777deaa9a0ce4a75aae539ae21a90b3ec8c1c11e19997f8664b8a35de91b1f9e",
@@ -1405,12 +1405,12 @@
     }
   },
   "client-efficiency": {
-    "reviewer": "Antigravity",
-    "note": "Reconciled public reading guides, FAQ, pricing, and not-found icon for GALX Images stream and prompt studio",
+    "reviewer": "Product/performance maintainer",
+    "note": "Decouple infinite stream from homepage into /explore",
     "reviewed_at": "2026-09-17",
-    "review_by": "2026-10-16",
+    "review_by": "2026-09-24",
     "evidence": {
-      "post-mortem/releases/2026-09-16-galx-images-masonry-stream.json": "a8ce663c9c9cd19930d9757114d13c1e4244b0c9351ddd76109e8de03d7ec38b"
+      "docs/knowledge/audits/2026-09-17-public-explore-page-review.json": "f7779636768149bc136729b42f30df90ccdb0ab070f13d3ea84b03b6a44863f3"
     },
     "files": {
       "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md": "5eb65f39a725934f807a7373995b33399893cad2a8a5455e74d6195aadd8a57b",
@@ -1456,7 +1456,7 @@
       "src/app/pricing/page.tsx": "bd79e875889fea251419de4e775e5505cc2118453005450ac50b40f167877e29",
       "src/app/pricing/seats/page.tsx": "d0f7e15a799ac07c96be793655b6468f5e6445db9eedca128634302b9bc90904",
       "src/app/robots.ts": "b91a7b6448c76e59a849a61aa3ab9841c4ee859024c2ac413bf9c1d9e0ae37d3",
-      "src/app/sitemap.ts": "144c79b46205f0e12e946288b264aefb13d2b5c5b231667dfa752c9e146ecd43",
+      "src/app/sitemap.ts": "2fe75d1917ed4cec4a4198e72c3593b47d7d9e168615406b26900724720be782",
       "src/components/common/CommandMenu.tsx": "cfca2e721378b0fc3a47e679aec2211a68596c949b4359b52442714361084df3",
       "src/components/common/FloatingActionDock.tsx": "82a21751b0ad7ee8f7233ad59ba892f28622bc0dcd63bb4a387027a686028b7f",
       "src/components/common/IntentLink.tsx": "c866bc13acbbc81829c9f4ec1be5736bfb064c7a039c3d43ab5c524dd5d6e201",
@@ -1467,8 +1467,8 @@
       "src/components/dashboard/Footer.tsx": "008b6388f9e09a772a1371f3da83c7b24a36aa78d430aed5b2a8a154851441a4",
       "src/components/dashboard/FreeGenerationQuota.tsx": "419a52433d2b3baece49b2ada8b96f819da2e535d49104e40b22c8dae82fb89d",
       "src/components/dashboard/GenerationGateNotice.tsx": "0c905274ce933e0247d4a05f4174c9c13377bcb02e0d833c3927cfce62701bac",
-      "src/components/dashboard/MobileBottomNav.tsx": "464bdf7d8d9c08beb7fe05358fae02b217226f3afc0cb923a45c9d10a78c1832",
-      "src/components/dashboard/Navigation.tsx": "d7ded222d0e46a7ca8ad48c855ee0dece06416585caacdef8862b0b992bf3b97",
+      "src/components/dashboard/MobileBottomNav.tsx": "3a1cb21642a3f5c121c9123eb3ff3dcab96e139bde504d9a2feb135114956bb6",
+      "src/components/dashboard/Navigation.tsx": "9dc6f58c713c70fe241afb2c8e1b45bb2236b3a1075dd97d60b0306f29ebad85",
       "src/components/dashboard/generation-gate.module.css": "efd8526722ca0ad42aec319a56bc2ea7e638185f30c35cea9b445dfb69bba4a4",
       "src/components/dashboard/navigation.module.css": "75bfa5c7649b5dbeaf72f73bf43a52104a0b8488dc8d4312eb53a3b72bec43da",
       "src/components/home/ArtisanalSignalSection.tsx": "35bd389dfa74ec6113d6046afd9966b53af09826f3ad81f67627e2d6e8c6bb85",
@@ -1479,9 +1479,9 @@
       "src/components/home/HomeClient.tsx": "0a14d774e3f73d72614d102e903d9cf0e928de16395bf52bd525e4dce4336a6c",
       "src/components/home/HomeMotion.tsx": "2367776ba2956cdb92a3f0e1e18fbc9169a94e106ab36aa1d10b7a9053bdff1b",
       "src/components/home/PlanAction.tsx": "c624af95fac166dfaddc9c6fccc6fd9a1314b1ea397c1bc16471ac790f72222b",
-      "src/components/home/PublicHome.tsx": "9f2674d3c8b86b81bea696706bf2308de85c3b3b88033cfa27c0a04d867c85b0",
+      "src/components/home/PublicHome.tsx": "508500aaa3b9941d34e748edf9c78b9d1e2a0766642725585449603ed5b1dab2",
       "src/components/home/SitesExample.tsx": "4fe7f9f61198aacc2f88486a4d19ad061da308c73df7f5f4549f6559af1bad5b",
-      "src/components/home/public-home.module.css": "edd80d5451d68eec9c679780f03f359b920b79c3e55bd80af043fe0e9459fff6",
+      "src/components/home/public-home.module.css": "492aeacf57f32b8a39ad4650e98b31471613abe976da54246d94226cf0b2c262",
       "src/components/home/use-galaxy-interactions.ts": "0a654c3abd4d7f562172df5d79afd94ee3b1c86509693dbc69d993920497d348",
       "src/components/home/use-story-entrance.ts": "8e3d8a6634a4b67456cff4d17ef76e2d450b136a4b844b86c21b4ec6b6b24a67",
       "src/components/images/ImageStudio.tsx": "d64041b6f5d9bbf1223380b4850c9f3921929b11267a1685c26cad31db7c7130",

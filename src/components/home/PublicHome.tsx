@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
   ArrowUpRight,
+  ArrowRight,
   Check,
   Plus,
   Sparkles,
@@ -24,7 +25,6 @@ import { PRO_PLAN } from '@/lib/billing/pro-plan';
 import { PlanAction } from './PlanAction';
 import { HomeMotion } from './HomeMotion';
 import { GalaxyScene, GalaxyStory } from './GalaxyScene';
-import { PublicImageMasonryStream } from '@/components/images/PublicImageMasonryStream';
 import styles from './public-home.module.css';
 
 const HERO_RATIOS = ['1:1', '16:9', '9:16', '3:2', '4:3'] as const;
@@ -143,14 +143,6 @@ const SHOWCASE_ITEMS = [
   },
 ];
 
-const STREAM_CATEGORIES = [
-  { label: '✨ All Stream', query: '' },
-  { label: '📸 Photorealism', query: 'photorealistic' },
-  { label: '🎌 Anime & Concept', query: 'anime' },
-  { label: '🚀 Sci-Fi & Cyberpunk', query: 'cyberpunk' },
-  { label: '⚡ Action & Manhwa', query: 'cinematic' },
-  { label: '🐱 Wildlife & Pets', query: 'cat' },
-] as const;
 
 export function PublicHome() {
   const router = useRouter();
@@ -158,7 +150,7 @@ export function PublicHome() {
   const [heroRatio, setHeroRatio] = useState<string>('1:1');
   const [activeShowcase, setActiveShowcase] = useState(0);
   const [copiedShowcase, setCopiedShowcase] = useState(false);
-  const [streamCategoryQuery, setStreamCategoryQuery] = useState('');
+  const [copiedCardId, setCopiedCardId] = useState<string | null>(null);
   const [isEnhanced, setIsEnhanced] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -581,8 +573,8 @@ export function PublicHome() {
           </div>
         </div>
 
-        {/* --- Section 1: Live Public Masonry Stream --- */}
-        <section id="stream" className={styles.streamSection} aria-labelledby="stream-heading">
+        {/* --- Section 1: Curated Trending Showcase --- */}
+        <section id="stream" className={styles.streamSection} aria-labelledby="showcase-heading">
           <div className={styles.streamSectionHeader}>
             <div
               style={{
@@ -600,30 +592,84 @@ export function PublicHome() {
               }}
             >
               <Compass size={14} />
-              <span>COMMUNITY GALLERY</span>
+              <span>COMMUNITY SPOTLIGHT</span>
             </div>
-            <h2 id="stream-heading">Live Public Stream</h2>
+            <h2 id="showcase-heading">Trending Community Creations</h2>
             <p>
-              Every image created on GALX is streamed live into our community feed.
-              Click any card to inspect the prompt, copy it, or remix it directly in the Studio.
+              High-resolution diffusion visuals crafted with GALX AI. Click any creation to inspect the prompt recipe or remix it instantly in the Studio.
             </p>
           </div>
 
-          {/* Stream Discovery Categories Bar */}
-          <div className={styles.streamCategoriesBar} role="toolbar" aria-label="Filter community creations by theme">
-            {STREAM_CATEGORIES.map((cat) => (
-              <button
-                key={cat.label}
-                type="button"
-                className={`${styles.streamCategoryBtn} ${streamCategoryQuery === cat.query ? styles.active : ''}`}
-                onClick={() => setStreamCategoryQuery(cat.query)}
-              >
-                <span>{cat.label}</span>
-              </button>
+          {/* Curated 6-Card Showcase Grid */}
+          <div className={styles.showcaseGrid}>
+            {SHOWCASE_ITEMS.map((item) => (
+              <article key={item.id} className={styles.curatedCard}>
+                <div className={styles.curatedMedia}>
+                  <img
+                    src={item.url}
+                    alt={item.prompt}
+                    loading="lazy"
+                    className={styles.curatedImg}
+                  />
+                  <div className={styles.curatedBadgeRow}>
+                    <span className={styles.curatedBadgeRatio}>{item.ratioLabel}</span>
+                    <span className={styles.curatedBadgeSpeed}>⚡ {item.speed}</span>
+                  </div>
+                </div>
+
+                <div className={styles.curatedBody}>
+                  <div>
+                    <h3 className={styles.curatedTitle}>{item.title}</h3>
+                    <p className={styles.curatedPrompt}>&ldquo;{item.prompt}&rdquo;</p>
+                  </div>
+
+                  <div className={styles.curatedActions}>
+                    <Link
+                      href={`/images?prompt=${encodeURIComponent(item.prompt)}&aspect_ratio=${item.ratio}`}
+                      className={styles.curatedRemixBtn}
+                    >
+                      <Sparkles size={13} />
+                      <span>Remix in Studio</span>
+                    </Link>
+
+                    <button
+                      type="button"
+                      className={styles.curatedCopyBtn}
+                      onClick={() => {
+                        navigator.clipboard.writeText(item.prompt);
+                        setCopiedCardId(item.id);
+                        setTimeout(() => setCopiedCardId(null), 2000);
+                      }}
+                      aria-label={`Copy prompt for ${item.title}`}
+                    >
+                      {copiedCardId === item.id ? <Check size={13} /> : <Copy size={13} />}
+                      <span>{copiedCardId === item.id ? 'Copied' : 'Copy Prompt'}</span>
+                    </button>
+                  </div>
+                </div>
+              </article>
             ))}
           </div>
 
-          <PublicImageMasonryStream externalQuery={streamCategoryQuery} />
+          {/* World-Class Explore Callout Banner */}
+          <div className={styles.exploreBanner}>
+            <h3 className={styles.exploreBannerTitle}>Browse 10,000+ Community Creations</h3>
+            <p className={styles.exploreBannerDesc}>
+              Every creation generated on GALX is streamed live into our collective discovery gallery. Search by keyword, filter by aspect ratio and style, and remix thousands of community prompts.
+            </p>
+            <Link href="/explore" className={styles.exploreCtaBtn}>
+              <Compass size={18} />
+              <span>Explore All Community Creations</span>
+              <ArrowRight size={18} />
+            </Link>
+            <div className={styles.exploreMetaRow}>
+              <span>⚡ Sub-Second GPU Dispatch</span>
+              <span>•</span>
+              <span>💎 100% Lossless Raw PNGs</span>
+              <span>•</span>
+              <span>🔄 Live Real-Time Feed</span>
+            </div>
+          </div>
         </section>
 
         {/* --- Section 2: Possibilities / Product Highlights --- */}

@@ -21,7 +21,7 @@ export function MobileBottomNav() {
   }
 
   const navItems = [
-    { label: 'Stream', href: '/#stream', icon: Compass },
+    { label: 'Explore', href: '/explore', icon: Compass },
     { label: 'Studio', href: '/images', icon: Sparkles },
     { label: 'Developers', href: '/developers', icon: Code2 },
     { label: 'Pricing', href: '/pricing', icon: CreditCard },

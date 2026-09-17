@@ -1,0 +1,33 @@
+{
+  "reviewed_at": "2026-09-17T04:26:00.000000+00:00",
+  "reviewer": "Product and Security maintainer",
+  "scope": "Move infinite public image masonry stream to dedicated /explore page, restore clean homepage showcase grid, and exempt /explore in preview policy",
+  "domains": {
+    "access": "Public access policy updated to include /explore in publicPages set with regression test passing in scripts/test-developer-preview.ts.",
+    "client-efficiency": "Dedicated /explore page decouples infinite image feed from root marketing page, restoring clean footer access and smooth scrolling on homepage."
+  },
+  "sources_inspected": [
+    "src/app/explore/page.tsx",
+    "src/app/explore/explore.module.css",
+    "src/components/home/PublicHome.tsx",
+    "src/components/home/public-home.module.css",
+    "src/components/dashboard/Navigation.tsx",
+    "src/components/dashboard/MobileBottomNav.tsx",
+    "src/lib/security/preview-policy.ts",
+    "scripts/test-developer-preview.ts",
+    "src/app/sitemap.ts"
+  ],
+  "complete_guides_inspected": [
+    "docs/maintainers/PUBLIC_DISCOVERY.md",
+    "docs/PRODUCT_SURFACE_STRATEGY.md",
+    "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md",
+    "docs/maintainers/readable-urls.md",
+    "docs/operations/developer-preview.md"
+  ],
+  "checks_run": [
+    "npx tsx --test scripts/test-developer-preview.ts",
+    "npm run test:image:security",
+    "npx tsc --noEmit",
+    "npm run lint"
+  ]
+}

@@ -43,6 +43,7 @@ import {
 const isProductRoute = (pathname: string) =>
   pathname === '/' ||
   /^\/images(?:\/|$)/.test(pathname) ||
+  /^\/explore(?:\/|$)/.test(pathname) ||
   isPublicReadingPath(pathname);
 
 function NavigationFeedback({ label }: { label: string }) {
@@ -184,17 +185,17 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
               {activeDropdown === 'platform' && (
                 <div className={styles.flyoutMenu} role="menu">
                   <div className={styles.flyoutGrid}>
-                    <Link href="/#stream" className={styles.flyoutItem} role="menuitem">
+                    <Link href="/explore" className={styles.flyoutItem} role="menuitem">
                       <div className={`${styles.iconBox} ${styles.iconIndigo}`}>
                         <Compass size={18} />
                       </div>
                       <div className={styles.flyoutContent}>
                         <div className={styles.flyoutTitle}>
-                          Public Image Stream
+                          Community Explore
                           <span className={styles.badgeMini}>Live</span>
                         </div>
                         <span className={styles.flyoutDesc}>
-                          Pinterest-style real-time community stream of generative images.
+                          Explore public community stream of generative diffusion creations.
                         </span>
                       </div>
                     </Link>
@@ -247,6 +248,18 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
                   </div>
                 </div>
               )}
+            </div>
+
+            {/* Direct Explore Link */}
+            <div className={styles.navItem}>
+              <Link
+                href="/explore"
+                className={styles.navButton}
+                aria-current={pathname === '/explore' ? 'page' : undefined}
+              >
+                <Compass size={14} className="text-indigo-400" />
+                <span>Explore</span>
+              </Link>
             </div>
 
             {/* 2. Developers Mega Menu */}
@@ -681,9 +694,9 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
               <div>
                 <div className={styles.drawerSectionTitle}>Platform</div>
                 <div className={styles.drawerList}>
-                  <Link href="/#stream" className={styles.drawerLink} onClick={() => setIsMobileOpen(false)}>
+                  <Link href="/explore" className={styles.drawerLink} onClick={() => setIsMobileOpen(false)}>
                     <Compass size={16} className="text-indigo-400" />
-                    <span>Public Image Stream (Live)</span>
+                    <span>Community Explore (Live)</span>
                   </Link>
                   <Link href="/images" className={styles.drawerLink} onClick={() => setIsMobileOpen(false)}>
                     <Sparkles size={16} className="text-sky-400" />
