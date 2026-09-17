@@ -55,6 +55,29 @@ export type GalxWorkspaceRole = 'owner' | 'admin' | 'developer' | 'viewer';
 export type GalxEnvironmentType = 'production' | 'staging' | 'development';
 export type GalxIdempotencyState = 'IN_FLIGHT' | 'COMMITTED' | 'FAILED';
 
+/**
+ * Canonical compute tier keys for the Prepaid Compute Tier system.
+ * Maps to the 7 deposit thresholds ($0, $10, $25, $50, $100, $250, $500).
+ * Single source of truth — used by DB columns, TypeScript interfaces, and API responses.
+ */
+export type ComputeTierKey =
+  | 'free'
+  | 'developer_10'
+  | 'starter_25'
+  | 'growth_50'
+  | 'fleet_100'
+  | 'sovereign_250'
+  | 'hyperscale_500';
+
+/** RPM limit for a compute tier. 'Unlimited' applies to hyperscale_500 only. */
+export type ComputeTierRpmLimit = number | 'Unlimited';
+
+/** Stripe Checkout Session status values. */
+export type GalxCheckoutStatus = 'open' | 'complete' | 'expired' | 'canceled';
+
+/** Stripe Payment status values on a checkout session. */
+export type GalxPaymentStatus = 'unpaid' | 'paid' | 'no_payment_required';
+
 export interface Database {
   private: {
     Tables: {
@@ -1102,7 +1125,7 @@ export interface Database {
           proof_of_deposit_verified: boolean;
           verified_at: string | null;
           /** Durable tier snapshot: auto-updated by trigger on deposit */
-          compute_tier_key: 'free' | 'developer_10' | 'starter_25' | 'growth_50' | 'fleet_100' | 'sovereign_250' | 'hyperscale_500';
+          compute_tier_key: ComputeTierKey;
           compute_tier_rpm: number;
           compute_tier_tpm: number;
           compute_tier_updated_at: string | null;

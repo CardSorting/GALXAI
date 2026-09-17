@@ -1,11 +1,47 @@
 /**
  * GALXAI: Stripe Product Tier Packages & Price Catalog
- * Authoritative definitions for Prepaid Compute Tiers with 50% Match Grants,
- * Tax Codes, Metadata, and Instant Activation Badges.
+ * Authoritative definitions for Prepaid Compute Tiers with match grants,
+ * tax codes, metadata, and instant activation badges.
+ *
+ * ARCHITECTURE: STRIPE_PRODUCT_TIERS is the single source of truth.
+ * All resolution helpers (getTierLimitsForDeposit, resolveTierKey)
+ * derive from these records — no parallel switch statements.
  */
 
+import type { ComputeTierKey, ComputeTierRpmLimit } from '../supabase/types';
+
+export type { ComputeTierKey };
+
+/**
+ * Ordered deposit thresholds mapping deposit amount -> tier key.
+ * Evaluated highest-to-lowest. Changing a threshold here propagates
+ * automatically to getTierLimitsForDeposit and resolveTierKey.
+ */
+export const COMPUTE_TIER_THRESHOLDS: ReadonlyArray<{ minUsd: number; key: ComputeTierKey }> = [
+  { minUsd: 500, key: 'hyperscale_500' },
+  { minUsd: 250, key: 'sovereign_250' },
+  { minUsd: 100, key: 'fleet_100'     },
+  { minUsd: 50,  key: 'growth_50'     },
+  { minUsd: 25,  key: 'starter_25'    },
+  { minUsd: 10,  key: 'developer_10'  },
+  { minUsd: 0,   key: 'free'          },
+] as const;
+
+/**
+ * Resolve the canonical ComputeTierKey for a deposit total.
+ * Import this in checkout.ts and quote.ts instead of maintaining
+ * parallel copies of the same thresholds.
+ */
+export function resolveTierKey(depositedTotalUsd: number): ComputeTierKey {
+  for (const { minUsd, key } of COMPUTE_TIER_THRESHOLDS) {
+    if (depositedTotalUsd >= minUsd) return key;
+  }
+  return 'free';
+}
+
 export interface StripeProductTier {
-  id: string; // Internal key e.g. 'starter_25'
+  /** Canonical ComputeTierKey — matches DB compute_tier_key CHECK constraint */
+  id: ComputeTierKey;
   name: string;
   statementDescriptor: string;
   description: string;
@@ -16,16 +52,19 @@ export interface StripeProductTier {
   multiplier: number;
   badge: string;
   concurrency: string;
-  concurrencyRpm: number | 'Unlimited';
+  concurrencyRpm: ComputeTierRpmLimit;
+  /** Numeric TPM ceiling. Use Number.POSITIVE_INFINITY for unlimited (hyperscale_500). */
+  tpmLimitNum: number;
+  /** Human-readable display string e.g. '40k TPM' or 'Unlimited'. */
   tpmLimit: string;
   routingLane: string;
   supportTier: string;
   promptCacheDiscount: string;
   isPopular?: boolean;
-  taxCode: string; // txcd_10000000 (Software as a Service / Cloud API Compute)
+  taxCode: string;
   features: string[];
   metadata: {
-    galxai_tier_key: string;
+    galxai_tier_key: ComputeTierKey;
     deposit_amount_usd: string;
     total_credit_usd: string;
     match_percentage: string;
@@ -38,6 +77,7 @@ export interface StripeProductTier {
     rate_lock: string;
   };
 }
+
 
 export const STRIPE_PRODUCT_TIERS: Record<string, StripeProductTier> = {
   developer_10: {
@@ -53,45 +93,7 @@ export const STRIPE_PRODUCT_TIERS: Record<string, StripeProductTier> = {
     badge: 'INSTANT UNLOCK ⚡',
     concurrency: '60 RPM / 40k TPM',
     concurrencyRpm: 60,
-    tpmLimit: '40k TPM',
-    routingLane: 'Standard Anycast Routing',
-    supportTier: 'Community Discord Support',
-    promptCacheDiscount: 'Standard',
-    taxCode: 'txcd_10000000',
-    features: [
-      'Instant API Key minting (/keys) with zero waitlist',
-      'Drop-in OpenAI SDK & Cursor/Windsurf compatibility',
-      'Full $10.00 Pay-As-You-Go compute balance',
-      'Images API generation (/v1/images/generations)',
-      'Standard Tier 1 throughput with safety spend caps'
-    ],
-    metadata: {
-      galxai_tier_key: 'developer_10',
-      deposit_amount_usd: '10.00',
-      total_credit_usd: '10.00',
-      match_percentage: '0%',
-      concurrency_rpm: '60',
-      tpm_limit: '40000',
-      routing_lane: 'standard_anycast',
-      sla_priority: 'developer_standard',
-      prompt_cache_discount: 'standard',
-      support_tier: 'community_discord',
-      rate_lock: 'guaranteed'
-    }
-  },
-  lumi_10: {
-    id: 'lumi_10',
-    name: 'GALXAI Developer Tier — Images & Frontier OpenAI Models Pass',
-    statementDescriptor: 'GALXAI DEV $10',
-    description: 'Instant Developer Tier activation. 100% pay-as-you-go prepaid credit for Images & Frontier models without waitlist delay.',
-    depositAmountUsd: 10,
-    welcomeGrantUsd: 0.0,
-    matchBonusUsd: 0.00,
-    totalCreditUsd: 10.00,
-    multiplier: 1.00,
-    badge: 'INSTANT UNLOCK ⚡',
-    concurrency: '60 RPM / 40k TPM',
-    concurrencyRpm: 60,
+    tpmLimitNum: 40_000,
     tpmLimit: '40k TPM',
     routingLane: 'Standard Anycast Routing',
     supportTier: 'Community Discord Support',
@@ -131,6 +133,7 @@ export const STRIPE_PRODUCT_TIERS: Record<string, StripeProductTier> = {
     badge: '50% MATCH',
     concurrency: '120 RPM Concurrency',
     concurrencyRpm: 120,
+    tpmLimitNum: 80_000,
     tpmLimit: '80k TPM',
     routingLane: 'Standard Anycast Routing',
     supportTier: 'Standard Email & Community Discord Support',
@@ -171,6 +174,7 @@ export const STRIPE_PRODUCT_TIERS: Record<string, StripeProductTier> = {
     isPopular: true,
     concurrency: '300 RPM Concurrency',
     concurrencyRpm: 300,
+    tpmLimitNum: 200_000,
     tpmLimit: '200k TPM',
     routingLane: 'Sub-15ms VIP Priority Routing Lane',
     supportTier: 'Priority Technical Support Lane',
@@ -211,6 +215,7 @@ export const STRIPE_PRODUCT_TIERS: Record<string, StripeProductTier> = {
     isPopular: true,
     concurrency: '600 RPM Concurrency',
     concurrencyRpm: 600,
+    tpmLimitNum: 500_000,
     tpmLimit: '500k TPM',
     routingLane: 'Priority Global Edge Ingestion',
     supportTier: 'Direct Discord Architect Support Channel',
@@ -250,6 +255,7 @@ export const STRIPE_PRODUCT_TIERS: Record<string, StripeProductTier> = {
     badge: '100% DOUBLE MATCH 👑',
     concurrency: '1,200 RPM Concurrency',
     concurrencyRpm: 1200,
+    tpmLimitNum: 1_000_000,
     tpmLimit: '1,000k TPM',
     routingLane: 'Dedicated VPC Private Lane & Vault',
     supportTier: 'Dedicated Account Infrastructure Engineer',
@@ -289,6 +295,7 @@ export const STRIPE_PRODUCT_TIERS: Record<string, StripeProductTier> = {
     badge: '100% DOUBLE MATCH ✨',
     concurrency: 'Unlimited Burst',
     concurrencyRpm: 'Unlimited',
+    tpmLimitNum: Number.POSITIVE_INFINITY,
     tpmLimit: 'Unlimited',
     routingLane: 'Unlimited Concurrency Burst & Dedicated Route',
     supportTier: 'Direct Private Slack Channel with Core Team',
@@ -318,13 +325,15 @@ export const STRIPE_PRODUCT_TIERS: Record<string, StripeProductTier> = {
 };
 
 export function getTierByAmount(amount: number): StripeProductTier | undefined {
-  const match = Object.values(STRIPE_PRODUCT_TIERS).find(t => t.depositAmountUsd === amount);
-  return match;
+  return Object.values(STRIPE_PRODUCT_TIERS).find(t => t.depositAmountUsd === amount && t.id !== 'free');
 }
 
 export interface AccountTierLimits {
-  tierKey: string;
+  tierKey: ComputeTierKey;
   rpm: number;
+  /** Numeric TPM ceiling. Number.POSITIVE_INFINITY for unlimited (hyperscale_500). */
+  tpmNum: number;
+  /** Human-readable display string, e.g. '40k TPM' or 'Unlimited'. */
   tpm: string;
   name: string;
   routingLane: string;
@@ -332,80 +341,27 @@ export interface AccountTierLimits {
   promptCacheDiscount: string;
 }
 
+/**
+ * Returns the tier limits for a cumulative deposit total.
+ * Derived directly from STRIPE_PRODUCT_TIERS — no separate switch statement.
+ * Free-tier accounts (< $10 deposited) get conservative defaults.
+ */
 export function getTierLimitsForDeposit(depositTotalUsd: number): AccountTierLimits {
-  if (depositTotalUsd >= 500) {
-    return {
-      tierKey: 'hyperscale_500',
-      rpm: 10000,
-      tpm: 'Unlimited',
-      name: 'Hyperscale Infra',
-      routingLane: 'Unlimited Concurrency Burst & Dedicated Route',
-      supportTier: 'Direct Private Slack Channel with Core Team',
-      promptCacheDiscount: 'Custom Fine-Tuning & Model Weight Cache'
-    };
+  const key = resolveTierKey(depositTotalUsd);
+  if (key === 'free') {
+    return { tierKey: 'free', rpm: 20, tpmNum: 20_000, tpm: '20k TPM', name: 'Free Tier',
+      routingLane: 'Shared Community Pool', supportTier: 'Community Discord Support', promptCacheDiscount: 'Standard' };
   }
-  if (depositTotalUsd >= 250) {
-    return {
-      tierKey: 'sovereign_250',
-      rpm: 1200,
-      tpm: '1,000k TPM',
-      name: 'Enterprise Sovereign',
-      routingLane: 'Dedicated VPC Private Lane & Vault',
-      supportTier: 'Dedicated Account Infrastructure Engineer',
-      promptCacheDiscount: '75% Prompt Cache pass-through discount'
-    };
-  }
-  if (depositTotalUsd >= 100) {
-    return {
-      tierKey: 'fleet_100',
-      rpm: 600,
-      tpm: '500k TPM',
-      name: 'Fleet Scale',
-      routingLane: 'Priority Global Edge Ingestion',
-      supportTier: 'Direct Discord Architect Support Channel',
-      promptCacheDiscount: 'Prompt Caching multi-turn persistence'
-    };
-  }
-  if (depositTotalUsd >= 50) {
-    return {
-      tierKey: 'growth_50',
-      rpm: 300,
-      tpm: '200k TPM',
-      name: 'Growth VIP',
-      routingLane: 'Sub-15ms VIP Priority Routing Lane',
-      supportTier: 'Priority Technical Support Lane',
-      promptCacheDiscount: '75% Prompt Cache pass-through discount'
-    };
-  }
-  if (depositTotalUsd >= 25) {
-    return {
-      tierKey: 'starter_25',
-      rpm: 120,
-      tpm: '80k TPM',
-      name: 'Starter Builder',
-      routingLane: 'Standard Anycast Routing',
-      supportTier: 'Standard Email & Community Discord Support',
-      promptCacheDiscount: '75% Prompt Cache pass-through discount'
-    };
-  }
-  if (depositTotalUsd >= 10) {
-    return {
-      tierKey: 'developer_10',
-      rpm: 60,
-      tpm: '40k TPM',
-      name: 'Developer Tier',
-      routingLane: 'Standard Anycast Routing',
-      supportTier: 'Community Discord Support',
-      promptCacheDiscount: 'Standard'
-    };
-  }
+  const tier = STRIPE_PRODUCT_TIERS[key]!;
+  const rpmNum = tier.concurrencyRpm === 'Unlimited' ? 10_000 : (tier.concurrencyRpm as number);
   return {
-    tierKey: 'free',
-    rpm: 60,
-    tpm: '20k TPM',
-    name: 'Free Tier',
-    routingLane: 'Shared Community Pool',
-    supportTier: 'Community Discord Support',
-    promptCacheDiscount: 'Standard'
+    tierKey: key,
+    rpm: rpmNum,
+    tpmNum: tier.tpmLimitNum,
+    tpm: tier.tpmLimit,
+    name: tier.name.replace(/^GALXAI (?:Developer Tier|Prepaid Compute) — /, '').replace(/ Pack$/, ''),
+    routingLane: tier.routingLane,
+    supportTier: tier.supportTier,
+    promptCacheDiscount: tier.promptCacheDiscount,
   };
 }

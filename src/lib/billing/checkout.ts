@@ -5,17 +5,8 @@ import { BillingError } from './account';
 import { checkoutReturnPath, hostedPaymentUrl } from './payment';
 import { readTopUpQuote } from './quote';
 import { calculateComputeCredit } from '../stripe/config';
+import { resolveTierKey } from '../stripe/products';
 
-/** Returns the canonical tier_key string for a deposit amount. */
-function resolveTierKey(depositUsd: number): { tierKey: string; tierRpm: number } {
-  if (depositUsd >= 500) return { tierKey: 'hyperscale_500', tierRpm: 10000 };
-  if (depositUsd >= 250) return { tierKey: 'sovereign_250', tierRpm: 1200 };
-  if (depositUsd >= 100) return { tierKey: 'fleet_100', tierRpm: 600 };
-  if (depositUsd >= 50)  return { tierKey: 'growth_50', tierRpm: 300 };
-  if (depositUsd >= 25)  return { tierKey: 'starter_25', tierRpm: 120 };
-  if (depositUsd >= 10)  return { tierKey: 'developer_10', tierRpm: 60 };
-  return { tierKey: 'developer_10', tierRpm: 60 };
-}
 
 export async function createAccountCheckout(pool: Pool, stripe: Stripe, input: {
   userId: string; email: string; amount: number; requestId: string; surface?: unknown; origin: string;
@@ -36,7 +27,8 @@ export async function createAccountCheckout(pool: Pool, stripe: Stripe, input: {
       if (Number(count.rows[0].count) >= 5) throw new BillingError('Too many checkout attempts. Please wait a few minutes.', 429);
       const quote = await readTopUpQuote(db, input.userId, input.amount);
       const computed = calculateComputeCredit(input.amount);
-      const { tierKey, tierRpm } = resolveTierKey(input.amount);
+      const tierKey = resolveTierKey(input.amount);
+      const tierRpm = (computed.tier.concurrencyRpm === 'Unlimited' ? 10_000 : computed.tier.concurrencyRpm as number);
       row = (await db.query(`INSERT INTO galx_stripe_checkout_sessions
         (session_id,user_id,amount_usd,match_grant_usd,total_credited_usd,tier_key,tier_rpm,metadata)
         VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`, [`pending_${key}`, input.userId, input.amount, quote.bonusUsd, quote.creditUsd, tierKey, tierRpm,

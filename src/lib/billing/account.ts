@@ -1,4 +1,5 @@
 import type { PoolClient } from 'pg';
+import type { ComputeTierKey } from '../supabase/types';
 
 type Db = Pick<PoolClient, 'query'>;
 export class BillingError extends Error { constructor(message: string, public status = 400) { super(message); } }
@@ -13,7 +14,7 @@ export interface BillingSummary {
   proofOfDepositVerified: boolean;
   autoReloadEnabled: boolean;
   /** Compute tier: matches STRIPE_PRODUCT_TIERS keys in src/lib/stripe/products.ts */
-  tierKey: string;
+  tierKey: ComputeTierKey;
   tierName: string;
   tierRpm: number;
   tierTpm: number;
