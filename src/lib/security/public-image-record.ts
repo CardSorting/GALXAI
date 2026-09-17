@@ -8,7 +8,8 @@ export function publicImageRecord(record: ImageGenerationRecord) {
     prompt: record.prompt, model: 'openai-gpt-image-latest', aspectRatio: record.aspectRatio,
     dimensions: record.dimensions, quality: record.quality,
     publicUrl, thumbnailUrl: `${publicUrl}/thumbnail`,
-    isFavorite: record.isFavorite, tags: record.tags, createdAt: record.createdAt, updatedAt: record.updatedAt,
+    isFavorite: record.isFavorite, isPublic: record.isPublic ?? true, visibility: record.visibility ?? 'public',
+    tags: record.tags, createdAt: record.createdAt, updatedAt: record.updatedAt,
   };
 }
 

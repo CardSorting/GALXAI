@@ -75,24 +75,49 @@ export async function PATCH(
     const body = await req.json().catch(() => ({}));
     const repo = ImageLibraryRepository.getInstance();
 
+    let updated = null;
+    let hasMutations = false;
+
     if (typeof body.isFavorite === 'boolean') {
-      const updated = await repo.toggleFavorite(userId, assetId, body.isFavorite);
+      hasMutations = true;
+      updated = await repo.toggleFavorite(userId, assetId, body.isFavorite);
       if (!updated) {
         return NextResponse.json(
           { success: false, error: 'Asset not found or unauthorized' },
           { status: 404 }
         );
       }
-      return NextResponse.json({
-        success: true,
-        record: publicImageRecord(updated)
-      });
     }
 
-    return NextResponse.json(
-      { success: false, error: 'No valid update properties provided' },
-      { status: 400 }
-    );
+    let targetVisibility: 'public' | 'unlisted' | 'private' | undefined;
+    if (body.visibility === 'public' || body.visibility === 'unlisted' || body.visibility === 'private') {
+      targetVisibility = body.visibility;
+    } else if (typeof body.isPublic === 'boolean') {
+      targetVisibility = body.isPublic ? 'public' : 'private';
+    }
+
+    if (targetVisibility) {
+      hasMutations = true;
+      updated = await repo.setVisibility(userId, assetId, targetVisibility);
+      if (!updated) {
+        return NextResponse.json(
+          { success: false, error: 'Asset not found or unauthorized' },
+          { status: 404 }
+        );
+      }
+    }
+
+    if (!hasMutations) {
+      return NextResponse.json(
+        { success: false, error: 'No valid update properties provided. Supported: isFavorite, visibility, isPublic' },
+        { status: 400 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      record: publicImageRecord(updated!)
+    });
   } catch (err: unknown) {
     logImageFailure(crypto.randomUUID(), err);
     return NextResponse.json(

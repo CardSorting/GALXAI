@@ -185,6 +185,8 @@ export class BroccoliImageLibraryBuffer {
         latency_ms: r.latencyMs || 0,
         cost_usd: r.costUsd || 0,
         is_favorite: Boolean(r.isFavorite),
+        is_public: r.isPublic !== undefined ? Boolean(r.isPublic) : true,
+        visibility: r.visibility || 'public',
         tags: r.tags || [],
         metadata: r.metadata || {},
         created_at: r.createdAt
@@ -337,6 +339,10 @@ export class BroccoliImageLibraryBuffer {
 
     if (options.isFavorite !== undefined) {
       records = records.filter((r) => Boolean(r.isFavorite) === options.isFavorite);
+    }
+
+    if (options.visibility && options.visibility !== 'all') {
+      records = records.filter((r) => (r.visibility || 'public') === options.visibility);
     }
 
     if (options.search && options.search.trim().length > 0) {
@@ -644,6 +650,62 @@ export class BroccoliImageLibraryBuffer {
     return affectedIds.length;
   }
 
+  /** Sets visibility state (public, unlisted, private) for up to 500 assets in one database hop. */
+  public async batchSetVisibility(
+    userId: string,
+    assetIds: string[],
+    visibility: 'public' | 'unlisted' | 'private'
+  ): Promise<number> {
+    const uniqueIds = [...new Set(assetIds.filter((id) => typeof id === 'string' && id.length > 0))].slice(0, 500);
+    if (uniqueIds.length === 0) return 0;
+    if (isSupabaseConfigured()) await this.flushAssetsDurably(userId, uniqueIds);
+
+    const isPublic = visibility === 'public';
+    const pendingIds = uniqueIds.filter((id) => this.writeQueue.get(id)?.userId === userId);
+    const persistedIds = uniqueIds.filter((id) => !pendingIds.includes(id));
+    const pendingPrevious = new Map(pendingIds.map((id) => [id, this.l1Table.get(id)] as const));
+    const affectedIds: string[] = [...pendingIds];
+    for (const id of pendingIds) this.enqueueMutation(userId, id, { visibility, isPublic } as any);
+    try {
+      if (persistedIds.length === 0) {
+        // Pending records are coalesced into the existing upsert batch.
+      } else if (isSupabaseAdminConfigured()) {
+        const { data, error } = await getSupabaseAdmin().rpc('fn_batch_mutate_image_library', {
+          p_user_id: userId,
+          p_asset_ids: persistedIds,
+          p_action: 'visibility',
+          p_is_favorite: null as any,
+          p_visibility: visibility
+        });
+        if (error) throw error;
+        affectedIds.push(...(Array.isArray((data as any)?.assetIds) ? (data as any).assetIds.map(String) : []));
+      } else if (isSupabaseConfigured()) {
+        const result = await executePostgresQuery<{ result: any }>(
+          'SELECT public.fn_batch_mutate_image_library($1,$2,$3,$4,$5) AS result;',
+          [userId, persistedIds, 'visibility', null, visibility]
+        );
+        const payload = result?.rows[0]?.result;
+        affectedIds.push(...(Array.isArray(payload?.assetIds) ? payload.assetIds.map(String) : []));
+      } else {
+        affectedIds.push(...persistedIds.filter((id) => this.l1Table.get(id)?.userId === userId));
+      }
+    } catch (dbErr: any) {
+      console.warn(`[BroccoliImageLibraryBuffer] Batch visibility error: ${dbErr.message}`);
+      for (const [id, previous] of pendingPrevious) {
+        if (previous) this.enqueueMutation(userId, id, { visibility: previous.visibility, isPublic: previous.isPublic } as any);
+      }
+      return 0;
+    }
+
+    const updatedAt = new Date().toISOString();
+    for (const id of affectedIds) {
+      const record = this.l1Table.get(id);
+      if (record?.userId === userId) this.recordCache.put(id, { ...record, visibility, isPublic, updatedAt });
+    }
+    this.invalidateUserQueryCache(userId);
+    return affectedIds.length;
+  }
+
   /**
    * Returns live telemetry and cost savings metrics for the buffer.
    */
@@ -715,6 +777,8 @@ export class BroccoliImageLibraryBuffer {
       latencyMs: Number(row.latency_ms) || 0,
       costUsd: Number(row.cost_usd) || 0,
       isFavorite: Boolean(row.is_favorite),
+      isPublic: row.is_public !== undefined ? Boolean(row.is_public) : true,
+      visibility: (row.visibility as 'public' | 'unlisted' | 'private') || 'public',
       tags: Array.isArray(row.tags) ? row.tags.map(String) : [],
       metadata: (row.metadata as Record<string, unknown>) || {},
       createdAt: String(row.created_at),

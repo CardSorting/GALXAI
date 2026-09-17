@@ -8,8 +8,10 @@ import {
   ChevronRight,
   Copy,
   Download,
+  Globe,
   ImageIcon,
   LoaderCircle,
+  Lock,
   Search,
   Star,
   Trash2,
@@ -27,6 +29,7 @@ import type { ImageGenerationRecord, ImageLibraryStats } from '@/core/contracts/
 import { VisualLibrarySkeleton } from '@/components/library/VisualLibrarySkeleton';
 
 type SortOrder = 'newest' | 'oldest';
+type VisibilityFilter = 'all' | 'public' | 'private';
 
 interface LibraryResponse {
   success: boolean;
@@ -83,6 +86,7 @@ export function VisualLibraryDashboard() {
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedSession, setSelectedSession] = useState('all');
   const [selectedAspectRatio, setSelectedAspectRatio] = useState('all');
+  const [selectedVisibility, setSelectedVisibility] = useState<VisibilityFilter>('all');
   const [onlyFavorites, setOnlyFavorites] = useState(false);
   const [sortOrder, setSortOrder] = useState<SortOrder>('newest');
   const [selectedAssetIds, setSelectedAssetIds] = useState<Set<string>>(new Set());
@@ -112,11 +116,12 @@ export function VisualLibraryDashboard() {
     const params = new URLSearchParams({ limit: '48', sort: sortOrder });
     if (selectedSession !== 'all') params.set('sessionId', selectedSession);
     if (selectedAspectRatio !== 'all') params.set('aspectRatio', selectedAspectRatio);
+    if (selectedVisibility !== 'all') params.set('visibility', selectedVisibility);
     if (onlyFavorites) params.set('isFavorite', 'true');
     if (debouncedSearch) params.set('search', debouncedSearch);
     if (cursor) params.set('cursor', cursor);
     return params;
-  }, [debouncedSearch, onlyFavorites, selectedAspectRatio, selectedSession, sortOrder]);
+  }, [debouncedSearch, onlyFavorites, selectedAspectRatio, selectedSession, selectedVisibility, sortOrder]);
 
   const fetchLibrary = useCallback(async (cursor?: string) => {
     const sequence = ++requestSequence.current;
@@ -222,15 +227,69 @@ export function VisualLibraryDashboard() {
     return [...groups.entries()];
   }, [records]);
 
-  const runBatchAction = async (action: 'delete' | 'favorite', ids: string[], isFavorite?: boolean) => {
+  const runBatchAction = async (
+    action: 'delete' | 'favorite' | 'visibility',
+    ids: string[],
+    payloadOpts?: { isFavorite?: boolean; visibility?: 'public' | 'private' | 'unlisted' }
+  ) => {
     const response = await fetch('/api/images/library/batch', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify({ action, assetIds: ids, isFavorite })
+      body: JSON.stringify({
+        action,
+        assetIds: ids,
+        isFavorite: payloadOpts?.isFavorite,
+        visibility: payloadOpts?.visibility
+      })
     });
     const payload = await response.json();
     if (!response.ok || !payload.success) throw new Error(payload.error || 'The action could not be completed.');
     return Number(action === 'delete' ? payload.deletedCount : payload.updatedCount) || 0;
+  };
+
+  const handleToggleVisibility = async (record: ImageGenerationRecord, event?: ReactMouseEvent) => {
+    event?.stopPropagation();
+    const isCurrentlyPublic = record.visibility ? record.visibility === 'public' : (record.isPublic ?? true);
+    const nextVisibility: 'public' | 'private' = isCurrentlyPublic ? 'private' : 'public';
+    const nextIsPublic = nextVisibility === 'public';
+
+    setPendingAction(`visibility:${record.id}`);
+    setRecords((current) => current.map((item) => item.id === record.id ? { ...item, isPublic: nextIsPublic, visibility: nextVisibility } : item));
+
+    try {
+      const response = await fetch(`/api/images/library/${encodeURIComponent(record.id)}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ visibility: nextVisibility, isPublic: nextIsPublic })
+      });
+      const payload = await response.json();
+      if (!response.ok || !payload.success) throw new Error(payload.error || 'Privacy status was not saved.');
+      setNotice(nextIsPublic ? 'Published to Explore community stream.' : 'Changed to private (hidden from Explore).');
+    } catch (caught) {
+      setRecords((current) => current.map((item) => item.id === record.id ? record : item));
+      setError(caught instanceof Error ? caught.message : 'Privacy status was not saved.');
+    } finally {
+      setPendingAction(null);
+    }
+  };
+
+  const handleBatchVisibility = async (visibility: 'public' | 'private') => {
+    const ids = [...selectedAssetIds];
+    if (ids.length === 0) return;
+    const previous = records;
+    setPendingAction('batch-visibility');
+    setRecords((current) => current.map((record) => selectedAssetIds.has(record.id) ? { ...record, isPublic: visibility === 'public', visibility } : record));
+    try {
+      const updatedCount = await runBatchAction('visibility', ids, { visibility });
+      setSelectedAssetIds(new Set());
+      setNotice(`${updatedCount} ${updatedCount === 1 ? 'image' : 'images'} marked as ${visibility}.`);
+      await fetchLibrary();
+    } catch (caught) {
+      setRecords(previous);
+      setError(caught instanceof Error ? caught.message : 'Privacy status was not saved.');
+    } finally {
+      setPendingAction(null);
+    }
   };
 
   const handleToggleFavorite = async (record: ImageGenerationRecord, event?: ReactMouseEvent) => {
@@ -284,7 +343,7 @@ export function VisualLibraryDashboard() {
     setPendingAction('batch-favorite');
     setRecords((current) => current.map((record) => selectedAssetIds.has(record.id) ? { ...record, isFavorite: true } : record));
     try {
-      const updatedCount = await runBatchAction('favorite', ids, true);
+      const updatedCount = await runBatchAction('favorite', ids, { isFavorite: true });
       if (updatedCount !== ids.length) throw new Error(`Only ${updatedCount} of ${ids.length} favorites were saved.`);
       setSelectedAssetIds(new Set());
       setNotice(`${updatedCount} ${updatedCount === 1 ? 'image' : 'images'} added to favorites.`);
@@ -325,7 +384,7 @@ export function VisualLibraryDashboard() {
     }
   };
 
-  const hasFilters = Boolean(debouncedSearch || selectedSession !== 'all' || selectedAspectRatio !== 'all' || onlyFavorites);
+  const hasFilters = Boolean(debouncedSearch || selectedSession !== 'all' || selectedAspectRatio !== 'all' || onlyFavorites || selectedVisibility !== 'all');
 
   if (loading) return <VisualLibrarySkeleton />;
 
@@ -367,24 +426,80 @@ export function VisualLibraryDashboard() {
           <kbd className="pointer-events-none absolute right-3 top-1/2 hidden -translate-y-1/2 rounded border border-white/[0.1] bg-black/30 px-1.5 py-0.5 text-[10px] text-zinc-400 sm:block">/</kbd>
         </label>
 
-        <div className="grid grid-cols-2 gap-2 sm:flex">
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Privacy & Visibility Segmented Pills */}
+          <div role="tablist" aria-label="Visibility filter" className="flex h-11 items-center rounded-lg border border-white/[0.1] bg-white/[0.035] p-1 text-xs">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={selectedVisibility === 'all' && !onlyFavorites}
+              onClick={() => { setSelectedVisibility('all'); setOnlyFavorites(false); }}
+              className={`h-full rounded-md px-3 font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 ${
+                selectedVisibility === 'all' && !onlyFavorites
+                  ? 'bg-indigo-600 text-white shadow'
+                  : 'text-zinc-400 hover:text-white'
+              }`}
+            >
+              All
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={selectedVisibility === 'public' && !onlyFavorites}
+              onClick={() => { setSelectedVisibility('public'); setOnlyFavorites(false); }}
+              className={`flex h-full items-center gap-1.5 rounded-md px-3 font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${
+                selectedVisibility === 'public' && !onlyFavorites
+                  ? 'bg-emerald-600 text-white shadow'
+                  : 'text-zinc-400 hover:text-white'
+              }`}
+            >
+              <Globe aria-hidden="true" className="h-3.5 w-3.5" />
+              Public
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={selectedVisibility === 'private' && !onlyFavorites}
+              onClick={() => { setSelectedVisibility('private'); setOnlyFavorites(false); }}
+              className={`flex h-full items-center gap-1.5 rounded-md px-3 font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
+                selectedVisibility === 'private' && !onlyFavorites
+                  ? 'bg-amber-600 text-white shadow'
+                  : 'text-zinc-400 hover:text-white'
+              }`}
+            >
+              <Lock aria-hidden="true" className="h-3.5 w-3.5" />
+              Private
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={onlyFavorites}
+              onClick={() => setOnlyFavorites((value) => !value)}
+              className={`flex h-full items-center gap-1.5 rounded-md px-3 font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 ${
+                onlyFavorites
+                  ? 'bg-amber-400 text-zinc-950 font-semibold shadow'
+                  : 'text-zinc-400 hover:text-white'
+              }`}
+            >
+              <Star aria-hidden="true" className={`h-3.5 w-3.5 ${onlyFavorites ? 'fill-current' : ''}`} />
+              Favorites
+            </button>
+          </div>
+
           <label>
             <span className="sr-only">Filter by session</span>
-            <select value={selectedSession} onChange={(event) => setSelectedSession(event.target.value)} className="h-11 w-full rounded-lg border border-white/[0.1] bg-[#0d101c] px-3 text-sm text-zinc-200 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20 sm:w-48">
+            <select value={selectedSession} onChange={(event) => setSelectedSession(event.target.value)} className="h-11 w-full rounded-lg border border-white/[0.1] bg-[#0d101c] px-3 text-sm text-zinc-200 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20 sm:w-36">
               <option value="all">All sessions</option>
               {availableSessions.map((session) => <option key={session.sessionId} value={session.sessionId}>{session.sessionId} ({session.count})</option>)}
             </select>
           </label>
           <label>
             <span className="sr-only">Filter by aspect ratio</span>
-            <select value={selectedAspectRatio} onChange={(event) => setSelectedAspectRatio(event.target.value)} className="h-11 w-full rounded-lg border border-white/[0.1] bg-[#0d101c] px-3 text-sm text-zinc-200 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20 sm:w-36">
+            <select value={selectedAspectRatio} onChange={(event) => setSelectedAspectRatio(event.target.value)} className="h-11 w-full rounded-lg border border-white/[0.1] bg-[#0d101c] px-3 text-sm text-zinc-200 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20 sm:w-32">
               <option value="all">All ratios</option>
               {Object.keys(stats.aspectRatios).sort().map((ratio) => <option key={ratio} value={ratio}>{ratio} ({stats.aspectRatios[ratio]})</option>)}
             </select>
           </label>
-          <button type="button" aria-pressed={onlyFavorites} onClick={() => setOnlyFavorites((value) => !value)} className={`flex h-11 items-center justify-center gap-2 rounded-lg border px-3 text-sm text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 ${onlyFavorites ? 'border-amber-400/40 bg-amber-400/10' : 'border-white/[0.1] bg-white/[0.035] hover:bg-white/[0.07]'}`}>
-            <Star aria-hidden="true" className={`h-4 w-4 ${onlyFavorites ? 'fill-current' : ''}`} /> Favorites
-          </button>
           <label>
             <span className="sr-only">Sort images</span>
             <select value={sortOrder} onChange={(event) => setSortOrder(event.target.value as SortOrder)} className="h-11 w-full rounded-lg border border-white/[0.1] bg-[#0d101c] px-3 text-sm text-zinc-200 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20 sm:w-36">
@@ -410,7 +525,9 @@ export function VisualLibraryDashboard() {
             <button type="button" onClick={() => setSelectedAssetIds(new Set(records.map((record) => record.id)))} className="min-h-11 px-2 text-zinc-300 underline decoration-zinc-600 underline-offset-4 hover:text-white">Select loaded</button>
             <button type="button" onClick={() => setSelectedAssetIds(new Set())} className="min-h-11 px-2 text-zinc-300 underline decoration-zinc-600 underline-offset-4 hover:text-white">Cancel</button>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <button type="button" disabled={pendingAction !== null} onClick={() => void handleBatchVisibility('public')} className="flex min-h-11 items-center gap-2 rounded-lg border border-emerald-400/30 px-3 text-sm font-medium text-emerald-200 hover:bg-emerald-300/10 disabled:opacity-50"><Globe aria-hidden="true" className="h-4 w-4" /> Make Public</button>
+            <button type="button" disabled={pendingAction !== null} onClick={() => void handleBatchVisibility('private')} className="flex min-h-11 items-center gap-2 rounded-lg border border-amber-400/30 px-3 text-sm font-medium text-amber-200 hover:bg-amber-300/10 disabled:opacity-50"><Lock aria-hidden="true" className="h-4 w-4" /> Make Private</button>
             <button type="button" disabled={pendingAction !== null} onClick={() => void handleBatchFavorite()} className="flex min-h-11 items-center gap-2 rounded-lg border border-amber-400/30 px-3 text-sm font-medium text-amber-100 hover:bg-amber-300/10 disabled:opacity-50"><Star aria-hidden="true" className="h-4 w-4" /> Favorite</button>
             <button type="button" disabled={pendingAction !== null} onClick={() => void handleDelete([...selectedAssetIds])} className="flex min-h-11 items-center gap-2 rounded-lg border border-rose-400/30 px-3 text-sm font-medium text-rose-100 hover:bg-rose-300/10 disabled:opacity-50"><Trash2 aria-hidden="true" className="h-4 w-4" /> Delete</button>
           </div>
@@ -423,7 +540,7 @@ export function VisualLibraryDashboard() {
             <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white/[0.05] text-zinc-400"><Search aria-hidden="true" className="h-5 w-5" /></div>
             <h2 className="mt-4 text-base font-semibold text-white">No matching images</h2>
             <p className="mt-1 max-w-sm text-sm text-zinc-400">Try a broader search or reset the active filters to see your full library.</p>
-            <button type="button" onClick={() => { setSearchInput(''); setSelectedSession('all'); setSelectedAspectRatio('all'); setOnlyFavorites(false); }} className="mt-5 min-h-11 rounded-lg border border-white/[0.12] bg-white/[0.04] px-4 text-sm font-semibold text-white hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300">Reset filters</button>
+            <button type="button" onClick={() => { setSearchInput(''); setSelectedSession('all'); setSelectedAspectRatio('all'); setSelectedVisibility('all'); setOnlyFavorites(false); }} className="mt-5 min-h-11 rounded-lg border border-white/[0.12] bg-white/[0.04] px-4 text-sm font-semibold text-white hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300">Reset filters</button>
           </div>
         ) : (
           <div className="overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.015]">
@@ -453,6 +570,7 @@ export function VisualLibraryDashboard() {
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                 {items.map(({ record, index }) => {
                   const selected = selectedAssetIds.has(record.id);
+                  const isPublic = record.visibility ? record.visibility === 'public' : (record.isPublic ?? true);
                   return (
                     <article key={record.id} className={`group relative min-w-0 overflow-hidden rounded-lg border bg-[#0d101c] ${selected ? 'border-indigo-300 ring-2 ring-indigo-400/50' : 'border-white/[0.08] hover:border-white/[0.2]'}`}>
                       <button type="button" onClick={() => setActiveLightboxIndex(index)} aria-label={`Open image: ${record.prompt}`} className="relative block aspect-square w-full overflow-hidden bg-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-300">
@@ -460,10 +578,31 @@ export function VisualLibraryDashboard() {
                         <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent px-3 pb-2.5 pt-10 text-left text-xs text-white opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 motion-reduce:transition-none"><span className="line-clamp-2">{record.prompt}</span></span>
                       </button>
                       <button type="button" aria-label={selected ? `Deselect ${record.prompt}` : `Select ${record.prompt}`} aria-pressed={selected} onClick={(event) => toggleSelection(record.id, index, event)} className={`absolute left-2 top-2 flex h-11 w-11 items-center justify-center rounded-full border shadow-sm backdrop-blur-sm transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white ${selected ? 'border-indigo-300 bg-indigo-500 text-white' : 'border-white/40 bg-black/55 text-transparent opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100'}`}><Check aria-hidden="true" className="h-5 w-5" /></button>
+                      <button
+                        type="button"
+                        aria-label={isPublic ? 'Public on Explore (click to make private)' : 'Private (click to publish to Explore)'}
+                        title={isPublic ? 'Public on Explore (click to make private)' : 'Private (click to publish to Explore)'}
+                        disabled={pendingAction === `visibility:${record.id}`}
+                        onClick={(event) => void handleToggleVisibility(record, event)}
+                        className={`absolute right-14 top-2 flex h-11 w-11 items-center justify-center rounded-full border shadow-sm backdrop-blur-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white disabled:opacity-50 ${
+                          !isPublic
+                            ? 'border-amber-400/50 bg-black/75 text-amber-300'
+                            : 'border-white/30 bg-black/55 text-zinc-300 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 hover:text-emerald-300 hover:border-emerald-400/40'
+                        }`}
+                      >
+                        {isPublic ? <Globe aria-hidden="true" className="h-5 w-5" /> : <Lock aria-hidden="true" className="h-5 w-5" />}
+                      </button>
                       <button type="button" aria-label={record.isFavorite ? 'Remove from favorites' : 'Add to favorites'} aria-pressed={record.isFavorite} disabled={pendingAction === `favorite:${record.id}`} onClick={(event) => void handleToggleFavorite(record, event)} className={`absolute right-2 top-2 flex h-11 w-11 items-center justify-center rounded-full border border-white/30 bg-black/55 shadow-sm backdrop-blur-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white disabled:opacity-50 ${record.isFavorite ? 'text-amber-300' : 'text-white opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100'}`}><Star aria-hidden="true" className={`h-5 w-5 ${record.isFavorite ? 'fill-current' : ''}`} /></button>
                       <div className="flex min-w-0 items-center justify-between gap-2 px-3 py-2 text-xs">
                         <span className="truncate text-zinc-400">{record.model.replace(/^openai-/, '')}</span>
-                        <span className="shrink-0 tabular-nums text-zinc-400">{record.aspectRatio}</span>
+                        <div className="flex shrink-0 items-center gap-1.5 text-zinc-400">
+                          <span className="tabular-nums">{record.aspectRatio}</span>
+                          <span className="text-zinc-600">•</span>
+                          <span className={`inline-flex items-center gap-0.5 text-[11px] font-medium ${isPublic ? 'text-emerald-400/90' : 'text-amber-400/90'}`}>
+                            {isPublic ? <Globe className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
+                            {isPublic ? 'Public' : 'Private'}
+                          </span>
+                        </div>
                       </div>
                     </article>
                   );
@@ -496,13 +635,44 @@ export function VisualLibraryDashboard() {
                 <p className="mt-1.5 break-words text-sm leading-6 text-zinc-100">{activeRecord.prompt}</p>
                 <button type="button" onClick={() => void copyToClipboard(activeRecord.prompt, 'prompt')} className="mt-2 inline-flex min-h-11 items-center gap-2 text-sm text-indigo-300 hover:text-indigo-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400">{copiedField === 'prompt' ? <Check aria-hidden="true" className="h-4 w-4" /> : <Copy aria-hidden="true" className="h-4 w-4" />} {copiedField === 'prompt' ? 'Copied' : 'Copy prompt'}</button>
               </div>
+
+              {/* Privacy & Visibility Status Card */}
+              <div className="mt-5 rounded-lg border border-white/[0.08] bg-white/[0.025] p-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    {(activeRecord.visibility ? activeRecord.visibility === 'public' : (activeRecord.isPublic ?? true)) ? (
+                      <Globe className="h-4 w-4 text-emerald-400" />
+                    ) : (
+                      <Lock className="h-4 w-4 text-amber-400" />
+                    )}
+                    <span className="text-xs font-semibold text-zinc-200">
+                      {(activeRecord.visibility ? activeRecord.visibility === 'public' : (activeRecord.isPublic ?? true)) ? 'Public Community Stream' : 'Private Creation'}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    disabled={pendingAction === `visibility:${activeRecord.id}`}
+                    onClick={() => void handleToggleVisibility(activeRecord)}
+                    className="text-xs font-medium text-indigo-400 hover:text-indigo-300 disabled:opacity-50 underline underline-offset-2"
+                  >
+                    {(activeRecord.visibility ? activeRecord.visibility === 'public' : (activeRecord.isPublic ?? true)) ? 'Make Private' : 'Publish to Explore'}
+                  </button>
+                </div>
+                <p className="mt-1.5 text-xs text-zinc-400 leading-relaxed">
+                  {(activeRecord.visibility ? activeRecord.visibility === 'public' : (activeRecord.isPublic ?? true))
+                    ? 'Streamed live to the community Explore gallery.'
+                    : 'Hidden from community streams. Only visible inside your account.'}
+                </p>
+              </div>
+
               <dl className="mt-5 divide-y divide-white/[0.06] border-y border-white/[0.08] text-sm">
                 {[
                   ['Model', activeRecord.model],
                   ['Dimensions', `${activeRecord.dimensions} (${activeRecord.aspectRatio})`],
                   ['Quality', activeRecord.quality],
                   ['File size', formatBytes(activeRecord.sizeBytes)],
-                  ['Session', activeRecord.sessionId]
+                  ['Session', activeRecord.sessionId],
+                  ['Visibility', (activeRecord.visibility ? activeRecord.visibility === 'public' : (activeRecord.isPublic ?? true)) ? '🌐 Public (Explore)' : '🔒 Private (Only you)']
                 ].map(([term, value]) => <div key={term} className="grid grid-cols-[5.5rem_minmax(0,1fr)] gap-3 py-3"><dt className="text-zinc-400">{term}</dt><dd className="min-w-0 break-words text-right text-zinc-200">{value}</dd></div>)}
               </dl>
               <div className="mt-5 grid grid-cols-2 gap-2">

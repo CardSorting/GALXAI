@@ -52,11 +52,11 @@
   },
   "images": {
     "reviewer": "Product/API maintainer",
-    "note": "Enhanced explore feed with 12-item skeleton grid, append-skeletons, heart-pop animations, and canonical feed view",
+    "note": "Image library visibility contracts, batch mutations and dashboard UX",
     "reviewed_at": "2026-09-17",
     "review_by": "2026-09-24",
     "evidence": {
-      "src/components/images/PublicImageMasonryStream.tsx": "f430901e79dadae81b84269096263651263d7e341818162411624444837e1608"
+      "docs/knowledge/audits/2026-09-17-user-library-privacy-and-permissions-review.json": "31db07c9ef11a6e314e3908adcab9847e8526ef43f00df9d66d2b81943f2be04"
     },
     "files": {
       "docs/QUEUE_SPECIFICATION.md": "301d293b23327bf065202322e0a7554cf581740f28d0d5ab9fb827e73beed6ba",
@@ -84,8 +84,8 @@
       "scripts/verify-url-navigation.mjs": "e79a6d4ea8e1a5d7cce3ae35c0f9553248e20140569dcce6d99e73e885f66933",
       "src/app/api/billing/generation-quota/route.ts": "9886f0b6132866ea12dcd80ba3301b9e6ccb8bc9eeac9ae3aca9a2ef1d64621f",
       "src/app/api/images/availability/route.ts": "266d821c25d12990a45aac497bdb5051dfa75110004e90a73bd9cad61c860624",
-      "src/app/api/images/library/[assetId]/route.ts": "841b0e38f6bdbc67ecde213e8cc25179d208f23648439b46d592bbbb772345df",
-      "src/app/api/images/library/batch/route.ts": "33a5248bf381fc7af7301e1a2e058f01f437f6e8d0aa8d24563703b9e1de35e3",
+      "src/app/api/images/library/[assetId]/route.ts": "521d291c6b50e09c1a6eea9c0040912b5c96bc742105b18047b748d67b05a7a8",
+      "src/app/api/images/library/batch/route.ts": "d09d148a3e7041e9d854967617894aaca8a80eaf4c88cf60590c7b31dd430e38",
       "src/app/api/images/library/route.ts": "954b062d5ee0725326b563508812b8b44020c534252901d672df3a828db3a829",
       "src/app/images/error.tsx": "0b2a04890cd8de8ea6adf8eb58541aae5409033c49b28d90a51cb386af1d1097",
       "src/app/images/favorites/page.tsx": "e21af30f53a56aac76adf07efdd72563ad05bda28ea5084abccd67dd11dd47f1",
@@ -109,8 +109,8 @@
       "src/components/images/studio.css": "d04bce6d6f0eb817815b5dfbefc962221e8865fb68eb74bdb23bce881da87492",
       "src/components/images/use-image-studio.ts": "22b3ac9a41f10bceb777942da4c63ea84e079e7c85aff5d7027d019f0f1b8ff1",
       "src/contexts/GenerationAllowanceContext.tsx": "d73875872f3814131bfc18029e69a72091993d906af63058ca37282f2c261a7c",
-      "src/core/broccolidb/BroccoliImageLibraryBuffer.ts": "840d2e9fd075d314e196c056564b911b7a1d2b63ff0569f5ee16fb7604d81915",
-      "src/core/contracts/GalxContracts.ts": "68e0d937026c9904cdd2f6eba735c5a665c670032222cc8afaef3ff4b22fe426",
+      "src/core/broccolidb/BroccoliImageLibraryBuffer.ts": "328e1ee0411c1da2408527010836ef0a0fc4f3b1c10370c2d2ab5b700036e7d2",
+      "src/core/contracts/GalxContracts.ts": "1d06cea3dda929f6e3766fba62532e308a02ee73c2299875780357a890aadcaa",
       "src/core/storage/GalxUnifiedR2StorageManager.ts": "6ddf189a26e68f37a1109b416d6b5137df0288476cbe34801f0721845d349bf4",
       "src/core/storage/bounded-object-body.ts": "f2edc7ee66b0a76a19dc3cd46868654158113833f2c123b8b42a3600bb47bbb2",
       "src/lib/billing/free-generation-contract.ts": "dc21e2e396feafb371e64be27c68c62ac29e1a748c4d521003f67ac6286bca6a",
@@ -120,15 +120,15 @@
       "src/lib/billing/generation-access.ts": "7d0f05c6a9ea2c7e4b4fc532eb264215c4ca57be2633187a564f02d44116fb26",
       "src/lib/billing/generation-quota-route.ts": "f35bd7b7f55b7b43d3d43de3a1103e081cb82a50355b6f2e1f31d2233129de49",
       "src/lib/images/availability.ts": "9b2d701600fb46f3e864f285394c144e74e31a9016bc6e61ab4e8b6df1476345",
-      "src/lib/images/library-cursor.ts": "53d3e327e5e3ee57de4d045c62b73b8cfd1c69cb048013052c4af9f461bce798",
+      "src/lib/images/library-cursor.ts": "553df33b2925b9814b9ff9c42f7f1630616136a5432a8b529d0e27329c2a334a",
       "src/lib/images/navigation.ts": "827b7f91ef06422452aa03f66721e866be9755399c4514393230ce4fdcfc8e5c",
       "src/lib/images/read-image-artifact.ts": "af490bc9ccfa13d3e341574936f0929725ff2d1c9f042f53a48e0a45e8e7cb8b",
       "src/lib/images/request-repository.ts": "00dabfcb9cc6ba59a80aa8f3d15c2f9c8df813be9db3024c1c01cdd0a688ba47",
       "src/lib/images/request-service.ts": "8873301571d260bbb185591e7192337538e2087c48e0be6074d0d916fcfcd6e8",
       "src/lib/security/image-artifact.ts": "295df387bacc6f27620f36c8b90eaceb31934ded26c14117c2cea3efac3fa593",
       "src/lib/security/public-image-http.ts": "793b1a19ed4a704439544df062e6921f1f0e9862503a4e6dc38f01246e90584d",
-      "src/lib/security/public-image-record.ts": "777deaa9a0ce4a75aae539ae21a90b3ec8c1c11e19997f8664b8a35de91b1f9e",
-      "src/lib/supabase/repositories/ImageLibraryRepository.ts": "0ab87ab48cf9abc21cf80214818742b9d89c8ce168ddb5a4358e5397314323d7",
+      "src/lib/security/public-image-record.ts": "2aefe48eaf3da1e0efbcbbfd1f663167d0c5cbd020dc551a7dfc3cb2af914e74",
+      "src/lib/supabase/repositories/ImageLibraryRepository.ts": "78953e0b7faa6e61d95b32fc97ea4d6932b47d23d419248258fb8ee9a4133907",
       "src/workers/cloudflare/GalxR2AssetAdapter.ts": "b870f5f0c5aa94fcb490547cc16e280f0966eaa03a204622e576bab4d0b3672c",
       "supabase/migrations/20260913025900_durable_image_requests.sql": "a2269ab60058c2581813ba539bde54e3a7b69579458a88a12d74235cd12e2965",
       "supabase/migrations/20260913071757_image_library_bounded_pages.sql": "dcbaf3db4aba01f6b3f3665344cff5a0987726b6b6977b4671d37f64dc8d47f4",
@@ -138,11 +138,11 @@
   },
   "access": {
     "reviewer": "Security/access maintainer",
-    "note": "Exempt /explore in preview policy and verify security boundaries",
+    "note": "User image library permissions audit and hardened WITH CHECK RLS policy",
     "reviewed_at": "2026-09-17",
     "review_by": "2026-09-24",
     "evidence": {
-      "docs/knowledge/audits/2026-09-17-public-explore-page-review.json": "dbc8f3a64928f8bfc5bcdd9c1ab4ba34607272dfd997b15e96ea6e7113122b9a"
+      "docs/knowledge/audits/2026-09-17-user-library-privacy-and-permissions-review.json": "31db07c9ef11a6e314e3908adcab9847e8526ef43f00df9d66d2b81943f2be04"
     },
     "files": {
       "docs/OAUTH_AND_TOKEN_LIFECYCLE_SPECIFICATION.md": "1e8004f6dc024322356e5494b099b7c38ed00e4a62e22434b020fd43c9470183",
@@ -276,7 +276,7 @@
       "src/lib/security/preview-policy.ts": "db756f8cf58c8a93ec3356caa32fc387411fd8ddfc16dcab9a2f7260aa4f0b76",
       "src/lib/security/private-image-diagnostics.ts": "b2f34531192d580a86ff2bfe9cc65df9586ec28abb5648e0fc5cace2aba40255",
       "src/lib/security/public-image-http.ts": "793b1a19ed4a704439544df062e6921f1f0e9862503a4e6dc38f01246e90584d",
-      "src/lib/security/public-image-record.ts": "777deaa9a0ce4a75aae539ae21a90b3ec8c1c11e19997f8664b8a35de91b1f9e",
+      "src/lib/security/public-image-record.ts": "2aefe48eaf3da1e0efbcbbfd1f663167d0c5cbd020dc551a7dfc3cb2af914e74",
       "src/lib/security/public-task-response.ts": "c8ea0b785d5ee0d3d5d8def768a7d2cff940c6d712e8bec98e21ad34d9e32649",
       "src/lib/security/same-origin.ts": "28b03863cac4d9b1ce840f96e4ecec94ffb7e9e4ac70c694707b3aff3dcd6d17",
       "src/lib/security/workspace-policy.ts": "39f699630702c9272ddecbab35f4f72a2ad75b38ab6c969969d08f6f10963ca4",
@@ -591,11 +591,11 @@
   },
   "database": {
     "reviewer": "Database operator",
-    "note": "Audited explore permissions, verified like idempotency with ROW_COUNT and community_creations_feed view",
+    "note": "Applied migration granting authenticated role table permissions and visibility batch RPC",
     "reviewed_at": "2026-09-17",
     "review_by": "2026-09-24",
     "evidence": {
-      "supabase/migrations/20260917060000_audit_explore_permissions_and_idempotent_likes.sql": "9485a4bfdaa14f72eb8510f2759e887b327a03a156af9aee14052c35c4495320"
+      "docs/knowledge/audits/2026-09-17-user-library-privacy-and-permissions-review.json": "31db07c9ef11a6e314e3908adcab9847e8526ef43f00df9d66d2b81943f2be04"
     },
     "files": {
       "deploy/relay-execution/supabase/migrations/20260915082628_relay_execution.sql": "fc61d7c30bdd57706ffb4212788741302760722e7285c25c9b4cb93d629b137e",
@@ -642,7 +642,7 @@
       "src/lib/supabase/repositories/EdgeGovernanceRepository.ts": "f5d18c1146fd39694b67c76f20415b7a96392e6e789f4795c09044f26d22d3fa",
       "src/lib/supabase/repositories/EmbeddingsRepository.ts": "c1f5cd1c8b623d0ebf1795e8723499cbc39e2797fffb4b9d6f162f6d74e53cb5",
       "src/lib/supabase/repositories/IdempotencyRepository.ts": "79035b74c460e62b181498d6fd60fa741b09fa65574c19aafaae8419b322ed3f",
-      "src/lib/supabase/repositories/ImageLibraryRepository.ts": "0ab87ab48cf9abc21cf80214818742b9d89c8ce168ddb5a4358e5397314323d7",
+      "src/lib/supabase/repositories/ImageLibraryRepository.ts": "78953e0b7faa6e61d95b32fc97ea4d6932b47d23d419248258fb8ee9a4133907",
       "src/lib/supabase/repositories/OAuthRepository.ts": "b9498af6147ef8230ddc32a918780ccdf1d2f29649fca79a2215b9efeca8036e",
       "src/lib/supabase/repositories/PreviewAdminRepository.ts": "40fb35d15e77ad17622dc9e14424a8939c727bd2ea3d45dbd071c5627e1963ac",
       "src/lib/supabase/repositories/PreviewReadSync.ts": "047a84574819537875bd41828adff7f0ac354200a5d2f9239d978375e3931db9",
@@ -664,7 +664,7 @@
       "src/lib/supabase/repositories/TelemetryRepository.ts": "1887a04aa51424e44d6ac9d499fc24248edd2aa9c64c559cf1f307773dd252e5",
       "src/lib/supabase/repositories/WalletRepository.ts": "14ac2f53fd2600e698efac4b9fa0150c4fbc14bc2ab2539922926ee0e9794565",
       "src/lib/supabase/repositories/WorkspaceRepository.ts": "b9f6d1d09610760b172c6d1981a06e6ab97d4f5a9a58139377ade89df56a4ed8",
-      "src/lib/supabase/types.ts": "9e1f7d74e0af0eac1ae3e7a3493e8a561fa9bd386680381a4e3505e6b25a1385",
+      "src/lib/supabase/types.ts": "54147d64a39effa0090b68121a3c5ca5db8552c42f12f44b7686beabc9ff4e1c",
       "supabase/migrations/20260822000001_galxai_schema_core.sql": "084520c8cb3ab4e057ec788ea90605bb43e1373a28230e40696271f6a8476f77",
       "supabase/migrations/20260822000002_galxai_schema_apex.sql": "62b4fdc606104700d14eb3b80a7a7063a5152db9ed1afefe63a72315d586f539",
       "supabase/migrations/20260822000003_galxai_user_sessions_auth.sql": "ab2ec033c41bb147aa476acceb4d5dca3991f83f017a7cc41fddd01c6b8e75c4",
@@ -784,6 +784,7 @@
       "supabase/migrations/20260917040000_public_image_stream_schema_and_rls.sql": "4c0e0048ab49ab11d565eabaedf802b9c90c5c63d2b0899f6b2a4718ec41fd2a",
       "supabase/migrations/20260917050000_anti_locking_image_stats_and_interactions.sql": "1954a046371829f8fce4049a404e2e74c9ced899232bbb9a3279dff89028c79c",
       "supabase/migrations/20260917060000_audit_explore_permissions_and_idempotent_likes.sql": "9485a4bfdaa14f72eb8510f2759e887b327a03a156af9aee14052c35c4495320",
+      "supabase/migrations/20260917070000_user_image_library_permissions_and_visibility.sql": "c133349f449df8bb43d8f8f5f389c70119de668cdd88fe139ddb2a9320e5400e",
       "supabase/rollbacks/20260822000001_galxai_schema_core.down.sql": "d1267f3f89a7a0af12716a70167f615be1e904bf933e348a1173305cd5f2fe83",
       "supabase/rollbacks/20260822000002_galxai_schema_apex.down.sql": "df36655d564c6d6557d4461294ed2a502ad57adf799037c00a68481b809ffed9",
       "supabase/rollbacks/20260822000003_galxai_user_sessions_auth.down.sql": "4f3012db038b48387290b8d64638fe7aded774d8bdde88cfe683f01f1988adbc",
@@ -954,13 +955,12 @@
     }
   },
   "broccolidb": {
-    "reviewer": "Codex / billing modernization review",
-    "note": "Two existing governor recovery URLs now target Credits; algorithm, quota state and persistence unchanged. Full broader BroccoliDB suite not rerun. Search intent mapping has focused regression tests; no latency or model claim certified.",
-    "reviewed_at": "2026-09-16",
-    "review_by": "2026-09-23",
+    "reviewer": "BroccoliDB maintainer",
+    "note": "BroccoliImageLibraryBuffer atomic batch visibility and query filter support",
+    "reviewed_at": "2026-09-17",
+    "review_by": "2026-09-24",
     "evidence": {
-      "post-mortem/releases/2026-09-16-billing-modernization-semantic-review.json": "5f5dea07a824a7b0de64ff4ee8ce1276efcc91861ac8428aa00f429079684e6d",
-      "post-mortem/releases/2026-09-16-billing-modernization.json": "acde60424cd8fade9fb72648de648c2ef703cc5e56502a9af859b25868d4ca92"
+      "docs/knowledge/audits/2026-09-17-user-library-privacy-and-permissions-review.json": "31db07c9ef11a6e314e3908adcab9847e8526ef43f00df9d66d2b81943f2be04"
     },
     "files": {
       "docs/maintainers/COMPACTOR_FUZZING_AND_QA_MATRIX.md": "72325ecd8087214538910b8ee29bc739c20146b7491eb0947ed417b39229a87a",
@@ -1127,7 +1127,7 @@
       "src/core/broccolidb/BroccoliHyperLogLogCardinalityBuffer.ts": "87a7831483345ac00bcee122d43241ae0c74bf59f6014c64ea91c48ed4fea3f6",
       "src/core/broccolidb/BroccoliHypergraphIncidentEdgeFoldBuffer.ts": "7b26b460ed97d288156863cae64c2c791572c5d7527d392840dee6169e3db8b7",
       "src/core/broccolidb/BroccoliIbltInvertibleBloomBuffer.ts": "63f36cdbb39535e2d8b63db2df85e9755ed0d59ef1a6681ef30753bd6a747e8b",
-      "src/core/broccolidb/BroccoliImageLibraryBuffer.ts": "840d2e9fd075d314e196c056564b911b7a1d2b63ff0569f5ee16fb7604d81915",
+      "src/core/broccolidb/BroccoliImageLibraryBuffer.ts": "328e1ee0411c1da2408527010836ef0a0fc4f3b1c10370c2d2ab5b700036e7d2",
       "src/core/broccolidb/BroccoliImmigrationPetitionCompactor.ts": "20d7bf91007642101582bbb87a588224e19a682b9e29b2629625c68914876f6a",
       "src/core/broccolidb/BroccoliIncidentAnomalySlidingWindowBuffer.ts": "d7813e8b990cac56fb812552e30213bca23e8e6f22f531c5f36cd407c4b4f6d2",
       "src/core/broccolidb/BroccoliIndustrialPlcCompactor.ts": "7cfd21a5405c541a9993c665dac76518ba8d80a239a1bb5993b5a5f52b779145",

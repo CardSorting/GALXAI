@@ -82,6 +82,32 @@ export class ImageLibraryRepository {
   }
 
   /**
+   * Sets the visibility/privacy status of an image asset (public, unlisted, private).
+   */
+  public async setVisibility(
+    userId: string,
+    assetId: string,
+    visibility: 'public' | 'unlisted' | 'private'
+  ): Promise<ImageGenerationRecord | null> {
+    await this.buffer.flushAssetsDurably(userId, [assetId]);
+    const changed = await this.buffer.batchSetVisibility(userId, [assetId], visibility);
+    if (changed !== 1) return null;
+    await this.buffer.flushAssetsDurably(userId, [assetId]);
+    return this.buffer.getAsset(userId, assetId);
+  }
+
+  /**
+   * Batch sets visibility state across multiple assets in one set-based database operation.
+   */
+  public async batchSetVisibility(
+    userId: string,
+    assetIds: string[],
+    visibility: 'public' | 'unlisted' | 'private'
+  ): Promise<number> {
+    return this.buffer.batchSetVisibility(userId, assetIds, visibility);
+  }
+
+  /**
    * Deletes a single image asset from L1 buffer, PostgreSQL, and Cloudflare R2.
    */
   public async deleteAsset(userId: string, assetId: string): Promise<boolean> {

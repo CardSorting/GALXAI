@@ -1279,6 +1279,8 @@ export interface ImageGenerationRecord {
   readonly latencyMs?: number;
   readonly costUsd?: number;
   readonly isFavorite: boolean;
+  readonly isPublic?: boolean;
+  readonly visibility?: 'public' | 'unlisted' | 'private';
   readonly tags: string[];
   readonly metadata?: Record<string, unknown>;
   readonly createdAt: string;
@@ -1298,6 +1300,7 @@ export interface ImageLibraryFilterOptions {
   readonly sessionId?: string;
   readonly aspectRatio?: string;
   readonly isFavorite?: boolean;
+  readonly visibility?: 'public' | 'unlisted' | 'private' | 'all';
   readonly search?: string;
   readonly sort?: 'newest' | 'oldest';
   readonly limit?: number;

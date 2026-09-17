@@ -3613,8 +3613,9 @@ export interface Database {
         Args: {
           p_user_id: string;
           p_asset_ids: string[];
-          p_action: 'favorite' | 'delete';
+          p_action: 'favorite' | 'delete' | 'visibility';
           p_is_favorite?: boolean;
+          p_visibility?: string;
         };
         Returns: Json;
       };
@@ -3631,6 +3632,7 @@ export interface Database {
           p_session_id?: string;
           p_aspect_ratio?: string;
           p_is_favorite?: boolean;
+          p_visibility?: string;
           p_search?: string;
           p_sort?: 'newest' | 'oldest';
         };

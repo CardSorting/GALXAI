@@ -1,0 +1,34 @@
+{
+  "reviewed_at": "2026-09-17T09:15:00.000000+00:00",
+  "reviewer": "Product, Database and Security maintainer",
+  "scope": "User image library permissions audit, atomic batch visibility mutations, owner-scoped RLS hardening, and famous app gallery privacy controls",
+  "domains": {
+    "images": "Public image record and filter options extended with visibility ('public' | 'unlisted' | 'private' | 'all') and isPublic boolean. PATCH /api/images/library/[assetId] and POST /api/images/library/batch updated to support visibility mutations alongside favorite and delete.",
+    "access": "PostgreSQL permissions audited and granted: SELECT, UPDATE, DELETE ON public.user_image_library TO authenticated. Policy policy_user_image_library_update_owner hardened with explicit WITH CHECK (((auth.uid())::text = user_id) OR (auth.role() = 'service_role'::text)).",
+    "database": "Migration 20260917070000_user_image_library_permissions_and_visibility.sql applied. Created index idx_user_image_library_user_visibility. Upgraded fn_batch_mutate_image_library to support p_action = 'visibility'.",
+    "broccolidb": "BroccoliImageLibraryBuffer and ImageLibraryRepository updated with setVisibility and batchSetVisibility methods, atomic buffer cache invalidation, and visibility query filtering."
+  },
+  "sources_inspected": [
+    "src/core/contracts/GalxContracts.ts",
+    "src/lib/security/public-image-record.ts",
+    "src/lib/images/library-cursor.ts",
+    "src/core/broccolidb/BroccoliImageLibraryBuffer.ts",
+    "src/lib/supabase/repositories/ImageLibraryRepository.ts",
+    "src/app/api/images/library/[assetId]/route.ts",
+    "src/app/api/images/library/batch/route.ts",
+    "src/components/library/VisualLibraryDashboard.tsx",
+    "supabase/migrations/20260917070000_user_image_library_permissions_and_visibility.sql"
+  ],
+  "complete_guides_inspected": [
+    "docs/maintainers/image-library-scale.md",
+    "docs/maintainers/image-public-boundary.md",
+    "docs/SUPABASE_PARANOID_ARCHITECTURE_SPEC.md",
+    "docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md"
+  ],
+  "checks_run": [
+    "npx tsx --test scripts/test-image-library-http.ts",
+    "npm run test:image:security",
+    "npx tsx --test scripts/test-developer-preview.ts",
+    "npx tsc --noEmit"
+  ]
+}
