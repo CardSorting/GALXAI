@@ -26,13 +26,12 @@ const SQL = `SELECT p.id,p.account_class,p.workloads,p.registration_enabled,
   (SELECT count(*)::integer FROM private.galx_relay_installations i WHERE i.pool_id=p.id) AS installations,
   (SELECT count(*)::integer FROM private.galx_relay_account_assignments a WHERE a.pool_id=p.id) AS assignments,
   (SELECT count(*)::integer FROM private.galx_relay_registration_operations o WHERE o.pool_id=p.id) AS saved_registrations
-  FROM private.galx_relay_pools p ORDER BY p.id`;
+  FROM private.galx_relay_pools p WHERE p.id='premium'`;
 export function decodeRelayPoolInventory(rows: Record<string, unknown>[]): RelayPoolInventory[] {
-  if (rows.length !== 2 || new Set(rows.map(row => row.id)).size !== 2) throw Error('Central relay foundation is incomplete.');
+  if (rows.length !== 1 || rows[0]?.id !== 'premium') throw Error('Central relay foundation is incomplete.');
   return rows.map(row => {
-    if (row.id !== 'premium' && row.id !== 'standard') throw Error('Invalid central relay inventory.');
-    const expected = row.id === 'premium' ? ['text', 'sites', 'images'] : ['text'];
-    if (row.account_class !== (row.id === 'premium' ? 'paid' : 'free') || JSON.stringify(row.workloads) !== JSON.stringify(expected)
+    const expected = ['text', 'sites', 'images'];
+    if (row.id !== 'premium' || row.account_class !== 'paid' || JSON.stringify(row.workloads) !== JSON.stringify(expected)
       || typeof row.registration_enabled !== 'boolean' || ![row.installations,row.assignments,row.saved_registrations].every(n => Number.isSafeInteger(n) && Number(n) >= 0)) {
       throw Error('Invalid central relay inventory.');
     }

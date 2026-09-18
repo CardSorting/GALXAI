@@ -116,13 +116,12 @@ export const FAQS = [
   { id: 'revisions', group: 'plans-and-billing', question: 'Are generations and remixes unlimited with Pro?', answer: 'Yes. GALX Pro includes unlimited generations and 1-click prompt remixes under fair use. Peak traffic may experience queue pacing to ensure equitable throughput.', guide: '/pricing/fair-use' },
   { id: 'plan-price', group: 'plans-and-billing', question: 'How much does GALX Pro cost?', answer: `GALX Pro is $${PRO_PLAN.monthlyPriceUsd} USD per month for one account. It includes priority GPU queue access, high-resolution generation across all 5 aspect ratios, unlimited remixes, and stream discovery. The plan renews monthly.`, guide: '/pricing/galx-pro' },
   { id: 'cancellation', group: 'plans-and-billing', question: 'Can I cancel my subscription?', answer: 'Yes. You can cancel anytime directly from your account billing page. Pro access continues through the end of your prepaid period.', guide: '/pricing/billing-and-cancellation' },
-  { id: 'sites-sunset', group: 'plans-and-billing', question: 'What happened to GALX Sites?', answer: 'Sites was retired in September 2026. The technical setup and quota overhead of maintaining conversational websites became unsustainable. GALX is now fully dedicated to high-performance visual generation with GALX Images.', guide: '/knowledge-base/images-and-developer-access' },
   { id: 'aspect-ratios', group: 'publishing-and-access', question: 'Which aspect ratios are supported?', answer: 'We support 5 native diffusion aspect ratios: 1:1 Square, 16:9 Landscape, 9:16 Portrait (Stories/Reels), 4:3 Classic, and 3:4 Editorial.', guide: '/knowledge-base/getting-started' },
   { id: 'remix-prompt', group: 'publishing-and-access', question: 'How does prompt remixing work?', answer: 'Hover over any image card in the community stream or your library and click Remix. The prompt, model, and aspect ratio will automatically populate in your studio composer, ready for tweaking.', guide: '/knowledge-base/revising-your-site' },
   { id: 'developer-access', group: 'publishing-and-access', question: 'Does GALX Pro include developer API access?', answer: 'No. Developer API access is available instantly through the $10 Developer Tier (pay-as-you-go for images and frontier OpenAI models) or by applying to the free developer preview cohort. Pro studio subscriptions are separate.', guide: '/knowledge-base/images-and-developer-access' },
 ];
 
-export const HOME_FAQS = ['explore', 'what-can-i-make', 'public-beta', 'aspect-ratios', 'remix-prompt', 'sites-sunset']
+export const HOME_FAQS = ['explore', 'what-can-i-make', 'public-beta', 'aspect-ratios', 'remix-prompt']
   .map(id => FAQS.find(faq => faq.id === id)!);
 
 export function getGuide(path: string) { return GUIDES.find(guide => guide.path === path); }

@@ -2163,6 +2163,12 @@
       "title": "Standard relay rotation"
     },
     {
+      "path": "docs/reference/standard-relay-sunset.md",
+      "scope": "current-guide",
+      "category": "docs",
+      "title": "GALX Relay Standard sunset"
+    },
+    {
       "path": "docs/relay-security.md",
       "scope": "current-guide",
       "category": "docs",

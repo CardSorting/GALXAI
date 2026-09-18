@@ -135,11 +135,12 @@ test('Premium image alias needs a grant and performs no background image probe',
 test('application selection fixes Sites/images to Premium and never borrows after failure',async()=>{
   const {isolatedRelay,isolatedChat}=await import('../src/core/router/adapters/IsolatedRelayTransport.js');
   const keys=['GALX_PREMIUM_RELAY_URL','GALX_STANDARD_RELAY_URL','GALX_PREMIUM_RELAY_KEY','GALX_STANDARD_RELAY_KEY','GALX_TEXT_RELAY_POOL'];const old=keys.map(k=>process.env[k]);const fetcher=globalThis.fetch;const calls:string[]=[];
-  try{Object.assign(process.env,{GALX_PREMIUM_RELAY_URL:'https://premium.example',GALX_STANDARD_RELAY_URL:'https://standard.example',GALX_PREMIUM_RELAY_KEY:key('premium'),GALX_STANDARD_RELAY_KEY:key('standard'),GALX_TEXT_RELAY_POOL:'standard'});
-    assert.equal(isolatedRelay('images').url,'https://premium.example');assert.equal(isolatedRelay('sites').url,'https://premium.example');assert.equal(isolatedRelay('text').url,'https://standard.example');
+  try{Object.assign(process.env,{GALX_PREMIUM_RELAY_URL:'https://premium.example',GALX_PREMIUM_RELAY_KEY:key('premium')});
+    assert.equal(isolatedRelay('images').url,'https://premium.example');assert.equal(isolatedRelay('sites').url,'https://premium.example');assert.equal(isolatedRelay('text').url,'https://premium.example');
     globalThis.fetch=(async(url:any,init:any)=>{calls.push(new URL(url).origin);assert.equal(init.headers['x-galx-tenant'],hash('owner'));return Response.json({error:{code:'busy'}},{status:503});}) as typeof fetch;
-    await assert.rejects(isolatedChat({model:'fixture',messages:[{role:'user',content:'test'}]},'owner','operation',()=>{}));assert.deepEqual(calls,['https://standard.example']);
-    process.env.GALX_STANDARD_RELAY_KEY=process.env.GALX_PREMIUM_RELAY_KEY;assert.throws(()=>isolatedRelay('text'));
+    await assert.rejects(isolatedChat({model:'fixture',messages:[{role:'user',content:'test'}]},'owner','operation',()=>{}));assert.deepEqual(calls,['https://premium.example']);
+    process.env.GALX_TEXT_RELAY_POOL='standard';assert.throws(()=>isolatedRelay('text'));delete process.env.GALX_TEXT_RELAY_POOL;
+    process.env.GALX_STANDARD_RELAY_KEY=key('retired');assert.throws(()=>isolatedRelay('text'));
   }finally{globalThis.fetch=fetcher;keys.forEach((k,i)=>{if(old[i]===undefined)delete process.env[k];else process.env[k]=old[i];});}
 });
 
@@ -185,8 +186,8 @@ test('application router delegates without reading account credentials or acquir
  const names=['GALX_ISOLATED_RELAYS_ENABLED','GALX_PREMIUM_RELAY_URL','GALX_STANDARD_RELAY_URL','GALX_PREMIUM_RELAY_KEY','GALX_STANDARD_RELAY_KEY','GALX_TEXT_RELAY_POOL'];const old=names.map(k=>process.env[k]),original=globalThis.fetch;
  const forbidden=()=>{throw Error('Legacy authority was invoked');};
  try{
-  Object.assign(process.env,{GALX_ISOLATED_RELAYS_ENABLED:'1',GALX_PREMIUM_RELAY_URL:'https://premium.example',GALX_STANDARD_RELAY_URL:'https://standard.example',GALX_PREMIUM_RELAY_KEY:key('p'),GALX_STANDARD_RELAY_KEY:key('s'),GALX_TEXT_RELAY_POOL:'standard'});
-  let dispatches=0;globalThis.fetch=(async(url:any,init:any)=>{assert.equal(new URL(url).origin,'https://standard.example');assert.equal(init.headers['x-galx-tenant'],hash('owner'));if(init.method==='POST'){dispatches++;return Response.json({id:'job_fixture',streamUrl:'/v1/jobs/job_fixture/stream'},{status:202});}return new Response('data: '+JSON.stringify({choices:[{delta:{content:'hello'},finish_reason:'stop'}]})+'\n\ndata: [DONE]\n\n',{headers:{'Content-Type':'text/event-stream'}});}) as typeof fetch;
+  Object.assign(process.env,{GALX_ISOLATED_RELAYS_ENABLED:'1',GALX_PREMIUM_RELAY_URL:'https://premium.example',GALX_PREMIUM_RELAY_KEY:key('p')});
+  let dispatches=0;globalThis.fetch=(async(url:any,init:any)=>{assert.equal(new URL(url).origin,'https://premium.example');assert.equal(init.headers['x-galx-tenant'],hash('owner'));if(init.method==='POST'){dispatches++;return Response.json({id:'job_fixture',streamUrl:'/v1/jobs/job_fixture/stream'},{status:202});}return new Response('data: '+JSON.stringify({choices:[{delta:{content:'hello'},finish_reason:'stop'}]})+'\n\ndata: [DONE]\n\n',{headers:{'Content-Type':'text/event-stream'}});}) as typeof fetch;
   const router=new GalxModelRouter({ensureFreshFromAuthority:forbidden} as any,{} as any,{} as any,{acquireLeaseAuthoritatively:forbidden} as any,{} as any,{resolvePrivacyPolicy:()=>({profile:'standard',dataResidency:'global'})} as any,{} as any);
   const result=await router.routeChatCompletion({request:{model:'gpt-5.6-luna',messages:[{role:'user',content:'hello'}]},userId:'owner',requestId:'request-one'});assert.equal(result.statusCode,200);assert.equal(JSON.parse(result.body as string).choices[0].message.content,'hello');assert.equal(dispatches,1);
  }finally{globalThis.fetch=original;names.forEach((k,i)=>{if(old[i]===undefined)delete process.env[k];else process.env[k]=old[i];});}

@@ -15,7 +15,7 @@ args = parser.parse_args()
 build.mkdir(parents=True, exist_ok=True)
 binary = build / 'GALXMonitors'
 subprocess.run(['/usr/bin/swiftc', '-O', '-framework', 'AppKit', '-module-cache-path', str(build / 'module-cache'), str(root / 'scripts/macos/RelayMonitors.swift'), '-o', str(binary)], check=True)
-for name, pool in [('GALX Monitors', None), ('GALX Premium', 'premium'), ('GALX Standard', 'standard')]:
+for name, pool in [('GALX Monitors', None), ('GALX Premium', 'premium')]:
     app = build / (name + '.app')
     contents = app / 'Contents'
     (contents / 'MacOS').mkdir(parents=True, exist_ok=True)
@@ -60,4 +60,4 @@ if args.install:
         desktop.symlink_to(destination)
     subprocess.run(['/usr/bin/open', str(destination)], check=True)
 else:
-    print('Three signed local application bundles built. Use --install to install them.')
+    print('Two signed local application bundles built. Use --install to install them.')

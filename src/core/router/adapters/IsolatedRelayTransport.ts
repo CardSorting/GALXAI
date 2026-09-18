@@ -14,20 +14,18 @@ export function receiptRelay(origin:string,current:{url:string;key:string},tenan
   return {url,key,tenant:undefined};
 }
 const digest=(value:string)=>createHash('sha256').update(value).digest('hex');
-/** Server deployment policy chooses one pool. There is no peer or legacy fallback. */
+/** Premium is the only active isolated relay. The retired Standard pool is never selected. */
 export function isolatedRelay(workload:'text'|'sites'|'images') {
-  const selected=workload==='text'?(process.env.GALX_TEXT_RELAY_POOL||'standard'):'premium';
-  if(!['premium','standard'].includes(selected))throw new RelayDispatchError('invalid_configuration');
-  const pools=workload==='images'&&!isolatedRelaysEnabled()&&isolatedImagesEnabled()?['PREMIUM']:['PREMIUM','STANDARD'];
-  const endpoints=pools.map(pool=>{
+  if (process.env.GALX_TEXT_RELAY_POOL === 'standard' || process.env.GALX_STANDARD_RELAY_URL || process.env.GALX_STANDARD_RELAY_KEY)
+    throw new RelayDispatchError('invalid_configuration');
+  const endpoints=['PREMIUM'].map(pool=>{
     try{
       const url=new URL(process.env[`GALX_${pool}_RELAY_URL`]||'');const key=process.env[`GALX_${pool}_RELAY_KEY`]||'';
       if(url.username||url.password||url.pathname!=='/'||url.search||url.hash||!(url.protocol==='https:'||url.protocol==='http:'&&['127.0.0.1','[::1]'].includes(url.hostname))||!/^[A-Za-z0-9_-]{32,256}$/.test(key))throw Error();
       return {url:url.origin,key};
     }catch{throw new RelayDispatchError('invalid_configuration');}
   });
-  if(endpoints[1]&&(endpoints[0].url===endpoints[1].url||endpoints[0].key===endpoints[1].key))throw new RelayDispatchError('invalid_configuration');
-  return endpoints[selected==='premium'?0:1];
+  return endpoints[0];
 }
 export async function isolatedChat(payload:Record<string,any>,tenant:string,requestKey:string,onUsage:(usage:any)=>void) {
   const result=await executeRelayChat({...isolatedRelay('text'),tenant,idempotencyKey:digest(requestKey),payload,ttftTimeoutMs:45000,idleTimeoutMs:45000,wallTimeoutMs:300000});

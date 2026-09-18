@@ -2,7 +2,7 @@ variable "TAG" {
   default = "candidate-20260915"
 }
 group "default" {
-  targets = ["central", "premium-runtime", "standard-runtime", "premium-monitor", "standard-monitor"]
+  targets = ["central", "premium-runtime", "premium-monitor"]
 }
 target "common" {
   context = "."
@@ -18,18 +18,8 @@ target "premium-runtime" {
   target = "premium-runtime"
   tags = ["galxai-relay-premium:${TAG}"]
 }
-target "standard-runtime" {
-  inherits = ["common"]
-  target = "standard-runtime"
-  tags = ["galxai-relay-standard:${TAG}"]
-}
 target "premium-monitor" {
   inherits = ["common"]
   target = "premium-monitor"
   tags = ["galxai-monitor-premium:${TAG}"]
-}
-target "standard-monitor" {
-  inherits = ["common"]
-  target = "standard-monitor"
-  tags = ["galxai-monitor-standard:${TAG}"]
 }

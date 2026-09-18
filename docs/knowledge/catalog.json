@@ -4025,6 +4025,16 @@
       "decision": null
     },
     {
+      "path": "docs/reference/standard-relay-sunset.md",
+      "title": "GALX Relay Standard sunset",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
       "path": "docs/relay-security.md",
       "title": "Relay security reference",
       "scope": "current-guide",

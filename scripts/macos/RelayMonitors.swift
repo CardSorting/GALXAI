@@ -6,7 +6,7 @@ final class MonitorApp: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private let menu = NSMenu()
     private let worker = DispatchQueue(label: "ai.galx.monitors.launch")
     private var pending = Set<String>()
-    private var states = ["premium": "Checking…", "standard": "Checking…"]
+    private var states = ["premium": "Checking…"]
     private var opening: String?
     private var window: NSWindow?
     private var progressText: NSTextField?
@@ -14,11 +14,11 @@ final class MonitorApp: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var trackingMenu = false
     private var shortcut: String? { Bundle.main.object(forInfoDictionaryKey: "GALXPool") as? String }
     private var root: String { Bundle.main.object(forInfoDictionaryKey: "GALXWorkspace") as? String ?? "" }
-    private func name(_ pool: String) -> String { pool == "premium" ? "Premium" : "Standard" }
+    private func name(_ pool: String) -> String { pool == "premium" ? "Premium" : "Relay" }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         if let pool = shortcut {
-            guard ["premium", "standard"].contains(pool), let url = URL(string: "galx-monitor://open/\(pool)") else { NSApp.terminate(nil); return }
+            guard pool == "premium", let url = URL(string: "galx-monitor://open/\(pool)") else { NSApp.terminate(nil); return }
             NSWorkspace.shared.open(url)
             NSApp.terminate(nil)
             return
@@ -27,7 +27,7 @@ final class MonitorApp: NSObject, NSApplicationDelegate, NSMenuDelegate {
         item.button?.image = NSImage(systemSymbolName: "rectangle.stack", accessibilityDescription: "GALX Monitors")
         item.button?.image?.isTemplate = true
         item.button?.title = " GALX"
-        item.button?.toolTip = "Open Premium or Standard"
+        item.button?.toolTip = "Open Premium"
         menu.delegate = self
         menu.autoenablesItems = false
         item.menu = menu
@@ -42,7 +42,7 @@ final class MonitorApp: NSObject, NSApplicationDelegate, NSMenuDelegate {
             // Deep links accept exactly two destinations, never URLs, commands or credentials.
             guard url.scheme == "galx-monitor", url.host == "open", url.user == nil, url.password == nil,
                   url.port == nil, url.query == nil, url.fragment == nil,
-                  ["/premium", "/standard"].contains(url.path) else { continue }
+                  url.path == "/premium" else { continue }
             launch(String(url.path.dropFirst()))
         }
     }
@@ -62,7 +62,7 @@ final class MonitorApp: NSObject, NSApplicationDelegate, NSMenuDelegate {
         guard item != nil else { return }
         menu.removeAllItems()
         add("GALX Monitors", action: nil)
-        for (pool, key) in [("premium", "1"), ("standard", "2")] {
+        for (pool, key) in [("premium", "1")] {
             menu.addItem(.separator())
             let busy = pending.contains(pool)
             let row = add(busy ? "Opening \(name(pool))…" : "Open \(name(pool))", action: #selector(openMonitor(_:)), key: key, pool: pool)
@@ -79,7 +79,7 @@ final class MonitorApp: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
     @objc private func openMonitor(_ sender: NSMenuItem) { if let pool = sender.representedObject as? String { launch(pool) } }
     private func launch(_ pool: String) {
-        guard ["premium", "standard"].contains(pool), !pending.contains(pool) else { return }
+        guard pool == "premium", !pending.contains(pool) else { return }
         pending.insert(pool); rebuildMenu()
         worker.async {
             DispatchQueue.main.async { self.opening = pool; self.showProgress(pool) }
@@ -124,7 +124,7 @@ final class MonitorApp: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
     }
     private func refresh() {
-        for (pool, port) in [("premium", 13311), ("standard", 13312)] {
+        for (pool, port) in [("premium", 13311)] {
             var request = URLRequest(url: URL(string: "http://127.0.0.1:\(port)/health/live")!); request.timeoutInterval = 2
             URLSession.shared.dataTask(with: request) { data, response, error in
                 let ok = error == nil && (response as? HTTPURLResponse)?.statusCode == 200 && (try? JSONSerialization.jsonObject(with: data ?? Data()) as? [String: Bool])?["ok"] == true
@@ -146,8 +146,8 @@ final class MonitorApp: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
     @objc private func showShortcuts() { NSWorkspace.shared.selectFile(Bundle.main.bundlePath, inFileViewerRootedAtPath: NSHomeDirectory() + "/Applications") }
     @objc private func help() {
-        let alert = NSAlert(); alert.messageText = "Open a monitor in one step"
-        alert.informativeText = "Choose Premium or Standard in the GALX menu, or search for GALX Premium or GALX Standard in Spotlight. You can keep either app shortcut in the Dock.\n\nStopped services start when opened. Sessions reconnect automatically. Premium and Standard remain separate.\n\nQuitting this menu app leaves your services running."
+        let alert = NSAlert(); alert.messageText = "Open Premium in one step"
+        alert.informativeText = "Choose Premium in the GALX menu or search for GALX Premium in Spotlight. Stopped services start when opened.\n\nQuitting this menu app leaves your services running."
         alert.addButton(withTitle: "Done"); alert.runModal()
     }
     @objc private func quit() { NSApp.terminate(nil) }
@@ -159,7 +159,7 @@ if CommandLine.arguments.count == 4 && CommandLine.arguments[1] == "--icon" {
     canvas.lockFocus()
     NSColor(calibratedRed: 7/255, green: 8/255, blue: 13/255, alpha: 1).setFill()
     NSBezierPath(roundedRect: NSRect(x: 60, y: 60, width: 904, height: 904), xRadius: 190, yRadius: 190).fill()
-    let symbol = NSImage(systemSymbolName: pool == "premium" ? "p.square" : pool == "standard" ? "s.square" : "rectangle.stack", accessibilityDescription: nil)!.withSymbolConfiguration(.init(pointSize: 420, weight: .light))!
+    let symbol = NSImage(systemSymbolName: pool == "premium" ? "p.square" : "rectangle.stack", accessibilityDescription: nil)!.withSymbolConfiguration(.init(pointSize: 420, weight: .light))!
     let tinted = NSImage(size: symbol.size); tinted.lockFocus(); symbol.draw(at: .zero, from: .zero, operation: .sourceOver, fraction: 1)
     NSColor(calibratedWhite: 0.94, alpha: 1).setFill(); NSRect(origin: .zero, size: symbol.size).fill(using: .sourceAtop); tinted.unlockFocus()
     let scale = min(560 / tinted.size.width, 560 / tinted.size.height)

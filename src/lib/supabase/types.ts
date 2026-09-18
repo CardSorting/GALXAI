@@ -13,7 +13,8 @@ export type Json =
 
 export type GalxProviderType = 'openai';
 export type GalxAuthType = 'api_key' | 'oauth';
-export type GalxRelayPoolId = 'premium' | 'standard';
+/** Standard is retired; Premium is the only active relay pool. */
+export type GalxRelayPoolId = 'premium';
 // Private relay protocol DTOs; no browser Data API grants or public-schema table additions.
 export type RelayRegistrationManagementCommand = 'rename' | 'remove' | 'restore';
 export type RelayAccountManagementCommand = 'enabled' | 'paused' | 'revoked' | 'rename' | 'remove';
