@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { constructMetadata } from '@/lib/seo/metadata';
 import { PublicImageMasonryStream } from '@/components/images/PublicImageMasonryStream';
-import { Sparkles, Compass, ArrowRight } from 'lucide-react';
+import { Sparkles, ArrowRight } from 'lucide-react';
 import styles from './explore.module.css';
 
 export const metadata: Metadata = constructMetadata({
@@ -21,7 +21,34 @@ export const metadata: Metadata = constructMetadata({
   canonicalPath: '/explore',
 });
 
-export default function ExplorePage() {
+export default async function ExplorePage(props: {
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  const searchParams = props.searchParams ? await props.searchParams : {};
+  const q = typeof searchParams.q === 'string' ? searchParams.q : undefined;
+  const image =
+    typeof searchParams.image === 'string'
+      ? searchParams.image
+      : typeof searchParams.image_id === 'string'
+        ? searchParams.image_id
+        : typeof searchParams.id === 'string'
+          ? searchParams.id
+          : undefined;
+  const ratio =
+    typeof searchParams.ratio === 'string'
+      ? searchParams.ratio
+      : typeof searchParams.aspect_ratio === 'string'
+        ? searchParams.aspect_ratio
+        : undefined;
+  const tag =
+    typeof searchParams.tag === 'string'
+      ? searchParams.tag
+      : typeof searchParams.style === 'string'
+        ? searchParams.style
+        : undefined;
+  const sort =
+    searchParams.sort === 'recent' || searchParams.sort === 'trending' ? searchParams.sort : undefined;
+
   return (
     <main className={styles.explorePage}>
       <div className={styles.ambientGlow} aria-hidden="true" />
@@ -51,7 +78,14 @@ export default function ExplorePage() {
       </header>
 
       <section className={styles.streamWrap} aria-label="Community image gallery stream">
-        <PublicImageMasonryStream showToolbar={true} />
+        <PublicImageMasonryStream
+          showToolbar={true}
+          initialImageId={image}
+          externalQuery={q}
+          initialRatio={ratio}
+          initialStyle={tag}
+          initialSort={sort}
+        />
       </section>
     </main>
   );

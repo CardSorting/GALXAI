@@ -201,12 +201,18 @@ export async function GET(req: NextRequest) {
   const q = searchParams.get('q')?.trim();
   const sort = searchParams.get('sort') || 'recent';
   const tag = searchParams.get('tag')?.toLowerCase().trim();
+  const requestedId = searchParams.get('image_id') || searchParams.get('id') || searchParams.get('image');
 
   let items: PublicFeedItem[] = [];
   let nextCursor: string | null = null;
 
   try {
-    const conditions: string[] = ['1=1'];
+    const conditions: string[] = [
+      '1=1',
+      "user_id NOT LIKE 'usr_%'",
+      "user_id NOT LIKE 'test_%'",
+      "id NOT LIKE 'img_test_%'"
+    ];
     const params: any[] = [];
     let paramIndex = 1;
 
@@ -234,10 +240,20 @@ export async function GET(req: NextRequest) {
     if (cursor) {
       try {
         const decoded = Buffer.from(cursor, 'base64').toString('utf8');
-        const [cursorTime, cursorId] = decoded.split(',');
-        if (cursorTime && cursorId && !isNaN(Date.parse(cursorTime))) {
-          conditions.push(`(created_at, id) < ($${paramIndex++}::timestamptz, $${paramIndex++})`);
-          params.push(cursorTime, cursorId);
+        const parts = decoded.split(',');
+        if (sort === 'trending' && parts.length === 3) {
+          const [likesStr, cursorTime, cursorId] = parts;
+          const likes = parseInt(likesStr, 10);
+          if (!isNaN(likes) && cursorTime && cursorId && !isNaN(Date.parse(cursorTime))) {
+            conditions.push(`(likes_count, created_at, id) < ($${paramIndex++}::bigint, $${paramIndex++}::timestamptz, $${paramIndex++})`);
+            params.push(likes, cursorTime, cursorId);
+          }
+        } else {
+          const [cursorTime, cursorId] = parts.length === 3 ? [parts[1], parts[2]] : [parts[0], parts[1]];
+          if (cursorTime && cursorId && !isNaN(Date.parse(cursorTime))) {
+            conditions.push(`(created_at, id) < ($${paramIndex++}::timestamptz, $${paramIndex++})`);
+            params.push(cursorTime, cursorId);
+          }
         }
       } catch {
         // Ignore malformed cursor
@@ -277,7 +293,12 @@ export async function GET(req: NextRequest) {
 
     if (rows.length === limit) {
       const last = rows[rows.length - 1];
-      nextCursor = Buffer.from(`${new Date(last.created_at).toISOString()},${last.id}`).toString('base64');
+      if (sort === 'trending') {
+        const likes = Number(last.likes_count || 0);
+        nextCursor = Buffer.from(`${likes},${new Date(last.created_at).toISOString()},${last.id}`).toString('base64');
+      } else {
+        nextCursor = Buffer.from(`${new Date(last.created_at).toISOString()},${last.id}`).toString('base64');
+      }
     }
 
     items = rows.map((r: any) => {
@@ -337,6 +358,59 @@ export async function GET(req: NextRequest) {
       items = [...items, ...additionalShowcase].sort((a, b) => (b.likes_count || 0) - (a.likes_count || 0));
     } else {
       items = [...items, ...additionalShowcase];
+    }
+  }
+
+  // If a specific creation ID was requested, ensure it is prioritized at index 0 of the feed
+  if (requestedId) {
+    const existingIndex = items.findIndex(it => it.id === requestedId);
+    if (existingIndex > 0) {
+      const targetItem = items[existingIndex];
+      items = [targetItem, ...items.filter((_, i) => i !== existingIndex)];
+    } else if (existingIndex === -1) {
+      const showcaseMatch = SHOWCASE_ITEMS.find(it => it.id === requestedId);
+      if (showcaseMatch) {
+        items.unshift(showcaseMatch);
+      } else {
+        try {
+          const directRes = await executePostgresQuery(
+            `SELECT id, user_id, prompt, aspect_ratio, dimensions, public_url, created_at, lqip, seed, model, likes_count, remix_count, views_count
+             FROM public.community_creations_feed
+             WHERE id = $1 AND user_id NOT LIKE 'usr_%' AND id NOT LIKE 'img_test_%'
+             LIMIT 1`,
+            [requestedId]
+          );
+          if (directRes?.rows?.[0]) {
+            const r = directRes.rows[0];
+            let pubUrl = r.public_url;
+            let thumbUrl = r.public_url;
+            if (r.user_id && r.id) {
+              try {
+                const token = GalxCryptoVault.sealImageDownload(r.user_id, r.id);
+                pubUrl = `/v1/images/assets/${token}`;
+                thumbUrl = `/v1/images/assets/${token}/thumbnail`;
+              } catch {}
+            }
+            items.unshift({
+              id: r.id,
+              prompt: r.prompt,
+              aspect_ratio: r.aspect_ratio || '1:1',
+              dimensions: r.dimensions || '1024x1024',
+              public_url: pubUrl,
+              thumbnail_url: thumbUrl,
+              created_at: new Date(r.created_at).toISOString(),
+              lqip: r.lqip || null,
+              seed: r.seed || null,
+              model: r.model || 'openai-gpt-image-latest',
+              likes_count: Number(r.likes_count || 0),
+              remix_count: Number(r.remix_count || 0),
+              views_count: Number(r.views_count || 0),
+            });
+          }
+        } catch {
+          // Ignore single-item lookup failure
+        }
+      }
     }
   }
 

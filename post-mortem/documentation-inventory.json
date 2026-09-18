@@ -1443,28 +1443,10 @@
       "title": "🥦 BroccoliDB Core Documentation & Research Suite"
     },
     {
-      "path": "docs/events-and-devrel/01-ai-coding-agent-bounties.md",
-      "scope": "commercial-draft",
-      "category": "docs",
-      "title": "🏆 Playbook: AI Coding Agent Community Bounties & DevRel Growth"
-    },
-    {
       "path": "docs/explanations/README.md",
       "scope": "current-guide",
       "category": "docs",
       "title": "Explanations"
-    },
-    {
-      "path": "docs/first-10-customers/01-high-spend-startup-onboarding.md",
-      "scope": "commercial-draft",
-      "category": "docs",
-      "title": "🎯 Playbook: Onboarding the First 10 High-Spend AI Startups"
-    },
-    {
-      "path": "docs/first-10-customers/04-enterprise-poc-and-volume-discounts.md",
-      "scope": "commercial-draft",
-      "category": "docs",
-      "title": "🤝 Enterprise Proof-of-Concept & Wholesale Volume Discount Schedule"
     },
     {
       "path": "docs/how-to/README.md",
@@ -1500,73 +1482,85 @@
       "path": "docs/investors/00_ONE_PAGER_EXECUTIVE_TEASER.md",
       "scope": "commercial-draft",
       "category": "docs",
-      "title": "📄 GALXAI: Executive Fact Sheet"
+      "title": "📄 GALX Executive One-Pager & Fact Sheet"
     },
     {
       "path": "docs/investors/01_EXECUTIVE_SUMMARY_AND_MEMO.md",
       "scope": "commercial-draft",
       "category": "docs",
-      "title": "📑 GALXAI Executive Memorandum & Product Brief"
+      "title": "📑 GALX Executive Memorandum: Venture Formation Thesis"
     },
     {
       "path": "docs/investors/02_PITCH_DECK_SLIDE_BY_SLIDE.md",
       "scope": "commercial-draft",
       "category": "docs",
-      "title": "📊 GALXAI Pitch Deck: 8-Slide Crisis & Traction Specification"
+      "title": "📊 GALX Pitch Deck: Visual-First Slide Specification & Presenter Guide"
     },
     {
       "path": "docs/investors/03_MARKET_SIZING_TAM_SAM_SOM.md",
       "scope": "commercial-draft",
       "category": "docs",
-      "title": "📈 GALXAI Market Sizing: TAM, SAM & SOM Analysis"
+      "title": "📈 GALX Market Architecture & Scale Potential"
     },
     {
       "path": "docs/investors/04_UNIT_ECONOMICS_CAC_LTV_PAYBACK.md",
       "scope": "commercial-draft",
       "category": "docs",
-      "title": "💰 GALXAI Unit Economics: CAC, LTV, Margins & Payback Analysis"
+      "title": "💰 GALX Business Model & Unit Economics Framework"
     },
     {
       "path": "docs/investors/05_COMPETITIVE_LANDSCAPE_AND_MOATS.md",
       "scope": "commercial-draft",
       "category": "docs",
-      "title": "🛡️ GALXAI Competitive Landscape & Strategic Defensibility"
+      "title": "🛡️ GALX Competitive Landscape & Strategic Defensibility"
     },
     {
       "path": "docs/investors/06_FINANCIAL_PROJECTIONS_AND_MODEL.md",
       "scope": "commercial-draft",
       "category": "docs",
-      "title": "📊 GALXAI 5-Year Financial Projections & Operating Model"
+      "title": "📊 GALX Financial Architecture & Capital Milestones"
     },
     {
       "path": "docs/investors/07_TECHNICAL_DILIGENCE_AND_PATENTS.md",
       "scope": "commercial-draft",
       "category": "docs",
-      "title": "Technical diligence: implementation and evidence"
+      "title": "🔬 Technical Diligence: Implementation & Operating Boundaries"
     },
     {
       "path": "docs/investors/08_COMMERCIAL_THESIS_AND_DISCOVERY_PLAYBOOK.md",
       "scope": "commercial-draft",
       "category": "docs",
-      "title": "🎯 GALXAI Commercial Thesis & Customer Discovery Playbook"
+      "title": "🎯 GALX Builder Discovery & Feedback Playbook"
     },
     {
       "path": "docs/investors/09_ENTERPRISE_SPEND_GOVERNANCE_AND_CONTROL_PLANE.md",
       "scope": "commercial-draft",
       "category": "docs",
-      "title": "09. Enterprise Spend Governance & Control Plane"
+      "title": "⚙️ The Platform Abstraction Layer"
     },
     {
       "path": "docs/investors/10_ENTERPRISE_PILOT_PROPOSAL_AND_AGREEMENT.md",
       "scope": "commercial-draft",
       "category": "docs",
-      "title": "10. Enterprise 30-Day Zero-Risk Pilot Agreement & Commercial Terms"
+      "title": "🤝 Developer & Partner Access Framework"
     },
     {
       "path": "docs/investors/README.md",
       "scope": "commercial-draft",
       "category": "docs",
-      "title": "🏛️ GALXAI Institutional & Strategic Diligence Room"
+      "title": "🏛️ GALX Investor Materials & Strategic Diligence"
+    },
+    {
+      "path": "docs/investors/slides/PROMPTS.md",
+      "scope": "commercial-draft",
+      "category": "docs",
+      "title": "🎨 GALX Venture Pitch Deck — AI Image Generation Master Prompts"
+    },
+    {
+      "path": "docs/investors/slides/README.md",
+      "scope": "commercial-draft",
+      "category": "docs",
+      "title": "🖼️ GALX AI-Generated Slide Gallery"
     },
     {
       "path": "docs/knowledge/DECISIONS.md",

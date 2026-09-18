@@ -26,6 +26,7 @@ import {
   EyeOff,
   ShieldAlert,
   RotateCcw,
+  Share2,
 } from 'lucide-react';
 import type { PublicFeedItem } from '@/app/api/images/feed/route';
 import './masonry-stream.css';
@@ -37,6 +38,10 @@ interface PublicImageMasonryStreamProps {
   showToolbar?: boolean;
   onSelectPrompt?: (prompt: string, ratio?: string) => void;
   externalQuery?: string;
+  initialImageId?: string;
+  initialRatio?: string | null;
+  initialStyle?: string;
+  initialSort?: 'recent' | 'trending';
 }
 
 const FILTER_PILLS = [
@@ -95,6 +100,30 @@ function ratioToCss(ratio: string): string {
   }
 }
 
+function getShowcaseFallbackForRatio(ratio?: string, id?: string): string {
+  const hash = (id || '').split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  switch (ratio) {
+    case '16:9':
+      return hash % 2 === 0 ? '/images/showcase/cinematic_sky_16_9.jpg' : '/images/showcase/cyber_akira_16_9.jpg';
+    case '9:16':
+      return hash % 2 === 0 ? '/images/showcase/elf_princess.jpg' : '/images/showcase/shadow_monarch_9_16.jpg';
+    case '4:3':
+      return '/images/showcase/cinematic_portrait_4_3.jpg';
+    case '3:2':
+      return '/images/showcase/fine_art_oil_3_2.jpg';
+    case '1:1':
+    default: {
+      const square = [
+        '/images/showcase/cafe_cat.jpg',
+        '/images/showcase/render_3d.jpg',
+        '/images/showcase/frieren_fantasy.jpg',
+        '/images/showcase/minimal_vector.jpg',
+      ];
+      return square[hash % square.length];
+    }
+  }
+}
+
 function formatCount(num?: number): string {
   if (!num) return '0';
   if (num >= 1000) return `${(num / 1000).toFixed(1)}k`;
@@ -108,6 +137,10 @@ export function PublicImageMasonryStream({
   showToolbar = true,
   onSelectPrompt,
   externalQuery,
+  initialImageId,
+  initialRatio,
+  initialStyle,
+  initialSort,
 }: PublicImageMasonryStreamProps) {
   const router = useRouter();
   const [items, setItems] = useState<PublicFeedItem[]>(initialItems);
@@ -115,11 +148,49 @@ export function PublicImageMasonryStream({
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [hasMore, setHasMore] = useState(true);
-  const [sortMode, setSortMode] = useState<'recent' | 'trending'>('trending');
-  const [selectedRatio, setSelectedRatio] = useState<string | null>(null);
-  const [selectedStyle, setSelectedStyle] = useState<string>('all');
+
+  const [sortMode, setSortMode] = useState<'recent' | 'trending'>(() => {
+    if (initialSort) return initialSort;
+    if (typeof window !== 'undefined') {
+      const sp = new URLSearchParams(window.location.search);
+      const s = sp.get('sort');
+      if (s === 'recent' || s === 'trending') return s;
+    }
+    return 'trending';
+  });
+
+  const [selectedRatio, setSelectedRatio] = useState<string | null>(() => {
+    if (initialRatio !== undefined) return initialRatio;
+    if (typeof window !== 'undefined') {
+      const sp = new URLSearchParams(window.location.search);
+      const r = sp.get('ratio') || sp.get('aspect_ratio');
+      if (r && ['1:1', '16:9', '9:16', '3:2', '4:3', '2:3', '3:4'].includes(r)) return r;
+    }
+    return null;
+  });
+
+  const [selectedStyle, setSelectedStyle] = useState<string>(() => {
+    if (initialStyle) return initialStyle;
+    if (typeof window !== 'undefined') {
+      const sp = new URLSearchParams(window.location.search);
+      const s = sp.get('tag') || sp.get('style');
+      if (s) return s;
+    }
+    return 'all';
+  });
+
   const [density, setDensity] = useState<'comfortable' | 'compact'>('comfortable');
-  const [searchQuery, setSearchQuery] = useState('');
+
+  const [searchQuery, setSearchQuery] = useState<string>(() => {
+    if (externalQuery) return externalQuery;
+    if (typeof window !== 'undefined') {
+      const sp = new URLSearchParams(window.location.search);
+      const q = sp.get('q');
+      if (q) return q;
+    }
+    return '';
+  });
+
   const [activeModalIndex, setActiveModalIndex] = useState<number | null>(null);
   const [isZoomed, setIsZoomed] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -135,6 +206,16 @@ export function PublicImageMasonryStream({
   const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
   const [hidingIds, setHidingIds] = useState<Set<string>>(new Set());
   const [lastHiddenItem, setLastHiddenItem] = useState<{ item: PublicFeedItem; index: number } | null>(null);
+  const [imageSrcMap, setImageSrcMap] = useState<Record<string, string>>({});
+
+  const targetImageIdRef = useRef<string | null>(
+    initialImageId ||
+      (typeof window !== 'undefined'
+        ? new URLSearchParams(window.location.search).get('image') ||
+          new URLSearchParams(window.location.search).get('image_id') ||
+          new URLSearchParams(window.location.search).get('id')
+        : null)
+  );
 
   const observerTarget = useRef<HTMLDivElement>(null);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -142,6 +223,8 @@ export function PublicImageMasonryStream({
   const pendingImpressionsRef = useRef<Set<string>>(new Set());
   const touchStartCoordRef = useRef<{ x: number; y: number } | null>(null);
   const hiddenIdsRef = useRef<Set<string>>(new Set());
+  const loadingRef = useRef(false);
+  const initialFetchedRef = useRef(false);
 
   const showToast = useCallback((msg: string, undoable: boolean = false) => {
     if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
@@ -201,7 +284,61 @@ export function PublicImageMasonryStream({
     }
   };
 
-  // Fetch feed items with resilient error catching
+  // Synchronize URL parameters without refreshing or triggering infinite re-renders
+  const syncUrlState = useCallback(
+    (updates: {
+      image?: string | null;
+      q?: string | null;
+      ratio?: string | null;
+      style?: string | null;
+      sort?: 'recent' | 'trending' | null;
+    }) => {
+      if (typeof window === 'undefined') return;
+      try {
+        const url = new URL(window.location.href);
+
+        if (updates.image !== undefined) {
+          if (updates.image) url.searchParams.set('image', updates.image);
+          else url.searchParams.delete('image');
+        }
+
+        if (updates.q !== undefined) {
+          if (updates.q && updates.q.trim()) url.searchParams.set('q', updates.q.trim());
+          else url.searchParams.delete('q');
+        }
+
+        if (updates.ratio !== undefined) {
+          if (updates.ratio) {
+            url.searchParams.set('ratio', updates.ratio);
+            url.searchParams.delete('aspect_ratio');
+          } else {
+            url.searchParams.delete('ratio');
+            url.searchParams.delete('aspect_ratio');
+          }
+        }
+
+        if (updates.style !== undefined) {
+          if (updates.style && updates.style !== 'all') url.searchParams.set('tag', updates.style);
+          else {
+            url.searchParams.delete('tag');
+            url.searchParams.delete('style');
+          }
+        }
+
+        if (updates.sort !== undefined) {
+          if (updates.sort && updates.sort !== 'trending') url.searchParams.set('sort', updates.sort);
+          else url.searchParams.delete('sort');
+        }
+
+        window.history.replaceState({ modalImage: updates.image ?? null }, '', url.toString());
+      } catch {
+        // Ignore in non-standard environments
+      }
+    },
+    []
+  );
+
+  // Fetch feed items with resilient error catching, keyset pagination, and target image prioritization
   const fetchFeed = useCallback(
     async (
       nextCursor: string | null = null,
@@ -209,9 +346,11 @@ export function PublicImageMasonryStream({
       ratio: string | null = selectedRatio,
       style: string = selectedStyle,
       query: string = searchQuery,
-      sort: 'recent' | 'trending' = sortMode
+      sort: 'recent' | 'trending' = sortMode,
+      targetImageId: string | null = targetImageIdRef.current
     ) => {
-      if (loading) return;
+      if (loadingRef.current) return;
+      loadingRef.current = true;
       setLoading(true);
       setFetchError(null);
 
@@ -223,6 +362,7 @@ export function PublicImageMasonryStream({
         if (ratio) params.set('aspect_ratio', ratio);
         if (style && style !== 'all') params.set('tag', style);
         if (query.trim()) params.set('q', query.trim());
+        if (targetImageId) params.set('image', targetImageId);
 
         const res = await fetch(`/api/images/feed?${params.toString()}`);
         if (!res.ok) {
@@ -236,6 +376,15 @@ export function PublicImageMasonryStream({
           setItems((prev) => (reset ? visible : [...prev, ...visible]));
           setCursor(data.nextCursor);
           setHasMore(Boolean(data.nextCursor));
+
+          // If a target creation ID was requested, open it in the modal immediately
+          if (targetImageId) {
+            const idx = visible.findIndex((it: PublicFeedItem) => it.id === targetImageId);
+            if (idx >= 0) {
+              setActiveModalIndex(idx);
+            }
+            targetImageIdRef.current = null; // Fulfilled
+          }
 
           // Populate initial likes count map
           setLikesCountMap((prev) => {
@@ -251,26 +400,37 @@ export function PublicImageMasonryStream({
       } catch {
         setFetchError('Stream connection offline; displaying showcase images.');
       } finally {
+        loadingRef.current = false;
         setLoading(false);
         setRefreshing(false);
       }
     },
-    [loading, selectedRatio, selectedStyle, searchQuery, sortMode]
+    [selectedRatio, selectedStyle, searchQuery, sortMode]
   );
 
-  // Initial load if no initial items supplied
+  // Initial load if no initial items supplied - executed exactly once per component mount
   useEffect(() => {
-    if (initialItems.length === 0) {
-      void fetchFeed(null, true);
+    if (!initialFetchedRef.current && initialItems.length === 0) {
+      initialFetchedRef.current = true;
+      void fetchFeed(
+        null,
+        true,
+        selectedRatio,
+        selectedStyle,
+        searchQuery,
+        sortMode,
+        targetImageIdRef.current
+      );
     }
-  }, [fetchFeed, initialItems.length]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Synchronize external query changes if supplied
   useEffect(() => {
     if (externalQuery !== undefined && externalQuery !== searchQuery) {
       setSearchQuery(externalQuery);
       setCursor(null);
-      void fetchFeed(null, true, selectedRatio, selectedStyle, externalQuery, sortMode);
+      syncUrlState({ q: externalQuery });
+      void fetchFeed(null, true, selectedRatio, selectedStyle, externalQuery, sortMode, null);
     }
   }, [externalQuery]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -301,21 +461,24 @@ export function PublicImageMasonryStream({
     if (sort === sortMode) return;
     setSortMode(sort);
     setCursor(null);
-    void fetchFeed(null, true, selectedRatio, selectedStyle, searchQuery, sort);
+    syncUrlState({ sort });
+    void fetchFeed(null, true, selectedRatio, selectedStyle, searchQuery, sort, null);
   };
 
   // Handle ratio filter change
   const handleRatioChange = (ratio: string | null) => {
     setSelectedRatio(ratio);
     setCursor(null);
-    void fetchFeed(null, true, ratio, selectedStyle, searchQuery, sortMode);
+    syncUrlState({ ratio });
+    void fetchFeed(null, true, ratio, selectedStyle, searchQuery, sortMode, null);
   };
 
   // Handle style preset change
   const handleStyleChange = (style: string) => {
     setSelectedStyle(style);
     setCursor(null);
-    void fetchFeed(null, true, selectedRatio, style, searchQuery, sortMode);
+    syncUrlState({ style });
+    void fetchFeed(null, true, selectedRatio, style, searchQuery, sortMode, null);
   };
 
   // Handle search with debounce
@@ -329,39 +492,41 @@ export function PublicImageMasonryStream({
 
     searchTimeoutRef.current = setTimeout(() => {
       setCursor(null);
-      void fetchFeed(null, true, selectedRatio, selectedStyle, value, sortMode);
+      syncUrlState({ q: value });
+      void fetchFeed(null, true, selectedRatio, selectedStyle, value, sortMode, null);
     }, 350);
   };
 
   const handleClearSearch = () => {
     setSearchQuery('');
     setCursor(null);
-    void fetchFeed(null, true, selectedRatio, selectedStyle, '', sortMode);
+    syncUrlState({ q: '' });
+    void fetchFeed(null, true, selectedRatio, selectedStyle, '', sortMode, null);
   };
 
   const handleRefresh = () => {
     setRefreshing(true);
     setCursor(null);
-    void fetchFeed(null, true, selectedRatio, selectedStyle, searchQuery, sortMode);
+    void fetchFeed(null, true, selectedRatio, selectedStyle, searchQuery, sortMode, null);
   };
 
-  // Infinite scroll intersection observer
+  // Infinite scroll intersection observer - guarded against loops
   useEffect(() => {
     const target = observerTarget.current;
     if (!target) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && hasMore && !loading) {
+        if (entries[0].isIntersecting && hasMore && !loadingRef.current && cursor) {
           void fetchFeed(cursor, false);
         }
       },
-      { rootMargin: '400px' }
+      { rootMargin: '300px' }
     );
 
     observer.observe(target);
     return () => observer.disconnect();
-  }, [cursor, hasMore, loading, fetchFeed]);
+  }, [cursor, hasMore, fetchFeed]);
 
   // Copy prompt helper
   const handleCopyPrompt = (e: React.MouseEvent, item: PublicFeedItem) => {
@@ -427,24 +592,40 @@ export function PublicImageMasonryStream({
     params.set('prompt', item.prompt);
     if (item.aspect_ratio) params.set('aspect_ratio', item.aspect_ratio);
     if (item.seed) params.set('seed', item.seed);
+    params.set('tab', 'creations');
     router.push(`/images?${params.toString()}`);
   };
 
-  // Download image
+  // Download image with robust blob resolution and fallback visual resilience
   const handleDownload = async (e: React.MouseEvent, item: PublicFeedItem) => {
     e.stopPropagation();
+    const downloadUrl = imageSrcMap[item.id] || item.public_url;
     try {
+      showToast('Downloading high-res image…');
+      const res = await fetch(downloadUrl);
+      if (!res.ok) throw new Error('Download request failed');
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = item.public_url;
+      a.href = blobUrl;
+      const isPng = downloadUrl.endsWith('.png') || blob.type === 'image/png';
+      const isWebp = downloadUrl.endsWith('.webp') || blob.type === 'image/webp';
+      const ext = isPng ? 'png' : isWebp ? 'webp' : 'jpg';
+      a.download = `galx-${item.id}.${ext}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+      showToast('Download complete');
+    } catch {
+      const a = document.createElement('a');
+      a.href = downloadUrl;
       a.download = `galx-${item.id}.jpg`;
       a.target = '_blank';
       a.rel = 'noopener noreferrer';
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      showToast('Downloading high-res image');
-    } catch {
-      showToast('Failed to trigger download');
     }
   };
 
@@ -525,6 +706,19 @@ export function PublicImageMasonryStream({
     showToast('Artwork restored to Explore stream.');
   };
 
+  const openModalByIndex = useCallback((index: number) => {
+    setIsZoomed(false);
+    setActiveModalIndex(index);
+    const item = items[index];
+    if (item) syncUrlState({ image: item.id });
+  }, [items, syncUrlState]);
+
+  const closeModal = useCallback(() => {
+    setIsZoomed(false);
+    setActiveModalIndex(null);
+    syncUrlState({ image: null });
+  }, [syncUrlState]);
+
   // Modal navigation helpers
   const activeModalItem = activeModalIndex !== null && items[activeModalIndex] ? items[activeModalIndex] : null;
 
@@ -533,18 +727,85 @@ export function PublicImageMasonryStream({
     setIsZoomed(false);
     setActiveModalIndex((prev) => {
       if (prev === null || items.length === 0) return null;
-      return prev > 0 ? prev - 1 : items.length - 1;
+      const nextIdx = prev > 0 ? prev - 1 : items.length - 1;
+      const it = items[nextIdx];
+      if (it) syncUrlState({ image: it.id });
+      return nextIdx;
     });
-  }, [items.length]);
+  }, [items, syncUrlState]);
 
   const handleNextImage = useCallback((e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     setIsZoomed(false);
     setActiveModalIndex((prev) => {
       if (prev === null || items.length === 0) return null;
-      return prev < items.length - 1 ? prev + 1 : 0;
+      const nextIdx = prev < items.length - 1 ? prev + 1 : 0;
+      const it = items[nextIdx];
+      if (it) syncUrlState({ image: it.id });
+      return nextIdx;
     });
-  }, [items.length]);
+  }, [items, syncUrlState]);
+
+  // Share creation link helper: generates a universal Explore deep-link accessible to any visitor
+  const handleShareLink = (e: React.MouseEvent, item: PublicFeedItem) => {
+    e.stopPropagation();
+    if (typeof window === 'undefined') return;
+    const origin = window.location.origin;
+    const shareUrl = `${origin}/explore?image=${encodeURIComponent(item.id)}`;
+    navigator.clipboard.writeText(shareUrl);
+    showToast('Direct creation link copied to clipboard');
+  };
+
+  // Tiered fallback image resolver
+  const handleImageError = useCallback((item: PublicFeedItem, currentSrc: string) => {
+    setImageSrcMap((prev) => {
+      // Step 1: If thumbnail failed, try public_url if different
+      if (
+        item.thumbnail_url &&
+        currentSrc === item.thumbnail_url &&
+        item.public_url &&
+        item.public_url !== item.thumbnail_url
+      ) {
+        return { ...prev, [item.id]: item.public_url };
+      }
+      // Step 2: Fall back to aspect-ratio-matched showcase visual
+      const fallback = getShowcaseFallbackForRatio(item.aspect_ratio, item.id);
+      if (currentSrc !== fallback) {
+        return { ...prev, [item.id]: fallback };
+      }
+      return prev;
+    });
+  }, []);
+
+  // Deep-link hydration on mount
+  useEffect(() => {
+    if (typeof window === 'undefined' || items.length === 0) return;
+    const params = new URLSearchParams(window.location.search);
+    const targetId = params.get('image');
+    if (targetId && activeModalIndex === null) {
+      const idx = items.findIndex((it) => it.id === targetId);
+      if (idx >= 0) {
+        setActiveModalIndex(idx);
+      }
+    }
+  }, [items, activeModalIndex]);
+
+  // Handle browser back/forward buttons
+  useEffect(() => {
+    const handlePop = () => {
+      if (typeof window === 'undefined') return;
+      const params = new URLSearchParams(window.location.search);
+      const targetId = params.get('image');
+      if (targetId) {
+        const idx = items.findIndex((it) => it.id === targetId);
+        if (idx >= 0) setActiveModalIndex(idx);
+      } else {
+        setActiveModalIndex(null);
+      }
+    };
+    window.addEventListener('popstate', handlePop);
+    return () => window.removeEventListener('popstate', handlePop);
+  }, [items]);
 
   // Modal keyboard handling (Esc to close, Left/Right arrows to navigate, C to copy, Z to zoom)
   useEffect(() => {
@@ -552,8 +813,7 @@ export function PublicImageMasonryStream({
       if (!activeModalItem) return;
 
       if (e.key === 'Escape') {
-        setIsZoomed(false);
-        setActiveModalIndex(null);
+        closeModal();
       } else if (e.key === 'ArrowLeft') {
         handlePrevImage();
       } else if (e.key === 'ArrowRight') {
@@ -570,7 +830,7 @@ export function PublicImageMasonryStream({
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [activeModalItem, handlePrevImage, handleNextImage, showToast]);
+  }, [activeModalItem, handlePrevImage, handleNextImage, closeModal, showToast]);
 
   // Touch swipe support for mobile lightbox navigation
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -762,18 +1022,14 @@ export function PublicImageMasonryStream({
               <article
                 key={item.id}
                 className={`masonry-card ${hidingIds.has(item.id) ? 'hiding' : ''}`}
-                onClick={() => {
-                  setIsZoomed(false);
-                  setActiveModalIndex(idx);
-                }}
+                onClick={() => openModalByIndex(idx)}
                 tabIndex={0}
                 role="button"
                 aria-label={`View image: ${item.prompt}`}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
-                    setIsZoomed(false);
-                    setActiveModalIndex(idx);
+                    openModalByIndex(idx);
                   }
                 }}
               >
@@ -781,42 +1037,30 @@ export function PublicImageMasonryStream({
                   className="masonry-media-wrap"
                   style={{ aspectRatio: ratioCss }}
                 >
-                  {imageErrors[item.id] ? (
-                    <div className="masonry-fallback-visual">
-                      <div className="masonry-fallback-art">
-                        <Sparkles size={24} className="text-indigo-400 opacity-70" />
-                        <span className="masonry-fallback-tag">{item.aspect_ratio || '1:1'}</span>
-                      </div>
-                      <div className="masonry-fallback-pattern" />
-                    </div>
-                  ) : (
-                    <>
-                      {/* LQIP Placeholder */}
-                      {item.lqip && !isLoaded && (
-                        <img
-                          src={item.lqip}
-                          alt=""
-                          aria-hidden="true"
-                          className="masonry-lqip"
-                        />
-                      )}
-
-                      {/* High-res Image with impression trigger & error fallback */}
-                      <img
-                        src={item.thumbnail_url || item.public_url}
-                        alt={item.prompt}
-                        loading="lazy"
-                        className={`masonry-image ${isLoaded ? 'loaded' : ''}`}
-                        onLoad={() => {
-                          setLoadedImages((prev) => ({ ...prev, [item.id]: true }));
-                          registerCardImpression(item.id);
-                        }}
-                        onError={() => {
-                          setImageErrors((prev) => ({ ...prev, [item.id]: true }));
-                        }}
-                      />
-                    </>
+                  {/* LQIP Placeholder */}
+                  {item.lqip && !isLoaded && (
+                    <img
+                      src={item.lqip}
+                      alt=""
+                      aria-hidden="true"
+                      className="masonry-lqip"
+                    />
                   )}
+
+                  {/* High-res Image with impression trigger & tiered fallback */}
+                  <img
+                    src={imageSrcMap[item.id] || item.thumbnail_url || item.public_url}
+                    alt={item.prompt}
+                    loading="lazy"
+                    className={`masonry-image ${isLoaded ? 'loaded' : ''}`}
+                    onLoad={() => {
+                      setLoadedImages((prev) => ({ ...prev, [item.id]: true }));
+                      registerCardImpression(item.id);
+                    }}
+                    onError={(e) => {
+                      handleImageError(item, e.currentTarget.src);
+                    }}
+                  />
 
                   {/* Top Floating Badges & Action Buttons */}
                   <div className="masonry-card-topbar">
@@ -969,10 +1213,7 @@ export function PublicImageMasonryStream({
       {activeModalItem && (
         <div
           className="masonry-modal-backdrop"
-          onClick={() => {
-            setIsZoomed(false);
-            setActiveModalIndex(null);
-          }}
+          onClick={closeModal}
           role="dialog"
           aria-modal="true"
           aria-labelledby="modal-prompt-title"
@@ -986,10 +1227,7 @@ export function PublicImageMasonryStream({
             <button
               type="button"
               className="masonry-modal-close"
-              onClick={() => {
-                setIsZoomed(false);
-                setActiveModalIndex(null);
-              }}
+              onClick={closeModal}
               aria-label="Close dialog"
             >
               <X size={18} />
@@ -1013,13 +1251,11 @@ export function PublicImageMasonryStream({
                 title={isZoomed ? 'Click to fit view' : 'Click to zoom 1:1'}
               >
                 <img
-                  src={activeModalItem.public_url}
+                  src={imageSrcMap[activeModalItem.id] || activeModalItem.public_url}
                   alt={activeModalItem.prompt}
                   className={`masonry-modal-img ${isZoomed ? 'zoomed' : ''}`}
                   onError={(e) => {
-                    if (activeModalItem.thumbnail_url && e.currentTarget.src !== activeModalItem.thumbnail_url) {
-                      e.currentTarget.src = activeModalItem.thumbnail_url;
-                    }
+                    handleImageError(activeModalItem, e.currentTarget.src);
                   }}
                 />
               </div>
@@ -1135,7 +1371,7 @@ export function PublicImageMasonryStream({
                   onClick={() => {
                     if (onSelectPrompt) {
                       onSelectPrompt(activeModalItem.prompt, activeModalItem.aspect_ratio || undefined);
-                      setActiveModalIndex(null);
+                      closeModal();
                       return;
                     }
                     const params = new URLSearchParams();
@@ -1146,11 +1382,22 @@ export function PublicImageMasonryStream({
                     if (activeModalItem.seed) {
                       params.set('seed', activeModalItem.seed);
                     }
+                    params.set('tab', 'creations');
                     router.push(`/images?${params.toString()}`);
                   }}
                 >
                   <Sparkles size={16} />
                   <span>Remix in GALX Studio</span>
+                </button>
+
+                <button
+                  type="button"
+                  className="masonry-modal-secondary-btn"
+                  onClick={(e) => handleShareLink(e, activeModalItem)}
+                  title="Copy direct shareable creation link"
+                >
+                  <Share2 size={15} />
+                  <span>Share Creation Link</span>
                 </button>
 
                 <button

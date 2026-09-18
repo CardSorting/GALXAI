@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>GALX — Venture Pitch Deck (16:9 High-Resolution Slides)</title>
+  <meta name="description" content="Official 10-slide high-resolution venture pitch deck for GALX. Two models. API access. Abundant serving. Build what you want.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-space: #06080F;
+      --bg-surface: rgba(13, 18, 30, 0.92);
+      --bg-card: rgba(18, 25, 42, 0.85);
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-accent: rgba(0, 240, 255, 0.35);
+      --accent-cyan: #00F0FF;
+      --accent-violet: #8B5CF6;
+      --accent-emerald: #10B981;
+      --accent-amber: #F59E0B;
+      --accent-crimson: #EF4444;
+      --text-main: #F8FAFC;
+      --text-muted: #94A3B8;
+      --text-dim: #64748B;
+      --font-display: 'Outfit', -apple-system, sans-serif;
+      --font-body: 'Inter', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg-space);
+      color: var(--text-main);
+      font-family: var(--font-body);
+    }
+
+    /* Deck Chrome Container */
+    .deck-container {
+      display: flex;
+      flex-direction: column;
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+    }
+
+    /* Top Bar */
+    .deck-header {
+      height: 56px;
+      background: rgba(6, 8, 15, 0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      z-index: 50;
+      flex-shrink: 0;
+    }
+
+    .brand-cluster {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-logo {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 20px;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #00F0FF, #8B5CF6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-divider {
+      width: 1px;
+      height: 18px;
+      background: var(--border-subtle);
+    }
+
+    .deck-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      letter-spacing: 0.02em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .active-slide-title {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .counter-pill {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-subtle);
+      padding: 5px 12px;
+      border-radius: 999px;
+      color: var(--accent-cyan);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-main);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: var(--border-accent);
+    }
+
+    .btn-accent {
+      background: linear-gradient(135deg, #00F0FF 0%, #0099FF 100%);
+      color: #000;
+      border: none;
+      font-weight: 700;
+    }
+
+    .btn-accent:hover {
+      box-shadow: 0 0 16px rgba(0, 240, 255, 0.4);
+      transform: translateY(-1px);
+    }
+
+    /* Main Center Workspace */
+    .deck-stage {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      padding: 16px 24px;
+      background: radial-gradient(circle at 50% 50%, rgba(14, 22, 38, 0.6) 0%, rgba(6, 8, 15, 1) 100%);
+    }
+
+    /* 16:9 Slide Frame */
+    .slide-frame {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      max-width: calc((100vh - 170px) * 16 / 9);
+      max-height: calc(100vh - 170px);
+      aspect-ratio: 16 / 9;
+      background: #000;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .slide-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      user-select: none;
+      -webkit-user-drag: none;
+      transition: opacity 0.25s ease;
+    }
+
+    /* Stage Navigation Floating Buttons */
+    .nav-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: rgba(13, 18, 30, 0.85);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 40;
+      transition: all 0.2s ease;
+    }
+
+    .nav-arrow:hover {
+      background: rgba(0, 240, 255, 0.15);
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 16px rgba(0, 240, 255, 0.25);
+    }
+
+    .nav-arrow.prev { left: 28px; }
+    .nav-arrow.next { right: 28px; }
+
+    /* Bottom Thumbnail Rail */
+    .deck-footer {
+      height: 96px;
+      background: rgba(8, 11, 20, 0.95);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 20px;
+      z-index: 50;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .thumbs-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      overflow-x: auto;
+      max-width: 100%;
+      padding: 8px 12px;
+      scrollbar-width: none;
+    }
+
+    .thumbs-container::-webkit-scrollbar {
+      display: none;
+    }
+
+    .thumb-card {
+      width: 96px;
+      height: 54px;
+      aspect-ratio: 16 / 9;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1.5px solid rgba(255, 255, 255, 0.1);
+      cursor: pointer;
+      position: relative;
+      flex-shrink: 0;
+      background: #000;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .thumb-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.65;
+      transition: opacity 0.2s ease;
+    }
+
+    .thumb-card .thumb-num {
+      position: absolute;
+      bottom: 2px;
+      left: 4px;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: 700;
+      color: #fff;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 1px 4px;
+      border-radius: 3px;
+    }
+
+    .thumb-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    .thumb-card:hover img {
+      opacity: 0.9;
+    }
+
+    .thumb-card.active {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.4);
+      transform: translateY(-3px) scale(1.05);
+    }
+
+    .thumb-card.active img {
+      opacity: 1;
+    }
+
+    /* Speaker Notes Drawer */
+    .notes-drawer {
+      position: fixed;
+      right: -480px;
+      top: 56px;
+      bottom: 0;
+      width: 480px;
+      background: rgba(10, 14, 24, 0.98);
+      backdrop-filter: blur(20px);
+      border-left: 1px solid var(--border-subtle);
+      z-index: 100;
+      transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      box-shadow: -16px 0 48px rgba(0, 0, 0, 0.8);
+    }
+
+    .notes-drawer.open {
+      right: 0;
+    }
+
+    .notes-header {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .notes-header h3 {
+      font-size: 15px;
+      font-family: var(--font-display);
+      color: var(--accent-cyan);
+    }
+
+    .notes-content {
+      padding: 24px;
+      overflow-y: auto;
+      flex: 1;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .notes-section {
+      margin-bottom: 24px;
+    }
+
+    .notes-section-title {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+    }
+
+    .notes-script-box {
+      background: rgba(255, 255, 255, 0.03);
+      border-left: 3px solid var(--accent-cyan);
+      padding: 14px 16px;
+      border-radius: 0 8px 8px 0;
+      font-size: 13.5px;
+      color: var(--text-main);
+      margin-bottom: 16px;
+    }
+
+    .metric-badges-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .metric-badge-item {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+    }
+
+    .metric-badge-item strong {
+      color: var(--text-main);
+      display: block;
+      font-size: 13px;
+    }
+
+    /* Print / PDF generation styles */
+    @media print {
+      body, html {
+        overflow: visible !important;
+        background: #000 !important;
+      }
+      .deck-header, .deck-footer, .nav-arrow, .notes-drawer {
+        display: none !important;
+      }
+      .deck-stage {
+        padding: 0 !important;
+        background: #000 !important;
+      }
+      .slide-frame {
+        width: 100vw !important;
+        height: 100vh !important;
+        max-width: none !important;
+        max-height: none !important;
+        border-radius: 0 !important;
+        page-break-after: always;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="deck-container">
+  <!-- Top Navigation Header -->
+  <header class="deck-header">
+    <div class="brand-cluster">
+      <span class="brand-logo">GALX</span>
+      <div class="brand-divider"></div>
+      <div class="deck-title">
+        <span>Venture Deck</span>
+        <span>•</span>
+        <span class="active-slide-title" id="topSlideTitle">Mission & Platform Thesis</span>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <div class="counter-pill" id="slideCounter">01 / 10</div>
+      <button class="btn" id="btnNotesToggle" title="Toggle Speaker Notes & Talk Track (N)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        <span>Talk Track</span>
+      </button>
+      <button class="btn" id="btnFullscreen" title="Fullscreen Mode (F)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+      </button>
+      <a class="btn btn-accent" href="GALX_Pitch_Deck.pdf" download="GALX_Pitch_Deck.pdf" title="Download Complete 10-Slide Deck PDF">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <span>Download PDF</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- Central Presentation Stage -->
+  <main class="deck-stage" id="stageContainer">
+    <button class="nav-arrow prev" id="btnPrev" title="Previous Slide (Left Arrow)">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+
+    <div class="slide-frame">
+      <img id="currentSlideImg" class="slide-img" src="slide_01.jpg" alt="GALX Pitch Deck Slide">
+    </div>
+
+    <button class="nav-arrow next" id="btnNext" title="Next Slide (Right Arrow or Space)">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+  </main>
+
+  <!-- Bottom Thumbnail Scrubber -->
+  <footer class="deck-footer">
+    <div class="thumbs-container" id="thumbsRail">
+      <!-- Thumbnail cards injected dynamically via JavaScript -->
+    </div>
+  </footer>
+
+  <!-- Slide Speaker Notes & Diligence Drawer -->
+  <aside class="notes-drawer" id="notesDrawer">
+    <div class="notes-header">
+      <h3 id="notesSlideTitle">Slide 01: Cover & Mission</h3>
+      <button class="btn" id="btnCloseNotes">✕</button>
+    </div>
+    <div class="notes-content" id="notesBody">
+      <!-- Injected dynamically -->
+    </div>
+  </aside>
+</div>
+
+<script>
+  // Slide Data Catalog
+  const SLIDES = [
+    {
+      index: 1,
+      file: "slide_01.jpg",
+      title: "Cover & Mission",
+      category: "Platform Formation Thesis",
+      talkTrack: "GALX is building the abstraction and execution layer for the next era of software creation. We believe AI capability will continue becoming abundant, but accessing, routing, and operating it is becoming fragmented, costly, and brittle. Our mission is to make intelligence abundant, reliable, and dead simple for anyone who wants to build.",
+      metrics: [
+        { label: "TTFT Latency", val: "<100ms" },
+        { label: "Managed Models", val: "2 Workhorses" },
+        { label: "Continuity", val: "99.99% Uptime" },
+        { label: "Developer Ops", val: "Zero Infra" }
+      ],
+      diligence: "Q: Why enter as an abstraction layer rather than training another foundation model?\nA: Value migrates from raw commoditizing compute to the persistent software execution layer that controls developer routing and reliability."
+    },
+    {
+      index: 2,
+      file: "slide_02.png",
+      title: "The Structural Inefficiency",
+      category: "Structural Market Shift",
+      talkTrack: "Every investor agrees that AI capability is exploding. But as capability grows, the infrastructure underneath it is violently fragmenting. Developers must juggle 14 SDKs, fluctuating rate limits, 429 timeouts, and brittle retry loops. The winner won't be another model catalog exposing this chaos—it will be an abstraction layer that makes it completely disappear.",
+      metrics: [
+        { label: "Maintenance Overhead", val: "68% Time Lost" },
+        { label: "Fragmented SDKs", val: "14+ Vendors" },
+        { label: "Autonomous Routing", val: "<100ms Failover" }
+      ],
+      diligence: "Q: Won't hyperscalers standardize their own APIs?\nA: Hyperscalers have zero incentive to provide transparent, multi-cloud redundancy across competing compute clusters."
+    },
+    {
+      index: 3,
+      file: "slide_03.png",
+      title: "The Sufficiency Principle",
+      category: "Non-Consensus Thesis",
+      talkTrack: "The market is obsessed with benchmark supremacy and 100-model catalogs. Our non-consensus bet is the Sufficiency Principle: 99.2% of real-world production software tasks are completely satisfied by fast, optimized workhorse models. Chasing the final 0.8% costs 10x more and degrades latency. GALX dominates the 99.2% production plateau.",
+      metrics: [
+        { label: "Task Plateau", val: "99.2% Satisfied" },
+        { label: "Cost Multiplier Avoided", val: "10x Penalty" },
+        { label: "Curated Models", val: "2 Tiers Only" }
+      ],
+      diligence: "Q: What happens if a builder really needs frontier reasoning?\nA: We provide GALX Heavy for high-context synthesis; 99% of query volume stays on GALX Fast."
+    },
+    {
+      index: 4,
+      file: "slide_04.png",
+      title: "Radical Simplicity",
+      category: "Product Architecture",
+      talkTrack: "We make the product radically simple: Two models. API access. Abundant serving. Build what you want. GALX Fast delivers sub-100ms latency for streaming and routine tasks. GALX Heavy delivers deep reasoning. Both operate through a single standard endpoint. We absorb all upstream complexity so the developer never sees it.",
+      metrics: [
+        { label: "Unified Endpoint", val: "Single URL" },
+        { label: "TTFT Streaming", val: "<100ms" },
+        { label: "Migration Effort", val: "Zero Config" }
+      ],
+      diligence: "Q: Is standard OpenAI-compatible API format enough?\nA: Yes. Drop-in standard compatibility eliminates all developer switching friction."
+    },
+    {
+      index: 5,
+      file: "slide_05.png",
+      title: "The Builder Wedge",
+      category: "Go-To-Market Strategy",
+      talkTrack: "We aren't chasing slow enterprise RFP cycles right now. Our initial wedge is high-velocity creators: independent builders, creative technologists, and engineers experimenting with AI applications. They want to ship products without infrastructure plumbing becoming another full-time job. With GALX, they ship in 3 minutes instead of 6 weeks.",
+      metrics: [
+        { label: "Time-to-Production", val: "3 Minutes" },
+        { label: "Plumbing Time Saved", val: "4–6 Weeks" },
+        { label: "Developer Focus", val: "100% on Product" }
+      ],
+      diligence: "Q: How do you acquire builders without massive ad spend?\nA: Direct developer utility, zero-friction sandboxes, and pairing with modern stacks (Vercel, Supabase, Cloudflare)."
+    },
+    {
+      index: 6,
+      file: "slide_06.png",
+      title: "Why This Can Become Enormous",
+      category: "Scale & Expansion Thesis",
+      talkTrack: "Why is GALX venture-scale? Because of where we sit. When builders launch applications on GALX, every end-user action generates recurring query volume through our proxy. As request volume surges from millions to billions, our gross margins expand from 38% to 68%+ through intelligent routing and capacity scale.",
+      metrics: [
+        { label: "Query Expansion", val: "Compounding" },
+        { label: "Gross Margin", val: "38% → 68%+" },
+        { label: "Switching Barrier", val: "High Lock-In" }
+      ],
+      diligence: "Q: Does gross margin improve with volume?\nA: Yes. Routing efficiency, token batching, and spot capacity arbitrage expand margins as throughput scales."
+    },
+    {
+      index: 7,
+      file: "slide_07.png",
+      title: "Asymmetric Advantage",
+      category: "Moats & Defensibility",
+      talkTrack: "Our advantage is the operational knowledge required to turn heterogeneous, volatile compute into a dead-simple, 99.99% reliable developer product. The public product becomes simpler while the internal operational knowledge required to sustain it becomes deeper. GALX absorbs complexity and sells simplicity.",
+      metrics: [
+        { label: "Autonomous Failover", val: "<100ms" },
+        { label: "Token Loss", val: "Zero" },
+        { label: "Infrastructure Moat", val: "Sovereign Shield" }
+      ],
+      diligence: "Q: Can't a competitor clone the API surface in a weekend?\nA: They can clone the endpoint in a day, but they cannot replicate the real-time failover telemetry and capacity arbitrage engine."
+    },
+    {
+      index: 8,
+      file: "slide_08.png",
+      title: "Founder-Market Fit",
+      category: "Operator DNA",
+      talkTrack: "I didn't start GALX from a spreadsheet. I started it because I was building real-world AI applications and hitting the reliability, cost, and complexity walls of existing infrastructure. GALX was forged out of operational necessity. We run live systems under heavy load daily and turn every failure into hardened proxy defenses.",
+      metrics: [
+        { label: "Hardening Loop", val: "24/7 Production" },
+        { label: "Uptime Retention", val: "100%" },
+        { label: "Production Dogfooding", val: "100% Native" }
+      ],
+      diligence: "Q: Why bet on an operator over pure research founders?\nA: Infrastructure winners are determined by uptime resilience, cost discipline, and developer empathy, not benchmark papers."
+    },
+    {
+      index: 9,
+      file: "slide_09.png",
+      title: "Evidence & Diligence",
+      category: "Intellectual Honesty",
+      talkTrack: "We operate with total intellectual honesty. We separate what is proven from what we are testing next. Our structural belief is 100% validated. Builder demand for two-model simplicity is 87% observed. Sub-100ms continuity is live demonstrated. Our next test is scaling institutional capacity and sustaining high gross margins.",
+      metrics: [
+        { label: "Market Shift", val: "100% Validated" },
+        { label: "Simplicity Demand", val: "87% Observed" },
+        { label: "Continuity", val: "Live Proven" },
+        { label: "Capacity Scale", val: "In-Flight Test" }
+      ],
+      diligence: "Q: What is the single biggest risk?\nA: Ensuring capacity acquisition scales faster than developer query growth while defending 60%+ margins."
+    },
+    {
+      index: 10,
+      file: "slide_10.png",
+      title: "The Venture Test",
+      category: "The Venture Horizon",
+      talkTrack: "If GALX is right, what becomes enormous? GALX becomes the primary execution layer through which software consumes intelligence. This round of capital funds capacity reserves (52%), developer ecosystem growth (28%), and engine hardening (20%), establishing GALX as the default utility layer for AI software creation.",
+      metrics: [
+        { label: "Capital Runway", val: "18–24 Months" },
+        { label: "Gross Margin Target", val: "68% Stable" },
+        { label: "Target Position", val: "Default Utility Layer" }
+      ],
+      diligence: "Q: What are the key Series A milestones?\nA: 500M monthly queries, 65%+ gross margins, and sustained developer retention across 1,000+ production applications."
+    }
+  ];
+
+  let currentIdx = 0;
+  const currentImg = document.getElementById("currentSlideImg");
+  const topTitle = document.getElementById("topSlideTitle");
+  const counter = document.getElementById("slideCounter");
+  const thumbsRail = document.getElementById("thumbsRail");
+  const notesDrawer = document.getElementById("notesDrawer");
+  const notesTitle = document.getElementById("notesSlideTitle");
+  const notesBody = document.getElementById("notesBody");
+
+  // Render Thumbnails
+  function initThumbnails() {
+    thumbsRail.innerHTML = "";
+    SLIDES.forEach((slide, i) => {
+      const card = document.createElement("div");
+      card.className = `thumb-card ${i === currentIdx ? 'active' : ''}`;
+      card.innerHTML = `
+        <img src="${slide.file}" alt="${slide.title}">
+        <span class="thumb-num">${String(slide.index).padStart(2, '0')}</span>
+      `;
+      card.addEventListener("click", () => goToSlide(i));
+      thumbsRail.appendChild(card);
+    });
+  }
+
+  // Update Slide Display
+  function updateSlideView() {
+    const s = SLIDES[currentIdx];
+    currentImg.style.opacity = "0.3";
+    setTimeout(() => {
+      currentImg.src = s.file;
+      currentImg.style.opacity = "1";
+    }, 100);
+
+    topTitle.textContent = `${s.index}. ${s.title}`;
+    counter.textContent = `${String(s.index).padStart(2, '0')} / ${String(SLIDES.length).padStart(2, '0')}`;
+
+    // Update Thumbs Active
+    const cards = thumbsRail.querySelectorAll(".thumb-card");
+    cards.forEach((c, idx) => {
+      c.classList.toggle("active", idx === currentIdx);
+    });
+
+    // Scroll active thumb into view
+    if (cards[currentIdx]) {
+      cards[currentIdx].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+
+    // Update Notes
+    notesTitle.textContent = `Slide ${String(s.index).padStart(2, '0')}: ${s.title}`;
+    notesBody.innerHTML = `
+      <div class="notes-section">
+        <div class="notes-section-title">THEME & THESIS</div>
+        <p style="font-weight: 600; color: var(--accent-cyan); margin-bottom: 4px;">${s.category}</p>
+        <p style="color: var(--text-muted);">${s.title}</p>
+      </div>
+
+      <div class="notes-section">
+        <div class="notes-section-title">SPEAKER TALK TRACK</div>
+        <div class="notes-script-box">"${s.talkTrack}"</div>
+      </div>
+
+      <div class="notes-section">
+        <div class="notes-section-title">KEY METRICS CALLOUT</div>
+        <div class="metric-badges-grid">
+          ${s.metrics.map(m => `
+            <div class="metric-badge-item">
+              <strong>${m.val}</strong>
+              ${m.label}
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <div class="notes-section">
+        <div class="notes-section-title">ANTICIPATED DILIGENCE QUESTION</div>
+        <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-subtle); padding: 12px; border-radius: 6px; font-size: 13px; white-space: pre-wrap;">${s.diligence}</div>
+      </div>
+    `;
+  }
+
+  function goToSlide(i) {
+    if (i >= 0 && i < SLIDES.length) {
+      currentIdx = i;
+      updateSlideView();
+    }
+  }
+
+  function nextSlide() {
+    if (currentIdx < SLIDES.length - 1) {
+      goToSlide(currentIdx + 1);
+    } else {
+      goToSlide(0); // loop around
+    }
+  }
+
+  function prevSlide() {
+    if (currentIdx > 0) {
+      goToSlide(currentIdx - 1);
+    } else {
+      goToSlide(SLIDES.length - 1);
+    }
+  }
+
+  // Event Listeners
+  document.getElementById("btnNext").addEventListener("click", nextSlide);
+  document.getElementById("btnPrev").addEventListener("click", prevSlide);
+
+  // Keyboard navigation
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowRight" || e.key === " " || e.key === "PageDown") {
+      e.preventDefault();
+      nextSlide();
+    } else if (e.key === "ArrowLeft" || e.key === "PageUp") {
+      e.preventDefault();
+      prevSlide();
+    } else if (e.key === "Home") {
+      e.preventDefault();
+      goToSlide(0);
+    } else if (e.key === "End") {
+      e.preventDefault();
+      goToSlide(SLIDES.length - 1);
+    } else if (e.key.toLowerCase() === "n") {
+      toggleNotes();
+    } else if (e.key.toLowerCase() === "f") {
+      toggleFullscreen();
+    }
+  });
+
+  // Notes Drawer Toggle
+  function toggleNotes() {
+    notesDrawer.classList.toggle("open");
+  }
+
+  document.getElementById("btnNotesToggle").addEventListener("click", toggleNotes);
+  document.getElementById("btnCloseNotes").addEventListener("click", () => notesDrawer.classList.remove("open"));
+
+  // Fullscreen Toggle
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(err => console.log(err));
+    } else {
+      document.exitFullscreen();
+    }
+  }
+  document.getElementById("btnFullscreen").addEventListener("click", toggleFullscreen);
+
+  // Initialize
+  initThumbnails();
+  updateSlideView();
+</script>
+
+</body>
+</html>

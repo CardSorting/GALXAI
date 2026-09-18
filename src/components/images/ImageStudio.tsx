@@ -143,12 +143,14 @@ function StudioWorkspace({
 
   useEffect(() => () => reuseController.current?.abort(), []);
 
-  // Parse prompt from URL if user arrived from homepage remix
+  // Parse prompt from URL if user arrived from homepage remix or explore stream
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const sp = new URLSearchParams(window.location.search);
       const urlPrompt = sp.get('prompt');
       const urlRatio = sp.get('aspect_ratio') || sp.get('ratio');
+      const urlTab = sp.get('tab');
+
       if (urlPrompt || urlRatio) {
         setSettings((prev) => ({
           ...prev,
@@ -157,9 +159,16 @@ function StudioWorkspace({
             ? { ratio: urlRatio as any }
             : {}),
         }));
+        setActiveTab('creations');
         requestAnimationFrame(() => {
           promptRef.current?.focus();
         });
+      } else if (urlTab === 'stream') {
+        setActiveTab('stream');
+      } else if (urlTab === 'favorites') {
+        setActiveTab('favorites');
+      } else if (urlTab === 'creations') {
+        setActiveTab('creations');
       }
     }
   }, [setSettings]);
@@ -377,6 +386,8 @@ function StudioWorkspace({
             <PublicImageMasonryStream
               onSelectPrompt={(prompt, ratio) => {
                 applyPrompt(prompt, ratio || '1:1');
+                setActiveTab('creations');
+                changeView('library');
               }}
             />
           </div>

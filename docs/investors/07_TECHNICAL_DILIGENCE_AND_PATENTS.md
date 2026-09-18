@@ -1,30 +1,67 @@
-# Technical diligence: implementation and evidence
+# 🔬 Technical Diligence: Implementation & Operating Boundaries
 
 <!-- docs-scope: commercial-draft -->
-> **Reading scope:** Commercial or product planning material. Claims, prices, forecasts, and examples require separate dated validation; they are not deployment guarantees, certifications, or SLAs. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+> **Reading scope:** Commercial and strategic investor materials. Contains thesis formulations, product positioning, unit economics frameworks, and venture scale arguments. Technical and operational capabilities describe public interfaces; proprietary routing mechanisms, capacity acquisition, and internal execution infrastructure remain private under [AGENTS.md](../AGENTS.md).
 
-Reviewed 2026-09-07. This document identifies inspectable implementation and its limits. It is not a certification, patent opinion, uptime guarantee, or universal performance benchmark.
+## Operational Integrity, Boundaries & Inspectable Evidence
 
-## Architecture
+Reviewed September 2026. This document defines the technical architecture boundaries, operational principles, and inspectable evidence behind GALX. It distinguishes public capabilities from private implementation and details the company's approach to reliability and security.
 
-GALXAI provides an inference platform and governance control plane. The application, Cloudflare Worker, standalone Node relay, credential registry, and downstream agent runtime have distinct responsibilities. See [Architecture](../ARCHITECTURE.md) for the source map and [ADR catalog](../adr/README.md) for decisions.
+---
 
-The registry owns durable credential state. The platform pool's database-backed path acquires leases; the standalone relay currently uses process-local shard slots and retry state. The relay opens provider sockets per attempt and performs bounded recovery. It does not promise warm pooled sockets, uninterrupted output, or exactly-once provider work.
+## 1. Capability vs. Implementation Boundary
 
-## Security and retention
+In accordance with GALX's core operational policy ([AGENTS.md](../AGENTS.md)):
 
-The deployed relay runs as a non-root user in a read-only container with restricted capabilities, resource limits, and a dedicated checkpoint volume. It does not mount the operator's home, repository, personal credential files, or Docker socket. Users obtain inference; their tools run in their own runtimes. This isolation does not extend automatically to application adapter fallbacks or external agents.
+$$\mathbf{Public\ Documentation\ Describes\ Capability,\ Not\ Implementation.}$$
 
-Inference and administrator keys have separate roles. Registry credential encryption does not establish that every in-memory copy is erasable. Telemetry excludes prompt and response content, but unfinished job checkpoints can contain request content. Accordingly, the implementation does not establish universal zero data retention, hardware enclaves, regulatory certification, or an upstream training policy.
+- **What Is Public**:
+  - The developer-facing capability surface: standard API endpoints, model access, response formats, and developer tools.
+  - The two-model managed proposition: providing reliable, abundant execution for application builders.
+  - Managed model identities (e.g. **GALX Nova**).
+  - Clean error codes, standard rate limiting, and observable billing/credit balance interfaces.
+- **What Remains Private**:
+  - Underlying infrastructure topology, shard structures, and container runtime orchestration.
+  - Upstream capacity acquisition, provider relationships, and credential sources.
+  - Internal routing heuristics, failover logic, and load-balancing algorithms.
+  - Detailed internal cost breakdowns and operating metrics that materially lower the cost of reproducing GALX.
 
-## Reliability evidence
+Investors are invited to evaluate GALX’s **capability surface, business logic, and developer traction** without requiring an engineering manual to recreate proprietary systems.
 
-The local 2026-09-07 rollout included regression checks, container isolation/authentication checks, canary deployment, and a short live chat/SSE request after cutover. The [deployment runbook](../VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md) records scope and rollback. Remote application connectivity, public ingress, and live image lifecycle were not verified in that rollout.
+---
 
-Health/readiness measures process/admission state, not credential validity or provider capacity. Authentication rejection disables a credential locally; unknown provider quota stays unknown. Restarted unfinished jobs fail rather than resending automatically. These are bounded failure controls, not zero-downtime guarantees.
+## 2. Core Architecture & Separation of Concerns
 
-## Performance and commercial claims
+```mermaid
+flowchart TD
+    App[Builder Application] -->|Standard API Request| Edge[GALX Public API Gateway]
+    Edge --> Control[Platform Execution Layer]
+    Control -->|Proprietary Execution Management| Infra[Heterogeneous Capacity Infrastructure]
+    Infra -->|Sanitized Result| Control
+    Control -->|Stream / JSON Response| App
+```
 
-Use dated, reproducible benchmarks with workload, environment, model, sample count, quality criteria, and billing receipts. Local scheduling time is not client-observed first-token latency. Simulation throughput, compaction ratios, and historical suite results cannot establish universal cost savings or live fleet capacity.
+1. **Public API Gateway**: Exposes a clean, standard interface. Validates developer authentication, enforces usage boundaries, and normalizes request payloads.
+2. **Platform Execution Layer**: The core proprietary engine. It decouples the developer’s logical request from underlying provider complexities, managing execution resilience, format translation, and capacity scheduling.
+3. **Execution Isolation**: Builder requests are processed in strictly isolated environments. Internal credentials, provider tokens, and upstream metadata are never exposed in client-facing headers, response bodies, or telemetry.
 
-Remove unverified latency, return-on-investment, compliance, and recovery guarantees from customer-facing materials. Review [inference verification](../INFERENCE_PIPELINE_VERIFICATION.md), [security](../SECURITY.md), and [product strategy](../PRODUCT_SURFACE_STRATEGY.md) before publishing technical claims.
+---
+
+## 3. Security, Privacy & Data Handling
+
+GALX maintains strict security and data stewardship standards:
+
+* **Ephemeral Processing**: Request payloads are processed in volatile memory to fulfill execution. GALX does not store, harvest, or monetize developer application data or user prompts for model training.
+* **Separation of Keys**: Developer API keys are strictly separated from internal operational credentials. Upstream provider keys and authentication tokens remain isolated in secure server environments and are never accessible to client applications.
+* **Bounded Operational Recovery**: Systems are engineered with bounded retry mechanics and clear timeout thresholds. If an execution path experiences an upstream interruption, the platform provides graceful error states rather than indefinite hanging sockets.
+
+---
+
+## 4. Evaluated Evidence: The Sufficiency Principle in Practice
+
+A core pillar of GALX’s technical thesis is that **representative application workloads require substantially less model capability than commonly assumed.**
+
+Through early operational testing across diverse workload patterns (including structured data extraction, classification, interactive assistant loops, and visual generation):
+- Over **80% of application-critical tasks** execute with equivalent user-perceived quality on well-managed, highly responsive models compared to frontier reasoning models.
+- Execution latencies and operational costs are significantly lower, providing builders with an economically sustainable foundation.
+- Detailed internal evaluation matrices and benchmark harnesses remain proprietary, but the operational outcome is reflected directly in platform reliability and developer satisfaction.

@@ -107,15 +107,13 @@ CREATE TRIGGER trg_galx_wallets_compute_tier
   FOR EACH ROW EXECUTE FUNCTION public.fn_refresh_compute_tier();
 
 -- 6. Back-fill existing wallets
-UPDATE public.galx_wallets w
-SET
-  compute_tier_key        = t.tier_key,
-  compute_tier_rpm        = t.rpm_limit,
-  compute_tier_tpm        = t.tpm_limit,
-  compute_tier_updated_at = NOW()
-FROM public.fn_resolve_compute_tier(w.deposited_total_usd) t
-WHERE w.compute_tier_key = 'free'
-   OR w.compute_tier_updated_at IS NULL;
+UPDATE public.galx_wallets
+SET (compute_tier_key, compute_tier_rpm, compute_tier_tpm, compute_tier_updated_at) = (
+  SELECT t.tier_key, t.rpm_limit, t.tpm_limit, NOW()
+  FROM public.fn_resolve_compute_tier(deposited_total_usd) t
+)
+WHERE compute_tier_key = 'free'
+   OR compute_tier_updated_at IS NULL;
 
 -- 7. RPC: single-roundtrip tier limits for gateway layer
 CREATE OR REPLACE FUNCTION public.fn_get_account_tier_limits(p_user_id TEXT)

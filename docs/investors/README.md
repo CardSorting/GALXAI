@@ -1,70 +1,58 @@
-# 🏛️ GALXAI Institutional & Strategic Diligence Room
+# 🏛️ GALX Investor Materials & Strategic Diligence
 
 <!-- docs-scope: commercial-draft -->
-> **Reading scope:** Commercial or product planning material. Claims, prices, forecasts, and examples require separate dated validation; they are not deployment guarantees, certifications, or SLAs. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+> **Reading scope:** Commercial and strategic investor materials. Contains thesis formulations, product positioning, unit economics frameworks, and venture scale arguments. Technical and operational capabilities describe public interfaces; proprietary routing mechanisms, capacity acquisition, and internal execution infrastructure remain private under [AGENTS.md](../AGENTS.md).
 
-## Flattening and Easing the Path to the First Dollar Made with AI
+## Sustainable, Abundant AI Access for Anyone Who Wants to Build
 
-Welcome to the **GALXAI Product, Strategy & Diligence Room**. This repository contains all plain-language executive summaries, interactive pitch decks, market sizing models, competitive teardowns, and technical architecture proofs.
-
----
-
-> **The Core Catch**:  
-> **"GALXAI flattens and eases the path to the first dollar made with AI."**  
-> We turn complex, expensive AI engineering into a **15-minute journey from prototype to profitable revenue**.
+Welcome to the **GALX Investor & Strategic Diligence Room**. This collection documents the company formation thesis, market architecture, product positioning, operational economics, and early evidence behind GALX.
 
 ---
 
-## ⚡ Fast-Track 10-to-20 Minute Meeting Track
+## ⚡ The Venture Formation Thesis in Brief
 
-If you are preparing for or reviewing a **10-to-20 minute executive meeting**, start with these fast-track assets:
+1. **The Future We Are Betting On**: AI capability is becoming abundant, while the infrastructure required to access, select, operate, and economically sustain that capability is becoming increasingly fragmented. The developer should think about what they want to build—not which model, provider, capacity source, or infrastructure strategy should run it.
+2. **The Non-Consensus Thesis**: For a large class of applications, developers do not need maximum available intelligence. They need sufficient intelligence, reliably and economically delivered, to complete the task. Model proliferation creates an opportunity for an intermediary rather than eliminating one.
+3. **The Product Decision**: A radically simple managed AI surface: **Two models. API access. Abundant serving. Build what you want.** The simplicity is the product decision. GALX knows about the machinery so the developer does not have to.
+4. **The Initial Wedge**: Builders, hobbyists, independent developers, and creative technologists experimenting with AI applications who do not want infrastructure management to become another full-time job.
+5. **Why This Can Become Enormous**: Positioned between the application and fragmented intelligence infrastructure, GALX becomes a persistent execution layer. **More builders → more applications → more application usage → more execution through GALX.**
+
+---
+
+## 🧭 Fast-Track Investor Review Track
+
+For an initial 10-to-20 minute review, start with these assets:
 
 | Asset | Purpose | Format / Read Time |
 | :--- | :--- | :--- |
-| 🎴 **[Interactive HTML Pitch Deck](deck.html)** | Standalone 8-slide deck: Stopping the Tokenmaxxing Crisis for CFOs, Net Spend Interception, and Open-Source Funnel Traction. | **Live Web Deck** |
-| 📊 **[GALXAI Pitch Deck (Google Slides / PPTX)](GALXAI_Pitch_Deck.pptx)** | Native 16:9 widescreen presentation with dark theme, speaker notes, financial table, and comparison cards. | **Google Slides / PPTX** |
-| ⚡ **[Google Slides Apps Script Generator](generate_google_slides.js)** | 1-click Google Apps Script to generate the presentation natively in Google Drive. | **Apps Script** |
-| ⏱️ **[00. 10-to-20 Minute Meeting Playbook](00_10_MINUTE_INVESTOR_MEETING_PLAYBOOK.md)** | Crisis talk tracks, Net Spend Interception math, 30-second objection killers, and executive close. | **2 mins** |
-| 📄 **[00. Executive One-Pager & Fact Sheet](00_ONE_PAGER_EXECUTIVE_TEASER.md)** | High-density 1-page visual tear sheet with the Tokenmaxxing Crisis, unit economics, open-source moats, and financials. | **2 mins** |
-| 📊 **[02. Pitch Deck Slide-by-Slide Specification](02_PITCH_DECK_SLIDE_BY_SLIDE.md)** | 8-slide crisis-and-traction cheat sheet with speaker notes, timing cues, and transition bridges. | **3 mins** |
+| 📄 **[00. Executive One-Pager & Thesis Teaser](00_ONE_PAGER_EXECUTIVE_TEASER.md)** | Single-page summary of the core thesis, product simplicity, wedge, and expansion logic. | **2 mins** |
+| ⏱️ **[00. 10-Minute Investor Meeting Playbook](00_10_MINUTE_INVESTOR_MEETING_PLAYBOOK.md)** | Partner meeting narrative clock, core thesis walkthrough, and rapid-fire objection defense. | **3 mins** |
+| 📊 **[02. Pitch Deck Slide-by-Slide Specification](02_PITCH_DECK_SLIDE_BY_SLIDE.md)** | 10-slide venture deck script detailing headlines, visual structures, talk tracks, and transitions. | **4 mins** |
+| 🎴 **[Interactive HTML Pitch Deck](deck.html)** | Standalone 10-slide interactive web presentation with live navigation, timer, and notes. | **Live Web Deck** |
 
 ---
 
-## 📑 Full Data Room Table of Contents
+## 📑 Complete Diligence Room Catalog
+
+The diligence suite is structured according to the 10-part investor narrative hierarchy:
 
 | Document | Description | Focus Area |
 | :--- | :--- | :--- |
-| **[01. Executive Memorandum & Product Brief](01_EXECUTIVE_SUMMARY_AND_MEMO.md)** | Comprehensive memo covering company thesis, traction, financial highlights, and partnerships. | **Executive Memo** |
-| **[02. Pitch Deck Slide-by-Slide Specification](02_PITCH_DECK_SLIDE_BY_SLIDE.md)** | 12-slide narrative designed for executive partner meetings with full talk tracks. | **Pitch Deck** |
-| **[03. Market Sizing: TAM, SAM & SOM Analysis](03_MARKET_SIZING_TAM_SAM_SOM.md)** | Top-down ($1.30T TAM) and bottom-up ($1.31B near-term SOM) econometric sizing with CAGR benchmarks. | **Market Sizing** |
-| **[04. Unit Economics: CAC, LTV, Margins & Payback](04_UNIT_ECONOMICS_CAC_LTV_PAYBACK.md)** | Blended CAC ($185), LTV ($5,350), Gross Margins (42% $\to$ 68%), and 138% Net Dollar Retention (NDR). | **Unit Economics** |
-| **[05. Competitive Landscape & Strategic Moats](05_COMPETITIVE_LANDSCAPE_AND_MOATS.md)** | 2x2 positioning matrix, feature teardown vs OpenRouter / Cloudflare / Portkey, and 4 defensible moats. | **Competitive Moats** |
-| **[06. 5-Year Financial Projections & Operating Model](06_FINANCIAL_PROJECTIONS_AND_MODEL.md)** | 5-year P&L forecast ($1.2M ARR $\to$ $85M ARR), headcount ramp, OpEx breakdown, and Rule of 40 index. | **Financial Model** |
-| **[07. Technical Due Diligence & Architecture Proof](07_TECHNICAL_DILIGENCE_AND_PATENTS.md)** | Technical audit FAQs for Partner CTOs, runtime boundaries, retention limits, and dated verification evidence. | **Technical Diligence**|
-| **[08. Commercial Thesis & Customer Discovery Playbook](08_COMMERCIAL_THESIS_AND_DISCOVERY_PLAYBOOK.md)** | ICP segmentation matrix, procurement psychology ($100k vs $900k paradox), and 10-question discovery script. | **Commercial Discovery** |
-| **[09. Enterprise Spend Governance & Control Plane](09_ENTERPRISE_SPEND_GOVERNANCE_AND_CONTROL_PLANE.md)** | "Why is our AI bill so high and how do we make it stop?" 7 waste root causes, Day 1 reverse-audit, and 3-tier remediation. | **Spend Governance** |
-| **[10. Enterprise Pilot Agreement & Proposal](10_ENTERPRISE_PILOT_PROPOSAL_AND_AGREEMENT.md)** | 30-Day Zero-Risk Reverse-Audit pilot contract terms, Net Spend Interception invoicing, and SLA exit criteria. | **Commercial Pilot** |
-
----
-
-## 💎 The Value Proposition in Brief
-
-1. **Massive Market Wave**: The global AI market is shifting from training models to **running AI in production**—a **$1.3 Trillion market by 2030 (38.2% CAGR)**.
-2. **Costco Wholesale Pricing for Compute**: We buy AI capacity in massive bulk and pass 25%–40% wholesale discounts directly to companies.
-3. **Stripe-Level Developer Simplicity**:
-   - **Drop-In Inference**: OpenAI-compatible SDKs and Server Actions eliminate custom proxy infrastructure.
-   - **Zero-Migration Auto-Patch**: `import 'galxai/patch'` upgrades existing OpenAI apps in 1 line.
-   - **AI Coding Agent Directives**: `npx galxai skills` embeds GALXAI into Cursor, Claude Code, and Windsurf workflows by default.
-4. **Smart Context Fluff Trimming (BroccoliDB)**:
-   - Slashes input token costs by **60%–90%** with 100% verified action safety across 180 domain tests and 0 errors.
-   - Request timing measured on the actual deployed path; no universal latency guarantee.
-5. **Top-Tier Unit Economics**: Blended CAC of **$185**, payback period of **2.1 months**, and **138% Net Dollar Retention**.
+| **[01. Executive Memorandum & Formation Thesis](01_EXECUTIVE_SUMMARY_AND_MEMO.md)** | The comprehensive investment memo detailing the venture formation argument in full depth. | **Core Memo** |
+| **[02. Pitch Deck Slide-by-Slide Specification](02_PITCH_DECK_SLIDE_BY_SLIDE.md)** | Slide-by-slide narrative structure and speaker cues for partner presentations. | **Pitch Deck** |
+| **[03. Market Architecture & Scale Potential](03_MARKET_SIZING_TAM_SAM_SOM.md)** | Structural market expansion thesis: why execution demand compounds with application software. | **Market Architecture** |
+| **[04. Business Model & Unit Economics](04_UNIT_ECONOMICS_CAC_LTV_PAYBACK.md)** | Clear economic engine: customer payment, serving costs, gross margin retention, and organic expansion. | **Unit Economics** |
+| **[05. Competitive Landscape & Defensibility](05_COMPETITIVE_LANDSCAPE_AND_MOATS.md)** | Catalogs vs. cloud primitives vs. abstraction; the operating knowledge asymmetry. | **Defensibility** |
+| **[06. Financial Architecture & Capital Milestones](06_FINANCIAL_PROJECTIONS_AND_MODEL.md)** | Phase-based capital allocation, operating milestones, and what subsequent rounds unlock. | **Capital Roadmap** |
+| **[07. Technical Diligence & Operating Boundaries](07_TECHNICAL_DILIGENCE_AND_PATENTS.md)** | Capability vs. implementation boundary; operational integrity and security posture. | **Technical Diligence** |
+| **[08. Builder Discovery & Feedback Playbook](08_COMMERCIAL_THESIS_AND_DISCOVERY_PLAYBOOK.md)** | Discovery script for understanding builder friction and validating the sufficient intelligence thesis. | **Builder Discovery** |
+| **[09. The Platform Abstraction Layer](09_ENTERPRISE_SPEND_GOVERNANCE_AND_CONTROL_PLANE.md)** | How GALX absorbs underlying ecosystem fragmentation so builders never encounter it. | **Platform Abstraction** |
+| **[10. Developer & Partner Access Framework](10_ENTERPRISE_PILOT_PROPOSAL_AND_AGREEMENT.md)** | Commercial terms, service expectations, and evaluation criteria for early design partners. | **Commercial Framework** |
 
 ---
 
 ## 📬 Contact & Inquiries
 
-- **Direct Inquiries**: `willcruzanswers@gmail.com`
+- **Founder Direct**: William Cruz (`willcruzanswers@gmail.com`)
 - **Live Platform**: [https://galx.ai](https://galx.ai)
-- **Developer Hub**: [https://galx.ai/agents](https://galx.ai/agents)
 - **Developer Documentation**: [https://galx.ai/docs](https://galx.ai/docs)

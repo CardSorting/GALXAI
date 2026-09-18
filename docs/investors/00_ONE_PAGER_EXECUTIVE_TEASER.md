@@ -1,67 +1,53 @@
-# 📄 GALXAI: Executive Fact Sheet
+# 📄 GALX Executive One-Pager & Fact Sheet
 
 <!-- docs-scope: commercial-draft -->
-> **Reading scope:** Commercial or product planning material. Claims, prices, forecasts, and examples require separate dated validation; they are not deployment guarantees, certifications, or SLAs. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+> **Reading scope:** Commercial and strategic investor materials. Contains thesis formulations, product positioning, unit economics frameworks, and venture scale arguments. Technical and operational capabilities describe public interfaces; proprietary routing mechanisms, capacity acquisition, and internal execution infrastructure remain private under [AGENTS.md](../AGENTS.md).
 
-## Stopping the "Tokenmaxxing" Crisis for CFOs & Startups
+## Sustainable, Abundant AI Access for Anyone Who Wants to Build
 
-**Company**: GALXAI, Inc. | **Sector**: AI Infrastructure, Token Clearinghouse & Developer Tooling  
-**Stage (2026)**: Pre-Launch / Private Beta (Core Product Complete & Functionally Verified)  
-**Live Platform**: [https://galx.ai](https://galx.ai) | **Contact**: `willcruzanswers@gmail.com`  
-
----
-
-### 🚨 The Crisis: "Tokenmaxxing" Economics Spiraling Out of Control
-Startups, enterprises, and CFOs are drowning in uncontrollable AI compute costs:
-* **The SaaS Margin Trap**: An AI startup charges $20/user/mo, but users interacting with autonomous agents trigger **$45/user/mo in retail API compute bills**. The more users they acquire, the faster they burn cash.
-* **CFO Invoicing Shock**: Enterprises connect agents and context-bloated workflows, and CFOs watch monthly bills explode from **$10,000 to $150,000+ overnight**.
-* **100x Agent Token Loops**: Autonomous AI agents (Cursor, Claude Code) consume **50x–200x more tokens**, while developers accidentally burn **$60/M o1-pro flagship models** (a 400x cost penalty) on trivial tasks.
-* **The CFO Mandate**: *"Make the bleeding stop."*
+**Company**: GALX, Inc. | **Sector**: AI Developer Infrastructure & Abstraction Layer  
+**Stage (2026)**: Early Stage / Working Platform & Developer Access  
+**Founder**: William Cruz | **Contact**: `willcruzanswers@gmail.com` | **Platform**: [https://galx.ai](https://galx.ai)
 
 ---
 
-### 💡 The Solution: How GALXAI Rescues Unit Economics
-**GALXAI flattens and eases the path to the first dollar made with AI.**  
-From prototype to profitable revenue in **15 minutes**.
+### 1. The Future We Are Betting On
+AI capability is becoming abundant, while the infrastructure required to access, select, operate, and economically sustain that capability is becoming increasingly fragmented. The long-term winner is not another sprawling model catalog. It is an abstraction layer through which developers can consume useful intelligence without having to continuously manage the underlying AI ecosystem.
 
-* **Costco Wholesale Margins**: 25%–40% bulk discounts on Tier-5 compute + prompt compaction flip negative-margin AI features into **+50% to +68% gross profit margins** on Day 1.
-* **Semantic Prompt Compaction**: Automated fluff trimming slashes 60%–90% of redundant context dumps and repeated AST logs with 0 errors across 180 domain tests.
-* **Smart Bill Circuit Breaker**: Automatically cascades tasks to cheaper models and clamps runaway subagent loops before bills explode.
+### 2. The Non-Consensus Thesis
+The AI market is fixated on maximizing frontier capability and exposing endless model knobs. GALX explores a different reality: **For a large class of applications, developers do not need maximum available intelligence. They need sufficient intelligence, reliably and economically delivered, to complete the task.** As models proliferate, complexity multiplies underneath the application. GALX's opportunity is to absorb that complexity.
 
----
+### 3. The Product Today: Deliberately Simple
+**Two models. API access. Abundant serving. Build what you want.**  
+GALX provides developers access to a deliberately small managed model surface (including **GALX Nova**) through a standard API. The simplicity is the product decision. GALX knows about the machinery so the developer does not have to.
 
-### 💰 The Financial Proof: Net Spend Interception
-We replace a customer's **$100,000 retail OpenAI bill** with a consolidated **$62,000 GALXAI bill**.  
-The customer saves **$38,000 in cash on Day 1 (-38%)**, and GALXAI captures **$14,000 in platform gross margin** on $48,000 wholesale compute.
+### 4. The Initial Wedge: Builders
+The initial wedge is hobbyists, independent developers, creative technologists, and developers experimenting with AI-powered applications who want to make something without model configuration and infrastructure management becoming another full-time project.
 
-### 🚀 In-House Open-Source Distribution Engine
-* **LUMI VS Code Extension**: **16,000 Active Users** coding daily inside their IDE.
-* **GALXAI CLI Agent**: **2,000 Active Users** running autonomous terminal workflows.
-* **120,000+ Lifetime Installs**: Rapid 9-month organic adoption with **$0 paid ad spend**.
-* **The Built-In Funnel**: 18,000+ active developers already trust our developer tools, creating an immediate organic conversion bridge into GALXAI production clearing.
+### 5. Why This Can Become Enormous
+GALX sits directly between the application and the fragmented intelligence infrastructure underneath it:
+$$\text{More Builders} \longrightarrow \text{More Applications} \longrightarrow \text{More Application Usage} \longrightarrow \text{More Execution Through GALX}$$
+When experiments become software people actually use, every user interaction generates recurring execution demand. GALX participates in the ongoing execution layer of applications built on AI.
 
 ---
 
-### 📊 Unit Economics & Forward Capital Growth
+### 6. The Asymmetric Advantage: We Absorb Complexity, Sell Simplicity
+GALX's defensibility is the accumulated operational knowledge required to turn heterogeneous, economically volatile AI capacity into a reliable, dead-simple developer experience. The public product becomes simpler while the knowledge required to operate it becomes deeper.
 
-| Metric | Benchmark | Plain English Takeaway |
+### 7. Clear Economic Engine
+$$\text{Customer Pays GALX} \longrightarrow \text{Customer Uses GALX} \longrightarrow \text{GALX Incurs Serving Cost} \longrightarrow \text{GALX Retains Gross Margin}$$
+As applications running on GALX scale their active users, execution volume compounds naturally.
+
+---
+
+### 8. What We Are Testing & Proving Next
+| Dimension | Current Status | What We Are Learning |
 | :--- | :--- | :--- |
-| **Paid Customer Acquisition (CAC)** | **$0 Paid CAC** | Pure organic conversion from 120k+ open-source installs |
-| **Projected Customer LTV**| **$5,350** | $1,020 (Self-serve) to $440,000+ (Enterprise accounts) |
-| **Payback Period** | **2.1 Months** | Top-decile capital recovery velocity |
-| **Net Dollar Retention** | **138%** | Revenue expands automatically as customer token volume scales |
-
-```
-2026 (Private Beta): Core Built & Tested in Closed Cohorts | Pre-Launch
-2027 (Launch Y1):    $ 1.50M ARR |  1,800 Apps | 42.0% Margin
-2028 (Scale Y2):     $ 7.20M ARR |  7,500 Apps | 50.0% Margin
-2029 (Exp. Y3):      $22.00M ARR | 20,000 Apps | 58.0% Margin | Cash Flow Breakeven (Mo 34)
-2031 (Y5):           $90.00M ARR | 70,000 Apps | 68.0% Margin ($22.0M Free Cash Flow)
-```
+| **What We Believe** | Abstraction beats model catalogs | Developers want to build features, not calibrate model weights or providers. |
+| **What We Observed** | Overkill is common in the wild | Representative application workloads run effectively on far leaner capability tiers than commonly assumed. |
+| **What We Demonstrated** | Working 2-model platform | Live API serving real requests with seamless developer ergonomics. |
+| **What We Are Testing Next** | Retention & compounding usage | Tracking what builders create, whether their applications retain users, and how recurring execution demand grows. |
 
 ---
 
-### 🤝 Strategic Portfolio Rescue Collaboration
-* **Portfolio AI Spend Audit**: 30-day zero-risk audit to slash portfolio company AI bills by 30%+ and stop the tokenmaxxing burn.
-* **Developer Acceleration Pilot**: Equip engineering teams with drop-in components to ship in 15 minutes.
-* **Strategic Partnership**: Join us as we build the economic clearinghouse for the AI era.
+> **The Venture Test:** If GALX is right, what becomes enormous? GALX does not merely sell inexpensive inference. GALX becomes the **default abstraction and execution layer** through which the next generation of software consumes AI capability.

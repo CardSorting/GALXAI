@@ -1,104 +1,87 @@
-# 💰 GALXAI Unit Economics: CAC, LTV, Margins & Payback Analysis
+# 💰 GALX Business Model & Unit Economics Framework
 
 <!-- docs-scope: commercial-draft -->
-> **Reading scope:** Commercial or product planning material. Claims, prices, forecasts, and examples require separate dated validation; they are not deployment guarantees, certifications, or SLAs. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+> **Reading scope:** Commercial and strategic investor materials. Contains thesis formulations, product positioning, unit economics frameworks, and venture scale arguments. Technical and operational capabilities describe public interfaces; proprietary routing mechanisms, capacity acquisition, and internal execution infrastructure remain private under [AGENTS.md](../AGENTS.md).
 
-A quantitative breakdown of customer acquisition costs (CAC), lifetime value (LTV), gross margin expansion, cohort retention curves, and capital efficiency.
+## An Honest Economic Engine: Consumption, Serving & Margin
 
----
-
-## 📈 1. Executive Unit Economics Dashboard
-
-| Metric | Self-Serve (PLG) | Mid-Market | Enterprise | Blended Total |
-| :--- | :--- | :--- | :--- | :--- |
-| **Customer Acquisition Cost (CAC)** | **$45** | **$1,200** | **$12,500** | **$185** |
-| **Average Initial Monthly Revenue (MRR)** | **$85** | **$1,800** | **$15,000** | **$340** |
-| **Gross Margin (Year 1 $\to$ Year 3)** | **45% $\to$ 62%** | **42% $\to$ 65%** | **40% $\to$ 68%** | **42% $\to$ 65%** |
-| **Average Customer Lifetime (Months)** | **24 months** | **36 months** | **48 months** | **30 months** |
-| **Customer Lifetime Value (LTV)** | **$1,020** | **$38,880** | **$440,640** | **$5,350** |
-| **LTV / CAC Ratio** | **22.6x** | **32.4x** | **35.2x** | **28.9x** (Gross LTV) / **12.1x** (Net Margin LTV) |
-| **Payback Period** | **1.2 Months** | **2.6 Months** | **3.8 Months** | **2.1 Months** |
-| **Net Dollar Retention (NDR)** | **124%** | **142%** | **156%** | **138%** |
+A disciplined examination of how GALX generates revenue, incurs serving costs, preserves gross margin, and expands economically as customer applications grow.
 
 ---
 
-## 🎯 2. Customer Acquisition Cost (CAC) by Channel
+## 1. The Core Economic Engine
 
-```mermaid
-graph LR
-    A[Organic npx CLI & Agent Skills] -->|CAC: $8| D[Developer Signups]
-    B[Programmatic SEO: 235+ Pages] -->|CAC: $22| D
-    C[Component Eject npx add] -->|CAC: $14| D
-    E[Enterprise Outbound & SRE Content] -->|CAC: $4,500| F[Enterprise Sales]
-```
+GALX operates on a clear, legible business model:
 
-1. **Organic Developer CLI & Agent Skills Directives (`npx galxai skills`)**:
-   - **Cost**: Open-source engineering cost + lightweight CDN distribution.
-   - **Effective CAC**: **$8.00 / activated developer**.
-   - **Mechanism**: Every time a developer or AI assistant installs `.cursorrules` or `CLAUDE.md`, downstream projects inherit GALXAI as the default gateway.
-
-2. **Programmatic SEO (pSEO) & AEO Saturation**:
-   - **Cost**: Static generation tooling & Schema.org automated data pipelines.
-   - **Effective CAC**: **$22.00 / acquired user**.
-   - **Mechanism**: High-intent search queries ("cheapest gpt-5.6-sol api", "openai prompt cache discount", "cursor base url router") land on static SSG comparison pages.
-
-3. **Product-Led Component Eject (`npx galxai add image`)**:
-   - **Cost**: Zero ad spend.
-   - **Effective CAC**: **$14.00 / active engineering team**.
-   - **Mechanism**: Developers copy-paste declarative JSX components into their frontend trees; the application permanently routes backend requests to GALXAI.
-
-4. **Mid-Market & Enterprise Inbound (FinOps & Reliability)**:
-   - **Cost**: Dedicated technical solutions architects, SOC 2 compliance verification, proof-of-concept testing.
-   - **Effective CAC**: **$4,500–$12,500 / closed enterprise contract**.
-
----
-
-## 💎 3. Gross Margin Expansion Model
-
-GALXAI's gross margin scales dynamically through three structural margin drivers:
-
-```
-Year 1: 42% Gross Margin  (Initial clearinghouse float & volume tier discounts)
-Year 2: 49% Gross Margin  (+ Compound prompt cache margin retention)
-Year 3: 58% Gross Margin  (+ Tier-5 enterprise capacity commitment arbitrage)
-Year 4: 64% Gross Margin  (+ High-margin ZAPS Priority & Enterprise Workspace seats)
-Year 5: 68% Gross Margin  (+ Proprietary Anycast edge caching & zero-egress mesh)
-```
+$$\text{Customer Pays GALX} \longrightarrow \text{Customer Uses GALX} \longrightarrow \text{GALX Incurs Serving Cost} \longrightarrow \text{GALX Retains Gross Margin}$$
 
 ```mermaid
 flowchart LR
-    A[Developer Pays Wholesale: $0.70/1M] --> B[GALXAI Clearinghouse Engine]
-    B -->|Foundation Provider Bulk Cost: $0.40/1M| C[Direct Margin: 42.8%]
-    B -->|75% Prompt Cache Pass-Through| D[Cache Arbitrage Margin: +15%]
-    B -->|Enterprise Shard & Seat Addon| E[SaaS Platform Margin: +10.2%]
-    C & D & E --> F[Blended Net Margin: 68.0%]
+    A[Customer Pays Usage / Tier Fee] --> B[GALX Platform]
+    B -->|Serves Execution Request| C[Application End User]
+    B -->|Optimized Serving Cost| D[Underlying Infrastructure / Capacity]
+    B -->|Retained Capital| E[Platform Gross Margin]
 ```
 
-### Margin Mechanism 1: Tier Volume Aggregation (Float Arbitrage)
-GALXAI aggregates millions of small developer requests into single tier-5 enterprise accounts with OpenAI, capturing the 25%–35% delta between retail tier-1 and wholesale tier-5 pricing.
+### 1. Customer Revenue
+Developers purchase compute access through developer tiers and usage-based billing. They receive abundant, predictable execution without paying punitive retail surcharges or dealing with arbitrary provider rate limits.
 
-### Margin Mechanism 2: Compound Prompt Caching Pass-Through
-Prefix caching yields a 75% provider rebate on long context queries. GALXAI passes the full discount to the customer while maintaining its clearing fee on total processed throughput.
+### 2. Serving Cost
+GALX fulfills execution requests through proprietary operational knowledge, managing capacity across heterogeneous infrastructure sources, local runtimes, and optimized serving topologies.
 
-### Margin Mechanism 3: SaaS Seat & Shard Subscription Revenue
-Enterprise customers purchase high-margin ($15–$50/seat/mo) governance tools:
-- Role-based access control (RBAC) & SAML/SSO.
-- Team spend limits and per-project cost center budgets.
-- Dedicated Anycast IP addresses and 99.999% SLA private VPC tunnels.
+### 3. Gross Margin Retention
+Because GALX provides a focused two-model managed surface rather than passing through unmanaged retail calls, the platform captures healthy gross margins by delivering sufficient intelligence efficiently.
 
 ---
 
-## 🔄 4. Retention & Expansion Curves (Net Dollar Retention: 138%)
+## 2. Compounding Expansion: The Application Lifecycle
 
-Unlike traditional SaaS tools that hit a ceiling on seat counts, **GALXAI revenue expands automatically as customer applications scale in user traffic and token consumption**:
+Traditional developer tools hit revenue ceilings because they charge per seat. GALX’s economics expand with the execution volume of the applications built on the platform:
 
 ```
-Cohort Month 0:  $10,000 (100 Dev Teams onboarded)
-Cohort Month 6:  $11,800 (118% NDR - Early apps launching to production)
-Cohort Month 12: $13,800 (138% NDR - High-traffic apps driving massive token volume)
-Cohort Month 24: $18,400 (184% NDR - Enterprise accounts federating all internal tools)
+    [Phase 1: Prototype]           [Phase 2: Launch]              [Phase 3: Scale]
+      Builder Experiments           Initial Users Adopt             High-Traffic Production
+    -------------------------     -------------------------     -----------------------------
+    • Low initial spend           • Daily active usage          • Compounding execution volume
+    • Fast iteration & test       • Predictable execution       • Deep platform stickiness
+    • Low cost to acquire         • Organic revenue growth      • High gross margin retention
 ```
 
-### Churn Containment:
-- **Zero Lock-In Paradox**: Because switching to GALXAI requires zero code changes (`import 'galxai/patch'` or `base_url`), onboarding friction is near zero.
-- **Infrastructure Integration Depth**: Once routing policies, telemetry, budgets, and Server Actions are deployed into production repositories, switching costs increase naturally while developer satisfaction remains high.
+1. **Low Acquisition Friction**: Builders start quickly because GALX provides an immediate API without multi-week enterprise negotiations or confusing setup steps.
+2. **Organic Account Expansion**: As an application attracts more end users, its requests per day compound. GALX participates directly in that upside without needing additional sales effort.
+3. **High Switching Friction**: Once an application’s backend and client-facing workflows depend on GALX's reliability and low operational overhead, switching back to managing raw infrastructure represents a substantial engineering regression.
+
+---
+
+## 3. The Sufficient Intelligence Margin Advantage
+
+The conventional approach to AI developer tooling assumes that every call must be forwarded to the most expensive foundation model available. This destroys application margins and makes developer pricing volatile.
+
+GALX’s non-consensus thesis creates an asymmetric economic advantage:
+
+| Dimension | Conventional Model Reseller | GALX Abstraction Layer |
+| :--- | :--- | :--- |
+| **Model Scope** | Sells 100+ unmanaged third-party models | Deliberately manages two focused models (e.g. GALX Nova) |
+| **Operational Control** | Passive byte-pipe forwarding | Active management of capacity, resilience, and serving |
+| **Gross Margin Profile** | Thin, fragile spread on top of retail rates | Healthy platform margin enabled by operational delivery |
+| **Developer Experience** | High decision friction; developer manages complexity | Radical simplicity; developer builds software |
+
+By delivering **sufficient intelligence** reliably and economically, GALX provides developers with cost certainty while protecting platform unit economics.
+
+---
+
+## 4. What We Are Proving in Current Cohorts
+
+Intellectual honesty requires measuring what is known today versus what is being validated:
+
+### 1. Developer Payment Willingness
+- **Observation**: Builders are willing to pay for friction-free access that saves them days of infrastructure setup.
+- **Ongoing Test**: Evaluating optimal initial credit structures and usage thresholds to balance rapid onboarding with immediate margin contribution.
+
+### 2. Execution Volume Durability
+- **Observation**: Early builders exhibit steady request activity during active development.
+- **Ongoing Test**: Tracking long-term retention as developer prototypes transition into publicly distributed products.
+
+### 3. Serving Cost Predictability
+- **Observation**: Concentrated model surfaces allow far greater operational control than broad, uncurated catalogs.
+- **Ongoing Test**: Validating that serving margins remain stable across fluctuating traffic patterns and multi-tenant spikes.

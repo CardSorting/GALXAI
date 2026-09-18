@@ -1,117 +1,79 @@
-# 🎯 GALXAI Commercial Thesis & Customer Discovery Playbook
+# 🎯 GALX Builder Discovery & Feedback Playbook
 
 <!-- docs-scope: commercial-draft -->
-> **Reading scope:** Commercial or product planning material. Claims, prices, forecasts, and examples require separate dated validation; they are not deployment guarantees, certifications, or SLAs. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+> **Reading scope:** Commercial and strategic investor materials. Contains thesis formulations, product positioning, unit economics frameworks, and venture scale arguments. Technical and operational capabilities describe public interfaces; proprietary routing mechanisms, capacity acquisition, and internal execution infrastructure remain private under [AGENTS.md](../AGENTS.md).
 
-> **Strategic Context**: This playbook captures the commercial breakthrough documented in `context.md`—transitioning from a commodity "cheap token seller" to an **Enterprise AI Consumption & Acceleration Layer** that compresses *time-to-first-dollar*, eliminates engineering infrastructure mistakes, and provides autonomous cost governance.
+## Understanding the Builder: Validating the Abstraction Thesis
+
+A practical discovery and user-research playbook designed to understand builder friction, evaluate the sufficient intelligence thesis, and turn early experiments into long-term execution workloads.
 
 ---
 
-## 1. The Core Strategic Thesis
+## 1. The Core Discovery Objective
 
-### The Commodity Trap vs. The Problem Around the Commodity
-* **The Surface Illusion**: "GalX sells tokens for 25%–40% cheaper."
-* **The Reality**: Token discounts are the *measurable outcome*, but not the *reason enterprises buy*.
-* **The True Value Proposition**: 
-  > **"We compress time-to-first-dollar and eliminate the infrastructure tuition of deploying production AI."**
+GALX's commercial success depends on solving the genuine operational bottlenecks faced by builders:
 
-Most engineering teams waste months and hundreds of thousands of dollars learning AI infrastructure the hard way:
-* Fragile backend route proxies to hide API keys
-* State management and loading state boilerplate
-* Unpredictable monthly inference bills from accidentally routing simple tasks to flagship frontier models
-* Rate-limiting (HTTP 429) outages during traffic spikes
-* Complex multi-provider failover and vendor lock-in
+> **"Are developers spending more time wrestling with AI infrastructure than actually building their software?"**
 
-**GalX already paid that engineering tuition so the customer doesn't have to.**
+If yes, GALX's radical simplicity—**Two models. API access. Abundant serving. Build what you want.**—provides an immediate, high-relief solution.
 
-```
-┌─────────────────────────────────────────────────────────────────────────────────────────────────┐
-│                                    THE COMMERCIAL SHIFT                                         │
-├────────────────────────────────────────┬────────────────────────────────────────────────────────┤
-│ FROM: Commodity Pricing                │ TO: Problem-Centric Value                              │
-├────────────────────────────────────────┼────────────────────────────────────────────────────────┤
-│ • "Save 25%-40% per million tokens"    │ • "Compress time from AI prototype to revenue"         │
-│ • "Proprietary token aggregation"      │ • "Eliminate $150k+ in unbillable ML-infra dev time"   │
-│ • Perceived as an extra $100k vendor   │ • Net budget reduction: replace retail API invoices    │
-│ • Competing on price against routers   │ • Competing on velocity, governance, & reliability     │
-└────────────────────────────────────────┴────────────────────────────────────────────────────────┘
+---
+
+## 2. Builder Personas: Who We Talk To
+
+```mermaid
+graph TD
+    B1[Indie Developers & Micro-SaaS Founders] --> GALX[GALX Execution Layer]
+    B2[Creative Technologists & Media Hackers] --> GALX
+    B3[Product Engineers Experimenting with AI Features] --> GALX
 ```
 
----
+### Persona 1: Indie Developers & Micro-SaaS Founders
+- **Profile**: Solo founders or small teams launching niche SaaS, browser extensions, or automated workflow tools.
+- **Pain Point**: Cannot afford to spend weeks building complex proxy servers, handling rate limits, or risking runaway credit card bills from unpredictable API spikes.
+- **What GALX Provides**: An immediate API endpoint that works predictably out of the box with clear economic boundaries.
 
-## 2. Solving the Procurement Psychology Paradox
-*(The "$900K Saved vs. $100K New Vendor Invoice" Barrier)*
+### Persona 2: Creative Technologists & Media Hackers
+- **Profile**: Designers, interactive artists, and developers building generative media tools, interactive bots, and visual synthesis projects.
+- **Pain Point**: Need abundant, responsive execution for rapid prototyping and live user interaction without jumping through enterprise cloud hurdles.
+- **What GALX Provides**: Abundant capacity, fast turnaround, and zero configuration drag.
 
-### The Psychological Hurdle
-If GalX eliminates $900K of unnecessary annual inference spend and charges $100K, an organization's finance team might still view GalX as an **unwanted $100K new line-item expense** rather than an $800K net gain.
-
-### The 3 Architectural Solutions:
-
-#### 1. The Direct Spend Interception (Consolidated Billing)
-* **How it works**: The customer does not pay OpenAI + GalX. GalX becomes the primary clearinghouse.
-* **Psychological Reality**: The customer's $1,000K OpenAI invoice is eliminated and replaced by a single $200K GalX invoice. Procurement registers a **$800K direct budget reduction**, zero net vendor additions.
-
-#### 2. Avoided Spend Attribution on Every Invoice
-Every monthly statement and dashboard widget explicitly highlights:
-```
-┌───────────────────────────────────────────────────────────────┐
-│ INVOICE SUMMARY — ACME CORP                                   │
-├───────────────────────────────────────────────────────────────┤
-│ Gross Retail Workload Value (OpenAI List Price):   $18,400.00 │
-│ Autonomous Caching & Routing Rebate:              -$ 6,250.00 │
-│ Net Amount Billed by GALXAI:                       $12,150.00 │
-├───────────────────────────────────────────────────────────────┤
-│ NET SAVINGS DELIVERED THIS CYCLE:                  $ 6,250.00 │
-└───────────────────────────────────────────────────────────────┘
-```
-
-#### 3. Free-Tier Gateway with Zero Lock-In
-Developers start with $5 in free credits, test with `import 'galxai/patch'` or an OpenAI-compatible SDK, and experience the performance without requiring procurement sign-off.
+### Persona 3: Product Engineers Adding AI to Existing Apps
+- **Profile**: Full-stack developers at growing startups tasked with integrating AI capabilities (summarization, structured extraction, smart search) into existing products.
+- **Pain Point**: Overwhelmed by the endless parade of models, providers, and SDK updates; just want a stable, dependable endpoint that returns valid data.
+- **What GALX Provides**: A clean abstraction layer that eliminates ongoing maintenance.
 
 ---
 
-## 3. The 3 Ideal Customer Profiles (ICPs) & Cost Breakdown Matrix
+## 3. The 10-Question Discovery Framework
 
-| Dimension | ICP 1: AI-Native Startups (Seed to Series B) | ICP 2: Dev Agencies & Studios | ICP 3: Mid-Market SaaS Adding AI |
-| :--- | :--- | :--- | :--- |
-| **Target Titles** | CTO, Head of AI, Lead Engineer | Agency Owner, Technical Director, Solutions Architect | VP Engineering, Head of Product, FinOps Lead |
-| **Existing Cost in Dollars** | $15,000–$80,000 / month in frontier inference | $2,000–$10,000 / month across client projects | $30,000–$250,000 / month in unmanaged model spend |
-| **Existing Cost in Engineering Hours** | 1–2 Senior Devs ($300k–$400k/yr) building proxies, caching layers, and failover | 20–40 hours per client build wiring backend routes & auth | 3–6 months of platform team time building internal AI gateway |
-| **Biggest Infrastructure Footgun** | Launch delay from rate limits (429s) and runaway prompt size costs | Client key leakage and non-technical clients failing to provision API keys | Rogue teams using expensive frontier models for basic classification tasks |
-| **Why In-House / Alternatives Fail** | Self-hosted LiteLLM/Portkey breaks on edge runtimes and requires on-call maintenance | Asking clients to manage their own OpenAI accounts causes massive onboarding friction | AWS Bedrock / Azure AI charge full retail and take 6+ months for enterprise procurement |
-| **The GalX Hook** | *"Get 30%+ savings, auto-failover, and managed inference routing with observable failures."* | *"Keep your product UI while GALXAI handles inference routing, failover, and billing."* | *"One-line drop-in (`import 'galxai/patch'`) with instant team spend caps and compliance auditing."* |
+Use these questions in structured user interviews to test our core hypotheses:
 
----
+### Category A: Uncovering Infrastructure Drag
+1. **"When you decided to add AI to your project, how long did it take to go from an idea to your first working prototype?"**
+2. **"How much time do you currently spend managing API keys, evaluating new models, handling rate limits, or dealing with provider outages?"**
+3. **"Have you ever abandoned or paused an AI project because the backend setup or provider onboarding felt like too much overhead?"**
 
-## 4. Customer Discovery Interview Script (10 Questions)
+### Category B: Testing the "Sufficient Intelligence" Thesis
+4. **"Which models are you currently using in production, and how did you decide on them?"**
+5. **"Do you actually need the largest, most expensive reasoning model for your core user flow, or would a faster, cheaper, well-tuned model deliver the same user outcome?"**
+6. **"If you could have a reliable, abundant model that costs significantly less and never hits arbitrary rate limits, would you switch tomorrow?"**
 
-Use this script during discovery conversations with engineering leaders to quantify their existing pain:
-
-### Category A: Uncovering the True Cost & Waste
-1. **"When your team builds a new AI feature, how many engineering days are spent on backend plumbing, proxy routes, loading states, and key security before user-facing UI is shipped?"**
-2. **"How do you currently ensure your application doesn't go down or stall when OpenAI or your primary provider throws a 429 rate limit or 503 error?"**
-3. **"Do you have visibility into which internal services or team members are calling expensive frontier models for tasks that could be handled by faster, cheaper models?"**
-
-### Category B: Diagnosing Current Workarounds
-4. **"How are you currently managing LLM costs and caching across your environments?"**
-5. **"Have you considered or built an internal AI proxy? If so, who maintains it when providers update their APIs?"**
-6. **"How long does it take for a new developer or contractor on your team to get credentials and safely start making LLM calls in your codebase?"**
-
-### Category C: Understanding Procurement & Budgeting Behavior
-7. **"Where does your AI inference spend live on your P&L today—is it classified as COGS, cloud hosting, or R&D expense?"**
-8. **"If a solution cut your monthly inference bill by 30% and prevented rate-limit outages, how would finance prefer to pay for it: consolidated compute invoice or SaaS license?"**
-9. **"What internal approvals are required when your team wants to test different OpenAI model tiers (e.g. benchmarking gpt-5.6-sol vs gpt-5.6-terra for cost/speed tradeoffs)?"**
-10. **"What would be the risk if your core AI feature experienced a 2-hour outage during a customer demo or high-traffic event due to OpenAI rate limits?"**
+### Category C: Economics & Compounding Usage
+7. **"How do API costs factor into how you price or design your software?"**
+8. **"What happens to your infrastructure bill when your application gets featured on Hacker News, Product Hunt, or Twitter?"**
+9. **"If your app scales from 100 users to 10,000 users, what is your biggest operational fear regarding your AI backend?"**
+10. **"What is the single thing an AI platform could do that would allow you to focus 100% of your time on building your product?"**
 
 ---
 
-## 5. Objection Handling Cheat-Sheet
+## 4. Synthesis: How Discovery Feeds Product Evolution
 
-### Objection 1: *"Aren't you just an AI token aggregator / discount broker?"*
-* **Response**: *"Token aggregation is just one of the mechanisms we use under the hood. The actual product is the infrastructure layer that compresses your time-to-first-dollar. We give you zero-boilerplate React components, automatic edge failover, and prompt caching so your team can ship in hours instead of spending months building custom inference plumbing."*
+Discovery signals are synthesized directly into our learning framework:
 
-### Objection 2: *"Why wouldn't we just use LiteLLM or OpenRouter?"*
-* **Response**: *"OpenRouter and LiteLLM are traditional API proxies. GALXAI adds zero-route Server Actions, spend governance, and automatic IDE agent directives (`npx galxai skills`). Self-hosting proxies also means your team manages infrastructure and handles routing failures."*
-
-### Objection 3: *"We already have direct OpenAI enterprise credits."*
-* **Response**: *"That's great! You can bring your own enterprise OpenAI keys directly into our sovereign Shard Vaults. You still get our inference routing, bounded failure handling, and workload-dependent caching, and zero-boilerplate frontend components across all OpenAI models."*
+| What Builders Tell Us | What It Validates | How GALX Responds |
+| :--- | :--- | :--- |
+| *"I hate choosing between 40 models on an endless dropdown."* | Validates the **Two-Model Managed Surface** thesis. | Keep the public surface focused and simple. |
+| *"I spent 3 days setting up an enterprise cloud console just to test an API."* | Validates the **Instant API Access** wedge. | Instant onboarding with zero friction. |
+| *"My users don't care what model it is as long as it works instantly and reliably."* | Validates the **Sufficient Intelligence** principle. | Focus engineering on abundant, dependable execution. |
+| *"I was terrified of getting a surprise \$5,000 bill when my app went viral."* | Validates the **Predictable Economics** thesis. | Clear developer tiers and transparent serving economics. |

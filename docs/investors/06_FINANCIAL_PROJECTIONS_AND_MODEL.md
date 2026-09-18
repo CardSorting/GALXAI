@@ -1,71 +1,83 @@
-# 📊 GALXAI 5-Year Financial Projections & Operating Model
+# 📊 GALX Financial Architecture & Capital Milestones
 
 <!-- docs-scope: commercial-draft -->
-> **Reading scope:** Commercial or product planning material. Claims, prices, forecasts, and examples require separate dated validation; they are not deployment guarantees, certifications, or SLAs. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+> **Reading scope:** Commercial and strategic investor materials. Contains thesis formulations, product positioning, unit economics frameworks, and venture scale arguments. Technical and operational capabilities describe public interfaces; proprietary routing mechanisms, capacity acquisition, and internal execution infrastructure remain private under [AGENTS.md](../AGENTS.md).
 
-## Forward Forecast from 2026 Private Testing to Full-Scale Commercialization
+## Capital Formation, Phase Milestones & Operating Discipline
 
-A quantitative 5-year financial forecast detailing revenue growth, gross margin expansion, headcount ramp, operating expenses, and cash flow milestones.
-
----
-
-## 📈 1. 5-Year P&L Forecast Summary ($ in Millions)
-
-**Current Status (2026)**: Early-stage pre-launch / Private Beta testing. Frontend and backend architectures are 100% complete and functionally verified in closed test cohorts. Public marketing has not commenced.
-
-| Financial Metric | **2026 (Private Beta)** | **2027 (Launch Y1)** | **2028 (Scale Y2)** | **2029 (Exp. Y3)** | **2030 (Y4)** | **2031 (Y5)** |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Stage / Operating Status** | **Core Built & Testing** | **Public Rollout** | **Rapid Scale** | **Enterprise Exp.** | **Market Lead** | **Global Infra** |
-| **Active Production Apps** | **Closed Cohort** | **1,800** | **7,500** | **20,000** | **40,000** | **70,000** |
-| **Gross Processed Volume (GMV)**| **--** | **$4.2M** | **$21.0M** | **$62.0M** | **$145.0M** | **$265.0M** |
-| **Annual Recurring Revenue (ARR)**| **Pre-Launch** | **$1.50M** | **$7.20M** | **$22.00M** | **$50.00M** | **$90.00M** |
-| **Cost of Goods Sold (COGS)** | **--** | **$0.87M** | **$3.60M** | **$9.24M** | **$18.00M** | **$28.80M** |
-| **Gross Profit** | **--** | **$0.63M** | **$3.60M** | **$12.76M** | **$32.00M** | **$61.20M** |
-| **Gross Margin (%)** | **--** | **42.0%** | **50.0%** | **58.0%** | **64.0%** | **68.0%** |
-| **R&D / Engineering Expense** | **$1.60M** | **$2.20M** | **$3.80M** | **$7.00M** | **$13.00M** | **$19.00M** |
-| **Sales & Marketing Expense** | **$0.20M** | **$0.80M** | **$2.10M** | **$4.50M** | **$9.00M** | **$14.50M** |
-| **General & Administrative (G&A)**| **$0.30M** | **$0.50M** | **$1.00M** | **$1.90M** | **$3.50M** | **$5.70M** |
-| **Total Operating Expenses (OpEx)**| **$2.10M** | **$3.50M** | **$6.90M** | **$13.40M** | **$25.50M** | **$39.20M** |
-| **EBITDA / Operating Income** | **-$2.10M** | **-$2.87M** | **-$3.30M** | **-$0.64M** | **+$6.50M** | **+$22.00M** |
-| **Cash Flow Trajectory** | Built & Testing | Launch Phase | Scale Phase | **Breakeven (Mo 34)** | Profitable ($6.5M)| Free Cash ($22.0M)|
+A grounded financial framework detailing how capital is deployed across development phases, what each round of funding enables GALX to prove, and how the business scales towards cash flow durability.
 
 ---
 
-## 👥 2. Headcount & Talent Scaling Plan
+## 1. Operating Philosophy: Intellectual Honesty Over Fantasy Models
 
-```
-2026 (6 FTEs): Core Founding Systems Engineers & Developer Experience Leads (Substrate Built)
-2027 (14 FTEs): 8 Distributed Systems Engineers, 3 DevRel & DX, 2 Solutions Architects, 1 Founder
-2028 (28 FTEs): 16 Engineers (Edge, Security, Infra), 5 Solutions Architects, 4 GTM/Sales, 3 Ops
-2029 (54 FTEs): 30 Engineers, 12 Enterprise Sales & SA, 6 Marketing & DevRel, 6 Finance/Ops
-2030 (90 FTEs): 50 Engineers, 22 Enterprise GTM, 10 Developer Growth, 8 G&A
-2031 (140 FTEs): 72 Engineers, 40 Global Sales/Customer Success, 16 DevRel/Product, 12 G&A
-```
+Early-stage venture pitches frequently present elaborate 5-year spreadsheets projecting hundreds of millions in revenue with artificial decimal precision.
+
+GALX takes a disciplined, intellectually honest approach:
+- We do not manufacture fictitious enterprise ARR forecasts for a product currently in active developer onboarding.
+- We structure our financial roadmap around **clear operational phases**, where each phase validates critical thesis assumptions before capital is expanded.
+- Capital is deployed to expand capacity, deepen operational resilience, and accelerate builder onboarding—not to fund vanity burn.
 
 ---
 
-## 🎯 3. Capital Efficiency & Path to Cash Flow Neutrality
-
-- **Cash Flow Breakeven Target**: **Year 3 (Month 34 post-launch)** at ~$22M ARR run-rate.
-- **Top-Decile Unit Efficiency**:
-  - **Projected Blended CAC**: **$185** (Driven by organic CLI `npx galxai skills` and 235+ pSEO routes).
-  - **Projected Customer LTV**: **$5,350** blended ($1,020 Self-serve / $440,000+ Enterprise).
-  - **Payback Period**: **2.1 Months** (Self-serve pays back in 1.2 months).
-  - **Net Dollar Retention (NDR)**: **138%** (Driven by token volume expansion as customer applications scale).
-
----
-
-## 💰 4. Key Revenue Streams Breakdown (Year 3 Forecast)
+## 2. Phase-Based Capital & Operating Roadmap
 
 ```mermaid
-pie title Year 3 Revenue Breakdown ($22.0M ARR)
-    "Wholesale Token Spread (GMV Float)" : 12.1
-    "Prompt Caching & Compaction Fees" : 4.6
-    "Enterprise Shards & SSO Seat Licenses" : 3.9
-    "ZAPS Instant Priority Packs" : 1.4
+graph LR
+    P1[Phase 1: Proof & Core Functionality\nCurrent Phase] --> P2[Phase 2: Builder Acceleration & Scale\nNext 12-18 Months]
+    P2 --> P3[Phase 3: Compounding Execution Platform\nExpansion Phase]
 ```
 
-1. **Wholesale Token Spread (55.0% of Revenue)**: Clearinghouse float between bulk upstream Tier-5 contracts and customer wholesale invoices.
-2. **Prompt Caching & Compaction Margins (20.9% of Revenue)**: Processing fee on compound cache hits and BroccoliDB context trimming.
-3. **Enterprise SaaS Platform Seats & Private Shards (17.7% of Revenue)**: Flat-rate recurring subscription fees for SOC 2 isolation, SSO/SAML, and custom spend limits.
-4. **ZAPS Priority Capacity Packs (6.4% of Revenue)**: Prepaid burst packs for autonomous agent fleets requiring guaranteed <5ms queue times during peak traffic.
+### Phase 1: Platform Foundation & Core Operational Verification (Current)
+* **Core Objective**: Verify that the two-model managed platform delivers dependable, abundant execution to early builders with zero infrastructure friction.
+* **Key Activities**:
+  - Live operation of developer endpoints (including **GALX Nova**).
+  - Validating sufficient intelligence delivery on representative application workloads.
+  - Observing initial builder usage patterns, request latencies, and platform stability.
+* **Capital Focus**: Core engineering, local serving infrastructure, operational monitoring, and initial developer access programs.
+
+### Phase 2: Builder Onboarding & Compounding Usage Validation (Next 12–18 Months)
+* **Core Objective**: Prove the expansion engine—demonstrating that applications built on GALX generate compounding, recurring execution volume as they acquire end users.
+* **What Capital Enables**:
+  - **Serving Capacity Expansion**: Scaling capacity to support high-concurrency developer applications without degradation.
+  - **Operational Instrumentation**: Deepening automated capacity balancing, resilience tooling, and serving optimizations.
+  - **Developer Onboarding & Community**: Direct developer relations, hackathons, and builder grants to seed the next 1,000 applications.
+* **Key Metrics to Prove**:
+  - 30-day and 90-day builder retention.
+  - Ratio of development traffic vs. production end-user traffic.
+  - Sustained platform gross margin across multi-tenant workloads.
+
+### Phase 3: The Persistent Execution Layer (Expansion Horizon)
+* **Core Objective**: Establish GALX as the default execution layer beneath an expanding ecosystem of software applications.
+* **Key Activities**:
+  - Supporting high-volume production scale for breakaway applications built on GALX.
+  - Deepening proprietary operational infrastructure to further expand gross margins.
+  - Transitioning from early venture funding to cash flow neutrality powered by recurring execution volume.
+
+---
+
+## 3. Resource Allocation & Capital Efficiency
+
+```mermaid
+pie title Phase 2 Capital Allocation
+    "Serving Capacity & Infrastructure" : 50
+    "Systems & Runtime Engineering" : 30
+    "Builder Onboarding & Developer Relations" : 15
+    "Operations & Administration" : 5
+```
+
+1. **Infrastructure & Serving Capacity (50%)**: Securing dependable capacity and server resources to guarantee abundant, low-latency execution for scaling applications.
+2. **Systems Engineering (30%)**: Advancing proprietary operational tooling, resilience mechanisms, and runtime management that preserve high platform gross margins.
+3. **Builder Onboarding & DevRel (15%)**: Providing hands-on onboarding support, documentation, and tooling for independent builders and creative technologists.
+4. **Operations & Governance (5%)**: Maintaining lean administrative, legal, and operational compliance.
+
+---
+
+## 4. The Long-Term Economic Outcome
+
+**What does the mature business look like?**
+
+As thousands of applications run their production workloads through GALX:
+- **Revenue compounds with software usage**: Rather than renegotiating software contracts annually, revenue expands automatically with the growth of every application on the platform.
+- **High gross margin profile**: Operational knowledge and capacity optimization enable software-like margins on top of managed execution.
+- **Durable infrastructure moat**: Switching costs remain exceptionally high, creating a defensible, high-retention infrastructure business.
