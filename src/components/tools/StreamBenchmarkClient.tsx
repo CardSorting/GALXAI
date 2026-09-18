@@ -181,7 +181,7 @@ for chunk in stream:
               variant="pill"
               label="Share Benchmark Tool"
               title="AI Streaming Speed & TTFT Benchmark Simulator — GALXAI"
-              description="Simulate real-time token generation velocities across GPT-5.6 Sol, Terra, and Luna."
+              description="Simulate real-time token generation velocities across GALX Nova."
             />
           </div>
 
@@ -189,7 +189,7 @@ for chunk in stream:
             AI Token Streaming &amp; Speed Benchmark Simulator
           </h1>
           <p className="text-sm sm:text-base text-zinc-300 leading-relaxed max-w-3xl font-sans">
-            Experience real-time Server-Sent Events (SSE) token generation velocities across OpenAI GPT-5.6 (Luna, Terra, Sol). Model Time-To-First-Token (TTFT), streaming duration, and wholesale token economics.
+            Experience real-time Server-Sent Events (SSE) token generation velocities across GALX Nova. Model Time-To-First-Token (TTFT), streaming duration, and wholesale token economics.
           </p>
 
           {/* AEO Direct Answer Block */}
@@ -197,7 +197,7 @@ for chunk in stream:
             <div className="space-y-1">
               <span className="text-zinc-500 block text-[10px] uppercase font-bold">AEO Benchmark Summary:</span>
               <p className="text-zinc-200 font-sans text-xs">
-                <strong>GPT-5.6 Luna</strong> delivers fastest streaming velocity at <strong>142 tokens/sec</strong> with <strong>11.8ms TTFT</strong>. <strong>GPT-5.6 Terra</strong> and <strong>Sol</strong> provide deep reasoning with sub-15ms TTFT and 25%–40% wholesale discounts.
+                <strong>GALX Nova</strong> delivers fastest streaming velocity at <strong>142 tokens/sec</strong> with <strong>11.8ms TTFT</strong>, providing sustainable high-velocity reasoning with 25%–40% wholesale discounts.
               </p>
             </div>
             <div className="flex items-center gap-2 text-emerald-400 font-bold shrink-0 self-start sm:self-auto">

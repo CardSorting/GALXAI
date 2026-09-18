@@ -47,8 +47,8 @@ export function LumiWorkloadVisualizer() {
   const [filterCategory, setFilterCategory] = useState<'all' | 'text' | 'image'>('all');
 
   const filteredModels = OPENAI_LUMI_MODELS.filter(m => {
-    if (filterCategory === 'text') return m.id === 'gpt-5-6-luna-low';
-    if (filterCategory === 'image') return m.id === 'openai-gpt-image-latest';
+    if (filterCategory === 'text') return m.id === 'galx-nova';
+    if (filterCategory === 'image') return m.id === 'galx-nova-image';
     return true;
   });
 

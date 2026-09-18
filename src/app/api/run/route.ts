@@ -36,7 +36,7 @@ async function previewPOST(req: NextRequest) {
       return generateImage(new NextRequest(req.url, { method: 'POST', headers, body: JSON.stringify(body), signal: req.signal }));
     }
     const prompt = body.prompt || '';
-    const model = body.model || 'gpt-5.6-sol';
+    const model = body.model || 'galx-nova';
     const type = body.type || 'chat';
     const isBackground = !!body.background;
 
@@ -62,7 +62,7 @@ async function previewPOST(req: NextRequest) {
         taskKind: 'image_generation',
         imagePayload: {
           prompt,
-          model: 'openai-gpt-image-latest'
+          model: 'galx-nova-image'
         }
       };
     }

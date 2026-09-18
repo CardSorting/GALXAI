@@ -144,7 +144,7 @@ function BaseGatewayKeysPage() {
   const [activeSnippetTab, setActiveSnippetTab] = useState<SnippetTab>('cursor');
 
   // Interactive Live Chat Completion Test Runner
-  const [chatModel, setChatModel] = useState('gpt-5.6-sol');
+  const [chatModel, setChatModel] = useState('galx-nova');
   const [chatPrompt, setChatPrompt] = useState('Explain the fastest way to sort 1M numbers in Rust.');
   const [isTestingChat, setIsTestingChat] = useState(false);
   const [chatTestResult, setChatTestResult] = useState<{ content: string; latencyMs: number; model: string } | null>(null);
@@ -507,7 +507,7 @@ function BaseGatewayKeysPage() {
       code: `// Set in Cursor Settings -> Models -> OpenAI API Key:
 // 1. Override OpenAI Base URL: https://galx.ai/v1
 // 2. API Key: ${activeDisplayKey}
-// 3. Enable Models: gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna`
+// 3. Enable Models: galx-nova, galx-nova-image`
     },
     vercel: {
       title: 'Vercel AI SDK (@ai-sdk/openai)',
@@ -521,7 +521,7 @@ const galx = createOpenAI({
 });
 
 const { text } = await generateText({
-  model: galx('gpt-5.6-sol'),
+  model: galx('galx-nova'),
   prompt: 'Write a high-performance LRU cache in Rust.'
 });
 console.log(text);`
@@ -538,7 +538,7 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="gpt-5.6-sol",
+    model="galx-nova",
     messages=[{"role": "user", "content": "Write a high-performance LRU cache in Rust."}]
 )
 print(response.choices[0].message.content)`
@@ -554,7 +554,7 @@ const client = new OpenAI({
 });
 
 const completion = await client.chat.completions.create({
-  model: 'gpt-5.6-sol',
+  model: 'galx-nova',
   messages: [{ role: 'user', content: 'Write a high-performance LRU cache in Rust.' }]
 });
 console.log(completion.choices[0].message.content);`
@@ -566,7 +566,7 @@ console.log(completion.choices[0].message.content);`
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer ${activeDisplayKey}" \\
   -d '{
-    "model": "gpt-5.6-sol",
+    "model": "galx-nova",
     "messages": [{"role": "user", "content": "Write a high-performance LRU cache in Rust."}]
   }'`
     }
@@ -1077,9 +1077,8 @@ console.log(completion.choices[0].message.content);`
                   onChange={(e) => setChatModel(e.target.value)}
                   className="py-1 px-2.5 rounded-lg bg-black/50 border border-white/10 text-xs font-mono text-zinc-300 focus:outline-none cursor-pointer"
                 >
-                  <option value="gpt-5.6-sol" className="bg-[#0d101c] text-white">gpt-5.6-sol (Flagship)</option>
-                  <option value="gpt-5.6-terra" className="bg-[#0d101c] text-white">gpt-5.6-terra (Fast)</option>
-                  <option value="gpt-5.6-luna" className="bg-[#0d101c] text-white">gpt-5.6-luna (Reasoning)</option>
+                  <option value="galx-nova" className="bg-[#0d101c] text-white">galx-nova (Flagship)</option>
+                  <option value="galx-nova-image" className="bg-[#0d101c] text-white">galx-nova-image (Visual Synthesis)</option>
                 </select>
               </div>
 

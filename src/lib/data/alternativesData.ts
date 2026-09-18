@@ -34,7 +34,7 @@ export const COMPETITOR_ALTERNATIVES: CompetitorAlternative[] = [
     title: 'Best OpenRouter Alternative — 0% Gateway Markup & 75% Prompt Caching',
     headline: 'The #1 OpenRouter Alternative with 0% Markup',
     description:
-      'Switch from OpenRouter to GALXAI to eliminate the 5.5% platform fee markup and get 100% pass-through on 75% prompt caching rebates with guaranteed sub-15ms Anycast routing.',
+      'Switch from OpenRouter to GALXAI to eliminate the 5.5% platform fee markup and get 100% pass-through on 75% prompt caching rebates with guaranteed sub-15ms edge routing.',
     verdict:
       'GALXAI acts as a true wholesale token clearinghouse with 0% gateway markup fees, whereas OpenRouter applies a 5% to 5.5% platform fee and retains part of upstream prompt caching rebates.',
     feeComparison: [
@@ -50,7 +50,7 @@ export const COMPETITOR_ALTERNATIVES: CompetitorAlternative[] = [
       },
       {
         feature: 'Time-To-First-Token (TTFT)',
-        galxai: '<14ms Global Anycast',
+        galxai: '<14ms Distributed Edge',
         competitor: '45ms – 120ms Variable Proxy',
       },
       {
@@ -75,7 +75,7 @@ export const COMPETITOR_ALTERNATIVES: CompetitorAlternative[] = [
       },
       {
         step: 'Step 3: Keep Model Identifiers',
-        desc: 'Use standard model IDs like "gpt-5.6-sol" or "gpt-5.6-terra" with zero code changes.',
+        desc: 'Use standard model IDs like "galx-nova" or "galx-nova-image" with zero code changes.',
       },
     ],
     codeSnippet: {
@@ -89,7 +89,7 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="gpt-5.6-sol",
+    model="galx-nova",
     messages=[{"role": "user", "content": "Execute high-throughput inference"}]
 )`,
     },
@@ -111,19 +111,19 @@ response = client.chat.completions.create(
     title: 'Cheaper Direct OpenAI API Alternative — 25%–40% Wholesale Savings',
     headline: 'Save 25%–40% vs Direct OpenAI API Pricing',
     description:
-      'Route official OpenAI GPT-5.6 Sol, Terra, and Luna models through GALXAI for 25%–40% direct wholesale savings, Anycast 429 shield protection, and automated failover.',
+      'Route GALX Nova through GALXAI for 25%–40% direct wholesale savings, distributed edge 429 shield protection, and automated failover.',
     verdict:
       'GALXAI delivers identical upstream OpenAI model weights with 25%–40% wholesale cost reductions, instant deposit matching, and enterprise rate limit protection.',
     feeComparison: [
       {
-        feature: 'GPT-5.6 Sol Input Price / 1M',
-        galxai: '$3.75 / 1M (-25% Wholesale)',
-        competitor: '$5.00 / 1M (Retail List)',
+        feature: 'GALX Nova Input Price / 1M',
+        galxai: '$0.75 / 1M Wholesale',
+        competitor: 'Direct Retail List Pricing',
       },
       {
-        feature: 'GPT-5.6 Sol Output Price / 1M',
-        galxai: '$11.25 / 1M (-25% Wholesale)',
-        competitor: '$15.00 / 1M (Retail List)',
+        feature: 'GALX Nova Output Price / 1M',
+        galxai: '$2.25 / 1M Wholesale',
+        competitor: 'Direct Retail List Pricing',
       },
       {
         feature: '429 Rate Limit Stalls',
@@ -138,7 +138,7 @@ response = client.chat.completions.create(
     ],
     migrationSteps: [
       {
-        step: 'Step 1: Point to GALXAI Anycast Edge',
+        step: 'Step 1: Point to GALXAI Distributed Edge',
         desc: 'Set base_url="https://galx.ai/v1" in your existing OpenAI SDK configuration.',
       },
       {
@@ -161,7 +161,7 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="gpt-5.6-sol",
+    model="galx-nova",
     messages=[{"role": "user", "content": "Run with 25% wholesale savings"}]
 )`,
     },
@@ -176,21 +176,21 @@ response = client.chat.completions.create(
     slug: 'together-ai',
     competitorName: 'Together AI',
     badge: 'Frontier OpenAI Fleet',
-    title: 'Together AI Alternative with Native GPT-5.6 & Frontier Routing',
-    headline: 'Together AI Alternative for Frontier Model Routing',
+    title: 'Together AI Alternative with Native GALX Nova & Frontier Routing',
+    headline: 'Together AI Alternative for Frontier Intelligence Routing',
     description:
-      'Access OpenAI GPT-5.6 frontier models in a unified, wire-compatible gateway with 75% prompt caching and zero data retention.',
+      'Access GALX Nova in a unified, wire-compatible gateway with 75% prompt caching and zero data retention.',
     verdict:
-      'While Together AI focuses heavily on open-weights inference, GALXAI specializes in enterprise wholesale access to frontier reasoning models (GPT-5.6 Sol, Terra, Luna) with Anycast low-latency routing.',
+      'While Together AI focuses heavily on open-weights inference, GALXAI specializes in enterprise wholesale access to frontier reasoning models (GALX Nova) with distributed edge low-latency routing.',
     feeComparison: [
       {
-        feature: 'OpenAI GPT-5.6 Access',
+        feature: 'Frontier Intelligence Access',
         galxai: 'Full SOTA Access (-25% Wholesale)',
         competitor: 'Not Supported (Open Weights Only)',
       },
       {
-        feature: '900K Context Window',
-        galxai: 'Native Wholesale Routing (GPT-5.6 Sol)',
+        feature: '1M+ Context Window',
+        galxai: 'Native Wholesale Routing (GALX Nova)',
         competitor: 'Not Supported',
       },
       {
@@ -211,7 +211,7 @@ response = client.chat.completions.create(
       },
       {
         step: 'Step 2: Update Model Parameter',
-        desc: 'Specify "gpt-5.6-sol" or "gpt-5.6-terra".',
+        desc: 'Specify "galx-nova" or "galx-nova-image".',
       },
     ],
     codeSnippet: {
@@ -224,14 +224,14 @@ const client = new OpenAI({
 });
 
 const res = await client.chat.completions.create({
-  model: "gpt-5.6-sol",
-  messages: [{ role: "user", content: "Analyze 900K token context" }],
+  model: "galx-nova",
+  messages: [{ role: "user", content: "Analyze 1M+ token context" }],
 });`,
     },
     faqs: [
       {
-        q: 'Can I route between OpenAI models on GALXAI?',
-        a: 'Yes. A single API key and shared compute wallet routes seamlessly across all OpenAI model tiers.',
+        q: 'Can I route between text and image models on GALXAI?',
+        a: 'Yes. A single API key and shared compute wallet routes seamlessly across GALX Nova and GALX Nova-image.',
       },
     ],
   },
@@ -239,12 +239,12 @@ const res = await client.chat.completions.create({
     slug: 'anyscale',
     competitorName: 'Anyscale Endpoints',
     badge: 'Instant Setup & Key Minting',
-    title: 'Anyscale Endpoints Alternative — Sub-15ms Anycast Routing & Wholesale Rates',
+    title: 'Anyscale Endpoints Alternative — Sub-15ms Edge Routing & Wholesale Rates',
     headline: 'High-Velocity Alternative to Anyscale Endpoints',
     description:
-      'Seamlessly route OpenAI completions with zero cold starts, sub-15ms Anycast TTFT, and wholesale billing with 0% platform markups.',
+      'Seamlessly route completions with zero cold starts, sub-15ms edge TTFT, and wholesale billing with 0% platform markups.',
     verdict:
-      'GALXAI provides instant key minting and Anycast low-latency routing without complex cluster provisioning or compute hour management.',
+      'GALXAI provides instant key minting and distributed edge low-latency routing without complex cluster provisioning or compute hour management.',
     feeComparison: [
       {
         feature: 'Setup & Deployment Time',
@@ -282,14 +282,14 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="gpt-5.6-luna",
+    model="galx-nova",
     messages=[{"role": "user", "content": "Sub-15ms speed test"}]
 )`,
     },
     faqs: [
       {
         q: 'Do I need to manage servers or clusters on GALXAI?',
-        a: 'No. GALXAI is fully serverless with pre-warmed Anycast capacity worldwide.',
+        a: 'No. GALXAI is fully serverless with pre-warmed distributed edge capacity worldwide.',
       },
     ],
   },
@@ -300,7 +300,7 @@ response = client.chat.completions.create(
     title: 'Portkey Alternative — Wholesale Token Pricing & Zero-Latency Gateway',
     headline: 'High-Performance 0% Markup Alternative to Portkey AI',
     description:
-      'Eliminate per-seat gateway licenses and platform surcharges with GALXAI’s wholesale token clearinghouse, 75% prompt caching, and sub-15ms Anycast routing.',
+      'Eliminate per-seat gateway licenses and platform surcharges with GALXAI’s wholesale token clearinghouse, 75% prompt caching, and sub-15ms edge routing.',
     verdict:
       'GALXAI offers 100% wire-compatible routing with 25%–40% wholesale token discounts and $0 seat fees, whereas Portkey charges tiered enterprise platform subscriptions.',
     feeComparison: [
@@ -340,7 +340,7 @@ const client = new OpenAI({
 });
 
 const response = await client.chat.completions.create({
-  model: "gpt-5.6-sol",
+  model: "galx-nova",
   messages: [{ role: "user", content: "Zero-latency wholesale routing" }],
 });`,
     },
@@ -373,8 +373,8 @@ const response = await client.chat.completions.create({
         competitor: 'Persistent Database Request Logging',
       },
       {
-        feature: 'Anycast TTFT',
-        galxai: '<15ms Global Anycast',
+        feature: 'Edge TTFT',
+        galxai: '<15ms Distributed Edge',
         competitor: 'Proxy Overhead on Direct Connections',
       },
     ],
@@ -398,7 +398,7 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="gpt-5.6-sol",
+    model="galx-nova",
     messages=[{"role": "user", "content": "Execute with Zero Data Retention"}]
 )
 print(response.choices[0].message.content)`,
@@ -413,11 +413,11 @@ print(response.choices[0].message.content)`,
   {
     slug: 'litellm',
     competitorName: 'LiteLLM Proxy',
-    badge: 'Serverless Global Anycast vs Self-Hosting',
-    title: 'LiteLLM Alternative — Managed Anycast Gateway with 0% Maintenance',
+    badge: 'Serverless Distributed Edge vs Self-Hosting',
+    title: 'LiteLLM Alternative — Managed Distributed Edge Gateway with 0% Maintenance',
     headline: 'Serverless Managed Alternative to LiteLLM Self-Hosting',
     description:
-      'Avoid maintaining self-hosted Docker proxies, Redis clusters, and load balancers. GALXAI provides managed Anycast routing with 25%–40% token savings.',
+      'Avoid maintaining self-hosted Docker proxies, Redis clusters, and load balancers. GALXAI provides managed distributed edge routing with 25%–40% token savings.',
     verdict:
       'GALXAI delivers turnkey managed failover and wholesale token purchasing with zero infrastructure maintenance overhead.',
     feeComparison: [
@@ -458,8 +458,8 @@ const client = new OpenAI({
 });
 
 const completion = await client.chat.completions.create({
-  model: "gpt-5.6-sol",
-  messages: [{ role: "user", content: "Managed 900K context routing" }],
+  model: "galx-nova",
+  messages: [{ role: "user", content: "Managed 1M+ context routing" }],
 });`,
     },
     faqs: [
@@ -517,7 +517,7 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="gpt-5.6-sol",
+    model="galx-nova",
     messages=[{"role": "user", "content": "Clean REST inference"}]
 )`,
     },
@@ -537,7 +537,7 @@ response = client.chat.completions.create(
     description:
       'Get true wholesale token prices (25%–40% off), automated multi-account 429 failover, and compound 75% prompt caching without configuring custom workers.',
     verdict:
-      'GALXAI delivers direct wholesale token clearinghouse economics with sub-15ms Anycast routing and Zero Data Retention.',
+      'GALXAI delivers direct wholesale token clearinghouse economics with sub-15ms edge routing and Zero Data Retention.',
     feeComparison: [
       {
         feature: 'Token Price Discount',
@@ -575,7 +575,7 @@ const client = new OpenAI({
 });
 
 const res = await client.chat.completions.create({
-  model: "gpt-5.6-sol",
+  model: "galx-nova",
   messages: [{ role: "user", content: "Wholesale AI Gateway routing" }],
 });`,
     },
@@ -589,22 +589,22 @@ const res = await client.chat.completions.create({
   {
     slug: 'deepinfra',
     competitorName: 'DeepInfra',
-    badge: 'Frontier Reasoning + 900K Context',
-    title: 'DeepInfra Alternative — Frontier OpenAI Routing',
+    badge: 'Frontier Reasoning + 1M+ Context',
+    title: 'DeepInfra Alternative — Frontier Intelligence Routing',
     headline: 'Frontier AI Gateway Alternative to DeepInfra',
     description:
-      'Access OpenAI GPT-5.6 with 900K context windows, 75% prompt caching, and wholesale token pricing on GALXAI.',
+      'Access GALX Nova with 1M+ context windows, 75% prompt caching, and wholesale token pricing on GALXAI.',
     verdict:
-      'GALXAI provides frontier reasoning model access with sub-15ms Anycast TTFT and zero rate limit stalls.',
+      'GALXAI provides frontier reasoning model access with sub-15ms edge TTFT and zero rate limit stalls.',
     feeComparison: [
       {
         feature: 'Model Portfolio',
-        galxai: 'OpenAI GPT-5.6 Suite (Sol, Terra, Luna)',
+        galxai: 'GALX Nova Suite',
         competitor: 'Primarily Open-Source LLMs',
       },
       {
         feature: 'Context Window Capacity',
-        galxai: 'Up to 900,000 Tokens (GPT-5.6 Sol)',
+        galxai: 'Up to 1,000,000+ Tokens (GALX Nova)',
         competitor: 'Varies by Open-Source Checkpoint',
       },
       {
@@ -620,7 +620,7 @@ const res = await client.chat.completions.create({
       },
       {
         step: 'Step 2: Select SOTA Model',
-        desc: 'Specify model="gpt-5.6-sol" or model="gpt-5.6-terra".',
+        desc: 'Specify model="galx-nova" or model="galx-nova-image".',
       },
     ],
     codeSnippet: {
@@ -633,14 +633,14 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="gpt-5.6-sol",
-    messages=[{"role": "user", "content": "900K context frontier processing"}]
+    model="galx-nova",
+    messages=[{"role": "user", "content": "1M+ context frontier processing"}]
 )`,
     },
     faqs: [
       {
         q: 'Can I route image generation models on GALXAI?',
-        a: 'Yes. GALXAI supports OpenAI Image Generation via standard /v1/images/generations requests.',
+        a: 'Yes. GALXAI supports GALX Nova-image via standard /v1/images/generations requests.',
       },
     ],
   },
@@ -653,11 +653,11 @@ response = client.chat.completions.create(
     description:
       'Route frontier reasoning and coding models with sub-15ms TTFT, 75% prompt caching pass-through, and wholesale token pricing.',
     verdict:
-      'GALXAI unites the OpenAI GPT-5.6 suite under a single wholesale wallet with zero platform markups and zero 429 stalls.',
+      'GALXAI unites the GALX Nova suite under a single wholesale wallet with zero platform markups and zero 429 stalls.',
     feeComparison: [
       {
         feature: 'Frontier Model Support',
-        galxai: 'GPT-5.6 Sol, Terra, Luna & OpenAI Image Generation',
+        galxai: 'GALX Nova & GALX Nova-image',
         competitor: 'Specialized Open Weights & Fine-tunes',
       },
       {
@@ -691,7 +691,7 @@ const client = new OpenAI({
 });
 
 const stream = await client.chat.completions.create({
-  model: "gpt-5.6-luna",
+  model: "galx-nova",
   messages: [{ role: "user", content: "Sub-15ms fast streaming" }],
   stream: true,
 });

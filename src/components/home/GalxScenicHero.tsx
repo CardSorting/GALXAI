@@ -612,7 +612,7 @@ export function GalxScenicHero() {
             </div>
 
             <div className="flex items-center gap-3 text-zinc-600 font-mono text-[10px]">
-              <span>GPT-5.6 Engine</span>
+              <span>GALX Nova Engine</span>
               <span>•</span>
               <span className="text-zinc-500">GALX API</span>
             </div>

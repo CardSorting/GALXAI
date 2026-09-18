@@ -31,87 +31,67 @@ export interface ProviderPortalItem {
 export const PROVIDERS_DATA: ProviderPortalItem[] = [
   {
     slug: 'openai',
-    providerName: 'OpenAI',
-    badge: 'Wholesale Gateway',
-    title: 'OpenAI API Gateway & Wholesale Token Clearinghouse — 25%–40% Off',
-    headline: 'Access Official OpenAI Frontier Models at Wholesale Rates',
+    providerName: 'GALX Managed Gateway',
+    badge: 'Sustainable Intelligence',
+    title: 'GALX Managed Intelligence Portal — Sustainable Frontier Access',
+    headline: 'Build What You Want. GALX Handles the Intelligence Layer.',
     description:
-      'Direct Anycast routing for OpenAI (GPT-5.6 Sol, Terra, Luna) and visual synthesis with 0% gateway markup, 75% prompt caching pass-through, and $5 free developer credits.',
+      'Access curated frontier models (GALX Nova & GALX Nova-image) through a single unified OpenAI wire-compatible API gateway with sustainable developer rates, automated prompt caching, and zero code refactoring.',
     fleetSummary:
-      'The complete OpenAI GPT-5.6 reasoning fleet, high-velocity coding models, and OpenAI Image Generation studio endpoints.',
+      'Curated reasoning engine GALX Nova and high-fidelity visual synthesis studio GALX Nova-image.',
     discountPct: 40,
     featuredModels: [
       {
-        id: 'gpt-5.6-sol',
-        name: 'GPT-5.6 Sol',
-        role: 'Frontier Reasoning & Coding',
-        context: '900K Tokens',
-        inputPrice: '$3.75/1M',
-        outputPrice: '$11.25/1M',
-        discount: '-25% Off',
+        id: 'galx-nova',
+        name: 'GALX Nova',
+        role: 'Sustainable Intelligence & Reasoning',
+        context: '1,050,000 Tokens',
+        inputPrice: '$0.20/1M',
+        outputPrice: '$1.20/1M',
+        discount: 'Optimal $/Perf',
       },
       {
-        id: 'gpt-5.6-terra',
-        name: 'GPT-5.6 Terra',
-        role: 'Balanced Production Workhorses',
-        context: '750K Tokens',
-        inputPrice: '$2.25/1M',
-        outputPrice: '$6.75/1M',
+        id: 'galx-nova-image',
+        name: 'GALX Nova-image',
+        role: 'Creative Visual Synthesis',
+        context: '128K Tokens',
+        inputPrice: '$0.060/1M',
+        outputPrice: 'Visual output',
         discount: '-25% Off',
-      },
-      {
-        id: 'gpt-5.6-luna',
-        name: 'GPT-5.6 Luna',
-        role: 'Extreme Velocity (145 tok/s)',
-        context: '500K Tokens',
-        inputPrice: '$0.75/1M',
-        outputPrice: '$2.25/1M',
-        discount: '-25% Off',
-      },
-      {
-        id: 'openai-gpt-image-latest',
-        name: 'OpenAI Image Generation',
-        role: 'Text-to-image generation',
-        context: 'Image generation',
-        inputPrice: '$0.032/img',
-        outputPrice: 'Image output',
-        discount: '-20% Off',
       },
     ],
     quickstartSnippet: {
       language: 'python',
       code: `from openai import OpenAI
 
-# Direct OpenAI Wire-Compatibility with 25%-40% Wholesale Pass
+# Direct OpenAI Wire-Compatibility with GALX Nova
 client = OpenAI(
     base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
 response = client.chat.completions.create(
-    model="gpt-5.6-sol",
+    model="galx-nova",
     messages=[{"role": "user", "content": "Execute high-tier architectural analysis"}]
 )
 
 print(response.choices[0].message.content)`,
     },
     keyAdvantages: [
-      'True 25%–40% wholesale discount passed directly from volume clearinghouses',
+      'Sustainable developer rates with zero gateway markups',
       'Zero annual Provisioned Throughput Unit (PTU) or seat license lock-in',
-      'Automatic 75% compound prompt caching rebate on prefixes >1,024 tokens',
-      'Cryptographic Zero Data Retention (ZDR) and SOC 2 Type II compliance',
+      'Automatic prompt caching rebate on repetitive prefixes >1,024 tokens',
+      'Cryptographic Zero Data Retention (ZDR) and enterprise security',
     ],
     faqs: [
       {
-        q: 'Are these models authentic OpenAI weights?',
-        a: 'Yes. All completions route through verified OpenAI enterprise infrastructure with zero alterations to token logits or mathematical attention matrices.',
+        q: 'How does GALX deliver sustainable intelligence rates?',
+        a: 'GALX handles the underlying execution so developers can focus on building, eliminating infrastructure overhead and passing prompt caching savings directly to your account.',
       },
       {
-        q: 'How does prompt caching work on OpenAI models?',
-        a: 'GALXAI passes 100% of the 75% prompt caching rebate directly to your wallet for prompt prefixes exceeding 1,024 tokens.',
+        q: 'How does prompt caching work on GALX Nova?',
+        a: 'GALX passes automated prompt caching rebates directly to your wallet for prompt prefixes exceeding 1,024 tokens, reducing input costs by up to 90%.',
       },
     ],
   },
 ];
-
-

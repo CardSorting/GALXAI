@@ -95,24 +95,24 @@ const LEAKAGE_CATEGORIES: LeakageCategory[] = [
     title: 'Frontier Model Misallocation',
     sharePercent: 37.5,
     currentModel: 'Direct Retail Call ($5.00 in / $20.00 out)',
-    remediatedModel: 'gpt-5-6-luna-low ($0.20 in / $1.20 out)',
+    remediatedModel: 'galx-nova ($0.20 in / $1.20 out)',
     rootCause: 'Developers defaulted to expensive retail endpoints for simple 1-sentence classification and JSON routing.',
-    galxAction: 'Recommends gpt-5-6-luna-low for named low-risk workloads; enforcement requires approved regression evidence.',
+    galxAction: 'Recommends galx-nova for named low-risk workloads; enforcement requires approved regression evidence.',
     sampleBeforeCode: `// Direct Retail Call (Unmanaged Overspend)
 const res = await openai.chat.completions.create({
   model: "gpt-4o", // Retail $20/1M output rate
   messages: [{ role: "user", content: "Is this inquiry billing, technical, or account?" }]
 });`,
     sampleAfterCode: `// GalX evidence-gated route policy
-// Candidate: gpt-5-6-luna-low ($1.20/1M output); requested model remains active by default
+// Candidate: galx-nova ($1.20/1M output); requested model remains active by default
 // Enforce only after shadow evaluation meets the approved quality threshold`,
   },
   {
     id: 'cache_collision',
     title: 'Cache-Busting Header Volatility',
     sharePercent: 28.5,
-    currentModel: 'gpt-5-6-luna-low (0% Cache Hit Rate)',
-    remediatedModel: 'gpt-5-6-luna-low (cache-read opportunity)',
+    currentModel: 'galx-nova (0% Cache Hit Rate)',
+    remediatedModel: 'galx-nova (cache-read opportunity)',
     rootCause: 'ISO timestamps and session UUIDs placed at line 1 of system prompts, invalidating 100% of prefix RAM cache.',
     galxAction: 'Diagnoses the first divergent prefix and recommends explicit, application-owned cache controls.',
     sampleBeforeCode: `// Broken System Prompt (0% Cache Hit)
@@ -128,7 +128,7 @@ Session ID: \${crypto.randomUUID()}
     title: 'Uncapped CI/CD & Staging Overburn',
     sharePercent: 18.0,
     currentModel: 'Direct Retail Call (Unmonitored CI Key)',
-    remediatedModel: 'gpt-5-6-luna-low (Policy Capped $25/day)',
+    remediatedModel: 'galx-nova (Policy Capped $25/day)',
     rootCause: 'Automated GitHub Actions PR test runner executing 4,000 full-context inference calls per day on master.',
     galxAction: 'Enforces a deterministic spend ceiling; model changes still require an approved route policy.',
     sampleBeforeCode: `// GitHub Actions CI Pipeline (Running on every commit)
@@ -137,7 +137,7 @@ Session ID: \${crypto.randomUUID()}
     OPENAI_API_KEY: \${{ secrets.PROD_OPENAI_API_KEY }} // No spend cap!`,
     sampleAfterCode: `// GalX staging governance policy
 // Key tagged: env=staging -> max spend clamped at $25/day
-// Optional gpt-5-6-luna-low route requires workload-specific evaluation approval`,
+// Optional galx-nova route requires workload-specific evaluation approval`,
   },
   {
     id: 'agent_recursion',
@@ -184,7 +184,7 @@ export function AuditClient() {
   const [playgroundPrompt, setPlaygroundPrompt] = useState<string>(
     'Please classify the following support ticket into billing, tech_support, or feature_request: "My credit card was charged twice for invoice #4920."'
   );
-  const [playgroundTargetModel, setPlaygroundTargetModel] = useState<string>('gpt-5-6-luna-low');
+  const [playgroundTargetModel, setPlaygroundTargetModel] = useState<string>('galx-nova');
   const [playgroundAnalyzing, setPlaygroundAnalyzing] = useState<boolean>(false);
   const [playgroundResult, setPlaygroundResult] = useState<{
     workloadClass: string;
@@ -248,7 +248,7 @@ export function AuditClient() {
       setPlaygroundResult({
         workloadClass: 'classification',
         evidenceStatus: 'candidate_only',
-        recommendedRoute: 'gpt-5-6-luna-low',
+        recommendedRoute: 'galx-nova',
         originalCostPer1M: 20.00,
         optimizedCostPer1M: 1.20,
         savingsDeltaPercent: 94.0,
@@ -793,8 +793,8 @@ Audit generated via: https://galx.ai/audit
                     onChange={(e) => setPlaygroundTargetModel(e.target.value)}
                     className="w-full p-3 rounded-xl bg-black/60 border border-white/15 text-white font-mono text-xs focus:outline-none focus:border-cyan-500 cursor-pointer"
                   >
-                    <option value="gpt-5-6-luna-low">gpt-5-6-luna-low (Ultra-Fast SOTA - $0.20 In / $1.20 Out)</option>
-                    <option value="openai-gpt-image-latest">openai-gpt-image-latest (Visual Synthesis - $0.040 / Image)</option>
+                    <option value="galx-nova">galx-nova (Frontier Intelligence - $0.20 In / $1.20 Out)</option>
+                    <option value="galx-nova-image">galx-nova-image (Visual Synthesis - $0.060 / Image)</option>
                   </select>
                 </div>
 
@@ -995,7 +995,7 @@ Audit generated via: https://galx.ai/audit
                       email: inboundEmail,
                       companyName: inboundCompany || 'Enterprise Org',
                       source: 'audit_hub',
-                      modelPreference: 'gpt-5-6-luna-low',
+                      modelPreference: 'galx-nova',
                       estimatedMonthlySpend: monthlySpendInput,
                       stack: ['openai', 'langchain', 'nextjs'],
                       notes: `Requested Enterprise Spend Forensic Audit. Modeled spend: $${monthlySpendInput}/mo with $${calculations.activeWasteRemediated}/mo identified waste.`,

@@ -35,7 +35,7 @@ export class WorkflowsResource {
             taskKind: 'image_generation',
             imagePayload: {
               prompt: s.prompt || 'Generate image from context',
-              model: s.model || 'openai-gpt-image-latest'
+              model: s.model || 'galx-nova-image'
             }
           }
         };
@@ -61,7 +61,7 @@ export class WorkflowsResource {
           type: 'INTERNAL_MODEL',
           taskKind: 'chat_completion',
           chatPayload: {
-            model: s.model || 'gpt-5-6-luna-low',
+            model: s.model || 'galx-nova',
             messages: s.messages || [{ role: 'user', content: s.prompt || 'Process step' }]
           }
         }

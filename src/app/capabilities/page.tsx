@@ -11,14 +11,14 @@ import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 export const metadata: Metadata = constructMetadata({
   title: 'Architectural Capabilities & Edge Engine Features',
   description:
-    'Deep dive into GALXAI core gateway capabilities: 1M token context windows, zero data retention, 75% prompt caching, Anycast routing, and predictive headroom governance.',
+    'Deep dive into GALXAI core gateway capabilities: 1M token context windows, zero data retention, 75% prompt caching, distributed edge routing, and predictive headroom governance.',
   canonicalPath: '/capabilities',
   keywords: [
     'AI Gateway Capabilities',
     '1M Context Window LLM',
     'Zero Data Retention AI',
     'Prompt Caching Gateway',
-    'Anycast AI Routing',
+    'Distributed Edge AI Routing',
     'Predictive Rate Limiting',
     'Constrained Structured Decoding',
   ],

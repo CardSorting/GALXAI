@@ -13,15 +13,15 @@ import { SITE_CONFIG } from '@/lib/seo/siteConfig';
 export const metadata: Metadata = constructMetadata({
   title: 'Universal AI Velocity & Total Cost of Ownership (TCO) Calculator — GALXAI',
   description:
-    'Calculate the true economics of operating OpenAI models. Simulate 25%–40% wholesale token pricing, 75% compound prompt caching rebates, avoided developer infrastructure tuition, and accelerated time-to-first-dollar.',
+    'Calculate the true economics of operating frontier AI. Simulate 25%–40% wholesale token pricing, compound prompt caching rebates, avoided developer infrastructure tuition, and accelerated time-to-first-dollar.',
   canonicalPath: '/calculator',
   keywords: [
     'AI Velocity Calculator',
     'AI Total Cost of Ownership',
-    'OpenAI Cost Calculator',
+    'AI Cost Calculator',
     'Time to First Dollar AI',
     'Prompt Caching Calculator',
-    'GPT-5.6 Token Pricing',
+    'GALX Nova Token Pricing',
     'Wholesale LLM Savings',
     'Avoided Engineering Tuition',
     'AI FinOps Simulator',
@@ -40,11 +40,11 @@ export default function CalculatorPage() {
     },
     {
       q: 'How does Intelligent Tier Cascading prevent frontier model overspend?',
-      a: 'Many teams accidentally use flagship reasoning models (like gpt-5.6-sol) for simple classification, routing, or formatting tasks. Intelligent Tier Cascading automatically identifies simple workloads and routes them to high-velocity tiers (like gpt-5.6-terra or gpt-5.6-luna), unlocking an additional 20%–40% cost reduction without quality degradation.',
+      a: 'Many teams accidentally use oversized reasoning pipelines for simple classification, routing, or formatting tasks. Intelligent Tier Cascading automatically identifies simple workloads and routes them to optimal velocity execution, unlocking an additional 20%–40% cost reduction without quality degradation.',
     },
     {
       q: 'How is the prompt caching savings calculated?',
-      a: 'When prompt prefixes exceed 1,024 tokens and match cached RAM slices, GALXAI applies a 75% compound rebate on the input token price, passing 100% of the upstream savings directly to your wallet.',
+      a: 'When prompt prefixes exceed 1,024 tokens and match cached RAM slices, GALXAI applies a compound rebate on the input token price, passing 100% of the upstream savings directly to your wallet.',
     },
     {
       q: 'Do I need an enterprise subscription to access wholesale rates?',

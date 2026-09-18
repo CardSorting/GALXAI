@@ -22,7 +22,7 @@ export async function OPTIONS() {
 async function previewPOST(req: NextRequest) {
   try {
     const body = (await req.json().catch(() => ({}))) as any;
-    const modelName = body.name || body.model || 'gpt-5.6-sol';
+    const modelName = body.name || body.model || 'galx-nova';
     const spec = ModelCatalog.resolveModel(modelName);
 
     return NextResponse.json({

@@ -136,13 +136,13 @@ export function ArtisanalSignalSection() {
   const [enclaveVpcActive, setEnclaveVpcActive] = useState(true);
   const [zeroRetentionActive, setZeroRetentionActive] = useState(true);
   const [zeroEgressActive, setZeroEgressActive] = useState(true);
-  const [frontierEnclaveTier, setFrontierEnclaveTier] = useState<'sol' | 'terra' | 'luna'>('sol');
+  const [frontierEnclaveTier, setFrontierEnclaveTier] = useState<'nova' | 'image'>('nova');
   const [isVerifyingEnclave, setIsVerifyingEnclave] = useState(false);
   const [enclaveAuditLog, setEnclaveAuditLog] = useState(
     'GALX API • Text and image generation for your applications'
   );
 
-  const verifyPrivateEnclave = (tier: 'sol' | 'terra' | 'luna') => {
+  const verifyPrivateEnclave = (tier: 'nova' | 'image') => {
     setFrontierEnclaveTier(tier);
     setIsVerifyingEnclave(true);
     setEnclaveAuditLog('🔄 Verifying cryptographic Zero Data Retention handshake with Dedicated VPC...');
@@ -150,7 +150,7 @@ export function ArtisanalSignalSection() {
     setTimeout(() => {
       setIsVerifyingEnclave(false);
       setEnclaveAuditLog(
-        `✅ [CRYPTOGRAPHIC AUDIT PASSED] GALX Nova Enclave Verified\n✔ Data Retention: 0 Days (Strict ZDR Policy)\n✔ Customer Prompt Training: 100% Exemption Guaranteed\n✔ Egress / Ingress Transfer Fee: $0.00 / GB\n✔ High-Availability Edge Verified`
+        `✅ [CRYPTOGRAPHIC AUDIT PASSED] ${tier === 'image' ? 'GALX Nova-image' : 'GALX Nova'} Enclave Verified\n✔ Data Retention: 0 Days (Strict ZDR Policy)\n✔ Customer Prompt Training: 100% Exemption Guaranteed\n✔ Egress / Ingress Transfer Fee: $0.00 / GB\n✔ High-Availability Edge Verified`
       );
     }, 600);
   };
@@ -247,12 +247,11 @@ export function ArtisanalSignalSection() {
   // ===========================================================================
   const [activeUsers, setActiveUsers] = useState<number>(2500);
   const [promptsPerDay, setPromptsPerDay] = useState<number>(15);
-  const [selectedModelTier, setSelectedModelTier] = useState<'sol' | 'terra' | 'luna'>('sol');
+  const [selectedModelTier, setSelectedModelTier] = useState<'nova' | 'image'>('nova');
 
   const modelRates = {
-    sol: { retail: 0.0035, wholesale: 0.0021, name: 'GPT-5.6 Sol' },
-    terra: { retail: 0.0018, wholesale: 0.0011, name: 'GPT-5.6 Terra' },
-    luna: { retail: 0.0006, wholesale: 0.00036, name: 'GPT-5.6 Luna' },
+    nova: { retail: 0.0020, wholesale: 0.0012, name: 'GALX Nova' },
+    image: { retail: 0.080, wholesale: 0.060, name: 'GALX Nova-image' },
   };
 
   const totalMonthlyPrompts = activeUsers * promptsPerDay * 30;
@@ -554,7 +553,7 @@ export function ArtisanalSignalSection() {
                 <div className="space-y-1.5">
                   <label className="text-[11px] font-mono text-zinc-400 uppercase font-bold">Model Engine:</label>
                   <div className="flex rounded-xl bg-white/5 p-1 text-xs font-mono">
-                    {(['sol', 'terra', 'luna'] as const).map((m) => (
+                    {(['nova', 'image'] as const).map((m) => (
                       <button
                         key={m}
                         onClick={() => setSelectedModelTier(m)}
@@ -564,7 +563,7 @@ export function ArtisanalSignalSection() {
                             : 'text-zinc-400 hover:text-white'
                         }`}
                       >
-                        {m}
+                        {m === 'image' ? 'Nova-image' : 'Nova'}
                       </button>
                     ))}
                   </div>
@@ -744,7 +743,7 @@ export function ArtisanalSignalSection() {
 
                 <div className="flex items-center gap-2">
                   <div className="flex rounded-xl bg-white/5 p-1 text-xs font-mono">
-                    {(['sol', 'terra', 'luna'] as const).map((t) => (
+                    {(['nova', 'image'] as const).map((t) => (
                       <button
                         key={t}
                         onClick={() => verifyPrivateEnclave(t)}
@@ -754,7 +753,7 @@ export function ArtisanalSignalSection() {
                             : 'text-zinc-400 hover:text-white'
                         }`}
                       >
-                        {t}
+                        {t === 'image' ? 'Nova-image' : 'Nova'}
                       </button>
                     ))}
                   </div>
@@ -1313,7 +1312,7 @@ export function ArtisanalSignalSection() {
                   <span className="text-purple-400">import</span> OpenAI <span className="text-purple-400">from</span> <span className="text-emerald-300">&apos;openai&apos;</span>;{'\n'}
                   <span className="text-purple-400">const</span> openai = <span className="text-purple-400">new</span> OpenAI();{'\n\n'}
                   <span className="text-purple-400">const</span> response = <span className="text-purple-400">await</span> openai.chat.completions.create(&#123;{'\n'}
-                  {'  '}model: <span className="text-emerald-300">&apos;gpt-5.6-sol&apos;</span>,{'\n'}
+                  {'  '}model: <span className="text-emerald-300">&apos;galx-nova&apos;</span>,{'\n'}
                   {'  '}messages: [&#123; role: <span className="text-emerald-300">&apos;user&apos;</span>, content: <span className="text-emerald-300">&apos;Analyze data&apos;</span> &#125;],{'\n'}
                   &#125;);
                 </code>

@@ -15,12 +15,12 @@ import { SITE_CONFIG } from '@/lib/seo/siteConfig';
 export const metadata: Metadata = constructMetadata({
   title: 'AI Model Cost Comparator & Wholesale Pricing Calculator — GALXAI Tools',
   description:
-    'Free interactive LLM cost comparator. Calculate side-by-side monthly inference invoices across OpenAI GPT-5.6 Sol, GPT-5.6 Terra, GPT-5.6 Luna, and xAI Grok with 75% prompt caching savings.',
+    'Free interactive LLM cost comparator. Calculate side-by-side monthly inference invoices across GALX Nova and frontier models with 75% prompt caching savings.',
   canonicalPath: '/tools/model-cost-comparator',
   keywords: [
     'LLM Price Comparison',
-    'OpenAI vs Grok Cost Calculator',
-    'GPT-5.6 Pricing Calculator',
+    'GALX Nova vs Frontier Cost Calculator',
+    'GALX Nova Pricing Calculator',
     'Prompt Caching Savings Estimator',
     'AI Gateway Wholesale Rates',
     'pSEO Tools',
@@ -39,8 +39,8 @@ export default function ModelCostComparatorPage() {
       a: 'When an incoming request shares an identical prefix of 1,024+ tokens with previous requests, the cached tokens are processed at a 75% discount ($0.25 on the dollar) and delivered in <15ms.',
     },
     {
-      q: 'Can I switch between OpenAI and xAI models using the same API key?',
-      a: 'Yes. A single GALXAI API key unlocks unified routing across GPT-5.6 Sol, GPT-5.6 Terra, GPT-5.6 Luna, Grok 4.6 (1M context), and OpenAI Image Generation.',
+      q: 'Can I switch between reasoning and visual models using the same API key?',
+      a: 'Yes. A single GALX API key unlocks unified access across GALX Nova for text/reasoning and GALX Nova-image for visual synthesis.',
     },
   ];
 
@@ -76,7 +76,7 @@ export default function ModelCostComparatorPage() {
   const codeSchema = createSoftwareSourceCodeSchema({
     name: 'Wholesale Model Invocation Code',
     programmingLanguage: 'Python',
-    codeSample: 'from openai import OpenAI\nclient = OpenAI(base_url="https://galx.ai/v1", api_key="galx_live_key")\nres = client.chat.completions.create(model="gpt-5.6-sol", messages=[{"role":"user","content":"Hello"}])',
+    codeSample: 'from openai import OpenAI\nclient = OpenAI(base_url="https://galx.ai/v1", api_key="galx_live_key")\nres = client.chat.completions.create(model="galx-nova", messages=[{"role":"user","content":"Hello"}])',
     targetUrl: 'https://galx.ai/tools/model-cost-comparator#comparator-code-snippet',
   });
 
@@ -95,7 +95,7 @@ export default function ModelCostComparatorPage() {
       createTechArticleSchema({
         headline: 'AI Model Cost Comparator & Wholesale Pricing Calculator',
         description:
-          'Calculate side-by-side monthly inference invoices across OpenAI and xAI models with 75% prompt caching savings.',
+          'Calculate side-by-side monthly inference invoices across GALX Nova and frontier models with prompt caching savings.',
         path: '/tools/model-cost-comparator',
         keywords: ['Model Cost Comparator', 'LLM Pricing', 'Wholesale AI Tokens', 'pSEO', 'AEO'],
       }),

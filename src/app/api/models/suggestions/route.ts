@@ -70,8 +70,8 @@ async function previewGET(req: Request) {
       category: 'Tool',
     },
     {
-      title: 'Anycast Latency & Time-To-First-Token (TTFT) Estimator',
-      description: 'Simulate TLS Anycast edge termination vs single-origin RTT across global regions.',
+      title: 'Distributed Edge Latency & Time-To-First-Token (TTFT) Estimator',
+      description: 'Simulate TLS distributed edge termination vs single-origin RTT across global regions.',
       url: `${SITE_CONFIG.url}/tools/latency-estimator`,
       category: 'Tool',
     },

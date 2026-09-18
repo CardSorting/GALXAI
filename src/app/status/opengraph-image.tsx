@@ -96,7 +96,7 @@ export default async function Image() {
             Real-Time Gateway Uptime &amp; Router Metrics
           </div>
           <div style={{ fontSize: '22px', color: '#cbd5e1', lineHeight: 1.4 }}>
-            Sub-millisecond routing overhead, continuous circuit breaker health checks, and active Anycast failover.
+            Sub-millisecond routing overhead, continuous circuit breaker health checks, and active edge failover.
           </div>
         </div>
 

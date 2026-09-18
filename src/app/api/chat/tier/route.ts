@@ -53,7 +53,7 @@ async function previewGET(req: NextRequest) {
         spendCapUsd: 25.0,
         currentSpendUsd: 0.0,
         remainingSpendUsd: 25.0,
-        allowedModels: ['gpt-5.6-sol', 'gpt-5.6-luna'],
+        allowedModels: ['galx-nova', 'galx-nova-image'],
         isCapped: false,
         promptCacheRebatePct: 75,
         concurrencyLimit: 20,

@@ -15,14 +15,14 @@ import { SITE_CONFIG } from '@/lib/seo/siteConfig';
 export const metadata: Metadata = constructMetadata({
   title: 'LLM Context Window Capacity & Prompt Caching Visualizer — GALXAI Tools',
   description:
-    'Interactive 1,000,000 token context window visualizer and caching calculator for OpenAI GPT-5.6 and xAI Grok 4.6. Calculate word counts, document capacity, and 75% prompt caching savings.',
+    'Interactive 1,050,000 token context window visualizer and caching calculator for GALX Nova. Calculate word counts, document capacity, and automated prompt caching savings.',
   canonicalPath: '/tools/context-window-visualizer',
   keywords: [
     'LLM Context Window Visualizer',
     '1M Context Window Calculator',
     '1 Million Token Capacity',
-    'GPT-5.6 Sol Context Window',
-    'Grok 4.6 1M Context',
+    'GALX Nova Context Window',
+    '1M Context Window',
     'Prompt Caching Breakpoint',
     'Tokens to Words Calculator',
     'pSEO AI Tools',
@@ -34,7 +34,7 @@ export default function ContextWindowVisualizerPage() {
   const toolFaqs = [
     {
       q: 'What is the largest context window available on GALXAI?',
-      a: 'xAI Grok 4.6 offers a 1,000,000 (1M) token context window, while OpenAI GPT-5.6 Sol, Terra, and Luna offer 900,000 (900K) tokens with sub-15ms Anycast TTFT.',
+      a: 'GALX Nova provides a 1,050,000 (1M+) token context window with sub-15ms edge TTFT.',
     },
     {
       q: 'How does prompt caching work on 1M token contexts?',
@@ -69,7 +69,7 @@ export default function ContextWindowVisualizerPage() {
       'Step-by-step instructions to simulate token utilization and calculate prefix caching discounts.',
     totalTime: 'PT10S',
     steps: [
-      { name: 'Select Model', text: 'Choose between Grok 4.6 (1M), GPT-5.6 Sol (900K), or GPT-5.6 Luna.' },
+      { name: 'Select Model', text: 'Select GALX Nova (1,050,000 tokens) or custom context presets.' },
       { name: 'Adjust Token Volume', text: 'Move the slider or click a preset (monorepo, textbook, whitepaper).' },
       { name: 'Inspect Capacity & Savings', text: 'View word equivalence, page count, and 75% prompt caching savings.' },
     ],
@@ -78,7 +78,7 @@ export default function ContextWindowVisualizerPage() {
   const codeSchema = createSoftwareSourceCodeSchema({
     name: 'Python 1M Context Ingestion Snippet',
     programmingLanguage: 'Python',
-    codeSample: 'from openai import OpenAI\nclient = OpenAI(base_url="https://galx.ai/v1", api_key="galx_live_...")\nresponse = client.chat.completions.create(model="x-ai/grok-4.6", messages=[{"role": "user", "content": "Analyze 1M token context"}])',
+    codeSample: 'from openai import OpenAI\nclient = OpenAI(base_url="https://galx.ai/v1", api_key="galx_live_...")\nresponse = client.chat.completions.create(model="galx-nova", messages=[{"role": "user", "content": "Analyze 1M token context"}])',
     targetUrl: 'https://galx.ai/tools/context-window-visualizer#code-snippet',
   });
 

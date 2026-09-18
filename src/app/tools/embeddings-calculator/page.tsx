@@ -40,7 +40,7 @@ export default function EmbeddingsCalculatorPage() {
     },
     {
       q: 'How should I batch embedding requests for maximum throughput?',
-      a: 'We recommend batching 100 to 500 document chunks per API request to minimize HTTP roundtrip overhead and maximize Anycast pipeline efficiency.',
+      a: 'We recommend batching 100 to 500 document chunks per API request to minimize HTTP roundtrip overhead and maximize distributed pipeline efficiency.',
     },
   ];
 

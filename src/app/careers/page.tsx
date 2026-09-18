@@ -9,7 +9,7 @@ import { SITE_CONFIG } from '@/lib/seo/siteConfig';
 
 export const metadata: Metadata = constructMetadata({
   title: 'Careers at GALX AI — Join Our Core Distributed Engineering Team',
-  description: 'Explore engineering, research, security, and product roles at GALX AI. Help build the universal Anycast routing, caching, and reasoning substrate for autonomous intelligence.',
+  description: 'Explore engineering, research, security, and product roles at GALX AI. Help build the universal distributed edge routing, caching, and reasoning substrate for autonomous intelligence.',
   canonicalPath: '/careers',
   keywords: [
     'GALX AI Careers',
@@ -17,7 +17,7 @@ export const metadata: Metadata = constructMetadata({
     'Distributed Systems Engineer',
     'LLM Research Jobs',
     'Remote AI Jobs',
-    'OpenAI Infrastructure Careers',
+    'Frontier AI Infrastructure Careers',
     'Zero Data Retention Security Careers',
   ],
 });

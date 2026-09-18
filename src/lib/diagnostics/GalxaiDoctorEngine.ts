@@ -2,15 +2,15 @@
  * GalxaiDoctorEngine.ts
  *
  * Developer Health & Connectivity Diagnostic Runner.
- * Executes automated benchmarks for DNS Anycast routing latency, streaming TTFT,
+ * Executes automated benchmarks for distributed edge routing latency, streaming TTFT,
  * prompt caching rebate verification, and API key sandbox quotas.
  */
 
 export interface DiagnosticReport {
   timestamp: number;
   environment: string;
-  anycastCluster: string;
-  anycastLatencyMs: number;
+  edgeCluster: string;
+  edgeLatencyMs: number;
   streamingTtftMs: number;
   promptCachingRebateVerified: boolean;
   apiKeyQuota: {
@@ -29,7 +29,7 @@ export class GalxaiDoctorEngine {
   public async runDiagnostics(apiKey?: string): Promise<DiagnosticReport> {
     const startMs = Date.now();
 
-    // 1. Anycast edge cluster latency probe simulation
+    // 1. Distributed edge cluster latency probe simulation
     const simulatedLatencyMs = 13.8;
     const streamingTtftMs = 14.2;
 
@@ -38,8 +38,8 @@ export class GalxaiDoctorEngine {
     return {
       timestamp: startMs,
       environment: typeof window !== 'undefined' ? 'browser' : 'node',
-      anycastCluster: 'iad1-us-east-edge',
-      anycastLatencyMs: simulatedLatencyMs,
+      edgeCluster: 'iad1-us-east-edge',
+      edgeLatencyMs: simulatedLatencyMs,
       streamingTtftMs,
       promptCachingRebateVerified: true,
       apiKeyQuota: {

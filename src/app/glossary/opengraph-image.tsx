@@ -107,7 +107,7 @@ export default async function Image() {
             AI Routing, Caching &amp; Inference Knowledge Base
           </div>
           <div style={{ fontSize: '20px', color: '#94a3b8', lineHeight: 1.4 }}>
-            Authoritative definitions and architectural explanations for prompt caching rebates, Time-To-First-Token (TTFT), Zero Data Retention, Anycast proxies, and token economics.
+            Authoritative definitions and architectural explanations for prompt caching rebates, Time-To-First-Token (TTFT), Zero Data Retention, distributed edge proxies, and token economics.
           </div>
         </div>
 

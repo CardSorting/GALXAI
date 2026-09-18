@@ -210,7 +210,7 @@ export class AgentRuntime {
     this.completions = completions;
     this.memory = config.memory || new AgentMemoryStore();
     this.config = {
-      model: 'gpt-5-6-luna-low',
+      model: 'galx-nova',
       maxSteps: 10,
       temperature: 0.2,
       parallelToolExecution: true,
@@ -468,7 +468,7 @@ export class AgentRuntime {
         delete state.pauseReason;
         await save(); // A failed persistence write must precede, and prevent, inference.
         const request = {
-          model: this.config.model || 'gpt-5-6-luna-low', messages: structuredClone(state.messages), temperature: this.config.temperature,
+          model: this.config.model || 'galx-nova', messages: structuredClone(state.messages), temperature: this.config.temperature,
           max_tokens: maxOutputTokens, tools: tools.length ? tools : undefined, tool_choice: tools.length ? 'auto' as const : undefined,
           conversation_id: state.conversationId, session_mode: state.sessionMode,
           turn_id: state.steps === 1 ? state.turnId : `${state.turnId.slice(0,52)}:s${state.steps}`,

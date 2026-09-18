@@ -1,11 +1,6 @@
 /**
  * Curated Model Comparison Matchup Data for Programmatic SEO (pSEO) and AEO
- * Focused exclusively on the OpenAI GPT flagship suite:
- * 1. gpt-6-astra (default)
- * 2. gpt-5.6-sol (workhorse)
- * 3. gpt-5.6-terra (balanced)
- * 4. gpt-5.6-luna (fast & affordable)
- * 5. gpt-5.5 (proven)
+ * Focused on GALX Nova and visual synthesis.
  */
 
 export interface ModelMatchup {
@@ -26,33 +21,33 @@ export interface ModelMatchup {
 
 export const CURATED_MATCHUPS: ModelMatchup[] = [
   {
-    slug: 'gpt-5-6-luna-low-vs-openai-gpt-image-latest',
-    modelAId: 'gpt-5-6-luna',
-    modelBId: 'openai-gpt-image-latest',
-    title: 'OpenAI GPT-5.6 Luna vs Visual Synthesis: High-Velocity Text & Code vs Image Generation',
-    headline: 'Flagship Text & Code vs Visual Synthesis: GPT-5.6 Luna vs OpenAI Image',
+    slug: 'galx-nova-vs-galx-nova-image',
+    modelAId: 'galx-nova',
+    modelBId: 'galx-nova-image',
+    title: 'GALX Nova vs GALX Nova-image: Sustainable Intelligence vs Visual Synthesis',
+    headline: 'Flagship Text & Code vs Visual Synthesis: GALX Nova vs Nova-image',
     description:
-      'Compare OpenAI GPT-5.6 Luna for high-velocity inference, coding, and reasoning against OpenAI Visual Synthesis for production-ready image generation.',
+      'Compare GALX Nova for high-velocity inference, coding, and reasoning against GALX Nova-image for production-ready image generation.',
     verdict: {
       summary:
-        'GPT-5.6 Luna is OpenAI’s flagship ultra-fast model for text, inline coding, and agentic workflows at $0.20/1M input and $1.20/1M output, while Visual Synthesis (openai-gpt-image-latest) generates high-definition visual assets.',
+        'GALX Nova is our flagship model for text, inline coding, and agentic workflows at $0.20/1M input and $1.20/1M output, while GALX Nova-image generates high-definition visual assets.',
       modelABestFor: 'High-velocity text generation, autonomous agentic loops, inline coding autocompletion, and structured JSON extraction.',
       modelBBestFor: 'Production image synthesis, graphic asset generation, UI mockups, and visual design pipelines.',
       costDifferenceSummary:
-        'GPT-5.6 Luna is priced at $0.20/1M input and $1.20/1M output, whereas Visual Synthesis is priced at $0.040 per 1024x1024 image.',
+        'GALX Nova is priced at $0.20/1M input and $1.20/1M output, whereas GALX Nova-image is priced at $0.060 per 1M tokens.',
     },
     faqs: [
       {
-        q: 'Can I use both GPT-5.6 Luna and Visual Synthesis in the same application?',
-        a: 'Yes. You can use GPT-5.6 Luna for prompt expansion, logic orchestration, and metadata extraction, then route image synthesis tasks to openai-gpt-image-latest.',
+        q: 'Can I use both GALX Nova and GALX Nova-image in the same application?',
+        a: 'Yes. You can use GALX Nova for prompt expansion, logic orchestration, and metadata extraction, then route image synthesis tasks to galx-nova-image.',
       },
       {
-        q: 'What are the latency expectations for GPT-5.6 Luna?',
-        a: 'GPT-5.6 Luna delivers sub-15ms Time-To-First-Token (TTFT) across our Anycast edge relay network.',
+        q: 'What are the latency expectations for GALX Nova?',
+        a: 'GALX Nova delivers sub-15ms Time-To-First-Token (TTFT) across our distributed edge relay network.',
       },
       {
         q: 'How does image generation billing work?',
-        a: 'Visual synthesis requests are billed per sanitized binary artifact at direct developer rates ($0.040 per standard image).',
+        a: 'Visual synthesis requests are billed per sanitized binary artifact at direct developer rates with zero markups.',
       },
     ],
   },

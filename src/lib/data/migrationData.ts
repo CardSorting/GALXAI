@@ -75,7 +75,7 @@ client = OpenAI(
 
 # Direct canonical model names
 response = client.chat.completions.create(
-    model="gpt-5.6-sol",
+    model="galx-nova",
     messages=[{"role": "user", "content": "Hello with 40% wholesale savings"}]
 )`,
     },
@@ -85,12 +85,12 @@ response = client.chat.completions.create(
         desc: 'Import "OpenAI" from "openai" instead of "AzureOpenAI".',
       },
       {
-        step: 'Step 2: Set Base URL to GALXAI Anycast Edge',
+        step: 'Step 2: Set Base URL to GALXAI Distributed Edge',
         desc: 'Set base_url="https://galx.ai/v1" and supply your live developer key.',
       },
       {
         step: 'Step 3: Replace Deployment Names with Model IDs',
-        desc: 'Use canonical model IDs like "gpt-5.6-sol" or "gpt-5.6-terra".',
+        desc: 'Use canonical model IDs like "galx-nova" or "galx-nova-image".',
       },
     ],
     faqs: [
@@ -115,8 +115,8 @@ response = client.chat.completions.create(
     estimatedCostReductionPct: 35,
     keyPainPointsSolved: [
       'Eliminates AWS IAM Signature V4 request signing complexity',
-      'Direct access to official OpenAI (GPT-5.6 Sol/Terra) not on Bedrock',
-      'Sub-15ms Anycast TTFT vs cross-region AWS VPC latency',
+      'Direct access to official frontier intelligence (GALX Nova) not on Bedrock',
+      'Sub-15ms edge TTFT vs cross-region AWS VPC latency',
       'True 0% gateway markup with 75% prompt caching pass-through',
     ],
     beforeCode: {
@@ -149,7 +149,7 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="gpt-5.6-sol",
+    model="galx-nova",
     messages=[{"role": "user", "content": "Hello from streamlined gateway"}]
 )`,
     },
@@ -166,7 +166,7 @@ response = client.chat.completions.create(
     faqs: [
       {
         q: 'Does GALXAI offer lower latency than AWS Bedrock?',
-        a: 'Yes. Anycast edge routing terminates client connections in <14ms TTFT, avoiding multi-hop AWS VPC gateway overhead.',
+        a: 'Yes. Distributed edge routing terminates client connections in <14ms TTFT, avoiding multi-hop AWS VPC gateway overhead.',
       },
     ],
   },
@@ -206,7 +206,7 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="gpt-5.6-sol",
+    model="galx-nova",
     messages=[{"role": "user", "content": "Hello"}]
 )`,
     },
@@ -230,15 +230,15 @@ response = client.chat.completions.create(
   {
     slug: 'groq',
     sourceProvider: 'Groq Cloud',
-    badge: '900K Context & SOTA Reasoning',
-    title: 'Migrate from Groq to GALXAI — Access SOTA Reasoning & 900K Context',
+    badge: '1M+ Context & SOTA Reasoning',
+    title: 'Migrate from Groq to GALXAI — Access SOTA Reasoning & 1M+ Context',
     headline: 'Migrate from Groq to GALXAI Universal Gateway',
     description:
-      'Combine sub-15ms Anycast speed with SOTA frontier reasoning (GPT-5.6 Sol) and massive 900K token context windows on OpenAI.',
+      'Combine sub-15ms edge speed with SOTA frontier reasoning (GALX Nova) and massive 1M+ token context windows.',
     estimatedCostReductionPct: 25,
     keyPainPointsSolved: [
-      'Expands from 8K/32K open-weights context to 900,000 token context',
-      'Provides flagship cognitive reasoning (GPT-5.6 Sol) alongside high velocity (Luna)',
+      'Expands from 8K/32K open-weights context to 1,000,000+ token context',
+      'Provides flagship cognitive reasoning and high velocity with GALX Nova',
       'Zero data retention security enclave with HIPAA/SOC 2 guarantees',
     ],
     beforeCode: {
@@ -264,7 +264,7 @@ client = OpenAI(
 
 # SOTA Frontier Reasoning + 140 tok/sec Velocity
 response = client.chat.completions.create(
-    model="gpt-5.6-sol",
+    model="galx-nova",
     messages=[{"role": "user", "content": "Complex reasoning task"}]
 )`,
     },
@@ -275,13 +275,13 @@ response = client.chat.completions.create(
       },
       {
         step: 'Step 2: Choose Velocity or Reasoning',
-        desc: 'Use GPT-5.6 Luna for extreme speed (140+ tok/s) or Sol for SOTA intelligence.',
+        desc: 'Use GALX Nova for extreme speed (140+ tok/s) and SOTA intelligence.',
       },
     ],
     faqs: [
       {
         q: 'Is GALXAI fast enough to replace Groq for streaming chat?',
-        a: 'Yes. GPT-5.6 Luna streams in sub-12ms TTFT with 145 tok/sec throughput on GALXAI Anycast edge proxies.',
+        a: 'Yes. GALX Nova streams in sub-12ms TTFT with 145 tok/sec throughput on GALXAI distributed edge proxies.',
       },
     ],
   },
@@ -297,7 +297,7 @@ response = client.chat.completions.create(
     keyPainPointsSolved: [
       'Eliminates cold-start container spin-up delays (0ms cold start on GALXAI)',
       'Replaces unpredictable per-second hardware billing with deterministic token rates',
-      'Native /v1/images/generations endpoint for OpenAI Image Generation',
+      'Native /v1/images/generations endpoint for GALX Nova-image',
     ],
     beforeCode: {
       language: 'python',
@@ -322,7 +322,7 @@ client = OpenAI(
 
 # Instant wholesale image synthesis (0ms cold start)
 response = client.images.generate(
-    model="openai-gpt-image-latest",
+    model="galx-nova-image",
     prompt="A cinematic landscape",
     size="1024x1024"
 )`,
@@ -334,7 +334,7 @@ response = client.images.generate(
       },
       {
         step: 'Step 2: Benefit from Wholesale Rates',
-        desc: 'Pay $0.032/image for OpenAI Image Generation (-20% wholesale discount).',
+        desc: 'Pay wholesale rates for GALX Nova-image (-20% wholesale discount).',
       },
     ],
     faqs: [
@@ -386,7 +386,7 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="gpt-5.6-sol",
+    model="galx-nova",
     messages=[{"role": "user", "content": "Execute task"}]
 )`,
     },
@@ -414,12 +414,12 @@ response = client.chat.completions.create(
     title: 'Migrate from Together AI to GALXAI Universal Gateway',
     headline: 'Migrate from Together AI to GALXAI Wholesale Clearinghouse',
     description:
-      'Consolidate your inference stack with OpenAI GPT-5.6 (900K context) alongside wholesale token pricing and zero rate limit stalls.',
+      'Consolidate your inference stack with GALX Nova (1M+ context) alongside wholesale token pricing and zero rate limit stalls.',
     estimatedCostReductionPct: 30,
     keyPainPointsSolved: [
-      'Access to frontier reasoning flagships (GPT-5.6 Sol, Terra, Luna)',
+      'Access to frontier reasoning flagship (GALX Nova)',
       '75% prompt caching pass-through on long prompts',
-      'Predictive 429 rate limit pooling across global Anycast edge nodes',
+      'Predictive 429 rate limit pooling across global distributed edge nodes',
     ],
     beforeCode: {
       language: 'typescript',
@@ -454,23 +454,23 @@ const client = new OpenAI({
     ],
     faqs: [
       {
-        q: 'Can I route 900K context requests through GALXAI?',
-        a: 'Yes. OpenAI GPT-5.6 Sol supports full 900,000 token context window queries with wholesale pricing.',
+        q: 'Can I route 1M+ context requests through GALXAI?',
+        a: 'Yes. GALX Nova supports full 1,000,000+ token context window queries with wholesale pricing.',
       },
     ],
   },
   {
     slug: 'openrouter',
     sourceProvider: 'OpenRouter',
-    badge: '0% Surcharge + Anycast',
+    badge: '0% Surcharge + Distributed Edge',
     title: 'Migrate from OpenRouter to GALXAI — 0% Gateway Markups',
     headline: 'Migrate from OpenRouter to GALXAI Wholesale Gateway',
     description:
-      'Eliminate routing markups, proxy latency jitter, and rate-limit errors with GALXAI’s wholesale token clearinghouse and sub-15ms Anycast routing.',
+      'Eliminate routing markups, proxy latency jitter, and rate-limit errors with GALXAI’s wholesale token clearinghouse and sub-15ms edge routing.',
     estimatedCostReductionPct: 35,
     keyPainPointsSolved: [
       '0% platform gateway markup (true wholesale token clearinghouse)',
-      'Sub-15ms Anycast TTFT with zero proxy hops',
+      'Sub-15ms edge TTFT with zero proxy hops',
       'Automatic 75% prompt caching rebate pass-through',
     ],
     beforeCode: {
@@ -488,7 +488,7 @@ client = OpenAI(
       filename: 'galxai_wholesale.py',
       code: `from openai import OpenAI
 
-# 0% markup wholesale Anycast gateway
+# 0% markup wholesale distributed edge gateway
 client = OpenAI(
     base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
@@ -507,9 +507,8 @@ client = OpenAI(
     faqs: [
       {
         q: 'How does GALXAI compare in latency to OpenRouter?',
-        a: 'GALXAI routes traffic via multi-region Anycast POPs with sub-15ms Time-To-First-Token, eliminating intermediary proxy latency.',
+        a: 'GALXAI routes traffic via multi-region distributed edge POPs with sub-15ms Time-To-First-Token, eliminating intermediary proxy latency.',
       },
     ],
   },
 ];
-

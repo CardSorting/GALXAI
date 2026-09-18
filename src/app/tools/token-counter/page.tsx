@@ -13,12 +13,12 @@ import {
 import { SITE_CONFIG } from '@/lib/seo/siteConfig';
 
 export const metadata: Metadata = constructMetadata({
-  title: 'OpenAI Token Counter & BPE Tokenizer Studio — GALXAI Tools',
+  title: 'AI Token Counter & BPE Tokenizer Studio — GALXAI Tools',
   description:
-    'Free interactive Byte-Pair Encoding (BPE) token counter and subword inspector for OpenAI GPT-5.6, GPT-4o, and xAI Grok. Calculate token slices, byte counts, and wholesale inference pricing.',
+    'Free interactive Byte-Pair Encoding (BPE) token counter and subword inspector for frontier LLMs. Calculate token slices, byte counts, and wholesale inference pricing.',
   canonicalPath: '/tools/token-counter',
   keywords: [
-    'OpenAI Token Counter',
+    'AI Token Counter',
     'tiktoken Online Calculator',
     'BPE Tokenizer Studio',
     'o200k_base Tokenizer',
@@ -37,7 +37,7 @@ export default function TokenCounterPage() {
     },
     {
       q: 'What is the difference between cl100k_base and o200k_base?',
-      a: 'cl100k_base was introduced with GPT-4 with a 100k vocabulary. o200k_base powers GPT-5.6 and Grok with a 200k vocabulary, improving compression density by 15%–20% on code and non-English text.',
+      a: 'cl100k_base was introduced with earlier models with a 100k vocabulary. o200k_base powers frontier models with a 200k vocabulary, improving compression density by 15%–20% on code and non-English text.',
     },
     {
       q: 'How does token count affect prompt caching rebates on GALXAI?',
@@ -69,7 +69,7 @@ export default function TokenCounterPage() {
     totalTime: 'PT10S',
     steps: [
       { name: 'Paste Text', text: 'Enter system prompts or user messages into the input area.' },
-      { name: 'Select Tokenizer', text: 'Choose between o200k_base (GPT-5.6/Grok) and cl100k_base (legacy).' },
+      { name: 'Select Tokenizer', text: 'Choose between o200k_base (GALX Nova / modern) and cl100k_base (legacy).' },
       { name: 'Review Token Slices', text: 'Inspect individual colored subwords and model price estimates.' },
     ],
   });

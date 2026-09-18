@@ -168,7 +168,7 @@ export async function GET(request: NextRequest) {
               }}
             >
               <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                ⚡ Sub-15ms Anycast TTFT
+                ⚡ Sub-15ms Edge TTFT
               </span>
               <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 🧠 75% Prompt Caching Rebate

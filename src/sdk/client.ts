@@ -431,14 +431,14 @@ export class GalxAIClientCore {
       return {
         created: Math.floor(Date.now() / 1000),
         data: [{ url: `https://picsum.photos/seed/galx-mock-${seed}/1024/1024`, revised_prompt: prompt }],
-        modelUsed: options.body?.model || 'openai-gpt-image-latest'
+        modelUsed: options.body?.model || 'galx-nova-image'
       } as T;
     }
     if (path.includes('/models')) {
       return {
         data: [
-          { id: 'gpt-5-6-luna-low', name: 'OpenAI GPT-5.6 Luna', description: 'Ultra-fast text & code inference engine' },
-          { id: 'openai-gpt-image-latest', name: 'OpenAI Image Generation', description: 'Generate images from text prompts' }
+          { id: 'galx-nova', name: 'GALX Nova', description: 'Sustainable Intelligence Engine for reasoning and coding' },
+          { id: 'galx-nova-image', name: 'GALX Nova-image', description: 'Visual synthesis engine for creative generation and diagrams' }
         ]
       } as T;
     }
@@ -447,7 +447,7 @@ export class GalxAIClientCore {
         id: `mock_chat_${Date.now()}`,
         object: 'chat.completion',
         created: Math.floor(Date.now() / 1000),
-        model: options.body?.model || 'gpt-5-6-luna-low',
+        model: options.body?.model || 'galx-nova',
         choices: [
           {
             index: 0,
@@ -475,7 +475,7 @@ export class GalxAIClientCore {
           id: `chatcmpl_mock_${Date.now()}`,
           object: 'chat.completion.chunk',
           created: Math.floor(Date.now() / 1000),
-          model: (options.body as any)?.model || 'gpt-5-6-luna-low',
+          model: (options.body as any)?.model || 'galx-nova',
           choices: [
             {
               index: 0,
@@ -696,7 +696,7 @@ export class GalxAI {
     this.chat = new ChatResource(this.core);
     this.messages = {
       create: async (params, reqOptions) => {
-        const mappedModel = params.model || 'gpt-5-6-luna-low';
+        const mappedModel = params.model || 'galx-nova';
         if (params.stream) {
           return this.core.requestStream('/v1/messages', {
             method: 'POST',
@@ -850,7 +850,7 @@ export class GalxAI {
    * @example
    * ```typescript
    * const defaultModel = await galx.model();
-   * const gptModel = await galx.model('gpt-5-6-luna-low');
+   * const gptModel = await galx.model('galx-nova');
    * const allIds = await galx.model.names();
    * ```
    */
@@ -896,7 +896,7 @@ export class GalxAI {
       ? [{ role: 'user', content: promptOrMessages }]
       : promptOrMessages;
 
-    const model = options?.model || 'gpt-5-6-luna-low';
+    const model = options?.model || 'galx-nova';
 
     const response = await this.chat.completions.create({
       model,
@@ -934,7 +934,7 @@ export class GalxAI {
       ? [{ role: 'user', content: promptOrMessages }]
       : promptOrMessages;
 
-    const model = options?.model || 'gpt-5-6-luna-low';
+    const model = options?.model || 'galx-nova';
 
     return this.chat.completions.stream({
       model,
@@ -957,7 +957,7 @@ export class GalxAI {
    * @example
    * ```typescript
    * const agent = galx.agent({
-   *   model: 'gpt-5-6-luna-low',
+   *   model: 'galx-nova',
    *   systemPrompt: 'You are a research analyst.',
    *   tools: {
    *     getPrice: {
@@ -1010,7 +1010,7 @@ export class GalxAI {
     messages.push({ role: 'user', content: prompt });
 
     const completion = await this.chat.completions.create({
-      model: options.model || 'gpt-5-6-luna-low',
+      model: options.model || 'galx-nova',
       messages
     }, options);
 
@@ -1039,7 +1039,7 @@ export class GalxAI {
     const formattedResult = typeof result === 'string' ? result : JSON.stringify(result, null, 2);
     return `### [GALXAI Autonomous Agent Context]
 Prompt: ${prompt}
-Model: ${metadata.model || 'gpt-5-6-luna-low'}
+Model: ${metadata.model || 'galx-nova'}
 Task ID: ${metadata.id || 'direct'}
 
 === RESULT OUTPUT ===
@@ -1072,7 +1072,7 @@ ${formattedResult}
     messages.push({ role: 'user', content: prompt });
 
     const streamResponse = await this.chat.completions.create({
-      model: options.model || 'gpt-5-6-luna-low',
+      model: options.model || 'galx-nova',
       messages,
       temperature: options.temperature,
       stream: true
@@ -1107,7 +1107,7 @@ ${formattedResult}
     const systemPrompt = `You are a precise data extractor. Extract the requested fields from the input text and return ONLY valid JSON matching this schema:\n${schemaStr}\nDo not output markdown code blocks or explanations, only valid parseable JSON.`;
 
     const raw = await this.run(input, {
-      model: options.model || 'gpt-5-6-luna-low',
+      model: options.model || 'galx-nova',
       system: systemPrompt,
       ...options
     });

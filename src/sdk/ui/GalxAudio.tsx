@@ -21,7 +21,7 @@ export interface GalxAudioProps {
 export function GalxAudio({
   text = 'GALXAI provides sovereign AI infrastructure and autonomous spend governance for production applications.',
   voice = 'alloy',
-  model = 'openai-gpt-audio',
+  model = 'galx-audio',
   autoPlay = false,
   className = '',
   onEnded,

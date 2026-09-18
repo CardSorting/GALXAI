@@ -5,7 +5,7 @@ import { imageDownloadUrl } from './image-download-url';
 export function publicImageRecord(record: ImageGenerationRecord) {
   const publicUrl = imageDownloadUrl(record.userId, record.id);
   return { id: record.id, sessionId: record.sessionId, status: record.status,
-    prompt: record.prompt, model: 'openai-gpt-image-latest', aspectRatio: record.aspectRatio,
+    prompt: record.prompt, model: 'galx-nova-image', aspectRatio: record.aspectRatio,
     dimensions: record.dimensions, quality: record.quality,
     publicUrl, thumbnailUrl: `${publicUrl}/thumbnail`,
     isFavorite: record.isFavorite, isPublic: record.isPublic ?? true, visibility: record.visibility ?? 'public',

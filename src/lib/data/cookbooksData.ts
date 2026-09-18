@@ -47,7 +47,7 @@ export async function POST(req: Request) {
   const { messages } = await req.json();
 
   const stream = await client.chat.completions.create({
-    model: "gpt-5.6-luna",
+    model: "galx-nova",
     stream: true,
     messages,
   });
@@ -122,7 +122,7 @@ client = OpenAI(
 
 # Enforces 100% strict JSON schema grammar decoding
 response = client.beta.chat.completions.parse(
-    model="gpt-5.6-sol",
+    model="galx-nova",
     messages=[
         {"role": "system", "content": "Extract customer data with zero schema drift."},
         {"role": "user", "content": "Alex Mercer from Acme Corp wants an Enterprise contract for $50,000/yr. Reach him at alex@acme.com."}
@@ -158,7 +158,7 @@ print(f"Extracted: {data.name} ({data.email}) - \${data.estimated_arr_usd}/yr")`
     category: 'Agent Tool Calling',
     badge: 'Multi-Tool Execution',
     title: 'Parallel Tool & Function Calling in Python & TypeScript',
-    headline: 'Execute Parallel Multi-Tool Function Calls with GPT-5.6 Sol',
+    headline: 'Execute Parallel Multi-Tool Function Calls with GALX Nova',
     description:
       'Orchestrate autonomous agent tool calls in parallel with zero sequential blocking and wholesale token pricing.',
     difficulty: 'Intermediate',
@@ -200,9 +200,9 @@ client = OpenAI(
     api_key="galx_live_your_gateway_key"
 )
 
-# GPT-5.6 Sol triggers both functions in parallel in a single turn
+# GALX Nova triggers both functions in parallel in a single turn
 response = client.chat.completions.create(
-    model="gpt-5.6-sol",
+    model="galx-nova",
     messages=[{"role": "user", "content": "What is the stock price and latest news for NVDA and MSFT?"}],
     tools=tools,
     tool_choice="auto"
@@ -248,7 +248,7 @@ from langchain_openai import ChatOpenAI
 
 # Shared Gateway LLM with 429 Shield Pooling
 llm = ChatOpenAI(
-    model="gpt-5.6-sol",
+    model="galx-nova",
     openai_api_base="https://galx.ai/v1",
     openai_api_key="galx_live_your_gateway_key"
 )
@@ -271,7 +271,7 @@ reviewer = Agent(
 crew = Crew(
     agents=[planner, reviewer],
     tasks=[
-        Task(description="Architect Anycast routing layer", expected_output="Architecture spec", agent=planner),
+        Task(description="Architect distributed edge routing layer", expected_output="Architecture spec", agent=planner),
         Task(description="Audit zero-data-retention buffers", expected_output="Audit report", agent=reviewer)
     ],
     process=Process.sequential
@@ -324,7 +324,7 @@ large_document_context = load_annual_report_markdown()  # ~25,000 tokens
 
 def query_knowledge_base(user_question: str):
     response = client.chat.completions.create(
-        model="gpt-5.6-sol",  # 900K Context Window
+        model="galx-nova",  # 1M+ Context Window
         messages=[
             {
                 "role": "system",
@@ -363,13 +363,13 @@ print(query_knowledge_base("Summarize ESG initiatives."))`,
     ],
   },
   {
-    slug: 'image-generation-gpt-image-2',
+    slug: 'image-generation-galx-nova-image',
     category: 'Visual Synthesis',
-    badge: 'OpenAI Image Generation',
-    title: 'Generating Images with OpenAI Image Generation',
-    headline: 'Generate Images with OpenAI Image Generation on GALXAI',
+    badge: 'GALX Nova-image',
+    title: 'Generating Images with GALX Nova-image',
+    headline: 'Generate Images with GALX Nova-image on GALXAI',
     description:
-      'Create photorealistic images with readable typography, UI mockups, and marketing assets at 20% below retail list prices.',
+      'Create photorealistic images with readable typography, UI mockups, and marketing assets at wholesale rates.',
     difficulty: 'Beginner',
     timeToComplete: 'PT2M',
     prerequisites: ['Python 3.10+', 'openai package'],
@@ -383,8 +383,8 @@ client = OpenAI(
 
 # Generate image with crisp typography and complex composition
 response = client.images.generate(
-    model="openai-gpt-image-latest",
-    prompt="Sleek glassmorphism developer dashboard with glowing neon telemetry graph and title 'GALXAI ANYCAST READY'",
+    model="galx-nova-image",
+    prompt="Sleek glassmorphism developer dashboard with glowing neon telemetry graph and title 'GALXAI EDGE READY'",
     size="1024x1024",
     quality="hd"
 )
@@ -394,7 +394,7 @@ print(f"Generated Asset: {image_url}")`,
     steps: [
       {
         name: 'Call client.images.generate',
-        description: 'Specify model="openai-gpt-image-latest" with your visual prompt.',
+        description: 'Specify model="galx-nova-image" with your visual prompt.',
       },
       {
         name: 'Receive HD Asset URL',
@@ -415,7 +415,7 @@ print(f"Generated Asset: {image_url}")`,
     title: 'Implementing Client-Side Circuit Breakers with Automated Model Fallback',
     headline: 'Client-Side AI Circuit Breaker & Resilient Model Fallbacks',
     description:
-      'Build zero-downtime AI pipelines that automatically degrade from flagship reasoning models (GPT-5.6 Sol) to high-speed fallbacks (GPT-5.6 Luna) during upstream network anomalies.',
+      'Build zero-downtime AI pipelines that automatically handle retry loops and circuit breakers with GALX Nova during upstream network anomalies.',
     difficulty: 'Intermediate',
     timeToComplete: 'PT5M',
     prerequisites: ['TypeScript / Node.js 18+', 'openai SDK'],
@@ -428,21 +428,23 @@ const client = new OpenAI({
 });
 
 async function executeResilientInference(prompt: string): Promise<string> {
-  const models = ["gpt-5.6-sol", "gpt-5.6-terra", "gpt-5.6-luna"];
+  const maxRetries = 3;
 
-  for (const model of models) {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       const response = await client.chat.completions.create({
-        model,
+        model: "galx-nova",
         messages: [{ role: "user", content: prompt }],
         timeout: 5000, // 5s circuit timeout
       });
       return response.choices[0].message.content || "";
     } catch (err) {
-      console.warn(\`Model \${model} degraded, falling back to next tier...\`, err);
+      console.warn(\`Attempt \${attempt} degraded, retrying with backoff...\`, err);
+      if (attempt === maxRetries) throw err;
+      await new Promise(r => setTimeout(r, attempt * 1000));
     }
   }
-  throw new Error("All model tiers exhausted.");
+  throw new Error("All retry attempts exhausted.");
 }
 
 const result = await executeResilientInference("Summarize mission-critical system state");
@@ -502,12 +504,12 @@ def ask_with_cache(user_prompt: str):
     # 2. Check local semantic cache (cosine similarity > 0.95)
     # If cache miss, dispatch to GALXAI wholesale model
     completion = client.chat.completions.create(
-        model="gpt-5.6-terra",
+        model="galx-nova",
         messages=[{"role": "user", "content": user_prompt}]
     )
     return completion.choices[0].message.content
 
-print(ask_with_cache("How do I configure Anycast proxy endpoints?"))`,
+print(ask_with_cache("How do I configure distributed edge proxy endpoints?"))`,
     steps: [
       {
         name: 'Compute Low-Cost Vector Embedding',
@@ -519,7 +521,7 @@ print(ask_with_cache("How do I configure Anycast proxy endpoints?"))`,
       },
       {
         name: 'Dispatch Miss to GALXAI Wholesale',
-        description: 'Route cache misses to GPT-5.6 Terra with 25% wholesale savings.',
+        description: 'Route cache misses to GALX Nova with wholesale savings.',
       },
     ],
     faqs: [
@@ -549,7 +551,7 @@ export default function AIStudioPage() {
       {/* 1. Declarative Reasoning Stream */}
       <GalxReasoningStream
         prompt="Explain the difference between SOTA reasoning and high-velocity tiers"
-        model="gpt-5.6-sol"
+        model="galx-nova"
         autoStart
       />
 
@@ -613,11 +615,10 @@ const openai = new OpenAI({
 });
 
 async function runClassificationTask(ticketText: string) {
-  // Low-entropy classification query:
-  // GalX automatically routes from Sol ($15/1M output) to Luna ($3/1M output)
-  // saving 80% with verified statistical quality equivalence.
+  // High-efficiency classification query:
+  // GALX Nova optimizes token throughput and latency with prefix cache preservation.
   const response = await openai.chat.completions.create({
-    model: "gpt-5.6-sol",
+    model: "galx-nova",
     messages: [
       {
         role: "system",
@@ -639,7 +640,7 @@ runClassificationTask("My credit card was charged twice on invoice #9201")
       },
       {
         name: 'Execute Normal Inference Calls',
-        description: 'Make standard chat.completions calls. GalX transparently evaluates entropy and applies tier cascading.',
+        description: 'Make standard chat.completions calls. GALX automatically optimizes performance and cache preservation.',
       },
       {
         name: 'Inspect Telemetry in /audit',

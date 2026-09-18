@@ -40,7 +40,7 @@ function resolveModelFromSlug(slug: string) {
     ModelCatalog.resolveModel(decoded.replace(/-/g, '/'));
   if (resolved) return resolved;
 
-  // 3. Fallback for dash separated version numbers like gpt-5-6-sol -> gpt-5.6-sol
+  // 3. Fallback for dash separated version numbers like model-1-0 -> model.1.0
   const dotNormalized = decoded.replace(/(\d+)-(\d+)/g, '$1.$2');
   const dotResolved =
     ModelCatalog.resolveModel(dotNormalized) ||

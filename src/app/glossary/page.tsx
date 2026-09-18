@@ -12,13 +12,13 @@ import { GLOSSARY_TERMS } from '@/lib/data/glossaryData';
 export const metadata: Metadata = constructMetadata({
   title: 'AI Routing & Gateway Engineering Glossary — AEO Knowledge Base',
   description:
-    'Comprehensive developer knowledge base and architectural glossary defining prompt caching rebates, sub-15ms TTFT, Anycast routing, 429 shield pooling, and zero data retention.',
+    'Comprehensive developer knowledge base and architectural glossary defining prompt caching rebates, sub-15ms TTFT, distributed edge routing, 429 shield pooling, and zero data retention.',
   canonicalPath: '/glossary',
   keywords: [
     'AI Gateway Glossary',
     'Prompt Caching Definition',
     'Time to First Token TTFT',
-    'Anycast LLM Router',
+    'Distributed Edge Gateway',
     'Zero Data Retention AI',
     'OpenAI Wire Compatibility',
     '429 Shield Rate Limiting',
@@ -47,7 +47,7 @@ export default function GlossaryPage() {
         description:
           'Comprehensive architectural glossary defining foundational AI gateway concepts, latency benchmarks, and pricing mechanisms.',
         path: '/glossary',
-        keywords: ['AEO', 'AI Gateway', 'Prompt Caching', 'Anycast Routing'],
+        keywords: ['AEO', 'AI Gateway', 'Prompt Caching', 'Distributed Edge Routing'],
       }),
       createBreadcrumbSchema([
         { name: 'Home', url: '/' },

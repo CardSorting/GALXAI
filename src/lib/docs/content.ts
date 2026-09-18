@@ -1,8 +1,8 @@
 import { BILLING_PATHS } from '@/lib/billing/navigation';
 import { GALX_API_BASE_URL } from '@/sdk/base-url';
 
-export const DOC_MODEL = 'gpt-5-6-luna';
-export const DOC_IMAGE_MODEL = 'openai-gpt-image-latest';
+export const DOC_MODEL = 'galx-nova';
+export const DOC_IMAGE_MODEL = 'galx-nova-image';
 
 export const DOC_NAV = [
   { href: '/docs', title: 'Quickstart', description: 'Curated developer foundation & first request.' },
@@ -141,17 +141,17 @@ Integrate GALXAI into the existing application. Inspect its language, framework,
 - API base URL: ${GALX_API_BASE_URL}
 - Authentication: Authorization: Bearer <GALXAI_API_KEY>
 - Secret environment variable: GALXAI_API_KEY
-- Curated Flagship Model: ${DOC_MODEL} (OpenAI GPT-5.6 Luna)
-- Visual Synthesis Model: ${DOC_IMAGE_MODEL} (OpenAI Image Generation)
+- Curated Flagship Model: ${DOC_MODEL} (GALX Nova)
+- Visual Synthesis Model: ${DOC_IMAGE_MODEL} (GALX Nova-image)
 - Model catalog: GET ${GALX_API_BASE_URL}/models
 - Chat endpoint: POST ${GALX_API_BASE_URL}/chat/completions
 - Image endpoint: POST ${GALX_API_BASE_URL}/images/generations
 - Create a key: https://galx.ai/keys
 
 ## Platform Strategy
-1. Curated Frontier Intelligence: GALXAI exclusively serves GPT-5.6 Luna for text and reasoning, selected through private internal testing as having the highest performance per dollar so developers can build and explore without being constrained by quality, price, or exploration limits.
-2. Generative Creative Playground: Multimodal pipelines combine GPT-5.6 Luna reasoning and orchestration with high-fidelity visual synthesis via ${DOC_IMAGE_MODEL}.
-3. Sustainable Developer Compute: Sub-15ms Anycast edge relay with zero markup, transparent billing, and 90% prompt cache rebates.
+1. Curated Frontier Intelligence: GALXAI exclusively serves GALX Nova for text and reasoning, selected through extensive benchmark validation to provide sustainable high performance per dollar so developers can build and explore without artificial constraints.
+2. Generative Creative Playground: Multimodal pipelines combine GALX Nova reasoning and orchestration with high-fidelity visual synthesis via ${DOC_IMAGE_MODEL}.
+3. Sustainable Developer Compute: Sub-15ms distributed edge relay with zero markup, transparent billing, and 90% prompt cache rebates.
 
 ## Implementation Steps
 1. Keep GALXAI_API_KEY on the server. Never put it in browser code, NEXT_PUBLIC variables, logs, commits, or this conversation. If it is missing, ask the user to configure it in their environment or secret manager.
@@ -180,7 +180,7 @@ export const DOC_PAGES: Record<DocId, DocPage> = {
     path: '/docs',
     title: 'Developer Quickstart',
     badge: 'Frontier Developer Foundation',
-    description: 'Connect your applications to GALXAI in under two minutes. One API key, one standard base URL, and immediate access to curated GPT-5.6 Luna intelligence.',
+    description: 'Connect your applications to GALXAI in under two minutes. One API key, one standard base URL, and immediate access to GALX Nova intelligence.',
     sections: [
       {
         id: 'credentials',
@@ -233,10 +233,10 @@ export OPENAI_BASE_URL="${GALX_API_BASE_URL}"`,
       },
       {
         id: 'models',
-        title: 'Curated Intelligence: Why GPT-5.6 Luna',
+        title: 'Curated Intelligence: Why GALX Nova',
         badge: 'Optimal $/Perf',
         body: [
-          `GALXAI exclusively serves ${DOC_MODEL} as our flagship reasoning engine. Through extensive private internal testing, GPT-5.6 Luna demonstrated the single highest performance-per-dollar ratio of any frontier model.`,
+          `GALXAI serves ${DOC_MODEL} as our flagship reasoning engine, delivering exceptional performance per dollar for production workloads.`,
           'By curating our engine rather than offering an unvetted marketplace of dozens of overlapping checkpoints, developers can explore, test, and deploy production pipelines with maximum reliability, zero confusion, and no artificial quality constraints.',
         ],
         code: [
@@ -300,7 +300,7 @@ export OPENAI_BASE_URL="${GALX_API_BASE_URL}"`,
         title: 'Chat Completions Contract',
         badge: `POST /v1/chat/completions`,
         body: [
-          'Dispatch conversations to GPT-5.6 Luna. Supports multi-turn dialogue, system prompts, JSON schema enforcement, and tool calling with up to 1,050,000 tokens of context.',
+          'Dispatch conversations to GALX Nova. Supports multi-turn dialogue, system prompts, JSON schema enforcement, and tool calling with up to 1,050,000 tokens of context.',
         ],
         table: {
           headings: ['Parameter', 'Type', 'Default', 'Description'],
@@ -377,7 +377,7 @@ export OPENAI_BASE_URL="${GALX_API_BASE_URL}"`,
     path: '/docs/examples',
     title: 'Creative Playground & Patterns',
     badge: 'Multimodal Execution',
-    description: 'Explore the generative creative playground: streaming responses, structured JSON schema extraction, autonomous tools, and multimodal visual pipelines chaining GPT-5.6 Luna with image generation.',
+    description: 'Explore the generative creative playground: streaming responses, structured JSON schema extraction, autonomous tools, and multimodal visual pipelines chaining GALX Nova with image generation.',
     sections: [
       {
         id: 'streaming',
@@ -413,7 +413,7 @@ for await (const chunk of stream) {
         title: 'Structured Outputs (JSON Schema)',
         badge: 'Deterministic DTO',
         body: [
-          'Constrain GPT-5.6 Luna to return strictly valid JSON. Ideal for extracting entities, generating database records, or orchestrating downstream services.',
+          'Constrain GALX Nova to return strictly valid JSON. Ideal for extracting entities, generating database records, or orchestrating downstream services.',
         ],
         code: [
           {
@@ -444,7 +444,7 @@ console.log(data);`,
         title: 'Autonomous Tool & Function Calling',
         badge: 'Agentic Actions',
         body: [
-          'Declare functions for GPT-5.6 Luna to execute. The model inspects parameters, generates structured arguments, and waits for your application to return the execution results.',
+          'Declare functions for GALX Nova to execute. The model inspects parameters, generates structured arguments, and waits for your application to return the execution results.',
         ],
         steps: [
           'Define functions in the `tools` array with JSON Schema descriptions.',
@@ -481,7 +481,7 @@ console.log(data);`,
         badge: 'Multimodal Creative Playground',
         body: [
           `Generate high-fidelity imagery using ${DOC_IMAGE_MODEL}. By default, GALXAI returns clean binary image artifacts (PNG/JPEG/WebP) or structured JSON containing binary URLs.`,
-          'Combine GPT-5.6 Luna with image generation: use Luna to expand artistic prompts with rich lighting and camera direction, then feed the refined prompt into visual synthesis.',
+          'Combine GALX Nova with image generation: use Nova to expand artistic prompts with rich lighting and camera direction, then feed the refined prompt into visual synthesis.',
         ],
         code: [
           {
@@ -493,7 +493,7 @@ console.log(data);`,
           },
           {
             label: 'Python Multimodal Pipeline',
-            source: `# 1. Refine creative prompt with GPT-5.6 Luna
+            source: `# 1. Refine creative prompt with GALX Nova
 refined = client.chat.completions.create(
     model="${DOC_MODEL}",
     messages=[{"role": "user", "content": "Expand into a vivid image prompt: Cyberpunk greenhouse"}]
@@ -515,7 +515,7 @@ print("Image artifact URL:", image_resp.data[0].url)`,
         title: 'Large Contexts & 90% Prompt Caching',
         badge: '1,050,000 Context Window',
         body: [
-          'GPT-5.6 Luna supports up to 1,050,000 tokens of input context. When passing shared system instructions, codebase indexes, or documentation libraries, prefix stability activates automated prompt caching.',
+          'GALX Nova supports up to 1,050,000 tokens of input context. When passing shared system instructions, codebase indexes, or documentation libraries, prefix stability activates automated prompt caching.',
           'Cached tokens are served at $0.02 / 1M tokens (a 90% discount compared to standard input rates), eliminating cost barriers for complex multi-turn developer workflows.',
         ],
         callout: {
@@ -582,7 +582,7 @@ print("Image artifact URL:", image_resp.data[0].url)`,
           rows: [
             ['OpenAI Base URL', GALX_API_BASE_URL, 'Do not add trailing slash or duplicate /v1'],
             ['API Key', '$GALXAI_API_KEY', 'Use your generated secret key'],
-            ['Model Name / ID', DOC_MODEL, 'OpenAI GPT-5.6 Luna'],
+            ['Model Name / ID', DOC_MODEL, 'GALX Nova'],
             ['Context Window', '1,050,000 tokens', 'Full long-context support'],
           ],
         },
@@ -593,13 +593,13 @@ print("Image artifact URL:", image_resp.data[0].url)`,
         title: '1-Line Migration from Direct OpenAI API',
         badge: 'Zero Refactoring',
         body: [
-          'No code changes required. Keep your existing OpenAI client imports and method calls intact. Simply update your environment variables to route requests through GALXAI Anycast edge relays.',
+          'No code changes required. Keep your existing OpenAI client imports and method calls intact. Simply update your environment variables to route requests through GALXAI distributed edge relays.',
         ],
         steps: [
           'Keep your existing OpenAI Python or TypeScript SDK code.',
           'Set OPENAI_BASE_URL="https://galx.ai/v1" in your environment.',
           'Replace your API key with your GALXAI API key.',
-          'Switch your model parameter to gpt-5-6-luna.',
+          'Switch your model parameter to galx-nova.',
         ],
         links: [{ href: '/models', label: 'Review Curated Model Catalog' }],
       },
@@ -608,7 +608,7 @@ print("Image artifact URL:", image_resp.data[0].url)`,
         title: 'Native GALXAI Client SDK',
         badge: 'Native TypeScript SDK',
         body: [
-          'The native galxai npm package provides zero-dependency typed wrappers with automated retry backoff, prompt caching tracking, and Anycast health failover.',
+          'The native galxai npm package provides zero-dependency typed wrappers with automated retry backoff, prompt caching tracking, and distributed edge health failover.',
         ],
         code: [
           {
@@ -693,10 +693,10 @@ function calculateBackoff(attempt: number, baseMs = 500, maxMs = 10000): number 
       },
       {
         id: 'routing',
-        title: 'Anycast Edge Architecture',
+        title: 'Distributed Edge Architecture',
         badge: 'Sub-15ms Latency',
         body: [
-          'All API traffic routes through global Anycast edge relays. The gateway performs sub-millisecond protocol sanitization and token bucket balancing to ensure high-concurrency stability without sudden throttling.',
+          'All API traffic routes through our global distributed edge. The gateway performs sub-millisecond protocol sanitization and token bucket balancing to ensure high-concurrency stability without sudden throttling.',
         ],
       },
       {

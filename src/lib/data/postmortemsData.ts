@@ -39,7 +39,7 @@ export const POSTMORTEMS_DATA: PostmortemItem[] = [
       slaAvailability: '99.994%',
     },
     rootCauseAnalysis:
-      'Upstream origin cluster experienced elevated 500/503 errors and socket timeouts due to a core control plane deadlock. Within 200ms of detecting failure thresholds, GALXAI Anycast edge health probes automatically triggered circuit breakers and rerouted all traffic to cold standby clusters.',
+      'Upstream origin cluster experienced elevated 500/503 errors and socket timeouts due to a core control plane deadlock. Within 200ms of detecting failure thresholds, GALXAI distributed edge health probes automatically triggered circuit breakers and rerouted all traffic to cold standby clusters.',
     mitigationRunbook: [
       'Edge Circuit Breaker Tripping: Closed unhealthy origin sockets after 3 consecutive 503 responses within 500ms',
       'Automated Traffic Shedding: Federated traffic across 4 geographically distinct cloud origins without packet drops',
@@ -59,7 +59,7 @@ client = OpenAI(
 
 # Even during upstream origin outages, GALXAI routes through active capacity
 completion = client.chat.completions.create(
-    model="gpt-5.6-sol",
+    model="galx-nova",
     messages=[{"role": "user", "content": "Execute mission-critical financial report synthesis."}],
     timeout=5.0
 )
@@ -68,7 +68,7 @@ print(completion.choices[0].message.content)`,
     faqs: [
       {
         q: 'Do developers need to write manual failover logic in their applications?',
-        a: 'No. GALXAI handles all health probing, circuit breaking, and sub-second multi-origin rerouting at the Anycast edge layer transparently.',
+        a: 'No. GALXAI handles all health probing, circuit breaking, and sub-second multi-origin rerouting at the distributed edge layer transparently.',
       },
     ],
   },
@@ -78,7 +78,7 @@ print(completion.choices[0].message.content)`,
     title: 'Postmortem: Mitigating a 4.2M req/sec Layer 7 Sponge Attack on Edge Proxies',
     headline: 'Incident Postmortem: Layer 7 Sponge Attack & Token Starvation Defense',
     description:
-      'Analysis of an adversarial attempt to induce GPU attention memory exhaustion via crafted sponge prompts, and how GALXAI Anycast edge rate limiters absorbed the traffic.',
+      'Analysis of an adversarial attempt to induce GPU attention memory exhaustion via crafted sponge prompts, and how GALXAI distributed edge rate limiters absorbed the traffic.',
     incidentDate: 'November 03, 2026',
     impactMetrics: {
       downtimeDuration: '0s',
@@ -86,15 +86,15 @@ print(completion.choices[0].message.content)`,
       slaAvailability: '100.0%',
     },
     rootCauseAnalysis:
-      'A distributed botnet generated repetitive token patterns crafted to maximize attention matrix compute cycles and starve GPU memory queues. Anycast edge inspectors identified anomalous TTFT variances and dropped rogue connections before reaching inference clusters.',
+      'A distributed botnet generated repetitive token patterns crafted to maximize attention matrix compute cycles and starve GPU memory queues. Distributed edge inspectors identified anomalous TTFT variances and dropped rogue connections before reaching inference clusters.',
     mitigationRunbook: [
-      'Volumetric L7 Edge Scrubbing: Absorbed 4.2M req/s across global Anycast PoPs using eBPF packet filters',
+      'Volumetric L7 Edge Scrubbing: Absorbed 4.2M req/s across global distributed edge PoPs using eBPF packet filters',
       'Attention Complexity Profiling: Dropped prompts with repetitive quadratic attention structures in <5ms',
       'API Key Token Buckets: Rate-limited non-whitelisted IP clusters to prevent key quota depletion',
     ],
     runbookCodeSnippet: {
       language: 'bash',
-      title: 'Verify Edge Anycast Response & Threat Scrubbing',
+      title: 'Verify Distributed Edge Response & Threat Scrubbing',
       code: `curl -sI https://galx.ai/v1/models \\
   -H "Authorization: Bearer \$GALXAI_API_KEY" | grep "x-galxai-protection: ACTIVE"`,
     },
@@ -111,7 +111,7 @@ print(completion.choices[0].message.content)`,
     title: 'Postmortem: Sub-Second Origin Rerouting During Trans-Atlantic Subsea Fiber Cut',
     headline: 'Incident Postmortem: Dynamic Subsea Fiber Cut BGP Rerouting',
     description:
-      'How GALXAI dynamic BGP Anycast routing maintained <15ms TTFT latency during a major transatlantic subsea fiber outage.',
+      'How GALXAI dynamic distributed edge routing maintained <15ms TTFT latency during a major transatlantic subsea fiber outage.',
     incidentDate: 'December 18, 2026',
     impactMetrics: {
       downtimeDuration: '0s',
@@ -119,11 +119,11 @@ print(completion.choices[0].message.content)`,
       slaAvailability: '99.998%',
     },
     rootCauseAnalysis:
-      'A physical subsea fiber cut increased transatlantic packet transit latency by 140ms. GALXAI Anycast BGP route controllers automatically shifted European client traffic to continental Frankfurt and London compute clusters within 80ms.',
+      'A physical subsea fiber cut increased transatlantic packet transit latency by 140ms. GALXAI distributed edge route controllers automatically shifted European client traffic to continental Frankfurt and London compute clusters within 80ms.',
     mitigationRunbook: [
-      'Sub-Second BGP Path Convergence: Shifted routing tables away from degraded subsea cables in <80ms',
+      'Sub-Second Path Convergence: Shifted routing tables away from degraded subsea cables in <80ms',
       'Local Cache Warming: Replicated prefix caches to regional European nodes to avoid long-haul transit',
-      'Latency-Optimized Anycast Metric: Enforced TTFT latency routing over geographic proximity',
+      'Latency-Optimized Edge Metric: Enforced TTFT latency routing over geographic proximity',
     ],
     runbookCodeSnippet: {
       language: 'python',
@@ -140,7 +140,7 @@ print("Edge Latency (ms):", response.headers.get("x-galxai-ttft-ms"))`,
     faqs: [
       {
         q: 'How does GALXAI route traffic when an entire regional data center goes offline?',
-        a: 'GALXAI Anycast dynamically withdraws the BGP route announcement for the failed node, causing Tier 1 internet backbones to automatically deliver traffic to the next closest healthy point of presence in <200ms.',
+        a: 'GALXAI distributed edge dynamically shifts route announcements for the failed node, causing Tier 1 internet backbones to automatically deliver traffic to the next closest healthy point of presence in <200ms.',
       },
     ],
   },
@@ -216,7 +216,7 @@ client = AsyncOpenAI(
 async def fetch_batch(prompts: list):
     tasks = [
         client.chat.completions.create(
-            model="gpt-5.6-sol",
+            model="galx-nova",
             messages=[{"role": "user", "content": p}]
         )
         for p in prompts
@@ -234,9 +234,9 @@ async def fetch_batch(prompts: list):
     slug: 'aws-us-east-1-outage-cross-region-reroute',
     badge: 'Cross-Cloud BGP Failover',
     title: 'Postmortem: Sub-Second Traffic Rerouting During AWS us-east-1 Fiber Cut',
-    headline: 'Incident Postmortem: AWS us-east-1 Cloud Outage & Anycast Rerouting',
+    headline: 'Incident Postmortem: AWS us-east-1 Cloud Outage & Edge Rerouting',
     description:
-      'How GALXAI Anycast edge nodes detected AWS us-east-1 fiber degradation and shifted 18.4M tokens/minute to European and US-West GPU origins in <350ms.',
+      'How GALXAI distributed edge nodes detected AWS us-east-1 fiber degradation and shifted 18.4M tokens/minute to European and US-West GPU origins in <350ms.',
     incidentDate: 'January 28, 2027',
     impactMetrics: {
       downtimeDuration: '0s (Zero Dropped Sockets)',
@@ -244,9 +244,9 @@ async def fetch_batch(prompts: list):
       slaAvailability: '99.998%',
     },
     rootCauseAnalysis:
-      'A transatlantic optical fiber cut caused packet loss spikes exceeding 45% into AWS us-east-1 (N. Virginia). GALXAI Anycast edge health probes failed over to us-west-2 (Oregon) and eu-west-1 (Dublin) clusters without terminating active client SSE streams.',
+      'A transatlantic optical fiber cut caused packet loss spikes exceeding 45% into AWS us-east-1 (N. Virginia). GALXAI distributed edge health probes failed over to us-west-2 (Oregon) and eu-west-1 (Dublin) clusters without terminating active client SSE streams.',
     mitigationRunbook: [
-      'BGP Anycast Route Withdrawal: Withdrew impaired east-coast edge routes within 120ms',
+      'Distributed Edge Route Withdrawal: Withdrew impaired east-coast edge routes within 120ms',
       'Persistent TCP Tunnel Re-binding: Transparently migrated in-flight prompt payloads to west-coast origin pools',
       'Sub-5ms Health Probing: Continuous SYN/ACK heartbeat probes evaluated RTT jitter every 250ms',
       'Telemetry Transparency: Public real-time cluster status updated dynamically at /status',
@@ -264,7 +264,7 @@ client = OpenAI(
 
 # Even during major AWS regional outages, completions execute seamlessly
 response = client.chat.completions.create(
-    model="gpt-5.6-sol",
+    model="galx-nova",
     messages=[{"role": "user", "content": "Execute mission-critical transaction"}]
 )
 print(response.choices[0].message.content)`,
@@ -272,17 +272,17 @@ print(response.choices[0].message.content)`,
     faqs: [
       {
         q: 'Do developers need to configure multiple regional endpoints?',
-        a: 'No. GALXAI Anycast handles global routing and failover automatically through the universal https://galx.ai/v1 gateway URL.',
+        a: 'No. GALXAI handles global routing and failover automatically through the universal https://galx.ai/v1 gateway URL.',
       },
     ],
   },
   {
-    slug: 'gpt-reasoning-ddos-layer7-mitigation',
+    slug: 'frontier-reasoning-ddos-layer7-mitigation',
     badge: 'Volumetric L7 Defense',
-    title: 'Postmortem: Neutralizing 40M Req/Sec Layer 7 Volumetric Attack on OpenAI Reasoning Clusters',
+    title: 'Postmortem: Neutralizing 40M Req/Sec Layer 7 Volumetric Attack on Frontier Reasoning Clusters',
     headline: 'Incident Postmortem: Layer 7 DDoS Mitigation & Token Starvation Defense',
     description:
-      'How GALXAI edge filtering absorbed and scrubbed a 40M request/second Layer 7 volumetric attack targeting OpenAI reasoning endpoints with zero origin degradation.',
+      'How GALXAI edge filtering absorbed and scrubbed a 40M request/second Layer 7 volumetric attack targeting frontier reasoning endpoints with zero origin degradation.',
     incidentDate: 'February 18, 2027',
     impactMetrics: {
       downtimeDuration: '0s (Zero Latency Spike)',
@@ -290,7 +290,7 @@ print(response.choices[0].message.content)`,
       slaAvailability: '100.0%',
     },
     rootCauseAnalysis:
-      'A coordinated botnet launched an HTTP/2 flood attack aimed at exhausting GPU attention buffers through crafted high-entropy prompts. GALXAI Anycast edge scrubbers identified anomalous header fingerprints and dropped 99.98% of malicious packets at the border.',
+      'A coordinated botnet launched an HTTP/2 flood attack aimed at exhausting GPU attention buffers through crafted high-entropy prompts. GALXAI distributed edge scrubbers identified anomalous header fingerprints and dropped 99.98% of malicious packets at the border.',
     mitigationRunbook: [
       'Edge Token-Bucket Rate Limiting: Enforced IP-reputation and ASN token bounds in eBPF kernel space',
       'Cryptographic Challenge Handshakes: Verified authentic developer SDK signatures before GPU dispatch',

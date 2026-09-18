@@ -206,7 +206,7 @@ client = OpenAI(
 
 # 100% Guaranteed Strict JSON Schema Constrained Decoding
 completion = client.beta.chat.completions.parse(
-    model="gpt-5.6-sol",
+    model="galx-nova",
     messages=[
         {"role": "system", "content": "Extract structured records strictly matching schema."},
         {"role": "user", "content": "Raw document or prompt text goes here..."}

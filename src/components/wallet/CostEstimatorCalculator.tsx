@@ -50,7 +50,7 @@ const PRESETS: WorkloadPreset[] = [
     name: 'Cursor IDE / Coding Agent',
     description: 'Daily multi-file coding completions and inline refactoring for a 3-engineer team.',
     icon: Laptop,
-    modelId: 'gpt-5-6-luna-low',
+    modelId: 'galx-nova',
     dailyRequests: 600,
     avgPromptTokens: 2500,
     avgCompletionTokens: 450,
@@ -61,7 +61,7 @@ const PRESETS: WorkloadPreset[] = [
     name: 'Customer Support AI Agent',
     description: 'High-volume conversational AI resolving tier-1 user inquiries 24/7.',
     icon: MessageSquare,
-    modelId: 'gpt-5-6-luna-low',
+    modelId: 'galx-nova',
     dailyRequests: 2500,
     avgPromptTokens: 1200,
     avgCompletionTokens: 280,
@@ -72,7 +72,7 @@ const PRESETS: WorkloadPreset[] = [
     name: 'Autonomous Agent Fleet',
     description: 'Multi-agent LangChain / AutoGPT fleet running autonomous research and tool loops.',
     icon: Bot,
-    modelId: 'gpt-5-6-luna-low',
+    modelId: 'galx-nova',
     dailyRequests: 1200,
     avgPromptTokens: 4500,
     avgCompletionTokens: 850,
@@ -83,7 +83,7 @@ const PRESETS: WorkloadPreset[] = [
     name: 'Batch Document Processing (50% Off)',
     description: 'Asynchronous offline PDF and financial report parsing with massive context.',
     icon: FileText,
-    modelId: 'gpt-5-6-luna-low',
+    modelId: 'galx-nova',
     dailyRequests: 4000,
     avgPromptTokens: 8000,
     avgCompletionTokens: 600,
@@ -101,7 +101,7 @@ export function CostEstimatorCalculator({
   currentBalance = 114.59,
   onSelectTopUp
 }: CostEstimatorCalculatorProps) {
-  const [selectedModelId, setSelectedModelId] = useState<string>('gpt-5-6-luna-low');
+  const [selectedModelId, setSelectedModelId] = useState<string>('galx-nova');
   const [dailyRequests, setDailyRequests] = useState<number>(600);
   const [promptTokens, setPromptTokens] = useState<number>(2500);
   const [completionTokens, setCompletionTokens] = useState<number>(450);

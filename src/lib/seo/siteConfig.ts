@@ -9,7 +9,7 @@ export const SITE_CONFIG = {
   alternateName: ['GALX AI'],
   tagline: 'Generative Creative Playground & Sustainable Frontier Intelligence',
   description:
-    'A generative creative playground with community creators and sustainable serving of frontier-level intelligence. Serving OpenAI GPT-5.6 Luna for the highest performance per dollar so developers can build and explore without constraints.',
+    'A generative creative playground with community creators and sustainable serving of frontier-level intelligence. Serving GALX Nova for the highest performance per dollar so developers can build and explore without constraints.',
   // Discovery always identifies the public origin, including local/preview builds.
   // Runtime callback and request origins have their own configuration.
   url: 'https://galx.ai',

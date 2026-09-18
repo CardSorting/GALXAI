@@ -100,7 +100,7 @@ export default async function Image() {
             Side-by-Side Live AI Model Battle Arena
           </div>
           <div style={{ display: 'flex', fontSize: '22px', color: '#cbd5e1', lineHeight: 1.4 }}>
-            Benchmark GPT-5.6 Sol against Grok 4.5 concurrently in real-time. Measure tokens/sec, time-to-first-token, and output precision.
+            Benchmark GALX Nova against baseline models concurrently in real-time. Measure tokens/sec, time-to-first-token, and output precision.
           </div>
         </div>
 

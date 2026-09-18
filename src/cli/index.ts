@@ -25,7 +25,7 @@ async function main() {
   $ npx galxai tiers                         List all compute tiers, match bonuses & RPM quotas
   $ npx galxai stripe sync                   Provision & push all compute tiers & prices to Stripe
   $ npx galxai checkout [amount]             Show the credit top-up link
-  $ npx galxai <prompt>                      Run a fast completion (gpt-5-6-luna-low)
+  $ npx galxai <prompt>                      Run a fast completion (galx-nova)
   $ npx galxai run "<prompt>" [--model <id>] Execute prompt against model or alias
   $ npx galxai image "<prompt>"              Generate visual image directly in terminal
   $ npx galxai models                        List all available models and wholesale rates
@@ -346,7 +346,7 @@ ${agentMarkdown}
   }
 
   if (command === 'chat') {
-    console.log('\n\x1b[1m\x1b[36m🌌 GALXAI Interactive REPL Chat (gpt-5-6-luna-low)\x1b[0m');
+    console.log('\n\x1b[1m\x1b[36m🌌 GALXAI Interactive REPL Chat (galx-nova)\x1b[0m');
     console.log('\x1b[90mType your prompt and press Enter. Type "exit" or Ctrl+C to quit.\x1b[0m\n');
 
     const client = new GalxAI();
@@ -362,7 +362,7 @@ ${agentMarkdown}
           process.exit(0);
         }
         try {
-          const answer = await client.run(input, { model: 'gpt-5-6-luna-low' });
+          const answer = await client.run(input, { model: 'galx-nova' });
           console.log(`\n${answer}\x1b[0m\n`);
         } catch (err: any) {
           console.error(`\x1b[31mError: ${err.message}\x1b[0m\n`);
@@ -531,7 +531,7 @@ ${agentMarkdown}
 
   // Direct Prompt Execution
   let prompt = '';
-  let model = 'gpt-5-6-luna-low';
+  let model = 'galx-nova';
 
   if (command === 'run') {
     prompt = args[1] || '';

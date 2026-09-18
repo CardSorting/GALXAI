@@ -247,7 +247,7 @@ export function PublicHome() {
               A generative creative playground for community creators paired with sustainable frontier-level intelligence. Prompt, remix, and build without constraints.
             </p>
             <p className={styles.heroNote}>
-              Every creation is public by default. Powered by high-speed visual diffusion and OpenAI GPT-5.6 Luna—curated for the highest performance per dollar.
+              Every creation is public by default. Powered by high-speed visual diffusion and GALX Nova—curated for the highest performance per dollar.
             </p>
 
             {/* Fast Prompt Composer Cockpit */}
@@ -770,9 +770,9 @@ export function PublicHome() {
                 <Cpu size={12} />
                 <span>FRONTIER INTELLIGENCE &middot; OPTIMAL $/PERF</span>
               </div>
-              <h3>Curated Developer Foundation: GPT-5.6 Luna</h3>
+              <h3>Curated Developer Foundation: GALX Nova</h3>
               <p>
-                We believe developers reach their goals faster with unconstrained exploration. Based on extensive private internal testing, we exclusively serve OpenAI GPT-5.6 Luna for text and reasoning—delivering the highest performance per dollar so you can test, iterate, and build without artificial markups or quality compromises.
+                We believe developers reach their goals faster with unconstrained exploration. Based on extensive private internal testing, we exclusively serve GALX Nova for text and reasoning—delivering the highest performance per dollar so you can test, iterate, and build without artificial markups or quality compromises.
               </p>
             </article>
           </div>

@@ -68,7 +68,7 @@ export default function PromptCachingToolPage() {
     steps: [
       { name: 'Paste System Prompt', text: 'Input your system instructions or RAG documents.' },
       { name: 'Verify 1,024-Token Threshold', text: 'Ensure prefix tokens exceed 1,024 tokens.' },
-      { name: 'Deploy via Anycast Gateway', text: 'Point baseURL to https://galx.ai/v1 to receive automatic 75% rebates.' },
+      { name: 'Deploy via Distributed Gateway', text: 'Point baseURL to https://galx.ai/v1 to receive automatic 75% rebates.' },
     ],
   });
 

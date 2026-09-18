@@ -27,7 +27,7 @@ const AVAILABLE_SCOPES = [
   { id: '*', label: 'Full Root Access (*)', desc: 'Unrestricted completions, models, images, and embeddings' },
   { id: 'chat:*', label: 'Chat & Completions (chat:*)', desc: 'Allows chat completions, streaming, and tool execution' },
   { id: 'models:read', label: 'Models Read (models:read)', desc: 'Allows querying model catalogs and context limits' },
-  { id: 'images:generate', label: 'Image Synthesis (images:generate)', desc: 'Allows GPT-Image generation calls' },
+  { id: 'images:generate', label: 'Image Synthesis (images:generate)', desc: 'Allows GALX Nova-image generation calls' },
   { id: 'embeddings:*', label: 'Embeddings (embeddings:*)', desc: 'Allows vector embeddings generation' }
 ];
 

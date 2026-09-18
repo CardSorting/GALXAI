@@ -19,7 +19,7 @@ export const metadata: Metadata = constructMetadata({
   keywords: [
     'LLM ROI Calculator',
     'AI Token Budget Modeler',
-    'OpenAI API Cost Calculator',
+    'AI API Cost Calculator',
     'LLM cost per user',
     'Enterprise AI Cost Estimation',
     'Prompt Caching ROI',
@@ -37,7 +37,7 @@ export default function RoiCalculatorPage() {
     },
     {
       q: 'How is the 75% prompt caching discount applied in the calculator?',
-      a: 'When prompt prefixes exceed 1,024 tokens and match active RAM cache slices, input pricing for the cached segment drops by 75% (e.g. from $2.25/1M to $0.75/1M on GPT-5.6 Terra).',
+      a: 'When prompt prefixes exceed 1,024 tokens and match active cache slices, input pricing for the cached segment drops significantly (e.g. down to $0.02/1M on GALX Nova).',
     },
     {
       q: 'Does GALXAI require annual volume commitments or seat fees?',
@@ -70,7 +70,7 @@ export default function RoiCalculatorPage() {
     steps: [
       {
         name: 'Select Target Model',
-        text: 'Choose between GPT-5.6 Sol, Terra, Luna, or xAI Grok 4.6.',
+        text: 'Select GALX Nova or custom workload configurations.',
       },
       {
         name: 'Configure Active User Scale',

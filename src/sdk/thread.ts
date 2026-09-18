@@ -45,7 +45,7 @@ export class ConversationThread {
     const suppliedId = options.id || options.sessionId || options.conversationId;
     this.id = suppliedId || createChatResourceId('session');
     this.nextSessionMode = suppliedId ? 'continue' : 'new';
-    this.model = options.model || 'gpt-5-6-luna-low';
+    this.model = options.model || 'galx-nova';
     this.systemPrompt = options.system || options.systemPrompt;
     this.maxTokens = options.maxTokens ?? 100_000;
 

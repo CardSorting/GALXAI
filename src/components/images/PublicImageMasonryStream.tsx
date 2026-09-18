@@ -1335,9 +1335,7 @@ export function PublicImageMasonryStream({
                 </div>
                 <div className="masonry-meta-item">
                   <div className="masonry-meta-label">Model Engine</div>
-                  <div className="masonry-meta-value">
-                    {activeModalItem.model === 'openai-gpt-image-latest' ? 'GPT-Image-2' : activeModalItem.model}
-                  </div>
+                  <div className="masonry-meta-value">GALX Nova-image</div>
                 </div>
                 {activeModalItem.seed && (
                   <div

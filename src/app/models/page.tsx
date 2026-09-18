@@ -5,15 +5,15 @@ import { constructMetadata } from '@/lib/seo/metadata';
 import { JsonLd, createModelItemListSchema, createBreadcrumbSchema } from '@/lib/seo/jsonld';
 
 export const metadata: Metadata = constructMetadata({
-  title: 'Frontier AI Models & Architecture Specs | OpenAI-Compatible API Gateway',
-  description: 'Explore flagship AI models including OpenAI GPT-5.6 Sol, Terra, Luna, and GPT-Image suite. Access via a 100% OpenAI-compatible endpoint with automatic prompt caching and the GALX API.',
+  title: 'Frontier AI Models & Architecture Specs | GALX Nova Intelligence Layer',
+  description: 'Explore canonical frontier intelligence models GALX Nova and GALX Nova-image. Access via OpenAI-compatible endpoints with automatic prompt caching and the GALX API.',
   canonicalPath: '/models',
   keywords: [
     'AI Model Catalog',
-    'GPT-5.6 Sol Pricing',
-    'GPT-5.6 Terra Specs',
-    'GPT-5.6 Luna Benchmarks',
-    'OpenAI Image Generation API',
+    'GALX Nova Pricing',
+    'GALX Nova Specs',
+    'GALX Nova Benchmarks',
+    'GALX Nova-image API',
     'Wholesale AI Inference',
     'Prompt Caching LLM',
     'OpenAI SDK Compatible Models',

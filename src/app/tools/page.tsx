@@ -86,9 +86,9 @@ const TOOLS_CATALOG: ToolItem[] = [
   },
   {
     id: 'latency-estimator',
-    title: 'Anycast Latency & TTFT Estimator',
+    title: 'Distributed Edge Latency & TTFT Estimator',
     category: 'Performance',
-    description: 'Simulate TLS Anycast edge termination vs single-origin RTT across North America, Europe, and Asia-Pacific.',
+    description: 'Simulate TLS distributed edge termination vs single-origin RTT across North America, Europe, and Asia-Pacific.',
     iconName: 'Activity',
     href: '/tools/latency-estimator',
     badge: 'Global Edge',

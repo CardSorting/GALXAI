@@ -14,17 +14,17 @@ import { SITE_CONFIG } from '@/lib/seo/siteConfig';
 export const metadata: Metadata = constructMetadata({
   title: 'AI Token Streaming & Speed Benchmark Simulator — TTFT & Velocity Tool',
   description:
-    'Free interactive AI token streaming and latency benchmark simulator. Model Time-To-First-Token (TTFT), tokens/sec throughput, and 25%-40% wholesale savings across OpenAI GPT-5.6 and xAI Grok 4.6.',
+    'Free interactive AI token streaming and latency benchmark simulator. Model Time-To-First-Token (TTFT), tokens/sec throughput, and 25%-40% wholesale savings across GALX Nova.',
   canonicalPath: '/tools/stream-benchmark',
   keywords: [
     'AI streaming benchmark',
     'token generation speed tester',
-    'OpenAI tokens per second',
+    'GALX Nova tokens per second',
     'Time to First Token simulator',
-    'GPT-5.6 Luna streaming speed',
-    'Grok 4.6 streaming throughput',
+    'GALX Nova streaming speed',
+    'Frontier streaming throughput',
     'AI latency estimator',
-    'Anycast TTFT calculator',
+    'Distributed edge TTFT calculator',
     'pSEO Developer Tool',
     'AEO Benchmark Simulator',
   ],
@@ -34,11 +34,11 @@ export default function StreamBenchmarkPage() {
   const faqs = [
     {
       q: 'Which model provides the fastest token generation speed on GALXAI?',
-      a: 'OpenAI GPT-5.6 Luna is the fastest model in the catalog, delivering 142 tokens/second with an average Time-To-First-Token (TTFT) of 11.8ms at $0.75/1M input tokens.',
+      a: 'GALX Nova is the flagship model in the catalog, delivering 142 tokens/second with an average Time-To-First-Token (TTFT) of 11.8ms at wholesale rates.',
     },
     {
-      q: 'How does Anycast routing achieve sub-15ms TTFT?',
-      a: 'GALXAI terminates client TLS connections at the closest global edge Point of Presence (PoP) in <5ms and streams data over pre-warmed persistent fiber tunnels directly to origin GPU clusters.',
+      q: 'How does distributed edge routing achieve sub-15ms TTFT?',
+      a: 'GALX terminates client TLS connections at the closest global edge Point of Presence (PoP) in <5ms and streams data over pre-warmed persistent tunnels directly to execution clusters.',
     },
     {
       q: 'Does streaming token generation qualify for the 75% prompt caching discount?',
@@ -71,7 +71,7 @@ export default function StreamBenchmarkPage() {
     steps: [
       {
         name: 'Select Frontier Model',
-        text: 'Choose between GPT-5.6 Luna (142 tok/s), Terra (92 tok/s), Sol (68 tok/s), or Grok 4.6 (75 tok/s).',
+        text: 'Select GALX Nova (142 tok/s) or test custom benchmark parameters.',
       },
       {
         name: 'Set Target Output Tokens',
@@ -102,7 +102,7 @@ export default function StreamBenchmarkPage() {
       createTechArticleSchema({
         headline: 'AI Token Streaming Velocity & Time-To-First-Token Benchmarks',
         description:
-          'Technical methodology for evaluating streaming latency, SSE chunk delivery, and Anycast edge acceleration across frontier LLMs.',
+          'Technical methodology for evaluating streaming latency, SSE chunk delivery, and distributed edge acceleration across frontier LLMs.',
         path: '/tools/stream-benchmark',
         keywords: ['Streaming Benchmark', 'TTFT', 'Tokens Per Second', 'pSEO Tool', 'AEO'],
       }),

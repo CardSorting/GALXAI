@@ -94,7 +94,7 @@ async function previewPOST(req: NextRequest) {
       title: typeof body.title === 'string' ? body.title.slice(0, 200) : 'New conversation',
       createdAt: body.createdAt || Date.now(),
       updatedAt: body.updatedAt || Date.now(),
-      modelId: body.modelId || 'gpt-5.6-sol',
+      modelId: body.modelId || 'galx-nova',
       personaId: body.personaId,
       isPinned: Boolean(body.isPinned),
       isArchived: Boolean(body.isArchived),

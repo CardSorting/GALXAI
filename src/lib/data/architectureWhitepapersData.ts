@@ -26,43 +26,43 @@ export interface ArchitectureWhitepaperItem {
 
 export const ARCHITECTURE_WHITEPAPERS_DATA: ArchitectureWhitepaperItem[] = [
   {
-    slug: 'anycast-edge-proxy',
-    badge: 'Sub-15ms Anycast BGP',
-    title: 'Anycast Edge Proxy & BGP Routing Architecture for Low-Latency LLM Inference',
-    headline: 'Sub-15ms Anycast Edge Proxy & BGP Routing Architecture',
+    slug: 'distributed-edge-proxy',
+    badge: 'Sub-15ms Distributed Edge',
+    title: 'Distributed Edge Gateway & Global Routing Architecture for Low-Latency LLM Inference',
+    headline: 'Sub-15ms Distributed Edge Gateway & Global Routing Architecture',
     description:
-      'A technical breakdown of Border Gateway Protocol (BGP) Anycast routing, edge TLS termination, and TCP congestion tuning for real-time AI token streams.',
+      'A technical breakdown of distributed edge routing, edge TLS termination, and TCP congestion tuning for real-time AI token streams.',
     abstract:
-      'Traditional centralized LLM APIs incur 80ms–200ms of TCP/TLS handshake latency before the first token is evaluated. GALXAI deploys an Anycast BGP edge mesh across 300+ PoPs, terminating TLS locally and piping token streams over dedicated backbones to achieve sub-15ms TTFT.',
+      'Traditional centralized LLM APIs incur 80ms–200ms of TCP/TLS handshake latency before the first token is evaluated. GALXAI deploys a distributed edge mesh across 300+ PoPs, terminating TLS locally and piping token streams over dedicated backbones to achieve sub-15ms TTFT.',
     engineeringPrinciples: [
       'Edge TLS 1.3 Termination: Eliminates multi-hop handshake latency for client connections',
       'Persistent Origin TCP Pools: Pre-warmed keep-alive socket tunnels to AI research clusters',
-      'BGP Equal-Cost Multi-Path (ECMP): Seamless sub-second traffic redistribution during localized ISP fiber cuts',
+      'Dynamic Multi-Path Routing: Seamless sub-second traffic redistribution during localized network anomalies',
       'HTTP/2 Multiplexed SSE: Zero stream head-of-line blocking for high-concurrency client applications',
     ],
     systemDiagramMermaid: `graph LR
-  Client[Client App] -->|BGP Anycast <15ms| Edge[Edge PoP Gateway]
+  Client[Client App] -->|Distributed Edge <15ms| Edge[Edge PoP Gateway]
   Edge -->|Pre-warmed Fiber Tunnel| Origin[Origin GPU Cluster]
   Origin -->|Token SSE Stream| Edge
   Edge -->|Zero-Buffering SSE| Client`,
     technicalMetrics: [
-      { label: 'Edge TTFT', value: '11.8 ms', context: 'Measured on GPT-5.6 Luna' },
-      { label: 'Global PoPs', value: '300+', context: 'Worldwide BGP Anycast' },
+      { label: 'Edge TTFT', value: '11.8 ms', context: 'Measured on GALX Nova' },
+      { label: 'Global PoPs', value: '300+', context: 'Worldwide Distributed Edge' },
       { label: 'TLS Handshake', value: '<5 ms', context: 'Edge TLS 1.3' },
     ],
     codeVerificationSnippet: {
       language: 'bash',
-      title: 'Verify Edge Anycast Response Time',
+      title: 'Verify Distributed Edge Response Time',
       code: `curl -w "\\nTLS: %{time_appconnect}s | TTFT: %{time_starttransfer}s | Total: %{time_total}s\\n" \\
   -X POST https://galx.ai/v1/chat/completions \\
   -H "Authorization: Bearer \$GALXAI_API_KEY" \\
   -H "Content-Type: application/json" \\
-  -d '{"model": "gpt-5.6-luna", "messages": [{"role": "user", "content": "ping"}], "stream": true}'`,
+  -d '{"model": "galx-nova", "messages": [{"role": "user", "content": "ping"}], "stream": true}'`,
     },
     faqs: [
       {
-        q: 'How does Anycast differ from GeoDNS?',
-        a: 'GeoDNS relies on DNS resolvers that frequently cache stale IP addresses. BGP Anycast routes IP packets at the routing table layer, enabling sub-second automatic route optimization.',
+        q: 'How does distributed edge routing differ from GeoDNS?',
+        a: 'GeoDNS relies on DNS resolvers that frequently cache stale IP addresses. Distributed edge routing operates at the network routing layer, enabling sub-second automatic route optimization.',
       },
     ],
   },
@@ -104,7 +104,7 @@ client = OpenAI(
 
 # System prompt (>1,024 tokens) receives 75% rebate automatically
 response = client.chat.completions.create(
-    model="gpt-5.6-sol",
+    model="galx-nova",
     messages=[
         {"role": "system", "content": static_multi_thousand_token_documentation},
         {"role": "user", "content": "Analyze section 4.2"}
@@ -154,7 +154,7 @@ headers = {
 }
 
 resp = requests.post("https://galx.ai/v1/chat/completions", headers=headers, json={
-    "model": "gpt-5.6-sol",
+    "model": "galx-nova",
     "messages": [{"role": "user", "content": "Sensitive financial payload"}]
 })
 print("ZDR Enclave Header:", resp.headers.get("x-galxai-zdr-verified"))`,
@@ -204,7 +204,7 @@ client = AsyncOpenAI(
 
 async def dispatch_agent(agent_id: int):
     return await client.chat.completions.create(
-        model="gpt-5.6-sol",
+        model="galx-nova",
         messages=[{"role": "user", "content": f"Task from agent {agent_id}"}]
     )
 
@@ -260,7 +260,7 @@ client = OpenAI(
 
 # 100% strict grammar enforcement
 response = client.beta.chat.completions.parse(
-    model="gpt-5.6-sol",
+    model="galx-nova",
     messages=[{"role": "user", "content": "Flight UA891 at 35000ft on time"}],
     response_format=FlightRecord
 )
@@ -285,7 +285,7 @@ print(response.choices[0].message.parsed)`,
     engineeringPrinciples: [
       'Continuous Token Flux Integration: Monitors moving-window token dissipation rates',
       'Dynamic Route Hydration: Pre-warms dormant backup origin routes when primary paths reach 75% capacity',
-      'Non-Blocking Semaphore Allocation: Sub-microsecond local lock acquisition on Anycast edge workers',
+      'Non-Blocking Semaphore Allocation: Sub-microsecond local lock acquisition on distributed edge workers',
       'Zero 429 Cascade Resilience: Isolate high-volume tenant surges from baseline API traffic',
     ],
     systemDiagramMermaid: `graph TD
@@ -312,7 +312,7 @@ client = OpenAI(
 
 async def send_burst(i):
     return client.chat.completions.create(
-        model="gpt-5.6-sol",
+        model="galx-nova",
         messages=[{"role": "user", "content": f"P-AHT burst test probe {i}"}]
     )
 
@@ -343,8 +343,8 @@ asyncio.run(asyncio.gather(*[send_burst(i) for i in range(100)]))`,
     ],
     systemDiagramMermaid: `graph LR
   Developers[Developer Teams] --> Gateway[GALXAI Clearinghouse]
-  Gateway -->|Wholesale Liquidity Pool| OpenAI[OpenAI Tier 5 Fleet]
-  Gateway -->|Wholesale Liquidity Pool| Models[OpenAI Fleet]
+  Gateway -->|Wholesale Liquidity Pool| Compute[Enterprise Compute Fleet]
+  Gateway -->|Model Execution Pool| Models[GALX Fleet]
   Gateway -->|Atomic Rebate Settlement| Wallet[Enterprise Balance]`,
     technicalMetrics: [
       { label: 'Token Discount', value: '25% - 40%', context: 'Below Provider List Prices' },

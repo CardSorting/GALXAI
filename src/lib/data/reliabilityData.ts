@@ -34,11 +34,11 @@ export const RELIABILITY_DATA: ReliabilityItem[] = [
     mitigationStrategy: [
       'Active-Active Regional Routing: Distributes traffic across independent cloud availability zones',
       'Dynamic Health Check Probes: Origin probes detect HTTP 500/503 spikes in <500ms',
-      'Automatic Model Alias Failover: Seamless fallback from Sol to Terra with zero client code changes',
+      'Automatic Model Routing Resilience: Seamless fallback and dynamic routing with zero client code changes',
       'Non-Blocking Error Shields: Client streams receive gracefully formatted error frames rather than abrupt TCP drops',
     ],
     topologyDiagramMermaid: `graph LR
-  Client[Client Application] --> Gateway[GALXAI Anycast Edge]
+  Client[Client Application] --> Gateway[GALXAI Distributed Edge]
   Gateway -->|Primary 503 Detected| Breaker[Circuit Breaker Cutover]
   Breaker -->|Auto-Reroute <50ms| Backup[Enterprise Backup Cluster]
   Backup -->|Stream Output| Client`,
@@ -57,7 +57,7 @@ client = OpenAI(
 
 # If primary origin experiences latency spikes, GALXAI absorbs failover transparently
 response = client.chat.completions.create(
-    model="gpt-5.6-sol",
+    model="galx-nova",
     messages=[{"role": "user", "content": "Mission-critical agent prompt"}]
 )
 print(response.choices[0].message.content)`,
@@ -103,7 +103,7 @@ client = AsyncOpenAI(
 
 async def dispatch_job(job_id: int):
     return await client.chat.completions.create(
-        model="gpt-5.6-luna",
+        model="galx-nova",
         messages=[{"role": "user", "content": f"Batch process item #{job_id}"}]
     )
 
@@ -150,7 +150,7 @@ client = OpenAI(
 
 # Stream massive context without TCP timeouts
 stream = client.chat.completions.create(
-    model="gpt-5.6-sol",
+    model="galx-nova",
     messages=[
         {"role": "system", "content": "You are analyzing a 500-page enterprise contract."},
         {"role": "user", "content": "Identify all indemnity liability caps."}
@@ -206,7 +206,7 @@ client = OpenAI(
 
 # Mathematically guarantees zero json parse exceptions
 completion = client.beta.chat.completions.parse(
-    model="gpt-5.6-sol",
+    model="galx-nova",
     messages=[{"role": "user", "content": "Extract pipeline event telemetry..."}],
     response_format=PipelineRecord
 )
@@ -221,38 +221,38 @@ print("Validated Record:", record)`,
     ],
   },
   {
-    slug: 'cross-region-bgp-anycast-resilience',
-    badge: 'Sub-Second BGP Routing',
-    title: 'Sub-Second BGP Anycast Failover During Global Fiber Cuts & ISP Outages',
-    headline: 'Global BGP Anycast Resilience Against Transatlantic Fiber Cuts',
+    slug: 'cross-region-edge-resilience',
+    badge: 'Sub-Second Edge Routing',
+    title: 'Sub-Second Distributed Edge Failover During Global Fiber Cuts & ISP Outages',
+    headline: 'Global Distributed Edge Resilience Against Transatlantic Fiber Cuts',
     description:
-      'How Border Gateway Protocol (BGP) Anycast routing routes inference traffic around global undersea cable cuts and localized ISP outages in under 1 second.',
+      'How distributed edge routing routes inference traffic around global undersea cable cuts and localized ISP outages in under 1 second.',
     incidentScenario:
       'Undersea cable severed or Tier-1 transit provider experiences major routing degradation, causing 500ms+ latency spikes or total packet loss on regional DNS-based gateways.',
-    uptimeGuarantee: 'Sub-Second Automatic BGP Route Convergence Across 300+ PoPs',
+    uptimeGuarantee: 'Sub-Second Automatic Route Convergence Across 300+ Edge PoPs',
     mitigationStrategy: [
-      'BGP Anycast Routing Mesh: Advertises a single global IP across 300+ edge points of presence',
+      'Distributed Edge Routing Mesh: High-availability routing across 300+ edge points of presence',
       'Equal-Cost Multi-Path (ECMP): Automatically shifts traffic to redundant transit links during localized degradation',
-      'Automated Health Withdrawals: Degraded PoPs instantly withdraw BGP route announcements in <800ms',
+      'Automated Health Withdrawals: Degraded PoPs instantly withdraw route announcements in <800ms',
       'End-to-End Dedicated Fiber: Routes origin traffic over private cloud backbones rather than public internet',
     ],
     topologyDiagramMermaid: `graph TD
-  User[User in London] --> Anycast[BGP Global Anycast IP]
-  Anycast -->|Link Cut Detected| PoP2[Frankfurt PoP Backup]
+  User[User in London] --> Edge[Global Distributed Edge]
+  Edge -->|Link Cut Detected| PoP2[Frankfurt PoP Backup]
   PoP2 -->|Private Backbone| Origin[AI Compute Cluster]`,
     runbookCodeSnippet: {
       language: 'bash',
-      title: 'BGP Route & Latency Verification',
+      title: 'Edge Route & Latency Verification',
       code: `curl -w "\\nConnected PoP: %{remote_ip} | Edge Connect: %{time_connect}s | TTFT: %{time_starttransfer}s\\n" \\
   -X POST https://galx.ai/v1/chat/completions \\
   -H "Authorization: Bearer \$GALXAI_API_KEY" \\
   -H "Content-Type: application/json" \\
-  -d '{"model": "gpt-5.6-luna", "messages": [{"role": "user", "content": "ping"}], "stream": true}'`,
+  -d '{"model": "galx-nova", "messages": [{"role": "user", "content": "ping"}], "stream": true}'`,
     },
     faqs: [
       {
-        q: 'Why is BGP Anycast superior to GeoDNS during ISP routing incidents?',
-        a: 'GeoDNS relies on cached DNS entries that take minutes or hours to expire (TTL). BGP Anycast re-routes IP packets at the routing table level within milliseconds.',
+        q: 'Why is distributed edge routing superior to GeoDNS during ISP routing incidents?',
+        a: 'GeoDNS relies on cached DNS entries that take minutes or hours to expire (TTL). Distributed edge re-routes packets at the routing level within milliseconds.',
       },
     ],
   },

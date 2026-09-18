@@ -13,8 +13,8 @@ export const metadata: Metadata = constructMetadata({
   keywords: [
     'GALXAI Status',
     'AI Router Uptime',
-    'OpenAI Status Gateway',
-    'GPT-5.6 Operational Health',
+    'Model Status Gateway',
+    'GALX Nova Operational Health',
     'AI Gateway Latency Status',
   ],
 });

@@ -59,7 +59,7 @@ export const CAPABILITIES_DATA: CapabilityItem[] = [
     "description": "Generate a static image from a text prompt.",
     "architecturalOverview": "Generate a static image from a text prompt.",
     "technicalHighlights": [
-      "Use openai-gpt-image-latest",
+      "Use galx-nova-image",
       "Receive PNG, JPEG, or WebP",
       "Request JSON explicitly for existing clients"
     ],

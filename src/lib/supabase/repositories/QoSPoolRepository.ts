@@ -80,7 +80,7 @@ export class QoSPoolRepository {
   async acquireLumiLease(params: LumiLeaseAcquireParams): Promise<LumiLeaseResult> {
     const args = [
       params.userId,
-      params.modelId || 'gpt-5.6-luna',
+      params.modelId || 'galx-nova',
       params.apiKeyId || null,
       params.clientFingerprint || null,
       params.maxBurst || 12,
@@ -101,7 +101,7 @@ export class QoSPoolRepository {
       try {
         const { data, error } = await this.supabase.rpc('rpc_acquire_lumi_stream_lease_v2', {
           p_user_id: params.userId,
-          p_model_id: params.modelId || 'gpt-5.6-luna',
+          p_model_id: params.modelId || 'galx-nova',
           p_api_key_id: params.apiKeyId || null,
           p_client_fingerprint: params.clientFingerprint || null,
           p_max_burst: params.maxBurst || 12,

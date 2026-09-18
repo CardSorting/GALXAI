@@ -146,7 +146,7 @@ tools = ${generatedToolsJson}
 
 # 1. Initial Prompt Invocation with Tool Definition
 response = client.chat.completions.create(
-    model="gpt-5.6-sol",
+    model="galx-nova",
     messages=[{"role": "user", "content": "What is the weather in Tokyo right now in Celsius?"}],
     tools=tools,
     tool_choice="auto"
@@ -175,7 +175,7 @@ const tools: OpenAI.Chat.Completions.ChatCompletionTool[] = ${generatedToolsJson
 
 async function runAgent() {
   const response = await client.chat.completions.create({
-    model: "gpt-5.6-sol",
+    model: "galx-nova",
     messages: [{ role: "user", content: "What is the weather in Tokyo right now in Celsius?" }],
     tools,
     tool_choice: "auto",

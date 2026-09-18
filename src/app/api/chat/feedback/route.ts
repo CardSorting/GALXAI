@@ -42,7 +42,7 @@ async function previewPOST(req: NextRequest) {
       const result = await trainingEngine.ingestKTOFeedback({
         source: source || 'user_thumb_rating',
         userId: authResult.userId,
-        modelId: modelId || 'gpt-5.6-sol',
+        modelId: modelId || 'galx-nova',
         prompt: String(prompt),
         completion: String(completion),
         label: Boolean(label),
@@ -70,7 +70,7 @@ async function previewPOST(req: NextRequest) {
     const result = await trainingEngine.ingestDPOFeedback({
       source: source || 'web_chat_swipe',
       userId: authResult.userId,
-      modelId: modelId || 'gpt-5.6-sol',
+      modelId: modelId || 'galx-nova',
       prompt: String(prompt),
       chosen: String(chosen),
       rejected: String(rejected),

@@ -91,7 +91,7 @@ async function main() {
     }
 
     case 'chat': {
-      const model = args[1] || 'gpt-5-6-luna-low';
+      const model = args[1] || 'galx-nova';
       const prompt = args.slice(2).join(' ') || 'Explain the concept of quantum computing concisely.';
       console.log(`💬 Streaming prompt to [${model}]: "${prompt}"\n`);
       const start = Date.now();

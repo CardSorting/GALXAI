@@ -72,7 +72,7 @@ export class AnthropicMessageStream implements AsyncIterable<any>, PromiseLike<A
   private finalPromise?: Promise<AnthropicMessage>;
   private modelUsed: string;
 
-  constructor(sourceStream: AsyncIterable<ChatCompletionChunk>, model = 'gpt-5-6-luna-low') {
+  constructor(sourceStream: AsyncIterable<ChatCompletionChunk>, model = 'galx-nova') {
     this.sourceStream = sourceStream;
     this.modelUsed = model;
   }
@@ -197,7 +197,7 @@ export class Anthropic extends GalxAI {
 
     this.messages = {
       create: (async (params: AnthropicMessageCreateParams, options?: RequestOptions) => {
-        const mappedModel = params.model || 'gpt-5-6-luna-low';
+        const mappedModel = params.model || 'galx-nova';
 
         // Normalize Anthropic format messages into standard gateway format
         const messages: Array<{ role: string; content: any }> = [];
@@ -262,7 +262,7 @@ export class Anthropic extends GalxAI {
       }) as any,
 
       stream: (params: Omit<AnthropicMessageCreateParams, 'stream'>, options?: RequestOptions) => {
-        const mappedModel = params.model || 'gpt-5-6-luna-low';
+        const mappedModel = params.model || 'galx-nova';
         const messages: Array<{ role: string; content: any }> = [];
         if (params.system) {
           const sysContent = typeof params.system === 'string'

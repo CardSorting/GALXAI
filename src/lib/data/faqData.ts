@@ -10,7 +10,7 @@ export const FAQS: FAQItem[] = [
     id: 'what-is-galxai',
     category: 'general',
     q: 'What is GALXAI?',
-    a: 'GALXAI is a high-speed AI Gateway providing GPT-5.6 and frontier models at 25%–40% wholesale discounts with a 1-line OpenAI drop-in.',
+    a: 'GALXAI is a high-speed intelligence platform providing GALX Nova and frontier intelligence at 25%–40% wholesale discounts with a 1-line OpenAI drop-in.',
   },
   {
     id: 'discounts-explained',
@@ -46,12 +46,12 @@ export const FAQS: FAQItem[] = [
     id: 'model-fleet-coverage',
     category: 'general',
     q: 'Which AI models are available?',
-    a: 'Flagship frontier models including GPT-5.6 Sol, Terra, and Luna, OpenAI Image Generation, and dense vector embeddings.',
+    a: 'Frontier intelligence models including GALX Nova, GALX Nova-image, and high-dimension vector embeddings.',
   },
   {
     id: 'uptime-failover-sla',
     category: 'developer',
-    q: 'How does Anycast failover prevent 429 stalls?',
+    q: 'How does distributed edge failover prevent 429 stalls?',
     a: 'Check the status page for current availability. If a request fails, follow its documented error guidance.',
   },
 ];

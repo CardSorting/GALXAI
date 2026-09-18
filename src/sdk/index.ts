@@ -268,7 +268,7 @@ export async function chat(
     return getClient().run(promptOrMessages, options);
   }
   return getClient().chat.completions.create({
-    model: options?.model || 'gpt-5-6-luna-low',
+    model: options?.model || 'galx-nova',
     messages: promptOrMessages as any,
     temperature: options?.temperature
   });

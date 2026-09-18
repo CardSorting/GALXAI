@@ -160,7 +160,7 @@ export class BudgetGovernor {
    * @example
    * ```typescript
    * const modelsBreakdown = client.budget.byModel();
-   * console.log(modelsBreakdown['gpt-5.6-sol'].totalSpendUsd);
+   * console.log(modelsBreakdown['galx-nova'].totalSpendUsd);
    * ```
    */
   public byModel(): Record<string, { totalSpendUsd: number; totalTokens: number; callCount: number }> {

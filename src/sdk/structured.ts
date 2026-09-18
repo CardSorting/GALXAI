@@ -181,7 +181,7 @@ export class StructuredOutputExtractor {
     }
 
     const response = await this.completions.create({
-      model: params.model || 'gpt-5-6-luna-low',
+      model: params.model || 'galx-nova',
       messages: params.messages,
       temperature: params.temperature ?? 0,
       max_tokens: params.maxTokens,

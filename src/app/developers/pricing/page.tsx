@@ -3,13 +3,13 @@ import { DeveloperPricingClient } from '@/components/developers/DeveloperPricing
 import { constructMetadata } from '@/lib/seo/metadata';
 
 export const metadata: Metadata = constructMetadata({
-  title: 'Developer Tier & Compute Pricing — Images and Frontier OpenAI Models',
-  description: 'Instant Developer Tier unlock for $10 USD. Pay-as-you-go API access for image generation and frontier OpenAI models with up to 100% compute match bonus.',
+  title: 'Developer Tier & Compute Pricing — GALX Nova & Nova-image',
+  description: 'Instant Developer Tier unlock for $10 USD. Pay-as-you-go API access for image generation and frontier intelligence models with up to 100% compute match bonus.',
   canonicalPath: '/developers/pricing',
   keywords: [
     'Developer Tier Pricing',
-    'OpenAI Model API Pricing',
-    'GPT-5.6 Sol Token Rates',
+    'GALX Model API Pricing',
+    'GALX Nova Token Rates',
     'Image Generation API Pricing',
     'Prepaid AI Compute Credits',
     'Prompt Caching Discounts',

@@ -11,7 +11,7 @@ import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 export const metadata: Metadata = constructMetadata({
   title: 'AI Model Providers & Wholesale Gateways',
   description:
-    'Explore official AI model provider portals routed through GALXAI Anycast edge with 25%–40% wholesale savings, zero rate limit stalls, and automatic multi-provider failover.',
+    'Explore official AI model provider portals routed through GALXAI distributed edge network with 25%–40% wholesale savings, zero rate limit stalls, and automatic multi-provider failover.',
   canonicalPath: '/providers',
   keywords: [
     'AI Model Providers',
@@ -19,7 +19,7 @@ export const metadata: Metadata = constructMetadata({
     'Wholesale AI Tokens',
     'LLM Provider Directory',
     'OpenAI API Provider',
-    'Anycast Model Router',
+    'Distributed Model Gateway',
   ],
 });
 
@@ -28,7 +28,7 @@ export default function ProvidersHubPage() {
     canonicalPath: '/providers',
     title: 'GALXAI AI Model Providers & Wholesale Gateways',
     description:
-      'Official AI model provider hubs connecting developers to frontier AI compute with wholesale pricing and sub-15ms Anycast routing.',
+      'Official AI model provider hubs connecting developers to frontier AI compute with wholesale pricing and sub-15ms distributed edge routing.',
     breadcrumbs: [
       { name: 'Home', url: '/' },
       { name: 'Providers', url: '/providers' },
@@ -58,7 +58,7 @@ export default function ProvidersHubPage() {
             Frontier AI <span className="bg-gradient-to-r from-blue-400 via-indigo-400 to-violet-400 bg-clip-text text-transparent">Model Providers</span>
           </h1>
           <p className="text-base sm:text-lg text-zinc-400 leading-relaxed">
-            Access the world&apos;s leading frontier AI providers through a single unified OpenAI wire-compatible API gateway with wholesale pricing and sub-15ms Anycast routing.
+            Access the world&apos;s leading frontier AI providers through a single unified OpenAI wire-compatible API gateway with wholesale pricing and sub-15ms distributed edge routing.
           </p>
         </header>
 

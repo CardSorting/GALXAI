@@ -358,7 +358,7 @@ client = OpenAI(
 )
 
 response = client.images.generate(
-    model="gpt-image-2",
+    model="dall-e-3",
     prompt="Cyberpunk futuristic architecture...",
     size="1024x1024"
 )`

@@ -68,7 +68,7 @@ export class TokenOptimizer {
   public static calculateSavings(
     promptTokens: number,
     completionTokens: number,
-    modelId = 'gpt-5-6-luna-low'
+    modelId = 'galx-nova'
   ): { retailCostUsd: number; galxCostUsd: number; savingsUsd: number; discountPercentage: number } {
     const spec = ModelCatalog.resolveModel(modelId);
     const inputListPrice = spec.listPricePer1MInput ?? 5.0;

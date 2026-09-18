@@ -98,7 +98,7 @@ export default async function Image() {
             Encrypted Developer Key Vault &amp; Rate-Limit Shield
           </div>
           <div style={{ display: 'flex', fontSize: '22px', color: '#cbd5e1', lineHeight: 1.4 }}>
-            High-availability token routing with authenticated data isolation, sub-15ms Anycast speed, and zero disk persistence.
+            High-availability token routing with authenticated data isolation, sub-15ms distributed edge speed, and zero disk persistence.
           </div>
         </div>
 

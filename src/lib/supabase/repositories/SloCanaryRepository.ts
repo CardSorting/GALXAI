@@ -117,7 +117,7 @@ export class SloCanaryRepository {
   }
 
   /**
-   * Records a synthetic canary probe execution across global Anycast Edge PoPs.
+   * Records a synthetic canary probe execution across global Distributed Edge PoPs.
    */
   async recordCanaryProbe(probe: {
     probeName: string;

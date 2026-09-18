@@ -71,7 +71,7 @@ export function inferIntent(input: string): InferredIntent {
     return {
       type: 'image',
       prompt: cleanPrompt,
-      model: 'openai-gpt-image-latest',
+      model: 'galx-nova-image',
       aspectRatio,
       quality: isHD ? 'hd' : 'standard'
     };
@@ -83,7 +83,7 @@ export function inferIntent(input: string): InferredIntent {
     return {
       type: 'code',
       prompt: input,
-      model: 'gpt-5-6-luna-low'
+      model: 'galx-nova'
     };
   }
 
@@ -91,7 +91,7 @@ export function inferIntent(input: string): InferredIntent {
   return {
     type: 'chat',
     prompt: input,
-    model: 'gpt-5-6-luna-low'
+    model: 'galx-nova'
   };
 }
 

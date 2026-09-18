@@ -51,7 +51,7 @@ export default function ApiKeyCheckerPage() {
     operatingSystem: 'Any',
     url: `${SITE_CONFIG.url}/tools/api-key-checker`,
     description:
-      'In-browser API key format validator, entropy checker, and Anycast edge latency diagnostic tool.',
+      'In-browser API key format validator, entropy checker, and distributed edge latency diagnostic tool.',
     offers: {
       '@type': 'Offer',
       price: '0.00',
@@ -68,7 +68,7 @@ export default function ApiKeyCheckerPage() {
     steps: [
       { name: 'Enter API Key', text: 'Paste your galx_live_ or sk- key into the local validator input.' },
       { name: 'Execute Diagnostic', text: 'Click Validate Key to test format entropy and ping response.' },
-      { name: 'Review Health Readout', text: 'Inspect model tier permissions and Anycast edge response latency.' },
+      { name: 'Review Health Readout', text: 'Inspect model tier permissions and distributed edge response latency.' },
     ],
   });
 
@@ -86,7 +86,7 @@ export default function ApiKeyCheckerPage() {
       createTechArticleSchema({
         headline: 'OpenAI API Key Validator & Health Tester',
         description:
-          'Validate API key format entropy, active model permissions, and Anycast edge response latency.',
+          'Validate API key format entropy, active model permissions, and distributed edge response latency.',
         path: '/tools/api-key-checker',
         keywords: ['API Key Validator', 'OpenAI Tester', 'pSEO', 'AEO'],
       }),

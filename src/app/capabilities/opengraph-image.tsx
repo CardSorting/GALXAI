@@ -2,7 +2,7 @@ import { ImageResponse } from 'next/og';
 
 export const runtime = 'edge';
 
-export const alt = 'GALXAI — Architectural Capabilities, Anycast Edge & ZDR';
+export const alt = 'GALXAI — Architectural Capabilities, Distributed Edge & ZDR';
 export const size = {
   width: 1200,
   height: 630,
@@ -108,12 +108,12 @@ export default async function Image() {
             1M Context, Zero Data Retention &amp; Prompt Caching
           </div>
           <div style={{ fontSize: '20px', color: '#94a3b8', lineHeight: 1.4 }}>
-            Explore technical architecture for 1,000,000 token context windows, ephemeral memory zeroization, 75% prompt caching, and sub-15ms Anycast routing.
+            Explore technical architecture for 1,000,000 token context windows, ephemeral memory zeroization, 75% prompt caching, and sub-15ms distributed edge routing.
           </div>
         </div>
 
         <div style={{ display: 'flex', gap: '16px' }}>
-          {['1M Token Context', '75% Prompt Caching', 'Zero Data Retention', 'Global Anycast'].map((t) => (
+          {['1M Token Context', '75% Prompt Caching', 'Zero Data Retention', 'Global Distributed Edge'].map((t) => (
             <div
               key={t}
               style={{

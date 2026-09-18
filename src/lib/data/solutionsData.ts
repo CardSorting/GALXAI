@@ -34,7 +34,7 @@ export const SOLUTION_GUIDES: SolutionGuide[] = [
     description:
       'Power autonomous coding agents, multi-file refactoring swarms, and Cursor/Windsurf IDE instances with 25%–40% wholesale rates and zero rate-limit stalls.',
     targetWorkload: 'Multi-turn code editing, automated test generation, repo-level refactoring.',
-    primaryModelId: 'gpt-5-6-luna',
+    primaryModelId: 'galx-nova',
     estimatedSavingsPct: 45,
     keyBenefits: [
       {
@@ -46,7 +46,7 @@ export const SOLUTION_GUIDES: SolutionGuide[] = [
         description: 'Run concurrent application requests within your plan limits.',
       },
       {
-        title: 'Sub-15ms Anycast Latency',
+        title: 'Sub-15ms Edge Latency',
         description: 'Instantaneous Time-To-First-Token keeps interactive IDE autocomplete loops snappy.',
       },
     ],
@@ -61,7 +61,7 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="gpt-5-6-luna",
+    model="galx-nova",
     messages=[
         {"role": "system", "content": "You are a senior software architect with zero data retention."},
         {"role": "user", "content": "Refactor this concurrent Rust worker pool with atomic primitives."}
@@ -72,11 +72,11 @@ print(response.choices[0].message.content)`,
     faqs: [
       {
         q: 'How does GALXAI handle large multi-file codebase contexts in coding agents?',
-        a: 'GALXAI supports up to 1,050,000 token context windows on OpenAI GPT-5.6 Luna, allowing entire repositories to be ingested in a single inference call.',
+        a: 'GALXAI supports up to 1,050,000 token context windows on GALX Nova, allowing entire repositories to be ingested in a single inference call.',
       },
       {
         q: 'Can I route high-velocity and image generation models under the same account?',
-        a: 'Yes. You can use GPT-5.6 Luna for code execution and openai-gpt-image-latest for visual synthesis with the same API key and wallet.',
+        a: 'Yes. You can use GALX Nova for code execution and galx-nova-image for visual synthesis with the same API key and wallet.',
       },
     ],
   },
@@ -89,12 +89,12 @@ print(response.choices[0].message.content)`,
     description:
       'Slash recurring context costs by up to 70% on document question-answering, PDF parsing, and enterprise vector search pipelines with automatic 75% prompt caching.',
     targetWorkload: 'Retrieval-Augmented Generation, legal document analysis, semantic customer search.',
-    primaryModelId: 'gpt-5-6-luna',
+    primaryModelId: 'galx-nova',
     estimatedSavingsPct: 65,
     keyBenefits: [
       {
         title: 'Massive 1M+ Context Window',
-        description: 'Ingest hundreds of PDF pages simultaneously on GPT-5.6 Luna without chunk truncation.',
+        description: 'Ingest hundreds of PDF pages simultaneously on GALX Nova without chunk truncation.',
       },
       {
         title: 'Compound 75% Prompt Caching',
@@ -116,7 +116,7 @@ client = OpenAI(
 
 # 100K+ token document chunk automatically receives 75% prompt cache pass-through
 response = client.chat.completions.create(
-    model="gpt-5-6-luna",
+    model="galx-nova",
     messages=[
         {"role": "system", "content": "You are an enterprise research analyst. Reference document below:\\n" + large_pdf_text},
         {"role": "user", "content": "Extract all compliance liability clauses."}
@@ -139,16 +139,16 @@ response = client.chat.completions.create(
     description:
       'Deliver instant, human-like conversational responses with sub-15ms TTFT, continuous rate limit pooling, and 25%–40% wholesale token savings.',
     targetWorkload: 'Interactive chat widgets, AI phone assistants, conversational routing.',
-    primaryModelId: 'gpt-5-6-luna',
+    primaryModelId: 'galx-nova',
     estimatedSavingsPct: 50,
     keyBenefits: [
       {
         title: '140+ Tokens/Sec Velocity',
-        description: 'GPT-5.6 Luna streams responses in under 12ms, ideal for real-time speech and chat.',
+        description: 'GALX Nova streams responses in under 12ms, ideal for real-time speech and chat.',
       },
       {
         title: 'Zero Dropped Connections',
-        description: 'Automated Anycast load balancing absorbs sudden user concurrency spikes without 429 stalls.',
+        description: 'Automated distributed edge load balancing absorbs sudden user concurrency spikes without 429 stalls.',
       },
       {
         title: 'Strict JSON Schema Validation',
@@ -166,7 +166,7 @@ const client = new OpenAI({
 
 // Stream interactive customer response in <15ms TTFT
 const stream = await client.chat.completions.create({
-  model: "gpt-5-6-luna",
+  model: "galx-nova",
   stream: true,
   messages: [
     { role: "system", content: "You are a helpful customer concierge." },
@@ -190,7 +190,7 @@ const stream = await client.chat.completions.create({
     description:
       'Execute high-stakes financial analysis, contract review, and quantitative modeling with SOTA reasoning engines and verified Zero Data Retention (ZDR).',
     targetWorkload: 'M&A contract review, risk modeling, automated algorithmic audits.',
-    primaryModelId: 'gpt-5-6-luna',
+    primaryModelId: 'galx-nova',
     estimatedSavingsPct: 35,
     keyBenefits: [
       {
@@ -199,7 +199,7 @@ const stream = await client.chat.completions.create({
       },
       {
         title: 'SOTA Formal Reasoning',
-        description: 'GPT-5.6 Luna provides highest precision and speed on complex logic and numerical constraints.',
+        description: 'GALX Nova provides highest precision and speed on complex logic and numerical constraints.',
       },
       {
         title: 'Audit-Ready Logging',
@@ -208,7 +208,7 @@ const stream = await client.chat.completions.create({
     ],
     codeSnippet: {
       language: 'Python',
-      code: `from OpenAI import OpenAI
+      code: `from openai import OpenAI
 
 client = OpenAI(
     base_url="https://galx.ai/v1",
@@ -216,7 +216,7 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="gpt-5-6-luna",
+    model="galx-nova",
     messages=[
         {"role": "system", "content": "You are a financial quantitative risk analyst with ZDR security."},
         {"role": "user", "content": "Audit this portfolio VAR exposure model under 3-sigma volatility."}
@@ -239,7 +239,7 @@ response = client.chat.completions.create(
     description:
       'Process millions of asynchronous background tasks, data transformations, and embeddings with an extra 10% off-peak floating rebate and pooled throughput.',
     targetWorkload: 'Asynchronous catalog tagging, dataset synthetic generation, offline embedding pipelines.',
-    primaryModelId: 'gpt-5-6-luna',
+    primaryModelId: 'galx-nova',
     estimatedSavingsPct: 55,
     keyBenefits: [
       {
@@ -267,7 +267,7 @@ client = OpenAI(
 # Batch processing with automatic volume discounts
 for batch_chunk in dataset_chunks:
     resp = client.chat.completions.create(
-        model="gpt-5-6-luna",
+        model="galx-nova",
         messages=[{"role": "user", "content": batch_chunk}]
     )`,
     },
@@ -281,18 +281,18 @@ for batch_chunk in dataset_chunks:
   {
     slug: 'visual-synthesis',
     name: 'Enterprise Visual Studio & Image Generation',
-    badge: 'OpenAI Image Generation',
-    title: 'Enterprise Visual Synthesis API with OpenAI Image Generation',
+    badge: 'GALX Nova-image',
+    title: 'Enterprise Visual Synthesis API with GALX Nova-image',
     headline: 'Enterprise Image Generation API with Wholesale Rates',
     description:
       'Generate ultra-high-definition marketing graphics, UI mockups, and photorealistic renders at 25% below direct list prices using standard OpenAI /v1/images endpoints.',
     targetWorkload: 'Marketing creative generation, photorealistic product rendering, typography generation.',
-    primaryModelId: 'openai-gpt-image-latest',
+    primaryModelId: 'galx-nova-image',
     estimatedSavingsPct: 25,
     keyBenefits: [
       {
         title: 'Photorealistic Text & Typography',
-        description: 'OpenAI Image Generation renders sharp, accurate embedded text and brand typography.',
+        description: 'GALX Nova-image renders sharp, accurate embedded text and brand typography.',
       },
       {
         title: '1-Line OpenAI Images Parity',
@@ -300,7 +300,7 @@ for batch_chunk in dataset_chunks:
       },
       {
         title: 'Instant Wholesale Pricing',
-        description: 'Pay wholesale rates for OpenAI Image Generation with zero monthly seat surcharges.',
+        description: 'Pay wholesale rates for GALX Nova-image with zero monthly seat surcharges.',
       },
     ],
     codeSnippet: {
@@ -313,7 +313,7 @@ client = OpenAI(
 )
 
 response = client.images.generate(
-    model="openai-gpt-image-latest",
+    model="galx-nova-image",
     prompt="Futuristic holographic control panel with crisp glowing text 'GALXAI CORE ONLINE'",
     size="1024x1024",
     quality="hd"
@@ -322,8 +322,8 @@ print(response.data[0].url)`,
     },
     faqs: [
       {
-        q: 'How do I use OpenAI Image Generation?',
-        a: 'Send a text prompt to /v1/images/generations using the openai-gpt-image-latest model ID. Describe the subject, composition, and style you want.',
+        q: 'How do I use GALX Nova-image?',
+        a: 'Send a text prompt to /v1/images/generations using the galx-nova-image model ID. Describe the subject, composition, and style you want.',
       },
     ],
   },
@@ -331,17 +331,17 @@ print(response.data[0].url)`,
     slug: 'autonomous-voice-agents',
     name: 'Real-Time Voice AI & Low-Latency Assistants',
     badge: 'Sub-12ms TTFT',
-    title: 'Low-Latency Voice Agent Architecture with Sub-12ms Anycast Streaming',
+    title: 'Low-Latency Voice Agent Architecture with Sub-12ms Edge Streaming',
     headline: 'Power Conversational Voice Agents with Sub-12ms TTFT',
     description:
-      'Deploy human-paced conversational voice bots with instant streaming Time-To-First-Token (TTFT), zero edge buffering, and 25% wholesale token savings on GPT-5.6 Luna.',
+      'Deploy human-paced conversational voice bots with instant streaming Time-To-First-Token (TTFT), zero edge buffering, and 25% wholesale token savings on GALX Nova.',
     targetWorkload: 'Interactive telephone customer care, live AI interviewers, in-game NPC dialogue.',
-    primaryModelId: 'gpt-5-6-luna',
+    primaryModelId: 'galx-nova',
     estimatedSavingsPct: 35,
     keyBenefits: [
       {
         title: 'Sub-12ms Edge TTFT',
-        description: 'Anycast edge TLS termination eliminates speech-to-speech conversational lag.',
+        description: 'Distributed edge TLS termination eliminates speech-to-speech conversational lag.',
       },
       {
         title: '140+ Tokens/Sec Velocity',
@@ -363,7 +363,7 @@ client = OpenAI(
 
 # Stream immediate conversational response for TTS synthesis (<12ms TTFT)
 stream = client.chat.completions.create(
-    model="gpt-5-6-luna",
+    model="galx-nova",
     messages=[
         {"role": "system", "content": "You are a concise voice assistant. Respond in short, speakable sentences."},
         {"role": "user", "content": "Book an appointment for tomorrow at 2 PM."}
@@ -376,8 +376,8 @@ for chunk in stream:
     },
     faqs: [
       {
-        q: 'Why is GPT-5.6 Luna optimal for real-time voice agents?',
-        a: 'GPT-5.6 Luna delivers sub-12ms Anycast TTFT and 140+ tokens/second at wholesale rates, preventing user conversation lag.',
+        q: 'Why is GALX Nova optimal for real-time voice agents?',
+        a: 'GALX Nova delivers sub-12ms edge TTFT and 140+ tokens/second at wholesale rates, preventing user conversation lag.',
       },
     ],
   },
@@ -390,7 +390,7 @@ for chunk in stream:
     description:
       'Extract nested, strongly-typed JSON records from complex documents, web HTML, and receipts with 100% schema compliance and 75% prompt caching savings.',
     targetWorkload: 'Invoice processing, financial filings parsing, automated web scraping ingestion.',
-    primaryModelId: 'gpt-5-6-luna',
+    primaryModelId: 'galx-nova',
     estimatedSavingsPct: 30,
     keyBenefits: [
       {
@@ -416,10 +416,10 @@ const client = new OpenAI({
 });
 
 const response = await client.chat.completions.create({
-  model: "gpt-5-6-luna",
+  model: "galx-nova",
   messages: [
     { role: "system", content: "Extract line items and tax totals into valid JSON." },
-    { role: "user", content: "Invoice #9842: 5x Server Shards @ $120.00, Tax: $60.00, Total: $660.00" }
+    { role: "user", content: "Invoice #9842: 5x Compute Units @ $120.00, Tax: $60.00, Total: $660.00" }
   ],
   response_format: { type: "json_object" }
 });
@@ -442,7 +442,7 @@ console.log(JSON.parse(response.choices[0].message.content || "{}"));`,
     description:
       'Orchestrate dozens of parallel autonomous agents (CrewAI, AutoGen, LangGraph) without hitting rate limit walls, saving 25%–40% on recursive loop tokens.',
     targetWorkload: 'Multi-agent software engineering, market research swarms, automated bug hunting.',
-    primaryModelId: 'gpt-5-6-luna',
+    primaryModelId: 'galx-nova',
     estimatedSavingsPct: 40,
     keyBenefits: [
       {
@@ -455,7 +455,7 @@ console.log(JSON.parse(response.choices[0].message.content || "{}"));`,
       },
       {
         title: 'Unified Wallet & Logs',
-        description: 'Track per-agent token spend across all GPT models in a single dashboard.',
+        description: 'Track per-agent token spend across all GALX models in a single dashboard.',
       },
     ],
     codeSnippet: {
@@ -469,7 +469,7 @@ client = OpenAI(
 
 # Multi-agent swarm loops execute with continuous token governance
 response = client.chat.completions.create(
-    model="gpt-5-6-luna",
+    model="galx-nova",
     messages=[
         {"role": "system", "content": "You are Agent 01: Systems Architect. Coordinate with Agent 02."},
         {"role": "user", "content": "Design a resilient event-driven microservices topology."}

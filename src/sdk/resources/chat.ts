@@ -37,13 +37,13 @@ export class ChatResource {
    *
    * @example
    * ```typescript
-   * const res = await galx.chat.builder('gpt-5-6-luna-low')
+   * const res = await galx.chat.builder('galx-nova')
    *   .system('You are an expert.')
    *   .user('Explain raft')
    *   .execute();
    * ```
    */
-  public builder(model = 'gpt-5-6-luna-low'): ChatCompletionBuilder {
+  public builder(model = 'galx-nova'): ChatCompletionBuilder {
     return new ChatCompletionBuilder(this.completions, model);
   }
 
@@ -53,7 +53,7 @@ export class ChatResource {
    * @example
    * ```typescript
    * const stream = galx.chat.stream({
-   *   model: 'gpt-5-6-luna-low',
+   *   model: 'galx-nova',
    *   messages: [{ role: 'user', content: 'Explain raft consensus' }]
    * });
    * stream.on('content', (delta) => process.stdout.write(delta));
@@ -109,7 +109,7 @@ export class CompletionsResource {
    * @example
    * ```typescript
    * const stream = galx.chat.completions.stream({
-   *   model: 'gpt-5-6-luna-low',
+   *   model: 'galx-nova',
    *   messages: [{ role: 'user', content: 'Explain quantum gravity' }]
    * });
    * stream.on('content', (delta, snapshot) => console.log(delta));
@@ -137,7 +137,7 @@ export class CompletionsResource {
    * @example
    * ```typescript
    * const response = await galx.chat.completions.create({
-   *   model: 'gpt-5-6-luna-low',
+   *   model: 'galx-nova',
    *   messages: [{ role: 'user', content: 'Explain quantum computing' }]
    * });
    * ```
@@ -177,8 +177,8 @@ export class CompletionsResource {
    * @example
    * ```typescript
    * const response = await galx.chat.completions.createWithFallback({
-   *   model: 'gpt-5.6-terra',
-   *   fallbackModels: ['gpt-5.6-sol', 'gpt-5.6-nova'],
+   *   model: 'galx-nova',
+   *   fallbackModels: ['galx-nova-fast', 'galx-nova-reasoning'],
    *   messages: [{ role: 'user', content: 'Generate quarterly analysis' }]
    * });
    * console.log(response._executedModel, response._fallbacksTriggered);
@@ -227,7 +227,7 @@ export class CompletionsResource {
    * @example
    * ```typescript
    * const task = await galx.chat.completions.createAsync({
-   *   model: 'gpt-5.6-sol',
+   *   model: 'galx-nova',
    *   messages: [{ role: 'user', content: 'Mass dataset evaluation' }],
    *   queue: 'llm-batch',
    *   groupId: 'conv_session_123'

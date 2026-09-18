@@ -44,7 +44,7 @@ async function previewPOST(req: NextRequest) {
     } catch {
       rawBody = { prompt: 'Hello' };
     }
-    const requestedModel = rawBody.model || 'gpt-5.6-sol';
+    const requestedModel = rawBody.model || 'galx-nova';
     const modelSpec = ModelCatalog.resolveModel(requestedModel);
     const promptStr = rawBody.prompt ?? rawBody.input ?? rawBody.text ?? 'Hello';
     const isStream = rawBody.stream !== false; // Ollama defaults stream to true
@@ -192,7 +192,7 @@ async function previewPOST(req: NextRequest) {
 async function previewGET(req: NextRequest) {
   const url = new URL(req.url);
   const prompt = url.searchParams.get('prompt') || url.searchParams.get('q') || url.searchParams.get('input') || 'Hello';
-  const model = url.searchParams.get('model') || 'gpt-5.6-sol';
+  const model = url.searchParams.get('model') || 'galx-nova';
   const stream = url.searchParams.get('stream') !== 'false';
 
   const syntheticReq = new NextRequest(req.url, {

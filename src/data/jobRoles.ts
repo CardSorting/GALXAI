@@ -26,21 +26,21 @@ export const JOB_ROLES: JobRole[] = [
     experience: 'Staff',
     experienceLabel: 'Staff / Principal (5+ yrs)',
     urgency: 'Immediate',
-    tags: ['Rust', 'eBPF', 'Tokio', 'Anycast BGP', 'Linux Kernel', 'HTTP/2'],
-    description: 'Lead the architecture of our global Anycast routing substrate and sub-15ms edge proxy fabric handling billions of daily OpenAI GPT-5.6 tokens with zero downtime.',
+    tags: ['Rust', 'eBPF', 'Tokio', 'Distributed Systems', 'Linux Kernel', 'HTTP/2'],
+    description: 'Lead the architecture of our global distributed edge routing substrate and sub-15ms edge proxy fabric handling billions of daily tokens with zero downtime.',
     first90Days: [
-      'Day 30: Deploy custom zero-copy buffer routing in Rust across 10 Anycast Edge PoPs.',
-      'Day 60: Improve streaming reliability and latency for GPT-5.6 requests.',
+      'Day 30: Deploy custom zero-copy buffer routing in Rust across global Edge PoPs.',
+      'Day 60: Improve streaming reliability and latency for GALX Nova requests.',
       'Day 90: Architect automated kernel-level failover when upstream region packet loss exceeds 0.2%.',
     ],
     responsibilities: [
-      'Design, benchmark, and deploy low-latency Anycast routing nodes in Rust and Go across 40+ global Edge PoPs.',
+      'Design, benchmark, and deploy low-latency distributed routing nodes in Rust and Go across global Edge PoPs.',
       'Optimize kernel-level socket handling, TCP connection pooling, and HTTP/2 stream multiplexing for zero-hesitation streaming.',
       'Implement real-time upstream health scoring, predictive failover algorithms, and automated traffic rebalancing.',
-      'Collaborate with foundation model providers to expand wholesale direct-peering connections.',
+      'Collaborate with compute providers to expand wholesale direct-peering connections.',
     ],
     requirements: [
-      'Deep mastery of distributed systems, TCP/IP, BGP/Anycast routing, and Linux networking internals (eBPF, epoll).',
+      'Deep mastery of distributed systems, TCP/IP, edge routing, and Linux networking internals (eBPF, epoll).',
       'Production experience with high-throughput systems written in Rust, C++, or Go.',
       'Familiarity with streaming protocols (SSE, WebSockets, gRPC) and cryptographic protocols (mTLS, TLS 1.3).',
       'Strong empathy for developer ergonomics and ultra-reliable infrastructure design.',
@@ -62,7 +62,7 @@ export const JOB_ROLES: JobRole[] = [
     tags: ['CUDA', 'Triton', 'FlashAttention-3', 'vLLM', 'NCCL', 'TensorRT-LLM'],
     description: 'Optimize low-level GPU memory layouts, custom Triton kernels, and speculative decoding execution paths across our dedicated H100/H200 cluster fleet.',
     first90Days: [
-      'Day 30: Benchmark and profile kernel-level bottlenecks across GPT-5.6 Sol reasoning passes.',
+      'Day 30: Benchmark and profile kernel-level bottlenecks across GALX Nova reasoning passes.',
       'Day 60: Deploy fused FlashAttention-3 kernels with customized KV-cache compression layers.',
       'Day 90: Reduce median token generation latency by 35% through custom CUDA graph execution.',
     ],
@@ -230,7 +230,7 @@ export const JOB_ROLES: JobRole[] = [
     first90Days: [
       'Day 30: Implement automated operator fusion passes for speculative decoding draft models.',
       'Day 60: Lower custom transformer attention blocks to Triton IR with auto-tuned block sizes.',
-      'Day 90: Deliver a 25% end-to-end latency reduction for GPT-5.6 Terra inference graphs.',
+      'Day 90: Deliver a 25% end-to-end latency reduction for GALX Nova inference graphs.',
     ],
     responsibilities: [
       'Design and maintain MLIR dialect passes and graph lowering pipelines for frontier LLMs.',
@@ -462,7 +462,7 @@ export const JOB_ROLES: JobRole[] = [
     tags: ['Prompt Injection', 'Jailbreak Defense', 'OWASP LLM 01', 'Adversarial Robustness', 'Guardrails'],
     description: 'Safeguard our universal gateway against prompt injection attacks, indirect context poisoning, and model evasion vulnerabilities.',
     first90Days: [
-      'Day 30: Deploy real-time prompt injection detector with <3ms latency overhead on Anycast edge.',
+      'Day 30: Deploy real-time prompt injection detector with <3ms latency overhead on distributed edge.',
       'Day 60: Create automated red-teaming adversarial fuzzing suite testing 10,000 permutations daily.',
       'Day 90: Publish our open-source benchmark for enterprise LLM gateway adversarial resilience.',
     ],
@@ -563,7 +563,7 @@ export const JOB_ROLES: JobRole[] = [
     description: 'Partner with CTOs, VP of AI, and lead architects at Fortune 500s and high-growth AI startups to migrate their inference workloads onto GALX AI.',
     first90Days: [
       'Day 30: Design 3 custom migration architectures for enterprise customers migrating from OpenAI direct.',
-      'Day 60: Standardize our Enterprise VPC Peering and dedicated Anycast routing runbooks.',
+      'Day 60: Standardize our Enterprise VPC Peering and dedicated edge routing runbooks.',
       'Day 90: Close and onboard 5 enterprise fleet accounts with multi-year compute commitments.',
     ],
     responsibilities: [

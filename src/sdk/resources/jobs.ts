@@ -33,7 +33,7 @@ export class JobsResource {
    * ```ts
    * const job = await galx.jobs.submit({
    *   prompt: 'Generate an executive summary of market trends',
-   *   model: 'gpt-5-6-luna-low'
+   *   model: 'galx-nova'
    * });
    * const result = await job.result();
    * ```
@@ -50,7 +50,7 @@ export class JobsResource {
         taskKind: 'image_generation',
         imagePayload: {
           prompt: params.prompt || '',
-          model: params.model || 'openai-gpt-image-latest'
+          model: params.model || 'galx-nova-image'
         }
       };
     } else if (jobType === 'webhook' && params.webhookUrl) {
@@ -67,7 +67,7 @@ export class JobsResource {
         type: 'INTERNAL_MODEL',
         taskKind: 'chat_completion',
         chatPayload: {
-          model: params.model || 'gpt-5-6-luna-low',
+          model: params.model || 'galx-nova',
           messages: params.messages || [{ role: 'user', content: params.prompt || '' }]
         }
       };

@@ -75,7 +75,7 @@ export default async function Image() {
               color: '#38bdf8',
             }}
           >
-            6 Frontier AI Models
+            Frontier AI Models
           </div>
         </div>
 
@@ -85,13 +85,13 @@ export default async function Image() {
             Frontier AI Model Catalog &amp; Live Benchmarks
           </div>
           <div style={{ fontSize: '22px', color: '#cbd5e1', lineHeight: 1.4 }}>
-            Compare OpenAI GPT-5.6 Sol, Terra, Luna, and GPT-Image specs, token rates, and latency side-by-side.
+            Compare GALX Nova and GALX Nova-image specs, token rates, and latency side-by-side.
           </div>
         </div>
 
         {/* Model tags */}
         <div style={{ display: 'flex', gap: '14px' }}>
-          {['gpt-5.6-sol (900K Context)', 'gpt-5.6-terra (Balanced)', 'gpt-5.6-luna (Fast)', 'openai-gpt-image-latest (Vision)'].map((m, i) => (
+          {['GALX Nova (1M Context)', 'GALX Nova-image (Visual Synthesis)', 'Sub-15ms Edge TTFT', '75% Prompt Caching'].map((m, i) => (
             <div
               key={i}
               style={{

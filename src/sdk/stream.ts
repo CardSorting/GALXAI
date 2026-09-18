@@ -226,7 +226,7 @@ export class ChatCompletionStream implements AsyncIterable<ChatCompletionChunk>,
       id: lastChunk?.id || `chat_${Date.now()}`,
       object: 'chat.completion',
       created: lastChunk?.created || Math.floor(Date.now() / 1000),
-      model: lastChunk?.model || 'gpt-5-6-luna-low',
+      model: lastChunk?.model || 'galx-nova',
       choices: [
         {
           index: 0,

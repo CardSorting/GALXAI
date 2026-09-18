@@ -80,7 +80,7 @@ export default function TermsOfServicePage() {
             </div>
             <h2 className="font-bold text-white text-base">99.99% High-Availability SLA</h2>
             <p className="text-xs text-zinc-400 leading-relaxed">
-              Enterprise workloads benefit from our multi-region Anycast active-active failover. If an upstream model cluster experiences an outage, requests reroute in under 50ms.
+              Enterprise workloads benefit from our multi-region distributed active-active failover. If a backend cluster experiences an outage, requests reroute in under 50ms.
             </p>
           </div>
 

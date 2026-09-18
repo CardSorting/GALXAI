@@ -12,7 +12,7 @@ export async function serveImageRequest(client: GalxAI, request: Request, defaul
   if (!['binary', 'url', 'b64_json'].includes(format) || (body.output_format !== undefined && !['png', 'jpeg', 'webp'].includes(body.output_format))) return imageError('unsupported_input', id);
   if (format === 'binary' && (body.n ?? 1) !== 1) return imageError('invalid_request', id);
   try {
-    const params = { prompt: body.prompt, model: body.model || defaultModel || 'openai-gpt-image-latest',
+    const params = { prompt: body.prompt, model: body.model || defaultModel || 'galx-nova-image',
       aspectRatio: body.aspectRatio || body.aspect_ratio, size: body.size, quality: body.quality,
       n: body.n ?? 1, response_format: 'b64_json' as const };
     const result = body.isAsync || body.priority

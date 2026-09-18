@@ -43,7 +43,7 @@ export async function generateMetadata({ params }: ProviderPortalPageProps): Pro
       `${provider.providerName} API Gateway`,
       'Wholesale AI Tokens',
       'Prompt Caching',
-      'Anycast AI Proxy',
+      'Distributed AI Proxy',
       'pSEO Provider Portal',
       'AEO Gateway',
     ],

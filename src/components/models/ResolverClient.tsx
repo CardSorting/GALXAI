@@ -33,20 +33,20 @@ interface PresetGroup {
 const PRESET_GROUPS: PresetGroup[] = [
   {
     group: 'GALX Nova (Sustainable Intelligence)',
-    items: ['luna', 'gpt-5-6-luna', 'fast', 'coding', 'default'],
+    items: ['galx-nova', 'nova', 'fast', 'coding', 'default'],
   },
   {
     group: 'Visual & Multimodal',
-    items: ['image', 'dalle-3', 'openai-gpt-image-latest', 'visual'],
+    items: ['galx-nova-image', 'image', 'dalle-3', 'visual'],
   },
   {
-    group: 'Legacy & Cross-Provider Resolution',
-    items: ['sol', 'terra', 'gpt-5', 'claude-3-7-sonnet', 'deepseek-r1', 'openai/gpt-5.6-sol:latest'],
+    group: 'Cross-Provider Resolution',
+    items: ['claude-3-7-sonnet', 'deepseek-r1', 'gpt-4o', 'gemini-2.5-flash', 'fast'],
   },
 ];
 
 export function ResolverClient() {
-  const [query, setQuery] = useState('luna-low');
+  const [query, setQuery] = useState('galx-nova');
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [activeCodeTab, setActiveCodeTab] = useState<'curl' | 'python' | 'ts'>('curl');
 
@@ -237,7 +237,7 @@ console.log(res.choices[0].message.content);`;
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Type an alias (e.g. luna-low, luna, fast, sol, dalle, image)..."
+                placeholder="Type an alias (e.g. galx-nova, nova, fast, coding, image)..."
                 className="w-full pl-11 pr-24 py-3.5 rounded-xl bg-black/60 border border-white/10 text-white font-mono text-sm focus:outline-none focus:border-cyan-500 transition-colors placeholder:text-zinc-600"
               />
               {query && (
@@ -450,7 +450,7 @@ console.log(res.choices[0].message.content);`;
           <div className="glass-panel rounded-3xl p-8 text-center space-y-2 border border-rose-500/20 bg-rose-500/5">
             <p className="text-sm text-zinc-300 font-mono">No direct match for &quot;{query}&quot;.</p>
             <p className="text-xs text-zinc-500">
-              Try shorthand aliases like <strong className="text-zinc-300 font-mono">luna-low</strong>, <strong className="text-zinc-300 font-mono">luna</strong>, <strong className="text-zinc-300 font-mono">fast</strong>, or <strong className="text-zinc-300 font-mono">image</strong>.
+              Try shorthand aliases like <strong className="text-zinc-300 font-mono">galx-nova</strong>, <strong className="text-zinc-300 font-mono">nova</strong>, <strong className="text-zinc-300 font-mono">fast</strong>, or <strong className="text-zinc-300 font-mono">image</strong>.
             </p>
           </div>
         )}

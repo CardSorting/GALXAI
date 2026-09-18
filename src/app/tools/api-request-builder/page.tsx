@@ -15,7 +15,7 @@ import { SITE_CONFIG } from '@/lib/seo/siteConfig';
 export const metadata: Metadata = constructMetadata({
   title: 'Interactive API Request Builder & Code Generator — GALXAI Tools',
   description:
-    'Free interactive OpenAI API request builder and multi-language code generator. Export ready-to-run code in Python, TypeScript, cURL, Go, Rust, Ruby, and PHP with sub-15ms Anycast routing.',
+    'Free interactive OpenAI API request builder and multi-language code generator. Export ready-to-run code in Python, TypeScript, cURL, Go, Rust, Ruby, and PHP with sub-15ms distributed edge routing.',
   canonicalPath: '/tools/api-request-builder',
   keywords: [
     'OpenAI Request Builder',

@@ -22,7 +22,7 @@ export interface GalxReasoningStreamProps {
 
 export function GalxReasoningStream({
   prompt = 'Explain how prompt prefix caching reduces token costs by 75%',
-  model = 'gpt-5.6-sol',
+  model = 'galx-nova',
   autoStart = false,
   showThoughtTrace = true,
   className = '',

@@ -24,7 +24,7 @@ export const SDK_LANG_GUIDES: SdkLangGuide[] = [
     title: 'Go / Golang AI Gateway Integration — sashabaranov/go-openai Setup',
     headline: 'Connect Go / Golang to GALXAI Universal Gateway',
     description:
-      'Integrate the popular sashabaranov/go-openai library with GALXAI for high-concurrency Go microservices with 25%–40% wholesale savings and 75% prompt caching.',
+      'Integrate the popular sashabaranov/go-openai library with GALXAI for high-concurrency Go microservices with sustainable pricing and 75% prompt caching.',
     packageManager: 'go get',
     installCommand: 'go get github.com/sashabaranov/go-openai',
     codeSnippet: `package main
@@ -43,7 +43,7 @@ func main() {
 	resp, err := client.CreateChatCompletion(
 		context.Background(),
 		openai.ChatCompletionRequest{
-			Model: "gpt-5.6-sol",
+			Model: "galx-nova",
 			Messages: []openai.ChatCompletionMessage{
 				{Role: openai.ChatMessageRoleUser, Content: "Hello from high-concurrency Golang worker!"},
 			},
@@ -58,7 +58,7 @@ func main() {
 stream, err := client.CreateChatCompletionStream(
 	context.Background(),
 	openai.ChatCompletionRequest{
-		Model: "gpt-5.6-luna",
+		Model: "galx-nova",
 		Stream: true,
 		Messages: []openai.ChatCompletionMessage{
 			{Role: openai.ChatMessageRoleUser, Content: "Stream in <14ms TTFT"},
@@ -79,7 +79,7 @@ stream, err := client.CreateChatCompletionStream(
     title: 'Rust AI Gateway Integration — async-openai Crate Quickstart',
     headline: 'Connect Rust to GALXAI Universal Gateway with async-openai',
     description:
-      'Build memory-safe, ultra-low latency AI pipelines in Rust using the async-openai crate routed through GALXAI Anycast edge nodes.',
+      'Build memory-safe, ultra-low latency AI pipelines in Rust using the async-openai crate routed through GALXAI distributed edge nodes.',
     packageManager: 'cargo add',
     installCommand: 'cargo add async-openai tokio',
     codeSnippet: `use async_openai::{
@@ -97,7 +97,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let client = Client::with_config(config);
 
     let request = CreateChatCompletionRequestArgs::default()
-        .model("gpt-5.6-sol")
+        .model("galx-nova")
         .messages([ChatCompletionRequestSystemMessageArgs::default()
             .content("You are a Rust systems engineer.")
             .build()?
@@ -115,7 +115,7 @@ while let Some(result) = stream.next().await {
 }`,
     faqs: [
       {
-        q: 'Is async-openai compatible with GALXAI Anycast proxies?',
+        q: 'Is async-openai compatible with GALXAI distributed edge proxies?',
         a: 'Yes, async-openai supports with_api_base("https://galx.ai/v1") with complete request and SSE streaming parity.',
       },
     ],
@@ -134,7 +134,7 @@ while let Some(result) = stream.next().await {
   -H "Authorization: Bearer galx_live_your_gateway_key" \\
   -H "Content-Type: application/json" \\
   -d '{
-    "model": "gpt-5.6-sol",
+    "model": "galx-nova",
     "messages": [
       {"role": "user", "content": "Execute high-throughput cURL completion"}
     ]
@@ -144,7 +144,7 @@ curl -N https://galx.ai/v1/chat/completions \\
   -H "Authorization: Bearer galx_live_your_gateway_key" \\
   -H "Content-Type: application/json" \\
   -d '{
-    "model": "gpt-5.6-luna",
+    "model": "galx-nova",
     "stream": true,
     "messages": [{"role": "user", "content": "Stream response in real time"}]
   }'`,
@@ -162,7 +162,7 @@ curl -N https://galx.ai/v1/chat/completions \\
     title: 'Ruby AI Gateway Integration — ruby-openai Gem Quickstart',
     headline: 'Connect Ruby on Rails to GALXAI with ruby-openai',
     description:
-      'Power Ruby on Rails applications with wholesale LLM tokens and 75% prompt caching using the official ruby-openai gem.',
+      'Power Ruby on Rails applications with sustainable LLM tokens and 75% prompt caching using the official ruby-openai gem.',
     packageManager: 'gem install',
     installCommand: 'bundle add ruby-openai',
     codeSnippet: `require "openai"
@@ -174,7 +174,7 @@ client = OpenAI::Client.new(
 
 response = client.chat(
   parameters: {
-    model: "gpt-5.6-sol",
+    model: "galx-nova",
     messages: [{ role: "user", content: "Hello from Ruby on Rails!" }]
   }
 )
@@ -182,7 +182,7 @@ puts response.dig("choices", 0, "message", "content")`,
     streamingSnippet: `# Streaming in Ruby
 client.chat(
   parameters: {
-    model: "gpt-5.6-luna",
+    model: "galx-nova",
     messages: [{ role: "user", content: "Stream output" }],
     stream: proc { |chunk, _bytesize| print chunk.dig("choices", 0, "delta", "content") }
   }
@@ -201,7 +201,7 @@ client.chat(
     title: 'PHP & Laravel AI Gateway Integration — openai-php/client Quickstart',
     headline: 'Connect PHP & Laravel to GALXAI with openai-php/client',
     description:
-      'Seamlessly route Laravel and Symfony AI workloads through GALXAI with wholesale pricing and sub-15ms Anycast latency.',
+      'Seamlessly route Laravel and Symfony AI workloads through GALXAI with sustainable pricing and sub-15ms edge latency.',
     packageManager: 'composer require',
     installCommand: 'composer require openai-php/client',
     codeSnippet: `<?php
@@ -213,7 +213,7 @@ $client = OpenAI::factory()
     ->make();
 
 $result = $client->chat()->create([
-    'model' => 'gpt-5.6-sol',
+    'model' => 'galx-nova',
     'messages' => [
         ['role' => 'user', 'content' => 'Hello from PHP & Laravel!'],
     ],
@@ -222,7 +222,7 @@ $result = $client->chat()->create([
 echo $result->choices[0]->message->content;`,
     streamingSnippet: `// Server-Sent Events Streaming in PHP
 $stream = $client->chat()->createStreamed([
-    'model' => 'gpt-5.6-luna',
+    'model' => 'galx-nova',
     'messages' => [['role' => 'user', 'content' => 'Stream tokens']],
 ]);
 
@@ -243,7 +243,7 @@ foreach ($stream as $response) {
     title: 'C# .NET AI Gateway Integration — Official OpenAI .NET Client Quickstart',
     headline: 'Connect C# & .NET Applications to GALXAI Universal Gateway',
     description:
-      'Integrate the official OpenAI NuGet package in ASP.NET Core, MAUI, and enterprise microservices with 25%–40% wholesale token savings and 75% prompt caching.',
+      'Integrate the official OpenAI NuGet package in ASP.NET Core, MAUI, and enterprise microservices with sustainable developer pricing and 75% prompt caching.',
     packageManager: 'dotnet add package',
     installCommand: 'dotnet add package OpenAI --prerelease',
     codeSnippet: `using OpenAI;
@@ -253,7 +253,7 @@ using OpenAI.Chat;
 var clientOptions = new OpenAIClientOptions {
     Endpoint = new Uri("https://galx.ai/v1")
 };
-var client = new ChatClient("gpt-5.6-sol", "galx_live_your_gateway_key", clientOptions);
+var client = new ChatClient("galx-nova", "galx_live_your_gateway_key", clientOptions);
 
 ChatCompletion completion = await client.CompleteChatAsync("Hello from ASP.NET Core microservice!");
 Console.WriteLine(completion.Content[0].Text);`,
@@ -279,7 +279,7 @@ await foreach (StreamingChatCompletionUpdate update in client.CompleteChatStream
     title: 'Java & Spring Boot AI Gateway Integration — LangChain4j Quickstart',
     headline: 'Connect Java & Spring Boot Enterprise Services to GALXAI',
     description:
-      'Power Java, Kotlin, and Spring AI backends with OpenAI GPT-5.6 wholesale routing and 429 rate limit protection.',
+      'Power Java, Kotlin, and Spring AI backends with GALX Nova managed routing and rate limit protection.',
     packageManager: 'Maven / Gradle',
     installCommand: 'implementation "dev.langchain4j:langchain4j-open-ai:0.35.0"',
     codeSnippet: `import dev.langchain4j.model.openai.OpenAiChatModel;
@@ -289,7 +289,7 @@ public class GalxAiQuickstart {
         OpenAiChatModel model = OpenAiChatModel.builder()
             .baseUrl("https://galx.ai/v1")
             .apiKey("galx_live_your_gateway_key")
-            .modelName("gpt-5.6-sol")
+            .modelName("galx-nova")
             .build();
 
         String response = model.generate("Hello from Spring Boot enterprise cluster!");
@@ -300,7 +300,7 @@ public class GalxAiQuickstart {
 OpenAiStreamingChatModel streamingModel = OpenAiStreamingChatModel.builder()
     .baseUrl("https://galx.ai/v1")
     .apiKey("galx_live_your_gateway_key")
-    .modelName("gpt-5.6-luna")
+    .modelName("galx-nova")
     .build();`,
     faqs: [
       {
@@ -314,16 +314,16 @@ OpenAiStreamingChatModel streamingModel = OpenAiStreamingChatModel.builder()
     language: 'Elixir / Phoenix',
     badge: 'High-Concurrency BEAM',
     title: 'Elixir & Phoenix AI Gateway Integration — openai.ex Setup',
-    headline: 'Connect Elixir & Phoenix LiveView to GALXAI Anycast Gateway',
+    headline: 'Connect Elixir & Phoenix LiveView to GALXAI Distributed Gateway',
     description:
-      'Leverage the BEAM virtual machine for millions of concurrent streaming AI sessions with sub-12ms Anycast TTFT on GPT-5.6 Luna.',
+      'Leverage the BEAM virtual machine for millions of concurrent streaming AI sessions with sub-12ms TTFT on GALX Nova.',
     packageManager: 'mix deps.get',
     installCommand: '{:openai, "~> 0.6.2"}',
     codeSnippet: `defmodule GalxAiDemo do
   def complete do
     OpenAI.chat_completion(
       [
-        model: "gpt-5.6-sol",
+        model: "galx-nova",
         messages: [%{role: "user", content: "Hello from Elixir Phoenix LiveView!"}]
       ],
       %{
@@ -335,7 +335,7 @@ OpenAiStreamingChatModel streamingModel = OpenAiStreamingChatModel.builder()
 end`,
     streamingSnippet: `// Server-Sent Events Streaming in Phoenix LiveView
 OpenAI.chat_completion_stream(
-  [model: "gpt-5.6-luna", messages: [%{role: "user", content: "Stream"}]],
+  [model: "galx-nova", messages: [%{role: "user", content: "Stream"}]],
   &send(self(), {:chunk, &1})
 )`,
     faqs: [
@@ -346,4 +346,3 @@ OpenAI.chat_completion_stream(
     ],
   },
 ];
-

@@ -45,7 +45,7 @@ export async function generateMetadata({ params }: WorkloadBenchmarkPageProps): 
       'AI Leaderboard',
       'SWE-bench',
       'HumanEval',
-      'Anycast TTFT',
+      'Edge TTFT',
       'pSEO Benchmarks',
       'AEO Benchmark Answer',
     ],

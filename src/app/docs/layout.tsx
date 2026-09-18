@@ -44,7 +44,7 @@ export default function DocsLayout({ children }: { children: ReactNode }) {
                     className="flex items-center gap-2 text-zinc-300 transition-colors hover:text-indigo-300"
                   >
                     <Terminal className="h-3.5 w-3.5 text-cyan-400" />
-                    <span>GPT-5.6 Luna Catalog</span>
+                    <span>GALX Nova Catalog</span>
                   </Link>
                 </li>
                 <li>
@@ -62,7 +62,7 @@ export default function DocsLayout({ children }: { children: ReactNode }) {
                     className="flex items-center gap-2 text-zinc-300 transition-colors hover:text-indigo-300"
                   >
                     <Activity className="h-3.5 w-3.5 text-amber-400" />
-                    <span>Anycast Edge Health</span>
+                    <span>Distributed Edge Health</span>
                   </Link>
                 </li>
               </ul>

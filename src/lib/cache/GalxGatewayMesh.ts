@@ -189,7 +189,7 @@ export class GalxGatewayMesh {
    */
   public async executeUniversalQoSPreflight(
     keyHash: string,
-    requestedModel: string = 'gpt-5.6-luna',
+    requestedModel: string = 'galx-nova',
     clientFingerprint?: string,
     ipSubnet?: string,
     options: { requestId?: string; estimatedTokens?: number } = {}

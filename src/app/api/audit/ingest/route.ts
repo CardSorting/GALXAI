@@ -82,8 +82,8 @@ async function previewPOST(req: NextRequest) {
 
     const detectedAnomalies: AnomalyDetectionRecord[] = [];
 
-    const sol = ModelCatalog.resolveModel('gpt-5.6-sol');
-    const luna = ModelCatalog.resolveModel('gpt-5.6-luna');
+    const sol = ModelCatalog.resolveModel('galx-nova');
+    const luna = ModelCatalog.resolveModel('galx-nova');
 
     for (let i = 0; i < traces.length; i++) {
       const trace = traces[i];
@@ -127,7 +127,7 @@ async function previewPOST(req: NextRequest) {
           department,
           service: workload,
           estimatedWasteUsd: Number(waste.toFixed(6)),
-          remediation: 'Automated Tier Cascading routed to gpt-5.6-luna (-80% output cost)',
+          remediation: 'Automated Tier Cascading routed to galx-nova (-80% output cost)',
         });
         continue;
       }

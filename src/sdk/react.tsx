@@ -33,7 +33,7 @@ export function GalxAIProvider({
   children,
   client,
   endpoint,
-  defaultModel = 'openai-gpt-image-latest'
+  defaultModel = 'galx-nova-image'
 }: GalxAIProviderProps) {
   return (
     <GalxAIContext.Provider value={{ client, endpoint, defaultModel }}>
@@ -119,7 +119,7 @@ export function useImageGeneration(options: { endpoint?: string; defaultModel?: 
         const mockResult = {
           created: Math.floor(Date.now() / 1000),
           data: [{ url: mockUrl, revised_prompt: prompt }],
-          modelUsed: payload.model || 'openai-gpt-image-latest',
+          modelUsed: payload.model || 'galx-nova-image',
         };
         setResult(mockResult);
         setImageUrl(mockUrl);
@@ -273,7 +273,7 @@ export function useChat(options: UseChatOptions = {}): UseChatHelpers {
             body: JSON.stringify({
               messages: updatedMessages,
               stream: true,
-              model: options.defaultModel || context.defaultModel || 'gpt-5-6-luna-low',
+              model: options.defaultModel || context.defaultModel || 'galx-nova',
               conversation_id: sessionId,
               session_mode: sessionModeRef.current,
               turn_id: turnId,
@@ -451,7 +451,7 @@ export function useCompletion(options: { endpoint?: string; defaultModel?: strin
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           messages: [{ role: 'user', content: text }],
-          model: options.defaultModel || 'gpt-5-6-luna-low',
+          model: options.defaultModel || 'galx-nova',
           stream: true
         }),
         signal: controller.signal
@@ -505,7 +505,7 @@ export function useObject<T = any>(options: { endpoint?: string; schema?: any; d
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           messages: [{ role: 'user', content: prompt }],
-          model: options.defaultModel || 'gpt-5-6-luna-low',
+          model: options.defaultModel || 'galx-nova',
           schema: options.schema
         })
       });
@@ -563,8 +563,8 @@ export function useModels(options: { endpoint?: string } = {}) {
         // Fallback models
         if (isMounted) {
           setModels([
-            { id: 'gpt-5-6-luna-low', name: 'OpenAI GPT-5.6 Luna', description: 'Ultra-fast text & code inference engine' },
-            { id: 'openai-gpt-image-latest', name: 'OpenAI Image Generation', description: 'Generate images from text prompts' }
+            { id: 'galx-nova', name: 'GALX Nova', description: 'Sustainable Intelligence Engine for reasoning and coding' },
+            { id: 'galx-nova-image', name: 'GALX Nova-image', description: 'Visual synthesis engine for creative generation and diagrams' }
           ]);
         }
       } catch (err: any) {

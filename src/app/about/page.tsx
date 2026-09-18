@@ -10,7 +10,7 @@ import { SITE_CONFIG } from '@/lib/seo/siteConfig';
 
 export const metadata: Metadata = constructMetadata({
   title: 'About GALXAI — Universal AI Router & Wholesale Compute Substrate',
-  description: 'Learn about GALXAI’s mission to democratize frontier AI compute with wholesale clearinghouse pricing, sub-15ms Anycast routing, 75% prompt caching, and zero data retention.',
+  description: 'Learn about GALXAI’s mission to democratize frontier AI compute with wholesale clearinghouse pricing, sub-15ms edge routing, 75% prompt caching, and zero data retention.',
   canonicalPath: '/about',
   keywords: [
     'About GALXAI',
@@ -65,7 +65,7 @@ export default function AboutPage() {
           </div>
           <div className="p-6 rounded-2xl bg-zinc-900/40 border border-white/10 text-center space-y-1">
             <div className="text-3xl sm:text-4xl font-black text-emerald-400 font-mono">&lt;15ms</div>
-            <div className="text-xs text-zinc-400 font-semibold">Anycast Edge TTFT</div>
+            <div className="text-xs text-zinc-400 font-semibold">Distributed Edge TTFT</div>
           </div>
           <div className="p-6 rounded-2xl bg-zinc-900/40 border border-white/10 text-center space-y-1">
             <div className="text-3xl sm:text-4xl font-black text-amber-400 font-mono">75%</div>

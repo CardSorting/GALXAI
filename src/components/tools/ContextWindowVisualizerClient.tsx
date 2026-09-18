@@ -146,7 +146,7 @@ print(response.choices[0].message.content)`;
             <span>Direct Answer: How Much Fits in a 900,000 Token Context Window?</span>
           </div>
           <p className="text-sm sm:text-base text-white leading-relaxed font-sans">
-            A <strong>900,000 (900K) token context window</strong> (supported by <strong>OpenAI GPT-5.6 Sol</strong> on GALXAI) holds approximately <strong>675,000 English words</strong>, <strong>1,900 pages of text</strong>, or roughly <strong>75,000 lines of source code</strong> in a single prompt. On GALXAI, prefixes over 1,024 tokens automatically receive a <strong>75% prompt caching discount</strong>, reducing recurring context analysis costs from $3.75 down to just $1.25 per million tokens.
+            A <strong>1,000,000+ (1M) token context window</strong> (supported by <strong>GALX Nova</strong> on GALX) holds approximately <strong>750,000 English words</strong>, <strong>2,100 pages of text</strong>, or roughly <strong>85,000 lines of source code</strong> in a single prompt. On GALX, prefixes over 1,024 tokens automatically receive an automated <strong>prompt caching discount down to $0.02/1M</strong>, drastically reducing recurring context analysis costs.
           </p>
         </section>
 

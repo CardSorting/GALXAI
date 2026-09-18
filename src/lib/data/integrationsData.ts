@@ -48,10 +48,8 @@ OPENAI_API_KEY=galx_live_your_gateway_key`,
   "cursor.openaiBaseUrl": "https://galx.ai/v1",
   "cursor.openaiApiKey": "galx_live_your_gateway_key",
   "cursor.customModels": [
-    "gpt-5.6-sol",
-    "gpt-5.6-terra",
-    "gpt-5.6-luna",
-    "openai-gpt-image-latest"
+    "galx-nova",
+    "galx-nova-image"
   ]
 }`,
     },
@@ -62,7 +60,7 @@ curl https://galx.ai/v1/chat/completions \\
   -H "Authorization: Bearer galx_live_your_gateway_key" \\
   -H "Content-Type: application/json" \\
   -d '{
-    "model": "gpt-5.6-sol",
+    "model": "galx-nova",
     "messages": [{"role": "user", "content": "Cursor connection verified"}]
   }'`,
     },
@@ -77,7 +75,7 @@ curl https://galx.ai/v1/chat/completions \\
       },
       {
         name: 'Add Model Names',
-        description: 'Add "gpt-5.6-sol", "gpt-5.6-terra", "gpt-5.6-luna", and "openai-gpt-image-latest" to the active model list.',
+        description: 'Add "galx-nova" and "galx-nova-image" to the active model list.',
       },
     ],
     faqs: [
@@ -99,7 +97,7 @@ curl https://galx.ai/v1/chat/completions \\
     title: 'How to Connect Windsurf IDE to GALXAI Universal AI Gateway',
     headline: 'Connect Windsurf IDE to GALXAI in 30 Seconds',
     description:
-      'Set up Windsurf cascade flows and inline suggestions with wholesale AI token rates and automated failover across GPT-5.6 models.',
+      'Set up Windsurf cascade flows and inline suggestions with wholesale AI token rates and automated failover across GALX models.',
     timeToSetup: 'PT30S',
     envSnippet: `WINDSURF_API_BASE=https://galx.ai/v1
 WINDSURF_API_KEY=galx_live_your_gateway_key`,
@@ -112,7 +110,7 @@ WINDSURF_API_KEY=galx_live_your_gateway_key`,
       "name": "GALXAI Wholesale Gateway",
       "base_url": "https://galx.ai/v1",
       "api_key": "galx_live_your_gateway_key",
-      "models": ["gpt-5.6-sol", "gpt-5.6-terra", "gpt-5.6-luna"]
+      "models": ["galx-nova"]
     }
   ]
 }`,
@@ -134,7 +132,7 @@ curl https://galx.ai/v1/models \\
       },
       {
         name: 'Select Default Model',
-        description: 'Select "gpt-5.6-sol" for maximum reasoning or "gpt-5.6-luna" for sub-second autocomplete velocity.',
+        description: 'Select "galx-nova" for intelligent reasoning and sub-second autocomplete velocity.',
       },
     ],
     faqs: [
@@ -166,7 +164,7 @@ export const galxai = createOpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-export const defaultModel = galxai('gpt-5.6-sol');`,
+export const defaultModel = galxai('galx-nova');`,
     },
     codeExample: {
       language: 'TypeScript',
@@ -177,7 +175,7 @@ export async function POST(req: Request) {
   const { messages } = await req.json();
 
   const result = streamText({
-    model: galxai('gpt-5.6-sol'),
+    model: galxai('galx-nova'),
     messages,
   });
 
@@ -195,7 +193,7 @@ export async function POST(req: Request) {
       },
       {
         name: 'Execute streamText / generateObject',
-        description: 'Invoke standard Vercel AI SDK methods with gpt-5.6-sol, gpt-5.6-terra, or gpt-5.6-luna.',
+        description: 'Invoke standard Vercel AI SDK methods with galx-nova or galx-nova-image.',
       },
     ],
     faqs: [
@@ -223,7 +221,7 @@ OPENAI_API_KEY=galx_live_your_gateway_key`,
       code: `from langchain_openai import ChatOpenAI
 
 llm = ChatOpenAI(
-    model="gpt-5.6-sol",
+    model="galx-nova",
     openai_api_base="https://galx.ai/v1",
     openai_api_key="galx_live_your_gateway_key",
     temperature=0.2
@@ -243,7 +241,7 @@ prompt = ChatPromptTemplate.from_messages([
 ])
 
 llm = ChatOpenAI(
-    model="gpt-5.6-sol",
+    model="galx-nova",
     openai_api_base="https://galx.ai/v1",
     openai_api_key="galx_live_your_gateway_key"
 )
@@ -291,7 +289,7 @@ OPENAI_API_KEY=galx_live_your_gateway_key`,
 from llama_index.core import Settings
 
 Settings.llm = OpenAI(
-    model="gpt-5.6-sol",
+    model="galx-nova",
     api_base="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
@@ -305,7 +303,7 @@ from llama_index.llms.openai import OpenAI
 from llama_index.core import Settings
 
 Settings.llm = OpenAI(
-    model="gpt-5.6-sol",
+    model="galx-nova",
     api_base="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
@@ -326,7 +324,7 @@ response = query_engine.query("Summarize the quarterly financial report")`,
       },
       {
         name: 'Execute Vector Queries',
-        description: 'Synthesize document chunks with wholesale pricing and sub-15ms Anycast TTFT.',
+        description: 'Synthesize document chunks with wholesale pricing and sub-15ms edge TTFT.',
       },
     ],
     faqs: [
@@ -355,7 +353,7 @@ OPENAI_API_KEY=galx_live_your_gateway_key`,
 from langchain_openai import ChatOpenAI
 
 gateway_llm = ChatOpenAI(
-    model="gpt-5.6-sol",
+    model="galx-nova",
     openai_api_base="https://galx.ai/v1",
     openai_api_key="galx_live_your_gateway_key"
 )
@@ -399,7 +397,7 @@ print(result)`,
     faqs: [
       {
         q: 'Why is GALXAI ideal for multi-agent swarms?',
-        a: 'Multi-agent swarms generate heavy concurrent bursts that trigger 429 rate limit stalls on direct provider tiers. GALXAI provisions enterprise Anycast routing with predictive capacity headroom, ensuring zero dropped agent loops.',
+        a: 'Multi-agent swarms generate heavy concurrent bursts that trigger 429 rate limit stalls on direct provider tiers. GALXAI provisions enterprise distributed edge routing with predictive capacity headroom, ensuring zero dropped agent loops.',
       },
     ],
   },
@@ -424,7 +422,7 @@ export OPENAI_API_KEY="galx_live_your_gateway_key"`,
     codeExample: {
       language: 'Bash',
       code: `# Launch Claude Code pointing to GALXAI wholesale clearinghouse
-claude --openai-base-url="https://galx.ai/v1" --model="gpt-5.6-sol"`,
+claude --openai-base-url="https://galx.ai/v1" --model="galx-nova"`,
     },
     steps: [
       {
@@ -455,7 +453,7 @@ claude --openai-base-url="https://galx.ai/v1" --model="gpt-5.6-sol"`,
     title: 'Dify AI Workflow Integration with GALXAI Universal Gateway',
     headline: 'Connect Dify LLM Workflows to GALXAI',
     description:
-      'Build visual AI workflows, RAG agents, and assistants in Dify with sub-15ms Anycast latency, 75% prompt caching, and wholesale token pricing.',
+      'Build visual AI workflows, RAG agents, and assistants in Dify with sub-15ms edge latency, 75% prompt caching, and wholesale token pricing.',
     timeToSetup: 'PT45S',
     envSnippet: `OPENAI_API_BASE=https://galx.ai/v1
 OPENAI_API_KEY=galx_live_your_gateway_key`,
@@ -466,7 +464,7 @@ OPENAI_API_KEY=galx_live_your_gateway_key`,
   "provider": "openai",
   "api_base": "https://galx.ai/v1",
   "api_key": "galx_live_your_gateway_key",
-  "models": ["gpt-5.6-sol", "gpt-5.6-terra", "gpt-5.6-luna"]
+  "models": ["galx-nova", "galx-nova-image"]
 }`,
     },
     codeExample: {
@@ -479,7 +477,7 @@ const response = await fetch("https://galx.ai/v1/chat/completions", {
     "Authorization": "Bearer " + process.env.GALXAI_API_KEY,
   },
   body: JSON.stringify({
-    model: "gpt-5.6-sol",
+    model: "galx-nova",
     messages: [{ role: "user", content: "Synthesize workflow telemetry" }],
   }),
 });`,
@@ -495,7 +493,7 @@ const response = await fetch("https://galx.ai/v1/chat/completions", {
       },
       {
         name: 'Add Model Identifiers',
-        description: 'Add "gpt-5.6-sol", "gpt-5.6-terra", and "gpt-5.6-luna".',
+        description: 'Add "galx-nova" and "galx-nova-image".',
       },
     ],
     faqs: [
@@ -527,7 +525,7 @@ OPENAI_API_KEY="galx_live_your_gateway_key"`,
       language: 'TypeScript',
       code: `// Flowise Chat Node Configuration
 const chatNode = {
-  modelName: "gpt-5.6-sol",
+  modelName: "galx-nova",
   basePath: "https://galx.ai/v1",
   openAIApiKey: process.env.GALXAI_API_KEY,
   temperature: 0.2
@@ -549,8 +547,8 @@ const chatNode = {
     ],
     faqs: [
       {
-        q: 'Does Flowise support GPT-5.6 Sol via GALXAI?',
-        a: 'Yes. Simply specify "gpt-5.6-sol" in the Custom Model Name input field in the Flowise node.',
+        q: 'Does Flowise support GALX Nova via GALXAI?',
+        a: 'Yes. Simply specify "galx-nova" in the Custom Model Name input field in the Flowise node.',
       },
     ],
   },
@@ -562,7 +560,7 @@ const chatNode = {
     title: 'Open WebUI Integration Guide with GALXAI Wholesale Token Gateway',
     headline: 'Power Open WebUI with GALXAI Frontier Models',
     description:
-      'Supercharge your self-hosted Open WebUI instance with OpenAI GPT-5.6, 75% prompt caching, and wholesale billing.',
+      'Supercharge your self-hosted Open WebUI instance with GALX Nova, 75% prompt caching, and wholesale billing.',
     timeToSetup: 'PT30S',
     envSnippet: `OPENAI_API_BASE_URL=https://galx.ai/v1
 OPENAI_API_KEY=galx_live_your_gateway_key`,
@@ -602,7 +600,7 @@ OPENAI_API_KEY=galx_live_your_gateway_key`,
     faqs: [
       {
         q: 'Does Open WebUI support vision models via GALXAI?',
-        a: 'Yes. Use a vision-capable text model for image analysis; OpenAI Image Generation is the image creation route.',
+        a: 'Yes. Use a vision-capable text model for image analysis; GALX Nova-image is the image creation route.',
       },
     ],
   },
@@ -611,7 +609,7 @@ OPENAI_API_KEY=galx_live_your_gateway_key`,
     name: 'Continue.dev',
     category: 'ide',
     badge: 'VSCode & JetBrains Extension',
-    title: 'Continue.dev IDE Setup Guide with GALXAI Fast Anycast Gateway',
+    title: 'Continue.dev IDE Setup Guide with GALX Distributed Edge Gateway',
     headline: 'Supercharge Continue.dev with GALXAI Wholesale AI',
     description:
       'Integrate the popular open-source VSCode and JetBrains coding assistant with GALXAI for sub-12ms inline autocomplete and deep chat refactoring.',
@@ -624,24 +622,17 @@ OPENAI_API_KEY=galx_live_your_gateway_key`,
       code: `{
   "models": [
     {
-      "title": "GPT-5.6 Sol (Wholesale)",
+      "title": "GALX Nova (Flagship)",
       "provider": "openai",
-      "model": "gpt-5.6-sol",
-      "apiBase": "https://galx.ai/v1",
-      "apiKey": "galx_live_your_gateway_key"
-    },
-    {
-      "title": "GPT-5.6 Terra (Balanced)",
-      "provider": "openai",
-      "model": "gpt-5.6-terra",
+      "model": "galx-nova",
       "apiBase": "https://galx.ai/v1",
       "apiKey": "galx_live_your_gateway_key"
     }
   ],
   "tabAutocompleteModel": {
-    "title": "GPT-5.6 Luna Autocomplete",
+    "title": "GALX Nova Autocomplete",
     "provider": "openai",
-    "model": "gpt-5.6-luna",
+    "model": "galx-nova",
     "apiBase": "https://galx.ai/v1",
     "apiKey": "galx_live_your_gateway_key"
   }
@@ -649,11 +640,11 @@ OPENAI_API_KEY=galx_live_your_gateway_key`,
     },
     codeExample: {
       language: 'TypeScript',
-      code: `// Set GPT-5.6 Luna as lightning-fast autocomplete model (<12ms TTFT)
+      code: `// Set GALX Nova as lightning-fast autocomplete model (<12ms TTFT)
 const config = {
   tabAutocompleteModel: {
     provider: "openai",
-    model: "gpt-5.6-luna",
+    model: "galx-nova",
     apiBase: "https://galx.ai/v1",
     apiKey: process.env.GALXAI_API_KEY,
   }
@@ -676,7 +667,7 @@ const config = {
     faqs: [
       {
         q: 'Which model should I use for tab autocomplete in Continue?',
-        a: 'We recommend GPT-5.6 Luna, which streams at 140+ tokens/sec with sub-12ms Anycast TTFT at $0.75/1M input tokens.',
+        a: 'We recommend GALX Nova, which streams at 140+ tokens/sec with sub-12ms edge TTFT at wholesale token pricing.',
       },
     ],
   },
@@ -699,7 +690,7 @@ OPENAI_API_KEY=galx_live_your_gateway_key`,
   "apiProvider": "openai-compatible",
   "baseUrl": "https://galx.ai/v1",
   "apiKey": "galx_live_your_gateway_key",
-  "modelId": "gpt-5.6-sol"
+  "modelId": "galx-nova"
 }`,
     },
     codeExample: {
@@ -709,7 +700,7 @@ const clineSettings = {
   apiProvider: "openai-compatible",
   baseUrl: "https://galx.ai/v1",
   apiKey: process.env.GALXAI_API_KEY,
-  modelId: "gpt-5.6-sol"
+  modelId: "galx-nova"
 };`,
     },
     steps: [

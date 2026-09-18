@@ -85,7 +85,7 @@ export default async function Image() {
             Developer Guides, Cookbooks &amp; No-Code Setup
           </div>
           <div style={{ fontSize: '22px', color: '#cbd5e1', lineHeight: 1.4 }}>
-            Integrate GPT-5.6 Sol, Terra, and Luna into Cursor, Python, TypeScript, Make.com, and AI Agent Swarms in seconds.
+            Integrate GALX Nova and Nova-image into Cursor, Python, TypeScript, Make.com, and AI Agent Swarms in seconds.
           </div>
         </div>
 

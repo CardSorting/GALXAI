@@ -29,7 +29,7 @@ export function ModelCostComparatorToolClient() {
   const [monthlyInputMillions, setMonthlyInputMillions] = useState<number>(20);
   const [monthlyOutputMillions, setMonthlyOutputMillions] = useState<number>(5);
   const [cacheHitPercentage, setCacheHitPercentage] = useState<number>(50);
-  const [selectedModelId, setSelectedModelId] = useState<string>('gpt-5-6-luna-low');
+  const [selectedModelId, setSelectedModelId] = useState<string>('galx-nova');
   const [copiedCode, setCopiedCode] = useState<boolean>(false);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
   const [inboundEmail, setInboundEmail] = useState('');
@@ -144,8 +144,8 @@ print(response.choices[0].message.content)`;
       a: 'When an incoming request shares an identical prefix of 1,024+ tokens with previous requests, the cached tokens are processed at a 75% discount ($0.25 on the dollar) and delivered in <15ms.',
     },
     {
-      q: 'Can I switch between OpenAI models and visual models using the same API key?',
-      a: 'Yes. A single GALXAI API key unlocks unified routing across GPT-6 Astra, GPT-5.6 Sol, GPT-5.6 Terra, GPT-5.6 Luna, GPT-5.5, and OpenAI Image Generation.',
+      q: 'Can I switch between reasoning models and visual models using the same API key?',
+      a: 'Yes. A single GALX API key unlocks unified access across GALX Nova for text/reasoning and GALX Nova-image for visual generation with zero switching friction.',
     },
   ];
 
@@ -172,7 +172,7 @@ print(response.choices[0].message.content)`;
               variant="pill"
               label="Share Tool"
               title="GALXAI Model Cost Comparator & Savings Studio"
-              description="Calculate and compare monthly inference costs across OpenAI frontier models with wholesale discounts."
+              description="Calculate and compare monthly inference costs across GALX frontier models with wholesale discounts."
             />
           </div>
 
@@ -180,7 +180,7 @@ print(response.choices[0].message.content)`;
             Model Cost Comparator Studio
           </h1>
           <p className="text-sm sm:text-base text-zinc-300 leading-relaxed max-w-3xl font-sans">
-            Compare real-world monthly token costs across GPT-6 Astra, GPT-5.6 Sol, GPT-5.6 Terra, GPT-5.6 Luna, and GPT-5.5 with automated 75% prompt caching and wholesale volume rebates.
+            Compare real-world monthly token costs across GALX Nova and GALX Nova-image with automated prompt caching and wholesale volume rebates.
           </p>
         </section>
 

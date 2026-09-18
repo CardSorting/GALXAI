@@ -243,7 +243,7 @@ export function createFallbackModelPlugin(options: {
   fallbackModel?: string;
   onFallbackTriggered?: (originalModel: string, fallbackModel: string, error: Error) => void;
 } = {}): GalxPlugin {
-  const fallback = options.fallbackModel || 'gpt-5.6-luna';
+  const fallback = options.fallbackModel || 'galx-nova';
 
   return {
     name: 'FallbackModelPlugin',

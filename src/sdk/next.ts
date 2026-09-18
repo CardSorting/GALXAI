@@ -109,7 +109,7 @@ export function createChatRoute(options: RouteHandlerOptions = {}) {
 
       if (stream) {
         const responseStream = await client.chat.completions.create({
-          model: body.model || options.defaultModel || 'gpt-5.6-sol',
+          model: body.model || options.defaultModel || 'galx-nova',
           messages,
           temperature: body.temperature,
           stream: true
@@ -141,7 +141,7 @@ export function createChatRoute(options: RouteHandlerOptions = {}) {
       }
 
       const completion = await client.chat.completions.create({
-        model: body.model || options.defaultModel || 'gpt-5.6-sol',
+        model: body.model || options.defaultModel || 'galx-nova',
         messages,
         temperature: body.temperature
       });
@@ -176,8 +176,8 @@ export function createModelsRoute(options: RouteHandlerOptions = {}) {
       return new Response(
         JSON.stringify({
           data: [
-            { id: 'openai-gpt-image-latest', name: 'OpenAI Image Generation', description: 'Generate images from text prompts' },
-            { id: 'gpt-5.6-sol', name: 'GPT-5.6 Sol', description: 'Flagship reasoning & text generation' }
+            { id: 'galx-nova', name: 'GALX Nova', description: 'Sustainable Intelligence Engine for reasoning and coding' },
+            { id: 'galx-nova-image', name: 'GALX Nova-image', description: 'Visual synthesis engine for creative generation and diagrams' }
           ]
         }),
         { status: 200, headers: { 'Content-Type': 'application/json' } }

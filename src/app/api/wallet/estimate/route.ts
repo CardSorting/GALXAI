@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
     const {
-      modelId = 'gpt-5.6-sol',
+      modelId = 'galx-nova',
       dailyRequests = 100,
       avgPromptTokens = 1500,
       avgCompletionTokens = 400,

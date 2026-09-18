@@ -304,7 +304,7 @@ export class GalxBrowserAgentClient {
         signal: controller.signal,
         body: JSON.stringify({
           ...input.body,
-          model: input.model || input.body?.model || 'gpt-5-6-luna-low',
+          model: input.model || input.body?.model || 'galx-nova',
           messages: input.messages,
           stream: true,
           conversation_id: input.sessionId,

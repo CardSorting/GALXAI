@@ -98,13 +98,13 @@ export default async function Image() {
             Interactive AI Model Playground &amp; Code Sandbox
           </div>
           <div style={{ display: 'flex', fontSize: '22px', color: '#cbd5e1', lineHeight: 1.4 }}>
-            Test GPT-5.6 Sol, Terra, Luna, and reasoning models live in your browser with real-time token streaming and zero auth setup.
+            Test GALX Nova and Nova-image live in your browser with real-time token streaming and zero auth setup.
           </div>
         </div>
 
         {/* Badges */}
         <div style={{ display: 'flex', gap: '14px' }}>
-          {['Real-time SSE Streaming', 'Sub-15ms Time to First Token', 'Zero Signup Sandbox', '6 Frontier Models'].map((item, i) => (
+          {['Real-time SSE Streaming', 'Sub-15ms Time to First Token', 'Zero Signup Sandbox', 'Frontier Intelligence Models'].map((item, i) => (
             <div
               key={i}
               style={{

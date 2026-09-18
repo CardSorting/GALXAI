@@ -153,11 +153,11 @@ const BASE_CATALOG_ITEMS: CatalogItem[] = [
   },
   {
     title: 'Supported Models & Pricing Catalog',
-    description: 'Explore wholesale rates across GPT-5.6 Sol, Terra, and Luna.',
+    description: 'Explore wholesale rates for GALX Nova and GALX Nova-image.',
     category: 'Models & Engines',
     href: '/models',
     shortcutKey: 'G M',
-    keywords: ['models', 'pricing', 'catalog', 'gpt', 'openai', 'sol', 'terra', 'luna', 'tokens', 'cost', 'cheap', 'rates'],
+    keywords: ['models', 'pricing', 'catalog', 'nova', 'galx-nova', 'image', 'tokens', 'cost', 'cheap', 'rates'],
     intentPhrases: ['cheapest model', 'browse models', 'compare pricing', 'discount rates', 'which model is best', 'lowest cost', 'model list'],
   },
   {
@@ -175,7 +175,7 @@ const BASE_CATALOG_ITEMS: CatalogItem[] = [
     href: '/models/compare',
     shortcutKey: 'G C',
     keywords: ['compare', 'matrix', 'versus', 'benchmarks', 'speed', 'arena', 'diff', 'side by side'],
-    intentPhrases: ['compare gpt models', 'model benchmark', 'cost comparison table', 'difference between models', 'which model is faster'],
+    intentPhrases: ['compare models', 'model benchmark', 'cost comparison table', 'difference between models', 'which model is faster'],
   },
   {
     title: 'Developer Gateway API Keys',
@@ -260,7 +260,7 @@ const BASE_CATALOG_ITEMS: CatalogItem[] = [
     keywords: ['curl', 'bash', 'terminal', 'copy curl', 'snippet', 'cli', 'request'],
     intentPhrases: ['copy curl', 'curl snippet', 'how to curl galxai', 'terminal command', 'curl request'],
     actionType: 'copy_curl',
-    actionData: `curl https://galx.ai/v1/chat/completions \\\n  -H "Content-Type: application/json" \\\n  -H "Authorization: Bearer $GALX_API_KEY" \\\n  -d '{"model": "gpt-5.6-sol", "messages": [{"role": "user", "content": "Hello GALXAI"}]}'`
+    actionData: `curl https://galx.ai/v1/chat/completions \\\n  -H "Content-Type: application/json" \\\n  -H "Authorization: Bearer $GALX_API_KEY" \\\n  -d '{"model": "galx-nova", "messages": [{"role": "user", "content": "Hello GALXAI"}]}'`
   },
   {
     title: 'Quick Action: Copy Python SDK Snippet',
@@ -271,7 +271,7 @@ const BASE_CATALOG_ITEMS: CatalogItem[] = [
     keywords: ['python', 'pip', 'openai python', 'copy python', 'sdk', 'code'],
     intentPhrases: ['copy python', 'python code snippet', 'how to use python sdk', 'python client'],
     actionType: 'copy_python',
-    actionData: `from openai import OpenAI\n\nclient = OpenAI(base_url="https://galx.ai/v1", api_key="galx_live_your_key")\nresponse = client.chat.completions.create(model="gpt-5.6-sol", messages=[{"role": "user", "content": "Hello"}])\nprint(response.choices[0].message.content)`
+    actionData: `from openai import OpenAI\n\nclient = OpenAI(base_url="https://galx.ai/v1", api_key="galx_live_your_key")\nresponse = client.chat.completions.create(model="galx-nova", messages=[{"role": "user", "content": "Hello"}])\nprint(response.choices[0].message.content)`
   },
   {
     title: 'Quick Action: Copy TypeScript / Node SDK Snippet',
@@ -282,7 +282,7 @@ const BASE_CATALOG_ITEMS: CatalogItem[] = [
     keywords: ['typescript', 'javascript', 'node', 'npm', 'copy typescript', 'sdk'],
     intentPhrases: ['copy typescript', 'nodejs code snippet', 'typescript client', 'javascript sdk'],
     actionType: 'copy_ts',
-    actionData: `import OpenAI from "openai";\n\nconst client = new OpenAI({ baseURL: "https://galx.ai/v1", apiKey: process.env.GALX_API_KEY });\nconst res = await client.chat.completions.create({ model: "gpt-5.6-sol", messages: [{ role: "user", content: "Hello" }] });\nconsole.log(res.choices[0].message.content);`
+    actionData: `import OpenAI from "openai";\n\nconst client = new OpenAI({ baseURL: "https://galx.ai/v1", apiKey: process.env.GALX_API_KEY });\nconst res = await client.chat.completions.create({ model: "galx-nova", messages: [{ role: "user", content: "Hello" }] });\nconsole.log(res.choices[0].message.content);`
   },
 
   // 3. Documentation Hub & Deep Dives
@@ -498,13 +498,13 @@ class BroccoliOmniSearchImpl {
         intentPhrases: ['count my tokens', 'tokenizer studio', 'bpe token counter', 'how many tokens is this text'],
       },
       {
-        title: 'Anycast Latency & Time-To-First-Token (TTFT) Estimator',
-        description: 'Interactive streaming latency and TTFT simulator across Anycast Edge vs Single-Origin routing.',
+        title: 'Distributed Edge Latency & Time-To-First-Token (TTFT) Estimator',
+        description: 'Interactive streaming latency and TTFT simulator across Distributed Edge vs Single-Origin routing.',
         category: 'Actions & Tools',
         href: '/tools/latency-estimator',
         badge: 'Interactive Tool',
-        keywords: ['latency', 'ttft', 'estimator', 'anycast', 'edge', 'tls handshake', 'ping'],
-        intentPhrases: ['estimate latency', 'ttft simulator', 'how fast is anycast routing'],
+        keywords: ['latency', 'ttft', 'estimator', 'distributed edge', 'edge', 'tls handshake', 'ping'],
+        intentPhrases: ['estimate latency', 'ttft simulator', 'how fast is distributed edge routing'],
       },
       {
         title: 'Prompt Compressor & System Instruction Optimizer',
@@ -531,7 +531,7 @@ class BroccoliOmniSearchImpl {
         href: '/tools/model-cost-comparator',
         badge: 'Interactive Tool',
         keywords: ['cost comparator', 'compare prices', 'wholesale comparator', 'cheapest llm'],
-        intentPhrases: ['compare model costs', 'who has cheapest gpt 5', 'model cost comparator'],
+        intentPhrases: ['compare model costs', 'who has cheapest tokens', 'model cost comparator'],
       },
     ];
 

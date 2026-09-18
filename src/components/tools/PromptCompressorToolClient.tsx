@@ -27,7 +27,7 @@ import { FRONTEND_VISIBLE_MODELS } from '@/core/router/PublicModelCatalog';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 
 export function PromptCompressorToolClient() {
-  const [selectedModelId, setSelectedModelId] = useState<string>('gpt-5.6-sol');
+  const [selectedModelId, setSelectedModelId] = useState<string>('galx-nova');
   const [inputPrompt, setInputPrompt] = useState<string>(
     `You are an expert AI assistant that is designed to help software engineers write high performance code.
 

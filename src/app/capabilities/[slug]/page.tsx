@@ -43,7 +43,7 @@ export async function generateMetadata({ params }: CapabilityPageProps): Promise
       capability.title,
       'AI Gateway Architecture',
       'Prompt Caching',
-      'Anycast AI',
+      'Distributed Edge AI',
       'Zero Data Retention',
       'pSEO Capabilities',
       'AEO Technical Architecture',

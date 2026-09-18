@@ -11,13 +11,13 @@ import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 export const metadata: Metadata = constructMetadata({
   title: 'Frontier AI Model Matchups & Head-to-Head Comparisons',
   description:
-    'Detailed head-to-head model comparisons: GPT-5.6 Sol vs Terra, GPT-5.6 Sol vs Luna, GPT-5.6 Terra vs Luna, and GPT-Image editions on reasoning, token speed, and pricing.',
+    'Detailed head-to-head model comparisons evaluating reasoning depth, token speed, and wholesale pricing on the GALX platform.',
   canonicalPath: '/models/vs',
   keywords: [
     'AI Model Comparisons',
-    'GPT-5.6 Sol vs Terra',
-    'GPT-5.6 Sol vs Luna',
-    'OpenAI Model Matchups',
+    'GALX Nova vs Legacy Models',
+    'GALX Nova Performance',
+    'AI Gateway Benchmarks',
     'LLM Benchmark Comparison',
     'Token Economics Matchups',
   ],

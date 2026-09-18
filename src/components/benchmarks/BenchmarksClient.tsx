@@ -225,7 +225,7 @@ export function BenchmarksClient() {
                     selectedCategory === 'image' ? 'bg-white/10 text-white font-medium' : 'text-zinc-400'
                   }`}
                 >
-                  GPT-Image Engines
+                  Visual Synthesis Engines
                 </button>
               </div>
 

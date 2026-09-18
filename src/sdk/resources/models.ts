@@ -149,7 +149,7 @@ export class ModelsResource {
    *
    * @example
    * ```typescript
-   * const model = await galx.models.get('gpt-5-6-luna-low');
+   * const model = await galx.models.get('galx-nova');
    * ```
    */
   public get(modelId: string, options?: RequestOptions): Promise<ModelInfo> {
@@ -161,7 +161,7 @@ export class ModelsResource {
    *
    * @example
    * ```typescript
-   * if (await galx.models.has('gpt-5-6-luna-low')) {
+   * if (await galx.models.has('galx-nova')) {
    *   // Model is ready
    * }
    * ```
@@ -181,11 +181,11 @@ export class ModelsResource {
    * @example
    * ```typescript
    * const defaultModel = await galx.models.default();
-   * console.log(defaultModel.id); // 'gpt-5-6-luna-low'
+   * console.log(defaultModel.id); // 'galx-nova'
    * ```
    */
   public async default(options?: RequestOptions): Promise<ModelInfo> {
-    return this.retrieve('gpt-5-6-luna-low', options);
+    return this.retrieve('galx-nova', options);
   }
 
   /**
@@ -194,7 +194,7 @@ export class ModelsResource {
    * @example
    * ```typescript
    * const ids = await galx.models.names();
-   * console.log(ids); // ['gpt-5.6-sol', 'gpt-5.6-terra', ...]
+   * console.log(ids); // ['galx-nova', 'galx-nova-image']
    * ```
    */
   public async names(options?: RequestOptions): Promise<string[]> {
@@ -263,7 +263,7 @@ export class ModelsResource {
    *
    * @example
    * ```typescript
-   * const comparison = await galx.models.compare('gpt-5-6-luna-low', 'openai-gpt-image-latest');
+   * const comparison = await galx.models.compare('galx-nova', 'galx-nova-image');
    * console.log(comparison.cheaperInputModel, comparison.inputSavingsPercentage);
    * ```
    */

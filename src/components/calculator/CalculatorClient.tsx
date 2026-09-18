@@ -151,7 +151,7 @@ export function CalculatorClient() {
       uncachedTokensM * selectedModel.inputPricePer1M + cachedTokensM * cachedInputRate;
     
     // Intelligent Efficiency Optimization
-    const cascadingRebateMonthly = preventMisallocation && (selectedModel.id === 'galx-nova' || selectedModel.id === 'gpt-5.6-sol')
+    const cascadingRebateMonthly = preventMisallocation && selectedModel.id === 'galx-nova'
       ? (inputTokensM * 0.25 * (3.75 - 2.25) + outputTokensM * 0.25 * (15.0 - 9.0))
       : 0;
 

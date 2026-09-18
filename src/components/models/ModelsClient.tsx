@@ -50,7 +50,7 @@ interface ModelCuratedMetadata {
 }
 
 const MODEL_METADATA: Record<string, ModelCuratedMetadata> = {
-  'gpt-5-6-luna-low': {
+  'galx-nova': {
     roleBadge: 'Fast & Affordable Agentic Coding',
     speedTier: 'Sub-Second Real-Time (~65ms)',
     bestFor: [
@@ -60,8 +60,8 @@ const MODEL_METADATA: Record<string, ModelCuratedMetadata> = {
     ],
     cacheDiscountPercent: 90,
   },
-  'openai-gpt-image-latest': {
-    roleBadge: 'OpenAI Image Generation',
+  'galx-nova-image': {
+    roleBadge: 'Frontier Visual Generation',
     speedTier: 'Text-to-image generation',
     bestFor: [
       'Commercial advertising & visual assets',
@@ -83,7 +83,7 @@ const openai = new OpenAI({
 });
 
 const response = await openai.chat.completions.create({
-  model: 'gpt-5-6-luna-low',
+  model: 'galx-nova',
   messages: [
     { role: 'system', content: 'You are an expert agentic engineer.' },
     { role: 'user', content: 'Implement an ultra-resilient distributed streaming loop.' },
@@ -104,7 +104,7 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="gpt-5-6-luna-low",
+    model="galx-nova",
     messages=[
         {"role": "system", "content": "You are an expert agentic engineer."},
         {"role": "user", "content": "Implement an ultra-resilient distributed streaming loop."}
@@ -119,7 +119,7 @@ print(response.choices[0].message.content)`,
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer $GALXAI_API_KEY" \\
   -d '{
-    "model": "gpt-5-6-luna-low",
+    "model": "galx-nova",
     "messages": [
       {"role": "user", "content": "Implement an ultra-resilient distributed streaming loop."}
     ]
@@ -326,7 +326,7 @@ console.log(res.choices[0].message.content);`;
       if (activeCategory === 'llm') return m.category === 'llm';
       if (activeCategory === 'image') return m.category === 'image';
       if (activeCategory === 'high_context') return m.contextWindowTokens >= 500000;
-      if (activeCategory === 'low_latency') return m.id.includes('luna');
+      if (activeCategory === 'low_latency') return m.id.includes('nova') || m.id.includes('luna');
       return true;
     });
 
@@ -652,7 +652,7 @@ console.log(res.choices[0].message.content);`;
                     ? FRONTEND_VISIBLE_MODELS.filter((m) => m.category === 'image').length
                     : tab.id === 'high_context'
                     ? FRONTEND_VISIBLE_MODELS.filter((m) => m.contextWindowTokens >= 500000).length
-                    : FRONTEND_VISIBLE_MODELS.filter((m) => m.id.includes('luna')).length;
+                    : FRONTEND_VISIBLE_MODELS.filter((m) => m.id.includes('nova') || m.id.includes('luna')).length;
                 const isSelected = activeCategory === tab.id;
 
                 return (

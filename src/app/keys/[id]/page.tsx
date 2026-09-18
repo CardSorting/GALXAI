@@ -107,7 +107,7 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="gpt-5.6-sol",
+    model="galx-nova",
     messages=[{"role": "user", "content": "Explain algorithmic game theory."}]
 )
 print(response.choices[0].message.content)`,
@@ -119,7 +119,7 @@ const client = new OpenAI({
 });
 
 const response = await client.chat.completions.create({
-  model: 'gpt-5.6-sol',
+  model: 'galx-nova',
   messages: [{ role: 'user', content: 'Write a LRU cache in Rust.' }],
   stream: true
 });`,
@@ -127,11 +127,11 @@ const response = await client.chat.completions.create({
 OPENAI_BASE_URL="https://galx.ai/v1"
 OPENAI_API_KEY="${prefix}..."
 GALXAI_API_KEY="${prefix}..."
-DEFAULT_MODEL="gpt-5.6-sol"`,
+DEFAULT_MODEL="galx-nova"`,
     cursor: `// In Cursor IDE / Windsurf Settings -> Models -> OpenAI API Key:
 // 1. Override OpenAI Base URL: https://galx.ai/v1
 // 2. API Key: ${prefix}...
-// 3. Enable Models: gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna`,
+// 3. Enable Models: galx-nova, galx-nova-image`,
     vercel: `import { createOpenAI } from '@ai-sdk/openai';
 import { generateText } from 'ai';
 
@@ -141,7 +141,7 @@ const galx = createOpenAI({
 });
 
 const { text } = await generateText({
-  model: galx('gpt-5.6-sol'),
+  model: galx('galx-nova'),
   prompt: 'Explain algorithmic game theory.'
 });
 console.log(text);`,
@@ -149,7 +149,7 @@ console.log(text);`,
   -H "Authorization: Bearer ${prefix}..." \\
   -H "Content-Type: application/json" \\
   -d '{
-    "model": "gpt-5.6-sol",
+    "model": "galx-nova",
     "messages": [{"role": "user", "content": "Hello GALXAI!"}]
   }'`
   });

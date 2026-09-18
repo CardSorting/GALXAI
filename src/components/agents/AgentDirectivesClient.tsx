@@ -397,7 +397,7 @@ import 'galxai/patch';
 import OpenAI from 'openai';
 const openai = new OpenAI();
 const completion = await openai.chat.completions.create({
-  model: 'gpt-5.6-sol',
+  model: 'galx-nova',
   messages: [{ role: 'user', content: 'Audit distributed lock implementation' }]
 });`}
               {activeCodeTab === 'rules' && generatedDirectives}

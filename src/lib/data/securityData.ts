@@ -76,7 +76,7 @@ webbrowser.open("https://galx.ai/billing/invoices")`,
 resp = requests.post("https://galx.ai/v1/chat/completions", headers={
     "Authorization": f"Bearer {GALXAI_API_KEY}",
     "Content-Type": "application/json"
-}, json={"model": "gpt-5.6-sol", "messages": [{"role": "user", "content": "Risk assessment"}]})
+}, json={"model": "galx-nova", "messages": [{"role": "user", "content": "Risk assessment"}]})
 
 print("EU Compliance Attestation:", resp.headers.get("x-galxai-eu-act-compliance"))`,
     },
@@ -99,7 +99,7 @@ print("EU Compliance Attestation:", resp.headers.get("x-galxai-eu-act-compliance
     enforcementMechanism: 'FIPS 140-3 Validated Crypto + US Citizen Operator Isolation',
     complianceGuarantees: [
       'FIPS 140-3 Hardware Encryption: All TLS and internal mesh communication encrypted with NIST-approved ciphers',
-      'US Sovereign Anycast Routing: Guaranteed routing exclusively within Continental US (CONUS) data centers',
+      'US Sovereign Edge Routing: Guaranteed routing exclusively within Continental US (CONUS) data centers',
       'Role-Based Granular Key Scoping: Strict NIST 800-53 Access Control (AC) and Least Privilege enforcement',
       'Continuous Threat Monitoring: Real-time automated IDS/IPS inspection and anomalous token flood detection',
     ],
@@ -197,7 +197,7 @@ print("Do Not Sell Policy Status:", resp.json().get("policy_status"))`,
       code: `curl -I https://galx.ai/v1/chat/completions \\
   -H "Authorization: Bearer $GALXAI_API_KEY" \\
   -H "Content-Type: application/json" \\
-  -d '{"model":"gpt-5.6-sol","messages":[{"role":"user","content":"Ping"}]}' | grep -i "x-galx-data-policy"`,
+  -d '{"model":"galx-nova","messages":[{"role":"user","content":"Ping"}]}' | grep -i "x-galx-data-policy"`,
     },
     faqs: [
       {

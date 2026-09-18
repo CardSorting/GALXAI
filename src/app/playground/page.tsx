@@ -9,12 +9,12 @@ import { SITE_CONFIG } from '@/lib/seo/siteConfig';
 
 export const metadata: Metadata = constructMetadata({
   title: 'Model Playground & Gateway Sandbox',
-  description: 'Test OpenAI GPT-5.6 Sol, Terra, and Luna models in the interactive GALXAI developer playground with live streaming telemetry.',
+  description: 'Test GALX Nova and Nova-image models in the interactive GALXAI developer playground with live streaming telemetry.',
   canonicalPath: '/playground',
   keywords: [
     'AI Model Playground',
-    'GPT-5.6 Sandbox',
-    'OpenAI Streaming Test',
+    'GALX Nova Sandbox',
+    'Streaming Inference Test',
     'Prompt Caching Sandbox',
     'API Request Simulator',
   ],

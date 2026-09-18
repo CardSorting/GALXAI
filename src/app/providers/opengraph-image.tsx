@@ -109,12 +109,12 @@ export default async function Image() {
             Unified Frontier AI Provider Portals &amp; Wholesale Channels
           </div>
           <div style={{ fontSize: '20px', color: '#94a3b8', lineHeight: 1.4 }}>
-            Direct access to OpenAI and frontier models with 25%–40% wholesale rate cards, sub-15ms Anycast latency, and automatic failover.
+            Direct access to GALX Nova and frontier intelligence with 25%–40% wholesale rate cards, sub-15ms edge latency, and automatic failover.
           </div>
         </div>
 
         <div style={{ display: 'flex', gap: '16px' }}>
-          {['OpenAI Flagships', '75% Prompt Caching', 'Sub-15ms Anycast', 'Zero Rate-Limit Stalls'].map((t) => (
+          {['GALX Nova Flagship', '75% Prompt Caching', 'Sub-15ms Edge Latency', 'Zero Rate-Limit Stalls'].map((t) => (
             <div
               key={t}
               style={{

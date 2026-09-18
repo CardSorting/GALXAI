@@ -26,7 +26,7 @@ import { FRONTEND_VISIBLE_MODELS } from '@/core/router/PublicModelCatalog';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 
 export function ApiRequestBuilderClient() {
-  const [selectedModelId, setSelectedModelId] = useState<string>('gpt-5.6-sol');
+  const [selectedModelId, setSelectedModelId] = useState<string>('galx-nova');
   const [temperature, setTemperature] = useState<number>(0.7);
   const [maxTokens, setMaxTokens] = useState<number>(2048);
   const [isStreaming, setIsStreaming] = useState<boolean>(true);
@@ -243,7 +243,7 @@ echo $result->choices[0]->message->content;`;
     setTestOutput('');
 
     const modelName = selectedModel ? selectedModel.name : selectedModelId;
-    const estLatency = selectedModel ? (selectedModel.id.includes('luna') ? '8.4ms' : '14.2ms') : '12.0ms';
+    const estLatency = selectedModel ? (selectedModel.id.includes('nova') ? '8.4ms' : '14.2ms') : '12.0ms';
 
     const fullResponse = `[GALX Stream - ${estLatency} TTFT]\n` +
       `Model: ${modelName} (${selectedModelId})\n` +

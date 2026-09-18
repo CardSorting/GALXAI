@@ -207,7 +207,7 @@ export class ChatRepository {
       const supabase = getSupabaseAdmin();
       const mutableValues = {
         title: session.title,
-        model_id: session.modelId || 'gpt-5.6-sol',
+        model_id: session.modelId || 'galx-nova',
         persona_id: session.personaId || null,
         is_pinned: Boolean(session.isPinned),
         is_archived: Boolean(session.isArchived),
@@ -446,7 +446,7 @@ export class ChatRepository {
           const sessions: ChatSession[] = (data.sessions || []).map((s: any) => ({
             id: s.id,
             title: s.title,
-            modelId: s.modelId || 'gpt-5.6-sol',
+            modelId: s.modelId || 'galx-nova',
             personaId: s.personaId || undefined,
             isPinned: Boolean(s.isPinned),
             isArchived: Boolean(s.isArchived),
@@ -559,7 +559,7 @@ export class ChatRepository {
           const sessions: ChatSession[] = (data.sessions || []).map((s: any) => ({
             id: s.id,
             title: s.title,
-            modelId: s.modelId || 'gpt-5.6-sol',
+            modelId: s.modelId || 'galx-nova',
             personaId: s.personaId || undefined,
             isPinned: Boolean(s.isPinned),
             isArchived: Boolean(s.isArchived),
@@ -747,7 +747,7 @@ export class ChatRepository {
       title: row.title,
       createdAt: new Date(row.created_at).getTime(),
       updatedAt: new Date(row.updated_at).getTime(),
-      modelId: row.model_id || 'gpt-5.6-sol',
+      modelId: row.model_id || 'galx-nova',
       personaId: row.persona_id || undefined,
       isPinned: Boolean(row.is_pinned),
       isArchived: Boolean(row.is_archived),
