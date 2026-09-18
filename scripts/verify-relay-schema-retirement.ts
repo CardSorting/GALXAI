@@ -17,6 +17,11 @@ const relayTables = [
   'galx_relay_management_operations',
   'galx_relay_lease_bindings',
 ] as const;
+const purgedShardIds = [
+  'codex_sh_238671c215e5f3b13898cd7b',
+  'codex_sh_47da301f8280a763f659ebc8',
+  'codex_sh_834707761bf76510dd70d6a7',
+] as const;
 
 async function run() {
   await client.connect();
@@ -48,6 +53,16 @@ async function run() {
     );
     if (accounts.rows[0]?.count !== '0') {
       throw new Error('Public shard accounts still reference the Standard relay pool');
+    }
+
+    const purged = await client.query<{ count: string }>(
+      `SELECT count(*)::text AS count
+         FROM public.galx_shard_accounts
+        WHERE id = ANY($1::text[])`,
+      [purgedShardIds],
+    );
+    if (purged.rows[0]?.count !== '0') {
+      throw new Error('Retired Standard-origin shard accounts still exist');
     }
 
     const constraints = await client.query<{ name: string; definition: string }>(
