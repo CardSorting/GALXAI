@@ -504,7 +504,7 @@ async function runTests() {
         'content-type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'gpt-5.6-sol',
+        model: 'galx-nova',
         messages: [{ role: 'user', content: 'Explain zero-egress edge routing' }],
         stream: true
       })
