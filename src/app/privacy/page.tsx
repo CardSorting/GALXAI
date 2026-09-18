@@ -32,7 +32,7 @@ export default function PrivacyPolicyPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#07080d] text-zinc-100 flex flex-col font-sans selection:bg-cyan-500/30">
+    <div className="min-h-screen bg-[#07080d] text-white flex flex-col font-sans selection:bg-cyan-500/30 selection:text-white">
       <JsonLd
         data={createBreadcrumbSchema([
           { name: 'Home', url: SITE_CONFIG.url },
@@ -91,7 +91,7 @@ export default function PrivacyPolicyPage() {
             </div>
             <h2 className="font-bold text-white text-base">End-to-End TLS 1.3 Encryption</h2>
             <p className="text-xs text-zinc-400 leading-relaxed">
-              All traffic between your client, our Anycast edge proxy, and upstream model providers is encrypted using modern TLS 1.3 with Perfect Forward Secrecy (PFS).
+              Connections to GALX are encrypted in transit using modern TLS protections with Perfect Forward Secrecy (PFS).
             </p>
           </div>
 
@@ -127,10 +127,10 @@ export default function PrivacyPolicyPage() {
               <span className="text-emerald-400 font-mono text-base">2.</span> Zero Data Retention (ZDR) Execution
             </h2>
             <p>
-              When a request is submitted to <code>https://galx.ai/v1/chat/completions</code>, our Anycast proxy verifies your API key hash, meters available credit, and proxies the payload directly to the upstream model provider via an encrypted pipe. 
+              When a request is submitted to <code>https://galx.ai/v1/chat/completions</code>, GALX applies account access and usage controls before processing the request.
             </p>
             <p>
-              At no point in the pipeline are prompt text strings, document uploads, or generated responses written to disk, persistent databases, or non-volatile storage.
+              Data handling follows the retention and access settings documented for your account and plan. Review those settings before sending regulated or sensitive material.
             </p>
           </section>
 

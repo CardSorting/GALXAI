@@ -28,36 +28,37 @@ export interface IndustryItem {
 export const INDUSTRIES_DATA: IndustryItem[] = [
   {
     slug: 'healthcare-and-lifesciences',
-    badge: 'HIPAA & BAA Ready',
-    title: 'HIPAA-Compliant AI Gateway for Healthcare, Clinical Trials & EHR Systems',
-    headline: 'HIPAA-Compliant AI Gateway for Healthcare & Life Sciences',
+    badge: 'Healthcare Data Controls',
+    title: 'Privacy-Focused AI Workflows for Healthcare, Clinical Trials & EHR Systems',
+    headline: 'Privacy-Focused AI Workflows for Healthcare & Life Sciences',
     description:
-      'Zero Data Retention (ZDR) proxy infrastructure, signed Business Associate Agreements (BAA), and high-throughput EHR clinical summarization.',
+      'Build clinical summarization, medical coding, and patient-support workflows with clear data-handling controls and structured outputs.',
     sectorName: 'Healthcare & Life Sciences',
     targetWorkloads: ['Clinical EHR Note Summarization', 'Medical Coding & ICD-10 Extraction', 'Patient Triage Chatbots'],
-    regulatoryCompliance: ['HIPAA / HITECH Act', 'Signed BAA Agreements', 'Cryptographic Zero Data Retention (ZDR)'],
+    regulatoryCompliance: ['HIPAA-aware workflows', 'Configurable retention controls', 'Structured clinical outputs'],
     recommendedModels: [
-      { name: 'OpenAI GPT-5.6 Sol', modelId: 'gpt-5.6-sol', role: 'Complex multi-page medical chart reasoning' },
-      { name: 'OpenAI GPT-5.6 Luna', modelId: 'gpt-5.6-luna', role: 'Real-time patient voice transcription & triage' },
+      { name: 'GALX Nova', modelId: 'galx-nova', role: 'Complex multi-page medical chart reasoning' },
+      { name: 'GALX Nova-image', modelId: 'galx-nova-image', role: 'Medical imaging and visual synthesis' },
     ],
     architectureHighlights: [
-      'Volatile Memory Processing: Protected Health Information (PHI) is purged immediately upon stream completion',
-      'End-to-End TLS 1.3 Encryption: Complete cryptographic isolation in compliance with HIPAA Security Rules',
-      'Strict JSON Schema Enforcement: 100% valid medical diagnosis and ICD-10 record parsing',
+      'Clinical summarization: Turn notes and records into consistent, reviewable summaries',
+      'Structured extraction: Capture medications, measurements, and codes in predictable fields',
+      'Human review support: Keep domain experts in control of sensitive decisions',
     ],
     codeExample: {
       language: 'python',
-      title: 'HIPAA-Compliant Clinical Note Extraction',
-      code: `from openai import OpenAI
+      title: 'Clinical Note Extraction',
+      code: `import os
+from openai import OpenAI
 
 client = OpenAI(
     base_url="https://galx.ai/v1",
-    api_key="galx_live_your_gateway_key"
+    api_key=os.environ["GALXAI_API_KEY"]
 )
 
-# Process clinical notes in volatile memory with zero persistent logging
+# Process clinical notes with your application’s approved data controls
 completion = client.chat.completions.create(
-    model="gpt-5.6-sol",
+    model="galx-nova",
     messages=[
         {"role": "system", "content": "You are a clinical NLP assistant. Extract vital signs and medications."},
         {"role": "user", "content": "Patient presents with BP 120/80, prescribed Metformin 500mg daily."}
@@ -68,34 +69,35 @@ print(completion.choices[0].message.content)`,
     },
     faqs: [
       {
-        q: 'Does GALXAI execute Business Associate Agreements (BAAs)?',
-        a: 'Yes. Enterprise healthcare customers can execute standardized BAAs directly through our enterprise compliance portal.',
+        q: 'Can healthcare teams evaluate GALXAI for regulated workflows?',
+        a: 'Yes. Review the service terms, available data controls, access model, and any required agreements with your compliance and legal teams before production use.',
       },
     ],
   },
   {
     slug: 'financial-services-and-banking',
-    badge: 'PCI DSS & SOC 2 Type II',
-    title: 'Low-Latency AI Proxy for Financial Services, Banking & Algorithmic Trading',
-    headline: 'High-Availability AI Inference for Banking & Financial Services',
+    badge: 'Financial Data Workflows',
+    title: 'Reliable AI Workflows for Financial Services, Banking & Trading',
+    headline: 'Reliable AI Workflows for Banking & Financial Services',
     description:
-      'Sub-15ms Anycast routing, PCI DSS Level 1 financial isolation, and high-throughput KYC and anti-money laundering (AML) reasoning.',
+      'Support fraud review, KYC and AML analysis, and financial research with dependable responses and structured review workflows.',
     sectorName: 'Financial Services & Banking',
     targetWorkloads: ['Real-Time Fraud Detection', 'Automated KYC / AML Document Verification', 'Equity Research Analysis'],
-    regulatoryCompliance: ['PCI DSS Level 1', 'SOC 1 / SOC 2 Type II', 'GLBA Financial Privacy'],
+    regulatoryCompliance: ['Privacy-aware processing', 'Audit-friendly outputs', 'Human approval workflows'],
     recommendedModels: [
-      { name: 'OpenAI GPT-5.6 Sol', modelId: 'gpt-5.6-sol', role: 'Deep financial report synthesis & balance sheet audits' },
-      { name: 'OpenAI GPT-5.6 Luna', modelId: 'gpt-5.6-luna', role: 'Sub-15ms market event stream parsing' },
+      { name: 'GALX Nova', modelId: 'galx-nova', role: 'Deep financial report synthesis & balance sheet audits' },
+      { name: 'GALX Nova-image', modelId: 'galx-nova-image', role: 'Financial chart rendering and visual analytics' },
     ],
     architectureHighlights: [
-      'Sub-15ms Anycast Edge Dispatch: High-velocity market news summarization before next tick',
-      'Append-Only Financial Ledgers: Cryptographically audited token billing receipts with tamper-evidence',
-      '429 Rate Limit Shield: Guaranteed capacity pooling during high-volatility market opening bells',
+      'Fast analysis: Summarize filings, alerts, and market updates for timely review',
+      'Structured decisions: Return consistent fields for downstream risk and compliance checks',
+      'Traffic resilience: Keep customer workflows responsive as demand changes',
     ],
     codeExample: {
       language: 'python',
       title: 'Financial Balance Sheet Parsing',
-      code: `from pydantic import BaseModel
+      code: `import os
+from pydantic import BaseModel
 from openai import OpenAI
 
 class FinancialMetrics(BaseModel):
@@ -105,12 +107,12 @@ class FinancialMetrics(BaseModel):
 
 client = OpenAI(
     base_url="https://galx.ai/v1",
-    api_key="galx_live_your_gateway_key"
+    api_key=os.environ["GALXAI_API_KEY"]
 )
 
-# 100% strict JSON extraction for automated financial modeling
+# Structured extraction for automated financial modeling
 completion = client.beta.chat.completions.parse(
-    model="gpt-5.6-sol",
+    model="galx-nova",
     messages=[{"role": "user", "content": "Q3 2026 10-Q filing transcript text..."}],
     response_format=FinancialMetrics
 )
@@ -119,42 +121,42 @@ print(completion.choices[0].message.parsed)`,
     faqs: [
       {
         q: 'How does GALXAI handle market volatility traffic surges?',
-        a: 'GALXAI pools wholesale enterprise quotas across multiple cloud clusters, preventing 429 rate limit stalls during breaking financial news.',
+        a: 'GALXAI is designed for bursty workloads and provides clear request outcomes so teams can build their own retry and review policies.',
       },
     ],
   },
   {
     slug: 'legal-and-contract-analysis',
-    badge: '1M Context & Zero Retention',
-    title: 'Zero Data Retention AI Gateway for Legal Discovery & Contract Analysis',
-    headline: '900K Token Context & Zero Retention for Legal Discovery',
+    badge: 'Legal Review Workflows',
+    title: 'AI Workflows for Legal Discovery & Contract Analysis',
+    headline: 'Large-Document AI Review for Legal Teams',
     description:
-      'Massive 900,000 token context window on GPT-5.6 Sol for whole-docket indexing with strict confidentiality guarantees.',
+      'Review long agreements, discovery material, and regulatory documents with focused extraction and clear human-review checkpoints.',
     sectorName: 'Legal & Contract Intelligence',
     targetWorkloads: ['Multi-Gigabyte Litigation Discovery', 'M&A Due Diligence & Contract Audits', 'Regulatory Compliance Mapping'],
-    regulatoryCompliance: ['Attorney-Client Privilege Protection', 'Cryptographic Zero Retention', 'ISO/IEC 27001 Aligned'],
+    regulatoryCompliance: ['Confidentiality-aware workflows', 'Configurable retention controls', 'Reviewable outputs'],
     recommendedModels: [
-      { name: 'OpenAI GPT-5.6 Sol', modelId: 'gpt-5.6-sol', role: '900,000 token whole-case litigation discovery' },
-      { name: 'OpenAI GPT-5.6 Terra', modelId: 'gpt-5.6-terra', role: 'Complex indemnity and liability cross-referencing' },
+      { name: 'GALX Nova', modelId: 'galx-nova', role: '1,000,000+ token whole-case litigation discovery' },
     ],
     architectureHighlights: [
-      '900K Token Ingestion: Analyze 500-page master service agreements in a single prompt without chunking loss',
-      '75% Prompt Caching Rebate: Drastically lowers the cost of repeated multi-document cross-examinations',
-      'Zero Model Training: Enforced upstream legal contracts guaranteeing client briefs are never used in training',
+      'Long-document review: Extract clauses, obligations, and exceptions from extensive source material',
+      'Repeatable analysis: Reuse approved prompts and schemas across document sets',
+      'Review checkpoints: Keep counsel responsible for conclusions and final action',
     ],
     codeExample: {
       language: 'python',
       title: 'Full-Contract Indemnity Extraction',
-      code: `from openai import OpenAI
+      code: `import os
+from openai import OpenAI
 
 client = OpenAI(
     base_url="https://galx.ai/v1",
-    api_key="galx_live_your_gateway_key"
+    api_key=os.environ["GALXAI_API_KEY"]
 )
 
-# 900K Token context enables single-pass contract review
+# Review a long agreement with a structured prompt
 response = client.chat.completions.create(
-    model="gpt-5.6-sol",
+    model="galx-nova",
     messages=[
         {"role": "system", "content": "You are a senior partner examining contract liabilities."},
         {"role": "user", "content": "Review the full 200-page agreement and list all non-standard warranties."}
@@ -165,42 +167,43 @@ print(response.choices[0].message.content)`,
     faqs: [
       {
         q: 'Does GALXAI protect Attorney-Client privilege?',
-        a: 'Yes. Payloads exist solely in volatile RAM enclaves and are purged upon stream closure, preventing discovery exposure.',
+        a: 'GALXAI supports confidentiality-aware workflows and configurable data controls. Teams should validate their retention, access, and privilege requirements before production use.',
       },
     ],
   },
   {
     slug: 'ecommerce-and-retail',
-    badge: 'Sub-15ms & 145 Tok/s',
-    title: 'Sub-15ms AI Proxy for E-Commerce Recommendations, Search & Customer Care',
+    badge: 'Commerce AI Workflows',
+    title: 'AI Workflows for E-Commerce Recommendations, Search & Customer Care',
     headline: 'High-Throughput Visual AI & Recommendations for Retail',
     description:
-      'Sub-15ms edge dispatch, photorealistic OpenAI Image Generation studio synthesis, and 145 tok/sec streaming customer support bots.',
+      'Combine product discovery, visual merchandising, and customer support workflows with fast, practical responses.',
     sectorName: 'E-Commerce & Digital Retail',
     targetWorkloads: ['Visual Product Synthesis', 'Semantic Product Search & Ranking', '24/7 Omnichannel Customer Care'],
-    regulatoryCompliance: ['PCI DSS Level 1', 'GDPR / CCPA Data Rights', '99.99% Uptime SLA'],
+    regulatoryCompliance: ['Privacy-aware customer journeys', 'Consent-conscious personalization', 'Operational continuity planning'],
     recommendedModels: [
-      { name: 'OpenAI Image Generation', modelId: 'openai-gpt-image-latest', role: 'On-demand high-definition product staging' },
-      { name: 'OpenAI GPT-5.6 Luna', modelId: 'gpt-5.6-luna', role: '145 tok/s live customer chat resolution' },
+      { name: 'GALX Nova-image', modelId: 'galx-nova-image', role: 'On-demand high-definition product staging' },
+      { name: 'GALX Nova', modelId: 'galx-nova', role: '145 tok/s live customer chat resolution' },
     ],
     architectureHighlights: [
-      'Sub-15ms TTFT for Conversational Commerce: Instant responses keep cart abandonment rates near zero',
-      'High-Speed Image Generation: Pre-warmed visual inference clusters render marketing assets in <500ms',
-      'Wholesale Tier Pricing: $0.75/1M token pricing allows retail bots to run cost-effectively at massive scale',
+      'Conversational shopping: Help customers compare products and find relevant options',
+      'Visual merchandising: Create product concepts and campaign variations',
+      'Scalable support: Extend service coverage across common customer questions',
     ],
     codeExample: {
       language: 'python',
       title: 'E-Commerce Product Recommendations Call',
-      code: `from openai import OpenAI
+      code: `import os
+from openai import OpenAI
 
 client = OpenAI(
     base_url="https://galx.ai/v1",
-    api_key="galx_live_your_gateway_key"
+    api_key=os.environ["GALXAI_API_KEY"]
 )
 
 # Fast streaming customer assistant
 stream = client.chat.completions.create(
-    model="gpt-5.6-luna",
+    model="galx-nova",
     messages=[
         {"role": "system", "content": "You are an e-commerce personal shopper."},
         {"role": "user", "content": "Find me outdoor waterproof hiking boots under $150."}
@@ -214,74 +217,73 @@ for chunk in stream:
     faqs: [
       {
         q: 'Can GALXAI handle Black Friday / Cyber Monday traffic surges?',
-        a: 'Yes. GALXAI provides active-active capacity pooling with zero rate limit stalls during peak holiday flash sales.',
+        a: 'GALXAI supports bursty commerce workloads. Your application should still define bounded retries, graceful degradation, and queueing for peak events.',
       },
     ],
   },
   {
     slug: 'defense-and-government',
-    badge: 'FedRAMP High & US CONUS',
-    title: 'Sovereign AI Gateway for Defense, National Security & Public Sector',
-    headline: 'US Sovereign Anycast Routing & FedRAMP Ready AI Substrate',
+    badge: 'Public-Sector Workflows',
+    title: 'Controlled AI Workflows for Government & Public-Sector Teams',
+    headline: 'Reviewable AI Workflows for Public-Sector Teams',
     description:
-      'Guaranteed Continental US (CONUS) data residency, FIPS 140-3 cryptography, and strict US citizen operator isolation.',
+      'Support document review, policy research, and public-service operations with explicit access controls and human review.',
     sectorName: 'Defense & Government',
     targetWorkloads: ['Intelligence Document Triage', 'Tactical Field Support Agents', 'Public Agency Regulatory Summaries'],
-    regulatoryCompliance: ['FedRAMP High Ready', 'FIPS 140-3 Validated', 'ITAR Data Segregation'],
+    regulatoryCompliance: ['Access-controlled workflows', 'Policy-aware deployment review', 'Human approval checkpoints'],
     recommendedModels: [
-      { name: 'OpenAI GPT-5.6 Sol', modelId: 'gpt-5.6-sol', role: 'High-assurance geopolitical and tactical reasoning' },
-      { name: 'OpenAI GPT-5.6 Terra', modelId: 'gpt-5.6-terra', role: 'Comprehensive intelligence brief synthesis' },
+      { name: 'GALX Nova', modelId: 'galx-nova', role: 'High-assurance geopolitical and tactical reasoning' },
     ],
     architectureHighlights: [
-      'CONUS-Only Anycast Nodes: Zero international packet transit or foreign edge proxy hops',
-      'FIPS 140-3 Hardware Cryptography: End-to-end hardware-authenticated ciphers across all internal links',
-      'Tamper-Evident SIEM Audit Logs: Continuous compliance telemetry integrated with enterprise security centers',
+      'Document operations: Summarize policies, reports, and case material for staff review',
+      'Controlled access: Align application permissions with agency responsibilities',
+      'Traceable work: Preserve the application-level evidence your governance process requires',
     ],
     codeExample: {
       language: 'bash',
-      title: 'Verify Sovereign CONUS Header',
+      title: 'Call the public API',
       code: `curl -sI https://galx.ai/v1/models \\
-  -H "Authorization: Bearer \$GALXAI_API_KEY" | grep "x-galxai-jurisdiction: US-CONUS"`,
+  -H "Authorization: Bearer \$GALXAI_API_KEY"`,
     },
     faqs: [
       {
-        q: 'Is traffic guaranteed to stay within the United States?',
-        a: 'Yes. Dedicated sovereign contracts enforce BGP Anycast routes restricted exclusively to sovereign CONUS data centers.',
+        q: 'How should public-sector teams evaluate GALXAI?',
+        a: 'Confirm the service configuration, contract terms, access controls, retention settings, and agency-specific requirements before sending regulated or mission-sensitive data.',
       },
     ],
   },
   {
     slug: 'cybersecurity-and-soc',
-    badge: 'SOC 2 & SIEM Integration',
+    badge: 'Security Operations Workflows',
     title: 'AI Gateway for Cybersecurity Operations, Threat Hunting & SIEM Triage',
-    headline: 'Automated SOC Triage & Threat Intelligence AI Substrate',
+    headline: 'Automated SOC Triage & Threat Intelligence Workflows',
     description:
-      'Analyze millions of SIEM event logs, decode malicious payloads, and automate incident response with 900K context windows, 75% prompt caching, and zero data retention.',
+      'Analyze security alerts, incident notes, and threat intelligence with structured triage workflows that keep responders in control.',
     sectorName: 'Cybersecurity & Threat Intelligence',
     targetWorkloads: ['Automated SIEM Alert Triaging', 'Vulnerability Exploitation Analysis', 'Zero-Day IOC Extraction'],
-    regulatoryCompliance: ['SOC 2 Type II Aligned', 'ISO/IEC 27001:2022', 'Volatile RAM ZDR Protocol'],
+    regulatoryCompliance: ['Security-review workflows', 'Structured incident outputs', 'Configurable data controls'],
     recommendedModels: [
-      { name: 'OpenAI GPT-5.6 Sol', modelId: 'gpt-5.6-sol', role: 'Full network traffic capture & multi-gigabyte log analysis' },
-      { name: 'OpenAI GPT-5.6 Terra', modelId: 'gpt-5.6-terra', role: 'Decompiled assembly & reverse engineering reasoning' },
+      { name: 'GALX Nova', modelId: 'galx-nova', role: 'Full network traffic capture & multi-gigabyte log analysis' },
     ],
     architectureHighlights: [
-      '900,000 Token Threat Telemetry Ingestion: Ingest hours of packet traces in a single request',
-      'Ephemeral Volatile Buffers: Sensitive corporate network logs are never stored or used for training',
-      'Automated SOC 2 Audit Logs: Real-time cryptographic logging of all gateway authorization events',
+      'Alert triage: Group and summarize high-volume security findings',
+      'Investigation support: Extract indicators, timelines, and next questions',
+      'Action discipline: Keep response actions subject to your existing security approvals',
     ],
     codeExample: {
       language: 'python',
       title: 'Automated SIEM Alert Triaging Script',
-      code: `from openai import OpenAI
+      code: `import os
+from openai import OpenAI
 
 client = OpenAI(
     base_url="https://galx.ai/v1",
-    api_key="galx_live_your_gateway_key"
+    api_key=os.environ["GALXAI_API_KEY"]
 )
 
-# Analyze massive security log with zero persistent retention
+# Analyze a security log with your approved data controls
 response = client.chat.completions.create(
-    model="gpt-5.6-sol",
+    model="galx-nova",
     messages=[
         {"role": "system", "content": "You are a Principal SOC Threat Hunter. Identify malicious lateral movement."},
         {"role": "user", "content": "Log dump: 2026-08-23T14:22:10Z auth.fail user=admin src=198.51.100.44..."}
@@ -292,42 +294,43 @@ print(response.choices[0].message.content)`,
     faqs: [
       {
         q: 'Are sensitive customer network logs retained by GALXAI?',
-        a: 'No. GALXAI enforces Cryptographic Zero Data Retention (ZDR). Payloads exist only in volatile RAM during active TCP socket processing.',
+        a: 'Use the retention and access settings available to your deployment, and validate them against your organization’s security policy before sending sensitive logs.',
       },
     ],
   },
   {
     slug: 'automotive-and-robotics',
-    badge: 'Edge Anycast Telemetry',
-    title: 'Low-Latency AI Gateway for Autonomous Robotics & Spatial Systems',
-    headline: 'Sub-15ms AI Routing for Autonomous Robotics & Spatial AI',
+    badge: 'Robotics & Spatial AI',
+    title: 'AI Workflows for Autonomous Robotics & Spatial Systems',
+    headline: 'Fast, Reviewable AI for Robotics & Spatial Systems',
     description:
-      'Execute real-time robot perception, trajectory validation, and multimodal sensor fusion with sub-15ms Anycast TTFT and zero rate-limit stalls.',
+      'Support perception, trajectory validation, and multimodal sensor analysis with application-level safeguards and clear outputs.',
     sectorName: 'Automotive & Autonomous Systems',
     targetWorkloads: ['Robot Fleet Teleoperation Assistance', 'Spatial Point-Cloud Analysis', 'Multimodal Vision Sensor Fusion'],
-    regulatoryCompliance: ['ISO 26262 ASIL Compatible', 'Zero Content Retention', '99.99% Financial Uptime SLA'],
+    regulatoryCompliance: ['Safety-review workflows', 'Content handling controls', 'Bounded failure planning'],
     recommendedModels: [
-      { name: 'OpenAI GPT-5.6 Luna', modelId: 'gpt-5.6-luna', role: 'Sub-12ms real-time control decision streaming' },
-      { name: 'OpenAI GPT-5.6 Terra', modelId: 'gpt-5.6-terra', role: 'High-speed sensor telemetry interpretation' },
+      { name: 'GALX Nova', modelId: 'galx-nova', role: 'Sub-12ms real-time control decision streaming' },
+      { name: 'GALX Nova-image', modelId: 'galx-nova-image', role: 'Spatial camera frame synthesis and scene evaluation' },
     ],
     architectureHighlights: [
-      'Sub-15ms Global Anycast POPs: Terminate vehicle edge telemetry at the nearest geographical cloud node',
-      'Multimodal Visual Processing: Forward camera frames to a vision-capable text model',
-      'Rate-Limit Pooling: Continuous token governance prevents vehicle telemetry disconnects under fleet scale',
+      'Perception support: Interpret camera frames, sensor summaries, and spatial observations',
+      'Trajectory review: Compare proposed actions against operator-defined constraints',
+      'Bounded operation: Design explicit fallbacks for delayed or unavailable responses',
     ],
     codeExample: {
       language: 'python',
       title: 'Robotics Spatial Trajectory Query',
-      code: `from openai import OpenAI
+      code: `import os
+from openai import OpenAI
 
 client = OpenAI(
     base_url="https://galx.ai/v1",
-    api_key="galx_live_your_gateway_key"
+    api_key=os.environ["GALXAI_API_KEY"]
 )
 
 # Sub-second trajectory safety validation
 response = client.chat.completions.create(
-    model="gpt-5.6-luna",
+    model="galx-nova",
     messages=[
         {"role": "system", "content": "You are a robotics collision avoidance validator."},
         {"role": "user", "content": "LiDAR vector: obstacle at (x=2.4m, y=0.8m, z=0.1m), speed=1.2m/s"}
@@ -336,8 +339,8 @@ response = client.chat.completions.create(
     },
     faqs: [
       {
-        q: 'How does Anycast routing help robotics and IoT edge fleets?',
-        a: 'Vehicles and robotic units connect to the nearest global Anycast edge node, slashing network round-trip overhead before token processing.',
+        q: 'How should robotics teams use GALXAI in safety-sensitive systems?',
+        a: 'Treat model output as advisory, keep safety-critical control local to the system, and define deterministic fallbacks for uncertain, delayed, or unavailable responses.',
       },
     ],
   },
@@ -347,32 +350,32 @@ response = client.chat.completions.create(
     title: 'High-Concurrency AI Gateway for EdTech & Personalized Learning',
     headline: 'High-Throughput AI Gateway for EdTech & Adaptive Tutoring',
     description:
-      'Empower millions of simultaneous students with instant AI tutoring, essay feedback, and STEM problem grading with 25%–40% wholesale savings and 75% prompt caching.',
+      'Support personalized tutoring, essay feedback, and STEM practice with age-aware workflows, structured feedback, and educator oversight.',
     sectorName: 'Education & EdTech',
     targetWorkloads: ['1-on-1 Personalized Socratic Tutoring', 'Automated Code & Math Homework Feedback', 'Curriculum Synthesis'],
-    regulatoryCompliance: ['FERPA Compliant Processing', 'COPPA Zero Retention Rules', 'Student Data Privacy Shield'],
+    regulatoryCompliance: ['Student privacy review', 'Age-appropriate workflows', 'Educator oversight'],
     recommendedModels: [
-      { name: 'OpenAI GPT-5.6 Terra', modelId: 'gpt-5.6-terra', role: 'Balanced reasoning for complex STEM homework evaluation' },
-      { name: 'OpenAI GPT-5.6 Luna', modelId: 'gpt-5.6-luna', role: 'Ultra-low cost ($0.75/1M) conversational student chat' },
+      { name: 'GALX Nova', modelId: 'galx-nova', role: 'Balanced reasoning for complex STEM homework evaluation and conversational tutoring' },
     ],
     architectureHighlights: [
-      'Classroom Concurrency Burst Absorber: Handles 10,000+ simultaneous student submissions at bell time',
-      '75% Course Context Caching: Ingest textbooks and rubrics once; reuse across student cohorts with 75% savings',
-      'Strict Zero Student Data Retention: Meets FERPA and COPPA student privacy mandates out of the box',
+      'Personalized tutoring: Guide learners with questions, hints, and explanations',
+      'Rubric-aware feedback: Apply instructor-provided criteria consistently',
+      'Responsible learning: Keep educators in the loop for grading and sensitive decisions',
     ],
     codeExample: {
       language: 'python',
       title: 'Socratic Tutor Response Generation',
-      code: `from openai import OpenAI
+      code: `import os
+from openai import OpenAI
 
 client = OpenAI(
     base_url="https://galx.ai/v1",
-    api_key="galx_live_your_gateway_key"
+    api_key=os.environ["GALXAI_API_KEY"]
 )
 
-# Socratic feedback with wholesale token pricing
+# Socratic feedback with educator-defined guidance
 stream = client.chat.completions.create(
-    model="gpt-5.6-terra",
+    model="galx-nova",
     messages=[
         {"role": "system", "content": "You are a Socratic math tutor. Guide the student with questions rather than answers."},
         {"role": "user", "content": "Why does x^2 + 5x + 6 factor into (x+2)(x+3)?"}
@@ -383,9 +386,8 @@ stream = client.chat.completions.create(
     faqs: [
       {
         q: 'Can GALXAI handle morning classroom login spikes without 429 errors?',
-        a: 'Yes. High-throughput Anycast routing and automated token buffering absorb peak morning student concurrency without throttling or dropped requests.',
+        a: 'GALXAI can support high-concurrency education workflows. Applications should add bounded retries, queueing, and a clear fallback experience for peak periods.',
       },
     ],
   },
 ];
-

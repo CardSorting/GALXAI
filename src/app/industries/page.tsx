@@ -9,26 +9,26 @@ import { Navigation } from '@/components/dashboard/Navigation';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 
 export const metadata: Metadata = constructMetadata({
-  title: 'Vertical Industry AI Gateways & Compliance Blueprints',
+  title: 'Vertical Industry AI Workflows',
   description:
-    'Tailored enterprise AI gateway architectures and compliance blueprints for Healthcare, FinTech, Legal, Cybersecurity, E-Commerce, and DevOps industries on GALXAI.',
+    'Tailored enterprise AI workflow guidance for Healthcare, FinTech, Legal, Cybersecurity, E-Commerce, and public-sector teams on GALXAI.',
   canonicalPath: '/industries',
   keywords: [
-    'Vertical AI Gateways',
-    'Healthcare AI Compliance',
-    'FinTech LLM Gateway',
-    'Legal AI Discovery API',
-    'HIPAA AI Routing',
-    'PCI DSS Token Router',
+    'Vertical AI Workflows',
+    'Healthcare AI Workflows',
+    'Financial AI Workflows',
+    'Legal AI Review',
+    'Security Operations AI',
+    'Public-Sector AI',
   ],
 });
 
 export default function IndustriesHubPage() {
   const hubSchema = createTopicHubGraph({
     canonicalPath: '/industries',
-    title: 'GALXAI Vertical Industry AI Gateways & Compliance Blueprints',
+    title: 'GALXAI Vertical Industry AI Workflows',
     description:
-      'Enterprise industry gateways with sector-specific compliance standards, SLA thresholds, and reference architectures.',
+      'Enterprise AI workflows with sector-specific considerations, operating practices, and integration examples.',
     breadcrumbs: [
       { name: 'Home', url: '/' },
       { name: 'Industries', url: '/industries' },
@@ -41,7 +41,7 @@ export default function IndustriesHubPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[#07080d] text-zinc-100 flex flex-col font-sans selection:bg-cyan-500/30">
+    <div className="min-h-screen bg-[#07080d] text-white flex flex-col font-sans selection:bg-cyan-500/30 selection:text-white">
       <JsonLd data={hubSchema} />
       <Navigation />
 
@@ -52,13 +52,13 @@ export default function IndustriesHubPage() {
         <header className="text-center max-w-3xl mx-auto space-y-4 mb-16">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-mono font-bold tracking-wide">
             <Building2 className="w-4 h-4 text-amber-400" />
-            <span>VERTICAL ENTERPRISE ARCHITECTURES</span>
+            <span>VERTICAL ENTERPRISE WORKFLOWS</span>
           </div>
           <h1 className="text-4xl sm:text-5xl font-black text-white tracking-tight">
-            Industry <span className="bg-gradient-to-r from-amber-400 via-orange-400 to-yellow-400 bg-clip-text text-transparent">AI Gateways</span>
+            Industry <span className="text-amber-300">AI Workflows</span>
           </h1>
           <p className="text-base sm:text-lg text-zinc-400 leading-relaxed">
-            Sector-specific AI routing architectures, regulatory compliance baselines, and prompt caching patterns tailored for mission-critical enterprise workloads.
+            Sector-specific AI workflow guidance, review practices, and integration examples tailored for enterprise workloads.
           </p>
         </header>
 

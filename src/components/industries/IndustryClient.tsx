@@ -85,7 +85,7 @@ export function IndustryClient({ industry }: IndustryClientProps) {
 
           {/* Compliance & Workloads Tags */}
           <div className="flex flex-wrap items-center gap-2 pt-2">
-            <span className="text-xs font-mono text-zinc-400">Security &amp; Compliance Standards:</span>
+            <span className="text-xs font-mono text-zinc-400">Security &amp; Compliance Considerations:</span>
             {industry.regulatoryCompliance.map((rc, idx) => (
               <span key={idx} className="px-2.5 py-0.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-[11px] font-mono font-bold">
                 {rc}
@@ -101,7 +101,7 @@ export function IndustryClient({ industry }: IndustryClientProps) {
           <div className="space-y-1 border-b border-white/10 pb-3">
             <h2 className="text-base font-bold text-white font-mono flex items-center gap-2">
               <Cpu className="w-4 h-4 text-cyan-400" />
-              <span>Recommended Model Fleet for {industry.sectorName}</span>
+              <span>Recommended Models for {industry.sectorName}</span>
             </h2>
             <p className="text-xs text-zinc-400">Optimal intelligence and speed configurations for this industry.</p>
           </div>
@@ -124,7 +124,7 @@ export function IndustryClient({ industry }: IndustryClientProps) {
           <div className="space-y-1 border-b border-white/10 pb-3">
             <h2 className="text-base font-bold text-white font-mono flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-              <span>Architectural Capabilities &amp; Safeguards</span>
+              <span>Customer-Facing Capabilities &amp; Safeguards</span>
             </h2>
             <p className="text-xs text-zinc-400">Enterprise features tailored for {industry.sectorName} pipelines.</p>
           </div>
@@ -172,7 +172,7 @@ export function IndustryClient({ industry }: IndustryClientProps) {
               <HelpCircle className="w-4 h-4 text-amber-400" />
               <span>Frequently Asked Questions ({industry.badge})</span>
             </h2>
-            <p className="text-xs text-zinc-400">Security requirements, SLAs, and enterprise integration options.</p>
+            <p className="text-xs text-zinc-400">Security considerations, operating practices, and integration options.</p>
           </div>
 
           <div className="space-y-3 pt-2">

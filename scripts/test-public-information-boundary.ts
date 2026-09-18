@@ -55,3 +55,13 @@ test('published documentation does not include operational implementation vocabu
     'public/llms.txt', 'public/llms-full.txt', 'public/agents.txt', 'src/lib/data/capabilitiesData.ts', 'src/lib/data/glossaryData.ts', 'src/lib/data/errorsData.ts'];
   for (const path of paths) assert.doesNotMatch(await readFile(path, 'utf8'), /codex|shard|relay|checkpoint|topolog|upstream|P-AHT|VM_RELAY_URL|GALX_VAULT_|deploymentId/i, path);
 });
+
+test('industry pages expose capabilities without internal topology or unverified infrastructure claims', async () => {
+  const { INDUSTRIES_DATA } = await import('../src/lib/data/industriesData');
+  const published = JSON.stringify(INDUSTRIES_DATA);
+  assert.doesNotMatch(
+    published,
+    /anycast|edge\s+(?:node|pop)|\b(?:routing|route)\b|cloud\s+cluster|volatile\s+(?:ram|memory)|active-active|upstream|x-galxai-jurisdiction|fedramp|fips\s*140|pci\s*dss|soc\s*[12]|iso\/iec|galx_live/i,
+  );
+  assert.doesNotMatch(published, /guaranteed|zero\s+data\s+retention|cryptographic\s+zero/i);
+});
