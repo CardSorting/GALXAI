@@ -12,7 +12,7 @@ Private product authority, reconciled September 18, 2026. [PRODUCT.md](../PRODUC
 | Public guidance | Dedicated `/pricing`, `/faq`, and `/knowledge-base` guides explain image creation, public sharing, GALX Nova, published consumer terms, and the Developer subscription boundary |
 | Images | Consumer creation surface: public-by-default visual generation, community stream, prompt remixing across five supported aspect ratios, owned library, Favorites, and sanitized image downloads |
 | GALX Nova | Managed intelligence layer for reasoning and generation. The service name explains the relationship; it does not disclose or promise internal execution details |
-| Developer | Separate API information and access path. Developer Access is $50/month recurring for API admission; usage is billed separately and no usage credits are included |
+| Developer | Separate API information and access path. Developer Access is $50/month recurring for API admission; usage is $0.02 per completed message with a default $25 monthly hard cap, and no usage credits are included |
 | Staff administration | Independent owner/reviewer/viewer membership, approval inbox, activity history and private feedback |
 | Destination chat and arbitrary execution | Not introduced by the Image Studio; downstream and other proposals retain their own scope |
 
@@ -22,7 +22,13 @@ Public means users can discover and explore the live stream, while sign-in remai
 
 Explain the creative friction removed: turning an idea into an image, testing compositions across aspect ratios, and discovering prompt inspirations. Explain user outcomes and supported capabilities, not internal execution mechanics. Homepage content and metadata attribute the experience to GALX Nova without making a foundation-model or performance claim.
 
-Current consumer plan pricing is $10/month in the active product configuration and is separate from Developer access. Published consumer copy should describe image creation, exploration, remixing, downloads, and fair-use boundaries without adding unverified speed or capacity promises. Developer Access is a separate $50/month recurring API access subscription; usage is billed separately and zero usage credits are included.
+Current consumer plan pricing is $10/month in the active product configuration and is separate from Developer access. Published consumer copy should describe image creation, exploration, remixing, downloads, and fair-use boundaries without adding unverified speed or capacity promises. Developer Access is a separate $50/month recurring API access subscription; usage is billed at $0.02 per completed message, not per token, with a default $25 monthly hard cap and zero usage credits included.
+
+The billing workspace is the customer control plane for this contract. It shows
+completed and pending message quantity, accrued and remaining spend, cap progress,
+UTC reset timing, and durable in-app notices at 50%, 80%, and 100%. The API and
+browser surfaces expose only allowlisted customer terms; supplier token economics,
+internal ledger rows, Stripe identifiers, and operational diagnostics remain private.
 
 For explanation, describe Developer Access as membership to a managed
 workspace: the subscription provides API access to the service, while

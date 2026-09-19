@@ -16,7 +16,8 @@ account, with the published image-creation terms and fair-use boundaries.
 GALX Nova Developer Access is a separate `$50 USD/month` recurring subscription
 for programmable access to supported Nova capabilities. It is an access fee,
 not prepaid inference, a credit bundle or an included usage allowance. Usage is
-billed separately; this document does not define usage pricing or metering.
+billed separately at $0.02 per completed message with a default $25 monthly
+hard cap. No usage credits are included and customer billing is not token-based.
 
 The public status page at `/pricing/usage` makes that boundary explicit: usage
 is billed at $0.02 per completed message with a default $25 monthly cap. The
@@ -29,6 +30,12 @@ Credits, Transactions, Invoices and Payment settings. Credits presents existing
 account-credit records and historical reconciliation. It is not a Developer
 usage or purchase ledger. `/developers` owns the Developer subscription path;
 the private preview form remains separate.
+
+Overview and Credits also show the authenticated message-usage summary: completed
+and pending messages, accrued and remaining spend, cap progress, UTC reset date,
+and durable in-app notices at 50%, 80%, and 100% of the monthly cap. The summary
+is an allowlisted, no-store view; it does not expose supplier tokens, internal
+ledger rows, Stripe identifiers, or diagnostics.
 
 ## Payment and confirmation
 

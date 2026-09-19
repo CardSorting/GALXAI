@@ -118,7 +118,7 @@ No customer, subscription, payment, or consumption charge was created by this ac
 
 ## Release closeout evidence — September 18, 2026
 
-- Production Supabase readback: 131 applied migrations, 0 pending, 0 remote-only.
+- Production Supabase readback: 132 applied migrations, 0 pending, 0 remote-only.
 - Vercel production deployment: `dpl_q1GLBjL5HpKRvNwshMsrpp19F5Fr`, status `Ready`, aliases verified on the canonical web domains.
 - Cloudflare Worker production version: `9712cd56-aaad-40f5-b5bb-616899e15712`, custom API domain deployed.
 - Public pricing smoke check: HTTP 200; page contains `$0.02/message`, `$25 cap`, and active-meter messaging.

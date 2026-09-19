@@ -176,7 +176,7 @@ export const DOC_PAGES: Record<DocId, DocPage> = {
     path: '/docs',
     title: 'Developer Quickstart',
     badge: 'GALX Nova Developer access',
-    description: 'Developer Access is a $50/month membership for API access to GALX Nova. Usage is intended to be billed per message, not per token; no usage credits are included. GALX handles the managed intelligence behind the supported API.',
+    description: 'Developer Access is a $50/month membership for API access to GALX Nova. Usage is billed at $0.02 per completed message, not per token, with a default $25 monthly hard cap and no usage credits included. GALX handles the managed intelligence behind the supported API.',
     sections: [
       {
         id: 'credentials',
@@ -655,7 +655,8 @@ console.log(response.choices[0].message.content);`,
             ['403 Forbidden', 'Access control', 'The account or key is not permitted to use the requested capability.', 'Check the documented access requirements.'],
             ['404 Not Found', 'Request path', 'The requested endpoint is not available at that path.', 'Check the current API reference and base URL.'],
             ['429 Rate Limit', 'Service limit', 'The request was limited temporarily.', 'Honor Retry-After when returned and use bounded backoff.'],
-            ['503', 'Usage contract', 'Usage-pricing terms are not published for public inference.', 'Review /pricing/usage; do not retry or treat the access subscription as usage.'],
+            ['402 Payment Required', 'Usage cap', 'The monthly message cap or another documented access term prevents the request.', 'Review /pricing/usage and the authenticated billing workspace; do not retry until the term changes.'],
+            ['503 Service Unavailable', 'Service dependency', 'A temporary service dependency or delivery condition prevented completion.', 'Retry only when the operation is safe and the service status permits it.'],
             ['500 / 502', 'Service error', 'A transient service error occurred.', 'Retry carefully when the operation is safe to repeat.'],
           ],
         },

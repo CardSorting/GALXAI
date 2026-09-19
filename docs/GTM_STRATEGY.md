@@ -55,8 +55,10 @@ boundaries.
 
 GALX Nova Developer Access is a **$50/month recurring subscription** for API
 access. The fee is an access fee, not prepaid inference, a credit bundle or an
-included usage allowance. Usage is billed separately; this change does not
-define usage pricing, metering, balances, limits or consumption billing.
+included usage allowance. Usage is billed separately at **$0.02 per completed
+message**, not per token, with a default **$25 monthly hard cap**. The billing
+workspace shows live message usage, reset timing, remaining spend, and durable
+50%/80%/100% in-app threshold notices.
 
 Think of Developer Access like membership to a managed workspace: the
 subscription gives the developer access to the service; consumption is billed
@@ -87,8 +89,9 @@ community counts and examples. Keep Nova attribution farther down the page.
 Message: “Build with GALX Nova.”
 
 Explain supported API capabilities and integration requirements. State the
-$50/month access subscription and separate usage boundary. Do not defend the
-number with internal costs or unverified performance claims.
+$50/month access subscription, $0.02/message usage rate, $25 monthly hard cap,
+and separate billing boundary. Do not defend the number with internal costs or
+unverified performance claims.
 
 ### Teams and assisted buyers
 

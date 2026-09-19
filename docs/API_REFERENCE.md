@@ -11,10 +11,12 @@ Use `https://galx.ai/v1` as the API base URL. Authenticate with
 A user ID is not a credential. Missing or invalid credentials return `401`;
 browser requests require a valid signed-in session.
 
-The Developer subscription is an access fee, not a usage allowance. Usage rates
-are not published at this time; do not infer a rate, credit, balance or model
-charge from the capability catalog. Review the [usage-pricing status](https://galx.ai/pricing/usage)
-before integrating.
+The Developer subscription is an access fee, not a usage allowance. Developer
+usage is billed at $0.02 per completed message, not per token, with a default
+$25 monthly hard cap. Failed, rejected, duplicate, and aborted requests are not
+completed messages. Review the [usage-pricing status](https://galx.ai/pricing/usage)
+and billing workspace before integrating; do not treat the subscription as a
+credit balance or infer supplier costs from the capability catalog.
 
 ## Image generation
 
