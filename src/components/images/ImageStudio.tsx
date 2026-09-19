@@ -10,6 +10,7 @@ import {
   ArrowDownToLine,
   ArrowLeft,
   ArrowRight,
+  CircleAlert,
   Check,
   ChevronDown,
   Compass,
@@ -102,6 +103,35 @@ function StudioWorkspace({
   const activeImage = active;
   const activeIndex = activeCollection.findIndex((image) => image.id === active?.id);
   const dialogOpen = Boolean(active);
+  const readinessNotice = studio.error
+    ? {
+        tone: 'error',
+        title: studio.uncertain ? 'We couldn’t confirm that generation' : 'Generation needs your attention',
+        body: studio.error,
+        action: studio.uncertain ? 'Check My Creations' : 'Check again',
+      }
+    : studio.checkingAvailability
+      ? {
+          tone: 'checking',
+          title: 'Checking image creation',
+          body: 'Your prompt is ready. We’ll keep it here while we confirm the service.',
+          action: undefined,
+        }
+      : studio.availability === 'unavailable'
+        ? {
+            tone: 'warning',
+            title: 'Image creation is temporarily unavailable',
+            body: 'Your prompt is saved. Try again in a moment.',
+            action: 'Check again',
+          }
+        : studio.ready && studio.availability === 'unknown'
+          ? {
+              tone: 'warning',
+              title: 'Image creation needs a quick check',
+              body: 'We couldn’t confirm readiness yet. Your prompt will stay here while you retry.',
+              action: 'Check again',
+            }
+          : null;
 
   // Sync route to active tab
   useEffect(() => {
@@ -376,6 +406,39 @@ function StudioWorkspace({
           >
             <X size={14} />
           </button>
+        </div>
+      )}
+
+      {readinessNotice && (
+        <div
+          className={`studio-readiness studio-readiness-${readinessNotice.tone}`}
+          role={readinessNotice.tone === 'error' || readinessNotice.tone === 'warning' ? 'alert' : 'status'}
+          aria-live="polite"
+        >
+          <div className="studio-readiness-icon" aria-hidden="true">
+            {readinessNotice.tone === 'checking' ? <LoaderCircle className="studio-spin" size={16} /> : <CircleAlert size={16} />}
+          </div>
+          <div className="studio-readiness-copy">
+            <strong>{readinessNotice.title}</strong>
+            <span>{readinessNotice.body}</span>
+          </div>
+          {readinessNotice.action && (
+            <button
+              type="button"
+              className="studio-readiness-action"
+              onClick={() => {
+                if (studio.uncertain) {
+                  setActiveTab('creations');
+                  changeView('library');
+                } else {
+                  void studio.checkAvailability();
+                }
+              }}
+            >
+              {readinessNotice.action}
+              <ArrowRight size={14} aria-hidden="true" />
+            </button>
+          )}
         </div>
       )}
 
@@ -794,6 +857,8 @@ function StudioWorkspace({
               className="studio-dock-submit-btn"
               disabled={
                 studio.availability === 'unavailable' ||
+                studio.checkingAvailability ||
+                studio.availability === 'unknown' ||
                 gate.blocked ||
                 !studio.ready ||
                 authLoading ||

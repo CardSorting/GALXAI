@@ -31,7 +31,7 @@ test('generation output is projected and never renders upstream messages or malf
 });
 test('draft and receipt recovery restrict settings and construct a minimal request', () => {
   const settings = readSettings({ prompt: '  A vase  ', ratio: '3:2', quality: 'hd', count: 2, secret: 'not-public' });
-  assert.deepEqual(generationBody(settings), { model: 'openai-gpt-image-latest', prompt: 'A vase', n: 2, size: '1536x1024', quality: 'hd', response_format: 'url' });
+  assert.deepEqual(generationBody(settings), { model: 'galx-nova-image', prompt: 'A vase', n: 2, size: '1536x1024', quality: 'hd', response_format: 'url' });
   assert.equal(readSettings({ count: 100, quality: 'ultra', ratio: '100:1' }).count, 1);
   assert.equal(readSettings({ prompt: 'a'.repeat(40_000) }).prompt.length, 32_000);
   assert.equal(readPending({ id: '../api/private', startedAt: Date.now(), settings }), null);

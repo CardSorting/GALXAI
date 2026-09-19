@@ -64,6 +64,9 @@ export function useImageStudio(owner: string | null, token?: string, libraryActi
   const checkAvailability = useCallback(async () => {
     if (!owner || availabilityLock.current) return;
     availabilityLock.current = true; setCheckingAvailability(true);
+    // A retry is a new observation. Clear the previous result immediately so
+    // the banner cannot keep showing a stale failure while the check runs.
+    setError('');
     const sequence = ++availabilitySequence.current;
     try {
       const response = await workspaceFetch(owner, '/api/images/availability', {

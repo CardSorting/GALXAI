@@ -200,6 +200,104 @@
   color: #fff;
 }
 
+/* --- Readiness / recovery banner --- */
+.studio-readiness {
+  position: fixed;
+  top: 116px;
+  left: 50%;
+  z-index: 44;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: min(680px, calc(100% - 32px));
+  padding: 10px 12px;
+  transform: translateX(-50%);
+  border: 1px solid var(--studio-line);
+  border-radius: 12px;
+  background: rgba(18, 22, 34, 0.96);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.44);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.studio-readiness-icon {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  border-radius: 8px;
+}
+
+.studio-readiness-copy {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+  flex: 1;
+}
+
+.studio-readiness-copy strong {
+  color: #f8fafc;
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.25;
+}
+
+.studio-readiness-copy span {
+  color: #b9bfce;
+  font-size: 12px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.studio-readiness-action {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  padding: 7px 10px;
+  border: 1px solid rgba(129, 140, 248, 0.44);
+  border-radius: 8px;
+  background: rgba(99, 102, 241, 0.14);
+  color: #dbe2ff;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.studio-readiness-action:hover {
+  background: rgba(99, 102, 241, 0.26);
+  border-color: rgba(165, 180, 252, 0.7);
+}
+
+.studio-readiness-error .studio-readiness-icon {
+  background: rgba(244, 63, 94, 0.14);
+  color: #fb7185;
+}
+
+.studio-readiness-warning .studio-readiness-icon {
+  background: rgba(245, 158, 11, 0.14);
+  color: #fbbf24;
+}
+
+.studio-readiness-checking .studio-readiness-icon {
+  background: rgba(99, 102, 241, 0.16);
+  color: #a5b4fc;
+}
+
+@media (max-width: 620px) {
+  .studio-readiness {
+    align-items: flex-start;
+    top: 112px;
+    padding: 10px;
+  }
+
+  .studio-readiness-action {
+    align-self: center;
+    white-space: nowrap;
+  }
+}
+
 @keyframes studioFadeDown {
   from {
     opacity: 0;
@@ -402,8 +500,8 @@
 
 /* Circular '+' Button */
 .studio-dock-plus-btn {
-  width: 38px;
-  height: 38px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -451,8 +549,8 @@
 
 /* Submit / Generate Button */
 .studio-dock-submit-btn {
-  width: 38px;
-  height: 38px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   background: linear-gradient(135deg, #6366f1, #4f46e5);
   color: #fff;
