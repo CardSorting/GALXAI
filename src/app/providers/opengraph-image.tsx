@@ -2,7 +2,7 @@ import { ImageResponse } from 'next/og';
 
 export const runtime = 'edge';
 
-export const alt = 'GALXAI — Frontier AI Model Providers & Wholesale Gateways';
+export const alt = 'GALXAI — Private integration guidance';
 export const size = {
   width: 1200,
   height: 630,
@@ -71,7 +71,7 @@ export default async function Image() {
                 GALX<span style={{ color: '#34d399' }}>AI</span>
               </div>
               <div style={{ fontSize: '12px', color: '#94a3b8', letterSpacing: '2px', fontWeight: 600 }}>
-                FRONTIER MODEL PROVIDERS
+                PRIVATE INTEGRATION GUIDANCE
               </div>
             </div>
           </div>
@@ -90,7 +90,7 @@ export default async function Image() {
               fontWeight: 700,
             }}
           >
-            <span>Wholesale Routing Channels</span>
+            <span>By decision</span>
           </div>
         </div>
 
@@ -106,15 +106,15 @@ export default async function Image() {
               color: 'transparent',
             }}
           >
-            Unified Frontier AI Provider Portals &amp; Wholesale Channels
+            GALX capabilities for selected private integrations
           </div>
           <div style={{ fontSize: '20px', color: '#94a3b8', lineHeight: 1.4 }}>
-            Direct access to GALX Nova and frontier intelligence with 25%–40% wholesale rate cards, sub-15ms edge latency, and automatic failover.
+            GALX Nova supports GALX experiences and explicitly authorized private integrations. Public self-service access is not available.
           </div>
         </div>
 
         <div style={{ display: 'flex', gap: '16px' }}>
-          {['GALX Nova Flagship', '75% Prompt Caching', 'Sub-15ms Edge Latency', 'Zero Rate-Limit Stalls'].map((t) => (
+          {['Explicit', 'Bounded', 'Metered', 'Revocable'].map((t) => (
             <div
               key={t}
               style={{

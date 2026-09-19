@@ -22,9 +22,10 @@ export function createDeveloperAccessHandlers(deps = {
   identity: requireAccountIdentity,
   repository: () => new DeveloperAccessRepository(),
 }) {
+  const retired = () => previewError(410, 'public_access_retired', 'Self-service developer access is no longer available.');
   function failure(error: unknown) {
     return error instanceof AccountIdentityError
-      ? previewError(401, 'authentication_required', 'Sign in with a verified email to request access.')
+      ? previewError(401, 'authentication_required', 'Sign in with an authorized account to continue.')
       : previewError(503, 'request_unavailable', 'Your request could not be saved. Please try again.');
   }
   async function body(req: NextRequest) {
@@ -61,28 +62,9 @@ export function createDeveloperAccessHandlers(deps = {
     } catch (error) { return failure(error); }
   }
   return {
-    GET: async (req: NextRequest) => {
-      try { const actor = await deps.identity(req); return previewResponse(publicStatus(await deps.repository().access(actor.id))); }
-      catch (error) { return failure(error); }
-    },
-    POST: (req: NextRequest) => saveApplication(req, false),
-    PATCH: (req: NextRequest) => saveApplication(req, true),
-    feedback: async (req: NextRequest) => {
-      try {
-        if (!isSameOriginRequest(req, true))
-          return previewError(403, 'origin_not_allowed', 'Send feedback from the GALX website.');
-        const actor = await deps.identity(req);
-        const repo = deps.repository();
-        const access = await repo.get(actor.id);
-        if (access?.status !== 'approved' || (access.expires_at && access.expires_at.getTime() <= Date.now()))
-          return previewError(403, 'developer_preview_required', 'Private feedback is available to approved preview participants.');
-        const input = await body(req);
-        const message = typeof input?.message === 'string' ? input.message.trim() : '';
-        if (message.length < 10 || message.length > 4000)
-          return previewError(400, 'invalid_request', 'Enter feedback in 10–4,000 characters.');
-        if (!await repo.feedback(actor.id, message)) return previewError(429, 'feedback_limit', 'Please wait a minute before sending more feedback.');
-        return previewResponse({ received: true }, 201);
-      } catch (error) { return failure(error); }
-    },
+    GET: async () => retired(),
+    POST: async () => retired(),
+    PATCH: async () => retired(),
+    feedback: async () => retired(),
   };
 }

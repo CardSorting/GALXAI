@@ -190,15 +190,9 @@ function BaseCommandMenu({ isOpen, onClose }: CommandMenuProps) {
         if (e.key === 'h') {
           e.preventDefault();
           router.push('/');
-        } else if (e.key === 'm') {
-          e.preventDefault();
-          router.push('/developers');
         } else if (e.key === 'd') {
           e.preventDefault();
           router.push('/docs');
-        } else if (e.key === 'k') {
-          e.preventDefault();
-          router.push('/keys');
         } else if (e.key === 'b') {
           e.preventDefault();
           router.push(BILLING_PATHS.overview);
@@ -208,9 +202,6 @@ function BaseCommandMenu({ isOpen, onClose }: CommandMenuProps) {
         } else if (e.key === 's') {
           e.preventDefault();
           router.push('/status');
-        } else if (e.key === 'p') {
-          e.preventDefault();
-          router.push('/developers');
         } else if (e.key === 'c') {
           e.preventDefault();
           router.push('/docs');
@@ -257,13 +248,6 @@ function BaseCommandMenu({ isOpen, onClose }: CommandMenuProps) {
               <kbd className="px-2 py-0.5 rounded bg-white/10 text-indigo-300 font-bold">⌘K</kbd>
             </div>
             <div className="flex items-center justify-between p-2 rounded-xl bg-black/40 border border-white/5">
-              <span className="text-zinc-300">Go to Developer</span>
-              <span className="space-x-1">
-                <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-zinc-300">g</kbd>
-                <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-zinc-300">m</kbd>
-              </span>
-            </div>
-            <div className="flex items-center justify-between p-2 rounded-xl bg-black/40 border border-white/5">
               <span className="text-zinc-300">Go to Requests & Results</span>
               <span className="space-x-1">
                 <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-zinc-300">g</kbd>
@@ -275,13 +259,6 @@ function BaseCommandMenu({ isOpen, onClose }: CommandMenuProps) {
               <span className="space-x-1">
                 <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-zinc-300">g</kbd>
                 <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-zinc-300">d</kbd>
-              </span>
-            </div>
-            <div className="flex items-center justify-between p-2 rounded-xl bg-black/40 border border-white/5">
-              <span className="text-zinc-300">Go to API Keys</span>
-              <span className="space-x-1">
-                <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-zinc-300">g</kbd>
-                <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-zinc-300">k</kbd>
               </span>
             </div>
             <div className="flex items-center justify-between p-2 rounded-xl bg-black/40 border border-white/5">
@@ -314,7 +291,7 @@ function BaseCommandMenu({ isOpen, onClose }: CommandMenuProps) {
               autoFocus
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search images, Developer, guides, or API keys..."
+              placeholder="Search images, guides, or supported capabilities..."
               className="w-full bg-transparent text-white placeholder:text-zinc-500 text-sm focus:outline-none font-mono"
               aria-label="Universal Command Search"
             />
@@ -469,7 +446,7 @@ function BaseCommandMenu({ isOpen, onClose }: CommandMenuProps) {
 
         {/* Footer Shortcut Hints with Category Filter Cheatsheet */}
         <div className="px-4 py-2.5 border-t border-white/5 bg-black/50 flex items-center justify-between text-[11px] text-zinc-500 font-mono">
-          <span>Navigate: <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-zinc-300">↑</kbd> <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-zinc-300">↓</kbd> • Filters: <span className="text-zinc-400">&gt; Actions</span> <span className="text-zinc-400">@ Developer</span> <span className="text-zinc-400"># Docs</span> <span className="text-zinc-400">$ Pricing</span></span>
+          <span>Navigate: <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-zinc-300">↑</kbd> <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-zinc-300">↓</kbd> • Filters: <span className="text-zinc-400">&gt; Actions</span> <span className="text-zinc-400"># Docs</span> <span className="text-zinc-400">$ Pricing</span></span>
           <span>Close: <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-zinc-300">esc</kbd></span>
         </div>
       </div>

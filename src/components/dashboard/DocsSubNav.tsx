@@ -29,7 +29,6 @@ const NAV_GROUPS: NavGroup[] = [
     category: 'Getting Started',
     items: [
       { href: '/docs', title: 'Developer Quickstart', badge: 'Start', icon: Compass },
-      { href: '/developers', title: 'Developer access', badge: 'Subscribe', icon: Sparkles },
     ],
   },
   {
@@ -50,7 +49,6 @@ const NAV_GROUPS: NavGroup[] = [
     category: 'Production',
     items: [
       { href: '/docs/error-handling', title: 'Troubleshooting & Status', badge: 'Errors', icon: ShieldAlert },
-      { href: '/keys', title: 'API Key Management', icon: Terminal },
       { href: '/status', title: 'Service status', icon: ExternalLink },
     ],
   },

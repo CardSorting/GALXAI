@@ -1,7 +1,12 @@
 import type { Pool, PoolClient } from 'pg';
 import { getPostgresPool } from '@/lib/db/postgres';
 import { AdminError } from '@/lib/admin/errors';
-import type { AccessRequest, AdminActor, AdminRole, AuditItem, FeedbackItem, Page, RequestState, StaffMember } from '@/lib/admin/preview-contract';
+import type { AccessRequest, AdminActor, AdminRole, AuditItem, FeedbackItem, Page, PrivateAccessDetail, PrivateAccessKey, PrivateAccessUsage, RequestState, StaffMember } from '@/lib/admin/preview-contract';
+import { ApiKeyRepository } from './ApiKeyRepository';
+import { TeamGovernanceRepository } from './TeamGovernanceRepository';
+import { GalxCryptoVault } from '@/core/vault/GalxCryptoVault';
+import type { DeveloperGatewayKey } from '@/core/contracts/GalxContracts';
+import { USAGE_PRICING } from '@/lib/billing/usage-pricing';
 
 type Identity = { id: string; email: string };
 const requestColumns = 'user_id, email, use_case, expected_traffic, introduction, github_url, linkedin_url, cohort_interest, application_updated_at, status, requested_at, reviewed_at, expires_at, revision';
@@ -25,6 +30,36 @@ const feedbackDTO = (r: FeedbackRow): FeedbackItem => ({ id: r.id, user_id: r.us
 const pageDTO = <T>(items: T[], page: number): Page<T> => ({ items: items.slice(0, 25), has_more: items.length > 25, page });
 const conflict = () => new AdminError(409, 'changed', 'This record changed. Refresh it before saving your decision.');
 const forbidden = () => new AdminError(403, 'forbidden', 'You do not have permission to perform this action.');
+const cleanKeyName = (value: unknown) => typeof value === 'string' ? value.trim().replace(/[<>"/\\{}\x00-\x1F]/g, '').slice(0, 80) || 'Private cohort key' : 'Private cohort key';
+const cleanRpm = (value: unknown) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? Math.min(10000, Math.max(10, Math.floor(parsed))) : 60;
+};
+const cleanCap = (value: unknown) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? Math.min(100000, Math.max(0.01, Math.round(parsed * 100) / 100)) : USAGE_PRICING.monthlySpendCapUsd;
+};
+const keyDTO = (key: DeveloperGatewayKey): PrivateAccessKey => ({
+  id: key.id, name: key.name, key_prefix: key.keyPrefix || key.prefix,
+  environment: key.environment || (key.prefix.includes('test') ? 'test' : 'live'), scopes: key.scopes || ['*'],
+  rate_limit_per_minute: key.rateLimitPerMinute || 60, usage_cap_usd: key.spendCapUsd ?? null,
+  current_usage_usd: key.currentSpendUsd || 0, total_requests: key.totalRequests || 0, total_tokens: key.totalTokens || 0,
+  created_at: new Date(key.createdAtMs).toISOString(), last_used_at: key.lastUsedAtMs ? new Date(key.lastUsedAtMs).toISOString() : null,
+  expires_at: key.expiresAtMs ? new Date(key.expiresAtMs).toISOString() : null, revoked: Boolean(key.revoked),
+});
+const usageDTO = (summary: Record<string, unknown> | null): PrivateAccessUsage | null => {
+  if (!summary || summary.status !== 'active') return null;
+  const completed = Number(summary.completedUnits || 0), pending = Number(summary.reservedUnits || 0);
+  const cap = Number(summary.capUnits || Math.floor(USAGE_PRICING.monthlySpendCapUsd / USAGE_PRICING.unitAmountUsd));
+  const accrued = Number((completed * USAGE_PRICING.unitAmountUsd).toFixed(6));
+  return {
+    status: 'active', period_start: typeof summary.periodStart === 'string' ? summary.periodStart : null,
+    reset_at: typeof summary.resetAt === 'string' ? summary.resetAt : null, completed_messages: completed,
+    pending_messages: pending, cap_messages: cap, accrued_usd: accrued,
+    remaining_usd: Number(Math.max(0, (cap - completed - pending) * USAGE_PRICING.unitAmountUsd).toFixed(6)),
+    percent_used: cap > 0 ? Math.min(100, Math.round(((completed + pending) / cap) * 1000) / 10) : 0,
+  };
+};
 
 /** Every operation checks current staff membership. Writes hold that membership until commit. */
 export class PreviewAdminRepository {
@@ -93,7 +128,78 @@ export class PreviewAdminRepository {
       'feedback', (SELECT COALESCE(jsonb_agg(r), '[]'::jsonb) FROM (SELECT ${feedbackColumns} FROM private.developer_preview_feedback f
         JOIN private.developer_access_requests a USING (user_id) WHERE f.user_id=$3 ORDER BY f.created_at DESC, f.id DESC LIMIT 25) r))`, [userId]);
     if (!payload.request) throw new AdminError(404, 'not_found', 'This access request could not be found.');
-    return { request: requestDTO(payload.request), activity: payload.activity.map(auditDTO), feedback: payload.feedback.map(feedbackDTO) };
+    const privateAccess = await this.privateAccess(payload.request.user_id);
+    return { request: requestDTO(payload.request), activity: payload.activity.map(auditDTO), feedback: payload.feedback.map(feedbackDTO), private_access: privateAccess };
+  }
+
+  private async privateAccess(userId: string): Promise<PrivateAccessDetail> {
+    const keys = await ApiKeyRepository.getInstance().getGatewayKeys(userId);
+    const usage = await TeamGovernanceRepository.getInstance().getNovaMessageUsageSummary(userId);
+    return { keys: (keys || []).map(keyDTO), usage: usageDTO(usage) };
+  }
+
+  private async approvedActor(identity: Identity, userId: string) {
+    return this.transaction(async db => {
+      const actor = await this.authorize(db, identity, 'review');
+      const result = await db.query<{ status: RequestState; expires_at: Date | null }>(
+        'SELECT status, expires_at FROM private.developer_access_requests WHERE user_id=$1 FOR SHARE', [userId]);
+      const cohort = result.rows[0];
+      if (!cohort || cohort.status !== 'approved' || (cohort.expires_at && cohort.expires_at.getTime() <= Date.now())) {
+        throw new AdminError(409, 'cohort_inactive', 'Approve an active private cohort before managing credentials.');
+      }
+      return actor;
+    });
+  }
+
+  async createPrivateKey(identity: Identity, userId: string, input: { name?: unknown; environment?: unknown; rateLimitPerMinute?: unknown; usageCapUsd?: unknown; expiresInDays?: unknown }) {
+    const actor = await this.approvedActor(identity, userId);
+    const environment = input.environment === 'test' ? 'test' : 'live';
+    const expiresInDays = Number(input.expiresInDays);
+    const expiresAtMs = Number.isFinite(expiresInDays) && expiresInDays > 0 ? Date.now() + Math.min(730, Math.floor(expiresInDays)) * 86400 * 1000 : undefined;
+    const generated = GalxCryptoVault.generateGatewayKey(cleanKeyName(input.name), userId, { environment });
+    const key: DeveloperGatewayKey = {
+      id: `key_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+      prefix: generated.prefix, keyPrefix: generated.keyPrefix, keyHash: generated.keyHash, checksum: generated.checksum,
+      name: cleanKeyName(input.name), userId, environment, scopes: ['*'], rateLimitPerMinute: cleanRpm(input.rateLimitPerMinute),
+      spendCapUsd: cleanCap(input.usageCapUsd), totalRequests: 0, totalTokens: 0, createdAtMs: Date.now(), revoked: false, expiresAtMs,
+    };
+    await ApiKeyRepository.getInstance().saveGatewayKey(key, { requireRemote: true });
+    await this.transaction(async db => {
+      const current = await this.authorize(db, identity, 'review');
+      await this.audit(db, current, 'credential_created', userId, null, 'active', `Created ${key.name}`);
+    });
+    return { success: true, key: { ...keyDTO(key), api_key: generated.apiKey } };
+  }
+
+  async updatePrivateKey(identity: Identity, userId: string, keyId: string, input: { name?: unknown; rateLimitPerMinute?: unknown; usageCapUsd?: unknown }) {
+    await this.approvedActor(identity, userId);
+    const repo = ApiKeyRepository.getInstance();
+    const existing = await repo.getGatewayKeyById(keyId, userId);
+    if (!existing || existing.userId !== userId) throw new AdminError(404, 'not_found', 'This credential could not be found.');
+    const updated: DeveloperGatewayKey = { ...existing,
+      name: input.name === undefined ? existing.name : cleanKeyName(input.name),
+      rateLimitPerMinute: input.rateLimitPerMinute === undefined ? existing.rateLimitPerMinute : cleanRpm(input.rateLimitPerMinute),
+      spendCapUsd: input.usageCapUsd === undefined ? existing.spendCapUsd : cleanCap(input.usageCapUsd),
+    };
+    await repo.saveGatewayKey(updated, { requireRemote: true });
+    await this.transaction(async db => {
+      const actor = await this.authorize(db, identity, 'review');
+      await this.audit(db, actor, 'credential_updated', userId, 'active', 'active', `Updated ${updated.name}`);
+    });
+    return { success: true, key: keyDTO(updated) };
+  }
+
+  async revokePrivateKey(identity: Identity, userId: string, keyId: string, reason: string) {
+    await this.approvedActor(identity, userId);
+    const repo = ApiKeyRepository.getInstance();
+    const existing = await repo.getGatewayKeyById(keyId, userId);
+    if (!existing || existing.userId !== userId) throw new AdminError(404, 'not_found', 'This credential could not be found.');
+    await repo.revokeKey(keyId, reason || 'Revoked by GALX administrator', userId);
+    await this.transaction(async db => {
+      const actor = await this.authorize(db, identity, 'review');
+      await this.audit(db, actor, 'credential_revoked', userId, 'active', 'revoked', reason || 'Revoked by GALX administrator');
+    });
+    return { success: true };
   }
   review(identity: Identity, userId: string, revision: number, status: RequestState, reason: string, days: number | null) {
     return this.transaction(async db => {
@@ -103,7 +209,7 @@ export class PreviewAdminRepository {
       if (!row || row.revision !== revision) throw conflict();
       if (status === 'revoked' && row.status !== 'approved') throw new AdminError(400, 'invalid_transition', 'Only approved access can be paused.');
       if (status === 'declined' && row.status !== 'pending') throw new AdminError(400, 'invalid_transition', 'Only pending requests can be declined.');
-      if (status === 'pending' && !['revoked', 'declined'].includes(row.status)) throw new AdminError(400, 'invalid_transition', 'Only paused or declined requests can return to the waitlist.');
+      if (status === 'pending' && !['revoked', 'declined'].includes(row.status)) throw new AdminError(400, 'invalid_transition', 'Only paused or declined records can return to pending.');
       // Expiry is computed by the database and checked on every API request, with no scheduled-job dependency.
       const updated = await db.query<{ expires_at: Date | null }>(`UPDATE private.developer_access_requests
         SET status=$2, reviewed_at=now(), reviewed_by=$3, revision=revision+1,

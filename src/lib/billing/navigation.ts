@@ -6,7 +6,7 @@ export const BILLING_PATHS = {
 export const BILLING_PAGES = {
   overview: { href: BILLING_PATHS.overview, label: 'Overview', title: 'Billing overview', description: 'Your plan and existing account credit, in one place.' },
   plan: { href: BILLING_PATHS.plan, label: 'Plan', title: 'Your plan', description: 'Review your Pro access, subscription, and renewal details.' },
-  credits: { href: BILLING_PATHS.credits, label: 'Account credit', title: 'Account credit', description: 'Review existing account credit and activity. Developer Access is a separate subscription.' },
+  credits: { href: BILLING_PATHS.credits, label: 'Account credit', title: 'Account credit', description: 'Review existing account credit and activity.' },
   transactions: { href: BILLING_PATHS.transactions, label: 'Transactions', title: 'Transactions', description: 'Review credit added, usage, and adjustments to your balance.' },
   invoices: { href: BILLING_PATHS.invoices, label: 'Invoices', title: 'Invoices', description: 'View and download invoices for your payments.' },
   payments: { href: BILLING_PATHS.payments, label: 'Payment settings', title: 'Payment settings', description: 'Manage your saved payment methods securely with Stripe.' },

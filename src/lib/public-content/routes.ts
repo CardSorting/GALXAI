@@ -1,7 +1,6 @@
 /** Explicit public reading routes. Never widen this list to the private docs corpus. */
 export const PUBLIC_READING_PATHS = [
   '/pricing',
-  '/pricing/usage',
   '/pricing/galx-pro',
   '/pricing/fair-use',
   '/pricing/billing-and-cancellation',
@@ -11,7 +10,6 @@ export const PUBLIC_READING_PATHS = [
   '/knowledge-base/remixing-creations',
   '/knowledge-base/public-creations',
   '/knowledge-base/public-beta',
-  '/knowledge-base/images-and-developer-access',
 ] as const;
 
 const readingPaths = new Set<string>(PUBLIC_READING_PATHS);
@@ -23,5 +21,4 @@ export const PUBLIC_NAVIGATION = [
   { label: 'Pricing', href: '/pricing' },
   { label: 'FAQ', href: '/faq' },
   { label: 'Knowledge base', href: '/knowledge-base' },
-  { label: 'Developer', href: '/developers' },
 ] as const;

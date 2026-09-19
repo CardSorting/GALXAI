@@ -1,7 +1,6 @@
 import type { Pool } from 'pg';
 import type Stripe from 'stripe';
 import { BillingError } from './account';
-import { USAGE_PRICING } from './usage-pricing';
 /**
  * The former endpoint created one-time prepaid Developer/compute checkouts.
  * Developer access now uses the subscription checkout on /api/billing/plan.
@@ -21,7 +20,7 @@ export async function createAccountCheckout(
   },
 ): Promise<never> {
   throw new BillingError(
-    `This purchase route is retired. Start GALX Nova Developer Access at /developers: $50/month recurring, with usage billed separately and no usage credits included. Review ${USAGE_PRICING.path} for usage status.`,
+    'This purchase route is retired. GALX does not offer self-service developer access.',
     410,
   );
 }

@@ -3,6 +3,16 @@
 <!-- docs-scope: domain-reference -->
 > **Reading scope:** Subsystem reference retained for its own domain; not re-certified by the federation documentation refactor. Older routing, deployment, compatibility, or performance descriptions do not override the current relay contract. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
 
+## Distribution and support boundary
+
+This is a retained SDK/design reference, not public onboarding. GALX has
+retired Developer Access as a public subscription and self-service product.
+The API and client infrastructure remain available to GALX products and
+explicitly authorized private integrations. Any example that calls the API
+assumes an administrator-issued credential, server-side secret handling, and an
+allocation already assigned to the integration. Package availability and
+method support must be confirmed against the owning source before adoption.
+
 > Application/SDK scope: these interfaces do not replace the [federation contract](FEDERATION_STRATEGY.md). Model eligibility precedes load; no implicit model substitution occurs in the federation. The [Codex image alias](FEDERATION_STRATEGY.md#explicit-codex-image-tool-compatibility) is opt-in, verified, and provider-managed. Use the [recovery table](RELAY_API_REFERENCE.md#request-recovery) for accepted or uncertain work. Server credentials must never enter browser bundles.
 
 > **Version**: 1.0.0  

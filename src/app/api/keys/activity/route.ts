@@ -1,4 +1,4 @@
-import { withDeveloperAccess } from '@/lib/security/developer-access';
+import { withPreviewAdmin } from '@/lib/security/preview-admin';
 import { NextRequest, NextResponse } from 'next/server';
 import { AccountIdentityError, requireAccountIdentity } from '@/lib/auth/accountIdentity';
 import { getPostgresPool } from '@/lib/db/postgres';
@@ -27,4 +27,4 @@ async function previewGET(req: NextRequest) {
   } finally { db?.release(); }
 }
 
-export const GET = withDeveloperAccess(previewGET);
+export const GET = withPreviewAdmin(previewGET);

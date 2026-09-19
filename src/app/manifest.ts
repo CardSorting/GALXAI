@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: 'GALX — Images and Developer',
     short_name: 'GALX',
-    description: 'Create images in GALX. Explore public creations or subscribe to GALX Nova Developer Access.',
+    description: 'Create images in GALX and explore public creations powered by GALX Nova.',
     start_url: '/',
     display: 'standalone',
     background_color: '#07080d',

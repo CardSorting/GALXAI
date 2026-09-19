@@ -158,6 +158,7 @@ export async function createProCheckout(pool: Pool, stripe: Stripe, policy: Fair
 
 /** Nova Developer Access subscription checkout. No wallet or usage credit is created. */
 export async function createDeveloperCheckout(pool: Pool, stripe: Stripe, input: { userId: string; requestId: string; origin: string }) {
+  if (!DEVELOPER_ACCESS.checkoutEnabled) throw new BillingError('Self-service developer access is no longer available.', 410);
   const price = await developerPrice(stripe);
   const usagePrice = await developerUsagePrice(stripe);
   return createSubscriptionCheckout(pool, stripe, {

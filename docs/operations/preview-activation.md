@@ -2,6 +2,11 @@
 
 <!-- docs-scope: operational-record -->
 
+> **Historical activation record.** This dated evidence describes the earlier
+> private-preview rollout. The current contract is [Private developer access](developer-preview.md):
+> public Developer Access is retired, public self-service remains closed, and
+> deliberate provisioning is administered from the staff-only control plane.
+
 The site and API gateway now enforce the private developer preview. Images and Sites retain their public product paths and existing account/billing requirements. Signup, payment and existing API keys do not grant developer approval. No participant was approved during deployment.
 
 ## Production changes

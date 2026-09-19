@@ -1,0 +1,48 @@
+{
+  "reviewed_at": "2026-09-19T03:10:00Z",
+  "change": "Retire public Developer Access distribution while preserving inference infrastructure and moving private credential operations behind administrator authorization.",
+  "scope": [
+    "public purchase, enrollment, provisioning, pricing and account-management surfaces",
+    "administrator-only cohort and credential workflow",
+    "API-key persistence, allocation controls, metering and reservation synchronization",
+    "public documentation, metadata, social previews and response allowlists"
+  ],
+  "inspected": [
+    "src/app/developers/page.tsx",
+    "src/app/keys/page.tsx",
+    "src/app/benchmarks/opengraph-image.tsx",
+    "src/app/capabilities/opengraph-image.tsx",
+    "src/app/cookbook/opengraph-image.tsx",
+    "src/app/glossary/opengraph-image.tsx",
+    "src/app/how-it-works/opengraph-image.tsx",
+    "src/app/migrate/opengraph-image.tsx",
+    "src/app/security/opengraph-image.tsx",
+    "src/app/vault/opengraph-image.tsx",
+    "src/lib/admin/preview-route.ts",
+    "src/lib/supabase/repositories/PreviewAdminRepository.ts",
+    "src/lib/supabase/repositories/ApiKeyRepository.ts",
+    "src/lib/security/preview-admin.ts",
+    "src/lib/security/developer-access.ts",
+    "src/workers/cloudflare/GalxEdgeGateway.ts",
+    "supabase/migrations/20260918250000_private_developer_access_controls.sql",
+    "supabase/migrations/20260918251000_private_access_allocation_sync.sql",
+    "docs/PRODUCT_SURFACE_STRATEGY.md",
+    "docs/operations/developer-preview.md",
+    "docs/operations/preview-admin.md",
+    "docs/reference/billing-pages.md"
+  ],
+  "checks": [
+    "npm run test:developer-preview: 16 passed",
+    "npm run test:preview-admin: 7 passed",
+    "npm run test:signup-credit: 6 passed",
+    "npm run test:stripe: passed",
+    "npx tsc --noEmit: passed",
+    "npm run test:docs: passed",
+    "npm run build: passed after social-preview neutralization"
+  ],
+  "result": "Current guides and source contracts agree that public self-service access is retired, private access is explicit/bounded/metered/administered/revocable, and the backend machinery remains preserved.",
+  "limits": [
+    "No hosted deployment or live-account acceptance is implied.",
+    "Production build and rendered browser-asset scan are separate release checks."
+  ]
+}

@@ -1,4 +1,4 @@
-import { withDeveloperAccess } from '@/lib/security/developer-access';
+import { withPreviewAdmin } from '@/lib/security/preview-admin';
 import { NextRequest, NextResponse } from 'next/server';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 import { GalxCryptoVault } from '@/core/vault/GalxCryptoVault';
@@ -75,5 +75,5 @@ async function previewPOST(req: NextRequest) {
   return handleVerify(req);
 }
 
-export const GET = withDeveloperAccess(previewGET);
-export const POST = withDeveloperAccess(previewPOST);
+export const GET = withPreviewAdmin(previewGET);
+export const POST = withPreviewAdmin(previewPOST);

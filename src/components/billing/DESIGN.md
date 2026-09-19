@@ -158,12 +158,12 @@ Native links support direct entry, browser history and visible keyboard focus. T
 | --- | --- | --- |
 | Overview | `/billing` | Compact plan status, existing account-credit summary and task links. Refresh checks both the plan and credit summaries. |
 | Plan | `/billing/plan` | Full access, subscription and renewal details; choose or manage Pro as account status permits. |
-| Credits | `/billing/credits` | Existing account-credit figures and history; Developer Access is a separate subscription. |
+| Credits | `/billing/credits` | Existing account-credit figures and history; private API access is not a public billing plan. |
 | Transactions | `/billing/transactions` | Transaction filter, loaded rows, pagination and Export loaded rows. |
 | Invoices | `/billing/invoices` | Recent invoice rows, individual invoice links and hosted invoice history. |
 | Payment settings | `/billing/payment-methods` | Hosted payment-method management and links to Plan and Invoices. |
 
-Previously issued checkout return URLs and saved Billing section anchors resolve to the relevant canonical page. Pending return destinations remain reachable from navigation; they do not establish payment success. Use the canonical destination registry in navigation, search and new interfaces. Credits remains available for existing account-credit records and historical payment reconciliation; it is not a Developer usage ledger. Developer Access checkout is available through `/developers` as a `$50/month` recurring subscription with zero usage credits; saved bookmarks resolve through middleware, with unsupported purchase plans returning to Pricing.
+Previously issued checkout return URLs and saved Billing section anchors resolve to the relevant canonical page. Pending return destinations remain reachable from navigation; they do not establish payment success. Use the canonical destination registry in navigation, search and new interfaces. Credits remains available for existing account-credit records and historical payment reconciliation; it is not a private API usage ledger. Private API access is administered separately for explicitly authorized cohorts and is not a public purchase path; saved legacy bookmarks resolve through middleware, with unsupported purchase plans returning to Pricing.
 
 ### Overview and full Plan
 
@@ -171,7 +171,7 @@ Previously issued checkout return URLs and saved Billing section anchors resolve
 
 Overview shows the plan name or Your plan, a short status, any supplied period/end date, and View plan or Review payment linking to Plan. Its Refresh action checks both account credit and the compact plan status; each summary can announce its own refresh or failure while keeping its last checked data.
 
-The full Plan page uses a flat section with a wrapping heading/refresh row, a two-column detail list when space permits, then product terms and actions. Show the Pro offer at $10/month for one account when choosing a plan; preserve the existing commercial terms. Include the published Image Studio experience and fair-use boundaries near the action. Developer Access is a separate $50/month recurring API access subscription; usage is billed separately and no usage credits are included. Display the current billing-period end or scheduled subscription end only when the server supplies it; complimentary access does not invent a renewal date. Dates are explicitly UTC. The following action states apply to the full Plan page; Overview routes to that page.
+The full Plan page uses a flat section with a wrapping heading/refresh row, a two-column detail list when space permits, then product terms and actions. Show the Pro offer at $10/month for one account when choosing a plan; preserve the existing commercial terms. Include the published Image Studio experience and fair-use boundaries near the action. Private API access is not a public subscription, does not appear as a public plan, and remains an administrator-controlled capability for approved cohorts. Display the current billing-period end or scheduled subscription end only when the server supplies it; complimentary access does not invent a renewal date. Dates are explicitly UTC. The following action states apply to the full Plan page; Overview routes to that page.
 
 | State | Visible treatment and action |
 | --- | --- |
@@ -192,7 +192,7 @@ Controls have a minimum 44px height. Loading labels identify the actual action. 
 
 ### Credits, transactions and account continuity
 
-Credits is a read-only continuity surface for existing account balances, historical payment records and refunds. It does not offer preset amounts, custom amounts, quotes, automatic reload or Developer usage billing. The Developer link explains the separate `$50/month` access subscription and zero included usage credits. Historical return and payment status records remain visible without turning a URL or old payment into a new access grant.
+Credits is a read-only continuity surface for existing account balances, historical payment records and refunds. It does not offer preset amounts, custom amounts, quotes, automatic reload or private API usage billing. Historical return and payment status records remain visible without turning a URL or old payment into a new access grant.
 
 The shared account layout retains the typed credit amount, transaction filter, last checked wallet data and pending-return context while moving among Billing pages. Refresh preserves that state; an account change clears it. Payment retry identity is retained separately from the typed draft. Do not promise that a page reload saves the draft, or replay a purchase automatically when revisiting a return URL.
 
@@ -219,7 +219,7 @@ Pricing describes an available Pro offer with one included seat, Sites creation 
 - **Do** keep six canonical billing destinations and use Overview for concise summaries and task links.
 - **Do** refresh both Overview summaries and preserve account drafts and filters during billing navigation.
 - **Do** preserve subscription management after a status failure and base known management availability on the payment profile.
-- **Do** keep historical account credit visually and conceptually separate from Pro plan access and the Developer subscription entitlement.
+- **Do** keep historical account credit visually and conceptually separate from Pro plan access and administrator-controlled private access.
 
 ### Don't:
 

@@ -175,7 +175,6 @@
         "src/app/settings/page.tsx",
         "src/components/admin/PreviewAdminWorkspace.tsx",
         "src/components/billing/BillingClient.tsx",
-        "src/components/developers/DeveloperPreview.tsx",
         "src/lib/billing/free-generation*.ts",
         "src/lib/billing/generation-*.ts",
         "src/app/api/billing/generation-quota/**/*.ts",

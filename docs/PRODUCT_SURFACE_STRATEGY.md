@@ -2,45 +2,69 @@
 
 <!-- docs-scope: current-guide -->
 
-Private product authority, reconciled September 18, 2026. [PRODUCT.md](../PRODUCT.md) summarizes the experience; [current state](../post-mortem/CURRENT_STATE.md) records deployment evidence. Earlier inference-first, customer-local-only, and conversational website strategies are historical, superseded by the GALX Images surface and GALX Nova service framing.
+Private product authority, reconciled September 18, 2026. [PRODUCT.md](../PRODUCT.md)
+summarizes the experience; [current state](../post-mortem/CURRENT_STATE.md)
+records deployment evidence.
 
 ## Product and access boundaries
 
 | Surface | Current scope |
 | --- | --- |
-| Homepage | Image-first prompt cockpit, prompt inspiration, live community stream from real public data, Nova attribution, and a separate Developer route |
-| Public guidance | Dedicated `/pricing`, `/faq`, and `/knowledge-base` guides explain image creation, public sharing, GALX Nova, published consumer terms, and the Developer subscription boundary |
-| Images | Consumer creation surface: public-by-default visual generation, community stream, prompt remixing across five supported aspect ratios, owned library, Favorites, and sanitized image downloads |
-| GALX Nova | Managed intelligence layer for reasoning and generation. The service name explains the relationship; it does not disclose or promise internal execution details |
-| Developer | Separate API information and access path. Developer Access is $50/month recurring for API admission; usage is $0.02 per completed message with a default $25 monthly hard cap, and no usage credits are included |
-| Staff administration | Independent owner/reviewer/viewer membership, approval inbox, activity history and private feedback |
-| Destination chat and arbitrary execution | Not introduced by the Image Studio; downstream and other proposals retain their own scope |
+| Homepage | Image-first creation, prompt inspiration, community discovery and Nova attribution |
+| Public guidance | `/pricing`, `/faq` and `/knowledge-base` explain supported capabilities and consumer terms |
+| Images | Consumer creation, remixing, downloads, owned library and public sharing controls |
+| GALX Nova | Managed intelligence used by GALX experiences and selected private integrations |
+| Private developer access | Explicit, bounded, metered, administered and revocable; not a public subscription |
+| Staff administration | Authenticated owner/reviewer/viewer membership with private cohort, credential and audit controls |
 
-Public means users can discover and explore the live stream, while sign-in remains required before opening the full Image Studio or accessing owned library history. It does not mean unrestricted abuse or unmetered server compute: consumer plan terms remain governed by fair use and rate limiting.
+GALX is retiring public inference distribution, not inference infrastructure. A
+normal user must not be able to purchase API access, enroll, receive a key
+automatically, create additional credentials, upgrade into API access or
+discover a public inference price sheet. No public waitlist replaces the
+retired workflow.
 
-## Positioning and commercial contract
+## Positioning and communication
 
-Explain the creative friction removed: turning an idea into an image, testing compositions across aspect ratios, and discovering prompt inspirations. Explain user outcomes and supported capabilities, not internal execution mechanics. Homepage content and metadata attribute the experience to GALX Nova without making a foundation-model or performance claim.
+Describe what users can do and what outcomes they can expect: create images,
+explore and remix ideas, use supported GALX experiences, and—when GALX chooses
+to authorize it—use a bounded private integration. Do not describe providers,
+routing or selection logic, capacity acquisition, scheduling, failover,
+internal economics or implementation diagnostics in public content, metadata,
+social previews, browser bundles, response bodies or headers.
 
-Current consumer plan pricing is $10/month in the active product configuration and is separate from Developer access. Published consumer copy should describe image creation, exploration, remixing, downloads, and fair-use boundaries without adding unverified speed or capacity promises. Developer Access is a separate $50/month recurring API access subscription; usage is billed at $0.02 per completed message, not per token, with a default $25 monthly hard cap and zero usage credits included.
+GALX Pro remains the public consumer plan. Its price and fair-use terms are
+maintained in the public consumer pricing surfaces. Private access has no public
+checkout or public usage-pricing contract. Historical billing identities and
+records remain available to server-side reconciliation where required.
 
-The billing workspace is the customer control plane for this contract. It shows
-completed and pending message quantity, accrued and remaining spend, cap progress,
-UTC reset timing, and durable in-app notices at 50%, 80%, and 100%. The API and
-browser surfaces expose only allowlisted customer terms; supplier token economics,
-internal ledger rows, Stripe identifiers, and operational diagnostics remain private.
+## Infrastructure and administration
 
-For explanation, describe Developer Access as membership to a managed
-workspace: the subscription provides API access to the service, while
-consumption is billed separately. This is an explanation of the existing
-subscription, not a workspace product, team-seat model or capacity promise.
+Keep the existing API endpoints, key authentication and authorization, usage
+metering, consumption and traffic accounting, quota and allocation controls,
+scheduling, worker/pool boundaries, recovery, request diagnostics, audit
+records, security boundaries and revocation mechanisms. Internal GALX products
+continue consuming the same machinery.
 
-Stripe follows the same boundary. GALX Pro and Developer Access use the existing subscription architecture with separate product/price identities. The former prepaid Developer/compute-pack checkout is retired: new quote and legacy checkout requests are rejected, the public Stripe configuration exposes no pack catalog, and historical wallet sessions remain available only for ledger/refund reconciliation. A paid historical wallet session never creates or approves a Developer access entitlement.
+Administrators use the private workspace to approve or disable a bounded
+cohort, generate credentials, assign rate and usage allocations, inspect
+metered consumption, modify allocations and revoke access. Credential secrets
+are revealed once and public users never receive the admin DTOs. Ordinary
+authenticated users are not administrators.
 
-Historical product records retain their original evidence and contract history. They do not define the current GALX Images, GALX Nova, or Developer narrative.
+Metering remains first-class even without public billing. It supports allocation
+enforcement, private cohort management, internal cost analysis, abnormal-use
+detection, capacity planning, experiments and future products. Removing a
+public price does not remove the measurement path.
 
-## Execution and evidence
+## Evidence and release
 
-Public documentation uses capability contracts and explicit response fields. Operational topology, credential sources, readiness mechanics and diagnostics stay private under [AGENTS.md](../AGENTS.md). Keep server-verified identity, independent staff authority, durable ownership and uncertain-operation recovery intact.
+Use explicit public response DTOs and capability-oriented documentation. Keep
+operational topology, credential sources, routing mechanics, internal economics
+and diagnostics private under [AGENTS.md](../AGENTS.md). Distinguish source
+implementation, local tests, deployment evidence and real-user acceptance.
 
-Measure completed user journeys, durable image generations, prompt remix engagement, stream discovery, and repeat use. Distinguish implementation, local tests, component deployment and real customer acceptance. [Incident records](../post-mortem/INCIDENTS.md) retain failed attempts and verification limits; a successful image test does not qualify checkout or third-party integrations.
+Every release should test both sides of the boundary: existing inference and
+metering consumers continue to function, while public users cannot purchase,
+enroll, provision, subscribe to or automatically obtain general-purpose API
+access. Scan rendered pages and browser assets before claiming the public site
+is clean.

@@ -387,8 +387,8 @@ function StudioWorkspace({
         </nav>
 
         <div className="studio-top-right">
-          <Link className="studio-docs-link" href="/developers">
-            Developer
+          <Link className="studio-docs-link" href="/docs">
+            Guidance
             <ArrowRight size={14} aria-hidden="true" />
           </Link>
         </div>

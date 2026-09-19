@@ -1,6 +1,5 @@
 import React from 'react';
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { Navigation } from '@/components/dashboard/Navigation';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 import { constructMetadata } from '@/lib/seo/metadata';
@@ -9,17 +8,16 @@ import { Shield, Lock, EyeOff, Server, CheckCircle2, ArrowRight } from 'lucide-r
 import { SITE_CONFIG } from '@/lib/seo/siteConfig';
 
 export const metadata: Metadata = constructMetadata({
-  title: 'Privacy Policy & Zero Data Retention (ZDR) Protocol',
-  description: 'GALXAI Privacy Policy, Ephemeral Data Zeroization, Zero Data Retention (ZDR) guarantees, GDPR, CCPA, and HIPAA compliance data protection practices.',
+  title: 'Privacy Policy — GALX',
+  description: 'How GALX handles account, product, usage, and support information.',
   canonicalPath: '/privacy',
   keywords: [
     'Privacy Policy',
-    'Zero Data Retention',
-    'ZDR Protocol',
+    'Privacy Policy',
     'GDPR Compliance',
     'CCPA Data Rights',
-    'HIPAA BAA Privacy',
-    'Ephemeral Token Processing',
+    'Account privacy',
+    'Product data controls',
   ],
 });
 
@@ -48,18 +46,18 @@ export default function PrivacyPolicyPage() {
         <header className="space-y-4 border-b border-white/10 pb-8">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-mono font-bold">
             <Shield className="w-3.5 h-3.5 text-emerald-400" />
-            <span>ENTERPRISE PRIVACY &amp; DATA SOVEREIGNTY</span>
+            <span>PRIVACY &amp; DATA CONTROLS</span>
           </div>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight">
-            Privacy Policy &amp; ZDR Protocol
+            Privacy Policy
           </h1>
           <p className="text-sm sm:text-base text-zinc-400 max-w-3xl leading-relaxed">
-            GALXAI is architected from the ground up for strict confidentiality. We operate under a deterministic <strong>Zero Data Retention (ZDR)</strong> standard: your prompts, completions, embeddings, and fine-tuning datasets are never stored, inspected, or used for model training.
+            This policy explains the information GALX collects, why it is used, and the choices available to you. Product-specific notices and access terms apply where they provide more detail.
           </p>
           <div className="flex items-center gap-4 text-xs font-mono text-zinc-500 pt-2">
             <span>Last Updated: {lastUpdated}</span>
             <span>•</span>
-            <span>GDPR &amp; CCPA Compliant</span>
+            <span>Privacy rights available</span>
           </div>
         </header>
 
@@ -69,9 +67,9 @@ export default function PrivacyPolicyPage() {
             <div className="w-9 h-9 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center">
               <EyeOff className="w-4 h-4" />
             </div>
-            <h2 className="font-bold text-white text-base">API Zero Data Retention &amp; Chat Controls</h2>
+            <h2 className="font-bold text-white text-base">Product data controls</h2>
             <p className="text-xs text-zinc-400 leading-relaxed">
-              Developer API endpoints are 100% private under strict Zero Data Retention (ZDR). Web chat users can manage or opt out of &quot;Improve the model for everyone&quot; in settings with zero raw session database storage and automated in-flight PII redaction.
+              GALX uses product and account controls to manage information submitted through supported experiences. Review the controls shown in the product before sharing sensitive material.
             </p>
           </div>
 
@@ -79,9 +77,9 @@ export default function PrivacyPolicyPage() {
             <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
               <Lock className="w-4 h-4" />
             </div>
-            <h2 className="font-bold text-white text-base">Ephemeral RAM Processing</h2>
+            <h2 className="font-bold text-white text-base">Limited collection</h2>
             <p className="text-xs text-zinc-400 leading-relaxed">
-              All token payloads exist only in volatile server memory during active TCP stream transmission and are immediately zeroized upon response completion.
+              GALX aims to collect only the information needed to provide products, secure accounts, measure usage, process payments, and respond to support requests.
             </p>
           </div>
 
@@ -89,9 +87,9 @@ export default function PrivacyPolicyPage() {
             <div className="w-9 h-9 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center">
               <Server className="w-4 h-4" />
             </div>
-            <h2 className="font-bold text-white text-base">End-to-End TLS 1.3 Encryption</h2>
+            <h2 className="font-bold text-white text-base">Security safeguards</h2>
             <p className="text-xs text-zinc-400 leading-relaxed">
-              Connections to GALX are encrypted in transit using modern TLS protections with Perfect Forward Secrecy (PFS).
+              GALX maintains administrative, technical, and organizational safeguards appropriate to the information it handles.
             </p>
           </div>
 
@@ -99,9 +97,9 @@ export default function PrivacyPolicyPage() {
             <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
               <CheckCircle2 className="w-4 h-4" />
             </div>
-            <h2 className="font-bold text-white text-base">GDPR &amp; CCPA Sovereign Rights</h2>
+            <h2 className="font-bold text-white text-base">Privacy rights</h2>
             <p className="text-xs text-zinc-400 leading-relaxed">
-              Full support for developer data deletion, account purging, Data Processing Addenda (DPA), and sovereign routing within US or EU geographic boundaries.
+              Depending on where you live, you may have rights to access, correct, delete, or restrict use of personal information. Contact GALX to exercise those rights.
             </p>
           </div>
         </section>
@@ -113,24 +111,24 @@ export default function PrivacyPolicyPage() {
               <span className="text-emerald-400 font-mono text-base">1.</span> Information We Collect
             </h2>
             <p>
-              We collect only the minimum account data required to maintain your developer wallet and compute quota:
+              We collect information needed to operate GALX products and support users, which may include:
             </p>
             <ul className="list-disc pl-6 space-y-2 text-xs text-zinc-400">
               <li><strong>Account Identification:</strong> Email address, hashed authentication credentials, and organization name.</li>
-              <li><strong>Billing Data:</strong> Payment transaction metadata, invoice history, and token consumption aggregates (integer counts of prompt and completion tokens). We never store raw credit card numbers.</li>
-              <li><strong>Operational Telemetry:</strong> Aggregated latency (p50/p90/p99), HTTP status codes, and error counts stripped of request payload bodies.</li>
+              <li><strong>Product and usage data:</strong> Information about features used, usage totals, preferences, and product interactions.</li>
+              <li><strong>Payment and support data:</strong> Transaction metadata, invoices, communications, and support requests. Payment card details are handled by payment providers.</li>
             </ul>
           </section>
 
           <section className="space-y-4">
             <h2 className="text-xl font-bold text-white flex items-center gap-2">
-              <span className="text-emerald-400 font-mono text-base">2.</span> Zero Data Retention (ZDR) Execution
+              <span className="text-emerald-400 font-mono text-base">2.</span> How information is used
             </h2>
             <p>
-              When a request is submitted to <code>https://galx.ai/v1/chat/completions</code>, GALX applies account access and usage controls before processing the request.
+              GALX uses information to provide and improve supported products, authenticate accounts, prevent abuse, measure usage, process payments, communicate with users, and meet legal obligations.
             </p>
             <p>
-              Data handling follows the retention and access settings documented for your account and plan. Review those settings before sending regulated or sensitive material.
+              Retention depends on the type of information and the reason it was collected. GALX retains information only as long as reasonably necessary for those purposes and applicable legal requirements.
             </p>
           </section>
 
@@ -156,16 +154,16 @@ export default function PrivacyPolicyPage() {
         {/* CTA Strip */}
         <section className="p-8 rounded-3xl bg-gradient-to-r from-emerald-950/40 via-zinc-900 to-cyan-950/40 border border-emerald-500/20 flex flex-col sm:flex-row items-center justify-between gap-6">
           <div className="space-y-1 text-center sm:text-left">
-            <h3 className="text-base sm:text-lg font-bold text-white">Review Security Certifications &amp; SOC 2 Type II</h3>
-            <p className="text-xs text-zinc-400">Explore our complete compliance catalog and cryptographic proof of zero PHI storage.</p>
+            <h3 className="text-base sm:text-lg font-bold text-white">Questions about privacy?</h3>
+            <p className="text-xs text-zinc-400">Contact GALX if you have a privacy question or want to exercise an available privacy right.</p>
           </div>
-          <Link
-            href="/compliance"
+          <a
+            href="mailto:privacy@galx.ai"
             className="px-5 py-2.5 rounded-xl bg-emerald-400 text-black font-bold text-xs font-mono flex items-center gap-2 hover:bg-emerald-300 transition-all shrink-0 cursor-pointer"
           >
-            <span>View Compliance Hub</span>
+            <span>Contact privacy</span>
             <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
+          </a>
         </section>
       </main>
     </div>

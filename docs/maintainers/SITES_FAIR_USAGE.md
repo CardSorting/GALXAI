@@ -118,10 +118,11 @@ The earlier [production release verification](../../internal/scaling-strategy-20
 
 The launch record below is historical evidence for the Sites policy. It is not
 the current public pricing authority. The current customer strategy is GALX
-Images with GALX Pro at $10/month and GALX Nova Developer Access at $50/month
-recurring, with zero included usage credits. Do not use the older Sites,
-Standard, prepaid or compute-pack terms below as current offers, and do not
-recreate those Stripe objects.
+Images with GALX Pro as the public subscription. Developer Access is no longer
+a public subscription or self-service API product; private access is deliberate
+administrator provisioning with bounded allocation and metering. Do not use the
+older Sites, Standard, prepaid, compute-pack, or Developer subscription terms
+below as current offers, and do not recreate those Stripe objects.
 
 At the time of the historical launch, application commit `8d82351` was deployed at `galx.ai`, private policy revision **2** was `enforce`, and a live GALX Pro recurring price was eligible. [Launch acceptance](../../internal/scaling-strategy-2026-09-10/commercial-reset/sites-automation/durable/pro-launch-release-verification.json) records that earlier deployment, catalog, policy, application/DB checks and live acceptance. It does not establish the current price or product narrative. Billing still distinguishes an available offer from active paid access, and transaction/invoice responses still use public field allowlists.
 
@@ -137,15 +138,26 @@ At the time of the historical launch, application commit `8d82351` was deployed 
 | Snapshot / refresh / admission / reserved grant | 5 seconds / 2,000 ms / 4,000 ms / 3,000 ms | Fresh local evidence with bounded shared admission |
 | Attempts / request deadline | 1 / 45 seconds | Preserve single dispatch and existing receipt recovery |
 
-The historical provisioning procedure was `npm run sites:provision -- --prepare /absolute/private/policy.json`, followed by the reviewed policy action. Do not use it to recreate an old Sites or prepaid catalog. Current Stripe catalog changes follow the private GALX Pro and Nova Developer procedures and the current [billing page contract](../reference/billing-pages.md); neither procedure is authorized by this guide.
+The historical provisioning procedure was `npm run sites:provision -- --prepare /absolute/private/policy.json`, followed by the reviewed policy action. Do not use it to recreate an old Sites, prepaid, or Developer catalog. Current Stripe catalog changes follow the private GALX Pro procedure and the current [billing page contract](../reference/billing-pages.md); private developer access is administered in `/admin`, not provisioned through Stripe. No live provisioning action is authorized by this guide.
 
-The historical Sites launch used an older commercial term and access policy; that term is not current pricing. The current `GET /api/billing/plan` response exposes only the verified consumer plan terms, access state, checkout availability, payment-profile presence and an allowlisted subscription summary. Its POST accepts a server-generated Pro or Nova Developer checkout request ID or a portal action, never caller-selected prices, customers, quantities, URLs or subscription authority. It contains no provider identifiers. Incomplete, foreign or ambiguous results disable new checkout; existing billing management remains reachable.
+The historical Sites launch used an older commercial term and access policy; that term is not current pricing. The current `GET /api/billing/plan` response exposes only the verified consumer plan terms, access state, checkout availability, payment-profile presence and an allowlisted subscription summary. Its POST accepts a server-generated Pro checkout request ID or a portal action, never caller-selected prices, customers, quantities, URLs or subscription authority. It contains no provider identifiers. Incomplete, foreign or ambiguous results disable new checkout; existing billing management remains reachable.
 
-Billing has dedicated [Plan, Credits, Transactions, Invoices and Payment settings pages](../reference/billing-pages.md) under a persistent account layout. Pricing and Pro upgrade actions open `/billing/plan`; `/billing` summarizes access and existing account credit separately. Developer subscription checkout opens `/developers`. Old checkout return URLs and section bookmarks continue into the relevant canonical page. The existing private return-path migration remains a prerequisite for the Pro checkout writer where it has not already been applied. These navigation rules do not alter paid-access or ledger authority.
+Billing has dedicated [Plan, Credits, Transactions, Invoices and Payment settings pages](../reference/billing-pages.md) under a persistent account layout. Pricing and Pro upgrade actions open `/billing/plan`; `/billing` summarizes access and existing account credit separately. `/developers` is informational and does not open checkout. Old checkout return URLs and section bookmarks continue into the relevant canonical page. The existing private return-path migration remains a prerequisite for the Pro checkout writer where it has not already been applied. These navigation rules do not alter paid-access or ledger authority.
 
 `private.galx_plan_checkouts` permits one open subscription attempt per account. A short database transaction claims its durable lease; all Stripe calls run outside transactions. Identical provider parameters and idempotency keys survive lost acknowledgements. Another browser resumes the current checkout. An old uncertain attempt without a session reference remains closed for operator review rather than risking a second subscription. Checkout completion is not itself proof of paid access.
 
-The existing signed webhook records Pro and Developer checkout completion, invoices and `customer.subscription.*` events atomically with its event receipt. Terminal cancellation cannot be overwritten by older events. The subscription table is an operational projection; active Stripe lifecycle evidence grants Developer API admission only when the verified Nova Price is active and the period remains current. Historical wallet refunds/disputes remain separate from subscription adjustments. Both plan management and payment settings select the same restricted portal. Runtime and readiness checks require invoice history, payment-method changes and period-end cancellation, with plan/quantity changes disabled. A missing, ambiguous or broader configuration fails closed instead of falling back to the account default. Historical purchases never create Developer access.
+The existing signed webhook retains Pro lifecycle events and historical Developer
+events atomically with their event receipts. Terminal cancellation cannot be
+overwritten by older events. The subscription table is an operational
+projection; active Stripe lifecycle evidence does not grant Developer API
+admission. Private access is decided and revoked by the admin control plane.
+Historical wallet refunds/disputes remain separate from subscription
+adjustments. Both plan management and payment settings select the same
+restricted portal. Runtime and readiness checks require invoice history,
+payment-method changes and period-end cancellation, with plan/quantity changes
+disabled. A missing, ambiguous or broader configuration fails closed instead of
+falling back to the account default. Historical purchases never create private
+Developer access.
 
 No active tax registrations were found. Provisioning leaves automatic tax disabled and does not create registrations or change existing tax settings. Review registrations and subscription tax collection before a later tax rollout; enabling an option alone is not registration.
 
@@ -157,6 +169,6 @@ During the initial rollout, inspect private admission latency/deferrals, provide
 
 For the historical Sites policy, `npm run sites:fair -- --disable` stopped new
 included admission while retaining receipts and recovery records. Do not use a
-Sites rollback command to change the current Images/Pro/Developer strategy.
+Sites rollback command to change the current Images/Pro/private-access strategy.
 Keep historical wallet reconciliation and private snapshots intact; never
 re-enable a former charged POST or prepaid Developer catalog as a rollback.

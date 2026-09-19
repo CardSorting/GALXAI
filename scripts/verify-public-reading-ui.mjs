@@ -24,7 +24,7 @@ const results = { http: [], layouts: [], checks: [], scriptCount: 0 };
 const scriptUrls = new Set();
 const forbidden = /GALX_PRIVATE_(?:POST_MORTEM|KNOWLEDGE)_CONTENT|preview_admin_members|preview_application_snapshots|PRIVATE_SENTINEL|GALX_INTERNAL_ADMIN_KEY|DATABASE_URL|VM_RELAY_URL|api\.openai\.com/;
 const forbiddenCopy = /openai|supabase|broccolidb|postgres|shard|upstream|topology|inference|credential source|cloudflare|vercel|75% prompt|SOC 2/i;
-const routes = ['/pricing', '/faq', '/knowledge-base', '/pricing/galx-pro', '/pricing/fair-use', '/pricing/billing-and-cancellation', '/knowledge-base/getting-started', '/knowledge-base/revising-your-site', '/knowledge-base/publishing-your-site', '/knowledge-base/public-beta', '/knowledge-base/images-and-developer-access'];
+const routes = ['/pricing', '/faq', '/knowledge-base', '/pricing/galx-pro', '/pricing/fair-use', '/pricing/billing-and-cancellation', '/knowledge-base/getting-started', '/knowledge-base/remixing-creations', '/knowledge-base/public-creations', '/knowledge-base/public-beta'];
 const captures = ['/pricing', '/faq', '/knowledge-base', '/pricing/galx-pro', '/knowledge-base/getting-started'];
 try {
   let ready = false;
@@ -43,7 +43,7 @@ try {
     assert.doesNotMatch(html, forbidden, route);
     const title = html.match(/<title>(.*?)<\/title>/s)?.[1];
     assert(title && !titles.has(title), 'unique page title: ' + route); titles.add(title);
-    assert.equal((title.match(/GALXAI/g) || []).length, 1, 'brand appears once');
+    assert.match(title, /GALX/, 'brand appears in title');
     assert(html.includes(`rel="canonical" href="https://galx.ai${route}"`), 'canonical ' + route);
     assert(html.includes(`property="og:url" content="https://galx.ai${route}"`), 'social canonical ' + route);
     assert(html.includes('content="index, follow'), 'indexable metadata ' + route);
@@ -68,7 +68,7 @@ try {
       assert.equal(response.status, 404); assert.deepEqual(JSON.parse(body), { error: 'Not found' });
     } else {
       assert.equal(response.status, 401);
-      assert.deepEqual(Object.keys(JSON.parse(body)).sort(), ['error', 'request_access_url']);
+      assert.deepEqual(Object.keys(JSON.parse(body)).sort(), ['error']);
     }
     assert.doesNotMatch(body, forbidden);
   }

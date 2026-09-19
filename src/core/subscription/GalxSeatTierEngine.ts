@@ -394,8 +394,11 @@ export class GalxSeatTierEngine {
     }
   }
 
-  public async reserveNovaMessage(userId: string, requestId: string): Promise<{ allowed: boolean; code?: string; [key: string]: unknown }> {
-    const result = await this.teamRepo.reserveNovaMessage({ userId, requestId });
+  public async reserveNovaMessage(userId: string, requestId: string, capUsd?: number): Promise<{ allowed: boolean; code?: string; [key: string]: unknown }> {
+    const capMicros = typeof capUsd === 'number' && Number.isFinite(capUsd) && capUsd > 0
+      ? Math.round(capUsd * 1_000_000)
+      : undefined;
+    const result = await this.teamRepo.reserveNovaMessage({ userId, requestId, capMicros });
     if (!result) throw new Error('NOVA_MESSAGE_RESERVATION_UNAVAILABLE');
     return result;
   }

@@ -24,12 +24,12 @@ export default function SingleKeyError({
           error={error}
           reset={reset}
           title="Gateway Key Unresolved"
-          subtitle="The requested API key metadata or rate limit configuration could not be loaded from the registry."
+          subtitle="The requested private credential metadata could not be loaded from the registry."
           badge="GATEWAY KEY AUDIT SAFEGUARD"
           icon={Key}
           accentColor="indigo"
           primaryLinkHref="/keys"
-          primaryLinkLabel="Back to API Keys"
+          primaryLinkLabel="Back to credential management"
           autoRetrySeconds={6}
         />
       </main>

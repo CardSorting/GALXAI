@@ -130,8 +130,8 @@ export function PublicHome() {
             <article data-home-reveal="step">
               <div className={styles.homeBenefitEyebrow}><Cpu size={12} aria-hidden="true" /><span>GALX NOVA</span></div>
               <h3>Intelligence, handled.</h3>
-              <p>Nova is our managed intelligence layer for reasoning and generation. Use it through GALX, or subscribe to Developer Access to build with supported capabilities through the API.</p>
-              <Link className={styles.textLink} href="/developers">Explore Developer <ArrowUpRight size={16} aria-hidden="true" /></Link>
+              <p>Nova is our managed intelligence layer for reasoning and generation. Use it through GALX and supported private integrations.</p>
+              <Link className={styles.textLink} href="/developers">Learn about private access <ArrowUpRight size={16} aria-hidden="true" /></Link>
             </article>
           </div>
         </section>
@@ -159,7 +159,7 @@ export function PublicHome() {
         <section id="faq" className={styles.faq} aria-labelledby="faq-title">
           <div className={styles.sectionIntro} data-home-reveal="intro">
             <h2 id="faq-title">Questions,<br />answered.</h2>
-            <p>Answers about creating in GALX, Nova, and Developer access.</p>
+            <p>Answers about creating in GALX and using Nova-powered experiences.</p>
             <Link href="/faq" className={styles.textLink}>Browse all FAQs <ArrowUpRight size={16} aria-hidden="true" /></Link>
             <Link href="/knowledge-base" className={styles.textLink}>Explore the knowledge base <ArrowUpRight size={16} aria-hidden="true" /></Link>
           </div>

@@ -13,18 +13,12 @@ try {
     for (const signedIn of [false,true]) {
       const context = await browser.newContext({ viewport: { width, height: 980 }, reducedMotion: 'reduce' });
       if (signedIn) await context.addInitScript(() => localStorage.setItem('galx_custom_auth_user', JSON.stringify({ id:'preview-fixture', email:'creator@example.test', name:'Creator', token:'preview-fixture-token', provider:'fixture' })));
-      const state = { status:'not_requested', unavailable:false, posts:0, feedback:0 };
+      const state = { status:'retired', unavailable:false, posts:0, feedback:0 };
       await context.route('**/*', async (route: any) => {
         const req = route.request(), url = new URL(req.url());
         if (url.origin !== new URL(base).origin) return route.abort();
         const json = (value: unknown, status=200) => route.fulfill({ status, contentType:'application/json', body:JSON.stringify(value) });
-        if (url.pathname === '/api/developer-access') {
-          assert.equal(req.headers().authorization, 'Bearer preview-fixture-token');
-          if (state.unavailable) return json({ error:{ code:'request_unavailable', message:'Your request could not be saved. Please try again.' } },503);
-          if (req.method() === 'POST') { state.posts++; assert.deepEqual(Object.keys(req.postDataJSON()).sort(), ['cohort_interest','expected_traffic','github_url','introduction','linkedin_url','use_case']); state.status='pending'; }
-          return json({ status:state.status, requested_at:null });
-        }
-        if (url.pathname === '/api/developer-access/feedback') { state.feedback++; assert.deepEqual(Object.keys(req.postDataJSON()), ['message']); return json({received:true},201); }
+        if (url.pathname === '/api/developer-access' || url.pathname === '/api/developer-access/feedback') return json({ error:{ code:'public_access_retired', message:'Self-service developer access is no longer available.' } },410);
         if (url.pathname.startsWith('/api/')) return json({ enabled:false, amountUsd:null, status:'healthy' });
         return route.continue();
       });
@@ -39,36 +33,17 @@ try {
       }
       await page.goto(base+'/developers',{waitUntil:'networkidle'});
       if (!signedIn) {
-        await page.getByRole('link',{name:'Sign up to apply',exact:true}).waitFor();
+        await page.getByRole('heading',{name:'GALX Nova Private access, by decision.',exact:true}).waitFor();
         await inspect('guest');
-        await page.getByRole('link',{name:'Create images',exact:true}).click();
+        await page.getByRole('link',{name:'Explore GALX',exact:true}).click();
         await page.waitForURL(base+'/images');
         assert.equal(new URL(page.url()).pathname,'/images');
         await page.goto(base+'/sites'); assert.equal(new URL(page.url()).pathname,'/sites');
         await page.goto(base+'/'); await inspect('home');
-      } else {
-        await page.getByLabel('A short introduction', {exact:true}).fill('I am a builder working on small research tools.');
-        await page.getByLabel('GitHub profile', {exact:true}).fill('github.com/preview-builder');
-        await page.getByRole('radio', {name:/Yes, I’d like to participate/}).check();
-        await page.getByLabel('What would you use the API for?').fill('I am building a writing assistant for a small research team.');
-        await inspect('request');
-        await page.getByRole('button',{name:'Review application',exact:true}).click();
-        await page.getByRole('button',{name:'Submit application',exact:true}).click();
-        await page.getByRole('heading',{name:'You’re on the developer waitlist'}).waitFor(); assert.equal(state.posts,1);
-        await page.reload();await page.getByRole('heading',{name:'You’re on the developer waitlist'}).waitFor();
-        await inspect('pending');
-        state.status='approved';await page.getByRole('button',{name:'Check access status'}).click();
-        await page.getByRole('heading',{name:'Your preview access is approved'}).waitFor();
-        await page.getByLabel('Share private feedback').fill('The first request worked. I would like a clearer explanation of usage limits.');
-        await page.getByRole('button',{name:'Send private feedback'}).click();await page.getByText('Feedback received.',{exact:false}).waitFor();assert.equal(state.feedback,1);
-        await inspect('approved');
-        state.status='revoked';await page.reload();await page.getByRole('heading',{name:'Your developer access is paused'}).waitFor();
-        state.unavailable=true;await page.getByRole('button',{name:'Check access status'}).click();await page.getByRole('button',{name:'Try again',exact:true}).waitFor();
-        state.unavailable=false;await page.getByRole('button',{name:'Try again',exact:true}).click();await page.getByRole('heading',{name:'Your developer access is paused'}).waitFor();
-      }
+      } else await inspect('signed-in');
       await context.close();
     }
   }
   assert(checks.every((check: any) => check.violations.length === 0), 'Accessibility findings: see checks.json');
-  console.log('PASS: desktop/mobile public entry, signup link, request, persistence, approval, feedback, revocation, recovery, accessibility and overflow checks.');
+  console.log('PASS: desktop/mobile public entry is informational, has no enrollment or feedback workflow, and remains accessible without overflow.');
 } finally { await fs.writeFile(`${output}/checks.json`,JSON.stringify(checks,null,2));await browser.close(); }

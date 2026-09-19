@@ -10,12 +10,13 @@ Use for a Stripe failed-delivery alert or missing billing update. Owner: billing
 
 Read the alert's account ID and URL, then confirm the authenticated account with `stripe whoami --format json`. The CLI profile can differ from the application's configured account. Inspect endpoint IDs, URLs, `livemode`, status and subscriptions without printing keys, signing secrets or customer payloads. Preserve the original event IDs and receipt history.
 
-The active Pro and Developer Access paths require subscription creation,
-updates and deletion, invoice payment events and the rest of the shared event
-allowlist. Readiness also verifies the unique restricted customer portal:
-invoice history, payment-method updates and period-end cancellation enabled;
-subscription changes disabled. Developer Access uses its own recurring Price
-and its signed subscription lifecycle grants or removes only API admission.
+The active public billing path is GALX Pro: subscription creation, updates and
+deletion, invoice payment events, and the rest of the shared event allowlist.
+Readiness also verifies the unique restricted customer portal: invoice history,
+payment-method updates and period-end cancellation enabled; subscription changes
+disabled. Private developer access is no longer a Stripe checkout product. Its
+credential, allocation, metering, and revocation lifecycle is administered in
+`/admin` and must not be inferred from a subscription event.
 
 The application owns `/api/stripe/webhook` and `/api/internal/credits/stripe`. Its receiver verifies the unmodified body signature and requires the event's mode to match the configured key. `api.galx.ai` is not a billing receiver; `www.galx.ai` redirects. The production application origin is `https://galx.ai`. Test payments require an isolated test application, credentials and database, or local Stripe CLI forwarding to an isolated receiver.
 
@@ -36,14 +37,15 @@ Stop dependent changes when account/mode ownership is uncertain, the signature d
 Retain endpoint IDs, event subscriptions, URL and prior status in private allowlisted evidence. Re-enable a disabled test endpoint only after an isolated receiver is verified; restoring a known failing production target reintroduces the incident. Do not delete receipts, rewrite ledger history or rotate unrelated live credentials. Apply application rollback only with the compatible durable billing schema.
 
 The retired catalog provisioner and product seeder are guards; they cannot
-recreate prepaid Developer or compute-pack objects. The private Pro and Nova
-provisioning procedures must be run with their existing live-authority,
-webhook, portal and policy preflights. This runbook does not authorize a live
-provisioning action.
+recreate prepaid Developer or compute-pack objects. Pro provisioning must use
+the existing live-authority, webhook, portal, and policy preflights. Private
+developer access is provisioned through the existing admin control plane, not
+through Stripe. This runbook does not authorize a live provisioning action.
 
 ## Verification and evidence
 
-Run `npm run test:stripe` for the current Pro/Developer pricing boundary and
+Run `npm run test:stripe` for the current Pro and retired-Developer billing
+boundary and
 `npm run test:billing:lifecycle` for provider-state, portal, DTO, URL and
 signature/mode/body checks. Run `npm run test:developer-preview` for the
 independent reviewed-access boundary. Run

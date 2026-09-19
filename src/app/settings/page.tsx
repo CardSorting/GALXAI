@@ -169,11 +169,11 @@ export default function SettingsPage() {
       <header className="sticky top-0 z-40 bg-[#07090e]/90 backdrop-blur-xl border-b border-white/10 px-4 sm:px-8 py-3.5 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Link
-            href="/keys"
+            href="/billing"
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white transition-all text-xs font-semibold"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span className="hidden sm:inline">Back to API Keys</span>
+            <span className="hidden sm:inline">Back to account</span>
           </Link>
           <h1 className="text-base font-bold text-white tracking-tight">Settings</h1>
         </div>

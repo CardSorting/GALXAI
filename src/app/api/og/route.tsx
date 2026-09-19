@@ -7,12 +7,11 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
 
-    const title = searchParams.get('title') || 'GALX — Images and Sites';
+    const title = searchParams.get('title') || 'GALX — Supported product experiences';
     const subtitle =
       searchParams.get('subtitle') ||
-      'Create images and build with GALX Nova. Developer Access is $50/month; usage is billed separately.';
-    const badge = searchParams.get('badge') || 'IMAGES & SITES';
-    const price = searchParams.get('price');
+      'Create with GALX Images. Private access is provided by decision.';
+    const badge = searchParams.get('badge') || 'GALX';
     const category = searchParams.get('category') || 'GALX';
 
     return new ImageResponse(
@@ -146,7 +145,7 @@ export async function GET(request: NextRequest) {
             </div>
           </div>
 
-          {/* Bottom Bar / Telemetry */}
+          {/* Bottom Bar */}
           <div
             style={{
               display: 'flex',
@@ -168,30 +167,12 @@ export async function GET(request: NextRequest) {
               }}
             >
               <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                ⚡ Sub-15ms Edge TTFT
+                ✦ Supported GALX capabilities
               </span>
               <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                🧠 75% Prompt Caching Rebate
-              </span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                🛡️ Zero Data Retention
+                ◇ Explicit private access
               </span>
             </div>
-
-            {price && (
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  fontSize: '20px',
-                  fontWeight: 900,
-                  color: '#fbbf24',
-                }}
-              >
-                {price}
-              </div>
-            )}
           </div>
         </div>
       ),
@@ -203,7 +184,7 @@ export async function GET(request: NextRequest) {
         },
       }
     );
-  } catch (e: any) {
-    return new Response(`Failed to generate OpenGraph image: ${e.message}`, { status: 500 });
+  } catch {
+    return new Response('Failed to generate image.', { status: 500 });
   }
 }

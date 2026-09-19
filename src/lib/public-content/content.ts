@@ -56,10 +56,10 @@ export const GUIDES: Guide[] = [
       },
       {
         id: 'developer-access',
-        title: 'Developer access is separate',
+        title: 'Private integrations are separate',
         paragraphs: [
-          'GALX Developer is the separate route for programmable access to GALX Nova. Developer Access is a $50/month recurring API access subscription.',
-          'The subscription is an access fee. Usage is billed separately and no usage credits are included. Review supported capabilities and the applicable usage terms before building.',
+          'GALX Nova powers supported GALX experiences and selected private integrations. General-purpose developer access is not a public subscription.',
+          'Private access is explicit, bounded, metered, administered, and revocable. GALX establishes any applicable terms directly with an authorized cohort.',
         ],
       },
     ],
@@ -91,7 +91,7 @@ export const GUIDES: Guide[] = [
         id: 'scope',
         title: 'What this applies to',
         paragraphs: [
-          'These terms describe image creation in GALX Images. Developer access is a separate route with its own supported capabilities and usage terms.',
+          'These terms describe image creation in GALX Images. Selected private integrations are administered separately and do not change the consumer image contract.',
         ],
       },
     ],
@@ -108,7 +108,7 @@ export const GUIDES: Guide[] = [
         title: 'Monthly billing',
         paragraphs: [
           PRO_PLAN.name + ' is $' + PRO_PLAN.monthlyPriceUsd + ' USD per month and renews monthly. Review the plan in your account before subscribing.',
-          'Developer API access is separate from the consumer image plan and has separate access and usage terms.',
+          'Selected private integrations are separate from the consumer image plan and have directly assigned access terms.',
         ],
       },
       {
@@ -260,7 +260,7 @@ export const GUIDES: Guide[] = [
         id: 'feedback',
         title: 'Tell us what you want to make',
         paragraphs: [
-          'Feedback about prompts, discovery, and the Image Studio helps us improve the experience. Developers can subscribe to build with supported Nova capabilities through the API.',
+          'Feedback about prompts, discovery, and the Image Studio helps us improve the experience. Selected integrations may be authorized to use supported Nova capabilities.',
         ],
       },
     ],
@@ -268,8 +268,8 @@ export const GUIDES: Guide[] = [
   },
   {
     path: '/knowledge-base/images-and-developer-access',
-    title: 'GALX Images and Developer access',
-    description: 'Choose the right path: create in GALX Images or build with GALX Nova through Developer.',
+    title: 'GALX Images and private integrations',
+    description: 'Create in GALX Images or learn how GALX Nova supports explicitly authorized private integrations.',
     category: 'Getting started',
     sections: [
       {
@@ -284,8 +284,8 @@ export const GUIDES: Guide[] = [
         title: 'Build with GALX Nova',
         paragraphs: [
           'GALX Nova is our managed intelligence layer for reasoning and generation. You use the capability; GALX handles the underlying execution.',
-          'Developer Access is a $50/month recurring membership for API access. Usage is billed separately and no usage credits are included. Review supported capabilities and applicable usage terms before building.',
-          'The API exposes supported capabilities documented for developers. The Image Studio and API may not expose identical capabilities.',
+          'General-purpose API access is not self-service. GALX may authorize a bounded private integration with directly assigned terms.',
+          'Authorized integrations use supported capabilities documented for their cohort. The Image Studio and private integrations may not expose identical capabilities.',
         ],
       },
       {
@@ -305,7 +305,7 @@ export const FAQ_GROUPS = [
   { id: 'getting-started', title: 'Getting started' },
   { id: 'about-galx', title: 'GALX and Nova' },
   { id: 'plans-and-billing', title: 'Plans and billing' },
-  { id: 'publishing-and-access', title: 'Creation and Developer access' },
+  { id: 'publishing-and-access', title: 'Creation and private access' },
 ] as const;
 
 export const FAQS = [
@@ -313,7 +313,7 @@ export const FAQS = [
     id: 'what-is-galx',
     group: 'about-galx',
     question: 'What is GALX?',
-    answer: 'GALX lets people create AI images. The intelligence service behind the experience is called Nova, and developers can subscribe for API access.',
+    answer: 'GALX lets people create AI images. The intelligence service behind the experience is called Nova, and selected private integrations may be authorized by decision.',
     guide: '/knowledge-base/getting-started',
   },
   {
@@ -327,7 +327,7 @@ export const FAQS = [
     id: 'what-managed-means',
     group: 'about-galx',
     question: 'What does “managed intelligence” mean?',
-    answer: 'You use GALX Nova through the API. GALX operates the service behind that API; you build your application around its supported capabilities.',
+    answer: 'GALX Nova powers supported GALX experiences and selected private integrations. GALX operates the service behind those experiences.',
     guide: '/knowledge-base/images-and-developer-access',
   },
   {
@@ -403,43 +403,43 @@ export const FAQS = [
   {
     id: 'developer-access',
     group: 'publishing-and-access',
-    question: 'How do I build with Nova?',
-    answer: 'Subscribe to GALX Nova Developer Access, a $50/month membership for supported reasoning and generation capabilities through the documented API. Usage is billed separately and no usage credits are included.',
+    question: 'Is programmable access available publicly?',
+    answer: 'No. General-purpose developer access is not self-service. GALX may authorize a bounded private integration when it deliberately chooses to support the use case.',
     guide: '/knowledge-base/images-and-developer-access',
   },
   {
-    id: 'developer-membership-price',
+    id: 'private-access-boundary',
     group: 'publishing-and-access',
-    question: 'What am I paying $50/month for?',
-    answer: 'The recurring subscription gives you access to GALX Nova through its API. It is an access membership, not a purchase of usage credits. API usage is billed separately.',
+    question: 'How is private access managed?',
+    answer: 'Private access is explicit, bounded, metered, administered, and revocable. Credentials and allocations are managed directly for an authorized cohort.',
     guide: '/knowledge-base/images-and-developer-access',
   },
   {
-    id: 'developer-membership-model',
+    id: 'private-access-metering',
     group: 'publishing-and-access',
-    question: 'How does the membership model work?',
-    answer: 'Think of Developer Access like membership to a managed workspace. The subscription gives you access to the service; consumption is billed separately. For GALX Nova, the membership is $50/month for API access, with no usage credits included.',
+    question: 'Does GALX still measure private integration usage?',
+    answer: 'Yes. Metering remains in place for infrastructure operations, bounded cohorts, allocation controls, accounting, and capacity planning. It does not create a public pricing offer.',
     guide: '/knowledge-base/images-and-developer-access',
   },
   {
     id: 'developer-membership-usage',
     group: 'publishing-and-access',
-    question: 'Does the membership include $50 of API usage?',
-    answer: 'No. The monthly fee is for API access. It is not converted into credits, applied against usage charges, or treated as a prepaid balance. Developer usage is billed separately at $0.02 per completed message with a default $25 monthly usage cap.',
+    question: 'Can a public account provision API credentials?',
+    answer: 'No. Public accounts cannot enroll, purchase, or automatically receive general-purpose API credentials. GALX administrators provision private access deliberately when appropriate.',
     guide: '/pricing/usage',
   },
   {
     id: 'developer-usage-rates',
     group: 'publishing-and-access',
-    question: 'Where can I see Nova usage rates?',
-    answer: 'A separate usage-pricing contract has not been published. Developer Access remains $50/month for API access with no usage credits included; do not infer rates from model metadata, examples, or historical pages.',
+    question: 'Where can I see private integration usage terms?',
+    answer: 'There is no public usage-pricing contract for general-purpose developer access. Authorized cohorts receive directly assigned allocation and operating terms.',
     guide: '/pricing/usage',
   },
   {
     id: 'developer-images',
     group: 'publishing-and-access',
-    question: 'Do I need Developer Access to create images in GALX?',
-    answer: 'No. Developer Access is for integrating the API into an application. Image creation within GALX uses the separate consumer product and its applicable access requirements.',
+    question: 'Do I need private integration access to create images in GALX?',
+    answer: 'No. Image creation within GALX uses the consumer product and its applicable access requirements.',
     guide: '/knowledge-base/images-and-developer-access',
   },
 ] as const;

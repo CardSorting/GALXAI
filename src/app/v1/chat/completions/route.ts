@@ -551,7 +551,8 @@ async function previewPOST(req: NextRequest) {
       requestId,
       isPriorityUser,
       headers: req.headers,
-      usageBillingBasis: 'message'
+      usageBillingBasis: 'message',
+      usageCapUsd: authResult.authType === 'developer_key' ? authResult.apiKey?.spendCapUsd : undefined,
     });
 
     // 5. Return formatted response with CORS headers, TTFT streaming optimization & ZDR Attestation

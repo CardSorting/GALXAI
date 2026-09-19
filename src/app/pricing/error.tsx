@@ -24,7 +24,7 @@ export default function PricingError({
           error={error}
           reset={reset}
           title="Pricing could not be loaded"
-          subtitle="Please try again. Review the current GALX Images plan or the $50/month Developer Access membership."
+          subtitle="Please try again. Review the current GALX Images plan."
           badge="GALX PLANS"
           icon={CircleDollarSign}
           accentColor="emerald"

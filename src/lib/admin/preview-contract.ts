@@ -14,9 +14,15 @@ export type StaffMember = { email: string; role: AdminRole; active: boolean; rev
 export type AuditItem = { id: string; actor_email: string; action: string; subject: string; subject_label: string;
   previous_state: string | null; next_state: string | null; reason: string; expires_at: string | null; created_at: string };
 export type Page<T> = { items: T[]; has_more: boolean; page: number };
-export type RequestDetail = { request: AccessRequest; activity: AuditItem[]; feedback: FeedbackItem[] };
+export type PrivateAccessKey = { id: string; name: string; key_prefix: string; environment: 'live' | 'test'; scopes: string[];
+  rate_limit_per_minute: number; usage_cap_usd: number | null; current_usage_usd: number; total_requests: number; total_tokens: number;
+  created_at: string; last_used_at: string | null; expires_at: string | null; revoked: boolean };
+export type PrivateAccessUsage = { status: 'active' | 'unavailable'; period_start: string | null; reset_at: string | null;
+  completed_messages: number; pending_messages: number; cap_messages: number; accrued_usd: number; remaining_usd: number; percent_used: number };
+export type PrivateAccessDetail = { keys: PrivateAccessKey[]; usage: PrivateAccessUsage | null };
+export type RequestDetail = { request: AccessRequest; activity: AuditItem[]; feedback: FeedbackItem[]; private_access?: PrivateAccessDetail };
 export const ROLE_DESCRIPTION: Record<AdminRole, string> = {
-  owner: 'Review requests, manage feedback and control staff access.',
-  reviewer: 'Approve or pause developer access and manage feedback.',
+  owner: 'Review requests, manage private access, and control staff access.',
+  reviewer: 'Approve or pause private access, manage credentials, and manage feedback.',
   viewer: 'Read requests, private feedback and decision history.',
 };

@@ -25,7 +25,7 @@ export default function KeysError({
           error={error}
           reset={reset}
           title="API Keys View Unavailable"
-          subtitle="An error occurred while loading your developer API keys. Active gateway keys continue to route requests normally."
+          subtitle="Credential management is administered privately. Existing authorized integrations continue operating normally."
           badge="KEY VAULT ISOLATION ACTIVE"
           icon={Key}
           accentColor="indigo"

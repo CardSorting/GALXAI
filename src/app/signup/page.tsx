@@ -238,18 +238,6 @@ function SignUpContent() {
                   >
                     Credits
                   </Link>
-                  <Link
-                    href="/developers"
-                    className="py-2.5 px-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-indigo-300 transition-all text-center"
-                  >
-                    Developer preview
-                  </Link>
-                  <Link
-                    href="/developers"
-                    className="py-2.5 px-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-cyan-300 transition-all text-center"
-                  >
-                    Access status
-                  </Link>
                 </div>
 
                 <button
@@ -274,7 +262,7 @@ function SignUpContent() {
                   {confirmationEmail ? 'Check your email' : 'Create GALX AI Account'}
                 </h1>
                 <p className="text-xs text-zinc-400">
-                  {confirmationEmail ? <>Open the confirmation link sent to <strong className="text-zinc-200 break-all">{confirmationEmail}</strong> to finish signing up.</> : 'Synthesize images, explore the live stream, and manage your credits. Developer API access requires a separate preview approval.'}
+                  {confirmationEmail ? <>Open the confirmation link sent to <strong className="text-zinc-200 break-all">{confirmationEmail}</strong> to finish signing up.</> : 'Synthesize images, explore the live stream, and manage your credits in GALX.'}
                 </p>
               </div>
 

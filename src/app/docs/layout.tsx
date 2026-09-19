@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import Link from 'next/link';
-import { Sparkles, Terminal, KeyRound, Activity, ShieldCheck, Download } from 'lucide-react';
+import { Sparkles, Terminal, Activity, ShieldCheck, Download } from 'lucide-react';
 import { Navigation } from '@/components/dashboard/Navigation';
 import { DocsSubNav } from '@/components/dashboard/DocsSubNav';
 
@@ -45,15 +45,6 @@ export default function DocsLayout({ children }: { children: ReactNode }) {
                   >
                     <Terminal className="h-3.5 w-3.5 text-cyan-400" />
                     <span>Supported capabilities</span>
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/keys"
-                    className="flex items-center gap-2 text-zinc-300 transition-colors hover:text-indigo-300"
-                  >
-                    <KeyRound className="h-3.5 w-3.5 text-emerald-400" />
-                    <span>API Credentials</span>
                   </Link>
                 </li>
                 <li>

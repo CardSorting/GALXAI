@@ -97,16 +97,16 @@ export default async function Image() {
               color: '#ffffff',
             }}
           >
-            Universal Developer API Keys &amp; Workload Tokens
+            Private integration credentials
           </div>
           <div style={{ display: 'flex', fontSize: '22px', color: '#cbd5e1', lineHeight: 1.4 }}>
-            Mint granular API keys with automated IP whitelisting, model-specific restrictions, rate-limit governance, and real-time telemetry.
+            Credentials, allocations, and metered consumption are administered for explicitly authorized integrations.
           </div>
         </div>
 
         {/* Badges */}
         <div style={{ display: 'flex', gap: '14px' }}>
-          {['1-Click Cursor IDE Preset', 'Per-Key Budget Quotas', 'Model Isolation Scopes', 'Real-time Ingestion Metrics'].map((item, i) => (
+          {['Bounded allocations', 'Credential revocation', 'Metered consumption', 'Administered access'].map((item, i) => (
             <div
               key={i}
               style={{

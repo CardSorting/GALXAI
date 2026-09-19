@@ -1,15 +1,25 @@
-# Private preview administration
+# Private access administration
 
 <!-- docs-scope: current-guide -->
 
-The admin workspace is `/admin`. Images and Sites stay public; preview approvals apply to the developer API and tools. Staff membership is a separate permission and does not itself grant developer access.
+The authenticated `/admin` workspace is the only user-facing control plane for
+private developer access. It uses a familiar cloud-console model: an inbox for
+review, a resource detail page for credentials and allocations, a usage view
+for metering, an activity trail for accountability, and role-based staff
+management.
 
-## First-time setup
+Staff membership is separate from cohort approval. Neither ordinary account
+metadata nor possession of an API key grants administration. Images and Sites
+retain their own product paths and eligibility rules.
 
-Apply both migrations, in order, before deploying the updated site:
+## Before you start
+
+Apply the migrations in order:
 
 1. `20260912215724_developer_private_preview.sql`
 2. `20260912222003_preview_admin_workspace.sql`
+3. `20260918250000_private_developer_access_controls.sql`
+4. `20260918251000_private_access_allocation_sync.sql`
 
 Provision the first owner from a trusted server environment:
 
@@ -17,62 +27,134 @@ Provision the first owner from a trusted server environment:
 npm run developer-preview -- bootstrap-owner founder@example.com
 ```
 
-Replace the example with the founder's actual GALX sign-in email. This command only works with an empty staff roster. It sends no email and grants no developer API access. Sign in with that verified email, then open `/admin`; the membership becomes permanently bound to that account ID. Subsequent staff changes happen in **Staff access**. An invitation for a different account cannot take over an already-bound membership.
+Use the actual verified sign-in email. After the owner signs in, subsequent
+staff changes happen in **Staff access**. Keep database credentials and raw API
+secrets out of browsers, logs, tickets, and screenshots.
 
-The migrations, site and API gateway were deployed on 2026-09-12. The first owner is provisioned and bound directly to the founder-specified, verified account ID; see the [activation receipt](preview-activation.md). The production roster is initialized, so use **Staff access** for subsequent changes. The Worker calls the site's approval check on every private request, so pauses and expiry apply to existing keys.
+## Console map
 
-## Daily review
+| View | Use it for | Familiar pattern |
+| --- | --- | --- |
+| Requests | Review a bounded cohort and intended use | Triage inbox / approval queue |
+| Private access | Provision, allocate, inspect, and revoke credentials | Resource detail |
+| Feedback | Review participant reports without changing access implicitly | Support inbox |
+| Activity | Inspect decisions, credential changes, and staff changes | Audit trail |
+| Staff access | Add, change, or remove staff roles | Team/RBAC settings |
 
-1. Open **Requests → Waiting**. Search by email or account ID when following up with a known participant.
-2. Select a project, read the builder's introduction, supplied profiles, cohort preference, project description and expected traffic, then choose a decision. Profile ownership is self-reported. Older applications may not include the new details. Approval defaults to 30 days; 7 days, 90 days and no expiry are also available.
-3. Add an internal decision note. The confirmation names the account, period and immediate effect. Saving creates the decision and history entry in one transaction.
-4. Use **Next request** to continue reviewing. Each admission is individual so the operator controls cohort growth.
-5. Use **Feedback** to review participant reports. Marking one resolved removes it from the open inbox; it can be reopened. Resolution does not send a response to the participant.
-6. Approved accounts can be paused, and paused/declined requests can be returned to the waitlist. Expired approvals deny new private requests without requiring a background job. Already-running work is not cancelled.
+The page keeps list context and detail context together. Search narrows the
+current view; filters describe a state; status chips communicate whether an
+action is pending, approved, expired, paused, or revoked. A destructive action
+names its target and reports its result immediately.
 
-Participants see their current status and any access expiry on `/developers`. They do not see staff identities, internal notes or other participants' feedback. No email is sent automatically. After adding staff, use **Copy sign-in link** and share it yourself.
+## Provision a bounded integration
 
-## Permissions
+Use this sequence for every new private integration:
 
-| Role | Read requests, feedback and history | Approve, pause and resolve | Manage staff |
+1. Open **Requests** and inspect the account, intended use, cohort preference,
+   and existing decision history.
+2. Approve an explicit bounded cohort with an expiry when appropriate. Record
+   the reason required for later review.
+3. Open **Private access**, select the approved cohort, and choose
+   **Generate credential**.
+4. Assign a clear name, `live` or `test` environment, traffic allocation
+   (requests per minute), usage allocation (USD), and credential expiry.
+5. Copy the raw API secret from the one-time reveal and deliver it through an
+   approved private channel. The admin API does not return the raw secret again.
+6. Confirm the key prefix, environment, allocation, expiry, and current usage
+   in the access detail. Do not record the raw secret in the audit note.
+
+Approval does not automatically mint a key. The repository writes the durable
+key before returning success and appends an audit record. A failed durable
+write must not appear active in cache or in the workspace.
+
+## Operate existing access
+
+The **Private access** detail is the source of truth for the operator view. It
+shows allowlisted metadata and usage summary:
+
+- key name, prefix, environment, scopes, and expiry;
+- traffic allocation and usage allocation;
+- request and token totals;
+- current metering-period consumption;
+- remaining allocation and reset date; and
+- recent decision and credential activity.
+
+It does not expose key hashes, raw secrets, provider credentials, topology,
+routing state, raw ledger rows, or internal diagnostics.
+
+Use **Save allocation** to change a key name, traffic limit, or usage cap. The
+next reservation synchronizes the active period with the assigned cap, so an
+allocation change applies without deleting usage history. Use **Revoke** when a
+credential is compromised, no longer needed, expired, or outside the approved
+scope.
+
+To disable a cohort, revoke its credentials and change the cohort decision to a
+non-active state. New requests fail closed; already admitted work is not
+cancelled. Re-enable only through an explicit administrator decision and a new
+bounded allocation.
+
+The current metering card is intentionally colocated with the credential
+resource. It shows completed and pending messages, allocation, remaining
+amount, accrued amount, percentage used, and reset timing where recorded. This
+supports safe operations without turning metering into public billing.
+
+## Roles and permissions
+
+| Role | Read cohorts, credentials, usage, and history | Decide cohorts, allocate, revoke | Manage staff |
 | --- | --- | --- | --- |
 | Owner | Yes | Yes | Yes |
 | Reviewer | Yes | Yes | No |
 | Viewer | Yes | No | No |
 
-Only owners can add, change or remove staff. Pending owner invitations do not count toward the last-active-owner safeguard. Concurrent owner changes are serialized; they cannot remove all active owners. Each request rechecks database membership. Writes hold the actor's membership until commit, so staff removal and in-flight decisions have a defined order.
+Every request rechecks staff membership. Writes use server-side authorization,
+exact same-origin mutation checks, revisions, and allowlisted DTOs. Responses
+are private/no-store and noindex. Browser database roles do not access the
+private tables. Ordinary authenticated users are not administrators.
 
-Staff access requires an Auth-verified account with confirmed email. A native provider token or its email claim is not staff identity proof; use the canonical account sign-in. API keys, customer approval, payment, editable profile metadata and internal service headers cannot authorize administration. The page, its JavaScript entry chunk, middleware and route handlers are protected. Responses are private/no-store and use explicit DTOs. The private tables deny `anon` and `authenticated` access and force RLS. The application service role can append audit records but cannot edit or delete them.
+The preserved API-key endpoints remain available to the admin implementation,
+but `/api/keys`, key activity, verification, rotation, and revocation are
+admin-only. Do not create a second public credential workflow around them.
 
-## Conflict and recovery behavior
+## Recovery paths
 
-Every permission record has a revision. Pending applicants can update their application; each edit increments the same revision so a stale staff review cannot decide against changed details. A stale browser receives a conflict instead of overwriting someone else's decision. Decision notes survive workspace refresh and switching between requests while the workspace remains open; reloading the browser or closing the tab does not persist drafts. Network errors do not trigger automatic mutation retries. If the account changes, staff access is removed or the session expires, the UI clears private records and drafts and requires sign-in again. On a database outage, administration and private API checks fail closed; Images and Sites retain their own access path.
+| Situation | Operator action | Expected boundary |
+| --- | --- | --- |
+| Stale detail or conflicting edit | Refresh and review the current revision before saving | The stale write is rejected; the draft remains available until reload |
+| Credential compromised | Revoke the named credential | New requests fail; admitted work is not cancelled |
+| Cohort no longer supported | Disable the cohort and revoke its credentials | No new admission; preserve metering and audit history |
+| Staff member loses authority | Refresh or sign in with an authorized role | Workspace locks; no cached staff grant is reused |
+| Database or identity outage | Stop provisioning and retry after authority returns | Admin and private admission fail closed with generic responses |
 
-The original operator `approve`/`revoke` CLI remains a trusted recovery path. It increments revisions and records an operator audit event; CLI approvals have no expiry. Prefer the workspace for normal review. Keep database credentials out of browsers and use them only in trusted server environments.
+The trusted CLI remains available for recovery and cohort decisions:
 
-Export staff/audit records privately before rolling back. The admin rollback turns declined and expiring approvals into paused records before dropping the new fields, so removing expiry support cannot convert a temporary grant into permanent access. Roll back the application coherently; reverting to the pre-gate application would reopen the developer API.
+```sh
+npm run developer-preview -- list
+npm run developer-preview -- approve ACCOUNT_ID REVIEWER_NAME
+npm run developer-preview -- revoke ACCOUNT_ID REVIEWER_NAME
+npm run developer-preview -- feedback
+```
 
-## Pattern references and decisions
-
-- [Linear Triage](https://linear.app/docs/triage): an incoming review queue with explicit acceptance and decline decisions. GALX uses that familiar structure and keeps admission deliberate; it does not automatically approve requests.
-- [Vercel team management](https://vercel.com/docs/rbac/managing-team-members): owners control membership and roles. GALX adopts a smaller three-role model suited to the preview stage.
-- [GitHub organization audit log](https://docs.github.com/en/organizations/keeping-your-organization-secure/managing-security-settings-for-your-organization/reviewing-the-audit-log-for-your-organization): records who changed access and when. GALX records staff and participant decisions without exposing operational infrastructure.
-- [Supabase RLS guidance](https://supabase.com/docs/guides/database/postgres/row-level-security): authorization never relies on editable user metadata; private staff permissions are checked from the database instead of cached JWT role claims.
-
-These are design influences, not claims that GALX implements every capability or guarantee of those products. Expected traffic is an admission signal, not a new quota override. Existing API key scope, billing and request limits still apply.
+Prefer the workspace for normal credential operations because it combines
+cohort decision, allocation, metering, and audit context.
 
 ## Verification
 
+Run:
+
 ```sh
 npm run test:preview-admin
-npm run test:preview-admin:db
-npm run test:preview-admin:ui
 npm run test:developer-preview
-npm run test:developer-preview:db
-npm run test:image:security
-npm run db:verify
-npm run db:test
+npm run test:signup-credit
+npm run test:stripe
+npx tsc --noEmit
+npm run lint
 npm run build
 ```
 
-The browser suite runs the production build in a temporary directory without `.env.local`, against a disposable local database. It substitutes only test identity-provider responses and blocks external requests. Browser tooling can be configured with `GALX_BROWSER_MODULE` and `GALX_AXE_MODULE`; the local default points to temporary tooling outside the repository. Evidence is under `.impeccable/review/preview-admin/`. Live deployment and real-account acceptance need separate verification.
+The browser and HTTP checks must cover anonymous users, ordinary authenticated
+users, forged staff headers, cross-origin mutations, malformed allocation
+payloads, one-time secret delivery, stale revisions, revocation, expiry, and
+sanitized failure bodies. Review desktop, phone, keyboard, focus, 200% text,
+long email, empty-state, loading, conflict, and error states. Browser evidence
+is local validation; live deployment and real-account acceptance require
+separate evidence.

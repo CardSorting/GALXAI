@@ -56,8 +56,8 @@ Relevant checks (select for the change; impact discovery never executes these): 
 
 Owner role: **Security/access maintainer**. Domain: `access`.
 
-- [Developer private preview](../../docs/operations/developer-preview.md)
-- [Private preview administration](../../docs/operations/preview-admin.md)
+- [Private developer access](../../docs/operations/developer-preview.md)
+- [Private access administration](../../docs/operations/preview-admin.md)
 - [Private preview activation — 2026-09-12](../../docs/operations/preview-activation.md)
 - [Developer preview reads and hybrid sync](../../docs/operations/preview-hybrid-sync.md)
 - [Workspace authentication and recovery](../../docs/operations/workspace-auth.md)
@@ -88,7 +88,7 @@ Owner role: **Sites maintainer**. Domain: `sites`.
 - [Create and manage Sites (Retired)](../../docs/SITES_WORKSPACE.md)
 - [Site content generation (Retired)](../../docs/SITES_CONTENT.md)
 - [ADR 0150: Bounded free admission and paid capacity protection](../../docs/adr/0150-free-generation-admission-gate.md)
-- [GALXAI](../../docs/API_BASE_URL.md)
+- [API base URL and authentication](../../docs/API_BASE_URL.md)
 
 Relevant checks (select for the change; impact discovery never executes these): `npm run test:sites:fair`, `npm run test:sites:workspace`, `npm run test:sites:conversation`, `npm run test:sites:fair:db`, `npm run test:sites:workspace:db`, `npm run test:sites:plans:db`, `npm run test:free-quota`, `npm run test:free-quota:db`.
 
@@ -213,7 +213,7 @@ Owner role: **Billing maintainer**. Domain: `billing`.
 - [Sites paid access and fair usage (Retired)](../../docs/maintainers/SITES_FAIR_USAGE.md)
 - [DESIGN](../../src/components/billing/DESIGN.md)
 - [Billing pages and payment paths](../../docs/reference/billing-pages.md)
-- [Billing strategy and customer paths](../../docs/WALLET_AND_BILLING_STRATEGY.md)
+- [Billing boundary and account continuity](../../docs/WALLET_AND_BILLING_STRATEGY.md)
 - [DESIGN](../../src/components/home/DESIGN.md)
 - [DESIGN](../../src/components/public-content/DESIGN.md)
 

@@ -9,7 +9,7 @@ export const SITE_CONFIG = {
   alternateName: ['GALXAI', 'GALX AI'],
   tagline: 'Intelligence, handled.',
   description:
-    'GALX is where people create. Turn a prompt into an image, explore what others are making, and subscribe to the $50/month GALX Nova Developer Access membership for supported API capabilities.',
+    'GALX is where people create. Turn a prompt into an image, explore what others are making, and use GALX Nova-powered experiences.',
   // Discovery always identifies the public origin, including local/preview builds.
   // Runtime callback and request origins have their own configuration.
   url: 'https://galx.ai',

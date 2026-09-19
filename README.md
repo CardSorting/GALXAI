@@ -1,8 +1,8 @@
-> **Developer API private preview:** Sign up and request access at [galx.ai/developers](https://galx.ai/developers). Developer endpoints require individual approval, including for existing keys. Images and Sites remain available without preview approval.
+> **Developer access boundary:** GALX Nova infrastructure remains available to GALX products and explicitly authorized private integrations. Public subscription, enrollment, self-service credential provisioning and public inference pricing are retired. Images and Sites remain available with their existing account and plan requirements.
 
 # GALXAI
 
-GALX helps you turn an early idea into a site you can revise, preview, and share at a public GALX address. Explore [Sites](https://galx.ai/sites), or create and save images in the [Image studio](https://galx.ai/images). Both are public products with their existing account and plan requirements. Other developer APIs are available through individual private-preview approval.
+GALX helps you turn an early idea into a site you can revise, preview, and share at a public GALX address. Explore [Sites](https://galx.ai/sites), or create and save images in the [Image studio](https://galx.ai/images). Both are public products with their existing account and plan requirements. GALX Nova may also support explicitly authorized private integrations.
 
 Use `https://galx.ai/v1` as the API base URL. Authenticate with
 `Authorization: Bearer YOUR_GALX_API_KEY`.
@@ -11,8 +11,8 @@ browser requests require a valid signed-in session.
 
 ## Image generation
 
-`POST /v1/images/generations` accepts a text `prompt` and the public model alias
-`openai-gpt-image-latest`. A successful request returns one image as binary bytes
+`POST /v1/images/generations` accepts a text `prompt` and the documented GALX
+image capability assigned to your integration. A successful request returns one image as binary bytes
 with its `image/png`, `image/jpeg`, or `image/webp` content type.
 Set `output_format` to `png`, `jpeg`, or `webp` to select a format.
 

@@ -15,7 +15,7 @@ Pick the symptom or operation. Each entry leads to the canonical procedure; inci
 | Conflicting or stale documentation | [Knowledge maintenance](knowledge-maintenance.md), [incident documentation containment](../../post-mortem/runbooks/documentation.md) | Documentation maintainer |
 | Weekly audit missing or failed | [Weekly knowledge audit](weekly-knowledge-audit.md) | Release operator and documentation maintainer |
 | Prepare and verify a release | [Release readiness](release-readiness.md), [component deployment](../DEPLOYMENT.md) | Release operator |
-| Developer access or staff permission issue | [Preview administration](../operations/preview-admin.md), [activation](../operations/preview-activation.md) | Authorized preview administrator |
+| Private developer access or staff permission issue | [Private access administration](../operations/preview-admin.md), [activation record](../operations/preview-activation.md) | Authorized access administrator |
 | Sites deferrals or unresolved operations | [Fair usage](../maintainers/SITES_FAIR_USAGE.md), [workspace](../maintainers/SITES_WORKSPACE.md) | Sites maintainer |
 | Published site or address mismatch | [Domain operations](../maintainers/SITES_DOMAINS.md) | Sites maintainer |
 | Database migration or authorization issue | [Database runbook](../maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md) | Database operator |

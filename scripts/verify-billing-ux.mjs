@@ -106,11 +106,9 @@ try {
     assert.equal(await page.getByRole('button', { name: /Continue to checkout/i }).count(), 0);
     await page.goto(base + '/developers');
     const developer = await page.getByRole('main').first().innerText();
-    assert.match(developer, /\$50\/month/);
-    assert.match(developer, /Usage billed separately/);
-    assert.match(developer, /No usage credits included/);
-    assert.match(developer, /Subscribe to Developer Access/);
-    assert.doesNotMatch(developer, /From \$50|request-stage|Access starts at \$50|Buy now|Continue to checkout|Unlimited usage/i);
+    assert.match(developer, /Private access, by decision/i);
+    assert.match(developer, /explicitly authorized private integrations/i);
+    assert.doesNotMatch(developer, /\$50\/month|Subscribe to Developer Access|request-stage|Access starts at|Buy now|Continue to checkout|Unlimited usage/i);
   } finally {
     await context?.close();
     await browser.close();

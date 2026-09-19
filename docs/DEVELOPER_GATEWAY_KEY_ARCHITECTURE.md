@@ -3,6 +3,16 @@
 <!-- docs-scope: domain-reference -->
 > **Reading scope:** Subsystem reference retained for its own domain; not re-certified by the federation documentation refactor. Older routing, deployment, compatibility, or performance descriptions do not override the current relay contract. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
 
+## Current distribution boundary
+
+This is a private subsystem reference, not public API onboarding. GALX has
+retired Developer Access as a public subscription and self-service product.
+The key repository, authentication, rotation, metering, traffic controls,
+allocation enforcement, and revocation mechanisms remain retained for GALX
+products and explicitly authorized private integrations. Credential operations
+are administered through the staff-only control plane; examples below assume
+an already authorized operator or integration.
+
 ## Executive Summary
 This document specifies the enterprise architecture for API key minting, authentication, zero-downtime rotation, and state synchronization across the GALX AI platform (`https://galx.ai/v1`). It details how the hybrid combination of **BroccoliDB L0/L1 Hot Cache**, **Direct PostgreSQL Connection Pooling**, **Micro-Watermark Delta Sync**, and **Autonomous Circuit Breaking** achieves sub-microsecond resolution latencies while cutting database egress and roundtrips by more than 95%.
 
@@ -110,19 +120,28 @@ The PostgreSQL connection pool in `src/lib/db/postgres.ts` is guarded by an auto
 
 ---
 
-## 6. Zero-Downtime Key Rotation Ergonomics
+## 6. Admin-controlled key rotation
 
-Rotating an API key in production requires zero downtime:
-1. **Client requests rotation**: `POST /api/keys/[id]/roll` specifying `graceHours` (e.g. 24h, 48h, or 0h for immediate revoke).
+Rotating an API key for a private integration is an administrator action and
+must preserve bounded access:
+1. **Administrator starts rotation** from the private access resource detail and
+   chooses a short grace period appropriate to the integration.
 2. **Dual-Key Coexistence**:
    - A new key is minted with the same scopes, rate limits, and workspace settings.
    - The legacy key has its `expiresAtMs` set to `Date.now() + graceHours * 3600 * 1000`.
    - Both keys authenticate valid requests during the migration window.
-3. **One-Click `.env.galx` Download**:
-   - The reveal modal generates a ready-to-use `.env.galx` file with `GALX_API_KEY`, `GALX_BASE_URL`, and OpenAI aliases.
-   - Developers click "Download .env" to save credentials directly to disk, eliminating accidental credential loss.
-4. **Optimistic UI Updates**:
-   - Renaming and rolling update the dashboard table instantly in 0ms with zero screen flicker.
+3. **One-time secret delivery**:
+   - The raw secret is revealed once to the authorized administrator and copied
+     through an approved private channel.
+   - Never generate a browser `.env` download, place a secret in a bundle, or
+     write the raw value to activity history or logs.
+4. **Auditable state updates**:
+   - The console shows a pending state until the authoritative write and audit
+     record succeed; a failed write must not appear active.
+
+The API-key endpoints remain available to the admin implementation, but they
+are not a public credential-management product. Public users cannot mint,
+rotate, or revoke general-purpose API access.
 
 ---
 

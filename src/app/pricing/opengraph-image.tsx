@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og';
 
 export const runtime = 'edge';
-export const alt = 'GALX pricing: plans and Developer access';
+export const alt = 'GALX pricing: plans for image creation';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -11,7 +11,7 @@ export default function Image() {
       <div style={{ fontSize: 28, color: '#a5b4fc' }}>galx.ai</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
           <div style={{ fontSize: 64, fontWeight: 600 }}>Pricing and plans</div>
-        <div style={{ fontSize: 28, color: '#a1a1aa' }}>Create in GALX Images. Developer Access is a $50/month API access membership.</div>
+        <div style={{ fontSize: 28, color: '#a1a1aa' }}>Create in GALX Images with published consumer plan terms.</div>
       </div>
       <div style={{ display: 'flex', gap: 48, borderTop: '1px solid #27272a', paddingTop: 28, fontSize: 24 }}>GALX Images · GALX Nova · Developer</div>
     </div>,

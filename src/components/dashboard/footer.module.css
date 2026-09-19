@@ -139,6 +139,7 @@
 }
 
 .colTitle {
+  margin: 0;
   font-size: 11.5px;
   font-weight: 700;
   text-transform: uppercase;
@@ -158,6 +159,7 @@
 .footerLink {
   display: inline-flex;
   align-items: center;
+  min-height: 36px;
   gap: 6px;
   font-size: 13.5px;
   color: #9ca3af;
@@ -169,6 +171,14 @@
 .footerLink:hover {
   color: #ffffff;
   transform: translateX(2px);
+}
+
+.footerLink:focus-visible,
+.statusPill:focus-visible,
+.backToTop:focus-visible,
+.brandLink:focus-visible {
+  outline: 2px solid var(--footer-accent);
+  outline-offset: 3px;
 }
 
 .linkBadge {
@@ -227,6 +237,7 @@
   color: #9ca3af;
   font-size: 12px;
   cursor: pointer;
+  min-height: 36px;
   padding: 4px 8px;
   border-radius: 6px;
   transition: color 0.15s ease, background-color 0.15s ease;
@@ -235,4 +246,28 @@
 .backToTop:hover {
   color: #ffffff;
   background: rgba(255, 255, 255, 0.05);
+}
+
+@media (max-width: 639px) {
+  .footer {
+    padding-bottom: 48px;
+  }
+
+  .mainGrid {
+    gap: 28px;
+  }
+
+  .footerLink {
+    min-height: 40px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .statusDot::after,
+  .footerLink,
+  .statusPill,
+  .backToTop {
+    animation: none;
+    transition: none;
+  }
 }

@@ -123,12 +123,12 @@ try {
     await page.getByRole('combobox',{name:/^Role/}).selectOption('viewer'); await page.getByLabel('Internal note',{exact:true}).fill('Read early feedback alongside the founder.'); await capture('staff-editor');
     await page.getByRole('button',{name:'Save staff access',exact:true}).click(); await page.getByText('Staff access updated.').waitFor();
     await page.getByRole('button',{name:'Activity',exact:true}).click(); await page.getByText('Staff access added',{exact:true}).first().waitFor(); await capture('activity');
-    // An expired participant session has a useful recovery action, not an endless retry loop.
-    await context.route('**/api/developer-access', (route: any) => route.fulfill({status:401,contentType:'application/json',body:JSON.stringify({error:{code:'authentication_required'}})}));
+    // Public developer access is informational only; no participant workflow or credential path is exposed.
     await page.goto(base+'/developers',{waitUntil:'networkidle'});
-    await page.getByRole('heading',{name:'Sign in to check your access',exact:true}).waitFor();
-    assert.equal(await page.getByRole('link',{name:'Sign in again',exact:true}).getAttribute('href'),'/auth/signin?next=%2Fdevelopers');
-    await capture('participant-signin');
+    await page.getByRole('heading',{name:'GALX Nova Private access, by decision.',exact:true}).waitFor();
+    assert.equal(await page.getByRole('link',{name:'Explore GALX',exact:true}).getAttribute('href'),'/images');
+    assert.doesNotMatch(await page.locator('main').innerText(), /Sign up to apply|Complete application|Create credential|API key/i);
+    await capture('public-developer-surface');
     activePage = null; await context.close();
   }
   // A verified account claiming owner in editable metadata still has no staff authority.

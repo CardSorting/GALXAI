@@ -533,6 +533,9 @@ export interface GatewayApiKey {
   readonly checksum?: string;
   readonly computePool?: 'shared_community' | 'priority_dedicated';
   readonly freeMonthlyGrantUsd?: number;
+  /** Private administrator allocation. It is not a public pricing claim. */
+  readonly spendCapUsd?: number;
+  readonly currentSpendUsd?: number;
   readonly defaultCompactionMode?: 'auto' | 'raw';
 }
 

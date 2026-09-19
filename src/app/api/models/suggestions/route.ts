@@ -1,7 +1,6 @@
 import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextResponse } from 'next/server';
 import { SITE_CONFIG } from '@/lib/seo/siteConfig';
-import { USAGE_PRICING } from '@/lib/billing/usage-pricing';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,7 +22,7 @@ interface SuggestionItem {
 const CURRENT_SUGGESTIONS: SuggestionItem[] = [
   {
     title: 'GALX Nova — supported API capability',
-    description: 'Managed reasoning and generation through the documented GALX API. Usage is $0.02 per completed message with a default $25 monthly cap.',
+    description: 'Managed reasoning and generation through documented GALX Nova capabilities for explicitly authorized integrations.',
     url: `${SITE_CONFIG.url}/docs/api-reference`,
     category: 'Capability',
   },
@@ -34,16 +33,10 @@ const CURRENT_SUGGESTIONS: SuggestionItem[] = [
     category: 'API',
   },
   {
-    title: 'GALX Nova Developer Access',
-    description: 'A $50/month recurring membership for API access. Usage is billed separately and no usage credits are included.',
+    title: 'GALX Nova private integration access',
+    description: 'Private access may be authorized by decision for bounded integrations. It is not a public self-service product.',
     url: `${SITE_CONFIG.url}/developers`,
     category: 'Access',
-  },
-  {
-    title: 'Usage pricing status',
-    description: 'Usage is $0.02 per completed message with a default $25 monthly cap. Review the access and usage boundary before building.',
-    url: `${SITE_CONFIG.url}${USAGE_PRICING.path}`,
-    category: 'Pricing',
   },
   {
     title: 'Prompt construction guidance',

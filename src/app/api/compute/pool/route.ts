@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { USAGE_PRICING } from '@/lib/billing/usage-pricing';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -23,8 +22,7 @@ export function OPTIONS() {
 
 export function GET() {
   return NextResponse.json({
-    error: 'Usage allowances are not part of Developer Access. Usage is billed at $0.02 per completed message with a default $25 monthly usage cap.',
-    usage_pricing_url: USAGE_PRICING.path,
+    error: 'Self-service developer access and public usage allowances are not available.',
   }, {
     status: 410,
     headers: { 'Cache-Control': 'private, no-store', 'X-Content-Type-Options': 'nosniff' },

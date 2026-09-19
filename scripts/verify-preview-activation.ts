@@ -7,7 +7,6 @@ const site = new URL(process.argv[2] || 'https://galx.ai');
 assert(site.protocol === 'https:' && (site.hostname === 'galx.ai' || /^galxai-[a-z0-9-]+\.vercel\.app$/.test(site.hostname)), 'Use the GALX production or staged deployment.');
 assert(!site.username && !site.password && site.pathname === '/' && !site.search && !site.hash);
 const checkGateway = process.argv.includes('--gateway');
-const cohort = process.argv.includes('--cohort');
 // Vercel's authenticated curl command can issue a cookie for a protected staged build.
 // Scope it to that exact host; never send it to production or the API gateway.
 const cookieJar = process.env.GALX_PREVIEW_COOKIE_JAR;
@@ -27,7 +26,7 @@ async function request(origin: URL, pathname: string, method = 'GET', extra: Rec
 }
 try {
   const pool = getPostgresPool(); assert(pool, 'Server database configuration required.');
-  const expectedMigrations = ['20260912215724','20260912222003', ...(cohort ? ['20260912234139'] : [])];
+  const expectedMigrations = ['20260912215724','20260912222003','20260918250000','20260918251000'];
   const migrations = await pool.query('SELECT version FROM supabase_migrations.schema_migrations WHERE version = ANY($1::text[]) ORDER BY version', [expectedMigrations]);
   assert.deepEqual(migrations.rows.map(row => row.version), expectedMigrations);
   if (cohort) {
@@ -49,9 +48,6 @@ try {
   for (const pathname of ['/','/developers','/images','/sites','/pricing','/auth/signin?next=%2Fadmin','/auth/signup?next=%2Fdevelopers']) {
     const response = await request(site, pathname); assert.equal(response.status, 200, pathname);
     const html = await response.text(); assert.doesNotMatch(html, forbidden, pathname);
-    if (cohort && pathname === '/developers') {
-      assert.match(html, /A smaller cohort/); assert.match(html, /participant-reported results/); assert.match(html, /30–60%/);
-    }
     for (const match of html.matchAll(/<script[^>]+src="([^"]+)"/g)) scripts.add(match[1].replaceAll('&amp;', '&'));
   }
   for (const script of scripts) {
@@ -60,7 +56,7 @@ try {
     assert.doesNotMatch(await response.text(), forbidden, script);
   }
   for (const pathname of ['/v1/chat/completions','/v1/messages','/v1/embeddings','/v1/models','/v1/models/model.png','/api/chat','/api/run','/api/keys','/api/new-endpoint','/api/admin/preview?view=requests','/api/admin/preview?view=staff','/api/developer-access','/api/developer-access/check']) {
-    for (const method of pathname === '/api/developer-access/check' ? ['POST'] : cohort && pathname === '/api/developer-access' ? ['GET','POST','PATCH'] : ['GET','POST']) {
+    for (const method of pathname === '/api/developer-access/check' ? ['POST'] : pathname === '/api/developer-access' ? ['GET','POST','PATCH'] : ['GET','POST']) {
       const response = await request(site, pathname, method, {'x-user-id':'invented','x-role':'owner','x-galx-approved':'true','x-middleware-subrequest':'middleware:middleware:middleware:middleware:middleware'});
       assert.equal(response.status, 401, `${method} ${pathname}`); assert.match(response.headers.get('cache-control') || '', /no-store/);
       assert.doesNotMatch(await response.text(), forbidden, pathname);
@@ -81,8 +77,8 @@ try {
     }
     const response = await request(gateway, '/v1/images/generations', 'POST'); assert.equal(response.status, 401); assert.equal((await response.json()).error.code, 'unauthorized');
   }
-  const report = { checkedAt: new Date().toISOString(), site: site.origin, checkGateway, cohort, migrations: migrations.rows.map(row => row.version), tables: tables.rows, roster, scriptsScanned: scripts.size, results };
+  const report = { checkedAt: new Date().toISOString(), site: site.origin, checkGateway, migrations: migrations.rows.map(row => row.version), tables: tables.rows, roster, scriptsScanned: scripts.size, results };
   await mkdir('docs/operations/evidence', { recursive: true });
-  await writeFile(`docs/operations/evidence/${cohort ? 'cohort' : 'preview'}-${site.hostname === 'galx.ai' ? 'production' : 'staged'}.json`, JSON.stringify(report, null, 2) + '\n');
+  await writeFile(`docs/operations/evidence/preview-${site.hostname === 'galx.ai' ? 'production' : 'staged'}.json`, JSON.stringify(report, null, 2) + '\n');
   console.log(`PASS: migrations, private privileges, ${results.length} HTTP checks, ${scripts.size} public scripts. Owners: ${roster.owners}; active: ${roster.activeOwners}.`);
 } finally { await closePostgresPool(); }

@@ -43,6 +43,22 @@ test('decisions use authenticated reviewer identity and explicit request fields'
   assert.equal(response.status,200);assert.deepEqual(args,[actor,'applicant',4,'approved','Reviewed the project.',7]);
   assert.deepEqual(await response.json(),{saved:true});
 });
+test('private credential actions stay admin-only and accept only bounded fields', async () => {
+  const calls: unknown[][] = [];
+  const repo = {
+    session: async () => ({ ...actor, role: 'owner' }),
+    createPrivateKey: async (...input: unknown[]) => { calls.push(input); return { success: true, key: { id: 'key-1', api_key: 'shown-once' } }; },
+    updatePrivateKey: async (...input: unknown[]) => { calls.push(input); return { success: true }; },
+    revokePrivateKey: async (...input: unknown[]) => { calls.push(input); return { success: true }; },
+  } as unknown as PreviewAdminRepository;
+  const handlers = createPreviewAdminHandlers({ identity: async () => actor, repository: () => repo });
+  assert.equal((await handlers.POST(request({ action: 'credential_create', user_id: 'cohort-1', name: 'Research', environment: 'test', rate_limit_per_minute: 60, usage_cap_usd: 25, expires_in_days: 30 }))).status, 200);
+  assert.equal((await handlers.POST(request({ action: 'credential_update', user_id: 'cohort-1', key_id: 'key-1', rate_limit_per_minute: 90, usage_cap_usd: 40 }))).status, 200);
+  assert.equal((await handlers.POST(request({ action: 'credential_revoke', user_id: 'cohort-1', key_id: 'key-1', reason: 'No longer approved.' }))).status, 200);
+  assert.equal(calls.length, 3);
+  assert.equal((await handlers.POST(request({ action: 'credential_create', user_id: 'cohort-1', environment: 'live', rate_limit_per_minute: 0, usage_cap_usd: 25 }))).status, 400);
+  assert.equal(calls.length, 3);
+});
 test('direct route handlers and middleware reject forged admin credentials', async () => {
   const {GET,POST}=await import('../src/app/api/admin/preview/route');
   const req=new NextRequest('https://galx.ai/api/admin/preview?view=requests',{headers:{authorization:'Bearer galx_sess_invalid','x-galx-internal-key':'invalid','x-role':'owner','x-user-id':'owner','x-middleware-subrequest':'middleware:middleware:middleware:middleware:middleware'}});

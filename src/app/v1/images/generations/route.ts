@@ -96,7 +96,8 @@ export async function POST(req: NextRequest) {
     }
     // Only explicitly supported request fields reach dispatch. No user-selected shards or internal headers.
     const result = await galxRouter.routeImageGeneration({ request: body, userId: auth.userId,
-      requestId, isPriorityUser: entitlement.isPriorityUser, signal: req.signal, usageBillingBasis: 'message' });
+      requestId, isPriorityUser: entitlement.isPriorityUser, signal: req.signal, usageBillingBasis: 'message',
+      usageCapUsd: auth.authType === 'developer_key' ? auth.apiKey?.spendCapUsd : undefined });
     return await normalizeImageOutput(result, { requestId, userId: auth.userId,
       responseFormat: format as ImageResponseFormat, outputFormat: outputFormat as ImageFormat | undefined });
   } catch (error) {

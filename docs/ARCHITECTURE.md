@@ -35,15 +35,25 @@ Health, saved state, relay confirmation and desktop connection are separate fact
 
 ## Product identity and durable images
 
-Account-facing routes verify session and ownership; developer inference requires an active Nova Developer Access subscription or a separately approved private preview account, while staff access has independent authority. Product image receipts commit before async acknowledgement and claim one dispatch. Completion requires owned stored artifacts. Public JSON uses explicit allowlists; image artifacts are re-encoded and stripped of upstream metadata. The public image alias does not promise an unverified underlying model. See [image boundaries](maintainers/image-public-boundary.md).
+Account-facing routes verify session and ownership. GALX products can continue to
+use the inference infrastructure, while private developer access follows an
+administrator-controlled lifecycle: review a bounded cohort, provision a
+credential, assign an allocation, inspect metered use, and revoke or expire the
+credential. There is no active public Developer Access subscription or
+self-service API-key path. Staff access has independent authority.
 
-Developer Access is an admission subscription with a separate completed-message
-consumption contract. The current public usage-pricing status is `published`:
-usage is $0.02 per completed message with a default $25 monthly cap. The public
-inference route reserves a message before dispatch, commits only after
-completion, and does not apply historical free-grant or wallet behavior. Model
-discovery and key admission do not serialize supplier rates, credits, balances
-or routing state.
+Product image receipts commit before async acknowledgement and claim one
+dispatch. Completion requires owned stored artifacts. Public JSON uses explicit
+allowlists; image artifacts are re-encoded and stripped of upstream metadata.
+The public image alias does not promise an unverified underlying model. See
+[image boundaries](maintainers/image-public-boundary.md).
+
+The inference gateway still reserves work before dispatch, accounts for
+completed consumption, enforces per-key allocations, and retains its request,
+recovery and audit records. Metering is an operational control and accounting
+source, not a public price promise. Public capability docs therefore describe
+what an approved integration can call, while this private guide retains the
+implementation authority needed to operate the system.
 
 ## Sites content and delivery
 

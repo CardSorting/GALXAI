@@ -270,9 +270,9 @@ export class GalxEdgeGateway {
 
   private previewDenied(status: number): Response {
     return new Response(JSON.stringify({ error: {
-      code: status === 403 ? 'developer_preview_required' : status === 401 ? 'authentication_required' : 'access_check_unavailable',
-      message: status === 403 ? 'An active GALX Nova Developer Access subscription or approved private-preview account is required.' : status === 401 ? 'Use an active account’s API key.' : 'We couldn’t check your access. Please try again.',
-    }, request_access_url: 'https://galx.ai/developers' }), { status, headers: {
+      code: status === 403 ? 'private_access_required' : status === 401 ? 'authentication_required' : 'access_check_unavailable',
+      message: status === 403 ? 'This capability is limited to explicitly authorized private integrations.' : status === 401 ? 'Use an authorized integration credential.' : 'We couldn’t check access. Please try again.',
+    } }), { status, headers: {
       'Content-Type': 'application/json', 'Cache-Control': 'private, no-store',
       'Access-Control-Allow-Origin': '*', 'X-Robots-Tag': 'noindex, nofollow',
     } });
@@ -295,10 +295,9 @@ export class GalxEdgeGateway {
 
   private usagePricingUnavailable(): Response {
     return new Response(JSON.stringify({ error: {
-      message: 'API usage is not available until the separate per-message usage-pricing terms are published. Developer Access includes no usage credits.',
+      message: 'This integration is not enabled for metered inference access.',
       type: 'service_unavailable',
       code: 'usage_pricing_not_published',
-      usage_pricing_url: USAGE_PRICING.path,
     } }), { status: 503, headers: {
       'content-type': 'application/json',
       'Access-Control-Allow-Origin': '*',

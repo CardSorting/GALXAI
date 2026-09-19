@@ -39,6 +39,8 @@ export interface RouteChatOptions {
   headers?: Headers | Record<string, string | null | undefined>;
   /** Public Developer API usage is counted as completed messages, never tokens. */
   usageBillingBasis?: 'message' | 'legacy_token';
+  /** Private administrator allocation applied to message reservations. */
+  usageCapUsd?: number;
 }
 
 export interface RouteImageOptions {
@@ -50,6 +52,8 @@ export interface RouteImageOptions {
   signal?: AbortSignal;
   /** Public Developer API usage is counted as completed messages, never tokens. */
   usageBillingBasis?: 'message' | 'legacy_token';
+  /** Private administrator allocation applied to message reservations. */
+  usageCapUsd?: number;
 }
 
 /**
@@ -241,7 +245,7 @@ export class GalxModelRouter {
     if (!shouldReserve) return this.routeChatCompletionInternal(options);
 
     const seatEngine = GalxSeatTierEngine.getInstance();
-    const reservation = await seatEngine.reserveNovaMessage(options.userId, options.requestId);
+    const reservation = await seatEngine.reserveNovaMessage(options.userId, options.requestId, options.usageCapUsd);
     if (!reservation.allowed) {
       const error = new Error(String(reservation.code || 'NOVA_MESSAGE_MONTHLY_CAP_EXCEEDED'));
       (error as Error & { status?: number; code?: string }).status = 429;
@@ -947,7 +951,7 @@ export class GalxModelRouter {
     const shouldReserve = options.usageBillingBasis === 'message' && options.userId && options.userId !== 'anonymous_developer';
     if (!shouldReserve) return this.routeImageGenerationInternal(options);
     const seatEngine = GalxSeatTierEngine.getInstance();
-    const reservation = await seatEngine.reserveNovaMessage(options.userId, options.requestId);
+    const reservation = await seatEngine.reserveNovaMessage(options.userId, options.requestId, options.usageCapUsd);
     if (!reservation.allowed) {
       const error = new Error(String(reservation.code || 'NOVA_MESSAGE_MONTHLY_CAP_EXCEEDED'));
       (error as Error & { status?: number; code?: string }).status = 429;

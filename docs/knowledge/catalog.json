@@ -15,7 +15,7 @@
     },
     {
       "path": "docs/API_BASE_URL.md",
-      "title": "GALXAI",
+      "title": "API base URL and authentication",
       "scope": "current-guide",
       "kind": "reference",
       "domains": [
@@ -27,7 +27,7 @@
     },
     {
       "path": "docs/API_REFERENCE.md",
-      "title": "GALXAI",
+      "title": "API reference",
       "scope": "current-guide",
       "kind": "reference",
       "domains": [],
@@ -362,7 +362,7 @@
     },
     {
       "path": "docs/QUICKSTART.md",
-      "title": "GALXAI",
+      "title": "API quickstart",
       "scope": "current-guide",
       "kind": "reference",
       "domains": [],
@@ -658,7 +658,7 @@
     },
     {
       "path": "docs/WALLET_AND_BILLING_STRATEGY.md",
-      "title": "Billing strategy and customer paths",
+      "title": "Billing boundary and account continuity",
       "scope": "domain-reference",
       "kind": "reference",
       "domains": [
@@ -3651,7 +3651,7 @@
     },
     {
       "path": "docs/operations/developer-preview.md",
-      "title": "Developer private preview",
+      "title": "Private developer access",
       "scope": "current-guide",
       "kind": "reference",
       "domains": [
@@ -3685,7 +3685,7 @@
     },
     {
       "path": "docs/operations/preview-admin.md",
-      "title": "Private preview administration",
+      "title": "Private access administration",
       "scope": "current-guide",
       "kind": "reference",
       "domains": [

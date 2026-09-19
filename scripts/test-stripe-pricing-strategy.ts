@@ -16,13 +16,13 @@ assert.equal(PRO_PLAN.monthlyPriceUsd, 10);
 assert.equal(PRO_PLAN.interval, 'month');
 assert.equal(DEVELOPER_ACCESS.monthlyPriceUsd, 50);
 assert.equal(DEVELOPER_ACCESS.interval, 'month');
-assert.equal(DEVELOPER_ACCESS.checkoutEnabled, true);
+assert.equal(DEVELOPER_ACCESS.checkoutEnabled, false);
 assert.equal(DEVELOPER_ACCESS.automaticActivation, true);
 assert.equal(DEVELOPER_ACCESS.usageBilledSeparately, true);
 assert.equal(DEVELOPER_ACCESS.includedUsageCreditsUsd, 0);
 assert.equal(PREPAID_DEVELOPER_CHECKOUT_ENABLED, false);
-assert.equal(USAGE_PRICING.status, 'not_published');
-assert.equal(USAGE_PRICING.ratesPublished, false);
+assert.equal(USAGE_PRICING.status, 'published');
+assert.equal(USAGE_PRICING.ratesPublished, true);
 assert.equal(USAGE_PRICING.basis, 'message');
 assert.equal(USAGE_PRICING.unit, 'message');
 assert.equal(USAGE_PRICING.path, '/pricing/usage');
@@ -54,14 +54,9 @@ const response = await stripeConfig();
 const body = await response.json();
 assert.equal(response.status, 200);
 assert.equal(body.consumerPlan.monthlyPriceUsd, 10);
-assert.equal(body.developerAccess.monthlyPriceUsd, 50);
-assert.equal(body.developerAccess.interval, 'month');
-assert.equal(body.developerAccess.checkoutEnabled, true);
-assert.equal(body.developerAccess.automaticActivation, true);
-assert.equal(body.developerAccess.usageBilledSeparately, true);
-assert.equal(body.developerAccess.includedUsageCreditsUsd, 0);
+assert.equal('developerAccess' in body, false);
+assert.equal('usagePricing' in body, false);
 assert.equal('packs' in body, false);
-assert.deepEqual(body.usagePricing, { status: 'not_published', ratesPublished: false, basis: 'message', unit: 'message', path: '/pricing/usage' });
 
 const checkoutResponse = await stripeCheckout(new NextRequest('https://galx.ai/api/stripe/checkout', {
   method: 'POST',
@@ -77,4 +72,4 @@ assert.equal((await computePool()).status, 410);
 assert.doesNotMatch(await (await seoRates()).text(), /input_per_1m|discount|rebate|balance/i);
 assert.doesNotMatch(await (await computePool()).text(), /freeGrant|monthlyAllowance|remainingUsd/i);
 
-console.log('Stripe pricing strategy checks passed: Pro remains $10/month, Nova Developer Access is $50/month recurring with zero included usage credits, and legacy prepaid checkout is disabled.');
+console.log('Stripe pricing strategy checks passed: Pro remains public, Developer Access checkout is disabled, and legacy purchase routes remain retired.');

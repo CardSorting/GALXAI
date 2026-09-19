@@ -5,7 +5,6 @@ import { Navigation } from '@/components/dashboard/Navigation';
 import {
   Compass,
   ImageIcon,
-  Code2,
   CreditCard,
   Home
 } from 'lucide-react';
@@ -74,13 +73,6 @@ export default function NotFound() {
               <span className="font-bold">Account</span>
             </Link>
 
-            <Link
-              href="/developers"
-              className="col-span-2 sm:col-span-1 p-3.5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 hover:text-white flex flex-col items-center justify-center gap-1.5 transition-all group"
-            >
-              <Code2 className="w-4 h-4 text-indigo-400 group-hover:scale-110 transition-transform" />
-              <span className="font-bold">Developer preview</span>
-            </Link>
           </div>
         </div>
       </main>

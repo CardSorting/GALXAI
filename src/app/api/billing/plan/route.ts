@@ -6,7 +6,7 @@ import { getStripeConfig } from '@/lib/stripe/config';
 import { BillingError } from '@/lib/billing/account';
 import { checkPaymentOrigin, hostedPaymentUrl, paymentOrigin, readPaymentBody } from '@/lib/billing/payment';
 import { createDeveloperCheckout, createProCheckout, proPrice } from '@/lib/billing/plan-subscription';
-import { PRO_PLAN } from '@/lib/billing/pro-plan';
+import { DEVELOPER_ACCESS, PRO_PLAN } from '@/lib/billing/pro-plan';
 import { SitesFairStore } from '@/lib/sites/fair-store';
 import { requirePaidSitesAccess } from '@/lib/sites/paid-access';
 import { FairUsageError } from '@/lib/sites/fair-policy';
@@ -21,11 +21,14 @@ async function handle(req:NextRequest) {
     if(req.method==='POST')checkPaymentOrigin(req);
     const actor=await requireAccountIdentity(req);
     if(req.nextUrl.search)throw new BillingError('Invalid plan request.');
+    const body=req.method==='POST'?await readPaymentBody(req):null;
+    if (body?.action === 'developer_checkout' && !DEVELOPER_ACCESS.checkoutEnabled) {
+      throw new BillingError('Self-service developer access is no longer available.', 410);
+    }
     const pool=getPostgresPool(),stripe=StripeEngine.getInstance().getClient(),config=getStripeConfig();
     if(!pool||!stripe||!config.webhookSecrets.length)throw new BillingError('Plans are temporarily unavailable. Try again shortly.',503);
     const customer=(await pool.query('SELECT stripe_customer_id FROM galx_stripe_customers WHERE user_id=$1',[actor.id])).rows[0]?.stripe_customer_id;
     // Cancellation and payment management remain accessible during a Sites pause.
-    const body=req.method==='POST'?await readPaymentBody(req):null;
     if(body?.action==='portal'&&Object.keys(body).join()==='action') {
       if(!customer||customer.startsWith('cus_mock_'))throw new BillingError('Your billing profile becomes available when you start a checkout.',404);
       const configuration=await billingPortalConfiguration(stripe);
@@ -33,7 +36,7 @@ async function handle(req:NextRequest) {
       return NextResponse.json({url:hostedPaymentUrl(session.url,'billing.stripe.com')},{headers});
     }
     if (body?.action === 'developer_checkout') {
-      if (Object.keys(body).sort().join() !== 'action,requestId' || typeof body.requestId !== 'string') throw new BillingError('Invalid Developer checkout request.');
+      if (Object.keys(body).sort().join() !== 'action,requestId' || typeof body.requestId !== 'string') throw new BillingError('Invalid plan request.');
       return NextResponse.json(await createDeveloperCheckout(pool, stripe, { userId: actor.id, requestId: body.requestId, origin: paymentOrigin(config.appUrl) }), { headers });
     }
     const policy=await new SitesFairStore(pool).policy();

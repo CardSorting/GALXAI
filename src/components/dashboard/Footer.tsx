@@ -17,7 +17,8 @@ export function Footer() {
 
   const scrollToTop = () => {
     if (typeof window !== 'undefined') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      const behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+      window.scrollTo({ top: 0, behavior });
     }
   };
 
@@ -34,18 +35,18 @@ export function Footer() {
             </Link>
 
             <p className={styles.tagline}>
-              GALX is where people create. Powered by GALX Nova — our managed intelligence layer for reasoning and generation.
+              GALX is where people create — with helpful tools for images, ideas, and selected private integrations.
             </p>
 
-            <Link href="/status" className={styles.statusPill}>
+            <Link href="/status" className={styles.statusPill} aria-label="View GALX system status">
               <span className={styles.statusDot} />
-              <span>All Systems Operational</span>
+              <span>View system status</span>
             </Link>
           </div>
 
-          {/* Column 1: Platform */}
-          <div className={styles.navCol}>
-            <div className={styles.colTitle}>Platform</div>
+          {/* Primary user journeys */}
+          <nav className={styles.navCol} aria-label="Create">
+            <h2 className={styles.colTitle}>Create</h2>
             <ul className={styles.linkList}>
               <li>
                 <Link href="/images" className={styles.footerLink}>
@@ -54,18 +55,7 @@ export function Footer() {
               </li>
               <li>
                 <Link href="/explore" className={styles.footerLink}>
-                  <span>Community Explore</span>
-                  <span className={styles.linkBadge}>Live</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/developers" className={styles.footerLink}>
-                  <span>GALX Nova</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/docs" className={styles.footerLink}>
-                  <span>Developer docs</span>
+                  <span>Explore</span>
                 </Link>
               </li>
               <li>
@@ -74,99 +64,75 @@ export function Footer() {
                 </Link>
               </li>
             </ul>
-          </div>
+          </nav>
 
-          {/* Column 2: Developers */}
-          <div className={styles.navCol}>
-            <div className={styles.colTitle}>Developers</div>
+          <nav className={styles.navCol} aria-label="Learn">
+            <h2 className={styles.colTitle}>Learn</h2>
             <ul className={styles.linkList}>
-              <li>
-                <Link href="/developers" className={styles.footerLink}>
-                  <span>Developer access</span>
-                  <span className={styles.linkBadge}>$50/month</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/developers" className={styles.footerLink}>
-                  <span>Access terms</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/keys" className={styles.footerLink}>
-                  <span>API Secret Keys</span>
-                </Link>
-              </li>
               <li>
                 <Link href="/docs" className={styles.footerLink}>
-                  <span>Integration guidance</span>
+                  <span>Docs</span>
                 </Link>
               </li>
-            </ul>
-          </div>
-
-          {/* Column 3: Pricing & Billing */}
-          <div className={styles.navCol}>
-            <div className={styles.colTitle}>Pricing & Plans</div>
-            <ul className={styles.linkList}>
-              <li>
-                <Link href="/pricing" className={styles.footerLink}>
-                  <span>Pricing Overview</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/pricing/galx-pro" className={styles.footerLink}>
-                  <span>GALX Pro ($10/mo)</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/pricing/fair-use" className={styles.footerLink}>
-                  <span>Fair-use boundaries</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/pricing/billing-and-cancellation" className={styles.footerLink}>
-                  <span>Billing & Cancellation</span>
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Column 4: Resources & Legal */}
-          <div className={styles.navCol}>
-            <div className={styles.colTitle}>Resources & Trust</div>
-            <ul className={styles.linkList}>
               <li>
                 <Link href="/knowledge-base" className={styles.footerLink}>
-                  <span>Knowledge Base</span>
+                  <span>Knowledge base</span>
                 </Link>
               </li>
               <li>
                 <Link href="/faq" className={styles.footerLink}>
-                  <span>Frequently Asked Questions</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/privacy" className={styles.footerLink}>
-                  <span>Security & Compliance</span>
+                  <span>FAQ</span>
                 </Link>
               </li>
               <li>
                 <Link href="/status" className={styles.footerLink}>
-                  <span>System Status</span>
+                  <span>System status</span>
+                </Link>
+              </li>
+            </ul>
+          </nav>
+
+          <nav className={styles.navCol} aria-label="Plans and access">
+            <h2 className={styles.colTitle}>Plans & access</h2>
+            <ul className={styles.linkList}>
+              <li>
+                <Link href="/pricing" className={styles.footerLink}>
+                  <span>Pricing</span>
+                </Link>
+              </li>
+              <li>
+                <Link href="/pricing/galx-pro" className={styles.footerLink}>
+                  <span>GALX Pro</span>
+                </Link>
+              </li>
+              <li>
+                <Link href="/developers" className={styles.footerLink}>
+                  <span>Private access</span>
+                </Link>
+              </li>
+            </ul>
+          </nav>
+
+          <nav className={styles.navCol} aria-label="Company and legal">
+            <h2 className={styles.colTitle}>Company & legal</h2>
+            <ul className={styles.linkList}>
+              <li>
+                <Link href="/about" className={styles.footerLink}>
+                  <span>About GALX</span>
                 </Link>
               </li>
               <li>
                 <Link href="/privacy" className={styles.footerLink}>
-                  <span>Privacy Policy</span>
+                  <span>Privacy</span>
                 </Link>
               </li>
               <li>
                 <Link href="/terms" className={styles.footerLink}>
-                  <span>Terms of Service</span>
+                  <span>Terms</span>
                 </Link>
               </li>
             </ul>
-          </div>
+          </nav>
         </div>
 
         {/* Bottom Bar */}
@@ -176,7 +142,7 @@ export function Footer() {
           </div>
 
           <div className={styles.bottomLegal}>
-            <span>Developer Access is a $50/month API access membership. Usage billed separately; no usage credits included.</span>
+            <span>Private access is provided by decision, not self-service enrollment.</span>
             <button
               type="button"
               onClick={scrollToTop}

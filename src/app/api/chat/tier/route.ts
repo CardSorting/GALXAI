@@ -1,6 +1,5 @@
 import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextRequest, NextResponse } from 'next/server';
-import { publicUsagePricing } from '@/lib/billing/usage-pricing';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -28,7 +27,6 @@ async function previewGET(_req: NextRequest) {
   return NextResponse.json({
     authenticated: true,
     access: 'developer',
-    usagePricing: publicUsagePricing(),
   }, {
     status: 200,
     headers: {

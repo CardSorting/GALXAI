@@ -209,11 +209,11 @@ print(response.tool_calls)`,
               <span>PARALLEL TOOL CALLING READY</span>
             </div>
             <Link
-              href="/keys"
+              href="/developers"
               className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase font-mono tracking-wider shadow-md flex items-center gap-1.5 cursor-pointer"
             >
               <Zap className="w-3.5 h-3.5 fill-black" />
-              <span>Create API Key</span>
+              <span>Private access guidance</span>
             </Link>
           </div>
           <h1 className="text-3xl sm:text-4xl font-black text-white">Function Calling &amp; Agentic Tools Guide</h1>

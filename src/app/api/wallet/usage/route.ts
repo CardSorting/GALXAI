@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { USAGE_PRICING } from '@/lib/billing/usage-pricing';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -25,8 +24,7 @@ export async function OPTIONS() {
 export async function GET() {
   return NextResponse.json({
     success: false,
-    error: 'Usage details are separate from Developer Access and are not available through this retired wallet route.',
-    requestUrl: USAGE_PRICING.path,
+    error: 'Usage details are not available through this retired wallet route.',
   }, {
     status: 410,
     headers: { 'Cache-Control': 'private, no-store', 'X-Content-Type-Options': 'nosniff' },

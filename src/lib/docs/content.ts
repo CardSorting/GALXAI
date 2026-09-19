@@ -2,7 +2,7 @@ import { BILLING_PATHS } from '@/lib/billing/navigation';
 import { GALX_API_BASE_URL } from '@/sdk/base-url';
 
 export const DOC_MODEL = 'galx-nova';
-export const DOC_IMAGE_MODEL = 'galx-nova-image';
+export const DOC_IMAGE_MODEL = '<assigned-image-capability>';
 
 export const DOC_NAV = [
   { href: '/docs', title: 'Quickstart', description: 'First request with GALX Nova.' },
@@ -142,10 +142,10 @@ Use the supported GALX API from the server side of the existing application. Ins
 - Authentication: Authorization: Bearer <GALXAI_API_KEY>
 - Secret environment variable: GALXAI_API_KEY
 - Supported reasoning capability identifier: ${DOC_MODEL}
-- Supported image capability identifier: ${DOC_IMAGE_MODEL}
+- Supported image capability identifier: assigned directly for your integration
 - Chat endpoint: POST ${GALX_API_BASE_URL}/chat/completions
 - Image endpoint: POST ${GALX_API_BASE_URL}/images/generations
-- Create a key: https://galx.ai/keys
+- Credentials are provisioned directly for explicitly authorized integrations.
 
 ## Service boundary
 GALX Nova is GALX’s managed intelligence layer for reasoning and generation. Use the supported capability identifiers documented for your request; Nova names the service and does not claim that GALX trained a foundation model.
@@ -156,7 +156,7 @@ GALX Nova is GALX’s managed intelligence layer for reasoning and generation. U
 3. Use the documented capability identifier for the route you are calling. Do not infer additional capabilities from the Image Studio.
 4. Reuse the application’s existing server handler or server action. Do not expose the secret to users.
 5. Handle failed requests visibly. Bound retries for transient failures and honor Retry-After when returned. Do not silently change the requested capability.
-6. Confirm the usage-pricing status before attempting Developer API inference. Developer usage is billed at $0.02 per completed message with a default $25 monthly usage cap; it is not sold by token. Do not treat the access fee as usage. The browser Image Studio remains a separate consumer path.
+6. Confirm that your integration has explicit authorization and assigned operating terms before attempting API inference. The browser Image Studio remains a separate consumer path.
 
 ## Minimal request
 ${REQUEST_EXAMPLES[0].source}
@@ -175,17 +175,17 @@ export const DOC_PAGES: Record<DocId, DocPage> = {
   quickstart: {
     path: '/docs',
     title: 'Developer Quickstart',
-    badge: 'GALX Nova Developer access',
-    description: 'Developer Access is a $50/month membership for API access to GALX Nova. Usage is billed at $0.02 per completed message, not per token, with a default $25 monthly hard cap and no usage credits included. GALX handles the managed intelligence behind the supported API.',
+    badge: 'GALX Nova capabilities',
+    description: 'GALX Nova powers supported GALX experiences and selected private integrations. General-purpose API access is not a public self-service product.',
     sections: [
       {
         id: 'credentials',
-        title: '1. Create an API key',
+        title: '1. Confirm private access credentials',
         badge: 'Authentication',
         body: [
-          'Generate an API key in your dashboard. Keys are secret tokens displayed once upon generation. Keep your key secure on the server side—never commit it to git or expose it in client-side bundles.',
+          'Credentials are provisioned only for explicitly authorized private integrations. If GALX has assigned your cohort access, keep its secret credentials server-side—never commit them to git or expose them in client-side bundles.',
         ],
-        links: [{ href: '/keys', label: 'Create API key in Dashboard' }],
+        links: [{ href: '/developers', label: 'Review the private access boundary' }],
         callout: {
           type: 'tip',
           title: 'Keep credentials server-side',
@@ -205,7 +205,7 @@ export OPENAI_BASE_URL="${GALX_API_BASE_URL}"`,
         title: '2. Send your first request',
         badge: 'Supported API request',
         body: [
-          'GALX Nova provides managed reasoning and generation capabilities through the supported API. Confirm the current endpoint and usage-pricing status before integrating. Developer usage is billed at $0.02 per completed message with a default $25 monthly usage cap; the browser Image Studio remains separate.',
+          'GALX Nova provides managed reasoning and generation capabilities through the supported API for explicitly authorized integrations. Confirm the current endpoint and assigned access terms before integrating; the browser Image Studio remains separate.',
         ],
         code: REQUEST_EXAMPLES,
         responseCode: RESPONSE_EXAMPLE,
@@ -220,12 +220,11 @@ export OPENAI_BASE_URL="${GALX_API_BASE_URL}"`,
         callout: {
           type: 'note',
           title: 'Use the documented contract',
-          text: 'Capability support, response fields, and usage terms can change. Treat the current API reference, access terms and usage-pricing status as the source of truth. The access subscription does not include usage credits; completed messages are billed separately at the published rate.',
+          text: 'Capability support, response fields, and assigned operating terms can change. Treat the current API reference and authorization terms as the source of truth.',
         },
         links: [
           { href: '/docs/error-handling', label: 'Inspect error codes & troubleshooting' },
-          { href: '/keys/activity', label: 'View real-time usage telemetry' },
-          { href: '/pricing/usage', label: 'Review usage-pricing status' },
+          { href: '/developers', label: 'Review private access guidance' },
         ],
       },
       {
@@ -243,7 +242,7 @@ export OPENAI_BASE_URL="${GALX_API_BASE_URL}"`,
   -H "Authorization: Bearer $GALXAI_API_KEY"`,
           },
         ],
-        links: [{ href: '/developers', label: 'Review Developer access' }],
+        links: [{ href: '/developers', label: 'Review the private access boundary' }],
       },
       {
         id: 'agent-setup',
@@ -280,11 +279,11 @@ export OPENAI_BASE_URL="${GALX_API_BASE_URL}"`,
       {
         id: 'usage-boundary',
         title: 'Access and usage boundary',
-        badge: 'Published message usage',
+        badge: 'Private integrations',
         body: [
-          'The $50/month Developer Access subscription is an API access fee. It includes no usage credits. Developer usage is billed at $0.02 per completed message with a default $25 monthly usage cap, not per token. The consumer Image Studio image path remains separate under its existing GALX Pro/account contract.',
+          'General-purpose developer access is not self-service. GALX may authorize a bounded private integration with directly assigned terms. Metering remains in place for allocation controls, operating decisions, and capacity planning. The consumer Image Studio path remains separate under its existing GALX Pro/account contract.',
         ],
-        links: [{ href: '/pricing/usage', label: 'Review usage-pricing status' }],
+        links: [{ href: '/developers', label: 'Review private access guidance' }],
       },
       {
         id: 'endpoints',
@@ -486,8 +485,8 @@ console.log(data);`,
         title: 'Creative Visual Synthesis',
         badge: 'Image generation',
         body: [
-          'The supported image capability identifier is ' + DOC_IMAGE_MODEL + '. The browser Image Studio uses its separate GALX Pro/account contract; Developer API image consumption is billed at the published per-message rate.',
-          'You can combine reasoning and image generation when both capabilities are documented for your access. Do not treat the $50 access fee as image usage.',
+          'Use the image capability identifier assigned to your authorized integration. The browser Image Studio uses its separate GALX Pro/account contract; private integration terms are assigned directly when access is authorized.',
+          'You can combine reasoning and image generation when both capabilities are documented for your access. Do not infer commercial terms from capability documentation.',
         ],
         code: [
           {
@@ -514,7 +513,7 @@ image_resp = client.images.generate(
 print("Image artifact URL:", image_resp.data[0].url)`,
           },
         ],
-        links: [{ href: '/developers', label: 'Subscribe to Developer Access' }],
+        links: [{ href: '/developers', label: 'Review the private access boundary' }],
       },
       {
         id: 'prompt-caching',
@@ -586,7 +585,7 @@ print("Image artifact URL:", image_resp.data[0].url)`,
           headings: ['Setting Field', 'Value to Enter', 'Notes'],
           rows: [
             ['OpenAI Base URL', GALX_API_BASE_URL, 'Do not add trailing slash or duplicate /v1'],
-            ['API Key', '$GALXAI_API_KEY', 'Use your generated secret key'],
+            ['API Key', '$GALXAI_API_KEY', 'Use the secret credential assigned to your integration'],
             ['Model Name / ID', DOC_MODEL, 'GALX Nova'],
             ['Capability support', 'See current API reference', 'Do not infer unsupported features'],
           ],
@@ -606,7 +605,7 @@ print("Image artifact URL:", image_resp.data[0].url)`,
           'Replace your API key with your GALXAI API key.',
           'Use the supported capability identifier documented for your route.',
         ],
-        links: [{ href: '/developers', label: 'Review Developer access' }],
+        links: [{ href: '/developers', label: 'Review private access guidance' }],
       },
       {
         id: 'client-example',
@@ -650,18 +649,18 @@ console.log(response.choices[0].message.content);`,
           headings: ['HTTP Status', 'Category', 'Root Cause', 'Recommended Remediation'],
           rows: [
             ['400 Bad Request', 'Client Error', 'Malformed JSON, missing required fields, or unsupported parameters.', 'Validate request payload against the API reference schema.'],
-            ['401 Unauthorized', 'Authentication', 'The API key is invalid, revoked, or missing.', 'Check server-side key configuration and request access if needed.'],
+            ['401 Unauthorized', 'Authentication', 'The API key is invalid, revoked, or missing.', 'Check the server-side credential assigned to your authorized integration.'],
             ['402 Payment Required', 'Access terms', 'The request is not covered by the account’s current access terms.', 'Review the current access and usage terms.'],
             ['403 Forbidden', 'Access control', 'The account or key is not permitted to use the requested capability.', 'Check the documented access requirements.'],
             ['404 Not Found', 'Request path', 'The requested endpoint is not available at that path.', 'Check the current API reference and base URL.'],
             ['429 Rate Limit', 'Service limit', 'The request was limited temporarily.', 'Honor Retry-After when returned and use bounded backoff.'],
-            ['402 Payment Required', 'Usage cap', 'The monthly message cap or another documented access term prevents the request.', 'Review /pricing/usage and the authenticated billing workspace; do not retry until the term changes.'],
+            ['402 Payment Required', 'Access terms', 'The request is not covered by the integration’s assigned access terms.', 'Review the terms assigned to your authorized integration; do not retry until the term changes.'],
             ['503 Service Unavailable', 'Service dependency', 'A temporary service dependency or delivery condition prevented completion.', 'Retry only when the operation is safe and the service status permits it.'],
             ['500 / 502', 'Service error', 'A transient service error occurred.', 'Retry carefully when the operation is safe to repeat.'],
           ],
         },
         links: [
-          { href: '/keys', label: 'Manage & Rotate API Keys' },
+          { href: '/developers', label: 'Review private credential guidance' },
           { href: BILLING_PATHS.credits, label: 'Manage Account Balance' },
           { href: '/status', label: 'Live Service Status' },
         ],
@@ -697,7 +696,7 @@ function calculateBackoff(attempt: number, baseMs = 500, maxMs = 10000): number 
           'Never prefix API keys with NEXT_PUBLIC_ or VITE_ in frontend frameworks.',
           'If a key is accidentally committed to a repository, immediately revoke it in the dashboard and provision a fresh key.',
         ],
-        links: [{ href: '/keys', label: 'Rotate API Keys' }],
+        links: [{ href: '/developers', label: 'Review private access guidance' }],
       },
       {
         id: 'diagnostics',
@@ -708,7 +707,7 @@ function calculateBackoff(attempt: number, baseMs = 500, maxMs = 10000): number 
           'Operational diagnostics are handled through authorized support channels; ordinary API responses should contain only the documented public contract.',
         ],
         links: [
-          { href: '/keys/activity', label: 'View Real-Time API Usage Telemetry' },
+          { href: '/developers', label: 'Review private access guidance' },
           { href: '/docs/api-reference', label: 'Review API Reference' },
         ],
       },

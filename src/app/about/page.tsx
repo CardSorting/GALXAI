@@ -9,9 +9,9 @@ import { SITE_CONFIG } from '@/lib/seo/siteConfig';
 
 export const metadata: Metadata = constructMetadata({
   title: 'About GALX — Managed intelligence for creation',
-  description: 'GALX is where people create. GALX Nova is our managed intelligence layer for reasoning and generation, with a separate Developer path for API access.',
+  description: 'GALX is where people create. GALX Nova is our managed intelligence layer for reasoning and generation, with selected private integrations.',
   canonicalPath: '/about',
-  keywords: ['About GALX', 'GALX Nova', 'managed intelligence', 'AI image creation', 'Developer API access'],
+  keywords: ['About GALX', 'GALX Nova', 'managed intelligence', 'AI image creation', 'private integrations'],
 });
 
 const hierarchy = [
@@ -62,7 +62,7 @@ export default function AboutPage() {
         <section className="space-y-6" aria-labelledby="definition-heading">
           <div className="space-y-2">
             <h2 id="definition-heading" className="text-2xl sm:text-3xl font-black text-white tracking-tight">A simple relationship</h2>
-            <p className="text-sm text-zinc-400 max-w-2xl">Managed intelligence is AI capability delivered through a GALX-managed service—for people creating in GALX and developers building with its API.</p>
+            <p className="text-sm text-zinc-400 max-w-2xl">Managed intelligence is AI capability delivered through a GALX-managed service—for people creating in GALX and selected integrations using supported capabilities.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {hierarchy.map(({ icon: Icon, name, description }) => (
@@ -80,7 +80,7 @@ export default function AboutPage() {
         <section className="grid grid-cols-1 md:grid-cols-2 gap-6" aria-label="GALX and Nova definitions">
           <div className="p-7 rounded-3xl bg-zinc-900/40 border border-white/10 space-y-3">
             <h2 className="text-xl font-bold text-white">What is GALX?</h2>
-            <p className="text-sm text-zinc-400 leading-relaxed">GALX lets people create AI images. The intelligence service behind it is called Nova, and developers can subscribe for API access.</p>
+            <p className="text-sm text-zinc-400 leading-relaxed">GALX lets people create AI images. The intelligence service behind the experience is called Nova, and selected private integrations may be authorized by decision.</p>
           </div>
           <div className="p-7 rounded-3xl bg-zinc-900/40 border border-white/10 space-y-3">
             <h2 className="text-xl font-bold text-white">What is Nova?</h2>
@@ -98,14 +98,14 @@ export default function AboutPage() {
         <section className="p-8 sm:p-10 rounded-3xl bg-gradient-to-r from-cyan-950/40 via-zinc-900 to-indigo-950/40 border border-cyan-500/20 flex flex-col sm:flex-row items-center justify-between gap-6">
           <div className="space-y-1 text-center sm:text-left">
             <h2 className="text-lg sm:text-xl font-bold text-white">Bring an idea, not an infrastructure plan.</h2>
-            <p className="text-sm text-zinc-400">Create in GALX, or build with supported capabilities through Developer.</p>
+            <p className="text-sm text-zinc-400">Create in GALX, or learn about supported private integrations.</p>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-3">
             <Link href="/images" className="px-5 py-3 rounded-2xl bg-cyan-400 text-black font-bold text-xs flex items-center gap-2 hover:bg-cyan-300 transition-all">
               <span>Create an image</span><ArrowRight className="w-4 h-4" aria-hidden="true" />
             </Link>
             <Link href="/developers" className="px-5 py-3 rounded-2xl border border-white/15 text-white font-bold text-xs hover:bg-white/5 transition-all">
-              Explore Developer
+              Private access
             </Link>
           </div>
         </section>

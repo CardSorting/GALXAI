@@ -1,59 +1,98 @@
-> **GALX Nova Developer Access:** $50/month recurring membership for API access. Think of it like membership to a managed workspace: the subscription gives you access to the service; consumption is billed separately. No usage credits are included. [Subscribe](https://galx.ai/developers), or review the separate private preview path.
-
-# GALXAI
+# API reference
 
 <!-- docs-scope: current-guide -->
 
-GALX provides text and image generation APIs, model discovery, API keys, and usage controls.
+GALX exposes text, image, and model-discovery capabilities to GALX products
+and explicitly authorized private integrations. This is a capability reference,
+not a public signup or billing guide. Access is provisioned by an administrator
+and remains bounded, metered, and revocable.
 
-Use `https://galx.ai/v1` as the API base URL. Authenticate with
-`Authorization: Bearer YOUR_GALX_API_KEY`.
-A user ID is not a credential. Missing or invalid credentials return `401`;
-browser requests require a valid signed-in session.
+## Common contract
 
-The Developer subscription is an access fee, not a usage allowance. Developer
-usage is billed at $0.02 per completed message, not per token, with a default
-$25 monthly hard cap. Failed, rejected, duplicate, and aborted requests are not
-completed messages. Review the [usage-pricing status](https://galx.ai/pricing/usage)
-and billing workspace before integrating; do not treat the subscription as a
-credit balance or infer supplier costs from the capability catalog.
+| Concern | Contract |
+| --- | --- |
+| Base URL | `https://galx.ai/v1` |
+| Authentication | `Authorization: Bearer YOUR_GALX_API_KEY` |
+| Model selection | Use an exact identifier returned by `GET /v1/models` |
+| Credential lifecycle | Administered privately; expiry, allocation, and revocation apply |
+| Public availability | No public subscription, enrollment, waitlist, or self-service key provisioning |
+
+Credentials belong on a server or trusted runtime. Never expose a key in a
+browser bundle, URL, source repository, log, or screenshot. Public model names
+and aliases describe capabilities; they do not promise an unverified underlying
+provider or implementation.
+
+## Model discovery
+
+`GET /v1/models` returns the model identifiers available to the credential's
+scope. Treat this response as the source of truth for a request:
+
+```bash
+curl --fail-with-body https://galx.ai/v1/models \
+  -H "Authorization: Bearer $GALX_API_KEY"
+```
+
+## Text generation
+
+`POST /v1/chat/completions` accepts a supported `model` and `messages` array.
+Streaming uses the documented event sequence when `stream` is enabled. The
+response contains the requested capability's allowlisted result fields.
+
+```bash
+curl --fail-with-body https://galx.ai/v1/chat/completions \
+  -H "Authorization: Bearer $GALX_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "MODEL_ID_FROM_V1_MODELS",
+    "messages": [{"role": "user", "content": "Summarize this request."}]
+  }'
+```
 
 ## Image generation
 
-`POST /v1/images/generations` accepts a text `prompt` and the public model alias
-`openai-gpt-image-latest`. A successful request returns one image as binary bytes
-with its `image/png`, `image/jpeg`, or `image/webp` content type.
-Set `output_format` to `png`, `jpeg`, or `webp` to select a format.
+`POST /v1/images/generations` accepts a text `prompt` and a supported GALX image
+capability. A successful request returns one image as binary bytes with an
+`image/png`, `image/jpeg`, or `image/webp` content type. Set `output_format` to
+`png`, `jpeg`, or `webp` when selecting a format.
 
-For existing JSON clients, set `response_format` to `b64_json` or `url`.
-`Accept: application/json` also selects base64 JSON. JSON contains only `created`
-and `data`, with each item containing only `b64_json` or `url`. URL results are
-GALX download links valid for one hour or self-contained data URLs. Save the
-image before a download link expires. Request up to four images using JSON;
-binary responses support one image per request.
+For JSON clients, set `response_format` to `b64_json` or `url`. An
+`Accept: application/json` request also selects base64 JSON. JSON contains only
+`created` and `data`, with each item containing `b64_json` or `url`. Download
+links are temporary; save the image before the link expires. JSON requests can
+ask for up to four images; binary responses support one image per request.
 
-Images are static. PNG and WebP support transparency; JPEG does not. Dimensions
-can vary from the requested size. Image metadata is not preserved.
+For asynchronous work, send `Prefer: respond-async`. The `202` response
+contains `id`, `status`, and `task_url`. Retrieve that URL with the same
+credential; pending work remains `202`. Append `/stream` for status events.
 
-For asynchronous requests, send `Prefer: respond-async`. A `202` response contains
-`id`, `status`, and `task_url`. GET that URL with the same authentication to retrieve
-the result; pending requests return `202`. Append `/stream` for status events.
+Image artifacts are static. PNG and WebP support transparency; JPEG does not.
+Dimensions can vary from the requested size, and source metadata is not
+preserved.
+
+## Site content
+
+Site content is a separate account product with its own eligibility and
+settlement contract. See [Site content](SITES_CONTENT.md) when that capability
+is explicitly enabled for the account. Do not infer API access from Site or
+Images eligibility.
+
+## Errors and uncertain outcomes
 
 Errors contain only `error.code`, `error.message`, and `error.request_id`.
-Contact support with the request ID. A timeout can leave a request outcome
-uncertain; check an asynchronous request before submitting another generation.
 
-## Site content generation
+- `401`: credential missing, invalid, expired, or revoked.
+- `403`: capability, scope, or account authorization denied.
+- `429`: assigned traffic or usage allocation reached.
+- `5xx` or a timeout: outcome may be uncertain; check the operation before
+  retrying a side effect.
 
-Eligible accounts can use the [Site content contract](SITES_CONTENT.md) for quoted, bounded
-text drafts and recovery by operation ID. It uses an account session bearer at
-`/api/sites/content`. The guide covers fixed pricing, allowances, repairs and
-settlement; availability depends on account eligibility.
+Private integrations are metered so GALX can understand consumption, enforce
+allocations, plan capacity, and investigate abnormal use. Metering is not a
+public price sheet or a promise of self-service availability.
 
-## Documentation
+## Related references
 
-- [API documentation](https://galx.ai/docs)
-- [Models](https://galx.ai/models)
-- [API schema](https://galx.ai/api/openapi.json)
-- [Pricing](https://galx.ai/pricing)
-- [Service status](https://galx.ai/status)
+- [API quickstart](QUICKSTART.md)
+- [Base URL and authentication](API_BASE_URL.md)
+- [OpenAPI schema](https://galx.ai/api/openapi.json)
+- [Public developer page](https://galx.ai/developers)

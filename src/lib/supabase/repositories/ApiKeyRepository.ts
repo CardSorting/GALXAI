@@ -616,15 +616,20 @@ export class ApiKeyRepository {
     // 2. Direct PostgreSQL connection pool protected by circuit breaker
     const res = await executePostgresQuery(
       `INSERT INTO galx_developer_keys (
-        id, user_id, name, prefix, key_hash, rate_limit_per_minute, total_requests, total_tokens, allowed_ips, is_revoked, created_at, updated_at
+      id, user_id, name, prefix, key_hash, rate_limit_per_minute, total_requests, total_tokens, allowed_ips, spend_cap_usd, environment, scopes, expires_at, default_compaction_mode, is_revoked, created_at, updated_at
       ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, to_timestamp($11 / 1000.0), NOW()
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, to_timestamp($16 / 1000.0), NOW()
       ) ON CONFLICT (id) DO UPDATE SET
         name = EXCLUDED.name,
         prefix = EXCLUDED.prefix,
         key_hash = EXCLUDED.key_hash,
         rate_limit_per_minute = EXCLUDED.rate_limit_per_minute,
         allowed_ips = EXCLUDED.allowed_ips,
+        spend_cap_usd = EXCLUDED.spend_cap_usd,
+        environment = EXCLUDED.environment,
+        scopes = EXCLUDED.scopes,
+        expires_at = EXCLUDED.expires_at,
+        default_compaction_mode = EXCLUDED.default_compaction_mode,
         is_revoked = EXCLUDED.is_revoked,
         updated_at = NOW();`,
       [
@@ -637,6 +642,11 @@ export class ApiKeyRepository {
         key.totalRequests || 0,
         key.totalTokens || 0,
         key.ipWhitelist || null,
+        key.spendCapUsd ?? null,
+        key.environment || 'live',
+        key.scopes || ['*'],
+        key.expiresAtMs ? new Date(key.expiresAtMs).toISOString() : null,
+        key.defaultCompactionMode || 'auto',
         Boolean(key.revoked),
         key.createdAtMs || Date.now()
       ]
@@ -872,6 +882,8 @@ export class ApiKeyRepository {
       expiresAtMs: data.expires_at ? new Date(data.expires_at).getTime() : undefined,
       description: data.description || undefined,
       checksum: data.checksum || undefined,
+      spendCapUsd: data.spend_cap_usd === null || data.spend_cap_usd === undefined ? undefined : Number(data.spend_cap_usd),
+      currentSpendUsd: data.current_spend_usd === null || data.current_spend_usd === undefined ? undefined : Number(data.current_spend_usd),
       defaultCompactionMode: data.default_compaction_mode || data.defaultCompactionMode || 'auto',
     };
   }
@@ -886,6 +898,7 @@ export class ApiKeyRepository {
       rate_limit_per_minute: key.rateLimitPerMinute,
       total_requests: key.totalRequests,
       total_tokens: key.totalTokens,
+      spend_cap_usd: key.spendCapUsd ?? null,
       is_revoked: key.revoked || false,
       last_used_at: key.lastUsedAtMs ? new Date(key.lastUsedAtMs).toISOString() : null,
       created_at: new Date(key.createdAtMs).toISOString(),

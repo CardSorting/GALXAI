@@ -62,7 +62,7 @@ export function DocsClient() {
             Connect to GALXAI
           </h1>
           <p className="mt-4 max-w-2xl text-base leading-7 text-zinc-300">
-            Choose a model, create a key, and point an OpenAI-compatible client at GALXAI. These docs cover inference infrastructure—not a hosted chat or image application.
+            Review supported capabilities and point an authorized server-side client at GALXAI. These docs cover integration contracts—not a hosted chat or image application.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Link
@@ -73,11 +73,11 @@ export function DocsClient() {
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </Link>
             <Link
-              href="/keys"
+              href="/developers"
               className="inline-flex items-center gap-2 rounded-lg border border-white/15 px-4 py-2.5 text-sm font-semibold text-zinc-100 transition-colors hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300"
             >
               <KeyRound className="h-4 w-4" aria-hidden="true" />
-              Create API key
+              Private access guidance
             </Link>
           </div>
         </header>

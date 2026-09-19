@@ -13,7 +13,7 @@ export const previewResponse = (body: unknown, status = 200) => NextResponse.jso
   'X-Content-Type-Options': 'nosniff', 'Access-Control-Allow-Origin': '*',
 } });
 export function previewError(status: number, code: string, message: string) {
-  return previewResponse({ error: { code, message }, request_access_url: '/developers' }, status);
+  return previewResponse({ error: { code, message } }, status);
 }
 const dependencies: PreviewGateDependencies = {
   identity: async req => {
@@ -27,8 +27,8 @@ export async function enforceDeveloperAccess(req: Request, deps = dependencies):
   try {
     if (hasInternalAccess(req.headers)) return null;
     const actor = await deps.identity(req);
-    if (!actor.authenticated || !actor.userId) return previewError(401, 'authentication_required', 'Sign in or use an approved account’s API key.');
-    if (!await deps.approved(actor.userId)) return previewError(403, 'developer_access_required', 'An active GALX Nova Developer Access subscription or approved preview is required.');
+    if (!actor.authenticated || !actor.userId) return previewError(401, 'authentication_required', 'Sign in with an authorized account or API key.');
+    if (!await deps.approved(actor.userId)) return previewError(403, 'developer_access_required', 'This capability is limited to explicitly authorized private integrations.');
     return null;
   } catch {
     return previewError(503, 'access_check_unavailable', 'We couldn’t check your access. Please try again.');
@@ -56,7 +56,7 @@ export function usagePricingUnavailable(req: Request): NextResponse | null {
 
   return NextResponse.json({
     error: {
-      message: 'API usage is not available until the separate per-message usage-pricing terms are published. Developer Access includes no usage credits.',
+      message: 'This integration is not enabled for metered inference access.',
       type: 'service_unavailable',
       code: 'usage_pricing_not_published',
       usage_pricing_url: USAGE_PRICING.path,

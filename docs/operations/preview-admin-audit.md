@@ -2,7 +2,12 @@
 
 <!-- docs-scope: operational-record -->
 
-Scope: the private admin workspace, its HTTP handlers, staff authorization, waitlist decisions, access expiry, feedback management and the affected public entry points. Browser workflow evidence uses synthetic identities and a disposable database. Deployment evidence is recorded separately in the activation receipt; neither is a blanket live-site certification.
+Scope: the private admin workspace, its HTTP handlers, staff authorization,
+bounded access decisions, credential allocation, expiry, feedback management,
+and the affected public entry points. Browser workflow evidence uses synthetic
+identities and a disposable database. Deployment evidence is recorded
+separately in the activation receipt; neither is a blanket live-site
+certification.
 
 ## Results
 
@@ -13,11 +18,29 @@ Scope: the private admin workspace, its HTTP handlers, staff authorization, wait
 | Expiry and revocation | Private requests query effective approval on every call. Database tests cover expired approval, feedback denial after expiry, immediate staff removal and participant pause/re-review. |
 | Privacy | Forced RLS; browser database roles have no table access. Explicit response DTOs, bounded bodies, no credential-bearing CORS and no-store responses. Public pages and associated scripts are scanned for admin records and UI payloads. |
 | UX and accessibility | Desktop and phone fixtures cover inbox, review, approval, conflict, feedback, staff editor and activity. Native controls, visible focus, live errors, bounded pagination and an explicit mobile back action. |
-| Existing products | The 19-test image HTTP/security suite and 94-test database integration suite passed. The original waitlist persistence and CLI review tests also passed. |
+| Existing products | The 19-test image HTTP/security suite and 94-test database integration suite passed. The existing decision-persistence and CLI recovery tests also passed. |
 
 An independent finish reviewer returned **ship**, with no material visual or interaction findings across the 14 final captures and reviewed interface code. The review is recorded in `.impeccable/review/preview-admin/finish-review.md`.
 
 The static interface detector reported no findings after alignment with the existing palette. Browser Axe A/AA checks reported no violations or horizontal document overflow in the captured states. No global design-rule exceptions were added.
+
+## UX contract
+
+The workspace intentionally uses patterns that users already recognize from
+cloud consoles and operational inboxes:
+
+- a left navigation grouped by task rather than by implementation;
+- a triage list with search, filters, status chips, and a focused detail view;
+- explicit resource states instead of ambiguous success copy;
+- a one-time secret reveal followed by copy-and-deliver guidance;
+- allocation and usage in the same detail context as the credential;
+- an append-only activity view for accountability; and
+- destructive actions that require a named target and an immediate result.
+
+These are interaction patterns, not a dependency on any external product.
+The public developer page follows the complementary documentation pattern:
+state the access boundary first, explain the capability, and provide no public
+workflow that implies availability.
 
 ## Audit health score
 
@@ -61,8 +84,8 @@ The recovery choices follow [NN/g's user control and freedom guidance](https://w
 ## Operational limits
 
 - Both migrations, the site and API gateway are deployed. First-owner provisioning is complete and the account binding and audit event were verified in production. Owner browser sign-in and real-participant acceptance remain untested; see the [activation receipt](preview-activation.md).
-- Admission is individual. Expected traffic helps review; it does not override the existing per-key quota, billing or scope checks.
-- Staff additions and access decisions do not automatically send emails. The founder shares the staff sign-in link; participants check `/developers` for their status.
+- Cohort approval is deliberate; credential allocation remains per key. Expected traffic helps review but does not override per-key quota, metering, or scope checks.
+- Staff additions and access decisions do not automatically send emails. The founder shares the staff sign-in link; private recipients receive access details through an approved channel. `/developers` remains an informational public boundary page, not a status or enrollment workflow.
 - Revocation denies new requests; already-running work is not cancelled. Data retention and account-deletion workflows remain operator responsibilities.
 - This pass does not certify every legacy private developer page or measure production latency. The new workspace uses the established dark theme; a separate light theme was not introduced.
 

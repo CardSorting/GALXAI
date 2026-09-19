@@ -1,4 +1,4 @@
-import { withDeveloperAccess } from '@/lib/security/developer-access';
+import { withPreviewAdmin } from '@/lib/security/preview-admin';
 import { NextRequest, NextResponse } from 'next/server';
 import { GalxPersistence } from '@/lib/storage/GalxPersistence';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
@@ -244,6 +244,6 @@ async function previewDELETE(
   }
 }
 
-export const GET = withDeveloperAccess(previewGET);
-export const PATCH = withDeveloperAccess(previewPATCH);
-export const DELETE = withDeveloperAccess(previewDELETE);
+export const GET = withPreviewAdmin(previewGET);
+export const PATCH = withPreviewAdmin(previewPATCH);
+export const DELETE = withPreviewAdmin(previewDELETE);

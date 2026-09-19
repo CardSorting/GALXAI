@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { USAGE_PRICING } from '@/lib/billing/usage-pricing';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -13,8 +12,7 @@ export const dynamic = 'force-dynamic';
  */
 export function GET() {
   return NextResponse.json({
-    error: 'Developer usage is billed at $0.02 per completed message with a default $25 monthly usage cap.',
-    usage_pricing_url: USAGE_PRICING.path,
+    error: 'Public usage-rate discovery is not available.',
   }, {
     status: 410,
     headers: {

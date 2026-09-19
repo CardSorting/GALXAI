@@ -9,14 +9,14 @@ import { Shield, FileText, Lock, Scale, Zap, ArrowRight } from 'lucide-react';
 import { SITE_CONFIG } from '@/lib/seo/siteConfig';
 
 export const metadata: Metadata = constructMetadata({
-  title: 'Terms of Service — GALX Images, Nova, and Developer access',
-  description: 'Terms for creating in GALX Images, using GALX Nova, and subscribing to separate Developer API access.',
+  title: 'Terms of Service — GALX Images and Nova',
+  description: 'Terms for creating in GALX Images and using GALX Nova-powered experiences.',
   canonicalPath: '/terms',
   keywords: [
     'Terms of Service',
     'GALX Images',
     'GALX Nova',
-    'Developer API access',
+    'Private integrations',
     'Account billing terms',
   ],
 });
@@ -64,10 +64,10 @@ export default function TermsOfServicePage() {
         <section className="rounded-2xl border border-indigo-400/20 bg-indigo-500/5 p-6 space-y-3" aria-labelledby="current-scope">
           <h2 id="current-scope" className="font-bold text-white text-base">Current product and pricing scope</h2>
           <p className="text-sm text-zinc-300 leading-relaxed">
-            GALX Pro is the consumer Image Studio plan at $10 USD per month for one account. GALX Nova Developer Access is a separate $50/month recurring API access subscription.
+            GALX Pro is the consumer Image Studio plan at $10 USD per month for one account. General-purpose developer access is not a public subscription.
           </p>
           <p className="text-sm text-zinc-400 leading-relaxed">
-            Usage is billed separately from the access subscription, and no usage credits are included. Start through <Link href="/developers" className="text-cyan-300 hover:underline">Developer</Link> and review the supported capabilities and usage terms before building. Historical account-credit records and prior transactions remain subject to the terms presented when they were created.
+            Private integrations may be authorized directly for a bounded use case and remain subject to assigned terms. Historical account-credit records and prior transactions remain subject to the terms presented when they were created.
           </p>
         </section>
 
@@ -99,7 +99,7 @@ export default function TermsOfServicePage() {
             </div>
             <h2 className="font-bold text-white text-base">Reviewed access</h2>
             <p className="text-xs text-zinc-400 leading-relaxed">
-              Private preview is a separate request path for supported Nova capabilities. Applying does not grant subscription access; Developer Access is granted by an active subscription and follows its published terms.
+              Private access is administered directly for explicitly authorized integrations. Public accounts do not receive credentials or a self-service enrollment path.
             </p>
           </div>
         </section>
@@ -111,7 +111,7 @@ export default function TermsOfServicePage() {
               <span className="text-cyan-400 font-mono text-base">1.</span> Provision of Services
             </h2>
             <p>
-              GALX provides image creation through GALX Images and managed intelligence through GALX Nova. Developer API capabilities are available only through the approved access path and documented supported contract. By creating an account or using a supported capability, you agree to comply with applicable law and the published acceptable-use requirements.
+              GALX provides image creation through GALX Images and managed intelligence through GALX Nova. Selected private integrations may receive explicitly authorized capabilities under assigned terms. By creating an account or using a supported capability, you agree to comply with applicable law and the published acceptable-use requirements.
             </p>
           </section>
 
@@ -120,10 +120,10 @@ export default function TermsOfServicePage() {
               <span className="text-cyan-400 font-mono text-base">2.</span> Billing and access terms
             </h2>
             <p>
-              GALX Pro is a consumer subscription at $10 USD per month for one account and follows the published Image Studio terms and fair-use boundaries. GALX Nova Developer Access is a separate $50 USD per month recurring subscription for API access. Usage is billed separately; no usage credits are included.
+              GALX Pro is a consumer subscription at $10 USD per month for one account and follows the published Image Studio terms and fair-use boundaries. Private integration terms, when applicable, are established directly with the authorized cohort.
             </p>
             <p>
-              Existing account-credit balances, refunds, and other payment records remain governed by the terms presented when those records were created. Developer Access is purchased through the Developer surface; an active subscription grants API admission and cancellation or expiration removes it according to the subscription lifecycle.
+              Existing account-credit balances, refunds, and other payment records remain governed by the terms presented when those records were created. Private access may be changed or revoked by GALX and does not create a public promise of availability.
             </p>
           </section>
 
@@ -132,7 +132,7 @@ export default function TermsOfServicePage() {
               <span className="text-cyan-400 font-mono text-base">3.</span> Cryptographic API Key Security
             </h2>
             <p>
-              You are responsible for maintaining the confidentiality of account credentials and any approved API keys. In the event of a suspected key compromise, revoke or rotate the key from the <Link href="/keys" className="text-cyan-400 hover:underline">API Keys Management Console</Link> and contact support if you need help.
+              You are responsible for maintaining the confidentiality of account credentials and any approved private integration credentials. In the event of a suspected compromise, contact the authorized GALX administrator or support so the credential can be revoked or rotated.
             </p>
           </section>
 
@@ -158,8 +158,8 @@ export default function TermsOfServicePage() {
         {/* CTA Strip */}
         <section className="p-8 rounded-3xl bg-gradient-to-r from-cyan-950/40 via-zinc-900 to-indigo-950/40 border border-cyan-500/20 flex flex-col sm:flex-row items-center justify-between gap-6">
           <div className="space-y-1 text-center sm:text-left">
-            <h3 className="text-base sm:text-lg font-bold text-white">Review our Zero Data Retention Privacy Architecture</h3>
-            <p className="text-xs text-zinc-400">Learn how ephemeral memory zeroization protects enterprise confidentiality.</p>
+            <h3 className="text-base sm:text-lg font-bold text-white">Review our privacy policy</h3>
+            <p className="text-xs text-zinc-400">Learn how GALX handles account, product, usage, and support information.</p>
           </div>
           <Link
             href="/privacy"

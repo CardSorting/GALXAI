@@ -37,13 +37,13 @@ export interface RecentNavItem extends Record<string, unknown> {
 const STORAGE_RECENT_NAV_KEY = 'galx_recent_nav_v1';
 
 const ACRONYM_MAP: Record<string, string> = {
-  api: '/developers',
+  api: '/docs',
   about: '/about',
   docs: '/docs',
   faq: '/faq',
   explore: '/explore',
   images: '/images',
-  nova: '/developers',
+  nova: '/docs',
   pricing: '/pricing',
 };
 
@@ -77,15 +77,6 @@ const BASE_CATALOG_ITEMS: CatalogItem[] = [
     intentPhrases: ['see creations', 'find inspiration', 'browse images', 'explore the community'],
   },
   {
-    title: 'GALX Developer',
-    description: 'Subscribe to build with supported GALX Nova capabilities.',
-    category: 'Developer',
-    href: '/developers',
-    shortcutKey: 'G D',
-    keywords: ['developer', 'nova', 'api', 'access', 'managed intelligence', 'build'],
-    intentPhrases: ['build with nova', 'subscribe to developer access', 'use the api', 'build an application'],
-  },
-  {
     title: 'Supported capabilities and documentation',
     description: 'Review API capabilities and integration requirements.',
     category: 'Documentation',
@@ -95,10 +86,10 @@ const BASE_CATALOG_ITEMS: CatalogItem[] = [
   },
   {
     title: 'Pricing for creating',
-    description: 'Review the consumer plan and Developer access statement.',
+    description: 'Review the consumer plan for image creation.',
     category: 'Finance',
     href: '/pricing',
-    keywords: ['pricing', 'price', 'plan', 'pro', 'developer access', '$50'],
+    keywords: ['pricing', 'price', 'plan', 'pro'],
     intentPhrases: ['how much does it cost', 'review pricing', 'what is the pro plan'],
   },
   {
@@ -112,7 +103,7 @@ const BASE_CATALOG_ITEMS: CatalogItem[] = [
   },
   {
     title: 'Knowledge base',
-    description: 'Guidance for creating, sharing, remixing, and Developer access.',
+    description: 'Guidance for creating, sharing, remixing, and GALX Nova-powered experiences.',
     category: 'Support',
     href: '/knowledge-base',
     keywords: ['knowledge', 'guides', 'help', 'getting started', 'remix', 'public'],
@@ -133,14 +124,6 @@ const BASE_CATALOG_ITEMS: CatalogItem[] = [
     href: '/status',
     keywords: ['status', 'availability', 'service', 'health'],
     intentPhrases: ['is galx available', 'check service status'],
-  },
-  {
-    title: 'API keys',
-    description: 'Manage keys after Developer Access is active.',
-    category: 'Developer',
-    href: '/keys',
-    keywords: ['keys', 'api key', 'credentials', 'developer'],
-    intentPhrases: ['manage api keys', 'open api keys'],
   },
   {
     title: 'Billing overview',

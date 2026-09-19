@@ -19,6 +19,11 @@ const roles = new Set(['owner', 'reviewer', 'viewer']);
 const states = new Set(['pending', 'approved', 'revoked', 'declined']);
 export const validStaffEmail = (value: unknown): value is string => typeof value === 'string' && value.length <= 320 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 const validRevision = (value: unknown): value is number => typeof value === 'number' && Number.isSafeInteger(value) && value > 0;
+const validUserId = (value: unknown): value is string => typeof value === 'string' && value.length > 0 && value.length <= 200;
+const validCredentialNumber = (value: unknown) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0;
+};
 async function readBody(req: NextRequest) {
   if (!req.headers.get('content-type')?.toLowerCase().startsWith('application/json')) throw invalid();
   const reader = req.body?.getReader(); if (!reader) throw invalid();
@@ -41,7 +46,7 @@ export function createPreviewAdminHandlers(deps = defaults) {
         const page = Number(params.get('page') || '1');
         if (!Number.isSafeInteger(page) || page < 1 || page > 10000) throw invalid();
         if (view === 'session') return adminResponse({ actor: await repo.session(identity) });
-        if (view === 'requests') {
+        if (view === 'requests' || view === 'access') {
           const status = params.get('status') || 'pending', search = (params.get('q') || '').trim();
           if (!states.has(status) && !['all', 'expired'].includes(status) || search.length > 320) throw invalid();
           return adminResponse(await repo.requests(identity, status, search, page));
@@ -82,6 +87,29 @@ export function createPreviewAdminHandlers(deps = defaults) {
           if (!validStaffEmail(data.email) || !(data.revision === null || validRevision(data.revision))
             || !(data.role === null || roles.has(data.role)) || typeof data.reason !== 'string' || data.reason.trim().length < 3 || data.reason.length > 1000) throw invalid();
           return adminResponse(await repo.updateStaff(identity, data.email.toLowerCase(), data.revision, data.role as AdminRole | null, data.reason.trim()));
+        }
+        if (data.action === 'credential_create') {
+          if (!validUserId(data.user_id) || (data.environment !== undefined && !['live', 'test'].includes(data.environment))
+            || !validCredentialNumber(data.rate_limit_per_minute) || !validCredentialNumber(data.usage_cap_usd)
+            || (data.expires_in_days !== undefined && data.expires_in_days !== null && (!validCredentialNumber(data.expires_in_days) || Number(data.expires_in_days) > 730))) throw invalid();
+          return adminResponse(await repo.createPrivateKey(identity, data.user_id, {
+            name: data.name, environment: data.environment, rateLimitPerMinute: data.rate_limit_per_minute,
+            usageCapUsd: data.usage_cap_usd, expiresInDays: data.expires_in_days,
+          }));
+        }
+        if (data.action === 'credential_update') {
+          if (!validUserId(data.user_id) || typeof data.key_id !== 'string' || data.key_id.length > 100
+            || (data.name !== undefined && typeof data.name !== 'string')
+            || (data.rate_limit_per_minute !== undefined && !validCredentialNumber(data.rate_limit_per_minute))
+            || (data.usage_cap_usd !== undefined && !validCredentialNumber(data.usage_cap_usd))) throw invalid();
+          return adminResponse(await repo.updatePrivateKey(identity, data.user_id, data.key_id, {
+            name: data.name, rateLimitPerMinute: data.rate_limit_per_minute, usageCapUsd: data.usage_cap_usd,
+          }));
+        }
+        if (data.action === 'credential_revoke') {
+          if (!validUserId(data.user_id) || typeof data.key_id !== 'string' || data.key_id.length > 100
+            || typeof data.reason !== 'string' || data.reason.trim().length < 3 || data.reason.length > 1000) throw invalid();
+          return adminResponse(await repo.revokePrivateKey(identity, data.user_id, data.key_id, data.reason.trim()));
         }
         throw invalid();
       } catch (error) { return adminFailure(error); }

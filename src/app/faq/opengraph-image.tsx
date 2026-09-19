@@ -2,7 +2,7 @@ import { ImageResponse } from 'next/og';
 
 export const runtime = 'edge';
 
-export const alt = 'GALX FAQ — Images, Nova, and Developer access';
+export const alt = 'GALX FAQ — Images, Nova, and private access';
 export const size = {
   width: 1200,
   height: 630,
@@ -98,13 +98,13 @@ export default async function Image() {
             Frequently Asked Questions &amp; Knowledge Base
           </div>
           <div style={{ display: 'flex', fontSize: '22px', color: '#cbd5e1', lineHeight: 1.4 }}>
-            Clear answers about creating in GALX, Nova, public sharing, and Developer access.
+            Clear answers about creating in GALX, Nova, public sharing, and private integrations.
           </div>
         </div>
 
         {/* Badges */}
         <div style={{ display: 'flex', gap: '14px' }}>
-          {['Create in GALX', 'Powered by GALX Nova', 'Public by default', 'Developer access'].map((item, i) => (
+          {['Create in GALX', 'Powered by GALX Nova', 'Public by default', 'Private integrations'].map((item, i) => (
             <div
               key={i}
               style={{

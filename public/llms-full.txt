@@ -3,6 +3,4 @@
 Create images at https://galx.ai/images and build websites at https://galx.ai/sites.
 Both products are open to explore. Sign in to create and save work; existing usage and billing requirements apply.
 
-The developer API and other developer tools are in private preview. Sign up, verify your email, and request access at https://galx.ai/developers. Signup, credits, or an existing API key do not grant developer preview access. Requests are reviewed individually; there is no guaranteed invitation date.
-
-Approved participants can manage API keys, read API documentation, and submit private feedback from their developer preview page. Missing authentication returns 401; an authenticated account without approval receives 403 with code developer_preview_required. Images and Sites do not require developer preview approval.
+GALX Nova also supports selected private integrations by explicit decision. There is no public developer subscription, enrollment, waitlist, self-service credential provisioning, or public inference price sheet. Private access is bounded, metered, administered, and revocable. Images and Sites remain separate supported products.

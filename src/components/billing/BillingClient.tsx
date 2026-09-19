@@ -29,38 +29,20 @@ export function BillingClient({ page = 'overview' }: { page?: BillingPage }) {
       {loading && <p role="status" className="text-sm text-zinc-400">{data ? 'Updating billing details…' : 'Loading billing…'}</p>}
       {page === 'overview' && <>
         <PlanPanel accountId={accountId} token={token} compact refreshKey={planRefresh} />
-        <UsageSummaryCard />
-        {data && <section aria-labelledby="overview-credit"><div className="flex flex-wrap items-center justify-between gap-3"><h2 id="overview-credit" className="text-xl font-semibold">Account credit</h2><Link href={BILLING_PATHS.credits} className={primary}>View credit</Link></div><p className="mt-2 text-sm leading-6 text-zinc-400">Existing account credit remains visible here. Developer Access is a separate $50/month API access membership; usage is billed separately and no usage credits are included.</p><BalanceSummary compact /><div className="mt-3 flex flex-wrap gap-x-6"><Link href={BILLING_PATHS.transactions} className={link}>View transactions</Link><Link href="/keys/activity" className={link}>Usage by API key</Link><Link href="/developers" className={link}>Subscribe to Developer Access</Link><Link href="/pricing/usage" className={link}>View usage pricing and terms</Link></div></section>}
+        {data && <section aria-labelledby="overview-credit"><div className="flex flex-wrap items-center justify-between gap-3"><h2 id="overview-credit" className="text-xl font-semibold">Account credit</h2><Link href={BILLING_PATHS.credits} className={primary}>View credit</Link></div><p className="mt-2 text-sm leading-6 text-zinc-400">Existing account credit remains visible here for historical account activity and current GALX product records.</p><BalanceSummary compact /><div className="mt-3 flex flex-wrap gap-x-6"><Link href={BILLING_PATHS.transactions} className={link}>View transactions</Link></div></section>}
         <div className="divide-y divide-white/10 border-y border-white/10">{[
           [BILLING_PATHS.invoices, 'Invoices', 'Find invoices and download them from Stripe.'],
           [BILLING_PATHS.payments, 'Payment settings', 'Update the payment methods saved to your account.'],
         ].map(([href, title, description]) => <Link key={href} href={href} className="group block py-5 focus-visible:outline-indigo-300"><span className="text-sm font-medium text-indigo-300 underline-offset-4 group-hover:underline">{title}</span><p className="mt-1 text-sm leading-6 text-zinc-400">{description}</p></Link>)}</div>
       </>}
       {page === 'credits' && <>
-        <UsageSummaryCard />
-        {data && <><BalanceSummary /><section aria-labelledby="developer-access" className="border-t border-white/10 pt-7"><h2 id="developer-access" className="text-xl font-semibold">GALX Nova Developer Access</h2><p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-400">$50/month recurring subscription for API access. Usage billed separately. No usage credits included.</p><p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">This membership is separate from account credit and does not create a balance.</p><Link href="/developers" className={`${primary} mt-5`}>Subscribe to Developer Access</Link><Link href="/pricing/usage" className={`${link} mt-4 inline-flex`}>View usage pricing and terms</Link></section><div className="border-t border-white/10 pt-5 space-y-2"><p className="text-sm leading-6 text-zinc-400">This page shows existing account credit and its history. Developer Access membership status is separate from this credit and from usage.</p><div className="flex flex-wrap gap-x-6"><Link href={BILLING_PATHS.transactions} className={link}>View transactions</Link><Link href={BILLING_PATHS.plan} className={link}>View GALX Pro</Link></div></div></>}
+        {data && <><BalanceSummary /><div className="border-t border-white/10 pt-5 space-y-2"><p className="text-sm leading-6 text-zinc-400">This page shows existing account credit and its history.</p><div className="flex flex-wrap gap-x-6"><Link href={BILLING_PATHS.transactions} className={link}>View transactions</Link><Link href={BILLING_PATHS.plan} className={link}>View GALX Pro</Link></div></div></>}
       </>}
       {page === 'transactions' && data && <Transactions />}
       {page === 'invoices' && <Invoices />}
       {page === 'payments' && <PaymentSettings />}
     </>}
   </div>;
-}
-
-function UsageSummaryCard() {
-  const { usage, usageLoading, usageError } = useBilling();
-  if (usageLoading && !usage) return <section aria-labelledby="usage-summary" className="border-y border-white/10 py-6"><p role="status" className="text-sm text-zinc-400">Loading message usage…</p></section>;
-  if (usageError && !usage) return <section aria-labelledby="usage-summary" className="border-y border-white/10 py-6"><h2 id="usage-summary" className="text-xl font-semibold">Message usage</h2><p role="alert" className="mt-2 text-sm leading-6 text-amber-200">{usageError} Your requests and billing terms are unchanged.</p></section>;
-  if (!usage) return null;
-  const { currentPeriod: period } = usage;
-  const reset = period.resetAt ? new Date(period.resetAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' }) : 'next month';
-  return <section aria-labelledby="usage-summary" className="border-y border-white/10 py-6">
-    <div className="flex flex-wrap items-start justify-between gap-4"><div><h2 id="usage-summary" className="text-xl font-semibold">Message usage</h2><p className="mt-2 max-w-xl text-sm leading-6 text-zinc-400">Completed messages are billed at {money(usage.rateUsd)} each. Your default monthly hard cap is {money(usage.monthlyCapUsd)}.</p></div><Link href="/pricing/usage" className={link}>View terms</Link></div>
-    <div className="mt-5 h-2 overflow-hidden rounded-full bg-white/10" role="progressbar" aria-label="Monthly message usage" aria-valuemin={0} aria-valuemax={100} aria-valuenow={period.percentUsed}><div className={`h-full rounded-full ${period.percentUsed >= 80 ? 'bg-amber-300' : 'bg-indigo-300'}`} style={{ width: `${Math.min(100, period.percentUsed)}%` }} /></div>
-    <dl className="mt-4 grid grid-cols-2 gap-5 sm:grid-cols-4"><div><dt className="text-xs text-zinc-500">Completed</dt><dd className="mt-1 text-lg font-medium tabular-nums">{period.completedMessages.toLocaleString()}</dd></div><div><dt className="text-xs text-zinc-500">Pending</dt><dd className="mt-1 text-lg font-medium tabular-nums">{period.pendingMessages.toLocaleString()}</dd></div><div><dt className="text-xs text-zinc-500">Accrued</dt><dd className="mt-1 text-lg font-medium tabular-nums">{money(period.accruedUsd)}</dd></div><div><dt className="text-xs text-zinc-500">Remaining</dt><dd className="mt-1 text-lg font-medium tabular-nums">{money(period.remainingUsd)}</dd></div></dl>
-    <p className="mt-4 text-xs leading-5 text-zinc-500">Resets {reset} UTC. Requests stop at the cap until the next reset.</p>
-    {usage.notifications.length > 0 && <div className="mt-5 space-y-3" aria-label="Usage notifications">{usage.notifications.map(notification => <div key={notification.id || notification.thresholdPercent} className={`rounded-md border px-4 py-3 text-sm ${notification.thresholdPercent >= 80 ? 'border-amber-300/30 bg-amber-300/5 text-amber-100' : 'border-white/10 bg-white/[0.03] text-zinc-200'}`}><p className="font-medium">{notification.title}</p><p className={`mt-1 leading-6 ${notification.thresholdPercent >= 80 ? 'text-amber-50' : 'text-zinc-400'}`}>{notification.body}</p></div>)}</div>}
-  </section>;
 }
 
 function BalanceSummary({ compact = false }: { compact?: boolean }) {
@@ -103,7 +85,7 @@ function Transactions() {
       <ul className="mt-4 divide-y divide-white/10 border-y border-white/10 sm:hidden">{data.transactions.map(row => <li key={row.id} className="space-y-2 py-4 text-sm"><div className="flex flex-wrap justify-between gap-3"><span>{types[row.type] || 'Adjustment'}</span><span className="break-words tabular-nums">{row.amountUsd > 0 ? '+' : ''}{money(row.amountUsd)}</span></div><p className="break-words text-xs leading-5 text-zinc-400">{row.description}</p><div className="flex flex-wrap justify-between gap-2 text-xs text-zinc-400"><span>{date(row.createdAt)} UTC</span><span className="break-words">Balance {money(row.balanceAfterUsd)}</span></div></li>)}</ul>
     </>}
     {data.nextCursor && <button type="button" className={`${button} mt-4`} disabled={loading || loadingMore || !rowsMatch || Boolean(error)} onClick={() => void load(data.nextCursor!)}>{loadingMore ? 'Loading…' : 'Load more'}</button>}
-    <div className="mt-5 flex flex-wrap gap-x-6"><Link href={BILLING_PATHS.invoices} className={link}>View invoices</Link><Link href="/keys/activity" className={link}>Usage by API key</Link></div>
+    <div className="mt-5 flex flex-wrap gap-x-6"><Link href={BILLING_PATHS.invoices} className={link}>View invoices</Link></div>
   </section>;
 }
 
@@ -123,7 +105,7 @@ function Invoices() {
 
 function PaymentSettings() {
   const { data } = useBilling();
-  return <div className="space-y-8"><section aria-labelledby="payment-methods"><h2 id="payment-methods" className="text-xl font-semibold">Payment methods</h2><p className="mb-5 mt-3 max-w-2xl text-sm leading-6 text-zinc-400">{data && !data.hasCustomer ? 'Your billing profile is created when you subscribe to GALX Pro or GALX Nova Developer Access.' : 'Open Stripe to review or update your saved payment methods. You can return to GALX when you’re done.'}</p><PortalButton />{data && !data.hasCustomer && <div className="mt-3 flex flex-wrap gap-x-6"><Link href={BILLING_PATHS.plan} className={link}>Explore Pro</Link><Link href="/developers" className={link}>Subscribe to Developer Access</Link></div>}</section>
+  return <div className="space-y-8"><section aria-labelledby="payment-methods"><h2 id="payment-methods" className="text-xl font-semibold">Payment methods</h2><p className="mb-5 mt-3 max-w-2xl text-sm leading-6 text-zinc-400">{data && !data.hasCustomer ? 'Your billing profile is created when you subscribe to GALX Pro.' : 'Open Stripe to review or update your saved payment methods. You can return to GALX when you’re done.'}</p><PortalButton />{data && !data.hasCustomer && <div className="mt-3 flex flex-wrap gap-x-6"><Link href={BILLING_PATHS.plan} className={link}>Explore Pro</Link></div>}</section>
     {data?.summary.autoReloadEnabled && <section className="border-t border-white/10 pt-6"><h2 className="font-semibold">Automatic reload</h2><p className="mt-2 text-sm leading-6 text-zinc-400">Auto-reload is enabled on this account. Contact <a href="mailto:support@galx.ai" className="text-indigo-300 underline underline-offset-4">billing support</a> to change it.</p></section>}
     <section className="border-t border-white/10 pt-6"><h2 className="font-semibold">More billing options</h2><div className="mt-2 flex flex-wrap gap-x-6"><Link href={BILLING_PATHS.plan} className={link}>Manage your plan</Link><Link href={BILLING_PATHS.invoices} className={link}>View invoices</Link></div></section>
   </div>;

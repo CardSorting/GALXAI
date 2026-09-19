@@ -13,7 +13,7 @@ import { DEVELOPER_ACCESS } from '../src/lib/billing/pro-plan';
 
 assert.equal(DEVELOPER_ACCESS.monthlyPriceUsd, 50);
 assert.equal(DEVELOPER_ACCESS.interval, 'month');
-assert.equal(DEVELOPER_ACCESS.checkoutEnabled, true);
+assert.equal(DEVELOPER_ACCESS.checkoutEnabled, false);
 assert.equal(DEVELOPER_ACCESS.automaticActivation, true);
 assert.equal(DEVELOPER_ACCESS.includedUsageCreditsUsd, 0);
 
@@ -38,7 +38,7 @@ if (process.argv.includes('--create') || process.argv.includes('--expire')) {
     assert.equal((error as { status?: number }).status, 410);
   }
 
-  console.log('Legacy live-checkout flags are safely retired: Nova subscription strategy checked without Stripe or database calls.');
+  console.log('Legacy live-checkout flags are safely retired: private access remains available only through administered provisioning.');
 } else {
-  console.log('Nova Developer Access strategy is $50/month recurring with no included usage credits; no live Stripe action was performed.');
+  console.log('Public Developer Access checkout is retired; no live Stripe action was performed.');
 }

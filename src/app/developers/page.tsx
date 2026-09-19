@@ -1,79 +1,57 @@
 import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, BarChart3, CheckCircle2, ChevronRight, Gauge, KeyRound, ShieldCheck } from 'lucide-react';
 import { Navigation } from '@/components/dashboard/Navigation';
-import { DeveloperPreview } from '@/components/developers/DeveloperPreview';
 import { constructMetadata } from '@/lib/seo/metadata';
 import styles from '@/components/developers/developer-preview.module.css';
 
 export const metadata = constructMetadata({
-  title: 'GALX Developer — Build with GALX Nova',
-  description: 'A developer membership for programmable access to GALX Nova’s managed intelligence. $50/month for API access; usage is billed separately and no usage credits are included.',
+  title: 'GALX Developer access',
+  description: 'Programmable GALX capabilities are available only to explicitly authorized private integrations. GALX Nova is not a public self-service API subscription.',
   canonicalPath: '/developers',
 });
 
 export default function DevelopersPage() {
-  return (
-    <>
-      <Navigation />
-      <main className={styles.page}>
-        <header className={styles.hero}>
-          <h1>GALX Developer<br />Build with GALX Nova.</h1>
-          <p>A developer membership for programmable access to GALX Nova’s managed intelligence.<br /><strong>$50/month for API access.</strong> Usage billed separately. No usage credits included.</p>
-          <div className={styles.publicLinks} style={{ marginTop: 16 }}>
-            <Link href="#developer-access" className={styles.primary}>
-              Subscribe to Developer Access <ArrowRight size={14} style={{ marginLeft: 6 }} />
-            </Link>
-            <Link href="/docs" className={styles.secondary}>
-              Read the documentation
-            </Link>
+  return <>
+    <Navigation />
+    <main className={styles.page}>
+      <div className={styles.breadcrumbs}><Link href="/">GALX</Link><ChevronRight size={14} aria-hidden="true" /><span>Developer</span><ChevronRight size={14} aria-hidden="true" /><strong>Private access</strong></div>
+      <header className={styles.hero}>
+        <div className={styles.heroCopy}>
+          <h1>GALX Nova<br />Private access, by decision.</h1>
+          <p>GALX Nova powers supported GALX experiences and selected private integrations. General-purpose developer access is not a public subscription or self-service product.</p>
+          <div className={styles.publicLinks}>
+            <Link href="/images" className={styles.primary}>Explore GALX <ArrowRight size={14} aria-hidden="true" /></Link>
+            <Link href="/pricing" className={styles.secondary}>View GALX plans</Link>
           </div>
-        </header>
-
-        <div className={styles.layout}>
-          <DeveloperPreview />
-          <aside className={styles.aside} aria-label="About GALX Developer access">
-            <section>
-              <h2>GALX Nova — Developer Access</h2>
-              <p className={styles.accessPrice}>$50/month</p>
-              <p>Recurring API access membership for GALX Nova.</p>
-              <p>Usage billed separately. No usage credits included.</p>
-              <div className={styles.publicLinks}>
-                <Link href="#developer-access" className={styles.asideLink}>
-                  Subscribe to Developer Access →
-                </Link>
-                <Link href="/pricing/usage" className={styles.asideLink}>
-                  View usage pricing and terms →
-                </Link>
-              </div>
-            </section>
-            <section>
-              <h2>Membership for access. Separate billing for usage.</h2>
-              <p>Think of Developer Access like membership to a managed workspace. The subscription gives you access to the service; consumption is billed separately.</p>
-              <p>Your $50 monthly subscription provides API access. API usage is billed separately and is not deducted from the subscription fee.</p>
-            </section>
-            <section>
-              <h2>Your application. Nova’s intelligence.</h2>
-              <p>Use the documented API to work with Nova’s supported capabilities. GALX handles the underlying execution; you build the experience around it.</p>
-            </section>
-            <section>
-              <h2>Private preview</h2>
-              <ol className={styles.steps}>
-                <li><strong>Share what you are building</strong>A short introduction and project description help us understand the request.</li>
-                <li><strong>Review supported access</strong>We check the application against current capability and availability.</li>
-                <li><strong>Check your status here</strong>Your account shows the next step. Applying does not grant API access.</li>
-              </ol>
-            </section>
-            <section>
-              <h2>Ready to create?</h2>
-              <p>GALX Images is the place to create and explore without an API integration.</p>
-              <div className={styles.publicLinks}>
-                <Link href="/images">Create an image</Link>
-                <Link href="/explore">Explore creations</Link>
-              </div>
-            </section>
-          </aside>
         </div>
-      </main>
-    </>
-  );
+        <aside className={styles.availability} aria-label="Developer access availability">
+          <div className={styles.availabilityStatus}><span className={styles.statusDot} aria-hidden="true" />Availability</div>
+          <strong>Not a public self-service product</strong>
+          <p>Private access is considered deliberately for supported integrations and bounded cohorts.</p>
+        </aside>
+      </header>
+      <div className={styles.consoleLayout}>
+        <section className={styles.panel} aria-labelledby="private-access-heading">
+          <div className={styles.panelHeader}><div><h2 id="private-access-heading">A clear operating boundary</h2><p>When GALX chooses to authorize an integration, the access model stays simple to understand and safe to operate.</p></div><span className={styles.panelTag}><ShieldCheck size={14} aria-hidden="true" /> Administered</span></div>
+          <div className={styles.boundaryList}>
+            <div className={styles.boundaryRow}><span className={styles.boundaryIcon}><KeyRound size={17} aria-hidden="true" /></span><div><strong>Explicit</strong><p>Access is granted deliberately to an approved integration.</p></div><CheckCircle2 size={17} aria-hidden="true" /></div>
+            <div className={styles.boundaryRow}><span className={styles.boundaryIcon}><Gauge size={17} aria-hidden="true" /></span><div><strong>Bounded</strong><p>Allocations are set for the approved cohort and use case.</p></div><CheckCircle2 size={17} aria-hidden="true" /></div>
+            <div className={styles.boundaryRow}><span className={styles.boundaryIcon}><BarChart3 size={17} aria-hidden="true" /></span><div><strong>Administered</strong><p>Private access is managed by GALX for the approved integration.</p></div><CheckCircle2 size={17} aria-hidden="true" /></div>
+            <div className={styles.boundaryRow}><span className={styles.boundaryIcon}><ShieldCheck size={17} aria-hidden="true" /></span><div><strong>Revocable</strong><p>GALX can change or disable private access when needed.</p></div><CheckCircle2 size={17} aria-hidden="true" /></div>
+          </div>
+          <div className={styles.panelFooter}><span>Existing authorized integrations remain subject to their assigned terms.</span><Link href="/images" className={styles.textLink}>Create with GALX Images <ArrowRight size={14} aria-hidden="true" /></Link></div>
+        </section>
+        <aside className={styles.asideCard} aria-labelledby="available-heading">
+          <h2 id="available-heading">What remains available</h2>
+          <p>Retiring public distribution does not retire the capabilities behind GALX products.</p>
+          <ul className={styles.surfaceList}>
+            <li><CheckCircle2 size={16} aria-hidden="true" /><span><strong>GALX Images</strong> Public creation and exploration.</span></li>
+            <li><CheckCircle2 size={16} aria-hidden="true" /><span><strong>Supported integrations</strong> Private access when GALX chooses to provide it.</span></li>
+            <li><CheckCircle2 size={16} aria-hidden="true" /><span><strong>GALX infrastructure</strong> The underlying systems continue powering selected experiences.</span></li>
+          </ul>
+        </aside>
+      </div>
+      <section className={styles.policyNote}><ShieldCheck size={18} aria-hidden="true" /><p><strong>Public experience, deliberate access.</strong> There is no public checkout, application, or automatic credential workflow for developer access.</p></section>
+    </main>
+  </>;
 }
