@@ -1407,3 +1407,31 @@ Incident: `INC-20260913-IMAGES`. Kind: `verification`.
 **Next step:** Verify one signed-in production generation, durable library/Favorites/download and raw HTTP/privacy boundaries.
 
 Evidence: [2026-09-16-premium-image-connection.json](releases/2026-09-16-premium-image-connection.json).
+
+## EVT-20260919-account-profile-migration-recovered — 2026-09-19T19:58:58Z
+
+Incident: `INC-20260919-PROFILE`. Kind: `recovery`.
+
+**Observation:** The canonical account-profile migration first rolled back when an existing settled signup-credit row hit the legacy immutability trigger during ownership metadata backfill; the three preceding migrations committed in order.
+
+**Action:** Narrowed the signup-credit guard to permit only account_profile_id metadata changes on settled rows, added a disposable regression, dry-ran the exact pending migration, and applied the repaired migration.
+
+**Result:** The migration ledger is complete with 137 applied and zero pending; 759 identities have profiles, all 12 signup-credit grants have profile links, and the canonical profile table remains forced-RLS with no anon/authenticated/service_role SELECT privilege.
+
+**Next step:** Retain the immutable-record regression and exact pending-migration dry-run requirement before future live schema changes.
+
+Evidence: [README.md](incidents/2026/2026-09-19-account-profile/README.md), [20260919120000_canonical_account_profiles_and_ownership_bridge.sql](../supabase/migrations/20260919120000_canonical_account_profiles_and_ownership_bridge.sql), [test-account-profile-db.ts](../scripts/test-account-profile-db.ts).
+
+## EVT-20260919-manual-enrollment-accepted — 2026-09-19T20:03:40Z
+
+Incident: `INC-20260914-ENROLLMENT`. Kind: `verification`.
+
+**Observation:** The later owner-requested Premium connection repair provides the missing real manual-enrollment and serving-readiness evidence for ACT-022: a saved desktop sign-in was reused through the scoped Connect flow.
+
+**Action:** Reconciled ACT-022 against the dated repair release, updated the action and current-state records, and kept image qualification and broader provider scope separate.
+
+**Result:** The registration is registered; the account is connected and enabled; four models are verified; runtime readiness returns HTTP 200; and a sanitized sample completed without new credential import or unknown-receipt replay.
+
+**Next step:** Retain manual-only enrollment and serving-readiness checks; do not reopen external enrollment paths.
+
+Evidence: [2026-09-19-relay-connection-repair.json](releases/2026-09-19-relay-connection-repair.json), [register.json](register.json), [CURRENT_STATE.md](CURRENT_STATE.md).

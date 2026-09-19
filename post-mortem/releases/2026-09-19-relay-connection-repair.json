@@ -1,0 +1,40 @@
+{
+  "classification": "private",
+  "at": "2026-09-19T17:15:14Z",
+  "incident": "INC-20260916-REGISTRATION",
+  "scope": "Owner-requested Premium registration repair and bounded local generation verification.",
+  "observation": {
+    "registration_state_before": "prepared",
+    "operator_error_code": "credential_registry_unavailable",
+    "database_failure": "duplicate registry journal revision during deterministic account enrollment"
+  },
+  "repair": {
+    "migration": "20260919090000_reuse_safe_shard_registry_revisions",
+    "behavior": "New inserts continue after the append-only journal high-water mark when a deterministic account ID is reused.",
+    "rollback": "supabase/rollbacks/20260919090000_reuse_safe_shard_registry_revisions.down.sql",
+    "regression": "scripts/test-relay-connections-db.ts"
+  },
+  "verification": {
+    "migration_dry_run": "passed",
+    "migration_applied": true,
+    "connect_http_status": 200,
+    "registration_state_after": "registered",
+    "account_connection_state": "connected",
+    "account_desired_state": "enabled",
+    "verified_model_count": 4,
+    "execution_allowed": true,
+    "runtime_ready_http_status": 200,
+    "sample_generation_http_status": 200,
+    "sample_artifact": ".relay/samples/relay-connection-sample.png",
+    "sample_artifact_sha256": "82b6a82b20214d33e0368b0d6cf1f6068f1c2b4e666a6da9ee6b861c7dbcd071"
+  },
+  "limits": [
+    "The disposable relay authorization suite loaded the migration chain but stopped on an existing installation-fixture configuration error before assertions.",
+    "Static documentation verification retains two pre-existing missing rollback reports from unrelated 20260918 migrations."
+  ],
+  "evidence": [
+    "supabase/migrations/20260919090000_reuse_safe_shard_registry_revisions.sql",
+    "supabase/rollbacks/20260919090000_reuse_safe_shard_registry_revisions.down.sql",
+    "scripts/test-relay-connections-db.ts"
+  ]
+}

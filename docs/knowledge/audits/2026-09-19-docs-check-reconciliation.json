@@ -1,0 +1,56 @@
+{
+  "classification": "private",
+  "observed_at": "2026-09-19T20:04:59Z",
+  "scope": "Explicit domain-review reconciliation for the account-profile implementation, bounded fixture ergonomics and scoped manual enrollment acceptance.",
+  "reviewed": {
+    "knowledge": [
+      "package.json",
+      "docs/knowledge/registry.json",
+      "docs/DOCUMENTATION_POLICY.md",
+      "docs/how-to/change-with-documentation.md",
+      "docs/reference/knowledge-commands.md"
+    ],
+    "access": [
+      "src/app/api/account/profile/route.ts",
+      "src/app/settings/page.tsx",
+      "scripts/test-account-profile-api.ts"
+    ],
+    "relay": [
+      "docs/maintainers/AI_AGENT_PAIR_PROGRAMMING_AND_GOVERNANCE.md",
+      "docs/maintainers/RELAY_CREDENTIAL_ENROLLMENT.md",
+      "post-mortem/incidents/2026/2026-09-14-enrollment/README.md",
+      "post-mortem/releases/2026-09-19-relay-connection-repair.json"
+    ],
+    "database": [
+      "supabase/migrations/20260919110000_autonomous_account_identity_and_provenance.sql",
+      "supabase/migrations/20260919120000_canonical_account_profiles_and_ownership_bridge.sql",
+      "supabase/rollbacks/20260919120000_canonical_account_profiles_and_ownership_bridge.down.sql",
+      "scripts/run-supabase-integration.ts",
+      "scripts/test-account-profile-db.ts",
+      "scripts/verify-supabase-integrity.ts",
+      "src/lib/supabase/repositories/AccountProfileRepository.ts",
+      "src/lib/supabase/types.ts",
+      "docs/maintainers/ACCOUNT_PROFILE_SCHEMA.md"
+    ]
+  },
+  "findings": [
+    "The account-profile test commands are explicitly routed through the disposable PostgreSQL fixture and do not broaden production authority.",
+    "The profile route and Settings surface retain allowlisted product DTOs; private profile identifiers and implementation errors remain excluded.",
+    "The manual enrollment record was stale bookkeeping: the dated owner-requested connection repair satisfies ACT-022 for the scoped Premium account while external enrollment and image qualification remain separate.",
+    "The canonical profile migration and rollback preserve legacy ownership fields, immutable signup-credit business fields and private/RLS boundaries."
+  ],
+  "checks": [
+    "npm run test:docs",
+    "npm run test:account-profile:api",
+    "npm run test:account-profile:db",
+    "npm run db:verify",
+    "npm run build",
+    "node --import tsx --test scripts/test-public-information-boundary.ts",
+    "npm run docs:sync",
+    "npm run docs:check"
+  ],
+  "limits": [
+    "This attestation refreshes documentation fingerprints only; it is not deployment or runtime acceptance evidence.",
+    "Relay acceptance remains scoped to the dated Premium connection repair; broader provider and image qualification remain separate actions."
+  ]
+}

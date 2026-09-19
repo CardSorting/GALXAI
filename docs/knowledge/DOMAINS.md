@@ -164,6 +164,7 @@ Owner role: **Database operator**. Domain: `database`.
 - [Maintainer runbook: shard authority and key rotation](../../docs/maintainers/MULTI_TENANT_SHARD_AND_KEY_ROTATION.md)
 - [Migration to central accounts and isolated relays](../../docs/MIGRATION_GUIDE.md)
 - [Central account management and isolated relay contract](../../docs/reference/relay-account-management.md)
+- [Canonical account profile and actor model](../../docs/maintainers/ACCOUNT_PROFILE_SCHEMA.md)
 
 Relevant checks (select for the change; impact discovery never executes these): `npm run db:verify`, `npm run db:test`, `npm run test:relay:manual-db`, `npm run test:relay:foundation-db`, `npm run test:relay:authorization-db`, `npm run test:relay:activation-db`.
 

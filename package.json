@@ -271,6 +271,8 @@
     "test:10k": "tsx simulations/high-concurrency-10k-fairness/index.test.ts",
     "db:verify": "tsx scripts/verify-supabase-integrity.ts",
     "test:auth:db": "node --import tsx scripts/run-supabase-integration.ts --auth-sessions",
+    "test:account-profile:db": "node --import tsx scripts/run-supabase-integration.ts --account-profile",
+    "test:account-profile:api": "node --import tsx --test scripts/test-account-profile-api.ts",
     "db:test": "node --import tsx scripts/run-supabase-integration.ts",
     "test:wallet-lifecycle": "node --import tsx scripts/test-wallet-lifecycle.ts",
     "test:relay-chat": "node --import tsx --test scripts/test-relay-chat-transport.ts scripts/test-relay-client-auth.ts",

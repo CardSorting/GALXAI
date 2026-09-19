@@ -1371,6 +1371,12 @@
       "title": "ADR 0157: Compatible relay requests and honest output budgets"
     },
     {
+      "path": "docs/adr/0158-canonical-account-profiles-and-actor-provenance.md",
+      "scope": "decision-record",
+      "category": "docs",
+      "title": "ADR 0158: Canonical account profiles with explicit actor provenance"
+    },
+    {
       "path": "docs/adr/README.md",
       "scope": "current-guide",
       "category": "docs",
@@ -1687,6 +1693,12 @@
       "scope": "commercial-draft",
       "category": "docs",
       "title": "landingpage"
+    },
+    {
+      "path": "docs/maintainers/ACCOUNT_PROFILE_SCHEMA.md",
+      "scope": "current-guide",
+      "category": "docs",
+      "title": "Canonical account profile and actor model"
     },
     {
       "path": "docs/maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md",
@@ -2833,6 +2845,12 @@
       "scope": "operational-record",
       "category": "post-mortem",
       "title": "Shared-account quota exhaustion and costly continuation"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-09-19-account-profile/README.md",
+      "scope": "operational-record",
+      "category": "post-mortem",
+      "title": "Canonical account-profile migration backfill"
     },
     {
       "path": "post-mortem/runbooks/controller-lock.md",

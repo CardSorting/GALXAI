@@ -393,6 +393,25 @@ class SupabaseParanoiaLinter {
         });
       }
     }
+
+    const requiredPrivateTables = [
+      'galx_account_profiles',
+      'galx_account_profile_preferences',
+      'galx_account_identities',
+      'galx_autonomous_actor_configuration_versions',
+      'galx_administrative_entitlement_events'
+    ];
+    for (const tbl of requiredPrivateTables) {
+      if (!typesContent.includes(tbl)) {
+        this.violations.push({
+          level: 'FATAL',
+          category: 'TYPE_SYNC',
+          file: 'src/lib/supabase/types.ts',
+          message: `Private canonical table "${tbl}" is missing from TypeScript types.`,
+          remediation: `Add "${tbl}" to Database['private']['Tables'] in src/lib/supabase/types.ts.`
+        });
+      }
+    }
   }
 
   private printReport(): void {

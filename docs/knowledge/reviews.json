@@ -1,11 +1,11 @@
 {
   "knowledge": {
     "reviewer": "Codex",
-    "note": "Reviewed the documentation-boundary and navigation changes. Current public/API guidance is capability-first, private implementation details remain out of public docs, dated evidence remains scoped as historical, and generated catalog/index views are consistent.",
+    "note": "Reviewed the canonical account-profile documentation, registry mappings and generated knowledge views. Account-profile source coverage, lifecycle metadata and retained audit evidence are consistent.",
     "reviewed_at": "2026-09-19",
-    "review_by": "2026-09-26",
+    "review_by": "2026-10-19",
     "evidence": {
-      "docs/knowledge/audits/2026-09-19-developer-access-retirement-review.json": "2ee2e9f2bf262356527bc390b2c8f1f5807acc5a7b27166a169ae7095d858436"
+      "docs/knowledge/audits/2026-09-19-docs-check-reconciliation.json": "40d0c4f4485315641abf2769ecaa635766fa05bd0211c5b3117cffce8e15039d"
     },
     "files": {
       ".github/CODEOWNERS": "ef2f416d15f027dc8f197ad844289c9a44c8e843d3214d1590a3a380e939d13f",
@@ -26,7 +26,7 @@
       "docs/how-to/change-with-documentation.md": "abcf6bfb2f0aadcf8cfc2fdae18ac8f3f84565f127c34f7453d50e7283006e40",
       "docs/knowledge/DESIGN_RATIONALE.md": "edd3cf9b49ed794fbe8bf14448fd0c56cb4d8df832bab81cdf07e9ea2e2204a1",
       "docs/knowledge/README.md": "5ad219aeee44a9c065db2ca69e5a6498966fed42e2d8c74773dbc055d0220931",
-      "docs/knowledge/registry.json": "a47400b7b137c0ceba4aedcb3afe0750376a2f97e50d0d4ac4ada98869c72493",
+      "docs/knowledge/registry.json": "3f5162b1bb1e6d25bc6e3ee5f80609fc2b450c792c90df2beaa8b47d20bb0740",
       "docs/knowledge/templates/adr.md": "28773b3cbdb53ad34f08d0362e87b6dba24b6fd76ddb6c85db8ad63d99ad1331",
       "docs/knowledge/templates/runbook.md": "19679a7eb8c1a3aafd87852fa93817e7bf9ef4696772c8deb1617366c290abc1",
       "docs/maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md": "b7df75535611c14aabe599764a6f6c2a4f0f1461d068929602c68e39d8ce850d",
@@ -42,7 +42,7 @@
       "docs/runbooks/weekly-knowledge-audit.md": "ade4fc2133306e1b544d8783f647bc4c5b8a85e3a89ce769d36f586a91c36169",
       "docs/tutorials/README.md": "7cc84f00412108e1c8ec84ef127b15027b606bd16c2dc290f6efc607b9ca5268",
       "docs/tutorials/first-change.md": "06b7c9501cfe62893978e1da6556d6d4fc0d88f4e36b484d05dad4ad72d9fd60",
-      "package.json": "30e72332c74fdad28a4b47c2bc2177b3be4b8cab0b20ac54f659c570fba720fd",
+      "package.json": "fd592df90ec442cb97481077a1b58c07af74022d88977f443e1e827c99566398",
       "scripts/docs-kb.py": "57642bcce6edcdec6b14dc285e973c1c7ba43d9b8908903826befcba6e992d88",
       "scripts/test-docs-kb.py": "83aa914e66cc04d866fd4c77554760748f8e1d07378326c49ac1738f12851856",
       "scripts/test-post-mortem.py": "c4dbb8c575760a2110eb1ad01575fb55b2f96da28da2bd57101dc630adaa464f",
@@ -138,11 +138,11 @@
   },
   "access": {
     "reviewer": "Codex",
-    "note": "Re-reviewed the final private access retirement and cloud-console documentation pass. Current public/API/billing guidance describes approved integrations only; the admin lifecycle is review, provision, allocate, meter, observe, and revoke. Preserved gateway, key, metering, accounting, allocation, scheduling, reliability, security, and audit infrastructure remains represented. Historical activation and economics evidence remains unchanged and is explicitly labeled dated/superseded.",
+    "note": "Reviewed the account-profile route, Settings profile UX and API regression. Verified-session, same-origin, allowlisted DTO and generic-error contracts remain explicit; private profile internals are not exposed.",
     "reviewed_at": "2026-09-19",
-    "review_by": "2026-10-18",
+    "review_by": "2026-10-19",
     "evidence": {
-      "docs/knowledge/audits/2026-09-19-developer-access-retirement-review.json": "2ee2e9f2bf262356527bc390b2c8f1f5807acc5a7b27166a169ae7095d858436"
+      "docs/knowledge/audits/2026-09-19-docs-check-reconciliation.json": "40d0c4f4485315641abf2769ecaa635766fa05bd0211c5b3117cffce8e15039d"
     },
     "files": {
       "docs/OAUTH_AND_TOKEN_LIFECYCLE_SPECIFICATION.md": "1e8004f6dc024322356e5494b099b7c38ed00e4a62e22434b020fd43c9470183",
@@ -184,6 +184,7 @@
       "scripts/verify-workspace-auth-http.mjs": "2c22f50cd5286d21b8aad8f1aaf526c27b181e5d1200cc4f1160038581bb3579",
       "scripts/verify-workspace-cache-http.mjs": "05c2e5d7dae80925862e7879172982ddcaf196cfedd8e796e924dfa48e693d8c",
       "src/app/admin/page.tsx": "d337d893d86c3544f7cde2043ae38298d9adee808a95f327f0bfc128bd71cf27",
+      "src/app/api/account/profile/route.ts": "0223cfb4dad0e7950a13c5ec5959e271ddeff02d3972ae3dfc25cc8d79627f41",
       "src/app/api/auth/audit/activity/route.ts": "2b493ca246e82550835918807b373980419bf354514a783a55a1a9072568e19c",
       "src/app/api/auth/identities/route.ts": "ed7bfb783b01fa283b42a9a0505d86146a13c17f547d8fc8db263bd64eedad77",
       "src/app/api/auth/ingest/route.ts": "a428cf2b6ba4311539252b9fa785d77486a3af5c84022a9b9dca5d4b210afa87",
@@ -216,7 +217,7 @@
       "src/app/device/page.tsx": "1f784b8f48fa3ccee643e47743ae06bf8395ad62fe5c66b8dbb018d0bcef1fec",
       "src/app/library/page.tsx": "61b9b82fafc3c9a295a1afd9ce6b11473d0b62fe7f2a3ff7c517696c24c20d99",
       "src/app/login/page.tsx": "0b556e39fbf622400b8b70e397f4e83706e5e702971dde3c37aeb6c627f4c791",
-      "src/app/settings/page.tsx": "80b96644c9c7c0b0ecccd3bd1091b85b90d653898ee9b472f84ddcedeb06ce37",
+      "src/app/settings/page.tsx": "8ac8c9eecd0e4f5aaf4007de886fc02186fa3874b3fb12bf97b33b5f767f7519",
       "src/app/signup/layout.tsx": "8be40956bf752390f9481942301f310cebf4ee00569d5c20c673360d7d42de04",
       "src/app/signup/page.tsx": "d6baaee51a237cdc3812fe42b7b3211b9fd8431f2709b9cb63b69f9cc75d2476",
       "src/components/admin/PreviewAdminWorkspace.tsx": "a7af04c107145c26b4f010d986cee91eab01c091b27d56f2deff31cd6a17b03c",
@@ -231,7 +232,7 @@
       "src/components/auth/auth-entry.module.css": "165e10d51ed9ad6849a113904a431b5cf90482eaf3b078cee33c9189621cc63f",
       "src/components/billing/BillingClient.tsx": "ad0e61000768a4dc2a96972c69a79308504281e5aa8b8baca0b48164b7b5466b",
       "src/components/billing/BillingProvider.tsx": "cdfefd2683186cc736ee105739b84fd0426a15666d3b063ff02c1714a61c781a",
-      "src/components/dashboard/Footer.tsx": "b71db383712ddc16e6f9ad348994938816500ee44ef1cc8818fdf3c1ffe785e3",
+      "src/components/dashboard/Footer.tsx": "5dde4c0459e32ec1275623ec3469f4989d251589a08084195a0e4de425b8471e",
       "src/components/dashboard/FreeGenerationQuota.tsx": "419a52433d2b3baece49b2ada8b96f819da2e535d49104e40b22c8dae82fb89d",
       "src/components/dashboard/GenerationGateNotice.tsx": "0c905274ce933e0247d4a05f4174c9c13377bcb02e0d833c3927cfce62701bac",
       "src/components/dashboard/generation-gate.module.css": "efd8526722ca0ad42aec319a56bc2ea7e638185f30c35cea9b445dfb69bba4a4",
@@ -370,11 +371,11 @@
   },
   "relay": {
     "reviewer": "Codex",
-    "note": "Reviewed the architecture and API-boundary references affected by the access retirement. Inference, scheduling, allocation, recovery, authentication, and metering machinery remains described as preserved infrastructure; public docs do not expose topology or provider mechanics.",
+    "note": "Reviewed the parent/child execution guide and changed integration dispatch. Throughput guidance remains bounded and account-profile work does not alter public relay contracts.",
     "reviewed_at": "2026-09-19",
-    "review_by": "2026-09-26",
+    "review_by": "2026-10-19",
     "evidence": {
-      "docs/knowledge/audits/2026-09-19-developer-access-retirement-review.json": "2ee2e9f2bf262356527bc390b2c8f1f5807acc5a7b27166a169ae7095d858436"
+      "docs/knowledge/audits/2026-09-19-docs-check-reconciliation.json": "40d0c4f4485315641abf2769ecaa635766fa05bd0211c5b3117cffce8e15039d"
     },
     "files": {
       ".env.example": "1d4b783c06974ff2c64ec4e883ae94db805b94ea4193a66a0cb93abdb4ef0029",
@@ -427,7 +428,7 @@
       "docs/adr/0155-shared-quota-containment-and-bounded-continuation.md": "e749064de6fba0b842bad4730c7d11d5bbe6735f9eec6445fedf2ec49d68c747",
       "docs/adr/0156-verified-automatic-relay-activation.md": "21591444f13106fd8bd06da7d7b6bfe71a37c3136477e5e516f90f4f85c75d62",
       "docs/adr/0157-compatible-relay-output-budgets.md": "328a2797f7b9c471df96ffabadd839c78e5d2c92beb0afb478a7047a22b9505f",
-      "docs/maintainers/AI_AGENT_PAIR_PROGRAMMING_AND_GOVERNANCE.md": "7c6b8be1a95a73f416ab3b5efec0cc66c56c49b5efce7dbbed9ee9d0b727fef3",
+      "docs/maintainers/AI_AGENT_PAIR_PROGRAMMING_AND_GOVERNANCE.md": "dafb1b97fa0d5f9748f2cbb2df3f765c4fcba326aad9106bf5a4d8c332e5b0ac",
       "docs/maintainers/DEBUGGING_AND_DIAGNOSTIC_RUNBOOKS.md": "a22910cebb0d77bc25b266416c5373ad1dbafbdf448e0532a24578114cb445e6",
       "docs/maintainers/MAINTAINER_CLI_CHEATSHEET.md": "8abcf56d6465fa4c48884576e4259719be2830844fc1c75c2fa07af4962776c7",
       "docs/maintainers/MAINTAINER_GLOSSARY_AND_LEXICON.md": "f7db4883a2b9a364e1d246705beee022e6cff67684c6b31f51b78286a2a8336e",
@@ -591,17 +592,18 @@
   },
   "database": {
     "reviewer": "Codex",
-    "note": "Re-reviewed the Developer Access retirement scope, public boundary, preserved infrastructure, and generated/public surface evidence.",
+    "note": "Reviewed the canonical account-profile schema guide, paired migrations, rollback coverage and disposable database fixture. Identity/profile ownership, actor provenance, entitlement audit and bridge invariants are documented.",
     "reviewed_at": "2026-09-19",
-    "review_by": "2026-09-26",
+    "review_by": "2026-10-19",
     "evidence": {
-      "docs/knowledge/audits/2026-09-19-developer-access-retirement-review.json": "2ee2e9f2bf262356527bc390b2c8f1f5807acc5a7b27166a169ae7095d858436"
+      "docs/knowledge/audits/2026-09-19-docs-check-reconciliation.json": "40d0c4f4485315641abf2769ecaa635766fa05bd0211c5b3117cffce8e15039d"
     },
     "files": {
       "deploy/relay-execution/supabase/migrations/20260915082628_relay_execution.sql": "fc61d7c30bdd57706ffb4212788741302760722e7285c25c9b4cb93d629b137e",
       "deploy/relay-execution/supabase/rollbacks/20260915082628_relay_execution.down.sql": "303c01dd288472cccc9eeee706be45c3c93da44fb98393b7bbe86429a85a2b45",
       "docs/MIGRATION_GUIDE.md": "5eda22f2dd90f91d8859d14b0c857ba11ed7babc28c0709e81376160c46d3c59",
       "docs/SUPABASE_PARANOID_ARCHITECTURE_SPEC.md": "652e51cdd6ce0f2b8d87825cb4f224744dc83f5ef755d7b4b8b4f7bcb83574d5",
+      "docs/maintainers/ACCOUNT_PROFILE_SCHEMA.md": "b301ec4aa686691c3f85170039e4de3052182c1d5c1853392d15702654ad49c0",
       "docs/maintainers/FREE_GENERATION_QUOTA.md": "239c0c173e05cbba23f74818e712b1ad217e2e0d3a1c69f86b0de8504f06f42b",
       "docs/maintainers/MULTI_TENANT_SHARD_AND_KEY_ROTATION.md": "47c4456689c07175b566a9813ff75e9b707a124c44082b7b602dad059b769a52",
       "docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md": "468dedfb3231410bd5f7ee88a4a57dbe08aff5fa0e99cf113a19df30846988bb",
@@ -612,9 +614,11 @@
       "scripts/lib/sql-migration-safety.ts": "574c3984ffced9b8cc614fd99f387afb2d8a95de3eab82573f33f21b052ed520",
       "scripts/manage-free-generation.ts": "7a1f786789e9507e758c13db2e750c5edc982fec2b714e646d7e0bf9526fbb2b",
       "scripts/manage-migrations.ts": "16b43fd34f4e1cf642da920dadd614997ff960b8297ef98202b1f5398fadf3fc",
-      "scripts/run-supabase-integration.ts": "500a2830ee068af3d0e23e9c191e61fd7ef72c075479aae78cde6418abcb0b47",
+      "scripts/run-supabase-integration.ts": "e76d1e0e7ad6a5733b56cfd385fd08905278fe5fa3ae827c925b5a723b2662c1",
       "scripts/set-relay-service-gates.ts": "18ce55ca864eebe1a0f5ef13a0c0416e28548e2f300be2b04d6bb811b80c46df",
       "scripts/setup-relay-services.ts": "40a6a61d67462e2c11b6096b4aaba3996232ccb121277cb7ec77f2c8fbec19db",
+      "scripts/test-account-profile-api.ts": "84dda35ef60d7866fdadd88371faeeebc5c207b29d63abccc8f3383e3fb42adb",
+      "scripts/test-account-profile-db.ts": "b12f0b9868555e0c86c0edc48cf1ccce72915b409686c809397fc53d9ccefcbc",
       "scripts/test-account-session-db.ts": "e0fd7cae653565106f331f45471292564d09b944bc28f473e0e267732a3f453f",
       "scripts/test-manual-desktop-shards-db.ts": "fb1568130b55effb1db774851033934e0039b2256adf1be593bae9657093bd50",
       "scripts/test-relay-account-foundation-db.ts": "c2d569655707055b780dd12c691d9c46928acb08b839d59d8fe742773cda9caa",
@@ -626,13 +630,14 @@
       "scripts/test-sql-migration-safety.ts": "8a671b7a5083e774e6ea4efdcb4203a4c476dafa6174273a606badb6f4292a51",
       "scripts/test-supabase-integration.ts": "1a4d8ec9b4d11d7d82b6f242e03160c9ec833c2dae96bde56d0b4bf94a895f5d",
       "scripts/verify-shard-authority-live.ts": "6fd08d5cba01a2b8e9d9cce5121fbb7d77e7be145e379edfd024bc6403624bf8",
-      "scripts/verify-supabase-integrity.ts": "31bb1c7fc64ea74fc7621cee17edeffa7528550ce381b5a7db8d2b6d2998d786",
+      "scripts/verify-supabase-integrity.ts": "acbee3637a5f26384092688b92a0a30192e8963a06e971273dea21d56a153277",
       "src/lib/billing/free-generation-policy.ts": "463ce63039316e7124d4e055b13288a6dcbbe9802f99115777f3c5675b51b152",
       "src/lib/db/postgres.ts": "b9a7dee4e29afadc8e291e20dd8d2c02f0bdd0904110f83c213873dc5783e59f",
       "src/lib/supabase/GalxSupabaseClient.ts": "c5930d2b74a954d24b444f4cc0658fe4d70a3282d4caf5e1b7d0583d9c7a16eb",
       "src/lib/supabase/client.ts": "db451b92ca18d9d4b3aa1b5803008e61b4672591b6f236882177572b149afc40",
       "src/lib/supabase/config.ts": "1b1d351d833783dcd078872251874ff1174810ba5d3e6751d795d5d5e0d366a2",
       "src/lib/supabase/index.ts": "bfa8d42003ab646b21a2f1259642042b9c2f14fd09aeae8239ea6ffe5fa31383",
+      "src/lib/supabase/repositories/AccountProfileRepository.ts": "6dc53cecf6c0aeea0f0bc62def1128fcab898a6c5d51ab537e58110971f4ec16",
       "src/lib/supabase/repositories/ApiKeyRepository.ts": "3f8b6cea4ec2498f9f51a887772b57d698de186ee9809b6207dcc7b4ad104dfe",
       "src/lib/supabase/repositories/AuditRepository.ts": "1dd7321093b6638578f9fd7db98eeb0b6198d0bb7651ee761948f158d7416b8f",
       "src/lib/supabase/repositories/BudgetRepository.ts": "cd2c685fe1f26333bf29bae2bf742fb4394714cf6425415351311ac75ae79af7",
@@ -664,7 +669,7 @@
       "src/lib/supabase/repositories/TelemetryRepository.ts": "1887a04aa51424e44d6ac9d499fc24248edd2aa9c64c559cf1f307773dd252e5",
       "src/lib/supabase/repositories/WalletRepository.ts": "bfaddb9365d1fe93454df2fca44962f9fdd2aa3e30464c10089083bf913791ed",
       "src/lib/supabase/repositories/WorkspaceRepository.ts": "b9f6d1d09610760b172c6d1981a06e6ab97d4f5a9a58139377ade89df56a4ed8",
-      "src/lib/supabase/types.ts": "2180587a377bcb2ed94359d9319a61bd60307b9311307257064211ed0365cb2b",
+      "src/lib/supabase/types.ts": "b601fc8cffb1aca2d8c6707a2e97f1186ac6e33cf86960219358d17161943b0b",
       "supabase/migrations/20260822000001_galxai_schema_core.sql": "084520c8cb3ab4e057ec788ea90605bb43e1373a28230e40696271f6a8476f77",
       "supabase/migrations/20260822000002_galxai_schema_apex.sql": "62b4fdc606104700d14eb3b80a7a7063a5152db9ed1afefe63a72315d586f539",
       "supabase/migrations/20260822000003_galxai_user_sessions_auth.sql": "ab2ec033c41bb147aa476acceb4d5dca3991f83f017a7cc41fddd01c6b8e75c4",
@@ -783,7 +788,7 @@
       "supabase/migrations/20260916161120_isolate_account_session_lookup.sql": "7b50f46b7fca6b75f2bf996e108696c033fe9365fdc10485381793a17a88e171",
       "supabase/migrations/20260917040000_public_image_stream_schema_and_rls.sql": "4c0e0048ab49ab11d565eabaedf802b9c90c5c63d2b0899f6b2a4718ec41fd2a",
       "supabase/migrations/20260917050000_anti_locking_image_stats_and_interactions.sql": "1954a046371829f8fce4049a404e2e74c9ced899232bbb9a3279dff89028c79c",
-      "supabase/migrations/20260917060000_audit_explore_permissions_and_idempotent_likes.sql": "9485a4bfdaa14f72eb8510f2759e887b327a03a156af9aee14052c35c4495320",
+      "supabase/migrations/20260917060000_audit_explore_permissions_and_idempotent_likes.sql": "c25d493969908a1d42d5adf546301fb7a459adb831b2780ffe4aaf5942dfd7fe",
       "supabase/migrations/20260917070000_user_image_library_permissions_and_visibility.sql": "c133349f449df8bb43d8f8f5f389c70119de668cdd88fe139ddb2a9320e5400e",
       "supabase/migrations/20260917080000_community_explore_moderation_hide.sql": "f78e11bcf2b4f8d65f2007e66f2be0918ace55e09153a193eddcce87789783a1",
       "supabase/migrations/20260917090000_compute_tier_enrichment.sql": "df7b75333330589cb69d1cb154c31b154ab2706e3cb69077508b0eda01cc5d90",
@@ -799,6 +804,8 @@
       "supabase/migrations/20260918242000_nova_message_usage_workspace.sql": "2aee9a6ced003755571fe528f827d692b24f29d9ff282fe488879f7d6feae28d",
       "supabase/migrations/20260918250000_private_developer_access_controls.sql": "638b25debefe9e29b96644d2a647a834141cba85d8872ad51d607ab17cb329b2",
       "supabase/migrations/20260918251000_private_access_allocation_sync.sql": "7b68cb5c3087cb3ea58972869d5aafaadaa69d37acb55cde7dd22882d2e98d10",
+      "supabase/migrations/20260919110000_autonomous_account_identity_and_provenance.sql": "6128540c0fb1ce4ef4f8b00aba2a7b41f83ffca44d0e50103ed3f04560a5b7e9",
+      "supabase/migrations/20260919120000_canonical_account_profiles_and_ownership_bridge.sql": "bc8c3cab06824b64505a5d5a69de042f201bb5bd305dcbdddd1ebcff8707fb4a",
       "supabase/rollbacks/20260822000001_galxai_schema_core.down.sql": "d1267f3f89a7a0af12716a70167f615be1e904bf933e348a1173305cd5f2fe83",
       "supabase/rollbacks/20260822000002_galxai_schema_apex.down.sql": "df36655d564c6d6557d4461294ed2a502ad57adf799037c00a68481b809ffed9",
       "supabase/rollbacks/20260822000003_galxai_user_sessions_auth.down.sql": "4f3012db038b48387290b8d64638fe7aded774d8bdde88cfe683f01f1988adbc",
@@ -930,7 +937,11 @@
       "supabase/rollbacks/20260918231500_nova_message_billing_outbox.down.sql": "215f3f88ffa6e56b0a69e0de91a85f9295340d37ca568609a65c86c946cd4b90",
       "supabase/rollbacks/20260918240000_nova_message_usage_cap.down.sql": "c25ef4b20bc070ba5b1f8637166b25b9200ef48e2c9d5da5678fb14faec02c3e",
       "supabase/rollbacks/20260918241000_nova_message_billing_delivery.down.sql": "68001fbbbe821ac81fba85f726b4bf957b285f69768c6760e431b55a3151a235",
-      "supabase/rollbacks/20260918242000_nova_message_usage_workspace.down.sql": "1b8271dabd56d059e7d69db65ece2cc2f0e445917bf2af7665a6be3609708b64"
+      "supabase/rollbacks/20260918242000_nova_message_usage_workspace.down.sql": "1b8271dabd56d059e7d69db65ece2cc2f0e445917bf2af7665a6be3609708b64",
+      "supabase/rollbacks/20260918250000_private_developer_access_controls.down.sql": "272d6c2d8d312802ece5cde22886e91a920cd157f3221062444e9f72a5e2f5c0",
+      "supabase/rollbacks/20260918251000_private_access_allocation_sync.down.sql": "a222e6ee301d615eb56eb958c95d54d93f502c2d1da4fa8d850089abe9d879e0",
+      "supabase/rollbacks/20260919110000_autonomous_account_identity_and_provenance.down.sql": "89b883ac9e4cc18d1b07a1edacff0d8c11739eb269450320c7770566e539f3dc",
+      "supabase/rollbacks/20260919120000_canonical_account_profiles_and_ownership_bridge.down.sql": "d7e13106ff3e50411c5e202d44d66e9afa2ee39207ce64159a994e183f8e8bdc"
     }
   },
   "delivery": {
@@ -1436,11 +1447,11 @@
   },
   "client-efficiency": {
     "reviewer": "Codex",
-    "note": "Re-reviewed the Developer Access retirement scope, public boundary, preserved infrastructure, and generated/public surface evidence.",
+    "note": "Reviewed the Settings profile surface and account-profile repository/API changes. Profile reads and writes are bounded, session-scoped and compatible with the existing client interaction model.",
     "reviewed_at": "2026-09-19",
-    "review_by": "2026-09-26",
+    "review_by": "2026-10-19",
     "evidence": {
-      "docs/knowledge/audits/2026-09-19-developer-access-retirement-review.json": "2ee2e9f2bf262356527bc390b2c8f1f5807acc5a7b27166a169ae7095d858436"
+      "docs/knowledge/audits/2026-09-19-docs-check-reconciliation.json": "40d0c4f4485315641abf2769ecaa635766fa05bd0211c5b3117cffce8e15039d"
     },
     "files": {
       "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md": "c9b27cc284c32ec3a222a4f40daf64b88a9d73c0acdcbb0bbc0103bddd057a85",
@@ -1497,13 +1508,13 @@
       "src/components/common/RouteRecovery.tsx": "02f126f82df14daf04a9085d2fc72034beddb3493485841dd0f6a97f25461736",
       "src/components/common/WorkspaceLoading.tsx": "fcc220850cf2a7280d3cbb9d46a3f579da1f4fb8c298f0b37b54e6d7c1d84820",
       "src/components/common/workspace-route.module.css": "6654e288040f2196747f08319a9cad95916f086708d14b4cdafaabe40db88523",
-      "src/components/dashboard/Footer.tsx": "b71db383712ddc16e6f9ad348994938816500ee44ef1cc8818fdf3c1ffe785e3",
+      "src/components/dashboard/Footer.tsx": "5dde4c0459e32ec1275623ec3469f4989d251589a08084195a0e4de425b8471e",
       "src/components/dashboard/FreeGenerationQuota.tsx": "419a52433d2b3baece49b2ada8b96f819da2e535d49104e40b22c8dae82fb89d",
       "src/components/dashboard/GenerationGateNotice.tsx": "0c905274ce933e0247d4a05f4174c9c13377bcb02e0d833c3927cfce62701bac",
-      "src/components/dashboard/MobileBottomNav.tsx": "baa38c0db96a9be590fab0a007075fa326b7ca0dbd6b99622709f7a740ecbd0e",
-      "src/components/dashboard/Navigation.tsx": "7875ac4d249ca5252831e0c19e0cb74147ad116964723a4e34aa55ce6bc2e9f7",
+      "src/components/dashboard/MobileBottomNav.tsx": "4bbc14e33a90b18595bad0b3838d23e81b53c7fb4265d80f7fe7420e0e00dbe5",
+      "src/components/dashboard/Navigation.tsx": "14066489f97b6350cfdc11ab95f44bea1fdafc855684586af033e33080eb4a88",
       "src/components/dashboard/generation-gate.module.css": "efd8526722ca0ad42aec319a56bc2ea7e638185f30c35cea9b445dfb69bba4a4",
-      "src/components/dashboard/navigation.module.css": "cdd520f7b83e8750f95f5601dcab5fae96208e1436ef3dc74dc781f3c35ade93",
+      "src/components/dashboard/navigation.module.css": "e3269abbdb5f17e5be52b9ce201ed8c2f5de4c999664918c2055dca82bdd09bf",
       "src/components/home/ArtisanalSignalSection.tsx": "f69ec3ef0ec73b4f41dff90daa4529b86a975199b84e33d25c493dfdfcae1fe1",
       "src/components/home/DESIGN.md": "08b283af1636dd6c76fcd866db6ebff36c7b66e7ebd9d7587b4367784a366c90",
       "src/components/home/GalaxyFormation.tsx": "7613b6a3316b3688a868581d6461afdffdbad9fceb367e36c6bb4d7bbd2f066a",

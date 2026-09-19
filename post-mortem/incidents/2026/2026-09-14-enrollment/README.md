@@ -2,7 +2,7 @@
 
 <!-- docs-scope: operational-record -->
 
-Date: September 14, 2026. Owner: relay maintainer. Status: contained after September 15 UTC activation; first manual account acceptance remains open.
+Date: September 14, 2026. Owner: relay maintainer. Status: contained after September 15 UTC activation; scoped manual account acceptance recovered September 19.
 
 The owner reports unstable externally enrolled provider sessions and requests closure of outside enrollment. Read-only registry inspection found 56 retained rows, three non-revoked and one unexpired. This count does not prove current capability. Existing manual desktops remain available for repair.
 
@@ -17,3 +17,7 @@ The [deployed record](../../../releases/2026-09-15-manual-desktop-enrollment-act
 ## September 15 documentation follow-through
 
 The [workspace-wide documentation review](../../../releases/2026-09-15-manual-enrollment-documentation-review.json) replaces stale external-enrollment and provider-renewal instructions throughout the affected current guides, private API/schema references, deployment/recovery procedures and example configuration. Historical measurements and earlier decisions remain dated. The guide changes do not enroll an account or establish image capability; ACT-022 and ACT-020 remain open.
+
+## September 19 scoped manual acceptance
+
+The owner-requested [Premium connection repair](../../../releases/2026-09-19-relay-connection-repair.json) supplies the previously missing real acceptance for ACT-022: the saved manual sign-in was reused through the scoped Connect flow, the registration became registered, the account became connected and enabled, four models were verified, runtime readiness returned HTTP 200, and a sanitized sample completed. No new credential import or unknown-receipt replay occurred. ACT-022 is complete; image qualification remains separate under ACT-020.

@@ -307,6 +307,24 @@
       "recovery_evidence": [
         "post-mortem/incidents/2026/2026-09-16-session-recovery/recovery-release.json"
       ]
+    },
+    {
+      "id": "INC-20260919-PROFILE",
+      "category": "database",
+      "severity": "SEV-3",
+      "status": "recovered",
+      "title": "Canonical account-profile migration backfill",
+      "owner": "Account platform maintainer",
+      "record": "post-mortem/incidents/2026/2026-09-19-account-profile/README.md",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-09-19-account-profile/README.md",
+        "supabase/migrations/20260919120000_canonical_account_profiles_and_ownership_bridge.sql",
+        "scripts/test-account-profile-db.ts"
+      ],
+      "failure_modes": [],
+      "recovery_evidence": [
+        "post-mortem/events.jsonl"
+      ]
     }
   ],
   "actions": [
@@ -585,11 +603,12 @@
       "incident": "INC-20260914-ENROLLMENT",
       "owner": "relay operator",
       "review_by": "2026-09-16",
-      "status": "open",
-      "next_step": "Use the desktop shortcut, sign in inside the owning desktop, explicitly Enroll shard, and inspect fresh worker readiness. Renew expired sessions manually there.",
-      "closure": "Retain a successful real manual enrollment and subsequent verified serving readiness without external ingestion, credential import or replay of unknown work.",
+      "status": "completed",
+      "next_step": "Retain the manual-only enrollment, connected/enabled account and runtime-readiness checks; renew expired provider sessions only through the owning desktop.",
+      "closure": "The owner-requested saved-desktop sign-in and scoped Connect operation now produce a registered, connected and enabled Premium account with four verified models, HTTP 200 runtime readiness and a sanitized sample, without new credential import or unknown-receipt replay.",
       "evidence": [
-        "post-mortem/releases/2026-09-15-manual-desktop-enrollment-activation.json"
+        "post-mortem/releases/2026-09-15-manual-desktop-enrollment-activation.json",
+        "post-mortem/releases/2026-09-19-relay-connection-repair.json"
       ]
     },
     {
@@ -692,6 +711,20 @@
       "closure": "Dedicated helper schema deployed with unchanged account/session predicates and operational denial; existing browser and owned live session acceptance pass.",
       "evidence": [
         "post-mortem/incidents/2026/2026-09-16-session-recovery/recovery-release.json"
+      ]
+    },
+    {
+      "id": "ACT-031",
+      "incident": "INC-20260919-PROFILE",
+      "owner": "Account platform maintainer",
+      "review_by": "2026-09-26",
+      "status": "completed",
+      "next_step": "Retain the immutable-record bridge regression and exact pending-migration dry-run requirement before future live schema changes.",
+      "closure": "Repaired and applied the canonical account-profile migration after the settled signup-credit bridge backfill was verified against disposable and live database state.",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-09-19-account-profile/README.md",
+        "scripts/test-account-profile-db.ts",
+        "supabase/migrations/20260919120000_canonical_account_profiles_and_ownership_bridge.sql"
       ]
     }
   ]

@@ -1,8 +1,8 @@
 {
   "version": 1,
   "reviewer": "Codex",
-  "reviewed_at": "2026-09-19T03:45:37.610334Z",
-  "note": "Reviewed the final public Developer Access retirement docs and private admin/cloud-console guidance. Public capability and API docs no longer imply checkout, enrollment, pricing, or self-service credentials; private access is explicitly bounded, metered, administered, and revocable. Historical activation/economics records are labeled as dated evidence. Preserved backend infrastructure and public-information boundaries remain represented. No runtime acceptance implied.",
+  "reviewed_at": "2026-09-19T20:12:50.986472Z",
+  "note": "Reviewed the account-profile package entrypoints, integration dispatch and current source/guide boundaries. The bounded fixture command and canonical account-profile changes are represented; no runtime acceptance is implied by the fingerprint refresh.",
   "files": {
     ".dockerignore": "fb4dc7ef84e7f36c5bfed0f267187a022bbb61e66dd26060295b133e08fa74c5",
     ".github/workflows/vercel-preflight.yml": "60856940957e45075d1c54de644d3ba0268fad16b35b3ed5eb8005bc40a5b4b3",
@@ -39,7 +39,7 @@
     "docs/operations/signup-credit.md": "6e0462a35d8042512bc6e5d1ea890a330e7bd3cc015d4b9938e7febf5c9fa135",
     "docs/operations/wallet-lifecycle.md": "ddc86ed1d3347f5fff19a07581bc040c52eee7a115c279a2ba28bceae92303db",
     "docs/operations/workspace-auth.md": "58f0a796e0ddc3c3180eb33f77590305ee13ec6318adb3b1fe0e005c903267c9",
-    "package.json": "30e72332c74fdad28a4b47c2bc2177b3be4b8cab0b20ac54f659c570fba720fd",
+    "package.json": "fd592df90ec442cb97481077a1b58c07af74022d88977f443e1e827c99566398",
     "post-mortem/CURRENT_STATE.md": "8ae10a93f7312772ddf260c5fa16483eac83b0f93e0513abc0214384e0d8ce57",
     "post-mortem/README.md": "109e413d0323577f935e1b911356db7ca1f48da6e394639a6ec81fc253025dee",
     "post-mortem/failure-modes/README.md": "150ab3321fac31559853fcf376be76f05840286c9c14bc2c812b0a61bf901e99",
@@ -54,7 +54,7 @@
     "post-mortem/runbooks/image-generation.md": "cafd2ecd11bd89d4fce8a48e646980d32dcc021fddcc0b9f697ccd9fd0dd8532",
     "post-mortem/runbooks/triage.md": "3953054082b8d1993c12bff24a1a56368246699c46dd8c0b058228f80bf840d7",
     "scripts/run-relay-federation.ts": "e37abe51cedb4125010b41a19e9a376bc9f1876d42d58b2fc24ee850f751fcad",
-    "scripts/run-supabase-integration.ts": "500a2830ee068af3d0e23e9c191e61fd7ef72c075479aae78cde6418abcb0b47",
+    "scripts/run-supabase-integration.ts": "e76d1e0e7ad6a5733b56cfd385fd08905278fe5fa3ae827c925b5a723b2662c1",
     "scripts/test-auth-identity-boundary.ts": "7a4c8de24a4c82869d1adeb4c57567a574d206116b16df37681e8569bffefe93",
     "scripts/test-image-public-http.ts": "49c26d913f415ebbbecee92588833307811027483ec773e23ad6fc82672a46bf",
     "scripts/test-image-requests-db.ts": "a42635ad7fb9432c23d79e715784085690742efcfd1b252df34856bcf0488037",

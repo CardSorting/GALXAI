@@ -19,3 +19,4 @@ Generated metadata, separate from [the full ADR catalog](../adr/README.md). Unre
 | [ADR 0155: Shared quota containment and bounded agent continuation](../../docs/adr/0155-shared-quota-containment-and-bounded-continuation.md) | proposed | local | Relay and SDK maintainer |
 | [ADR 0156: Verified automatic relay activation](../../docs/adr/0156-verified-automatic-relay-activation.md) | proposed | local | Relay operator |
 | [ADR 0157: Compatible relay requests and honest output budgets](../../docs/adr/0157-compatible-relay-output-budgets.md) | proposed | local | Relay maintainer |
+| [ADR 0158: Canonical account profiles with explicit actor provenance](../../docs/adr/0158-canonical-account-profiles-and-actor-provenance.md) | proposed | local | Account platform maintainer |

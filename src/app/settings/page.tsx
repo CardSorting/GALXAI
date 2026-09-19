@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import {
   ArrowLeft,
@@ -12,11 +12,12 @@ import {
   Shield,
   Search,
   CheckCircle2,
+  AlertCircle,
+  Loader2,
+  Save,
   User,
   LogOut,
   LogIn,
-  Layers,
-  Type,
   ChevronRight,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -30,6 +31,7 @@ import {
 } from '@/contexts/AppearanceContext';
 import { SUPPORTED_LANGUAGES, SupportedLanguage } from '@/lib/i18n/translations';
 type SettingsTab =
+  | 'profile'
   | 'appearance'
   | 'language'
   | 'seats';
@@ -95,6 +97,32 @@ const ACCENT_OPTIONS: AccentOption[] = [
   { id: 'rose', name: 'Rose', hex: '#f43f5e' },
 ];
 
+interface AccountProfile {
+  displayName: string | null;
+  locale: SupportedLanguage;
+  timezone: string;
+  revision: number;
+}
+
+interface AccountProfileDraft {
+  displayName: string;
+  locale: SupportedLanguage;
+  timezone: string;
+}
+
+type ProfileState = 'idle' | 'loading' | 'ready' | 'saving' | 'saved' | 'error' | 'conflict';
+
+const COMMON_TIMEZONES = [
+  'UTC',
+  'America/Denver',
+  'America/Los_Angeles',
+  'America/New_York',
+  'Europe/London',
+  'Europe/Paris',
+  'Asia/Tokyo',
+  'Australia/Sydney',
+];
+
 export default function SettingsPage() {
   const { user, isAuthenticated, logout } = useAuth();
   const { language, details: langDetails, isAutoDetected, setLanguage } = useLanguage();
@@ -112,12 +140,16 @@ export default function SettingsPage() {
 
   const [activeTab, setActiveTab] = useState<SettingsTab>('appearance');
   const [languageSearch, setLanguageSearch] = useState('');
+  const [profile, setProfile] = useState<AccountProfile | null>(null);
+  const [profileDraft, setProfileDraft] = useState<AccountProfileDraft | null>(null);
+  const [profileState, setProfileState] = useState<ProfileState>('idle');
+  const [profileError, setProfileError] = useState('');
 
   useEffect(() => {
     try {
       const urlParams = new URLSearchParams(window.location.search);
       const tabParam = urlParams.get('tab') as SettingsTab | null;
-      if (tabParam && ['appearance', 'language', 'seats'].includes(tabParam)) {
+      if (tabParam && ['profile', 'appearance', 'language', 'seats'].includes(tabParam)) {
         setActiveTab(tabParam);
       }
     } catch {}
@@ -137,11 +169,99 @@ export default function SettingsPage() {
     });
   }, [languageSearch]);
 
+  const loadProfile = useCallback(async (signal?: AbortSignal) => {
+    if (!isAuthenticated) {
+      setProfile(null);
+      setProfileDraft(null);
+      setProfileState('idle');
+      return;
+    }
+    setProfileState('loading');
+    setProfileError('');
+    try {
+      const response = await fetch('/api/account/profile', {
+        method: 'GET',
+        cache: 'no-store',
+        credentials: 'same-origin',
+        signal,
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok || !payload.profile) throw new Error(payload.error || 'Profile is temporarily unavailable.');
+      const next: AccountProfile = {
+        displayName: typeof payload.profile.displayName === 'string' ? payload.profile.displayName : null,
+        locale: SUPPORTED_LANGUAGES[payload.profile.locale as SupportedLanguage] ? payload.profile.locale : 'en',
+        timezone: typeof payload.profile.timezone === 'string' ? payload.profile.timezone : 'UTC',
+        revision: Number(payload.profile.revision),
+      };
+      if (signal?.aborted) return;
+      setProfile(next);
+      setProfileDraft({ displayName: next.displayName || '', locale: next.locale, timezone: next.timezone });
+      setProfileState('ready');
+    } catch (error) {
+      if (signal?.aborted) return;
+      setProfileError(error instanceof Error ? error.message : 'Profile is temporarily unavailable.');
+      setProfileState('error');
+    }
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (activeTab !== 'profile' || !isAuthenticated) return;
+    const controller = new AbortController();
+    void loadProfile(controller.signal);
+    return () => controller.abort();
+  }, [activeTab, isAuthenticated, loadProfile]);
+
+  const timezoneOptions = useMemo(() => {
+    const local = typeof Intl !== 'undefined' ? Intl.DateTimeFormat().resolvedOptions().timeZone : null;
+    return Array.from(new Set([profileDraft?.timezone, local, ...COMMON_TIMEZONES].filter(Boolean) as string[]));
+  }, [profileDraft?.timezone]);
+
+  const saveProfile = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!profile || !profileDraft || profileState === 'saving') return;
+    setProfileState('saving');
+    setProfileError('');
+    try {
+      const response = await fetch('/api/account/profile', {
+        method: 'PATCH',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...profileDraft, revision: profile.revision }),
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (response.status === 409) {
+        setProfileState('conflict');
+        setProfileError(payload.error || 'Your profile changed in another tab. Refresh and try again.');
+        return;
+      }
+      if (!response.ok || !payload.profile) throw new Error(payload.error || 'Profile could not be saved.');
+      const next: AccountProfile = {
+        displayName: typeof payload.profile.displayName === 'string' ? payload.profile.displayName : null,
+        locale: SUPPORTED_LANGUAGES[payload.profile.locale as SupportedLanguage] ? payload.profile.locale : profileDraft.locale,
+        timezone: typeof payload.profile.timezone === 'string' ? payload.profile.timezone : profileDraft.timezone,
+        revision: Number(payload.profile.revision),
+      };
+      setProfile(next);
+      setProfileDraft({ displayName: next.displayName || '', locale: next.locale, timezone: next.timezone });
+      setProfileState('saved');
+      setLanguage(next.locale);
+    } catch (error) {
+      setProfileError(error instanceof Error ? error.message : 'Profile could not be saved.');
+      setProfileState('error');
+    }
+  };
+
   const handleResetAll = () => {
     resetAppearance();
   };
 
   const navItems = [
+    {
+      id: 'profile' as SettingsTab,
+      label: 'Profile',
+      icon: User,
+      gated: !isAuthenticated,
+    },
     {
       id: 'appearance' as SettingsTab,
       label: 'Appearance',
@@ -281,7 +401,149 @@ export default function SettingsPage() {
 
           {/* Right Detail Pane (8 cols) */}
           <div className="md:col-span-8 space-y-5">
-            {/* 1. APPEARANCE TAB */}
+            {/* 1. PROFILE TAB */}
+            {activeTab === 'profile' && isAuthenticated && (
+              <form onSubmit={saveProfile} className="space-y-5 animate-in fade-in duration-150">
+                <div className="p-5 rounded-2xl bg-[#0c101c] border border-white/10 space-y-5">
+                  <div>
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <h2 className="text-sm font-bold text-white">Profile</h2>
+                        <p className="text-xs text-zinc-400 mt-1">Keep the details GALX uses to personalize your workspace.</p>
+                      </div>
+                      <div className="w-9 h-9 rounded-xl bg-cyan-500/10 border border-cyan-400/20 flex items-center justify-center">
+                        <User className="w-4 h-4 text-cyan-300" />
+                      </div>
+                    </div>
+                  </div>
+
+                  {profileState === 'loading' && (
+                    <div className="space-y-3" aria-label="Loading profile" role="status">
+                      <div className="h-10 rounded-xl bg-white/5 animate-pulse" />
+                      <div className="h-10 rounded-xl bg-white/5 animate-pulse" />
+                      <div className="h-10 rounded-xl bg-white/5 animate-pulse" />
+                    </div>
+                  )}
+
+                  {profileState === 'error' && !profileDraft && (
+                    <div className="rounded-xl border border-rose-400/20 bg-rose-500/10 p-4" role="alert">
+                      <div className="flex items-start gap-2.5">
+                        <AlertCircle className="w-4 h-4 text-rose-300 mt-0.5 shrink-0" />
+                        <div className="space-y-2">
+                          <p className="text-xs text-rose-100">{profileError || 'Profile is temporarily unavailable.'}</p>
+                          <button
+                            type="button"
+                            onClick={() => void loadProfile()}
+                            className="text-xs font-bold text-cyan-300 hover:text-cyan-200"
+                          >
+                            Try again
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {profileDraft && profile && profileState !== 'loading' && (
+                    <>
+                      <div className="space-y-4">
+                        <div>
+                          <label htmlFor="profile-display-name" className="block text-xs font-bold text-zinc-300 mb-1.5">Display name</label>
+                          <input
+                            id="profile-display-name"
+                            name="displayName"
+                            type="text"
+                            autoComplete="name"
+                            maxLength={120}
+                            value={profileDraft.displayName}
+                            onChange={(event) => {
+                              setProfileDraft({ ...profileDraft, displayName: event.target.value });
+                              setProfileState('ready');
+                              setProfileError('');
+                            }}
+                            className="w-full px-3 py-2.5 rounded-xl bg-black/40 border border-white/10 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-cyan-400/70 focus:ring-1 focus:ring-cyan-400/30"
+                            placeholder="How should GALX address you?"
+                          />
+                        </div>
+
+                        <div>
+                          <label htmlFor="profile-email" className="block text-xs font-bold text-zinc-300 mb-1.5">Sign-in email</label>
+                          <input
+                            id="profile-email"
+                            type="email"
+                            value={user?.email || ''}
+                            readOnly
+                            className="w-full px-3 py-2.5 rounded-xl bg-black/20 border border-white/5 text-sm text-zinc-500 cursor-not-allowed"
+                          />
+                          <p className="text-[10px] text-zinc-600 mt-1.5">Email changes are managed through authentication.</p>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div>
+                            <label htmlFor="profile-locale" className="block text-xs font-bold text-zinc-300 mb-1.5">Language</label>
+                            <select
+                              id="profile-locale"
+                              value={profileDraft.locale}
+                              onChange={(event) => {
+                                setProfileDraft({ ...profileDraft, locale: event.target.value as SupportedLanguage });
+                                setProfileState('ready');
+                                setProfileError('');
+                              }}
+                              className="w-full px-3 py-2.5 rounded-xl bg-black/40 border border-white/10 text-sm text-white focus:outline-none focus:border-cyan-400/70"
+                            >
+                              {(Object.keys(SUPPORTED_LANGUAGES) as SupportedLanguage[]).map((key) => (
+                                <option key={key} value={key} className="bg-[#0c101c]">{SUPPORTED_LANGUAGES[key].nativeName}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <div>
+                            <label htmlFor="profile-timezone" className="block text-xs font-bold text-zinc-300 mb-1.5">Time zone</label>
+                            <select
+                              id="profile-timezone"
+                              value={profileDraft.timezone}
+                              onChange={(event) => {
+                                setProfileDraft({ ...profileDraft, timezone: event.target.value });
+                                setProfileState('ready');
+                                setProfileError('');
+                              }}
+                              className="w-full px-3 py-2.5 rounded-xl bg-black/40 border border-white/10 text-sm text-white focus:outline-none focus:border-cyan-400/70"
+                            >
+                              {timezoneOptions.map((zone) => <option key={zone} value={zone} className="bg-[#0c101c]">{zone}</option>)}
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+
+                      {(profileError || profileState === 'saved' || profileState === 'conflict') && (
+                        <div
+                          className={`flex items-start gap-2.5 rounded-xl border p-3 ${profileState === 'saved' ? 'border-emerald-400/20 bg-emerald-500/10' : 'border-amber-400/20 bg-amber-500/10'}`}
+                          aria-live="polite"
+                          role={profileState === 'conflict' || profileState === 'error' ? 'alert' : 'status'}
+                        >
+                          {profileState === 'saved' ? <CheckCircle2 className="w-4 h-4 text-emerald-300 mt-0.5" /> : <AlertCircle className="w-4 h-4 text-amber-300 mt-0.5" />}
+                          <p className={`text-xs ${profileState === 'saved' ? 'text-emerald-100' : 'text-amber-100'}`}>
+                            {profileState === 'saved' ? 'Profile saved.' : profileError}
+                          </p>
+                        </div>
+                      )}
+
+                      <div className="flex items-center justify-between gap-3 pt-1">
+                        <p className="text-[10px] text-zinc-600">Changes are safe to retry if your connection drops.</p>
+                        <button
+                          type="submit"
+                          disabled={profileState === 'saving'}
+                          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed text-black text-xs font-bold transition-colors"
+                        >
+                          {profileState === 'saving' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                          {profileState === 'saving' ? 'Saving…' : 'Save changes'}
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </form>
+            )}
+
+            {/* 2. APPEARANCE TAB */}
             {activeTab === 'appearance' && (
               <div className="space-y-5 animate-in fade-in duration-150">
                 {/* Theme */}
@@ -451,7 +713,7 @@ export default function SettingsPage() {
               </div>
             )}
 
-            {/* 2. LANGUAGE TAB */}
+            {/* 3. LANGUAGE TAB */}
             {activeTab === 'language' && (
               <div className="space-y-4 animate-in fade-in duration-150">
                 <div className="p-5 rounded-2xl bg-[#0c101c] border border-white/10 space-y-4">
@@ -504,7 +766,26 @@ export default function SettingsPage() {
               </div>
             )}
 
-            {/* 3. GATED TABS (WHEN NOT LOGGED IN) */}
+            {/* 4. GATED TABS (WHEN NOT LOGGED IN) */}
+            {!isAuthenticated && activeTab === 'profile' && (
+              <div className="p-8 rounded-2xl bg-[#0c101c] border border-white/10 text-center space-y-4 animate-in fade-in duration-150">
+                <div className="w-10 h-10 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-zinc-400 mx-auto">
+                  <Lock className="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 className="text-sm font-bold text-white">Sign In Required</h2>
+                  <p className="text-xs text-zinc-400 mt-1">Sign in to manage your profile.</p>
+                </div>
+                <Link
+                  href="/login?next=/settings?tab=profile"
+                  className="px-5 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-bold text-xs cursor-pointer shadow-md shadow-cyan-500/20"
+                >
+                  Sign In
+                </Link>
+              </div>
+            )}
+
+            {/* 5. GATED SEATS TAB (WHEN NOT LOGGED IN) */}
             {!isAuthenticated && activeTab === 'seats' && (
               <div className="p-8 rounded-2xl bg-[#0c101c] border border-white/10 text-center space-y-4 animate-in fade-in duration-150">
                 <div className="w-10 h-10 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-zinc-400 mx-auto">
@@ -525,7 +806,7 @@ export default function SettingsPage() {
               </div>
             )}
 
-            {/* 5. SEATS TAB (AUTHENTICATED) */}
+            {/* 6. SEATS TAB (AUTHENTICATED) */}
             {isAuthenticated && activeTab === 'seats' && (
               <div className="p-5 rounded-2xl bg-[#0c101c] border border-white/10 space-y-4 animate-in fade-in duration-150">
                 <h2 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Seat Tier</h2>

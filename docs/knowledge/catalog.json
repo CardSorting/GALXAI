@@ -2428,6 +2428,26 @@
       }
     },
     {
+      "path": "docs/adr/0158-canonical-account-profiles-and-actor-provenance.md",
+      "title": "ADR 0158: Canonical account profiles with explicit actor provenance",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": {
+        "status": "proposed",
+        "delivery": "local",
+        "domain": "database",
+        "owner": "Account platform maintainer",
+        "date": "2026-09-19",
+        "evidence": [
+          "docs/maintainers/ACCOUNT_PROFILE_SCHEMA.md"
+        ],
+        "supersedes": []
+      }
+    },
+    {
       "path": "docs/adr/README.md",
       "title": "Architecture decision records",
       "scope": "current-guide",
@@ -3011,6 +3031,25 @@
       "domains": [],
       "curation": "unreviewed",
       "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/maintainers/ACCOUNT_PROFILE_SCHEMA.md",
+      "title": "Canonical account profile and actor model",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [
+        "database"
+      ],
+      "curation": "assigned",
+      "keywords": [
+        "account",
+        "profile",
+        "identity",
+        "actor",
+        "entitlement",
+        "migration"
+      ],
       "decision": null
     },
     {
@@ -4583,6 +4622,16 @@
     {
       "path": "post-mortem/incidents/2026/2026-09-16-shared-quota/README.md",
       "title": "Shared-account quota exhaustion and costly continuation",
+      "scope": "operational-record",
+      "kind": "navigation",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-09-19-account-profile/README.md",
+      "title": "Canonical account-profile migration backfill",
       "scope": "operational-record",
       "kind": "navigation",
       "domains": [],

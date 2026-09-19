@@ -151,6 +151,7 @@
         "src/components/dashboard/Footer.tsx",
         "src/lib/auth/**/*.ts",
         "src/app/api/auth/**/*.ts",
+        "src/app/api/account/profile/route.ts",
         "src/app/api/ingest/route.ts",
         "src/app/auth/callback/route.ts",
         "src/contexts/AuthContext.tsx",
@@ -447,7 +448,9 @@
         "scripts/setup-relay-services.ts",
         "scripts/set-relay-service-gates.ts",
         "scripts/test-relay-connections-db.ts",
-        "scripts/test-relay-activation-db.ts"
+        "scripts/test-relay-activation-db.ts",
+        "scripts/test-account-profile-db.ts",
+        "scripts/test-account-profile-api.ts"
       ],
       "guides": [
         "docs/SUPABASE_PARANOID_ARCHITECTURE_SPEC.md",
@@ -455,7 +458,8 @@
         "docs/maintainers/FREE_GENERATION_QUOTA.md",
         "docs/maintainers/MULTI_TENANT_SHARD_AND_KEY_ROTATION.md",
         "docs/MIGRATION_GUIDE.md",
-        "docs/reference/relay-account-management.md"
+        "docs/reference/relay-account-management.md",
+        "docs/maintainers/ACCOUNT_PROFILE_SCHEMA.md"
       ],
       "checks": [
         "npm run db:verify",
@@ -950,6 +954,17 @@
         "retirement",
         "audit"
       ]
+    },
+    "docs/maintainers/ACCOUNT_PROFILE_SCHEMA.md": {
+      "kind": "reference",
+      "keywords": [
+        "account",
+        "profile",
+        "identity",
+        "actor",
+        "entitlement",
+        "migration"
+      ]
     }
   },
   "runbooks": [
@@ -1139,6 +1154,17 @@
       "evidence": [
         "post-mortem/releases/2026-09-16-relay-generation-recovery.json",
         "post-mortem/releases/2026-09-16-relay-generation-recovery-final.json"
+      ],
+      "supersedes": []
+    },
+    "docs/adr/0158-canonical-account-profiles-and-actor-provenance.md": {
+      "status": "proposed",
+      "delivery": "local",
+      "domain": "database",
+      "owner": "Account platform maintainer",
+      "date": "2026-09-19",
+      "evidence": [
+        "docs/maintainers/ACCOUNT_PROFILE_SCHEMA.md"
       ],
       "supersedes": []
     }

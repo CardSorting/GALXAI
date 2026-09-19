@@ -13,7 +13,7 @@ CREATE OR REPLACE FUNCTION public.fn_record_image_like(p_image_id text, p_sessio
  RETURNS jsonb
  LANGUAGE plpgsql
  SECURITY DEFINER
- SET search_path TO ''
+ SET search_path = ''
 AS $function$
 DECLARE
   v_affected INTEGER := 0;

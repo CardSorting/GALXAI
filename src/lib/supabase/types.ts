@@ -78,10 +78,72 @@ export type GalxCheckoutStatus = 'open' | 'complete' | 'expired' | 'canceled';
 
 /** Stripe Payment status values on a checkout session. */
 export type GalxPaymentStatus = 'unpaid' | 'paid' | 'no_payment_required';
+export type GalxAccountClass = 'human' | 'autonomous';
+export type GalxAccountProfileStatus = 'active' | 'suspended' | 'archived';
 
 export interface Database {
   private: {
     Tables: {
+      galx_account_profiles: {
+        Row: {
+          id: string;
+          owner_key: string;
+          auth_user_id: string | null;
+          account_class: GalxAccountClass;
+          status: GalxAccountProfileStatus;
+          display_name: string | null;
+          metadata: Json;
+          revision: number;
+          created_at: string;
+          updated_at: string;
+          archived_at: string | null;
+        };
+        Insert: {
+          owner_key: string;
+          auth_user_id?: string | null;
+          account_class?: GalxAccountClass;
+          status?: GalxAccountProfileStatus;
+          display_name?: string | null;
+          metadata?: Json;
+          revision?: number;
+          created_at?: string;
+          updated_at?: string;
+          archived_at?: string | null;
+        };
+        Update: {
+          display_name?: string | null;
+          status?: GalxAccountProfileStatus;
+          metadata?: Json;
+          revision?: number;
+          updated_at?: string;
+          archived_at?: string | null;
+        };
+        Relationships: [];
+      };
+      galx_account_profile_preferences: {
+        Row: { profile_id: string; locale: string; timezone: string; revision: number; created_at: string; updated_at: string };
+        Insert: { profile_id: string; locale?: string; timezone?: string; revision?: number; created_at?: string; updated_at?: string };
+        Update: { locale?: string; timezone?: string; revision?: number; updated_at?: string };
+        Relationships: [];
+      };
+      galx_account_identities: {
+        Row: { account_id: string; auth_user_id: string | null; profile_id: string; account_class: GalxAccountClass; created_at: string; updated_at: string };
+        Insert: { account_id: string; auth_user_id?: string | null; profile_id?: string; account_class?: GalxAccountClass };
+        Update: { auth_user_id?: string | null; profile_id?: string; updated_at?: string };
+        Relationships: [];
+      };
+      galx_autonomous_actor_configuration_versions: {
+        Row: { actor_id: string; configuration_version: number; persona_ref: string; configuration_ref: string; created_at: string };
+        Insert: { actor_id: string; configuration_version: number; persona_ref: string; configuration_ref: string; created_at?: string };
+        Update: never;
+        Relationships: [];
+      };
+      galx_administrative_entitlement_events: {
+        Row: { event_id: number; entitlement_id: string; action: 'granted' | 'revoked'; account_profile_id: string; actor_profile_id: string; revision: number; reason: string; previous_state: Json | null; next_state: Json; created_at: string };
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
       galx_relay_principals: {
         Row: { id: string; actor_id: string; pool_id: GalxRelayPoolId; installation_id: string; kind: 'runtime' | 'registrar' | 'operator' | 'viewer'; token_sha256: string; disabled: boolean; created_at: string };
         Insert: never; Update: never; Relationships: [];
@@ -243,7 +305,10 @@ export interface Database {
       enroll_desktop_shard: { Args: { p_desktop_id: string; p_row: Json; p_expected?: Json }; Returns: string };
       refresh_desktop_shard: { Args: { p_desktop_id: string; p_id: string; p_expected: Json; p_next: Json }; Returns: boolean };
     };
-    Enums: { [_ in never]: never };
+    Enums: {
+      galx_account_class: GalxAccountClass;
+      galx_account_profile_status: GalxAccountProfileStatus;
+    };
     CompositeTypes: { [_ in never]: never };
   };
   public: {
