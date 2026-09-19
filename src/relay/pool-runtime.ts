@@ -100,6 +100,8 @@ export class PoolRuntime {
     }
     if (req.headers.origin || !equalSecret(bearer(req),this.inferenceKey)) throw new RequestError(401,'unauthorized','Provide valid authorization.');
     if(pathname==='/v1/images/availability' && req.method==='GET') {
+      const model = new URL(req.url ?? '/', 'http://local').searchParams.get('model');
+      if (!model || !/^[a-zA-Z0-9._:-]{1,128}$/.test(model)) throw new RequestError(400, 'invalid_request', 'Specify a valid image model.');
       let available:boolean|null=false;
       if(this.execution.central.identity.pool==='premium'&&ready) {
         const checks=[...this.workers.values()].map(w=>w.engine.imageAvailability());

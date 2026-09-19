@@ -18,10 +18,15 @@ if (fs.existsSync(envLocal)) {
 import { GalxR2AssetAdapter } from '../src/workers/cloudflare/GalxR2AssetAdapter';
 import { galxRouter } from '../src/core/router/GalxModelRouter';
 
-const ARTIFACT_DIR = '/Users/bozoegg/.gemini/antigravity-ide/brain/dfd0cf32-731b-494c-b1f1-e69ef8f1ac1b';
+const ARTIFACT_DIR = path.resolve(process.cwd(), 'tests/relay/samples');
+// Image generation is requested as a model-backed workload. The Relay then
+// dispatches the model through Codex Responses with the image_generation tool.
+const IMAGE_MODEL = 'gpt-5.6-terra';
 
 async function main() {
   console.log('Generating showcase images via live Relay & Router...');
+
+  fs.mkdirSync(ARTIFACT_DIR, { recursive: true });
 
   const relayUrl = process.env.VM_RELAY_URL || 'http://localhost:3001';
   const r2Adapter = GalxR2AssetAdapter.getInstance();
@@ -35,10 +40,11 @@ async function main() {
     headers: {
       'Content-Type': 'application/json',
       'x-galx-client': 'gallery-showcase-generator',
+      ...(process.env.VM_RELAY_API_KEY ? { Authorization: `Bearer ${process.env.VM_RELAY_API_KEY}` } : {}),
     },
     body: JSON.stringify({
       prompt: prompt1,
-      model: 'gpt-5.6-terra',
+      model: IMAGE_MODEL,
       response_format: 'b64_json',
     }),
   });
@@ -65,7 +71,7 @@ async function main() {
     contentType: 'image/png',
     prompt: prompt1,
     revisedPrompt: relayData.data[0].revised_prompt,
-    model: 'gpt-5.6-terra',
+    model: IMAGE_MODEL,
   });
   console.log(`Uploaded Image 1 to R2: ${r2Upload1.publicUrl}`);
 
@@ -76,7 +82,7 @@ async function main() {
   const routerResult = await galxRouter.routeImageGeneration({
     request: {
       prompt: prompt2,
-      model: 'openai-gpt-image-latest',
+      model: IMAGE_MODEL,
       size: '1024x1024',
       quality: 'hd',
       response_format: 'b64_json',

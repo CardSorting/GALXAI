@@ -73,9 +73,8 @@ export function useImageStudio(owner: string | null, token?: string, libraryActi
       if (!alive.current || sequence !== availabilitySequence.current) return;
       if (response.ok && (data?.status === 'available' || data?.status === 'unavailable')) {
         setAvailability(data.status);
-        if (data.status === 'available') setNotice('Image generation is available. Your prompt is ready when you are.');
-      } else setNotice('Availability could not be checked. Your draft is still here.');
-    } catch { if (alive.current && sequence === availabilitySequence.current) setNotice('Availability could not be checked. Your draft is still here.'); }
+      } else setAvailability('unknown');
+    } catch { /* Keep the draft and leave availability unknown without interrupting the studio. */ }
     finally { if (sequence === availabilitySequence.current) { availabilityLock.current = false; if (alive.current) setCheckingAvailability(false); } }
   }, [owner, headers]);
 

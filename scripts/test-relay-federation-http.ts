@@ -51,6 +51,10 @@ test('durable receipts survive worker and front-door replacement without weakeni
     const unavailable = await fetch(availabilityUrl, { headers: { Authorization: 'Bearer one' } });
     assert.equal(unavailable.headers.get('cache-control'), 'private, no-store');
     assert.deepEqual(await unavailable.json(), { available: false });
+    const missingModel = await fetch(base + '/v1/images/availability', { headers: { Authorization: 'Bearer one' } });
+    assert.equal(missingModel.status, 400);
+    assert.equal((await missingModel.json()).error.code, 'invalid_request');
+    assert.equal((await fetch(base + '/v1/images/availability?model=bad%20model', { headers: { Authorization: 'Bearer one' } })).status, 400);
     const imageTicket = lifecycle.capabilities.beginObservation('a', 'image:gpt-image-2')!;
     lifecycle.capabilities.observe(imageTicket, 'image:gpt-image-2', 'AVAILABLE');
     assert.deepEqual(await (await fetch(availabilityUrl, { headers: { Authorization: 'Bearer one' } })).json(), { available: true });

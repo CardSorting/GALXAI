@@ -6,7 +6,7 @@ import { createRoot } from 'react-dom/client';
 import { useImageStudio } from '../src/components/images/use-image-studio';
 
 const { JSDOM } = await import(process.env.GALX_JSDOM_MODULE || 'jsdom');
-test('concurrent generation survives transient status failures, reload and lost acknowledgement', async () => {
+test('availability stays silent while generation survives transient failures, reload and lost acknowledgement', async () => {
   const dom = new JSDOM('<div id="root"></div>', { url: 'http://localhost', pretendToBeVisual: true });
   const originalFetch = globalThis.fetch;
   const replacements: Record<string, unknown> = { window: dom.window, document: dom.window.document,
@@ -44,12 +44,13 @@ test('concurrent generation survives transient status failures, reload and lost 
     available=false;
     await act(async()=>{await studio.checkAvailability();});
     assert.equal(studio.availability,'unavailable');
+    assert.equal(studio.notice,'','availability checks must not interrupt the prompt workflow');
     await act(async()=>{await studio.generate();}); assert.equal(posts,0);
     await act(async()=>{await studio.checkAvailability();}); assert.equal(posts,0);
     assert(availabilityReads>=2); assert.equal(studio.settings.prompt,'Original prompt');
     available=true;
     await act(async()=>{await studio.checkAvailability();});
-    assert.equal(studio.availability,'available'); assert.equal(posts,0);
+    assert.equal(studio.availability,'available'); assert.equal(studio.notice,'','availability success must remain silent'); assert.equal(posts,0);
     for(let i=0;i<4;i++) await act(async()=>{await studio.generate();});
     await settle();
     assert.equal(studio.activeCount,4); assert(studio.atCapacity);

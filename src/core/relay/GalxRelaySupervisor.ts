@@ -492,8 +492,14 @@ export class GalxRelaySupervisor {
    * Spawns the relay as a native detached Node.js child process with bounded memory.
    */
   private static async spawnNativeDaemon(serverScript: string, cwd: string, port: number): Promise<void> {
-    const logDir = path.resolve(os.homedir(), '.lumi', 'logs');
-    if (!fs.existsSync(logDir)) {
+    const preferredLogDir = process.env.GALX_RELAY_LOG_DIR || path.resolve(os.homedir(), '.lumi', 'logs');
+    const workspaceLogDir = path.resolve(cwd, '.galxai', 'relay-logs');
+    let logDir = preferredLogDir;
+    try {
+      fs.mkdirSync(logDir, { recursive: true });
+      fs.accessSync(logDir, fs.constants.W_OK);
+    } catch {
+      logDir = workspaceLogDir;
       fs.mkdirSync(logDir, { recursive: true });
     }
 

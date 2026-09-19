@@ -132,6 +132,15 @@ test('Premium image alias needs a grant and performs no background image probe',
   finally{globalThis.fetch=original;await engine.stop();await rm(directory,{recursive:true,force:true});}
 });
 
+test('model-backed image requests preserve the requested model for Codex tool dispatch', async () => {
+  const { imageExecution } = await import('../src/relay/image-compatibility.js');
+  const execution = imageExecution('gpt-5.6-terra', false, true);
+  assert.equal(execution.requestedModel, 'gpt-5.6-terra');
+  assert.equal(execution.executionModel, 'gpt-5.6-terra');
+  assert.equal(execution.routingMode, 'exact');
+  assert.equal(execution.tool, undefined);
+});
+
 test('application selection fixes Sites/images to Premium and never borrows after failure',async()=>{
   const {isolatedRelay,isolatedChat}=await import('../src/core/router/adapters/IsolatedRelayTransport.js');
   const keys=['GALX_PREMIUM_RELAY_URL','GALX_STANDARD_RELAY_URL','GALX_PREMIUM_RELAY_KEY','GALX_STANDARD_RELAY_KEY','GALX_TEXT_RELAY_POOL'];const old=keys.map(k=>process.env[k]);const fetcher=globalThis.fetch;const calls:string[]=[];
@@ -202,13 +211,18 @@ test('manual registration reports the required account class without forwarding 
 test('Premium availability reads actual engine evidence without worker HTTP or provider calls',async()=>{
  const {PoolRuntime}=await import('../src/relay/pool-runtime.js');
  const runtime=new PoolRuntime({central:{identity:{pool:'premium'}}} as any,key('availability'),'/unused');
- let observed:boolean|null=null;
- (runtime as any).refreshedAt=Date.now();(runtime as any).workers.set('own',{engine:{credentialRejected:()=>false,imageAvailability:()=>observed},account:{models:['fixture']}});
+ let observed:boolean|null=false, reads=0;
+ (runtime as any).refreshedAt=Date.now();(runtime as any).workers.set('own',{engine:{credentialRejected:()=>false,imageAvailability:()=>{reads++;return observed;}},account:{models:['fixture']}});
  const origin=await listen(runtime.server);
  try {
-  for(const value of [null,true,false] as const){observed=value;const response=await fetch(origin+'/v1/images/availability',{headers:{Authorization:`Bearer ${key('availability')}`}});assert.equal(response.status,200);assert.deepEqual(await response.json(),{available:value});}
-  assert.equal((await fetch(origin+'/v1/images/availability')).status,401);
+  const response=await fetch(origin+'/v1/images/availability?model=gpt-image-2',{headers:{Authorization:`Bearer ${key('availability')}`}});
+  assert.equal(response.status,200);assert.equal(response.headers.get('cache-control'),'no-store');assert.equal(response.headers.get('x-content-type-options'),'nosniff');assert.deepEqual(await response.json(),{available:false});
+  assert.equal((await fetch(origin+'/v1/images/availability',{headers:{Authorization:`Bearer ${key('availability')}`}})).status,400);
+  assert.equal((await fetch(origin+'/v1/images/availability?model=bad%20model',{headers:{Authorization:`Bearer ${key('availability')}`}})).status,400);
+  assert.equal((await fetch(origin+'/v1/images/availability?model=gpt-image-2')).status,401);
   assert.equal((await fetch(origin+'/v1/images/availability',{headers:{Authorization:`Bearer ${key('availability')}`,Origin:'https://customer.invalid'}})).status,401);
-  (runtime as any).refreshedAt=0;const stopped=await fetch(origin+'/v1/images/availability',{headers:{Authorization:`Bearer ${key('availability')}`}});assert.deepEqual(await stopped.json(),{available:false});
+  for(const value of [null,true,false] as const){observed=value;const result=await fetch(origin+'/v1/images/availability?model=gpt-image-2',{headers:{Authorization:`Bearer ${key('availability')}`}});assert.equal(result.status,200);assert.deepEqual(await result.json(),{available:value});}
+  assert.equal(reads,4,'availability reads must use engine evidence without dispatching generation');
+  (runtime as any).refreshedAt=0;const stopped=await fetch(origin+'/v1/images/availability?model=gpt-image-2',{headers:{Authorization:`Bearer ${key('availability')}`}});assert.deepEqual(await stopped.json(),{available:false});
  }finally{await close(runtime.server);}
 });
