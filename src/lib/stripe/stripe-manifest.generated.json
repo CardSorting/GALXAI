@@ -1,60 +1,9 @@
 {
-  "timestamp": "2026-09-17T17:20:28.334Z",
-  "isLiveOrTest": "live",
-  "productsProvisioned": 7,
-  "pricesProvisioned": 7,
-  "taxConfigured": true,
-  "catalog": {
-    "developer_10": {
-      "productId": "prod_VGxC36EN0xAnvY",
-      "productName": "GALXAI Developer Tier — Images & Frontier OpenAI Models Pass",
-      "priceId": "price_1UGPHdIA2zQnWbn5S4U4zuO2",
-      "amountUsd": 10,
-      "totalCreditUsd": 10
-    },
-    "lumi_10": {
-      "productId": "prod_VHHYrIOiUb9u1X",
-      "productName": "GALXAI Developer Tier — Images & Frontier OpenAI Models Pass",
-      "priceId": "price_1UGiz3IA2zQnWbn5HjHdQNru",
-      "amountUsd": 10,
-      "totalCreditUsd": 10
-    },
-    "starter_25": {
-      "productId": "prod_V9tvNOYriT9X2g",
-      "productName": "GALXAI Prepaid Compute — Starter Builder Pack",
-      "priceId": "price_1U9a7bIA2zQnWbn5PAtSACkj",
-      "amountUsd": 25,
-      "totalCreditUsd": 42.5
-    },
-    "growth_50": {
-      "productId": "prod_V9tvoq8YU3h6gr",
-      "productName": "GALXAI Prepaid Compute — Growth VIP Priority Pack",
-      "priceId": "price_1U9a7cIA2zQnWbn5DZLpbm6l",
-      "amountUsd": 50,
-      "totalCreditUsd": 85
-    },
-    "fleet_100": {
-      "productId": "prod_V9tvtnaGgIzEWy",
-      "productName": "GALXAI Prepaid Compute — Fleet Scale Pack",
-      "priceId": "price_1U9a7cIA2zQnWbn5xuXLzGbl",
-      "amountUsd": 100,
-      "totalCreditUsd": 180
-    },
-    "sovereign_250": {
-      "productId": "prod_V9tvZvWXmiRwHg",
-      "productName": "GALXAI Prepaid Compute — Enterprise Sovereign Pack",
-      "priceId": "price_1U9a7dIA2zQnWbn5EapFGsYi",
-      "amountUsd": 250,
-      "totalCreditUsd": 505
-    },
-    "hyperscale_500": {
-      "productId": "prod_V9tvtqgBuw6px9",
-      "productName": "GALXAI Prepaid Compute — Hyperscale Infrastructure Pack",
-      "priceId": "price_1U9a7dIA2zQnWbn5N36bM3Gl",
-      "amountUsd": 500,
-      "totalCreditUsd": 1005
-    }
-  },
-  "portalConfigId": "bpc_1SfRJBIA2zQnWbn5wccY9XgR",
-  "webhookEndpointId": "we_1UCvKoIA2zQnWbn5HaBkRV3p"
+  "status": "active",
+  "surface": "subscriptions",
+  "plans": [
+    { "planKey": "pro-v1", "lookupKey": "galx_pro_monthly_v1", "monthlyUsd": 10, "checkoutEnabled": true },
+    { "planKey": "nova-developer-v1", "lookupKey": "galx_nova_developer_monthly_v1", "monthlyUsd": 50, "checkoutEnabled": true, "usageCreditsIncludedUsd": 0, "usageBilledSeparately": true, "usagePricingStatus": "published", "usageBasis": "message" }
+  ],
+  "historicalPrepaidCatalog": "reconciliation-only"
 }

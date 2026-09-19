@@ -116,9 +116,9 @@ function BaseShareModal({
     ctx.fillText('AI', 230, 98);
     ctx.font = '500 20px sans-serif';
     ctx.fillStyle = '#94a3b8';
-    ctx.fillText('Universal Gateway', 275, 98);
+    ctx.fillText('Managed intelligence', 275, 98);
 
-    // Discount badge
+    // Capability badge
     ctx.fillStyle = 'rgba(16, 185, 129, 0.2)';
     ctx.beginPath();
     ctx.roundRect(850, 65, 280, 44, 22);
@@ -128,7 +128,7 @@ function BaseShareModal({
     ctx.stroke();
     ctx.font = 'bold 16px sans-serif';
     ctx.fillStyle = '#34d399';
-    ctx.fillText('Optimal Performance / $', 860, 93);
+    ctx.fillText('Intelligence, handled.', 860, 93);
 
     // Card Title
     ctx.font = '900 48px sans-serif';
@@ -141,7 +141,7 @@ function BaseShareModal({
     ctx.fillText(description.slice(0, 80), 70, 300);
 
     // Specs row
-    const specs = ['Sub-15ms TTFT', '75% Prompt Caching', 'Zero Code Changes', 'AES-256 Vault'];
+    const specs = ['Supported capabilities', 'Create in GALX', 'Developer access', 'Public creations'];
     specs.forEach((s, i) => {
       ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
       ctx.beginPath();

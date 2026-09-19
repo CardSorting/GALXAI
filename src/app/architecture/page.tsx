@@ -1,2 +1,5 @@
-import { permanentRedirect } from 'next/navigation';
-export default function Page() { permanentRedirect('/docs'); }
+import { redirectRetiredSurface } from '@/lib/public-content/retired-surface';
+
+export default function Page() {
+  redirectRetiredSurface('/docs');
+}

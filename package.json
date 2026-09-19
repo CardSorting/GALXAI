@@ -228,13 +228,16 @@
     "training:strategy": "tsx scripts/run-training-strategy.ts",
     "stripe:setup": "tsx scripts/setup-stripe-cli.ts",
     "stripe:provision": "tsx scripts/provision-stripe-all.ts",
+    "stripe:provision:pro": "tsx scripts/provision-sites-pro.ts",
+    "stripe:provision:nova": "node --env-file-if-exists=.env.local --import tsx scripts/provision-nova-developer.ts",
     "stripe:login": "stripe login",
     "stripe:listen": "stripe listen --forward-to localhost:3000/api/stripe/webhook",
     "stripe:seed": "tsx scripts/seed-stripe-products.ts",
     "stripe:fixture:products": "stripe fixtures stripe/fixtures/products.json",
-    "stripe:trigger:checkout": "stripe trigger checkout.session.completed",
+    "stripe:trigger:checkout": "tsx scripts/verify-live-checkout.ts --create",
+    "stripe:verify:strategy": "tsx scripts/verify-live-checkout.ts",
     "stripe:trigger:invoice": "stripe trigger invoice.payment_succeeded",
-    "test:stripe": "tsx scripts/test-stripe-integration.ts",
+    "test:stripe": "tsx scripts/test-stripe-pricing-strategy.ts",
     "test:billing:lifecycle": "node --import tsx --test scripts/test-billing-lifecycle.ts scripts/test-billing-navigation.ts scripts/test-billing-public-boundary.ts scripts/test-stripe-webhook-target.ts && node --import tsx scripts/test-stripe-webhook-endpoint.ts",
     "test:router": "tsx scripts/validate-galxai-router.ts",
     "test:relay:image": "node --import tsx scripts/run-supabase-integration.ts --image-assets",
@@ -404,6 +407,6 @@
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20260823.1",
     "@types/ws": "^8.18.1",
-    "wrangler": "^4.125.0"
+    "wrangler": "^4.135.0"
   }
 }

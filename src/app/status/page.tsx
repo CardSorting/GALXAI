@@ -7,15 +7,13 @@ import { constructMetadata } from '@/lib/seo/metadata';
 import { JsonLd, createSoftwareAppSchema, createBreadcrumbSchema } from '@/lib/seo/jsonld';
 
 export const metadata: Metadata = constructMetadata({
-  title: 'Real-Time System Status & Operational SLA Health',
-  description: 'Current GALX service availability.',
+  title: 'GALX service status',
+  description: 'Check current availability for GALX services.',
   canonicalPath: '/status',
   keywords: [
-    'GALXAI Status',
-    'AI Router Uptime',
-    'Model Status Gateway',
-    'GALX Nova Operational Health',
-    'AI Gateway Latency Status',
+    'GALX status',
+    'GALX service availability',
+    'GALX Nova status',
   ],
 });
 
@@ -24,8 +22,8 @@ export default function StatusPage() {
     '@context': 'https://schema.org',
     '@graph': [
       createSoftwareAppSchema({
-        name: 'GALXAI Real-Time System Status',
-        description: 'Current GALX service availability.',
+        name: 'GALX Service Status',
+        description: 'Check current availability for GALX services.',
         url: '/status',
         id: 'https://galx.ai/status#software',
         includeRating: false,
@@ -43,7 +41,7 @@ export default function StatusPage() {
       <Navigation />
 
       <main className="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
-        <Breadcrumbs items={[{ label: 'System Status & Health' }]} />
+        <Breadcrumbs items={[{ label: 'Service status' }]} />
         <LiveStatusDashboard />
       </main>
     </div>

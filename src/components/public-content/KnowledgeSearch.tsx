@@ -15,7 +15,7 @@ export function KnowledgeSearch() {
   function reset() { setQuery(''); setCategory('All topics'); document.getElementById('guide-search')?.focus(); }
   return <section aria-label="Find a guide">
     <div className={styles.searchArea} role="search"><label htmlFor="guide-search" className={styles.searchLabel}>Search the knowledge base</label>
-      <div className={styles.searchField}><Search size={20} aria-hidden="true" /><input id="guide-search" type="search" autoComplete="off" value={query} maxLength={160} onChange={event => setQuery(event.target.value)} onKeyDown={event => { if (event.key === 'Escape') setQuery(''); }} placeholder="Try publishing, revisions, or billing" aria-controls="guide-results" />
+      <div className={styles.searchField}><Search size={20} aria-hidden="true" /><input id="guide-search" type="search" autoComplete="off" value={query} maxLength={160} onChange={event => setQuery(event.target.value)} onKeyDown={event => { if (event.key === 'Escape') setQuery(''); }} placeholder="Try image creation, sharing, or Developer access" aria-controls="guide-results" />
         {query && <button type="button" aria-label="Clear search" onClick={() => { setQuery(''); document.getElementById('guide-search')?.focus(); }}><X size={18} aria-hidden="true" /></button>}
       </div>
     </div>

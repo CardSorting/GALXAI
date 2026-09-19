@@ -1,42 +1,23 @@
 'use client';
 import { BILLING_PATHS } from '@/lib/billing/navigation';
 
-import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { prefetchOnIntent } from '@/lib/resilience/intent-prefetch';
 import {
   Search,
-  Zap,
-  Rocket,
-  Shield,
-  Key,
-  Terminal,
-  Code2,
-  Activity,
   Cpu,
   Sparkles,
   ArrowRight,
   X,
-  CreditCard,
-  CheckCircle2,
-  GitCompare,
   HelpCircle,
   BookOpen,
   FileText,
-  DollarSign,
   ShieldCheck,
-  LifeBuoy,
   Copy,
   Check,
-  Users2,
-  Building2,
-  Sliders,
-  UserPlus,
-  Settings,
-  Lock
 } from 'lucide-react';
-import { FRONTEND_VISIBLE_MODELS, ModelCatalog } from '@/core/router/PublicModelCatalog';
-import { BroccoliOmniSearch, OmniSearchItem } from '@/lib/resilience/BroccoliOmniSearch';
+import { BroccoliOmniSearch } from '@/lib/resilience/BroccoliOmniSearch';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 import { withErrorBoundary } from './ErrorBoundary';
 
@@ -45,245 +26,12 @@ interface CommandMenuProps {
   onClose: () => void;
 }
 
-interface PlatformPage {
-  label: string;
-  href: string;
-  icon: React.ComponentType<{ className?: string }>;
-  category: string;
-  keywords: string[];
-  description: string;
-}
-
-const PLATFORM_PAGES: PlatformPage[] = [
-  {
-    label: 'Frontier AI Models & Arena',
-    href: '/models',
-    icon: Cpu,
-    category: 'Models',
-    keywords: ['models', 'gpt', 'openai', 'sol', 'terra', 'luna', 'ai', 'engines', 'intelligence'],
-    description: 'Explore and compare OpenAI & GPT flagship models'
-  },
-  {
-    label: 'Requests & Live Results (Async AI)',
-    href: '/queues',
-    icon: Activity,
-    category: 'Workloads',
-    keywords: ['requests', 'results', 'queues', 'async', 'tasks', 'jobs', 'batch'],
-    description: 'Submit background AI tasks and stream live results'
-  },
-  {
-    label: 'API quickstart',
-    href: '/docs',
-    icon: Sparkles,
-    category: 'Getting Started',
-    keywords: ['beginner', 'simple', 'easy', 'plain english', 'guide', 'start', 'how to', 'tutorial', 'no-code'],
-    description: 'Send a request or copy setup instructions for your agent'
-  },
-  {
-    label: 'Developer API Keys',
-    href: '/keys',
-    icon: Key,
-    category: 'Access',
-    keywords: ['api keys', 'keys', 'tokens', 'secret', 'create key', 'credentials', 'auth'],
-    description: 'Generate and manage universal gateway API access keys'
-  },
-
-  { label: 'Billing overview', href: BILLING_PATHS.overview, icon: DollarSign, category: 'Finance', keywords: ['billing', 'account'], description: 'Your plan and prepaid credit' },
-  { label: 'Plan and subscription', href: BILLING_PATHS.plan, icon: DollarSign, category: 'Finance', keywords: ['pro', 'plan', 'subscription', 'renewal', 'cancel'], description: 'Review and manage your Pro subscription' },
-  { label: 'Transactions', href: BILLING_PATHS.transactions, icon: FileText, category: 'Finance', keywords: ['history', 'ledger', 'usage', 'export'], description: 'Credit added, usage and balance adjustments' },
-  { label: 'Payment settings', href: BILLING_PATHS.payments, icon: DollarSign, category: 'Finance', keywords: ['card', 'stripe', 'payment method'], description: 'Manage saved payment methods' },
-  {
-    label: 'Credit balance and top-up',
-    href: BILLING_PATHS.credits,
-    icon: DollarSign,
-    category: 'Finance',
-    keywords: ['wallet', 'balance', 'deposit', 'add money', 'add funds', 'billing', 'credits', 'pay'],
-    description: 'Review prepaid credit and add a one-time top-up'
-  },
-  {
-    label: 'Enterprise AI Spend Forensic & Governance',
-    href: '/audit',
-    icon: ShieldCheck,
-    category: 'Governance',
-    keywords: ['audit', 'spend', 'forensic', 'governance', 'waste', 'bills', 'finops', 'tco', 'reduce spend'],
-    description: 'Reverse-audit live OpenAI traffic to identify and stop spend leakage'
-  },
-  {
-    label: 'Universal AI Velocity & TCO Calculator',
-    href: '/calculator',
-    icon: CreditCard,
-    category: 'Finance',
-    keywords: ['calculator', 'tco', 'roi', 'savings', 'prompt caching', 'tuition', 'time to first dollar'],
-    description: 'Calculate exact savings with 75% prompt caching and avoided engineering tuition'
-  },
-  {
-    label: 'Developer Pricing & Token Rates',
-    href: '/pricing',
-    icon: DollarSign,
-    category: 'Finance',
-    keywords: ['pricing', 'cost', 'rates', 'nova', 'developer', 'sustainable'],
-    description: 'Direct developer rates on GALX Nova and GALX Nova-image'
-  },
-  {
-    label: 'Model Comparison Matrix',
-    href: '/models/compare',
-    icon: GitCompare,
-    category: 'Tools',
-    keywords: ['compare', 'matrix', 'benchmark', 'side by side', 'difference', 'which model'],
-    description: 'Side-by-side capability matrix across GALX managed models'
-  },
-  {
-    label: 'SDK and IDE integrations',
-    href: '/docs/sdks#ide',
-    icon: Terminal,
-    category: 'Solutions',
-    keywords: ['cursor', 'windsurf', 'vscode', 'ide', 'code editor', 'setup', 'copilot'],
-    description: 'Connect GALXAI base URL to your favorite AI IDE'
-  },
-  {
-    label: 'System Status & Operational Health',
-    href: '/status',
-    icon: CheckCircle2,
-    category: 'Trust',
-    keywords: ['status', 'uptime', 'health', 'is it down', 'latency', 'operational', 'monitoring'],
-    description: 'Real-time multi-region operational health checks'
-  },
-  {
-    label: 'Seats & Team Member Governance',
-    href: '/teams/seats',
-    icon: Users2,
-    category: 'Teams',
-    keywords: ['seats', 'team', 'members', 'invite', 'rbac', 'roles', 'squad', 'small business', 'permissions', 'users', 'add seats'],
-    description: 'Manage team seats, invite colleagues, and assign RBAC roles and spend caps'
-  },
-  {
-    label: 'Pending Team Invitations & Magic Links',
-    href: '/teams/invites',
-    icon: UserPlus,
-    category: 'Teams',
-    keywords: ['invites', 'pending', 'magic link', 'join', 'email invite', 'domain auto-join'],
-    description: 'Track pending invites, send email invites, and generate shareable magic links'
-  },
-  {
-    label: 'Member Spend Caps & Auto-Throttles',
-    href: '/teams/spend-limits',
-    icon: Sliders,
-    category: 'Teams',
-    keywords: ['spend caps', 'limits', 'allowance', 'throttle', 'kill switch', 'budget control'],
-    description: 'Configure individual developer monthly allowances and hard freeze safety limits'
-  },
-  {
-    label: 'Small Business & Squad Workspace (5 Seats)',
-    href: '/solutions/small-business',
-    icon: Users2,
-    category: 'Solutions',
-    keywords: ['small business', 'startup', 'squad', '5 seats', 'team plan', 'shared wallet'],
-    description: 'Shared wallet, per-seat safety caps, and 5 seats with $100 pooled credits'
-  },
-  {
-    label: 'Enterprise Cost Centers & GL Budgets',
-    href: '/teams/cost-centers',
-    icon: Building2,
-    category: 'Teams',
-    keywords: ['cost center', 'gl', 'teams', 'departments', 'squads', 'budget', 'allocations'],
-    description: 'Allocate compute budgets with multi-tenant GL accounting'
-  },
-  {
-    label: 'RBAC Roles & Deterministic Permissions',
-    href: '/teams/roles',
-    icon: ShieldCheck,
-    category: 'Teams',
-    keywords: ['rbac', 'roles', 'permissions', 'admin', 'owner', 'developer', 'finops', 'viewer'],
-    description: 'Configure least-privilege role permissions across your organization'
-  },
-  {
-    label: 'Organization Security & 2FA Policies',
-    href: '/teams/security',
-    icon: Shield,
-    category: 'Security',
-    keywords: ['2fa', 'security', 'ip allowlist', 'cidr', 'session timeout', 'key rotation', 'policies'],
-    description: 'Enforce mandatory 2FA, corporate IP allowlisting, and key rotation baselines'
-  },
-  {
-    label: 'Enterprise SAML 2.0 SSO & SCIM Sync',
-    href: '/teams/sso',
-    icon: Lock,
-    category: 'Enterprise',
-    keywords: ['sso', 'saml', 'scim', 'okta', 'google workspace', 'azure ad', 'domain capture'],
-    description: 'Centralized authentication, domain capture, and automated directory sync'
-  },
-  {
-    label: 'Organization Activity & Governance Audit',
-    href: '/teams/activity',
-    icon: Activity,
-    category: 'Governance',
-    keywords: ['activity', 'audit log', 'events', 'history', 'soc 2', 'compliance log'],
-    description: 'Real-time audit log of member invitations, role changes, and budget updates'
-  },
-  {
-    label: 'Organization Profile & Workspace Settings',
-    href: '/teams/settings',
-    icon: Settings,
-    category: 'Settings',
-    keywords: ['settings', 'organization', 'slug', 'profile', 'data jurisdiction', 'sovereign routing'],
-    description: 'Manage organization identity, workspace slug, and US/EU sovereign data routing'
-  },
-  {
-    label: 'Small Business & Enterprise Seat Pricing',
-    href: '/pricing/seats',
-    icon: Users2,
-    category: 'Finance',
-    keywords: ['seat pricing', 'plans', 'small business', 'enterprise fleet', 'tiers', 'features'],
-    description: 'Dedicated team seat tiers with included monthly pooled compute credits'
-  },
-  {
-    label: 'Dual Seat & Compute ROI Calculator',
-    href: '/pricing/calculator',
-    icon: Sliders,
-    category: 'Finance',
-    keywords: ['calculator', 'roi', 'seat savings', 'compare', 'team cost', 'estimate', 'savings'],
-    description: 'Calculate net annual savings across team seats and developer compute'
-  },
-  {
-    label: 'Billing invoices',
-    href: BILLING_PATHS.invoices,
-    icon: FileText,
-    category: 'Finance',
-    keywords: ['invoices', 'receipts', 'tax', 'pdf', 'bills', 'accounting'],
-    description: 'View invoices and available downloads'
-  },
-  {
-    label: 'SOC2 & Zero-Retention Compliance',
-    href: '/compliance',
-    icon: ShieldCheck,
-    category: 'Security',
-    keywords: ['compliance', 'soc2', 'security', 'privacy', 'hipaa', 'gdpr', 'zero retention', 'encryption', 'private', 'safe'],
-    description: 'Security certifications, DPA agreement, and data safety'
-  },
-  {
-    label: 'Interactive API & Model Playground',
-    href: '/playground',
-    icon: Sparkles,
-    category: 'Tools',
-    keywords: ['playground', 'try', 'test', 'demo', 'sandbox', 'chat', 'prompt', 'experiment', 'run model'],
-    description: 'Test prompts live across OpenAI models with 0 config'
-  },
-  {
-    label: 'Knowledge Base & Frequently Asked Questions',
-    href: '/faq',
-    icon: HelpCircle,
-    category: 'Support',
-    keywords: ['faq', 'help', 'support', 'questions', 'answers', 'contact', 'troubleshooting', 'cancel', 'refund'],
-    description: 'Instant answers to billing, models, and integration questions'
-  },
-];
-
 interface SelectableItem {
   id: string;
   href: string;
   title: string;
   category: string;
-  type: 'recent' | 'resolved' | 'omni' | 'model';
+  type: 'recent' | 'omni';
   actionType?: 'copy_curl' | 'copy_python' | 'copy_ts' | 'copy_key' | 'navigate';
   actionData?: string;
 }
@@ -297,20 +45,9 @@ function BaseCommandMenu({ isOpen, onClose }: CommandMenuProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const normalizedQuery = query.toLowerCase().trim();
-  const resolvedCandidate = normalizedQuery ? ModelCatalog.resolveModel(normalizedQuery) : null;
-  const resolvedFromQuery = resolvedCandidate;
   const recentVisits = BroccoliOmniSearch.getRecentVisits(3);
   const omniResults = BroccoliOmniSearch.search(normalizedQuery, 8);
   const autocompleteSuggestion = BroccoliOmniSearch.getAutocompleteSuggestion(normalizedQuery);
-
-  const filteredModels = useMemo(() => {
-    return FRONTEND_VISIBLE_MODELS.filter(
-      (m) =>
-        m.id.toLowerCase().includes(normalizedQuery) ||
-        m.name.toLowerCase().includes(normalizedQuery) ||
-        m.provider.toLowerCase().includes(normalizedQuery)
-    );
-  }, [normalizedQuery]);
 
   // Unified Selectable Item List for Keyboard Navigation
   const selectableItems = useMemo<SelectableItem[]>(() => {
@@ -329,16 +66,6 @@ function BaseCommandMenu({ isOpen, onClose }: CommandMenuProps) {
       return items;
     }
 
-    if (resolvedFromQuery) {
-      items.push({
-        id: `resolved_${resolvedFromQuery.id}`,
-        href: `/models/${resolvedFromQuery.id}`,
-        title: resolvedFromQuery.name,
-        category: 'Models & Engines',
-        type: 'resolved'
-      });
-    }
-
     omniResults.forEach((o) => {
       items.push({
         id: `omni_${o.id}`,
@@ -351,20 +78,8 @@ function BaseCommandMenu({ isOpen, onClose }: CommandMenuProps) {
       });
     });
 
-    if (!resolvedFromQuery) {
-      filteredModels.forEach((m) => {
-        items.push({
-          id: `model_${m.id}`,
-          href: `/models/${m.id.replace('/', '-')}`,
-          title: m.name,
-          category: 'Models & Engines',
-          type: 'model'
-        });
-      });
-    }
-
     return items;
-  }, [normalizedQuery, recentVisits, resolvedFromQuery, omniResults, filteredModels]);
+  }, [normalizedQuery, recentVisits, omniResults]);
 
   // Reset selected index on query change
   useEffect(() => {
@@ -477,7 +192,7 @@ function BaseCommandMenu({ isOpen, onClose }: CommandMenuProps) {
           router.push('/');
         } else if (e.key === 'm') {
           e.preventDefault();
-          router.push('/models');
+          router.push('/developers');
         } else if (e.key === 'd') {
           e.preventDefault();
           router.push('/docs');
@@ -495,10 +210,10 @@ function BaseCommandMenu({ isOpen, onClose }: CommandMenuProps) {
           router.push('/status');
         } else if (e.key === 'p') {
           e.preventDefault();
-          router.push('/playground');
+          router.push('/developers');
         } else if (e.key === 'c') {
           e.preventDefault();
-          router.push('/models/compare');
+          router.push('/docs');
         } else if (e.key === 'f') {
           e.preventDefault();
           router.push('/faq');
@@ -542,7 +257,7 @@ function BaseCommandMenu({ isOpen, onClose }: CommandMenuProps) {
               <kbd className="px-2 py-0.5 rounded bg-white/10 text-indigo-300 font-bold">⌘K</kbd>
             </div>
             <div className="flex items-center justify-between p-2 rounded-xl bg-black/40 border border-white/5">
-              <span className="text-zinc-300">Go to Models</span>
+              <span className="text-zinc-300">Go to Developer</span>
               <span className="space-x-1">
                 <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-zinc-300">g</kbd>
                 <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-zinc-300">m</kbd>
@@ -599,7 +314,7 @@ function BaseCommandMenu({ isOpen, onClose }: CommandMenuProps) {
               autoFocus
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search models, pricing, guides, API keys, or prefix with '>', '@', '#', '$'..."
+              placeholder="Search images, Developer, guides, or API keys..."
               className="w-full bg-transparent text-white placeholder:text-zinc-500 text-sm focus:outline-none font-mono"
               aria-label="Universal Command Search"
             />
@@ -643,7 +358,7 @@ function BaseCommandMenu({ isOpen, onClose }: CommandMenuProps) {
                   >
                     Clear
                   </button>
-                  <span className="text-zinc-600 font-normal">Instant Cache L1</span>
+              <span className="text-zinc-600 font-normal">Recent navigation</span>
                 </div>
               </div>
               <div className="space-y-1">
@@ -682,47 +397,12 @@ function BaseCommandMenu({ isOpen, onClose }: CommandMenuProps) {
             </div>
           )}
 
-          {/* Ambiguity-Resolved Match Card */}
-          {resolvedFromQuery && (() => {
-            const itemIndex = currentItemCounter++;
-            const isSelected = itemIndex === selectedIndex;
-            return (
-              <div className="p-3.5 rounded-2xl bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-indigo-600/15 border border-amber-500/40 space-y-2">
-                <div className="flex items-center justify-between text-[10px] font-mono font-bold text-amber-300 uppercase">
-                  <span className="flex items-center gap-1">
-                    <Zap className="w-3 h-3 text-amber-400 fill-amber-400" />
-                    <span>Resolved Model for "{query}":</span>
-                  </span>
-                  <span>Optimal Performance / $</span>
-                </div>
-                <button
-                  onClick={() => navigateTo(`/models/${resolvedFromQuery.id}`, resolvedFromQuery.name, 'Models & Engines')}
-                  onMouseEnter={() => {
-                    setSelectedIndex(itemIndex);
-                  }}
-                  className={`w-full flex items-center justify-between p-2 rounded-xl transition-all text-left cursor-pointer border ${
-                    isSelected ? 'bg-black/90 border-amber-400 ring-1 ring-amber-400/40' : 'bg-black/60 hover:bg-black/80 border-white/5'
-                  }`}
-                >
-                  <div>
-                    <div className="text-xs font-bold text-white font-mono">{resolvedFromQuery.name}</div>
-                    <div className="text-[11px] text-cyan-300 font-mono">ID: {resolvedFromQuery.id} • ${resolvedFromQuery.inputPricePer1M.toFixed(2)} / 1M</div>
-                  </div>
-                  <div className="px-3 py-1.5 rounded-lg bg-amber-400 text-black font-mono font-black text-xs flex items-center gap-1">
-                    <span>View Specs</span>
-                    <ArrowRight className="w-3 h-3 text-black" />
-                  </div>
-                </button>
-              </div>
-            );
-          })()}
-
           {/* Intelligent OmniSearch Results (Non-Technical Natural Query Matching & Action Dispatchers) */}
           {normalizedQuery && omniResults.length > 0 && (
             <div className="space-y-1">
               <div className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-cyan-400 font-mono flex items-center justify-between">
                 <span>Matching Pages & Actions ({omniResults.length})</span>
-                <span className="text-zinc-500 font-normal">Edge Intent Matcher</span>
+                <span className="text-zinc-500 font-normal">Search results</span>
               </div>
               <div className="space-y-1">
                 {omniResults.map((item) => {
@@ -745,7 +425,7 @@ function BaseCommandMenu({ isOpen, onClose }: CommandMenuProps) {
                         <div className="w-7 h-7 rounded-lg bg-cyan-500/10 text-cyan-400 flex items-center justify-center shrink-0">
                           {item.actionType ? (
                             <Copy className="w-3.5 h-3.5 text-amber-400" />
-                          ) : item.category === 'Models & Engines' ? (
+                          ) : item.category === 'Actions & Tools' ? (
                             <Cpu className="w-3.5 h-3.5" />
                           ) : item.category === 'Documentation' ? (
                             <FileText className="w-3.5 h-3.5" />
@@ -785,57 +465,11 @@ function BaseCommandMenu({ isOpen, onClose }: CommandMenuProps) {
             </div>
           )}
 
-          {/* Direct Model Engine Matches */}
-          {filteredModels.length > 0 && !resolvedFromQuery && (
-            <div className="space-y-1">
-              <div className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-zinc-400 font-mono">
-                Model Engines ({filteredModels.length})
-              </div>
-              <div className="space-y-1">
-                {filteredModels.map((m) => {
-                  const itemIndex = currentItemCounter++;
-                  const isSelected = itemIndex === selectedIndex;
-                  const routeHref = `/models/${m.id.replace('/', '-')}`;
-                  return (
-                    <button
-                      key={m.id}
-                      onClick={() => navigateTo(routeHref, m.name, 'Models & Engines')}
-                      onMouseEnter={() => {
-                        setSelectedIndex(itemIndex);
-                      }}
-                      className={`w-full px-3.5 py-2.5 rounded-xl flex items-center justify-between group transition-all text-left cursor-pointer border ${
-                        isSelected
-                          ? 'bg-white/10 border-indigo-500/50 shadow-sm ring-1 ring-indigo-500/20'
-                          : 'hover:bg-white/5 border-transparent'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-amber-500/10 text-amber-400">
-                          <Zap className="w-3.5 h-3.5 fill-amber-400" />
-                        </div>
-                        <div>
-                          <div className={`font-bold text-xs transition-colors ${isSelected ? 'text-cyan-300' : 'text-white group-hover:text-cyan-300'}`}>
-                            {m.id}
-                          </div>
-                          <p className="text-[10px] text-zinc-400">{m.name}</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-mono text-zinc-500">{m.contextWindowTokens / 1000}K ctx</span>
-                        <ArrowRight className={`w-3.5 h-3.5 transition-all ${isSelected ? 'text-white translate-x-0.5' : 'text-zinc-600 group-hover:text-white group-hover:translate-x-0.5'}`} />
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Footer Shortcut Hints with Category Filter Cheatsheet */}
         <div className="px-4 py-2.5 border-t border-white/5 bg-black/50 flex items-center justify-between text-[11px] text-zinc-500 font-mono">
-          <span>Navigate: <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-zinc-300">↑</kbd> <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-zinc-300">↓</kbd> • Filters: <span className="text-zinc-400">&gt; Actions</span> <span className="text-zinc-400">@ Models</span> <span className="text-zinc-400"># Docs</span> <span className="text-zinc-400">$ Pricing</span></span>
+          <span>Navigate: <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-zinc-300">↑</kbd> <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-zinc-300">↓</kbd> • Filters: <span className="text-zinc-400">&gt; Actions</span> <span className="text-zinc-400">@ Developer</span> <span className="text-zinc-400"># Docs</span> <span className="text-zinc-400">$ Pricing</span></span>
           <span>Close: <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-zinc-300">esc</kbd></span>
         </div>
       </div>

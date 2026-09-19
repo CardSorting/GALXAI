@@ -2,7 +2,7 @@ import { ImageResponse } from 'next/og';
 
 export const runtime = 'edge';
 
-export const alt = 'GALXAI Documentation & Quickstart Center';
+export const alt = 'GALX Developer documentation — Build with GALX Nova.';
 export const size = {
   width: 1200,
   height: 630,
@@ -60,7 +60,7 @@ export default async function Image() {
               </svg>
             </div>
             <div style={{ fontSize: '28px', fontWeight: 900 }}>
-              GALX<span style={{ color: '#f59e0b' }}>AI</span> Docs
+              GALX<span style={{ color: '#f59e0b' }}> Nova</span> Docs
             </div>
           </div>
 
@@ -75,23 +75,23 @@ export default async function Image() {
               color: '#fbbf24',
             }}
           >
-            Zero-Refactor Quickstarts
+            Supported API guidance
           </div>
         </div>
 
         {/* Title */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '1000px' }}>
           <div style={{ fontSize: '50px', fontWeight: 900, lineHeight: 1.1, letterSpacing: '-1px' }}>
-            Developer Guides, Cookbooks &amp; No-Code Setup
+            Developer guides and API reference
           </div>
           <div style={{ fontSize: '22px', color: '#cbd5e1', lineHeight: 1.4 }}>
-            Integrate GALX Nova and Nova-image into Cursor, Python, TypeScript, Make.com, and AI Agent Swarms in seconds.
+            Build with supported GALX Nova reasoning and generation capabilities through the API.
           </div>
         </div>
 
         {/* Bottom Feature Badges */}
         <div style={{ display: 'flex', gap: '14px' }}>
-          {['30s Quickstart', 'Cursor IDE', 'Python & TypeScript SDKs', 'Plain English Guide', 'Agent Swarms'].map((item, i) => (
+          {['Quickstart', 'API reference', 'SDK guidance', 'Capability contracts', 'Secret hygiene'].map((item, i) => (
             <div
               key={i}
               style={{

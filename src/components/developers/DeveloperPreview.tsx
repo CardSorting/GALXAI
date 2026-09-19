@@ -42,6 +42,7 @@ function PreviewFlow({ user, isLoading }: Pick<ReturnType<typeof useAuth>, 'user
   const [errors, setErrors] = useState<ApplicationErrors>({});
   const [feedback, setFeedback] = useState('');
   const [busy, setBusy] = useState(false);
+  const [checkoutBusy, setCheckoutBusy] = useState(false);
   const [notice, setNotice] = useState('');
   const [conflict, setConflict] = useState(false);
   const [refresh, setRefresh] = useState(0);
@@ -49,11 +50,12 @@ function PreviewFlow({ user, isLoading }: Pick<ReturnType<typeof useAuth>, 'user
   const heading = useRef<HTMLHeadingElement>(null);
   const errorSummary = useRef<HTMLDivElement>(null);
   const mutation = useRef<AbortController | null>(null);
+  const checkoutMutation = useRef<AbortController | null>(null);
   const accountId = user?.id, token = user?.token;
   const focusHeading = () => setFocusVersion(value => value + 1);
   useEffect(() => { if (focusVersion) heading.current?.focus(); }, [focusVersion]);
   useEffect(() => { if (Object.keys(errors).length) errorSummary.current?.focus(); }, [errors]);
-  useEffect(() => () => mutation.current?.abort(), []);
+  useEffect(() => () => { mutation.current?.abort(); checkoutMutation.current?.abort(); }, []);
 
   function applySaved(data: { status: Status; application?: ApplicationDetails | null; expires_at?: string | null }) {
     setStatus(['not_requested', 'pending', 'approved', 'revoked', 'declined', 'expired', 'session_required'].includes(data.status) ? data.status : 'error');
@@ -108,71 +110,74 @@ function PreviewFlow({ user, isLoading }: Pick<ReturnType<typeof useAuth>, 'user
     finally { if (!controller.signal.aborted) { mutation.current = null; setBusy(false); } }
   }
 
-  async function purchaseDeveloperTier() {
-    if (mutation.current) return;
-    const controller = new AbortController(); mutation.current = controller; setBusy(true); setNotice('');
+  async function startDeveloperCheckout() {
+    if (!user || checkoutBusy || checkoutMutation.current) return;
+    const controller = new AbortController(); checkoutMutation.current = controller; setCheckoutBusy(true); setNotice('');
     try {
-      const requestId = crypto.randomUUID();
-      const response = await fetch('/api/stripe/checkout', {
+      const response = await fetch('/api/billing/plan', {
         method: 'POST', credentials: 'same-origin', signal: controller.signal,
         headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-        body: JSON.stringify({ amount: 10, requestId }),
+        body: JSON.stringify({ action: 'developer_checkout', requestId: crypto.randomUUID() }),
       });
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error || 'Could not start Developer Tier checkout.');
-      const target = new URL(result.url);
-      if (target.protocol !== 'https:' || target.hostname !== 'checkout.stripe.com') throw new Error('Could not open secure checkout.');
-      window.location.assign(target.href);
-    } catch (e: any) {
-      if (!controller.signal.aborted) setNotice(e?.message || 'Could not start Developer Tier checkout. Please try again.');
-    } finally {
-      if (!controller.signal.aborted) { mutation.current = null; setBusy(false); }
-    }
+      const data = await response.json().catch(() => null);
+      if (controller.signal.aborted) return;
+      if (response.status === 401) { setStatus('session_required'); setNotice('Sign in with a verified account to subscribe to Developer Access.'); return; }
+      if (!response.ok) { setNotice(data?.error || 'Developer checkout is temporarily unavailable. Please try again.'); return; }
+      const url = typeof data?.url === 'string' ? new URL(data.url) : null;
+      if (!url || url.protocol !== 'https:' || url.hostname !== 'checkout.stripe.com') {
+        setNotice('Checkout could not be opened. Please try again.'); return;
+      }
+      window.location.assign(url.toString());
+    } catch { if (!controller.signal.aborted) setNotice('Checkout could not be opened. Check your connection and try again.'); }
+    finally { if (!controller.signal.aborted) { checkoutMutation.current = null; setCheckoutBusy(false); } }
   }
 
   const fieldError = (key: keyof ApplicationInput) => errors[key] && <p id={`${fieldIds[key]}-error`} className={styles.fieldError}>{errors[key]}</p>;
   const describedBy = (key: keyof ApplicationInput, hint: string) => `${hint}${errors[key] ? ` ${fieldIds[key]}-error` : ''}`;
   const showForm = status === 'not_requested' || (status === 'pending' && editing);
-  return <section className={styles.panel} aria-label="Developer application" aria-busy={busy}>
-    {isLoading || status === 'loading' ? <p role="status">Checking your preview access…</p> : !user ? <>
-      <div className={styles.tierCard}>
-        <span className={styles.tierBadge}>Instant Access ⚡</span>
-        <h3 className={styles.tierTitle}>Developer Tier ($10 USD)</h3>
-        <p className={styles.tierDesc}>Instant API access for image generation and frontier OpenAI models. 100% pay-as-you-go micro-metered token pricing.</p>
-        <ul className={styles.tierFeatures}>
-          <li>Includes $10.00 usable Pay-As-You-Go compute balance (never expires)</li>
-          <li>Instant API Key minting & full access to OpenAI Frontier models and Images API</li>
-          <li>Standard Tier 1 developer throughput (60 RPM / 40k TPM) with safety spend caps</li>
-          <li>No waitlist application or review delay required</li>
-        </ul>
-        <div className={styles.actions}>
-          <Link className={styles.primary} href="/signup?next=/developers">Sign up to get instant Developer Tier <ArrowRight size={16} aria-hidden="true" /></Link>
-        </div>
-      </div>
-      <div className={styles.orDivider}>or apply for free preview</div>
-      <h2>Apply for the private preview</h2><p>Start with a verified GALX account. Then share a short introduction, a profile, and what you’d like to build.</p>
-      <p>We read each application and invite builders as space opens. Applying doesn’t grant API access.</p>
+  const subscriptionCard = !user ? <div className={styles.tierCard}>
+    <span className={styles.tierBadge}>Developer subscription</span>
+    <h3 className={styles.tierTitle}>GALX Nova Developer Access</h3>
+    <p className={styles.accessPrice}>$50/month</p>
+    <p className={styles.tierDesc}>Recurring subscription for API access only. Usage billed separately. No usage credits included.</p>
+    <ul className={styles.tierFeatures}>
+      <li>Programmable access to GALX Nova’s supported capabilities through the GALX API</li>
+      <li>GALX handles the underlying execution; your application owns the experience</li>
+    </ul>
+    <div className={styles.actions}>
+      <Link className={styles.primary} href="/signup?next=/developers">Sign up to subscribe <ArrowRight size={16} aria-hidden="true" /></Link>
+      <Link className={styles.textLink} href="/pricing/usage">View usage pricing and terms</Link>
+    </div>
+  </div> : <div className={styles.tierCard}>
+    <span className={styles.tierBadge}>Developer subscription</span>
+    <h3 className={styles.tierTitle}>GALX Nova Developer Access</h3>
+    <p className={styles.accessPrice}>$50/month</p>
+    <p className={styles.tierDesc}>Recurring subscription for API access only. Usage billed separately. No usage credits included.</p>
+    <ul className={styles.tierFeatures}>
+      <li>Programmable access to GALX Nova’s supported capabilities through the GALX API</li>
+      <li>GALX handles the underlying execution; your application owns the experience</li>
+    </ul>
+    <div className={styles.actions}>
+      <button className={styles.primary} type="button" disabled={checkoutBusy} onClick={() => void startDeveloperCheckout()}>
+        {checkoutBusy ? 'Opening secure checkout…' : 'Subscribe to Developer Access'} <ArrowRight size={16} aria-hidden="true" />
+      </button>
+      <Link className={styles.textLink} href="/pricing/usage">View usage pricing and terms</Link>
+    </div>
+  </div>;
+  return <section id="developer-access" className={styles.panel} aria-label="GALX Nova Developer Access" aria-busy={busy || checkoutBusy}>
+    {isLoading || status === 'loading' ? <p role="status">Checking your access request…</p> : !user ? <>
+      {subscriptionCard}
+      <div className={styles.orDivider}>or apply for a private preview</div>
+      <h2>Tell us what you’re building</h2><p>Start with a verified GALX account. Then share a short introduction, a profile, and what you’d like to build.</p>
+      <p>Applications are reviewed against supported capabilities and current availability. Applying doesn’t grant API access.</p>
       <div className={styles.actions}><Link className={styles.secondary} href="/signup?next=/developers">Sign up to apply <ArrowRight size={16} aria-hidden="true" /></Link><Link className={styles.textLink} href="/login?next=/developers">Already have an account? Sign in</Link></div>
     </> : status === 'session_required' ? <>
       <h2>Sign in to check your access</h2><p>Use your verified account to apply or view your current status. Your saved application will be waiting for you.</p><Link className={styles.primary} href="/login?next=/developers">Sign in again</Link>
     </> : status === 'error' ? <>
       <h2>We couldn’t check your access</h2><p role="alert">Please try again. Your saved application is unchanged.</p><button className={styles.primary} onClick={() => setRefresh(n => n + 1)}>Try again</button>
     </> : showForm ? <>
-      {!editing && <div className={styles.tierCard}>
-        <span className={styles.tierBadge}>Instant Access ⚡</span>
-        <h3 className={styles.tierTitle}>Get Instant Developer Tier ($10)</h3>
-        <p className={styles.tierDesc}>Skip the waitlist and unlock pay-as-you-go API access immediately for Images and Frontier models.</p>
-        <ul className={styles.tierFeatures}>
-          <li>Includes $10.00 usable Pay-As-You-Go compute balance</li>
-          <li>Instant API Key minting (`/keys`) and drop-in OpenAI compatible endpoints</li>
-          <li>Standard Tier 1 developer throughput with safety spend caps</li>
-          <li>Instant activation without manual review delay</li>
-        </ul>
-        <button className={styles.primary} disabled={busy} onClick={() => void purchaseDeveloperTier()}>
-          {busy ? 'Opening checkout…' : 'Purchase Developer Tier ($10)'} <ArrowRight size={16} aria-hidden="true" />
-        </button>
-      </div>}
-      {!editing && <div className={styles.orDivider}>or apply for free waitlist</div>}
+      {!editing && subscriptionCard}
+      {!editing && <div className={styles.orDivider}>or apply for a private preview</div>}
       <div className={styles.formHeading}><h2 ref={heading} tabIndex={-1}>{reviewing ? 'Review your application' : editing ? 'Update your application' : 'Tell us a little about yourself'}</h2><p>{reviewing ? 'Check your details before sharing them with the GALX team.' : 'A short introduction is enough. We’re interested in the builder and the project.'}</p></div>
       <p className={styles.account}>Applying as <strong>{user.email}</strong></p>
       {reviewing ? <>
@@ -196,23 +201,23 @@ function PreviewFlow({ user, isLoading }: Pick<ReturnType<typeof useAuth>, 'user
         <div className={styles.actions}><button className={styles.primary}>Review application <ArrowRight size={16} aria-hidden="true" /></button>{editing && <button className={styles.secondary} type="button" onClick={() => { setEditing(false); setErrors({}); setNotice(''); focusHeading(); }}>Cancel</button>}</div>
       </form>}
     </> : status === 'approved' ? <>
-      <h2 ref={heading} tabIndex={-1}>Your Developer Tier access is active</h2>{expiresAt && <p>Your access is available until {new Date(expiresAt).toLocaleString()}.</p>}<p>Your account is unlocked for pay-as-you-go API usage across GALX Nova and GALX Nova-image.</p>
-      <div className={styles.actions}><Link className={styles.primary} href="/keys">Manage API keys</Link><Link className={styles.textLink} href="/docs">Read the API docs</Link><Link className={styles.textLink} href="/playground">Open playground</Link></div>
-      <form className={styles.feedbackForm} onSubmit={e => { e.preventDefault(); void save('feedback'); }}><label htmlFor="preview-feedback">Share private feedback</label><p id="feedback-hint" className={styles.helper}>Tell us what happened and what you expected. Only the GALX team can read your feedback. Leave out credentials and sensitive data.</p><textarea id="preview-feedback" aria-describedby="feedback-hint" rows={5} minLength={10} maxLength={4000} required value={feedback} onChange={e => setFeedback(e.target.value)} /><button className={styles.primary} disabled={busy}>{busy ? 'Sending…' : 'Send private feedback'}</button></form>
-    </> : <>
-      {status === 'pending' && <Check className={styles.received} size={28} aria-hidden="true" />}
-      <div className={styles.tierCard}>
-        <span className={styles.tierBadge}>Skip the Waitlist ⚡</span>
-        <h3 className={styles.tierTitle}>Get Instant Developer Tier ($10)</h3>
-        <p className={styles.tierDesc}>Unlock pay-as-you-go API access immediately with a $10 usable balance for Images and frontier models with Tier 1 throughput without waiting for manual cohort review.</p>
-        <button className={styles.primary} disabled={busy} onClick={() => void purchaseDeveloperTier()}>
-          {busy ? 'Opening checkout…' : 'Purchase Developer Tier ($10)'} <ArrowRight size={16} aria-hidden="true" />
-        </button>
+      <Check className={styles.received} size={28} aria-hidden="true" />
+      <h2 ref={heading} tabIndex={-1}>Your GALX Nova Developer access is active</h2>
+      {expiresAt && <p>Your access is available until {new Date(expiresAt).toLocaleString()}.</p>}
+      <p>Your account has access to the supported GALX Nova capabilities covered by your approval.</p>
+      <div className={styles.actions}>
+        <Link className={styles.primary} href="/docs">Read the documentation <ArrowRight size={16} aria-hidden="true" /></Link>
+        <Link className={styles.secondary} href="/keys">Manage API keys</Link>
+        <Link className={styles.textLink} href="/billing/payment-methods">Manage subscription</Link>
       </div>
-      <div className={styles.orDivider}>current waitlist status</div>
-      <h2 ref={heading} tabIndex={-1}>{status === 'pending' ? 'You’re on the developer waitlist' : status === 'expired' ? 'Your preview access period has ended' : status === 'declined' ? 'Your request was reviewed' : 'Your developer access is paused'}</h2>
-      <p>{status === 'pending' ? 'Your application is saved. We review each project and open access as we make room for another small group. Check your status here; there’s no guaranteed invitation date.' : status === 'declined' ? 'We’re unable to open developer access for your project at this stage. Your application remains on file for future review. Images and Sites are still available.' : 'Developer API calls are unavailable for your account. Your original application is saved for review. Images and Sites are still available.'}</p>
-      {status === 'pending' && application && <><p className={styles.preference}>{cohortLabel(application.cohort_interest)}</p>{!application.introduction && <p>Help us get to know you: add an introduction, a profile, and your cohort preference to your existing application.</p>}<details className={styles.savedDetails}><summary>Your saved application</summary><ApplicationSummary value={application} /></details></>}
+    </> : <>
+      {subscriptionCard}
+      <div className={styles.orDivider}>or apply for a private preview</div>
+      {status === 'pending' && <Check className={styles.received} size={28} aria-hidden="true" />}
+      <div className={styles.orDivider}>current access request status</div>
+      <h2 ref={heading} tabIndex={-1}>{status === 'pending' ? 'Your request is under review' : status === 'expired' ? 'Your preview access period has ended' : status === 'declined' ? 'Your request was reviewed' : 'Your developer access is paused'}</h2>
+      <p>{status === 'pending' ? 'Your application is saved. We review each project against supported capabilities and current availability. Check your status here; there’s no guaranteed invitation date.' : status === 'declined' ? 'We’re unable to open developer access for your project at this stage. Your application remains on file for future review. GALX Images is still available.' : 'Developer API calls are unavailable for your account. Your original application is saved for review. GALX Images is still available.'}</p>
+      {status === 'pending' && application && <><p className={styles.preference}>{cohortLabel(application.cohort_interest)}</p>{!application.introduction && <p>Help us get to know you: add an introduction, a profile, and your project details to your existing application.</p>}<details className={styles.savedDetails}><summary>Your saved application</summary><ApplicationSummary value={application} /></details></>}
       <div className={styles.actions}>{status === 'pending' && application && <button className={styles.primary} onClick={startEditing}>{application.introduction ? 'Update application' : 'Complete application'}</button>}<button className={styles.secondary} onClick={() => { setNotice(''); setRefresh(n => n + 1); }}>Check access status</button></div>
     </>}
     <div role="status" aria-live="polite" className={notice ? styles.notice : styles.silent}>{notice}</div>

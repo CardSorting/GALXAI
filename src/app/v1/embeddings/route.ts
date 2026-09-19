@@ -1,7 +1,9 @@
-import { withDeveloperAccess } from '@/lib/security/developer-access';
+import { withDeveloperUsageAccess } from '@/lib/security/developer-access';
 import { NextRequest, NextResponse } from 'next/server';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 import { EmbeddingsRepository } from '@/lib/supabase/repositories/EmbeddingsRepository';
+import { GalxSeatTierEngine } from '@/core/subscription/GalxSeatTierEngine';
+import crypto from 'node:crypto';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -50,6 +52,14 @@ async function previewPOST(req: NextRequest) {
       };
     });
 
+    // Embeddings are one billable Developer API message per completed request;
+    // token counts below remain compatibility response fields, not pricing.
+    GalxSeatTierEngine.getInstance().recordSeatMessageUsage(
+      authResult.userId || 'anonymous_developer',
+      model,
+      `emb_req_${crypto.randomUUID()}`,
+    );
+
     return NextResponse.json({
       object: 'list',
       data,
@@ -74,4 +84,4 @@ async function previewPOST(req: NextRequest) {
   }
 }
 
-export const POST = withDeveloperAccess(previewPOST);
+export const POST = withDeveloperUsageAccess(previewPOST);

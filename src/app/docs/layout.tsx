@@ -31,20 +31,20 @@ export default function DocsLayout({ children }: { children: ReactNode }) {
               <ul className="space-y-2 text-xs">
                 <li>
                   <Link
-                    href="/playground"
+                    href="/developers"
                     className="flex items-center gap-2 text-zinc-300 transition-colors hover:text-indigo-300"
                   >
                     <Sparkles className="h-3.5 w-3.5 text-indigo-400" />
-                    <span>Inference Playground</span>
+                    <span>Developer access</span>
                   </Link>
                 </li>
                 <li>
                   <Link
-                    href="/models"
+                    href="/docs"
                     className="flex items-center gap-2 text-zinc-300 transition-colors hover:text-indigo-300"
                   >
                     <Terminal className="h-3.5 w-3.5 text-cyan-400" />
-                    <span>GALX Nova Catalog</span>
+                    <span>Supported capabilities</span>
                   </Link>
                 </li>
                 <li>
@@ -62,7 +62,7 @@ export default function DocsLayout({ children }: { children: ReactNode }) {
                     className="flex items-center gap-2 text-zinc-300 transition-colors hover:text-indigo-300"
                   >
                     <Activity className="h-3.5 w-3.5 text-amber-400" />
-                    <span>Distributed Edge Health</span>
+                    <span>Service status</span>
                   </Link>
                 </li>
               </ul>
@@ -71,10 +71,10 @@ export default function DocsLayout({ children }: { children: ReactNode }) {
             <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-4 shadow-sm">
               <div className="flex items-center gap-2 text-xs font-semibold text-zinc-300 mb-2">
                 <ShieldCheck className="h-4 w-4 text-emerald-400" />
-                <span>Zero Data Retention</span>
+                <span>Credential guidance</span>
               </div>
               <p className="text-[11px] leading-relaxed text-zinc-400">
-                Prompts and tokens are never stored to disk or trained upon.
+                Keep API keys server-side and review the current access and data terms before integrating.
               </p>
             </div>
 

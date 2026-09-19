@@ -5,6 +5,7 @@
 
 import { GalxEdgeGateway, type CloudflareEnv } from './GalxEdgeGateway';
 import { GalxEdgeQueueWorker } from './GalxEdgeQueueWorker';
+import { GalxMessageBillingWorker } from './GalxMessageBillingWorker';
 import { GalxSwarmCoordinatorDO } from './GalxSwarmCoordinatorDO';
 
 export interface CloudflareExecutionContext {
@@ -34,6 +35,10 @@ export default {
    */
   async scheduled(event: CloudflareScheduledEvent, env: CloudflareEnv, ctx: CloudflareExecutionContext): Promise<void> {
     const worker = new GalxEdgeQueueWorker(env);
-    ctx.waitUntil(worker.processBatch('default', 25));
+    const messageBilling = new GalxMessageBillingWorker(env);
+    ctx.waitUntil(Promise.all([
+      worker.processBatch('default', 25),
+      messageBilling.processBatch(25),
+    ]).then(() => undefined));
   }
 };

@@ -12,6 +12,7 @@ import { billingReturnDestination } from '@/lib/billing/navigation';
 interface BillingState {
   accountId: string; token?: string; email: string;
   data: BillingData | null; loading: boolean; loadingMore: boolean; error: string;
+  usage: UsageSummary | null; usageLoading: boolean; usageError: string;
   filter: string; setFilter: (value: string) => void; loadedFilter: string;
   load: (cursor?: string) => Promise<void>;
   creditAmount: string; setCreditAmount: (value: string) => void;
@@ -19,6 +20,11 @@ interface BillingState {
   checkoutSearch?: string;
   planSearch?: string;
   paymentBusy: boolean; paymentError: string; openPayments: () => Promise<void>;
+}
+export interface UsageSummary {
+  unit: 'message'; rateUsd: number; monthlyCapUsd: number;
+  currentPeriod: { start: string | null; end: string | null; resetAt: string | null; completedMessages: number; pendingMessages: number; capMessages: number; accruedUsd: number; pendingUsd: number; remainingUsd: number; percentUsed: number };
+  notifications: Array<{ id?: string; thresholdPercent: number; title: string; body: string; createdAt: string | null; readAt: string | null }>;
 }
 const Context = createContext<BillingState | null>(null);
 export function useBilling() {
@@ -41,6 +47,7 @@ function AccountBilling({ children, accountId, token, email }: { children: React
   const pathname = usePathname();
   const needsWallet = pathname !== BILLING_PATHS.plan;
   const [data, setData] = useState<BillingData | null>(null);
+  const [usage, setUsage] = useState<UsageSummary | null>(null), [usageLoading, setUsageLoading] = useState(true), [usageError, setUsageError] = useState('');
   const [loading, setLoading] = useState(true), [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState(''), [filter, setFilter] = useState('all'), [loadedFilter, setLoadedFilter] = useState('all');
   const [creditAmount, setCreditAmount] = useState('25'), [paymentPending, setPaymentPending] = useState(false);
@@ -82,6 +89,17 @@ function AccountBilling({ children, accountId, token, email }: { children: React
     if (pathname === BILLING_PATHS.credits && destination?.startsWith('/billing/credits?')) setCheckoutSearch(destination.slice(BILLING_PATHS.credits.length));
     if (pathname === BILLING_PATHS.plan && destination?.startsWith('/billing/plan?')) setPlanSearch(destination.slice(BILLING_PATHS.plan.length));
   }, [pathname]);
+  useEffect(() => {
+    let active = true;
+    const controller = new AbortController();
+    setUsageLoading(true); setUsageError('');
+    void fetch('/api/billing/usage', { credentials: 'same-origin', cache: 'no-store', signal: AbortSignal.any([controller.signal, AbortSignal.timeout(15000)]), headers: token ? { Authorization: `Bearer ${token}` } : {} })
+      .then(async response => { const result = await response.json(); if (!response.ok) throw new Error(); return result as UsageSummary; })
+      .then(result => { if (active) setUsage(result); })
+      .catch(() => { if (active && !controller.signal.aborted) setUsageError('Usage details are temporarily unavailable.'); })
+      .finally(() => { if (active) setUsageLoading(false); });
+    return () => { active = false; controller.abort(); };
+  }, [token]);
 
   const openPayments = async () => {
     if (paymentInFlight.current) return;
@@ -97,5 +115,5 @@ function AccountBilling({ children, accountId, token, email }: { children: React
     } catch (e) { if (active.current && !controller.signal.aborted) setPaymentError((e as Error).name === 'TimeoutError' ? 'Opening payment settings took too long. Please try again.' : (e as Error).message); }
     finally { paymentInFlight.current = false; if (active.current) setPaymentBusy(false); }
   };
-  return <Context.Provider value={{ accountId, token, email, data, loading, loadingMore, error, filter, setFilter, loadedFilter, load, creditAmount, setCreditAmount, paymentPending, setPaymentPending, checkoutSearch, planSearch, paymentBusy, paymentError, openPayments }}>{children}</Context.Provider>;
+  return <Context.Provider value={{ accountId, token, email, data, loading, loadingMore, error, usage, usageLoading, usageError, filter, setFilter, loadedFilter, load, creditAmount, setCreditAmount, paymentPending, setPaymentPending, checkoutSearch, planSearch, paymentBusy, paymentError, openPayments }}>{children}</Context.Provider>;
 }

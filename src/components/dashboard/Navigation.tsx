@@ -117,32 +117,29 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
   const isImageActive = pathname === '/images' || pathname.startsWith('/images/');
   const isExploreActive = pathname === '/explore' || pathname.startsWith('/explore/');
   const isPricingActive = pathname === '/pricing' || pathname.startsWith('/pricing/');
+  const isDeveloperActive = pathname === '/developers' || pathname.startsWith('/developers/');
 
   return (
     <>
       <header ref={navRef} className={styles.header}>
         <div className={styles.glowLine} />
         <div className={styles.inner}>
-          {/* Brand Logo & Version Tag */}
+          {/* Brand Logo */}
           <div className={styles.brandWrapper}>
             <Link href="/" aria-label="GALX home" className={styles.brand}>
               <GalxGalaxyLogo size={28} textClassName="text-xl font-bold tracking-tight text-white" />
             </Link>
-            <span className={styles.versionBadge}>
-              <Sparkles size={11} className="text-indigo-400" />
-              <span>v1.2</span>
-            </span>
           </div>
 
-          {/* Desktop Navigation Links: Exactly 3 minimalist links (Image, Explore, Pricing) */}
+          {/* Desktop Navigation Links */}
           <nav aria-label="Main navigation" className={styles.desktopNav}>
             <Link
               href="/images"
               className={styles.navLink}
               aria-current={isImageActive ? 'page' : undefined}
             >
-              <span>Image</span>
-              <NavigationFeedback label="Image" />
+              <span>Images</span>
+              <NavigationFeedback label="Images" />
             </Link>
 
             <Link
@@ -162,6 +159,15 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
               <span>Pricing</span>
               <NavigationFeedback label="Pricing" />
             </Link>
+
+            <Link
+              href="/developers"
+              className={styles.navLink}
+              aria-current={isDeveloperActive ? 'page' : undefined}
+            >
+              <span>Developer</span>
+              <NavigationFeedback label="Developer" />
+            </Link>
           </nav>
 
           {/* Quick Search Trigger Pill (⌘K) */}
@@ -169,7 +175,7 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
             type="button"
             className={styles.searchTrigger}
             onClick={() => setIsCommandOpen(true)}
-            aria-label="Search navigation, models, and docs"
+            aria-label="Search navigation, creations, and docs"
           >
             <Search size={14} className="text-zinc-400" />
             <span>Search or jump to...</span>
@@ -294,9 +300,9 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
                 <Link href={authEntryPath(returnTo)} className={styles.signIn}>
                   Sign in
                 </Link>
-                <Link href="/developers/pricing" className={styles.ctaDeveloper}>
+                <Link href="/developers" className={styles.ctaDeveloper}>
                   <Sparkles size={13} />
-                  <span>Developer Tier</span>
+                  <span>Developer</span>
                 </Link>
               </div>
             )}
@@ -370,7 +376,7 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
                     onClick={() => setIsMobileOpen(false)}
                   >
                     <Sparkles size={18} className="text-sky-400" />
-                    <span>Image</span>
+                    <span>Images</span>
                   </Link>
                   <Link
                     href="/explore"
@@ -389,6 +395,15 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
                   >
                     <CreditCard size={18} className="text-emerald-400" />
                     <span>Pricing</span>
+                  </Link>
+                  <Link
+                    href="/developers"
+                    className={styles.drawerLink}
+                    aria-current={isDeveloperActive ? 'page' : undefined}
+                    onClick={() => setIsMobileOpen(false)}
+                  >
+                    <Sparkles size={18} className="text-purple-400" />
+                    <span>Developer</span>
                   </Link>
                 </div>
               </div>
@@ -420,12 +435,12 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
               ) : (
                 <div className="flex flex-col gap-2">
                   <Link
-                    href="/developers/pricing"
+                    href="/developers"
                     className="flex items-center justify-center gap-2 p-3 rounded-xl bg-gradient-to-r from-indigo-600 to-sky-600 text-white font-semibold text-sm shadow-lg"
                     onClick={() => setIsMobileOpen(false)}
                   >
                     <Sparkles size={15} />
-                    <span>Get Developer Tier ($10)</span>
+                    <span>Explore Developer</span>
                   </Link>
                   <Link
                     href={authEntryPath(returnTo)}

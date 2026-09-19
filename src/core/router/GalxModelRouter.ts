@@ -37,6 +37,8 @@ export interface RouteChatOptions {
   requestId: string;
   isPriorityUser?: boolean;
   headers?: Headers | Record<string, string | null | undefined>;
+  /** Public Developer API usage is counted as completed messages, never tokens. */
+  usageBillingBasis?: 'message' | 'legacy_token';
 }
 
 export interface RouteImageOptions {
@@ -46,6 +48,8 @@ export interface RouteImageOptions {
   isPriorityUser?: boolean;
   headers?: Headers | Record<string, string | null | undefined>;
   signal?: AbortSignal;
+  /** Public Developer API usage is counted as completed messages, never tokens. */
+  usageBillingBasis?: 'message' | 'legacy_token';
 }
 
 /**
@@ -232,7 +236,28 @@ export class GalxModelRouter {
   /**
    * Routes OpenAI chat completion across pooled quota shards with HIPAA/ZDR/GDPR compliance.
    */
-  async routeChatCompletion(options: RouteChatOptions): Promise<{
+  async routeChatCompletion(options: RouteChatOptions) {
+    const shouldReserve = options.usageBillingBasis === 'message' && options.userId && options.userId !== 'anonymous_developer';
+    if (!shouldReserve) return this.routeChatCompletionInternal(options);
+
+    const seatEngine = GalxSeatTierEngine.getInstance();
+    const reservation = await seatEngine.reserveNovaMessage(options.userId, options.requestId);
+    if (!reservation.allowed) {
+      const error = new Error(String(reservation.code || 'NOVA_MESSAGE_MONTHLY_CAP_EXCEEDED'));
+      (error as Error & { status?: number; code?: string }).status = 429;
+      (error as Error & { status?: number; code?: string }).code = String(reservation.code || 'nova_message_monthly_cap_exceeded');
+      throw error;
+    }
+
+    try {
+      return await this.routeChatCompletionInternal(options);
+    } catch (error) {
+      await seatEngine.releaseNovaMessage(options.userId, options.requestId).catch(() => undefined);
+      throw error;
+    }
+  }
+
+  private async routeChatCompletionInternal(options: RouteChatOptions): Promise<{
     body: ReadableStream<Uint8Array> | string;
     isStream: boolean;
     headers: Headers;
@@ -260,9 +285,13 @@ export class GalxModelRouter {
       const response=await isolatedChat({...options.request,model:modelSpec.upstreamId||modelSpec.id},userId,this.extractHeaderValue(incomingHeaders,'idempotency-key')||requestId,usage=>{
         if(!usage||!['prompt_tokens','completion_tokens','total_tokens'].every(k=>Number.isSafeInteger(usage[k])&&usage[k]>=0))return;
         const cost=TokenCostCalculator.calculateCost(modelSpec,{promptTokens:usage.prompt_tokens,completionTokens:usage.completion_tokens,cachedTokens:0});
-        GalxEdgeBatchBuffer.getInstance().enqueueTokenDraw({userId,costUsd:cost.totalCostUsd,description:`API Chat: ${modelSpec.name}`,model:modelSpec.id,promptTokens:usage.prompt_tokens,completionTokens:usage.completion_tokens,cachedTokens:0,metadata:{requestId,latencyMs:Date.now()-started}});
-        void GalxSeatTierEngine.getInstance().recordSeatTokenDraw(userId,cost.totalCostUsd).catch(()=>{});
-        GalxSeatTierEngine.getInstance().recordSeatUsage(userId,modelSpec.id,usage.total_tokens,requestId);
+        if (options.usageBillingBasis === 'message') {
+          GalxSeatTierEngine.getInstance().recordSeatMessageUsage(userId, modelSpec.id, requestId);
+        } else {
+          GalxEdgeBatchBuffer.getInstance().enqueueTokenDraw({userId,costUsd:cost.totalCostUsd,description:`API Chat: ${modelSpec.name}`,model:modelSpec.id,promptTokens:usage.prompt_tokens,completionTokens:usage.completion_tokens,cachedTokens:0,metadata:{requestId,latencyMs:Date.now()-started}});
+          void GalxSeatTierEngine.getInstance().recordSeatTokenDraw(userId,cost.totalCostUsd).catch(()=>{});
+          GalxSeatTierEngine.getInstance().recordSeatUsage(userId,modelSpec.id,usage.total_tokens,requestId);
+        }
       });
       return {body:options.request.stream?response.body!:await response.text(),isStream:options.request.stream===true,headers:new Headers({'Content-Type':options.request.stream?'text/event-stream':'application/json','Cache-Control':'no-store'}),statusCode:200,shardId:'',modelUsed:modelSpec.id,provider};
     }
@@ -525,7 +554,8 @@ export class GalxModelRouter {
             decrypted,
             userId,
             requestId,
-            approxPromptTokens
+            approxPromptTokens,
+            options.usageBillingBasis
           );
 
           return {
@@ -566,6 +596,9 @@ export class GalxModelRouter {
 
         // Enqueue micro-metered token draw to Cloudflare buffer & Supabase ledger
         try {
+          if (options.usageBillingBasis === 'message') {
+            GalxSeatTierEngine.getInstance().recordSeatMessageUsage(userId, modelSpec.id, requestId);
+          } else {
           GalxEdgeBatchBuffer.getInstance().enqueueTokenDraw({
             userId,
             costUsd: costBreakdown.totalCostUsd,
@@ -587,6 +620,7 @@ export class GalxModelRouter {
           });
           GalxSeatTierEngine.getInstance().recordSeatTokenDraw(userId, costBreakdown.totalCostUsd).catch(() => {});
           GalxSeatTierEngine.getInstance().recordSeatUsage(userId, modelSpec.id, tokensUsed, requestId);
+          }
         } catch {}
 
         // Non-streaming ZDR proof calculation
@@ -691,7 +725,8 @@ export class GalxModelRouter {
     decryptedSecrets?: DecryptedGalxSecret,
     userId?: string,
     requestId?: string,
-    approxPromptTokens: number = 100
+    approxPromptTokens: number = 100,
+    usageBillingBasis: 'message' | 'legacy_token' = 'legacy_token'
   ): ReadableStream<Uint8Array> {
     let estimatedTokens = 0;
     const decoder = new TextDecoder();
@@ -753,8 +788,11 @@ export class GalxModelRouter {
       // Micro-metered stream token draw calculation
       if (success && userId) {
         try {
-          const completionTokens = Math.max(1, estimatedTokens);
           const modelSpec = ModelCatalog.resolveModel(modelId);
+          if (usageBillingBasis === 'message') {
+            GalxSeatTierEngine.getInstance().recordSeatMessageUsage(userId, modelSpec.id, requestId);
+          } else {
+          const completionTokens = Math.max(1, estimatedTokens);
           const costBreakdown = TokenCostCalculator.calculateCost(modelSpec, {
             promptTokens: approxPromptTokens,
             completionTokens,
@@ -786,7 +824,10 @@ export class GalxModelRouter {
             approxPromptTokens + completionTokens,
             requestId
           );
+          }
         } catch {}
+      } else if (usageBillingBasis === 'message' && userId && requestId) {
+        await GalxSeatTierEngine.getInstance().releaseNovaMessage(userId, requestId).catch(() => undefined);
       }
 
       await routerPool.releaseLeaseAuthoritatively(
@@ -902,7 +943,26 @@ export class GalxModelRouter {
   /**
    * Dispatches visual synthesis request with HIPAA/ZDR/GDPR compliance and ephemeral zeroization.
    */
-  async routeImageGeneration(options: RouteImageOptions): Promise<ImageGenerationResponse> {
+  async routeImageGeneration(options: RouteImageOptions) {
+    const shouldReserve = options.usageBillingBasis === 'message' && options.userId && options.userId !== 'anonymous_developer';
+    if (!shouldReserve) return this.routeImageGenerationInternal(options);
+    const seatEngine = GalxSeatTierEngine.getInstance();
+    const reservation = await seatEngine.reserveNovaMessage(options.userId, options.requestId);
+    if (!reservation.allowed) {
+      const error = new Error(String(reservation.code || 'NOVA_MESSAGE_MONTHLY_CAP_EXCEEDED'));
+      (error as Error & { status?: number; code?: string }).status = 429;
+      (error as Error & { status?: number; code?: string }).code = String(reservation.code || 'nova_message_monthly_cap_exceeded');
+      throw error;
+    }
+    try {
+      return await this.routeImageGenerationInternal(options);
+    } catch (error) {
+      await seatEngine.releaseNovaMessage(options.userId, options.requestId).catch(() => undefined);
+      throw error;
+    }
+  }
+
+  private async routeImageGenerationInternal(options: RouteImageOptions): Promise<ImageGenerationResponse> {
     if(!isolatedImagesEnabled())await this.substrate.ensureFreshFromAuthority();
     const { userId, requestId, isPriorityUser, headers: incomingHeaders, signal } = options;
     const modelSpec = ModelCatalog.resolveModel(options.request.model || 'openai-gpt-image-latest');
@@ -916,9 +976,13 @@ export class GalxModelRouter {
       if((provider!=='openai'&&provider!=='galx')||privacyPolicy.profile!=='standard'||privacyPolicy.hipaaEnabled||privacyPolicy.zdrEnabled||privacyPolicy.gdprEnabled||privacyPolicy.dataResidency!=='global'||privacyPolicy.piiMasking||privacyPolicy.deidentifyPhi)throw new RelayDispatchError('unsupported_policy');
       const result: ImageGenerationResponse={...await isolatedImage({...options.request,model:modelSpec.upstreamId||modelSpec.id},userId,options.request.idempotencyKey||requestId,signal),modelUsed:modelSpec.id};
       const cost=TokenCostCalculator.calculateCost(modelSpec,{promptTokens:1000,imagesCount:1,quality:options.request.quality});
-      GalxEdgeBatchBuffer.getInstance().enqueueTokenDraw({userId,costUsd:cost.totalCostUsd,description:`Visual Synthesis: ${modelSpec.name}`,model:modelSpec.id,promptTokens:1000,completionTokens:0,cachedTokens:0,metadata:{requestId,imagesCount:1}});
-      void GalxSeatTierEngine.getInstance().recordSeatTokenDraw(userId,cost.totalCostUsd).catch(()=>{});
-      GalxSeatTierEngine.getInstance().recordSeatUsage(userId,modelSpec.id,1000,requestId);
+      if (options.usageBillingBasis === 'message') {
+        GalxSeatTierEngine.getInstance().recordSeatMessageUsage(userId, modelSpec.id, requestId);
+      } else {
+        GalxEdgeBatchBuffer.getInstance().enqueueTokenDraw({userId,costUsd:cost.totalCostUsd,description:`Visual Synthesis: ${modelSpec.name}`,model:modelSpec.id,promptTokens:1000,completionTokens:0,cachedTokens:0,metadata:{requestId,imagesCount:1}});
+        void GalxSeatTierEngine.getInstance().recordSeatTokenDraw(userId,cost.totalCostUsd).catch(()=>{});
+        GalxSeatTierEngine.getInstance().recordSeatUsage(userId,modelSpec.id,1000,requestId);
+      }
       await this.persistImageGeneration(result, options.request, userId, requestId, modelSpec.id, incomingHeaders);
       return {...result,modelUsed:modelSpec.id,shardId:''};
     }
@@ -1008,7 +1072,7 @@ export class GalxModelRouter {
         decrypted.refreshToken &&
         decrypted.expiresAtMs &&
         Date.now() >= decrypted.expiresAtMs - 120_000
-      ) {
+        ) {
         try {
           const authEngine = GalxAuthEngine.getInstance();
           const refreshed = await authEngine.refreshProviderShardTokens(lease.shardId);
@@ -1081,6 +1145,9 @@ export class GalxModelRouter {
       // Micro-metered image draw
       if (userId) {
         try {
+          if (options.usageBillingBasis === 'message') {
+            GalxSeatTierEngine.getInstance().recordSeatMessageUsage(userId, modelSpec.id, requestId);
+          } else {
           GalxEdgeBatchBuffer.getInstance().enqueueTokenDraw({
             userId,
             costUsd: costBreakdown.totalCostUsd,
@@ -1100,7 +1167,10 @@ export class GalxModelRouter {
           });
           GalxSeatTierEngine.getInstance().recordSeatTokenDraw(userId, costBreakdown.totalCostUsd).catch(() => {});
           GalxSeatTierEngine.getInstance().recordSeatUsage(userId, modelSpec.id, 1000, requestId);
+          }
         } catch {}
+      } else if (options.usageBillingBasis === 'message' && userId && requestId) {
+        await GalxSeatTierEngine.getInstance().releaseNovaMessage(userId, requestId).catch(() => undefined);
       }
 
       await this.pool.releaseLeaseAuthoritatively(lease.leaseId, {

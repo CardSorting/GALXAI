@@ -6,13 +6,47 @@ Images and Sites are available without developer-preview approval, but their acc
 The [workspace authentication runbook](workspace-auth.md) owns sign-in methods, safe return destinations, 401 expiry recovery and outage handling.
 The authored Pricing, FAQ, knowledge-base and eight guide routes are public reading pages. `src/lib/public-content/routes.ts` lists each exact path; it does not expose `/docs`, private guide prefixes, account data or arbitrary descendants. Their static page chunks follow the existing exact-path public-page rule.
 The exact `/api/billing/generation-quota` endpoint supports the Images/Sites account experience and is exempt from developer approval. Its own verified-account guard and private/no-store DTO remain mandatory; the exemption grants no sibling or deeper API paths. A quota read must reach that guard for both anonymous and signed-in callers, so negative HTTP checks verify the account-error body as well as the 401 status.
-Other API routes and developer pages require an individually approved account or an active Developer Tier purchase. Signup, account metadata, and a pending request without approval or purchase do not grant API access. The $10 Developer Tier activates instant API approval upon Stripe payment fulfillment, unlocking API keys and pay-as-you-go API access for image generation and frontier OpenAI models without waiting for manual cohort review.
+Other API routes and developer pages require an active GALX Nova Developer
+Access subscription or an individually approved private-preview account.
+Signup, account metadata, a pending request and historical purchases do not
+grant API access. Developer Access is a `$50/month` recurring access fee; it
+includes zero usage credits, and API usage is economically separate. A
+successful active subscription grants only the supported Developer/API
+entitlement.
+
+The public usage-pricing status is `published`. The consumption unit is one
+message per completed Developer API request at $0.02/message with a default $25
+monthly usage cap; GALX does not sell Developer API usage by token. Consumption
+routes must reserve a message before dispatch, commit only after completion, and
+release the reservation on failure or client abort. They must not apply the
+retired free-grant path or create a prepaid balance. The consumer Image Studio
+image-generation path remains governed by the existing GALX Pro/account access
+contract and is not part of Developer usage pricing.
 
 ## Rollout
 
-Apply `20260912215724_developer_private_preview.sql` followed by `20260912222003_preview_admin_workspace.sql` before deploying the application and API gateway Worker. The [admin workspace guide](preview-admin.md) covers first-owner setup and daily review. It creates two private tables, denies all browser database roles access, and grants no accounts automatically. If approval storage is unavailable, private operations fail closed. Images and Sites do not query approval storage. The API hostname checks approval through the application's authenticated `/api/developer-access/check` contract on every private request; deploy both entry points to close legacy access.
+Apply `20260912215724_developer_private_preview.sql`,
+`20260912222003_preview_admin_workspace.sql`, and the additive
+`20260918212835_nova_developer_subscription_entitlement.sql` before deploying
+the application and API gateway Worker. The [admin workspace guide](preview-admin.md)
+covers first-owner setup and daily review. The entitlement migration adds the
+private plan discriminator and checkout return path needed for the Nova
+subscription; it creates no usage balance and grants no historical purchase
+access. All private tables deny browser database roles. If approval or billing
+authority is unavailable, private operations fail closed. Images and Sites do
+not query Developer approval storage. The API hostname checks the application's
+authenticated `/api/developer-access/check` contract on every private request;
+deploy both entry points to close legacy access.
 
-Use `/developers` to purchase the $10 Developer Tier for instant access, or sign up and apply for the free preview cohort by sharing a project description and expected traffic. Requests are idempotent per verified account. The page explains that free cohort applications are reviewed individually without a promised date, while Developer Tier purchases activate immediately upon fulfillment. Approval is checked on every new private API request, including requests made with older API keys. Already-running work is not cancelled by revocation.
+Use `/developers` to start the `$50/month` GALX Nova Developer Access
+subscription, or sign up and apply for the separate private preview cohort by
+sharing a project description and expected traffic. Subscription checkout is
+idempotent per verified account and uses the existing subscription lifecycle;
+successful active subscription events grant API admission, while cancellation
+or expiration removes it. The subscription creates no usage credits. Preview
+applications remain individually reviewed without a promised date. Approval is
+checked on every new private API request, including requests made with older
+API keys. Already-running work is not cancelled by revocation.
 
 ## Operator workflow (private)
 

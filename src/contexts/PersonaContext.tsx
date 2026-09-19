@@ -40,14 +40,14 @@ export const PERSONA_CONFIGS: Record<UserPersona, PersonaDetails> = {
     title: 'Developer & Cursor User',
     shortLabel: 'Developer',
     tagline: 'Developer private preview',
-    description: 'Request access to build with the GALX developer API.',
+    description: 'Subscribe to build with the GALX Nova developer API.',
     badge: 'Cursor / SDKs',
     icon: Terminal,
     color: 'text-cyan-400',
     bgColor: 'bg-cyan-500/10',
     borderColor: 'border-cyan-500/30',
     primaryDocLink: '/developers',
-    primaryActionLabel: 'Request developer access',
+    primaryActionLabel: 'Subscribe to Developer Access',
   },
   agent_builder: {
     id: 'agent_builder',
@@ -61,7 +61,7 @@ export const PERSONA_CONFIGS: Record<UserPersona, PersonaDetails> = {
     bgColor: 'bg-indigo-500/10',
     borderColor: 'border-indigo-500/30',
     primaryDocLink: '/developers',
-    primaryActionLabel: 'Request developer access',
+    primaryActionLabel: 'Subscribe to Developer Access',
   },
 };
 

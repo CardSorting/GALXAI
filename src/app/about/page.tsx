@@ -1,157 +1,113 @@
-import React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { ArrowRight, Code2, Cpu, Images, Sparkles } from 'lucide-react';
 import { Navigation } from '@/components/dashboard/Navigation';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 import { constructMetadata } from '@/lib/seo/metadata';
 import { JsonLd, createBreadcrumbSchema } from '@/lib/seo/jsonld';
-import { Shield, Zap, Globe, Cpu, Award, ArrowRight, Layers, Lock, Users } from 'lucide-react';
 import { SITE_CONFIG } from '@/lib/seo/siteConfig';
 
 export const metadata: Metadata = constructMetadata({
-  title: 'About GALXAI — Universal AI Router & Wholesale Compute Substrate',
-  description: 'Learn about GALXAI’s mission to democratize frontier AI compute with wholesale clearinghouse pricing, sub-15ms edge routing, 75% prompt caching, and zero data retention.',
+  title: 'About GALX — Managed intelligence for creation',
+  description: 'GALX is where people create. GALX Nova is our managed intelligence layer for reasoning and generation, with a separate Developer path for API access.',
   canonicalPath: '/about',
-  keywords: [
-    'About GALXAI',
-    'AI Model Router Mission',
-    'Wholesale AI Compute',
-    'Zero Data Retention Infrastructure',
-    'OpenAI Compatible Gateway',
-    'AI Systems Architecture Group',
-  ],
+  keywords: ['About GALX', 'GALX Nova', 'managed intelligence', 'AI image creation', 'Developer API access'],
 });
 
-export default function AboutPage() {
-  const breadcrumbs = [
-    { label: 'Home', href: '/' },
-    { label: 'About', href: '/about' },
-  ];
+const hierarchy = [
+  {
+    icon: Images,
+    name: 'GALX',
+    description: 'The platform people visit and create in.',
+  },
+  {
+    icon: Cpu,
+    name: 'GALX Nova',
+    description: 'Our managed intelligence service for reasoning and generation.',
+  },
+  {
+    icon: Code2,
+    name: 'Developer',
+    description: 'The separate route to API information and access.',
+  },
+];
 
+export default function AboutPage() {
   return (
     <div className="min-h-screen bg-[#07090e] text-foreground flex flex-col font-sans selection:bg-indigo-500 selection:text-white">
       <JsonLd
-        data={[
-          createBreadcrumbSchema([
-            { name: 'Home', url: SITE_CONFIG.url },
-            { name: 'About', url: `${SITE_CONFIG.url}/about` },
-          ]),
-        ]}
+        data={createBreadcrumbSchema([
+          { name: 'Home', url: SITE_CONFIG.url },
+          { name: 'About', url: `${SITE_CONFIG.url}/about` },
+        ])}
       />
       <Navigation />
 
       <main id="main-content" className="flex-1 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16 w-full space-y-16">
-        <Breadcrumbs items={breadcrumbs} />
+        <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'About', href: '/about' }]} />
 
-        {/* Hero Header */}
         <header className="space-y-5 border-b border-white/10 pb-10">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-mono font-bold">
-            <Cpu className="w-3.5 h-3.5 text-cyan-400" />
-            <span>MISSION &amp; ARCHITECTURAL PRINCIPLES</span>
+            <Sparkles className="w-3.5 h-3.5" aria-hidden="true" />
+            <span>GALX</span>
           </div>
           <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-tight">
-            Building the Universal Substrate for Autonomous AI Systems
+            Create first.<br />Intelligence, handled.
           </h1>
           <p className="text-base sm:text-lg text-zinc-400 max-w-3xl leading-relaxed">
-            GALXAI was founded on a simple thesis: developers building next-generation agent swarms, coding engines, and multimodal applications should never be held back by retail markups, regional downtime, or artificial rate limit bottlenecks.
+            GALX is where people create. Bring an idea, make an image, and explore what others are making. Behind the experience is GALX Nova, our managed intelligence layer for reasoning and generation.
           </p>
         </header>
 
-        {/* Key Metrics / Value Propositions */}
-        <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="p-6 rounded-2xl bg-zinc-900/40 border border-white/10 text-center space-y-1">
-            <div className="text-3xl sm:text-4xl font-black text-cyan-400 font-mono">25%–40%</div>
-            <div className="text-xs text-zinc-400 font-semibold">Wholesale Savings</div>
-          </div>
-          <div className="p-6 rounded-2xl bg-zinc-900/40 border border-white/10 text-center space-y-1">
-            <div className="text-3xl sm:text-4xl font-black text-emerald-400 font-mono">&lt;15ms</div>
-            <div className="text-xs text-zinc-400 font-semibold">Distributed Edge TTFT</div>
-          </div>
-          <div className="p-6 rounded-2xl bg-zinc-900/40 border border-white/10 text-center space-y-1">
-            <div className="text-3xl sm:text-4xl font-black text-amber-400 font-mono">75%</div>
-            <div className="text-xs text-zinc-400 font-semibold">Prompt Cache Rebate</div>
-          </div>
-          <div className="p-6 rounded-2xl bg-zinc-900/40 border border-white/10 text-center space-y-1">
-            <div className="text-3xl sm:text-4xl font-black text-sky-400 font-mono">99.99%</div>
-            <div className="text-xs text-zinc-400 font-semibold">Active-Active Uptime</div>
-          </div>
-        </section>
-
-        {/* The 3 Core Pillars */}
-        <section className="space-y-8">
+        <section className="space-y-6" aria-labelledby="definition-heading">
           <div className="space-y-2">
-            <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">Our Core Engineering Pillars</h2>
-            <p className="text-sm text-zinc-400">Deterministic design choices that set GALXAI apart from traditional API proxies.</p>
+            <h2 id="definition-heading" className="text-2xl sm:text-3xl font-black text-white tracking-tight">A simple relationship</h2>
+            <p className="text-sm text-zinc-400 max-w-2xl">Managed intelligence is AI capability delivered through a GALX-managed service—for people creating in GALX and developers building with its API.</p>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="p-7 rounded-3xl bg-zinc-900/40 border border-white/10 space-y-4">
-              <div className="w-10 h-10 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center">
-                <Globe className="w-5 h-5" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {hierarchy.map(({ icon: Icon, name, description }) => (
+              <div key={name} className="p-6 rounded-3xl bg-zinc-900/40 border border-white/10 space-y-4">
+                <div className="w-10 h-10 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center">
+                  <Icon className="w-5 h-5" aria-hidden="true" />
+                </div>
+                <h3 className="text-lg font-bold text-white">{name}</h3>
+                <p className="text-sm text-zinc-400 leading-relaxed">{description}</p>
               </div>
-              <h3 className="text-lg font-bold text-white">Wholesale Clearinghouse</h3>
-              <p className="text-xs text-zinc-400 leading-relaxed">
-                By pooling enterprise compute volume across global GPU clusters, we secure institutional wholesale rate cards and pass 100% of these savings directly to builders with $0 seat fees.
-              </p>
-            </div>
-
-            <div className="p-7 rounded-3xl bg-zinc-900/40 border border-white/10 space-y-4">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
-                <Lock className="w-5 h-5" />
-              </div>
-              <h3 className="text-lg font-bold text-white">Zero Data Retention (ZDR)</h3>
-              <p className="text-xs text-zinc-400 leading-relaxed">
-                We operate strictly on volatile ephemeral RAM buffers. Customer prompt strings, vector embeddings, and LLM completions are never written to disk or used for foundation model training.
-              </p>
-            </div>
-
-            <div className="p-7 rounded-3xl bg-zinc-900/40 border border-white/10 space-y-4">
-              <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center">
-                <Zap className="w-5 h-5" />
-              </div>
-              <h3 className="text-lg font-bold text-white">Predictive Failover Shield</h3>
-              <p className="text-xs text-zinc-400 leading-relaxed">
-                Use the status page to check service availability. API errors include guidance for your next step.
-              </p>
-            </div>
+            ))}
           </div>
         </section>
 
-        {/* Compliance & Security Standards */}
-        <section className="p-8 rounded-3xl bg-zinc-900/30 border border-white/10 space-y-6">
-          <div className="flex items-center gap-3">
-            <Award className="w-6 h-6 text-amber-400" />
-            <h2 className="text-xl font-bold text-white">Enterprise Governance &amp; Security Architecture</h2>
+        <section className="grid grid-cols-1 md:grid-cols-2 gap-6" aria-label="GALX and Nova definitions">
+          <div className="p-7 rounded-3xl bg-zinc-900/40 border border-white/10 space-y-3">
+            <h2 className="text-xl font-bold text-white">What is GALX?</h2>
+            <p className="text-sm text-zinc-400 leading-relaxed">GALX lets people create AI images. The intelligence service behind it is called Nova, and developers can subscribe for API access.</p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs text-zinc-300">
-            <div className="p-4 rounded-xl bg-black/40 border border-white/5 space-y-1">
-              <div className="font-bold text-white">SOC 2 Type II Aligned</div>
-              <div className="text-zinc-500">Continuous Security Control Monitoring</div>
-            </div>
-            <div className="p-4 rounded-xl bg-black/40 border border-white/5 space-y-1">
-              <div className="font-bold text-white">ISO/IEC 27001:2022</div>
-              <div className="text-zinc-500">Information Security Management Framework</div>
-            </div>
-            <div className="p-4 rounded-xl bg-black/40 border border-white/5 space-y-1">
-              <div className="font-bold text-white">HIPAA BAA Compliant</div>
-              <div className="text-zinc-500">Zero PHI Retention Architecture</div>
-            </div>
+          <div className="p-7 rounded-3xl bg-zinc-900/40 border border-white/10 space-y-3">
+            <h2 className="text-xl font-bold text-white">What is Nova?</h2>
+            <p className="text-sm text-zinc-400 leading-relaxed">GALX Nova is our managed intelligence layer for reasoning and generation.</p>
+            <p className="text-sm text-zinc-400 leading-relaxed">You bring the task. GALX operates the service behind it.</p>
           </div>
         </section>
 
-        {/* CTA */}
+        <section className="p-8 rounded-3xl bg-zinc-900/30 border border-white/10 space-y-4" aria-labelledby="managed-heading">
+          <h2 id="managed-heading" className="text-xl font-bold text-white">What “managed” means</h2>
+          <p className="text-sm text-zinc-400 leading-relaxed max-w-3xl">Managed means GALX operates the service through which you access the supported capability. It does not automatically mean unlimited capacity, guaranteed outputs, dedicated infrastructure, human-reviewed responses, enterprise support, or a proprietary foundation model.</p>
+          <p className="text-sm text-zinc-400 leading-relaxed max-w-3xl">We explain supported capabilities and integration requirements. Operational implementation details stay internal.</p>
+        </section>
+
         <section className="p-8 sm:p-10 rounded-3xl bg-gradient-to-r from-cyan-950/40 via-zinc-900 to-indigo-950/40 border border-cyan-500/20 flex flex-col sm:flex-row items-center justify-between gap-6">
           <div className="space-y-1 text-center sm:text-left">
-            <h3 className="text-lg sm:text-xl font-bold text-white">Ready to connect to the universal gateway?</h3>
-            <p className="text-xs text-zinc-400">Generate an instant API key in 10 seconds with $5 free test credit.</p>
+            <h2 className="text-lg sm:text-xl font-bold text-white">Bring an idea, not an infrastructure plan.</h2>
+            <p className="text-sm text-zinc-400">Create in GALX, or build with supported capabilities through Developer.</p>
           </div>
-          <Link
-            href="/keys"
-            className="px-6 py-3 rounded-2xl bg-cyan-400 text-black font-bold text-xs font-mono flex items-center gap-2 hover:bg-cyan-300 transition-all shrink-0 cursor-pointer shadow-lg shadow-cyan-500/20"
-          >
-            <span>Get Instant API Key</span>
-            <ArrowRight className="w-4 h-4" />
-          </Link>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <Link href="/images" className="px-5 py-3 rounded-2xl bg-cyan-400 text-black font-bold text-xs flex items-center gap-2 hover:bg-cyan-300 transition-all">
+              <span>Create an image</span><ArrowRight className="w-4 h-4" aria-hidden="true" />
+            </Link>
+            <Link href="/developers" className="px-5 py-3 rounded-2xl border border-white/15 text-white font-bold text-xs hover:bg-white/5 transition-all">
+              Explore Developer
+            </Link>
+          </div>
         </section>
       </main>
     </div>

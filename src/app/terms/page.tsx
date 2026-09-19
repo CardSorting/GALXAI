@@ -9,16 +9,15 @@ import { Shield, FileText, Lock, Scale, Zap, ArrowRight } from 'lucide-react';
 import { SITE_CONFIG } from '@/lib/seo/siteConfig';
 
 export const metadata: Metadata = constructMetadata({
-  title: 'Terms of Service — Enterprise AI Gateway & SLA',
-  description: 'GALXAI Terms of Service, API Master Service Agreement, 99.99% SLA guarantees, wholesale pricing terms, and Zero Data Retention obligations.',
+  title: 'Terms of Service — GALX Images, Nova, and Developer access',
+  description: 'Terms for creating in GALX Images, using GALX Nova, and subscribing to separate Developer API access.',
   canonicalPath: '/terms',
   keywords: [
     'Terms of Service',
-    'Master Service Agreement',
-    'AI Gateway SLA',
-    'Zero Data Retention Agreement',
-    'Enterprise API Terms',
-    'Wholesale Token Billing',
+    'GALX Images',
+    'GALX Nova',
+    'Developer API access',
+    'Account billing terms',
   ],
 });
 
@@ -50,10 +49,10 @@ export default function TermsOfServicePage() {
             <span>LEGAL &amp; COMPLIANCE FRAMEWORK</span>
           </div>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight">
-            Terms of Service &amp; SLA
+            Terms of Service
           </h1>
           <p className="text-sm sm:text-base text-zinc-400 max-w-3xl leading-relaxed">
-            These Terms of Service (&ldquo;Terms&rdquo;) govern your access to and use of GALXAI&rsquo;s universal AI inference routing gateway, API endpoints, developer console, and wholesale compute infrastructure.
+            These Terms of Service (&ldquo;Terms&rdquo;) govern your access to GALX Images, GALX Nova, and any separately approved Developer capabilities. Product pages and access materials describe the supported customer experience; implementation details are not part of the public product contract.
           </p>
           <div className="flex items-center gap-4 text-xs font-mono text-zinc-500 pt-2">
             <span>Effective Date: {lastUpdated}</span>
@@ -62,15 +61,25 @@ export default function TermsOfServicePage() {
           </div>
         </header>
 
+        <section className="rounded-2xl border border-indigo-400/20 bg-indigo-500/5 p-6 space-y-3" aria-labelledby="current-scope">
+          <h2 id="current-scope" className="font-bold text-white text-base">Current product and pricing scope</h2>
+          <p className="text-sm text-zinc-300 leading-relaxed">
+            GALX Pro is the consumer Image Studio plan at $10 USD per month for one account. GALX Nova Developer Access is a separate $50/month recurring API access subscription.
+          </p>
+          <p className="text-sm text-zinc-400 leading-relaxed">
+            Usage is billed separately from the access subscription, and no usage credits are included. Start through <Link href="/developers" className="text-cyan-300 hover:underline">Developer</Link> and review the supported capabilities and usage terms before building. Historical account-credit records and prior transactions remain subject to the terms presented when they were created.
+          </p>
+        </section>
+
         {/* Core Principles Grid */}
         <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="p-6 rounded-2xl bg-zinc-900/40 border border-white/10 space-y-3">
             <div className="w-9 h-9 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center">
               <Lock className="w-4 h-4" />
             </div>
-            <h2 className="font-bold text-white text-base">Zero Data Retention (ZDR)</h2>
+            <h2 className="font-bold text-white text-base">Public creations</h2>
             <p className="text-xs text-zinc-400 leading-relaxed">
-              We never store, log, inspect, or train on your customer prompts, responses, or vector embeddings. All memory is zeroed out immediately after HTTP stream closure.
+              Creations made in GALX Images are public by default and may appear in the community stream. Review the current product controls before creating anything that should not be shared.
             </p>
           </div>
 
@@ -78,9 +87,9 @@ export default function TermsOfServicePage() {
             <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
               <Zap className="w-4 h-4" />
             </div>
-            <h2 className="font-bold text-white text-base">99.99% High-Availability SLA</h2>
+            <h2 className="font-bold text-white text-base">Managed intelligence</h2>
             <p className="text-xs text-zinc-400 leading-relaxed">
-              Enterprise workloads benefit from our multi-region distributed active-active failover. If a backend cluster experiences an outage, requests reroute in under 50ms.
+              GALX Nova is the managed intelligence layer for reasoning and generation. Managed describes the service relationship; it does not promise unlimited capacity, guaranteed outputs, dedicated infrastructure, human review, enterprise support, or a proprietary foundation model.
             </p>
           </div>
 
@@ -88,9 +97,9 @@ export default function TermsOfServicePage() {
             <div className="w-9 h-9 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center">
               <Shield className="w-4 h-4" />
             </div>
-            <h2 className="font-bold text-white text-base">SOC 2 &amp; HIPAA Compliant</h2>
+            <h2 className="font-bold text-white text-base">Reviewed access</h2>
             <p className="text-xs text-zinc-400 leading-relaxed">
-              Fully compliant with SOC 2 Type II, ISO 27001, and HIPAA Business Associate Agreements (BAA) for healthcare, fintech, and sovereign enterprise deployments.
+              Private preview is a separate request path for supported Nova capabilities. Applying does not grant subscription access; Developer Access is granted by an active subscription and follows its published terms.
             </p>
           </div>
         </section>
@@ -102,19 +111,19 @@ export default function TermsOfServicePage() {
               <span className="text-cyan-400 font-mono text-base">1.</span> Provision of Services
             </h2>
             <p>
-              GALXAI provides high-performance, low-latency proxy routing for OpenAI-compatible LLM inference. By creating an account or querying the API at <code>https://galx.ai/v1</code>, you agree to comply with all applicable local, national, and international laws, as well as the safety policies of upstream model providers.
+              GALX provides image creation through GALX Images and managed intelligence through GALX Nova. Developer API capabilities are available only through the approved access path and documented supported contract. By creating an account or using a supported capability, you agree to comply with applicable law and the published acceptable-use requirements.
             </p>
           </section>
 
           <section className="space-y-4">
             <h2 className="text-xl font-bold text-white flex items-center gap-2">
-              <span className="text-cyan-400 font-mono text-base">2.</span> Wholesale Token Billing &amp; 75% Prompt Caching
+              <span className="text-cyan-400 font-mono text-base">2.</span> Billing and access terms
             </h2>
             <p>
-              Token usage is metered per individual request based on exact input, output, and cached token counts returned by upstream GPU clusters. Prompt caching rebates (up to 75% off standard input token rates) are automatically applied to matching prefix prompts exceeding 1,024 tokens.
+              GALX Pro is a consumer subscription at $10 USD per month for one account and follows the published Image Studio terms and fair-use boundaries. GALX Nova Developer Access is a separate $50 USD per month recurring subscription for API access. Usage is billed separately; no usage credits are included.
             </p>
             <p>
-              Prepaid developer wallet balances never expire. Refunds for unspent credit balances can be requested via our support portal within 30 days of purchase.
+              Existing account-credit balances, refunds, and other payment records remain governed by the terms presented when those records were created. Developer Access is purchased through the Developer surface; an active subscription grants API admission and cancellation or expiration removes it according to the subscription lifecycle.
             </p>
           </section>
 
@@ -123,7 +132,7 @@ export default function TermsOfServicePage() {
               <span className="text-cyan-400 font-mono text-base">3.</span> Cryptographic API Key Security
             </h2>
             <p>
-              You are responsible for maintaining the confidentiality of your API keys. GALXAI stores only salted cryptographic hashes of your keys. In the event of a suspected key compromise, you can instantly revoke and rotate keys from the <Link href="/keys" className="text-cyan-400 hover:underline">API Keys Management Console</Link>.
+              You are responsible for maintaining the confidentiality of account credentials and any approved API keys. In the event of a suspected key compromise, revoke or rotate the key from the <Link href="/keys" className="text-cyan-400 hover:underline">API Keys Management Console</Link> and contact support if you need help.
             </p>
           </section>
 
@@ -132,7 +141,7 @@ export default function TermsOfServicePage() {
               <span className="text-cyan-400 font-mono text-base">4.</span> Acceptable Use Policy
             </h2>
             <p>
-              You agree not to use GALXAI services to generate unlawful content, launch denial-of-service attacks, bypass upstream model safety guardrails via automated adversarial attacks, or reverse-engineer upstream frontier model weights.
+              You agree not to use GALX services to generate unlawful content, abuse the service, bypass applicable safety controls, or attempt to obtain access to private implementation details or another account.
             </p>
           </section>
 

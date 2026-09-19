@@ -1,4 +1,6 @@
-// Deposits begin a hosted payment; only verified payment fulfillment credits the wallet.
+// Historical wallet-deposit path retained only as a compatibility alias. New
+// Developer subscriptions use /api/billing/plan; this historical wallet alias
+// remains inert and inherits the retired Stripe-route response.
 export { POST } from '../../stripe/checkout/route';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';

@@ -1,6 +1,7 @@
 import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextRequest, NextResponse } from 'next/server';
 import { ModelCatalog } from '@/core/router/ModelCatalog';
+import { USAGE_PRICING } from '@/lib/billing/usage-pricing';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -38,15 +39,11 @@ async function previewGET(
     category: modelSpec.category,
     context_window: modelSpec.contextWindowTokens,
     max_output: modelSpec.maxOutputTokens,
-    pricing: {
-      input_per_1m: modelSpec.inputPricePer1M,
-      output_per_1m: modelSpec.outputPricePer1M,
-      cached_input_per_1m: modelSpec.cachedInputPricePer1M
-    },
     supports_vision: modelSpec.supportsVision,
     supports_reasoning: modelSpec.supportsReasoning,
     supports_streaming: modelSpec.supportsStreaming,
     description: modelSpec.description,
+    usage_pricing: { status: USAGE_PRICING.status, rates_published: USAGE_PRICING.ratesPublished, basis: USAGE_PRICING.basis, unit: USAGE_PRICING.unit, path: USAGE_PRICING.path },
     permission: [
       {
         id: `perm-${modelSpec.id}`,
@@ -67,7 +64,6 @@ async function previewGET(
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
-      'x-galx-cached': 'edge-swr'
     }
   });
 }

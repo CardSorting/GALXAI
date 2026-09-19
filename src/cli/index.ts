@@ -376,21 +376,19 @@ ${agentMarkdown}
   }
 
   if (command === 'tiers' || command === 'pricing') {
-    const { STRIPE_PRODUCT_TIERS } = await import('../lib/stripe/products');
-    console.log(`\n\x1b[1m\x1b[36m⚡ GALXAI PREPAID COMPUTE TIERS & STRIPE MATCH BONUSES\x1b[0m\n`);
-    console.log(`  Tier Key         Deposit   Match %   Bonus Grant   Total Credit   RPM Quota  Perks`);
-    console.log(`  ---------------------------------------------------------------------------------------`);
-    for (const [key, tier] of Object.entries(STRIPE_PRODUCT_TIERS)) {
-      const matchPct = `${Math.round((tier.multiplier - 1) * 100)}%`;
-      const rpm = tier.depositAmountUsd >= 500 ? 'Unlimited' : tier.depositAmountUsd >= 250 ? '1,200 RPM' : tier.depositAmountUsd >= 100 ? '600 RPM' : tier.depositAmountUsd >= 50 ? '300 RPM' : tier.depositAmountUsd >= 25 ? '120 RPM' : '60 RPM';
-      console.log(`  \x1b[1m${key.padEnd(16)}\x1b[0m $${tier.depositAmountUsd.toString().padEnd(8)} ${matchPct.padEnd(9)} +$${(tier.matchBonusUsd + tier.welcomeGrantUsd).toFixed(2).padEnd(11)} \x1b[32m$${tier.totalCreditUsd.toFixed(2).padEnd(13)}\x1b[0m ${rpm.padEnd(10)} ${tier.badge}`);
-    }
-    console.log(`\n  \x1b[90mIncludes $5.00 introductory welcome grant on tiers $25 and above. 100% refundable unspent balances.\x1b[0m`);
-    console.log(`  \x1b[90mRun \x1b[1mnpx galxai checkout <amount>\x1b[0m\x1b[90m to review a credit top-up.\x1b[0m\n`);
+    console.log('\nGALX pricing strategy');
+    console.log('  GALX Pro: $10 USD / month for the consumer image experience.');
+    console.log('  GALX Nova Developer Access: $50 USD / month recurring for API access.');
+    console.log('  Usage is billed separately; no usage credits are included.\n');
     return;
   }
 
   if (command === 'stripe') {
+    console.error('The legacy prepaid Stripe catalog is retired. Provision and manage the GALX Pro subscription through the private Pro billing procedure.');
+    process.exitCode = 1;
+    return;
+    /* Legacy pack provisioning retained below for historical source review only. */
+    /* istanbul ignore next */
     const sub = args[1] || 'sync';
     const { STRIPE_PRODUCT_TIERS } = await import('../lib/stripe/products');
     const { getStripeConfig } = await import('../lib/stripe/config');
@@ -477,7 +475,7 @@ ${agentMarkdown}
 
         const prices = await stripe.prices.list({ product: product.id, active: true, limit: 10 });
         const targetAmountCents = tier.depositAmountUsd * 100;
-        let price = prices.data.find(p => p.unit_amount === targetAmountCents && p.currency === 'usd');
+        let price: any = prices.data.find(p => p.unit_amount === targetAmountCents && p.currency === 'usd');
 
         if (!price) {
           price = await stripe.prices.create({
@@ -517,15 +515,8 @@ ${agentMarkdown}
   }
 
   if (command === 'checkout' || command === 'topup') {
-    const amount = Number(args[1] || '50');
-    if (!Number.isFinite(amount) || amount < 1 || amount > 10000 || Math.abs(amount * 100 - Math.round(amount * 100)) > 0.000001) {
-      console.error('Enter $1–$10,000, with up to two decimal places.');
-      process.exitCode = 1;
-      return;
-    }
-    console.log('\nGALX credit top-up\n');
-    console.log(`Review a one-time $${amount.toFixed(2)} top-up. Sign in to see your credit terms before paying.`);
-    console.log(`https://galx.ai/billing/credits?amount=${amount}\n`);
+    console.error('Prepaid Developer and compute checkouts are retired. Request GALX Nova access at https://galx.ai/developers.');
+    process.exitCode = 1;
     return;
   }
 

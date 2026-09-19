@@ -1,130 +1,139 @@
-# 🚀 GALXAI: Go-To-Market (GTM) & Positioning Strategy
+# GALX Go-To-Market and positioning strategy
 
 <!-- docs-scope: commercial-draft -->
-> **Reading scope:** Commercial or product planning material. Claims, prices, forecasts, and examples require separate dated validation; they are not deployment guarantees, certifications, or SLAs. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
 
-## 1. Executive Summary & Market Whitespace
+Commercial planning material, reconciled September 18, 2026. Claims, prices
+and access terms are only current when they match the product and billing
+authorities. This document does not authorize infrastructure changes,
+commercial entitlements or a live release.
 
-The generative AI developer market is suffering from **"Gateway Fatigue"**:
-1. **Raw Foundation Model APIs** (OpenAI, Anthropic, xAI) offer cutting-edge models but impose strict single-account rate limits, high retail list prices, and zero automated failover.
-2. **Generic API Gateways & Aggregators** (OpenRouter, Cloudflare AI Gateway) charge an additional **5%–10% routing markup** on top of retail rates, adding an extra middleware rectangle without solving underlying token unit economics.
+## The category
 
-**GALXAI breaks this paradigm by positioning as a Inference Platform with Bounded Recovery:**
-- **Value Proposition**: Direct **25%–40% wholesale pricing discounts**, **75% prompt caching pass-through**, and **zero rate-limit stalls** with **zero code modifications**.
-- **The Core Economic Moat**: High-volume wholesale arbitrage. By consolidating enterprise compute demand, GALXAI captures wholesale tier discounts and passes them directly to developers while generating sustainable platform gross margins ($\sim 33\%$).
+GALX presents **managed intelligence**.
 
----
+- **GALX** is where people create.
+- **GALX Nova** is the managed intelligence layer behind the experience.
+- **Developer** is the separate route for subscribing to programmable access
+  to supported Nova capabilities.
 
-## 2. The 4 Jobs To Be Done (JTBD) & Persona Breakdown
+Canonical description:
 
-```mermaid
-mindmap
-  root((GALXAI Jobs To Be Done))
-    1. Token Bill Slasher
-      High monthly token burn ($1K-$50K/mo)
-      Slash bills 25%-40% instantly
-      75% prompt cache pass-through
-      1-line baseURL swap
-    2. Zero Rate-Limit Stalls
-      Agent swarms & batch pipelines
-      Bounded retries and recovery
-      Multi-region Anycast routing
-    3. Universal Developer Pass
-      Cursor, Windsurf, Claude Code, Python
-      One wallet for all frontier models
-      No $100k enterprise commitments
-    4. Zero-Hesitation DX
-      npx galxai terminal instant prompt
-      OpenAI-compatible API execution
-      Raw text cURL with zero 400 errors
-```
+> GALX Nova is our managed intelligence layer for reasoning and generation.
 
-### Persona 1: High-Burn Startups & AI Scaleups (The Cost Job)
-- **Profile**: Founders and engineering leaders spending $2,000–$50,000/mo on LLM tokens for customer-facing AI products.
-- **Pain Point**: High monthly token burn eating runway, unable to commit $100k+ upfront to OpenAI enterprise sales.
-- **The Hook**: 1-line `baseURL` swap that slashes monthly token bills by **25%–40%** on day 1 with zero prompt rewrites.
+Plain-language explanation:
 
-### Persona 2: AI Agent & Batch Pipeline Engineers (The Reliability Job)
-- **Profile**: Developers building multi-agent swarms (CrewAI, LangGraph, AutoGen) and high-concurrency document RAG pipelines.
-- **Pain Point**: Frequent `429 Too Many Requests` upstream stalls when batch jobs spike.
-- **The Hook**: Sub-millisecond automatic failover that ensures multi-region resilience with zero rate-limit stalls.
+> You bring the task. GALX handles the underlying execution.
 
-### Persona 3: Power Hackers & IDE Users (The Tooling Job)
-- **Profile**: Developers using Cursor, Windsurf, Claude Code CLI, and local scripts.
-- **Pain Point**: Managing 4 different provider billing accounts, minimum deposit balances, and API keys.
-- **The Hook**: One universal API key and prepaid wallet that powers all tools across GPT-5.6, Grok 4.6, and Claude 3.7 at wholesale cost.
+“Managed intelligence” explains the relationship between the customer and
+GALX. It is not another technical prerequisite before someone creates an image.
+The term is used by other companies; GALX defines its own service meaning and
+does not claim to have invented the category or be its first provider.
 
-### Persona 4: Terminal & Bash Hackers (The DX Job)
-- **Profile**: Engineers writing bash scripts, automation pipelines, and quick CLI tools.
-- **Pain Point**: Writing 20 lines of SDK boilerplate or debugging 400 parameter errors just to run a quick prompt.
-- **The Hook**: `npx galxai "Explain Raft"` with zero installs, zero accounts, and instant streaming.
+## The customer narrative
 
----
+Bring an idea, not an infrastructure plan.
 
-## 3. Product Positioning vs. Traditional Alternatives
+GALX puts the experience first: describe an image, create it, and explore what
+others are making. Behind the experience is GALX Nova. Create in GALX, or
+use Developer Access to build with supported capabilities through the API.
 
-| Vector | Direct Upstream (OpenAI / xAI) | Standard Gateways (OpenRouter) | **GALXAI Wholesale Clearinghouse** |
-| :--- | :--- | :--- | :--- |
-| **Pricing vs. Retail** | 100% Retail List Price | 105% (+5% Markup Fee) | **75%–60% (25%–40% DISCOUNT)** |
-| **Prompt Caching Rebate** | 50%–75% | Variable / Partial Retention | **100% Pass-Through (75%–85% Rebate)** |
-| **Failover & High Availability** | None (Single Key Fails) | Basic Provider Switching | **Bounded Recovery & Request Telemetry** |
-| **Rate Limit Resilience** | Hard 429 Rate Limit Errors | Retry queue | **Zero Rate-Limit Stalls (<1ms Overhead)** |
-| **Edge Network Coverage** | Centralized Origin Regions | Centralized Origin Proxy | **300+ Global Edge PoPs (<15ms TTFT)** |
-| **CLI & Terminal DX** | None (SDK Required) | None (REST cURL Only) | **Zero-Install CLI (`npx galxai`)** |
-| **Security Architecture** | Standard API Key | Plaintext Gateway Storage | **AES-256-GCM + AAD Tenant Envelope Vault** |
-| **SDK Compatibility** | Native | OpenAI Compatible | **100% Drop-in for OpenAI, Anthropic, Vercel AI, LangChain** |
+The primary customer journey is:
 
----
+1. Make something worth sharing.
+2. Explore creations and find the next idea.
+3. Discover that the experience is powered by GALX Nova.
+4. Choose the separate Developer path only when programmable access is needed.
 
-## 4. Developer Distribution & Growth Loops
+The public story does not lead with capacity, pools, quotas, provider names,
+routing, model-training claims or operating internals.
 
-```mermaid
-flowchart TD
-    subgraph Top-of-Funnel Ingestion
-        A1[Zero-Install CLI: npx galxai] --> Funnel[Frictionless Self-Serve Funnel]
-        A2[IDE Extensions: Cursor, Windsurf, Claude Code] --> Funnel
-        A3[1-Minute Spend Audit Tool] --> Funnel
-        A4[Open-Source SDKs & Framework Shims] --> Funnel
-    end
+## Commercial boundaries
 
-    subgraph Activation & Retention
-        Funnel --> B1[Instant $5 Free Live Compute Key]
-        B1 --> B2[1-Line SDK / baseURL Swap]
-        B2 --> B3[Live Compound Savings Dashboard]
-        B3 --> B4[Viral Referral Loop: $10 Compute + 5% Rebate]
-    end
-```
+GALX Pro is the consumer image plan at **$10 USD/month for one account**. It
+has a real Stripe subscription, published Image Studio terms and fair-use
+boundaries.
 
-### Channel 1: IDE & Coding Agent Integrations (Cursor, Windsurf, Cline)
-- Publish 1-click configuration presets. Developers paste their GALXAI key into Cursor settings and get 25%–40% cheaper reasoning completions without altering their workflow.
+GALX Nova Developer Access is a **$50/month recurring subscription** for API
+access. The fee is an access fee, not prepaid inference, a credit bundle or an
+included usage allowance. Usage is billed separately; this change does not
+define usage pricing, metering, balances, limits or consumption billing.
 
-### Channel 2: The Zero-Install CLI (`npx galxai`)
-- Spread through developer terminal culture, GitHub READMEs, and technical blog posts as the fastest way to run frontier LLMs from the command line.
+Think of Developer Access like membership to a managed workspace: the
+subscription gives the developer access to the service; consumption is billed
+separately. “Membership” describes the existing Developer Access subscription;
+it is not a new plan, workspace application, team-seat offer or capacity
+promise.
 
-### Channel 3: Spend Arbitrage Calculator & Instant Grants
-- Provide frictionless ROI transparency. Developers simulate their monthly token volume and immediately claim a **$5 Free Live Compute Key** to test latency and savings in real time.
+The Developer route creates the subscription through the existing Stripe
+subscription architecture. A successful active subscription grants only the
+Developer/API access entitlement. Cancellation or expiration removes that
+entitlement through the existing webhook lifecycle. A historical wallet
+payment may be reconciled for ledger/refund purposes, but it never creates or
+approves Developer access. Do not restore prepaid pack checkout, match
+bonuses, old tiers or retired usage promises.
 
----
+## Audience and messages
 
-## 5. Programmatic SEO (pSEO), AEO & GEO Organic Dominance Engine
+### Creators and community members
 
-GALXAI deploys an automated, high-intent programmatic knowledge mesh designed to capture 100% of organic developer discovery queries and AI answer engine citations:
+Message: “Make something worth sharing.”
 
-1. **13 Interactive Developer Tools**: Real-time calculators (`/tools/roi-calculator`, `/tools/stream-benchmark`, `/tools/context-window-visualizer`, `/tools/token-counter`) creating natural backlink flywheels and high session dwell time.
-2. **14 Dedicated Glossary Term Portals (`/glossary/[slug]`)**: Standalone semantic definitions with Schema.org `DefinedTermSet` and Wikidata entity linkage for instant Google Featured Snippet and Perplexity AI citations.
-3. **14 Programmatic Landing Clusters (>100 SSG Pages)**: Solutions, Industry Portals, Error Troubleshooting Runbooks, Multi-Language SDKs, Benchmark Leaderboards, Developer Cookbooks, Model Matchups, Competitor Alternatives, and Architecture Whitepapers.
-4. **Machine-Readable LLM Grounding Standards**: `public/llms.txt`, `public/llms-full.txt`, and RSS feeds guaranteeing 100% factual accuracy in SearchGPT, Claude, Perplexity, and Gemini responses.
+Show the image prompt, studio, community stream and prompt exploration. State
+that creations are public by default where applicable. Use real product data for
+community counts and examples. Keep Nova attribution farther down the page.
 
-For the complete technical specification of the organic growth substrate, see [`docs/PSEO_AND_AEO_STRATEGY.md`](PSEO_AND_AEO_STRATEGY.md).
+### Developers
 
----
+Message: “Build with GALX Nova.”
 
-## 6. The Dual-Wedge Enterprise Strategy: Spend Governance & Representation Transformation
+Explain supported API capabilities and integration requirements. State the
+$50/month access subscription and separate usage boundary. Do not defend the
+number with internal costs or unverified performance claims.
 
-GALXAI executes a differentiated two-tier enterprise go-to-market motion:
+### Teams and assisted buyers
 
-1. **Bottom-Up Developer Wedge**: 1-line auto-patch (`import 'galxai/patch'`), native SDKs, and zero-install CLI (`npx galxai`) accelerating time-to-first-dollar.
-2. **Top-Down Spend Governance Wedge**: The **Spend Forensic Control Tower (`/audit`)** and **BroccoliDB Representation Transformation Substrate**:
-   - Dissects runaway agent loops, high-frequency telemetry noise, and cache-busting prefixes.
-   - Transforms high-redundancy payloads into dense, task-relevant representations before model inference.
-   - Delivers a verifiable **$2.89\times - 3.32\times$ cost efficiency multiplier** backed by empirical provider-boundary receipts (`npm run bench:inference-boundary`).
+Use the current supported access path and contact process. Do not introduce
+Nova tiers, enterprise limits, dedicated capacity, SLAs or contract terms that
+have not been approved.
+
+## Distribution
+
+- Make the image experience the front door and the community the discovery
+  loop.
+- Use search and social metadata that names GALX Images and GALX Nova without
+  exposing implementation details.
+- Let the Developer page qualify interest through the supported-capability
+  explanation and subscription checkout; keep the private preview form as a
+  separate path.
+- Use documentation to explain how to call the API only after access is
+  granted; do not use documentation as a public infrastructure tour.
+- Measure completed image creation, exploration, remix and active Developer
+  subscriptions. Do not substitute decorative counts, savings claims or
+  benchmark promises for product data.
+
+## Founder answers
+
+- **What is GALX?** GALX lets people create AI images. The intelligence
+  service behind it is Nova, and developers can subscribe for API access.
+- **What is Nova?** Our managed intelligence layer for reasoning and
+  generation.
+- **What does managed mean?** You use the capability. GALX handles the
+  underlying execution.
+- **How does the underlying system work?** We keep implementation details
+  internal. We can explain supported capabilities and integration
+  requirements.
+- **Did you train the models?** Nova is the name of our managed service, not a
+  claim that GALX trained a foundation model.
+- **Why should I pay $50?** The $50/month subscription provides access to the
+  supported Nova API. Usage is billed separately, so review the documented
+  capability and applicable usage terms before building.
+
+## Acceptance boundary
+
+Before publishing a Developer capability or price term, verify it against the
+actual API and billing implementation. The current change is complete when the
+consumer Pro subscription remains independently operable, Developer checkout
+creates only the $50/month access subscription, no usage credits are created,
+historical reconciliation remains intact, cancellation removes access, and
+public pages do not expose retired pack names, match bonuses, unverified
+limits, internal provider details or unsupported usage economics.

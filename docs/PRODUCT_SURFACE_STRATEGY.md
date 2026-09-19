@@ -2,29 +2,36 @@
 
 <!-- docs-scope: current-guide -->
 
-Private product authority, reconciled September 16, 2026. [PRODUCT.md](../PRODUCT.md) summarizes the experience; [current state](../post-mortem/CURRENT_STATE.md) records deployment evidence. Earlier inference-first, customer-local-only, and conversational website (Sites) strategies are historical, superseded by the public GALX Images surface.
+Private product authority, reconciled September 18, 2026. [PRODUCT.md](../PRODUCT.md) summarizes the experience; [current state](../post-mortem/CURRENT_STATE.md) records deployment evidence. Earlier inference-first, customer-local-only, and conversational website strategies are historical, superseded by the GALX Images surface and GALX Nova service framing.
 
 ## Product and access boundaries
 
 | Surface | Current scope |
 | --- | --- |
-| Homepage | Images-first prompt cockpit, instant prompt inspiration chips, live infinite masonry community stream, model & aspect ratio selector, pricing followed by FAQ |
-| Public guidance | Dedicated `/pricing`, `/faq`, `/knowledge-base` guides with capability-only copy, explaining visual synthesis, aspect ratios, community streams, and account tiers |
-| Images | Flagship public product: public-by-default visual generation, Pinterest-style live community masonry feed, prompt remixing across 5 aspect ratios, durable async receipts, owned library, Favorites and sanitized PNG downloads |
-| Sites (Retired) | Retired product surface; decommissioned September 2026 due to unsustainable quota consumption and technical setup overhead. Legacy `/sites` routes gracefully redirect to `/images` |
-| Developer preview | Signup, project introduction, GitHub/LinkedIn profiles and cohort interest; instant access via $10 Developer Tier ($20 compute credit) or cohort approval before private API access |
+| Homepage | Image-first prompt cockpit, prompt inspiration, live community stream from real public data, Nova attribution, and a separate Developer route |
+| Public guidance | Dedicated `/pricing`, `/faq`, and `/knowledge-base` guides explain image creation, public sharing, GALX Nova, published consumer terms, and the Developer subscription boundary |
+| Images | Consumer creation surface: public-by-default visual generation, community stream, prompt remixing across five supported aspect ratios, owned library, Favorites, and sanitized image downloads |
+| GALX Nova | Managed intelligence layer for reasoning and generation. The service name explains the relationship; it does not disclose or promise internal execution details |
+| Developer | Separate API information and access path. Developer Access is $50/month recurring for API admission; usage is billed separately and no usage credits are included |
 | Staff administration | Independent owner/reviewer/viewer membership, approval inbox, activity history and private feedback |
 | Destination chat and arbitrary execution | Not introduced by the Image Studio; downstream and other proposals retain their own scope |
 
-Public means users can discover, explore the live stream, and generate visuals in Images without developer-preview approval. Sign-in is required before opening the full Image Studio or accessing owned library history. It does not mean unrestricted abuse or unmetered server compute: free welcome allowances and Pro plans are governed by fair use and rate limiting.
+Public means users can discover and explore the live stream, while sign-in remains required before opening the full Image Studio or accessing owned library history. It does not mean unrestricted abuse or unmetered server compute: consumer plan terms remain governed by fair use and rate limiting.
 
 ## Positioning and commercial contract
 
-Explain the creative friction removed: crafting complex visual assets, testing compositions across aspect ratios, and discovering prompt inspirations. Explain user outcomes and visual diffusion fidelity, not internal relay mechanics. Homepage content and metadata follow public-facing model naming and omit upstream backend topology.
+Explain the creative friction removed: turning an idea into an image, testing compositions across aspect ratios, and discovering prompt inspirations. Explain user outcomes and supported capabilities, not internal execution mechanics. Homepage content and metadata attribute the experience to GALX Nova without making a foundation-model or performance claim.
 
-The one-time welcome allowance provides five free image generations under [quota operations](maintainers/FREE_GENERATION_QUOTA.md); it is not an unlimited free pass. Current Pro pricing ($29/month) includes priority GPU queues, high-resolution rendering, unlimited 1-click prompt remixes, and community stream participation under fair use. Developer API compute carries separate pay-as-you-go credit terms ($10 Developer Tier with $20 usable credit).
+Current consumer plan pricing is $10/month in the active product configuration and is separate from Developer access. Published consumer copy should describe image creation, exploration, remixing, downloads, and fair-use boundaries without adding unverified speed or capacity promises. Developer Access is a separate $50/month recurring API access subscription; usage is billed separately and zero usage credits are included.
 
-The conversational website builder (Sites) has been completely sunset. Existing Sites assets and historical per-generation billing records retain their originally accepted contract and recovery path without repricing history.
+For explanation, describe Developer Access as membership to a managed
+workspace: the subscription provides API access to the service, while
+consumption is billed separately. This is an explanation of the existing
+subscription, not a workspace product, team-seat model or capacity promise.
+
+Stripe follows the same boundary. GALX Pro and Developer Access use the existing subscription architecture with separate product/price identities. The former prepaid Developer/compute-pack checkout is retired: new quote and legacy checkout requests are rejected, the public Stripe configuration exposes no pack catalog, and historical wallet sessions remain available only for ledger/refund reconciliation. A paid historical wallet session never creates or approves a Developer access entitlement.
+
+Historical product records retain their original evidence and contract history. They do not define the current GALX Images, GALX Nova, or Developer narrative.
 
 ## Execution and evidence
 

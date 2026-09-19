@@ -6,9 +6,9 @@ import { Sparkles, ArrowRight } from 'lucide-react';
 import styles from './explore.module.css';
 
 export const metadata: Metadata = constructMetadata({
-  title: 'Explore AI Images & Prompts — GALX Community Stream',
+  title: 'Explore creations — GALX Images',
   description:
-    'Discover thousands of AI-generated images created with GALX. Search prompts, filter by aspect ratio and visual style, copy generation recipes, and remix directly in the studio.',
+    'Explore images created on GALX. Search prompts, filter by aspect ratio and style, and remix ideas in the Image Studio.',
   keywords: [
     'AI explore',
     'image prompts',
@@ -60,17 +60,14 @@ export default async function ExplorePage(props: {
               <span className={styles.pulseDot} />
               <span>LIVE COMMUNITY STREAM</span>
             </div>
-            <h1>Explore Visual Creations</h1>
-            <p>
-              Every artwork generated on GALX is streamed into this collective gallery.
-              Search prompts, filter by aspect ratio and artistic style, and remix anything in the Studio.
-            </p>
+            <h1>See what imagination looks like.</h1>
+            <p>Explore images created on GALX. Find your next idea.</p>
           </div>
 
           <div className={styles.headerActions}>
             <Link href="/images" className={styles.studioCta}>
               <Sparkles size={16} />
-              <span>Create in Studio</span>
+              <span>Create your own</span>
               <ArrowRight size={14} />
             </Link>
           </div>

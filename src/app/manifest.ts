@@ -2,9 +2,9 @@ import type { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'GALX — Images and Sites',
-    short_name: 'GALXAI',
-    description: 'Create images and build websites. Developer API access is in private preview.',
+    name: 'GALX — Images and Developer',
+    short_name: 'GALX',
+    description: 'Create images in GALX. Explore public creations or subscribe to GALX Nova Developer Access.',
     start_url: '/',
     display: 'standalone',
     background_color: '#07080d',

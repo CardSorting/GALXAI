@@ -1,7 +1,5 @@
-import { GuidePage } from '@/components/public-content/ReadingPage';
-import { getGuide } from '@/lib/public-content/content';
-import { constructMetadata } from '@/lib/seo/metadata';
+import { permanentRedirect } from 'next/navigation';
 
-const guide = getGuide('/knowledge-base/revising-your-site')!;
-export const metadata = constructMetadata({ title: guide.title, description: guide.description, canonicalPath: guide.path, ogType: 'article' });
-export default function Page() { return <GuidePage guide={guide} />; }
+export default function LegacyRemixGuide() {
+  permanentRedirect('/knowledge-base/remixing-creations');
+}

@@ -281,24 +281,31 @@ test('alternate gateway projects JSON and maps upstream HTML failures', async ()
   const { GalxEdgeGateway } = await import('../src/workers/cloudflare/GalxEdgeGateway');
   const originalFetch = globalThis.fetch;
   try {
-    const gateway = new GalxEdgeGateway({ SUPABASE_URL: 'https://unused.example' });
+    const gateway = new GalxEdgeGateway({ ENVIRONMENT: 'test', GATEWAY_AUTH_MODE: 'format-only', USAGE_PRICING_TEST_OVERRIDE: 'published', SUPABASE_URL: 'https://unused.example' });
     globalThis.fetch = async (_url, init) => {
       assert.equal(init?.redirect, 'manual');
+      if (new URL(String(_url)).pathname === '/api/developer-access/check') return Response.json({ approved: true });
       return new Response(JSON.stringify(result), { headers: { 'content-type': 'application/json', 'x-galx-shard': secret } });
     };
-    const request = () => new Request('https://api.galx.ai/v1/images/generations', { method: 'POST', headers: { authorization: 'Bearer customer' }, body: '{"prompt":"flower"}' });
+    const request = () => new Request('https://api.galx.ai/v1/images/generations', { method: 'POST', headers: { authorization: 'Bearer galx_live_customer' }, body: '{"prompt":"flower"}' });
     const response = await gateway.handleRequest(request());
     assert.equal(response.headers.get('x-galx-shard'), null);
     const json = await response.json();
     assert.deepEqual(Object.keys(json).sort(), ['created', 'data']);
     assert.deepEqual(Object.keys(json.data[0]), ['b64_json']);
-    globalThis.fetch = async () => new Response(`<html>${secret}</html>`, { status: 502, headers: { 'content-type': 'text/html' } });
+    globalThis.fetch = async (_url, init) => {
+      assert.equal(init?.redirect, 'manual');
+      if (new URL(String(_url)).pathname === '/api/developer-access/check') return Response.json({ approved: true });
+      return new Response(`<html>${secret}</html>`, { status: 502, headers: { 'content-type': 'text/html' } });
+    };
     const error = await gateway.handleRequest(request());
     assert.equal(error.status, 503); assert.equal(forbidden.test(await error.text()), false);
     for (const status of [301,302,303,307,308]) {
       let calls = 0;
       globalThis.fetch = async (_url, init) => {
-        calls++; assert.equal(init?.redirect, 'manual');
+        assert.equal(init?.redirect, 'manual');
+        if (new URL(String(_url)).pathname === '/api/developer-access/check') return Response.json({ approved: true });
+        calls++;
         return new Response(JSON.stringify(result), {status, headers:{'content-type':'application/json',location:'https://untrusted.example/collect'}});
       };
       const redirect = await gateway.handleRequest(request());

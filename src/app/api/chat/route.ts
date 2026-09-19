@@ -1,4 +1,4 @@
-import { withDeveloperAccess } from '@/lib/security/developer-access';
+import { withDeveloperUsageAccess } from '@/lib/security/developer-access';
 import crypto from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { galxRouter, GalxModelRouter } from '@/core/router/GalxModelRouter';
@@ -300,7 +300,8 @@ async function previewPOST(req: NextRequest) {
       userId,
       requestId,
       isPriorityUser: entitlement.isPriorityUser,
-      headers: req.headers
+      headers: req.headers,
+      usageBillingBasis: 'message'
     });
 
     const createdAt = new Date().toISOString();
@@ -647,4 +648,4 @@ async function previewPOST(req: NextRequest) {
   }
 }
 
-export const POST = withDeveloperAccess(previewPOST);
+export const POST = withDeveloperUsageAccess(previewPOST);

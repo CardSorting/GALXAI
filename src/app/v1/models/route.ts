@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ModelCatalog } from '@/core/router/ModelCatalog';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 import { GalxSeatTierEngine } from '@/core/subscription/GalxSeatTierEngine';
+import { USAGE_PRICING } from '@/lib/billing/usage-pricing';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -21,7 +22,8 @@ export async function OPTIONS() {
 
 /**
  * Universal OpenAI-Compatible GET /v1/models Endpoint.
- * Resolves caller Seat Tier to annotate tier model allowances and spend caps.
+ * Returns supported capability descriptors only. Pricing, spend caps and
+ * routing/governance state are not part of the public model contract.
  */
 async function previewGET(req: NextRequest) {
   const authEngine = GalxAuthEngine.getInstance();
@@ -35,11 +37,6 @@ async function previewGET(req: NextRequest) {
       (allowed) => allowed === m.id || m.id.includes(allowed) || allowed.includes(m.id)
     );
 
-    let requiredTier = 'developer';
-    if (m.category === 'image') {
-      requiredTier = 'enterprise';
-    }
-
     return {
       id: m.id,
       object: 'model',
@@ -49,21 +46,10 @@ async function previewGET(req: NextRequest) {
       category: m.category,
       context_window: m.contextWindowTokens,
       max_output: m.maxOutputTokens,
-      pricing: {
-        input_per_1m: m.inputPricePer1M,
-        output_per_1m: m.outputPricePer1M,
-        cached_input_per_1m: m.cachedInputPricePer1M || 0
-      },
       supports_vision: m.supportsVision,
       supports_reasoning: m.supportsReasoning,
       supports_streaming: m.supportsStreaming,
       description: m.description,
-      seat_governance: {
-        allowed_for_seat: isAllowed,
-        required_seat_tier: requiredTier,
-        user_current_tier: entitlement.tier,
-        user_seat_role: entitlement.role
-      },
       permission: [
         {
           id: `perm-${m.id}`,
@@ -87,21 +73,12 @@ async function previewGET(req: NextRequest) {
     {
       object: 'list',
       data: models,
-      seat_tier: {
-        tier: entitlement.tier,
-        tier_label: entitlement.tierLabel,
-        role: entitlement.role,
-        is_capped: entitlement.isCapped,
-        remaining_spend_usd: Math.max(0, entitlement.spendCapUsd - entitlement.currentSpendUsd),
-        prompt_cache_rebate_pct: entitlement.promptCacheRebatePct
-      }
+      usage_pricing: { status: USAGE_PRICING.status, rates_published: USAGE_PRICING.ratesPublished, basis: USAGE_PRICING.basis, unit: USAGE_PRICING.unit, path: USAGE_PRICING.path }
     },
     {
       headers: {
         'Access-Control-Allow-Origin': '*',
         'Cache-Control': 'no-cache, no-transform',
-        'X-Galx-Seat-Tier': entitlement.tier,
-        'X-Galx-Seat-Role': entitlement.role
       }
     }
   );

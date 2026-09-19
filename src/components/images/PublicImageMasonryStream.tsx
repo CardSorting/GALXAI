@@ -22,7 +22,6 @@ import {
   Eye,
   Grid,
   LayoutGrid,
-  Hash,
   EyeOff,
   ShieldAlert,
   RotateCcw,
@@ -100,30 +99,6 @@ function ratioToCss(ratio: string): string {
   }
 }
 
-function getShowcaseFallbackForRatio(ratio?: string, id?: string): string {
-  const hash = (id || '').split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  switch (ratio) {
-    case '16:9':
-      return hash % 2 === 0 ? '/images/showcase/cinematic_sky_16_9.jpg' : '/images/showcase/cyber_akira_16_9.jpg';
-    case '9:16':
-      return hash % 2 === 0 ? '/images/showcase/elf_princess.jpg' : '/images/showcase/shadow_monarch_9_16.jpg';
-    case '4:3':
-      return '/images/showcase/cinematic_portrait_4_3.jpg';
-    case '3:2':
-      return '/images/showcase/fine_art_oil_3_2.jpg';
-    case '1:1':
-    default: {
-      const square = [
-        '/images/showcase/cafe_cat.jpg',
-        '/images/showcase/render_3d.jpg',
-        '/images/showcase/frieren_fantasy.jpg',
-        '/images/showcase/minimal_vector.jpg',
-      ];
-      return square[hash % square.length];
-    }
-  }
-}
-
 function formatCount(num?: number): string {
   if (!num) return '0';
   if (num >= 1000) return `${(num / 1000).toFixed(1)}k`;
@@ -194,7 +169,6 @@ export function PublicImageMasonryStream({
   const [activeModalIndex, setActiveModalIndex] = useState<number | null>(null);
   const [isZoomed, setIsZoomed] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [copiedSeed, setCopiedSeed] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [toastUndoable, setToastUndoable] = useState(false);
   const [loadedImages, setLoadedImages] = useState<Record<string, boolean>>({});
@@ -366,7 +340,7 @@ export function PublicImageMasonryStream({
 
         const res = await fetch(`/api/images/feed?${params.toString()}`);
         if (!res.ok) {
-          setFetchError('Transient stream error; serving curated collection.');
+          setFetchError('The community stream is unavailable. Try again.');
           return;
         }
 
@@ -398,7 +372,7 @@ export function PublicImageMasonryStream({
           });
         }
       } catch {
-        setFetchError('Stream connection offline; displaying showcase images.');
+        setFetchError('The community stream is offline. Try again.');
       } finally {
         loadingRef.current = false;
         setLoading(false);
@@ -537,15 +511,6 @@ export function PublicImageMasonryStream({
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  // Copy seed helper
-  const handleCopySeed = (e: React.MouseEvent, seed: string) => {
-    e.stopPropagation();
-    navigator.clipboard.writeText(seed);
-    setCopiedSeed(seed);
-    showToast(`Seed #${seed} copied`);
-    setTimeout(() => setCopiedSeed(null), 2000);
-  };
-
   // Like toggle with optimistic UI, local persistence, and server sync
   const handleToggleLike = (e: React.MouseEvent, item: PublicFeedItem) => {
     e.stopPropagation();
@@ -591,12 +556,11 @@ export function PublicImageMasonryStream({
     const params = new URLSearchParams();
     params.set('prompt', item.prompt);
     if (item.aspect_ratio) params.set('aspect_ratio', item.aspect_ratio);
-    if (item.seed) params.set('seed', item.seed);
     params.set('tab', 'creations');
     router.push(`/images?${params.toString()}`);
   };
 
-  // Download image with robust blob resolution and fallback visual resilience
+  // Download the selected public asset with a browser fallback.
   const handleDownload = async (e: React.MouseEvent, item: PublicFeedItem) => {
     e.stopPropagation();
     const downloadUrl = imageSrcMap[item.id] || item.public_url;
@@ -756,25 +720,18 @@ export function PublicImageMasonryStream({
     showToast('Direct creation link copied to clipboard');
   };
 
-  // Tiered fallback image resolver
+  // Prefer a live thumbnail, then the live public asset. Never substitute unrelated artwork.
   const handleImageError = useCallback((item: PublicFeedItem, currentSrc: string) => {
-    setImageSrcMap((prev) => {
-      // Step 1: If thumbnail failed, try public_url if different
-      if (
-        item.thumbnail_url &&
-        currentSrc === item.thumbnail_url &&
-        item.public_url &&
-        item.public_url !== item.thumbnail_url
-      ) {
-        return { ...prev, [item.id]: item.public_url };
-      }
-      // Step 2: Fall back to aspect-ratio-matched showcase visual
-      const fallback = getShowcaseFallbackForRatio(item.aspect_ratio, item.id);
-      if (currentSrc !== fallback) {
-        return { ...prev, [item.id]: fallback };
-      }
-      return prev;
-    });
+    if (
+      item.thumbnail_url &&
+      currentSrc === item.thumbnail_url &&
+      item.public_url &&
+      item.public_url !== item.thumbnail_url
+    ) {
+      setImageSrcMap((prev) => ({ ...prev, [item.id]: item.public_url as string }));
+      return;
+    }
+    setItems((previous) => previous.filter((candidate) => candidate.id !== item.id));
   }, []);
 
   // Deep-link hydration on mount
@@ -1047,7 +1004,7 @@ export function PublicImageMasonryStream({
                     />
                   )}
 
-                  {/* High-res Image with impression trigger & tiered fallback */}
+                  {/* High-res live asset with impression trigger */}
                   <img
                     src={imageSrcMap[item.id] || item.thumbnail_url || item.public_url}
                     alt={item.prompt}
@@ -1182,7 +1139,7 @@ export function PublicImageMasonryStream({
           <p>
             {searchQuery
               ? `No creations found for "${searchQuery}". Try a different search term or clear filters.`
-              : 'The image stream is currently warming up. Create the very first public image!'}
+              : 'No public creations are available yet. Create an image in GALX Images and it can appear here.'}
           </p>
           <Link
             href="/images"
@@ -1334,25 +1291,9 @@ export function PublicImageMasonryStream({
                   </div>
                 </div>
                 <div className="masonry-meta-item">
-                  <div className="masonry-meta-label">Model Engine</div>
-                  <div className="masonry-meta-value">GALX Nova-image</div>
+                  <div className="masonry-meta-label">Service</div>
+                  <div className="masonry-meta-value">GALX Nova</div>
                 </div>
-                {activeModalItem.seed && (
-                  <div
-                    className="masonry-meta-item clickable"
-                    onClick={(e) => handleCopySeed(e, activeModalItem.seed!)}
-                    title="Click to copy seed"
-                  >
-                    <div className="masonry-meta-label">Seed</div>
-                    <div className="masonry-meta-value seed-val">
-                      <Hash size={12} />
-                      <span>{activeModalItem.seed}</span>
-                      {copiedSeed === activeModalItem.seed ? (
-                        <Check size={11} className="text-emerald-400 ml-1" />
-                      ) : null}
-                    </div>
-                  </div>
-                )}
                 <div className="masonry-meta-item">
                   <div className="masonry-meta-label">Visibility</div>
                   <div className="masonry-meta-value">
@@ -1376,9 +1317,6 @@ export function PublicImageMasonryStream({
                     params.set('prompt', activeModalItem.prompt);
                     if (activeModalItem.aspect_ratio) {
                       params.set('aspect_ratio', activeModalItem.aspect_ratio);
-                    }
-                    if (activeModalItem.seed) {
-                      params.set('seed', activeModalItem.seed);
                     }
                     params.set('tab', 'creations');
                     router.push(`/images?${params.toString()}`);

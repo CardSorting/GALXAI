@@ -32,6 +32,9 @@ export async function GET(req: NextRequest) {
           const event = { id: `reconcile_${id}_${remote.payment_status === 'paid' ? 'paid' : 'expired'}`, type: remote.payment_status === 'paid' ? 'checkout.session.completed' : 'checkout.session.expired',
             object: 'event', api_version: '2026-07-29.dahlia', pending_webhooks: 0, request: null,
             created: Math.floor(Date.now()/1000), livemode: remote.livemode, data: { object: remote } } as Stripe.Event;
+          // The durable checkout row already records the Price that passed
+          // the server-side Developer contract check. Reconciliation must not
+          // depend on that Price remaining active in Stripe.
           const result = await fulfillStripeEvent(pool, event, JSON.stringify(event));
           if (result.changedUser) {
             const { WalletRepository } = await import('@/lib/supabase/repositories/WalletRepository');

@@ -11,7 +11,7 @@ import { recordRecentVisit } from '@/lib/resilience/recent-navigation';
 const publicPages = [
   { id: 'images', title: 'Image Studio', href: '/images', category: 'Product', description: 'Create generative images with floating composer.' },
   { id: 'stream', title: 'Community Stream', href: '/#stream', category: 'Product', description: 'Explore live public masonry stream of community creations.' },
-  { id: 'developers', title: 'Developer preview', href: '/developers', category: 'Access', description: 'Request API access and check your waitlist status.' },
+  { id: 'developers', title: 'GALX Nova Developer Access', href: '/developers', category: 'Access', description: 'Subscribe to the $50/month API access membership or review the private preview.' },
   { id: 'billing', title: 'Account and billing', href: BILLING_PATHS.overview, category: 'Account', description: 'Your credits, plan and payments.' },
 ];
 

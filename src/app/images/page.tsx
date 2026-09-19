@@ -5,11 +5,11 @@ import { WorkspacePageGate } from '@/components/auth/WorkspacePageGate';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Image Studio | GALXAI',
+  title: 'GALX Images — Image Studio',
   robots: { index: false, follow: false },
-  description: 'Turn your ideas into images. Create, explore, and revisit your work in the GALXAI image studio.',
+  description: 'Describe an image, create it, and explore what others are making. Powered by GALX Nova.',
   alternates: { canonical: '/images' },
-  openGraph: { title: 'Image Studio | GALXAI', description: 'Create images from a prompt and make them your own.' },
+  openGraph: { title: 'GALX Images — Image Studio', description: 'Describe an image, create it, and explore what others are making. Powered by GALX Nova.' },
 };
 
 export default async function ImagesPage() {

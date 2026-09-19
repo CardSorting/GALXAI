@@ -2,7 +2,6 @@ import { createHash, randomUUID } from 'node:crypto';
 import type { Pool, PoolClient } from 'pg';
 import type Stripe from 'stripe';
 import { fulfillPlanStripeEvent } from './plan-subscription';
-import { PreviewReadSync } from '../supabase/repositories/PreviewReadSync';
 
 type Session = { session_id: string; user_id: string; customer_id: string | null; amount_usd: string; total_credited_usd: string; payment_intent_id: string | null; metadata: Record<string, any> };
 const id = (value: unknown): string | undefined => typeof value === 'string' ? value : value && typeof value === 'object' && 'id' in value ? String(value.id) : undefined;
@@ -37,7 +36,7 @@ async function sessionForPayment(db: PoolClient, payment: string): Promise<Sessi
 
 /** All financial effects and the event receipt commit together. Throwing requests
  * a Stripe retry; a database outage must never fall back to process-local money. */
-export async function fulfillStripeEvent(pool: Pool, event: Stripe.Event, rawBody: string, context: { planAdjustment?: boolean } = {}) {
+export async function fulfillStripeEvent(pool: Pool, event: Stripe.Event, rawBody: string, context: { planAdjustment?: boolean; developerPriceId?: string } = {}) {
   const db = await pool.connect();
   let changedUser: string | undefined;
   let handled = false;
@@ -51,7 +50,7 @@ export async function fulfillStripeEvent(pool: Pool, event: Stripe.Event, rawBod
       await db.query('COMMIT'); return { duplicate: true };
     }
     const object = event.data.object as any;
-    handled = context.planAdjustment === true || await fulfillPlanStripeEvent(db,event);
+    handled = context.planAdjustment === true || await fulfillPlanStripeEvent(db,event,{ developerPriceId: context.developerPriceId });
     if (!handled && event.type.startsWith('checkout.session.')) {
       const payment = id(object.payment_intent);
       if (payment) await db.query('SELECT pg_advisory_xact_lock(hashtextextended($1,0))', [`payment:${payment}`]);
@@ -71,19 +70,9 @@ export async function fulfillStripeEvent(pool: Pool, event: Stripe.Event, rawBod
           if (previous.rows.some(row => row.metadata.checkout_session && row.metadata.checkout_session !== session.session_id)) throw new Error('Payment already fulfilled another checkout');
           if (!session.metadata.fulfilledAt && !previous.rowCount) {
             await ledger(db, session, Number(session.total_credited_usd), Number(session.amount_usd), 'deposit', event.id);
-            const userEmail = session.metadata?.email || object.customer_details?.email || 'developer@galx.ai';
-            await db.query(`INSERT INTO private.developer_access_requests
-              (user_id, email, use_case, expected_traffic, status, reviewed_at, reviewed_by, expires_at)
-              VALUES ($1, $2, $3, 'over_1000_daily', 'approved', now(), 'stripe-fulfillment', NULL)
-              ON CONFLICT (user_id) DO UPDATE SET
-                status = 'approved',
-                reviewed_at = now(),
-                reviewed_by = 'stripe-fulfillment',
-                expires_at = NULL,
-                revision = COALESCE(private.developer_access_requests.revision, 1) + 1`,
-              [session.user_id, userEmail,
-               `Compute tier purchased via checkout: ${(session.metadata as any)?.tierKey ?? 'developer_10'} — ${(session.metadata as any)?.tierLabel ?? 'Developer Tier'}`]);
-            try { PreviewReadSync.for(db).invalidate(session.user_id); } catch {}
+            // A payment may reconcile an historical wallet session, but it
+            // must never create or approve Developer access. Access remains a
+            // separate reviewed request through /developers.
             changedUser = session.user_id;
           }
           await db.query(`UPDATE galx_stripe_checkout_sessions SET status='complete',payment_status='paid',payment_intent_id=$2,

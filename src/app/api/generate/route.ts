@@ -1,4 +1,4 @@
-import { withDeveloperAccess } from '@/lib/security/developer-access';
+import { withDeveloperUsageAccess } from '@/lib/security/developer-access';
 import { NextRequest, NextResponse } from 'next/server';
 import { galxRouter, GalxModelRouter } from '@/core/router/GalxModelRouter';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
@@ -69,7 +69,8 @@ async function previewPOST(req: NextRequest) {
       userId: authResult.userId || 'ollama_user',
       requestId,
       isPriorityUser: authResult.isPriorityUser,
-      headers: req.headers
+      headers: req.headers,
+      usageBillingBasis: 'message'
     });
 
     const createdAt = new Date().toISOString();
@@ -204,5 +205,5 @@ async function previewGET(req: NextRequest) {
   return previewPOST(syntheticReq);
 }
 
-export const POST = withDeveloperAccess(previewPOST);
-export const GET = withDeveloperAccess(previewGET);
+export const POST = withDeveloperUsageAccess(previewPOST);
+export const GET = withDeveloperUsageAccess(previewGET);

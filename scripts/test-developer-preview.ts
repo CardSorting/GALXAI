@@ -4,7 +4,7 @@ import { NextRequest } from 'next/server';
 import { isPublicProductPath, normalizedPath } from '../src/lib/security/preview-policy';
 import { previewMiddleware } from '../src/lib/security/preview-middleware';
 import { generationQuotaRoute } from '../src/lib/billing/generation-quota-route';
-import { enforceDeveloperAccess } from '../src/lib/security/developer-access';
+import { enforceDeveloperAccess, usagePricingUnavailable } from '../src/lib/security/developer-access';
 import { createDeveloperAccessHandlers } from '../src/lib/auth/developer-access-route';
 import { AccountIdentityError } from '../src/lib/auth/accountIdentity';
 import { DeveloperAccessRepository, type PreviewRecord } from '../src/lib/supabase/repositories/DeveloperAccessRepository';
@@ -87,7 +87,7 @@ test('profile validation accepts either profile and rejects hostile URLs and mis
 test('application edits bind to the caller, reject stale revisions and fail closed without leaking diagnostics', async () => {
   let args: unknown[] = []; let conflict = false;
   const record = { ...application, user_id: 'caller', email: 'caller@example.test', status: 'pending' as const, revision: 4, requested_at: new Date(), reviewed_at: null, reviewed_by: 'PRIVATE_SENTINEL' };
-  const repo = { get: async (id: string) => { assert.equal(id, 'caller'); return record; }, updateApplication: async (...input: unknown[]) => { args = input; return conflict ? null : record; } } as unknown as DeveloperAccessRepository;
+  const repo = { get: async (id: string) => { assert.equal(id, 'caller'); return record; }, access: async (id: string) => { assert.equal(id, 'caller'); return { approved: false, record }; }, updateApplication: async (...input: unknown[]) => { args = input; return conflict ? null : record; } } as unknown as DeveloperAccessRepository;
   const handlers = createDeveloperAccessHandlers({ identity: async () => ({ id: 'caller', email: 'caller@example.test', name: 'Caller' }), repository: () => repo });
   const req = (input: unknown, origin = 'https://galx.ai') => new NextRequest('https://galx.ai/api/developer-access?user_id=victim', { method: 'PATCH', headers: { origin, 'content-type': 'application/json' }, body: JSON.stringify(input) });
   const response = await handlers.PATCH(req({ ...application, revision: 3, user_id: 'victim', status: 'approved', role: 'owner' }));
@@ -114,7 +114,7 @@ test('direct handlers deny anonymous execution and key minting before handling i
   }
 });
 
-test('API hostname rechecks approval even for authenticated cached keys and preserves images', async () => {
+test('API hostname rechecks approval for images and closes Developer consumption without usage terms', async () => {
   const { GalxEdgeGateway } = await import('../src/workers/cloudflare/GalxEdgeGateway');
   const gateway = new GalxEdgeGateway({ SUPABASE_URL: 'https://unused.example.test' });
   const internals = gateway as unknown as { authenticateGatewayKey: () => Promise<unknown>; checkRateLimit: () => Promise<boolean>; handleListModels: () => Response; handleImageGenerations: () => Promise<Response> };
@@ -142,8 +142,13 @@ test('API hostname rechecks approval even for authenticated cached keys and pres
     accessStatus = 500; assert.equal((await gateway.handleRequest(request('/v1/models'))).status, 503);
     accessStatus = 307; assert.equal((await gateway.handleRequest(request('/v1/models'))).status, 503);
     const checked = checks;
-    assert.equal((await gateway.handleRequest(request('/v1/images/generations'))).status, 200);
-    assert.equal(checks, checked, 'images never query developer approval');
+    accessStatus = 200;
+    const image = await gateway.handleRequest(new Request('https://api.galx.ai/v1/images/generations', {
+      method: 'POST', headers: { Authorization: 'Bearer galx_live_fixture' }, body: '{}'
+    }));
+    assert.equal(image.status, 503);
+    assert.equal((await image.json()).error.code, 'usage_pricing_not_published');
+    assert.equal(checks, checked + 1, 'images recheck Developer approval before reaching the API boundary');
     globalThis.fetch = async () => { throw new Error('private outage'); };
     assert.equal((await gateway.handleRequest(request('/v1/models'))).status, 503);
   } finally { globalThis.fetch = original; }
@@ -168,29 +173,29 @@ test('authorization probes validate keys without charging request quota or usage
   assert.equal((await repo.validateGatewayKey(apiKey)).valid,true);assert.equal(slots,1);assert.equal(writes,1);
 });
 
-test('grantDeveloperTier activates approved access upon developer tier purchase', async () => {
-  let executedQuery = '';
-  let queryParams: unknown[] = [];
-  const fakeDb = {
-    query: async <T>(sql: string, params: unknown[]): Promise<{ rows: T[]; rowCount: number }> => {
-      executedQuery = sql;
-      queryParams = params;
-      return {
-        rows: [{
-          user_id: params[0] as string, email: params[1] as string, use_case: 'Developer tier purchased via checkout for images and frontier models API access',
-          expected_traffic: 'over_1000_daily', status: 'approved' as const, requested_at: new Date(), reviewed_at: new Date(),
-          expires_at: null, revision: 1,
-        }] as unknown as T[],
-        rowCount: 1,
-      };
-    },
-  };
-  const repo = new DeveloperAccessRepository(fakeDb as any);
-  const granted = await repo.grantDeveloperTier('test-user-id', 'test-user@example.com');
-  assert.equal(granted?.status, 'approved');
-  assert.equal(granted?.user_id, 'test-user-id');
-  assert.match(executedQuery, /INSERT INTO private\.developer_access_requests/);
-  assert.match(executedQuery, /ON CONFLICT \(user_id\) DO UPDATE SET/);
-  assert.equal(queryParams[0], 'test-user-id');
-  assert.equal(queryParams[1], 'test-user@example.com');
+test('Developer Access is a recurring API admission subscription with no usage credits', async () => {
+  const repo = Object.create(DeveloperAccessRepository.prototype) as Record<string, unknown>;
+  assert.equal(typeof repo.grantDeveloperTier, 'undefined');
+  const { DEVELOPER_ACCESS } = await import('../src/lib/billing/pro-plan');
+  assert.equal(DEVELOPER_ACCESS.monthlyPriceUsd, 50);
+  assert.equal(DEVELOPER_ACCESS.interval, 'month');
+  assert.equal(DEVELOPER_ACCESS.checkoutEnabled, true);
+  assert.equal(DEVELOPER_ACCESS.automaticActivation, true);
+  assert.equal(DEVELOPER_ACCESS.usageBilledSeparately, true);
+  assert.equal(DEVELOPER_ACCESS.includedUsageCreditsUsd, 0);
+  assert.equal('minimumEntryUsd' in DEVELOPER_ACCESS, false);
+  assert.equal('stage' in DEVELOPER_ACCESS, false);
+});
+
+test('public inference stays closed until a separate usage contract is published', async () => {
+  const denied = usagePricingUnavailable(new Request('https://galx.ai/v1/chat/completions'));
+  assert(denied);
+  assert.equal(denied.status, 503);
+  const body = await denied.json();
+  assert.deepEqual(body.error, {
+    message: 'API usage is not available until the separate per-message usage-pricing terms are published. Developer Access includes no usage credits.',
+    type: 'service_unavailable',
+    code: 'usage_pricing_not_published',
+    usage_pricing_url: '/pricing/usage',
+  });
 });

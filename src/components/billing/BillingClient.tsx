@@ -3,9 +3,7 @@ import { BILLING_PATHS } from '@/lib/billing/navigation';
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { TopUpForm } from './TopUpForm';
 import { PlanPanel } from './PlanPanel';
-import { CheckoutStatus } from './CheckoutStatus';
 import { useBilling } from './BillingProvider';
 import { billingCsv } from '@/lib/billing/csv';
 import type { BillingPage } from '@/lib/billing/navigation';
@@ -16,10 +14,10 @@ const link = 'inline-flex min-h-11 items-center text-indigo-300 underline underl
 const primary = 'inline-flex min-h-11 items-center justify-center rounded-md border border-indigo-400/40 bg-indigo-500/20 px-4 py-2.5 text-sm font-medium text-indigo-100 hover:bg-indigo-500/30 focus-visible:outline-indigo-300 disabled:cursor-not-allowed disabled:opacity-50';
 const money = (amount: number) => amount.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 6 });
 const date = (value: string) => new Date(value).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'UTC' });
-const types: Record<string, string> = { deposit: 'Top-up', auto_reload: 'Auto-reload', usage_draw: 'Usage', match_grant: 'Credit', refund: 'Refund', adjustment: 'Adjustment' };
-const filters = [['all', 'All transactions'], ['deposit', 'Top-ups'], ['usage', 'Usage'], ['grant', 'Credits'], ['refund', 'Refunds']];
+const types: Record<string, string> = { deposit: 'Account credit', auto_reload: 'Historical reload', usage_draw: 'Usage', match_grant: 'Credit adjustment', refund: 'Refund', adjustment: 'Adjustment' };
+const filters = [['all', 'All transactions'], ['deposit', 'Account credit'], ['usage', 'Usage'], ['grant', 'Credit adjustments'], ['refund', 'Refunds']];
 
-/** Each route renders its own task; the layout retains account state and credit drafts. */
+/** Each route renders its own task; existing account records remain readable. */
 export function BillingClient({ page = 'overview' }: { page?: BillingPage }) {
   const state = useBilling();
   const [planRefresh, setPlanRefresh] = useState(0);
@@ -31,15 +29,16 @@ export function BillingClient({ page = 'overview' }: { page?: BillingPage }) {
       {loading && <p role="status" className="text-sm text-zinc-400">{data ? 'Updating billing details…' : 'Loading billing…'}</p>}
       {page === 'overview' && <>
         <PlanPanel accountId={accountId} token={token} compact refreshKey={planRefresh} />
-        {data && <section aria-labelledby="overview-credit"><div className="flex flex-wrap items-center justify-between gap-3"><h2 id="overview-credit" className="text-xl font-semibold">Prepaid credit</h2><Link href={BILLING_PATHS.credits} className={primary}>Add credit</Link></div><p className="mt-2 text-sm leading-6 text-zinc-400">For API and image usage. Separate from your Pro subscription.</p><BalanceSummary compact /><div className="mt-3 flex flex-wrap gap-x-6"><Link href={BILLING_PATHS.transactions} className={link}>View transactions</Link><Link href="/keys/activity" className={link}>Usage by API key</Link><Link href="/developers/pricing" className={link}>Developer pricing & tiers</Link></div></section>}
+        <UsageSummaryCard />
+        {data && <section aria-labelledby="overview-credit"><div className="flex flex-wrap items-center justify-between gap-3"><h2 id="overview-credit" className="text-xl font-semibold">Account credit</h2><Link href={BILLING_PATHS.credits} className={primary}>View credit</Link></div><p className="mt-2 text-sm leading-6 text-zinc-400">Existing account credit remains visible here. Developer Access is a separate $50/month API access membership; usage is billed separately and no usage credits are included.</p><BalanceSummary compact /><div className="mt-3 flex flex-wrap gap-x-6"><Link href={BILLING_PATHS.transactions} className={link}>View transactions</Link><Link href="/keys/activity" className={link}>Usage by API key</Link><Link href="/developers" className={link}>Subscribe to Developer Access</Link><Link href="/pricing/usage" className={link}>View usage pricing and terms</Link></div></section>}
         <div className="divide-y divide-white/10 border-y border-white/10">{[
           [BILLING_PATHS.invoices, 'Invoices', 'Find invoices and download them from Stripe.'],
           [BILLING_PATHS.payments, 'Payment settings', 'Update the payment methods saved to your account.'],
         ].map(([href, title, description]) => <Link key={href} href={href} className="group block py-5 focus-visible:outline-indigo-300"><span className="text-sm font-medium text-indigo-300 underline-offset-4 group-hover:underline">{title}</span><p className="mt-1 text-sm leading-6 text-zinc-400">{description}</p></Link>)}</div>
       </>}
       {page === 'credits' && <>
-        <CheckoutStatus accountId={accountId} token={token} returnSearch={state.checkoutSearch} onConfirmed={() => void load()} onPending={state.setPaymentPending} />
-        {data && <><BalanceSummary /><section aria-labelledby="add-credit" className="border-t border-white/10 pt-7"><h2 id="add-credit" className="text-xl font-semibold">Add credit</h2>{state.paymentPending ? <p className="mt-3 text-sm leading-6 text-zinc-400">Confirm your current payment above before starting another top-up.</p> : <TopUpForm accountId={accountId} token={token} available={data.paymentsAvailable && !error} draft={{ amount: state.creditAmount, onChange: state.setCreditAmount }} />}</section><div className="border-t border-white/10 pt-5 space-y-2"><p className="text-sm leading-6 text-zinc-400">Credits are <strong className="text-zinc-300 font-medium">non-expiring</strong> — they remain on your balance until consumed by API or image requests. Deposits of $25 and above include compute match bonuses of 50%–100%, giving you up to <strong className="text-zinc-300 font-medium">$1,005 in total credit for a $500 deposit</strong>. Higher tiers also unlock greater concurrency (RPM/TPM).</p><div className="flex flex-wrap gap-x-6"><Link href={BILLING_PATHS.transactions} className={link}>View transactions</Link><Link href="/developers/pricing" className={link}>Compute tiers &amp; match bonuses</Link><Link href={BILLING_PATHS.plan} className={link}>Looking for Pro?</Link></div></div></>}
+        <UsageSummaryCard />
+        {data && <><BalanceSummary /><section aria-labelledby="developer-access" className="border-t border-white/10 pt-7"><h2 id="developer-access" className="text-xl font-semibold">GALX Nova Developer Access</h2><p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-400">$50/month recurring subscription for API access. Usage billed separately. No usage credits included.</p><p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">This membership is separate from account credit and does not create a balance.</p><Link href="/developers" className={`${primary} mt-5`}>Subscribe to Developer Access</Link><Link href="/pricing/usage" className={`${link} mt-4 inline-flex`}>View usage pricing and terms</Link></section><div className="border-t border-white/10 pt-5 space-y-2"><p className="text-sm leading-6 text-zinc-400">This page shows existing account credit and its history. Developer Access membership status is separate from this credit and from usage.</p><div className="flex flex-wrap gap-x-6"><Link href={BILLING_PATHS.transactions} className={link}>View transactions</Link><Link href={BILLING_PATHS.plan} className={link}>View GALX Pro</Link></div></div></>}
       </>}
       {page === 'transactions' && data && <Transactions />}
       {page === 'invoices' && <Invoices />}
@@ -48,30 +47,28 @@ export function BillingClient({ page = 'overview' }: { page?: BillingPage }) {
   </div>;
 }
 
+function UsageSummaryCard() {
+  const { usage, usageLoading, usageError } = useBilling();
+  if (usageLoading && !usage) return <section aria-labelledby="usage-summary" className="border-y border-white/10 py-6"><p role="status" className="text-sm text-zinc-400">Loading message usage…</p></section>;
+  if (usageError && !usage) return <section aria-labelledby="usage-summary" className="border-y border-white/10 py-6"><h2 id="usage-summary" className="text-xl font-semibold">Message usage</h2><p role="alert" className="mt-2 text-sm leading-6 text-amber-200">{usageError} Your requests and billing terms are unchanged.</p></section>;
+  if (!usage) return null;
+  const { currentPeriod: period } = usage;
+  const reset = period.resetAt ? new Date(period.resetAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' }) : 'next month';
+  return <section aria-labelledby="usage-summary" className="border-y border-white/10 py-6">
+    <div className="flex flex-wrap items-start justify-between gap-4"><div><h2 id="usage-summary" className="text-xl font-semibold">Message usage</h2><p className="mt-2 max-w-xl text-sm leading-6 text-zinc-400">Completed messages are billed at {money(usage.rateUsd)} each. Your default monthly hard cap is {money(usage.monthlyCapUsd)}.</p></div><Link href="/pricing/usage" className={link}>View terms</Link></div>
+    <div className="mt-5 h-2 overflow-hidden rounded-full bg-white/10" role="progressbar" aria-label="Monthly message usage" aria-valuemin={0} aria-valuemax={100} aria-valuenow={period.percentUsed}><div className={`h-full rounded-full ${period.percentUsed >= 80 ? 'bg-amber-300' : 'bg-indigo-300'}`} style={{ width: `${Math.min(100, period.percentUsed)}%` }} /></div>
+    <dl className="mt-4 grid grid-cols-2 gap-5 sm:grid-cols-4"><div><dt className="text-xs text-zinc-500">Completed</dt><dd className="mt-1 text-lg font-medium tabular-nums">{period.completedMessages.toLocaleString()}</dd></div><div><dt className="text-xs text-zinc-500">Pending</dt><dd className="mt-1 text-lg font-medium tabular-nums">{period.pendingMessages.toLocaleString()}</dd></div><div><dt className="text-xs text-zinc-500">Accrued</dt><dd className="mt-1 text-lg font-medium tabular-nums">{money(period.accruedUsd)}</dd></div><div><dt className="text-xs text-zinc-500">Remaining</dt><dd className="mt-1 text-lg font-medium tabular-nums">{money(period.remainingUsd)}</dd></div></dl>
+    <p className="mt-4 text-xs leading-5 text-zinc-500">Resets {reset} UTC. Requests stop at the cap until the next reset.</p>
+    {usage.notifications.length > 0 && <div className="mt-5 space-y-3" aria-label="Usage notifications">{usage.notifications.map(notification => <div key={notification.id || notification.thresholdPercent} className={`rounded-md border px-4 py-3 text-sm ${notification.thresholdPercent >= 80 ? 'border-amber-300/30 bg-amber-300/5 text-amber-100' : 'border-white/10 bg-white/[0.03] text-zinc-200'}`}><p className="font-medium">{notification.title}</p><p className={`mt-1 leading-6 ${notification.thresholdPercent >= 80 ? 'text-amber-50' : 'text-zinc-400'}`}>{notification.body}</p></div>)}</div>}
+  </section>;
+}
+
 function BalanceSummary({ compact = false }: { compact?: boolean }) {
   const { data } = useBilling();
   if (!data) return null;
   const figures = [['Available credit', data.summary.balanceUsd], ['Usage this month · UTC', data.summary.currentMonthSpendUsd], ...(!compact ? [['Total deposited', data.summary.depositedTotalUsd]] : [])] as [string, number][];
-  const tierName = data.summary.tierName || 'Developer Tier';
-  const tierRpm = data.summary.tierRpm || 20;
-  const tierTpm = data.summary.tierTpm || 20000;
-  const tpmDisplay = tierTpm >= 1000000 ? `${(tierTpm / 1000000).toLocaleString()}M TPM` : `${(tierTpm / 1000).toLocaleString()}k TPM`;
-
   return (
     <>
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/[0.02] px-4 py-3">
-        <div className="flex flex-wrap items-center gap-2.5">
-          <span className="inline-flex items-center rounded-md border border-indigo-500/30 bg-indigo-500/10 px-2.5 py-1 text-xs font-semibold uppercase tracking-wider text-indigo-300">
-            {tierName}
-          </span>
-          <span className="text-xs text-zinc-400">
-            Throughput: <strong className="font-medium text-zinc-200">{tierRpm === 10000 ? 'Unlimited' : `${tierRpm} RPM`}</strong> · <span className="text-zinc-300">{tpmDisplay}</span>
-          </span>
-        </div>
-        <Link href="/developers/pricing" className="text-xs text-indigo-300 underline underline-offset-4 hover:text-indigo-200">
-          Tier limits & perks →
-        </Link>
-      </div>
       <dl className={`mt-5 grid grid-cols-1 gap-6 min-[400px]:grid-cols-2 ${compact ? '' : 'lg:grid-cols-3'}`}>
         {figures.map(([label, value]) => (
           <div key={label} className="min-w-0">
@@ -82,7 +79,7 @@ function BalanceSummary({ compact = false }: { compact?: boolean }) {
       </dl>
       {data.summary.paymentDebtUsd > 0 && (
         <p className="mt-4 text-sm leading-6 text-amber-200">
-          {money(data.summary.paymentDebtUsd)} outstanding from a payment adjustment. Your next top-up covers this first.
+          {money(data.summary.paymentDebtUsd)} outstanding from a payment adjustment. Contact billing support before making another payment.
         </p>
       )}
     </>
@@ -101,7 +98,7 @@ function Transactions() {
     <div className="flex flex-wrap items-end justify-between gap-4"><div><label className="mb-2 block text-sm text-zinc-400" htmlFor="transaction-type">Transaction type</label><select id="transaction-type" value={filter} onChange={event => setFilter(event.target.value)} className={`${control} max-w-full`}>{filters.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></div><button type="button" className={button} onClick={exportHistory} disabled={loading || loadingMore || Boolean(error) || !rowsMatch || !data.transactions.length}>Export loaded rows</button></div>
     <p className="mt-4 text-sm leading-6 text-zinc-400">Newest first. All dates are UTC. Exports include the rows loaded below.</p>
     {!rowsMatch && <p role="status" className="mt-3 text-sm text-amber-200">The selected filter has not loaded yet. Showing {filters.find(([value]) => value === loadedFilter)?.[1].toLowerCase()} from your last check.</p>}
-    {!data.transactions.length ? <div className="border-b border-white/10 py-9"><h2 className="font-medium">{loadedFilter === 'all' ? 'No transactions yet' : 'No matching transactions'}</h2><p className="mt-2 text-sm leading-6 text-zinc-400">{loadedFilter === 'all' ? 'Credit added and usage will appear here after they are recorded.' : 'Choose another transaction type to see more activity.'}</p><Link href={loadedFilter === 'all' ? BILLING_PATHS.credits : BILLING_PATHS.invoices} className={`${link} mt-3`}>{loadedFilter === 'all' ? 'Add credit' : 'Looking for an invoice?'}</Link></div> : <>
+    {!data.transactions.length ? <div className="border-b border-white/10 py-9"><h2 className="font-medium">{loadedFilter === 'all' ? 'No transactions yet' : 'No matching transactions'}</h2><p className="mt-2 text-sm leading-6 text-zinc-400">{loadedFilter === 'all' ? 'Existing account activity will appear here when it is recorded.' : 'Choose another transaction type to see more activity.'}</p><Link href={loadedFilter === 'all' ? BILLING_PATHS.credits : BILLING_PATHS.invoices} className={`${link} mt-3`}>{loadedFilter === 'all' ? 'View account credit' : 'Looking for an invoice?'}</Link></div> : <>
       <div className="mt-4 hidden overflow-x-auto rounded-lg border border-white/10 sm:block"><table className="w-full text-left text-sm"><caption className="sr-only">Account transactions, newest first</caption><thead className="bg-white/[0.03] text-zinc-400"><tr>{['Date (UTC)', 'Transaction', 'Amount', 'Balance after'].map(heading => <th scope="col" key={heading} className="px-3 py-3 font-medium">{heading}</th>)}</tr></thead><tbody>{data.transactions.map(row => <tr key={row.id} className="border-t border-white/10"><td className="whitespace-nowrap px-3 py-3 text-xs text-zinc-400">{date(row.createdAt)}</td><td className="min-w-40 px-3 py-3"><span>{types[row.type] || 'Adjustment'}</span><p className="mt-1 max-w-sm break-words text-xs leading-5 text-zinc-400">{row.description}</p></td><td className="whitespace-nowrap px-3 py-3 tabular-nums">{row.amountUsd > 0 ? '+' : ''}{money(row.amountUsd)}</td><td className="whitespace-nowrap px-3 py-3 tabular-nums">{money(row.balanceAfterUsd)}</td></tr>)}</tbody></table></div>
       <ul className="mt-4 divide-y divide-white/10 border-y border-white/10 sm:hidden">{data.transactions.map(row => <li key={row.id} className="space-y-2 py-4 text-sm"><div className="flex flex-wrap justify-between gap-3"><span>{types[row.type] || 'Adjustment'}</span><span className="break-words tabular-nums">{row.amountUsd > 0 ? '+' : ''}{money(row.amountUsd)}</span></div><p className="break-words text-xs leading-5 text-zinc-400">{row.description}</p><div className="flex flex-wrap justify-between gap-2 text-xs text-zinc-400"><span>{date(row.createdAt)} UTC</span><span className="break-words">Balance {money(row.balanceAfterUsd)}</span></div></li>)}</ul>
     </>}
@@ -126,7 +123,7 @@ function Invoices() {
 
 function PaymentSettings() {
   const { data } = useBilling();
-  return <div className="space-y-8"><section aria-labelledby="payment-methods"><h2 id="payment-methods" className="text-xl font-semibold">Payment methods</h2><p className="mb-5 mt-3 max-w-2xl text-sm leading-6 text-zinc-400">{data && !data.hasCustomer ? 'Your billing profile is created when you start a subscription or credit checkout.' : 'Open Stripe to review or update your saved payment methods. You can return to GALX when you’re done.'}</p><PortalButton />{data && !data.hasCustomer && <div className="mt-3 flex flex-wrap gap-x-6"><Link href={BILLING_PATHS.plan} className={link}>Explore Pro</Link><Link href={BILLING_PATHS.credits} className={link}>Add credit</Link></div>}</section>
+  return <div className="space-y-8"><section aria-labelledby="payment-methods"><h2 id="payment-methods" className="text-xl font-semibold">Payment methods</h2><p className="mb-5 mt-3 max-w-2xl text-sm leading-6 text-zinc-400">{data && !data.hasCustomer ? 'Your billing profile is created when you subscribe to GALX Pro or GALX Nova Developer Access.' : 'Open Stripe to review or update your saved payment methods. You can return to GALX when you’re done.'}</p><PortalButton />{data && !data.hasCustomer && <div className="mt-3 flex flex-wrap gap-x-6"><Link href={BILLING_PATHS.plan} className={link}>Explore Pro</Link><Link href="/developers" className={link}>Subscribe to Developer Access</Link></div>}</section>
     {data?.summary.autoReloadEnabled && <section className="border-t border-white/10 pt-6"><h2 className="font-semibold">Automatic reload</h2><p className="mt-2 text-sm leading-6 text-zinc-400">Auto-reload is enabled on this account. Contact <a href="mailto:support@galx.ai" className="text-indigo-300 underline underline-offset-4">billing support</a> to change it.</p></section>}
     <section className="border-t border-white/10 pt-6"><h2 className="font-semibold">More billing options</h2><div className="mt-2 flex flex-wrap gap-x-6"><Link href={BILLING_PATHS.plan} className={link}>Manage your plan</Link><Link href={BILLING_PATHS.invoices} className={link}>View invoices</Link></div></section>
   </div>;

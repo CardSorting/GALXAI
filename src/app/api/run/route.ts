@@ -1,4 +1,4 @@
-import { withDeveloperAccess } from '@/lib/security/developer-access';
+import { withDeveloperUsageAccess } from '@/lib/security/developer-access';
 import { POST as generateImage } from '@/app/v1/images/generations/route';
 import { NextRequest, NextResponse } from 'next/server';
 import { GalxTaskQueueEngine } from '@/core/queue/GalxTaskQueueEngine';
@@ -129,4 +129,4 @@ async function previewPOST(req: NextRequest) {
   }
 }
 
-export const POST = withDeveloperAccess(previewPOST);
+export const POST = withDeveloperUsageAccess(previewPOST);

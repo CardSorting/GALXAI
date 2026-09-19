@@ -218,7 +218,8 @@ async function previewPOST(req: NextRequest) {
       );
     }
 
-    // Welcome credit is spendable balance, never proof of a paid deposit.
+    // Historical wallet state can still influence legacy operational limits,
+    // but it never creates Developer access or a usage allowance.
     const tier = await getAccountTier(userId);
     const computePool: 'shared_community' | 'priority_dedicated' = tier.isPaid ? 'priority_dedicated' : 'shared_community';
     const effectiveRpm = rateLimitPerMinute !== undefined
@@ -245,7 +246,6 @@ async function previewPOST(req: NextRequest) {
       expiresAtMs,
       checksum,
       computePool,
-      freeMonthlyGrantUsd: 30.00,
       defaultCompactionMode: cleanCompactionMode,
     };
 
@@ -257,7 +257,7 @@ async function previewPOST(req: NextRequest) {
 
     persistence.logAudit(
       'GATEWAY_KEY_CREATED',
-      { keyId, keyPrefix, name: cleanName, environment: cleanEnv, scopes: cleanScopes, computePool, freeMonthlyGrantUsd: 30.00 },
+      { keyId, keyPrefix, name: cleanName, environment: cleanEnv, scopes: cleanScopes, computePool },
       keyId,
       userId
     );

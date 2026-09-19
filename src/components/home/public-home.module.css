@@ -39,6 +39,8 @@
 .shootingStar::after { content: ''; position: absolute; right: 0; top: -1px; width: 4px; height: 4px; border-radius: 50%; background: var(--home-fg); }
 .page:not([data-sky-active="true"]) :is(.skyParallax, .orbits) { transform: none; transition: none; }
 .heroCopy h1 { margin: 0; max-width: none; font-size: clamp(3rem, 5vw, 3.75rem); font-weight: 600; line-height: 1.04; letter-spacing: -.04em; }
+.heroEyebrow, .homeSectionEyebrow, .homeBenefitEyebrow { display: inline-flex; align-items: center; gap: 8px; color: var(--home-accent); font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.heroEyebrow { margin-bottom: 18px; }
 .lede { max-width: 43ch; margin-top: 28px; font-size: 20px; line-height: 1.65; color: #d4d4d8; }
 .lede strong { font-weight: 500; color: var(--home-fg); }
 .heroNote { max-width: 45ch; margin-top: 16px; font-size: 16px; line-height: 1.7; color: #d4d4d8; }
@@ -62,6 +64,13 @@
 .exampleLabel { display: flex; justify-content: space-between; gap: 16px; margin-bottom: 14px; font-size: 12px; line-height: 1.5; }
 .exampleLabel > span:last-child { color: #d4d4d8; }
 .exampleSheet { position: relative; overflow: hidden; border-radius: 12px; box-shadow: 0 20px 48px rgba(0, 0, 0, 0.4); }
+.creationPreview { min-height: 440px; display: flex; flex-direction: column; justify-content: center; gap: 24px; padding: clamp(28px, 5vw, 56px); background: radial-gradient(circle at 65% 35%, rgba(99, 102, 241, .32), transparent 34%), linear-gradient(145deg, #12172c, #080a10 70%); }
+.creationPreviewOrb { display: grid; place-items: center; width: 74px; height: 74px; border: 1px solid rgba(251, 191, 36, .45); border-radius: 50%; color: var(--home-accent); background: rgba(251, 191, 36, .08); box-shadow: 0 0 46px rgba(251, 191, 36, .18); }
+.creationPreviewLabel { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; color: var(--home-fg); font-size: 13px; font-weight: 600; }
+.creationPreviewLabel span:last-child { color: var(--home-muted); font-weight: 400; }
+.creationPreview p { max-width: 14ch; margin: 0; color: var(--home-fg); font-size: clamp(2rem, 4vw, 3rem); font-weight: 500; line-height: 1.05; letter-spacing: -.04em; }
+.creationPreviewPrompt { display: flex; align-items: center; gap: 10px; max-width: 34rem; min-height: 52px; padding: 14px 16px; border: 1px solid var(--home-line); border-radius: 8px; color: var(--home-muted); font-size: 13px; line-height: 1.5; }
+.creationPreviewFooter { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; padding: 14px 18px; border-top: 1px solid var(--home-line); color: var(--home-muted); font-size: 12px; }
 .exampleSheet::after { content: ''; position: absolute; top: 0; inset-inline: 0; height: 2px; background: var(--home-accent); transform: scaleX(0); transform-origin: left; transition: transform .36s var(--home-ease); pointer-events: none; }
 .exampleSheet[data-revised="true"]::after { transform: scaleX(1); }
 .exampleAddress { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 12px 20px; background: #14192d; font-size: 12px; color: #d4d4d8; }
@@ -479,6 +488,9 @@
   color: #94a3b8;
   margin: 0;
 }
+.homeSectionEyebrow { justify-content: center; margin-bottom: 14px; }
+.homeStream { max-width: 1440px; margin-inline: auto; }
+.homeBenefitEyebrow { margin-bottom: 10px; color: var(--home-muted); font-size: 11px; }
 
 /* --- Curated Showcase Grid on Homepage --- */
 .showcaseGrid {
@@ -1000,4 +1012,3 @@
     gap: 16px;
   }
 }
-

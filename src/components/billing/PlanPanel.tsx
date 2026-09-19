@@ -109,7 +109,7 @@ export function PlanPanel({ token, accountId, compact = false, returnSearch, ref
   let detail = 'Checking your plan…';
   if (status) {
     title = included || ['active', 'ending', 'payment_required', 'paused', 'processing'].includes(subscription?.state || '') ? PRO_PLAN.name : 'Your plan';
-    detail = included ? 'Pro access is active. High-resolution image synthesis and priority GPU queues are active.' : 'Choose Pro for high-resolution image generation and priority GPU queues.';
+    detail = included ? 'Pro access is active for the published Image Studio experience.' : 'Choose Pro to use the published Image Studio plan.';
     if (subscription?.state === 'ending') detail = included ? 'Your subscription is set to end. Pro access is still active.' : 'Your subscription is set to end. Check billing for your current access.';
     else if (paymentRequired) detail = 'Your subscription needs a payment update. Review it in billing to continue.';
     else if (subscription?.state === 'paused') detail = 'Your subscription is paused. Review it in billing.';
@@ -127,10 +127,10 @@ export function PlanPanel({ token, accountId, compact = false, returnSearch, ref
       <button type="button" className={control} disabled={loading || Boolean(busy)} onClick={() => void load()}>{loading && status ? 'Refreshing…' : 'Refresh plan'}</button>
     </div>
     <dl className="mt-5 grid gap-4 text-sm sm:grid-cols-2">
-      <div><dt className="text-zinc-400">{included ? 'Included with Pro' : ['none', 'canceled'].includes(subscription?.state || '') ? 'Available plan' : 'Plan'}</dt><dd className="mt-1 leading-6 text-zinc-100">{included ? 'High-resolution image generation and public stream · one account' : `${PRO_PLAN.name} · $${PRO_PLAN.monthlyPriceUsd} / month · one account`}</dd></div>
+      <div><dt className="text-zinc-400">{included ? 'Included with Pro' : ['none', 'canceled'].includes(subscription?.state || '') ? 'Available plan' : 'Plan'}</dt><dd className="mt-1 leading-6 text-zinc-100">{included ? 'Published Image Studio access · one account' : `${PRO_PLAN.name} · $${PRO_PLAN.monthlyPriceUsd} / month · one account`}</dd></div>
       {subscription?.endsAt ? <div><dt className="text-zinc-400">Subscription ends</dt><dd className="mt-1 leading-6 text-zinc-100">{date(subscription.endsAt)} · UTC</dd></div> : subscription?.periodEnd ? <div><dt className="text-zinc-400">Current billing period ends</dt><dd className="mt-1 leading-6 text-zinc-100">{date(subscription.periodEnd)} · UTC</dd></div> : null}
     </dl>
-    <p className="mt-4 max-w-2xl text-sm leading-6 text-zinc-400">GALX Pro includes unlimited high-resolution image generations and priority synthesis queues.</p>
+    <p className="mt-4 max-w-2xl text-sm leading-6 text-zinc-400">GALX Pro follows the published Image Studio terms and fair-use boundaries.</p>
     <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">{subscription?.state === 'ending' ? 'Renewal is canceled. Review your subscription in billing; access continues through the paid period.' : 'Paid subscriptions renew monthly. Cancel in Manage subscription; access continues through the paid period.'}</p>
     {returned === 'canceled' && <p role="status" className="mt-4 text-sm leading-6 text-zinc-300">Checkout was closed. You can resume when you’re ready.</p>}
     {confirming && <p role="status" className="mt-4 text-sm leading-6 text-zinc-300">{waiting ? 'Confirming your subscription… This can take a moment.' : 'Your subscription is still being confirmed. Refresh your plan or open billing before paying again.'}</p>}

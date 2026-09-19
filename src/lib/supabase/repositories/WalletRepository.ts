@@ -1,7 +1,7 @@
 /**
- * GALXAI: Supabase Developer Compute Wallet & Micro-Billing Repository + BroccoliDB Hot Tables
- * High-precision ledger, 50% instant match compute verification ($10 deposit -> $15 credit),
- * real-time token deduction down to $0.000001 precision, and auto-reload safeguards.
+ * GALX: Supabase account-credit ledger and BroccoliDB projections.
+ * Historical wallet settlement records remain readable while new Developer
+ * access is handled by the separate reviewed request path.
  * Backed by BroccoliDB L1 reactive tables with secondary indexing, natural query parsing, and aggregation.
  */
 
@@ -12,7 +12,7 @@ import type { Database, GalxWalletTransactionType } from '../types';
 import { BroccoliDbTable } from '../../../core/broccolidb/broccolidb-table';
 import { BroccoliNaturalQueryParser } from '../../../core/broccolidb/broccolidb-natural-query';
 import type { DbQueryOptions, DbAggregateQuery, DbAggregateResult } from '../../../core/broccolidb/broccolidb.contracts';
-import { calculateComputeCredit } from '../../stripe/config';
+import { calculateLegacyComputeCredit } from '../../billing/legacy-wallet-pricing';
 import { GalxRequestCoalescer } from '../../cache/GalxRequestCoalescer';
 import { GalxBatchDataLoader } from '../../cache/GalxBatchDataLoader';
 import { randomUUID } from 'node:crypto';
@@ -194,10 +194,7 @@ export class WalletRepository {
     return wallet;
   }
 
-  /**
-   * 50% Instant Match Compute Verification (ADR 0007)
-   * Minimum $10 deposit matches with $5 introductory developer compute grant ($15 total).
-   */
+  /** Historical payment settlement entry point; not a new Developer access grant. */
   async verifyDepositAndApplyMatch(params: {
     userId: string;
     depositAmountUsd: number;
@@ -1274,7 +1271,7 @@ export class WalletRepository {
   }) {
     const wallet = await this.createOrGetWallet(params.userId);
     const deposit = Math.max(0, Number(params.depositAmountUsd) || 0);
-    const credit = calculateComputeCredit(deposit);
+    const credit = calculateLegacyComputeCredit(deposit);
 
     const welcomeGrant = wallet.proofOfDepositVerified ? 0 : credit.welcomeGrant;
     const matchBonus = credit.matchBonus;

@@ -14,178 +14,12 @@ export interface PublicFeedItem {
   thumbnail_url?: string;
   created_at: string;
   lqip: string | null;
-  seed: string | null;
-  model: string;
   likes_count?: number;
   remix_count?: number;
   views_count?: number;
-  tags?: string[];
 }
 
 const ALLOWED_ASPECT_RATIOS = new Set(['1:1', '16:9', '9:16', '3:2', '4:3', '2:3', '3:4']);
-
-const SHOWCASE_ITEMS: PublicFeedItem[] = [
-  {
-    id: 'showcase-cafe-cat',
-    prompt: 'An orange tabby cat wearing round glasses and cozy plaid shirt, typing on a laptop at a wooden Starbucks cafe table with a latte, photorealistic 8k',
-    aspect_ratio: '1:1',
-    dimensions: '1024x1024',
-    public_url: '/images/showcase/cafe_cat.jpg',
-    thumbnail_url: '/images/showcase/cafe_cat_thumb.jpg',
-    created_at: new Date(Date.now() - 1000 * 60 * 12).toISOString(),
-    lqip: null,
-    seed: '48291',
-    model: 'galx-nova-image',
-    likes_count: 384,
-    remix_count: 62,
-    views_count: 2190,
-    tags: ['photorealistic', 'animals']
-  },
-  {
-    id: 'showcase-blonde-elf',
-    prompt: 'A celestial blonde horned elf princess with piercing emerald green eyes, golden tiara and cyan gem necklace, anime aesthetic high detail key visual',
-    aspect_ratio: '9:16',
-    dimensions: '768x1376',
-    public_url: '/images/showcase/elf_princess.jpg',
-    thumbnail_url: '/images/showcase/elf_princess_thumb.jpg',
-    created_at: new Date(Date.now() - 1000 * 60 * 25).toISOString(),
-    lqip: null,
-    seed: '91823',
-    model: 'galx-nova-image',
-    likes_count: 512,
-    remix_count: 94,
-    views_count: 3410,
-    tags: ['anime', 'fantasy']
-  },
-  {
-    id: 'showcase-cinematic-sky',
-    prompt: 'Cinematic anime visual scene, dramatic sweeping lens flare, rich cloudscapes and glowing horizons, Makoto Shinkai quality emotional lighting',
-    aspect_ratio: '16:9',
-    dimensions: '1024x576',
-    public_url: '/images/showcase/cinematic_sky_16_9.jpg',
-    thumbnail_url: '/images/showcase/cinematic_sky_16_9_thumb.jpg',
-    created_at: new Date(Date.now() - 1000 * 60 * 40).toISOString(),
-    lqip: null,
-    seed: '77215',
-    model: 'galx-nova-image',
-    likes_count: 279,
-    remix_count: 41,
-    views_count: 1840,
-    tags: ['cinematic', 'anime']
-  },
-  {
-    id: 'showcase-shadow-monarch',
-    prompt: 'High-impact cinematic manhwa digital rendering, glowing violet and blue aura, sharp specular highlights, dynamic shadow monarch action illustration',
-    aspect_ratio: '9:16',
-    dimensions: '576x1024',
-    public_url: '/images/showcase/shadow_monarch_9_16.jpg',
-    thumbnail_url: '/images/showcase/shadow_monarch_9_16_thumb.jpg',
-    created_at: new Date(Date.now() - 1000 * 60 * 55).toISOString(),
-    lqip: null,
-    seed: '63810',
-    model: 'galx-nova-image',
-    likes_count: 420,
-    remix_count: 87,
-    views_count: 2950,
-    tags: ['anime', 'action']
-  },
-  {
-    id: 'showcase-render-3d',
-    prompt: 'A futuristic isometric 3D render, glowing volumetric lighting, glassmorphism textures, Unreal Engine 5 ambient occlusion and neon reflections',
-    aspect_ratio: '1:1',
-    dimensions: '1024x1024',
-    public_url: '/images/showcase/render_3d.jpg',
-    thumbnail_url: '/images/showcase/render_3d_thumb.jpg',
-    created_at: new Date(Date.now() - 1000 * 60 * 70).toISOString(),
-    lqip: null,
-    seed: '51294',
-    model: 'galx-nova-image',
-    likes_count: 195,
-    remix_count: 29,
-    views_count: 1320,
-    tags: ['3d', 'cyberpunk']
-  },
-  {
-    id: 'showcase-cyber-akira',
-    prompt: 'Meticulously detailed retro-futurist cyberpunk anime illustration, dense line work rendering urban decay and technology, flat cel-shaded colors, dramatic neon shadow contrast',
-    aspect_ratio: '16:9',
-    dimensions: '1024x576',
-    public_url: '/images/showcase/cyber_akira_16_9.jpg',
-    thumbnail_url: '/images/showcase/cyber_akira_16_9_thumb.jpg',
-    created_at: new Date(Date.now() - 1000 * 60 * 85).toISOString(),
-    lqip: null,
-    seed: '34912',
-    model: 'galx-nova-image',
-    likes_count: 641,
-    remix_count: 112,
-    views_count: 4290,
-    tags: ['cyberpunk', 'anime']
-  },
-  {
-    id: 'showcase-frieren-fantasy',
-    prompt: 'Frieren Fantasy Anime Style: Gentle atmospheric fantasy anime illustration, soft delicate linework, muted cel shading with subtle gradation, hushed melancholic stillness, elf mage fantasy scene',
-    aspect_ratio: '1:1',
-    dimensions: '1024x1024',
-    public_url: '/images/showcase/frieren_fantasy.jpg',
-    thumbnail_url: '/images/showcase/frieren_fantasy_thumb.jpg',
-    created_at: new Date(Date.now() - 1000 * 60 * 98).toISOString(),
-    lqip: null,
-    seed: '18204',
-    model: 'galx-nova-image',
-    likes_count: 388,
-    remix_count: 53,
-    views_count: 2470,
-    tags: ['fantasy', 'anime']
-  },
-  {
-    id: 'showcase-cinematic-portrait',
-    prompt: 'A stunning 35mm cinematic photograph, professional editorial portraiture, Rembrandt chiaroscuro lighting, shallow depth of field, sharp detail, rich film grain',
-    aspect_ratio: '4:3',
-    dimensions: '1024x768',
-    public_url: '/images/showcase/cinematic_portrait_4_3.jpg',
-    thumbnail_url: '/images/showcase/cinematic_portrait_4_3_thumb.jpg',
-    created_at: new Date(Date.now() - 1000 * 60 * 110).toISOString(),
-    lqip: null,
-    seed: '29481',
-    model: 'galx-nova-image',
-    likes_count: 310,
-    remix_count: 38,
-    views_count: 1980,
-    tags: ['photorealistic', 'cinematic']
-  },
-  {
-    id: 'showcase-fine-art-oil',
-    prompt: 'A textured impasto Renaissance oil painting, thick palette knife brushstrokes, golden patina, dramatic Rembrandt lighting, museum fine art masterpiece',
-    aspect_ratio: '3:2',
-    dimensions: '1024x682',
-    public_url: '/images/showcase/fine_art_oil_3_2.jpg',
-    thumbnail_url: '/images/showcase/fine_art_oil_3_2_thumb.jpg',
-    created_at: new Date(Date.now() - 1000 * 60 * 130).toISOString(),
-    lqip: null,
-    seed: '99120',
-    model: 'galx-nova-image',
-    likes_count: 247,
-    remix_count: 31,
-    views_count: 1620,
-    tags: ['fantasy', 'art']
-  },
-  {
-    id: 'showcase-minimal-vector',
-    prompt: 'A modern minimalist flat vector illustration poster, clean geometric shapes, sophisticated duotone pastel color palette, sleek graphic design',
-    aspect_ratio: '1:1',
-    dimensions: '1024x1024',
-    public_url: '/images/showcase/minimal_vector.jpg',
-    thumbnail_url: '/images/showcase/minimal_vector_thumb.jpg',
-    created_at: new Date(Date.now() - 1000 * 60 * 145).toISOString(),
-    lqip: null,
-    seed: '84019',
-    model: 'galx-nova-image',
-    likes_count: 182,
-    remix_count: 22,
-    views_count: 1190,
-    tags: ['minimalist']
-  }
-];
 
 /**
  * GET /api/images/feed
@@ -277,8 +111,6 @@ export async function GET(req: NextRequest) {
         public_url,
         created_at,
         lqip,
-        seed,
-        model,
         likes_count,
         remix_count,
         views_count
@@ -324,41 +156,13 @@ export async function GET(req: NextRequest) {
         thumbnail_url: thumbnailUrl,
         created_at: new Date(r.created_at).toISOString(),
         lqip: r.lqip || null,
-        seed: r.seed || null,
-        model: r.model || 'galx-nova-image',
         likes_count: Number(r.likes_count || 0),
         remix_count: Number(r.remix_count || 0),
         views_count: Number(r.views_count || 0),
       };
     });
   } catch {
-    // Database connection or table not yet populated; proceed gracefully to showcase fallback
-  }
-
-  // On first page, combine live community creations with curated showcase items
-  if (!cursor) {
-    let filteredShowcase = SHOWCASE_ITEMS.filter(it => {
-      if (aspectRatio && it.aspect_ratio !== aspectRatio) return false;
-      if (q && !it.prompt.toLowerCase().includes(q.toLowerCase())) return false;
-      if (tag && tag !== 'all') {
-        const matchesTag = it.tags?.some(t => t.toLowerCase() === tag) || it.prompt.toLowerCase().includes(tag);
-        if (!matchesTag) return false;
-      }
-      return true;
-    });
-
-    if (sort === 'trending') {
-      filteredShowcase = [...filteredShowcase].sort((a, b) => (b.likes_count || 0) - (a.likes_count || 0));
-    }
-
-    const existingPrompts = new Set(items.map(it => it.prompt.trim().toLowerCase()));
-    const additionalShowcase = filteredShowcase.filter(it => !existingPrompts.has(it.prompt.trim().toLowerCase()));
-
-    if (sort === 'trending') {
-      items = [...items, ...additionalShowcase].sort((a, b) => (b.likes_count || 0) - (a.likes_count || 0));
-    } else {
-      items = [...items, ...additionalShowcase];
-    }
+    // Keep the public stream empty when the live feed is unavailable.
   }
 
   // If a specific creation ID was requested, ensure it is prioritized at index 0 of the feed
@@ -368,13 +172,9 @@ export async function GET(req: NextRequest) {
       const targetItem = items[existingIndex];
       items = [targetItem, ...items.filter((_, i) => i !== existingIndex)];
     } else if (existingIndex === -1) {
-      const showcaseMatch = SHOWCASE_ITEMS.find(it => it.id === requestedId);
-      if (showcaseMatch) {
-        items.unshift(showcaseMatch);
-      } else {
-        try {
+      try {
           const directRes = await executePostgresQuery(
-            `SELECT id, user_id, prompt, aspect_ratio, dimensions, public_url, created_at, lqip, seed, model, likes_count, remix_count, views_count
+            `SELECT id, user_id, prompt, aspect_ratio, dimensions, public_url, created_at, lqip, likes_count, remix_count, views_count
              FROM public.community_creations_feed
              WHERE id = $1 AND user_id NOT LIKE 'usr_%' AND id NOT LIKE 'img_test_%'
              LIMIT 1`,
@@ -400,16 +200,13 @@ export async function GET(req: NextRequest) {
               thumbnail_url: thumbUrl,
               created_at: new Date(r.created_at).toISOString(),
               lqip: r.lqip || null,
-              seed: r.seed || null,
-              model: r.model || 'galx-nova-image',
               likes_count: Number(r.likes_count || 0),
               remix_count: Number(r.remix_count || 0),
               views_count: Number(r.views_count || 0),
             });
           }
-        } catch {
-          // Ignore single-item lookup failure
-        }
+      } catch {
+        // Ignore single-item lookup failure
       }
     }
   }
@@ -464,7 +261,7 @@ export async function POST(req: NextRequest) {
           isLiked: data?.is_liked ?? Boolean(increment)
         });
       } catch {
-        // Fallback for showcase or offline items
+        // Keep interactions non-blocking when a public item is unavailable.
         return NextResponse.json({ success: true, likes: null, isLiked: Boolean(increment) });
       }
     }
@@ -521,7 +318,7 @@ export async function POST(req: NextRequest) {
           result: data
         });
       } catch {
-        // Fallback for showcase or offline items
+        // Keep view recording non-blocking when a public item is unavailable.
         return NextResponse.json({
           success: true,
           action: 'set_private',

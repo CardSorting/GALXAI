@@ -1,5 +1,5 @@
 /** Browser-only image studio contracts. Keep these independent of server internals. */
-export const IMAGE_MODEL = { id: 'galx-nova-image', name: 'GALX Nova-image' } as const;
+export const IMAGE_MODEL = { id: 'galx-nova-image', name: 'GALX Nova' } as const;
 export const MAX_PROMPT = 32_000;
 export const LIBRARY_PAGE_SIZE = 36;
 export const RECENT_IMAGE_LIMIT = 120;

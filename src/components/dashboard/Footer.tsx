@@ -34,7 +34,7 @@ export function Footer() {
             </Link>
 
             <p className={styles.tagline}>
-              A generative creative playground for community creators paired with sustainable frontier-level intelligence. Powered by GALX Nova — our managed intelligence layer delivering state-of-the-art reasoning and generation.
+              GALX is where people create. Powered by GALX Nova — our managed intelligence layer for reasoning and generation.
             </p>
 
             <Link href="/status" className={styles.statusPill}>
@@ -59,13 +59,13 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/models" className={styles.footerLink}>
-                  <span>Managed Intelligence (GALX Nova)</span>
+                <Link href="/developers" className={styles.footerLink}>
+                  <span>GALX Nova</span>
                 </Link>
               </li>
               <li>
-                <Link href="/playground" className={styles.footerLink}>
-                  <span>Playground</span>
+                <Link href="/docs" className={styles.footerLink}>
+                  <span>Developer docs</span>
                 </Link>
               </li>
               <li>
@@ -82,13 +82,13 @@ export function Footer() {
             <ul className={styles.linkList}>
               <li>
                 <Link href="/developers" className={styles.footerLink}>
-                  <span>Developer Hub</span>
-                  <span className={styles.linkBadge}>$10 Tier</span>
+                  <span>Developer access</span>
+                  <span className={styles.linkBadge}>$50/month</span>
                 </Link>
               </li>
               <li>
-                <Link href="/developers/pricing" className={styles.footerLink}>
-                  <span>Developer Compute</span>
+                <Link href="/developers" className={styles.footerLink}>
+                  <span>Access terms</span>
                 </Link>
               </li>
               <li>
@@ -97,8 +97,8 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/tools" className={styles.footerLink}>
-                  <span>Developer Tools</span>
+                <Link href="/docs" className={styles.footerLink}>
+                  <span>Integration guidance</span>
                 </Link>
               </li>
             </ul>
@@ -120,7 +120,7 @@ export function Footer() {
               </li>
               <li>
                 <Link href="/pricing/fair-use" className={styles.footerLink}>
-                  <span>Fair Use & SLAs</span>
+                  <span>Fair-use boundaries</span>
                 </Link>
               </li>
               <li>
@@ -146,7 +146,7 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/security" className={styles.footerLink}>
+                <Link href="/privacy" className={styles.footerLink}>
                   <span>Security & Compliance</span>
                 </Link>
               </li>
@@ -176,7 +176,7 @@ export function Footer() {
           </div>
 
           <div className={styles.bottomLegal}>
-            <span>Images and Explore are live. Developer tools in preview.</span>
+            <span>Developer Access is a $50/month API access membership. Usage billed separately; no usage credits included.</span>
             <button
               type="button"
               onClick={scrollToTop}

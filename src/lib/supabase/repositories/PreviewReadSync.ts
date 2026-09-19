@@ -93,8 +93,11 @@ export class PreviewReadSync {
       // Approval-only results are compact slot numbers, not repeated IDs or
       // nullable application columns for every caller in the batch.
       const result = await this.database.query<BatchRow>(`SELECT count(*)::integer AS checked,
-        COALESCE(array_agg(wanted.ordinality::integer) FILTER (WHERE a.status='approved'
-          AND (a.expires_at IS NULL OR a.expires_at>statement_timestamp())), '{}'::integer[]) AS approved,
+        COALESCE(array_agg(wanted.ordinality::integer) FILTER (WHERE
+          (a.status='approved' AND (a.expires_at IS NULL OR a.expires_at>statement_timestamp())) OR
+          EXISTS (SELECT 1 FROM private.galx_plan_subscriptions s
+            WHERE s.user_id::text=wanted.user_id AND s.plan_key='nova-developer-v1'
+              AND s.status='active' AND s.period_end>statement_timestamp())), '{}'::integer[]) AS approved,
         COALESCE(jsonb_agg(jsonb_build_object('slot', wanted.ordinality::integer,
           'version', a.xmin::text || ':' || a.ctid::text,
           'record', CASE WHEN a.user_id IS NOT NULL AND (a.xmin::text || ':' || a.ctid::text) IS DISTINCT FROM wanted.version THEN

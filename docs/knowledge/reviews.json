@@ -137,12 +137,12 @@
     }
   },
   "access": {
-    "reviewer": "Product, Safety and Security maintainer",
-    "note": "Public preview policy includes /api/images/moderate; security definer moderation pattern maintains strict library tenant update restrictions",
-    "reviewed_at": "2026-09-17",
-    "review_by": "2026-09-24",
+    "reviewer": "Codex",
+    "note": "Reviewed the changed Developer access and billing workspace sources against the active verified-session boundary and current preview guide; no internal diagnostics or authorization scope was made public.",
+    "reviewed_at": "2026-09-18",
+    "review_by": "2026-09-25",
     "evidence": {
-      "docs/knowledge/audits/2026-09-17-community-explore-moderation-review.json": "29e3f7e47ce9c8076b46bff059648e3279aa8782bdbaa9234cd2740017ef91a1"
+      "docs/knowledge/audits/2026-09-18-nova-message-unit-economics.md": "c7f91922228fa1e54b66a5e4a53896a4ec8a50bab6a4837544efc015b4332f75"
     },
     "files": {
       "docs/OAUTH_AND_TOKEN_LIFECYCLE_SPECIFICATION.md": "1e8004f6dc024322356e5494b099b7c38ed00e4a62e22434b020fd43c9470183",
@@ -153,7 +153,7 @@
       "docs/adr/0147-verified-account-and-session-authority.md": "5c97eaabc0faa667f329c44ed0366125c96cb0cbd4625f7cf84649b882e57a96",
       "docs/maintainers/FREE_GENERATION_QUOTA.md": "239c0c173e05cbba23f74818e712b1ad217e2e0d3a1c69f86b0de8504f06f42b",
       "docs/maintainers/readable-urls.md": "f04fe2f7d2752ceef765feb24a2f2a29fedee3b526a3291d114dbfdaceae1a40",
-      "docs/operations/developer-preview.md": "7e8f6efad1da424b851ad1a849943b8e2c93706d08894e62d2d1588e5f0a11fc",
+      "docs/operations/developer-preview.md": "2c7ec130ca3f9c3e2ba47e312b8a93b8a5fdd7598bc8ea1b63d10d078bafd821",
       "docs/operations/preview-activation.md": "d724da3eefe8b52d2557f0f4be91a70ed3562f56e7586e17fe0c2dc06c824e44",
       "docs/operations/preview-admin.md": "d7e854fdd3ff3d1aadbee97d0163c1a38cf3a7626a2907c540093003f5064b40",
       "docs/operations/preview-hybrid-sync.md": "1ac7ce76537660cfc507a595c942d4da2324060b8a3f15ddf9ab96d993ff38e9",
@@ -166,7 +166,7 @@
       "scripts/test-auth-identity-boundary.ts": "7a4c8de24a4c82869d1adeb4c57567a574d206116b16df37681e8569bffefe93",
       "scripts/test-auth-provider-recovery.ts": "b97fb5e6c21e01fe830752e580b26208a2d96b219a8b773f1aba4702c63f83fe",
       "scripts/test-browser-session.ts": "2bcb16b82cc74f011dfa8c7d4d799145e084520b0d43b96addc552f4de9230e1",
-      "scripts/test-developer-preview.ts": "a2f0d09611e3cab472ba8a5b0b4fac1276e1df7ea33e5d6d9ee80a287cfcb711",
+      "scripts/test-developer-preview.ts": "0fc79eefd0ca91f79bd1996138c12bb2e45c45ae47fb7523ef0934a24c72ac8e",
       "scripts/test-free-generation-gate-db.ts": "2919f39490203795965f494f61b288305ea7136e544515cc504d9e8a0ff7e037",
       "scripts/test-free-generation-quota-db.ts": "26d3381b0a90285cce6d954b954601fb7a5a4596998389ac7091cfb7b49d9b04",
       "scripts/test-free-generation-quota.ts": "cbf7034c6f10ecfcf6176718f693a2636af775899e05552b5d7c53c58f142fb3",
@@ -229,13 +229,13 @@
       "src/components/auth/WorkspacePageGate.tsx": "dc1bd7080a4eb470769c85fad310fb8bf242a51e5afc81a3ee8811a20cd48f24",
       "src/components/auth/WorkspaceSessionBoundary.tsx": "866e9a8f9af618abb291ae5797a323a3e94c04dd849129e2a883f2b11d733ee1",
       "src/components/auth/auth-entry.module.css": "165e10d51ed9ad6849a113904a431b5cf90482eaf3b078cee33c9189621cc63f",
-      "src/components/billing/BillingClient.tsx": "97b1d46f5beaef69ba3d19a84bc1306a3ef038d1ca5ed5d2b4c9a80e351573f9",
-      "src/components/billing/BillingProvider.tsx": "73f5e63384cf96624f8111cf801783decdb650148e0b445fd0092bef886049de",
-      "src/components/dashboard/Footer.tsx": "008b6388f9e09a772a1371f3da83c7b24a36aa78d430aed5b2a8a154851441a4",
+      "src/components/billing/BillingClient.tsx": "3008774cbb27a0f8d4747741c0f370acb912e7fef70a5eba401b76670dc30533",
+      "src/components/billing/BillingProvider.tsx": "cdfefd2683186cc736ee105739b84fd0426a15666d3b063ff02c1714a61c781a",
+      "src/components/dashboard/Footer.tsx": "fce902fcd0bc3eac321446b1d4510ca59a83217667ac74c9b6fe4507a87e2095",
       "src/components/dashboard/FreeGenerationQuota.tsx": "419a52433d2b3baece49b2ada8b96f819da2e535d49104e40b22c8dae82fb89d",
       "src/components/dashboard/GenerationGateNotice.tsx": "0c905274ce933e0247d4a05f4174c9c13377bcb02e0d833c3927cfce62701bac",
       "src/components/dashboard/generation-gate.module.css": "efd8526722ca0ad42aec319a56bc2ea7e638185f30c35cea9b445dfb69bba4a4",
-      "src/components/developers/DeveloperPreview.tsx": "d4b3b3c5ba0d8c164de27031f33fb8971bb7e0d49a977071237f225341ea1de3",
+      "src/components/developers/DeveloperPreview.tsx": "87f7494318330766f09f29978afb4e6bbad35d7f14669e9db627d7f19d27d21f",
       "src/contexts/AuthContext.tsx": "925072632aef4a44e915fb04b479b1891bcc97343072e866231f37a5127916b0",
       "src/contexts/GenerationAllowanceContext.tsx": "d73875872f3814131bfc18029e69a72091993d906af63058ca37282f2c261a7c",
       "src/core/auth/GalxAuthEngine.ts": "0f03a805b48838694510eb98bb2b3eb6996ba3198ae21f10a9437b6d80e8def9",
@@ -249,7 +249,7 @@
       "src/lib/auth/active-account-session.ts": "94de4efc8ac82b983ac35ef030258879668ec3f3dd3a612deb53aaedc9cee5d9",
       "src/lib/auth/browser-session.ts": "97c4fcc2f795964a188d8ca3c64beb66f5737004add1a5a08e1fc34b39807cb2",
       "src/lib/auth/browser-verification.ts": "2eba0544c2da486f5ad258d2b99d1b62e46c6044b46b46efe567dafd1b94ec52",
-      "src/lib/auth/developer-access-route.ts": "881870ffa3e404b046eb1f0fbad7a75196f8f03617b85b3e53e9863fbcabf4f9",
+      "src/lib/auth/developer-access-route.ts": "49271ff8eeed80e2cd496470a0cbbf09bb3ae9cbb7b7e735ad05110ed0ca995a",
       "src/lib/auth/provider-connection-route.ts": "366fdc7e011313fd174f092e5ebb015709a7a1ad01dbcf9925e73323cd6ac564",
       "src/lib/auth/redirects.ts": "b4b385d2240c19b0ba7edcd559db89746f895d74512c7c23134232898f3091eb",
       "src/lib/auth/request-session.ts": "f5980d7f521819040a36ded03fdcf592d4d66faebfc62dc987a1a5298511f749",
@@ -267,25 +267,25 @@
       "src/lib/billing/free-generation-quota.ts": "2079ecfa10b1f9c603a4a8b5390100a5ca823da165d37db1840e1406994b61c6",
       "src/lib/billing/generation-access.ts": "7d0f05c6a9ea2c7e4b4fc532eb264215c4ca57be2633187a564f02d44116fb26",
       "src/lib/billing/generation-quota-route.ts": "f35bd7b7f55b7b43d3d43de3a1103e081cb82a50355b6f2e1f31d2233129de49",
-      "src/lib/security/developer-access.ts": "4591764b2c3fa5472e73460079bf066291abf610bba68ba3cb12fbc328a0c872",
+      "src/lib/security/developer-access.ts": "5bd7a18088bf8e446ad728b33e5bfc6073b827a99d3340e17fb6506402e82f21",
       "src/lib/security/image-artifact.ts": "295df387bacc6f27620f36c8b90eaceb31934ded26c14117c2cea3efac3fa593",
       "src/lib/security/image-download-url.ts": "1a853c43d60796bf6eb6a52db6b9d5e3e4a2d810f00f57d3acd2d513ab979f30",
       "src/lib/security/internal-access.ts": "ea9c2c0f280b819e285b04bb1c82b8e1669c8498ec1e05a6560a34d27a25d11c",
       "src/lib/security/normalize-image-output.ts": "205920bbb0a1df05c955211edc4d738b21cabefbe04bd0a5386ac5e0ac0af4bd",
       "src/lib/security/preview-middleware.ts": "ea577ad1118ca166c882cd8a5d335221a2a1a5b65b4cfa7b0078daa76572229d",
-      "src/lib/security/preview-policy.ts": "146e70fa0eba0afd815a363940ef7ee98503a5d90a9ebc8ffbe07ea9746f3203",
+      "src/lib/security/preview-policy.ts": "0b94693fef8fb8887cf31f2cf67418ca89416ea8e532f551191a3567c905f9a2",
       "src/lib/security/private-image-diagnostics.ts": "b2f34531192d580a86ff2bfe9cc65df9586ec28abb5648e0fc5cace2aba40255",
       "src/lib/security/public-image-http.ts": "793b1a19ed4a704439544df062e6921f1f0e9862503a4e6dc38f01246e90584d",
-      "src/lib/security/public-image-record.ts": "2aefe48eaf3da1e0efbcbbfd1f663167d0c5cbd020dc551a7dfc3cb2af914e74",
+      "src/lib/security/public-image-record.ts": "44e9897936035c4345f78481c41607438da27de0bee17a64de01c101a7c74294",
       "src/lib/security/public-task-response.ts": "c8ea0b785d5ee0d3d5d8def768a7d2cff940c6d712e8bec98e21ad34d9e32649",
       "src/lib/security/same-origin.ts": "28b03863cac4d9b1ce840f96e4ecec94ffb7e9e4ac70c694707b3aff3dcd6d17",
       "src/lib/security/workspace-policy.ts": "39f699630702c9272ddecbab35f4f72a2ad75b38ab6c969969d08f6f10963ca4",
       "src/lib/security/workspace-unavailable.ts": "b9a0b7ed20661ac625ec5bc4e9fa066da3f09f36bc8ba7b81decf7efb8d69efe",
       "src/lib/supabase/client.ts": "db451b92ca18d9d4b3aa1b5803008e61b4672591b6f236882177572b149afc40",
-      "src/lib/supabase/repositories/DeveloperAccessRepository.ts": "9409796d2e3bd9227797766b7ec703c8e15e0c742534feb69db94fd3d6afc2e5",
+      "src/lib/supabase/repositories/DeveloperAccessRepository.ts": "25c31fe3a61e8d2d1590826ddcb9d974dce80c0f6f5f09aec0284563809bd249",
       "src/lib/supabase/repositories/OAuthRepository.ts": "b9498af6147ef8230ddc32a918780ccdf1d2f29649fca79a2215b9efeca8036e",
       "src/lib/supabase/repositories/PreviewAdminRepository.ts": "40fb35d15e77ad17622dc9e14424a8939c727bd2ea3d45dbd071c5627e1963ac",
-      "src/lib/supabase/repositories/PreviewReadSync.ts": "047a84574819537875bd41828adff7f0ac354200a5d2f9239d978375e3931db9",
+      "src/lib/supabase/repositories/PreviewReadSync.ts": "06b42da2b7de09526a4566df1320b67d0f70578287ddb2dc9667c1b2f01be9cd",
       "src/lib/supabase/repositories/SessionRepository.ts": "d1b96ce2aed9fe7370e8330e4750892f88b99c6306d008ae2f154b0b3722f62d",
       "src/middleware.ts": "c8c20ebb930c3e0d1ee6c11f29fa54fa36e9e0e8b6fcc31a1c5ef2a1796ce490",
       "src/utils/supabase/middleware.ts": "2038083061059920df7f9bf0d3c640d94ed6a97f2ae5a1e40550267ce042dfb6"
@@ -956,12 +956,12 @@
     }
   },
   "broccolidb": {
-    "reviewer": "BroccoliDB maintainer",
-    "note": "BroccoliImageLibraryBuffer atomic batch visibility and query filter support",
-    "reviewed_at": "2026-09-17",
-    "review_by": "2026-09-24",
+    "reviewer": "Codex",
+    "note": "Reviewed the current affected source and canonical guide bodies after sync, including the public boundary, recovery guidance, and current contract limits. This is a semantic documentation review and does not imply runtime acceptance.",
+    "reviewed_at": "2026-09-19",
+    "review_by": "2026-09-25",
     "evidence": {
-      "docs/knowledge/audits/2026-09-17-user-library-privacy-and-permissions-review.json": "31db07c9ef11a6e314e3908adcab9847e8526ef43f00df9d66d2b81943f2be04"
+      "docs/knowledge/audits/2026-09-18-nova-message-unit-economics.md": "c7f91922228fa1e54b66a5e4a53896a4ec8a50bab6a4837544efc015b4332f75"
     },
     "files": {
       "docs/maintainers/COMPACTOR_FUZZING_AND_QA_MATRIX.md": "72325ecd8087214538910b8ee29bc739c20146b7491eb0947ed417b39229a87a",
@@ -1403,7 +1403,7 @@
       "src/core/governor/GalxElasticContextGovernor.ts": "4269b5f97e24dd35a9a083e8681ac1df58618863a87ae137b4bb49550ed406d3",
       "src/core/governor/GalxLumiQoSPoolGovernor.ts": "eb1ec8e290d02db0fab5dc23261713819992c4db6bf3fcdeaf7b1fafd57f474a",
       "src/core/governor/LockFreeShardGovernor.ts": "60c1d47b6ef778f65eba692cb743173c1d1b89f1d8756425f8783ecdf1c7bd52",
-      "src/lib/supabase/repositories/PreviewReadSync.ts": "047a84574819537875bd41828adff7f0ac354200a5d2f9239d978375e3931db9"
+      "src/lib/supabase/repositories/PreviewReadSync.ts": "06b42da2b7de09526a4566df1320b67d0f70578287ddb2dc9667c1b2f01be9cd"
     }
   },
   "client-efficiency": {

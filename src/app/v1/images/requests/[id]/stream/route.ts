@@ -3,6 +3,7 @@ import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 import { ImageRequestService, imageRequestSnapshot } from '@/lib/images/request-service';
 import { imageError, imageHeaders } from '@/lib/security/public-image-http';
 import { logImageFailure } from '@/lib/security/private-image-diagnostics';
+import { enforceDeveloperApiKeyAccess } from '@/lib/security/developer-access';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 180;
@@ -12,6 +13,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     const auth = await GalxAuthEngine.getInstance().resolveAuthIdentity(req);
     if (auth.error === 'AUTH_UNAVAILABLE') return imageError('temporarily_unavailable', requestId, 3);
     if (!auth.authenticated || !auth.userId) return imageError('unauthorized', requestId);
+    const developerDenied = await enforceDeveloperApiKeyAccess(req, auth.authType);
+    if (developerDenied) return developerDenied;
     const service = ImageRequestService.getInstance();
     const task = await service.repository.get(auth.userId,(await params).id);
     if (!task || task.user_id !== auth.userId) return imageError('not_found', requestId);

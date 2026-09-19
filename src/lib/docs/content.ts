@@ -5,9 +5,9 @@ export const DOC_MODEL = 'galx-nova';
 export const DOC_IMAGE_MODEL = 'galx-nova-image';
 
 export const DOC_NAV = [
-  { href: '/docs', title: 'Quickstart', description: 'Curated developer foundation & first request.' },
+  { href: '/docs', title: 'Quickstart', description: 'First request with GALX Nova.' },
   { href: '/docs/api-reference', title: 'API reference', description: 'Endpoints, schemas, and HTTP contracts.' },
-  { href: '/docs/examples', title: 'Creative Playground', description: 'Multimodal pipelines, streaming, and JSON.' },
+  { href: '/docs/examples', title: 'Developer examples', description: 'Documented patterns for streaming, JSON, tools, and images.' },
   { href: '/docs/sdks', title: 'SDKs & IDEs', description: 'Connect Python, TypeScript, Cursor, and Windsurf.' },
   { href: '/docs/error-handling', title: 'Troubleshooting', description: 'Error status codes, backoff, and diagnostics.' },
 ] as const;
@@ -133,44 +133,40 @@ export const RESPONSE_EXAMPLE: DocCode = {
 }`,
 };
 
-export const AGENT_SETUP = `# Set up GALXAI in this project
+export const AGENT_SETUP = `# Build with GALX Nova
 
-Integrate GALXAI into the existing application. Inspect its language, framework, and current AI client first. Reuse existing conventions and dependencies.
+Use the supported GALX API from the server side of the existing application. Inspect the application’s language, framework, and current AI client first. Reuse existing conventions and dependencies.
 
 ## Connection
 - API base URL: ${GALX_API_BASE_URL}
 - Authentication: Authorization: Bearer <GALXAI_API_KEY>
 - Secret environment variable: GALXAI_API_KEY
-- Curated Flagship Model: ${DOC_MODEL} (GALX Nova)
-- Visual Synthesis Model: ${DOC_IMAGE_MODEL} (GALX Nova-image)
-- Model catalog: GET ${GALX_API_BASE_URL}/models
+- Supported reasoning capability identifier: ${DOC_MODEL}
+- Supported image capability identifier: ${DOC_IMAGE_MODEL}
 - Chat endpoint: POST ${GALX_API_BASE_URL}/chat/completions
 - Image endpoint: POST ${GALX_API_BASE_URL}/images/generations
 - Create a key: https://galx.ai/keys
 
-## Platform Strategy
-1. Curated Frontier Intelligence: GALXAI exclusively serves GALX Nova for text and reasoning, selected through extensive benchmark validation to provide sustainable high performance per dollar so developers can build and explore without artificial constraints.
-2. Generative Creative Playground: Multimodal pipelines combine GALX Nova reasoning and orchestration with high-fidelity visual synthesis via ${DOC_IMAGE_MODEL}.
-3. Sustainable Developer Compute: Sub-15ms distributed edge relay with zero markup, transparent billing, and 90% prompt cache rebates.
+## Service boundary
+GALX Nova is GALX’s managed intelligence layer for reasoning and generation. Use the supported capability identifiers documented for your request; Nova names the service and does not claim that GALX trained a foundation model.
 
 ## Implementation Steps
-1. Keep GALXAI_API_KEY on the server. Never put it in browser code, NEXT_PUBLIC variables, logs, commits, or this conversation. If it is missing, ask the user to configure it in their environment or secret manager.
-2. If the project already uses an OpenAI-compatible client, set its base URL and key explicitly. Python uses base_url; JavaScript uses baseURL. Do not append /v1 twice. Do not substitute api.galx.ai: it is a separate deployment.
-3. Default to ${DOC_MODEL} for chat, reasoning, code generation, and agentic workflows. For visual synthesis, use ${DOC_IMAGE_MODEL}.
-4. Add one server-side request with the payload below. Reuse the application's existing API handler or server action. Do not expose the secret to users.
-5. Handle failed requests visibly. Do not retry 400, 401, 402, or 403 blindly. Bound retries for transient failures; honor Retry-After on 429. Do not silently switch models.
-6. Validate the integration with the configured credential, using one small request when authorized. Never substitute simulated responses. If the credential is missing or the request fails, report that accurately.
-7. Report changed files, required environment variables, how to run it, and the verification result. Do not add unrelated features.
+1. Keep GALXAI_API_KEY on the server. Never put it in browser code, public environment variables, logs, commits, or client-visible errors.
+2. If the project already uses an OpenAI-compatible client, set its base URL and key explicitly. Python uses base_url; JavaScript uses baseURL.
+3. Use the documented capability identifier for the route you are calling. Do not infer additional capabilities from the Image Studio.
+4. Reuse the application’s existing server handler or server action. Do not expose the secret to users.
+5. Handle failed requests visibly. Bound retries for transient failures and honor Retry-After when returned. Do not silently change the requested capability.
+6. Confirm the usage-pricing status before attempting Developer API inference. Developer usage is billed at $0.02 per completed message with a default $25 monthly usage cap; it is not sold by token. Do not treat the access fee as usage. The browser Image Studio remains a separate consumer path.
 
 ## Minimal request
 ${REQUEST_EXAMPLES[0].source}
 
-A successful non-streaming response is an OpenAI-compatible JSON object. Read choices[0].message.content. With stream: true, consume SSE deltas and stop at [DONE]. Do not retry after displaying partial output unless the application explicitly supports resumption.
+A successful non-streaming response is a JSON object described by the API reference. With stream: true, consume SSE deltas and stop at [DONE]. Do not retry after displaying partial output unless the application explicitly supports resumption.
 
 ## References
 - Quickstart: https://galx.ai/docs
 - API reference: https://galx.ai/docs/api-reference
-- Creative Playground & Examples: https://galx.ai/docs/examples
+- Developer examples: https://galx.ai/docs/examples
 - Integrations: https://galx.ai/docs/sdks
 - Troubleshooting: https://galx.ai/docs/error-handling
 `;
@@ -179,8 +175,8 @@ export const DOC_PAGES: Record<DocId, DocPage> = {
   quickstart: {
     path: '/docs',
     title: 'Developer Quickstart',
-    badge: 'Frontier Developer Foundation',
-    description: 'Connect your applications to GALXAI in under two minutes. One API key, one standard base URL, and immediate access to GALX Nova intelligence.',
+    badge: 'GALX Nova Developer access',
+    description: 'Developer Access is a $50/month membership for API access to GALX Nova. Usage is intended to be billed per message, not per token; no usage credits are included. GALX handles the managed intelligence behind the supported API.',
     sections: [
       {
         id: 'credentials',
@@ -192,8 +188,8 @@ export const DOC_PAGES: Record<DocId, DocPage> = {
         links: [{ href: '/keys', label: 'Create API key in Dashboard' }],
         callout: {
           type: 'tip',
-          title: 'Zero-Egress Security',
-          text: 'GALXAI operates with Zero Data Retention (ZDR). Your prompts and generations are never used for model training or retained to disk.',
+          title: 'Keep credentials server-side',
+          text: 'Keep API keys on the server, avoid public environment variables, and do not place prompts or responses in logs unless your own data policy allows it.',
         },
         code: [
           {
@@ -207,9 +203,9 @@ export OPENAI_BASE_URL="${GALX_API_BASE_URL}"`,
       {
         id: 'request',
         title: '2. Send your first request',
-        badge: 'Universal Wire Protocol',
+        badge: 'Supported API request',
         body: [
-          'GALXAI is 100% wire-compatible with standard OpenAI SDKs and HTTP clients. Point your client to https://galx.ai/v1 and dispatch your query.',
+          'GALX Nova provides managed reasoning and generation capabilities through the supported API. Confirm the current endpoint and usage-pricing status before integrating. Developer usage is billed at $0.02 per completed message with a default $25 monthly usage cap; the browser Image Studio remains separate.',
         ],
         code: REQUEST_EXAMPLES,
         responseCode: RESPONSE_EXAMPLE,
@@ -217,27 +213,28 @@ export OPENAI_BASE_URL="${GALX_API_BASE_URL}"`,
       {
         id: 'response',
         title: '3. Inspect the response & usage',
-        badge: 'Clean JSON DTO',
+        badge: 'Documented JSON',
         body: [
-          'Responses follow the standard chat completion schema. Assistant text resides at `choices[0].message.content`. Inspect token counts in `usage` to verify automated prompt caching rebates.',
+          'Responses follow the documented chat completion schema. Read the fields described in the API reference and handle errors explicitly.',
         ],
         callout: {
           type: 'note',
-          title: 'Prompt Caching Pass-Through',
-          text: 'Requests with 1,024+ repeated prefix tokens automatically qualify for prompt caching rebates, reducing input costs by up to 90%.',
+          title: 'Use the documented contract',
+          text: 'Capability support, response fields, and usage terms can change. Treat the current API reference, access terms and usage-pricing status as the source of truth. The access subscription does not include usage credits; completed messages are billed separately at the published rate.',
         },
         links: [
           { href: '/docs/error-handling', label: 'Inspect error codes & troubleshooting' },
           { href: '/keys/activity', label: 'View real-time usage telemetry' },
+          { href: '/pricing/usage', label: 'Review usage-pricing status' },
         ],
       },
       {
         id: 'models',
-        title: 'Curated Intelligence: Why GALX Nova',
-        badge: 'Optimal $/Perf',
+        title: 'Supported capabilities',
+        badge: 'Service boundary',
         body: [
-          `GALXAI serves ${DOC_MODEL} as our flagship reasoning engine, delivering exceptional performance per dollar for production workloads.`,
-          'By curating our engine rather than offering an unvetted marketplace of dozens of overlapping checkpoints, developers can explore, test, and deploy production pipelines with maximum reliability, zero confusion, and no artificial quality constraints.',
+          'Use the documented capability identifier for the route you are calling. GALX Nova names the managed service; it is not a claim that GALX trained a foundation model.',
+          'The Developer API exposes supported capabilities. The Image Studio and API may not expose identical capabilities, so check the current documentation before publishing a feature-specific promise.',
         ],
         code: [
           {
@@ -246,14 +243,14 @@ export OPENAI_BASE_URL="${GALX_API_BASE_URL}"`,
   -H "Authorization: Bearer $GALXAI_API_KEY"`,
           },
         ],
-        links: [{ href: '/models', label: 'Browse curated model benchmarks' }],
+        links: [{ href: '/developers', label: 'Review Developer access' }],
       },
       {
         id: 'agent-setup',
         title: 'Configure Coding Agents (Cursor, Claude, Windsurf)',
         badge: 'Agent Ergonomics',
         body: [
-          'Hand this setup brief directly to your coding assistant (Cursor, Windsurf, Claude Code, GitHub Copilot). It contains standard base URLs, target model IDs, and implementation constraints with zero secret leakage.',
+          'Hand this setup brief directly to your coding assistant (Cursor, Windsurf, Claude Code, GitHub Copilot). It contains documented base URLs, supported capability identifiers, and implementation constraints without asking you to paste a secret into the brief.',
         ],
         links: [{ href: '/docs/agent-setup', label: 'View plain-text agent brief' }],
       },
@@ -263,35 +260,44 @@ export OPENAI_BASE_URL="${GALX_API_BASE_URL}"`,
   api: {
     path: '/docs/api-reference',
     title: 'API Reference',
-    badge: 'OpenAI Wire-Compatible',
-    description: 'Comprehensive HTTP specifications for GALXAI endpoints. All requests communicate over HTTPS with JSON or Server-Sent Events (SSE).',
+    badge: 'Supported API contracts',
+    description: 'Use the supported GALX API to send JSON requests and, where documented, receive Server-Sent Events (SSE).',
     sections: [
       {
         id: 'authentication',
         title: 'Authentication & Base URL',
         badge: 'Bearer Token',
         body: [
-          'Authenticate every HTTP request with your secret API key via the standard HTTP Authorization header. Base URL paths are anchored at https://galx.ai/v1.',
+          'Authenticate every HTTP request with your secret API key via the documented Authorization header. Use the current base URL and path shown in the access documentation.',
         ],
         callout: {
           type: 'important',
           title: 'Never expose keys in client code',
-          text: 'Never use NEXT_PUBLIC_ variables or client-side fetch for GALXAI API keys. Keep all inference calls inside server actions, API routes, or backend microservices.',
+          text: 'Keep API keys in server-side code and do not place them in browser bundles, public environment variables, logs, or client-visible errors.',
         },
         code: [{ label: 'Header', source: 'Authorization: Bearer <GALXAI_API_KEY>' }],
+      },
+      {
+        id: 'usage-boundary',
+        title: 'Access and usage boundary',
+        badge: 'Published message usage',
+        body: [
+          'The $50/month Developer Access subscription is an API access fee. It includes no usage credits. Developer usage is billed at $0.02 per completed message with a default $25 monthly usage cap, not per token. The consumer Image Studio image path remains separate under its existing GALX Pro/account contract.',
+        ],
+        links: [{ href: '/pricing/usage', label: 'Review usage-pricing status' }],
       },
       {
         id: 'endpoints',
         title: 'Supported Endpoints',
         badge: 'Core Surface',
         table: {
-          headings: ['Method', 'Path', 'Description', 'Model Engine'],
+          headings: ['Method', 'Path', 'Description', 'Capability identifier'],
           rows: [
-            ['GET', '/v1/models', 'Enumerate verified model IDs and context limits', 'All'],
+            ['GET', '/v1/models', 'Review identifiers currently supported for your access', 'Documented identifiers'],
             ['POST', '/v1/chat/completions', 'Text reasoning, structured outputs, streaming & tools', DOC_MODEL],
             ['POST', '/v1/messages', 'Messages-compatible reasoning requests', DOC_MODEL],
-            ['POST', '/v1/images/generations', 'Visual synthesis & creative asset generation', DOC_IMAGE_MODEL],
-            ['POST', '/v1/embeddings', 'Experimental deterministic vectors (see limitations)', 'Deterministic Local'],
+            ['POST', '/v1/images/generations', 'Visual synthesis & creative asset generation; usage contract required', DOC_IMAGE_MODEL],
+            ['POST', '/v1/embeddings', 'Embedding requests, when enabled for your access', 'Documented identifier'],
           ],
         },
       },
@@ -300,7 +306,7 @@ export OPENAI_BASE_URL="${GALX_API_BASE_URL}"`,
         title: 'Chat Completions Contract',
         badge: `POST /v1/chat/completions`,
         body: [
-          'Dispatch conversations to GALX Nova. Supports multi-turn dialogue, system prompts, JSON schema enforcement, and tool calling with up to 1,050,000 tokens of context.',
+          'Dispatch conversations to GALX Nova using the supported request fields. Confirm optional features and applicable limits in the current API reference before shipping.',
         ],
         table: {
           headings: ['Parameter', 'Type', 'Default', 'Description'],
@@ -308,7 +314,7 @@ export OPENAI_BASE_URL="${GALX_API_BASE_URL}"`,
             ['model', 'string', 'required', `Exact model ID: "${DOC_MODEL}".`],
             ['messages', 'array', 'required', 'Array of message objects with "role" (system, user, assistant, tool) and "content".'],
             ['stream', 'boolean', 'false', 'When true, yields Server-Sent Events (text/event-stream) terminating with [DONE].'],
-            ['max_tokens', 'integer', '4096', 'Maximum number of tokens to generate in the completion (up to 128,000).'],
+            ['max_tokens', 'integer', 'documented', 'Maximum output length allowed by the current contract.'],
             ['temperature', 'number', '1.0', 'Sampling temperature between 0.0 and 2.0. Higher values yield more creative outputs.'],
             ['response_format', 'object', 'null', 'Set { "type": "json_object" } for structured JSON output.'],
             ['tools', 'array', 'null', 'List of available tool/function specifications the model may invoke.'],
@@ -350,7 +356,7 @@ export OPENAI_BASE_URL="${GALX_API_BASE_URL}"`,
             label: 'Error (HTTP 429)',
             source: `{
   "error": {
-    "message": "Rate limit exceeded for tier: 20 concurrent streams. Please back off.",
+    "message": "Request rate limit reached. Follow the response guidance and try again later.",
     "type": "rate_limit_exceeded",
     "code": 429
   }
@@ -367,7 +373,7 @@ export OPENAI_BASE_URL="${GALX_API_BASE_URL}"`,
         title: 'Embeddings Route Note',
         badge: 'Technical Notice',
         body: [
-          'The current `/v1/embeddings` route produces deterministic local hash vectors for structural fingerprinting, not semantic dense embeddings. For semantic search and RAG retrieval pipelines, use dedicated embedding services.',
+          'Embedding support is capability- and access-dependent. Confirm the current response contract before using it for search or retrieval.',
         ],
       },
     ],
@@ -375,16 +381,16 @@ export OPENAI_BASE_URL="${GALX_API_BASE_URL}"`,
 
   examples: {
     path: '/docs/examples',
-    title: 'Creative Playground & Patterns',
-    badge: 'Multimodal Execution',
-    description: 'Explore the generative creative playground: streaming responses, structured JSON schema extraction, autonomous tools, and multimodal visual pipelines chaining GALX Nova with image generation.',
+    title: 'Developer examples',
+    badge: 'Supported patterns',
+    description: 'Explore documented patterns for streaming responses, structured JSON, tool calls, and image generation with GALX Nova.',
     sections: [
       {
         id: 'streaming',
-        title: 'High-Velocity Streaming (SSE)',
-        badge: 'Sub-15ms TTFT',
+        title: 'Streaming with SSE',
+        badge: 'Documented pattern',
         body: [
-          'Stream tokens in real time via Server-Sent Events. Process deltas as they arrive for low perceived latency in user-facing chat interfaces.',
+          'Where streaming is supported, process Server-Sent Events as deltas arrive and stop when the documented completion marker is received.',
         ],
         code: [
           {
@@ -398,7 +404,7 @@ const client = new OpenAI({
 
 const stream = await client.chat.completions.create({
   model: "${DOC_MODEL}",
-  messages: [{ role: "user", content: "Write a high-performance HTTP router in Rust." }],
+  messages: [{ role: "user", content: "Write an HTTP router in Rust." }],
   stream: true,
 });
 
@@ -411,9 +417,9 @@ for await (const chunk of stream) {
       {
         id: 'structured-outputs',
         title: 'Structured Outputs (JSON Schema)',
-        badge: 'Deterministic DTO',
+        badge: 'Structured JSON',
         body: [
-          'Constrain GALX Nova to return strictly valid JSON. Ideal for extracting entities, generating database records, or orchestrating downstream services.',
+          'Request structured JSON where the capability supports it, then validate the response in your application before passing it to downstream services.',
         ],
         code: [
           {
@@ -429,7 +435,7 @@ const response = await client.chat.completions.create({
   model: "${DOC_MODEL}",
   messages: [
     { role: "system", content: "Extract sentiment and keywords. Return JSON." },
-    { role: "user", content: "The latency dropped from 250ms to 12ms! Incredible platform." }
+    { role: "user", content: "Summarize the customer feedback into sentiment and keywords." }
   ],
   response_format: { type: "json_object" },
 });
@@ -442,9 +448,9 @@ console.log(data);`,
       {
         id: 'tools',
         title: 'Autonomous Tool & Function Calling',
-        badge: 'Agentic Actions',
+        badge: 'Tool calls',
         body: [
-          'Declare functions for GALX Nova to execute. The model inspects parameters, generates structured arguments, and waits for your application to return the execution results.',
+          'Declare functions for Nova to call on behalf of your application. Your application validates and executes each tool, then returns the documented result.',
         ],
         steps: [
           'Define functions in the `tools` array with JSON Schema descriptions.',
@@ -478,10 +484,10 @@ console.log(data);`,
       {
         id: 'images',
         title: 'Creative Visual Synthesis',
-        badge: 'Multimodal Creative Playground',
+        badge: 'Image generation',
         body: [
-          `Generate high-fidelity imagery using ${DOC_IMAGE_MODEL}. By default, GALXAI returns clean binary image artifacts (PNG/JPEG/WebP) or structured JSON containing binary URLs.`,
-          'Combine GALX Nova with image generation: use Nova to expand artistic prompts with rich lighting and camera direction, then feed the refined prompt into visual synthesis.',
+          'The supported image capability identifier is ' + DOC_IMAGE_MODEL + '. The browser Image Studio uses its separate GALX Pro/account contract; Developer API image consumption is billed at the published per-message rate.',
+          'You can combine reasoning and image generation when both capabilities are documented for your access. Do not treat the $50 access fee as image usage.',
         ],
         code: [
           {
@@ -508,20 +514,19 @@ image_resp = client.images.generate(
 print("Image artifact URL:", image_resp.data[0].url)`,
           },
         ],
-        links: [{ href: '/models', label: 'View image model pricing and capabilities' }],
+        links: [{ href: '/developers', label: 'Subscribe to Developer Access' }],
       },
       {
         id: 'prompt-caching',
-        title: 'Large Contexts & 90% Prompt Caching',
-        badge: '1,050,000 Context Window',
+        title: 'Prompt construction',
+        badge: 'Practical guidance',
         body: [
-          'GALX Nova supports up to 1,050,000 tokens of input context. When passing shared system instructions, codebase indexes, or documentation libraries, prefix stability activates automated prompt caching.',
-          'Cached tokens are served at $0.02 / 1M tokens (a 90% discount compared to standard input rates), eliminating cost barriers for complex multi-turn developer workflows.',
+          'Keep stable instructions and relevant context together, then put the current task where your application can update it. Follow the documented limits and usage terms for your access.',
         ],
         callout: {
           type: 'tip',
-          title: 'Prefix Optimization Rule',
-          text: 'Always place invariant context (system rules, schema definitions, long reference files) at the beginning of your message array. Put dynamic, changing user questions at the end.',
+          title: 'Keep context intentional',
+          text: 'Send only the context the task needs. Do not assume a capability, limit, or price term that is not in the current documentation.',
         },
       },
       {
@@ -538,34 +543,34 @@ print("Image artifact URL:", image_resp.data[0].url)`,
 
   integrations: {
     path: '/docs/sdks',
-    title: 'SDKs & IDE Integrations',
-    badge: 'Zero Configuration',
-    description: 'Integrate GALXAI into your existing stack in minutes. Use official OpenAI libraries or plug directly into modern AI development environments like Cursor, Claude Code, and Windsurf.',
+    title: 'SDKs and IDE integrations',
+    badge: 'Build with Nova',
+    description: 'Connect an existing server-side client to the supported GALX API using the documented base URL, key handling, and capability identifiers.',
     sections: [
       {
         id: 'python',
         title: 'Python Ecosystem',
-        badge: 'Official OpenAI SDK',
+        badge: 'OpenAI-compatible client',
         body: [
-          'Use the official openai Python library. Specify base_url="https://galx.ai/v1" and supply your GALXAI_API_KEY.',
+          'Use the openai Python library with the documented base URL and supply your GALXAI_API_KEY on the server.',
         ],
         code: [REQUEST_EXAMPLES[1]],
       },
       {
         id: 'typescript',
         title: 'JavaScript, TypeScript & Next.js',
-        badge: 'Edge Compatible',
+        badge: 'Server-side TypeScript',
         body: [
-          'Compatible with Node.js, Next.js Server Components / Server Actions, Bun, Cloudflare Workers, and Deno.',
+          'Use a server-side JavaScript or TypeScript client in the environment supported by your application.',
         ],
         code: [REQUEST_EXAMPLES[2]],
       },
       {
         id: 'http',
         title: 'Direct HTTP & Additional Languages',
-        badge: 'Universal Wire Protocol',
+        badge: 'HTTP integration',
         body: [
-          'Any standard HTTP client in Go, Rust, Ruby, PHP, Java, or C# can communicate with GALXAI over HTTPS.',
+          'An HTTP client in Go, Rust, Ruby, PHP, Java, or C# can call the documented API over HTTPS.',
         ],
         code: [REQUEST_EXAMPLES[3], REQUEST_EXAMPLES[0]],
         links: [{ href: '/docs/api-reference', label: 'Browse Full Endpoint Specification' }],
@@ -575,7 +580,7 @@ print("Image artifact URL:", image_resp.data[0].url)`,
         title: 'Cursor, Windsurf & Claude Code Configuration',
         badge: 'Developer IDEs',
         body: [
-          'Configure your AI code editor to route through GALXAI for high-speed frontier reasoning and lower token costs.',
+          'Configure your coding environment with the documented API base URL, secret key, and supported capability identifier.',
         ],
         table: {
           headings: ['Setting Field', 'Value to Enter', 'Notes'],
@@ -583,45 +588,46 @@ print("Image artifact URL:", image_resp.data[0].url)`,
             ['OpenAI Base URL', GALX_API_BASE_URL, 'Do not add trailing slash or duplicate /v1'],
             ['API Key', '$GALXAI_API_KEY', 'Use your generated secret key'],
             ['Model Name / ID', DOC_MODEL, 'GALX Nova'],
-            ['Context Window', '1,050,000 tokens', 'Full long-context support'],
+            ['Capability support', 'See current API reference', 'Do not infer unsupported features'],
           ],
         },
         links: [{ href: '/docs/agent-setup', label: 'Get the one-click agent setup prompt' }],
       },
       {
         id: 'migration',
-        title: '1-Line Migration from Direct OpenAI API',
-        badge: 'Zero Refactoring',
+        title: 'Connect an existing OpenAI-style client',
+        badge: 'Review before shipping',
         body: [
-          'No code changes required. Keep your existing OpenAI client imports and method calls intact. Simply update your environment variables to route requests through GALXAI distributed edge relays.',
+          'An existing OpenAI-style client may be reusable, but verify the documented request and response contract before shipping. Keep the API key on the server.',
         ],
         steps: [
           'Keep your existing OpenAI Python or TypeScript SDK code.',
           'Set OPENAI_BASE_URL="https://galx.ai/v1" in your environment.',
           'Replace your API key with your GALXAI API key.',
-          'Switch your model parameter to galx-nova.',
+          'Use the supported capability identifier documented for your route.',
         ],
-        links: [{ href: '/models', label: 'Review Curated Model Catalog' }],
+        links: [{ href: '/developers', label: 'Review Developer access' }],
       },
       {
-        id: 'galxai-sdk',
-        title: 'Native GALXAI Client SDK',
-        badge: 'Native TypeScript SDK',
+        id: 'client-example',
+        title: 'Server-side client example',
+        badge: 'TypeScript',
         body: [
-          'The native galxai npm package provides zero-dependency typed wrappers with automated retry backoff, prompt caching tracking, and distributed edge health failover.',
+          'Use a server-side client that matches your application. Keep retry behavior bounded and follow the current API contract.',
         ],
         code: [
           {
             label: 'TypeScript',
-            source: `import { GalxAI } from "galxai";
+            source: `import OpenAI from "openai";
 
-const client = new GalxAI({
+const client = new OpenAI({
+  baseURL: "${GALX_API_BASE_URL}",
   apiKey: process.env.GALXAI_API_KEY,
 });
 
 const response = await client.chat.completions.create({
   model: "${DOC_MODEL}",
-  messages: [{ role: "user", content: "Hello from native SDK" }],
+  messages: [{ role: "user", content: "Hello from a server-side client" }],
 });
 console.log(response.choices[0].message.content);`,
           },
@@ -632,9 +638,9 @@ console.log(response.choices[0].message.content);`,
 
   troubleshooting: {
     path: '/docs/error-handling',
-    title: 'Operations & Error Handling',
-    badge: 'Production Resilience',
-    description: 'Diagnostic guidelines, HTTP status code specifications, rate limit mitigation, and secure credential handling for production workloads.',
+    title: 'API errors and recovery',
+    badge: 'Integration guidance',
+    description: 'Handle documented API errors, retry transient failures carefully, and keep credentials out of client-visible surfaces.',
     sections: [
       {
         id: 'errors',
@@ -644,12 +650,13 @@ console.log(response.choices[0].message.content);`,
           headings: ['HTTP Status', 'Category', 'Root Cause', 'Recommended Remediation'],
           rows: [
             ['400 Bad Request', 'Client Error', 'Malformed JSON, missing required fields, or unsupported parameters.', 'Validate request payload against the API reference schema.'],
-            ['401 Unauthorized', 'Authentication', 'Invalid, revoked, or missing Bearer API key.', 'Verify GALXAI_API_KEY is loaded in process.env and matches dashboard.'],
-            ['402 Payment Required', 'Billing', 'Zero credit balance or exhausted account wallet.', 'Add credits or configure auto-reload in Billing Settings.'],
-            ['403 Forbidden', 'Access Control', 'Key lacks permission or Developer Preview access required.', 'Check key scopes in dashboard or request developer preview access.'],
-            ['404 Not Found', 'Routing', 'Endpoint path does not exist. (e.g. /v1/v1/chat).', 'Ensure base URL is https://galx.ai/v1 and path is /chat/completions.'],
-            ['429 Rate Limit', 'Concurrency / Quota', 'Exceeded concurrent stream limit or requests-per-minute.', 'Honor Retry-After header and implement exponential jitter backoff.'],
-            ['500 / 502 / 503', 'Server / Gateway', 'Transient edge network failure or upstream provider timeout.', 'Retry with exponential backoff. Check https://galx.ai/status.'],
+            ['401 Unauthorized', 'Authentication', 'The API key is invalid, revoked, or missing.', 'Check server-side key configuration and request access if needed.'],
+            ['402 Payment Required', 'Access terms', 'The request is not covered by the account’s current access terms.', 'Review the current access and usage terms.'],
+            ['403 Forbidden', 'Access control', 'The account or key is not permitted to use the requested capability.', 'Check the documented access requirements.'],
+            ['404 Not Found', 'Request path', 'The requested endpoint is not available at that path.', 'Check the current API reference and base URL.'],
+            ['429 Rate Limit', 'Service limit', 'The request was limited temporarily.', 'Honor Retry-After when returned and use bounded backoff.'],
+            ['503', 'Usage contract', 'Usage-pricing terms are not published for public inference.', 'Review /pricing/usage; do not retry or treat the access subscription as usage.'],
+            ['500 / 502', 'Service error', 'A transient service error occurred.', 'Retry carefully when the operation is safe to repeat.'],
           ],
         },
         links: [
@@ -679,10 +686,10 @@ function calculateBackoff(attempt: number, baseMs = 500, maxMs = 10000): number 
       },
       {
         id: 'security',
-        title: 'Zero Data Retention & Secret Hygiene',
-        badge: 'Security Posture',
+        title: 'Secret hygiene',
+        badge: 'Security guidance',
         body: [
-          'GALXAI enforces strict Zero Data Retention (ZDR). Your prompt text and generated completions are processed in volatile memory and never persisted to disk or used for training.',
+          'Keep API keys in a server-side secret manager and apply your own data-handling policy to prompts, responses, and generated artifacts. Do not assume a retention or training policy that is not stated in the current terms.',
         ],
         steps: [
           'Store API keys exclusively in server-side secret managers (AWS Secrets Manager, Vault, Cloudflare Secrets, Vercel Env).',
@@ -692,20 +699,12 @@ function calculateBackoff(attempt: number, baseMs = 500, maxMs = 10000): number 
         links: [{ href: '/keys', label: 'Rotate API Keys' }],
       },
       {
-        id: 'routing',
-        title: 'Distributed Edge Architecture',
-        badge: 'Sub-15ms Latency',
-        body: [
-          'All API traffic routes through our global distributed edge. The gateway performs sub-millisecond protocol sanitization and token bucket balancing to ensure high-concurrency stability without sudden throttling.',
-        ],
-      },
-      {
         id: 'diagnostics',
-        title: 'Production Diagnostics & Telemetry',
-        badge: 'Observability',
+        title: 'What to include when asking for help',
+        badge: 'Support',
         body: [
-          'When logging errors for support or debugging, record the timestamp, HTTP status, model ID, and request ID if provided in headers. Never log raw Authorization headers or user confidential prompt data.',
-          'Inspect the API Usage dashboard for real-time latency distributions, token throughput, and prompt cache hit ratios.',
+          'Include the time, status code, endpoint, and request ID if the response provides one. Never share Authorization headers, API keys, or private prompt and response data.',
+          'Operational diagnostics are handled through authorized support channels; ordinary API responses should contain only the documented public contract.',
         ],
         links: [
           { href: '/keys/activity', label: 'View Real-Time API Usage Telemetry' },

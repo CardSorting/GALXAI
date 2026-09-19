@@ -3,7 +3,7 @@
 import React, { useEffect } from 'react';
 import { RouteErrorBoundaryCard } from '@/components/common/RouteErrorBoundaryCard';
 import { Navigation } from '@/components/dashboard/Navigation';
-import { TrendingDown } from 'lucide-react';
+import { CircleDollarSign } from 'lucide-react';
 
 export default function PricingError({
   error,
@@ -23,14 +23,14 @@ export default function PricingError({
         <RouteErrorBoundaryCard
           error={error}
           reset={reset}
-          title="Pricing Calculator Interrupted"
-          subtitle="An error occurred while compiling wholesale token rates. Standard 25%–40% wholesale discounts remain active across all model routes."
-          badge="DISRUPTOR WHOLESALE MATRIX"
-          icon={TrendingDown}
+          title="Pricing could not be loaded"
+          subtitle="Please try again. Review the current GALX Images plan or the $50/month Developer Access membership."
+          badge="GALX PLANS"
+          icon={CircleDollarSign}
           accentColor="emerald"
-          primaryLinkHref="/models"
-          primaryLinkLabel="Model Catalog"
-          autoRetrySeconds={8}
+          primaryLinkHref="/pricing"
+          primaryLinkLabel="Back to pricing"
+          autoRetrySeconds={0}
         />
       </main>
     </div>

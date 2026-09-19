@@ -48,7 +48,7 @@
       "path": "PRODUCT.md",
       "scope": "supporting-reference-unreviewed",
       "category": "root",
-      "title": "Product: GALXAI"
+      "title": "Product: GALX"
     },
     {
       "path": "README.md",
@@ -192,7 +192,7 @@
       "path": "docs/GTM_STRATEGY.md",
       "scope": "commercial-draft",
       "category": "docs",
-      "title": "🚀 GALXAI: Go-To-Market (GTM) & Positioning Strategy"
+      "title": "GALX Go-To-Market and positioning strategy"
     },
     {
       "path": "docs/INFERENCE_PIPELINE_VERIFICATION.md",
@@ -1665,6 +1665,12 @@
       "title": "Shared quota and continuation audit — September 16, 2026"
     },
     {
+      "path": "docs/knowledge/audits/2026-09-18-nova-message-unit-economics.md",
+      "scope": "operational-record",
+      "category": "docs",
+      "title": "Nova Developer message-unit economics audit — September 18, 2026"
+    },
+    {
       "path": "docs/knowledge/templates/adr.md",
       "scope": "domain-reference",
       "category": "docs",
@@ -2130,7 +2136,7 @@
       "path": "docs/reference/billing-pages.md",
       "scope": "current-guide",
       "category": "docs",
-      "title": "Billing pages and navigation"
+      "title": "Billing pages and payment paths"
     },
     {
       "path": "docs/reference/knowledge-commands.md",

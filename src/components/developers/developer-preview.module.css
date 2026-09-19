@@ -66,6 +66,8 @@
 .aside h2 { color: #f3f4f6; font-size: 1rem; letter-spacing: 0; margin-bottom: 14px; }
 .aside section + section { margin-top: 32px; padding-top: 28px; border-top: 1px solid rgba(255, 255, 255, 0.08); }
 .aside p { margin: 0 0 12px; }
+.accessPrice { color: #f3f4f6; font-size: 1.5rem; font-weight: 600; }
+.accessTerms { color: #9ca3af; font-size: .8125rem; }
 .aside strong { color: #d4d4d8; font-weight: 500; }
 .steps { margin: 0; padding-left: 20px; }
 .steps li { margin-bottom: 16px; padding-left: 4px; }
@@ -74,9 +76,9 @@
 .publicLinks a { display: inline-flex; min-height: 44px; align-items: center; }
 .srOnly { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .tierCard { background: linear-gradient(135deg, rgba(79, 70, 229, 0.12), rgba(13, 16, 28, 0.9)); border: 1px solid rgba(99, 102, 241, 0.35); border-radius: 12px; padding: 24px; margin-bottom: 28px; }
-.tierBadge { display: inline-block; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: #a5b4fc; background: rgba(99, 102, 241, 0.2); padding: 4px 10px; border-radius: 6px; margin-bottom: 12px; }
+.tierBadge { display: inline-block; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: #d4d4d8; background: rgba(99, 102, 241, 0.2); padding: 4px 10px; border-radius: 6px; margin-bottom: 12px; }
 .tierTitle { font-size: 1.25rem; font-weight: 600; color: #fff; margin: 0 0 8px; }
-.tierDesc { font-size: 0.9375rem; color: #d4d4d8; line-height: 1.5; margin: 0 0 16px; }
+.tierDesc { font-size: 1rem; color: #d4d4d8; line-height: 1.5; margin: 0 0 16px; }
 .tierFeatures { margin: 0 0 20px; padding-left: 20px; font-size: 0.875rem; color: #9ca3af; }
 .tierFeatures li { margin-bottom: 6px; }
 .orDivider { display: flex; align-items: center; gap: 16px; margin: 28px 0; color: #71717a; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em; }

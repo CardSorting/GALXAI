@@ -172,6 +172,35 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
+        // Retired public catalog/benchmark hubs still contain historical
+        // economics and implementation claims. Keep the roots aligned with
+        // the current Developer path; the more-specific redirects below
+        // preserve existing bookmarked subpaths.
+        source: "/benchmarks",
+        destination: "/developers",
+        permanent: true,
+      },
+      {
+        source: "/capabilities",
+        destination: "/developers",
+        permanent: true,
+      },
+      {
+        source: "/migrate",
+        destination: "/developers",
+        permanent: true,
+      },
+      {
+        source: "/providers",
+        destination: "/developers",
+        permanent: true,
+      },
+      {
+        source: "/solutions",
+        destination: "/developers",
+        permanent: true,
+      },
+      {
         source: "/settings",
         has: [{ type: "query", key: "tab", value: "developer" }],
         destination: "/keys",
@@ -201,6 +230,126 @@ const nextConfig: NextConfig = {
       {
         source: "/telemetry",
         destination: "/status",
+        permanent: true,
+      },
+      {
+        source: "/home",
+        destination: "/",
+        permanent: true,
+      },
+      {
+        source: "/agents",
+        destination: "/developers",
+        permanent: true,
+      },
+      {
+        source: "/sites/:path*",
+        destination: "/images",
+        permanent: true,
+      },
+      {
+        source: "/models/:path*",
+        destination: "/developers",
+        permanent: true,
+      },
+      {
+        source: "/playground/:path*",
+        destination: "/developers",
+        permanent: true,
+      },
+      {
+        source: "/tools/:path*",
+        destination: "/docs",
+        permanent: true,
+      },
+      {
+        source: "/alternatives/:path*",
+        destination: "/developers",
+        permanent: true,
+      },
+      {
+        source: "/architecture/:path*",
+        destination: "/docs",
+        permanent: true,
+      },
+      {
+        source: "/audit",
+        destination: "/developers",
+        permanent: true,
+      },
+      {
+        source: "/benchmarks/:path*",
+        destination: "/docs",
+        permanent: true,
+      },
+      {
+        source: "/calculator",
+        destination: "/developers",
+        permanent: true,
+      },
+      {
+        source: "/capabilities/:path*",
+        destination: "/docs",
+        permanent: true,
+      },
+      {
+        source: "/compliance/:path*",
+        destination: "/privacy",
+        permanent: true,
+      },
+      {
+        source: "/cookbook/:path*",
+        destination: "/docs",
+        permanent: true,
+      },
+      {
+        source: "/glossary/:path*",
+        destination: "/docs",
+        permanent: true,
+      },
+      {
+        source: "/grants",
+        destination: "/developers",
+        permanent: true,
+      },
+      {
+        source: "/how-it-works",
+        destination: "/developers",
+        permanent: true,
+      },
+      {
+        source: "/industries/:path*",
+        destination: "/developers",
+        permanent: true,
+      },
+      {
+        source: "/migrate/:path*",
+        destination: "/docs",
+        permanent: true,
+      },
+      {
+        source: "/providers/:path*",
+        destination: "/developers",
+        permanent: true,
+      },
+      {
+        source: "/reliability/:path*",
+        destination: "/status",
+        permanent: true,
+      },
+      {
+        source: "/security/:path*",
+        destination: "/privacy",
+        permanent: true,
+      },
+      {
+        source: "/solutions/:path*",
+        destination: "/developers",
+        permanent: true,
+      },
+      {
+        source: "/postmortems/:path*",
+        destination: "/",
         permanent: true,
       },
     ];

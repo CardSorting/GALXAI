@@ -4,7 +4,7 @@ import { StripeEngine } from '@/lib/stripe/stripe';
 import { getStripeConfig } from '@/lib/stripe/config';
 import { getPostgresPool } from '@/lib/db/postgres';
 import { fulfillStripeEvent } from '@/lib/billing/fulfillment';
-import { isProPaymentAdjustment } from '@/lib/billing/plan-subscription';
+import { developerPrice, isProPaymentAdjustment } from '@/lib/billing/plan-subscription';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
@@ -29,6 +29,19 @@ export async function POST(req: NextRequest) {
     if (!verification.isValid || !verification.event || verification.event.livemode !== config.secretKey.includes('_live_')) return NextResponse.json({ error: 'Invalid webhook' }, { status: 400 });
     const event = verification.event;
     const stripe = engine.getClient()!;
+    const pool = getPostgresPool();
+    if (!pool) throw new Error('Storage unavailable');
+    const eventObject = event.data.object as any;
+    // New subscription activation still verifies the currently approved Price.
+    // Known checkout/subscription records carry their durable Price identity so
+    // cancellation and replay remain reconcilable if a successor Price is
+    // later activated or the old one is archived.
+    const knownSubscription = event.type.startsWith('customer.subscription.') && typeof eventObject?.id === 'string'
+      ? (await pool.query('SELECT 1 FROM private.galx_plan_subscriptions WHERE subscription_id=$1 LIMIT 1', [eventObject.id])).rowCount === 1
+      : false;
+    const needsDeveloperPrice = event.type === 'customer.subscription.created' &&
+      eventObject?.metadata?.galxPlan === 'nova-developer-v1' && !knownSubscription;
+    const developerPriceId = needsDeveloperPrice ? (await developerPrice(stripe)).id : undefined;
     if (['charge.dispute.funds_withdrawn','charge.dispute.funds_reinstated'].includes(event.type)) {
       const dispute = event.data.object as Stripe.Dispute;
       const chargeId = typeof dispute.charge === 'string' ? dispute.charge : dispute.charge.id;
@@ -52,9 +65,7 @@ export async function POST(req: NextRequest) {
         event.data.object = Object.assign({}, charge, { amount_refunded: refunded, refundsSnapshot });
       }
     }
-    const pool = getPostgresPool();
-    if (!pool) throw new Error('Storage unavailable');
-    const result = await fulfillStripeEvent(pool, event, rawBody, {planAdjustment:await isProPaymentAdjustment(pool,stripe,event)});
+    const result = await fulfillStripeEvent(pool, event, rawBody, { planAdjustment: await isProPaymentAdjustment(pool,stripe,event), developerPriceId });
     if (result.changedUser) {
       const { WalletRepository } = await import('@/lib/supabase/repositories/WalletRepository');
       WalletRepository.getInstance().invalidateAccount(result.changedUser);

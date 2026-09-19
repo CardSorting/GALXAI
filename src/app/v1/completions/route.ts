@@ -1,4 +1,4 @@
-import { withDeveloperAccess } from '@/lib/security/developer-access';
+import { withDeveloperUsageAccess } from '@/lib/security/developer-access';
 import { NextRequest, NextResponse } from 'next/server';
 import { galxRouter, GalxModelRouter } from '@/core/router/GalxModelRouter';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
@@ -59,7 +59,8 @@ async function previewPOST(req: NextRequest) {
       userId: authResult.userId,
       requestId,
       isPriorityUser: authResult.isPriorityUser,
-      headers: req.headers
+      headers: req.headers,
+      usageBillingBasis: 'message'
     });
 
     const parsed = typeof result.body === 'string' ? JSON.parse(result.body) : {};
@@ -142,4 +143,4 @@ async function previewPOST(req: NextRequest) {
   }
 }
 
-export const POST = withDeveloperAccess(previewPOST);
+export const POST = withDeveloperUsageAccess(previewPOST);

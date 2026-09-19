@@ -24,7 +24,7 @@ export default function StatusError({
           error={error}
           reset={reset}
           title="System Status Unreachable"
-          subtitle="The health status collector encountered a connection delay. Core API routing proxies remain operational."
+          subtitle="The status page is temporarily unavailable. Please try again in a moment."
           badge="EDGE HEALTH STATUS"
           icon={Activity}
           accentColor="emerald"

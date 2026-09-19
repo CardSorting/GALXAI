@@ -2,6 +2,7 @@ import { imageDownloadUrl } from '@/lib/security/image-download-url';
 import { NextRequest, NextResponse } from 'next/server';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 import { GalxR2AssetAdapter } from '@/workers/cloudflare/GalxR2AssetAdapter';
+import { enforceDeveloperApiKeyAccess } from '@/lib/security/developer-access';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,6 +38,8 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
     const authEngine = GalxAuthEngine.getInstance();
     const authResult = await authEngine.resolveAuthIdentity(req);
     if (!authResult.authenticated || !authResult.userId) return NextResponse.json({ error: { message: 'Unauthorized' } }, { status: 401 });
+    const developerDenied = await enforceDeveloperApiKeyAccess(req, authResult.authType);
+    if (developerDenied) return developerDenied;
     const userId = authResult.userId;
 
     const r2Adapter = GalxR2AssetAdapter.getInstance();
@@ -84,6 +87,8 @@ export async function DELETE(req: NextRequest, { params }: RouteParams) {
     const authEngine = GalxAuthEngine.getInstance();
     const authResult = await authEngine.resolveAuthIdentity(req);
     if (!authResult.authenticated || !authResult.userId) return NextResponse.json({ error: { message: 'Unauthorized' } }, { status: 401 });
+    const developerDenied = await enforceDeveloperApiKeyAccess(req, authResult.authType);
+    if (developerDenied) return developerDenied;
     const userId = authResult.userId;
 
     const r2Adapter = GalxR2AssetAdapter.getInstance();

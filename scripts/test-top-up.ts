@@ -6,4 +6,4 @@ for (const value of ['keys', 'billing', 'https://evil.test', '//evil.test', {}, 
 assert.equal(depositAmount('25.50'), 25.5);
 assert.throws(() => depositAmount(0));
 assert.throws(() => hostedPaymentUrl('https://checkout.stripe.com.evil.test', 'checkout.stripe.com'));
-console.log('Top-up checks passed: fixed return destinations and shared payment validation.');
+console.log('Billing compatibility checks passed: fixed historical return destinations and shared payment validation.');

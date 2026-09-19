@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { DeveloperAccessRepository } from '@/lib/supabase/repositories/DeveloperAccessRepository';
+import { USAGE_PRICING } from '@/lib/billing/usage-pricing';
 import { hasInternalAccess } from './internal-access';
 
 export type PreviewIdentity = { authenticated: boolean; userId?: string };
@@ -21,13 +22,13 @@ const dependencies: PreviewGateDependencies = {
   },
   approved: async id => new DeveloperAccessRepository().isApproved(id),
 };
-/** Approval is looked up on every request; no JWT claim, payment, header, or stale grant cache authorizes access. */
+/** The current approved preview or active paid Developer subscription is looked up on every request; no JWT claim, payment header, or stale grant cache authorizes access. */
 export async function enforceDeveloperAccess(req: Request, deps = dependencies): Promise<NextResponse | null> {
   try {
     if (hasInternalAccess(req.headers)) return null;
     const actor = await deps.identity(req);
     if (!actor.authenticated || !actor.userId) return previewError(401, 'authentication_required', 'Sign in or use an approved account’s API key.');
-    if (!await deps.approved(actor.userId)) return previewError(403, 'developer_preview_required', 'The developer API is in private preview. Request access to join.');
+    if (!await deps.approved(actor.userId)) return previewError(403, 'developer_access_required', 'An active GALX Nova Developer Access subscription or approved preview is required.');
     return null;
   } catch {
     return previewError(503, 'access_check_unavailable', 'We couldn’t check your access. Please try again.');
@@ -43,4 +44,50 @@ export function withDeveloperAccess<Args extends unknown[]>(handler: (req: NextR
     response.headers.set('X-Robots-Tag', 'noindex, nofollow');
     return response;
   };
+}
+
+/**
+ * Developer admission and consumption approval are separate decisions. Keep
+ * API admission available for keys, models, and documentation, but do not
+ * dispatch public inference until the per-message consumption contract exists.
+ */
+export function usagePricingUnavailable(req: Request): NextResponse | null {
+  if (USAGE_PRICING.ratesPublished || hasInternalAccess(req.headers)) return null;
+
+  return NextResponse.json({
+    error: {
+      message: 'API usage is not available until the separate per-message usage-pricing terms are published. Developer Access includes no usage credits.',
+      type: 'service_unavailable',
+      code: 'usage_pricing_not_published',
+      usage_pricing_url: USAGE_PRICING.path,
+    },
+  }, {
+    status: 503,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Cache-Control': 'no-store',
+      'X-Content-Type-Options': 'nosniff',
+    },
+  });
+}
+
+/**
+ * The image route is shared by the browser Image Studio and the API. Browser
+ * sessions retain the consumer contract; Developer API keys must still pass
+ * the live subscription check, and API consumption remains closed until its
+ * separate per-message usage contract is published.
+ */
+export async function enforceDeveloperApiKeyAccess(req: Request, authType: string, consumption = false): Promise<NextResponse | null> {
+  if (authType !== 'developer_key') return null;
+  const denied = await enforceDeveloperAccess(req);
+  if (denied) return denied;
+  return consumption ? usagePricingUnavailable(req) : null;
+}
+
+export function withDeveloperUsageAccess<Args extends unknown[]>(handler: (req: NextRequest, ...args: Args) => Response | Promise<Response>) {
+  return withDeveloperAccess(async (req: NextRequest, ...args: Args) => {
+    const unavailable = usagePricingUnavailable(req);
+    if (unavailable) return unavailable;
+    return handler(req, ...args);
+  });
 }

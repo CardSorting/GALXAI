@@ -1,5 +1,5 @@
 import { RelayDispatchError, publicRelayChatFailure } from '@/core/router/adapters/RelayChatTransport';
-import { withDeveloperAccess } from '@/lib/security/developer-access';
+import { withDeveloperUsageAccess, usagePricingUnavailable } from '@/lib/security/developer-access';
 import crypto from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { galxRouter, GalxModelRouter } from '@/core/router/GalxModelRouter';
@@ -91,6 +91,15 @@ async function previewPOST(req: NextRequest) {
         }
       );
     }
+
+    // Developer Access is an admission subscription, not a usage allowance.
+    // Until the separate consumption contract is approved, do not let the
+    // legacy community grant/governor path turn an authenticated API call into
+    // free or unpriced inference. Internal operator requests retain their
+    // existing diagnostic path; ordinary customers receive a bounded public
+    // dependency response.
+    const usageUnavailable = usagePricingUnavailable(req);
+    if (usageUnavailable) return usageUnavailable;
 
     // 2. Resolve Sovereign Seat Tier & Entitlements
     const seatEngine = GalxSeatTierEngine.getInstance();
@@ -541,7 +550,8 @@ async function previewPOST(req: NextRequest) {
       userId,
       requestId,
       isPriorityUser,
-      headers: req.headers
+      headers: req.headers,
+      usageBillingBasis: 'message'
     });
 
     // 5. Return formatted response with CORS headers, TTFT streaming optimization & ZDR Attestation
@@ -992,5 +1002,5 @@ async function previewGET(req: NextRequest) {
   return previewPOST(syntheticReq);
 }
 
-export const POST = withDeveloperAccess(previewPOST);
-export const GET = withDeveloperAccess(previewGET);
+export const POST = withDeveloperUsageAccess(previewPOST);
+export const GET = withDeveloperUsageAccess(previewGET);

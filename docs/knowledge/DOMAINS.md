@@ -212,7 +212,7 @@ Owner role: **Billing maintainer**. Domain: `billing`.
 - [Recover Stripe webhook delivery](../../docs/runbooks/stripe-webhook-delivery.md)
 - [Sites paid access and fair usage (Retired)](../../docs/maintainers/SITES_FAIR_USAGE.md)
 - [DESIGN](../../src/components/billing/DESIGN.md)
-- [Billing pages and navigation](../../docs/reference/billing-pages.md)
+- [Billing pages and payment paths](../../docs/reference/billing-pages.md)
 - [Billing strategy and customer paths](../../docs/WALLET_AND_BILLING_STRATEGY.md)
 - [DESIGN](../../src/components/home/DESIGN.md)
 - [DESIGN](../../src/components/public-content/DESIGN.md)

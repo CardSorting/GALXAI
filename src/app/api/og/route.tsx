@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
     const title = searchParams.get('title') || 'GALX — Images and Sites';
     const subtitle =
       searchParams.get('subtitle') ||
-      'Create images and build sites. Developer API access is in private preview.';
+      'Create images and build with GALX Nova. Developer Access is $50/month; usage is billed separately.';
     const badge = searchParams.get('badge') || 'IMAGES & SITES';
     const price = searchParams.get('price');
     const category = searchParams.get('category') || 'GALX';

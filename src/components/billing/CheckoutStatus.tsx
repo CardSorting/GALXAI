@@ -40,7 +40,7 @@ export function CheckoutStatus({ token, onConfirmed, accountId, onPending, retur
           // Keep the receipt identifier in the URL for refreshes and support.
           return;
         }
-        if (['expired','canceled'].includes(result.session.status)) { pendingCallback.current(false); setMessage('This checkout did not complete. You can start a new top-up.'); return; }
+        if (['expired','canceled'].includes(result.session.status)) { pendingCallback.current(false); setMessage('This historical checkout did not complete. Subscribe to GALX Nova Developer Access from the Developer page if you need API access.'); return; }
         if (Date.now() - started < 30000) timer = setTimeout(check, 2000);
         else { setMessage('Payment is still pending confirmation. Check again before making another payment.'); setRetry(true); }
       } catch { if (!stopped) { setMessage('Could not check payment status. Check again before paying again.'); setRetry(true); } }

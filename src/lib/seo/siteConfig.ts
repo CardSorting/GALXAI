@@ -4,17 +4,17 @@
  */
 
 export const SITE_CONFIG = {
-  name: 'GALXAI',
+  name: 'GALX',
   legalName: 'GALXAI Technologies Inc.',
-  alternateName: ['GALX AI'],
-  tagline: 'Generative Creative Playground & Sustainable Frontier Intelligence',
+  alternateName: ['GALXAI', 'GALX AI'],
+  tagline: 'Intelligence, handled.',
   description:
-    'A generative creative playground with community creators and sustainable serving of frontier-level intelligence. Serving GALX Nova for the highest performance per dollar so developers can build and explore without constraints.',
+    'GALX is where people create. Turn a prompt into an image, explore what others are making, and subscribe to the $50/month GALX Nova Developer Access membership for supported API capabilities.',
   // Discovery always identifies the public origin, including local/preview builds.
   // Runtime callback and request origins have their own configuration.
   url: 'https://galx.ai',
   apiUrl: 'https://galx.ai/v1',
-  ogImage: '/brand/galaxy-hero-banner.jpg',
+  ogImage: '/opengraph-image',
   twitterHandle: '@galxai',
   foundingDate: '2024-01-15',
   address: {
@@ -64,15 +64,15 @@ export const SITE_CONFIG = {
       status: 'Verified Zero PHI Storage',
     },
   ],
-  keywords: ['GALX', 'GALX Images', 'AI image generator', 'masonry stream', 'prompt studio', 'diffusion models', 'public beta'],
+  keywords: ['GALX', 'GALX Images', 'GALX Nova', 'managed intelligence', 'AI image creation', 'public image community'],
   authors: [
     {
-      name: 'GALXAI Systems & AI Security Architecture Group',
+      name: 'GALX',
       url: 'https://galx.ai/about',
     },
   ],
-  creator: 'GALXAI Technologies Inc.',
-  publisher: 'GALXAI Technologies Inc.',
+  creator: 'GALX',
+  publisher: 'GALX',
   verification: {
     google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || 'google-site-verification-galxai-apex',
     bing: process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION || 'bing-site-verification-galxai-apex',

@@ -89,11 +89,6 @@ export function createOrganizationSchema() {
         sameAs: SITE_CONFIG.wikidataEntities.cloudComputing,
       },
     ],
-    award: [
-      'SOC 2 Type II Security Architecture',
-      'ISO/IEC 27001:2022 Security Framework',
-      'HIPAA BAA Compliant Zero PHI Architecture',
-    ],
     contactPoint: {
       '@type': 'ContactPoint',
       email: SITE_CONFIG.contactPoint.email,
@@ -119,22 +114,15 @@ export function createWebSiteSchema() {
       '@id': `${SITE_CONFIG.url}/#organization`,
     },
     about: [
-      {
-        '@type': 'Thing',
-        name: 'AI Model Gateway',
-        sameAs: SITE_CONFIG.wikidataEntities.largeLanguageModel,
-      },
-      {
-        '@type': 'Thing',
-        name: 'OpenAI API Compatibility',
-        sameAs: SITE_CONFIG.wikidataEntities.openai,
-      },
+      { '@type': 'Thing', name: 'AI image creation' },
+      { '@type': 'Thing', name: 'Managed intelligence' },
+      { '@type': 'Thing', name: 'API integration' },
     ],
     potentialAction: {
       '@type': 'SearchAction',
       target: {
         '@type': 'EntryPoint',
-        urlTemplate: `${SITE_CONFIG.url}/models?q={search_term_string}`,
+        urlTemplate: `${SITE_CONFIG.url}/explore?q={search_term_string}`,
       },
       'query-input': 'required name=search_term_string',
     },
@@ -143,7 +131,7 @@ export function createWebSiteSchema() {
 }
 
 /**
- * Schema.org SoftwareApplication for GALXAI Universal AI Gateway
+ * Schema.org SoftwareApplication for a documented GALX capability.
  */
 export function createSoftwareAppSchema(props?: {
   name?: string;
@@ -153,145 +141,66 @@ export function createSoftwareAppSchema(props?: {
   featureList?: string[];
   includeRating?: boolean;
 }) {
-  const isDefaultSoftware = !props?.name || props.name.includes('Universal AI Gateway');
-  const softwareId = props?.id || (isDefaultSoftware ? `${SITE_CONFIG.url}/#software` : `${props?.url || SITE_CONFIG.url}#software`);
-  const shouldIncludeRating = props?.includeRating ?? (isDefaultSoftware && !props?.id);
+  const softwareId = props?.id || `${props?.url || SITE_CONFIG.url}#software`;
 
   return {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
     '@id': softwareId,
-    name: props?.name || 'GALXAI Universal AI Gateway & Model Router',
+    name: props?.name || 'GALX Nova',
     applicationCategory: 'DeveloperApplication',
-    operatingSystem: 'Cross-platform (HTTP REST / OpenAI SDK Compatible)',
-    offers: {
-      '@type': 'Offer',
-      price: '0.00',
-      priceCurrency: 'USD',
-      availability: 'https://schema.org/InStock',
-      description: 'Free developer account with $5 instant compute grant',
-    },
-    ...(shouldIncludeRating && {
-      aggregateRating: {
-        '@type': 'AggregateRating',
-        ratingValue: '4.99',
-        ratingCount: '1420',
-        reviewCount: '680',
-        bestRating: '5',
-        worstRating: '1',
-      },
-      review: [
-        {
-          '@type': 'Review',
-          author: { '@type': 'Person', name: 'Alexander Chen' },
-          datePublished: '2026-02-14',
-          reviewBody: 'Cut our autonomous agent cluster token bills by 38% immediately with zero code changes. 1-line baseURL swap with OpenAI SDK.',
-          reviewRating: {
-            '@type': 'Rating',
-            ratingValue: '5',
-            bestRating: '5',
-          },
-        },
-        {
-          '@type': 'Review',
-          author: { '@type': 'Person', name: 'Sarah Lindqvist' },
-          datePublished: '2026-03-01',
-          reviewBody: 'The 75% prompt caching rebate plus low-latency edge routing solved all our rate limit spikes under high concurrency.',
-          reviewRating: {
-            '@type': 'Rating',
-            ratingValue: '5',
-            bestRating: '5',
-          },
-        },
-      ],
-    }),
+    operatingSystem: 'Cross-platform',
+    description: props?.description || 'GALX Nova is GALX’s managed intelligence layer for reasoning and generation.',
     featureList: props?.featureList || [
-      'Text and image generation through one API',
-      'Zero rate limit stalls & automatic multi-account failover',
-      '25% to 40% wholesale token price discounts',
-      '75% prompt caching pass-through rebate',
-      '100% OpenAI Wire-Compatible SDK drop-in',
-      'Ephemeral volatile chunk buffers with Zero Data Retention (ZDR)',
-      'Guaranteed 100% structured JSON outputs with Zod and Pydantic',
+      'Supported reasoning and generation capabilities',
+      'Documented API integration requirements',
+      'GALX-managed service access',
     ],
   };
 }
 
 /**
- * Schema.org ItemList for Models Catalog
+ * Schema.org ItemList for supported GALX capabilities.
  */
 export function createModelItemListSchema(models: ModelSpecItem[]) {
   return {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
-    name: 'GALXAI Frontier AI Model Catalog',
-    description: 'Wholesale pricing, latency benchmarks, and architectural specifications for frontier AI models.',
-    itemListElement: models.map((m, index) => ({
+    name: 'GALX Nova supported capabilities',
+    description: 'Documented capabilities available through GALX Nova.',
+    itemListElement: [{
       '@type': 'ListItem',
-      position: index + 1,
-      name: m.name,
-      url: `${SITE_CONFIG.url}/models/${m.id.replace('/', '-')}`,
+      position: 1,
+      name: 'GALX Nova supported capabilities',
+      url: `${SITE_CONFIG.url}/developers`,
       item: {
-        '@type': 'Product',
-        name: m.name,
-        description: m.description,
-        brand: {
-          '@type': 'Brand',
-          name: 'OpenAI',
-          sameAs: SITE_CONFIG.wikidataEntities.openai,
-        },
-        offers: {
-          '@type': 'Offer',
-          price: m.inputPricePer1M.toFixed(2),
-          priceCurrency: 'USD',
-          availability: 'https://schema.org/InStock',
-          url: `${SITE_CONFIG.url}/models/${m.id.replace('/', '-')}`,
-        },
+        '@type': 'SoftwareApplication',
+        name: 'GALX Nova',
+        description: 'Managed intelligence for supported reasoning and generation capabilities.',
+        url: `${SITE_CONFIG.url}/developers`,
       },
-    })),
+    }],
   };
 }
 
 /**
- * Schema.org Product for Individual Model Specs
+ * Schema.org descriptor for a supported GALX capability.
  */
 export function createProductModelSchema(model: ModelSpecItem, options?: { includeRating?: boolean }) {
-  const canonicalUrl = `${SITE_CONFIG.url}/models/${model.id.replace('/', '-')}`;
+  const canonicalUrl = `${SITE_CONFIG.url}/developers`;
 
   return {
     '@context': 'https://schema.org',
     '@type': 'Product',
     '@id': `${canonicalUrl}/#product`,
-    name: `${model.name} — GALXAI Universal API Gateway`,
-    image: `${canonicalUrl}/opengraph-image`,
-    description: model.description,
-    disambiguatingDescription: `Wholesale OpenAI-compatible API compute channel for ${model.name} with 75% prompt caching and zero rate limit stalls.`,
+    name: 'GALX Nova — supported capability',
+    description: 'GALX Nova is GALX’s managed intelligence layer for supported reasoning and generation capabilities.',
+    disambiguatingDescription: 'Programmable access to documented GALX Nova capabilities.',
     brand: {
       '@type': 'Brand',
-      name: 'OpenAI',
-      sameAs: SITE_CONFIG.wikidataEntities.openai,
+      name: 'GALX',
     },
-    offers: {
-      '@type': 'Offer',
-      price: model.inputPricePer1M.toFixed(2),
-      priceCurrency: 'USD',
-      availability: 'https://schema.org/InStock',
-      priceValidUntil: '2028-12-31',
-      url: canonicalUrl,
-      seller: {
-        '@type': 'Organization',
-        name: SITE_CONFIG.name,
-      },
-    },
-    ...(options?.includeRating !== false && {
-      aggregateRating: {
-        '@type': 'AggregateRating',
-        ratingValue: '4.97',
-        reviewCount: '410',
-        bestRating: '5',
-        worstRating: '1',
-      },
-    }),
+    url: canonicalUrl,
   };
 }
 
@@ -459,26 +368,21 @@ export function createTechArticleSchema({
 }
 
 /**
- * Schema.org FinancialProduct / Grants
+ * Schema.org descriptor for Developer access.
  */
 export function createGrantFinancialSchema() {
   return {
     '@context': 'https://schema.org',
-    '@type': 'FinancialProduct',
-    name: 'GALXAI Builder & Scale Acceleration Grant Fund',
-    description: 'Up to $2,500 in 50% compute match grants for AI builders, funded startups, and enterprise teams.',
+    '@type': 'Service',
+    name: 'GALX Developer access',
+    description: 'Request programmable access to supported GALX Nova capabilities.',
     provider: {
       '@type': 'Organization',
       '@id': `${SITE_CONFIG.url}/#organization`,
       name: SITE_CONFIG.name,
       url: SITE_CONFIG.url,
     },
-    offers: {
-      '@type': 'Offer',
-      price: '0.00',
-      priceCurrency: 'USD',
-      description: '50% deposit match up to $2,500 with instant activation',
-    },
+    url: `${SITE_CONFIG.url}/developers`,
   };
 }
 

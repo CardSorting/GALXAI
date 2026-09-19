@@ -355,10 +355,11 @@ export class GalxSeatTierEngine {
     return 1.0;
   }
 
-  public recordSeatUsage(userId: string, modelId: string, tokens: number = 1000, requestId?: string): void {
+  /** Records one completed API message for the message-based Developer contract. */
+  public recordSeatMessageUsage(userId: string, modelId: string, requestId?: string): void {
     if (!userId || userId === 'anonymous_developer') return;
 
-    const units = this.getSeatUsageUnits(modelId);
+    const units = 1.0;
 
     const now = Date.now();
     const existing = this.usageEventsTable.get(userId);
@@ -376,9 +377,36 @@ export class GalxSeatTierEngine {
       userId,
       modelId,
       units,
-      tokens,
+      tokens: 0,
+      costUsd: 0,
       requestId,
     }).catch(() => {});
+
+    if (requestId) {
+      this.teamRepo.commitNovaMessage({ userId, requestId }).catch(() => {});
+    }
+
+    // The outbox is intentionally best-effort at request time. The unique
+    // database key makes retries safe, while a private reconciler can replay
+    // completed usage events if the outbox call is temporarily unavailable.
+    if (requestId) {
+      this.teamRepo.enqueueMessageBillingEvent({ userId, modelId, requestId }).catch(() => {});
+    }
+  }
+
+  public async reserveNovaMessage(userId: string, requestId: string): Promise<{ allowed: boolean; code?: string; [key: string]: unknown }> {
+    const result = await this.teamRepo.reserveNovaMessage({ userId, requestId });
+    if (!result) throw new Error('NOVA_MESSAGE_RESERVATION_UNAVAILABLE');
+    return result;
+  }
+
+  public async releaseNovaMessage(userId: string, requestId: string): Promise<void> {
+    await this.teamRepo.releaseNovaMessage({ userId, requestId });
+  }
+
+  /** @deprecated Kept for historical callers; Developer billing never uses token quantities. */
+  public recordSeatUsage(userId: string, modelId: string, _tokens = 0, requestId?: string): void {
+    this.recordSeatMessageUsage(userId, modelId, requestId);
   }
 
   public async evaluateAndAcquireDistributedGate(params: {

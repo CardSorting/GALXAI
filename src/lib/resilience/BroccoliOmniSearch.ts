@@ -1,37 +1,22 @@
 import { BILLING_PATHS } from '../billing/navigation';
-/**
- * GALXAI: BroccoliDB OmniSearch & Natural Navigation Engine
- * High-performance in-memory semantic indexing for non-technical and power users alike.
- * Indexes routes, plain-English intent phrases, models, error solutions, actionable code dispatchers,
- * and frequency-weighted navigation history.
- * Backed by BroccoliDB L1 reactive tables with secondary indexing, fuzzy typo tolerance, and predictive prefetching.
- */
-
 import { BroccoliDbTable } from '@/core/broccolidb/broccolidb-table';
-import { FRONTEND_VISIBLE_MODELS } from '@/core/router/PublicModelCatalog';
-import { COOKBOOK_RECIPES_DATA } from '@/lib/data/cookbooksData';
-import { ERROR_TROUBLESHOOT_DATA } from '@/lib/data/errorsData';
-import { COMPETITOR_ALTERNATIVES } from '@/lib/data/alternativesData';
-import { SOLUTION_GUIDES } from '@/lib/data/solutionsData';
-import { MIGRATION_GUIDES_DATA } from '@/lib/data/migrationData';
-import { SECURITY_PATTERNS_DATA } from '@/lib/data/securityPatternsData';
-import { GLOSSARY_TERMS } from '@/lib/data/glossaryData';
-import { CAPABILITIES_DATA } from '@/lib/data/capabilitiesData';
 import { SafeStorage } from './SafeStorage';
 
+/**
+ * The command palette is a public navigation surface. Keep its catalog limited
+ * to current GALX destinations and customer-safe descriptions. Product and
+ * operational catalogs belong behind their respective server-side boundaries.
+ */
 
 export interface CatalogItem {
   title: string;
   description: string;
-  category: 'Navigation' | 'Models & Engines' | 'Documentation' | 'Actions & Tools' | 'Help & Diagnostics' | 'Recent';
+  category: 'Navigation' | 'Developer' | 'Documentation' | 'Actions & Tools' | 'Help & Diagnostics' | 'Finance' | 'Support' | 'Recent';
   href: string;
   keywords: string[];
   intentPhrases: string[];
   shortcutKey?: string;
-  iconName?: string;
   badge?: string;
-  modelId?: string;
-  pricePer1M?: number;
   actionType?: 'copy_curl' | 'copy_python' | 'copy_ts' | 'copy_key' | 'navigate';
   actionData?: string;
 }
@@ -51,583 +36,232 @@ export interface RecentNavItem extends Record<string, unknown> {
 
 const STORAGE_RECENT_NAV_KEY = 'galx_recent_nav_v1';
 
-/**
- * Calculates Levenshtein distance between two strings for fuzzy typo matching.
- */
+const ACRONYM_MAP: Record<string, string> = {
+  api: '/developers',
+  about: '/about',
+  docs: '/docs',
+  faq: '/faq',
+  explore: '/explore',
+  images: '/images',
+  nova: '/developers',
+  pricing: '/pricing',
+};
+
+const ALLOWED_RECENT_ROUTE_PREFIXES = [
+  '/about', '/developers', '/docs', '/explore', '/faq', '/images',
+  '/knowledge-base', '/keys', '/library', '/pricing', '/privacy', '/queues',
+  '/settings', '/status', '/teams', '/terms', '/billing',
+];
+
+function isAllowedRecentHref(href: string): boolean {
+  return href === '/' || ALLOWED_RECENT_ROUTE_PREFIXES.some((prefix) => href === prefix || href.startsWith(`${prefix}/`));
+}
+
+const BASE_CATALOG_ITEMS: CatalogItem[] = [
+  {
+    title: 'GALX Images',
+    description: 'Create an image and explore what others create.',
+    category: 'Navigation',
+    href: '/images',
+    shortcutKey: 'G I',
+    keywords: ['images', 'create', 'creation', 'prompt', 'image studio'],
+    intentPhrases: ['make an image', 'create an image', 'open image studio', 'start creating'],
+  },
+  {
+    title: 'Explore creations',
+    description: 'Find images created on GALX and your next idea.',
+    category: 'Navigation',
+    href: '/explore',
+    shortcutKey: 'G E',
+    keywords: ['explore', 'community', 'gallery', 'creations', 'discover'],
+    intentPhrases: ['see creations', 'find inspiration', 'browse images', 'explore the community'],
+  },
+  {
+    title: 'GALX Developer',
+    description: 'Subscribe to build with supported GALX Nova capabilities.',
+    category: 'Developer',
+    href: '/developers',
+    shortcutKey: 'G D',
+    keywords: ['developer', 'nova', 'api', 'access', 'managed intelligence', 'build'],
+    intentPhrases: ['build with nova', 'subscribe to developer access', 'use the api', 'build an application'],
+  },
+  {
+    title: 'Supported capabilities and documentation',
+    description: 'Review API capabilities and integration requirements.',
+    category: 'Documentation',
+    href: '/docs',
+    keywords: ['docs', 'documentation', 'api', 'integration', 'quickstart', 'capabilities'],
+    intentPhrases: ['read the docs', 'how do I integrate', 'api guide', 'supported capabilities'],
+  },
+  {
+    title: 'Pricing for creating',
+    description: 'Review the consumer plan and Developer access statement.',
+    category: 'Finance',
+    href: '/pricing',
+    keywords: ['pricing', 'price', 'plan', 'pro', 'developer access', '$50'],
+    intentPhrases: ['how much does it cost', 'review pricing', 'what is the pro plan'],
+  },
+  {
+    title: 'Frequently asked questions',
+    description: 'Answers about GALX, Nova, public creations, and access.',
+    category: 'Support',
+    href: '/faq',
+    shortcutKey: 'G F',
+    keywords: ['faq', 'questions', 'answers', 'help', 'nova', 'managed'],
+    intentPhrases: ['what is galx', 'what is nova', 'what does managed mean', 'get help'],
+  },
+  {
+    title: 'Knowledge base',
+    description: 'Guidance for creating, sharing, remixing, and Developer access.',
+    category: 'Support',
+    href: '/knowledge-base',
+    keywords: ['knowledge', 'guides', 'help', 'getting started', 'remix', 'public'],
+    intentPhrases: ['read the guides', 'how do I get started', 'learn about public creations'],
+  },
+  {
+    title: 'About GALX',
+    description: 'Learn how GALX, Nova, and Developer fit together.',
+    category: 'Navigation',
+    href: '/about',
+    keywords: ['about', 'managed intelligence', 'galx', 'nova'],
+    intentPhrases: ['learn about galx', 'what is galx nova'],
+  },
+  {
+    title: 'Service status',
+    description: 'Check the current status of GALX services.',
+    category: 'Help & Diagnostics',
+    href: '/status',
+    keywords: ['status', 'availability', 'service', 'health'],
+    intentPhrases: ['is galx available', 'check service status'],
+  },
+  {
+    title: 'API keys',
+    description: 'Manage keys after Developer Access is active.',
+    category: 'Developer',
+    href: '/keys',
+    keywords: ['keys', 'api key', 'credentials', 'developer'],
+    intentPhrases: ['manage api keys', 'open api keys'],
+  },
+  {
+    title: 'Billing overview',
+    description: 'Review your plan and payment activity.',
+    category: 'Finance',
+    href: BILLING_PATHS.overview,
+    keywords: ['billing', 'payments', 'account'],
+    intentPhrases: ['open billing', 'review payments'],
+  },
+  {
+    title: 'Account credit',
+    description: 'Review existing account credit and activity.',
+    category: 'Finance',
+    href: BILLING_PATHS.credits,
+    keywords: ['credit', 'wallet', 'balance', 'account credit'],
+    intentPhrases: ['top up wallet', 'view account credit', 'check my balance'],
+  },
+  {
+    title: 'Plan and subscription',
+    description: 'Review and manage your consumer subscription.',
+    category: 'Finance',
+    href: BILLING_PATHS.plan,
+    keywords: ['plan', 'subscription', 'renewal', 'cancel'],
+    intentPhrases: ['manage my subscription', 'cancel my plan'],
+  },
+  {
+    title: 'Billing invoices',
+    description: 'View invoices and available downloads.',
+    category: 'Finance',
+    href: BILLING_PATHS.invoices,
+    keywords: ['invoice', 'invoices', 'receipts', 'tax', 'bills'],
+    intentPhrases: ['view invoices', 'download a receipt', 'where is my invoice'],
+  },
+  {
+    title: 'Billing transactions',
+    description: 'Review account credit and usage activity.',
+    category: 'Finance',
+    href: BILLING_PATHS.transactions,
+    keywords: ['transactions', 'activity', 'usage', 'history'],
+    intentPhrases: ['view transactions', 'view billing history'],
+  },
+  {
+    title: 'Payment settings',
+    description: 'Manage saved payment methods in Stripe.',
+    category: 'Finance',
+    href: BILLING_PATHS.payments,
+    keywords: ['payment methods', 'credit card', 'card', 'stripe'],
+    intentPhrases: ['update my credit card', 'manage payment methods'],
+  },
+  {
+    title: 'Privacy and terms',
+    description: 'Read GALX privacy and service terms.',
+    category: 'Help & Diagnostics',
+    href: '/privacy',
+    keywords: ['privacy', 'terms', 'data', 'legal'],
+    intentPhrases: ['read privacy', 'read terms'],
+  },
+];
+
+/** Calculates edit distance for small navigation typos. */
 export function calculateLevenshteinDistance(a: string, b: string): number {
   if (a === b) return 0;
   if (!a.length) return b.length;
   if (!b.length) return a.length;
 
-  const matrix: number[][] = [];
-  for (let i = 0; i <= b.length; i++) matrix[i] = [i];
-  for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
-
-  for (let i = 1; i <= b.length; i++) {
-    for (let j = 1; j <= a.length; j++) {
-      if (b.charAt(i - 1) === a.charAt(j - 1)) {
-        matrix[i][j] = matrix[i - 1][j - 1];
-      } else {
-        matrix[i][j] = Math.min(
-          matrix[i - 1][j - 1] + 1, // substitution
-          matrix[i][j - 1] + 1,     // insertion
-          matrix[i - 1][j] + 1      // deletion
-        );
-      }
+  const previous = Array.from({ length: b.length + 1 }, (_, index) => index);
+  for (let i = 1; i <= a.length; i += 1) {
+    let diagonal = previous[0];
+    previous[0] = i;
+    for (let j = 1; j <= b.length; j += 1) {
+      const above = previous[j];
+      previous[j] = a[i - 1] === b[j - 1]
+        ? diagonal
+        : Math.min(diagonal + 1, previous[j] + 1, previous[j - 1] + 1);
+      diagonal = above;
     }
   }
-
-  return matrix[b.length][a.length];
+  return previous[b.length];
 }
 
-/**
- * Calculates Soundex phonetic hash code for non-technical phonetic spelling absorption.
- */
-export function calculateSoundex(s: string): string {
-  if (!s) return '';
-  let clean = s.toUpperCase().replace(/[^A-Z]/g, '');
+/** Provides forgiving matching without loading a second public product catalog. */
+export function calculateSoundex(value: string): string {
+  const clean = value.toUpperCase().replace(/[^A-Z]/g, '');
   if (!clean) return '';
-
-  // Phonetic normalization for English phonetic variants
-  clean = clean
-    .replace(/^PH/, 'F')
-    .replace(/^KN/, 'N')
-    .replace(/^GN/, 'N')
-    .replace(/^WR/, 'R')
-    .replace(/^K/, 'C');
-
-  const mapping: Record<string, string> = {
-    B: '1', F: '1', P: '1', V: '1',
-    C: '2', G: '2', J: '2', K: '2', Q: '2', S: '2', X: '2', Z: '2',
-    D: '3', T: '3',
-    L: '4',
-    M: '5', N: '5',
-    R: '6',
-  };
-
-  const firstChar = clean[0];
-  let res = firstChar;
-  let prevCode = mapping[firstChar] || '';
-
-  for (let i = 1; i < clean.length; i++) {
-    const code = mapping[clean[i]] || '';
-    if (code && code !== prevCode) {
-      res += code;
-      if (res.length === 4) break;
-    }
-    prevCode = code;
+  const mapping: Record<string, string> = { B: '1', F: '1', P: '1', V: '1', C: '2', G: '2', J: '2', K: '2', Q: '2', S: '2', X: '2', Z: '2', D: '3', T: '3', L: '4', M: '5', N: '5', R: '6' };
+  let result = clean[0];
+  let previous = mapping[clean[0]] || '';
+  for (let index = 1; index < clean.length && result.length < 4; index += 1) {
+    const code = mapping[clean[index]] || '';
+    if (code && code !== previous) result += code;
+    previous = code;
   }
-
-  return (res + '0000').slice(0, 4);
+  return (result + '0000').slice(0, 4);
 }
-
-const ACRONYM_MAP: Record<string, string> = {
-  gpt: '/models',
-  ide: '/docs/ide-setup',
-  zdr: '/compliance',
-  sla: '/status',
-  faq: '/faq',
-  sdk: '/docs',
-  api: '/keys',
-  key: '/keys',
-  ui: '/playground',
-  tax: BILLING_PATHS.invoices,
-  sub: BILLING_PATHS.plan,
-  bpe: '/docs/prompt-caching',
-  pci: '/compliance',
-  vat: BILLING_PATHS.invoices,
-  usd: BILLING_PATHS.credits,
-  llm: '/models',
-};
-
-const BASE_CATALOG_ITEMS: CatalogItem[] = [
-  // 1. Navigation & Core Pages
-  {
-    title: 'Home & Gateway Overview',
-    description: 'Wholesale AI compute gateway, live pool liquidity, and featured model routers.',
-    category: 'Navigation',
-    href: '/',
-    shortcutKey: 'G H',
-    keywords: ['home', 'landing', 'main', 'start', 'index', 'dashboard', 'rates', 'overview'],
-    intentPhrases: ['go home', 'main page', 'gateway overview', 'what is galxai', 'start here', 'home screen'],
-  },
-  {
-    title: 'Supported Models & Pricing Catalog',
-    description: 'Explore wholesale rates for GALX Nova and GALX Nova-image.',
-    category: 'Models & Engines',
-    href: '/models',
-    shortcutKey: 'G M',
-    keywords: ['models', 'pricing', 'catalog', 'nova', 'galx-nova', 'image', 'tokens', 'cost', 'cheap', 'rates'],
-    intentPhrases: ['cheapest model', 'browse models', 'compare pricing', 'discount rates', 'which model is best', 'lowest cost', 'model list'],
-  },
-  {
-    title: 'Wholesale Pricing & Calculator',
-    description: 'Calculate 25%–40% wholesale savings and compare prompt caching discounts.',
-    category: 'Navigation',
-    href: '/pricing',
-    keywords: ['pricing', 'cost', 'rates', 'wholesale', 'savings', 'calculator', 'cheap', 'budget', 'roi'],
-    intentPhrases: ['how much does it cost', 'pricing calculator', 'wholesale rates', 'check prices', 'estimate token cost'],
-  },
-  {
-    title: 'Universal Model Comparison Matrix',
-    description: 'Side-by-side benchmark of pricing, context windows, benchmark scores, and caching discounts.',
-    category: 'Models & Engines',
-    href: '/models/compare',
-    shortcutKey: 'G C',
-    keywords: ['compare', 'matrix', 'versus', 'benchmarks', 'speed', 'arena', 'diff', 'side by side'],
-    intentPhrases: ['compare models', 'model benchmark', 'cost comparison table', 'difference between models', 'which model is faster'],
-  },
-  {
-    title: 'Developer Gateway API Keys',
-    description: 'Create, revoke, and manage zero-markup cryptographic API keys with instant rate limiting.',
-    category: 'Actions & Tools',
-    href: '/keys',
-    shortcutKey: 'G K',
-    keywords: ['keys', 'api key', 'create key', 'bearer', 'token', 'secret', 'credentials', 'access', 'auth'],
-    intentPhrases: ['create api key', 'get new key', 'how do i connect cursor', 'api credentials', 'view my keys', 'manage tokens'],
-  },
-
-  {
-    title: 'Billing overview', description: 'Your plan, prepaid credit and payment activity.',
-    category: 'Navigation', href: BILLING_PATHS.overview, shortcutKey: 'G B',
-    keywords: ['billing', 'account billing', 'overview'], intentPhrases: ['open billing', 'manage billing'],
-  },
-  {
-    title: 'Plan and subscription', description: 'Review Pro access, renewal details and your subscription.',
-    category: 'Navigation', href: BILLING_PATHS.plan,
-    keywords: ['plan', 'subscription', 'pro', 'renewal', 'cancel subscription', 'upgrade'],
-    intentPhrases: ['manage my subscription', 'cancel my plan', 'upgrade to pro', 'when does my plan renew'],
-  },
-  {
-    title: 'Credits and top-up', description: 'Review prepaid credit and add a one-time top-up.',
-    category: 'Navigation', href: BILLING_PATHS.credits,
-    keywords: ['wallet', 'balance', 'credits', 'top up', 'deposit', 'funds', 'usd'],
-    intentPhrases: ['add funds', 'top up wallet', 'check balance', 'deposit money', 'minimum deposit', 'how to check remaining balance'],
-  },
-  {
-    title: 'Transactions', description: 'Review credit added, usage and balance adjustments.',
-    category: 'Navigation', href: BILLING_PATHS.transactions,
-    keywords: ['transactions', 'history', 'credit history', 'usage', 'ledger', 'export csv'],
-    intentPhrases: ['view transactions', 'export credit history', 'where did my credit go'],
-  },
-  {
-    title: 'Billing invoices', description: 'View and download invoices for your payments.',
-    category: 'Navigation', href: BILLING_PATHS.invoices,
-    keywords: ['invoice', 'receipt', 'tax', 'pdf', 'bills', 'accounting', 'vat', 'expenses'],
-    intentPhrases: ['where is my invoice', 'download tax receipt', 'billing invoice pdf', 'accounting receipt', 'corporate invoice', 'vat invoice'],
-  },
-  {
-    title: 'Payment settings', description: 'Manage your saved payment methods securely with Stripe.',
-    category: 'Navigation', href: BILLING_PATHS.payments,
-    keywords: ['payment methods', 'credit card', 'debit card', 'stripe', 'payment settings'],
-    intentPhrases: ['update my credit card', 'add credit card', 'change payment method', 'how do i pay'],
-  },
-  {
-    title: 'Live System Status & Operational Health',
-    description: 'Real-time multi-region health checks, p50/p90/p99 edge latency probes, and circuit states.',
-    category: 'Help & Diagnostics',
-    href: '/status',
-    shortcutKey: 'G S',
-    keywords: ['status', 'uptime', 'health', 'ping', 'latency', 'incident', 'down', 'slow', 'offline', 'operational', 'history'],
-    intentPhrases: ['is the api down', 'check latency', 'service health', 'system operational status', 'why is it slow', 'is galxai working', 'historical uptime'],
-  },
-  {
-    title: 'Asynchronous Requests & Queue Governor',
-    description: 'Inspect execution leases, priority fair-share queues, and batch agent pipelines.',
-    category: 'Navigation',
-    href: '/queues',
-    shortcutKey: 'G Q',
-    keywords: ['queues', 'async', 'batch', 'background', 'priority', 'rate limit', 'buffer', 'tasks', 'jobs', 'results'],
-    intentPhrases: ['view request queue', 'batch processing', 'off-peak yield', 'async background tasks', 'check task status', 'queued requests'],
-  },
-  {
-    title: 'Interactive API Sandbox & Playground',
-    description: 'Test chat completions, image synthesis, and prompt caching with live token telemetry.',
-    category: 'Actions & Tools',
-    href: '/playground',
-    shortcutKey: 'G P',
-    keywords: ['playground', 'sandbox', 'test', 'try', 'chat', 'curl', 'code snippets', 'demo', 'experiment'],
-    intentPhrases: ['test prompts', 'try models live', 'copy python snippet', 'sandbox test', 'run prompt test', 'interactive chat', 'live api tester'],
-  },
-
-  // 2. Action Dispatchers (Raycast / Linear Style)
-  {
-    title: 'Quick Action: Copy cURL Request Snippet',
-    description: 'Instant drop-in bash cURL completion snippet with OpenAI compatibility.',
-    category: 'Actions & Tools',
-    href: '/playground',
-    badge: 'Quick Action',
-    keywords: ['curl', 'bash', 'terminal', 'copy curl', 'snippet', 'cli', 'request'],
-    intentPhrases: ['copy curl', 'curl snippet', 'how to curl galxai', 'terminal command', 'curl request'],
-    actionType: 'copy_curl',
-    actionData: `curl https://galx.ai/v1/chat/completions \\\n  -H "Content-Type: application/json" \\\n  -H "Authorization: Bearer $GALX_API_KEY" \\\n  -d '{"model": "galx-nova", "messages": [{"role": "user", "content": "Hello GALXAI"}]}'`
-  },
-  {
-    title: 'Quick Action: Copy Python SDK Snippet',
-    description: '1-line drop-in OpenAI Python SDK client code configured to galx.ai/v1.',
-    category: 'Actions & Tools',
-    href: '/docs',
-    badge: 'Quick Action',
-    keywords: ['python', 'pip', 'openai python', 'copy python', 'sdk', 'code'],
-    intentPhrases: ['copy python', 'python code snippet', 'how to use python sdk', 'python client'],
-    actionType: 'copy_python',
-    actionData: `from openai import OpenAI\n\nclient = OpenAI(base_url="https://galx.ai/v1", api_key="galx_live_your_key")\nresponse = client.chat.completions.create(model="galx-nova", messages=[{"role": "user", "content": "Hello"}])\nprint(response.choices[0].message.content)`
-  },
-  {
-    title: 'Quick Action: Copy TypeScript / Node SDK Snippet',
-    description: '1-line drop-in OpenAI Node.js SDK client code with type safety.',
-    category: 'Actions & Tools',
-    href: '/docs',
-    badge: 'Quick Action',
-    keywords: ['typescript', 'javascript', 'node', 'npm', 'copy typescript', 'sdk'],
-    intentPhrases: ['copy typescript', 'nodejs code snippet', 'typescript client', 'javascript sdk'],
-    actionType: 'copy_ts',
-    actionData: `import OpenAI from "openai";\n\nconst client = new OpenAI({ baseURL: "https://galx.ai/v1", apiKey: process.env.GALX_API_KEY });\nconst res = await client.chat.completions.create({ model: "galx-nova", messages: [{ role: "user", content: "Hello" }] });\nconsole.log(res.choices[0].message.content);`
-  },
-
-  // 3. Documentation Hub & Deep Dives
-  {
-    title: 'Documentation & Developer Guides',
-    description: 'Comprehensive guides for SDKs, structured outputs, prompt caching, and multi-agent loops.',
-    category: 'Documentation',
-    href: '/docs',
-    shortcutKey: 'G D',
-    keywords: ['docs', 'documentation', 'learn', 'guide', 'tutorial', 'manual', 'help', 'instructions', 'sdk', 'endpoint', 'base url'],
-    intentPhrases: ['how to use api', 'integration guides', 'documentation home', 'sdk cheatsheet', 'getting started docs', 'what is the base url', 'api endpoint'],
-  },
-  {
-    title: 'Plain English Guide (Zero Jargon)',
-    description: 'Simple explanation of tokens, API keys, wholesale discounts, and setup for non-technical users.',
-    category: 'Documentation',
-    href: '/docs/simple',
-    badge: 'Beginner Friendly',
-    keywords: ['simple', 'plain english', 'beginner', 'non-technical', 'explained', 'easy', 'no code', 'tutorial'],
-    intentPhrases: ['explain tokens like im five', 'what is an api key', 'simple guide for beginners', 'no code explanation', 'how does this work', 'is there a free tier'],
-  },
-  {
-    title: '1-Click Zero-Code Migration Guide',
-    description: 'Switch from OpenAI, OpenRouter, LiteLLM, or Bedrock by changing only your baseUrl and key.',
-    category: 'Documentation',
-    href: '/docs/migration',
-    keywords: ['migration', 'switch', 'drop-in', 'openai replacement', 'openrouter alternative', 'litellm', 'langchain'],
-    intentPhrases: ['how to migrate from openai', 'switch from openrouter', 'drop-in replacement', 'replace openrouter', 'change base url'],
-  },
-  {
-    title: 'Cursor, Windsurf & IDE Setup',
-    description: 'Configure your favorite AI editor with sub-15ms Time-To-First-Token in under 60 seconds.',
-    category: 'Documentation',
-    href: '/docs/ide-setup',
-    keywords: ['cursor', 'windsurf', 'continue', 'vscode', 'ide', 'editor', 'setup', 'copilot'],
-    intentPhrases: ['configure cursor ide', 'use galxai in windsurf', 'ide api settings', 'vscode setup', 'continue dev setup', 'windsurf base url', 'cursor api base url'],
-  },
-  {
-    title: '75% Automated Prompt Caching Guide',
-    description: 'Learn how prefix matching over 1,024 tokens automatically saves 75% on repetitive system prompts.',
-    category: 'Documentation',
-    href: '/docs/prompt-caching',
-    badge: '75% Discount',
-    keywords: ['caching', 'prompt caching', 'rebate', 'discount', 'system prompt', 'long context', 'savings'],
-    intentPhrases: ['how does prompt caching work', 'save money on system prompts', '75% discount', 'cache prefix discount'],
-  },
-  {
-    title: 'Guaranteed JSON Structured Outputs',
-    description: 'Constrained decoding grammar enforcing 100% adherence to complex Zod / JSON schemas.',
-    category: 'Documentation',
-    href: '/docs/structured-outputs',
-    keywords: ['structured outputs', 'json', 'zod', 'schema', 'pydantic', 'typesafe', 'parsing'],
-    intentPhrases: ['guaranteed json', 'how to return json', 'type safe response', 'zod schema parsing', 'structured output'],
-  },
-  {
-    title: 'AI Multi-Agent Swarms Architecture',
-    description: 'High-concurrency streaming infrastructure engineered for autonomous agent fleets.',
-    category: 'Documentation',
-    href: '/docs/agents',
-    keywords: ['agents', 'swarms', 'multi-agent', 'concurrency', 'autonomous', 'crewai', 'autogen', 'langchain', 'llamaindex'],
-    intentPhrases: ['how to run agent swarms', 'multi agent fleet', 'high concurrency agents', 'crewai integration', 'how to setup langchain', 'llamaindex agent', 'autogen agents'],
-  },
-  {
-    title: 'Error Codes & Exponential Backoff Guide',
-    description: 'Troubleshoot HTTP 429, 502, 503, and understand the 4-state circuit breaker failover.',
-    category: 'Help & Diagnostics',
-    href: '/docs/error-handling',
-    keywords: ['errors', 'troubleshoot', '429', '502', '503', '504', 'timeout', 'retry', 'circuit breaker', 'failover'],
-    intentPhrases: ['why am i getting 429 rate limit', 'fix api connection error', 'how to handle errors', 'rate limit exceeded', 'server error 502', 'i got rate limited 429 what should i do'],
-  },
-
-  // 4. Security, Grants & Growth
-  {
-    title: 'SOC2 Type II, HIPAA & Zero Retention (ZDR)',
-    description: 'Cryptographic proof of ephemeral memory zeroization, SOC2 compliance, and HIPAA BAA safeguards.',
-    category: 'Help & Diagnostics',
-    href: '/compliance',
-    badge: 'SOC2 & HIPAA',
-    keywords: ['compliance', 'soc2', 'hipaa', 'gdpr', 'zdr', 'zero data retention', 'privacy', 'security', 'dpa', 'encryption'],
-    intentPhrases: ['do you log prompts', 'is my data safe', 'hipaa compliance', 'zero retention proof', 'soc2 report', 'security policy'],
-  },
-  {
-    title: 'Scale & Builder Acceleration Grants',
-    description: 'Claim up to $2,500 in matching compute credits for production workloads and startups.',
-    category: 'Actions & Tools',
-    href: '/grants',
-    badge: 'Up to $2,500 Match',
-    keywords: ['grants', 'credits', 'free money', 'startup', 'subsidy', 'funding', 'accelerator', 'match'],
-    intentPhrases: ['apply for grants', 'free compute credits', 'startup discount', 'accelerator grant', 'credit matching'],
-  },
-  {
-    title: 'Frequently Asked Questions (FAQ)',
-    description: 'Transparent answers on zero data retention, latency SLA, uptime guarantees, and crypto payments.',
-    category: 'Help & Diagnostics',
-    href: '/faq',
-    shortcutKey: 'G F',
-    keywords: ['faq', 'questions', 'support', 'help', 'privacy', 'data retention', 'compliance', 'security', 'refund', 'cancel'],
-    intentPhrases: ['do you log prompts', 'is my data safe', 'where are servers located', 'faq answers', 'how to contact support', 'how do refunds work', 'how to cancel', 'refund policy'],
-  },
-];
 
 class BroccoliOmniSearchImpl {
   private static instance: BroccoliOmniSearchImpl | null = null;
-  private searchTable: BroccoliDbTable<OmniSearchItem>;
-  private recentTable: BroccoliDbTable<RecentNavItem>;
-  private prefetchedRoutes = new Set<string>();
+  private readonly searchTable: BroccoliDbTable<OmniSearchItem>;
+  private readonly recentTable: BroccoliDbTable<RecentNavItem>;
+  private readonly prefetchedRoutes = new Set<string>();
 
   private constructor() {
     this.searchTable = new BroccoliDbTable<OmniSearchItem>('galx_omnisearch_catalog');
     this.searchTable.createIndex('category');
     this.searchTable.createIndex('href');
-    this.searchTable.createIndex('modelId');
-
     this.recentTable = new BroccoliDbTable<RecentNavItem>('galx_recent_nav_history');
     this.recentTable.createSortedIndex('timestamp');
     this.recentTable.createSortedIndex('visitCount');
-
     this.seedCatalog();
-    if (typeof window !== 'undefined') {
-      this.hydrateRecentNav();
-    }
+    if (typeof window !== 'undefined') this.hydrateRecentNav();
   }
 
   public static getInstance(): BroccoliOmniSearchImpl {
-    if (!BroccoliOmniSearchImpl.instance) {
-      BroccoliOmniSearchImpl.instance = new BroccoliOmniSearchImpl();
-    }
+    if (!BroccoliOmniSearchImpl.instance) BroccoliOmniSearchImpl.instance = new BroccoliOmniSearchImpl();
     return BroccoliOmniSearchImpl.instance;
   }
 
   private seedCatalog(): void {
-    // 1. Seed base platform catalog
     BASE_CATALOG_ITEMS.forEach((item, index) => {
       const id = `item_${index}_${item.href.replace(/[^a-zA-Z0-9]/g, '_')}`;
-      this.searchTable.put(id, {
-        id,
-        ...item,
-      });
-    });
-
-    // 2. Dynamically index frontend visible models from FRONTEND_VISIBLE_MODELS
-    FRONTEND_VISIBLE_MODELS.forEach((model) => {
-      const modelId = `model_${model.id.replace(/[^a-zA-Z0-9]/g, '_')}`;
-      const item: CatalogItem = {
-        title: `${model.name} (${model.id})`,
-        description: `${model.description} • $${model.inputPricePer1M.toFixed(2)}/1M input • ${model.contextWindowTokens / 1000}K ctx • -${model.discountPercentage}% Wholesale`,
-        category: 'Models & Engines',
-        href: `/models/${model.id.replace('/', '-')}`,
-        modelId: model.id,
-        pricePer1M: model.inputPricePer1M,
-        badge: `-${model.discountPercentage}% OFF`,
-        keywords: [
-          model.id,
-          model.name.toLowerCase(),
-          model.provider,
-          'model',
-          'engine',
-          'ai',
-          'openai',
-          'gpt',
-          'sota'
-        ],
-        intentPhrases: [
-          `use ${model.name.toLowerCase()}`,
-          `run ${model.id}`,
-          `pricing for ${model.name.toLowerCase()}`,
-          `${model.id} specs`,
-        ],
-      };
-
-      this.searchTable.put(modelId, {
-        id: modelId,
-        ...item,
-      });
-    });
-
-    // 3. Dynamically index Interactive Developer Tools
-    const interactiveTools: CatalogItem[] = [
-      {
-        title: 'Enterprise LLM ROI & Token Budget Calculator',
-        description: 'Interactive financial modeling tool for enterprise AI inference costs, DAU scale forecasting, and compound 75% prompt caching savings.',
-        category: 'Actions & Tools',
-        href: '/tools/roi-calculator',
-        badge: 'Interactive Tool',
-        keywords: ['roi', 'calculator', 'token budget', 'savings', 'forecast', 'finance', 'caching rebate'],
-        intentPhrases: ['calculate roi', 'llm token budget calculator', 'estimate enterprise cost', 'prompt cache math'],
-      },
-      {
-        title: 'AI Token Streaming & Speed Benchmark Simulator',
-        description: 'Interactive simulator for streaming token speed and time to first token.',
-        category: 'Actions & Tools',
-        href: '/tools/stream-benchmark',
-        badge: 'Interactive Tool',
-        keywords: ['stream', 'benchmark', 'speed', 'ttft', 'tokens per second', 'sse', 'velocity'],
-        intentPhrases: ['test streaming speed', 'benchmark ttft', 'token velocity simulator', 'sse tester'],
-      },
-      {
-        title: '1,000,000 Token Context Window Capacity Visualizer',
-        description: 'Interactive context window simulator and prompt caching calculator.',
-        category: 'Actions & Tools',
-        href: '/tools/context-window-visualizer',
-        badge: 'Interactive Tool',
-        keywords: ['context window', '1m tokens', 'visualizer', 'capacity', 'ast lines', 'caching visualizer'],
-        intentPhrases: ['visualize 1m context', 'context window visualizer', 'how many tokens in document'],
-      },
-      {
-        title: 'OpenAI Token Counter & BPE Tokenizer Studio',
-        description: 'Interactive Byte-Pair Encoding (BPE) subword visualizer and token counter for o200k_base and cl100k_base vocabularies.',
-        category: 'Actions & Tools',
-        href: '/tools/token-counter',
-        badge: 'Interactive Tool',
-        keywords: ['token counter', 'bpe', 'tokenizer', 'o200k', 'cl100k', 'subwords', 'count tokens'],
-        intentPhrases: ['count my tokens', 'tokenizer studio', 'bpe token counter', 'how many tokens is this text'],
-      },
-      {
-        title: 'Distributed Edge Latency & Time-To-First-Token (TTFT) Estimator',
-        description: 'Interactive streaming latency and TTFT simulator across Distributed Edge vs Single-Origin routing.',
-        category: 'Actions & Tools',
-        href: '/tools/latency-estimator',
-        badge: 'Interactive Tool',
-        keywords: ['latency', 'ttft', 'estimator', 'distributed edge', 'edge', 'tls handshake', 'ping'],
-        intentPhrases: ['estimate latency', 'ttft simulator', 'how fast is distributed edge routing'],
-      },
-      {
-        title: 'Prompt Compressor & System Instruction Optimizer',
-        description: 'Lexical redundancy reduction engine preserving instruction semantics and reducing token spend.',
-        category: 'Actions & Tools',
-        href: '/tools/prompt-compressor',
-        badge: 'Interactive Tool',
-        keywords: ['compress prompt', 'optimizer', 'reduce tokens', 'prompt compressor', 'system prompt'],
-        intentPhrases: ['compress my prompt', 'reduce token usage in system prompt', 'optimize prompt length'],
-      },
-      {
-        title: 'Compound Prompt Caching Rebate Calculator',
-        description: 'Calculate exact compound savings from 75% cached prefix pass-through across repetitive agent prompts.',
-        category: 'Actions & Tools',
-        href: '/tools/prompt-caching-calculator',
-        badge: 'Interactive Tool',
-        keywords: ['prompt caching calculator', 'rebate calculator', '75% discount', 'cache savings'],
-        intentPhrases: ['calculate prompt caching savings', 'cache rebate calculator'],
-      },
-      {
-        title: 'Wholesale Model Cost Comparator',
-        description: 'Side-by-side pricing matrix comparing GALXAI wholesale rates against direct OpenAI and competitor pricing.',
-        category: 'Actions & Tools',
-        href: '/tools/model-cost-comparator',
-        badge: 'Interactive Tool',
-        keywords: ['cost comparator', 'compare prices', 'wholesale comparator', 'cheapest llm'],
-        intentPhrases: ['compare model costs', 'who has cheapest tokens', 'model cost comparator'],
-      },
-    ];
-
-    interactiveTools.forEach((tool, idx) => {
-      const id = `tool_${idx}_${tool.href.replace(/[^a-zA-Z0-9]/g, '_')}`;
-      this.searchTable.put(id, { id, ...tool });
-    });
-
-    // 4. Dynamically index Cookbooks
-    COOKBOOK_RECIPES_DATA.forEach((c) => {
-      const id = `cookbook_${c.slug}`;
-      this.searchTable.put(id, {
-        id,
-        title: c.title,
-        description: c.description,
-        category: 'Documentation',
-        href: `/cookbook/${c.slug}`,
-        badge: `${c.difficulty.toUpperCase()} • ${(c.primaryLanguage || 'TypeScript').toUpperCase()}`,
-        keywords: ['cookbook', 'recipe', 'code', (c.primaryLanguage || 'typescript').toLowerCase(), c.category.toLowerCase(), c.difficulty.toLowerCase()],
-        intentPhrases: [`how to ${c.title.toLowerCase()}`, `code for ${c.title.toLowerCase()}`, c.slug],
-      });
-    });
-
-    // 5. Dynamically index Error Runbooks
-    ERROR_TROUBLESHOOT_DATA.forEach((e) => {
-      const id = `error_${e.code}`;
-      this.searchTable.put(id, {
-        id,
-        title: `Fix HTTP ${e.httpStatus} (${e.code})`,
-        description: e.description,
-        category: 'Help & Diagnostics',
-        href: `/docs/errors/${e.code}`,
-        badge: `HTTP ${e.httpStatus}`,
-        keywords: ['error', 'fix', `${e.httpStatus}`, e.code, 'troubleshoot', 'failover'],
-        intentPhrases: [`fix ${e.code}`, `how to resolve http ${e.httpStatus}`, `error ${e.code} troubleshooting`],
-      });
-    });
-
-    // 6. Dynamically index Competitor Alternatives
-    COMPETITOR_ALTERNATIVES.forEach((a) => {
-      const id = `alt_${a.slug}`;
-      this.searchTable.put(id, {
-        id,
-        title: a.headline,
-        description: a.description,
-        category: 'Documentation',
-        href: `/alternatives/${a.slug}`,
-        badge: 'Alternative',
-        keywords: ['alternative', 'vs', a.competitorName.toLowerCase(), 'switch', 'compare'],
-        intentPhrases: [`switch from ${a.competitorName.toLowerCase()}`, `${a.competitorName.toLowerCase()} alternative`, `compare with ${a.competitorName.toLowerCase()}`],
-      });
-    });
-
-    // 7. Dynamically index Solutions
-    SOLUTION_GUIDES.forEach((s) => {
-      const id = `sol_${s.slug}`;
-      this.searchTable.put(id, {
-        id,
-        title: s.headline,
-        description: s.description,
-        category: 'Documentation',
-        href: `/solutions/${s.slug}`,
-        badge: s.badge || 'Solution',
-        keywords: ['solution', s.name.toLowerCase(), s.slug, 'workload', s.targetWorkload.toLowerCase()],
-        intentPhrases: [`solution for ${s.name.toLowerCase()}`, s.headline.toLowerCase()],
-      });
-    });
-
-    // 8. Dynamically index Security Patterns
-    SECURITY_PATTERNS_DATA.forEach((p) => {
-      const id = `sec_${p.slug}`;
-      this.searchTable.put(id, {
-        id,
-        title: p.headline,
-        description: p.description,
-        category: 'Help & Diagnostics',
-        href: `/security/patterns/${p.slug}`,
-        badge: p.badge || 'Security',
-        keywords: ['security', 'owasp', (p.owaspLlmMapping || '').toLowerCase(), p.slug, 'red team', 'defense'],
-        intentPhrases: [`mitigate ${(p.owaspLlmMapping || '').toLowerCase()}`, `how to defend against ${p.headline.toLowerCase()}`],
-      });
-    });
-
-    // 9. Dynamically index Glossary Terms
-    GLOSSARY_TERMS.forEach((g) => {
-      const id = `glossary_${g.slug}`;
-      this.searchTable.put(id, {
-        id,
-        title: `${g.term} — AI Glossary`,
-        description: g.shortDefinition,
-        category: 'Documentation',
-        href: `/glossary/${g.slug}`,
-        badge: 'Glossary',
-        keywords: ['glossary', 'definition', 'term', g.term.toLowerCase(), g.category],
-        intentPhrases: [`what is ${g.term.toLowerCase()}`, `define ${g.term.toLowerCase()}`],
-      });
+      this.searchTable.put(id, { id, ...item });
     });
   }
 
@@ -635,230 +269,152 @@ class BroccoliOmniSearchImpl {
     try {
       const raw = SafeStorage.getItem(STORAGE_RECENT_NAV_KEY);
       if (!raw) return;
-      const recents: RecentNavItem[] = JSON.parse(raw);
-      for (const r of recents) {
-        if (r && r.href) {
-          this.recentTable.put(r.href, {
-            ...r,
-            visitCount: r.visitCount || 1,
-          });
-        }
-      }
+      const parsed: unknown = JSON.parse(raw);
+      if (!Array.isArray(parsed)) return;
+      const recents = parsed.filter((item): item is RecentNavItem => {
+        if (!item || typeof item !== 'object') return false;
+        const candidate = item as Partial<RecentNavItem>;
+        return typeof candidate.href === 'string' && typeof candidate.title === 'string' && isAllowedRecentHref(candidate.href);
+      }).map((item) => ({ ...item, visitCount: item.visitCount || 1 }));
+      for (const item of recents) this.recentTable.put(item.href, item);
+      if (recents.length !== parsed.length) SafeStorage.setItem(STORAGE_RECENT_NAV_KEY, JSON.stringify(recents));
     } catch {}
   }
 
   private persistRecentNav(): void {
     try {
-      const all = this.recentTable.query({
-        sortBy: 'timestamp',
-        sortOrder: 'desc',
-        limit: 15,
-      });
-      SafeStorage.setItem(STORAGE_RECENT_NAV_KEY, JSON.stringify(all));
+      const recent = this.recentTable.query({ sortBy: 'timestamp', sortOrder: 'desc', limit: 15 }).filter((item) => isAllowedRecentHref(item.href));
+      SafeStorage.setItem(STORAGE_RECENT_NAV_KEY, JSON.stringify(recent));
     } catch {}
   }
 
-  public recordVisit(title: string, href: string, category: string = 'Navigation'): void {
+  public recordVisit(title: string, href: string, category = 'Navigation'): void {
+    if (!isAllowedRecentHref(href)) return;
     const existing = this.recentTable.get(href);
-    const item: RecentNavItem = {
+    this.recentTable.put(href, {
       id: href,
       title,
       href,
       category,
       timestamp: Date.now(),
       visitCount: (existing?.visitCount || 0) + 1,
-    };
-    this.recentTable.put(href, item);
+    });
     this.persistRecentNav();
   }
 
   public getRecentVisits(limit = 4): readonly RecentNavItem[] {
-    return this.recentTable.query({
-      sortBy: 'timestamp',
-      sortOrder: 'desc',
-      limit,
-    });
+    return this.recentTable.query({ sortBy: 'timestamp', sortOrder: 'desc', limit }).filter((item) => isAllowedRecentHref(item.href));
   }
 
-  /**
-   * Clears recent navigation history in BroccoliDB and SafeStorage.
-   */
   public clearRecentVisits(): void {
-    const all = this.recentTable.getAll();
-    for (const r of all) {
-      this.recentTable.delete(r.id);
-    }
+    for (const item of this.recentTable.getAll()) this.recentTable.delete(item.id);
     SafeStorage.removeItem(STORAGE_RECENT_NAV_KEY);
   }
 
-  /**
-   * Generates inline auto-completion suggestions for input hint and Tab-key completion.
-   */
   public getAutocompleteSuggestion(query: string): string | null {
-    const q = query.trim().toLowerCase();
-    if (!q || q.length < 2) return null;
-
-    const allItems = this.searchTable.getAll();
-    for (const item of allItems) {
-      const titleLower = item.title.toLowerCase();
-      if (titleLower.startsWith(q)) {
-        return item.title;
-      }
-      for (const phrase of item.intentPhrases || []) {
-        if (phrase.toLowerCase().startsWith(q)) {
-          return phrase;
-        }
-      }
-      for (const kw of item.keywords || []) {
-        if (kw.toLowerCase().startsWith(q)) {
-          return kw;
-        }
-      }
+    const normalized = query.trim().toLowerCase();
+    if (normalized.length < 2) return null;
+    for (const item of this.searchTable.getAll()) {
+      if (item.title.toLowerCase().startsWith(normalized)) return item.title;
+      const phrase = item.intentPhrases.find((value) => value.toLowerCase().startsWith(normalized));
+      if (phrase) return phrase;
+      const keyword = item.keywords.find((value) => value.toLowerCase().startsWith(normalized));
+      if (keyword) return keyword;
     }
     return null;
   }
 
-  /**
-   * Predictive Route Prefetch Trigger (prevents duplicate prefetch storms).
-   */
   public prefetchRoute(href: string): void {
     if (this.prefetchedRoutes.has(href)) return;
     this.prefetchedRoutes.add(href);
-
-    if (typeof window !== 'undefined' && (window as any).__next) {
-      try {
-        const nextRouter = (window as any).__next?.router;
-        if (nextRouter && typeof nextRouter.prefetch === 'function') {
-          nextRouter.prefetch(href);
-        }
-      } catch {}
+    const nextWindow = typeof window === 'undefined'
+      ? null
+      : window as Window & { __next?: { router?: { prefetch?: (path: string) => void } } };
+    if (nextWindow?.__next?.router?.prefetch) {
+      try { nextWindow.__next.router.prefetch(href); } catch {}
     }
   }
 
-  /**
-   * Deterministic Natural Query Fuzzy Search:
-   * Features Levenshtein typo absorption, token inclusion, category prefix filtering,
-   * frequency weighting, and intent phrase semantic similarity with zero network roundtrips (<0.05ms).
-   */
   public search(query: string, limit = 8): OmniSearchItem[] {
-    let rawQ = query.trim().toLowerCase();
-    if (!rawQ) {
-      return [...this.searchTable.query({ limit })];
-    }
+    let rawQuery = query.trim().toLowerCase();
+    if (!rawQuery) return [...this.searchTable.query({ limit })];
 
-    // 1. Resolve Category Prefix Filters (Raycast / VSCode style)
-    let categoryFilter: string | null = null;
-    if (rawQ.startsWith('>') || rawQ.startsWith('action:')) {
+    let categoryFilter: CatalogItem['category'] | null = null;
+    if (rawQuery.startsWith('>') || rawQuery.startsWith('action:')) {
       categoryFilter = 'Actions & Tools';
-      rawQ = rawQ.replace(/^(\>|action:)\s*/i, '');
-    } else if (rawQ.startsWith('@') || rawQ.startsWith('model:')) {
-      categoryFilter = 'Models & Engines';
-      rawQ = rawQ.replace(/^(\@|model:)\s*/i, '');
-    } else if (rawQ.startsWith('#') || rawQ.startsWith('doc:') || rawQ.startsWith('guide:')) {
+      rawQuery = rawQuery.replace(/^(>|action:)\s*/i, '');
+    } else if (rawQuery.startsWith('@') || rawQuery.startsWith('developer:')) {
+      categoryFilter = 'Developer';
+      rawQuery = rawQuery.replace(/^(@|developer:)\s*/i, '');
+    } else if (rawQuery.startsWith('#') || rawQuery.startsWith('doc:') || rawQuery.startsWith('guide:')) {
       categoryFilter = 'Documentation';
-      rawQ = rawQ.replace(/^(\#|doc:|guide:)\s*/i, '');
-    } else if (rawQ.startsWith('$') || rawQ.startsWith('billing:') || rawQ.startsWith('pricing:')) {
-      categoryFilter = 'Navigation';
-      rawQ = rawQ.replace(/^(\$|billing:|pricing:)\s*/i, '');
-    } else if (rawQ.startsWith('?') || rawQ.startsWith('help:')) {
+      rawQuery = rawQuery.replace(/^(#|doc:|guide:)\s*/i, '');
+    } else if (rawQuery.startsWith('$') || rawQuery.startsWith('billing:') || rawQuery.startsWith('pricing:')) {
+      categoryFilter = 'Finance';
+      rawQuery = rawQuery.replace(/^(\$|billing:|pricing:)\s*/i, '');
+    } else if (rawQuery.startsWith('?') || rawQuery.startsWith('help:')) {
       categoryFilter = 'Help & Diagnostics';
-      rawQ = rawQ.replace(/^(\?|help:)\s*/i, '');
+      rawQuery = rawQuery.replace(/^(\?|help:)\s*/i, '');
     }
 
-    const q = rawQ.trim();
-    if (!q && categoryFilter) {
-      return [...this.searchTable.query({ where: { category: categoryFilter }, limit })];
-    }
-
-    const words = q.split(/\s+/).filter(Boolean);
-    const allItems = categoryFilter
+    const normalized = rawQuery.trim();
+    const candidates = categoryFilter
       ? this.searchTable.query({ where: { category: categoryFilter } })
       : this.searchTable.getAll();
+    if (!normalized) return candidates.slice(0, limit);
 
-    const scored = allItems.map((item: OmniSearchItem) => {
+    const words = normalized.split(/\s+/).filter(Boolean);
+    const scored = candidates.map((item) => {
+      const title = item.title.toLowerCase();
+      const description = item.description.toLowerCase();
+      const href = item.href.toLowerCase();
       let score = 0;
-      const titleLower = item.title.toLowerCase();
-      const descLower = item.description.toLowerCase();
-      const hrefLower = item.href.toLowerCase();
+      if (ACRONYM_MAP[normalized] && (href === ACRONYM_MAP[normalized] || href.startsWith(`${ACRONYM_MAP[normalized]}/`))) score += 190;
+      if (title === normalized) score += 120;
+      else if (title.startsWith(normalized)) score += 60;
+      else if (title.includes(normalized)) score += 35;
+      if (href === normalized || href === `/${normalized}`) score += 90;
+      else if (href.includes(normalized)) score += 25;
 
-      // 0. Acronym Match (e.g. "gpt", "ide", "zdr", "sla", "faq", "sdk", "api", "tax", "sub")
-      if (ACRONYM_MAP[q] && (hrefLower === ACRONYM_MAP[q] || hrefLower.startsWith(ACRONYM_MAP[q]))) {
-        score += 190;
-      }
-
-      // 1. Exact & Prefix Title Match
-      if (titleLower === q) score += 120;
-      else if (titleLower.startsWith(q)) score += 60;
-      else if (titleLower.includes(q)) score += 35;
-
-      // 2. Direct URL Route Match
-      if (hrefLower === q || hrefLower === `/${q}`) score += 90;
-      else if (hrefLower.includes(q)) score += 25;
-
-      // 3. Intent Phrases Matching
-      for (const phrase of item.intentPhrases || []) {
-        const pLower = phrase.toLowerCase();
-        if (pLower === q) score += 250;
-        else if (pLower.startsWith(q) || q.startsWith(pLower)) score += 180;
-        else if (pLower.includes(q) || q.includes(pLower)) score += 140;
-        else {
-          const matchCount = words.filter((w) => pLower.includes(w)).length;
-          if (matchCount > 0) score += matchCount * 30;
-          if (matchCount === words.length) score += 60; // all search query words present in intent
-        }
-
-        // Fuzzy typo match on intent phrases for non-technical users
-        if (q.length >= 4) {
-          const dist = calculateLevenshteinDistance(q, pLower.slice(0, q.length));
-          if (dist === 1) score += 50;
-          else if (dist === 2) score += 25;
+      for (const phrase of item.intentPhrases) {
+        const value = phrase.toLowerCase();
+        if (value === normalized) score += 250;
+        else if (value.startsWith(normalized) || normalized.startsWith(value)) score += 180;
+        else if (value.includes(normalized) || normalized.includes(value)) score += 140;
+        else score += words.filter((word) => value.includes(word)).length * 30;
+        if (normalized.length >= 4) {
+          const distance = calculateLevenshteinDistance(normalized, value.slice(0, normalized.length));
+          if (distance === 1) score += 50;
+          else if (distance === 2) score += 25;
         }
       }
 
-      // 4. Keyword & Typo Tolerance Matching
-      for (const kw of item.keywords || []) {
-        const kwLower = kw.toLowerCase();
-        if (kwLower === q) score += 50;
-        else if (kwLower.startsWith(q)) score += 25;
-        else if (kwLower.includes(q)) score += 15;
-        else if (words.some((w) => kwLower.includes(w))) score += 12;
-
-        // Levenshtein typo tolerance on keywords (e.g. "modles" -> "models", "bililng" -> "billing")
-        if (q.length >= 4 && kwLower.length >= 4) {
-          const dist = calculateLevenshteinDistance(q, kwLower);
-          if (dist === 1) score += 40;
-          else if (dist === 2 && q.length >= 6) score += 20;
+      for (const keyword of item.keywords) {
+        const value = keyword.toLowerCase();
+        if (value === normalized) score += 50;
+        else if (value.startsWith(normalized)) score += 25;
+        else if (value.includes(normalized)) score += 15;
+        else if (words.some((word) => value.includes(word))) score += 12;
+        if (normalized.length >= 4 && value.length >= 4) {
+          const distance = calculateLevenshteinDistance(normalized, value);
+          if (distance === 1) score += 40;
+          else if (distance === 2 && normalized.length >= 6) score += 20;
         }
-
-        // Soundex Phonetic matching for non-technical users
-        if (q.length >= 3 && kwLower.length >= 3) {
-          if (calculateSoundex(q) === calculateSoundex(kwLower)) {
-            score += 35;
-          }
-        }
+        if (normalized.length >= 3 && value.length >= 3 && calculateSoundex(normalized) === calculateSoundex(value)) score += 35;
       }
 
-      // 5. Description Matching
-      if (descLower.includes(q)) score += 15;
-      else {
-        const descMatchCount = words.filter((w) => descLower.includes(w)).length;
-        score += descMatchCount * 5;
-      }
-
-      // 6. Frequency Recency Boost (from user navigation history)
+      if (description.includes(normalized)) score += 15;
+      else score += words.filter((word) => description.includes(word)).length * 5;
       const recent = this.recentTable.get(item.href);
-      if (recent && recent.visitCount > 0) {
-        score += Math.min(25, recent.visitCount * 3);
-      }
-
+      if (recent) score += Math.min(25, recent.visitCount * 3);
       return { item, score };
     });
 
     return scored
-      .filter((s: { item: OmniSearchItem; score: number }) => s.score > 0)
-      .sort((a: { item: OmniSearchItem; score: number }, b: { item: OmniSearchItem; score: number }) => b.score - a.score)
+      .filter(({ score }) => score > 0)
+      .sort((a, b) => b.score - a.score)
       .slice(0, limit)
-      .map((s: { item: OmniSearchItem; score: number }) => s.item);
+      .map(({ item }) => item);
   }
 }
 

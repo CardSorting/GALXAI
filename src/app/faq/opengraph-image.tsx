@@ -2,7 +2,7 @@ import { ImageResponse } from 'next/og';
 
 export const runtime = 'edge';
 
-export const alt = 'GALXAI Knowledge Base & Developer FAQ';
+export const alt = 'GALX FAQ — Images, Nova, and Developer access';
 export const size = {
   width: 1200,
   height: 630,
@@ -62,8 +62,7 @@ export default async function Image() {
             </div>
             <div style={{ display: 'flex', alignItems: 'center', fontSize: '28px', fontWeight: 900 }}>
               <span>GALX</span>
-              <span style={{ color: '#22d3ee' }}>AI</span>
-              <span style={{ color: '#94a3b8', fontSize: '20px', marginLeft: '10px', fontWeight: 500 }}>Knowledge Base</span>
+              <span style={{ color: '#94a3b8', fontSize: '20px', marginLeft: '10px', fontWeight: 500 }}>FAQ</span>
             </div>
           </div>
 
@@ -99,13 +98,13 @@ export default async function Image() {
             Frequently Asked Questions &amp; Knowledge Base
           </div>
           <div style={{ display: 'flex', fontSize: '22px', color: '#cbd5e1', lineHeight: 1.4 }}>
-            Clear answers about 25%–40% wholesale savings, 1-line OpenAI SDK drop-in integration, developer wallets, and security specs.
+            Clear answers about creating in GALX, Nova, public sharing, and Developer access.
           </div>
         </div>
 
         {/* Badges */}
         <div style={{ display: 'flex', gap: '14px' }}>
-          {['Zero Code Refactoring', '75% Prompt Caching Rebate', 'Sub-Cent Developer Wallet', 'SOC2 / HIPAA Compliance'].map((item, i) => (
+          {['Create in GALX', 'Powered by GALX Nova', 'Public by default', 'Developer access'].map((item, i) => (
             <div
               key={i}
               style={{

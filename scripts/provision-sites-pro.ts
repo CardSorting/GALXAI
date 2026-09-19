@@ -18,7 +18,7 @@ if(!endpoints.data.some(e=>e.url==='https://galx.ai/api/stripe/webhook'&&e.statu
 let product:Stripe.Product;
 try{product=await stripe.products.retrieve('galx_pro_v1');}
 catch(e){if((e as any).statusCode!==404)throw e;product=await stripe.products.create({id:'galx_pro_v1',name:PRO_PLAN.name,
-  description:'Image Studio creation and high-velocity synthesis for one account, with fair usage included. API usage billed separately.',metadata:{galxPlan:'pro-v1'}},{idempotencyKey:'galx-pro-product-v1'});}
+  description:'Image creation and exploration for one account, with published plan terms. Developer access is separate.',metadata:{galxPlan:'pro-v1'}},{idempotencyKey:'galx-pro-product-v1'});}
 if(!product.active||product.name!==PRO_PLAN.name||product.metadata.galxPlan!=='pro-v1')throw Error('Existing Pro product needs review');
 const targetUnitAmount=PRO_PLAN.monthlyPriceUsd*100;
 const prices=await stripe.prices.list({lookup_keys:[PRO_LOOKUP_KEY],limit:10});

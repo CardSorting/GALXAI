@@ -1,5 +1,4 @@
 import type { PoolClient } from 'pg';
-import type { ComputeTierKey } from '../supabase/types';
 
 type Db = Pick<PoolClient, 'query'>;
 export class BillingError extends Error { constructor(message: string, public status = 400) { super(message); } }
@@ -13,42 +12,25 @@ export interface BillingSummary {
   currentMonthSpendUsd: number;
   proofOfDepositVerified: boolean;
   autoReloadEnabled: boolean;
-  /** Compute tier: matches STRIPE_PRODUCT_TIERS keys in src/lib/stripe/products.ts */
-  tierKey: ComputeTierKey;
-  tierName: string;
-  tierRpm: number;
-  tierTpm: number;
 }
 export interface BillingData { summary: BillingSummary; transactions: BillingTransaction[]; nextCursor: string | null; invoices: BillingInvoice[]; hasCustomer: boolean; paymentsAvailable: boolean }
 
 const publicTransactionDescriptions: Record<string, string> = {
-  deposit: 'Account credit added.', auto_reload: 'Automatic account top-up.',
-  usage_draw: 'Compute usage.', match_grant: 'Promotional credit.',
+  deposit: 'Account credit added.', auto_reload: 'Historical account reload.',
+  usage_draw: 'Compute usage.', match_grant: 'Historical credit adjustment.',
   refund: 'Payment refund.', adjustment: 'Account balance adjustment.',
-};
-
-const TIER_DISPLAY_NAMES: Record<string, string> = {
-  free: 'Free Tier', developer_10: 'Developer Tier', starter_25: 'Starter Builder',
-  growth_50: 'Growth VIP', fleet_100: 'Fleet Scale',
-  sovereign_250: 'Enterprise Sovereign', hyperscale_500: 'Hyperscale Infra',
 };
 
 export async function readBillingSummary(db: Db, userId: string): Promise<BillingSummary> {
   const { rows } = await db.query(`SELECT w.balance_usd, w.payment_debt_usd, w.deposited_total_usd, w.lifetime_spent_usd, w.proof_of_deposit_verified, w.auto_reload_enabled,
-    w.compute_tier_key, w.compute_tier_rpm, w.compute_tier_tpm,
     (SELECT coalesce(-sum(t.amount_usd), 0) FROM galx_wallet_transactions t
       WHERE t.user_id = $1 AND t.wallet_id = w.id AND t.transaction_type = 'usage_draw'
       AND t.created_at >= date_trunc('month', NOW() AT TIME ZONE 'UTC') AT TIME ZONE 'UTC') AS month_spend
     FROM galx_wallets w WHERE w.user_id = $1`, [userId]);
   const row = rows[0];
-  const tierKey = row?.compute_tier_key || (Number(row?.deposited_total_usd ?? 0) >= 10 ? 'developer_10' : 'free');
   return { balanceUsd: Number(row?.balance_usd ?? 0), paymentDebtUsd: Number(row?.payment_debt_usd ?? 0), depositedTotalUsd: Number(row?.deposited_total_usd ?? 0),
     lifetimeSpentUsd: Number(row?.lifetime_spent_usd ?? 0), currentMonthSpendUsd: Number(row?.month_spend ?? 0),
-    proofOfDepositVerified: row?.proof_of_deposit_verified === true, autoReloadEnabled: row?.auto_reload_enabled === true,
-    tierKey,
-    tierName: TIER_DISPLAY_NAMES[tierKey] ?? 'Developer Tier',
-    tierRpm: Number(row?.compute_tier_rpm ?? 20),
-    tierTpm: Number(row?.compute_tier_tpm ?? 20000) };
+    proofOfDepositVerified: row?.proof_of_deposit_verified === true, autoReloadEnabled: row?.auto_reload_enabled === true };
 }
 
 export async function readBillingTransactions(db: Db, userId: string, params: URLSearchParams) {

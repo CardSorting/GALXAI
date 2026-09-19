@@ -17,6 +17,9 @@ export class DeveloperAccessRepository {
   async get(userId: string): Promise<PreviewRecord | null> {
     return (await PreviewReadSync.for(this.db()).read(userId, true)).record;
   }
+  async access(userId: string): Promise<{ approved: boolean; record: PreviewRecord | null }> {
+    return PreviewReadSync.for(this.db()).read(userId, true);
+  }
   async isApproved(userId: string): Promise<boolean> {
     return (await PreviewReadSync.for(this.db()).read(userId, false)).approved;
   }
@@ -67,19 +70,5 @@ export class DeveloperAccessRepository {
       SELECT $3, 'operator-cli', 'request_reviewed', user_id, previous_state, $2, 'Access changed through the server CLI.' FROM changed RETURNING id`, [userId, status, reviewer]);
     PreviewReadSync.for(this.db()).invalidate(userId);
     return result.rowCount === 1;
-  }
-  async grantDeveloperTier(userId: string, email: string, source = 'stripe-fulfillment') {
-    const result = await this.db().query<PreviewRecord>(`INSERT INTO private.developer_access_requests
-      (user_id, email, use_case, expected_traffic, status, reviewed_at, reviewed_by, expires_at)
-      VALUES ($1, $2, 'Developer tier purchased via checkout for images and frontier models API access', 'over_1000_daily', 'approved', now(), $3, NULL)
-      ON CONFLICT (user_id) DO UPDATE SET
-        status = 'approved',
-        reviewed_at = now(),
-        reviewed_by = $3,
-        expires_at = NULL,
-        revision = COALESCE(private.developer_access_requests.revision, 1) + 1
-      RETURNING ${columns}`, [userId, email, source]);
-    PreviewReadSync.for(this.db()).invalidate(userId);
-    return result.rows[0] ?? null;
   }
 }

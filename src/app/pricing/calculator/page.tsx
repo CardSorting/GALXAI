@@ -1,2 +1,2 @@
 import { permanentRedirect } from 'next/navigation';
-export default function Page() { permanentRedirect('/pricing#rates'); }
+export default function Page() { permanentRedirect('/pricing/usage'); }

@@ -4,279 +4,13 @@
   },
   "fixtures": [
     {
-      "name": "prod_developer_10",
-      "path": "/v1/products",
-      "method": "post",
-      "params": {
-        "name": "GALXAI Developer Tier — Images & Frontier OpenAI Models Pass",
-        "statement_descriptor": "GALXAI DEV $10",
-        "description": "Instant Developer Tier activation. 100% pay-as-you-go prepaid credit for Images & Frontier models without waitlist delay.",
-        "tax_code": "txcd_10000000",
-        "metadata": {
-          "galxai_tier_key": "developer_10",
-          "deposit_amount_usd": "10.00",
-          "total_credit_usd": "10.00",
-          "match_percentage": "0%",
-          "concurrency_rpm": "60",
-          "tpm_limit": "40000",
-          "routing_lane": "standard_anycast",
-          "sla_priority": "developer_standard",
-          "prompt_cache_discount": "standard",
-          "support_tier": "community_discord",
-          "rate_lock": "guaranteed"
-        }
-      }
-    },
-    {
-      "name": "price_developer_10",
-      "path": "/v1/prices",
-      "method": "post",
-      "params": {
-        "product": "${prod_developer_10:id}",
-        "unit_amount": 1000,
-        "currency": "usd",
-        "tax_behavior": "exclusive",
-        "metadata": {
-          "galxai_tier_key": "developer_10"
-        }
-      }
-    },
-    {
-      "name": "prod_lumi_10",
-      "path": "/v1/products",
-      "method": "post",
-      "params": {
-        "name": "GALXAI Developer Tier — Images & Frontier OpenAI Models Pass",
-        "statement_descriptor": "GALXAI DEV $10",
-        "description": "Instant Developer Tier activation. 100% pay-as-you-go prepaid credit for Images & Frontier models without waitlist delay.",
-        "tax_code": "txcd_10000000",
-        "metadata": {
-          "galxai_tier_key": "developer_10",
-          "deposit_amount_usd": "10.00",
-          "total_credit_usd": "10.00",
-          "match_percentage": "0%",
-          "concurrency_rpm": "60",
-          "tpm_limit": "40000",
-          "routing_lane": "standard_anycast",
-          "sla_priority": "developer_standard",
-          "prompt_cache_discount": "standard",
-          "support_tier": "community_discord",
-          "rate_lock": "guaranteed"
-        }
-      }
-    },
-    {
-      "name": "price_lumi_10",
-      "path": "/v1/prices",
-      "method": "post",
-      "params": {
-        "product": "${prod_lumi_10:id}",
-        "unit_amount": 1000,
-        "currency": "usd",
-        "tax_behavior": "exclusive",
-        "metadata": {
-          "galxai_tier_key": "developer_10"
-        }
-      }
-    },
-    {
-      "name": "prod_starter_25",
-      "path": "/v1/products",
-      "method": "post",
-      "params": {
-        "name": "GALXAI Prepaid Compute — Starter Builder Pack",
-        "statement_descriptor": "GALXAI COMPUTE $25",
-        "description": "Ideal for early-stage builders deploying production prototypes and agentic workflows.",
-        "tax_code": "txcd_10000000",
-        "metadata": {
-          "galxai_tier_key": "starter_25",
-          "deposit_amount_usd": "25.00",
-          "total_credit_usd": "42.50",
-          "match_percentage": "50%",
-          "concurrency_rpm": "120",
-          "tpm_limit": "80000",
-          "routing_lane": "standard_anycast",
-          "sla_priority": "builder_standard",
-          "prompt_cache_discount": "75%",
-          "support_tier": "email_and_discord",
-          "rate_lock": "guaranteed"
-        }
-      }
-    },
-    {
-      "name": "price_starter_25",
-      "path": "/v1/prices",
-      "method": "post",
-      "params": {
-        "product": "${prod_starter_25:id}",
-        "unit_amount": 2500,
-        "currency": "usd",
-        "tax_behavior": "exclusive",
-        "metadata": {
-          "galxai_tier_key": "starter_25"
-        }
-      }
-    },
-    {
-      "name": "prod_growth_50",
-      "path": "/v1/products",
-      "method": "post",
-      "params": {
-        "name": "GALXAI Prepaid Compute — Growth VIP Priority Pack",
-        "statement_descriptor": "GALXAI COMPUTE $50",
-        "description": "Engineered for scaling agentic fleets requiring dedicated high-throughput concurrency lanes.",
-        "tax_code": "txcd_10000000",
-        "metadata": {
-          "galxai_tier_key": "growth_50",
-          "deposit_amount_usd": "50.00",
-          "total_credit_usd": "85.00",
-          "match_percentage": "60%",
-          "concurrency_rpm": "300",
-          "tpm_limit": "200000",
-          "routing_lane": "sub_15ms_vip_priority",
-          "sla_priority": "vip_sub15ms",
-          "prompt_cache_discount": "75%",
-          "support_tier": "priority_support",
-          "rate_lock": "guaranteed"
-        }
-      }
-    },
-    {
-      "name": "price_growth_50",
-      "path": "/v1/prices",
-      "method": "post",
-      "params": {
-        "product": "${prod_growth_50:id}",
-        "unit_amount": 5000,
-        "currency": "usd",
-        "tax_behavior": "exclusive",
-        "metadata": {
-          "galxai_tier_key": "growth_50"
-        }
-      }
-    },
-    {
-      "name": "prod_fleet_100",
-      "path": "/v1/products",
-      "method": "post",
-      "params": {
-        "name": "GALXAI Prepaid Compute — Fleet Scale Pack",
-        "statement_descriptor": "GALXAI COMPUTE $100",
-        "description": "Built for high-velocity teams running automated multi-agent code analysis & bulk image pipelines.",
-        "tax_code": "txcd_10000000",
-        "metadata": {
-          "galxai_tier_key": "fleet_100",
-          "deposit_amount_usd": "100.00",
-          "total_credit_usd": "180.00",
-          "match_percentage": "75%",
-          "concurrency_rpm": "600",
-          "tpm_limit": "500000",
-          "routing_lane": "priority_global_edge",
-          "sla_priority": "fleet_high_throughput",
-          "prompt_cache_discount": "75%",
-          "support_tier": "discord_architect",
-          "rate_lock": "guaranteed"
-        }
-      }
-    },
-    {
-      "name": "price_fleet_100",
-      "path": "/v1/prices",
-      "method": "post",
-      "params": {
-        "product": "${prod_fleet_100:id}",
-        "unit_amount": 10000,
-        "currency": "usd",
-        "tax_behavior": "exclusive",
-        "metadata": {
-          "galxai_tier_key": "fleet_100"
-        }
-      }
-    },
-    {
-      "name": "prod_sovereign_250",
-      "path": "/v1/products",
-      "method": "post",
-      "params": {
-        "name": "GALXAI Prepaid Compute — Enterprise Sovereign Pack",
-        "statement_descriptor": "GALXAI COMPUTE $250",
-        "description": "Maximum 100% double compute match with dedicated isolated VPC compute lanes.",
-        "tax_code": "txcd_10000000",
-        "metadata": {
-          "galxai_tier_key": "sovereign_250",
-          "deposit_amount_usd": "250.00",
-          "total_credit_usd": "505.00",
-          "match_percentage": "100%",
-          "concurrency_rpm": "1200",
-          "tpm_limit": "1000000",
-          "routing_lane": "dedicated_vpc_private_lane",
-          "sla_priority": "enterprise_vpc",
-          "prompt_cache_discount": "75%",
-          "support_tier": "dedicated_account_engineer",
-          "rate_lock": "guaranteed"
-        }
-      }
-    },
-    {
-      "name": "price_sovereign_250",
-      "path": "/v1/prices",
-      "method": "post",
-      "params": {
-        "product": "${prod_sovereign_250:id}",
-        "unit_amount": 25000,
-        "currency": "usd",
-        "tax_behavior": "exclusive",
-        "metadata": {
-          "galxai_tier_key": "sovereign_250"
-        }
-      }
-    },
-    {
-      "name": "prod_hyperscale_500",
-      "path": "/v1/products",
-      "method": "post",
-      "params": {
-        "name": "GALXAI Prepaid Compute — Hyperscale Infrastructure Pack",
-        "statement_descriptor": "GALXAI COMPUTE $500",
-        "description": "Enterprise-grade SLA guarantee with unlimited burst and dedicated Slack bridge.",
-        "tax_code": "txcd_10000000",
-        "metadata": {
-          "galxai_tier_key": "hyperscale_500",
-          "deposit_amount_usd": "500.00",
-          "total_credit_usd": "1005.00",
-          "match_percentage": "100%",
-          "concurrency_rpm": "unlimited",
-          "tpm_limit": "unlimited",
-          "routing_lane": "dedicated_unlimited_route",
-          "sla_priority": "hyperscale_custom_sla",
-          "prompt_cache_discount": "75%",
-          "support_tier": "private_slack_channel",
-          "rate_lock": "guaranteed"
-        }
-      }
-    },
-    {
-      "name": "price_hyperscale_500",
-      "path": "/v1/prices",
-      "method": "post",
-      "params": {
-        "product": "${prod_hyperscale_500:id}",
-        "unit_amount": 50000,
-        "currency": "usd",
-        "tax_behavior": "exclusive",
-        "metadata": {
-          "galxai_tier_key": "hyperscale_500"
-        }
-      }
-    },
-    {
       "name": "prod_galx_pro_v1",
       "path": "/v1/products",
       "method": "post",
       "params": {
         "name": "GALX Pro",
         "statement_descriptor": "GALX PRO $10",
-        "description": "Image Studio creation and high-velocity synthesis for one account, with fair usage included. API usage billed separately.",
+        "description": "Image creation and exploration for one account, with published plan terms. Developer access is separate.",
         "tax_code": "txcd_10000000",
         "metadata": {
           "galxPlan": "pro-v1"
@@ -297,6 +31,42 @@
         "lookup_key": "galx_pro_monthly_v1",
         "metadata": {
           "galxPlan": "pro-v1"
+        }
+      }
+    },
+    {
+      "name": "prod_galx_nova_developer_access_v1",
+      "path": "/v1/products",
+      "method": "post",
+      "params": {
+        "id": "galx_nova_developer_access_v1",
+        "name": "GALX Nova — Developer Access",
+        "description": "Recurring API access to GALX Nova. Usage is intended to be billed per message; no usage credits are included.",
+        "metadata": {
+          "galxPlan": "nova-developer-v1",
+          "usagePricingStatus": "not_published",
+          "usageBasis": "message",
+          "includedUsageCreditsUsd": "0"
+        }
+      }
+    },
+    {
+      "name": "price_galx_nova_developer_v1",
+      "path": "/v1/prices",
+      "method": "post",
+      "params": {
+        "product": "${prod_galx_nova_developer_access_v1:id}",
+        "unit_amount": 5000,
+        "currency": "usd",
+        "recurring": {
+          "interval": "month"
+        },
+        "lookup_key": "galx_nova_developer_monthly_v1",
+        "metadata": {
+          "galxPlan": "nova-developer-v1",
+          "usagePricingStatus": "not_published",
+          "usageBasis": "message",
+          "includedUsageCreditsUsd": "0"
         }
       }
     }

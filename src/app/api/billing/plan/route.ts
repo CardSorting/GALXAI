@@ -5,7 +5,7 @@ import { StripeEngine } from '@/lib/stripe/stripe';
 import { getStripeConfig } from '@/lib/stripe/config';
 import { BillingError } from '@/lib/billing/account';
 import { checkPaymentOrigin, hostedPaymentUrl, paymentOrigin, readPaymentBody } from '@/lib/billing/payment';
-import { createProCheckout, proPrice } from '@/lib/billing/plan-subscription';
+import { createDeveloperCheckout, createProCheckout, proPrice } from '@/lib/billing/plan-subscription';
 import { PRO_PLAN } from '@/lib/billing/pro-plan';
 import { SitesFairStore } from '@/lib/sites/fair-store';
 import { requirePaidSitesAccess } from '@/lib/sites/paid-access';
@@ -31,6 +31,10 @@ async function handle(req:NextRequest) {
       const configuration=await billingPortalConfiguration(stripe);
       const session=await stripe.billingPortal.sessions.create({customer,configuration,return_url:`${paymentOrigin(config.appUrl)}/billing/plan`},{timeout:8000,maxNetworkRetries:0});
       return NextResponse.json({url:hostedPaymentUrl(session.url,'billing.stripe.com')},{headers});
+    }
+    if (body?.action === 'developer_checkout') {
+      if (Object.keys(body).sort().join() !== 'action,requestId' || typeof body.requestId !== 'string') throw new BillingError('Invalid Developer checkout request.');
+      return NextResponse.json(await createDeveloperCheckout(pool, stripe, { userId: actor.id, requestId: body.requestId, origin: paymentOrigin(config.appUrl) }), { headers });
     }
     const policy=await new SitesFairStore(pool).policy();
     if(req.method==='GET') {

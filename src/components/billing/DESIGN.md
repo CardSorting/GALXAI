@@ -80,7 +80,7 @@ components:
 
 This is a local record for the shared `BillingWorkspace.tsx` shell, account state in `BillingProvider.tsx`, the six destinations rendered by `BillingClient.tsx`, and their plan and credit controls. The related Pro row is rendered by `src/components/pricing/PricingClient.tsx` through `src/app/pricing/page.tsx`. It extends the existing dark, compact account interface with restrained indigo actions and flat divided sections. It establishes no new product identity or global design rules.
 
-Overview summarizes plan access and prepaid credit, then links to each billing task. The Plan page makes current access, terms, and the next action readable; Credits holds the separate balance and top-up form. Pricing presents the offer; Billing establishes the account's current status. Product terms remain authoritative in the root `PRODUCT.md` and existing public plan data; this record captures how the interface presents them.
+Overview summarizes plan access and any existing account credit, then links to each billing task. The Plan page makes current access, terms, and the next action readable; Credits is a read-only account-credit and history surface. Pricing presents the offer; Billing establishes the account's current status. Product terms remain authoritative in the root `PRODUCT.md` and existing public plan data; this record captures how the interface presents them.
 
 **Key Characteristics:**
 
@@ -115,7 +115,7 @@ The extension inherits Inter through the existing document font variable and fal
 
 - **Billing page heading:** use `headline` at all widths. Allow words to break when necessary so narrow screens and enlarged text stay within the content column.
 - **Pricing page heading:** use `headline`, changing to `headline-wide` at the small breakpoint.
-- **Section heading:** use `title` for plan, prepaid credit and task sections.
+- **Section heading:** use `title` for plan, account-credit and task sections.
 - **Introduction:** use `introduction` below the page title.
 - **Body:** use `body` for plan terms and explanations; brief status lines use the control line height.
 - **Controls and task links:** use `control`. Billing navigation uses the same size with a 1.5rem line height, and medium weight (500) for the active page. Pricing and wallet primary actions also use medium weight (500).
@@ -156,14 +156,14 @@ Native links support direct entry, browser history and visible keyboard focus. T
 
 | Destination | Canonical address | Content and main action |
 | --- | --- | --- |
-| Overview | `/billing` | Compact plan status, prepaid credit and task links. Refresh checks both the plan and credit summaries. |
+| Overview | `/billing` | Compact plan status, existing account-credit summary and task links. Refresh checks both the plan and credit summaries. |
 | Plan | `/billing/plan` | Full access, subscription and renewal details; choose or manage Pro as account status permits. |
-| Credits | `/billing/credits` | Balance figures, payment confirmation and a one-time credit top-up. |
+| Credits | `/billing/credits` | Existing account-credit figures and history; Developer Access is a separate subscription. |
 | Transactions | `/billing/transactions` | Transaction filter, loaded rows, pagination and Export loaded rows. |
 | Invoices | `/billing/invoices` | Recent invoice rows, individual invoice links and hosted invoice history. |
 | Payment settings | `/billing/payment-methods` | Hosted payment-method management and links to Plan and Invoices. |
 
-Previously issued checkout return URLs and saved Billing section anchors resolve to the relevant canonical page. Pending return destinations remain reachable from navigation; they do not establish payment success. Use the canonical destination registry in navigation, search and new interfaces. Credits is the only top-up form; retired API-key, checkout and paywall presentations are removed. Saved bookmarks resolve through middleware, with unsupported purchase plans returning to Pricing.
+Previously issued checkout return URLs and saved Billing section anchors resolve to the relevant canonical page. Pending return destinations remain reachable from navigation; they do not establish payment success. Use the canonical destination registry in navigation, search and new interfaces. Credits remains available for existing account-credit records and historical payment reconciliation; it is not a Developer usage ledger. Developer Access checkout is available through `/developers` as a `$50/month` recurring subscription with zero usage credits; saved bookmarks resolve through middleware, with unsupported purchase plans returning to Pricing.
 
 ### Overview and full Plan
 
@@ -171,7 +171,7 @@ Previously issued checkout return URLs and saved Billing section anchors resolve
 
 Overview shows the plan name or Your plan, a short status, any supplied period/end date, and View plan or Review payment linking to Plan. Its Refresh action checks both account credit and the compact plan status; each summary can announce its own refresh or failure while keeping its last checked data.
 
-The full Plan page uses a flat section with a wrapping heading/refresh row, a two-column detail list when space permits, then product terms and actions. Show the Pro offer at $20/month for one account when choosing a plan; preserve the existing commercial terms. Include Sites fair usage and separate API/image billing near the action. Display the current billing-period end or scheduled subscription end only when the server supplies it; complimentary access does not invent a renewal date. Dates are explicitly UTC. The following action states apply to the full Plan page; Overview routes to that page.
+The full Plan page uses a flat section with a wrapping heading/refresh row, a two-column detail list when space permits, then product terms and actions. Show the Pro offer at $10/month for one account when choosing a plan; preserve the existing commercial terms. Include the published Image Studio experience and fair-use boundaries near the action. Developer Access is a separate $50/month recurring API access subscription; usage is billed separately and no usage credits are included. Display the current billing-period end or scheduled subscription end only when the server supplies it; complimentary access does not invent a renewal date. Dates are explicitly UTC. The following action states apply to the full Plan page; Overview routes to that page.
 
 | State | Visible treatment and action |
 | --- | --- |
@@ -192,7 +192,7 @@ Controls have a minimum 44px height. Loading labels identify the actual action. 
 
 ### Credits, transactions and account continuity
 
-Credit controls distinguish a one-time payment from a Pro subscription. Preset amounts and the labeled custom amount feed a quote showing You pay once and Credit added. Input guidance stays beside the field; unavailable or stale billing data disables new top-ups. A pending payment replaces the top-up form with a confirmation instruction and a status recheck. Only verified payment confirmation announces credit added.
+Credits is a read-only continuity surface for existing account balances, historical payment records and refunds. It does not offer preset amounts, custom amounts, quotes, automatic reload or Developer usage billing. The Developer link explains the separate `$50/month` access subscription and zero included usage credits. Historical return and payment status records remain visible without turning a URL or old payment into a new access grant.
 
 The shared account layout retains the typed credit amount, transaction filter, last checked wallet data and pending-return context while moving among Billing pages. Refresh preserves that state; an account change clears it. Payment retry identity is retained separately from the typed draft. Do not promise that a page reload saves the draft, or replay a purchase automatically when revisiting a return URL.
 
@@ -202,7 +202,7 @@ Transactions identify the loaded filter when it differs from the selected filter
 
 The Billing shell and task identity remain visible while the account or page loads. Sign-in preserves the intended billing destination. An unavailable account offers Retry account; a page failure offers Try again and Billing overview. Keep errors short and actionable without implementation diagnostics.
 
-On a billing read failure, retain last checked amounts and the typed top-up with an explicit stale-data notice; disable new checkout until recovery. Plan failures likewise keep last checked plan details, block new checkout and preserve management. Hosted-payment errors remain next to the relevant action. Status and return parameters never substitute for verified account state.
+On a billing read failure, retain last checked amounts with an explicit stale-data notice; keep account-credit history read-only. Plan failures likewise keep last checked plan details, block a duplicate checkout and preserve management. Hosted-payment errors remain next to the relevant action. Status and return parameters never substitute for verified account state.
 
 ### Pricing relationship
 
@@ -219,7 +219,7 @@ Pricing describes an available Pro offer with one included seat, Sites creation 
 - **Do** keep six canonical billing destinations and use Overview for concise summaries and task links.
 - **Do** refresh both Overview summaries and preserve account drafts and filters during billing navigation.
 - **Do** preserve subscription management after a status failure and base known management availability on the payment profile.
-- **Do** keep the wallet visually and conceptually separate from plan access.
+- **Do** keep historical account credit visually and conceptually separate from Pro plan access and the Developer subscription entitlement.
 
 ### Don't:
 

@@ -29,21 +29,21 @@ const NAV_GROUPS: NavGroup[] = [
     category: 'Getting Started',
     items: [
       { href: '/docs', title: 'Developer Quickstart', badge: 'Start', icon: Compass },
-      { href: '/playground', title: 'Interactive Playground', badge: 'Try', icon: Sparkles },
+      { href: '/developers', title: 'Developer access', badge: 'Subscribe', icon: Sparkles },
     ],
   },
   {
     category: 'Core Platform',
     items: [
       { href: '/docs/api-reference', title: 'API Reference', badge: 'REST', icon: Terminal },
-      { href: '/docs/examples', title: 'Creative Playground', badge: 'Multimodal', icon: Sparkles },
+      { href: '/docs/examples', title: 'API examples', badge: 'Supported', icon: Sparkles },
     ],
   },
   {
     category: 'SDKs & Tools',
     items: [
       { href: '/docs/sdks', title: 'SDKs & IDE Setup', badge: 'Cursor/Py', icon: Code2 },
-      { href: '/models', title: 'Curated Models', badge: 'Nova', icon: Sparkles },
+      { href: '/docs', title: 'Supported capabilities', badge: 'Nova', icon: Sparkles },
     ],
   },
   {
@@ -51,7 +51,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: '/docs/error-handling', title: 'Troubleshooting & Status', badge: 'Errors', icon: ShieldAlert },
       { href: '/keys', title: 'API Key Management', icon: Terminal },
-      { href: '/status', title: 'System Edge Status', icon: ExternalLink },
+      { href: '/status', title: 'Service status', icon: ExternalLink },
     ],
   },
 ];

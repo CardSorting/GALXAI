@@ -2,13 +2,12 @@ import { PublicHome } from '@/components/home/PublicHome';
 import { constructMetadata } from '@/lib/seo/metadata';
 
 export const metadata = constructMetadata({
-  title: 'GALX Images — Generative Visual Studio & Public Stream',
-  description: 'Turn ideas into high-resolution visuals with GALX Images. Explore an endless real-time stream of public community creations, generate imagery from prompts, and remix any style.',
-  keywords: ['GALX Images', 'AI image generator', 'generative images', 'prompt to image', 'image stream', 'pinterest masonry'],
+  title: 'GALX Images — Make something worth sharing',
+  description: 'Turn a prompt into an image. Explore what others create. Powered by GALX Nova.',
+  keywords: ['GALX Images', 'AI image creation', 'prompt to image', 'image community', 'GALX Nova'],
   canonicalPath: '/',
 });
 
 export default function HomePage() {
   return <PublicHome />;
 }
-

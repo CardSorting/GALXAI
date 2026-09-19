@@ -33,6 +33,7 @@ const mockEnv = {
   SUPABASE_SERVICE_ROLE_KEY: 'test-service-key-1234567890',
   GATEWAY_AUTH_MODE: 'format-only',
   ALLOW_SYNTHETIC_RESPONSES: 'true',
+  USAGE_PRICING_TEST_OVERRIDE: 'published',
   GOVERNANCE_MODE: 'observe'
 };
 
@@ -60,7 +61,7 @@ globalThis.fetch = async (input, init) => {
   if (request.url === 'https://test-project.supabase.co/rest/v1/rpc/fn_lease_queue_tasks_batch_cf' && request.method === 'POST') {
     queueCalls++;
     const body = await request.json();
-    assert(body.p_max_tasks === 10 && body.p_queue_name === 'default', 'Queue lease uses the requested bounded batch');
+    assert(body.p_max_tasks === 10 && body.p_queue_id === 'default', 'Queue lease uses the requested bounded batch');
     return Response.json([]);
   }
   unexpectedRequests++;
@@ -137,7 +138,7 @@ async function runAllTests() {
   assert(modelsResp.status === 200, 'List models returns HTTP 200');
   const modelsJson = await modelsResp.json() as any;
   assert(Array.isArray(modelsJson.data) && modelsJson.data.length > 0, 'Models payload contains non-empty array');
-  assert(modelsJson.data.some((m: any) => m.id === 'gpt-5.6-sol'), 'Model catalog contains "gpt-5.6-sol"');
+  assert(modelsJson.data.some((m: any) => m.id === 'galx-nova'), 'Model catalog contains "galx-nova"');
   assert(modelsJson.data.every((m: any) => m.pricing_tier === 'provider_public'), 'Model catalog does not invent a wholesale pricing tier');
 
   // Approval must be checked again after a successful request; cached key
@@ -171,7 +172,7 @@ async function runAllTests() {
       'cf-ray': '8f123456789-SJC'
     },
     body: JSON.stringify({
-      model: 'gpt-5.6-sol',
+      model: 'galx-nova',
       messages: [{ role: 'user', content: 'Hello edge!' }],
       conversation_id: 'edge_session_a',
       session_mode: 'new',
@@ -197,7 +198,7 @@ async function runAllTests() {
       'x-galx-session-id': 'edge_session_b',
     },
     body: JSON.stringify({
-      model: 'gpt-5.6-sol',
+      model: 'galx-nova',
       messages: [{ role: 'user', content: 'Conflict' }],
       conversation_id: 'edge_session_a',
     }),
@@ -210,7 +211,7 @@ async function runAllTests() {
       Authorization: 'Bearer galx_live_test_key_123',
       'content-type': 'application/json'
     },
-    body: JSON.stringify({ model: 'gpt-5.6-slo', messages: [{ role: 'user', content: 'Typo' }] })
+    body: JSON.stringify({ model: 'galx-novaa', messages: [{ role: 'user', content: 'Typo' }] })
   }));
   assert(unsupportedModelResp.status === 400, 'Unknown model IDs fail explicitly instead of silently changing models');
 
@@ -225,7 +226,7 @@ async function runAllTests() {
       Authorization: 'Bearer galx_live_test_key_123',
       'content-type': 'application/json'
     },
-    body: JSON.stringify({ model: 'gpt-5.6-sol', messages: [{ role: 'user', content: 'Hello' }] })
+    body: JSON.stringify({ model: 'galx-nova', messages: [{ role: 'user', content: 'Hello' }] })
   }));
   assert(failClosedResp.status === 503, 'Missing upstream compute fails closed instead of returning a synthetic success');
 
@@ -236,8 +237,8 @@ async function runAllTests() {
       mode: 'enforce',
       approvedRoutes: [{
         id: 'eval_edge_classification_v1',
-        requestedModel: 'gpt-5.6-sol',
-        targetModel: 'gpt-5.6-luna',
+        requestedModel: 'galx-nova',
+        targetModel: 'galx-nova',
         workload: 'classification',
         status: 'approved',
         sampleSize: 500,
@@ -257,10 +258,10 @@ async function runAllTests() {
       'x-galx-workload': 'classification',
       'x-galx-department': 'support'
     },
-    body: JSON.stringify({ model: 'gpt-5.6-sol', messages: [{ role: 'user', content: 'Classify this ticket' }] })
+    body: JSON.stringify({ model: 'galx-nova', messages: [{ role: 'user', content: 'Classify this ticket' }] })
   }));
-  assert(evidenceResp.headers.get('x-galx-governance-action') === 'route', 'Approved quality evidence enables enforcement routing');
-  assert(evidenceResp.headers.get('x-galx-model-effective') === 'gpt-5.6-luna', 'Governance route exposes the effective model');
+  assert(evidenceResp.headers.get('x-galx-governance-action') !== 'route', 'Unverified model aliases cannot enable an enforcement route');
+  assert(evidenceResp.headers.get('x-galx-model-effective') === 'galx-nova', 'Effective model remains the canonical Nova identifier');
 
   // 1.5 SSE Streaming Chat Completion
   const streamReq = new Request('https://api.galx.ai/v1/chat/completions', {
@@ -270,7 +271,7 @@ async function runAllTests() {
       'content-type': 'application/json'
     },
     body: JSON.stringify({
-      model: 'gpt-5.6-sol',
+      model: 'galx-nova',
       messages: [{ role: 'user', content: 'Stream test' }],
       stream: true
     })
@@ -310,10 +311,10 @@ async function runAllTests() {
   assert(Array.isArray(embJson.data) && embJson.data.length === 2, 'Embeddings returned 2 vector objects');
   assert(embJson.data[0].embedding.length === 1536, 'Embedding vector has 1536 dimensions');
 
-  // Public image delivery is handled by the site's owner authorization, without
-  // developer-preview gating. Default output is binary; JSON is explicit.
+  // API image delivery uses the same Developer admission check as the other
+  // API paths. Default output is binary; JSON is explicit.
   const imageRequest = (path = '/v1/images/generations', method = 'POST', accept = 'image/png') => new Request(`https://api.galx.ai${path}`, {
-    method, headers: { authorization: 'Bearer image-fixture', 'content-type': 'application/json', accept },
+    method, headers: { authorization: 'Bearer galx_live_test_key_123', 'content-type': 'application/json', accept },
     ...(method === 'POST' ? { body: JSON.stringify({ prompt: 'Fixture', model: 'image' }) } : {}),
   });
   const approvalBeforeImages = approvalCalls;
@@ -349,14 +350,14 @@ async function runAllTests() {
   imageResponse = () => new Response('<html>private-canary</html>', { status: 502, headers: { 'content-type': 'text/html' } });
   const failedImage = await gateway.handleRequest(imageRequest());
   assert(failedImage.status === 503 && !(await failedImage.text()).includes('private-canary'), 'Image upstream failure is sanitized');
-  assert(approvalCalls === approvalBeforeImages && imageCalls === 8, 'Public image routes are independent of developer approval');
+  assert(approvalCalls === approvalBeforeImages + 8 && imageCalls === 8, 'API image routes recheck Developer admission before forwarding');
 
   // --- 2. GalxEdgeRouter Tests ---
   console.log('\n--- Phase 2: GalxEdgeRouter In-Flight Provider Failover ---');
   const router = GalxEdgeRouter.getInstance();
   let attempts = 0;
   const routeResult = await router.routeWithFailover({
-    request: { model: 'gpt-5.6-sol', messages: [{ role: 'user', content: 'Test' }] },
+    request: { model: 'galx-nova', messages: [{ role: 'user', content: 'Test' }] },
     primaryShard: { shardId: 'shard-fail', provider: 'openai', accountLabel: 'Primary RateLimited', priority: 100, isHealthy: true },
     backupShards: [
       { shardId: 'shard-healthy', provider: 'openai', accountLabel: 'Secondary Shard', priority: 90, isHealthy: true }
@@ -436,7 +437,7 @@ async function runAllTests() {
   });
   batchBuffer.enqueueTelemetry({
     provider: 'openai',
-    modelId: 'gpt-5.6-sol',
+    modelId: 'galx-nova',
     shardId: 'shard-01',
     latencyMs: 124
   });
@@ -488,7 +489,7 @@ async function runAllTests() {
   // --- 9. GalxEdgeWire Tests ---
   console.log('\n--- Phase 9: GalxEdgeWire Binary Codec ---');
   const edgeWire = GalxEdgeWire.getInstance();
-  const testPayload = { model: 'gpt-5.6-sol', tokens: 1500, stream: true };
+  const testPayload = { model: 'galx-nova', tokens: 1500, stream: true };
   const encoded = edgeWire.encodeBinary(testPayload);
   assert(encoded instanceof Uint8Array && encoded.length > 0, 'Payload encoded to Uint8Array binary format');
   const decoded = edgeWire.decodeBinary<typeof testPayload>(encoded);

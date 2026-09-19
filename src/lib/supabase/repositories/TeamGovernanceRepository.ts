@@ -204,6 +204,72 @@ export class TeamGovernanceRepository {
     return data;
   }
 
+  /**
+   * Enqueue one completed message for future Stripe meter delivery. The
+   * database function owns the unique key so retries cannot double-count.
+   */
+  async enqueueMessageBillingEvent(params: {
+    userId: string;
+    modelId: string;
+    requestId: string;
+    contractVersion?: string;
+  }): Promise<any> {
+    if (!isSupabaseConfigured() || !params.userId || !params.requestId) return null;
+    const client = getSupabaseAdmin();
+    const { data, error } = await (client as any).rpc('fn_enqueue_message_billing_event', {
+      p_user_id: params.userId,
+      p_model_id: params.modelId,
+      p_request_id: params.requestId,
+      p_contract_version: params.contractVersion || 'nova-message-v1',
+    });
+
+    if (error || !data) return null;
+    return data;
+  }
+
+  async reserveNovaMessage(params: { userId: string; requestId: string; unitAmountMicros?: number; capMicros?: number }): Promise<{ allowed: boolean; code?: string; [key: string]: unknown } | null> {
+    if (!isSupabaseConfigured() || !params.userId || !params.requestId) return { allowed: true, degraded: true };
+    const client = getSupabaseAdmin();
+    const { data, error } = await (client as any).rpc('fn_reserve_nova_message', {
+      p_user_id: params.userId,
+      p_request_id: params.requestId,
+      p_unit_amount_micros: params.unitAmountMicros ?? 20_000,
+      p_cap_micros: params.capMicros ?? 25_000_000,
+    });
+    if (error || !data) return null;
+    return data as { allowed: boolean; code?: string; [key: string]: unknown };
+  }
+
+  async commitNovaMessage(params: { userId: string; requestId: string }): Promise<any> {
+    if (!isSupabaseConfigured() || !params.userId || !params.requestId) return null;
+    const client = getSupabaseAdmin();
+    const { data, error } = await (client as any).rpc('fn_commit_nova_message', {
+      p_user_id: params.userId,
+      p_request_id: params.requestId,
+    });
+    return error ? null : data;
+  }
+
+  async releaseNovaMessage(params: { userId: string; requestId: string }): Promise<any> {
+    if (!isSupabaseConfigured() || !params.userId || !params.requestId) return null;
+    const client = getSupabaseAdmin();
+    const { data, error } = await (client as any).rpc('fn_release_nova_message', {
+      p_user_id: params.userId,
+      p_request_id: params.requestId,
+    });
+    return error ? null : data;
+  }
+
+  async getNovaMessageUsageSummary(userId: string): Promise<Record<string, unknown> | null> {
+    if (!isSupabaseConfigured() || !userId) return null;
+    const client = getSupabaseAdmin();
+    const { data, error } = await (client as any).rpc('fn_get_nova_message_usage_summary', {
+      p_user_id: userId,
+    });
+    if (error || !data || typeof data !== 'object') return null;
+    return data as Record<string, unknown>;
+  }
+
   async getSeatRollingTelemetry(userId: string, tier: string = 'developer'): Promise<any> {
     if (!isSupabaseConfigured() || !userId) return null;
     const client = getSupabaseAdmin();

@@ -5,10 +5,13 @@ import { previewError, previewResponse } from '@/lib/security/developer-access';
 import { isSameOriginRequest } from '@/lib/security/same-origin';
 import { validateApplication } from '@/lib/developers/application';
 
-function publicStatus(record: PreviewRecord | null) {
+function publicStatus(access: { approved: boolean; record: PreviewRecord | null }) {
+  const record = access.record;
   const expired = record?.status === 'approved' && record.expires_at && record.expires_at.getTime() <= Date.now();
-  return { status: expired ? 'expired' : record?.status ?? 'not_requested', requested_at: record?.requested_at.toISOString() ?? null,
-    expires_at: record?.status === 'approved' ? record.expires_at?.toISOString() ?? null : null,
+  const manualExpiry = access.approved && record?.status === 'approved' && !expired && record.expires_at
+    ? record.expires_at.toISOString() : null;
+  return { status: access.approved ? 'approved' : expired ? 'expired' : record?.status ?? 'not_requested', requested_at: record?.requested_at.toISOString() ?? null,
+    expires_at: manualExpiry,
     application: record ? {
       introduction: record.introduction ?? null, github_url: record.github_url ?? null, linkedin_url: record.linkedin_url ?? null,
       use_case: record.use_case, expected_traffic: record.expected_traffic, cohort_interest: record.cohort_interest ?? null,
@@ -51,12 +54,15 @@ export function createDeveloperAccessHandlers(deps = {
       const record = editing ? await repo.updateApplication(actor.id, input.revision, value)
         : await repo.request(actor.id, actor.email, value.use_case, value.expected_traffic, value);
       if (!record) return previewError(409, 'application_changed', 'Your application or access status changed. Reload the saved application before editing again.');
-      return previewResponse(publicStatus(record));
+      return previewResponse(publicStatus({
+        approved: record.status === 'approved' && (!record.expires_at || record.expires_at.getTime() > Date.now()),
+        record,
+      }));
     } catch (error) { return failure(error); }
   }
   return {
     GET: async (req: NextRequest) => {
-      try { const actor = await deps.identity(req); return previewResponse(publicStatus(await deps.repository().get(actor.id))); }
+      try { const actor = await deps.identity(req); return previewResponse(publicStatus(await deps.repository().access(actor.id))); }
       catch (error) { return failure(error); }
     },
     POST: (req: NextRequest) => saveApplication(req, false),

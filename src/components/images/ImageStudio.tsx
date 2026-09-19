@@ -313,6 +313,7 @@ function StudioWorkspace({
           <Link href="/" className="studio-brand-link" title="Return to GALX Home">
             <Sparkles className="studio-brand-sparkle" aria-hidden="true" />
             <span className="studio-brand-title">GALX Images</span>
+            <span className="studio-brand-attribution">Powered by GALX Nova.</span>
           </Link>
         </div>
 
@@ -356,8 +357,8 @@ function StudioWorkspace({
         </nav>
 
         <div className="studio-top-right">
-          <Link className="studio-docs-link" href="/docs/api-reference">
-            API Docs
+          <Link className="studio-docs-link" href="/developers">
+            Developer
             <ArrowRight size={14} aria-hidden="true" />
           </Link>
         </div>
@@ -412,7 +413,7 @@ function StudioWorkspace({
                 <div className="studio-active-gen-meta">
                   <span>Aspect: {settings.ratio}</span>
                   <span>Count: {settings.count}</span>
-                  <span>Model: {IMAGE_MODEL.name}</span>
+                  <span>Service: {IMAGE_MODEL.name}</span>
                 </div>
               </div>
             )}
@@ -757,7 +758,7 @@ function StudioWorkspace({
           <textarea
             ref={promptRef}
             className="studio-dock-textarea"
-            placeholder="Describe what you want to create..."
+            placeholder="Describe the image you want to create."
             value={settings.prompt}
             maxLength={MAX_PROMPT}
             rows={1}
@@ -910,7 +911,7 @@ function StudioWorkspace({
 
                 <dl>
                   <div>
-                    <dt>Model</dt>
+                    <dt>Service</dt>
                     <dd>{IMAGE_MODEL.name}</dd>
                   </div>
                   <div>

@@ -1,4 +1,4 @@
-> **Developer API private preview:** Sign up and request access at [galx.ai/developers](https://galx.ai/developers). Developer endpoints require individual approval, including for existing keys. Images and Sites remain available without preview approval.
+> **GALX Nova Developer Access:** $50/month recurring membership for API access. Think of it like membership to a managed workspace: the subscription gives you access to the service; consumption is billed separately. No usage credits are included. [Subscribe](https://galx.ai/developers), or review the separate private preview path.
 
 # GALXAI
 
@@ -10,6 +10,12 @@ Use `https://galx.ai/v1` as the API base URL. Authenticate with
 `Authorization: Bearer YOUR_GALX_API_KEY`.
 A user ID is not a credential. Missing or invalid credentials return `401`;
 browser requests require a valid signed-in session.
+
+The Developer subscription is an access fee, not a usage allowance. Developer
+usage is intended to be measured per message, not per token. The per-message
+rate is $0.02 per completed message with a default $25 monthly usage cap; do not infer a credit, balance or
+model charge from the capability catalog. Review the [usage-pricing status](https://galx.ai/pricing/usage)
+before integrating.
 
 ## Image generation
 

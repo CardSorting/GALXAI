@@ -23,9 +23,12 @@ import {
   ChatRequestValidationError,
   resolveChatIdentity,
 } from '../../core/chat/GalxChatRequestNormalizer';
+import { USAGE_PRICING } from '../../lib/billing/usage-pricing';
 
 export interface CloudflareEnv {
   ENVIRONMENT?: string;
+  /** Test-only transport fixture; production cannot override the public status. */
+  USAGE_PRICING_TEST_OVERRIDE?: 'published';
   SUPABASE_URL: string;
   SUPABASE_SERVICE_ROLE_KEY?: string;
   GALX_VAULT_MASTER_SECRET?: string;
@@ -113,8 +116,6 @@ export class GalxEdgeGateway {
       );
     }
 
-    if (url.pathname.startsWith('/v1/images/') || url.pathname === '/images/generations') return this.handleImageGenerations(request);
-
     // 3. API Key & Session Authentication Guard with Universal Ingestion
     const queryCredentialsAllowed =
       this.env.ENVIRONMENT === 'test' || this.env.ENVIRONMENT === 'development';
@@ -161,7 +162,6 @@ export class GalxEdgeGateway {
     }
 
     // Check the same approval authority on every request, including cached keys.
-    // Image requests returned above retain their existing public-product contract.
     try {
       const access = await fetch('https://galx.ai/api/developer-access/check', {
         method: 'POST', headers: { Authorization: `Bearer ${rawKey}` },
@@ -176,6 +176,14 @@ export class GalxEdgeGateway {
       const value = await access.json() as { approved?: unknown };
       if (value.approved !== true) return this.previewDenied(503);
     } catch { return this.previewDenied(503); }
+
+    // API admission and consumption approval are separate decisions. Keep
+    // model discovery available, but never dispatch a billable Developer
+    // request while the separate usage contract is unpublished.
+    const path = url.pathname.replace(/\/+$/, '') || '/';
+    if (this.isDeveloperConsumptionPath(path, request.method) && !this.usagePricingPublished()) {
+      return this.usagePricingUnavailable();
+    }
 
     // 4. Rate Limiting Check via KV (Sliding Window)
     const isAllowed = await this.checkRateLimit(
@@ -204,8 +212,6 @@ export class GalxEdgeGateway {
     }
 
     // 5. Protected Path Routing (Zero-friction path matching)
-    const path = url.pathname.replace(/\/+$/, '');
-
     if ((path === '/v1/chat/completions' || path === '/chat/completions' || path === '/api/chat' || path === '/v1/completions' || path === '/completions' || path === '/api/generate') && (request.method === 'POST' || request.method === 'GET')) {
       return this.handleChatCompletions(request, authResult.key);
     }
@@ -242,6 +248,10 @@ export class GalxEdgeGateway {
       return this.handleImageGenerations(request);
     }
 
+    if (path.startsWith('/v1/images/') || path === '/images/generations') {
+      return this.handleImageGenerations(request);
+    }
+
     if ((path === '/v1/assets/upload' || path === '/assets/upload') && request.method === 'PUT') {
       return this.handleAssetUpload(request);
     }
@@ -261,10 +271,39 @@ export class GalxEdgeGateway {
   private previewDenied(status: number): Response {
     return new Response(JSON.stringify({ error: {
       code: status === 403 ? 'developer_preview_required' : status === 401 ? 'authentication_required' : 'access_check_unavailable',
-      message: status === 403 ? 'The developer API is in private preview. Request access to join.' : status === 401 ? 'Use an approved account’s API key.' : 'We couldn’t check your access. Please try again.',
+      message: status === 403 ? 'An active GALX Nova Developer Access subscription or approved private-preview account is required.' : status === 401 ? 'Use an active account’s API key.' : 'We couldn’t check your access. Please try again.',
     }, request_access_url: 'https://galx.ai/developers' }), { status, headers: {
       'Content-Type': 'application/json', 'Cache-Control': 'private, no-store',
       'Access-Control-Allow-Origin': '*', 'X-Robots-Tag': 'noindex, nofollow',
+    } });
+  }
+
+  private isDeveloperConsumptionPath(path: string, method: string): boolean {
+    if (!['GET', 'POST'].includes(method)) return false;
+    if (path === '/v1/chat/completions' || path === '/chat/completions' || path === '/api/chat' ||
+      path === '/v1/completions' || path === '/completions' || path === '/api/generate' ||
+      path === '/v1/messages' || path === '/messages') return true;
+    if (method === 'POST' && (path === '/v1/embeddings' || path === '/embeddings' ||
+      path === '/v1/images/generations' || path === '/images/generations')) return true;
+    return false;
+  }
+
+  private usagePricingPublished(): boolean {
+    return USAGE_PRICING.ratesPublished ||
+      (this.env.ENVIRONMENT === 'test' && this.env.USAGE_PRICING_TEST_OVERRIDE === 'published');
+  }
+
+  private usagePricingUnavailable(): Response {
+    return new Response(JSON.stringify({ error: {
+      message: 'API usage is not available until the separate per-message usage-pricing terms are published. Developer Access includes no usage credits.',
+      type: 'service_unavailable',
+      code: 'usage_pricing_not_published',
+      usage_pricing_url: USAGE_PRICING.path,
+    } }), { status: 503, headers: {
+      'content-type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+      'Cache-Control': 'no-store',
+      'X-Content-Type-Options': 'nosniff',
     } });
   }
 

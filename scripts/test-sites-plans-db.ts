@@ -4,12 +4,13 @@ import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { Pool } from 'pg';
-import { createProCheckout, fulfillPlanStripeEvent, isProPaymentAdjustment, proPrice } from '../src/lib/billing/plan-subscription';
-import { PRO_PLAN } from '../src/lib/billing/pro-plan';
+import { createDeveloperCheckout, createProCheckout, developerPrice, fulfillPlanStripeEvent, isProPaymentAdjustment, proPrice } from '../src/lib/billing/plan-subscription';
+import { DEVELOPER_ACCESS, PRO_PLAN } from '../src/lib/billing/pro-plan';
 import { fulfillStripeEvent } from '../src/lib/billing/fulfillment';
 import type { FairPolicy } from '../src/lib/sites/fair-store';
 import { SiteDomainRegistry } from '../src/lib/sites/domain-registry';
 import { hasComplimentaryProAccess, requirePaidSitesAccess } from '../src/lib/sites/paid-access';
+import { DeveloperAccessRepository } from '../src/lib/supabase/repositories/DeveloperAccessRepository';
 const pool=new Pool({connectionString:process.env.GALX_INTEGRATION_DATABASE_URL,max:8});
 const fixture=JSON.parse(await readFile(new URL('../GALX_Fair_Usage_Test_Fixture.json',import.meta.url),'utf8'));
 const policy:FairPolicy={mode:'enforce',pool_id:'test-plans',revision:1,limits:fixture.policy,paid_price_ids:['price_pro']};
@@ -18,18 +19,24 @@ const check=async(name:string,run:()=>Promise<void>)=>{await run();checks++;cons
 function fake(){
   const sessions=new Map<string,any>(),params=new Map<string,any>();let calls=0,customerCalls=0,lost=false,delay=0;
   let subscription:any[]=[];let beforeReply:((session:any)=>Promise<void>)|undefined;
-  const stripe:any={prices:{list:async()=>({data:[{id:'price_pro',currency:'usd',unit_amount:PRO_PLAN.monthlyPriceUsd*100,recurring:{interval:'month',interval_count:1,usage_type:'licensed'}}]})},
+  const stripe:any={prices:{list:async(input:any)=>{const developer=input?.lookup_keys?.[0] === DEVELOPER_ACCESS.lookupKey;return {data:[{id:developer?'price_developer':'price_pro',product:developer?'galx_nova_developer_access_v1':'galx_pro_v1',metadata:developer?{galxPlan:'nova-developer-v1'}:{},currency:'usd',unit_amount:(developer?DEVELOPER_ACCESS.monthlyPriceUsd:PRO_PLAN.monthlyPriceUsd)*100,recurring:{interval:'month',interval_count:1,usage_type:'licensed'}}]};}},
     customers:{create:async()=>{customerCalls++;return{id:'cus_'+randomUUID().replaceAll('-','')};}},
     subscriptions:{list:async()=>({data:subscription,has_more:false})},checkout:{sessions:{
       retrieve:async(id:string)=>sessions.get(id),
       create:async(input:any,options:any)=>{
-        calls++;assert.equal(input.mode,'subscription');assert.deepEqual(input.line_items,[{price:'price_pro',quantity:1}]);assert.equal(input.allow_promotion_codes,false);
+        calls++;assert.equal(input.mode,'subscription');assert.equal(input.line_items.length,1);assert.equal(input.line_items[0].quantity,1);assert(input.line_items[0].price === 'price_pro' || input.line_items[0].price === 'price_developer');assert.equal(input.allow_promotion_codes,false);
+        if(input.line_items[0].price === 'price_developer') {
+          assert.equal(input.custom_text?.submit?.message,'This is a recurring API access subscription at $50/month. Usage is billed separately. No usage credits are included.');
+          assert.equal(input.metadata?.usagePricingStatus,'not_published');
+          assert.equal(input.metadata?.includedUsageCreditsUsd,'0');
+          assert.equal(input.subscription_data?.metadata?.usagePricingStatus,'not_published');
+        } else assert.equal(input.custom_text,undefined);
         assert.equal(input.payment_method_types,undefined);assert.equal(input.automatic_tax,undefined);assert.equal(options.maxNetworkRetries,0);
         assert.equal(new URL(input.success_url).origin,'https://galx.ai');
         if(params.has(options.idempotencyKey))assert.deepEqual(input,params.get(options.idempotencyKey));else params.set(options.idempotencyKey,structuredClone(input));
         const id='cs_test_'+options.idempotencyKey.replaceAll(':','');
         let session=sessions.get(id);if(!session){session={id,status:'open',mode:'subscription',customer:input.customer,client_reference_id:input.client_reference_id,
-          metadata:input.metadata,currency:'usd',amount_subtotal:PRO_PLAN.monthlyPriceUsd*100,payment_status:'unpaid',url:'https://checkout.stripe.com/c/pay/'+id};sessions.set(id,session);}
+          metadata:input.metadata,currency:'usd',amount_subtotal:input.line_items[0].price === 'price_developer' ? DEVELOPER_ACCESS.monthlyPriceUsd*100 : PRO_PLAN.monthlyPriceUsd*100,payment_status:'unpaid',url:'https://checkout.stripe.com/c/pay/'+id};sessions.set(id,session);}
         if(delay)await new Promise(r=>setTimeout(r,delay));if(beforeReply)await beforeReply(session);
         if(lost){lost=false;throw Error('Lost provider acknowledgement');}return session;
       }}}};
@@ -118,6 +125,55 @@ try{
     for(const [type,status,created] of [['created','active',100],['updated','past_due',102],['deleted','canceled',103],['updated','active',101],['updated','active',104]] as const){const e=event('customer.subscription.'+type,{...sub,status},created);await fulfillStripeEvent(pool,e,JSON.stringify(e));}
     const row=(await pool.query('SELECT status FROM private.galx_plan_subscriptions WHERE subscription_id=$1',[sub.id])).rows[0];assert.equal(row.status,'canceled');
     const bad=event('customer.subscription.updated',{...sub,metadata:{...sub.metadata,userId:randomUUID()}});await assert.rejects(fulfillStripeEvent(pool,bad,JSON.stringify(bad)));
+  });
+  await check('Nova Developer Access is a $50 subscription entitlement with no usage credits',async()=>{
+    const f=fake(),i=input();
+    const price=await developerPrice(f.stripe);
+    assert.equal(price.id,'price_developer'); assert.equal(price.unit_amount,DEVELOPER_ACCESS.monthlyPriceUsd*100);
+    const existingUser=input();
+    await pool.query('INSERT INTO galx_stripe_customers(id,user_id,stripe_customer_id) VALUES($1,$2,$3)',[randomUUID(),existingUser.userId,'cus_existing_'+randomUUID().replaceAll('-','')]);
+    f.subscriptions([{status:'active',items:{data:[{price:{id:'price_archived',product:'galx_nova_developer_access_v1'}}]}}]);
+    await assert.rejects(createDeveloperCheckout(pool,f.stripe,existingUser),(e:any)=>e.status===409);
+    f.subscriptions([]);
+    await createDeveloperCheckout(pool,f.stripe,i);
+    const session=[...f.sessions.values()][0];
+    assert.equal(session.metadata.galxPlan,'nova-developer-v1');
+    assert.equal(session.amount_subtotal,5000);
+    const periodEnd=Math.floor(Date.now()/1000)+3600;
+    const sub={id:'sub_'+randomUUID(),customer:session.customer,status:'active',cancel_at_period_end:false,
+      metadata:{galxPlan:'nova-developer-v1',userId:i.userId},items:{data:[{price:{id:'price_developer'},current_period_end:periodEnd}]}};
+    const checkoutEvent=event('checkout.session.completed',{...session,status:'complete',payment_status:'paid'});
+    await fulfillStripeEvent(pool,checkoutEvent,JSON.stringify(checkoutEvent),{developerPriceId:'price_developer'});
+    const createdEvent=event('customer.subscription.created',sub);
+    await fulfillStripeEvent(pool,createdEvent,JSON.stringify(createdEvent),{developerPriceId:'price_developer'});
+    const stored=(await pool.query('SELECT plan_key,status,price_id FROM private.galx_plan_subscriptions WHERE subscription_id=$1',[sub.id])).rows[0];
+    assert.deepEqual(stored,{plan_key:'nova-developer-v1',status:'active',price_id:'price_developer'});
+    assert.equal((await pool.query('SELECT count(*) FROM galx_wallet_transactions WHERE user_id=$1',[i.userId])).rows[0].count,'0');
+    assert.equal((await new DeveloperAccessRepository(pool).isApproved(i.userId)),true);
+    const ending={...sub,cancel_at_period_end:true};
+    const endingEvent=event('customer.subscription.updated',ending,101);
+    await fulfillStripeEvent(pool,endingEvent,JSON.stringify(endingEvent),{developerPriceId:'price_developer'});
+    assert.equal(await new DeveloperAccessRepository(pool).isApproved(i.userId),true);
+    // Lifecycle reconciliation uses the stored subscription Price identity;
+    // it must still work without a live Price lookup or subscription metadata
+    // after a provider-side Price rotation/archive.
+    const pastDue={...sub,status:'past_due',metadata:undefined};
+    const pastDueEvent=event('customer.subscription.updated',pastDue,102);
+    await fulfillStripeEvent(pool,pastDueEvent,JSON.stringify(pastDueEvent));
+    assert.equal(await new DeveloperAccessRepository(pool).isApproved(i.userId),false);
+    const activeAgain={...sub,status:'active',metadata:undefined};
+    const activeAgainEvent=event('customer.subscription.updated',activeAgain,103);
+    await fulfillStripeEvent(pool,activeAgainEvent,JSON.stringify(activeAgainEvent));
+    assert.equal(await new DeveloperAccessRepository(pool).isApproved(i.userId),true);
+    const canceled={...sub,status:'canceled',cancel_at_period_end:false,metadata:undefined};
+    const canceledEvent=event('customer.subscription.deleted',canceled,104);
+    await fulfillStripeEvent(pool,canceledEvent,JSON.stringify(canceledEvent));
+    assert.equal(await new DeveloperAccessRepository(pool).isApproved(i.userId),false);
+  });
+  await check('retired checkout evidence cannot create Developer entitlement',async()=>{
+    const i=input();
+    await pool.query('INSERT INTO private.galx_plan_checkouts(user_id,request_id,price_id,state,return_path) VALUES($1,$2,$3,$4,$5)',[i.userId,i.requestId,'price_retired','complete','/billing/plan']);
+    assert.equal(await new DeveloperAccessRepository(pool).isApproved(i.userId),false);
   });
   await check('verified subscription adjustments never debit a prepaid wallet',async()=>{
     const f=fake(),i=input();await createProCheckout(pool,f.stripe,policy,i);const session=[...f.sessions.values()][0];

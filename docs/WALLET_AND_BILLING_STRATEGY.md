@@ -2,28 +2,81 @@
 
 <!-- docs-scope: domain-reference -->
 
-Private maintainer reference, reconciled September 16, 2026. This document describes the current billing entry strategy. Original wallet, native checkout, rebate and seat proposals remain in Git and their dated decision records; they do not establish current capabilities. [Current operating state](../post-mortem/CURRENT_STATE.md) distinguishes source changes from releases.
+Private maintainer reference, reconciled September 18, 2026. This document
+describes the current billing boundary. Original wallet, native checkout,
+rebate and seat proposals remain in Git and their dated decision records; they
+do not establish current capabilities. [Current operating state](../post-mortem/CURRENT_STATE.md)
+distinguishes source changes from releases.
 
-## Separate purchases and tasks
+## Separate surfaces
 
-GALX Pro and prepaid credit are separate contracts. Pro is the current monthly Sites offer; [paid-access guidance](maintainers/SITES_FAIR_USAGE.md) owns verification and limitations. Prepaid credit supports usage where authorized. Neither purchase grants developer preview approval or acts as an administrator credential. Team and enterprise needs use assisted support, not a retired self-service seat checkout.
+GALX Pro is the consumer Image Studio subscription: `$10 USD/month` for one
+account, with the published image-creation terms and fair-use boundaries.
 
-The [billing page contract](reference/billing-pages.md) owns six task destinations: Overview, Plan, Credits, Transactions, Invoices and Payment settings. Account links open Overview, subscription actions open Plan, credit actions open Credits, and financial history links open Transactions or Invoices as labeled. Both search menus and the CLI use these destinations.
+GALX Nova Developer Access is a separate `$50 USD/month` recurring subscription
+for programmable access to supported Nova capabilities. It is an access fee,
+not prepaid inference, a credit bundle or an included usage allowance. Usage is
+billed separately; this document does not define usage pricing or metering.
 
-## Purchase and confirmation
+The public status page at `/pricing/usage` makes that boundary explicit: usage
+is billed at $0.02 per completed message with a default $25 monthly cap. The
+page is not a token rate card, wallet balance or credit grant. Developer
+checkout includes the live metered Price alongside the access Price; the
+application reservation path remains authoritative for the hard cap.
 
-Credits offers one hosted checkout form with a server-derived quote. The customer sees the one-time charge and resulting credit before opening Stripe. The CLI only prefills the amount; it does not promise a bonus or create a Checkout session. Pro has its own subscription action and management path.
+The six billing destinations remain the account workspace: Overview, Plan,
+Credits, Transactions, Invoices and Payment settings. Credits presents existing
+account-credit records and historical reconciliation. It is not a Developer
+usage or purchase ledger. `/developers` owns the Developer subscription path;
+the private preview form remains separate.
 
-Retry identities and original provider parameters survive uncertain responses. New checkouts return to the task page; previously issued URLs continue through constrained redirects. A URL or browser event never proves payment, unlocks a key, or adds a balance. Signed server processing and owner-scoped account state remain authoritative. The [webhook runbook](runbooks/stripe-webhook-delivery.md) owns delivery diagnosis, mode separation and recovery.
+## Payment and confirmation
 
-## Management and recovery
+Pro and Developer Access create Checkout Sessions through the same existing
+subscription writer. Pro uses the server-verified `galx_pro_monthly_v1`
+recurring Price at `$10/month`. Developer uses its own
+`galx_nova_developer_monthly_v1` recurring Price at `$50/month`, durable
+request identity, Stripe webhooks and owner-scoped subscription state. The
+restricted Stripe portal handles payment methods, invoice history and
+period-end cancellation.
 
-Transaction views filter recorded activity and export only loaded rows. Invoices link to actual owner-scoped records and hosted history. Payment settings uses a restricted Stripe portal for saved payment methods, invoices and period-end cancellation. Arbitrary plan changes remain disabled.
+The former prepaid Developer/compute-pack catalog is retired. New calls to the
+legacy quote, wallet-deposit, wallet-estimate, automatic-reload and generic
+Developer checkout paths reject with a bounded response and make no provider or
+database call. Developer subscription checkout creates no wallet row, usage
+credit, balance or consumption entitlement.
 
-The application does not offer the former native express-pay checkout, crypto purchase path, immediate key reveal, automatic reload setup or one-click refund flow. Existing automatic-reload status can direct the customer to support; refund requests use billing support. Do not revive those features through old components, search terms, link labels or unverified pricing claims.
+Historical checkout sessions remain processable only when needed to reconcile
+existing wallet ledger, refund or dispute records. That path is not a current
+catalog and must never create or approve a row in
+`private.developer_access_requests`. A successful active Developer subscription
+creates only the subscription-backed API entitlement; the private preview
+review workflow remains an independent access path.
 
-Account-scoped drafts and retry hints survive movement among billing tasks. Failed refreshes show last checked data with an explicit warning; new payments stay disabled while authority is uncertain. Empty states explain the next useful action. Private diagnostics stay out of pages, errors, metadata and browser assets.
+## Account continuity and public responses
+
+Existing account balances, transactions, invoices and refunds remain
+owner-scoped and readable through explicit DTOs. Historical protocol keys and
+ledger fields stay available to internal reconciliation code but are not
+current product names or public entitlements. Public billing responses expose
+only account-facing summaries, generic transaction descriptions and validated
+Stripe-hosted invoice URLs.
+
+Old return URLs and bookmarks remain resolvable where safe. They select a
+canonical page and never prove payment, create a new session, or grant access.
+No automatic retry or payment replay is allowed from a return URL.
 
 ## Change and release
 
-Use the canonical destination registry for new links. Retired addresses have middleware redirects only; historical payment identifiers and operational records are preserved. Apply the additive private return-path migration before the new checkout writer, and retain both return contracts during presentation rollback. The [page contract](reference/billing-pages.md#verification-and-release) contains exact release prerequisites, tests and rollback instructions. Local tests do not certify a hosted payment or live deployment.
+Keep the consumer and Developer surfaces separate in copy, routes, Stripe
+objects and access decisions. Do not delete historical Stripe objects or
+rewrite customer records as part of this framing change. Provision the
+Developer Price only through the private Nova procedure, after the existing
+live/test Stripe authority and deployment conventions are verified. This
+strategy does not authorize running that live procedure.
+
+Use the [billing page contract](reference/billing-pages.md) for route,
+compatibility and verification details. Use the
+[Stripe webhook runbook](runbooks/stripe-webhook-delivery.md) for signed-event
+delivery, mode separation and recovery. Local checks do not certify a hosted
+payment or a live deployment.

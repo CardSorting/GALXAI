@@ -214,7 +214,7 @@
     },
     {
       "path": "docs/GTM_STRATEGY.md",
-      "title": "🚀 GALXAI: Go-To-Market (GTM) & Positioning Strategy",
+      "title": "GALX Go-To-Market and positioning strategy",
       "scope": "commercial-draft",
       "kind": "draft",
       "domains": [],
@@ -2970,6 +2970,16 @@
       "decision": null
     },
     {
+      "path": "docs/knowledge/audits/2026-09-18-nova-message-unit-economics.md",
+      "title": "Nova Developer message-unit economics audit — September 18, 2026",
+      "scope": "operational-record",
+      "kind": "evidence",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
       "path": "docs/knowledge/templates/adr.md",
       "title": "ADR template",
       "scope": "domain-reference",
@@ -3925,7 +3935,7 @@
     },
     {
       "path": "docs/reference/billing-pages.md",
-      "title": "Billing pages and navigation",
+      "title": "Billing pages and payment paths",
       "scope": "current-guide",
       "kind": "reference",
       "domains": [

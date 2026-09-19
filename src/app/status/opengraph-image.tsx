@@ -2,7 +2,7 @@ import { ImageResponse } from 'next/og';
 
 export const runtime = 'edge';
 
-export const alt = 'GALXAI Live Router Status & Operational Health';
+export const alt = 'GALX service status';
 export const size = {
   width: 1200,
   height: 630,
@@ -60,7 +60,7 @@ export default async function Image() {
               </svg>
             </div>
             <div style={{ fontSize: '28px', fontWeight: 900 }}>
-              GALX<span style={{ color: '#34d399' }}>AI</span> Status
+            GALX<span style={{ color: '#34d399' }}> Status</span>
             </div>
           </div>
 
@@ -93,10 +93,10 @@ export default async function Image() {
         {/* Title */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '1000px' }}>
           <div style={{ fontSize: '50px', fontWeight: 900, lineHeight: 1.1, letterSpacing: '-1px' }}>
-            Real-Time Gateway Uptime &amp; Router Metrics
+            GALX service status
           </div>
           <div style={{ fontSize: '22px', color: '#cbd5e1', lineHeight: 1.4 }}>
-            Sub-millisecond routing overhead, continuous circuit breaker health checks, and active edge failover.
+            Check current availability for GALX services.
           </div>
         </div>
 
@@ -113,9 +113,9 @@ export default async function Image() {
             }}
           >
             <span style={{ fontSize: '12px', color: '#6ee7b7', textTransform: 'uppercase', fontWeight: 700 }}>
-              Gateway Uptime
+              Images
             </span>
-            <span style={{ fontSize: '22px', color: '#ffffff', fontWeight: 900 }}>Operational</span>
+            <span style={{ fontSize: '22px', color: '#ffffff', fontWeight: 900 }}>Live status</span>
           </div>
 
           <div
@@ -129,9 +129,9 @@ export default async function Image() {
             }}
           >
             <span style={{ fontSize: '12px', color: '#6ee7b7', textTransform: 'uppercase', fontWeight: 700 }}>
-              Routing Overhead
+              Developer
             </span>
-            <span style={{ fontSize: '22px', color: '#ffffff', fontWeight: 900 }}>&lt; 0.8ms</span>
+            <span style={{ fontSize: '22px', color: '#ffffff', fontWeight: 900 }}>Live status</span>
           </div>
 
           <div
@@ -145,9 +145,9 @@ export default async function Image() {
             }}
           >
             <span style={{ fontSize: '12px', color: '#6ee7b7', textTransform: 'uppercase', fontWeight: 700 }}>
-              Failover Latency
+              Community
             </span>
-            <span style={{ fontSize: '22px', color: '#ffffff', fontWeight: 900 }}>&lt; 15ms</span>
+            <span style={{ fontSize: '22px', color: '#ffffff', fontWeight: 900 }}>Live status</span>
           </div>
         </div>
       </div>

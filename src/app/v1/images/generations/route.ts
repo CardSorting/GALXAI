@@ -14,6 +14,7 @@ import type { ImageGenerationRequest } from '@/core/contracts/GalxContracts';
 import { normalizeImageOutput, type ImageResponseFormat } from '@/lib/security/normalize-image-output';
 import { imageError, imageHeaders } from '@/lib/security/public-image-http';
 import { logImageFailure } from '@/lib/security/private-image-diagnostics';
+import { enforceDeveloperApiKeyAccess } from '@/lib/security/developer-access';
 import type { ImageFormat } from '@/lib/security/image-artifact';
 
 export const runtime = 'nodejs';
@@ -41,6 +42,8 @@ export async function POST(req: NextRequest) {
     const auth = await GalxAuthEngine.getInstance().resolveAuthIdentity(req);
     if (auth.error === 'AUTH_UNAVAILABLE') return imageError('temporarily_unavailable', requestId, 3);
     if (!auth.authenticated || !auth.userId) return imageError('unauthorized', requestId);
+    const developerDenied = await enforceDeveloperApiKeyAccess(req, auth.authType, true);
+    if (developerDenied) return developerDenied;
     let raw: Record<string, unknown>;
     try {
       const value = await req.json();
@@ -93,7 +96,7 @@ export async function POST(req: NextRequest) {
     }
     // Only explicitly supported request fields reach dispatch. No user-selected shards or internal headers.
     const result = await galxRouter.routeImageGeneration({ request: body, userId: auth.userId,
-      requestId, isPriorityUser: entitlement.isPriorityUser, signal: req.signal });
+      requestId, isPriorityUser: entitlement.isPriorityUser, signal: req.signal, usageBillingBasis: 'message' });
     return await normalizeImageOutput(result, { requestId, userId: auth.userId,
       responseFormat: format as ImageResponseFormat, outputFormat: outputFormat as ImageFormat | undefined });
   } catch (error) {
