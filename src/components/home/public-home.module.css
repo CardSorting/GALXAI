@@ -60,6 +60,33 @@
 .betaNote { display: flex; align-items: center; gap: 10px; margin-top: 22px; font-size: 13px; line-height: 1.6; color: #d4d4d8; }
 .betaNote > span { width: 6px; height: 6px; flex: 0 0 6px; border-radius: 50%; background: var(--home-accent); }
 
+/* The homepage earns the click before asking for a prompt. The studio owns the
+   detailed controls; this surface uses a familiar editorial/gallery entry. */
+.heroCopy h1 { max-width: 11ch; font-size: clamp(3rem, 6vw, 3.75rem); font-weight: 600; line-height: .99; letter-spacing: -.045em; }
+.heroCopy .lede { max-width: 39ch; margin-top: 26px; font-size: 18px; line-height: 1.55; color: #d4d4d8; }
+.heroCopy .heroNote { max-width: 42ch; margin-top: 18px; color: var(--home-muted); font-size: 13px; }
+.heroCopy .actions { margin-top: 34px; }
+.heroGallery { min-width: 0; overflow: hidden; border: 1px solid var(--home-line); border-radius: 12px; background: #0d101c; box-shadow: 0 20px 48px rgba(0, 0, 0, .4); }
+.galleryChrome, .galleryFooter { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; padding: 14px 16px; color: var(--home-muted); font-size: 11px; letter-spacing: .02em; }
+.galleryChrome { border-bottom: 1px solid var(--home-line); }
+.galleryChrome span:first-child { display: inline-flex; align-items: center; gap: 7px; color: var(--home-fg); font-weight: 600; }
+.galleryChrome svg { color: var(--home-accent); }
+.galleryGrid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(104px, .72fr); grid-template-rows: repeat(2, minmax(120px, 1fr)); gap: 8px; padding: 8px; aspect-ratio: 1 / .96; background: #07080d; }
+.galleryGrid a { position: relative; overflow: hidden; display: block; min-height: 0; }
+.galleryGrid a::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 40%, rgba(7, 8, 13, .78)); opacity: 0; transition: opacity .25s var(--home-ease); }
+.galleryGrid a:hover::after, .galleryGrid a:focus-visible::after { opacity: 1; }
+.galleryGrid img { object-fit: cover; transition: transform .5s var(--home-ease); }
+.galleryGrid a:hover img, .galleryGrid a:focus-visible img { transform: scale(1.035); }
+.galleryFeature { grid-row: 1 / -1; }
+.galleryFeature::after { opacity: 1; }
+.galleryTile:first-of-type img { object-position: 52% center; }
+.galleryCaption { position: absolute; z-index: 1; right: 18px; bottom: 18px; left: 18px; display: grid; gap: 7px; color: var(--home-fg); opacity: 1; transform: none; transition: opacity .25s var(--home-ease), transform .25s var(--home-ease); }
+.galleryFeature:hover .galleryCaption, .galleryFeature:focus-visible .galleryCaption { opacity: 1; transform: none; }
+.galleryCaption strong { font-size: 16px; font-weight: 500; letter-spacing: -.02em; }
+.galleryCaption span, .galleryFooter span:last-child { display: inline-flex; align-items: center; gap: 5px; color: #d4d4d8; font-size: 11px; }
+.galleryFooter { border-top: 1px solid var(--home-line); }
+.galleryFooter span:last-child { color: var(--home-accent); }
+
 .example { min-width: 0; margin: 0; }
 .exampleLabel { display: flex; justify-content: space-between; gap: 16px; margin-bottom: 14px; font-size: 12px; line-height: 1.5; }
 .exampleLabel > span:last-child { color: #d4d4d8; }

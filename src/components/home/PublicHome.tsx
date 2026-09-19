@@ -1,15 +1,14 @@
 'use client';
 
-import React, { useRef, useState } from 'react';
+import React from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import {
   ArrowRight,
   ArrowUpRight,
   Check,
   Compass,
   Cpu,
-  Dices,
   Layers,
   Plus,
   Share2,
@@ -27,181 +26,42 @@ import { HomeMotion } from './HomeMotion';
 import { GalaxyScene, GalaxyStory } from './GalaxyScene';
 import styles from './public-home.module.css';
 
-const HERO_RATIOS = ['1:1', '16:9', '9:16', '3:2', '4:3'] as const;
-
-const PROMPT_PRESETS = [
-  { label: 'Quiet landscape', ratio: '16:9', prompt: 'A quiet alpine lake at first light, cool blues, warm window-like highlights' },
-  { label: 'Paper collage', ratio: '1:1', prompt: 'A paper-cut garden full of tiny doors, layered texture, soft afternoon light' },
-  { label: 'Editorial portrait', ratio: '4:3', prompt: 'An editorial portrait with sculptural shadows, deep color, and a calm expression' },
-  { label: 'Night market', ratio: '3:2', prompt: 'A night market in the rain, hand-painted signs, reflections, and warm lanterns' },
-] as const;
-
 export function PublicHome() {
-  const router = useRouter();
-  const [heroPrompt, setHeroPrompt] = useState('');
-  const [heroRatio, setHeroRatio] = useState<string>('1:1');
-  const [isEnhanced, setIsEnhanced] = useState(false);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  const handleHeroSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const params = new URLSearchParams();
-    if (heroPrompt.trim()) params.set('prompt', heroPrompt.trim());
-    params.set('aspect_ratio', heroRatio);
-    router.push('/images?' + params.toString());
-  };
-
-  const handleApplyPreset = (prompt: string, ratio: string) => {
-    setHeroPrompt(prompt);
-    setHeroRatio(ratio);
-    setIsEnhanced(false);
-    requestAnimationFrame(() => textareaRef.current?.focus());
-  };
-
-  const handleMagicEnhance = () => {
-    if (!heroPrompt.trim()) return;
-    if (!heroPrompt.toLowerCase().includes('detailed')) {
-      setHeroPrompt(heroPrompt.trim() + ', detailed texture, considered lighting');
-    }
-    setIsEnhanced(true);
-  };
-
   return (
     <HomeMotion
       hero={
         <section className={styles.hero} aria-labelledby="images-title" data-home-hero>
           <GalaxyScene />
           <div className={styles.heroCopy}>
-            <div className={styles.heroEyebrow}>
-              <Sparkles size={13} aria-hidden="true" />
-              <span>GALX Images</span>
-            </div>
-            <h1 id="images-title">Make something worth sharing.</h1>
-            <p className={styles.lede}>Turn a prompt into an image. Explore what others create.</p>
-            <p className={styles.heroNote}>Powered by GALX Nova.</p>
-
-            <div className={styles.heroPromptWrap}>
-              <form onSubmit={handleHeroSubmit} className={styles.promptBar}>
-                <div className={styles.promptInputRow}>
-                  <Wand2 size={20} aria-hidden="true" />
-                  <textarea
-                    ref={textareaRef}
-                    className={styles.promptInput}
-                    placeholder="Describe the image you want to create."
-                    value={heroPrompt}
-                    onChange={(event) => {
-                      setHeroPrompt(event.target.value);
-                      setIsEnhanced(false);
-                    }}
-                    rows={2}
-                    aria-label="Describe the image you want to create"
-                    onKeyDown={(event) => {
-                      if (event.key === 'Enter' && !event.shiftKey) {
-                        event.preventDefault();
-                        handleHeroSubmit(event as unknown as React.FormEvent<HTMLFormElement>);
-                      }
-                    }}
-                  />
-                  {heroPrompt && (
-                    <button
-                      type="button"
-                      className={styles.promptClearBtn}
-                      onClick={() => {
-                        setHeroPrompt('');
-                        setIsEnhanced(false);
-                        textareaRef.current?.focus();
-                      }}
-                      aria-label="Clear prompt"
-                    >
-                      ×
-                    </button>
-                  )}
-                </div>
-                <div className={styles.promptControlsRow}>
-                  <div className={styles.promptRatios} aria-label="Select aspect ratio">
-                    {HERO_RATIOS.map((ratio) => (
-                      <button
-                        key={ratio}
-                        type="button"
-                        className={styles.promptRatioBtn + (heroRatio === ratio ? ' ' + styles.active : '')}
-                        onClick={() => setHeroRatio(ratio)}
-                        aria-pressed={heroRatio === ratio}
-                      >
-                        <span className={styles.ratioIcon + ' ' + styles.ratioIconSquare} aria-hidden="true" />
-                        <span>{ratio}</span>
-                      </button>
-                    ))}
-                  </div>
-                  <div className={styles.promptRightActions}>
-                    <button
-                      type="button"
-                      className={styles.promptEnhanceBtn + (isEnhanced ? ' ' + styles.enhanced : '')}
-                      onClick={handleMagicEnhance}
-                    >
-                      <Sparkles size={13} aria-hidden="true" />
-                      <span>{isEnhanced ? 'Enhanced' : 'Enhance'}</span>
-                    </button>
-                    <button type="submit" className={styles.promptSubmitBtn}>
-                      <Wand2 size={14} aria-hidden="true" />
-                      <span>Create an image</span>
-                    </button>
-                  </div>
-                </div>
-                <div className={styles.promptFooterMeta}>
-                  <span><kbd>Enter</kbd> to open the Image Studio</span>
-                  <span>{heroPrompt.length} chars</span>
-                </div>
-              </form>
-              <div className={styles.promptPresetsRow} aria-label="Starter prompts">
-                <button
-                  type="button"
-                  className={styles.surpriseBtn}
-                  onClick={() => {
-                    const preset = PROMPT_PRESETS[Math.floor(Math.random() * PROMPT_PRESETS.length)];
-                    handleApplyPreset(preset.prompt, preset.ratio);
-                  }}
-                >
-                  <Dices size={13} aria-hidden="true" />
-                  <span>Surprise me</span>
-                </button>
-                {PROMPT_PRESETS.map((preset) => (
-                  <button key={preset.label} type="button" className={styles.presetChip} onClick={() => handleApplyPreset(preset.prompt, preset.ratio)}>
-                    {preset.label}
-                  </button>
-                ))}
-              </div>
-            </div>
+            <h1 id="images-title">Turn a thought into something worth sharing.</h1>
+            <p className={styles.lede}>Describe an idea, make an image, and discover what the community creates next.</p>
 
             <div className={styles.actions}>
               <Link className={styles.primary} href="/images">
-                Create an image <ArrowUpRight size={19} aria-hidden="true" />
+                Start creating <ArrowUpRight size={19} aria-hidden="true" />
               </Link>
               <Link className={styles.secondary} href="/explore">
-                Explore creations <ArrowUpRight size={19} aria-hidden="true" />
+                Explore creations <ArrowRight size={19} aria-hidden="true" />
               </Link>
             </div>
-            <p className={styles.betaNote}><span aria-hidden="true" />Creations are public by default.</p>
+            <p className={styles.heroNote}>Open the Image Studio when you’re ready. No setup or creative brief required.</p>
           </div>
 
-          <div className={styles.example}>
-            <div className={styles.exampleSheet}>
-              <div className={styles.creationPreview}>
-                <div className={styles.creationPreviewOrb} aria-hidden="true"><Sparkles size={30} /></div>
-                <div className={styles.creationPreviewLabel}>
-                  <span>GALX Images</span>
-                  <span>Powered by GALX Nova.</span>
-                </div>
-                <p>Bring an idea, not an infrastructure plan.</p>
-                <div className={styles.creationPreviewPrompt}>
-                  <Wand2 size={16} aria-hidden="true" />
-                  <span>Describe the image you want to create.</span>
-                </div>
-              </div>
-              <div className={styles.creationPreviewFooter}>
-                <span>Five supported aspect ratios</span>
-                <span>Public by default</span>
-              </div>
+          <div className={styles.heroGallery} aria-label="A selection of public GALX creations">
+            <div className={styles.galleryChrome}><span><Sparkles size={13} aria-hidden="true" /> GALX Images</span><span>Public creations</span></div>
+            <div className={styles.galleryGrid}>
+              <Link href="/explore" className={styles.galleryFeature} aria-label="Explore the cinematic sky creation">
+                <Image src="/images/showcase/cinematic_sky_16_9.jpg" alt="A cinematic sky over a quiet landscape" fill priority unoptimized sizes="(max-width: 760px) 100vw, 48vw" />
+                <span className={styles.galleryCaption}><strong>Quiet light, wide open.</strong><span>Explore creation <ArrowUpRight size={14} aria-hidden="true" /></span></span>
+              </Link>
+              <Link href="/explore" className={styles.galleryTile} aria-label="Explore the cafe cat creation">
+                <Image src="/images/showcase/cafe_cat.jpg" alt="A cat in a warm cafe" fill unoptimized sizes="(max-width: 760px) 45vw, 20vw" />
+              </Link>
+              <Link href="/explore" className={styles.galleryTile} aria-label="Explore the cyber akira creation">
+                <Image src="/images/showcase/cyber_akira.jpg" alt="A neon cyberpunk portrait" fill unoptimized sizes="(max-width: 760px) 45vw, 20vw" />
+              </Link>
             </div>
+            <div className={styles.galleryFooter}><span>Bring an idea</span><span>Powered by GALX Nova</span><span>Explore more <ArrowUpRight size={13} aria-hidden="true" /></span></div>
           </div>
         </section>
       }
