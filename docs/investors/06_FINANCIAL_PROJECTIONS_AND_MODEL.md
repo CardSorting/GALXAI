@@ -1,83 +1,85 @@
-# 📊 GALX Financial Architecture & Capital Milestones
+# GALX financial architecture and capital milestones
 
 <!-- docs-scope: commercial-draft -->
-> **Reading scope:** Commercial and strategic investor materials. Contains thesis formulations, product positioning, unit economics frameworks, and venture scale arguments. Technical and operational capabilities describe public interfaces; proprietary routing mechanisms, capacity acquisition, and internal execution infrastructure remain private under [AGENTS.md](../AGENTS.md).
 
-## Capital Formation, Phase Milestones & Operating Discipline
+## Operating principle
 
-A grounded financial framework detailing how capital is deployed across development phases, what each round of funding enables GALX to prove, and how the business scales towards cash flow durability.
+The financial model should turn the thesis into a sequence of evidence, not manufacture certainty. No revenue, margin, CAC, LTV, market forecast, or growth rate should be presented as actual until it is measured, dated, and tied to a defined cohort.
 
----
+The model should answer two questions at once:
 
-## 1. Operating Philosophy: Intellectual Honesty Over Fantasy Models
+1. Does the experience expand a person’s creative capability?
+2. Can GALX deliver that value repeatedly without founder intervention and unsustainable cost?
 
-Early-stage venture pitches frequently present elaborate 5-year spreadsheets projecting hundreds of millions in revenue with artificial decimal precision.
+## Milestone phases
 
-GALX takes a disciplined, intellectually honest approach:
-- We do not manufacture fictitious enterprise ARR forecasts for a product currently in active developer onboarding.
-- We structure our financial roadmap around **clear operational phases**, where each phase validates critical thesis assumptions before capital is expanded.
-- Capital is deployed to expand capacity, deepen operational resilience, and accelerate builder onboarding—not to fund vanity burn.
+### Phase 1 — Make the first result meaningful
 
----
+Improve the image-first creative loop. Measure activation, usable direction, revision, completion, recoverability, and whether the creator can describe a change in what feels possible.
 
-## 2. Phase-Based Capital & Operating Roadmap
+**Exit evidence:** creators complete a meaningful project under a defined support condition, and the experience records direction rather than only output volume.
 
-```mermaid
-graph LR
-    P1[Phase 1: Proof & Core Functionality\nCurrent Phase] --> P2[Phase 2: Builder Acceleration & Scale\nNext 12-18 Months]
-    P2 --> P3[Phase 3: Compounding Execution Platform\nExpansion Phase]
-```
+### Phase 2 — Prove the product earns a return
 
-### Phase 1: Platform Foundation & Core Operational Verification (Current)
-* **Core Objective**: Verify that the two-model managed platform delivers dependable, abundant execution to early builders with zero infrastructure friction.
-* **Key Activities**:
-  - Live operation of developer endpoints (including **GALX Nova**).
-  - Validating sufficient intelligence delivery on representative application workloads.
-  - Observing initial builder usage patterns, request latencies, and platform stability.
-* **Capital Focus**: Core engineering, local serving infrastructure, operational monitoring, and initial developer access programs.
+Run bounded cohorts and self-serve experiments. Measure second-project behavior, project continuity, willingness to pay, paid retention, cost to serve, and founder intervention.
 
-### Phase 2: Builder Onboarding & Compounding Usage Validation (Next 12–18 Months)
-* **Core Objective**: Prove the expansion engine—demonstrating that applications built on GALX generate compounding, recurring execution volume as they acquire end users.
-* **What Capital Enables**:
-  - **Serving Capacity Expansion**: Scaling capacity to support high-concurrency developer applications without degradation.
-  - **Operational Instrumentation**: Deepening automated capacity balancing, resilience tooling, and serving optimizations.
-  - **Developer Onboarding & Community**: Direct developer relations, hackathons, and builder grants to seed the next 1,000 applications.
-* **Key Metrics to Prove**:
-  - 30-day and 90-day builder retention.
-  - Ratio of development traffic vs. production end-user traffic.
-  - Sustained platform gross margin across multi-tenant workloads.
+**Exit evidence:** a meaningful share of suitable creators return without continuous prompting, with a paid continuation test that is interpretable after subsidies are removed.
 
-### Phase 3: The Persistent Execution Layer (Expansion Horizon)
-* **Core Objective**: Establish GALX as the default execution layer beneath an expanding ecosystem of software applications.
-* **Key Activities**:
-  - Supporting high-volume production scale for breakaway applications built on GALX.
-  - Deepening proprietary operational infrastructure to further expand gross margins.
-  - Transitioning from early venture funding to cash flow neutrality powered by recurring execution volume.
+### Phase 3 — Prove a business loop
 
----
+Test acquisition sources separately. Establish contribution margin, support capacity, payment behavior, and a repeatable path from activation to paid retention.
 
-## 3. Resource Allocation & Capital Efficiency
+**Exit evidence:** at least one acquisition path produces paid retained creators at a cost and support burden the company can sustain.
 
-```mermaid
-pie title Phase 2 Capital Allocation
-    "Serving Capacity & Infrastructure" : 50
-    "Systems & Runtime Engineering" : 30
-    "Builder Onboarding & Developer Relations" : 15
-    "Operations & Administration" : 5
-```
+### Phase 4 — Expand by observed demand
 
-1. **Infrastructure & Serving Capacity (50%)**: Securing dependable capacity and server resources to guarantee abundant, low-latency execution for scaling applications.
-2. **Systems Engineering (30%)**: Advancing proprietary operational tooling, resilience mechanisms, and runtime management that preserve high platform gross margins.
-3. **Builder Onboarding & DevRel (15%)**: Providing hands-on onboarding support, documentation, and tooling for independent builders and creative technologists.
-4. **Operations & Governance (5%)**: Maintaining lean administrative, legal, and operational compliance.
+Add persistent project capabilities, collaboration, or adjacent media only when existing users demonstrate repeated demand and the economics remain healthy.
 
----
+**Exit evidence:** expansion increases retained value rather than diluting the initial creative loop.
 
-## 4. The Long-Term Economic Outcome
+## Scenario model
 
-**What does the mature business look like?**
+Present base, upside, and downside cases using explicit assumptions for:
 
-As thousands of applications run their production workloads through GALX:
-- **Revenue compounds with software usage**: Rather than renegotiating software contracts annually, revenue expands automatically with the growth of every application on the platform.
-- **High gross margin profile**: Operational knowledge and capacity optimization enable software-like margins on top of managed execution.
-- **Durable infrastructure moat**: Switching costs remain exceptionally high, creating a defensible, high-retention infrastructure business.
+| Driver | Questions the model must expose |
+| --- | --- |
+| Paid creators | How many are activated, retained, and newly acquired by source? |
+| Realized price | What do creators actually pay after trials, discounts, refunds, and pauses? |
+| Retention | How long do creators continue a project or begin another? |
+| Cost to serve | What are the direct creative, storage, delivery, support, payment, and moderation costs? |
+| CAC | Which channels produce paid creators, at what fully loaded cost? |
+| Founder intervention | How does human support change with creator count? |
+| Expansion revenue | Which adjacent behaviors are actually requested and paid for? |
+| Hiring | Which roles reduce founder dependency and when? |
+
+Show sensitivity for retention, service cost, support burden, and acquisition cost. Use ranges where evidence is thin. Do not use a precise LTV/CAC multiple to hide uncertain retention.
+
+## Capital allocation
+
+Capital should prioritize:
+
+- product quality in the initial creative loop;
+- bounded activation cohorts and measurement;
+- reliability, safeguards, privacy, support, and cost controls;
+- distribution experiments with explicit cohort accounting; and
+- hiring that reduces founder dependency.
+
+Capital should not be allocated on the assumption that public inference volume, every creative medium, or a broad developer platform must be served simultaneously.
+
+## Raise discipline
+
+A fundraising amount should follow the milestone plan and budget required to reach the next evidence boundary. The raise should specify:
+
+- the product behavior to improve;
+- the cohorts or channels to test;
+- the success and stop criteria;
+- the expected founder-intervention reduction; and
+- the evidence that would justify the next expansion.
+
+It should not be reverse-engineered from the scale of HEAV3NS MANDATE or a broad category label.
+
+## Long-term outcome
+
+The model becomes venture-scale only if useful creative behavior repeats across a substantial population, paid retention is durable, delivery becomes more efficient with learning, and customer value grows faster than founder intervention.
+
+The financial model is therefore a decision instrument. It should make it easy to narrow, reprice, redesign, or stop when the evidence does not support expansion.

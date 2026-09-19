@@ -1,124 +1,78 @@
-# 🛡️ GALX Competitive Landscape & Strategic Defensibility
+# GALX competition and defensibility
 
 <!-- docs-scope: commercial-draft -->
-> **Reading scope:** Commercial and strategic investor materials. Contains thesis formulations, product positioning, unit economics frameworks, and venture scale arguments. Technical and operational capabilities describe public interfaces; proprietary routing mechanisms, capacity acquisition, and internal execution infrastructure remain private under [AGENTS.md](../AGENTS.md).
 
-## Absorbing Complexity, Selling Simplicity
+## The competitive reality
 
-A visual teardown of why model catalogs, raw hyperscaler primitives, and self-hosted infrastructure fail to solve the developer's core problem—and how GALX creates a defensible intermediary moat.
+AI image creation, visual workspaces, agent tools, and creative collaboration already exist. OpenAI and Adobe are credible alternatives, among others. GALX cannot claim that creative users were ignored or that a general belief in human agency is a moat. [OpenAI](https://openai.com/index/introducing-chatgpt-images-2-5/) · [Adobe Firefly Boards](https://www.adobe.com/products/firefly/features/boards.html)
 
----
+The precise competitive question is:
 
-## 1. The Strategic Landscape: 2x2 Positioning Matrix
+> **For which creator, doing which recurring activity, is GALX meaningfully preferable?**
 
-The developer infrastructure market is divided along two critical axes: **Operational Predictability** vs. **Cognitive Overhead**:
+The answer must appear in behavior: people choose GALX when comparable generation capability is available elsewhere.
 
-```
-                    ▲ HIGH OPERATIONAL RELIABILITY & ECONOMIC PREDICTABILITY
-                    │
-      Cloud         │        ★ GALX (LEADER QUADRANT)
-   Hyperscalers     │        - Radical 2-Model Simplicity
-  (AWS Bedrock,     │        - Autonomous Zero-Downtime Fallback
-   GCP Vertex)      │        - Sub-100ms TTFT Latency
-  (Heavy IAM Drag)  │        - Sustainable 50%+ Platform Gross Margin
-                    │
-  ──────────────────┼────────────────────────────────────────▶ LOW COGNITIVE OVERHEAD
-    Self-Hosted     │       Model Aggregator Catalogs
-     GPU Pods       │       (OpenRouter, LiteLLM)
-  (Custom Proxies)  │       - 150+ Raw Models (Choice Paralysis)
-  (DevOps Sinkhole) │       - Exposed 429 Provider Rate Limits
-                    │       - Race-to-the-Bottom Commodity Reselling
-                    ▼ FRAGILE & VOLATILE RUNTIME
-```
+## Comparison frame
 
-### Time-to-Production Velocity Comparison
+| Alternative | Existing strength | What GALX must earn |
+| --- | --- | --- |
+| General image products | Broad capability, distribution, and fast first results. | A focused creative process that improves direction, revision, and project continuity. |
+| Professional creative suites | Mature tools, established workflows, and professional ecosystems. | Lower friction for a specific emerging workflow without pretending to replace the whole suite. |
+| Agent and coding tools | Powerful delegation and task execution. | A creative experience in which the person can inspect, redirect, preserve, and continue. |
+| Community platforms | Discovery, audience, and social proof. | Creation that remains useful before a large community exists. |
+| Build-it-yourself workflows | Flexibility, experimentation, and control. | A coherent experience without assembly and maintenance overhead. |
+| Existing personal workflows | Familiarity, ownership, and sunk effort. | Enough recurring value to justify changing behavior. |
 
-```
-  Enterprise Hyperscalers (AWS / GCP)   ████████████████████████████████████ 4–6 Weeks (IAM, VPCs, Quotas)
-  Model Catalogs (OpenRouter / LiteLLM)  ████████████████ 1–2 Weeks (Drift testing, custom fallbacks)
-  GALX (The Builder Wedge)               █ < 3 Minutes (npm i galx, 1 key, instant stream) ⚡ 99% FASTER
-```
+## The product preference hypothesis
 
----
+GALX could become preferable if it helps a creator:
 
-## 2. The Structural Shift: The Complexity Divergence Curve
+1. begin with an idea that currently feels impractical;
+2. see and influence the result without losing the thread of the work;
+3. preserve what matters across revisions and sessions;
+4. recover when the system diverges; and
+5. return because the next project is easier to pursue.
 
-Why does an intermediary layer become more defensible over time? Because model velocity increases upstream chaos while applications demand rock-solid stability:
+These are product behaviors to build and measure, not claims of exclusivity.
 
-```
-  Operational Complexity
-      ▲
-  4x  │                                  ╭─────── Model Fragmentation (+380%)
-      │                                ╭─╯        (429 Rate Limits, SDK Churn, Price Drift)
-      │          THE ABSTRACTION     ╭─╯
-  1x  │            OPPORTUNITY     ╭─╯
-      │                          ╭─╯
-  0x  ├──────────────────────────┴──────────────── GALX Developer Overhead (Flat Zero)
-      └─────────────────────────────────────────▶
-       Early Models        Multi-Provider Sprawl      Ubiquitous Software Substrate
+## Possible sources of defensibility
+
+HCI expertise is founder fit. It becomes defensible only if it accumulates into a preferred product loop:
+
+```text
+permissioned observation
+        ↓
+learn where intention is lost
+        ↓
+improve intervention and continuity
+        ↓
+creator completes and returns
+        ↓
+more evidence for better product behavior
 ```
 
----
+Potential assets include:
 
-## 3. The GALX Asymmetry: Absorbing Complexity
+- a more accurate understanding of where creators lose direction;
+- revision behavior that preserves what users value;
+- project continuity across sessions;
+- community discovery that helps the right person begin;
+- evaluation cases built around meaningful creative completion; and
+- a recognizable interaction experience that users prefer.
 
-$$\mathbf{GALX\ Absorbs\ Complexity\ and\ Sells\ Simplicity.}$$
+Learning from user activity must remain permissioned and privacy-respecting. The thesis is not a claim to unrestricted access to creative work.
 
-| Dimension | Raw Providers & Catalogs | GALX Abstraction Layer |
-| :--- | :--- | :--- |
-| **Model Choice** | Exposes 150+ raw models | Concentrated on two managed tiers (`galx-nova` + `galx-max`) |
-| **Developer Responsibility** | Developer manages routing, retries & failover | GALX manages execution reliability and uptime |
-| **Setup Overhead** | Multi-step cloud accounts, IAM & configuration | Immediate standard API key; call the endpoint and build |
-| **Economic Alignment** | Incentivized to resell expensive frontier compute | Incentivized to deliver sufficient intelligence efficiently |
+## Tests that can earn the claim
 
----
+- substitution interviews: what would a creator lose by leaving GALX?
+- blind workflow comparisons against relevant existing tools;
+- second-project tests after the first successful result;
+- recoverability tests after a deliberately unhelpful direction;
+- paid retention cohorts by source; and
+- willingness-to-pay interviews followed by an actual paid continuation.
 
-## 4. The 3-Tier Layered Systems Architecture Stack
+Report negative cases. If users cannot name a recurring advantage, the positioning is not yet a moat.
 
-```
-┌───────────────────────────────────────────────────────────────────────────────┐
-│ TIER 1: PUBLIC DEVELOPER INTERFACE (Radical Simplicity)                       │
-│ 1 Standard API Endpoint · 2 Curated Models · Instant Token Stream · Zero Ops  │
-└──────────────────────────────────────┬────────────────────────────────────────┘
-                                       ▼
-┌───────────────────────────────────────────────────────────────────────────────┐
-│ TIER 2: GALX ABSORPTION SHIELD & TELEMETRY ENGINE (Proprietary Moat)          │
-│ Dynamic Virtual Shard Balancing · 429 Shielding · Buffer Normalization        │
-│ Automated Failover · Real-Time Capacity Arbitrage · Forensic Telemetry        │
-└──────────────────────────────────────┬────────────────────────────────────────┘
-                                       ▼
-┌───────────────────────────────────────────────────────────────────────────────┐
-│ TIER 3: HETEROGENEOUS CAPACITY SUBSTRATE (Underlying Chaos)                   │
-│ Model Labs · Spot GPU Pools · Dedicated Shards · Upstream Quota Volatility    │
-└───────────────────────────────────────────────────────────────────────────────┘
-```
+## What not to claim
 
-The public developer experience stays dead simple; the proprietary operational systems knowledge required to sustain it compounds with every request.
-
----
-
-## 5. The Closed-Loop Operator's Telemetry Flywheel
-
-Why can't a passive catalog copy GALX? Because GALX operates a continuous operational feedback loop born from direct systems operation:
-
-```
-                    ┌──────────────────────────────┐
-                    │ 01: Live Traffic Ingestion   │
-                    │ Real apps executing requests │
-                    └──────────────┬───────────────┘
-                                   ▼
-  ┌──────────────────────────┐          ┌──────────────────────────┐
-  │ 04: Superior Builder     │   CORE   │ 02: Forensic Telemetry   │
-  │     Ergonomics & Margins │◀────────▶│     & Bottleneck Profiler│
-  └──────────────────────────┘          └──────────────────────────┘
-                                   ▲
-                    ┌──────────────┴───────────────┐
-                    │ 03: Infrastructure Hardening │
-                    │ Zero-downtime shielding      │
-                    └──────────────────────────────┘
-```
-
-1. **Live Traffic Ingestion**: Every application running on GALX surfaces real-world execution telemetry.
-2. **Forensic Telemetry**: Upstream bottlenecks, rate limit triggers, and latency anomalies are identified instantly.
-3. **Infrastructure Hardening**: Automated failover policies, buffer dampening, and cost arbitrage algorithms are updated in real time.
-4. **Superior Builder Ergonomics**: Applications enjoy higher uptime, sub-100ms TTFT, and stable pricing, attracting more developers to the platform.
+Do not claim exclusive model access, a permanent cost advantage, category ownership, network effects from a small cohort, or an HCI moat. Do not publish internal routing, topology, credential sources, upstream identities, or operational mechanics as competitive proof. A competitor’s ability to copy the surface is a real risk; the answer has to be repeated customer preference and accumulated product learning.

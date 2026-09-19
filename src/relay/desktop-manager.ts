@@ -374,17 +374,27 @@ export class DesktopManager {
   }
   async display(id: string, containerId: string) { return this.driver.display(id, containerId); }
   private hasInput(id: string) { return [...this.ioJobs.values()].some(job => job.desktopId === id); }
-  private input<T>(id: string, key: string, run: () => Promise<T>): Promise<T> {
+  private input<T>(id: string, key: string, run: (connection: { containerId: string }) => Promise<T>): Promise<T> {
     this.accepting(); this.record(id);
-    const slot = id + ':' + (key.startsWith('launch-') || key === 'match-credential' || key === 'cancel-signin' ? key : 'clipboard');
+    const slot = id + ':' + (key.startsWith('launch-') || key === 'match-credential' || key === 'cancel-signin' || key === 'read-credentials' ? key : 'clipboard');
     const existing = this.ioJobs.get(slot);
     if (existing) {
       if (existing.key === key) return existing.promise as Promise<T>;
       throw new RequestError(409, 'desktop_busy', 'Another input operation is running in this desktop. Retry shortly.');
     }
     if (this.ioJobs.size >= 4 || this.operations.has(id)) throw new RequestError(429, 'desktop_busy', 'Desktop input is busy. Retry shortly.');
-    const promise = (async () => { await this.connection(id); this.accepting(); return run(); })().finally(() => this.ioJobs.delete(slot));
+    if (this.credentialJobs.has(id) && key !== 'cancel-signin') throw new RequestError(409, 'desktop_busy', 'A sign-in check is in progress. Retry shortly.');
+    const promise = (async () => { const connection = await this.connection(id); this.accepting(); return run(connection); })().finally(() => this.ioJobs.delete(slot));
     this.ioJobs.set(slot, { desktopId: id, key, promise }); return promise;
+  }
+  credentials(id: string): Promise<{ containerId: string; files: DesktopCredentialFile[] }> {
+    if (!this.driver.credentials) return Promise.reject(new RequestError(503, 'credential_reader_unavailable', 'Saved sign-in access is unavailable. Retry shortly.'));
+    return this.input(id, 'read-credentials', async before => {
+      const files = await this.driver.credentials!(id);
+      const after = await this.connection(id);
+      if (before.containerId !== after.containerId) throw new RequestError(409, 'desktop_changed', 'The desktop changed. Review its sign-in again.');
+      return { containerId: before.containerId, files };
+    });
   }
   clipboard(id: string, text?: string) {
     if (text !== undefined && (typeof text !== 'string' || text.length > 65536)) throw new RequestError(400, 'invalid_clipboard', 'Clipboard text is limited to 65,536 characters.');
@@ -398,7 +408,7 @@ export class DesktopManager {
     if (!['browser', 'device'].includes(method)) throw new RequestError(400, 'invalid_signin', 'Choose a supported sign-in method.');
     if (shardId !== (r.relayId ?? null)) throw new RequestError(409, 'desktop_link_changed', 'Refresh and review the linked shard.');
     if (!this.refreshCredential || !this.driver.credentials) throw new RequestError(503, 'credential_sync_unavailable', 'Terminal sign-in sync is unavailable on this controller.');
-    if (this.corrupt || this.inventoryError || this.operations.has(id) || this.credentialJobs.has(id) || this.active + this.credentialJobs.size >= this.maxOperations) throw new RequestError(409, 'desktop_busy', 'Wait for the current desktop operation to finish.');
+    if (this.corrupt || this.inventoryError || this.operations.has(id) || this.credentialJobs.has(id) || this.hasInput(id) || this.active + this.credentialJobs.size >= this.maxOperations) throw new RequestError(409, 'desktop_busy', 'Wait for the current desktop operation to finish.');
     const event = this.beginActivity(id, 'opening_signin'); this.updateActivity(event, 'running');
     const job = (async () => {
       try {
@@ -485,7 +495,7 @@ export class DesktopManager {
       if (this.credentialJobKinds.get(id) === 'check') return existing;
       throw new RequestError(409, 'desktop_busy', 'Sign-in is opening. Wait for it to open, then check the saved login.');
     }
-    if (this.credentialClosing || this.corrupt || this.inventoryError || this.operations.has(id) || this.active + this.credentialJobs.size >= this.maxOperations) return Promise.reject(new RequestError(409, 'desktop_busy', 'An operation slot is not available yet. Try again shortly.'));
+    if (this.credentialClosing || this.corrupt || this.inventoryError || this.operations.has(id) || this.hasInput(id) || this.active + this.credentialJobs.size >= this.maxOperations) return Promise.reject(new RequestError(409, 'desktop_busy', 'An operation slot is not available yet. Try again shortly.'));
     const current = () => !this.credentialClosing && this.records.get(id) === r && this.containers.get(id)?.running === true;
     const job = (async () => {
       const previous = this.credentialStates.get(id); let event: DesktopActivity | undefined;

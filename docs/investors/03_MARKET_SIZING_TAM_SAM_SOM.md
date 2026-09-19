@@ -1,84 +1,100 @@
-# 📈 GALX Market Architecture & Scale Potential
+# GALX market architecture
 
 <!-- docs-scope: commercial-draft -->
-> **Reading scope:** Commercial and strategic investor materials. Contains thesis formulations, product positioning, unit economics frameworks, and venture scale arguments. Technical and operational capabilities describe public interfaces; proprietary routing mechanisms, capacity acquisition, and internal execution infrastructure remain private under [AGENTS.md](../AGENTS.md).
 
-## Scaling With the Software Creation Lifecycle
+## The market question
 
-A grounded structural analysis examining why GALX’s market scale is defined by the ongoing execution demand of applications built on AI, rather than cosmetic top-down inference estimates.
+“Creativity is enormous” is not a market model. GALX should build its market case from a reachable initial audience, demonstrated willingness to pay, retention, and credible expansion.
 
----
+The market claim is conditional:
 
-## 1. The Flaw in Traditional Inference Sizing
+> **If a focused creative experience helps people pursue recurring ideas, and if those people return and pay, the same value can be delivered to a much larger population.**
 
-Traditional venture pitch decks routinely open with a generic top-down TAM calculation:
-$$\text{"The global AI inference market will reach \$1 Trillion by 2030, so capturing 1\% is a \$10B business."}$$
+The first job is to measure the condition.
 
-This framing is fundamentally incomplete. It treats AI compute as a raw bulk commodity sold in undifferentiated bytes, obscuring three critical market dynamics:
-1. **Commoditization of Raw Model Endpoints**: Raw access to commoditized models experiences continuous downward price pressure as providers compete on per-token prices.
-2. **Value Migration to the Application Layer**: The true economic value is created and captured where software solves end-user problems.
-3. **The Intermediary Value Paradox**: An infrastructure provider only builds a durable, compounding business if it embeds itself directly into the ongoing execution lifecycle of the application.
+## Initial serviceable audience
 
-**GALX is not sized merely as an inference reseller.**  
-The scale of GALX is determined by its role as the **persistent execution layer beneath software built on AI.**
+The initial audience is independent creators with visual ideas they want to develop repeatedly: designers, artists, creative technologists, storytellers, hobbyists, and small creative teams.
 
----
+This is narrower than everyone who might generate an image once. The relevant customer has a recurring reason to create, a current workaround or unmet need, and enough value in the workflow to consider paying for continuation.
 
-## 2. The Structural Shift: Intelligence as Software Infrastructure
+The initial product is not:
 
-```mermaid
-graph TD
-    A[Proliferation of Foundation Models & Providers] --> B[Compounding Operational Complexity & Fragmentation]
-    B --> C[GALX Execution & Abstraction Layer]
-    C --> D[Builder Applications: SaaS, Creative Tools, Agent Loops]
-    D --> E[End Users Generating Continuous Execution Demand]
-    E -->|Recurring Execution Volume| C
+- a universal tool for every creative medium;
+- a general-purpose developer inference service;
+- a substitute for every professional creative suite; or
+- a claim on all advertising, entertainment, software, or media spending.
+
+## Bottom-up market model
+
+| Layer | Definition | Evidence required |
+| --- | --- | --- |
+| Reachable audience | People GALX can reach through bounded cohorts, referrals, communities, product discovery, and later paid channels. | Source-qualified signups, audience size, acquisition cost, and activation rate. |
+| Activated creators | New users who begin a visual idea and produce a result they consider worth keeping, revising, or sharing. | Activation definition, completion rate, time to first meaningful result, and creator report. |
+| Returning creators | Activated users who start another project without continuous founder prompting. | Second-project rate, return interval, project continuity, and retention cohorts. |
+| Paid creators | Returning users who pay for continuing value. | Paid conversion, realized price, paid retention, refunds, and contribution margin. |
+| Expansion creators | Paid users who adopt deeper projects or adjacent capabilities. | Repeated requests, paid adoption, frequency, and incremental margin. |
+
+The initial bottom-up model is:
+
+```text
+reachable audience
+× activation rate
+× second-project rate
+× paid conversion
+× annual contribution per creator
 ```
 
-We identify three distinct structural waves driving execution demand toward an abstraction layer:
+Every input should be dated, cohort-specific, and traceable to behavior. No TAM, SAM, or SOM number should be presented as fact until its inputs are measured.
 
-### Wave 1: The Transition from Experimentation to Application
-In the initial wave of generative AI, developers evaluated raw API keys, played with prompt sandboxes, and built standalone demo chatbots. Today, developers are embedding AI into persistent application loops: background processing, creative generation, agentic reasoning, code transformation, and structured data pipelines.
+## Why the opportunity could be large
 
-Every feature built this way requires **ongoing execution**. When an end user clicks a button, saves an asset, or triggers an automated task, the application executes a request.
+A singular person is a sufficient unit of demonstration. It is not a sufficient market. If the same experience is independently useful across a substantial population, GALX can grow through repeated project behavior:
 
-### Wave 2: Ecosystem Fragmentation
-As more foundation models, hardware architectures, open-weight alternatives, and hosting providers enter the market, developers face an overwhelming matrix of trade-offs:
-- Which provider offers sufficient reliability right now?
-- How do we handle provider-specific outages or rate limits?
-- Why pay for a frontier reasoning model when a streamlined model delivers 99% of the required utility?
+```text
+meaningful first result
+        ↓
+recurring project work
+        ↓
+retained paying creator
+        ↓
+preferred creative environment
+```
 
-Developers do not have the time or operational desire to build an internal infrastructure team just to balance these variables.
+The expansion thesis is depth before breadth: stronger visual creation, more persistent creative work, then adjacent capabilities retained users demonstrate they need. A universal interface to every agent and medium is not required for the first commercial proof.
 
-### Wave 3: The Compounding Flywheel
-When an independent builder launches an application on GALX:
-- In Month 1, they may run only 10,000 requests during development.
-- When their application acquires 500 active users, execution scales to 500,000 requests.
-- When the product scales to 50,000 users, execution scales to 50,000,000 requests.
+## Distribution assumptions
 
-GALX scales revenue directly with the success of the applications running on top of it.
+HEAV3NS MANDATE, private creative sessions, hackathons, and community discovery can lower the cost of beginning. They are activation mechanisms, not proof of durable demand.
 
----
+Distribution must be reported by source:
 
-## 3. Structural Scale Drivers
+| Source | What it can show | What it cannot show alone |
+| --- | --- | --- |
+| Founder-guided cohort | Whether a participant can activate with support. | Self-serve retention or scalable acquisition. |
+| Community referral | Whether a creator invites a relevant peer. | Willingness to pay or channel repeatability. |
+| Organic discovery | Whether the product communicates a clear reason to begin. | Long-term contribution margin. |
+| Paid acquisition | Whether a segment can be reached at a known cost. | Product value if retention is weak. |
 
-Rather than assigning arbitrary financial projections, we assess the addressable scale through four observable structural vectors:
+## What would invalidate the market case
 
-| Structural Vector | Market Reality | How GALX Participates |
-| :--- | :--- | :--- |
-| **Builder Explosion** | Millions of developers and non-traditional builders are creating software powered by AI coding tools and high-level frameworks. | Radical simplicity (two models, API access) removes the setup barrier, making GALX the easiest place to start. |
-| **Execution Density** | Modern AI applications execute multi-step requests, background tasks, and interactive generation rather than single one-off prompts. | Execution volume per application grows faster than raw user count. |
-| **Abstraction Stickiness** | Once an application is wired to a dependable API that handles reliability and economics, switching away to manage raw providers introduces high operational friction. | High developer retention and expanding net volume over time. |
-| **Sufficient Intelligence Wedge** | Over 80% of application execution tasks can be handled by well-managed, efficient models rather than expensive frontier behemoths. | GALX captures high gross margin by optimizing delivery while providing developers with abundant, cost-effective serving. |
+- People enjoy a first generation but do not develop a project.
+- Existing tools are good enough for the target recurring activity.
+- Community creates browsing and inspiration but not creation or paid return.
+- Cost to serve and support grow faster than recurring customer value.
+- The product broadens into multiple media before the visual wedge is strong.
+- Founder-led translation remains necessary for each creator.
 
----
+## Investor evidence package
 
-## 4. The Scale Hypothesis
+Report the market as a dated funnel, not a single headline number:
 
-**The Core Question**: What determines whether GALX becomes a multi-billion dollar platform?
+- qualified audience and acquisition source;
+- activation and meaningful-completion rate;
+- second-project rate and retained cohorts;
+- paid conversion and paid retention;
+- realized revenue and contribution margin per cohort;
+- founder time and support burden per creator; and
+- expansion behavior requested and paid for by existing users.
 
-1. **Breadth of Builders**: Can GALX become the default starting point for tens of thousands of independent developers and creative technologists?
-2. **Application Longevity**: Do applications built on GALX achieve product-market fit and generate recurring, long-term traffic?
-3. **Execution Monopoly**: Does the simplicity and reliability of GALX create enough stickiness that scaling applications stay on GALX rather than building custom in-house infrastructure?
-
-If those hypotheses hold, GALX becomes the **essential execution layer** for the next generation of software—participating in the compounding economic value of every application built on AI.
+The market becomes venture-relevant when those measures show independent, paid, repeatable value—not when a broad category label becomes fashionable.

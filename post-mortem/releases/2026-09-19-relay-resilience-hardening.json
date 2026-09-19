@@ -1,0 +1,39 @@
+{
+  "classification": "private",
+  "at": "2026-09-19T18:00:00Z",
+  "scope": "Relay connection reliability and operator monitor hardening after the September 19 registration repair.",
+  "patterns": [
+    "bounded exponential backoff with jitter for safe control-plane reads",
+    "shared retry budgets and short circuit breakers with a single half-open recovery probe",
+    "single-flight coalescing for duplicate status and connection operations",
+    "bounded credential I/O bulkhead with same-read coalescing and same-desktop exclusion",
+    "read-only reconciliation after uncertain mutation responses",
+    "stale snapshot preservation with mutation fail-closed behavior",
+    "visibility and online-aware polling with jittered intervals and capped reconnect backoff",
+    "explicit browser DTO allowlists that keep control identity, credential material, container identity and implementation-only revisions server-side",
+    "plain-language recovery guidance colocated with the affected connection and a direct path back to Connections"
+  ],
+  "verification": {
+    "monitor_resilience_tests": "4/4 passed",
+    "relay_connection_suite": "50/50 passed",
+    "relay_services_suite": "77/77 passed",
+    "desktop_manager_suite": "28/28 passed",
+    "relay_capabilities_suite": "166/166 passed",
+    "typescript_check": "passed",
+    "javascript_syntax_check": "passed",
+    "diff_check": "passed",
+    "browser_verification": "blocked: local Playwright fixture module is unavailable in this workspace"
+  },
+  "limits": [
+    "No automatic credential mutation retry was added; an explicit retry still reconciles the persisted operation first.",
+    "The browser visual suite could not run without the repository's local Playwright fixture module."
+  ],
+  "evidence": [
+    "src/relay/pool-protocol.ts",
+    "src/relay/pool-monitor-server.ts",
+    "src/relay/pool-monitor.js",
+    "src/relay/desktop-manager.ts",
+    "scripts/test-relay-desktops.ts",
+    "scripts/test-relay-monitor-resilience.ts"
+  ]
+}

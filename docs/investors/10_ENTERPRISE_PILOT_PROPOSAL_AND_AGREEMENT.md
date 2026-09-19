@@ -1,65 +1,81 @@
-# 🤝 Developer & Partner Access Framework
+# GALX cohort and partner framework
 
 <!-- docs-scope: commercial-draft -->
-> **Reading scope:** Commercial and strategic investor materials. Contains thesis formulations, product positioning, unit economics frameworks, and venture scale arguments. Technical and operational capabilities describe public interfaces; proprietary routing mechanisms, capacity acquisition, and internal execution infrastructure remain private under [AGENTS.md](../AGENTS.md).
 
-## Commercial Terms, Service Expectations & Partner Engagement
+## Purpose
 
-A straightforward framework outlining how developers, early design partners, and scaling applications engage with GALX, test platform execution, and transition into production usage.
+Use private creative cohorts, hackathons, and design partnerships to test whether HEAV3NS MANDATE activates continuing creative behavior and whether GALX can deliver that value without becoming a founder-led service business.
 
----
+The cohort is an evidence instrument, not the business model.
 
-## 1. Engagement Philosophy: Frictionless Developer Access
+## Participant contract
 
-GALX believes that great developer infrastructure spreads through immediate utility rather than enterprise friction.
+Before a session, participants should understand:
 
-- **Instant Onboarding**: Developers can obtain API credentials, test endpoints, and integrate execution into their codebases in minutes.
-- **Transparent Usage**: Clear credit allocations and usage tracking eliminate surprise bills.
-- **Design Partner Collaboration**: For high-velocity teams building ambitious AI-powered applications, GALX provides direct engineering channels to support custom integration needs and gather operational feedback.
+- what is experimental;
+- what they are being asked to create or evaluate;
+- what access is bounded or subsidized;
+- what work remains private;
+- whether any work may be shown or retained;
+- what data is collected and why; and
+- how they can stop, withdraw, or request deletion where applicable.
 
----
+## Engagement shape
 
-## 2. Developer Tiers & Commercial Access
+A cohort receives:
 
-```mermaid
-flowchart LR
-    A[Free Onboarding / Welcome Allowance] --> B[Developer Tier\nPay-As-You-Go]
-    B --> C[Scale / Partner Tier\nDedicated Capacity & SLAs]
-```
+1. a bounded creative invitation;
+2. a clear starting point for an image or visual project;
+3. a way to direct, reject, revise, and preserve work;
+4. a defined path to return after the session; and
+5. a clear paid-continuation test when the cohort is ready.
 
-### 1. Developer Preview / Welcome Allowance
-- **Purpose**: Immediate experimentation for new builders.
-- **Includes**: Starter execution credits to build and validate prototypes.
-- **Commitment**: Zero payment required; test the API and explore capability immediately.
+The facilitator should help participants understand the product, not translate every intention or complete the work for them.
 
-### 2. Standard Developer Tier
-- **Purpose**: Independent developers, creative technologists, and live applications.
-- **Pricing**: Predictable, usage-based consumption.
-- **Features**: Full access to the two-model managed surface (including **GALX Nova**), standard API endpoints, and community support.
+## Success criteria
 
-### 3. Scale & Design Partner Program
-- **Purpose**: High-growth applications with substantial recurring execution volume.
-- **Features**:
-  - Reserved serving capacity to accommodate high-concurrency traffic spikes.
-  - Dedicated communication channels with GALX engineering.
-  - Collaborative workload optimization to ensure maximum cost-effectiveness and reliability.
+| Signal | Strong evidence |
+| --- | --- |
+| Activation | Participant begins and completes a meaningful action. |
+| Agency | Participant directs, rejects, preserves, and revises intentionally. |
+| Continuation | Participant returns for another project without personal founder prompting. |
+| Payment | Participant accepts a paid continuation or subscription after the subsidy is clear. |
+| Distribution | Participant invites or refers another suitable creator. |
+| Economics | Delivery remains sustainable without disproportionate manual support. |
 
----
+No single signal is sufficient. A full room, high engagement, or a beautiful output can coexist with weak return and payment.
 
-## 3. Data Privacy & Operational Commitments
+## Cohort discipline
 
-GALX maintains clear commitments regarding customer data:
+Record cohort source, participant profile, subsidy, facilitator time, starting brief, completed work, revisions, return behavior, payment, support burden, and consent for any public sharing.
 
-1. **No Data Monetization**: Developer prompts and generation outputs are never sold, harvested, or used for third-party model training.
-2. **Ephemeral Memory Processing**: Payloads are processed in volatile memory for the explicit purpose of fulfilling the requested execution.
-3. **Availability & Resilience**: GALX continuously monitors platform health to provide high availability across all managed models.
+Separate:
 
----
+- founder-guided activation from self-serve behavior;
+- event enthusiasm from delayed return;
+- free access from willingness to pay; and
+- referrals from repeatable acquisition.
 
-## 4. Getting Started
+Do not use event enthusiasm as a proxy for retention.
 
-To explore developer access, join the design partner cohort, or discuss scaling an application on GALX:
+## Commercial transition
 
-- **Platform**: [https://galx.ai](https://galx.ai)
-- **Documentation**: [https://galx.ai/docs](https://galx.ai/docs)
-- **Direct Founder Channel**: `willcruzanswers@gmail.com`
+Move a participant from bounded access to a paid creative product only after the value proposition is clear. Test price, limits, and continuation rather than promising them in advance.
+
+The transition should answer:
+
+> **Would this person pay to continue the project or begin another one without the event, the facilitator, or the founder?**
+
+## Data and safety
+
+Collect only what the experience requires. Protect user content and account data, sanitize public artifacts, and keep internal diagnostics private. Do not forward upstream metadata or expose implementation details in participant-facing responses. Obtain explicit permission before using creative work in demonstrations or research summaries.
+
+## Exit criteria
+
+| Result | Action |
+| --- | --- |
+| Independent return, payment, and acceptable cost move together. | Continue the cohort pattern and test a new source. |
+| Participants activate but do not return. | Improve the recurring job, project continuity, or onboarding. |
+| Participants return but delivery is too manual. | Reduce scope, improve self-serve behavior, or staff the service deliberately. |
+| Participants like the demonstration but do not pay. | Test a clearer recurring value proposition before scaling. |
+| The product cannot create meaningful control or safe continuation. | Stop or redesign the experience. |

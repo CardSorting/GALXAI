@@ -1,181 +1,333 @@
-import os
-from pptx import Presentation
-from pptx.util import Inches, Pt
-from pptx.enum.text import PP_ALIGN
-from pptx.enum.shapes import MSO_SHAPE
-from pptx.dml.color import RGBColor
+"""Build the GALX ACI investor deck without external Python dependencies.
 
-def create_deck():
-    prs = Presentation()
-    prs.slide_width = Inches(13.333)
-    prs.slide_height = Inches(7.5)
-    blank_slide_layout = prs.slide_layouts[6]
+The copy mirrors 02_PITCH_DECK_SLIDE_BY_SLIDE.md. This small OOXML writer keeps
+the presentation artifact regenerable in environments without python-pptx.
+"""
 
-    # Color Palette
-    COLOR_BG = RGBColor(6, 8, 13)          # #06080D
-    COLOR_CARD = RGBColor(13, 18, 30)       # #0D121E
-    COLOR_CARD_BORDER = RGBColor(30, 41, 59)# #1E293B
-    COLOR_CYAN = RGBColor(0, 240, 255)      # #00F0FF
-    COLOR_PURPLE = RGBColor(168, 85, 247)   # #A855F7
-    COLOR_PINK = RGBColor(236, 72, 153)     # #EC4899
-    COLOR_EMERALD = RGBColor(16, 185, 129)  # #10B981
-    COLOR_AMBER = RGBColor(245, 158, 11)    # #F59E0B
-    COLOR_TEXT_PRIMARY = RGBColor(248, 250, 252) # #F8FAFC
-    COLOR_TEXT_MUTED = RGBColor(148, 163, 184)   # #94A3B8
+from pathlib import Path
+from zipfile import ZIP_DEFLATED, ZipFile
+from xml.sax.saxutils import escape
 
-    def set_slide_bg(slide):
-        bg_shape = slide.shapes.add_shape(
-            MSO_SHAPE.RECTANGLE, Inches(0), Inches(0), prs.slide_width, prs.slide_height
+
+SLIDE_WIDTH = 12191695
+SLIDE_HEIGHT = 6858000
+
+BG = "07080D"
+SURFACE = "0D101C"
+CARD = "121628"
+LINE = "30334A"
+CYAN = "00F0FF"
+PURPLE = "8B5CF6"
+TEXT = "F8FAFC"
+MUTED = "9CA3AF"
+
+NS_A = "http://schemas.openxmlformats.org/drawingml/2006/main"
+NS_P = "http://schemas.openxmlformats.org/presentationml/2006/main"
+NS_R = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
+
+
+def xml_text(value: str) -> str:
+    return escape(value)
+
+
+def paragraph(text: str, size: int, color: str, bold: bool = False, align: str | None = None) -> str:
+    alignment = f'<a:pPr algn="{align}"/>' if align else ""
+    bold_attr = ' b="1"' if bold else ""
+    return (
+        f"<a:p>{alignment}"
+        f'<a:r><a:rPr lang="en-US" sz="{size}"{bold_attr}>'
+        f'<a:solidFill><a:srgbClr val="{color}"/></a:solidFill>'
+        '<a:latin typeface="Arial"/></a:rPr>'
+        f"<a:t>{xml_text(text)}</a:t></a:r>"
+        '<a:endParaRPr lang="en-US"/></a:p>'
+    )
+
+
+def text_body(paragraphs: list[str], margin: int = 0, anchor: str = "t") -> str:
+    return (
+        f'<p:txBody><a:bodyPr wrap="square" lIns="{margin}" tIns="{margin}" '
+        f'rIns="{margin}" bIns="{margin}" anchor="{anchor}"><a:spAutoFit/></a:bodyPr>'
+        f"<a:lstStyle/>{''.join(paragraphs)}</p:txBody>"
+    )
+
+
+def shape(
+    shape_id: int,
+    name: str,
+    x: int,
+    y: int,
+    width: int,
+    height: int,
+    body: str,
+    fill: str | None = None,
+    line: str | None = None,
+    rounded: bool = False,
+) -> str:
+    geometry = "roundRect" if rounded else "rect"
+    fill_xml = f'<a:solidFill><a:srgbClr val="{fill}"/></a:solidFill>' if fill else "<a:noFill/>"
+    line_xml = f'<a:ln w="12700"><a:solidFill><a:srgbClr val="{line}"/></a:solidFill></a:ln>' if line else "<a:ln><a:noFill/></a:ln>"
+    return (
+        "<p:sp>"
+        f'<p:nvSpPr><p:cNvPr id="{shape_id}" name="{name}"/><p:cNvSpPr txBox="1"/><p:nvPr/></p:nvSpPr>'
+        f'<p:spPr><a:xfrm><a:off x="{x}" y="{y}"/><a:ext cx="{width}" cy="{height}"/></a:xfrm>'
+        f'<a:prstGeom prst="{geometry}"><a:avLst/></a:prstGeom>{fill_xml}{line_xml}</p:spPr>'
+        f"{body}</p:sp>"
+    )
+
+
+def slide_xml(number: int, title: str, subtitle: str, cards: list[tuple[str, str]]) -> str:
+    shapes: list[str] = []
+    shapes.append(
+        shape(
+            2,
+            "Header",
+            731520,
+            365760,
+            8686800,
+            365760,
+            text_body(
+                [paragraph("GALX", 1400, CYAN, True), paragraph("  •  Augmented Creative Intelligence", 1100, MUTED)],
+                anchor="ctr",
+            ),
         )
-        bg_shape.fill.solid()
-        bg_shape.fill.fore_color.rgb = COLOR_BG
-        bg_shape.line.fill.background()
-        return bg_shape
+    )
+    shapes.append(
+        shape(
+            3,
+            "Slide number",
+            9601200,
+            365760,
+            1828800,
+            365760,
+            text_body([paragraph(f"Slide {number:02d} / 10", 1100, MUTED, True, "r")]),
+        )
+    )
+    shapes.append(
+        shape(
+            4,
+            "Title",
+            731520,
+            1005840,
+            10728655,
+            1188720,
+            text_body([paragraph(title, 2400, TEXT, True), paragraph(subtitle, 1300, CYAN)], margin=0),
+        )
+    )
 
-    def add_header(slide, slide_num, total_slides=10):
-        header_box = slide.shapes.add_textbox(Inches(0.8), Inches(0.4), Inches(11.733), Inches(0.5))
-        tf = header_box.text_frame
-        tf.word_wrap = True
-        tf.margin_left = tf.margin_top = tf.margin_right = tf.margin_bottom = 0
-        p = tf.paragraphs[0]
-        
-        r1 = p.add_run()
-        r1.text = "GALX "
-        r1.font.bold = True
-        r1.font.size = Pt(14)
-        r1.font.color.rgb = COLOR_CYAN
-        
-        r2 = p.add_run()
-        r2.text = "•  Venture Formation Thesis"
-        r2.font.size = Pt(11)
-        r2.font.color.rgb = COLOR_TEXT_MUTED
+    gap = 274320
+    card_width = (10728655 - gap * (len(cards) - 1)) // len(cards)
+    card_y = 2560320
+    card_height = 3291840
+    for index, (card_title, card_body) in enumerate(cards):
+        card_x = 731520 + index * (card_width + gap)
+        shapes.append(
+            shape(
+                10 + index * 2,
+                f"Card {index + 1}",
+                card_x,
+                card_y,
+                card_width,
+                card_height,
+                text_body(
+                    [paragraph(card_title, 1500, TEXT, True), paragraph(card_body, 1150, MUTED)],
+                    margin=228600,
+                ),
+                fill=CARD,
+                line=PURPLE if index == 0 else LINE,
+                rounded=True,
+            )
+        )
 
-        num_box = slide.shapes.add_textbox(Inches(10.5), Inches(0.4), Inches(2.0), Inches(0.5))
-        tf2 = num_box.text_frame
-        tf2.margin_left = tf2.margin_top = tf2.margin_right = tf2.margin_bottom = 0
-        p2 = tf2.paragraphs[0]
-        p2.alignment = PP_ALIGN.RIGHT
-        r3 = p2.add_run()
-        r3.text = f"Slide {slide_num:02d} / {total_slides:02d}"
-        r3.font.size = Pt(11)
-        r3.font.color.rgb = COLOR_TEXT_MUTED
+    shape_tree = (
+        '<p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr>'
+        '<p:grpSpPr/>'
+        + "".join(shapes)
+        + "</p:spTree>"
+    )
+    return (
+        f'<p:sld xmlns:a="{NS_A}" xmlns:p="{NS_P}" xmlns:r="{NS_R}">'
+        f'<p:cSld><p:bg><p:bgPr><a:solidFill><a:srgbClr val="{BG}"/></a:solidFill><a:effectLst/></p:bgPr></p:bg>'
+        f"{shape_tree}</p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sld>"
+    )
 
-    def add_card(slide, left, top, width, height, title, body, border_color=COLOR_CARD_BORDER, bg_color=COLOR_CARD):
-        card = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, left, top, width, height)
-        card.fill.solid()
-        card.fill.fore_color.rgb = bg_color
-        card.line.color.rgb = border_color
-        card.line.width = Pt(1)
 
-        tf = card.text_frame
-        tf.word_wrap = True
-        tf.margin_left = tf.margin_right = Inches(0.25)
-        tf.margin_top = tf.margin_bottom = Inches(0.25)
+def presentation_xml(slide_count: int) -> str:
+    slide_ids = "".join(
+        f'<p:sldId id="{256 + index}" r:id="rId{index + 1}"/>'
+        for index in range(slide_count)
+    )
+    return (
+        f'<p:presentation xmlns:a="{NS_A}" xmlns:p="{NS_P}" xmlns:r="{NS_R}">'
+        '<p:sldMasterIdLst><p:sldMasterId id="2147483648" r:id="rIdMaster"/></p:sldMasterIdLst>'
+        f"<p:sldIdLst>{slide_ids}</p:sldIdLst>"
+        f'<p:sldSz cx="{SLIDE_WIDTH}" cy="{SLIDE_HEIGHT}" type="screen16x9"/>'
+        '<p:notesSz cx="6858000" cy="9144000"/>'
+        '<p:defaultTextStyle><a:defPPr/><a:lvl1pPr marL="0" algn="l"><a:defRPr lang="en-US"/></a:lvl1pPr></p:defaultTextStyle>'
+        '</p:presentation>'
+    )
 
-        p = tf.paragraphs[0]
-        p.text = title
-        p.font.bold = True
-        p.font.size = Pt(14)
-        p.font.color.rgb = COLOR_TEXT_PRIMARY
 
-        p2 = tf.add_paragraph()
-        p2.text = body
-        p2.font.size = Pt(11)
-        p2.font.color.rgb = COLOR_TEXT_MUTED
-        p2.space_before = Pt(8)
-        return card
+def root_relationships() -> str:
+    return (
+        '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+        '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="ppt/presentation.xml"/>'
+        '</Relationships>'
+    )
 
-    slides_data = [
-        ("Sustainable, Abundant AI Access for Anyone Who Wants to Build",
-         "The abstraction layer for the next era of software creation. Eliminating infrastructure management so developers can focus entirely on what they want to build.",
-         [("Two Managed Models", "Concentrated surface, including GALX Nova"),
-          ("Standard API Access", "Instant drop-in integration"),
-          ("Abundant Serving", "Reliable operational execution"),
-          ("Build What You Want", "Simplicity is the product decision")]),
 
-        ("The Future: Abundant Intelligence, Fragmented Infrastructure",
-         "AI capability is becoming abundant, while the systems required to access and sustain it are fragmenting.",
-         [("What Is Coming", "AI capability is becoming the fundamental substrate of all software creation."),
-          ("The Impending Bottleneck", "Multiplying models, providers, and pricing structures create severe operational fragmentation.")]),
-
-        ("The Non-Consensus Thesis: The Sufficiency Principle",
-         "For a large class of applications, developers do not need maximum available intelligence. They need sufficient intelligence, reliably and economically delivered, to complete the task.",
-         [("The Consensus Trap", "Obsession with benchmark supremacy and endless model dropdowns."),
-          ("The Intermediary Moat", "Model proliferation creates an opportunity for an intermediary to absorb complexity.")]),
-
-        ("Product Today: Radical Simplicity",
-         "Two models. API access. Abundant serving. Build what you want.",
-         [("Two Models", "Access focused models under clear GALX identities such as GALX Nova."),
-          ("Standard API", "Drop-in execution with zero custom proxy plumbing."),
-          ("Abundant Serving", "GALX handles availability, capacity, and resilience behind the scenes.")]),
-
-        ("The Wedge: Builders Who Want to Make Something",
-         "We focus on high-velocity creators who want to build software rather than manage inference infrastructure.",
-         [("Independent Developers", "Building indie SaaS and productivity tools with predictable costs."),
-          ("Creative Technologists", "Crafting interactive apps and media without cloud console friction."),
-          ("AI Experimenters", "Testing application loops and agent workflows rapidly.")]),
-
-        ("Why This Can Become Enormous",
-         "GALX sits directly between the application and fragmented intelligence infrastructure.",
-         [("The Expansion Loop", "More Builders -> More Applications -> More Application Usage -> More Execution Through GALX."),
-          ("The Persistent Execution Layer", "Software built on GALX generates ongoing recurring execution demand with every user click.")]),
-
-        ("Asymmetric Advantage: Absorb Complexity, Sell Simplicity",
-         "Operating knowledge turns heterogeneous, volatile AI capacity into a reliable developer product.",
-         [("Developer Simplicity", "Clean, dependable API with zero infrastructure maintenance."),
-          ("Proprietary Depth", "Proprietary operational knowledge required to run heterogeneous capacity economically.")]),
-
-        ("Founder-Market Fit: Built From Direct Systems Operation",
-         "Arrived at the problem through building AI applications and living the operational constraints.",
-         [("Hands-On Experience", "Direct exposure to building AI applications and operating autonomous agent systems."),
-          ("Operational Learning", "Learning and iterating through live traffic and operational feedback.")]),
-
-        ("Evidence: Observations vs. Next Validations",
-         "Separating conviction from verified observations and upcoming milestones.",
-         [("What We Believe", "Abundant intelligence belongs behind a dependable abstraction layer."),
-          ("What We Have Observed", "Representative workloads require substantially less model capability than assumed."),
-          ("What We Demonstrated", "A functional, high-reliability platform serving real developer requests."),
-          ("What We Are Testing Next", "Builder retention, application usage growth, and long-term execution margins.")]),
-
-        ("The Venture Test: What Becomes Enormous?",
-         "GALX becomes the primary abstraction and execution layer through which software consumes AI capability.",
-         [("Scale Capacity", "Expand serving infrastructure to support high-concurrency builder apps."),
-          ("Instrument Resilience", "Deepen operational knowledge tooling and serving cost optimization."),
-          ("Onboard Builders", "Seed the next 1,000 applications building on top of GALX execution.")])
+def presentation_relationships(slide_count: int) -> str:
+    relationships = [
+        '<Relationship Id="rIdMaster" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideMaster" Target="slideMasters/slideMaster1.xml"/>'
     ]
+    relationships.extend(
+        f'<Relationship Id="rId{index + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slide" Target="slides/slide{index + 1}.xml"/>'
+        for index in range(slide_count)
+    )
+    return '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' + "".join(relationships) + "</Relationships>"
 
-    for idx, (title, subtitle, cards) in enumerate(slides_data, start=1):
-        slide = prs.slides.add_slide(blank_slide_layout)
-        set_slide_bg(slide)
-        add_header(slide, idx, len(slides_data))
 
-        # Title & Subtitle box
-        t_box = slide.shapes.add_textbox(Inches(0.8), Inches(1.1), Inches(11.733), Inches(1.4))
-        tf = t_box.text_frame
-        tf.word_wrap = True
-        tf.margin_left = tf.margin_top = tf.margin_right = tf.margin_bottom = 0
-        p = tf.paragraphs[0]
-        p.text = title
-        p.font.bold = True
-        p.font.size = Pt(24)
-        p.font.color.rgb = COLOR_TEXT_PRIMARY
+def slide_relationships() -> str:
+    return (
+        '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+        '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideLayout" Target="../slideLayouts/slideLayout1.xml"/>'
+        '</Relationships>'
+    )
 
-        p_sub = tf.add_paragraph()
-        p_sub.text = subtitle
-        p_sub.font.size = Pt(13)
-        p_sub.font.color.rgb = COLOR_CYAN
-        p_sub.space_before = Pt(6)
 
-        # Cards Layout
-        num_cards = len(cards)
-        card_w = (11.733 - (0.3 * (num_cards - 1))) / num_cards
-        for c_idx, (c_title, c_body) in enumerate(cards):
-            c_left = 0.8 + c_idx * (card_w + 0.3)
-            add_card(slide, Inches(c_left), Inches(2.8), Inches(card_w), Inches(3.6), c_title, c_body)
+def master_relationships() -> str:
+    return (
+        '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+        '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideLayout" Target="../slideLayouts/slideLayout1.xml"/>'
+        '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme" Target="../theme/theme1.xml"/>'
+        '</Relationships>'
+    )
 
-    out_path = "/Users/bozoegg/Desktop/GALXAI/docs/investors/GALXAI_Pitch_Deck.pptx"
-    prs.save(out_path)
-    print(f"Saved pitch deck to {out_path}")
+
+def master_xml() -> str:
+    return (
+        f'<p:sldMaster xmlns:a="{NS_A}" xmlns:p="{NS_P}" xmlns:r="{NS_R}">'
+        '<p:cSld><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr/></p:spTree></p:cSld>'
+        '<p:clrMap bg1="lt1" tx1="dk1" bg2="lt2" tx2="dk2" accent1="accent1" accent2="accent2" accent3="accent3" accent4="accent4" accent5="accent5" accent6="accent6" hlink="hlink" folHlink="folHlink"/>'
+        '<p:sldLayoutIdLst><p:sldLayoutId id="1" r:id="rId1"/></p:sldLayoutIdLst><p:txStyles/>'
+        '</p:sldMaster>'
+    )
+
+
+def layout_xml() -> str:
+    return (
+        f'<p:sldLayout xmlns:a="{NS_A}" xmlns:p="{NS_P}" xmlns:r="{NS_R}" type="blank" preserve="1">'
+        '<p:cSld name="Blank"><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr/></p:spTree></p:cSld>'
+        '<p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr>'
+        '</p:sldLayout>'
+    )
+
+
+def theme_xml() -> str:
+    return (
+        f'<a:theme xmlns:a="{NS_A}" name="GALX ACI">'
+        '<a:themeElements><a:clrScheme name="GALX ACI"><a:dk1><a:srgbClr val="000000"/></a:dk1><a:lt1><a:srgbClr val="FFFFFF"/></a:lt1>'
+        '<a:dk2><a:srgbClr val="07080D"/></a:dk2><a:lt2><a:srgbClr val="F8FAFC"/></a:lt2>'
+        '<a:accent1><a:srgbClr val="00F0FF"/></a:accent1><a:accent2><a:srgbClr val="8B5CF6"/></a:accent2>'
+        '<a:accent3><a:srgbClr val="10B981"/></a:accent3><a:accent4><a:srgbClr val="F59E0B"/></a:accent4>'
+        '<a:accent5><a:srgbClr val="F43F5E"/></a:accent5><a:accent6><a:srgbClr val="6366F1"/></a:accent6>'
+        '<a:hlink><a:srgbClr val="00F0FF"/></a:hlink><a:folHlink><a:srgbClr val="8B5CF6"/></a:folHlink></a:clrScheme>'
+        '<a:fontScheme name="GALX"><a:majorFont><a:latin typeface="Arial"/></a:majorFont><a:minorFont><a:latin typeface="Arial"/></a:minorFont></a:fontScheme>'
+        '<a:fmtScheme name="GALX"><a:fillStyleLst/><a:lnStyleLst/><a:effectStyleLst/><a:bgFillStyleLst/></a:fmtScheme>'
+        '</a:themeElements></a:theme>'
+    )
+
+
+def content_types(slide_count: int) -> str:
+    overrides = [
+        '<Override PartName="/ppt/presentation.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.presentation.main+xml"/>',
+        '<Override PartName="/ppt/slideMasters/slideMaster1.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slideMaster+xml"/>',
+        '<Override PartName="/ppt/slideLayouts/slideLayout1.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slideLayout+xml"/>',
+        '<Override PartName="/ppt/theme/theme1.xml" ContentType="application/vnd.openxmlformats-officedocument.theme+xml"/>',
+    ]
+    overrides.extend(
+        f'<Override PartName="/ppt/slides/slide{index + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slide+xml"/>'
+        for index in range(slide_count)
+    )
+    return (
+        '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
+        '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
+        '<Default Extension="xml" ContentType="application/xml"/>'
+        + "".join(overrides)
+        + '</Types>'
+    )
+
+
+SLIDES = [
+    (
+        "More capable machines will create demand for more capable people",
+        "GALX is building around what people become able to accomplish through agents.",
+        [("The forecast", "Agent capability may shift the bottleneck from execution to direction."), ("The first proof", "One person creates something meaningful that was previously beyond practical reach.")],
+    ),
+    (
+        "The bottleneck is between human intention and agent execution",
+        "Creative work often develops through interaction rather than a single complete instruction.",
+        [("The relationship", "Express → delegate → inspect → redirect → preserve → continue."), ("The risk", "More output can leave the person with more interpretation and correction.")],
+    ),
+    (
+        "Augmented Creative Intelligence changes the unit of analysis",
+        "The system is the person, their agents, their tools, and the work they create together.",
+        [("ACI asks", "What can the person now initiate, influence, complete, and return to?"), ("ACI is not", "A claim that GALX invented human augmentation or a new model category.")],
+    ),
+    (
+        "The first individual experiment is obtainable now",
+        "Enough capability exists to test the creative experience directly, without building an institution first.",
+        [("Then", "DreamBees pursued creative range when the capability layer was harder to access."), ("Now", "Agentic capability makes the person-level experiment practical to run and measure.")],
+    ),
+    (
+        "The founder has studied both sides of the relationship",
+        "Human-centered systems, creative work, agent construction, and operational judgment meet in one problem.",
+        [("Continuity", "DreamBees → LUMI → GALX: recurring pursuit of individual creative capability."), ("Evidence", "The May 2026 JoyZoning report distinguished generated changes from accepted work.")],
+    ),
+    (
+        "One creator. One visual idea. One meaningful result.",
+        "Image creation and community discovery are the focused commercial entry point.",
+        [("The loop", "Bring an idea → direct and revise → keep or share → return."), ("The customer", "An independent creator with recurring visual ideas, not a one-time generator.")],
+    ),
+    (
+        "Permission becomes action; the product earns the next visit",
+        "HEAV3NS MANDATE activates. LUMI remains a software-creation instrument.",
+        [("HEAV3NS MANDATE", "The call to begin—not a product tier or a promise to be productive."), ("LUMI", "A maintained expression of the thesis, not a second general-purpose coding-agent race.")],
+    ),
+    (
+        "Turn individual capability into repeatable paid value",
+        "The economic unit is a retained, paying creator—not an externally supplied token.",
+        [("The sequence", "Meaningful result → recurring projects → retained creator → preferred environment."), ("The scale condition", "Customer value must grow faster than founder intervention.")],
+    ),
+    (
+        "The thesis must survive comparison, behavior, and economics",
+        "Capability, product, and business are separate proofs.",
+        [("Capability", "Meaningful completion, direction, revision, and recoverability."), ("Product", "Independent return and preference over relevant alternatives."), ("Business", "Payment, sustainable cost to serve, and repeatable distribution.")],
+    ),
+    (
+        "Make the first proof small enough to perform",
+        "Capital accelerates product quality, bounded cohorts, measurement, and dependable delivery.",
+        [("Next milestones", "Meaningful capability → paid return → repeatable delivery."), ("The close", "One person demonstrates possibility; repeated use and payment demonstrate the business.")],
+    ),
+]
+
+
+def create_deck() -> None:
+    output = Path(__file__).resolve().parent / "GALXAI_Pitch_Deck.pptx"
+    with ZipFile(output, "w", compression=ZIP_DEFLATED) as archive:
+        archive.writestr("[Content_Types].xml", content_types(len(SLIDES)))
+        archive.writestr("_rels/.rels", root_relationships())
+        archive.writestr("ppt/presentation.xml", presentation_xml(len(SLIDES)))
+        archive.writestr("ppt/_rels/presentation.xml.rels", presentation_relationships(len(SLIDES)))
+        archive.writestr("ppt/slideMasters/slideMaster1.xml", master_xml())
+        archive.writestr("ppt/slideMasters/_rels/slideMaster1.xml.rels", master_relationships())
+        archive.writestr("ppt/slideLayouts/slideLayout1.xml", layout_xml())
+        archive.writestr("ppt/slideLayouts/_rels/slideLayout1.xml.rels", master_relationships().replace("../slideLayouts/slideLayout1.xml", "../slideMasters/slideMaster1.xml").replace("<Relationship Id=\"rId2\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme\" Target=\"../theme/theme1.xml\"/>", ""))
+        archive.writestr("ppt/theme/theme1.xml", theme_xml())
+        for index, (title, subtitle, cards) in enumerate(SLIDES, start=1):
+            archive.writestr(f"ppt/slides/slide{index}.xml", slide_xml(index, title, subtitle, cards))
+            archive.writestr(f"ppt/slides/_rels/slide{index}.xml.rels", slide_relationships())
+    print(f"Saved pitch deck to {output}")
+
 
 if __name__ == "__main__":
     create_deck()

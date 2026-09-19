@@ -1,53 +1,62 @@
-# 📄 GALX Executive One-Pager & Fact Sheet
+# GALX executive one-pager
 
 <!-- docs-scope: commercial-draft -->
-> **Reading scope:** Commercial and strategic investor materials. Contains thesis formulations, product positioning, unit economics frameworks, and venture scale arguments. Technical and operational capabilities describe public interfaces; proprietary routing mechanisms, capacity acquisition, and internal execution infrastructure remain private under [AGENTS.md](../AGENTS.md).
 
-## Sustainable, Abundant AI Access for Anyone Who Wants to Build
+## Augmented Creative Intelligence
 
-**Company**: GALX, Inc. | **Sector**: AI Developer Infrastructure & Abstraction Layer  
-**Stage (2026)**: Early Stage / Working Platform & Developer Access  
-**Founder**: William Cruz | **Contact**: `willcruzanswers@gmail.com` | **Platform**: [https://galx.ai](https://galx.ai)
+**Our forecast for the agent age: more capable machines will create demand for more capable people.**
 
----
+GALX is building a creative product around that forecast. We call the category **Augmented Creative Intelligence (ACI)**: the person, their agents, their tools, and the work they are creating together.
 
-### 1. The Future We Are Betting On
-AI capability is becoming abundant, while the infrastructure required to access, select, operate, and economically sustain that capability is becoming increasingly fragmented. The long-term winner is not another sprawling model catalog. It is an abstraction layer through which developers can consume useful intelligence without having to continuously manage the underlying AI ecosystem.
+ACI is not a claim that GALX invented human augmentation. It is a product and market thesis: make that combined system useful enough that people choose it repeatedly.
 
-### 2. The Non-Consensus Thesis
-The AI market is fixated on maximizing frontier capability and exposing endless model knobs. GALX explores a different reality: **For a large class of applications, developers do not need maximum available intelligence. They need sufficient intelligence, reliably and economically delivered, to complete the task.** As models proliferate, complexity multiplies underneath the application. GALX's opportunity is to absorb that complexity.
+### The bottleneck
 
-### 3. The Product Today: Deliberately Simple
-**Two models. API access. Abundant serving. Build what you want.**  
-GALX provides developers access to a deliberately small managed model surface (including **GALX Nova**) through a standard API. The simplicity is the product decision. GALX knows about the machinery so the developer does not have to.
+As agents become more capable, the hard product question may shift from *“Can the machine perform the task?”* to:
 
-### 4. The Initial Wedge: Builders
-The initial wedge is hobbyists, independent developers, creative technologists, and developers experimenting with AI-powered applications who want to make something without model configuration and infrastructure management becoming another full-time project.
+> **Can a person reliably turn that capability toward something they actually intend?**
 
-### 5. Why This Can Become Enormous
-GALX sits directly between the application and the fragmented intelligence infrastructure underneath it:
-$$\text{More Builders} \longrightarrow \text{More Applications} \longrightarrow \text{More Application Usage} \longrightarrow \text{More Execution Through GALX}$$
-When experiments become software people actually use, every user interaction generates recurring execution demand. GALX participates in the ongoing execution layer of applications built on AI.
+Creative specifications often develop through interaction. A person expresses, delegates, inspects, redirects, preserves, and continues. More output is not automatically more capability if it leaves the person with more interpretation and correction.
 
----
+### The first product
 
-### 6. The Asymmetric Advantage: We Absorb Complexity, Sell Simplicity
-GALX's defensibility is the accumulated operational knowledge required to turn heterogeneous, economically volatile AI capacity into a reliable, dead-simple developer experience. The public product becomes simpler while the knowledge required to operate it becomes deeper.
+Image creation and community discovery for independent creators with recurring visual ideas.
 
-### 7. Clear Economic Engine
-$$\text{Customer Pays GALX} \longrightarrow \text{Customer Uses GALX} \longrightarrow \text{GALX Incurs Serving Cost} \longrightarrow \text{GALX Retains Gross Margin}$$
-As applications running on GALX scale their active users, execution volume compounds naturally.
+**Bring an idea → direct and revise → keep or share → return with another idea.**
 
----
+The first proof is intentionally small: one person makes something meaningful that was previously beyond practical reach. The product must then make that result repeatable without continuous founder guidance.
 
-### 8. What We Are Testing & Proving Next
-| Dimension | Current Status | What We Are Learning |
-| :--- | :--- | :--- |
-| **What We Believe** | Abstraction beats model catalogs | Developers want to build features, not calibrate model weights or providers. |
-| **What We Observed** | Overkill is common in the wild | Representative application workloads run effectively on far leaner capability tiers than commonly assumed. |
-| **What We Demonstrated** | Working 2-model platform | Live API serving real requests with seamless developer ergonomics. |
-| **What We Are Testing Next** | Retention & compounding usage | Tracking what builders create, whether their applications retain users, and how recurring execution demand grows. |
+### The three names
 
----
+| Name | Role |
+| --- | --- |
+| **ACI** | The capability thesis: expand what a person can imagine, direct, make, revise, and return to. |
+| **HEAV3NS MANDATE** | The call to activation: permission made actionable. It is not a product tier or a promise to be productive. |
+| **GALX** | The company and product that must turn the thesis into repeatable creative value. |
 
-> **The Venture Test:** If GALX is right, what becomes enormous? GALX does not merely sell inexpensive inference. GALX becomes the **default abstraction and execution layer** through which the next generation of software consumes AI capability.
+**LUMI** remains a maintained expression of the same thesis in software creation. It is not a second simultaneous go-to-market campaign or a general-purpose coding-agent arms race.
+
+### Why this founder
+
+William Cruz’s founder fit is the intersection of human-centered systems, creative experimentation, hands-on agent development, and operational judgment. DreamBees, LUMI, and GALX put him close to both sides of the problem: what people are trying to create and what happens when working systems act on their behalf.
+
+The May 2026 JoyZoning field report recorded the distinction between generated changes and accepted work, with completion remaining under human authority. It also documented scope drift, conflicting changes, unverifiable outputs, and verification burden. Those are project observations—not independent market proof—but they show that the generation-versus-completion question predates the current positioning.
+
+The founder advantage is not certainty about every model release. It is the ability to recognize when an apparent execution improvement has simply moved difficulty onto the person, then design and test the whole system.
+
+### The business test
+
+GALX earns its place when creators return for another project, pay for continuing value, and can be served without founder intervention growing in proportion to the user base.
+
+| Must become true | Evidence |
+| --- | --- |
+| Capability | Meaningful work, usable direction, intentional revision, and the ability to reject or change course. |
+| Product | Independent return and project continuity after the first session. |
+| Business | Paid retention, sustainable contribution margin, and repeatable acquisition. |
+| Scale | Customer value grows faster than founder intervention. |
+
+### Capital use
+
+Capital should improve the image-first creative loop, run bounded activation cohorts, measure behavior and willingness to pay, and build delivery capacity that removes the founder as the single operational dependency.
+
+The opportunity is not “creativity” as an abstract total market. It is widespread paid use of a preferred creative environment, earned through evidence.

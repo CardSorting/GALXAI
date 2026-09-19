@@ -1,0 +1,75 @@
+{
+  "classification": "private",
+  "at": "2026-09-19T18:05:35Z",
+  "scope": "Provider-free relay admission and load-balancing hardening follow-up.",
+  "patterns": [
+    "least-request style local reservations with stable fairness under burst load",
+    "strict token and request-slot admission before lease creation",
+    "bounded waiting-room depth with explicit overflow shedding",
+    "single coalesced wake-up for queued admissions instead of one timer per caller",
+    "absolute deadline handling for queued work",
+    "cooldown exclusion and recovery admission without provider probes",
+    "seeded fake-clock state-machine exploration with replay traces",
+    "bounded synthetic MMO staging to exercise heterogeneous user behavior"
+  ],
+  "verification": {
+    "synthetic_load_suite": "10/10 passed; smoke, stress and war tiers are deterministic and provider-free",
+    "synthetic_scale": "smoke 16,798 operations; stress 45,402 operations; war 101,125 operations",
+    "tiers": {
+      "smoke": {
+        "command": "npm run test:relay:load",
+        "runtime_ms": 8282.329083,
+        "operations": 16798,
+        "seeds": [334462, 12648430, -17958172],
+        "result": "10/10 passed"
+      },
+      "stress": {
+        "command": "npm run test:relay:load:stress",
+        "runtime_ms": 14513.693208,
+        "operations": 45402,
+        "seeds": [334462, 12648430, 14600926, 2125315823, -17958158],
+        "result": "10/10 passed"
+      },
+      "war": {
+        "command": "npm run test:relay:load:war",
+        "runtime_ms": 33133.437208,
+        "operations": 101125,
+        "seeds": [334462, 12648430, 14600926, 2125315823, 79225, 149130, -17958252],
+        "result": "10/10 passed"
+      }
+    },
+    "continuous_invariants": [
+      "queue depth <= 500 and empty-queue wake timers are cancelled",
+      "no duplicate lease IDs, double admissions or terminal requests retaining leases",
+      "in-flight counts, reserved tokens and request capacity never become invalid",
+      "cancelled/expired callers are never admitted",
+      "cooling, depleted, paused and unavailable accounts receive no prohibited admission",
+      "queued requests reach exactly one terminal state and traffic eventually quiesces",
+      "healthy and recovered accounts continue making progress under saturation"
+    ],
+    "invariant_assertions": "smoke >= 8,386; stress >= 28,888; war >= 65,090, plus queue-case terminal assertions",
+    "failures_discovered": "No relay invariant violations; no production behavior change was required by the war-game expansion.",
+    "production_changes": "None for this expansion. The existing local pool admission hardening was exercised by the suite.",
+    "network_safety": "Zero provider, generation, authority/Supabase and external network requests; shared telemetry egress is disabled at the test seam.",
+    "relay_services_suite": "77/77 passed",
+    "relay_connection_suite": "50/50 passed",
+    "relay_capabilities_suite": "166/166 passed",
+    "typescript_check": "passed",
+    "lint": "passed with 8 pre-existing warnings",
+    "production_build": "passed",
+    "documentation_check": "passed; ACT-022 remains an unrelated overdue advisory"
+  },
+  "limits": [
+    "The harness uses synthetic schedulers, accounts and central dependencies; it does not prove physical provider throughput or availability.",
+    "No real generation request, provider connection, Supabase call or external network request was issued by the load suite."
+  ],
+  "evidence": [
+    "src/core/pool/GalxCredentialPool.ts",
+    "src/relay/standard-pool-scheduler.ts",
+    "scripts/test-relay-load-balancing.ts",
+    "scripts/relay-load-war-game.ts",
+    "scripts/run-relay-load-tier.mjs",
+    "docs/maintainers/RELAY_HARDENING.md",
+    "docs/reference/standard-relay-scheduling.md"
+  ]
+}

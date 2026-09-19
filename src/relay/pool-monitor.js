@@ -9,24 +9,142 @@ const node = (tag, text, className) => {
 };
 const busy = new Set();
 const errors = new Map();
+const errorMeta = new Map();
 let state, loading = false, connected = false, lastUpdated, view = 'accounts';
+let refreshPromise = null, recoveryPromise = null, refreshRetryTimer = null, refreshRetryAttempt = 0, pollTimer = null;
 let noticeKind = '', draft, preserveViewFocus = false;
+const wait = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds));
 const date = value => {
   const parsed = new Date(Number.isFinite(Number(value)) ? Number(value) : value);
   return value && Number.isFinite(parsed.getTime()) ? parsed.toLocaleString() : 'Not confirmed';
 };
+const errorLanguage = {
+  action_in_progress: {
+    title: 'Another connection check is running',
+    message: 'This connection is already being checked. Nothing was duplicated.',
+    next: 'Refresh status to see the result.'
+  },
+  control_unavailable: {
+    title: 'We could not confirm that change',
+    message: 'Your saved sign-in is safe. The connection service is taking longer than expected.',
+    next: 'Refresh status in a moment. Retry only if the connection still needs action.'
+  },
+  credential_registry_unavailable: {
+    title: 'We could not finish the connection',
+    message: 'Your saved sign-in is safe. The connection was not confirmed yet.',
+    next: 'Refresh status before trying again.'
+  },
+  credential_check_unavailable: {
+    title: 'Access could not be checked',
+    message: 'Your saved sign-in is safe, but access could not be verified right now.',
+    next: 'Refresh status later, then connect again if needed.'
+  },
+  credential_missing: {
+    title: 'Sign-in is not saved yet',
+    message: 'Complete sign-in in the desktop before connecting this account.',
+    next: 'Open Connections and choose Start sign-in.'
+  },
+  credential_invalid: {
+    title: 'Sign-in needs to be completed again',
+    message: 'The saved sign-in could not be read. Your account settings are still safe.',
+    next: 'Start sign-in again, then connect this account.'
+  },
+  credential_expired: {
+    title: 'Sign-in has expired',
+    message: 'Your account is still saved, but its sign-in is no longer current.',
+    next: 'Start sign-in again, then reconnect this account.'
+  },
+  credential_account_mismatch: {
+    title: 'This is a different account',
+    message: 'The sign-in in this desktop does not match the saved account.',
+    next: 'Sign in to the intended account, then connect again.'
+  },
+  credential_rejected: {
+    title: 'Sign-in was not accepted',
+    message: 'The account did not accept this saved sign-in. Your account settings are still safe.',
+    next: 'Start sign-in again, then reconnect this account.'
+  },
+  credential_older: {
+    title: 'A newer sign-in is already saved',
+    message: 'This connection was not changed because a newer sign-in is already in place.',
+    next: 'Refresh status to see the current connection.'
+  },
+  credential_conflict: {
+    title: 'The sign-in changed during the check',
+    message: 'This connection was not changed because its saved sign-in changed while it was being checked.',
+    next: 'Refresh status and review the current connection.'
+  },
+  credential_not_allowed: {
+    title: 'This account cannot be connected here',
+    message: 'The account is already reserved or no longer available for this connection.',
+    next: 'Refresh status, then ask an operator to review the connection.'
+  },
+  credential_account_ambiguous: {
+    title: 'The account needs review',
+    message: 'More than one saved connection matches this sign-in, so nothing was changed.',
+    next: 'Ask an operator to review the existing connections.'
+  },
+  desktop_busy: {
+    title: 'The desktop is busy',
+    message: 'The desktop is finishing another action before it can continue.',
+    next: 'Wait a moment, then refresh status.'
+  },
+  desktop_not_running: {
+    title: 'The desktop is not ready',
+    message: 'The sign-in desktop needs to be running before this connection can continue.',
+    next: 'Open Connections and choose Start desktop.'
+  },
+  registration_removed: {
+    title: 'This connection was removed',
+    message: 'The saved connection was not changed.',
+    next: 'Refresh status and choose Restore if you want to set it up again.'
+  },
+  record_changed: {
+    title: 'This connection changed elsewhere',
+    message: 'The saved connection was updated in another window, so this change was not applied.',
+    next: 'Refresh status and review the latest connection before trying again.'
+  },
+  desktop_changed: {
+    title: 'The sign-in desktop changed',
+    message: 'The connection was not changed because its sign-in desktop is no longer the same.',
+    next: 'Review the connection and complete sign-in in its current desktop.'
+  },
+  registration_not_found: {
+    title: 'Connection not found',
+    message: 'This connection is no longer available in the current list.',
+    next: 'Refresh status to load the latest connections.'
+  },
+  invalid_request: {
+    title: 'That action could not be completed',
+    message: 'The connection details are no longer current.',
+    next: 'Refresh status and try again from the current connection.'
+  }
+};
+function errorDetail(error) {
+  const known = typeof error?.code === 'string' && Object.hasOwn(errorLanguage, error.code) ? errorLanguage[error.code] : undefined;
+  if (known) return known;
+  return {
+    title: 'We could not confirm that change',
+    message: 'Your saved sign-in is safe, but the latest change was not confirmed.',
+    next: 'Refresh status before trying again.'
+  };
+}
 function notice(text, kind = 'action') {
   noticeKind = kind;
   $('notice').textContent = text;
   $('notice').hidden = !text;
 }
 function remember(key, value) {
-  try { value ? sessionStorage.setItem(key, JSON.stringify(value)) : sessionStorage.removeItem(key); } catch {}
+  try {
+    if (value) sessionStorage.setItem(key, JSON.stringify(value));
+    else sessionStorage.removeItem(key);
+  } catch {}
 }
 function recalled(key) {
   try { return JSON.parse(sessionStorage.getItem(key)); } catch { return null; }
 }
 async function api(route, body, method = body ? 'POST' : 'GET') {
+  if (method === 'GET' && navigator.onLine === false) throw Error('You’re offline. Showing the last confirmed state.');
   let response;
   try {
     response = await fetch(route, {
@@ -34,16 +152,79 @@ async function api(route, body, method = body ? 'POST' : 'GET') {
       body: body ? JSON.stringify(body) : undefined, signal: AbortSignal.timeout(30000)
     });
   } catch {
-    throw Error(method === 'GET' ? 'Could not reach this monitor. Refresh to reconnect.' :
+    const error = Error(method === 'GET' ? 'Could not reach this monitor. Refresh to reconnect.' :
       'The result could not be confirmed. Refresh and check the saved state before trying again.');
+    error.code = 'network_unavailable';
+    throw error;
   }
   if (response.status === 401) {
     location.replace('/?reason=expired');
-    throw Error('Your session expired. Open this monitor again.');
+    const error = Error('Your session expired. Open this monitor again.');
+    error.code = 'session_expired';
+    throw error;
   }
-  const data = await response.json();
-  if (!response.ok) throw Error(data.error?.message || 'The action could not be confirmed. Refresh to check its status.');
+  let data;
+  try { data = await response.json(); } catch {
+    const error = Error('The monitor returned an incomplete response. Refresh to check the saved state.');
+    error.code = 'incomplete_response';
+    throw error;
+  }
+  if (!response.ok) {
+    const code = typeof data?.error?.code === 'string' ? data.error.code : 'control_unavailable';
+    const known = Object.hasOwn(errorLanguage, code) ? errorLanguage[code] : undefined;
+    const message = known?.message || 'The action could not be confirmed. Refresh to check its status.';
+    const error = Error(message);
+    error.code = code;
+    error.status = response.status;
+    throw error;
+  }
   return data;
+}
+function clearRefreshRetry() {
+  if (refreshRetryTimer) clearTimeout(refreshRetryTimer);
+  refreshRetryTimer = null;
+}
+function scheduleRefreshRetry() {
+  if (refreshRetryTimer || document.hidden || navigator.onLine === false) return;
+  const base = Math.min(30000, 1000 * 2 ** Math.min(refreshRetryAttempt, 5));
+  const delay = Math.round(base * (0.8 + Math.random() * 0.4));
+  refreshRetryAttempt++;
+  refreshRetryTimer = setTimeout(() => { refreshRetryTimer = null; void refresh(); }, delay);
+}
+function clearPollTimer() {
+  if (pollTimer) clearTimeout(pollTimer);
+  pollTimer = null;
+}
+function schedulePoll() {
+  clearPollTimer();
+  if (document.hidden || navigator.onLine === false) return;
+  const delay = Math.round(10000 * (0.8 + Math.random() * 0.4));
+  pollTimer = setTimeout(() => {
+    pollTimer = null;
+    if (document.hidden || navigator.onLine === false) return schedulePoll();
+    void refresh().finally(schedulePoll);
+  }, delay);
+}
+function connectionIntentKey(registrationId) { return 'registration-connect:' + registrationId; }
+async function recoverPendingConnections() {
+  if (recoveryPromise) return recoveryPromise;
+  const work = (async () => {
+    const pending = (state?.registrations ?? []).filter(registration => {
+      const intent = recalled(connectionIntentKey(registration.id));
+      return intent?.action === 'connect' && registration.state !== 'registered';
+    });
+    for (const registration of pending) {
+      if (await reconcileConnection(registration.id, 'connect')) {
+        remember(connectionIntentKey(registration.id), null);
+        errors.delete(registration.id);
+        errorMeta.delete(registration.id);
+        notice('Account connected. The saved state is confirmed.');
+      } else notice('The previous connection is still not confirmed. Your saved sign-in was not duplicated; retry when the relay is available.', 'action');
+    }
+  })();
+  const settled = work.finally(() => { if (recoveryPromise === settled) recoveryPromise = null; });
+  recoveryPromise = settled;
+  return settled;
 }
 function button(label, key, action, primary = false, disabled = false) {
   const element = node('button', busy.has(key) ? 'Working…' : label, primary ? '' : 'quiet');
@@ -59,6 +240,7 @@ async function run(key, action) {
   if (noticeKind === 'action') notice('');
   busy.add(key);
   errors.delete(key);
+  errorMeta.delete(key);
   // Keep the original node mounted through the user gesture (desktop popup permission).
   document.querySelectorAll('[data-busy]').forEach(element => {
     if (element.dataset.busy === key) { element.disabled = true; }
@@ -66,8 +248,10 @@ async function run(key, action) {
   try {
     await action();
   } catch (error) {
-    errors.set(key, error.message);
-    if (key === 'prepare') notice(error.message);
+    const detail = errorDetail(error);
+    errors.set(key, detail.message);
+    errorMeta.set(key, detail);
+    if (key === 'prepare') notice(detail.message);
   } finally {
     busy.delete(key);
     await refresh();
@@ -87,7 +271,7 @@ function chooseView(focus = false) {
     document.title = $('pool').textContent + ' — ' + titles[view];
     $('summary').textContent = view === 'accounts'
       ? state.accounts.filter(a => !a.removedAt).length + ' registered · ' + state.accounts.filter(a => !a.removedAt && a.state === 'enabled').length + ' enabled'
-      : view === 'registrations' ? 'Sign in, then connect. Reconnect here when access expires.'
+      : view === 'registrations' ? 'Sign in on the desktop, then connect here. Reconnect here when access expires.'
       : 'A history of saved account changes.';
     $('new').textContent = 'Connect account';
     $('gate-note').hidden = state.executionAllowed || view !== 'accounts';
@@ -185,6 +369,19 @@ async function openDesktop(registration) {
     tab.location = '/desktops?id=' + encodeURIComponent(registration.desktopId) + '#ticket=' + encodeURIComponent(result.ticket);
   } catch (error) { tab.close(); throw error; }
 }
+async function reconcileConnection(registrationId, action, previousCheckedAt) {
+  notice('Checking whether the connection finished…', 'action');
+  const delays = [0, 350, 900, 1800];
+  for (const delay of delays) {
+    if (delay) await wait(delay);
+    await refresh();
+    const registration = state?.registrations.find(item => item.id === registrationId);
+    const account = registration?.accountId ? state?.accounts.find(item => item.id === registration.accountId) : null;
+    if (action === 'connect' && registration?.state === 'registered') return true;
+    if (action === 'refresh' && account?.connectionState === 'connected' && account.connectionCheckedAt && account.connectionCheckedAt !== previousCheckedAt) return true;
+  }
+  return false;
+}
 function registrationRow(registration) {
   const desktop = state.desktops.find(d => d.id === registration.desktopId);
   const step = registrationStep(registration, desktop), saved = step === 3;
@@ -202,8 +399,24 @@ function registrationRow(registration) {
   if (account?.connectionCheckedAt) row.append(node('p', 'Last verified ' + date(account.connectionCheckedAt), 'hint'));
   const actions = node('div', undefined, 'actions');
   const call = async (action, message) => {
-    await api('/api/registrations/' + action, { id: registration.id });
-    if (message) notice(message);
+    const intentKey = connectionIntentKey(registration.id);
+    const previousCheckedAt = account?.connectionCheckedAt;
+    if (action === 'connect' || action === 'refresh') remember(intentKey, { registrationId: registration.id, action, startedAt: Date.now() });
+    try {
+      const result = await api('/api/registrations/' + action, { id: registration.id });
+      if (action === 'connect' || action === 'refresh') remember(intentKey, null);
+      if (message) notice(message);
+      return result;
+    } catch (error) {
+      // A timed-out or interrupted mutation is deliberately not replayed. The
+      // persisted registration is the source of truth, so reconcile it first.
+      if ((action === 'connect' || action === 'refresh') && await reconcileConnection(registration.id, action, previousCheckedAt)) {
+        remember(intentKey, null);
+        notice(action === 'connect' ? 'Account connected. The saved state is confirmed.' : 'Connection verified. The latest sign-in is saved.');
+        return { reconciled: true };
+      }
+      throw error;
+    }
   };
   if (registration.removedAt || condition.code === 'revoked') {
     heading.querySelector('.badge').textContent = registration.removedAt ? 'Removed' : 'Revoked';
@@ -245,16 +458,16 @@ function registrationRow(registration) {
           }, step === 2, closed));
           if (step === 1 && desktop.login?.state !== 'waiting') actions.append(button('Start sign-in', registration.id,
             () => call('signin', 'Sign-in started. Open the desktop to finish, then choose Connect account.'), true, closed || desktop.login?.state === 'starting'));
-          row.append(node('p', 'Already signed in manually? Choose Connect account to verify and save it.', 'hint'));
+          row.append(node('p', 'Already signed in? Choose Connect account. GALX will check this desktop and save the connection.', 'hint'));
         }
         actions.append(button('Open desktop', registration.id, () => openDesktop(registration), !saved && step === 1 && desktop.login?.state === 'waiting'));
         const tools = node('details', undefined, 'registration-tools'), summary = node('summary', saved ? 'Reconnect' : 'Sign-in options');
         summary.dataset.action = 'registration-options';
         tools.open = Boolean(reconnect);
-        tools.append(summary, node('p', saved ? 'Sign in to the same account in this desktop, then save the new sign-in. Your account and settings stay in place.' : 'Use this desktop to complete sign-in. Connecting verifies its saved credentials.', 'hint'));
+        tools.append(summary, node('p', saved ? 'Sign in to the same account in this desktop, then reconnect it. Your account and settings stay in place.' : 'Use this desktop to complete sign-in. Connect here when you are finished.', 'hint'));
         const secondary = node('div', undefined, 'actions');
         secondary.append(button('Start sign-in again', registration.id, () => call('signin', 'Sign-in started. Open the desktop to finish.'), false, closed || desktop.login?.state === 'starting'));
-        if (saved) secondary.append(button('Save new sign-in', registration.id, () => call('refresh', 'Connection verified. Check Accounts for its current status.'), true, closed));
+        if (saved) secondary.append(button('Reconnect account', registration.id, () => call('refresh', 'Connection verified. Check Accounts for its current status.'), true, closed));
         secondary.append(button('Stop desktop', registration.id, async () => {
           if (confirm('Stop the desktop for ' + registration.name + '? Any open sign-in will disconnect. Saved account access is retained.')) await call('stop', 'Desktop stopped. Start it again here when needed.');
         }));
@@ -294,6 +507,32 @@ function renderRegistrations() {
     $('pending').append(empty);
   }
 }
+function recoveryCandidate() {
+  if (!state) return null;
+  const registration = state.registrations.find(item => errorMeta.has(item.id) || errors.has(item.id));
+  if (registration) return {
+    registration,
+    account: registration.accountId ? state.accounts.find(item => item.id === registration.accountId) : null,
+    detail: errorMeta.get(registration.id) ?? errorDetail()
+  };
+  const account = state.accounts.find(item => errorMeta.has(item.id) || errors.has(item.id));
+  if (account) return { account, detail: errorMeta.get(account.id) ?? errorDetail() };
+  if (errorMeta.has('prepare') || errors.has('prepare')) return { detail: errorMeta.get('prepare') ?? errorDetail() };
+  return null;
+}
+function renderRecovery() {
+  const panel = $('recovery');
+  const candidate = recoveryCandidate();
+  panel.hidden = !candidate;
+  if (!candidate) return;
+  $('recovery-title').textContent = candidate.detail.title;
+  $('recovery-message').textContent = candidate.detail.message;
+  $('recovery-next').textContent = candidate.detail.next;
+  $('recovery-refresh').disabled = !connected || loading || busy.has('recovery-refresh');
+  const canOpen = Boolean(candidate.registration || candidate.account);
+  $('recovery-open').hidden = !canOpen;
+  $('recovery-open').disabled = !connected;
+}
 function render() {
   const focused = document.activeElement;
   const focusedRecord = focused?.closest('[data-record]')?.dataset.record;
@@ -307,17 +546,18 @@ function render() {
   $('prepare-copy').textContent = 'Use a ' + (state.pool === 'premium' ? 'paid' : 'free') + ' account for this relay. ' + (state.automaticActivation ? 'Connecting verifies access and enables the account automatically. You can pause it in Accounts.' : 'New connections stay paused while execution is paused for this relay.');
   $('prepare').querySelector('[type=submit]').disabled = !connected || !state.registrationAllowed || busy.has('prepare');
   if (!operator) $('prepare').hidden = true;
-  $('connection').textContent = connected ? (relayFresh(state) ? 'Connected' : 'Awaiting relay') : 'Connection interrupted';
+  $('connection').textContent = connected ? (relayFresh(state) ? 'Connected' : 'Awaiting relay') : navigator.onLine === false ? 'Offline' : refreshRetryTimer ? 'Reconnecting…' : 'Connection interrupted';
   $('connection').className = connected && relayFresh(state) ? 'ok' : 'waiting';
   const execution = executionStatus(state);
   $('execution').textContent = execution.label;
   $('registration').textContent = state.registrationAllowed ? 'Open' : 'Closed';
-  $('updated').textContent = (connected ? 'Updated ' : 'Last update ') + lastUpdated.toLocaleTimeString();
+  $('updated').textContent = connected ? 'Updated ' + lastUpdated.toLocaleTimeString() : lastUpdated ? 'Last confirmed ' + lastUpdated.toLocaleTimeString() : 'No confirmed update yet';
   $('gate-note').hidden = state.executionAllowed;
   $('gate-note').textContent = execution.detail;
   $('account-count').textContent = state.accounts.filter(a => !a.removedAt).length;
   $('registration-count').textContent = state.registrations.filter(r => !r.removedAt && r.state !== 'registered').length || '';
   chooseView();
+  renderRecovery();
   const selection = window.getSelection();
   if (selection && !selection.isCollapsed && selection.anchorNode?.parentElement?.closest('#rows,#pending,#completed-rows')) return;
   renderAccounts();
@@ -349,42 +589,57 @@ function render() {
   }
 }
 async function refresh() {
-  if (loading) return;
-  loading = true;
-  $('refresh').disabled = true;
-  $('main').setAttribute('aria-busy', 'true');
-  try {
-    const next = await api('/api/status');
-    for (const registration of next.registrations) {
-      const previous = state?.registrations.find(r => r.id === registration.id);
-      const account = next.accounts.find(a => a.id === registration.accountId);
-      const oldAccount = state?.accounts.find(a => a.id === registration.accountId);
-      const connectedNow = registration.state === 'registered' && previous?.state !== 'registered';
-      const refreshedNow = account?.connectionState === 'connected' && account.connectionCheckedAt && account.connectionCheckedAt !== oldAccount?.connectionCheckedAt;
-      if (errors.has(registration.id) && (connectedNow || refreshedNow)) {
-        errors.delete(registration.id);
-        notice(connectedNow ? 'Account connected. View its current state in Accounts.' : 'Connection verified. The latest sign-in is saved.');
+  if (refreshPromise) return refreshPromise;
+  const work = (async () => {
+    const wasConnected = connected;
+    loading = true;
+    $('refresh').disabled = true;
+    $('main').setAttribute('aria-busy', 'true');
+    try {
+      const next = await api('/api/status');
+      for (const registration of next.registrations) {
+        const previous = state?.registrations.find(r => r.id === registration.id);
+        const account = next.accounts.find(a => a.id === registration.accountId);
+        const oldAccount = state?.accounts.find(a => a.id === registration.accountId);
+        const connectedNow = registration.state === 'registered' && previous?.state !== 'registered';
+        const refreshedNow = account?.connectionState === 'connected' && account.connectionCheckedAt && account.connectionCheckedAt !== oldAccount?.connectionCheckedAt;
+        if (errors.has(registration.id) && (connectedNow || refreshedNow)) {
+          errors.delete(registration.id);
+          errorMeta.delete(registration.id);
+          notice(connectedNow ? 'Account connected. View its current state in Accounts.' : 'Connection verified. The latest sign-in is saved.');
+        }
+        const intent = recalled(connectionIntentKey(registration.id));
+        if (intent && ((intent.action === 'connect' && registration.state === 'registered') || (intent.action === 'refresh' && refreshedNow))) remember(connectionIntentKey(registration.id), null);
       }
+      state = next;
+      connected = true;
+      lastUpdated = new Date();
+      refreshRetryAttempt = 0;
+      clearRefreshRetry();
+      if (wasConnected === false && state && noticeKind === 'connection') notice('Relay reconnected. The latest status is confirmed.');
+      else if (noticeKind === 'connection') notice('');
+      render();
+      // Let the refresh promise settle before the read-only reconciliation starts;
+      // otherwise reconciliation would await this same in-flight refresh.
+      if (!wasConnected) setTimeout(() => void recoverPendingConnections(), 0);
+    } catch (error) {
+      connected = false;
+      scheduleRefreshRetry();
+      if (state) render();
+      else {
+        $('connection').textContent = navigator.onLine === false ? 'Offline' : refreshRetryTimer ? 'Reconnecting…' : 'Connection interrupted';
+        $('updated').textContent = 'No confirmed update yet';
+      }
+      document.querySelectorAll('#rows button,#pending button,#completed-rows button,#new,#first-account,#prepare [type=submit]').forEach(el => { el.disabled = true; });
+      notice(navigator.onLine === false ? 'You’re offline. Showing the last confirmed state.' : error.message, 'connection');
+    } finally {
+      loading = false;
+      $('refresh').disabled = false;
+      $('main').removeAttribute('aria-busy');
     }
-    state = next;
-    connected = true;
-    lastUpdated = new Date();
-    if (noticeKind === 'connection') notice('');
-    render();
-  } catch (error) {
-    connected = false;
-    if (state) render();
-    else {
-      $('connection').textContent = 'Connection interrupted';
-      $('updated').textContent = 'No confirmed update yet';
-    }
-    document.querySelectorAll('#rows button,#pending button,#completed-rows button,#new,#first-account,#prepare [type=submit]').forEach(el => { el.disabled = true; });
-    notice(error.message, 'connection');
-  } finally {
-    loading = false;
-    $('refresh').disabled = false;
-    $('main').removeAttribute('aria-busy');
-  }
+  })();
+  refreshPromise = work;
+  try { return await work; } finally { if (refreshPromise === work) refreshPromise = null; }
 }
 
 function healthBadge(condition) {
@@ -417,6 +672,7 @@ function openManagement(kind, record, command) {
   $('manage-submit').disabled = false;
   $('manage-cancel').disabled = false;
   $('manage-error').hidden = true;
+  $('manage-name').setAttribute('aria-invalid', 'false');
   $('manage-dialog').setAttribute('role', remove ? 'alertdialog' : 'dialog');
   $('manage-dialog').showModal();
   (rename ? $('manage-name') : $('manage-cancel')).focus();
@@ -438,6 +694,7 @@ $('manage-form').onsubmit = async event => {
   const { kind, record, command } = management;
   const name = $('manage-name').value.trim();
   if (command === 'rename' && (!name || /[\u0000-\u001f\u007f]/.test(name))) {
+    $('manage-name').setAttribute('aria-invalid', 'true');
     $('manage-error').textContent = 'Enter a name of 1–64 characters without control characters.';
     $('manage-error').hidden = false; $('manage-name').focus(); return;
   }
@@ -460,6 +717,7 @@ $('manage-form').onsubmit = async event => {
     await refresh();
     finishManagement();
   } catch (error) {
+    if (command === 'rename') $('manage-name').setAttribute('aria-invalid', 'true');
     $('manage-error').textContent = error.message;
     $('manage-error').hidden = false;
     managing = false; busy.delete(record.id);
@@ -485,6 +743,26 @@ function managementActions(kind, record) {
   return details;
 }
 
+$('recovery-refresh').onclick = async () => {
+  if (busy.has('recovery-refresh') || !connected) return;
+  busy.add('recovery-refresh');
+  renderRecovery();
+  try { await refresh(); }
+  finally { busy.delete('recovery-refresh'); renderRecovery(); }
+};
+$('recovery-open').onclick = () => {
+  const candidate = recoveryCandidate();
+  if (!candidate) return;
+  if (candidate.account) { goToRegistration(candidate.account.id); return; }
+  location.hash = 'registrations';
+  chooseView(true);
+  $('registration-search').value = '';
+  $('registration-filter').value = 'all';
+  renderRegistrations();
+  const row = candidate.registration && [...document.querySelectorAll('[data-record]')].find(el => el.dataset.record === candidate.registration.id);
+  row?.scrollIntoView({ block: 'center', behavior: 'instant' });
+  row?.querySelector('button,summary')?.focus({ preventScroll: true });
+};
 $('new').onclick = startDraft;
 $('first-account').onclick = startDraft;
 $('cancel').onclick = () => { $('prepare').hidden = true; renderRegistrations(); $('new').focus(); };
@@ -519,6 +797,18 @@ $('logout').onclick = async () => {
   try { await api('/session', undefined, 'DELETE'); location.replace('/?reason=signed-out'); }
   catch (error) { notice(error.message); $('logout').disabled = false; }
 };
+window.addEventListener('online', () => { refreshRetryAttempt = 0; notice('Back online. Checking the relay…', 'connection'); void refresh(); schedulePoll(); });
+window.addEventListener('offline', () => {
+  clearPollTimer(); clearRefreshRetry();
+  connected = false;
+  if (state) render();
+  notice('You’re offline. Showing the last confirmed state.', 'connection');
+});
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) { clearPollTimer(); clearRefreshRetry(); }
+  else { void refresh(); schedulePoll(); }
+});
+window.addEventListener('focus', () => { if (!document.hidden) { void refresh(); schedulePoll(); } });
 window.addEventListener('hashchange', () => {
   chooseView(!preserveViewFocus);
   preserveViewFocus = false;
@@ -527,5 +817,5 @@ chooseView();
 void (window.monitorConnection ?? Promise.resolve(true)).then(ready => {
   if (!ready) return;
   void refresh();
-  setInterval(() => { if (!document.hidden) void refresh(); }, 10000);
+  schedulePoll();
 });

@@ -1435,3 +1435,17 @@ Incident: `INC-20260914-ENROLLMENT`. Kind: `verification`.
 **Next step:** Retain manual-only enrollment and serving-readiness checks; do not reopen external enrollment paths.
 
 Evidence: [2026-09-19-relay-connection-repair.json](releases/2026-09-19-relay-connection-repair.json), [register.json](register.json), [CURRENT_STATE.md](CURRENT_STATE.md).
+
+## EVT-20260919-relay-registration-revision-repair — 2026-09-19T17:15:14Z
+
+Incident: `INC-20260916-REGISTRATION`. Kind: `recovery`.
+
+**Observation:** The Premium registration had a saved manual sign-in and remained prepared because enrollment reused a deterministic account ID whose retained journal history conflicted with a fresh insert revision.
+
+**Action:** Applied migration 20260919090000 with its paired rollback, added the delete-and-reenroll regression, and retried the same scoped Connect operation.
+
+**Result:** Connect returned HTTP 200; the registration is registered, the account is enabled and connected with four verified models, execution is allowed, runtime readiness is HTTP 200, and one sanitized PNG sample completed with HTTP 200.
+
+**Next step:** Retain the revision-reuse regression and rerun the full relay authorization fixture after its independent installation-configuration setup is corrected.
+
+Evidence: [2026-09-19-relay-connection-repair.json](releases/2026-09-19-relay-connection-repair.json), [20260919090000_reuse_safe_shard_registry_revisions.sql](../supabase/migrations/20260919090000_reuse_safe_shard_registry_revisions.sql).

@@ -1,10 +1,9 @@
 // Presentation only; authorization and account classification remain server-owned.
-export function relayFresh(state, now = Date.now()) {
-  const age = now - Date.parse(state.lastSeenAt);
-  return Number.isFinite(age) && age >= 0 && age < 45000;
+export function relayFresh(state) {
+  return state.relayFresh === true;
 }
-export function accountApplied(account, state, now = Date.now()) {
-  return relayFresh(state, now) && account.acknowledgedRevision === account.revision && account.acknowledgedEpoch === state.epoch;
+export function accountApplied(account, state) {
+  return relayFresh(state) && account.applied === true;
 }
 export function needsSignIn(account, now = Date.now()) {
   return account.connectionState === 'sign_in_required' || !(Number(account.credentialExpiresAt) > now);
@@ -30,7 +29,7 @@ export function accountHealth(account, state, connected = true, now = Date.now()
   if (account.removedAt) return health('removed', 'Removed', 'Access revoked. History retained.', false, 9);
   if (account.state === 'revoked') return health('revoked', 'Revoked', 'This account can no longer be enabled.', false, 8);
   if (!connected) return health('unknown', 'Status unavailable', 'Reconnect to check the current account health.', false, 3);
-  if (needsSignIn(account, now)) return health('signin', 'Reconnect required', account.connectionState === 'sign_in_required' ? 'The saved sign-in was rejected. Reconnect this account to restore access.' : 'The saved sign-in has expired. Reconnect this account to restore access.', true, 0);
+  if (needsSignIn(account, now)) return health('signin', 'Reconnect required', account.connectionState === 'sign_in_required' ? 'This account needs a fresh sign-in. Reconnect it to restore access.' : 'This account’s sign-in has expired. Reconnect it to restore access.', true, 0);
   if (account.healthSignal === 'unavailable') return health('failures', 'Access unavailable', 'The account reported unavailable access. Review its sign-in.', true, 0);
   if (Number(account.cooldownUntilMs) > now || account.healthSignal === 'cooldown') return health('cooldown', 'Cooling down', Number(account.cooldownUntilMs) > now ? 'Requests are paused until ' + new Date(Number(account.cooldownUntilMs)).toLocaleString() + '.' : 'The account reported a temporary limit. Refresh before enabling it.', true, 1);
   if (Number(account.consecutiveFailures) >= 3) return health('failures', 'Repeated failures', account.consecutiveFailures + ' consecutive failures reported. Review the account before enabling it.', true, 1);
@@ -55,7 +54,7 @@ export function registrationHealth(registration, state, connected = true, now = 
   if (!desktop || ['stopped', 'missing', 'error', 'unhealthy'].includes(desktop.state)) return health('desktop', !desktop ? 'Desktop needed' : desktop.state === 'stopped' ? 'Desktop stopped' : 'Desktop needs attention', 'Create or start this registration’s desktop to continue.', true, 1);
   if (['failed', 'expired', 'cancelled'].includes(desktop.login?.state)) return health('signin', 'Sign-in incomplete', 'Start a new sign-in, then connect this account.', true, 0);
   if (!desktop.canConnect) return health('progress', 'Starting desktop', 'The desktop is getting ready. This page updates automatically.', false, 4);
-  if (registration.state === 'reviewed' || desktop.login?.state === 'saved') return health('reviewed', 'Ready to connect', 'Sign-in is saved. Connect to verify access and save the account.', false, 4);
+  if (registration.state === 'reviewed' || desktop.login?.state === 'saved') return health('reviewed', 'Ready to connect', 'Your sign-in is ready. Connect to finish setting up this account.', false, 4);
   return health('progress', desktop.login?.state === 'waiting' ? 'Waiting for sign-in' : 'Sign-in needed', 'Complete manual sign-in, then connect this account.', false, 5);
 }
 export function filterAccounts(accounts, query, filter, now = Date.now(), options = {}) {

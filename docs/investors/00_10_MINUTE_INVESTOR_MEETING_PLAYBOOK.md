@@ -1,96 +1,108 @@
-# ⏱️ The 10-Minute Executive Pitch Playbook
+# GALX 10-minute investor meeting playbook
 
 <!-- docs-scope: commercial-draft -->
-> **Reading scope:** Commercial and strategic investor materials. Contains thesis formulations, product positioning, unit economics frameworks, and venture scale arguments. Technical and operational capabilities describe public interfaces; proprietary routing mechanisms, capacity acquisition, and internal execution infrastructure remain private under [AGENTS.md](../AGENTS.md).
 
-## Sustainable, Abundant AI Access for Anyone Who Wants to Build
+The meeting should make one mechanism memorable: **human intention becomes useful creative work when the person can direct the agent relationship, not merely request an output.**
 
-**Purpose**: A crisp 10-minute presentation guide for venture partner meetings, structured around the venture formation argument and rapid-fire thesis validation.
+| Time | Topic | Job |
+| --- | --- | --- |
+| 0:00–1:00 | Forecast | State why more capable machines may create demand for more capable people. |
+| 1:00–2:15 | Bottleneck | Explain the gap between agent execution and human intention. |
+| 2:15–3:30 | ACI | Define the combined system and the user-level outcome. |
+| 3:30–4:45 | Founder | Show why William has relevant proximity to this problem. |
+| 4:45–6:15 | Product | Show the image-first loop and the role of HEAV3NS MANDATE. |
+| 6:15–7:15 | Portfolio | Explain LUMI without turning it into a second go-to-market campaign. |
+| 7:15–8:30 | Business | Define the retained paying creator and the scale condition. |
+| 8:30–10:00 | Proof and ask | State what capital must make true and what would falsify the thesis. |
 
----
+## 0:00–1:00 — The forecast
 
-## 🧭 The 10-Minute Executive Clock
+> I’m building GALX around a forecast for the agent age: more capable machines will create demand for more capable people.
+>
+> The important opportunity is not only what an agent can execute. It is what a person becomes able to create through that agent.
 
-```
-[0:00 - 2:00] 1. The Future & The Non-Consensus Thesis (Intelligence abundance + sufficient intelligence)
-[2:00 - 3:30] 2. The Product Today: Radical Simplicity (Two models, API access, abundant serving)
-[3:30 - 5:30] 3. The Wedge & Expansion Engine (Builders → Applications → Application Usage → GALX Execution)
-[5:30 - 7:30] 4. Asymmetric Advantage & Founder-Market Fit (Absorbing complexity; learning through operation)
-[7:30 - 10:00] 5. Intellectual Honesty, Unknowns & Next Milestones (What we believe vs observed vs proving next)
-```
+Do not open with a model catalog, an infrastructure diagram, or a claim about a universal market. Open with the person’s changed capability.
 
----
+## 1:00–2:15 — The bottleneck
 
-## 🎙️ 1. The Future & The Non-Consensus Thesis `[0:00 - 2:00]`
+> As agents improve, a product question becomes more important: can a person reliably turn that capability toward something they actually intend?
+>
+> Creative work often develops through interaction. The person expresses, delegates, inspects, redirects, preserves, and continues. A functional output can still leave the person with more interpretation and correction than before.
 
-> *"We are building GALX around a clear conviction about where the AI market is heading:
-> 
-> **AI capability will continue becoming more abundant, while the infrastructure required to access, select, operate, and economically sustain that capability becomes increasingly fragmented.**
-> 
-> Today, the market is obsessed with frontier benchmark battles and exposing 200 different model switches to developers. But here is our non-consensus thesis:
-> 
-> **For a large class of applications, developers do not need maximum available intelligence. They need sufficient intelligence, reliably and economically delivered, to complete the task.**
-> 
-> More models, providers, pricing tiers, and capacity constraints do not eliminate the need for an intermediary—they make one essential. GALX’s opportunity is to absorb that complexity so the developer can focus entirely on what they are building."*
+Make clear that this is not anti-autonomy. Delegation can be exactly how a person becomes more capable. The product must make delegation serve the person’s purpose.
 
----
+## 2:15–3:30 — ACI
 
-## 💡 2. The Product Today: Radical Simplicity `[2:00 - 3:30]`
+> We call the thesis Augmented Creative Intelligence—ACI. The unit is not the agent alone. It is the person, their agents, their tools, and the work they are creating together.
+>
+> The question is: what can this person now initiate, influence, complete, and return to?
 
-> *"How does this thesis translate into a product today?
-> 
-> We keep the product brutally understandable:
-> **Two models. API access. Abundant serving. Build what you want.**
-> 
-> We provide access to a deliberately small managed model surface—featuring **GALX Nova**—through a clean, standard API endpoint.
-> 
-> We did not build a complex 50-slider configuration interface because **the simplicity is the product decision**. GALX handles the underlying execution mechanics, reliability, and economic delivery so the builder never has to think about infrastructure."*
+Explain that ACI is a category thesis, not a claim that GALX invented human augmentation. Spell out the term before using the acronym.
 
----
+## 3:30–4:45 — Why this founder
 
-## 🚀 3. The Wedge & The Expansion Engine `[3:30 - 5:30]`
+> My background is in human-centered systems, creative tools, hands-on agent development, and the operational work around them.
+>
+> DreamBees, LUMI, and GALX put me close to both sides of the interaction: what people are trying to make and what happens when working systems act.
+>
+> A recurring lesson is that generation is not the same as completion. The May 2026 JoyZoning field report distinguished generated changes from accepted work and kept completion under human authority. It also exposed scope drift, conflicting changes, unverifiable outputs, and verification burden.
 
-> *"Who uses this first, and how does it become enormous?
-> 
-> **The Initial Wedge**: We are not chasing enterprise procurement committees with buzzwords. Our wedge is builders: independent developers, hobbyists, creative technologists, and engineers experimenting with AI who want to make something without model management becoming a second job.
-> 
-> **How It Becomes Enormous**: We don't argue that GALX is venture-scale simply because inference is a large market. We build the scale argument from where GALX sits in the software lifecycle.
-> 
-> **More Builders $\longrightarrow$ More Applications $\longrightarrow$ More Application Usage $\longrightarrow$ More Execution Through GALX.**
-> 
-> As our builders' experiments turn into software that real people use every day, every user interaction generates continuing execution demand through GALX. We become the persistent execution layer underneath an expanding ecosystem of AI applications."*
+The point is not to present a field report as market validation. The point is to show that the anticipated bottleneck is grounded in prior work.
 
----
+## 4:45–6:15 — Product and activation
 
-## 🛡️ 4. Asymmetric Advantage & Founder-Market Fit `[5:30 - 7:30]`
+> We are starting with image creation and community discovery for independent creators with recurring visual ideas.
+>
+> Bring an idea, direct and revise it, keep or share the result, and return with another idea.
 
-> *"Why GALX?
-> 
-> **GALX absorbs complexity and sells simplicity.**
-> 
-> Turning heterogeneous, economically variable AI capacity into a reliable, dead-simple developer experience requires deep operating knowledge. The public product stays simple; the proprietary knowledge required to operate it becomes deeper.
-> 
-> **Founder-Market Fit**: I didn't arrive at GALX by staring at market analyst spreadsheets. I got here by building and operating AI systems—building autonomous applications, running agent workloads, encountering the brutal economic and reliability friction of existing access, and building infrastructure to solve it. GALX is early, and we are learning and iterating rapidly through live operational feedback."*
+Then explain HEAV3NS MANDATE:
 
----
+> HEAV3NS MANDATE is our call to activation: the moment available capability becomes permission to begin. A private cohort can make that invitation concrete, but the product has to earn the next visit.
 
-## 🔬 5. Rapid-Fire Investor Q&A & Unknowns `[7:30 - 10:00]`
+The first demonstration is one person making something meaningful that was previously beyond practical reach. The product proof is independent return.
 
-1. **"Why only two models? Won't developers demand more choice?"**  
-   *Developers building applications want functionality and predictability, not decision fatigue. By managing a concentrated surface, we optimize for reliability and economics. If an application needs to complete a task, having two well-managed models that work abundantly is dramatically superior to managing 50 uncertain ones.*
+## 6:15–7:15 — LUMI and the product boundary
 
-2. **"What if foundation model providers cut retail prices to zero?"**  
-   *Cheaper underlying capability accelerates our thesis. Cheaper models lead to more applications, higher execution volume, and greater ecosystem fragmentation across providers. As long as the underlying layer is heterogeneous and fragmented, an abstraction layer that provides dependable execution becomes more valuable, not less.*
+> LUMI remains a maintained expression of the same thesis in software creation. It is coding-agent-shaped, but it is not a second simultaneous go-to-market campaign or a general coding-agent arms race. Its coding ability serves a person’s creative work.
 
-3. **"What prevents an OpenRouter or Cloudflare from doing this?"**  
-   *Model routers act as catalogs; they expose every model and push the selection and operational burden onto the developer. GALX takes the opposite approach: we absorb the operational burden and sell dependable simplicity.*
+> We are also not selling public general-purpose inference access as the commercial wedge. GALX has to earn paid return for a creative experience.
 
-4. **"What are the key unknowns you are testing right now?"**  
-   *We are actively testing four things: (1) Do builders continue using GALX as their primary platform? (2) What kinds of applications stick? (3) Does execution volume compound as applications gain users? (4) Can we sustain healthy gross margins as execution scales?*
+This is an operating decision, not evidence that the creative product is already validated.
 
-5. **"What does the next capital raise unlock?"**  
-   *Capital expands serving capacity, supports deeper operational instrumentation, and accelerates onboarding for the next wave of high-velocity builders.*
+## 7:15–8:30 — The business
 
----
+> The commercial unit is a retained, paying creator. We earn when someone returns for continuing creative value and the cost to serve remains sustainable.
 
-> **Close**: *"If GALX is right, we don't just sell inexpensive tokens. We become the persistent abstraction and execution layer through which developers build and run the next era of software."*
+> Growth in customer value must outpace growth in founder intervention. If every new creator still needs me to translate their intention, repair their workflow, or monitor their session, we have not built a scalable product.
+
+The large outcome is widespread paid, repeat use of a preferred creative environment. It is not “creativity” as an abstract total market.
+
+## 8:30–10:00 — Evidence and ask
+
+> We separate three proofs. Capability: can a creator accomplish something meaningful with usable direction? Product: do creators return to GALX without continuous founder guidance? Business: do enough creators pay while delivery and acquisition remain sustainable?
+
+> Capital improves the image-first loop, runs bounded activation cohorts, measures behavior and willingness to pay, and builds the team and operations that remove founder dependency.
+
+Close with:
+
+> One person making something they could not previously make demonstrates possibility. Repeated use, payment, and sustainable delivery demonstrate the business.
+
+## Rapid answers
+
+**Why not an existing image product?** GALX must be preferable for a particular recurring activity through direction, continuity, revision, and community. The question is what users would lose by leaving, not whether other products can generate images.
+
+**Is this an argument against autonomous agents?** No. Successful delegation can expand capability. GALX is focused on whether the person can direct the combined system without inheriting all of its complexity.
+
+**What is the moat?** HCI is not a moat by itself. The hypothesis is accumulated product knowledge about where creators lose direction, which interventions help, what to preserve, and why they return when comparable generation exists elsewhere.
+
+**What proves the thesis?** Meaningful completion, deliberate revision, perceived control, independent return, payment, sustainable cost to serve, and distribution beyond founder-led cohorts.
+
+**What could invalidate it?** People may enjoy a first generation but not develop a project; existing tools may be good enough; community may drive browsing but not return; or cost and support may grow faster than value.
+
+## Guardrails
+
+- Say **Augmented Creative Intelligence** on first use; use ACI afterward.
+- Keep **ACI**, **HEAV3NS MANDATE**, **LUMI**, and **GALX** distinct.
+- Describe observations as observations and hypotheses as hypotheses.
+- Do not claim product–market fit, a moat, a market size, or model superiority before the evidence exists.
+- Keep topology, routing, credentials, upstream identities, internal limits, and diagnostics private.

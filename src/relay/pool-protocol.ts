@@ -1,6 +1,6 @@
 import { createHash, timingSafeEqual } from 'node:crypto';
 import type { IncomingMessage, ServerResponse } from 'node:http';
-import { RequestError } from './request-policy.js';
+import { RequestError, RetryBudget } from './request-policy.js';
 
 export type PoolId = 'premium' | 'standard';
 export type Workload = 'text' | 'sites' | 'images';
@@ -19,6 +19,7 @@ export function json(res: ServerResponse, status: number, value: unknown) {
 }
 export function failure(res: ServerResponse, error: unknown) {
   const status = error instanceof RequestError ? error.status : 503;
+  if (status === 429 || status === 503) res.setHeader('Retry-After', '2');
   json(res, status, { error: { code: error instanceof RequestError ? error.code : 'service_unavailable', message: error instanceof RequestError ? error.message : 'This service is temporarily unavailable.' } });
 }
 export function exactKeys(body: Record<string, unknown>, keys: readonly string[]) {
@@ -30,12 +31,12 @@ export const registrationErrors: Record<string, { status: number; message: strin
   credential_not_allowed: { status: 409, message: 'This account cannot be registered here. Ask an administrator to review its existing access and registration.' },
   credential_account_mismatch: { status: 409, message: 'This sign-in does not match the saved account. Sign in to the intended account, then connect again.' },
   credential_missing: { status: 422, message: 'No saved sign-in was found. Complete sign-in in this desktop, then connect again.' },
-  credential_invalid: { status: 422, message: 'The saved sign-in could not be read. Start sign-in again, then save the new sign-in.' },
-  credential_expired: { status: 422, message: 'The saved sign-in has expired. Sign in again, then save the new sign-in.' },
-  credential_older: { status: 409, message: 'A newer sign-in is already saved for this account. Sign in again in this desktop, then save the new sign-in.' },
-  credential_rejected: { status: 422, message: 'The saved sign-in was not accepted. Sign in again, then save the new sign-in.' },
+  credential_invalid: { status: 422, message: 'We could not read the saved sign-in. Start sign-in again, then connect this account.' },
+  credential_expired: { status: 422, message: 'Your sign-in has expired. Start sign-in again, then reconnect this account.' },
+  credential_older: { status: 409, message: 'A newer sign-in is already saved. Refresh this connection to use it.' },
+  credential_rejected: { status: 422, message: 'This sign-in was not accepted. Start sign-in again, then reconnect this account.' },
   credential_check_unavailable: { status: 503, message: 'Account access could not be checked. Keep the saved sign-in and try connecting later.' },
-  credential_registry_unavailable: { status: 503, message: 'The account update could not be confirmed. Refresh its status before retrying.' },
+  credential_registry_unavailable: { status: 503, message: 'The connection is not confirmed yet. Your saved sign-in is safe. Refresh its status before trying again.' },
   credential_conflict: { status: 409, message: 'The saved sign-in changed during review. Refresh, then connect again.' },
 };
 export function serviceOrigin(value: string) {
@@ -59,33 +60,83 @@ export function requestWorkload(pool: PoolId, pathname: string, body: Record<str
 export interface PoolIdentity { pool: PoolId; installationId: string; }
 export class CentralClient {
   readonly origin: string;
+  private readonly readRetryBudget = new RetryBudget();
+  private readonly readCircuit = { failures: 0, openUntil: 0, probeInFlight: false };
   constructor(origin: string, private readonly token: string, readonly identity: PoolIdentity, private readonly transport: typeof fetch = fetch) {
     this.origin = serviceOrigin(origin);
     if (!['premium','standard'].includes(identity.pool) || !uuid(identity.installationId) || !/^[A-Za-z0-9_-]{32,256}$/.test(token)) throw Error('Invalid service identity.');
   }
+  private beginSafeRead() {
+    const now = Date.now();
+    if (this.readCircuit.openUntil > now) throw new RequestError(503, 'control_unavailable', 'The control service is recovering. Refresh in a moment.');
+    if (this.readCircuit.failures >= 3) {
+      if (this.readCircuit.probeInFlight) throw new RequestError(503, 'control_unavailable', 'The control service is recovering. Refresh in a moment.');
+      this.readCircuit.probeInFlight = true;
+    }
+  }
+  private safeReadHealthy() {
+    this.readCircuit.failures = 0;
+    this.readCircuit.openUntil = 0;
+    this.readCircuit.probeInFlight = false;
+    this.readRetryBudget.success();
+  }
+  private safeReadFailed() {
+    this.readCircuit.failures = Math.min(3, this.readCircuit.failures + 1);
+    this.readCircuit.probeInFlight = false;
+    if (this.readCircuit.failures >= 3) this.readCircuit.openUntil = Date.now() + 4000;
+  }
   async call<T = any>(route: string, body: Record<string, unknown> = {}): Promise<T> {
     if (!/^\/(runtime|operator|registrar)\/[a-z_-]+$/.test(route)) throw Error('Invalid service route.');
-    const response = await this.transport(this.origin + route, { method: 'POST', redirect: 'error', signal: AbortSignal.timeout(12000),
-      headers: { Authorization: `Bearer ${this.token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ ...body, ...this.identity }) });
-    // Bound credential-bearing replies; never include raw responses in errors or logs.
-    const reader = response.body?.getReader(); let size = 0; const chunks: Uint8Array[] = [];
-    try { if (reader) for (;;) { const r = await reader.read(); if (r.done) break; size += r.value.length; if (size > 8 * 1024 * 1024) throw Error(); chunks.push(r.value); } }
-    finally { await reader?.cancel().catch(() => {}); }
-    if (!response.ok) {
-      let code:string|undefined;try{code=JSON.parse(Buffer.concat(chunks).toString('utf8'))?.error?.code;}catch{}
-      if(code && Object.hasOwn(registrationErrors,code)) {
-        const known=registrationErrors[code];throw new RequestError(known.status,code,known.message);
+    // Status and operation reads are safe to retry. Mutating registrar and account
+    // calls deliberately stay single-shot; their durable operation identities make
+    // an explicit user retry safe without replaying a credential write here.
+    const retryableRead = route === '/operator/status' || route === '/operator/operation';
+    const retryableStatus = (status: number) => [429, 502, 503, 504].includes(status);
+    const timeoutMs = retryableRead ? 5000 : 12000;
+    if (retryableRead) this.beginSafeRead();
+    let attempt = 0;
+    for (;;) {
+      try {
+        const response = await this.transport(this.origin + route, { method: 'POST', redirect: 'error', signal: AbortSignal.timeout(timeoutMs),
+          headers: { Authorization: `Bearer ${this.token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ ...body, ...this.identity }) });
+        // Bound credential-bearing replies; never include raw responses in errors or logs.
+        const reader = response.body?.getReader(); let size = 0; const chunks: Uint8Array[] = [];
+        try { if (reader) for (;;) { const r = await reader.read(); if (r.done) break; size += r.value.length; if (size > 8 * 1024 * 1024) throw Error('Service response exceeded the safety limit.'); chunks.push(r.value); } }
+        finally { await reader?.cancel().catch(() => {}); }
+        if (retryableRead && !retryableStatus(response.status)) this.safeReadHealthy();
+        if (!response.ok) {
+          let code:string|undefined;try{code=JSON.parse(Buffer.concat(chunks).toString('utf8'))?.error?.code;}catch{}
+          if(code && Object.hasOwn(registrationErrors,code)) {
+            const known=registrationErrors[code];throw new RequestError(known.status,code,known.message);
+          }
+          const reviewErrors:Record<string,string>={
+            account_type_mismatch:`Sign in with a ${this.identity.pool==='premium'?'paid':'free'} account for this registration.`,
+            account_type_unverified:'The account type could not be verified. Sign in again, then review the account.',
+            models_unverified:'Model access could not be verified. Review the account after its connection is restored.',
+            account_check_unavailable:'Account review is unavailable. Restore the central account service before retrying.',
+          };
+          if(code==='record_changed')throw new RequestError(409,code,'This item changed while you were editing. Close this dialog, refresh, and try again.');
+          if(code&&Object.hasOwn(reviewErrors,code))throw new RequestError(response.status===422?422:503,code,reviewErrors[code]);
+          throw new RequestError([400,401,403,404,409,429].includes(response.status) ? response.status : 503, 'control_unavailable', 'We could not confirm that change. Your saved sign-in is safe. Refresh its status before retrying.');
+        }
+        try { return JSON.parse(Buffer.concat(chunks).toString('utf8')); } catch { throw Error('Invalid service response.'); }
+      } catch (error) {
+        const status = error instanceof RequestError ? error.status : undefined;
+        const canRetry = retryableRead && attempt < 2 && (status === undefined || retryableStatus(status));
+        if (!canRetry) {
+          if (retryableRead && (status === undefined || retryableStatus(status))) this.safeReadFailed();
+          throw error;
+        }
+        if (!this.readRetryBudget.take()) {
+          this.safeReadFailed();
+          throw error;
+        }
+        // Small bounded exponential backoff with jitter prevents a monitor fleet
+        // from stampeding a recovering control service while keeping reads snappy.
+        const delay = Math.round((150 * 2 ** attempt) * (0.8 + Math.random() * 0.4));
+        attempt++;
+        await new Promise(resolve => setTimeout(resolve, delay));
       }
-      const reviewErrors:Record<string,string>={
-        account_type_mismatch:`Sign in with a ${this.identity.pool==='premium'?'paid':'free'} account for this registration.`,
-        account_type_unverified:'The account type could not be verified. Sign in again, then review the account.',
-        models_unverified:'Model access could not be verified. Review the account after its connection is restored.',
-        account_check_unavailable:'Account review is unavailable. Restore the central account service before retrying.',
-      };
-      if(code==='record_changed')throw new RequestError(409,code,'This item changed while you were editing. Close this dialog, refresh, and try again.');
-      if(code&&Object.hasOwn(reviewErrors,code))throw new RequestError(response.status===422?422:503,code,reviewErrors[code]);
-      throw new RequestError([400,401,403,404,409,429].includes(response.status) ? response.status : 503, 'control_unavailable', 'The action could not be confirmed. Refresh its status before retrying.');
     }
-    try { return JSON.parse(Buffer.concat(chunks).toString('utf8')); } catch { throw Error('Invalid service response.'); }
   }
 }

@@ -1,81 +1,58 @@
-# ⚙️ The Platform Abstraction Layer
+# GALX product boundary and operating choice
 
 <!-- docs-scope: commercial-draft -->
-> **Reading scope:** Commercial and strategic investor materials. Contains thesis formulations, product positioning, unit economics frameworks, and venture scale arguments. Technical and operational capabilities describe public interfaces; proprietary routing mechanisms, capacity acquisition, and internal execution infrastructure remain private under [AGENTS.md](../AGENTS.md).
 
-## Absorbing Ecosystem Fragmentation for Modern Software
+This file retains its historical path for navigation. Its current subject is the boundary around the GALX product and the obligations the company is choosing to take on.
 
-An architectural and operational overview of how GALX functions as an abstraction layer between application code and the rapidly fragmenting AI infrastructure ecosystem.
+## What GALX is
 
----
+GALX is a creative product for Augmented Creative Intelligence. It helps an individual imagine, direct, make, revise, preserve, and revisit creative work with agent assistance.
 
-## 1. The Fragmentation Crisis Facing Developers
+The initial commercial expression is image creation and community discovery for independent creators with recurring visual ideas.
 
-Software engineering has always progressed by introducing abstractions over underlying complexity:
-- **Operating Systems** abstracted raw hardware instructions.
-- **Relational Databases** abstracted disk storage and file systems.
-- **Cloud Infrastructure** abstracted physical server racks and networking.
-- **Payment APIs** abstracted fragmented international banking protocols.
+## What GALX is not
 
-Today, AI capability is the new foundational layer of computing—but developers are being forced to interact with it at the "bare metal" level.
+GALX is not currently:
 
-```
-┌─────────────────────────────────────────────────────────────────────────────────┐
-│                      THE AI INFRASTRUCTURE FRAGMENTATION                        │
-├─────────────────────────────────────────────────────────────────────────────────┤
-│ • 100+ competing foundation models with differing capabilities & token limits   │
-│ • Fractured cloud providers (OpenAI, Anthropic, Google, AWS, Azure, open hosts) │
-│ • Incompatible parameter schemas, error responses, and streaming protocols      │
-│ • Volatile pricing, unexpected rate limits (HTTP 429), and capacity drop-offs   │
-│ • Continuous refactoring required as providers deprecate older versions         │
-└─────────────────────────────────────────────────────────────────────────────────┘
-```
+- a public inference marketplace;
+- a model catalog whose value depends on exposing every choice;
+- a generic endpoint business;
+- a promise to accommodate unrelated external workloads; or
+- a requirement to launch every creative medium at once.
 
-Forcing developers to manage this fragmentation directly wastes valuable engineering time and slows down product velocity.
+Existing capabilities may support the product or explicitly administered private access, but customers buy the creative experience.
 
----
+## Public product contract
 
-## 2. How GALX Solves the Problem: The Abstraction Boundary
+The public experience should explain:
 
-GALX sits cleanly between the application and the fragmented infrastructure underneath it:
+- what a person can make;
+- how they can direct and revise it;
+- what can be saved, revisited, or shared;
+- what happens when an action fails; and
+- how user content and account information are handled.
 
-```
-┌────────────────────────────────────────────────────────┐
-│               DEVELOPER APPLICATION                    │
-│      (SaaS, Creative Tools, Agent Loops, Mobile)       │
-└───────────────────────────┬────────────────────────────┘
-                            │ Standard API Call
-                            ▼
-┌────────────────────────────────────────────────────────┐
-│             GALX PLATFORM ABSTRACTION LAYER            │
-│  • Manages Two Deliberate Models (e.g. GALX Nova)       │
-│  • Absorbs Provider Outages, Rate Limits & Failover    │
-│  • Balances Capacity Across Heterogeneous Sources      │
-│  • Provides Economically Predictable Execution         │
-└───────────────────────────┬────────────────────────────┘
-                            │ Proprietary Execution
-                            ▼
-┌────────────────────────────────────────────────────────┐
-│            FRAGMENTED UNDERLYING ECOSYSTEM             │
-│    (Diverse Model Providers, Cloud Tiers, Hardware)    │
-└────────────────────────────────────────────────────────┘
-```
+It should not expose topology, shard configuration, credential sources, upstream authentication, routing mechanics, internal constraints, execution-model selection, or implementation diagnostics. Public responses and metadata use explicit allowlists; images are sanitized and re-encoded before publication.
 
-### The Developer Contract:
-- **One endpoint**: Call the standard API.
-- **Two models**: Choose the appropriate capability level without decision paralysis.
-- **Abundant serving**: Requests execute with high availability and predictable speed.
-- **Zero infrastructure management**: Never configure cloud IAM, rate limit retries, or multi-provider failover.
+## Portfolio boundary
 
----
+HEAV3NS MANDATE is the call to activation. GALX is the product and company that must earn continuing value. LUMI is a maintained software-creation instrument within the broader thesis.
 
-## 3. Operational Asymmetry as a Defensible Engine
+These names should not be presented as three simultaneous products with three independent go-to-market plans:
 
-Why doesn't every developer build their own internal abstraction layer?
+| Name | Boundary |
+| --- | --- |
+| ACI | Category thesis and product lens. |
+| HEAV3NS MANDATE | Activation language and bounded invitation to begin. |
+| LUMI | Maintained software expression and learning instrument. |
+| GALX | Commercial creative product and business. |
 
-Because **maintaining an abstraction layer across a rapidly moving ecosystem requires continuous operational effort:**
-1. **Handling Provider Volatility**: When an upstream provider alters its API behavior, experiences latency spikes, or degrades, an in-house proxy breaks. GALX absorbs these fluctuations dynamically.
-2. **Economic Optimization**: Operating at aggregate scale enables GALX to optimize capacity utilization in ways an individual application spending \$500/month never could.
-3. **Focus Preservation**: Engineering teams want to build features that differentiate their product, not maintain plumbing.
+## Operating choice
 
-**GALX absorbs the ongoing operational tax of AI so builders can focus entirely on creating great software.**
+Retiring public Developer Access concentrates effort on the product that must earn paid return. Existing capability and metering can remain useful for the product and intentionally administered private access. This is a portfolio and operating decision, not evidence that the creative thesis is already validated.
+
+The product team should optimize for creative value, direction, continuity, reliability, safeguards, support, and sustainable cost to serve. Administrative controls and private operational records belong behind server-side authorization and are not ordinary user features.
+
+## Investor interpretation
+
+The boundary is part of the thesis. A focused company can choose which obligations to accept. The decision is credible only if the narrower product produces meaningful capability, independent return, payment, and delivery economics.

@@ -1,172 +1,156 @@
 /**
- * GALX — Google Slides Presentation Generator (Apps Script)
- * 
- * Instructions:
- * 1. Open Google Drive (drive.google.com) or Google Apps Script (script.google.com).
- * 2. Create a new Apps Script project or open Google Slides -> Extensions -> Apps Script.
- * 3. Paste this code into the editor and click "Run" (createGalxPitchDeck).
- * 4. The script will automatically create a 16:9 widescreen presentation in your Google Drive with all 10 slides & speaker notes!
+ * GALX — Augmented Creative Intelligence investor deck (Apps Script)
+ *
+ * Open this file in Google Apps Script and run createGalxPitchDeck(). It
+ * creates a ten-slide presentation whose copy follows the canonical
+ * specification in 02_PITCH_DECK_SLIDE_BY_SLIDE.md.
  */
 
 function createGalxPitchDeck() {
-  const presentation = SlidesApp.create("GALX — Venture Formation Thesis");
+  const presentation = SlidesApp.create("GALX — Augmented Creative Intelligence");
   const slides = presentation.getSlides();
-  if (slides.length > 0) {
-    slides[0].remove(); // Remove default title slide
-  }
+  if (slides.length > 0) slides[0].remove();
 
-  // Color Palette Constants
-  const COLOR_BG = "#06080D";
-  const COLOR_CARD = "#0D121E";
-  const COLOR_CYAN = "#00F0FF";
-  const COLOR_PURPLE = "#A855F7";
-  const COLOR_PINK = "#EC4899";
-  const COLOR_EMERALD = "#10B981";
-  const COLOR_AMBER = "#F59E0B";
+  const COLOR_BG = "#08090F";
+  const COLOR_CARD = "#141523";
+  const COLOR_CARD_BORDER = "#30334A";
+  const COLOR_CYAN = "#8DEBFF";
+  const COLOR_PURPLE = "#BFA4FF";
+  const COLOR_PINK = "#FF9CCB";
   const COLOR_TEXT_PRIMARY = "#F8FAFC";
-  const COLOR_TEXT_MUTED = "#94A3B8";
+  const COLOR_TEXT_MUTED = "#A8ADBF";
 
-  function setupSlide(slide, num) {
+  function setupSlide(slide, number) {
     slide.getBackground().setSolidFill(COLOR_BG);
-    
-    // Header text
-    const header = slide.insertTextBox("GALX  •  Venture Formation Thesis", 40, 20, 400, 30);
-    const hText = header.getText();
-    hText.getTextStyle().setFontSize(11).setForegroundColor(COLOR_TEXT_MUTED);
-    hText.getRange(0, 4).getTextStyle().setFontSize(12).setBold(true).setForegroundColor(COLOR_CYAN);
 
-    const slideCount = slide.insertTextBox("Slide " + num + " / 10", 580, 20, 100, 30);
+    const header = slide.insertTextBox("GALX  •  Augmented Creative Intelligence", 40, 20, 490, 30);
+    const headerText = header.getText();
+    headerText.getTextStyle().setFontSize(11).setForegroundColor(COLOR_TEXT_MUTED);
+    headerText.getRange(0, 4).getTextStyle().setFontSize(12).setBold(true).setForegroundColor(COLOR_CYAN);
+
+    const slideCount = slide.insertTextBox("Slide " + number + " / 10", 580, 20, 100, 30);
     slideCount.getText().getTextStyle().setFontSize(10).setBold(true).setForegroundColor(COLOR_TEXT_MUTED);
     slideCount.getText().getParagraphStyle().setParagraphAlignment(SlidesApp.ParagraphAlignment.RIGHT);
   }
 
   const slidesData = [
     {
-      title: "Sustainable, Abundant AI Access for Anyone Who Wants to Build",
-      subtitle: "The abstraction layer for the next era of software creation.",
+      title: "More capable machines will create demand for more capable people",
+      subtitle: "GALX is building around what people become able to accomplish through agents.",
       points: [
-        { t: "Two Managed Models", b: "Concentrated surface, including GALX Nova." },
-        { t: "Standard API Access", b: "Instant drop-in integration without custom proxies." },
-        { t: "Abundant Serving", b: "Dependable operational execution at scale." },
-        { t: "Build What You Want", b: "Simplicity is the intentional product decision." }
+        { t: "The forecast", b: "Agent capability may shift the bottleneck from execution to direction." },
+        { t: "The first proof", b: "One person creates something meaningful that was previously beyond practical reach." }
       ],
-      notes: "GALX is building the abstraction layer for the next era of software creation. We believe AI capability will continue becoming abundant, but accessing and operating it is becoming fragmented and complicated. Our mission is to make intelligence abundant, reliable, and dead simple for anyone who wants to build."
+      notes: "GALX is building around a forecast for the agent age: more capable machines will create demand for more capable people. The opportunity is not only what an agent can execute; it is what a person becomes able to create through that agent."
     },
     {
-      title: "The Future: Abundant Intelligence, Fragmented Infrastructure",
-      subtitle: "AI capability is becoming abundant, while the systems required to access and sustain it are fragmenting.",
+      title: "The bottleneck is between human intention and agent execution",
+      subtitle: "Creative work often develops through interaction rather than a single complete instruction.",
       points: [
-        { t: "What Is Coming", b: "AI capability is becoming the fundamental substrate of all software creation." },
-        { t: "The Impending Bottleneck", b: "Multiplying models, providers, and pricing structures create severe operational fragmentation." }
+        { t: "The relationship", b: "Express → delegate → inspect → redirect → preserve → continue." },
+        { t: "The risk", b: "More output can leave the person with more interpretation and correction." }
       ],
-      notes: "Every investor agrees that AI capability is exploding. But as capability grows, the infrastructure underneath it is fragmenting. Developers now have to navigate dozens of providers, fluctuating pricing models, capacity cliffs, and API changes. The long-term winner won't be another model catalog that exposes all this chaos—it will be an abstraction layer that makes it disappear."
+      notes: "The product question is whether a person can reliably turn agent capability toward something they actually intend. This is not an argument against autonomy; successful delegation can expand capability when it serves the person's purpose."
     },
     {
-      title: "The Non-Consensus Thesis: The Sufficiency Principle",
-      subtitle: "For a large class of applications, developers do not need maximum available intelligence. They need sufficient intelligence, reliably and economically delivered, to complete the task.",
+      title: "Augmented Creative Intelligence changes the unit of analysis",
+      subtitle: "The system is the person, their agents, their tools, and the work they create together.",
       points: [
-        { t: "The Consensus Trap", b: "Obsession with benchmark supremacy and endless model dropdowns." },
-        { t: "The Intermediary Moat", b: "Model proliferation creates an opportunity for an intermediary to absorb complexity." }
+        { t: "ACI asks", b: "What can the person now initiate, influence, complete, and return to?" },
+        { t: "ACI is not", b: "A claim that GALX invented human augmentation or a new model category." }
       ],
-      notes: "The market is obsessed with benchmark supremacy and exposing 100 model choices. Our thesis is different: For most real-world software, developers don't need maximum available intelligence—they need sufficient intelligence, reliably and economically delivered, to complete the job. As the ecosystem becomes more complicated, our opportunity to absorb that complexity grows."
+      notes: "We call the thesis Augmented Creative Intelligence, or ACI. It is a product and market forecast: make the combined system useful enough that people choose it repeatedly."
     },
     {
-      title: "Product Today: Radical Simplicity",
-      subtitle: "Two models. API access. Abundant serving. Build what you want.",
+      title: "The first individual experiment is obtainable now",
+      subtitle: "Enough capability exists to test the creative experience directly, without building an institution first.",
       points: [
-        { t: "Two Models", b: "Access focused models under clear GALX identities such as GALX Nova." },
-        { t: "Standard API", b: "Drop-in execution with zero custom proxy plumbing." },
-        { t: "Abundant Serving", b: "GALX handles availability, capacity, and resilience behind the scenes." }
+        { t: "Then", b: "DreamBees pursued creative range when the capability layer was harder to access." },
+        { t: "Now", b: "Agentic capability makes the person-level experiment practical to run and measure." }
       ],
-      notes: "We make the current product brutally simple: Two models. API access. Abundant serving. Build what you want. We provide access to a tightly managed surface, featuring GALX Nova, through a clean API. We know about the machinery so the developer does not have to."
+      notes: "The timing claim is not that every creative workload is solved. It is that the first experiment—one person pursuing a meaningful idea through an agent-supported workflow—is obtainable enough to test."
     },
     {
-      title: "The Wedge: Builders Who Want to Make Something",
-      subtitle: "We focus on high-velocity creators who want to build software rather than manage inference infrastructure.",
+      title: "The founder has studied both sides of the relationship",
+      subtitle: "Human-centered systems, creative work, agent construction, and operational judgment meet in one problem.",
       points: [
-        { t: "Independent Developers", b: "Building indie SaaS and productivity tools with predictable costs." },
-        { t: "Creative Technologists", b: "Crafting interactive apps and media without cloud console friction." },
-        { t: "AI Experimenters", b: "Testing application loops and agent workflows rapidly." }
+        { t: "Continuity", b: "DreamBees → LUMI → GALX: recurring pursuit of individual creative capability." },
+        { t: "Evidence", b: "The May 2026 JoyZoning report distinguished generated changes from accepted work." }
       ],
-      notes: "We aren't chasing bureaucratic enterprise RFP cycles today. Our initial wedge is builders—hobbyists, independent developers, creative technologists, and engineers experimenting with AI applications. They want to make something without model configuration and server maintenance becoming another full-time job. We give them an API key and let them build."
+      notes: "William's founder fit is proximity to both what people are trying to make and what happens when working systems act. The JoyZoning field report is project evidence, not independent market validation; it shows that the generation-versus-completion distinction predates the positioning."
     },
     {
-      title: "Why This Can Become Enormous",
-      subtitle: "GALX sits directly between the application and fragmented intelligence infrastructure.",
+      title: "One creator. One visual idea. One meaningful result.",
+      subtitle: "Image creation and community discovery are the focused commercial entry point.",
       points: [
-        { t: "The Expansion Loop", b: "More Builders -> More Applications -> More Application Usage -> More Execution Through GALX." },
-        { t: "The Persistent Execution Layer", b: "Software built on GALX generates ongoing recurring execution demand with every user click." }
+        { t: "The loop", b: "Bring an idea → direct and revise → keep or share → return." },
+        { t: "The customer", b: "An independent creator with recurring visual ideas, not a one-time generator." }
       ],
-      notes: "Why is this venture-scale? Not because inference is big, but because of where GALX sits. When builders launch software on GALX, every user action in their app generates continuing execution through our platform. More builders lead to more applications, which lead to more end-user traffic, driving compounding execution volume through GALX."
+      notes: "GALX starts with image creation and community discovery for independent creators with visual ideas they want to develop repeatedly. The product must be useful when one person is present, before community scale."
     },
     {
-      title: "Asymmetric Advantage: Absorb Complexity, Sell Simplicity",
-      subtitle: "Operating knowledge turns heterogeneous, volatile AI capacity into a reliable developer product.",
+      title: "Permission becomes action; the product earns the next visit",
+      subtitle: "HEAV3NS MANDATE activates. LUMI remains a software-creation instrument.",
       points: [
-        { t: "Developer Simplicity", b: "Clean, dependable API with zero infrastructure maintenance." },
-        { t: "Proprietary Depth", b: "Proprietary operational knowledge required to run heterogeneous capacity economically." }
+        { t: "HEAV3NS MANDATE", b: "The call to begin—not a product tier or a promise to be productive." },
+        { t: "LUMI", b: "A maintained expression of the thesis, not a second general-purpose coding-agent race." }
       ],
-      notes: "Our advantage is the operational knowledge required to turn heterogeneous, volatile AI capacity into a dead-simple developer product. The public product becomes simpler while the knowledge required to operate it becomes deeper. That asymmetry is our moat: GALX absorbs complexity and sells simplicity."
+      notes: "HEAV3NS MANDATE turns available capability into permission to begin. LUMI is coding-agent-shaped but is judged on what a person can create through it. Neither replaces the focused GALX image-creation wedge."
     },
     {
-      title: "Founder-Market Fit: Built From Direct Systems Operation",
-      subtitle: "Arrived at the problem through building AI applications and living the operational constraints.",
+      title: "Turn individual capability into repeatable paid value",
+      subtitle: "The economic unit is a retained, paying creator—not an externally supplied token.",
       points: [
-        { t: "Hands-On Experience", b: "Direct exposure to building AI applications and operating autonomous agent systems." },
-        { t: "Operational Learning", b: "Learning and iterating through live traffic and operational feedback." }
+        { t: "The sequence", b: "Meaningful result → recurring projects → retained creator → preferred environment." },
+        { t: "The scale condition", b: "Customer value must grow faster than founder intervention." }
       ],
-      notes: "I didn't start GALX from an investment thesis spreadsheet. I started it because I was building AI applications and operating autonomous agent systems, and I ran headfirst into the reliability, cost, and complexity walls of existing infrastructure. GALX was built out of operational necessity, and we are learning and adapting through live traffic every single day."
+      notes: "The venture opportunity is to deliver independently useful creative capability to a large population of people with recurring reasons to use it. Expansion begins with depth, then follows demonstrated demand."
     },
     {
-      title: "Evidence: Observations vs. Next Validations",
-      subtitle: "Separating conviction from verified observations and upcoming milestones.",
+      title: "The thesis must survive comparison, behavior, and economics",
+      subtitle: "Capability, product, and business are separate proofs.",
       points: [
-        { t: "What We Believe", b: "Abundant intelligence belongs behind a dependable abstraction layer." },
-        { t: "What We Observed", b: "Representative workloads require substantially less model capability than assumed." },
-        { t: "What We Demonstrated", b: "A functional, high-reliability platform serving real developer requests." },
-        { t: "What We Are Testing Next", b: "Builder retention, application usage growth, and long-term execution margins." }
+        { t: "Capability", b: "Meaningful completion, direction, revision, and recoverability." },
+        { t: "Product", b: "Independent return and preference over relevant alternatives." },
+        { t: "Business", b: "Payment, sustainable cost to serve, and repeatable distribution." }
       ],
-      notes: "We believe in intellectual honesty. We have demonstrated a functional, reliable two-model platform. We have observed that many real-world workloads do not require frontier overkill. What we are proving next is developer retention, application lifecycle longevity, and sustained gross margins as our builders scale."
+      notes: "Human-AI collaboration must be evaluated rather than assumed. GALX will compare relevant tools and measure meaningful work, return behavior, payment, cost to serve, and founder intervention. HCI is founder fit; accumulated product learning is a defensibility hypothesis."
     },
     {
-      title: "The Venture Test: What Becomes Enormous?",
-      subtitle: "GALX becomes the primary abstraction and execution layer through which software consumes AI capability.",
+      title: "Make the first proof small enough to perform",
+      subtitle: "Capital accelerates product quality, bounded cohorts, measurement, and dependable delivery.",
       points: [
-        { t: "Scale Capacity", b: "Expand serving infrastructure to support high-concurrency builder apps." },
-        { t: "Instrument Resilience", b: "Deepen operational knowledge tooling and serving cost optimization." },
-        { t: "Onboard Builders", b: "Seed the next 1,000 applications building on top of GALX execution." }
+        { t: "Next milestones", b: "Meaningful capability → paid return → repeatable delivery." },
+        { t: "The close", b: "One person demonstrates possibility; repeated use and payment demonstrate the business." }
       ],
-      notes: "If GALX is right, what becomes enormous? We don't just sell inexpensive tokens. GALX becomes the primary execution layer through which software consumes intelligence. This round of capital allows us to expand our capacity, onboard thousands of builders, and prove that sustainable, abundant AI access is the winning foundation for software."
+      notes: "Capital should strengthen the image-first experience, run bounded activation cohorts, measure behavior and willingness to pay, and build delivery capacity that removes founder dependency. It should not finance a return to arbitrary public inference demand or every possible medium."
     }
   ];
 
-  slidesData.forEach((sData, idx) => {
+  slidesData.forEach((slideData, index) => {
     const slide = presentation.appendSlide();
-    setupSlide(slide, idx + 1);
+    setupSlide(slide, index + 1);
 
-    // Title & Subtitle
-    const titleBox = slide.insertTextBox(sData.title, 40, 50, 640, 50);
+    const titleBox = slide.insertTextBox(slideData.title, 40, 50, 640, 60);
     titleBox.getText().getTextStyle().setFontSize(20).setBold(true).setForegroundColor(COLOR_TEXT_PRIMARY);
 
-    const subBox = slide.insertTextBox(sData.subtitle, 40, 100, 640, 50);
-    subBox.getText().getTextStyle().setFontSize(11).setForegroundColor(COLOR_CYAN);
+    const subtitleBox = slide.insertTextBox(slideData.subtitle, 40, 112, 640, 45);
+    subtitleBox.getText().getTextStyle().setFontSize(11).setForegroundColor(COLOR_CYAN);
 
-    // Content cards
-    const numCards = sData.points.length;
-    const cardWidth = (640 - (15 * (numCards - 1))) / numCards;
-    sData.points.forEach((pt, pIdx) => {
-      const left = 40 + pIdx * (cardWidth + 15);
-      const card = slide.insertShape(SlidesApp.ShapeType.ROUNDED_RECTANGLE, left, 170, cardWidth, 180);
+    const cardGap = 15;
+    const cardWidth = (640 - (cardGap * (slideData.points.length - 1))) / slideData.points.length;
+    slideData.points.forEach((point, pointIndex) => {
+      const left = 40 + pointIndex * (cardWidth + cardGap);
+      const card = slide.insertShape(SlidesApp.ShapeType.ROUNDED_RECTANGLE, left, 180, cardWidth, 180);
       card.getFill().setSolidFill(COLOR_CARD);
-      card.getBorder().getLineFill().setSolidFill("#1E293B");
+      card.getBorder().getLineFill().setSolidFill(pointIndex === 0 ? COLOR_PURPLE : COLOR_CARD_BORDER);
 
       const cardText = card.getText();
-      cardText.setText(pt.t + "\n\n" + pt.b);
-      cardText.getRange(0, pt.t.length).getTextStyle().setFontSize(13).setBold(true).setForegroundColor(COLOR_TEXT_PRIMARY);
-      cardText.getRange(pt.t.length + 2, cardText.getLength()).getTextStyle().setFontSize(10).setForegroundColor(COLOR_TEXT_MUTED);
+      cardText.setText(point.t + "\n\n" + point.b);
+      cardText.getRange(0, point.t.length).getTextStyle().setFontSize(13).setBold(true).setForegroundColor(COLOR_TEXT_PRIMARY);
+      cardText.getRange(point.t.length + 2, cardText.getLength()).getTextStyle().setFontSize(10).setForegroundColor(COLOR_TEXT_MUTED);
     });
 
-    // Notes
-    slide.getNotesPage().getSpeakerNotesShape().getText().setText(sData.notes);
+    slide.getNotesPage().getSpeakerNotesShape().getText().setText(slideData.notes);
   });
 }

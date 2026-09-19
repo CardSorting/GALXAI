@@ -6,6 +6,81 @@ import type { DesktopManager } from './desktop-manager.js';
 import { CentralClient, bearer, equalSecret, exactKeys, failure, json } from './pool-protocol.js';
 import { RequestError, readJsonBody } from './request-policy.js';
 
+const text = (value: unknown, max = 256) => typeof value === 'string' && value.length <= max ? value : undefined;
+const integer = (value: unknown) => Number.isSafeInteger(value) ? value as number : undefined;
+const dateText = (value: unknown) => text(value, 80);
+const models = (value: unknown) => Array.isArray(value) ? value.filter((model): model is string => typeof model === 'string' && model.length <= 128).slice(0, 512) : [];
+const state = (value: unknown, allowed: readonly string[], fallback: string) => typeof value === 'string' && allowed.includes(value) ? value : fallback;
+
+/**
+ * The browser monitor gets a deliberately small, product-shaped contract.
+ * Central identity, epoch, credential revisions, tickets and arbitrary upstream
+ * fields stay server-side even though the monitor is local-only.
+ */
+function monitorStatus(current: Record<string, any>, access: 'operator' | 'viewer', desktopState: any) {
+  const epoch = text(current.epoch, 128);
+  const accounts = (Array.isArray(current.accounts) ? current.accounts : []).map((account: any) => {
+    const id = text(account?.id, 128);
+    if (!id) return undefined;
+    return {
+      id, desktopId: text(account.desktopId, 128), name: text(account.name, 128) ?? 'Account',
+      state: state(account.state, ['enabled', 'paused', 'revoked'], 'paused'), revision: integer(account.revision) ?? 0,
+      applied: !!epoch && account.acknowledgedRevision === account.revision && account.acknowledgedEpoch === epoch,
+      acknowledgedAt: dateText(account.acknowledgedAt), models: models(account.models),
+      accountClass: account.accountClass === 'paid' || account.accountClass === 'free' ? account.accountClass : undefined,
+      credentialExpiresAt: Number.isFinite(Number(account.credentialExpiresAt)) ? Number(account.credentialExpiresAt) : undefined,
+      removedAt: dateText(account.removedAt), updatedAt: dateText(account.updatedAt),
+      cooldownUntilMs: Number.isFinite(Number(account.cooldownUntilMs)) ? Number(account.cooldownUntilMs) : undefined,
+      consecutiveFailures: Number.isSafeInteger(account.consecutiveFailures) ? account.consecutiveFailures : undefined,
+      healthSignal: account.healthSignal === 'unavailable' || account.healthSignal === 'cooldown' ? account.healthSignal : undefined,
+      connectionState: account.connectionState === 'connected' || account.connectionState === 'sign_in_required' ? account.connectionState : undefined,
+      connectionCheckedAt: dateText(account.connectionCheckedAt),
+    };
+  }).filter(Boolean);
+  const registrations = (Array.isArray(current.registrations) ? current.registrations : []).map((registration: any) => {
+    const id = text(registration?.id, 128);
+    if (!id) return undefined;
+    return {
+      id, desktopId: text(registration.desktopId, 128), name: text(registration.name, 128) ?? 'Connection',
+      state: state(registration.state, ['prepared', 'reviewed', 'registered'], 'prepared'), accountId: text(registration.accountId, 128),
+      accountClass: registration.accountClass === 'paid' || registration.accountClass === 'free' ? registration.accountClass : undefined,
+      models: models(registration.models), updatedAt: dateText(registration.updatedAt), revision: integer(registration.revision) ?? 0,
+      removedAt: dateText(registration.removedAt),
+    };
+  }).filter(Boolean);
+  const activity = (Array.isArray(current.activity) ? current.activity : []).slice(0, 100).map((event: any) => ({
+    accountId: text(event?.accountId, 128), name: text(event?.name, 128),
+    command: state(event?.command, ['enabled', 'paused', 'revoked', 'rename', 'remove', 'restore'], 'change'), at: dateText(event?.at),
+  }));
+  const desktops = (Array.isArray(desktopState?.desktops) ? desktopState.desktops : []).map((desktop: any) => {
+    const id = text(desktop?.id, 128);
+    if (!id) return undefined;
+    return { id, state: state(desktop.state, ['running', 'stopped', 'starting', 'creating', 'stopping', 'deleting', 'queued', 'unhealthy', 'missing', 'error', 'unknown'], 'unknown'),
+      canConnect: desktop.canConnect === true, login: { state: state(desktop.login?.state, ['idle', 'starting', 'waiting', 'saved', 'failed', 'expired', 'cancelled', 'unavailable'], 'unavailable') } };
+  }).filter(Boolean);
+  return {
+    pool: current.pool === 'premium' ? 'premium' : 'standard', registrationAllowed: current.registrationAllowed === true,
+    executionAllowed: current.executionAllowed === true, automaticActivation: current.automaticActivation === true,
+    relayFresh: (() => { const seen = Date.parse(String(current.lastSeenAt ?? '')); const age = Date.now() - seen; return Number.isFinite(age) && age >= 0 && age < 45000; })(),
+    accounts, registrations, activity, role: access, desktops, desktopAvailable: desktopState?.available === true,
+  };
+}
+
+function publicRegistrationResult(result: Record<string, any>, action: string) {
+  if (action === 'start' || action === 'stop') return { saved: true };
+  if (action === 'signin') return { opened: true };
+  if (action === 'desktop') return { ready: true };
+  return {
+    state: state(result.state, ['prepared', 'reviewed', 'registered'], 'prepared'),
+    accountId: text(result.accountId, 128), accountClass: result.accountClass === 'paid' || result.accountClass === 'free' ? result.accountClass : undefined,
+    models: models(result.models), replayed: result.replayed === true,
+  };
+}
+
+function publicManagementResult(result: Record<string, any>, desktopStopped?: boolean) {
+  return { removedAt: dateText(result.removedAt), replayed: result.replayed === true, ...(desktopStopped === undefined ? {} : { desktopStopped }) };
+}
+
 /** A fixed installation monitor. Operator and viewer cookies never grant the other monitor access. */
 export function poolMonitor(deps:{operator:CentralClient;viewer:CentralClient;registrar:CentralClient;operatorToken:string;viewerToken:string;desktops:DesktopManager}) {
   const operator=new MonitorSessions(Date.now,'pool-operator'),viewer=new MonitorSessions(Date.now,'pool-viewer');
@@ -18,7 +93,23 @@ export function poolMonitor(deps:{operator:CentralClient;viewer:CentralClient;re
     if(!registration)throw new RequestError(404,'registration_not_found','Registration not found.');
     if(registration.removedAt&&action!=='stop')throw new RequestError(409,'registration_removed','This registration was removed. Use Registration to review it.');
   };
-  const busy=new Set<string>();
+  // Coalesce duplicate requests for the same persisted operation. This is the
+  // familiar single-flight pattern: a double click, a second browser tab, or a
+  // retry after a lost response shares one server-side mutation instead of
+  // competing for the same desktop and credential record.
+  const busy=new Map<string,string>();
+  const operationFlights=new Map<string,Promise<unknown>>();
+  const statusFlights=new Map<'operator'|'viewer',Promise<any>>();
+  const readStatus=(access:'operator'|'viewer',central:CentralClient)=>{
+    const existing=statusFlights.get(access);if(existing)return existing;
+    const flight=(async()=>{
+      const current=await central.call('/operator/status');
+      await deps.desktops.refresh();
+      const desktopState=deps.desktops.snapshot();
+      return monitorStatus(current,access,desktopState);
+    })().finally(()=>{if(statusFlights.get(access)===flight)statusFlights.delete(access);});
+    statusFlights.set(access,flight);return flight;
+  };
   const server=http.createServer((req,res)=>void(async()=>{
     operator.origin(req);
     const route=new URL(req.url ?? '/','http://local').pathname;
@@ -50,14 +141,13 @@ export function poolMonitor(deps:{operator:CentralClient;viewer:CentralClient;re
     const access=role(req);if(!access)throw new RequestError(401,'session_required','Open a fresh sign-in link from the host.');
     const central=access==='operator'?deps.operator:deps.viewer;
     // All privileged routes verify the central principal on every request; no stale session can outlive revocation.
-    const status=await central.call('/operator/status');
+    const status=await readStatus(access,central);
     const assets:Record<string,string>={'/assets/monitor.js':'pool-monitor.js','/assets/monitor-model.js':'pool-monitor-model.js','/assets/monitor.css':'pool-monitor.css','/assets/desktop.js':'pool-desktop.js'};
     if(req.method==='GET'&&Object.hasOwn(assets,route)){
       res.writeHead(200,{'Content-Type':route.endsWith('.js')?'text/javascript':'text/css','Cache-Control':'no-store'});res.end(await readFile(new URL('./'+assets[route],import.meta.url)));return;
     }
     if(req.method==='GET'&&route==='/api/status'){
-      await deps.desktops.refresh();const desktopState=deps.desktops.snapshot();
-      return json(res,200,{...status,role:access,desktops:desktopState.desktops.map(d=>({id:d.id,state:d.state,canConnect:d.canConnect,login:d.login})),desktopAvailable:desktopState.available});
+      return json(res,200,status);
     }
     requireOperator(req);
     if(req.method==='GET'&&route==='/desktops'){
@@ -83,33 +173,38 @@ export function poolMonitor(deps:{operator:CentralClient;viewer:CentralClient;re
           await deps.desktops.refresh();
           const desktop=deps.desktops.snapshot().desktops.find(d=>d.id===saved.desktopId);
           if(desktop)await deps.desktops.action(saved.desktopId,'stop');
-          return json(res,200,{...saved,desktopStopped:true});
-        } catch { return json(res,200,{...saved,desktopStopped:false}); }
+          return json(res,200,publicManagementResult(saved,true));
+        } catch { return json(res,200,publicManagementResult(saved,false)); }
       }
-      return json(res,200,saved);
+      return json(res,200,publicManagementResult(saved));
     }
     if(route==='/api/registrations/prepare'){
       exactKeys(body,['id','desktopId','name']);const saved=await central.call('/operator/prepare',body);
-      await deps.desktops.create({id:saved.desktopId,name:saved.name});return json(res,201,saved);
+      await deps.desktops.create({id:saved.desktopId,name:saved.name});return json(res,201,publicRegistrationResult(saved,'prepare'));
     }
     const registration=/^\/api\/registrations\/(connect|review|register|refresh|signin|desktop|start|stop)$/.exec(route);
     if(registration){
       exactKeys(body,['id']);const saved=await central.call('/operator/operation',{id:body.id});
       if(saved.removedAt&&registration[1]!=='stop')throw new RequestError(409,'registration_removed','This registration was removed. Restore it before continuing.');
       // An explicit retry after a lost connect response returns the already committed operation.
-      if(registration[1]==='connect'&&saved.state==='registered')return json(res,200,{id:saved.id,state:'registered',accountId:saved.accountId,replayed:true});
-      if(busy.has(saved.id))throw new RequestError(409,'action_in_progress','Wait for the current action to finish.');busy.add(saved.id);
-      try {
+      if(registration[1]==='connect'&&saved.state==='registered')return json(res,200,publicRegistrationResult({...saved,replayed:true},'connect'));
+      const action=registration[1],current=busy.get(saved.id),existing=operationFlights.get(saved.id);
+      if(current&&current!==action)throw new RequestError(409,'action_in_progress','Another connection action is already in progress. Refresh this connection to see its result.');
+      if(existing)return json(res,200,await existing);
+      busy.set(saved.id,action);
+      const operation=(async()=>{
         // Resolve the desktop through the centrally scoped registration, never a browser-supplied desktop ID.
-        if(registration[1]==='start'||registration[1]==='stop'){await deps.desktops.action(saved.desktopId,registration[1]);return json(res,200,{saved:true});}
-        const desktop=await deps.desktops.connection(saved.desktopId);
-        if(registration[1]==='signin'){await deps.desktops.signIn(saved.desktopId,null,'device');return json(res,200,{opened:true});}
-        if(registration[1]==='desktop')return json(res,200,{...gatewayTicket(req),desktopId:saved.desktopId});
-        const ticket=await central.call('/operator/ticket',{id:saved.id,purpose:registration[1]});
-        const files=await deps.desktops.driver.credentials!(saved.desktopId);
-        if((await deps.desktops.connection(saved.desktopId)).containerId!==desktop.containerId)throw new RequestError(409,'desktop_changed','The desktop changed. Review its sign-in again.');
-        return json(res,200,await deps.registrar.call(`/registrar/${registration[1]}`,{id:saved.id,ticket:ticket.ticket,files}));
-      } finally {busy.delete(saved.id);}
+        if(action==='start'||action==='stop'){await deps.desktops.action(saved.desktopId,action);return {saved:true};}
+        if(action==='signin'){await deps.desktops.signIn(saved.desktopId,null,'device');return {opened:true};}
+        if(action==='desktop')return {...gatewayTicket(req),desktopId:saved.desktopId};
+        const ticket=await central.call('/operator/ticket',{id:saved.id,purpose:action});
+        const credentials=await deps.desktops.credentials(saved.desktopId);
+        const result=await deps.registrar.call(`/registrar/${action}`,{id:saved.id,ticket:ticket.ticket,files:credentials.files});
+        return publicRegistrationResult(result,action);
+      })();
+      operationFlights.set(saved.id,operation);
+      try { return json(res,200,await operation); }
+      finally { if(operationFlights.get(saved.id)===operation)operationFlights.delete(saved.id);if(busy.get(saved.id)===action)busy.delete(saved.id); }
     }
     throw new RequestError(404,'not_found','Not found.');
   })().catch(error=>{if(!res.headersSent)failure(res,error);else res.destroy();}));

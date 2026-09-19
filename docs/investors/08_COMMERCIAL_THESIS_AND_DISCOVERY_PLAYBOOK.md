@@ -1,79 +1,83 @@
-# 🎯 GALX Builder Discovery & Feedback Playbook
+# GALX creator discovery playbook
 
 <!-- docs-scope: commercial-draft -->
-> **Reading scope:** Commercial and strategic investor materials. Contains thesis formulations, product positioning, unit economics frameworks, and venture scale arguments. Technical and operational capabilities describe public interfaces; proprietary routing mechanisms, capacity acquisition, and internal execution infrastructure remain private under [AGENTS.md](../AGENTS.md).
 
-## Understanding the Builder: Validating the Abstraction Thesis
+## Objective
 
-A practical discovery and user-research playbook designed to understand builder friction, evaluate the sufficient intelligence thesis, and turn early experiments into long-term execution workloads.
+Test whether GALX creates meaningful creative capability—not merely attractive outputs—and whether that capability becomes a product people choose to revisit and pay for.
 
----
+## Working hypotheses
 
-## 1. The Core Discovery Objective
+| Hypothesis | Falsifier |
+| --- | --- |
+| A person can pursue an idea that previously felt impractical. | The person produces an output but cannot describe greater control or a meaningful change in what feels possible. |
+| Direction and revision make the capability useful. | Users accept the first output, avoid revision, or report more review burden than value. |
+| A successful first project creates a reason to return. | People enjoy the session but do not begin a second project without personal prompting. |
+| Community discovery helps the right people begin. | Community increases browsing or likes without increasing suitable creator activation. |
+| The experience can support a paid relationship. | Users value the demo only under free, founder-guided, or subsidized conditions. |
+| The business can scale beyond the founder. | Founder translation, repair, or monitoring grows proportionally with creator count. |
 
-GALX's commercial success depends on solving the genuine operational bottlenecks faced by builders:
+## Who to interview
 
-> **"Are developers spending more time wrestling with AI infrastructure than actually building their software?"**
+Start with independent creators, designers, artists, creative technologists, storytellers, hobbyists, and small teams with visual ideas they want to develop repeatedly.
 
-If yes, GALX's radical simplicity—**Two models. API access. Abundant serving. Build what you want.**—provides an immediate, high-relief solution.
+Recruit for a recurring job, not only curiosity about AI. Record current tools, workarounds, time cost, abandoned ideas, and what makes the activity worth returning to.
 
----
+Do not substitute arbitrary developer demand for the chosen audience. LUMI can inform the broader thesis, but the initial commercial evidence should come from the image-first customer.
 
-## 2. Builder Personas: Who We Talk To
+## Discovery questions
 
-```mermaid
-graph TD
-    B1[Indie Developers & Micro-SaaS Founders] --> GALX[GALX Execution Layer]
-    B2[Creative Technologists & Media Hackers] --> GALX
-    B3[Product Engineers Experimenting with AI Features] --> GALX
-```
+1. What were you trying to make?
+2. Why did the idea feel difficult or impractical before this session?
+3. What did you direct, reject, preserve, or revise?
+4. Which decision still feels like yours?
+5. Where did the system make you do more interpretation or correction?
+6. What would you return to make next?
+7. Did the result change what you believe you can make?
+8. What do you currently use instead?
+9. What would make this a continuing tool rather than a one-time experiment?
+10. What would you pay for recurring value, and what would make that payment feel justified?
+11. What would make you recommend it without being asked?
 
-### Persona 1: Indie Developers & Micro-SaaS Founders
-- **Profile**: Solo founders or small teams launching niche SaaS, browser extensions, or automated workflow tools.
-- **Pain Point**: Cannot afford to spend weeks building complex proxy servers, handling rate limits, or risking runaway credit card bills from unpredictable API spikes.
-- **What GALX Provides**: An immediate API endpoint that works predictably out of the box with clear economic boundaries.
+Ask about observed behavior before asking for a product opinion. Do not lead users toward a thesis-confirming answer.
 
-### Persona 2: Creative Technologists & Media Hackers
-- **Profile**: Designers, interactive artists, and developers building generative media tools, interactive bots, and visual synthesis projects.
-- **Pain Point**: Need abundant, responsive execution for rapid prototyping and live user interaction without jumping through enterprise cloud hurdles.
-- **What GALX Provides**: Abundant capacity, fast turnaround, and zero configuration drag.
+## Behavioral test sequence
 
-### Persona 3: Product Engineers Adding AI to Existing Apps
-- **Profile**: Full-stack developers at growing startups tasked with integrating AI capabilities (summarization, structured extraction, smart search) into existing products.
-- **Pain Point**: Overwhelmed by the endless parade of models, providers, and SDK updates; just want a stable, dependable endpoint that returns valid data.
-- **What GALX Provides**: A clean abstraction layer that eliminates ongoing maintenance.
+1. Give a bounded creative brief and observe whether the participant can begin.
+2. Let the participant direct, reject, and revise without taking over the work.
+3. Ask the participant to explain what they accepted and what remains unfinished.
+4. Preserve the project and invite a second session later without personal founder prompting.
+5. Test a clear paid continuation with the subsidy and price stated.
+6. Compare founder-guided, self-serve, community-referred, and acquisition cohorts separately.
+7. Compare GALX with a relevant existing tool for the same recurring activity.
 
----
+## What to measure
 
-## 3. The 10-Question Discovery Framework
+| Proof | Measures |
+| --- | --- |
+| Capability | Meaningful completion, direction, revision, recoverability, perceived control, and creator-described possibility. |
+| Product | Second-project rate, return interval, project continuity, self-serve completion, and substitution preference. |
+| Business | Paid conversion, paid retention, contribution margin, support burden, acquisition cost, and founder intervention. |
 
-Use these questions in structured user interviews to test our core hypotheses:
+Output count is a diagnostic, not the primary success metric.
 
-### Category A: Uncovering Infrastructure Drag
-1. **"When you decided to add AI to your project, how long did it take to go from an idea to your first working prototype?"**
-2. **"How much time do you currently spend managing API keys, evaluating new models, handling rate limits, or dealing with provider outages?"**
-3. **"Have you ever abandoned or paused an AI project because the backend setup or provider onboarding felt like too much overhead?"**
+## Evidence ledger
 
-### Category B: Testing the "Sufficient Intelligence" Thesis
-4. **"Which models are you currently using in production, and how did you decide on them?"**
-5. **"Do you actually need the largest, most expensive reasoning model for your core user flow, or would a faster, cheaper, well-tuned model deliver the same user outcome?"**
-6. **"If you could have a reliable, abundant model that costs significantly less and never hits arbitrary rate limits, would you switch tomorrow?"**
+| Observation | Interpretation | Next test |
+| --- | --- | --- |
+| A beautiful first result | Capability may be compelling. | Test deliberate revision, accepted work, and return. |
+| Repeated edits | Direction may be meaningful or the first result may be poor. | Ask what was intentionally preserved and test completion. |
+| A second project | Product value may repeat. | Test self-serve continuation and payment. |
+| Paid continuation | Commercial value exists for this cohort. | Test a different source and measure cost to serve. |
+| High event enthusiasm | Activation may be strong under social energy. | Test a delayed, unprompted return. |
+| More support requests | Product may be unclear or the workflow may be too broad. | Reduce scope and measure founder time per creator. |
 
-### Category C: Economics & Compounding Usage
-7. **"How do API costs factor into how you price or design your software?"**
-8. **"What happens to your infrastructure bill when your application gets featured on Hacker News, Product Hunt, or Twitter?"**
-9. **"If your app scales from 100 users to 10,000 users, what is your biggest operational fear regarding your AI backend?"**
-10. **"What is the single thing an AI platform could do that would allow you to focus 100% of your time on building your product?"**
+Record negative cases and the conditions under which a result occurred. Separate founder enthusiasm, subsidized access, social energy, and independent paid behavior.
 
----
+## Decision rules
 
-## 4. Synthesis: How Discovery Feeds Product Evolution
-
-Discovery signals are synthesized directly into our learning framework:
-
-| What Builders Tell Us | What It Validates | How GALX Responds |
-| :--- | :--- | :--- |
-| *"I hate choosing between 40 models on an endless dropdown."* | Validates the **Two-Model Managed Surface** thesis. | Keep the public surface focused and simple. |
-| *"I spent 3 days setting up an enterprise cloud console just to test an API."* | Validates the **Instant API Access** wedge. | Instant onboarding with zero friction. |
-| *"My users don't care what model it is as long as it works instantly and reliably."* | Validates the **Sufficient Intelligence** principle. | Focus engineering on abundant, dependable execution. |
-| *"I was terrified of getting a surprise \$5,000 bill when my app went viral."* | Validates the **Predictable Economics** thesis. | Clear developer tiers and transparent serving economics. |
+- Continue when meaningful completion, independent return, payment, and acceptable cost to serve move together.
+- Improve onboarding and product clarity when activation requires founder translation but the underlying recurring job is strong.
+- Narrow or reprice when users value the workflow but delivery economics are weak.
+- Redesign when users like the first result but do not develop or return to a project.
+- Stop the segment when neither meaningful control nor recurring value appears.

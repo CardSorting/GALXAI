@@ -2625,7 +2625,7 @@
     },
     {
       "path": "docs/investors/00_10_MINUTE_INVESTOR_MEETING_PLAYBOOK.md",
-      "title": "⏱️ The 10-Minute Executive Pitch Playbook",
+      "title": "GALX 10-minute investor meeting playbook",
       "scope": "commercial-draft",
       "kind": "draft",
       "domains": [],
@@ -2635,7 +2635,7 @@
     },
     {
       "path": "docs/investors/00_ONE_PAGER_EXECUTIVE_TEASER.md",
-      "title": "📄 GALX Executive One-Pager & Fact Sheet",
+      "title": "GALX executive one-pager",
       "scope": "commercial-draft",
       "kind": "draft",
       "domains": [],
@@ -2645,7 +2645,7 @@
     },
     {
       "path": "docs/investors/01_EXECUTIVE_SUMMARY_AND_MEMO.md",
-      "title": "📑 GALX Executive Memorandum: Venture Formation Thesis",
+      "title": "GALX executive memorandum",
       "scope": "commercial-draft",
       "kind": "draft",
       "domains": [],
@@ -2655,7 +2655,7 @@
     },
     {
       "path": "docs/investors/02_PITCH_DECK_SLIDE_BY_SLIDE.md",
-      "title": "📊 GALX Pitch Deck: Visual-First Slide Specification & Presenter Guide",
+      "title": "GALX pitch deck specification",
       "scope": "commercial-draft",
       "kind": "draft",
       "domains": [],
@@ -2665,7 +2665,7 @@
     },
     {
       "path": "docs/investors/03_MARKET_SIZING_TAM_SAM_SOM.md",
-      "title": "📈 GALX Market Architecture & Scale Potential",
+      "title": "GALX market architecture",
       "scope": "commercial-draft",
       "kind": "draft",
       "domains": [],
@@ -2675,7 +2675,7 @@
     },
     {
       "path": "docs/investors/04_UNIT_ECONOMICS_CAC_LTV_PAYBACK.md",
-      "title": "💰 GALX Business Model & Unit Economics Framework",
+      "title": "GALX business model and unit economics",
       "scope": "commercial-draft",
       "kind": "draft",
       "domains": [],
@@ -2685,7 +2685,7 @@
     },
     {
       "path": "docs/investors/05_COMPETITIVE_LANDSCAPE_AND_MOATS.md",
-      "title": "🛡️ GALX Competitive Landscape & Strategic Defensibility",
+      "title": "GALX competition and defensibility",
       "scope": "commercial-draft",
       "kind": "draft",
       "domains": [],
@@ -2695,7 +2695,7 @@
     },
     {
       "path": "docs/investors/06_FINANCIAL_PROJECTIONS_AND_MODEL.md",
-      "title": "📊 GALX Financial Architecture & Capital Milestones",
+      "title": "GALX financial architecture and capital milestones",
       "scope": "commercial-draft",
       "kind": "draft",
       "domains": [],
@@ -2705,7 +2705,7 @@
     },
     {
       "path": "docs/investors/07_TECHNICAL_DILIGENCE_AND_PATENTS.md",
-      "title": "🔬 Technical Diligence: Implementation & Operating Boundaries",
+      "title": "GALX technical diligence and product evidence",
       "scope": "commercial-draft",
       "kind": "draft",
       "domains": [],
@@ -2715,7 +2715,7 @@
     },
     {
       "path": "docs/investors/08_COMMERCIAL_THESIS_AND_DISCOVERY_PLAYBOOK.md",
-      "title": "🎯 GALX Builder Discovery & Feedback Playbook",
+      "title": "GALX creator discovery playbook",
       "scope": "commercial-draft",
       "kind": "draft",
       "domains": [],
@@ -2725,7 +2725,7 @@
     },
     {
       "path": "docs/investors/09_ENTERPRISE_SPEND_GOVERNANCE_AND_CONTROL_PLANE.md",
-      "title": "⚙️ The Platform Abstraction Layer",
+      "title": "GALX product boundary and operating choice",
       "scope": "commercial-draft",
       "kind": "draft",
       "domains": [],
@@ -2735,7 +2735,7 @@
     },
     {
       "path": "docs/investors/10_ENTERPRISE_PILOT_PROPOSAL_AND_AGREEMENT.md",
-      "title": "🤝 Developer & Partner Access Framework",
+      "title": "GALX cohort and partner framework",
       "scope": "commercial-draft",
       "kind": "draft",
       "domains": [],
@@ -2745,27 +2745,7 @@
     },
     {
       "path": "docs/investors/README.md",
-      "title": "🏛️ GALX Investor Materials & Strategic Diligence",
-      "scope": "commercial-draft",
-      "kind": "navigation",
-      "domains": [],
-      "curation": "unreviewed",
-      "keywords": [],
-      "decision": null
-    },
-    {
-      "path": "docs/investors/slides/PROMPTS.md",
-      "title": "🎨 GALX Venture Pitch Deck — AI Image Generation Master Prompts",
-      "scope": "commercial-draft",
-      "kind": "draft",
-      "domains": [],
-      "curation": "unreviewed",
-      "keywords": [],
-      "decision": null
-    },
-    {
-      "path": "docs/investors/slides/README.md",
-      "title": "🖼️ GALX AI-Generated Slide Gallery",
+      "title": "GALX investor materials",
       "scope": "commercial-draft",
       "kind": "navigation",
       "domains": [],

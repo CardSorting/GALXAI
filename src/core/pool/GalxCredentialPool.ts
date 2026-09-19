@@ -25,6 +25,9 @@ interface QueuedAdmissionRequest {
   isDone?: boolean;
 }
 
+const MAX_ADMISSION_QUEUE_DEPTH = 500;
+const MIN_ADMISSION_WAKE_DELAY_MS = 25;
+
 /**
  * Enterprise Adaptive Quota Cycling & Shard Governor for GALXAI.
  *
@@ -66,6 +69,8 @@ export class GalxCredentialPool {
 
   // Anti-Stampede Bounded Admission Queue (Waiting Room)
   private readonly admissionQueue: QueuedAdmissionRequest[] = [];
+  private admissionWakeTimer?: NodeJS.Timeout;
+  private admissionWakeAtMs = 0;
   private readonly syncBuffer = GalxShardSyncBuffer.getInstance();
   private readonly shardRepository: ShardRepository;
 
@@ -134,7 +139,12 @@ export class GalxCredentialPool {
   /**
    * Forecasts earliest reset timestamp across all provider shards for admission queueing.
    */
-  public getEarliestPoolResetTimeMs(provider: string, nowMs = Date.now()): number {
+  public getEarliestPoolResetTimeMs(
+    provider: string,
+    nowMs = Date.now(),
+    estimatedTokens = 1000,
+    maxInFlightPerShard = 10
+  ): number {
     const accounts = this.substrate.listAccounts(undefined, provider as any);
     if (accounts.length === 0) return nowMs + 30_000;
 
@@ -148,6 +158,40 @@ export class GalxCredentialPool {
         if (acc.slidingWindowQuota.lastExhaustionResetAtMs < earliestReset) {
           earliestReset = acc.slidingWindowQuota.lastExhaustionResetAtMs;
         }
+      }
+
+      const bucket = this.rateGovernor.refillBucket(acc.tokenBucket, nowMs);
+      const inFlight = this.inFlightCounts.get(acc.id) || 0;
+      const adaptiveLimit = this.calculateAdaptiveInFlightLimit(acc, maxInFlightPerShard);
+      if (inFlight >= adaptiveLimit) {
+        for (const lease of this.activeLeases.values()) {
+          if (lease.shardId === acc.id && lease.expiresAtMs > nowMs) {
+            earliestReset = Math.min(earliestReset, lease.expiresAtMs);
+          }
+        }
+      }
+
+      const availableTokens = Math.max(0, bucket.remainingTokens - (bucket.reservedTokens || 0));
+      const tokenDeficit = Math.max(0, estimatedTokens - availableTokens);
+      const tokenRefillPerMinute = bucket.refillRatePerMinute || bucket.maxTokens;
+      if (tokenDeficit > 0 && tokenRefillPerMinute > 0) {
+        earliestReset = Math.min(
+          earliestReset,
+          nowMs + Math.ceil((tokenDeficit / tokenRefillPerMinute) * 60_000)
+        );
+      }
+
+      // Request slots are consumed at settlement, so in-flight leases are the
+      // local reservation for this dimension. This mirrors the authoritative
+      // coordinator's active-in-flight guard and prevents burst over-commit.
+      const availableRequests = Math.max(0, bucket.remainingRequests - inFlight);
+      const requestDeficit = Math.max(0, 1 - availableRequests);
+      const requestRefillPerMinute = bucket.maxRequests || 500;
+      if (requestDeficit > 0 && requestRefillPerMinute > 0) {
+        earliestReset = Math.min(
+          earliestReset,
+          nowMs + Math.ceil((requestDeficit / requestRefillPerMinute) * 60_000)
+        );
       }
     }
 
@@ -225,7 +269,10 @@ export class GalxCredentialPool {
    * 2. When a lease is successfully acquired, resolve caller immediately.
    */
   public drainAdmissionQueue(nowMs = Date.now()): void {
-    if (this.admissionQueue.length === 0) return;
+    if (this.admissionQueue.length === 0) {
+      this.cancelAdmissionWake();
+      return;
+    }
 
     const remaining: QueuedAdmissionRequest[] = [];
 
@@ -233,18 +280,24 @@ export class GalxCredentialPool {
       const item = this.admissionQueue[i];
       if (item.isDone) continue;
 
-      const maxWait = item.req.deadlineMs ?? item.req.maxQueueWaitMs ?? 4000;
       const sojournMs = nowMs - item.enqueuedAtMs;
+      const deadlineAtMs = item.req.deadlineMs;
+      const maxWait = deadlineAtMs !== undefined
+        ? Math.max(0, deadlineAtMs - item.enqueuedAtMs)
+        : Math.max(0, item.req.maxQueueWaitMs ?? 4000);
+      const expired = deadlineAtMs !== undefined
+        ? nowMs >= deadlineAtMs
+        : sojournMs >= maxWait;
 
       // Anti-Aging Invariant: Never dispatch an expired or aborted caller to an upstream shard
-      if (sojournMs > maxWait || item.req.signal?.aborted) {
+      if (expired || item.req.signal?.aborted) {
         clearTimeout(item.timeoutTimer);
         item.isDone = true;
         item.resolve({
           status: item.req.signal?.aborted ? 'cancelled' : 'queue_timeout',
           reason: item.req.signal?.aborted
             ? 'Request aborted by client signal while waiting in admission queue'
-            : `Admission queue deadline exceeded (${sojournMs}ms > ${maxWait}ms)`
+            : `Admission queue deadline exceeded (${sojournMs}ms >= ${maxWait}ms)`
         });
         continue;
       }
@@ -261,6 +314,20 @@ export class GalxCredentialPool {
 
     this.admissionQueue.length = 0;
     this.admissionQueue.push(...remaining);
+
+    if (remaining.length > 0) {
+      const next = remaining[0];
+      const nextReset = this.getEarliestPoolResetTimeMs(
+        next.req.provider,
+        nowMs,
+        next.req.estimatedTokens || 1000,
+        next.req.maxInFlightPerShard || 10
+      );
+      const nextDeadline = next.req.deadlineMs ?? nowMs + (next.req.maxQueueWaitMs ?? 4000);
+      this.scheduleAdmissionWake(Math.min(nextReset, nextDeadline));
+    } else {
+      this.cancelAdmissionWake();
+    }
   }
 
   /**
@@ -277,16 +344,27 @@ export class GalxCredentialPool {
     }
 
     const directResult = this.acquireLeaseDirect(req, nowMs);
-    if (directResult.lease || req.queueIfExhausted === false) {
+    if (
+      directResult.lease
+      || req.queueIfExhausted === false
+      || directResult.status !== 'all_shards_cooldown'
+    ) {
       return directResult;
     }
 
     // Anti-Stampede Bounded Admission Queueing
-    const maxWaitMs = req.deadlineMs ?? req.maxQueueWaitMs ?? 4000;
-    const earliestResetMs = this.getEarliestPoolResetTimeMs(req.provider, nowMs);
+    const maxWaitMs = req.deadlineMs !== undefined
+      ? Math.max(0, req.deadlineMs - nowMs)
+      : Math.max(0, req.maxQueueWaitMs ?? 4000);
+    const earliestResetMs = this.getEarliestPoolResetTimeMs(
+      req.provider,
+      nowMs,
+      req.estimatedTokens || 1000,
+      req.maxInFlightPerShard || 10
+    );
     const resetDeltaMs = earliestResetMs - nowMs;
 
-    if (resetDeltaMs <= maxWaitMs && this.admissionQueue.length < 500) {
+    if (resetDeltaMs <= maxWaitMs && this.admissionQueue.length < MAX_ADMISSION_QUEUE_DEPTH) {
       const id = `wait_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
       let resolvePromise!: (res: ShardAcquisitionResult) => void;
       let rejectPromise!: (err: any) => void;
@@ -304,6 +382,7 @@ export class GalxCredentialPool {
           const idx = this.admissionQueue.findIndex((q) => q.id === id);
           if (idx !== -1) {
             this.admissionQueue.splice(idx, 1);
+            if (this.admissionQueue.length === 0) this.cancelAdmissionWake();
           }
           resolvePromise({
             status: 'queue_timeout',
@@ -335,6 +414,7 @@ export class GalxCredentialPool {
               const idx = this.admissionQueue.findIndex((q) => q.id === id);
               if (idx !== -1) {
                 this.admissionQueue.splice(idx, 1);
+                if (this.admissionQueue.length === 0) this.cancelAdmissionWake();
               }
               resolvePromise({
                 status: 'cancelled',
@@ -347,6 +427,7 @@ export class GalxCredentialPool {
       }
 
       this.admissionQueue.push(itemRef);
+      this.scheduleAdmissionWake(Math.min(earliestResetMs, nowMs + maxWaitMs));
 
       return {
         status: 'queued',
@@ -356,7 +437,36 @@ export class GalxCredentialPool {
       };
     }
 
+    if (this.admissionQueue.length >= MAX_ADMISSION_QUEUE_DEPTH) {
+      return {
+        ...directResult,
+        status: 'shed_overflow',
+        reason: 'Admission capacity is temporarily full. Retry shortly.'
+      };
+    }
+
     return directResult;
+  }
+
+  private scheduleAdmissionWake(atMs: number): void {
+    const now = Date.now();
+    const wakeAt = Math.max(now + MIN_ADMISSION_WAKE_DELAY_MS, atMs);
+    if (this.admissionWakeTimer && this.admissionWakeAtMs <= wakeAt) return;
+    this.cancelAdmissionWake();
+    this.admissionWakeAtMs = wakeAt;
+    const delay = Math.min(2_147_000_000, Math.max(MIN_ADMISSION_WAKE_DELAY_MS, wakeAt - now));
+    this.admissionWakeTimer = setTimeout(() => {
+      this.admissionWakeTimer = undefined;
+      this.admissionWakeAtMs = 0;
+      this.drainAdmissionQueue(Date.now());
+    }, delay);
+    this.admissionWakeTimer.unref?.();
+  }
+
+  private cancelAdmissionWake(): void {
+    if (this.admissionWakeTimer) clearTimeout(this.admissionWakeTimer);
+    this.admissionWakeTimer = undefined;
+    this.admissionWakeAtMs = 0;
   }
 
   /**
@@ -665,16 +775,38 @@ export class GalxCredentialPool {
       return {
         reason: `Compute capacity for provider '${req.provider}' is temporarily saturated. Automatic failover active.`,
         status: 'all_shards_cooldown',
-        earliestPoolResetMs: this.getEarliestPoolResetTimeMs(req.provider, nowMs)
+        earliestPoolResetMs: this.getEarliestPoolResetTimeMs(
+          req.provider,
+          nowMs,
+          estimatedTokens,
+          baseMaxInFlight
+        )
       };
     }
 
     // 4. Rate-Governor Token Bucket Capacity Check
-    const capableCandidates = candidateAccounts.filter((acc) =>
-      this.rateGovernor.canConsume(acc.tokenBucket, estimatedTokens, 1, nowMs)
-    );
+    const capableCandidates = candidateAccounts.filter((acc) => {
+      const bucket = this.rateGovernor.refillBucket(acc.tokenBucket, nowMs);
+      const inFlight = this.inFlightCounts.get(acc.id) || 0;
+      const availableTokens = Math.max(0, bucket.remainingTokens - (bucket.reservedTokens || 0));
+      const availableRequests = Math.max(0, bucket.remainingRequests - inFlight);
+      return availableTokens >= estimatedTokens && availableRequests >= 1;
+    });
 
-    const finalCandidates = capableCandidates.length > 0 ? capableCandidates : candidateAccounts;
+    if (capableCandidates.length === 0) {
+      return {
+        reason: `Compute capacity for provider '${req.provider}' is temporarily saturated. Automatic failover active.`,
+        status: 'all_shards_cooldown',
+        earliestPoolResetMs: this.getEarliestPoolResetTimeMs(
+          req.provider,
+          nowMs,
+          estimatedTokens,
+          baseMaxInFlight
+        )
+      };
+    }
+
+    const finalCandidates = capableCandidates;
 
     // 5. Anti-Starvation Fair-Share Concurrency Ceiling for Tenant
     const currentTenantInFlight = this.tenantInFlightCounts.get(req.userId) || 0;
@@ -713,10 +845,23 @@ export class GalxCredentialPool {
       }
     }
 
-    this.tenantInFlightCounts.set(req.userId, currentTenantInFlight + 1);
-
     // 7. Phase 1: Soft Token Reservation & Sliding Window Log update
-    const { bucket: reservedBucket } = this.rateGovernor.reserve(selectedAccount.tokenBucket, estimatedTokens, nowMs);
+    const reservation = this.rateGovernor.reserve(selectedAccount.tokenBucket, estimatedTokens, nowMs);
+    if (!reservation.reserved) {
+      this.circuitBreaker.releaseCanarySlot(selectedAccount.id);
+      return {
+        reason: `Compute capacity for provider '${req.provider}' is temporarily saturated. Automatic failover active.`,
+        status: 'all_shards_cooldown',
+        earliestPoolResetMs: this.getEarliestPoolResetTimeMs(
+          req.provider,
+          nowMs,
+          estimatedTokens,
+          baseMaxInFlight
+        )
+      };
+    }
+    const reservedBucket = reservation.bucket;
+    this.tenantInFlightCounts.set(req.userId, currentTenantInFlight + 1);
 
     let updatedSlidingWindow = selectedAccount.slidingWindowQuota;
     if (updatedSlidingWindow) {

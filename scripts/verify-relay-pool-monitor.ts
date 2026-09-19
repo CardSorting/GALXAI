@@ -197,8 +197,8 @@ try{
       const sameId=data.accounts.at(-1).id;data.accounts.at(-1).connectionState='sign_in_required';
       await page.locator('#refresh').click();await added.getByRole('button',{name:'Reconnect',exact:true}).click();
       const reconnectRow=page.locator('#pending article').filter({hasText:'Synthetic · Added account'});
-      await reconnectRow.getByRole('button',{name:'Save new sign-in',exact:true}).waitFor();
-      refreshError=true;await reconnectRow.getByRole('button',{name:'Save new sign-in',exact:true}).click();
+      await reconnectRow.getByRole('button',{name:'Reconnect account',exact:true}).waitFor();
+      refreshError=true;await reconnectRow.getByRole('button',{name:'Reconnect account',exact:true}).click();
       await reconnectRow.getByRole('alert').waitFor();
       for(const [name,width,height] of [['desktop',1440,1000],['narrow',320,844]] as const){
         await page.setViewportSize({width,height});await page.screenshot({path:path.join(shots,`premium-reconnect-${name}.png`),fullPage:true});
@@ -206,7 +206,7 @@ try{
         assert.deepEqual((await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa']).analyze()).violations.map((v:any)=>v.id),[]);
         report.push({pool,surface:'reconnect-error',viewport:name,axeViolations:0,overflow:false});
       }
-      refreshError=false;await reconnectRow.getByRole('button',{name:'Save new sign-in',exact:true}).click();
+      refreshError=false;await reconnectRow.getByRole('button',{name:'Reconnect account',exact:true}).click();
       await page.getByText('Connection verified. Check Accounts for its current status.',{exact:true}).waitFor();
       assert.equal(data.accounts.at(-1).id,sameId);assert.equal(data.accounts.at(-1).state,'paused');assert.equal(data.accounts.length,3);
       await page.locator('nav a[href="#accounts"]').click();

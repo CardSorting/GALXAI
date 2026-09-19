@@ -1,87 +1,93 @@
-# 💰 GALX Business Model & Unit Economics Framework
+# GALX business model and unit economics
 
 <!-- docs-scope: commercial-draft -->
-> **Reading scope:** Commercial and strategic investor materials. Contains thesis formulations, product positioning, unit economics frameworks, and venture scale arguments. Technical and operational capabilities describe public interfaces; proprietary routing mechanisms, capacity acquisition, and internal execution infrastructure remain private under [AGENTS.md](../AGENTS.md).
 
-## An Honest Economic Engine: Consumption, Serving & Margin
+## The commercial unit
 
-A disciplined examination of how GALX generates revenue, incurs serving costs, preserves gross margin, and expands economically as customer applications grow.
+GALX sells paid access to a creative experience. The unit is a **retained, paying creator receiving recurring value at a sustainable cost to serve**—not a token, endpoint, API credential, or isolated generation.
 
----
+The product earns the next visit by helping a creator continue a project or begin another one. A first beautiful result is a capability signal. It is not yet a business unit.
 
-## 1. The Core Economic Engine
+## Core equations
 
-GALX operates on a clear, legible business model:
-
-$$\text{Customer Pays GALX} \longrightarrow \text{Customer Uses GALX} \longrightarrow \text{GALX Incurs Serving Cost} \longrightarrow \text{GALX Retains Gross Margin}$$
-
-```mermaid
-flowchart LR
-    A[Customer Pays Usage / Tier Fee] --> B[GALX Platform]
-    B -->|Serves Execution Request| C[Application End User]
-    B -->|Optimized Serving Cost| D[Underlying Infrastructure / Capacity]
-    B -->|Retained Capital| E[Platform Gross Margin]
+```text
+creator revenue
+− direct creative service cost
+− storage and delivery cost
+− payment and support cost
+− attributable acquisition cost
+= cohort contribution
 ```
 
-### 1. Customer Revenue
-Developers purchase compute access through developer tiers and usage-based billing. They receive abundant, predictable execution without paying punitive retail surcharges or dealing with arbitrary provider rate limits.
+For a retained creator:
 
-### 2. Serving Cost
-GALX fulfills execution requests through proprietary operational knowledge, managing capacity across heterogeneous infrastructure sources, local runtimes, and optimized serving topologies.
-
-### 3. Gross Margin Retention
-Because GALX provides a focused two-model managed surface rather than passing through unmanaged retail calls, the platform captures healthy gross margins by delivering sufficient intelligence efficiently.
-
----
-
-## 2. Compounding Expansion: The Application Lifecycle
-
-Traditional developer tools hit revenue ceilings because they charge per seat. GALX’s economics expand with the execution volume of the applications built on the platform:
-
-```
-    [Phase 1: Prototype]           [Phase 2: Launch]              [Phase 3: Scale]
-      Builder Experiments           Initial Users Adopt             High-Traffic Production
-    -------------------------     -------------------------     -----------------------------
-    • Low initial spend           • Daily active usage          • Compounding execution volume
-    • Fast iteration & test       • Predictable execution       • Deep platform stickiness
-    • Low cost to acquire         • Organic revenue growth      • High gross margin retention
+```text
+monthly contribution margin
+= realized revenue
+− variable delivery cost
+− variable support cost
 ```
 
-1. **Low Acquisition Friction**: Builders start quickly because GALX provides an immediate API without multi-week enterprise negotiations or confusing setup steps.
-2. **Organic Account Expansion**: As an application attracts more end users, its requests per day compound. GALX participates directly in that upside without needing additional sales effort.
-3. **High Switching Friction**: Once an application’s backend and client-facing workflows depend on GALX's reliability and low operational overhead, switching back to managing raw infrastructure represents a substantial engineering regression.
+LTV should be presented as a scenario range derived from observed paid retention and contribution margin. It should not be reverse-engineered from a desired multiple.
 
----
+## Metrics to establish
 
-## 3. The Sufficient Intelligence Margin Advantage
+| Metric | Definition | Required qualification |
+| --- | --- | --- |
+| Activation | A new user begins a visual idea and saves, revises, or shares work they consider meaningful. | Record cohort source, support level, and time to result. |
+| Direction | The creator intentionally selects, rejects, redirects, or revises the work. | Do not use output count as a proxy. |
+| Project return | The user starts a subsequent project without founder intervention. | Separate prompted, subsidized, and independent return. |
+| Paid conversion | The user begins a paid relationship after experiencing value. | Record offer, price, subsidy, and payment completion. |
+| Paid retention | A paying creator remains active and continues or begins another project. | Report by cohort and period; include refunds and pauses. |
+| Cost to serve | Direct generation, storage, delivery, support, moderation, and payment costs allocated to the cohort. | Keep unknown costs explicit; do not infer supplier economics from short canaries. |
+| CAC | Fully loaded acquisition spend divided by newly paid creators. | State channel, period, attribution window, and founder effort treatment. |
+| Payback | Months until cumulative cohort contribution margin recovers CAC. | Use realized cohort curves and scenario ranges. |
+| LTV | Expected contribution from a creator over a stated retention scenario. | Show base, upside, and downside assumptions. |
+| Founder intervention | Founder hours required per activated or retained creator. | Treat it as a scale constraint and eventual hiring input. |
 
-The conventional approach to AI developer tooling assumes that every call must be forwarded to the most expensive foundation model available. This destroys application margins and makes developer pricing volatile.
+## What the experience must improve
 
-GALX’s non-consensus thesis creates an asymmetric economic advantage:
+More output is not automatically more value. GALX should measure:
 
-| Dimension | Conventional Model Reseller | GALX Abstraction Layer |
-| :--- | :--- | :--- |
-| **Model Scope** | Sells 100+ unmanaged third-party models | Deliberately manages two focused models (e.g. GALX Nova) |
-| **Operational Control** | Passive byte-pipe forwarding | Active management of capacity, resilience, and serving |
-| **Gross Margin Profile** | Thin, fragile spread on top of retail rates | Healthy platform margin enabled by operational delivery |
-| **Developer Experience** | High decision friction; developer manages complexity | Radical simplicity; developer builds software |
+- meaningful completion;
+- deliberate revision;
+- perceived direction and ownership;
+- ability to reject, recover, or change course;
+- project continuity across sessions; and
+- willingness to return and pay.
 
-By delivering **sufficient intelligence** reliably and economically, GALX provides developers with cost certainty while protecting platform unit economics.
+A workflow that produces more material but increases review burden may have weak economics even when generation costs fall.
 
----
+## Cohort design
 
-## 4. What We Are Proving in Current Cohorts
+Compare acquisition and support conditions separately:
 
-Intellectual honesty requires measuring what is known today versus what is being validated:
+| Cohort | Learning objective |
+| --- | --- |
+| Founder-guided activation | Can the experience create capability when a human helps someone begin? |
+| Self-serve continuation | Can users return without the founder translating their intention? |
+| Community referral | Does a useful result cause a suitable creator to begin? |
+| Paid continuation | Does the user value the recurring experience enough to pay? |
+| Paid acquisition | Can distribution scale at a known cost? |
 
-### 1. Developer Payment Willingness
-- **Observation**: Builders are willing to pay for friction-free access that saves them days of infrastructure setup.
-- **Ongoing Test**: Evaluating optimal initial credit structures and usage thresholds to balance rapid onboarding with immediate margin contribution.
+Track subsidies, facilitator time, free capacity, support conversations, and consent. A free cohort can prove activation; it cannot by itself prove price, retention, or payback.
 
-### 2. Execution Volume Durability
-- **Observation**: Early builders exhibit steady request activity during active development.
-- **Ongoing Test**: Tracking long-term retention as developer prototypes transition into publicly distributed products.
+## Economic risks
 
-### 3. Serving Cost Predictability
-- **Observation**: Concentrated model surfaces allow far greater operational control than broad, uncurated catalogs.
-- **Ongoing Test**: Validating that serving margins remain stable across fluctuating traffic patterns and multi-tenant spikes.
+- Users generate once and churn.
+- Iteration creates high delivery cost without higher willingness to pay.
+- Support, moderation, or project recovery remains founder-dependent.
+- Community discovery creates attention but not durable work.
+- Storage, delivery, or privacy requirements are omitted from cost to serve.
+- Product breadth dilutes the initial value proposition and contribution margin.
+- Paid acquisition reaches users with low second-project rates.
+
+## Decision gates
+
+| Observation | Decision |
+| --- | --- |
+| Meaningful completion and independent return improve together. | Increase self-serve product work and test paid continuation. |
+| Users value the workflow but cost to serve is unsustainable. | Narrow the experience, reprice, or improve delivery before scaling acquisition. |
+| Activation is strong only with founder support. | Invest in onboarding and product clarity; do not call it scalable retention. |
+| Users like the demonstration but do not return or pay. | Redesign the recurring job or stop the segment. |
+| Paid retention is healthy in one cohort. | Re-test the behavior in a different channel before treating it as a repeatable engine. |

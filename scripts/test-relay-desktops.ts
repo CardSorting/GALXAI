@@ -425,6 +425,20 @@ test('concurrent inventory checks share one read; foreground input coalesces whi
   assert(!JSON.stringify(manager.snapshot()).includes('PRIVATE_CLIPBOARD'));
 });
 
+test('foreground credential reads do not overlap a background credential check', async t => {
+  let release!: () => void, entered!: () => void;
+  const gate = new Promise<void>(resolve => { release = resolve; }), started = new Promise<void>(resolve => { entered = resolve; });
+  const { manager, driver } = fixture(t, async () => ({ outcome: 'current' }));
+  const id = randomUUID(); await manager.create({ id, name: 'Credential boundary', relayId: 'fixture-shard' });
+  let reads = 0;
+  driver.credentials = async () => { reads++; entered(); await gate; return savedLogin(); };
+  const check = manager.syncCredential(id, 'fixture-shard'); await started;
+  assert.throws(() => manager.credentials(id), /sign-in check/);
+  release(); await check;
+  await manager.credentials(id);
+  assert.equal(reads, 2);
+});
+
 test('saved credential checkpoints survive restart, recheck authority quietly and report a superseded login', async t => {
   const f = fixture(t); let now = Date.now(), checks = 0, superseded = false;
   const refresh: RefreshDesktopCredential = async (_id, _candidate, _current, checkOnly) => {

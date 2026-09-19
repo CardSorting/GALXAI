@@ -1,67 +1,57 @@
-# 🔬 Technical Diligence: Implementation & Operating Boundaries
+# GALX technical diligence and product evidence
 
 <!-- docs-scope: commercial-draft -->
-> **Reading scope:** Commercial and strategic investor materials. Contains thesis formulations, product positioning, unit economics frameworks, and venture scale arguments. Technical and operational capabilities describe public interfaces; proprietary routing mechanisms, capacity acquisition, and internal execution infrastructure remain private under [AGENTS.md](../AGENTS.md).
 
-## Operational Integrity, Boundaries & Inspectable Evidence
+## What investors should understand
 
-Reviewed September 2026. This document defines the technical architecture boundaries, operational principles, and inspectable evidence behind GALX. It distinguishes public capabilities from private implementation and details the company's approach to reliability and security.
+GALX’s technical question is whether the product can give creators a steerable, continuous, and dependable creative experience. The investor story should describe observable capability and behavior. Implementation topology, credential sources, routing mechanics, upstream identities, internal constraints, and diagnostics remain private.
 
----
+The useful diligence boundary is not “does a model return an image?” It is whether the product supports the complete human-directed loop:
 
-## 1. Capability vs. Implementation Boundary
-
-In accordance with GALX's core operational policy ([AGENTS.md](../AGENTS.md)):
-
-$$\mathbf{Public\ Documentation\ Describes\ Capability,\ Not\ Implementation.}$$
-
-- **What Is Public**:
-  - The developer-facing capability surface: standard API endpoints, model access, response formats, and developer tools.
-  - The two-model managed proposition: providing reliable, abundant execution for application builders.
-  - Managed model identities (e.g. **GALX Nova**).
-  - Clean error codes, standard rate limiting, and observable billing/credit balance interfaces.
-- **What Remains Private**:
-  - Underlying infrastructure topology, shard structures, and container runtime orchestration.
-  - Upstream capacity acquisition, provider relationships, and credential sources.
-  - Internal routing heuristics, failover logic, and load-balancing algorithms.
-  - Detailed internal cost breakdowns and operating metrics that materially lower the cost of reproducing GALX.
-
-Investors are invited to evaluate GALX’s **capability surface, business logic, and developer traction** without requiring an engineering manual to recreate proprietary systems.
-
----
-
-## 2. Core Architecture & Separation of Concerns
-
-```mermaid
-flowchart TD
-    App[Builder Application] -->|Standard API Request| Edge[GALX Public API Gateway]
-    Edge --> Control[Platform Execution Layer]
-    Control -->|Proprietary Execution Management| Infra[Heterogeneous Capacity Infrastructure]
-    Infra -->|Sanitized Result| Control
-    Control -->|Stream / JSON Response| App
+```text
+intention → action → result → inspection → redirection → preserved work → continuation
 ```
 
-1. **Public API Gateway**: Exposes a clean, standard interface. Validates developer authentication, enforces usage boundaries, and normalizes request payloads.
-2. **Platform Execution Layer**: The core proprietary engine. It decouples the developer’s logical request from underlying provider complexities, managing execution resilience, format translation, and capacity scheduling.
-3. **Execution Isolation**: Builder requests are processed in strictly isolated environments. Internal credentials, provider tokens, and upstream metadata are never exposed in client-facing headers, response bodies, or telemetry.
+## Product capabilities to verify
 
----
+- A person can begin from a visual idea without needing an institution-sized production apparatus.
+- The person can direct and revise results rather than only request another output.
+- The person can preserve decisions and revisit a project.
+- The person can reject an output, change direction, or stop.
+- The product distinguishes generated material from work the person has accepted as complete.
+- Ordinary failures preserve user agency and do not expose private diagnostics.
+- Public responses, metadata, errors, and artifacts contain only intended product information.
 
-## 3. Security, Privacy & Data Handling
+## Generation versus completion
 
-GALX maintains strict security and data stewardship standards:
+The May 2026 JoyZoning field report is relevant as founder evidence because it treated generated changes and accepted work as different states, with completion remaining under human authority. It also recorded scope drift, conflicting changes, unverifiable outputs, and verification burden.
 
-* **Ephemeral Processing**: Request payloads are processed in volatile memory to fulfill execution. GALX does not store, harvest, or monetize developer application data or user prompts for model training.
-* **Separation of Keys**: Developer API keys are strictly separated from internal operational credentials. Upstream provider keys and authentication tokens remain isolated in secure server environments and are never accessible to client applications.
-* **Bounded Operational Recovery**: Systems are engineered with bounded retry mechanics and clear timeout thresholds. If an execution path experiences an upstream interruption, the platform provides graceful error states rather than indefinite hanging sockets.
+These are project observations, not proof that GALX has solved the problem. Diligence should test whether the current product reduces those burdens for the chosen image-creation workflow.
 
----
+## Evidence package
 
-## 4. Evaluated Evidence: The Sufficiency Principle in Practice
+Diligence should include dated, bounded evidence for:
 
-A core pillar of GALX’s technical thesis is that **representative application workloads require substantially less model capability than commonly assumed.**
+| Area | Evidence |
+| --- | --- |
+| Capability | Representative creator journeys, meaningful completion, deliberate revision, and recoverability. |
+| Product | Return cohorts, project continuity, self-serve use, and comparison with relevant alternatives. |
+| Business | Paid continuation, contribution margin, acquisition source, support burden, and founder time. |
+| Safety and privacy | Authorization tests, adversarial response tests, artifact sanitation, metadata handling, and public-surface scans. |
+| Delivery | Production-build results and a clear distinction between local validation, deployed behavior, and unverified assumptions. |
 
-Through early operational testing across diverse workload patterns (including structured data extraction, classification, interactive assistant loops, and visual generation):
-- Over **80% of application-critical tasks** execute with equivalent user-perceived quality on well-managed, highly responsive models compared to frontier reasoning models.
-- Execution latencies and operational costs are significantly lower, providing builders with an economically sustainable foundation.
-- Detailed internal evaluation matrices and benchmark harnesses remain proprietary, but the operational outcome is reflected directly in platform reliability and developer satisfaction.
+No single demo establishes all five.
+
+## Privacy and public boundary
+
+Protect user content and account data. Re-encode published images and sanitize metadata. Do not forward upstream headers or internal objects. Keep topology, credential sources, routing mechanics, upstream identities, operational diagnostics, and private incident records out of public materials and ordinary user responses. Use explicit public response field allowlists.
+
+Investor materials should describe what a creator can do and expect. They should not turn implementation details into a product promise.
+
+## LUMI
+
+LUMI is a maintained instrument that may support the thesis in software creation. It is not a second venture, a promise of general-purpose coding-agent commercialization, or a substitute for the GALX creative product. Its relevance to diligence is comparative: does the same human-directed loop—intention, delegation, inspection, redirection, preservation, and continuation—remain useful in a different medium?
+
+## Patents and intellectual property
+
+Do not imply patents are the strategy. The nearer-term defensibility question is whether GALX learns a creative process and project continuity well enough that users prefer it. Any patent, trademark, copyright, or trade-secret review should be handled through counsel and documented separately from product claims.

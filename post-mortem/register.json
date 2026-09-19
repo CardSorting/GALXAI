@@ -253,13 +253,15 @@
       "evidence": [
         "post-mortem/incidents/2026/2026-09-16-relay-registration/README.md",
         "post-mortem/releases/2026-09-16-relay-execution-activation.json",
-        "post-mortem/releases/2026-09-16-relay-automatic-activation.json"
+        "post-mortem/releases/2026-09-16-relay-automatic-activation.json",
+        "post-mortem/releases/2026-09-19-relay-connection-repair.json"
       ],
       "failure_modes": [
         "FM-ACCESS-001"
       ],
       "recovery_evidence": [
-        "post-mortem/incidents/2026/2026-09-16-relay-registration/connection-lifecycle.json"
+        "post-mortem/incidents/2026/2026-09-16-relay-registration/connection-lifecycle.json",
+        "post-mortem/releases/2026-09-19-relay-connection-repair.json"
       ]
     },
     {
@@ -711,6 +713,19 @@
       "closure": "Dedicated helper schema deployed with unchanged account/session predicates and operational denial; existing browser and owned live session acceptance pass.",
       "evidence": [
         "post-mortem/incidents/2026/2026-09-16-session-recovery/recovery-release.json"
+      ]
+    },
+    {
+      "id": "ACT-030",
+      "incident": "INC-20260916-REGISTRATION",
+      "owner": "Relay/database maintainer",
+      "review_by": "2026-09-26",
+      "status": "completed",
+      "next_step": "Retain deterministic-ID journal-revision reuse coverage and rerun the full disposable authorization suite after its independent installation fixture is corrected.",
+      "closure": "The duplicate journal-revision enrollment failure was repaired with a paired migration; the real pending Connect committed, automatic execution remained allowed, and a sanitized Premium image sample completed.",
+      "evidence": [
+        "post-mortem/releases/2026-09-19-relay-connection-repair.json",
+        "scripts/test-relay-connections-db.ts"
       ]
     },
     {
