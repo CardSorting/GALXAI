@@ -1,0 +1,148 @@
+{
+  "classification": "private",
+  "observed_at": "2026-09-20T04:41:27Z",
+  "scope": "Semantic reconciliation of the stale Sites, Relay, Delivery and BroccoliDB domain reviews plus the critical source/guide fingerprint set.",
+  "reviewed": {
+    "sites": {
+      "sources": [
+        "src/lib/sites/paid-access.ts",
+        "scripts/test-sites-fair.ts",
+        "scripts/test-sites-plans-db.ts",
+        "src/lib/billing/plan-subscription.ts"
+      ],
+      "guides": [
+        "docs/maintainers/SITES_OPERATIONS.md",
+        "docs/maintainers/SITES_FAIR_USAGE.md",
+        "docs/maintainers/SITES_WORKSPACE.md",
+        "docs/maintainers/SITES_DOMAINS.md",
+        "docs/maintainers/FREE_GENERATION_QUOTA.md",
+        "docs/SITES_WORKSPACE.md",
+        "docs/SITES_CONTENT.md",
+        "docs/adr/0148-complimentary-pro-access.md",
+        "docs/adr/0149-one-time-free-generation.md",
+        "docs/adr/0150-free-generation-admission-gate.md"
+      ],
+      "corrections": [
+        "Reconciled the fair-usage authority table and grant procedure with autonomous Star accounts: only an active administrative pro-v1 entitlement on an explicitly autonomous canonical identity can use that branch; human Auth metadata and paid subscription checks remain separate.",
+        "Updated the Sites fixture to exercise both the private autonomous entitlement and its revocation.",
+        "Reconciled the database plan fixture with the retired Developer self-service contract: checkout returns 410 without a provider checkout call while historical subscription records remain reconcilable."
+      ]
+    },
+    "relay": {
+      "sources": [
+        "src/core/router/adapters/RelayEndpointDiscovery.ts",
+        "src/core/router/adapters/IsolatedRelayTransport.ts",
+        "src/relay/admission-lifecycle.ts",
+        "src/relay/admission-observability.ts",
+        "src/relay/private-failure.ts",
+        "src/relay/pool-runtime.ts",
+        "src/relay/relay-server.ts",
+        "src/relay/standard-pool-scheduler.ts",
+        "src/core/router/GalxModelRouter.ts",
+        "src/core/router/ModelCatalog.ts",
+        "src/lib/stars/StarPopulationController.ts",
+        "scripts/populate-stars.ts",
+        "scripts/reconcile-stars.ts",
+        "scripts/verify-stars.ts",
+        "scripts/test-relay-adaptive-quota.ts",
+        "scripts/test-relay-admission-lifecycle.ts",
+        "scripts/test-relay-admission-observability.ts",
+        "scripts/test-relay-services.ts",
+        "scripts/test-relay-pool-images.ts",
+        "scripts/test-standard-pool.ts",
+        "scripts/test-star-qualification-plan.ts"
+      ],
+      "guides": [
+        "docs/runbooks/relay-admission-lifecycle.md",
+        "docs/runbooks/relay-pool-services.md",
+        "docs/reference/standard-relay-scheduling.md",
+        "docs/QUEUE_SPECIFICATION.md",
+        "docs/maintainers/RELAY_HARDENING.md",
+        "docs/maintainers/RELAY_TELEMETRY.md",
+        "docs/adr/0153-central-account-authority-isolated-relays.md",
+        "docs/adr/0154-relay-connection-lifecycle-and-legacy-retirement.md",
+        "docs/adr/0155-shared-quota-containment-and-bounded-continuation.md",
+        "docs/adr/0156-verified-automatic-relay-activation.md",
+        "docs/adr/0157-compatible-relay-output-budgets.md",
+        "docs/maintainers/ACCOUNT_PROFILE_SCHEMA.md"
+      ],
+      "corrections": [
+        "Added the endpoint-discovery and relay admission-observability sources to the Relay domain registry so source drift is visible.",
+        "Reconciled the admission runbook with target-local image failover, ambiguous-dispatch no-replay, bounded queue ownership and private failure/event allowlists.",
+        "Confirmed that Star qualification remains finite, versioned and administrative; no public response or browser asset exposes relay diagnostics."
+      ]
+    },
+    "delivery": {
+      "sources": [
+        ".env.example",
+        "src/workers/cloudflare/GalxR2AssetAdapter.ts",
+        "docs/DEPLOYMENT.md",
+        "docs/VERCEL_DEPLOYMENT.md",
+        "docs/runbooks/release-readiness.md"
+      ],
+      "guides": [
+        "docs/DEPLOYMENT.md",
+        "docs/VERCEL_DEPLOYMENT.md",
+        "docs/runbooks/release-readiness.md",
+        "docs/runbooks/deployment-storage.md",
+        "docs/VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md",
+        "docs/CLOUDFLARE_STRATEGY.md",
+        "docs/maintainers/CLOUDFLARE_EDGE_MESH_MAINTAINER_RUNBOOK.md",
+        "docs/playbooks/02-deployment-and-release.md",
+        "docs/runbooks/stripe-webhook-delivery.md"
+      ],
+      "corrections": [
+        "Documented that persisted image rows may retain the canonical private generation receipt correlation for recovery, without making it authorization or public response data.",
+        "Rechecked server-only relay configuration, migration ordering, rollback boundaries and the distinction between local build evidence and deployment acceptance."
+      ]
+    },
+    "broccolidb": {
+      "sources": [
+        "src/core/broccolidb/BroccoliImageLibraryBuffer.ts",
+        "docs/maintainers/image-library-scale.md",
+        "docs/maintainers/COMPACTOR_FUZZING_AND_QA_MATRIX.md",
+        "docs/operations/preview-hybrid-sync.md"
+      ],
+      "guides": [
+        "docs/maintainers/image-library-scale.md",
+        "docs/maintainers/COMPACTOR_FUZZING_AND_QA_MATRIX.md",
+        "docs/operations/preview-hybrid-sync.md"
+      ],
+      "corrections": [
+        "Documented the private generation_id correlation written and restored by the image-library buffer, including its compatibility fallback and explicit non-authorization boundary.",
+        "Confirmed that BroccoliDB remains a bounded process-local cache/write buffer and PostgreSQL/storage remain authoritative."
+      ]
+    },
+    "critical_source_watch": [
+      "package.json",
+      "docs/DEPLOYMENT.md",
+      "post-mortem/CURRENT_STATE.md",
+      "src/core/broccolidb/BroccoliImageLibraryBuffer.ts",
+      "src/lib/images/availability.ts",
+      "src/lib/images/request-repository.ts",
+      "src/workers/cloudflare/GalxR2AssetAdapter.ts"
+    ]
+  },
+  "checks": [
+    "npm run test:sites:fair: passed 10 tests",
+    "npm run test:sites:workspace: passed 19 tests",
+    "npm run test:sites:conversation: passed 15 tests",
+    "npm run test:sites:fair:db: passed 26 acceptance cases with 60 role denials and rollback receipt preservation",
+    "npm run test:sites:workspace:db: passed 86 checks",
+    "npm run test:sites:plans:db: passed 19 checks with 24 role denials and no external provider calls",
+    "npm run test:free-quota: passed 4 tests",
+    "npm run test:relay:capabilities: passed 170 tests",
+    "npm run test:relay:services: passed 91 tests",
+    "npm run test:relay:pool-images: passed 3 tests",
+    "npm run verify:relay:service-images: passed 50 checks for 5 images",
+    "npm run test:agent:tools: passed 25 tests",
+    "npm run test:broccolidb:api: passed all 7 facade/API stages",
+    "npm run test:broccolidb:hardening: passed",
+    "npm run test:egress:transport: passed 43 tests"
+  ],
+  "limits": [
+    "This evidence and the resulting attestations refresh source/guide fingerprints only; they do not claim a new deployment, production authorization, provider readiness or hosted acceptance.",
+    "Relay pool image and disposable PostgreSQL checks used local fixtures; the Docker/loopback commands required the approved elevated execution boundary.",
+    "The broader registry fingerprint inventory is hashed by the review tool; the semantic inspection above is limited to changed source contracts, canonical guides and their focused checks."
+  ]
+}

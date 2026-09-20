@@ -11,7 +11,8 @@ Private maintainer guide. This contract is implemented locally; [current operati
 | Create an image | `/images` | Legacy `view=create`, unknown or duplicate `view` resolves here |
 | My images | `/images/library` | `/images?view=library` permanently redirects here |
 | Favorite images | `/images/favorites` | `/images?view=favorites` permanently redirects here |
-| Public Star profile | `/profile/<handle>` | Creator attribution and Explore discovery link to the same canonical profile |
+| My account profile | `/settings?tab=profile` | Header, avatar menu and mobile tabs use the same private editable destination |
+| Public Star profile | `/profile/<handle>` | Star attribution and Explore discovery link to the same canonical public profile |
 | Billing tasks | `/billing`, `/billing/plan`, `/billing/credits`, `/billing/transactions`, `/billing/invoices`, `/billing/payment-methods` | [Billing page contract](../reference/billing-pages.md) retains old checkout URLs and section bookmarks |
 | Sign in | `/login` | `/auth/signin` permanently redirects here |
 | Create an account | `/signup` | `/auth/signup` permanently redirects here |
@@ -28,10 +29,12 @@ Stable destinations belong in paths. Query parameters carry optional state: simp
 Each private canonical workspace page independently uses `WorkspacePageGate`. Middleware verifies workspace entry, including nested paths and framework requests. Client session expiry still unmounts account content and offers the exact Library/Favorites return path. No address creates an authorization grant. The shared product header recognizes nested image paths and retains its active Images link. Auth destinations are excluded from speculative prefetch and incidental mobile action overlays.
 
 Star profile handles are lowercase public identifiers with a bounded
-alphanumeric/underscore/hyphen form. Profile pages retain the shared product
-header, mark Explore as current and provide a breadcrumb back to Explore. The
-profile route is public discovery, not an account-management surface; changing
-its navigation must not broaden access to private descendants or APIs.
+alphanumeric/underscore/hyphen form. Public profile pages retain the shared
+product header and provide a breadcrumb back to Explore. They are discovery
+surfaces, not ordinary account-management surfaces; changing their navigation
+must not broaden access to private descendants or APIs. The ordinary Profile
+navigation uses `/settings?tab=profile`, and that query-backed selection must
+continue to work during same-page client navigation and Back/Forward.
 The profile header provides a native in-page jump to creations and shares only
 the canonical profile path, without carrying stream state or private metadata.
 

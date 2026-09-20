@@ -11,12 +11,14 @@ This document is an internal maintainer record, not public site content.
 Community discovery is part of the public image boundary. Star profiles use the
 canonical `/profile/<handle>` route and `/api/community/participants/<handle>`
 endpoint. Both expose explicit identity and creation DTOs only; the gallery is
-creator-scoped, newest-first and continuable. Missing, invalid or temporarily
-unavailable profiles return authored public categories without database fields,
-execution context or diagnostics. Keep the profile and feed projections aligned
-when adding a new public field. Handles are normalized before they become links,
-avatars accept only site-relative or HTTPS image URLs, and malformed gallery
-cursors are rejected with a generic 400 response.
+creator-scoped, newest-first and continuable. Ordinary account profiles remain
+private under `/settings?tab=profile` and are never projected through the Star
+profile endpoint. Missing, invalid or temporarily unavailable Star profiles
+return authored public categories without database fields, execution context or
+diagnostics. Keep the profile and feed projections aligned when adding a new
+public field. Handles are normalized before they become links, avatars accept
+only site-relative or HTTPS image URLs, and malformed gallery cursors are
+rejected with a generic 400 response.
 
 Public profile image inspection is a viewport-owned dialog. It renders above the
 application shell, prevents background scrolling while open, returns focus on

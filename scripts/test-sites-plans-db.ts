@@ -68,6 +68,26 @@ try{
     assert.equal(await hasComplimentaryProAccess(pool,owner),false);
     await pool.query(`UPDATE auth.users SET email_confirmed_at=now(),raw_app_meta_data='{}' WHERE id=$1`,[owner]);
     assert.equal(await hasComplimentaryProAccess(pool,owner),false);
+    const operator=randomUUID(),autonomous=`star-${randomUUID()}`;
+    await pool.query(
+      `INSERT INTO private.galx_account_identities(account_id, account_class)
+       VALUES ($1, 'human'), ($2, 'autonomous')`,
+      [operator,autonomous],
+    );
+    const entitlement=(await pool.query(
+      `INSERT INTO private.galx_administrative_entitlements
+        (account_id, entitlement_key, granted_by_account_id, reason)
+       VALUES ($1, 'pro-v1', $2, 'Sites plan verification') RETURNING id`,
+      [autonomous,operator],
+    )).rows[0].id;
+    assert.deepEqual(await requirePaidSitesAccess(pool,null,autonomous,policy,1000),
+      {tier:'pro',accountId:autonomous,policyRevision:1,validUntil:16000});
+    await pool.query(
+      `UPDATE private.galx_administrative_entitlements
+       SET revoked_at=now(), revoked_by_account_id=$2 WHERE id=$1`,
+      [entitlement,operator],
+    );
+    assert.equal(await hasComplimentaryProAccess(pool,autonomous),false);
     for(const role of ['anon','authenticated']) {
       const db=await pool.connect();
       try {
@@ -126,24 +146,16 @@ try{
     const row=(await pool.query('SELECT status FROM private.galx_plan_subscriptions WHERE subscription_id=$1',[sub.id])).rows[0];assert.equal(row.status,'canceled');
     const bad=event('customer.subscription.updated',{...sub,metadata:{...sub.metadata,userId:randomUUID()}});await assert.rejects(fulfillStripeEvent(pool,bad,JSON.stringify(bad)));
   });
-  await check('Nova Developer Access is a $50 subscription entitlement with no usage credits',async()=>{
-    const f=fake(),i=input();
+  await check('Retired Developer Access stays non-purchasable while historical subscriptions reconcile',async()=>{
+    const f=fake(),i=input(),customer='cus_historical_'+randomUUID().replaceAll('-','');
     const price=await developerPrice(f.stripe);
     assert.equal(price.id,'price_developer'); assert.equal(price.unit_amount,DEVELOPER_ACCESS.monthlyPriceUsd*100);
-    const existingUser=input();
-    await pool.query('INSERT INTO galx_stripe_customers(id,user_id,stripe_customer_id) VALUES($1,$2,$3)',[randomUUID(),existingUser.userId,'cus_existing_'+randomUUID().replaceAll('-','')]);
-    f.subscriptions([{status:'active',items:{data:[{price:{id:'price_archived',product:'galx_nova_developer_access_v1'}}]}}]);
-    await assert.rejects(createDeveloperCheckout(pool,f.stripe,existingUser),(e:any)=>e.status===409);
-    f.subscriptions([]);
-    await createDeveloperCheckout(pool,f.stripe,i);
-    const session=[...f.sessions.values()][0];
-    assert.equal(session.metadata.galxPlan,'nova-developer-v1');
-    assert.equal(session.amount_subtotal,5000);
+    await assert.rejects(createDeveloperCheckout(pool,f.stripe,i),(e:any)=>e.status===410);
+    assert.equal(f.counts().calls,0,'retired checkout must not call Stripe checkout');
+    await pool.query('INSERT INTO galx_stripe_customers(id,user_id,stripe_customer_id) VALUES($1,$2,$3)',[randomUUID(),i.userId,customer]);
     const periodEnd=Math.floor(Date.now()/1000)+3600;
-    const sub={id:'sub_'+randomUUID(),customer:session.customer,status:'active',cancel_at_period_end:false,
+    const sub={id:'sub_'+randomUUID(),customer,status:'active',cancel_at_period_end:false,
       metadata:{galxPlan:'nova-developer-v1',userId:i.userId},items:{data:[{price:{id:'price_developer'},current_period_end:periodEnd}]}};
-    const checkoutEvent=event('checkout.session.completed',{...session,status:'complete',payment_status:'paid'});
-    await fulfillStripeEvent(pool,checkoutEvent,JSON.stringify(checkoutEvent),{developerPriceId:'price_developer'});
     const createdEvent=event('customer.subscription.created',sub);
     await fulfillStripeEvent(pool,createdEvent,JSON.stringify(createdEvent),{developerPriceId:'price_developer'});
     const stored=(await pool.query('SELECT plan_key,status,price_id FROM private.galx_plan_subscriptions WHERE subscription_id=$1',[sub.id])).rows[0];

@@ -1,0 +1,54 @@
+{
+  "observed_at": "2026-09-20T04:46:32Z",
+  "authorization": "User explicitly requested the pending database migrations be pushed.",
+  "target": "Linked application database; exact target identity verified through the Supabase CLI link and remote migration history.",
+  "migration": "supabase/migrations/20260920041311_private_profile_settings_projection.sql",
+  "sha256": "117e450958524ebcd3b996e56ea456f9cec784a608fe9e48502d476b2651bba8",
+  "rollback": {
+    "path": "supabase/rollbacks/20260920041311_private_profile_settings_projection.down.sql",
+    "sha256": "22c9b500264721eb8aecab9a150787a19688625b5e2f36bd0a9cf5e4e1a901ec",
+    "boundary": "Drops only the private Settings view; canonical profile and preference rows remain intact."
+  },
+  "dry_run": {
+    "command": "supabase db push --linked --dry-run --skip-vault",
+    "pending": [
+      "20260920041311_private_profile_settings_projection.sql"
+    ],
+    "other_pending": 0,
+    "skip_vault": true
+  },
+  "application": {
+    "command": "supabase db push --linked --skip-vault --yes",
+    "exit_code": 0,
+    "applied": 144,
+    "pending": 0,
+    "remote_only": 0
+  },
+  "readback": {
+    "migration_applied": true,
+    "view_exists": true,
+    "security_barrier": true,
+    "columns": [
+      "owner_key",
+      "display_name",
+      "locale",
+      "timezone",
+      "revision"
+    ],
+    "preference_orphans": 0,
+    "browser_and_service_select_denied": true,
+    "roles_checked": [
+      "anon",
+      "authenticated",
+      "service_role"
+    ]
+  },
+  "local_validation": [
+    "npm run db:verify",
+    "npm run db:test"
+  ],
+  "limits": [
+    "This record covers migration application and database readback only; hosted application/browser acceptance remains separate.",
+    "Existing unrelated database-advisor findings were not changed by this migration."
+  ]
+}

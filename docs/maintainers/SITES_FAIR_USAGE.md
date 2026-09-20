@@ -13,7 +13,7 @@ Private maintainer runbook for [ADR 0140](../adr/0140-paid-sites-and-shared-fair
 | Concern | Existing entry point and implementation |
 | --- | --- |
 | Verified parent account | `requireAccountIdentity`; Sites accepts explicit verified session bearers, not inference keys or submitted identity |
-| Pro eligibility | `paid-access.ts` reads a current explicit complimentary grant or verified paid recurring subscription coverage; no editable tier or staff-role fallback |
+| Pro eligibility | `paid-access.ts` reads current human Auth application metadata, a current autonomous-account administrative entitlement, or verified paid recurring subscription coverage; no editable tier or staff-role fallback |
 | Chat and content dispatch | Workspace and content routes both call `included-configuration.ts` and `included-generation.ts` |
 | Policy and actual accounting scope | One private `galx_sites_fair_policy` row names the shared delivery pool for all Sites callers; routing aliases never supply this ID |
 | Cross-worker state | `SitesFairStore` uses existing pooled PostgreSQL; no new service, queue, daemon or reconciliation scheduler |
@@ -56,9 +56,11 @@ For accounts without an explicit complimentary grant, paid access uses an existi
 
 Keep `GALX_SITES_CONTENT_ENABLED`, managed-hosting configuration and publication/domain flags under their existing operational control. Included browser requests require the policy and either Pro eligibility or the one-time free workspace allowance rather than per-account companion enrollment. [Quota operations](FREE_GENERATION_QUOTA.md) owns its separate three-turn lifetime limit; standalone content requests remain Pro-only. Native connection/domain administration retains its prior cohort contract. The DNS worker also claims managed rows with a matching account-owned published snapshot, independent of the native account list. Pro eligibility or allocated free-Site ownership is checked at publication; already accepted snapshots continue to reconcile after plan expiry. Selecting a paid plan or deploying a new app does not itself configure a hosting provider.
 
-## Complimentary Pro account grants
+## Complimentary Pro authorities
 
 [ADR 0148](../adr/0148-complimentary-pro-access.md) authorizes explicit complimentary Pro provisioning when requested by the account operator. Staff membership alone grants nothing. The current boolean `galx_pro` in `auth.users.raw_app_meta_data` is read directly for the authenticated account, with confirmed email, non-anonymous/non-deleted identity and no active ban. JWT claims and `raw_user_meta_data` are ignored. There is no positive process cache. Database failure fails closed; the ordinary fifteen-second admission proof limit also applies to complimentary grants.
+
+Autonomous Star accounts do not have an `auth.users` identity and are not covered by the ADR 0148 metadata flag. For those accounts only, `paid-access.ts` accepts an active, unrevoked `pro-v1` row from the private administrative-entitlement projection when the canonical identity is explicitly classified `autonomous` and the entitlement source is `administrative`. Human accounts cannot acquire access through this branch. Grant/revocation history, Star cohort controls and the immutable account classification remain governed by the [canonical account-profile contract](ACCOUNT_PROFILE_SCHEMA.md); ordinary product responses expose only the existing allowlisted access state, never entitlement provenance or private account metadata.
 
 From a trusted server environment, use:
 
@@ -68,7 +70,7 @@ node --env-file-if-exists=.env.local --import tsx scripts/manage-pro-access.ts g
 node --env-file-if-exists=.env.local --import tsx scripts/manage-pro-access.ts revoke <account-id>
 ```
 
-The operator command makes a single account-keyed update through the configured privileged database connection, merges only the Pro flag, and reads it back. Record the authorized action and minimal private evidence; never expose credentials or full account records. This requires no schema migration and changes no staff membership, preview approval, wallet balance, subscription or payment. It does not send email. Revocation affects the next membership check; previously issued admission proof can last at most fifteen seconds. Already admitted work and saved Sites retain normal recovery.
+For human accounts, the operator command makes a single account-keyed update through the configured privileged database connection, merges only the Pro flag, and reads it back. Record the authorized action and minimal private evidence; never expose credentials or full account records. This command does not create or mutate an autonomous entitlement, staff membership, preview approval, wallet balance, subscription or payment. It does not send email. Human flag revocation and autonomous entitlement revocation each affect the next membership check; previously issued admission proof can last at most fifteen seconds. Already admitted work and saved Sites retain normal recovery.
 
 Deploy the compatible application before claiming live acceptance. Check the signed-in Billing and Sites setup responses report included access. An unrelated account must not acquire Pro; it may independently qualify for the limited free workspace allowance. Billing says Pro access is active without asserting a payment. Public response allowlists reveal no grant mechanism or administrative metadata. Revoke the flag to undo this grant; rolling back the application restores paid-only checks and retains saved work and all payment history.
 

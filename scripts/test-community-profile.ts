@@ -81,6 +81,7 @@ test('creation projection excludes database-only fields and canonicalizes attrib
 test('profile routes are discoverable without broadening private path exemptions', () => {
   const urls = sitemap().map((entry) => new URL(entry.url).pathname);
   assert.ok(urls.includes('/profile/soravale'));
+  assert.equal(isPublicProductPath('/profile'), false);
   assert.equal(isPublicProductPath('/profile/soravale'), true);
   assert.equal(isPublicProductPath('/api/community/participants/soravale'), true);
   assert.equal(isPublicProductPath('/profile/soravale/diagnostics'), false);

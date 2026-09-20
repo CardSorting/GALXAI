@@ -36,7 +36,12 @@ test('No missing/default production policy, extra knobs, or unsupported provider
 });
 const policy={mode:'enforce' as const,pool_id:'test',revision:1,limits:p,paid_price_ids:['price_paid']};
 function membership(subscription:any,customer='cus_owner'){
-  let network=0;const pool={connect:async()=>({query:async(sql:string,args:unknown[])=>{assert.match(sql,/WHERE user_id=\$1/);assert.deepEqual(args,['alice']);return{rows:customer?[{stripe_customer_id:customer}]:[]};},release:()=>{}})} as any;
+  let network=0;const pool={connect:async()=>({query:async(sql:string,args:unknown[])=>{
+    assert.deepEqual(args,['alice']);
+    if(sql.includes('galx_administrative_entitlements'))return{rows:[{granted:false}]};
+    assert.match(sql,/WHERE user_id=\$1/);
+    return{rows:customer?[{stripe_customer_id:customer}]:[]};
+  },release:()=>{}})} as any;
   const stripe={subscriptions:{list:async(params:any,options:any)=>{network++;assert.equal(params.customer,'cus_owner');assert.equal(options.maxNetworkRetries,0);return{data:[subscription],has_more:false};}},invoicePayments:{list:async()=>({data:[{amount_paid:2000,payment:{type:'charge',charge:{customer:'cus_owner',amount:2000,paid:true,captured:true,refunded:false,amount_refunded:0,disputed:subscription.refunded||false}}}],has_more:false})}} as any;
   return {run:()=>requirePaidSitesAccess(pool,stripe,'alice',policy,now),network:()=>network};
 }
@@ -46,6 +51,16 @@ test('Membership uses verified customer, eligible recurring price, active paid i
   assert.deepEqual(await membership(paid).run(),{tier:'pro',accountId:'alice',policyRevision:1,validUntil:now+15000});
   for(const subscription of [{...paid,refunded:true},{...paid,status:'trialing'},{...paid,status:'past_due'},{...paid,customer:'cus_other'}, {...paid,pause_collection:{}}, {...paid,latest_invoice:{...paid.latest_invoice,amount_paid:0}}, {...paid,items:{data:[{...paid.items.data[0],price:{id:'price_other',recurring:{}}}]}}, {...paid,latest_invoice:{...paid.latest_invoice,lines:{data:[]}}}, {...paid,items:{data:[{...paid.items.data[0],current_period_end:999}]}}])await assert.rejects(membership(subscription).run(),(e:any)=>e.status===403);
   const missing=membership(paid,'');await assert.rejects(missing.run());assert.equal(missing.network(),0);
+});
+test('Autonomous Pro requires the private administrative entitlement and skips Stripe',async()=>{
+  let queries=0;
+  const pool={connect:async()=>({query:async(sql:string,args:unknown[])=>{
+    queries++;assert.match(sql,/galx_administrative_entitlements/);assert.deepEqual(args,['star-fixture']);
+    return{rows:[{granted:true}]};
+  },release:()=>{}})} as any;
+  assert.deepEqual(await requirePaidSitesAccess(pool,null,'star-fixture',policy,now),
+    {tier:'pro',accountId:'star-fixture',policyRevision:1,validUntil:now+15000});
+  assert.equal(queries,1);
 });
 const request=(body?:any,query='',auth='Bearer alice')=>new Request('https://galx.ai/api/sites/content'+query,{method:body?'POST':'GET',headers:{authorization:auth,'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{})});
 test('Included content HTTP excludes costs, quota internals, headers and caller-selected authority',async()=>{

@@ -2432,8 +2432,10 @@
       "title": "ADR 0158: Canonical account profiles with explicit actor provenance",
       "scope": "decision-record",
       "kind": "decision",
-      "domains": [],
-      "curation": "unreviewed",
+      "domains": [
+        "database"
+      ],
+      "curation": "assigned",
       "keywords": [],
       "decision": {
         "status": "proposed",

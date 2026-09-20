@@ -36,6 +36,8 @@ A failed configured database query returns unavailable, never the old partially 
 
 Writes coalesce by asset ID and flush in batches of at most 64. A full queue rejects admission before changing retained pending records. Flush failure keeps the pending records; completion still requires the existing durable asset check. Adapter enqueue failure propagates rather than reporting a successful catalog insertion. A binary upload that succeeds before metadata failure can remain orphaned for later private reconciliation; this is not a transactional storage/database commit or a new automatic cleanup policy. Do not regenerate an uncertain operation solely to rebuild its library row.
 
+Each newly persisted library row carries the canonical generation receipt ID when the upload supplies it, with the existing private request metadata used only as a compatibility fallback. BroccoliDB writes that value to `generation_id` and restores it on reads. This correlation supports owner-scoped recovery and provenance; it does not authorize the asset, replace the request repository, or expose a receipt identifier through a public response that has not explicitly allowlisted it.
+
 The legacy R2 session listing is still limited to its first 100 objects and is not the large-library browsing contract. Adapter listings no longer return an arbitrary hot-cache subset as if it were complete. The legacy summary RPC and its API default remain for older callers; exact counts/facets may still scan the owner library. `/images` explicitly uses the compact path. This change does not claim to scale every legacy list or storage manifest.
 
 ## Pagination and public contracts
