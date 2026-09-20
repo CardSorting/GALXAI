@@ -676,6 +676,8 @@
         "src/app/billing/**/*.tsx",
         "src/components/dashboard/GenerationGateNotice.tsx",
         "src/components/pricing/PricingClient.tsx",
+        "src/lib/data/pricingSummary.ts",
+        "src/lib/data/image-plan-offers.ts",
         "src/components/home/PlanAction.tsx",
         ".impeccable/surfaces/src-app-billing-page-tsx.md",
         "src/app/keys/page.tsx",

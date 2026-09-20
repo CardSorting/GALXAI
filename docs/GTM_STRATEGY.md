@@ -51,19 +51,17 @@ routing, model-training claims or operating internals.
 
 ## Commercial boundaries
 
-GALX Pro is the published consumer image plan at **$10 USD/month for one
-account**, with Image Studio terms and fair-use boundaries. The existing live
-Stripe lookup key needs a separate price reconciliation before checkout can be
-called healthy. The next pricing hypothesis is a simple three-step expansion:
-Creator at $15/month for a solo practice, Studio at $35/month for heavier
-individual use, and Team at $75/month for shared work.
+GALX sells four one-account Image Studio subscriptions: GALX Pro at **$10
+USD/month**, Creator at **$15/month**, Studio at **$35/month**, and Team at
+**$75/month**, all with published Image Studio terms and fair-use boundaries.
+The live Pro lookup key was reconciled to the published $10 contract only after
+the bounded subscription audit found no active consumer subscriptions.
 
-Those three Products and recurring Prices are staged in Stripe as inactive
-catalog entries only. They are not checkout options, do not create access or
-entitlements, and must not be described as live plans until the corresponding
-usage, workspace, support, webhook and entitlement contracts are implemented.
-The amounts are a reviewable value ladder—not a promise of image counts,
-throughput, seats, priority, video, editing or private infrastructure.
+The ladder uses familiar value steps without inventing unsupported quotas. All
+paid tiers currently include the same supported creation controls, owner-scoped
+Private mode, personal library, favorites, remix and downloads. Team is a
+one-account commercial tier today; image counts, priority, seats, roles,
+shared libraries, video, editing and private infrastructure are not promised.
 
 There is no public Nova Developer subscription, public usage price, or
 self-service API purchase path. Private access follows an administrator-owned

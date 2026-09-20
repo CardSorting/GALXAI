@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { Navigation } from '@/components/dashboard/Navigation';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
-import { FREE_IMAGE_OFFER, FUTURE_PLAN_CONCEPTS, PRICING_FAQS, PRICING_PLANS } from '@/lib/data/pricingSummary';
+import { FREE_IMAGE_OFFER, IMAGE_PLAN_OFFERS, PRICING_FAQS, PRICING_PLANS } from '@/lib/data/pricingSummary';
 import { FREE_PLAN_INCLUSIONS, PLAN_INCLUSIONS } from '@/lib/public-content/content';
 
 const linkStyle = 'text-indigo-300 underline underline-offset-4 hover:text-indigo-200 focus-visible:outline-indigo-300';
@@ -16,7 +16,7 @@ export function PricingClient() {
         <Breadcrumbs items={[{ label: 'Pricing' }]} />
         <header className="border-b border-white/10 pb-8">
           <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Make more room for ideas.</h1>
-          <p className="mt-3 max-w-2xl text-base leading-7 text-zinc-400">Try the Image Studio with a one-time five-image allowance, then continue with the current GALX Pro plan when you are ready.</p>
+          <p className="mt-3 max-w-2xl text-base leading-7 text-zinc-400">Try the Image Studio with a one-time five-image allowance, then choose the monthly plan that fits how you create.</p>
         </header>
 
         <section className="border-b border-white/10 py-8" aria-labelledby="free-plan">
@@ -32,17 +32,19 @@ export function PricingClient() {
           <p className="mt-5 text-3xl font-semibold tabular-nums">${plan.monthlyPrice}<span className="ml-1 text-sm font-normal text-zinc-400">USD / month</span></p>
           <ul className="mt-5 space-y-3 text-sm leading-6 text-zinc-300">{PLAN_INCLUSIONS.map(([label, value]) => <li key={label}><strong className="text-zinc-100">{label}:</strong> {value}</li>)}</ul>
           <p className="mt-4 max-w-2xl text-sm leading-6 text-zinc-300">Published Image Studio terms and fair-use boundaries apply.</p>
-          <Link href="/billing/plan" className="mt-5 inline-flex min-h-11 items-center rounded-md border border-indigo-400/40 bg-indigo-500/20 px-4 py-2.5 text-sm font-medium text-indigo-100">Choose Pro</Link>
+          <Link href="/billing/plan?plan=pro" className="mt-5 inline-flex min-h-11 items-center rounded-md border border-indigo-400/40 bg-indigo-500/20 px-4 py-2.5 text-sm font-medium text-indigo-100">Choose Pro</Link>
         </section>
 
-        <section className="border-b border-white/10 py-8" aria-labelledby="roadmap-plans">
-          <h2 id="roadmap-plans" className="text-xl font-semibold">Planned next steps</h2>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">These prices are staged in Stripe for planning only. They are inactive and cannot be purchased until their usage and workspace contracts are ready.</p>
+        <section className="border-b border-white/10 py-8" aria-labelledby="image-plans">
+          <h2 id="image-plans" className="text-xl font-semibold">Choose the pace that fits your practice.</h2>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">Creator, Studio, and Team are live monthly Image Studio options for one account. They share the supported controls and published fair-use boundary; Team does not currently include shared workspaces or seats.</p>
           <div className="mt-6 grid gap-4 md:grid-cols-3">
-            {FUTURE_PLAN_CONCEPTS.map((future) => <article key={future.id} className="rounded-lg border border-white/10 bg-white/[0.03] p-5">
-              <div className="flex flex-wrap items-start justify-between gap-3"><div><h3 className="font-semibold">{future.name}</h3><p className="mt-1 text-xs text-zinc-400">{future.audience}</p></div><span className="rounded-full border border-white/15 px-2 py-1 text-[11px] text-zinc-400">Not available</span></div>
-              <p className="mt-5 text-2xl font-semibold tabular-nums">${future.monthlyPrice}<span className="ml-1 text-xs font-normal text-zinc-400">/month planned</span></p>
-              <ul className="mt-4 space-y-2 text-sm leading-6 text-zinc-400">{future.features.map((feature) => <li key={feature}>{feature}</li>)}</ul>
+            {IMAGE_PLAN_OFFERS.map((plan) => <article key={plan.id} className="rounded-lg border border-white/10 bg-white/[0.03] p-5">
+              <div className="flex flex-wrap items-start justify-between gap-3"><div><h3 className="font-semibold">{plan.name}</h3><p className="mt-1 text-xs text-zinc-400">{plan.audience}</p></div><span className="rounded-full border border-white/15 px-2 py-1 text-[11px] text-zinc-300">{plan.status}</span></div>
+              <p className="mt-5 text-2xl font-semibold tabular-nums">${plan.monthlyPrice}<span className="ml-1 text-xs font-normal text-zinc-400">/month</span></p>
+              <ul className="mt-4 space-y-2 text-sm leading-6 text-zinc-400">{plan.features.map((feature) => <li key={feature}>{feature}</li>)}</ul>
+              <p className="mt-4 text-xs leading-5 text-zinc-400">{plan.boundary}</p>
+              <Link href={`/billing/plan?plan=${plan.id}`} className={`${linkStyle} mt-4 inline-flex min-h-11 items-center`}>Choose {plan.name}</Link>
             </article>)}
           </div>
         </section>

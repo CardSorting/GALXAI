@@ -10,13 +10,16 @@ Use for a Stripe failed-delivery alert or missing billing update. Owner: billing
 
 Read the alert's account ID and URL, then confirm the authenticated account with `stripe whoami --format json`. The CLI profile can differ from the application's configured account. Inspect endpoint IDs, URLs, `livemode`, status and subscriptions without printing keys, signing secrets or customer payloads. Preserve the original event IDs and receipt history.
 
-The active public billing path is GALX Pro: subscription creation, updates and
-deletion, invoice payment events, and the rest of the shared event allowlist.
-Readiness also verifies the unique restricted customer portal: invoice history,
+The active public billing path is the Image Studio subscription catalog (GALX
+Pro, Creator, Studio, and Team): subscription creation, updates and deletion,
+invoice payment events, and the rest of the shared event allowlist. Readiness
+also verifies the unique restricted customer portal: invoice history,
 payment-method updates and period-end cancellation enabled; subscription changes
-disabled. Private developer access is no longer a Stripe checkout product. Its
-credential, allocation, metering, and revocation lifecycle is administered in
-`/admin` and must not be inferred from a subscription event.
+disabled. All four plans use the same one-account capability boundary; plan
+names and prices do not grant unsupported seats, quotas, video, editing, or
+workspace features. Private developer access is no longer a Stripe checkout
+product. Its credential, allocation, metering, and revocation lifecycle is
+administered in `/admin` and must not be inferred from a subscription event.
 
 The application owns `/api/stripe/webhook` and `/api/internal/credits/stripe`. Its receiver verifies the unmodified body signature and requires the event's mode to match the configured key. `api.galx.ai` is not a billing receiver; `www.galx.ai` redirects. The production application origin is `https://galx.ai`. Test payments require an isolated test application, credentials and database, or local Stripe CLI forwarding to an isolated receiver.
 
@@ -44,8 +47,8 @@ through Stripe. This runbook does not authorize a live provisioning action.
 
 ## Verification and evidence
 
-Run `npm run test:stripe` for the current Pro and retired-Developer billing
-boundary and
+Run `npm run test:stripe` for the current Image Studio catalog and
+retired-Developer billing boundary and
 `npm run test:billing:lifecycle` for provider-state, portal, DTO, URL and
 signature/mode/body checks. Run `npm run test:developer-preview` for the
 independent reviewed-access boundary. Run

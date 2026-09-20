@@ -1,11 +1,11 @@
 {
   "knowledge": {
     "reviewer": "Codex",
-    "note": "Reviewed the new Stripe provisioning command and package script against the knowledge-base maintenance workflow, including the separate read-only Pro catalog mismatch audit. The command is private, idempotent, live-key guarded, and creates only inactive image catalog entries; no operational secret, customer data, schema migration, entitlement, or runtime access claim was introduced.",
+    "note": "Reviewed the documentation registry and current production catalog guidance after adding the browser-safe offer projection. Generated indexes remain mechanical; source review and live verification evidence stay separate.",
     "reviewed_at": "2026-09-20",
     "review_by": "2026-10-20",
     "evidence": {
-      "docs/knowledge/audits/2026-09-20-image-pricing-catalog-review.json": "0d283a96bbd194c530c665cd57d34cb998ef5555e80705da3ccf9b1a4ee9032e"
+      "docs/knowledge/audits/2026-09-20-image-pricing-catalog-review.json": "29e6e45874bfd958aba440f23dbd4a699e3b61baf61175afe94f6ea86f5975a5"
     },
     "files": {
       ".github/CODEOWNERS": "ef2f416d15f027dc8f197ad844289c9a44c8e843d3214d1590a3a380e939d13f",
@@ -26,7 +26,7 @@
       "docs/how-to/change-with-documentation.md": "abcf6bfb2f0aadcf8cfc2fdae18ac8f3f84565f127c34f7453d50e7283006e40",
       "docs/knowledge/DESIGN_RATIONALE.md": "edd3cf9b49ed794fbe8bf14448fd0c56cb4d8df832bab81cdf07e9ea2e2204a1",
       "docs/knowledge/README.md": "5ad219aeee44a9c065db2ca69e5a6498966fed42e2d8c74773dbc055d0220931",
-      "docs/knowledge/registry.json": "1eb1b179609b65298f82ccf39d612a38d2f14baa0f92e4c93cb2802e5fa07f86",
+      "docs/knowledge/registry.json": "87464aee7af179e8571be7d574cc68cc10d74aa264d3ca0271d834b9c5d90500",
       "docs/knowledge/templates/adr.md": "28773b3cbdb53ad34f08d0362e87b6dba24b6fd76ddb6c85db8ad63d99ad1331",
       "docs/knowledge/templates/runbook.md": "19679a7eb8c1a3aafd87852fa93817e7bf9ef4696772c8deb1617366c290abc1",
       "docs/maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md": "b7df75535611c14aabe599764a6f6c2a4f0f1461d068929602c68e39d8ce850d",
@@ -43,7 +43,7 @@
       "docs/runbooks/weekly-knowledge-audit.md": "ade4fc2133306e1b544d8783f647bc4c5b8a85e3a89ce769d36f586a91c36169",
       "docs/tutorials/README.md": "7cc84f00412108e1c8ec84ef127b15027b606bd16c2dc290f6efc607b9ca5268",
       "docs/tutorials/first-change.md": "06b7c9501cfe62893978e1da6556d6d4fc0d88f4e36b484d05dad4ad72d9fd60",
-      "package.json": "f4c02f189416ff131a3ce07d2ba4bebea4b90531a60467d5cbb81401b256d6fa",
+      "package.json": "1a6131abb519298ab7bbd1f4c9fcfd1009c11ee55461a0f9d9ffb14647fd383e",
       "scripts/docs-kb.py": "57642bcce6edcdec6b14dc285e973c1c7ba43d9b8908903826befcba6e992d88",
       "scripts/test-docs-kb.py": "83aa914e66cc04d866fd4c77554760748f8e1d07378326c49ac1738f12851856",
       "scripts/test-post-mortem.py": "c4dbb8c575760a2110eb1ad01575fb55b2f96da28da2bd57101dc630adaa464f",
@@ -53,14 +53,11 @@
   },
   "images": {
     "reviewer": "Codex",
-    "note": "Reviewed the image pricing strategy alongside the implemented Image Studio capability boundary and the read-only Pro catalog audit. Creator, Studio, and Team remain inactive pricing hypotheses; Private mode is owner-scoped and included in the current image product rather than represented as an unverified tier entitlement.",
+    "note": "Reviewed the active Creator, Studio, and Team catalog against the current Image Studio capability boundary and live verification. All plans are one-account offers with the same supported controls and fair-use terms; private mode remains owner-scoped.",
     "reviewed_at": "2026-09-20",
     "review_by": "2026-10-20",
     "evidence": {
-      "docs/knowledge/audits/2026-09-20-image-card-density-review.json": "6bdfb37806fe8e29fe001cced6197ab3c9226b216d37bb04797038460a6f9120",
-      "docs/knowledge/audits/2026-09-20-image-private-mode-review.json": "75cb301d3c76f025e862316e5d3bace89f8ea29892dec6a4436db51f2aec69aa",
-      "docs/knowledge/audits/2026-09-20-image-pricing-strategy-review.json": "88114d8bd1a571db6af593e5fe810763d90eacc13f51910ff74d88610831ad56",
-      "docs/knowledge/audits/2026-09-20-image-pricing-catalog-review.json": "0d283a96bbd194c530c665cd57d34cb998ef5555e80705da3ccf9b1a4ee9032e"
+      "docs/knowledge/audits/2026-09-20-image-pricing-catalog-review.json": "29e6e45874bfd958aba440f23dbd4a699e3b61baf61175afe94f6ea86f5975a5"
     },
     "files": {
       "docs/QUEUE_SPECIFICATION.md": "301d293b23327bf065202322e0a7554cf581740f28d0d5ab9fb827e73beed6ba",
@@ -320,14 +317,14 @@
   },
   "sites": {
     "reviewer": "Codex",
-    "note": "Reviewed the complete Sites operations, fair-use, workspace, domain, quota and ADR guidance against human, autonomous-Star and retired Developer access behavior. Focused fair-use, workspace, conversation and disposable database checks pass.",
+    "note": "Reviewed the shared paid-price policy and billing references after the Image Studio catalog activation. The fair-use authority now accepts the four active consumer prices without exposing policy internals, and historical Sites guidance remains clearly separated.",
     "reviewed_at": "2026-09-20",
-    "review_by": "2026-09-27",
+    "review_by": "2026-10-20",
     "evidence": {
-      "docs/knowledge/audits/2026-09-20-docs-check-stale-domain-review.json": "6d446a9de6f3730cbf01359b7bf9ced531ae735bf391bcf69b5499a7d0d00c25"
+      "docs/knowledge/audits/2026-09-20-image-pricing-catalog-review.json": "29e6e45874bfd958aba440f23dbd4a699e3b61baf61175afe94f6ea86f5975a5"
     },
     "files": {
-      "docs/API_BASE_URL.md": "7889636416035542a17bbb8bb2d0153c0f261344a8b011fcb1628003e689b2f2",
+      "docs/API_BASE_URL.md": "f1c38d5f35472f5e222b9617b00dbffe030d8d00cc507376e50cfdf19b07717d",
       "docs/SITES_CONTENT.md": "cbb15cbb1961ee539a4ee77d070f440b1a5fb5168a3fffbb2c8c25098a59b69a",
       "docs/SITES_WORKSPACE.md": "25bc8b58f78fed467fde5332c1d466c0a70be91ece119127919f279d6ab48af8",
       "docs/adr/0148-complimentary-pro-access.md": "4d454694d9a03c11485d32a428c9b7bb1de635f00e62f60ed51ac86619ad6922",
@@ -335,7 +332,7 @@
       "docs/adr/0150-free-generation-admission-gate.md": "23c6220cad7a15f262e05e9fc9c134622551c218e474da1a8ed262e9a95563a8",
       "docs/maintainers/FREE_GENERATION_QUOTA.md": "239c0c173e05cbba23f74818e712b1ad217e2e0d3a1c69f86b0de8504f06f42b",
       "docs/maintainers/SITES_DOMAINS.md": "99e64a33d4a55c03cc0dc59a2cf4b1b91beb38429911fd90f1e938e3bcc9f59a",
-      "docs/maintainers/SITES_FAIR_USAGE.md": "65bb8305a08197e3667ffdbc1cc123d6457f9fd26a2f6c195a2762d121a2ab5b",
+      "docs/maintainers/SITES_FAIR_USAGE.md": "5d09bc8ec036525d440d76f1d9507d05773990f0fc1a545fde98d27393f31478",
       "docs/maintainers/SITES_OPERATIONS.md": "8e6fac83fea19c7bbcf4b64a2b11ff2d511cfddd81db7666b2c4b41e409842ba",
       "docs/maintainers/SITES_WORKSPACE.md": "f09934fe65973d944cd5eaff361405a2c0ea83ebc7a0b2950ba62bcd746b93bb",
       "scripts/manage-pro-access.ts": "1ebddafc9bfcc287daf63cfab41d7fd20825b51840fd697dcb41a873fa1d2dbb",
@@ -344,7 +341,7 @@
       "scripts/test-free-generation-quota.ts": "cbf7034c6f10ecfcf6176718f693a2636af775899e05552b5d7c53c58f142fb3",
       "scripts/test-sites-fair-db.ts": "81c54900423732529355f40b450ab354edee2b24a705e6a95e19e97faba01b92",
       "scripts/test-sites-fair.ts": "06cc1fba44cc2d63a769f4b5fe5af5340f291e4ee70103da6a72a3fe77dd713c",
-      "scripts/test-sites-plans-db.ts": "3a13728c71c1b33e2553d840a71103c7e6b2006f1c7b08753249045c2c652ec8",
+      "scripts/test-sites-plans-db.ts": "ae3d5f8e260094b35caa99c50a2b7d5ceb13720e689ab3e41dd4f16284aafebe",
       "src/app/api/billing/generation-quota/route.ts": "9886f0b6132866ea12dcd80ba3301b9e6ccb8bc9eeac9ae3aca9a2ef1d64621f",
       "src/app/api/sites/content/route.ts": "b99c87335b9f2772b9ef423bb8e577b71357d89d3b2c0e3b5b0a8a95bc05aae4",
       "src/app/api/sites/domains/route.ts": "04a78970e61861898a5066b36cd760ed9224a368adf33562bf6bb2a0762ab2c7",
@@ -354,7 +351,7 @@
       "src/app/sites/error.tsx": "f2d40e7c5567e92746b18fc489099f7ab1331393859d7fae9a34db13f2bc4736",
       "src/app/sites/loading.tsx": "652066b8b7a8a11a586f6fb795a198f3168a752cad03f187a45ac9014bf61aad",
       "src/app/sites/page.tsx": "d0d249c52a5343b3f166810511408c61b87f14badc1a4318d4cc7970fbbc86d1",
-      "src/components/billing/PlanPanel.tsx": "73522acf22a071a0c88e2f294518378ad2d503bd8088dbe9d18e34f80b93e0e9",
+      "src/components/billing/PlanPanel.tsx": "751260c94ba690826e606b5d69be0867c2379b79ab3f3cb0f179b22c2c56e783",
       "src/components/dashboard/GenerationGateNotice.tsx": "0c905274ce933e0247d4a05f4174c9c13377bcb02e0d833c3927cfce62701bac",
       "src/components/dashboard/generation-gate.module.css": "efd8526722ca0ad42aec319a56bc2ea7e638185f30c35cea9b445dfb69bba4a4",
       "src/components/sites/SitesWorkspace.tsx": "941aaeaa82706182ba1615ef2a58ffa77be0de729e333724fc65b8a462f9c36b",
@@ -637,11 +634,11 @@
   },
   "database": {
     "reviewer": "Codex",
-    "note": "Final semantic audit after live privilege repair and advisor scan: both migration pairs, generated types, runbook and role readback rechecked. Forced RLS and exact service grants are verified; browser roles and old global function are denied. Advisor errors/warnings are pre-existing and name no new object.",
+    "note": "Reviewed the plan-aware checkout migration, paired rollback guard, generated types, and lifecycle ownership checks. Historical rows remain compatible, new plan keys are allowlisted, browser roles retain no access, and rollback refuses ambiguous image-plan records.",
     "reviewed_at": "2026-09-20",
-    "review_by": "2026-09-27",
+    "review_by": "2026-10-20",
     "evidence": {
-      "docs/knowledge/audits/2026-09-20-personal-explore-hide-review.json": "9aab9544afed0989dd2a69f00bd391a77218455d21e4357ca04ff86ec1872bab"
+      "docs/knowledge/audits/2026-09-20-image-pricing-catalog-review.json": "29e6e45874bfd958aba440f23dbd4a699e3b61baf61175afe94f6ea86f5975a5"
     },
     "files": {
       "deploy/relay-execution/supabase/migrations/20260915082628_relay_execution.sql": "fc61d7c30bdd57706ffb4212788741302760722e7285c25c9b4cb93d629b137e",
@@ -720,7 +717,7 @@
       "src/lib/supabase/repositories/TelemetryRepository.ts": "1887a04aa51424e44d6ac9d499fc24248edd2aa9c64c559cf1f307773dd252e5",
       "src/lib/supabase/repositories/WalletRepository.ts": "bfaddb9365d1fe93454df2fca44962f9fdd2aa3e30464c10089083bf913791ed",
       "src/lib/supabase/repositories/WorkspaceRepository.ts": "b9f6d1d09610760b172c6d1981a06e6ab97d4f5a9a58139377ade89df56a4ed8",
-      "src/lib/supabase/types.ts": "a187a12c89a4ecbca0f43dc759b2964b21e5006be27deea6730e0f6264bdd520",
+      "src/lib/supabase/types.ts": "07ae138e8e3d3e6d67e6d2cbe101479aeab9e5325918e37e8e3cc8bfd2dca1d5",
       "supabase/migrations/20260822000001_galxai_schema_core.sql": "084520c8cb3ab4e057ec788ea90605bb43e1373a28230e40696271f6a8476f77",
       "supabase/migrations/20260822000002_galxai_schema_apex.sql": "62b4fdc606104700d14eb3b80a7a7063a5152db9ed1afefe63a72315d586f539",
       "supabase/migrations/20260822000003_galxai_user_sessions_auth.sql": "ab2ec033c41bb147aa476acceb4d5dca3991f83f017a7cc41fddd01c6b8e75c4",
@@ -870,6 +867,7 @@
       "supabase/migrations/20260920075103_restore_legacy_star_profile_visibility.sql": "2058f1d0a36f806fd7b2a4f050a7b65e8242bb2fa0ec2ceb52ee75142babb621",
       "supabase/migrations/20260920120000_personal_explore_hide_controls.sql": "4f12f106facffe040f195983ec237b40507808bdbad8b90a75c0ca7950023679",
       "supabase/migrations/20260920123000_personal_explore_hide_privilege_repair.sql": "4c58ac84e73db4a60f66c8ef4dc5d75e6cf75e43fb29488f103a8ffa174a9c61",
+      "supabase/migrations/20260920130000_image_plan_checkout_contract.sql": "c5abc08dd659325e70fa114fff1401c133dad79f83bf5101cea3106832849869",
       "supabase/rollbacks/20260822000001_galxai_schema_core.down.sql": "d1267f3f89a7a0af12716a70167f615be1e904bf933e348a1173305cd5f2fe83",
       "supabase/rollbacks/20260822000002_galxai_schema_apex.down.sql": "df36655d564c6d6557d4461294ed2a502ad57adf799037c00a68481b809ffed9",
       "supabase/rollbacks/20260822000003_galxai_user_sessions_auth.down.sql": "4f3012db038b48387290b8d64638fe7aded774d8bdde88cfe683f01f1988adbc",
@@ -1018,16 +1016,17 @@
       "supabase/rollbacks/20260920072707_star_profile_explore_visibility_boundary.down.sql": "c41b86a4544c25f23c82dcb18a31fa03d79255edce4d1fe2d1288e83ee68525e",
       "supabase/rollbacks/20260920075103_restore_legacy_star_profile_visibility.down.sql": "51fcf830feecd3ffba34440d69c630b497e61af4b52b4a37f3fd802a16d48091",
       "supabase/rollbacks/20260920120000_personal_explore_hide_controls.down.sql": "52b6f77027fa4a49450489f706178e5a5385769f6fec77caf10d157f6ce99b8a",
-      "supabase/rollbacks/20260920123000_personal_explore_hide_privilege_repair.down.sql": "32453ab6460872950b7e1382c7f19bc4abac409abfc6c4138333b76ecb576712"
+      "supabase/rollbacks/20260920123000_personal_explore_hide_privilege_repair.down.sql": "32453ab6460872950b7e1382c7f19bc4abac409abfc6c4138333b76ecb576712",
+      "supabase/rollbacks/20260920130000_image_plan_checkout_contract.down.sql": "d822bd1aea90fead6365fbf1f1b7a64a4190d6e7ff96a573de03ff028f20e729"
     }
   },
   "delivery": {
     "reviewer": "Codex",
-    "note": "Reviewed deployment guidance after retiring the public developer path; the follow-up migration is documented as a narrow compatibility cleanup and no public implementation detail is exposed.",
+    "note": "Reviewed the Stripe webhook runbook after the four-plan activation. Readiness, portal, event allowlist, live verification, and rollback guidance cover the active Image Studio catalog without publishing credentials or provider identifiers.",
     "reviewed_at": "2026-09-20",
-    "review_by": "2026-09-27",
+    "review_by": "2026-10-20",
     "evidence": {
-      "docs/knowledge/audits/2026-09-20-developer-surface-removal-review.json": "0fa160336964bfa99dcc959012d1cbcb7ae816ec6f692ae74963bf682ea05f39"
+      "docs/knowledge/audits/2026-09-20-image-pricing-catalog-review.json": "29e6e45874bfd958aba440f23dbd4a699e3b61baf61175afe94f6ea86f5975a5"
     },
     "files": {
       ".dockerignore": "fb4dc7ef84e7f36c5bfed0f267187a022bbb61e66dd26060295b133e08fa74c5",
@@ -1044,7 +1043,7 @@
       "docs/maintainers/CLOUDFLARE_EDGE_MESH_MAINTAINER_RUNBOOK.md": "15571a03c6ce52400aea457f4797ca0ebc273892563c81c4c137074a6a822aa0",
       "docs/playbooks/02-deployment-and-release.md": "81e9a3764f54d92b728b18e6bc91864b9d45a9edf1371250f76a9ff6bc640246",
       "docs/runbooks/release-readiness.md": "585c381a14592b9c682beb56d4117a0afd123e26433669ab1688ebae19ddfb01",
-      "docs/runbooks/stripe-webhook-delivery.md": "f54173fde492ec26371fba31d3d28f5151ec4e4d487dc496708e4f44779f3ba3",
+      "docs/runbooks/stripe-webhook-delivery.md": "6d6980baaff16a95c9847f40bd518ed2963d012f429c09704a0329253b610f9a",
       "post-mortem/runbooks/deployment-storage.md": "056e84c5fa65ddbaeae5cbe9a09bf64a0f04cf6548fc30abe519de60028fdd3f",
       "scripts/lib/require-isolated-worker-env.ts": "0d53a207db93e611839175b68520824b8f97753607cf05d8f0bf25929c362127",
       "scripts/lib/stripe-webhook-target.ts": "a849c2441e61d6573a9fe7a9b6cad3e24bf86919cd1b5ebeeac2e5b97ab9e2db",
@@ -1062,7 +1061,7 @@
       "src/workers/cloudflare/GalxEdgeWebhookDispatcher.ts": "f6ce6d7efa5172ef3f0e15501cd1275a45e5bfce4b27478e9e33409c994d1f87",
       "src/workers/cloudflare/GalxEdgeWire.ts": "111f2dec2f0e3e99c5e7f09344f8b7ceee79dc4821ead16df7d667fb3cfaa373",
       "src/workers/cloudflare/GalxMessageBillingWorker.ts": "d57352f9db270b9245cfdae99cecf65555bfd3ac1218354cca72aa715b71f387",
-      "src/workers/cloudflare/GalxR2AssetAdapter.ts": "ee8fa8c10e274edb3ac71a5f5ed7bc0620dde69096859cb1c56c2500315486f0",
+      "src/workers/cloudflare/GalxR2AssetAdapter.ts": "81b1aace43cf42be766d36183cc13080cac082884b5e0132431e2b9b6637c2d7",
       "src/workers/cloudflare/GalxSwarmCoordinatorDO.ts": "d9cd3c3ae16ed4a421dba82fcf9c67340d7a8a2f19aaf9bf7e59d58e446f2dde",
       "src/workers/cloudflare/index.ts": "6192dbf49b58a617204ed7a3c4e8b9a6e9700bc51255479872d32b2eb1365fd8",
       "vercel.json": "68a341164bfeac2679510cca65b68fa1f2cf9e7e3ae5fb1e53f7f159b99260e8",
@@ -1524,12 +1523,11 @@
   },
   "client-efficiency": {
     "reviewer": "Codex",
-    "note": "Reviewed the pricing-card additions and client rendering path. The new cards are static, clearly marked unavailable, contain no checkout action, and do not add polling, billing requests, or entitlement reads. Existing free/Pro navigation remains the only actionable path; the staged Stripe audit evidence records no client-facing runtime change.",
+    "note": "Reviewed the pricing and plan-selection client path. Active offers use an allowlisted status DTO and one explicit checkout action per selection; no unsupported capability claims or extra polling loops were introduced.",
     "reviewed_at": "2026-09-20",
     "review_by": "2026-10-20",
     "evidence": {
-      "docs/knowledge/audits/2026-09-20-image-pricing-strategy-review.json": "88114d8bd1a571db6af593e5fe810763d90eacc13f51910ff74d88610831ad56",
-      "docs/knowledge/audits/2026-09-20-image-pricing-catalog-review.json": "0d283a96bbd194c530c665cd57d34cb998ef5555e80705da3ccf9b1a4ee9032e"
+      "docs/knowledge/audits/2026-09-20-image-pricing-catalog-review.json": "29e6e45874bfd958aba440f23dbd4a699e3b61baf61175afe94f6ea86f5975a5"
     },
     "files": {
       ".impeccable/surfaces/src-components-dashboard-navigation-tsx.md": "ed6144c9da6cf2c4e1537f735891cb91e1c064c488c24e1cec953509cfad6360",
@@ -1574,7 +1572,7 @@
       "src/app/pricing/fair-use/page.tsx": "f9d18d3e9438c1b5e849a124b6a0bfd5198b19a544634ca519e8fae53bf94539",
       "src/app/pricing/galx-pro/page.tsx": "271f7ff923562055c204241d1380cf05920837323a4ec69d6f092cde96f48e47",
       "src/app/pricing/opengraph-image.tsx": "57b0e4af2c492c4208eccf2a791a1824e8f4efb7704fcd2a56d7a07fb2766f02",
-      "src/app/pricing/page.tsx": "12bff09e1a9ab194f0b7f77d3d1b7a4abd5e81e31842c1067064c07fef79515c",
+      "src/app/pricing/page.tsx": "4af23c607b9d969f29b6c5024494c9bc68d58f6256e3268c139b3a0c0c1098db",
       "src/app/pricing/seats/page.tsx": "d0f7e15a799ac07c96be793655b6468f5e6445db9eedca128634302b9bc90904",
       "src/app/pricing/usage/page.tsx": "bf4b01115d242b71225b9954b2aa609c15c73f7471c9717207bb95b8766bee29",
       "src/app/privacy/page.tsx": "49a354b4d8716249d7d9803adc479302f11a7ea09a1b5b154b83d2e5ad06e6d2",
@@ -1637,40 +1635,39 @@
   },
   "billing": {
     "reviewer": "Codex",
-    "note": "Reviewed the staged image-plan pricing strategy, deterministic Stripe catalog provisioning, inactive Product and Price guardrails, the published Pro contract, and the separate live Pro lookup-key mismatch audit. The public billing surfaces clearly distinguish current Pro from Creator, Studio, and Team price hypotheses; checkout remains disabled for staged plans and Pro reconciliation is not silently changed.",
+    "note": "Reviewed the active consumer pricing catalog, browser-safe offer projection, plan-aware checkout, schema contract, webhook guards, and one-account capability boundary after production activation.",
     "reviewed_at": "2026-09-20",
     "review_by": "2026-10-20",
     "evidence": {
-      "docs/knowledge/audits/2026-09-20-image-pricing-strategy-review.json": "88114d8bd1a571db6af593e5fe810763d90eacc13f51910ff74d88610831ad56",
-      "docs/knowledge/audits/2026-09-20-image-pricing-catalog-review.json": "0d283a96bbd194c530c665cd57d34cb998ef5555e80705da3ccf9b1a4ee9032e"
+      "docs/knowledge/audits/2026-09-20-image-pricing-catalog-review.json": "29e6e45874bfd958aba440f23dbd4a699e3b61baf61175afe94f6ea86f5975a5"
     },
     "files": {
       ".impeccable/surfaces/src-app-billing-page-tsx.md": "7b6165eb4b5c85cac4900e9070cc20da30c96d06ff12ccd21f4c0450b817bc31",
-      "docs/WALLET_AND_BILLING_STRATEGY.md": "15b6864d3a2eaa2a580a86cb9efc3c6085c67d5769330aa0ecdeb14ea88ceb00",
-      "docs/maintainers/SITES_FAIR_USAGE.md": "20be8cea19781394db735816f83a02dcd79cea94c22f15b091c47ca663508f10",
-      "docs/reference/billing-pages.md": "532cfa4310d63ce40c4c8500316d0ea3665cf3080611b1e7f4b96efc182844c2",
-      "docs/runbooks/stripe-webhook-delivery.md": "f54173fde492ec26371fba31d3d28f5151ec4e4d487dc496708e4f44779f3ba3",
+      "docs/WALLET_AND_BILLING_STRATEGY.md": "07808bc362053cde008b82af6ee3a31d664c32557b7c9547056459c9477a5a83",
+      "docs/maintainers/SITES_FAIR_USAGE.md": "5d09bc8ec036525d440d76f1d9507d05773990f0fc1a545fde98d27393f31478",
+      "docs/reference/billing-pages.md": "1d60cd57687fe9d0772b0b7bea7d17153007192260992f635844cf3e3372d761",
+      "docs/runbooks/stripe-webhook-delivery.md": "6d6980baaff16a95c9847f40bd518ed2963d012f429c09704a0329253b610f9a",
       "next.config.ts": "dcfac740468b5568756a210bee88e2777eabc5afaaa2c230cb45e0c7805573ee",
       "scripts/lib/stripe-webhook-target.ts": "a849c2441e61d6573a9fe7a9b6cad3e24bf86919cd1b5ebeeac2e5b97ab9e2db",
       "scripts/provision-sites-pro.ts": "e146b0d34e9001d4b7ab096b06011395c3c8344b30d6522d562e2f9db21b1334",
       "scripts/provision-stripe-all.ts": "bacd1fa7ef366ea60e1c8f9df293626575aeb6facde0d5c00d3468811c0092e6",
       "scripts/seed-stripe-products.ts": "d11bcd5cf073cd94fe9eeedafa2fcf76681a06ecd2bfe0b34d34a9297034e0e2",
       "scripts/setup-stripe-cli.ts": "5d3222fba33a93fdbd562a5e6f2fa8c2e84196a2504b1233f2767ab91b85e9ad",
-      "scripts/test-billing-lifecycle.ts": "ab6a04b244a8ece0e745513efa5640fd39ad732ae8689549ab7809b6a1313d06",
+      "scripts/test-billing-lifecycle.ts": "266c52d82edb6a85ea6c3263b96737d48fe63144becf753239bf3376ce2dd0fb",
       "scripts/test-billing-navigation.ts": "3503b5e75cfad70ace5e655b77e063951ae58b4d408d44799d2c4db4f682b1e2",
       "scripts/test-billing-public-boundary.ts": "96aace744c9aa8cb2645088cf8f6f28a8972e1e50fdc35fceb7559b4ce8fbd49",
       "scripts/test-billing.ts": "fea243a5310434b46dede14a73a59430fb0c3dfc5282a6098e664c1e19b53bfb",
-      "scripts/test-sites-plans-db.ts": "3a13728c71c1b33e2553d840a71103c7e6b2006f1c7b08753249045c2c652ec8",
+      "scripts/test-sites-plans-db.ts": "ae3d5f8e260094b35caa99c50a2b7d5ceb13720e689ab3e41dd4f16284aafebe",
       "scripts/test-stripe-integration.ts": "5e6333b307d31b6c297447132510b925ad295e3f86c78e7eaf00bba37a9073ac",
-      "scripts/test-stripe-pricing-strategy.ts": "0e0ee229dfe8652e8094b795bd99704698d581c0a68d20aa2439fd05ae3ad3cf",
+      "scripts/test-stripe-pricing-strategy.ts": "a1915cafb3558c84ee976fd167900eef972cd45a864fb34ab896b4bb75b7c933",
       "scripts/test-stripe-webhook-endpoint.ts": "5c0d932f0e16d15d02d1559abce05fc97c69fda30727132814437e299682a054",
       "scripts/test-stripe-webhook-target.ts": "12e7e32acacb0343d5598ca1c0569751deb4b31841f1e7668e039d7ea9b165fa",
       "scripts/test-top-up.ts": "25d65025b60acb9fe209b903c8d5ae5087d4343e9404db19e869226d2ea57393",
-      "scripts/verify-billing-ux.mjs": "e5280aee4bbd34155f7e80e70467d50c06e7b858d3b755dc21cfdd2a8320cd42",
+      "scripts/verify-billing-ux.mjs": "06d3982725395a9bfa1a5ff1ee147600953908fd44fe31eef30f0de29f18cbf9",
       "scripts/verify-hybrid-broccolidb-omnisearch.ts": "e45f9f1885a91819079f98891e3e4aff8f2f620ea7d4c2bc2978d785bb2741cf",
       "scripts/verify-live-checkout.ts": "49c82b084955fbb1934b4a15c5bcd9a2a807e5f0ad2c9f8f507f04b2f6d55275",
       "scripts/verify-stripe-readiness.ts": "db90d4391bf35485789c4c4d7a3f0f77db05399a6e8bc040ea794e11a609c515",
-      "src/app/api/billing/plan/route.ts": "fb3ff0fb7fffb84f2f67577e8804238de22b0ba50f667b29631cea5eba4b1eae",
+      "src/app/api/billing/plan/route.ts": "cdf721b8230ac961a9ae6fe7f4ef5d4b7322558172ca3cec5af1cc34517fdd7b",
       "src/app/api/billing/quote/route.ts": "82770db472f65e450d96fed70440ef27f6e31a8f3654caa5c2ab44dcf04257a5",
       "src/app/api/billing/route.ts": "8feaeb645a5f5aaf9c15412b4413b25770c8ef65777b7797ad9fd87fc094074b",
       "src/app/api/internal/credits/stripe/route.ts": "ca9087394c058661fdc3a4681a6d7d518770c32341f7a5d2f1068d799bb684c6",
@@ -1699,8 +1696,8 @@
       "src/components/billing/BillingProvider.tsx": "cdfefd2683186cc736ee105739b84fd0426a15666d3b063ff02c1714a61c781a",
       "src/components/billing/BillingWorkspace.tsx": "dd50bbbbd1a041aed1bf10d99081abf04c13328e199471d33773ef3812e24cad",
       "src/components/billing/CheckoutStatus.tsx": "06e397007dae2050b902c02648bd6cdfb62ab0515355af5b0c851d1bae6b481d",
-      "src/components/billing/DESIGN.md": "130373ec0147ea27a3fd2020fed93f29d735678372de11dab92eec9fc406d932",
-      "src/components/billing/PlanPanel.tsx": "73522acf22a071a0c88e2f294518378ad2d503bd8088dbe9d18e34f80b93e0e9",
+      "src/components/billing/DESIGN.md": "a79edc738e76b902dc9578524b4d625ea0f2cac5c0f12347bd813f69dbe4c847",
+      "src/components/billing/PlanPanel.tsx": "751260c94ba690826e606b5d69be0867c2379b79ab3f3cb0f179b22c2c56e783",
       "src/components/billing/SeatsManagementClient.tsx": "4392f9525163626cbdee73ac28c73dbcf69d46d3c7cd37b86baa6ce659d91814",
       "src/components/billing/TopUpForm.tsx": "b3ebf09ff5e70949dfa8ad465d381d80c29fdd9c7b2957a81071727920b7bb67",
       "src/components/common/KeyboardShortcutsModal.tsx": "6553a9fe6afd0c6809602d44d8997424668d2285ba1bd71bc3df01357ead9d35",
@@ -1710,7 +1707,7 @@
       "src/components/grants/GrantsClient.tsx": "b9ddef7ff80365d85dcc1169f05ebf81b76e2abe126c66511e55e7d5ad262a88",
       "src/components/home/DESIGN.md": "d4c3aed483c303f297a518b6e481e45f0710c54bb58bdee597c0e6b47230af9b",
       "src/components/home/PlanAction.tsx": "c624af95fac166dfaddc9c6fccc6fd9a1314b1ea397c1bc16471ac790f72222b",
-      "src/components/pricing/PricingClient.tsx": "2df9c2c4752d1bebdf9d839dcfd766eaa1538cc00b8946339e5ce9a4a10a80ae",
+      "src/components/pricing/PricingClient.tsx": "72d1d5442adde9254e6972fc592cd1746f0b16d58ecca983bbe2d263df0bc883",
       "src/components/public-content/DESIGN.md": "1070795a25fc6075d9bceaaf8f77ee8033ff942a507d55196e0c39b4a4470d83",
       "src/components/teams/TeamsSubNav.tsx": "12ca1e90ab0c98b9166822234b13f6b958e863363ef2222bd05e73fb62b931b2",
       "src/lib/billing/account.ts": "c211925fcce0e39199b93eb8097cafe5c413a2809a8d1c00baf0bf7ad036dc1c",
@@ -1720,14 +1717,16 @@
       "src/lib/billing/fulfillment.ts": "9c2f27da870e394f36ea5ad510084fd2a80f6cd87fb1ef2141b3b18f263a003c",
       "src/lib/billing/navigation.ts": "c0069053559e49dc78a9b05d0179577c90d3729af2fc644b04239b422904d43e",
       "src/lib/billing/payment.ts": "9eecd90e8bfd5beed2c4ca90c0989d6a8c120d4b6a03be894a66914dc844daf1",
-      "src/lib/billing/plan-status.ts": "2b39191582d14463cd02887674870fe8da00285318cddb6b51aa10436bac9519",
-      "src/lib/billing/plan-subscription.ts": "637cb237daa11ef63f3811dad4f1ee058ecd5f4d85f754a40dce72c29c5fd3a9",
+      "src/lib/billing/plan-status.ts": "63bb20a4b0bfd5b8c4411ecb33784159c1711f5376b32008b16a422d39098c6b",
+      "src/lib/billing/plan-subscription.ts": "b5b2d5bb4ddd24ef5ddcab0ac492005621a5db1b0e1d8147218f38ef47205b0e",
       "src/lib/billing/portal.ts": "0c873967bccbf178b40723f2be93fe87e4d12dccd228b845bfb6a5896a775eee",
       "src/lib/billing/pro-plan.ts": "91dca015555707aa846d1815bd77cbd12d1365e83b3b4acbde9bc7d8516bd29a",
       "src/lib/billing/quote.ts": "75b6da7ec1874e8729d37051d22b244b98567d1f8f3271a02094d22abbfeb766",
       "src/lib/billing/subscription-summary.ts": "3e2ac9b31b14ed86f6b615960b0d9e21b80df3da6a790a859826b3670d95d947",
       "src/lib/billing/webhookEvents.ts": "40caeb9ce80dd4656e6505499ce4bcbd48014521d9fb64226e764f29ce91668a",
+      "src/lib/data/image-plan-offers.ts": "5540d5fd0c14f281184ff2a60fba5bb0149140ea50b55b357a568aacc3e25c7f",
       "src/lib/data/pricingData.ts": "74df7d459092bfc33a15687637ac0fa973334fc2a86a0a033cf4181f25f6afab",
+      "src/lib/data/pricingSummary.ts": "2a61d59bef17e87d96e3bac1304d4050aa91b8fe8be877ea789658787a92262f",
       "src/lib/data/securityData.ts": "58b979f22788438bf98247a522f66b580141570ab8a038fb879f44f654eefb42",
       "src/lib/docs/content.ts": "91d478abebf6aa5921213393bc5a7195472072c0926f7e2c69a0b508b1a58b94",
       "src/lib/hooks/useDepositVerification.ts": "b3047733f7eec82b0c78d3130047e6ace443e1a14ee09411f87e15c0495fa0cc",

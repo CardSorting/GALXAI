@@ -25,7 +25,16 @@ const billing = {
   transactions: [{ id: 'tx_fixture', type: 'deposit', description: 'Account credit added.', amountUsd: 25, balanceAfterUsd: 25, createdAt: '2026-09-15T12:00:00Z' }],
   nextCursor: null, invoices: [], hasCustomer: true, paymentsAvailable: true,
 };
-const plan = { access: 'paid_plan_required', checkoutAvailable: true, hasPaymentProfile: true, subscription: { state: 'none', periodEnd: null, endsAt: null } };
+const plan = {
+  access: 'paid_plan_required', checkoutAvailable: true, hasPaymentProfile: true,
+  offers: [
+    { id: 'pro', name: 'GALX Pro', audience: 'For people creating in GALX Images.', monthlyPriceUsd: 10, checkoutAvailable: true },
+    { id: 'creator', name: 'Creator', audience: 'A steady solo creative practice.', monthlyPriceUsd: 15, checkoutAvailable: true },
+    { id: 'studio', name: 'Studio', audience: 'A focused workspace for heavier individual use.', monthlyPriceUsd: 35, checkoutAvailable: true },
+    { id: 'team', name: 'Team', audience: 'A larger creative practice on one account.', monthlyPriceUsd: 75, checkoutAvailable: true },
+  ],
+  subscription: { state: 'none', periodEnd: null, endsAt: null },
+};
 
 try {
   let ready = false;
@@ -101,6 +110,9 @@ try {
     assert(await proButton.isVisible());
     await page.waitForFunction(() => Array.from(document.querySelectorAll('button')).some(button => button.textContent?.includes('Choose Pro · $10/month') && !button.disabled));
     assert.equal(await proButton.isDisabled(), false);
+    for (const label of ['Creator', 'Studio', 'Team']) {
+      assert.equal(await page.getByText(label, { exact: true }).count(), 1, label);
+    }
     await page.goto(base + '/billing/credits');
     assert.equal(await page.getByRole('textbox', { name: 'Custom amount' }).count(), 0);
     assert.equal(await page.getByRole('button', { name: /Continue to checkout/i }).count(), 0);

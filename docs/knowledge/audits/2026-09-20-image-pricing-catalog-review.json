@@ -1,7 +1,7 @@
 {
   "reviewed_at": "2026-09-20T00:00:00.000000+00:00",
   "reviewer": "Codex",
-  "scope": "Image pricing strategy and staged Stripe catalog entries for Creator, Studio, and Team.",
+  "scope": "Image pricing strategy, activated Stripe catalog, and plan-aware checkout for Creator, Studio, and Team.",
   "research": [
     {
       "source": "https://docs.midjourney.com/hc/en-us/articles/27870484040333-Comparing-Midjourney-Plans",
@@ -13,27 +13,28 @@
     },
     {
       "source": "https://docs.stripe.com/api/prices/create",
-      "finding": "Stripe supports recurring Prices with lookup keys and an active flag; inactive Prices are appropriate for a catalog staged before checkout."
+      "finding": "Stripe supports recurring Prices with lookup keys and an active flag; activation is safe only after the application validates plan keys, recurring terms, webhook delivery, and paid-price policy."
     }
   ],
   "strategy": {
     "current_offer": "Start free plus GALX Pro at the existing published $10/month contract.",
-    "creator": { "monthly_usd": 15, "audience": "solo creative practice", "status": "staged" },
-    "studio": { "monthly_usd": 35, "audience": "heavier individual use", "status": "staged" },
-    "team": { "monthly_usd": 75, "audience": "shared work", "status": "staged" }
+    "creator": { "monthly_usd": 15, "audience": "solo creative practice", "status": "active" },
+    "studio": { "monthly_usd": 35, "audience": "heavier individual use", "status": "active" },
+    "team": { "monthly_usd": 75, "audience": "one-account commercial tier", "status": "active" }
   },
   "guardrails": [
-    "Products and Prices are inactive and have checkoutEnabled=false.",
-    "No customers, subscriptions, payments, tax registrations, migrations, or entitlements were created.",
-    "The current Pro Product and Price were not modified.",
+    "Products and Prices are active and have checkoutEnabled=true only after the backend and webhook checks passed.",
+    "No customers, subscriptions, invoices, payments, tax registrations, or application entitlements were created.",
+    "The old unused Pro $20 Price was archived and the lookup key now resolves to the published $10 contract.",
     "Private mode remains an owner-scoped product control, not a plan entitlement.",
     "Higher usage, throughput, seats, roles, support, video, editing and priority are release gates, not current promises."
   ],
   "verification": [
-    "The provisioning command uses deterministic Product IDs, lookup keys, metadata and idempotency keys.",
-    "Live Stripe readback confirmed three staged Products and recurring Prices with active=false.",
-    "A separate read-only audit found the existing GALX Pro lookup key active at $20 with no matching subscriptions in the bounded account scan; the repository's published Pro contract remains $10 and was intentionally not changed in this pass.",
+    "The provisioning and activation commands use deterministic Product IDs, lookup keys, metadata and idempotency keys.",
+    "Live Stripe readback confirmed the Pro, Creator, Studio, and Team Products and recurring Prices are active with the reviewed amounts.",
+    "The activation audit found no active consumer subscriptions, verified the production webhook and billing portal, and updated the private paid-price allowlist to four prices.",
+    "The production verification command observed zero active subscriptions and zero active Stripe Tax registrations; automatic tax remains disabled until registrations are confirmed.",
     "No secret, customer data or webhook payload was recorded in this evidence."
   ],
-  "limits": "This change stages a catalog for pricing review; it does not make the new plans purchasable or change runtime access."
+  "limits": "The paid tiers currently share the supported one-account Image Studio controls and fair-use boundary. Team seats, shared workspaces, priority, video, editing, and plan-specific monthly quotas are not implemented or advertised."
 }

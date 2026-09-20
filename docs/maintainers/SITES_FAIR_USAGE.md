@@ -120,8 +120,11 @@ The earlier [production release verification](../../internal/scaling-strategy-20
 
 The launch record below is historical evidence for the Sites policy. It is not
 the current public pricing authority. The current customer strategy is GALX
-Images with GALX Pro as the public subscription. Developer Access is no longer
-a public subscription or self-service API product; private access is deliberate
+Images with four active one-account subscriptions: GALX Pro at $10/month,
+Creator at $15/month, Studio at $35/month, and Team at $75/month. They share the
+same supported Image Studio controls and fair-use boundary; Team does not
+currently include shared workspaces or seats. Developer Access is no longer a
+public subscription or self-service API product; private access is deliberate
 administrator provisioning with bounded allocation and metering. Do not use the
 older Sites, Standard, prepaid, compute-pack, or Developer subscription terms
 below as current offers, and do not recreate those Stripe objects.
@@ -142,7 +145,7 @@ At the time of the historical launch, application commit `8d82351` was deployed 
 
 The historical provisioning procedure was `npm run sites:provision -- --prepare /absolute/private/policy.json`, followed by the reviewed policy action. Do not use it to recreate an old Sites, prepaid, or Developer catalog. Current Stripe catalog changes follow the private GALX Pro procedure and the current [billing page contract](../reference/billing-pages.md); private developer access is administered in `/admin`, not provisioned through Stripe. No live provisioning action is authorized by this guide.
 
-The historical Sites launch used an older commercial term and access policy; that term is not current pricing. The current `GET /api/billing/plan` response exposes only the verified consumer plan terms, access state, checkout availability, payment-profile presence and an allowlisted subscription summary. Its POST accepts a server-generated Pro checkout request ID or a portal action, never caller-selected prices, customers, quantities, URLs or subscription authority. It contains no provider identifiers. Incomplete, foreign or ambiguous results disable new checkout; existing billing management remains reachable.
+The historical Sites launch used an older commercial term and access policy; that term is not current pricing. The current `GET /api/billing/plan` response exposes only the verified consumer plan terms, active catalog offers, access state, checkout availability, payment-profile presence and an allowlisted subscription summary. Its POST accepts a server-generated checkout request ID plus an allowlisted plan selection, or a portal action; it never accepts caller-selected prices, customers, quantities, URLs or subscription authority. It contains no provider identifiers. Incomplete, foreign or ambiguous results disable new checkout; existing billing management remains reachable.
 
 Billing has dedicated [Plan, Credits, Transactions, Invoices and Payment settings pages](../reference/billing-pages.md) under a persistent account layout. Pricing and Pro upgrade actions open `/billing/plan`; `/billing` summarizes access and existing account credit separately. No public private-access page or checkout is exposed. Old checkout return URLs and section bookmarks continue into the relevant canonical page. The existing private return-path migration remains a prerequisite for the Pro checkout writer where it has not already been applied. These navigation rules do not alter paid-access or ledger authority.
 

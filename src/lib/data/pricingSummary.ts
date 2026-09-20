@@ -1,12 +1,7 @@
 import { PRO_PLAN } from '../billing/pro-plan';
-import { IMAGE_PLAN_CATALOG } from '../billing/image-plan-catalog';
+import { PUBLIC_IMAGE_PLAN_OFFERS } from './image-plan-offers';
 
-/**
- * Public image pricing is intentionally a two-step ladder today. The product
- * has a bounded welcome allowance and one active recurring consumer price;
- * the next prices are shown as staged hypotheses until their matching
- * entitlement and checkout contracts exist.
- */
+/** Public image pricing. Provider IDs and operational limits stay server-side. */
 export const FREE_IMAGE_OFFER = {
   id: 'free',
   name: 'Start free',
@@ -15,28 +10,7 @@ export const FREE_IMAGE_OFFER = {
   allowance: '5 image outputs once per verified account',
 } as const;
 
-/**
- * Product-shaped roadmap concepts mirrored into the Stripe catalog as inactive
- * Products and Prices. They are not purchasable until the corresponding
- * capacity, support, checkout, and entitlement contracts exist.
- */
-export const FUTURE_PLAN_CONCEPTS = IMAGE_PLAN_CATALOG.map(plan => ({
-  id: plan.id,
-  name: plan.name.replace('GALX Images — ', ''),
-  audience: plan.audience,
-  monthlyPrice: plan.monthlyPriceUsd,
-  status: 'Staged in Stripe · not available',
-  features: plan.capabilities,
-  futureBoundary: plan.futureBoundary,
-})) as ReadonlyArray<{
-  id: typeof IMAGE_PLAN_CATALOG[number]['id'];
-  name: string;
-  audience: string;
-  monthlyPrice: number;
-  status: string;
-  features: readonly string[];
-  futureBoundary: string;
-}>;
+export const IMAGE_PLAN_OFFERS = PUBLIC_IMAGE_PLAN_OFFERS;
 
 export const PRICING_PLANS = [{
   id: PRO_PLAN.id,
@@ -62,8 +36,8 @@ export const PRICING_FAQS = [
   { q: 'How are image outputs counted?', a: 'Each generated image counts as one output. A request for four images uses four outputs, so you can choose the batch size that fits your idea.' },
   { q: 'Can I keep a creation private?', a: 'Yes. Signed-in creators can choose Private mode before generating. Private creations stay in the owner library and are excluded from Explore and the community stream; you can publish one later.' },
   { q: 'Are video or uploaded-image editing included?', a: 'No. GALX currently publishes image creation only. We do not advertise video or uploaded-image editing until those capabilities are supported end to end.' },
-  { q: 'What are the additional tiers on this page?', a: 'Creator, Studio, and Team are priced roadmap hypotheses staged as inactive Stripe catalog entries. They are not purchasable, do not have checkout or entitlements, and do not change today’s account access.' },
+  { q: 'What are Creator, Studio, and Team?', a: 'They are monthly Image Studio subscriptions for one account. Each includes the currently supported creation controls, personal library, downloads, and optional Private mode. All plans follow the same published fair-use terms; Team does not currently include shared workspaces or seats.' },
   { q: 'Is programmable access a public subscription?', a: 'No. General-purpose developer access is not self-service. GALX may authorize bounded private integrations by decision.' },
   { q: 'How are private integrations managed?', a: 'Private access is explicit, bounded, metered, administered, and revocable. It is not a generally available commercial plan.' },
-  { q: 'How do I activate Pro?', a: 'Open Billing, complete the secure Stripe checkout, then return to GALX after payment confirmation. Pro renews monthly and can be managed through Stripe.' },
+  { q: 'How do I activate a plan?', a: 'Choose a plan, complete the secure Stripe checkout, then return to GALX after payment confirmation. Plans renew monthly and can be managed through Stripe.' },
 ] as const;

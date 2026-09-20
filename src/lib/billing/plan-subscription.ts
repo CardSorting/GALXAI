@@ -7,8 +7,10 @@ import { DEVELOPER_ACCESS, PRO_PLAN } from './pro-plan';
 import { USAGE_PRICING } from './usage-pricing';
 import { BILLING_PATHS } from './navigation';
 import type { FairPolicy } from '../sites/fair-store';
+import { IMAGE_PLAN_BY_ID, IMAGE_PLAN_CATALOG, type ImagePlanId, type ImagePlanKey } from './image-plan-catalog';
 
 export const PRO_LOOKUP_KEY = 'galx_pro_monthly_v1';
+export const PRO_PRODUCT_ID = 'galx_pro_v1';
 export const NOVA_DEVELOPER_LOOKUP_KEY = DEVELOPER_ACCESS.lookupKey;
 export const NOVA_DEVELOPER_PLAN_KEY = DEVELOPER_ACCESS.planKey;
 export const NOVA_DEVELOPER_PRODUCT_ID = 'galx_nova_developer_access_v1';
@@ -16,15 +18,46 @@ export const NOVA_MESSAGE_PRICE_LOOKUP_KEY = 'galx_nova_message_monthly_v1';
 const objectId = (value: any): string | undefined => typeof value === 'string' ? value : value?.id;
 const requestOptions = { timeout: 8000, maxNetworkRetries: 0 };
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-type Checkout = { user_id: string; request_id: string; price_id: string; customer_id: string | null; session_id: string | null; checkout_url: string | null; return_path: string | null; state: string; created_at: Date; expires_at: Date };
+type Checkout = { user_id: string; request_id: string; price_id: string; plan_key: string | null; customer_id: string | null; session_id: string | null; checkout_url: string | null; return_path: string | null; state: string; created_at: Date; expires_at: Date };
+
+export const IMAGE_PLAN_KEYS = IMAGE_PLAN_CATALOG.map(plan => plan.planKey) as readonly ImagePlanKey[];
+export const CONSUMER_PLAN_KEYS = ['pro-v1', ...IMAGE_PLAN_KEYS] as const;
+const isConsumerPlanKey = (value: unknown): value is typeof CONSUMER_PLAN_KEYS[number] =>
+  typeof value === 'string' && (CONSUMER_PLAN_KEYS as readonly string[]).includes(value);
+const isSupportedPlanKey = (value: unknown): value is typeof CONSUMER_PLAN_KEYS[number] | typeof NOVA_DEVELOPER_PLAN_KEY =>
+  isConsumerPlanKey(value) || value === NOVA_DEVELOPER_PLAN_KEY;
+const imagePlanForKey = (key: unknown) => typeof key === 'string' && (IMAGE_PLAN_KEYS as readonly string[]).includes(key)
+  ? IMAGE_PLAN_CATALOG.find(plan => plan.planKey === key) : undefined;
+const expectedMonthlyAmount = (key: unknown) => key === 'pro-v1' ? PRO_PLAN.monthlyPriceUsd * 100 :
+  key === NOVA_DEVELOPER_PLAN_KEY ? DEVELOPER_ACCESS.monthlyPriceUsd * 100 : imagePlanForKey(key)?.monthlyPriceUsd ? imagePlanForKey(key)!.monthlyPriceUsd * 100 : null;
 
 export async function proPrice(stripe: Stripe, policy: FairPolicy) {
   if (policy.mode !== 'enforce') throw new BillingError('Plan checkout is temporarily unavailable.', 503);
   const prices = await stripe.prices.list({ lookup_keys: [PRO_LOOKUP_KEY], active: true, limit: 2 }, requestOptions);
   const price = prices.data[0];
-  if (prices.has_more || prices.data.length !== 1 || !price || !policy.paid_price_ids.includes(price.id) || price.currency !== 'usd' ||
+  if (prices.has_more || prices.data.length !== 1 || !price || !policy.paid_price_ids.includes(price.id) ||
+      objectId(price.product) !== PRO_PRODUCT_ID || price.metadata?.galxPlan !== 'pro-v1' || price.currency !== 'usd' ||
       price.unit_amount !== PRO_PLAN.monthlyPriceUsd * 100 || price.recurring?.interval !== 'month' || price.recurring.interval_count !== 1 ||
       price.recurring.usage_type !== 'licensed') throw new BillingError('Plan checkout is temporarily unavailable.', 503);
+  return price;
+}
+
+/** Validate an active image tier before creating a Checkout Session. The public
+ * plan ID is mapped to one server-owned lookup key; callers cannot supply a
+ * Stripe Price ID or arbitrary amount. */
+export async function imagePlanPrice(stripe: Stripe, policy: FairPolicy, planId: ImagePlanId) {
+  if (policy.mode !== 'enforce') throw new BillingError('Plan checkout is temporarily unavailable.', 503);
+  const plan = IMAGE_PLAN_BY_ID[planId];
+  if (!plan || !plan.checkoutEnabled || plan.catalogStatus !== 'active') throw new BillingError('That plan is temporarily unavailable.', 503);
+  const prices = await stripe.prices.list({ lookup_keys: [plan.stripeLookupKey], active: true, limit: 2 }, requestOptions);
+  const price = prices.data[0];
+  if (prices.has_more || prices.data.length !== 1 || !price || !policy.paid_price_ids.includes(price.id) ||
+      objectId(price.product) !== plan.stripeProductId || price.metadata?.galxPlan !== plan.planKey ||
+      price.metadata?.catalogStatus !== 'active' || price.metadata?.checkoutEnabled !== 'true' ||
+      price.currency !== 'usd' || price.unit_amount !== plan.monthlyPriceUsd * 100 ||
+      price.recurring?.interval !== 'month' || price.recurring.interval_count !== 1 || price.recurring.usage_type !== 'licensed') {
+    throw new BillingError('That plan is temporarily unavailable.', 503);
+  }
   return price;
 }
 
@@ -81,7 +114,7 @@ async function createSubscriptionCheckout(
     if (!row) {
       const recent = (await db.query("SELECT count(*) FROM private.galx_plan_checkouts WHERE user_id=$1 AND created_at>now()-interval '10 minutes'", [input.userId])).rows[0];
       if (Number(recent.count) >= 5) throw new BillingError('Too many checkout attempts. Try again in a few minutes.', 429);
-      row = (await db.query('INSERT INTO private.galx_plan_checkouts(user_id,request_id,price_id,return_path) VALUES($1,$2,$3,$4) RETURNING *', [input.userId,input.requestId,definition.price.id,definition.returnPath])).rows[0] as Checkout;
+      row = (await db.query('INSERT INTO private.galx_plan_checkouts(user_id,request_id,price_id,plan_key,return_path) VALUES($1,$2,$3,$4,$5) RETURNING *', [input.userId,input.requestId,definition.price.id,definition.planKey,definition.returnPath])).rows[0] as Checkout;
     }
     const claimed = await db.query(`UPDATE private.galx_plan_checkouts SET lease_token=$3,lease_until=now()+interval '60 seconds'
       WHERE user_id=$1 AND request_id=$2 AND (lease_until IS NULL OR lease_until<=now()) RETURNING request_id`, [input.userId,row.request_id,lease]);
@@ -151,7 +184,35 @@ export async function createProCheckout(pool: Pool, stripe: Stripe, policy: Fair
     returnPath: BILLING_PATHS.plan, returnParam: 'plan_checkout', integrationPrefix: 'galx_pro',
     idempotencyPrefix: 'pro-checkout', customerIdempotencyPrefix: 'pro-customer',
     legacyReturnPath: BILLING_PATHS.overview, legacyReturnHash: '#plan',
-    checkoutLockPrefix: 'pro-checkout', keySeedPrefix: 'pro',
+    checkoutLockPrefix: 'consumer-plan-checkout', keySeedPrefix: 'pro',
+    isExistingSubscription: subscription => subscription.items.data.some(item => policy.paid_price_ids.includes(item.price.id)),
+  }, input);
+}
+
+/** Checkout for the active Image Studio catalog tiers. The same subscription
+ * writer is used so payment ownership and lifecycle reconciliation stay
+ * identical across Pro and the image plans. */
+export async function createImagePlanCheckout(
+  pool: Pool,
+  stripe: Stripe,
+  policy: FairPolicy,
+  planId: ImagePlanId,
+  input: { userId: string; requestId: string; origin: string },
+) {
+  const plan = IMAGE_PLAN_BY_ID[planId];
+  if (!plan) throw new BillingError('That plan is not available.', 400);
+  const price = await imagePlanPrice(stripe, policy, planId);
+  return createSubscriptionCheckout(pool, stripe, {
+    planKey: plan.planKey,
+    price,
+    returnPath: BILLING_PATHS.plan,
+    returnParam: 'plan_checkout',
+    integrationPrefix: `galx_images_${plan.id}`,
+    idempotencyPrefix: `images-${plan.id}-checkout`,
+    customerIdempotencyPrefix: 'plan-customer',
+    checkoutLockPrefix: 'consumer-plan-checkout',
+    keySeedPrefix: `images-${plan.id}`,
+    checkoutNotice: `${plan.name} is a recurring Image Studio subscription at $${plan.monthlyPriceUsd}/month for one account.`,
     isExistingSubscription: subscription => subscription.items.data.some(item => policy.paid_price_ids.includes(item.price.id)),
   }, input);
 }
@@ -197,17 +258,19 @@ export async function developerUsagePrice(stripe: Stripe) {
 export async function fulfillPlanStripeEvent(db: PoolClient, event: Stripe.Event, context: { developerPriceId?: string } = {}): Promise<boolean> {
   const object = event.data.object as any;
   const planKey = object.metadata?.galxPlan;
-  if (event.type.startsWith('checkout.session.') && object.mode === 'subscription' && ['pro-v1', NOVA_DEVELOPER_PLAN_KEY].includes(planKey)) {
+  if (event.type.startsWith('checkout.session.') && object.mode === 'subscription' && isSupportedPlanKey(planKey)) {
     const row: Checkout | undefined = (await db.query('SELECT * FROM private.galx_plan_checkouts WHERE user_id=$1 AND request_id=$2 FOR UPDATE', [object.metadata.userId,object.metadata.requestId])).rows[0];
     const developerCheckout = planKey === NOVA_DEVELOPER_PLAN_KEY;
+    const expectedAmount = expectedMonthlyAmount(planKey);
     // The checkout row was created only after the current Price passed the
     // server-side contract check. Keep that durable identity authoritative for
     // webhook replay; an archived successor Price must not block reconciliation
     // of this already-created subscription attempt.
     if (!row || row.customer_id !== objectId(object.customer) || object.client_reference_id !== row.user_id ||
         (row.session_id && row.session_id !== object.id) ||
+        (row.plan_key && row.plan_key !== planKey) ||
         (developerCheckout && context.developerPriceId && row.price_id !== context.developerPriceId) ||
-        object.currency !== 'usd' || object.amount_subtotal !== (developerCheckout ? DEVELOPER_ACCESS.monthlyPriceUsd : PRO_PLAN.monthlyPriceUsd)*100)
+        object.currency !== 'usd' || expectedAmount === null || object.amount_subtotal !== expectedAmount)
       throw new Error('Subscription checkout ownership or terms mismatch');
     // A completed Checkout Session is not proof of payment by itself. Keep
     // the durable attempt open until Stripe reports the paid state; delayed
@@ -220,16 +283,30 @@ export async function fulfillPlanStripeEvent(db: PoolClient, event: Stripe.Event
   }
   if (event.type.startsWith('customer.subscription.')) {
     const known = (await db.query('SELECT user_id,customer_id,price_id,plan_key FROM private.galx_plan_subscriptions WHERE subscription_id=$1', [object.id])).rows[0];
-    const metadataPlan = ['pro-v1', NOVA_DEVELOPER_PLAN_KEY].includes(planKey) ? planKey : undefined;
+    const metadataPlan = isSupportedPlanKey(planKey) ? planKey : undefined;
     if (!known && !metadataPlan) return false;
-    const subscriptionPlan = known?.plan_key || metadataPlan;
-    if (!subscriptionPlan || (known && metadataPlan && known.plan_key !== metadataPlan)) throw new Error('Subscription plan ownership mismatch');
     const customer = objectId(object.customer);
-    const owner = (await db.query('SELECT user_id FROM galx_stripe_customers WHERE stripe_customer_id=$1', [customer])).rows[0];
     const item = object.items?.data?.[0];
     const eventUserId = typeof object.metadata?.userId === 'string' ? object.metadata.userId : known?.user_id;
+    // Consumer subscriptions must originate from a server-created checkout
+    // attempt. Signed provider metadata alone is not an access or projection
+    // authority: requiring the durable row prevents an externally-created
+    // subscription with copied metadata from becoming a local plan record.
+    let checkout: Pick<Checkout, 'user_id' | 'customer_id' | 'price_id' | 'plan_key'> | undefined;
+    if (!known && isConsumerPlanKey(metadataPlan)) {
+      if (!eventUserId || !customer || !item?.price?.id) throw new Error('Subscription checkout ownership mismatch');
+      checkout = (await db.query(`SELECT user_id,customer_id,price_id,plan_key
+        FROM private.galx_plan_checkouts
+        WHERE user_id=$1 AND customer_id=$2 AND price_id=$3 AND plan_key=$4 AND state IN ('open','complete')
+        ORDER BY created_at DESC LIMIT 1`, [eventUserId, customer, item.price.id, metadataPlan])).rows[0];
+      if (!checkout) throw new Error('Subscription checkout ownership mismatch');
+    }
+    const subscriptionPlan = known?.plan_key || metadataPlan;
+    if (!subscriptionPlan || (known && metadataPlan && known.plan_key !== metadataPlan)) throw new Error('Subscription plan ownership mismatch');
+    const owner = (await db.query('SELECT user_id FROM galx_stripe_customers WHERE stripe_customer_id=$1', [customer])).rows[0];
     const expectedDeveloperPriceId = known?.price_id || context.developerPriceId;
-    if (!owner || (known && (known.user_id !== owner.user_id || known.customer_id !== customer || known.price_id !== item?.price?.id)) ||
+    if (!owner || (checkout && (checkout.user_id !== owner.user_id || checkout.customer_id !== customer || checkout.price_id !== item?.price?.id || checkout.plan_key !== subscriptionPlan)) ||
+        (known && (known.user_id !== owner.user_id || known.customer_id !== customer || known.price_id !== item?.price?.id)) ||
         eventUserId !== owner.user_id || !item?.price?.id ||
         (subscriptionPlan === NOVA_DEVELOPER_PLAN_KEY && (!expectedDeveloperPriceId || item.price.id !== expectedDeveloperPriceId)))
       throw new Error('Subscription ownership mismatch');

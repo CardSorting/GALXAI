@@ -5,8 +5,9 @@ import { StripeEngine } from '@/lib/stripe/stripe';
 import { getStripeConfig } from '@/lib/stripe/config';
 import { BillingError } from '@/lib/billing/account';
 import { checkPaymentOrigin, hostedPaymentUrl, paymentOrigin, readPaymentBody } from '@/lib/billing/payment';
-import { createDeveloperCheckout, createProCheckout, proPrice } from '@/lib/billing/plan-subscription';
+import { createDeveloperCheckout, createImagePlanCheckout, createProCheckout, imagePlanPrice, proPrice } from '@/lib/billing/plan-subscription';
 import { DEVELOPER_ACCESS, PRO_PLAN } from '@/lib/billing/pro-plan';
+import { IMAGE_PLAN_CATALOG, type ImagePlanId } from '@/lib/billing/image-plan-catalog';
 import { SitesFairStore } from '@/lib/sites/fair-store';
 import { requirePaidSitesAccess } from '@/lib/sites/paid-access';
 import { FairUsageError } from '@/lib/sites/fair-policy';
@@ -16,6 +17,11 @@ export const runtime='nodejs';
 export const dynamic='force-dynamic';
 export const maxDuration=60;
 const headers={ 'Cache-Control':'private, no-store', 'X-Content-Type-Options':'nosniff' };
+const publicOffers = [
+  { id: 'pro' as const, name: PRO_PLAN.name, audience: 'For people creating in GALX Images.', monthlyPriceUsd: PRO_PLAN.monthlyPriceUsd },
+  ...IMAGE_PLAN_CATALOG.map(plan => ({ id: plan.id, name: plan.name.replace('GALX Images — ', ''), audience: plan.audience, monthlyPriceUsd: plan.monthlyPriceUsd })),
+];
+const imagePlanIds = new Set(IMAGE_PLAN_CATALOG.map(plan => plan.id));
 async function handle(req:NextRequest) {
   try {
     if(req.method==='POST')checkPaymentOrigin(req);
@@ -46,14 +52,26 @@ async function handle(req:NextRequest) {
       try { await requirePaidSitesAccess(pool,stripe,actor.id,policy);access='included'; }
       catch(e){if(e instanceof FairUsageError&&e.status===403)access='paid_plan_required';}
       const subscription=await summary;
-      let checkoutAvailable=false;
-      if(access==='paid_plan_required'&&['none','canceled'].includes(subscription.state)) {
-        try{await proPrice(stripe,policy);checkoutAvailable=true;}catch{}
-      }
-      return NextResponse.json({plan:PRO_PLAN,access,checkoutAvailable,hasPaymentProfile:Boolean(customer&&!customer.startsWith('cus_mock_')),subscription},{headers});
+      const canStart = access !== 'unavailable' && ['none','canceled'].includes(subscription.state);
+      const checks = await Promise.all(publicOffers.map(async offer => {
+        if (!canStart) return false;
+        try {
+          if (offer.id === 'pro') await proPrice(stripe,policy);
+          else await imagePlanPrice(stripe,policy,offer.id as ImagePlanId);
+          return true;
+        } catch { return false; }
+      }));
+      const offers = publicOffers.map((offer,index) => ({ ...offer, checkoutAvailable: checks[index] }));
+      return NextResponse.json({plan:PRO_PLAN,access,checkoutAvailable:offers.some(offer=>offer.checkoutAvailable),offers,hasPaymentProfile:Boolean(customer&&!customer.startsWith('cus_mock_')),subscription},{headers});
     }
-    if(!body||Object.keys(body).sort().join()!=='action,requestId'||body.action!=='checkout'||typeof body.requestId!=='string')throw new BillingError('Invalid plan request.');
-    return NextResponse.json(await createProCheckout(pool,stripe,policy,{userId:actor.id,requestId:body.requestId,origin:paymentOrigin(config.appUrl)}),{headers});
+    if(!body||!['action,requestId','action,plan,requestId'].includes(Object.keys(body).sort().join())||body.action!=='checkout'||typeof body.requestId!=='string')throw new BillingError('Invalid plan request.');
+    const requestedPlan = body.plan === undefined ? 'pro' : body.plan;
+    if (typeof requestedPlan !== 'string' || (requestedPlan !== 'pro' && !imagePlanIds.has(requestedPlan as ImagePlanId))) throw new BillingError('Invalid plan request.');
+    const input={userId:actor.id,requestId:body.requestId,origin:paymentOrigin(config.appUrl)};
+    const checkout = requestedPlan === 'pro'
+      ? createProCheckout(pool,stripe,policy,input)
+      : createImagePlanCheckout(pool,stripe,policy,requestedPlan as ImagePlanId,input);
+    return NextResponse.json(await checkout,{headers});
   } catch(e) {
     const known=e instanceof AccountIdentityError||e instanceof BillingError;
     return NextResponse.json({error:known?e.message:'Plans are temporarily unavailable. Try again shortly.'},{status:known?e.status:503,headers});

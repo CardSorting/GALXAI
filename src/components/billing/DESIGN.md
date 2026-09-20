@@ -1,6 +1,6 @@
 ---
 name: GALX Billing — local account workspace
-description: The six Billing pages and their relationship to the Pricing Pro row.
+description: The six Billing pages and their relationship to the Image Studio plan rows.
 colors:
   canvas: "#090b10"
   foreground: "#f4f4f5"
@@ -78,7 +78,7 @@ components:
 
 **Creative North Star: "Established Billing and Pricing"**
 
-This is a local record for the shared `BillingWorkspace.tsx` shell, account state in `BillingProvider.tsx`, the six destinations rendered by `BillingClient.tsx`, and their plan and credit controls. The related Pro row is rendered by `src/components/pricing/PricingClient.tsx` through `src/app/pricing/page.tsx`. It extends the existing dark, compact account interface with restrained indigo actions and flat divided sections. It establishes no new product identity or global design rules.
+This is a local record for the shared `BillingWorkspace.tsx` shell, account state in `BillingProvider.tsx`, the six destinations rendered by `BillingClient.tsx`, and their plan and credit controls. The related Image Studio plan rows are rendered by `src/components/pricing/PricingClient.tsx` through `src/app/pricing/page.tsx`. It extends the existing dark, compact account interface with restrained indigo actions and flat divided sections. It establishes no new product identity or global design rules.
 
 Overview summarizes plan access and any existing account credit, then links to each billing task. The Plan page makes current access, terms, and the next action readable; Credits is a read-only account-credit and history surface. Pricing presents the offer; Billing establishes the account's current status. Product terms remain authoritative in the root `PRODUCT.md` and existing public plan data; this record captures how the interface presents them.
 
@@ -96,7 +96,7 @@ The local palette is a near-black canvas with cool neutral text and a small indi
 
 ### Primary
 
-- **Soft indigo wash** (`action-fill`) and **pale indigo text** (`action-text`) identify the plan's forward action and Pricing's Choose Pro link.
+- **Soft indigo wash** (`action-fill`) and **pale indigo text** (`action-text`) identify the plan's forward action and Pricing's choose-plan links.
 - **Indigo outline** (`action-border`) bounds those controls without adding glow.
 - **Quiet indigo** (`link`) identifies task links and the plan controls' keyboard-focus outline. Active Billing navigation uses pale indigo text over a subtle neutral wash.
 
@@ -120,7 +120,7 @@ The extension inherits Inter through the existing document font variable and fal
 - **Body:** use `body` for plan terms and explanations; brief status lines use the control line height.
 - **Controls and task links:** use `control`. Billing navigation uses the same size with a 1.5rem line height, and medium weight (500) for the active page. Pricing and wallet primary actions also use medium weight (500).
 
-Pricing's Pro name uses a smaller semibold heading (1.125rem with 1.75rem line height); its price is a semibold, tabular-number value (1.5rem with 2rem line height). These remain row-specific roles, not a new global type scale.
+Pricing's plan names use a smaller semibold heading (1.125rem with 1.75rem line height); prices are semibold, tabular-number values (1.5rem with 2rem line height). These remain row-specific roles, not a new global type scale.
 
 ## Layout
 
@@ -132,7 +132,7 @@ Within the full Plan page, the status heading and Refresh plan control share a w
 
 Credit figures stack below 400px, use two columns from 400px, and expand to three columns on the full Credits page from 1024px. Transactions use a divided list below 640px and a horizontally scrollable table above it. Invoice rows, amounts and actions wrap at narrow widths and enlarged text sizes.
 
-Pricing retains its separate centered 64rem container, 2rem top padding and 4rem bottom padding. Its section navigation wraps with a 1.25rem gap, and its section anchors retain 6rem scroll clearance. The Pro row uses the same flat treatment as its neighboring plans. Below 640px it stacks name and price, inclusion details, and Choose Pro. At 640px it becomes three columns (`1fr 1.4fr 11rem`) with a 1.5rem gap and the action aligned to the end. It links directly to `/billing/plan`.
+Pricing retains its separate centered 64rem container, 2rem top padding and 4rem bottom padding. Its section navigation wraps with a 1.25rem gap, and its section anchors retain 6rem scroll clearance. Each Image Studio plan row uses the same flat treatment. Below 640px it stacks name and price, inclusion details, and the choose action. At 640px it becomes three columns (`1fr 1.4fr 11rem`) with a 1.5rem gap and the action aligned to the end. Each plan links directly to `/billing/plan?plan=<id>`.
 
 ## Elevation & Depth
 
@@ -148,7 +148,7 @@ Controls, inputs and navigation links reuse the modest `control` corner radius; 
 
 ### Plan controls
 
-The forward action is a restrained filled control; refresh and management are outlined controls. All plan controls share the same padding and radius. Billing's plan controls use the subtle neutral hover wash; Pricing's Choose Pro link strengthens its indigo fill on hover. Preserve the existing indigo keyboard-focus outline. Disabled buttons are visibly dimmed (opacity 0.5) and show the disabled cursor; an in-flight action names the operation (Opening checkout or Opening billing) and prevents repeated actions. These controls introduce no local motion or transform.
+The forward action is a restrained filled control; refresh and management are outlined controls. All plan controls share the same padding and radius. Billing's plan controls use the subtle neutral hover wash; Pricing's choose-plan links strengthen their indigo fill on hover. Preserve the existing indigo keyboard-focus outline. Disabled buttons are visibly dimmed (opacity 0.5) and show the disabled cursor; an in-flight action names the operation (Opening checkout or Opening billing) and prevents repeated actions. These controls introduce no local motion or transform.
 
 ### Billing navigation and task pages
 
@@ -167,18 +167,18 @@ Previously issued checkout return URLs and saved Billing section anchors resolve
 
 ### Overview and full Plan
 
-**The Offer and Status Rule.** An available offer, a subscription record and verified Pro access are separate facts. Only the server's access result controls the Open Sites action. A checkout return URL never proves payment.
+**The Offer and Status Rule.** An available offer, a subscription record and verified Image Studio access are separate facts. Only the server's access result controls the Open Image Studio action. A checkout return URL never proves payment.
 
 Overview shows the plan name or Your plan, a short status, any supplied period/end date, and View plan or Review payment linking to Plan. Its Refresh action checks both account credit and the compact plan status; each summary can announce its own refresh or failure while keeping its last checked data.
 
-The full Plan page uses a flat section with a wrapping heading/refresh row, a two-column detail list when space permits, then product terms and actions. Show the Pro offer at $10/month for one account when choosing a plan; preserve the existing commercial terms. Include the published Image Studio experience and fair-use boundaries near the action. Private API access is not a public subscription, does not appear as a public plan, and remains an administrator-controlled capability for approved cohorts. Display the current billing-period end or scheduled subscription end only when the server supplies it; complimentary access does not invent a renewal date. Dates are explicitly UTC. The following action states apply to the full Plan page; Overview routes to that page.
+The full Plan page uses a flat section with a wrapping heading/refresh row, a two-column detail list when space permits, then plan terms and actions. Show the four active one-account offers—GALX Pro $10, Creator $15, Studio $35, and Team $75 per month—only when the server confirms each offer's checkout availability. Include the published Image Studio experience and fair-use boundaries near the action; Team does not currently include shared workspaces or seats. Private API access is not a public subscription, does not appear as a public plan, and remains an administrator-controlled capability for approved cohorts. Display the current billing-period end or scheduled subscription end only when the server supplies it; complimentary access does not invent a renewal date. Dates are explicitly UTC. The following action states apply to the full Plan page; Overview routes to that page.
 
 | State | Visible treatment and action |
 | --- | --- |
 | Initial check | Checking status; checkout disabled. Billing management remains reachable. |
 | Refresh | Keep the previous plan in place, announce Refreshing, and reject obsolete responses. |
-| Confirmed Pro access | Active access text and Open Sites. Paid-subscription details remain separate from access. |
-| No subscription / ended subscription | Available offer and Choose Pro at the stated price, only when the server permits checkout. |
+| Confirmed Image Studio access | Active access text and Open Image Studio. Paid-subscription details remain separate from access. |
+| No subscription / ended subscription | Available offer selector and choose action at the stated price, only when the server permits checkout. |
 | Scheduled cancellation | Explicit subscription-end date and canceled-renewal copy; existing verified access can continue. |
 | Payment required | A text warning and Review payment opens the restricted Stripe portal, including when an independent grant still provides Pro access. |
 | Paused / processing / unconfirmed | State-specific explanation and billing management; no second subscription checkout. |
@@ -206,14 +206,14 @@ On a billing read failure, retain last checked amounts with an explicit stale-da
 
 ### Pricing relationship
 
-Pricing describes an available Pro offer with one included seat, Sites creation and publishing under fair usage, and separate API and image billing. Choose Pro opens `/billing/plan`, where account status determines the next action. Keep it within the established divided plan list; it is not a current-plan badge or an account-status summary. Plan status must not be inferred from a wallet balance.
+Pricing describes the four active Image Studio offers for one account and the current fair-use boundary; private API access and historical credit records remain separate. A choose-plan link opens `/billing/plan?plan=<id>`, where account status determines the next action. Keep the offers within the established divided plan list; they are not a current-plan badge or an account-status summary. Plan status must not be inferred from a wallet balance.
 
 ## Do's and Don'ts
 
 ### Do:
 
 - **Do** retain the shared Billing and Pricing canvas, type hierarchy, dividers, and restrained indigo controls.
-- **Do** distinguish the available Pro offer from confirmed paid status before presenting the next action.
+- **Do** distinguish each available Image Studio offer from confirmed paid status before presenting the next action.
 - **Do** keep renewal, cancellation, inclusion, and separate usage terms readable beside the plan controls.
 - **Do** let navigation and actions wrap while preserving their reading and keyboard order.
 - **Do** keep six canonical billing destinations and use Overview for concise summaries and task links.

@@ -80,7 +80,12 @@ test('all billing entry points can use only the unique restricted cancellation p
 });
 
 test('browser contract allowlists display fields and rejects malformed status', () => {
-  const status = { access: 'included', checkoutAvailable: false, hasPaymentProfile: false, subscription: { state: 'none', periodEnd: null, endsAt: null } };
+  const status = { access: 'included', checkoutAvailable: false, hasPaymentProfile: false, offers: [
+    { id: 'pro', name: 'GALX Pro', audience: 'For people creating in GALX Images.', monthlyPriceUsd: 10, checkoutAvailable: false },
+    { id: 'creator', name: 'Creator', audience: 'A steady solo creative practice.', monthlyPriceUsd: 15, checkoutAvailable: false },
+    { id: 'studio', name: 'Studio', audience: 'A focused workspace for heavier individual use.', monthlyPriceUsd: 35, checkoutAvailable: false },
+    { id: 'team', name: 'Team', audience: 'A larger creative practice on one account.', monthlyPriceUsd: 75, checkoutAvailable: false },
+  ], subscription: { state: 'none', periodEnd: null, endsAt: null } };
   assert.deepEqual(parsePlanStatus({ ...status, secret: 'PRIVATE_SENTINEL', subscription: { ...status.subscription, customer: 'PRIVATE_SENTINEL' } }), status);
   assert.equal(parsePlanStatus({ ...status, subscription: { ...status.subscription, periodEnd: 'bad date' } }), null);
   assert.equal(parsePlanStatus({ ...status, subscription: { ...status.subscription, state: 'PRIVATE_SENTINEL' } }), null);

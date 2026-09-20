@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { NextRequest } from 'next/server';
 import { DEVELOPER_ACCESS, PREPAID_DEVELOPER_CHECKOUT_ENABLED, PRO_PLAN } from '../src/lib/billing/pro-plan';
-import { developerPrice } from '../src/lib/billing/plan-subscription';
+import { developerPrice, imagePlanPrice } from '../src/lib/billing/plan-subscription';
 import { createAccountCheckout } from '../src/lib/billing/checkout';
 import { readTopUpQuote } from '../src/lib/billing/quote';
 import { GET as stripeConfig } from '../src/app/api/stripe/config/route';
@@ -12,6 +12,7 @@ import { POST as walletEstimate } from '../src/app/api/wallet/estimate/route';
 import { GET as walletUsage } from '../src/app/api/wallet/usage/route';
 import { USAGE_PRICING } from '../src/lib/billing/usage-pricing';
 import { IMAGE_PLAN_CATALOG } from '../src/lib/billing/image-plan-catalog';
+import { IMAGE_PLAN_OFFERS } from '../src/lib/data/pricingSummary';
 
 assert.equal(PRO_PLAN.monthlyPriceUsd, 10);
 assert.equal(PRO_PLAN.interval, 'month');
@@ -34,7 +35,9 @@ assert.deepEqual(IMAGE_PLAN_CATALOG.map(plan => [plan.id, plan.monthlyPriceUsd, 
   ['studio', 35, 'galx_images_studio_monthly_v1'],
   ['team', 75, 'galx_images_team_monthly_v1'],
 ]);
-assert(IMAGE_PLAN_CATALOG.every(plan => plan.catalogStatus === 'staged' && plan.checkoutEnabled === false));
+assert(IMAGE_PLAN_CATALOG.every(plan => plan.catalogStatus === 'active' && plan.checkoutEnabled === true));
+assert.deepEqual(IMAGE_PLAN_OFFERS.map(plan => [plan.id, plan.monthlyPrice]), [['creator', 15], ['studio', 35], ['team', 75]]);
+assert.doesNotMatch(JSON.stringify(IMAGE_PLAN_OFFERS), /stripeProductId|stripeLookupKey|planKey|price_/);
 
 const price = { id: 'price_nova_developer', product: 'galx_nova_developer_access_v1', metadata: { galxPlan: 'nova-developer-v1' }, currency: 'usd', unit_amount: 5000,
   recurring: { interval: 'month', interval_count: 1, usage_type: 'licensed' } } as any;
@@ -43,6 +46,16 @@ const priceProvider = { prices: { list: async (input: any) => {
   return { data: [price], has_more: false };
 } } } as any;
 assert.equal((await developerPrice(priceProvider)).id, price.id);
+
+const creator = IMAGE_PLAN_CATALOG.find(plan => plan.id === 'creator')!;
+const imagePrice = { id: 'price_creator', product: creator.stripeProductId, metadata: { galxPlan: creator.planKey, catalogStatus: 'active', checkoutEnabled: 'true' }, currency: 'usd', unit_amount: creator.monthlyPriceUsd * 100,
+  recurring: { interval: 'month', interval_count: 1, usage_type: 'licensed' } } as any;
+const imagePriceProvider = { prices: { list: async (input: any) => {
+  assert.deepEqual(input, { lookup_keys: [creator.stripeLookupKey], active: true, limit: 2 });
+  return { data: [imagePrice], has_more: false };
+} } } as any;
+assert.equal((await imagePlanPrice(imagePriceProvider, { mode: 'enforce', paid_price_ids: [imagePrice.id] } as any, creator.id)).id, imagePrice.id);
+await assert.rejects(imagePlanPrice(imagePriceProvider, { mode: 'enforce', paid_price_ids: ['price_other'] } as any, creator.id));
 
 let providerCalls = 0;
 const provider = new Proxy({}, { get: () => { providerCalls += 1; throw new Error('Stripe must not be called'); } }) as any;

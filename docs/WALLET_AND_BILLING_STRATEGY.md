@@ -13,7 +13,10 @@ distinguishes source changes from releases.
 
 | Surface | Current contract | Payment behavior |
 | --- | --- | --- |
-| GALX Pro | Consumer Image Studio plan | Active public subscription path |
+| GALX Pro | Consumer Image Studio plan at $10/month | Active public subscription path |
+| Creator | Image Studio plan at $15/month for one account | Active public subscription path |
+| Studio | Image Studio plan at $35/month for one account | Active public subscription path |
+| Team | Image Studio plan at $75/month for one account | Active public subscription path; shared workspaces are not included |
 | GALX Nova private access | GALX products and explicitly authorized private cohorts | No public checkout or self-service purchase |
 | Historical account records | Prior transactions, invoices, refunds, and credits | Retained for owner-scoped display and reconciliation |
 
@@ -24,10 +27,12 @@ deliberate private provisioning; no public private-access page is exposed.
 
 ## What remains active
 
-GALX Pro remains the consumer Image Studio subscription with its own published
-terms. Its billing pages, payment recovery, restricted payment portal, signed
-webhook lifecycle, and owner-scoped records remain independent of private API
-access.
+GALX Pro, Creator, Studio, and Team are the active consumer Image Studio
+subscriptions with the same currently supported controls and published
+fair-use terms. Each is billed for one account; Team does not currently add
+seats, roles, shared workspaces, or workspace billing. Their billing pages,
+payment recovery, restricted payment portal, signed webhook lifecycle, and
+owner-scoped records remain independent of private API access.
 
 The billing system also retains the infrastructure needed to reconcile existing
 records: subscription and invoice history, transaction and refund records,

@@ -19,7 +19,7 @@ const check=async(name:string,run:()=>Promise<void>)=>{await run();checks++;cons
 function fake(){
   const sessions=new Map<string,any>(),params=new Map<string,any>();let calls=0,customerCalls=0,lost=false,delay=0;
   let subscription:any[]=[];let beforeReply:((session:any)=>Promise<void>)|undefined;
-  const stripe:any={prices:{list:async(input:any)=>{const developer=input?.lookup_keys?.[0] === DEVELOPER_ACCESS.lookupKey;return {data:[{id:developer?'price_developer':'price_pro',product:developer?'galx_nova_developer_access_v1':'galx_pro_v1',metadata:developer?{galxPlan:'nova-developer-v1'}:{},currency:'usd',unit_amount:(developer?DEVELOPER_ACCESS.monthlyPriceUsd:PRO_PLAN.monthlyPriceUsd)*100,recurring:{interval:'month',interval_count:1,usage_type:'licensed'}}]};}},
+  const stripe:any={prices:{list:async(input:any)=>{const developer=input?.lookup_keys?.[0] === DEVELOPER_ACCESS.lookupKey;return {data:[{id:developer?'price_developer':'price_pro',product:developer?'galx_nova_developer_access_v1':'galx_pro_v1',metadata:developer?{galxPlan:'nova-developer-v1'}:{galxPlan:'pro-v1'},currency:'usd',unit_amount:(developer?DEVELOPER_ACCESS.monthlyPriceUsd:PRO_PLAN.monthlyPriceUsd)*100,recurring:{interval:'month',interval_count:1,usage_type:'licensed'}}]};}},
     customers:{create:async()=>{customerCalls++;return{id:'cus_'+randomUUID().replaceAll('-','')};}},
     subscriptions:{list:async()=>({data:subscription,has_more:false})},checkout:{sessions:{
       retrieve:async(id:string)=>sessions.get(id),

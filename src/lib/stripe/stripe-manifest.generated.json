@@ -3,6 +3,9 @@
   "surface": "subscriptions",
   "plans": [
     { "planKey": "pro-v1", "lookupKey": "galx_pro_monthly_v1", "monthlyUsd": 10, "checkoutEnabled": true },
+    { "planKey": "creator-v1", "lookupKey": "galx_images_creator_monthly_v1", "monthlyUsd": 15, "checkoutEnabled": true },
+    { "planKey": "studio-v1", "lookupKey": "galx_images_studio_monthly_v1", "monthlyUsd": 35, "checkoutEnabled": true },
+    { "planKey": "team-v1", "lookupKey": "galx_images_team_monthly_v1", "monthlyUsd": 75, "checkoutEnabled": true },
     { "planKey": "nova-developer-v1", "lookupKey": "galx_nova_developer_monthly_v1", "monthlyUsd": 50, "checkoutEnabled": true, "usageCreditsIncludedUsd": 0, "usageBilledSeparately": true, "usagePricingStatus": "published", "usageBasis": "message" }
   ],
   "historicalPrepaidCatalog": "reconciliation-only"
