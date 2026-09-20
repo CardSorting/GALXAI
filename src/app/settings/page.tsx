@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import {
   ArrowLeft,
   RotateCcw,
@@ -35,6 +36,12 @@ type SettingsTab =
   | 'appearance'
   | 'language'
   | 'seats';
+
+const SETTINGS_TABS = new Set<SettingsTab>(['profile', 'appearance', 'language', 'seats']);
+
+function settingsTab(value: string | null): SettingsTab {
+  return value && SETTINGS_TABS.has(value as SettingsTab) ? value as SettingsTab : 'appearance';
+}
 
 interface ThemeOption {
   id: ThemePreset;
@@ -124,6 +131,7 @@ const COMMON_TIMEZONES = [
 ];
 
 export default function SettingsPage() {
+  const searchParams = useSearchParams();
   const { user, isAuthenticated, logout } = useAuth();
   const { language, details: langDetails, isAutoDetected, setLanguage } = useLanguage();
   const {
@@ -138,7 +146,7 @@ export default function SettingsPage() {
     resetAppearance,
   } = useAppearance();
 
-  const [activeTab, setActiveTab] = useState<SettingsTab>('appearance');
+  const [activeTab, setActiveTab] = useState<SettingsTab>(() => settingsTab(searchParams.get('tab')));
   const [languageSearch, setLanguageSearch] = useState('');
   const [profile, setProfile] = useState<AccountProfile | null>(null);
   const [profileDraft, setProfileDraft] = useState<AccountProfileDraft | null>(null);
@@ -146,14 +154,8 @@ export default function SettingsPage() {
   const [profileError, setProfileError] = useState('');
 
   useEffect(() => {
-    try {
-      const urlParams = new URLSearchParams(window.location.search);
-      const tabParam = urlParams.get('tab') as SettingsTab | null;
-      if (tabParam && ['profile', 'appearance', 'language', 'seats'].includes(tabParam)) {
-        setActiveTab(tabParam);
-      }
-    } catch {}
-  }, []);
+    setActiveTab(settingsTab(searchParams.get('tab')));
+  }, [searchParams]);
 
   const filteredLanguages = useMemo(() => {
     const keys = Object.keys(SUPPORTED_LANGUAGES) as SupportedLanguage[];
@@ -369,10 +371,12 @@ export default function SettingsPage() {
                 const Icon = item.icon;
                 const isSelected = activeTab === item.id;
                 return (
-                  <button
+                  <Link
                     key={item.id}
-                    type="button"
+                    href={`/settings?tab=${item.id}`}
+                    scroll={false}
                     onClick={() => setActiveTab(item.id)}
+                    aria-current={isSelected ? 'page' : undefined}
                     className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer ${
                       isSelected
                         ? 'bg-white/10 text-white font-bold'
@@ -393,7 +397,7 @@ export default function SettingsPage() {
                       )}
                       <ChevronRight className="w-3.5 h-3.5 text-zinc-600" />
                     </div>
-                  </button>
+                  </Link>
                 );
               })}
             </div>

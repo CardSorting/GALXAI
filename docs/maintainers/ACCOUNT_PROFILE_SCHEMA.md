@@ -19,6 +19,7 @@ The canonical pattern is now:
 | --- | --- | --- |
 | `galx_account_profiles` | One private account record with lifecycle, human/autonomous class, optional auth link, display name and revision | Identity fields are immutable; profile fields use compare-and-swap revisioning |
 | `galx_account_profile_preferences` | One-to-one locale and time-zone projection | Mutable with its own revision |
+| `galx_account_profile_settings` | Private server-side Settings read allowlist | Read-only view; denied to browser database roles |
 | `galx_account_identities` | Compatibility bridge from existing owner keys to a profile | Class and established auth link are immutable |
 | `galx_autonomous_actor_runs` / `galx_autonomous_actors` | Explicit actor lifecycle and human control ownership | State transitions are server-controlled |
 | `galx_star_cohort_members` | Append-only membership of durable Star actors in each bounded execution cohort | Membership identity is immutable; activation is server-controlled |
@@ -89,25 +90,32 @@ rules.
 - Entitlement grants are never deleted or edited in place. Revoke them and retain the event.
 - Actor configuration changes must increase `configuration_version`; history cannot be edited.
 - Private tables use RLS, forced RLS, least-privilege grants, indexed foreign keys and fixed `search_path` for security-definer functions.
-- Public responses expose only product fields. They do not serialize profile UUIDs, class, run state, audit rows or database errors.
+- Public responses expose only product fields. They do not serialize profile UUIDs, class, run state, audit rows or database errors. Ordinary account profiles remain private Settings data; public handle profiles remain Star-only.
 
 ## Rollout and rollback
 
 1. Apply and replay the paired migration in a disposable Postgres fixture.
-2. Confirm profile backfill counts, owner/profile foreign keys, RLS/grants and public policy evaluation.
+2. Confirm profile backfill counts, owner/profile foreign keys, RLS/grants, private Settings projection denial and public policy evaluation.
 3. Ship the repository/API/UI path with allowlisted DTOs and optimistic conflict handling.
 4. Observe profile writes and entitlement/actor audit rows before planning a contract migration.
 
-The linked database currently records the full account-profile expansion through
-`20260919180000`; this includes the Star participant extension, reusable bounded
-cohort membership, refresh uniqueness repair and durable generation-receipt
-ownership/state synchronization. Deployment and browser acceptance remain
-separate release evidence.
+The linked database records the account-profile expansion through
+`20260920041311_private_profile_settings_projection`. That migration repaired
+missing one-to-one preference rows and added a private server-only Settings read
+projection with explicit columns. The [dated migration evidence](../../post-mortem/releases/2026-09-20-account-profile-settings-migration.json)
+records the exact push and readback: 144 applied migrations, no pending or
+remote-only versions, zero preference orphans, a security barrier and denied
+browser/service SELECT privileges. It does not create human public profiles or
+change Star discovery. Deployment and browser acceptance remain separate release
+evidence.
 
-The paired down script is intentionally data-retaining. It keeps canonical rows,
-history and compatibility columns so an application can return to legacy
-owner-key reads without deleting evidence. Removing the bridge is a later,
-reviewed contract operation.
+The paired down scripts are intentionally data-retaining. The Settings
+projection rollback drops only the private view and keeps canonical preference
+rows. The account bridge rollback keeps canonical rows, history and
+compatibility columns so an application can return to legacy owner-key reads
+without deleting evidence. Removing the bridge is a later, reviewed contract
+operation. Roll the application reader back to the direct private-table join
+before dropping the Settings view.
 
 ## Verification contract
 

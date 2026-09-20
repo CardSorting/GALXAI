@@ -30,6 +30,9 @@ async function deniedAs(role: string, sql: string) {
 try {
   const migration = readFileSync(new URL('../supabase/migrations/20260919120000_canonical_account_profiles_and_ownership_bridge.sql', import.meta.url), 'utf8');
   await pool.query(migration);
+  const settingsProjectionMigration = readFileSync(new URL('../supabase/migrations/20260920041311_private_profile_settings_projection.sql', import.meta.url), 'utf8');
+  const settingsProjectionRollback = readFileSync(new URL('../supabase/rollbacks/20260920041311_private_profile_settings_projection.down.sql', import.meta.url), 'utf8');
+  await pool.query(settingsProjectionMigration);
 
   await insertAuthUser(owner);
   await insertAuthUser(other);
@@ -59,6 +62,22 @@ try {
   assert(profiles.every(row => row.account_class === 'human'));
   assert(profiles.some(row => row.auth_user_id === owner));
   checks++;
+
+  const projectionColumns = (await pool.query(
+    `SELECT column_name
+     FROM information_schema.columns
+     WHERE table_schema = 'private' AND table_name = 'galx_account_profile_settings'
+     ORDER BY ordinal_position`,
+  )).rows.map(row => row.column_name);
+  assert.deepEqual(projectionColumns, ['owner_key', 'display_name', 'locale', 'timezone', 'revision']);
+  assert.equal((await pool.query(
+    'SELECT count(*)::int AS count FROM private.galx_account_profile_settings WHERE owner_key = ANY($1::text[])',
+    [[owner, other]],
+  )).rows[0].count, 2);
+  for (const role of ['anon', 'authenticated', 'service_role']) {
+    await deniedAs(role, 'SELECT * FROM private.galx_account_profile_settings');
+  }
+  checks += 5;
 
   const identity = (await pool.query(
     'SELECT profile_id FROM private.galx_account_identities WHERE account_id = $1',
@@ -203,7 +222,20 @@ try {
   assert.equal((await pool.query("SELECT has_function_privilege('anon', 'private.galx_is_human_account(text)', 'EXECUTE') AS allowed")).rows[0].allowed, true);
   checks += 4 * 3 + 1;
 
-  console.log(JSON.stringify({ checks, failed: 0, scope: 'disposable PostgreSQL; profile bridge, actor history, entitlement audit, RLS and authorization' }));
+  await pool.query(settingsProjectionRollback);
+  assert.equal((await pool.query(
+    `SELECT to_regclass('private.galx_account_profile_settings') AS relation`,
+  )).rows[0].relation, null);
+  assert.equal((await pool.query(
+    'SELECT count(*)::int AS count FROM private.galx_account_profile_preferences',
+  )).rows[0].count >= 2, true);
+  await pool.query(settingsProjectionMigration);
+  assert.notEqual((await pool.query(
+    `SELECT to_regclass('private.galx_account_profile_settings') AS relation`,
+  )).rows[0].relation, null);
+  checks += 3;
+
+  console.log(JSON.stringify({ checks, failed: 0, scope: 'disposable PostgreSQL; private Settings projection, rollback replay, actor history, entitlement audit, RLS and authorization' }));
 } finally {
   await pool.end();
 }

@@ -3,7 +3,7 @@
 import { IntentLink as Link } from '@/components/common/IntentLink';
 import { usePathname } from 'next/navigation';
 import { isPublicReadingPath } from '@/lib/public-content/routes';
-import { Compass, Sparkles, CreditCard, Search } from 'lucide-react';
+import { Compass, Sparkles, User, Search } from 'lucide-react';
 
 export function MobileBottomNav() {
   const pathname = usePathname();
@@ -23,7 +23,7 @@ export function MobileBottomNav() {
   const navItems = [
     { label: 'Explore', href: '/explore', icon: Compass },
     { label: 'Studio', href: '/images', icon: Sparkles },
-    { label: 'Pricing', href: '/pricing', icon: CreditCard },
+    { label: 'Profile', href: '/settings?tab=profile', icon: User },
   ];
 
   const handleOpenSearch = () => {
@@ -43,6 +43,8 @@ export function MobileBottomNav() {
           ? pathname === '/images' || pathname.startsWith('/images/') || pathname === '/library' || pathname.startsWith('/library/')
           : item.href === '/explore'
             ? pathname === '/explore' || pathname.startsWith('/explore/') || pathname.startsWith('/profile/')
+            : item.label === 'Profile'
+              ? pathname === '/settings'
             : pathname === item.href || pathname.startsWith(`${item.href}/`);
         return (
           <Link

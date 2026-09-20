@@ -1,0 +1,24 @@
+{
+  "observed_at": "2026-09-20T04:30:00Z",
+  "scope": "Local navigation and private account-profile Settings change. No migration was applied to a linked database and no deployment or live acceptance was performed.",
+  "semantic_review": [
+    "Reviewed the final desktop header, signed-in avatar menu, mobile drawer and mobile bottom tabs. All ordinary-account Profile entries use /settings?tab=profile; Docs and More are absent from the desktop primary navigation while resources remain in the mobile drawer, search, reading navigation and footer.",
+    "Reviewed Settings query-state initialization and updates. The profile selection follows the URL during direct entry, same-page navigation and browser history instead of depending on a one-time window read.",
+    "Reviewed the canonical account-profile repository, private projection migration and paired rollback. The view exposes only owner key, display name, locale, time zone and revision to the server connection and denies PUBLIC, anon, authenticated and service_role database roles.",
+    "Reviewed public participant code, route policy and image-boundary tests. Ordinary account profiles are not projected through /profile/[handle]; those routes remain Star-only and retain Explore as their active navigation parent.",
+    "Reviewed the complete changed navigation, readable-URL, account-schema, image-boundary and ADR bodies plus the generated domain mapping. Rollback order and the local-only migration state are explicit."
+  ],
+  "validation": {
+    "migration_integrity": "npm run db:verify passed with 144 paired migrations and no warnings",
+    "database_replay": "npm run test:account-profile:db passed 33 checks including role denial and down/up replay; npm run db:test passed 94/94 checks",
+    "authorization_and_boundary": "account-profile API, 55 image-security tests, 43 auth-session tests and 43 request-efficiency tests passed",
+    "build": "npm run build passed against the final source and generated all 166 static pages",
+    "compiled_navigation": "Inspected the final browser chunks: primary order is Images, Explore, Pricing, Profile; desktop, account menu, drawer and mobile tab compile to /settings?tab=profile",
+    "quality": "TypeScript passed before the final production build; ESLint completed with zero errors and eight pre-existing warnings outside the changed files; documentation tests passed"
+  },
+  "limitations": [
+    "The schema migration is prepared but not applied to a linked or production database.",
+    "The available computer-use surface was not configured and no Playwright package was installed, so final visual acceptance is limited to source review, compiled-asset inspection and production build output.",
+    "Local success is not deployment, production authorization or assistive-technology acceptance."
+  ]
+}

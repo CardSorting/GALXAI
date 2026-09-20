@@ -38,6 +38,8 @@ const isProductRoute = (pathname: string) =>
   pathname === '/developers' ||
   isPublicReadingPath(pathname);
 
+const PROFILE_SETTINGS_PATH = '/settings?tab=profile';
+
 function NavigationFeedback({ label }: { label: string }) {
   const { pending } = useLinkStatus();
   return (
@@ -63,7 +65,6 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
 
   // Navigation State
   const [isAccountOpen, setIsAccountOpen] = useState(false);
-  const [isMoreOpen, setIsMoreOpen] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isCommandOpen, setIsCommandOpen] = useState(false);
   const [osShortcut, setOsShortcut] = useState('⌘K');
@@ -73,7 +74,6 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
   const drawerCloseRef = useRef<HTMLButtonElement>(null);
   const drawerRef = useRef<HTMLDivElement>(null);
   const accountToggleRef = useRef<HTMLButtonElement>(null);
-  const moreButtonRef = useRef<HTMLButtonElement>(null);
 
   // OS detection for keyboard shortcut
   useEffect(() => {
@@ -94,16 +94,12 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
       }
       if (e.key === 'Escape') {
         const wasAccountOpen = isAccountOpen;
-        const wasMoreOpen = isMoreOpen;
         setIsAccountOpen(false);
-        setIsMoreOpen(false);
         if (isMobileOpen) {
           setIsMobileOpen(false);
           requestAnimationFrame(() => mobileToggleRef.current?.focus());
         } else if (wasAccountOpen) {
           requestAnimationFrame(() => accountToggleRef.current?.focus());
-        } else if (wasMoreOpen) {
-          requestAnimationFrame(() => moreButtonRef.current?.focus());
         }
       }
     };
@@ -114,12 +110,11 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
       window.removeEventListener('open-command-menu', handleOpenCommand);
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isAccountOpen, isMobileOpen, isMoreOpen]);
+  }, [isAccountOpen, isMobileOpen]);
 
   // Close menus on route change
   useEffect(() => {
     setIsAccountOpen(false);
-    setIsMoreOpen(false);
     setIsMobileOpen(false);
   }, [pathname]);
 
@@ -128,7 +123,6 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
     const handleClickOutside = (e: MouseEvent) => {
       if (navRef.current && !navRef.current.contains(e.target as Node)) {
         setIsAccountOpen(false);
-        setIsMoreOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -179,31 +173,6 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
     }
   };
 
-  const handleMoreMenuKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
-    const items = Array.from(
-      event.currentTarget.querySelectorAll<HTMLElement>('[role="menuitem"]')
-    );
-    const currentIndex = items.indexOf(document.activeElement as HTMLElement);
-
-    if (event.key === 'Escape') {
-      event.preventDefault();
-      setIsMoreOpen(false);
-      requestAnimationFrame(() => moreButtonRef.current?.focus());
-      return;
-    }
-
-    if (!items.length || !['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return;
-    event.preventDefault();
-    const nextIndex = event.key === 'Home'
-      ? 0
-      : event.key === 'End'
-        ? items.length - 1
-        : event.key === 'ArrowDown'
-          ? (currentIndex + 1 + items.length) % items.length
-          : (currentIndex - 1 + items.length) % items.length;
-    items[nextIndex]?.focus();
-  };
-
   // Legacy error/not-found surfaces can still include Navigation themselves.
   if (!inLayout && isProductRoute(pathname)) return null;
   const returnTo = pathname === '/' ? '/images' : pathname;
@@ -212,7 +181,7 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
   const isExploreActive = pathname === '/explore' || pathname.startsWith('/explore/') || pathname.startsWith('/profile/');
   const isPricingActive = pathname === '/pricing' || pathname.startsWith('/pricing/');
   const isDocsActive = pathname === '/docs' || pathname.startsWith('/docs/');
-  const isMoreActive = isDocsActive || pathname.startsWith('/knowledge-base') || pathname === '/faq' || pathname === '/developers' || pathname === '/status';
+  const isProfileActive = pathname === '/settings';
 
   return (
     <>
@@ -226,7 +195,7 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
             </Link>
           </div>
 
-          {/* Primary navigation: direct destinations first, grouped resources second. */}
+          {/* Primary navigation: creation, discovery, plans, and personal profile. */}
           <nav aria-label="Main navigation" className={styles.desktopNav}>
             <Link
               href="/images"
@@ -256,84 +225,13 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
             </Link>
 
             <Link
-              href="/docs"
+              href={PROFILE_SETTINGS_PATH}
               className={styles.navLink}
-              aria-current={isDocsActive ? 'page' : undefined}
+              aria-current={isProfileActive ? 'page' : undefined}
             >
-              <span>Docs</span>
-              <NavigationFeedback label="Docs" />
+              <span>Profile</span>
+              <NavigationFeedback label="Profile" />
             </Link>
-
-            <div className={styles.moreWrapper}>
-              <button
-                type="button"
-                ref={moreButtonRef}
-                className={`${styles.navLink} ${styles.moreButton}`}
-                onClick={() => {
-                  setIsAccountOpen(false);
-                  setIsMoreOpen((prev) => !prev);
-                }}
-                onKeyDown={(event) => {
-                  if (event.key === 'ArrowDown') {
-                    event.preventDefault();
-                    setIsMoreOpen(true);
-                    requestAnimationFrame(() => document.getElementById('navigation-more-first-link')?.focus());
-                  }
-                }}
-                aria-expanded={isMoreOpen}
-                aria-haspopup="menu"
-                aria-controls="navigation-more-menu"
-                data-active={isMoreActive || undefined}
-              >
-                <span>More</span>
-                <ChevronDown size={13} aria-hidden="true" />
-              </button>
-
-              {isMoreOpen && (
-                <div id="navigation-more-menu" className={styles.moreMenu} role="menu" aria-label="More navigation" onKeyDown={handleMoreMenuKeyDown}>
-                  <div className={styles.moreMenuLabel}>Resources & access</div>
-                  <div className={styles.moreMenuList}>
-                    <Link
-                      id="navigation-more-first-link"
-                      href="/knowledge-base"
-                      className={styles.moreMenuItem}
-                      role="menuitem"
-                      onClick={() => setIsMoreOpen(false)}
-                    >
-                      <BookOpen size={16} aria-hidden="true" />
-                      <span><strong>Knowledge base</strong><small>Guides for getting more from GALX</small></span>
-                    </Link>
-                    <Link
-                      href="/faq"
-                      className={styles.moreMenuItem}
-                      role="menuitem"
-                      onClick={() => setIsMoreOpen(false)}
-                    >
-                      <HelpCircle size={16} aria-hidden="true" />
-                      <span><strong>FAQ</strong><small>Answers about products and plans</small></span>
-                    </Link>
-                    <Link
-                      href="/developers"
-                      className={styles.moreMenuItem}
-                      role="menuitem"
-                      onClick={() => setIsMoreOpen(false)}
-                    >
-                      <KeyRound size={16} aria-hidden="true" />
-                      <span><strong>Private access</strong><small>How explicitly authorized integrations work</small></span>
-                    </Link>
-                    <Link
-                      href="/status"
-                      className={styles.moreMenuItem}
-                      role="menuitem"
-                      onClick={() => setIsMoreOpen(false)}
-                    >
-                      <Activity size={16} aria-hidden="true" />
-                      <span><strong>System status</strong><small>Current service availability</small></span>
-                    </Link>
-                  </div>
-                </div>
-              )}
-            </div>
           </nav>
 
           {/* Quick Search Trigger Pill (⌘K) */}
@@ -372,7 +270,6 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
                   type="button"
                   className={styles.userButton}
                   onClick={() => {
-                    setIsMoreOpen(false);
                     setIsAccountOpen((prev) => !prev);
                   }}
                   aria-expanded={isAccountOpen}
@@ -397,12 +294,22 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
                     </div>
 
                     <Link
-                      href={BILLING_PATHS.overview}
+                      href={PROFILE_SETTINGS_PATH}
                       className={styles.accountLinkItem}
                       role="menuitem"
                       onClick={() => setIsAccountOpen(false)}
                     >
                       <User size={14} className="text-indigo-400" />
+                      <span>Profile</span>
+                    </Link>
+
+                    <Link
+                      href={BILLING_PATHS.overview}
+                      className={styles.accountLinkItem}
+                      role="menuitem"
+                      onClick={() => setIsAccountOpen(false)}
+                    >
+                      <CreditCard size={14} className="text-sky-400" />
                       <span>Account & Usage</span>
                     </Link>
 
@@ -552,6 +459,15 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
                     >
                       <Compass size={18} aria-hidden="true" className="text-indigo-400" />
                       <span><strong>Explore</strong><small>See what the community is making</small></span>
+                    </Link>
+                    <Link
+                      href={PROFILE_SETTINGS_PATH}
+                      className={styles.drawerLink}
+                      aria-current={isProfileActive ? 'page' : undefined}
+                      onClick={closeMobileMenu}
+                    >
+                      <User size={18} aria-hidden="true" className="text-violet-300" />
+                      <span><strong>Profile</strong><small>Your personal account details</small></span>
                     </Link>
                   </div>
                 </div>

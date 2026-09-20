@@ -4,8 +4,10 @@
 
 Date: 2026-09-19. Status: proposed implementation. Owner: Account platform
 maintainer. Delivery: the migration and focused disposable-Postgres checks are
-present locally, and the linked database records the migration through
-`20260919120000`; deployment acceptance remains separate.
+present locally, and the linked database records the profile expansion through
+`20260920041311_private_profile_settings_projection`; deployment acceptance
+remains separate. See the [private migration evidence](../../post-mortem/releases/2026-09-20-account-profile-settings-migration.json)
+for the exact readback.
 
 ## Context
 
@@ -30,6 +32,12 @@ the expand phase. Private account-scoped tables gain indexed profile foreign-key
 bridges. This avoids exposing private profile identifiers through public table
 responses while allowing server-side domains to converge on one ownership
 authority.
+
+Server-side Settings reads use a private allowlisted projection of owner key,
+display name, locale, time zone and profile revision. Browser database roles
+have no access to that projection; the authenticated account API performs its
+own owner verification and returns a smaller public response DTO. Ordinary
+account profiles remain distinct from public Star handle profiles.
 
 ## Familiar patterns and constraints
 

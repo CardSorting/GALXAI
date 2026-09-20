@@ -74,10 +74,9 @@ export class AccountProfileRepository {
 
   async get(ownerKey: string, authUserId: string, fallbackName?: string): Promise<AccountProfileDto> {
     let result = await this.db().query<ProfileRow>(
-      `SELECT p.display_name, pref.locale, pref.timezone, p.revision
-       FROM private.galx_account_profiles AS p
-       JOIN private.galx_account_profile_preferences AS pref ON pref.profile_id = p.id
-       WHERE p.owner_key = $1
+      `SELECT display_name, locale, timezone, revision
+       FROM private.galx_account_profile_settings
+       WHERE owner_key = $1
        LIMIT 1`,
       [ownerKey],
     );
@@ -87,10 +86,9 @@ export class AccountProfileRepository {
     if (!result.rows[0]) {
       await this.ensure(ownerKey, authUserId);
       result = await this.db().query<ProfileRow>(
-        `SELECT p.display_name, pref.locale, pref.timezone, p.revision
-         FROM private.galx_account_profiles AS p
-         JOIN private.galx_account_profile_preferences AS pref ON pref.profile_id = p.id
-         WHERE p.owner_key = $1
+        `SELECT display_name, locale, timezone, revision
+         FROM private.galx_account_profile_settings
+         WHERE owner_key = $1
          LIMIT 1`,
         [ownerKey],
       );
@@ -123,7 +121,6 @@ export class AccountProfileRepository {
       if (Number(profile.revision) !== input.expectedRevision) {
         throw new AccountProfileConflictError();
       }
-
       await client.query(
         `INSERT INTO private.galx_account_profile_preferences (profile_id)
          VALUES ($1)
@@ -144,11 +141,10 @@ export class AccountProfileRepository {
       );
 
       const updated = await client.query<ProfileRow>(
-        `SELECT p.display_name, pref.locale, pref.timezone, p.revision
-         FROM private.galx_account_profiles AS p
-         JOIN private.galx_account_profile_preferences AS pref ON pref.profile_id = p.id
-         WHERE p.id = $1`,
-        [profile.id],
+        `SELECT display_name, locale, timezone, revision
+         FROM private.galx_account_profile_settings
+         WHERE owner_key = $1`,
+        [input.ownerKey],
       );
       if (!updated.rows[0]) throw new AccountProfileNotFoundError();
       await client.query('COMMIT');
