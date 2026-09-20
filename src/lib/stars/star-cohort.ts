@@ -12,6 +12,13 @@ export const STAR_RETRY_COHORT_KEY = 'stars-qualification-retry-2026-09';
 export const STAR_RETRY_RUN_KEY = 'stars-qualification-retry-run-2026-09';
 export const STAR_QUALIFICATION_COHORT_KEY = 'stars-production-qualification-2026-09';
 export const STAR_QUALIFICATION_RUN_KEY = 'stars-production-qualification-run-2026-09';
+/**
+ * A qualification result is immutable. Keep each separately authorized
+ * production check on its own versioned cohort/run rather than reopening a
+ * historical batch or issuing an untracked opportunity.
+ */
+export const STAR_QUALIFICATION_V2_COHORT_KEY = 'stars-production-qualification-2026-09-r2';
+export const STAR_QUALIFICATION_V2_RUN_KEY = 'stars-production-qualification-run-2026-09-r2';
 export const STAR_MAX_GENERATION_CONCURRENCY = 3;
 export const STAR_CONTENT_OPPORTUNITIES = 3;
 export const STAR_MAX_CONTENT_ATTEMPTS = 12 * STAR_CONTENT_OPPORTUNITIES;

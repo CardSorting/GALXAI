@@ -90,10 +90,14 @@ small, separately recorded production check. It reuses four existing Star
 identities (`veyrasol`, `morrowkest`, `soravale` and `ilyx`), creates no
 accounts or avatars, allows two content opportunities per Star, caps the run at
 eight real generations with concurrency two, creates no schedules and disables
-the qualification membership after the run. Inspect it first with
-`npm run stars:qualification:plan`; execute it only after the deployment,
-health, empty-shard failover and endpoint-discovery gates have passed. A closed
-qualification cohort cannot be reopened or expanded by the runner.
+the qualification membership after the run. Inspect the original batch first
+with `npm run stars:qualification:plan`; a separately authorized
+requalification must use the fresh immutable versioned selector
+`npm run stars:qualification:v2:plan` and `npm run stars:qualification:v2`.
+Execute either only after the deployment, health, empty-shard failover and
+endpoint-discovery gates have passed. A closed qualification cohort cannot be
+reopened or expanded by the runner; each new qualification requires a new
+versioned cohort/run key.
 
 ## Stop conditions
 

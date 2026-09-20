@@ -1,12 +1,26 @@
 import { Client } from 'pg';
 import { getPostgresSslConfig } from '../src/lib/db/postgres';
-import { STAR_COHORT_KEY, STAR_REFRESH_COHORT_KEY, STAR_REFRESH_V2_COHORT_KEY, STAR_RETRY_COHORT_KEY } from '../src/lib/stars/star-cohort';
+import {
+  STAR_COHORT_KEY,
+  STAR_REFRESH_COHORT_KEY,
+  STAR_REFRESH_V2_COHORT_KEY,
+  STAR_RETRY_COHORT_KEY,
+  STAR_QUALIFICATION_COHORT_KEY,
+  STAR_QUALIFICATION_V2_COHORT_KEY,
+} from '../src/lib/stars/star-cohort';
 
 const refresh = process.argv.includes('--refresh');
 const refreshV2 = process.argv.includes('--refresh-v2');
 const retry = process.argv.includes('--retry');
-if ([refresh, refreshV2, retry].filter(Boolean).length > 1) throw new Error('--refresh, --refresh-v2, and --retry are mutually exclusive');
-const cohortKey = retry ? STAR_RETRY_COHORT_KEY : refreshV2 ? STAR_REFRESH_V2_COHORT_KEY : refresh ? STAR_REFRESH_COHORT_KEY : STAR_COHORT_KEY;
+const qualification = process.argv.includes('--qualification');
+const qualificationV2 = process.argv.includes('--qualification-v2');
+if ([refresh, refreshV2, retry, qualification, qualificationV2].filter(Boolean).length > 1) throw new Error('--refresh, --refresh-v2, --retry, --qualification, and --qualification-v2 are mutually exclusive');
+const cohortKey = qualificationV2 ? STAR_QUALIFICATION_V2_COHORT_KEY
+  : qualification ? STAR_QUALIFICATION_COHORT_KEY
+    : retry ? STAR_RETRY_COHORT_KEY
+      : refreshV2 ? STAR_REFRESH_V2_COHORT_KEY
+        : refresh ? STAR_REFRESH_COHORT_KEY
+          : STAR_COHORT_KEY;
 
 const password = process.env.SUPABASE_DB_PASSWORD;
 const projectRef = process.env.SUPABASE_PROJECT_REF;

@@ -15,6 +15,8 @@ import {
   STAR_RETRY_RUN_KEY,
   STAR_QUALIFICATION_COHORT_KEY,
   STAR_QUALIFICATION_RUN_KEY,
+  STAR_QUALIFICATION_V2_COHORT_KEY,
+  STAR_QUALIFICATION_V2_RUN_KEY,
   STAR_DEFINITIONS,
   STAR_QUALIFICATION_DEFINITIONS,
   STAR_MAX_CONTENT_ATTEMPTS,
@@ -30,7 +32,7 @@ import {
 const STAR_MODEL = 'galx-nova-image';
 const STAR_GENERATION_SIZES = ['1024x1024', '1792x1024', '1024x1792'] as const;
 
-export type StarPopulationMode = 'initial' | 'refresh' | 'refresh-v2' | 'retry' | 'qualification';
+export type StarPopulationMode = 'initial' | 'refresh' | 'refresh-v2' | 'retry' | 'qualification' | 'qualification-v2';
 
 interface StarExecutionConfig {
   mode: StarPopulationMode;
@@ -44,6 +46,18 @@ interface StarExecutionConfig {
 }
 
 function getStarExecutionConfig(mode: StarPopulationMode = 'initial'): StarExecutionConfig {
+  if (mode === 'qualification-v2') {
+    return {
+      mode,
+      cohortKey: STAR_QUALIFICATION_V2_COHORT_KEY,
+      runKey: STAR_QUALIFICATION_V2_RUN_KEY,
+      label: 'Production Star qualification (version 2)',
+      definitions: STAR_QUALIFICATION_DEFINITIONS,
+      contentOpportunities: STAR_QUALIFICATION_CONTENT_OPPORTUNITIES,
+      maxContentAttempts: STAR_QUALIFICATION_DEFINITIONS.length * STAR_QUALIFICATION_CONTENT_OPPORTUNITIES,
+      maxGenerationConcurrency: STAR_QUALIFICATION_MAX_GENERATION_CONCURRENCY,
+    };
+  }
   if (mode === 'qualification') {
     return {
       mode,
