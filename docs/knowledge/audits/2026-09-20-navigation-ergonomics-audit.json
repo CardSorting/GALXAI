@@ -1,0 +1,29 @@
+{
+  "classification": "private",
+  "observed_at": "2026-09-20T00:00:00Z",
+  "base_revision": "aae102f4c9e8082fda241d3172a7cbbd35eea104",
+  "scope": "Second technical and ergonomic audit of the shared header, account menu, command palette, mobile workspace tabs, footer grid and retired account-profile boundary.",
+  "findings": [
+    "Tablet widths from 768px through 1023px previously exposed both the desktop header links and the fixed mobile bottom bar; the bottom bar and main-content reservation now use the same md breakpoint.",
+    "The footer retained a fourth navigation track after the account column was removed; the desktop grid now matches its three visible navigation columns.",
+    "The mobile bottom tab now says Library, matching the /images/library destination and the user's saved-work mental model.",
+    "Header and drawer controls meet the 44px touch-target floor; the account menu supports menu semantics, Arrow/Home/End traversal, Escape dismissal and focus return.",
+    "The command palette is a labelled modal with focus containment and restoration, a valid combobox/listbox relationship, active-option metadata, backdrop dismissal, an authored no-match state and a 44px close target."
+  ],
+  "validation": {
+    "production_build": "npm run build passed; Next generated 163 pages and the route manifests contain no /settings route.",
+    "retired_surface_scan": "Compiled HTML/JS/JSON contains no /settings?tab=profile or app/settings/page references; /teams/settings is a separate existing team route.",
+    "typecheck": "npx tsc --noEmit passed.",
+    "lint": "npm run lint passed with zero errors and eight pre-existing warnings outside this navigation scope.",
+    "ux_detector": "The deterministic Impeccable detector returned no findings for the audited navigation, command, layout and footer files.",
+    "security_navigation": "npm run test:image:security passed 55/55; node --import tsx --test scripts/test-url-navigation.ts passed 5/5.",
+    "preview_boundary": "npm run test:developer-preview passed 17/17.",
+    "documentation_tests": "npm run test:docs passed 17/17; npm run docs:sync completed successfully. docs:impact maps all product source edits and leaves only this retained audit plus generated review metadata outside source ownership.",
+    "browser_fixture": "Not executed: the repository does not include the Playwright and Axe modules required by scripts/verify-navigation-ui.ts, and the CUA browser surface was unavailable. The fixture now asserts phone-only bottom tabs and tablet/desktop hiding."
+  },
+  "limits": [
+    "No live deployment or hosted browser acceptance is implied.",
+    "The account-profile data/API schema remains untouched; only the unsupported settings navigation surface stays retired.",
+    "Unrelated stale review fingerprints in the Sites, Relay, Delivery and BroccoliDB knowledge domains were not refreshed."
+  ]
+}

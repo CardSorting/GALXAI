@@ -1,7 +1,7 @@
 'use client';
 import { BILLING_PATHS } from '@/lib/billing/navigation';
 
-import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback, type KeyboardEvent as ReactKeyboardEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { prefetchOnIntent } from '@/lib/resilience/intent-prefetch';
 import {
@@ -43,6 +43,11 @@ function BaseCommandMenu({ isOpen, onClose }: CommandMenuProps) {
   const [showShortcutsModal, setShowShortcutsModal] = useState(false);
   const [copiedNotification, setCopiedNotification] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const shortcutsDialogRef = useRef<HTMLDivElement>(null);
+  const shortcutsCloseRef = useRef<HTMLButtonElement>(null);
+  const returnFocusRef = useRef<HTMLElement | null>(null);
+  const shortcutsReturnFocusRef = useRef<HTMLElement | null>(null);
 
   const normalizedQuery = query.toLowerCase().trim();
   const recentVisits = BroccoliOmniSearch.getRecentVisits(3);
@@ -85,6 +90,70 @@ function BaseCommandMenu({ isOpen, onClose }: CommandMenuProps) {
   useEffect(() => {
     setSelectedIndex(0);
   }, [query]);
+
+  useEffect(() => {
+    if (isOpen) {
+      returnFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      requestAnimationFrame(() => inputRef.current?.focus());
+      return;
+    }
+
+    const previous = returnFocusRef.current;
+    returnFocusRef.current = null;
+    if (previous && document.contains(previous)) requestAnimationFrame(() => previous.focus());
+    setQuery('');
+    setSelectedIndex(0);
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (showShortcutsModal) {
+      shortcutsReturnFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      requestAnimationFrame(() => shortcutsCloseRef.current?.focus());
+      return;
+    }
+
+    const previous = shortcutsReturnFocusRef.current;
+    shortcutsReturnFocusRef.current = null;
+    if (previous && document.contains(previous)) requestAnimationFrame(() => previous.focus());
+  }, [showShortcutsModal]);
+
+  const handleDialogKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
+    if (event.key !== 'Tab' || !dialogRef.current) return;
+    const focusable = Array.from(
+      dialogRef.current.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      )
+    );
+    if (!focusable.length) return;
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  };
+
+  const handleShortcutsKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
+    if (event.key !== 'Tab' || !shortcutsDialogRef.current) return;
+    const focusable = Array.from(
+      shortcutsDialogRef.current.querySelectorAll<HTMLElement>('button:not([disabled]), [tabindex]:not([tabindex="-1"])')
+    );
+    if (!focusable.length) return;
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  };
 
   // Warm one stable selection only while the palette is actually open.
   useEffect(() => {
@@ -227,16 +296,29 @@ function BaseCommandMenu({ isOpen, onClose }: CommandMenuProps) {
 
   if (showShortcutsModal) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-150">
-        <div className="relative w-full max-w-md glass-panel border border-indigo-500/40 rounded-3xl p-6 shadow-2xl space-y-4">
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-150"
+        onClick={(event) => { if (event.target === event.currentTarget) setShowShortcutsModal(false); }}
+      >
+        <div
+          ref={shortcutsDialogRef}
+          className="relative w-full max-w-md glass-panel border border-indigo-500/40 rounded-3xl p-6 shadow-2xl space-y-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="keyboard-shortcuts-title"
+          onKeyDown={handleShortcutsKeyDown}
+        >
           <div className="flex items-center justify-between">
-            <h3 className="text-base font-bold text-white flex items-center gap-2">
+            <h3 id="keyboard-shortcuts-title" className="text-base font-bold text-white flex items-center gap-2">
               <HelpCircle className="w-4 h-4 text-indigo-400" />
               Keyboard Navigation Shortcuts
             </h3>
             <button
+              ref={shortcutsCloseRef}
+              type="button"
               onClick={() => setShowShortcutsModal(false)}
-              className="p-1 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white"
+              className="min-h-11 min-w-11 p-1 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white"
+              aria-label="Close keyboard shortcuts"
             >
               <X className="w-4 h-4" />
             </button>
@@ -279,8 +361,20 @@ function BaseCommandMenu({ isOpen, onClose }: CommandMenuProps) {
   let currentItemCounter = 0;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24 px-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-150">
-      <div className="relative w-full max-w-2xl glass-panel border border-indigo-500/30 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
+    <div
+      className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24 px-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-150"
+      onClick={(event) => { if (event.target === event.currentTarget) onClose(); }}
+    >
+      <div
+        id="command-menu"
+        ref={dialogRef}
+        className="relative w-full max-w-2xl glass-panel border border-indigo-500/30 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh]"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="command-menu-title"
+        onKeyDown={handleDialogKeyDown}
+      >
+        <h2 id="command-menu-title" className="sr-only">Search GALX</h2>
         {/* Search Bar Input */}
         <div className="flex items-center gap-3 px-5 py-4 border-b border-white/10 bg-black/40">
           <Search className="w-5 h-5 text-zinc-400 shrink-0" />
@@ -288,12 +382,16 @@ function BaseCommandMenu({ isOpen, onClose }: CommandMenuProps) {
             <input
               ref={inputRef}
               type="text"
-              autoFocus
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search images, guides, or supported capabilities..."
               className="w-full bg-transparent text-white placeholder:text-zinc-500 text-sm focus:outline-none font-mono"
               aria-label="Universal Command Search"
+              role="combobox"
+              aria-controls="command-menu-options"
+              aria-expanded={selectableItems.length > 0}
+              aria-autocomplete="list"
+              aria-activedescendant={selectableItems[selectedIndex] ? `command-option-${selectedIndex}` : undefined}
             />
           </div>
           {copiedNotification && (
@@ -308,8 +406,9 @@ function BaseCommandMenu({ isOpen, onClose }: CommandMenuProps) {
             </div>
           )}
           <button
+            type="button"
             onClick={onClose}
-            className="p-1 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-all cursor-pointer"
+            className="min-h-11 min-w-11 p-1 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-all cursor-pointer"
             aria-label="Close Command Search"
           >
             <X className="w-4 h-4" />
@@ -317,7 +416,7 @@ function BaseCommandMenu({ isOpen, onClose }: CommandMenuProps) {
         </div>
 
         {/* Results Body */}
-        <div className="overflow-y-auto p-3 space-y-4">
+        <div id="command-menu-results" className="overflow-y-auto p-3 space-y-4">
           {/* Recent Navigation (Shown when query is empty) */}
           {!normalizedQuery && recentVisits.length > 0 && (
             <div className="space-y-1">
@@ -325,26 +424,30 @@ function BaseCommandMenu({ isOpen, onClose }: CommandMenuProps) {
                 <span>Recently Visited Workflows</span>
                 <div className="flex items-center gap-2">
                   <button
+                    type="button"
                     onClick={(e) => {
                       e.stopPropagation();
                       BroccoliOmniSearch.clearRecentVisits();
                       setQuery((q) => q + ' ');
                       setTimeout(() => setQuery((q) => q.trim()), 10);
                     }}
-                    className="text-zinc-500 hover:text-zinc-300 transition-colors uppercase text-[10px] cursor-pointer"
+                    className="min-h-11 px-2 text-zinc-500 hover:text-zinc-300 transition-colors uppercase text-[10px] cursor-pointer"
                   >
                     Clear
                   </button>
-              <span className="text-zinc-600 font-normal">Recent navigation</span>
                 </div>
               </div>
-              <div className="space-y-1">
+              <div id="command-menu-options" className="space-y-1" role="listbox" aria-label="Recently visited destinations">
                 {recentVisits.map((r) => {
                   const itemIndex = currentItemCounter++;
                   const isSelected = itemIndex === selectedIndex;
                   return (
                     <button
                       key={r.href}
+                      id={`command-option-${itemIndex}`}
+                      type="button"
+                      role="option"
+                      aria-selected={isSelected}
                       onClick={() => navigateTo(r.href, r.title, r.category)}
                       onMouseEnter={() => {
                         setSelectedIndex(itemIndex);
@@ -381,13 +484,17 @@ function BaseCommandMenu({ isOpen, onClose }: CommandMenuProps) {
                 <span>Matching Pages & Actions ({omniResults.length})</span>
                 <span className="text-zinc-500 font-normal">Search results</span>
               </div>
-              <div className="space-y-1">
+              <div id="command-menu-options" className="space-y-1" role="listbox" aria-label="Matching destinations">
                 {omniResults.map((item) => {
                   const itemIndex = currentItemCounter++;
                   const isSelected = itemIndex === selectedIndex;
                   return (
                     <button
                       key={item.id}
+                      id={`command-option-${itemIndex}`}
+                      type="button"
+                      role="option"
+                      aria-selected={isSelected}
                       onClick={() => navigateTo(item.href, item.title, item.category, item.actionType, item.actionData)}
                       onMouseEnter={() => {
                         setSelectedIndex(itemIndex);
@@ -439,6 +546,13 @@ function BaseCommandMenu({ isOpen, onClose }: CommandMenuProps) {
                   );
                 })}
               </div>
+            </div>
+          )}
+
+          {normalizedQuery && omniResults.length === 0 && (
+            <div className="px-4 py-10 text-center" role="status">
+              <p className="text-sm font-semibold text-white">No matching destinations</p>
+              <p className="mt-1 text-xs text-zinc-400">Try Images, Explore, Pricing, Docs, or FAQ.</p>
             </div>
           )}
 

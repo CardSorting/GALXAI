@@ -586,6 +586,7 @@
         "src/app/globals.css",
         "src/components/dashboard/MobileBottomNav.tsx",
         "src/components/dashboard/Footer.tsx",
+        "src/components/dashboard/footer.module.css",
         "src/components/images/use-image-studio.ts",
         "src/components/images/ImageStudio.tsx",
         "src/components/sites/use-sites-workspace.ts",

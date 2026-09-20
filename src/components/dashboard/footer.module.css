@@ -1,6 +1,6 @@
 /* ===========================================================================
    GALX public footer navigation
-   Product, learning, account, support and legal destinations stay scannable.
+   Product, learning, support and legal destinations stay scannable.
    =========================================================================== */
 
 .footer {
@@ -57,7 +57,7 @@
 
 @media (min-width: 1024px) {
   .mainGrid {
-    grid-template-columns: 2.2fr repeat(4, 1.2fr);
+    grid-template-columns: 2.2fr repeat(3, 1.2fr);
     gap: 32px;
   }
 }

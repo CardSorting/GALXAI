@@ -69,6 +69,7 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
   const drawerCloseRef = useRef<HTMLButtonElement>(null);
   const drawerRef = useRef<HTMLDivElement>(null);
   const accountToggleRef = useRef<HTMLButtonElement>(null);
+  const accountMenuRef = useRef<HTMLDivElement>(null);
 
   // OS detection for keyboard shortcut
   useEffect(() => {
@@ -141,6 +142,45 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
     setIsMobileOpen(false);
     requestAnimationFrame(() => mobileToggleRef.current?.focus());
   };
+
+  const handleAccountMenuKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    const items = accountMenuRef.current
+      ? Array.from(accountMenuRef.current.querySelectorAll<HTMLElement>('[role="menuitem"]'))
+      : [];
+    if (!items.length) return;
+
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      setIsAccountOpen(false);
+      requestAnimationFrame(() => accountToggleRef.current?.focus());
+      return;
+    }
+
+    if (event.key === 'Tab') {
+      setIsAccountOpen(false);
+      return;
+    }
+
+    const currentIndex = items.indexOf(document.activeElement as HTMLElement);
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp' || event.key === 'Home' || event.key === 'End') {
+      event.preventDefault();
+      const nextIndex = event.key === 'Home'
+        ? 0
+        : event.key === 'End'
+          ? items.length - 1
+          : currentIndex < 0
+            ? (event.key === 'ArrowUp' ? items.length - 1 : 0)
+            : (currentIndex + (event.key === 'ArrowUp' ? -1 : 1) + items.length) % items.length;
+      items[nextIndex]?.focus();
+    }
+  };
+
+  useEffect(() => {
+    if (!isAccountOpen) return;
+    requestAnimationFrame(() => {
+      accountMenuRef.current?.querySelector<HTMLElement>('[role="menuitem"]')?.focus();
+    });
+  }, [isAccountOpen]);
 
   const handleMobileDrawerKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (event.key === 'Escape') {
@@ -217,7 +257,6 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
               <span>Pricing</span>
               <NavigationFeedback label="Pricing" />
             </Link>
-
           </nav>
 
           {/* Quick Search Trigger Pill (⌘K) */}
@@ -227,6 +266,8 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
             onClick={() => setIsCommandOpen(true)}
             aria-label="Search navigation, creations, and docs"
             aria-haspopup="dialog"
+            aria-expanded={isCommandOpen}
+            aria-controls="command-menu"
           >
             <Search size={14} className="text-zinc-400" />
             <span>Search or jump to…</span>
@@ -241,6 +282,9 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
               className={styles.searchIconMobile}
               onClick={() => setIsCommandOpen(true)}
               aria-label="Open search palette"
+              aria-haspopup="dialog"
+              aria-expanded={isCommandOpen}
+              aria-controls="command-menu"
             >
               <Search size={18} />
             </button>
@@ -273,7 +317,15 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
                 </button>
 
                 {isAccountOpen && (
-                  <div id="account-menu" className={styles.accountDropdown} role="menu" aria-label="Account menu">
+                  <div
+                    id="account-menu"
+                    ref={accountMenuRef}
+                    className={styles.accountDropdown}
+                    role="menu"
+                    aria-label="Account menu"
+                    aria-orientation="vertical"
+                    onKeyDown={handleAccountMenuKeyDown}
+                  >
                     <div className={styles.accountUserHeader}>
                       <div className="text-xs font-semibold text-white">Signed in as</div>
                       <div className={styles.accountEmail}>{user.email || 'Builder'}</div>
@@ -396,6 +448,9 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
                   closeMobileMenu();
                   setIsCommandOpen(true);
                 }}
+                aria-haspopup="dialog"
+                aria-expanded={isCommandOpen}
+                aria-controls="command-menu"
               >
                 <div className="flex items-center gap-2">
                   <Search size={16} aria-hidden="true" />

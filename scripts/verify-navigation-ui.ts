@@ -50,6 +50,11 @@ async function inspect(page: any, label: string) {
   const nav = page.getByRole('navigation', { name: 'Main navigation', exact: true });
   assert.equal(await nav.count(), 1, 'exactly one header navigation');
   assert.deepEqual(await nav.locator('a').evaluateAll((links: HTMLAnchorElement[]) => links.map(link => link.firstChild?.textContent)), expected);
+  const bottomNav = page.getByRole('navigation', { name: 'Mobile bottom navigation', exact: true });
+  if (await page.evaluate(() => innerWidth < 768)) {
+    assert.equal(await bottomNav.isVisible(), true, 'mobile bottom navigation is visible on phone widths');
+    assert.deepEqual(await bottomNav.locator('a').evaluateAll((links: HTMLAnchorElement[]) => links.map(link => link.textContent?.trim())), ['Explore', 'Library']);
+  } else assert.equal(await bottomNav.isVisible(), false, 'mobile bottom navigation is hidden once the header nav is available');
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, 'no document overflow');
   assert.equal(await page.evaluate(() => getComputedStyle(document.documentElement).scrollbarGutter), 'stable');
   const audit = await new AxeBuilder({ page }).include('header').withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();

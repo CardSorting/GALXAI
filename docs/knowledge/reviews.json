@@ -1,11 +1,11 @@
 {
   "knowledge": {
     "reviewer": "Codex",
-    "note": "Reviewed generated knowledge index changes after removing the deleted settings source and registering the privacy copy with the navigation/client-efficiency domain. Confirmed generated views remain aligned and no historical evidence was rewritten.",
+    "note": "Reviewed the registry change that maps the footer stylesheet into client-efficiency ownership; generated knowledge views remain consistent and no historical stale fingerprints were refreshed.",
     "reviewed_at": "2026-09-20",
     "review_by": "2026-09-27",
     "evidence": {
-      "docs/knowledge/audits/2026-09-20-settings-surface-retirement-review.json": "85ee9b0c442a81efa5244ea0fa6ce12eddf594a9b9fef36579b58905454deb3d"
+      "docs/knowledge/audits/2026-09-20-navigation-ergonomics-audit.json": "76766f51b2dde833a0d152c313ae4b7dba6339403714f4ae1b619a34c5d4510b"
     },
     "files": {
       ".github/CODEOWNERS": "ef2f416d15f027dc8f197ad844289c9a44c8e843d3214d1590a3a380e939d13f",
@@ -26,7 +26,7 @@
       "docs/how-to/change-with-documentation.md": "abcf6bfb2f0aadcf8cfc2fdae18ac8f3f84565f127c34f7453d50e7283006e40",
       "docs/knowledge/DESIGN_RATIONALE.md": "edd3cf9b49ed794fbe8bf14448fd0c56cb4d8df832bab81cdf07e9ea2e2204a1",
       "docs/knowledge/README.md": "5ad219aeee44a9c065db2ca69e5a6498966fed42e2d8c74773dbc055d0220931",
-      "docs/knowledge/registry.json": "0729f4fe5478e78133ed27aeff7275f49bef70931bcc90a1149135260bf9b9d2",
+      "docs/knowledge/registry.json": "417ba83966510cc707c7103d53530148ee08cd5c795bd84302346a52b305a3bf",
       "docs/knowledge/templates/adr.md": "28773b3cbdb53ad34f08d0362e87b6dba24b6fd76ddb6c85db8ad63d99ad1331",
       "docs/knowledge/templates/runbook.md": "19679a7eb8c1a3aafd87852fa93817e7bf9ef4696772c8deb1617366c290abc1",
       "docs/maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md": "b7df75535611c14aabe599764a6f6c2a4f0f1461d068929602c68e39d8ce850d",
@@ -1510,15 +1510,15 @@
   },
   "client-efficiency": {
     "reviewer": "Codex",
-    "note": "Reviewed navigation and privacy-copy changes after retiring the unavailable profile settings destination. Confirmed desktop/mobile/footer links, legal language, and route catalogs stay aligned with current product destinations and retain simple social-product patterns without dead entries.",
+    "note": "Reviewed the second navigation ergonomics pass against current route behavior, breakpoint ownership, mobile tabs, footer structure, command palette semantics and the retired account-profile boundary. No public route or account schema was reintroduced.",
     "reviewed_at": "2026-09-20",
     "review_by": "2026-09-27",
     "evidence": {
-      "docs/knowledge/audits/2026-09-20-settings-surface-retirement-review.json": "85ee9b0c442a81efa5244ea0fa6ce12eddf594a9b9fef36579b58905454deb3d"
+      "docs/knowledge/audits/2026-09-20-navigation-ergonomics-audit.json": "76766f51b2dde833a0d152c313ae4b7dba6339403714f4ae1b619a34c5d4510b"
     },
     "files": {
-      ".impeccable/surfaces/src-components-dashboard-navigation-tsx.md": "30674caaca76149a135842ba67199b9ecee5f17c39965b16ab78d31a8ba64a59",
-      "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md": "b65fac9024b805c6cd201fb1252f2defce47c919470adc1d37b3878f28989efa",
+      ".impeccable/surfaces/src-components-dashboard-navigation-tsx.md": "ed6144c9da6cf2c4e1537f735891cb91e1c064c488c24e1cec953509cfad6360",
+      "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md": "d9a94b33a8e753afff8d61a6540a09dd2b6df1eced7608453fd657e57d3633da",
       "docs/PRODUCT_SURFACE_STRATEGY.md": "888f8434a2d49e4177dbdd1a34c444e7d4221c2419d5623c8fa8ad2abf465103",
       "docs/maintainers/PUBLIC_DISCOVERY.md": "d489c2950b13d259c0f88c9ece526b250fa5d6d996db6993ac567b416aa9d873",
       "docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md": "e7eb3ac5660d0882b832be22d127b303e278bf7b78aeca40932967e4b2814ff0",
@@ -1530,7 +1530,7 @@
       "scripts/verify-homepage-ui.mjs": "d87cb084693d1bc61d019ed6ae20c4f3ade648d578d7124bee941afbc7d84aa1",
       "scripts/verify-image-library-scale-ui.ts": "0e7003e1f256f99f28c953537b16044b50678c700b496c53d47f1b0104ff23cc",
       "scripts/verify-image-studio-ui.ts": "21555c294e1f08ea20bfcb22e2b250633e369b96561f39ab0da8850d25d10691",
-      "scripts/verify-navigation-ui.ts": "288a4656d000e1e6ee3830b67c78933accaa854c6da69b9cbe0c7930d5f29362",
+      "scripts/verify-navigation-ui.ts": "daddf8dd275187af22f29bc8b100d859cec01d50ce9f39be3c543fb1fef36c53",
       "scripts/verify-public-reading-ui.mjs": "1a87ce71e12b4aab2a78d522b946eb3444e7ae8e677b4389781506afae731719",
       "scripts/verify-sites-workspace-ui.ts": "b1821725236e252e3a774fbbe06cfdd6ef34183ab67edf230c94c99e8099271c",
       "scripts/verify-url-navigation.mjs": "8a3907bfc2b7021645968e1c6d8f5fd08da72cf55662691603f5479e88a059e7",
@@ -1550,7 +1550,7 @@
       "src/app/knowledge-base/publishing-your-site/page.tsx": "b6d28d2e59fc1b855e26368bda1a61112ca4721e8c2a22dfb7283d32f3daa7a6",
       "src/app/knowledge-base/remixing-creations/page.tsx": "e24aef3e6b869239781f4a70769f4b3c2591f3ddcd247de0c43114980a0d46c8",
       "src/app/knowledge-base/revising-your-site/page.tsx": "a893c2f859a29c03477a8c29225fa585d6e64618e2e19f578ae678a93e3e716d",
-      "src/app/layout.tsx": "24d700f718657b46d5369fea13650195456fa6ffe346e54a744cfbd4fcae1e16",
+      "src/app/layout.tsx": "8afb9d3dbb10fe8e0b10408ee1bafe01ab592091a2b73b2367ac54780d878a63",
       "src/app/loading.tsx": "79d916c532377cf08b9af7452e710fd3422a7a9bc7a03f2082bc197b53b0f006",
       "src/app/not-found.tsx": "a25b16e2264541f096b8862dd6e8e865977dba9608410d75a5620606c65aa531",
       "src/app/pricing/billing-and-cancellation/page.tsx": "93a6dfab3306657b5647ad82093e4396effde413ed41e2c88b7609ecb57e7a6b",
@@ -1571,7 +1571,7 @@
       "src/app/profile/[handle]/profile.module.css": "4979dd640476f0c940dad5781fe72e9618a0a3b5aa77c22a7dd4dad39fc6de0b",
       "src/app/robots.ts": "31d0d6df94d2bb9fac84c2a35f1230ca6e91f05fb5b0ba48f64e3b682bc7def9",
       "src/app/sitemap.ts": "ba7cc53e76ee4faaab65fccf31ffd9f0f176ab9f683e84ba99989f5027cb47a3",
-      "src/components/common/CommandMenu.tsx": "c5da472fd62213a98275df7f1b753438af1ab4492ec67fa56411f5b338d2a2f9",
+      "src/components/common/CommandMenu.tsx": "3e419a5aabd1ef92355eb322c717ad2423bba56e627148fe006d517f3764ac1e",
       "src/components/common/FloatingActionDock.tsx": "82a21751b0ad7ee8f7233ad59ba892f28622bc0dcd63bb4a387027a686028b7f",
       "src/components/common/IntentLink.tsx": "c866bc13acbbc81829c9f4ec1be5736bfb064c7a039c3d43ab5c524dd5d6e201",
       "src/components/common/NotFoundSearchHelper.tsx": "b5d77b908d382c46842b9709b5207ab721194210b0e37500b1af3c4280b5cdb2",
@@ -1581,10 +1581,11 @@
       "src/components/dashboard/Footer.tsx": "19ee864580f216a38c4151c5a531e21e36a0f120269a5dcc609214757852f0a0",
       "src/components/dashboard/FreeGenerationQuota.tsx": "419a52433d2b3baece49b2ada8b96f819da2e535d49104e40b22c8dae82fb89d",
       "src/components/dashboard/GenerationGateNotice.tsx": "0c905274ce933e0247d4a05f4174c9c13377bcb02e0d833c3927cfce62701bac",
-      "src/components/dashboard/MobileBottomNav.tsx": "04210a3081e4ea07c749fba86a820a807311395d75797184d999080fafd25a26",
-      "src/components/dashboard/Navigation.tsx": "d3f9b0ffe542a5b56a4ad906dd2742bdffa19f3deac5c047c2e62ec07b5386c8",
+      "src/components/dashboard/MobileBottomNav.tsx": "cc847e9924b3a92c3670934be66088da05c4bf839e78add402c2851d8e648f12",
+      "src/components/dashboard/Navigation.tsx": "e72af146035a6e5223f9275117b34f18ff3fba22311f473086c08299ef9d3ccd",
+      "src/components/dashboard/footer.module.css": "aabd6af1f82bb930e29c4b0956a7b8e04e292817a4b23f331b865434547b78a1",
       "src/components/dashboard/generation-gate.module.css": "efd8526722ca0ad42aec319a56bc2ea7e638185f30c35cea9b445dfb69bba4a4",
-      "src/components/dashboard/navigation.module.css": "d743612bfcb24fecb919f16194bbb4d89b91015512f86452e797e47f04490cf8",
+      "src/components/dashboard/navigation.module.css": "629cb45c54e560670f62606f6b0b250d7b7800a391b9570b0b18c85646e7ebfc",
       "src/components/home/ArtisanalSignalSection.tsx": "f69ec3ef0ec73b4f41dff90daa4529b86a975199b84e33d25c493dfdfcae1fe1",
       "src/components/home/DESIGN.md": "08b283af1636dd6c76fcd866db6ebff36c7b66e7ebd9d7587b4367784a366c90",
       "src/components/home/GalaxyFormation.tsx": "7613b6a3316b3688a868581d6461afdffdbad9fceb367e36c6bb4d7bbd2f066a",

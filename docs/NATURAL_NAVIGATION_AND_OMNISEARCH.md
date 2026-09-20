@@ -8,6 +8,10 @@ Private maintainer reference. Public discovery follows [product scope](PRODUCT_S
 
 The top menu follows a compact social-product order everywhere: Images, Explore and Pricing. Signed-in account actions remain in the avatar menu for Account & Usage, Billing & Invoices and Sign out; the retired private profile surface is not advertised until a supported destination is available. Documentation and developer resources remain available through search, the mobile drawer, public reading navigation and footer without competing with the primary creation/discovery loop. The homepage leads with the image experience and keeps concise links to pricing, FAQ and guidance. Active links change color and background without changing their text weight or dimensions. Account loading, guest and signed-in states reserve the same space. Below 1100px the logo/account row sits above a horizontally scrollable, nonwrapping link row; at wider sizes all three regions occupy one row. A focus handler brings clipped links fully into view immediately when the row overflows.
 
+On phones, the workspace bottom bar exposes Explore, Library and Search; it is
+hidden once the desktop header navigation is available so tablet users do not
+get duplicate navigation. Public reading routes omit that workspace-only bar.
+
 Public Star profiles are nested community destinations under `/profile/<handle>`.
 They remain discovery surfaces and are separate from private account management.
 The shared header and mobile bottom bar keep Explore
@@ -65,7 +69,7 @@ The [public discovery guide](maintainers/PUBLIC_DISCOVERY.md) owns Pricing, FAQ,
 
 The public 404 page uses plain recovery copy, a static icon and Home, Sites, Images and Account links through `IntentLink`. It exposes no diagnostic log, routing explanation or invented service status. Its search helper searches the explicit Images, Sites and account list locally. Up/down selects a result and Enter follows it. Recent visits use the existing bounded local history. It warms only a stable highlighted result through the same budget; it never launches an API data prefetch.
 
-The developer command menu retains its local catalog, typo matching, category filters, clipboard actions and keyboard shortcuts. Its warmup effect runs only while the menu is open, waits 120 ms for the selected result and excludes action-only results. Pointer selections share the global budget. It no longer prefetches the top three alternatives or calls the legacy secondary router path. Audit catalog entries against current product scope before exposing this menu to another audience.
+The command menu retains its local catalog, typo matching, category filters, clipboard actions and keyboard shortcuts. Opening it moves focus into a modal dialog; Escape, backdrop click and the close control dismiss it and restore the trigger, while Tab remains within the dialog. Search results expose a labelled listbox with one active option, and a no-match state explains what to try next. The account menu uses the same predictable focus return and supports Arrow, Home, End and Escape movement. Its warmup effect runs only while the menu is open, waits 120 ms for the selected result and excludes action-only results. Pointer selections share the global budget. It no longer prefetches the top three alternatives or calls the legacy secondary router path. Audit catalog entries against current product scope before exposing this menu to another audience.
 
 `BroccoliOmniSearch` retains its existing local matching implementation. Its legacy prefetch method is not used by these surfaces. `ResilientClient` and `useResilientQuery` are separate helpers; their caches/retries are not part of the Sites bootstrap or image polling contract. Do not infer a production latency, an authentication guarantee or cross-account cache safety from a helper name or comment.
 

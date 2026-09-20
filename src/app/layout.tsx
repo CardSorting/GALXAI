@@ -168,7 +168,7 @@ export default function RootLayout({
               <AuthProvider>
                 <GenerationAllowanceProvider><PersonaProvider>
                   <ProductNavigation />
-                  <div id="main-content" tabIndex={-1} className="relative z-10 flex-1 flex flex-col pb-16 lg:pb-0 outline-none">
+                  <div id="main-content" tabIndex={-1} className="relative z-10 flex-1 flex flex-col pb-16 md:pb-0 outline-none">
                     <AuthSessionContent>{children}</AuthSessionContent>
                     <Footer />
                   </div>
