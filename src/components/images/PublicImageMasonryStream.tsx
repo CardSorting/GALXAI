@@ -34,9 +34,15 @@ import './masonry-stream.css';
 interface PublicImageMasonryStreamProps {
   initialItems?: PublicFeedItem[];
   initialCursor?: string | null;
+  initialHasMore?: boolean;
   className?: string;
   showToolbar?: boolean;
   onSelectPrompt?: (prompt: string, ratio?: string) => void;
+  authorHandle?: string | null;
+  emptyTitle?: string;
+  emptyDescription?: string;
+  endMessage?: string;
+  loadingLabel?: string;
   externalQuery?: string;
   initialImageId?: string;
   initialRatio?: string | null;
@@ -109,9 +115,15 @@ function formatCount(num?: number): string {
 export function PublicImageMasonryStream({
   initialItems = [],
   initialCursor = null,
+  initialHasMore,
   className = '',
   showToolbar = true,
   onSelectPrompt,
+  authorHandle,
+  emptyTitle,
+  emptyDescription,
+  endMessage,
+  loadingLabel,
   externalQuery,
   initialImageId,
   initialRatio,
@@ -123,7 +135,9 @@ export function PublicImageMasonryStream({
   const [cursor, setCursor] = useState<string | null>(initialCursor);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
+  const [hasMore, setHasMore] = useState(
+    initialHasMore ?? (initialItems.length === 0 || Boolean(initialCursor)),
+  );
 
   const [sortMode, setSortMode] = useState<'recent' | 'trending'>(() => {
     if (initialSort) return initialSort;
@@ -337,6 +351,7 @@ export function PublicImageMasonryStream({
         if (ratio) params.set('aspect_ratio', ratio);
         if (style && style !== 'all') params.set('tag', style);
         if (query.trim()) params.set('q', query.trim());
+        if (authorHandle) params.set('author_handle', authorHandle);
         if (targetImageId) params.set('image', targetImageId);
 
         const res = await fetch(`/api/images/feed?${params.toString()}`);
@@ -380,12 +395,12 @@ export function PublicImageMasonryStream({
         setRefreshing(false);
       }
     },
-    [selectedRatio, selectedStyle, searchQuery, sortMode]
+    [authorHandle, selectedRatio, selectedStyle, searchQuery, sortMode]
   );
 
   // Initial load if no initial items supplied - executed exactly once per component mount
   useEffect(() => {
-    if (!initialFetchedRef.current && initialItems.length === 0) {
+    if (!initialFetchedRef.current && initialItems.length === 0 && initialHasMore !== false) {
       initialFetchedRef.current = true;
       void fetchFeed(
         null,
@@ -1136,11 +1151,11 @@ export function PublicImageMasonryStream({
       ) : (
         <div className="masonry-empty">
           <Layers className="masonry-empty-icon" />
-          <h3>No creations match your filter</h3>
+          <h3>{emptyTitle || 'No creations match your filter'}</h3>
           <p>
             {searchQuery
               ? `No creations found for "${searchQuery}". Try a different search term or clear filters.`
-              : 'No public creations are available yet. Create an image in GALX Images and it can appear here.'}
+              : emptyDescription || 'No public creations are available yet. Create an image in GALX Images and it can appear here.'}
           </p>
           <Link
             href="/images"
@@ -1158,11 +1173,11 @@ export function PublicImageMasonryStream({
         {loading && items.length === 0 ? null : loading ? (
           <div className="masonry-loading-indicator">
             <span className="masonry-loading-spinner" />
-            <span>Streaming community creations…</span>
+            <span>{loadingLabel || 'Streaming community creations…'}</span>
           </div>
         ) : !hasMore && items.length > 0 ? (
           <p className="masonry-end-message">
-            ✦ You’ve explored the entire community stream. Bring your imagination into reality!
+            {endMessage || '✦ You’ve explored the entire community stream. Bring your imagination into reality!'}
           </p>
         ) : null}
       </div>

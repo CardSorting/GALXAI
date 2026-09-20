@@ -8,6 +8,16 @@ Public documentation describes capability, not implementation. The public API
 defaults to a binary image. JSON compatibility uses explicit field projection.
 This document is an internal maintainer record, not public site content.
 
+Community discovery is part of the public image boundary. Star profiles use the
+canonical `/profile/<handle>` route and `/api/community/participants/<handle>`
+endpoint. Both expose explicit identity and creation DTOs only; the gallery is
+creator-scoped, newest-first and continuable. Missing, invalid or temporarily
+unavailable profiles return authored public categories without database fields,
+execution context or diagnostics. Keep the profile and feed projections aligned
+when adding a new public field. Handles are normalized before they become links,
+avatars accept only site-relative or HTTPS image URLs, and malformed gallery
+cursors are rejected with a generic 400 response.
+
 The normalization path is internal result -> decoded/re-encoded artifact -> public
 DTO -> HTTP response. Formatting helpers receive only normalized bytes or public
 image fields. The native and relay adapters request base64 so normalization never

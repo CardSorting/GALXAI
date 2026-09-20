@@ -282,11 +282,6 @@
   color: #fbbf24;
 }
 
-.studio-readiness-checking .studio-readiness-icon {
-  background: rgba(99, 102, 241, 0.16);
-  color: #a5b4fc;
-}
-
 @media (max-width: 620px) {
   .studio-readiness {
     align-items: flex-start;

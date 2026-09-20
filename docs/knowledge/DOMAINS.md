@@ -48,6 +48,7 @@ Owner role: **Product/API maintainer**. Domain: `images`.
 - [Image public boundary verification](../../docs/maintainers/image-public-boundary.md)
 - [Image generation and library recovery](../../post-mortem/runbooks/image-generation.md)
 - [Large image libraries](../../docs/maintainers/image-library-scale.md)
+- [Stars](../../docs/reference/stars.md)
 - [Readable product URLs](../../docs/maintainers/readable-urls.md)
 - [Free generation quota operations](../../docs/maintainers/FREE_GENERATION_QUOTA.md)
 

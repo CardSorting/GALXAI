@@ -289,15 +289,6 @@
   border: 1px solid rgba(99, 102, 241, 0.3);
 }
 
-.masonry-fallback-pattern {
-  position: absolute;
-  inset: 0;
-  background-image: radial-gradient(rgba(168, 85, 247, 0.15) 1px, transparent 1px);
-  background-size: 16px 16px;
-  opacity: 0.5;
-  pointer-events: none;
-}
-
 /* LQIP blur placeholder */
 .masonry-lqip {
   position: absolute;
@@ -1063,7 +1054,7 @@
 }
 
 .masonry-like-btn.pop {
-  animation: heart-pop 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  animation: heart-pop 0.45s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* --- Floating Modal Prev/Next Navigation --- */
@@ -1159,7 +1150,7 @@
 }
 
 .masonry-modal-like-btn.pop {
-  animation: heart-pop 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  animation: heart-pop 0.45s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .masonry-modal-shortcuts {

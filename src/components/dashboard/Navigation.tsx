@@ -34,6 +34,7 @@ const isProductRoute = (pathname: string) =>
   pathname === '/' ||
   /^\/images(?:\/|$)/.test(pathname) ||
   /^\/explore(?:\/|$)/.test(pathname) ||
+  /^\/profile\/[a-z0-9][a-z0-9_-]{2,31}$/.test(pathname) ||
   pathname === '/developers' ||
   isPublicReadingPath(pathname);
 
@@ -208,7 +209,7 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
   const returnTo = pathname === '/' ? '/images' : pathname;
 
   const isImageActive = pathname === '/images' || pathname.startsWith('/images/');
-  const isExploreActive = pathname === '/explore' || pathname.startsWith('/explore/');
+  const isExploreActive = pathname === '/explore' || pathname.startsWith('/explore/') || pathname.startsWith('/profile/');
   const isPricingActive = pathname === '/pricing' || pathname.startsWith('/pricing/');
   const isDocsActive = pathname === '/docs' || pathname.startsWith('/docs/');
   const isMoreActive = isDocsActive || pathname.startsWith('/knowledge-base') || pathname === '/faq' || pathname === '/developers' || pathname === '/status';

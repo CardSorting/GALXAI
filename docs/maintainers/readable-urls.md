@@ -11,6 +11,7 @@ Private maintainer guide. This contract is implemented locally; [current operati
 | Create an image | `/images` | Legacy `view=create`, unknown or duplicate `view` resolves here |
 | My images | `/images/library` | `/images?view=library` permanently redirects here |
 | Favorite images | `/images/favorites` | `/images?view=favorites` permanently redirects here |
+| Public Star profile | `/profile/<handle>` | Creator attribution and Explore discovery link to the same canonical profile |
 | Billing tasks | `/billing`, `/billing/plan`, `/billing/credits`, `/billing/transactions`, `/billing/invoices`, `/billing/payment-methods` | [Billing page contract](../reference/billing-pages.md) retains old checkout URLs and section bookmarks |
 | Sign in | `/login` | `/auth/signin` permanently redirects here |
 | Create an account | `/signup` | `/auth/signup` permanently redirects here |
@@ -24,7 +25,15 @@ Stable destinations belong in paths. Query parameters carry optional state: simp
 
 `src/lib/images/navigation.ts` owns the finite view/path map. Studio navigation uses native anchors through Next Link with prefetch disabled. Same-tab navigation uses Next's native history integration, deriving view and Favorites from `usePathname`; it does not remount the workspace or resubmit a generation. Back/Forward restores the selected view, and document titles follow it. Modified clicks and new tabs use the actual href and a fresh guarded server entry. Create/library switches retain local prompt, selected result, result layout and recent completions. Search, sort and page positions remain local state; filter changes reset pagination. Reload or departure from Images still discards in-memory completions, while existing account-scoped drafts and durable receipts retain their own recovery behavior.
 
-Each canonical page independently uses `WorkspacePageGate`. Middleware verifies workspace entry, including nested paths and framework requests. Client session expiry still unmounts account content and offers the exact Library/Favorites return path. No address creates an authorization grant. The shared product header recognizes nested image paths and retains its active Images link. Auth destinations are excluded from speculative prefetch and incidental mobile action overlays.
+Each private canonical workspace page independently uses `WorkspacePageGate`. Middleware verifies workspace entry, including nested paths and framework requests. Client session expiry still unmounts account content and offers the exact Library/Favorites return path. No address creates an authorization grant. The shared product header recognizes nested image paths and retains its active Images link. Auth destinations are excluded from speculative prefetch and incidental mobile action overlays.
+
+Star profile handles are lowercase public identifiers with a bounded
+alphanumeric/underscore/hyphen form. Profile pages retain the shared product
+header, mark Explore as current and provide a breadcrumb back to Explore. The
+profile route is public discovery, not an account-management surface; changing
+its navigation must not broaden access to private descendants or APIs.
+The profile header provides a native in-page jump to creations and shares only
+the canonical profile path, without carrying stream state or private metadata.
 
 ## Redirect and public-response boundary
 

@@ -28,7 +28,9 @@ test('public health does not enumerate infrastructure', async () => {
 
 test('Star profiles and participant APIs are public product surfaces without broadening private routes', () => {
   assert.equal(isPublicProductPath('/profile/veyrasol'), true);
+  assert.equal(isPublicProductPath('/profile/soravale'), true);
   assert.equal(isPublicProductPath('/api/community/participants/veyrasol'), true);
+  assert.equal(isPublicProductPath('/api/community/participants/soravale'), true);
   assert.equal(isPublicProductPath('/profile/../../settings'), false);
   assert.equal(isPublicProductPath('/api/community/participants/invalid!'), false);
   assert.equal(isPublicProductPath('/api/community/participants/veyrasol/diagnostics'), false);

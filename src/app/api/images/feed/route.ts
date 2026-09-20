@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { executePostgresQuery } from '@/lib/db/postgres';
 import { GalxCryptoVault } from '@/core/vault/GalxCryptoVault';
-import type { ParticipantKind } from '@/components/community/ParticipantIdentity';
+import type { ParticipantKind } from '@/lib/community/participant-handle';
+import {
+  normalizePublicParticipantHandle,
+  sanitizePublicImageUrl,
+} from '@/lib/community/participant-handle';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -42,7 +46,13 @@ export async function GET(req: NextRequest) {
   const q = searchParams.get('q')?.trim();
   const sort = searchParams.get('sort') || 'recent';
   const tag = searchParams.get('tag')?.toLowerCase().trim();
+  const rawAuthorHandle = searchParams.get('author_handle')?.trim();
   const requestedId = searchParams.get('image_id') || searchParams.get('id') || searchParams.get('image');
+
+  if (rawAuthorHandle && !normalizePublicParticipantHandle(rawAuthorHandle)) {
+    return NextResponse.json({ success: false, error: 'Invalid creator handle.' }, { status: 400 });
+  }
+  const authorHandle = rawAuthorHandle ? normalizePublicParticipantHandle(rawAuthorHandle) : null;
 
   let items: PublicFeedItem[] = [];
   let nextCursor: string | null = null;
@@ -75,6 +85,11 @@ export async function GET(req: NextRequest) {
       const sanitizedTag = tag.replace(/[%_\\]/g, '\\$&');
       conditions.push(`prompt ILIKE $${paramIndex++}`);
       params.push(`%${sanitizedTag}%`);
+    }
+
+    if (authorHandle) {
+      conditions.push(`author_handle = $${paramIndex++}`);
+      params.push(authorHandle);
     }
 
     // Keyset pagination cursor
@@ -174,12 +189,8 @@ export async function GET(req: NextRequest) {
           displayName: typeof r.author_display_name === 'string' && r.author_display_name.trim()
             ? r.author_display_name.trim()
             : 'GALX creator',
-          handle: typeof r.author_handle === 'string' && r.author_handle.trim()
-            ? r.author_handle.trim()
-            : null,
-          avatarUrl: typeof r.author_avatar_url === 'string' && r.author_avatar_url.trim()
-            ? r.author_avatar_url.trim()
-            : null,
+          handle: normalizePublicParticipantHandle(r.author_handle),
+          avatarUrl: sanitizePublicImageUrl(r.author_avatar_url),
           participantKind: r.participant_kind === 'star' ? 'star' : 'human',
         },
       };
@@ -201,8 +212,9 @@ export async function GET(req: NextRequest) {
                     author_display_name, author_handle, author_avatar_url, participant_kind
              FROM public.community_creations_feed
              WHERE id = $1 AND user_id NOT LIKE 'usr_%' AND id NOT LIKE 'img_test_%'
+               ${authorHandle ? 'AND author_handle = $2' : ''}
              LIMIT 1`,
-            [requestedId]
+            authorHandle ? [requestedId, authorHandle] : [requestedId]
           );
           if (directRes?.rows?.[0]) {
             const r = directRes.rows[0];
@@ -231,12 +243,8 @@ export async function GET(req: NextRequest) {
                 displayName: typeof r.author_display_name === 'string' && r.author_display_name.trim()
                   ? r.author_display_name.trim()
                   : 'GALX creator',
-                handle: typeof r.author_handle === 'string' && r.author_handle.trim()
-                  ? r.author_handle.trim()
-                  : null,
-                avatarUrl: typeof r.author_avatar_url === 'string' && r.author_avatar_url.trim()
-                  ? r.author_avatar_url.trim()
-                  : null,
+                handle: normalizePublicParticipantHandle(r.author_handle),
+                avatarUrl: sanitizePublicImageUrl(r.author_avatar_url),
                 participantKind: r.participant_kind === 'star' ? 'star' : 'human',
               },
             });

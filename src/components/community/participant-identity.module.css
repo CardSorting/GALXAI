@@ -17,8 +17,6 @@
 }
 
 .avatar {
-  width: 32px;
-  height: 32px;
   flex: 0 0 32px;
   display: inline-flex;
   align-items: center;
@@ -33,11 +31,25 @@
   letter-spacing: 0.03em;
 }
 
-.compact .avatar {
+.avatarSmall {
   width: 24px;
   height: 24px;
   flex-basis: 24px;
   font-size: 0.625rem;
+}
+
+.avatarMedium {
+  width: 32px;
+  height: 32px;
+}
+
+.avatarLarge {
+  width: 80px;
+  height: 80px;
+  flex-basis: 80px;
+  font-size: 1.25rem;
+  letter-spacing: 0.02em;
+  box-shadow: 0 0 0 6px rgba(99, 102, 241, 0.08), 0 14px 30px rgba(0, 0, 0, 0.28);
 }
 
 .avatar img {
@@ -110,4 +122,10 @@
   text-decoration: underline;
   text-decoration-color: rgba(251, 191, 36, 0.85);
   text-underline-offset: 3px;
+}
+
+.link:focus-visible {
+  outline: 2px solid #6366f1;
+  outline-offset: 3px;
+  border-radius: 6px;
 }

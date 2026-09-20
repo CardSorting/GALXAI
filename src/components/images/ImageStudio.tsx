@@ -110,13 +110,6 @@ function StudioWorkspace({
         body: studio.error,
         action: studio.uncertain ? 'Check My Creations' : 'Check again',
       }
-      : studio.checkingAvailability
-        ? {
-            tone: 'checking',
-          title: 'Checking image creation',
-          body: 'Your prompt is safe. We’re looking for a ready service and will keep checking in the background.',
-          action: undefined,
-        }
       : studio.availability === 'unavailable'
         ? {
             tone: 'warning',
@@ -124,14 +117,7 @@ function StudioWorkspace({
             body: 'Your prompt is saved. We’ll check again automatically, or you can retry now.',
             action: 'Check again',
           }
-        : studio.ready && studio.availability === 'unknown'
-          ? {
-              tone: 'warning',
-              title: 'Reconnecting to image creation',
-              body: 'We couldn’t confirm readiness yet. Your prompt stays here while we try again.',
-              action: 'Check again',
-            }
-          : null;
+        : null;
 
   // Sync route to active tab
   useEffect(() => {
@@ -416,7 +402,7 @@ function StudioWorkspace({
           aria-live="polite"
         >
           <div className="studio-readiness-icon" aria-hidden="true">
-            {readinessNotice.tone === 'checking' ? <LoaderCircle className="studio-spin" size={16} /> : <CircleAlert size={16} />}
+            <CircleAlert size={16} />
           </div>
           <div className="studio-readiness-copy">
             <strong>{readinessNotice.title}</strong>
@@ -857,8 +843,6 @@ function StudioWorkspace({
               className="studio-dock-submit-btn"
               disabled={
                 studio.availability === 'unavailable' ||
-                studio.checkingAvailability ||
-                studio.availability === 'unknown' ||
                 gate.blocked ||
                 !studio.ready ||
                 authLoading ||

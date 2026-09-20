@@ -4069,7 +4069,8 @@
       "scope": "current-guide",
       "kind": "reference",
       "domains": [
-        "knowledge"
+        "knowledge",
+        "images"
       ],
       "curation": "assigned",
       "keywords": [],

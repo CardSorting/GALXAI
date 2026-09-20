@@ -41,7 +41,9 @@ export function MobileBottomNav() {
         const Icon = item.icon;
         const isActive = item.href === '/images'
           ? pathname === '/images' || pathname.startsWith('/images/') || pathname === '/library' || pathname.startsWith('/library/')
-          : pathname === item.href || pathname.startsWith(`${item.href}/`);
+          : item.href === '/explore'
+            ? pathname === '/explore' || pathname.startsWith('/explore/') || pathname.startsWith('/profile/')
+            : pathname === item.href || pathname.startsWith(`${item.href}/`);
         return (
           <Link
             key={item.href}
@@ -54,7 +56,7 @@ export function MobileBottomNav() {
             <div className={`flex items-center justify-center w-8 h-8 rounded-lg ${isActive ? 'bg-indigo-500/15 text-indigo-400' : ''}`}>
               <Icon size={18} />
             </div>
-            <span className="text-[10px] tracking-tight">{item.label}</span>
+            <span className="text-[11px] tracking-tight">{item.label}</span>
           </Link>
         );
       })}
@@ -69,7 +71,7 @@ export function MobileBottomNav() {
         <div className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-white/5">
           <Search size={18} />
         </div>
-        <span className="text-[10px] tracking-tight">Search</span>
+        <span className="text-[11px] tracking-tight">Search</span>
       </button>
     </nav>
   );
