@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { IntentLink as Link } from '@/components/common/IntentLink';
 import { GalxGalaxyLogo } from '@/components/brand/GalxGalaxyLogo';
 import { IMAGE_PATHS } from '@/lib/images/navigation';
-import { ArrowUp } from 'lucide-react';
+import { ArrowRight, ArrowUp } from 'lucide-react';
 import styles from './footer.module.css';
 
 export function Footer() {
@@ -29,29 +29,33 @@ export function Footer() {
 
       <div className={styles.container}>
         <div className={styles.mainGrid}>
-          {/* Brand & Platform Status */}
+          {/* Brand and one clear next step */}
           <div className={styles.brandCol}>
             <Link href="/" aria-label="GALX home" className={styles.brandLink}>
               <GalxGalaxyLogo size={26} textClassName="text-lg font-bold tracking-tight text-white" />
             </Link>
 
             <p className={styles.tagline}>
-              GALX is where people create — with helpful tools for images, ideas, and selected private integrations.
+              Create images, discover new work, and keep your best ideas close.
             </p>
 
-            <Link href="/status" className={styles.statusPill} aria-label="View GALX system status">
-              <span className={styles.statusDot} />
-              <span>View system status</span>
+            <Link href={IMAGE_PATHS.library} className={styles.primaryLink}>
+              <span>Open Image Studio</span>
+              <ArrowRight size={14} aria-hidden="true" />
             </Link>
           </div>
 
-          {/* Primary user journeys */}
-          <nav className={styles.navCol} aria-label="Create">
-            <h2 className={styles.colTitle}>Create</h2>
+          <nav className={styles.navCol} aria-label="Product">
+            <h2 className={styles.colTitle}>Product</h2>
             <ul className={styles.linkList}>
               <li>
-                <Link href={IMAGE_PATHS.library} className={styles.footerLink}>
+                <Link href="/images" className={styles.footerLink}>
                   <span>Image Studio</span>
+                </Link>
+              </li>
+              <li>
+                <Link href={IMAGE_PATHS.library} className={styles.footerLink}>
+                  <span>My images</span>
                 </Link>
               </li>
               <li>
@@ -60,8 +64,8 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/library" className={styles.footerLink}>
-                  <span>Visual Library</span>
+                <Link href="/pricing" className={styles.footerLink}>
+                  <span>Pricing</span>
                 </Link>
               </li>
             </ul>
@@ -70,11 +74,6 @@ export function Footer() {
           <nav className={styles.navCol} aria-label="Learn">
             <h2 className={styles.colTitle}>Learn</h2>
             <ul className={styles.linkList}>
-              <li>
-                <Link href="/docs" className={styles.footerLink}>
-                  <span>Docs</span>
-                </Link>
-              </li>
               <li>
                 <Link href="/knowledge-base" className={styles.footerLink}>
                   <span>Knowledge base</span>
@@ -86,31 +85,31 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/status" className={styles.footerLink}>
-                  <span>System status</span>
+                <Link href="/docs" className={styles.footerLink}>
+                  <span>Documentation</span>
                 </Link>
               </li>
             </ul>
           </nav>
 
-          <nav className={styles.navCol} aria-label="Plans and access">
-            <h2 className={styles.colTitle}>Plans & access</h2>
+          <nav className={styles.navCol} aria-label="Account">
+            <h2 className={styles.colTitle}>Account</h2>
             <ul className={styles.linkList}>
               <li>
-                <Link href="/pricing" className={styles.footerLink}>
-                  <span>Pricing</span>
+                <Link href="/settings?tab=profile" className={styles.footerLink}>
+                  <span>Profile &amp; settings</span>
                 </Link>
               </li>
               <li>
-                <Link href="/pricing/galx-pro" className={styles.footerLink}>
-                  <span>GALX Pro</span>
+                <Link href={IMAGE_PATHS.favorites} className={styles.footerLink}>
+                  <span>Favorites</span>
                 </Link>
               </li>
             </ul>
           </nav>
 
-          <nav className={styles.navCol} aria-label="Company and legal">
-            <h2 className={styles.colTitle}>Company & legal</h2>
+          <nav className={styles.navCol} aria-label="Company and support">
+            <h2 className={styles.colTitle}>Company &amp; support</h2>
             <ul className={styles.linkList}>
               <li>
                 <Link href="/about" className={styles.footerLink}>
@@ -118,27 +117,30 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/privacy" className={styles.footerLink}>
-                  <span>Privacy</span>
+                <Link href="/status" className={styles.footerLink}>
+                  <span>System status</span>
                 </Link>
               </li>
               <li>
-                <Link href="/terms" className={styles.footerLink}>
-                  <span>Terms</span>
-                </Link>
+                <a href="mailto:support@galx.ai" className={styles.footerLink}>
+                  <span>Contact support</span>
+                </a>
               </li>
             </ul>
           </nav>
         </div>
 
-        {/* Bottom Bar */}
         <div className={styles.bottomBar}>
           <div>
             © {new Date().getFullYear()} GALXAI, Inc. All rights reserved.
           </div>
 
           <div className={styles.bottomLegal}>
-            <span>Private access is provided by decision, not self-service enrollment.</span>
+            <span className={styles.bottomNote}>Creations are public by default. Review sharing before you create.</span>
+            <div className={styles.legalLinks}>
+              <Link href="/privacy" className={styles.legalLink}>Privacy</Link>
+              <Link href="/terms" className={styles.legalLink}>Terms</Link>
+            </div>
             <button
               type="button"
               onClick={scrollToTop}

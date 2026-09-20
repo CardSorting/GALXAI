@@ -1,10 +1,10 @@
-/* ==========================================================================
-   GALX Comprehensive Footer Navigation System
-   Minimalist Header Companion: Houses all deep-linking, docs & platform routes
-   ========================================================================== */
+/* ===========================================================================
+   GALX public footer navigation
+   Product, learning, account, support and legal destinations stay scannable.
+   =========================================================================== */
 
 .footer {
-  --footer-accent: var(--accent-primary, currentColor);
+  --footer-accent: var(--accent-primary, #6366f1);
   position: relative;
   margin-top: auto;
   width: 100%;
@@ -73,6 +73,7 @@
   display: inline-flex;
   align-items: center;
   gap: 10px;
+  min-height: 44px;
   text-decoration: none;
   width: fit-content;
 }
@@ -84,51 +85,25 @@
   max-width: 320px;
 }
 
-.statusPill {
+.primaryLink {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 12px;
-  border-radius: 9999px;
-  background: rgba(16, 185, 129, 0.08);
-  border: 1px solid rgba(16, 185, 129, 0.2);
-  color: #34d399;
-  font-size: 12px;
-  font-weight: 500;
+  min-height: 44px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: var(--footer-accent, #6366f1);
+  color: #000000;
+  font-size: 13px;
+  font-weight: 600;
   text-decoration: none;
   width: fit-content;
-  transition: background-color 0.15s ease, border-color 0.15s ease;
+  transition: background-color 0.15s ease, transform 0.15s ease;
 }
 
-.statusPill:hover {
-  background: rgba(16, 185, 129, 0.15);
-  border-color: rgba(16, 185, 129, 0.35);
-}
-
-.statusDot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #10b981;
-  box-shadow: 0 0 8px #10b981;
-  position: relative;
-}
-
-.statusDot::after {
-  content: '';
-  position: absolute;
-  inset: -2px;
-  border-radius: 50%;
-  background: #10b981;
-  opacity: 0.4;
-  animation: pulsePing 2s cubic-bezier(0, 0, 0.2, 1) infinite;
-}
-
-@keyframes pulsePing {
-  75%, 100% {
-    transform: scale(2);
-    opacity: 0;
-  }
+.primaryLink:hover {
+  background: color-mix(in srgb, var(--footer-accent, #6366f1) 82%, white);
+  transform: translateY(-1px);
 }
 
 /* Nav Columns */
@@ -159,7 +134,7 @@
 .footerLink {
   display: inline-flex;
   align-items: center;
-  min-height: 36px;
+  min-height: 44px;
   gap: 6px;
   font-size: 13.5px;
   color: #9ca3af;
@@ -174,21 +149,11 @@
 }
 
 .footerLink:focus-visible,
-.statusPill:focus-visible,
+.primaryLink:focus-visible,
 .backToTop:focus-visible,
 .brandLink:focus-visible {
   outline: 2px solid var(--footer-accent);
   outline-offset: 3px;
-}
-
-.linkBadge {
-  font-size: 10px;
-  font-weight: 600;
-  padding: 1px 5px;
-  border-radius: 4px;
-  text-transform: uppercase;
-  background: rgba(99, 102, 241, 0.18);
-  color: var(--footer-accent);
 }
 
 /* Bottom Bar */
@@ -218,7 +183,20 @@
   gap: 16px;
 }
 
+.bottomNote {
+  max-width: 38ch;
+}
+
+.legalLinks {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .legalLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   color: #6b7280;
   text-decoration: none;
   transition: color 0.15s ease;
@@ -237,7 +215,7 @@
   color: #9ca3af;
   font-size: 12px;
   cursor: pointer;
-  min-height: 36px;
+  min-height: 44px;
   padding: 4px 8px;
   border-radius: 6px;
   transition: color 0.15s ease, background-color 0.15s ease;
@@ -256,16 +234,11 @@
   .mainGrid {
     gap: 28px;
   }
-
-  .footerLink {
-    min-height: 40px;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .statusDot::after,
   .footerLink,
-  .statusPill,
+  .primaryLink,
   .backToTop {
     animation: none;
     transition: none;

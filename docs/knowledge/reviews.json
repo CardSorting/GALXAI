@@ -158,11 +158,11 @@
   },
   "access": {
     "reviewer": "Codex",
-    "note": "Reviewed removal of the public /developers surface. Confirmed the route and pricing page are deleted, protected requests return a generic private 404, public navigation/search/SEO pointers are removed, legacy marketing routes use the neutral landing surface, private APIs remain protected, and historical evidence retains dated references.",
+    "note": "Reviewed the global footer after the navigation copy and destination audit. Public footer links now expose only the consumer product, account settings, support, and capability-level learning surfaces; private access and implementation details are not advertised.",
     "reviewed_at": "2026-09-20",
     "review_by": "2026-09-27",
     "evidence": {
-      "docs/knowledge/audits/2026-09-20-developer-surface-removal-review.json": "0fa160336964bfa99dcc959012d1cbcb7ae816ec6f692ae74963bf682ea05f39"
+      "docs/knowledge/audits/2026-09-20-footer-navigation-review.json": "09cf6a749dc11de5f43c0022a5601fae164170ef17d6ee29763c335459833bbd"
     },
     "files": {
       "docs/OAUTH_AND_TOKEN_LIFECYCLE_SPECIFICATION.md": "1e8004f6dc024322356e5494b099b7c38ed00e4a62e22434b020fd43c9470183",
@@ -253,7 +253,7 @@
       "src/components/auth/auth-entry.module.css": "165e10d51ed9ad6849a113904a431b5cf90482eaf3b078cee33c9189621cc63f",
       "src/components/billing/BillingClient.tsx": "ad0e61000768a4dc2a96972c69a79308504281e5aa8b8baca0b48164b7b5466b",
       "src/components/billing/BillingProvider.tsx": "cdfefd2683186cc736ee105739b84fd0426a15666d3b063ff02c1714a61c781a",
-      "src/components/dashboard/Footer.tsx": "fe8a2b1e4ee859444da38626de864efff1eec18f18e96f17d1c90d75dc0151cc",
+      "src/components/dashboard/Footer.tsx": "6cf7ef23b1af5ce707f43d14504579a6a1a7c82af23b68104f05e4515d4b3ba1",
       "src/components/dashboard/FreeGenerationQuota.tsx": "419a52433d2b3baece49b2ada8b96f819da2e535d49104e40b22c8dae82fb89d",
       "src/components/dashboard/GenerationGateNotice.tsx": "0c905274ce933e0247d4a05f4174c9c13377bcb02e0d833c3927cfce62701bac",
       "src/components/dashboard/generation-gate.module.css": "efd8526722ca0ad42aec319a56bc2ea7e638185f30c35cea9b445dfb69bba4a4",
@@ -1511,11 +1511,11 @@
   },
   "client-efficiency": {
     "reviewer": "Codex",
-    "note": "Reviewed the navigation and public-surface cleanup. Confirmed Images defaults to /images/library, Explore and Images avoid filter clutter while retaining core controls, developer links are removed without broadening public routes, and stale social-card artifacts are gone. Build, typecheck and request-efficiency checks pass.",
+    "note": "Reviewed the global footer after the ergonomics pass. Link groups are finite and route-stable, repeated status/legal destinations were consolidated, and touch targets/focus behavior remain bounded across responsive layouts.",
     "reviewed_at": "2026-09-20",
     "review_by": "2026-09-27",
     "evidence": {
-      "docs/knowledge/audits/2026-09-20-developer-surface-removal-review.json": "0fa160336964bfa99dcc959012d1cbcb7ae816ec6f692ae74963bf682ea05f39"
+      "docs/knowledge/audits/2026-09-20-footer-navigation-review.json": "09cf6a749dc11de5f43c0022a5601fae164170ef17d6ee29763c335459833bbd"
     },
     "files": {
       ".impeccable/surfaces/src-components-dashboard-navigation-tsx.md": "30674caaca76149a135842ba67199b9ecee5f17c39965b16ab78d31a8ba64a59",
@@ -1578,7 +1578,7 @@
       "src/components/common/RouteRecovery.tsx": "02f126f82df14daf04a9085d2fc72034beddb3493485841dd0f6a97f25461736",
       "src/components/common/WorkspaceLoading.tsx": "fcc220850cf2a7280d3cbb9d46a3f579da1f4fb8c298f0b37b54e6d7c1d84820",
       "src/components/common/workspace-route.module.css": "6654e288040f2196747f08319a9cad95916f086708d14b4cdafaabe40db88523",
-      "src/components/dashboard/Footer.tsx": "fe8a2b1e4ee859444da38626de864efff1eec18f18e96f17d1c90d75dc0151cc",
+      "src/components/dashboard/Footer.tsx": "6cf7ef23b1af5ce707f43d14504579a6a1a7c82af23b68104f05e4515d4b3ba1",
       "src/components/dashboard/FreeGenerationQuota.tsx": "419a52433d2b3baece49b2ada8b96f819da2e535d49104e40b22c8dae82fb89d",
       "src/components/dashboard/GenerationGateNotice.tsx": "0c905274ce933e0247d4a05f4174c9c13377bcb02e0d833c3927cfce62701bac",
       "src/components/dashboard/MobileBottomNav.tsx": "de7ba32ccf76cc902b107437aceab546802b188044889b30b59bc72e9de29f69",

@@ -1,8 +1,8 @@
 {
   "version": 1,
   "reviewer": "Codex",
-  "reviewed_at": "2026-09-20T06:46:58.387478Z",
-  "note": "Reviewed current public-surface and database/deployment guidance after retiring the public developer route. Current guides describe capability and migration behavior without exposing internal topology, credentials, or routing mechanics; historical incident evidence remains preserved.",
+  "reviewed_at": "2026-09-20T06:56:36.535620Z",
+  "note": "Reviewed the current footer navigation implementation after the ergonomics and copy pass. Public links remain capability-level and consumer-focused, touch targets and focus behavior are explicit, and no internal topology, credentials, routing mechanics, or operational diagnostics are published.",
   "files": {
     ".dockerignore": "fb4dc7ef84e7f36c5bfed0f267187a022bbb61e66dd26060295b133e08fa74c5",
     ".github/workflows/vercel-preflight.yml": "60856940957e45075d1c54de644d3ba0268fad16b35b3ed5eb8005bc40a5b4b3",

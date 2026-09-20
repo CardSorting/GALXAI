@@ -1,0 +1,24 @@
+{
+  "reviewed_at": "2026-09-20",
+  "surface": "Global footer navigation",
+  "scope": "Public copy, destination grouping, accessibility, responsive ergonomics, and information-boundary review for src/components/dashboard/Footer.tsx and footer.module.css.",
+  "decisions": [
+    "Grouped destinations by Product, Learn, Account, and Company & support so the footer mirrors the primary product mental model without duplicating navigation labels.",
+    "Replaced vague product/private-access copy with consumer-facing image creation and discovery language.",
+    "Added one clear Image Studio action, consolidated legal links into the bottom row, and retained system status plus support contact as the only operational help destinations.",
+    "Removed the legacy Visual Library destination and routed account/profile access to the private settings profile tab.",
+    "Added a concise public-by-default creation disclosure without exposing internal implementation or authorization details."
+  ],
+  "quality_checks": {
+    "detector": "No deterministic impeccable findings for the footer component or stylesheet.",
+    "touch_targets": "Primary, brand, footer, legal, and back-to-top controls use a 44px minimum height.",
+    "keyboard": "Native links and button retain visible focus rings and logical DOM order; the back-to-top control remains a button.",
+    "responsive": "Existing one-, two-, and five-column breakpoints remain intact; link groups wrap naturally in the bottom legal row.",
+    "public_boundary": "No private access, topology, credential, provider, routing, or operational implementation copy is published by the footer.",
+    "build": "Production build completed successfully with 164 generated static pages."
+  },
+  "limits": [
+    "No production deployment or live-site acceptance is implied.",
+    "Browser localhost acceptance remains unavailable in the sandbox; production HTML output and static route/assets were inspected instead."
+  ]
+}
