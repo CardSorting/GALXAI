@@ -327,6 +327,33 @@
       "recovery_evidence": [
         "post-mortem/events.jsonl"
       ]
+    },
+    {
+      "id": "INC-20260919-STARS",
+      "category": "images",
+      "severity": "SEV-3",
+      "status": "contained",
+      "title": "Initial autonomous Star population qualification",
+      "owner": "Product/image maintainer",
+      "record": "post-mortem/incidents/2026/2026-09-19-stars/README.md",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-09-19-stars/README.md",
+        "supabase/migrations/20260919130000_star_participant_profiles_and_population_controls.sql",
+        "supabase/migrations/20260919170000_star_cohort_membership_and_refresh.sql",
+        "supabase/migrations/20260919180000_star_refresh_constraint_repair.sql",
+        "src/lib/stars/StarPopulationController.ts",
+        "supabase/migrations/20260919150000_star_generation_request_and_counter_repairs.sql",
+        "scripts/verify-stars.ts",
+        "scripts/reconcile-stars.ts",
+        "post-mortem/releases/2026-09-19-stars-qualification-retry.json",
+        "post-mortem/releases/2026-09-20-stars-production-qualification.json",
+        "src/relay/admission-observability.ts",
+        "docker/relay-pools/local/images.json"
+      ],
+      "failure_modes": [],
+      "recovery_evidence": [
+        "post-mortem/events.jsonl"
+      ]
     }
   ],
   "actions": [
@@ -579,12 +606,14 @@
       "owner": "image maintainer",
       "review_by": "2026-09-23",
       "status": "open",
-      "next_step": "Install the verified independent Premium image connection and tunnel; complete signed-in production generation, durable library/Favorites and download acceptance. Local synthesis canary, in-process availability reads and BroccoliDB persistence wiring passed preflight.",
+      "next_step": "Keep the image-only application route on the verified Premium runtime, require fresh positive capability evidence, then complete signed-in production generation, durable library/Favorites and download acceptance. Do not treat an unknown availability result as capacity.",
       "closure": "Retain regression, deployment and signed-in generation/library evidence; distinguish local throughput fixtures from live capacity.",
       "evidence": [
         "post-mortem/releases/2026-09-14-codex-image-tool-local.json",
         "post-mortem/releases/2026-09-16-premium-image-preflight.json",
-        "post-mortem/releases/2026-09-16-premium-image-connection.json"
+        "post-mortem/releases/2026-09-16-premium-image-connection.json",
+        "post-mortem/releases/2026-09-19-premium-image-routing-repair.json",
+        "post-mortem/releases/2026-09-19-premium-image-discovery-hardening.json"
       ]
     },
     {
@@ -740,6 +769,49 @@
         "post-mortem/incidents/2026/2026-09-19-account-profile/README.md",
         "scripts/test-account-profile-db.ts",
         "supabase/migrations/20260919120000_canonical_account_profiles_and_ownership_bridge.sql"
+      ]
+    },
+    {
+      "id": "ACT-032",
+      "incident": "INC-20260919-STARS",
+      "owner": "Product/image maintainer",
+      "review_by": "2026-09-26",
+      "status": "open",
+      "next_step": "All six bounded cohort records are inactive. Retain the fresh versioned qualification at 8/8 with five persisted public assets and three contained ambiguous terminal failures; do not add retries, reset, replay, activate the Stars, create schedules, or expand to the 36-attempt population. Upstream image capability remains undisclosed; the bounded run learned usable execution from real work without using null as a gate. ACT-020's broader signed-in generation/library/download acceptance remains separate.",
+      "closure": "Close only after the fresh qualification evidence and retained ownership/provenance records are reviewed; this bounded result does not authorize further Star activity or close the broader image-generation acceptance work.",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-09-19-stars/README.md",
+        "scripts/verify-stars.ts",
+        "scripts/reconcile-stars.ts",
+        "supabase/migrations/20260919170000_star_cohort_membership_and_refresh.sql",
+        "supabase/migrations/20260919180000_star_refresh_constraint_repair.sql",
+        "src/lib/stars/StarPopulationController.ts",
+        "src/relay/private-failure.ts",
+        "src/relay/pool-runtime.ts",
+        "src/relay/relay-server.ts",
+        "src/relay/standard-pool-scheduler.ts",
+        "docs/QUEUE_SPECIFICATION.md",
+        "src/core/router/adapters/RelayEndpointDiscovery.ts",
+        "scripts/test-relay-services.ts",
+        "scripts/test-standard-pool.ts",
+        "scripts/test-relay-capabilities.ts",
+        "scripts/test-image-availability.ts",
+        "scripts/test-image-retry-contract.ts",
+        "src/relay/admission-lifecycle.ts",
+        "scripts/test-relay-admission-lifecycle.ts",
+        "docs/runbooks/relay-admission-lifecycle.md",
+        "post-mortem/releases/2026-09-19-stars-refresh-v2-live.json",
+        "post-mortem/releases/2026-09-19-stars-refresh-v2-forensic.json",
+        "post-mortem/releases/2026-09-19-stars-refresh-v2-predispatch-audit.json",
+        "post-mortem/releases/2026-09-19-relay-image-target-failover.json",
+        "post-mortem/releases/2026-09-20-stars-production-qualification.json",
+        "post-mortem/releases/2026-09-20-stars-cooldown-scope-repair.json",
+        "post-mortem/releases/2026-09-20-stars-cooldown-scope-deployment.json",
+        "post-mortem/releases/2026-09-20-stars-production-qualification-r2.json",
+        "src/relay/admission-observability.ts",
+        "docker/relay-pools/local/images.json",
+        "scripts/populate-stars.ts",
+        "scripts/verify-stars.ts"
       ]
     }
   ]

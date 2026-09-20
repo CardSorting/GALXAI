@@ -1,0 +1,35 @@
+{
+  "classification": "private",
+  "observed_at": "2026-09-19T21:36:08Z",
+  "incident": "INC-20260913-IMAGES",
+  "scope": "Prevent a live-but-wrong relay port from being treated as the image service.",
+  "implementation": {
+    "candidateSources": [
+      "explicit Premium relay URL and URL list",
+      "private discovery/runtime component configuration",
+      "configured local port list",
+      "bounded loopback-only port range",
+      "known local pool ports"
+    ],
+    "probeContract": "Each image candidate must pass bounded health and image-availability reads before selection.",
+    "selection": "Availability-aware scoring prefers a confirmed ready candidate, then an image-compatible unknown candidate, and only then a compatible unavailable candidate.",
+    "resilience": "The selected endpoint is cached briefly; repeated dispatch failures open a per-endpoint cooldown circuit; the next explicit attempt re-discovers candidates.",
+    "replaySafety": "Generation POSTs are never automatically replayed on another endpoint after dispatch could have started."
+  },
+  "verification": {
+    "currentLocalResolution": "Selected the functioning Premium image endpoint automatically; capability remained unknown.",
+    "dynamicWrongPortFixture": "passed",
+    "imageAvailabilityAndRouting": "passed",
+    "relayServiceContracts": "31 passed",
+    "studioRecovery": "passed",
+    "typescript": "passed",
+    "targetedLint": "passed"
+  },
+  "safety": {
+    "generationCallsIssued": 0,
+    "starCohortsChanged": false,
+    "publicTopologyExposed": false,
+    "uncertainWorkReplayed": false
+  },
+  "next_step": "Keep both Star cohorts inactive. Require positive capability evidence and separate bounded authorization before any future generation qualification."
+}

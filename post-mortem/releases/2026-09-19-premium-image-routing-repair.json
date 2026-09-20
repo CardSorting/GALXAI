@@ -1,0 +1,32 @@
+{
+  "classification": "private",
+  "observed_at": "2026-09-19T21:29:25Z",
+  "incident": "INC-20260913-IMAGES",
+  "scope": "Correct the local image-generation relay target without changing text, Sites, Star cohort state, accounts, entitlements or receipts.",
+  "observation": "The application image path still resolved through the retained legacy controller. That controller was healthy as a process but had no eligible worker, while the active Premium image runtime was healthy and served the expected model inventory.",
+  "correction": [
+    "Enabled the image-only Premium route in the local server configuration.",
+    "Resolved image availability and generation through the Premium runtime URL.",
+    "Loaded the local Premium inference credential only from the private runtime component file when a server-only environment key is absent.",
+    "Preserved the legacy relay setting for retained receipts and recovery; no fallback from Premium to legacy or Standard was added."
+  ],
+  "verification": {
+    "premiumHealth": "passed",
+    "premiumModelInventory": "HTTP 200",
+    "adapterTarget": "Premium image route",
+    "focusedImageRoutingTests": "5 passed",
+    "imageSecuritySuite": "passed",
+    "typescript": "passed",
+    "productionBuild": "passed",
+    "lint": "passed with existing warnings only",
+    "documentationCheck": "known pre-existing stale review fingerprints remain; no fingerprints refreshed"
+  },
+  "safety": {
+    "generationCallsIssued": 0,
+    "starCohortChanged": false,
+    "credentialsPublished": false,
+    "publicResponseContractChanged": false,
+    "capabilityEvidence": "unknown; no positive capacity claim made"
+  },
+  "next_step": "Keep both Star cohorts inactive. Require a fresh positive Premium capability observation and separate bounded authorization before any future content qualification; then verify signed-in generation, durable ownership, library/Favorites and download acceptance."
+}

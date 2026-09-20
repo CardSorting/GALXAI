@@ -1,0 +1,144 @@
+{
+  "version": 1,
+  "classification": "private",
+  "incident": "INC-20260919-STARS",
+  "observed_at": "2026-09-19T23:48:02Z",
+  "scope": "Narrow audit of the five pre-dispatch failures in stars-refresh-2026-09-r2",
+  "authorization": "Read-only forensic comparison and source-test verification; no generation, retry, replay, deployment or cohort mutation was performed",
+  "summary": {
+    "pre_dispatch_failures": 5,
+    "taxonomy": {
+      "endpoint_discovery_circuit_open": 3,
+      "target_eligibility_boundary_not_retained": 2,
+      "ambiguous": 0,
+      "post_generation": 0
+    },
+    "known_not_dispatched": 5,
+    "provider_requests": 0,
+    "new_production_behavior": false,
+    "reason": "The demonstrated endpoint-circuit defect is already corrected in the un-deployed source. The two remaining records do not retain the private admission transition needed to justify another fix."
+  },
+  "attempts": [
+    {
+      "star": "Sora Vale",
+      "opportunity": 3,
+      "attempt_id": "522940ab-f656-436a-9e57-c5a5ac46e5ba",
+      "received_at": "2026-09-19T22:54:24.809Z",
+      "terminal_at": "2026-09-19T22:56:00.275Z",
+      "lifecycle": "RECEIVED -> QUEUED/ADMISSION PATH -> no central execution lease -> terminal failure",
+      "stop_transition": "Before central lease and before worker image submission",
+      "private_reason": "not retained; public Star record reduced the result to relay_unavailable",
+      "runtime_context": "The previously failing execution target was quarantined; the healthy target remained the only recorded eligible path",
+      "provider_request": false,
+      "nearest_success_control": "Sora Vale opportunity 2 reached a central lease and worker submission on the healthy target"
+    },
+    {
+      "star": "Morrow Kest",
+      "opportunity": 3,
+      "attempt_id": "009a0ffb-b29a-4ea7-883b-768a3558be93",
+      "received_at": "2026-09-19T22:55:29.589Z",
+      "terminal_at": "2026-09-19T22:56:00.276Z",
+      "lifecycle": "RECEIVED -> QUEUED/ADMISSION PATH -> no central execution lease -> terminal failure",
+      "stop_transition": "Before central lease and before worker image submission",
+      "private_reason": "not retained; public Star record reduced the result to relay_unavailable",
+      "runtime_context": "The previously failing execution target was quarantined; the healthy target remained the only recorded eligible path",
+      "provider_request": false,
+      "nearest_success_control": "Morrow Kest opportunity 2 reached a central lease and worker submission on the healthy target"
+    },
+    {
+      "star": "Ilyx",
+      "opportunity": 1,
+      "attempt_id": "38801fe7-13ae-4146-b37c-82f1a4155a05",
+      "received_at": "2026-09-19T22:56:00.675Z",
+      "terminal_at": "2026-09-19T22:56:00.880Z",
+      "lifecycle": "RECEIVED -> discovery before admission -> terminal failure",
+      "stop_transition": "Before relay POST, central lease and worker submission",
+      "private_reason": "relay_discovery_failed after the endpoint circuit opened",
+      "runtime_context": "Two valid HTTP admission responses had been counted as endpoint reachability failures; discovery then excluded the reachable endpoint",
+      "provider_request": false,
+      "nearest_success_control": "A prior request reached the same relay path before the circuit opened"
+    },
+    {
+      "star": "Nemi Orra",
+      "opportunity": 1,
+      "attempt_id": "9c339798-b94e-4903-b08e-d7acc4aa34bb",
+      "received_at": "2026-09-19T22:56:00.826Z",
+      "terminal_at": "2026-09-19T22:56:01.009Z",
+      "lifecycle": "RECEIVED -> discovery before admission -> terminal failure",
+      "stop_transition": "Before relay POST, central lease and worker submission",
+      "private_reason": "relay_discovery_failed after the endpoint circuit opened",
+      "runtime_context": "The endpoint circuit remained open even though the earlier responses were valid relay responses rather than transport failures",
+      "provider_request": false,
+      "nearest_success_control": "The five successful controls all reached an eligible execution target before the discovery circuit opened"
+    },
+    {
+      "star": "Ilyx",
+      "opportunity": 2,
+      "attempt_id": "10ab98f6-3e36-499d-b7c2-68370fb76ec2",
+      "received_at": "2026-09-19T22:56:01.355Z",
+      "terminal_at": "2026-09-19T22:56:01.514Z",
+      "lifecycle": "RECEIVED -> discovery before admission -> terminal failure",
+      "stop_transition": "Before relay POST, central lease and worker submission",
+      "private_reason": "relay_discovery_failed after the endpoint circuit opened",
+      "runtime_context": "The same open endpoint circuit rejected discovery; no provider execution was possible or attempted",
+      "provider_request": false,
+      "nearest_success_control": "The five successful controls completed through the relay before the circuit state was poisoned"
+    }
+  ],
+  "control_comparison": {
+    "successful_controls": 5,
+    "successful_target_submissions": "healthy target 5/5",
+    "failed_target_submissions": "failing target 2/2 dispatched quota failures before quarantine",
+    "smallest_demonstrated_difference": "After two valid not_accepted responses, endpoint discovery treated response-level admission failure as transport failure and opened the endpoint circuit. The later three requests therefore failed before discovery could return a relay target. The two earlier target-eligibility records have no per-request admission event and cannot be narrowed beyond no lease/no submission.",
+    "admission_invariants": {
+      "duplicate_admission": false,
+      "duplicate_dispatch": false,
+      "occupancy_collision": false,
+      "queue_overflow": false,
+      "owner_limit_violation": false,
+      "stale_cancellation": false,
+      "deadline_reset": false,
+      "reservation_leak": false,
+      "ambiguous_post_replay": false
+    }
+  },
+  "demonstrated_root_cause": {
+    "mechanism": "Endpoint discovery used a circuit intended for transport reachability, but valid HTTP relay admission/capability outcomes were allowed to increment that circuit. Two ordinary target/admission failures therefore hid a reachable endpoint from later requests and converted a local response into global pre-dispatch relay_discovery_failed.",
+    "why_tests_missed_it": "The original admission tests exercised known scheduler state and the production run did not persist a private per-request admission event. No regression covered the boundary between a valid non-2xx relay response and endpoint reachability accounting until the forensic reproduction.",
+    "two_unresolved_records": "The Sora and Morrow opportunity-3 records stopped before a central lease and worker submission, but retained neither the exact candidate, reservation failure, reselect decision nor worker pre-grant event. Existing evidence proves known-not-dispatched, not a specific second defect."
+  },
+  "repair_and_regression": {
+    "source_change": "src/core/router/adapters/IsolatedRelayTransport.ts",
+    "supporting_source": "src/core/router/adapters/RelayEndpointDiscovery.ts",
+    "change": "Only transport/fetch failures call reportRelayFailure. A valid HTTP response, including a private not_accepted admission response, remains evidence that the endpoint is reachable and does not poison endpoint discovery.",
+    "regression": "scripts/test-image-availability.ts: a valid not-accepted response does not poison endpoint discovery",
+    "before_fix": "The focused regression failed: after two valid not_accepted responses, the third request became relay_discovery_failed.",
+    "after_fix": "The focused regression passes; all three valid response attempts reach the endpoint and no request is replayed on another endpoint.",
+    "deployed": false,
+    "live_run_after_fix": false
+  },
+  "semantics_verified": {
+    "reselect": "The existing admission/pool implementation reselects another compatible healthy target within the same lifecycle when the current candidate is target-local and known unusable; request-local exclusions bound the candidates.",
+    "wait": "The existing bounded queue waits only for known compatible capacity that can be released before the original absolute deadline; the deadline is not reset.",
+    "terminate": "The existing path terminates invalid configuration, no valid execution path, ambiguous dispatch and post-generation uncertainty without replay. No new generic retry loop was added.",
+    "runtime_authority": "Discovery establishes candidate existence/capability; runtime ownership and reservations establish live occupancy; workload-specific runtime state establishes image/text eligibility; quarantine/cooldown excludes future work; the lifecycle owns cleanup. Refresh cannot erase live runtime ownership."
+  },
+  "observability_gap": {
+    "missing": "Private per-request admission events for candidate selection, reservation failure, reselect classification and worker pre-grant boundary",
+    "safe_next_step": "Add the smallest administrator-only event fields before a future qualification run if the two records must be distinguished. Do not generate traffic solely to fill this gap.",
+    "public_exposure": "No provider, topology, worker, shard, credential or capacity detail is added to public errors or frontend data."
+  },
+  "verification": {
+    "current_focused": "scripts/test-image-availability.ts plus relay service, adaptive quota and admission lifecycle suites: 59/59 passed",
+    "previous_full_matrix": "Relay services 89/89, relay capabilities 170/170, image/security 51/51, TypeScript, production build, lint with 0 errors and 8 existing warnings, documentation tests and git diff checks passed after the reviewed relay changes",
+    "documentation_check": "docs:check and docs:check:build retain only the seven pre-existing stale review fingerprints; none was refreshed",
+    "live_generations": 0,
+    "deployments": 0
+  },
+  "disposition": {
+    "additional_star_run_justified": false,
+    "cohort_state": "disabled",
+    "remaining_opportunities_issued": 0,
+    "next_step": "Keep Stars inactive. Deploy/reload only under separate release authorization, then obtain fresh positive capability evidence. Add private admission events before any future run that needs the two under-observed pre-dispatch records distinguished. Do not replay the five failures or issue the 24 unallocated opportunities."
+  }
+}

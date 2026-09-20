@@ -2,14 +2,15 @@
 
 <!-- docs-scope: current-guide -->
 
-Reconciled 2026-09-19 UTC. These are the latest recorded observations, not a live status feed. Before an intervention, inspect the current target, process and migration history again. [Open items](OPEN_ITEMS.md) remain part of this handover.
+Reconciled 2026-09-20 UTC. These are the latest recorded observations, not a live status feed. Before an intervention, inspect the current target, process and migration history again. [Open items](OPEN_ITEMS.md) remain part of this handover.
 
 | Component | Latest evidence | Qualification |
 | --- | --- | --- |
 | Stripe webhook delivery | Separate obsolete test-account endpoint disabled September 15; production live configuration passes readiness | [Endpoint retirement](incidents/2026/2026-09-15-stripe-test-webhook/endpoint-retirement.json) preserves history and leaves both live endpoints enabled. [Diagnosis](incidents/2026/2026-09-15-stripe-test-webhook/diagnosis.json) found four pending test events and no pending deliveries among three recent live events. Test events were not fulfilled; no payment or application deployment occurred. Use [webhook recovery](../docs/runbooks/stripe-webhook-delivery.md) for account/mode checks. |
 | Public product policy | Images, Sites and Library require a verified active account before workspace entry; developer APIs retain separate individual preview approval | September 13 [auth release acceptance](incidents/2026/2026-09-13-workspace-auth/session-revocation-release.json) verifies anonymous denial and real account entry, replacement sign-in and local logout. Cloudflare now respects private origin cache headers, including static-looking workspace paths. Billing, ownership and independent staff authorization remain separate. Earlier incident/pass records preserve the anonymous exposure and local-only stages. |
 | Site application | Auth recovery is Ready as `dpl_ANUiRkHxr59cKvNYAAz7BgEG16At`, serving `galx.ai` | September 16 [recovery acceptance](incidents/2026/2026-09-16-session-recovery/recovery-release.json) verifies original-browser Images/library/Sites, live cookie-only Sites API, refresh/revocation and 34 linked browser assets. This does not establish generation capability or publication. Earlier [manual enrollment activation](releases/2026-09-15-manual-desktop-enrollment-activation.json) remains dated evidence. |
-| Image generation | Preflight verified: independent Premium image connection and tunnel installed; deployment/browser acceptance pending | [Connection preflight](releases/2026-09-16-premium-image-preflight.json) and [installation evidence](releases/2026-09-16-premium-image-connection.json): Premium runtime updated to `images-20260916`, image availability reads in-process evidence directly, authenticated Cloudflare tunnel `images-service.galx.ai` exposes port 13301 `/v1/images/*` only, and local synthesis canary passed. ACT-020 remains open for signed-in production generation, library persistence and download acceptance. |
+| Image generation | Image-only application routing and the three reviewed relay repairs are deployed; upstream capability remains undisclosed | [Routing repair](releases/2026-09-19-premium-image-routing-repair.json) records the legacy-controller mismatch. Commit `3e0d66c` is pushed, and Premium runtime `cooldown-scope-20260920-r1` is loaded at digest `sha256:869e2718d86e2fe217ddd38ed6151a6954d333dc8ae1084e056ed01100c1e110`; live/ready checks returned 200. The pre-run image-capability read was `null` (unknown, not false), and the fresh bounded run learned usable execution from real work without treating capability as a gate. ACT-020 remains open for general signed-in production generation, library persistence and download acceptance beyond this Star qualification. |
+| Star population | Six bounded cohorts exist and are inactive; the fresh versioned qualification completed its fixed 8-attempt check | The initial, refresh, retry, versioned refresh, prior qualification and fresh `r2` qualification cohorts remain immutable with their ceilings intact. The prior qualification remains disabled at 7/8. The fresh `r2` cohort issued 8/8 opportunities at concurrency two: five relay completions persisted as correctly owned public assets and three dispatched ambiguous failures were contained without replay. All six cohort records are inactive; no Star attempt, image request or generation record is queued/generating, four administrative Pro entitlements remain active, and no counter reset, avatar generation or recurring schedule exists. See [Star containment](incidents/2026/2026-09-19-stars/README.md), [prior qualification evidence](releases/2026-09-20-stars-production-qualification.json), [fresh qualification evidence](releases/2026-09-20-stars-production-qualification-r2.json), and [cooldown-scope release](releases/2026-09-20-stars-cooldown-scope-deployment.json). |
 | Image receipts | `20260913025900_durable_image_requests.sql` applied before the site deployment | Owner-scoped PostgreSQL receipt committed before async acknowledgement. Single claim, no automatic retry after ambiguous dispatch. |
 | Image library and navigation | `20260913071757_image_library_bounded_pages.sql` applied before `c9c9121`; both indexes, invoker permissions and a page query verified against production | Signed-in My images, Favorites, thumbnail/full-image lightbox and Images/Sites navigation passed read-only acceptance. One known valid original and thumbnail passed sanitation and capability checks. No live load or new generation was tested. The previously missing historical test object was restored from its exact hash-matched original bytes at 09:01 UTC. Catalog unchanged; sanitized original/thumbnail and denied capabilities verified. ACT-012 is complete; [repair evidence](releases/2026-09-13-followup-repairs-local.json) includes isolated-test prevention. |
 | Auth and Favorites | September 16 session permission and Sites cookie-auth regressions repaired in production | [Recovery acceptance](incidents/2026/2026-09-16-session-recovery/recovery-release.json): migration `20260916161120` isolates the unchanged owner-bound helper from operational-schema revocations; application accepts verified Sites cookies with same-origin mutation protection. Original browser and isolated live refresh/revocation pass; operational grants remain denied. ACT-029 is complete. ACT-028 retains provider/history/account-switch acceptance, ACT-014 fresh-proof/device acceptance; earlier Favorites and September 13 results remain dated history. |
@@ -37,7 +38,79 @@ Reconciled 2026-09-19 UTC. These are the latest recorded observations, not a liv
 
 Owner requested image availability and generation connected to GALX Relay Premium. The preflight verified an independent server-only image cutover (`GALX_PREMIUM_IMAGES_ENABLED=1`), avoiding forced text or Sites changes. Dedicated Cloudflare tunnel connector `galx-image-tunnel` is live on `https://images-service.galx.ai`, forwarding only `/v1/images/availability` and `/v1/images/generations` to Premium port 13301. Premium runtime image tag is updated to `images-20260916` with direct in-process capability inspection (reporting boolean or null). The local canary request produced and decoded a 1.4 MB PNG artifact without upstream headers or metadata, and shared owned BroccoliDB persistence is wired before receipt completion. 69 installed VM/TLS/authorization checks and 45 image security tests passed. Public deployment, browser generation, library and download acceptance remain pending under [ACT-020](OPEN_ITEMS.md).
 
+## September 19 Premium image routing correction
+
+The image application path was still pointed at the retained legacy controller. That process was live but had no eligible worker; the active Premium image runtime was healthy and returned its expected model inventory. The correction enables the image-only Premium route and reads the local inference credential from the private runtime component file when a server-only environment key is not present. The legacy setting remains available only for retained receipts and recovery, with no fallback from Premium to legacy or Standard.
+
+Focused image-routing/security tests, TypeScript and the production build pass. The runtime availability result is unknown because no fresh positive capability evidence was available, so no generation call or Star retry was issued. ACT-020 remains open for fresh capability evidence and signed-in production generation/library/download acceptance. See [routing repair](releases/2026-09-19-premium-image-routing-repair.json).
+
+The follow-up discovery hardening no longer trusts one port: the server probes a bounded private candidate set, requires the image contract in addition to health, caches the winner briefly, cools down repeated failures and re-evaluates on the next attempt. Client availability checks retry with bounded backoff while preserving the prompt; generation POSTs are never replayed on a different endpoint after dispatch may have started. The current local resolver selected the functioning Premium endpoint, but capability remains unknown. See [discovery hardening](releases/2026-09-19-premium-image-discovery-hardening.json).
+
+## September 19 authorized Star refresh
+
+After the reviewed relay admission implementation was loaded into the local Premium runtime, the owner explicitly authorized a new versioned Star refresh. The run reused the existing twelve autonomous identities, retained their deterministic avatars, created no new account or schedule, and kept the fixed three-opportunity ceiling per Star with maximum concurrency three. The runtime's final read-only capability observation was positive, and targeted post-run inspection found no active jobs or leaked capacity.
+
+The run issued 12 of 36 possible content attempts. Five completed through the real relay and persisted as five correctly owned public library assets; seven ordinary relay attempts failed. The controller then hit its explicit systemic discovery stop boundary and left the remaining 24 opportunities unissued. All twelve Stars were finalized inactive, administrative Pro remained an entitlement rather than a payment event, and the normal frontend projection plus human/Star analytics split verified. No ambiguous request was replayed. The full local relay verification still has a separate central-monitor authorization limitation after the Premium checks; this evidence does not close ACT-020's broader signed-in production acceptance. See [V2 live evidence](releases/2026-09-19-stars-refresh-v2-live.json).
+
+The read-only forensic reconstruction found five pre-provider failures and two dispatched, known worker quota failures; there were no ambiguous outcomes or post-generation persistence failures. Seven unique execution leases and worker submissions mapped cleanly to the five successes and two worker failures, with no duplicate dispatch, collision, leaked occupancy or replay. A second narrow audit resolved the five pre-provider records into three exact endpoint-circuit failures and two known-not-dispatched target-eligibility failures whose private admission transition was not retained. The three exact failures were caused by endpoint discovery treating valid `not_accepted` HTTP responses as endpoint reachability failures, allowing its circuit to hide an otherwise reachable route after two ordinary admission failures. The two remaining records cannot support a second demonstrated defect without new private per-request admission events. The source correction is recorded in [the pre-dispatch audit](releases/2026-09-19-stars-refresh-v2-predispatch-audit.json), remains un-deployed and not live-verified, and no speculative source change was added. Keep all cohorts inactive and do not retry the seven failures or issue the remaining 24 opportunities.
+
+The follow-up execution audit isolated a second, narrower defect at the shard boundary: a confirmed pre-generation image quota/capacity rejection from shard A was being treated as request-global even when compatible shard B remained healthy. The source repair now keeps one receipt and admission lifecycle, excludes A for that request, releases A exactly once, records image-scoped cooldown/eligibility, and selects B only for an authoritative pre-generation rejection. Ambiguous dispatch, post-generation and unknown outcomes remain terminal with no failover; image cooldown does not disable text capacity. The focused failover regression and full requested relay/security/build matrix passed, and the repair was deployed in `5e54bbd` / Premium runtime `admission-20260919-r2`. The bounded qualification exercised the handoff live, but its overall result was not qualified because a later target failure opened both worker image cooldowns. See [target-local failover evidence](releases/2026-09-19-relay-image-target-failover.json) and [qualification evidence](releases/2026-09-20-stars-production-qualification.json).
+
+## September 20 deployed Star qualification
+
+The narrow production pass deployed commit `5e54bbd9cbae4a64556b761414ecfeccf694b22d`, verified the Vercel revision and Premium runtime image, and added administrator-only admission events around candidate evaluation, reservation, pre-grant and dispatch. No prompts, credentials, provider text or topology details are emitted through public responses.
+
+Four existing Stars were authorized for two opportunities each, with concurrency capped at two. Seven attempts were allocated and one was never issued. Veyra opportunity one demonstrated target-local pre-generation rejection, exclusion and a later target handoff; Morrow opportunity one reached relay terminal completion but the runner stopped before persistence verification and was retained as ambiguous. The other five requests were fully observed as pre-dispatch no-compatible-candidate failures after both image targets entered cooling/quarantine. No duplicate generation, replay, reservation leak, occupancy leak or open Star receipt remains. The qualification is **NOT QUALIFIED**; do not issue another Star request until the cooldown amplification is separately diagnosed and authorized. Valid HTTP relay rejections continued to reach the relay and did not poison endpoint discovery. See [production qualification evidence](releases/2026-09-20-stars-production-qualification.json).
+
+## September 20 cooldown-scope repair and controlled release
+
+The source audit found no parent-pool or target-A-to-target-B propagation. The
+runtime owns separate per-worker, per-workload circuits. Target A's confirmed
+pre-generation rejection correctly opened only A's image cooldown. Target B's
+unknown outcome was incorrectly allowed to use the generic worker-scoped
+fallback, so B also became ineligible for later distinct requests. The
+historical run did not retain B's inner private class, so the correction is
+limited to the demonstrated fallback mapping: unknown/ambiguous is request
+scoped, terminal for the current mutation, and never replayed; evidence-backed
+worker failures retain their existing worker/workload cooldown and recovery.
+
+The before-fix regression failed with B cooled and the next request rejected;
+the after-fix regression passes with B serving the next distinct request. The
+relay, capability, quota/admission, standard-pool, security, TypeScript, build
+and lint suites pass. Commit `3e0d66c` was pushed and the Premium-only runtime
+was reloaded under the immutable `cooldown-scope-20260920-r1` pin. Premium
+authenticated monitor, TLS, isolation and peer-denial checks passed; the
+existing full acceptance command still stops at the central-monitor
+authorization limitation after the Premium checks. Live/ready returned 200,
+and the administrator-only runtime read showed two enabled, connected accounts
+with no health suppression. No Star request was made: the comparable
+qualification cohort is already disabled at 7/8 and the runner correctly
+refuses to reopen it. No Star history, ceiling, or health state was reset. See
+[source repair](releases/2026-09-20-stars-cooldown-scope-repair.json) and
+[controlled release](releases/2026-09-20-stars-cooldown-scope-deployment.json).
+
+## September 20 fresh versioned Star qualification
+
+The pushed operator runner commit `0287d5e` added a new immutable
+`stars-production-qualification-2026-09-r2` cohort/run selector without
+reopening the historical 7/8 cohort. The pre-run Premium relay was live and
+ready, the upstream image-capability value was unknown/undisclosed, and no
+queued Star work, generating record or active lease existed.
+
+The same four existing Stars received two opportunities each at concurrency
+two. All eight bounded requests were observed through admission, reservation,
+dispatch, execution and terminal cleanup. Five completed through the real
+relay and persisted as correctly owned public assets; three dispatched requests
+ended ambiguously and were not replayed. No pre-dispatch failure, duplicate,
+cycle, endpoint-discovery poisoning, reservation/occupancy leak or public
+diagnostic exposure occurred. Frontend Star projection, ownership/provenance,
+human-vs-Star analytics and inactive-after-run checks passed. The new cohort is
+completed and inactive; no additional population activity is authorized by
+this qualification. See [fresh qualification evidence](releases/2026-09-20-stars-production-qualification-r2.json).
+
 ## Implemented relay documentation
+
+The current [relay admission lifecycle runbook](../docs/runbooks/relay-admission-lifecycle.md) is the maintainer authority for the bounded generation path: `AdmissionLifecycle` owns the request state, scheduler reservations are acquired synchronously, dispatch becomes ambiguous before the worker POST, cleanup is idempotent, and exactly one successor is woken after release. The focused lifecycle, registry-refresh, active-quarantine and cooldown-scope regressions pass locally. The reviewed relay components are deployed and reloaded in Premium runtime `cooldown-scope-20260920-r1`; the fresh versioned qualification is retained as bounded live evidence, not a general signed-in acceptance. Upstream image capability remains undisclosed; no 36-attempt population run, recurring schedule or additional Star activity was started. The documentation check still reports only the seven pre-existing stale review fingerprints, and none was refreshed.
 
 ## September 19 Premium registration repair
 

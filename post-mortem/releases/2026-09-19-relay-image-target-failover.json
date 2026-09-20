@@ -1,0 +1,50 @@
+{
+  "release": "relay-image-target-failover-2026-09-19",
+  "observed_at": "2026-09-19T23:29:08Z",
+  "incident": "INC-20260919-STARS",
+  "status": "source-verified-not-deployed",
+  "scope": "Narrow repair for the demonstrated image shard-local quota/capacity failure. No live generation, Star retry, relay request, cohort mutation or provider change was performed.",
+  "demonstrated_defect": "The image execution path treated a confirmed pre-generation quota/capacity rejection from the selected shard as terminal for the request even when another compatible shard remained usable.",
+  "behavior": {
+    "safe_failover": [
+      "confirmed target-local quota, rate, capacity or explicitly not-accepted rejection",
+      "request-local shard exclusion prevents A-to-B-to-A cycling",
+      "release the failed shard reservation once, update image-scoped eligibility, then select the next compatible shard",
+      "retain one receipt and one external request identity"
+    ],
+    "terminal_without_failover": [
+      "timeout or connection loss after dispatch",
+      "malformed or unknown response",
+      "post-generation persistence failure",
+      "any outcome where replay could duplicate generated or billable work"
+    ],
+    "capacity_scope": "Image cooldown/quota state is shard- and workload-scoped; it does not disable independent text capacity."
+  },
+  "regressions": {
+    "file": "scripts/test-relay-adaptive-quota.ts",
+    "cases": [
+      "one depleted image shard fails over to a healthy compatible shard",
+      "all compatible image shards are depleted without looping or replay",
+      "ambiguous first dispatch does not attempt a healthy second shard",
+      "image depletion leaves independent text capacity available"
+    ]
+  },
+  "verification": {
+    "focused_image_failover": "15/15",
+    "admission_lifecycle": "16/16",
+    "standard_pool": "50/50",
+    "relay_services": "89/89",
+    "relay_capabilities": "170/170",
+    "image_security": "51/51",
+    "typescript": "pass",
+    "production_build": "pass",
+    "lint": "0 errors, 8 existing warnings",
+    "diff_check": "pass"
+  },
+  "evidence": [
+    "src/relay/relay-server.ts",
+    "scripts/test-relay-adaptive-quota.ts",
+    "docs/runbooks/relay-admission-lifecycle.md"
+  ],
+  "next_step": "Review and deploy/reload under release authorization, observe private target capability evidence, and require fresh positive image capability before any separately authorized Star run. Keep every Star cohort inactive and do not replay ambiguous requests or reset ceilings."
+}

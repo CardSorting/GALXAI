@@ -2175,6 +2175,12 @@
       "title": "GALX Relay Standard sunset"
     },
     {
+      "path": "docs/reference/stars.md",
+      "scope": "current-guide",
+      "category": "docs",
+      "title": "Stars"
+    },
+    {
       "path": "docs/relay-security.md",
       "scope": "current-guide",
       "category": "docs",
@@ -2191,6 +2197,12 @@
       "scope": "current-guide",
       "category": "docs",
       "title": "Reconcile stale knowledge"
+    },
+    {
+      "path": "docs/runbooks/relay-admission-lifecycle.md",
+      "scope": "current-guide",
+      "category": "docs",
+      "title": "Relay admission lifecycle"
     },
     {
       "path": "docs/runbooks/relay-pool-images.md",
@@ -2839,6 +2851,12 @@
       "scope": "operational-record",
       "category": "post-mortem",
       "title": "Canonical account-profile migration backfill"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-09-19-stars/README.md",
+      "scope": "operational-record",
+      "category": "post-mortem",
+      "title": "Initial Star population containment"
     },
     {
       "path": "post-mortem/runbooks/controller-lock.md",

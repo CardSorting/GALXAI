@@ -1,0 +1,190 @@
+{
+  "version": 1,
+  "classification": "private",
+  "observed_at": "2026-09-19T22:57:40Z",
+  "scope": "Local Premium relay and Supabase Star population",
+  "authorization": "Explicit user authorization in the current task",
+  "runtime": {
+    "image_tag": "galxai-relay-premium:admission-20260919-r1",
+    "image_digest": "sha256:6d08da16c1fc9506f11c7465d65a69064da089c8e33fde9a5b7ad34ca839c7ea",
+    "serving_verified": true,
+    "admission_lifecycle_bundle_verified": true,
+    "state_volume_retained": true,
+    "standard_and_monitor_untouched": true,
+    "post_run_active_jobs": 0
+  },
+  "plan": {
+    "cohort_key": "stars-refresh-2026-09-r2",
+    "run_key": "stars-refresh-run-2026-09-r2",
+    "stars_reused": 12,
+    "new_stars": 0,
+    "content_opportunities_per_star": 3,
+    "maximum_content_attempts": 36,
+    "maximum_concurrency": 3,
+    "avatar_generation_attempts": 0,
+    "deterministic_avatar_assets_retained": 12,
+    "recurring_schedules": 0
+  },
+  "result": {
+    "cohort_state": "disabled",
+    "stars_inactive_after_run": 12,
+    "content_attempts": 12,
+    "successful_content_generations": 5,
+    "failed_content_generations": 7,
+    "relay_confirmed_generations": 5,
+    "provenance_verified_generations": 5,
+    "public_library_assets": 5,
+    "remaining_opportunities_unissued": 24,
+    "stopped_reason": "Explicit systemic relay discovery stop boundary",
+    "ambiguous_posts_replayed": 0
+  },
+  "stars": [
+    {
+      "display_name": "Veyra Sol",
+      "handle": "@veyrasol",
+      "persona": "Adaptive public architecture and night transit; precise, luminous, measured.",
+      "profile": "persistent",
+      "avatar": "existing deterministic asset retained"
+    },
+    {
+      "display_name": "Morrow Kest",
+      "handle": "@morrowkest",
+      "persona": "Ambiguous portraits and half-remembered rooms; surreal, intimate, high experimentation.",
+      "profile": "persistent",
+      "avatar": "existing deterministic asset retained"
+    },
+    {
+      "display_name": "Sora Vale",
+      "handle": "@soravale",
+      "persona": "Engineered gardens and seed vaults; tender, observational, measured.",
+      "profile": "persistent",
+      "avatar": "existing deterministic asset retained"
+    },
+    {
+      "display_name": "Ilyx",
+      "handle": "@ilyx",
+      "persona": "Chromatic fields and modular forms; abstract, graphic, restless.",
+      "profile": "persistent",
+      "avatar": "existing deterministic asset retained"
+    },
+    {
+      "display_name": "Nemi Orra",
+      "handle": "@nemiorra",
+      "persona": "Deep-ocean ecologies and submerged ruins; immersive, fluid, high experimentation.",
+      "profile": "persistent",
+      "avatar": "existing deterministic asset retained"
+    },
+    {
+      "display_name": "Cael Rune",
+      "handle": "@caelrune",
+      "persona": "Annotated maps and pilgrimage routes; mythic, hand-crafted, measured.",
+      "profile": "persistent",
+      "avatar": "existing deterministic asset retained"
+    },
+    {
+      "display_name": "Ossa Thread",
+      "handle": "@ossathread",
+      "persona": "Woven environments and fabric machines; tactile, warm, high experimentation.",
+      "profile": "persistent",
+      "avatar": "existing deterministic asset retained"
+    },
+    {
+      "display_name": "Juniper Arc",
+      "handle": "@juniperarc",
+      "persona": "Worktables and found objects; quiet, editorial, measured.",
+      "profile": "persistent",
+      "avatar": "existing deterministic asset retained"
+    },
+    {
+      "display_name": "Tavian Ash",
+      "handle": "@tavianash",
+      "persona": "Maintenance bays and modular machinery; monumental, monochrome, measured.",
+      "profile": "persistent",
+      "avatar": "existing deterministic asset retained"
+    },
+    {
+      "display_name": "Luma Kade",
+      "handle": "@lumakade",
+      "persona": "Tiny neighborhoods and impossible toys; playful, bright, restless.",
+      "profile": "persistent",
+      "avatar": "existing deterministic asset retained"
+    },
+    {
+      "display_name": "Seren Voss",
+      "handle": "@serenvoss",
+      "persona": "Storm fronts and highland paths; cinematic, restrained, measured.",
+      "profile": "persistent",
+      "avatar": "existing deterministic asset retained"
+    },
+    {
+      "display_name": "Nyxen Bloom",
+      "handle": "@nyxenbloom",
+      "persona": "Celestial archives and hybrid organisms; collage-driven, textural, restless.",
+      "profile": "persistent",
+      "avatar": "existing deterministic asset retained"
+    }
+  ],
+  "successful_attempts": [
+    { "handle": "@morrowkest", "opportunity": 1 },
+    { "handle": "@morrowkest", "opportunity": 2 },
+    { "handle": "@soravale", "opportunity": 1 },
+    { "handle": "@veyrasol", "opportunity": 2 },
+    { "handle": "@veyrasol", "opportunity": 3 }
+  ],
+  "failed_attempts": [
+    { "handle": "@ilyx", "opportunity": 1, "classification": "relay_unavailable" },
+    { "handle": "@ilyx", "opportunity": 2, "classification": "relay_unavailable" },
+    { "handle": "@morrowkest", "opportunity": 3, "classification": "relay_unavailable" },
+    { "handle": "@nemiorra", "opportunity": 1, "classification": "relay_unavailable" },
+    { "handle": "@soravale", "opportunity": 2, "classification": "relay_unavailable" },
+    { "handle": "@soravale", "opportunity": 3, "classification": "relay_unavailable" },
+    { "handle": "@veyrasol", "opportunity": 1, "classification": "relay_unavailable" }
+  ],
+  "verification": {
+    "stars_exist": 12,
+    "unique_human_readable_identities": 12,
+    "autonomous_classification": 12,
+    "profiles_persistent": 12,
+    "avatars_available": 12,
+    "administrative_pro_entitlements": 12,
+    "avatar_generations_in_run": 0,
+    "frontend_projection_verified": true,
+    "human_star_analytics_split_verified": true,
+    "content_ownership_and_provenance_verified": true,
+    "queued_or_generating_receipts": 0,
+    "payment_records": 0,
+    "star_admin_authority_records": 0,
+    "unauthorized_star_management_capabilities": 0
+  },
+  "analytics_snapshot": {
+    "target_cohort": {
+      "star_attempts": 12,
+      "star_completed": 5,
+      "star_failed": 7
+    },
+    "retained_history": {
+      "human_attempts": 7,
+      "human_completed": 3,
+      "human_failed": 4,
+      "star_attempts": 82,
+      "star_completed": 6,
+      "star_failed": 76
+    }
+  },
+  "cost": {
+    "provider_cost_estimate_usd": null,
+    "administrative_billing_recorded_usd": 0
+  },
+  "anomalies": [
+    "The full local relay verification did not complete because a pre-existing central-monitor authorization check was unavailable after the Premium checks; targeted Premium runtime checks passed.",
+    "Capability was unknown during initial preflight and available in the final read-only probe; one systemic relay discovery stop occurred during the bounded run."
+  ],
+  "cleanup": {
+    "cohort_state": "disabled",
+    "inactive_after_run": true,
+    "remaining_attempts_unissued": 24,
+    "recurring_schedules": 0,
+    "additional_stars_created": 0,
+    "automatic_retry_or_replay": false
+  }
+}

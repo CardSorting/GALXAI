@@ -110,25 +110,25 @@ function StudioWorkspace({
         body: studio.error,
         action: studio.uncertain ? 'Check My Creations' : 'Check again',
       }
-    : studio.checkingAvailability
-      ? {
-          tone: 'checking',
+      : studio.checkingAvailability
+        ? {
+            tone: 'checking',
           title: 'Checking image creation',
-          body: 'Your prompt is ready. We’ll keep it here while we confirm the service.',
+          body: 'Your prompt is safe. We’re looking for a ready service and will keep checking in the background.',
           action: undefined,
         }
       : studio.availability === 'unavailable'
         ? {
             tone: 'warning',
-            title: 'Image creation is temporarily unavailable',
-            body: 'Your prompt is saved. Try again in a moment.',
+            title: 'Image creation is busy right now',
+            body: 'Your prompt is saved. We’ll check again automatically, or you can retry now.',
             action: 'Check again',
           }
         : studio.ready && studio.availability === 'unknown'
           ? {
               tone: 'warning',
-              title: 'Image creation needs a quick check',
-              body: 'We couldn’t confirm readiness yet. Your prompt will stay here while you retry.',
+              title: 'Reconnecting to image creation',
+              body: 'We couldn’t confirm readiness yet. Your prompt stays here while we try again.',
               action: 'Check again',
             }
           : null;
@@ -431,7 +431,7 @@ function StudioWorkspace({
                   setActiveTab('creations');
                   changeView('library');
                 } else {
-                  void studio.checkAvailability();
+                  void studio.checkAvailability(true);
                 }
               }}
             >

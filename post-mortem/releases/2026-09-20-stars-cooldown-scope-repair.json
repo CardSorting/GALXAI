@@ -1,0 +1,83 @@
+{
+  "id": "REL-20260920-STARS-COOLDOWN-SCOPE-REPAIR",
+  "incident": "INC-20260919-STARS",
+  "observed_at": "2026-09-20T00:45:43Z",
+  "status": "source_verified_not_deployed",
+  "trigger": "The bounded production qualification observed five pre-dispatch rejections after target-1 pre-generation rejection and target-2 unknown terminal outcome.",
+  "historical_evidence": {
+    "target_a": {
+      "observed_transition": "eligible -> reserved -> dispatched -> confirmed pre-generation rejection -> released/excluded",
+      "classification": "pre_generation_rejected",
+      "scope": "worker/images",
+      "state_mutation": "worker-local image circuit",
+      "shared_parent_state_found": false
+    },
+    "target_b": {
+      "observed_transition": "eligible -> reserved -> dispatched -> terminal unknown",
+      "classification": "unknown at the admission boundary; the private inner classification was not retained by the historical run",
+      "scope_proven_by_evidence": "request only",
+      "source_fallback_before_repair": "unclassified image worker response was synthesized as unknown/worker with a five-second fallback circuit",
+      "shared_parent_state_found": false
+    },
+    "later_requests": {
+      "count": 5,
+      "transition": "received -> both worker image circuits evaluated as cooling/quarantined -> no reservation -> no pre-grant -> no dispatch",
+      "endpoint_discovery": "healthy; no endpoint circuit poisoning"
+    }
+  },
+  "demonstrated_mechanism": {
+    "source_owner": "PoolRuntime.worker.failureCircuits[workload]",
+    "scope": "independent worker plus workload",
+    "propagation": "No A-to-B or parent-pool propagation was found. A and B receive separate Worker circuit objects.",
+    "mapping_before": [
+      { "failure": "pre_generation_rejected", "scope": "worker", "mutation": "worker image cooldown; authoritative retry-after or 30-second fallback" },
+      { "failure": "unknown", "scope": "worker", "mutation": "worker image cooldown; five-second fallback" },
+      { "failure": "ambiguous POST", "scope": "request", "mutation": "terminal current request; no replay" }
+    ],
+    "conclusion": "The demonstrated amplification was an overly broad unknown-to-worker cooldown mapping, not a shared capacity or admission failure. The A failure remained correctly target-local; B was incorrectly suppressed for future work by an outcome that proved only that the current mutation was unresolved."
+  },
+  "repair": {
+    "files": [
+      "src/relay/private-failure.ts",
+      "src/relay/pool-runtime.ts",
+      "scripts/test-relay-services.ts",
+      "docs/runbooks/relay-admission-lifecycle.md",
+      "docs/runbooks/relay-pool-services.md"
+    ],
+    "changes": [
+      "classify unclassified image failures as request-scoped unknown",
+      "defensively prevent unknown failures from opening worker circuits",
+      "retain worker-local cooldown for evidence-backed worker/capability failures",
+      "retain no-POST-replay behavior for the current ambiguous mutation",
+      "retain image/text capacity independence and existing recovery timing"
+    ],
+    "recovery": "Worker-local cooldowns remain bounded by their existing retry deadline; an expired circuit requires a successful probe to clear its failure streak. Unknown outcomes create no worker cooldown and therefore require no worker recovery transition."
+  },
+  "regression": {
+    "scenario": "A pre-generation rejection -> B ambiguous response -> next distinct request",
+    "before_fix": "failed: B received an unknown worker circuit and the next request could not use B",
+    "after_fix": "passed: A was attempted once and excluded, B was attempted once for the original request, B received the next distinct request, and it completed; no replay or A/B cycle",
+    "focused_test": "scripts/test-relay-services.ts: ambiguous image outcome does not suppress future capacity on the worker that received it"
+  },
+  "verification": {
+    "relay_services": "91/91 passed",
+    "relay_capabilities": "170/170 passed",
+    "adaptive_quota_admission_standard_pool": "81/81 passed",
+    "image_security": "51/51 passed",
+    "typescript": "passed",
+    "production_build": "passed",
+    "lint": "passed with eight pre-existing warnings and zero errors",
+    "diff_check": "passed",
+    "documentation_tests": "passed; docs:check still reports only the seven pre-existing stale review fingerprints, none refreshed",
+    "live_generations": 0,
+    "deployment": "not performed"
+  },
+  "safety": {
+    "morrow_replayed": false,
+    "new_star_requests": 0,
+    "queue_or_infrastructure_changes": 0,
+    "previous_failover_semantics_changed": false,
+    "endpoint_discovery_semantics_changed": false
+  },
+  "next_step": "Keep the qualification cohort inactive. Review and deploy this source repair only through a separate controlled release; do not issue another Star generation until that release and a separately authorized bounded qualification are approved."
+}

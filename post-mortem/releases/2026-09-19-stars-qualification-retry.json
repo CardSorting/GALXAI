@@ -1,0 +1,56 @@
+{
+  "record_type": "bounded-star-population-execution",
+  "captured_at": "2026-09-19T21:44:51Z",
+  "incident": "INC-20260919-STARS",
+  "cohort_key": "stars-qualification-retry-2026-09",
+  "run_key": "stars-qualification-retry-run-2026-09",
+  "authorization": {
+    "scope": "same twelve durable Stars, up to 36 additional content opportunities",
+    "maximum_attempts": 36,
+    "maximum_concurrency": 3,
+    "avatar_generations": 0,
+    "recurring_schedule": false,
+    "additional_stars": 0
+  },
+  "preflight": {
+    "database_migrations": "143 applied, 0 pending",
+    "relay_discovery": "functioning Premium endpoint selected automatically; image capability remained unknown",
+    "prior_cohorts_reopened": false,
+    "initial_and_refresh_ceiling_reset": false
+  },
+  "result": {
+    "stars_reused": 12,
+    "new_stars_created": 0,
+    "administrative_pro_assignments": 12,
+    "attempts_allocated": 3,
+    "successful_content_generations": 1,
+    "failed_content_generations": 2,
+    "relay_confirmed_generations": 1,
+    "provenance_verified_generations": 1,
+    "persisted_public_assets": 1,
+    "avatar_assets_created": 0,
+    "cohort_state": "disabled",
+    "actors_inactive_after_run": true,
+    "frontend_projection_verified": true,
+    "human_star_analytics_verified": true,
+    "star_admin_authority_records": 0,
+    "star_payment_records": 0,
+    "queued_or_generating_receipts": 0,
+    "provider_cost_estimate_usd": null
+  },
+  "failure": {
+    "systemic_stop": true,
+    "reason": "Two first-batch relay_unavailable failures triggered the controller systemic-stop rule; the third in-flight request was allowed to settle.",
+    "remaining_unallocated_opportunities": 33,
+    "retries_issued_after_stop": 0
+  },
+  "verification": {
+    "cohort_audit": "scripts/verify-stars.ts --retry",
+    "ownership": "The completed asset is owned by the correct autonomous Star account and is public through the normal library projection.",
+    "provenance": "The completed generation is marked galx-relay and its mapped asset passed account, generation, library, status, and visibility checks.",
+    "analytics": "Human and Star activity remain separate; the audit reports 70 Star generation records, 1 completed and 69 failed across the retained cohorts.",
+    "relay": "One generation was relay-confirmed; two requests returned the allowlisted relay_unavailable failure.",
+    "cleanup": "All twelve retry-cohort memberships and actors are inactive; no schedule, payment record, or administrative-management authority was created."
+  },
+  "next_step": "Retain all three cohorts as inactive. Do not reset, reopen, replay, or expand the retry cohort without a separate explicit authorization and fresh capability evidence."
+}

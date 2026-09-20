@@ -32,8 +32,10 @@ export function useImageStudio(owner: string | null, token?: string, libraryActi
   const [notice, setNotice] = useState('');
   const [availability, setAvailability] = useState<'available' | 'unavailable' | 'unknown'>('unknown');
   const [checkingAvailability, setCheckingAvailability] = useState(false);
+  const [availabilityRetryAt, setAvailabilityRetryAt] = useState(0);
   const availabilityLock = useRef(false);
   const availabilitySequence = useRef(0);
+  const availabilityAttempt = useRef(0);
   const [retryAt, setRetryAt] = useState(0);
   const [now, setNow] = useState(Date.now());
   const [creations, setCreations] = useState<StudioImage[]>([]);
@@ -61,12 +63,13 @@ export function useImageStudio(owner: string | null, token?: string, libraryActi
   const activeTasks = useRef<Map<string, PendingGeneration>>(new Map());
   const headers = useCallback((): Record<string, string> => ({ Accept: 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) }), [token]);
 
-  const checkAvailability = useCallback(async () => {
+  const checkAvailability = useCallback(async (manual = false) => {
     if (!owner || availabilityLock.current) return;
+    if (manual) {
+      availabilityAttempt.current = 0;
+      setAvailabilityRetryAt(0);
+    }
     availabilityLock.current = true; setCheckingAvailability(true);
-    // A retry is a new observation. Clear the previous result immediately so
-    // the banner cannot keep showing a stale failure while the check runs.
-    setError('');
     const sequence = ++availabilitySequence.current;
     try {
       const response = await workspaceFetch(owner, '/api/images/availability', {
@@ -76,8 +79,25 @@ export function useImageStudio(owner: string | null, token?: string, libraryActi
       if (!alive.current || sequence !== availabilitySequence.current) return;
       if (response.ok && (data?.status === 'available' || data?.status === 'unavailable')) {
         setAvailability(data.status);
-      } else setAvailability('unknown');
-    } catch { /* Keep the draft and leave availability unknown without interrupting the studio. */ }
+        if (data.status === 'available') {
+          availabilityAttempt.current = 0;
+          setAvailabilityRetryAt(0);
+        } else {
+          const delay = Math.min(60_000, 15_000 * (2 ** Math.min(availabilityAttempt.current++, 3)));
+          setAvailabilityRetryAt(Date.now() + Math.round(delay * (0.85 + Math.random() * 0.3)));
+        }
+      } else {
+        setAvailability('unknown');
+        const delay = Math.min(60_000, 5_000 * (2 ** Math.min(availabilityAttempt.current++, 3)));
+        setAvailabilityRetryAt(Date.now() + Math.round(delay * (0.85 + Math.random() * 0.3)));
+      }
+    } catch {
+      if (alive.current && sequence === availabilitySequence.current) {
+        setAvailability('unknown');
+        const delay = Math.min(60_000, 5_000 * (2 ** Math.min(availabilityAttempt.current++, 3)));
+        setAvailabilityRetryAt(Date.now() + Math.round(delay * (0.85 + Math.random() * 0.3)));
+      }
+    }
     finally { if (sequence === availabilitySequence.current) { availabilityLock.current = false; if (alive.current) setCheckingAvailability(false); } }
   }, [owner, headers]);
 
@@ -104,11 +124,29 @@ export function useImageStudio(owner: string | null, token?: string, libraryActi
     setReady(true);
     return () => { alive.current = false; submitController.current?.abort(); libraryController.current?.abort(); };
   }, [key, owner]);
-  const invalidateAvailability = useCallback(() => { availabilitySequence.current++; availabilityLock.current = false; }, []);
+  const invalidateAvailability = useCallback(() => {
+    availabilitySequence.current++;
+    availabilityLock.current = false;
+    availabilityAttempt.current = 0;
+  }, []);
   useEffect(() => {
-    setAvailability('unknown'); void checkAvailability();
+    setAvailability('unknown');
+    availabilityAttempt.current = 0;
+    setAvailabilityRetryAt(0);
+    void checkAvailability();
     return invalidateAvailability;
   }, [checkAvailability, invalidateAvailability]);
+  useEffect(() => {
+    if (!owner || !availabilityRetryAt || availability === 'available') return;
+    const timer = window.setTimeout(() => {
+      if (document.visibilityState !== 'visible') {
+        setAvailabilityRetryAt(Date.now() + 15_000);
+        return;
+      }
+      void checkAvailability();
+    }, Math.max(0, availabilityRetryAt - Date.now()));
+    return () => window.clearTimeout(timer);
+  }, [availability, availabilityRetryAt, checkAvailability, owner]);
   useEffect(() => { if (ready) save(`${key}:draft`, settings); }, [key, ready, settings]);
   useEffect(() => { const timer = window.setTimeout(() => setFilter(search.trim()), 300); return () => clearTimeout(timer); }, [search]);
   useEffect(() => {
