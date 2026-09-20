@@ -232,6 +232,11 @@
   box-shadow: 0 16px 36px -6px rgba(0, 0, 0, 0.6), 0 0 24px -4px rgba(168, 85, 247, 0.2);
 }
 
+.masonry-card:focus-visible {
+  outline: 2px solid #a855f7;
+  outline-offset: 4px;
+}
+
 .masonry-media-wrap {
   position: relative;
   width: 100%;
@@ -331,45 +336,7 @@
   border-color: rgba(56, 189, 248, 0.3);
 }
 
-/* Hover Overlay */
-.masonry-card-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to top, rgba(7, 9, 15, 0.95) 0%, rgba(7, 9, 15, 0.4) 45%, rgba(7, 9, 15, 0.05) 100%);
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  padding: 16px;
-  opacity: 0;
-  transition: opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-  z-index: 3;
-}
-
-.masonry-card:hover .masonry-card-overlay {
-  opacity: 1;
-}
-
-.masonry-prompt-snippet {
-  color: #ffffff;
-  font-size: 13px;
-  line-height: 1.45;
-  font-weight: 500;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  margin-bottom: 12px;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
-}
-
-/* Card Action Buttons */
-.masonry-card-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: auto;
-}
-
+/* Empty-state and explicit-action buttons */
 .masonry-action-btn {
   display: inline-flex;
   align-items: center;
@@ -402,16 +369,6 @@
 .masonry-action-btn.remix:hover {
   background: linear-gradient(135deg, #a855f7, #60a5fa);
   box-shadow: 0 6px 18px rgba(147, 51, 234, 0.5);
-}
-
-.masonry-action-icon-only {
-  width: 44px;
-  height: 44px;
-  min-width: 44px;
-  padding: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
 }
 
 /* --- Infinite Scroll & Loading States --- */
@@ -932,42 +889,6 @@
   min-width: 0;
 }
 
-.masonry-card-actions-top {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.masonry-hide-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  background: rgba(15, 18, 29, 0.7);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 9999px;
-  color: #94a3b8;
-  cursor: pointer;
-  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
-  opacity: 0;
-  transform: translateY(-4px);
-}
-
-.masonry-card:hover .masonry-hide-btn,
-.masonry-card:focus-within .masonry-hide-btn {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.masonry-hide-btn:hover {
-  background: rgba(245, 158, 11, 0.2);
-  border-color: rgba(245, 158, 11, 0.4);
-  color: #fbbf24;
-}
-
 /* Card Hiding Animation */
 .masonry-card.hiding {
   opacity: 0;
@@ -1034,47 +955,6 @@
 .masonry-moderation-desc strong {
   color: #fbbf24;
   font-weight: 600;
-}
-
-.masonry-like-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 4px 9px;
-  background: rgba(15, 18, 29, 0.7);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 9999px;
-  color: #cbd5e1;
-  font-size: 11px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
-  opacity: 0;
-  transform: translateY(-4px);
-}
-
-.masonry-card:hover .masonry-like-btn,
-.masonry-like-btn.liked {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.masonry-like-btn:hover {
-  background: rgba(244, 63, 94, 0.2);
-  border-color: rgba(244, 63, 94, 0.4);
-  color: #f43f5e;
-}
-
-.masonry-like-btn.liked {
-  background: rgba(244, 63, 94, 0.25);
-  border-color: rgba(244, 63, 94, 0.5);
-  color: #fda4af;
-}
-
-.masonry-like-btn.pop {
-  animation: heart-pop 0.45s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* --- Floating Modal Prev/Next Navigation --- */

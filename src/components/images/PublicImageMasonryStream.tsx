@@ -591,27 +591,6 @@ export function PublicImageMasonryStream({
     }).catch(() => {});
   };
 
-  // Remix / create with this prompt
-  const handleRemix = (e: React.MouseEvent, item: PublicFeedItem) => {
-    e.stopPropagation();
-
-    void fetch('/api/images/feed', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'remix', imageId: item.id }),
-    }).catch(() => {});
-
-    if (onSelectPrompt) {
-      onSelectPrompt(item.prompt, item.aspect_ratio || undefined);
-      return;
-    }
-    const params = new URLSearchParams();
-    params.set('prompt', item.prompt);
-    if (item.aspect_ratio) params.set('aspect_ratio', item.aspect_ratio);
-    params.set('tab', 'creations');
-    router.push(`/images?${params.toString()}`);
-  };
-
   // Download the selected public asset with a browser fallback.
   const handleDownload = async (e: React.MouseEvent, item: PublicFeedItem) => {
     e.stopPropagation();
@@ -1140,9 +1119,6 @@ export function PublicImageMasonryStream({
         <div className={`masonry-grid ${density}`} aria-label="Image creations stream">
           {items.map((item, idx) => {
             const isLoaded = loadedImages[item.id];
-            const isCopied = copiedId === item.id;
-            const isLiked = Boolean(likedMap[item.id]);
-            const likesCount = likesCountMap[item.id] ?? item.likes_count ?? 0;
             const ratioCss = ratioToCss(item.aspect_ratio);
 
             return (
@@ -1189,81 +1165,10 @@ export function PublicImageMasonryStream({
                     }}
                   />
 
-                  {/* Top Floating Badges & Action Buttons */}
+                  {/* Lightweight attribution; card tap opens the creation details */}
                   <div className="masonry-card-topbar">
                     <div className="masonry-card-author">
                       <ParticipantIdentity {...item.author} compact showHandle={false} />
-                    </div>
-
-                    <div className="masonry-card-actions-top">
-                      <button
-                        type="button"
-                        className="masonry-hide-btn"
-                        onClick={(e) => handleHideItem(e, item)}
-                        title={user ? 'Hide for me' : 'Sign in to hide'}
-                        aria-label={user ? 'Hide for me' : 'Sign in to hide this creation'}
-                      >
-                        <EyeOff size={13} />
-                      </button>
-
-                      <button
-                        type="button"
-                        className={`masonry-like-btn ${isLiked ? 'liked' : ''} ${likedPopId === item.id ? 'pop' : ''}`}
-                        onClick={(e) => handleToggleLike(e, item)}
-                        title={isLiked ? 'Unlike' : 'Like'}
-                        aria-label="Like creation"
-                      >
-                        <Heart size={14} className={isLiked ? 'fill-current text-rose-500' : ''} />
-                        {likesCount > 0 && <span>{formatCount(likesCount)}</span>}
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Hover Overlay */}
-                  <div className="masonry-card-overlay">
-                    <p className="masonry-prompt-snippet">{item.prompt}</p>
-
-                    <div className="masonry-card-actions">
-                      <button
-                        type="button"
-                        className="masonry-action-btn"
-                        onClick={(e) => handleCopyPrompt(e, item)}
-                        title="Copy prompt"
-                        aria-label="Copy prompt"
-                      >
-                        {isCopied ? <Check size={13} /> : <Copy size={13} />}
-                        <span>{isCopied ? 'Copied' : 'Prompt'}</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        className="masonry-action-btn masonry-action-icon-only"
-                        onClick={(e) => handleDownload(e, item)}
-                        title="Download image"
-                        aria-label="Download image"
-                      >
-                        <Download size={13} />
-                      </button>
-
-                      <button
-                        type="button"
-                        className="masonry-action-btn masonry-action-icon-only"
-                        onClick={(e) => handleHideItem(e, item)}
-                        title={user ? 'Hide for me' : 'Sign in to hide'}
-                        aria-label={user ? 'Hide for me' : 'Sign in to hide this creation'}
-                      >
-                        <EyeOff size={13} />
-                      </button>
-
-                      <button
-                        type="button"
-                        className="masonry-action-btn remix"
-                        onClick={(e) => handleRemix(e, item)}
-                        title="Create with this prompt"
-                      >
-                        <Sparkles size={13} />
-                        <span>Remix</span>
-                      </button>
                     </div>
                   </div>
                 </div>

@@ -1022,6 +1022,17 @@
         "audit"
       ]
     },
+    "docs/knowledge/audits/2026-09-20-image-card-density-review.json": {
+      "kind": "evidence",
+      "keywords": [
+        "images",
+        "cards",
+        "hover",
+        "focus",
+        "progressive-disclosure",
+        "audit"
+      ]
+    },
     "docs/maintainers/ACCOUNT_PROFILE_SCHEMA.md": {
       "kind": "reference",
       "keywords": [

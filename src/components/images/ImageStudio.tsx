@@ -522,46 +522,6 @@ function StudioWorkspace({
                       <div className="masonry-card-badges">
                         <span className="masonry-badge masonry-badge-ratio">{image.ratio}</span>
                       </div>
-                      <div className="masonry-card-overlay">
-                        <p className="masonry-prompt-snippet">{image.prompt}</p>
-                        <div className="masonry-card-actions">
-                          <button
-                            type="button"
-                            className="masonry-action-btn"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              void copyPrompt(image.prompt);
-                            }}
-                            title="Copy prompt"
-                          >
-                            <Copy size={13} />
-                            <span>Prompt</span>
-                          </button>
-                          <button
-                            type="button"
-                            className="masonry-action-btn masonry-action-icon-only"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              void download(image);
-                            }}
-                            title="Download image"
-                          >
-                            <ArrowDownToLine size={13} />
-                          </button>
-                          <button
-                            type="button"
-                            className="masonry-action-btn remix"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              applyPrompt(image.prompt, image.ratio, image.quality);
-                            }}
-                            title="Reuse prompt"
-                          >
-                            <Sparkles size={13} />
-                            <span>Reuse</span>
-                          </button>
-                        </div>
-                      </div>
                     </div>
                   </article>
                 ))}
@@ -605,39 +565,18 @@ function StudioWorkspace({
                       tabIndex={0}
                       role="button"
                       aria-label={`View image: ${image.prompt}`}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          openImage(image, 'library');
+                        }
+                      }}
                     >
                       <div className="masonry-media-wrap" style={{ aspectRatio: image.ratio === '16:9' ? '16/9' : image.ratio === '9:16' ? '9/16' : '1/1' }}>
                         <Artwork image={image} />
                         <div className="masonry-card-badges">
                           <span className="masonry-badge masonry-badge-ratio">{image.ratio}</span>
                           <span className="masonry-badge"><Star size={11} fill="currentColor" /></span>
-                        </div>
-                        <div className="masonry-card-overlay">
-                          <p className="masonry-prompt-snippet">{image.prompt}</p>
-                          <div className="masonry-card-actions">
-                            <button
-                              type="button"
-                              className="masonry-action-btn"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                void copyPrompt(image.prompt);
-                              }}
-                            >
-                              <Copy size={13} />
-                              <span>Prompt</span>
-                            </button>
-                            <button
-                              type="button"
-                              className="masonry-action-btn remix"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                applyPrompt(image.prompt, image.ratio, image.quality);
-                              }}
-                            >
-                              <Sparkles size={13} />
-                              <span>Reuse</span>
-                            </button>
-                          </div>
                         </div>
                       </div>
                     </article>

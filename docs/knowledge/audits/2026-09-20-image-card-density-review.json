@@ -1,0 +1,29 @@
+{
+  "reviewed_at": "2026-09-20T00:00:00.000000+00:00",
+  "reviewer": "Codex",
+  "scope": "Image card hover and focus ergonomics across the public stream, My Creations, and Favorites. Local implementation review and production build; no production deployment or authenticated browser session claimed.",
+  "decision": "Use image-first progressive disclosure. Cards remain a single browse target with lightweight creator or ratio context; prompt text and action clusters move to the deliberate detail inspector.",
+  "implementation": [
+    "Removed prompt text, duplicate hide/like controls, copy/download controls and Remix/Reuse clusters from card hover states in the public stream and saved studio grids.",
+    "Kept card tap, keyboard focus and the existing detail inspector as the clear entry point for full prompt, copy, download, reuse, like, hide and share actions.",
+    "Added a visible focus ring and removed now-unused hover overlay/action styles, reducing competing affordances without removing the underlying capabilities."
+  ],
+  "checks": {
+    "studio_contract": "passed 9 tests",
+    "typescript": "passed",
+    "targeted_lint": "passed with existing image-component warnings only",
+    "production_build": "passed",
+    "docs_impact": "mapped runtime changes to images and client-efficiency; surface brief, maintainer note and this retained evidence remain explicit unmapped documentation paths and were reviewed separately"
+  },
+  "limits": [
+    "No live production browser session, physical-device pass, or deployment was performed in this local change.",
+    "Existing Impeccable design-token findings in masonry-stream.css were left scoped; no new detector exceptions were added."
+  ],
+  "sources": [
+    "src/components/images/PublicImageMasonryStream.tsx",
+    "src/components/images/ImageStudio.tsx",
+    "src/components/images/masonry-stream.css",
+    ".impeccable/surfaces/src-app-images-page-tsx.md",
+    "docs/maintainers/image-studio-review.md"
+  ]
+}

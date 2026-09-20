@@ -1,11 +1,11 @@
 {
   "knowledge": {
     "reviewer": "codex",
-    "note": "Reviewed the new retained prompt-dock evidence and registry mapping; changed knowledge scope is limited to local UI verification and no production acceptance is implied.",
+    "note": "Reviewed the retained card-density evidence and registry mapping; documentation scope records local UI verification only.",
     "reviewed_at": "2026-09-20",
-    "review_by": "2026-09-20",
+    "review_by": "2026-10-20",
     "evidence": {
-      "docs/knowledge/audits/2026-09-20-image-prompt-dock-review.json": "7f9e4af3c01c133cf0860399b13635c4967ce8223581db4e5e8a001fdb586035"
+      "docs/knowledge/audits/2026-09-20-image-card-density-review.json": "6bdfb37806fe8e29fe001cced6197ab3c9226b216d37bb04797038460a6f9120"
     },
     "files": {
       ".github/CODEOWNERS": "ef2f416d15f027dc8f197ad844289c9a44c8e843d3214d1590a3a380e939d13f",
@@ -26,7 +26,7 @@
       "docs/how-to/change-with-documentation.md": "abcf6bfb2f0aadcf8cfc2fdae18ac8f3f84565f127c34f7453d50e7283006e40",
       "docs/knowledge/DESIGN_RATIONALE.md": "edd3cf9b49ed794fbe8bf14448fd0c56cb4d8df832bab81cdf07e9ea2e2204a1",
       "docs/knowledge/README.md": "5ad219aeee44a9c065db2ca69e5a6498966fed42e2d8c74773dbc055d0220931",
-      "docs/knowledge/registry.json": "5d84e0499e6920f6248878dcfd000eace366d023ff8544bb4bed698d50eda19d",
+      "docs/knowledge/registry.json": "5f9e9a048316816a92b8c4e0a4544d1cc2bde906e5fa1f65adad744bfc7660a8",
       "docs/knowledge/templates/adr.md": "28773b3cbdb53ad34f08d0362e87b6dba24b6fd76ddb6c85db8ad63d99ad1331",
       "docs/knowledge/templates/runbook.md": "19679a7eb8c1a3aafd87852fa93817e7bf9ef4696772c8deb1617366c290abc1",
       "docs/maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md": "b7df75535611c14aabe599764a6f6c2a4f0f1461d068929602c68e39d8ce850d",
@@ -53,11 +53,11 @@
   },
   "images": {
     "reviewer": "codex",
-    "note": "Reviewed the floating prompt dock's viewport-safe autosize, bottom-aligned actions, page-clearance synchronization, and contained scrolling for large prompts after local build and studio checks.",
+    "note": "Reviewed the image-first card interaction after the final keyboard-accessibility patch: public, My Creations and Favorites cards keep context-only metadata; hover no longer exposes prompts or action clusters; deliberate actions remain in the inspector; focus and keyboard activation are available.",
     "reviewed_at": "2026-09-20",
-    "review_by": "2026-09-20",
+    "review_by": "2026-10-20",
     "evidence": {
-      "docs/knowledge/audits/2026-09-20-image-prompt-dock-review.json": "7f9e4af3c01c133cf0860399b13635c4967ce8223581db4e5e8a001fdb586035"
+      "docs/knowledge/audits/2026-09-20-image-card-density-review.json": "6bdfb37806fe8e29fe001cced6197ab3c9226b216d37bb04797038460a6f9120"
     },
     "files": {
       "docs/QUEUE_SPECIFICATION.md": "301d293b23327bf065202322e0a7554cf581740f28d0d5ab9fb827e73beed6ba",
@@ -120,10 +120,10 @@
       "src/components/dashboard/GenerationGateNotice.tsx": "0c905274ce933e0247d4a05f4174c9c13377bcb02e0d833c3927cfce62701bac",
       "src/components/dashboard/generation-gate.module.css": "efd8526722ca0ad42aec319a56bc2ea7e638185f30c35cea9b445dfb69bba4a4",
       "src/components/images/GenerationCanvas.tsx": "4341702fc0842c20a7d860b8241a4bf55780919b73254f54915a61cd09269473",
-      "src/components/images/ImageStudio.tsx": "48177beafc7b60a7380e25950187a83058d3be813c79958f40236dc13907e834",
-      "src/components/images/PublicImageMasonryStream.tsx": "e77f97aeefe02ecdad9fdfd95143749a3cdf1be1245fb0e96033521c406f1317",
+      "src/components/images/ImageStudio.tsx": "9e675d39e26cbe60e56ec58a067d99c10306e93de3922023ec72a758e164fea3",
+      "src/components/images/PublicImageMasonryStream.tsx": "9d47d948f368a772fd617ae8e0b60df4e270fecb9568ccc94650fed39ad02727",
       "src/components/images/StudioArtwork.tsx": "427128b4f3ea300222b74fdfe132564237030507f1d40c20093c89ef52e26229",
-      "src/components/images/masonry-stream.css": "56b4202051dca94057cbf46805c09ee4ec185d473b5ca3c36c66a1f74d8ca6dc",
+      "src/components/images/masonry-stream.css": "85fb5e8126bad633328bca3a640524659cdcffe9f06bd40359308dc710ca8199",
       "src/components/images/studio-contract.ts": "b5803cbdc39ad60d71202a73b5a36228101a730fff272e51e54a6d4f96e9f83c",
       "src/components/images/studio.css": "700eef96913f5e9f7ae7a8f76b97b7e05f7628d32d2f7d156270e87194d9814a",
       "src/components/images/use-image-studio.ts": "0b948235a590eed6cf7db59a447f81ccf025514c2db9e0708eb86b60c624dec8",
@@ -1521,11 +1521,11 @@
   },
   "client-efficiency": {
     "reviewer": "codex",
-    "note": "Reviewed prompt editor resizing and viewport resize handling for bounded browser work; no polling, network, or generation request behavior changed.",
+    "note": "Reviewed card simplification after the final keyboard-accessibility patch as a render and interaction reduction: hover overlays and duplicate handlers are removed, inspector actions remain, and generation/network contracts are unchanged.",
     "reviewed_at": "2026-09-20",
-    "review_by": "2026-09-20",
+    "review_by": "2026-10-20",
     "evidence": {
-      "docs/knowledge/audits/2026-09-20-image-prompt-dock-review.json": "7f9e4af3c01c133cf0860399b13635c4967ce8223581db4e5e8a001fdb586035"
+      "docs/knowledge/audits/2026-09-20-image-card-density-review.json": "6bdfb37806fe8e29fe001cced6197ab3c9226b216d37bb04797038460a6f9120"
     },
     "files": {
       ".impeccable/surfaces/src-components-dashboard-navigation-tsx.md": "ed6144c9da6cf2c4e1537f735891cb91e1c064c488c24e1cec953509cfad6360",
@@ -1610,7 +1610,7 @@
       "src/components/home/public-home.module.css": "1a368aa1059dbcbc8899ebcb9b25c83944d37570b37093c5edb6fca826245e46",
       "src/components/home/use-galaxy-interactions.ts": "0a654c3abd4d7f562172df5d79afd94ee3b1c86509693dbc69d993920497d348",
       "src/components/home/use-story-entrance.ts": "8e3d8a6634a4b67456cff4d17ef76e2d450b136a4b844b86c21b4ec6b6b24a67",
-      "src/components/images/ImageStudio.tsx": "48177beafc7b60a7380e25950187a83058d3be813c79958f40236dc13907e834",
+      "src/components/images/ImageStudio.tsx": "9e675d39e26cbe60e56ec58a067d99c10306e93de3922023ec72a758e164fea3",
       "src/components/images/use-image-studio.ts": "0b948235a590eed6cf7db59a447f81ccf025514c2db9e0708eb86b60c624dec8",
       "src/components/public-content/DESIGN.json": "d8594db0bdf0f53295e4a7cb9cb7f770f47e54498d93489d2349cabb14373d61",
       "src/components/public-content/DESIGN.md": "1070795a25fc6075d9bceaaf8f77ee8033ff942a507d55196e0c39b4a4470d83",

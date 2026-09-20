@@ -19,7 +19,7 @@ The [shared product header](src-components-dashboard-navigation-tsx.md) lives in
 
 The primary Images entries in the desktop header, mobile drawer/tab and footer open My images at `/images/library`, which is the useful default for returning users. Create remains an explicit `/images` destination for the community stream and composer flow.
 
-The workspace leads with composition at the left and a blank results canvas at the right. A compact title and persistent Create / My images / Favorites navigation establish the workflow. The creation pane groups prompt, aspect ratio, and count in that order. Controls scroll independently on desktop while Generate remains available at the bottom.
+The workspace leads with composition at the left and a blank results canvas at the right. A compact title and persistent Create / My images / Favorites navigation establish the workflow. The creation pane groups prompt, aspect ratio, and count in that order. Controls scroll independently on desktop while Generate remains available at the bottom. Image cards stay image-first: hover does not reveal prompt text or an action cluster; tapping or focusing a card opens the detail inspector where copy, download, reuse, like, hide and share actions are grouped deliberately.
 
 The embedded Community Stream keeps its `/images` toolbar focused on sort, search, refresh and density. Aspect-ratio/style filter rows and the secondary Guidance action are intentionally omitted here to keep the creation loop calm; Explore follows the same quiet toolbar while public Star profiles and deep-linked stream queries retain their filter contract.
 

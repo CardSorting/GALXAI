@@ -12,6 +12,8 @@ Current large-library behavior is maintained in [image library scale](image-libr
 
 The current floating prompt dock stays fixed to the viewport edge while its textarea grows upward with the prompt. Page clearance follows the measured editor height, and prompts that exceed the viewport-safe expansion cap scroll inside the editor rather than covering the primary actions. This keeps short prompts compact while making long prompt writing and pasted text practical on desktop and mobile.
 
+Image cards use the same progressive-disclosure rule: the card remains an image-first browse target, with creator/ratio context only. Hover never reveals prompt copy or a competing button cluster. Tapping or focusing the card opens the inspector, where copy, download, reuse, like, hide and share actions are available together with the full prompt.
+
 ## Historical behavior through the ergonomics refinement
 
 - Composer refinement, 2026-09-13: removed the model selector, Standard / High detail buttons, and their helper copy at the user's request because the product serves a single image model. The initial September 10 interface included those controls; the verification checkpoint below remains dated evidence of that initial implementation.
