@@ -1,8 +1,8 @@
 {
   "version": 1,
   "reviewer": "Codex",
-  "reviewed_at": "2026-09-20T10:05:36.238307Z",
-  "note": "Final critical review for the production Image Studio catalog: provisioning remains deterministic and live-key guarded, activation is explicit, verification is read-only, and the active Creator, Studio, Team and reconciled Pro contracts are reflected in the plan-aware checkout and private policy. No customer, subscription, invoice, payment, tax registration or application entitlement was created by catalog activation; public responses remain allowlisted and contain no credentials or provider internals.",
+  "reviewed_at": "2026-09-20T10:23:09.607455Z",
+  "note": "Reviewed the public security disclosure asset allowlist, the authorization-aware deployment smoke contract, and the regression coverage for public disclosure assets after production deployment. Anonymous developer model and browser bootstrap requests remain intentionally denied.",
   "files": {
     ".dockerignore": "fb4dc7ef84e7f36c5bfed0f267187a022bbb61e66dd26060295b133e08fa74c5",
     ".github/workflows/vercel-preflight.yml": "60856940957e45075d1c54de644d3ba0268fad16b35b3ed5eb8005bc40a5b4b3",
@@ -81,7 +81,7 @@
     "src/lib/images/request-service.ts": "8873301571d260bbb185591e7192337538e2087c48e0be6074d0d916fcfcd6e8",
     "src/lib/security/developer-access.ts": "90ae12eaeeb6d04fdd64d69484b3aef1a2b3cdcd4be1ac5c0475682fe5f11180",
     "src/lib/security/preview-middleware.ts": "5aa7d99e127c3e4277a476c4edf21df1aa86db9733fa806709ebd15551390a1a",
-    "src/lib/security/preview-policy.ts": "8ba82c4e6e901bbffcfbe15b1dff04aa8e705a21608c4f37c5b499730fac0d2a",
+    "src/lib/security/preview-policy.ts": "e005c4f562f864b9e6976ad2fef4c3b39a0ca0a21678c64096a336e1261f40da",
     "src/lib/security/public-image-http.ts": "793b1a19ed4a704439544df062e6921f1f0e9862503a4e6dc38f01246e90584d",
     "src/lib/supabase/client.ts": "db451b92ca18d9d4b3aa1b5803008e61b4672591b6f236882177572b149afc40",
     "src/lib/supabase/repositories/ImageLibraryRepository.ts": "78953e0b7faa6e61d95b32fc97ea4d6932b47d23d419248258fb8ee9a4133907",

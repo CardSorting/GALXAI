@@ -161,11 +161,11 @@
   },
   "access": {
     "reviewer": "Codex",
-    "note": "Reviewed the owner-library DTO visibility field and its security implications. The field is an allowlisted owner-facing state only; private artifact bytes still require the owning authenticated session, public feed projections remain public-only, and no internal storage or identity data is exposed.",
+    "note": "Reviewed the public asset allowlist, anonymous access boundaries, and regression coverage. Security disclosure assets are intentionally public; developer model and bootstrap routes intentionally require authorization, and smoke assertions verify those boundaries.",
     "reviewed_at": "2026-09-20",
     "review_by": "2026-10-20",
     "evidence": {
-      "docs/knowledge/audits/2026-09-20-image-private-mode-review.json": "75cb301d3c76f025e862316e5d3bace89f8ea29892dec6a4436db51f2aec69aa"
+      "docs/SECURITY.md": "4e3bd43b6de8c2a9eb19dcd0c543f6c8d3616a81528b263046ebec549760afc6"
     },
     "files": {
       "docs/OAUTH_AND_TOKEN_LIFECYCLE_SPECIFICATION.md": "1e8004f6dc024322356e5494b099b7c38ed00e4a62e22434b020fd43c9470183",
@@ -189,7 +189,7 @@
       "scripts/test-auth-identity-boundary.ts": "7a4c8de24a4c82869d1adeb4c57567a574d206116b16df37681e8569bffefe93",
       "scripts/test-auth-provider-recovery.ts": "b97fb5e6c21e01fe830752e580b26208a2d96b219a8b773f1aba4702c63f83fe",
       "scripts/test-browser-session.ts": "2bcb16b82cc74f011dfa8c7d4d799145e084520b0d43b96addc552f4de9230e1",
-      "scripts/test-developer-preview.ts": "2f2a141dbdc5b0b56ab382c6031ce61adac4a9c073202218f6d3156271cff214",
+      "scripts/test-developer-preview.ts": "26b5b3f10d00a7db6b913b5378480ef6d41ffc302cd376d977fdac33ad9c11da",
       "scripts/test-free-generation-gate-db.ts": "2919f39490203795965f494f61b288305ea7136e544515cc504d9e8a0ff7e037",
       "scripts/test-free-generation-quota-db.ts": "26d3381b0a90285cce6d954b954601fb7a5a4596998389ac7091cfb7b49d9b04",
       "scripts/test-free-generation-quota.ts": "cbf7034c6f10ecfcf6176718f693a2636af775899e05552b5d7c53c58f142fb3",
@@ -297,7 +297,7 @@
       "src/lib/security/normalize-image-output.ts": "205920bbb0a1df05c955211edc4d738b21cabefbe04bd0a5386ac5e0ac0af4bd",
       "src/lib/security/preview-admin.ts": "a3b9a346555aa0328652956bbae443ad438930dc9d73f76a0444f1e116ab59ec",
       "src/lib/security/preview-middleware.ts": "5aa7d99e127c3e4277a476c4edf21df1aa86db9733fa806709ebd15551390a1a",
-      "src/lib/security/preview-policy.ts": "8ba82c4e6e901bbffcfbe15b1dff04aa8e705a21608c4f37c5b499730fac0d2a",
+      "src/lib/security/preview-policy.ts": "e005c4f562f864b9e6976ad2fef4c3b39a0ca0a21678c64096a336e1261f40da",
       "src/lib/security/private-image-diagnostics.ts": "b2f34531192d580a86ff2bfe9cc65df9586ec28abb5648e0fc5cace2aba40255",
       "src/lib/security/public-image-http.ts": "793b1a19ed4a704439544df062e6921f1f0e9862503a4e6dc38f01246e90584d",
       "src/lib/security/public-image-record.ts": "6abc053e0119b06275ba760f6fbabdb1fb2e6600464e7f5184f762574eea4b4b",

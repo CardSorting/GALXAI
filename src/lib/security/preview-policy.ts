@@ -12,7 +12,8 @@ const publicApis = new Set(['/api/health', '/api/openapi.json', '/api/auth/signu
   '/api/seo/rates', '/api/compute/pool']);
 const publicAssets = new Set(['/favicon.ico', '/favicon.svg', '/robots.txt', '/sitemap.xml', '/feed.xml',
   '/manifest.webmanifest', '/opensearch.xml', '/icon-192.png', '/icon.png', '/apple-icon.png', '/apple-touch-icon.png', '/icon-512.png', '/apple-touch-icon-precomposed.png',
-  '/opengraph-image', '/twitter-image', '/api/og', '/BingSiteAuth.xml']);
+  '/opengraph-image', '/twitter-image', '/api/og', '/BingSiteAuth.xml',
+  '/.well-known/security.txt', '/.well-known/pgp-key.txt', '/.well-known/traffic-advice', '/.well-known/ai-plugin.json']);
 export function normalizedPath(pathname: string): string {
   try { return decodeURIComponent(pathname).replace(/\/+$/, '') || '/'; } catch { return '/invalid-private-path'; }
 }

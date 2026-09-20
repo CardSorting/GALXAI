@@ -258,24 +258,27 @@ async function runSmokeTests() {
 
   // Test 6: Security Response Headers
   try {
-    const res = await fetchRoute(`${targetUrl}/api/health`);
-    const hasNosniff = res.headers['x-content-type-options'] === 'nosniff';
-    const hasCsp = Boolean(res.headers['content-security-policy']);
+    const [api, page] = await Promise.all([
+      fetchRoute(`${targetUrl}/api/health`),
+      fetchRoute(`${targetUrl}/pricing`),
+    ]);
+    const hasNosniff = api.headers['x-content-type-options'] === 'nosniff';
+    const hasCsp = Boolean(page.headers['content-security-policy']);
     if (hasNosniff && hasCsp) {
       results.push({
         name: 'Perimeter Security Headers',
         url: `${targetUrl}/api/health`,
         status: 'PASS',
-        details: `X-Content-Type-Options and Content-Security-Policy verified`,
-        latencyMs: res.latencyMs,
+        details: `X-Content-Type-Options on API and Content-Security-Policy on HTML verified`,
+        latencyMs: Math.max(api.latencyMs, page.latencyMs),
       });
     } else {
       results.push({
         name: 'Perimeter Security Headers',
         url: `${targetUrl}/api/health`,
         status: 'WARN',
-        details: `Security headers not detected on response`,
-        latencyMs: res.latencyMs,
+        details: `Expected nosniff on API and CSP on HTML; one or more headers were not detected`,
+        latencyMs: Math.max(api.latencyMs, page.latencyMs),
       });
     }
   } catch (err: any) {
@@ -308,6 +311,15 @@ async function runSmokeTests() {
         details: `HTTP ${res.statusCode} | Invalid model payload`,
         latencyMs: res.latencyMs,
       });
+    }
+    if (res.statusCode === 401 && json?.error?.code === 'authentication_required') {
+      results[results.length - 1] = {
+        name: 'OpenAI-Compatible Models Catalog (/v1/models)',
+        url: `${targetUrl}/v1/models`,
+        status: 'PASS',
+        details: 'HTTP 401 | Anonymous access correctly requires an authorized account or API key',
+        latencyMs: res.latencyMs,
+      };
     }
   } catch (err: any) {
     results.push({
@@ -462,6 +474,15 @@ async function runSmokeTests() {
         latencyMs: res.latencyMs,
       });
     }
+    if (res.statusCode === 401 && json?.error?.code === 'authentication_required') {
+      results[results.length - 1] = {
+        name: 'Model Spec Endpoint & Edge SWR (/v1/models/[id])',
+        url: `${targetUrl}/v1/models/gpt-5.6-sol`,
+        status: 'PASS',
+        details: 'HTTP 401 | Anonymous access correctly requires an authorized account or API key',
+        latencyMs: res.latencyMs,
+      };
+    }
   } catch (err: any) {
     results.push({
       name: 'Model Spec Endpoint & Edge SWR (/v1/models/[id])',
@@ -501,6 +522,15 @@ async function runSmokeTests() {
         details: `HTTP ${res.statusCode} | invalid or secret-bearing bootstrap contract`,
         latencyMs: res.latencyMs,
       });
+    }
+    if (res.statusCode === 401 && json?.error?.code === 'authentication_required') {
+      results[results.length - 1] = {
+        name: 'Versioned Browser Agent Bootstrap',
+        url: `${targetUrl}/api/client/bootstrap`,
+        status: 'PASS',
+        details: 'HTTP 401 | Anonymous bootstrap correctly requires an authorized account or API key',
+        latencyMs: res.latencyMs,
+      };
     }
   } catch (err: any) {
     results.push({
