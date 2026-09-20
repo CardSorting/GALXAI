@@ -1011,6 +1011,17 @@
         "audit"
       ]
     },
+    "docs/knowledge/audits/2026-09-20-image-prompt-dock-review.json": {
+      "kind": "evidence",
+      "keywords": [
+        "images",
+        "studio",
+        "prompt",
+        "dock",
+        "responsive",
+        "audit"
+      ]
+    },
     "docs/maintainers/ACCOUNT_PROFILE_SCHEMA.md": {
       "kind": "reference",
       "keywords": [

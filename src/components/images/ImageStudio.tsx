@@ -5,7 +5,7 @@ import { GenerationGateNotice, useGenerationGate } from '@/components/dashboard/
 import { usePathname } from 'next/navigation';
 import { IMAGE_PATHS, imageView, type ImageView } from '@/lib/images/navigation';
 import { authEntryPath } from '@/lib/auth/redirects';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ArrowDownToLine,
   ArrowLeft,
@@ -94,6 +94,7 @@ function StudioWorkspace({
   const [downloading, setDownloading] = useState(false);
   const [copied, setCopied] = useState(false);
   const promptRef = useRef<HTMLTextAreaElement>(null);
+  const studioRootRef = useRef<HTMLElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -107,6 +108,39 @@ function StudioWorkspace({
   const activeImage = active;
   const activeIndex = activeCollection.findIndex((image) => image.id === active?.id);
   const dialogOpen = Boolean(active);
+
+  // Keep the floating composer comfortable for long prompts. It grows with
+  // the text until it reaches a viewport-safe cap, then scrolls internally so
+  // the dock never pushes the primary actions off-screen.
+  const syncPromptEditor = useCallback((element?: HTMLTextAreaElement | null) => {
+    const textarea = element ?? promptRef.current;
+    if (!textarea) return;
+
+    const maxHeight = typeof window === 'undefined'
+      ? 360
+      : Math.max(120, Math.min(360, Math.floor(window.innerHeight * 0.46)));
+    textarea.style.height = 'auto';
+    const nextHeight = Math.max(24, Math.min(textarea.scrollHeight, maxHeight));
+    textarea.style.height = `${nextHeight}px`;
+    textarea.style.overflowY = textarea.scrollHeight > maxHeight ? 'auto' : 'hidden';
+
+    // Keep the page content reachable as the fixed dock grows upward.
+    studioRootRef.current?.style.setProperty(
+      '--studio-dock-clearance',
+      `${Math.max(160, nextHeight + 112)}px`,
+    );
+  }, []);
+
+  useEffect(() => {
+    syncPromptEditor();
+  }, [settings.prompt, syncPromptEditor]);
+
+  useEffect(() => {
+    const handleViewportResize = () => syncPromptEditor();
+    window.addEventListener('resize', handleViewportResize);
+    return () => window.removeEventListener('resize', handleViewportResize);
+  }, [syncPromptEditor]);
+
   const readinessNotice = studio.error
     ? {
         tone: 'error',
@@ -326,7 +360,7 @@ function StudioWorkspace({
   }
 
   return (
-    <main className="studio" aria-label="GALX Image Studio">
+    <main ref={studioRootRef} className="studio" aria-label="GALX Image Studio">
       {/* --- Sleek Floating Header --- */}
       <header className="studio-top-bar">
         <div className="studio-top-left">
@@ -812,9 +846,7 @@ function StudioWorkspace({
             aria-label="Image prompt"
             onChange={(e) => {
               setSettings((prev) => ({ ...prev, prompt: e.target.value }));
-              // Auto grow
-              e.target.style.height = 'auto';
-              e.target.style.height = `${Math.min(e.target.scrollHeight, 120)}px`;
+              syncPromptEditor(e.currentTarget);
             }}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {

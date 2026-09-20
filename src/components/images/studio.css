@@ -21,6 +21,7 @@
   --studio-line: rgba(255, 255, 255, 0.1);
   --studio-accent: #6366f1;
   --studio-selected: #c7d2fe;
+  --studio-dock-clearance: 160px;
   width: 100%;
   min-height: 100dvh;
   position: relative;
@@ -287,7 +288,7 @@
   flex: 1;
   width: 100%;
   max-width: 100%;
-  padding-bottom: 160px; /* Clearance for floating bottom dock */
+  padding-bottom: var(--studio-dock-clearance); /* Clearance for floating bottom dock */
 }
 
 .studio-stream-view {
@@ -460,8 +461,9 @@
 /* Main Dock Pill Bar */
 .studio-dock-bar {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: 12px;
+  min-height: 60px;
   padding: 8px 12px 8px 14px;
   border-radius: 22px;
   background: rgba(18, 20, 28, 0.92);
@@ -503,7 +505,8 @@
 .studio-dock-textarea {
   flex: 1;
   min-height: 24px;
-  max-height: 120px;
+  height: 24px;
+  max-height: clamp(120px, 46dvh, 360px);
   background: transparent;
   border: none;
   outline: none;
@@ -513,6 +516,11 @@
   line-height: 1.5;
   resize: none;
   padding: 6px 4px;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  overflow-wrap: anywhere;
+  scrollbar-gutter: stable;
+  overscroll-behavior: contain;
 }
 
 .studio-dock-textarea::placeholder {

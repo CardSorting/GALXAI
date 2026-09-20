@@ -1,0 +1,28 @@
+{
+  "reviewed_at": "2026-09-20T00:00:00.000000+00:00",
+  "reviewer": "Codex",
+  "scope": "Floating Image Studio prompt dock behavior for long and pasted prompts. Local implementation review and production build; no production deployment or authenticated browser session claimed.",
+  "decision": "Keep the floating dock anchored to the viewport, let the prompt editor grow upward with the content, preserve bottom-aligned actions, and switch to an internal editor scrollbar only at a viewport-safe cap.",
+  "implementation": [
+    "The prompt editor measures its content on change, restored prompt updates, and viewport resize; the cap is the smaller of 360px and 46% of the viewport height, with a 120px floor.",
+    "The studio root receives matching dock clearance so the fixed composer does not hide the lower content as it expands.",
+    "Long unbroken text wraps safely, editor scrolling is contained, and plus/Generate actions remain reachable at the bottom of the growing dock."
+  ],
+  "checks": {
+    "studio_contract": "passed 9 tests",
+    "typescript": "passed",
+    "targeted_lint": "passed with no new ImageStudio findings",
+    "production_build": "passed",
+    "docs_impact": "mapped to images and client-efficiency; no unmapped paths"
+  },
+  "limits": [
+    "No live production browser session, physical-device pass, or deployment was performed in this local change.",
+    "Existing Impeccable color/radius findings in studio.css were not broadened or suppressed; this change adds no new detector exceptions."
+  ],
+  "sources": [
+    "src/components/images/ImageStudio.tsx",
+    "src/components/images/studio.css",
+    ".impeccable/surfaces/src-app-images-page-tsx.md",
+    "docs/maintainers/image-studio-review.md"
+  ]
+}
