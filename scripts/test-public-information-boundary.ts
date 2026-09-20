@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { hasInternalAccess } from '../src/lib/security/internal-access';
-import { isPublicProductPath } from '../src/lib/security/preview-policy';
+import { isPublicFrameworkAssetPath, isPublicProductPath } from '../src/lib/security/preview-policy';
 import { GET as health } from '../src/app/api/health/route';
 
 test('administrator access fails closed for missing, user, and malformed credentials', () => {
@@ -34,6 +34,8 @@ test('Star profiles and participant APIs are public product surfaces without bro
   assert.equal(isPublicProductPath('/profile/../../settings'), false);
   assert.equal(isPublicProductPath('/api/community/participants/invalid!'), false);
   assert.equal(isPublicProductPath('/api/community/participants/veyrasol/diagnostics'), false);
+  assert.equal(isPublicFrameworkAssetPath('/_next/static/chunks/app/profile/%5Bhandle%5D/page-fixture.js'), true);
+  assert.equal(isPublicFrameworkAssetPath('/_next/static/chunks/app/profile/%5Bhandle%5D/diagnostics/page-fixture.js'), false);
 });
 
 test('operational routes reject anonymous and ordinary bearer callers before collecting data', async () => {

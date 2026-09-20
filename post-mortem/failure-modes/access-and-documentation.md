@@ -16,6 +16,12 @@ Run the workspace entry cases in `npm run test:image:security`, build production
 
 A downstream cache override is part of this boundary: September 13 live acceptance found a four-hour Cloudflare browser TTL replacing private headers on static-looking protected paths. Respect origin cache headers and run `node scripts/verify-workspace-cache-http.mjs https://galx.ai` after deployment or CDN changes. Authentication redirects alone do not establish safe cache policy. Active Supabase session lookup and a verified logout postcondition reject copied JWTs on subsequent GALX account requests; do not replace that check with cached identity.
 
+## FM-ACCESS-003 — a public dynamic route loads a protected framework chunk
+
+A public page can render on the server while its browser bundle is denied if framework assets infer access from a route template such as `/profile/[handle]` using a validator that only accepts concrete public handles. The browser then receives a private JSON denial where JavaScript is required and reports a chunk-load failure.
+
+Keep framework-asset exemptions as an explicit route-template allowlist. Never make all page chunks public or treat arbitrary bracketed paths as product routes. Regression coverage must request both encoded and decoded forms of the reviewed template, deny private descendants and unrelated page chunks, and verify the raw hosted asset body, content type and cache behavior after deployment.
+
 ## FM-DOCS-001 — old operational advice regresses a repaired system
 
 The September 13 audit found stale September 11 handovers, the retired no-image-studio product rule, process-local image guidance presented too broadly, incomplete catalog coverage, and a diagnostic recipe that exposed secrets and invoked a mutation script. These are operational hazards even when code is correct.

@@ -4663,6 +4663,16 @@
       "decision": null
     },
     {
+      "path": "post-mortem/incidents/2026/2026-09-20-profile-chunk/README.md",
+      "title": "Public profile route chunk denied",
+      "scope": "operational-record",
+      "kind": "navigation",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
       "path": "post-mortem/runbooks/controller-lock.md",
       "title": "Controller ownership and stale-lock recovery",
       "scope": "current-guide",

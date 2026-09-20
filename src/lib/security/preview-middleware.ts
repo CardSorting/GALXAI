@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { enforceDeveloperAccess } from './developer-access';
-import { isApiPath, isMachineRoute, isPublicProductPath, normalizedPath } from './preview-policy';
+import { isApiPath, isMachineRoute, isPublicFrameworkAssetPath, isPublicProductPath, normalizedPath } from './preview-policy';
 import { enforcePreviewAdmin } from '@/lib/admin/preview-route';
 
 export async function previewMiddleware(req: NextRequest): Promise<NextResponse | null> {
@@ -22,8 +22,7 @@ export async function previewMiddleware(req: NextRequest): Promise<NextResponse 
   // Framework assets are immutable and contain no grants. Page-specific developer
   // chunks are private as well; shared chunks must satisfy the public-content scan.
   if (path.startsWith('/_next/')) {
-    const pageChunk = path.match(/^\/_next\/static\/chunks\/app\/(.+)\/(?:page|layout)-[^/]+\.js$/);
-    if (!pageChunk || isPublicProductPath('/' + pageChunk[1])) return null;
+    if (isPublicFrameworkAssetPath(path)) return null;
   } else if (isPublicProductPath(path) || isMachineRoute(path)) return null;
   if (isApiPath(path) && req.method === 'OPTIONS') return new NextResponse(null, { status: 204, headers: {
     'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',

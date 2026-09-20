@@ -30,6 +30,16 @@ export function isPublicProductPath(pathname: string): boolean {
   if (/^\/(?:google[^/]+\.html|yandex_[^/]+\.html)$/.test(p)) return true;
   return false;
 }
+/** Framework assets inherit access only from an exact, reviewed route template. */
+export function isPublicFrameworkAssetPath(pathname: string): boolean {
+  const path = normalizedPath(pathname);
+  if (!path.startsWith('/_next/')) return false;
+  const pageChunk = path.match(/^\/_next\/static\/chunks\/app\/(.+)\/(?:page|layout)-[^/]+\.js$/);
+  if (!pageChunk) return true;
+  const route = '/' + pageChunk[1];
+  if (route === '/profile/[handle]') return true;
+  return isPublicProductPath(route);
+}
 export function isMachineRoute(pathname: string): boolean {
   // These handlers must retain their independent administrator/signature checks.
   return /^\/api\/internal(?:\/|$)/.test(pathname) || pathname === '/api/credits/stripe';

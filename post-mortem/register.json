@@ -4,6 +4,24 @@
   "notes": "Severity assigned retrospectively where the original record had no incident label. Recovered historical records retain their original verification scope; no fresh live test is implied.",
   "incidents": [
     {
+      "id": "INC-20260920-PROFILECHUNK",
+      "category": "authorization",
+      "severity": "SEV-2",
+      "status": "investigating",
+      "title": "Public profile route chunk denied by preview authorization",
+      "owner": "Codex (active responder)",
+      "record": "post-mortem/incidents/2026/2026-09-20-profile-chunk/README.md",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-09-20-profile-chunk/README.md",
+        "src/lib/security/preview-policy.ts",
+        "scripts/test-developer-preview.ts"
+      ],
+      "failure_modes": [
+        "FM-ACCESS-003"
+      ],
+      "recovery_evidence": []
+    },
+    {
       "id": "INC-20260907-RELAY",
       "category": "relay",
       "severity": "SEV-1",
@@ -812,6 +830,19 @@
         "docker/relay-pools/local/images.json",
         "scripts/populate-stars.ts",
         "scripts/verify-stars.ts"
+      ]
+    },
+    {
+      "id": "ACT-033",
+      "incident": "INC-20260920-PROFILECHUNK",
+      "owner": "Security/access maintainer",
+      "review_by": "2026-09-27",
+      "status": "open",
+      "next_step": "Retain encoded and decoded public dynamic-route chunk coverage together with private sibling denial in the preview authorization suite.",
+      "closure": "Close after the repaired production asset and anonymous browser path pass and the regression remains part of the normal access test command.",
+      "evidence": [
+        "scripts/test-developer-preview.ts",
+        "post-mortem/incidents/2026/2026-09-20-profile-chunk/README.md"
       ]
     }
   ]

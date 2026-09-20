@@ -119,6 +119,14 @@ allowlisted, private/no-store, and contain no internal diagnostics or
 enrollment link. Keep middleware and route-level guards when adding a private
 route.
 
+Public framework assets inherit access only from exact reviewed route
+templates. Dynamic templates are not concrete customer paths: for example,
+the public profile page emits a browser chunk under `profile/[handle]`, while
+the public page validator accepts only a normalized real handle. Keep that
+template in the explicit framework-asset allowlist. Do not exempt arbitrary
+bracketed paths, private descendants, unrelated page chunks, or administrator
+assets.
+
 Run the focused checks after changes:
 
 ```sh
@@ -137,6 +145,12 @@ administrator can create, inspect, update, meter, and revoke a bounded
 credential. Scan rendered HTML, RSC responses, and browser assets for retired
 checkout, enrollment, pricing, and internal implementation copy. Local
 verification is not evidence of a hosted deployment.
+
+For each public dynamic route, request the encoded and decoded route-chunk
+forms anonymously and keep adversarial private siblings in the same test. A
+hosted acceptance must confirm the exact chunk returns JavaScript with a
+successful status and that a clean anonymous browser renders the route. A page
+document returning 200 does not prove its browser assets are accessible.
 
 Do not roll back to a pre-gate or pre-retirement application: that would reopen
 the public distribution contract. A safe rollback keeps the admin-only boundary

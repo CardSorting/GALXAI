@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { NextRequest } from 'next/server';
-import { isPublicProductPath, normalizedPath } from '../src/lib/security/preview-policy';
+import { isPublicFrameworkAssetPath, isPublicProductPath, normalizedPath } from '../src/lib/security/preview-policy';
 import { previewMiddleware } from '../src/lib/security/preview-middleware';
 import { generationQuotaRoute } from '../src/lib/billing/generation-quota-route';
 import { enforceDeveloperAccess, usagePricingUnavailable } from '../src/lib/security/developer-access';
@@ -17,6 +17,26 @@ test('only product and supporting endpoints bypass preview, including async imag
   for (const path of ['/v1/chat/completions','/v1/models','/v1/models/id.png','/v1/messages','/api/generate','/api/run','/api/chat','/api/keys','/api/auth/tokens/restricted','/api/sites/workspace-evil','/v1/images/generations/evil','/api/images/availability/diagnostics','/api/new-service','/playground','/docs','/keys','/models/opengraph-image','/llms-full.txt']) assert.equal(isPublicProductPath(path), false, path);
   assert.equal(normalizedPath('/v1/chat/completions/'), '/v1/chat/completions');
   assert.equal(isPublicProductPath('/api/%73ites/workspace-evil'), false);
+});
+
+test('public dynamic profile chunks bypass preview without exposing private sibling chunks', async () => {
+  const publicChunks = [
+    '/_next/static/chunks/app/profile/%5Bhandle%5D/page-fixture.js',
+    '/_next/static/chunks/app/profile/[handle]/page-fixture.js',
+  ];
+  for (const path of publicChunks) {
+    assert.equal(isPublicFrameworkAssetPath(path), true, path);
+    assert.equal(await previewMiddleware(new NextRequest('https://galx.ai' + path)), null, path);
+  }
+  for (const path of [
+    '/_next/static/chunks/app/profile/%5Bhandle%5D/diagnostics/page-fixture.js',
+    '/_next/static/chunks/app/profile/%5Bhandle%5D/private/page-fixture.js',
+    '/_next/static/chunks/app/settings/page-fixture.js',
+    '/_next/static/chunks/app/api/community/participants/%5Bhandle%5D/page-fixture.js',
+  ]) {
+    assert.equal(isPublicFrameworkAssetPath(path), false, path);
+    assert.notEqual(await previewMiddleware(new NextRequest('https://galx.ai' + path)), null, path);
+  }
 });
 
 test('anonymous, pending, revoked, forged grants, and unavailable authority cannot dispatch', async () => {

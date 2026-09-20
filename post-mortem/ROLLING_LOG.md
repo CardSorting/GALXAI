@@ -1743,3 +1743,31 @@ Incident: `INC-20260919-STARS`. Kind: `verification`.
 **Next step:** Leave the fresh cohort completed and inactive. Make any broader Star population or recurring activity a separate authorization; retain the upstream capability state as undisclosed and route future work from bounded execution evidence.
 
 Evidence: [2026-09-20-stars-production-qualification-r2.json](releases/2026-09-20-stars-production-qualification-r2.json), [test-star-qualification-plan.ts](../scripts/test-star-qualification-plan.ts), [populate-stars.ts](../scripts/populate-stars.ts), [verify-stars.ts](../scripts/verify-stars.ts).
+
+## EVT-20260920-profile-chunk-observed — 2026-09-20T02:18:17Z
+
+Incident: `INC-20260920-PROFILECHUNK`. Kind: `observation`.
+
+**Observation:** The public profile route document was reachable, but its exact versioned browser chunk returned HTTP 401, application/json and private no-store to an anonymous request, causing the reported ChunkLoadError and profile recovery screen. The contemporaneous /explore document returned HTTP 200. Incident start time and affected request count are unknown.
+
+**Action:** Inspected the public-route and framework-asset authorization classifiers without changing production state. Traced the denial to the decoded dynamic route template being evaluated as though it were a concrete handle.
+
+**Result:** The failure is isolated to the public dynamic profile route asset authorization path; no evidence indicates a profile-data, generation or artifact mutation failure.
+
+**Next step:** Add an exact reviewed route-template asset exemption, retain denial for private sibling chunks, run adversarial authorization/public-boundary tests and a production build, then deploy and verify the raw asset plus anonymous browser path before marking recovery.
+
+Evidence: [README.md](incidents/2026/2026-09-20-profile-chunk/README.md), [preview-middleware.ts](../src/lib/security/preview-middleware.ts), [preview-policy.ts](../src/lib/security/preview-policy.ts).
+
+## EVT-20260920-profile-chunk-local-repair — 2026-09-20T02:25:43Z
+
+Incident: `INC-20260920-PROFILECHUNK`. Kind: `containment`.
+
+**Observation:** The decoded dynamic profile route template was the only demonstrated cause of the profile ChunkLoadError; broad framework assets and concrete public profile paths already had distinct correct behavior.
+
+**Action:** Added an exact framework-asset exemption for the reviewed /profile/[handle] route template and adversarial coverage for encoded, decoded, private-descendant, unrelated and administrator asset paths. Reconciled the private access guide and failure-mode record.
+
+**Result:** Focused developer-preview, profile, public-boundary, administrator, session, quota and image/security suites pass. TypeScript and the production build pass. An isolated production server returned the compiled profile chunk as HTTP 200 application/javascript with immutable caching, while a private profile descendant returned the existing sanitized HTTP 401 no-store response.
+
+**Next step:** Complete documentation gates, deploy the reviewed application revision, and verify the exact hosted chunk plus a clean anonymous profile browser path before marking recovery.
+
+Evidence: [preview-policy.ts](../src/lib/security/preview-policy.ts), [preview-middleware.ts](../src/lib/security/preview-middleware.ts), [test-developer-preview.ts](../scripts/test-developer-preview.ts), [developer-preview.md](../docs/operations/developer-preview.md), [README.md](incidents/2026/2026-09-20-profile-chunk/README.md).
