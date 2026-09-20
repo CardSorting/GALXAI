@@ -1,8 +1,8 @@
 {
   "version": 1,
   "reviewer": "Codex security/access maintainer",
-  "reviewed_at": "2026-09-20T02:27:00.130334Z",
-  "note": "Reviewed public dynamic profile route asset authorization, adversarial sibling denial, incident guidance, and hosted acceptance requirements.",
+  "reviewed_at": "2026-09-20T02:35:23.212568Z",
+  "note": "Reviewed final dated profile recovery wording and retained deployment limitations.",
   "files": {
     ".dockerignore": "fb4dc7ef84e7f36c5bfed0f267187a022bbb61e66dd26060295b133e08fa74c5",
     ".github/workflows/vercel-preflight.yml": "60856940957e45075d1c54de644d3ba0268fad16b35b3ed5eb8005bc40a5b4b3",
@@ -40,7 +40,7 @@
     "docs/operations/wallet-lifecycle.md": "ddc86ed1d3347f5fff19a07581bc040c52eee7a115c279a2ba28bceae92303db",
     "docs/operations/workspace-auth.md": "58f0a796e0ddc3c3180eb33f77590305ee13ec6318adb3b1fe0e005c903267c9",
     "package.json": "443e2937bbfe5e57f7e8b3b4f02bb7cdaa87fa8b44ba6d3c35396c9398829b41",
-    "post-mortem/CURRENT_STATE.md": "a2757f6e0a767605db89204cf2aa99687c98a0d4c06d9efb9e50a06c31ebfa84",
+    "post-mortem/CURRENT_STATE.md": "8d7ba3c955a189c519e73d13a68e7a058bc967c2eddf040ea66a93fb35772a83",
     "post-mortem/README.md": "109e413d0323577f935e1b911356db7ca1f48da6e394639a6ec81fc253025dee",
     "post-mortem/failure-modes/README.md": "f7263e9b1feaf8600803ef3b527df2db100929b9c92571d818c6e259093bca0a",
     "post-mortem/failure-modes/access-and-documentation.md": "270a62e90cc0f9674dd81e62fe7ef3781e34dc7a4373c1914b71da5bbb558002",

@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "classification": "private-operational-evidence",
+  "observed_at": "2026-09-20T02:33:41Z",
+  "source_commit": "83b07d5",
+  "deployment_id": "dpl_BfHmeo4ePafqUQZeBafDFdCYn9Er",
+  "target": "production galx.ai",
+  "checks": {
+    "deployment_status": "Ready",
+    "profile_document_status": 200,
+    "profile_chunk_status": 200,
+    "profile_chunk_content_type": "application/javascript; charset=utf-8",
+    "profile_chunk_cache_control": "public,max-age=31536000,immutable",
+    "anonymous_browser_heading": "Veyra Sol",
+    "profile_error_boundary_present": false,
+    "private_descendant_local_status": 401
+  },
+  "limits": [
+    "Acceptance covered one public profile in a clean anonymous browser and the exact route chunk from the reported error.",
+    "No account mutation, image generation, payment, or private administrator action was exercised."
+  ]
+}

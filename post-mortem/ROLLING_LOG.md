@@ -1771,3 +1771,17 @@ Incident: `INC-20260920-PROFILECHUNK`. Kind: `containment`.
 **Next step:** Complete documentation gates, deploy the reviewed application revision, and verify the exact hosted chunk plus a clean anonymous profile browser path before marking recovery.
 
 Evidence: [preview-policy.ts](../src/lib/security/preview-policy.ts), [preview-middleware.ts](../src/lib/security/preview-middleware.ts), [test-developer-preview.ts](../scripts/test-developer-preview.ts), [developer-preview.md](../docs/operations/developer-preview.md), [README.md](incidents/2026/2026-09-20-profile-chunk/README.md).
+
+## EVT-20260920-profile-chunk-recovered — 2026-09-20T02:33:41Z
+
+Incident: `INC-20260920-PROFILECHUNK`. Kind: `recovery`.
+
+**Observation:** Production deployment dpl_BfHmeo4ePafqUQZeBafDFdCYn9Er for source 83b07d5 became Ready and was promoted to galx.ai.
+
+**Action:** Requested the public profile document and the exact chunk from the reported browser error through the apex hostname, then rendered /profile/veyrasol in a clean anonymous headless Chrome process.
+
+**Result:** The profile document returned HTTP 200; the exact chunk returned HTTP 200 application/javascript with immutable caching; Chrome rendered the Veyra Sol profile and public gallery without the unavailable-profile boundary. No mutation, generation, payment or administrator action was exercised.
+
+**Next step:** Retain the encoded/decoded dynamic-route asset regression and private sibling denial in the developer-preview suite. Reopen only if a public route asset is again denied or a new dynamic public route lacks an explicit reviewed template mapping.
+
+Evidence: [recovery.json](incidents/2026/2026-09-20-profile-chunk/recovery.json), [test-developer-preview.ts](../scripts/test-developer-preview.ts), [preview-policy.ts](../src/lib/security/preview-policy.ts).
