@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ArrowRight, Code2, Cpu, Images, Sparkles } from 'lucide-react';
+import { ArrowRight, Cpu, Images, Sparkles } from 'lucide-react';
 import { Navigation } from '@/components/dashboard/Navigation';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 import { constructMetadata } from '@/lib/seo/metadata';
@@ -24,11 +24,6 @@ const hierarchy = [
     icon: Cpu,
     name: 'GALX Nova',
     description: 'Our managed intelligence service for reasoning and generation.',
-  },
-  {
-    icon: Code2,
-    name: 'Developer',
-    description: 'The separate route to API information and access.',
   },
 ];
 
@@ -64,7 +59,7 @@ export default function AboutPage() {
             <h2 id="definition-heading" className="text-2xl sm:text-3xl font-black text-white tracking-tight">A simple relationship</h2>
             <p className="text-sm text-zinc-400 max-w-2xl">Managed intelligence is AI capability delivered through a GALX-managed service—for people creating in GALX and selected integrations using supported capabilities.</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {hierarchy.map(({ icon: Icon, name, description }) => (
               <div key={name} className="p-6 rounded-3xl bg-zinc-900/40 border border-white/10 space-y-4">
                 <div className="w-10 h-10 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center">
@@ -98,14 +93,11 @@ export default function AboutPage() {
         <section className="p-8 sm:p-10 rounded-3xl bg-gradient-to-r from-cyan-950/40 via-zinc-900 to-indigo-950/40 border border-cyan-500/20 flex flex-col sm:flex-row items-center justify-between gap-6">
           <div className="space-y-1 text-center sm:text-left">
             <h2 className="text-lg sm:text-xl font-bold text-white">Bring an idea, not an infrastructure plan.</h2>
-            <p className="text-sm text-zinc-400">Create in GALX, or learn about supported private integrations.</p>
+            <p className="text-sm text-zinc-400">Create in GALX, or review the supported product experience.</p>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-3">
             <Link href="/images" className="px-5 py-3 rounded-2xl bg-cyan-400 text-black font-bold text-xs flex items-center gap-2 hover:bg-cyan-300 transition-all">
               <span>Create an image</span><ArrowRight className="w-4 h-4" aria-hidden="true" />
-            </Link>
-            <Link href="/developers" className="px-5 py-3 rounded-2xl border border-white/15 text-white font-bold text-xs hover:bg-white/5 transition-all">
-              Private access
             </Link>
           </div>
         </section>

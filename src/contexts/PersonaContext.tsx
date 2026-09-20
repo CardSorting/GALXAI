@@ -46,8 +46,8 @@ export const PERSONA_CONFIGS: Record<UserPersona, PersonaDetails> = {
     color: 'text-cyan-400',
     bgColor: 'bg-cyan-500/10',
     borderColor: 'border-cyan-500/30',
-    primaryDocLink: '/developers',
-    primaryActionLabel: 'Read private access guidance',
+    primaryDocLink: '/docs',
+    primaryActionLabel: 'Read supported integration docs',
   },
   agent_builder: {
     id: 'agent_builder',
@@ -60,8 +60,8 @@ export const PERSONA_CONFIGS: Record<UserPersona, PersonaDetails> = {
     color: 'text-indigo-400',
     bgColor: 'bg-indigo-500/10',
     borderColor: 'border-indigo-500/30',
-    primaryDocLink: '/developers',
-    primaryActionLabel: 'Read private access guidance',
+    primaryDocLink: '/docs',
+    primaryActionLabel: 'Read supported integration docs',
   },
 };
 

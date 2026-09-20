@@ -72,7 +72,7 @@ export async function fulfillStripeEvent(pool: Pool, event: Stripe.Event, rawBod
             await ledger(db, session, Number(session.total_credited_usd), Number(session.amount_usd), 'deposit', event.id);
             // A payment may reconcile an historical wallet session, but it
             // must never create or approve Developer access. Access remains a
-            // separate reviewed request through /developers.
+            // separate reviewed request through an approved private channel.
             changedUser = session.user_id;
           }
           await db.query(`UPDATE galx_stripe_checkout_sessions SET status='complete',payment_status='paid',payment_intent_id=$2,

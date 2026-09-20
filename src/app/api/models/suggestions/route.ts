@@ -33,12 +33,6 @@ const CURRENT_SUGGESTIONS: SuggestionItem[] = [
     category: 'API',
   },
   {
-    title: 'GALX Nova private integration access',
-    description: 'Private access may be authorized by decision for bounded integrations. It is not a public self-service product.',
-    url: `${SITE_CONFIG.url}/developers`,
-    category: 'Access',
-  },
-  {
     title: 'Prompt construction guidance',
     description: 'Practical guidance for stable instructions, relevant context and current API behavior without a rate estimate.',
     url: `${SITE_CONFIG.url}/docs/examples`,

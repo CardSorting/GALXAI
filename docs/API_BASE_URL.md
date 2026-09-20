@@ -56,7 +56,6 @@ administrator-defined allocation.
 - [Quickstart](QUICKSTART.md) — make a first request with an existing credential.
 - [API reference](API_REFERENCE.md) — capability and response contracts.
 - [OpenAPI schema](https://galx.ai/api/openapi.json) — machine-readable shapes.
-- [Public developer page](https://galx.ai/developers) — explains the access boundary; it does not provision access.
 
 Public documentation describes capabilities and user-visible outcomes. It does
 not describe provider relationships, routing, capacity acquisition, scheduling,

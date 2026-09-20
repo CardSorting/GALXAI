@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import Link from 'next/link';
-import { Sparkles, Terminal, Activity, ShieldCheck, Download } from 'lucide-react';
+import { Terminal, Activity, ShieldCheck, Download } from 'lucide-react';
 import { Navigation } from '@/components/dashboard/Navigation';
 import { DocsSubNav } from '@/components/dashboard/DocsSubNav';
 
@@ -22,22 +22,13 @@ export default function DocsLayout({ children }: { children: ReactNode }) {
             {children}
           </main>
 
-          {/* Right Rail (Quick Developer Actions on Wide Screens) */}
+          {/* Right Rail (Quick Documentation Actions on Wide Screens) */}
           <aside className="hidden w-56 shrink-0 xl:block xl:self-start xl:sticky xl:top-24 space-y-6">
             <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-4 shadow-sm">
               <p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-3">
-                Developer Utilities
+                Documentation utilities
               </p>
               <ul className="space-y-2 text-xs">
-                <li>
-                  <Link
-                    href="/developers"
-                    className="flex items-center gap-2 text-zinc-300 transition-colors hover:text-indigo-300"
-                  >
-                    <Sparkles className="h-3.5 w-3.5 text-indigo-400" />
-                    <span>Developer access</span>
-                  </Link>
-                </li>
                 <li>
                   <Link
                     href="/docs"

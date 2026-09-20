@@ -20,7 +20,6 @@ export default function PricingPage() {
       </section>
     </div>
     <section className={styles.section} aria-labelledby="pricing-guides"><div className={styles.sectionHead}><h2 id="pricing-guides">Understand your plan.</h2><p>The details, before you decide.</p></div><GuideList guides={GUIDES.filter(guide => guide.path.startsWith('/pricing/'))} /></section>
-    <section className={styles.section} aria-labelledby="other-products"><h2 id="other-products" className={styles.sectionHead}>Looking for something else?</h2><div className={styles.otherProducts}><div><h3>Image Studio</h3><p>Describe an image, explore your library, and keep iterating.</p><Link href="/images" className={styles.textLink}>Open Image Studio <ArrowRight size={16} aria-hidden="true" /></Link></div><div><h3>GALX Nova</h3><p>Nova powers supported GALX experiences and selected private integrations. General-purpose developer access is not self-service.</p><Link href="/developers" className={styles.textLink}>Learn about private access <ArrowRight size={16} aria-hidden="true" /></Link></div></div></section>
     <SupportLink />
   </main>;
 }

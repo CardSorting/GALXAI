@@ -73,7 +73,7 @@ The follow-up pass retained the familiar triage inbox and explicit owner-managed
 | Severity | Finding | Resolution and evidence |
 | --- | --- | --- |
 | P1 | Refreshing a record or resolving feedback could erase an unfinished decision note. | Notes stay in component memory per request during inbox navigation and workspace refresh. Successful decisions clear their note; account changes and lost access clear all private drafts. Browser checks cover refresh and moving away/back. Nothing is saved to localStorage. |
-| P2 | An expired participant session produced a generic retry loop. | A 401 presents a verified-account sign-in action with a return to `/developers`. Desktop and mobile recovery captures are included. |
+| P2 | An expired participant session produced a generic retry loop. | A 401 presents a verified-account sign-in action with a bounded return destination. Desktop and mobile recovery captures are included. |
 | P2 | Mobile staff fields inherited 14px text, which can trigger Safari focus zoom. | Phone input, select and textarea text is 16px; the updated phone form passed layout and accessibility checks. |
 | P1 | A crawler-denial response named internal implementation concepts. | The response now contains only an allowlisted generic error. A raw middleware test verifies its exact body. |
 
@@ -85,7 +85,7 @@ The recovery choices follow [NN/g's user control and freedom guidance](https://w
 
 - Both migrations, the site and API gateway are deployed. First-owner provisioning is complete and the account binding and audit event were verified in production. Owner browser sign-in and real-participant acceptance remain untested; see the [activation receipt](preview-activation.md).
 - Cohort approval is deliberate; credential allocation remains per key. Expected traffic helps review but does not override per-key quota, metering, or scope checks.
-- Staff additions and access decisions do not automatically send emails. The founder shares the staff sign-in link; private recipients receive access details through an approved channel. `/developers` remains an informational public boundary page, not a status or enrollment workflow.
+- Staff additions and access decisions do not automatically send emails. The founder shares the staff sign-in link; private recipients receive access details through an approved channel. The former public developer-access route is removed; no status or enrollment workflow is exposed.
 - Revocation denies new requests; already-running work is not cancelled. Data retention and account-deletion workflows remain operator responsibilities.
 - This pass does not certify every legacy private developer page or measure production latency. The new workspace uses the established dark theme; a separate light theme was not introduced.
 

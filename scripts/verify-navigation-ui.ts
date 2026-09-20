@@ -10,7 +10,7 @@ const browser = await chromium.launch({ headless: true, executablePath: '/Applic
 const output = path.resolve('.impeccable/review/navigation');
 await fs.mkdir(output, { recursive: true });
 const results: unknown[] = [];
-const expected = ['Sites', 'Images', 'Pricing', 'FAQ', 'Knowledge base', 'Developer preview'];
+const expected = ['Images', 'Explore', 'Pricing', 'Profile'];
 const guestGeometry = new Map<number, unknown>();
 
 async function setup(width: number, signedIn: boolean, reduce = true) {
@@ -76,13 +76,13 @@ try {
     else guestGeometry.set(width, initial);
     await page.evaluate(() => { (window as any).navigationHeader = document.querySelector('nav[aria-label="Main navigation"]')!.closest('header'); });
     const nav = page.getByRole('navigation', { name: 'Main navigation', exact: true });
-    for (const destination of ['sites', 'images', 'sites']) {
-      await nav.locator(`a[href="/${destination}"]`).click();
-      await page.waitForURL(base + '/' + destination);
+    for (const [destination, href] of [['sites', '/sites'], ['images', '/images/library'], ['sites', '/sites']]) {
+      await nav.locator(`a[href="${href}"]`).click();
+      await page.waitForURL(base + href);
       await page.locator(destination === 'sites' ? '.sites-workspace' : '.studio').waitFor();
       assert(await page.evaluate(() => (window as any).navigationHeader === document.querySelector('nav[aria-label="Main navigation"]')!.closest('header')), 'header DOM is preserved');
       sameGeometry(await geometry(page), initial);
-      assert.equal(await nav.locator(`[href="/${destination}"]`).getAttribute('aria-current'), 'page');
+      assert.equal(await nav.locator(`[href="${href}"]`).getAttribute('aria-current'), 'page');
     }
     await inspect(page, `sites-${width}-${signedIn ? 'account' : 'guest'}`);
     await page.goBack(); await page.waitForURL(base + '/images');
@@ -102,9 +102,9 @@ try {
     if (width < 1100) {
       await nav.locator('[href="/knowledge-base"]').focus();
       await page.keyboard.press('Tab');
-      assert.equal(await page.evaluate(() => document.activeElement?.getAttribute('href')), '/developers');
+      assert.equal(await page.evaluate(() => document.activeElement?.getAttribute('href')), '/faq');
       await page.waitForFunction(() => {
-        const link = document.querySelector('nav[aria-label="Main navigation"] a[href="/developers"]')!;
+        const link = document.querySelector('nav[aria-label="Mobile navigation"] a[href="/faq"]')!;
         const rect = link.getBoundingClientRect(), container = link.closest('nav')!.getBoundingClientRect();
         return rect.left >= container.left && rect.right <= container.right + 1;
       }, undefined, { timeout: 2000 });
@@ -127,8 +127,8 @@ try {
     assert.equal(await nav.locator('[href="/sites"]').getAttribute('aria-current'), 'page');
     const initial = await geometry(nested.page);
     await nested.page.evaluate(() => { (window as any).navigationHeader = document.querySelector('nav[aria-label="Main navigation"]')!.closest('header'); });
-    await nav.locator('[href="/images"]').click();
-    await nested.page.waitForURL(base + '/images');
+    await nav.locator('[href="/images/library"]').click();
+    await nested.page.waitForURL(base + '/images/library');
     assert(await nested.page.evaluate(() => (window as any).navigationHeader === document.querySelector('nav[aria-label="Main navigation"]')!.closest('header')));
     sameGeometry(await geometry(nested.page), initial);
   }

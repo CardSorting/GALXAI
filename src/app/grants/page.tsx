@@ -5,5 +5,5 @@ import { permanentRedirect } from 'next/navigation';
  * Keep the historical component for reference, but remove the stale public offer.
  */
 export default function GrantsPage() {
-  permanentRedirect('/developers');
+  permanentRedirect('/');
 }

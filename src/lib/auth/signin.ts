@@ -7,7 +7,6 @@ export function authDestinationLabel(destination: string): string {
   if (/^\/images(?:\/|$)/.test(path) || path === '/library') return 'Images';
   if (/^\/billing(?:\/|$)/.test(path)) return 'your account';
   if (/^\/admin(?:\/|$)/.test(path)) return 'your workspace';
-  if (path === '/developers') return 'private access information';
   return 'GALX';
 }
 

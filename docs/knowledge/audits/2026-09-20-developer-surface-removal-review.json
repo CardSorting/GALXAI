@@ -1,0 +1,32 @@
+{
+  "classification": "private",
+  "observed_at": "2026-09-20T00:00:00Z",
+  "scope": "Semantic review of removing the public /developers surface and all public navigation, search, SEO, and legacy-route pointers to it.",
+  "reviewed": [
+    "Confirmed the /developers and /developers/pricing route modules and route-specific styling are removed; requests are handled by the generic unavailable response rather than exposing implementation details.",
+    "Confirmed desktop, mobile, footer, documentation, search, home, pricing, About, metadata, manifest and robots surfaces no longer link to /developers or advertise a public developer landing page.",
+    "Confirmed protected preview requests still use the existing authorization boundary and now return a generic private 404 without a redirect or internal diagnostics.",
+    "Confirmed legacy public marketing routes that previously converged on /developers now converge on the neutral public landing surface, while private developer APIs and internal authorization modules remain intact.",
+    "Confirmed historical incident and audit records retain their original route references as dated evidence rather than being rewritten as current public instructions."
+  ],
+  "validation": {
+    "typecheck": "npx tsc --noEmit passed",
+    "documentation_sync": "npm run docs:sync passed",
+    "documentation_check": "Affected domains and the post-mortem source ledger pass review; npm run docs:check reports only the pre-existing unrelated Sites fingerprint, which remains intentionally untouched",
+    "production_build": "npm run build passed and generated 164 static pages; the removed developer routes are absent from the route manifest",
+    "lint": "npm run lint passed with zero errors and eight pre-existing warnings",
+    "security_suite": "npm run test:image:security passed",
+    "request_efficiency": "node --import tsx --test scripts/test-request-efficiency.ts passed 11/11",
+    "billing_suite": "npm run test:billing:lifecycle passed 18/18 plus webhook boundary checks",
+    "developer_preview_suite": "npm run test:developer-preview passed 17/17",
+    "preview_admin_suite": "npm run test:preview-admin passed 7/7",
+    "migration_inventory": "npm run db:verify passed with 145 migrations and paired rollbacks",
+    "migration_application": "20260920064323_remove_public_developer_return_path applied; npm run db:status reports 145 applied and zero pending",
+    "public_asset_scan": "No /developers URL remains under public/ or in the rebuilt browser/rendered assets; obsolete social-card artifacts were removed"
+  },
+  "limits": [
+    "No live deployment or production acceptance was performed.",
+    "Browser-level visual and raw localhost HTTP acceptance could not run because this sandbox denies local socket connections and the Playwright package is unavailable; source, type, security and production-build checks were completed.",
+    "This review does not remove private developer APIs, internal modules, or historical evidence; it only removes public exposure and public pointers."
+  ]
+}

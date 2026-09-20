@@ -172,12 +172,12 @@ export function createModelItemListSchema(models: ModelSpecItem[]) {
       '@type': 'ListItem',
       position: 1,
       name: 'GALX Nova supported capabilities',
-      url: `${SITE_CONFIG.url}/developers`,
+      url: `${SITE_CONFIG.url}/docs/api-reference`,
       item: {
         '@type': 'SoftwareApplication',
         name: 'GALX Nova',
         description: 'Managed intelligence for supported reasoning and generation capabilities.',
-        url: `${SITE_CONFIG.url}/developers`,
+        url: `${SITE_CONFIG.url}/docs/api-reference`,
       },
     }],
   };
@@ -187,7 +187,7 @@ export function createModelItemListSchema(models: ModelSpecItem[]) {
  * Schema.org descriptor for a supported GALX capability.
  */
 export function createProductModelSchema(model: ModelSpecItem, options?: { includeRating?: boolean }) {
-  const canonicalUrl = `${SITE_CONFIG.url}/developers`;
+  const canonicalUrl = `${SITE_CONFIG.url}/docs/api-reference`;
 
   return {
     '@context': 'https://schema.org',
@@ -382,7 +382,7 @@ export function createGrantFinancialSchema() {
       name: SITE_CONFIG.name,
       url: SITE_CONFIG.url,
     },
-    url: `${SITE_CONFIG.url}/developers`,
+    url: `${SITE_CONFIG.url}/docs/api-reference`,
   };
 }
 

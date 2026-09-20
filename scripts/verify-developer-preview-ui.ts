@@ -31,19 +31,14 @@ try {
         checks.push({label,width,overflow,violations:violations.map((v:any)=>({id:v.id,nodes:v.nodes.map((n:any)=>n.target)})),errors});
         assert.equal(overflow,false,label); assert.deepEqual(errors,[],label);
       }
-      await page.goto(base+'/developers',{waitUntil:'networkidle'});
-      if (!signedIn) {
-        await page.getByRole('heading',{name:'GALX Nova Private access, by decision.',exact:true}).waitFor();
-        await inspect('guest');
-        await page.getByRole('link',{name:'Explore GALX',exact:true}).click();
-        await page.waitForURL(base+'/images');
-        assert.equal(new URL(page.url()).pathname,'/images');
-        await page.goto(base+'/sites'); assert.equal(new URL(page.url()).pathname,'/sites');
-        await page.goto(base+'/'); await inspect('home');
-      } else await inspect('signed-in');
+      const removed = await page.goto(base+'/developers',{waitUntil:'networkidle'});
+      assert.equal(removed?.status(), 404);
+      assert.match(await page.locator('body').innerText(), /unavailable/i);
+      await page.goto(base+'/', { waitUntil: 'networkidle' });
+      await inspect(signedIn ? 'home-signed-in' : 'home-guest');
       await context.close();
     }
   }
   assert(checks.every((check: any) => check.violations.length === 0), 'Accessibility findings: see checks.json');
-  console.log('PASS: desktop/mobile public entry is informational, has no enrollment or feedback workflow, and remains accessible without overflow.');
+  console.log('PASS: desktop/mobile developer route is removed and the public home surface remains accessible without overflow.');
 } finally { await fs.writeFile(`${output}/checks.json`,JSON.stringify(checks,null,2));await browser.close(); }

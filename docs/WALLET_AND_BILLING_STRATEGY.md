@@ -19,8 +19,8 @@ distinguishes source changes from releases.
 
 The Developer Access subscription is not a current product. Do not publish a
 Developer price, usage rate card, checkout button, enrollment form, waitlist,
-or automatic API-key workflow. `/developers` explains the boundary; `/admin`
-is the authenticated control plane for deliberate private provisioning.
+or automatic API-key workflow. `/admin` is the authenticated control plane for
+deliberate private provisioning; no public private-access page is exposed.
 
 ## What remains active
 

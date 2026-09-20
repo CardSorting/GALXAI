@@ -130,8 +130,7 @@ export function PublicHome() {
             <article data-home-reveal="step">
               <div className={styles.homeBenefitEyebrow}><Cpu size={12} aria-hidden="true" /><span>GALX NOVA</span></div>
               <h3>Intelligence, handled.</h3>
-              <p>Nova is our managed intelligence layer for reasoning and generation. Use it through GALX and supported private integrations.</p>
-              <Link className={styles.textLink} href="/developers">Learn about private access <ArrowUpRight size={16} aria-hidden="true" /></Link>
+              <p>Nova is our managed intelligence layer for reasoning and generation. Use it through the GALX product experience.</p>
             </article>
           </div>
         </section>

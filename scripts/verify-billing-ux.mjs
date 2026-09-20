@@ -37,7 +37,7 @@ try {
   }
   assert(ready, 'Fixture server failed: ' + log.slice(-2000));
 
-  for (const route of ['/', '/pricing', '/developers', '/faq']) {
+  for (const route of ['/', '/pricing', '/faq']) {
     const response = await fetch(base + route);
     const html = await response.text();
     assert.equal(response.status, 200, route);
@@ -48,8 +48,8 @@ try {
   for (const route of ['/alternatives', '/alternatives/openrouter', '/calculator', '/grants']) {
     const response = await fetch(base + route, { redirect: 'manual' });
     assert.equal(response.status, 308, route);
-    assert.equal(response.headers.get('location'), '/developers', route);
-    results.publicPages.push({ route, status: response.status, redirect: '/developers' });
+    assert.equal(response.headers.get('location'), '/', route);
+    results.publicPages.push({ route, status: response.status, redirect: '/' });
   }
 
   for (const route of ['/billing', '/billing/plan', '/billing/credits', '/billing/transactions', '/billing/invoices', '/billing/payment-methods']) {
@@ -104,11 +104,8 @@ try {
     await page.goto(base + '/billing/credits');
     assert.equal(await page.getByRole('textbox', { name: 'Custom amount' }).count(), 0);
     assert.equal(await page.getByRole('button', { name: /Continue to checkout/i }).count(), 0);
-    await page.goto(base + '/developers');
-    const developer = await page.getByRole('main').first().innerText();
-    assert.match(developer, /Private access, by decision/i);
-    assert.match(developer, /explicitly authorized private integrations/i);
-    assert.doesNotMatch(developer, /\$50\/month|Subscribe to Developer Access|request-stage|Access starts at|Buy now|Continue to checkout|Unlimited usage/i);
+    const removed = await page.request.get(base + '/developers');
+    assert.equal(removed.status(), 404);
   } finally {
     await context?.close();
     await browser.close();

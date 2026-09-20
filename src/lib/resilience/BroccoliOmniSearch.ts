@@ -48,7 +48,7 @@ const ACRONYM_MAP: Record<string, string> = {
 };
 
 const ALLOWED_RECENT_ROUTE_PREFIXES = [
-  '/about', '/developers', '/docs', '/explore', '/faq', '/images',
+  '/about', '/docs', '/explore', '/faq', '/images',
   '/knowledge-base', '/keys', '/library', '/pricing', '/privacy', '/queues',
   '/settings', '/status', '/teams', '/terms', '/billing',
 ];
@@ -111,7 +111,7 @@ const BASE_CATALOG_ITEMS: CatalogItem[] = [
   },
   {
     title: 'About GALX',
-    description: 'Learn how GALX, Nova, and Developer fit together.',
+    description: 'Learn how GALX and Nova work together.',
     category: 'Navigation',
     href: '/about',
     keywords: ['about', 'managed intelligence', 'galx', 'nova'],

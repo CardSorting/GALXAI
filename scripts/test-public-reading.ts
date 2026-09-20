@@ -48,8 +48,8 @@ test('anonymous, fake-user and prefetch requests can read only the curated pages
     assert.equal(await previewMiddleware(new NextRequest('https://galx.ai' + chunk)), null);
   }
   const denied = await previewMiddleware(new NextRequest('https://galx.ai/docs?token=do-not-reflect', { headers: { rsc: '1', 'next-router-prefetch': '1' } }));
-  assert.equal(denied?.status, 307);
-  assert.equal(denied?.headers.get('location'), 'https://galx.ai/developers');
+  assert.equal(denied?.status, 404);
+  assert.equal(denied?.headers.get('location'), null);
   assert.doesNotMatch(await denied!.text(), /do-not-reflect/);
 });
 

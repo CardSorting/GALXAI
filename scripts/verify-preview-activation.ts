@@ -45,7 +45,7 @@ try {
   const owners = await pool.query("SELECT count(*)::integer AS count, count(user_id)::integer AS active FROM private.preview_admin_members WHERE role='owner'");
   const roster = { owners: owners.rows[0].count, activeOwners: owners.rows[0].active };
   const scripts = new Set<string>();
-  for (const pathname of ['/','/developers','/images','/sites','/pricing','/auth/signin?next=%2Fadmin','/auth/signup?next=%2Fdevelopers']) {
+  for (const pathname of ['/','/images','/sites','/pricing','/auth/signin?next=%2Fadmin','/auth/signup?next=%2Fimages']) {
     const response = await request(site, pathname); assert.equal(response.status, 200, pathname);
     const html = await response.text(); assert.doesNotMatch(html, forbidden, pathname);
     for (const match of html.matchAll(/<script[^>]+src="([^"]+)"/g)) scripts.add(match[1].replaceAll('&amp;', '&'));
@@ -63,9 +63,14 @@ try {
     }
   }
   for (const pathname of ['/admin','/models','/docs','/keys','/llms-full.txt']) {
-    const response = await request(site, pathname); assert.equal(response.status, 307, pathname);
-    const target = new URL(response.headers.get('location')!, site);
-    assert.equal(target.pathname, pathname === '/admin' ? '/auth/signin' : '/developers');
+    const response = await request(site, pathname);
+    if (pathname === '/admin') {
+      assert.equal(response.status, 307, pathname);
+      assert.equal(new URL(response.headers.get('location')!, site).pathname, '/auth/signin');
+    } else {
+      assert.equal(response.status, 404, pathname);
+      assert.equal(response.headers.get('location'), null);
+    }
   }
   const schema = await (await request(site, '/api/openapi.json')).json(); assert.deepEqual(Object.keys(schema.paths), ['/images/generations']);
   const image = await request(site, '/v1/images/generations', 'POST'); assert.equal(image.status, 401); assert.equal((await image.json()).error.code, 'unauthorized');

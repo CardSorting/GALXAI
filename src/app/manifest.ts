@@ -2,14 +2,14 @@ import type { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'GALX — Images and Developer',
+    name: 'GALX — Images and Ideas',
     short_name: 'GALX',
     description: 'Create images in GALX and explore public creations powered by GALX Nova.',
     start_url: '/',
     display: 'standalone',
     background_color: '#07080d',
     theme_color: '#07080d',
-    categories: ['developer', 'productivity', 'utilities', 'business'],
+    categories: ['creativity', 'productivity', 'utilities', 'business'],
     icons: [
       {
         src: '/icon.png',

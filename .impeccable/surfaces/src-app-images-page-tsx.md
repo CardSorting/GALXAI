@@ -17,7 +17,11 @@ The September 13 results and ergonomics refinements extend the existing GALX ide
 
 The [shared product header](src-components-dashboard-navigation-tsx.md) lives in the root layout and keeps its position through Home, Images and Sites navigation. Studio navigation below it remains Create / My images / Favorites, using `/images`, `/images/library` and `/images/favorites`. Native links preserve new-tab behavior; same-tab history updates keep the studio mounted. Back/Forward derives view and Favorites from the pathname. Each address supports guarded direct entry and refresh. Leaving the Images product still unmounts the workspace and its in-memory session results; header continuity does not add durable history.
 
+The primary Images entries in the desktop header, mobile drawer/tab and footer open My images at `/images/library`, which is the useful default for returning users. Create remains an explicit `/images` destination for the community stream and composer flow.
+
 The workspace leads with composition at the left and a blank results canvas at the right. A compact title and persistent Create / My images / Favorites navigation establish the workflow. The creation pane groups prompt, aspect ratio, and count in that order. Controls scroll independently on desktop while Generate remains available at the bottom.
+
+The embedded Community Stream keeps its `/images` toolbar focused on sort, search, refresh and density. Aspect-ratio/style filter rows and the secondary Guidance action are intentionally omitted here to keep the creation loop calm; Explore follows the same quiet toolbar while public Star profiles and deep-linked stream queries retain their filter contract.
 
 The initial Create view shows **Your creations**, **0 images this session**, the **Image / Grid** toggle, and an empty dark canvas. It contains no starter images, inspiration cards, or starter prompt actions. The blank canvas has an accessible empty-state description without visible filler content. The separate saved-library view retains its existing copy and empty states.
 

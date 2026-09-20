@@ -515,7 +515,7 @@ ${agentMarkdown}
   }
 
   if (command === 'checkout' || command === 'topup') {
-    console.error('Prepaid Developer and compute checkouts are retired. Request GALX Nova access at https://galx.ai/developers.');
+    console.error('Prepaid Developer and compute checkouts are retired. Contact GALX through an approved private channel for access questions.');
     process.exitCode = 1;
     return;
   }

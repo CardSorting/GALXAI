@@ -13,15 +13,15 @@ machinery.
 
 | Audience | Can do what | Where |
 | --- | --- | --- |
-| Public visitor | Read the capability and access boundary | `/developers` |
+| Public visitor | No public developer-access surface | Generic not-found response |
 | Ordinary signed-in user | Use GALX products that are independently available | Product workspace |
 | Authorized administrator | Review a bounded cohort, provision credentials, allocate, meter, and revoke | `/admin` |
 | Approved private integration | Call the assigned API scope within its allocation | API base URL |
 
-There is no public checkout, enrollment form, waitlist, application flow,
-automatic key issuance, upgrade path, or public inference price sheet. The
-public page is informational. Do not add a replacement public application or
-waitlist without a separate product decision.
+There is no public route, checkout, enrollment form, waitlist, application
+flow, automatic key issuance, upgrade path, or public inference price sheet.
+Protected page requests return a generic not-found response. Do not add a
+replacement public application or waitlist without a separate product decision.
 
 ## Private access lifecycle
 

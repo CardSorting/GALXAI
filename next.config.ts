@@ -174,30 +174,30 @@ const nextConfig: NextConfig = {
       {
         // Retired public catalog/benchmark hubs still contain historical
         // economics and implementation claims. Keep the roots aligned with
-        // the current Developer path; the more-specific redirects below
+        // the current public landing surface; the more-specific redirects below
         // preserve existing bookmarked subpaths.
         source: "/benchmarks",
-        destination: "/developers",
+        destination: "/",
         permanent: true,
       },
       {
         source: "/capabilities",
-        destination: "/developers",
+        destination: "/",
         permanent: true,
       },
       {
         source: "/migrate",
-        destination: "/developers",
+        destination: "/",
         permanent: true,
       },
       {
         source: "/providers",
-        destination: "/developers",
+        destination: "/",
         permanent: true,
       },
       {
         source: "/solutions",
-        destination: "/developers",
+        destination: "/",
         permanent: true,
       },
       {
@@ -239,7 +239,7 @@ const nextConfig: NextConfig = {
       },
       {
         source: "/agents",
-        destination: "/developers",
+        destination: "/",
         permanent: true,
       },
       {
@@ -249,12 +249,12 @@ const nextConfig: NextConfig = {
       },
       {
         source: "/models/:path*",
-        destination: "/developers",
+        destination: "/",
         permanent: true,
       },
       {
         source: "/playground/:path*",
-        destination: "/developers",
+        destination: "/",
         permanent: true,
       },
       {
@@ -264,7 +264,7 @@ const nextConfig: NextConfig = {
       },
       {
         source: "/alternatives/:path*",
-        destination: "/developers",
+        destination: "/",
         permanent: true,
       },
       {
@@ -274,7 +274,7 @@ const nextConfig: NextConfig = {
       },
       {
         source: "/audit",
-        destination: "/developers",
+        destination: "/",
         permanent: true,
       },
       {
@@ -284,7 +284,7 @@ const nextConfig: NextConfig = {
       },
       {
         source: "/calculator",
-        destination: "/developers",
+        destination: "/",
         permanent: true,
       },
       {
@@ -309,17 +309,17 @@ const nextConfig: NextConfig = {
       },
       {
         source: "/grants",
-        destination: "/developers",
+        destination: "/",
         permanent: true,
       },
       {
         source: "/how-it-works",
-        destination: "/developers",
+        destination: "/",
         permanent: true,
       },
       {
         source: "/industries/:path*",
-        destination: "/developers",
+        destination: "/",
         permanent: true,
       },
       {
@@ -329,7 +329,7 @@ const nextConfig: NextConfig = {
       },
       {
         source: "/providers/:path*",
-        destination: "/developers",
+        destination: "/",
         permanent: true,
       },
       {
@@ -344,7 +344,7 @@ const nextConfig: NextConfig = {
       },
       {
         source: "/solutions/:path*",
-        destination: "/developers",
+        destination: "/",
         permanent: true,
       },
       {

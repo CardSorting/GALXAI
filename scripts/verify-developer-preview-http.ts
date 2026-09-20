@@ -12,11 +12,11 @@ for(const path of ['/v1/chat/completions','/v1/messages','/v1/completions','/v1/
   }
 }
 for(const path of ['/models','/docs','/playground','/keys','/tools/api-request-builder','/models/opengraph-image','/llms-full.txt']) {
-  const response=await fetch(base+path,{redirect:'manual'});assert.equal(response.status,307,path);assert.equal(new URL(response.headers.get('location')!,base).pathname,'/developers');
+  const response=await fetch(base+path,{redirect:'manual'});assert.equal(response.status,404,path);assert.equal(response.headers.get('location'),null);
 }
 const scripts=new Set<string>();
 const forbidden=/GALX_VAULT_|SUPABASE_SERVICE_ROLE_KEY|VM_RELAY_URL|galx_shard|private\.developer|upstreamId|executionModel|P-AHT|GALXAI delivers identical upstream|Upstream Enterprise Contracts|High-Concurrency Fleet Routing/;
-for(const path of ['/','/developers','/images','/sites','/auth/signup?next=%2Fdevelopers','/pricing']) {
+for(const path of ['/','/images','/sites','/auth/signup?next=%2Fimages','/pricing']) {
   const response=await fetch(base+path);assert.equal(response.status,200,path);const html=await response.text();assert.doesNotMatch(html,forbidden,path);
   for(const match of html.matchAll(/<script[^>]+src="([^"]+)"/g))scripts.add(match[1].replaceAll('&amp;','&'));
   results.push({path,status:response.status});

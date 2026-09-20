@@ -69,7 +69,11 @@ function StudioWorkspace({
 }) {
   const pathname = usePathname();
   const selectedView = imageView(pathname);
-  const [activeTab, setActiveTab] = useState<'stream' | 'creations' | 'favorites'>('stream');
+  const [activeTab, setActiveTab] = useState<'stream' | 'creations' | 'favorites'>(() => {
+    if (selectedView === 'library') return 'creations';
+    if (selectedView === 'favorites') return 'favorites';
+    return 'stream';
+  });
   const [active, setActive] = useState<StudioImage | null>(null);
   const [activeCollection, setActiveCollection] = useState<StudioImage[]>([]);
   const [activeSource, setActiveSource] = useState<'create' | 'library'>('create');
@@ -371,13 +375,6 @@ function StudioWorkspace({
             <span>Favorites</span>
           </button>
         </nav>
-
-        <div className="studio-top-right">
-          <Link className="studio-docs-link" href="/docs">
-            Guidance
-            <ArrowRight size={14} aria-hidden="true" />
-          </Link>
-        </div>
       </header>
 
       {/* --- Notifications / Alert notices --- */}
@@ -434,6 +431,7 @@ function StudioWorkspace({
         {activeTab === 'stream' && (
           <div className="studio-stream-view">
             <PublicImageMasonryStream
+              showFilters={false}
               onSelectPrompt={(prompt, ratio) => {
                 applyPrompt(prompt, ratio || '1:1');
                 setActiveTab('creations');

@@ -25,7 +25,6 @@ export default function UsagePricingPage() {
       </section>
       <nav className="mt-8 flex flex-wrap gap-x-6 gap-y-3 text-sm" aria-label="Usage actions">
         <Link href="/pricing" className="inline-flex min-h-11 items-center px-2 py-2.5 text-cyan-300 underline underline-offset-4 hover:text-cyan-200">Review GALX Pro</Link>
-        <Link href="/developers" className="inline-flex min-h-11 items-center px-2 py-2.5 text-cyan-300 underline underline-offset-4 hover:text-cyan-200">Read the private access boundary</Link>
       </nav>
     </main>
   </div>;

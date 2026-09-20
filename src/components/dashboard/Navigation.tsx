@@ -7,6 +7,7 @@ import { IntentLink as Link } from '@/components/common/IntentLink';
 import { useAuth } from '@/contexts/AuthContext';
 import { GalxGalaxyLogo } from '@/components/brand/GalxGalaxyLogo';
 import { BILLING_PATHS } from '@/lib/billing/navigation';
+import { IMAGE_PATHS } from '@/lib/images/navigation';
 import { authEntryPath } from '@/lib/auth/redirects';
 import { isPublicReadingPath } from '@/lib/public-content/routes';
 import { FreeGenerationQuota } from './FreeGenerationQuota';
@@ -21,7 +22,6 @@ import {
   FileText,
   BookOpen,
   HelpCircle,
-  KeyRound,
   Activity,
   User,
   Sliders,
@@ -35,7 +35,6 @@ const isProductRoute = (pathname: string) =>
   /^\/images(?:\/|$)/.test(pathname) ||
   /^\/explore(?:\/|$)/.test(pathname) ||
   /^\/profile\/[a-z0-9][a-z0-9_-]{2,31}$/.test(pathname) ||
-  pathname === '/developers' ||
   isPublicReadingPath(pathname);
 
 const PROFILE_SETTINGS_PATH = '/settings?tab=profile';
@@ -198,7 +197,7 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
           {/* Primary navigation: creation, discovery, plans, and personal profile. */}
           <nav aria-label="Main navigation" className={styles.desktopNav}>
             <Link
-              href="/images"
+              href={IMAGE_PATHS.library}
               className={styles.navLink}
               aria-current={isImageActive ? 'page' : undefined}
             >
@@ -443,7 +442,7 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
                   <div className={styles.drawerSectionTitle}>Create</div>
                   <div className={styles.drawerList}>
                     <Link
-                      href="/images"
+                      href={IMAGE_PATHS.library}
                       className={styles.drawerLink}
                       aria-current={isImageActive ? 'page' : undefined}
                       onClick={closeMobileMenu}
@@ -514,14 +513,6 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
                     >
                       <CreditCard size={18} aria-hidden="true" className="text-emerald-400" />
                       <span><strong>Pricing</strong><small>Plans for GALX experiences</small></span>
-                    </Link>
-                    <Link
-                      href="/developers"
-                      className={styles.drawerLink}
-                      onClick={closeMobileMenu}
-                    >
-                      <KeyRound size={18} aria-hidden="true" className="text-fuchsia-300" />
-                      <span><strong>Private access</strong><small>Explicitly authorized integrations</small></span>
                     </Link>
                   </div>
                 </div>

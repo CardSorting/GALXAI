@@ -111,10 +111,10 @@ try {
       results.layouts.push({ route, width, overflow: false });
     }
     // Keyboard reachability of the last clipped menu item on narrow widths.
-    const developerLink = page.locator('nav[aria-label="Main navigation"] a[href="/developers"]');
+    const knowledgeLink = page.locator('nav[aria-label="Main navigation"] a[href="/knowledge-base"]');
     console.log('Checking navigation focus', width);
-    await developerLink.focus({ timeout: 10000 });
-    assert(await developerLink.evaluate(link => { const r = link.getBoundingClientRect(); return r.x >= 0 && r.right <= innerWidth; }));
+    await knowledgeLink.focus({ timeout: 10000 });
+    assert(await knowledgeLink.evaluate(link => { const r = link.getBoundingClientRect(); return r.x >= 0 && r.right <= innerWidth; }));
     assert.equal(mutations, 0); assert.deepEqual(errors, []);
     console.log('Closing viewport', width);
     await context.close();

@@ -185,7 +185,6 @@ export const DOC_PAGES: Record<DocId, DocPage> = {
         body: [
           'Credentials are provisioned only for explicitly authorized private integrations. If GALX has assigned your cohort access, keep its secret credentials server-side—never commit them to git or expose them in client-side bundles.',
         ],
-        links: [{ href: '/developers', label: 'Review the private access boundary' }],
         callout: {
           type: 'tip',
           title: 'Keep credentials server-side',
@@ -224,7 +223,6 @@ export OPENAI_BASE_URL="${GALX_API_BASE_URL}"`,
         },
         links: [
           { href: '/docs/error-handling', label: 'Inspect error codes & troubleshooting' },
-          { href: '/developers', label: 'Review private access guidance' },
         ],
       },
       {
@@ -242,7 +240,6 @@ export OPENAI_BASE_URL="${GALX_API_BASE_URL}"`,
   -H "Authorization: Bearer $GALXAI_API_KEY"`,
           },
         ],
-        links: [{ href: '/developers', label: 'Review the private access boundary' }],
       },
       {
         id: 'agent-setup',
@@ -283,7 +280,6 @@ export OPENAI_BASE_URL="${GALX_API_BASE_URL}"`,
         body: [
           'General-purpose developer access is not self-service. GALX may authorize a bounded private integration with directly assigned terms. Metering remains in place for allocation controls, operating decisions, and capacity planning. The consumer Image Studio path remains separate under its existing GALX Pro/account contract.',
         ],
-        links: [{ href: '/developers', label: 'Review private access guidance' }],
       },
       {
         id: 'endpoints',
@@ -513,7 +509,6 @@ image_resp = client.images.generate(
 print("Image artifact URL:", image_resp.data[0].url)`,
           },
         ],
-        links: [{ href: '/developers', label: 'Review the private access boundary' }],
       },
       {
         id: 'prompt-caching',
@@ -605,7 +600,6 @@ print("Image artifact URL:", image_resp.data[0].url)`,
           'Replace your API key with your GALXAI API key.',
           'Use the supported capability identifier documented for your route.',
         ],
-        links: [{ href: '/developers', label: 'Review private access guidance' }],
       },
       {
         id: 'client-example',
@@ -660,7 +654,6 @@ console.log(response.choices[0].message.content);`,
           ],
         },
         links: [
-          { href: '/developers', label: 'Review private credential guidance' },
           { href: BILLING_PATHS.credits, label: 'Manage Account Balance' },
           { href: '/status', label: 'Live Service Status' },
         ],
@@ -696,7 +689,6 @@ function calculateBackoff(attempt: number, baseMs = 500, maxMs = 10000): number 
           'Never prefix API keys with NEXT_PUBLIC_ or VITE_ in frontend frameworks.',
           'If a key is accidentally committed to a repository, immediately revoke it in the dashboard and provision a fresh key.',
         ],
-        links: [{ href: '/developers', label: 'Review private access guidance' }],
       },
       {
         id: 'diagnostics',
@@ -707,7 +699,6 @@ function calculateBackoff(attempt: number, baseMs = 500, maxMs = 10000): number 
           'Operational diagnostics are handled through authorized support channels; ordinary API responses should contain only the documented public contract.',
         ],
         links: [
-          { href: '/developers', label: 'Review private access guidance' },
           { href: '/docs/api-reference', label: 'Review API Reference' },
         ],
       },

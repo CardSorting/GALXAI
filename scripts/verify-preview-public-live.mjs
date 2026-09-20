@@ -10,11 +10,10 @@ try {
     const context=await browser.newContext({viewport:{width,height:1000},reducedMotion:'reduce'});
     const page=await context.newPage(); const errors=[];
     page.on('pageerror',error=>errors.push(error.message));
-    for (const path of ['/developers','/images','/sites']) {
+    for (const path of ['/images','/sites']) {
       const response=await page.goto('https://galx.ai'+path,{waitUntil:'networkidle',timeout:30000});
       assert.equal(response.status(),200,path); assert.equal(new URL(page.url()).pathname,path);
       await page.evaluate(()=>document.fonts.ready);
-      if (path==='/developers') await page.getByRole('heading',{name:'GALX Nova Private access, by decision.',exact:true}).waitFor();
       const text=await page.locator('body').innerText();
       assert.doesNotMatch(text,/private\.developer|preview_admin_|Internal decision note|GALX_VAULT_|SUPABASE_SERVICE_ROLE_KEY|High-Concurrency Fleet Routing/);
       const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth);
@@ -27,7 +26,7 @@ try {
     assert.equal(new URL(page.url()).searchParams.get('next'),'/admin');
     await context.close();
   }
-  console.log('PASS: live desktop/mobile Images, Sites, informational private-access page and admin sign-in redirect.');
+  console.log('PASS: live desktop/mobile Images, Sites and admin sign-in redirect.');
 } finally {
   await writeFile(`${output}/checks.json`,JSON.stringify({checkedAt:new Date().toISOString(),checks},null,2)+'\n');
   await browser.close();

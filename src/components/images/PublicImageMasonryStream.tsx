@@ -38,6 +38,7 @@ interface PublicImageMasonryStreamProps {
   initialHasMore?: boolean;
   className?: string;
   showToolbar?: boolean;
+  showFilters?: boolean;
   onSelectPrompt?: (prompt: string, ratio?: string) => void;
   authorHandle?: string | null;
   emptyTitle?: string;
@@ -119,6 +120,7 @@ export function PublicImageMasonryStream({
   initialHasMore,
   className = '',
   showToolbar = true,
+  showFilters = true,
   onSelectPrompt,
   authorHandle,
   emptyTitle,
@@ -902,22 +904,26 @@ export function PublicImageMasonryStream({
               </button>
             </div>
 
-            <div className="masonry-divider" />
+            {showFilters && (
+              <>
+                <div className="masonry-divider" />
 
-            {/* Ratio Filter Pills */}
-            <div className="masonry-filters" role="tablist" aria-label="Filter by aspect ratio">
-              {FILTER_PILLS.map((pill) => (
-                <button
-                  key={pill.label}
-                  type="button"
-                  className={`masonry-filter-pill ${selectedRatio === pill.value ? 'active' : ''}`}
-                  onClick={() => handleRatioChange(pill.value)}
-                  aria-pressed={selectedRatio === pill.value}
-                >
-                  {pill.label}
-                </button>
-              ))}
-            </div>
+                {/* Ratio Filter Pills */}
+                <div className="masonry-filters" role="tablist" aria-label="Filter by aspect ratio">
+                  {FILTER_PILLS.map((pill) => (
+                    <button
+                      key={pill.label}
+                      type="button"
+                      className={`masonry-filter-pill ${selectedRatio === pill.value ? 'active' : ''}`}
+                      onClick={() => handleRatioChange(pill.value)}
+                      aria-pressed={selectedRatio === pill.value}
+                    >
+                      {pill.label}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
 
           <div className="masonry-toolbar-right">
@@ -978,7 +984,7 @@ export function PublicImageMasonryStream({
       )}
 
       {/* --- Style / Aesthetics Preset Chips Bar --- */}
-      {showToolbar && (
+      {showToolbar && showFilters && (
         <div className="masonry-styles-bar" role="tablist" aria-label="Filter by art style">
           <span className="masonry-styles-label">Style:</span>
           <div className="masonry-styles-scroll">

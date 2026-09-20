@@ -38,8 +38,8 @@ for (const suffix of ['', '/thumbnail']) {
 }
 for (const path of ['/models/openai-gpt-image-latest','/models/gpt-5.6-sol','/llms.txt']) {
   const denied = await fetch(`${base}${path}`, { redirect: 'manual' });
-  assert.equal(denied.status, 307);
-  assert.equal(new URL(denied.headers.get('location')!, base).pathname, '/developers');
+  assert.equal(denied.status, 404);
+  assert.equal(denied.headers.get('location'), null);
 }
 const browserAssets = new Set<string>();
 for (const path of ['/images', '/sites', '/sites/00000000-0000-4000-8000-000000000000']) {

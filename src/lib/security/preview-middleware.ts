@@ -31,12 +31,14 @@ export async function previewMiddleware(req: NextRequest): Promise<NextResponse 
   const denied = await enforceDeveloperAccess(req);
   if (!denied) return null;
   if (isApiPath(path) || path.startsWith('/_next/') || !['GET', 'HEAD'].includes(req.method)) return denied;
-  const url = req.nextUrl.clone();
-  url.pathname = '/developers';
-  // Never copy credentials or arbitrary query strings into the redirect.
-  url.search = '';
-  const response = NextResponse.redirect(url);
-  response.headers.set('Cache-Control', 'private, no-store');
-  response.headers.set('X-Robots-Tag', 'noindex, nofollow');
-  return response;
+  // Protected pages no longer expose a public developer landing page. Keep the
+  // denial generic so callers cannot infer a private surface or reflect input.
+  return new NextResponse('This page is unavailable.', {
+    status: 404,
+    headers: {
+      'Cache-Control': 'private, no-store',
+      'X-Robots-Tag': 'noindex, nofollow',
+      'Content-Type': 'text/plain; charset=utf-8',
+    },
+  });
 }

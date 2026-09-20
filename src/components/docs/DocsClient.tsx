@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowRight, BookOpen, KeyRound, Layers, Terminal } from 'lucide-react';
+import { ArrowRight, BookOpen, Layers, Terminal } from 'lucide-react';
 import { Navigation } from '@/components/dashboard/Navigation';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 import { DocsSubNav } from '@/components/dashboard/DocsSubNav';
@@ -71,13 +71,6 @@ export function DocsClient() {
             >
               Browse models
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
-            </Link>
-            <Link
-              href="/developers"
-              className="inline-flex items-center gap-2 rounded-lg border border-white/15 px-4 py-2.5 text-sm font-semibold text-zinc-100 transition-colors hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300"
-            >
-              <KeyRound className="h-4 w-4" aria-hidden="true" />
-              Private access guidance
             </Link>
           </div>
         </header>

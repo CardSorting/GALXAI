@@ -86,6 +86,7 @@
         "scripts/verify-image-public-http.ts",
         "scripts/test-relay-image-generation.ts",
         "src/app/images/**/*.tsx",
+        "src/app/explore/page.tsx",
         "scripts/verify-url-navigation.mjs",
         "src/lib/billing/free-generation*.ts",
         "src/lib/billing/generation-*.ts",

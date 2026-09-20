@@ -8,7 +8,7 @@ import styles from './explore.module.css';
 export const metadata: Metadata = constructMetadata({
   title: 'Explore creations — GALX Images',
   description:
-    'Explore images created on GALX. Search prompts, filter by aspect ratio and style, and remix ideas in the Image Studio.',
+    'Explore images created on GALX. Search prompts, discover new ideas, and remix them in the Image Studio.',
   keywords: [
     'AI explore',
     'image prompts',
@@ -77,6 +77,7 @@ export default async function ExplorePage(props: {
       <section className={styles.streamWrap} aria-label="Community image gallery stream">
         <PublicImageMasonryStream
           showToolbar={true}
+          showFilters={false}
           initialImageId={image}
           externalQuery={q}
           initialRatio={ratio}

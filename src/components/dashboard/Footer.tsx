@@ -4,6 +4,7 @@ import React from 'react';
 import { usePathname } from 'next/navigation';
 import { IntentLink as Link } from '@/components/common/IntentLink';
 import { GalxGalaxyLogo } from '@/components/brand/GalxGalaxyLogo';
+import { IMAGE_PATHS } from '@/lib/images/navigation';
 import { ArrowUp } from 'lucide-react';
 import styles from './footer.module.css';
 
@@ -49,7 +50,7 @@ export function Footer() {
             <h2 className={styles.colTitle}>Create</h2>
             <ul className={styles.linkList}>
               <li>
-                <Link href="/images" className={styles.footerLink}>
+                <Link href={IMAGE_PATHS.library} className={styles.footerLink}>
                   <span>Image Studio</span>
                 </Link>
               </li>
@@ -103,11 +104,6 @@ export function Footer() {
               <li>
                 <Link href="/pricing/galx-pro" className={styles.footerLink}>
                   <span>GALX Pro</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/developers" className={styles.footerLink}>
-                  <span>Private access</span>
                 </Link>
               </li>
             </ul>

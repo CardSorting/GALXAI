@@ -123,12 +123,6 @@ try {
     await page.getByRole('combobox',{name:/^Role/}).selectOption('viewer'); await page.getByLabel('Internal note',{exact:true}).fill('Read early feedback alongside the founder.'); await capture('staff-editor');
     await page.getByRole('button',{name:'Save staff access',exact:true}).click(); await page.getByText('Staff access updated.').waitFor();
     await page.getByRole('button',{name:'Activity',exact:true}).click(); await page.getByText('Staff access added',{exact:true}).first().waitFor(); await capture('activity');
-    // Public developer access is informational only; no participant workflow or credential path is exposed.
-    await page.goto(base+'/developers',{waitUntil:'networkidle'});
-    await page.getByRole('heading',{name:'GALX Nova Private access, by decision.',exact:true}).waitFor();
-    assert.equal(await page.getByRole('link',{name:'Explore GALX',exact:true}).getAttribute('href'),'/images');
-    assert.doesNotMatch(await page.locator('main').innerText(), /Sign up to apply|Complete application|Create credential|API key/i);
-    await capture('public-developer-surface');
     activePage = null; await context.close();
   }
   // A verified account claiming owner in editable metadata still has no staff authority.
@@ -143,7 +137,7 @@ try {
   const manifest = JSON.parse(await readFile(path.join(root,'.next/server/app-build-manifest.json'),'utf8').catch(()=>readFile(path.join(root,'.next/app-build-manifest.json'),'utf8')));
   const adminChunk = manifest.pages['/admin/page'].find((name:string)=>name.includes('/admin/page-'));
   assert(adminChunk); assert.equal((await anonymous.request.get(base+'/_next/'+adminChunk)).status(),401);
-  for (const pathname of ['/','/developers','/images','/sites']) {
+  for (const pathname of ['/','/images','/sites']) {
     const response = await anonymous.request.get(base+pathname); assert.equal(response.status(),200);
     const html = await response.text(); assert(!/owner@preview|maya@smallstudio|Internal decision note|preview_admin_audit|preview_application_snapshots|PreviewReadSync|wanted\.ordinality/.test(html));
     for (const match of html.matchAll(/<script[^>]+src="([^"]+)"/g)) {

@@ -61,7 +61,7 @@ test('adaptive image polling honors delta/date server hints and rejects malforme
 test('shared navigation budget collapses duplicate destinations and limits bursts',()=>{
   const claim=createIntentPrefetchBudget();
   assert(claim('/sites',100_000));assert(!claim('/sites',100_001));
-  assert(claim('/images',100_002));assert(claim('/developers',100_003));assert(!claim('/pricing',100_004));
+  assert(claim('/images',100_002));assert(claim('/docs',100_003));assert(!claim('/pricing',100_004));
   assert(claim('/pricing',110_001));assert(!claim('/sites',110_002));assert(claim('/sites',130_001));
 });
 test('navigation cannot double its request budget at a time-window boundary',()=>{

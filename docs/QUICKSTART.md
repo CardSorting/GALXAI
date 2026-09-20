@@ -68,4 +68,3 @@ administrators, not by the API caller.
 - [API base URL and authentication](API_BASE_URL.md)
 - [API reference](API_REFERENCE.md)
 - [OpenAPI schema](https://galx.ai/api/openapi.json)
-- [Public developer page](https://galx.ai/developers)

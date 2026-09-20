@@ -163,7 +163,7 @@ export async function createDeveloperCheckout(pool: Pool, stripe: Stripe, input:
   const usagePrice = await developerUsagePrice(stripe);
   return createSubscriptionCheckout(pool, stripe, {
     planKey: NOVA_DEVELOPER_PLAN_KEY, price,
-    returnPath: '/developers', returnParam: 'developer_checkout', integrationPrefix: 'galx_nova_developer',
+    returnPath: BILLING_PATHS.plan, returnParam: 'developer_checkout', integrationPrefix: 'galx_nova_developer',
     idempotencyPrefix: 'nova-developer-checkout', customerIdempotencyPrefix: 'subscription-customer',
     checkoutLockPrefix: 'nova-developer-checkout', keySeedPrefix: 'nova-developer',
     checkoutNotice: 'This is a recurring API access subscription at $50/month. Usage is billed separately. No usage credits are included.',

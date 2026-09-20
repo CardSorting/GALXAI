@@ -22,11 +22,10 @@ export async function verifyCohortUI({ browser, base, output, AxeBuilder }: {
       console.log(`Verified cohort ${label} at ${width}px.`);
     }
     try {
-      await page.goto(base + '/developers', { waitUntil: 'networkidle' });
-      await page.getByRole('heading', { name: 'GALX Nova Private access, by decision.', exact: true }).waitFor();
-      await page.getByRole('link', { name: 'Explore GALX', exact: true }).waitFor();
-      assert.doesNotMatch(await page.locator('main').last().innerText(), /Sign up to apply|Complete application|Submit application|Create credential|API key/i);
-      await capture('guest');
+      const removed = await page.goto(base + '/developers', { waitUntil: 'networkidle' });
+      assert.equal(removed?.status(), 404);
+      assert.match(await page.locator('body').innerText(), /unavailable/i);
+      await capture('removed');
     } catch (error) {
       await page.screenshot({ path: path.join(output, `failure-${width}.png`), fullPage: true });
       throw error;

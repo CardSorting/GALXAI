@@ -95,4 +95,3 @@ public price sheet or a promise of self-service availability.
 - [API quickstart](QUICKSTART.md)
 - [Base URL and authentication](API_BASE_URL.md)
 - [OpenAPI schema](https://galx.ai/api/openapi.json)
-- [Public developer page](https://galx.ai/developers)

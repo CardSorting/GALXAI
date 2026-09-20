@@ -63,7 +63,7 @@ try {
     await page.reload(); await page.getByRole('heading', { name: 'Your favorites', exact: true }).waitFor();
     assert.equal(state.library.at(-1), true);
     assert.equal(await page.title(), 'Favorites | GALX');
-    assert.equal(await page.getByRole('navigation', { name: 'Main navigation', exact: true }).locator('[href="/images"]').getAttribute('aria-current'), 'page');
+    assert.equal(await page.getByRole('navigation', { name: 'Main navigation', exact: true }).locator('[href="/images/library"]').getAttribute('aria-current'), 'page');
     await nav.getByRole('link', { name: 'My images', exact: true }).focus();
     await page.keyboard.press('Enter'); await page.waitForURL(base + '/images/library');
     const popupPromise = context.waitForEvent('page');

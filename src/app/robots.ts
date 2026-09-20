@@ -5,7 +5,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: '*',
       allow: ['/', '/about', '/explore', '/images', '/pricing', '/faq'],
-      disallow: ['/api/', '/v1/', '/keys', '/billing', '/auth/', '/login', '/signup', '/admin', '/postmortems', '/models', '/playground', '/tools', '/sites', '/docs', '/developers', '/pricing/usage'],
+      disallow: ['/api/', '/v1/', '/keys', '/billing', '/auth/', '/login', '/signup', '/admin', '/postmortems', '/models', '/playground', '/tools', '/sites', '/docs', '/pricing/usage'],
     },
     sitemap: `${SITE_CONFIG.url}/sitemap.xml`,
   };

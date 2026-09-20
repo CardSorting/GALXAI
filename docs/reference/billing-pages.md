@@ -35,14 +35,13 @@ usage rate card or self-service inference billing promise is implied.
 | Transactions | `/billing/transactions` | Filter and export recorded account activity |
 | Invoices | `/billing/invoices` | View owner-scoped invoices and hosted history |
 | Payment settings | `/billing/payment-methods` | Open the restricted payment portal |
-| Private access guidance | `/developers` | Read the public boundary; no application or purchase flow |
 
 The public pricing page links only to the consumer plan. Retired developer
-pricing paths redirect to the neutral private-access page, and retired checkout,
+pricing paths redirect to the neutral home surface, and retired checkout,
 quote, wallet purchase and inbound-application endpoints return bounded 410
 responses without creating storage records. Key-management pages redirect to
-the private-access explanation; their server-side infrastructure remains
-available to administrators.
+the neutral home surface; their server-side infrastructure remains available to
+administrators.
 
 ## State and recovery
 
