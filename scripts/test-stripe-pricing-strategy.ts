@@ -11,6 +11,7 @@ import { POST as stripeCheckout } from '../src/app/api/stripe/checkout/route';
 import { POST as walletEstimate } from '../src/app/api/wallet/estimate/route';
 import { GET as walletUsage } from '../src/app/api/wallet/usage/route';
 import { USAGE_PRICING } from '../src/lib/billing/usage-pricing';
+import { IMAGE_PLAN_CATALOG } from '../src/lib/billing/image-plan-catalog';
 
 assert.equal(PRO_PLAN.monthlyPriceUsd, 10);
 assert.equal(PRO_PLAN.interval, 'month');
@@ -28,6 +29,12 @@ assert.equal(USAGE_PRICING.unit, 'message');
 assert.equal(USAGE_PRICING.path, '/pricing/usage');
 assert.equal('rates' in USAGE_PRICING, false);
 assert.equal('prices' in USAGE_PRICING, false);
+assert.deepEqual(IMAGE_PLAN_CATALOG.map(plan => [plan.id, plan.monthlyPriceUsd, plan.stripeLookupKey]), [
+  ['creator', 15, 'galx_images_creator_monthly_v1'],
+  ['studio', 35, 'galx_images_studio_monthly_v1'],
+  ['team', 75, 'galx_images_team_monthly_v1'],
+]);
+assert(IMAGE_PLAN_CATALOG.every(plan => plan.catalogStatus === 'staged' && plan.checkoutEnabled === false));
 
 const price = { id: 'price_nova_developer', product: 'galx_nova_developer_access_v1', metadata: { galxPlan: 'nova-developer-v1' }, currency: 'usd', unit_amount: 5000,
   recurring: { interval: 'month', interval_count: 1, usage_type: 'licensed' } } as any;

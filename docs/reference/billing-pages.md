@@ -11,9 +11,27 @@ This guide is not imported into application content.
 
 | Surface | Current meaning | Payment behavior |
 | --- | --- | --- |
-| GALX Pro | Consumer Image Studio plan for one account at $10/month | Active public Stripe subscription at the verified consumer price |
+| GALX Pro | Consumer Image Studio plan for one account at the published $10/month contract | Checkout is permitted only when the server-side Price and policy match; the live lookup key currently needs reconciliation |
 | GALX Nova private access | Explicitly authorized private integrations and GALX products | No public checkout or self-service purchase path |
 | Historical account records | Prior transactions, invoices and ledger history | Readable only for the applicable account and reconciliation |
+
+## Image plan catalog strategy
+
+The current sellable ladder remains Start free plus GALX Pro. Creator at
+$15/month, Studio at $35/month and Team at $75/month are staged pricing
+hypotheses for the next image ladder. Each has a deterministic Stripe Product
+and recurring Price with `catalogStatus=staged`, `checkoutEnabled=false` and
+`active=false`. The catalog is useful for internal pricing review and future
+activation, but it is not a public offer and does not grant access.
+
+The ladder is intentionally capability-led rather than a copy of another
+provider's plan names: Creator is a solo practice, Studio is heavier
+individual use, and Team is shared work. The only capabilities that can be
+described today are the existing Image Studio controls, owner-scoped Private
+mode, and the personal library. Higher fair-use headroom, throughput, seats,
+roles, shared libraries, support commitments and workspace billing remain
+release gates. They must have a matching usage policy, checkout flow, webhook
+reconciliation and entitlement authority before any staged Price is activated.
 
 The former Developer subscription and prepaid/compute purchase paths are not
 public products. Retain their backend price identities, webhook handling and
@@ -38,8 +56,8 @@ usage rate card or self-service inference billing promise is implied.
 
 The public pricing page shows the one-time five-image welcome allowance beside
 the current Pro plan, so the free-to-paid path matches the real Image Studio
-experience. It also shows clearly marked Creator, Studio and Team roadmap
-concepts without prices or checkout actions; these are not current plans or
+experience. It also shows clearly marked Creator, Studio and Team price
+hypotheses without checkout actions; these are not current plans or
 entitlements. Video, Fast/Relax lanes and uploaded-image editing are not
 current consumer capabilities. Private mode is an existing owner-scoped
 sharing control, not a paid tier. Retired developer
@@ -88,6 +106,10 @@ npx tsc --noEmit
 npm run lint
 npm run build
 ```
+
+The staged image catalog is provisioned separately with the live-key guarded
+command `npm run stripe:provision:image-plans`. It is idempotent and must read
+back inactive Products and Prices before any future activation review.
 
 Rendered HTML, RSC responses and browser assets must not contain retired
 checkout labels, public inference prices, enrollment links, raw pricing DTOs or

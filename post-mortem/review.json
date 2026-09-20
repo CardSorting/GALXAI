@@ -1,8 +1,8 @@
 {
   "version": 1,
   "reviewer": "Codex",
-  "reviewed_at": "2026-09-20T09:40:44.944601Z",
-  "note": "Final critical source review for the private-generation change: verified owner authentication occurs before private artifact cache reads, unlisted links remain opaque and link-addressable, relay payloads strip publication-only visibility, and public DTOs expose only the allowlisted visibility state. Targeted image, auth, billing, egress, and build checks passed; unrelated stale documentation queues remain intentionally untouched.",
+  "reviewed_at": "2026-09-20T09:49:35.146822Z",
+  "note": "Final critical review for the staged image pricing catalog: source, strategy, provisioning guardrails, public copy and Stripe readback agree that Creator, Studio and Team are inactive, checkout-disabled hypotheses. The command creates no customers, subscriptions, payments, taxes, schema changes or entitlements; current Pro remains the only sellable consumer plan. A separate read-only audit identified the existing live Pro lookup key at $20 versus the repository published $10 contract with no matching subscriptions in the bounded scan; that existing catalog was intentionally left unchanged for a dedicated reconciliation decision.",
   "files": {
     ".dockerignore": "fb4dc7ef84e7f36c5bfed0f267187a022bbb61e66dd26060295b133e08fa74c5",
     ".github/workflows/vercel-preflight.yml": "60856940957e45075d1c54de644d3ba0268fad16b35b3ed5eb8005bc40a5b4b3",
@@ -39,7 +39,7 @@
     "docs/operations/signup-credit.md": "6e0462a35d8042512bc6e5d1ea890a330e7bd3cc015d4b9938e7febf5c9fa135",
     "docs/operations/wallet-lifecycle.md": "ddc86ed1d3347f5fff19a07581bc040c52eee7a115c279a2ba28bceae92303db",
     "docs/operations/workspace-auth.md": "58f0a796e0ddc3c3180eb33f77590305ee13ec6318adb3b1fe0e005c903267c9",
-    "package.json": "4cda8a18113cb752cda05cc19cc55b98ec497fb16f83fda387e97180f58a7e02",
+    "package.json": "f4c02f189416ff131a3ce07d2ba4bebea4b90531a60467d5cbb81401b256d6fa",
     "post-mortem/CURRENT_STATE.md": "a96ac96b059e50af8895b212f7b7567eb8096d22e886a5b57d77edf954e772f5",
     "post-mortem/README.md": "109e413d0323577f935e1b911356db7ca1f48da6e394639a6ec81fc253025dee",
     "post-mortem/failure-modes/README.md": "1fe80f6a74991f1751708749a9e323948868e1c21890c569983162eaf68c2d80",

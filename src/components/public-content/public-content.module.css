@@ -29,6 +29,8 @@
 .conceptGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 24px; }
 .conceptOption { display: flex; min-width: 0; flex-direction: column; border: 1px solid var(--reading-line); border-radius: 12px; background: rgba(13,16,28,.58); padding: 24px; }
 .conceptOption h3 { font-size: 1.25rem; }
+.conceptPrice { margin-top: 20px; color: #f3f4f6; font-size: 1.5rem; font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+.conceptPrice span { margin-left: 6px; color: var(--reading-muted); font-size: .8125rem; font-weight: 400; letter-spacing: 0; }
 .conceptFeatures { display: grid; gap: 12px; margin: 24px 0 0; padding: 20px 0; border-block: 1px solid var(--reading-line); list-style: none; color: var(--reading-muted); font-size: .875rem; line-height: 1.6; }
 .conceptFeatures li { position: relative; padding-left: 18px; }
 .conceptFeatures li::before { content: ''; position: absolute; left: 0; top: .6em; width: 6px; height: 6px; border-radius: 50%; background: #818cf8; }

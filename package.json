@@ -248,6 +248,7 @@
     "stripe:setup": "tsx scripts/setup-stripe-cli.ts",
     "stripe:provision": "tsx scripts/provision-stripe-all.ts",
     "stripe:provision:pro": "tsx scripts/provision-sites-pro.ts",
+    "stripe:provision:image-plans": "node --env-file-if-exists=.env.local --import tsx scripts/provision-image-plan-catalog.ts",
     "stripe:provision:nova": "node --env-file-if-exists=.env.local --import tsx scripts/provision-nova-developer.ts",
     "stripe:login": "stripe login",
     "stripe:listen": "stripe listen --forward-to localhost:3000/api/stripe/webhook",

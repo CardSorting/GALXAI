@@ -1,0 +1,39 @@
+{
+  "reviewed_at": "2026-09-20T00:00:00.000000+00:00",
+  "reviewer": "Codex",
+  "scope": "Image pricing strategy and staged Stripe catalog entries for Creator, Studio, and Team.",
+  "research": [
+    {
+      "source": "https://docs.midjourney.com/hc/en-us/articles/27870484040333-Comparing-Midjourney-Plans",
+      "finding": "A familiar ladder separates plans by explicit usage and privacy/concurrency terms; GALX must not copy unsupported modes or promises."
+    },
+    {
+      "source": "https://helpx.adobe.com/lu_en/firefly/web/get-started/learn-the-basics/generative-credits-overview.html",
+      "finding": "Plain-language usage balances and reset expectations are easier to compare than opaque job labels; GALX will add those only with enforceable accounting."
+    },
+    {
+      "source": "https://docs.stripe.com/api/prices/create",
+      "finding": "Stripe supports recurring Prices with lookup keys and an active flag; inactive Prices are appropriate for a catalog staged before checkout."
+    }
+  ],
+  "strategy": {
+    "current_offer": "Start free plus GALX Pro at the existing published $10/month contract.",
+    "creator": { "monthly_usd": 15, "audience": "solo creative practice", "status": "staged" },
+    "studio": { "monthly_usd": 35, "audience": "heavier individual use", "status": "staged" },
+    "team": { "monthly_usd": 75, "audience": "shared work", "status": "staged" }
+  },
+  "guardrails": [
+    "Products and Prices are inactive and have checkoutEnabled=false.",
+    "No customers, subscriptions, payments, tax registrations, migrations, or entitlements were created.",
+    "The current Pro Product and Price were not modified.",
+    "Private mode remains an owner-scoped product control, not a plan entitlement.",
+    "Higher usage, throughput, seats, roles, support, video, editing and priority are release gates, not current promises."
+  ],
+  "verification": [
+    "The provisioning command uses deterministic Product IDs, lookup keys, metadata and idempotency keys.",
+    "Live Stripe readback confirmed three staged Products and recurring Prices with active=false.",
+    "A separate read-only audit found the existing GALX Pro lookup key active at $20 with no matching subscriptions in the bounded account scan; the repository's published Pro contract remains $10 and was intentionally not changed in this pass.",
+    "No secret, customer data or webhook payload was recorded in this evidence."
+  ],
+  "limits": "This change stages a catalog for pricing review; it does not make the new plans purchasable or change runtime access."
+}

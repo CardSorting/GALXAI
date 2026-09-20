@@ -1,0 +1,122 @@
+/**
+ * Private operator provisioning for the staged image-plan catalog.
+ *
+ * This command creates only inactive Stripe Products and recurring Prices. It
+ * never creates customers, subscriptions, invoices, payments, tax records, or
+ * entitlements. Checkout stays disabled until the matching usage and workspace
+ * contracts are implemented and reviewed.
+ */
+import Stripe from 'stripe';
+import { IMAGE_PLAN_CATALOG } from '../src/lib/billing/image-plan-catalog';
+
+const secretKey = process.env.STRIPE_SECRET_KEY || '';
+if (!/^(sk|rk)_live_[A-Za-z0-9]+$/.test(secretKey)) {
+  throw new Error('A valid live Stripe key is required');
+}
+
+const stripe = new Stripe(secretKey, {
+  apiVersion: '2026-07-29.dahlia',
+  maxNetworkRetries: 0,
+  timeout: 10_000,
+});
+
+const requestOptions = { timeout: 10_000, maxNetworkRetries: 0 } as const;
+const version = '2026-09-20';
+const metadata = (plan: typeof IMAGE_PLAN_CATALOG[number]) => ({
+  galxPlan: plan.planKey,
+  galxSurface: 'images',
+  catalogStatus: plan.catalogStatus,
+  checkoutEnabled: String(plan.checkoutEnabled),
+  privateMode: 'owner-scoped',
+  pricingVersion: version,
+});
+
+const isNotFound = (error: unknown) => (error as { statusCode?: number })?.statusCode === 404;
+
+const provision = async (plan: typeof IMAGE_PLAN_CATALOG[number]) => {
+  let product: Stripe.Product;
+  try {
+    product = await stripe.products.retrieve(plan.stripeProductId, {}, requestOptions);
+  } catch (error) {
+    if (!isNotFound(error)) throw error;
+    product = await stripe.products.create({
+      id: plan.stripeProductId,
+      name: plan.name,
+      description: `${plan.audience} Catalog staged for future GALX Images billing; not available for checkout.`,
+      active: false,
+      metadata: metadata(plan),
+    }, { ...requestOptions, idempotencyKey: `galx-images-${plan.id}-product-${version}` });
+  }
+
+  if (product.id !== plan.stripeProductId || product.name !== plan.name ||
+      product.metadata.galxPlan !== plan.planKey || product.metadata.catalogStatus !== plan.catalogStatus) {
+    throw new Error(`Existing ${plan.id} product does not match the approved image catalog contract`);
+  }
+  if (product.active) {
+    throw new Error(`Existing ${plan.id} product is active; review manually before activating staged billing`);
+  }
+  product = await stripe.products.update(product.id, { metadata: { ...product.metadata, ...metadata(plan) } }, requestOptions);
+
+  const [activePrices, inactivePrices] = await Promise.all([
+    stripe.prices.list({ lookup_keys: [plan.stripeLookupKey], active: true, limit: 10 }, requestOptions),
+    stripe.prices.list({ lookup_keys: [plan.stripeLookupKey], active: false, limit: 10 }, requestOptions),
+  ]);
+  const matches = [...activePrices.data, ...inactivePrices.data];
+  if (activePrices.has_more || inactivePrices.has_more || matches.length > 1) {
+    throw new Error(`Image plan ${plan.id} has an ambiguous Stripe lookup key`);
+  }
+
+  const amount = plan.monthlyPriceUsd * 100;
+  let price = matches[0];
+  if (price && (price.product !== product.id || price.unit_amount !== amount || price.currency !== 'usd' ||
+      price.active || price.recurring?.interval !== 'month' || price.recurring.interval_count !== 1 ||
+      price.recurring.usage_type !== 'licensed' || price.metadata.galxPlan !== plan.planKey ||
+      price.metadata.catalogStatus !== plan.catalogStatus)) {
+    throw new Error(`Existing ${plan.id} Price does not match the approved staged billing contract`);
+  }
+  if (!price) {
+    price = await stripe.prices.create({
+      product: product.id,
+      unit_amount: amount,
+      currency: 'usd',
+      recurring: { interval: 'month' },
+      lookup_key: plan.stripeLookupKey,
+      transfer_lookup_key: true,
+      active: false,
+      nickname: `${plan.id} monthly · staged`,
+      metadata: metadata(plan),
+    }, { ...requestOptions, idempotencyKey: `galx-images-${plan.id}-price-${version}` });
+  }
+  if (price.active || !price.livemode || price.product !== product.id || price.unit_amount !== amount ||
+      price.currency !== 'usd' || price.recurring?.interval !== 'month' || price.recurring.interval_count !== 1 ||
+      price.recurring.usage_type !== 'licensed' || price.metadata.galxPlan !== plan.planKey ||
+      price.metadata.catalogStatus !== plan.catalogStatus) {
+    throw new Error(`Stripe readback for ${plan.id} Price does not match the approved staged billing contract`);
+  }
+
+  return {
+    id: plan.id,
+    planKey: plan.planKey,
+    product: product.id,
+    price: price.id,
+    lookupKey: plan.stripeLookupKey,
+    monthlyUsd: plan.monthlyPriceUsd,
+    active: false,
+    checkoutEnabled: plan.checkoutEnabled,
+  };
+};
+
+const results = [];
+for (const plan of IMAGE_PLAN_CATALOG) results.push(await provision(plan));
+
+console.log(JSON.stringify({
+  mode: 'live',
+  catalogStatus: 'staged',
+  productsCreatedOrVerified: results.length,
+  pricesCreatedOrVerified: results.length,
+  customersCreated: 0,
+  subscriptionsCreated: 0,
+  paymentsCreated: 0,
+  entitlementsCreated: 0,
+  results,
+}, null, 2));
