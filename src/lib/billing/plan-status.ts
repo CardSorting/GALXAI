@@ -1,6 +1,6 @@
 /** Customer-facing display state. It never grants access or contains provider IDs. */
 export type SubscriptionState = 'none' | 'active' | 'ending' | 'payment_required' | 'processing' | 'paused' | 'canceled' | 'unavailable';
-export type ConsumerPlanId = 'pro' | 'creator' | 'studio' | 'team';
+export type ConsumerPlanId = 'pro' | 'creator' | 'studio' | 'max';
 export interface PlanOffer {
   id: ConsumerPlanId;
   name: string;
@@ -30,7 +30,7 @@ export function parsePlanStatus(value: unknown): PlanStatus | null {
   const validOffers = Array.isArray(offers) && offers.every(value => {
     if (!value || typeof value !== 'object') return false;
     const offer = value as Record<string, unknown>;
-    return ['pro', 'creator', 'studio', 'team'].includes(String(offer.id)) && typeof offer.name === 'string' &&
+    return ['pro', 'creator', 'studio', 'max'].includes(String(offer.id)) && typeof offer.name === 'string' &&
       typeof offer.audience === 'string' && typeof offer.monthlyPriceUsd === 'number' && Number.isSafeInteger(offer.monthlyPriceUsd) &&
       offer.monthlyPriceUsd > 0 && offer.monthlyPriceUsd <= 100_000 && typeof offer.checkoutAvailable === 'boolean';
   });

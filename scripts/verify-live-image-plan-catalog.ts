@@ -27,7 +27,7 @@ const imagePriceIds: string[] = [];
 for (const plan of IMAGE_PLAN_CATALOG) {
   const product = await stripe.products.retrieve(plan.stripeProductId, {}, requestOptions);
   const price = await readPrice(plan.stripeLookupKey);
-  if (!product.livemode || !product.active || product.metadata.galxPlan !== plan.planKey || objectId(price.product) !== product.id || price.unit_amount !== plan.monthlyPriceUsd * 100 || price.currency !== 'usd' || price.recurring?.interval !== 'month' || price.recurring.interval_count !== 1 || price.metadata.galxPlan !== plan.planKey || price.metadata.catalogStatus !== 'active' || price.metadata.checkoutEnabled !== 'true') throw new Error(`${plan.id} live contract verification failed.`);
+  if (!product.livemode || !product.active || product.name !== plan.name || product.metadata.galxPlan !== plan.planKey || objectId(price.product) !== product.id || price.unit_amount !== plan.monthlyPriceUsd * 100 || price.currency !== 'usd' || price.recurring?.interval !== 'month' || price.recurring.interval_count !== 1 || price.metadata.galxPlan !== plan.planKey || price.metadata.catalogStatus !== 'active' || price.metadata.checkoutEnabled !== 'true') throw new Error(`${plan.id} live contract verification failed.`);
   image.push({ id: plan.id, monthlyUsd: plan.monthlyPriceUsd, active: true });
   imagePriceIds.push(price.id);
 }

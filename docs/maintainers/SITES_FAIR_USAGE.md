@@ -121,9 +121,9 @@ The earlier [production release verification](../../internal/scaling-strategy-20
 The launch record below is historical evidence for the Sites policy. It is not
 the current public pricing authority. The current customer strategy is GALX
 Images with four active one-account subscriptions: GALX Pro at $10/month,
-Creator at $15/month, Studio at $35/month, and Team at $75/month. They share the
-same supported Image Studio controls and fair-use boundary; Team does not
-currently include shared workspaces or seats. Developer Access is no longer a
+Creator at $15/month, Studio at $35/month, and MAX at $200/month. They share the
+same supported Image Studio controls and fair-use boundary; MAX is an individual
+plan and does not include account sharing, shared workspaces or seats. Developer Access is no longer a
 public subscription or self-service API product; private access is deliberate
 administrator provisioning with bounded allocation and metering. Do not use the
 older Sites, Standard, prepaid, compute-pack, or Developer subscription terms

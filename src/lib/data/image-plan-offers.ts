@@ -30,17 +30,17 @@ export const PUBLIC_IMAGE_PLAN_OFFERS = [
     boundary: 'One account, billed monthly, under the published fair-use terms.',
   },
   {
-    id: 'team',
-    name: 'Team',
-    audience: 'A larger creative practice on one account.',
-    monthlyPrice: 75,
+    id: 'max',
+    name: 'MAX',
+    audience: 'Maximum room for one creator’s Image Studio practice.',
+    monthlyPrice: 200,
     status: 'Available now',
     features: [
-      'Current Image Studio controls per account',
+      'Current Image Studio controls for one account',
       'Private mode for owner-scoped drafts',
       'Personal library, favorites, remix, and downloads',
     ],
-    boundary: 'One account, billed monthly, under the published fair-use terms; shared workspaces are not included.',
+    boundary: 'One account, billed monthly, under the published fair-use terms. Account sharing, seats, and shared workspaces are not included.',
   },
 ] as const;
 

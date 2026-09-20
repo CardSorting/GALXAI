@@ -44,11 +44,13 @@ export const IMAGE_PLAN_CATALOG = [
     boundary: 'One account, billed monthly, under the published fair-use terms.',
   },
   {
-    id: 'team',
+    // Keep the private plan key stable so existing checkout/webhook records
+    // continue to reconcile while the customer-facing name becomes MAX.
+    id: 'max',
     planKey: 'team-v1',
-    name: 'GALX Images — Team',
-    audience: 'A larger creative practice on one account.',
-    monthlyPriceUsd: 75,
+    name: 'GALX Images — MAX',
+    audience: 'Maximum room for one creator’s Image Studio practice.',
+    monthlyPriceUsd: 200,
     currency: 'USD',
     interval: 'month',
     stripeProductId: 'galx_images_team_v1',
@@ -56,11 +58,11 @@ export const IMAGE_PLAN_CATALOG = [
     catalogStatus: 'active',
     checkoutEnabled: true,
     capabilities: [
-      'Current Image Studio controls per account',
+      'Current Image Studio controls for one account',
       'Private mode for owner-scoped drafts',
       'Personal library, favorites, remix, and downloads',
     ],
-    boundary: 'One account, billed monthly, under the published fair-use terms; shared workspaces are not included.',
+    boundary: 'One account, billed monthly, under the published fair-use terms. Account sharing, seats, and shared workspaces are not included.',
   },
 ] as const;
 

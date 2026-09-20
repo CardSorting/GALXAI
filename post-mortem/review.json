@@ -1,8 +1,8 @@
 {
   "version": 1,
   "reviewer": "Codex",
-  "reviewed_at": "2026-09-20T10:23:09.607455Z",
-  "note": "Reviewed the public security disclosure asset allowlist, the authorization-aware deployment smoke contract, and the regression coverage for public disclosure assets after production deployment. Anonymous developer model and browser bootstrap requests remain intentionally denied.",
+  "reviewed_at": "2026-09-20T10:38:35.068075Z",
+  "note": "Reviewed the final MAX naming and $200 production catalog rotation, including live verification, deployment safety, and the remaining unrelated stale Relay and BroccoliDB fingerprints.",
   "files": {
     ".dockerignore": "fb4dc7ef84e7f36c5bfed0f267187a022bbb61e66dd26060295b133e08fa74c5",
     ".github/workflows/vercel-preflight.yml": "60856940957e45075d1c54de644d3ba0268fad16b35b3ed5eb8005bc40a5b4b3",

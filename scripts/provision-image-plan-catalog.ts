@@ -21,7 +21,7 @@ const stripe = new Stripe(secretKey, {
 });
 
 const requestOptions = { timeout: 10_000, maxNetworkRetries: 0 } as const;
-const version = '2026-09-20';
+const version = '2026-09-20-max-rename-v1';
 const metadata = (plan: typeof IMAGE_PLAN_CATALOG[number]) => ({
   galxPlan: plan.planKey,
   galxSurface: 'images',
@@ -48,7 +48,8 @@ const provision = async (plan: typeof IMAGE_PLAN_CATALOG[number]) => {
     }, { ...requestOptions, idempotencyKey: `galx-images-${plan.id}-product-${version}` });
   }
 
-  if (product.id !== plan.stripeProductId || product.name !== plan.name ||
+  const legacyName = plan.id === 'max' ? 'GALX Images — Team' : null;
+  if (product.id !== plan.stripeProductId || ![plan.name, legacyName].includes(product.name) ||
       product.metadata.galxPlan !== plan.planKey || product.metadata.catalogStatus !== plan.catalogStatus) {
     throw new Error(`Existing ${plan.id} product does not match the approved image catalog contract`);
   }
@@ -69,6 +70,9 @@ const provision = async (plan: typeof IMAGE_PLAN_CATALOG[number]) => {
       price.recurring?.interval !== 'month' || price.recurring.interval_count !== 1 ||
       price.recurring.usage_type !== 'licensed' || price.metadata.galxPlan !== plan.planKey ||
       price.metadata.catalogStatus !== plan.catalogStatus)) {
+    if (plan.id === 'max' && price.unit_amount === 7500) {
+      throw new Error('MAX still has the retired $75 Price; run npm run stripe:activate:image-plans -- --activate to rotate it safely');
+    }
     throw new Error(`Existing ${plan.id} Price does not match the approved billing contract`);
   }
   if (!price) {

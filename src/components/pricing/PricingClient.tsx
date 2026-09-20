@@ -37,7 +37,7 @@ export function PricingClient() {
 
         <section className="border-b border-white/10 py-8" aria-labelledby="image-plans">
           <h2 id="image-plans" className="text-xl font-semibold">Choose the pace that fits your practice.</h2>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">Creator, Studio, and Team are live monthly Image Studio options for one account. They share the supported controls and published fair-use boundary; Team does not currently include shared workspaces or seats.</p>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">Creator, Studio, and MAX are live monthly Image Studio options for one account. They share the supported controls and published fair-use boundary; MAX does not include account sharing, seats, or shared workspaces.</p>
           <div className="mt-6 grid gap-4 md:grid-cols-3">
             {IMAGE_PLAN_OFFERS.map((plan) => <article key={plan.id} className="rounded-lg border border-white/10 bg-white/[0.03] p-5">
               <div className="flex flex-wrap items-start justify-between gap-3"><div><h3 className="font-semibold">{plan.name}</h3><p className="mt-1 text-xs text-zinc-400">{plan.audience}</p></div><span className="rounded-full border border-white/15 px-2 py-1 text-[11px] text-zinc-300">{plan.status}</span></div>

@@ -11,7 +11,7 @@ Use for a Stripe failed-delivery alert or missing billing update. Owner: billing
 Read the alert's account ID and URL, then confirm the authenticated account with `stripe whoami --format json`. The CLI profile can differ from the application's configured account. Inspect endpoint IDs, URLs, `livemode`, status and subscriptions without printing keys, signing secrets or customer payloads. Preserve the original event IDs and receipt history.
 
 The active public billing path is the Image Studio subscription catalog (GALX
-Pro, Creator, Studio, and Team): subscription creation, updates and deletion,
+Pro, Creator, Studio, and MAX): subscription creation, updates and deletion,
 invoice payment events, and the rest of the shared event allowlist. Readiness
 also verifies the unique restricted customer portal: invoice history,
 payment-method updates and period-end cancellation enabled; subscription changes

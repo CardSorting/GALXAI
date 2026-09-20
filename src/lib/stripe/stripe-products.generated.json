@@ -5,7 +5,7 @@
     { "id": "galx_pro_v1", "planKey": "pro-v1", "lookupKey": "galx_pro_monthly_v1", "monthlyUsd": 10 },
     { "id": "galx_images_creator_v1", "planKey": "creator-v1", "lookupKey": "galx_images_creator_monthly_v1", "monthlyUsd": 15 },
     { "id": "galx_images_studio_v1", "planKey": "studio-v1", "lookupKey": "galx_images_studio_monthly_v1", "monthlyUsd": 35 },
-    { "id": "galx_images_team_v1", "planKey": "team-v1", "lookupKey": "galx_images_team_monthly_v1", "monthlyUsd": 75 },
+    { "id": "galx_images_team_v1", "planKey": "team-v1", "lookupKey": "galx_images_team_monthly_v1", "monthlyUsd": 200 },
     { "id": "galx_nova_developer_access_v1", "planKey": "nova-developer-v1", "lookupKey": "galx_nova_developer_monthly_v1", "monthlyUsd": 50, "usageCreditsIncludedUsd": 0, "usageBilledSeparately": true, "usagePricingStatus": "published", "usageBasis": "message" }
   ],
   "historicalPrepaidCatalog": "reconciliation-only"

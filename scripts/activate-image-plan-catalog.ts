@@ -20,7 +20,10 @@ if (!process.argv.includes('--activate')) throw new Error('Activation is explici
 
 const stripe = new Stripe(secretKey, { apiVersion: '2026-07-29.dahlia', maxNetworkRetries: 0, timeout: 10_000 });
 const requestOptions = { timeout: 10_000, maxNetworkRetries: 0 } as const;
-const version = '2026-09-20';
+// This version records the MAX rename and price rotation. Stripe Price amounts
+// are immutable, so the old Team amount is replaced by a new Price under the
+// same private lookup key after an active-subscription safety check.
+const version = '2026-09-20-max-rename-v1';
 const requiredWebhookEvents = [
   'checkout.session.completed', 'checkout.session.async_payment_succeeded',
   'checkout.session.async_payment_failed', 'checkout.session.expired',
@@ -57,12 +60,17 @@ async function activeSubscriptionsForPrices(priceIds: Set<string>) {
 
 async function activateImagePlan(plan: typeof IMAGE_PLAN_CATALOG[number]) {
   const product = await stripe.products.retrieve(plan.stripeProductId, {}, requestOptions);
-  if (!product.livemode || product.name !== plan.name || product.metadata.galxPlan !== plan.planKey) {
+  const legacyName = plan.id === 'max' ? 'GALX Images — Team' : null;
+  if (!product.livemode || ![plan.name, legacyName].includes(product.name) || product.metadata.galxPlan !== plan.planKey) {
     throw new Error(`The ${plan.id} Product does not match the reviewed catalog contract.`);
   }
   const metadata = imageMetadata(plan);
-  const activeProduct = product.active ? product : await stripe.products.update(product.id, { active: true, metadata: { ...product.metadata, ...metadata }, description: `${plan.audience} Image Studio subscription for one account.` }, requestOptions);
-  const updatedProduct = activeProduct.active ? await stripe.products.update(product.id, { metadata: { ...product.metadata, ...metadata }, description: `${plan.audience} Image Studio subscription for one account.` }, requestOptions) : activeProduct;
+  const updatedProduct = await stripe.products.update(product.id, {
+    active: true,
+    name: plan.name,
+    metadata: { ...product.metadata, ...metadata },
+    description: `${plan.audience} Image Studio subscription for one account. Account sharing, seats, and shared workspaces are not included.`,
+  }, requestOptions);
 
   const [activeLookup, inactiveLookup] = await Promise.all([
     stripe.prices.list({ lookup_keys: [plan.stripeLookupKey], active: true, limit: 10 }, requestOptions),
@@ -70,18 +78,52 @@ async function activateImagePlan(plan: typeof IMAGE_PLAN_CATALOG[number]) {
   ]);
   const matches = [...activeLookup.data, ...inactiveLookup.data];
   if (activeLookup.has_more || inactiveLookup.has_more || matches.length !== 1) throw new Error(`The ${plan.id} lookup key is ambiguous.`);
-  const price = matches[0];
-  if (!price.livemode || objectId(price.product) !== product.id || price.unit_amount !== plan.monthlyPriceUsd * 100 || price.currency !== 'usd' ||
-      price.recurring?.interval !== 'month' || price.recurring.interval_count !== 1 || price.recurring.usage_type !== 'licensed' ||
-      price.metadata.galxPlan !== plan.planKey) throw new Error(`The ${plan.id} Price does not match the reviewed catalog contract.`);
-  const activated = await stripe.prices.update(price.id, {
-    active: true,
-    lookup_key: plan.stripeLookupKey,
-    metadata: { ...price.metadata, ...metadata },
-    nickname: `${plan.id} monthly`,
-  }, requestOptions);
-  if (!activated.active || objectId(activated.product) !== updatedProduct.id || activated.unit_amount !== plan.monthlyPriceUsd * 100 ||
+  const current = matches[0];
+  const productPrices = await stripe.prices.list({ product: updatedProduct.id, active: true, limit: 100 }, requestOptions);
+  if (productPrices.has_more) throw new Error(`The ${plan.id} Product price inventory is truncated.`);
+  const amount = plan.monthlyPriceUsd * 100;
+  const isContractPrice = (price: Stripe.Price) => price.livemode && objectId(price.product) === updatedProduct.id &&
+    price.unit_amount === amount && price.currency === 'usd' && price.recurring?.interval === 'month' &&
+    price.recurring.interval_count === 1 && price.recurring.usage_type === 'licensed' && price.metadata.galxPlan === plan.planKey;
+  const exact = isContractPrice(current) ? current : null;
+  const staleActive = productPrices.data.filter(price => price.id !== exact?.id && price.metadata.galxPlan === plan.planKey);
+  if (staleActive.length) {
+    const subscriptions = await activeSubscriptionsForPrices(new Set(staleActive.map(price => price.id)));
+    if (subscriptions.length) throw new Error(`An active ${plan.id} subscription uses a superseded catalog price; rotation stopped.`);
+  }
+
+  let activated: Stripe.Price;
+  if (exact && staleActive.length === 0) {
+    activated = await stripe.prices.update(exact.id, {
+      active: true,
+      lookup_key: plan.stripeLookupKey,
+      transfer_lookup_key: true,
+      metadata: { ...exact.metadata, ...metadata },
+      nickname: `${plan.id} monthly`,
+    }, requestOptions);
+  } else {
+    // Stripe Price amounts are immutable. Transfer the stable lookup key to a
+    // replacement Price, then archive the superseded amount after readback.
+    activated = await stripe.prices.create({
+      product: updatedProduct.id,
+      unit_amount: amount,
+      currency: 'usd',
+      recurring: { interval: 'month' },
+      lookup_key: plan.stripeLookupKey,
+      transfer_lookup_key: true,
+      active: false,
+      nickname: `${plan.id} monthly`,
+      metadata,
+    }, { ...requestOptions, idempotencyKey: `galx-images-${plan.id}-price-${version}` });
+    activated = await stripe.prices.update(activated.id, {
+      active: true,
+      metadata,
+      nickname: `${plan.id} monthly`,
+    }, requestOptions);
+  }
+  if (!activated.active || objectId(activated.product) !== updatedProduct.id || activated.unit_amount !== amount ||
       activated.metadata.catalogStatus !== 'active' || activated.metadata.checkoutEnabled !== 'true') throw new Error(`Stripe readback failed for ${plan.id}.`);
+  for (const extra of staleActive) await stripe.prices.update(extra.id, { active: false }, requestOptions);
   return activated;
 }
 

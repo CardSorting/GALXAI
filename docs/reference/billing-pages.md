@@ -14,7 +14,7 @@ This guide is not imported into application content.
 | GALX Pro | Consumer Image Studio plan for one account at the published $10/month contract | Checkout is permitted only when the server-side Price and policy match |
 | Creator | Image Studio plan for one account at $15/month | Checkout is permitted only when the server-side Price, plan key, and policy match |
 | Studio | Image Studio plan for one account at $35/month | Checkout is permitted only when the server-side Price, plan key, and policy match |
-| Team | Image Studio plan for one account at $75/month | Checkout is permitted only when the server-side Price, plan key, and policy match; shared workspaces are not included |
+| MAX | Highest individual Image Studio plan at $200/month | Checkout is permitted only when the server-side Price, plan key, and policy match; account sharing, seats, and shared workspaces are not included |
 | GALX Nova private access | Explicitly authorized private integrations and GALX products | No public checkout or self-service purchase path |
 | Historical account records | Prior transactions, invoices and ledger history | Readable only for the applicable account and reconciliation |
 
@@ -22,7 +22,7 @@ This guide is not imported into application content.
 
 The sellable ladder is Start free plus four one-account Image Studio
 subscriptions: GALX Pro at $10/month, Creator at $15/month, Studio at
-$35/month, and Team at $75/month. Each active tier has a deterministic Stripe
+$35/month, and MAX at $200/month. Each active tier has a deterministic Stripe
 Product and recurring Price. The server validates the allowlisted plan key,
 product, amount, currency, interval, metadata and private paid-price policy
 before creating Checkout.
@@ -30,8 +30,8 @@ before creating Checkout.
 The ladder is intentionally capability-led rather than a copy of another
 provider's plan names. Every paid tier currently provides the existing Image
 Studio controls, owner-scoped Private mode, personal library, favorites, remix
-and downloads under the same published fair-use boundary. Team is a one-account
-commercial tier today; seats, roles, shared libraries, priority, video,
+and downloads under the same published fair-use boundary. MAX is the highest
+individual tier; account sharing, seats, shared libraries, priority, video,
 uploaded-image editing and workspace billing are not current promises.
 
 The former Developer subscription and prepaid/compute purchase paths are not

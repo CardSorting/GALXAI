@@ -33,10 +33,10 @@ assert.equal('prices' in USAGE_PRICING, false);
 assert.deepEqual(IMAGE_PLAN_CATALOG.map(plan => [plan.id, plan.monthlyPriceUsd, plan.stripeLookupKey]), [
   ['creator', 15, 'galx_images_creator_monthly_v1'],
   ['studio', 35, 'galx_images_studio_monthly_v1'],
-  ['team', 75, 'galx_images_team_monthly_v1'],
+  ['max', 200, 'galx_images_team_monthly_v1'],
 ]);
 assert(IMAGE_PLAN_CATALOG.every(plan => plan.catalogStatus === 'active' && plan.checkoutEnabled === true));
-assert.deepEqual(IMAGE_PLAN_OFFERS.map(plan => [plan.id, plan.monthlyPrice]), [['creator', 15], ['studio', 35], ['team', 75]]);
+assert.deepEqual(IMAGE_PLAN_OFFERS.map(plan => [plan.id, plan.monthlyPrice]), [['creator', 15], ['studio', 35], ['max', 200]]);
 assert.doesNotMatch(JSON.stringify(IMAGE_PLAN_OFFERS), /stripeProductId|stripeLookupKey|planKey|price_/);
 
 const price = { id: 'price_nova_developer', product: 'galx_nova_developer_access_v1', metadata: { galxPlan: 'nova-developer-v1' }, currency: 'usd', unit_amount: 5000,

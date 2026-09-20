@@ -52,15 +52,15 @@ routing, model-training claims or operating internals.
 ## Commercial boundaries
 
 GALX sells four one-account Image Studio subscriptions: GALX Pro at **$10
-USD/month**, Creator at **$15/month**, Studio at **$35/month**, and Team at
-**$75/month**, all with published Image Studio terms and fair-use boundaries.
+USD/month**, Creator at **$15/month**, Studio at **$35/month**, and MAX at
+**$200/month**, all with published Image Studio terms and fair-use boundaries.
 The live Pro lookup key was reconciled to the published $10 contract only after
 the bounded subscription audit found no active consumer subscriptions.
 
 The ladder uses familiar value steps without inventing unsupported quotas. All
 paid tiers currently include the same supported creation controls, owner-scoped
-Private mode, personal library, favorites, remix and downloads. Team is a
-one-account commercial tier today; image counts, priority, seats, roles,
+Private mode, personal library, favorites, remix and downloads. MAX is the
+highest individual tier; image counts, priority, account sharing, seats, roles,
 shared libraries, video, editing and private infrastructure are not promised.
 
 There is no public Nova Developer subscription, public usage price, or
@@ -99,8 +99,8 @@ details in the authenticated admin console.
 
 Use the current supported access path and contact process. Do not introduce
 Nova tiers, enterprise limits, dedicated capacity, SLAs or contract terms that
-have not been approved. The Team image hypothesis is not a workspace product
-until shared libraries, roles and seat billing exist.
+have not been approved. The MAX image tier is not a workspace product; account
+sharing, shared libraries, roles and seat billing are not included.
 
 ## Distribution
 

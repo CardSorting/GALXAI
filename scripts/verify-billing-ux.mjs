@@ -31,7 +31,7 @@ const plan = {
     { id: 'pro', name: 'GALX Pro', audience: 'For people creating in GALX Images.', monthlyPriceUsd: 10, checkoutAvailable: true },
     { id: 'creator', name: 'Creator', audience: 'A steady solo creative practice.', monthlyPriceUsd: 15, checkoutAvailable: true },
     { id: 'studio', name: 'Studio', audience: 'A focused workspace for heavier individual use.', monthlyPriceUsd: 35, checkoutAvailable: true },
-    { id: 'team', name: 'Team', audience: 'A larger creative practice on one account.', monthlyPriceUsd: 75, checkoutAvailable: true },
+    { id: 'max', name: 'MAX', audience: 'Maximum room for one creator’s Image Studio practice.', monthlyPriceUsd: 200, checkoutAvailable: true },
   ],
   subscription: { state: 'none', periodEnd: null, endsAt: null },
 };
@@ -110,7 +110,7 @@ try {
     assert(await proButton.isVisible());
     await page.waitForFunction(() => Array.from(document.querySelectorAll('button')).some(button => button.textContent?.includes('Choose Pro · $10/month') && !button.disabled));
     assert.equal(await proButton.isDisabled(), false);
-    for (const label of ['Creator', 'Studio', 'Team']) {
+    for (const label of ['Creator', 'Studio', 'MAX']) {
       assert.equal(await page.getByText(label, { exact: true }).count(), 1, label);
     }
     await page.goto(base + '/billing/credits');

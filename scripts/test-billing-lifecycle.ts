@@ -84,7 +84,7 @@ test('browser contract allowlists display fields and rejects malformed status', 
     { id: 'pro', name: 'GALX Pro', audience: 'For people creating in GALX Images.', monthlyPriceUsd: 10, checkoutAvailable: false },
     { id: 'creator', name: 'Creator', audience: 'A steady solo creative practice.', monthlyPriceUsd: 15, checkoutAvailable: false },
     { id: 'studio', name: 'Studio', audience: 'A focused workspace for heavier individual use.', monthlyPriceUsd: 35, checkoutAvailable: false },
-    { id: 'team', name: 'Team', audience: 'A larger creative practice on one account.', monthlyPriceUsd: 75, checkoutAvailable: false },
+    { id: 'max', name: 'MAX', audience: 'Maximum room for one creator’s Image Studio practice.', monthlyPriceUsd: 200, checkoutAvailable: false },
   ], subscription: { state: 'none', periodEnd: null, endsAt: null } };
   assert.deepEqual(parsePlanStatus({ ...status, secret: 'PRIVATE_SENTINEL', subscription: { ...status.subscription, customer: 'PRIVATE_SENTINEL' } }), status);
   assert.equal(parsePlanStatus({ ...status, subscription: { ...status.subscription, periodEnd: 'bad date' } }), null);
