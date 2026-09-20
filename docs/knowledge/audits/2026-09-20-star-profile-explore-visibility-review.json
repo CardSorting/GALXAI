@@ -1,0 +1,40 @@
+{
+  "classification": "private",
+  "observed_at": "2026-09-20T08:15:00Z",
+  "scope": "Semantic review of the Star profile visibility boundary: Explore-only moderation, complete public Star galleries, legacy private-row repair, public DTO projection and migration rollout.",
+  "reviewed": {
+    "images": [
+      "Confirmed that community moderation changes only the Explore-surface flag and no longer changes is_public or visibility.",
+      "Confirmed that Explore reads the suppression-aware community view, while Star profile initial pages and pagination read the separate complete-gallery projection.",
+      "Confirmed that hidden public Star creations continue through the existing owner-scoped sealed artifact route and remain available on /profile/<handle>.",
+      "Confirmed that the client-side hidden-from-Explore preference and optimistic dismissal are scoped to Explore; profile galleries do not inherit local suppression or remove a creation after moderation.",
+      "Confirmed that moderation HTTP responses now return an explicit allowlist and do not forward the database function's audit object.",
+      "Confirmed that the Star profile copy and moderation controls describe Explore suppression without claiming the creation became private."
+    ],
+    "database": [
+      "Reviewed the additive is_explore_visible migration, public view grants, profile projection, function replacement, paired rollback and TypeScript row types.",
+      "Reviewed the guarded legacy repair migration: only discoverable active Star rows whose latest legacy moderation event matches the private-row update are restored to public profile visibility; later owner privacy changes are not overridden.",
+      "Confirmed linked migration history records 20260920072707 and 20260920075103 after dry-run and apply."
+    ],
+    "documentation": [
+      "Reconciled the current image public-boundary and Star guides with the Explore/profile distinction.",
+      "Mapped the moderation route into the Images knowledge domain and retained the old moderation audit as dated historical evidence."
+    ]
+  },
+  "validation": {
+    "focused_contract": "node --import tsx --test scripts/test-community-profile.ts passed 5/5",
+    "image_security": "npm run test:image:security passed 56/56",
+    "database_integrity": "node --import tsx scripts/verify-supabase-integrity.ts passed: 147 paired migrations, 0 fatal violations, 0 warnings",
+    "typecheck": "npx tsc --noEmit passed",
+    "lint": "npm run lint passed with 0 errors and 8 pre-existing warnings",
+    "production_build": "npm run build passed and generated 163 static pages",
+    "linked_readback": "Read-only schema/readback checks confirmed the new flag, views and function; /profile/veyrasol has 3 profile creations and 3 Explore-visible creations; the repaired legacy Star has 3 profile creations and 2 Explore-visible creations; no legacy-moderated Star asset remains private.",
+    "production_http_smoke": "The local production server returned 3 author-filtered /api/images/feed items for veyrasol with no user_id, seed or model fields, and /profile/veyrasol returned HTTP 200.",
+    "documentation": "npm run docs:sync completed; docs:check passed structural and incident validation and now reports only the unrelated pre-existing Sites source/guide fingerprint as stale."
+  },
+  "limits": [
+    "The local production build and linked database readback do not establish a hosted deployment or browser/assistive-technology acceptance.",
+    "The legacy repair intentionally does not reverse later owner privacy decisions; unresolved historical rows require a separately authorized review.",
+    "Unrelated Sites, Relay, Delivery and BroccoliDB review fingerprints remain untouched."
+  ]
+}

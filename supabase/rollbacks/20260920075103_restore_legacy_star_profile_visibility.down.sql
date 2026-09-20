@@ -1,0 +1,4 @@
+-- Rollback for 20260920075103_restore_legacy_star_profile_visibility.sql
+-- Intentionally no-op: reversing this repair would re-hide a Star creation and
+-- could override an owner's subsequent public/profile decision. The additive
+-- visibility boundary migration owns the schema rollback separately.

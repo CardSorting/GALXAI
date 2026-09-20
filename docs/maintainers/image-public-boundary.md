@@ -16,9 +16,12 @@ remains private and is never projected through the Star profile endpoint.
 Missing, invalid or temporarily unavailable Star profiles
 return authored public categories without database fields, execution context or
 diagnostics. Keep the profile and feed projections aligned when adding a new
-public field. Handles are normalized before they become links, avatars accept
-only site-relative or HTTPS image URLs, and malformed gallery cursors are
-rejected with a generic 400 response.
+public field. Explore moderation is a discovery-surface decision: hiding a
+creation removes it from the community stream but does not make a still-public
+Star creation disappear from that Star's profile gallery. Handles are
+normalized before they become links, avatars accept only site-relative or
+HTTPS image URLs, and malformed gallery cursors are rejected with a generic 400
+response.
 
 Public profile image inspection is a viewport-owned dialog. It renders above the
 application shell, prevents background scrolling while open, returns focus on

@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
 /**
  * POST /api/images/moderate
  * Community explore moderation endpoint allowing any user or visitor to hide an artwork from Explore.
- * Sets the image to private in PostgreSQL so it only remains visible in the creator's personal library.
+ * Suppresses the artwork in Explore while preserving its public Star profile gallery.
  */
 export async function POST(req: NextRequest) {
   try {
@@ -43,27 +43,26 @@ export async function POST(req: NextRequest) {
 
     try {
       const query = `SELECT public.fn_moderate_hide_community_image($1, $2, $3) AS result;`;
-      const result = await executePostgresQuery<{ result: any }>(query, [
+      // The database function is an internal audit boundary. Return only the
+      // stable public moderation contract below.
+      await executePostgresQuery<{ result: any }>(query, [
         assetId,
         moderatorId,
         reason
       ]);
-      const data = result?.rows?.[0]?.result;
 
       return NextResponse.json({
         success: true,
-        action: 'set_private',
-        assetId,
-        result: data || null
+        action: 'hidden_from_explore',
+        assetId
       });
     } catch (queryErr) {
       logImageFailure(crypto.randomUUID(), queryErr);
       // Fallback for demo / showcase items
       return NextResponse.json({
         success: true,
-        action: 'set_private',
-        assetId,
-        clientOnly: true
+        action: 'hidden_from_explore',
+        assetId
       });
     }
   } catch (err) {

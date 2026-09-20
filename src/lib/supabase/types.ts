@@ -3600,6 +3600,7 @@ export interface Database {
           cost_usd: number;
           is_favorite: boolean;
           is_public: boolean;
+          is_explore_visible: boolean;
           visibility: 'public' | 'unlisted' | 'private';
           likes_count: number;
           remix_count: number;
@@ -3631,6 +3632,7 @@ export interface Database {
           cost_usd?: number;
           is_favorite?: boolean;
           is_public?: boolean;
+          is_explore_visible?: boolean;
           visibility?: 'public' | 'unlisted' | 'private';
           likes_count?: number;
           remix_count?: number;

@@ -53,6 +53,12 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ success: false, error: 'Invalid creator handle.' }, { status: 400 });
   }
   const authorHandle = rawAuthorHandle ? normalizePublicParticipantHandle(rawAuthorHandle) : null;
+  // A Star profile is a complete public gallery, while Explore is an
+  // editorial/discovery surface. Keep the SQL projection explicit so a
+  // moderation hide never removes a creation from its Star profile.
+  const feedView = authorHandle
+    ? 'public.community_star_profile_creations'
+    : 'public.community_creations_feed';
 
   let items: PublicFeedItem[] = [];
   let nextCursor: string | null = null;
@@ -140,7 +146,7 @@ export async function GET(req: NextRequest) {
         author_handle,
         author_avatar_url,
         participant_kind
-      FROM public.community_creations_feed
+      FROM ${feedView}
       WHERE ${conditions.join(' AND ')}
       ORDER BY ${orderBy}
       LIMIT $${limitIndex}
@@ -210,7 +216,7 @@ export async function GET(req: NextRequest) {
           const directRes = await executePostgresQuery(
             `SELECT id, user_id, prompt, aspect_ratio, dimensions, public_url, created_at, lqip, likes_count, remix_count, views_count,
                     author_display_name, author_handle, author_avatar_url, participant_kind
-             FROM public.community_creations_feed
+             FROM ${feedView}
              WHERE id = $1 AND user_id NOT LIKE 'usr_%' AND id NOT LIKE 'img_test_%'
                ${authorHandle ? 'AND author_handle = $2' : ''}
              LIMIT 1`,
@@ -349,25 +355,22 @@ export async function POST(req: NextRequest) {
 
       try {
         const query = `SELECT public.fn_moderate_hide_community_image($1, $2, $3) AS result;`;
-        const result = await executePostgresQuery<{ result: any }>(query, [
+        await executePostgresQuery<{ result: any }>(query, [
           imageId,
           sessionHash,
           reason
         ]);
-        const data = result?.rows?.[0]?.result;
         return NextResponse.json({
           success: true,
-          action: 'set_private',
-          assetId: imageId,
-          result: data
+          action: 'hidden_from_explore',
+          assetId: imageId
         });
       } catch {
         // Keep view recording non-blocking when a public item is unavailable.
         return NextResponse.json({
           success: true,
-          action: 'set_private',
-          assetId: imageId,
-          clientOnly: true
+          action: 'hidden_from_explore',
+          assetId: imageId
         });
       }
     }

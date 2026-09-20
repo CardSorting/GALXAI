@@ -1,5 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import sitemap from '../src/app/sitemap';
 import { isPublicProductPath } from '../src/lib/security/preview-policy';
 import {
@@ -86,4 +88,27 @@ test('profile routes are discoverable without broadening private path exemptions
   assert.equal(isPublicProductPath('/api/community/participants/soravale'), true);
   assert.equal(isPublicProductPath('/profile/soravale/diagnostics'), false);
   assert.equal(isPublicProductPath('/api/community/participants/soravale/diagnostics'), false);
+});
+
+test('Explore moderation stays separate from the complete Star profile gallery', () => {
+  const migration = readFileSync(resolve('supabase/migrations/20260920072707_star_profile_explore_visibility_boundary.sql'), 'utf8');
+  const repairMigration = readFileSync(resolve('supabase/migrations/20260920075103_restore_legacy_star_profile_visibility.sql'), 'utf8');
+  const repository = readFileSync(resolve('src/lib/community/public-participants.ts'), 'utf8');
+  const feedRoute = readFileSync(resolve('src/app/api/images/feed/route.ts'), 'utf8');
+  const masonry = readFileSync(resolve('src/components/images/PublicImageMasonryStream.tsx'), 'utf8');
+
+  assert.match(migration, /ADD COLUMN is_explore_visible BOOLEAN NOT NULL DEFAULT true/);
+  assert.match(migration, /SET is_explore_visible = false/);
+  assert.match(migration, /AND l\.is_explore_visible = true/);
+  assert.match(migration, /CREATE OR REPLACE VIEW public\.community_star_profile_creations/);
+
+  const profileView = migration.split('CREATE OR REPLACE VIEW public.community_star_profile_creations')[1] || '';
+  assert.doesNotMatch(profileView, /is_explore_visible\s*=\s*true/);
+  assert.match(repository, /FROM public\.community_star_profile_creations/);
+  assert.match(feedRoute, /const feedView = authorHandle/);
+  assert.match(feedRoute, /FROM \$\{feedView\}/);
+  assert.match(masonry, /const visible = authorHandle\s*\n\s*\? data\.items/);
+  assert.match(masonry, /const isProfileGallery = Boolean\(authorHandle\)/);
+  assert.match(repairMigration, /ABS\(EXTRACT\(EPOCH FROM/);
+  assert.match(repairMigration, /is_explore_visible = false/);
 });

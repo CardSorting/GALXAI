@@ -1,11 +1,11 @@
 {
   "knowledge": {
-    "reviewer": "Codex",
-    "note": "Reviewed the registry change that maps the footer stylesheet into client-efficiency ownership; generated knowledge views remain consistent and no historical stale fingerprints were refreshed.",
+    "reviewer": "Product/API maintainer",
+    "note": "Reviewed the documentation policy, change workflow, registry mapping, current image/Star guides and retained dated moderation evidence; current navigation and public-boundary guidance remains capability-only.",
     "reviewed_at": "2026-09-20",
-    "review_by": "2026-09-27",
+    "review_by": "2026-10-20",
     "evidence": {
-      "docs/knowledge/audits/2026-09-20-navigation-ergonomics-audit.json": "76766f51b2dde833a0d152c313ae4b7dba6339403714f4ae1b619a34c5d4510b"
+      "docs/knowledge/audits/2026-09-20-star-profile-explore-visibility-review.json": "b09aee803ec635b8c096ed457479559f8ccc3bf0cf8bc9497f2f14dd3bd62fde"
     },
     "files": {
       ".github/CODEOWNERS": "ef2f416d15f027dc8f197ad844289c9a44c8e843d3214d1590a3a380e939d13f",
@@ -26,7 +26,7 @@
       "docs/how-to/change-with-documentation.md": "abcf6bfb2f0aadcf8cfc2fdae18ac8f3f84565f127c34f7453d50e7283006e40",
       "docs/knowledge/DESIGN_RATIONALE.md": "edd3cf9b49ed794fbe8bf14448fd0c56cb4d8df832bab81cdf07e9ea2e2204a1",
       "docs/knowledge/README.md": "5ad219aeee44a9c065db2ca69e5a6498966fed42e2d8c74773dbc055d0220931",
-      "docs/knowledge/registry.json": "417ba83966510cc707c7103d53530148ee08cd5c795bd84302346a52b305a3bf",
+      "docs/knowledge/registry.json": "b689fde2caaee3b2ca8ebe52dad2e654ddac6bef6f7b5f6f476d45cc79f1d91a",
       "docs/knowledge/templates/adr.md": "28773b3cbdb53ad34f08d0362e87b6dba24b6fd76ddb6c85db8ad63d99ad1331",
       "docs/knowledge/templates/runbook.md": "19679a7eb8c1a3aafd87852fa93817e7bf9ef4696772c8deb1617366c290abc1",
       "docs/maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md": "b7df75535611c14aabe599764a6f6c2a4f0f1461d068929602c68e39d8ce850d",
@@ -36,7 +36,7 @@
       "docs/maintainers/SUBSYSTEM_MAINTAINER_MATRIX.md": "9d0dad1aa9c7ce7790428d7ae587c8e4acb456538380062d0a65de8859791b57",
       "docs/reference/README.md": "6b1f52196a4d55f6fcbc59e61cf133198ad8d1d2c81513f527da75d03a6fce4c",
       "docs/reference/knowledge-commands.md": "3ae9092ea941ebc459a2895b8c2eebb4c1c8d59659d718a2c353a1a6be6e8379",
-      "docs/reference/stars.md": "71b2c1f27e7c2eb941c00e800b8b6fb28d05667ab0ed78f5d192619aa08fdc25",
+      "docs/reference/stars.md": "13efae901355793f968fd458c556064451dd5b4f1e9d2c6519461622c2e5d3d2",
       "docs/runbooks/README.md": "cc1b2a311d46a7e999fc922bb6f89cafa0c5f5ef1d44448e9ea7a91c96de1d80",
       "docs/runbooks/knowledge-maintenance.md": "8ec7e6e7940202e38b8aa16cba88e1e5d9040cbb1769bd0ec456b04c77e26b08",
       "docs/runbooks/release-readiness.md": "585c381a14592b9c682beb56d4117a0afd123e26433669ab1688ebae19ddfb01",
@@ -52,24 +52,24 @@
     }
   },
   "images": {
-    "reviewer": "Codex",
-    "note": "Reviewed the private settings-surface retirement alongside image/profile boundary and readable URL guidance. Confirmed public Star creator profiles remain canonical, private account profile navigation is not advertised, and image/security tests preserve public/private boundaries.",
+    "reviewer": "Product/API maintainer",
+    "note": "Reviewed the complete image public-boundary, library-scale, Star profile, readable-URL, queue, recovery and quota guidance against the Explore-only moderation and complete Star profile projections; checked DTO, artifact, pagination and local suppression contracts.",
     "reviewed_at": "2026-09-20",
-    "review_by": "2026-09-27",
+    "review_by": "2026-10-20",
     "evidence": {
-      "docs/knowledge/audits/2026-09-20-settings-surface-retirement-review.json": "85ee9b0c442a81efa5244ea0fa6ce12eddf594a9b9fef36579b58905454deb3d"
+      "docs/knowledge/audits/2026-09-20-star-profile-explore-visibility-review.json": "b09aee803ec635b8c096ed457479559f8ccc3bf0cf8bc9497f2f14dd3bd62fde"
     },
     "files": {
       "docs/QUEUE_SPECIFICATION.md": "301d293b23327bf065202322e0a7554cf581740f28d0d5ab9fb827e73beed6ba",
       "docs/maintainers/FREE_GENERATION_QUOTA.md": "239c0c173e05cbba23f74818e712b1ad217e2e0d3a1c69f86b0de8504f06f42b",
       "docs/maintainers/image-library-scale.md": "064bef895f17a587811da2a5df8a4b16295664ee2f348576c996f5aa5a901c7a",
-      "docs/maintainers/image-public-boundary.md": "9a9f9a756438d559293b1a47916213c3207ccc2bfe93c58d03b7b1d94ec4a50e",
+      "docs/maintainers/image-public-boundary.md": "17887c5d255caa16cb32b8c92c21177aba0e9d015ee2b415764f778af7662061",
       "docs/maintainers/readable-urls.md": "ffc42ff362cf57da1d0f308e6385a667d04fe22878cb1012e6da8773134a7ce3",
-      "docs/reference/stars.md": "71b2c1f27e7c2eb941c00e800b8b6fb28d05667ab0ed78f5d192619aa08fdc25",
+      "docs/reference/stars.md": "13efae901355793f968fd458c556064451dd5b4f1e9d2c6519461622c2e5d3d2",
       "post-mortem/runbooks/image-generation.md": "cafd2ecd11bd89d4fce8a48e646980d32dcc021fddcc0b9f697ccd9fd0dd8532",
       "scripts/populate-stars.ts": "5f820036ded20dd139ccbc888ae5716ad06a79e62a33792d02325d0d37d7b1e9",
       "scripts/reconcile-stars.ts": "70666eb2455049247c2970042d283911cfa392550ebdf588b8ac5aae25f0155f",
-      "scripts/test-community-profile.ts": "460d7a790827128b1dcb6d37ea6c0d6a08ac6964b80560c09bd3de913762b587",
+      "scripts/test-community-profile.ts": "1da2f43b74bbe248afac739597c1288612b99b58bd219e14254e78bc07a757d1",
       "scripts/test-free-generation-gate-db.ts": "2919f39490203795965f494f61b288305ea7136e544515cc504d9e8a0ff7e037",
       "scripts/test-free-generation-quota-db.ts": "26d3381b0a90285cce6d954b954601fb7a5a4596998389ac7091cfb7b49d9b04",
       "scripts/test-free-generation-quota.ts": "cbf7034c6f10ecfcf6176718f693a2636af775899e05552b5d7c53c58f142fb3",
@@ -91,10 +91,11 @@
       "src/app/api/billing/generation-quota/route.ts": "9886f0b6132866ea12dcd80ba3301b9e6ccb8bc9eeac9ae3aca9a2ef1d64621f",
       "src/app/api/community/participants/[handle]/route.ts": "cf54a0ea494db4670b4bb20f1d56a935a4d82df1d06b2887279047283056b0be",
       "src/app/api/images/availability/route.ts": "266d821c25d12990a45aac497bdb5051dfa75110004e90a73bd9cad61c860624",
-      "src/app/api/images/feed/route.ts": "0d6d4ae940a47ed683f18a1ca3f1b3f719653602d218f32f297aa93db2875fab",
+      "src/app/api/images/feed/route.ts": "0c72940f87285544df88c9ee36e89e4f5f51b44eb403ed28e9d5334fbd77eec1",
       "src/app/api/images/library/[assetId]/route.ts": "521d291c6b50e09c1a6eea9c0040912b5c96bc742105b18047b748d67b05a7a8",
       "src/app/api/images/library/batch/route.ts": "d09d148a3e7041e9d854967617894aaca8a80eaf4c88cf60590c7b31dd430e38",
       "src/app/api/images/library/route.ts": "954b062d5ee0725326b563508812b8b44020c534252901d672df3a828db3a829",
+      "src/app/api/images/moderate/route.ts": "f71c99cfb766b59d0a1eba24fac96fedaa98688eb2c78ba6d7b7f90c8187ff10",
       "src/app/explore/page.tsx": "a2fb11c9edea530ed23afad8fafc229ec2c04cd72476c82322dc17842f086412",
       "src/app/images/error.tsx": "0b2a04890cd8de8ea6adf8eb58541aae5409033c49b28d90a51cb386af1d1097",
       "src/app/images/favorites/page.tsx": "e21af30f53a56aac76adf07efdd72563ad05bda28ea5084abccd67dd11dd47f1",
@@ -119,7 +120,7 @@
       "src/components/dashboard/generation-gate.module.css": "efd8526722ca0ad42aec319a56bc2ea7e638185f30c35cea9b445dfb69bba4a4",
       "src/components/images/GenerationCanvas.tsx": "4341702fc0842c20a7d860b8241a4bf55780919b73254f54915a61cd09269473",
       "src/components/images/ImageStudio.tsx": "25cad85bb37b1ddaba876552e8dfeb592df31d55ebcb6a6faa96bc4186e9a5c3",
-      "src/components/images/PublicImageMasonryStream.tsx": "62f7a9a315cfdd82645ed59d76a1952500b21fe4435bb6647e6aff66aa4caf85",
+      "src/components/images/PublicImageMasonryStream.tsx": "c9af33eaccfce8e0a12f36aa1225a6b7981588dde1a7d1e5840182a0d24b6d9e",
       "src/components/images/StudioArtwork.tsx": "427128b4f3ea300222b74fdfe132564237030507f1d40c20093c89ef52e26229",
       "src/components/images/masonry-stream.css": "29cc5b38fa3fdbc3c0030f7b78301d515ddef85721d31d488d76c8b8d51b7499",
       "src/components/images/studio-contract.ts": "b5803cbdc39ad60d71202a73b5a36228101a730fff272e51e54a6d4f96e9f83c",
@@ -137,7 +138,7 @@
       "src/lib/billing/generation-access.ts": "7d0f05c6a9ea2c7e4b4fc532eb264215c4ca57be2633187a564f02d44116fb26",
       "src/lib/billing/generation-quota-route.ts": "f35bd7b7f55b7b43d3d43de3a1103e081cb82a50355b6f2e1f31d2233129de49",
       "src/lib/community/participant-handle.ts": "d69335254a0944f19abf580b928080c55795d9d20d7f12be687bfd5626663355",
-      "src/lib/community/public-participants.ts": "9a3225b823fc7f8de2f1ec9e3986a7e55cf6aa695263bcf945b37bfb04487d44",
+      "src/lib/community/public-participants.ts": "11701ec283ceddab94c30a7ddf15009c3d97034478eb2ca54e854fb01468a1d9",
       "src/lib/images/availability.ts": "18fa43b1b6a4f7979203820ddf65242d2940127588ddb68276086602ee648aaa",
       "src/lib/images/library-cursor.ts": "553df33b2925b9814b9ff9c42f7f1630616136a5432a8b529d0e27329c2a334a",
       "src/lib/images/navigation.ts": "827b7f91ef06422452aa03f66721e866be9755399c4514393230ce4fdcfc8e5c",
@@ -630,12 +631,12 @@
     }
   },
   "database": {
-    "reviewer": "Codex",
-    "note": "Reviewed migration runbook and current database guidance after retiring the public developer path; the narrow return-path normalization and constraint update are reflected without exposing internal topology.",
+    "reviewer": "Database operator",
+    "note": "Reviewed the migration, rollback, RLS/grant boundary, generated row types, database operations and account/actor authority guidance; verified guarded legacy repair and linked migration history.",
     "reviewed_at": "2026-09-20",
-    "review_by": "2026-09-27",
+    "review_by": "2026-10-20",
     "evidence": {
-      "docs/knowledge/audits/2026-09-20-developer-surface-removal-review.json": "0fa160336964bfa99dcc959012d1cbcb7ae816ec6f692ae74963bf682ea05f39"
+      "docs/knowledge/audits/2026-09-20-star-profile-explore-visibility-review.json": "b09aee803ec635b8c096ed457479559f8ccc3bf0cf8bc9497f2f14dd3bd62fde"
     },
     "files": {
       "deploy/relay-execution/supabase/migrations/20260915082628_relay_execution.sql": "fc61d7c30bdd57706ffb4212788741302760722e7285c25c9b4cb93d629b137e",
@@ -714,7 +715,7 @@
       "src/lib/supabase/repositories/TelemetryRepository.ts": "1887a04aa51424e44d6ac9d499fc24248edd2aa9c64c559cf1f307773dd252e5",
       "src/lib/supabase/repositories/WalletRepository.ts": "bfaddb9365d1fe93454df2fca44962f9fdd2aa3e30464c10089083bf913791ed",
       "src/lib/supabase/repositories/WorkspaceRepository.ts": "b9f6d1d09610760b172c6d1981a06e6ab97d4f5a9a58139377ade89df56a4ed8",
-      "src/lib/supabase/types.ts": "b601fc8cffb1aca2d8c6707a2e97f1186ac6e33cf86960219358d17161943b0b",
+      "src/lib/supabase/types.ts": "4ad6da9915ab48aa486de80796c3029d043928fc10db63bb33b4ac60bf7b64da",
       "supabase/migrations/20260822000001_galxai_schema_core.sql": "084520c8cb3ab4e057ec788ea90605bb43e1373a28230e40696271f6a8476f77",
       "supabase/migrations/20260822000002_galxai_schema_apex.sql": "62b4fdc606104700d14eb3b80a7a7063a5152db9ed1afefe63a72315d586f539",
       "supabase/migrations/20260822000003_galxai_user_sessions_auth.sql": "ab2ec033c41bb147aa476acceb4d5dca3991f83f017a7cc41fddd01c6b8e75c4",
@@ -860,6 +861,8 @@
       "supabase/migrations/20260919180000_star_refresh_constraint_repair.sql": "320921a809aad5761321215e8b5038bfe2d9c013fa1269447cb6fc88f79c7e10",
       "supabase/migrations/20260920041311_private_profile_settings_projection.sql": "117e450958524ebcd3b996e56ea456f9cec784a608fe9e48502d476b2651bba8",
       "supabase/migrations/20260920064323_remove_public_developer_return_path.sql": "fc72bf37284df3f040bdd6bf5264fba67d39842b9e3891b03b509dd317e1d0fa",
+      "supabase/migrations/20260920072707_star_profile_explore_visibility_boundary.sql": "becf657e175192edc917d96df2b2797f5dc836dc19f5a16ae6cb667550d8c03c",
+      "supabase/migrations/20260920075103_restore_legacy_star_profile_visibility.sql": "2058f1d0a36f806fd7b2a4f050a7b65e8242bb2fa0ec2ceb52ee75142babb621",
       "supabase/rollbacks/20260822000001_galxai_schema_core.down.sql": "d1267f3f89a7a0af12716a70167f615be1e904bf933e348a1173305cd5f2fe83",
       "supabase/rollbacks/20260822000002_galxai_schema_apex.down.sql": "df36655d564c6d6557d4461294ed2a502ad57adf799037c00a68481b809ffed9",
       "supabase/rollbacks/20260822000003_galxai_user_sessions_auth.down.sql": "4f3012db038b48387290b8d64638fe7aded774d8bdde88cfe683f01f1988adbc",
@@ -1004,7 +1007,9 @@
       "supabase/rollbacks/20260919170000_star_cohort_membership_and_refresh.down.sql": "b9985a66a42178d0fec272a7c0fa9552f4e00080b27726f3a6c08d7544c08d8f",
       "supabase/rollbacks/20260919180000_star_refresh_constraint_repair.down.sql": "d13012225cc2da5a585fc9fad47ddb6a03633ee6fde6f162ba4d531456e6d4c3",
       "supabase/rollbacks/20260920041311_private_profile_settings_projection.down.sql": "22c9b500264721eb8aecab9a150787a19688625b5e2f36bd0a9cf5e4e1a901ec",
-      "supabase/rollbacks/20260920064323_remove_public_developer_return_path.down.sql": "9ee793215ede8a08489b291e5aaa3e99048487c11a2ce8b2ed0bad71b942b8af"
+      "supabase/rollbacks/20260920064323_remove_public_developer_return_path.down.sql": "9ee793215ede8a08489b291e5aaa3e99048487c11a2ce8b2ed0bad71b942b8af",
+      "supabase/rollbacks/20260920072707_star_profile_explore_visibility_boundary.down.sql": "c41b86a4544c25f23c82dcb18a31fa03d79255edce4d1fe2d1288e83ee68525e",
+      "supabase/rollbacks/20260920075103_restore_legacy_star_profile_visibility.down.sql": "51fcf830feecd3ffba34440d69c630b497e61af4b52b4a37f3fd802a16d48091"
     }
   },
   "delivery": {

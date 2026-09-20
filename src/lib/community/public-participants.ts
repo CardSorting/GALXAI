@@ -161,7 +161,7 @@ export class PublicParticipantRepository {
       SELECT id, user_id, prompt, aspect_ratio, dimensions, public_url,
              created_at, lqip, likes_count, remix_count, views_count,
              author_display_name, author_handle, author_avatar_url, participant_kind
-      FROM public.community_creations_feed
+      FROM public.community_star_profile_creations
       WHERE ${conditions.join(' AND ')}
       ORDER BY created_at DESC, id DESC
       LIMIT $${limitIndex}

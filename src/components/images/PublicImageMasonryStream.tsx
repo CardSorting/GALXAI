@@ -246,7 +246,11 @@ export function PublicImageMasonryStream({
           const set = new Set<string>(parsed);
           setHiddenIds(set);
           hiddenIdsRef.current = set;
-          setItems((prev) => prev.filter((it) => !set.has(it.id)));
+          // Local suppression is an Explore preference. A Star profile is the
+          // complete public gallery and must not inherit that discovery filter.
+          if (!authorHandle) {
+            setItems((prev) => prev.filter((it) => !set.has(it.id)));
+          }
         }
       }
       const storedDensity = localStorage.getItem('galx_stream_density');
@@ -256,7 +260,7 @@ export function PublicImageMasonryStream({
     } catch {
       // Ignore storage errors in private modes
     }
-  }, []);
+  }, [authorHandle]);
 
   // Save likedMap to localStorage
   const persistLikes = useCallback((updated: Record<string, boolean>) => {
@@ -366,7 +370,9 @@ export function PublicImageMasonryStream({
 
         const data = await res.json();
         if (data.success && Array.isArray(data.items)) {
-          const visible = data.items.filter((it: PublicFeedItem) => !hiddenIdsRef.current.has(it.id));
+          const visible = authorHandle
+            ? data.items
+            : data.items.filter((it: PublicFeedItem) => !hiddenIdsRef.current.has(it.id));
           setItems((prev) => (reset ? visible : [...prev, ...visible]));
           setCursor(data.nextCursor);
           setHasMore(Boolean(data.nextCursor));
@@ -613,41 +619,48 @@ export function PublicImageMasonryStream({
     }
   };
 
-  // Hide / moderate artwork: immediate removal and conversion to creator's private library
+  // Hide / moderate artwork: remove it from Explore while preserving the
+  // creator's public Star profile gallery.
   const handleHideItem = async (e: React.MouseEvent, item: PublicFeedItem, reason: string = 'community_moderation') => {
     e.stopPropagation();
 
-    // 1. Mark as hiding for smooth CSS exit animation
-    setHidingIds((prev) => new Set(prev).add(item.id));
+    // Profile galleries are complete public archives. Hiding from Explore must
+    // not optimistically remove the creation from a Star's own profile view.
+    const isProfileGallery = Boolean(authorHandle);
 
-    // Save for undo
-    const itemIndex = items.findIndex((i) => i.id === item.id);
-    setLastHiddenItem({ item, index: itemIndex >= 0 ? itemIndex : 0 });
+    if (!isProfileGallery) {
+      // 1. Mark as hiding for smooth CSS exit animation
+      setHidingIds((prev) => new Set(prev).add(item.id));
 
-    // 2. Persist to local hidden set
-    const updatedHidden = new Set(hiddenIds);
-    updatedHidden.add(item.id);
-    setHiddenIds(updatedHidden);
-    hiddenIdsRef.current = updatedHidden;
-    try {
-      localStorage.setItem('galx_hidden_images', JSON.stringify([...updatedHidden]));
-    } catch {}
+      // Save for undo
+      const itemIndex = items.findIndex((i) => i.id === item.id);
+      setLastHiddenItem({ item, index: itemIndex >= 0 ? itemIndex : 0 });
 
-    // 3. Remove from stream after smooth transition
-    setTimeout(() => {
-      setItems((prev) => prev.filter((i) => i.id !== item.id));
-      setHidingIds((prev) => {
-        const next = new Set(prev);
-        next.delete(item.id);
-        return next;
-      });
-      if (activeModalIndex !== null && items[activeModalIndex]?.id === item.id) {
-        setActiveModalIndex(null);
-      }
-    }, 260);
+      // 2. Persist to local hidden set
+      const updatedHidden = new Set(hiddenIds);
+      updatedHidden.add(item.id);
+      setHiddenIds(updatedHidden);
+      hiddenIdsRef.current = updatedHidden;
+      try {
+        localStorage.setItem('galx_hidden_images', JSON.stringify([...updatedHidden]));
+      } catch {}
+
+      // 3. Remove from stream after smooth transition
+      setTimeout(() => {
+        setItems((prev) => prev.filter((i) => i.id !== item.id));
+        setHidingIds((prev) => {
+          const next = new Set(prev);
+          next.delete(item.id);
+          return next;
+        });
+        if (activeModalIndex !== null && items[activeModalIndex]?.id === item.id) {
+          setActiveModalIndex(null);
+        }
+      }, 260);
+    }
 
     // 4. Show toast with undo
-    showToast('Artwork hidden and returned to creator\'s private library.', true);
+    showToast('Artwork hidden from Explore.', !isProfileGallery);
 
     // 5. Fire backend moderation request
     try {
@@ -687,7 +700,7 @@ export function PublicImageMasonryStream({
     setLastHiddenItem(null);
     setToastMessage(null);
     setToastUndoable(false);
-    showToast('Artwork restored to Explore stream.');
+    showToast('Artwork visible again for this session.');
   };
 
   const openModalByIndex = useCallback((index: number) => {
@@ -1078,8 +1091,8 @@ export function PublicImageMasonryStream({
                         type="button"
                         className="masonry-hide-btn"
                         onClick={(e) => handleHideItem(e, item)}
-                        title="Hide from Explore (Set to Private)"
-                        aria-label="Hide from Explore and set to private"
+                        title="Hide from Explore"
+                        aria-label="Hide from Explore"
                       >
                         <EyeOff size={13} />
                       </button>
@@ -1127,8 +1140,8 @@ export function PublicImageMasonryStream({
                         type="button"
                         className="masonry-action-btn masonry-action-icon-only"
                         onClick={(e) => handleHideItem(e, item)}
-                        title="Hide from Explore (Set to Private)"
-                        aria-label="Hide from Explore and set to private"
+                        title="Hide from Explore"
+                        aria-label="Hide from Explore"
                       >
                         <EyeOff size={13} />
                       </button>
@@ -1417,16 +1430,16 @@ export function PublicImageMasonryStream({
                   <span>Community Safety & Moderation</span>
                 </div>
                 <p className="masonry-moderation-desc">
-                  Notice inappropriate or sensitive content? Hiding this item immediately removes it from Explore and resets its status to private in the creator's personal library.
+                  Notice inappropriate or sensitive content? Hide it from Explore. Star profiles keep their complete public galleries.
                 </p>
                 <button
                   type="button"
                   className="masonry-modal-hide-btn"
                   onClick={(e) => handleHideItem(e, activeModalItem)}
-                  title="Hide from Explore and set to private"
+                  title="Hide from Explore"
                 >
                   <EyeOff size={13} />
-                  <span>Hide from Explore (Set to Private)</span>
+                  <span>Hide from Explore</span>
                 </button>
               </div>
 

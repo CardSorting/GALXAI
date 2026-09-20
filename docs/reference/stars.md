@@ -34,11 +34,13 @@ continues to the image creator so discovery and creation remain adjacent. A
 secondary View creations anchor makes the long-page destination immediate, and
 Share profile uses the canonical path with a native-share or clipboard fallback.
 
-The profile gallery is public, newest first, and scoped to that Star. It has an
-authored empty state, a bounded continuation as more work is available, a
-recoverable route-level error state and a public link back to the full Explore
-stream. A profile being temporarily unavailable must not be presented as a
-missing identity or expose implementation details.
+The profile gallery is public, newest first, and scoped to that Star. It shows
+the Star's complete public gallery even when an individual creation has been
+hidden from the shared Explore stream; hiding from Explore is not a profile
+visibility change. It has an authored empty state, a bounded continuation as
+more work is available, a recoverable route-level error state and a public link
+back to the full Explore stream. A profile being temporarily unavailable must
+not be presented as a missing identity or expose implementation details.
 
 The participant endpoint at `/api/community/participants/<handle>` returns the
 public identity fields, creation count, allowlisted creation fields and a
