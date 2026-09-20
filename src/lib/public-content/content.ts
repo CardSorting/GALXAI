@@ -1,11 +1,20 @@
 import { PRO_PLAN } from '@/lib/billing/pro-plan';
+import { FREE_IMAGE_OFFER, IMAGE_PLAN_FEATURES } from '@/lib/data/pricingSummary';
 
 /** Authored customer guidance only. Operational details and provider identifiers stay private. */
 export const PLAN_INCLUSIONS = [
-  ['Create', 'High-resolution images across five supported aspect ratios'],
-  ['Explore', 'Browse the public community stream and find ideas to remix'],
-  ['Remix', 'Reuse prompts and iterate in the Image Studio'],
-  ['Download', 'Download generated images from your library'],
+  ['Create', IMAGE_PLAN_FEATURES[0]],
+  ['Compose', IMAGE_PLAN_FEATURES[1]],
+  ['Detail', IMAGE_PLAN_FEATURES[2]],
+  ['Keep iterating', 'Save to your library, favorite, remix, and download'],
+  ['Share', 'Public sharing controls with creations public by default'],
+] as const;
+
+export const FREE_PLAN_INCLUSIONS = [
+  ['Allowance', FREE_IMAGE_OFFER.allowance],
+  ['Create', IMAGE_PLAN_FEATURES[0]],
+  ['Compose', IMAGE_PLAN_FEATURES[1]],
+  ['Explore', 'Browse public creations and discover prompts to remix'],
 ] as const;
 
 export type Guide = {
@@ -36,6 +45,14 @@ export const GUIDES: Guide[] = [
         paragraphs: [
           PRO_PLAN.name + ' costs $' + PRO_PLAN.monthlyPriceUsd + ' USD per month for one account. It supports image creation, community discovery, prompt reuse, and access to your image library.',
           'Generated images are public by default and may appear in the community stream. Review the published plan terms before subscribing.',
+        ],
+      },
+      {
+        id: 'free-start',
+        title: 'Try it before subscribing',
+        paragraphs: [
+          FREE_IMAGE_OFFER.allowance.charAt(0).toUpperCase() + FREE_IMAGE_OFFER.allowance.slice(1) + '. The allowance is designed to let you experience the full creation loop before choosing a recurring plan.',
+          'A request for four images uses four outputs. The Image Studio keeps the batch size visible so the allowance is easy to understand.',
         ],
       },
       {
@@ -266,39 +283,6 @@ export const GUIDES: Guide[] = [
     ],
     related: ['/knowledge-base/getting-started', '/pricing/fair-use', '/faq'],
   },
-  {
-    path: '/knowledge-base/images-and-developer-access',
-    title: 'GALX Images and private integrations',
-    description: 'Create in GALX Images or learn how GALX Nova supports explicitly authorized private integrations.',
-    category: 'Getting started',
-    sections: [
-      {
-        id: 'images',
-        title: 'Create in GALX Images',
-        paragraphs: [
-          'GALX Images is the consumer experience for describing, creating, exploring, and remixing images. It is the simplest place to start.',
-        ],
-      },
-      {
-        id: 'developers',
-        title: 'Build with GALX Nova',
-        paragraphs: [
-          'GALX Nova is our managed intelligence layer for reasoning and generation. You use the capability; GALX handles the underlying execution.',
-          'General-purpose API access is not self-service. GALX may authorize a bounded private integration with directly assigned terms.',
-          'Authorized integrations use supported capabilities documented for their cohort. The Image Studio and private integrations may not expose identical capabilities.',
-        ],
-      },
-      {
-        id: 'model-boundary',
-        title: 'What Nova does—and does not—claim',
-        paragraphs: [
-          'Nova names the managed service. It is not a claim that GALX trained a foundation model, and “managed” does not promise unlimited capacity, a dedicated cluster, human-reviewed responses, enterprise support, or guaranteed outputs.',
-          'For integration requirements and supported capabilities, use the Developer documentation.',
-        ],
-      },
-    ],
-    related: ['/pricing/galx-pro', '/knowledge-base/getting-started', '/faq'],
-  },
 ];
 
 export const FAQ_GROUPS = [
@@ -321,28 +305,28 @@ export const FAQS = [
     group: 'about-galx',
     question: 'What is Nova?',
     answer: 'GALX Nova is our managed intelligence layer for reasoning and generation.',
-    guide: '/knowledge-base/images-and-developer-access',
+    guide: '/pricing/galx-pro',
   },
   {
     id: 'what-managed-means',
     group: 'about-galx',
     question: 'What does “managed intelligence” mean?',
     answer: 'GALX Nova powers supported GALX experiences and selected private integrations. GALX operates the service behind those experiences.',
-    guide: '/knowledge-base/images-and-developer-access',
+    guide: '/pricing/galx-pro',
   },
   {
     id: 'underlying-system',
     group: 'about-galx',
     question: 'How does the underlying system work?',
     answer: 'We keep implementation details internal. We can explain the supported capabilities and integration requirements.',
-    guide: '/knowledge-base/images-and-developer-access',
+    guide: '/pricing/galx-pro',
   },
   {
     id: 'trained-models',
     group: 'about-galx',
     question: 'Did GALX train the models?',
     answer: 'Nova is the name of our managed service, not a claim that GALX trained a foundation model.',
-    guide: '/knowledge-base/images-and-developer-access',
+    guide: '/pricing/galx-pro',
   },
   {
     id: 'explore',
@@ -350,6 +334,13 @@ export const FAQS = [
     question: 'Can I explore before choosing a plan?',
     answer: 'Yes. Create in GALX Images, explore the public community stream, and review the published plan terms before subscribing.',
     guide: '/knowledge-base/getting-started',
+  },
+  {
+    id: 'free-allowance',
+    group: 'plans-and-billing',
+    question: 'What can I try for free?',
+    answer: 'Verified accounts receive a one-time allowance of five image outputs. A four-image request uses four outputs, so the Image Studio keeps the balance easy to understand.',
+    guide: '/pricing/galx-pro',
   },
   {
     id: 'what-can-i-make',
@@ -380,6 +371,13 @@ export const FAQS = [
     guide: '/pricing/galx-pro',
   },
   {
+    id: 'unsupported-plan-features',
+    group: 'plans-and-billing',
+    question: 'Does GALX currently offer video or private generation modes?',
+    answer: 'No. GALX currently publishes image creation only. Video, Fast or Relax modes, uploaded-image editing, Stealth and separate concurrency tiers are not advertised as current consumer capabilities.',
+    guide: '/pricing/galx-pro',
+  },
+  {
     id: 'cancellation',
     group: 'plans-and-billing',
     question: 'Can I cancel my subscription?',
@@ -405,42 +403,42 @@ export const FAQS = [
     group: 'publishing-and-access',
     question: 'Is programmable access available publicly?',
     answer: 'No. General-purpose developer access is not self-service. GALX may authorize a bounded private integration when it deliberately chooses to support the use case.',
-    guide: '/knowledge-base/images-and-developer-access',
+    guide: '/pricing/galx-pro',
   },
   {
     id: 'private-access-boundary',
     group: 'publishing-and-access',
     question: 'How is private access managed?',
     answer: 'Private access is explicit, bounded, metered, administered, and revocable. Credentials and allocations are managed directly for an authorized cohort.',
-    guide: '/knowledge-base/images-and-developer-access',
+    guide: '/pricing/galx-pro',
   },
   {
     id: 'private-access-metering',
     group: 'publishing-and-access',
     question: 'Does GALX still measure private integration usage?',
     answer: 'Yes. Metering remains in place for infrastructure operations, bounded cohorts, allocation controls, accounting, and capacity planning. It does not create a public pricing offer.',
-    guide: '/knowledge-base/images-and-developer-access',
+    guide: '/pricing/galx-pro',
   },
   {
     id: 'developer-membership-usage',
     group: 'publishing-and-access',
     question: 'Can a public account provision API credentials?',
     answer: 'No. Public accounts cannot enroll, purchase, or automatically receive general-purpose API credentials. GALX administrators provision private access deliberately when appropriate.',
-    guide: '/pricing/usage',
+    guide: '/pricing/galx-pro',
   },
   {
     id: 'developer-usage-rates',
     group: 'publishing-and-access',
     question: 'Where can I see private integration usage terms?',
     answer: 'There is no public usage-pricing contract for general-purpose developer access. Authorized cohorts receive directly assigned allocation and operating terms.',
-    guide: '/pricing/usage',
+    guide: '/pricing/galx-pro',
   },
   {
     id: 'developer-images',
     group: 'publishing-and-access',
     question: 'Do I need private integration access to create images in GALX?',
     answer: 'No. Image creation within GALX uses the consumer product and its applicable access requirements.',
-    guide: '/knowledge-base/images-and-developer-access',
+    guide: '/pricing/galx-pro',
   },
 ] as const;
 
@@ -459,7 +457,6 @@ const knowledgeOrder = [
   'fair-use',
   'billing-and-cancellation',
   'public-beta',
-  'images-and-developer-access',
 ];
 
 const knowledgeGuides = [...GUIDES].sort(

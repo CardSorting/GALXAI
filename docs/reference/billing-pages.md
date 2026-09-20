@@ -11,7 +11,7 @@ This guide is not imported into application content.
 
 | Surface | Current meaning | Payment behavior |
 | --- | --- | --- |
-| GALX Pro | Consumer Image Studio plan for one account | Active public Stripe subscription at the verified consumer price |
+| GALX Pro | Consumer Image Studio plan for one account at $10/month | Active public Stripe subscription at the verified consumer price |
 | GALX Nova private access | Explicitly authorized private integrations and GALX products | No public checkout or self-service purchase path |
 | Historical account records | Prior transactions, invoices and ledger history | Readable only for the applicable account and reconciliation |
 
@@ -36,7 +36,11 @@ usage rate card or self-service inference billing promise is implied.
 | Invoices | `/billing/invoices` | View owner-scoped invoices and hosted history |
 | Payment settings | `/billing/payment-methods` | Open the restricted payment portal |
 
-The public pricing page links only to the consumer plan. Retired developer
+The public pricing page shows the one-time five-image welcome allowance beside
+the current Pro plan, so the free-to-paid path matches the real Image Studio
+experience. It does not publish a four-tier ladder: video, Fast/Relax lanes,
+uploaded-image editing, Stealth and separate concurrency entitlements are not
+current consumer capabilities. Retired developer
 pricing paths redirect to the neutral home surface, and retired checkout,
 quote, wallet purchase and inbound-application endpoints return bounded 410
 responses without creating storage records. Key-management pages redirect to

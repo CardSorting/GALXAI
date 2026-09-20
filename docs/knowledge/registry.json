@@ -1033,6 +1033,17 @@
         "audit"
       ]
     },
+    "docs/knowledge/audits/2026-09-20-image-pricing-strategy-review.json": {
+      "kind": "evidence",
+      "keywords": [
+        "images",
+        "pricing",
+        "plans",
+        "fair-use",
+        "stripe",
+        "audit"
+      ]
+    },
     "docs/maintainers/ACCOUNT_PROFILE_SCHEMA.md": {
       "kind": "reference",
       "keywords": [

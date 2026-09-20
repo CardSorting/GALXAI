@@ -1,11 +1,11 @@
 {
   "knowledge": {
     "reviewer": "codex",
-    "note": "Reviewed the retained card-density evidence and registry mapping; documentation scope records local UI verification only.",
+    "note": "Reviewed the pricing strategy evidence and registry mapping. The public offer is intentionally documented as a verified welcome allowance plus one active consumer plan; unsupported tiers remain a future hypothesis and retired private-integration guidance is not indexed as a public guide.",
     "reviewed_at": "2026-09-20",
     "review_by": "2026-10-20",
     "evidence": {
-      "docs/knowledge/audits/2026-09-20-image-card-density-review.json": "6bdfb37806fe8e29fe001cced6197ab3c9226b216d37bb04797038460a6f9120"
+      "docs/knowledge/audits/2026-09-20-image-pricing-strategy-review.json": "88114d8bd1a571db6af593e5fe810763d90eacc13f51910ff74d88610831ad56"
     },
     "files": {
       ".github/CODEOWNERS": "ef2f416d15f027dc8f197ad844289c9a44c8e843d3214d1590a3a380e939d13f",
@@ -26,7 +26,7 @@
       "docs/how-to/change-with-documentation.md": "abcf6bfb2f0aadcf8cfc2fdae18ac8f3f84565f127c34f7453d50e7283006e40",
       "docs/knowledge/DESIGN_RATIONALE.md": "edd3cf9b49ed794fbe8bf14448fd0c56cb4d8df832bab81cdf07e9ea2e2204a1",
       "docs/knowledge/README.md": "5ad219aeee44a9c065db2ca69e5a6498966fed42e2d8c74773dbc055d0220931",
-      "docs/knowledge/registry.json": "5f9e9a048316816a92b8c4e0a4544d1cc2bde906e5fa1f65adad744bfc7660a8",
+      "docs/knowledge/registry.json": "1eb1b179609b65298f82ccf39d612a38d2f14baa0f92e4c93cb2802e5fa07f86",
       "docs/knowledge/templates/adr.md": "28773b3cbdb53ad34f08d0362e87b6dba24b6fd76ddb6c85db8ad63d99ad1331",
       "docs/knowledge/templates/runbook.md": "19679a7eb8c1a3aafd87852fa93817e7bf9ef4696772c8deb1617366c290abc1",
       "docs/maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md": "b7df75535611c14aabe599764a6f6c2a4f0f1461d068929602c68e39d8ce850d",
@@ -1521,20 +1521,20 @@
   },
   "client-efficiency": {
     "reviewer": "codex",
-    "note": "Reviewed card simplification after the final keyboard-accessibility patch as a render and interaction reduction: hover overlays and duplicate handlers are removed, inspector actions remain, and generation/network contracts are unchanged.",
+    "note": "Reviewed the pricing page, public content, knowledge search, and product surface strategy. The UI explains the real image workflow, removes the inaccessible private-integration guide and route from public results, and avoids unsupported video, private, concurrency, or mode claims; no runtime generation path changed.",
     "reviewed_at": "2026-09-20",
     "review_by": "2026-10-20",
     "evidence": {
-      "docs/knowledge/audits/2026-09-20-image-card-density-review.json": "6bdfb37806fe8e29fe001cced6197ab3c9226b216d37bb04797038460a6f9120"
+      "docs/knowledge/audits/2026-09-20-image-pricing-strategy-review.json": "88114d8bd1a571db6af593e5fe810763d90eacc13f51910ff74d88610831ad56"
     },
     "files": {
       ".impeccable/surfaces/src-components-dashboard-navigation-tsx.md": "ed6144c9da6cf2c4e1537f735891cb91e1c064c488c24e1cec953509cfad6360",
       "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md": "44cf79006707a49af2f35253bbbf23acab8708184f0869459e6760844813c454",
-      "docs/PRODUCT_SURFACE_STRATEGY.md": "888f8434a2d49e4177dbdd1a34c444e7d4221c2419d5623c8fa8ad2abf465103",
+      "docs/PRODUCT_SURFACE_STRATEGY.md": "bbf4001636cf801baf6864bbf2d4037587e12871b5694554998f3143f0234c53",
       "docs/maintainers/PUBLIC_DISCOVERY.md": "d489c2950b13d259c0f88c9ece526b250fa5d6d996db6993ac567b416aa9d873",
       "docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md": "8456e90e39d2a4ba9da1267c0f3f9498ba94da12dd3a312c157f6aca0e58fc5f",
       "docs/maintainers/readable-urls.md": "ffc42ff362cf57da1d0f308e6385a667d04fe22878cb1012e6da8773134a7ce3",
-      "scripts/test-public-reading.ts": "3fca2139eedebb90b713b612d8c66c9238a7fdc50703b641d0aa47c87ba8addd",
+      "scripts/test-public-reading.ts": "2c57d94fcc26eed0a078d942f42389d9fdcb5b4cf4b50d6f0231e72fbda884e6",
       "scripts/test-request-efficiency.ts": "aca2f322aabd181b2b0d403bb0836b121de3b5a9f1c4746716e5c12e986731cc",
       "scripts/test-sites-workspace.ts": "08af95908269446e4fe6590619e7180d5b41575deb0a3c2a6797c2127c873899",
       "scripts/verify-free-generation-ui.mjs": "a03011864866e4d172a07d67f185fcbd996df3c5347fc9338825719793ddbdbd",
@@ -1554,7 +1554,6 @@
       "src/app/images/error.tsx": "0b2a04890cd8de8ea6adf8eb58541aae5409033c49b28d90a51cb386af1d1097",
       "src/app/images/loading.tsx": "7874f6730a73d1b21ce1c8d0f957f6ac3a7368adbc38e9467c05db9236279223",
       "src/app/knowledge-base/getting-started/page.tsx": "aa36e2768fcbbe6a2f8dc43cbe5a41ddd1ede9f624b40fe940a3b26e4ea05f2d",
-      "src/app/knowledge-base/images-and-developer-access/page.tsx": "73551d4dd4a7b5159a0ef9a952a812fb840a085d956099e956cb2e24cb4457cd",
       "src/app/knowledge-base/page.tsx": "a33a9c3884a3542f8728f2b493f0aa1980dbe63fe504e7bc3d978d3e653bec62",
       "src/app/knowledge-base/public-beta/page.tsx": "c7b943461d394e83cfe88c51090b60077571acadabed7c61dae63d5fddce64f6",
       "src/app/knowledge-base/public-creations/page.tsx": "328c3497bdcb56e3b2ecc7b635e8b292084ec4fa47fc0578f96d2f69f951c70f",
@@ -1571,7 +1570,7 @@
       "src/app/pricing/fair-use/page.tsx": "f9d18d3e9438c1b5e849a124b6a0bfd5198b19a544634ca519e8fae53bf94539",
       "src/app/pricing/galx-pro/page.tsx": "271f7ff923562055c204241d1380cf05920837323a4ec69d6f092cde96f48e47",
       "src/app/pricing/opengraph-image.tsx": "57b0e4af2c492c4208eccf2a791a1824e8f4efb7704fcd2a56d7a07fb2766f02",
-      "src/app/pricing/page.tsx": "1feb2960edb31a8761a7cba2cc0b85b8bf862b36079982a84c88416e161776d6",
+      "src/app/pricing/page.tsx": "849a739e9fa63930ddfc13a6eb633fb5547e189b51948d92de2b0749b59961f8",
       "src/app/pricing/seats/page.tsx": "d0f7e15a799ac07c96be793655b6468f5e6445db9eedca128634302b9bc90904",
       "src/app/pricing/usage/page.tsx": "bf4b01115d242b71225b9954b2aa609c15c73f7471c9717207bb95b8766bee29",
       "src/app/privacy/page.tsx": "49a354b4d8716249d7d9803adc479302f11a7ea09a1b5b154b83d2e5ad06e6d2",
@@ -1614,15 +1613,15 @@
       "src/components/images/use-image-studio.ts": "0b948235a590eed6cf7db59a447f81ccf025514c2db9e0708eb86b60c624dec8",
       "src/components/public-content/DESIGN.json": "d8594db0bdf0f53295e4a7cb9cb7f770f47e54498d93489d2349cabb14373d61",
       "src/components/public-content/DESIGN.md": "1070795a25fc6075d9bceaaf8f77ee8033ff942a507d55196e0c39b4a4470d83",
-      "src/components/public-content/KnowledgeSearch.tsx": "46f90964a93e5827db6a9cf9cbd99e0cf50c3eccf81741c9c56aa7d3c1169143",
+      "src/components/public-content/KnowledgeSearch.tsx": "9793cb618c86ec0e61ae2bf0be8b2e608d465e4b87e705da9c75d14070fa106f",
       "src/components/public-content/ReadingPage.tsx": "fc0faa94abe22b5037f11f6f32b92390858c08b10d0ebe2bfa7f8b76ed6d16e4",
-      "src/components/public-content/public-content.module.css": "c1c6a99a77563ae5afcca6f46b34216afd7f16c3fdb671139f01109e88bc48a6",
+      "src/components/public-content/public-content.module.css": "7407d8fcff11f13e841e9a84af43abaffe51e640111f647cd8c2091dcee45e0d",
       "src/components/sites/sites.css": "c0bae18b97b929439551d3252d6aeca9f05539e445bd6f79737388d31edf3859",
       "src/components/sites/use-sites-workspace.ts": "47714d686d824d498dfe3ec88e6797426f24e41ffed896f934950c06b63cf00b",
       "src/contexts/AuthContext.tsx": "925072632aef4a44e915fb04b479b1891bcc97343072e866231f37a5127916b0",
       "src/contexts/GenerationAllowanceContext.tsx": "d73875872f3814131bfc18029e69a72091993d906af63058ca37282f2c261a7c",
       "src/lib/images/navigation.ts": "827b7f91ef06422452aa03f66721e866be9755399c4514393230ce4fdcfc8e5c",
-      "src/lib/public-content/content.ts": "f201ac2fc170a0744f71b55bc7af31303427920340337886ea877a63c156724f",
+      "src/lib/public-content/content.ts": "a2cee2fa3cffd93e15e0ee509c8ac82be29bed0c1269ded188a8f4280ad2ea07",
       "src/lib/public-content/retired-surface.ts": "a7b4182444689b70163d90d98b952c05edba7359c9b7742518ec2f99f4113f2c",
       "src/lib/public-content/routes.ts": "c5357abd31215c9ce14957347fb53394306acca7dd47acf19aa02695aa82f525",
       "src/lib/resilience/ResilientClient.ts": "02f0b3dc1d931cb01730e6dd5b40c0daf9ded5470558b9eecc80a33d78576f75",
@@ -1633,18 +1632,18 @@
     }
   },
   "billing": {
-    "reviewer": "Codex",
-    "note": "Reviewed billing/search compatibility after removing the obsolete settings redirect and recent-route allowlist entry. Confirmed canonical billing paths remain intact and no billing task points to the retired route.",
+    "reviewer": "codex",
+    "note": "Reviewed the public billing copy and compatibility pricing client against the active Pro checkout contract. Existing $10 Pro checkout remains unchanged; no new Stripe product, price, entitlement, or webhook behavior was introduced.",
     "reviewed_at": "2026-09-20",
-    "review_by": "2026-09-27",
+    "review_by": "2026-10-20",
     "evidence": {
-      "docs/knowledge/audits/2026-09-20-settings-surface-retirement-review.json": "85ee9b0c442a81efa5244ea0fa6ce12eddf594a9b9fef36579b58905454deb3d"
+      "docs/knowledge/audits/2026-09-20-image-pricing-strategy-review.json": "88114d8bd1a571db6af593e5fe810763d90eacc13f51910ff74d88610831ad56"
     },
     "files": {
       ".impeccable/surfaces/src-app-billing-page-tsx.md": "7b6165eb4b5c85cac4900e9070cc20da30c96d06ff12ccd21f4c0450b817bc31",
       "docs/WALLET_AND_BILLING_STRATEGY.md": "15b6864d3a2eaa2a580a86cb9efc3c6085c67d5769330aa0ecdeb14ea88ceb00",
       "docs/maintainers/SITES_FAIR_USAGE.md": "20be8cea19781394db735816f83a02dcd79cea94c22f15b091c47ca663508f10",
-      "docs/reference/billing-pages.md": "6f7c092fc155d44db2ad8d98279801208ee5a0fdf381bb2f56d752d61696e3bb",
+      "docs/reference/billing-pages.md": "c4758f93247969606d8ffb72c4f5f9a0a549a201240cd64f07540a7d1bac9f8d",
       "docs/runbooks/stripe-webhook-delivery.md": "f54173fde492ec26371fba31d3d28f5151ec4e4d487dc496708e4f44779f3ba3",
       "next.config.ts": "dcfac740468b5568756a210bee88e2777eabc5afaaa2c230cb45e0c7805573ee",
       "scripts/lib/stripe-webhook-target.ts": "a849c2441e61d6573a9fe7a9b6cad3e24bf86919cd1b5ebeeac2e5b97ab9e2db",
@@ -1704,9 +1703,9 @@
       "src/components/dashboard/GenerationGateNotice.tsx": "0c905274ce933e0247d4a05f4174c9c13377bcb02e0d833c3927cfce62701bac",
       "src/components/dashboard/KeysSubNav.tsx": "fe3ae6f1956cc038f63fe0f5eb90b5762589b06964947f0115634e04191f5b2d",
       "src/components/grants/GrantsClient.tsx": "b9ddef7ff80365d85dcc1169f05ebf81b76e2abe126c66511e55e7d5ad262a88",
-      "src/components/home/DESIGN.md": "08b283af1636dd6c76fcd866db6ebff36c7b66e7ebd9d7587b4367784a366c90",
+      "src/components/home/DESIGN.md": "d4c3aed483c303f297a518b6e481e45f0710c54bb58bdee597c0e6b47230af9b",
       "src/components/home/PlanAction.tsx": "c624af95fac166dfaddc9c6fccc6fd9a1314b1ea397c1bc16471ac790f72222b",
-      "src/components/pricing/PricingClient.tsx": "902672649ab2929fc3140118c2b7ef47f9a67b09fad68264afee27b7881d1da1",
+      "src/components/pricing/PricingClient.tsx": "e84ec6aafcdd450b045f7ed218158432f38420faf1752d8fcee5a1b05338bbee",
       "src/components/public-content/DESIGN.md": "1070795a25fc6075d9bceaaf8f77ee8033ff942a507d55196e0c39b4a4470d83",
       "src/components/teams/TeamsSubNav.tsx": "12ca1e90ab0c98b9166822234b13f6b958e863363ef2222bd05e73fb62b931b2",
       "src/lib/billing/account.ts": "c211925fcce0e39199b93eb8097cafe5c413a2809a8d1c00baf0bf7ad036dc1c",

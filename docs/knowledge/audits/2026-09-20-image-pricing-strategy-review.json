@@ -1,0 +1,43 @@
+{
+  "reviewed_at": "2026-09-20T00:00:00.000000+00:00",
+  "reviewer": "Codex",
+  "scope": "Public consumer image pricing and the proposed Midjourney-shaped four-tier template, compared with GALX's implemented creation, account, Stripe and fair-use contracts.",
+  "research": [
+    {
+      "source": "https://docs.midjourney.com/hc/en-us/articles/27870484040333-Comparing-Midjourney-Plans",
+      "finding": "Midjourney's familiar ladder is Basic, Standard, Pro and Mega, differentiated by a metered fast allowance, slower/unlimited modes and privacy/concurrency features."
+    },
+    {
+      "source": "https://helpx.adobe.com/lu_en/firefly/web/get-started/learn-the-basics/generative-credits-overview.html",
+      "finding": "Adobe makes a monthly generative-credit balance and reset explicit, which is a clearer pattern than hiding generation volume behind an ambiguous job count."
+    }
+  ],
+  "implemented_capabilities": [
+    "One-time five-image welcome allowance for verified accounts",
+    "One active $10/month GALX Pro consumer subscription",
+    "One to four image outputs per request",
+    "Five supported aspect ratios and Standard/HD detail options",
+    "Owned library, Favorites, prompt reuse, downloads and public community discovery",
+    "Public-by-default creations with account sharing controls"
+  ],
+  "not_currently_offered": [
+    "Video generation or SD/HD video tiers",
+    "Fast, Relax or other customer-selectable queue modes",
+    "Uploaded-image editor or image-to-image workflow",
+    "Stealth/private generation as a plan entitlement",
+    "Public Stripe prices or checkout contracts for four consumer tiers"
+  ],
+  "decision": "Use a truthful two-step ladder now: Start free with five outputs once, then GALX Pro at $10/month for ongoing image creation under fair-use terms. Keep the four-tier Basic/Standard/Pro/Mega shape as a future expansion hypothesis only; do not publish its unsupported video, privacy, queue, editor or concurrency promises.",
+  "ux_strategy": [
+    "Make the free-to-paid decision the first comparison, with one primary action per option.",
+    "Use image outputs as the plain-language unit and state that a four-image batch uses four outputs.",
+    "Show supported controls once, in one comparison, instead of inventing separate feature gates.",
+    "Keep the current checkout and billing authority as the source of truth; a card is not an entitlement until its backend price, webhook reconciliation and usage policy exist."
+  ],
+  "checks": {
+    "source_contracts": "reviewed",
+    "stripe_contract": "existing Pro price and checkout preserved",
+    "public_boundary": "unsupported capabilities omitted from the active offer; retired private-integration guidance is not indexed as a public guide",
+    "limitations": "No Stripe products/prices or production deployment changed in this pass"
+  }
+}

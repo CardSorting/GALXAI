@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "reviewer": "Codex",
-  "reviewed_at": "2026-09-20T08:37:59.459850Z",
-  "note": "Reviewed the final changed watched paths for the signed-in, account-scoped Explore hide contract: package test registration, image hide helper, and migration runbook. Confirmed allowlisted responses, session authority, generic failures, abuse limits, privilege repair and post-apply role readback; targeted/image security, docs and build checks passed. Existing unrelated incident watch fingerprints were not semantically reinterpreted.",
+  "reviewer": "codex",
+  "reviewed_at": "2026-09-20T09:14:02.366153Z",
+  "note": "Reviewed the changed product-surface strategy and public pricing guidance against the implemented Image Studio, free allowance, active Pro checkout, public-by-default sharing, and retained fair-use boundaries. Confirmed the four-tier template remains a future hypothesis and no operational topology, deployment, or unsupported capability claim was added.",
   "files": {
     ".dockerignore": "fb4dc7ef84e7f36c5bfed0f267187a022bbb61e66dd26060295b133e08fa74c5",
     ".github/workflows/vercel-preflight.yml": "60856940957e45075d1c54de644d3ba0268fad16b35b3ed5eb8005bc40a5b4b3",
@@ -18,7 +18,7 @@
     "docs/DEPLOYMENT.md": "ecf3ade15628fb4acb480adf3a02e6cd715320f15f46a214cfc2cc72e2bb21b9",
     "docs/DEVELOPER_GUIDE.md": "f8670e55cd94143b98701e9185eb6657a6cab4fb85e5077b126f4ddffbe68784",
     "docs/DOCUMENTATION_POLICY.md": "ab2030f9d15010634b9a2d9cf2bc680fdf4ae961c2ee3f9f7ad567e99d49d40c",
-    "docs/PRODUCT_SURFACE_STRATEGY.md": "888f8434a2d49e4177dbdd1a34c444e7d4221c2419d5623c8fa8ad2abf465103",
+    "docs/PRODUCT_SURFACE_STRATEGY.md": "bbf4001636cf801baf6864bbf2d4037587e12871b5694554998f3143f0234c53",
     "docs/QUEUE_SPECIFICATION.md": "301d293b23327bf065202322e0a7554cf581740f28d0d5ab9fb827e73beed6ba",
     "docs/RESILIENCE_AND_DISASTER_RECOVERY.md": "87ad4fc3c0291dac8910f851ec8fede69c8860d00b37d0287b5a8ddb8769bee9",
     "docs/SUPABASE_PARANOID_ARCHITECTURE_SPEC.md": "652e51cdd6ce0f2b8d87825cb4f224744dc83f5ef755d7b4b8b4f7bcb83574d5",

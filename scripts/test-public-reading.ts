@@ -6,6 +6,7 @@ import { GUIDES, FAQS, filterGuides } from '../src/lib/public-content/content';
 import { isPublicProductPath } from '../src/lib/security/preview-policy';
 import { previewMiddleware } from '../src/lib/security/preview-middleware';
 import { constructMetadata } from '../src/lib/seo/metadata';
+import { SITE_CONFIG } from '../src/lib/seo/siteConfig';
 import sitemap from '../src/app/sitemap';
 
 test('every authored guide has one public, canonical, sitemap-listed destination', () => {
@@ -25,7 +26,7 @@ test('every authored guide has one public, canonical, sitemap-listed destination
     const metadata = constructMetadata({ title: guide.title, canonicalPath: guide.path });
     assert.equal(new URL(String(metadata.alternates?.canonical)).origin, 'https://galx.ai');
     assert.equal(new URL(String(metadata.alternates?.canonical)).pathname, guide.path);
-    assert.deepEqual(metadata.title, { absolute: `${guide.title} | GALXAI` });
+    assert.deepEqual(metadata.title, { absolute: `${guide.title} | ${SITE_CONFIG.name}` });
   }
   for (const faq of FAQS) assert(GUIDES.some(guide => guide.path === faq.guide));
   for (const item of PUBLIC_NAVIGATION) assert(!item.href.includes('#'));
@@ -55,7 +56,7 @@ test('anonymous, fake-user and prefetch requests can read only the curated pages
 
 test('search finds body text, tolerates whitespace/case, combines terms and recovers from no results', () => {
   assert.deepEqual(filterGuides('  CANCEL  ', 'All topics').map(guide => guide.path), filterGuides('cancel', 'All topics').map(guide => guide.path));
-  assert(filterGuides('pottery', 'All topics').some(guide => guide.path.endsWith('/getting-started')));
+  assert(filterGuides('alpine lake', 'All topics').some(guide => guide.path.endsWith('/getting-started')));
   assert(filterGuides('paid period', 'Plans and billing').every(guide => guide.category === 'Plans and billing'));
   assert.equal(filterGuides('zzzz-no-match', 'All topics').length, 0);
   assert.equal(filterGuides('', 'All topics').length, GUIDES.length);

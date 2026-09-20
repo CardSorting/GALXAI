@@ -32,10 +32,16 @@ routing or selection logic, capacity acquisition, scheduling, failover,
 internal economics or implementation diagnostics in public content, metadata,
 social previews, browser bundles, response bodies or headers.
 
-GALX Pro remains the public consumer plan. Its price and fair-use terms are
-maintained in the public consumer pricing surfaces. Private access has no public
-checkout or public usage-pricing contract. Historical billing identities and
-records remain available to server-side reconciliation where required.
+GALX Pro remains the public consumer plan at the currently verified
+$10/month price. The public pricing surface pairs it with the one-time
+five-image welcome allowance so visitors can try the real Image Studio before
+subscribing. Its supported ratios, Standard/HD detail, 1–4 output batches,
+library, Favorites, remix and download behavior are the active contract.
+Private access has no public checkout or public usage-pricing contract.
+Historical billing identities and records remain available to server-side
+reconciliation where required. Do not publish additional consumer tiers until
+their Stripe prices, webhook reconciliation, usage policy and user-facing
+capabilities all exist together.
 
 ## Infrastructure and administration
 

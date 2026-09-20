@@ -2,23 +2,39 @@ import { IntentLink as Link } from '@/components/common/IntentLink';
 import { ArrowRight, Check, Info } from 'lucide-react';
 import { constructMetadata } from '@/lib/seo/metadata';
 import { PRO_PLAN } from '@/lib/billing/pro-plan';
-import { GUIDES, PLAN_INCLUSIONS } from '@/lib/public-content/content';
+import { FREE_IMAGE_OFFER } from '@/lib/data/pricingSummary';
+import { GUIDES, FREE_PLAN_INCLUSIONS, PLAN_INCLUSIONS } from '@/lib/public-content/content';
 import { PlanAction } from '@/components/home/PlanAction';
 import { Breadcrumbs, GuideList, SupportLink } from '@/components/public-content/ReadingPage';
 import styles from '@/components/public-content/public-content.module.css';
 
-export const metadata = constructMetadata({ title: 'Pricing — GALX Pro', description: 'Create images with GALX Pro at $10/month. Private integrations are administered separately and are not a public subscription.', canonicalPath: '/pricing' });
+export const metadata = constructMetadata({ title: 'Pricing — GALX Images', description: 'Try GALX Images with a one-time five-image allowance, then continue with GALX Pro at $10/month under published fair-use terms.', canonicalPath: '/pricing' });
 
 export default function PricingPage() {
   return <main className={styles.page}>
     <Breadcrumbs items={[{ name: 'Home', url: '/' }, { name: 'Pricing' }]} />
-    <div className={styles.pricingHero}>
-      <header className={styles.pricingIntro}><h1>A plan for creating.</h1><p>Create images, explore the public stream, and keep iterating in GALX Images.</p><Link href="/knowledge-base/getting-started" className={styles.textLink}>New to Images? Start here <ArrowRight size={16} aria-hidden="true" /></Link><div className={styles.beta}><Info size={18} aria-hidden="true" /><p>Creations are public by default and may appear in the community stream. Review the current product controls before creating anything that should not be shared publicly.</p></div></header>
-      <section className={styles.plan} aria-labelledby="plan-name"><div className={styles.planTop}><div><h2 id="plan-name">{PRO_PLAN.name}</h2><p>Images Pro · one account</p></div></div><p className={styles.price}><strong>${PRO_PLAN.monthlyPriceUsd}</strong><span>USD / month</span></p>
-        <ul className={styles.inclusions}>{PLAN_INCLUSIONS.map(([label, value]) => <li key={label}><Check size={16} aria-hidden="true" /><span>{value}</span></li>)}</ul>
-        <PlanAction className={styles.planAction} actionClassName={styles.primary} /><p className={styles.terms}>Published plan terms and fair-use boundaries apply. Private integrations are administered separately.</p>
-      </section>
-    </div>
+    <header className={styles.pricingIntro}><h1>Make more room for ideas.</h1><p>Try the full image-making loop, then choose the simple monthly plan when you’re ready to keep creating.</p><div className={styles.pricingIntroLinks}><Link href="/knowledge-base/getting-started" className={styles.textLink}>New to Images? Start here <ArrowRight size={16} aria-hidden="true" /></Link><Link href="/images" className={styles.textLink}>Open Image Studio <ArrowRight size={16} aria-hidden="true" /></Link></div><div className={styles.beta}><Info size={18} aria-hidden="true" /><p>Creations are public by default and may appear in the community stream. Review the current product controls before creating anything that should not be shared publicly.</p></div></header>
+
+    <section className={styles.pricingOptions} aria-labelledby="options-title">
+      <h2 className={styles.visuallyHidden} id="options-title">GALX Images options</h2>
+      <article className={styles.option} aria-labelledby="free-option-title">
+        <div className={styles.optionTop}><div><h2 id="free-option-title">{FREE_IMAGE_OFFER.name}</h2><p>{FREE_IMAGE_OFFER.audience}</p></div><span className={styles.optionBadge}>No card required</span></div>
+        <p className={styles.price}><strong>$0</strong><span>to start</span></p>
+        <ul className={styles.inclusions}>{FREE_PLAN_INCLUSIONS.map(([label, value]) => <li key={label}><Check size={16} aria-hidden="true" /><span><strong>{label}:</strong> {value}</span></li>)}</ul>
+        <Link href="/images" className={styles.secondary}>Start creating <ArrowRight size={17} aria-hidden="true" /></Link>
+        <p className={styles.terms}>The welcome allowance is one-time and account-bound. Your prompt remains editable when it is used.</p>
+      </article>
+
+      <article className={`${styles.option} ${styles.featuredOption}`} aria-labelledby="pro-option-title">
+        <div className={styles.optionTop}><div><h2 id="pro-option-title">{PRO_PLAN.name}</h2><p>For ongoing image creation</p></div><span className={styles.optionBadgeFeatured}>Current plan</span></div>
+        <p className={styles.price}><strong>${PRO_PLAN.monthlyPriceUsd}</strong><span>USD / month</span></p>
+        <ul className={styles.inclusions}>{PLAN_INCLUSIONS.map(([label, value]) => <li key={label}><Check size={16} aria-hidden="true" /><span><strong>{label}:</strong> {value}</span></li>)}</ul>
+        <PlanAction className={styles.planAction} actionClassName={styles.primary} /><p className={styles.terms}>Renews monthly. Cancel anytime. Published plan terms and fair-use boundaries apply.</p>
+      </article>
+    </section>
+
+    <section className={styles.section} aria-labelledby="usage-title"><div className={styles.sectionHead}><h2 id="usage-title">Simple usage, clear expectations.</h2><p>One image output keeps the offer easy to understand.</p></div><dl className={styles.pricingRules}><div><dt>Image output</dt><dd>Each generated image counts as one output.</dd></div><div><dt>Batch size</dt><dd>Choose 1–4 images per request. A four-image request uses four outputs.</dd></div><div><dt>Creation controls</dt><dd>All supported ratios and Standard/HD detail options are available in the Image Studio.</dd></div><div><dt>Sharing</dt><dd>Creations are public by default; use the available sharing controls before creating sensitive work.</dd></div></dl></section>
+
     <section className={styles.section} aria-labelledby="pricing-guides"><div className={styles.sectionHead}><h2 id="pricing-guides">Understand your plan.</h2><p>The details, before you decide.</p></div><GuideList guides={GUIDES.filter(guide => guide.path.startsWith('/pricing/'))} /></section>
     <SupportLink />
   </main>;
