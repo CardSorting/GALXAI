@@ -77,16 +77,17 @@ components:
 
 This is a scoped extension of the [GALX design system](../../../DESIGN.md), grounded in [PublicHome.tsx](PublicHome.tsx), [SitesExample.tsx](SitesExample.tsx), [PlanAction.tsx](PlanAction.tsx), and [public-home.module.css](public-home.module.css). It applies to this component family on `/`. Shared navigation, other routes, and the operator interface retain their existing design authority. The [homepage surface brief](../../../.impeccable/surfaces/src-app-page-tsx.md) owns the audience, offer, section sequence, and conversion strategy.
 
-The homepage retains the dark GALX field, galaxy artwork, and Inter voice. Generous editorial spacing, light actions, and divided content sections give this public surface a calmer density. A light illustrative Site is a distinct content object within that world, with the serif headings already used by the [Sites preview](../../lib/sites/site-preview.ts).
+The homepage retains the dark GALX field and Inter voice, with a text-first hero that introduces the creation loop before asking visitors to choose a path. Generous editorial spacing, light actions, and divided content sections give this public surface a calmer density. A light illustrative Site remains a distinct content object within that world, with the serif headings already used by the [Sites preview](../../lib/sites/site-preview.ts).
 
 **Key Characteristics:**
 
-- An established dark canvas with retained galaxy artwork.
+- An established dark canvas with a resilient, image-independent first viewport.
+- A static Image Studio preview that explains Describe → Make → Discover without simulating generation.
 - Inter page typography with serif headings confined to the illustrative Site.
 - Light primary actions and restrained amber interaction details.
 - Divided sections, native controls, and responsive stacking.
 
-The [finish review](../../../.impeccable/review/sites-home-refinement/finish-review.md) records the reviewed built state and its desktop, tablet, and mobile evidence. This extension retains the existing galaxy asset; it introduces no new visual world or generated shipping image.
+The [finish review](../../../.impeccable/review/sites-home-refinement/finish-review.md) records the reviewed built state and its desktop, tablet, and mobile evidence. The current hero introduces no production showcase image, remote artwork dependency, or generated shipping image.
 
 ## Colors
 
@@ -107,14 +108,14 @@ The palette extends the incumbent cool near-black and light-neutral family; ambe
 
 **The Restrained Accent Rule.** Preserve a light primary action and reserve amber for the small interaction and annotation roles built on this homepage.
 
-Text selection retains the established indigo treatment from the shared palette. The galaxy image supplies its own color; it is not a source of new UI color tokens.
+Text selection retains the established indigo treatment from the shared palette. The studio preview uses the existing cool inset and amber detail tokens; it does not derive UI colors from an image.
 
 ## Typography
 
 **Display and Body Font:** Inter, inherited from the shared application font stack.
 **Illustrative Preview Headings:** Georgia, serif, inherited from the existing Sites page-preview vocabulary.
 
-The page combines a large, closely tracked display with medium-weight section headings and comfortable body leading. The frontmatter records recurring section, title, body, and action roles. The hero is a local display treatment: weight 600, line height 1.04, tracking −.04em, and a desktop size of `clamp(3rem, 5vw, 3.75rem)`. Its size becomes 60px at the 1000px breakpoint, `clamp(48px, 8vw, 60px)` at 760px, and 48px at 380px.
+The page combines a large, closely tracked display with medium-weight section headings and comfortable body leading. The frontmatter records recurring section, title, body, and action roles. The hero is a local display treatment: weight 600, line height 1, tracking −.04em, and a desktop size of `clamp(3rem, 5.4vw, 4.5rem)`. Its size becomes 60px at the 1000px breakpoint, `clamp(48px, 8vw, 60px)` at 760px, and 48px at 380px. The studio preview prompt uses a slightly larger body scale to read as authored content rather than a fake form control.
 
 Section headings use the headline role; the closing heading uses a slightly looser line height (1.2). Benefit titles use the title role. The hero introduction uses 20px text, reducing to 18px at 1000px. Body copy remains 16px, with the FAQ using line height 1.8. Supporting labels range from 12px to 14px; table values are 14px. Price figures use tabular numerals.
 
@@ -124,9 +125,9 @@ The example's main heading is regular-weight Georgia at 36px with line height 1.
 
 ## Layout
 
-Major sections share a centered maximum width (1280px) and side gutters (24px). The hero pairs text and example in columns (`1.05fr 1fr`) with a 64px gap and 80px vertical padding. Divided sections pair an introduction with content (`.85fr 1.15fr`), a 100px gap, and the recurring section padding. Benefit rows use a 30px gap and matching padding across their divider. Descriptive lines have measured widths, including 35ch section introductions and 60ch benefit text.
+Major sections share a centered maximum width (1280px) and side gutters (24px). The hero pairs the value proposition and static Image Studio preview in columns (`1fr .9fr`) with a fluid 48–96px gap and 88px vertical padding. Divided sections pair an introduction with content (`.85fr 1.15fr`), a 100px gap, and the recurring section padding. Benefit rows use a 30px gap and matching padding across their divider. Descriptive lines have measured widths, including 35ch section introductions and 60ch benefit text.
 
-At 1000px, horizontal gaps tighten. At 760px, the hero and divided sections become a single column, section padding becomes 52px, and the closing action stacks beneath its text. The illustrative Site is bounded to 560px when stacked. At 380px, page gutters reduce to 20px and the example's internal content columns become one. Actions wrap while retaining their reading order.
+At 1000px, horizontal gaps tighten. At 760px, the hero and divided sections become a single column, section padding becomes 52px, the studio flow becomes a vertical list, and the closing action stacks beneath its text. The studio preview is bounded to 560px when stacked. At 380px, page gutters reduce to 20px and the example's internal content columns become one. Actions wrap while retaining their reading order.
 
 The example canvas shares one intrinsic grid area across all six authored results, so its tallest content at the current width determines the available height. Sizing copies stay `aria-hidden` and `visibility: hidden`; only the active result is visible and announced. Preserve this sizing when editing examples so the revision and entry actions remain stationary. At 380px and below, the address bar reserves a minimum height of 60px for a two-line address; the draft label does not shrink.
 
@@ -136,11 +137,9 @@ The pricing table stays a semantic two-column table at narrow widths. Its first 
 
 ## Elevation & Depth
 
-Most content rests directly on the dark page. Thin dividers and tonal differences provide separation. The retained galaxy artwork is confined to the hero background at opacity 0.5 (0.38 on mobile), with a static edge mask and dark scrim protecting text contrast. Fine elliptical orbits, an amber orbital highlight, 72 distant SVG stars and a layered star formation extend the galaxy theme. The geometry uses the existing foreground and accent families. All artwork remains decorative, with an empty alternative text, an aria-hidden wrapper and no input interception. Scroll translates the background by at most 72px and scales it by at most 6%. Fine mouse movement adds up to 12px horizontal and 8px vertical depth, with counter-motion in the orbital layer; text and controls remain stationary. Touch input never drives parallax. Orbital rotation takes 80 seconds and small star drift takes 14 seconds in each direction; both stop offscreen, when hidden, with reduced motion, or when paused. SVG rotation uses a group with a fill-box transform origin.
+Most content rests directly on the dark page. Thin dividers and tonal differences provide separation. The studio preview is the one raised object in the first viewport: a restrained inset surface, a clear authored prompt, a three-step flow, and a small status footer. Its elliptical geometry is decorative and clipped inside the preview; it never represents a generated image or progress state. Later reading sections use lightweight geometric paths and static tonal backgrounds from the existing inset palette. They connect the story visually without a bitmap, canvas, or production asset request.
 
-The cinematic focal sequence is a seeded three-arm spiral that gathers, resolves into six constellations, traces their connections, and releases over a 36-second cycle. One Canvas 2D scene draws 360 stars on larger scenes and 220 below 760px, capped at 30/24 paints per second, 1.5 device scale and approximately 1.6 million backing pixels. Bright star points use the existing light neutral and amber palette. A quiet pocket protects introductory copy. A single automatic meteor crosses every 20 seconds without a separate timer or particle queue. Pause freezes the composition; offscreen/hidden state cancels the frame callback, and resume preserves elapsed visible time. Initial reduced motion gets a static constellation view. Canvas failure retains the image and 72 SVG stars. The focal sequence never delays content or represents creation progress.
-
-The later reading sections share 72 distant stars, six constellations, two faint orbital paths and dark tonal fields from the existing inset palette. Constellation connections trace in order with reading progress, and all are complete in the static motion-off view. One amber path draws with reading progress. It connects the story visually and never represents a real generation or publication. The closing invitation contains three concentric rings that settle with scroll, clipped behind the content. These layers require no additional bitmap or canvas.
+The later reading sections share faint paths, constellations and dark tonal fields from the existing inset palette. One amber path draws with reading progress. It connects the story visually and never represents a real generation or publication. The closing invitation contains three concentric rings that settle with scroll, clipped behind the content. These layers require no additional bitmap or canvas.
 
 The illustrative Site is the local raised object, with a soft shadow (`0 20px 48px rgba(0, 0, 0, 0.4)`). The enclosing address bar and light page establish its boundary. This does not create a new shadow system for other homepage sections.
 
@@ -154,9 +153,7 @@ Primary actions and starter controls use the modest recurring radii recorded in 
 
 Primary and secondary actions share a minimum height (48px), medium-size type, and a 12px content gap. The light primary action has a neutral hover fill. The secondary action remains text with an underline-like bottom border that brightens on hover. Links retain their native destinations; the visual style does not imply a form submission.
 
-Interactive links, buttons, and disclosure summaries inside the homepage use an amber focus-visible outline (3px) with a 5px offset. Content controls reserve 84px of scroll space for the sticky bar; controls inside the bar use zero scroll margin. Touch feedback uses the amber family and `touch-action: manipulation` preserves normal pan/zoom behavior. Color-state transitions last 160ms; spatial feedback uses `cubic-bezier(0.16, 1, 0.3, 1)`. Primary actions compress slightly on press, and arrows advance two pixels on fine-pointer hover. Reduced-motion preferences and the per-tab pause control remove transitions, animation and smooth scrolling while retaining immediate selected, hover, focus and disclosure states. Device reduced motion takes precedence and updates live. Synchronized pause controls sit above the hero and in the sticky navigation, use 44px targets, and do not move the primary actions or reset reading position.
-
-The hero's optional “Send a star” button shares the small control row with pause. It sends a decorative shooting star across the sky over 1.1 seconds, equally accessible by mouse, touch or keyboard. Its pale trail stays behind content, emits no sound and makes no product claim. A second activation replaces the first effect. The button is disabled while motion is off; pause, hidden/offscreen state and unmount cancel the effect. No particles accumulate or autoplay shooting stars are introduced.
+Interactive links, buttons, and disclosure summaries inside the homepage use an amber focus-visible outline (3px) with a 5px offset. Content controls reserve 84px of scroll space for the sticky bar; controls inside the bar use zero scroll margin. Touch feedback uses the amber family and `touch-action: manipulation` preserves normal pan/zoom behavior. Color-state transitions last 160ms; spatial feedback uses `cubic-bezier(0.16, 1, 0.3, 1)`. Primary actions compress slightly on press, and arrows advance two pixels on fine-pointer hover. Reduced-motion preferences and the per-tab pause control remove transitions, animation and smooth scrolling while retaining immediate selected, hover, focus and disclosure states. Device reduced motion takes precedence and updates live. The single pause control lives in the sticky navigation, uses a 44px target, and never moves the primary actions or resets reading position.
 
 ### Illustrative Site and starter controls
 
@@ -180,7 +177,7 @@ Six native `details` and `summary` pairs supply the open state and keyboard beha
 
 ### Reading motion and local navigation
 
-Below the hero, an opaque sticky section navigation links to Possibilities, Pricing and Questions. Its minimum height is 60px (56px on mobile), with a small amber underline for the current section and native anchor destinations. Section targets reserve 84px above them. A synchronized, named pause/resume button remains reachable in the bar, and the Sites action is available there on desktop. The shared product header remains separate and unchanged. On mobile, all three section links and the 44px motion control fit one row; the additional Sites action is omitted. The hero's mobile top padding is 68px to accommodate the two galaxy controls.
+Below the hero, an opaque sticky section navigation links to Possibilities, Pricing and Questions. Its minimum height is 60px (56px on mobile), with a small amber underline for the current section and native anchor destinations. Section targets reserve 84px above them. A synchronized, named pause/resume button remains reachable in the bar, and the Image Studio action is available there on desktop. The shared product header remains separate and unchanged. On mobile, all three section links and the 44px motion control fit one row; the additional Image Studio action is omitted. The hero's mobile top padding is 68px for a calm first viewport.
 
 The benefit rows share a thin connected track with amber nodes. The track and constellation paths ease between scroll samples over 240ms; closing orbital rings use 300ms. This connects describing, revising, sharing and the next section without changing native scrolling.
 
@@ -194,7 +191,8 @@ The homepage uses the existing navigation and footer components. Their local pro
 
 ### Do:
 
-- **Do** preserve the dark GALX ground, retained galaxy artwork, and Inter page voice.
+- **Do** preserve the dark GALX ground, image-independent hero, and Inter page voice.
+- **Do** make the first viewport explain the creation loop before asking visitors to choose create or explore.
 - **Do** keep the light illustrative Site distinct from GALX interface typography.
 - **Do** use light primary actions, thin dividers, and small amber interaction details within this homepage.
 - **Do** preserve native button, table, link, and disclosure semantics with visible keyboard focus.
@@ -205,6 +203,7 @@ The homepage uses the existing navigation and footer components. Their local pro
 
 - **Don't** promote the illustrative Site's Georgia headings into GALX display or navigation styles.
 - **Don't** turn this local homepage treatment into a replacement for the shared operator design system.
+- **Don't** use remote showcase images, fake editor controls, or decorative states that imply a completed generation.
 - **Don't** replace the illustrative label or pressed-state semantics with appearance alone.
 - **Don't** collapse the pricing header gutter when labels wrap on narrow screens.
 - **Don't** expose hidden sizing copies to assistive technology or silently replace an unsent draft.

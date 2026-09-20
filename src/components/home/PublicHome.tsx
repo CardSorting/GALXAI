@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import {
   ArrowRight,
@@ -23,7 +22,7 @@ import { PRO_PLAN } from '@/lib/billing/pro-plan';
 import { PublicImageMasonryStream } from '@/components/images/PublicImageMasonryStream';
 import { PlanAction } from './PlanAction';
 import { HomeMotion } from './HomeMotion';
-import { GalaxyScene, GalaxyStory } from './GalaxyScene';
+import { GalaxyStory } from './GalaxyScene';
 import styles from './public-home.module.css';
 
 export function PublicHome() {
@@ -31,7 +30,6 @@ export function PublicHome() {
     <HomeMotion
       hero={
         <section className={styles.hero} aria-labelledby="images-title" data-home-hero>
-          <GalaxyScene />
           <div className={styles.heroCopy}>
             <h1 id="images-title">Turn a thought into something worth sharing.</h1>
             <p className={styles.lede}>Describe an idea, make an image, and discover what the community creates next.</p>
@@ -47,22 +45,38 @@ export function PublicHome() {
             <p className={styles.heroNote}>Open the Image Studio when you’re ready. No setup or creative brief required.</p>
           </div>
 
-          <div className={styles.heroGallery} aria-label="A selection of public GALX creations">
-            <div className={styles.galleryChrome}><span><Sparkles size={13} aria-hidden="true" /> GALX Images</span><span>Public creations</span></div>
-            <div className={styles.galleryGrid}>
-              <Link href="/explore" className={styles.galleryFeature} aria-label="Explore the cinematic sky creation">
-                <Image src="/images/showcase/cinematic_sky_16_9.jpg" alt="A cinematic sky over a quiet landscape" fill priority unoptimized sizes="(max-width: 760px) 100vw, 48vw" />
-                <span className={styles.galleryCaption}><strong>Quiet light, wide open.</strong><span>Explore creation <ArrowUpRight size={14} aria-hidden="true" /></span></span>
-              </Link>
-              <Link href="/explore" className={styles.galleryTile} aria-label="Explore the cafe cat creation">
-                <Image src="/images/showcase/cafe_cat.jpg" alt="A cat in a warm cafe" fill unoptimized sizes="(max-width: 760px) 45vw, 20vw" />
-              </Link>
-              <Link href="/explore" className={styles.galleryTile} aria-label="Explore the cyber akira creation">
-                <Image src="/images/showcase/cyber_akira.jpg" alt="A neon cyberpunk portrait" fill unoptimized sizes="(max-width: 760px) 45vw, 20vw" />
-              </Link>
+          <aside className={styles.studioPreview} aria-label="Image Studio preview">
+            <div className={styles.studioBar}>
+              <div className={styles.studioBrand}><Sparkles size={15} aria-hidden="true" /><span>Image Studio</span></div>
+              <span className={styles.studioStatus}><span aria-hidden="true" />Ready when you are</span>
             </div>
-            <div className={styles.galleryFooter}><span>Bring an idea</span><span>Powered by GALX Nova</span><span>Explore more <ArrowUpRight size={13} aria-hidden="true" /></span></div>
-          </div>
+            <div className={styles.studioCanvas}>
+              <div className={styles.studioPrompt}>
+                <span className={styles.studioPromptLabel}>Describe an idea</span>
+                <p>“A quiet street after rain, warm windows, and a sky full of stars.”</p>
+              </div>
+              <div className={styles.studioFlow} role="list" aria-label="Creation flow">
+                <div className={styles.studioFlowStep} role="listitem">
+                  <span className={styles.studioFlowMarker}><Wand2 size={15} aria-hidden="true" /></span>
+                  <span><strong>Describe</strong><small>Start with a thought</small></span>
+                </div>
+                <span className={styles.studioFlowLine} aria-hidden="true" />
+                <div className={styles.studioFlowStep} role="listitem">
+                  <span className={styles.studioFlowMarker}><Sparkles size={15} aria-hidden="true" /></span>
+                  <span><strong>Make</strong><small>Shape the direction</small></span>
+                </div>
+                <span className={styles.studioFlowLine} aria-hidden="true" />
+                <div className={styles.studioFlowStep} role="listitem">
+                  <span className={styles.studioFlowMarker}><Compass size={15} aria-hidden="true" /></span>
+                  <span><strong>Discover</strong><small>Find what’s next</small></span>
+                </div>
+              </div>
+            </div>
+            <div className={styles.studioFooter}>
+              <span>No setup required</span>
+              <span>Make, explore, repeat</span>
+            </div>
+          </aside>
         </section>
       }
     >

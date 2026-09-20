@@ -1,6 +1,4 @@
-import Image from 'next/image';
 import { type CSSProperties } from 'react';
-import { GalaxyFormation } from './GalaxyFormation';
 import styles from './public-home.module.css';
 
 const distantStars = Array.from({ length: 72 }, (_, index) => [
@@ -15,34 +13,6 @@ const storyConstellations = [
   [[75, 1750], [160, 1810], [215, 1760], [295, 1840]],
   [[905, 2010], [1010, 1960], [1090, 2040], [1175, 1980]],
 ];
-
-/** Decorative geometry, deliberately separate from the illustrative product result. */
-export function GalaxyScene() {
-  return <div className={styles.sky} aria-hidden="true">
-    <div className={styles.skyDepth} data-home-sky>
-      <div className={styles.skyParallax} data-home-parallax>
-      <Image src="/brand/galaxy-hero-banner.jpg" alt="" fill priority sizes="(max-width: 800px) 100vw, 1280px" />
-      <GalaxyFormation />
-      <svg className={styles.orbits} viewBox="0 0 1280 860" fill="none" focusable="false">
-        <g className={styles.orbitPlane}>
-          <ellipse cx="850" cy="420" rx="510" ry="280" transform="rotate(-28 850 420)" />
-          <ellipse cx="850" cy="420" rx="570" ry="345" transform="rotate(-28 850 420)" />
-          <ellipse cx="850" cy="420" rx="630" ry="410" transform="rotate(-28 850 420)" />
-          <ellipse className={styles.orbitHighlight} cx="850" cy="420" rx="570" ry="345" transform="rotate(-28 850 420)" pathLength="100" />
-        </g>
-        <g className={styles.constellation}>
-          <path d="M74 245 165 183 296 216M990 716 1104 660 1208 701" />
-          {[[74,245],[165,183],[296,216],[990,716],[1104,660],[1208,701]].map(([cx,cy]) => <circle key={`${cx}-${cy}`} cx={cx} cy={cy} r="2.5" />)}
-        </g>
-        <g className={styles.stars}>
-          {distantStars.map(([cx,cy], index) => <circle key={index} cx={cx} cy={cy} r={index % 9 === 0 ? 1.7 : .7} opacity={index % 3 === 0 ? .8 : .4} />)}
-        </g>
-      </svg>
-      </div>
-    </div>
-    <span className={styles.shootingStar} data-home-comet />
-  </div>;
-}
 
 /** A quiet, continuous star map connects the reading sections without another bitmap. */
 export function GalaxyStory() {

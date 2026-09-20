@@ -1,0 +1,26 @@
+{
+  "reviewed_at": "2026-09-20",
+  "surface": "Public homepage hero",
+  "scope": "Replacement of the unreachable showcase-image hero with a resilient creation entry point, including copy hierarchy, create/explore destinations, responsive behavior, motion boundaries, and public-information review.",
+  "decisions": [
+    "Replaced the image-dependent showcase with a text-first promise and two native paths: Start creating -> /images and Explore creations -> /explore.",
+    "Added a static Image Studio preview that explains Describe, Make, and Discover without fake editor controls, remote artwork, or simulated generation progress.",
+    "Removed hero-only galaxy image, canvas, parallax, shooting-star, and control machinery; retained the lower-page story geometry and sticky pause control for the sections that still use motion.",
+    "Stacked the hero and creation-flow preview below 760px, with a vertical flow list and wrapped actions so copy and touch targets remain readable at narrow widths."
+  ],
+  "quality_checks": {
+    "typecheck": "npx tsc --noEmit passed",
+    "lint": "npm run lint passed with zero errors and eight pre-existing warnings outside the changed hero files",
+    "production_build": "npm run build passed and generated 163 static pages",
+    "production_html": "Local production smoke test returned 200; the new heading, supporting copy, Image Studio preview and no-setup note were present; stale showcase labels and /images/showcase asset paths were absent from the root hero output",
+    "responsive": "Source review confirmed a two-column desktop hero, single-column layout at 760px, and a vertical creation-flow list on narrow screens; no fixed-width hero asset remains",
+    "accessibility": "Native links retain visible focus styles and 48px minimum action heights; the creation flow exposes list semantics and the hero keeps one level-one heading",
+    "public_boundary": "Hero copy describes customer capabilities only and does not expose provider, topology, credential, routing, or operational diagnostics",
+    "detector": "Targeted impeccable detector completed; remaining findings are advisory design-system color/font/radius values in the existing homepage stylesheet, with no blocking layout or structure finding acted on in this pass"
+  },
+  "limits": [
+    "No live deployment or hosted-site acceptance is implied.",
+    "Browser screenshot capture was unavailable in this environment; production HTML, TypeScript, lint, build, and source-level responsive checks were used instead.",
+    "The legacy scripts/verify-homepage-ui.mjs fixture still contains historical Sites and galaxy assertions and was not treated as an acceptance gate for this replacement."
+  ]
+}
