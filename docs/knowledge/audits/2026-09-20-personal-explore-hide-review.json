@@ -1,0 +1,50 @@
+{
+  "reviewed_at": "2026-09-20T00:00:00.000000+00:00",
+  "reviewer": "Codex",
+  "scope": "Signed-in, account-scoped Explore hide preference and Star profile independence. Local implementation review and migration rehearsal; no production mutation or deployment claimed.",
+  "decision": "Hide is personalization, not community moderation. Anonymous visitors and developer API keys cannot write a preference. A Star profile remains a complete public gallery even when a viewer hides one of its creations from Explore.",
+  "implementation": {
+    "server": [
+      "One allowlisted mutation helper verifies same-origin/session intent, resolves the authenticated account server-side, rejects anonymous and developer-key callers, and never accepts a caller-supplied viewer identity.",
+      "Explore feed reads apply the private preference only for a verified session and use private no-store caching; Star profile reads intentionally skip it.",
+      "Hide and undo are idempotent, reversible, and return generic public errors without database or moderation details."
+    ],
+    "database": [
+      "Migration 20260920120000 adds forced-RLS private preference and per-account abuse-ledger tables.",
+      "The active list is capped at 500; successful new hides use a 30-per-ten-minute and 200-per-day ledger that survives undo; duplicate hides do not consume allowance.",
+      "The historical anonymous/global function is execution-revoked and browser roles cannot read or write moderation records.",
+      "Migration 20260920123000 explicitly revokes inherited service-role ACLs before granting only the operations required by the private function."
+    ],
+    "ui": [
+      "Hide is labeled for the current viewer, sign-in is requested before mutation, optimistic removal has undo, and failed writes restore the card.",
+      "Touch targets are at least 44px and the hide affordance is available from keyboard focus as well as pointer hover."
+    ]
+  },
+  "checks": {
+    "migration_dry_run": "passed for 20260920120000 and 20260920123000",
+    "targeted_adversarial_tests": "passed",
+    "image_security_suite": "passed",
+    "typescript": "passed",
+    "targeted_lint": "passed with existing image-component warnings only",
+    "supabase_advisors": "reported 3 pre-existing errors and 87 pre-existing warnings; no finding named either new explore-hide table or function",
+    "detector": "91 pre-existing design-system color/radius findings in masonry-stream.css; no new detector suppression added",
+    "remote_migration": "20260920120000 and 20260920123000 applied; post-apply privilege readback verified forced RLS and narrow browser/function grants"
+  },
+  "limits": [
+    "No authenticated browser session or production deployment was exercised in this local pass.",
+    "The migration dry run validates SQL in a rolled-back transaction; post-apply privilege and live Star-profile acceptance remain release checks.",
+    "The detector findings belong to the existing image surface and were left scoped rather than changing unrelated visual tokens."
+  ],
+  "sources": [
+    "src/app/api/images/feed/route.ts",
+    "src/app/api/images/moderate/route.ts",
+    "src/lib/images/explore-hide.ts",
+    "src/components/images/PublicImageMasonryStream.tsx",
+    "supabase/migrations/20260920120000_personal_explore_hide_controls.sql",
+    "supabase/rollbacks/20260920120000_personal_explore_hide_controls.down.sql",
+    "supabase/migrations/20260920123000_personal_explore_hide_privilege_repair.sql",
+    "supabase/rollbacks/20260920123000_personal_explore_hide_privilege_repair.down.sql",
+    "docs/maintainers/image-public-boundary.md",
+    "docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md"
+  ]
+}

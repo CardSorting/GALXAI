@@ -1,11 +1,11 @@
 {
   "knowledge": {
-    "reviewer": "Product/API maintainer",
-    "note": "Reviewed the documentation policy, change workflow, registry mapping, current image/Star guides and retained dated moderation evidence; current navigation and public-boundary guidance remains capability-only.",
+    "reviewer": "Codex",
+    "note": "Final semantic audit after live privilege repair and advisor scan: registry, evidence, package test registration, migration/runbook references and stale-review boundaries rechecked. Unrelated Sites and billing reviews remain intentionally stale.",
     "reviewed_at": "2026-09-20",
-    "review_by": "2026-10-20",
+    "review_by": "2026-09-27",
     "evidence": {
-      "docs/knowledge/audits/2026-09-20-star-profile-explore-visibility-review.json": "b09aee803ec635b8c096ed457479559f8ccc3bf0cf8bc9497f2f14dd3bd62fde"
+      "docs/knowledge/audits/2026-09-20-personal-explore-hide-review.json": "9aab9544afed0989dd2a69f00bd391a77218455d21e4357ca04ff86ec1872bab"
     },
     "files": {
       ".github/CODEOWNERS": "ef2f416d15f027dc8f197ad844289c9a44c8e843d3214d1590a3a380e939d13f",
@@ -26,7 +26,7 @@
       "docs/how-to/change-with-documentation.md": "abcf6bfb2f0aadcf8cfc2fdae18ac8f3f84565f127c34f7453d50e7283006e40",
       "docs/knowledge/DESIGN_RATIONALE.md": "edd3cf9b49ed794fbe8bf14448fd0c56cb4d8df832bab81cdf07e9ea2e2204a1",
       "docs/knowledge/README.md": "5ad219aeee44a9c065db2ca69e5a6498966fed42e2d8c74773dbc055d0220931",
-      "docs/knowledge/registry.json": "b689fde2caaee3b2ca8ebe52dad2e654ddac6bef6f7b5f6f476d45cc79f1d91a",
+      "docs/knowledge/registry.json": "cb72eda9be9183def3d2e4b30e35df3bfdd28430af8c7f8c2aa1cb01a589c5c7",
       "docs/knowledge/templates/adr.md": "28773b3cbdb53ad34f08d0362e87b6dba24b6fd76ddb6c85db8ad63d99ad1331",
       "docs/knowledge/templates/runbook.md": "19679a7eb8c1a3aafd87852fa93817e7bf9ef4696772c8deb1617366c290abc1",
       "docs/maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md": "b7df75535611c14aabe599764a6f6c2a4f0f1461d068929602c68e39d8ce850d",
@@ -43,7 +43,7 @@
       "docs/runbooks/weekly-knowledge-audit.md": "ade4fc2133306e1b544d8783f647bc4c5b8a85e3a89ce769d36f586a91c36169",
       "docs/tutorials/README.md": "7cc84f00412108e1c8ec84ef127b15027b606bd16c2dc290f6efc607b9ca5268",
       "docs/tutorials/first-change.md": "06b7c9501cfe62893978e1da6556d6d4fc0d88f4e36b484d05dad4ad72d9fd60",
-      "package.json": "97c693394dca15b8064c7e1608ce82b7122a5482fd26e40a35eefc9449a5bac3",
+      "package.json": "4cda8a18113cb752cda05cc19cc55b98ec497fb16f83fda387e97180f58a7e02",
       "scripts/docs-kb.py": "57642bcce6edcdec6b14dc285e973c1c7ba43d9b8908903826befcba6e992d88",
       "scripts/test-docs-kb.py": "83aa914e66cc04d866fd4c77554760748f8e1d07378326c49ac1738f12851856",
       "scripts/test-post-mortem.py": "c4dbb8c575760a2110eb1ad01575fb55b2f96da28da2bd57101dc630adaa464f",
@@ -52,18 +52,18 @@
     }
   },
   "images": {
-    "reviewer": "Product/API maintainer",
-    "note": "Reviewed the complete image public-boundary, library-scale, Star profile, readable-URL, queue, recovery and quota guidance against the Explore-only moderation and complete Star profile projections; checked DTO, artifact, pagination and local suppression contracts.",
+    "reviewer": "codex",
+    "note": "Reviewed private signed-in Explore hide behavior, account-switch isolation, Star profile completeness, abuse controls, and final feed query formatting after verification.",
     "reviewed_at": "2026-09-20",
-    "review_by": "2026-10-20",
+    "review_by": "2026-09-20",
     "evidence": {
-      "docs/knowledge/audits/2026-09-20-star-profile-explore-visibility-review.json": "b09aee803ec635b8c096ed457479559f8ccc3bf0cf8bc9497f2f14dd3bd62fde"
+      "docs/knowledge/audits/2026-09-20-personal-explore-hide-review.json": "9aab9544afed0989dd2a69f00bd391a77218455d21e4357ca04ff86ec1872bab"
     },
     "files": {
       "docs/QUEUE_SPECIFICATION.md": "301d293b23327bf065202322e0a7554cf581740f28d0d5ab9fb827e73beed6ba",
       "docs/maintainers/FREE_GENERATION_QUOTA.md": "239c0c173e05cbba23f74818e712b1ad217e2e0d3a1c69f86b0de8504f06f42b",
       "docs/maintainers/image-library-scale.md": "064bef895f17a587811da2a5df8a4b16295664ee2f348576c996f5aa5a901c7a",
-      "docs/maintainers/image-public-boundary.md": "17887c5d255caa16cb32b8c92c21177aba0e9d015ee2b415764f778af7662061",
+      "docs/maintainers/image-public-boundary.md": "9d7cf3299d8fd6dea24b6d4644ae60356b3760b7e588204d3411f5681341b93f",
       "docs/maintainers/readable-urls.md": "ffc42ff362cf57da1d0f308e6385a667d04fe22878cb1012e6da8773134a7ce3",
       "docs/reference/stars.md": "13efae901355793f968fd458c556064451dd5b4f1e9d2c6519461622c2e5d3d2",
       "post-mortem/runbooks/image-generation.md": "cafd2ecd11bd89d4fce8a48e646980d32dcc021fddcc0b9f697ccd9fd0dd8532",
@@ -74,6 +74,7 @@
       "scripts/test-free-generation-quota-db.ts": "26d3381b0a90285cce6d954b954601fb7a5a4596998389ac7091cfb7b49d9b04",
       "scripts/test-free-generation-quota.ts": "cbf7034c6f10ecfcf6176718f693a2636af775899e05552b5d7c53c58f142fb3",
       "scripts/test-image-availability.ts": "d136a7a30439794c180fe1887f8ab158387763ebb1c6086aa9f758f7f80f22b9",
+      "scripts/test-image-explore-hide.ts": "60f679a61bf6133c08b92725440598ea43d7ee21617c5390ece37cd425d54d09",
       "scripts/test-image-library-api.ts": "e29b96a2542534a2aad54fc5ecb6481829a238fdf78b55f900dc17824e9e479c",
       "scripts/test-image-library-http.ts": "f889bc632c6ccd33aa5f1f40f321ce75bd2167e7758fdde602db230f5d524f84",
       "scripts/test-image-library-scale-db.ts": "131e2decca645d22522ffbd90170a3e47f81b6db068d93f6429d3c5d30ee02b7",
@@ -91,11 +92,11 @@
       "src/app/api/billing/generation-quota/route.ts": "9886f0b6132866ea12dcd80ba3301b9e6ccb8bc9eeac9ae3aca9a2ef1d64621f",
       "src/app/api/community/participants/[handle]/route.ts": "cf54a0ea494db4670b4bb20f1d56a935a4d82df1d06b2887279047283056b0be",
       "src/app/api/images/availability/route.ts": "266d821c25d12990a45aac497bdb5051dfa75110004e90a73bd9cad61c860624",
-      "src/app/api/images/feed/route.ts": "0c72940f87285544df88c9ee36e89e4f5f51b44eb403ed28e9d5334fbd77eec1",
+      "src/app/api/images/feed/route.ts": "81593afa9c4aaff5813728ac2cb45ff7ddeec98e55c47abd19d109f8c4e78586",
       "src/app/api/images/library/[assetId]/route.ts": "521d291c6b50e09c1a6eea9c0040912b5c96bc742105b18047b748d67b05a7a8",
       "src/app/api/images/library/batch/route.ts": "d09d148a3e7041e9d854967617894aaca8a80eaf4c88cf60590c7b31dd430e38",
       "src/app/api/images/library/route.ts": "954b062d5ee0725326b563508812b8b44020c534252901d672df3a828db3a829",
-      "src/app/api/images/moderate/route.ts": "f71c99cfb766b59d0a1eba24fac96fedaa98688eb2c78ba6d7b7f90c8187ff10",
+      "src/app/api/images/moderate/route.ts": "5be5508002e9fdf952f77388a73fad7caa92b8cbc6c3c792aed657d2c2ab3ea2",
       "src/app/explore/page.tsx": "a2fb11c9edea530ed23afad8fafc229ec2c04cd72476c82322dc17842f086412",
       "src/app/images/error.tsx": "0b2a04890cd8de8ea6adf8eb58541aae5409033c49b28d90a51cb386af1d1097",
       "src/app/images/favorites/page.tsx": "e21af30f53a56aac76adf07efdd72563ad05bda28ea5084abccd67dd11dd47f1",
@@ -120,9 +121,9 @@
       "src/components/dashboard/generation-gate.module.css": "efd8526722ca0ad42aec319a56bc2ea7e638185f30c35cea9b445dfb69bba4a4",
       "src/components/images/GenerationCanvas.tsx": "4341702fc0842c20a7d860b8241a4bf55780919b73254f54915a61cd09269473",
       "src/components/images/ImageStudio.tsx": "25cad85bb37b1ddaba876552e8dfeb592df31d55ebcb6a6faa96bc4186e9a5c3",
-      "src/components/images/PublicImageMasonryStream.tsx": "c9af33eaccfce8e0a12f36aa1225a6b7981588dde1a7d1e5840182a0d24b6d9e",
+      "src/components/images/PublicImageMasonryStream.tsx": "e77f97aeefe02ecdad9fdfd95143749a3cdf1be1245fb0e96033521c406f1317",
       "src/components/images/StudioArtwork.tsx": "427128b4f3ea300222b74fdfe132564237030507f1d40c20093c89ef52e26229",
-      "src/components/images/masonry-stream.css": "29cc5b38fa3fdbc3c0030f7b78301d515ddef85721d31d488d76c8b8d51b7499",
+      "src/components/images/masonry-stream.css": "56b4202051dca94057cbf46805c09ee4ec185d473b5ca3c36c66a1f74d8ca6dc",
       "src/components/images/studio-contract.ts": "b5803cbdc39ad60d71202a73b5a36228101a730fff272e51e54a6d4f96e9f83c",
       "src/components/images/studio.css": "8fdf2a1c8764a55dd4a82278a428a6c6dc506f678360d447866ce815305979e9",
       "src/components/images/use-image-studio.ts": "0b948235a590eed6cf7db59a447f81ccf025514c2db9e0708eb86b60c624dec8",
@@ -140,6 +141,7 @@
       "src/lib/community/participant-handle.ts": "d69335254a0944f19abf580b928080c55795d9d20d7f12be687bfd5626663355",
       "src/lib/community/public-participants.ts": "11701ec283ceddab94c30a7ddf15009c3d97034478eb2ca54e854fb01468a1d9",
       "src/lib/images/availability.ts": "18fa43b1b6a4f7979203820ddf65242d2940127588ddb68276086602ee648aaa",
+      "src/lib/images/explore-hide.ts": "42ae9634a13b8e5bf0b4abbb3acf21bd21be99d0d455fb7381879f2bcd1c1823",
       "src/lib/images/library-cursor.ts": "553df33b2925b9814b9ff9c42f7f1630616136a5432a8b529d0e27329c2a334a",
       "src/lib/images/navigation.ts": "827b7f91ef06422452aa03f66721e866be9755399c4514393230ce4fdcfc8e5c",
       "src/lib/images/read-image-artifact.ts": "af490bc9ccfa13d3e341574936f0929725ff2d1c9f042f53a48e0a45e8e7cb8b",
@@ -631,12 +633,12 @@
     }
   },
   "database": {
-    "reviewer": "Database operator",
-    "note": "Reviewed the migration, rollback, RLS/grant boundary, generated row types, database operations and account/actor authority guidance; verified guarded legacy repair and linked migration history.",
+    "reviewer": "Codex",
+    "note": "Final semantic audit after live privilege repair and advisor scan: both migration pairs, generated types, runbook and role readback rechecked. Forced RLS and exact service grants are verified; browser roles and old global function are denied. Advisor errors/warnings are pre-existing and name no new object.",
     "reviewed_at": "2026-09-20",
-    "review_by": "2026-10-20",
+    "review_by": "2026-09-27",
     "evidence": {
-      "docs/knowledge/audits/2026-09-20-star-profile-explore-visibility-review.json": "b09aee803ec635b8c096ed457479559f8ccc3bf0cf8bc9497f2f14dd3bd62fde"
+      "docs/knowledge/audits/2026-09-20-personal-explore-hide-review.json": "9aab9544afed0989dd2a69f00bd391a77218455d21e4357ca04ff86ec1872bab"
     },
     "files": {
       "deploy/relay-execution/supabase/migrations/20260915082628_relay_execution.sql": "fc61d7c30bdd57706ffb4212788741302760722e7285c25c9b4cb93d629b137e",
@@ -647,7 +649,7 @@
       "docs/maintainers/ACCOUNT_PROFILE_SCHEMA.md": "8de8c299d490dd41e4804c0c57213100b5a1472369b925ddd23a93027b287d0c",
       "docs/maintainers/FREE_GENERATION_QUOTA.md": "239c0c173e05cbba23f74818e712b1ad217e2e0d3a1c69f86b0de8504f06f42b",
       "docs/maintainers/MULTI_TENANT_SHARD_AND_KEY_ROTATION.md": "47c4456689c07175b566a9813ff75e9b707a124c44082b7b602dad059b769a52",
-      "docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md": "0ff0862466a4ad5ac1178ddefd0a8eb37b0caf40b883c1318cabc2ce50dd64df",
+      "docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md": "9301ad6b8db728699c6a419d941d6f31b69d0505e3f1659c67a79192c228cdf6",
       "docs/reference/relay-account-management.md": "e9dfef0b18fd13fee182b13dda0619873391a79054fee560825911689f521468",
       "scripts/apply-manual-desktop-enrollment.ts": "97f5ef7377b6eaca4760fe0e2a02f5f611bdcffb2cd46800313b710665bc4975",
       "scripts/check-relay-account-foundation.ts": "e9beb3e6f400269583c64ff265801778f25b04f6a3021ffe9734f41986014c12",
@@ -715,7 +717,7 @@
       "src/lib/supabase/repositories/TelemetryRepository.ts": "1887a04aa51424e44d6ac9d499fc24248edd2aa9c64c559cf1f307773dd252e5",
       "src/lib/supabase/repositories/WalletRepository.ts": "bfaddb9365d1fe93454df2fca44962f9fdd2aa3e30464c10089083bf913791ed",
       "src/lib/supabase/repositories/WorkspaceRepository.ts": "b9f6d1d09610760b172c6d1981a06e6ab97d4f5a9a58139377ade89df56a4ed8",
-      "src/lib/supabase/types.ts": "4ad6da9915ab48aa486de80796c3029d043928fc10db63bb33b4ac60bf7b64da",
+      "src/lib/supabase/types.ts": "a187a12c89a4ecbca0f43dc759b2964b21e5006be27deea6730e0f6264bdd520",
       "supabase/migrations/20260822000001_galxai_schema_core.sql": "084520c8cb3ab4e057ec788ea90605bb43e1373a28230e40696271f6a8476f77",
       "supabase/migrations/20260822000002_galxai_schema_apex.sql": "62b4fdc606104700d14eb3b80a7a7063a5152db9ed1afefe63a72315d586f539",
       "supabase/migrations/20260822000003_galxai_user_sessions_auth.sql": "ab2ec033c41bb147aa476acceb4d5dca3991f83f017a7cc41fddd01c6b8e75c4",
@@ -863,6 +865,8 @@
       "supabase/migrations/20260920064323_remove_public_developer_return_path.sql": "fc72bf37284df3f040bdd6bf5264fba67d39842b9e3891b03b509dd317e1d0fa",
       "supabase/migrations/20260920072707_star_profile_explore_visibility_boundary.sql": "becf657e175192edc917d96df2b2797f5dc836dc19f5a16ae6cb667550d8c03c",
       "supabase/migrations/20260920075103_restore_legacy_star_profile_visibility.sql": "2058f1d0a36f806fd7b2a4f050a7b65e8242bb2fa0ec2ceb52ee75142babb621",
+      "supabase/migrations/20260920120000_personal_explore_hide_controls.sql": "4f12f106facffe040f195983ec237b40507808bdbad8b90a75c0ca7950023679",
+      "supabase/migrations/20260920123000_personal_explore_hide_privilege_repair.sql": "4c58ac84e73db4a60f66c8ef4dc5d75e6cf75e43fb29488f103a8ffa174a9c61",
       "supabase/rollbacks/20260822000001_galxai_schema_core.down.sql": "d1267f3f89a7a0af12716a70167f615be1e904bf933e348a1173305cd5f2fe83",
       "supabase/rollbacks/20260822000002_galxai_schema_apex.down.sql": "df36655d564c6d6557d4461294ed2a502ad57adf799037c00a68481b809ffed9",
       "supabase/rollbacks/20260822000003_galxai_user_sessions_auth.down.sql": "4f3012db038b48387290b8d64638fe7aded774d8bdde88cfe683f01f1988adbc",
@@ -1009,7 +1013,9 @@
       "supabase/rollbacks/20260920041311_private_profile_settings_projection.down.sql": "22c9b500264721eb8aecab9a150787a19688625b5e2f36bd0a9cf5e4e1a901ec",
       "supabase/rollbacks/20260920064323_remove_public_developer_return_path.down.sql": "9ee793215ede8a08489b291e5aaa3e99048487c11a2ce8b2ed0bad71b942b8af",
       "supabase/rollbacks/20260920072707_star_profile_explore_visibility_boundary.down.sql": "c41b86a4544c25f23c82dcb18a31fa03d79255edce4d1fe2d1288e83ee68525e",
-      "supabase/rollbacks/20260920075103_restore_legacy_star_profile_visibility.down.sql": "51fcf830feecd3ffba34440d69c630b497e61af4b52b4a37f3fd802a16d48091"
+      "supabase/rollbacks/20260920075103_restore_legacy_star_profile_visibility.down.sql": "51fcf830feecd3ffba34440d69c630b497e61af4b52b4a37f3fd802a16d48091",
+      "supabase/rollbacks/20260920120000_personal_explore_hide_controls.down.sql": "52b6f77027fa4a49450489f706178e5a5385769f6fec77caf10d157f6ce99b8a",
+      "supabase/rollbacks/20260920123000_personal_explore_hide_privilege_repair.down.sql": "32453ab6460872950b7e1382c7f19bc4abac409abfc6c4138333b76ecb576712"
     }
   },
   "delivery": {

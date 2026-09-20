@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { executePostgresQuery } from '@/lib/db/postgres';
 import { GalxCryptoVault } from '@/core/vault/GalxCryptoVault';
+import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
+import { handleExploreHideMutation } from '@/lib/images/explore-hide';
 import type { ParticipantKind } from '@/lib/community/participant-handle';
 import {
   normalizePublicParticipantHandle,
@@ -60,6 +62,21 @@ export async function GET(req: NextRequest) {
     ? 'public.community_star_profile_creations'
     : 'public.community_creations_feed';
 
+  // Explore hides are private viewer preferences. A Star profile intentionally
+  // skips this lookup so the profile remains a complete public gallery.
+  let viewerUserId: string | null = null;
+  if (!authorHandle) {
+    try {
+      const auth = await GalxAuthEngine.getInstance().resolveAuthIdentity(req);
+      if (auth.authenticated && auth.authType === 'session_token' && auth.userId && auth.userId !== 'anonymous_developer') {
+        viewerUserId = auth.userId;
+      }
+    } catch {
+      // Public discovery remains available when optional session verification is
+      // unavailable; it simply cannot apply a private preference for this read.
+    }
+  }
+
   let items: PublicFeedItem[] = [];
   let nextCursor: string | null = null;
 
@@ -96,6 +113,16 @@ export async function GET(req: NextRequest) {
     if (authorHandle) {
       conditions.push(`author_handle = $${paramIndex++}`);
       params.push(authorHandle);
+    }
+
+    if (viewerUserId) {
+      conditions.push(`NOT EXISTS (
+        SELECT 1
+        FROM public.user_image_explore_hides AS viewer_hide
+        WHERE viewer_hide.viewer_user_id = $${paramIndex++}
+          AND viewer_hide.asset_id = id
+      )`);
+      params.push(viewerUserId);
     }
 
     // Keyset pagination cursor
@@ -213,48 +240,65 @@ export async function GET(req: NextRequest) {
       items = [targetItem, ...items.filter((_, i) => i !== existingIndex)];
     } else if (existingIndex === -1) {
       try {
-          const directRes = await executePostgresQuery(
-            `SELECT id, user_id, prompt, aspect_ratio, dimensions, public_url, created_at, lqip, likes_count, remix_count, views_count,
-                    author_display_name, author_handle, author_avatar_url, participant_kind
-             FROM ${feedView}
-             WHERE id = $1 AND user_id NOT LIKE 'usr_%' AND id NOT LIKE 'img_test_%'
-               ${authorHandle ? 'AND author_handle = $2' : ''}
-             LIMIT 1`,
-            authorHandle ? [requestedId, authorHandle] : [requestedId]
-          );
-          if (directRes?.rows?.[0]) {
-            const r = directRes.rows[0];
-            let pubUrl = r.public_url;
-            let thumbUrl = r.public_url;
-            if (r.user_id && r.id) {
-              try {
-                const token = GalxCryptoVault.sealImageDownload(r.user_id, r.id);
-                pubUrl = `/v1/images/assets/${token}`;
-                thumbUrl = `/v1/images/assets/${token}/thumbnail`;
-              } catch {}
-            }
-            items.unshift({
-              id: r.id,
-              prompt: r.prompt,
-              aspect_ratio: r.aspect_ratio || '1:1',
-              dimensions: r.dimensions || '1024x1024',
-              public_url: pubUrl,
-              thumbnail_url: thumbUrl,
-              created_at: new Date(r.created_at).toISOString(),
-              lqip: r.lqip || null,
-              likes_count: Number(r.likes_count || 0),
-              remix_count: Number(r.remix_count || 0),
-              views_count: Number(r.views_count || 0),
-              author: {
-                displayName: typeof r.author_display_name === 'string' && r.author_display_name.trim()
-                  ? r.author_display_name.trim()
-                  : 'GALX creator',
-                handle: normalizePublicParticipantHandle(r.author_handle),
-                avatarUrl: sanitizePublicImageUrl(r.author_avatar_url),
-                participantKind: r.participant_kind === 'star' ? 'star' : 'human',
-              },
-            });
+        const directParams: Array<string> = [requestedId];
+        const directConditions = [
+          'id = $1',
+          "user_id NOT LIKE 'usr_%'",
+          "id NOT LIKE 'img_test_%'",
+        ];
+        if (authorHandle) {
+          directConditions.push('author_handle = $2');
+          directParams.push(authorHandle);
+        } else if (viewerUserId) {
+          directConditions.push(`NOT EXISTS (
+              SELECT 1
+              FROM public.user_image_explore_hides AS viewer_hide
+              WHERE viewer_hide.viewer_user_id = $2
+                AND viewer_hide.asset_id = id
+            )`);
+          directParams.push(viewerUserId);
+        }
+        const directRes = await executePostgresQuery(
+          `SELECT id, user_id, prompt, aspect_ratio, dimensions, public_url, created_at, lqip, likes_count, remix_count, views_count,
+                  author_display_name, author_handle, author_avatar_url, participant_kind
+           FROM ${feedView}
+           WHERE ${directConditions.join(' AND ')}
+           LIMIT 1`,
+          directParams
+        );
+        if (directRes?.rows?.[0]) {
+          const r = directRes.rows[0];
+          let pubUrl = r.public_url;
+          let thumbUrl = r.public_url;
+          if (r.user_id && r.id) {
+            try {
+              const token = GalxCryptoVault.sealImageDownload(r.user_id, r.id);
+              pubUrl = `/v1/images/assets/${token}`;
+              thumbUrl = `/v1/images/assets/${token}/thumbnail`;
+            } catch {}
           }
+          items.unshift({
+            id: r.id,
+            prompt: r.prompt,
+            aspect_ratio: r.aspect_ratio || '1:1',
+            dimensions: r.dimensions || '1024x1024',
+            public_url: pubUrl,
+            thumbnail_url: thumbUrl,
+            created_at: new Date(r.created_at).toISOString(),
+            lqip: r.lqip || null,
+            likes_count: Number(r.likes_count || 0),
+            remix_count: Number(r.remix_count || 0),
+            views_count: Number(r.views_count || 0),
+            author: {
+              displayName: typeof r.author_display_name === 'string' && r.author_display_name.trim()
+                ? r.author_display_name.trim()
+                : 'GALX creator',
+              handle: normalizePublicParticipantHandle(r.author_handle),
+              avatarUrl: sanitizePublicImageUrl(r.author_avatar_url),
+              participantKind: r.participant_kind === 'star' ? 'star' : 'human',
+            },
+          });
+        }
       } catch {
         // Ignore single-item lookup failure
       }
@@ -269,9 +313,9 @@ export async function GET(req: NextRequest) {
       count: items.length,
     },
     {
-      headers: {
-        'Cache-Control': 'public, s-maxage=10, stale-while-revalidate=59',
-      },
+      headers: viewerUserId
+        ? { 'Cache-Control': 'private, no-store', 'Vary': 'Cookie, Authorization' }
+        : { 'Cache-Control': 'public, s-maxage=10, stale-while-revalidate=59' },
     }
   );
 }
@@ -345,34 +389,11 @@ export async function POST(req: NextRequest) {
     }
 
     if (action === 'hide' || action === 'moderate') {
-      if (!imageId || typeof imageId !== 'string') {
-        return NextResponse.json({ success: false, error: 'Invalid image identifier' }, { status: 400 });
-      }
+      return handleExploreHideMutation(req, { ...body, action: 'hide', imageId });
+    }
 
-      const reason = typeof body.reason === 'string' && body.reason.trim().length > 0
-        ? body.reason.trim().slice(0, 200)
-        : 'community_moderation';
-
-      try {
-        const query = `SELECT public.fn_moderate_hide_community_image($1, $2, $3) AS result;`;
-        await executePostgresQuery<{ result: any }>(query, [
-          imageId,
-          sessionHash,
-          reason
-        ]);
-        return NextResponse.json({
-          success: true,
-          action: 'hidden_from_explore',
-          assetId: imageId
-        });
-      } catch {
-        // Keep view recording non-blocking when a public item is unavailable.
-        return NextResponse.json({
-          success: true,
-          action: 'hidden_from_explore',
-          assetId: imageId
-        });
-      }
+    if (action === 'unhide') {
+      return handleExploreHideMutation(req, { ...body, action: 'unhide', imageId });
     }
 
     return NextResponse.json({ success: false, error: 'Unsupported interaction action' }, { status: 400 });

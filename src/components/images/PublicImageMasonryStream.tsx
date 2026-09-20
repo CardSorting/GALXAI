@@ -24,12 +24,13 @@ import {
   Grid,
   LayoutGrid,
   EyeOff,
-  ShieldAlert,
   RotateCcw,
   Share2,
 } from 'lucide-react';
 import type { PublicFeedItem } from '@/app/api/images/feed/route';
 import { ParticipantIdentity } from '@/components/community/ParticipantIdentity';
+import { useAuth } from '@/contexts/AuthContext';
+import { authEntryPath } from '@/lib/auth/redirects';
 import './masonry-stream.css';
 
 interface PublicImageMasonryStreamProps {
@@ -134,6 +135,7 @@ export function PublicImageMasonryStream({
   initialSort,
 }: PublicImageMasonryStreamProps) {
   const router = useRouter();
+  const { user, isLoading: authLoading, status: authStatus } = useAuth();
   const [items, setItems] = useState<PublicFeedItem[]>(initialItems);
   const [cursor, setCursor] = useState<string | null>(initialCursor);
   const [loading, setLoading] = useState(false);
@@ -215,6 +217,8 @@ export function PublicImageMasonryStream({
   const pendingImpressionsRef = useRef<Set<string>>(new Set());
   const touchStartCoordRef = useRef<{ x: number; y: number } | null>(null);
   const hiddenIdsRef = useRef<Set<string>>(new Set());
+  const pendingHideIdsRef = useRef<Set<string>>(new Set());
+  const lastViewerIdRef = useRef<string | null>(user?.id ?? null);
   const loadingRef = useRef(false);
   const initialFetchedRef = useRef(false);
   const modalCloseButtonRef = useRef<HTMLButtonElement>(null);
@@ -229,7 +233,11 @@ export function PublicImageMasonryStream({
     }, undoable ? 4500 : 2400);
   }, []);
 
-  // Hydrate persistent likes, hidden items and density preference from localStorage
+  const hiddenStorageKey = user?.id ? `galx_hidden_images:${user.id}` : null;
+
+  // Hydrate persistent likes, account-scoped hidden items and density preference
+  // from localStorage. Guest browsers never get a hide preference: the server
+  // requires a verified account and the local key is scoped to that account.
   useEffect(() => {
     try {
       const storedLikes = localStorage.getItem('galx_liked_images');
@@ -239,8 +247,8 @@ export function PublicImageMasonryStream({
           setLikedMap(parsed);
         }
       }
-      const storedHidden = localStorage.getItem('galx_hidden_images');
-      if (storedHidden) {
+      const storedHidden = hiddenStorageKey ? localStorage.getItem(hiddenStorageKey) : null;
+      if (storedHidden && user?.id) {
         const parsed = JSON.parse(storedHidden);
         if (Array.isArray(parsed)) {
           const set = new Set<string>(parsed);
@@ -252,6 +260,9 @@ export function PublicImageMasonryStream({
             setItems((prev) => prev.filter((it) => !set.has(it.id)));
           }
         }
+      } else if (!user?.id) {
+        setHiddenIds(new Set());
+        hiddenIdsRef.current = new Set();
       }
       const storedDensity = localStorage.getItem('galx_stream_density');
       if (storedDensity === 'compact' || storedDensity === 'comfortable') {
@@ -260,7 +271,7 @@ export function PublicImageMasonryStream({
     } catch {
       // Ignore storage errors in private modes
     }
-  }, [authorHandle]);
+  }, [authorHandle, hiddenStorageKey, user?.id]);
 
   // Save likedMap to localStorage
   const persistLikes = useCallback((updated: Record<string, boolean>) => {
@@ -407,6 +418,21 @@ export function PublicImageMasonryStream({
     },
     [authorHandle, selectedRatio, selectedStyle, searchQuery, sortMode]
   );
+
+  // Never carry a previous account's filtered collection into the next account
+  // (or back to a guest). Re-read the current surface when auth ownership
+  // changes so server filtering and local preferences agree.
+  useEffect(() => {
+    if (authLoading) return;
+    const viewerId = user?.id ?? null;
+    if (lastViewerIdRef.current === viewerId) return;
+    lastViewerIdRef.current = viewerId;
+    setHiddenIds(new Set());
+    hiddenIdsRef.current = new Set();
+    setLastHiddenItem(null);
+    setCursor(null);
+    void fetchFeed(null, true, selectedRatio, selectedStyle, searchQuery, sortMode, null);
+  }, [authLoading, fetchFeed, searchQuery, selectedRatio, selectedStyle, sortMode, user?.id]);
 
   // Initial load if no initial items supplied - executed exactly once per component mount
   useEffect(() => {
@@ -619,21 +645,38 @@ export function PublicImageMasonryStream({
     }
   };
 
-  // Hide / moderate artwork: remove it from Explore while preserving the
-  // creator's public Star profile gallery.
-  const handleHideItem = async (e: React.MouseEvent, item: PublicFeedItem, reason: string = 'community_moderation') => {
+  // Hide artwork for this signed-in viewer only. The server owns auth,
+  // idempotency and abuse limits; this optimistic layer only keeps the feed
+  // feeling immediate and offers a reversible Undo.
+  const handleHideItem = async (e: React.MouseEvent, item: PublicFeedItem) => {
     e.stopPropagation();
+
+    if (!user) {
+      if (authLoading) {
+        showToast('Checking your account…');
+      } else if (authStatus === 'unavailable') {
+        showToast('Your account could not be checked. Try again shortly.');
+      } else if (typeof window !== 'undefined') {
+        router.push(authEntryPath(`${window.location.pathname}${window.location.search}`));
+      }
+      return;
+    }
+
+    if (pendingHideIdsRef.current.has(item.id)) return;
+    pendingHideIdsRef.current.add(item.id);
 
     // Profile galleries are complete public archives. Hiding from Explore must
     // not optimistically remove the creation from a Star's own profile view.
     const isProfileGallery = Boolean(authorHandle);
+
+    let itemIndex = -1;
 
     if (!isProfileGallery) {
       // 1. Mark as hiding for smooth CSS exit animation
       setHidingIds((prev) => new Set(prev).add(item.id));
 
       // Save for undo
-      const itemIndex = items.findIndex((i) => i.id === item.id);
+      itemIndex = items.findIndex((i) => i.id === item.id);
       setLastHiddenItem({ item, index: itemIndex >= 0 ? itemIndex : 0 });
 
       // 2. Persist to local hidden set
@@ -642,11 +685,19 @@ export function PublicImageMasonryStream({
       setHiddenIds(updatedHidden);
       hiddenIdsRef.current = updatedHidden;
       try {
-        localStorage.setItem('galx_hidden_images', JSON.stringify([...updatedHidden]));
+        localStorage.setItem(hiddenStorageKey!, JSON.stringify([...updatedHidden]));
       } catch {}
 
       // 3. Remove from stream after smooth transition
       setTimeout(() => {
+        if (!hiddenIdsRef.current.has(item.id)) {
+          setHidingIds((prev) => {
+            const next = new Set(prev);
+            next.delete(item.id);
+            return next;
+          });
+          return;
+        }
         setItems((prev) => prev.filter((i) => i.id !== item.id));
         setHidingIds((prev) => {
           const next = new Set(prev);
@@ -659,23 +710,56 @@ export function PublicImageMasonryStream({
       }, 260);
     }
 
-    // 4. Show toast with undo
-    showToast('Artwork hidden from Explore.', !isProfileGallery);
+    // Show the outcome immediately; a failed persistence request below restores
+    // the card so the UI never claims a preference that was not saved.
+    showToast('Hidden from your Explore feed.', !isProfileGallery);
 
-    // 5. Fire backend moderation request
     try {
-      void fetch('/api/images/moderate', {
+      const res = await fetch('/api/images/moderate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ assetId: item.id, reason }),
-      }).catch(() => {});
-    } catch {}
+        body: JSON.stringify({ action: 'hide', assetId: item.id }),
+        credentials: 'same-origin',
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(typeof data?.error === 'string' ? data.error : 'The hide preference could not be saved.');
+      }
+    } catch (error) {
+      if (!isProfileGallery) {
+        setItems((prev) => {
+          if (prev.some((entry) => entry.id === item.id)) return prev;
+          const next = [...prev];
+          next.splice(Math.max(0, Math.min(itemIndex, next.length)), 0, item);
+          return next;
+        });
+        setHiddenIds((prev) => {
+          const next = new Set(prev);
+          next.delete(item.id);
+          hiddenIdsRef.current = next;
+          return next;
+        });
+        try {
+          const current = new Set<string>(JSON.parse(localStorage.getItem(hiddenStorageKey!) || '[]'));
+          current.delete(item.id);
+          localStorage.setItem(hiddenStorageKey!, JSON.stringify([...current]));
+        } catch {}
+        setLastHiddenItem(null);
+      }
+      showToast(error instanceof Error ? error.message : 'The hide preference could not be saved.');
+    } finally {
+      pendingHideIdsRef.current.delete(item.id);
+    }
   };
 
   // Undo hide action
-  const handleUndoHide = () => {
+  const handleUndoHide = async () => {
     if (!lastHiddenItem) return;
     const { item, index } = lastHiddenItem;
+    if (pendingHideIdsRef.current.has(item.id)) {
+      showToast('Saving your hide preference…');
+      return;
+    }
 
     // Restore to items
     setItems((prev) => {
@@ -694,13 +778,38 @@ export function PublicImageMasonryStream({
     setHiddenIds(updatedHidden);
     hiddenIdsRef.current = updatedHidden;
     try {
-      localStorage.setItem('galx_hidden_images', JSON.stringify([...updatedHidden]));
+      if (hiddenStorageKey) localStorage.setItem(hiddenStorageKey, JSON.stringify([...updatedHidden]));
     } catch {}
 
     setLastHiddenItem(null);
     setToastMessage(null);
     setToastUndoable(false);
-    showToast('Artwork visible again for this session.');
+    try {
+      const res = await fetch('/api/images/moderate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'unhide', assetId: item.id }),
+        credentials: 'same-origin',
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(typeof data?.error === 'string' ? data.error : 'The creation could not be restored.');
+      }
+      showToast('Visible in your Explore feed again.');
+    } catch (error) {
+      setItems((prev) => prev.filter((entry) => entry.id !== item.id));
+      setHiddenIds((prev) => {
+        const next = new Set(prev).add(item.id);
+        hiddenIdsRef.current = next;
+        return next;
+      });
+      try {
+        const current = new Set<string>(JSON.parse(localStorage.getItem(hiddenStorageKey || '') || '[]'));
+        current.add(item.id);
+        if (hiddenStorageKey) localStorage.setItem(hiddenStorageKey, JSON.stringify([...current]));
+      } catch {}
+      showToast(error instanceof Error ? error.message : 'The creation could not be restored.');
+    }
   };
 
   const openModalByIndex = useCallback((index: number) => {
@@ -1091,8 +1200,8 @@ export function PublicImageMasonryStream({
                         type="button"
                         className="masonry-hide-btn"
                         onClick={(e) => handleHideItem(e, item)}
-                        title="Hide from Explore"
-                        aria-label="Hide from Explore"
+                        title={user ? 'Hide for me' : 'Sign in to hide'}
+                        aria-label={user ? 'Hide for me' : 'Sign in to hide this creation'}
                       >
                         <EyeOff size={13} />
                       </button>
@@ -1140,8 +1249,8 @@ export function PublicImageMasonryStream({
                         type="button"
                         className="masonry-action-btn masonry-action-icon-only"
                         onClick={(e) => handleHideItem(e, item)}
-                        title="Hide from Explore"
-                        aria-label="Hide from Explore"
+                        title={user ? 'Hide for me' : 'Sign in to hide'}
+                        aria-label={user ? 'Hide for me' : 'Sign in to hide this creation'}
                       >
                         <EyeOff size={13} />
                       </button>
@@ -1423,23 +1532,23 @@ export function PublicImageMasonryStream({
                 </button>
               </div>
 
-              {/* Community Safety & Moderation Card */}
+              {/* Personal Explore preference */}
               <div className="masonry-moderation-card">
-                <div className="flex items-center gap-1.5 text-xs font-semibold text-rose-400">
-                  <ShieldAlert size={14} />
-                  <span>Community Safety & Moderation</span>
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-indigo-300">
+                  <EyeOff size={14} />
+                  <span>Personalize Explore</span>
                 </div>
                 <p className="masonry-moderation-desc">
-                  Notice inappropriate or sensitive content? Hide it from Explore. Star profiles keep their complete public galleries.
+                  Hide this creation from your Explore feed. It stays visible on the creator’s profile, and only you can see this preference.
                 </p>
                 <button
                   type="button"
                   className="masonry-modal-hide-btn"
                   onClick={(e) => handleHideItem(e, activeModalItem)}
-                  title="Hide from Explore"
+                  title={user ? 'Hide for me' : 'Sign in to hide'}
                 >
                   <EyeOff size={13} />
-                  <span>Hide from Explore</span>
+                  <span>{user ? 'Hide for me' : 'Sign in to hide'}</span>
                 </button>
               </div>
 

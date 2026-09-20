@@ -3665,6 +3665,40 @@ export interface Database {
         Update: Partial<Database['public']['Tables']['image_moderation_events']['Insert']>;
         Relationships: [];
       };
+      user_image_explore_hides: {
+        Row: {
+          viewer_user_id: string;
+          asset_id: string;
+          created_at: string;
+        };
+        Insert: {
+          viewer_user_id: string;
+          asset_id: string;
+          created_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['user_image_explore_hides']['Insert']>;
+        Relationships: [];
+      };
+      user_image_explore_hide_limits: {
+        Row: {
+          viewer_user_id: string;
+          burst_started_at: string;
+          burst_count: number;
+          day_started_on: string;
+          daily_count: number;
+          updated_at: string;
+        };
+        Insert: {
+          viewer_user_id: string;
+          burst_started_at?: string;
+          burst_count?: number;
+          day_started_on?: string;
+          daily_count?: number;
+          updated_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['user_image_explore_hide_limits']['Insert']>;
+        Relationships: [];
+      };
       user_image_stats: {
         Row: {
           image_id: string;
@@ -3767,6 +3801,14 @@ export interface Database {
           p_asset_id: string;
           p_moderator_id?: string;
           p_reason?: string;
+        };
+        Returns: Json;
+      };
+      fn_set_image_explore_hide: {
+        Args: {
+          p_viewer_user_id: string;
+          p_asset_id: string;
+          p_hidden: boolean;
         };
         Returns: Json;
       };

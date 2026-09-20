@@ -35,6 +35,35 @@ Keep private operation tables unavailable to browser database roles. RLS, explic
 
 The [large-library migration](image-library-scale.md#validation-rollout-and-recovery) adds partial ordering indexes and a page-only function. Review writer-blocking index creation against the target size/load; its timeout bounds are not a zero-lock promise. Apply it before dependent application readers.
 
+### Private Explore hide preferences
+
+Migration `20260920120000_personal_explore_hide_controls.sql` replaces the old
+anonymous/global Explore hide mutation with an additive, account-scoped
+preference. The application must verify an interactive signed-in session before
+calling the narrow service function; developer API keys, anonymous callers and
+caller-supplied viewer IDs are not valid authorities. The preference table is
+closed to browser database roles and forced through RLS as defense in depth.
+
+The mutation preserves the public product boundary: it filters only the current
+viewer's Explore response, never changes `user_image_library` publication state,
+and is deliberately omitted from the Star profile projection. The active list
+is capped at 500. A private per-account rate ledger records successful new hides
+so undo cannot be used to evade the 30-per-ten-minute or 200-per-day limits;
+duplicate hides are idempotent and undo is reversible without replenishing the
+allowance. Unknown showcase IDs return a client-only outcome and do not create
+rows. The old global function and moderation-event table are closed to browser
+roles; historical records remain retained for operators and are not a user
+report queue.
+
+Follow-up migration `20260920123000_personal_explore_hide_privilege_repair.sql`
+explicitly revokes any inherited `service_role` table privileges before
+regranting the exact operations required by the server function. This repair is
+fail-closed on rollback and does not restore broad service or browser access.
+
+Before application, run the targeted adversarial suite, the full image security
+suite, `npm run db:verify`, and a production build. Rehearse the exact migration
+with `node --env-file-if-exists=.env.local --import tsx scripts/push-migrations-direct.ts --dry-run --version 20260920120000` and the privilege repair with the corresponding `20260920123000` version; inspect that both are the only pending versions. The paired DOWN files remove only the new preference objects or retain the restricted privilege boundary and intentionally do not reopen the retired anonymous/global path; restore by reapplying the UP migrations, not by manually granting the old function. After application, verify migration history, table/function privileges, private cache headers for authenticated Explore reads, and that a Star profile still returns its complete public gallery. Do not apply these migrations to a relay execution project.
+
 The [free-generation migrations](FREE_GENERATION_QUOTA.md) add private grants/usage, followed by the aggregate policy, capacity flag, bounded-query indexes and Sites tier. Apply both in timestamp order before dependent handlers. The aggregate policy seeds paused; its DOWN file disables new free admission while retaining every record. The older quota DOWN only reasserts privileges. Use the compatible gate or a Pro-only application rollback, never the earlier unbounded free implementation.
 
 The manual desktop migration adds paired nullable provenance columns, a unique binding, protected writer functions and lease admission. It retains old records but excludes unconfirmed ones; deploy the compatible controller/application together and manually confirm accounts. Its DOWN restores older access while retaining provenance columns, so rollback deliberately reopens the former boundary.

@@ -405,8 +405,9 @@
 }
 
 .masonry-action-icon-only {
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
   padding: 0;
   display: inline-flex;
   align-items: center;
@@ -800,7 +801,7 @@
   background: rgba(99, 102, 241, 0.25);
   border: 1px solid rgba(99, 102, 241, 0.45);
   border-radius: 9999px;
-  color: #c7d2fe;
+  color: #d4d4d8;
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
@@ -941,8 +942,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 26px;
-  height: 26px;
+  width: 44px;
+  height: 44px;
   background: rgba(15, 18, 29, 0.7);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
@@ -955,7 +956,8 @@
   transform: translateY(-4px);
 }
 
-.masonry-card:hover .masonry-hide-btn {
+.masonry-card:hover .masonry-hide-btn,
+.masonry-card:focus-within .masonry-hide-btn {
   opacity: 1;
   transform: translateY(0);
 }
@@ -975,12 +977,12 @@
   pointer-events: none;
 }
 
-/* Moderation Card in Lightbox Modal */
+/* Personal Explore preference card in the lightbox modal */
 .masonry-moderation-card {
   margin-top: 20px;
   padding: 14px 16px;
-  background: rgba(245, 158, 11, 0.04);
-  border: 1px solid rgba(245, 158, 11, 0.18);
+  background: rgba(99, 102, 241, 0.06);
+  border: 1px solid rgba(99, 102, 241, 0.22);
   border-radius: 14px;
 }
 
@@ -1004,11 +1006,12 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 12px;
-  background: rgba(245, 158, 11, 0.12);
-  border: 1px solid rgba(245, 158, 11, 0.3);
+  min-height: 44px;
+  padding: 8px 14px;
+  background: rgba(99, 102, 241, 0.14);
+  border: 1px solid rgba(99, 102, 241, 0.34);
   border-radius: 8px;
-  color: #fbbf24;
+  color: #c7d2fe;
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
@@ -1016,9 +1019,9 @@
 }
 
 .masonry-modal-hide-btn:hover {
-  background: rgba(245, 158, 11, 0.22);
-  border-color: rgba(245, 158, 11, 0.5);
-  color: #fef08a;
+  background: rgba(99, 102, 241, 0.24);
+  border-color: rgba(99, 102, 241, 0.58);
+  color: #ffffff;
 }
 
 .masonry-moderation-desc {

@@ -16,9 +16,16 @@ remains private and is never projected through the Star profile endpoint.
 Missing, invalid or temporarily unavailable Star profiles
 return authored public categories without database fields, execution context or
 diagnostics. Keep the profile and feed projections aligned when adding a new
-public field. Explore moderation is a discovery-surface decision: hiding a
-creation removes it from the community stream but does not make a still-public
-Star creation disappear from that Star's profile gallery. Handles are
+public field. Explore hide is a private, signed-in personalization preference:
+it removes a creation only from that viewer's Explore stream and never changes
+the creator's publication state. The Star profile projection intentionally does
+not consume the viewer preference, so a Star's complete public gallery remains
+available even when one of its creations is hidden from Explore. Hides are
+account-scoped, reversible, capped at 500 active preferences, and guarded by a
+30-per-ten-minute and 200-per-day allowance; undo does not replenish either
+allowance. Unknown showcase IDs may be dismissed locally but are never written
+as durable preferences. This control is not a safety report or a community
+vote. Handles are
 normalized before they become links, avatars accept only site-relative or
 HTTPS image URLs, and malformed gallery cursors are rejected with a generic 400
 response.
@@ -69,6 +76,10 @@ Premium image results use the same owned storage, manifest and durable library f
 ## Verification
 
 Run `npm run test:image:security`, `npx tsc --noEmit`, and `npm run build`.
+The Explore preference tests additionally assert that anonymous callers are
+rejected before any write, caller-supplied viewer IDs are ignored, the response
+is an allowlisted DTO, rate/cap outcomes are generic and retryable, the private
+feed response is not publicly cacheable, and a Star profile remains unaffected.
 The [workspace authentication runbook](../operations/workspace-auth.md) owns the sign-in flow and server-backed browser fixture. A current-owner API 401 unmounts the studio and focuses recovery; 403, rate limits and outages do not become sign-in loops. Create/My images switches preserve the supported library view in the URL; same-tab drafts remain account scoped and no generation is replayed.
 
 Initial browser profile failures withhold the studio inside the shared shell, preserving public navigation and Home. Manual session recovery retains same-tab drafts; its pending, unsuccessful and offline states use authored messages. A 403 image error says the action is unavailable for the account and never claims that the session expired. The shared loading shell announces a longer wait after six seconds, outside its decorative busy region. The compiled navigation fixture additionally verifies draft continuity, keyboard recovery, themes and reflow; no new storage or mutation-retry contract is introduced.

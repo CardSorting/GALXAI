@@ -100,6 +100,7 @@
         "src/contexts/GenerationAllowanceContext.tsx",
         "scripts/test-image-premium-routing.ts",
         "scripts/test-community-profile.ts",
+        "scripts/test-image-explore-hide.ts",
         "src/app/api/images/feed/route.ts",
         "src/lib/community/**/*.ts",
         "src/components/community/**/*",
@@ -996,6 +997,17 @@
         "registration",
         "reconnect",
         "retirement",
+        "audit"
+      ]
+    },
+    "docs/knowledge/audits/2026-09-20-personal-explore-hide-review.json": {
+      "kind": "evidence",
+      "keywords": [
+        "images",
+        "explore",
+        "hide",
+        "abuse",
+        "profile",
         "audit"
       ]
     },
