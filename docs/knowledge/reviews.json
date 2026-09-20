@@ -1,11 +1,11 @@
 {
   "knowledge": {
     "reviewer": "Codex",
-    "note": "Reviewed the knowledge registry and generated views after the public developer-surface removal, image navigation declutter, and retained historical evidence updates. Confirmed ownership/index generation remains aligned; no historical evidence was rewritten as current guidance.",
+    "note": "Reviewed generated knowledge index changes after removing the deleted settings source and registering the privacy copy with the navigation/client-efficiency domain. Confirmed generated views remain aligned and no historical evidence was rewritten.",
     "reviewed_at": "2026-09-20",
     "review_by": "2026-09-27",
     "evidence": {
-      "docs/knowledge/audits/2026-09-20-developer-surface-removal-review.json": "0fa160336964bfa99dcc959012d1cbcb7ae816ec6f692ae74963bf682ea05f39"
+      "docs/knowledge/audits/2026-09-20-settings-surface-retirement-review.json": "85ee9b0c442a81efa5244ea0fa6ce12eddf594a9b9fef36579b58905454deb3d"
     },
     "files": {
       ".github/CODEOWNERS": "ef2f416d15f027dc8f197ad844289c9a44c8e843d3214d1590a3a380e939d13f",
@@ -26,7 +26,7 @@
       "docs/how-to/change-with-documentation.md": "abcf6bfb2f0aadcf8cfc2fdae18ac8f3f84565f127c34f7453d50e7283006e40",
       "docs/knowledge/DESIGN_RATIONALE.md": "edd3cf9b49ed794fbe8bf14448fd0c56cb4d8df832bab81cdf07e9ea2e2204a1",
       "docs/knowledge/README.md": "5ad219aeee44a9c065db2ca69e5a6498966fed42e2d8c74773dbc055d0220931",
-      "docs/knowledge/registry.json": "7463b08418d865f3f9e9211089678620acfbae4e1845495fbea02e999ec019be",
+      "docs/knowledge/registry.json": "0729f4fe5478e78133ed27aeff7275f49bef70931bcc90a1149135260bf9b9d2",
       "docs/knowledge/templates/adr.md": "28773b3cbdb53ad34f08d0362e87b6dba24b6fd76ddb6c85db8ad63d99ad1331",
       "docs/knowledge/templates/runbook.md": "19679a7eb8c1a3aafd87852fa93817e7bf9ef4696772c8deb1617366c290abc1",
       "docs/maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md": "b7df75535611c14aabe599764a6f6c2a4f0f1461d068929602c68e39d8ce850d",
@@ -53,23 +53,23 @@
   },
   "images": {
     "reviewer": "Codex",
-    "note": "Reviewed the Images/Explore declutter and developer-surface removal. Confirmed shared stream controls, /images/library default entry, no public developer route/navigation pointer, existing image authorization boundaries, and historical evidence handling. Build and image/security checks pass.",
+    "note": "Reviewed the private settings-surface retirement alongside image/profile boundary and readable URL guidance. Confirmed public Star creator profiles remain canonical, private account profile navigation is not advertised, and image/security tests preserve public/private boundaries.",
     "reviewed_at": "2026-09-20",
     "review_by": "2026-09-27",
     "evidence": {
-      "docs/knowledge/audits/2026-09-20-developer-surface-removal-review.json": "0fa160336964bfa99dcc959012d1cbcb7ae816ec6f692ae74963bf682ea05f39"
+      "docs/knowledge/audits/2026-09-20-settings-surface-retirement-review.json": "85ee9b0c442a81efa5244ea0fa6ce12eddf594a9b9fef36579b58905454deb3d"
     },
     "files": {
       "docs/QUEUE_SPECIFICATION.md": "301d293b23327bf065202322e0a7554cf581740f28d0d5ab9fb827e73beed6ba",
       "docs/maintainers/FREE_GENERATION_QUOTA.md": "239c0c173e05cbba23f74818e712b1ad217e2e0d3a1c69f86b0de8504f06f42b",
       "docs/maintainers/image-library-scale.md": "064bef895f17a587811da2a5df8a4b16295664ee2f348576c996f5aa5a901c7a",
-      "docs/maintainers/image-public-boundary.md": "f01b3aa6af02d5acec2bc07239c50c719b52993a6bd7c77fbd8059836f85c62d",
-      "docs/maintainers/readable-urls.md": "cbb3fe084a5c15e7e5354d72e4542a26ae824386089748c7a503b0f20924a36b",
+      "docs/maintainers/image-public-boundary.md": "9a9f9a756438d559293b1a47916213c3207ccc2bfe93c58d03b7b1d94ec4a50e",
+      "docs/maintainers/readable-urls.md": "ffc42ff362cf57da1d0f308e6385a667d04fe22878cb1012e6da8773134a7ce3",
       "docs/reference/stars.md": "71b2c1f27e7c2eb941c00e800b8b6fb28d05667ab0ed78f5d192619aa08fdc25",
       "post-mortem/runbooks/image-generation.md": "cafd2ecd11bd89d4fce8a48e646980d32dcc021fddcc0b9f697ccd9fd0dd8532",
       "scripts/populate-stars.ts": "5f820036ded20dd139ccbc888ae5716ad06a79e62a33792d02325d0d37d7b1e9",
       "scripts/reconcile-stars.ts": "70666eb2455049247c2970042d283911cfa392550ebdf588b8ac5aae25f0155f",
-      "scripts/test-community-profile.ts": "078d3c57d70e1708dc71c693d4020159dc477be71183aa6d3fbeac5c45a57d01",
+      "scripts/test-community-profile.ts": "460d7a790827128b1dcb6d37ea6c0d6a08ac6964b80560c09bd3de913762b587",
       "scripts/test-free-generation-gate-db.ts": "2919f39490203795965f494f61b288305ea7136e544515cc504d9e8a0ff7e037",
       "scripts/test-free-generation-quota-db.ts": "26d3381b0a90285cce6d954b954601fb7a5a4596998389ac7091cfb7b49d9b04",
       "scripts/test-free-generation-quota.ts": "cbf7034c6f10ecfcf6176718f693a2636af775899e05552b5d7c53c58f142fb3",
@@ -158,11 +158,11 @@
   },
   "access": {
     "reviewer": "Codex",
-    "note": "Reviewed the global footer after the navigation copy and destination audit. Public footer links now expose only the consumer product, account settings, support, and capability-level learning surfaces; private access and implementation details are not advertised.",
+    "note": "Reviewed access implications of retiring the broken settings page. Confirmed the deleted route and removed route-policy/redirect/preview fixture pointers without weakening auth, public Star profile, or private account-data boundaries.",
     "reviewed_at": "2026-09-20",
     "review_by": "2026-09-27",
     "evidence": {
-      "docs/knowledge/audits/2026-09-20-footer-navigation-review.json": "09cf6a749dc11de5f43c0022a5601fae164170ef17d6ee29763c335459833bbd"
+      "docs/knowledge/audits/2026-09-20-settings-surface-retirement-review.json": "85ee9b0c442a81efa5244ea0fa6ce12eddf594a9b9fef36579b58905454deb3d"
     },
     "files": {
       "docs/OAUTH_AND_TOKEN_LIFECYCLE_SPECIFICATION.md": "1e8004f6dc024322356e5494b099b7c38ed00e4a62e22434b020fd43c9470183",
@@ -172,7 +172,7 @@
       "docs/STANDARDIZED_OAUTH_AND_INGESTION_ARCHITECTURE.md": "5503c6d028002c4b0f511cd88ca2bd30317eb08200266faae449200db290ad04",
       "docs/adr/0147-verified-account-and-session-authority.md": "5c97eaabc0faa667f329c44ed0366125c96cb0cbd4625f7cf84649b882e57a96",
       "docs/maintainers/FREE_GENERATION_QUOTA.md": "239c0c173e05cbba23f74818e712b1ad217e2e0d3a1c69f86b0de8504f06f42b",
-      "docs/maintainers/readable-urls.md": "cbb3fe084a5c15e7e5354d72e4542a26ae824386089748c7a503b0f20924a36b",
+      "docs/maintainers/readable-urls.md": "ffc42ff362cf57da1d0f308e6385a667d04fe22878cb1012e6da8773134a7ce3",
       "docs/operations/developer-preview.md": "8902ed59cc1d8160adca9e1f95587dfa10b199865cf6417832f7c47e2e67665e",
       "docs/operations/preview-activation.md": "20b77ed5c8fdc5c318f5186964d8ce5079a3ec17cccd15898b0fd947f86794d4",
       "docs/operations/preview-admin.md": "a459aa1c69322837467a917640ec44240bc18afcd99f0d76e44fad80187da47f",
@@ -186,15 +186,15 @@
       "scripts/test-auth-identity-boundary.ts": "7a4c8de24a4c82869d1adeb4c57567a574d206116b16df37681e8569bffefe93",
       "scripts/test-auth-provider-recovery.ts": "b97fb5e6c21e01fe830752e580b26208a2d96b219a8b773f1aba4702c63f83fe",
       "scripts/test-browser-session.ts": "2bcb16b82cc74f011dfa8c7d4d799145e084520b0d43b96addc552f4de9230e1",
-      "scripts/test-developer-preview.ts": "b732057b9ecdf8a1bddaaa77463ba61b74f491f8f5240ead799cb401dc4a828f",
+      "scripts/test-developer-preview.ts": "2f2a141dbdc5b0b56ab382c6031ce61adac4a9c073202218f6d3156271cff214",
       "scripts/test-free-generation-gate-db.ts": "2919f39490203795965f494f61b288305ea7136e544515cc504d9e8a0ff7e037",
       "scripts/test-free-generation-quota-db.ts": "26d3381b0a90285cce6d954b954601fb7a5a4596998389ac7091cfb7b49d9b04",
       "scripts/test-free-generation-quota.ts": "cbf7034c6f10ecfcf6176718f693a2636af775899e05552b5d7c53c58f142fb3",
       "scripts/test-preview-admin.ts": "3cbe5d792ba585ab10377d3ba3cf6c8992bda2f6b0266311c803d335c8b64a24",
       "scripts/test-preview-read-sync.ts": "bbd27e91f88a78c461890ad05e7ba988c674c35eb9096ee0bfb8f33a3825989c",
-      "scripts/test-public-information-boundary.ts": "594ffddcc21d5269bc91f8ebe4dbb161e32167fbc86fce74e31bd4360219734c",
+      "scripts/test-public-information-boundary.ts": "4279407394adc121fdea29f5f616a3003115a3c2003be29bbf1f2fe907bc5572",
       "scripts/test-session-lifecycle.ts": "ce26ed207ead54373298770ca738abd61533ccb70da6c4e022c6e34f33044ae3",
-      "scripts/test-url-navigation.ts": "9afc19e5e32166f292d3859b287b3a6747c2f3179e75e62e845b64bbc03d06ae",
+      "scripts/test-url-navigation.ts": "534f0b352cfa4d1bbbd6a8e9db58f18b3a13ae30e11818aca53f7845b5988a63",
       "scripts/test-workspace-auth.ts": "88f111f18705446ed6a38a10129b8d180b48f12e0f388c5ac05ea1c4b481acd5",
       "scripts/verify-auth-entry-server.cjs": "598d88ba9e781042126b4725944d2e3834324b6bed7b3465aa1d8f272d14e932",
       "scripts/verify-auth-entry-ui.ts": "c807594c59c6baf96f693f78c2e9454a73cd26ffe0f0ed4aabbc71ac77600a86",
@@ -238,7 +238,6 @@
       "src/app/device/page.tsx": "1f784b8f48fa3ccee643e47743ae06bf8395ad62fe5c66b8dbb018d0bcef1fec",
       "src/app/library/page.tsx": "61b9b82fafc3c9a295a1afd9ce6b11473d0b62fe7f2a3ff7c517696c24c20d99",
       "src/app/login/page.tsx": "0b556e39fbf622400b8b70e397f4e83706e5e702971dde3c37aeb6c627f4c791",
-      "src/app/settings/page.tsx": "f9b1d904fd75d2df304248e35cba767c06abda519f1dea5947dcb3c46efb6bb9",
       "src/app/signup/layout.tsx": "8be40956bf752390f9481942301f310cebf4ee00569d5c20c673360d7d42de04",
       "src/app/signup/page.tsx": "d6baaee51a237cdc3812fe42b7b3211b9fd8431f2709b9cb63b69f9cc75d2476",
       "src/components/admin/PreviewAdminWorkspace.tsx": "cf62f0408e125b00c6077dbdd56cd4ed2bd3a28b1576f956975665767d470631",
@@ -253,7 +252,7 @@
       "src/components/auth/auth-entry.module.css": "165e10d51ed9ad6849a113904a431b5cf90482eaf3b078cee33c9189621cc63f",
       "src/components/billing/BillingClient.tsx": "ad0e61000768a4dc2a96972c69a79308504281e5aa8b8baca0b48164b7b5466b",
       "src/components/billing/BillingProvider.tsx": "cdfefd2683186cc736ee105739b84fd0426a15666d3b063ff02c1714a61c781a",
-      "src/components/dashboard/Footer.tsx": "6cf7ef23b1af5ce707f43d14504579a6a1a7c82af23b68104f05e4515d4b3ba1",
+      "src/components/dashboard/Footer.tsx": "19ee864580f216a38c4151c5a531e21e36a0f120269a5dcc609214757852f0a0",
       "src/components/dashboard/FreeGenerationQuota.tsx": "419a52433d2b3baece49b2ada8b96f819da2e535d49104e40b22c8dae82fb89d",
       "src/components/dashboard/GenerationGateNotice.tsx": "0c905274ce933e0247d4a05f4174c9c13377bcb02e0d833c3927cfce62701bac",
       "src/components/dashboard/generation-gate.module.css": "efd8526722ca0ad42aec319a56bc2ea7e638185f30c35cea9b445dfb69bba4a4",
@@ -310,7 +309,7 @@
       "src/lib/supabase/repositories/PreviewReadSync.ts": "06b42da2b7de09526a4566df1320b67d0f70578287ddb2dc9667c1b2f01be9cd",
       "src/lib/supabase/repositories/SessionRepository.ts": "d1b96ce2aed9fe7370e8330e4750892f88b99c6306d008ae2f154b0b3722f62d",
       "src/middleware.ts": "c8c20ebb930c3e0d1ee6c11f29fa54fa36e9e0e8b6fcc31a1c5ef2a1796ce490",
-      "src/utils/supabase/middleware.ts": "2038083061059920df7f9bf0d3c640d94ed6a97f2ae5a1e40550267ce042dfb6"
+      "src/utils/supabase/middleware.ts": "fed6c7d4fa7f70c6a870b4dd006a0c19f2e13c7205281bd1b6a97b31ec4e5f8f"
     }
   },
   "sites": {
@@ -1511,19 +1510,19 @@
   },
   "client-efficiency": {
     "reviewer": "Codex",
-    "note": "Reviewed the global footer after the ergonomics pass. Link groups are finite and route-stable, repeated status/legal destinations were consolidated, and touch targets/focus behavior remain bounded across responsive layouts.",
+    "note": "Reviewed navigation and privacy-copy changes after retiring the unavailable profile settings destination. Confirmed desktop/mobile/footer links, legal language, and route catalogs stay aligned with current product destinations and retain simple social-product patterns without dead entries.",
     "reviewed_at": "2026-09-20",
     "review_by": "2026-09-27",
     "evidence": {
-      "docs/knowledge/audits/2026-09-20-footer-navigation-review.json": "09cf6a749dc11de5f43c0022a5601fae164170ef17d6ee29763c335459833bbd"
+      "docs/knowledge/audits/2026-09-20-settings-surface-retirement-review.json": "85ee9b0c442a81efa5244ea0fa6ce12eddf594a9b9fef36579b58905454deb3d"
     },
     "files": {
       ".impeccable/surfaces/src-components-dashboard-navigation-tsx.md": "30674caaca76149a135842ba67199b9ecee5f17c39965b16ab78d31a8ba64a59",
-      "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md": "1b6961b4b61dcaac61113dcc3929b0fc4ccedd8e2bfeb11cb8d23a9c601d5af8",
+      "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md": "b65fac9024b805c6cd201fb1252f2defce47c919470adc1d37b3878f28989efa",
       "docs/PRODUCT_SURFACE_STRATEGY.md": "888f8434a2d49e4177dbdd1a34c444e7d4221c2419d5623c8fa8ad2abf465103",
       "docs/maintainers/PUBLIC_DISCOVERY.md": "d489c2950b13d259c0f88c9ece526b250fa5d6d996db6993ac567b416aa9d873",
       "docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md": "e7eb3ac5660d0882b832be22d127b303e278bf7b78aeca40932967e4b2814ff0",
-      "docs/maintainers/readable-urls.md": "cbb3fe084a5c15e7e5354d72e4542a26ae824386089748c7a503b0f20924a36b",
+      "docs/maintainers/readable-urls.md": "ffc42ff362cf57da1d0f308e6385a667d04fe22878cb1012e6da8773134a7ce3",
       "scripts/test-public-reading.ts": "3fca2139eedebb90b713b612d8c66c9238a7fdc50703b641d0aa47c87ba8addd",
       "scripts/test-request-efficiency.ts": "aca2f322aabd181b2b0d403bb0836b121de3b5a9f1c4746716e5c12e986731cc",
       "scripts/test-sites-workspace.ts": "08af95908269446e4fe6590619e7180d5b41575deb0a3c2a6797c2127c873899",
@@ -1531,7 +1530,7 @@
       "scripts/verify-homepage-ui.mjs": "d87cb084693d1bc61d019ed6ae20c4f3ade648d578d7124bee941afbc7d84aa1",
       "scripts/verify-image-library-scale-ui.ts": "0e7003e1f256f99f28c953537b16044b50678c700b496c53d47f1b0104ff23cc",
       "scripts/verify-image-studio-ui.ts": "21555c294e1f08ea20bfcb22e2b250633e369b96561f39ab0da8850d25d10691",
-      "scripts/verify-navigation-ui.ts": "282fa2c40057beef00af398f077bdfc5b2dad9024e1e9c93e5cfb83e4f8d263e",
+      "scripts/verify-navigation-ui.ts": "288a4656d000e1e6ee3830b67c78933accaa854c6da69b9cbe0c7930d5f29362",
       "scripts/verify-public-reading-ui.mjs": "1a87ce71e12b4aab2a78d522b946eb3444e7ae8e677b4389781506afae731719",
       "scripts/verify-sites-workspace-ui.ts": "b1821725236e252e3a774fbbe06cfdd6ef34183ab67edf230c94c99e8099271c",
       "scripts/verify-url-navigation.mjs": "8a3907bfc2b7021645968e1c6d8f5fd08da72cf55662691603f5479e88a059e7",
@@ -1564,6 +1563,7 @@
       "src/app/pricing/page.tsx": "1feb2960edb31a8761a7cba2cc0b85b8bf862b36079982a84c88416e161776d6",
       "src/app/pricing/seats/page.tsx": "d0f7e15a799ac07c96be793655b6468f5e6445db9eedca128634302b9bc90904",
       "src/app/pricing/usage/page.tsx": "bf4b01115d242b71225b9954b2aa609c15c73f7471c9717207bb95b8766bee29",
+      "src/app/privacy/page.tsx": "49a354b4d8716249d7d9803adc479302f11a7ea09a1b5b154b83d2e5ad06e6d2",
       "src/app/profile/[handle]/error.tsx": "e909fe125c56b5b5c158cca2d01b097d6b228a1ebd6712ada4019e0b9fd991ad",
       "src/app/profile/[handle]/loading.tsx": "f3fa2b03456917feed192b95fd06534f90214205c7449ba081f546257bfe7483",
       "src/app/profile/[handle]/not-found.tsx": "4e9cd4f17d53983feaec142f0d99ade7a4c730363f18347b7c4d813f4991a326",
@@ -1578,11 +1578,11 @@
       "src/components/common/RouteRecovery.tsx": "02f126f82df14daf04a9085d2fc72034beddb3493485841dd0f6a97f25461736",
       "src/components/common/WorkspaceLoading.tsx": "fcc220850cf2a7280d3cbb9d46a3f579da1f4fb8c298f0b37b54e6d7c1d84820",
       "src/components/common/workspace-route.module.css": "6654e288040f2196747f08319a9cad95916f086708d14b4cdafaabe40db88523",
-      "src/components/dashboard/Footer.tsx": "6cf7ef23b1af5ce707f43d14504579a6a1a7c82af23b68104f05e4515d4b3ba1",
+      "src/components/dashboard/Footer.tsx": "19ee864580f216a38c4151c5a531e21e36a0f120269a5dcc609214757852f0a0",
       "src/components/dashboard/FreeGenerationQuota.tsx": "419a52433d2b3baece49b2ada8b96f819da2e535d49104e40b22c8dae82fb89d",
       "src/components/dashboard/GenerationGateNotice.tsx": "0c905274ce933e0247d4a05f4174c9c13377bcb02e0d833c3927cfce62701bac",
-      "src/components/dashboard/MobileBottomNav.tsx": "de7ba32ccf76cc902b107437aceab546802b188044889b30b59bc72e9de29f69",
-      "src/components/dashboard/Navigation.tsx": "06c928286b14370ed8c36e4a20ff48e90d05e6de48a2bfc77ff2c6bf32560a48",
+      "src/components/dashboard/MobileBottomNav.tsx": "04210a3081e4ea07c749fba86a820a807311395d75797184d999080fafd25a26",
+      "src/components/dashboard/Navigation.tsx": "d3f9b0ffe542a5b56a4ad906dd2742bdffa19f3deac5c047c2e62ec07b5386c8",
       "src/components/dashboard/generation-gate.module.css": "efd8526722ca0ad42aec319a56bc2ea7e638185f30c35cea9b445dfb69bba4a4",
       "src/components/dashboard/navigation.module.css": "d743612bfcb24fecb919f16194bbb4d89b91015512f86452e797e47f04490cf8",
       "src/components/home/ArtisanalSignalSection.tsx": "f69ec3ef0ec73b4f41dff90daa4529b86a975199b84e33d25c493dfdfcae1fe1",
@@ -1622,11 +1622,11 @@
   },
   "billing": {
     "reviewer": "Codex",
-    "note": "Reviewed the retired public developer surface in pricing, billing return paths, legacy redirects and search/navigation copy. Confirmed private checkout/API contracts remain separate, persisted legacy return paths are normalized by the applied migration, and public fallback destinations are neutral. No payment mutation was performed.",
+    "note": "Reviewed billing/search compatibility after removing the obsolete settings redirect and recent-route allowlist entry. Confirmed canonical billing paths remain intact and no billing task points to the retired route.",
     "reviewed_at": "2026-09-20",
     "review_by": "2026-09-27",
     "evidence": {
-      "docs/knowledge/audits/2026-09-20-developer-surface-removal-review.json": "0fa160336964bfa99dcc959012d1cbcb7ae816ec6f692ae74963bf682ea05f39"
+      "docs/knowledge/audits/2026-09-20-settings-surface-retirement-review.json": "85ee9b0c442a81efa5244ea0fa6ce12eddf594a9b9fef36579b58905454deb3d"
     },
     "files": {
       ".impeccable/surfaces/src-app-billing-page-tsx.md": "7b6165eb4b5c85cac4900e9070cc20da30c96d06ff12ccd21f4c0450b817bc31",
@@ -1634,7 +1634,7 @@
       "docs/maintainers/SITES_FAIR_USAGE.md": "20be8cea19781394db735816f83a02dcd79cea94c22f15b091c47ca663508f10",
       "docs/reference/billing-pages.md": "6f7c092fc155d44db2ad8d98279801208ee5a0fdf381bb2f56d752d61696e3bb",
       "docs/runbooks/stripe-webhook-delivery.md": "f54173fde492ec26371fba31d3d28f5151ec4e4d487dc496708e4f44779f3ba3",
-      "next.config.ts": "afc47bbeb106d2baa4ebf5e6b4d36b424e8d3823ab464a8cc5380f9c4ca204c7",
+      "next.config.ts": "dcfac740468b5568756a210bee88e2777eabc5afaaa2c230cb45e0c7805573ee",
       "scripts/lib/stripe-webhook-target.ts": "a849c2441e61d6573a9fe7a9b6cad3e24bf86919cd1b5ebeeac2e5b97ab9e2db",
       "scripts/provision-sites-pro.ts": "e146b0d34e9001d4b7ab096b06011395c3c8344b30d6522d562e2f9db21b1334",
       "scripts/provision-stripe-all.ts": "bacd1fa7ef366ea60e1c8f9df293626575aeb6facde0d5c00d3468811c0092e6",
@@ -1715,7 +1715,7 @@
       "src/lib/data/securityData.ts": "58b979f22788438bf98247a522f66b580141570ab8a038fb879f44f654eefb42",
       "src/lib/docs/content.ts": "91d478abebf6aa5921213393bc5a7195472072c0926f7e2c69a0b508b1a58b94",
       "src/lib/hooks/useDepositVerification.ts": "b3047733f7eec82b0c78d3130047e6ace443e1a14ee09411f87e15c0495fa0cc",
-      "src/lib/resilience/BroccoliOmniSearch.ts": "5e464a08c77a24338a61094ca6c43b88445c2c05eef049577f31fe3bb1405bcd",
+      "src/lib/resilience/BroccoliOmniSearch.ts": "4da453b2f1561a5ae33a3d966b63bbb8955ef2fb1ff9a9c71e17906752b1a6b2",
       "src/lib/stripe/config.ts": "43aecb7f7a1208b4c55eede31c1fd519ecffde37c32105289176393a8e416ace",
       "src/lib/stripe/products.ts": "e692b3c93c11f659e7aa25e5372e233356b667f26c7a4ed35e2f65e5966be960",
       "src/lib/stripe/stripe.ts": "ca744350db314ba1ec139962b4917498747a9d59beb6d6e6fdddae3d878a6062",

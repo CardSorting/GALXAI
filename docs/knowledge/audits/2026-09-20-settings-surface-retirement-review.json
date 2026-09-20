@@ -1,0 +1,25 @@
+{
+  "classification": "private",
+  "observed_at": "2026-09-20T00:00:00Z",
+  "scope": "Semantic review of retiring the broken private account settings/profile route and removing user-facing navigation, search, redirect, and route-policy pointers to it.",
+  "decisions": [
+    "Deleted the /settings page module so /settings and /settings?tab=profile no longer resolve to a broken account surface; public Star creator profiles at /profile/<handle> remain unchanged.",
+    "Removed Profile and Settings & Preferences entries from the desktop header, avatar menu, mobile drawer, mobile bottom tabs, footer, and recent-route catalog; billing and image-library destinations remain available.",
+    "Removed the legacy developer-tab redirect and the dead settings route classification so no compatibility rule silently revives the retired destination.",
+    "Reconciled current navigation and image-boundary maintainer guides while preserving dated historical audit evidence as historical rather than current instructions."
+  ],
+  "validation": {
+    "production_build": "npm run build passed; the generated route manifest contains 163 pages and no /settings route.",
+    "typecheck": "npx tsc --noEmit passed after the production build regenerated route types.",
+    "lint": "npm run lint passed with zero errors and eight pre-existing warnings.",
+    "ux_detector": "Impeccable deterministic detector returned no findings for Navigation, MobileBottomNav, Footer, or footer styles.",
+    "security_navigation": "npm run test:image:security passed 55/55; node --import tsx --test scripts/test-url-navigation.ts passed 5/5.",
+    "preview_boundary": "npm run test:developer-preview passed 17/17.",
+    "public_asset_scan": "Source and rebuilt public/browser asset scans contain no /settings or /settings?tab=profile navigation references; /teams/settings remains an unrelated team-admin destination.",
+    "documentation_sync": "npm run docs:sync passed; affected Images, access, client-efficiency, and billing domains were reviewed explicitly."
+  },
+  "limits": [
+    "No live deployment or production browser acceptance is implied.",
+    "The underlying account-profile data schema remains intact for a future supported account surface; this change retires only the broken page and its navigation exposure."
+  ]
+}

@@ -50,7 +50,7 @@ const ACRONYM_MAP: Record<string, string> = {
 const ALLOWED_RECENT_ROUTE_PREFIXES = [
   '/about', '/docs', '/explore', '/faq', '/images',
   '/knowledge-base', '/keys', '/library', '/pricing', '/privacy', '/queues',
-  '/settings', '/status', '/teams', '/terms', '/billing',
+  '/status', '/teams', '/terms', '/billing',
 ];
 
 function isAllowedRecentHref(href: string): boolean {

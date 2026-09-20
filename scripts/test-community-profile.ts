@@ -13,7 +13,7 @@ test('public participant handles normalize safely and reject traversal-shaped va
   assert.equal(normalizePublicParticipantHandle(' SoraVale '), 'soravale');
   assert.equal(normalizePublicParticipantHandle('so'), null);
   assert.equal(normalizePublicParticipantHandle('sora/vale'), null);
-  assert.equal(normalizePublicParticipantHandle('../settings'), null);
+  assert.equal(normalizePublicParticipantHandle('../admin'), null);
   assert.equal(normalizePublicParticipantHandle(null), null);
   assert.equal(isValidPublicParticipantCursor('not-a-cursor'), false);
   assert.equal(

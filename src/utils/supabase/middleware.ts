@@ -85,7 +85,6 @@ function applySecurityHeaders(response: NextResponse, pathname: string): NextRes
     pathname.startsWith('/keys') ||
     pathname.startsWith('/queues') ||
     pathname.startsWith('/device') ||
-    pathname.startsWith('/settings') ||
     pathname === '/models/routing';
 
   if (isProtectedPath) {

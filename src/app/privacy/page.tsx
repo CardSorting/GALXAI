@@ -137,7 +137,7 @@ export default function PrivacyPolicyPage() {
               <span className="text-emerald-400 font-mono text-base">3.</span> Your Data Privacy Rights (GDPR &amp; CCPA)
             </h2>
             <p>
-              Depending on your jurisdiction, you have the right to request access to, correction of, or permanent erasure of your account metadata. You may export your billing data or terminate your account at any time from the account settings dashboard.
+              Depending on your jurisdiction, you have the right to request access to, correction of, or permanent erasure of your account metadata. You may export your billing data or request account termination through our support channels.
             </p>
           </section>
 

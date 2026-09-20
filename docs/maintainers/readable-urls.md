@@ -11,7 +11,6 @@ Private maintainer guide. This contract is implemented locally; [current operati
 | Create an image | `/images` | Legacy `view=create`, unknown or duplicate `view` resolves here |
 | My images | `/images/library` | `/images?view=library` permanently redirects here |
 | Favorite images | `/images/favorites` | `/images?view=favorites` permanently redirects here |
-| My account profile | `/settings?tab=profile` | Header, avatar menu and mobile tabs use the same private editable destination |
 | Public Star profile | `/profile/<handle>` | Star attribution and Explore discovery link to the same canonical public profile |
 | Billing tasks | `/billing`, `/billing/plan`, `/billing/credits`, `/billing/transactions`, `/billing/invoices`, `/billing/payment-methods` | [Billing page contract](../reference/billing-pages.md) retains old checkout URLs and section bookmarks |
 | Sign in | `/login` | `/auth/signin` permanently redirects here |
@@ -32,9 +31,9 @@ Star profile handles are lowercase public identifiers with a bounded
 alphanumeric/underscore/hyphen form. Public profile pages retain the shared
 product header and provide a breadcrumb back to Explore. They are discovery
 surfaces, not ordinary account-management surfaces; changing their navigation
-must not broaden access to private descendants or APIs. The ordinary Profile
-navigation uses `/settings?tab=profile`, and that query-backed selection must
-continue to work during same-page client navigation and Back/Forward.
+must not broaden access to private descendants or APIs. Private account-profile
+navigation is temporarily retired while its destination is unavailable; do not
+reintroduce a guessed public handle or an unverified private route.
 The profile header provides a native in-page jump to creations and shares only
 the canonical profile path, without carrying stream state or private metadata.
 

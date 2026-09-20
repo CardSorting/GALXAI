@@ -201,12 +201,6 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
-        source: "/settings",
-        has: [{ type: "query", key: "tab", value: "developer" }],
-        destination: "/keys",
-        permanent: false,
-      },
-      {
         source: "/gateway",
         destination: "/keys",
         permanent: true,

@@ -23,8 +23,6 @@ import {
   BookOpen,
   HelpCircle,
   Activity,
-  User,
-  Sliders,
   LogOut,
   Menu,
   X
@@ -36,8 +34,6 @@ const isProductRoute = (pathname: string) =>
   /^\/explore(?:\/|$)/.test(pathname) ||
   /^\/profile\/[a-z0-9][a-z0-9_-]{2,31}$/.test(pathname) ||
   isPublicReadingPath(pathname);
-
-const PROFILE_SETTINGS_PATH = '/settings?tab=profile';
 
 function NavigationFeedback({ label }: { label: string }) {
   const { pending } = useLinkStatus();
@@ -180,7 +176,6 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
   const isExploreActive = pathname === '/explore' || pathname.startsWith('/explore/') || pathname.startsWith('/profile/');
   const isPricingActive = pathname === '/pricing' || pathname.startsWith('/pricing/');
   const isDocsActive = pathname === '/docs' || pathname.startsWith('/docs/');
-  const isProfileActive = pathname === '/settings';
 
   return (
     <>
@@ -194,7 +189,7 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
             </Link>
           </div>
 
-          {/* Primary navigation: creation, discovery, plans, and personal profile. */}
+          {/* Primary navigation: creation, discovery, and plans. Account actions stay in the avatar menu. */}
           <nav aria-label="Main navigation" className={styles.desktopNav}>
             <Link
               href={IMAGE_PATHS.library}
@@ -223,14 +218,6 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
               <NavigationFeedback label="Pricing" />
             </Link>
 
-            <Link
-              href={PROFILE_SETTINGS_PATH}
-              className={styles.navLink}
-              aria-current={isProfileActive ? 'page' : undefined}
-            >
-              <span>Profile</span>
-              <NavigationFeedback label="Profile" />
-            </Link>
           </nav>
 
           {/* Quick Search Trigger Pill (⌘K) */}
@@ -293,16 +280,6 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
                     </div>
 
                     <Link
-                      href={PROFILE_SETTINGS_PATH}
-                      className={styles.accountLinkItem}
-                      role="menuitem"
-                      onClick={() => setIsAccountOpen(false)}
-                    >
-                      <User size={14} className="text-indigo-400" />
-                      <span>Profile</span>
-                    </Link>
-
-                    <Link
                       href={BILLING_PATHS.overview}
                       className={styles.accountLinkItem}
                       role="menuitem"
@@ -320,16 +297,6 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
                     >
                       <CreditCard size={14} className="text-sky-400" />
                       <span>Billing & Invoices</span>
-                    </Link>
-
-                    <Link
-                      href="/settings"
-                      className={styles.accountLinkItem}
-                      role="menuitem"
-                      onClick={() => setIsAccountOpen(false)}
-                    >
-                      <Sliders size={14} className="text-zinc-400" />
-                      <span>Settings & Preferences</span>
                     </Link>
 
                     <div className={styles.accountDivider} />
@@ -458,15 +425,6 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
                     >
                       <Compass size={18} aria-hidden="true" className="text-indigo-400" />
                       <span><strong>Explore</strong><small>See what the community is making</small></span>
-                    </Link>
-                    <Link
-                      href={PROFILE_SETTINGS_PATH}
-                      className={styles.drawerLink}
-                      aria-current={isProfileActive ? 'page' : undefined}
-                      onClick={closeMobileMenu}
-                    >
-                      <User size={18} aria-hidden="true" className="text-violet-300" />
-                      <span><strong>Profile</strong><small>Your personal account details</small></span>
                     </Link>
                   </div>
                 </div>

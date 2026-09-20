@@ -6,11 +6,11 @@ Private maintainer reference. Public discovery follows [product scope](PRODUCT_S
 
 ## Public navigation
 
-The top menu follows a compact social-product order everywhere: Images, Explore, Pricing and Profile, with account actions in a separate fixed-width slot. Profile always points to `/settings?tab=profile`, the authenticated account's private editable profile. The avatar menu and mobile bottom bar use that same destination; they never guess a public handle. Documentation and developer resources remain available through search, the mobile drawer, public reading navigation and footer without competing with the primary creation/discovery loop. The homepage leads with the image experience and keeps concise links to pricing, FAQ and guidance. Active links change color and background without changing their text weight or dimensions. Account loading, guest and signed-in states reserve the same space. Below 1100px the logo/account row sits above a horizontally scrollable, nonwrapping link row; at wider sizes all three regions occupy one row. A focus handler brings clipped links fully into view immediately when the row overflows.
+The top menu follows a compact social-product order everywhere: Images, Explore and Pricing. Signed-in account actions remain in the avatar menu for Account & Usage, Billing & Invoices and Sign out; the retired private profile surface is not advertised until a supported destination is available. Documentation and developer resources remain available through search, the mobile drawer, public reading navigation and footer without competing with the primary creation/discovery loop. The homepage leads with the image experience and keeps concise links to pricing, FAQ and guidance. Active links change color and background without changing their text weight or dimensions. Account loading, guest and signed-in states reserve the same space. Below 1100px the logo/account row sits above a horizontally scrollable, nonwrapping link row; at wider sizes all three regions occupy one row. A focus handler brings clipped links fully into view immediately when the row overflows.
 
 Public Star profiles are nested community destinations under `/profile/<handle>`.
-They remain discovery surfaces and are not the destination of the ordinary
-account Profile navigation. The shared header and mobile bottom bar keep Explore
+They remain discovery surfaces and are separate from private account management.
+The shared header and mobile bottom bar keep Explore
 selected on those routes. Stream attribution links, the profile breadcrumb
 and the full-stream link provide familiar entry and escape paths. Profile galleries preserve the same
 newest-first ordering across their initial render and continuation requests. The

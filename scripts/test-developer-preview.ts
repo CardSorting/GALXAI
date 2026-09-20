@@ -31,7 +31,7 @@ test('public dynamic profile chunks bypass preview without exposing private sibl
   for (const path of [
     '/_next/static/chunks/app/profile/%5Bhandle%5D/diagnostics/page-fixture.js',
     '/_next/static/chunks/app/profile/%5Bhandle%5D/private/page-fixture.js',
-    '/_next/static/chunks/app/settings/page-fixture.js',
+    '/_next/static/chunks/app/admin/page-fixture.js',
     '/_next/static/chunks/app/api/community/participants/%5Bhandle%5D/page-fixture.js',
   ]) {
     assert.equal(isPublicFrameworkAssetPath(path), false, path);

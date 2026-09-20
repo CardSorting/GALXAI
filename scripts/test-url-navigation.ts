@@ -12,7 +12,7 @@ test('readable login links round-trip nested destinations without query injectio
   assert.equal(authEntryPath('/sites'), '/login?next=/sites');
   assert.equal(authEntryPath('/images'), '/login');
   assert.equal(authEntryPath('/images/favorites', 'signup'), '/signup?next=/images/favorites');
-  for (const path of ['/sites?starter=portfolio&refine=1', '/billing#plan', '/device?code=A%26B', '/settings?tab=seats']) {
+  for (const path of ['/sites?starter=portfolio&refine=1', '/billing#plan', '/device?code=A%26B', '/images/library']) {
     const url = new URL(authEntryPath(path), 'https://galx.ai');
     assert.equal(url.searchParams.get('next'), path);
     assert.equal(url.hash, '');

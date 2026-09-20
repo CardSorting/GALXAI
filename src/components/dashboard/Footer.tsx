@@ -59,6 +59,11 @@ export function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href={IMAGE_PATHS.favorites} className={styles.footerLink}>
+                  <span>Favorites</span>
+                </Link>
+              </li>
+              <li>
                 <Link href="/explore" className={styles.footerLink}>
                   <span>Explore</span>
                 </Link>
@@ -87,22 +92,6 @@ export function Footer() {
               <li>
                 <Link href="/docs" className={styles.footerLink}>
                   <span>Documentation</span>
-                </Link>
-              </li>
-            </ul>
-          </nav>
-
-          <nav className={styles.navCol} aria-label="Account">
-            <h2 className={styles.colTitle}>Account</h2>
-            <ul className={styles.linkList}>
-              <li>
-                <Link href="/settings?tab=profile" className={styles.footerLink}>
-                  <span>Profile &amp; settings</span>
-                </Link>
-              </li>
-              <li>
-                <Link href={IMAGE_PATHS.favorites} className={styles.footerLink}>
-                  <span>Favorites</span>
                 </Link>
               </li>
             </ul>

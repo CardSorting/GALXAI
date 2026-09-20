@@ -10,7 +10,7 @@ const browser = await chromium.launch({ headless: true, executablePath: '/Applic
 const output = path.resolve('.impeccable/review/navigation');
 await fs.mkdir(output, { recursive: true });
 const results: unknown[] = [];
-const expected = ['Images', 'Explore', 'Pricing', 'Profile'];
+const expected = ['Images', 'Explore', 'Pricing'];
 const guestGeometry = new Map<number, unknown>();
 
 async function setup(width: number, signedIn: boolean, reduce = true) {
