@@ -8,7 +8,7 @@ import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { WebSocketServer, type WebSocket } from 'ws';
-import { StandardPoolScheduler } from '../src/relay/standard-pool-scheduler.js';
+import { SchedulerQueueError, StandardPoolScheduler } from '../src/relay/standard-pool-scheduler.js';
 import { PoolRuntime } from '../src/relay/pool-runtime.js';
 import { PoolExecution, type AssignedAccount } from '../src/relay/pool-execution.js';
 import { CentralClient, hash, type PoolId } from '../src/relay/pool-protocol.js';
@@ -121,6 +121,114 @@ test('recovery starts have a pool-wide budget while healthy work stays available
   scheduler.reconcile(new Set(['a','b','healthy']));now=4999;assert.equal(scheduler.reserve([b]),undefined);
   now=5000;const second=scheduler.reserve([a,b,healthy])!;assert.equal(second.candidate.id,'b');second.release();
   assert.equal(scheduler.reserve([a]),undefined);
+});
+
+test('image dispatch queues are bounded, per-owner fair, and release only after completion',async()=>{
+  const scheduler=new StandardPoolScheduler();
+  const candidate={id:'worker',lastUsedAtMs:0,availableSlots:1};
+  const active=scheduler.reserve([candidate],'images')!;
+  const first=scheduler.waitForAvailability('images','owner-a',{maxWaitMs:1000,maxQueueDepth:4,maxOwnerDepth:2});
+  const second=scheduler.waitForAvailability('images','owner-b',{maxWaitMs:1000,maxQueueDepth:4,maxOwnerDepth:2});
+  assert.equal(scheduler.queueDepth('images'),2);
+  active.release();
+  await first;
+  assert.equal(scheduler.queueDepth('images'),1);
+  const next=scheduler.reserve([candidate],'images')!;
+  next.release();
+  await second;
+  assert.equal(scheduler.queueDepth('images'),0);
+});
+
+test('image dispatch queue exposes only bounded internal backpressure and cancellation',async()=>{
+  const scheduler=new StandardPoolScheduler();
+  const active=scheduler.reserve([{id:'worker',lastUsedAtMs:0,availableSlots:1}],'images')!;
+  const queued=scheduler.waitForAvailability('images','owner',{maxWaitMs:20,maxQueueDepth:1,maxOwnerDepth:1});
+  await assert.rejects(
+    scheduler.waitForAvailability('images','owner-2',{maxWaitMs:100,maxQueueDepth:1,maxOwnerDepth:1}),
+    (error:unknown)=>error instanceof SchedulerQueueError && error.reason==='full',
+  );
+  await assert.rejects(queued,(error:unknown)=>error instanceof SchedulerQueueError && error.reason==='timeout');
+  const controller=new AbortController();
+  const cancelled=scheduler.waitForAvailability('images','owner',{maxWaitMs:1000,signal:controller.signal});
+  controller.abort();
+  await assert.rejects(cancelled,(error:unknown)=>error instanceof SchedulerQueueError && error.reason==='cancelled');
+  active.release();
+});
+
+test('image queue rechecks once per workload so non-image completion can reopen a shard',async()=>{
+  const scheduler=new StandardPoolScheduler();
+  const waiter=scheduler.waitForAvailability('images','owner',{maxWaitMs:250,maxQueueDepth:2,maxOwnerDepth:1,recheckMs:5});
+  await waiter;
+  assert.equal(scheduler.queueDepth('images'),0);
+});
+
+test('image requests stay off the worker until its prior generation response completes',async()=>{
+  const png='iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+  let calls=0;let firstResponse:http.ServerResponse|undefined;
+  const workerServer=http.createServer((_req,res)=>{
+    calls++;
+    if(calls===1){firstResponse=res;return;}
+    res.writeHead(200,{'Content-Type':'application/json'});res.end(JSON.stringify({data:[{b64_json:png}]}));
+  });
+  const workerOrigin=await listen(workerServer);
+  const account={id:'codex_sh_000000000000000000000001',revision:1,credentialRevision:hash('image-queue'),state:'enabled' as const,desktopId:randomUUID(),models:['image:gpt-image-2'],expiresAtMs:Date.now()+600000};
+  const engine={credentialRejected:()=>false,accountAvailability:()=>({eligible:true,lastUsedAtMs:0,recovering:false,availableSlots:1})};
+  const execution={epoch:'epoch',central:{identity:{pool:'premium'}},standardAvailable:()=>true,standardRecovering:()=>false,store:{call:async(action:string)=>{assert.equal(action,'lookup');return null;}}};
+  const runtime=new PoolRuntime(execution as any,hash('image-queue-wire'),'/unused');
+  (runtime as any).refreshedAt=Date.now();
+  (runtime as any).workers.set(account.id,{account,engine,port:Number(new URL(workerOrigin).port),key:hash('image-queue-inner'),failureCircuits:{}});
+  const origin=await listen(runtime.server);
+  const post=(id:string)=>fetch(origin+'/v1/images/generations',{method:'POST',headers:{Authorization:`Bearer ${hash('image-queue-wire')}`,'Content-Type':'application/json','x-galx-tenant':hash('image-owner'),'Idempotency-Key':id},body:JSON.stringify({model:'gpt-image-2',prompt:id,response_format:'b64_json'})});
+  let first!:Promise<Response>;let second!:Promise<Response>;
+  try{
+    first=post('first');await until(()=>calls===1);
+    second=post('second');await until(()=> (runtime as any).standard.queueDepth('images')===1);
+    assert.equal(calls,1);
+    firstResponse!.writeHead(200,{'Content-Type':'application/json'});firstResponse!.end(JSON.stringify({data:[{b64_json:png}]}));
+    assert.equal((await first).status,200);
+    await until(()=>calls===2);
+    assert.equal((await second).status,200);
+    assert.equal(calls,2);
+  } finally {
+    if(firstResponse && !firstResponse.writableEnded){firstResponse.writeHead(200,{'Content-Type':'application/json'});firstResponse.end(JSON.stringify({data:[{b64_json:png}]}));}
+    await Promise.allSettled([first,second].filter(Boolean));
+    (runtime as any).standard.close();
+    await close(runtime.server);await close(workerServer);
+  }
+});
+
+test('image occupancy is single-flight per shard without collapsing text capacity',async()=>{
+  const f=await fixture(1,'premium');
+  try{
+    const engine=f.engines[0] as any;
+    const shard=engine.shardsTable.get(f.accounts[0].id);
+    assert.equal(engine.accountAvailability('image:fixture-a',true).availableSlots,1);
+    assert.equal(engine.accountAvailability('fixture-a').availableSlots,4);
+    engine.shardsTable.put(f.accounts[0].id,{...shard,inFlight:1,imageInFlight:0});
+    assert.equal(engine.accountAvailability('image:fixture-a',true).availableSlots,1,'a text job does not consume the image single-flight slot');
+    assert.equal(engine.accountAvailability('fixture-a').availableSlots,3);
+    engine.shardsTable.put(f.accounts[0].id,{...shard,inFlight:1,imageInFlight:1});
+    assert.equal(engine.accountAvailability('image:fixture-a',true).availableSlots,0);
+    assert.equal(engine.accountAvailability('fixture-a').availableSlots,3);
+    (engine as any).installFleet([{id:shard.id,accessToken:shard.accessToken,accountId:shard.accountId}]);
+    assert.equal(engine.accountAvailability('image:fixture-a',true).availableSlots,0,'a registry refresh must not forget live image occupancy');
+  }finally{await f.cleanup();}
+});
+
+test('a registry refresh that temporarily omits an occupied shard cannot advertise it as free',async()=>{
+  const f=await fixture(1,'premium');
+  try{
+    const engine=f.engines[0] as any;
+    const shard=engine.acquireHealthyShard(undefined,'image:fixture-a',true);
+    assert(shard,'the authorized image trial should acquire the fixture shard');
+    assert.equal(engine.accountAvailability('image:fixture-a',true).availableSlots,0);
+    engine.installFleet([]);
+    assert.equal(engine.shardsTable.count(),0);
+    engine.installFleet([{id:shard.id,accessToken:shard.accessToken,accountId:shard.accountId}]);
+    assert.equal(engine.accountAvailability('image:fixture-a',true).availableSlots,0,'refresh must preserve process-owned image occupancy');
+    engine.releaseShard(shard.id,false,true);
+    assert.equal(engine.accountAvailability('image:fixture-a',true).availableSlots,1);
+  }finally{await f.cleanup();}
 });
 
 test('real Standard runtime admits one ongoing job per account and returns bounded private-free backpressure',async()=>{

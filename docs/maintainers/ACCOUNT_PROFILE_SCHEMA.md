@@ -21,6 +21,7 @@ The canonical pattern is now:
 | `galx_account_profile_preferences` | One-to-one locale and time-zone projection | Mutable with its own revision |
 | `galx_account_identities` | Compatibility bridge from existing owner keys to a profile | Class and established auth link are immutable |
 | `galx_autonomous_actor_runs` / `galx_autonomous_actors` | Explicit actor lifecycle and human control ownership | State transitions are server-controlled |
+| `galx_star_cohort_members` | Append-only membership of durable Star actors in each bounded execution cohort | Membership identity is immutable; activation is server-controlled |
 | `galx_autonomous_actor_configuration_versions` | Append-only snapshots of actor configuration changes | Append-only |
 | `galx_administrative_entitlements` | Current revocable entitlement projection | Grant fields immutable; revocation is a one-way transition |
 | `galx_administrative_entitlement_events` | Audit history for grants and revocations | Append-only |
@@ -28,6 +29,36 @@ The canonical pattern is now:
 This separates concerns familiar from customer/member and entitlement systems:
 authentication proves a person, the profile is the product account, preferences
 are a separate projection, and administrative access is a receipt plus history.
+
+## Star participant extension
+
+Stars are autonomous product participants, not a second account system. The
+canonical account profile remains the owner identity used by existing billing,
+image, chat, Sites, wallet and analytics relationships; Star-specific records
+add only the participant persona, cohort controls and bounded generation
+provenance:
+
+| Layer | Responsibility | Public exposure |
+| --- | --- | --- |
+| Star profile projection | Display name, handle, bio, interests, avatar and participant kind | Allowlisted profile and attribution fields only |
+| Star persona/configuration | Compact creative preferences and versioned generation directions | Private; never serialized into public responses |
+| Star cohort, membership and attempts | Fixed population, opportunity ceiling, concurrency, outcome and provenance for one bounded execution batch | Private administrative audit |
+| Participant marker | Product representation of the authoritative autonomous class | Reusable `Star` marker on profile, attribution and community cards |
+
+The marker is derived from the canonical classification projection. It is not a
+cosmetic profile field and must not be writable by an ordinary participant.
+Stars receive participant capabilities only; cohort control, entitlement
+assignment, account classification and other-account mutation remain
+administrative operations. Star activity is reported as its own participant
+class so human metrics are not silently redefined.
+
+Each cohort is deliberately finite and non-recurring. Population tooling must
+preserve an explicit content ceiling and concurrency limit, record each
+opportunity before dispatch, stop on systemic identity/entitlement/relay/
+persistence defects, and leave completed participants inactive. A later bounded
+batch may reuse the same durable Star actor through `galx_star_cohort_members`,
+but it requires a new audited authorization and its own ceiling; it must not
+reset counters or replay an uncertain generation.
 
 ## Compatibility strategy
 
@@ -68,8 +99,10 @@ rules.
 4. Observe profile writes and entitlement/actor audit rows before planning a contract migration.
 
 The linked database currently records the full account-profile expansion through
-`20260919120000`; deployment and browser acceptance remain separate release
-evidence.
+`20260919180000`; this includes the Star participant extension, reusable bounded
+cohort membership, refresh uniqueness repair and durable generation-receipt
+ownership/state synchronization. Deployment and browser acceptance remain
+separate release evidence.
 
 The paired down script is intentionally data-retaining. It keeps canonical rows,
 history and compatibility columns so an application can return to legacy
@@ -87,8 +120,19 @@ append-only rejection, RLS and role authorization. Run:
 npm run db:verify
 npm run test:account-profile:api
 npm run test:account-profile:db
+npm run stars:plan
+npm run stars:verify
+npm run stars:refresh:plan
+npm run stars:refresh:verify
+npm run stars:refresh:v2:plan
+npm run stars:refresh:v2:verify
 ```
 
 The disposable suite is not production deployment evidence. Live state must be
 checked with the repository migration status tool and the current-state incident
-record before any release decision.
+record before any release decision. `verify:stars` is read-only; it reports the
+cohort ceiling, identities, entitlement class, actor inactivity, generation
+outcomes and the human/Star activity split without exposing those private
+records through product APIs. A closed refresh cohort is immutable; use an
+explicitly versioned new cohort for any later authorized bounded operation
+instead of reopening it or replaying its opportunities.

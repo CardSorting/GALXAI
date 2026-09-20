@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { hasInternalAccess } from '../src/lib/security/internal-access';
+import { isPublicProductPath } from '../src/lib/security/preview-policy';
 import { GET as health } from '../src/app/api/health/route';
 
 test('administrator access fails closed for missing, user, and malformed credentials', () => {
@@ -23,6 +24,14 @@ test('public health does not enumerate infrastructure', async () => {
   assert.deepEqual(Object.keys(await response.json()).sort(), ['status', 'timestamp']);
   assert.equal(response.headers.get('x-galx-platform'), null);
   assert.equal(response.headers.get('cache-control'), 'no-store');
+});
+
+test('Star profiles and participant APIs are public product surfaces without broadening private routes', () => {
+  assert.equal(isPublicProductPath('/profile/veyrasol'), true);
+  assert.equal(isPublicProductPath('/api/community/participants/veyrasol'), true);
+  assert.equal(isPublicProductPath('/profile/../../settings'), false);
+  assert.equal(isPublicProductPath('/api/community/participants/invalid!'), false);
+  assert.equal(isPublicProductPath('/api/community/participants/veyrasol/diagnostics'), false);
 });
 
 test('operational routes reject anonymous and ordinary bearer callers before collecting data', async () => {

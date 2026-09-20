@@ -39,7 +39,10 @@ export const EXCLUSIVE_MODEL_CATALOG: ModelSpecItem[] = [
     id: 'galx-nova-image',
     upstreamId: 'gpt-image-2',
     name: 'GALX Nova-image',
-    provider: 'galx',
+    // PublicModelCatalog keeps the GALX-facing brand. Internally the managed
+    // image route is dispatched through the enrolled OpenAI OAuth relay
+    // accounts; this field is a credential-pool routing key, not public copy.
+    provider: 'openai',
     category: 'image',
     contextWindowTokens: 128_000,
     maxOutputTokens: 4_096,

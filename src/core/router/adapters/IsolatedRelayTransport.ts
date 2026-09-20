@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { executeRelayChat, RelayDispatchError, relayFailure } from './RelayChatTransport';
 import { sanitizeImageArtifact, decodeImageBase64 } from '../../../lib/security/image-artifact';
+import { relayCandidates, reportRelayFailure, resolveIsolatedRelay } from './RelayEndpointDiscovery';
 
 export const isolatedRelaysEnabled=()=>process.env.GALX_ISOLATED_RELAYS_ENABLED==='1';
 /** Images may be cut over independently, without changing text or Sites. */
@@ -18,17 +19,12 @@ const digest=(value:string)=>createHash('sha256').update(value).digest('hex');
 export function isolatedRelay(workload:'text'|'sites'|'images') {
   if (process.env.GALX_TEXT_RELAY_POOL === 'standard' || process.env.GALX_STANDARD_RELAY_URL || process.env.GALX_STANDARD_RELAY_KEY)
     throw new RelayDispatchError('invalid_configuration');
-  const endpoints=['PREMIUM'].map(pool=>{
-    try{
-      const url=new URL(process.env[`GALX_${pool}_RELAY_URL`]||'');const key=process.env[`GALX_${pool}_RELAY_KEY`]||'';
-      if(url.username||url.password||url.pathname!=='/'||url.search||url.hash||!(url.protocol==='https:'||url.protocol==='http:'&&['127.0.0.1','[::1]'].includes(url.hostname))||!/^[A-Za-z0-9_-]{32,256}$/.test(key))throw Error();
-      return {url:url.origin,key};
-    }catch{throw new RelayDispatchError('invalid_configuration');}
-  });
-  return endpoints[0];
+  const endpoint = relayCandidates('PREMIUM')[0];
+  if (!endpoint) throw new RelayDispatchError('invalid_configuration');
+  return endpoint;
 }
 export async function isolatedChat(payload:Record<string,any>,tenant:string,requestKey:string,onUsage:(usage:any)=>void) {
-  const result=await executeRelayChat({...isolatedRelay('text'),tenant,idempotencyKey:digest(requestKey),payload,ttftTimeoutMs:45000,idleTimeoutMs:45000,wallTimeoutMs:300000});
+  const result=await executeRelayChat({...await resolveIsolatedRelay('text'),tenant,idempotencyKey:digest(requestKey),payload,ttftTimeoutMs:45000,idleTimeoutMs:45000,wallTimeoutMs:300000});
   if(!payload.stream){const body=await result.response.json();onUsage(body.usage);return Response.json(body);}
   if(!result.response.body)throw new RelayDispatchError('missing_stream');
   // Observe only the final allowlisted usage event; forward existing bytes unchanged.
@@ -40,10 +36,22 @@ export async function isolatedChat(payload:Record<string,any>,tenant:string,requ
   }})),{headers:{'Content-Type':'text/event-stream','Cache-Control':'no-store'}});
 }
 export async function isolatedImage(payload:Record<string,unknown>,tenant:string,requestKey:string,signal?:AbortSignal) {
-  const relay=isolatedRelay('images');
-  const response=await fetch(new URL('/v1/images/generations',relay.url),{method:'POST',redirect:'error',signal:AbortSignal.any([AbortSignal.timeout(300000),...(signal?[signal]:[])]),
-    headers:{Authorization:`Bearer ${relay.key}`,'Content-Type':'application/json','x-galx-tenant':digest(tenant),'Idempotency-Key':digest(requestKey)},body:JSON.stringify({...payload,response_format:'b64_json'})});
-  if(!response.ok)throw await relayFailure(response,'image_unavailable');
+  const relay=await resolveIsolatedRelay('images');
+  let response: Response;
+  try {
+    response=await fetch(new URL('/v1/images/generations',relay.url),{method:'POST',redirect:'error',signal:AbortSignal.any([AbortSignal.timeout(300000),...(signal?[signal]:[])]),
+      headers:{Authorization:`Bearer ${relay.key}`,'Content-Type':'application/json','x-galx-tenant':digest(tenant),'Idempotency-Key':digest(requestKey)},body:JSON.stringify({...payload,response_format:'b64_json'})});
+  } catch (error) {
+    reportRelayFailure(relay);
+    throw error;
+  }
+  if(!response.ok) {
+    const failure=await relayFailure(response,'image_unavailable');
+    // A valid HTTP response proves this endpoint is reachable. Admission,
+    // capability and upstream outcomes belong to the worker/relay response;
+    // they must not poison endpoint discovery and hide healthy candidates.
+    throw failure;
+  }
   const reader=response.body?.getReader();if(!reader)throw new RelayDispatchError('invalid_image_response');
   const chunks:Uint8Array[]=[];let bytes=0;
   try{for(;;){const part=await reader.read();if(part.done)break;bytes+=part.value.length;if(bytes>32*1024*1024)throw new RelayDispatchError('invalid_image_response');chunks.push(part.value);}}

@@ -4064,6 +4064,18 @@
       "decision": null
     },
     {
+      "path": "docs/reference/stars.md",
+      "title": "Stars",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [
+        "knowledge"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": null
+    },
+    {
       "path": "docs/relay-security.md",
       "title": "Relay security reference",
       "scope": "current-guide",
@@ -4098,6 +4110,26 @@
       ],
       "curation": "assigned",
       "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/runbooks/relay-admission-lifecycle.md",
+      "title": "Relay admission lifecycle",
+      "scope": "current-guide",
+      "kind": "runbook",
+      "domains": [
+        "relay"
+      ],
+      "curation": "assigned",
+      "keywords": [
+        "admission",
+        "queue",
+        "lifecycle",
+        "dispatch",
+        "reservation",
+        "handoff",
+        "ambiguous"
+      ],
       "decision": null
     },
     {
@@ -4612,6 +4644,16 @@
     {
       "path": "post-mortem/incidents/2026/2026-09-19-account-profile/README.md",
       "title": "Canonical account-profile migration backfill",
+      "scope": "operational-record",
+      "kind": "navigation",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-09-19-stars/README.md",
+      "title": "Initial Star population containment",
       "scope": "operational-record",
       "kind": "navigation",
       "domains": [],

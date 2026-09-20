@@ -1,20 +1,54 @@
 import http from 'node:http';
 import { randomBytes } from 'node:crypto';
+import { performance } from 'node:perf_hooks';
 import path from 'node:path';
 import { once } from 'node:events';
 import { GalxaiRelayServer } from './relay-server.js';
 import { PoolExecution, type AssignedAccount, type ExecutionRecord } from './pool-execution.js';
-import { bearer, equalSecret, failure, hash, json, requestWorkload } from './pool-protocol.js';
+import { bearer, equalSecret, failure, hash, json, requestWorkload, type Workload } from './pool-protocol.js';
 import { RequestError, readJsonBody } from './request-policy.js';
 import { sanitizeImageArtifact } from '../lib/security/image-artifact.js';
 import { CODEX_IMAGE_ALIAS } from './image-compatibility.js';
 import { publicJob, publicUsage, boundedJson } from './pool-public-response.js';
 import { sitesContractRequest, sitesContractReply } from './sites-contract.js';
-import { StandardPoolScheduler } from './standard-pool-scheduler.js';
+import {
+  IMAGE_QUEUE_MAX_DEPTH,
+  IMAGE_QUEUE_MAX_PER_OWNER,
+  IMAGE_QUEUE_MAX_WAIT_MS,
+  IMAGE_QUEUE_RECHECK_MS,
+  SchedulerQueueError,
+  StandardPoolScheduler,
+} from './standard-pool-scheduler.js';
 import { functionCalls } from './function-tools.js';
 import { RequestBulkhead } from './request-bulkhead.js';
+import { AdmissionLifecycle } from './admission-lifecycle.js';
+import { AdmissionEventBuffer, type AdmissionEventName, type AdmissionEventReason } from './admission-observability.js';
+import {
+  decodePrivateRelayFailure,
+  MAX_PRIVATE_RETRY_AFTER_MS,
+  privateRelayFailure,
+  retryAfterSeconds,
+  PRIVATE_RELAY_FAILURE_HEADER,
+  type PrivateRelayFailure,
+} from './private-failure.js';
 
-type Worker = {account:AssignedAccount;engine:GalxaiRelayServer;key:string;port:number};
+interface WorkerCircuit {
+  consecutiveFailures: number;
+  openUntilMs: number;
+  lastClass?: PrivateRelayFailure['class'];
+}
+
+type Worker = {
+  account:AssignedAccount;
+  engine:GalxaiRelayServer;
+  key:string;
+  port:number;
+  /** Per-worker, per-workload circuit state. Never part of public DTOs. */
+  failureCircuits?: Partial<Record<Workload, WorkerCircuit>>;
+};
+
+const WORKER_CIRCUIT_MAX_MS = MAX_PRIVATE_RETRY_AFTER_MS;
+
 export class PoolRuntime {
   readonly server: http.Server;
   private workers = new Map<string,Worker>();
@@ -28,9 +62,61 @@ export class PoolRuntime {
     const age=Date.now()-this.refreshedAt;
     return !this.stopped && age>=0 && age<20000 && [...this.workers.values()].some(w=>!w.engine.credentialRejected());
   }
-  constructor(readonly execution: PoolExecution, private readonly inferenceKey: string, private readonly stateDirectory: string, private readonly capabilityKey?: string) {
+  private workerCircuit(worker: Worker, workload: Workload): WorkerCircuit | undefined {
+    return worker.failureCircuits?.[workload];
+  }
+  private workerCircuitOpen(worker: Worker, workload: Workload, now = Date.now()): boolean {
+    const circuit = this.workerCircuit(worker, workload);
+    return Boolean(circuit && circuit.openUntilMs > now);
+  }
+  private noteWorkerFailure(worker: Worker, workload: Workload, failure: PrivateRelayFailure): void {
+    if (failure.scope !== 'worker') return;
+    const circuits = worker.failureCircuits ??= {};
+    const previous = circuits[workload];
+    const consecutiveFailures = (previous?.consecutiveFailures ?? 0) + 1;
+    const fallback = failure.class === 'capability_denied' ? 120_000
+      : failure.class === 'capability_temporarily_unavailable' ? 30_000
+        : failure.class === 'pre_generation_rejected' || failure.class === 'rate_limited' ? 30_000
+          : failure.class === 'upstream_timeout' ? 10_000
+            : failure.class === 'invalid_upstream_response' ? 30_000
+              : 5_000;
+    const exponential = Math.min(WORKER_CIRCUIT_MAX_MS, fallback * 2 ** Math.min(4, consecutiveFailures - 1));
+    const retryAfterMs = Math.min(WORKER_CIRCUIT_MAX_MS, Math.max(failure.retryAfterMs ?? 0, exponential));
+    circuits[workload] = {
+      consecutiveFailures,
+      openUntilMs: Date.now() + retryAfterMs,
+      lastClass: failure.class,
+    };
+  }
+  private clearWorkerFailure(worker: Worker, workload: Workload): void {
+    const circuit = this.workerCircuit(worker, workload);
+    // A newer quarantine observed while this request was already executing
+    // belongs to the worker, not to this older success. Let its cooldown
+    // expire or be explicitly replaced before future eligibility changes.
+    if (circuit && circuit.openUntilMs > Date.now()) return;
+    if (worker.failureCircuits) delete worker.failureCircuits[workload];
+  }
+  constructor(
+    readonly execution: PoolExecution,
+    private readonly inferenceKey: string,
+    private readonly stateDirectory: string,
+    private readonly capabilityKey?: string,
+    private readonly admissionEvents = new AdmissionEventBuffer(),
+  ) {
     this.server = http.createServer((req,res)=>void this.route(req,res).catch(error=>{ if (!res.headersSent) failure(res,error); else res.destroy(); }));
     this.server.requestTimeout=15000; this.server.maxHeadersCount=40;
+  }
+  private observeAdmission(admission: AdmissionLifecycle, name: AdmissionEventName, targetId?: string, reason?: AdmissionEventReason): void {
+    this.admissionEvents.record({ requestId: admission.requestId, workload: admission.workload, name, state: admission.state,
+      ...(targetId ? { targetId } : {}), ...(reason ? { reason } : {}), queuePasses: admission.queuePasses });
+  }
+  private terminalAdmissionReason(admission: AdmissionLifecycle): AdmissionEventReason | undefined {
+    if (admission.state === 'cancelled') return 'cancelled';
+    if (admission.state === 'timed_out') return 'deadline_expired';
+    if (admission.dispatchOutcome === 'ambiguous') return 'ambiguous_dispatch';
+    if (admission.state === 'rejected') return 'no_compatible_candidate';
+    if (admission.state === 'failed') return 'unknown';
+    return undefined;
   }
   async start(port=3001, host='0.0.0.0') {
     await this.execution.store.call('identity');
@@ -76,7 +162,7 @@ export class PoolRuntime {
             pool:central.identity.pool,jobId:context.jobId,status:d.status,code:d.code,parameter:d.parameter,reason:d.reason})),
           shardConcurrency:central.identity.pool==='standard'?1:4,
           stateSnapshotPath:path.join(this.stateDirectory,a.id,'relay.json')});
-        try { await engine.start(); this.workers.set(a.id,{account:a,engine,key,port:engine.listeningPort()}); }
+        try { await engine.start(); this.workers.set(a.id,{account:a,engine,key,port:engine.listeningPort(),failureCircuits:{}}); }
         catch { await engine.stop().catch(()=>{}); throw Error('Worker unavailable.'); }
       }
       // Disabled accounts are acknowledged only once the old engine is stopped. Enabled accounts require a running engine.
@@ -104,8 +190,12 @@ export class PoolRuntime {
       if (!model || !/^[a-zA-Z0-9._:-]{1,128}$/.test(model)) throw new RequestError(400, 'invalid_request', 'Specify a valid image model.');
       let available:boolean|null=false;
       if(this.execution.central.identity.pool==='premium'&&ready) {
-        const checks=[...this.workers.values()].map(w=>w.engine.imageAvailability());
-        available=checks.includes(true)?true:checks.includes(null)?null:false;
+        const checks=[...this.workers.values()]
+          .filter(w=>!this.workerCircuitOpen(w,'images'))
+          .map(w=>w.engine.imageAvailability());
+        // An open worker circuit is temporary evidence, not proof that the
+        // account permanently lacks image capability.
+        available=checks.length===0?null:checks.includes(true)?true:checks.includes(null)?null:false;
       }
       return json(res,200,{available});
     }
@@ -120,11 +210,22 @@ export class PoolRuntime {
     const generation=req.method==='POST' && ['/v1/chat/completions','/v1/images/generations'].includes(pathname);
     const job=/^\/v1\/jobs\/([\w-]{1,96})(?:\/(stream|receipt|cancel))?$/.exec(pathname);
     if (!generation && !(job && (req.method==='GET' || req.method==='POST' && job[2]==='cancel'))) throw new RequestError(404,'not_found','Not found.');
-    let worker:Worker|undefined, body:Record<string,any>|undefined, lock:string|undefined;
-    let releaseSelection: (() => unknown) | undefined, ownsLock=false;
+    let worker:Worker|undefined, body:Record<string,any>|undefined, lock:string|undefined, workload:Workload|undefined;
+    const attemptedWorkerIds = new Set<string>();
+    let admission:AdmissionLifecycle|undefined, ownsLock=false;
     let releaseRequest: (() => void) | undefined;
     let releaseStream: (() => void) | undefined;
-    let provenNew = false, forwarded = false;
+    const queueAbort = generation ? new AbortController() : undefined;
+    let reselectWorker: (() => Promise<Worker | undefined>) | undefined;
+    const abortQueueWait = () => {
+      admission?.clientDisconnected();
+      queueAbort?.abort();
+    };
+    if (queueAbort) {
+      req.once('aborted', abortQueueWait);
+      res.once('close', abortQueueWait);
+    }
+    let provenNew = false;
     try {
       // Bound body parsing and dependency lookups before allocating their buffers/queries.
       // Recovery reads/cancel have a separate allowance from new submissions.
@@ -138,24 +239,28 @@ export class PoolRuntime {
         if (!releaseStream) { res.setHeader('Retry-After','5'); throw new RequestError(503,'service_busy','This service is busy. Try again shortly.'); }
       }
       if (generation) {
-        body=await readJsonBody(req,1024*1024,10000); const workload=requestWorkload(this.execution.central.identity.pool,pathname,body);
+        body=await readJsonBody(req,1024*1024,10000); workload=requestWorkload(this.execution.central.identity.pool,pathname,body);
         if (!ready) throw new RequestError(503,'service_unavailable','This service is temporarily unavailable.');
         const key=req.headers['idempotency-key'];
         if (typeof key!=='string'||!/^[\x21-\x7e]{1,128}$/.test(key)) throw new RequestError(400,'request_key_required','Supply an Idempotency-Key.');
         lock=hash(JSON.stringify([tenantSha256,workload,key]));
+        admission=new AdmissionLifecycle(lock,tenantSha256,workload);
+        this.observeAdmission(admission, 'received');
         if (this.pending.has(lock)) throw new RequestError(409,'request_in_progress','Check the existing request.');
         if (this.pending.size>=128) throw new RequestError(429,'busy','Try again shortly.');
         this.pending.add(lock); ownsLock=true;
         const previous:ExecutionRecord|null=await this.execution.store.call('lookup',{requestKey:lock,tenantSha256});
         // Lookup can outlive the caller or the projection. Do not spend a new grant
         // for abandoned work, or use a readiness decision made before this await.
-        if (req.aborted || res.destroyed) return;
+        if (req.aborted || res.destroyed) { admission.clientDisconnected(); return; }
         if (previous) {
           if (previous.requestSha256!==hash(JSON.stringify(body))) throw new RequestError(409,'idempotency_conflict','This request key was already used.');
           if (previous.epoch!==this.execution.epoch || previous.workload==='images' || !this.workers.has(previous.accountId)) throw new RequestError(409,'result_unconfirmed','The original result is unavailable. Do not repeat this request.');
+          admission.reject();
           return json(res,202,{id:previous.executionId,status:previous.state==='running'?'running':previous.state==='completed'?'completed':'failed',statusUrl:`/v1/jobs/${previous.executionId}`,streamUrl:`/v1/jobs/${previous.executionId}/stream`});
         }
         provenNew = true;
+        if (workload==='images') admission.setDeadline(performance.now()+IMAGE_QUEUE_MAX_WAIT_MS);
         if (body.require_output_limit === true) throw new RequestError(400,'capability_unavailable','This request requires an unavailable capability.');
         if (workload === 'text') {
           if (Buffer.byteLength(JSON.stringify({messages:body.messages,tools:body.tools})) > 262144)
@@ -165,55 +270,191 @@ export class PoolRuntime {
         }
         if (!this.ready()) throw new RequestError(503,'service_unavailable','This service is temporarily unavailable.');
         const model=body.model ?? 'gpt-5.6-terra'; const capability=workload==='images'?`image:${model}`:model;
-        const candidates=[...this.workers.values()].filter(w=>!w.engine.credentialRejected() && (w.account.models.includes(capability) || workload==='images' && this.execution.central.identity.pool==='premium' && model===CODEX_IMAGE_ALIAS.requestedModel));
-        {
-          const now=Date.now();
-          const eligible=candidates.flatMap(w=>{
-            if (w.account.expiresAtMs<=now+30000 || (w.account.cooldownUntilMs??0)>now || !this.execution.standardAvailable(w.account.id,now)) return [];
-            const state=w.engine.accountAvailability(capability, workload==='images' && model===CODEX_IMAGE_ALIAS.requestedModel);
-            return state.eligible?[{id:w.account.id,lastUsedAtMs:state.lastUsedAtMs,availableSlots:state.availableSlots,recovering:state.recovering||this.execution.standardRecovering(w.account.id),worker:w}]:[];
-          });
-          const selection=this.standard.reserve(eligible);
-          worker=selection?.candidate.worker; releaseSelection=selection?.release;
-          if (!worker) {
-            res.setHeader('Retry-After','5');
-            throw new RequestError(503,'service_busy','This service is busy. Try again shortly.');
+        const generationAdmission = admission;
+        reselectWorker = async (): Promise<Worker | undefined> => {
+          for (;;) {
+            if (!generationAdmission.queue()) return;
+            if (attemptedWorkerIds.size) this.observeAdmission(generationAdmission, 'reselection_started', undefined, 'excluded_target');
+            if (!this.ready()) throw new RequestError(503,'service_unavailable','This service is temporarily unavailable.');
+            const now=Date.now();
+            const candidates=[...this.workers.values()].filter(w=>{
+              this.observeAdmission(generationAdmission, 'candidate_evaluated', w.account.id);
+              const reason: AdmissionEventReason | undefined = attemptedWorkerIds.has(w.account.id) ? 'excluded_target'
+                : w.engine.credentialRejected() ? 'credential_rejected'
+                  : this.workerCircuitOpen(w,workload!,now) ? 'cooling_or_quarantined'
+                    : (w.account.models.includes(capability) || workload==='images' && this.execution.central.identity.pool==='premium' && model===CODEX_IMAGE_ALIAS.requestedModel)
+                      ? undefined : 'capability_mismatch';
+              if (reason) this.observeAdmission(generationAdmission, 'candidate_rejected', w.account.id, reason);
+              return !reason;
+            });
+            const states=candidates.flatMap(w=>{
+              if (w.account.expiresAtMs<=now+30000) {
+                this.observeAdmission(generationAdmission, 'candidate_rejected', w.account.id, 'not_ready');
+                return [];
+              }
+              if ((w.account.cooldownUntilMs??0)>now) {
+                this.observeAdmission(generationAdmission, 'candidate_rejected', w.account.id, 'cooling_or_quarantined');
+                return [];
+              }
+              if (!this.execution.standardAvailable(w.account.id,now)) {
+                this.observeAdmission(generationAdmission, 'candidate_rejected', w.account.id, 'workload_capacity_unavailable');
+                return [];
+              }
+              const state=w.engine.accountAvailability(capability, workload==='images' && model===CODEX_IMAGE_ALIAS.requestedModel);
+              return [{worker:w,state}];
+            });
+            for (const {worker:w,state} of states) if (!state.eligible) {
+              const reason: AdmissionEventReason = state.availableSlots===0 ? 'occupied' : state.recovering ? 'cooling_or_quarantined' : 'not_ready';
+              this.observeAdmission(generationAdmission, 'candidate_rejected', w.account.id, reason);
+            }
+            const eligible=states.filter(({state})=>state.eligible).map(({worker:w,state})=>({
+              id:w.account.id,lastUsedAtMs:state.lastUsedAtMs,
+              // Image POSTs are single-flight per worker/shard. Text and Sites
+              // retain their independently advertised capacity.
+              availableSlots:workload==='images'?Math.min(1,state.availableSlots):state.availableSlots,
+              recovering:state.recovering||this.execution.standardRecovering(w.account.id),worker:w,
+            }));
+            const selection=this.standard.reserve(eligible,workload);
+            const reservationReason: AdmissionEventReason | undefined = selection ? undefined : eligible.length ? 'occupied' : 'reservation_unavailable';
+            this.observeAdmission(generationAdmission, 'reservation_attempted', selection?.candidate.worker.account.id, reservationReason);
+            if (selection && generationAdmission.admit(selection)) {
+              this.observeAdmission(generationAdmission, 'reservation_acquired', selection.candidate.worker.account.id);
+              return selection.candidate.worker;
+            }
+            if (selection) this.observeAdmission(generationAdmission, 'reservation_rejected', selection.candidate.worker.account.id,
+              generationAdmission.state === 'cancelled' ? 'cancelled' : generationAdmission.state === 'timed_out' ? 'deadline_expired' : 'reservation_unavailable');
+            if (generationAdmission.isTerminal) return;
+
+            // Queue only while a known image-capable worker is capacity-blocked.
+            // Capability loss, cooldowns and worker circuits fail this attempt
+            // normally instead of turning a systemic defect into a long wait.
+            const imageCapacityBlocked=workload==='images' && (eligible.length>0 || states.some(({state})=>state.availableSlots===0));
+            if (!imageCapacityBlocked) {
+              this.observeAdmission(generationAdmission, 'candidate_rejected', undefined, 'no_compatible_candidate');
+              res.setHeader('Retry-After','5');
+              throw new RequestError(503,'service_busy','This service is busy. Try again shortly.');
+            }
+            const remainingQueueMs=generationAdmission.remainingWaitMs() ?? IMAGE_QUEUE_MAX_WAIT_MS;
+            if (remainingQueueMs<1) {
+              res.setHeader('Retry-After','5');
+              throw new RequestError(503,'service_busy','This service is busy. Try again shortly.');
+            }
+            try {
+              await this.standard.waitForAvailability('images',tenantSha256,{
+                maxWaitMs:Math.min(IMAGE_QUEUE_MAX_WAIT_MS,remainingQueueMs),maxQueueDepth:IMAGE_QUEUE_MAX_DEPTH,maxOwnerDepth:IMAGE_QUEUE_MAX_PER_OWNER,
+                recheckMs:IMAGE_QUEUE_RECHECK_MS,
+                signal:queueAbort?.signal,
+              });
+            } catch (error) {
+              if (error instanceof SchedulerQueueError && error.reason==='cancelled' && (req.aborted || res.destroyed)) {
+                generationAdmission.cancel();
+                return;
+              }
+              if (error instanceof SchedulerQueueError && error.reason==='timeout') generationAdmission.timeout();
+              else if (error instanceof SchedulerQueueError && error.reason==='full') generationAdmission.reject();
+              res.setHeader('Retry-After','5');
+              throw new RequestError(error instanceof SchedulerQueueError && error.reason==='full'?429:503,'service_busy','This service is busy. Try again shortly.');
+            }
+            if (req.aborted || res.destroyed) { generationAdmission.clientDisconnected(); return; }
           }
-        }
+        };
+        worker=await reselectWorker();
+        if (!worker) return;
       } else {
         const saved:ExecutionRecord|null=await this.execution.store.call('lookup',{executionId:job![1],tenantSha256});
         if (!saved) throw new RequestError(404,'not_found','Request not found.');
         if (saved.epoch!==this.execution.epoch) throw new RequestError(409,'result_unconfirmed','The original result is unavailable. Do not repeat this request.');
+        workload=saved.workload;
         worker=this.workers.get(saved.accountId);
       }
-      if (!worker) throw new RequestError(503,'service_unavailable','This service is temporarily unavailable.');
-      forwarded = true;
-      const response=await fetch(`http://127.0.0.1:${worker.port}${pathname}`,{method:req.method,redirect:'error',signal:AbortSignal.timeout(310000),
-        headers:{Authorization:`Bearer ${worker.key}`,'Content-Type':'application/json','x-galx-tenant':delegated,
-          ...(typeof req.headers['idempotency-key']==='string'?{'idempotency-key':req.headers['idempotency-key']}:{}),
-          ...(typeof req.headers['last-event-id']==='string'?{'last-event-id':req.headers['last-event-id']}: {})},body:body?JSON.stringify(body):req.method==='POST'?'{}':undefined});
-      if (!response.ok) { await response.body?.cancel(); throw new RequestError([400,403,404,409,429].includes(response.status)?response.status:503,'request_unavailable','The request could not be completed. Check its status before retrying.'); }
-      if (response.headers.get('content-type')?.includes('text/event-stream')) {
-        releaseRequest?.(); releaseRequest=undefined;
-        return await this.stream(response,res);
+      for (;;) {
+        if (!worker) {
+          admission?.reject();
+          throw new RequestError(503,'service_unavailable','This service is temporarily unavailable.');
+        }
+        if (admission && !admission.beginDispatch()) {
+          this.observeAdmission(admission, 'reservation_rejected', worker.account.id,
+            admission.state === 'cancelled' ? 'cancelled' : admission.state === 'timed_out' ? 'deadline_expired' : 'reservation_unavailable');
+          return;
+        }
+        attemptedWorkerIds.add(worker.account.id);
+        if (admission) {
+          this.observeAdmission(admission, 'dispatch_started', worker.account.id);
+          this.observeAdmission(admission, 'worker_pregrant_started', worker.account.id);
+        }
+        let response:Response;
+        try {
+          response=await fetch(`http://127.0.0.1:${worker.port}${pathname}`,{method:req.method,redirect:'error',signal:AbortSignal.timeout(310000),
+            headers:{Authorization:`Bearer ${worker.key}`,'Content-Type':'application/json','x-galx-tenant':delegated,
+              ...(typeof req.headers['idempotency-key']==='string'?{'idempotency-key':req.headers['idempotency-key']}:{}),
+              ...(typeof req.headers['last-event-id']==='string'?{'last-event-id':req.headers['last-event-id']}: {})},body:body?JSON.stringify(body):req.method==='POST'?'{}':undefined});
+        } catch {
+          const observed=privateRelayFailure({class:'worker_unavailable',scope:'worker',retryAfterMs:5000});
+          this.noteWorkerFailure(worker,workload ?? 'text',observed);
+          res.setHeader('Retry-After',String(retryAfterSeconds(observed)));
+          throw new RequestError(503,'request_unavailable','The request could not be completed. Check its status before retrying.');
+        }
+        admission?.resolveDispatch();
+        if (!response.ok) {
+          const observed=decodePrivateRelayFailure(response.headers.get(PRIVATE_RELAY_FAILURE_HEADER))
+            ?? (workload === 'images' ? privateRelayFailure({class:'unknown',scope:'worker',retryAfterMs:5000}) : undefined);
+          await response.body?.cancel();
+          if (observed) {
+            this.noteWorkerFailure(worker,workload ?? 'text',observed);
+            const canFailover = workload === 'images'
+              && observed.scope === 'worker'
+              && observed.class === 'pre_generation_rejected';
+            if (canFailover && admission) this.observeAdmission(admission, 'worker_pregrant_rejected', worker.account.id, 'worker_pregrant_rejected');
+            if (canFailover && admission?.handoffAfterTargetRejection()) {
+              worker = await reselectWorker?.();
+              if (!worker) return;
+              // The admission object remains authoritative. Its handoff
+              // released A's reservation and preserved the original deadline;
+              // the outer selection loop revalidates B before dispatch.
+              continue;
+            }
+            const retry=retryAfterSeconds(observed); if (retry) res.setHeader('Retry-After',String(retry));
+            const code=observed.scope==='fleet' ? 'relay_fleet_unavailable' : 'request_unavailable';
+            admission?.fail();
+            throw new RequestError([400,403,404,409,429].includes(response.status)?response.status:503,code,'The request could not be completed. Check its status before retrying.');
+          }
+          admission?.fail();
+          throw new RequestError([400,403,404,409,429].includes(response.status)?response.status:503,'request_unavailable','The request could not be completed. Check its status before retrying.');
+        }
+        if (workload) this.clearWorkerFailure(worker,workload);
+        if (response.headers.get('content-type')?.includes('text/event-stream')) {
+          releaseRequest?.(); releaseRequest=undefined;
+          await this.stream(response,res);
+          admission?.complete();
+          return;
+        }
+        const data=await boundedJson(response,pathname.includes('/images/')?32*1024*1024:18*1024*1024);
+        if (pathname.includes('/images/')) {
+          const artifact=await sanitizeImageArtifact(Buffer.from(data.data?.[0]?.b64_json ?? '','base64'));
+          if (body?.response_format==='b64_json') { json(res,200,{created:Math.floor(Date.now()/1000),data:[{b64_json:artifact.bytes.toString('base64')}]}); admission?.complete(); return; }
+          res.writeHead(200,{'Content-Type':artifact.contentType,'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});res.end(artifact.bytes);admission?.complete();return;
+        }
+        json(res,response.status,publicJob(data)); admission?.complete(); return;
       }
-      const data=await boundedJson(response,pathname.includes('/images/')?32*1024*1024:18*1024*1024);
-      if (pathname.includes('/images/')) {
-        const artifact=await sanitizeImageArtifact(Buffer.from(data.data?.[0]?.b64_json ?? '','base64'));
-        if (body?.response_format==='b64_json') return json(res,200,{created:Math.floor(Date.now()/1000),data:[{b64_json:artifact.bytes.toString('base64')}]});
-        res.writeHead(200,{'Content-Type':artifact.contentType,'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});res.end(artifact.bytes);return;
-      }
-      return json(res,response.status,publicJob(data));
     } catch (error) {
+      if (admission && !admission.isTerminal) admission.fail();
       if (!generation || res.headersSent) throw error;
-      const state = provenNew && !forwarded ? 'not_accepted' : 'unknown';
+      const state = provenNew && admission?.knownNotDispatched ? 'not_accepted' : 'unknown';
       res.setHeader('X-Should-Retry', state === 'not_accepted' &&
         (!(error instanceof RequestError) || [429,503].includes(error.status)) ? 'true' : 'false');
       return json(res,error instanceof RequestError ? error.status : 503,{error:{
         code:error instanceof RequestError ? error.code : 'request_unavailable',
         message:error instanceof RequestError ? error.message : 'Check the existing request before continuing.',execution_state:state,
       }});
-    } finally { releaseStream?.(); releaseRequest?.(); releaseSelection?.(); if (ownsLock && lock) this.pending.delete(lock); }
+    } finally {
+      if (queueAbort) {
+        req.off('aborted', abortQueueWait);
+        res.off('close', abortQueueWait);
+      }
+      if (admission) this.observeAdmission(admission, 'terminal', undefined, this.terminalAdmissionReason(admission));
+      admission?.cleanup();
+      releaseStream?.(); releaseRequest?.(); if (ownsLock && lock) this.pending.delete(lock);
+    }
   }
   private async stream(response:Response,res:http.ServerResponse) {
     res.writeHead(200,{'Content-Type':'text/event-stream','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});
@@ -229,5 +470,5 @@ export class PoolRuntime {
       }}res.end();
     } finally {res.off('close',close);await reader.cancel().catch(()=>{});}
   }
-  async stop(){this.stopped=true;clearTimeout(this.timer);this.refreshedAt=0;this.server.close();await this.syncing?.catch(()=>{});await Promise.all([...this.workers.values()].map(w=>w.engine.stop()));this.workers.clear();this.execution.stop();await this.execution.settlePending().catch(()=>{});}
+  async stop(){this.stopped=true;clearTimeout(this.timer);this.refreshedAt=0;this.standard.close();this.server.close();await this.syncing?.catch(()=>{});await Promise.all([...this.workers.values()].map(w=>w.engine.stop()));this.workers.clear();this.execution.stop();await this.execution.settlePending().catch(()=>{});}
 }

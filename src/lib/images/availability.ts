@@ -1,11 +1,13 @@
-import { isolatedRelay, isolatedImagesEnabled } from '../../core/router/adapters/IsolatedRelayTransport';
+import { isolatedImagesEnabled } from '../../core/router/adapters/IsolatedRelayTransport';
+import { resolveIsolatedRelay } from '../../core/router/adapters/RelayEndpointDiscovery';
 export type ImageAvailability = 'available' | 'unavailable' | 'unknown';
 
 /** Advisory read only. An outage or malformed response never establishes readiness. */
 export async function readImageAvailability(fetcher = fetch): Promise<ImageAvailability> {
-  let selected:ReturnType<typeof isolatedRelay>|undefined;
-  try { selected=isolatedImagesEnabled()?isolatedRelay('images'):undefined; }
+  let selected:Awaited<ReturnType<typeof resolveIsolatedRelay>>|undefined;
+  try { selected=isolatedImagesEnabled()?await resolveIsolatedRelay('images',{fetcher,cache:fetcher===globalThis.fetch}):undefined; }
   catch { return 'unknown'; }
+  if (selected?.availability) return selected.availability;
   const origin = selected?.url || process.env.VM_RELAY_URL || process.env.GALXAI_RELAY_URL || process.env.RELAY_URL;
   const key = selected?.key || process.env.VM_RELAY_API_KEY || process.env.RELAY_API_KEYS?.split(',')[0]?.trim();
   if (!origin || !key) return 'unknown';

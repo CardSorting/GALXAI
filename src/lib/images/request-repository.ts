@@ -101,7 +101,7 @@ export class ImageRequestRepository {
         THEN jsonb_build_object('failureCode','generation_not_started') ELSE '{}'::jsonb END,updated_at=now()
       WHERE user_id=$1 AND id=$2::uuid AND state='generating' RETURNING id
     ) UPDATE private.galx_free_generation_usage SET released=true,capacity_settled=true
-      WHERE $3::boolean AND user_id=$1::uuid AND kind='image'
+      WHERE $3::boolean AND user_id::text=$1 AND kind='image'
         AND operation_id IN (SELECT id::text FROM failed)`, [owner,id,notStarted]);
   }
 
@@ -112,7 +112,7 @@ export class ImageRequestRepository {
       UPDATE private.galx_image_requests SET state='cancelled',payload='{}'::jsonb,updated_at=now()
       WHERE user_id=$1 AND id=$2::uuid AND state='queued' RETURNING id
     ), released AS (UPDATE private.galx_free_generation_usage SET released=true,capacity_settled=true
-      WHERE user_id=$1::uuid AND kind='image' AND operation_id IN (SELECT id::text FROM cancelled) RETURNING operation_id)
+      WHERE user_id::text=$1 AND kind='image' AND operation_id IN (SELECT id::text FROM cancelled) RETURNING operation_id)
       SELECT id FROM cancelled`, [owner,id])).rowCount === 1;
   }
 }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { executePostgresQuery } from '@/lib/db/postgres';
 import { GalxCryptoVault } from '@/core/vault/GalxCryptoVault';
+import type { ParticipantKind } from '@/components/community/ParticipantIdentity';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -17,6 +18,12 @@ export interface PublicFeedItem {
   likes_count?: number;
   remix_count?: number;
   views_count?: number;
+  author: {
+    displayName: string;
+    handle: string | null;
+    avatarUrl: string | null;
+    participantKind: ParticipantKind;
+  };
 }
 
 const ALLOWED_ASPECT_RATIOS = new Set(['1:1', '16:9', '9:16', '3:2', '4:3', '2:3', '3:4']);
@@ -113,7 +120,11 @@ export async function GET(req: NextRequest) {
         lqip,
         likes_count,
         remix_count,
-        views_count
+        views_count,
+        author_display_name,
+        author_handle,
+        author_avatar_url,
+        participant_kind
       FROM public.community_creations_feed
       WHERE ${conditions.join(' AND ')}
       ORDER BY ${orderBy}
@@ -159,6 +170,18 @@ export async function GET(req: NextRequest) {
         likes_count: Number(r.likes_count || 0),
         remix_count: Number(r.remix_count || 0),
         views_count: Number(r.views_count || 0),
+        author: {
+          displayName: typeof r.author_display_name === 'string' && r.author_display_name.trim()
+            ? r.author_display_name.trim()
+            : 'GALX creator',
+          handle: typeof r.author_handle === 'string' && r.author_handle.trim()
+            ? r.author_handle.trim()
+            : null,
+          avatarUrl: typeof r.author_avatar_url === 'string' && r.author_avatar_url.trim()
+            ? r.author_avatar_url.trim()
+            : null,
+          participantKind: r.participant_kind === 'star' ? 'star' : 'human',
+        },
       };
     });
   } catch {
@@ -174,7 +197,8 @@ export async function GET(req: NextRequest) {
     } else if (existingIndex === -1) {
       try {
           const directRes = await executePostgresQuery(
-            `SELECT id, user_id, prompt, aspect_ratio, dimensions, public_url, created_at, lqip, likes_count, remix_count, views_count
+            `SELECT id, user_id, prompt, aspect_ratio, dimensions, public_url, created_at, lqip, likes_count, remix_count, views_count,
+                    author_display_name, author_handle, author_avatar_url, participant_kind
              FROM public.community_creations_feed
              WHERE id = $1 AND user_id NOT LIKE 'usr_%' AND id NOT LIKE 'img_test_%'
              LIMIT 1`,
@@ -203,6 +227,18 @@ export async function GET(req: NextRequest) {
               likes_count: Number(r.likes_count || 0),
               remix_count: Number(r.remix_count || 0),
               views_count: Number(r.views_count || 0),
+              author: {
+                displayName: typeof r.author_display_name === 'string' && r.author_display_name.trim()
+                  ? r.author_display_name.trim()
+                  : 'GALX creator',
+                handle: typeof r.author_handle === 'string' && r.author_handle.trim()
+                  ? r.author_handle.trim()
+                  : null,
+                avatarUrl: typeof r.author_avatar_url === 'string' && r.author_avatar_url.trim()
+                  ? r.author_avatar_url.trim()
+                  : null,
+                participantKind: r.participant_kind === 'star' ? 'star' : 'human',
+              },
             });
           }
       } catch {

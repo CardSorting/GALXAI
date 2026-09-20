@@ -32,6 +32,7 @@
         "docs/runbooks/knowledge-maintenance.md",
         "docs/runbooks/release-readiness.md",
         "docs/reference/README.md",
+        "docs/reference/stars.md",
         "docs/reference/knowledge-commands.md",
         "docs/explanations/README.md",
         "docs/maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md",
@@ -95,7 +96,12 @@
         "src/components/dashboard/GenerationGateNotice.tsx",
         "src/components/dashboard/generation-gate.module.css",
         "src/contexts/GenerationAllowanceContext.tsx",
-        "scripts/test-image-premium-routing.ts"
+        "scripts/test-image-premium-routing.ts",
+        "src/app/api/images/feed/route.ts",
+        "src/lib/stars/StarPopulationController.ts",
+        "scripts/populate-stars.ts",
+        "scripts/reconcile-stars.ts",
+        "scripts/verify-stars.ts"
       ],
       "guides": [
         "docs/QUEUE_SPECIFICATION.md",
@@ -318,8 +324,19 @@
         "src/relay/pool-*.js",
         "src/relay/pool-*.css",
         "src/core/router/GalxModelRouter.ts",
+        "src/core/router/ModelCatalog.ts",
         "src/core/router/adapters/RelayChatTransport.ts",
         "src/core/router/adapters/IsolatedRelayTransport.ts",
+        "src/lib/stars/**/*.ts",
+        "src/lib/community/**/*.ts",
+        "src/components/community/**/*",
+        "src/app/api/community/participants/**/*.ts",
+        "src/app/profile/**/*.tsx",
+        "src/app/profile/**/*.css",
+        "src/app/api/images/feed/route.ts",
+        "scripts/populate-stars.ts",
+        "scripts/reconcile-stars.ts",
+        "scripts/verify-stars.ts",
         "scripts/setup-relay-services.ts",
         "scripts/export-relay-services.ts",
         "scripts/set-relay-service-gates.ts",
@@ -350,6 +367,11 @@
         "scripts/test-agent-continuation.ts",
         "scripts/test-relay-chat-transport.ts",
         "src/relay/request-bulkhead.ts",
+        "src/relay/admission-lifecycle.ts",
+        "src/relay/standard-pool-scheduler.ts",
+        "src/relay/pool-runtime.ts",
+        "src/relay/relay-server.ts",
+        "scripts/test-relay-admission-lifecycle.ts",
         "scripts/test-relay-overload.ts",
         "scripts/test-relay-activation-db.ts"
       ],
@@ -408,7 +430,8 @@
         "docs/reference/shared-quota-recovery.md",
         "docs/adr/0155-shared-quota-containment-and-bounded-continuation.md",
         "docs/adr/0156-verified-automatic-relay-activation.md",
-        "docs/adr/0157-compatible-relay-output-budgets.md"
+        "docs/adr/0157-compatible-relay-output-budgets.md",
+        "docs/runbooks/relay-admission-lifecycle.md"
       ],
       "checks": [
         "npm run test:relay:capabilities",
@@ -454,7 +477,11 @@
         "scripts/test-relay-connections-db.ts",
         "scripts/test-relay-activation-db.ts",
         "scripts/test-account-profile-db.ts",
-        "scripts/test-account-profile-api.ts"
+        "scripts/test-account-profile-api.ts",
+        "src/lib/stars/**/*.ts",
+        "scripts/populate-stars.ts",
+        "scripts/reconcile-stars.ts",
+        "scripts/verify-stars.ts"
       ],
       "guides": [
         "docs/SUPABASE_PARANOID_ARCHITECTURE_SPEC.md",
@@ -969,6 +996,18 @@
         "entitlement",
         "migration"
       ]
+    },
+    "docs/runbooks/relay-admission-lifecycle.md": {
+      "kind": "runbook",
+      "keywords": [
+        "admission",
+        "queue",
+        "lifecycle",
+        "dispatch",
+        "reservation",
+        "handoff",
+        "ambiguous"
+      ]
     }
   },
   "runbooks": [
@@ -978,6 +1017,7 @@
     "docs/operations/workspace-auth.md",
     "docs/runbooks/relay-pool-images.md",
     "docs/runbooks/relay-pool-services.md",
+    "docs/runbooks/relay-admission-lifecycle.md",
     "docs/runbooks/stripe-webhook-delivery.md"
   ],
   "decisions": {

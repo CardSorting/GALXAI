@@ -42,6 +42,11 @@ test('old discovery and older active successes cannot undo a denial', () => {
   advance(5001); r.publishInventory(r.beginRefresh('a')!, ['A','B']);
   assert.equal(r.get('a')!.models.find(m => m.model === 'B')!.state, 'AVAILABLE');
 });
+
+test('standalone image-tool access denial is worker-scoped while generic relay 403 remains neutral', () => {
+  assert.equal(classifyCapabilityFailure({ source: 'codex_image_tool', status: 403, code: 'codex_image_request_failed' })?.state, 'NOT_AUTHORIZED');
+  assert.equal(classifyCapabilityFailure({ status: 403, error: { message: 'private provider response' } }), undefined);
+});
 test('different model observations do not suppress authoritative denials', () => {
   const { registry: r } = fixture(); const b = r.beginObservation('a','B')!;
   r.observe(r.beginObservation('a','A')!, 'A', 'AVAILABLE');

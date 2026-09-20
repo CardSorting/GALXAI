@@ -1263,6 +1263,8 @@ export interface MemorySlab {
 
 export interface ImageGenerationRecord {
   readonly id: string;
+  /** Private generation receipt that owns the persisted asset, when available. */
+  readonly generationId?: string;
   readonly userId: string;
   readonly sessionId: string;
   readonly status: 'queued' | 'generating' | 'completed' | 'failed';

@@ -28,6 +28,7 @@ import {
   Share2,
 } from 'lucide-react';
 import type { PublicFeedItem } from '@/app/api/images/feed/route';
+import { ParticipantIdentity } from '@/components/community/ParticipantIdentity';
 import './masonry-stream.css';
 
 interface PublicImageMasonryStreamProps {
@@ -1021,9 +1022,9 @@ export function PublicImageMasonryStream({
 
                   {/* Top Floating Badges & Action Buttons */}
                   <div className="masonry-card-topbar">
-                    <span className="masonry-badge masonry-badge-ratio">
-                      {item.aspect_ratio || '1:1'}
-                    </span>
+                    <div className="masonry-card-author">
+                      <ParticipantIdentity {...item.author} compact showHandle={false} />
+                    </div>
 
                     <div className="masonry-card-actions-top">
                       <button
@@ -1247,6 +1248,9 @@ export function PublicImageMasonryStream({
 
             {/* Info & Inspector side */}
             <div className="masonry-modal-info">
+              <div className="masonry-modal-author">
+                <ParticipantIdentity {...activeModalItem.author} showHandle />
+              </div>
               <div className="masonry-modal-header">
                 <div className="masonry-modal-badges">
                   <span className="masonry-badge masonry-badge-ratio">

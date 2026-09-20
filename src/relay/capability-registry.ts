@@ -218,6 +218,13 @@ export function classifyCapabilityFailure(frame: any): { state: CapabilityState;
   const code = String(error.code ?? '').toLowerCase();
   const status = Number(frame?.status ?? frame?.status_code);
   if ([408, 429, 500, 502, 503, 504].includes(status)) return;
+  // The standalone Codex image tool has a fixed endpoint contract and does
+  // not expose provider text. For that authenticated capability, a 401/403/
+  // 404 is sufficient worker-scoped evidence that this account cannot use the
+  // image tool. Generic relay HTTP responses remain intentionally neutral.
+  if (frame?.source === 'codex_image_tool' && [401, 403, 404].includes(status)) {
+    return { state: 'NOT_AUTHORIZED', reason: 'image_tool_access_denied' };
+  }
   if (['model_not_allowed', 'model_not_found', 'model_permission_denied', 'model_not_authorized', 'unsupported_model'].includes(code)) {
     return { state: 'NOT_AUTHORIZED', reason: code };
   }

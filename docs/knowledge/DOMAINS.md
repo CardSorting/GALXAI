@@ -21,6 +21,7 @@ Owner role: **Documentation maintainer**. Domain: `knowledge`.
 - [Reconcile stale knowledge](../../docs/runbooks/knowledge-maintenance.md)
 - [Prepare and verify a release](../../docs/runbooks/release-readiness.md)
 - [Reference](../../docs/reference/README.md)
+- [Stars](../../docs/reference/stars.md)
 - [Knowledge commands and metadata](../../docs/reference/knowledge-commands.md)
 - [Explanations](../../docs/explanations/README.md)
 - [Write and maintain an architecture decision](../../docs/maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md)
@@ -151,6 +152,7 @@ Owner role: **Relay operator**. Domain: `relay`.
 - [ADR 0155: Shared quota containment and bounded agent continuation](../../docs/adr/0155-shared-quota-containment-and-bounded-continuation.md)
 - [ADR 0156: Verified automatic relay activation](../../docs/adr/0156-verified-automatic-relay-activation.md)
 - [ADR 0157: Compatible relay requests and honest output budgets](../../docs/adr/0157-compatible-relay-output-budgets.md)
+- [Relay admission lifecycle](../../docs/runbooks/relay-admission-lifecycle.md)
 
 Relevant checks (select for the change; impact discovery never executes these): `npm run test:relay:capabilities`, `npm run test:relay:desktop-login`, `npm run test:relay:pool-images`, `npm run verify:relay:pool-images`, `npm run test:relay:services`, `npm run verify:relay:service-images`, `npm run test:agent:tools`, `npm run test:relay:activation-db`.
 

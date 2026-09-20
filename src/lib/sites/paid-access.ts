@@ -6,13 +6,32 @@ import type { FairPolicy, PaidAccess } from './fair-store';
 /** Explicit operator grants are read from current server-managed account data.
  * JWT claims, user metadata, staff roles and editable tiers are not authority. */
 export async function hasComplimentaryProAccess(pool: Pick<Pool,'connect'>, account: string): Promise<boolean> {
-  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(account)) return false;
   const db = await pool.connect();
   try {
-    const result = await db.query(`SELECT EXISTS(SELECT 1 FROM auth.users WHERE id=$1::uuid
-      AND raw_app_meta_data->'galx_pro'='true'::jsonb AND email_confirmed_at IS NOT NULL AND is_anonymous=false
-      AND deleted_at IS NULL AND (banned_until IS NULL OR banned_until<=statement_timestamp())) AS granted`, [account]);
-    return result.rows[0]?.granted === true;
+    const isAuthAccount = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(account);
+    if (isAuthAccount) {
+      const result = await db.query(`SELECT EXISTS(SELECT 1 FROM auth.users WHERE id=$1::uuid
+        AND raw_app_meta_data->'galx_pro'='true'::jsonb AND email_confirmed_at IS NOT NULL AND is_anonymous=false
+        AND deleted_at IS NULL AND (banned_until IS NULL OR banned_until<=statement_timestamp())) AS granted`, [account]);
+      if (result.rows[0]?.granted === true) return true;
+    }
+
+    // Autonomous Stars do not require an auth.users row. Their Pro access is
+    // an explicit administrative entitlement, never a purchase or Stripe row.
+    const administrative = await db.query(`SELECT EXISTS(
+      SELECT 1
+      FROM private.galx_administrative_entitlements AS entitlement
+      JOIN private.galx_account_identities AS identity_row
+        ON identity_row.account_id = entitlement.account_id
+      WHERE entitlement.account_id = $1
+        AND entitlement.entitlement_key = 'pro-v1'
+        AND entitlement.source = 'administrative'
+        AND identity_row.account_class = 'autonomous'
+        AND entitlement.revoked_at IS NULL
+        AND entitlement.starts_at <= statement_timestamp()
+        AND (entitlement.ends_at IS NULL OR entitlement.ends_at > statement_timestamp())
+    ) AS granted`, [account]);
+    return administrative.rows[0]?.granted === true;
   } finally { db.release(); }
 }
 

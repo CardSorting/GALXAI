@@ -59,6 +59,40 @@ import { registryConfig, readShardRegistry, decryptRegistryShard } from './shard
 import { BroccoliDbTable } from '../core/broccolidb/broccolidb-table.js';
 import { requestWorkload } from './pool-protocol.js';
 import type { ExecutionPolicy, ExecutionGrant } from './pool-execution.js';
+import {
+  PRIVATE_RELAY_FAILURE_HEADER,
+  classifyImageRelayFailure,
+  encodePrivateRelayFailure,
+  fleetRelayFailure,
+} from './private-failure.js';
+
+/** Add a fixed source/code label before capability classification. The
+ * provider response itself is never retained or forwarded. */
+function imageFailureFrame(error: any): any {
+  if (!error?.upstream) return error;
+  return { ...error.upstream, code: error.code, source: 'codex_image_tool' };
+}
+
+/**
+ * Only a target-local rejection that proves useful image work was never
+ * accepted may move this request to another shard. A timeout, socket close,
+ * malformed result or generic provider error remains terminal because the
+ * image mutation may already have started.
+ */
+function isConfirmedPreGenerationImageFailure(error: any, failure: ReturnType<typeof classifyUpstreamError>): boolean {
+  const frame = imageFailureFrame(error);
+  const status = Number(frame?.status ?? frame?.status_code ?? frame?.response?.status);
+  const code = String(error?.code ?? frame?.error?.code ?? frame?.response?.error?.code ?? frame?.code ?? '').toLowerCase();
+  const executionState = String(frame?.execution_state ?? frame?.response?.execution_state ?? error?.executionState ?? '').toLowerCase();
+  const quotaCode = /quota|rate[ _-]?limit|usage_limit|too many requests|capacity/.test(code);
+  const explicitRejection = executionState === 'not_accepted' || error?.preGeneration === true || frame?.preGeneration === true;
+  const responseRejectedBeforeGeneration = frame?.type === 'response.failed' && quotaCode;
+  const httpRejection = [401, 403, 404, 429].includes(status);
+  return Boolean(
+    (failure.quota && (status === 429 || responseRejectedBeforeGeneration || explicitRejection))
+    || (failure.unauthorized && (httpRejection || explicitRejection))
+  );
+}
 
 // ============================================================================
 // CONFIGURATION & TIMEOUT TAXONOMY (Layer 0 through Layer 6)
@@ -133,6 +167,9 @@ export interface RelayConfig {
   quotaWindowMaxCalls: number;         // Optional operator limit; 0 means no local call cap
   quotaWindowDurationMs: number;       // Duration of rolling window (default: 3h / 10800000ms)
 }
+
+/** Image providers are single-flight per assigned shard; text keeps pool capacity. */
+export const IMAGE_SHARD_CONCURRENCY = 1;
 
 function assignedShardFromEnvironment(): DiscoveryShard | undefined {
   if (!process.env.RELAY_ASSIGNED_SHARD) return;
@@ -297,17 +334,30 @@ export interface ShardRecord extends Record<string, unknown> {
   consecutiveFailures: number;
   lastUsedAtMs: number;
   inFlight: number;
+  /** Transient image-only occupancy; reset on process recovery. */
+  imageInFlight?: number;
   slidingWindowTimestamps: number[];
   availableDripTokens?: number;
   lastDripRefillMs?: number;
   cooldownUntilMs?: number;
   quotaFailures?: number;
   lastQuotaFailureJobId?: string;
+  /** Image-only provider eligibility; never disables independent text work. */
+  imageConsecutiveFailures?: number;
+  imageQuotaFailures?: number;
+  imageCooldownUntilMs?: number;
+  lastImageQuotaFailureJobId?: string;
+  imageProbeInFlight?: boolean;
   probeInFlight?: boolean;
   providerLimits?: ProviderLimit[];
   source?: string;
   expiresAtMs?: number;
   credentialFingerprint?: string;
+}
+
+interface RuntimeShardOwnership {
+  inFlight: number;
+  imageInFlight: number;
 }
 
 interface TransientJobSession {
@@ -849,6 +899,8 @@ export class GalxaiRelayServer extends EventEmitter {
   private registryError: string | null = null;
   private registryCounts = { total: 0, skipped: 0 };
   private recoveredShardState = new Map<string, Partial<ShardRecord>>();
+  /** Ephemeral ownership survives registry refreshes, never checkpoint recovery. */
+  private readonly runtimeShardOwnership = new Map<string, RuntimeShardOwnership>();
 
   // Ephemeral In-Flight Sessions
   private readonly sessions = new Map<string, TransientJobSession>();
@@ -1102,6 +1154,40 @@ export class GalxaiRelayServer extends EventEmitter {
   // SHARD FLEET MANAGEMENT (Governed by BroccoliDB + Vault Decryption)
   // --------------------------------------------------------------------------
 
+  private runtimeOwnership(shard: ShardRecord): RuntimeShardOwnership {
+    const owned = this.runtimeShardOwnership.get(shard.id);
+    const inFlight = Math.max(0, Number.isSafeInteger(owned?.inFlight ?? shard.inFlight) ? Number(owned?.inFlight ?? shard.inFlight) : 0);
+    const imageInFlight = Math.max(0, Number.isSafeInteger(owned?.imageInFlight ?? shard.imageInFlight) ? Number(owned?.imageInFlight ?? shard.imageInFlight) : 0);
+    return { inFlight, imageInFlight: Math.min(inFlight, imageInFlight) };
+  }
+
+  private persistShard(shard: ShardRecord): void {
+    const ownership = this.runtimeShardOwnership.get(shard.id);
+    this.shardsTable.put(shard.id, ownership
+      ? { ...shard, inFlight: ownership.inFlight, imageInFlight: ownership.imageInFlight }
+      : shard);
+  }
+
+  private updateRuntimeOwnership(shard: ShardRecord, inFlight: number, imageInFlight: number): void {
+    const next = { inFlight: Math.max(0, inFlight), imageInFlight: Math.min(Math.max(0, inFlight), Math.max(0, imageInFlight)) };
+    if (next.inFlight || next.imageInFlight) this.runtimeShardOwnership.set(shard.id, next);
+    else this.runtimeShardOwnership.delete(shard.id);
+    this.persistShard({ ...shard, inFlight: next.inFlight, imageInFlight: next.imageInFlight });
+  }
+
+  private releaseRuntimeOwnership(shardId: string, imageWorkload: boolean): void {
+    const current = this.runtimeShardOwnership.get(shardId);
+    if (!current) return;
+    const next = {
+      inFlight: Math.max(0, current.inFlight - 1),
+      imageInFlight: Math.min(Math.max(0, current.inFlight - 1), Math.max(0, current.imageInFlight - (imageWorkload ? 1 : 0))),
+    };
+    const shard = this.shardsTable.get(shardId);
+    if (next.inFlight || next.imageInFlight) this.runtimeShardOwnership.set(shardId, next);
+    else this.runtimeShardOwnership.delete(shardId);
+    if (shard) this.persistShard({ ...shard, inFlight: next.inFlight, imageInFlight: next.imageInFlight });
+  }
+
   private installFleet(items: Array<Partial<ShardRecord> & { accessToken: string; accountId: string }>): void {
     if (!this.config.testOnlyMultiShard && items.length > 1) throw new Error('One active shard requires one relay container');
     if (this.config.assignedShardId && items.some(s => s.id !== this.config.assignedShardId)) throw new Error('Relay cannot enroll another shard');
@@ -1128,6 +1214,11 @@ export class GalxaiRelayServer extends EventEmitter {
       const id = item.id || `shard_${crypto.createHash('sha256').update(identity).digest('hex').slice(0, 16)}`;
       const old = previous.find(s => s.id === id || (s.accountId === item.accountId && !s.accountId.startsWith('acc_')) || s.accessToken === item.accessToken);
       const state = old ?? this.recoveredShardState.get(id);
+      const ownership = this.runtimeShardOwnership.get(id) ?? {
+        inFlight: old?.inFlight ?? 0,
+        imageInFlight: old?.imageInFlight ?? 0,
+      };
+      if (ownership.inFlight || ownership.imageInFlight) this.runtimeShardOwnership.set(id, ownership);
       const credentialFingerprint = crypto.createHash('sha256').update(item.accessToken).digest('hex');
       const rotated = old ? old.accessToken !== item.accessToken
         : Boolean(state?.credentialFingerprint && state.credentialFingerprint !== credentialFingerprint);
@@ -1137,18 +1228,31 @@ export class GalxaiRelayServer extends EventEmitter {
         status: state?.status === 'disabled' && rotated ? 'active' : state?.status ?? item.status ?? 'active',
         consecutiveFailures: state?.consecutiveFailures ?? 0,
         quotaFailures: state?.quotaFailures ?? 0,
+        imageConsecutiveFailures: state?.imageConsecutiveFailures ?? 0,
+        imageQuotaFailures: state?.imageQuotaFailures ?? 0,
         lastUsedAtMs: state?.lastUsedAtMs ?? 0,
-        inFlight: old?.inFlight ?? 0,
+        inFlight: ownership.inFlight,
         probeInFlight: old?.probeInFlight ?? false,
+        imageProbeInFlight: old?.imageProbeInFlight ?? false,
         cooldownUntilMs: Math.max(state?.cooldownUntilMs ?? 0, item.cooldownUntilMs ?? 0),
+        imageCooldownUntilMs: state?.imageCooldownUntilMs ?? 0,
+        lastImageQuotaFailureJobId: state?.lastImageQuotaFailureJobId,
         providerLimits: state?.providerLimits ?? [],
         slidingWindowTimestamps: state?.slidingWindowTimestamps ?? [],
+        // This is process-local occupancy. Preserve it across a registry
+        // refresh for the same live shard, but never restore it from a
+        // checkpoint after restart (an old request cannot still own a slot).
+        imageInFlight: ownership.imageInFlight,
       });
     }
-    for (const old of previous) if (!next.some(s => s.id === old.id && s.credentialFingerprint === old.credentialFingerprint)) this.capabilities.remove(old.id);
+    for (const old of previous) if (!next.some(s => s.id === old.id && s.credentialFingerprint === old.credentialFingerprint)) {
+      this.capabilities.remove(old.id);
+      const ownership = this.runtimeShardOwnership.get(old.id);
+      if (!ownership?.inFlight && !ownership?.imageInFlight) this.runtimeShardOwnership.delete(old.id);
+    }
     this.shardsTable.clear();
     for (const shard of next) {
-      this.shardsTable.put(shard.id, shard);
+      this.persistShard(shard);
       this.capabilities.register(shard.id, this.config.relayId || `relay-${shard.id}`, this.config.generation!, 'openai', this.config.shardConcurrency);
     }
   }
@@ -1256,7 +1360,9 @@ export class GalxaiRelayServer extends EventEmitter {
   private maybeRefreshImageAlias(shard: ShardRecord): void {
     if (this.config.executionPolicy) return; // Probes also require explicit central admission.
     if (!this.config.codexImageToolAlias || shard.accessToken.startsWith('sk-') || this.imageCapabilityProbe || this.isDraining || Date.now() < this.nextImageProbeAt) return;
-    if (this.shardReadyAt(shard) > Date.now() || shard.inFlight >= this.config.shardConcurrency || this.imageControllers.size) return;
+    const ownership = this.runtimeOwnership(shard);
+    if (this.shardReadyAt(shard, Date.now(), true) > Date.now() || shard.imageProbeInFlight || ownership.imageInFlight >= IMAGE_SHARD_CONCURRENCY
+      || ownership.inFlight >= this.config.shardConcurrency || this.imageControllers.size) return;
     const record = this.capabilities.get(shard.id);
     if (!record || record.lastCapabilityRefreshMs + this.config.capabilityTtlMs <= Date.now()) return;
     const alias = record.models.find(m => m.model === `image:${CODEX_IMAGE_ALIAS.requestedModel}`);
@@ -1272,7 +1378,9 @@ export class GalxaiRelayServer extends EventEmitter {
   private async verifyImageCapability(model: string, prompt: string) {
     if (this.config.executionPolicy) throw new RequestError(403,'capability_unavailable','This action is unavailable.');
     const shard = this.shardsTable.getAll()[0];
-    if (this.isDraining || !shard || this.shardReadyAt(shard) > Date.now() || shard.inFlight >= this.config.shardConcurrency || this.imageControllers.size) throw new RequestError(503, 'probe_busy', 'Shard is not ready for an image probe.');
+    if (this.isDraining || !shard || this.shardReadyAt(shard, Date.now(), true) > Date.now() || shard.imageProbeInFlight
+      || this.runtimeOwnership(shard).imageInFlight >= IMAGE_SHARD_CONCURRENCY || this.runtimeOwnership(shard).inFlight >= this.config.shardConcurrency
+      || this.imageControllers.size) throw new RequestError(503, 'probe_busy', 'Shard is not ready for an image probe.');
     const execution = imageExecution(model, shard.accessToken.startsWith('sk-'), this.config.codexImageToolAlias);
     const alias = execution.routingMode === 'codex_image_tool_alias';
     const inventory = this.capabilities.get(shard.id);
@@ -1281,7 +1389,8 @@ export class GalxaiRelayServer extends EventEmitter {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 90000);
     this.imageControllers.add(controller);
-    this.shardsTable.put(shard.id, { ...shard, inFlight: shard.inFlight + 1 });
+    const ownership = this.runtimeOwnership(shard);
+    this.updateRuntimeOwnership(shard, ownership.inFlight + 1, ownership.imageInFlight + 1);
     try {
       const result = shard.accessToken.startsWith('sk-')
         ? await this.synthesizeImageViaOpenAiRest(prompt, {model}, shard.accessToken, controller.signal)
@@ -1296,10 +1405,10 @@ export class GalxaiRelayServer extends EventEmitter {
       if (alias && published) { this.imageProbeFailures = 0; this.nextImageProbeAt = Date.now() + 3000000; }
       return { verified: published, model, bytes: bytes.length, expiresInMs: alias ? IMAGE_TOOL_EVIDENCE_TTL_MS : this.config.capabilityTtlMs, ...execution };
     } catch (error: any) {
-      const negative = classifyCapabilityFailure(error.upstream);
+      const negative = classifyCapabilityFailure(imageFailureFrame(error));
       if (negative) this.capabilities.observe(ticket, `image:${model}`, negative.state, negative.reason, alias);
       throw error;
-    } finally { clearTimeout(timeout); this.imageControllers.delete(controller); this.releaseShard(shard.id); }
+    } finally { clearTimeout(timeout); this.imageControllers.delete(controller); this.releaseShard(shard.id, false, true); }
   }
 
   private updateCapabilityHealth() {
@@ -1331,14 +1440,23 @@ export class GalxaiRelayServer extends EventEmitter {
       ? this.shardsTable.get(this.config.assignedShardId) : undefined;
     if (!shard) return { eligible: false, lastUsedAtMs: 0, recovering: false, availableSlots: 0 };
     this.updateCapabilityHealth();
-    const recovering = Boolean(shard.quotaFailures || shard.consecutiveFailures >= 3);
-    const active = Math.max(shard.inFlight, this.jobsTable.getAll().filter(j => ['queued','running','streaming'].includes(j.status)).length);
+    const imageWorkload = authorizedImageTrial || model.startsWith('image:');
+    const recovering = imageWorkload
+      ? Boolean(shard.imageQuotaFailures || shard.imageConsecutiveFailures && shard.imageConsecutiveFailures >= 3)
+      : Boolean(shard.quotaFailures || shard.consecutiveFailures >= 3);
+    const readyAt = this.shardReadyAt(shard, Date.now(), imageWorkload);
+    const probeInFlight = imageWorkload ? shard.imageProbeInFlight : shard.probeInFlight;
+    const ownership = this.runtimeOwnership(shard);
+    const active = Math.max(ownership.inFlight, this.jobsTable.getAll().filter(j => ['queued','running','streaming'].includes(j.status)).length);
     const previous = this.capabilities.get(shard.id)?.models.find(m => m.model === model);
     const trial = authorizedImageTrial && this.config.executionPolicy?.pool === 'premium'
       && (!previous || previous.source !== 'response' || previous.state === 'AVAILABLE' || previous.expiresAtMs <= Date.now());
-    const availableSlots = Math.max(0, (recovering ? 1 : this.config.shardConcurrency) - active);
+    const capacity = imageWorkload ? IMAGE_SHARD_CONCURRENCY : this.config.shardConcurrency;
+    const availableSlots = imageWorkload
+      ? (ownership.imageInFlight >= capacity || ownership.inFlight >= this.config.shardConcurrency ? 0 : capacity)
+      : Math.max(0, (recovering ? Math.min(1, capacity) : capacity) - active);
     return {
-      eligible: !this.isDraining && this.shardReadyAt(shard) <= Date.now() && !shard.probeInFlight && availableSlots > 0
+      eligible: !this.isDraining && readyAt <= Date.now() && !probeInFlight && availableSlots > 0
         && (trial || this.capabilities.eligibleShardIds(model).includes(shard.id)),
       lastUsedAtMs: shard.lastUsedAtMs,
       recovering, availableSlots,
@@ -1363,10 +1481,11 @@ export class GalxaiRelayServer extends EventEmitter {
   private rejectModelCapacity(res: http.ServerResponse, model: string): void {
     this.updateCapabilityHealth();
     const eligible = this.capabilities.eligible(model);
+    const imageWorkload = model.startsWith('image:');
     const code = eligible.length ? 'model_capacity_exhausted' : 'model_temporarily_unavailable';
     const now = Date.now();
     const deadlines = this.shardsTable.getAll().filter(s => this.capabilities.get(s.id)?.models.some(m => m.model === model && m.state === 'AVAILABLE' && m.expiresAtMs > now))
-      .map(s => this.shardReadyAt(s, now)).filter(Number.isFinite);
+      .map(s => this.shardReadyAt(s, now, imageWorkload)).filter(Number.isFinite);
     const retryAfter = deadlines.length ? Math.max(5, Math.ceil((Math.min(...deadlines) - now) / 1000)) : 5;
     res.writeHead(503, { 'Content-Type': 'application/json', 'Retry-After': String(retryAfter), 'X-Should-Retry': 'true', 'Cache-Control': 'no-store' });
     res.end(JSON.stringify({ error: { code, model, message: eligible.length
@@ -1409,24 +1528,26 @@ export class GalxaiRelayServer extends EventEmitter {
     } catch {}
   }
 
-  private shardReadyAt(shard: ShardRecord, now = Date.now()): number {
+  private shardReadyAt(shard: ShardRecord, now = Date.now(), imageWorkload = false): number {
     if (shard.status === 'disabled' || (shard.expiresAtMs && shard.expiresAtMs <= now)) return Infinity;
-    let deadline = shard.cooldownUntilMs ?? 0;
-    if (shard.status === 'cooldown' && !deadline) deadline = shard.lastUsedAtMs + 60_000;
+    let deadline = imageWorkload ? shard.imageCooldownUntilMs ?? 0 : shard.cooldownUntilMs ?? 0;
+    if (!imageWorkload && shard.status === 'cooldown' && !deadline) deadline = shard.lastUsedAtMs + 60_000;
     const cap = this.currentQuotaProfile.maxCalls;
     const usage = shard.slidingWindowTimestamps.filter(t => t > now - this.currentQuotaProfile.windowDurationMs);
     if (cap > 0 && usage.length >= cap) deadline = Math.max(deadline, usage[usage.length - cap] + this.currentQuotaProfile.windowDurationMs);
     return deadline;
   }
 
-  private fleetRetryAfter(): number | null {
+  private fleetRetryAfter(imageWorkload = false): number | null {
     const now = Date.now();
-    const deadlines = this.shardsTable.getAll().map(s => this.shardReadyAt(s, now)).filter(Number.isFinite);
+    const deadlines = this.shardsTable.getAll().map(s => this.shardReadyAt(s, now, imageWorkload)).filter(Number.isFinite);
     return deadlines.length ? Math.max(1, Math.ceil((Math.min(...deadlines) - now) / 1000)) : null;
   }
 
   private acquireHealthyShard(exclude?: string | Set<string>, model?: string, authorizedImageTrial = false, jobId?: string): ShardRecord | null {
     if (!model || authorizedImageTrial && this.config.executionPolicy?.pool !== 'premium') return null;
+    const imageWorkload = authorizedImageTrial || model.startsWith('image:');
+    const capacity = imageWorkload ? IMAGE_SHARD_CONCURRENCY : this.config.shardConcurrency;
     this.updateCapabilityHealth();
     const eligibleIds = new Set(this.capabilities.eligibleShardIds(model));
     if (authorizedImageTrial && this.config.assignedShardId) {
@@ -1442,17 +1563,32 @@ export class GalxaiRelayServer extends EventEmitter {
       const index = (this.shardCursor + step) % all.length;
       const shard = all[index];
       if (typeof exclude === 'string' ? shard.id === exclude : exclude?.has(shard.id)) continue;
-      if (this.shardReadyAt(shard, now) > now || shard.probeInFlight || shard.inFlight >= this.config.shardConcurrency) continue;
+      const ownership = this.runtimeOwnership(shard);
+      const recovering = imageWorkload
+        ? Boolean(shard.imageQuotaFailures || (shard.imageConsecutiveFailures ?? 0) >= 3)
+        : Boolean(shard.quotaFailures || shard.consecutiveFailures >= 3);
+      const probeInFlight = imageWorkload ? shard.imageProbeInFlight : shard.probeInFlight;
+      if (this.shardReadyAt(shard, now, imageWorkload) > now || probeInFlight
+        || (imageWorkload ? ownership.imageInFlight >= capacity || ownership.inFlight >= this.config.shardConcurrency : ownership.inFlight >= capacity)) continue;
       // After a cooldown, admit exactly one probe only when previous work drained.
-      if ((shard.quotaFailures || shard.consecutiveFailures >= 3) && shard.inFlight > 0) continue;
-      if (!candidate || shard.inFlight < candidate.inFlight) { candidate = shard; selectedIndex = index; }
+      if (recovering && ownership.inFlight > 0) continue;
+      const shardLoad = imageWorkload ? ownership.imageInFlight : ownership.inFlight;
+      const candidateOwnership = candidate ? this.runtimeOwnership(candidate) : undefined;
+      const candidateLoad = candidate ? imageWorkload ? candidateOwnership!.imageInFlight : candidateOwnership!.inFlight : Infinity;
+      if (!candidate || shardLoad < candidateLoad) { candidate = shard; selectedIndex = index; }
     }
     if (!candidate) return null;
     this.shardCursor = (selectedIndex + 1) % all.length;
-    const probe = Boolean(candidate.quotaFailures || candidate.consecutiveFailures >= 3);
+    const probe = imageWorkload
+      ? Boolean(candidate.imageQuotaFailures || (candidate.imageConsecutiveFailures ?? 0) >= 3)
+      : Boolean(candidate.quotaFailures || candidate.consecutiveFailures >= 3);
+    const ownership = this.runtimeOwnership(candidate);
     const updated: ShardRecord = {
-      ...candidate, status: 'active', probeInFlight: probe,
-      inFlight: candidate.inFlight + 1, lastUsedAtMs: now,
+      ...candidate,
+      status: imageWorkload ? candidate.status : 'active',
+      probeInFlight: imageWorkload ? candidate.probeInFlight : probe,
+      ...(imageWorkload ? { imageProbeInFlight: probe } : {}),
+      inFlight: ownership.inFlight + 1, imageInFlight: ownership.imageInFlight + (imageWorkload ? 1 : 0), lastUsedAtMs: now,
       slidingWindowTimestamps: [...candidate.slidingWindowTimestamps.filter(t => t > now - this.currentQuotaProfile.windowDurationMs), now],
       providerLimits: (candidate.providerLimits ?? []).filter(l => (!l.resetAtMs || l.resetAtMs > now)
         // An elapsed fallback permits a real probe. Old zero observations without a reset
@@ -1463,62 +1599,114 @@ export class GalxaiRelayServer extends EventEmitter {
     };
     const depleted = (updated.providerLimits ?? []).filter(l => l.remaining === 0);
     if (depleted.length) {
-      updated.cooldownUntilMs = Math.max(updated.cooldownUntilMs ?? 0, ...depleted.map(l => l.resetAtMs ?? now + 60_000));
-      updated.status = 'cooldown';
-      updated.quotaFailures = Math.max(1, updated.quotaFailures ?? 0);
+      const deadline = Math.max(...depleted.map(l => l.resetAtMs ?? now + 60_000));
+      if (imageWorkload) {
+        updated.imageCooldownUntilMs = Math.max(updated.imageCooldownUntilMs ?? 0, deadline);
+        updated.imageQuotaFailures = Math.max(1, updated.imageQuotaFailures ?? 0);
+      } else {
+        updated.cooldownUntilMs = Math.max(updated.cooldownUntilMs ?? 0, deadline);
+        updated.status = 'cooldown';
+        updated.quotaFailures = Math.max(1, updated.quotaFailures ?? 0);
+      }
       if (this.config.executionPolicy && jobId) {
         updated.lastQuotaFailureJobId = jobId;
         const session = this.sessions.get(jobId); if (session) session.quotaFailureObserved = true;
       }
     }
-    this.shardsTable.put(updated.id, updated);
+    this.updateRuntimeOwnership(updated, updated.inFlight, updated.imageInFlight ?? 0);
     if (this.config.executionPolicy) this.saveStateSnapshot();
     return updated;
   }
 
-  private recordQuotaFailure(shardId: string, providerDeadline?: number, release = true, jobId?: string): void {
+  private recordQuotaFailure(shardId: string, providerDeadline?: number, release = true, jobId?: string, imageWorkload = false): void {
     const shard = this.shardsTable.get(shardId);
-    if (!shard) return;
+    if (!shard) {
+      if (release) this.releaseRuntimeOwnership(shardId, imageWorkload);
+      return;
+    }
+    const ownership = this.runtimeOwnership(shard);
     const standardJob = this.config.executionPolicy ? jobId : undefined;
     const session = standardJob ? this.sessions.get(standardJob) : undefined;
-    const repeatedObservation = session?.quotaFailureObserved || (standardJob !== undefined && shard.lastQuotaFailureJobId === standardJob);
+    const previousQuotaJob = imageWorkload ? shard.lastImageQuotaFailureJobId : shard.lastQuotaFailureJobId;
+    const repeatedObservation = session?.quotaFailureObserved || (standardJob !== undefined && previousQuotaJob === standardJob);
     if (session) session.quotaFailureObserved = true;
-    const failures = Math.max(1, (shard.quotaFailures ?? 0) + (repeatedObservation ? 0 : 1));
+    const failures = Math.max(1, ((imageWorkload ? shard.imageQuotaFailures : shard.quotaFailures) ?? 0) + (repeatedObservation ? 0 : 1));
     // New evidence can extend the wait; multiple frames cannot multiply the same job's backoff.
     const deadline = cooldownDeadline(failures, Date.now(), providerDeadline);
-    this.shardsTable.put(shardId, { ...shard,
-      status: shard.status === 'disabled' ? 'disabled' : 'cooldown', quotaFailures: failures, probeInFlight: false,
-      ...(standardJob ? {lastQuotaFailureJobId: standardJob} : {}),
-      inFlight: Math.max(0, shard.inFlight - (release ? 1 : 0)),
-      cooldownUntilMs: Math.max(shard.cooldownUntilMs ?? 0, deadline),
-    });
+    const updated: ShardRecord = { ...shard,
+      inFlight: Math.max(0, ownership.inFlight - (release ? 1 : 0)),
+      imageInFlight: Math.max(0, ownership.imageInFlight - (imageWorkload && release ? 1 : 0)),
+      ...(imageWorkload ? {
+        imageQuotaFailures: failures,
+        imageProbeInFlight: false,
+        imageCooldownUntilMs: Math.max(shard.imageCooldownUntilMs ?? 0, deadline),
+        ...(standardJob ? { lastImageQuotaFailureJobId: standardJob } : {}),
+      } : {
+        status: shard.status === 'disabled' ? 'disabled' : 'cooldown',
+        quotaFailures: failures,
+        probeInFlight: false,
+        ...(standardJob ? { lastQuotaFailureJobId: standardJob } : {}),
+        cooldownUntilMs: Math.max(shard.cooldownUntilMs ?? 0, deadline),
+      }),
+    };
+    this.updateRuntimeOwnership(updated, updated.inFlight, updated.imageInFlight ?? 0);
     if (this.config.executionPolicy) this.saveStateSnapshot();
   }
 
-  private recordShardFailure(shardId: string, unauthorized = false): void {
+  private recordShardFailure(shardId: string, unauthorized = false, imageWorkload = false): void {
     const shard = this.shardsTable.get(shardId);
-    if (!shard) return;
+    if (!shard) { this.releaseRuntimeOwnership(shardId, imageWorkload); return; }
+    const ownership = this.runtimeOwnership(shard);
     const failures = shard.consecutiveFailures + 1;
-    this.shardsTable.put(shardId, { ...shard,
-      inFlight: Math.max(0, shard.inFlight - 1), probeInFlight: false,
-      consecutiveFailures: failures,
-      status: unauthorized || shard.status === 'disabled' ? 'disabled' : failures >= 3 ? 'cooldown' : shard.status,
-      cooldownUntilMs: failures >= 3 ? Math.max(shard.cooldownUntilMs ?? 0, cooldownDeadline(failures - 2, Date.now())) : shard.cooldownUntilMs,
-    });
+    const imageFailures = (shard.imageConsecutiveFailures ?? 0) + 1;
+    const imageDeadline = unauthorized
+      ? Date.now() + 120_000
+      : imageFailures >= 3 ? cooldownDeadline(imageFailures - 2, Date.now()) : shard.imageCooldownUntilMs;
+    const updated: ShardRecord = { ...shard,
+      inFlight: Math.max(0, ownership.inFlight - 1),
+      imageInFlight: Math.max(0, ownership.imageInFlight - (imageWorkload ? 1 : 0)),
+      ...(imageWorkload ? {
+        imageConsecutiveFailures: imageFailures,
+        imageProbeInFlight: false,
+        ...(imageDeadline === undefined ? {} : { imageCooldownUntilMs: Math.max(shard.imageCooldownUntilMs ?? 0, imageDeadline) }),
+      } : {
+        probeInFlight: false,
+        consecutiveFailures: failures,
+        status: unauthorized || shard.status === 'disabled' ? 'disabled' : failures >= 3 ? 'cooldown' : shard.status,
+        cooldownUntilMs: failures >= 3 ? Math.max(shard.cooldownUntilMs ?? 0, cooldownDeadline(failures - 2, Date.now())) : shard.cooldownUntilMs,
+      }),
+    };
+    this.updateRuntimeOwnership(updated, updated.inFlight, updated.imageInFlight ?? 0);
     if (unauthorized || this.config.executionPolicy) this.saveStateSnapshot();
   }
 
-  private releaseShard(shardId: string, succeeded = false): void {
+  private releaseShard(shardId: string, succeeded = false, imageWorkload = false): void {
     const shard = this.shardsTable.get(shardId);
-    if (!shard || shard.inFlight <= 0) return;
-    const needsProbe = this.config.executionPolicy && Boolean(shard.quotaFailures || shard.consecutiveFailures >= 3);
+    if (!shard) { this.releaseRuntimeOwnership(shardId, imageWorkload); return; }
+    const ownership = this.runtimeOwnership(shard);
+    if (ownership.inFlight <= 0) return;
+    const needsProbe = this.config.executionPolicy && (imageWorkload
+      ? Boolean(shard.imageQuotaFailures || (shard.imageConsecutiveFailures ?? 0) >= 3)
+      : Boolean(shard.quotaFailures || shard.consecutiveFailures >= 3));
+    const probeInFlight = imageWorkload ? shard.imageProbeInFlight : shard.probeInFlight;
+    const readyAt = this.shardReadyAt(shard, Date.now(), imageWorkload);
     // A pre-exhaustion sibling finishing late is not evidence that a recovery probe succeeded.
-    const recovered = succeeded && (shard.cooldownUntilMs ?? 0) <= Date.now() && (!needsProbe || shard.probeInFlight);
-    this.shardsTable.put(shardId, { ...shard,
-      inFlight: shard.inFlight - 1, probeInFlight: false,
-      ...(recovered ? { consecutiveFailures: 0, quotaFailures: 0, status: shard.status === 'disabled' ? 'disabled' as const : 'active' as const } : {}),
-    });
-    if (this.config.executionPolicy && recovered && (shard.quotaFailures || shard.consecutiveFailures >= 3)) this.saveStateSnapshot();
+    const recovered = succeeded && readyAt <= Date.now() && (!needsProbe || probeInFlight);
+    const updated = { ...shard,
+      inFlight: ownership.inFlight - 1,
+      imageInFlight: Math.max(0, ownership.imageInFlight - (imageWorkload ? 1 : 0)),
+      ...(imageWorkload ? {
+        imageProbeInFlight: false,
+        ...(recovered ? { imageConsecutiveFailures: 0, imageQuotaFailures: 0, imageCooldownUntilMs: 0 } : {}),
+      } : {
+        probeInFlight: false,
+        ...(recovered ? { consecutiveFailures: 0, quotaFailures: 0, status: shard.status === 'disabled' ? 'disabled' as const : 'active' as const } : {}),
+      }),
+    };
+    this.updateRuntimeOwnership(updated, updated.inFlight, updated.imageInFlight ?? 0);
+    if (this.config.executionPolicy && recovered && (imageWorkload
+      ? (shard.imageQuotaFailures || (shard.imageConsecutiveFailures ?? 0) >= 3)
+      : (shard.quotaFailures || shard.consecutiveFailures >= 3))) this.saveStateSnapshot();
   }
 
   private getRateLimitHeaders(): Record<string, string> {
@@ -1530,8 +1718,8 @@ export class GalxaiRelayServer extends EventEmitter {
     };
   }
 
-  private rejectUnavailableFleet(res: http.ServerResponse): void {
-    const retry = this.fleetRetryAfter();
+  private rejectUnavailableFleet(res: http.ServerResponse, imageWorkload = false): void {
+    const retry = this.fleetRetryAfter(imageWorkload);
     res.writeHead(503, { 'Content-Type': 'application/json', ...(retry === null ? {} : { 'Retry-After': String(retry) }), ...this.getRateLimitHeaders() });
     res.end(JSON.stringify({ error: {
       code: 'all_shards_unavailable',
@@ -2114,7 +2302,29 @@ export class GalxaiRelayServer extends EventEmitter {
           this.metrics.totalImageJobsFailed++;
           if (traceId) this.telemetry.finish(traceId, 'failed', controller.signal.aborted ? String(controller.signal.reason?.message || 'image_wall_time_exceeded') : err.telemetryReason || err.message);
           if (res.destroyed || res.writableEnded) return;
-          if (err.message === 'all_shards_unavailable') { this.rejectUnavailableFleet(res); return; }
+          if (err.preGenerationTargetRejection === true) {
+            if (this.config.executionPolicy) {
+              res.setHeader(PRIVATE_RELAY_FAILURE_HEADER, encodePrivateRelayFailure({
+                version: 'v1', class: 'pre_generation_rejected', scope: 'worker',
+                ...(Number.isFinite(err.preGenerationRetryAfterMs) ? { retryAfterMs: err.preGenerationRetryAfterMs } : {}),
+              }));
+            }
+            res.writeHead(502, { 'Content-Type': 'application/json', 'X-Should-Retry': 'false' });
+            res.end(JSON.stringify({ error: {
+              execution_state: 'unknown',
+              message: 'Image generation failed. Inspect the trace for provider, connection or deadline evidence.',
+              code: 'upstream_image_synthesis_failed',
+            } }));
+            return;
+          }
+          if (err.message === 'all_shards_unavailable') {
+            const retryAfter = this.fleetRetryAfter(true);
+            if (this.config.executionPolicy) res.setHeader(PRIVATE_RELAY_FAILURE_HEADER, encodePrivateRelayFailure(fleetRelayFailure(retryAfter === null ? undefined : retryAfter * 1000)));
+            this.rejectUnavailableFleet(res, true); return;
+          }
+          // The pool consumes this fixed, private signal for worker-aware
+          // routing. It is never emitted by standalone/public relay modes.
+          if (this.config.executionPolicy) res.setHeader(PRIVATE_RELAY_FAILURE_HEADER, encodePrivateRelayFailure(classifyImageRelayFailure(err)));
           res.writeHead(502, { 'Content-Type': 'application/json', 'X-Should-Retry': 'false' });
           res.end(JSON.stringify({
             error: {
@@ -2138,38 +2348,63 @@ export class GalxaiRelayServer extends EventEmitter {
   }
 
   private async synthesizeImageWithFailover(prompt: string, body: Record<string, unknown>, model: string, traceId?: string, signal: AbortSignal = AbortSignal.timeout(this.config.jobMaxWallTimeMs)) {
-    signal.throwIfAborted();
-    await this.refreshShardRegistry();
-    signal.throwIfAborted();
     const authorizedAlias = this.config.executionPolicy?.pool === 'premium' && this.config.codexImageToolAlias && model === CODEX_IMAGE_ALIAS.requestedModel;
-    const shard = this.acquireHealthyShard(new Set(), `image:${body.model || model}`, authorizedAlias);
-    if (!shard) throw new Error('all_shards_unavailable');
-    const capabilityTicket = this.capabilities.beginObservation(shard.id, `image:${body.model || model}`);
-    const execution = imageExecution(model, shard.accessToken.startsWith('sk-'), this.config.codexImageToolAlias);
-    const alias = execution.routingMode === 'codex_image_tool_alias';
-    this.telemetry.attempt(traceId, shard.id, shard.accessToken.startsWith('sk-') || alias ? 'http' : 'websocket');
-    this.telemetry.model(traceId, model, execution.executionModel);
-    try {
-      const result = shard.accessToken.startsWith('sk-')
-        ? await this.synthesizeImageViaOpenAiRest(prompt, body, shard.accessToken, signal)
-        : alias ? await generateCodexToolImage(prompt, shard, signal, this.config.maxImagePayloadBytes)
-        : await this.synthesizeImageViaCodex(prompt, execution.executionModel, shard, traceId, signal);
-      if (capabilityTicket) this.capabilities.observe(capabilityTicket, `image:${body.model || model}`, 'AVAILABLE', undefined, execution.routingMode === 'codex_image_tool_alias');
-      this.releaseShard(shard.id, true);
-      return { result, shardId: shard.id, execution };
-    } catch (error: any) {
-      if (signal.aborted) { this.releaseShard(shard.id); throw signal.reason; }
-      const negative = classifyCapabilityFailure(error.upstream);
-      if (negative && capabilityTicket) this.capabilities.observe(capabilityTicket, `image:${body.model || model}`, negative.state, negative.reason);
-      const failure = classifyUpstreamError(error.upstream ?? { message: error.message });
-      error.telemetryReason = error.upstream ? `upstream_error_${failure.code}` : error.message;
-      this.telemetry.failedAttempt(traceId, error.telemetryReason);
-      if (failure.quota) this.recordQuotaFailure(shard.id, failure.deadline);
-      else if (failure.retryable) this.recordShardFailure(shard.id, failure.unauthorized);
-      else this.releaseShard(shard.id);
-      // Synthesis is not idempotent upstream. Never create a second image after
-      // an ambiguous disconnect, even when another shard has spare capacity.
-      throw error;
+    const imageModel = `image:${body.model || model}`;
+    const attemptedShardIds = new Set<string>();
+    let lastPreGenerationFailure: { retryAfterMs?: number } | undefined;
+
+    for (;;) {
+      signal.throwIfAborted();
+      await this.refreshShardRegistry();
+      signal.throwIfAborted();
+      const shard = this.acquireHealthyShard(attemptedShardIds, imageModel, authorizedAlias);
+      if (!shard) {
+        if (this.config.assignedShardId && lastPreGenerationFailure) {
+          throw Object.assign(new Error('pre_generation_target_rejected'), {
+            preGenerationTargetRejection: true,
+            preGenerationRetryAfterMs: lastPreGenerationFailure.retryAfterMs,
+          });
+        }
+        throw new Error('all_shards_unavailable');
+      }
+      attemptedShardIds.add(shard.id);
+
+      const capabilityTicket = this.capabilities.beginObservation(shard.id, imageModel);
+      const execution = imageExecution(model, shard.accessToken.startsWith('sk-'), this.config.codexImageToolAlias);
+      const alias = execution.routingMode === 'codex_image_tool_alias';
+      this.telemetry.attempt(traceId, shard.id, shard.accessToken.startsWith('sk-') || alias ? 'http' : 'websocket');
+      this.telemetry.model(traceId, model, execution.executionModel);
+      try {
+        const result = shard.accessToken.startsWith('sk-')
+          ? await this.synthesizeImageViaOpenAiRest(prompt, body, shard.accessToken, signal)
+          : alias ? await generateCodexToolImage(prompt, shard, signal, this.config.maxImagePayloadBytes)
+          : await this.synthesizeImageViaCodex(prompt, execution.executionModel, shard, traceId, signal);
+        if (capabilityTicket) this.capabilities.observe(capabilityTicket, imageModel, 'AVAILABLE', undefined, execution.routingMode === 'codex_image_tool_alias');
+        this.releaseShard(shard.id, true, true);
+        return { result, shardId: shard.id, execution };
+      } catch (error: any) {
+        if (signal.aborted) { this.releaseShard(shard.id, false, true); throw signal.reason; }
+        const negative = classifyCapabilityFailure(imageFailureFrame(error));
+        if (negative && capabilityTicket) this.capabilities.observe(capabilityTicket, imageModel, negative.state, negative.reason, alias);
+        const failure = classifyUpstreamError(imageFailureFrame(error));
+        error.telemetryReason = error.upstream ? `upstream_error_${failure.code}` : error.message;
+        this.telemetry.failedAttempt(traceId, error.telemetryReason);
+        const safeFailover = isConfirmedPreGenerationImageFailure(error, failure);
+        if (failure.quota) this.recordQuotaFailure(shard.id, failure.deadline, true, undefined, true);
+        else if (failure.retryable) this.recordShardFailure(shard.id, failure.unauthorized, true);
+        else this.releaseShard(shard.id, false, true);
+
+        // This is target failover, not a generic request retry. The same
+        // request identity remains in one receipt while each shard is tried
+        // at most once. Any ambiguous outcome stays terminal.
+        if (safeFailover) {
+          const retryAfterMs = failure.deadline === undefined ? undefined : Math.max(1000, failure.deadline - Date.now());
+          lastPreGenerationFailure = { ...(retryAfterMs === undefined ? {} : { retryAfterMs }) };
+          continue;
+        }
+        lastPreGenerationFailure = undefined;
+        throw error;
+      }
     }
   }
 
@@ -2838,7 +3073,7 @@ export class GalxaiRelayServer extends EventEmitter {
         if (data.type === 'rate_limits.updated' && Array.isArray(data.rate_limits)) {
           const limits = parseProviderLimits(data.rate_limits);
           const current = this.shardsTable.get(shard.id);
-          if (current) this.shardsTable.put(shard.id, { ...current, providerLimits: limits });
+          if (current) this.persistShard({ ...current, providerLimits: limits });
           const exhausted = limits.filter(l => l.remaining === 0);
           if (exhausted.length) {
             this.metrics.totalProactiveRateLimitCooldowns++;
@@ -3361,6 +3596,8 @@ export class GalxaiRelayServer extends EventEmitter {
         shards: this.shardsTable.getAll().map(s => ({
           id: s.id, credentialFingerprint: s.credentialFingerprint, status: s.status, cooldownUntilMs: s.cooldownUntilMs,
           consecutiveFailures: s.consecutiveFailures, quotaFailures: s.quotaFailures,
+          imageCooldownUntilMs: s.imageCooldownUntilMs, imageConsecutiveFailures: s.imageConsecutiveFailures,
+          imageQuotaFailures: s.imageQuotaFailures, lastImageQuotaFailureJobId: s.lastImageQuotaFailureJobId,
           providerLimits: s.providerLimits, lastUsedAtMs: s.lastUsedAtMs,
           slidingWindowTimestamps: s.slidingWindowTimestamps,
         })),
@@ -3376,6 +3613,9 @@ export class GalxaiRelayServer extends EventEmitter {
   }
 
   private recoverStateSnapshot(): void {
+    // A checkpoint contains health/configuration evidence, never live
+    // ownership. Any runtime occupancy belongs to this process only.
+    this.runtimeShardOwnership.clear();
     if (!fs.existsSync(this.config.stateSnapshotPath)) return;
 
     try {
@@ -3388,6 +3628,8 @@ export class GalxaiRelayServer extends EventEmitter {
           credentialFingerprint: state.credentialFingerprint,
           status: state.status === 'disabled' ? 'disabled' : state.cooldownUntilMs > Date.now() ? 'cooldown' : 'active',
           cooldownUntilMs: state.cooldownUntilMs, quotaFailures: state.quotaFailures,
+          imageCooldownUntilMs: state.imageCooldownUntilMs, imageQuotaFailures: state.imageQuotaFailures,
+          imageConsecutiveFailures: state.imageConsecutiveFailures, lastImageQuotaFailureJobId: state.lastImageQuotaFailureJobId,
           consecutiveFailures: state.consecutiveFailures, lastUsedAtMs: state.lastUsedAtMs,
           providerLimits: state.providerLimits,
           slidingWindowTimestamps: (state.slidingWindowTimestamps ?? []).filter((t: number) => Number.isFinite(t)).sort((a: number, b: number) => a - b),
@@ -3736,7 +3978,7 @@ export class GalxaiRelayServer extends EventEmitter {
 
       for (const shard of allShards) {
         if (!shardId || shard.id === shardId) {
-          this.shardsTable.put(shard.id, {
+          this.persistShard({
             ...shard,
             slidingWindowTimestamps: [],
             // Only clear local history; provider cooldowns and disabled credentials remain.

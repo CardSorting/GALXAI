@@ -35,6 +35,8 @@ export interface R2UploadResult {
 
 export interface UserSessionImageParams {
   userId: string;
+  /** Canonical private generation receipt that owns this persisted asset. */
+  generationId?: string;
   sessionId?: string;
   imageId?: string;
   data: Buffer | Uint8Array | string; // Buffer, Uint8Array, base64 string, data URL, or remote http(s) URL
@@ -249,6 +251,7 @@ export class GalxR2AssetAdapter {
       const aspectRatio = this.extractAspectRatio(params.size);
       libraryBuffer.enqueueRecord({
         id: imageId,
+        generationId: params.generationId || params.metadata?.requestId || undefined,
         userId,
         sessionId,
         status: 'completed',

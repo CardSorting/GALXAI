@@ -212,7 +212,7 @@ test('HTTP upgrade rejection distinguishes credential failure from access, serve
   }
 });
 
-test('successful streams replay real output while image requests do not automatically repeat synthesis', async () => {
+test('successful streams replay real output while image quota failover stays target-scoped', async () => {
   const upstream = http.createServer();
   const wss = new WebSocketServer({ server: upstream });
   const accounts: string[] = [];
@@ -248,18 +248,101 @@ test('successful streams replay real output while image requests do not automati
     assert.match(output, /"content":"OK"/);
     assert.match(output, /\[DONE\]/);
     const image = await fetch(`${baseUrl(f)}/v1/images/generations`, { method: 'POST',
-      headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt: 'Mock image' }) });
-    assert.equal(image.status, 502);
-    assert.equal(image.headers.get('x-should-retry'), 'false');
-    assert.equal((await image.json()).error.execution_state, 'unknown');
-    assert.equal(accounts.length, 1);
-    assert.ok(f.internals.shardsTable.getAll().every((s: any) => s.inFlight === 0));
+      headers: { 'Content-Type': 'application/json', 'Idempotency-Key': 'image-failover-one' }, body: JSON.stringify({ prompt: 'Mock image' }) });
+    assert.equal(image.status, 200);
+    assert.equal((await image.json()).data[0].b64_json, 'dGVzdA==');
+    assert.equal(accounts.length, 2, 'the same request may move to one distinct compatible shard after a confirmed quota rejection');
+    assert.equal(new Set(accounts).size, 2);
+    assert.ok(f.internals.shardsTable.getAll().every((s: any) => s.inFlight === 0 && s.imageInFlight === 0));
   } finally {
     await f.cleanup();
     for (const socket of wss.clients) socket.terminate();
     await new Promise<void>(resolve => wss.close(() => resolve()));
     await new Promise<void>(resolve => upstream.close(() => resolve()));
   }
+});
+
+test('image quota failover stops after every distinct compatible shard is exhausted', async () => {
+  const upstream = http.createServer();
+  const wss = new WebSocketServer({ server: upstream });
+  const accounts: string[] = [];
+  wss.on('connection', (socket, req) => {
+    accounts.push(String(req.headers['chatgpt-account-id']));
+    socket.on('message', raw => {
+      if (JSON.stringify(JSON.parse(raw.toString())).includes('image_generation')) {
+        socket.send(JSON.stringify({ type: 'response.failed', response: { error: { code: 'usage_limit_reached', retry_after_seconds: 90 } } }));
+      }
+    });
+  });
+  await new Promise<void>(resolve => upstream.listen(0, '127.0.0.1', resolve));
+  const f = fixture(2, { wsEndpoint: `ws://127.0.0.1:${(upstream.address() as any).port}` });
+  try {
+    await f.relay.start();
+    const image = await fetch(`${baseUrl(f)}/v1/images/generations`, { method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Idempotency-Key': 'image-both-depleted' }, body: JSON.stringify({ prompt: 'No image should be generated' }) });
+    assert.equal(image.status, 503);
+    assert.equal((await image.json()).error.code, 'all_shards_unavailable');
+    assert.equal(accounts.length, 2, 'failover is bounded by distinct shards');
+    assert.equal(new Set(accounts).size, 2);
+    assert.ok(f.internals.shardsTable.getAll().every((s: any) => s.inFlight === 0 && s.imageInFlight === 0));
+    const replay = await fetch(`${baseUrl(f)}/v1/images/generations`, { method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Idempotency-Key': 'image-both-depleted' }, body: JSON.stringify({ prompt: 'No image should be generated' }) });
+    assert.equal(replay.status, 409, 'a terminal failed receipt is not replayable');
+    assert.equal(accounts.length, 2);
+  } finally {
+    await f.cleanup();
+    for (const socket of wss.clients) socket.terminate();
+    await new Promise<void>(resolve => wss.close(() => resolve()));
+    await new Promise<void>(resolve => upstream.close(() => resolve()));
+  }
+});
+
+test('ambiguous image dispatch never fails over to a healthy shard', async () => {
+  const upstream = http.createServer();
+  const wss = new WebSocketServer({ server: upstream });
+  const accounts: string[] = [];
+  wss.on('connection', (socket, req) => {
+    accounts.push(String(req.headers['chatgpt-account-id']));
+    socket.on('message', raw => {
+      if (JSON.stringify(JSON.parse(raw.toString())).includes('image_generation')) socket.terminate();
+    });
+  });
+  await new Promise<void>(resolve => upstream.listen(0, '127.0.0.1', resolve));
+  const f = fixture(2, { wsEndpoint: `ws://127.0.0.1:${(upstream.address() as any).port}` });
+  try {
+    await f.relay.start();
+    const image = await fetch(`${baseUrl(f)}/v1/images/generations`, { method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Idempotency-Key': 'image-ambiguous' }, body: JSON.stringify({ prompt: 'Do not duplicate this image' }) });
+    assert.equal(image.status, 502);
+    assert.equal(image.headers.get('x-should-retry'), 'false');
+    assert.equal((await image.json()).error.execution_state, 'unknown');
+    assert.equal(accounts.length, 1, 'an ambiguous A outcome must not attempt B');
+    assert.ok(f.internals.shardsTable.getAll().every((s: any) => s.inFlight === 0 && s.imageInFlight === 0));
+  } finally {
+    await f.cleanup();
+    for (const socket of wss.clients) socket.terminate();
+    await new Promise<void>(resolve => wss.close(() => resolve()));
+    await new Promise<void>(resolve => upstream.close(() => resolve()));
+  }
+});
+
+test('image quota cooldown does not disable independent text capacity', async () => {
+  const f = fixture(2);
+  try {
+    const image = f.internals.acquireHealthyShard(undefined, 'image:test-model');
+    assert.equal(image?.id, 'shard_0');
+    f.internals.recordQuotaFailure('shard_0', Date.now() + 60_000, true, undefined, true);
+    const imageFallback = f.internals.acquireHealthyShard(undefined, 'image:test-model');
+    assert.equal(imageFallback?.id, 'shard_1');
+    f.internals.releaseShard('shard_1', false, true);
+    const text = f.internals.acquireHealthyShard(new Set(['shard_1']), 'test-model');
+    assert.equal(text?.id, 'shard_0');
+    f.internals.releaseShard('shard_0');
+    const shard = f.internals.shardsTable.get('shard_0');
+    assert.equal(shard.status, 'active');
+    assert.equal(shard.quotaFailures, 0);
+    assert(shard.imageCooldownUntilMs > Date.now());
+  } finally { await f.cleanup(); }
 });
 
 test('JWT expiry overrides stale registry metadata and excludes the credential', async () => {

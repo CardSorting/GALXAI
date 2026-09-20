@@ -7,8 +7,8 @@
       "component": "central"
     },
     {
-      "tag": "galxai-relay-premium:images-20260916",
-      "id": "sha256:1113244d3a5154fb2bdb97f20494b6df3a748ae390dc4a19d24e996a1160af97",
+      "tag": "galxai-relay-premium:admission-20260919-r2",
+      "id": "sha256:70f1cb8d669eb38d6d8bcc28fa36e438609c1bfa049e55e8ae27d30858f03a5d",
       "architecture": "arm64",
       "component": "runtime",
       "pool": "premium"

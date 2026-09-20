@@ -7,6 +7,7 @@ import { galxRouter } from '../src/core/router/GalxModelRouter';
 import { ImageCapacityError } from '../src/core/router/ImageCapacityError';
 import { RelayDispatchError } from '../src/core/router/adapters/RelayChatTransport';
 import { GenerationAccess } from '../src/lib/billing/generation-access';
+import { isSystemicFailure } from '../src/lib/stars/StarPopulationController';
 
 const auth = GalxAuthEngine.getInstance;
 const seat = GalxSeatTierEngine.getInstance;
@@ -54,3 +55,11 @@ for (const failure of [new Error('transport disconnected'), Object.assign(new Er
   assert.equal(writes.some(task=>task.status==='RETRYING'), false);
 }
 console.log('PASS: queued image failures cannot trigger duplicate synthesis.');
+
+assert.equal(isSystemicFailure(new RelayDispatchError('relay_http_503', {
+  upstreamCode: 'request_unavailable', executionState: 'unknown', shouldRetry: false,
+})), false, 'generic worker relay failures remain attempt-level outcomes');
+assert.equal(isSystemicFailure(new RelayDispatchError('relay_fleet_unavailable', {
+  upstreamCode: 'relay_fleet_unavailable', executionState: 'unknown', shouldRetry: false,
+})), true, 'explicit fleet failures stop a bounded population');
+console.log('PASS: Star systemic-stop classification distinguishes worker failures from fleet failures.');

@@ -625,6 +625,12 @@
   }
 }
 
+.masonry-modal-author {
+  margin: 0 0 22px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
 .masonry-modal-header {
   display: flex;
   align-items: center;
@@ -899,6 +905,22 @@
 
 .masonry-card-topbar > * {
   pointer-events: auto;
+}
+
+.masonry-card-author {
+  min-width: 0;
+  max-width: calc(100% - 74px);
+  padding: 4px 7px 4px 4px;
+  border: 1px solid rgba(15, 18, 29, 0.42);
+  border-radius: 9999px;
+  background: rgba(15, 18, 29, 0.78);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.masonry-card-author a,
+.masonry-card-author span {
+  min-width: 0;
 }
 
 .masonry-card-actions-top {
@@ -1355,5 +1377,3 @@
   align-items: center;
   gap: 3px;
 }
-
-

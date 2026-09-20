@@ -23,6 +23,8 @@ export function isPublicProductPath(pathname: string): boolean {
   // Resource identifiers never extend an exemption to sibling API namespaces.
   if (/^\/v1\/images\/(?:requests\/[^/]+(?:\/stream)?|assets\/[^/]+(?:\/thumbnail)?|sessions\/[^/]+)$/.test(p)) return true;
   if (/^\/api\/images\/library\/[^/]+$/.test(p) || /^\/api\/sites\/published\/[^/]+$/.test(p)) return true;
+  if (/^\/api\/community\/participants\/[a-z0-9][a-z0-9_-]{2,31}$/.test(p)) return true;
+  if (/^\/profile\/[a-z0-9][a-z0-9_-]{2,31}$/.test(p)) return true;
   if (/^\/sites\/[^/]+$/.test(p) || /^\/billing(?:\/|$)/.test(p)) return true;
   if (/^\/(?:brand|fonts|inspiration|images\/showcase)\//.test(p) || /^\/images\/studio\/(?:desert|glass|paper)\.webp$/.test(p)) return true;
   if (/^\/(?:google[^/]+\.html|yandex_[^/]+\.html)$/.test(p)) return true;

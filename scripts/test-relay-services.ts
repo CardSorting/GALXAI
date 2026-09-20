@@ -11,8 +11,11 @@ import { centralServer } from '../src/relay/pool-central.js';
 import { PoolExecution } from '../src/relay/pool-execution.js';
 import { CentralClient, hash, requestWorkload, assertProjectDatabase, PROJECTS } from '../src/relay/pool-protocol.js';
 import { GalxaiRelayServer } from '../src/relay/relay-server.js';
+import { PoolRuntime } from '../src/relay/pool-runtime.js';
+import { AdmissionEventBuffer } from '../src/relay/admission-observability.js';
 import { poolMonitor } from '../src/relay/pool-monitor-server.js';
 import { DesktopManager } from '../src/relay/desktop-manager.js';
+import { classifyImageRelayFailure, decodePrivateRelayFailure, encodePrivateRelayFailure, privateRelayFailure, PRIVATE_RELAY_FAILURE_HEADER } from '../src/relay/private-failure.js';
 
 async function listen(server:http.Server) {server.listen(0,'127.0.0.1');await once(server,'listening');return `http://127.0.0.1:${(server.address() as any).port}`;}
 const close=(server:http.Server)=>new Promise<void>(resolve=>{server.closeAllConnections();server.close(()=>resolve());});
@@ -120,6 +123,186 @@ test('public job DTOs strip nested operational data and bound response bytes',as
   await assert.rejects(boundedJson(new Response('x'.repeat(1025)),1024));
 });
 
+test('private worker failures open a scoped circuit, fail over future work, and stay out of public responses',async()=>{
+  const failure=encodePrivateRelayFailure(privateRelayFailure({class:'capability_denied',scope:'worker',retryAfterMs:120000}));
+  assert.deepEqual(decodePrivateRelayFailure(failure),{version:'v1',class:'capability_denied',scope:'worker',retryAfterMs:120000});
+  const calls={a:0,b:0};
+  const workerServer=(name:'a'|'b')=>http.createServer((_req,res)=>{
+    calls[name]++;
+    res.writeHead(502,{'Content-Type':'application/json',[PRIVATE_RELAY_FAILURE_HEADER]:failure});
+    res.end(JSON.stringify({error:{code:'upstream_image_synthesis_failed',message:'private provider detail'}}));
+  });
+  const servers=[workerServer('a'),workerServer('b')];
+  const origins=await Promise.all(servers.map(server=>listen(server)));
+  const account=(id:string)=>({id,revision:1,credentialRevision:key(`credential-${id}`),state:'enabled' as const,desktopId:randomUUID(),models:[],expiresAtMs:Date.now()+600000});
+  const engine={credentialRejected:()=>false,accountAvailability:()=>({eligible:true,lastUsedAtMs:0,recovering:false,availableSlots:1})};
+  const execution={epoch:'epoch',central:{identity:{pool:'premium'}},standardAvailable:()=>true,standardRecovering:()=>false,store:{call:async(action:string)=>action==='lookup'?null:[]}};
+  const runtime=new PoolRuntime(execution as any,key('wire'),'/unused');
+  (runtime as any).refreshedAt=Date.now();
+  (runtime as any).workers.set('a',{account:account('a'),engine,port:Number(new URL(origins[0]).port),key:key('inner-a'),failureCircuits:{}});
+  (runtime as any).workers.set('b',{account:account('b'),engine,port:Number(new URL(origins[1]).port),key:key('inner-b'),failureCircuits:{}});
+  const origin=await listen(runtime.server);
+  const post=(id:string)=>fetch(origin+'/v1/images/generations',{method:'POST',headers:{Authorization:`Bearer ${key('wire')}`,'Content-Type':'application/json','x-galx-tenant':hash('owner'),'Idempotency-Key':id},body:JSON.stringify({model:'gpt-image-2',prompt:'a quiet blue moon'})});
+  try {
+    const first=await post('first');
+    assert.equal(first.status,503); assert.equal(first.headers.get(PRIVATE_RELAY_FAILURE_HEADER),null);
+    assert.equal(first.headers.get('retry-after'),'120'); assert(!JSON.stringify(await first.json()).includes('capability_denied'));
+    const second=await post('second');
+    assert.equal(second.status,503); assert.equal(calls.a,1); assert.equal(calls.b,1);
+    assert((runtime as any).workers.get('a').failureCircuits.images.openUntilMs>Date.now());
+  } finally {
+    await close(runtime.server); await Promise.all(servers.map(close));
+  }
+});
+
+test('confirmed pre-generation image rejection fails over within one admission lifecycle', async () => {
+  const png = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+  assert.equal(classifyImageRelayFailure({ upstream: { type: 'response.failed', response: { error: { code: 'usage_limit_reached' } } } }).class, 'pre_generation_rejected');
+  assert.notEqual(classifyImageRelayFailure({ upstream: { type: 'error', error: { code: 'usage_limit_reached' } } }).class, 'pre_generation_rejected');
+  const preGeneration = encodePrivateRelayFailure(privateRelayFailure({ class: 'pre_generation_rejected', scope: 'worker', retryAfterMs: 90_000 }));
+  let aCalls = 0, bCalls = 0;
+  const aServer = http.createServer((_req, res) => {
+    aCalls++;
+    res.writeHead(502, { 'Content-Type': 'application/json', [PRIVATE_RELAY_FAILURE_HEADER]: preGeneration });
+    res.end(JSON.stringify({ error: { code: 'upstream_image_synthesis_failed', message: 'private detail' } }));
+  });
+  const bServer = http.createServer((_req, res) => {
+    bCalls++;
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ data: [{ b64_json: png }] }));
+  });
+  const [aOrigin, bOrigin] = await Promise.all([listen(aServer), listen(bServer)]);
+  const account = (id: string) => ({id,revision:1,credentialRevision:key(`failover-${id}`),state:'enabled' as const,desktopId:randomUUID(),models:[],expiresAtMs:Date.now()+600000});
+  const engine = {credentialRejected:()=>false,accountAvailability:()=>({eligible:true,lastUsedAtMs:0,recovering:false,availableSlots:1})};
+  const execution={epoch:'epoch',central:{identity:{pool:'premium'}},standardAvailable:()=>true,standardRecovering:()=>false,store:{call:async(action:string)=>action==='lookup'?null:[]}};
+  const admissionEvents:any[] = [];
+  const runtime = new PoolRuntime(execution as any, key('failover-wire'), '/unused', undefined, new AdmissionEventBuffer(128, event => admissionEvents.push(event)));
+  (runtime as any).refreshedAt = Date.now();
+  (runtime as any).workers.set('a',{account:account('a'),engine,port:Number(new URL(aOrigin).port),key:key('failover-a'),failureCircuits:{}});
+  (runtime as any).workers.set('b',{account:account('b'),engine,port:Number(new URL(bOrigin).port),key:key('failover-b'),failureCircuits:{}});
+  const origin = await listen(runtime.server);
+  try {
+    const response = await fetch(origin + '/v1/images/generations', {
+      method:'POST',
+      headers:{Authorization:`Bearer ${key('failover-wire')}`,'Content-Type':'application/json','x-galx-tenant':hash('failover-owner'),'Idempotency-Key':'failover-one'},
+      body:JSON.stringify({model:'gpt-image-2',prompt:'a quiet blue moon',response_format:'b64_json'}),
+    });
+    assert.equal(response.status, 200);
+    const body = await response.json();
+    assert.match(body.data[0].b64_json, /^iVBORw0KGgo/);
+    assert.notEqual(body.data[0].b64_json, '');
+    assert.deepEqual({a:aCalls,b:bCalls},{a:1,b:1});
+    assert.equal((runtime as any).workers.get('a').failureCircuits.images.lastClass, 'pre_generation_rejected');
+    const names = admissionEvents.map(event => event.name);
+    for (const name of ['received','candidate_evaluated','reservation_attempted','reservation_acquired','dispatch_started','worker_pregrant_started','worker_pregrant_rejected','reselection_started','terminal']) assert(names.includes(name), `missing private admission event: ${name}`);
+    assert(admissionEvents.some(event => event.name === 'candidate_rejected' && event.targetId === 'a' && event.reason === 'excluded_target'));
+    assert(admissionEvents.some(event => event.name === 'reservation_acquired' && event.targetId === 'b'));
+    assert.equal(admissionEvents.at(-1).state, 'completed');
+    assert(!JSON.stringify(admissionEvents).includes('quiet blue moon'));
+  } finally {
+    await close(runtime.server); await Promise.all([close(aServer), close(bServer)]);
+  }
+});
+
+test('single assigned image worker preserves target-local quota scope for its parent pool', async () => {
+  const original = globalThis.fetch;
+  const directory = await mkdtemp(path.join(tmpdir(), 'relay-image-target-scope-'));
+  globalThis.fetch = (async (url, options) => {
+    if (String(url).startsWith('https://api.openai.com/')) {
+      return new Response(JSON.stringify({ error: { code: 'usage_limit_reached', message: 'private provider detail' } }), {
+        status: 429, headers: { 'retry-after': '9' },
+      });
+    }
+    return original(url, options);
+  }) as typeof fetch;
+  const engine = new GalxaiRelayServer({
+    host:'127.0.0.1', port:0, assignedShardId:'own',
+    assignedShard:{id:'own',accessToken:'sk-test-token',accountId:'fixture-account'},
+    registryEnabled:false,discoverHostCredentials:false,apiKeys:[key('target-scope')],adminApiKeys:[key('target-scope-admin')],
+    maxUpstreamRetries:0,drainTimeoutMs:100,capabilityDiscovery:async()=>['image:gpt-image-2'],
+    codexImageToolAlias:false,stateSnapshotPath:path.join(directory,'state.json'),
+    executionPolicy:{pool:'premium',admit:async()=>({signal:new AbortController().signal,assert:()=>{},complete:async()=>{}})},
+  });
+  try {
+    await engine.start();
+    const response = await original(`http://127.0.0.1:${engine.listeningPort()}/v1/images/generations`, {
+      method:'POST', headers:{Authorization:`Bearer ${key('target-scope')}`,'Content-Type':'application/json','Idempotency-Key':'target-scope-one'},
+      body:JSON.stringify({model:'gpt-image-2',prompt:'a quiet blue moon',response_format:'b64_json'}),
+    });
+    assert.equal(response.status, 502);
+    assert.match(response.headers.get(PRIVATE_RELAY_FAILURE_HEADER) ?? '', /^v1:pre_generation_rejected:worker:/);
+    const body = await response.text();
+    assert(!body.includes('private provider detail') && !body.includes('all_shards_unavailable'));
+    assert.equal(engine.accountAvailability('image:gpt-image-2', true).eligible, false);
+  } finally {
+    globalThis.fetch = original; await engine.stop(); await rm(directory,{recursive:true,force:true});
+  }
+});
+
+test('a worker quarantined during an active request keeps that request once and stays excluded afterward', async () => {
+  const png = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+  let aCalls = 0, bCalls = 0, aResponse: http.ServerResponse | undefined;
+  const aServer = http.createServer((_req, res) => {
+    aCalls++;
+    if (aCalls === 1) { aResponse = res; return; }
+    res.writeHead(200, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ data: [{ b64_json: png }] }));
+  });
+  const bServer = http.createServer((_req, res) => {
+    bCalls++;
+    res.writeHead(200, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ data: [{ b64_json: png }] }));
+  });
+  const [aOrigin, bOrigin] = await Promise.all([listen(aServer), listen(bServer)]);
+  const account = (id: string) => ({id,revision:1,credentialRevision:key(`occupied-${id}`),state:'enabled' as const,desktopId:randomUUID(),models:['image:gpt-image-2'],expiresAtMs:Date.now()+600000});
+  const engine = {credentialRejected:()=>false,accountAvailability:()=>({eligible:true,lastUsedAtMs:0,recovering:false,availableSlots:1})};
+  const execution={epoch:'epoch',central:{identity:{pool:'premium'}},standardAvailable:()=>true,standardRecovering:()=>false,store:{call:async(action:string)=>action==='lookup'?null:[]}};
+  const runtime = new PoolRuntime(execution as any, key('occupied-wire'), '/unused');
+  (runtime as any).refreshedAt = Date.now();
+  (runtime as any).workers.set('a',{account:account('a'),engine,port:Number(new URL(aOrigin).port),key:key('occupied-a'),failureCircuits:{}});
+  (runtime as any).workers.set('b',{account:account('b'),engine,port:Number(new URL(bOrigin).port),key:key('occupied-b'),failureCircuits:{}});
+  const origin = await listen(runtime.server);
+  const post = (id: string) => fetch(origin+'/v1/images/generations',{method:'POST',headers:{Authorization:`Bearer ${key('occupied-wire')}`,'Content-Type':'application/json','x-galx-tenant':hash('occupied-owner'),'Idempotency-Key':id},body:JSON.stringify({model:'gpt-image-2',prompt:id,response_format:'b64_json'})});
+  try {
+    const first = post('occupied-first');
+    for (let i=0; i<100 && !aResponse; i++) await new Promise(resolve => setTimeout(resolve, 2));
+    assert(aResponse);
+    (runtime as any).workers.get('a').failureCircuits.images = {consecutiveFailures:1,openUntilMs:Date.now()+60000,lastClass:'capability_temporarily_unavailable'};
+    aResponse.writeHead(200, {'Content-Type':'application/json'}); aResponse.end(JSON.stringify({data:[{b64_json:png}]}));
+    assert.equal((await first).status, 200);
+    const second = await post('occupied-second');
+    assert.equal(second.status, 200);
+    assert.equal(aCalls, 1, 'quarantine must not duplicate the already-running request');
+    assert.equal(bCalls, 1, 'future work must fail over to the eligible worker');
+    assert((runtime as any).workers.get('a').failureCircuits.images.openUntilMs>Date.now());
+  } finally {
+    await close(runtime.server); await Promise.all([close(aServer), close(bServer)]);
+  }
+});
+
+test('ambiguous worker POST outcomes are never replayed to another worker', async () => {
+  const calls = { a: 0, b: 0 };
+  const ambiguous = http.createServer((_req, res) => { calls.a++; res.destroy(); });
+  const alternate = http.createServer((_req, res) => { calls.b++; res.writeHead(200, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ data: [{ b64_json: 'never-used' }] })); });
+  const origins = await Promise.all([listen(ambiguous), listen(alternate)]);
+  const account = (id:string) => ({id,revision:1,credentialRevision:key(`ambiguous-${id}`),state:'enabled' as const,desktopId:randomUUID(),models:[],expiresAtMs:Date.now()+600000});
+  const execution={epoch:'epoch',central:{identity:{pool:'premium'}},standardAvailable:()=>true,standardRecovering:()=>false,store:{call:async(action:string)=>action==='lookup'?null:[]}};
+  const runtime = new PoolRuntime(execution as any, key('ambiguous-wire'), '/unused');
+  (runtime as any).refreshedAt = Date.now();
+  (runtime as any).workers.set('a', {account:account('a'), engine:{credentialRejected:()=>false, accountAvailability:()=>({eligible:true,lastUsedAtMs:0,recovering:false,availableSlots:1})}, port:Number(new URL(origins[0]).port), key:key('inner-ambiguous-a'), failureCircuits:{}});
+  (runtime as any).workers.set('b', {account:account('b'), engine:{credentialRejected:()=>false, accountAvailability:()=>({eligible:true,lastUsedAtMs:0,recovering:false,availableSlots:1})}, port:Number(new URL(origins[1]).port), key:key('inner-ambiguous-b'), failureCircuits:{}});
+  const origin = await listen(runtime.server);
+  try {
+    const response = await fetch(origin + '/v1/images/generations', {
+      method:'POST', headers:{Authorization:`Bearer ${key('ambiguous-wire')}`,'Content-Type':'application/json','x-galx-tenant':hash('owner'),'Idempotency-Key':'ambiguous-one'},
+      body:JSON.stringify({model:'gpt-image-2',prompt:'a quiet blue moon'}),
+    });
+    assert.equal(response.status, 503);
+    assert.equal((await response.json()).error.execution_state, 'unknown');
+    assert.deepEqual(calls, {a:1,b:0});
+  } finally {
+    await close(runtime.server); await Promise.all([close(ambiguous), close(alternate)]);
+  }
+});
+
 test('Premium image alias needs a grant and performs no background image probe',async()=>{
   const {default:sharp}=await import('sharp');const image=await sharp({create:{width:2,height:2,channels:3,background:'white'}}).png().toBuffer();
   const original=globalThis.fetch;let providerCalls=0,admitted=0,settled=0;
@@ -130,6 +313,44 @@ test('Premium image alias needs a grant and performs no background image probe',
     const registry=(engine as any).capabilities; const ticket=registry.beginObservation('own','image:gpt-image-2');registry.observe(ticket,'image:gpt-image-2','NOT_AUTHORIZED');assert.equal(engine.imageAvailability(),false);assert.equal(engine.accountAvailability('image:gpt-image-2',true).eligible,false);
     const record=registry.shards.get('own');record.models.find((m:any)=>m.model==='image:gpt-image-2').expiresAtMs=Date.now()-1;assert.equal(engine.imageAvailability(),null);assert.equal(engine.accountAvailability('image:gpt-image-2',true).eligible,true);assert.equal(providerCalls,1);}
   finally{globalThis.fetch=original;await engine.stop();await rm(directory,{recursive:true,force:true});}
+});
+
+test('Premium image workers publish a private capability outcome without leaking it to callers', async () => {
+  const original = globalThis.fetch;
+  const directory = await mkdtemp(path.join(tmpdir(), 'premium-image-failure-'));
+  globalThis.fetch = (async (url, options) => {
+    if (String(url).startsWith('https://chatgpt.com/')) {
+      return new Response('private provider credential and topology', { status: 403, headers: { 'retry-after': '7' } });
+    }
+    return original(url, options);
+  }) as typeof fetch;
+  const engine = new GalxaiRelayServer({
+    host: '127.0.0.1', port: 0, assignedShardId: 'own',
+    assignedShard: { id: 'own', accessToken: 'fixture-token', accountId: 'fixture-account' },
+    registryEnabled: false, discoverHostCredentials: false, apiKeys: [key('premium-failure')],
+    adminApiKeys: [key('premium-failure-admin')], maxUpstreamRetries: 0, drainTimeoutMs: 100,
+    capabilityDiscovery: async () => ['fixture'], codexImageToolAlias: true,
+    stateSnapshotPath: path.join(directory, 'state.json'),
+    executionPolicy: { pool: 'premium', admit: async () => ({
+      signal: new AbortController().signal, assert: () => {}, complete: async () => {},
+    }) },
+  });
+  try {
+    await engine.start();
+    const response = await original(`http://127.0.0.1:${engine.listeningPort()}/v1/images/generations`, {
+      method: 'POST', headers: {
+        Authorization: `Bearer ${key('premium-failure')}`, 'Content-Type': 'application/json',
+        'Idempotency-Key': 'image-capability-failure',
+      }, body: JSON.stringify({ model: 'gpt-image-2', prompt: 'test', response_format: 'b64_json' }),
+    });
+    assert.equal(response.status, 502);
+    assert.equal(response.headers.get(PRIVATE_RELAY_FAILURE_HEADER), 'v1:capability_denied:worker:120000');
+    const body = await response.text();
+    assert(!body.includes('private provider credential') && !body.includes('capability_denied'));
+    assert.equal(engine.accountAvailability('image:gpt-image-2', true).eligible, false);
+  } finally {
+    globalThis.fetch = original; await engine.stop(); await rm(directory, { recursive: true, force: true });
+  }
 });
 
 test('model-backed image requests preserve the requested model for Codex tool dispatch', async () => {
@@ -146,7 +367,7 @@ test('application selection fixes Sites/images to Premium and never borrows afte
   const keys=['GALX_PREMIUM_RELAY_URL','GALX_STANDARD_RELAY_URL','GALX_PREMIUM_RELAY_KEY','GALX_STANDARD_RELAY_KEY','GALX_TEXT_RELAY_POOL'];const old=keys.map(k=>process.env[k]);const fetcher=globalThis.fetch;const calls:string[]=[];
   try{Object.assign(process.env,{GALX_PREMIUM_RELAY_URL:'https://premium.example',GALX_PREMIUM_RELAY_KEY:key('premium')});
     assert.equal(isolatedRelay('images').url,'https://premium.example');assert.equal(isolatedRelay('sites').url,'https://premium.example');assert.equal(isolatedRelay('text').url,'https://premium.example');
-    globalThis.fetch=(async(url:any,init:any)=>{calls.push(new URL(url).origin);assert.equal(init.headers['x-galx-tenant'],hash('owner'));return Response.json({error:{code:'busy'}},{status:503});}) as typeof fetch;
+    globalThis.fetch=(async(url:any,init:any)=>{const target=new URL(url);if(target.pathname==='/health/live')return Response.json({ok:true});if(target.pathname==='/v1/models')return Response.json({object:'list',data:[{id:'fixture'}]});calls.push(target.origin);assert.equal(init.headers['x-galx-tenant'],hash('owner'));return Response.json({error:{code:'busy'}},{status:503});}) as typeof fetch;
     await assert.rejects(isolatedChat({model:'fixture',messages:[{role:'user',content:'test'}]},'owner','operation',()=>{}));assert.deepEqual(calls,['https://premium.example']);
     process.env.GALX_TEXT_RELAY_POOL='standard';assert.throws(()=>isolatedRelay('text'));delete process.env.GALX_TEXT_RELAY_POOL;
     process.env.GALX_STANDARD_RELAY_KEY=key('retired');assert.throws(()=>isolatedRelay('text'));
@@ -196,7 +417,7 @@ test('application router delegates without reading account credentials or acquir
  const forbidden=()=>{throw Error('Legacy authority was invoked');};
  try{
   Object.assign(process.env,{GALX_ISOLATED_RELAYS_ENABLED:'1',GALX_PREMIUM_RELAY_URL:'https://premium.example',GALX_PREMIUM_RELAY_KEY:key('p')});
-  let dispatches=0;globalThis.fetch=(async(url:any,init:any)=>{assert.equal(new URL(url).origin,'https://premium.example');assert.equal(init.headers['x-galx-tenant'],hash('owner'));if(init.method==='POST'){dispatches++;return Response.json({id:'job_fixture',streamUrl:'/v1/jobs/job_fixture/stream'},{status:202});}return new Response('data: '+JSON.stringify({choices:[{delta:{content:'hello'},finish_reason:'stop'}]})+'\n\ndata: [DONE]\n\n',{headers:{'Content-Type':'text/event-stream'}});}) as typeof fetch;
+  let dispatches=0;globalThis.fetch=(async(url:any,init:any)=>{const target=new URL(url);assert.equal(target.origin,'https://premium.example');if(target.pathname==='/health/live')return Response.json({ok:true});if(target.pathname==='/v1/models')return Response.json({object:'list',data:[{id:'gpt-5.6-luna'}]});assert.equal(init.headers['x-galx-tenant'],hash('owner'));if(init.method==='POST'){dispatches++;return Response.json({id:'job_fixture',streamUrl:'/v1/jobs/job_fixture/stream'},{status:202});}return new Response('data: '+JSON.stringify({choices:[{delta:{content:'hello'},finish_reason:'stop'}]})+'\n\ndata: [DONE]\n\n',{headers:{'Content-Type':'text/event-stream'}});}) as typeof fetch;
   const router=new GalxModelRouter({ensureFreshFromAuthority:forbidden} as any,{} as any,{} as any,{acquireLeaseAuthoritatively:forbidden} as any,{} as any,{resolvePrivacyPolicy:()=>({profile:'standard',dataResidency:'global'})} as any,{} as any);
   const result=await router.routeChatCompletion({request:{model:'gpt-5.6-luna',messages:[{role:'user',content:'hello'}]},userId:'owner',requestId:'request-one'});assert.equal(result.statusCode,200);assert.equal(JSON.parse(result.body as string).choices[0].message.content,'hello');assert.equal(dispatches,1);
  }finally{globalThis.fetch=original;names.forEach((k,i)=>{if(old[i]===undefined)delete process.env[k];else process.env[k]=old[i];});}

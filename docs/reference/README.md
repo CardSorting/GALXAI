@@ -9,6 +9,7 @@ Look up a contract or tool without following an operational procedure.
 - [Decision lifecycle register](../knowledge/DECISIONS.md), [complete ADR catalog](../adr/README.md)
 - [Repository documentation scopes](../DOCUMENTATION_POLICY.md)
 - [Central account and registration management](relay-account-management.md)
+- [Stars and autonomous participants](stars.md)
 - [Isolated relay and monitor API](../RELAY_API_REFERENCE.md)
 - [Retained federation API and original-job recovery](legacy-federation-api.md)
 - [Billing pages and payment paths](billing-pages.md)

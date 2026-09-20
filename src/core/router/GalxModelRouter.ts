@@ -38,7 +38,7 @@ export interface RouteChatOptions {
   isPriorityUser?: boolean;
   headers?: Headers | Record<string, string | null | undefined>;
   /** Public Developer API usage is counted as completed messages, never tokens. */
-  usageBillingBasis?: 'message' | 'legacy_token';
+  usageBillingBasis?: 'message' | 'legacy_token' | 'administrative';
   /** Private administrator allocation applied to message reservations. */
   usageCapUsd?: number;
 }
@@ -51,7 +51,7 @@ export interface RouteImageOptions {
   headers?: Headers | Record<string, string | null | undefined>;
   signal?: AbortSignal;
   /** Public Developer API usage is counted as completed messages, never tokens. */
-  usageBillingBasis?: 'message' | 'legacy_token';
+  usageBillingBasis?: 'message' | 'legacy_token' | 'administrative';
   /** Private administrator allocation applied to message reservations. */
   usageCapUsd?: number;
 }
@@ -291,7 +291,7 @@ export class GalxModelRouter {
         const cost=TokenCostCalculator.calculateCost(modelSpec,{promptTokens:usage.prompt_tokens,completionTokens:usage.completion_tokens,cachedTokens:0});
         if (options.usageBillingBasis === 'message') {
           GalxSeatTierEngine.getInstance().recordSeatMessageUsage(userId, modelSpec.id, requestId);
-        } else {
+        } else if (options.usageBillingBasis === 'legacy_token') {
           GalxEdgeBatchBuffer.getInstance().enqueueTokenDraw({userId,costUsd:cost.totalCostUsd,description:`API Chat: ${modelSpec.name}`,model:modelSpec.id,promptTokens:usage.prompt_tokens,completionTokens:usage.completion_tokens,cachedTokens:0,metadata:{requestId,latencyMs:Date.now()-started}});
           void GalxSeatTierEngine.getInstance().recordSeatTokenDraw(userId,cost.totalCostUsd).catch(()=>{});
           GalxSeatTierEngine.getInstance().recordSeatUsage(userId,modelSpec.id,usage.total_tokens,requestId);
@@ -602,7 +602,7 @@ export class GalxModelRouter {
         try {
           if (options.usageBillingBasis === 'message') {
             GalxSeatTierEngine.getInstance().recordSeatMessageUsage(userId, modelSpec.id, requestId);
-          } else {
+          } else if (options.usageBillingBasis === 'legacy_token') {
           GalxEdgeBatchBuffer.getInstance().enqueueTokenDraw({
             userId,
             costUsd: costBreakdown.totalCostUsd,
@@ -730,7 +730,7 @@ export class GalxModelRouter {
     userId?: string,
     requestId?: string,
     approxPromptTokens: number = 100,
-    usageBillingBasis: 'message' | 'legacy_token' = 'legacy_token'
+    usageBillingBasis: 'message' | 'legacy_token' | 'administrative' = 'legacy_token'
   ): ReadableStream<Uint8Array> {
     let estimatedTokens = 0;
     const decoder = new TextDecoder();
@@ -795,7 +795,7 @@ export class GalxModelRouter {
           const modelSpec = ModelCatalog.resolveModel(modelId);
           if (usageBillingBasis === 'message') {
             GalxSeatTierEngine.getInstance().recordSeatMessageUsage(userId, modelSpec.id, requestId);
-          } else {
+          } else if (usageBillingBasis === 'legacy_token') {
           const completionTokens = Math.max(1, estimatedTokens);
           const costBreakdown = TokenCostCalculator.calculateCost(modelSpec, {
             promptTokens: approxPromptTokens,
@@ -982,7 +982,7 @@ export class GalxModelRouter {
       const cost=TokenCostCalculator.calculateCost(modelSpec,{promptTokens:1000,imagesCount:1,quality:options.request.quality});
       if (options.usageBillingBasis === 'message') {
         GalxSeatTierEngine.getInstance().recordSeatMessageUsage(userId, modelSpec.id, requestId);
-      } else {
+      } else if (options.usageBillingBasis === 'legacy_token') {
         GalxEdgeBatchBuffer.getInstance().enqueueTokenDraw({userId,costUsd:cost.totalCostUsd,description:`Visual Synthesis: ${modelSpec.name}`,model:modelSpec.id,promptTokens:1000,completionTokens:0,cachedTokens:0,metadata:{requestId,imagesCount:1}});
         void GalxSeatTierEngine.getInstance().recordSeatTokenDraw(userId,cost.totalCostUsd).catch(()=>{});
         GalxSeatTierEngine.getInstance().recordSeatUsage(userId,modelSpec.id,1000,requestId);
@@ -1151,7 +1151,7 @@ export class GalxModelRouter {
         try {
           if (options.usageBillingBasis === 'message') {
             GalxSeatTierEngine.getInstance().recordSeatMessageUsage(userId, modelSpec.id, requestId);
-          } else {
+          } else if (options.usageBillingBasis === 'legacy_token') {
           GalxEdgeBatchBuffer.getInstance().enqueueTokenDraw({
             userId,
             costUsd: costBreakdown.totalCostUsd,
@@ -1263,6 +1263,7 @@ export class GalxModelRouter {
           if (imageSource) {
             const uploaded = await r2Adapter.uploadUserSessionImage({
               userId: userId || 'anonymous',
+              generationId: requestId,
               sessionId: effectiveSessionId,
               data: imageSource,
               contentType: item.content_type || 'image/png',

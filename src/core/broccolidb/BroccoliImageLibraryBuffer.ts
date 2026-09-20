@@ -167,6 +167,9 @@ export class BroccoliImageLibraryBuffer {
       const rpcPayload = batch.map((r) => ({
         id: r.id,
         user_id: r.userId,
+        generation_id: typeof r.generationId === 'string'
+          ? r.generationId
+          : (typeof r.metadata?.requestId === 'string' ? r.metadata.requestId : null),
         session_id: r.sessionId || 'default',
         status: r.status || 'completed',
         prompt: r.prompt,
@@ -758,6 +761,7 @@ export class BroccoliImageLibraryBuffer {
   private mapDatabaseRow(row: any): ImageGenerationRecord {
     return {
       id: String(row.id),
+      generationId: typeof row.generation_id === 'string' ? row.generation_id : undefined,
       userId: String(row.user_id),
       sessionId: String(row.session_id || 'default'),
       status: row.status as ImageGenerationRecord['status'],
