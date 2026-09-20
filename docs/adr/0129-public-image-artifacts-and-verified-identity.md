@@ -18,6 +18,14 @@ Public documentation describes capabilities, accepted inputs, output contracts, 
 
 Image HTTP success defaults to a sanitized binary artifact. Decode and re-encode images before publication, including historical downloads. Explicit JSON uses allowlisted DTOs; never forward internal objects, arbitrary URLs, or upstream headers. Apply the same boundary to errors, async retrieval, streams, webhooks, SDK adapters, model descriptors, and browser assets. Private task records may retain operational evidence.
 
+September 20 extension: publication is an explicit library state, not a billing
+claim. Existing signed-in Image Studio creators may keep a generation `private`;
+Explore and community projections admit only `public` rows, while an opaque
+private artifact or thumbnail capability requires the current owning session
+before cache lookup. `unlisted` remains link-addressable and feed-excluded. The
+existing visibility column and owner-scoped mutation are reused; no new schema,
+Stripe price, or entitlement is inferred by this control.
+
 The identity resolver validates JWT bearer tokens with the authentication service. It rejects bare user IDs and developer/session identifiers. Verification errors fail closed. User-editable claims grant neither priority nor sudo authority. Existing gateway-key and signed-session validation paths remain in place. Reassemble split browser-session cookies before verification; headers, query strings, and cookies are credential transports, never proof of identity. Operational endpoints require separate server-side administrator authorization.
 
 ## Alternatives and consequences

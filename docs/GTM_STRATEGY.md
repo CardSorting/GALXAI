@@ -73,7 +73,8 @@ workload safely.
 Message: “Make something worth sharing.”
 
 Show the image prompt, studio, community stream and prompt exploration. State
-that creations are public by default where applicable. Use real product data for
+that creations are public by default where applicable, with an owner-controlled
+Private mode for drafts. Use real product data for
 community counts and examples. Keep Nova attribution farther down the page.
 
 ### Developers and private integrators

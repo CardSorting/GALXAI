@@ -7,7 +7,7 @@ export const PLAN_INCLUSIONS = [
   ['Compose', IMAGE_PLAN_FEATURES[1]],
   ['Detail', IMAGE_PLAN_FEATURES[2]],
   ['Keep iterating', 'Save to your library, favorite, remix, and download'],
-  ['Share', 'Public sharing controls with creations public by default'],
+  ['Share', 'Choose public or private sharing, with creations public by default'],
 ] as const;
 
 export const FREE_PLAN_INCLUSIONS = [
@@ -44,7 +44,7 @@ export const GUIDES: Guide[] = [
         title: 'One plan for image creation',
         paragraphs: [
           PRO_PLAN.name + ' costs $' + PRO_PLAN.monthlyPriceUsd + ' USD per month for one account. It supports image creation, community discovery, prompt reuse, and access to your image library.',
-          'Generated images are public by default and may appear in the community stream. Review the published plan terms before subscribing.',
+          'Generated images are public by default and may appear in the community stream. Signed-in creators can choose Private mode before generating when a work-in-progress should stay in their library.',
         ],
       },
       {
@@ -232,14 +232,14 @@ export const GUIDES: Guide[] = [
         title: 'Public by default',
         paragraphs: [
           'Creations made in GALX Images are public by default and may enter the community stream. This is part of the product experience, not a statement about how the underlying service operates.',
-          'Review the current product controls and terms before creating anything that should not be shared publicly.',
+          'Choose Private mode in the Image Studio before generating when a work should stay owner-only. Private creations remain in your library and are excluded from Explore and the community stream until you publish them.',
         ],
       },
       {
         id: 'publish',
         title: 'Explore the community stream',
         paragraphs: [
-          'Browse real public creations in a responsive gallery. Search prompts, filter by aspect ratio or style, and remix an idea into your own studio session.',
+          'Browse real public creations in a responsive gallery. Search prompts, filter by aspect ratio or style, and remix an idea into your own studio session. Private creations never enter this surface.',
         ],
       },
       {
@@ -353,7 +353,7 @@ export const FAQS = [
     id: 'public-beta',
     group: 'getting-started',
     question: 'Are generated images public?',
-    answer: 'Creations made in GALX Images are public by default and may appear in the community stream. Review the current product controls and terms before creating anything that should not be shared publicly.',
+    answer: 'Creations made in GALX Images are public by default and may appear in the community stream. Signed-in creators can choose Private mode before generating; private creations stay in the owner library and out of Explore until published.',
     guide: '/knowledge-base/public-creations',
   },
   {
@@ -373,8 +373,8 @@ export const FAQS = [
   {
     id: 'unsupported-plan-features',
     group: 'plans-and-billing',
-    question: 'Does GALX currently offer video or private generation modes?',
-    answer: 'No. GALX currently publishes image creation only. Video, Fast or Relax modes, uploaded-image editing, Stealth and separate concurrency tiers are not advertised as current consumer capabilities.',
+    question: 'Does GALX currently offer video or uploaded-image editing?',
+    answer: 'No. GALX currently publishes image creation only. Video and uploaded-image editing are not advertised as current consumer capabilities. Private mode is available as a sharing control for signed-in Image Studio creators.',
     guide: '/pricing/galx-pro',
   },
   {

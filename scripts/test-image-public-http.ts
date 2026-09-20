@@ -54,13 +54,13 @@ test('raw image HTTP boundary: success, compatibility, errors, async and adversa
   GenerationAccess.resolve=async()=> 'pro';
   t.after(()=>{GenerationAccess.resolve=resolveAccess;});
   const restore = [GalxAuthEngine.getInstance, GalxSeatTierEngine.getInstance, galxRouter.routeImageGeneration, ImageRequestService.getInstance, ImageLibraryRepository.getInstance, GalxR2AssetAdapter.getInstance, GalxQueueEventBus.getInstance];
-  let authenticated = true, capped = false, failure: unknown, calls = 0;
+  let authenticated = true, capped = false, failure: unknown, calls = 0, lastRouteRequest: any = null;
   let task: any = { id: 'opaque-task', user_id: 'customer', state: 'queued', asset_ids: ['asset'], queueId: secret, lastError: { message: secret },
     target: { type: 'INTERNAL_MODEL', taskKind: 'image_generation' }, result: { data: result, shardId: secret } };
   GalxAuthEngine.getInstance = () => ({ resolveAuthIdentity: async () => ({ authenticated, userId: authenticated ? 'customer' : undefined }) }) as any;
   GalxSeatTierEngine.getInstance = () => ({ resolveUserSeatTier: async () => ({ isCapped: capped, isPriorityUser: false }) }) as any;
   ImageRequestService.getInstance = () => ({ create: async () => task, resume: () => {}, repository: { get: async () => task } }) as any;
-  galxRouter.routeImageGeneration = async () => { calls++; if (failure) throw failure; return result as any; };
+  galxRouter.routeImageGeneration = async (options: any) => { calls++; lastRouteRequest = options.request; if (failure) throw failure; return result as any; };
   ImageLibraryRepository.getInstance = () => ({ getAsset: async (userId: string, assetId: string) => userId === 'customer' && assetId === 'asset' ? { id: 'asset', userId: 'customer', status: 'completed', r2Key: secret } : null }) as any;
   GalxR2AssetAdapter.getInstance = () => ({ getAssetBuffer: async () => fixture }) as any;
   GalxQueueEventBus.getInstance = () => ({ subscribeTask: () => () => {} }) as any;
@@ -113,9 +113,19 @@ test('raw image HTTP boundary: success, compatibility, errors, async and adversa
       }
       assert.equal((await send({ prompt: 'flower' }, { accept: 'application/json' })).headers.get('content-type'), 'application/json');
     });
+    await t.test('private visibility is accepted for authenticated generation and stays out of the public response', async () => {
+      const response = await send({ prompt: 'private flower', visibility: 'private', response_format: 'b64_json', upstream_secret: secret });
+      checkHeaders(response); assert.equal(response.status, 200);
+      assert.equal(lastRouteRequest.visibility, 'private');
+      assert.doesNotMatch(await response.text(), /private flower|upstream_secret|PRIVATE_CANARY/);
+      const aliasResponse = await send({ prompt: 'stealth flower', stealth: true, response_format: 'b64_json' });
+      checkHeaders(aliasResponse); assert.equal(aliasResponse.status, 200);
+      assert.equal(lastRouteRequest.visibility, 'private');
+    });
     await t.test('malformed and unauthorized requests never dispatch', async () => {
       const before = calls;
       for (const body of ['{', null, [], {}, { prompt: 'x', n: 2 }]) await checkError(await send(body), 400, 'invalid_request');
+      await checkError(await send({ prompt: 'x', visibility: 'public', stealth: true }), 400, 'unsupported_input');
       for (const body of [{ prompt: 'x', model: secret }, { prompt: 'x', output_format: 'svg' }]) await checkError(await send(body), 400, 'unsupported_input');
       authenticated = false; await checkError(await send(), 401, 'unauthorized'); authenticated = true;
       capped = true; await checkError(await send(), 429, 'rate_limited'); capped = false;
@@ -240,6 +250,39 @@ test('download capability is opaque, authenticated, expiring and purpose bound',
   assert.equal(GalxCryptoVault.openImageDownload(GalxCryptoVault.sealImageDownload('customer', 'asset', -1)), undefined);
   assert.equal(GalxCryptoVault.openImageDownload('not-a-valid-capability'), undefined);
   assert.equal(GalxCryptoVault.openImageDownload(GalxCryptoVault.sealAffinityTicket('private-shard')), undefined);
+});
+
+test('private image capabilities require the owning signed-in account', async () => {
+  const originalAuth = GalxAuthEngine.getInstance;
+  const originalRepository = ImageLibraryRepository.getInstance;
+  const originalStorage = GalxR2AssetAdapter.getInstance;
+  let viewer: string | undefined = 'someone-else';
+  GalxAuthEngine.getInstance = () => ({
+    resolveAuthIdentity: async () => ({ authenticated: Boolean(viewer), userId: viewer, authType: 'session_token' }),
+  }) as any;
+  ImageLibraryRepository.getInstance = () => ({
+    getAsset: async (userId: string, assetId: string) => userId === 'customer' && assetId === 'private-asset'
+      ? { id: assetId, userId, status: 'completed', visibility: 'private', isPublic: false, r2Key: 'private-key', sha256: 'sha', updatedAt: 'now' }
+      : userId === 'customer' && assetId === 'unlisted-asset'
+        ? { id: assetId, userId, status: 'completed', visibility: 'unlisted', isPublic: false, r2Key: 'unlisted-key', sha256: 'sha', updatedAt: 'now' }
+      : null,
+  }) as any;
+  GalxR2AssetAdapter.getInstance = () => ({ getAssetBuffer: async () => fixture }) as any;
+  const token = GalxCryptoVault.sealImageDownload('customer', 'private-asset');
+  const request = () => new NextRequest(`https://galx.ai/v1/images/assets/${token}`);
+  try {
+    assert.equal((await getAsset(request(), { params: Promise.resolve({ token }) })).status, 404);
+    viewer = 'customer';
+    await inspectArtifact(await getAsset(request(), { params: Promise.resolve({ token }) }));
+    viewer = undefined;
+    assert.equal((await getAsset(request(), { params: Promise.resolve({ token }) })).status, 404);
+    const unlistedToken = GalxCryptoVault.sealImageDownload('customer', 'unlisted-asset');
+    await inspectArtifact(await getAsset(new NextRequest(`https://galx.ai/v1/images/assets/${unlistedToken}`), { params: Promise.resolve({ token: unlistedToken }) }));
+  } finally {
+    GalxAuthEngine.getInstance = originalAuth;
+    ImageLibraryRepository.getInstance = originalRepository;
+    GalxR2AssetAdapter.getInstance = originalStorage;
+  }
 });
 
 test('SDK server adapters sanitize outputs and never fabricate success on failure', async () => {

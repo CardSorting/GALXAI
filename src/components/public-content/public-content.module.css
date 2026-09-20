@@ -25,6 +25,13 @@
 .beta { display: flex; gap: 10px; align-items: flex-start; margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--reading-line); color: var(--reading-muted); font-size: .875rem; line-height: 1.7; max-width: 42ch; }
 .beta svg { flex-shrink: 0; margin-top: 3px; }
 .pricingOptions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.roadmapIntro { max-width: 68ch; color: var(--reading-muted); line-height: 1.75; }
+.conceptGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 24px; }
+.conceptOption { display: flex; min-width: 0; flex-direction: column; border: 1px solid var(--reading-line); border-radius: 12px; background: rgba(13,16,28,.58); padding: 24px; }
+.conceptOption h3 { font-size: 1.25rem; }
+.conceptFeatures { display: grid; gap: 12px; margin: 24px 0 0; padding: 20px 0; border-block: 1px solid var(--reading-line); list-style: none; color: var(--reading-muted); font-size: .875rem; line-height: 1.6; }
+.conceptFeatures li { position: relative; padding-left: 18px; }
+.conceptFeatures li::before { content: ''; position: absolute; left: 0; top: .6em; width: 6px; height: 6px; border-radius: 50%; background: #818cf8; }
 .option { display: flex; min-width: 0; flex-direction: column; border: 1px solid var(--reading-line); border-radius: 12px; background: #0d101c; padding: 32px; }
 .featuredOption { border-color: #818cf8; background: #0d101c; }
 .optionTop { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 16px; }
@@ -117,6 +124,7 @@
 @media (max-width: 900px) {
   .pricingHero { gap: 32px; }
   .pricingOptions { grid-template-columns: minmax(0, 1fr); }
+  .conceptGrid { grid-template-columns: minmax(0, 1fr); }
   .readingLayout { grid-template-columns: 180px minmax(0, 1fr); gap: 32px; }
   .option { padding: 24px; }
 }

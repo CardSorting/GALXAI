@@ -2,18 +2,18 @@ import { IntentLink as Link } from '@/components/common/IntentLink';
 import { ArrowRight, Check, Info } from 'lucide-react';
 import { constructMetadata } from '@/lib/seo/metadata';
 import { PRO_PLAN } from '@/lib/billing/pro-plan';
-import { FREE_IMAGE_OFFER } from '@/lib/data/pricingSummary';
+import { FREE_IMAGE_OFFER, FUTURE_PLAN_CONCEPTS } from '@/lib/data/pricingSummary';
 import { GUIDES, FREE_PLAN_INCLUSIONS, PLAN_INCLUSIONS } from '@/lib/public-content/content';
 import { PlanAction } from '@/components/home/PlanAction';
 import { Breadcrumbs, GuideList, SupportLink } from '@/components/public-content/ReadingPage';
 import styles from '@/components/public-content/public-content.module.css';
 
-export const metadata = constructMetadata({ title: 'Pricing — GALX Images', description: 'Try GALX Images with a one-time five-image allowance, then continue with GALX Pro at $10/month under published fair-use terms.', canonicalPath: '/pricing' });
+export const metadata = constructMetadata({ title: 'Pricing — GALX Images', description: 'Try GALX Images with a one-time five-image allowance, then continue with GALX Pro at $10/month under published fair-use terms. Private mode keeps drafts out of Explore.', canonicalPath: '/pricing' });
 
 export default function PricingPage() {
   return <main className={styles.page}>
     <Breadcrumbs items={[{ name: 'Home', url: '/' }, { name: 'Pricing' }]} />
-    <header className={styles.pricingIntro}><h1>Make more room for ideas.</h1><p>Try the full image-making loop, then choose the simple monthly plan when you’re ready to keep creating.</p><div className={styles.pricingIntroLinks}><Link href="/knowledge-base/getting-started" className={styles.textLink}>New to Images? Start here <ArrowRight size={16} aria-hidden="true" /></Link><Link href="/images" className={styles.textLink}>Open Image Studio <ArrowRight size={16} aria-hidden="true" /></Link></div><div className={styles.beta}><Info size={18} aria-hidden="true" /><p>Creations are public by default and may appear in the community stream. Review the current product controls before creating anything that should not be shared publicly.</p></div></header>
+    <header className={styles.pricingIntro}><h1>Make more room for ideas.</h1><p>Try the full image-making loop, then choose the simple monthly plan when you’re ready to keep creating.</p><div className={styles.pricingIntroLinks}><Link href="/knowledge-base/getting-started" className={styles.textLink}>New to Images? Start here <ArrowRight size={16} aria-hidden="true" /></Link><Link href="/images" className={styles.textLink}>Open Image Studio <ArrowRight size={16} aria-hidden="true" /></Link></div><div className={styles.beta}><Info size={18} aria-hidden="true" /><p>Creations are public by default. Choose Private mode in Creation Settings before generating when a draft should stay in your library and out of Explore.</p></div></header>
 
     <section className={styles.pricingOptions} aria-labelledby="options-title">
       <h2 className={styles.visuallyHidden} id="options-title">GALX Images options</h2>
@@ -33,7 +33,9 @@ export default function PricingPage() {
       </article>
     </section>
 
-    <section className={styles.section} aria-labelledby="usage-title"><div className={styles.sectionHead}><h2 id="usage-title">Simple usage, clear expectations.</h2><p>One image output keeps the offer easy to understand.</p></div><dl className={styles.pricingRules}><div><dt>Image output</dt><dd>Each generated image counts as one output.</dd></div><div><dt>Batch size</dt><dd>Choose 1–4 images per request. A four-image request uses four outputs.</dd></div><div><dt>Creation controls</dt><dd>All supported ratios and Standard/HD detail options are available in the Image Studio.</dd></div><div><dt>Sharing</dt><dd>Creations are public by default; use the available sharing controls before creating sensitive work.</dd></div></dl></section>
+    <section className={styles.section} aria-labelledby="roadmap-title"><div className={styles.sectionHead}><h2 id="roadmap-title">A clear path as your workflow grows.</h2><p>Only Start free and GALX Pro are available today.</p></div><p className={styles.roadmapIntro}>These next tiers are product concepts, not checkout options. We’re keeping the promise narrow until the matching capacity, support, and billing contracts are ready.</p><div className={styles.conceptGrid}>{FUTURE_PLAN_CONCEPTS.map((plan) => <article className={styles.conceptOption} key={plan.id}><div className={styles.optionTop}><div><h3>{plan.name}</h3><p>{plan.audience}</p></div><span className={styles.optionBadge}>{plan.status}</span></div><ul className={styles.conceptFeatures}>{plan.features.map((feature) => <li key={feature}>{feature}</li>)}</ul><p className={styles.terms}>No price or entitlement is attached yet.</p></article>)}</div></section>
+
+    <section className={styles.section} aria-labelledby="usage-title"><div className={styles.sectionHead}><h2 id="usage-title">Simple usage, clear expectations.</h2><p>One image output keeps the offer easy to understand.</p></div><dl className={styles.pricingRules}><div><dt>Image output</dt><dd>Each generated image counts as one output.</dd></div><div><dt>Batch size</dt><dd>Choose 1–4 images per request. A four-image request uses four outputs.</dd></div><div><dt>Creation controls</dt><dd>All supported ratios and Standard/HD detail options are available in the Image Studio.</dd></div><div><dt>Sharing</dt><dd>Creations are public by default. Private mode keeps a new creation in your library and out of Explore until you publish it.</dd></div></dl></section>
 
     <section className={styles.section} aria-labelledby="pricing-guides"><div className={styles.sectionHead}><h2 id="pricing-guides">Understand your plan.</h2><p>The details, before you decide.</p></div><GuideList guides={GUIDES.filter(guide => guide.path.startsWith('/pricing/'))} /></section>
     <SupportLink />

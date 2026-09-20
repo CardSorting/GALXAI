@@ -1,0 +1,55 @@
+{
+  "reviewed_at": "2026-09-20T00:00:00.000000+00:00",
+  "reviewer": "Codex",
+  "scope": "Owner-scoped private image publication, artifact authorization, and truthful roadmap tier presentation.",
+  "sources_inspected": [
+    "src/app/v1/images/generations/route.ts",
+    "src/app/v1/images/assets/[token]/route.ts",
+    "src/app/v1/images/assets/[token]/thumbnail/route.ts",
+    "src/app/api/images/library/route.ts",
+    "src/lib/images/read-image-artifact.ts",
+    "src/lib/images/request-repository.ts",
+    "src/lib/security/public-image-record.ts",
+    "src/core/router/GalxModelRouter.ts",
+    "src/core/router/adapters/IsolatedRelayTransport.ts",
+    "src/workers/cloudflare/GalxR2AssetAdapter.ts",
+    "src/components/images/studio-contract.ts",
+    "src/components/images/ImageStudio.tsx",
+    "src/components/images/use-image-studio.ts",
+    "src/app/pricing/page.tsx",
+    "src/lib/data/pricingSummary.ts",
+    "src/lib/public-content/content.ts",
+    "scripts/test-image-library-http.ts"
+  ],
+  "guides_reconciled": [
+    "docs/adr/0129-public-image-artifacts-and-verified-identity.md",
+    "docs/maintainers/image-public-boundary.md",
+    "docs/maintainers/image-library-scale.md",
+    "docs/maintainers/PUBLIC_DISCOVERY.md",
+    "docs/reference/billing-pages.md",
+    "docs/GTM_STRATEGY.md"
+  ],
+  "corrections": [
+    "Private mode is an existing visibility state carried through generation receipts and the existing library mutation; it does not require a schema migration.",
+    "Explore and community feed contracts continue to admit public rows only, while private artifact and thumbnail reads require the current owning authenticated session before cache lookup.",
+    "Compact owner-library cards carry the visibility state so a private creation stays visibly private after reload; link-only unlisted assets retain their existing opaque-link behavior.",
+    "Creator, Studio, and Team are explicitly roadmap concepts with no prices, checkout actions, Stripe products, or entitlement claims; the verified free allowance and GALX Pro remain the only active commercial offers.",
+    "The Image Studio exposes a clear Public/Private mode choice before generation and a deliberate owner-only publish toggle afterward."
+  ],
+  "checks": [
+    "npx tsc --noEmit",
+    "npm run lint",
+    "npm run build",
+    "node --import tsx --test scripts/test-image-studio.ts",
+    "node --import tsx --test scripts/test-image-public-http.ts",
+    "npm run test:stripe",
+    "npm run docs:sync",
+    "npm run test:docs",
+    "git diff --check"
+  ],
+  "limits": [
+    "No Stripe prices, schema migrations, or paid entitlements were created in this pass.",
+    "A production deployment and live database acceptance were not performed by this local review.",
+    "The pre-existing Sites, Relay, Delivery, and BroccoliDB review queues remain separate and were not refreshed."
+  ]
+}

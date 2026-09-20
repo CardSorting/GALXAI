@@ -17,6 +17,8 @@ import {
   Copy,
   ImageIcon,
   LoaderCircle,
+  Lock,
+  Globe2,
   Pause,
   Play,
   Plus,
@@ -495,6 +497,7 @@ function StudioWorkspace({
                   <span>Aspect: {settings.ratio}</span>
                   <span>Count: {settings.count}</span>
                   <span>Service: {IMAGE_MODEL.name}</span>
+                  <span>{settings.visibility === 'private' ? 'Private mode' : 'Public'}</span>
                 </div>
               </div>
             )}
@@ -521,6 +524,7 @@ function StudioWorkspace({
                       <Artwork image={image} />
                       <div className="masonry-card-badges">
                         <span className="masonry-badge masonry-badge-ratio">{image.ratio}</span>
+                        {image.visibility === 'private' && <span className="masonry-badge masonry-badge-private"><Lock size={11} aria-hidden="true" />Private</span>}
                       </div>
                     </div>
                   </article>
@@ -716,6 +720,39 @@ function StudioWorkspace({
               </div>
             </div>
 
+            {/* Publication selector: a user-owned privacy choice, not a paid tier. */}
+            <div className="studio-popover-section">
+              <div className="studio-popover-label-row">
+                <label className="studio-popover-label" id="studio-visibility-label">Sharing</label>
+                <span className="studio-popover-note">{owner ? 'Included for signed-in creators' : 'Sign in to choose'}</span>
+              </div>
+              <div className="studio-dock-visibility" role="radiogroup" aria-labelledby="studio-visibility-label">
+                <button
+                  type="button"
+                  className={`studio-dock-visibility-btn ${settings.visibility === 'public' ? 'active' : ''}`}
+                  aria-pressed={settings.visibility === 'public'}
+                  disabled={!owner}
+                  title={!owner ? 'Sign in to choose sharing' : undefined}
+                  onClick={() => setSettings((prev) => ({ ...prev, visibility: 'public' }))}
+                >
+                  <Globe2 size={15} aria-hidden="true" />
+                  <span><strong>Public</strong><small>May appear in Explore</small></span>
+                </button>
+                <button
+                  type="button"
+                  className={`studio-dock-visibility-btn ${settings.visibility === 'private' ? 'active private' : ''}`}
+                  aria-pressed={settings.visibility === 'private'}
+                  disabled={!owner}
+                  title={!owner ? 'Sign in to choose sharing' : undefined}
+                  onClick={() => setSettings((prev) => ({ ...prev, visibility: 'private' }))}
+                >
+                  <Lock size={15} aria-hidden="true" />
+                  <span><strong>Private mode</strong><small>Stealth · only you can open it</small></span>
+                </button>
+              </div>
+              <p className="studio-field-hint">{owner ? 'Private creations stay in your library and are excluded from Explore and the community stream. You can publish them later.' : 'Sign in to generate and choose whether a creation is public or private.'}</p>
+            </div>
+
             {/* Quick Inspiration & Actions */}
             <div className="studio-popover-row">
               <button
@@ -769,7 +806,7 @@ function StudioWorkspace({
             onClick={() => setOptionsOpen((v) => !v)}
             aria-label={optionsOpen ? 'Close settings' : 'Image generation settings'}
             aria-expanded={optionsOpen}
-            title="Settings (Aspect Ratio, Count, Styles)"
+            title="Settings (aspect ratio, count, sharing)"
           >
             <Plus size={20} />
           </button>
@@ -940,6 +977,10 @@ function StudioWorkspace({
                     <dt>Quality</dt>
                     <dd>{activeImage.quality === 'hd' ? 'High detail' : 'Standard'}</dd>
                   </div>
+                  <div>
+                    <dt>Visibility</dt>
+                    <dd>{activeImage.visibility === 'private' ? 'Private · only you' : activeImage.visibility === 'unlisted' ? 'Unlisted' : 'Public · Explore'}</dd>
+                  </div>
                   {activeImage.createdAt && (
                     <div>
                       <dt>Created</dt>
@@ -988,6 +1029,20 @@ function StudioWorkspace({
                       fill={activeImage.favorite ? 'currentColor' : 'none'}
                     />
                     {activeImage.favorite ? 'Remove from favorites' : 'Add to favorites'}
+                  </button>
+                )}
+
+                {activeImage.saved && (
+                  <button
+                    className="studio-secondary"
+                    disabled={studio.busyAsset === activeImage.id}
+                    onClick={async () => {
+                      const next = activeImage.visibility === 'private' ? 'public' : 'private';
+                      if (await studio.setVisibility(activeImage, next)) setActive({ ...activeImage, visibility: next });
+                    }}
+                  >
+                    {activeImage.visibility === 'private' ? <Globe2 size={16} aria-hidden="true" /> : <Lock size={16} aria-hidden="true" />}
+                    {activeImage.visibility === 'private' ? 'Publish to Explore' : 'Make private'}
                   </button>
                 )}
 

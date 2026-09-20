@@ -12,15 +12,17 @@ export const RATIOS = [
   { value: '4:3', label: 'Classic', size: '1024x768', width: 24, height: 18, useCase: 'Standard Photo' },
 ] as const;
 export type Ratio = typeof RATIOS[number]['value'];
-export interface StudioSettings { prompt: string; ratio: Ratio; quality: 'standard' | 'hd'; count: number }
+export type StudioVisibility = 'public' | 'private';
+export interface StudioSettings { prompt: string; ratio: Ratio; quality: 'standard' | 'hd'; count: number; visibility: StudioVisibility }
 export interface StudioImage {
   id: string; prompt: string; url: string; ratio: string; quality: 'standard' | 'hd';
   createdAt: string; favorite: boolean; saved: boolean;
+  visibility?: StudioVisibility | 'unlisted';
   thumbnailUrl?: string; detailsLoaded?: boolean;
 }
 export const MAX_ACTIVE_GENERATIONS = 4;
 export interface PendingGeneration { id: string; startedAt: number; settings: StudioSettings; paused?: true }
-export const DEFAULT_SETTINGS: StudioSettings = { prompt: '', ratio: '1:1', quality: 'standard', count: 1 };
+export const DEFAULT_SETTINGS: StudioSettings = { prompt: '', ratio: '1:1', quality: 'standard', count: 1, visibility: 'public' };
 
 export interface StylePreset {
   id: string;
@@ -208,6 +210,7 @@ export function readSettings(value: unknown): StudioSettings {
     ratio: RATIOS.some(r => r.value === data.ratio) ? data.ratio as Ratio : '1:1',
     quality: data.quality === 'hd' ? 'hd' : 'standard',
     count: Number.isInteger(data.count) && Number(data.count) >= 1 && Number(data.count) <= 4 ? Number(data.count) : 1,
+    visibility: data.visibility === 'private' ? 'private' : 'public',
   };
 }
 export function readPending(value: unknown): PendingGeneration | null {
@@ -237,7 +240,7 @@ export function generationStatusFailure(status: number, value: unknown): 'not-st
 export function generationBody(settings: StudioSettings) {
   const clean = readSettings(settings);
   return { model: IMAGE_MODEL.id, prompt: clean.prompt.trim(), n: clean.count,
-    size: RATIOS.find(r => r.value === clean.ratio)!.size, quality: clean.quality, response_format: 'url' };
+    size: RATIOS.find(r => r.value === clean.ratio)!.size, quality: clean.quality, visibility: clean.visibility, response_format: 'url' };
 }
 
 /** Only same-origin artifact paths and encoded raster data are displayable. */
@@ -266,7 +269,8 @@ export function readLibrary(value: unknown): { images: StudioImage[]; cursor: st
       thumbnailUrl: thumbnailUrl(url), detailsLoaded: typeof row.prompt === 'string',
       ratio: typeof row.aspectRatio === 'string' && /^\d{1,2}:\d{1,2}$/.test(row.aspectRatio) ? row.aspectRatio : '1:1',
       quality: row.quality === 'hd' ? 'hd' : 'standard', createdAt: typeof row.createdAt === 'string' && Number.isFinite(Date.parse(row.createdAt)) ? row.createdAt : '',
-      favorite: row.isFavorite === true, saved: true });
+      favorite: row.isFavorite === true, saved: true,
+      visibility: row.visibility === 'private' ? 'private' : row.visibility === 'unlisted' ? 'unlisted' : 'public' });
   }
   return { images, cursor: typeof data.nextCursor === 'string' ? data.nextCursor : null,
     previousCursor: typeof data.previousCursor === 'string' ? data.previousCursor : null,
@@ -292,7 +296,7 @@ export function readGeneration(value: unknown, settings: StudioSettings, id: str
     }
     if (!url) throw new Error('Invalid image artifact');
     return { id: `${id}-${index}`, url, thumbnailUrl: thumbnailUrl(url), detailsLoaded: true, prompt: settings.prompt, ratio: settings.ratio,
-      quality: settings.quality, createdAt: new Date().toISOString(), favorite: false, saved: false };
+      quality: settings.quality, createdAt: new Date().toISOString(), favorite: false, saved: false, visibility: settings.visibility };
   });
 }
 export function studioError(status: number): string {

@@ -14,7 +14,7 @@ export async function serveImageRequest(client: GalxAI, request: Request, defaul
   try {
     const params = { prompt: body.prompt, model: body.model || defaultModel || 'galx-nova-image',
       aspectRatio: body.aspectRatio || body.aspect_ratio, size: body.size, quality: body.quality,
-      n: body.n ?? 1, response_format: 'b64_json' as const };
+      n: body.n ?? 1, response_format: 'b64_json' as const, visibility: body.visibility };
     const result = body.isAsync || body.priority
       ? await (await client.images.generateAsync({ ...params, priority: body.priority })).result()
       : await client.images.generate(params);

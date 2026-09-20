@@ -1272,6 +1272,7 @@ export class GalxModelRouter {
               model: modelId,
               size: sanitizedRequest.size || '1024x1024',
               quality: sanitizedRequest.quality || 'standard',
+              visibility: sanitizedRequest.visibility || 'public',
               deferManifestUpdate: true,
               metadata: {
                 prompt: sanitizedRequest.prompt || '',

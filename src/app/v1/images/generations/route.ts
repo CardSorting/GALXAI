@@ -59,6 +59,10 @@ export async function POST(req: NextRequest) {
     if (!['binary', 'url', 'b64_json'].includes(String(format))) return imageError('unsupported_input', requestId);
     const outputFormat = raw.output_format;
     if (outputFormat !== undefined && !['png', 'jpeg', 'webp'].includes(String(outputFormat))) return imageError('unsupported_input', requestId);
+    const requestedVisibility = raw.visibility ?? (raw.stealth === true ? 'private' : undefined);
+    if (requestedVisibility !== undefined && !['public', 'unlisted', 'private'].includes(String(requestedVisibility))) return imageError('unsupported_input', requestId);
+    if (raw.stealth !== undefined && typeof raw.stealth !== 'boolean') return imageError('unsupported_input', requestId);
+    if (raw.stealth === true && raw.visibility !== undefined && raw.visibility !== null && raw.visibility !== 'private') return imageError('unsupported_input', requestId);
     const n = raw.n ?? raw.num_images ?? raw.count ?? 1;
     if (typeof n !== 'number' || !Number.isInteger(n) || n < 1 || n > 4 || (format === 'binary' && n !== 1)) return imageError('invalid_request', requestId);
     if (raw.quality !== undefined && !['standard', 'hd'].includes(String(raw.quality))) return imageError('unsupported_input', requestId);
@@ -71,6 +75,7 @@ export async function POST(req: NextRequest) {
     const body: ImageGenerationRequest = {
       prompt, model: model.id, n, size, quality: raw.quality === 'hd' ? 'hd' : 'standard',
       response_format: 'b64_json',
+      visibility: (requestedVisibility as ImageGenerationRequest['visibility']) || 'public',
       sessionId: typeof raw.session_id === 'string' ? raw.session_id : typeof raw.sessionId === 'string' ? raw.sessionId : 'default',
       idempotencyKey: req.headers.get('idempotency-key') || undefined,
     };

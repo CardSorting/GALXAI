@@ -686,6 +686,8 @@ export interface ImageGenerationRequest {
   quality?: 'standard' | 'hd';
   aspect_ratio?: string;
   response_format?: 'url' | 'b64_json';
+  /** Controls publication of the generated asset in the GALX library. */
+  visibility?: 'public' | 'unlisted' | 'private';
   user?: string;
   sessionId?: string;
   idempotencyKey?: string;

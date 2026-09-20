@@ -28,7 +28,7 @@ export class ImageRequestRepository {
     const key = payload.idempotencyKey || randomUUID();
     const hash = createHash('sha256').update(JSON.stringify({ prompt: payload.prompt, model: payload.model,
       n: payload.n, size: payload.size, quality: payload.quality, sessionId: payload.sessionId,
-      responseFormat: payload.response_format, outputFormat: payload.outputFormat })).digest('hex');
+      responseFormat: payload.response_format, outputFormat: payload.outputFormat, visibility: payload.visibility })).digest('hex');
     const db = free ? await this.pool.connect?.() : null;
     if (free && !db) throw new Error('Quota storage unavailable');
     try {

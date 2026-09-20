@@ -344,6 +344,7 @@
 
 .studio-active-gen-meta {
   display: flex;
+  flex-wrap: wrap;
   gap: 16px;
   font-size: 11px;
   color: var(--studio-muted);
@@ -688,6 +689,18 @@
   margin-bottom: 16px;
 }
 
+.studio-popover-label-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.studio-popover-note {
+  color: var(--studio-muted);
+  font-size: 11px;
+}
+
 .studio-popover-label {
   display: block;
   font-size: 12px;
@@ -765,6 +778,76 @@
   border-color: #818cf8;
   color: #fff;
   font-weight: 600;
+}
+
+.studio-dock-visibility {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.studio-dock-visibility-btn {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--studio-line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--studio-muted);
+  text-align: left;
+  transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+
+.studio-dock-visibility-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #f3f4f6;
+}
+
+.studio-dock-visibility-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
+.studio-dock-visibility-btn:disabled:hover {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--studio-muted);
+}
+
+.studio-dock-visibility-btn.active {
+  border-color: #818cf8;
+  background: rgba(99, 102, 241, 0.18);
+  color: #fff;
+}
+
+.studio-dock-visibility-btn.active.private {
+  border-color: var(--studio-selected);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.studio-dock-visibility-btn svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+.studio-dock-visibility-btn span {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.studio-dock-visibility-btn strong {
+  font-size: 12px;
+  font-weight: 600;
+  color: inherit;
+}
+
+.studio-dock-visibility-btn small {
+  overflow-wrap: anywhere;
+  color: var(--studio-muted);
+  font-size: 10px;
+  line-height: 1.35;
 }
 
 /* Popover Row for Inspiration */
@@ -1001,6 +1084,14 @@
   margin-top: 8px;
 }
 
+.masonry-badge-private {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--studio-selected);
+  background: rgba(255, 255, 255, 0.08);
+}
+
 .studio-spin {
   animation: studioSpin 1.4s linear infinite;
 }
@@ -1049,5 +1140,8 @@
   }
   .studio-dock-ratios {
     grid-template-columns: repeat(3, 1fr);
+  }
+  .studio-dock-visibility {
+    grid-template-columns: 1fr;
   }
 }

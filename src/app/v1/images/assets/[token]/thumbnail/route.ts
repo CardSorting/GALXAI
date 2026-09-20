@@ -5,10 +5,10 @@ import { logImageFailure } from '@/lib/security/private-image-diagnostics';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
-export async function GET(_req: NextRequest, { params }: { params: Promise<{ token: string }> }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ token: string }> }) {
   const requestId = crypto.randomUUID();
   try {
-    const artifact = await readImageArtifact((await params).token, true);
+    const artifact = await readImageArtifact((await params).token, true, req);
     return artifact ? imageBytesResponse(artifact, requestId) : imageError('not_found', requestId);
   } catch (error) {
     logImageFailure(requestId, error);

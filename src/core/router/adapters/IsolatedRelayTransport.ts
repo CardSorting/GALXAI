@@ -37,10 +37,13 @@ export async function isolatedChat(payload:Record<string,any>,tenant:string,requ
 }
 export async function isolatedImage(payload:Record<string,unknown>,tenant:string,requestKey:string,signal?:AbortSignal) {
   const relay=await resolveIsolatedRelay('images');
+  // Publication is a GALX library concern. Never forward it to a relay or
+  // upstream provider that does not understand the field.
+  const { visibility: _visibility, ...providerPayload } = payload;
   let response: Response;
   try {
     response=await fetch(new URL('/v1/images/generations',relay.url),{method:'POST',redirect:'error',signal:AbortSignal.any([AbortSignal.timeout(300000),...(signal?[signal]:[])]),
-      headers:{Authorization:`Bearer ${relay.key}`,'Content-Type':'application/json','x-galx-tenant':digest(tenant),'Idempotency-Key':digest(requestKey)},body:JSON.stringify({...payload,response_format:'b64_json'})});
+      headers:{Authorization:`Bearer ${relay.key}`,'Content-Type':'application/json','x-galx-tenant':digest(tenant),'Idempotency-Key':digest(requestKey)},body:JSON.stringify({...providerPayload,response_format:'b64_json'})});
   } catch (error) {
     reportRelayFailure(relay);
     throw error;

@@ -350,6 +350,27 @@ export function useImageStudio(owner: string | null, token?: string, libraryActi
     } catch { if (alive.current) setNotice('Favorite could not be saved. Try again.'); }
     finally { assetLock.current = false; if (alive.current) setBusyAsset(null); }
   }
+
+  async function setVisibility(image: StudioImage, visibility: 'public' | 'private') {
+    if (!owner || !image.saved || assetLock.current || image.visibility === visibility) return false;
+    assetLock.current = true; setBusyAsset(image.id);
+    try {
+      const response = await workspaceFetch(owner, `/api/images/library/${encodeURIComponent(image.id)}`, { method: 'PATCH', headers: { ...headers(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({ visibility }), signal: AbortSignal.timeout(20_000) });
+      const payload = await response.json().catch(() => null);
+      if (!response.ok || payload?.success !== true) throw new Error('Visibility could not be saved. Try again.');
+      if (!alive.current) return false;
+      setImages(current => current.map(item => item.id === image.id ? { ...item, visibility } : item));
+      setCreations(current => current.map(item => item.id === image.id ? { ...item, visibility } : item));
+      setNotice(visibility === 'private'
+        ? 'Private mode on. This creation is hidden from Explore and the community stream.'
+        : 'Published. This creation can appear in Explore and the community stream.');
+      return true;
+    } catch {
+      if (alive.current) setNotice('Visibility could not be saved. Try again.');
+      return false;
+    } finally { assetLock.current = false; if (alive.current) setBusyAsset(null); }
+  }
   function clearPending() {
     // Explicit dismissal releases only paused/unconfirmed work; active work stays tracked.
     for (const task of activeTasks.current.values()) if (task.paused) activeTasks.current.delete(task.id);
@@ -385,5 +406,5 @@ export function useImageStudio(owner: string | null, token?: string, libraryActi
     firstPage: () => { if (!libraryLoading) void fetchLibrary(); },
     nextPage: () => { if (cursor && !libraryLoading) void fetchLibrary(cursor, page + 1); },
     previousPage: () => { if (previousCursor && !libraryLoading) void fetchLibrary(previousCursor, Math.max(1, page - 1)); },
-    toggleFavorite, busyAsset, clearPending, cancelPending };
+    toggleFavorite, setVisibility, busyAsset, clearPending, cancelPending };
 }

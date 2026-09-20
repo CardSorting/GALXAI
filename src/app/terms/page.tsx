@@ -79,7 +79,7 @@ export default function TermsOfServicePage() {
             </div>
             <h2 className="font-bold text-white text-base">Public creations</h2>
             <p className="text-xs text-zinc-400 leading-relaxed">
-              Creations made in GALX Images are public by default and may appear in the community stream. Review the current product controls before creating anything that should not be shared.
+              Creations made in GALX Images are public by default and may appear in the community stream. Signed-in creators can choose Private mode before generating; private creations remain in the owner library and out of Explore until published.
             </p>
           </div>
 

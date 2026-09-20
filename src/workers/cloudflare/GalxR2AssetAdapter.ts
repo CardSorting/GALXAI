@@ -46,6 +46,7 @@ export interface UserSessionImageParams {
   model?: string;
   size?: string;
   quality?: string;
+  visibility?: 'public' | 'unlisted' | 'private';
   metadata?: Record<string, string>;
   /** Coalesce manifest writes when the caller uploads several images in one generation. */
   deferManifestUpdate?: boolean;
@@ -271,6 +272,8 @@ export class GalxR2AssetAdapter {
         latencyMs: params.metadata?.latency_ms ? parseInt(params.metadata.latency_ms, 10) : 0,
         costUsd: params.metadata?.cost_usd ? parseFloat(params.metadata.cost_usd) : 0,
         isFavorite: false,
+        isPublic: params.visibility === 'public' || !params.visibility,
+        visibility: params.visibility || 'public',
         tags: params.metadata?.tags ? params.metadata.tags.split(',') : [],
         metadata: params.metadata || {},
         createdAt: new Date().toISOString(),

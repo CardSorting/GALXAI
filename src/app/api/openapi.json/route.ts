@@ -64,6 +64,12 @@ export function GET() {
                         enum: ['binary', 'b64_json', 'url'],
                         default: 'binary',
                       },
+                      visibility: {
+                        type: 'string',
+                        enum: ['public', 'unlisted', 'private'],
+                        default: 'public',
+                        description: 'Choose whether the generated asset is published to the community stream. Private assets remain owner-only.',
+                      },
                       output_format: { type: 'string', enum: ['png', 'jpeg', 'webp'] },
                       n: { type: 'integer', minimum: 1, maximum: 4, description: 'Binary output requires n=1.' },
                     },

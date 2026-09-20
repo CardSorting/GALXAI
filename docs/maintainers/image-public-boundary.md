@@ -30,6 +30,16 @@ normalized before they become links, avatars accept only site-relative or
 HTTPS image URLs, and malformed gallery cursors are rejected with a generic 400
 response.
 
+Image publication is a separate creator-owned choice. New generations default
+to `public` for the existing discovery experience, while signed-in Image Studio
+creators can choose `private` before dispatch. Private rows are excluded by the
+Explore and Star-profile feed views and remain readable only through an
+owner-authenticated library or artifact request. Publishing later uses the
+existing owner-scoped visibility mutation; no billing tier or entitlement is
+inferred from the setting. The user-facing label may say “Private mode” or
+“Stealth”, but public documentation should describe the observable outcome,
+not a provider implementation.
+
 Public profile image inspection is a viewport-owned dialog. It renders above the
 application shell, prevents background scrolling while open, returns focus on
 close, and keeps the media and details in independently bounded grid tracks. The
@@ -44,7 +54,13 @@ The normalization path is internal result -> decoded/re-encoded artifact -> publ
 DTO -> HTTP response. Formatting helpers receive only normalized bytes or public
 image fields. The native and relay adapters request base64 so normalization never
 fetches an arbitrary provider URL. Downloads resolve an authenticated, expiring
-opaque capability and re-encode stored images again, including historical assets. The exact thumbnail child is included in the public-product route policy; it requires no developer-preview grant and arbitrary child routes are not exempted. The thumbnail child route uses the same capability, checks the current owner-scoped row before every cache hit, and emits a fresh WebP preview inside 512×512. Storage/processing work has explicit admission, byte and time bounds. [Large-library guidance](image-library-scale.md) owns the precise limits and concurrent-read semantics.
+opaque capability and re-encode stored images again, including historical assets.
+For a private row, the capability is additionally checked against the current
+owner session before every cache lookup; copying a private URL to another
+account or an anonymous browser returns the same generic not-found category.
+An `unlisted` row remains addressable through its opaque capability while staying
+out of discovery feeds.
+The exact thumbnail child is included in the public-product route policy; it requires no developer-preview grant and arbitrary child routes are not exempted. The thumbnail child route uses the same capability, checks the current owner-scoped row before every cache hit, and emits a fresh WebP preview inside 512×512. Storage/processing work has explicit admission, byte and time bounds. [Large-library guidance](image-library-scale.md) owns the precise limits and concurrent-read semantics.
 
 Public errors use stable categories and opaque request IDs. Proven capacity rejection before dispatch (local admission, or a typed relay 503 with `not_accepted` and an allowlisted capacity/readiness code) persists only the allowlisted `generation_not_started` category and returns 503 with a short Retry-After. The same category appears in failed snapshots; arbitrary receipt diagnostics are never projected. Older/generic failed receipts remain uncertain. Middleware no longer
 adds execution timing or route-classification headers. Operational endpoints require
@@ -89,7 +105,12 @@ The HTTP suite opens a loopback server around the actual route handlers and merg
 middleware headers. It tests binary success, explicit JSON, format conversions,
 metadata removal, malformed input, auth failures, rate limits, unavailable models,
 capacity errors, exhausted dispatch errors, timeouts, async polling, terminal SSE,
-downloads, expired/tampered capabilities, unknown fields, and alternate gateway errors. Compact library tests add explicit prompt-preview DTOs, full owner-authorized details, thumbnail sizing/metadata removal, coalesced reads, expired/foreign/deleted capability denial and safe failures with Retry-After. The compact endpoint rejects unknown/duplicate query parameters and never accepts an input user ID as authority.
+downloads, expired/tampered capabilities, private-owner/foreign artifact access,
+unknown fields, and alternate gateway errors. Compact library tests add explicit
+prompt-preview DTOs, full owner-authorized details, thumbnail sizing/metadata
+removal, coalesced reads, expired/foreign/deleted/private capability denial and
+safe failures with Retry-After. The compact endpoint rejects unknown/duplicate
+query parameters and never accepts an input user ID as authority.
 The OpenAPI test closes JSON object schemas. Documentation and catalog checks
 prevent reintroduction of known private vocabulary in published contracts.
 

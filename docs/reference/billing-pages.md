@@ -38,9 +38,11 @@ usage rate card or self-service inference billing promise is implied.
 
 The public pricing page shows the one-time five-image welcome allowance beside
 the current Pro plan, so the free-to-paid path matches the real Image Studio
-experience. It does not publish a four-tier ladder: video, Fast/Relax lanes,
-uploaded-image editing, Stealth and separate concurrency entitlements are not
-current consumer capabilities. Retired developer
+experience. It also shows clearly marked Creator, Studio and Team roadmap
+concepts without prices or checkout actions; these are not current plans or
+entitlements. Video, Fast/Relax lanes and uploaded-image editing are not
+current consumer capabilities. Private mode is an existing owner-scoped
+sharing control, not a paid tier. Retired developer
 pricing paths redirect to the neutral home surface, and retired checkout,
 quote, wallet purchase and inbound-application endpoints return bounded 410
 responses without creating storage records. Key-management pages redirect to

@@ -10,7 +10,7 @@ Global navigation and the footer expose Sites, Images, Pricing, FAQ, Knowledge b
 
 | Destination | Purpose |
 | --- | --- |
-| `/pricing` | Single GALX Pro offer, inclusions, terms and pricing-guide links |
+| `/pricing` | Current free/Pro offer, clearly labeled roadmap concepts, sharing guidance and pricing-guide links |
 | `/pricing/galx-pro` | Included Sites capabilities and separate product contracts |
 | `/pricing/fair-use` | Revisions, conversation turns and early-beta waiting expectations |
 | `/pricing/billing-and-cancellation` | Monthly renewal, account plan entry and cancellation access |
@@ -22,7 +22,7 @@ Global navigation and the footer expose Sites, Images, Pricing, FAQ, Knowledge b
 | `/knowledge-base/public-beta` | Expectations, interruptions and useful feedback |
 | `/knowledge-base/images-and-developer-access` | Distinguish Sites, Images and approved developer access |
 
-Static route files select authored guides from `src/lib/public-content/content.ts`. The homepage reuses the same FAQ answers and plan inclusions. Price/name come from `src/lib/billing/pro-plan.ts`; do not duplicate operational product mappings or supplier settings. The one-time welcome allowance permits five images under [quota operations](FREE_GENERATION_QUOTA.md), while Sites creation requires GALX Pro. Reconcile all getting-started, pricing and FAQ bodies with those limits. No new annual plan, discount, image price or availability guarantee is introduced.
+Static route files select authored guides from `src/lib/public-content/content.ts`. The homepage reuses the same FAQ answers and plan inclusions. Price/name come from `src/lib/billing/pro-plan.ts`; do not duplicate operational product mappings or supplier settings. The one-time welcome allowance permits five images under [quota operations](FREE_GENERATION_QUOTA.md), while Sites creation requires GALX Pro. Signed-in Image Studio creators can choose Private mode before generating; that owner-scoped sharing control keeps an asset out of Explore and the community stream, but is not a paid entitlement. Reconcile all getting-started, pricing and FAQ bodies with those limits. Creator, Studio and Team cards are roadmap concepts without prices, checkout actions or entitlements. No new annual plan, discount, image price or availability guarantee is introduced.
 
 ## Public boundary and SEO
 

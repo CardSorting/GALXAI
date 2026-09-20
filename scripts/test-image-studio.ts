@@ -15,7 +15,8 @@ test('library projection discards unexpected fields, unsafe URLs, and invalid da
     model: 'private-model', shardId: 'private-shard', r2Key: 'private-storage', quality: 'secret', createdAt: 'invalid', aspectRatio: 'bad', internal: { secret: 'hidden' } };
   const result = readLibrary({ success: true, total: 2, nextCursor: 'next', records: [record, { ...record, publicUrl: 'https://evil.test/image.png' }] });
   assert.equal(result.images.length, 1);
-  assert.deepEqual(Object.keys(result.images[0]).sort(), ['createdAt','detailsLoaded','favorite','id','prompt','quality','ratio','saved','thumbnailUrl','url']);
+  assert.deepEqual(Object.keys(result.images[0]).sort(), ['createdAt','detailsLoaded','favorite','id','prompt','quality','ratio','saved','thumbnailUrl','url','visibility']);
+  assert.equal(result.images[0].visibility, 'public');
   assert.equal(result.images[0].createdAt, '');
   assert.equal(result.images[0].ratio, '1:1');
   assert.doesNotMatch(JSON.stringify(result), /private-|secret|hidden/);
@@ -31,7 +32,8 @@ test('generation output is projected and never renders upstream messages or malf
 });
 test('draft and receipt recovery restrict settings and construct a minimal request', () => {
   const settings = readSettings({ prompt: '  A vase  ', ratio: '3:2', quality: 'hd', count: 2, secret: 'not-public' });
-  assert.deepEqual(generationBody(settings), { model: 'galx-nova-image', prompt: 'A vase', n: 2, size: '1536x1024', quality: 'hd', response_format: 'url' });
+  assert.deepEqual(generationBody(settings), { model: 'galx-nova-image', prompt: 'A vase', n: 2, size: '1536x1024', quality: 'hd', visibility: 'public', response_format: 'url' });
+  assert.equal(generationBody(readSettings({ prompt: 'private', visibility: 'private' })).visibility, 'private');
   assert.equal(readSettings({ count: 100, quality: 'ultra', ratio: '100:1' }).count, 1);
   assert.equal(readSettings({ prompt: 'a'.repeat(40_000) }).prompt.length, 32_000);
   assert.equal(readPending({ id: '../api/private', startedAt: Date.now(), settings }), null);
