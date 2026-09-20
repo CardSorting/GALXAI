@@ -204,6 +204,57 @@ test('confirmed pre-generation image rejection fails over within one admission l
   }
 });
 
+test('ambiguous image outcome does not suppress future capacity on the worker that received it', async () => {
+  const png = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+  let aCalls = 0, bCalls = 0;
+  const unclassified = classifyImageRelayFailure({ code: 'unclassified_failure' });
+  assert.equal(unclassified.class, 'unknown');
+  assert.equal(unclassified.scope, 'request');
+  const preGeneration = encodePrivateRelayFailure(privateRelayFailure({ class: 'pre_generation_rejected', scope: 'worker', retryAfterMs: 90_000 }));
+  const aServer = http.createServer((_req, res) => {
+    aCalls++;
+    res.writeHead(502, { 'Content-Type': 'application/json', [PRIVATE_RELAY_FAILURE_HEADER]: preGeneration });
+    res.end(JSON.stringify({ error: { code: 'upstream_image_synthesis_failed' } }));
+  });
+  const bServer = http.createServer((_req, res) => {
+    bCalls++;
+    if (bCalls === 1) {
+      // The request outcome is intentionally ambiguous. It must remain
+      // terminal for that request, but it does not prove B lacks future
+      // image capacity.
+      res.writeHead(503, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: { execution_state: 'unknown', code: 'request_unavailable' } }));
+      return;
+    }
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ data: [{ b64_json: png }] }));
+  });
+  const [aOrigin, bOrigin] = await Promise.all([listen(aServer), listen(bServer)]);
+  const account = (id: string) => ({id,revision:1,credentialRevision:key(`ambiguous-scope-${id}`),state:'enabled' as const,desktopId:randomUUID(),models:[],expiresAtMs:Date.now()+600000});
+  const engine = {credentialRejected:()=>false,accountAvailability:()=>({eligible:true,lastUsedAtMs:0,recovering:false,availableSlots:1})};
+  const execution={epoch:'epoch',central:{identity:{pool:'premium'}},standardAvailable:()=>true,standardRecovering:()=>false,store:{call:async(action:string)=>action==='lookup'?null:[]}};
+  const runtime = new PoolRuntime(execution as any, key('ambiguous-scope-wire'), '/unused');
+  (runtime as any).refreshedAt = Date.now();
+  (runtime as any).workers.set('a',{account:account('a'),engine,port:Number(new URL(aOrigin).port),key:key('ambiguous-scope-a'),failureCircuits:{}});
+  (runtime as any).workers.set('b',{account:account('b'),engine,port:Number(new URL(bOrigin).port),key:key('ambiguous-scope-b'),failureCircuits:{}});
+  const origin = await listen(runtime.server);
+  const post = (id: string) => fetch(origin+'/v1/images/generations',{method:'POST',headers:{Authorization:`Bearer ${key('ambiguous-scope-wire')}`,'Content-Type':'application/json','x-galx-tenant':hash('ambiguous-scope-owner'),'Idempotency-Key':id},body:JSON.stringify({model:'gpt-image-2',prompt:id,response_format:'b64_json'})});
+  try {
+    const first = await post('ambiguous-scope-first');
+    assert.equal(first.status, 503);
+    assert.deepEqual({a:aCalls,b:bCalls},{a:1,b:1});
+    assert((runtime as any).workers.get('a').failureCircuits.images.openUntilMs > Date.now());
+    assert.equal((runtime as any).workers.get('b').failureCircuits.images, undefined,
+      'an ambiguous result must not create worker-scoped image cooldown evidence');
+
+    const second = await post('ambiguous-scope-second');
+    assert.equal(second.status, 200);
+    assert.deepEqual({a:aCalls,b:bCalls},{a:1,b:2});
+  } finally {
+    await close(runtime.server); await Promise.all([close(aServer), close(bServer)]);
+  }
+});
+
 test('single assigned image worker preserves target-local quota scope for its parent pool', async () => {
   const original = globalThis.fetch;
   const directory = await mkdtemp(path.join(tmpdir(), 'relay-image-target-scope-'));

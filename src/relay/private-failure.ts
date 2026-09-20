@@ -105,7 +105,10 @@ function retryAfterMs(error: any): number | undefined {
 /**
  * Classify only image dispatch outcomes. This is intentionally conservative:
  * an uncertain POST is never replayed, but a future distinct request may use
- * another worker after a short, worker-scoped circuit opens.
+ * another worker after a short, worker-scoped circuit opens when the failure
+ * proves that target is unhealthy. An unknown outcome remains request-scoped:
+ * it is terminal for the current mutation, but it does not prove that future
+ * work cannot use the target.
  */
 export function classifyImageRelayFailure(error: unknown): PrivateRelayFailure {
   const typed = error as any;
@@ -143,7 +146,7 @@ export function classifyImageRelayFailure(error: unknown): PrivateRelayFailure {
   if (status !== undefined && status >= 500) {
     return privateRelayFailure({ class: 'upstream_unavailable', scope: 'worker', retryAfterMs: retry ?? 5_000 });
   }
-  return privateRelayFailure({ class: 'unknown', scope: 'worker', retryAfterMs: retry ?? 5_000 });
+  return privateRelayFailure({ class: 'unknown', scope: 'request', retryAfterMs: retry ?? 5_000 });
 }
 
 export function fleetRelayFailure(retryAfterMs?: number): PrivateRelayFailure {

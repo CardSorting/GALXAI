@@ -70,6 +70,17 @@ The image controller and its owning `PoolRuntime` keep a request-local set of at
 
 The safe boundary is authoritative evidence that generation was not accepted by the selected target. A timeout, connection loss after dispatch, malformed or unknown response, post-generation persistence failure, or any other ambiguous outcome remains terminal under the no-POST-replay contract. Registry refresh may update discovered worker knowledge but cannot erase live ownership or image-scoped cooldown state.
 
+Failure-state scope follows the narrowest evidence available. A classified
+worker/capability failure may open only that worker's workload-specific
+cooldown; it must not mutate a sibling worker or the parent pool. An
+`unknown`/ambiguous outcome is request-scoped: it terminates that mutation and
+must never be replayed, but it does not prove that the worker lacks capacity
+for a later, distinct request. The worker circuit is therefore not a second
+quarantine authority. Its recovery is bounded by the recorded retry deadline
+and, when the circuit expires, a successful probe clears the worker-local
+failure streak. A request- or fleet-scoped failure does not open a worker
+circuit.
+
 The previous admission tests did not catch this defect because they exercised routing against already-known scheduler state. The production defect appeared after dispatch, when a target reported its own quota exhaustion and the execution layer incorrectly terminated the whole request instead of returning control to routing. The focused regressions live in `scripts/test-relay-adaptive-quota.ts`, `scripts/test-relay-admission-lifecycle.ts` and `scripts/test-relay-services.ts`; they cover direct single-shard failover, parent-pool handoff, all-target exhaustion, ambiguous first dispatch, workload-specific image cooldown, one receipt, one reservation at a time and no cycle.
 
 ## Bounded production qualification

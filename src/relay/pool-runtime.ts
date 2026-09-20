@@ -70,7 +70,11 @@ export class PoolRuntime {
     return Boolean(circuit && circuit.openUntilMs > now);
   }
   private noteWorkerFailure(worker: Worker, workload: Workload, failure: PrivateRelayFailure): void {
-    if (failure.scope !== 'worker') return;
+    // An unknown/ambiguous outcome is terminal for the current mutation, but
+    // it does not prove that this worker lacks future capacity. Keep it out of
+    // worker cooldown state so one ambiguous request cannot remove an
+    // otherwise usable target from the next request's candidate set.
+    if (failure.scope !== 'worker' || failure.class === 'unknown') return;
     const circuits = worker.failureCircuits ??= {};
     const previous = circuits[workload];
     const consecutiveFailures = (previous?.consecutiveFailures ?? 0) + 1;
