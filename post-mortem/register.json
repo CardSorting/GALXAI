@@ -4,6 +4,24 @@
   "notes": "Severity assigned retrospectively where the original record had no incident label. Recovered historical records retain their original verification scope; no fresh live test is implied.",
   "incidents": [
     {
+      "id": "INC-20260920-LIGHTBOX",
+      "category": "images",
+      "severity": "SEV-2",
+      "status": "investigating",
+      "title": "Public profile lightbox viewport overflow",
+      "owner": "Codex (active responder)",
+      "record": "post-mortem/incidents/2026/2026-09-20-profile-lightbox/README.md",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-09-20-profile-lightbox/README.md",
+        "src/components/images/PublicImageMasonryStream.tsx",
+        "src/components/images/masonry-stream.css"
+      ],
+      "failure_modes": [
+        "FM-IMG-006"
+      ],
+      "recovery_evidence": []
+    },
+    {
       "id": "INC-20260920-PROFILECHUNK",
       "category": "authorization",
       "severity": "SEV-2",
@@ -846,6 +864,20 @@
         "scripts/test-developer-preview.ts",
         "post-mortem/incidents/2026/2026-09-20-profile-chunk/README.md",
         "post-mortem/incidents/2026/2026-09-20-profile-chunk/recovery.json"
+      ]
+    },
+    {
+      "id": "ACT-034",
+      "incident": "INC-20260920-LIGHTBOX",
+      "owner": "Product/image maintainer",
+      "review_by": "2026-09-27",
+      "status": "open",
+      "next_step": "Deploy the viewport-bounded public profile lightbox and verify the reported deep link in clean desktop and narrow-viewport browsers, including shell occlusion, intrinsic image containment, all edge controls, background scroll lock, focus restoration, and browser-asset scanning.",
+      "closure": "Complete only after deployed browser acceptance and production asset scanning are retained as incident evidence.",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-09-20-profile-lightbox/README.md",
+        "src/components/images/PublicImageMasonryStream.tsx",
+        "src/components/images/masonry-stream.css"
       ]
     }
   ]

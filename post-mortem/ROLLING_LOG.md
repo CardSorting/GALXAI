@@ -1785,3 +1785,17 @@ Incident: `INC-20260920-PROFILECHUNK`. Kind: `recovery`.
 **Next step:** Retain the encoded/decoded dynamic-route asset regression and private sibling denial in the developer-preview suite. Reopen only if a public route asset is again denied or a new dynamic public route lacks an explicit reviewed template mapping.
 
 Evidence: [recovery.json](incidents/2026/2026-09-20-profile-chunk/recovery.json), [test-developer-preview.ts](../scripts/test-developer-preview.ts), [preview-policy.ts](../src/lib/security/preview-policy.ts).
+
+## EVT-20260920-profile-lightbox-observed — 2026-09-20T03:00:18Z
+
+Incident: `INC-20260920-LIGHTBOX`. Kind: `containment`.
+
+**Observation:** The reported public profile image deep link reproduced two presentation failures: persistent application navigation painted above the dialog because it remained inside a lower stacking context, and the narrow layout allowed the media surface and right-edge controls to extend beyond the visible viewport. The sanitized artifact's intrinsic shape also differed from its requested aspect metadata.
+
+**Action:** Moved the lightbox through a body-level portal; added background scroll locking and focus restoration; bounded desktop and narrow dialog tracks to the viewport; constrained the media border box and image to both axes; and kept details independently scrollable. No profile data, image binary, generation, storage, payment or authorization state was mutated.
+
+**Result:** TypeScript and production builds pass. Local browser captures of the exact deep link show the overlay above the shell at desktop and the full intrinsic artifact plus close, previous, next and zoom controls inside a 500-pixel narrow breakpoint. The 390-pixel macOS headless capture was discarded because Chrome enforced a wider CSS viewport and cropped the screenshot; it was not treated as physical-device evidence.
+
+**Next step:** Complete documentation gates, deploy the reviewed source, and verify the exact production deep link in clean desktop and narrow-viewport browsers. Scan rendered pages and browser assets before recording recovery.
+
+Evidence: [README.md](incidents/2026/2026-09-20-profile-lightbox/README.md), [PublicImageMasonryStream.tsx](../src/components/images/PublicImageMasonryStream.tsx), [masonry-stream.css](../src/components/images/masonry-stream.css).

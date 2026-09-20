@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -214,6 +215,7 @@ export function PublicImageMasonryStream({
   const hiddenIdsRef = useRef<Set<string>>(new Set());
   const loadingRef = useRef(false);
   const initialFetchedRef = useRef(false);
+  const modalCloseButtonRef = useRef<HTMLButtonElement>(null);
 
   const showToast = useCallback((msg: string, undoable: boolean = false) => {
     if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
@@ -805,6 +807,30 @@ export function PublicImageMasonryStream({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [activeModalItem, handlePrevImage, handleNextImage, closeModal, showToast]);
 
+  // Keep the page shell stationary while the lightbox owns the viewport and
+  // return keyboard focus to the control that opened it.
+  useEffect(() => {
+    if (!activeModalItem || typeof document === 'undefined') return;
+    const body = document.body;
+    const previousOverflow = body.style.overflow;
+    const previousPaddingRight = body.style.paddingRight;
+    const previouslyFocused = document.activeElement instanceof HTMLElement
+      ? document.activeElement
+      : null;
+    const scrollbarWidth = Math.max(0, window.innerWidth - document.documentElement.clientWidth);
+
+    body.style.overflow = 'hidden';
+    if (scrollbarWidth > 0) body.style.paddingRight = `${scrollbarWidth}px`;
+    const focusFrame = window.requestAnimationFrame(() => modalCloseButtonRef.current?.focus());
+
+    return () => {
+      window.cancelAnimationFrame(focusFrame);
+      body.style.overflow = previousOverflow;
+      body.style.paddingRight = previousPaddingRight;
+      previouslyFocused?.focus({ preventScroll: true });
+    };
+  }, [activeModalItem]);
+
   // Touch swipe support for mobile lightbox navigation
   const handleTouchStart = (e: React.TouchEvent) => {
     const touch = e.touches[0];
@@ -1183,7 +1209,7 @@ export function PublicImageMasonryStream({
       </div>
 
       {/* --- World-Class Lightbox Modal with Zoom & Mobile Swipe --- */}
-      {activeModalItem && (
+      {activeModalItem && typeof document !== 'undefined' && createPortal(
         <div
           className="masonry-modal-backdrop"
           onClick={closeModal}
@@ -1197,15 +1223,6 @@ export function PublicImageMasonryStream({
             onTouchStart={handleTouchStart}
             onTouchEnd={handleTouchEnd}
           >
-            <button
-              type="button"
-              className="masonry-modal-close"
-              onClick={closeModal}
-              aria-label="Close dialog"
-            >
-              <X size={18} />
-            </button>
-
             {/* Media side with floating Prev/Next navigators and Zoom */}
             <div className={`masonry-modal-media ${isZoomed ? 'zoomed' : ''}`}>
               <button
@@ -1259,6 +1276,19 @@ export function PublicImageMasonryStream({
                   {((activeModalIndex ?? 0) + 1)} / {items.length}
                 </div>
               </div>
+
+              <button
+                ref={modalCloseButtonRef}
+                type="button"
+                className="masonry-modal-close"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  closeModal();
+                }}
+                aria-label="Close dialog"
+              >
+                <X size={18} />
+              </button>
             </div>
 
             {/* Info & Inspector side */}
@@ -1403,7 +1433,8 @@ export function PublicImageMasonryStream({
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </div>
   );

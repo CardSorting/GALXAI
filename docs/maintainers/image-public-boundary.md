@@ -18,6 +18,16 @@ when adding a new public field. Handles are normalized before they become links,
 avatars accept only site-relative or HTTPS image URLs, and malformed gallery
 cursors are rejected with a generic 400 response.
 
+Public profile image inspection is a viewport-owned dialog. It renders above the
+application shell, prevents background scrolling while open, returns focus on
+close, and keeps the media and details in independently bounded grid tracks. The
+sanitized artifact's intrinsic dimensions control visual containment; requested
+ratio metadata remains descriptive and must not enlarge or crop the modal surface.
+On narrow viewports the media controls remain within the visible media layer and
+details scroll independently. Browser acceptance must cover a direct `?image=`
+deep link at desktop and phone breakpoints, including persistent navigation,
+previous/next controls, close, zoom and a portrait or metadata-mismatched asset.
+
 The normalization path is internal result -> decoded/re-encoded artifact -> public
 DTO -> HTTP response. Formatting helpers receive only normalized bytes or public
 image fields. The native and relay adapters request base64 so normalization never

@@ -2865,6 +2865,12 @@
       "title": "Public profile route chunk denied"
     },
     {
+      "path": "post-mortem/incidents/2026/2026-09-20-profile-lightbox/README.md",
+      "scope": "operational-record",
+      "category": "post-mortem",
+      "title": "Public profile lightbox viewport overflow"
+    },
+    {
       "path": "post-mortem/runbooks/controller-lock.md",
       "scope": "current-guide",
       "category": "post-mortem",
