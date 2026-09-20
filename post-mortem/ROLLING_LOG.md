@@ -1799,3 +1799,17 @@ Incident: `INC-20260920-LIGHTBOX`. Kind: `containment`.
 **Next step:** Complete documentation gates, deploy the reviewed source, and verify the exact production deep link in clean desktop and narrow-viewport browsers. Scan rendered pages and browser assets before recording recovery.
 
 Evidence: [README.md](incidents/2026/2026-09-20-profile-lightbox/README.md), [PublicImageMasonryStream.tsx](../src/components/images/PublicImageMasonryStream.tsx), [masonry-stream.css](../src/components/images/masonry-stream.css).
+
+## EVT-20260920-profile-lightbox-recovered — 2026-09-20T03:09:45Z
+
+Incident: `INC-20260920-LIGHTBOX`. Kind: `recovery`.
+
+**Observation:** Production deployment dpl_God3HUju5MCgrPHU3drcGDQqJ6aN for source f59f4a4 became Ready and was promoted to galx.ai.
+
+**Action:** Requested the exact reported profile deep link through the apex hostname and rendered it in clean headless Chrome at desktop and a 500-pixel narrow CSS viewport. Inspected the overlay, intrinsic image bounds and close/previous/next/zoom controls; retained the completed local build boundary scan.
+
+**Result:** The deep link returned HTTP 200. Both hosted captures show the lightbox above the application shell, the full intrinsic image contained within the media region, and every edge control visible. The compiled boundary scan covered 537 browser/rendered assets. No generation, image mutation, payment, authenticated workspace or administrator action was exercised.
+
+**Next step:** Retain deep-link desktop/narrow browser acceptance and FM-IMG-006 guidance. Reopen if shell navigation occludes a public dialog or media/edge controls escape a supported viewport.
+
+Evidence: [recovery.json](incidents/2026/2026-09-20-profile-lightbox/recovery.json), [PublicImageMasonryStream.tsx](../src/components/images/PublicImageMasonryStream.tsx), [masonry-stream.css](../src/components/images/masonry-stream.css).

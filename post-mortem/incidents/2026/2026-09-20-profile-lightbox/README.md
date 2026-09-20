@@ -8,7 +8,7 @@ Incident `INC-20260920-LIGHTBOX` is a SEV-2 presentation failure observed at 202
 
 ## Evidence and timeline
 
-Pre-intervention desktop and phone-sized browser captures reproduced the shell overlap and media overflow on the reported public URL. The public creation DTO described the requested aspect, while the delivered sanitized artifact had a different intrinsic shape; the lightbox layout did not reliably constrain itself to the viewport and artifact box. `EVT-20260920-profile-lightbox-observed` records this observation.
+Pre-intervention desktop and phone-sized browser captures reproduced the shell overlap and media overflow on the reported public URL. The public creation DTO described the requested aspect, while the delivered sanitized artifact had a different intrinsic shape; the lightbox layout did not reliably constrain itself to the viewport and artifact box. `EVT-20260920-profile-lightbox-observed` records this observation. `EVT-20260920-profile-lightbox-recovered` and [recovery evidence](recovery.json) record the deployed acceptance.
 
 ## Cause and contributing conditions
 
@@ -20,8 +20,8 @@ The source repair portals the dialog to the document body, locks background scro
 
 ## Verification and limits
 
-TypeScript and production builds pass. Local production and development browser captures verify the reported deep link at desktop and the mobile breakpoint; the header no longer paints above the overlay, the image remains inside the media region, and previous, next, zoom, and close controls remain visible. Production acceptance and browser-asset scanning remain pending deployment. Physical-device and assistive-technology coverage remain separate.
+TypeScript and production builds pass. Local production and development browser captures verified the reported deep link at desktop and the narrow breakpoint. Production deployment `dpl_God3HUju5MCgrPHU3drcGDQqJ6aN` for source `f59f4a4` then returned HTTP 200 at the exact deep link, and clean hosted browser captures showed the overlay above the shell, the intrinsic image inside the media region, and previous, next, zoom, and close controls visible. The build boundary scan covered 537 generated browser/rendered assets. Physical-device and assistive-technology coverage remain separate.
 
 ## Prevention and closure
 
-`FM-IMG-006` owns recurrence guidance. `ACT-034` remains open until the deployed deep link passes desktop and narrow-viewport browser acceptance and the final production asset scan is recorded.
+`FM-IMG-006` owns recurrence guidance. The incident is recovered and `ACT-034` is complete. Reopen if persistent shell navigation appears above a public image dialog or media/edge controls escape a supported viewport.

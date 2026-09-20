@@ -1,0 +1,25 @@
+{
+  "classification": "private",
+  "incident": "INC-20260920-LIGHTBOX",
+  "observed_at": "2026-09-20T03:09:45Z",
+  "source_revision": "f59f4a4",
+  "deployment_id": "dpl_God3HUju5MCgrPHU3drcGDQqJ6aN",
+  "deployment_status": "Ready",
+  "target": "https://galx.ai/profile/morrowkest?image=img_1789858525711_020774dc",
+  "checks": {
+    "profile_http_status": 200,
+    "desktop_browser": "passed",
+    "narrow_browser": "passed",
+    "shell_occlusion": "not observed",
+    "intrinsic_image_containment": "passed",
+    "edge_controls_visible": "passed",
+    "production_build": "passed",
+    "image_public_boundary_tests": "55 passed",
+    "compiled_boundary_assets_scanned": 537
+  },
+  "limitations": [
+    "The narrow clean-browser acceptance used a 500-pixel CSS viewport because macOS headless Chrome enforces a minimum viewport width; this is not physical-device evidence.",
+    "No generation, image mutation, payment, authenticated workspace, or administrator action was exercised.",
+    "Five unrelated source/guide review fingerprints remain stale and were not refreshed by this incident."
+  ]
+}
