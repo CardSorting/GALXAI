@@ -39,8 +39,8 @@ export function Footer() {
               Create images, discover new work, and keep your best ideas close.
             </p>
 
-            <Link href={IMAGE_PATHS.library} className={styles.primaryLink}>
-              <span>Open Image Studio</span>
+            <Link href="/explore" className={styles.primaryLink}>
+              <span>Explore Star Releases</span>
               <ArrowRight size={14} aria-hidden="true" />
             </Link>
           </div>
@@ -49,23 +49,18 @@ export function Footer() {
             <h2 className={styles.colTitle}>Product</h2>
             <ul className={styles.linkList}>
               <li>
-                <Link href="/images" className={styles.footerLink}>
-                  <span>Image Studio</span>
-                </Link>
-              </li>
-              <li>
-                <Link href={IMAGE_PATHS.library} className={styles.footerLink}>
-                  <span>My images</span>
-                </Link>
-              </li>
-              <li>
-                <Link href={IMAGE_PATHS.favorites} className={styles.footerLink}>
-                  <span>Favorites</span>
-                </Link>
-              </li>
-              <li>
                 <Link href="/explore" className={styles.footerLink}>
-                  <span>Explore</span>
+                  <span>Explore Releases</span>
+                </Link>
+              </li>
+              <li>
+                <Link href="/stars" className={styles.footerLink}>
+                  <span>The Stars</span>
+                </Link>
+              </li>
+              <li>
+                <Link href="/collections" className={styles.footerLink}>
+                  <span>Collections</span>
                 </Link>
               </li>
               <li>

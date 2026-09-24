@@ -1,10 +1,7 @@
 {
   "premium": {"ssh":"operator@PREMIUM_HOST", "addresses":["REPLACE_WITH_ALL_PUBLIC_AND_PRIVATE_IPS"]},
-  "standard": {"ssh":"operator@STANDARD_HOST", "addresses":["REPLACE_WITH_ALL_PUBLIC_AND_PRIVATE_IPS"]},
   "images": {
     "premium-runtime":"sha256:REPLACE_WITH_REVIEWED_IMAGE_ID",
-    "premium-monitor":"sha256:REPLACE_WITH_REVIEWED_IMAGE_ID",
-    "standard-runtime":"sha256:REPLACE_WITH_REVIEWED_IMAGE_ID",
-    "standard-monitor":"sha256:REPLACE_WITH_REVIEWED_IMAGE_ID"
+    "premium-monitor":"sha256:REPLACE_WITH_REVIEWED_IMAGE_ID"
   }
 }

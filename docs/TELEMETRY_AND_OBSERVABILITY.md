@@ -6,9 +6,9 @@ Private operations for [the implemented account/runtime contract](reference/rela
 
 ## Controller view
 
-Open **GALX Monitors** or a fixed Premium/Standard app. Each console has Accounts, Registration and Activity under its own operator/viewer session. The authorized `/api/status` combines scoped central state and own desktop observations. Ordinary GALX sign-in does not grant this access.
+Open **GALX Monitors** or the fixed Premium app. It has Accounts, Registration and Activity under its own operator/viewer session. The authorized `/api/status` combines scoped central state and own desktop observations. Ordinary GALX sign-in does not grant this access.
 
-Accounts show saved state, relay confirmation and Health separately. Search, Status and Health combine with issues-first/name sorting. Registration has separate progress/attention/unknown/removed filters. Default active views exclude removed records; history remains inspectable. The UI does not combine both pools or download peer accounts.
+Accounts show saved state, relay confirmation and Health separately. Search, Status and Health combine with issues-first/name sorting. Registration has separate progress/attention/unknown/removed filters. Default active views exclude removed records; history remains inspectable. The UI does not expose unrelated account records or download provider credentials.
 
 ## Worker view
 

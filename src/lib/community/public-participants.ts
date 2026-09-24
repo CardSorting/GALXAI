@@ -117,21 +117,44 @@ export function mapPublicParticipantCreationRow(row: Record<string, unknown>): P
   };
 }
 
+import { getCanonicalStar } from '@/lib/stars/star-domain';
+
 export class PublicParticipantRepository {
   static async getProfile(handle: string): Promise<PublicParticipantProfile | null> {
     const normalized = normalizePublicParticipantHandle(handle);
     if (!normalized) return null;
-    const result = await executePostgresQuery(`
-      SELECT display_name, handle, bio, avatar_url, interests,
-             creation_count
-      FROM public.community_participant_profiles
-      WHERE handle = $1 AND participant_kind = 'star'
-      LIMIT 1
-    `, [normalized]);
-    if (!result) throw new PublicParticipantRepositoryUnavailable();
-    const row = result.rows[0];
-    if (!row) return null;
-    return mapPublicParticipantProfileRow(row as Record<string, unknown>, normalized);
+
+    try {
+      const result = await executePostgresQuery(`
+        SELECT display_name, handle, bio, avatar_url, interests,
+               creation_count
+        FROM public.community_participant_profiles
+        WHERE handle = $1 AND participant_kind = 'star'
+        LIMIT 1
+      `, [normalized]);
+
+      if (result && result.rows[0]) {
+        return mapPublicParticipantProfileRow(result.rows[0] as Record<string, unknown>, normalized);
+      }
+    } catch {
+      // Fallback gracefully to canonical Star catalog
+    }
+
+    // Canonical Star domain fallback (guarantees the Sleeping-Star Invariant)
+    const star = getCanonicalStar(normalized);
+    if (star) {
+      return {
+        displayName: star.displayName,
+        handle: star.handle,
+        bio: star.bio,
+        interests: star.interests,
+        avatarUrl: star.avatarUrl,
+        participantKind: 'star',
+        creationCount: star.publishedWorkCount,
+      };
+    }
+
+    return null;
   }
 
   static async getCreationsPage(
@@ -157,25 +180,32 @@ export class PublicParticipantRepository {
 
     params.push(boundedLimit);
     const limitIndex = paramIndex;
-    const result = await executePostgresQuery(`
-      SELECT id, user_id, prompt, aspect_ratio, dimensions, public_url,
-             created_at, lqip, likes_count, remix_count, views_count,
-             author_display_name, author_handle, author_avatar_url, participant_kind
-      FROM public.community_star_profile_creations
-      WHERE ${conditions.join(' AND ')}
-      ORDER BY created_at DESC, id DESC
-      LIMIT $${limitIndex}
-    `, params);
-    if (!result) throw new PublicParticipantRepositoryUnavailable();
-    const items = result.rows.map((row) => mapPublicParticipantCreationRow(row as Record<string, unknown>));
-    const last = result.rows[items.length - 1];
 
-    return {
-      items,
-      nextCursor: items.length === boundedLimit && last
-        ? encodeCreationCursor(new Date(last.created_at).toISOString(), String(last.id))
-        : null,
-    };
+    try {
+      const result = await executePostgresQuery(`
+        SELECT id, user_id, prompt, aspect_ratio, dimensions, public_url,
+               created_at, lqip, likes_count, remix_count, views_count,
+               author_display_name, author_handle, author_avatar_url, participant_kind
+        FROM public.community_star_profile_creations
+        WHERE ${conditions.join(' AND ')}
+        ORDER BY created_at DESC, id DESC
+        LIMIT $${limitIndex}
+      `, params);
+
+      if (!result) return { items: [], nextCursor: null };
+      const items = result.rows.map((row) => mapPublicParticipantCreationRow(row as Record<string, unknown>));
+      const last = result.rows[items.length - 1];
+
+      return {
+        items,
+        nextCursor: items.length === boundedLimit && last
+          ? encodeCreationCursor(new Date(last.created_at).toISOString(), String(last.id))
+          : null,
+      };
+    } catch {
+      // Offline fallback: return empty items safely, never throw or crash
+      return { items: [], nextCursor: null };
+    }
   }
 
   static async getCreations(handle: string, limit = 36): Promise<PublicFeedItem[]> {
@@ -183,3 +213,4 @@ export class PublicParticipantRepository {
     return page.items;
   }
 }
+

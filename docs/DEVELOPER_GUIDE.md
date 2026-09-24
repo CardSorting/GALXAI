@@ -30,7 +30,7 @@ For async images, persist the receipt before returning 202 and claim dispatch at
 
 Provider adapters retain explicit capability selection, bounded I/O, cancellation and sanitized errors. A transport error is not permission for silent fallback or a second side effect. Use the owning component's regression suite and actual downstream contract.
 
-The new relay strategy keeps account authority and the existing account lease ledger in the main project, with separate execution-only projects and local VMs/daemons for Premium and Standard. Runtime engines are in-process per account. Standard rejects Sites/images/tool requests before provider I/O; the isolated transport never falls back to the peer or legacy dispatch. Account lifecycle uses explicit manual registration, central revisions and immutable operation identity. The [full contract](reference/relay-account-management.md) defines removal retention, health freshness and renewal. Do not apply retained controller hold/background-sync semantics to these services.
+The relay strategy keeps account authority and the existing account lease ledger in the main project, with a separate execution-only Premium project and local VM/daemon. Runtime engines are in-process per account. The isolated transport never falls back to the legacy dispatch. Account lifecycle uses explicit manual registration, central revisions and immutable operation identity. The [full contract](reference/relay-account-management.md) defines removal retention, health freshness and renewal. Do not apply retained controller hold/background-sync semantics to this service.
 
 ## Local verification and release
 

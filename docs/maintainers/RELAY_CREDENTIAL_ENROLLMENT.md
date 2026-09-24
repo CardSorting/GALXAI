@@ -2,13 +2,13 @@
 
 <!-- docs-scope: current-guide -->
 
-Private operator procedure for the two fixed pool monitors. [Central account management](../reference/relay-account-management.md) defines persistence, revisions and roles; [service operations](../runbooks/relay-pool-services.md) defines installation and activation. The existing single-controller enrollment procedure is retained separately as [legacy desktop enrollment](legacy-desktop-enrollment.md).
+Private operator procedure for the fixed Premium monitor. [Central account management](../reference/relay-account-management.md) defines persistence, revisions and roles; [service operations](../runbooks/relay-pool-services.md) defines installation and activation. The existing single-controller enrollment procedure is retained separately as [legacy desktop enrollment](legacy-desktop-enrollment.md).
 
 ## Sole enrollment path
 
-Accounts are managed only in `mazhcjisettrzbqhorvp` through a manually created sign-in desktop and the central registrar. Premium requires a paid provider account; Standard requires a free one. A provider account's class is separate from the customer's GALX plan. Host credential discovery, pasted-token registration and external API/CLI imports are closed.
+Accounts are managed only in `mazhcjisettrzbqhorvp` through a manually created sign-in desktop and the central registrar. Premium requires a verified paid provider account. A provider account's class is separate from the customer's GALX plan. Host credential discovery, pasted-token registration and external API/CLI imports are closed.
 
-1. Open **GALX Monitors**, choose Premium or Standard, then **Connect account**. Existing registered accounts must reuse their own registration/desktop.
+1. Open **GALX Monitors**, choose Premium, then **Connect account**. Existing registered accounts must reuse their own registration/desktop.
 2. Enter a recognizable name and **Create sign-in desktop**. Preparation saves central operation identity; an explicit same-intent retry preserves its IDs.
 3. Start sign-in, open the desktop and complete the provider interaction manually.
 4. Choose **Connect account** to verify identity, expiry, models and account class. Review, enrollment, assignment and result commit together; a new account starts enabled when automatic activation is configured, or paused during a manual installation hold.
@@ -25,9 +25,9 @@ The central database owns encrypted credentials and existing leases. Private fun
 
 ## Existing records and schema rollout
 
-The manual desktop policy retains unconfirmed legacy accounts without granting new capacity. Central foundation, authorization, legacy assignment guard and management migrations add the fixed-pool workflow. Their complete version inventory and rollback rules are in [central schema](../reference/relay-account-management.md#durable-schema). The two execution projects contain no account registry.
+The manual desktop policy retains unconfirmed legacy accounts without granting new capacity. Central foundation, authorization, legacy assignment guard and management migrations add the Premium workflow. Their complete version inventory and rollback rules are in [central schema](../reference/relay-account-management.md#durable-schema). The Premium execution project contains no account registry.
 
-At the earlier [management acceptance](../../post-mortem/releases/2026-09-15-relay-account-management.json), local services and central migrations were installed, registration was open, execution closed and both pools had zero accounts. These are dated observations. The later [connection acceptance](../../post-mortem/incidents/2026/2026-09-16-relay-registration/connection-lifecycle.json) verifies the original Premium manual sign-in after legacy retirement; the subsequent [automatic activation release](../../post-mortem/releases/2026-09-16-relay-automatic-activation.json) records both connected installations and automatic policy. Provider qualification remains separate. Manual sign-in remains an operator action.
+The earlier [management acceptance](../../post-mortem/releases/2026-09-15-relay-account-management.json) and later [connection acceptance](../../post-mortem/incidents/2026/2026-09-16-relay-registration/connection-lifecycle.json) are dated evidence, not current inventory. The subsequent [automatic activation release](../../post-mortem/releases/2026-09-16-relay-automatic-activation.json) records the historical installation policy. Provider qualification remains separate. Manual sign-in remains an operator action.
 
 ## Refresh an existing account
 

@@ -2,11 +2,13 @@
 services:
   relay:
     image: ${GALX_LOCAL_RUNTIME_IMAGE:?Set the reviewed local runtime image}
+    restart: unless-stopped
     environment: {NODE_EXTRA_CA_CERTS: /run/secrets/local-ca}
     extra_hosts: ['host.lima.internal:${GALX_LOCAL_GATEWAY:?Set this VM gateway}']
     secrets: [{source: local_ca, target: local-ca}]
   monitor:
     image: ${GALX_LOCAL_MONITOR_IMAGE:?Set the reviewed local monitor image}
+    restart: unless-stopped
     environment: {NODE_EXTRA_CA_CERTS: /run/secrets/local-ca}
     extra_hosts: ['host.lima.internal:${GALX_LOCAL_GATEWAY:?Set this VM gateway}']
     secrets: [{source: local_ca, target: local-ca}]

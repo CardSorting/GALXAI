@@ -10,7 +10,6 @@ import { BILLING_PATHS } from '@/lib/billing/navigation';
 import { IMAGE_PATHS } from '@/lib/images/navigation';
 import { authEntryPath } from '@/lib/auth/redirects';
 import { isPublicReadingPath } from '@/lib/public-content/routes';
-import { FreeGenerationQuota } from './FreeGenerationQuota';
 import { CommandMenu } from '@/components/common/CommandMenu';
 import styles from './navigation.module.css';
 import {
@@ -18,6 +17,7 @@ import {
   Search,
   Sparkles,
   Compass,
+  Bookmark,
   CreditCard,
   FileText,
   BookOpen,
@@ -30,6 +30,8 @@ import {
 
 const isProductRoute = (pathname: string) =>
   pathname === '/' ||
+  /^\/stars(?:\/|$)/.test(pathname) ||
+  /^\/collections(?:\/|$)/.test(pathname) ||
   /^\/images(?:\/|$)/.test(pathname) ||
   /^\/explore(?:\/|$)/.test(pathname) ||
   /^\/profile\/[a-z0-9][a-z0-9_-]{2,31}$/.test(pathname) ||
@@ -210,10 +212,11 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
 
   // Legacy error/not-found surfaces can still include Navigation themselves.
   if (!inLayout && isProductRoute(pathname)) return null;
-  const returnTo = pathname === '/' ? '/images' : pathname;
+  const returnTo = pathname === '/' ? '/explore' : pathname;
 
-  const isImageActive = pathname === '/images' || pathname.startsWith('/images/');
-  const isExploreActive = pathname === '/explore' || pathname.startsWith('/explore/') || pathname.startsWith('/profile/');
+  const isStarsActive = pathname === '/stars' || pathname.startsWith('/stars/') || pathname.startsWith('/profile/');
+  const isExploreActive = pathname === '/explore' || pathname.startsWith('/explore/');
+  const isCollectionsActive = pathname === '/collections' || pathname.startsWith('/collections/');
   const isPricingActive = pathname === '/pricing' || pathname.startsWith('/pricing/');
   const isDocsActive = pathname === '/docs' || pathname.startsWith('/docs/');
 
@@ -229,17 +232,8 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
             </Link>
           </div>
 
-          {/* Primary navigation: creation, discovery, and plans. Account actions stay in the avatar menu. */}
+          {/* Primary navigation: Explore, Stars, Collections, Pricing */}
           <nav aria-label="Main navigation" className={styles.desktopNav}>
-            <Link
-              href={IMAGE_PATHS.library}
-              className={styles.navLink}
-              aria-current={isImageActive ? 'page' : undefined}
-            >
-              <span>Images</span>
-              <NavigationFeedback label="Images" />
-            </Link>
-
             <Link
               href="/explore"
               className={styles.navLink}
@@ -247,6 +241,24 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
             >
               <span>Explore</span>
               <NavigationFeedback label="Explore" />
+            </Link>
+
+            <Link
+              href="/stars"
+              className={styles.navLink}
+              aria-current={isStarsActive ? 'page' : undefined}
+            >
+              <span>Stars</span>
+              <NavigationFeedback label="Stars" />
+            </Link>
+
+            <Link
+              href="/collections"
+              className={styles.navLink}
+              aria-current={isCollectionsActive ? 'page' : undefined}
+            >
+              <span>Collections</span>
+              <NavigationFeedback label="Collections" />
             </Link>
 
             <Link
@@ -274,7 +286,7 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
             <kbd className={styles.searchKbd}>{osShortcut}</kbd>
           </button>
 
-          {/* Right Action Cluster (Quota, Account & Mobile Toggle) */}
+          {/* Right Action Cluster (Account & Mobile Toggle) */}
           <div className={styles.actionsRight}>
             {/* Mobile Search Icon Button */}
             <button
@@ -288,9 +300,6 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
             >
               <Search size={18} />
             </button>
-
-            {/* Quota / Credit Status Indicator */}
-            <FreeGenerationQuota />
 
             {/* Authenticated Account Menu vs Unauthenticated CTA */}
             {user ? (
@@ -461,17 +470,8 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
 
               <nav aria-label="Mobile navigation" className={styles.drawerNavigation}>
                 <div>
-                  <div className={styles.drawerSectionTitle}>Create</div>
+                  <div className={styles.drawerSectionTitle}>Discover</div>
                   <div className={styles.drawerList}>
-                    <Link
-                      href={IMAGE_PATHS.library}
-                      className={styles.drawerLink}
-                      aria-current={isImageActive ? 'page' : undefined}
-                      onClick={closeMobileMenu}
-                    >
-                      <Sparkles size={18} aria-hidden="true" className="text-sky-400" />
-                      <span><strong>Images</strong><small>Make and refine creations</small></span>
-                    </Link>
                     <Link
                       href="/explore"
                       className={styles.drawerLink}
@@ -479,7 +479,25 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
                       onClick={closeMobileMenu}
                     >
                       <Compass size={18} aria-hidden="true" className="text-indigo-400" />
-                      <span><strong>Explore</strong><small>See what the community is making</small></span>
+                      <span><strong>Explore</strong><small>Finished releases and archives</small></span>
+                    </Link>
+                    <Link
+                      href="/stars"
+                      className={styles.drawerLink}
+                      aria-current={isStarsActive ? 'page' : undefined}
+                      onClick={closeMobileMenu}
+                    >
+                      <Sparkles size={18} aria-hidden="true" className="text-amber-400" />
+                      <span><strong>Stars</strong><small>Autonomous creators and series</small></span>
+                    </Link>
+                    <Link
+                      href="/collections"
+                      className={styles.drawerLink}
+                      aria-current={isCollectionsActive ? 'page' : undefined}
+                      onClick={closeMobileMenu}
+                    >
+                      <Bookmark size={18} aria-hidden="true" className="text-amber-300" />
+                      <span><strong>Collections</strong><small>Saved works and followed stars</small></span>
                     </Link>
                   </div>
                 </div>

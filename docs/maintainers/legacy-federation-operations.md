@@ -1,7 +1,7 @@
 # Legacy federation operations
 
 <!-- docs-scope: current-guide -->
-This guide applies only to the retained single-controller federation and its existing desktops, as identified in [current state](../../post-mortem/CURRENT_STATE.md). Premium and Standard use the [local pool service procedure](../runbooks/relay-pool-services.md) and [central management contract](../reference/relay-account-management.md). These legacy commands do not create or administer either new pool. Assigned accounts are excluded from legacy enrollment, refresh and lease authority.
+This guide applies only to the retained single-controller federation and its existing desktops, as identified in [current state](../../post-mortem/CURRENT_STATE.md). Premium uses the [local pool service procedure](../runbooks/relay-pool-services.md) and [central management contract](../reference/relay-account-management.md). These legacy commands do not create or administer the active Premium service. Assigned accounts are excluded from legacy enrollment, refresh and lease authority.
 
 > Private operating guide. Follow the [federation contract](../FEDERATION_STRATEGY.md), [desktop guide](legacy-desktop-operations.md) and [enrollment guide](legacy-desktop-enrollment.md). Dated results belong in the [verification record](RELAY_SESSION_VERIFICATION_20260909.md).
 
@@ -27,7 +27,7 @@ Use `npm run relay:open` and `npm run relay:desktops` on the host. The launcher 
 
 ## Configuration and bounds
 
-The original `staged-20260915` Premium/Standard images remain non-serving. The five new central/runtime/monitor service images and their applied database interfaces use the separate [isolated-services runbook](../runbooks/relay-pool-services.md). Do not set those images as `RELAY_FEDERATION_IMAGE` or launch them with this controller's shared environment. The central service and two separate Colima runtime/monitor stacks are installed locally. Manual registrations, execution activation and provider qualification remain separate. This runbook continues to govern the existing deployed controller.
+The original `staged-20260915` relay images remain non-serving. The three central/Premium runtime/monitor service images and their applied database interfaces use the separate [isolated-services runbook](../runbooks/relay-pool-services.md). Do not set those images as `RELAY_FEDERATION_IMAGE` or launch them with this controller's shared environment. The central service and Premium Colima runtime/monitor stack are installed locally. Manual registration, execution activation and provider qualification remain separate. This runbook continues to govern the existing deployed controller.
 
 | Setting/bound | Default or behavior |
 | --- | --- |

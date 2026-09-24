@@ -1,7 +1,7 @@
 /** Fixed destinations only. This module never accepts a caller-supplied origin. */
 export function monitorOrigin(pool) {
-  if (!['premium', 'standard'].includes(pool)) throw Error('Choose Premium or Standard.');
-  return `http://127.0.0.1:${pool === 'premium' ? 13311 : 13312}`;
+  if (pool !== 'premium') throw Error('Choose Premium.');
+  return 'http://127.0.0.1:13311';
 }
 
 export async function monitorTicket(pool, config, fetcher = fetch) {
@@ -29,7 +29,7 @@ async function available(origin, fetcher) {
   } catch { return false; }
 }
 export const monitorAvailable = (pool, fetcher = fetch) => available(monitorOrigin(pool), fetcher);
-export const runtimeAvailable = (pool, fetcher = fetch) => available(monitorOrigin(pool).replace(pool === 'premium' ? ':13311' : ':13312', pool === 'premium' ? ':13301' : ':13302'), fetcher);
+export const runtimeAvailable = (pool, fetcher = fetch) => available(monitorOrigin(pool).replace(':13311', ':13301'), fetcher);
 
 export function handoffDeadline(lastSeenAt, now = Date.now()) {
   if (lastSeenAt == null) return now;

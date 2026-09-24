@@ -11,7 +11,7 @@ import type {
 import { GalxCircuitBreaker } from '../src/core/circuit/GalxCircuitBreaker.js';
 import { ContinuousTokenBucketRateGovernor } from '../src/core/governor/ContinuousTokenBucketRateGovernor.js';
 import { GalxCredentialPool } from '../src/core/pool/GalxCredentialPool.js';
-import { StandardPoolScheduler } from '../src/relay/standard-pool-scheduler.js';
+import { PoolScheduler } from '../src/relay/pool-scheduler.js';
 
 /**
  * This file is deliberately a closed-world simulator. It has no provider
@@ -1412,12 +1412,12 @@ export function runHostileFairness(): {
   };
 }
 
-export function runStandardSchedulerRaceChecks(): {
+export function runSchedulerRaceChecks(): {
   operations: number;
   maxReservations: number;
   releasesOutOfOrder: number;
 } {
-  const scheduler = new StandardPoolScheduler(() => 0);
+  const scheduler = new PoolScheduler(() => 0);
   const candidates = [
     { id: 'race-a', lastUsedAtMs: 0, availableSlots: 3 },
     { id: 'race-b', lastUsedAtMs: 0, availableSlots: 3 },
@@ -1554,14 +1554,14 @@ export async function runRelayLoadWarGames(): Promise<{
   stateMachines: ReturnType<typeof runSeededStateMachines>;
   mmo: ReturnType<typeof runSyntheticMmo>;
   fairness: ReturnType<typeof runHostileFairness>;
-  races: ReturnType<typeof runStandardSchedulerRaceChecks>;
+  races: ReturnType<typeof runSchedulerRaceChecks>;
   quotas: ReturnType<typeof runQuotaBoundaryAttacks>;
 }> {
   const queue = await runQueueWarfare();
   const stateMachines = runSeededStateMachines();
   const mmo = runSyntheticMmo();
   const fairness = runHostileFairness();
-  const races = runStandardSchedulerRaceChecks();
+  const races = runSchedulerRaceChecks();
   const quotas = runQuotaBoundaryAttacks();
   const operations = stateMachines.operations + mmo.operations + races.operations + quotas.operations + queue.cases.reduce((sum, item) => sum + item.target, 0);
   const invariants = stateMachines.invariants + (mmo.report.invariantChecks as number) + fairness.operations + races.operations;

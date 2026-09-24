@@ -21,7 +21,7 @@ Ordinary authentication, preview approval, task IDs, model output and tenant hin
 
 ## Enrollment and credential custody
 
-All canonical accounts, encrypted credentials, assignments, lifecycle history and account leases live in `mazhcjisettrzbqhorvp`. Manual sign-in happens in the owning pool's desktop, followed by **Connect account** to verify and save access atomically. A verified installation policy enables new connections automatically; existing pauses and explicit installation holds remain in effect. Premium requires paid provider class and Standard free class. A GALX customer subscription does not prove provider classification or model access.
+All canonical accounts, encrypted credentials, assignments, lifecycle history and account leases live in `mazhcjisettrzbqhorvp`. Manual sign-in happens in the Premium desktop, followed by **Connect account** to verify and save access atomically. A verified installation policy enables new connections automatically; existing pauses and explicit installation holds remain in effect. Premium requires a verified paid provider class. A GALX customer subscription does not prove provider classification or model access.
 
 Only central holds the main database/vault configuration. Pool runtimes receive own execution credentials and narrow assigned execution material; neither execution database stores an account registry or second capacity balance. The monitor's registrar channel does not grant broad table access. Application/service/ordinary roles cannot directly write credentials, assignments or immutable management journals. Automatic activation can be armed only by verified owner installation tooling; runtime/registrar events reconcile their own policy without receiving owner credentials. Private functions use fixed search paths and check caller scope; database owners remain trusted.
 
@@ -33,7 +33,7 @@ Pool credential renewal is manual sign-in in the same bound desktop followed by 
 
 Each pool has its own Linux VM, daemon, runtime/monitor state and persistent peer-denial rules. The central service has no daemon socket; runtime containers have no daemon socket or main registry/vault authority. Each monitor has powerful access to its own daemon for desktops. Each runtime hosts its own account engines in-process; it does not create isolated per-account Docker workers. Per-account engine separation must not be described as hardware isolation.
 
-The two VMs share one trusted Mac administrator and physical host. No Mac directory mounts or peer credentials are supplied. Guest homes/checkpoints may contain sensitive data and must be retained privately. Local VM/daemon isolation does not certify resilience to a malicious Mac owner.
+The Premium VM shares one trusted Mac administrator and physical host with the central service. No Mac directory mounts or unrelated credentials are supplied. Guest homes/checkpoints may contain sensitive data and must be retained privately. Local VM/daemon isolation does not certify resilience to a malicious Mac owner.
 
 ## Requests, visibility and recovery
 

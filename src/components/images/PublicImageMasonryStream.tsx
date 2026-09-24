@@ -26,9 +26,13 @@ import {
   EyeOff,
   RotateCcw,
   Share2,
+  Bookmark,
 } from 'lucide-react';
 import type { PublicFeedItem } from '@/app/api/images/feed/route';
 import { ParticipantIdentity } from '@/components/community/ParticipantIdentity';
+import { FollowStarButton } from '@/components/community/FollowStarButton';
+import { CaughtUpCard } from '@/components/images/CaughtUpCard';
+import { getSavedWorks, toggleSaveWork, SAVED_WORKS_EVENT } from '@/lib/collections/saved-works';
 import { useAuth } from '@/contexts/AuthContext';
 import { authEntryPath } from '@/lib/auth/redirects';
 import './masonry-stream.css';
@@ -138,6 +142,34 @@ export function PublicImageMasonryStream({
   const { user, isLoading: authLoading, status: authStatus } = useAuth();
   const [items, setItems] = useState<PublicFeedItem[]>(initialItems);
   const [cursor, setCursor] = useState<string | null>(initialCursor);
+  const [savedWorkIds, setSavedWorkIds] = useState<Set<string>>(() => new Set());
+
+  useEffect(() => {
+    try {
+      const initial = new Set(getSavedWorks().map((w) => w.id));
+      setSavedWorkIds(initial);
+    } catch {
+      // Fallback
+    }
+
+    const handleSaveChange = (e: Event) => {
+      const customEvent = e as CustomEvent<{ id: string; isSaved: boolean }>;
+      if (customEvent.detail) {
+        setSavedWorkIds((prev) => {
+          const next = new Set(prev);
+          if (customEvent.detail.isSaved) {
+            next.add(customEvent.detail.id);
+          } else {
+            next.delete(customEvent.detail.id);
+          }
+          return next;
+        });
+      }
+    };
+
+    window.addEventListener(SAVED_WORKS_EVENT, handleSaveChange);
+    return () => window.removeEventListener(SAVED_WORKS_EVENT, handleSaveChange);
+  }, []);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [hasMore, setHasMore] = useState(
@@ -902,8 +934,11 @@ export function PublicImageMasonryStream({
         if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
         navigator.clipboard.writeText(activeModalItem.prompt);
         setCopiedId(activeModalItem.id);
-        showToast('Prompt copied to clipboard');
+        showToast('Creative concept copied to clipboard');
         setTimeout(() => setCopiedId(null), 2000);
+      } else if (e.key === 's' || e.key === 'S' || e.key === 'b' || e.key === 'B') {
+        if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+        toggleSaveWork(activeModalItem);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -1170,6 +1205,19 @@ export function PublicImageMasonryStream({
                     <div className="masonry-card-author">
                       <ParticipantIdentity {...item.author} compact showHandle={false} />
                     </div>
+                    <button
+                      type="button"
+                      className={`masonry-card-save-btn ${savedWorkIds.has(item.id) ? 'saved' : ''}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleSaveWork(item);
+                      }}
+                      aria-label={savedWorkIds.has(item.id) ? 'Remove from Collection' : 'Save to Collection'}
+                      title={savedWorkIds.has(item.id) ? 'Saved in Collection' : 'Save to Collection'}
+                    >
+                      <Bookmark size={13} className={savedWorkIds.has(item.id) ? 'fill-current text-amber-400' : ''} />
+                      <span>{savedWorkIds.has(item.id) ? 'Saved' : 'Save'}</span>
+                    </button>
                   </div>
                 </div>
               </article>
@@ -1217,12 +1265,12 @@ export function PublicImageMasonryStream({
               : emptyDescription || 'No public creations are available yet. Create an image in GALX Images and it can appear here.'}
           </p>
           <Link
-            href="/images"
+            href="/stars"
             className="masonry-action-btn remix"
             style={{ display: 'inline-flex', padding: '10px 20px' }}
           >
             <Sparkles size={15} />
-            <span>Create with GALX Images</span>
+            <span>Explore Star Creators</span>
           </Link>
         </div>
       )}
@@ -1235,9 +1283,7 @@ export function PublicImageMasonryStream({
             <span>{loadingLabel || 'Streaming community creations…'}</span>
           </div>
         ) : !hasMore && items.length > 0 ? (
-          <p className="masonry-end-message">
-            {endMessage || '✦ You’ve explored the entire community stream. Bring your imagination into reality!'}
-          </p>
+          <CaughtUpCard authorHandle={authorHandle} />
         ) : null}
       </div>
 
@@ -1326,8 +1372,11 @@ export function PublicImageMasonryStream({
 
             {/* Info & Inspector side */}
             <div className="masonry-modal-info">
-              <div className="masonry-modal-author">
+              <div className="masonry-modal-author" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', width: '100%' }}>
                 <ParticipantIdentity {...activeModalItem.author} showHandle />
+                {activeModalItem.author?.handle && (
+                  <FollowStarButton handle={activeModalItem.author.handle} size="sm" />
+                )}
               </div>
               <div className="masonry-modal-header">
                 <div className="masonry-modal-badges">
@@ -1360,7 +1409,7 @@ export function PublicImageMasonryStream({
               </div>
 
               <h4 className="masonry-modal-section-title" id="modal-prompt-title">
-                Prompt
+                Creative Concept
               </h4>
               <p className="masonry-modal-prompt">{activeModalItem.prompt}</p>
 
@@ -1379,7 +1428,7 @@ export function PublicImageMasonryStream({
                 <div className="masonry-meta-item">
                   <div className="masonry-meta-label">Visibility</div>
                   <div className="masonry-meta-value">
-                    Public Community
+                    Public Archive
                   </div>
                 </div>
               </div>
@@ -1388,24 +1437,31 @@ export function PublicImageMasonryStream({
               <div className="masonry-modal-actions">
                 <button
                   type="button"
+                  className={`masonry-modal-save-btn ${savedWorkIds.has(activeModalItem.id) ? 'saved' : ''}`}
+                  onClick={() => toggleSaveWork(activeModalItem)}
+                >
+                  <Bookmark size={16} className={savedWorkIds.has(activeModalItem.id) ? 'fill-current text-amber-400' : ''} />
+                  <span>{savedWorkIds.has(activeModalItem.id) ? 'Saved in your Collection' : 'Save to Collection'}</span>
+                </button>
+
+                <button
+                  type="button"
                   className="masonry-modal-primary-btn"
                   onClick={() => {
-                    if (onSelectPrompt) {
-                      onSelectPrompt(activeModalItem.prompt, activeModalItem.aspect_ratio || undefined);
-                      closeModal();
-                      return;
+                    closeModal();
+                    if (activeModalItem.author?.handle) {
+                      router.push(`/profile/${encodeURIComponent(activeModalItem.author.handle)}`);
+                    } else {
+                      router.push('/stars');
                     }
-                    const params = new URLSearchParams();
-                    params.set('prompt', activeModalItem.prompt);
-                    if (activeModalItem.aspect_ratio) {
-                      params.set('aspect_ratio', activeModalItem.aspect_ratio);
-                    }
-                    params.set('tab', 'creations');
-                    router.push(`/images?${params.toString()}`);
                   }}
                 >
                   <Sparkles size={16} />
-                  <span>Remix in GALX Studio</span>
+                  <span>
+                    {activeModalItem.author?.handle
+                      ? `Explore @${activeModalItem.author.handle}’s Archive`
+                      : 'Explore Star Creators'}
+                  </span>
                 </button>
 
                 <button
@@ -1424,7 +1480,7 @@ export function PublicImageMasonryStream({
                   onClick={(e) => handleCopyPrompt(e, activeModalItem)}
                 >
                   {copiedId === activeModalItem.id ? <Check size={15} /> : <Copy size={15} />}
-                  <span>{copiedId === activeModalItem.id ? 'Copied to Clipboard!' : 'Copy Full Prompt'}</span>
+                  <span>{copiedId === activeModalItem.id ? 'Copied to Clipboard!' : 'Copy Concept Text'}</span>
                 </button>
 
                 <button

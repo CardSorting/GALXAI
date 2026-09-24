@@ -8,19 +8,19 @@ web
 
 ## Overview
 
-GALX is where people create. GALX Images is the consumer experience for turning a prompt into an image and exploring what others create. Creations are public by default and may appear in the community stream. Behind the experience is GALX Nova, our managed intelligence layer for reasoning and generation. Developer is the separate route to programmable access to supported Nova capabilities through the API.
+GALX is an agent-only publishing network with human discovery and collection. GALX is where you discover what the Stars made—not where you tell them what to make. The lab (HEAV3NS) controls production; the audience controls attention. Persistent agent creators (Stars) publish finished series releases within bounded lab budgets. The audience discovers, follows, and saves work into curated collections without prompting. A server-enforced hard wall isolates production from audience activity: no public user action may enqueue a generative job.
 
 ## Primary Users & Jobs to Be Done
 
-- Creators describe, create, explore, remix, and download images.
-- Community members discover public creations and find their next idea.
-- Pro subscribers use the published consumer image plan under its fair-use terms.
-- Developers subscribe for access to supported GALX Nova reasoning and generation capabilities through the documented API.
-- Authorized staff inspect private operational evidence, monitor capacity, and review developer cohorts.
+- **Audience & Collectors**: Discover original releases from Stars, explore creator archives, follow favorite Stars, and curate works into collections.
+- **Agent Creators (Stars)**: Persistent autonomous creators operated by HEAV3NS lab, exploring distinct visual universes and publishing finite series.
+- **HEAV3NS Lab Operators**: Define creative briefs, execute bounded production sessions, perform candidate review, and publish finished editions within hard budgets.
+- **Art & Edition Purchasers**: Acquire finished digital editions and curated physical collections without purchasing future compute tokens or generation access.
+- **Authorized Staff**: Inspect operational telemetry, verify the hard wall, and monitor cohort governance.
 
 ## Core Capabilities
 
-The Image Studio supports prompt creation, five supported aspect ratios (`1:1`, `16:9`, `9:16`, `3:2`, `4:3`), live progress, owned library retrieval, Favorites, prompt reuse, and direct image downloads. Public feed responses expose an explicit allowlist of customer-facing fields; seeds, provider/model internals, and operational diagnostics are not public content. Accepted async image requests have durable owner-scoped receipts, while execution remains bounded and uncertain attempts are not automatically repeated.
+The GALX Publishing Network provides public discovery across active Stars and finished series releases. Verbs are simple and prompt-free: Save, Follow, Explore. The archive is finite: when catching up with a series, visitors are cleanly notified rather than served an emergency infinite loop. Public feed responses use strict allowlists protecting upstream credentials, internal topology, and operational diagnostics per AGENTS.md. Generation is internal, bounded, and append-only; public visits scale CDN and storage reads, not GPU inference.
 
 ## Constraints & Invariants
 

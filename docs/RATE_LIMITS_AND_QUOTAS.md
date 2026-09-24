@@ -6,7 +6,7 @@ Private reference. [Account management](reference/relay-account-management.md) o
 
 | Signal | Authority and meaning |
 | --- | --- |
-| Pool assignment | Exclusive central assignment; paid provider accounts in Premium, free provider accounts in Standard |
+| Pool assignment | Exclusive central assignment; verified paid provider accounts in Premium |
 | Account eligibility | Enabled state, current credentials and access, matching runtime ownership/revision |
 | Account quota/concurrency | Existing central account lease/budget ledger; no duplicate ledger in execution projects |
 | Execution reservation | Own-pool durable identity before provider I/O; not a second account budget |
@@ -14,11 +14,11 @@ Private reference. [Account management](reference/relay-account-management.md) o
 | Product entitlement/fair usage | GALX customer policy, independent of provider account class |
 | Health display | Observation with freshness and reason; not permission or throughput certification |
 
-Standard adds [one ongoing job per eligible account and fair rotation across models](reference/standard-relay-scheduling.md). It skips projected and live engine cooldowns, checkpoints provider quota exclusions immediately, and permits one recovery job per account after its deadline, subject to the pool's recovery interval. Explicit central admission denials back off locally for 60 seconds, doubling to 30 minutes; this process-local delay never overrides the central budget. No eligible account returns `503 service_busy` and a five-second polling hint, not a claimed reset time. Premium shares those exclusions and recovery controls while allowing four healthy ongoing jobs per account. The monitor's central health snapshot does not expose these local busy slots or denial timers.
+Premium uses fair rotation across eligible accounts, skips projected and live engine cooldowns, checkpoints provider quota exclusions immediately, and permits a bounded recovery job after its deadline. Explicit central admission denials back off locally for 60 seconds, doubling to 30 minutes; this process-local delay never overrides the central budget. No eligible account returns `503 service_busy` and a five-second polling hint, not a claimed reset time. Healthy Premium accounts allow four ongoing jobs per account. The monitor's central health snapshot does not expose these local busy slots or denial timers.
 
 Each pool also spaces new recovery selections at least five seconds apart, using a monotonic clock. Healthy traffic can continue during that wait. The same job's repeated quota notices do not multiply backoff, while fresh observations may extend its deadline. An elapsed reset-less zero observation permits one authorized probe; new exhaustion evidence still excludes the account. Confirmed recovery requires the post-cooldown probe; an older sibling success cannot reopen full capacity. Transient-failure cooldowns and confirmed recovery are retained in the engine checkpoint. The rate of recovery starts is a local admission bound, not a provider quota or an automatic retry schedule.
 
-Text uses the configured pool, with no peer fallback. Sites/images always select Premium. Standard's rejection is a capability boundary, not temporary saturation. Premium image capability requires explicitly requested observation; the isolated runtime does not run background paid image probes.
+Text, Sites and images select Premium, with no peer fallback. Premium image capability requires explicitly requested observation; the isolated runtime does not run background paid image probes.
 
 Central grants are short-lived and must renew; failed renewal stops upstream work. Central outage denies new grants and renewal. An unconfirmed terminal write or acquired-but-unbound lease blocks new local admission. Terminal writes serialize, and original settlements use one bounded maintenance pass with backoff. Durably completed results do not wait for that remote sweep. Do not reset counters, clear authoritative cooldowns or change operation IDs to bypass admission. Generic timeouts/403s do not establish permanent account failure, and uncertain work is never automatically repeated.
 

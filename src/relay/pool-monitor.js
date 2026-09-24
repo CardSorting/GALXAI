@@ -539,11 +539,11 @@ function render() {
   const focusedAction = focused?.dataset.action;
   const expanded = [...document.querySelectorAll('[data-record] details[open]')].map(d => [d.closest('[data-record]').dataset.record, d.querySelector('summary')?.dataset.action]);
   const operator = state.role === 'operator';
-  $('pool').textContent = (state.pool === 'premium' ? 'Premium' : 'Standard') + ' relay';
-  $('scope').textContent = state.pool === 'premium' ? 'Paid accounts · Text, sites and images' : 'Free accounts · Text';
+  $('pool').textContent = 'Premium relay';
+  $('scope').textContent = 'Paid accounts · Text, sites and images';
   $('role').textContent = operator ? 'Operator access' : 'Read-only access';
   $('new').disabled = !connected || !state.registrationAllowed;
-  $('prepare-copy').textContent = 'Use a ' + (state.pool === 'premium' ? 'paid' : 'free') + ' account for this relay. ' + (state.automaticActivation ? 'Connecting verifies access and enables the account automatically. You can pause it in Accounts.' : 'New connections stay paused while execution is paused for this relay.');
+  $('prepare-copy').textContent = 'Use a paid account for this relay. ' + (state.automaticActivation ? 'Connecting verifies access and enables the account automatically. You can pause it in Accounts.' : 'New connections stay paused while execution is paused for this relay.');
   $('prepare').querySelector('[type=submit]').disabled = !connected || !state.registrationAllowed || busy.has('prepare');
   if (!operator) $('prepare').hidden = true;
   $('connection').textContent = connected ? (relayFresh(state) ? 'Connected' : 'Awaiting relay') : navigator.onLine === false ? 'Offline' : refreshRetryTimer ? 'Reconnecting…' : 'Connection interrupted';

@@ -28,11 +28,6 @@ COPY docker/relay-pools/premium-runtime.json ./component.json
 EXPOSE 3001
 LABEL io.galx.component="runtime" io.galx.pool="premium"
 
-FROM service AS standard-runtime
-COPY docker/relay-pools/standard-runtime.json ./component.json
-EXPOSE 3001
-LABEL io.galx.component="runtime" io.galx.pool="standard"
-
 FROM service AS monitor
 USER root
 RUN apk add --no-cache docker-cli=29.5.3-r1
@@ -45,7 +40,3 @@ USER 1000:1000
 FROM monitor AS premium-monitor
 COPY docker/relay-pools/premium-monitor.json ./component.json
 LABEL io.galx.component="monitor" io.galx.pool="premium"
-
-FROM monitor AS standard-monitor
-COPY docker/relay-pools/standard-monitor.json ./component.json
-LABEL io.galx.component="monitor" io.galx.pool="standard"

@@ -7,8 +7,8 @@
 
 | Task | Command or action |
 | --- | --- |
-| Everyday monitor access | **GALX Monitors → Open Premium / Open Standard**, or the separate apps |
-| Open a fixed monitor | `npm run relay:local -- open premium` / `npm run relay:local -- open standard` |
+| Everyday monitor access | **GALX Monitors → Open Premium**, or the Premium app |
+| Open a fixed monitor | `npm run relay:local -- open premium` |
 | Start installed local services | `npm run relay:local -- up` |
 | Inspect installed services | `npm run relay:local -- status` |
 | Verify actual local isolation | `npm run relay:local -- verify` |

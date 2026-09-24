@@ -10,7 +10,7 @@ GALX signup, verified login, session renewal, developer approval, customer plan 
 
 ## Manual registration path
 
-Use **GALX Premium** for paid provider accounts and **GALX Standard** for free accounts. **Register account → prepare desktop → manual sign-in → Review access → register** commits authority only in `mazhcjisettrzbqhorvp`, with an exclusive immutable assignment and paused state. The monitor's scoped registrar validates saved login; the browser never uploads a token. Creation, polling, labels and desktop files alone cannot register or enable an account.
+Use **GALX Premium** for verified paid provider accounts. **Register account → prepare desktop → manual sign-in → Review access → register** commits authority only in `mazhcjisettrzbqhorvp`, with an exclusive immutable assignment and the current activation policy. The monitor's scoped registrar validates saved login; the browser never uploads a token. Creation, polling, labels and desktop files alone cannot register or enable an account.
 
 Renew in the owning desktop and explicitly choose **Update saved sign-in → Save new sign-in**. The new services do not synchronize saved files in the background. A revoked/removed or differently assigned account cannot be revived or transferred. Actual model/image capability requires separate qualification. [Manual registration](maintainers/RELAY_CREDENTIAL_ENROLLMENT.md) owns recovery and operator steps.
 

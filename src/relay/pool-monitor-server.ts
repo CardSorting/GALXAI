@@ -59,7 +59,7 @@ function monitorStatus(current: Record<string, any>, access: 'operator' | 'viewe
       canConnect: desktop.canConnect === true, login: { state: state(desktop.login?.state, ['idle', 'starting', 'waiting', 'saved', 'failed', 'expired', 'cancelled', 'unavailable'], 'unavailable') } };
   }).filter(Boolean);
   return {
-    pool: current.pool === 'premium' ? 'premium' : 'standard', registrationAllowed: current.registrationAllowed === true,
+    pool: 'premium', registrationAllowed: current.registrationAllowed === true,
     executionAllowed: current.executionAllowed === true, automaticActivation: current.automaticActivation === true,
     relayFresh: (() => { const seen = Date.parse(String(current.lastSeenAt ?? '')); const age = Date.now() - seen; return Number.isFinite(age) && age >= 0 && age < 45000; })(),
     accounts, registrations, activity, role: access, desktops, desktopAvailable: desktopState?.available === true,
@@ -132,7 +132,7 @@ export function poolMonitor(deps:{operator:CentralClient;viewer:CentralClient;re
     }
     if(req.method==='GET'&&route==='/'){
       const asset=role(req)?'pool-monitor.html':'pool-monitor-login.html';
-      const pool=deps.operator.identity.pool,name=pool==='premium'?'Premium':'Standard';
+      const pool='premium',name='Premium';
       const page=(await readFile(new URL(`./${asset}`,import.meta.url),'utf8')).replaceAll('__MONITOR_NAME__',name).replaceAll('__MONITOR_POOL__',pool);
       res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store','Referrer-Policy':'no-referrer','X-Content-Type-Options':'nosniff','Content-Security-Policy':"default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'"});res.end(page);return;
     }

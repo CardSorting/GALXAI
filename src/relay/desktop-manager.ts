@@ -11,6 +11,7 @@ import type { RefreshDesktopCredential, MatchDesktopCredential } from './desktop
 import { saveDesktopJournal } from './desktop-journal.js';
 import { desktopLoginState, type DesktopLoginState } from './desktop-login-state.js';
 import { DesktopOrganization } from './desktop-organization.js';
+import type { DesktopCapacity } from './desktop-capacity.js';
 
 interface DesktopActivity {
   id: string; sequence: number; desktopId: string; name: string; action: string;
@@ -183,10 +184,14 @@ export class DesktopManager {
   private ready = false;
   private inventoryError = false;
   private corrupt = false;
-  readonly maxRunning = 3;
-  readonly maxDesktops = 12;
+  readonly maxRunning: number;
+  readonly maxDesktops: number;
   constructor(private readonly file: string, readonly driver: DesktopDriver, private readonly now = Date.now,
-    private readonly refreshCredential?: RefreshDesktopCredential, private readonly matchCredential?: MatchDesktopCredential, private readonly enrollCredential?: EnrollDesktopCredential) {
+    private readonly refreshCredential?: RefreshDesktopCredential, private readonly matchCredential?: MatchDesktopCredential, private readonly enrollCredential?: EnrollDesktopCredential,
+    limits?: Pick<DesktopCapacity, 'maxRunning' | 'maxDesktops'>) {
+    this.maxRunning = limits?.maxRunning ?? 3;
+    this.maxDesktops = limits?.maxDesktops ?? 12;
+    if (!Number.isInteger(this.maxRunning) || this.maxRunning < 1 || !Number.isInteger(this.maxDesktops) || this.maxDesktops < this.maxRunning) throw Error('Invalid desktop capacity.');
     this.activityStartedAt = now();
     fs.mkdirSync(path.dirname(file), { recursive: true, mode: 0o700 });
     try {

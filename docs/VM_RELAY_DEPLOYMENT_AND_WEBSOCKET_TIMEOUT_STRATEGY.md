@@ -2,21 +2,21 @@
 
 <!-- docs-scope: current-guide -->
 
-Private navigation guide. [Current state](../post-mortem/CURRENT_STATE.md) owns deployment evidence; [service installation](runbooks/relay-pool-services.md) owns the complete installation and acceptance procedure.
+Private navigation guide. [Current state](../post-mortem/CURRENT_STATE.md) owns deployment evidence; [service operation](runbooks/relay-pool-services.md) owns the local installation and acceptance procedure.
 
 ## Current installation
 
-Premium and Standard run locally in separate Colima Linux VMs with separate Docker daemons, disks, runtimes, monitors and credentials. Central authorization and its HTTPS proxy run on Docker Desktop. The Mac and its administrator remain shared trusted infrastructure. Persistent peer-denial rules cover direct and Mac-forwarded paths; separate Compose networks alone do not establish this boundary.
+The selected operating target is the owner's Mac: central authorization runs in Docker Desktop, and Premium runs in a dedicated Colima Linux VM with its own Docker daemon and disk. The Mac is a common trusted physical host, not a second failure domain or a hosted uptime service. On September 23, fresh local acceptance passed 26 checks and the user-session supervisor recovered the local services; sign-in, daemon/VM failure and sleep/wake drills remain open under ACT-018. Consult the [current state](../post-mortem/CURRENT_STATE.md) before acting. A Compose network alone does not establish this boundary.
 
-Only project `mazhcjisettrzbqhorvp` manages accounts, encrypted credentials, assignments, registration, lifecycle operations and account leases. Premium and Standard projects contain execution identity/reservations/outcomes only. Each runtime runs an in-process engine per eligible account inside its own runtime container. Monitors create manual sign-in desktops using only their own VM's Docker daemon.
+Only project `mazhcjisettrzbqhorvp` manages accounts, encrypted credentials, assignments, registration, lifecycle operations and account leases. The Premium project contains execution identity/reservations/outcomes only. Its runtime runs an in-process engine per eligible account inside its own runtime container. The monitor creates manual sign-in desktops using only its VM's Docker daemon.
 
-Open **GALX Monitors → Open Premium / Open Standard**, or use `npm run relay:local -- open premium` and `npm run relay:local -- open standard`. The launcher verifies the installed boundary and obtains a scoped one-use browser ticket. See [account management](reference/relay-account-management.md) for registration, health, rename, removal and renewal.
+Open **GALX Monitors → Open Premium**, or use `npm run relay:local -- open premium`. The launcher verifies the installed boundary and obtains a scoped one-use browser ticket. See [account management](reference/relay-account-management.md) for registration, health, rename, removal and renewal.
 
 ## Release and activation
 
-The local installation and management release are installed and tested. Latest dated acceptance records registration open, execution closed and no registered accounts. Manual paid/free sign-ins, provider qualification, execution activation and public application cutover remain pending. SSH targets and an externally hosted central origin are prerequisites only for a separately selected external installation.
+The two native apps are installed, Keep Premium online is enabled for the signed-in user, and fresh VM/service acceptance passed 26 checks. Restart and sleep/wake acceptance remains pending; the DigitalOcean candidate remains unprovisioned. This change does not reconfigure DNS, tunnel ingress, application URLs or execution gates. The application must not be pointed directly at the Mac loopback origin.
 
-Use the reviewed component images, preserve private state, rerun local acceptance and follow the explicit gates in the service runbook. A successful image build or monitor response does not prove provider capability. Standard always rejects Sites/images/tool aliases before provider I/O; text failures never borrow the other pool.
+Use the reviewed component images, preserve private state, and run local acceptance before changing execution or ingress state. A successful image build, menu status or liveness response does not prove provider capability or continuous availability. The Premium runtime enforces workload boundaries before provider I/O; failures never borrow another deployment.
 
 ## Transport recovery
 
@@ -24,4 +24,4 @@ Use [request recovery](RELAY_API_REFERENCE.md#request-recovery). Execution ident
 
 ## Retained deployments
 
-The existing public application still retains the single-controller federation path. Its one-container-per-account lifecycle, maintenance holds and original signed receipt recovery remain documented in [legacy operations](maintainers/legacy-federation-operations.md) and [legacy API](reference/legacy-federation-api.md). Assigned accounts are excluded from its writers and leases. The earlier shared `docker-compose.relay.yml` layout is not a launcher for either replacement. Do not run an account under two execution owners or move accepted work between deployments.
+The existing public application still retains the single-controller federation path. Its one-container-per-account lifecycle, maintenance holds and original signed receipt recovery remain documented in [legacy operations](maintainers/legacy-federation-operations.md) and [legacy API](reference/legacy-federation-api.md). Assigned accounts are excluded from its writers and leases. The earlier shared `docker-compose.relay.yml` layout is not a launcher for the Premium service. Do not run an account under two execution owners or move accepted work between deployments.

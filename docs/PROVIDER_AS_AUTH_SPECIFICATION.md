@@ -18,7 +18,7 @@ A provider login cannot establish a GALX session. GALX plan and provider account
 
 ## Supported lifecycle
 
-Open the fixed Premium or Standard monitor. Register manually through its desktop, review access and save centrally in paused state. Premium uses paid provider accounts; Standard uses free accounts. Enable only after the execution gate and runtime checks permit it, then verify applied revision and actual capability. Both intend the same text catalog; only Premium accepts Sites/images.
+Open the fixed Premium monitor. Register manually through its desktop, review access and save centrally in paused state. Premium uses verified paid provider accounts and supports text, Sites and images subject to observed capability. Enable only after the execution gate and runtime checks permit it, then verify applied revision and actual capability.
 
 Renew through manual same-desktop sign-in and explicit **Update saved sign-in â†’ Save new sign-in**. Rename and account/registration removal are revision-aware central operations. Registered-account removal is permanent revocation with retained files/history; unfinished registration restoration requires new review. The [operator procedure](maintainers/RELAY_CREDENTIAL_ENROLLMENT.md) and [management reference](reference/relay-account-management.md) own detailed failure and retention behavior.
 
@@ -37,7 +37,7 @@ Renew through manual same-desktop sign-in and explicit **Update saved sign-in â†
 
 ## Custody and concurrency
 
-Only the central service has the main database/vault configuration. Runtimes receive only own-pool eligible material and restricted execution database access. Each monitor owns one VM's desktop daemon and separate scoped principals. Neither execution project stores a registry, credentials or another account budget. The shared physical Mac/admin remains trusted; two local VMs are not physical-host independence.
+Only the central service has the main database/vault configuration. The Premium runtime receives only its eligible material and restricted execution database access. The Premium monitor owns its VM's desktop daemon and separate scoped principals. The execution project stores no registry, credentials or second account budget. The shared physical Mac/admin remains trusted; a local VM is not physical-host independence.
 
 Expected revisions and immutable operation identity prevent stale overwrite and cross-scope replay. Registration ticket/review updates also advance revision. Central removal precedes desktop cleanup and does not claim remote provider logout. Retained guest files, memory, backups and ciphertext have distinct retention properties; this is not a claim of complete erasure or certification.
 

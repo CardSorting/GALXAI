@@ -10,7 +10,7 @@ test('central inventory exposes Premium only and rejects retired or conflicting 
   const rows = [{id:'premium',account_class:'paid',workloads:['text','sites','images'],registration_enabled:false,installations:0,assignments:0,saved_registrations:0}];
   assert.equal(JSON.stringify(decodeRelayPoolInventory(rows.map(row => ({...row, credential:'private-sentinel'})))).includes('private-sentinel'),false);
   assert.throws(() => decodeRelayPoolInventory([])); assert.throws(() => decodeRelayPoolInventory([rows[0],rows[0]]));
-  assert.throws(() => decodeRelayPoolInventory([{...rows[0],id:'standard'}]));
+  assert.throws(() => decodeRelayPoolInventory([{...rows[0],id:'retired'}]));
   assert.throws(() => decodeRelayPoolInventory([{...rows[0],workloads:['text','images']}]));
   assert.throws(() => decodeRelayPoolInventory([{...rows[0],assignments:-1}]));
 });

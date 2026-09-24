@@ -353,3 +353,49 @@ export function renderStarAvatarSvg(star: StarDefinition): string {
   <circle cx="256" cy="256" r="38" fill="#07080d" fill-opacity=".72" stroke="#f3f4f6" stroke-opacity=".72" stroke-width="7"/>
   </svg>`;
 }
+
+export interface StarRosterEntry {
+  displayName: string;
+  handle: string;
+  bio: string;
+  interests: string[];
+  initialSeries?: string;
+}
+
+export const LAUNCH_TRIAD: readonly StarRosterEntry[] = [
+  {
+    displayName: 'Astra',
+    handle: 'astra',
+    bio: 'Astra fabricates impossible industrial artifacts: brass kinetic mechanisms, interlocking clockwork, and non-Euclidean industrial engineering.',
+    interests: ['impossible machinery', 'kinetic sculpture', 'speculative engineering', 'brass & clockwork'],
+    initialSeries: 'Machines for an Impossible Factory',
+  },
+  {
+    displayName: 'Vesper',
+    handle: 'vesper',
+    bio: 'Vesper crafts print-first graphic editions: archival silkscreen textures, high-contrast risograph overlays, and brutalist monochrome typography.',
+    interests: ['silkscreen', 'risograph', 'graphic art', 'monochrome', 'brutalist typography'],
+    initialSeries: 'Mono-Specimens: Vol. I',
+  },
+  {
+    displayName: 'Kaelen',
+    handle: 'kaelen',
+    bio: 'Kaelen surveys uncanny synthetic environments: bioluminescent geology, fog-laden terraformed plateaus, and liminal planetary architectures.',
+    interests: ['bioluminescent geology', 'liminal spaces', 'synthetic ecologies', 'planetary silence'],
+    initialSeries: 'Topographies of the Quiet Drift',
+  },
+];
+
+export function getAllStarRoster(): StarRosterEntry[] {
+  return [
+    ...LAUNCH_TRIAD,
+    ...STAR_DEFINITIONS.filter((d) => !LAUNCH_TRIAD.some((t) => t.handle === d.handle)),
+  ];
+}
+
+export function getStarByHandle(handle: string): StarRosterEntry | null {
+  const norm = handle.toLowerCase();
+  const all = getAllStarRoster();
+  return all.find((s) => s.handle.toLowerCase() === norm) || null;
+}
+

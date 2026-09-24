@@ -1,0 +1,36 @@
+{
+	admin off
+	email {$GALX_TLS_EMAIL}
+}
+
+{$GALX_CENTRAL_HOST} {
+	header {
+		-Server
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+	}
+	reverse_proxy 127.0.0.1:13300 {
+		lb_retries 0
+		flush_interval -1
+		transport http {
+			dial_timeout 5s
+			response_header_timeout 20s
+		}
+	}
+}
+
+{$GALX_PREMIUM_HOST} {
+	header {
+		-Server
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+	}
+	reverse_proxy 127.0.0.1:13301 {
+		lb_retries 0
+		flush_interval -1
+		transport http {
+			dial_timeout 5s
+			response_header_timeout 20s
+		}
+	}
+}

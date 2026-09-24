@@ -1,7 +1,7 @@
 # Legacy desktop operations
 
 <!-- docs-scope: current-guide -->
-This guide applies only to the retained single-controller federation and its existing desktops, as identified in [current state](../../post-mortem/CURRENT_STATE.md). Premium and Standard use the [local pool service procedure](../runbooks/relay-pool-services.md) and [central management contract](../reference/relay-account-management.md). These legacy commands do not create or administer either new pool. Assigned accounts are excluded from legacy enrollment, refresh and lease authority.
+This guide applies only to the retained single-controller federation and its existing desktops, as identified in [current state](../../post-mortem/CURRENT_STATE.md). Premium uses the [local pool service procedure](../runbooks/relay-pool-services.md) and [central management contract](../reference/relay-account-management.md). These legacy commands do not create or administer the active Premium service. Assigned accounts are excluded from legacy enrollment, refresh and lease authority.
 
 > Private operator interface. [ADR 0131](../adr/0131-private-operator-desktops-and-maintenance.md) governs access/lifecycle; [ADR 0132](../adr/0132-recoverable-desktop-credential-handoff.md) governs synchronization, with the owning-desktop and manual-only restrictions in [ADR 0152](../adr/0152-manual-desktop-only-shard-authority.md).
 

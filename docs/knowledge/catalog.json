@@ -2450,12 +2450,38 @@
       }
     },
     {
+      "path": "docs/adr/0159-local-mac-relay-operation.md",
+      "title": "ADR 0159: Local Mac relay operation with bounded availability",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [
+        "relay"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": {
+        "status": "accepted",
+        "delivery": "local",
+        "domain": "relay",
+        "owner": "Relay operator",
+        "date": "2026-09-22",
+        "evidence": [
+          "docs/runbooks/relay-pool-services.md",
+          "scripts/relay-local.mjs",
+          "scripts/macos/RelayMonitors.swift"
+        ],
+        "supersedes": []
+      }
+    },
+    {
       "path": "docs/adr/README.md",
       "title": "Architecture decision records",
       "scope": "current-guide",
       "kind": "navigation",
-      "domains": [],
-      "curation": "unreviewed",
+      "domains": [
+        "knowledge"
+      ],
+      "curation": "assigned",
       "keywords": [],
       "decision": null
     },
@@ -4044,18 +4070,6 @@
       "decision": null
     },
     {
-      "path": "docs/reference/standard-relay-scheduling.md",
-      "title": "Standard relay rotation",
-      "scope": "current-guide",
-      "kind": "reference",
-      "domains": [
-        "relay"
-      ],
-      "curation": "assigned",
-      "keywords": [],
-      "decision": null
-    },
-    {
       "path": "docs/reference/standard-relay-sunset.md",
       "title": "GALX Relay Standard sunset",
       "scope": "current-guide",
@@ -4137,7 +4151,7 @@
     },
     {
       "path": "docs/runbooks/relay-pool-images.md",
-      "title": "Build and inspect the two relay images",
+      "title": "Build and inspect the Premium relay images",
       "scope": "current-guide",
       "kind": "runbook",
       "domains": [
@@ -4156,7 +4170,7 @@
     },
     {
       "path": "docs/runbooks/relay-pool-services.md",
-      "title": "Install the central authority and isolated relay services",
+      "title": "Operate the local Premium relay and monitor",
       "scope": "current-guide",
       "kind": "runbook",
       "domains": [

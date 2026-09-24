@@ -11,7 +11,7 @@ const hash = (v: string) => createHash('sha256').update(v).digest('hex');
 let checks = 0;
 const equal = (a: unknown,b: unknown) => { assert.deepEqual(a,b); checks++; };
 const denied = async (f: Promise<unknown>) => { await assert.rejects(f); checks++; };
-const scopes = Object.fromEntries(['premium','standard'].map(pool => [pool, {
+const scopes = Object.fromEntries(['premium'].map(pool => [pool, {
   pool, installation: randomUUID(), epoch: randomUUID(), actor: randomUUID(),
   keys: Object.fromEntries(['operator','viewer','runtime','registrar'].map(role => [role,hash(randomUUID())])),
 }]));
@@ -29,7 +29,7 @@ try {
   const legacyRow={id:legacyId,user_id:'system_admin',encrypted_ciphertext:'fixture-old',encrypted_iv:'fixture',encrypted_tag:'fixture',key_version:'v1',credential_expires_at_ms:Date.now()+3600000};
   equal((await database.query('SELECT private.enroll_desktop_shard($1,$2,NULL) AS id',[legacyDesktop,JSON.stringify(legacyRow)])).rows[0].id,legacyId);
   equal((await database.query('SELECT private.refresh_desktop_shard($1,$2,$3,$4) AS saved',[legacyDesktop,legacyId,JSON.stringify(legacyRow),JSON.stringify({...legacyRow,encrypted_ciphertext:'fixture-new'})])).rows[0].saved,true);
-  for (const pool of ['premium','standard']) {
+  for (const pool of ['premium']) {
     const s=scopes[pool];
     const principals=Object.entries(s.keys).map(([kind,tokenSha256])=>({id:randomUUID(),actorId:s.actor,kind,tokenSha256}));
     await database.query('SELECT private.relay_configure_installation($1,$2,$3,$4,true,true,$5)',[pool,s.installation,randomUUID(),JSON.stringify(principals),hash('synthetic isolation evidence')]);
@@ -43,7 +43,7 @@ try {
     equal((await call(pool,'runtime','heartbeat',{epoch:s.epoch})).executionAllowed,true);
   }
   async function register(pool: string,accountId='codex_sh_'+hash(randomUUID()).slice(0,24)) {
-    const id=randomUUID(),desktopId=randomUUID(),fingerprint=hash(id),credentialRevision=hash(desktopId),accountClass=pool==='premium'?'paid':'free';
+    const id=randomUUID(),desktopId=randomUUID(),fingerprint=hash(id),credentialRevision=hash(desktopId),accountClass='paid';
     const prepared={id,desktopId,name:pool+' fixture'};
     equal((await call(pool,'operator','prepare',prepared)).id,id);
     equal((await call(pool,'operator','prepare',prepared)).id,id);
@@ -63,14 +63,12 @@ try {
     await denied(call(pool,'registrar','register',{...request,fingerprint:hash('changed')}));
     return {id,desktopId,accountId,credentialRevision};
   }
-  const premium=await register('premium'),standard=await register('standard');
-  for(const [pool,account] of [['premium',premium],['standard',standard]] as const) {
-    const s=scopes[pool],peer=pool==='premium'?'standard':'premium';
+  const premium=await register('premium');
+  for(const [pool,account] of [['premium',premium]] as const) {
+    const s=scopes[pool];
     const status=await call(pool,'viewer','status');
     equal(status.accounts.length,1);equal(status.accounts[0].id,account.accountId);
     equal(JSON.stringify(status).includes('encrypted_'),false);
-    await denied(call(peer,'operator','operation',{id:account.id}));
-    await denied(call(peer,'registrar','registration_context',{id:account.id}));
     await denied(database.query('SELECT private.enroll_desktop_shard($1,$2,NULL)',[account.desktopId,JSON.stringify({id:account.accountId})]));
     await denied(database.query('SELECT private.refresh_desktop_shard($1,$2,$3,$4)',[account.desktopId,account.accountId,'{}','{}']));
     const operation={id:randomUUID(),accountId:account.accountId,command:'enabled',expectedRevision:1,requestSha256:hash('enable'+pool)};
@@ -78,16 +76,13 @@ try {
     equal((await call(pool,'operator','set_account',operation)).replayed,true);
     await denied(call(pool,'operator','set_account',{...operation,id:randomUUID(),expectedRevision:0}));
     await denied(call(pool,'operator','set_account',{...operation,id:randomUUID(),expectedRevision:undefined}));
-    await denied(call(peer,'operator','set_account',operation));
     await denied(call(pool,'viewer','set_account',operation));
     const projection=await call(pool,'runtime','projection',{epoch:s.epoch});
     equal(projection.accounts.length,1);equal(projection.accounts[0].id,account.accountId);
     const acquire={epoch:s.epoch,accountId:account.accountId,credentialRevision:account.credentialRevision,revision:2,
       workload:'text',requestKey:hash('request'+pool),requestSha256:hash('body'),tenantSha256:hash('caller'),estimatedTokens:100};
-    await denied(call(peer,'runtime','acquire',{...acquire,epoch:scopes[peer].epoch}));
     await denied(call(pool,'runtime','acquire',{...acquire,revision:undefined}));
     await denied(call(pool,'runtime','acquire',{...acquire,workload:undefined}));
-    if(pool==='standard') for(const workload of ['sites','images']) await denied(call(pool,'runtime','acquire',{...acquire,workload}));
     const lease=await call(pool,'runtime','acquire',acquire);
     assert(lease.leaseId);checks++;
     equal((await call(pool,'runtime','acquire',acquire)).leaseId,lease.leaseId);
@@ -102,7 +97,6 @@ try {
     equal((await call(pool,'operator','set_account',pause)).savedRevision,3);
     await denied(call(pool,'runtime','renew',{...acquire,...lease}));
     await denied(call(pool,'runtime','acquire',acquire));
-    await denied(call(peer,'runtime','settle',{epoch:s.epoch,leaseId:lease.leaseId}));
     equal((await call(pool,'runtime','settle',{epoch:s.epoch,leaseId:lease.leaseId,actualTokens:50,success:true})).success,true);
     equal((await call(pool,'runtime','settle',{epoch:s.epoch,leaseId:lease.leaseId,actualTokens:50,success:true})).replayed,true);
     equal((await call(pool,'viewer','status')).accounts[0].acknowledgedRevision,2);
@@ -115,7 +109,6 @@ try {
   const edit={id:randomUUID(),registrationId:managedId,expectedRevision:1,command:'rename',name:'Renamed draft',requestSha256:hash('rename draft')};
   equal((await call('premium','operator','manage_registration',edit)).savedRevision,2);
   equal((await call('premium','operator','manage_registration',edit)).replayed,true);
-  await denied(call('standard','operator','manage_registration',edit));
   await denied(call('premium','viewer','manage_registration',edit));
   await denied(call('premium','runtime','manage_registration',edit));
   await denied(call('premium','operator','manage_registration',{...edit,id:randomUUID(),name:'Stale'}));

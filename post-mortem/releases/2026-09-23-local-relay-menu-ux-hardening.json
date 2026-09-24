@@ -1,0 +1,77 @@
+{
+  "classification": "private",
+  "observedAt": "2026-09-23T05:06:35Z",
+  "scope": "Source-level audit and focused hardening of the owner-local menu and recovery status. No public route or execution gate changed.",
+  "audit": {
+    "score": "17/20 — Good",
+    "dimensions": {
+      "accessibility": 3,
+      "performance": 4,
+      "appearanceAndTheming": 4,
+      "platformConformance": 3,
+      "adaptivity": 3
+    },
+    "issues": [
+      {
+        "severity": "P2",
+        "finding": "Open at Login uses a manually written LaunchAgent rather than the app-associated SMAppService registration and status path available on macOS 13 and later.",
+        "disposition": "Deferred until the local app has a stable signing and bundled-helper distribution path; retain the current owner-session behavior meanwhile."
+      },
+      {
+        "severity": "P3",
+        "finding": "The cold-start progress window has a fixed height and has not been visually checked with enlarged text or translated copy.",
+        "disposition": "Keep bounded to a later native UI pass; current English content fits the source constraints, but no screenshot evidence is claimed."
+      }
+    ],
+    "positiveFindings": [
+      "The app uses AppKit menus, NSAlert, NSProgressIndicator, system colors and SF Symbols.",
+      "Relay and monitor health are checked independently; network work is asynchronous and subprocess output is discarded.",
+      "The menu separates service supervision from opening the menu app at login, and does not expose keys or raw operational errors.",
+      "The supervisor uses bounded jittered retries, a shared launcher lock and owner-only atomic state."
+    ]
+  },
+  "hardening": [
+    "Added a 15-second private supervisor heartbeat during waits so long bounded backoff is not misreported as a stopped or stale supervisor.",
+    "The menu now distinguishes active, recovering, stopped and non-reporting supervisor states, and shows the next retry estimate and attempt count.",
+    "Menu-bar status refreshes the private supervisor summary when opened.",
+    "Both login preference handlers validate the expected LaunchAgent identity and command; conflicting entries are left untouched, and the menu app preference file is owner-only."
+  ],
+  "verification": {
+    "nodeSyntax": "passed",
+    "nativeBundleBuild": "passed; both local app bundles signed and installed",
+    "localAcceptance": {
+      "at": "2026-09-23T05:03:56.301Z",
+      "checks": 26,
+      "sha256": "6f5eb19c1ecf97af8b6b0ee53fef981b7d1ca228888ba310ea69ca1782e76c44"
+    },
+    "supervisorHeartbeat": {
+      "observationAfterRestart": "20 seconds",
+      "status": "running",
+      "attempt": 0,
+      "checkedAt": "2026-09-23T05:05:56.638Z"
+    },
+    "liveStatusAt": "2026-09-23T05:06:35Z",
+    "power": "AC at 74%",
+    "centralServices": "2/2 running",
+    "premiumServices": "2/2 running",
+    "monitor": "healthy",
+    "relay": "healthy",
+    "keepPremiumOnline": "enabled for the signed-in user",
+    "openAtLogin": "off"
+  },
+  "limits": [
+    "The audit is source-level; visual capture was unavailable in this session.",
+    "ACT-018 remains open for sign-in, host/daemon restart, Docker/Colima failure injection, sleep/wake, closed-lid and duplicate-owner drills.",
+    "No provider generation, account mutation, public ingress change or execution-gate change was performed."
+  ],
+  "sourceSha256": {
+    "scripts/relay-local.mjs": "cf35e76b30bfb817a61ef451afc1733776ba5ba085cf85ec145fdf747c48bc0c",
+    "scripts/macos/RelayMonitors.swift": "6dedf77b3c71e67e977d2565bf7659dbbb48ab80a5016ed0b2d948e313e54357",
+    "scripts/install-relay-monitor-apps.py": "4ca09038db1cc982b17a2ef15f6bb6522a85d0fcc5750d849d0a73130743a415",
+    "docker/relay-pools/local/pool.yaml": "2d6481461ce7dc649fed3f7734d8ff212fd03c6e000c0085ccdc6abc999e4003",
+    "docker/relay-pools/local/central.yaml": "a08a5e3e489df018de850e85581410ef56512a0a8945d617348f52134efd5ec7",
+    "docs/runbooks/relay-pool-services.md": "6baeb9fbab3f3c294a37d40ed143d923974f90182401b5072c617c1c8de56e9f",
+    "docs/adr/0159-local-mac-relay-operation.md": "22a85c9e94789af021fb5e4f35d8f93031c6cd089b9f78a14202769da992b0d6",
+    "docs/DEPLOYMENT.md": "b10d5db112085c24f821611a77834cab3e4b6a0ab2ea2957b2188176d7e73c6c"
+  }
+}

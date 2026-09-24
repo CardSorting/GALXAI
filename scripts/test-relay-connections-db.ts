@@ -14,7 +14,6 @@ export async function connectionDatabaseChecks(db: pg.Pool, scopes: any, call: (
   await call('premium','operator','prepare',{id,desktopId,name:'Connection lifecycle'});
   await call('premium','operator','ticket',{id,purpose:'connect',ticketSha256});
   await denied(call('premium','viewer','connect',body));
-  await denied(call('standard','registrar','connect',body));
   await denied(call('premium','registrar','connect',{...body,row:{...row,id:'invalid'}}));
   eq((await call('premium','operator','operation',{id})).state,'prepared');
   eq((await call('premium','registrar','connect',body)).accountId,accountId);
@@ -25,7 +24,6 @@ export async function connectionDatabaseChecks(db: pg.Pool, scopes: any, call: (
   await call('premium','runtime','heartbeat',{epoch});
   const failure={epoch,accountId,revision:2,credentialRevision};
   await denied(call('premium','operator','credential_failed',failure));
-  await denied(call('standard','runtime','credential_failed',{...failure,epoch:scopes.standard.epoch}));
   await denied(call('premium','runtime','credential_failed',{...failure,epoch:randomUUID()}));
   eq((await call('premium','runtime','credential_failed',{...failure,credentialRevision:hash('old token')})).recorded,false);
   eq((await call('premium','runtime','credential_failed',failure)).recorded,true);

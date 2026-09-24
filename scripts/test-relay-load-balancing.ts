@@ -5,14 +5,14 @@ import { GalxCircuitBreaker } from '../src/core/circuit/GalxCircuitBreaker.js';
 import { ContinuousTokenBucketRateGovernor } from '../src/core/governor/ContinuousTokenBucketRateGovernor.js';
 import { GalxCredentialPool } from '../src/core/pool/GalxCredentialPool.js';
 import { GalxShardSyncBuffer } from '../src/core/pool/GalxShardSyncBuffer.js';
-import { StandardPoolScheduler } from '../src/relay/standard-pool-scheduler.js';
+import { PoolScheduler } from '../src/relay/pool-scheduler.js';
 import {
   RELAY_LOAD_TIER,
   RELAY_LOAD_TIER_CONFIG,
   runHostileFairness,
   runQuotaBoundaryAttacks,
   runQueueWarfare,
-  runStandardSchedulerRaceChecks,
+  runSchedulerRaceChecks,
   runSeededStateMachines,
   runSyntheticMmo
 } from './relay-load-war-game.js';
@@ -100,8 +100,8 @@ function makePool(
   return { pool, substrate, governor };
 }
 
-test('synthetic standard dispatch remains balanced under a high-throughput reservation burst', () => {
-  const scheduler = new StandardPoolScheduler(() => 0);
+test('synthetic dispatch remains balanced under a high-throughput reservation burst', () => {
+  const scheduler = new PoolScheduler(() => 0);
   const candidates = ['a', 'b', 'c', 'd'].map(id => ({ id, lastUsedAtMs: 0, availableSlots: 8 }));
   const counts = new Map(candidates.map(candidate => [candidate.id, 0]));
 
@@ -364,7 +364,7 @@ test('synthetic MMO traffic remains bounded and makes progress through account r
 
 test('synthetic hostile fairness and scheduler races preserve progress without dispatch', () => {
   const fairness = runHostileFairness();
-  const races = runStandardSchedulerRaceChecks();
+  const races = runSchedulerRaceChecks();
   assert.ok(Object.values(fairness.counts).every(count => count > 0));
   assert.ok(fairness.fairness > 0.65);
   assert.equal(races.maxReservations, 9);

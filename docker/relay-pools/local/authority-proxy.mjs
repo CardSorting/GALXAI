@@ -7,6 +7,24 @@ const server = https.createServer({
   cert: readFileSync('/run/secrets/tls-cert'),
   minVersion: 'TLSv1.2',
 }, (req, res) => {
+  if (req.method === 'GET' && req.url === '/health/live') {
+    res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' });
+    res.end('{"ok":true}'); return;
+  }
+  if (req.method === 'GET' && req.url === '/health/ready') {
+    const upstream = http.get({ hostname: 'authority', port: 3000, path: '/health/live', timeout: 2000 }, response => {
+      response.resume();
+      const ready = response.statusCode === 200;
+      res.writeHead(ready ? 200 : 503, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' });
+      res.end(ready ? '{"ok":true}' : '{"ok":false}');
+    });
+    upstream.on('timeout', () => upstream.destroy());
+    upstream.on('error', () => {
+      if (!res.headersSent) res.writeHead(503, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' });
+      res.end('{"ok":false}');
+    });
+    return;
+  }
   if (req.method !== 'POST' || !/^\/(runtime|operator|registrar)\/[a-z_-]+$/.test(req.url ?? '')) {
     res.writeHead(404, { 'Cache-Control': 'no-store' }); res.end(); return;
   }

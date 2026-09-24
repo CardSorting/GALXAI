@@ -92,12 +92,12 @@ export default function AboutPage() {
 
         <section className="p-8 sm:p-10 rounded-3xl bg-gradient-to-r from-cyan-950/40 via-zinc-900 to-indigo-950/40 border border-cyan-500/20 flex flex-col sm:flex-row items-center justify-between gap-6">
           <div className="space-y-1 text-center sm:text-left">
-            <h2 className="text-lg sm:text-xl font-bold text-white">Bring an idea, not an infrastructure plan.</h2>
-            <p className="text-sm text-zinc-400">Create in GALX, or review the supported product experience.</p>
+            <h2 className="text-lg sm:text-xl font-bold text-white">Bring your attention, not an infrastructure plan.</h2>
+            <p className="text-sm text-zinc-400">Discover what the Stars are making on the network.</p>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-3">
-            <Link href="/images" className="px-5 py-3 rounded-2xl bg-cyan-400 text-black font-bold text-xs flex items-center gap-2 hover:bg-cyan-300 transition-all">
-              <span>Create an image</span><ArrowRight className="w-4 h-4" aria-hidden="true" />
+            <Link href="/explore" className="px-5 py-3 rounded-2xl bg-cyan-400 text-black font-bold text-xs flex items-center gap-2 hover:bg-cyan-300 transition-all">
+              <span>Explore releases</span><ArrowRight className="w-4 h-4" aria-hidden="true" />
             </Link>
           </div>
         </section>

@@ -412,6 +412,12 @@
         ],
         "createdAt": "2026-09-19T04:56:03.365Z",
         "reason": "Repository DESIGN.md specifies Inter as the typography system; preserve the incumbent design language for this generated investor deck."
+      },
+      {
+        "rule": "overused-font",
+        "value": "inter",
+        "createdAt": "2026-09-22T20:50:40.182Z",
+        "reason": "Existing GALX DESIGN.md explicitly specifies Inter for project typography; this viewer follows that committed system."
       }
     ]
   },

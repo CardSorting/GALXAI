@@ -63,9 +63,9 @@ export function centralServer(deps: { query: Query; identitySecret: string; decr
         // A successful provider request validates this exact token before trusting its claims.
         const models = await (deps.validate ?? (c => discoverOpenAIModels({id:'manual-registration',...c},AbortSignal.timeout(10000))))(candidate);
         const classification = accountClass(candidate);
-        if (classification !== (principal.pool === 'premium' ? 'paid' : 'free')) throw new RequestError(422,'account_type_mismatch',`Use a ${principal.pool === 'premium' ? 'paid' : 'free'} account for this registration.`);
+        if (classification !== 'paid') throw new RequestError(422,'account_type_mismatch','Use a paid account for this registration.');
         const values = { ...scope, fingerprint: candidate.fingerprint, credentialRevision: hash(candidate.accessToken), accountClass: classification,
-          models: models.filter(m => principal.pool === 'premium' || !m.startsWith('image:')).slice(0,512) };
+          models: models.slice(0,512) };
         if (!values.models.length) throw new RequestError(422,'models_unverified','No supported models could be verified.');
         let result: any;
         const common = { read: async () => context.accounts, decrypt, encrypt, validate: async () => models };

@@ -14,14 +14,13 @@ function check(value, message) { assert(value, message); evidence.checks++; }
 // Disposable synthetic values only. Files are readable by the non-root container
 // under a private temporary parent; they are never real deployment credentials.
 const secrets = {};
-for (const pool of ['premium', 'standard']) for (const role of ['inference', 'admin']) {
+for (const pool of ['premium']) for (const role of ['inference', 'admin']) {
   const name = `${pool}-${role}`;
   secrets[name] = path.join(fixture, name);
   writeFileSync(secrets[name], randomBytes(32).toString('base64url'), { mode: 0o444 });
 }
 const env = { ...process.env, GALX_PREMIUM_INFERENCE_KEY_FILE: secrets['premium-inference'],
-  GALX_PREMIUM_ADMIN_KEY_FILE: secrets['premium-admin'], GALX_STANDARD_INFERENCE_KEY_FILE: secrets['standard-inference'],
-  GALX_STANDARD_ADMIN_KEY_FILE: secrets['standard-admin'] };
+  GALX_PREMIUM_ADMIN_KEY_FILE: secrets['premium-admin'] };
 const mounts = pool => ['--mount', `type=bind,src=${secrets[`${pool}-inference`]},dst=/run/secrets/relay-inference-key,readonly`,
   '--mount', `type=bind,src=${secrets[`${pool}-admin`]},dst=/run/secrets/relay-admin-key,readonly`];
 const hardened = ['--network', 'none', '--read-only', '--user', '1000:1000', '--cap-drop', 'ALL',
@@ -29,7 +28,7 @@ const hardened = ['--network', 'none', '--read-only', '--user', '1000:1000', '--
   '--tmpfs', '/tmp:rw,noexec,nosuid,nodev,size=32m,uid=1000,gid=1000,mode=0700'];
 try {
   const bundles = [];
-  for (const pool of ['premium', 'standard']) {
+  for (const pool of ['premium']) {
     const image = `galxai-relay-${pool}:staged-20260915`;
     const details = JSON.parse(docker(['image', 'inspect', image]))[0];
     check(details.Config.User === '1000:1000', 'Non-root image');
@@ -57,7 +56,7 @@ try {
     check(!service.environment && !service.volumes && !service.privileged, 'No environment inheritance, host directories or socket mounts');
     check(Object.values(compose.secrets).every(s => s.file.startsWith(fixture)), 'Only own synthetic secret files');
     for (const poison of ['DATABASE_URL=postgresql://synthetic.invalid/fixture', 'GALX_VAULT_MASTER_SECRET=synthetic',
-      'RELAY_ASSIGNED_SHARD={}', `RELAY_POOL=${pool === 'premium' ? 'standard' : 'premium'}`, 'RELAY_ACTIVATE=true']) {
+      'RELAY_ASSIGNED_SHARD={}', 'RELAY_POOL=retired', 'RELAY_ACTIVATE=true']) {
       let rejected = false;
       try { docker(['run', '--rm', ...hardened, ...mounts(pool), '-e', poison, image]); }
       catch (error) { rejected = error.status === 1 && String(error.stderr).includes('startup refused') && !String(error.stderr).includes('synthetic.invalid'); }
@@ -84,7 +83,7 @@ try {
     check(stopped.State.ExitCode === 0, 'Graceful SIGTERM');
     evidence.images.push({ tag: image, id: details.Id, platform: `${details.Os}/${details.Architecture}`, sizeBytes: details.Size, bundleSha256: bundle });
   }
-  check(bundles[0] === bundles[1], 'Mirrored engine build in both images');
+  check(bundles.length === 1, 'Premium engine build verified');
   mkdirSync(path.join(root, '.relay'), { recursive: true });
   writeFileSync(path.join(root, '.relay/pool-images-verification.json'), JSON.stringify(evidence, null, 2) + '\n');
   console.log(JSON.stringify(evidence, null, 2));

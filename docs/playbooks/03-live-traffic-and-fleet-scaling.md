@@ -4,9 +4,9 @@
 
 Private maintainer procedure.
 
-Inspect the fixed owning monitor: connection freshness, execution gate, account state, health reason, applied revision and epoch. Registration count, stopped/running desktops and catalog entries are not serving capacity. Both pools intend the same text catalog, but access is observed per account.
+Inspect the fixed Premium monitor: connection freshness, execution gate, account state, health reason, applied revision and epoch. Registration count, stopped/running desktops and catalog entries are not serving capacity; access is observed per account.
 
-Add capacity only through **Register account → manual sign-in → Review access → register paused**. Premium uses paid accounts and permits Sites/images; Standard uses free accounts and permits text only. Assignments are exclusive and immutable. Accounts, credentials and the existing lease/budget ledger remain central; execution projects contain no second capacity ledger.
+Add capacity only through **Register account → manual sign-in → Review access → register** in Premium. Premium uses verified paid accounts and permits text/Sites/images. Assignments are exclusive and immutable. Accounts, credentials and the existing lease/budget ledger remain central; the execution project contains no second capacity ledger.
 
 The runtime selects among its own eligible in-process engines. No peer discovery, account borrowing, model substitution or dispatch failover is allowed. Central grants and account limits remain authoritative; do not reset counters or replay unknown operations to measure throughput.
 

@@ -49,7 +49,7 @@ A child reports whether work was accepted, completed, failed, or uncertain. The 
 
 ## Throughput
 
-Batch independent reads and I/O with explicit concurrency and deadlines. Serialize mutations that share authority. Keep status/cancel traffic available while inference is saturated. Fixed Premium/Standard assignment precedes model eligibility, with no peer borrowing or fallback. Central account leases and bounded observation protect capacity; raising concurrency does not create provider access.
+Batch independent reads and I/O with explicit concurrency and deadlines. Serialize mutations that share authority. Keep status/cancel traffic available while inference is saturated. Fixed Premium assignment precedes model eligibility, with no borrowing or fallback. Central account leases and bounded observation protect capacity; raising concurrency does not create provider access.
 
 Return concise findings with evidence and the next safe action. Avoid unexplained retry loops, repeated approval questions for already-authorized work, and implementation jargon in product-facing errors. Preserve user intent when accepting familiar request shapes; do not silently substitute a model or grant tool authority.
 

@@ -13,7 +13,7 @@ export const metadata = constructMetadata({ title: 'Pricing — GALX Images', de
 export default function PricingPage() {
   return <main className={styles.page}>
     <Breadcrumbs items={[{ name: 'Home', url: '/' }, { name: 'Pricing' }]} />
-    <header className={styles.pricingIntro}><h1>Make more room for ideas.</h1><p>Try the full image-making loop, then choose the simple monthly plan when you’re ready to keep creating.</p><div className={styles.pricingIntroLinks}><Link href="/knowledge-base/getting-started" className={styles.textLink}>New to Images? Start here <ArrowRight size={16} aria-hidden="true" /></Link><Link href="/images" className={styles.textLink}>Open Image Studio <ArrowRight size={16} aria-hidden="true" /></Link></div><div className={styles.beta}><Info size={18} aria-hidden="true" /><p>Creations are public by default. Choose Private mode in Creation Settings before generating when a draft should stay in your library and out of Explore.</p></div></header>
+    <header className={styles.pricingIntro}><h1>Make more room for ideas.</h1><p>Support persistent Star creators and enjoy archival access across the publishing network.</p><div className={styles.pricingIntroLinks}><Link href="/knowledge-base/getting-started" className={styles.textLink}>New to GALX? Start here <ArrowRight size={16} aria-hidden="true" /></Link><Link href="/explore" className={styles.textLink}>Explore Releases <ArrowRight size={16} aria-hidden="true" /></Link></div><div className={styles.beta}><Info size={18} aria-hidden="true" /><p>Published series are curated and archived by HEAV3NS lab. Finite editions keep the network intentional.</p></div></header>
 
     <section className={styles.pricingOptions} aria-labelledby="options-title">
       <h2 className={styles.visuallyHidden} id="options-title">GALX Images options</h2>
@@ -21,8 +21,8 @@ export default function PricingPage() {
         <div className={styles.optionTop}><div><h2 id="free-option-title">{FREE_IMAGE_OFFER.name}</h2><p>{FREE_IMAGE_OFFER.audience}</p></div><span className={styles.optionBadge}>No card required</span></div>
         <p className={styles.price}><strong>$0</strong><span>to start</span></p>
         <ul className={styles.inclusions}>{FREE_PLAN_INCLUSIONS.map(([label, value]) => <li key={label}><Check size={16} aria-hidden="true" /><span><strong>{label}:</strong> {value}</span></li>)}</ul>
-        <Link href="/images" className={styles.secondary}>Start creating <ArrowRight size={17} aria-hidden="true" /></Link>
-        <p className={styles.terms}>The welcome allowance is one-time and account-bound. Your prompt remains editable when it is used.</p>
+        <Link href="/explore" className={styles.secondary}>Explore Releases <ArrowRight size={17} aria-hidden="true" /></Link>
+        <p className={styles.terms}>The welcome allowance is one-time and account-bound.</p>
       </article>
 
       <article className={`${styles.option} ${styles.featuredOption}`} aria-labelledby="pro-option-title">

@@ -1,0 +1,53 @@
+{
+  "classification": "private",
+  "observedAt": "2026-09-23T19:20:01Z",
+  "scope": "Focused owner-local relay recovery audit. No public route, ingress, execution gate, account state or provider workload changed.",
+  "audit": {
+    "method": "Source review, fixed-endpoint checks, exact Compose service-state inspection and bounded local acceptance; no failure injection.",
+    "findings": [
+      {
+        "severity": "P2",
+        "finding": "When a Premium monitor or relay process stayed running but its fixed listener stopped responding, the supervisor's Compose up command could be a no-op. It would then repeat recovery without restarting that failed service.",
+        "resolution": "Recovery now identifies exactly one container by the accepted local Compose project and service labels. It restarts only a running/restarting failed service, starts a missing/created/exited/dead service through Compose, and stops on ambiguous state. Runtime restart still requires the temporary authorized handoff session, expiry of the observed central claim fence, healthy central services and a final unavailable-runtime check."
+      },
+      {
+        "severity": "P3",
+        "finding": "The supervisor could display a generic recovery category when a specific dependency had already failed its fixed health check.",
+        "resolution": "The supervisor retains the first failed dependency using the existing fixed central/monitor/relay allowlist."
+      }
+    ]
+  },
+  "hardening": [
+    "Added an exact Compose project/service label check before selecting one local container for repair; unknown or ambiguous identities fail closed.",
+    "Added bounded, service-scoped recovery for stuck monitor and relay listeners. The missing/stopped path still uses Compose up, while a live-but-unresponsive service receives Compose restart.",
+    "Rechecked central health and runtime liveness after the existing ownership wait; no restart is attempted after an uncertain handoff or central health failure.",
+    "Preserved a fixed recovery category for the first failed local dependency and retained the existing jittered five-minute retry cap."
+  ],
+  "verification": {
+    "focusedSupervisorTests": "5 passed",
+    "localAccessBoundaryTests": "6 passed",
+    "localAcceptance": {
+      "at": "2026-09-23T19:16:48.252Z",
+      "checks": 27,
+      "sha256": "e7acc4969f12efa412f0109a1b4f40f7cc720579429452be2e0211c3eb42bdcb"
+    },
+    "productionBuild": "npm run build passed; all 162 static pages generated.",
+    "composeState": "The exact galx-premium monitor and relay service labels resolved to one running container each. No Premium container was restarted or recreated during verification.",
+    "hostStatus": "At 2026-09-23T19:20:01Z, Docker Desktop, the Premium VM, both healthy central services, monitor and relay were healthy. Keep Premium online was enabled; the reloaded supervisor reported running, attempt 0, no recovery cause and an active AC sleep assertion at 100% charge.",
+    "supervisorReload": "The existing per-user LaunchAgent was kickstarted successfully. A fresh heartbeat confirmed the new source was loaded while all service containers remained running.",
+    "diffCheck": "git diff --check passed before the documentation review."
+  },
+  "limits": [
+    "The targeted restart branch was not fault-injected to preserve the user's always-on relay session; source decisions and healthy-state verification do not prove recovery from an injected failure.",
+    "The fixed listener checks establish process liveness only. They do not prove database, account, provider or model readiness.",
+    "Docker Desktop/Colima restart, sign-in, host reboot, sleep/wake, closed-lid and duplicate-owner drills remain open under ACT-018.",
+    "This is a single signed-in Mac and does not provide an independent host failure domain or public uptime guarantee."
+  ],
+  "sourceSha256": {
+    "scripts/relay-local.mjs": "e4fd1cdefd63e2b8e5fba8dce6a6ff0bf5933d571f7901f96a6306c5738b89c2",
+    "scripts/lib/relay-local-supervisor.mjs": "d5a4c443549ff21101dffa8d61ec3c8931a1f9d585d6dfdeaa41add3c93e3c6b",
+    "scripts/test-relay-local-supervisor.mjs": "a4c5d7ff3e1bade82c2b06d81852876780d5aa455b5672839af354bf9d594c76",
+    "docs/runbooks/relay-pool-services.md": "23a48896590ee1bb2de2c97bede243a675ec3854877b12ccbc7754f3b5273593",
+    "docs/adr/0159-local-mac-relay-operation.md": "d57305e47f759dae402b40d82998a8482554224e71f7824c8e95f1d7653617d1"
+  }
+}

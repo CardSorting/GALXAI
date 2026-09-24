@@ -1421,7 +1421,7 @@ export class GalxaiRelayServer extends EventEmitter {
   }
 
   /** In-process scheduling observation only; never an HTTP response or an execution grant. */
-  standardAvailability(model: string) {
+  accountAvailabilityObservation(model: string) {
     return this.accountAvailability(model);
   }
 
@@ -1625,10 +1625,10 @@ export class GalxaiRelayServer extends EventEmitter {
       return;
     }
     const ownership = this.runtimeOwnership(shard);
-    const standardJob = this.config.executionPolicy ? jobId : undefined;
-    const session = standardJob ? this.sessions.get(standardJob) : undefined;
+    const executionJob = this.config.executionPolicy ? jobId : undefined;
+    const session = executionJob ? this.sessions.get(executionJob) : undefined;
     const previousQuotaJob = imageWorkload ? shard.lastImageQuotaFailureJobId : shard.lastQuotaFailureJobId;
-    const repeatedObservation = session?.quotaFailureObserved || (standardJob !== undefined && previousQuotaJob === standardJob);
+    const repeatedObservation = session?.quotaFailureObserved || (executionJob !== undefined && previousQuotaJob === executionJob);
     if (session) session.quotaFailureObserved = true;
     const failures = Math.max(1, ((imageWorkload ? shard.imageQuotaFailures : shard.quotaFailures) ?? 0) + (repeatedObservation ? 0 : 1));
     // New evidence can extend the wait; multiple frames cannot multiply the same job's backoff.
@@ -1640,12 +1640,12 @@ export class GalxaiRelayServer extends EventEmitter {
         imageQuotaFailures: failures,
         imageProbeInFlight: false,
         imageCooldownUntilMs: Math.max(shard.imageCooldownUntilMs ?? 0, deadline),
-        ...(standardJob ? { lastImageQuotaFailureJobId: standardJob } : {}),
+        ...(executionJob ? { lastImageQuotaFailureJobId: executionJob } : {}),
       } : {
         status: shard.status === 'disabled' ? 'disabled' : 'cooldown',
         quotaFailures: failures,
         probeInFlight: false,
-        ...(standardJob ? { lastQuotaFailureJobId: standardJob } : {}),
+        ...(executionJob ? { lastQuotaFailureJobId: executionJob } : {}),
         cooldownUntilMs: Math.max(shard.cooldownUntilMs ?? 0, deadline),
       }),
     };

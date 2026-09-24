@@ -1,0 +1,50 @@
+{
+  "classification": "private",
+  "observedAt": "2026-09-23T04:45:39Z",
+  "scope": "Owner Mac local Premium relay and monitor recovery; no public cutover or execution-gate change.",
+  "hostStatus": {
+    "power": "AC",
+    "dockerDesktop": "running",
+    "premiumVM": "running",
+    "centralServices": "2/2 running",
+    "premiumServices": "2/2 running",
+    "monitor": "healthy",
+    "relay": "healthy",
+    "keepPremiumOnline": "enabled for the signed-in user",
+    "supervisor": "running"
+  },
+  "nativeApps": {
+    "installed": [
+      "GALX Monitors",
+      "GALX Premium"
+    ],
+    "menuLauncher": "running",
+    "openAtLogin": "off"
+  },
+  "localAcceptance": {
+    "at": "2026-09-23T04:43:54.437Z",
+    "checks": 26,
+    "scope": "local VM separation on one trusted Mac; no provider generation or cloud deployment",
+    "sha256": "15dcb231e452b6a2c789f233c4719314c7ddede8eacdeefc6d3185d98cd4178f"
+  },
+  "checks": {
+    "launcherAccess": "6 passed",
+    "relayServiceAuthorizationAndResponses": "41 passed",
+    "productionBuild": "passed",
+    "documentation": "passed",
+    "compiledBoundary": "530 browser/rendered assets passed"
+  },
+  "limits": [
+    "Sign-in, host reboot, Docker/Colima failure injection, sleep/wake and closed-lid recovery drills remain open under ACT-018.",
+    "No provider generation or account mutation was performed.",
+    "External ingress, public routing and execution gates were not changed."
+  ],
+  "sourceSha256": {
+    "scripts/relay-local.mjs": "030db6f28555502355641dc3879cf205ff62eb4426ef1a92156121d5d539867a",
+    "scripts/macos/RelayMonitors.swift": "3d9d283e8a92f3abd0317fec06224c6d2b64daffdf2bbdc791b7c8fd23059297",
+    "scripts/install-relay-monitor-apps.py": "4ca09038db1cc982b17a2ef15f6bb6522a85d0fcc5750d849d0a73130743a415",
+    "docker/relay-pools/local/pool.yaml": "2d6481461ce7dc649fed3f7734d8ff212fd03c6e000c0085ccdc6abc999e4003",
+    "docker/relay-pools/local/central.yaml": "a08a5e3e489df018de850e85581410ef56512a0a8945d617348f52134efd5ec7",
+    "package.json": "d6416cf836907b6c4d96d09b487a3841acce0fcfe6245bf8a25926d03cd1ea9d"
+  }
+}

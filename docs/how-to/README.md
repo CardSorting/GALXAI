@@ -10,7 +10,7 @@ Choose a concrete outcome. Procedures link to the owning reference instead of re
 - [Activate the private access control plane](../operations/preview-activation.md)
 - [Manually register or renew a pool account](../maintainers/RELAY_CREDENTIAL_ENROLLMENT.md)
 - [Find health issues, rename or remove accounts](../reference/relay-account-management.md)
-- [Open the fixed local monitors](../runbooks/relay-pool-services.md#local-docker-operation-on-the-owners-mac)
+- [Operate the local Premium relay and monitor](../runbooks/relay-pool-services.md#local-premium-operation-on-the-owners-mac)
 - [Operate Sites publication](../maintainers/SITES_WORKSPACE.md)
 
 Use [runbooks](../runbooks/README.md) for recovery and release procedures, or [tutorials](../tutorials/README.md) for a guided first exercise.

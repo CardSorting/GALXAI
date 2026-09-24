@@ -24,7 +24,3 @@ ENTRYPOINT ["node", "/app/entrypoint.mjs"]
 FROM runtime AS premium
 COPY docker/relay-pools/premium.json ./pool.json
 LABEL org.opencontainers.image.title="GALX Premium Relay" io.galx.pool="premium" io.galx.stage="awaiting-central-authorization"
-
-FROM runtime AS standard
-COPY docker/relay-pools/standard.json ./pool.json
-LABEL org.opencontainers.image.title="GALX Standard Relay" io.galx.pool="standard" io.galx.stage="awaiting-central-authorization"

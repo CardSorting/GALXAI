@@ -8,9 +8,9 @@ Start production incidents with [triage](../post-mortem/runbooks/triage.md) and 
 
 1. Identify the affected product route, owner, operation ID and original execution origin. For Images/Favorites start with [image recovery](../post-mortem/runbooks/image-generation.md); preserve uncertain requests.
 2. For the new local services, open the owning fixed monitor through **GALX Monitors**. Inspect connection, execution gate, runtime freshness, account state and the specific health reason. Use `npm run relay:local -- status` and `npm run relay:local -- verify` when installation is in question.
-3. Filter **Accounts → Needs attention**, then inspect the affected account and linked registration. Registration health and running account health are distinct. Search and filters never query the peer pool.
+3. Filter **Accounts → Needs attention**, then inspect the affected account and linked registration. Registration health and running account health are distinct. Search and filters use only the authorized Premium snapshot.
 4. Check saved versus applied revision and the owning execution epoch. A saved command or listening monitor is not runtime or provider acceptance.
-5. Follow [request recovery](RELAY_API_REFERENCE.md#request-recovery); never replay uncertain work or borrow the peer pool.
+5. Follow [request recovery](RELAY_API_REFERENCE.md#request-recovery); never replay uncertain work or borrow an unrelated deployment.
 
 ## Accounts, registration and monitors
 
@@ -32,7 +32,7 @@ Start production incidents with [triage](../post-mortem/runbooks/triage.md) and 
 | Removed registration still has a desktop running | Removal is saved; use **Removed → Stop desktop** to finish cleanup |
 | Removed unfinished registration is needed again | **Removed → Manage → Restore registration**, followed by a fresh connection check |
 | Removed registered account is needed again | It cannot be restored or enabled; do not bypass retained revocation/assignment |
-| Standard rejects Sites/images/tool aliases | Intentional pre-provider boundary; submit only supported operations through the appropriate product path |
+| Unsupported Sites/images/tool aliases | Intentional pre-provider boundary; submit only supported operations through the appropriate product path |
 | Premium text works but images do not | Text does not certify image capability; qualify an explicit Premium request without background probes |
 | External connection endpoint returns 410 | Intentional closure; use manual registration, not token imports or a direct database write |
 

@@ -4,7 +4,7 @@ import path from 'node:path';
 import { RelayDispatchError } from './RelayChatTransport';
 
 export type RelayWorkload = 'text' | 'sites' | 'images';
-export type RelayPool = 'PREMIUM' | 'STANDARD';
+export type RelayPool = 'PREMIUM';
 export type ImageCapability = 'available' | 'unavailable' | 'unknown';
 
 export interface RelayEndpoint {
@@ -40,13 +40,9 @@ interface DiscoveryCacheEntry {
 }
 
 const LOOPBACK_HOSTS = new Set(['127.0.0.1', '[::1]', 'localhost']);
-const DEFAULT_PORTS: Record<RelayPool, number[]> = {
-  // Only inference listeners belong in automatic workload discovery. The
-  // adjacent monitor/management listeners are intentionally not candidates;
-  // explicit operator URLs still have to pass the inference contract below.
-  PREMIUM: [13301],
-  STANDARD: [13302],
-};
+// Only inference listeners belong in automatic workload discovery. The
+// adjacent monitor/management listener is intentionally not a candidate.
+const DEFAULT_PORTS = [13301];
 const MAX_CANDIDATES = 32;
 const MAX_PORT_RANGE = 32;
 const PROBE_TIMEOUT_MS = 900;
@@ -175,7 +171,7 @@ function internalCandidates(pool: RelayPool): RelayCandidate[] {
     ...numberList(readConfigValues(config, ['relayPort', 'relayPorts', 'port', 'ports', 'httpPort', 'listenPort'])),
     ...portRange(env(pool, 'PORT_RANGE')),
     ...portRange(readConfigValues(config, ['relayPortRange', 'portRange'])[0]),
-    ...(canDiscoverPorts ? DEFAULT_PORTS[pool] : []),
+    ...(canDiscoverPorts ? DEFAULT_PORTS : []),
   ];
   const unique = new Map<string, RelayCandidate>();
   const key = configuredRelayKey(pool);
@@ -186,13 +182,13 @@ function internalCandidates(pool: RelayPool): RelayCandidate[] {
   };
   parsed.forEach(url => {
     const port = Number(url.port || (url.protocol === 'https:' ? 443 : 80));
-    add(url, DEFAULT_PORTS[pool].includes(port));
+    add(url, DEFAULT_PORTS.includes(port));
   });
   if (canDiscoverPorts && (protocol === 'http:' || protocol === 'https:')) {
     for (const port of [...new Set(ports)]) {
       const url = new URL(`${protocol}//${host}`);
       url.port = String(port);
-      add(url, DEFAULT_PORTS[pool].includes(port));
+      add(url, DEFAULT_PORTS.includes(port));
       if (unique.size >= MAX_CANDIDATES) break;
     }
   }

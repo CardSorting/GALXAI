@@ -1,19 +1,19 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { AdmissionLifecycle } from '../src/relay/admission-lifecycle.js';
-import { SchedulerQueueError, StandardPoolScheduler } from '../src/relay/standard-pool-scheduler.js';
+import { SchedulerQueueError, PoolScheduler } from '../src/relay/pool-scheduler.js';
 
 type Candidate = { id: string; lastUsedAtMs: number; availableSlots: number };
 
 const candidate = (id = 'shard-a', availableSlots = 1): Candidate => ({ id, lastUsedAtMs: 0, availableSlots });
-const reservation = (scheduler: StandardPoolScheduler, item: Candidate, workload = 'images') => scheduler.reserve([item], workload)!;
+const reservation = (scheduler: PoolScheduler, item: Candidate, workload = 'images') => scheduler.reserve([item], workload)!;
 
 async function settled<T>(promise: Promise<T>) {
   return promise.then(() => 'fulfilled' as const, error => error as unknown);
 }
 
 test('two queued requests compete for a newly available shard and exactly one successor is woken', async () => {
-  const scheduler = new StandardPoolScheduler();
+  const scheduler = new PoolScheduler();
   const shard = candidate();
   const active = reservation(scheduler, shard);
   const first = new AdmissionLifecycle('first', 'owner-a', 'images');
@@ -41,7 +41,7 @@ test('two queued requests compete for a newly available shard and exactly one su
 });
 
 test('cancellation immediately before admission releases a late reservation without dispatch', async () => {
-  const scheduler = new StandardPoolScheduler();
+  const scheduler = new PoolScheduler();
   const shard = candidate();
   const active = reservation(scheduler, shard);
   const lifecycle = new AdmissionLifecycle('cancel-before-admit', 'owner', 'images');
@@ -62,7 +62,7 @@ test('cancellation immediately before admission releases a late reservation with
 });
 
 test('cancellation immediately after admission is terminal and releases exactly once', () => {
-  const scheduler = new StandardPoolScheduler();
+  const scheduler = new PoolScheduler();
   const shard = candidate();
   const lifecycle = new AdmissionLifecycle('cancel-after-admit', 'owner', 'images');
   lifecycle.queue();
@@ -80,7 +80,7 @@ test('cancellation immediately after admission is terminal and releases exactly 
 
 test('deadline expiry during wakeup terminates before a stale reservation can dispatch', async () => {
   let now = 0;
-  const scheduler = new StandardPoolScheduler(() => now);
+  const scheduler = new PoolScheduler(() => now);
   const shard = candidate();
   const active = reservation(scheduler, shard);
   const lifecycle = new AdmissionLifecycle('deadline-wakeup', 'owner', 'images', () => now);
@@ -96,7 +96,7 @@ test('deadline expiry during wakeup terminates before a stale reservation can di
 });
 
 test('scheduler reconciliation cannot erase an occupied reservation', () => {
-  const scheduler = new StandardPoolScheduler();
+  const scheduler = new PoolScheduler();
   const shard = candidate();
   const active = reservation(scheduler, shard);
   scheduler.reconcile(new Set([shard.id]));
@@ -107,7 +107,7 @@ test('scheduler reconciliation cannot erase an occupied reservation', () => {
 });
 
 test('quarantine removes future eligibility without changing the current owner', () => {
-  const scheduler = new StandardPoolScheduler();
+  const scheduler = new PoolScheduler();
   const shard = candidate();
   const lifecycle = new AdmissionLifecycle('quarantine-in-flight', 'owner', 'images');
   lifecycle.queue();
@@ -123,7 +123,7 @@ test('quarantine removes future eligibility without changing the current owner',
 
 test('capacity disappearing between queueing and dispatch requeues without resetting the deadline', async () => {
   let now = 0;
-  const scheduler = new StandardPoolScheduler();
+  const scheduler = new PoolScheduler();
   const shard = candidate();
   const lifecycle = new AdmissionLifecycle('capacity-disappears', 'owner', 'images', () => now);
   lifecycle.setDeadline(500); lifecycle.queue();
@@ -141,7 +141,7 @@ test('capacity disappearing between queueing and dispatch requeues without reset
 });
 
 test('disconnect while queued removes the queue entry and has no dispatch outcome', async () => {
-  const scheduler = new StandardPoolScheduler();
+  const scheduler = new PoolScheduler();
   const active = reservation(scheduler, candidate());
   const lifecycle = new AdmissionLifecycle('disconnect-queued', 'owner', 'images');
   lifecycle.queue();
@@ -156,7 +156,7 @@ test('disconnect while queued removes the queue entry and has no dispatch outcom
 });
 
 test('disconnect after dispatch preserves the ambiguous outcome until the worker terminates', () => {
-  const scheduler = new StandardPoolScheduler();
+  const scheduler = new PoolScheduler();
   const lifecycle = new AdmissionLifecycle('disconnect-dispatched', 'owner', 'images');
   lifecycle.queue(); assert(lifecycle.admit(reservation(scheduler, candidate()))); assert(lifecycle.beginDispatch());
   lifecycle.clientDisconnected();
@@ -169,7 +169,7 @@ test('disconnect after dispatch preserves the ambiguous outcome until the worker
 });
 
 test('cleanup is idempotent after an exception and cannot release capacity twice', () => {
-  const scheduler = new StandardPoolScheduler();
+  const scheduler = new PoolScheduler();
   const shard = candidate();
   const lifecycle = new AdmissionLifecycle('exception-cleanup', 'owner', 'images');
   lifecycle.queue(); assert(lifecycle.admit(reservation(scheduler, shard))); lifecycle.fail();
@@ -180,7 +180,7 @@ test('cleanup is idempotent after an exception and cannot release capacity twice
 });
 
 test('a dispatched POST with no response is never classified as safe to replay', () => {
-  const scheduler = new StandardPoolScheduler();
+  const scheduler = new PoolScheduler();
   const lifecycle = new AdmissionLifecycle('ambiguous-post', 'owner', 'images');
   lifecycle.queue(); assert(lifecycle.admit(reservation(scheduler, candidate()))); assert(lifecycle.beginDispatch());
   lifecycle.fail();
@@ -189,7 +189,7 @@ test('a dispatched POST with no response is never classified as safe to replay',
 });
 
 test('confirmed target rejection hands off one lifecycle without resetting its deadline', () => {
-  const scheduler = new StandardPoolScheduler();
+  const scheduler = new PoolScheduler();
   const first = candidate('shard-a');
   const second = candidate('shard-b');
   const lifecycle = new AdmissionLifecycle('target-handoff', 'owner', 'images');
@@ -215,7 +215,7 @@ test('confirmed target rejection hands off one lifecycle without resetting its d
 });
 
 test('image saturation does not consume independent text capacity', () => {
-  const scheduler = new StandardPoolScheduler();
+  const scheduler = new PoolScheduler();
   const imageShard = candidate('shared-shard', 1);
   const textShard = candidate('shared-shard', 4);
   const image = reservation(scheduler, imageShard, 'images');
@@ -230,7 +230,7 @@ test('image saturation does not consume independent text capacity', () => {
 });
 
 test('owner allowance is exact at 8 and rejects the ninth pending request', async () => {
-  const scheduler = new StandardPoolScheduler();
+  const scheduler = new PoolScheduler();
   const active = reservation(scheduler, candidate());
   const controllers = Array.from({ length: 8 }, () => new AbortController());
   const waits = controllers.map(controller => scheduler.waitForAvailability('images', 'same-owner', { maxWaitMs: 1000, signal: controller.signal }));
@@ -243,7 +243,7 @@ test('owner allowance is exact at 8 and rejects the ninth pending request', asyn
 });
 
 test('global queue allowance is exact at 32 and rejects the thirty-third pending request', async () => {
-  const scheduler = new StandardPoolScheduler();
+  const scheduler = new PoolScheduler();
   const active = reservation(scheduler, candidate());
   const controllers = Array.from({ length: 32 }, () => new AbortController());
   const waits = controllers.map((controller, index) => scheduler.waitForAvailability('images', `owner-${index}`, { maxWaitMs: 1000, signal: controller.signal }));
@@ -257,7 +257,7 @@ test('global queue allowance is exact at 32 and rejects the thirty-third pending
 });
 
 test('completion wakes multiple waiters one at a time and only one acquires the released shard', async () => {
-  const scheduler = new StandardPoolScheduler();
+  const scheduler = new PoolScheduler();
   const shard = candidate();
   const active = reservation(scheduler, shard);
   const first = scheduler.waitForAvailability('images', 'owner-a', { maxWaitMs: 1000 });

@@ -1,8 +1,8 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 
-export type RelayImagePool = 'premium' | 'standard';
+export type RelayImagePool = 'premium';
 export function imagePool(value: unknown): RelayImagePool {
-  if (value !== 'premium' && value !== 'standard') throw new Error('Invalid relay image identity');
+  if (value !== 'premium') throw new Error('Invalid relay image identity');
   return value;
 }
 
@@ -24,8 +24,8 @@ export function stagedPoolRequest(req: IncomingMessage, res: ServerResponse, poo
     if (!administrator()) return reply(401, { error: { code: 'unauthorized', message: 'Authorization required.' } });
     if (pathname === '/health/ready' && req.method === 'GET') {
       return reply(503, { ready: false, stage: 'awaiting-central-authorization', pool,
-        accountClass: pool === 'premium' ? 'paid' : 'free',
-        allowedWorkloads: pool === 'premium' ? ['text', 'sites', 'images'] : ['text'] });
+        accountClass: 'paid',
+        allowedWorkloads: ['text', 'sites', 'images'] });
     }
   }
   // Includes aliases, probes, recovery, unknown routes and generic tool requests.

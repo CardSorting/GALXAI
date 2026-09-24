@@ -35,7 +35,7 @@ test('completion storms persist once and do not wait for a stalled remote settle
     const grants=await Promise.all(Array.from({length:4},(_,i)=>f.admit(`job_${i}`)));
     await Promise.all(grants.map(g=>g.complete(true,10)));
     await until(()=>f.c.settles===1);
-    assert.equal(f.c.finishes,4);assert.equal(f.c.finishPeak,1);assert.equal(f.execution.standardAvailable('own'),true);
+    assert.equal(f.c.finishes,4);assert.equal(f.c.finishPeak,1);assert.equal(f.execution.accountAvailable('own'),true);
     const pending=Array.from({length:100},()=>f.execution.settlePending());assert(pending.every(p=>p===pending[0]));
     assert.equal(f.c.pending,1);assert.equal(f.c.settles,1);release();await Promise.all(pending);
     assert.equal(f.c.settles,4);assert.equal(f.c.settlePeak,1);assert([...f.rows.values()].every(r=>r.settled));

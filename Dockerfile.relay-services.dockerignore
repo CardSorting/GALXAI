@@ -6,9 +6,7 @@
 !docker/relay-pools/active-entrypoint.mjs
 !docker/relay-pools/central.json
 !docker/relay-pools/premium-runtime.json
-!docker/relay-pools/standard-runtime.json
 !docker/relay-pools/premium-monitor.json
-!docker/relay-pools/standard-monitor.json
 !src/
 !src/relay/
 !src/relay/**

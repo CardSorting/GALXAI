@@ -176,3 +176,4 @@ Use the [authoring guide](../maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md) f
 - [0156: Verified automatic relay activation](0156-verified-automatic-relay-activation.md)
 - [0157: Compatible relay requests and honest output budgets](0157-compatible-relay-output-budgets.md)
 - [0158: Canonical account profiles and actor provenance](0158-canonical-account-profiles-and-actor-provenance.md)
+- [0159: Local Mac relay operation with bounded availability](0159-local-mac-relay-operation.md)

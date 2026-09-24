@@ -1,4 +1,4 @@
-# Linux Premium host only. Standard uses a different VM and Docker daemon.
+# Linux Premium host only.
 name: galx-premium
 services:
   relay:

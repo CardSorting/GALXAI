@@ -17,8 +17,8 @@ import {
   IMAGE_QUEUE_MAX_WAIT_MS,
   IMAGE_QUEUE_RECHECK_MS,
   SchedulerQueueError,
-  StandardPoolScheduler,
-} from './standard-pool-scheduler.js';
+  PoolScheduler,
+} from './pool-scheduler.js';
 import { functionCalls } from './function-tools.js';
 import { RequestBulkhead } from './request-bulkhead.js';
 import { AdmissionLifecycle } from './admission-lifecycle.js';
@@ -54,7 +54,7 @@ export class PoolRuntime {
   private workers = new Map<string,Worker>();
   private refreshedAt = 0; private stopped = false; private timer?: NodeJS.Timeout;
   private syncing?: Promise<void>; private pending = new Set<string>();
-  private readonly standard = new StandardPoolScheduler();
+  private readonly scheduler = new PoolScheduler();
   private readonly submissions = new RequestBulkhead();
   private readonly observations = new RequestBulkhead();
   private readonly streams = new RequestBulkhead(64,8);
@@ -145,7 +145,7 @@ export class PoolRuntime {
     const projection=await central.call('/runtime/projection',{epoch:this.execution.epoch});
     if (projection.pool!==central.identity.pool || projection.installationId!==central.identity.installationId || projection.epoch!==this.execution.epoch || !Array.isArray(projection.accounts) || projection.accounts.length>128) throw Error('Invalid projection.');
     const next=new Map<string,AssignedAccount>(projection.accounts.map((a:AssignedAccount)=>[a.id,a]));
-    this.standard.reconcile(new Set(next.keys())); this.execution.reconcileAccounts(new Set(next.keys()));
+    this.scheduler.reconcile(new Set(next.keys())); this.execution.reconcileAccounts(new Set(next.keys()));
     for (const [id,worker] of this.workers) {
       const a=next.get(id);
       if (!projection.executionAllowed || !a?.credential || a.state!=='enabled' || a.revision!==worker.account.revision || a.credentialRevision!==worker.account.credentialRevision || a.expiresAtMs<=Date.now()+30000) {
@@ -160,11 +160,11 @@ export class PoolRuntime {
           executionPolicy:this.execution.policy(a),host:'127.0.0.1',port:0,apiKeys:[key],adminApiKeys:[randomBytes(32).toString('base64url')],
           registryEnabled:false,discoverHostCredentials:false,masterSecret:undefined,shardsJsonPath:undefined,testOnlyMultiShard:false,
           relayId:central.identity.installationId,generation:this.execution.epoch,allowedOrigins:[],maxUpstreamRetries:0,
-          codexImageToolAlias:central.identity.pool==='premium',forwardOutputTokenLimit:false,drainTimeoutMs:100,
+          codexImageToolAlias:true,forwardOutputTokenLimit:false,drainTimeoutMs:100,
           // Container logs are private operator evidence, never inference DTOs.
           onUpstreamDiagnostic:(d,context)=>console.warn(JSON.stringify({event:'relay_upstream_rejected',
             pool:central.identity.pool,jobId:context.jobId,status:d.status,code:d.code,parameter:d.parameter,reason:d.reason})),
-          shardConcurrency:central.identity.pool==='standard'?1:4,
+          shardConcurrency:4,
           stateSnapshotPath:path.join(this.stateDirectory,a.id,'relay.json')});
         try { await engine.start(); this.workers.set(a.id,{account:a,engine,key,port:engine.listeningPort(),failureCircuits:{}}); }
         catch { await engine.stop().catch(()=>{}); throw Error('Worker unavailable.'); }
@@ -182,7 +182,6 @@ export class PoolRuntime {
     if (req.method==='GET' && ['/health/live','/health/ready','/health'].includes(pathname)) return json(res,pathname==='/health/ready'&&!ready?503:200,{ok:pathname==='/health/ready'?ready:true});
     if (pathname==='/api/sites/contract' && req.method==='GET') {
       if(req.headers.origin || !this.capabilityKey || !equalSecret(bearer(req),this.capabilityKey))throw new RequestError(401,'unauthorized','Provide valid authorization.');
-      if(this.execution.central.identity.pool!=='premium')throw new RequestError(403,'capability_unavailable','This request is not supported.');
       const requested=sitesContractRequest(new URL(req.url!,'http://local').searchParams);
       if(requested.profile!=='sites-local-v1')throw new RequestError(503,'capability_unavailable','This request requires an unavailable capability.');
       if(!ready||![...this.workers.values()].some(w=>w.account.models.includes(requested.model)))throw new RequestError(503,'service_unavailable','This service is temporarily unavailable.');
@@ -193,7 +192,7 @@ export class PoolRuntime {
       const model = new URL(req.url ?? '/', 'http://local').searchParams.get('model');
       if (!model || !/^[a-zA-Z0-9._:-]{1,128}$/.test(model)) throw new RequestError(400, 'invalid_request', 'Specify a valid image model.');
       let available:boolean|null=false;
-      if(this.execution.central.identity.pool==='premium'&&ready) {
+      if(ready) {
         const checks=[...this.workers.values()]
           .filter(w=>!this.workerCircuitOpen(w,'images'))
           .map(w=>w.engine.imageAvailability());
@@ -286,7 +285,7 @@ export class PoolRuntime {
               const reason: AdmissionEventReason | undefined = attemptedWorkerIds.has(w.account.id) ? 'excluded_target'
                 : w.engine.credentialRejected() ? 'credential_rejected'
                   : this.workerCircuitOpen(w,workload!,now) ? 'cooling_or_quarantined'
-                    : (w.account.models.includes(capability) || workload==='images' && this.execution.central.identity.pool==='premium' && model===CODEX_IMAGE_ALIAS.requestedModel)
+                    : (w.account.models.includes(capability) || workload==='images' && model===CODEX_IMAGE_ALIAS.requestedModel)
                       ? undefined : 'capability_mismatch';
               if (reason) this.observeAdmission(generationAdmission, 'candidate_rejected', w.account.id, reason);
               return !reason;
@@ -300,7 +299,7 @@ export class PoolRuntime {
                 this.observeAdmission(generationAdmission, 'candidate_rejected', w.account.id, 'cooling_or_quarantined');
                 return [];
               }
-              if (!this.execution.standardAvailable(w.account.id,now)) {
+              if (!this.execution.accountAvailable(w.account.id,now)) {
                 this.observeAdmission(generationAdmission, 'candidate_rejected', w.account.id, 'workload_capacity_unavailable');
                 return [];
               }
@@ -316,9 +315,9 @@ export class PoolRuntime {
               // Image POSTs are single-flight per worker/shard. Text and Sites
               // retain their independently advertised capacity.
               availableSlots:workload==='images'?Math.min(1,state.availableSlots):state.availableSlots,
-              recovering:state.recovering||this.execution.standardRecovering(w.account.id),worker:w,
+              recovering:state.recovering||this.execution.accountRecovering(w.account.id),worker:w,
             }));
-            const selection=this.standard.reserve(eligible,workload);
+            const selection=this.scheduler.reserve(eligible,workload);
             const reservationReason: AdmissionEventReason | undefined = selection ? undefined : eligible.length ? 'occupied' : 'reservation_unavailable';
             this.observeAdmission(generationAdmission, 'reservation_attempted', selection?.candidate.worker.account.id, reservationReason);
             if (selection && generationAdmission.admit(selection)) {
@@ -344,7 +343,7 @@ export class PoolRuntime {
               throw new RequestError(503,'service_busy','This service is busy. Try again shortly.');
             }
             try {
-              await this.standard.waitForAvailability('images',tenantSha256,{
+              await this.scheduler.waitForAvailability('images',tenantSha256,{
                 maxWaitMs:Math.min(IMAGE_QUEUE_MAX_WAIT_MS,remainingQueueMs),maxQueueDepth:IMAGE_QUEUE_MAX_DEPTH,maxOwnerDepth:IMAGE_QUEUE_MAX_PER_OWNER,
                 recheckMs:IMAGE_QUEUE_RECHECK_MS,
                 signal:queueAbort?.signal,
@@ -474,5 +473,5 @@ export class PoolRuntime {
       }}res.end();
     } finally {res.off('close',close);await reader.cancel().catch(()=>{});}
   }
-  async stop(){this.stopped=true;clearTimeout(this.timer);this.refreshedAt=0;this.standard.close();this.server.close();await this.syncing?.catch(()=>{});await Promise.all([...this.workers.values()].map(w=>w.engine.stop()));this.workers.clear();this.execution.stop();await this.execution.settlePending().catch(()=>{});}
+  async stop(){this.stopped=true;clearTimeout(this.timer);this.refreshedAt=0;this.scheduler.close();this.server.close();await this.syncing?.catch(()=>{});await Promise.all([...this.workers.values()].map(w=>w.engine.stop()));this.workers.clear();this.execution.stop();await this.execution.settlePending().catch(()=>{});}
 }

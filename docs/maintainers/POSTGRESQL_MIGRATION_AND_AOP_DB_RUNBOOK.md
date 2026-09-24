@@ -11,7 +11,6 @@ Private database guide. Read the applicable repository Supabase skills before da
 | `npm run db:status` | Read migration history and compare local files; unavailable history is unknown, not “all applied” |
 | `npm run db:verify` | Static integrity checks; not proof a remote schema is applied |
 | `npm run test:relay:manual-db` | Desktop enrollment, role denial, race fencing, legacy exclusion and rollback/reapply in the disposable fixture |
-| `npm run test:relay:foundation-db` | Dormant central pool/assignment constraints, role denial, conflicting claims and retained rollback/reapply in a disposable fixture |
 | `npm run test:relay:authorization-db` | Scoped central authorization and independent execution-schema tests in disposable databases |
 | `npm run relay:accounts:status` | Read-only main-project pool counts and activation gates; not serving readiness |
 | `npm run db:test` | Full suite against an isolated disposable PostgreSQL fixture |
@@ -66,6 +65,14 @@ with `node --env-file-if-exists=.env.local --import tsx scripts/push-migrations-
 
 The [free-generation migrations](FREE_GENERATION_QUOTA.md) add private grants/usage, followed by the aggregate policy, capacity flag, bounded-query indexes and Sites tier. Apply both in timestamp order before dependent handlers. The aggregate policy seeds paused; its DOWN file disables new free admission while retaining every record. The older quota DOWN only reasserts privileges. Use the compatible gate or a Pro-only application rollback, never the earlier unbounded free implementation.
 
+### Durable Star follows
+
+Migration `20260924010000_user_star_follows.sql` establishes the `private.user_star_follows`
+table for the Phase 2 agent publishing architecture ("Stars create. Humans discover, follow, save, collect, and share").
+It persists human-to-Star follow relationships with zero generative inference demand or agent triggers.
+The table is enclosed in the `private` schema with default-deny Row Level Security (`REVOKE ALL FROM PUBLIC, anon, authenticated; GRANT ALL TO service_role;`), indexed by both `star_handle` and `user_id`, and has a deterministic rollback via `supabase/rollbacks/20260924010000_user_star_follows.down.sql`.
+
+
 The manual desktop migration adds paired nullable provenance columns, a unique binding, protected writer functions and lease admission. It retains old records but excludes unconfirmed ones; deploy the compatible controller/application together and manually confirm accounts. Its DOWN restores older access while retaining provenance columns, so rollback deliberately reopens the former boundary.
 
 Run static integrity, relevant isolated database tests, authorization/adversarial cases and application checks before applying. Verify rollback behavior in the fixture; a safe rollback may intentionally refuse data loss rather than delete new records.
@@ -108,7 +115,7 @@ Management changes require an own-pool operator principal and the displayed revi
 
 The former foundation-only closed CHECK is replaced by owner-controlled registration/execution gates with a persistent verified automatic-activation policy. Ordinary owner gate configuration disarms automation, preserving emergency closure across runtime restart. The restricted `galx_control_service` login can execute the private protocol, but cannot read its tables directly. Scope comes from a hashed principal. The same central lease ledger is used once; legacy acquire/renew/release wrappers deny assigned accounts and bound leases. Do not add a capacity ledger to an execution project.
 
-Each relay project has only migration `20260915082628` from `deploy/relay-execution/supabase/migrations`. Premium is `prgjcyokylzcsqrjmkaa`, Standard is `enbtzuxkguehtnrhuvlu`. Their two forced-RLS tables hold fixed identity and execution reservations/outcomes, without accounts or credentials. Each has its own restricted execution login. Never push the root application migrations to these projects.
+The Premium execution project (`prgjcyokylzcsqrjmkaa`) has only migration `20260915082628` from `deploy/relay-execution/supabase/migrations`. Its two forced-RLS tables hold fixed identity and execution reservations/outcomes, without accounts or credentials. It has its own restricted execution login. Never push the root application migrations to this project.
 
 The [service runbook](../runbooks/relay-pool-services.md) owns config export, local VM or external-host verification, manual registration and gate transitions. `relay:accounts:status` is read-only inventory, not serving acceptance. Installation IDs alone do not verify physical isolation. The [initial service release](../../post-mortem/releases/2026-09-15-relay-services.json) had both gates closed. The subsequent [local installation](../../post-mortem/releases/2026-09-15-relay-local.json) uses separate Docker VMs on the owner's trusted Mac and records registration open, execution closed and zero assignments. Existing Supabase projects retain their authority; local installation applies no new schema.
 

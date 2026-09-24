@@ -2,26 +2,25 @@
 
 <!-- docs-scope: current-guide -->
 
-Private implementation reference for the installed Premium and Standard services. [Service operations](../runbooks/relay-pool-services.md) owns installation and activation. [Current state](../../post-mortem/CURRENT_STATE.md) owns dated acceptance. [ADR 0153](../adr/0153-central-account-authority-isolated-relays.md) remains a proposed decision record; implemented code, applied migrations and local acceptance are recorded separately.
+Private implementation reference for the installed Premium service. [Service operations](../runbooks/relay-pool-services.md) owns installation and activation. [Current state](../../post-mortem/CURRENT_STATE.md) owns dated acceptance. [ADR 0153](../adr/0153-central-account-authority-isolated-relays.md) remains a proposed decision record; implemented code, applied migrations and local acceptance are recorded separately.
 
 ## Fixed destinations and authority
 
 | Destination | Provider accounts | Workloads | Account authority | Execution authority |
 | --- | --- | --- | --- | --- |
 | Premium | Paid, verified during manual review | Text, Sites, images | `mazhcjisettrzbqhorvp` | `prgjcyokylzcsqrjmkaa` |
-| Standard | Free, verified during manual review | Text only | `mazhcjisettrzbqhorvp` | `enbtzuxkguehtnrhuvlu` |
 
-Both pools have the same intended text catalog, subject to the account's verified access. GALX customer billing tiers do not select or classify provider accounts. Standard accepts client-owned function calling as text inference and rejects Sites/images and provider-hosted tool/image aliases before provider calls. No peer discovery, account borrowing, shared sessions or cross-pool retry exists, including for text.
+GALX customer billing tiers do not select or classify provider accounts. Premium accepts client-owned function calling as text inference and handles text, Sites and images after central admission. No account borrowing, shared sessions or legacy dispatch fallback exists.
 
 Pool and installation scope derive from the authenticated central principal. A request body, UI filter or database session variable cannot grant another destination. An account has one retained assignment and one owning desktop; moving it across pools is unsupported. Existing unassigned accounts remain separate and cannot be silently promoted.
 
 ## Installed local boundaries
 
-The central service and TLS proxy run on Docker Desktop. Each pool has a dedicated Colima Linux VM with its own daemon, disks, runtime container, monitor container, state and keys. Persistent guest firewall rules deny the peer directly and through Mac-forwarded services. The Mac and its administrator remain a common trusted boundary.
+The central service and TLS proxy run on Docker Desktop. Premium has a dedicated Colima Linux VM with its own daemon, disks, runtime container, monitor container, state and keys. The Mac and its administrator remain a common trusted boundary.
 
 Only central receives the main database login and vault settings. A runtime receives its own restricted execution database login and narrow central runtime principal. It hosts assigned account engines in-process; it has no Docker socket. Each monitor receives its own operator/viewer/registrar principals and its own daemon socket for desktops. Neither VM receives the other's configuration, browser profiles or credentials. A monitor's daemon access is powerful within its own VM.
 
-The fixed monitor ports are 13311 and 13312 on loopback; runtime ports are 13301 and 13302. The local central origin uses verified HTTPS on 13443. **GALX Monitors**, **GALX Premium** and **GALX Standard** issue one-use scoped sign-in links. The signed-out app link contains no credential. Startup preserves the central ownership handoff interval; local listeners alone do not prove execution readiness.
+The fixed Premium monitor uses port 13311 on loopback and the runtime uses port 13301. The local central origin uses verified HTTPS on 13443. **GALX Monitors** and **GALX Premium** issue one-use scoped sign-in links. The signed-out app link contains no credential. Startup preserves the central ownership handoff interval; local listeners alone do not prove execution readiness.
 
 ## Durable schema
 
@@ -59,7 +58,7 @@ The monitor resolves desktops from scoped saved registrations. Browser account-m
 
 ### Automatic activation and holds
 
-The installer verifies host isolation and identity, then calls owner-only `private.relay_configure_automatic_activation` with the evidence hash. This arms `automatic_activation` without promoting existing paused accounts. It requires no account in the other pool. Runtime/registrar/browser principals cannot arm the policy or call its internal reconciler directly.
+The installer verifies host isolation and identity, then calls owner-only `private.relay_configure_automatic_activation` with the evidence hash. This arms `automatic_activation` without promoting existing paused accounts. It requires no account outside Premium. Runtime/registrar/browser principals cannot arm the policy or call its internal reconciler directly.
 
 New Connect and compatible first Register commits enable exactly once. Repeated Register, registered Connect replay and Reconnect preserve current intent. The registration commit and own-runtime claim/heartbeat reconcile a closed gate only when policy and registration are enabled, isolation evidence exists, the ownership heartbeat is non-future and younger than 45 seconds, and an assigned enabled account has verified current credentials (over 30 seconds remaining), matching class/models and no rejection, removal, retirement or revocation. No provider generation probe or credential refresh is automatic.
 
@@ -121,7 +120,7 @@ Health uses an icon, label and explanation. Saved state is distinct from relay c
 
 The runtime claims its installation epoch, recovers old execution records and reconciles scoped accounts. Central owner handoff requires the prior heartbeat to be over 60 seconds old; no startup override weakens that check. The runtime selects among its own matching engines and persists identity before acquiring/binding the central account lease.
 
-Standard uses [health-aware account rotation](standard-relay-scheduling.md) across models, with one ongoing job per account, immediate provider-cooldown exclusion and bounded backoff after explicit central admission denial. Reconciliation refreshes cooldown/model observations even without a control revision change. These local admission restrictions do not introduce another account budget or change management authority. The monitor's central health snapshot is not live local scheduling telemetry; a busy response alone does not identify a broken registration. Premium's cursor/concurrency remains unchanged.
+Premium uses health-aware account rotation across models, with up to four ongoing jobs per healthy account, immediate provider-cooldown exclusion and bounded backoff after explicit central admission denial. Reconciliation refreshes cooldown/model observations even without a control revision change. These local admission restrictions do not introduce another account budget or change management authority. The monitor's central health snapshot is not live local scheduling telemetry; a busy response alone does not identify a broken registration.
 
 Grants last 30 seconds and renew every eight seconds, with independent expiry and a ten-minute central maximum. Central outage denies new grants and renewal. Account changes invalidate old authorization. Pause in this implementation stops old engines/renewal; it is not the legacy hold that preserves a worker and lets all accepted work drain normally.
 
@@ -137,6 +136,6 @@ Operational snapshots, topology, provider access details and audit records remai
 
 ## Verification and rollback
 
-The [management release](../../post-mortem/releases/2026-09-15-relay-account-management.json) records applied central schema, final local image IDs, database/authorization tests, 28 browser variants, 69 live checks and installed monitor acceptance. At that observation both pools had zero accounts, registration open and execution closed. The later [connection acceptance](../../post-mortem/incidents/2026/2026-09-16-relay-registration/connection-lifecycle.json) records retirement of 56 unused legacy credentials and one manually verified Premium connection, paused and acknowledged. The later [automatic activation release](../../post-mortem/releases/2026-09-16-relay-automatic-activation.json) configures both verified local installations. Generation qualification and public application cutover remain separate. Do not turn an old count into a live health claim.
+The [management release](../../post-mortem/releases/2026-09-15-relay-account-management.json) records applied central schema, final local image IDs, database/authorization tests, 28 browser variants, 69 live checks and installed monitor acceptance. The later [connection acceptance](../../post-mortem/incidents/2026/2026-09-16-relay-registration/connection-lifecycle.json) records retirement of 56 unused legacy credentials and one manually verified Premium connection, paused and acknowledged. The later [automatic activation release](../../post-mortem/releases/2026-09-16-relay-automatic-activation.json) records the installed Premium policy. Generation qualification and public application cutover remain separate. Do not turn an old count into a live health claim.
 
 Use the [database procedure](../maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md) and [local service procedure](../runbooks/relay-pool-services.md). Close gates before rollback, preserve assignments, removed markers, journals, homes and original operations. The automatic-activation DOWN disarms automation and closes both gates/protocol while retaining policy and history. The lifecycle DOWN closes both gates and protocol access while retaining retired tombstones and rejection evidence. The management DOWN similarly retains schema/history; it does not undo revocation or revive accounts. Image rollback alone cannot roll back central state.

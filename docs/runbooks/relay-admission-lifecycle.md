@@ -120,7 +120,6 @@ Run the focused deterministic suite:
 ```sh
 node --import tsx --test scripts/test-relay-admission-lifecycle.ts
 node --import tsx --test scripts/test-relay-adaptive-quota.ts
-node --import tsx --test --test-concurrency=1 scripts/test-standard-pool.ts
 node --import tsx --test --test-concurrency=1 scripts/test-relay-services.ts
 ```
 

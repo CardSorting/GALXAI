@@ -15,9 +15,9 @@ export function receiptRelay(origin:string,current:{url:string;key:string},tenan
   return {url,key,tenant:undefined};
 }
 const digest=(value:string)=>createHash('sha256').update(value).digest('hex');
-/** Premium is the only active isolated relay. The retired Standard pool is never selected. */
+/** Premium is the only active isolated relay. */
 export function isolatedRelay(workload:'text'|'sites'|'images') {
-  if (process.env.GALX_TEXT_RELAY_POOL === 'standard' || process.env.GALX_STANDARD_RELAY_URL || process.env.GALX_STANDARD_RELAY_KEY)
+  if (process.env.GALX_TEXT_RELAY_POOL && process.env.GALX_TEXT_RELAY_POOL !== 'premium')
     throw new RelayDispatchError('invalid_configuration');
   const endpoint = relayCandidates('PREMIUM')[0];
   if (!endpoint) throw new RelayDispatchError('invalid_configuration');

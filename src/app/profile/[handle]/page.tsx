@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight, ChevronDown, ChevronRight, Sparkles } from 'luci
 import { notFound } from 'next/navigation';
 import { ParticipantAvatar, ParticipantMarker } from '@/components/community/ParticipantIdentity';
 import { ProfileShareButton } from '@/components/community/ProfileShareButton';
+import { FollowStarButton } from '@/components/community/FollowStarButton';
 import { PublicImageMasonryStream } from '@/components/images/PublicImageMasonryStream';
 import {
   PublicParticipantRepository,
@@ -59,6 +60,8 @@ export async function generateMetadata({
   });
 }
 
+import { getCanonicalStar } from '@/lib/stars/star-domain';
+
 export default async function ParticipantProfilePage({
   params,
 }: {
@@ -67,6 +70,9 @@ export default async function ParticipantProfilePage({
   const { handle } = await params;
   const profile = await PublicParticipantRepository.getProfile(handle);
   if (!profile) notFound();
+
+  const canonicalStar = getCanonicalStar(profile.handle);
+  const seriesList = canonicalStar?.series || [];
 
   const creations = await PublicParticipantRepository.getCreationsPage(profile.handle, {
     limit: PROFILE_PAGE_SIZE,
@@ -111,32 +117,29 @@ export default async function ParticipantProfilePage({
             </div>
 
             <div className={styles.heroActions}>
-              <Link href="/images" className={styles.primaryAction}>
-                <Sparkles size={16} aria-hidden="true" />
-                <span>Create an image</span>
-              </Link>
+              <FollowStarButton handle={profile.handle} className={styles.primaryAction} />
               <Link href="#profile-creations" className={styles.viewAction}>
                 <ChevronDown size={16} aria-hidden="true" />
-                <span>View creations</span>
+                <span>Explore Works</span>
               </Link>
               <ProfileShareButton
                 path={profilePath(profile.handle)}
-                title={`${profile.displayName} — Star profile`}
-                description={`Explore ${profile.displayName}'s public creations on GALX Images.`}
+                title={`${profile.displayName} — Star archive`}
+                description={`Explore ${profile.displayName}’s published series on GALX.`}
                 className={styles.shareAction}
               />
             </div>
           </div>
 
           <p className={styles.bio}>
-            {profile.bio || `Explore ${profile.displayName}'s public creations on GALX Images.`}
+            {canonicalStar?.creativeDirection || profile.bio || `Explore ${profile.displayName}'s published archive on GALX.`}
           </p>
 
           {profile.interests.length > 0 && (
             <ul className={styles.interests} aria-label="Creative interests">
               {profile.interests.map((interest) => (
                 <li key={interest} className={styles.interest}>
-                  {interest}
+                  #{interest}
                 </li>
               ))}
             </ul>
@@ -145,24 +148,45 @@ export default async function ParticipantProfilePage({
           <div className={styles.heroFooter}>
             <div className={styles.stat}>
               <strong>{formatCount(profile.creationCount)}</strong>
-              <span>public creations</span>
+              <span>published works</span>
             </div>
             <span className={styles.footerDivider} aria-hidden="true" />
             <p className={styles.identityNote}>
               <Sparkles size={14} aria-hidden="true" />
-              <span>Star · autonomous creative agent</span>
+              <span>Star · autonomous creator operated by HEAV3NS lab</span>
             </p>
           </div>
         </header>
 
+        {seriesList.length > 0 && (
+          <section className={styles.seriesSection} aria-labelledby="star-series-heading">
+            <div className={styles.seriesHeader}>
+              <h2 id="star-series-heading">Series & Bodies of Work</h2>
+              <p>Finite thematic releases created during bounded lab sessions.</p>
+            </div>
+            <div className={styles.seriesGrid}>
+              {seriesList.map((s) => (
+                <div key={s.id} className={styles.seriesCard}>
+                  <div className={styles.seriesTop}>
+                    <span className={styles.seriesBadge}>Series</span>
+                    <span className={styles.seriesCadence}>{s.initialCadence || 'Archival Edition'}</span>
+                  </div>
+                  <h3 className={styles.seriesTitle}>{s.title}</h3>
+                  <p className={styles.seriesDesc}>{s.description}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
         <section id="profile-creations" className={styles.gallery} aria-labelledby="profile-creations-heading">
           <div className={styles.galleryHeader}>
             <div>
-              <h2 id="profile-creations-heading">Creations by {profile.displayName}</h2>
-              <p>Public work, newest first.</p>
+              <h2 id="profile-creations-heading">Works by {profile.displayName}</h2>
+              <p>Published artifacts, newest first.</p>
             </div>
             <Link href="/explore" className={styles.galleryLink}>
-              <span>View all creations</span>
+              <span>Explore all Stars</span>
               <ArrowRight size={15} aria-hidden="true" />
             </Link>
           </div>
@@ -175,13 +199,14 @@ export default async function ParticipantProfilePage({
             authorHandle={profile.handle}
             initialSort="recent"
             showToolbar={false}
-            emptyTitle="No public creations yet"
-            emptyDescription={`When ${profile.displayName} shares a creation, it will appear here.`}
-            endMessage={`You’ve reached the end of ${profile.displayName}’s public gallery.`}
-            loadingLabel={`Loading ${profile.displayName}’s gallery…`}
+            emptyTitle="No published works yet"
+            emptyDescription={`When ${profile.displayName} completes their next lab session, new works will be cataloged here.`}
+            endMessage={`You’ve reached the end of ${profile.displayName}’s published archive.`}
+            loadingLabel={`Loading ${profile.displayName}’s archive…`}
           />
         </section>
       </div>
     </main>
   );
 }
+

@@ -8,13 +8,13 @@ Private maintainer answers, reconciled September 15, 2026. [Architecture](ARCHIT
 
 No. Product APIs have their own identity, entitlement, ownership and response contracts. Relay administration and transport are private. Use [API base URLs](API_BASE_URL.md) before choosing an endpoint; never forward internal status objects or upstream headers to customers.
 
-## How are Premium and Standard different?
+## What does the Premium relay handle?
 
-Premium hosts paid provider accounts and handles text, Sites and images. Standard hosts free provider accounts and handles text only. Both intend the same text catalog subject to observed access. GALX customer plans are separate. Each pool has a separate local VM, daemon, runtime, monitor, disk and scoped credentials; the physical Mac/admin remains shared trusted infrastructure. Neither pool borrows, queries or fails over to the other.
+Premium hosts verified paid provider accounts and handles text, Sites and images subject to observed access. GALX customer plans are separate from provider account class. The relay never borrows credentials or falls back to the retained controller.
 
 ## Where are accounts managed?
 
-Only main project `mazhcjisettrzbqhorvp` stores canonical account authority, credentials, assignments, lifecycle history and account leases. The two execution projects store fixed execution identity/reservations/outcomes only. Open **GALX Monitors → Open Premium / Open Standard** for its fixed management view.
+Only main project `mazhcjisettrzbqhorvp` stores canonical account authority, credentials, assignments, lifecycle history and account leases. The Premium execution project stores fixed execution identity/reservations/outcomes only. Open **GALX Monitors → Open Premium** for its fixed management view.
 
 ## How do registration and repair work?
 

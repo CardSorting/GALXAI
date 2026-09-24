@@ -8,9 +8,15 @@ services:
     security_opt: [no-new-privileges:true]
     secrets: [{source: authority_config, target: component-config}]
     tmpfs: ['/tmp:rw,noexec,nosuid,size=16m,uid=1000,gid=1000,mode=0700']
-    restart: 'no'
+    restart: unless-stopped
     mem_limit: 384m
     pids_limit: 128
+    healthcheck:
+      test: [CMD, node, -e, "fetch('http://127.0.0.1:3000/health/live',{signal:AbortSignal.timeout(2000)}).then(r=>{if(r.status!==200)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 3s
+      retries: 3
+      start_period: 20s
     networks: [authority, egress]
     logging: {driver: json-file, options: {max-size: 10m, max-file: '3'}}
   tls:
@@ -22,11 +28,20 @@ services:
     security_opt: [no-new-privileges:true]
     ports: ['127.0.0.1:13443:8443']
     volumes: ['./authority-proxy.mjs:/local/authority-proxy.mjs:ro']
-    secrets: [{source: tls_key, target: tls-key}, {source: tls_cert, target: tls-cert}]
+    secrets: [{source: tls_key, target: tls-key}, {source: tls_cert, target: tls-cert}, {source: tls_ca, target: tls-ca}]
+    depends_on:
+      authority:
+        condition: service_healthy
     networks: [authority, egress]
-    restart: 'no'
+    restart: unless-stopped
     mem_limit: 96m
     pids_limit: 64
+    healthcheck:
+      test: [CMD, node, -e, "const h=require('node:https'),f=require('node:fs');const q=h.get({hostname:'127.0.0.1',servername:'localhost',port:8443,path:'/health/ready',ca:f.readFileSync('/run/secrets/tls-ca'),timeout:2000},r=>{r.resume();if(r.statusCode!==200)process.exitCode=1});q.on('error',()=>process.exitCode=1)"]
+      interval: 15s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
     logging: {driver: json-file, options: {max-size: 10m, max-file: '3'}}
 networks:
   authority: {internal: true}
@@ -35,3 +50,4 @@ secrets:
   authority_config: {file: '${GALX_CENTRAL_CONFIG_FILE:?Set the central config path}'}
   tls_key: {file: '${GALX_LOCAL_TLS_KEY:?Set the local TLS key path}'}
   tls_cert: {file: '${GALX_LOCAL_TLS_CERT:?Set the local TLS certificate path}'}
+  tls_ca: {file: '${GALX_LOCAL_TLS_CA:?Set the local TLS CA path}'}

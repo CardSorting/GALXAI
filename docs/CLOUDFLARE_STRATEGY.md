@@ -13,7 +13,7 @@ The application API at `https://galx.ai/v1` is a separate contract. The Worker i
 
 ## Relay ingress
 
-The implemented Premium/Standard services run locally in separate Colima VMs with a central HTTPS service on Docker Desktop. Their monitor/runtime ports are loopback-only on the Mac; no Cloudflare publication or hosted application cutover is implied. [Service installation](runbooks/relay-pool-services.md) owns the local boundary and a separate optional external-host procedure. No tunnel may connect the pools to each other or bypass their scoped authorization.
+The selected Premium operation runs on the owner's Mac, with loopback-only monitor/runtime ports; no Cloudflare publication or hosted application cutover is implied. [Service operation](runbooks/relay-pool-services.md) owns local recovery and acceptance. Any existing external ingress remains separately governed and unchanged. No tunnel may bypass its scoped authorization.
 
 The retained public application path uses a supervised host controller and one Docker worker per eligible unassigned account. Its ingress targets that controller; see [legacy operations](maintainers/legacy-federation-operations.md). This topology differs from the new in-process account engines inside each fixed pool runtime.
 

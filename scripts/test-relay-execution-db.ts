@@ -7,7 +7,7 @@ import { hash, PROJECTS, type PoolId } from '../src/relay/pool-protocol.js';
 export async function executionDatabaseChecks(owner:pg.Pool) {
   let checks=0;
   const sql=await readFile(new URL('../deploy/relay-execution/supabase/migrations/20260915082628_relay_execution.sql',import.meta.url),'utf8');
-  for(const pool of ['premium','standard'] as PoolId[]) {
+  for(const pool of ['premium'] as PoolId[]) {
     const name='galx_execution_test_'+randomUUID().replaceAll('-','');
     await owner.query(`CREATE DATABASE ${name}`);
     const connection=new URL(process.env.DATABASE_URL!);connection.pathname='/'+name;
@@ -19,7 +19,7 @@ export async function executionDatabaseChecks(owner:pg.Pool) {
       const call=async(action:string,body:object={},target=pool)=> (await c.query('SELECT private.relay_execution($1,$2,$3,$4) r',[target,installation,action,body])).rows[0].r;
       const eq=(a:unknown,b:unknown)=>{assert.deepEqual(a,b);checks++;};const deny=async(p:Promise<unknown>)=>{await assert.rejects(p);checks++;};
       try {
-        eq((await call('identity')).pool,pool);await deny(call('identity',{},pool==='premium'?'standard':'premium'));
+        eq((await call('identity')).pool,pool);await deny(call('identity',{},'retired'));
         await deny(c.query('SELECT * FROM private.relay_identity'));await deny(c.query('SELECT * FROM private.relay_executions'));
         eq((await c.query("SELECT to_regclass('public.galx_shard_accounts') x")).rows[0].x,null);
         const request={requestKey:hash('request'),requestSha256:hash('body'),tenantSha256:hash('tenant'),accountId:'codex_sh_'+hash('account').slice(0,24),epoch:randomUUID(),executionId:'job_fixture',workload:'text'};
@@ -33,7 +33,7 @@ export async function executionDatabaseChecks(owner:pg.Pool) {
         eq((await call('reserve',{...request,epoch:randomUUID(),executionId:'job_recovered'})).state,'unknown');
         eq((await call('finish',{...request,success:true,actualTokens:99})).state,'unknown');
         eq((await call('pending')).length,1);await call('settled',{requestKey:request.requestKey,leaseId:'lease_fixture'});eq((await call('pending')).length,0);
-        for(const workload of ['sites','images']){const r={...request,requestKey:hash(workload),executionId:'job_'+workload,workload};if(pool==='standard')await deny(call('reserve',r));else eq((await call('reserve',r)).workload,workload);}
+        for(const workload of ['sites','images']){const r={...request,requestKey:hash(workload),executionId:'job_'+workload,workload};eq((await call('reserve',r)).workload,workload);}
         await deny(call('recover',{}));
       } finally {await c.query('RESET ROLE');c.release();}
       await assert.rejects(db.query('UPDATE private.relay_identity SET pool_id=pool_id'));checks++;

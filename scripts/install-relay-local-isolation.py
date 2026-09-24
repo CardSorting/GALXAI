@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Local VM egress boundary: deny peer paths and Mac/LAN services, except central TLS.
+"""Premium relay VM egress boundary: deny Mac/LAN services, except central TLS.
 
 Run inside the owning fresh Colima VM before delivering credentials. The Mac and
 its administrator remain trusted; this is not physical-machine separation.
@@ -9,8 +9,8 @@ import subprocess
 import sys
 
 pool = sys.argv[1] if len(sys.argv) == 2 else ''
-if pool not in ('premium', 'standard') or sys.platform != 'linux':
-    raise SystemExit('Use inside Linux: install-relay-local-isolation.py premium|standard')
+if pool != 'premium' or sys.platform != 'linux':
+    raise SystemExit('Use inside Linux: install-relay-local-isolation.py premium')
 gateway = '192.168.105.2'
 lines = ['table inet galx_local_isolation {']
 for chain in ('output', 'forward'):
@@ -22,8 +22,8 @@ for chain in ('output', 'forward'):
               f'  ip daddr {gateway} tcp dport 53 accept',
               # Keep DHCP for the owning isolated VM network only.
               f'  ip daddr {{ {gateway}, 255.255.255.255 }} udp sport 68 udp dport 67 accept',
-              # Colima translates this gateway to Mac loopback. No peer monitor,
-              # runtime, proxy, SSH, daemon, or arbitrary Mac service is allowed.
+              # Colima translates this gateway to Mac loopback. No proxy, SSH,
+              # daemon, or arbitrary Mac service is allowed.
               f'  ip daddr {gateway} counter drop',
               # Restrict off-VM private networks while retaining own Docker bridge paths.
               '  oifname "eth0" ip daddr { 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 100.64.0.0/10, 169.254.0.0/16 } counter drop',

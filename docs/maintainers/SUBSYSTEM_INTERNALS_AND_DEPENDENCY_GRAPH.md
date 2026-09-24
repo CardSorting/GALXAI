@@ -13,22 +13,17 @@ flowchart TD
   Router --> Mode{Configured transport}
   Mode --> Isolated[IsolatedRelayTransport]
   Isolated --> Premium[Premium runtime]
-  Isolated --> Standard[Standard runtime: text only]
   Mode --> Legacy[Retained federation transport]
   Premium --> Central[Private central account service]
-  Standard --> Central
   Central --> Main[(Main account and lease authority)]
   Premium --> PremiumDB[(Premium execution records)]
-  Standard --> StandardDB[(Standard execution records)]
   PM[Premium monitor] --> Central
-  SM[Standard monitor] --> Central
   PM --> PD[Premium manual desktops]
-  SM --> SD[Standard manual desktops]
 ```
 
 The mode branch is deliberate server configuration, not failure fallback. Text stays in its selected pool; Sites/images use Premium. Pools cannot query or borrow the peer. Isolated dispatch bypasses application account selection/decryption and a duplicate account lease; runtime admission uses the existing central ledger. Product quota and shared Sites fair usage remain separate.
 
-Premium and Standard occupy separate local VMs/daemons/disks; central HTTPS runs on Docker Desktop. Engines run in-process per account inside each runtime container. Only each monitor has its own VM's Docker socket for desktops. The shared physical Mac/admin remains trusted. The public deployment still retains the legacy path until a separately qualified cutover.
+Premium occupies its own local VM/daemon/disk; central HTTPS runs on Docker Desktop. Engines run in-process per account inside the Premium runtime container. The Premium monitor has the VM's Docker socket for desktops. The shared physical Mac/admin remains trusted. The public deployment still retains the legacy path until a separately qualified cutover.
 
 The configured Cloudflare Worker has an independent entrypoint/bindings and is not automatically a hop before the application. R2 storage, native hosting and gateway deployment retain separate contracts. See [Cloudflare boundaries](../CLOUDFLARE_STRATEGY.md).
 
@@ -49,7 +44,7 @@ Read each owning implementation for actual bounds; do not infer them from an arc
 
 New pool account state is centrally saved; fresh matching runtime acknowledgment is separate. Registration is manual and paused initially. Remove permanently revokes registered accounts with retained evidence; unfinished registrations may restore with new review. Pause stops engines/grant renewal and does not use the legacy hold semantics.
 
-Execution reservation precedes central lease binding and provider I/O. Failed grant renewal aborts work; unconfirmed terminal writes stop new local admission. Old incomplete rows recover unknown after restart. Circuit-breaker or retry utilities cannot override those outcomes or select a peer pool. Use [resilience](../RESILIENCE_AND_DISASTER_RECOVERY.md), not an illustrative generic state machine, for recovery.
+Execution reservation precedes central lease binding and provider I/O. Failed grant renewal aborts work; unconfirmed terminal writes stop new local admission. Old incomplete rows recover unknown after restart. Circuit-breaker or retry utilities cannot override those outcomes or select an unrelated deployment. Use [resilience](../RESILIENCE_AND_DISASTER_RECOVERY.md), not an illustrative generic state machine, for recovery.
 
 ## 4. Barrel Export Hygiene & Boundary Rules
 

@@ -1,0 +1,19 @@
+[Unit]
+Description=GALX Premium relay services on DigitalOcean
+Requires=docker.service galx-pool-isolation.service
+After=docker.service galx-pool-isolation.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/opt/galx
+EnvironmentFile=/opt/galx/deploy/digitalocean/host.env
+ExecStart=/usr/bin/docker compose --env-file /opt/galx/deploy/digitalocean/host.env -p galx-relay-do -f docker/relay-pools/services.central.yaml -f docker/relay-pools/services.premium.yaml -f docker/relay-pools/services.digitalocean.yaml up -d --no-build --pull never
+ExecStart=/usr/bin/docker compose --env-file /opt/galx/deploy/digitalocean/host.env -p galx-relay-edge -f docker/relay-pools/edge.digitalocean.yaml up -d --no-build --pull never
+ExecStop=/usr/bin/docker compose --env-file /opt/galx/deploy/digitalocean/host.env -p galx-relay-edge -f docker/relay-pools/edge.digitalocean.yaml stop
+ExecStop=/usr/bin/docker compose --env-file /opt/galx/deploy/digitalocean/host.env -p galx-relay-do -f docker/relay-pools/services.central.yaml -f docker/relay-pools/services.premium.yaml -f docker/relay-pools/services.digitalocean.yaml stop
+TimeoutStartSec=120
+TimeoutStopSec=60
+
+[Install]
+WantedBy=multi-user.target

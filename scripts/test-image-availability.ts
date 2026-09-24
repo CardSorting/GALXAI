@@ -46,12 +46,11 @@ test('image-only cutover uses Premium for both observation and dispatch and fail
   const { isolatedImagesEnabled, isolatedRelaysEnabled, isolatedImage } = await import('../src/core/router/adapters/IsolatedRelayTransport');
   const { clearRelayDiscoveryCache } = await import('../src/core/router/adapters/RelayEndpointDiscovery');
   const { default: sharp } = await import('sharp');
-  const names=['GALX_PREMIUM_IMAGES_ENABLED','GALX_ISOLATED_RELAYS_ENABLED','GALX_PREMIUM_RELAY_URL','GALX_PREMIUM_RELAY_KEY','GALX_PREMIUM_RELAY_CONFIG_FILE','GALX_PREMIUM_RELAY_PORTS','GALX_PREMIUM_RELAY_PORT_RANGE','GALX_STANDARD_RELAY_URL','GALX_STANDARD_RELAY_KEY','VM_RELAY_URL','VM_RELAY_API_KEY'];
+  const names=['GALX_PREMIUM_IMAGES_ENABLED','GALX_ISOLATED_RELAYS_ENABLED','GALX_PREMIUM_RELAY_URL','GALX_PREMIUM_RELAY_KEY','GALX_PREMIUM_RELAY_CONFIG_FILE','GALX_PREMIUM_RELAY_PORTS','GALX_PREMIUM_RELAY_PORT_RANGE','VM_RELAY_URL','VM_RELAY_API_KEY'];
   const saved=names.map(name=>process.env[name]); const original=globalThis.fetch;
   const bytes=await sharp({create:{width:2,height:2,channels:3,background:'white'}}).png().toBuffer();
   try {
     Object.assign(process.env,{GALX_PREMIUM_IMAGES_ENABLED:'1',GALX_ISOLATED_RELAYS_ENABLED:'0',GALX_PREMIUM_RELAY_URL:'https://premium.invalid',GALX_PREMIUM_RELAY_KEY:'p'.repeat(64),VM_RELAY_URL:'https://legacy.invalid',VM_RELAY_API_KEY:'legacy'});
-    delete process.env.GALX_STANDARD_RELAY_URL; delete process.env.GALX_STANDARD_RELAY_KEY;
     assert.equal(isolatedImagesEnabled(),true); assert.equal(isolatedRelaysEnabled(),false);
     let reads=0,posts=0;
     globalThis.fetch=async(url,init)=>{

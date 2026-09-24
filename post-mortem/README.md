@@ -20,6 +20,8 @@ Private operational records. Start here during a failure; do not publish this di
 
 `register.json` owns incident status and follow-up actions. `events.jsonl` is the append-only troubleshooting and containment journal. The incident index, rolling log and open-items view are generated from those files; run `npm run docs:sync` after editing them. Recovery is an incident state; completed prevention work needs its own evidence.
 
+When an append-only record names source that is intentionally retired, `retired-evidence.json` records the retirement date, current replacement and dated historical evidence. This keeps the original observation intact without restoring deleted runtime or test files.
+
 ## Working rules
 
 1. Record the observation before intervention: UTC time (`Z` or explicit `+00:00`) or explicitly date-only evidence, customer impact, component, operation identity, and evidence location. Separate observed facts from hypotheses. Naive timestamps and nonzero offsets are rejected; equivalent UTC encodings do not require rewriting journal entries.

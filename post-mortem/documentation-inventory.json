@@ -1377,6 +1377,12 @@
       "title": "ADR 0158: Canonical account profiles with explicit actor provenance"
     },
     {
+      "path": "docs/adr/0159-local-mac-relay-operation.md",
+      "scope": "decision-record",
+      "category": "docs",
+      "title": "ADR 0159: Local Mac relay operation with bounded availability"
+    },
+    {
       "path": "docs/adr/README.md",
       "scope": "current-guide",
       "category": "docs",
@@ -2163,12 +2169,6 @@
       "title": "Shared quota and bounded continuation"
     },
     {
-      "path": "docs/reference/standard-relay-scheduling.md",
-      "scope": "current-guide",
-      "category": "docs",
-      "title": "Standard relay rotation"
-    },
-    {
       "path": "docs/reference/standard-relay-sunset.md",
       "scope": "current-guide",
       "category": "docs",
@@ -2208,13 +2208,13 @@
       "path": "docs/runbooks/relay-pool-images.md",
       "scope": "current-guide",
       "category": "docs",
-      "title": "Build and inspect the two relay images"
+      "title": "Build and inspect the Premium relay images"
     },
     {
       "path": "docs/runbooks/relay-pool-services.md",
       "scope": "current-guide",
       "category": "docs",
-      "title": "Install the central authority and isolated relay services"
+      "title": "Operate the local Premium relay and monitor"
     },
     {
       "path": "docs/runbooks/release-readiness.md",

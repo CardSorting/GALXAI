@@ -8,9 +8,9 @@ Private implementation and operator reference. This is the GALX SDK and relay co
 
 Register executable function callbacks with `galx.agent({ tools })`, then call `run`, consume `stream`, or use the corresponding agent session method. Each registered callback is authorized for automatic execution for that run. The SDK supplies that instruction on every run without accumulating duplicate instruction messages in session history. It executes model-requested registered functions and submits their real outputs to the next model step without an Allow/Accept interaction.
 
-The active relay protocol is Responses over WebSocket, not Codex app-server. The existing unused SDK adapter's `approvalPolicy: never` does not configure that relay. The previous gap was transport support: tool definitions were omitted, Standard rejected all tool fields, tool result messages were unsupported, argument deltas appeared as text, and public stream aggregation discarded structured calls. These paths now retain function definitions and correlated calls/results.
+The active relay protocol is Responses over WebSocket, not Codex app-server. The existing unused SDK adapter's `approvalPolicy: never` does not configure that relay. The previous gap was transport support: tool definitions were omitted, tool result messages were unsupported, argument deltas appeared as text, and public stream aggregation discarded structured calls. These paths now retain function definitions and correlated calls/results.
 
-Both Premium and Standard support **client-owned function calling as text inference**. Callbacks execute in the application running the SDK; neither relay executes the supplied function, shell command, URL or filesystem operation. Standard continues to reject Sites, images and provider-hosted tools. Premium images keep their dedicated artifact path. No pool obtains peer credentials, capacity or host authority.
+Premium supports **client-owned function calling as text inference**. Callbacks execute in the application running the SDK; the relay never executes the supplied function, shell command, URL or filesystem operation. Premium images keep their dedicated artifact path. The runtime obtains no other pool's credentials, capacity or host authority.
 
 ## Example
 
@@ -61,7 +61,7 @@ The isolated text output budget also constrains observed argument bytes and comp
 
 Unknown nested provider fields are removed from delivered calls. Tool arguments and outputs are application data and retain their content. Approval request IDs, credential metadata and provider objects are not forwarded as callable work.
 
-Every model continuation uses a distinct step identity under its original logical agent turn. It must pass the selected pool's normal admission, quota and account checks. Both pools retain fair rotation and paced recovery; Standard permits one ongoing job per account and healthy Premium accounts up to four. There is no automatic peer fallback or replay after uncertainty. A stopped inference preserves an owner-scoped checkpoint and ends the run with an actionable continuation error; see [shared quota and bounded continuation](shared-quota-recovery.md).
+Every model continuation uses a distinct step identity under its original logical agent turn. It must pass Premium's normal admission, quota and account checks. Premium retains fair rotation and paced recovery with up to four healthy ongoing jobs per account. There is no automatic fallback or replay after uncertainty. A stopped inference preserves an owner-scoped checkpoint and ends the run with an actionable continuation error; see [shared quota and bounded continuation](shared-quota-recovery.md).
 
 ## Errors, cancellation and limits
 
@@ -79,7 +79,7 @@ The SDK does not fabricate responses to missing-information questions. It cannot
 
 [OpenAI function calling](https://developers.openai.com/api/docs/guides/function-calling) separates model-produced calls from application execution and subsequent tool outputs. That is the implemented pattern. [Codex app-server](https://learn.chatgpt.com/docs/app-server) uses a different thread/turn approval protocol; setting its approval policy is not a substitute for implementing Responses tool continuation.
 
-Run `npm run test:agent:tools` and `npm run test:relay:services`. The latter includes real local SDK → relay → synthetic provider → callback → continuation chains in both pools over JSON and SSE. Additional shared-engine, transport, usage, public-boundary and authorization regressions plus the production build verify adjacent contracts. These checks make no real provider calls.
+Run `npm run test:agent:tools` and `npm run test:relay:services`. The latter includes real local SDK → Premium relay → synthetic provider → callback → continuation chains over JSON and SSE. Additional shared-engine, transport, usage, public-boundary and authorization regressions plus the production build verify adjacent contracts. These checks make no real provider calls.
 
 Install both reviewed runtime image pins using the [service runbook](../runbooks/relay-pool-services.md), preserving state volumes, pool identities and central ownership waits. Central and monitor images do not need this runtime change. The SDK source must also be rebuilt/distributed in its caller; replacing a relay container alone does not update an external installed SDK. No published SDK release or public application cutover is implied by local installation.
 

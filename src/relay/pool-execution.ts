@@ -95,17 +95,17 @@ export class PoolExecution {
     }
   }
   stop() { for (const grant of this.grants) void grant.complete(false).catch(()=>{}); }
-  standardAvailable(accountId: string, now = Date.now()) {
-    return (this.activeAccounts.get(accountId) ?? 0) < (this.central.identity.pool === 'standard' ? 1 : 4)
+  accountAvailable(accountId: string, now = Date.now()) {
+    return (this.activeAccounts.get(accountId) ?? 0) < 4
       && (this.admissionDenials.get(accountId)?.until ?? 0) <= now;
   }
-  standardRecovering(accountId: string) { return this.admissionDenials.has(accountId); }
+  accountRecovering(accountId: string) { return this.admissionDenials.has(accountId); }
   reconcileAccounts(ids: ReadonlySet<string>) {
     for (const id of this.admissionDenials.keys()) if (!ids.has(id) && !this.activeAccounts.has(id)) this.admissionDenials.delete(id);
   }
   policy(account: AssignedAccount): ExecutionPolicy {
     return {pool:this.central.identity.pool,admit:async(req,body,tenant,executionId)=>{
-      if (!this.standardAvailable(account.id)) throw new RequestError(503,'service_unavailable','This service is temporarily unavailable.');
+      if (!this.accountAvailable(account.id)) throw new RequestError(503,'service_unavailable','This service is temporarily unavailable.');
       this.activeAccounts.set(account.id, (this.activeAccounts.get(account.id) ?? 0) + 1);
       let released = false;
       const release = () => {

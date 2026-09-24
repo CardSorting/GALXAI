@@ -1,0 +1,14 @@
+{
+  "provider": "digitalocean",
+  "name": "galx-premium-relay",
+  "region": "sfo3",
+  "profile": "one-desktop",
+  "size": "s-4vcpu-8gb-amd",
+  "image": "ubuntu-24-04-x64",
+  "sshKeyId": "REPLACE_WITH_DIGITALOCEAN_SSH_KEY_ID",
+  "sshAllowCidrs": ["REPLACE_WITH_OPERATOR_IPV4_OR_IPV6_CIDR"],
+  "backups": true,
+  "monitoring": true,
+  "ipv6": true,
+  "tags": ["galx", "relay", "premium", "production"]
+}

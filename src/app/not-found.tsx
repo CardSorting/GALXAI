@@ -58,11 +58,11 @@ export default function NotFound() {
             </Link>
 
             <Link
-              href="/images"
+              href="/explore"
               className="p-3.5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 hover:text-white flex flex-col items-center justify-center gap-1.5 transition-all group"
             >
-              <ImageIcon className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
-              <span className="font-bold">Images</span>
+              <Compass className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
+              <span className="font-bold">Explore</span>
             </Link>
 
             <Link

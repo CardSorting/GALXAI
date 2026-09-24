@@ -15,7 +15,7 @@ The browser workspace and content API use the same included-generation adapter a
 
 The [workspace runbook](SITES_WORKSPACE.md) covers private drafts, publication snapshots and managed hosting. [Address operations](SITES_DOMAINS.md) covers the existing DNS worker. The optional native workflow retains its own connection and domain gates. No new worker or external service is added for fair usage.
 
-When the explicit isolated-relay deployment mode is enabled, all Sites dispatch and receipt reads select Premium under the [service runbook](../runbooks/relay-pool-services.md). The private preflight uses Premium's separate capability key. Calls include a hash of the server-verified owner, and no Standard/legacy fallback occurs. Customer Pro/free access and fair usage remain independent from the upstream account class. Preserve original job origins during cutover; do not migrate uncertain work by changing its URL.
+When the explicit isolated-relay deployment mode is enabled, all Sites dispatch and receipt reads select Premium under the [service runbook](../runbooks/relay-pool-services.md). The private preflight uses Premium's separate capability key. Calls include a hash of the server-verified owner, and no legacy fallback occurs. Customer Pro/free access and fair usage remain independent from the upstream account class. Preserve original job origins during cutover; do not migrate uncertain work by changing its URL.
 
 ## Historical recovery
 

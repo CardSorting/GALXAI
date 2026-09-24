@@ -20,7 +20,7 @@ Financial, audit and accepted-operation state must commit atomically at their de
 
 The implemented authority is [central account management](reference/relay-account-management.md). Only `mazhcjisettrzbqhorvp` owns canonical encrypted accounts, manual desktop provenance, exclusive immutable assignments, registration/review state, account revisions, lifecycle operations, runtime principals/epochs and bindings to the existing account lease/budget ledger. The central private tables force RLS and have no customer/service-role table grants. A restricted login executes the private protocol; hashed principal lookup determines role, pool and installation. Request JSON cannot broaden that scope.
 
-Premium `prgjcyokylzcsqrjmkaa` and Standard `enbtzuxkguehtnrhuvlu` each hold only fixed installation identity and execution reservations/outcomes. Restricted runtime logins cannot manage accounts, read credential tables or obtain the main vault key. Runtime projections carry only own-account access under central authorization. No registry, credential copy or second capacity ledger is deployed there.
+Premium `prgjcyokylzcsqrjmkaa` holds only fixed installation identity and execution reservations/outcomes. Its restricted runtime login cannot manage accounts, read credential tables or obtain the main vault key. Runtime projections carry only own-account access under central authorization. No registry, credential copy or second capacity ledger is deployed there.
 
 Management migration `20260915191404` is applied only centrally. Rename/remove/restore require expected revision and immutable operation identity tied to actor, pool, installation, record and request hash. Every registration mutation advances revision, including review/ticket updates. Concurrent changes cannot overwrite newer state. Registered-account rename synchronizes the linked registration. Account removal retains canonical identity, assignment, ciphertext, leases and immutable operation history, revokes access and cannot be undone through restore. Unfinished registration removal permits restoration only with fresh review.
 
@@ -38,7 +38,7 @@ Revoked/dead/conflicting records cannot be revived by enrollment. Deliberate [va
 
 ## Installation and acceptance
 
-The schemas and local central/Premium/Standard services are installed and tested. Separate Colima VMs provide separate daemons, disks and peer-denial rules; the Mac/admin remains shared infrastructure. Use [current state](../post-mortem/CURRENT_STATE.md) for current account counts and gate evidence. Registration, execution activation, actual provider generation and public application cutover are distinct acceptance steps. [ADR 0153](adr/0153-central-account-authority-isolated-relays.md) retains its own decision status rather than deriving acceptance from schema installation.
+The schemas and local central/Premium services are installed and tested. The Premium Colima VM provides its own daemon and disk; the Mac/admin remains shared infrastructure. Use [current state](../post-mortem/CURRENT_STATE.md) for current account counts and gate evidence. Registration, execution activation, actual provider generation and public application cutover are distinct acceptance steps. [ADR 0153](adr/0153-central-account-authority-isolated-relays.md) retains its own decision status rather than deriving acceptance from schema installation.
 
 ## Optional admission policy projection
 

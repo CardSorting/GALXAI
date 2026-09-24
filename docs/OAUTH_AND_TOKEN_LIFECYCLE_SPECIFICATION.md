@@ -20,7 +20,7 @@ Provider renewal, browser reconnection, GALX session renewal and vault re-encryp
 
 ## Registration and renewal
 
-Open the intended fixed Premium/Standard monitor, choose **Connect account**, prepare its desktop and manually sign in. Premium requires a paid provider account; Standard requires a free provider account. Choose **Connect account** to verify access and register atomically. The browser submits references/revisions rather than provider token contents; the scoped registrar reads the saved guest login and central authorization validates its authority. A verified automatic-activation policy enables the new connection and activates its own ready relay; manual holds leave it paused. Reconnect and replay preserve the existing enabled/paused setting.
+Open the fixed Premium monitor, choose **Connect account**, prepare its desktop and manually sign in with a paid provider account. Choose **Connect account** to verify access and register atomically. The browser submits references/revisions rather than provider token contents; the scoped registrar reads the saved guest login and central authorization validates its authority. A verified automatic-activation policy enables the new connection and activates its own ready relay; manual holds leave it paused. Reconnect and replay preserve the existing enabled/paused setting.
 
 Review tickets last two minutes and review evidence five minutes. Every registration update changes its revision, including ticket/review updates. Stale review or a changed record requires fresh inspection. Assignment cannot be edited or transferred by changing a desktop link. Revoked/removed or conflicting accounts cannot be revived through registration.
 

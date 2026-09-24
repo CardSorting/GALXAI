@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 
 try {
   const policy = JSON.parse(readFileSync(new URL('./pool.json', import.meta.url), 'utf8'));
-  if (!['premium', 'standard'].includes(policy.pool) || policy.stage !== 'awaiting-central-authorization') throw Error();
+  if (policy.pool !== 'premium' || policy.stage !== 'awaiting-central-authorization') throw Error();
   if (process.argv.length === 3 && process.argv[2] === '--describe') {
     console.log(JSON.stringify({ ...policy, servingReady: false }));
   } else {

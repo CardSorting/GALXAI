@@ -1,0 +1,27 @@
+{
+  "provider": "digitalocean",
+  "region": "sfo3",
+  "profile": "one-desktop",
+  "host": {
+    "ssh": "operator@REPLACE_WITH_DROPLET_HOST",
+    "addresses": ["REPLACE_WITH_EVERY_PUBLIC_AND_PRIVATE_ADDRESS"]
+  },
+  "origins": {
+    "central": "https://central-relay.example.com",
+    "premium": "https://premium-relay.example.com"
+  },
+  "imageDigests": {
+    "central": "sha256:REPLACE_WITH_REVIEWED_AMD64_DIGEST",
+    "premium-runtime": "sha256:REPLACE_WITH_REVIEWED_AMD64_DIGEST",
+    "premium-monitor": "sha256:REPLACE_WITH_REVIEWED_AMD64_DIGEST",
+    "desktop": "sha256:REPLACE_WITH_REVIEWED_AMD64_DIGEST",
+    "caddy": "sha256:REPLACE_WITH_REVIEWED_AMD64_DIGEST"
+  },
+  "imageRefs": {
+    "central": "galxai-relay-central@sha256:REPLACE_WITH_REVIEWED_AMD64_DIGEST",
+    "premium-runtime": "galxai-relay-premium@sha256:REPLACE_WITH_REVIEWED_AMD64_DIGEST",
+    "premium-monitor": "galxai-monitor-premium@sha256:REPLACE_WITH_REVIEWED_AMD64_DIGEST",
+    "desktop": "galxai-shard-desktop@sha256:REPLACE_WITH_REVIEWED_AMD64_DIGEST",
+    "caddy": "caddy:2.11.4-alpine@sha256:REPLACE_WITH_REVIEWED_AMD64_DIGEST"
+  }
+}

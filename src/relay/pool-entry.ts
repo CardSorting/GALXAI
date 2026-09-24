@@ -8,6 +8,7 @@ import { PoolRuntime } from './pool-runtime.js';
 import { poolMonitor } from './pool-monitor-server.js';
 import { DesktopManager, DockerDesktopDriver } from './desktop-manager.js';
 import { DesktopCredentialError } from './desktop-credentials.js';
+import { resolveDesktopCapacity } from './desktop-capacity.js';
 
 export async function poolEntrypoint() {
   const policy=JSON.parse(readFileSync('/app/component.json','utf8'));
@@ -30,7 +31,7 @@ export async function poolEntrypoint() {
     server.listen(3000,'0.0.0.0');close=async()=>{server.close();await db.end();};
   } else {
     const pool:PoolId=policy.pool;
-    if(!['premium','standard'].includes(pool)||config.pool!==pool||!uuid(config.installationId))throw Error('Pool identity mismatch.');
+    if(pool!=='premium'||config.pool!==pool||!uuid(config.installationId))throw Error('Pool identity mismatch.');
     const identity={pool,installationId:config.installationId};
     mkdirSync('/state',{recursive:true,mode:0o700});
     if(policy.component==='runtime') {
@@ -45,10 +46,11 @@ export async function poolEntrypoint() {
       if(['runtimeToken','databaseUrl','vault','identitySecret','inferenceKey'].some(k=>config[k]))throw Error('Monitor received execution authority.');
       const tokens=[config.operatorToken,config.viewerToken,config.registrarToken];if(new Set(tokens).size!==3)throw Error('Separate service credentials are required.');
       const clients=tokens.map(token=>new CentralClient(config.centralOrigin,token,identity));
+      const capacity=config.desktopProfile === undefined && config.desktopLimits === undefined ? undefined : resolveDesktopCapacity(config.desktopProfile,config.desktopLimits);
       const desktops=new DesktopManager('/state/desktops.json',new DockerDesktopDriver(`pool-${pool}`,config.desktopImage,'/app/desktop/seccomp.json'),Date.now,
-        async()=>{throw new DesktopCredentialError('credential_not_allowed');});
+        async()=>{throw new DesktopCredentialError('credential_not_allowed');},undefined,undefined,capacity);
       const monitor=poolMonitor({operator:clients[0],viewer:clients[1],registrar:clients[2],operatorToken:tokens[0],viewerToken:tokens[1],desktops});
-      monitor.server.listen(pool==='premium'?13311:13312,'127.0.0.1');close=monitor.close;
+      monitor.server.listen(13311,'127.0.0.1');close=monitor.close;
     }
   }
   let stopping=false;const stop=()=>{if(stopping)return;stopping=true;void close().catch(()=>{process.exitCode=1;});};process.once('SIGTERM',stop);process.once('SIGINT',stop);

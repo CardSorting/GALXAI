@@ -1,0 +1,19 @@
+# DigitalOcean overlay for the single always-on Premium host.
+# The base files retain their deliberate local restart policy; this overlay is
+# the only place that enables boot persistence for the cloud installation.
+services:
+  authority:
+    image: ${GALX_CENTRAL_IMAGE:?Set the reviewed amd64 central image}
+    platform: linux/amd64
+    init: true
+    restart: unless-stopped
+  relay:
+    image: ${GALX_PREMIUM_RUNTIME_IMAGE:?Set the reviewed amd64 Premium runtime image}
+    platform: linux/amd64
+    init: true
+    restart: unless-stopped
+  monitor:
+    image: ${GALX_PREMIUM_MONITOR_IMAGE:?Set the reviewed amd64 Premium monitor image}
+    platform: linux/amd64
+    init: true
+    restart: unless-stopped

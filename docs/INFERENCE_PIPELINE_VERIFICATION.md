@@ -5,9 +5,9 @@
 
 ## Preconditions
 
-Identify the actual target before issuing work. The local isolated services are installed with registration open and execution closed at latest acceptance; real provider sign-ins and public application cutover remain pending. Follow [service installation](runbooks/relay-pool-services.md) to register paid accounts in Premium and free accounts in Standard, review access, open the qualified execution gate and enable intended accounts. Verify fresh matching account/credential revisions and runtime epoch. Neither inventory nor monitor availability proves inference.
+Identify the actual target before issuing work. The local Premium service is installed with registration open and execution closed at latest acceptance; real provider sign-in and public application cutover remain pending. Follow [service installation](runbooks/relay-pool-services.md) to register a paid account, review access, open the qualified execution gate and enable the intended account. Verify fresh matching account/credential revisions and runtime epoch. Neither inventory nor monitor availability proves inference.
 
-Qualify Standard text and Premium text/Sites/images independently through their scoped runtime keys and mandatory operation identity. Standard must reject Sites/images/tool aliases with zero provider calls. Both pools intend the same text catalog, subject to observed access. No failure can borrow the other pool or dispatch through the retained controller. Premium image qualification is an explicit request; no automatic paid probe establishes readiness.
+Qualify Premium text/Sites/images through its scoped runtime key and mandatory operation identity. No failure can borrow another deployment or dispatch through the retained controller. Premium image qualification is an explicit request; no automatic paid probe establishes readiness.
 
 For the retained public deployment, use [legacy enrollment](maintainers/legacy-desktop-enrollment.md) only for eligible unassigned accounts and its original worker capability contract. Assigned accounts cannot use that path. Manual session renewal uses the owning workflow: explicit **Update saved sign-in → Save new sign-in** for new pools, legacy **Check now** only under the retained bridge.
 

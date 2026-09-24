@@ -1,0 +1,69 @@
+{
+  "classification": "private",
+  "observedAt": "2026-09-23T05:37:37Z",
+  "scope": "Focused resilience and owner-local menu audit. No public route, ingress, execution gate, account state or provider workload changed.",
+  "audit": {
+    "method": "Source review, live local status, Compose health inspection, strict-TLS health probes and bounded local acceptance.",
+    "findings": [
+      {
+        "severity": "P2",
+        "finding": "The supervisor inferred central readiness from an exact count of running containers; a process that was running but not serving could pass that check.",
+        "resolution": "The central authority and TLS proxy now have health checks. Compose starts the proxy after authority health, and the host supervisor requires every configured service to report healthy. Only services reported unhealthy are restarted after the readiness window."
+      },
+      {
+        "severity": "P2",
+        "finding": "Jitter could extend the nominal five-minute retry cap to six minutes.",
+        "resolution": "Jitter is now applied before the five-minute maximum is enforced; retry delay is tested at first, growing and saturated attempts."
+      },
+      {
+        "severity": "P3",
+        "finding": "The menu did not distinguish local recovery categories or confirm whether the AC sleep assertion process remained active.",
+        "resolution": "The private native menu reads only fixed recovery categories, retry timing and the sleep assertion state; it does not display subprocess output."
+      }
+    ]
+  },
+  "hardening": [
+    "Added authority liveness and TLS proxy readiness checks; the TLS health probe validates the local certificate chain using the private CA.",
+    "Made service discovery use the Compose configuration and require every configured service to be healthy; sanitized Compose override variables from the host supervisor environment.",
+    "The supervisor waits for central readiness and restarts only services Docker marks unhealthy, with bounded follow-up waits.",
+    "Added allowlisted supervisor cause codes and the caffeinate child-process state to owner-only atomic state; the menu maps them to concise recovery copy.",
+    "Capped equal-jitter exponential retry delays at 300 seconds and added focused readiness/backoff tests."
+  ],
+  "verification": {
+    "focusedSupervisorTests": "3 passed",
+    "localAccessBoundaryTests": "6 passed",
+    "composeHealth": "Both central services reported healthy after the overlay update.",
+    "tlsHealth": "Strict-CA GET probes for /health/live and /health/ready both returned the fixed {\"ok\":true} DTO.",
+    "localProxyBoundary": "Raw HTTPS probes confirmed exact allowlisted health bodies and no-store/nosniff headers; a query-string health path, POST health path and unrelated GET path returned empty 404 responses.",
+    "localAcceptance": {
+      "at": "2026-09-23T05:27:56.315Z",
+      "checks": 27,
+      "sha256": "2c3c47b755766effdd0c163f4e1f951b399f2428c0f1c75a1632d153f1831d05"
+    },
+    "nativeApps": "Both signed local app bundles built and were installed; the enabled per-user supervisor was restarted and reported running with attempt 0.",
+    "sleepAssertion": "The supervisor state reported active while the Mac was on AC power at 94%.",
+    "productionBuild": "Next.js production build passed and generated 162 of 162 static pages.",
+    "compiledBoundaryScan": "530 browser/rendered assets scanned; private markers and runtime trace paths passed.",
+    "documentation": "docs:sync generated 3 knowledge views, 4 indexes and the 496-file inventory. After explicit knowledge, relay, image, database and post-mortem reviews, docs:check passed for 371 guides, 41 incident documents and 159 ADRs; docs:check:build passed its 530-asset scan; test:docs passed 23 post-mortem and 17 knowledge tests. Four previously overdue actions ACT-005/006/008/014 remain open.",
+    "diffCheck": "git diff --check passed."
+  },
+  "limits": [
+    "The visual native-menu capture was unavailable in this environment; UX verification was source-level and the installed build compiled successfully.",
+    "The unhealthy-container restart branch, sign-in, host/daemon restart, sleep/wake, closed-lid and duplicate-owner drills were not fault-injected; ACT-018 remains open.",
+    "Compose health represents process and local TLS-path health, not database, account, provider or model readiness.",
+    "This is one owner-signed-in Mac, not an independent host failure domain or a public uptime guarantee."
+  ],
+  "sourceSha256": {
+    "scripts/relay-local.mjs": "c67111dd2fbaae776da584a13d5a54b883c0f83cbb1ddc594447fc05fd185a59",
+    "scripts/lib/relay-local-supervisor.mjs": "25f281e0e9fc4531ae86ed469d5f66f00bef369331598b600672455d6e74afdd",
+    "scripts/test-relay-local-supervisor.mjs": "ece6f47cd643431a0fdc20daa67a5ae1c6870f6dacf0d01282ba46889701b794",
+    "scripts/macos/RelayMonitors.swift": "6f2b8b281a49f65ca675f2e1d25c2ca374ae67ff536bf0299cacc3fe77b9a46d",
+    "docker/relay-pools/local/central.yaml": "588b79fa55c8f4f542e329b5e8469860282388d69293b9e9e624c63b56bb3f19",
+    "docker/relay-pools/local/authority-proxy.mjs": "bb2481765b9426d0aee472c7e4647d50702587f800855114a43f26a8c8575edb",
+    "docs/runbooks/relay-pool-services.md": "9d4256f6f899ff4583d4e97f31847c04015207c1c95003589d254ebff1d5e149",
+    "docs/adr/0159-local-mac-relay-operation.md": "c0d80bbfd5b4e9f65df546a18c1f313f6c60d457dd01a9eb164fe9680ce66d8d",
+    "docs/knowledge/registry.json": "9ab2f0741dcc59251889c2e65b2cdf86ef1b0b8cb943ea1cc502d11c5f413d37",
+    "package.json": "155047969fad6612e938d09ef313ebf8d2058513971e23eb40d919c19d5224b1",
+    "scripts/install-relay-monitor-apps.py": "4ca09038db1cc982b17a2ef15f6bb6522a85d0fcc5750d849d0a73130743a415"
+  }
+}

@@ -1,6 +1,6 @@
 import { performance } from 'node:perf_hooks';
 
-export const STANDARD_RECOVERY_INTERVAL_MS = 5000;
+export const RECOVERY_INTERVAL_MS = 5000;
 export const IMAGE_QUEUE_MAX_WAIT_MS = 120_000;
 export const IMAGE_QUEUE_RECHECK_MS = 1000;
 export const IMAGE_QUEUE_MAX_DEPTH = 32;
@@ -46,7 +46,7 @@ interface WorkloadWaiters {
 }
 
 /** Shared local dispatch ordering. Central leases remain the capacity authority. */
-export class StandardPoolScheduler {
+export class PoolScheduler {
   private readonly selected = new Map<string, true>();
   /** Capacity is workload-scoped: image slots cannot be consumed by text reservations. */
   private readonly forwarding = new Map<string, Map<string, Set<symbol>>>();
@@ -78,7 +78,7 @@ export class StandardPoolScheduler {
     activeWorkloadForwarding.set(candidate.id, reservations);
     this.forwarding.set(workload, activeWorkloadForwarding);
     // Recovery is real user work, never a timer-driven probe or an uncertain-request retry.
-    if (candidate.recovering) this.nextRecoveryAt = now + STANDARD_RECOVERY_INTERVAL_MS;
+    if (candidate.recovering) this.nextRecoveryAt = now + RECOVERY_INTERVAL_MS;
     let released = false;
     return { candidate, workload, release: () => {
       if (released) return;

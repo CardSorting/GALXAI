@@ -6,7 +6,6 @@
 !docker/relay-pools/package-lock.json
 !docker/relay-pools/entrypoint.mjs
 !docker/relay-pools/premium.json
-!docker/relay-pools/standard.json
 !src/
 !src/relay/
 !src/relay/**

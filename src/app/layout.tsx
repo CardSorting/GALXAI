@@ -13,6 +13,7 @@ import { Footer } from "@/components/dashboard/Footer";
 import { MobileBottomNav } from "@/components/dashboard/MobileBottomNav";
 import { ProductNavigation } from "@/components/dashboard/Navigation";
 import { ClientResilienceProvider } from "@/components/common/ClientResilienceProvider";
+import { CurationToast } from "@/components/common/CurationToast";
 import { SITE_CONFIG } from "@/lib/seo/siteConfig";
 import { JsonLd } from "@/lib/seo/jsonld";
 
@@ -165,6 +166,7 @@ export default function RootLayout({
             <LanguageProvider>
               <SkipToContent />
               <AccessibilityAnnouncer />
+              <CurationToast />
               <AuthProvider>
                 <GenerationAllowanceProvider><PersonaProvider>
                   <ProductNavigation />

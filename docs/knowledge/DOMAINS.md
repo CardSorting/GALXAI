@@ -31,6 +31,7 @@ Owner role: **Documentation maintainer**. Domain: `knowledge`.
 - [Assess maintainer readiness](../../docs/maintainers/MAINTAINER_ONBOARDING_ASSESSMENT.md)
 - [ADR template](../../docs/knowledge/templates/adr.md)
 - [Runbook template](../../docs/knowledge/templates/runbook.md)
+- [Architecture decision records](../../docs/adr/README.md)
 - [ADR 0145: Maintain knowledge with source changes](../../docs/adr/0145-maintained-knowledge-and-decision-lifecycle.md)
 - [Operate the weekly knowledge audit](../../docs/runbooks/weekly-knowledge-audit.md)
 - [MAINTAINERS](../../MAINTAINERS.md)
@@ -122,15 +123,14 @@ Owner role: **Relay operator**. Domain: `relay`.
 - [Troubleshooting](../../docs/TROUBLESHOOTING.md)
 - [Maintainer guides](../../docs/maintainers/README.md)
 - [ADR 0152: Manual desktop-only shard authority](../../docs/adr/0152-manual-desktop-only-shard-authority.md)
-- [Build and inspect the two relay images](../../docs/runbooks/relay-pool-images.md)
-- [Install the central authority and isolated relay services](../../docs/runbooks/relay-pool-services.md)
+- [Build and inspect the Premium relay images](../../docs/runbooks/relay-pool-images.md)
+- [Operate the local Premium relay and monitor](../../docs/runbooks/relay-pool-services.md)
 - [Central account management and isolated relay contract](../../docs/reference/relay-account-management.md)
 - [Legacy federation API](../../docs/reference/legacy-federation-api.md)
 - [Legacy federation operations](../../docs/maintainers/legacy-federation-operations.md)
 - [Legacy desktop enrollment](../../docs/maintainers/legacy-desktop-enrollment.md)
 - [Legacy desktop operations](../../docs/maintainers/legacy-desktop-operations.md)
 - [Relay selection and admission](../../docs/ROUTING_ALGORITHMS.md)
-- [Standard relay rotation](../../docs/reference/standard-relay-scheduling.md)
 - [Application queues and relay execution](../../docs/QUEUE_SPECIFICATION.md)
 - [Rate limits, concurrency and quota](../../docs/RATE_LIMITS_AND_QUOTAS.md)
 - [Model catalog and observed availability](../../docs/MODEL_CATALOG.md)
@@ -141,6 +141,7 @@ Owner role: **Relay operator**. Domain: `relay`.
 - [Maintainer glossary](../../docs/maintainers/MAINTAINER_GLOSSARY_AND_LEXICON.md)
 - [Frequently asked questions](../../docs/FAQS.md)
 - [ADR 0153: Central account authority with isolated relay execution](../../docs/adr/0153-central-account-authority-isolated-relays.md)
+- [ADR 0159: Local Mac relay operation with bounded availability](../../docs/adr/0159-local-mac-relay-operation.md)
 - [Parent and subagent execution guide](../../docs/maintainers/AI_AGENT_PAIR_PROGRAMMING_AND_GOVERNANCE.md)
 - [Maintainer debugging and diagnostics](../../docs/maintainers/DEBUGGING_AND_DIAGNOSTIC_RUNBOOKS.md)
 - [Upstream outage response](../../docs/maintainers/UPSTREAM_PROVIDER_OUTAGE_AND_DEGRADATION.md)
@@ -170,7 +171,7 @@ Owner role: **Database operator**. Domain: `database`.
 - [Canonical account profile and actor model](../../docs/maintainers/ACCOUNT_PROFILE_SCHEMA.md)
 - [ADR 0158: Canonical account profiles with explicit actor provenance](../../docs/adr/0158-canonical-account-profiles-and-actor-provenance.md)
 
-Relevant checks (select for the change; impact discovery never executes these): `npm run db:verify`, `npm run db:test`, `npm run test:relay:manual-db`, `npm run test:relay:foundation-db`, `npm run test:relay:authorization-db`, `npm run test:relay:activation-db`.
+Relevant checks (select for the change; impact discovery never executes these): `npm run db:verify`, `npm run db:test`, `npm run test:relay:manual-db`, `npm run test:relay:authorization-db`, `npm run test:relay:activation-db`.
 
 ## Release and deployment boundaries
 

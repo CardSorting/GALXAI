@@ -13,7 +13,7 @@ export type Json =
 
 export type GalxProviderType = 'openai';
 export type GalxAuthType = 'api_key' | 'oauth';
-/** Standard is retired; Premium is the only active relay pool. */
+/** The legacy relay pool is retired; Premium is the only active relay pool. */
 export type GalxRelayPoolId = 'premium';
 // Private relay protocol DTOs; no browser Data API grants or public-schema table additions.
 export type RelayRegistrationManagementCommand = 'rename' | 'remove' | 'restore';
@@ -296,6 +296,22 @@ export interface Database {
         Row: { user_id: string; amount_usd: number; status: 'pending' | 'granted' | 'duplicate'; identity_hash: string | null; transaction_id: string | null; enrolled_at: string; granted_at: string | null };
         Insert: { user_id: string; amount_usd: number; status?: 'pending'; enrolled_at?: string };
         Update: { status?: 'granted' | 'duplicate'; identity_hash?: string; transaction_id?: string; granted_at?: string };
+        Relationships: [];
+      };
+      user_star_follows: {
+        Row: {
+          user_id: string;
+          star_handle: string;
+          followed_at: string;
+        };
+        Insert: {
+          user_id: string;
+          star_handle: string;
+          followed_at?: string;
+        };
+        Update: {
+          followed_at?: string;
+        };
         Relationships: [];
       };
     };

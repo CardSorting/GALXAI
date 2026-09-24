@@ -6,7 +6,7 @@ Private reference for security, platform and relay operators, reconciled Septemb
 
 ## 1. Operational model
 
-Only project `mazhcjisettrzbqhorvp` owns canonical accounts, encrypted credentials, exclusive pool assignments, lifecycle history and account leases. The [central account contract](../reference/relay-account-management.md) governs the new services. Premium paid provider accounts support text/Sites/images; Standard free accounts support text only. Execution projects contain identity/reservations/outcomes, not accounts or another budget ledger.
+Only project `mazhcjisettrzbqhorvp` owns canonical accounts, encrypted credentials, exclusive pool assignments, lifecycle history and account leases. The [central account contract](../reference/relay-account-management.md) governs the new services. Premium paid provider accounts support text/Sites/images. The Premium execution project contains identity/reservations/outcomes, not accounts or another budget ledger.
 
 Manual sign-in takes place in the owning pool monitor's desktop. **Connect account** verifies and saves authority centrally, enabling new connections under the verified automatic-activation policy. Existing pauses and manual installation holds remain in effect. Later renewal is explicit **Reconnect → Save new sign-in**. Labels, files and valid tokens alone cannot establish assignment. The new monitor does not use the legacy background saved-file bridge. Rename, removal and unfinished-registration restoration use central revisions and immutable operation identity. Removal is revocation with retained evidence, not erasure or upstream logout.
 
@@ -32,7 +32,7 @@ Use component-specific secret files from [service installation](../runbooks/rela
 
 ## 3. Registration, renewal and revocation
 
-Use the [current manual procedure](RELAY_CREDENTIAL_ENROLLMENT.md) in the fixed Premium/Standard monitor. Connect verifies account class, identity and current access atomically before applying the installation policy to the new connection. A different desktop or pool cannot take over a binding. Saved revision, applied runtime revision and capability acceptance are separate. Account removal cannot be reversed; unfinished registration restoration requires new review and preserves history.
+Use the [current manual procedure](RELAY_CREDENTIAL_ENROLLMENT.md) in the fixed Premium monitor. Connect verifies account class, identity and current access atomically before applying the installation policy to the new connection. A different desktop cannot take over a binding. Saved revision, applied runtime revision and capability acceptance are separate. Account removal cannot be reversed; unfinished registration restoration requires new review and preserves history.
 
 Central removal precedes desktop disconnection/stop. If cleanup fails, use **Removed → Stop desktop**; do not restore authority to stop a container. Keep homes and canonical evidence. Hard upstream revocation needs the provider's own session process; database removal does not claim to perform it.
 

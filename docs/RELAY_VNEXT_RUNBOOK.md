@@ -2,15 +2,15 @@
 
 <!-- docs-scope: current-guide -->
 
-Private operator navigation for the implemented central authority and isolated Premium/Standard relays. Use [current state](../post-mortem/CURRENT_STATE.md) before intervention. The complete installation, gates and rollback procedure is [relay pool services](runbooks/relay-pool-services.md); the full account/health protocol is [central management](reference/relay-account-management.md).
+Private operator navigation for the implemented central authority and isolated Premium relay. Use [current state](../post-mortem/CURRENT_STATE.md) before intervention. The complete installation, gates and rollback procedure is [relay pool services](runbooks/relay-pool-services.md); the full account/health protocol is [central management](reference/relay-account-management.md).
 
 ## Validate the implementation
 
-Run `test:relay:services`, `test:relay:authorization-db`, `node --test scripts/test-relay-monitor-model.mjs` and the synthetic monitor browser verifier for affected source changes. Database changes also require `db:verify` and `db:test` in disposable fixtures. `npm run relay:local -- verify` checks installed image pins, own-pool authorization, TLS and peer denial. It performs no provider generation. Keep build, installation and actual acceptance separate.
+Run `test:relay:services`, `test:relay:authorization-db`, `node --test scripts/test-relay-monitor-model.mjs` and the synthetic monitor browser verifier for affected source changes. Database changes also require `db:verify` and `db:test` in disposable fixtures. `npm run relay:local -- verify` checks installed image pins, own-installation authorization, TLS and host isolation. It performs no provider generation. Keep build, installation and actual acceptance separate.
 
 ## Start the host controller
 
-The new installation uses `npm run relay:local -- up`, not `relay:federation`. Central/TLS runs on Docker Desktop; each pool has its own Colima VM, runtime and monitor. Open **GALX Monitors**, **GALX Premium** or **GALX Standard**, or use `npm run relay:local -- open premium` / `open standard`.
+The new installation uses `npm run relay:local -- up`, not `relay:federation`. Central/TLS runs on Docker Desktop; Premium has its own Colima VM, runtime and monitor. Open **GALX Monitors** or use `npm run relay:local -- open premium`.
 
 Native openers start only the requested pool and shared central dependency, verify saved identities/isolation/images and issue a scoped one-use ticket. A stopped runtime waits for the central ownership handoff interval before claiming a new epoch. Never delete identities or disable the fence to accelerate startup.
 
@@ -23,30 +23,29 @@ The retained single-controller service still uses its existing guardian and laun
 | Local image set | [Reviewed manifest](../docker/relay-pools/local/images.json), verified by exact image ID |
 | Central | Its own private main-project/vault config and local HTTPS proxy |
 | Premium runtime/monitor | Only Premium execution/principal/desktop config in its VM |
-| Standard runtime/monitor | Only Standard execution/principal/desktop config in its VM |
-| Application integration | Server-only full isolated mode, or independent Premium image switch; distinct pool credentials |
+| Application integration | Server-only Premium isolated mode or independent Premium image switch |
 
 The account contract records ownership/grant/health timing. Runtime engines execute in-process inside a fixed pool container; per-account Docker workers and `RELAY_FEDERATION_*` settings belong to the [legacy configuration](maintainers/legacy-federation-operations.md#configuration-and-bounds). Historical `staged-20260915` images are permanently closed; the service baseline and later management images have separately reviewed pins.
 
 ## Image verification
 
-Only Premium can handle image requests. Registration verifies account class and inventory; neither guarantees an image result. Availability checks are non-consuming and read actual in-process evidence. Missing or expired image evidence is unknown; chat inventory does not prove denial. Perform a separately authorized, small real image request after manual registration, activation and account enablement, then decode/inspect the sanitized artifact and verify its owned product persistence. No automatic paid probe runs in isolated execution. Standard must make zero provider calls for images/Sites. Keep the existing HTTP 403 incident separate from a claim that all paid accounts are qualified.
+Premium handles text, Sites and image requests. Registration verifies account class and inventory; neither guarantees an image result. Availability checks are non-consuming and read actual in-process evidence. Missing or expired image evidence is unknown; chat inventory does not prove denial. Perform a separately authorized, small real image request after manual registration, activation and account enablement, then decode/inspect the sanitized artifact and verify its owned product persistence. No automatic paid probe runs in isolated execution. Keep the existing HTTP 403 incident separate from a claim that all paid accounts are qualified.
 
 ## Production cutover checklist
 
 1. Inspect the exact central migration history, component image pins, installation identities and original-operation state.
 2. Install only reviewed, destination-specific configurations and images; preserve TLS trust, homes, keys and state.
-3. Verify both local VM boundaries and monitors. Local hosting is already implemented; do not fabricate SSH evidence.
-4. Manually register a paid Premium account and free Standard account. Both save paused.
+3. Verify the Premium VM boundary and monitor. Local hosting is already implemented; do not fabricate SSH evidence.
+4. Manually register a paid Premium account. Save it according to the current activation policy.
 5. Use the explicit `relay:services:gates -- serve-local` procedure, which reruns local acceptance and requires registrations. Enable intended accounts separately and wait for matching confirmation.
-6. Qualify Standard text and Premium text/Sites/images through their own endpoints. Preserve unknown outcomes.
+6. Qualify Premium text/Sites/images through its endpoint. Preserve unknown outcomes.
 7. Point the application at reachable, authenticated service origins only in a deliberate compatible cutover. A deployed application cannot use this Mac's loopback URLs.
 
 The external-host `serve` mode remains a separate optional procedure with actual SSH targets and private HTTPS. Local installation does not change public traffic. Use [deployment boundaries](DEPLOYMENT.md) for component acceptance and rollback.
 
 ## Sites generation rollout and recovery
 
-Sites chooses Premium only in isolated mode. Product inclusion, fair usage and historical settlement remain in [Sites operations](maintainers/SITES_OPERATIONS.md). Keep original origin, request identity and receipt reader. No epoch/account loss permits resubmission through another pool. Legacy retained-volume receipt behavior is documented separately and is not a new-runtime guarantee.
+Sites chooses Premium only in isolated mode. Product inclusion, fair usage and historical settlement remain in [Sites operations](maintainers/SITES_OPERATIONS.md). Keep original origin, request identity and receipt reader. No epoch/account loss permits resubmission through another deployment. Legacy retained-volume receipt behavior is documented separately and is not a new-runtime guarantee.
 
 ## Parent and subagent request contract
 
@@ -60,7 +59,7 @@ For an incident in the still-running legacy controller, use [legacy recovery sup
 
 ## Throughput and failure isolation
 
-Standard and Premium cannot lend capacity or call each other. Each runtime has bounded local admission bookkeeping and own account engines; central leases govern account usage. Unknown terminal persistence blocks new admission. Local acceptance proves tested boundaries, not a throughput SLA or physically independent availability.
+Premium has bounded local admission bookkeeping and in-process account engines; central leases govern account usage. Unknown terminal persistence blocks new admission. Local acceptance proves tested boundaries, not a throughput SLA or physical independence.
 
 ## Explicit Codex image-tool compatibility alias
 

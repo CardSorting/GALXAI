@@ -2,7 +2,7 @@
 
 <!-- docs-scope: current-guide -->
 
-Private maintainer guide. The implemented relay strategy has one central account authority and two isolated local execution pools. [Current state](../post-mortem/CURRENT_STATE.md) records installation and activation; [ADR 0153](adr/0153-central-account-authority-isolated-relays.md) retains decision status separately. Customer documentation describes capability and access, never this topology.
+Private maintainer guide. The implemented relay strategy has one central account authority and one isolated Premium execution pool. [Current state](../post-mortem/CURRENT_STATE.md) records installation and activation; [ADR 0153](adr/0153-central-account-authority-isolated-relays.md) retains decision status separately. Customer documentation describes capability and access, never this topology.
 
 ## Authority and topology
 
@@ -11,19 +11,18 @@ Private maintainer guide. The implemented relay strategy has one central account
 | Product application | Verified customer identity, entitlements, owned resources, durable product receipts and public responses | Server-only relay selection; customers cannot select provider accounts |
 | Central account service | Manual registration, account names, encrypted credentials, exclusive assignments, lifecycle history and existing account leases/budgets | Supabase `mazhcjisettrzbqhorvp` only; no Docker socket |
 | Premium runtime | Assigned paid accounts; text, Sites and images | Own Colima VM/daemon, execution project `prgjcyokylzcsqrjmkaa`, keys and state |
-| Standard runtime | Assigned free accounts; text only | Own Colima VM/daemon, execution project `enbtzuxkguehtnrhuvlu`, keys and state |
-| Two monitors | Fixed-pool operator/viewer access, account management and manual sign-in desktops | Separate localhost origins and sessions; central authorization on privileged requests |
-| Sign-in desktops | Manual provider sign-in and retained guest homes | Created only on the owning monitor's daemon; never copied between pools |
+| Premium monitor | Fixed operator/viewer access, account management and manual sign-in desktop | Loopback origin and session; central authorization on privileged requests |
+| Sign-in desktop | Manual provider sign-in and retained guest home | Created only on the Premium monitor's daemon |
 
-The central service and TLS proxy run on Docker Desktop. Premium and Standard use separate Linux kernels, daemons and disks; persistent rules deny direct and Mac-forwarded peer access. Both retain a common trusted Mac administrator and physical host. Two Compose networks or schema labels alone are not this boundary.
+The central service and TLS proxy run on Docker Desktop. Premium runs in its own Linux VM, daemon and disk with a persistent host boundary. The Mac administrator and physical host remain trusted infrastructure. A Compose network or schema label alone is not a host boundary.
 
-Each pool runtime hosts one in-process relay engine per eligible assigned account inside its own runtime container. It does **not** create a Docker worker container per account or use the legacy federation guardian. The monitor alone has its own daemon socket to manage desktops. The two execution databases hold installation identity and execution reservations/outcomes; they hold no account registry, credential table or second account-capacity ledger.
+The Premium runtime hosts one in-process relay engine per eligible assigned account inside its own runtime container. It does **not** create a Docker worker container per account or use the legacy federation guardian. The monitor alone has its daemon socket to manage desktops. The execution database holds installation identity and execution reservations/outcomes; it holds no account registry, credential table or second account-capacity ledger.
 
 ## Request path
 
-With the isolated-relay application mode enabled, server deployment policy selects one text pool, default Standard; Sites and images select Premium. Alternatively, images can be cut over independently to Premium via `GALX_PREMIUM_IMAGES_ENABLED=1` while keeping text and Sites on their existing configuration. Both pools have the same intended text catalog, subject to verified account access. Text includes [client-owned function calling](reference/automatic-agent-tools.md): the agent application executes its registered callbacks automatically and returns results for the next authorized model step. Account class is independent of GALX customer billing tier. No request borrows another pool or falls back to the legacy transport after failure.
+With isolated-relay mode enabled, server deployment policy selects the Premium runtime for text, Sites and images. The Premium image switch remains available for an independent image cutover. Text includes [client-owned function calling](reference/automatic-agent-tools.md): the agent application executes its registered callbacks automatically and returns results for the next authorized model step. Provider account class is independent of GALX customer billing tier. No request falls back to the legacy transport after failure.
 
-The selected runtime filters its assigned running engines for the requested model. Premium retains its matching-engine cursor. Standard uses [health-aware rotation](reference/standard-relay-scheduling.md) across idle accounts, with one ongoing job per account, live cooldown exclusion and bounded central-denial backoff. Before provider I/O it persists an execution reservation, obtains a destination-bound central lease and binds that lease to the reservation. Central authorization checks assignment, account/credential revision, installation epoch, workload and existing budget policy. Short grants renew while work is authorized and expire independently if central renewal fails.
+The selected runtime filters its assigned running engines for the requested model and uses health-aware rotation across eligible accounts. Before provider I/O it persists an execution reservation, obtains a destination-bound central lease and binds that lease to the reservation. Central authorization checks assignment, account/credential revision, installation epoch, workload and existing budget policy. Short grants renew while work is authorized and expire independently if central renewal fails.
 
 The application delegates customer identity but does not decrypt assigned accounts or acquire a second account lease. Product quota and Sites fair usage remain separate admission layers. See [routing](ROUTING_ALGORITHMS.md), [queues](QUEUE_SPECIFICATION.md) and [the protocol reference](RELAY_API_REFERENCE.md).
 

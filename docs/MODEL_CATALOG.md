@@ -12,9 +12,9 @@ Private reference. A catalog describes public IDs and product metadata; it does 
 | Retained controller model/capability endpoints | Eligible evidence only for its unassigned legacy federation |
 | Private execution records | Actual internal route/model evidence, never a public model promise |
 
-## Premium and Standard
+## Premium relay
 
-Both pools intend the same text catalog. Premium uses paid provider accounts and alone accepts Sites/images. Standard uses free accounts and rejects Sites/images/tool aliases before provider I/O. Provider account class is separate from GALX customer plan. A label or paid account is not evidence that every intended model works.
+The Premium relay uses verified paid provider accounts and accepts text, Sites and images subject to observed capability. Provider account class is separate from GALX customer plan. A label or paid account is not evidence that every intended model works.
 
 Text selects the configured deployment pool before account selection and cannot fall back to the peer or legacy dispatch. Capacity counts are meaningful only within the selected pool, requested capability and current authority. Zero eligible accounts is unavailable; a positive count is not an SLA or measured throughput guarantee.
 

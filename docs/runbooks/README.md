@@ -8,7 +8,7 @@ Pick the symptom or operation. Each entry leads to the canonical procedure; inci
 | --- | --- | --- |
 | Production failure, unclear blast radius | [Incident triage](../../post-mortem/runbooks/triage.md) | Incident lead |
 | Images, history or Favorites fail | [Image generation recovery](../../post-mortem/runbooks/image-generation.md) | Product/API maintainer |
-| Local Premium/Standard setup, access or activation | [Isolated service installation](relay-pool-services.md) | Relay operator |
+| Premium setup, hosted access or activation | [Isolated service installation](relay-pool-services.md) | Relay operator |
 | Admission state, queue ownership or dispatch uncertainty | [Relay admission lifecycle](relay-admission-lifecycle.md) | Relay maintainer |
 | Account health, rename, removal or registration repair | [Account management](../reference/relay-account-management.md), [manual registration](../maintainers/RELAY_CREDENTIAL_ENROLLMENT.md) | Own-pool operator |
 | Retained controller stopped or lock remains | [Controller lock recovery](../../post-mortem/runbooks/controller-lock.md) | Relay operator |

@@ -84,6 +84,40 @@ class IncidentGuardTests(unittest.TestCase):
         self.register['incidents'][0]['recovery_evidence'] = ['post-mortem/evidence/raw/trace.json']
         self.assertTrue(any('missing, raw' in error for error in self.errors()))
 
+    def test_retired_evidence_preserves_deleted_source_reference(self):
+        retired = 'src/lib/images/retired-example.ts'
+        self.events[0]['evidence'] = [retired]
+        (self.root / 'post-mortem/retired-evidence.json').write_text(json.dumps({
+            'version': 1,
+            'paths': {retired: {
+                'retired_at': '2026-09-22',
+                'reason': 'Fixture source was intentionally retired',
+                'replacement': 'src/lib/images/example.ts',
+                'historical_evidence': ['post-mortem/incidents/test/README.md'],
+            }}
+        }))
+        self.assertEqual(guard.validate_retired_evidence(
+            self.root, guard.load_retired_evidence(self.root)), [])
+        self.assertEqual(self.errors(), [])
+        views = guard.generated_views(self.root, self.register, self.events,
+                                      guard.load_retired_evidence(self.root))
+        self.assertIn('(retired)', views['post-mortem/ROLLING_LOG.md'])
+
+    def test_retired_evidence_cannot_hide_a_restored_source_file(self):
+        retired = 'src/lib/images/retired-example.ts'
+        (self.root / retired).write_text('export const retired = true;\n')
+        (self.root / 'post-mortem/retired-evidence.json').write_text(json.dumps({
+            'version': 1,
+            'paths': {retired: {
+                'retired_at': '2026-09-22',
+                'reason': 'Fixture source was intentionally retired',
+                'replacement': 'src/lib/images/example.ts',
+                'historical_evidence': ['post-mortem/incidents/test/README.md'],
+            }}
+        }))
+        self.assertTrue(any('still exists' in error for error in guard.validate_retired_evidence(
+            self.root, guard.load_retired_evidence(self.root))))
+
     def test_outside_workspace_evidence_rejected(self):
         self.events[0]['evidence'] = ['../../etc/passwd']
         self.assertTrue(any('outside-workspace' in error for error in self.errors()))

@@ -15,9 +15,9 @@ const {default:AxeBuilder}=await import(pathToFileURL('/private/tmp/galx-preview
 const directory=await mkdtemp(path.join(tmpdir(),'pool-browser-')),shots=path.resolve('.impeccable/review/relay-management');await mkdir(shots,{recursive:true});
 const browser=await chromium.launch({headless:true});const monitors:any[]=[];const report:any[]=[];
 try{
-  for(const pool of ['premium','standard'] as const){const identity={pool,installationId:randomUUID()},epoch=randomUUID(),accountId='codex_sh_'+hash(pool).slice(0,24),desktopId=randomUUID();
+  for(const pool of ['premium'] as const){const identity={pool,installationId:randomUUID()},epoch=randomUUID(),accountId='codex_sh_'+hash(pool).slice(0,24),desktopId=randomUUID();
     const data:any={pool,installationId:identity.installationId,epoch,registrationAllowed:true,executionAllowed:true,lastSeenAt:new Date().toISOString(),accounts:pool==='premium'?[{id:accountId,desktopId,name:'Synthetic · Design studio',state:'enabled',revision:2,acknowledgedRevision:2,acknowledgedEpoch:epoch,acknowledgedAt:new Date().toISOString(),models:['fixture-text-a','fixture-text-b'],accountClass:'paid',credentialExpiresAt:Date.now()+86400000},{id:'codex_sh_'+hash('second').slice(0,24),desktopId:randomUUID(),name:'Synthetic · Research team',state:'paused',revision:3,acknowledgedRevision:2,acknowledgedEpoch:epoch,models:['fixture-text-a'],accountClass:'paid',credentialExpiresAt:Date.now()-1000}]:[],registrations:pool==='premium'?[{id:randomUUID(),desktopId,name:'Synthetic · New account',state:'reviewed',revision:1,accountClass:'paid',models:['fixture-text-a','fixture-text-b']}]:[],activity:pool==='premium'?[{id:randomUUID(),accountId,command:'enabled',revision:2,at:new Date().toISOString()}]:[]};
-    if(pool==='premium')data.accounts[0].updatedAt=new Date(Date.now()-120000).toISOString();
+    data.accounts[0].updatedAt=new Date(Date.now()-120000).toISOString();
     const tokens=['operator','viewer','registrar'].map(role=>hash(pool+role));
     let offline=false, mutationCount=0, stopFails=false, connectWrites=0, connectError=false, lostConnect=false, refreshError=false;
     const clients=tokens.map(token=>new CentralClient('http://127.0.0.1:1',token,identity,(async(url:any,options:any)=>{
@@ -43,8 +43,8 @@ try{
       if(route==='/operator/prepare'){let saved=data.registrations.find((r:any)=>r.id===body.id);if(!saved){saved={id:body.id,desktopId:body.desktopId,name:body.name,state:'prepared',revision:1};data.registrations.unshift(saved);}return Response.json(saved);}
       if(route==='/operator/operation'){const saved=data.registrations.find((r:any)=>r.id===body.id);if(!saved)return Response.json({error:{code:'not_found',message:'Registration not found.'}},{status:404});return Response.json(saved);}
       if(route==='/operator/ticket')return Response.json({ticket:'synthetic'});
-      if(route==='/registrar/review'){const saved=data.registrations.find((r:any)=>r.id===body.id);Object.assign(saved,{state:'reviewed',accountClass:pool==='premium'?'paid':'free',models:['fixture-text-a']});return Response.json(saved);}
-      if(route==='/registrar/connect'){if(connectError)return Response.json({error:{code:'credential_missing'}},{status:422});connectWrites++;const saved=data.registrations.find((r:any)=>r.id===body.id);Object.assign(saved,{state:'registered',accountClass:pool==='premium'?'paid':'free',models:['fixture-text-a']});saved.accountId='codex_sh_'+hash(saved.id).slice(0,24);data.accounts.push({id:saved.accountId,desktopId:saved.desktopId,name:saved.name,state:'paused',revision:1,models:saved.models,accountClass:saved.accountClass,credentialExpiresAt:Date.now()+86400000,connectionState:'connected',connectionCheckedAt:new Date().toISOString()});return lostConnect?Response.json({error:{code:'control_unavailable'}},{status:503}):Response.json(saved);}
+      if(route==='/registrar/review'){const saved=data.registrations.find((r:any)=>r.id===body.id);Object.assign(saved,{state:'reviewed',accountClass:'paid',models:['fixture-text-a']});return Response.json(saved);}
+      if(route==='/registrar/connect'){if(connectError)return Response.json({error:{code:'credential_missing'}},{status:422});connectWrites++;const saved=data.registrations.find((r:any)=>r.id===body.id);Object.assign(saved,{state:'registered',accountClass:'paid',models:['fixture-text-a']});saved.accountId='codex_sh_'+hash(saved.id).slice(0,24);data.accounts.push({id:saved.accountId,desktopId:saved.desktopId,name:saved.name,state:'paused',revision:1,models:saved.models,accountClass:saved.accountClass,credentialExpiresAt:Date.now()+86400000,connectionState:'connected',connectionCheckedAt:new Date().toISOString()});return lostConnect?Response.json({error:{code:'control_unavailable'}},{status:503}):Response.json(saved);}
       if(route==='/registrar/refresh'){if(refreshError)return Response.json({error:{code:'credential_rejected'}},{status:422});const saved=data.registrations.find((r:any)=>r.id===body.id);const account=data.accounts.find((a:any)=>a.id===saved.accountId);Object.assign(account,{connectionState:'connected',connectionCheckedAt:new Date().toISOString(),credentialExpiresAt:Date.now()+86400000});return Response.json({accountId:account.id,state:'updated'});}
       return Response.json(data);
     }) as typeof fetch));
@@ -74,14 +74,14 @@ try{
     await page.goto(`${origin}/#ticket=invalid&role=operator`);
     await page.getByText('This sign-in link is invalid.',{exact:false}).waitFor();
     assert.equal(new URL(page.url()).hash,'');
-    const role=pool==='premium'?'operator':'viewer';const ticket=await(await fetch(origin+'/session/ticket',{method:'POST',headers:{Authorization:`Bearer ${tokens[role==='operator'?0:1]}`}})).json();
-    await page.goto(`${origin}/#ticket=${ticket.ticket}&role=${role}`);await page.getByText(pool==='premium'?'Premium relay':'Standard relay',{exact:true}).waitFor();
+    const role='operator';const ticket=await(await fetch(origin+'/session/ticket',{method:'POST',headers:{Authorization:`Bearer ${tokens[0]}`}})).json();
+    await page.goto(`${origin}/#ticket=${ticket.ticket}&role=${role}`);await page.getByText('Premium relay',{exact:true}).waitFor();
     assert.equal(new URL(page.url()).hash,'');
     const renewal=await(await fetch(origin+'/session/ticket',{method:'POST',headers:{Authorization:`Bearer ${tokens[role==='operator'?0:1]}`}})).json();
     await page.goto(`${origin}/#ticket=${renewal.ticket}&role=${role}`);
     await page.waitForFunction(()=>!location.hash&&document.querySelector('#role')?.textContent.includes('access'));
     assert.equal((await fetch(origin+'/session',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json'},body:JSON.stringify({role,ticket:renewal.ticket})})).status,401,'reopening an authenticated monitor consumes the ticket');
-    assert.equal(await page.locator('#role').textContent(),pool==='premium'?'Operator access':'Read-only access');
+    assert.equal(await page.locator('#role').textContent(),'Operator access');
     // Automatic activation communicates a useful pending state in both fixed monitors.
     data.automaticActivation=true;data.executionAllowed=false;
     const savedAccounts=data.accounts;data.accounts=[];
@@ -121,7 +121,7 @@ try{
       data.executionAllowed=false;await page.getByRole('button',{name:'Refresh',exact:true}).click();await page.locator('#execution').filter({hasText:'Paused'}).waitFor();
       assert.equal(await page.getByRole('button',{name:'Enable',exact:true}).first().isEnabled(),false);
       data.executionAllowed=true;
-    } else assert.equal(await page.locator('#new').isVisible(),false);
+    }
     if(pool==='premium'){
       await page.locator('#filter').selectOption('all');await page.locator('#health-filter').selectOption('attention');
       assert.equal(await page.locator('#rows tr').count(),1);await page.locator('#health-filter').selectOption('all');

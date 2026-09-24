@@ -2,9 +2,9 @@ import { createHash, timingSafeEqual } from 'node:crypto';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { RequestError, RetryBudget } from './request-policy.js';
 
-export type PoolId = 'premium' | 'standard';
+export type PoolId = 'premium';
 export type Workload = 'text' | 'sites' | 'images';
-export const PROJECTS = { central: 'mazhcjisettrzbqhorvp', premium: 'prgjcyokylzcsqrjmkaa', standard: 'enbtzuxkguehtnrhuvlu' } as const;
+export const PROJECTS = { central: 'mazhcjisettrzbqhorvp', premium: 'prgjcyokylzcsqrjmkaa' } as const;
 export const hash = (value: string) => createHash('sha256').update(value).digest('hex');
 export const uuid = (value: unknown): value is string => typeof value === 'string' && /^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/.test(value);
 export const equalSecret = (a: unknown, b: string) => typeof a === 'string' && timingSafeEqual(Buffer.from(hash(a)), Buffer.from(hash(b)));
@@ -52,9 +52,6 @@ export function assertProjectDatabase(value: string, project: string) {
 export function requestWorkload(pool: PoolId, pathname: string, body: Record<string, any>): Workload {
   const image = pathname.includes('/images/') || /^(image:|gpt-image|dall-e)/i.test(body.model ?? '');
   const sites = body.sites_profile !== undefined || body.require_output_limit !== undefined;
-  if (pool === 'standard' && (image || sites || ['functions','function_call','modalities','image','images','response_format'].some(key => body[key] !== undefined)
-    || body.tools !== undefined && (!Array.isArray(body.tools) || body.tools.some((t: any) => t?.type !== 'function'))
-    || body.messages?.some((m: any) => typeof m?.content !== 'string' && !(m?.role === 'assistant' && m.content === null && Array.isArray(m.tool_calls) && m.tool_calls.length)))) throw new RequestError(403, 'capability_unavailable', 'This request is not supported.');
   return image ? 'images' : sites ? 'sites' : 'text';
 }
 export interface PoolIdentity { pool: PoolId; installationId: string; }
@@ -64,7 +61,7 @@ export class CentralClient {
   private readonly readCircuit = { failures: 0, openUntil: 0, probeInFlight: false };
   constructor(origin: string, private readonly token: string, readonly identity: PoolIdentity, private readonly transport: typeof fetch = fetch) {
     this.origin = serviceOrigin(origin);
-    if (!['premium','standard'].includes(identity.pool) || !uuid(identity.installationId) || !/^[A-Za-z0-9_-]{32,256}$/.test(token)) throw Error('Invalid service identity.');
+    if (identity.pool !== 'premium' || !uuid(identity.installationId) || !/^[A-Za-z0-9_-]{32,256}$/.test(token)) throw Error('Invalid service identity.');
   }
   private beginSafeRead() {
     const now = Date.now();
@@ -110,7 +107,7 @@ export class CentralClient {
             const known=registrationErrors[code];throw new RequestError(known.status,code,known.message);
           }
           const reviewErrors:Record<string,string>={
-            account_type_mismatch:`Sign in with a ${this.identity.pool==='premium'?'paid':'free'} account for this registration.`,
+            account_type_mismatch:'Sign in with a paid account for this registration.',
             account_type_unverified:'The account type could not be verified. Sign in again, then review the account.',
             models_unverified:'Model access could not be verified. Review the account after its connection is restored.',
             account_check_unavailable:'Account review is unavailable. Restore the central account service before retrying.',

@@ -10,7 +10,7 @@ Trace verified customer identity and entitlement to one server-selected destinat
 
 ## Follow an account
 
-Accounts, credentials, assignments and lifecycle history live only in `mazhcjisettrzbqhorvp`. Open **GALX Monitors**, then the fixed Premium or Standard monitor. Premium requires a paid provider account; Standard requires a free one. Create a named registration, sign in manually in its desktop, then **Connect account**. The verified automatic policy enables the new connection and activates its own ready relay. Existing deliberate pauses and installation holds are preserved. Customer subscription is not provider classification.
+Accounts, credentials, assignments and lifecycle history live only in `mazhcjisettrzbqhorvp`. Open **GALX Monitors**, then the fixed Premium monitor. Register a paid provider account, sign in manually in its desktop, then **Connect account**. The verified automatic policy enables the new connection and activates its own ready relay. Existing deliberate pauses and installation holds are preserved. Customer subscription is not provider classification.
 
 Use **Manage** to rename or remove. Rename updates linked account/registration names together. Removing a registered account permanently revokes access and retains history; unfinished registrations can be restored from Removed with a new review. Stale revisions require refresh, and a lost response requires inspecting the saved outcome.
 
@@ -22,7 +22,7 @@ A removal that could not stop its desktop offers **Removed → Stop desktop**. N
 
 ## Practice and evidence
 
-The central authority is on Docker Desktop; each pool has its own Colima VM, Docker daemon and execution database. The two VMs share a trusted physical Mac. The runtime has no daemon socket or main database/vault authority. The owning monitor has the daemon access required for its desktops. Run `npm run relay:local -- verify` for actual local isolation checks; it does not generate content or activate execution.
+The central authority is on Docker Desktop; Premium has its own Colima VM, Docker daemon and execution database. The VM and central service share a trusted physical Mac. The runtime has no daemon socket or main database/vault authority. The owning monitor has the daemon access required for its desktops. Run `npm run relay:local -- verify` for actual local isolation checks; it does not generate content or activate execution.
 
 Use disposable database and synthetic monitor tests for mutations. Ordinary GALX authentication, preview approval and inference keys do not authorize monitor administration. Existing legacy controller/desktops remain governed by [legacy operations](maintainers/legacy-federation-operations.md) and cannot administer assigned pool accounts.
 

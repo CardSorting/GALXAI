@@ -3,7 +3,7 @@
 <!-- docs-scope: current-guide -->
 > **Reading scope:** Current guidance. The federation contract governs relay behavior; source and dated verification define implementation evidence. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
 
-Use [central account management](../reference/relay-account-management.md), [local service installation](../runbooks/relay-pool-services.md) and the [relay runbook](../RELAY_VNEXT_RUNBOOK.md) for the implemented Premium/Standard strategy. Identify the component and its authority before applying a subsystem procedure. Older domain references are not fleet-wide guarantees.
+Use [central account management](../reference/relay-account-management.md), [local service installation](../runbooks/relay-pool-services.md) and the [relay runbook](../RELAY_VNEXT_RUNBOOK.md) for the implemented Premium strategy. Identify the component and its authority before applying a subsystem procedure. Older domain references are not fleet-wide guarantees.
 
 Start with [parent/subagent execution](AI_AGENT_PAIR_PROGRAMMING_AND_GOVERNANCE.md), [hardening checks](RELAY_HARDENING.md), and [ADR lifecycle](ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md). Keep evidence dated, I/O bounded, and shared mutations serialized.
 

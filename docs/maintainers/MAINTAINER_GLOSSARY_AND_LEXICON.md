@@ -10,7 +10,6 @@ Private terminology reference. Definitions point to owning contracts; they do no
 | --- | --- |
 | Central account authority | Main project `mazhcjisettrzbqhorvp` and its private service; canonical credentials, assignment, lifecycle and existing account lease ledger |
 | Premium pool | Exclusive paid provider accounts; text, Sites and images |
-| Standard pool | Exclusive free provider accounts; text only; unsupported workloads rejected before provider I/O |
 | Customer plan | GALX product access/usage policy, independent of provider paid/free account class |
 | Registration | Centrally saved manual setup/review flow bound to one pool, installation and desktop; not an enabled account |
 | Assignment | Exclusive immutable central ownership relation; no account transfer or peer borrowing |
@@ -48,7 +47,7 @@ Private terminology reference. Definitions point to owning contracts; they do no
 
 ## Routing and accounting
 
-**Model eligibility** means the owning route has the required current access/capability evidence. It is evaluated inside the fixed destination, not across both pools. Premium retains its matching-engine cursor. Standard uses [health-aware rotation](../reference/standard-relay-scheduling.md) across idle eligible accounts, with one ongoing job per account and cooldown/backoff exclusion. Historical weighted/headroom utilities do not define these algorithms. See [routing](../ROUTING_ALGORITHMS.md).
+**Model eligibility** means the owning route has the required current access/capability evidence. It is evaluated inside Premium. Premium retains its matching-engine cursor, bounded concurrency and cooldown/backoff exclusion. Historical weighted/headroom utilities do not define these algorithms. See [routing](../ROUTING_ALGORITHMS.md).
 
 **Alias** is an explicitly supported input mapping. It cannot promise an unverified underlying model, provision an account, grant tool access or authorize fallback. **Circuit breaker** is a component-specific temporary admission/failure mechanism; it cannot overwrite central lifecycle authority or permit replay after uncertainty.
 

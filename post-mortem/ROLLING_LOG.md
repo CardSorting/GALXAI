@@ -1574,7 +1574,7 @@ Incident: `INC-20260919-STARS`. Kind: `follow-up`.
 
 **Next step:** Review and deploy/reload the relay components under release authorization, observe private queue/capacity telemetry, then require fresh positive image capability before any separately authorized Star run. Keep all cohorts inactive and do not reset or replay existing ceilings.
 
-Evidence: [standard-pool-scheduler.ts](../src/relay/standard-pool-scheduler.ts), [pool-runtime.ts](../src/relay/pool-runtime.ts), [relay-server.ts](../src/relay/relay-server.ts), [test-standard-pool.ts](../scripts/test-standard-pool.ts), [relay-pool-services.md](../docs/runbooks/relay-pool-services.md).
+Evidence: [standard-pool-scheduler.ts (retired)](retired-evidence.json), [pool-runtime.ts](../src/relay/pool-runtime.ts), [relay-server.ts](../src/relay/relay-server.ts), [test-standard-pool.ts (retired)](retired-evidence.json), [relay-pool-services.md](../docs/runbooks/relay-pool-services.md).
 
 ## EVT-20260919-relay-image-queue-second-pass — 2026-09-19T22:24:58Z
 
@@ -1588,7 +1588,7 @@ Incident: `INC-20260919-STARS`. Kind: `verification`.
 
 **Next step:** Review and deploy/reload the relay components under release authorization, observe private queue/capacity telemetry, then require fresh positive image capability before any separately authorized Star run. Keep all cohorts inactive and do not reset or replay existing ceilings.
 
-Evidence: [standard-pool-scheduler.ts](../src/relay/standard-pool-scheduler.ts), [pool-runtime.ts](../src/relay/pool-runtime.ts), [relay-server.ts](../src/relay/relay-server.ts), [test-standard-pool.ts](../scripts/test-standard-pool.ts), [QUEUE_SPECIFICATION.md](../docs/QUEUE_SPECIFICATION.md), [relay-pool-services.md](../docs/runbooks/relay-pool-services.md).
+Evidence: [standard-pool-scheduler.ts (retired)](retired-evidence.json), [pool-runtime.ts](../src/relay/pool-runtime.ts), [relay-server.ts](../src/relay/relay-server.ts), [test-standard-pool.ts (retired)](retired-evidence.json), [QUEUE_SPECIFICATION.md](../docs/QUEUE_SPECIFICATION.md), [relay-pool-services.md](../docs/runbooks/relay-pool-services.md).
 
 ## EVT-20260919-relay-image-queue-deadline-fix — 2026-09-19T22:28:23Z
 
@@ -1602,7 +1602,7 @@ Incident: `INC-20260919-STARS`. Kind: `correction`.
 
 **Next step:** Review and deploy/reload the relay components under release authorization, observe private queue/capacity telemetry, then require fresh positive image capability before any separately authorized Star run. Keep all cohorts inactive and do not reset or replay existing ceilings.
 
-Evidence: [pool-runtime.ts](../src/relay/pool-runtime.ts), [standard-pool-scheduler.ts](../src/relay/standard-pool-scheduler.ts), [test-standard-pool.ts](../scripts/test-standard-pool.ts).
+Evidence: [pool-runtime.ts](../src/relay/pool-runtime.ts), [standard-pool-scheduler.ts (retired)](retired-evidence.json), [test-standard-pool.ts (retired)](retired-evidence.json).
 
 ## EVT-20260919-relay-admission-lifecycle-hardening — 2026-09-19T22:40:08Z
 
@@ -1616,7 +1616,7 @@ Incident: `INC-20260919-STARS`. Kind: `verification`.
 
 **Next step:** Review and deploy/reload the reviewed relay components under release authorization before relying on this behavior in production. Keep all Star cohorts inactive, require fresh positive image capability and separate bounded authorization for any future qualification, and preserve the 32/8/120-second limits.
 
-Evidence: [admission-lifecycle.ts](../src/relay/admission-lifecycle.ts), [standard-pool-scheduler.ts](../src/relay/standard-pool-scheduler.ts), [pool-runtime.ts](../src/relay/pool-runtime.ts), [relay-server.ts](../src/relay/relay-server.ts), [test-relay-admission-lifecycle.ts](../scripts/test-relay-admission-lifecycle.ts), [test-standard-pool.ts](../scripts/test-standard-pool.ts), [test-relay-services.ts](../scripts/test-relay-services.ts), [relay-admission-lifecycle.md](../docs/runbooks/relay-admission-lifecycle.md).
+Evidence: [admission-lifecycle.ts](../src/relay/admission-lifecycle.ts), [standard-pool-scheduler.ts (retired)](retired-evidence.json), [pool-runtime.ts](../src/relay/pool-runtime.ts), [relay-server.ts](../src/relay/relay-server.ts), [test-relay-admission-lifecycle.ts](../scripts/test-relay-admission-lifecycle.ts), [test-standard-pool.ts (retired)](retired-evidence.json), [test-relay-services.ts](../scripts/test-relay-services.ts), [relay-admission-lifecycle.md](../docs/runbooks/relay-admission-lifecycle.md).
 
 ## EVT-20260919-relay-capacity-domain-repair — 2026-09-19T22:42:33Z
 
@@ -1630,7 +1630,7 @@ Incident: `INC-20260919-STARS`. Kind: `correction`.
 
 **Next step:** Review and deploy/reload the reviewed relay components under release authorization. Keep all Star cohorts inactive and retain the existing bounded authorization/capability requirements.
 
-Evidence: [standard-pool-scheduler.ts](../src/relay/standard-pool-scheduler.ts), [test-relay-admission-lifecycle.ts](../scripts/test-relay-admission-lifecycle.ts), [test-standard-pool.ts](../scripts/test-standard-pool.ts).
+Evidence: [standard-pool-scheduler.ts (retired)](retired-evidence.json), [test-relay-admission-lifecycle.ts](../scripts/test-relay-admission-lifecycle.ts), [test-standard-pool.ts (retired)](retired-evidence.json).
 
 ## EVT-20260919-stars-refresh-v2-live — 2026-09-19T22:57:40Z
 
@@ -1658,7 +1658,7 @@ Incident: `INC-20260919-STARS`. Kind: `verification`.
 
 **Next step:** Keep all cohorts inactive. Do not replay the seven failures or issue the 24 unallocated opportunities. Deploy/reload the reviewed source only under release authorization, obtain fresh positive capability evidence, then consider a separate bounded run.
 
-Evidence: [2026-09-19-stars-refresh-v2-forensic.json](releases/2026-09-19-stars-refresh-v2-forensic.json), [IsolatedRelayTransport.ts](../src/core/router/adapters/IsolatedRelayTransport.ts), [test-image-availability.ts](../scripts/test-image-availability.ts), [test-relay-admission-lifecycle.ts](../scripts/test-relay-admission-lifecycle.ts), [test-relay-services.ts](../scripts/test-relay-services.ts), [test-standard-pool.ts](../scripts/test-standard-pool.ts).
+Evidence: [2026-09-19-stars-refresh-v2-forensic.json](releases/2026-09-19-stars-refresh-v2-forensic.json), [IsolatedRelayTransport.ts](../src/core/router/adapters/IsolatedRelayTransport.ts), [test-image-availability.ts](../scripts/test-image-availability.ts), [test-relay-admission-lifecycle.ts](../scripts/test-relay-admission-lifecycle.ts), [test-relay-services.ts](../scripts/test-relay-services.ts), [test-standard-pool.ts (retired)](retired-evidence.json).
 
 ## EVT-20260919-relay-image-target-failover — 2026-09-19T23:29:08Z
 
@@ -1813,3 +1813,73 @@ Incident: `INC-20260920-LIGHTBOX`. Kind: `recovery`.
 **Next step:** Retain deep-link desktop/narrow browser acceptance and FM-IMG-006 guidance. Reopen if shell navigation occludes a public dialog or media/edge controls escape a supported viewport.
 
 Evidence: [recovery.json](incidents/2026/2026-09-20-profile-lightbox/recovery.json), [PublicImageMasonryStream.tsx](../src/components/images/PublicImageMasonryStream.tsx), [masonry-stream.css](../src/components/images/masonry-stream.css).
+
+## EVT-20260922-local-relay-hardening-pass — 2026-09-22T21:09:06Z
+
+Incident: `INC-20260913-IMAGES`. Kind: `verification`.
+
+**Observation:** A read-only host check found battery power at 83%, Docker Desktop running, the Premium VM and central services stopped, both listeners not responding, and Keep Premium online off. The owner-selected local supervisor and native menu work remain source/build changes; no app installation or local service acceptance is recorded.
+
+**Action:** Reviewed local supervisor recovery, process serialization, fixed monitor destinations, native menu status/toggles, restart policy overlay synchronization, runbook and deployment guidance. Ran the fixed-destination access suite, relay service authorization/public-response suite, production build and compiled browser/rendered asset boundary scan.
+
+**Result:** All 6 access checks and 41 relay service checks passed. The production build succeeded and its browser/rendered output had no matches for local VM, loopback service, provider-host or supervisor markers. Native local application bundles were built and verified earlier in this pass. No relay was started, no gate or ingress was changed, and no live verification was attempted while the VM was stopped and the host was on battery.
+
+**Next step:** Keep ACT-018 open. Install the reviewed menu apps after owner authorization, connect the Mac to power, explicitly enable Keep Premium online if desired, then record sign-in, daemon/VM restart, sleep/wake, identity/isolation, central/monitor/runtime health and duplicate-owner acceptance. Run fresh local verify before any separate gate or public-routing decision.
+
+Evidence: [0159-local-mac-relay-operation.md](../docs/adr/0159-local-mac-relay-operation.md), [relay-pool-services.md](../docs/runbooks/relay-pool-services.md), [DEPLOYMENT.md](../docs/DEPLOYMENT.md), [relay-local.mjs](../scripts/relay-local.mjs), [RelayMonitors.swift](../scripts/macos/RelayMonitors.swift), [install-relay-monitor-apps.py](../scripts/install-relay-monitor-apps.py), [CURRENT_STATE.md](CURRENT_STATE.md).
+
+## EVT-20260923-local-relay-supervisor-verified — 2026-09-23T04:45:39Z
+
+Incident: `INC-20260913-IMAGES`. Kind: `verification`.
+
+**Observation:** On AC power, the guarded local startup completed. Fresh verification passed 26 checks; a subsequent read-only status showed Docker Desktop, the Premium VM, central/Premium service pairs, relay and monitor healthy. The native apps are installed and the per-user Keep Premium online LaunchAgent reports running.
+
+**Action:** Synchronized the reviewed restart overlay into the Premium VM, started through the existing identity/isolation/image checks, ran authenticated monitor-role and database-TLS acceptance, then enabled the user-session supervisor after confirming AC power and fresh acceptance. No public routing or execution-gate operation was run.
+
+**Result:** The local acceptance record passed 26 checks and was retained with its digest in the private release record. The supervisor is active and local services respond. No provider generation or account mutation occurred. Login, Docker/Colima fault-injection, sleep/wake and duplicate-owner drills remain untested; ACT-018 stays open.
+
+**Next step:** Keep the Mac on AC with its lid open for best availability. Complete ACT-018 sign-in, daemon/VM restart, sleep/wake and duplicate-owner drills before claiming unattended recovery. Re-run local verify after a relevant change; handle any execution-gate or external-ingress change separately.
+
+Evidence: [2026-09-23-local-relay-supervisor-acceptance.json](releases/2026-09-23-local-relay-supervisor-acceptance.json), [CURRENT_STATE.md](CURRENT_STATE.md), [relay-local.mjs](../scripts/relay-local.mjs), [RelayMonitors.swift](../scripts/macos/RelayMonitors.swift), [0159-local-mac-relay-operation.md](../docs/adr/0159-local-mac-relay-operation.md).
+
+## EVT-20260923-local-relay-menu-ux-hardening — 2026-09-23T05:06:35Z
+
+Incident: `INC-20260913-IMAGES`. Kind: `verification`.
+
+**Observation:** A source-level native audit found that bounded supervisor backoff could outlast the menu's 60-second freshness threshold, causing a planned retry wait to appear as a stale startup state. The menu did not show a retry estimate, and login preference handlers did not fully validate existing LaunchAgent identity before removal.
+
+**Action:** Added a private 15-second heartbeat during waits, exposed supervisor liveness/retry estimate/attempt in the native menu, refreshed the summary when the menu opens, strictly validated the expected job identity and command before removal, and made the menu-app plist owner-only. Rebuilt and installed the local app; restarted only the per-user supervisor; ran fresh 26-check local acceptance and observed its timestamp after 20 seconds.
+
+**Result:** The supervisor continued reporting running with attempt 0 after restart and the heartbeat advanced. Docker Desktop, Premium VM, central and Premium service pairs, relay and monitor were healthy on AC power. No public ingress, execution gate, provider generation or account state changed. ACT-018 remains open for sign-in, daemon/VM recovery, sleep/wake and duplicate-owner acceptance. The UI audit was source-level because visual capture was unavailable.
+
+**Next step:** Keep ACT-018 open. Complete isolated sign-in, host/daemon failure, sleep/wake, closed-lid and duplicate-owner drills before claiming unattended availability. Retain heartbeat freshness, retry display and conflicting LaunchAgent preservation in local verification. Review adoption of SMAppService when a stable signed helper distribution path is available.
+
+Evidence: [2026-09-23-local-relay-menu-ux-hardening.json](releases/2026-09-23-local-relay-menu-ux-hardening.json), [CURRENT_STATE.md](CURRENT_STATE.md), [0159-local-mac-relay-operation.md](../docs/adr/0159-local-mac-relay-operation.md), [relay-pool-services.md](../docs/runbooks/relay-pool-services.md), [relay-local.mjs](../scripts/relay-local.mjs), [RelayMonitors.swift](../scripts/macos/RelayMonitors.swift).
+
+## EVT-20260923-local-relay-readiness-hardening — 2026-09-23T05:33:02Z
+
+Incident: `INC-20260913-IMAGES`. Kind: `verification`.
+
+**Observation:** A deeper owner-local resilience audit found that central readiness was inferred from container count, central containers had no health checks, post-jitter retry delay could exceed its five-minute nominal cap, and the native menu did not expose a fixed recovery cause or the caffeinate process state.
+
+**Action:** Added health checks for authority liveness and TLS-proxy readiness with CA verification; made Compose wait for authority health; changed the supervisor to require configured services healthy and to restart only services marked unhealthy; sanitized Compose override variables; clamped jittered retry delay to five minutes; exposed fixed recovery categories and sleep assertion process state in the native menu. Built/installed the apps and restarted only the per-user supervisor.
+
+**Result:** Both central services reported healthy; strict-CA /health/live and /health/ready probes returned the fixed healthy DTO; relay and monitor remained healthy; Keep Premium online supervisor reported running with attempt 0 and an active sleep assertion on AC. Fresh authenticated local verification passed 27 checks. Focused supervisor tests (3) and local access-boundary tests (6) passed. The production build passed and the compiled-boundary scan inspected 530 assets. No public route, ingress, execution gate, account state or provider workload changed. ACT-018 remains open for unhealthy restart and host/sign-in/sleep/wake/duplicate-owner drills.
+
+**Next step:** Finish isolated ACT-018 host and ownership recovery drills before claiming unattended availability. Re-run final documentation checks after the explicit relay and knowledge semantic reviews.
+
+Evidence: [2026-09-23-local-relay-readiness-hardening.json](releases/2026-09-23-local-relay-readiness-hardening.json), [CURRENT_STATE.md](CURRENT_STATE.md), [register.json](register.json), [0159-local-mac-relay-operation.md](../docs/adr/0159-local-mac-relay-operation.md), [relay-pool-services.md](../docs/runbooks/relay-pool-services.md), [relay-local.mjs](../scripts/relay-local.mjs), [RelayMonitors.swift](../scripts/macos/RelayMonitors.swift).
+
+## EVT-20260923-local-relay-readiness-docs-review — 2026-09-23T05:37:37Z
+
+Incident: `INC-20260913-IMAGES`. Kind: `verification`.
+
+**Observation:** The final documentation and boundary checks for the local relay readiness hardening completed after the explicit semantic reviews. A fresh direct host snapshot still showed central and Premium services healthy on AC power with the supervisor running.
+
+**Action:** Reviewed affected knowledge, relay, image and database domains plus the post-mortem record; ran docs:check, docs:check:build, docs tests, focused supervisor/access tests and git diff --check; refreshed the latest host observation and private evidence record.
+
+**Result:** docs:check passed for 371 guides, 41 incident documents and 159 ADRs; docs:check:build scanned 530 browser/rendered assets and passed; documentation tests passed (23 post-mortem, 17 knowledge); supervisor tests passed (3); local access-boundary tests passed (6); diff check passed. The existing ACT-005/006/008/014 overdue actions remain open. The 05:37 UTC host status showed AC at 94%, central and Premium services healthy, relay and monitor healthy, Keep Premium online enabled, supervisor running with attempt 0 and sleep assertion active. ACT-018 remains open for fault-injected and host recovery drills.
+
+**Next step:** Keep ACT-018 open until sign-in, Docker/Colima restart, unhealthy-service restart, sleep/wake and duplicate-owner acceptance are evidenced. Retain the assigned reviews for ACT-005/006/008/014.
+
+Evidence: [2026-09-23-local-relay-readiness-hardening.json](releases/2026-09-23-local-relay-readiness-hardening.json), [CURRENT_STATE.md](CURRENT_STATE.md), [register.json](register.json), [0159-local-mac-relay-operation.md](../docs/adr/0159-local-mac-relay-operation.md), [relay-pool-services.md](../docs/runbooks/relay-pool-services.md), [reviews.json](../docs/knowledge/reviews.json).

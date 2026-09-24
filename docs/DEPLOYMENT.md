@@ -2,26 +2,25 @@
 
 <!-- docs-scope: current-guide -->
 
-Private release guide. [Current state](../post-mortem/CURRENT_STATE.md) owns the latest dated component evidence. [Service installation](runbooks/relay-pool-services.md) owns the complete local procedure and the separate optional external-host procedure.
+Private release guide. [Current state](../post-mortem/CURRENT_STATE.md) owns the latest dated component evidence. [Service operation](runbooks/relay-pool-services.md) owns the local Premium install, recovery and acceptance procedure.
 
 | Component | Deployment and acceptance boundary |
 | --- | --- |
-| Central service and HTTPS proxy | Main-project account authority, protocol and lifecycle journal; reviewed image and private state on Docker Desktop |
-| Premium runtime and monitor | Premium Colima VM, own daemon/disk/secrets, execution database and manual desktops |
-| Standard runtime and monitor | Standard Colima VM, own daemon/disk/secrets, execution database and manual desktops |
+| Central service and HTTPS proxy | Main-project account authority, protocol and lifecycle journal; runs on the owner's Docker Desktop |
+| Premium runtime and monitor | Dedicated Premium Colima VM on the same Mac; own Linux daemon, disk, service files, execution database and manual desktops; monitor stays loopback-only |
 | Native monitor launchers | Fixed local destinations and scoped ticket access; no account or inference authority |
 | Application/gateway | Separate server/assets release, customer authorization and sanitized responses |
 | Retained federation | Existing controller/worker deployment and original jobs; [legacy operations](maintainers/legacy-federation-operations.md) |
 
-Source, built image, installed image, open execution and successful provider work are distinct states. The local pool services and account-management release are installed. Latest acceptance records registration open, execution closed and zero registered accounts. Manual paid/free sign-ins, capability qualification and public application cutover remain pending. Missing external SSH targets are not blockers for the chosen local installation.
+Source, built image, installed image, open execution and successful provider work are distinct states. The owner selected the local Mac operating path because hosted alternatives were unaffordable or did not work. On September 23, fresh local acceptance passed 26 checks; the [current state](../post-mortem/CURRENT_STATE.md) records the latest host and supervisor status. The [menu recovery audit](../post-mortem/releases/2026-09-23-local-relay-menu-ux-hardening.json) records private retry-status and login-item validation changes. Sign-in, host/daemon restart and sleep/wake recovery drills remain open under [ACT-018](../post-mortem/register.json). Local service health does not establish provider workload qualification. Direct loopback URLs are not public application origins; any existing external ingress and its acceptance remain separate. The DigitalOcean candidate remains unprovisioned. See [the retained local acceptance record](../post-mortem/releases/2026-09-23-local-relay-supervisor-acceptance.json).
 
 ## Local pool release
 
 Preserve the exact image manifest, VM/daemon identities, peer-denial rules, desktop homes and central/execution state. Do not copy main-project credentials into either runtime or use one pool's secrets in the other. A runtime hosts account engines inside its own container; it does not use the retained controller's one-worker-container-per-account deployment procedure.
 
-Use `npm run relay:local -- status` and `npm run relay:local -- verify` for installed acceptance. Build/release only affected component images and update their reviewed pins through the service runbook. Opening a monitor or starting a VM cannot open execution. The explicit `serve-local` gate requires both registrations and reruns local acceptance. Enable intended accounts individually, wait for matching applied revisions and qualify the provider operations. Standard must reject Sites/images/tool requests before provider I/O.
+Use `npm run relay:local -- status` to inspect power, supervisor, VM, relay and monitor state, then run `npm run relay:local -- verify` on the live accepted local install. Build/release only affected component images and update their reviewed pins through the service runbook. Opening the monitor or starting services does not open execution. `serve-local` changes control-plane state and requires fresh acceptance plus a separate deliberate authorization. Keep the public application origin and execution gate unchanged during routine recovery.
 
-The public application cutover requires its separately configured isolated transport, reachable private endpoints and distinct inference keys. Mac loopback addresses are not reachable from a hosted application. Preserve original-operation readers through cutover; there is no peer or legacy dispatch fallback. Account leases remain central and are acquired by the runtime, while product usage policy remains independent.
+Changing public application routing requires a separately reviewed reachable ingress, its server-only key and end-to-end customer-path acceptance. Mac loopback addresses are not reachable from a hosted application. Preserve original-operation readers through any future cutover; there is no legacy dispatch fallback. Account leases remain central and are acquired by the runtime, while product usage policy remains independent.
 
 Run the relevant [hardening checks](maintainers/RELAY_HARDENING.md), production build, raw public-response/authorization tests and rendered/browser-asset scans for changed runtime boundaries. Record scope and limitations, including actual provider and customer-path acceptance.
 

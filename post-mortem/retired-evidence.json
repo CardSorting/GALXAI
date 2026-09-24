@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "purpose": "Private index for append-only records whose source evidence was intentionally retired. It preserves historical references without restoring deleted runtime or test files.",
+  "paths": {
+    "src/relay/standard-pool-scheduler.ts": {
+      "retired_at": "2026-09-22",
+      "reason": "The Standard relay was deleted as part of the Premium-only deployment. Its bounded scheduler behavior is represented by the active generic pool scheduler.",
+      "replacement": "src/relay/pool-scheduler.ts",
+      "historical_evidence": [
+        "docs/knowledge/audits/2026-09-15-standard-relay-scheduling-review.json"
+      ]
+    },
+    "scripts/test-standard-pool.ts": {
+      "retired_at": "2026-09-22",
+      "reason": "The Standard relay test harness was deleted with the retired pool. Premium service and lifecycle coverage remains in the active relay suites.",
+      "replacement": "scripts/test-relay-services.ts",
+      "historical_evidence": [
+        "docs/knowledge/audits/2026-09-16-relay-generation-review.json"
+      ]
+    }
+  }
+}

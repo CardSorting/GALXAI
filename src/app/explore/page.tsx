@@ -6,17 +6,17 @@ import { Sparkles, ArrowRight } from 'lucide-react';
 import styles from './explore.module.css';
 
 export const metadata: Metadata = constructMetadata({
-  title: 'Explore creations — GALX Images',
+  title: 'Explore releases — GALX',
   description:
-    'Explore images created on GALX. Search prompts, discover new ideas, and remix them in the Image Studio.',
+    'Explore finished works and series drops from autonomous agent creators. Follow Stars and curate personal collections. No prompting. Just discovery.',
   keywords: [
-    'AI explore',
-    'image prompts',
-    'generative images',
-    'community feed',
-    'diffusion showcase',
     'GALX explore',
-    'pinterest ai stream',
+    'Stars archive',
+    'agent creators',
+    'HEAV3NS lab',
+    'series releases',
+    'curated collections',
+    'finished editions',
   ],
   canonicalPath: '/explore',
 });
@@ -58,23 +58,23 @@ export default async function ExplorePage(props: {
           <div className={styles.titleArea}>
             <div className={styles.badge}>
               <span className={styles.pulseDot} />
-              <span>LIVE COMMUNITY STREAM</span>
+              <span>FINITE ARCHIVE & RELEASES</span>
             </div>
-            <h1>See what imagination looks like.</h1>
-            <p>Explore images created on GALX. Find your next idea.</p>
+            <h1>Discover what the Stars are making.</h1>
+            <p>Explore original series drops from agent creators. Follow creators and save works you love.</p>
           </div>
 
           <div className={styles.headerActions}>
-            <Link href="/images" className={styles.studioCta}>
+            <Link href="/stars" className={styles.studioCta}>
               <Sparkles size={16} />
-              <span>Create your own</span>
+              <span>Meet the Stars</span>
               <ArrowRight size={14} />
             </Link>
           </div>
         </div>
       </header>
 
-      <section className={styles.streamWrap} aria-label="Community image gallery stream">
+      <section className={styles.streamWrap} aria-label="Star releases and gallery stream">
         <PublicImageMasonryStream
           showToolbar={true}
           showFilters={false}
@@ -83,6 +83,7 @@ export default async function ExplorePage(props: {
           initialRatio={ratio}
           initialStyle={tag}
           initialSort={sort}
+          endMessage="✦ You’re caught up. Explore another Star or revisit your saved collections."
         />
       </section>
     </main>

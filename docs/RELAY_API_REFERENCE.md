@@ -6,7 +6,7 @@ Private server/operator reference. Public clients use the application's allowlis
 
 ## Controller routes
 
-The new runtime is a fixed Premium or Standard service, with its own inference key and separate capability key. It is not a proxy for the other pool or the central database. Browser origins are rejected on server-only inference routes. The application derives tenant identity from a verified owner; an arbitrary caller header is not customer authentication.
+The new runtime is the fixed Premium service, with its own inference key and separate capability key. It is not a proxy for the central database. Browser origins are rejected on server-only inference routes. The application derives tenant identity from a verified owner; an arbitrary caller header is not customer authentication.
 
 | Method/path | Authority and behavior |
 | --- | --- |
@@ -15,7 +15,7 @@ The new runtime is a fixed Premium or Standard service, with its own inference k
 | `GET /v1/models` | Own inference key and delegated tenant; available assigned text model IDs |
 | `POST /v1/chat/completions` | Own inference key, tenant and idempotency key; fixed-pool admission |
 | `POST /v1/images/generations` | Premium only; explicit central image grant, sanitized artifact |
-| `GET /v1/images/availability` | Own inference key; true/false observed availability, null for absent/expired image evidence, no probe; Standard reports unavailable |
+| `GET /v1/images/availability` | Own inference key; true/false observed Premium availability, null for absent/expired image evidence, no probe |
 | `GET /v1/jobs/:id`, `/stream`, `/receipt` | Original tenant, account and epoch; no worker/pool migration |
 | `POST /v1/jobs/:id/cancel` | Original request context; does not establish refund or final settlement |
 | `GET /api/sites/contract` | Premium's distinct private capability key; challenged local-profile readiness, strict provider-ceiling profile unavailable; no generation |
@@ -24,7 +24,7 @@ The new runtime does not expose the legacy controller's `/api/capabilities`, `/a
 
 ## Local operator sessions and desktops
 
-Premium and Standard have separate loopback monitor origins and purpose-specific operator/viewer cookies. Central principal authorization is checked for privileged requests. The native launcher issues a one-use ticket; neither provider credentials nor long-lived monitor keys enter browser storage.
+Premium has a loopback monitor origin and purpose-specific operator/viewer cookies. Central principal authorization is checked for privileged requests. The native launcher issues a one-use ticket; neither provider credentials nor long-lived monitor keys enter browser storage.
 
 | Method/path | Authority and effect |
 | --- | --- |
@@ -77,7 +77,7 @@ Both relays accept client-owned OpenAI-style function definitions and `tool_choi
 | `202` with job identity | Accepted existing/new text work | Retain its original ID/origin and read status/stream |
 | `409 request_in_progress` | Same runtime admission is in progress | Inspect the original operation; no new key to bypass it |
 | `409 idempotency_conflict` | Key has a different saved payload | Reconcile original intent |
-| `409 result_unconfirmed` | Original image/result/epoch/account context unavailable | Preserve uncertainty; never redispatch to another pool |
+| `409 result_unconfirmed` | Original image/result/epoch/account context unavailable | Preserve uncertainty; never redispatch to another deployment |
 | `400/403 capability_unavailable` | Requested capability is unavailable or prohibited at this destination | Correct the deployment/request policy; no peer fallback |
 | `503 service_busy`, `Retry-After: 5` | No eligible account slot, paced recovery, or a full request allowance before an engine attempt | Follow `execution_state`: wait on a proven non-start, inspect the original outcome when unknown; the hint is not a provider reset promise |
 | `503 service_unavailable` / `request_unavailable` | Readiness, authorization, admission or original context unavailable | Inspect the owning dependency and retained operation before retry |

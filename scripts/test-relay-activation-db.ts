@@ -10,7 +10,7 @@ export async function activationDatabaseChecks(db:pg.Pool) {
  const eq=(a:unknown,b:unknown)=>{assert.deepEqual(a,b);checks++;};
  const denied=async(p:Promise<unknown>)=>{await assert.rejects(p);checks++;};
  const hash=(v:string)=>createHash('sha256').update(v).digest('hex');
- const scopes=Object.fromEntries(['premium','standard'].map(pool=>[pool,{pool,id:randomUUID(),host:randomUUID(),epoch:randomUUID(),actor:randomUUID(),keys:Object.fromEntries(['operator','viewer','registrar','runtime'].map(role=>[role,hash(randomUUID())]))}]));
+ const scopes=Object.fromEntries(['premium'].map(pool=>[pool,{pool,id:randomUUID(),host:randomUUID(),epoch:randomUUID(),actor:randomUUID(),keys:Object.fromEntries(['operator','viewer','registrar','runtime'].map(role=>[role,hash(randomUUID())]))}]));
  const call=async(pool:string,role:string,action:string,body:object={})=>{
   const c=await db.connect();try{await c.query('SET ROLE galx_relay_control');
    return (await c.query('SELECT private.relay_control($1,$2,$3) r',[scopes[pool].keys[role],action,JSON.stringify(body)])).rows[0].r;
@@ -25,7 +25,7 @@ export async function activationDatabaseChecks(db:pg.Pool) {
  const connect=async(pool='premium',expiry=Date.now()+3600000)=>{
   const id=randomUUID(),desktopId=randomUUID(),accountId='codex_sh_'+hash(id).slice(0,24),ticketSha256=hash(id+'ticket');
   const row={id:accountId,user_id:'system_admin',encrypted_ciphertext:'fixture',encrypted_iv:'fixture',encrypted_tag:'fixture',key_version:'v1',credential_expires_at_ms:expiry};
-  const body={id,purpose:'connect',ticketSha256,fingerprint:hash(id+'identity'),credentialRevision:hash(id+'credential'),accountClass:pool==='premium'?'paid':'free',models:['fixture-text'],row};
+  const body={id,purpose:'connect',ticketSha256,fingerprint:hash(id+'identity'),credentialRevision:hash(id+'credential'),accountClass:'paid',models:['fixture-text'],row};
   await call(pool,'operator','prepare',{id,desktopId,name:'Automatic fixture'});
   await call(pool,'operator','ticket',{id,purpose:'connect',ticketSha256});
   return {id,accountId,body};
@@ -52,14 +52,14 @@ export async function activationDatabaseChecks(db:pg.Pool) {
   }finally{await c.query('RESET ROLE');c.release();}
  }
  const p=await connect();
- await denied(call('premium','viewer','connect',p.body));await denied(call('standard','registrar','connect',p.body));
+ await denied(call('premium','viewer','connect',p.body));
  await denied(call('premium','registrar','connect',{...p.body,accountClass:'free'}));
  eq((await status()).accounts.length,0);
  await call('premium','registrar','connect',p.body);
  let a=(await status()).accounts[0];eq(a.state,'enabled');eq(a.revision,2);eq(a.connectionState,'connected');
  eq((await status()).executionAllowed,false); // No runtime owner yet.
  eq((await call('premium','runtime','claim',{epoch:scopes.premium.epoch})).executionAllowed,true);
- eq((await status()).executionAllowed,true);eq((await status('standard')).executionAllowed,false);
+ eq((await status()).executionAllowed,true);
  eq((await call('premium','runtime','projection',{epoch:scopes.premium.epoch})).accounts[0].envelope.encrypted_ciphertext,'fixture');
  eq((await status()).activity.filter((v:any)=>v.accountId===p.accountId&&v.command==='enabled').length,1);
  // An intentional pause survives re-arming, heartbeats, replay and a fresh same-account sign-in.
@@ -77,15 +77,6 @@ export async function activationDatabaseChecks(db:pg.Pool) {
  eq((await status()).accounts.find((v:any)=>v.id===held.accountId).state,'paused');
  await configure('premium');eq((await status()).executionAllowed,true);
  eq((await status()).accounts.find((v:any)=>v.id===held.accountId).state,'paused');
- // A stale or future heartbeat cannot open execution. The owning runtime reconciles on recovery.
- await configure('standard');
- await call('standard','runtime','claim',{epoch:scopes.standard.epoch});
- await db.query("UPDATE private.galx_relay_installation_runtime SET last_seen_at=clock_timestamp()-interval '46 seconds' WHERE installation_id=$1",[scopes.standard.id]);
- const st=await connect('standard');await call('standard','registrar','connect',st.body);
- eq((await status('standard')).executionAllowed,false);
- await db.query("UPDATE private.galx_relay_installation_runtime SET last_seen_at=clock_timestamp()+interval '1 minute' WHERE installation_id=$1",[scopes.standard.id]);
- await configure('standard');eq((await status('standard')).executionAllowed,false);
- eq((await call('standard','runtime','claim',{epoch:scopes.standard.epoch})).executionAllowed,true);
  // Rejected, removed, expired and revoked accounts cannot activate a closed automatic installation.
  await change(p.accountId,'revoked');await change(held.accountId,'revoked');
  await configure('premium',false);await configure('premium');eq((await status()).executionAllowed,false);

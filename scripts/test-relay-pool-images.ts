@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { GalxaiRelayServer } from '../src/relay/relay-server.js';
 
-for (const pool of ['premium', 'standard'] as const) {
+for (const pool of ['premium'] as const) {
   test(`${pool} image mode: real engine, no admissions or leaked diagnostics`, async () => {
     const directory = await mkdtemp(path.join(tmpdir(), 'galx-pool-test-'));
     let upstreamCalls = 0;
@@ -30,8 +30,7 @@ for (const pool of ['premium', 'standard'] as const) {
       const readiness = await request('/health/ready', 'admin-fixture-key');
       assert.equal(readiness.status, 503);
       assert.deepEqual(await readiness.json(), { ready: false, stage: 'awaiting-central-authorization', pool,
-        accountClass: pool === 'premium' ? 'paid' : 'free',
-        allowedWorkloads: pool === 'premium' ? ['text', 'sites', 'images'] : ['text'] });
+        accountClass: 'paid', allowedWorkloads: ['text', 'sites', 'images'] });
       for (const route of ['/v1/chat/completions', '/chat/completions', '/v1/images/generations',
         '/images/generations', '/api/capabilities/probe-image', '/api/sites/contract',
         '/api/shards/enroll', '/v1/responses', '/v1/jobs/fake/stream', '/federation', '/?secret=fixture']) {
@@ -39,14 +38,14 @@ for (const pool of ['premium', 'standard'] as const) {
         assert.equal(response.status, 503, route);
         assert.deepEqual(await response.json(), { error: { code: 'service_unavailable', message: 'This service is temporarily unavailable.' } });
         assert.equal(response.headers.get('cache-control'), 'no-store');
-        assert(![...response.headers].some(([k,v]) => /premium|standard|shard|supabase|galx-pool-test/.test(k + v)));
+        assert(![...response.headers].some(([k,v]) => /premium|retired|shard|supabase|galx-pool-test/.test(k + v)));
       }
       assert.equal(upstreamCalls, 0);
     } finally { await relay.stop(); await rm(directory, { recursive: true, force: true }); }
   });
 }
 test('staged mode rejects account-bearing and ambiguous administrator configurations', () => {
-  const base = { stagedPool: 'standard' as const, registryEnabled: false, discoverHostCredentials: false,
+  const base = { stagedPool: 'premium' as const, registryEnabled: false, discoverHostCredentials: false,
     assignedShard: undefined, assignedShardId: undefined, apiKeys: ['inference'], adminApiKeys: ['administrator'] };
   for (const extra of [{ registryEnabled: true }, { assignedShardId: 'foreign' }, { testOnlyMultiShard: true },
     { adminApiKeys: ['inference'] }, { adminApiKeys: [] }, { stagedPool: 'other' as any }]) {

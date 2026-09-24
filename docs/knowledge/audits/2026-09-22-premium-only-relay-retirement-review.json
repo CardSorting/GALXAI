@@ -1,0 +1,189 @@
+{
+  "classification": "private",
+  "observed_at": "2026-09-22T16:36:45Z",
+  "scope": "Premium-only relay retirement: delete the Standard runtime, monitor, scheduler, test harness and deployment/configuration surface while preserving dated incident, release and migration evidence.",
+  "reviewed": {
+    "relay": {
+      "sources": [
+        "src/core/router/adapters/IsolatedRelayTransport.ts",
+        "src/core/router/adapters/RelayEndpointDiscovery.ts",
+        "src/relay/pool-central.ts",
+        "src/relay/pool-entry.ts",
+        "src/relay/pool-execution.ts",
+        "src/relay/pool-image-policy.ts",
+        "src/relay/pool-monitor-server.ts",
+        "src/relay/pool-monitor.js",
+        "src/relay/pool-protocol.ts",
+        "src/relay/pool-runtime.ts",
+        "src/relay/pool-scheduler.ts",
+        "src/relay/relay-server.ts",
+        "Dockerfile.relay-pools",
+        "Dockerfile.relay-services",
+        "docker/relay-pools/entrypoint.mjs",
+        "docker/relay-pools/local/images.json",
+        "docker/relay-pools/services.premium.yaml",
+        "scripts/export-relay-services.ts",
+        "scripts/relay-local.mjs",
+        "scripts/test-relay-services.ts",
+        "scripts/test-relay-pool-images.ts",
+        "scripts/verify-relay-hosts.ts",
+        "scripts/verify-relay-pool-images.mjs",
+        "scripts/verify-relay-service-images.mjs",
+        "post-mortem/retired-evidence.json"
+      ],
+      "guides": [
+        "docs/ARCHITECTURE.md",
+        "docs/DEPLOYMENT.md",
+        "docs/RELAY_API_REFERENCE.md",
+        "docs/RELAY_VNEXT_RUNBOOK.md",
+        "docs/QUEUE_SPECIFICATION.md",
+        "docs/ROUTING_ALGORITHMS.md",
+        "docs/VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md",
+        "docs/runbooks/relay-pool-images.md",
+        "docs/runbooks/relay-pool-services.md",
+        "docs/reference/relay-account-management.md"
+      ],
+      "corrections": [
+        "Premium is the only active pool and the only accepted pool selector; the Standard runtime, monitor and scheduler paths are deleted.",
+        "The generic pool scheduler and Premium relay service suite retain the active bounded admission and image-capacity behavior.",
+        "Docker targets, compose/service manifests, local image metadata, ports, environment names and launcher paths expose only central/Premium services.",
+        "Historical Standard references remain only in private dated records; retired-evidence.json maps those append-only references to current replacements without restoring deleted files."
+      ]
+    },
+    "knowledge": {
+      "sources": [
+        "docs/knowledge/registry.json",
+        "scripts/docs-kb.py",
+        "scripts/verify-docs.py",
+        "scripts/verify-post-mortem.py",
+        "scripts/test-docs-kb.py",
+        "scripts/test-post-mortem.py",
+        "package.json",
+        "post-mortem/README.md",
+        "post-mortem/register.json"
+      ],
+      "guides": [
+        "docs/DOCUMENTATION_POLICY.md",
+        "docs/reference/knowledge-commands.md",
+        "docs/DEVELOPER_GUIDE.md",
+        "docs/runbooks/README.md"
+      ],
+      "corrections": [
+        "Removed deleted active guides and source paths from the knowledge registry and regenerated navigation/inventory views.",
+        "Added adversarial validation for retired evidence targets so a historical reference cannot silently restore a deleted file."
+      ]
+    },
+    "images": {
+      "sources": [
+        "docs/QUEUE_SPECIFICATION.md",
+        "scripts/test-image-availability.ts"
+      ],
+      "guides": [
+        "docs/QUEUE_SPECIFICATION.md",
+        "docs/reference/stars.md",
+        "post-mortem/runbooks/image-generation.md"
+      ],
+      "corrections": [
+        "Image admission and capability wording now names Premium as the active route without exposing internal topology or provider details."
+      ]
+    },
+    "access": {
+      "sources": [
+        "docs/OAUTH_AND_TOKEN_LIFECYCLE_SPECIFICATION.md",
+        "docs/PROVIDER_AS_AUTH_SPECIFICATION.md",
+        "docs/SECURITY.md",
+        "docs/SECURITY_POSTURE_AND_THREAT_MODEL.md",
+        "docs/STANDARDIZED_OAUTH_AND_INGESTION_ARCHITECTURE.md",
+        "docs/operations/workspace-auth.md",
+        "docs/relay-security.md"
+      ],
+      "guides": [
+        "docs/SECURITY.md",
+        "docs/SECURITY_POSTURE_AND_THREAT_MODEL.md",
+        "docs/relay-security.md",
+        "docs/operations/workspace-auth.md"
+      ],
+      "corrections": [
+        "Public-facing security and authorization guidance remains capability-focused and does not expose deleted pool topology, credentials or upstream diagnostics."
+      ]
+    },
+    "database": {
+      "sources": [
+        "scripts/run-supabase-integration.ts",
+        "scripts/set-relay-service-gates.ts",
+        "scripts/test-relay-account-inventory.ts",
+        "scripts/test-relay-activation-db.ts",
+        "scripts/test-relay-authorization-db.ts",
+        "scripts/test-relay-connections-db.ts",
+        "scripts/test-relay-execution-db.ts"
+      ],
+      "guides": [
+        "docs/MIGRATION_GUIDE.md",
+        "docs/SUPABASE_PARANOID_ARCHITECTURE_SPEC.md",
+        "docs/maintainers/MULTI_TENANT_SHARD_AND_KEY_ROTATION.md",
+        "docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md",
+        "docs/reference/relay-account-management.md"
+      ],
+      "corrections": [
+        "Database helpers and authorization fixtures use the Premium-only contract; historical schema and rollback artifacts remain unchanged. No live database mutation was performed."
+      ]
+    },
+    "delivery": {
+      "sources": [
+        "docs/CLOUDFLARE_STRATEGY.md",
+        "docs/DEPLOYMENT.md",
+        "docs/VERCEL_DEPLOYMENT.md",
+        "docs/VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md"
+      ],
+      "guides": [
+        "docs/DEPLOYMENT.md",
+        "docs/VERCEL_DEPLOYMENT.md",
+        "docs/VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md",
+        "docs/CLOUDFLARE_STRATEGY.md"
+      ],
+      "corrections": [
+        "Deployment guidance describes one active Premium runtime/monitor pair and central service; no Fly.io-specific path was introduced."
+      ]
+    },
+    "sites": {
+      "sources": [
+        "docs/maintainers/SITES_OPERATIONS.md"
+      ],
+      "guides": [
+        "docs/maintainers/SITES_OPERATIONS.md"
+      ],
+      "corrections": [
+        "Sites guidance now describes Premium dispatch with no retired-pool or legacy fallback while keeping customer eligibility and upstream account class separate."
+      ]
+    },
+    "broccolidb": {
+      "sources": [
+        "src/core/broccolidb/BroccoliImageLibraryBuffer.ts",
+        "docs/maintainers/image-library-scale.md",
+        "docs/maintainers/COMPACTOR_FUZZING_AND_QA_MATRIX.md",
+        "docs/operations/preview-hybrid-sync.md"
+      ],
+      "guides": [
+        "docs/maintainers/image-library-scale.md",
+        "docs/maintainers/COMPACTOR_FUZZING_AND_QA_MATRIX.md",
+        "docs/operations/preview-hybrid-sync.md"
+      ],
+      "corrections": [
+        "Revalidated the unchanged image-library buffer and authoritative persistence boundary because its domain review was stale; no relay-retirement change alters BroccoliDB semantics."
+      ]
+    }
+  },
+  "checks": [
+    "npm run docs:impact: completed; changed paths mapped to knowledge, images, access, relay, database and delivery domains.",
+    "npm run docs:sync: passed; generated knowledge views, incident indexes and documentation inventory.",
+    "npm run docs:check: passed after correcting a pre-existing broken incident evidence link; source fingerprints were then refreshed explicitly.",
+    "python3 scripts/test-post-mortem.py: passed 23 tests, including retired-evidence restoration guards.",
+    "Active Standard pool identifier/port/config scan: no matches outside migrations, rollbacks, retirement verifier or private historical evidence.",
+    "No live database, provider, deployment or generation operation was performed."
+  ],
+  "limits": [
+    "This is a source/configuration retirement audit, not proof that a remote VM has been deployed or restarted.",
+    "Historical audits and append-only incident records retain names of deleted Standard files by design; the retirement index makes that status explicit and keeps those paths out of active code/configuration.",
+    "Production acceptance still requires the separately authorized Premium VM rollout, health/monitor verification and raw HTTP/WebSocket checks."
+  ]
+}
