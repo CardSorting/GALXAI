@@ -7,7 +7,7 @@ COPY src/core/broccolidb ./src/core/broccolidb
 COPY src/lib/security/image-artifact.ts ./src/lib/security/image-artifact.ts
 COPY BroccoliDB/src ./BroccoliDB/src
 COPY BROCCOLIQUEUE/src ./BROCCOLIQUEUE/src
-RUN ./node_modules/.bin/esbuild src/relay/pool-entry.ts --bundle --platform=node --target=node22 --format=esm --outfile=dist/service.mjs --packages=external
+RUN ./node_modules/.bin/esbuild src/relay/pool-entry.ts --bundle --platform=node --target=node22 --format=esm --outfile=dist/service.mjs --packages=external --alias:@noorm/broccolidb=./BroccoliDB/src/index.ts --alias:broccoli-queue=./BROCCOLIQUEUE/src/index.ts
 
 FROM node:22-alpine@sha256:c610fcdfb1d5b4740dd70c284ed3cb16bb857e0f7166196e36a5501df7a3aa32 AS service
 WORKDIR /app

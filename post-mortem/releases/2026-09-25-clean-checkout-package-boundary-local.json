@@ -1,0 +1,31 @@
+{
+  "classification": "private",
+  "reviewed_at": "2026-09-25T22:51:35Z",
+  "scope": "Correct the clean-checkout dependency boundary exposed by a failed Vercel production build while preserving the existing local relay Docker source path.",
+  "failed_build_observation": {
+    "deployment": "galxai-28knkpzh1-cardsortings-projects.vercel.app",
+    "status": "Error",
+    "diagnosis": "The hosted build checks out GALXAI without its ignored sibling repositories. A relative TypeScript import into BroccoliDB/src therefore compiled locally but could not resolve in the hosted checkout.",
+    "serving_impact": "The previous Ready production deployment remained serving; no interruption was observed."
+  },
+  "correction": {
+    "application_dependencies": "The root manifest and lockfile pin immutable HTTPS Codeload archives for CardSorting/ABroccoliDB at f085f3f5dbceadc4cd6752b081ebfc51b02fe3f7 and CardSorting/BROCCOLIQUEUE at c38a7db40e8bcaf99c7f83af755c5e43a6d7feec.",
+    "application_imports": "The relay queue imports the published package entry points instead of sibling-repository source paths.",
+    "docker_bundle": "The existing image build retains local source copies and uses explicit esbuild aliases to compile those same repositories.",
+    "package_artifact": "BROCCOLIQUEUE now builds on package preparation and tracks its generated dist entry points for archive installs.",
+    "repository_boundary": "GALXAI ignores the two independent repository directories; root knowledge mappings no longer claim ownership of their guides. Their own package checks remain authoritative."
+  },
+  "verification": {
+    "BroccoliDB": "PASS: npm run check; 42 tests plus docs, licensing and package-boundary checks.",
+    "BROCCOLIQUEUE": "PASS: npm test; 24 tests. npm run docs:check passed.",
+    "GALXAI": "PASS: npx tsc --noEmit; npm run build generated 155 static pages.",
+    "relay_source_bundle": "PASS: esbuild produced a 701.8 KB service bundle with both package aliases resolved to the local sources.",
+    "relay_queue_integration": "PASS: npm run test:relay:queue; 13 tests.",
+    "remote_deployment": "Not yet verified for the corrected commit at this record's review time."
+  },
+  "limits": [
+    "The existing Premium R4 runtime remains deployed and healthy; this packaging correction does not change its queue behavior.",
+    "The corrected Vercel Git-triggered production deployment and its live route/assets checks remain pending.",
+    "No provider generation, Star activation, queue mutation, account-policy change or Docker runtime restart was performed during this packaging repair."
+  ]
+}
