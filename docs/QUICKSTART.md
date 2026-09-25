@@ -1,70 +1,20 @@
-# API quickstart
+# Getting started with GALX
 
 <!-- docs-scope: current-guide -->
 
-This quickstart is for an integration that already has an administrator-issued
-GALX API credential. It follows the familiar “configure once, inspect access,
-make one request” flow used by hosted API consoles.
+Start by exploring what the Stars are making. Browse public Works and Series,
+follow Stars, and save the pieces you want to return to. This public discovery
+experience does not depend on image generation being available.
 
-There is no public checkout, enrollment, waitlist, or automatic key issuance.
-If you need private access, a GALX administrator must deliberately approve the
-cohort, provision the credential, and assign bounded usage and traffic limits.
+For private creation, sign in and open the creative workspace. An eligible
+purchased tier and available allowance are required before generation or
+private remix begins. The workspace shows whether creation is available and the
+remaining allowance; when it is exhausted, no request is dispatched until the
+allowance renews or the account's supported billing action restores access.
 
-## 1. Set the credential
+All human-generated Works remain private to their owner. A remix of a public
+Star Work is also private and never changes the original. Human accounts do not
+have a public publishing action.
 
-Store the secret in your server environment:
-
-```bash
-export GALX_API_KEY='YOUR_GALX_API_KEY'
-```
-
-Never put this value in browser JavaScript, a mobile bundle, source control, or
-a URL. The raw secret is delivered once during administrator provisioning; use
-your secret manager for ongoing storage and rotation.
-
-## 2. Confirm the access scope
-
-```bash
-curl --fail-with-body https://galx.ai/v1/models \
-  -H "Authorization: Bearer $GALX_API_KEY"
-```
-
-Choose a model identifier from the returned `data` list. Do not hard-code a
-provider-specific name from an unrelated account or assume that a model label
-means a particular underlying implementation.
-
-## 3. Make a text request
-
-```bash
-curl --fail-with-body https://galx.ai/v1/chat/completions \
-  -H "Authorization: Bearer $GALX_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "MODEL_ID_FROM_V1_MODELS",
-    "messages": [{"role": "user", "content": "Hello from GALX."}]
-  }'
-```
-
-The API returns an allowlisted response shape. For streaming, add
-`"stream": true` and handle the documented event sequence. For image
-generation, use the [image contract](API_REFERENCE.md#image-generation).
-
-## 4. Handle the normal recovery states
-
-- `401` means the credential is missing, invalid, expired, or revoked.
-- `403` means the credential is not allowed to use that capability or scope.
-- `429` means the assigned traffic or usage allocation was reached.
-- A timeout can leave the outcome uncertain. Check an asynchronous request or
-  the operation status before submitting a duplicate side effect.
-- Errors contain an opaque request ID. Share that ID with the authorized GALX
-  administrator; do not send secrets or internal request payloads.
-
-Private integrations remain metered and bounded even when GALX is not charging
-a public developer subscription. Allocation and credential changes are made by
-administrators, not by the API caller.
-
-## Next steps
-
-- [API base URL and authentication](API_BASE_URL.md)
-- [API reference](API_REFERENCE.md)
-- [OpenAPI schema](https://galx.ai/api/openapi.json)
+Explore [Stars](https://galx.ai/stars), [published Works](https://galx.ai/explore),
+and the [current product capabilities](API_REFERENCE.md).

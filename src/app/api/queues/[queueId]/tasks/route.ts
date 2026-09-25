@@ -9,6 +9,15 @@ export const dynamic = 'force-dynamic';
 
 export const runtime = 'nodejs';
 
+function containsImageGeneration(value: unknown, depth = 0): boolean {
+  if (depth > 12) return true;
+  if (Array.isArray(value)) return value.some(item => containsImageGeneration(item, depth + 1));
+  if (!value || typeof value !== 'object') return false;
+  const record = value as Record<string, unknown>;
+  if (record.taskKind === 'image_generation') return true;
+  return Object.values(record).some(item => containsImageGeneration(item, depth + 1));
+}
+
 export async function OPTIONS() {
   return new NextResponse(null, {
     status: 204,
@@ -104,6 +113,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ que
         { error: { message: 'Missing required field: target (must be HTTP_PUSH, INTERNAL_MODEL, or PULL_WORKER)' } },
         { status: 400 }
       );
+    }
+    if (containsImageGeneration(body.target) || containsImageGeneration(body.pipelineSteps)) {
+      return NextResponse.json({ error: { code: 'private_creation_required', message: 'Image creation is not available through general task submission.' } }, { status: 403, headers: { 'Cache-Control': 'no-store' } });
     }
 
     const engine = GalxTaskQueueEngine.getInstance();

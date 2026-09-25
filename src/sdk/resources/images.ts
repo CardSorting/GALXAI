@@ -35,7 +35,6 @@ export interface ImageGenerateParams {
   negative_prompt?: string;
   responseFormat?: 'url' | 'b64_json';
   response_format?: 'url' | 'b64_json';
-  visibility?: 'public' | 'unlisted' | 'private';
   style?: string;
   seed?: number;
 }
@@ -252,7 +251,6 @@ export class ImagesResource {
       n: params.n || 1,
       negative_prompt: params.negativePrompt || params.negative_prompt,
       response_format: params.responseFormat || params.response_format || 'url',
-      visibility: params.visibility || 'public',
       style: params.style,
       seed: params.seed
     };

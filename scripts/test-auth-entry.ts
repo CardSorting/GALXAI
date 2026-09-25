@@ -10,12 +10,19 @@ import { workspaceFetch, WORKSPACE_SESSION_REJECTED } from '../src/lib/auth/work
 test('return destinations reject external URLs and recursive auth while preserving workspace context', () => {
   for (const path of ['/auth/signin', '/auth/signup?next=/auth/signin', '/%61uth/signin', '/auth%252fsignin', '//evil.test', 'javascript:alert(1)', '/\\evil.test', '/%2f%2fevil.test']) assert.equal(safeAuthRedirect(path), '/images', path);
   assert.equal(workspaceReturnPath('/images', new URLSearchParams('view=library&token=private&prompt=private')), '/images/library');
+  assert.equal(workspaceReturnPath('/images'), '/explore');
   assert.equal(workspaceReturnPath('/sites', new URLSearchParams('starter=portfolio&refine=1&key=private')), '/sites?starter=portfolio&refine=1');
   assert.equal(workspaceReturnPath('/sites', new URLSearchParams('starter=private&refine=private')), '/sites');
   assert.equal(workspaceReturnPath('/sites/owned', new URLSearchParams('token=private')), '/sites/owned');
   assert.equal(authDestinationLabel('/sites/owned'), 'Sites');
   assert.equal(authDestinationLabel('/images?view=library'), 'Images');
   assert.equal(authDestinationLabel('https://evil.test'), 'Images');
+});
+
+test('legacy Images links lead to public discovery while selected library views remain private', () => {
+  assert.equal(safeAuthRedirect('/images'), '/explore');
+  assert.equal(safeAuthRedirect('/images?view=library'), '/images/library');
+  assert.equal(safeAuthRedirect('/images?view=favorites'), '/images/favorites');
 });
 
 test('explicit sign-in recovery preserves only safe destinations and bypasses existing-session redirects', () => {

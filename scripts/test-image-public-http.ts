@@ -1,7 +1,5 @@
 import test from 'node:test';
-import { GenerationAccess } from '../src/lib/billing/generation-access';
-import { FreeGenerationGateError } from '../src/lib/billing/free-generation-gate';
-import { FreeQuotaError } from '../src/lib/billing/free-generation-quota';
+import { ImageAllowanceError } from '../src/lib/billing/image-allowance';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import sharp from 'sharp';
@@ -25,6 +23,7 @@ import { RelayDispatchError } from '../src/core/router/adapters/RelayChatTranspo
 import { GalxCryptoVault } from '../src/core/vault/GalxCryptoVault';
 import { sanitizeImageArtifact } from '../src/lib/security/image-artifact';
 import { serveImageRequest } from '../src/sdk/server-image';
+import { imageError } from '../src/lib/security/public-image-http';
 
 const secret = 'PRIVATE_CANARY_shard_relay_checkpoint_deployment';
 const forbidden = /PRIVATE_CANARY|shard|relay|checkpoint|deployment|provider|stack|\/private\/|internal\.example|sk-secret|execution|modelUsed/i;
@@ -33,6 +32,20 @@ const fixture = await sharp({ create: { width: 8, height: 6, channels: 4, backgr
   .withXmp(`<x:xmpmeta xmlns:x="adobe:ns:meta/">${secret}</x:xmpmeta>`).png().toBuffer();
 const result = { created: 1, modelUsed: secret, shardId: secret, execution: { provider: secret }, future: secret,
   data: [{ b64_json: fixture.toString('base64'), url: 'https://internal.example/private/bucket', revised_prompt: secret, worker: secret }] };
+
+test('retired free-image error identifiers do not imply public/free creation', async () => {
+  for (const [code, legacy, status] of [
+    ['free_generation_paused', /free image|explore pro/i, 429],
+    ['free_generation_busy', /free image|explore pro/i, 429],
+    ['free_quota_exhausted', /free image|upgrade to pro/i, 402],
+  ] as const) {
+    const response = imageError(code, '00000000-0000-4000-8000-000000000001');
+    assert.equal(response.status, status);
+    const body = await response.json() as { error: { code: string; message: string } };
+    assert.equal(body.error.code, code, 'keep the protocol identifier stable');
+    assert.equal(legacy.test(body.error.message), false);
+  }
+});
 
 async function inspectArtifact(response: Response, format = 'png') {
   assert.equal(response.status, 200);
@@ -50,16 +63,29 @@ async function inspectArtifact(response: Response, format = 'png') {
 // The HTTP adapter serializes the actual application Response without interpreting its body.
 // All assertions below use a real HTTP client's bytes and headers.
 test('raw image HTTP boundary: success, compatibility, errors, async and adversarial fields', async t => {
-  const resolveAccess=GenerationAccess.resolve;
-  GenerationAccess.resolve=async()=> 'pro';
-  t.after(()=>{GenerationAccess.resolve=resolveAccess;});
   const restore = [GalxAuthEngine.getInstance, GalxSeatTierEngine.getInstance, galxRouter.routeImageGeneration, ImageRequestService.getInstance, ImageLibraryRepository.getInstance, GalxR2AssetAdapter.getInstance, GalxQueueEventBus.getInstance];
-  let authenticated = true, capped = false, failure: unknown, calls = 0, lastRouteRequest: any = null;
+  let authenticated = true, capped = false, failure: unknown, createFailure: unknown, calls = 0, runs = 0, lastRouteRequest: any = null, lastCreateOptions: any = null;
   let task: any = { id: 'opaque-task', user_id: 'customer', state: 'queued', asset_ids: ['asset'], queueId: secret, lastError: { message: secret },
     target: { type: 'INTERNAL_MODEL', taskKind: 'image_generation' }, result: { data: result, shardId: secret } };
   GalxAuthEngine.getInstance = () => ({ resolveAuthIdentity: async () => ({ authenticated, userId: authenticated ? 'customer' : undefined }) }) as any;
   GalxSeatTierEngine.getInstance = () => ({ resolveUserSeatTier: async () => ({ isCapped: capped, isPriorityUser: false }) }) as any;
-  ImageRequestService.getInstance = () => ({ create: async () => task, resume: () => {}, repository: { get: async () => task } }) as any;
+  ImageRequestService.getInstance = () => ({
+    create: async (owner: string, payload: any, options: any) => {
+      if (createFailure) throw createFailure;
+      lastCreateOptions = options;
+      task = { ...task, user_id: owner, state: 'queued', response_format: payload.response_format, output_format: payload.outputFormat };
+      return task;
+    },
+    run: async (owner: string, _id: string, reportFailure: boolean) => {
+      runs++;
+      try {
+        await galxRouter.routeImageGeneration({ request: { prompt: 'fixture prompt' }, userId: owner, requestId: task.id,
+          workClass: 'private', isPriorityUser: false, signal: AbortSignal.timeout(1000) } as any);
+        task.state = 'completed';
+      } catch (error) { task.state = 'failed'; if (reportFailure) throw error; }
+    },
+    resume: () => {}, repository: { get: async (owner: string) => owner === task.user_id ? task : null },
+  }) as any;
   galxRouter.routeImageGeneration = async (options: any) => { calls++; lastRouteRequest = options.request; if (failure) throw failure; return result as any; };
   ImageLibraryRepository.getInstance = () => ({ getAsset: async (userId: string, assetId: string) => userId === 'customer' && assetId === 'asset' ? { id: 'asset', userId: 'customer', status: 'completed', r2Key: secret } : null }) as any;
   GalxR2AssetAdapter.getInstance = () => ({ getAssetBuffer: async () => fixture }) as any;
@@ -108,25 +134,34 @@ test('raw image HTTP boundary: success, compatibility, errors, async and adversa
         const raw = await response.text(); assert.equal(forbidden.test(raw), false);
         const json = JSON.parse(raw); assert.deepEqual(Object.keys(json).sort(), ['created', 'data']);
         assert.deepEqual(Object.keys(json.data[0]), [format]);
-        const b64 = format === 'url' ? json.data[0].url.split(',')[1] : json.data[0].b64_json;
-        await inspectArtifact(new Response(Buffer.from(b64, 'base64'), { headers: { 'content-type': 'image/png' } }));
+        if (format === 'url') {
+          assert.match(json.data[0].url, /^https:\/\/galx\.ai\/v1\/images\/assets\/[A-Za-z0-9_.-]+$/);
+        } else {
+          await inspectArtifact(new Response(Buffer.from(json.data[0].b64_json, 'base64'), { headers: { 'content-type': 'image/png' } }));
+        }
       }
       assert.equal((await send({ prompt: 'flower' }, { accept: 'application/json' })).headers.get('content-type'), 'application/json');
     });
-    await t.test('private visibility is accepted for authenticated generation and stays out of the public response', async () => {
-      const response = await send({ prompt: 'private flower', visibility: 'private', response_format: 'b64_json', upstream_secret: secret });
+    await t.test('human generation is always private and has no visibility toggle', async () => {
+      const response = await send({ prompt: 'private flower', response_format: 'b64_json', upstream_secret: secret });
       checkHeaders(response); assert.equal(response.status, 200);
-      assert.equal(lastRouteRequest.visibility, 'private');
+      assert.equal(lastRouteRequest.visibility, undefined);
+      assert.deepEqual(lastCreateOptions, { priority: false, schedule: false });
       assert.doesNotMatch(await response.text(), /private flower|upstream_secret|PRIVATE_CANARY/);
-      const aliasResponse = await send({ prompt: 'stealth flower', stealth: true, response_format: 'b64_json' });
-      checkHeaders(aliasResponse); assert.equal(aliasResponse.status, 200);
-      assert.equal(lastRouteRequest.visibility, 'private');
+      const before = calls;
+      for (const body of [
+        { prompt: 'x', visibility: 'public' }, { prompt: 'x', visibility: 'unlisted' },
+        { prompt: 'x', publish: true }, { prompt: 'x', isPublic: true }, { prompt: 'x', shareToExplore: true },
+      ]) await checkError(await send(body), 403, 'publishing_forbidden');
+      assert.equal(calls, before, 'publish attempts fail before dispatch');
     });
     await t.test('malformed and unauthorized requests never dispatch', async () => {
       const before = calls;
       for (const body of ['{', null, [], {}, { prompt: 'x', n: 2 }]) await checkError(await send(body), 400, 'invalid_request');
-      await checkError(await send({ prompt: 'x', visibility: 'public', stealth: true }), 400, 'unsupported_input');
-      for (const body of [{ prompt: 'x', model: secret }, { prompt: 'x', output_format: 'svg' }]) await checkError(await send(body), 400, 'unsupported_input');
+      for (const body of [{ prompt: 'x', visibility: 'private' }, { prompt: 'x', stealth: true }, { prompt: 'x', visibility: 'unsupported' }]) {
+        await checkError(await send(body), 400, 'unsupported_input');
+      }
+      for (const body of [{ prompt: 'x', model: secret }, { prompt: 'x', model: 'galx-nova-image' }, { prompt: 'x', model: 'openai-gpt-image-latest' }, { prompt: 'x', output_format: 'svg' }]) await checkError(await send(body), 400, 'unsupported_input');
       authenticated = false; await checkError(await send(), 401, 'unauthorized'); authenticated = true;
       capped = true; await checkError(await send(), 429, 'rate_limited'); capped = false;
       assert.equal(calls, before);
@@ -151,7 +186,9 @@ test('raw image HTTP boundary: success, compatibility, errors, async and adversa
       assert.deepEqual(Object.keys(body).sort(), ['id', 'status', 'task_url']);
       assert.equal(forbidden.test(JSON.stringify(body)), false);
       const pending = await fetch(origin); assert.equal(pending.status, 202);
-      assert.deepEqual(await pending.json(), { id: task.id, status: 'queued' });
+      assert.deepEqual(await pending.json(), { id: task.id, status: 'in_progress' });
+      const pendingSnapshot = await (await fetch(`${origin}?snapshot=true`)).json();
+      assert.deepEqual(pendingSnapshot.task, { id: task.id, status: 'in_progress' });
       task.state = 'completed'; await inspectArtifact(await fetch(origin));
       const snapshot = await (await fetch(`${origin}?snapshot=true`)).json();
       assert.equal(forbidden.test(JSON.stringify(snapshot)), false);
@@ -198,32 +235,19 @@ test('raw image HTTP boundary: success, compatibility, errors, async and adversa
       delete task.failure_code;
       task.user_id = 'someone-else'; await checkError(await fetch(origin), 404, 'not_found');
     });
-    await t.test('free requests enforce quota for sync and async and keep artifact/error allowlists',async()=>{
-      GenerationAccess.resolve=async()=>'free';
-      const before=calls;
-      let exhausted=false,gateCode:'free_generation_paused'|'free_generation_busy'|null=null,created=0,runs=0;
-      task={id:'opaque-task',user_id:'customer',state:'completed',asset_ids:['asset'],response_format:'b64_json',private:secret};
-      ImageRequestService.getInstance=()=>({create:async(owner:string,payload:any,_priority:boolean,free:boolean,schedule=true)=>{
-        assert.equal(owner,'customer');assert.equal(free,true);created++;
-        assert.equal(payload.private,undefined);
-        if(gateCode)throw Object.assign(new FreeGenerationGateError(gateCode),{message:secret});
-        if(exhausted)throw Object.assign(new FreeQuotaError(),{message:secret});
-        task.response_format=payload.response_format;task.output_format=payload.outputFormat;
-        if(schedule)task.state='queued';return task;
-      },run:async()=>{runs++;task.state='completed';},resume:()=>{},repository:{get:async()=>task}}) as any;
-      await inspectArtifact(await send({prompt:'flower',private:secret,output_format:'webp'}),'webp');
-      assert.equal(runs,1);
-      const json=await send({prompt:'flower',response_format:'b64_json'});checkHeaders(json);
-      const raw=await json.text();assert.doesNotMatch(raw,forbidden);assert.deepEqual(Object.keys(JSON.parse(raw)).sort(),['created','data']);
-      const asyncResponse=await send({prompt:'flower'},{prefer:'respond-async'});checkHeaders(asyncResponse);
-      assert.equal(asyncResponse.status,202);assert.deepEqual(Object.keys(await asyncResponse.json()).sort(),['id','status','task_url']);
-      exhausted=true;
-      for(const headers of [{},{prefer:'respond-async'}])await checkError(await send(undefined,headers),402,'free_quota_exhausted');
-      assert.equal(created,5);
-      for(const code of ['free_generation_paused','free_generation_busy'] as const){gateCode=code;for(const headers of [{},{prefer:'respond-async'}])await checkError(await send(undefined,headers),429,code);}
-      assert.equal(runs,2);assert.equal(calls,before,'free requests never use the unreserved dispatch path');
-      GenerationAccess.resolve=async()=>{throw Object.assign(new Error(secret),{status:503});};
-      await checkError(await send(),503,'temporarily_unavailable');assert.equal(created,9);
+    await t.test('missing or exhausted purchased allowance never creates or dispatches work',async()=>{
+      const before=calls, beforeRuns=runs;
+      for (const [code, expected] of [['image_plan_required','image_plan_required'], ['image_allowance_exhausted','image_allowance_exhausted']] as const) {
+        createFailure = Object.assign(new ImageAllowanceError(code), { message: secret });
+        for (const headers of [{}, { prefer: 'respond-async' }]) await checkError(await send(undefined, headers), 402, expected);
+      }
+      createFailure = undefined;
+      assert.equal(calls,before,'an unmetered request never reaches inference');
+      assert.equal(runs, beforeRuns, 'quota rejection happens before a worker run');
+      createFailure = Object.assign(new ImageAllowanceError('image_allowance_unavailable'), { message: secret });
+      await checkError(await send(),503,'image_allowance_unavailable');
+      assert.equal(calls,before);
+      createFailure = undefined;
     });
   } finally {
     [GalxAuthEngine.getInstance, GalxSeatTierEngine.getInstance, galxRouter.routeImageGeneration, ImageRequestService.getInstance, ImageLibraryRepository.getInstance, GalxR2AssetAdapter.getInstance, GalxQueueEventBus.getInstance] = restore as any;
@@ -262,9 +286,9 @@ test('private image capabilities require the owning signed-in account', async ()
   }) as any;
   ImageLibraryRepository.getInstance = () => ({
     getAsset: async (userId: string, assetId: string) => userId === 'customer' && assetId === 'private-asset'
-      ? { id: assetId, userId, status: 'completed', visibility: 'private', isPublic: false, r2Key: 'private-key', sha256: 'sha', updatedAt: 'now' }
-      : userId === 'customer' && assetId === 'unlisted-asset'
-        ? { id: assetId, userId, status: 'completed', visibility: 'unlisted', isPublic: false, r2Key: 'unlisted-key', sha256: 'sha', updatedAt: 'now' }
+      ? { id: assetId, userId, status: 'completed', workClass: 'private', r2Key: 'private-key', sha256: 'sha', updatedAt: 'now' }
+      : userId === 'customer' && assetId === 'star-work'
+        ? { id: assetId, userId, status: 'completed', workClass: 'star_published', r2Key: 'star-key', sha256: 'sha', updatedAt: 'now' }
       : null,
   }) as any;
   GalxR2AssetAdapter.getInstance = () => ({ getAssetBuffer: async () => fixture }) as any;
@@ -276,8 +300,8 @@ test('private image capabilities require the owning signed-in account', async ()
     await inspectArtifact(await getAsset(request(), { params: Promise.resolve({ token }) }));
     viewer = undefined;
     assert.equal((await getAsset(request(), { params: Promise.resolve({ token }) })).status, 404);
-    const unlistedToken = GalxCryptoVault.sealImageDownload('customer', 'unlisted-asset');
-    await inspectArtifact(await getAsset(new NextRequest(`https://galx.ai/v1/images/assets/${unlistedToken}`), { params: Promise.resolve({ token: unlistedToken }) }));
+    const starToken = GalxCryptoVault.sealImageDownload('customer', 'star-work');
+    await inspectArtifact(await getAsset(new NextRequest(`https://galx.ai/v1/images/assets/${starToken}`), { params: Promise.resolve({ token: starToken }) }));
   } finally {
     GalxAuthEngine.getInstance = originalAuth;
     ImageLibraryRepository.getInstance = originalRepository;
@@ -295,18 +319,13 @@ test('SDK server adapters sanitize outputs and never fabricate success on failur
 });
 
 
-test('OpenAPI defines binary output and closes every JSON object', async () => {
-  const spec = await (await schema()).json();
-  const outputs = spec.paths['/images/generations'].post.responses;
-  assert.deepEqual(Object.keys(outputs['200'].content).sort(), ['application/json', 'image/jpeg', 'image/png', 'image/webp']);
-  for (const output of Object.values(outputs) as any[]) {
-    const shape = output.content['application/json'].schema;
-    const visit = (node: any) => {
-      if (node.type === 'object') assert.equal(node.additionalProperties, false);
-      if (node && typeof node === 'object') for (const child of Object.values(node)) if (typeof child === 'object') visit(child);
-    };
-    visit(shape);
-  }
+test('OpenAPI endpoint does not expose a public inference contract', async () => {
+  const response = await schema();
+  assert.equal(response.status, 410);
+  assert.equal(response.headers.get('x-robots-tag'), 'noindex, nofollow');
+  assert.deepEqual(await response.json(), {
+    error: { code: 'not_available', message: 'Public API documentation is not available.' },
+  });
 });
 
 test('private diagnostics omit arbitrary provider message payloads and credentials', () => {

@@ -5,7 +5,7 @@ export function generationQuotaRoute(deps: {
   authenticate(request: Request): Promise<{id:string}>;
   plan(owner:string): Promise<'free'|'pro'>;
   quota(owner:string): Promise<FreeGenerationQuota>;
-  availability(owner:string): Promise<{sites:FreeGenerationAvailability;images:FreeGenerationAvailability}>;
+  availability(owner:string): Promise<{sites:FreeGenerationAvailability;images?:FreeGenerationAvailability}>;
 }) {
   const headers={'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff'};
   return async(request:Request) => {

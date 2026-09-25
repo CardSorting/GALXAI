@@ -1,5 +1,5 @@
 /**
- * The public Image Studio catalog. Stripe remains the billing authority; this
+ * The server-side Image Studio catalog. Stripe remains the billing authority; this
  * file is the small, reviewable contract used to validate the provider price
  * before a Checkout Session is created. Keep descriptions limited to behavior
  * that the current service actually enforces.
@@ -7,9 +7,10 @@
 export const IMAGE_PLAN_CATALOG = [
   {
     id: 'creator',
+    publicId: 'workshop',
     planKey: 'creator-v1',
-    name: 'GALX Images — Creator',
-    audience: 'A steady solo creative practice.',
+    name: 'GALX Images — Workshop',
+    audience: 'A private creative practice.',
     monthlyPriceUsd: 15,
     currency: 'USD',
     interval: 'month',
@@ -18,14 +19,15 @@ export const IMAGE_PLAN_CATALOG = [
     catalogStatus: 'active',
     checkoutEnabled: true,
     capabilities: [
-      'Current Image Studio controls',
-      'Public or Private mode',
+      'Bounded private image creation',
+      'Private remixing of published Star Works',
       'Personal library, favorites, remix, and downloads',
     ],
-    boundary: 'One account, billed monthly, under the published fair-use terms.',
+    boundary: 'One account. The purchase grants private creation only, with the published allowance and renewal terms.',
   },
   {
     id: 'studio',
+    publicId: 'studio',
     planKey: 'studio-v1',
     name: 'GALX Images — Studio',
     audience: 'A focused workspace for heavier individual use.',
@@ -37,19 +39,20 @@ export const IMAGE_PLAN_CATALOG = [
     catalogStatus: 'active',
     checkoutEnabled: true,
     capabilities: [
-      'Current Image Studio controls',
-      'Public or Private mode',
+      'Bounded private image creation',
+      'Private remixing of published Star Works',
       'Owner library, favorites, and downloads',
     ],
-    boundary: 'One account, billed monthly, under the published fair-use terms.',
+    boundary: 'One account. The purchase grants private creation only, with the published allowance and renewal terms.',
   },
   {
     // Keep the private plan key stable so existing checkout/webhook records
     // continue to reconcile while the customer-facing name becomes MAX.
     id: 'max',
+    publicId: 'max',
     planKey: 'team-v1',
     name: 'GALX Images — MAX',
-    audience: 'Maximum room for one creator’s Image Studio practice.',
+    audience: 'More room for an individual Image Studio practice.',
     monthlyPriceUsd: 200,
     currency: 'USD',
     interval: 'month',
@@ -58,11 +61,11 @@ export const IMAGE_PLAN_CATALOG = [
     catalogStatus: 'active',
     checkoutEnabled: true,
     capabilities: [
-      'Current Image Studio controls for one account',
-      'Private mode for owner-scoped drafts',
+      'Bounded private image creation for one account',
+      'Private remixing of published Star Works',
       'Personal library, favorites, remix, and downloads',
     ],
-    boundary: 'One account, billed monthly, under the published fair-use terms. Account sharing, seats, and shared workspaces are not included.',
+    boundary: 'One account. The purchase grants private creation only, with the published allowance and renewal terms. Account sharing, seats, and shared workspaces are not included.',
   },
 ] as const;
 

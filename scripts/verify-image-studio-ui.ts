@@ -37,11 +37,11 @@ async function setup(width: number, authenticated: boolean, reducedMotion: 'redu
       if (state.mode === 'unauthorized') return json({ error: { message: sentinel } }, 401);
       if (state.mode === 'malformed') return json({ data: [{ url: 'https://evil.test/image.png' }], internal: sentinel });
       if (state.mode === 'immediate') return json({ data: Array.from({ length: state.payload.n }, () => ({ b64_json: picture.toString('base64'), internal: sentinel })) });
-      return json({ id: 'request-fixture', status: 'queued', task_url: 'https://evil.test/private', internal: sentinel }, 202);
+      return json({ id: 'request-fixture', status: 'in_progress', task_url: 'https://evil.test/private', internal: sentinel }, 202);
     }
     if (url.pathname === '/v1/images/requests/request-fixture') {
       state.polls++;
-      if (!state.complete) return json({ id: 'request-fixture', status: 'queued', private: sentinel }, 202);
+      if (!state.complete) return json({ id: 'request-fixture', status: 'in_progress', private: sentinel }, 202);
       state.images = [fixture('fixture-image', state.payload?.prompt || 'Recovered image', '3:2')];
       return json({ data: [{ b64_json: picture.toString('base64'), internal: sentinel }], internal: sentinel });
     }

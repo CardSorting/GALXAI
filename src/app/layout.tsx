@@ -89,7 +89,7 @@ export const metadata: Metadata = {
         url: `${SITE_CONFIG.url}${SITE_CONFIG.ogImage}`,
         width: 1200,
         height: 630,
-        alt: `${SITE_CONFIG.name} Images — make something worth sharing`,
+        alt: `${SITE_CONFIG.name} — discover what the Stars are making`,
       },
     ],
   },

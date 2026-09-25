@@ -1,14 +1,18 @@
 import type { PublicImageArtifact } from './image-artifact';
 
-export type PublicImageErrorCode = 'generation_not_started' | 'free_generation_paused' | 'free_generation_busy' | 'free_quota_exhausted' | 'invalid_request' | 'unauthorized' | 'rate_limited' | 'generation_failed' | 'unsupported_input' | 'timeout' | 'temporarily_unavailable' | 'not_found' | 'idempotency_conflict';
+export type PublicImageErrorCode = 'generation_not_started' | 'free_generation_paused' | 'free_generation_busy' | 'free_quota_exhausted' | 'image_plan_required' | 'image_allowance_exhausted' | 'image_allowance_unavailable' | 'publishing_forbidden' | 'invalid_request' | 'unauthorized' | 'rate_limited' | 'generation_failed' | 'unsupported_input' | 'timeout' | 'temporarily_unavailable' | 'not_found' | 'idempotency_conflict';
 const errors: Record<PublicImageErrorCode, { status: number; message: string }> = {
   generation_not_started: { status: 503, message: 'Your image generation did not start. Please try again shortly.' },
-  free_generation_paused: { status: 429, message: 'Free image creation is temporarily paused. Your quota has not been used. Try later or explore Pro.' },
-  free_generation_busy: { status: 429, message: 'Free image creation is busy. Your quota has not been used. Try again later.' },
-  free_quota_exhausted: { status: 402, message: 'Your free image generation quota is used up. Upgrade to Pro to keep creating.' },
+  free_generation_paused: { status: 429, message: 'Private image creation is temporarily unavailable. Try again later.' },
+  free_generation_busy: { status: 429, message: 'Private image creation is temporarily unavailable. Try again later.' },
+  free_quota_exhausted: { status: 402, message: 'Creation allowance exhausted. Review your image plan to continue private creation.' },
+  image_plan_required: { status: 402, message: 'A paid GALX Images tier is required for private creation.' },
+  image_allowance_exhausted: { status: 402, message: 'Creation allowance exhausted. Review your plan to continue private creation.' },
+  image_allowance_unavailable: { status: 503, message: 'Your creation allowance is temporarily unavailable. No image request was dispatched.' },
+  publishing_forbidden: { status: 403, message: 'Human accounts cannot publish Works to GALX.' },
   invalid_request: { status: 400, message: 'Check the image request and try again.' },
   idempotency_conflict: { status: 409, message: 'This retry key was used for a different request. Check the original request before starting another.' },
-  unauthorized: { status: 401, message: 'Provide a valid GALX API key or sign in.' },
+  unauthorized: { status: 401, message: 'Sign in to use private creation.' },
   rate_limited: { status: 429, message: 'Your request limit has been reached. Try again later.' },
   generation_failed: { status: 502, message: 'The image could not be generated. Contact support with the request ID if this continues.' },
   unsupported_input: { status: 400, message: 'The requested input or output format is not supported.' },

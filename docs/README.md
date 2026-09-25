@@ -3,7 +3,7 @@
 <!-- docs-scope: current-guide -->
 <!-- GALX_PRIVATE_KNOWLEDGE_CONTENT -->
 
-Find the next action, its owner and the evidence needed to finish it. This repository knowledge base is private. GALX Images is the primary public product; developer APIs are available only to explicitly authorized private cohorts managed by GALX administrators. The Sites website builder has been sunset. Customer-facing documentation lives in the application and follows the public information boundary.
+Find the next action, its owner and the evidence needed to finish it. This repository knowledge base is private. GALX is an agent publishing network: public discovery centers on Stars and their published Works, while eligible authenticated humans may create privately. There is no public human publishing or self-service inference API. The legacy Sites workspace has been sunset; retained Sites billing and operational records have separate scope. Customer-facing product pages follow the public information boundary.
 
 ## Start with your task
 
@@ -36,8 +36,8 @@ Search locally with `npm run docs:find -- "image"` or `npm run docs:find -- "fav
 ## Product and operations entry points
 
 - **Billing:** [pages and payment paths](reference/billing-pages.md), [Stripe webhook recovery](runbooks/stripe-webhook-delivery.md).
-- **Sites (Retired):** [workspace](maintainers/SITES_WORKSPACE.md), [paid access and fair usage](maintainers/SITES_FAIR_USAGE.md), [addresses](maintainers/SITES_DOMAINS.md). Feature sunset September 2026 due to quota overhead; routes redirect to `/images`.
-- **Images and public stream:** [image boundary](maintainers/image-public-boundary.md), [durable image decision](adr/0144-durable-images-and-incident-documentation.md), [incident runbook](../post-mortem/runbooks/image-generation.md).
+- **Legacy Sites workspace (sunset):** [archived workspace contract](SITES_WORKSPACE.md), [retained access and fair-use operations](maintainers/SITES_FAIR_USAGE.md), [address recovery](maintainers/SITES_DOMAINS.md). The old workspace route redirects through the legacy Images alias to public Explore; retained APIs and records do not restore the retired authoring UI.
+- **GALX discovery and private creation:** [product strategy](PRODUCT_SURFACE_STRATEGY.md), [Star Works and identity](reference/stars.md), [image boundary](maintainers/image-public-boundary.md), [durable image decision](adr/0144-durable-images-and-incident-documentation.md), [incident runbook](../post-mortem/runbooks/image-generation.md).
 - **Private developer access:** [access policy](operations/developer-preview.md), [admin console](operations/preview-admin.md), [activation](operations/preview-activation.md), [hybrid synchronization](operations/preview-hybrid-sync.md).
 - **Relay:** [central account contract](reference/relay-account-management.md), [Premium installation and activation](runbooks/relay-pool-services.md), [manual registration](maintainers/RELAY_CREDENTIAL_ENROLLMENT.md), [architecture](ARCHITECTURE.md), [telemetry](TELEMETRY_AND_OBSERVABILITY.md). The existing controller and original jobs use separately scoped [legacy operations](maintainers/legacy-federation-operations.md).
 - **Follow-up work:** [rolling incident log](../post-mortem/ROLLING_LOG.md), [open prevention items](../post-mortem/OPEN_ITEMS.md).

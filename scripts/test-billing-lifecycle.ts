@@ -3,13 +3,21 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import type Stripe from 'stripe';
 import { readSubscriptionSummary } from '../src/lib/billing/subscription-summary';
+import { readImagePlanSummary } from '../src/lib/billing/image-allowance';
+import { approvedAllowanceFor, IMAGE_ALLOWANCE_CONFIGURATION, imagePlanAllowanceApproved, type ImageAllowanceConfiguration } from '../src/lib/billing/image-allowance-config';
 import { billingPortalConfiguration } from '../src/lib/billing/portal';
+import { IMAGE_PLAN_OFFERS } from '../src/lib/data/pricingSummary';
 import { parsePlanStatus } from '../src/lib/billing/plan-status';
 import { BILLING_WEBHOOK_EVENTS } from '../src/lib/billing/webhookEvents';
 import { stripeInvoiceUrl } from '../src/lib/billing/account';
 
 const customer = 'cus_owner', price = 'price_pro';
 const end = Date.parse('2026-10-15T12:00:00Z') / 1000;
+const approvedImageAllowanceFixture = IMAGE_ALLOWANCE_CONFIGURATION;
+const unapprovedCreatorConfiguration = {
+  ...IMAGE_ALLOWANCE_CONFIGURATION,
+  plans: { ...IMAGE_ALLOWANCE_CONFIGURATION.plans, 'creator-v1': { status: 'UNAPPROVED' as const } },
+} satisfies ImageAllowanceConfiguration;
 const subscription = (extra: Record<string, unknown> = {}) => ({
   id: 'sub_private', customer, status: 'active', cancel_at_period_end: false, cancel_at: null,
   metadata: { diagnostic: 'PRIVATE_SENTINEL' }, pause_collection: null,
@@ -81,15 +89,54 @@ test('all billing entry points can use only the unique restricted cancellation p
 
 test('browser contract allowlists display fields and rejects malformed status', () => {
   const status = { access: 'included', checkoutAvailable: false, hasPaymentProfile: false, offers: [
-    { id: 'pro', name: 'GALX Pro', audience: 'For people creating in GALX Images.', monthlyPriceUsd: 10, checkoutAvailable: false },
-    { id: 'creator', name: 'Creator', audience: 'A steady solo creative practice.', monthlyPriceUsd: 15, checkoutAvailable: false },
-    { id: 'studio', name: 'Studio', audience: 'A focused workspace for heavier individual use.', monthlyPriceUsd: 35, checkoutAvailable: false },
-    { id: 'max', name: 'MAX', audience: 'Maximum room for one creator’s Image Studio practice.', monthlyPriceUsd: 200, checkoutAvailable: false },
-  ], subscription: { state: 'none', periodEnd: null, endsAt: null } };
+    { id: 'pro', name: 'GALX Pro', audience: 'For the GALX Sites workspace.', monthlyPriceUsd: 10, checkoutAvailable: false, allowance: null },
+    ...IMAGE_PLAN_OFFERS.map(plan => ({ id: plan.id, name: plan.name, audience: plan.audience,
+      monthlyPriceUsd: plan.monthlyPrice, checkoutAvailable: false, allowance: plan.allowance })),
+  ], subscription: { state: 'none', periodEnd: null, endsAt: null },
+  imageSubscription: { state: 'none', plan: null, planName: null, allowanceConfigured: false, periodEnd: null, endsAt: null } };
   assert.deepEqual(parsePlanStatus({ ...status, secret: 'PRIVATE_SENTINEL', subscription: { ...status.subscription, customer: 'PRIVATE_SENTINEL' } }), status);
   assert.equal(parsePlanStatus({ ...status, subscription: { ...status.subscription, periodEnd: 'bad date' } }), null);
   assert.equal(parsePlanStatus({ ...status, subscription: { ...status.subscription, state: 'PRIVATE_SENTINEL' } }), null);
   assert.equal(parsePlanStatus({ ...status, checkoutAvailable: 'true' }), null);
+  assert.equal(parsePlanStatus({ ...status, offers: [{ ...status.offers[1], id: 'creator' }] }), null);
+});
+
+test('image allowance activation uses the canonical approved configuration and fails closed when invalid', async () => {
+  for (const [planKey, monthlyUnits] of [['creator-v1', 100], ['studio-v1', 500], ['team-v1', 2_000]] as const) {
+    assert.equal(imagePlanAllowanceApproved(IMAGE_ALLOWANCE_CONFIGURATION, planKey), true);
+    assert.deepEqual(approvedAllowanceFor(approvedImageAllowanceFixture, planKey), {
+      status: 'APPROVED', monthlyUnits, standardOutputUnits: 1, hdOutputUnits: 2,
+    });
+  }
+  assert.equal(imagePlanAllowanceApproved(unapprovedCreatorConfiguration, 'creator-v1'), false);
+  assert.equal(imagePlanAllowanceApproved({ ...approvedImageAllowanceFixture, plans: {
+    ...approvedImageAllowanceFixture.plans,
+    'creator-v1': { status: 'APPROVED', monthlyUnits: 0 },
+  } } as unknown as ImageAllowanceConfiguration, 'creator-v1'), false);
+  assert.equal(imagePlanAllowanceApproved({ ...approvedImageAllowanceFixture, plans: {
+    ...approvedImageAllowanceFixture.plans,
+    'creator-v1': { status: 'APPROVED', monthlyUnits: 2_147_483_648 },
+  } } as unknown as ImageAllowanceConfiguration, 'creator-v1'), false);
+  assert.equal(imagePlanAllowanceApproved({ ...approvedImageAllowanceFixture,
+    outputUnits: { standard: 1, hd: 32_768 },
+  } as unknown as ImageAllowanceConfiguration, 'creator-v1'), false);
+  assert.equal(imagePlanAllowanceApproved(null as unknown as ImageAllowanceConfiguration, 'creator-v1'), false);
+});
+
+test('Image billing summary maps internal keys without leaking them and rejects unapproved creation', async () => {
+  const expiry = new Date(Date.now() + 60_000);
+  const pool = { query: async (sql: string) => sql.includes('FROM private.galx_plan_subscriptions')
+    ? { rows: [{ plan_key: 'creator-v1', status: 'active', period_end: expiry, period_is_current: true, cancel_at_period_end: false }] }
+    : { rows: [] } } as any;
+  const summary = await readImagePlanSummary('owner-fixture', pool, approvedImageAllowanceFixture);
+  assert.deepEqual(summary, { state: 'active', plan: 'workshop', planName: 'Workshop',
+    periodEnd: expiry.toISOString(), endsAt: null, allowanceConfigured: true });
+  assert.doesNotMatch(JSON.stringify(summary), /creator-v1|team-v1|stripe|price_/i);
+  assert.equal((await readImagePlanSummary('owner-fixture', pool, unapprovedCreatorConfiguration)).allowanceConfigured, false);
+
+  const expiredPool = { query: async () => ({ rows: [{ plan_key: 'studio-v1', status: 'active', period_end: expiry,
+    period_is_current: false, cancel_at_period_end: false }] }) } as any;
+  assert.equal((await readImagePlanSummary('owner-fixture', expiredPool)).state, 'unavailable');
 });
 
 test('readiness includes lifecycle delivery and invoice links forbid alternate ports and credentials', () => {

@@ -77,7 +77,7 @@ export function CaughtUpCard({ authorHandle }: CaughtUpCardProps) {
         >
           {authorHandle
             ? `You’ve explored all published works by @${authorHandle}. Bounded production keeps our archive finite and intentional.`
-            : 'You’ve explored all currently published releases. The Stars do not need to be awake for their work to matter.'}
+            : 'You’ve explored all currently published releases. Each Star’s archive is here whenever you want to return.'}
         </p>
       </div>
 

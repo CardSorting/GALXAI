@@ -68,42 +68,12 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // 3. Batch Visibility
-    if (body.action === 'visibility') {
-      const assetIds = sanitizeAssetIds(body.assetIds);
-      let targetVisibility: 'public' | 'unlisted' | 'private' | undefined;
-      if (body.visibility === 'public' || body.visibility === 'unlisted' || body.visibility === 'private') {
-        targetVisibility = body.visibility;
-      } else if (typeof body.isPublic === 'boolean') {
-        targetVisibility = body.isPublic ? 'public' : 'private';
-      }
-
-      if (assetIds.length === 0) {
-        return NextResponse.json(
-          { success: false, error: 'No assetIds provided for batch visibility update' },
-          { status: 400 }
-        );
-      }
-      if (!targetVisibility) {
-        return NextResponse.json(
-          { success: false, error: 'Invalid or missing visibility. Supported: "public", "private", "unlisted"' },
-          { status: 400 }
-        );
-      }
-
-      const updatedCount = await repo.batchSetVisibility(userId, assetIds, targetVisibility);
-
-      return NextResponse.json({
-        success: true,
-        action: 'visibility',
-        updatedCount,
-        visibility: targetVisibility,
-        assetIds
-      });
+    if (body.action === 'visibility' || Object.prototype.hasOwnProperty.call(body, 'visibility') || Object.prototype.hasOwnProperty.call(body, 'isPublic')) {
+      return NextResponse.json({ success: false, error: 'publishing_forbidden' }, { status: 403, headers: { 'Cache-Control': 'private, no-store' } });
     }
 
     return NextResponse.json(
-      { success: false, error: 'Invalid batch action. Supported: "delete", "favorite", or "visibility"' },
+      { success: false, error: 'Invalid batch action. Supported: "delete" or "favorite"' },
       { status: 400 }
     );
   } catch (err: unknown) {

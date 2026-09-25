@@ -50,6 +50,8 @@ export interface RouteImageOptions {
   isPriorityUser?: boolean;
   headers?: Headers | Record<string, string | null | undefined>;
   signal?: AbortSignal;
+  /** Server-only content class. Public clients never pass this field through. */
+  workClass?: 'private' | 'star_published';
   /** Public Developer API usage is counted as completed messages, never tokens. */
   usageBillingBasis?: 'message' | 'legacy_token' | 'administrative';
   /** Private administrator allocation applied to message reservations. */
@@ -987,7 +989,7 @@ export class GalxModelRouter {
         void GalxSeatTierEngine.getInstance().recordSeatTokenDraw(userId,cost.totalCostUsd).catch(()=>{});
         GalxSeatTierEngine.getInstance().recordSeatUsage(userId,modelSpec.id,1000,requestId);
       }
-      await this.persistImageGeneration(result, options.request, userId, requestId, modelSpec.id, incomingHeaders);
+      await this.persistImageGeneration(result, options.request, userId, requestId, modelSpec.id, incomingHeaders, options.workClass);
       return {...result,modelUsed:modelSpec.id,shardId:''};
     }
     const { sanitizedRequest, redactionResult } = this.privacyEngine.sanitizeImageRequest(
@@ -1197,7 +1199,7 @@ export class GalxModelRouter {
         statusCode: 200
       });
 
-      await this.persistImageGeneration(result, sanitizedRequest, userId, requestId, modelSpec.id, incomingHeaders);
+      await this.persistImageGeneration(result, sanitizedRequest, userId, requestId, modelSpec.id, incomingHeaders, options.workClass);
 
       // Return private diagnostics to the public normalization boundary.
       return result;
@@ -1241,8 +1243,8 @@ export class GalxModelRouter {
     }
   }
 
-  private async persistImageGeneration(result: ImageGenerationResponse, sanitizedRequest: ImageGenerationRequest, userId: string, requestId: string, modelId: string, incomingHeaders?: RouteImageOptions["headers"]) {
-      // Mirror sanitized image payloads into private storage.
+  private async persistImageGeneration(result: ImageGenerationResponse, sanitizedRequest: ImageGenerationRequest, userId: string, requestId: string, modelId: string, incomingHeaders?: RouteImageOptions["headers"], workClass: RouteImageOptions['workClass'] = 'private') {
+      // Store only decoded/re-encoded image bytes in the private image bucket.
       const effectiveSessionId =
         sanitizedRequest.sessionId ||
         this.extractHeaderValue(incomingHeaders, 'x-galx-session-id') ||
@@ -1253,14 +1255,9 @@ export class GalxModelRouter {
       const mirroredImages = [];
       for (const item of result.data) {
         try {
-          let imageSource: Buffer | string | undefined;
-          if (item.b64_json) {
-            imageSource = Buffer.from(item.b64_json, 'base64');
-          } else if (item.url && !item.url.startsWith('https://assets.galx.ai')) {
-            imageSource = item.url;
-          }
-
-          if (imageSource) {
+          if (typeof item.b64_json !== 'string') throw new Error('Image output bytes unavailable');
+          const imageSource = Buffer.from(item.b64_json, 'base64');
+          if (imageSource.length) {
             const uploaded = await r2Adapter.uploadUserSessionImage({
               userId: userId || 'anonymous',
               generationId: requestId,
@@ -1272,7 +1269,7 @@ export class GalxModelRouter {
               model: modelId,
               size: sanitizedRequest.size || '1024x1024',
               quality: sanitizedRequest.quality || 'standard',
-              visibility: sanitizedRequest.visibility || 'public',
+              workClass,
               deferManifestUpdate: true,
               metadata: {
                 prompt: sanitizedRequest.prompt || '',
@@ -1287,7 +1284,6 @@ export class GalxModelRouter {
 
             item.asset_id = uploaded.assetId;
             item.r2_key = uploaded.key;
-            item.r2_url = uploaded.publicUrl;
             item.user_id = userId || 'anonymous';
             item.session_id = effectiveSessionId;
             item.content_type = 'image/png';
@@ -1303,6 +1299,7 @@ export class GalxModelRouter {
           }
         } catch (r2Err: any) {
           logImageFailure(requestId, r2Err);
+          throw r2Err;
         }
       }
 

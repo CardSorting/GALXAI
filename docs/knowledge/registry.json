@@ -5,6 +5,18 @@
       "title": "Documentation and decisions",
       "owner": "Documentation maintainer",
       "sources": [
+        "PRODUCT.md",
+        "README.md",
+        "docs/API_REFERENCE.md",
+        "docs/API_BASE_URL.md",
+        "docs/QUICKSTART.md",
+        "docs/GTM_STRATEGY.md",
+        "docs/PRODUCT_SURFACE_STRATEGY.md",
+        "docs/WALLET_AND_BILLING_STRATEGY.md",
+        "docs/DEVELOPER_CLIENT_SDK.md",
+        "docs/adr/0160-private-human-creation-star-publishing.md",
+        "src/app/docs/**/*.tsx",
+        "src/app/docs/agent-setup/route.ts",
         "scripts/docs-kb.py",
         "scripts/test-docs-kb.py",
         "scripts/verify-docs.py",
@@ -59,6 +71,33 @@
       "title": "Images, history and Favorites",
       "owner": "Product/API maintainer",
       "sources": [
+        "PRODUCT.md",
+        "README.md",
+        "docs/API_REFERENCE.md",
+        "docs/API_BASE_URL.md",
+        "docs/QUICKSTART.md",
+        "docs/GTM_STRATEGY.md",
+        "docs/PRODUCT_SURFACE_STRATEGY.md",
+        "docs/QUEUE_SPECIFICATION.md",
+        "docs/WALLET_AND_BILLING_STRATEGY.md",
+        "docs/DEVELOPER_CLIENT_SDK.md",
+        "docs/maintainers/PUBLIC_DISCOVERY.md",
+        "docs/maintainers/FREE_GENERATION_QUOTA.md",
+        "docs/maintainers/image-public-boundary.md",
+        "docs/maintainers/image-studio-review.md",
+        "docs/reference/billing-pages.md",
+        "docs/reference/stars.md",
+        "docs/adr/0160-private-human-creation-star-publishing.md",
+        "src/app/api/openapi.json/route.ts",
+        "src/app/api/queues/**/tasks/route.ts",
+        "src/app/images/create/page.tsx",
+        "src/app/models/**/*.tsx",
+        "src/components/library/VisualLibraryDashboard.tsx",
+        "src/core/queue/GalxTaskQueueEngine.ts",
+        "src/sdk/resources/images.ts",
+        "src/sdk/server-image.ts",
+        "scripts/test-private-image-storage.ts",
+        "scripts/test-public-information-boundary.ts",
         "src/lib/images/**/*.ts",
         "src/app/v1/images/**/*.ts",
         "src/app/api/images/library/**/*.ts",
@@ -71,6 +110,15 @@
         "src/workers/cloudflare/GalxR2AssetAdapter.ts",
         "scripts/test-image-requests-db.ts",
         "scripts/test-image-public-http.ts",
+        "scripts/audit-image-release.ts",
+        "scripts/release-certification.ts",
+        "src/app/api/billing/plan/route.ts",
+        "src/lib/billing/image-allowance.ts",
+        "src/lib/billing/image-allowance-config.ts",
+        "supabase/migrations/20260924020000_private_human_works_star_publication_boundary.sql",
+        "supabase/migrations/20260924030000_private_image_allowance_accounting.sql",
+        "supabase/rollbacks/20260924020000_private_human_works_star_publication_boundary.down.sql",
+        "supabase/rollbacks/20260924030000_private_image_allowance_accounting.down.sql",
         "supabase/migrations/20260913025900_durable_image_requests.sql",
         "supabase/rollbacks/20260913025900_durable_image_requests.down.sql",
         "src/components/images/**/*",
@@ -82,6 +130,7 @@
         "src/lib/security/public-image-record.ts",
         "scripts/test-image-library-*.ts",
         "scripts/test-image-studio.ts",
+        "scripts/test-image-studio-recovery.ts",
         "scripts/verify-image-library-scale-ui.ts",
         "supabase/migrations/20260913071757_image_library_bounded_pages.sql",
         "supabase/rollbacks/20260913071757_image_library_bounded_pages.down.sql",
@@ -101,6 +150,7 @@
         "src/contexts/GenerationAllowanceContext.tsx",
         "scripts/test-image-premium-routing.ts",
         "scripts/test-community-profile.ts",
+        "scripts/test-sleeping-star-invariant.ts",
         "scripts/test-image-explore-hide.ts",
         "src/app/api/images/feed/route.ts",
         "src/lib/community/**/*.ts",
@@ -120,7 +170,9 @@
         "docs/maintainers/image-library-scale.md",
         "docs/reference/stars.md",
         "docs/maintainers/readable-urls.md",
-        "docs/maintainers/FREE_GENERATION_QUOTA.md"
+        "docs/maintainers/FREE_GENERATION_QUOTA.md",
+        "docs/maintainers/private-image-accounting.md",
+        "docs/runbooks/private-image-release-audit.md"
       ],
       "checks": [
         "npm run test:image:security",
@@ -491,6 +543,8 @@
         "scripts/test-relay-activation-db.ts",
         "scripts/test-account-profile-db.ts",
         "scripts/test-account-profile-api.ts",
+        "scripts/test-image-requests-db.ts",
+        "scripts/audit-image-release.ts",
         "src/lib/stars/**/*.ts",
         "scripts/populate-stars.ts",
         "scripts/reconcile-stars.ts",
@@ -504,7 +558,9 @@
         "docs/MIGRATION_GUIDE.md",
         "docs/reference/relay-account-management.md",
         "docs/maintainers/ACCOUNT_PROFILE_SCHEMA.md",
-        "docs/adr/0158-canonical-account-profiles-and-actor-provenance.md"
+        "docs/adr/0158-canonical-account-profiles-and-actor-provenance.md",
+        "docs/maintainers/private-image-accounting.md",
+        "docs/runbooks/private-image-release-audit.md"
       ],
       "checks": [
         "npm run db:verify",
@@ -518,6 +574,12 @@
       "title": "Release and deployment boundaries",
       "owner": "Release operator",
       "sources": [
+        "src/app/docs/**/*.tsx",
+        "src/app/docs/agent-setup/route.ts",
+        "src/app/manifest.ts",
+        "src/app/stars/page.tsx",
+        "src/app/terms/page.tsx",
+        "src/app/sitemap.ts",
         ".vercelignore",
         ".dockerignore",
         "vercel.json",
@@ -533,7 +595,10 @@
         ".env.example",
         "scripts/provision-stripe-all.ts",
         "scripts/lib/stripe-webhook-target.ts",
-        "scripts/test-stripe-webhook-target.ts"
+        "scripts/test-stripe-webhook-target.ts",
+        "scripts/audit-image-release.ts",
+        "scripts/release-certification.ts",
+        "package.json"
       ],
       "guides": [
         "docs/DEPLOYMENT.md",
@@ -544,7 +609,8 @@
         "docs/CLOUDFLARE_STRATEGY.md",
         "docs/maintainers/CLOUDFLARE_EDGE_MESH_MAINTAINER_RUNBOOK.md",
         "docs/playbooks/02-deployment-and-release.md",
-        "docs/runbooks/stripe-webhook-delivery.md"
+        "docs/runbooks/stripe-webhook-delivery.md",
+        "docs/runbooks/private-image-release-audit.md"
       ],
       "checks": [
         "npm run docs:check",
@@ -654,6 +720,12 @@
       "title": "Billing, subscriptions and payment recovery",
       "owner": "Billing maintainer",
       "sources": [
+        "src/lib/billing/image-allowance.ts",
+        "src/lib/billing/image-allowance-config.ts",
+        "src/lib/billing/image-plan-catalog.ts",
+        "src/app/api/billing/image-allowance/route.ts",
+        "docs/WALLET_AND_BILLING_STRATEGY.md",
+        "docs/reference/billing-pages.md",
         "src/lib/billing/account.ts",
         "src/lib/billing/checkout.ts",
         "src/lib/billing/fulfillment.ts",
@@ -672,6 +744,8 @@
         "src/app/api/internal/credits/stripe/**/*.ts",
         "src/components/billing/*.tsx",
         "scripts/*stripe*.ts",
+        "scripts/activate-image-plan-catalog.ts",
+        "scripts/verify-live-image-plan-catalog.ts",
         "scripts/lib/stripe-webhook-target.ts",
         "scripts/test-billing*.ts",
         "scripts/verify-billing-ux.mjs",
@@ -718,7 +792,8 @@
         "docs/reference/billing-pages.md",
         "docs/WALLET_AND_BILLING_STRATEGY.md",
         "src/components/home/DESIGN.md",
-        "src/components/public-content/DESIGN.md"
+        "src/components/public-content/DESIGN.md",
+        "docs/maintainers/private-image-accounting.md"
       ],
       "checks": [
         "npm run test:billing:lifecycle",
@@ -831,6 +906,28 @@
         "images",
         "sites",
         "billing"
+      ]
+    },
+    "docs/maintainers/private-image-accounting.md": {
+      "kind": "reference",
+      "keywords": [
+        "private",
+        "image",
+        "allowance",
+        "reservation",
+        "accounting",
+        "lifecycle"
+      ]
+    },
+    "docs/runbooks/private-image-release-audit.md": {
+      "kind": "runbook",
+      "keywords": [
+        "private",
+        "image",
+        "release",
+        "privacy",
+        "audit",
+        "verification"
       ]
     },
     "docs/knowledge/audits/2026-09-14-free-admission-gate.md": {
@@ -1082,7 +1179,8 @@
     "docs/runbooks/relay-pool-images.md",
     "docs/runbooks/relay-pool-services.md",
     "docs/runbooks/relay-admission-lifecycle.md",
-    "docs/runbooks/stripe-webhook-delivery.md"
+    "docs/runbooks/stripe-webhook-delivery.md",
+    "docs/runbooks/private-image-release-audit.md"
   ],
   "decisions": {
     "docs/adr/0145-maintained-knowledge-and-decision-lifecycle.md": {
@@ -1148,7 +1246,7 @@
       "observed_at": "2026-09-14T01:51:14.255272+00:00"
     },
     "docs/adr/0149-one-time-free-generation.md": {
-      "status": "proposed",
+      "status": "superseded",
       "delivery": "deployed",
       "domain": "sites",
       "owner": "Product/API maintainer",
@@ -1158,12 +1256,13 @@
         "post-mortem/releases/2026-09-14-free-generation-gate.json"
       ],
       "supersedes": [],
+      "superseded_by": "docs/adr/0160-private-human-creation-star-publishing.md",
       "target": "galx.ai account generation gate",
       "revision": "d19e4ee1ad4b446e689bb4b85db48ec3a6f08fb0",
       "observed_at": "2026-09-14T04:36:11.300721Z"
     },
     "docs/adr/0150-free-generation-admission-gate.md": {
-      "status": "proposed",
+      "status": "superseded",
       "delivery": "deployed",
       "domain": "sites",
       "owner": "Product/API maintainer",
@@ -1173,6 +1272,7 @@
         "post-mortem/releases/2026-09-14-free-generation-gate.json"
       ],
       "supersedes": [],
+      "superseded_by": "docs/adr/0160-private-human-creation-star-publishing.md",
       "target": "galx.ai account generation gate",
       "revision": "d19e4ee1ad4b446e689bb4b85db48ec3a6f08fb0",
       "observed_at": "2026-09-14T04:36:11.300721Z"
@@ -1288,6 +1388,25 @@
         "scripts/macos/RelayMonitors.swift"
       ],
       "supersedes": []
+    },
+    "docs/adr/0160-private-human-creation-star-publishing.md": {
+      "status": "accepted",
+      "delivery": "local",
+      "domain": "images",
+      "owner": "Product/API maintainer",
+      "date": "2026-09-24",
+      "evidence": [
+        "docs/PRODUCT_SURFACE_STRATEGY.md",
+        "docs/maintainers/FREE_GENERATION_QUOTA.md",
+        "supabase/migrations/20260924020000_private_human_works_star_publication_boundary.sql",
+        "supabase/migrations/20260924030000_private_image_allowance_accounting.sql"
+      ],
+      "supersedes": [
+        "docs/adr/0149-one-time-free-generation.md",
+        "docs/adr/0150-free-generation-admission-gate.md"
+      ],
+      "target": "GALX application source and reviewed database migrations; not deployed",
+      "revision": "working tree under review"
     }
   },
   "managed_adr_from": 145,

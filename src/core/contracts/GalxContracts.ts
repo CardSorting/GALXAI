@@ -686,8 +686,6 @@ export interface ImageGenerationRequest {
   quality?: 'standard' | 'hd';
   aspect_ratio?: string;
   response_format?: 'url' | 'b64_json';
-  /** Controls publication of the generated asset in the GALX library. */
-  visibility?: 'public' | 'unlisted' | 'private';
   user?: string;
   sessionId?: string;
   idempotencyKey?: string;
@@ -1268,6 +1266,8 @@ export interface ImageGenerationRecord {
   /** Private generation receipt that owns the persisted asset, when available. */
   readonly generationId?: string;
   readonly userId: string;
+  /** Publication authority is a content class, never a user visibility preference. */
+  readonly workClass?: 'private' | 'star_published';
   readonly sessionId: string;
   readonly status: 'queued' | 'generating' | 'completed' | 'failed';
   readonly prompt: string;
@@ -1286,8 +1286,6 @@ export interface ImageGenerationRecord {
   readonly latencyMs?: number;
   readonly costUsd?: number;
   readonly isFavorite: boolean;
-  readonly isPublic?: boolean;
-  readonly visibility?: 'public' | 'unlisted' | 'private';
   readonly tags: string[];
   readonly metadata?: Record<string, unknown>;
   readonly createdAt: string;
@@ -1307,7 +1305,6 @@ export interface ImageLibraryFilterOptions {
   readonly sessionId?: string;
   readonly aspectRatio?: string;
   readonly isFavorite?: boolean;
-  readonly visibility?: 'public' | 'unlisted' | 'private' | 'all';
   readonly search?: string;
   readonly sort?: 'newest' | 'oldest';
   readonly limit?: number;

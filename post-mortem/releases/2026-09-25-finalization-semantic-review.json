@@ -1,0 +1,61 @@
+{
+  "classification": "private",
+  "reviewed_at": "2026-09-25",
+  "scope": "Semantic delta review for the final GALX private-creation release candidate. The September 25 Phase 5 domain review remains the baseline for unchanged sources; this record covers the changed allowance, storage, lifecycle, product-copy, and release-status contracts.",
+  "baseline": "post-mortem/releases/2026-09-25-phase5-domain-review.json",
+  "guides_read_or_reconciled": [
+    "PRODUCT.md",
+    "docs/PRODUCT_SURFACE_STRATEGY.md",
+    "docs/QUEUE_SPECIFICATION.md",
+    "docs/maintainers/FREE_GENERATION_QUOTA.md",
+    "docs/maintainers/PUBLIC_DISCOVERY.md",
+    "docs/maintainers/image-public-boundary.md",
+    "docs/maintainers/private-image-accounting.md",
+    "docs/reference/billing-pages.md",
+    "docs/runbooks/private-image-release-audit.md",
+    "docs/runbooks/release-readiness.md",
+    "docs/runbooks/stripe-webhook-delivery.md",
+    "docs/VERCEL_DEPLOYMENT.md",
+    "docs/GTM_STRATEGY.md"
+  ],
+  "implementation_contracts_reviewed": [
+    "src/lib/billing/image-allowance-config.ts",
+    "src/lib/billing/image-allowance.ts",
+    "src/lib/billing/plan-subscription.ts",
+    "src/lib/data/image-plan-offers.ts",
+    "src/app/api/billing/plan/route.ts",
+    "src/lib/billing/plan-status.ts",
+    ".env.example",
+    "wrangler.toml",
+    "src/core/storage/GalxUnifiedR2StorageManager.ts",
+    "src/lib/images/request-service.ts",
+    "src/lib/images/request-repository.ts",
+    "scripts/audit-image-release.ts",
+    "scripts/release-certification.ts",
+    "scripts/test-image-requests-db.ts",
+    "scripts/test-private-image-storage.ts"
+  ],
+  "findings": [
+    "Workshop, Studio, and MAX approval is represented by the single typed allowance configuration; Standard and HD output weights are shared there. Product pricing, API projection, checkout validation, admission, and UI summary derive values from it.",
+    "Image reservation remains transactionally committed before claim/dispatch. Success consumes; proven pre-dispatch rejection releases once; ambiguous/unknown outcomes remain reserved and are not retried or automatically refunded.",
+    "Private human images use the Vercel application-side R2 configuration and require server-only credentials before checkout or image receipt creation. No application/runtime call path requires a dedicated Cloudflare Worker image-bucket binding.",
+    "Historical image provenance and hosted/CDN state remain unknown. The new private path is separately scoped; historical uncertainty does not itself invalidate local candidate readiness or authorize production mutation.",
+    "Release certification now distinguishes local release-candidate readiness from production deployment; hosted/deployment uncertainty remains visible and is not converted into a local code failure."
+  ],
+  "focused_checks": {
+    "typecheck": "PASS",
+    "lint": "PASS with 8 warnings and zero errors",
+    "billing_lifecycle": "PASS, 20 tests",
+    "stripe_pricing_strategy": "PASS",
+    "image_security_auth_routes": "PASS, 67 tests",
+    "image_scale": "PASS, 19 tests",
+    "postgres_integration": "PASS, 153 migrations and 72 checks against disposable PostgreSQL 17",
+    "database_static_integrity": "PASS, 153 migration files with no findings",
+    "private_storage": "PASS, including pre-reservation fail-closed behavior"
+  },
+  "production_changes": "NONE",
+  "limits": [
+    "No production database, object store, CDN, application, Worker, billing account, or environment was modified or certified by this semantic review.",
+    "The record documents review scope and local tests; it is not a production deployment receipt or proof of historical asset privacy."
+  ]
+}

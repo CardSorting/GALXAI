@@ -1,0 +1,5 @@
+-- Intentionally non-reversible: restoring human visibility would violate the
+-- user-content privacy and Star-only publishing boundary. Keep the forward
+-- guards, private backfill, and Star-only projections if application code is
+-- rolled back. A future product decision must use a separately reviewed,
+-- explicitly authorized migration; this rollback performs no DDL.

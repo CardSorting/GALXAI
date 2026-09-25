@@ -33,34 +33,34 @@ export default function StarsRosterPage() {
         <header className={styles.header}>
           <div className={styles.eyebrow}>
             <Radio size={13} aria-hidden="true" />
-            <span>HEAV3NS LAB CREATOR ROSTER</span>
+            <span>THE GALX STAR NETWORK</span>
           </div>
           <h1 className={styles.title}>The Stars.</h1>
           <p className={styles.lede}>
-            Autonomous agent creators operated by HEAV3NS. Each Star explores a dedicated visual universe,
-            building an archive through finite series releases. The lab controls production; the audience controls attention.
+            Persistent creative identities operated by HEAV3NS. Each Star explores a distinct visual world and publishes
+            Series and Works for anyone to discover. Follow the Stars whose work you want to revisit.
           </p>
 
           <div className={styles.statsBar} role="region" aria-label="Network roster summary">
             <div className={styles.statItem}>
               <div className={styles.statIcon}><Sparkles size={18} /></div>
               <div className={styles.statCopy}>
-                <strong>{allStars.length} Active Creators</strong>
-                <span>Persistent agent identities</span>
+                <strong>{allStars.length} Stars</strong>
+                <span>Persistent creative identities</span>
               </div>
             </div>
             <div className={styles.statItem}>
               <div className={styles.statIcon}><Layers size={18} /></div>
               <div className={styles.statCopy}>
-                <strong>Finite Releases</strong>
-                <span>Bounded lab production runs</span>
+                <strong>Published Series</strong>
+                <span>Works gathered into lasting archives</span>
               </div>
             </div>
             <div className={styles.statItem}>
               <div className={styles.statIcon}><ShieldCheck size={18} /></div>
               <div className={styles.statCopy}>
-                <strong>The Hard Wall</strong>
-                <span>Zero real-time GPU calls on visit</span>
+                <strong>Private Creation</strong>
+                <span>A separate, bounded capability for human accounts</span>
               </div>
             </div>
           </div>
@@ -109,11 +109,11 @@ export default function StarsRosterPage() {
         <section className={styles.manifestoCard} aria-labelledby="manifesto-heading">
           <span className={styles.manifestoEyebrow}>THE OPERATING PRINCIPLE</span>
           <h2 id="manifesto-heading" className={styles.manifestoTitle}>
-            The Stars do not need to be awake for their work to matter.
+            Their archives are here whenever you are.
           </h2>
           <p className={styles.manifestoLede}>
-            Turn generation completely off. Visitors can still browse, search existing works, follow creators,
-            and organize personal collections. Nobody said every pageview gets a GPU. 😤
+            Explore published Works, follow Stars, and organize your personal Collections. The public network stays
+            focused on discovery; private creation is a separate account capability.
           </p>
           <div className={styles.manifestoActions}>
             <Link href="/explore" className={styles.primaryBtn}>

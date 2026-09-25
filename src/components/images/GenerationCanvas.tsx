@@ -5,8 +5,8 @@ import { ArrowDownToLine, ArrowLeft, ArrowRight, ImageIcon, LayoutGrid, Maximize
 import { STARTER_TEMPLATES, type StarterTemplate, type StudioImage, type StudioSettings } from './studio-contract';
 import { StudioArtwork } from './StudioArtwork';
 
-/** Modern Luminous Latent Flux simulation replacing noisy procedural TV static. */
-function LatentFluxSimulation({ running, seed }: { running: boolean; seed: number }) {
+/** Decorative placeholder only; it is not a progress indicator or result preview. */
+function CreationPlaceholderAnimation({ running, seed }: { running: boolean; seed: number }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const elapsed = useRef(0);
 
@@ -140,18 +140,16 @@ function LatentFluxSimulation({ running, seed }: { running: boolean; seed: numbe
     return () => { cancelAnimationFrame(animation); observer.disconnect(); document.removeEventListener('visibilitychange', sync); reducedMotion.removeEventListener('change', sync); };
   }, [running, seed]);
 
-  return <canvas ref={canvasRef} className="studio-denoising" aria-hidden="true" />;
+  return <canvas ref={canvasRef} className="studio-placeholder-animation" aria-hidden="true" />;
 }
 
 export function GenerationCanvas({ images, request, animating, onOpen, onDownload, onReuse, downloading, layout, onLayout, selectedId, onSelect, onLibrary,
-  remainingSeconds = 0, activePhaseLabel, onSelectTemplate }: {
+  onSelectTemplate }: {
   images: StudioImage[]; request: StudioSettings | null; animating: boolean;
   onOpen: (image: StudioImage) => void; onDownload: (image: StudioImage) => void; onReuse: (image: StudioImage) => void; downloading: boolean;
   layout: 'image' | 'grid'; onLayout: (layout: 'image' | 'grid') => void;
   onLibrary: () => void;
   selectedId: string | null; onSelect: (id: string | null) => void;
-  remainingSeconds?: number;
-  activePhaseLabel?: string;
   onSelectTemplate?: (template: StarterTemplate) => void;
 }) {
   const [paused, setPaused] = useState(false);
@@ -174,13 +172,12 @@ export function GenerationCanvas({ images, request, animating, onOpen, onDownloa
   }
 
   const pending = (index: number) => <div className="studio-generation-placeholder" role="img" aria-label={`Image ${index + 1} is pending. Generation animation, not an image preview.`}>
-    <LatentFluxSimulation running={running} seed={index} />
+    <CreationPlaceholderAnimation running={running} seed={index} />
     <div className="studio-pending-hud" aria-hidden="true">
       <div className="studio-hud-badge">
         <span className="studio-hud-pulse" />
-        <span>{activePhaseLabel || 'Synthesizing artwork…'}</span>
+        <span>Creating your image privately…</span>
       </div>
-      {remainingSeconds > 0 && <span className="studio-hud-eta">~{remainingSeconds}s remaining</span>}
     </div>
   </div>;
 

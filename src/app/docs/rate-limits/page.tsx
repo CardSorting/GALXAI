@@ -1,2 +1,5 @@
-import { permanentRedirect } from 'next/navigation';
-export default function Page() { permanentRedirect('/docs/error-handling#retries'); }
+import { redirect } from 'next/navigation';
+
+export default function Page() {
+  redirect('/docs');
+}

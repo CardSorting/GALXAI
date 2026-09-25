@@ -162,9 +162,11 @@ export class GalxUnifiedR2StorageManager {
       workerBindingName: 'ASSET_BUCKET',
     },
     images: {
-      bucketName: process.env.R2_IMAGES_BUCKET_NAME || process.env.R2_ASSETS_BUCKET_NAME || 'galxai-assets',
-      publicDomain: process.env.PUBLIC_IMAGES_URL || process.env.PUBLIC_ASSETS_URL || 'https://assets.galx.ai',
-      workerBindingName: 'IMAGE_BUCKET',
+      // Generated art is never stored in the public asset bucket. The private
+      // bucket has no public-domain default and is configured independently
+      // through Vercel's server-side R2 credentials, not a Worker binding.
+      bucketName: process.env.R2_PRIVATE_IMAGES_BUCKET_NAME || 'galxai-private-images',
+      publicDomain: 'https://galx.ai',
     },
     user_webapps: {
       bucketName: process.env.R2_WEBAPPS_BUCKET_NAME || 'galx-user-webapps',
@@ -213,6 +215,16 @@ export class GalxUnifiedR2StorageManager {
 
   public isConfigured(): boolean {
     return Boolean(this.workerEnv || (this.accountId && this.accessKeyId && this.secretAccessKey));
+  }
+
+  /** Fail closed unless image storage is distinct from public/legacy assets. */
+  public isPrivateImageStorageConfigured(): boolean {
+    const bucketName = this.bucketMap.images.bucketName;
+    const publicBucketName = this.bucketMap.assets.bucketName;
+    const legacyImageBucket = process.env.R2_IMAGES_BUCKET_NAME?.trim();
+    if (!bucketName || bucketName === publicBucketName || bucketName === legacyImageBucket) return false;
+    return Boolean(process.env.R2_PRIVATE_IMAGES_BUCKET_NAME?.trim() &&
+      this.accountId && this.accessKeyId && this.secretAccessKey);
   }
 
   public resolveBucket(bucketAlias: R2KnownBucket): { bucketName: string; publicDomain: string; workerBindingName?: string } {

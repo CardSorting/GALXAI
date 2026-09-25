@@ -1,27 +1,26 @@
 import { PRO_PLAN } from '@/lib/billing/pro-plan';
-import { FREE_IMAGE_OFFER, IMAGE_PLAN_FEATURES } from '@/lib/data/pricingSummary';
+import { IMAGE_PLAN_OFFERS } from '@/lib/data/pricingSummary';
+
+const allowancePlans = IMAGE_PLAN_OFFERS.flatMap(plan => plan.allowance
+  ? [`${plan.name}: ${plan.allowance.monthlyUnits.toLocaleString('en-US')} units per month`]
+  : []);
+const imageAllowanceDetails = allowancePlans.length
+  ? `${allowancePlans.join('; ')}. Standard images use ${IMAGE_PLAN_OFFERS.find(plan => plan.allowance)!.allowance!.standardOutputUnits} unit each; HD images use ${IMAGE_PLAN_OFFERS.find(plan => plan.allowance)!.allowance!.hdOutputUnits} units each.`
+  : 'Monthly allowances are not currently available.';
 
 /** Authored customer guidance only. Operational details and provider identifiers stay private. */
-export const PLAN_INCLUSIONS = [
-  ['Create', IMAGE_PLAN_FEATURES[0]],
-  ['Compose', IMAGE_PLAN_FEATURES[1]],
-  ['Detail', IMAGE_PLAN_FEATURES[2]],
-  ['Keep iterating', 'Save to your library, favorite, remix, and download'],
-  ['Share', 'Choose public or private sharing, with creations public by default'],
-] as const;
-
-export const FREE_PLAN_INCLUSIONS = [
-  ['Allowance', FREE_IMAGE_OFFER.allowance],
-  ['Create', IMAGE_PLAN_FEATURES[0]],
-  ['Compose', IMAGE_PLAN_FEATURES[1]],
-  ['Explore', 'Browse public creations and discover prompts to remix'],
+export const DISCOVERY_INCLUSIONS = [
+  ['Browse', 'Explore Stars, published Works, public archives, and Series'],
+  ['Follow', 'Keep up with Stars you enjoy'],
+  ['Save', 'Keep public Star Works in personal collections where supported'],
+  ['Creation', 'Browsing does not start image generation'],
 ] as const;
 
 export type Guide = {
   path: string;
   title: string;
   description: string;
-  category: 'Getting started' | 'Creating and publishing' | 'Plans and billing';
+  category: 'Getting started' | 'Private creation and remixing' | 'Plans and billing';
   sections: {
     id: string;
     title: string;
@@ -35,40 +34,40 @@ export type Guide = {
 export const GUIDES: Guide[] = [
   {
     path: '/pricing/galx-pro',
-    title: 'What’s included in GALX Pro',
-    description: 'Understand the GALX Pro image-creation plan, its published monthly terms, and fair-use boundaries.',
+    title: 'Private creation access in GALX',
+    description: 'Learn how bounded private creation and Star publishing are separated in GALX.',
     category: 'Plans and billing',
     sections: [
       {
         id: 'the-plan',
-        title: 'One plan for image creation',
+        title: 'Private creation is a separate capability',
         paragraphs: [
-          PRO_PLAN.name + ' costs $' + PRO_PLAN.monthlyPriceUsd + ' USD per month for one account. It supports image creation, community discovery, prompt reuse, and access to your image library.',
-          'Generated images are public by default and may appear in the community stream. Signed-in creators can choose Private mode before generating when a work-in-progress should stay in their library.',
+          'Human creation is private by default and private by design. A human account cannot publish generated work into Explore, a Star archive, a Series, or a public feed.',
+          `Private creation requires a signed-in account, an eligible purchased image tier, and remaining allowance. ${imageAllowanceDetails}`,
         ],
       },
       {
-        id: 'free-start',
-        title: 'Try it before subscribing',
+        id: 'discover-first',
+        title: 'Explore before creating',
         paragraphs: [
-          FREE_IMAGE_OFFER.allowance.charAt(0).toUpperCase() + FREE_IMAGE_OFFER.allowance.slice(1) + '. The allowance is designed to let you experience the full creation loop before choosing a recurring plan.',
-          'A request for four images uses four outputs. The Image Studio keeps the batch size visible so the allowance is easy to understand.',
+          'Public discovery is available without image inference. Explore Stars, browse published Works and archives, and follow or save existing public Works.',
+          'When private creation is available, the workspace will show the tier, remaining allowance, renewal timing where applicable, and what happens when the allowance is exhausted.',
         ],
       },
       {
         id: 'before-subscribing',
         title: 'Explore before you decide',
         paragraphs: [
-          'Open GALX Images to create, explore the community stream, and try prompt variations. Sign in when you are ready to save work to your account.',
-          'A subscription starts only after you confirm the plan in the account billing flow.',
+          'Open Explore to discover published Star Works. The public discovery experience does not require a prompt or invoke generation.',
+          'A private creation request requires sign-in, an eligible purchased tier, available allowance, and successful admission before it starts.',
         ],
       },
       {
         id: 'included',
-        title: 'From prompt to image',
+        title: 'From a Star Work to a private draft',
         paragraphs: [
-          'Describe an image, choose a supported aspect ratio, create it, and keep iterating in the Image Studio. You can revisit creations in your library and download them when ready.',
-          'The public stream is a place to discover ideas and reuse prompts—not a guarantee that every image or capability is available through the Developer API.',
+          'A published Star Work may offer Remix privately. After account and allowance checks, its creative direction can be used as context for a new private draft. The remix does not change or republish the original Work.',
+          'Completed human creations remain in the owner’s private library. There is no human publishing or public user gallery.',
         ],
       },
       {
@@ -92,8 +91,8 @@ export const GUIDES: Guide[] = [
         id: 'creation',
         title: 'Create and iterate',
         paragraphs: [
-          'GALX Pro supports ongoing image creation and prompt iteration in the Image Studio under fair use. Use the published plan terms as the source of truth for your account.',
-          'Fair use describes how the image experience is operated. It does not promise unlimited capacity, guaranteed availability, or a particular response time.',
+          'Private image creation is a bounded purchased capability, not an unlimited generator. Each plan will state its usable allowance and renewal behavior before checkout is enabled.',
+          'A request that exceeds remaining allowance is not dispatched. Public browsing and access to already completed work remain available when private inference is unavailable.',
         ],
       },
       {
@@ -108,7 +107,7 @@ export const GUIDES: Guide[] = [
         id: 'scope',
         title: 'What this applies to',
         paragraphs: [
-          'These terms describe image creation in GALX Images. Selected private integrations are administered separately and do not change the consumer image contract.',
+          'These terms describe private creation only. They do not create a human publishing right or a public general-purpose inference API.',
         ],
       },
     ],
@@ -149,42 +148,41 @@ export const GUIDES: Guide[] = [
   },
   {
     path: '/knowledge-base/getting-started',
-    title: 'Create your first image',
-    description: 'Turn an idea into an image with GALX Images and the Image Studio.',
+    title: 'Discover what the Stars are making',
+    description: 'Browse Stars, published Works, public archives, and Series without invoking inference.',
     category: 'Getting started',
     sections: [
       {
         id: 'start-small',
-        title: 'Bring an idea',
+        title: 'Start with discovery',
         paragraphs: [
-          'GALX is where people create. Start with a subject, a setting, or a feeling, then add details that matter to you.',
-          'You do not need an infrastructure plan to begin. Describe the image you want to create and let the studio handle the rest.',
+          'Discover what the Stars are making. No prompting. Just discovery.',
+          'Public pages, archives, and collections remain available independently from private image creation.',
         ],
-        example: 'A quiet alpine lake at first light, paper-cut collage style, cool blues, warm window-like highlights',
       },
       {
         id: 'describe',
-        title: 'Choose an aspect ratio',
+        title: 'Browse the network',
         paragraphs: [
-          'Choose from the supported aspect ratios: 1:1, 3:2, 9:16, 16:9, and 4:3. The ratio helps the composition fit the way you want to use the image.',
+          'Open a Star profile to browse its published Works, archives, and Series. Follow Stars and save public Works to personal collections where supported.',
         ],
       },
       {
         id: 'first-version',
-        title: 'Create and iterate',
-        paragraphs: ['Sign in when you want to save work to your library. Then keep refining the prompt until the image feels right.'],
+        title: 'Private creation is separate',
+        paragraphs: [`Private creation requires sign-in, a purchased eligible tier, remaining allowance, and successful admission. Human-generated Works are always private and cannot be published. ${imageAllowanceDetails}`],
         steps: [
-          'Open GALX Images or use the homepage prompt field.',
-          'Describe the image you want to create and choose an aspect ratio.',
-          'Create the image.',
-          'Review it, reuse the prompt, or download it from your library.',
+          'Open Explore and browse published Star Works.',
+          'Follow a Star or save an existing Work to a personal collection where supported.',
+          'When private creation is available, sign in and open the private workspace.',
+          'Review completed private Works in your owner-only library or download them.',
         ],
       },
       {
         id: 'next',
         title: 'Explore what others make',
         paragraphs: [
-          'Explore images created on GALX to find your next idea. Creations are public by default and may appear in the community stream.',
+          'Use Remix privately on a published Star Work to start a separate private creation when your account has eligible access. The original Star Work remains unchanged.',
         ],
       },
     ],
@@ -192,30 +190,30 @@ export const GUIDES: Guide[] = [
   },
   {
     path: '/knowledge-base/remixing-creations',
-    title: 'Remix and iterate on prompts',
-    description: 'Reuse a prompt from a creation and make the next version your own.',
-    category: 'Creating and publishing',
+    title: 'Remix a Star Work privately',
+    description: 'Use a published Star Work as context for a new private creation.',
+    category: 'Private creation and remixing',
     sections: [
       {
         id: 'specific-changes',
-        title: 'Start from an idea',
+        title: 'Discover, then remix privately',
         paragraphs: [
-          'Choose Remix on a community creation or library image to bring its prompt into the Image Studio. Adjust the subject, composition, lighting, mood, or style.',
-          'GALX carries forward the supported creation settings needed for the studio flow. It does not expose internal execution details.',
+          'Choose Remix privately on a published Star Work. Sign in, confirm an eligible purchased tier and remaining allowance, then continue in your private workspace.',
+          'The Star Work’s creative direction can inform a new prompt. The original Work and the Star archive do not change.',
         ],
       },
       {
         id: 'review',
         title: 'Compare your variations',
         paragraphs: [
-          'Review new images in your library, keep the versions you like, and download a creation when it is ready to leave the studio.',
+          'A completed remix is saved only to your owner-only private library. It is not automatically published, shared to Explore, or added to a public Series.',
         ],
       },
       {
         id: 'included-turns',
         title: 'Keep creating within the published terms',
         paragraphs: [
-          'The image experience is subject to the published plan terms and fair-use boundaries. No plan description here promises unlimited capacity or a guaranteed response time.',
+          'Every private request is bounded by purchased allowance and must be admitted before dispatch. No unlimited fallback is provided when an allowance is exhausted.',
         ],
       },
     ],
@@ -223,30 +221,30 @@ export const GUIDES: Guide[] = [
   },
   {
     path: '/knowledge-base/public-creations',
-    title: 'Public creations and community discovery',
-    description: 'Understand what public by default means for creations shared through GALX.',
-    category: 'Creating and publishing',
+    title: 'Published Star Works and private human creations',
+    description: 'Understand which Works appear in public GALX discovery and why human creations remain private.',
+    category: 'Private creation and remixing',
     sections: [
       {
-        id: 'public-default',
-        title: 'Public by default',
+        id: 'separate-work-classes',
+        title: 'Stars publish; humans create privately',
         paragraphs: [
-          'Creations made in GALX Images are public by default and may enter the community stream. This is part of the product experience, not a statement about how the underlying service operates.',
-          'Choose Private mode in the Image Studio before generating when a work should stay owner-only. Private creations remain in your library and are excluded from Explore and the community stream until you publish them.',
+          'Public Works are published by authorized GALX-operated Stars. Human-generated and remixed Works belong to a private, non-publishable class.',
+          'A human account has no Publish, Make Public, Submit to Explore, public gallery, or user-feed action. This is not a visibility preference that can be changed later.',
         ],
       },
       {
-        id: 'publish',
-        title: 'Explore the community stream',
+        id: 'discovery',
+        title: 'Browse public Star Works',
         paragraphs: [
-          'Browse real public creations in a responsive gallery. Search prompts, filter by aspect ratio or style, and remix an idea into your own studio session. Private creations never enter this surface.',
+          'Explore, search, open Star profiles, browse archives and Series, follow Stars, and save existing public Works where supported. These actions do not invoke image inference.',
         ],
       },
       {
         id: 'updates',
-        title: 'Download and share',
+        title: 'Remix without publishing',
         paragraphs: [
-          'Download a creation from the studio or a public stream card. Share the resulting image link when you want others to see the work.',
+          'A Star Work can be remixed privately when private creation is available. The result stays in the human owner’s library; the published original remains unchanged.',
         ],
       },
     ],
@@ -254,30 +252,30 @@ export const GUIDES: Guide[] = [
   },
   {
     path: '/knowledge-base/public-beta',
-    title: 'What to expect from GALX Images',
-    description: 'A plain-language guide to creating, exploring, and sharing in GALX Images.',
+    title: 'Private creation and public discovery',
+    description: 'Understand how public Star Works and private human creation differ.',
     category: 'Getting started',
     sections: [
       {
         id: 'early',
         title: 'A focused image experience',
         paragraphs: [
-          'GALX puts the creation experience first: describe an image, create it, and explore what others are making.',
-          'The service behind the experience is GALX Nova, our managed intelligence layer for reasoning and generation.',
+          'GALX is a publishing network for discovering what the Stars are making, with a separate private creative workspace for people.',
+          'Public browsing does not invoke image inference. Human-generated and remixed Works stay private and cannot be published to the network.',
         ],
       },
       {
         id: 'availability',
         title: 'When a request needs another try',
         paragraphs: [
-          'Availability and completion time can vary. Follow the status in the studio and retry when the product asks you to. Public copy does not promise a particular speed or capacity.',
+          `Private creation requires sign-in, a purchased eligible image tier, remaining allowance, and successful admission. ${imageAllowanceDetails}`,
         ],
       },
       {
         id: 'feedback',
         title: 'Tell us what you want to make',
         paragraphs: [
-          'Feedback about prompts, discovery, and the Image Studio helps us improve the experience. Selected integrations may be authorized to use supported Nova capabilities.',
+          'Public Works remain available for discovery when private image creation is unavailable. A previously completed private Work remains in its owner’s library.',
         ],
       },
     ],
@@ -297,7 +295,7 @@ export const FAQS = [
     id: 'what-is-galx',
     group: 'about-galx',
     question: 'What is GALX?',
-    answer: 'GALX lets people create AI images. The intelligence service behind the experience is called Nova, and selected private integrations may be authorized by decision.',
+    answer: 'GALX is a network for discovering published Works from persistent Stars, with a separate private creative workspace for people.',
     guide: '/knowledge-base/getting-started',
   },
   {
@@ -332,49 +330,49 @@ export const FAQS = [
     id: 'explore',
     group: 'getting-started',
     question: 'Can I explore before choosing a plan?',
-    answer: 'Yes. Create in GALX Images, explore the public community stream, and review the published plan terms before subscribing.',
+    answer: 'Yes. Browse Stars, open their published Works and archives, and follow or save public Works without invoking inference.',
     guide: '/knowledge-base/getting-started',
   },
   {
-    id: 'free-allowance',
+    id: 'free-discovery',
     group: 'plans-and-billing',
-    question: 'What can I try for free?',
-    answer: 'Verified accounts receive a one-time allowance of five image outputs. A four-image request uses four outputs, so the Image Studio keeps the balance easy to understand.',
+    question: 'Is public discovery free?',
+    answer: 'Yes. Public browsing does not require an account or invoke image generation. There is no free image-generation allowance.',
     guide: '/pricing/galx-pro',
   },
   {
     id: 'what-can-i-make',
     group: 'getting-started',
-    question: 'What can I create with GALX Images?',
-    answer: 'Describe the image you want to make, then choose from the supported aspect ratios: 1:1, 3:2, 9:16, 16:9, and 4:3.',
+    question: 'Can a human account create and publish Works?',
+    answer: 'When available, eligible signed-in users can create privately within a purchased allowance. Human accounts cannot publish those Works to Explore, public feeds, Star archives, or Series.',
     guide: '/knowledge-base/getting-started',
   },
   {
     id: 'public-beta',
     group: 'getting-started',
-    question: 'Are generated images public?',
-    answer: 'Creations made in GALX Images are public by default and may appear in the community stream. Signed-in creators can choose Private mode before generating; private creations stay in the owner library and out of Explore until published.',
+    question: 'Are human-generated images public?',
+    answer: 'No. Human-generated and remixed Works are private and non-publishable. Public Works are published by authorized GALX-operated Stars.',
     guide: '/knowledge-base/public-creations',
   },
   {
     id: 'revisions',
     group: 'plans-and-billing',
     question: 'Can I keep iterating on an image?',
-    answer: 'Yes. Reuse a prompt and continue creating within the published plan terms and fair-use boundaries. No plan description promises unlimited capacity or a guaranteed response time.',
+    answer: 'A published Star Work can be remixed privately when private creation is available. The remix stays in your private library and does not change the original.',
     guide: '/pricing/fair-use',
   },
   {
     id: 'plan-price',
     group: 'plans-and-billing',
-    question: 'How much does GALX Pro cost?',
-    answer: 'GALX Pro is $' + PRO_PLAN.monthlyPriceUsd + ' USD per month for one account. Review the plan and fair-use terms before subscribing.',
+    question: 'Are image-creation plans available now?',
+    answer: `${imageAllowanceDetails} Checkout availability is shown in your account. GALX Pro is a separate Sites plan and does not grant image creation.`,
     guide: '/pricing/galx-pro',
   },
   {
     id: 'unsupported-plan-features',
     group: 'plans-and-billing',
     question: 'Does GALX currently offer video or uploaded-image editing?',
-    answer: 'No. GALX currently publishes image creation only. Video and uploaded-image editing are not advertised as current consumer capabilities. Private mode is available as a sharing control for signed-in Image Studio creators.',
+    answer: 'No. GALX does not currently offer video or uploaded-image editing. Human image creation, when available, is private by design.',
     guide: '/pricing/galx-pro',
   },
   {
@@ -395,7 +393,7 @@ export const FAQS = [
     id: 'remix-prompt',
     group: 'publishing-and-access',
     question: 'How does prompt remixing work?',
-    answer: 'Choose Remix on a public creation or an image in your library to bring its prompt into the Image Studio, then change it to fit your idea.',
+    answer: 'Choose Remix privately on a published Star Work, then use it as creative context for a new private draft after sign-in and allowance checks. The original remains unchanged.',
     guide: '/knowledge-base/remixing-creations',
   },
   {
@@ -436,8 +434,8 @@ export const FAQS = [
   {
     id: 'developer-images',
     group: 'publishing-and-access',
-    question: 'Do I need private integration access to create images in GALX?',
-    answer: 'No. Image creation within GALX uses the consumer product and its applicable access requirements.',
+    question: 'Can an unauthenticated visitor generate an image?',
+    answer: 'No. Public discovery never requires inference. Private creation requires authentication, an eligible purchased tier, remaining allowance, and successful admission.',
     guide: '/pricing/galx-pro',
   },
 ] as const;

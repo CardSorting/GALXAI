@@ -1,5 +1,5 @@
 /**
- * Phase 2 Acceptance Test: The Sleeping-Star Invariant
+ * Acceptance Test: The Sleeping-Star Invariant
  * 
  * Verifies that the public discovery network is 100% functional when all
  * generative inference infrastructure is offline or unreachable.
@@ -14,7 +14,8 @@
  * 7. They save an existing Work.
  * 8. They browse elsewhere.
  * 9. They return and their durable relationships remain intact.
- * 10. At no point does GALX request generative inference.
+ * 10. Public discovery does not request inference; this does not prohibit
+ *     authenticated, metered private creation through its separate boundary.
  */
 
 import assert from 'node:assert';
@@ -38,17 +39,18 @@ async function runSleepingStarInvariantTest() {
   console.log('--- STARTING SLEEPING-STAR INVARIANT ACCEPTANCE TEST ---');
   simulateInferenceBlockade();
 
-  // 1. Verify all generative inference is blocked from public access
-  console.log('Step 1: Enforcing Hard Wall boundary check...');
+  // 1. Verify an unauthenticated caller cannot enter Star publishing.
+  // Private human inference is governed independently by its metered pipeline.
+  console.log('Step 1: Checking the Star publishing boundary...');
   assert.throws(
     () => {
       // Attempting to invoke lab production without lab operator secret must immediately fail
       assertPrivateLabProductionAuthority(null);
     },
-    /HARD WALL VIOLATION/,
-    'Public or unauthenticated caller was able to invoke lab production authority!'
+    /Unauthorized attempt to enter Star production boundary/,
+    'Unauthenticated caller was able to invoke Star publishing authority!'
   );
-  console.log('✓ Hard Wall securely prevents public caller from entering production boundary.');
+  console.log('✓ Unauthenticated callers cannot enter the Star publishing boundary.');
 
   // 2. Discover Stars and canonical roster
   console.log('Step 2: Browsing Star catalog while inference is offline...');
@@ -58,7 +60,7 @@ async function runSleepingStarInvariantTest() {
   assert(astra !== null, 'Astra must be present in canonical registry');
   assert.strictEqual(astra.displayName, 'Astra');
   assert.strictEqual(astra.lab, 'HEAV3NS');
-  console.log(`✓ Star catalog loaded ${stars.length} persistent creators with 0 GPU inference.`);
+  console.log(`✓ Star catalog loaded ${stars.length} persistent identities without requesting inference.`);
 
   // 3. Inspect Star profile with database / relay completely unavailable
   console.log('Step 3: Opening Star profile for @astra under offline tolerance...');
@@ -66,7 +68,7 @@ async function runSleepingStarInvariantTest() {
   assert(profile !== null, 'Profile must resolve through canonical fallback');
   assert.strictEqual(profile.handle, 'astra');
   assert.strictEqual(profile.displayName, 'Astra');
-  console.log('✓ Star profile retrieved with complete fidelity without inference or DB dependency.');
+  console.log('✓ Star profile resolved from available public data without requesting inference.');
 
   // 4. Explore Star Series
   console.log('Step 4: Exploring Series for Star @astra...');
@@ -84,8 +86,8 @@ async function runSleepingStarInvariantTest() {
   assert(kaelenSeries.some((s) => s.id === 'topographies-quiet-drift'));
   console.log('✓ Star → Series → Works taxonomy validated for launch roster.');
 
-  // 6. Hard Wall Code Audit: scan public routes for prohibited generation / prompt imports
-  console.log('Step 6: Auditing public pages for Hard Wall violations...');
+  // 6. Public discovery must remain separate from the private creation surface.
+  console.log('Step 6: Auditing public discovery pages for inference triggers...');
   const publicPages = [
     'src/app/page.tsx',
     'src/app/explore/page.tsx',
@@ -105,11 +107,11 @@ async function runSleepingStarInvariantTest() {
     assert(!content.includes('runInference'), `Forbidden inference trigger in ${relPath}`);
     assert(!content.includes('prompt-studio'), `Forbidden prompt studio in ${relPath}`);
   }
-  console.log('✓ All public discovery routes are free of generation triggers and prompt studios.');
+  console.log('✓ Public discovery routes contain no direct generation triggers or private studio imports.');
 
   // 7. Verification of Zero Inference Invariant
   assert.strictEqual(inferenceCallsAttempted, 0, 'Inference was attempted during discovery!');
-  console.log('✓ INVARIANT CONFIRMED: Zero inference requests were made throughout the entire discovery, inspect, and relationship sequence.');
+  console.log('✓ INVARIANT CONFIRMED: Public discovery completed without requesting inference.');
 
   console.log('--- ALL ACCEPTANCE TESTS PASSED SUCCESSFULLY ---');
 }

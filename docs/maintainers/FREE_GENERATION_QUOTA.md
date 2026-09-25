@@ -1,61 +1,93 @@
-# Free generation quota operations
+# Legacy free generation and current image allowance
 
 <!-- docs-scope: current-guide -->
 
-Private maintainer guide for [ADR 0149](../adr/0149-one-time-free-generation.md) and [ADR 0150](../adr/0150-free-generation-admission-gate.md). Public content describes remaining allowance and availability only. Budget settings, identity hashes, access provenance, delivery mechanics and diagnostics stay private.
+Private maintainer guide. The former one-time free Image quota is retired; this
+document is not an offer, a reset procedure, or permission to create new free
+image grants. Historical records remain available for safe reconciliation.
+Public pages describe only the customer's purchased allowance and current
+availability.
 
-## Contract and authority
+## Current image contract
 
-Verified active email accounts receive five total images, once. Image batches consume their requested quantity, up to four per request. Sites creation requires GALX Pro. Current paid-subscription or explicit complimentary Pro authority bypasses this welcome allowance and its extra admission gate. Pro still observes ordinary image limits, Sites fairness and ownership. An authority outage never establishes free eligibility.
+Human image inference is available only through an explicit private creation or
+private remix request from an authenticated account with an active eligible
+purchased image tier, sufficient allowance, and successful admission. A
+durable reservation must commit before dispatch. No image path may infer a free
+grant from a user ID, API key, Site plan, historical purchase, public visit, or
+client-provided field.
 
-The browser workspace supports free eligibility; standalone `/api/sites/content` remains Pro-only. Only the allocated free workspace may generate or publish through the allowance. Pro workspaces remain readable after downgrade but do not automatically become free Sites. Archive, restore, unpublish, another browser and another API key cannot reset a grant. Image aliases delegate to the same authenticated sync/async handler; generic queue mutation endpoints require internal authorization.
+The sequence is:
 
-`private.galx_free_generation_grants` retains the account ID, unique original normalized-email SHA-256 hash and Site allocation. Account deletion cannot reclaim the original email grant. This does not prove person identity, equate email aliases or retain every later email change. Usage records remain minimal. No wallet credit, payment history or public reset RPC is created. Forced RLS and revoked privileges deny PUBLIC, anon, authenticated and service_role; only the privileged server connection writes these tables.
+`authenticated owner → purchased entitlement → quota check → reserve usage → admission → dispatch → terminal outcome → settle accounting`
 
-## Aggregate stop gate
+Each idempotent receipt has one owner and one accounting identity. Reservation
+is concurrency-safe: requests for the same subscription period cannot exceed
+the allocation. Confirmed pre-dispatch rejection, queued cancellation, and a
+queued receipt expiring before claim may release a reservation under existing
+lifecycle rules. Successful work settles it; ambiguous or unknown execution
+after claim remains reserved until authoritative reconciliation. Do not treat
+a request as a charge, clear an uncertain reservation because it is old, or add
+automatic retries for unknown outcomes.
 
-`private.galx_free_generation_policy` contains one row per resource kind. Both seed paused. Free admission requires an enabled, unexpired approval, enough remaining cumulative units, rolling one-hour and twenty-four-hour units, global outstanding room and no other unsettled free work for that account across either resource. Quantity weights image batches. Separate kind rows serialize all free accounts; the account grant lock serializes cross-resource account use. No network calls occur under these locks. Paused, expired or cumulatively exhausted gates skip usage-history scans.
+The approved launch allocations and shared output weights live only in the
+canonical typed configuration; accounting-period snapshots are not an alternate
+activation source. If configuration is missing, malformed, or unapproved,
+checkout and dispatch fail closed and the UI shows that private creation is
+unavailable. Do not add an exhaustion fallback. When an allowance is exhausted,
+reject before dispatch with the normal “Creation allowance exhausted” state;
+public discovery remains unaffected. See the exact
+[accounting lifecycle](private-image-accounting.md).
 
-Every accepted reservation permanently increments `admitted_units`. Cancellation, non-start, completion, clock/window rollover, account deletion and application restart never lower it. `max_total_units` is an absolute lifetime ceiling for the shared offer, not a renewable balance. The hour/day limits count accepted reservations including subsequently refunded ones. This bounds repeated cancellations and capacity deferrals as well as account farming. A rejection before the reservation commits consumes neither account quota nor aggregate units.
+The legacy five-image balance is not exposed in the browser quota DTO and does
+not authorize new work. Human request claims require a current purchased
+reservation; old free-image usage rows cannot bypass that check. Preserve the
+historical ledger for idempotency and reconciliation; do not reset, backfill,
+or reinterpret its remaining count as purchased allowance.
 
-`capacity_settled` is separate from customer quota release. Only positive completion or proven non-dispatch clears capacity. A generic failure, missing receipt, expired execution deadline or lost acknowledgement cannot reclaim it. Unknown work may therefore stop further free use until the original receipt supplies evidence; never clear it merely to restore availability. Existing released usages are safely marked settled by migration; other historical usages remain conservative.
+## Other workspace allowances
 
-Sites additionally carry a server-verified `tier` in the short-lived access proof and persisted invocation. Free admission requires its existing quota reservation, healthy readiness and total shared outstanding/rolling attempts below the first quarter of the current configured ceiling. Paid work counts toward that threshold, so free admission stops as paid demand rises. Pools below four slots or four rolling attempts admit no free Site work; the quota availability DTO reflects this static stop. Free requests do not register paid continuation demand. Pro retains its baseline/continuation rules and can use remaining room. This reserves local capacity, not supplier quota or a latency guarantee.
+Sites access, Site turns, and fair-use admission remain separate from the
+Image Studio contract. Keep Site behavior documented in the
+[Sites workspace](SITES_WORKSPACE.md), [Sites fair-use](SITES_FAIR_USAGE.md),
+and [workspace operations](SITES_OPERATIONS.md) guides. Never couple Image
+plan exhaustion or an image-service outage to Explore, Star archives, or
+unrelated Sites access.
 
-The recorded initial paid Sites policy has two slots: it deliberately stays paid-only under this rule even if the free budget is enabled. Do not enlarge paid limits to make the welcome offer available without measuring capacity and approving the new policy. Images retain ordinary shared admission plus the bounded free gate; their caps must be selected from measured headroom. Units are bounded workload counts, not measured dollar costs. The default pause is the safe state when headroom is unknown.
+The shared account quota response contains only its supported Site fields.
+Image plan, remaining units, and renewal information come from the dedicated
+private image allowance contract. Project exact DTO allowlists; do not forward
+legacy image counts, identity hashes, billing IDs, policy counters, or internal
+failure details into a public response.
 
-Immediately before dispatch, Sites start and image claim recheck the pause/approval expiry while holding a shared policy lock. An operator pause serializes with this dispatch decision. Work that passed that point may already be running and is not cancelled by a later pause. Paid dispatch does not acquire the free-policy row lock. Saved reads, downloads, history, publication of the allocated free Site and original-operation recovery remain available.
+## Request lifecycle and recovery
 
-## Transactions and recovery
+Every human receipt is owner-scoped and classed Private Work before execution.
+Claim must fail closed if a private receipt has no current reservation. A
+Star-published receipt is a separate server-authorized class and may bypass a
+human purchase reservation only through the controlled Star operation. A
+client cannot request that class.
 
-Quota enrollment locks the normalized identity and then the account grant. Workspace mutations first lock their owned row. Free reservation then locks its resource policy. Short transactions retain three-second lock/five-second statement bounds. Free deductions commit with the Site turn or newly inserted image receipt. Rejected batches roll back the entire new receipt. No grant allows a second dispatch.
+Keep cancellation, queued expiry, timeout-after-claim, pre-generation
+rejection, completion, ambiguous upstream outcomes, safe reservation release,
+and idempotent cleanup aligned with the image request lifecycle. The request
+repository is not an automatic retry queue. A queued request expiring before
+claim is known not to have dispatched; a timeout after claim, missing status
+response, or worker restart does not prove non-dispatch. Preserve original
+operation identity and inspect the private library before a manual new
+operation.
 
-Image insertion uses `ON CONFLICT DO NOTHING` and a separate owner/key read to see a concurrent committed winner. Identical retries reuse the saved outcome without another deduction, including cancelled requests and work originally accepted as Pro. Changed payloads conflict. Free receipts cannot inherit a priority flag. One claim owns generation. Completion requires all owned artifacts to be cataloged and atomically settles free capacity. Queued cancellation, queued expiry after five minutes during grant access, and proven pre-dispatch capacity rejection atomically release customer quota and capacity. A pause at claim does the same. Generic failure keeps both occupied; no timed redispatch is allowed.
+## Operator and release guidance
 
-For Sites, pre-admission deferrals or durable `not_started` results release customer quota and capacity in the transaction finishing the matching workspace turn. Successful authoritative terminal receipts settle capacity without refunding the turn. Recovery works across plan changes. An unrelated or finished operation cannot release another turn. Missing-receipt recovery can clear a stale workspace operation but retains quota and capacity because absence alone is not non-dispatch evidence. The lifetime Site allocation is never released after a failed turn.
+Do not apply billing changes to a remote database or seed production image
+allowances without explicit approval of the amounts and renewal behavior. Use
+the existing documented billing, database, and private image recovery
+procedures. A migration being present in source does not mean it has been
+applied remotely.
 
-## Public state and UX
-
-`GET /api/billing/generation-quota` accepts a verified account session and no query parameters. Its exact path is exempt from developer-preview approval, matching the Images/Sites account experience; sibling and deeper paths retain their own gates. Responses are private/no-store: `{plan:"pro",quota:null}` or `{plan:"free",quota:{sites,images,siteTurns},availability:{sites,images}}`. Each availability is exactly `available`, `busy` or `paused`. Integer bounds and explicit projection omit private fields. Auth errors are generic 401; unavailable/malformed data is generic 503. Availability is advisory; admission repeats authoritative checks. Verify the account-error body, not only 401, to catch accidental interception by developer middleware.
-
-One root provider shares this read between the header and both composers. It refreshes on route entry, focus, visibility, generation-change events and a visible sixty-second interval. Requests have a fifteen-second deadline, owner/unmount fencing and one in-flight guard. Overlapping events produce one trailing refresh. Failed reads withhold counts; a previously known free state blocks new submission until refreshed. Pro hides free UI. This is per-visible-tab polling, not a cross-tab leader or push stream.
-
-Composers show remaining usage, separate exhausted/busy/paused/unavailable states, a pending manual availability check and an ordinary Pro plan link. Blocked forms keep prompts editable and guard both button and keyboard submission. No automatic generation, purchase or promised reopening countdown follows a refresh. Image batches larger than remaining allowance are blocked. Sites' send hook explicitly accepts free access; a synthetic submit test protects against a visible-enabled/hidden-Pro-only mismatch.
-
-Permanent quota denials use 402 `free_quota_exhausted`; additional/unallocated Sites use `free_site_limit`. The extra gate uses 429 `free_generation_paused` or `free_generation_busy`, with no internal reason. Sites fair-room rejection maps to the latter and can include bounded Retry-After. Public image errors keep `X-Should-Retry:false`. Binary image defaults, explicit JSON DTOs and re-encoded artifacts are unchanged. Exhaustion is lifetime; temporary availability is not a replenishment promise.
-
-## Operator procedure and rollout
-
-Run `npm run db:status` and inspect the exact target. Apply `20260914030425_free_generation_quota.sql`, then `20260914035003_free_generation_admission_gate.sql`, before the compatible application. The second adds a small private policy table, one usage flag, bounded query indexes and a Sites tier field. Short metadata locks and index creation can contend with existing traffic; the migration aborts on its three-second lock limit. Inspect private role denials after application. No free budget is enabled by migration or deployment.
-
-Inspect `npm run free:policy -- --status` from the private operator environment. Use `npm run free:policy -- --file /absolute/private/change.json` to preview a revision-checked change. The JSON has exactly `kind`, `expectedRevision`, `enabled`, `validUntil`, `maxOutstanding`, `maxHourUnits`, `maxDayUnits`, `maxTotalUnits`. Kind is `site` or `image`; limits are nonnegative integers ordered outstanding ≤ hour ≤ day ≤ total. Inspect the current private policy revision and accumulated admissions before preparing it. An enabled policy needs a future UTC ISO expiry within twenty-four hours, nonzero room and cumulative budget above admissions. Choose limits from measured workload/headroom while preserving paid capacity; no production numeric defaults or automatic renewal are supplied.
-
-Review the preview, then pass the same file with `--apply`. A changed revision rejects the edit. The tool cannot modify admitted units or usage. Retain its bounded result as operator evidence. A lost acknowledgement requires inspection, not blind retry. To pause one resource, submit an otherwise valid file with `enabled:false`; this requires no app release. Expiry or cumulative exhaustion also pauses automatically. Short rolling limits reopen eligibility as the window ages, subject to all other gates.
-
-The gate DOWN migration disables both resources and preserves every ledger/receipt. Keep the compatible gate in place when reverting UX or allowance changes. Reverting to the earlier free implementation would bypass this new control; use the preceding Pro-only release if an application rollback is required. Never drop/truncate grants, reset counters or redispatch unknown work. Broader Sites policy disablement remains available for a whole-service incident.
-
-## Verification and limits
-
-Run free quota/aggregate DB suites, image security/receipt suites, Sites workspace/fair/plan suites, `db:verify`, `db:test`, TypeScript, lint and a production build. Fixtures include cross-account races, paid progress under a locked/full free gate, cross-resource account occupancy, cancellation/non-start abuse, unknown work across window expiry, revision/expiry checks, role denials and retained rollback. Existing fairness tests include a two-process slot race and lost COMMIT acknowledgement.
-
-Serve the synthetic build through `scripts/verify-auth-entry-server.cjs`, run `scripts/verify-free-generation-ui.mjs`, and scan rendered HTTP and referenced browser assets with `scripts/verify-image-public-http.ts`. [Current local evidence](../knowledge/audits/2026-09-14-free-admission-gate.json) records scope and remaining limitations. Local fixtures do not establish production activation, measured supplier savings, payment, publication or live cleanliness. [Current state](../../post-mortem/CURRENT_STATE.md) owns release status.
+For changes, run `npm run docs:impact`; inspect unmapped paths and reconcile all
+affected guides. Run the quota/auth tests, image HTTP/security tests, isolated
+database tests where the disposable integration environment is available,
+TypeScript, lint, and a production build. Record actual results and scope.
+Local fixtures do not prove hosted allowance configuration, live R2 privacy,
+deployment, or real-user acceptance.

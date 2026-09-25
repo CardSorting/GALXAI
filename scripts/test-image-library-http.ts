@@ -25,7 +25,7 @@ test('raw library and thumbnail HTTP: compact DTOs, full details, sanitization, 
   let authenticated = true, exists = true, unavailable = false, storageReads = 0, ownerChecks = 0;
   const record = { id: 'scale-image', userId: 'owner', status: 'completed', sessionId: 'default', prompt: 'Beautiful '.repeat(2000),
     aspectRatio: '3:2', isFavorite: false, quality: 'standard', createdAt: '2026-09-01T00:00:00.123456Z', updatedAt: '2026-09-01T00:00:00Z',
-    sha256: 'a'.repeat(64), r2Key: canary, model: canary, dimensions: '1536x1024', tags: [], metadata: { future: canary }, visibility: 'private', isPublic: false };
+    sha256: 'a'.repeat(64), r2Key: canary, model: canary, dimensions: '1536x1024', tags: [], metadata: { future: canary }, workClass: 'private' };
   GalxAuthEngine.getInstance = () => ({ resolveAuthIdentity: async () => ({ authenticated, userId: authenticated ? 'owner' : null }) }) as any;
   ImageLibraryRepository.getInstance = () => ({
     getLibrary: async (owner: string, options: any) => {
@@ -59,11 +59,12 @@ test('raw library and thumbnail HTTP: compact DTOs, full details, sanitization, 
       assert.equal(response.status, 200); assert.equal(response.headers.get('cache-control'), 'private, no-store');
       const raw = await response.text(); assert(!raw.includes(canary)); const data = JSON.parse(raw);
       assert.equal(data.total, null); assert.equal(data.stats, null); assert.equal(data.records[0].promptPreview.length, 300);
-      assert.deepEqual(Object.keys(data.records[0]).sort(), ['aspectRatio','createdAt','id','isFavorite','promptPreview','publicUrl','quality','status','thumbnailUrl','visibility'].sort());
-      assert.equal(data.records[0].visibility, 'private');
+      assert.deepEqual(Object.keys(data.records[0]).sort(), ['aspectRatio','createdAt','id','isFavorite','promptPreview','publicUrl','quality','status','thumbnailUrl','workClass'].sort());
+      assert.equal(data.records[0].workClass, 'private');
       assert(data.records[0].thumbnailUrl.endsWith('/thumbnail')); assert.equal(data.records[0].prompt, undefined);
       const detail = await (await fetch(`${origin}/api/images/library/${record.id}`)).json();
-      assert.equal(detail.record.prompt, record.prompt); assert.equal(detail.record.visibility, 'private'); assert.equal(detail.record.isPublic, false); assert(!JSON.stringify(detail).includes(canary));
+      assert.equal(detail.record.prompt, record.prompt); assert.equal(detail.record.workClass, 'private');
+      assert.equal('visibility' in detail.record, false); assert.equal('isPublic' in detail.record, false); assert(!JSON.stringify(detail).includes(canary));
     });
     await t.test('thumbnail bytes are resized and freshly encoded, identical requests share storage work', async () => {
       const responses = await Promise.all(Array.from({ length: 100 }, () => fetch(origin + path)));

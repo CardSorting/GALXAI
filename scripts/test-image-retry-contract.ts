@@ -6,21 +6,33 @@ import { GalxSeatTierEngine } from '../src/core/subscription/GalxSeatTierEngine'
 import { galxRouter } from '../src/core/router/GalxModelRouter';
 import { ImageCapacityError } from '../src/core/router/ImageCapacityError';
 import { RelayDispatchError } from '../src/core/router/adapters/RelayChatTransport';
-import { GenerationAccess } from '../src/lib/billing/generation-access';
 import { isSystemicFailure } from '../src/lib/stars/StarPopulationController';
+import { ImageRequestService } from '../src/lib/images/request-service';
 
 const auth = GalxAuthEngine.getInstance;
 const seat = GalxSeatTierEngine.getInstance;
 const route = galxRouter.routeImageGeneration;
-const access = GenerationAccess.resolve;
+const service = ImageRequestService.getInstance;
 try {
-  GenerationAccess.resolve = async () => 'pro';
   GalxAuthEngine.getInstance = () => ({ resolveAuthIdentity: async () => ({ authenticated: true, userId: 'fixture' }) }) as any;
-  GalxSeatTierEngine.getInstance = () => ({ resolveUserSeatTier: async () => ({ isCapped: false, tier: 'standard' }) }) as any;
+  GalxSeatTierEngine.getInstance = () => ({ resolveUserSeatTier: async () => ({ isCapped: false, isPriorityUser: false, tier: 'standard' }) }) as any;
+  ImageRequestService.getInstance = () => ({
+    create: async (owner: string, payload: any, options: any) => {
+      assert.equal(owner, 'fixture');
+      assert.deepEqual(options, { priority: false, schedule: false });
+      return { id: '00000000-0000-4000-8000-000000000001', user_id: owner, state: 'queued', payload };
+    },
+    run: async (owner: string, id: string, reportFailure: boolean) => {
+      try {
+        await galxRouter.routeImageGeneration({ request: { prompt: 'test' }, userId: owner, requestId: id,
+          workClass: 'private', isPriorityUser: false, signal: AbortSignal.timeout(1000) } as any);
+      } catch (error) { if (reportFailure) throw error; }
+    },
+  }) as any;
   for (const failure of [new ImageCapacityError(Date.now() + 30000), new RelayDispatchError('image_deadline_or_cancelled')]) {
     galxRouter.routeImageGeneration = async () => { throw failure; };
     const response = await POST(new NextRequest('http://localhost/v1/images/generations', {
-      method: 'POST', body: JSON.stringify({ prompt: 'test', model: 'openai-gpt-image-latest' }),
+      method: 'POST', body: JSON.stringify({ prompt: 'test' }),
       headers: { 'content-type': 'application/json' }
     }));
     const body = await response.json();
@@ -37,7 +49,7 @@ try {
   GalxAuthEngine.getInstance = auth;
   GalxSeatTierEngine.getInstance = seat;
   galxRouter.routeImageGeneration = route;
-  GenerationAccess.resolve = access;
+  ImageRequestService.getInstance = service;
 }
 
 // Exercise the actual dispatcher decision without starting persistence workers.

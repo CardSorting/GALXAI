@@ -1,0 +1,82 @@
+{
+  "observed_at": "2026-09-24T23:35:03Z",
+  "scope": "Read-only review of the ten overdue open follow-up actions surfaced by docs:check during Phase 4 local release certification.",
+  "production_changes": false,
+  "reviews": [
+    {
+      "action": "ACT-001",
+      "incident": "INC-20260912-STORAGE",
+      "finding": "No current same-date storage metrics and deployment inventory were collected in this pass. The existing request still requires those owner-held operational observations.",
+      "status": "open",
+      "next_step": "Deployment maintainer records actual storage totals and deployment inventory for the same date range, preserving active aliases and rollback capacity."
+    },
+    {
+      "action": "ACT-005",
+      "incident": "INC-20260913-IMAGES",
+      "finding": "Phase 4 adds lifecycle tests and safe queued-expiry release, but does not define bounded retention for queued/failed payloads or expired receipts. Ambiguous receipts remain retained and are not replayed.",
+      "status": "open",
+      "next_step": "Image maintainer defines privacy- and idempotency-safe retention and tests cleanup for accepted, expired, and ambiguous operations before activation."
+    },
+    {
+      "action": "ACT-006",
+      "incident": "INC-20260912-AUTH",
+      "finding": "The local authentication/session suite passed, but this pass did not audit all production administrator credential dependencies or hosted role configuration.",
+      "status": "open",
+      "next_step": "Identity maintainer inventories remaining administrator-only paths and verifies least-privilege credentials independently of public Auth verification."
+    },
+    {
+      "action": "ACT-008",
+      "incident": "INC-20260913-DOCS",
+      "finding": "Current source-bound image/accounting/deployment guidance was reconciled and impact output was inspected. Generated indexes contain the only unmapped changed paths. Other registered-domain attestations remain stale until their explicit reviews are recorded.",
+      "status": "open",
+      "next_step": "Documentation maintainer continues weekly source-bound guide reviews, updates content when behavior changes, and records evidence before refreshing fingerprints."
+    },
+    {
+      "action": "ACT-014",
+      "incident": "INC-20260913-WORKSPACE",
+      "finding": "Local auth/session tests passed. Durable device approval/poll RPC ownership and one-time-consumption database acceptance remains unverified because the disposable PostgreSQL runtime could not start.",
+      "status": "open",
+      "next_step": "Keep legacy elevation closed and complete device-grant RLS, ownership, expiry, and one-time-consumption tests against disposable PostgreSQL."
+    },
+    {
+      "action": "ACT-015",
+      "incident": "INC-20260913-WORKSPACE",
+      "finding": "The earlier refreshed-profile availability observation remains nonreproduced. No hosted Auth or private lookup diagnostics were inspected in this local pass.",
+      "status": "open",
+      "next_step": "If the symptom recurs, retain allowlisted status/timing and correlate private Auth/lookup evidence; otherwise preserve the evidence-backed nonrecurrence disposition."
+    },
+    {
+      "action": "ACT-016",
+      "incident": "INC-20260913-RENDER",
+      "finding": "Local build, route/security, and rendered boundary checks are in scope; production digest correlation and the original authenticated Images/Sites acceptance matrix were not performed.",
+      "status": "open",
+      "next_step": "Release maintainer privately correlates the reported digest and completes deployed authenticated Images/Sites recovery acceptance."
+    },
+    {
+      "action": "ACT-020",
+      "incident": "INC-20260913-IMAGES",
+      "finding": "No signed-in production generation/library/download request was made. Allowance values remain unapproved, hosted authorization is unaudited, and local tests do not establish deployed capacity.",
+      "status": "open",
+      "next_step": "After approval and release authorization, verify fresh capability and complete signed-in production generation, durable library/Favorites, and download acceptance without replaying unknown work."
+    },
+    {
+      "action": "ACT-025",
+      "incident": "INC-20260916-SHAREDQUOTA",
+      "finding": "Phase 4 image allowance work does not establish caller distribution or deliberate continuation with owner-scoped revision-aware checkpoints for the separate relay/SDK contract.",
+      "status": "open",
+      "next_step": "Relay/SDK maintainer completes compatible caller distribution and deliberate continuation/checkpoint acceptance; do not infer provider hard spend caps."
+    },
+    {
+      "action": "ACT-028",
+      "incident": "INC-20260916-SESSION",
+      "finding": "The local auth/session regression suite passed, but real provider/email callbacks, account switching, physical browser history restoration, and failed-revocation browser acceptance were not exercised.",
+      "status": "open",
+      "next_step": "Security/access maintainer completes the explicit external-provider and original-browser acceptance matrix; retain session authority and revocation checks."
+    }
+  ],
+  "limitations": [
+    "No production or hosted resource was queried or mutated for this action review.",
+    "Docker/PostgreSQL unavailability blocks runtime migration, RLS, grant, reservation, and concurrency certification.",
+    "The review deadlines are extended one week for the next evidence-backed review; no action was closed or accepted."
+  ]
+}

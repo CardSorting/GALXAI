@@ -23,7 +23,7 @@ export function SitesWorkspace({initialId,initialStarter}: {initialId?:string;in
 }
 function Workspace({owner,token,authLoading,initialId,initialStarter}: {owner:string|null;token?:string;authLoading:boolean;initialId?:string;initialStarter?:SiteStarterSelection}) {
   const studio = useSitesWorkspace(owner,token,initialId);
-  const gate=useGenerationGate('sites',studio.access==='free');
+  const gate=useGenerationGate(studio.access==='free');
   const workspaceRef=useRef<HTMLElement>(null);
   useEffect(()=>{
     const element=workspaceRef.current;if(!element)return;

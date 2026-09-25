@@ -873,6 +873,23 @@ export function PublicImageMasonryStream({
     showToast('Direct creation link copied to clipboard');
   };
 
+  const handlePrivateRemix = (event: React.MouseEvent, item: PublicFeedItem) => {
+    event.stopPropagation();
+    if (authLoading) {
+      showToast('Checking your account…');
+      return;
+    }
+    if (authStatus === 'unavailable') {
+      showToast('Your account could not be checked. Try again shortly.');
+      return;
+    }
+
+    const params = new URLSearchParams({ remix_work: item.id, aspect_ratio: item.aspect_ratio || '1:1' });
+    const destination = `/images/create?${params.toString()}`;
+    closeModal();
+    router.push(user ? destination : authEntryPath(destination));
+  };
+
   // Prefer a live thumbnail, then the live public asset. Never substitute unrelated artwork.
   const handleImageError = useCallback((item: PublicFeedItem, currentSrc: string) => {
     if (
@@ -1262,7 +1279,7 @@ export function PublicImageMasonryStream({
           <p>
             {searchQuery
               ? `No creations found for "${searchQuery}". Try a different search term or clear filters.`
-              : emptyDescription || 'No public creations are available yet. Create an image in GALX Images and it can appear here.'}
+              : emptyDescription || 'No published Star Works are available yet. Explore Stars to discover their archives.'}
           </p>
           <Link
             href="/stars"
@@ -1422,10 +1439,6 @@ export function PublicImageMasonryStream({
                   </div>
                 </div>
                 <div className="masonry-meta-item">
-                  <div className="masonry-meta-label">Service</div>
-                  <div className="masonry-meta-value">GALX Nova</div>
-                </div>
-                <div className="masonry-meta-item">
                   <div className="masonry-meta-label">Visibility</div>
                   <div className="masonry-meta-value">
                     Public Archive
@@ -1443,6 +1456,17 @@ export function PublicImageMasonryStream({
                   <Bookmark size={16} className={savedWorkIds.has(activeModalItem.id) ? 'fill-current text-amber-400' : ''} />
                   <span>{savedWorkIds.has(activeModalItem.id) ? 'Saved in your Collection' : 'Save to Collection'}</span>
                 </button>
+
+                <button
+                  type="button"
+                  className="masonry-modal-primary-btn"
+                  onClick={(event) => handlePrivateRemix(event, activeModalItem)}
+                  title="Use this Star concept in your private workspace"
+                >
+                  <Sparkles size={16} />
+                  <span>Remix privately</span>
+                </button>
+                <p className="masonry-modal-action-note">Your remix is a private draft. It does not change or publish the Star’s Work.</p>
 
                 <button
                   type="button"

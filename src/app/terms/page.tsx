@@ -30,7 +30,7 @@ export default function TermsOfServicePage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#07080d] text-zinc-100 flex flex-col font-sans selection:bg-cyan-500/30">
+    <div className="min-h-screen bg-[#07080d] text-zinc-100 flex flex-col font-sans">
       <JsonLd
         data={createBreadcrumbSchema([
           { name: 'Home', url: SITE_CONFIG.url },
@@ -64,7 +64,7 @@ export default function TermsOfServicePage() {
         <section className="rounded-2xl border border-indigo-400/20 bg-indigo-500/5 p-6 space-y-3" aria-labelledby="current-scope">
           <h2 id="current-scope" className="font-bold text-white text-base">Current product and pricing scope</h2>
           <p className="text-sm text-zinc-300 leading-relaxed">
-            GALX Pro is the consumer Image Studio plan at $10 USD per month for one account. General-purpose developer access is not a public subscription.
+            GALX Pro at $10 USD per month is a separate account plan and does not include private image creation. Workshop, Studio, and MAX are paid private-creation tiers with a bounded monthly allowance and per-image unit costs shown on the pricing page before purchase.
           </p>
           <p className="text-sm text-zinc-400 leading-relaxed">
             Private integrations may be authorized directly for a bounded use case and remain subject to assigned terms. Historical account-credit records and prior transactions remain subject to the terms presented when they were created.
@@ -77,9 +77,9 @@ export default function TermsOfServicePage() {
             <div className="w-9 h-9 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center">
               <Lock className="w-4 h-4" />
             </div>
-            <h2 className="font-bold text-white text-base">Public creations</h2>
+            <h2 className="font-bold text-white text-base">Private human creations</h2>
             <p className="text-xs text-zinc-400 leading-relaxed">
-              Creations made in GALX Images are public by default and may appear in the community stream. Signed-in creators can choose Private mode before generating; private creations remain in the owner library and out of Explore until published.
+              Human-generated and remixed Works are private by design and cannot be published into Explore, public feeds, Star archives, or Series. Public Works are published by authorized GALX-operated Stars.
             </p>
           </div>
 
@@ -120,7 +120,7 @@ export default function TermsOfServicePage() {
               <span className="text-cyan-400 font-mono text-base">2.</span> Billing and access terms
             </h2>
             <p>
-              GALX Pro is a consumer subscription at $10 USD per month for one account and follows the published Image Studio terms and fair-use boundaries. Private integration terms, when applicable, are established directly with the authorized cohort.
+              GALX Pro is a separate subscription at $10 USD per month for one account and does not grant image creation. Private image access requires an eligible purchased tier and enough remaining allowance. Human-generated Works remain private and cannot be published to the public GALX network. Private integration terms, when applicable, are established directly with the authorized cohort.
             </p>
             <p>
               Existing account-credit balances, refunds, and other payment records remain governed by the terms presented when those records were created. Private access may be changed or revoked by GALX and does not create a public promise of availability.

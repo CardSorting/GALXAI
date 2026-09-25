@@ -51,7 +51,9 @@ Owner role: **Product/API maintainer**. Domain: `images`.
 - [Large image libraries](../../docs/maintainers/image-library-scale.md)
 - [Stars](../../docs/reference/stars.md)
 - [Readable product URLs](../../docs/maintainers/readable-urls.md)
-- [Free generation quota operations](../../docs/maintainers/FREE_GENERATION_QUOTA.md)
+- [Legacy free generation and current image allowance](../../docs/maintainers/FREE_GENERATION_QUOTA.md)
+- [Private image allowance and accounting lifecycle](../../docs/maintainers/private-image-accounting.md)
+- [Private image release and privacy audit](../../docs/runbooks/private-image-release-audit.md)
 
 Relevant checks (select for the change; impact discovery never executes these): `npm run test:image:security`, `npm run test:image:db`, `npm run test:image:scale`, `npm run test:image:library-db`, `npm run test:relay:image`, `npm run test:free-quota`, `npm run test:free-quota:db`.
 
@@ -68,7 +70,7 @@ Owner role: **Security/access maintainer**. Domain: `access`.
 - [Authentication security posture and threat model](../../docs/SECURITY_POSTURE_AND_THREAT_MODEL.md)
 - [ADR 0147: Verified account and session authority](../../docs/adr/0147-verified-account-and-session-authority.md)
 - [Readable product URLs](../../docs/maintainers/readable-urls.md)
-- [Free generation quota operations](../../docs/maintainers/FREE_GENERATION_QUOTA.md)
+- [Legacy free generation and current image allowance](../../docs/maintainers/FREE_GENERATION_QUOTA.md)
 - [OAuth and token lifecycle boundaries](../../docs/OAUTH_AND_TOKEN_LIFECYCLE_SPECIFICATION.md)
 - [Provider credentials and application identity](../../docs/PROVIDER_AS_AUTH_SPECIFICATION.md)
 - [Security boundaries](../../docs/SECURITY.md)
@@ -86,12 +88,12 @@ Owner role: **Sites maintainer**. Domain: `sites`.
 - [Sites workspace operations (Retired)](../../docs/maintainers/SITES_WORKSPACE.md)
 - [Sites address operations (Retired)](../../docs/maintainers/SITES_DOMAINS.md)
 - [ADR 0148: Explicit complimentary Pro access](../../docs/adr/0148-complimentary-pro-access.md)
-- [Free generation quota operations](../../docs/maintainers/FREE_GENERATION_QUOTA.md)
+- [Legacy free generation and current image allowance](../../docs/maintainers/FREE_GENERATION_QUOTA.md)
 - [ADR 0149: One-time free generation allowance](../../docs/adr/0149-one-time-free-generation.md)
 - [Create and manage Sites (Retired)](../../docs/SITES_WORKSPACE.md)
 - [Site content generation (Retired)](../../docs/SITES_CONTENT.md)
 - [ADR 0150: Bounded free admission and paid capacity protection](../../docs/adr/0150-free-generation-admission-gate.md)
-- [API base URL and authentication](../../docs/API_BASE_URL.md)
+- [Accessing GALX](../../docs/API_BASE_URL.md)
 
 Relevant checks (select for the change; impact discovery never executes these): `npm run test:sites:fair`, `npm run test:sites:workspace`, `npm run test:sites:conversation`, `npm run test:sites:fair:db`, `npm run test:sites:workspace:db`, `npm run test:sites:plans:db`, `npm run test:free-quota`, `npm run test:free-quota:db`.
 
@@ -164,12 +166,14 @@ Owner role: **Database operator**. Domain: `database`.
 
 - [Supabase authority and operational boundaries](../../docs/SUPABASE_PARANOID_ARCHITECTURE_SPEC.md)
 - [PostgreSQL migration and recovery operations](../../docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md)
-- [Free generation quota operations](../../docs/maintainers/FREE_GENERATION_QUOTA.md)
+- [Legacy free generation and current image allowance](../../docs/maintainers/FREE_GENERATION_QUOTA.md)
 - [Maintainer runbook: shard authority and key rotation](../../docs/maintainers/MULTI_TENANT_SHARD_AND_KEY_ROTATION.md)
 - [Migration to central accounts and isolated relays](../../docs/MIGRATION_GUIDE.md)
 - [Central account management and isolated relay contract](../../docs/reference/relay-account-management.md)
 - [Canonical account profile and actor model](../../docs/maintainers/ACCOUNT_PROFILE_SCHEMA.md)
 - [ADR 0158: Canonical account profiles with explicit actor provenance](../../docs/adr/0158-canonical-account-profiles-and-actor-provenance.md)
+- [Private image allowance and accounting lifecycle](../../docs/maintainers/private-image-accounting.md)
+- [Private image release and privacy audit](../../docs/runbooks/private-image-release-audit.md)
 
 Relevant checks (select for the change; impact discovery never executes these): `npm run db:verify`, `npm run db:test`, `npm run test:relay:manual-db`, `npm run test:relay:authorization-db`, `npm run test:relay:activation-db`.
 
@@ -186,6 +190,7 @@ Owner role: **Release operator**. Domain: `delivery`.
 - [Cloudflare maintainer runbook](../../docs/maintainers/CLOUDFLARE_EDGE_MESH_MAINTAINER_RUNBOOK.md)
 - [Deployment and release](../../docs/playbooks/02-deployment-and-release.md)
 - [Recover Stripe webhook delivery](../../docs/runbooks/stripe-webhook-delivery.md)
+- [Private image release and privacy audit](../../docs/runbooks/private-image-release-audit.md)
 
 Relevant checks (select for the change; impact discovery never executes these): `npm run docs:check`, `npm run build`, `npm run docs:check:build`.
 
@@ -205,7 +210,7 @@ Owner role: **Product/performance maintainer**. Domain: `client-efficiency`.
 
 - [Vercel quota efficiency](../../docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md)
 - [Navigation and request intent](../../docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md)
-- [Public navigation, pricing and knowledge base](../../docs/maintainers/PUBLIC_DISCOVERY.md)
+- [Public navigation, pricing, and knowledge base](../../docs/maintainers/PUBLIC_DISCOVERY.md)
 - [Readable product URLs](../../docs/maintainers/readable-urls.md)
 - [GALX product surface strategy](../../docs/PRODUCT_SURFACE_STRATEGY.md)
 
@@ -222,5 +227,6 @@ Owner role: **Billing maintainer**. Domain: `billing`.
 - [Billing boundary and account continuity](../../docs/WALLET_AND_BILLING_STRATEGY.md)
 - [DESIGN](../../src/components/home/DESIGN.md)
 - [DESIGN](../../src/components/public-content/DESIGN.md)
+- [Private image allowance and accounting lifecycle](../../docs/maintainers/private-image-accounting.md)
 
 Relevant checks (select for the change; impact discovery never executes these): `npm run test:billing:lifecycle`, `npm run test:sites:plans:db`, `npm run build`.

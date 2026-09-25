@@ -100,7 +100,7 @@ export function HomeMotion({ hero, children }: { hero: ReactNode; children: Reac
       <div className={styles.chapterLinks}>{chapters.map(chapter => <a key={chapter.id} href={`#${chapter.id}`} aria-current={active === chapter.id ? 'location' : undefined}>{chapter.label}<span aria-hidden="true" /></a>)}</div>
       <div className={styles.chapterActions}>
         <button type="button" className={styles.motionCompact} onClick={toggleMotion} disabled={reduced || !ready} aria-label={motionLabel} title={motionLabel}>{motionIcon}</button>
-        <Link className={styles.chapterStart} href="/images">Image Studio <ArrowUpRight size={16} aria-hidden="true" /></Link>
+        <Link className={styles.chapterStart} href="/images/create">Private creation <ArrowUpRight size={16} aria-hidden="true" /></Link>
       </div>
     </nav>
     {children}

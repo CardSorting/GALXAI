@@ -24,17 +24,51 @@ Current Sites admission follows its customer plan/free allowance and shared fair
 
 ## Application image requests
 
-Public async images and synchronous free images use [durable PostgreSQL receipts](../src/lib/images/request-repository.ts), not the generic process-local task table. The application commits before 202, scopes reads and transitions to the verified owner, fingerprints idempotency keys and claims dispatch atomically. Completion requires all owned image assets to be durably cataloged. Both legacy and isolated Premium paths mirror sanitized image payloads and durably flush BroccoliDB library records before completing receipts.
+Human async and synchronous image requests use durable owner-scoped receipts,
+not the generic process-local task table. The receipt commits with its purchased
+allowance reservation before work can be claimed. Replays preserve the original
+operation identity. Claim permits a human Private Work request only when its
+reservation is valid; it permits a public Star Work only for the server-owned
+Star publishing class. A client field cannot promote a human request into a
+Star publication.
 
-[The service](../src/lib/images/request-service.ts) tracks bounded work with Next.js `after`. Status reads can schedule an unclaimed queued request; claimed attempts are never leased for redispatch. A failed receipt with the explicit `generation_not_started` classification proves a pre-dispatch rejection; all other timeout/failed statuses are not proof of no side effect. A late authoritative completion can be recorded. Cancellation only succeeds before dispatch; keep original identity and check the library before another submission.
+Customer-facing 202 and snapshot responses project queued/claimed work to the
+single `in_progress` state. The internal receipt lifecycle is not serialized
+into user responses or progress streams.
 
-The [one-time free allowance](maintainers/FREE_GENERATION_QUOTA.md) commits image deductions with newly inserted receipts. Replays reuse saved outcomes without another deduction; queued cancellation, safe queue expiry and proven capacity non-start release only the corresponding usage. Dispatched uncertainty stays deducted and occupies free capacity. A separate private, expiring aggregate budget limits all free identities together; cancellation cannot replenish its cumulative or rolling attempt budget. Image claim and Sites start recheck a pause before dispatch; Pro remains outside this extra gate.
+Completion requires the owned image assets to be normalized, cataloged, and
+durably associated with the receipt. A successful image transport by itself is
+not a completed Work. The public network query surfaces include only eligible
+published Star Works. Human-generated or remixed Works remain owner-scoped and
+cannot enter Explore, public search, Star archives, Series, feeds, or another
+user's library.
 
-The [large-library implementation](maintainers/image-library-scale.md) bounds process-local metadata/page caches and pending image writes. A full write buffer rejects admission without evicting unsaved records; durable asset acknowledgement remains required. Browsing outages return unavailable instead of a partial cache presented as complete history. This does not add a durable generation queue.
+The image lifecycle reserves purchased allowance before dispatch and settles or
+releases it only from the existing terminal evidence. Proven pre-dispatch
+rejection, queued cancellation, and queued expiry before claim may safely
+release a reservation. Ambiguous outcomes remain reserved; timeout after claim,
+process restart, and an empty status read do not authorize an automatic retry
+or refund. Consult [current image allowance
+guidance](maintainers/FREE_GENERATION_QUOTA.md) and [image recovery](../post-mortem/runbooks/image-generation.md).
 
-The application's receipt persistence does not make upstream execution exactly once or transfer its guarantee to generic queues, relay jobs or SDK retries. Follow [image recovery](../post-mortem/runbooks/image-generation.md) and [ADR 0144](adr/0144-durable-images-and-incident-documentation.md).
+Public discovery is independent of image execution. Browsing, following,
+saving, searching, and opening archives do not create image work. The old
+one-time free image balance is historical only and cannot authorize a new
+claim. Image-plan checkout and generation use the approved bounded allowance
+configuration; invalid or missing configuration continues to fail closed.
 
-The image studio retains up to four accepted requests per tab, with one bounded parallel status batch and no overlapping batches. Requests survive reload in owner-scoped session storage; library navigation does not clear tracking. Transient HTTP failures retain requests, honor Retry-After and pause when hidden/offline. Five minutes of observation pauses updates without discarding identity. Explicit resume checks the same receipts. A lost POST acknowledgement retains its exact key and settings; the Recover request action resubmits that identity through the existing durable idempotency boundary. It cannot create another execution for an already committed receipt. Explicit dismissal can retire paused unknown tracking after the user reviews the library; it never cancels running work or refunds quota. This is a browser work bound, not a promise of four simultaneous backend executions.
+The [large-library implementation](maintainers/image-library-scale.md) bounds
+metadata/page caches and pending image writes. A full write buffer rejects
+admission without evicting unsaved records; durable asset acknowledgement
+remains required. Browsing outages return unavailable instead of partial cache
+history. This does not add a durable generation queue.
+
+The application's receipt persistence does not make execution exactly once or
+transfer that guarantee to generic queues, relay jobs, or SDK retries. Keep
+uncertain work bound to its original operation. The browser may retain a
+bounded set of receipt IDs for status recovery; resuming status never starts a
+new operation. This is a client observation bound, not a promise of parallel
+backend execution.
 
 ## Throughput isolation
 

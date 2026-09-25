@@ -2,6 +2,10 @@ import type { Pool } from 'pg';
 import type Stripe from 'stripe';
 import { FairUsageError } from './fair-policy';
 import type { FairPolicy, PaidAccess } from './fair-store';
+import { PRO_PRODUCT_ID } from '../billing/plan-subscription';
+
+const stripeObjectId = (value: unknown): string | undefined =>
+  typeof value === 'string' ? value : (value as { id?: string } | null)?.id;
 
 /** Explicit operator grants are read from current server-managed account data.
  * JWT claims, user metadata, staff roles and editable tiers are not authority. */
@@ -52,7 +56,9 @@ export async function requirePaidSitesAccess(pool: Pick<Pool,'connect'>, stripe:
     const invoiceCustomer=typeof invoice.customer==='string'?invoice.customer:invoice.customer?.id;
     if(invoiceCustomer!==customer)continue;
     for(const item of subscription.items.data){
-      if(!policy.paid_price_ids.includes(item.price.id)||!item.price.recurring||!item.quantity||item.quantity<1)continue;
+      // The Sites fair-use price list may contain other GALX consumer prices
+      // for checkout validation. Only the GALX Pro product grants Sites access.
+      if(stripeObjectId(item.price.product)!==PRO_PRODUCT_ID||!policy.paid_price_ids.includes(item.price.id)||!item.price.recurring||!item.quantity||item.quantity<1)continue;
       const paidLine=invoice.lines.data.some(line=>{
         const price=line.pricing?.price_details?.price;
         const priceId=typeof price==='string'?price:price?.id;

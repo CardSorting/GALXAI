@@ -1,0 +1,53 @@
+{
+  "classification": "private",
+  "observed_at": "2026-09-25T08:40:50Z",
+  "purpose": "Local release-candidate finalization; no production mutation",
+  "allowance_configuration": {
+    "status": "APPROVED",
+    "canonical_source": "src/lib/billing/image-allowance-config.ts",
+    "monthly_units": {
+      "Workshop": 100,
+      "Studio": 500,
+      "MAX": 2000
+    },
+    "output_units": {
+      "Standard": 1,
+      "HD": 2
+    }
+  },
+  "local_certification": {
+    "command": "npm run release:certify",
+    "status": "RELEASE CANDIDATE READY",
+    "counts": {
+      "PASS": 17,
+      "FAIL": 0,
+      "BLOCKED": 1,
+      "UNAPPROVED": 0
+    },
+    "blocked_gate": "hosted/deployment audit",
+    "postgres": "153 migrations applied against disposable PostgreSQL; 72 integration checks passed",
+    "other_commands": [
+      "npm run docs:check",
+      "npm run test:docs",
+      "npm run test:billing:lifecycle",
+      "npm run test:image:db",
+      "git diff --check"
+    ]
+  },
+  "lifecycle_invariants": {
+    "success": "consume reservation",
+    "known_releasable_pre_dispatch_failure": "release reservation",
+    "ambiguous_or_unknown_execution": "remain reserved; no automatic retry or refund"
+  },
+  "storage": {
+    "authoritative_runtime": "Vercel application-side server-only R2 credentials and private bucket configuration",
+    "worker_private_bucket_binding": "not a demonstrated runtime dependency",
+    "production_private_storage": "not provisioned or verified in this pass; must fail closed until configured"
+  },
+  "external_states": {
+    "hosted_database_and_deployment": "BLOCKED / not verified; require explicit target precheck",
+    "historical_human_asset_provenance_and_cdn_reachability": "UNKNOWN / UNVERIFIED; no privacy claim",
+    "production_resources": "not modified"
+  },
+  "release_decision": "RELEASE CANDIDATE READY; production has not been deployed"
+}

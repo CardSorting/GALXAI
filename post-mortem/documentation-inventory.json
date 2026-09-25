@@ -84,13 +84,13 @@
       "path": "docs/API_BASE_URL.md",
       "scope": "current-guide",
       "category": "docs",
-      "title": "API base URL and authentication"
+      "title": "Accessing GALX"
     },
     {
       "path": "docs/API_REFERENCE.md",
       "scope": "current-guide",
       "category": "docs",
-      "title": "API reference"
+      "title": "Product capabilities"
     },
     {
       "path": "docs/ARCHITECTURE.md",
@@ -138,7 +138,7 @@
       "path": "docs/DEVELOPER_CLIENT_SDK.md",
       "scope": "domain-reference",
       "category": "docs",
-      "title": "🌌 GALXAI Universal Developer Client SDK"
+      "title": "Developer client SDK — retired public guide"
     },
     {
       "path": "docs/DEVELOPER_GATEWAY_KEY_ARCHITECTURE.md",
@@ -192,7 +192,7 @@
       "path": "docs/GTM_STRATEGY.md",
       "scope": "commercial-draft",
       "category": "docs",
-      "title": "GALX Go-To-Market and positioning strategy"
+      "title": "GALX positioning and product narrative"
     },
     {
       "path": "docs/INFERENCE_PIPELINE_VERIFICATION.md",
@@ -270,7 +270,7 @@
       "path": "docs/QUICKSTART.md",
       "scope": "current-guide",
       "category": "docs",
-      "title": "API quickstart"
+      "title": "Getting started with GALX"
     },
     {
       "path": "docs/RATE_LIMITS_AND_QUOTAS.md",
@@ -1383,6 +1383,12 @@
       "title": "ADR 0159: Local Mac relay operation with bounded availability"
     },
     {
+      "path": "docs/adr/0160-private-human-creation-star-publishing.md",
+      "scope": "decision-record",
+      "category": "docs",
+      "title": "ADR 0160: Private human creation and Star-only publishing"
+    },
+    {
       "path": "docs/adr/README.md",
       "scope": "current-guide",
       "category": "docs",
@@ -1746,7 +1752,7 @@
       "path": "docs/maintainers/FREE_GENERATION_QUOTA.md",
       "scope": "current-guide",
       "category": "docs",
-      "title": "Free generation quota operations"
+      "title": "Legacy free generation and current image allowance"
     },
     {
       "path": "docs/maintainers/GIT_WORKFLOWS_AND_HOOKS.md",
@@ -1794,7 +1800,7 @@
       "path": "docs/maintainers/PUBLIC_DISCOVERY.md",
       "scope": "current-guide",
       "category": "docs",
-      "title": "Public navigation, pricing and knowledge base"
+      "title": "Public navigation, pricing, and knowledge base"
     },
     {
       "path": "docs/maintainers/README.md",
@@ -1957,6 +1963,12 @@
       "scope": "current-guide",
       "category": "docs",
       "title": "Legacy federation operations"
+    },
+    {
+      "path": "docs/maintainers/private-image-accounting.md",
+      "scope": "current-guide",
+      "category": "docs",
+      "title": "Private image allowance and accounting lifecycle"
     },
     {
       "path": "docs/maintainers/readable-urls.md",
@@ -2197,6 +2209,12 @@
       "scope": "current-guide",
       "category": "docs",
       "title": "Reconcile stale knowledge"
+    },
+    {
+      "path": "docs/runbooks/private-image-release-audit.md",
+      "scope": "current-guide",
+      "category": "docs",
+      "title": "Private image release and privacy audit"
     },
     {
       "path": "docs/runbooks/relay-admission-lifecycle.md",

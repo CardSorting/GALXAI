@@ -2,9 +2,9 @@ import type { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'GALX — Images and Ideas',
+    name: 'GALX — Star Publishing Network',
     short_name: 'GALX',
-    description: 'Create images in GALX and explore public creations powered by GALX Nova.',
+    description: 'Discover Stars, published Works, public archives, and Series in GALX.',
     start_url: '/',
     display: 'standalone',
     background_color: '#07080d',

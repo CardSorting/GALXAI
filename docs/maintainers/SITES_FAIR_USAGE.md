@@ -3,8 +3,8 @@
 <!-- docs-scope: current-guide -->
 
 > [!NOTE]
-> **Status: Retired / Sunset (September 2026)**
-> Sites generation and fair usage admission policies have been retired. GALX Pro has been repositioned around GALX Images (priority GPU inference queues, high-resolution generation across 5 aspect ratios, 1-click prompt remixing, and community stream access).
+> **Status: Current Sites access and admission runbook; separate from Image Studio.**
+> GALX Pro is the Sites workspace plan. This policy does not authorize Image Studio creation: Workshop, Studio, and MAX use their own purchased subscription projection and private allowance reservation. Keep Image Studio prices out of the Sites price allowlist.
 
 Private maintainer runbook for [ADR 0140](../adr/0140-paid-sites-and-shared-fair-usage.md). Never expose this page, policy objects, private diagnostics or the supplied handoff/fixture in public assets. The historical user contract was [Sites content](../SITES_CONTENT.md).
 
@@ -28,7 +28,7 @@ The prior seat engine uses weighted messages, process-local caches and editable 
 
 The controller has no implicit numeric defaults. The owner delegated an initial Pro rollout in [ADR 0141](../adr/0141-sites-pro-self-service-launch.md); its explicit limits and eligible price are in the private launch policy. Inspect with `npm run sites:fair -- --status`. The migration seeds `disabled`; the supplied test fixture cannot activate production through the operator tool. Configuration is private database state, not a browser bundle or editable account profile.
 
-`npm run sites:fair -- --configure /absolute/path/to/private-policy.json` accepts exactly `mode`, `pool_id`, `paid_price_ids` and `limits`. Set `mode` to `enforce`; name the common delivery scope and list verified Stripe recurring price IDs. Use operator-approved values for every limit below. The tool increments the policy revision, invalidates old snapshots and preserves outstanding work and rolling attempt history. Window duration is immutable after initial configuration; changing it requires a separately reviewed allowance migration. Do not split one shared quota into multiple policy IDs or raise limits based on unmeasured upstream capacity.
+`npm run sites:fair -- --configure /absolute/path/to/private-policy.json` accepts exactly `mode`, `pool_id`, `paid_price_ids` and `limits`. Set `mode` to `enforce`; name the common Sites delivery scope and list only verified GALX Pro Sites recurring prices. Image Studio prices cannot grant Sites access and must not be listed here. The Sites access check independently verifies the Pro product and settled subscription evidence. Use operator-approved values for every limit below. The tool increments the policy revision, invalidates old snapshots and preserves outstanding work and rolling attempt history. Window duration is immutable after initial configuration; changing it requires a separately reviewed allowance migration. Do not split one shared quota into multiple policy IDs or raise limits based on unmeasured upstream capacity.
 
 | Limit | Meaning and validation |
 | --- | --- |
@@ -119,15 +119,17 @@ The earlier [production release verification](../../internal/scaling-strategy-20
 ## Historical Sites launch record
 
 The launch record below is historical evidence for the Sites policy. It is not
-the current public pricing authority. The current customer strategy is GALX
-Images with four active one-account subscriptions: GALX Pro at $10/month,
-Creator at $15/month, Studio at $35/month, and MAX at $200/month. They share the
-same supported Image Studio controls and fair-use boundary; MAX is an individual
-plan and does not include account sharing, shared workspaces or seats. Developer Access is no longer a
-public subscription or self-service API product; private access is deliberate
-administrator provisioning with bounded allocation and metering. Do not use the
-older Sites, Standard, prepaid, compute-pack, or Developer subscription terms
-below as current offers, and do not recreate those Stripe objects.
+the current public pricing authority. An earlier Image Studio catalog listed
+GALX Pro, Creator, Studio and MAX as monthly subscriptions; that historical
+listing is not current offer language or proof of present catalog state. Current
+Image Studio plan names are Workshop, Studio and MAX, separate from the
+Sites-only GALX Pro plan. Image checkout remains fail-closed until the public
+catalog and approved private allowance configuration are verified. Developer
+Access is not a public subscription or self-service API product; private access
+is deliberate administrator provisioning with bounded allocation and metering.
+Do not use the older Sites, Standard, prepaid, compute-pack, Creator or
+Developer subscription terms below as current offers, and do not recreate those
+Stripe objects.
 
 At the time of the historical launch, application commit `8d82351` was deployed at `galx.ai`, private policy revision **2** was `enforce`, and a live GALX Pro recurring price was eligible. [Launch acceptance](../../internal/scaling-strategy-2026-09-10/commercial-reset/sites-automation/durable/pro-launch-release-verification.json) records that earlier deployment, catalog, policy, application/DB checks and live acceptance. It does not establish the current price or product narrative. Billing still distinguishes an available offer from active paid access, and transaction/invoice responses still use public field allowlists.
 
@@ -172,8 +174,8 @@ During the initial rollout, inspect private admission latency/deferrals, provide
 
 ## Rollback
 
-For the historical Sites policy, `npm run sites:fair -- --disable` stopped new
-included admission while retaining receipts and recovery records. Do not use a
-Sites rollback command to change the current Images/Pro/private-access strategy.
-Keep historical wallet reconciliation and private snapshots intact; never
-re-enable a former charged POST or prepaid Developer catalog as a rollback.
+`npm run sites:fair -- --disable` stops new included Sites admission while
+retaining receipts and recovery records. It does not change Image Studio
+subscription allowances, image request reservations, or Star publication
+authority. Keep historical wallet reconciliation and private snapshots intact;
+never re-enable a former charged POST or prepaid Developer catalog as a rollback.

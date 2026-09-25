@@ -2,7 +2,11 @@
 
 <!-- docs-scope: decision-record -->
 
-Date: 2026-09-14. Status: proposed. Owner: Product/API maintainer. Delivery: deployed.
+Date: 2026-09-14. Status: superseded for Image creation by ADR 0160. Owner: Product/API maintainer. Delivery evidence: deployed historically.
+
+ADR 0160 supersedes this decision only for human Image Studio inference and its
+allowance. The historical Site allocation and release record below are retained
+as evidence, not current instructions for image access or checkout.
 
 ## Context and decision
 

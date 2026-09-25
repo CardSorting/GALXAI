@@ -31,6 +31,15 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL(canonical, request.url), { status: 308,
       headers: { 'Cache-Control': 'private, no-store', 'X-Robots-Tag': 'noindex, nofollow' } });
   }
+  // Retire the old public developer guides. Preserve only the product-capability
+  // overview, and discard query parameters when redirecting legacy paths.
+  if (pathname.startsWith('/docs/') && ['GET', 'HEAD'].includes(request.method)) {
+    return NextResponse.redirect(new URL('/docs', request.url), { status: 308,
+      headers: { 'Cache-Control': 'public, max-age=3600', 'X-Robots-Tag': 'noindex, nofollow' } });
+  }
+  if (pathname.startsWith('/docs/') && request.method !== 'GET' && request.method !== 'HEAD') {
+    return new NextResponse('Not found.', { status: 404, headers: { 'Cache-Control': 'no-store' } });
+  }
   // Account workspaces require a session before any preview or asset exemption.
   if (isWorkspacePath(pathname)) return updateSession(request);
   const previewDenied = await previewMiddleware(request);

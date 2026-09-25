@@ -1,6 +1,26 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readPendingGenerations, generationStatusFailure, MAX_ACTIVE_GENERATIONS, appendCreations, generationBody, readGeneration, readLibrary, readPending, readSettings, safeImageUrl, studioError } from '../src/components/images/studio-contract';
+import { readPendingGenerations, generationStatusFailure, MAX_ACTIVE_GENERATIONS, appendCreations, generationBody, readGeneration, readLibrary, readPending, readPrivateAllowance, readSettings, safeImageUrl, studioError } from '../src/components/images/studio-contract';
+
+test('private allowance presentation is consistent, bounded, and excludes unexpected accounting fields', () => {
+  const active = readPrivateAllowance({ plan: { id: 'workshop', name: 'Workshop' }, privateCreationAvailable: true,
+    allowance: { totalUnits: 80, usedUnits: 17, remainingUnits: 63, standardOutputUnits: 1, hdOutputUnits: 2,
+      renewsAt: '2026-10-24T00:00:00Z', supplierCost: 0.04 } });
+  assert.deepEqual(active, { plan: { id: 'workshop', name: 'Workshop' }, privateCreationAvailable: true,
+    allowance: { totalUnits: 80, usedUnits: 17, remainingUnits: 63, standardOutputUnits: 1, hdOutputUnits: 2,
+      renewsAt: '2026-10-24T00:00:00Z' } });
+  const exhausted = readPrivateAllowance({ plan: { id: 'max', name: 'MAX' }, privateCreationAvailable: false,
+    allowance: { totalUnits: 80, usedUnits: 80, remainingUnits: 0, standardOutputUnits: 1, hdOutputUnits: 2,
+      renewsAt: '2026-10-24T00:00:00Z' } });
+  assert.equal(exhausted.allowance?.remainingUnits, 0);
+  assert.equal(exhausted.privateCreationAvailable, false);
+  assert.throws(() => readPrivateAllowance({ plan: { id: 'studio', name: 'Studio' }, privateCreationAvailable: true,
+    allowance: { totalUnits: 80, usedUnits: 17, remainingUnits: 62, standardOutputUnits: 1, hdOutputUnits: 2,
+      renewsAt: '2026-10-24T00:00:00Z' } }));
+  assert.throws(() => readPrivateAllowance({ plan: { id: 'studio', name: 'Studio' }, privateCreationAvailable: true,
+    allowance: { totalUnits: 2_147_483_648, usedUnits: 0, remainingUnits: 2_147_483_648, standardOutputUnits: 1,
+      hdOutputUnits: 2, renewsAt: '2026-10-24T00:00:00Z' } }));
+});
 
 test('studio accepts owned raster artifacts and rejects remote, active, and malformed URLs', () => {
   for (const value of ['https://evil.test/image.png', '//evil.test/image.png', 'javascript:alert(1)', 'data:image/svg+xml;base64,AAAA',
@@ -15,8 +35,8 @@ test('library projection discards unexpected fields, unsafe URLs, and invalid da
     model: 'private-model', shardId: 'private-shard', r2Key: 'private-storage', quality: 'secret', createdAt: 'invalid', aspectRatio: 'bad', internal: { secret: 'hidden' } };
   const result = readLibrary({ success: true, total: 2, nextCursor: 'next', records: [record, { ...record, publicUrl: 'https://evil.test/image.png' }] });
   assert.equal(result.images.length, 1);
-  assert.deepEqual(Object.keys(result.images[0]).sort(), ['createdAt','detailsLoaded','favorite','id','prompt','quality','ratio','saved','thumbnailUrl','url','visibility']);
-  assert.equal(result.images[0].visibility, 'public');
+  assert.deepEqual(Object.keys(result.images[0]).sort(), ['createdAt','detailsLoaded','favorite','id','prompt','quality','ratio','saved','thumbnailUrl','url','workClass']);
+  assert.equal(result.images[0].workClass, 'private');
   assert.equal(result.images[0].createdAt, '');
   assert.equal(result.images[0].ratio, '1:1');
   assert.doesNotMatch(JSON.stringify(result), /private-|secret|hidden/);
@@ -27,13 +47,13 @@ test('generation output is projected and never renders upstream messages or malf
   const images = readGeneration({ data: [{ b64_json: 'iVBORw0KGgo=', revised_prompt: 'private secret' }], private: 'secret' }, settings, 'receipt');
   assert.equal(images[0].prompt, 'A vase');
   assert.equal(images[0].url, 'data:image/png;base64,iVBORw0KGgo=');
-  assert.doesNotMatch(JSON.stringify(images), /private|secret/);
+  assert.doesNotMatch(JSON.stringify(images), /secret/);
   for (const value of [{ data: [] }, { data: [{ b64_json: 'PHN2Zz4=' }] }, { data: [{ url: 'https://evil.test/asset' }] }, { data: Array(5).fill({}) }]) assert.throws(() => readGeneration(value, settings, 'receipt'));
 });
 test('draft and receipt recovery restrict settings and construct a minimal request', () => {
   const settings = readSettings({ prompt: '  A vase  ', ratio: '3:2', quality: 'hd', count: 2, secret: 'not-public' });
-  assert.deepEqual(generationBody(settings), { model: 'galx-nova-image', prompt: 'A vase', n: 2, size: '1536x1024', quality: 'hd', visibility: 'public', response_format: 'url' });
-  assert.equal(generationBody(readSettings({ prompt: 'private', visibility: 'private' })).visibility, 'private');
+  assert.deepEqual(generationBody(settings), { prompt: 'A vase', n: 2, size: '1536x1024', quality: 'hd', response_format: 'url' });
+  assert.equal('visibility' in generationBody(readSettings({ prompt: 'private', visibility: 'public' })), false);
   assert.equal(readSettings({ count: 100, quality: 'ultra', ratio: '100:1' }).count, 1);
   assert.equal(readSettings({ prompt: 'a'.repeat(40_000) }).prompt.length, 32_000);
   assert.equal(readPending({ id: '../api/private', startedAt: Date.now(), settings }), null);
@@ -57,30 +77,6 @@ test('permission denial never tells an authenticated user to sign in again', () 
   for (const status of [403, 429, 500, 503]) assert.doesNotMatch(studioError(status), /expired|sign in/i);
   assert.match(studioError(403), /account/);
 });
-
-test('time estimation and progress calculation provide predictable bounds and phases', async () => {
-  const { estimateGenerationSeconds, calculateGenerationProgress } = await import('../src/components/images/studio-contract');
-  const standardEstimate = estimateGenerationSeconds({ prompt: 'test', ratio: '1:1', quality: 'standard', count: 1 });
-  const hdEstimate = estimateGenerationSeconds({ prompt: 'test', ratio: '16:9', quality: 'hd', count: 2 });
-  assert(standardEstimate >= 14 && standardEstimate <= 16);
-  assert(hdEstimate > standardEstimate);
-
-  const start = calculateGenerationProgress(1, standardEstimate, 'queued');
-  assert.equal(start.phase.key, 'queued');
-  assert(start.percent >= 5 && start.percent <= 20);
-  assert.equal(start.remainingSeconds, standardEstimate - 1);
-
-  const mid = calculateGenerationProgress(5, standardEstimate);
-  assert.equal(mid.phase.key, 'synthesizing');
-  assert(mid.percent > start.percent && mid.percent < 90);
-
-  const late = calculateGenerationProgress(standardEstimate + 5, standardEstimate);
-  assert(late.percent >= 92 && late.percent <= 98);
-  assert.equal(late.remainingSeconds, 0);
-  assert.match(late.statusText, /almost ready/i);
-});
-
-
 
 test('status retrieval retries transient errors without treating them as generation rejection', () => {
   for (const status of [408, 429, 500, 502, 503, 504]) assert.equal(generationStatusFailure(status, {error:{message:'private diagnostic'}}), 'retry');

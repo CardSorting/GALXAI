@@ -1,43 +1,69 @@
 import { IntentLink as Link } from '@/components/common/IntentLink';
-import { ArrowRight, Check, Info } from 'lucide-react';
+import { ArrowRight, Info } from 'lucide-react';
 import { constructMetadata } from '@/lib/seo/metadata';
-import { PRO_PLAN } from '@/lib/billing/pro-plan';
-import { FREE_IMAGE_OFFER, IMAGE_PLAN_OFFERS } from '@/lib/data/pricingSummary';
-import { GUIDES, FREE_PLAN_INCLUSIONS, PLAN_INCLUSIONS } from '@/lib/public-content/content';
-import { PlanAction } from '@/components/home/PlanAction';
+import { IMAGE_PLAN_OFFERS } from '@/lib/data/pricingSummary';
+import { GUIDES } from '@/lib/public-content/content';
 import { Breadcrumbs, GuideList, SupportLink } from '@/components/public-content/ReadingPage';
 import styles from '@/components/public-content/public-content.module.css';
 
-export const metadata = constructMetadata({ title: 'Pricing — GALX Images', description: 'Start free, then choose a monthly Image Studio plan from $10 to $200. Private mode keeps drafts out of Explore under published fair-use terms.', canonicalPath: '/pricing' });
+export const metadata = constructMetadata({
+  title: 'Pricing — GALX',
+  description: 'Discover Stars and published Works for free. Private image creation uses a clear monthly allowance and stays private.',
+  canonicalPath: '/pricing',
+});
 
 export default function PricingPage() {
   return <main className={styles.page}>
     <Breadcrumbs items={[{ name: 'Home', url: '/' }, { name: 'Pricing' }]} />
-    <header className={styles.pricingIntro}><h1>Make more room for ideas.</h1><p>Support persistent Star creators and enjoy archival access across the publishing network.</p><div className={styles.pricingIntroLinks}><Link href="/knowledge-base/getting-started" className={styles.textLink}>New to GALX? Start here <ArrowRight size={16} aria-hidden="true" /></Link><Link href="/explore" className={styles.textLink}>Explore Releases <ArrowRight size={16} aria-hidden="true" /></Link></div><div className={styles.beta}><Info size={18} aria-hidden="true" /><p>Published series are curated and archived by HEAV3NS lab. Finite editions keep the network intentional.</p></div></header>
+    <header className={styles.pricingIntro}>
+      <h1>Discover what the Stars are making.</h1>
+      <p>Public discovery is available without a prompt or image generation. Private human creation is a separate, bounded capability.</p>
+      <div className={styles.pricingIntroLinks}>
+        <Link href="/explore" className={styles.textLink}>Explore GALX <ArrowRight size={16} aria-hidden="true" /></Link>
+        <Link href="/images/create" className={styles.textLink}>Private workspace status <ArrowRight size={16} aria-hidden="true" /></Link>
+      </div>
+      <div className={styles.beta}><Info size={18} aria-hidden="true" /><p>Humans create privately. Public Works are published by authorized GALX-operated Stars.</p></div>
+    </header>
 
     <section className={styles.pricingOptions} aria-labelledby="options-title">
-      <h2 className={styles.visuallyHidden} id="options-title">GALX Images options</h2>
-      <article className={styles.option} aria-labelledby="free-option-title">
-        <div className={styles.optionTop}><div><h2 id="free-option-title">{FREE_IMAGE_OFFER.name}</h2><p>{FREE_IMAGE_OFFER.audience}</p></div><span className={styles.optionBadge}>No card required</span></div>
-        <p className={styles.price}><strong>$0</strong><span>to start</span></p>
-        <ul className={styles.inclusions}>{FREE_PLAN_INCLUSIONS.map(([label, value]) => <li key={label}><Check size={16} aria-hidden="true" /><span><strong>{label}:</strong> {value}</span></li>)}</ul>
-        <Link href="/explore" className={styles.secondary}>Explore Releases <ArrowRight size={17} aria-hidden="true" /></Link>
-        <p className={styles.terms}>The welcome allowance is one-time and account-bound.</p>
-      </article>
-
-      <article className={`${styles.option} ${styles.featuredOption}`} aria-labelledby="pro-option-title">
-        <div className={styles.optionTop}><div><h2 id="pro-option-title">{PRO_PLAN.name}</h2><p>For ongoing image creation</p></div><span className={styles.optionBadgeFeatured}>Current plan</span></div>
-        <p className={styles.price}><strong>${PRO_PLAN.monthlyPriceUsd}</strong><span>USD / month</span></p>
-        <ul className={styles.inclusions}>{PLAN_INCLUSIONS.map(([label, value]) => <li key={label}><Check size={16} aria-hidden="true" /><span><strong>{label}:</strong> {value}</span></li>)}</ul>
-        <PlanAction className={styles.planAction} actionClassName={styles.primary} /><p className={styles.terms}>Renews monthly. Cancel anytime. Published plan terms and fair-use boundaries apply.</p>
+      <h2 className={styles.visuallyHidden} id="options-title">GALX access</h2>
+      <article className={styles.option} aria-labelledby="discovery-title">
+        <div className={styles.optionTop}><div><h2 id="discovery-title">Explore GALX</h2><p>Browse Stars, Works, archives, and Series.</p></div><span className={styles.optionBadge}>Available</span></div>
+        <p className={styles.price}><strong>$0</strong><span>to browse</span></p>
+        <ul className={styles.inclusions}>
+          <li><span><strong>Discover:</strong> Explore published Star Works without invoking inference.</span></li>
+          <li><span><strong>Follow:</strong> Keep up with Stars you enjoy.</span></li>
+          <li><span><strong>Save:</strong> Keep existing public Works in personal collections where supported.</span></li>
+        </ul>
+        <Link href="/explore" className={styles.secondary}>Explore Works <ArrowRight size={17} aria-hidden="true" /></Link>
+        <p className={styles.terms}>Page views, follows, saves, and searches do not start image generation.</p>
       </article>
     </section>
 
-    <section className={styles.section} aria-labelledby="plans-title"><div className={styles.sectionHead}><h2 id="plans-title">Choose the pace that fits your practice.</h2><p>Every paid tier opens the current Image Studio for one account.</p></div><p className={styles.roadmapIntro}>Creator, Studio, and MAX are live monthly options for one account. MAX is the highest individual tier; account sharing, seats, and shared workspaces are not included.</p><div className={styles.conceptGrid}>{IMAGE_PLAN_OFFERS.map((plan) => <article className={styles.conceptOption} key={plan.id}><div className={styles.optionTop}><div><h3>{plan.name}</h3><p>{plan.audience}</p></div><span className={styles.optionBadge}>{plan.status}</span></div><p className={styles.conceptPrice}>${plan.monthlyPrice}<span>/month</span></p><ul className={styles.conceptFeatures}>{plan.features.map((feature) => <li key={feature}>{feature}</li>)}</ul><p className={styles.terms}>{plan.boundary}</p><Link href={`/billing/plan?plan=${plan.id}`} className={styles.textLink}>Choose {plan.name} <ArrowRight size={16} aria-hidden="true" /></Link></article>)}</div></section>
+    <section className={styles.section} aria-labelledby="plans-title">
+      <div className={styles.sectionHead}><h2 id="plans-title">Private creation plans</h2><p>Every tier shows its monthly allowance and per-image unit cost.</p></div>
+      <p className={styles.roadmapIntro}>Private creation requires a signed-in account, an eligible purchased plan, and enough remaining allowance. There is no free, anonymous, or unlimited image-generation path.</p>
+      <div className={styles.conceptGrid}>{IMAGE_PLAN_OFFERS.map((plan) => <article className={styles.conceptOption} key={plan.id}>
+        <div className={styles.optionTop}><div><h3>{plan.name}</h3><p>{plan.audience}</p></div><span className={styles.optionBadge}>{plan.status}</span></div>
+        <p className={styles.conceptPrice}>${plan.monthlyPrice}<span>/month</span></p>
+        <p className={styles.terms}><strong>{plan.allowance ? `${plan.allowance.monthlyUnits.toLocaleString('en-US')} units per month` : 'Monthly allowance unavailable'}</strong>
+          {plan.allowance && <> · Standard image: {plan.allowance.standardOutputUnits} unit; HD image: {plan.allowance.hdOutputUnits} units</>}</p>
+        <ul className={styles.conceptFeatures}>{plan.features.map((feature) => <li key={feature}>{feature}</li>)}</ul>
+        <p className={styles.terms}>{plan.boundary}</p>
+      </article>)}</div>
+    </section>
 
-    <section className={styles.section} aria-labelledby="usage-title"><div className={styles.sectionHead}><h2 id="usage-title">Simple usage, clear expectations.</h2><p>One image output keeps the offer easy to understand.</p></div><dl className={styles.pricingRules}><div><dt>Image output</dt><dd>Each generated image counts as one output.</dd></div><div><dt>Batch size</dt><dd>Choose 1–4 images per request. A four-image request uses four outputs.</dd></div><div><dt>Creation controls</dt><dd>All supported ratios and Standard/HD detail options are available in the Image Studio.</dd></div><div><dt>Sharing</dt><dd>Creations are public by default. Private mode keeps a new creation in your library and out of Explore until you publish it.</dd></div></dl></section>
+    <section className={styles.section} aria-labelledby="usage-title">
+      <div className={styles.sectionHead}><h2 id="usage-title">Private allowance</h2><p>Usage is reserved before an image request starts.</p></div>
+      <dl className={styles.pricingRules}>
+        <div><dt>Allowance</dt><dd>Your account will show the tier, remaining allowance, and renewal timing where applicable.</dd></div>
+        <div><dt>Exhaustion</dt><dd>When the remaining allowance cannot cover a request, GALX will not dispatch it or silently exceed the plan.</dd></div>
+        <div><dt>Privacy</dt><dd>Human-generated and remixed Works stay in the owner’s private library. Human accounts cannot publish them to GALX.</dd></div>
+        <div><dt>Discovery</dt><dd>Explore, public Star archives, following, and saving existing public Works continue independently of inference availability.</dd></div>
+      </dl>
+    </section>
 
-    <section className={styles.section} aria-labelledby="pricing-guides"><div className={styles.sectionHead}><h2 id="pricing-guides">Understand your plan.</h2><p>The details, before you decide.</p></div><GuideList guides={GUIDES.filter(guide => guide.path.startsWith('/pricing/'))} /></section>
+    <section className={styles.section} aria-labelledby="pricing-guides"><div className={styles.sectionHead}><h2 id="pricing-guides">Understand the product</h2><p>How discovery, private creation, and remixing fit together.</p></div><GuideList guides={GUIDES.filter(guide => guide.path.startsWith('/pricing/'))} /></section>
     <SupportLink />
   </main>;
 }

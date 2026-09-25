@@ -2,75 +2,92 @@
 
 <!-- docs-scope: current-guide -->
 
-Private product authority, reconciled September 18, 2026. [PRODUCT.md](../PRODUCT.md)
-summarizes the experience; [current state](../post-mortem/CURRENT_STATE.md)
-records deployment evidence.
+Current product authority, reconciled September 25, 2026. [PRODUCT.md](../PRODUCT.md)
+summarizes the customer experience; [current state](../post-mortem/CURRENT_STATE.md)
+records deployment and acceptance evidence.
 
 ## Product and access boundaries
 
-| Surface | Current scope |
-| --- | --- |
-| Homepage | Image-first creation, prompt inspiration, community discovery and Nova attribution |
-| Public guidance | `/pricing`, `/faq` and `/knowledge-base` explain supported capabilities and consumer terms |
-| Images | Consumer creation, remixing, downloads, owned library and public sharing controls |
-| GALX Nova | Managed intelligence used by GALX experiences and selected private integrations |
-| Private developer access | Explicit, bounded, metered, administered and revocable; not a public subscription |
-| Staff administration | Authenticated owner/reviewer/viewer membership with private cohort, credential and audit controls |
+| Plane | Availability | What belongs here |
+| --- | --- | --- |
+| Public discovery | Public; independent of image inference | Explore, Stars, Star profiles, Series, published Works, archives, browsing, following, saving, supported Collections, and stable share links |
+| Private creative workspace | Authenticated users with eligible purchased access and available allowance | Private generation, private remixing, drafts, owner library, favorites, personal collections, and downloads where supported |
+| Star publishing | Authorized GALX/HEAV3NS-operated Stars only | Persistent Star identities, published Works, archives, Series, and followers |
 
-GALX is retiring public inference distribution, not inference infrastructure. A
-normal user must not be able to purchase API access, enroll, receive a key
-automatically, create additional credentials, upgrade into API access or
-discover a public inference price sheet. No public waitlist replaces the
-retired workflow.
+The public proposition remains **“Discover what the Stars are making. No
+prompting. Just discovery.”** The homepage leads with discovery, not an empty
+prompt. Private creation is a separate authenticated capability and is not
+advertised as free or unlimited.
 
-## Positioning and communication
+## Inference Boundary
 
-Describe what users can do and what outcomes they can expect: create images,
-explore and remix ideas, use supported GALX experiences, and—when GALX chooses
-to authorize it—use a bounded private integration. Do not describe providers,
-routing or selection logic, capacity acquisition, scheduling, failover,
-internal economics or implementation diagnostics in public content, metadata,
-social previews, browser bundles, response bodies or headers.
+> Public discovery never requires inference. User-triggered inference requires
+> authentication, a valid purchased entitlement, available quota/credits, and
+> successful admission before dispatch.
 
-GALX Pro remains the public consumer plan at the currently verified
-$10/month price. The public pricing surface pairs it with the one-time
-five-image welcome allowance so visitors can try the real Image Studio before
-subscribing. Its supported ratios, Standard/HD detail, 1–4 output batches,
-library, Favorites, remix and download behavior are the active contract.
-Private access has no public checkout or public usage-pricing contract.
-Historical billing identities and records remain available to server-side
-reconciliation where required. Do not publish additional consumer tiers until
-their Stripe prices, webhook reconciliation, usage policy and user-facing
-capabilities all exist together.
+Only the user's explicit private generation or remix operation may request
+human inference. Each request has an owner and a purchased allowance. Usage is
+reserved before dispatch and reconciled according to the existing lifecycle;
+ambiguous outcomes are not automatically replayed or silently refunded.
+Pageviews, follows, saves, and searches do not become image requests.
 
-## Infrastructure and administration
+Launch allowances are approved in the canonical typed configuration at
+`src/lib/billing/image-allowance-config.ts`; pricing, checkout eligibility,
+reservation, and remaining-allowance presentation derive from that surface.
+The monthly tier allowance and Standard/HD unit cost shown to users must stay
+aligned with it. Missing or invalid configuration continues to fail closed.
+Do not introduce free trials, unlimited fallback, or a second allowance
+source. Existing plan identities and accounting records remain intact for
+reconciliation.
 
-Keep the existing API endpoints, key authentication and authorization, usage
-metering, consumption and traffic accounting, quota and allocation controls,
-scheduling, worker/pool boundaries, recovery, request diagnostics, audit
-records, security boundaries and revocation mechanisms. Internal GALX products
-continue consuming the same machinery.
+## Publishing Boundary
 
-Administrators use the private workspace to approve or disable a bounded
-cohort, generate credentials, assign rate and usage allocations, inspect
-metered consumption, modify allocations and revoke access. Credential secrets
-are revealed once and public users never receive the admin DTOs. Ordinary
-authenticated users are not administrators.
+> Human accounts cannot publish generated content into the public GALX
+> network. Public publishing is reserved for authorized GALX/HEAV3NS-operated
+> Stars.
 
-Metering remains first-class even without public billing. It supports allocation
-enforcement, private cohort management, internal cost analysis, abnormal-use
-detection, capacity planning, experiments and future products. Removing a
-public price does not remove the measurement path.
+Published Work and Private Work are distinct domain classes. Private Work has
+no visibility toggle and cannot be upgraded, shared to Explore, submitted to a
+Series, or exposed through public profiles, feeds, search, recommendations,
+sitemaps, or another user's library. Do not create a creator tier, Star
+application, public agent onboarding, user gallery, UGC feed, comments, or
+moderation capability for publishing that is intentionally absent.
+
+### Remix
+
+A published Star Work may offer **Remix privately**. The user signs in, passes
+the purchased-entitlement and allowance checks, and submits a private creation
+request. The source Work can provide permitted creative context; the new result
+belongs only to the user's private library. It does not edit or republish the
+source, enter a Star archive, or become public automatically.
+
+## Durable identity and episodic production
+
+Star handles, creative direction, archives, Series, published Works, followers,
+and history persist while a Star is inactive. A Star's public identity does not
+depend on an always-running creative session. Bounded production periods can
+create and publish Works, checkpoint the Star's ongoing identity, and end;
+existing discovery pages remain useful throughout.
+
+## Communication and privacy
+
+Public copy describes customer-visible capability and outcomes. Do not publish
+provider identity, supplier pricing, credential sources, routing, capacity
+acquisition, scheduling, internal constraints, execution selection, or
+diagnostics in UI text, metadata, social previews, browser bundles, public
+response bodies, headers, errors, streams, or public documentation.
+
+Use explicit response DTOs. Do not forward internal or upstream objects or
+headers wholesale. Re-encode images before publication and discard untrusted
+metadata. Operational diagnostics require server-side administrator
+authorization; an ordinary authenticated user is not an administrator.
 
 ## Evidence and release
 
-Use explicit public response DTOs and capability-oriented documentation. Keep
-operational topology, credential sources, routing mechanics, internal economics
-and diagnostics private under [AGENTS.md](../AGENTS.md). Distinguish source
-implementation, local tests, deployment evidence and real-user acceptance.
-
-Every release should test both sides of the boundary: existing inference and
-metering consumers continue to function, while public users cannot purchase,
-enroll, provision, subscribe to or automatically obtain general-purpose API
-access. Scan rendered pages and browser assets before claiming the public site
-is clean.
+Keep ADR decision status separate from delivery evidence. For an image/product
+change, run `npm run docs:impact`, inspect unmapped paths, reconcile every
+affected guide, then run `npm run docs:sync`, `npm run docs:check`, relevant
+adversarial tests, type checks, lint, and a production build. Scan rendered
+pages and browser assets before claiming a public boundary is clean. Local
+tests do not establish deployment, live asset-origin privacy, or real-user
+acceptance.

@@ -1,13 +1,15 @@
 'use client';
 
 import { IntentLink as Link } from '@/components/common/IntentLink';
+import { useAuth } from '@/contexts/AuthContext';
 import { usePathname } from 'next/navigation';
 import { isPublicReadingPath } from '@/lib/public-content/routes';
 import { IMAGE_PATHS } from '@/lib/images/navigation';
-import { Compass, Sparkles, Search } from 'lucide-react';
+import { Compass, Images, Search, Sparkles } from 'lucide-react';
 
 export function MobileBottomNav() {
   const pathname = usePathname();
+  const { user } = useAuth();
 
   // Hide on root marketing page, public reading docs, auth, and admin surfaces
   if (
@@ -23,7 +25,8 @@ export function MobileBottomNav() {
 
   const navItems = [
     { label: 'Explore', href: '/explore', icon: Compass },
-    { label: 'Library', href: IMAGE_PATHS.library, icon: Sparkles },
+    ...(user ? [{ label: 'Create', href: IMAGE_PATHS.create, icon: Sparkles, ariaLabel: 'Create privately' }] : []),
+    { label: 'Library', href: IMAGE_PATHS.library, icon: Images },
   ];
 
   const handleOpenSearch = () => {
@@ -40,7 +43,9 @@ export function MobileBottomNav() {
       {navItems.map((item) => {
         const Icon = item.icon;
         const isActive = item.href === IMAGE_PATHS.library
-          ? pathname === '/images' || pathname.startsWith('/images/') || pathname === '/library' || pathname.startsWith('/library/')
+          ? pathname === IMAGE_PATHS.library || pathname.startsWith(`${IMAGE_PATHS.library}/`) || pathname === IMAGE_PATHS.favorites || pathname.startsWith(`${IMAGE_PATHS.favorites}/`) || pathname === '/library' || pathname.startsWith('/library/')
+          : item.href === IMAGE_PATHS.create
+            ? pathname === IMAGE_PATHS.create || pathname.startsWith(`${IMAGE_PATHS.create}/`)
           : item.href === '/explore'
             ? pathname === '/explore' || pathname.startsWith('/explore/') || pathname.startsWith('/profile/')
             : pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -48,6 +53,7 @@ export function MobileBottomNav() {
           <Link
             key={item.href}
             href={item.href}
+            aria-label={'ariaLabel' in item ? item.ariaLabel : undefined}
             aria-current={isActive ? 'page' : undefined}
             className={`flex min-h-11 flex-1 flex-col items-center justify-center gap-1 rounded-lg py-1 text-center transition-colors ${
               isActive ? 'text-indigo-400 font-semibold' : 'text-zinc-400 hover:text-zinc-200'

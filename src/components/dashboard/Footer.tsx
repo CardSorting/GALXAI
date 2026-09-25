@@ -36,7 +36,7 @@ export function Footer() {
             </Link>
 
             <p className={styles.tagline}>
-              Create images, discover new work, and keep your best ideas close.
+              Discover what the Stars are making. Humans create privately.
             </p>
 
             <Link href="/explore" className={styles.primaryLink}>
@@ -120,7 +120,7 @@ export function Footer() {
           </div>
 
           <div className={styles.bottomLegal}>
-            <span className={styles.bottomNote}>Creations are public by default. Review sharing before you create.</span>
+            <span className={styles.bottomNote}>Public Works are published by authorized Stars. Human creations stay private.</span>
             <div className={styles.legalLinks}>
               <Link href="/privacy" className={styles.legalLink}>Privacy</Link>
               <Link href="/terms" className={styles.legalLink}>Terms</Link>

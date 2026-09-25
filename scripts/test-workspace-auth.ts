@@ -14,7 +14,7 @@ process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_test_only';
 const jwt = `${Buffer.from('{"alg":"HS256"}').toString('base64url')}.${Buffer.from(JSON.stringify({ sub: 'forged', exp: 4102444800 })).toString('base64url')}.forged`;
 const cookie = (expires = 4102444800) => `base64-${Buffer.from(JSON.stringify({ access_token: jwt, refresh_token: 'fixture-refresh', expires_at: expires, user: { id: 'forged' } })).toString('base64url')}`;
 const sessionCookie = `sb-auth-auth-token=${cookie()}`;
-const paths = ['/images/library', '/images/favorites', '/images', '/images/', '/%69mages', '/images/future', '/sites', '/sites/', '/%73ites', '/sites/00000000-0000-4000-8000-000000000000', '/sites/draft.js', '/sites/deep/path', '/library'];
+const paths = ['/images/create', '/images/library', '/images/favorites', '/images/future', '/sites', '/sites/', '/%73ites', '/sites/00000000-0000-4000-8000-000000000000', '/sites/draft.js', '/sites/deep/path', '/library'];
 
 test('anonymous navigation, RSC, prefetch and misleading paths never pass the workspace gate', async () => {
   const originalFetch = globalThis.fetch;
@@ -38,7 +38,17 @@ test('anonymous navigation, RSC, prefetch and misleading paths never pass the wo
     const response = await middleware(new NextRequest('https://galx.ai/sites?starter=portfolio&refine=1&token=PRIVATE_SENTINEL&next=https://evil.test'));
     assert.equal(new URL(response.headers.get('location')!).searchParams.get('next'), '/sites?starter=portfolio&refine=1');
     assert(!response.headers.get('location')!.includes('PRIVATE_SENTINEL'));
-    for (const path of ['/', '/login', '/images/studio/desert.webp', '/images/studio/glass.webp', '/images/studio/paper.webp', '/api/sites/published/example', '/v1/images/assets/invalid', '/api/sites/workspace']) {
+    const oldDocs = await middleware(new NextRequest('https://galx.ai/docs/api-reference?token=PRIVATE_SENTINEL'));
+    assert.equal(oldDocs.status, 308);
+    assert.equal(oldDocs.headers.get('location'), 'https://galx.ai/docs');
+    assert.equal(oldDocs.headers.get('x-robots-tag'), 'noindex, nofollow');
+    assert.equal(await middleware(new NextRequest('https://galx.ai/docs/api-reference', { method: 'POST' })).then(response => response.status), 404);
+    for (const path of ['/images', '/images/']) {
+      const response = await middleware(new NextRequest(`https://galx.ai${path}`));
+      assert.equal(response.status, 308, path);
+      assert.equal(response.headers.get('location'), 'https://galx.ai/explore');
+    }
+    for (const path of ['/', '/login', '/%69mages', '/images/studio/desert.webp', '/images/studio/glass.webp', '/images/studio/paper.webp', '/api/sites/published/example', '/v1/images/assets/invalid', '/api/sites/workspace']) {
       assert.equal((await middleware(new NextRequest(`https://galx.ai${path}`))).headers.get('x-middleware-next'), '1', path);
     }
   } finally { globalThis.fetch = originalFetch; }
@@ -57,7 +67,7 @@ test('forged sessions, anonymous Auth users and verification outages fail closed
   };
   try {
     for (const badCookie of [sessionCookie, `galx_session=${jwt}`, 'sb-auth-auth-token=garbage']) {
-      const response = await middleware(new NextRequest('https://galx.ai/images', { headers: { cookie: badCookie } }));
+      const response = await middleware(new NextRequest('https://galx.ai/images/create', { headers: { cookie: badCookie } }));
       assert.equal(response.status, 307);
       assert(!(await response.text()).includes('PRIVATE_AUTH_DIAGNOSTIC'));
     }
@@ -69,11 +79,11 @@ test('forged sessions, anonymous Auth users and verification outages fail closed
       assert(!(await response.text()).includes('PRIVATE_AUTH_DIAGNOSTIC'));
     }
     status = 200; anonymous = true;
-    assert.equal((await middleware(new NextRequest('https://galx.ai/images', { headers: { cookie: sessionCookie } }))).status, 307);
+    assert.equal((await middleware(new NextRequest('https://galx.ai/images/create', { headers: { cookie: sessionCookie } }))).status, 307);
     anonymous = false;
     const split = cookie(), mid = Math.floor(split.length / 2);
     for (const value of [sessionCookie, `sb-auth-auth-token.1=${split.slice(mid)}; sb-auth-auth-token.0=${split.slice(0, mid)}`, `galx_session=${jwt}`]) {
-      const response = await middleware(new NextRequest('https://galx.ai/images', { headers: { cookie: value } }));
+      const response = await middleware(new NextRequest('https://galx.ai/images/create', { headers: { cookie: value } }));
       assert.equal(response.headers.get('x-middleware-next'), '1');
       assert.equal(response.headers.get('cache-control'), 'private, no-store');
     }
@@ -127,13 +137,13 @@ test('server page guard independently denies anonymous entry when middleware did
   const { workAsyncStorage } = await import('next/dist/server/app-render/work-async-storage.external.js');
   const { workUnitAsyncStorage } = await import('next/dist/server/app-render/work-unit-async-storage.external.js');
   const { requireWorkspaceSession } = await import('../src/lib/auth/require-workspace-session');
-  const store = { type: 'request', phase: 'render', cookies: new NextRequest('https://galx.ai/images').cookies };
+  const store = { type: 'request', phase: 'render', cookies: new NextRequest('https://galx.ai/images/create').cookies };
   await workAsyncStorage.run({} as any, () => workUnitAsyncStorage.run(store as any, async () => {
-    for (const path of ['/images', '/sites', '/sites/00000000-0000-4000-8000-000000000000']) {
+    for (const path of ['/images/create', '/sites', '/sites/00000000-0000-4000-8000-000000000000']) {
       await assert.rejects(requireWorkspaceSession(path), error => (error as any).digest === `NEXT_REDIRECT;replace;${authEntryPath(path)};307;`);
     }
   }));
-  for (const path of ['src/app/images/library/page.tsx', 'src/app/images/favorites/page.tsx', 'src/app/images/page.tsx', 'src/app/sites/page.tsx', 'src/app/sites/[id]/page.tsx']) {
+  for (const path of ['src/app/images/create/page.tsx', 'src/app/images/library/page.tsx', 'src/app/images/favorites/page.tsx', 'src/app/sites/page.tsx', 'src/app/sites/[id]/page.tsx']) {
     const page = readFileSync(path, 'utf8');
     assert.match(page, /<WorkspacePageGate pathname=/, path);
     assert.match(page, /export const dynamic = 'force-dynamic'/, path);
@@ -147,7 +157,7 @@ test('independent page verification distinguishes an outage from an invalid sess
   const { workAsyncStorage } = await import('next/dist/server/app-render/work-async-storage.external.js');
   const { workUnitAsyncStorage } = await import('next/dist/server/app-render/work-unit-async-storage.external.js');
   const { requireWorkspaceSession, WorkspaceSessionUnavailableError } = await import('../src/lib/auth/require-workspace-session');
-  const store = { type: 'request', phase: 'render', cookies: new NextRequest('https://galx.ai/images', { headers: { cookie: sessionCookie } }).cookies };
+  const store = { type: 'request', phase: 'render', cookies: new NextRequest('https://galx.ai/images/create', { headers: { cookie: sessionCookie } }).cookies };
   const originalFetch = globalThis.fetch;
   let active: boolean | null = null;
   globalThis.fetch = async input => String(input).includes('/auth/v1/user')
@@ -155,11 +165,11 @@ test('independent page verification distinguishes an outage from an invalid sess
     : active === null ? Response.json({ error: 'PRIVATE_AUTH_SENTINEL' }, { status: 503 }) : Response.json(active);
   try {
     await workAsyncStorage.run({} as any, () => workUnitAsyncStorage.run(store as any, async () => {
-      await assert.rejects(requireWorkspaceSession('/images'), WorkspaceSessionUnavailableError);
+      await assert.rejects(requireWorkspaceSession('/images/create'), WorkspaceSessionUnavailableError);
       active = false;
-      await assert.rejects(requireWorkspaceSession('/images'), error => String((error as any).digest).startsWith('NEXT_REDIRECT;'));
+      await assert.rejects(requireWorkspaceSession('/images/create'), error => String((error as any).digest).startsWith('NEXT_REDIRECT;'));
       active = true;
-      await requireWorkspaceSession('/images');
+      await requireWorkspaceSession('/images/create');
     }));
   } finally { globalThis.fetch = originalFetch; }
 });

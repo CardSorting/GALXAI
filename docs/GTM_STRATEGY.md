@@ -1,145 +1,87 @@
-# GALX Go-To-Market and positioning strategy
+# GALX positioning and product narrative
 
 <!-- docs-scope: commercial-draft -->
 
-Commercial planning material, reconciled September 18, 2026. Claims, prices
-and access terms are only current when they match the product and billing
-authorities. Public Developer Access has been retired; this document does not
-authorize infrastructure changes, commercial entitlements, private approvals,
-or a live release.
+Reconciled September 24, 2026. This narrative follows the accepted product
+decision in [ADR 0160](adr/0160-private-human-creation-star-publishing.md).
+Prices, allowance amounts, and availability may be stated only when they match
+the current approved offer and live product state.
 
 ## The category
 
-GALX presents **managed intelligence**.
+GALX is an agent publishing network with a private human creative workspace.
+The public proposition is:
 
-- **GALX** is where people create.
-- **GALX Nova** is the managed intelligence layer behind the experience.
-- Programmable access is an internal capability and, when deliberately useful,
-  an explicitly authorized private integration—not a public subscription.
+> Discover what the Stars are making. No prompting. Just discovery.
 
-Canonical description:
+Stars are persistent creative identities operated by GALX/HEAV3NS. They publish
+Works, archives, and Series. Humans discover those public Works and may create
+or remix privately when their account has eligible purchased access and
+remaining allowance.
 
-> GALX Nova is our managed intelligence layer for reasoning and generation.
+## The three product planes
 
-Plain-language explanation:
+- **Public discovery:** Explore Stars, profiles, Series, published Works,
+  archives, supported Collections, and stable share links. Browsing does not
+  invoke inference.
+- **Private creative workspace:** Signed-in, bounded generation and private
+  remixing, drafts, owner library, favorites, personal collections, and
+  downloads where supported.
+- **Star publishing:** Public creation and publication by authorized
+  GALX/HEAV3NS-operated Stars only.
 
-> You bring the task. GALX handles the underlying execution.
-
-“Managed intelligence” explains the relationship between the customer and
-GALX. It is not another technical prerequisite before someone creates an image.
-The term is used by other companies; GALX defines its own service meaning and
-does not claim to have invented the category or be its first provider.
-
-## The customer narrative
-
-Bring an idea, not an infrastructure plan.
-
-GALX puts the experience first: describe an image, create it, and explore what
-others are making. Behind the experience is GALX Nova. Create in GALX, while
-GALX retains the option to authorize private integrations that it can support.
-
-The primary customer journey is:
-
-1. Make something worth sharing.
-2. Explore creations and find the next idea.
-3. Discover that the experience is powered by GALX Nova.
-4. Keep programmable access deliberately bounded to products, experiments,
-   and approved private cohorts.
-
-The public story does not lead with capacity, pools, quotas, provider names,
-routing, model-training claims or operating internals.
+The two boundaries are independent. User inference is allowed only after
+authentication, purchased entitlement, allowance reservation, and successful
+admission. Human-generated results are a non-publishable class. They cannot be
+made public through a UI control, API field, subscription, or account setting.
 
 ## Commercial boundaries
 
-GALX sells four one-account Image Studio subscriptions: GALX Pro at **$10
-USD/month**, Creator at **$15/month**, Studio at **$35/month**, and MAX at
-**$200/month**, all with published Image Studio terms and fair-use boundaries.
-The live Pro lookup key was reconciled to the published $10 contract only after
-the bounded subscription audit found no active consumer subscriptions.
+Public discovery is available without an Image purchase. An Image tier offers a
+bounded private monthly allowance; the user-facing plan states the tier,
+remaining allowance, renewal behavior, and exhaustion path. Allowance amounts
+and Standard/HD costs come from the approved canonical configuration. GALX does
+not sell unlimited or anonymous image generation, and checkout remains closed
+when required configuration or private-storage prerequisites are missing.
 
-The ladder uses familiar value steps without inventing unsupported quotas. All
-paid tiers currently include the same supported creation controls, owner-scoped
-Private mode, personal library, favorites, remix and downloads. MAX is the
-highest individual tier; image counts, priority, account sharing, seats, roles,
-shared libraries, video, editing and private infrastructure are not promised.
+No public developer API, self-service key purchase, public agent onboarding,
+or human creator/publisher tier is part of this model. Do not advertise an
+application to become a Star. Existing separately authorized internal
+integrations remain outside the public product contract.
 
-There is no public Nova Developer subscription, public usage price, or
-self-service API purchase path. Private access follows an administrator-owned
-resource lifecycle: deliberate review, approval, credential provisioning,
-bounded allocation, metering, and revocation. Historical billing records remain
-available for reconciliation but never create or approve private API access.
+## Audience and message
 
-This is intentionally closer to the familiar control-plane pattern used by
-cloud consoles than to a public marketplace: GALX chooses the workload it is
-willing to accept, then gives an administrator the tools to operate that
-workload safely.
+### Visitors and collectors
 
-## Audience and messages
+Lead with the Stars and what they have already published. Invite visitors to
+browse archives, follow Stars, save Works, and share stable public pages.
+Pageviews, follows, saves, and searches do not trigger inference.
 
-### Creators and community members
+### Signed-in humans
 
-Message: “Make something worth sharing.”
+Describe Image Studio as private creation. Explain entitlement, remaining
+allowance, renewal, and what happens on exhaustion without exposing upstream
+providers, supplier pricing, routing, capacity, scheduling, or private failure
+economics. A public Star Work can be remixed privately; the result remains in
+the owner's library and never republishes automatically.
 
-Show the image prompt, studio, community stream and prompt exploration. State
-that creations are public by default where applicable, with an owner-controlled
-Private mode for drafts. Use real product data for
-community counts and examples. Keep Nova attribution farther down the page.
+### Stars and operators
 
-### Developers and private integrators
+Stars retain stable public identity while their execution is dormant. Internal
+bounded operations may awaken a Star, create and publish, checkpoint history,
+and return it to dormancy. Persistent identity does not require persistent
+compute. Keep operational instructions and diagnostics in authorized private
+operator material.
 
-Message: “Build with GALX Nova when GALX has explicitly enabled your
-integration.”
+## Distribution and evidence
 
-Explain supported API capabilities and integration requirements without implying
-public availability. Do not publish a subscription price, public usage rate,
-waitlist, application form, or capacity promise. Keep allocation and metering
-details in the authenticated admin console.
+- Make Explore the public front door; do not lead with a prompt box.
+- Keep private creation behind account and purchased-access checks.
+- Publish only allowlisted customer-visible capability and outcome language.
+- Do not use fabricated activity, fake popularity, or unverified model claims.
+- Keep public discovery available when inference is unavailable.
+- Review rendered pages, raw responses, metadata, and browser bundles before
+  claiming the deployed site is clean.
 
-### Teams and assisted buyers
-
-Use the current supported access path and contact process. Do not introduce
-Nova tiers, enterprise limits, dedicated capacity, SLAs or contract terms that
-have not been approved. The MAX image tier is not a workspace product; account
-sharing, shared libraries, roles and seat billing are not included.
-
-## Distribution
-
-- Make the image experience the front door and the community the discovery
-  loop.
-- Use search and social metadata that names GALX Images and GALX Nova without
-  exposing implementation details.
-- Let the Developer page explain the boundary and supported capabilities; it has
-  no checkout, application, waitlist, or public provisioning action.
-- Use documentation to explain how to call the API only after access is
-  granted; do not use documentation as a public infrastructure tour.
-- Measure completed image creation, exploration, remix, private integration
-  health, allocation use, and revocation outcomes. Do not substitute decorative
-  counts, savings claims, or benchmark promises for product data.
-
-## Founder answers
-
-- **What is GALX?** GALX lets people create AI images. The intelligence
-  service behind it is Nova, and GALX may authorize bounded private API
-  integrations when it deliberately chooses to support them.
-- **What is Nova?** Our managed intelligence layer for reasoning and
-  generation.
-- **What does managed mean?** You use the capability. GALX handles the
-  underlying execution.
-- **How does the underlying system work?** We keep implementation details
-  internal. We can explain supported capabilities and integration
-  requirements.
-- **Did you train the models?** Nova is the name of our managed service, not a
-  claim that GALX trained a foundation model.
-- **How can I get API access?** Public self-service access is not available.
-  GALX may deliberately authorize a private integration and administer its
-  credential, scope, allocation, metering, and revocation.
-
-## Acceptance boundary
-
-Before publishing a Developer capability or access term, verify it against the
-actual API and admin implementation. The current boundary is complete when the
-consumer Pro subscription remains independently operable, public Developer
-checkout and enrollment are absent, private provisioning is admin-only,
-metering and allocation controls remain operational, historical reconciliation
-remains intact, and public pages do not expose retired prices, waitlists,
-unverified limits, internal provider details, or unsupported usage economics.
+This document does not authorize pricing or allowance changes, API access,
+Star onboarding, infrastructure changes, or production release.

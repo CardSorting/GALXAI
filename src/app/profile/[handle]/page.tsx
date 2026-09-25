@@ -162,7 +162,7 @@ export default async function ParticipantProfilePage({
           <section className={styles.seriesSection} aria-labelledby="star-series-heading">
             <div className={styles.seriesHeader}>
               <h2 id="star-series-heading">Series & Bodies of Work</h2>
-              <p>Finite thematic releases created during bounded lab sessions.</p>
+              <p>Published thematic Series that bring a Star’s creative direction together.</p>
             </div>
             <div className={styles.seriesGrid}>
               {seriesList.map((s) => (
@@ -209,4 +209,3 @@ export default async function ParticipantProfilePage({
     </main>
   );
 }
-

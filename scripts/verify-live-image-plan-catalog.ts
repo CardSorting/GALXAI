@@ -27,8 +27,14 @@ const imagePriceIds: string[] = [];
 for (const plan of IMAGE_PLAN_CATALOG) {
   const product = await stripe.products.retrieve(plan.stripeProductId, {}, requestOptions);
   const price = await readPrice(plan.stripeLookupKey);
-  if (!product.livemode || !product.active || product.name !== plan.name || product.metadata.galxPlan !== plan.planKey || objectId(price.product) !== product.id || price.unit_amount !== plan.monthlyPriceUsd * 100 || price.currency !== 'usd' || price.recurring?.interval !== 'month' || price.recurring.interval_count !== 1 || price.metadata.galxPlan !== plan.planKey || price.metadata.catalogStatus !== 'active' || price.metadata.checkoutEnabled !== 'true') throw new Error(`${plan.id} live contract verification failed.`);
-  image.push({ id: plan.id, monthlyUsd: plan.monthlyPriceUsd, active: true });
+  if (!product.livemode || !product.active || product.name !== plan.name || product.metadata.galxPlan !== plan.planKey ||
+      product.metadata.galxPublicPlan !== plan.publicId || product.metadata.galxSurface !== 'images' ||
+      objectId(price.product) !== product.id || price.unit_amount !== plan.monthlyPriceUsd * 100 || price.currency !== 'usd' ||
+      price.recurring?.interval !== 'month' || price.recurring.interval_count !== 1 || price.metadata.galxPlan !== plan.planKey ||
+      price.metadata.galxPublicPlan !== plan.publicId || price.metadata.catalogStatus !== 'active' || price.metadata.checkoutEnabled !== 'true') {
+    throw new Error(`${plan.publicId} live contract verification failed.`);
+  }
+  image.push({ id: plan.publicId, monthlyUsd: plan.monthlyPriceUsd, active: true });
   imagePriceIds.push(price.id);
 }
 
@@ -43,5 +49,5 @@ const pool = getPostgresPool();
 if (!pool) throw new Error('Database unavailable.');
 const policy = (await pool.query('SELECT mode,revision,paid_price_ids FROM private.galx_sites_fair_policy WHERE singleton')).rows[0];
 await pool.end();
-if (!policy || policy.mode !== 'enforce' || policy.paid_price_ids.length !== 4 || !policy.paid_price_ids.includes(proPrice.id) || imagePriceIds.some(id => !policy.paid_price_ids.includes(id))) throw new Error('Production paid-price allowlist verification failed.');
+if (!policy || policy.mode !== 'enforce' || !policy.paid_price_ids.includes(proPrice.id) || imagePriceIds.some(id => policy.paid_price_ids.includes(id))) throw new Error('Sites fair-use price allowlist must contain the Pro price and exclude all Image plan prices.');
 console.log(JSON.stringify({ mode: 'live', catalogStatus: 'active', pro: { monthlyUsd: PRO_PLAN.monthlyPriceUsd, active: true }, imagePlans: image, activeSubscriptions: activeSubscriptions.length, webhookReady: true, fairPolicy: { mode: policy.mode, revision: Number(policy.revision), paidPriceCount: policy.paid_price_ids.length }, activeTaxRegistrations: tax.data.length, automaticTaxEnabled: false }, null, 2));

@@ -1,13 +1,13 @@
 /**
  * GALX Canonical Star, Series & Work Domain Model
  * 
- * Governing principle:
- * Stars create. Humans discover, follow, save, collect, and share.
+ * Product boundary:
+ * Stars publish. Humans discover publicly and create privately with an eligible
+ * purchased allowance, reserved usage, and successful admission.
  * Persistent identity. Persistent artifacts. Persistent relationships. Ephemeral compute.
- * 
- * Hard Wall invariant:
- * No public-facing user action may directly or indirectly enqueue generative inference.
- * Stars remain browsable, followable, and inspectable when all inference infrastructure is offline.
+ * Public discovery remains browsable, followable, and inspectable when image
+ * inference is unavailable; those discovery actions do not invoke inference.
+ * Publication remains separate: only authorized Star operations publish Works.
  */
 
 export type StarStatus = 'dormant' | 'published' | 'archived';
@@ -77,7 +77,7 @@ export const CANONICAL_STARS: readonly Star[] = [
         title: 'Machines for an Impossible Factory',
         description: 'Brass kinetic assemblies, non-Euclidean gears, and autonomous mechanism studies.',
         status: 'active',
-        initialCadence: 'Finite lab sessions',
+        initialCadence: 'Published series',
       },
       {
         id: 'clockwork-astronomies',
@@ -106,7 +106,7 @@ export const CANONICAL_STARS: readonly Star[] = [
         title: 'Mono-Specimens: Vol. I',
         description: 'High-contrast risograph overlays exploring structural typography and print noise.',
         status: 'active',
-        initialCadence: 'Finite lab sessions',
+        initialCadence: 'Published series',
       },
       {
         id: 'silkscreen-posters',
@@ -135,7 +135,7 @@ export const CANONICAL_STARS: readonly Star[] = [
         title: 'Topographies of the Quiet Drift',
         description: 'Fog-shrouded geological surveys from unmapped celestial outposts.',
         status: 'active',
-        initialCadence: 'Finite lab sessions',
+        initialCadence: 'Published series',
       },
     ],
   },

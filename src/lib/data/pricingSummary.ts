@@ -1,43 +1,30 @@
-import { PRO_PLAN } from '../billing/pro-plan';
 import { PUBLIC_IMAGE_PLAN_OFFERS } from './image-plan-offers';
 
-/** Public image pricing. Provider IDs and operational limits stay server-side. */
-export const FREE_IMAGE_OFFER = {
-  id: 'free',
-  name: 'Start free',
-  audience: 'Try the Image Studio before subscribing.',
+/** Public discovery does not invoke or promise any image inference. */
+export const PUBLIC_DISCOVERY_OFFER = {
+  id: 'discovery',
+  name: 'Explore GALX',
+  audience: 'Browse Stars, published Works, archives, and Series.',
   price: 0,
-  allowance: '5 image outputs once per verified account',
 } as const;
 
 export const IMAGE_PLAN_OFFERS = PUBLIC_IMAGE_PLAN_OFFERS;
 
-export const PRICING_PLANS = [{
-  id: PRO_PLAN.id,
-  name: PRO_PLAN.name,
-  audience: 'For people creating in GALX Images.',
-  monthlyPrice: PRO_PLAN.monthlyPriceUsd,
-  includedSeats: 1,
-  extraSeatPrice: 0,
-  computeCredit: null,
-}] as const;
-
-export const IMAGE_PLAN_FEATURES = [
-  'Create 1–4 images per request',
-  'Choose 1:1, 3:2, 4:3, 16:9, or 9:16',
-  'Standard and HD detail options',
-  'Save to your library, favorite, remix, and download',
-  'Public or private sharing controls, with creations public by default',
-] as const;
+const publishedImageAllowances = IMAGE_PLAN_OFFERS.flatMap(plan => plan.allowance
+  ? [`${plan.name}: ${plan.allowance.monthlyUnits.toLocaleString('en-US')} units per month`]
+  : []);
+const imageWeights = IMAGE_PLAN_OFFERS.find(plan => plan.allowance)?.allowance;
+const allowanceTerms = publishedImageAllowances.length
+  ? `${publishedImageAllowances.join('; ')}. Standard images use ${imageWeights!.standardOutputUnits} unit each; HD images use ${imageWeights!.hdOutputUnits} units each.`
+  : 'Monthly allowances are not currently available.';
 
 export const PRICING_FAQS = [
-  { q: 'What can I try for free?', a: 'Verified accounts receive a one-time allowance of five image outputs. Your prompt stays editable when the allowance is used, and your saved work remains available.' },
-  { q: 'What does GALX Pro cover?', a: 'GALX Pro is the active consumer subscription for ongoing image creation in the Image Studio under published fair-use terms. It includes the same supported creation controls, library, remix, favorites, and downloads.' },
-  { q: 'How are image outputs counted?', a: 'Each generated image counts as one output. A request for four images uses four outputs, so you can choose the batch size that fits your idea.' },
-  { q: 'Can I keep a creation private?', a: 'Yes. Signed-in creators can choose Private mode before generating. Private creations stay in the owner library and are excluded from Explore and the community stream; you can publish one later.' },
-  { q: 'Are video or uploaded-image editing included?', a: 'No. GALX currently publishes image creation only. We do not advertise video or uploaded-image editing until those capabilities are supported end to end.' },
-  { q: 'What are Creator, Studio, and MAX?', a: 'They are monthly Image Studio subscriptions for one account. Each includes the currently supported creation controls, personal library, downloads, and optional Private mode. All plans follow the same published fair-use terms. MAX is an individual plan; account sharing, seats, and shared workspaces are not included.' },
-  { q: 'Is programmable access a public subscription?', a: 'No. General-purpose developer access is not self-service. GALX may authorize bounded private integrations by decision.' },
-  { q: 'How are private integrations managed?', a: 'Private access is explicit, bounded, metered, administered, and revocable. It is not a generally available commercial plan.' },
-  { q: 'How do I activate a plan?', a: 'Choose a plan, complete the secure Stripe checkout, then return to GALX after payment confirmation. Plans renew monthly and can be managed through Stripe.' },
+  { q: 'Can I explore GALX without creating an account?', a: 'Yes. Explore, browse Stars and their published Works, and open Series and archives without invoking image generation.' },
+  { q: 'Can I create images privately?', a: `Yes. Sign in with an eligible purchased image tier and enough remaining allowance. ${allowanceTerms}` },
+  { q: 'What happens when an allowance is used?', a: 'A request that would exceed the available allowance is not started. Browsing and access to existing Works remain available.' },
+  { q: 'Can people publish their generated images?', a: 'No. Human accounts can create privately but cannot publish generated Works to Explore, Star archives, Series, or public feeds.' },
+  { q: 'How does Remix privately work?', a: 'A published Star Work can be used as creative context for a new private draft. Remixing does not change or republish the original Work.' },
+  { q: 'What allowance comes with Workshop, Studio, and MAX?', a: `${allowanceTerms} Checkout availability is shown in your account. GALX Pro is a separate Sites plan and does not include image creation.` },
+  { q: 'Does GALX offer unlimited image generation or public API access?', a: 'No. GALX does not offer unlimited or anonymous image generation, or a public general-purpose inference API.' },
+  { q: 'Are video or uploaded-image editing included?', a: 'No. GALX currently supports the image capabilities shown in the private workspace when that access is available.' },
 ] as const;

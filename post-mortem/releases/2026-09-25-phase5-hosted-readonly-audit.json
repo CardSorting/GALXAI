@@ -1,0 +1,48 @@
+{
+  "classification": "private",
+  "observed_at": "2026-09-25T07:10:02Z",
+  "scope": "Read-only Cloudflare R2 metadata audit using the production account explicitly selected by the repository's default Wrangler configuration, plus one unauthenticated HEAD probe to the configured public asset hostname. No bucket contents, object keys, Supabase rows, secret values, user data, Vercel settings, deployed route configuration, or production workload was read. No production resource was changed.",
+  "checks": {
+    "r2_bucket_inventory": {
+      "status": "OBSERVED",
+      "method": "Wrangler 4.135.0 `r2 bucket list` with the repository production configuration.",
+      "finding": "The R2 account bucket inventory did not contain the private-image bucket declared by the production configuration. The public asset bucket declared by that configuration was present.",
+      "risk": "The configured private image storage binding is not backed by an R2 bucket in the selected production account inventory. This is a critical storage/deployment gap; the audit did not create the bucket or verify which Worker version is deployed."
+    },
+    "public_asset_custom_domain": {
+      "status": "OBSERVED_DISABLED",
+      "method": "Read-only `r2 bucket domain list` for the configured public asset bucket.",
+      "finding": "The configured asset hostname was attached to the bucket but its R2 custom-domain serving status was disabled."
+    },
+    "public_asset_r2_dev_url": {
+      "status": "OBSERVED_DISABLED",
+      "method": "Read-only `r2 bucket dev-url get` for the configured public asset bucket.",
+      "finding": "Direct public access using the R2 development URL was disabled."
+    },
+    "unauthenticated_asset_root": {
+      "status": "OBSERVED_ROOT_ONLY",
+      "method": "Unauthenticated HTTP HEAD to the configured public asset hostname at `/`.",
+      "result": "HTTP 403.",
+      "limit": "A root response does not prove that a known object URL, app proxy, alternate origin, or cached historical URL is private."
+    },
+    "historical_object_and_cache_inventory": {
+      "status": "UNVERIFIED",
+      "finding": "No complete R2 object listing, human-versus-Star provenance reconciliation, historical URL set, copied derivative inventory, or per-object origin/CDN probes were available. The installed Wrangler R2 object command exposes get/put/delete but no object-list operation; no explicit read-only S3 inventory credential or export was supplied."
+    },
+    "hosted_supabase": {
+      "status": "BLOCKED",
+      "finding": "The repository release-audit command reported that GALX_RELEASE_AUDIT_DATABASE_URL was not selected. No remote database target or credentials were inferred; hosted migration history, RLS, grants, and views remain unverified."
+    },
+    "hosted_app_environment_and_routes": {
+      "status": "BLOCKED",
+      "finding": "Production application environment presence, deployed generation-route authorization, live bucket bindings, and deployed Worker/application revision were not inspected in an explicitly selected read-only deployment console."
+    }
+  },
+  "historical_human_asset_status": "UNVERIFIED",
+  "actions_not_taken": [
+    "No bucket was created or deleted; no public-access, custom-domain, lifecycle, CORS, environment, RLS, or grant setting was changed.",
+    "No migration was applied to a hosted database; no application or Worker was deployed; no CDN cache was purged.",
+    "No image-generation request, upload, download of an object, paid creation, or production inference was issued."
+  ],
+  "release_conclusion": "RELEASE NOT READY. The selected account lacks the configured private-image bucket, while historical user-generated object reachability remains UNVERIFIED. Disabled R2 domain toggles and an HTTP 403 on the hostname root are not substitutes for object inventory and per-object origin/cache checks. Hosted Supabase and deployed route/environment gates are also blocked."
+}

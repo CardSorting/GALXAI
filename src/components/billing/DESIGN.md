@@ -157,7 +157,7 @@ Native links support direct entry, browser history and visible keyboard focus. T
 | Destination | Canonical address | Content and main action |
 | --- | --- | --- |
 | Overview | `/billing` | Compact plan status, existing account-credit summary and task links. Refresh checks both the plan and credit summaries. |
-| Plan | `/billing/plan` | Full access, subscription and renewal details; choose or manage Pro as account status permits. |
+| Plan | `/billing/plan` | Separate Sites Pro and private Image Studio status; choose or manage each product only under its own account status. |
 | Credits | `/billing/credits` | Existing account-credit figures and history; private API access is not a public billing plan. |
 | Transactions | `/billing/transactions` | Transaction filter, loaded rows, pagination and Export loaded rows. |
 | Invoices | `/billing/invoices` | Recent invoice rows, individual invoice links and hosted invoice history. |
@@ -171,7 +171,7 @@ Previously issued checkout return URLs and saved Billing section anchors resolve
 
 Overview shows the plan name or Your plan, a short status, any supplied period/end date, and View plan or Review payment linking to Plan. Its Refresh action checks both account credit and the compact plan status; each summary can announce its own refresh or failure while keeping its last checked data.
 
-The full Plan page uses a flat section with a wrapping heading/refresh row, a two-column detail list when space permits, then plan terms and actions. Show the four active one-account offers—GALX Pro $10, Creator $15, Studio $35, and MAX $200 per month—only when the server confirms each offer's checkout availability. Include the published Image Studio experience and fair-use boundaries near the action; MAX is an individual tier and does not include account sharing, seats, or shared workspaces. Private API access is not a public subscription, does not appear as a public plan, and remains an administrator-controlled capability for approved cohorts. Display the current billing-period end or scheduled subscription end only when the server supplies it; complimentary access does not invent a renewal date. Dates are explicitly UTC. The following action states apply to the full Plan page; Overview routes to that page.
+The full Plan page uses a flat section with a wrapping heading/refresh row, a two-column detail list when space permits, then plan terms and actions. Show image-workspace offers—Workshop $15, Studio $35, and MAX $200 per month—only when the server confirms a published bounded allowance and checkout availability; GALX Pro is a separate product and does not grant image creation. Human image Works remain private, and no image plan grants Star publishing permissions. MAX is an individual tier and does not include account sharing, seats, or shared workspaces. Private API access is not a public subscription, does not appear as a public plan, and remains an administrator-controlled capability for approved cohorts. Display the current billing-period end or scheduled subscription end only when the server supplies it; complimentary access does not invent a renewal date. Dates are explicitly UTC. The following action states apply to the full Plan page; Overview routes to that page.
 
 | State | Visible treatment and action |
 | --- | --- |
@@ -206,7 +206,7 @@ On a billing read failure, retain last checked amounts with an explicit stale-da
 
 ### Pricing relationship
 
-Pricing describes the four active Image Studio offers for one account and the current fair-use boundary; private API access and historical credit records remain separate. A choose-plan link opens `/billing/plan?plan=<id>`, where account status determines the next action. Keep the offers within the established divided plan list; they are not a current-plan badge or an account-status summary. Plan status must not be inferred from a wallet balance.
+Pricing describes the three private Image Studio offers for one account; checkout stays closed until each bounded allowance is published. GALX Pro for Sites, private API access, and historical credit records remain separate. A choose-plan link opens `/billing/plan?plan=<id>`, where account status determines the next action. Keep the offers within the established divided plan list; they are not a current-plan badge or an account-status summary. Plan status must not be inferred from a wallet balance.
 
 ## Do's and Don'ts
 

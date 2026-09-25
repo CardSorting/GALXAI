@@ -22,7 +22,7 @@ export default function KeysPage() {
       <div className="rounded-xl border border-white/10 bg-white/[0.03] p-6 text-zinc-300">
         <div className="flex gap-3"><ShieldCheck size={20} className="mt-1 shrink-0 text-emerald-300" aria-hidden="true" /><p>Private access remains bounded, metered, administered, and revocable. GALX products continue using the underlying infrastructure where appropriate.</p></div>
       </div>
-      <Link href="/images" className="w-fit rounded-lg border border-white/20 px-4 py-3 text-sm font-medium hover:bg-white/[0.06]">Return to GALX Images</Link>
+      <Link href="/explore" className="w-fit rounded-lg border border-white/20 px-4 py-3 text-sm font-medium hover:bg-white/[0.06]">Return to Explore</Link>
     </main>
   </div>;
 }

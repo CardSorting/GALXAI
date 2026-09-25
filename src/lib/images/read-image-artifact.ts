@@ -15,13 +15,9 @@ export async function readImageArtifact(token: string, thumbnail = false, reques
   if (!identity) return null;
   const asset = await ImageLibraryRepository.getInstance().getAsset(identity.userId, identity.assetId);
   if (!asset || asset.status !== 'completed') return null;
-  // Public links are intentionally readable without a session. Private links
-  // are owner-scoped even when the opaque URL has been copied or cached.
-  // `unlisted` remains link-addressable by design; it is hidden from feeds,
-  // but only the explicit `private` state (or a legacy non-unlisted false
-  // flag) receives owner-session enforcement.
-  const isPrivate = asset.visibility === 'private' || (asset.visibility !== 'unlisted' && asset.isPublic === false);
-  if (isPrivate) {
+  // Publication is a distinct content class, never a user-selected visibility
+  // toggle. All other Works stay owner-scoped even if a stale link is copied.
+  if (asset.workClass !== 'star_published') {
     if (!request) return null;
     const auth = await GalxAuthEngine.getInstance().resolveAuthIdentity(request);
     if (!auth.authenticated || auth.userId !== identity.userId) return null;

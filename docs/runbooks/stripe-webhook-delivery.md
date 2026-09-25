@@ -52,7 +52,7 @@ retired-Developer billing boundary and
 `npm run test:billing:lifecycle` for provider-state, portal, DTO, URL and
 signature/mode/body checks. Run `npm run test:developer-preview` for the
 independent reviewed-access boundary. Run
-`node scripts/verify-billing-ux.mjs /private/tmp/galx-billing-audit-<validation-directory>`
+`node --import tsx scripts/verify-billing-ux.mjs /private/tmp/galx-billing-audit-<validation-directory>`
 with a production build made by `scripts/build-ci.mjs` without dotenv or live
 credentials. The browser runner uses a synthetic Auth transport, blocks
 external requests, checks desktop/mobile/200% text, all six billing

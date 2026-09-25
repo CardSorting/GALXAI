@@ -2,11 +2,24 @@
 
 <!-- docs-scope: current-guide -->
 
-Authority: [ADR 0129](../adr/0129-public-image-artifacts-and-verified-identity.md).
+Current product authority: [ADR 0160](../adr/0160-private-human-creation-star-publishing.md).
+Artifact normalization and verified identity remain governed by [ADR 0129](../adr/0129-public-image-artifacts-and-verified-identity.md).
 
-Public documentation describes capability, not implementation. The public API
-defaults to a binary image. JSON compatibility uses explicit field projection.
-This document is an internal maintainer record, not public site content.
+Public documentation describes capability, not implementation. The application
+creation route is not a public inference API; its responses use explicit field
+projection. Image HTTP results default to sanitized binary artifacts, while
+explicit JSON response contracts use allowlisted DTOs. This is an internal
+maintainer record, not public site content.
+
+The Inference Boundary is independent of publication: public discovery does not
+invoke image inference; human-triggered inference requires verified
+authentication, an eligible purchased tier, an available reserved allowance,
+and successful admission before dispatch. If allowance configuration is
+missing, creation and checkout fail closed. The Publishing Boundary reserves
+public Works for authorized Stars. Human-generated and remixed Works are
+non-publishable owner-scoped records, not private rows waiting for a visibility
+toggle. Public discovery projections include only eligible published Star
+Works.
 
 Community discovery is part of the public image boundary. Star profiles use the
 canonical `/profile/<handle>` route and `/api/community/participants/<handle>`
@@ -30,15 +43,12 @@ normalized before they become links, avatars accept only site-relative or
 HTTPS image URLs, and malformed gallery cursors are rejected with a generic 400
 response.
 
-Image publication is a separate creator-owned choice. New generations default
-to `public` for the existing discovery experience, while signed-in Image Studio
-creators can choose `private` before dispatch. Private rows are excluded by the
-Explore and Star-profile feed views and remain readable only through an
-owner-authenticated library or artifact request. Publishing later uses the
-existing owner-scoped visibility mutation; no billing tier or entitlement is
-inferred from the setting. The user-facing label may say “Private mode” or
-“Stealth”, but public documentation should describe the observable outcome,
-not a provider implementation.
+Human creation always targets the private non-publishable class. No request
+field, signed-in account, paid tier, UI action, or legacy visibility mutation
+can promote it to a public Work. A Star Work may expose “Remix privately”; the
+remix uses the same private entitlement and reservation pipeline and remains
+visible only to its owner. The original Star Work and its public archive remain
+unchanged.
 
 Public profile image inspection is a viewport-owned dialog. It renders above the
 application shell, prevents background scrolling while open, returns focus on
@@ -58,8 +68,10 @@ opaque capability and re-encode stored images again, including historical assets
 For a private row, the capability is additionally checked against the current
 owner session before every cache lookup; copying a private URL to another
 account or an anonymous browser returns the same generic not-found category.
-An `unlisted` row remains addressable through its opaque capability while staying
-out of discovery feeds.
+Historic `unlisted` or human-public rows do not establish a current publishing
+capability; the current data boundary classifies human Works as private and
+Star Works as published. Historical origin controls and cached copies require
+separate verification.
 The exact thumbnail child is included in the public-product route policy; it requires no developer-preview grant and arbitrary child routes are not exempted. The thumbnail child route uses the same capability, checks the current owner-scoped row before every cache hit, and emits a fresh WebP preview inside 512×512. Storage/processing work has explicit admission, byte and time bounds. [Large-library guidance](image-library-scale.md) owns the precise limits and concurrent-read semantics.
 
 Public errors use stable categories and opaque request IDs. Proven capacity rejection before dispatch (local admission, or a typed relay 503 with `not_accepted` and an allowlisted capacity/readiness code) persists only the allowlisted `generation_not_started` category and returns 503 with a short Retry-After. The same category appears in failed snapshots; arbitrary receipt diagnostics are never projected. Older/generic failed receipts remain uncertain. Middleware no longer
@@ -70,7 +82,7 @@ public projection. Logs omit arbitrary provider message payloads, which may quot
 user secrets, while keeping categories, status and call sites. Existing operational
 metrics retain capacity, model, attempt and timing information privately.
 
-Free sync/async creation passes the aggregate admission gate in [quota operations](FREE_GENERATION_QUOTA.md). It returns only `free_generation_paused` or `free_generation_busy` with 429 and the existing retry veto; private policy reasons and counters never appear. Receipt claim rechecks a pause; paid requests do not wait on that free-policy lock. Cancellation/non-start refunds customer quota but never replenishes the aggregate attempt budget.
+No Image request uses the retired free-creation gate. Image allowance admission and lifecycle accounting follow the purchased private-creation contract below. The separate free Sites allowance and aggregate Sites limits remain in their own product policy and do not authorize image inference.
 
 
 ## Capability availability
@@ -79,15 +91,36 @@ Free sync/async creation passes the aggregate admission gate in [quota operation
 
 The controller’s authenticated `GET /v1/images/availability?model=...` projects one boolean from fresh image capability. It performs no paid probe, reservation, generation or quota mutation. Availability is advisory; authoritative admission still runs for every generation. The isolated Premium runtime reads its own in-process account engines directly, without an internal HTTP availability endpoint or provider probe. It reports true for fresh successful image evidence, false for unavailable execution or fresh negative evidence, and null when evidence is absent or expired. The application maps null to unknown. Chat inventory cannot establish image permission. A new explicit generation still needs central admission; an unknown status never creates a background probe. See [isolated service operations](../runbooks/relay-pool-services.md) for configuration and separate first-image qualification.
 
-Premium image results use the same owned storage, manifest and durable library flush as the legacy image path before receipt completion. Transport success alone is insufficient; completion validates the stored asset owner. The image-only switch changes neither account entry nor free admission nor text/Sites routing. The routing regression verifies that image dispatch skips legacy account selection while preserving sanitized storage and library persistence.
+Premium image results use owned storage, a manifest and a durable library flush before receipt completion. Transport success alone is insufficient; completion validates the stored asset owner. The private creation path additionally requires a purchased image allowance reservation committed with its durable receipt before a request can be claimed or dispatched. No legacy/free Image balance authorizes new human inference. Text and Sites admission remain governed by their independent product contracts.
 
-## Free generation admission
+## Purchased private-creation admission
 
-[Quota operations](FREE_GENERATION_QUOTA.md) owns the one-time five-image account allowance. New free requests, synchronous and asynchronous, reserve requested quantity atomically with durable receipt creation. Saved retries reuse their original state without another deduction, including cancellation and plan changes. Pro retains existing image usage/admission rules. Confirmed capacity non-start and queued cancellation release deductions atomically; ambiguous generation and storage failures retain them. Grant reads expire never-claimed queued work safely. Public 402 quota errors stay allowlisted and generic. The shared header/composer provider obtains only current plan, remaining customer counts and allowlisted availability; no grant/payment/execution records reach the browser.
+[Quota operations](FREE_GENERATION_QUOTA.md) owns the retired one-time free Image balance as historical accounting only; it cannot authorize new image work. Human synchronous and asynchronous requests require verified account identity, an eligible purchased Image entitlement, sufficient current allowance, a durable reservation and successful admission before dispatch. The reservation is serialized against the account's allowance period so concurrent requests cannot exceed the allocation. Launch values are maintained in the canonical typed configuration; missing or invalid configuration, entitlement, allowance, storage setup, or admission rejects before dispatch.
+
+Saved retries reuse the original durable receipt and reservation rather than reserving twice. Confirmed pre-dispatch rejection, queued cancellation, and queued expiry before claim may release a reservation; successful completion settles according to the established lifecycle; ambiguous generation or storage outcomes after claim remain reserved until authoritative reconciliation. Never clear an uncertain reservation based only on age or add a free automatic retry. Public errors remain generic and allowlisted. The browser allowance DTO exposes only the plan, usable remaining allowance, renewal information and supported product state; billing IDs, grants, payment evidence and execution records stay server-side.
 
 ## Workspace entry
 
-`/images` requires a verified account session before the studio is rendered. Middleware checks workspace paths before asset exemptions; the server page repeats verification and is dynamically rendered. `/library` also remains session protected. Missing, malformed, forged or expired-without-refresh sessions cannot render the workspace. Anonymous Supabase users are denied. Refresh uses the Auth service and retains response cookies; temporary middleware verification failures return a generic 503. The independent server page gate withholds studio content and renders authored recovery on an expected outage, including when streaming has already committed HTTP 200. Manual retry fetches fresh server state; unexpected failures stay within the Images route boundary. No raw diagnostics or automatic retry timers appear in these recovery views. Pages and denials use private, no-store headers and noindex. This account gate is independent from developer-preview approval, API ownership and expiring artifact capabilities; published artifacts and the three studio example images keep their existing delivery contracts.
+`/images` redirects to public Explore. `/images/create`, `/images/library`, and
+`/images/favorites` require a verified account session; middleware and each
+server page guard independently. Missing, malformed, forged, anonymous or
+revoked sessions cannot render the workspace. Refresh uses the Auth service and
+retains response cookies; temporary verification failures return a generic
+unavailable state. Workspace pages and denials are private/no-store and
+noindex. Public discovery routes remain available without an account or image
+service readiness. The private studio never hydrates from public demonstration
+content or treats a public Star Work as a user's saved private artifact; a
+deliberate remix action enters the authenticated, metered private pipeline.
+
+Application artifact URLs are not sufficient proof of storage privacy. New
+human objects use a distinct private image storage class, but historical human
+objects were stored alongside publicly served assets. Verify that the actual
+object origin rejects unauthenticated direct requests for private keys and
+historical objects, including cached variants, and migrate/protect historical
+objects before claiming all private artifacts are inaccessible outside the
+owner-gated application route. Do not treat unguessability, owner-scoped
+database rows, or `private, no-store` response metadata as origin access
+control.
 
 ## Verification
 
@@ -121,8 +154,9 @@ private repository material; they must never be copied into site content.
 
 ## Adversarial review and operational limits
 
-Customer outputs should reveal only images, public request state, public model
-aliases, user-owned library fields and generic error categories. Public download
+Customer outputs should reveal only sanitized images, customer-level request
+state, user-owned library fields and generic error categories. Model identity
+and execution selection remain server-side. Public download
 URLs reveal neither storage paths nor tenant identifiers in plaintext. Unknown
 internal result fields are not serialized. Images are decoded and freshly encoded,
 so EXIF, XMP, software labels and embedded generation metadata are discarded.

@@ -59,15 +59,9 @@ export async function releaseFreeGeneration(db: Pick<PoolClient, 'query'>, owner
   await db.query('UPDATE private.galx_free_generation_usage SET released=true,capacity_settled=true WHERE user_id=$1 AND kind=$2 AND operation_id=$3 AND NOT released', [owner,kind,operation]);
 }
 export async function readFreeGenerationQuota(pool: Pick<Pool,'connect'>, owner: string): Promise<FreeGenerationQuota> {
-  const db = await pool.connect();
-  try {
-    await db.query('BEGIN');
-    await db.query("SET LOCAL lock_timeout='3s'; SET LOCAL statement_timeout='5s'");
-    const row = await grant(db,owner);
-    const usage = (await db.query('SELECT kind,sum(quantity)::int AS used FROM private.galx_free_generation_usage WHERE user_id=$1 AND NOT released GROUP BY kind', [owner])).rows;
-    await db.query('COMMIT');
-    return { sites: 0,
-      images: row ? Math.max(0,5-(usage.find(r=>r.kind==='image')?.used || 0)) : 0,
-      siteTurns: 0 };
-  } catch(error) { await db.query('ROLLBACK'); throw error; } finally { db.release(); }
+  void pool;
+  void owner;
+  // The one-time free image allocation is retired. Keep its ledger private for
+  // historical reconciliation; do not create grants or expose remaining images.
+  return { sites: 0, images: 0, siteTurns: 0 };
 }

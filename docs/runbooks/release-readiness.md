@@ -29,3 +29,9 @@ Use the component runbook's compatible containment/rollback path. Preserve durab
 ## Verification and evidence
 
 Link actual command results, environment, revision, deployment identifiers, dated acceptance and limitations. The [incident templates](../../post-mortem/templates/incident.md) capture operational evidence. Local checks do not establish live capacity, successful remote CI or continued availability.
+
+`npm run release:certify` certifies the local release candidate only. It may
+report the candidate ready while separately retaining blocked hosted/deployment
+evidence; this is not a production deploy receipt. Keep the exact-target
+database precheck, environment/storage provisioning, deployment and live smoke
+acceptance as separate operator prerequisites.

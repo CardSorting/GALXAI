@@ -19,6 +19,12 @@ import { BroccoliNaturalQueryParser } from '../../core/broccolidb/broccolidb-nat
 import { BroccoliImageLibraryBuffer } from '../../core/broccolidb/BroccoliImageLibraryBuffer';
 import type { DbAggregateQuery, DbAggregateResult } from '../../core/broccolidb/broccolidb.contracts';
 import { GalxUnifiedR2StorageManager, buildUserSessionImagePath } from '../../core/storage/GalxUnifiedR2StorageManager';
+import { imageDownloadUrl } from '../../lib/security/image-download-url';
+import { sanitizeImageArtifact } from '../../lib/security/image-artifact';
+
+export function imageR2BucketForKey(key: string): 'images' | 'assets' {
+  return /^(?:private|published)\//.test(key) ? 'images' : 'assets';
+}
 
 export interface R2UploadResult {
   assetId: string;
@@ -39,14 +45,14 @@ export interface UserSessionImageParams {
   generationId?: string;
   sessionId?: string;
   imageId?: string;
-  data: Buffer | Uint8Array | string; // Buffer, Uint8Array, base64 string, data URL, or remote http(s) URL
+  data: Buffer | Uint8Array | string; // Local bytes, base64 string, or a base64 data URL; remote URLs are rejected.
   contentType?: string;
   prompt?: string;
   revisedPrompt?: string;
   model?: string;
   size?: string;
   quality?: string;
-  visibility?: 'public' | 'unlisted' | 'private';
+  workClass?: 'private' | 'star_published';
   metadata?: Record<string, string>;
   /** Coalesce manifest writes when the caller uploads several images in one generation. */
   deferManifestUpdate?: boolean;
@@ -164,15 +170,9 @@ export class GalxR2AssetAdapter {
       return { buffer: Buffer.from(data), contentType: fallbackContentType };
     }
     if (typeof data === 'string') {
-      // Remote HTTP/HTTPS URL
+      // Never fetch an upstream- or caller-controlled image URL.
       if (data.startsWith('http://') || data.startsWith('https://')) {
-        const resp = await fetch(data, { signal: AbortSignal.timeout(15000) });
-        if (!resp.ok) {
-          throw new Error(`Failed to fetch image from remote URL (${resp.status}): ${data}`);
-        }
-        const ab = await resp.arrayBuffer();
-        const detectedType = resp.headers.get('content-type') || fallbackContentType;
-        return { buffer: Buffer.from(ab), contentType: detectedType };
+        throw new Error('Remote image URLs are not accepted');
       }
       // Data URI: data:image/png;base64,...
       if (data.startsWith('data:')) {
@@ -193,26 +193,28 @@ export class GalxR2AssetAdapter {
     throw new Error('Unsupported image data payload format');
   }
 
-  /**
-   * Stores a visual synthesis generation partitioned by user and session into Cloudflare R2 (`galxai-assets`).
-   * Path: users/{userId}/sessions/{sessionId}/images/{imageId}.png
-   */
+  /** Store re-encoded image bytes in the dedicated non-public image bucket. */
   async uploadUserSessionImage(params: UserSessionImageParams): Promise<UserSessionImageResult> {
-    const { buffer, contentType } = await this.resolveDataPayload(params.data, params.contentType || 'image/png');
+    if (!this.r2Manager.isPrivateImageStorageConfigured()) throw new Error('Private image storage unavailable');
+    const source = await this.resolveDataPayload(params.data, params.contentType || 'image/png');
+    const sanitized = await sanitizeImageArtifact(source.buffer);
+    const buffer = sanitized.bytes;
+    const contentType = sanitized.contentType;
     const ext = contentType.includes('webp') ? 'webp' : contentType.includes('jpeg') || contentType.includes('jpg') ? 'jpg' : 'png';
     const userId = params.userId.trim();
     if (!userId || userId === 'anonymous' || userId === 'anonymous_user') {
       throw new Error('Authenticated userId is required for user image library persistence');
     }
     const sessionId = (params.sessionId || 'default').trim();
-    const imageId = params.imageId || `img_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
+    const imageId = params.imageId || `img_${crypto.randomUUID().replace(/-/g, '')}`;
 
-    const key = buildUserSessionImagePath({
+    const objectPath = buildUserSessionImagePath({
       userId,
       sessionId,
       imageId,
       extension: ext
     });
+    const key = `${params.workClass === 'star_published' ? 'published' : 'private'}/${objectPath}`;
 
     const r2Result = await this.r2Manager.putObject({
       bucket: 'images',
@@ -229,7 +231,7 @@ export class GalxR2AssetAdapter {
       assetId: imageId,
       userId,
       sessionId,
-      publicUrl: r2Result.publicUrl,
+      publicUrl: imageDownloadUrl(userId, imageId),
       sizeBytes: r2Result.sizeBytes,
       contentType,
       sha256: r2Result.sha256,
@@ -262,7 +264,7 @@ export class GalxR2AssetAdapter {
         aspectRatio,
         dimensions: params.size || '1024x1024',
         quality: params.quality || 'standard',
-        publicUrl: r2Result.publicUrl,
+        publicUrl: imageDownloadUrl(userId, imageId),
         r2Key: key,
         contentType,
         sizeBytes: r2Result.sizeBytes,
@@ -272,8 +274,7 @@ export class GalxR2AssetAdapter {
         latencyMs: params.metadata?.latency_ms ? parseInt(params.metadata.latency_ms, 10) : 0,
         costUsd: params.metadata?.cost_usd ? parseFloat(params.metadata.cost_usd) : 0,
         isFavorite: false,
-        isPublic: params.visibility === 'public' || !params.visibility,
-        visibility: params.visibility || 'public',
+        workClass: params.workClass || 'private',
         tags: params.metadata?.tags ? params.metadata.tags.split(',') : [],
         metadata: params.metadata || {},
         createdAt: new Date().toISOString(),
@@ -296,48 +297,6 @@ export class GalxR2AssetAdapter {
   }
 
   /**
-   * Legacy uploadAsset adapter mapping for backward compatibility.
-   */
-  async uploadAsset(params: {
-    data: Buffer | Uint8Array | string;
-    contentType: string;
-    folder?: string;
-    customKey?: string;
-    metadata?: Record<string, string>;
-  }): Promise<R2UploadResult> {
-    const assetId = `asset_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-    const folder = params.folder || 'generations';
-    const key = params.customKey || `${folder}/${assetId}.${params.contentType.split('/')[1] || 'bin'}`;
-
-    const { buffer, contentType } = await this.resolveDataPayload(params.data, params.contentType);
-
-    const r2Result = await this.r2Manager.putObject({
-      bucket: 'assets',
-      key,
-      data: buffer,
-      contentType,
-      metadata: params.metadata,
-      cacheControl: 'public, max-age=31536000, immutable'
-    });
-
-    const result: UserSessionImageResult = {
-      assetId,
-      userId: 'legacy_anonymous',
-      sessionId: 'default',
-      publicUrl: r2Result.publicUrl,
-      sizeBytes: r2Result.sizeBytes,
-      contentType,
-      sha256: r2Result.sha256,
-      bucket: r2Result.bucket,
-      key,
-      uploadedAtMs: Date.now(),
-    };
-
-    this.assetCache.put(assetId, result);
-    return result;
-  }
-
-  /**
    * Retrieves asset metadata from the fast in-memory BroccoliDB index.
    */
   getAsset(assetId: string): UserSessionImageResult | null {
@@ -353,18 +312,22 @@ export class GalxR2AssetAdapter {
 
     // A bounded metadata cache cannot represent a complete storage listing.
     const prefix = `users/${cleanUserId.replace(/[^a-zA-Z0-9_-]/g, '_')}/sessions/${cleanSessionId.replace(/[^a-zA-Z0-9_-]/g, '_')}/images/`;
-    const listed = await this.r2Manager.listObjects({ bucket: 'images', prefix, maxKeys: 100 });
-    const { publicDomain, bucketName } = this.r2Manager.resolveBucket('images');
+    const [privateObjects, legacyObjects] = await Promise.all([
+      this.r2Manager.isPrivateImageStorageConfigured()
+        ? this.r2Manager.listObjects({ bucket: 'images', prefix: `private/${prefix}`, maxKeys: 100 })
+        : Promise.resolve({ objects: [] as any[] }),
+      this.r2Manager.listObjects({ bucket: 'assets', prefix, maxKeys: 100 }),
+    ]);
 
-    return listed.objects.map((obj) => ({
+    return [...privateObjects.objects, ...legacyObjects.objects].map((obj) => ({
       assetId: obj.key.split('/').pop()?.replace(/\.[^.]+$/, '') || obj.key,
       userId: cleanUserId,
       sessionId: cleanSessionId,
-      publicUrl: `${publicDomain}/${obj.key}`,
+      publicUrl: imageDownloadUrl(cleanUserId, obj.key.split('/').pop()?.replace(/\.[^.]+$/, '') || obj.key),
       sizeBytes: obj.sizeBytes,
       contentType: obj.key.endsWith('.webp') ? 'image/webp' : 'image/png',
       sha256: obj.etag.replace(/"/g, ''),
-      bucket: bucketName,
+      bucket: this.r2Manager.resolveBucket(imageR2BucketForKey(obj.key)).bucketName,
       key: obj.key,
       uploadedAtMs: new Date(obj.lastModified).getTime()
     }));
@@ -375,28 +338,28 @@ export class GalxR2AssetAdapter {
    */
   async listUserImages(userId: string, options?: { limit?: number; continuationToken?: string }): Promise<{ images: UserSessionImageResult[]; nextContinuationToken?: string }> {
     const cleanUserId = userId.trim();
+    if (!this.r2Manager.isPrivateImageStorageConfigured()) return { images: [] };
     const limit = options?.limit || 50;
 
-    const prefix = `users/${cleanUserId.replace(/[^a-zA-Z0-9_-]/g, '_')}/`;
+    const prefix = `private/users/${cleanUserId.replace(/[^a-zA-Z0-9_-]/g, '_')}/`;
     const listed = await this.r2Manager.listObjects({
       bucket: 'images',
       prefix,
       maxKeys: limit,
       continuationToken: options?.continuationToken
     });
-    const { publicDomain, bucketName } = this.r2Manager.resolveBucket('images');
 
     const mapped = listed.objects
       .filter(o => !o.key.endsWith('manifest.json'))
       .map((obj) => ({
         assetId: obj.key.split('/').pop()?.replace(/\.[^.]+$/, '') || obj.key,
         userId: cleanUserId,
-        sessionId: obj.key.split('/')[3] || 'default',
-        publicUrl: `${publicDomain}/${obj.key}`,
+        sessionId: obj.key.split('/')[4] || 'default',
+        publicUrl: imageDownloadUrl(cleanUserId, obj.key.split('/').pop()?.replace(/\.[^.]+$/, '') || obj.key),
         sizeBytes: obj.sizeBytes,
         contentType: obj.key.endsWith('.webp') ? 'image/webp' : 'image/png',
         sha256: obj.etag.replace(/"/g, ''),
-        bucket: bucketName,
+        bucket: this.r2Manager.resolveBucket('images').bucketName,
         key: obj.key,
         uploadedAtMs: new Date(obj.lastModified).getTime()
       }));
@@ -415,7 +378,12 @@ export class GalxR2AssetAdapter {
     const cleanSessionId = sessionId.trim();
     const prefix = `users/${cleanUserId.replace(/[^a-zA-Z0-9_-]/g, '_')}/sessions/${cleanSessionId.replace(/[^a-zA-Z0-9_-]/g, '_')}/`;
 
-    const res = await this.r2Manager.deletePrefix('images', prefix);
+    const [legacy, privateResult] = await Promise.all([
+      this.r2Manager.deletePrefix('assets', prefix),
+      this.r2Manager.isPrivateImageStorageConfigured()
+        ? this.r2Manager.deletePrefix('images', `private/${prefix}`)
+        : Promise.resolve({ deleted: [] as string[], errors: [] as string[] }),
+    ]);
 
     // Evict from in-memory BroccoliDB index
     const records = this.assetTable.getAll().filter(
@@ -425,19 +393,22 @@ export class GalxR2AssetAdapter {
       this.assetCache.delete(r.assetId);
     }
 
-    return { deletedCount: res.deleted.length };
+    return { deletedCount: legacy.deleted.length + privateResult.deleted.length };
   }
 
   /**
    * Reads the session visual manifest from R2.
    */
   async getSessionManifest(userId: string, sessionId: string): Promise<SessionImageManifest | null> {
-    const key = `users/${userId.replace(/[^a-zA-Z0-9_-]/g, '_')}/sessions/${sessionId.replace(/[^a-zA-Z0-9_-]/g, '_')}/manifest.json`;
+    const key = `private/users/${userId.replace(/[^a-zA-Z0-9_-]/g, '_')}/sessions/${sessionId.replace(/[^a-zA-Z0-9_-]/g, '_')}/manifest.json`;
     try {
       const obj = await this.r2Manager.getObject('images', key);
       return JSON.parse(obj.data.toString('utf-8')) as SessionImageManifest;
     } catch {
-      return null;
+      try {
+        const legacy = await this.r2Manager.getObject('assets', key.replace(/^private\//, ''));
+        return JSON.parse(legacy.data.toString('utf-8')) as SessionImageManifest;
+      } catch { return null; }
     }
   }
 
@@ -446,7 +417,7 @@ export class GalxR2AssetAdapter {
    */
   async updateSessionManifestBatch(userId: string, sessionId: string, newImages: UserSessionImageResult[]): Promise<void> {
     if (newImages.length === 0) return;
-    const manifestKey = `users/${userId.replace(/[^a-zA-Z0-9_-]/g, '_')}/sessions/${sessionId.replace(/[^a-zA-Z0-9_-]/g, '_')}/manifest.json`;
+    const manifestKey = `private/users/${userId.replace(/[^a-zA-Z0-9_-]/g, '_')}/sessions/${sessionId.replace(/[^a-zA-Z0-9_-]/g, '_')}/manifest.json`;
     let manifest: SessionImageManifest;
 
     try {
@@ -498,15 +469,10 @@ export class GalxR2AssetAdapter {
    * Retrieves raw asset data from Cloudflare R2.
    */
   async getAssetBuffer(key: string): Promise<Buffer> {
-    const res = await this.r2Manager.getObject('images', key, true, { maxBytes: 32 * 1024 * 1024, signal: AbortSignal.timeout(15_000) });
+    const bucket = imageR2BucketForKey(key);
+    if (bucket === 'images' && !this.r2Manager.isPrivateImageStorageConfigured()) throw new Error('Private image storage unavailable');
+    const res = await this.r2Manager.getObject(bucket, key, true, { maxBytes: 32 * 1024 * 1024, signal: AbortSignal.timeout(15_000) });
     return res.data;
-  }
-
-  /**
-   * Generates a presigned download URL for direct browser streaming.
-   */
-  getPresignedAssetUrl(key: string, expiresInSeconds = 3600): string {
-    return this.r2Manager.getPresignedDownloadUrl('images', key, expiresInSeconds);
   }
 
   /** Drains the coalesced image metadata batch at the request boundary. */

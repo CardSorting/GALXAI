@@ -59,7 +59,7 @@ test('failed callbacks preserve safe destinations and reach the form even with a
     ['error=PRIVATE_SENTINEL&error_description=PRIVATE_SENTINEL&next=//evil.test', 'auth_cancelled'],
     ['next=/login', 'no_auth_code_provided'],
     ['code=one&code=two', 'no_auth_code_provided'],
-  ]) await clean(await GET(request(query)), `/login?error=${notice}&reauth=1`);
+  ]) await clean(await GET(request(query)), `/login?next=/explore&error=${notice}&reauth=1`);
   assert.equal(calls, 1, 'invalid callback parameters do not exchange a code');
 });
 
@@ -74,8 +74,8 @@ test('callback exchange has one overall deadline, honors cancellation and does n
       controller.abort();
     });
   });
-  await clean(await GET(request('code=fixture-code')), '/login?error=auth_exchange_failed&reauth=1');
+  await clean(await GET(request('code=fixture-code')), '/login?next=/explore&error=auth_exchange_failed&reauth=1');
   assert.equal(calls, 1);
-  await clean(await GET(request('code=fixture-code')), '/login?error=auth_exchange_failed&reauth=1');
+  await clean(await GET(request('code=fixture-code')), '/login?next=/explore&error=auth_exchange_failed&reauth=1');
   assert.equal(calls, 1, 'already cancelled exchange cannot start another request');
 });

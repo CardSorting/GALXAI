@@ -1,0 +1,312 @@
+{
+  "classification": "private",
+  "observed_at": "2026-09-25T06:34:02Z",
+  "scope": "Semantic review of all ten stale knowledge domains after the Phase 3/4 private-creation and Star-publishing changes; review evidence is separate from runtime and hosted acceptance.",
+  "production_changes": false,
+  "fingerprint_method": "The explicit docs:review command records hashes for every registered source and complete guide in each domain. Those hashes prove reviewed inventory freshness, not that every inventoried source was read line by line. The canonical guide bodies and changed source contracts listed per domain were semantically inspected.",
+  "reviewed_domains": {
+    "knowledge": {
+      "canonical_guides_inspected": [
+        "PRODUCT.md",
+        "README.md",
+        "docs/API_BASE_URL.md",
+        "docs/API_REFERENCE.md",
+        "docs/DEVELOPER_CLIENT_SDK.md",
+        "docs/GTM_STRATEGY.md",
+        "docs/PRODUCT_SURFACE_STRATEGY.md",
+        "docs/QUICKSTART.md",
+        "docs/WALLET_AND_BILLING_STRATEGY.md",
+        "docs/adr/0160-private-human-creation-star-publishing.md",
+        "docs/reference/stars.md",
+        "docs/DOCUMENTATION_POLICY.md",
+        "docs/how-to/change-with-documentation.md"
+      ],
+      "source_contracts_inspected": [
+        "docs/knowledge/registry.json",
+        "scripts/docs-kb.py",
+        "scripts/verify-post-mortem.py",
+        "scripts/test-public-information-boundary.ts",
+        "src/app/docs/page.tsx",
+        "src/app/docs/api-reference/page.tsx"
+      ],
+      "findings": [
+        "Product/API pages describe discovery, private human creation, and Star-only public publishing without offering public API access or exposing implementation details.",
+        "The README's former Images-first positioning was stale; it now identifies GALX as a Star publishing network with private human creation.",
+        "The public capability statement remains discovery-first. No pricing or allowance values were introduced."
+      ],
+      "mapped_checks": ["npm run docs:audit", "npm run test:docs"]
+    },
+    "images": {
+      "canonical_guides_inspected": [
+        "docs/QUEUE_SPECIFICATION.md",
+        "docs/maintainers/image-public-boundary.md",
+        "post-mortem/runbooks/image-generation.md",
+        "docs/maintainers/image-library-scale.md",
+        "docs/reference/stars.md",
+        "docs/maintainers/readable-urls.md",
+        "docs/maintainers/FREE_GENERATION_QUOTA.md",
+        "docs/maintainers/private-image-accounting.md",
+        "docs/runbooks/private-image-release-audit.md",
+        "docs/maintainers/image-studio-review.md"
+      ],
+      "source_contracts_inspected": [
+        "src/lib/images/request-repository.ts",
+        "src/lib/images/request-service.ts",
+        "src/lib/images/navigation.ts",
+        "src/lib/security/public-image-http.ts",
+        "src/lib/supabase/repositories/ImageLibraryRepository.ts",
+        "src/lib/security/public-image-record.ts",
+        "scripts/test-public-information-boundary.ts",
+        "supabase/migrations/20260924020000_private_human_works_star_publication_boundary.sql",
+        "supabase/migrations/20260924030000_private_image_allowance_accounting.sql"
+      ],
+      "findings": [
+        "Public Works and owner-private Works remain separate classes; library and public projections describe the class boundary rather than a user visibility toggle.",
+        "The old guest draft/sign-in checkpoint and the former /images library path were explicitly clarified as historical; current private routes and public Explore destination now match source.",
+        "The audit still treats historical storage/CDN reachability and hosted SQL behavior as unverified until external/runtime checks run."
+      ],
+      "mapped_checks": ["npm run test:image:security", "npm run test:image:db", "npm run test:image:scale", "npm run test:image:library-db", "npm run test:relay:image", "npm run test:free-quota", "npm run test:free-quota:db"]
+    },
+    "access": {
+      "canonical_guides_inspected": [
+        "docs/operations/workspace-auth.md",
+        "docs/operations/developer-preview.md",
+        "docs/operations/preview-admin.md",
+        "docs/SECURITY_POSTURE_AND_THREAT_MODEL.md",
+        "docs/adr/0147-verified-account-and-session-authority.md",
+        "docs/maintainers/readable-urls.md",
+        "docs/maintainers/FREE_GENERATION_QUOTA.md",
+        "docs/SECURITY.md"
+      ],
+      "source_contracts_inspected": [
+        "src/lib/security/workspace-policy.ts",
+        "src/lib/security/preview-policy.ts",
+        "src/middleware.ts",
+        "src/app/signup/page.tsx",
+        "src/app/api/billing/image-allowance/route.ts",
+        "scripts/test-auth-entry.ts",
+        "scripts/test-workspace-auth.ts"
+      ],
+      "findings": [
+        "Public discovery exemptions do not grant private-workspace, owner, entitlement, administrator, or Star-publishing authority.",
+        "Private Image Studio routes require verified account sessions; the legacy /images root resolves to public discovery.",
+        "Legacy free Image balance is not an authorization source for image inference; separate Sites policy remains out of scope for Image entitlement."
+      ],
+      "mapped_checks": ["npm run test:preview-admin", "npm run test:image:security", "npm run test:auth:sessions", "npm run test:free-quota", "npm run test:free-quota:db"]
+    },
+    "sites": {
+      "canonical_guides_inspected": [
+        "docs/maintainers/SITES_OPERATIONS.md",
+        "docs/maintainers/SITES_FAIR_USAGE.md",
+        "docs/maintainers/SITES_WORKSPACE.md",
+        "docs/maintainers/SITES_DOMAINS.md",
+        "docs/adr/0148-complimentary-pro-access.md",
+        "docs/maintainers/FREE_GENERATION_QUOTA.md",
+        "docs/adr/0149-one-time-free-generation.md",
+        "docs/SITES_WORKSPACE.md",
+        "docs/SITES_CONTENT.md",
+        "docs/adr/0150-free-generation-admission-gate.md",
+        "docs/API_BASE_URL.md"
+      ],
+      "source_contracts_inspected": [
+        "src/components/sites/SitesWorkspace.tsx",
+        "src/lib/sites/paid-access.ts",
+        "src/lib/billing/free-generation-contract.ts",
+        "src/lib/billing/free-generation-gate.ts",
+        "src/lib/billing/generation-quota-route.ts",
+        "scripts/test-sites-fair.ts"
+      ],
+      "findings": [
+        "The legacy Sites authoring route is retired and redirects; retained Sites billing/fair-use operations remain separate from Image Studio private allowance.",
+        "The Site allowance is not a human Image inference entitlement and does not authorize Star publishing.",
+        "Historical Sites workflow copy is marked as retired/reference material; no Sites policy was changed by the image product decision."
+      ],
+      "mapped_checks": ["npm run test:sites:fair", "npm run test:sites:workspace", "npm run test:sites:conversation", "npm run test:sites:fair:db", "npm run test:sites:workspace:db", "npm run test:sites:plans:db", "npm run test:free-quota", "npm run test:free-quota:db"]
+    },
+    "relay": {
+      "canonical_guides_inspected": [
+        "docs/QUEUE_SPECIFICATION.md",
+        "docs/ARCHITECTURE.md",
+        "docs/FEDERATION_STRATEGY.md",
+        "docs/RELAY_VNEXT_RUNBOOK.md",
+        "docs/INFERENCE_PIPELINE_VERIFICATION.md",
+        "docs/RESILIENCE_AND_DISASTER_RECOVERY.md",
+        "docs/maintainers/RELAY_HARDENING.md",
+        "docs/runbooks/relay-pool-images.md",
+        "docs/runbooks/relay-admission-lifecycle.md",
+        "docs/reference/shared-quota-recovery.md"
+      ],
+      "source_contracts_inspected": [
+        "src/lib/stars/StarPopulationController.ts",
+        "src/lib/stars/production-boundary.ts",
+        "src/lib/stars/star-domain.ts",
+        "src/core/router/GalxModelRouter.ts",
+        "src/core/queue/GalxTaskQueueEngine.ts",
+        ".env.example",
+        "scripts/test-sleeping-star-invariant.ts"
+      ],
+      "findings": [
+        "Star production remains an internally controlled channel distinct from public discovery and human private creation.",
+        "Persistent Star identity does not require an always-on runtime; no public route, follower event, save, or general queue request authorizes Star execution.",
+        "Relay/provider selection, credentials, and operational diagnostics remain private and are not added to public product language."
+      ],
+      "mapped_checks": ["npm run test:relay:capabilities", "npm run test:relay:desktop-login", "npm run test:relay:pool-images", "npm run verify:relay:pool-images", "npm run test:relay:services", "npm run verify:relay:service-images", "npm run test:agent:tools", "npm run test:relay:activation-db"]
+    },
+    "database": {
+      "canonical_guides_inspected": [
+        "docs/SUPABASE_PARANOID_ARCHITECTURE_SPEC.md",
+        "docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md",
+        "docs/maintainers/FREE_GENERATION_QUOTA.md",
+        "docs/maintainers/MULTI_TENANT_SHARD_AND_KEY_ROTATION.md",
+        "docs/maintainers/private-image-accounting.md",
+        "docs/runbooks/private-image-release-audit.md"
+      ],
+      "source_contracts_inspected": [
+        "supabase/migrations/20260924020000_private_human_works_star_publication_boundary.sql",
+        "supabase/migrations/20260924030000_private_image_allowance_accounting.sql",
+        "supabase/rollbacks/20260924020000_private_human_works_star_publication_boundary.down.sql",
+        "supabase/rollbacks/20260924030000_private_image_allowance_accounting.down.sql",
+        "src/lib/supabase/repositories/ImageLibraryRepository.ts",
+        "src/lib/supabase/types.ts",
+        "scripts/test-image-requests-db.ts",
+        "scripts/run-supabase-integration.ts"
+      ],
+      "findings": [
+        "Human content is stored/classified as Private Work and browser roles cannot promote it to Star-published state; public views remain explicitly Star-authorized.",
+        "The reservation lifecycle is documented as an atomic extension of existing durable image receipts, with unknown outcomes retained.",
+        "Postgres runtime migration/RLS/grant/view/concurrency behavior was not claimed here; disposable runtime suite remains a release gate."
+      ],
+      "mapped_checks": ["npm run db:verify", "npm run db:test", "npm run test:relay:manual-db", "npm run test:relay:authorization-db", "npm run test:relay:activation-db"]
+    },
+    "delivery": {
+      "canonical_guides_inspected": [
+        "docs/DEPLOYMENT.md",
+        "docs/VERCEL_DEPLOYMENT.md",
+        "docs/runbooks/release-readiness.md",
+        "post-mortem/runbooks/deployment-storage.md",
+        "docs/CLOUDFLARE_STRATEGY.md",
+        "docs/playbooks/02-deployment-and-release.md",
+        "docs/runbooks/private-image-release-audit.md"
+      ],
+      "source_contracts_inspected": [
+        "scripts/audit-image-release.ts",
+        "scripts/release-certification.ts",
+        "scripts/run-supabase-integration.ts",
+        "src/workers/cloudflare/GalxR2AssetAdapter.ts",
+        "src/app/robots.ts",
+        "src/app/sitemap.ts",
+        "src/app/manifest.ts",
+        "wrangler.toml",
+        "next.config.ts"
+      ],
+      "findings": [
+        "Release tooling distinguishes PASS, FAIL, BLOCKED, and UNAPPROVED and does not equate local source with hosted privacy.",
+        "Deployment configuration separates intended private image storage from legacy/public assets, but configuration presence is not proof that historical objects or caches are private.",
+        "No hosted resource was queried, changed, purged, or deployed during this review."
+      ],
+      "mapped_checks": ["npm run docs:check", "npm run build", "npm run docs:check:build"]
+    },
+    "broccolidb": {
+      "canonical_guides_inspected": [
+        "docs/operations/preview-hybrid-sync.md",
+        "docs/maintainers/COMPACTOR_FUZZING_AND_QA_MATRIX.md",
+        "docs/maintainers/image-library-scale.md"
+      ],
+      "source_contracts_inspected": [
+        "src/core/broccolidb/BroccoliImageLibraryBuffer.ts",
+        "src/lib/supabase/repositories/ImageLibraryRepository.ts",
+        "scripts/test-image-library-scale.ts",
+        "scripts/test-private-image-storage.ts"
+      ],
+      "findings": [
+        "BroccoliDB maps the domain Work class to storage/projection fields and the human library excludes Star-published records; user visibility mutation was removed.",
+        "Garbage collection separates private image and legacy asset object namespaces without changing durable ownership checks.",
+        "Cache bounds and local implementation notes do not claim global quota or hosted storage-origin privacy."
+      ],
+      "mapped_checks": ["npm run test:broccolidb:api", "npm run test:broccolidb:hardening", "npm run test:egress:transport"]
+    },
+    "client-efficiency": {
+      "canonical_guides_inspected": [
+        "docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md",
+        "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md",
+        "docs/maintainers/PUBLIC_DISCOVERY.md",
+        "docs/maintainers/readable-urls.md",
+        "docs/PRODUCT_SURFACE_STRATEGY.md"
+      ],
+      "source_contracts_inspected": [
+        "src/components/dashboard/Navigation.tsx",
+        "src/components/dashboard/MobileBottomNav.tsx",
+        "src/components/home/PublicHome.tsx",
+        "src/components/home/HomeMotion.tsx",
+        "src/lib/images/navigation.ts",
+        "scripts/verify-image-studio-ui.ts"
+      ],
+      "findings": [
+        "Public navigation stays discovery-led; private creation/library entry is signed-in only, and private routes retain independent server guards.",
+        "Page rendering, navigation, following, saving, search, and library browsing do not enqueue inference; explicit submission alone enters the private pipeline.",
+        "The homepage/library guide was corrected to describe the published-Star spotlight, /explore and /stars links, and the current /images/library path."
+      ],
+      "mapped_checks": ["npm run test:egress:transport", "npm run test:image:security", "npm run build"]
+    },
+    "billing": {
+      "canonical_guides_inspected": [
+        "docs/runbooks/stripe-webhook-delivery.md",
+        "docs/maintainers/SITES_FAIR_USAGE.md",
+        "src/components/billing/DESIGN.md",
+        "docs/reference/billing-pages.md",
+        "docs/WALLET_AND_BILLING_STRATEGY.md",
+        "docs/maintainers/private-image-accounting.md"
+      ],
+      "source_contracts_inspected": [
+        "src/lib/billing/image-allowance-config.ts",
+        "src/lib/billing/image-allowance.ts",
+        "src/lib/billing/plan-subscription.ts",
+        "src/lib/billing/image-plan-catalog.ts",
+        "src/app/api/billing/image-allowance/route.ts",
+        "src/app/api/billing/plan/route.ts",
+        "src/components/billing/PlanPanel.tsx",
+        "src/components/dashboard/GenerationGateNotice.tsx",
+        "scripts/test-billing-lifecycle.ts",
+        "scripts/test-stripe-pricing-strategy.ts"
+      ],
+      "findings": [
+        "The typed central allowance configuration remains explicitly UNAPPROVED; tests use synthetic values only and no business values were introduced.",
+        "Image checkout and dispatch fail closed without approved allowance configuration; the Site plan/fair-use contract is separate.",
+        "Customer-facing language describes private creation and allowance state without exposing provider economics or granting publication permission."
+      ],
+      "mapped_checks": ["npm run test:billing:lifecycle", "npm run test:sites:plans:db", "npm run build"]
+    }
+  },
+  "documentation_test_execution": {
+    "docs_sync": "PASS: generated 3 knowledge views and 4 indexes without refreshing review records.",
+    "test_docs": "PASS: 24 incident guard tests and 17 knowledge-base tests.",
+    "docs_check_build": "PASS: compiled boundary scan checked 526 browser/rendered assets; incident validation passed.",
+    "docs_check": "EXPECTED STALE REVIEW FAILURE before the ten domain attestations were refreshed; no other document, incident, or boundary validation failure was reported.",
+    "mapped_domain_checks": "Recorded per registry above; execution is a separate release-certification step, not implied by semantic review."
+  },
+  "unmapped_paths": {
+    "generated_indexes_and_inventories": [
+      "docs/CATALOG.md",
+      "docs/knowledge/DECISIONS.md",
+      "docs/knowledge/DOMAINS.md",
+      "docs/knowledge/catalog.json",
+      "post-mortem/OPEN_ITEMS.md",
+      "post-mortem/ROLLING_LOG.md",
+      "post-mortem/documentation-inventory.json"
+    ],
+    "private_incident_authority": [
+      "post-mortem/events.jsonl",
+      "post-mortem/register.json",
+      "post-mortem/review.json",
+      "post-mortem/releases/2026-09-24-phase4-action-review.json",
+      "post-mortem/releases/2026-09-25-phase4-semantic-review.json"
+    ],
+    "treatment": "These are generated views, separately validated append-only incident authority, or dated private evidence. They were inspected for scope and generated/validated through the repository commands, not force-mapped to product domains merely to clear impact output."
+  },
+  "remaining_limits": [
+    "The Postgres runtime suite had not yet run at the time of semantic review; no RLS, grant, view or allowance-concurrency runtime claim is made here.",
+    "Hosted Supabase, production environment, object storage, CDN and historical human asset reachability were not queried or mutated.",
+    "Allowance units and output weights remain UNAPPROVED business inputs; paid private creation remains fail-closed.",
+    "Open prevention actions remain open; domain review does not close incident actions or certify remote CI/deployment."
+  ]
+}

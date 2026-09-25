@@ -1,5 +1,4 @@
 /** Browser-only image studio contracts. Keep these independent of server internals. */
-export const IMAGE_MODEL = { id: 'galx-nova-image', name: 'GALX Nova' } as const;
 export const MAX_PROMPT = 32_000;
 export const LIBRARY_PAGE_SIZE = 36;
 export const RECENT_IMAGE_LIMIT = 120;
@@ -12,17 +11,22 @@ export const RATIOS = [
   { value: '4:3', label: 'Classic', size: '1024x768', width: 24, height: 18, useCase: 'Standard Photo' },
 ] as const;
 export type Ratio = typeof RATIOS[number]['value'];
-export type StudioVisibility = 'public' | 'private';
-export interface StudioSettings { prompt: string; ratio: Ratio; quality: 'standard' | 'hd'; count: number; visibility: StudioVisibility }
+export interface StudioSettings { prompt: string; ratio: Ratio; quality: 'standard' | 'hd'; count: number }
 export interface StudioImage {
   id: string; prompt: string; url: string; ratio: string; quality: 'standard' | 'hd';
   createdAt: string; favorite: boolean; saved: boolean;
-  visibility?: StudioVisibility | 'unlisted';
+  workClass: 'private';
   thumbnailUrl?: string; detailsLoaded?: boolean;
+}
+export interface StudioImageAllowance {
+  plan: { id: 'workshop' | 'studio' | 'max'; name: string } | null;
+  privateCreationAvailable: boolean;
+  allowance: { totalUnits: number; usedUnits: number; remainingUnits: number;
+    standardOutputUnits: number; hdOutputUnits: number; renewsAt: string } | null;
 }
 export const MAX_ACTIVE_GENERATIONS = 4;
 export interface PendingGeneration { id: string; startedAt: number; settings: StudioSettings; paused?: true }
-export const DEFAULT_SETTINGS: StudioSettings = { prompt: '', ratio: '1:1', quality: 'standard', count: 1, visibility: 'public' };
+export const DEFAULT_SETTINGS: StudioSettings = { prompt: '', ratio: '1:1', quality: 'standard', count: 1 };
 
 export interface StylePreset {
   id: string;
@@ -81,102 +85,6 @@ export const INSPIRATION_PROMPTS = [
   'An ancient enchanted sandstone library carved into canyon walls with towering book stacks and floating brass lanterns, cinematic',
 ];
 
-export type GenerationPhaseKey = 'queued' | 'synthesizing' | 'refining' | 'finalizing';
-
-export interface GenerationPhaseInfo {
-  key: GenerationPhaseKey;
-  stepNumber: number;
-  label: string;
-  shortLabel: string;
-  description: string;
-}
-
-export const GENERATION_PHASES: Record<GenerationPhaseKey, GenerationPhaseInfo> = {
-  queued: {
-    key: 'queued',
-    stepNumber: 1,
-    label: 'Preparing request',
-    shortLabel: 'Setup',
-    description: 'Scheduling request and preparing image pipeline…',
-  },
-  synthesizing: {
-    key: 'synthesizing',
-    stepNumber: 2,
-    label: 'Composing artwork',
-    shortLabel: 'Composing',
-    description: 'Synthesizing scene layout, composition, and forms…',
-  },
-  refining: {
-    key: 'refining',
-    stepNumber: 3,
-    label: 'Refining details',
-    shortLabel: 'Detailing',
-    description: 'Refining lighting, textures, color balance, and clarity…',
-  },
-  finalizing: {
-    key: 'finalizing',
-    stepNumber: 4,
-    label: 'Finalizing asset',
-    shortLabel: 'Finalizing',
-    description: 'Encoding high-resolution image and preparing preview…',
-  },
-};
-
-/** Calculate realistic baseline duration in seconds based on request parameters. */
-export function estimateGenerationSeconds(settings: StudioSettings): number {
-  const base = settings.quality === 'hd' ? 22 : 14;
-  const ratioExtra = ['16:9', '9:16', '3:2'].includes(settings.ratio) ? 2 : 0;
-  const countExtra = (settings.count - 1) * 3;
-  return base + ratioExtra + countExtra;
-}
-
-/** Compute dynamic progress percentage, remaining seconds, and active phase. */
-export function calculateGenerationProgress(elapsedSeconds: number, estimatedTotal: number, serverStatus?: string): {
-  percent: number;
-  remainingSeconds: number;
-  phase: GenerationPhaseInfo;
-  statusText: string;
-} {
-  const isQueued = serverStatus === 'queued';
-  const remainingSeconds = Math.max(0, estimatedTotal - elapsedSeconds);
-
-  let phaseKey: GenerationPhaseKey = 'queued';
-  if (isQueued || elapsedSeconds < 3) {
-    phaseKey = 'queued';
-  } else if (elapsedSeconds < Math.round(estimatedTotal * 0.55)) {
-    phaseKey = 'synthesizing';
-  } else if (elapsedSeconds < Math.round(estimatedTotal * 0.88)) {
-    phaseKey = 'refining';
-  } else {
-    phaseKey = 'finalizing';
-  }
-
-  let percent: number;
-  if (isQueued && elapsedSeconds < 4) {
-    percent = Math.min(18, 5 + elapsedSeconds * 3);
-  } else if (elapsedSeconds <= estimatedTotal) {
-    const ratio = elapsedSeconds / Math.max(1, estimatedTotal);
-    percent = Math.round(15 + (1 - (1 - ratio) ** 1.6) * 77);
-  } else {
-    const overTime = elapsedSeconds - estimatedTotal;
-    const extra = (1 - Math.exp(-overTime / 12)) * 5;
-    percent = Math.min(97, Math.round(92 + extra));
-  }
-
-  const phase = GENERATION_PHASES[phaseKey];
-  let statusText = phase.description;
-  if (elapsedSeconds > estimatedTotal) {
-    statusText = 'Taking a few extra seconds to polish details… almost ready!';
-  }
-
-  return {
-    percent,
-    remainingSeconds,
-    phase,
-    statusText,
-  };
-}
-
 /** Keep completion order without duplicating a receipt observed more than once. */
 export function appendCreations(current: StudioImage[], completed: StudioImage[], pinnedId?: string | null): StudioImage[] {
   const seen = new Set(current.map(image => image.id));
@@ -203,6 +111,29 @@ function creationWeight(image: StudioImage): number { return 2 * (image.prompt.l
 function object(value: unknown): Record<string, unknown> {
   return value !== null && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {};
 }
+export function readPrivateAllowance(value: unknown): StudioImageAllowance {
+  const data = object(value);
+  if (data.plan === null && data.privateCreationAvailable === false && data.allowance === null) {
+    return { plan: null, privateCreationAvailable: false, allowance: null };
+  }
+  const plan = object(data.plan), allowance = object(data.allowance);
+  const planId = plan.id;
+  if (!['workshop', 'studio', 'max'].includes(String(planId)) || typeof plan.name !== 'string' || plan.name.length > 32 ||
+    typeof data.privateCreationAvailable !== 'boolean' ||
+    !['totalUnits','usedUnits','remainingUnits','standardOutputUnits','hdOutputUnits'].every(key => Number.isSafeInteger(allowance[key])) ||
+    Number(allowance.totalUnits) < 1 || Number(allowance.totalUnits) > 2_147_483_647 ||
+    Number(allowance.usedUnits) < 0 || Number(allowance.usedUnits) > Number(allowance.totalUnits) ||
+    Number(allowance.remainingUnits) !== Math.max(0, Number(allowance.totalUnits) - Number(allowance.usedUnits)) ||
+    data.privateCreationAvailable !== (Number(allowance.remainingUnits) > 0) ||
+    Number(allowance.standardOutputUnits) < 1 || Number(allowance.standardOutputUnits) > 32_767 ||
+    Number(allowance.hdOutputUnits) < Number(allowance.standardOutputUnits) || Number(allowance.hdOutputUnits) > 32_767 ||
+    typeof allowance.renewsAt !== 'string' || !Number.isFinite(Date.parse(allowance.renewsAt))) throw new Error('Invalid image allowance');
+  return { plan: { id: planId as 'workshop' | 'studio' | 'max', name: plan.name },
+    privateCreationAvailable: data.privateCreationAvailable,
+    allowance: { totalUnits: Number(allowance.totalUnits), usedUnits: Number(allowance.usedUnits),
+      remainingUnits: Number(allowance.remainingUnits), standardOutputUnits: Number(allowance.standardOutputUnits),
+      hdOutputUnits: Number(allowance.hdOutputUnits), renewsAt: allowance.renewsAt } };
+}
 export function readSettings(value: unknown): StudioSettings {
   const data = object(value);
   return {
@@ -210,7 +141,6 @@ export function readSettings(value: unknown): StudioSettings {
     ratio: RATIOS.some(r => r.value === data.ratio) ? data.ratio as Ratio : '1:1',
     quality: data.quality === 'hd' ? 'hd' : 'standard',
     count: Number.isInteger(data.count) && Number(data.count) >= 1 && Number(data.count) <= 4 ? Number(data.count) : 1,
-    visibility: data.visibility === 'private' ? 'private' : 'public',
   };
 }
 export function readPending(value: unknown): PendingGeneration | null {
@@ -239,8 +169,9 @@ export function generationStatusFailure(status: number, value: unknown): 'not-st
 }
 export function generationBody(settings: StudioSettings) {
   const clean = readSettings(settings);
-  return { model: IMAGE_MODEL.id, prompt: clean.prompt.trim(), n: clean.count,
-    size: RATIOS.find(r => r.value === clean.ratio)!.size, quality: clean.quality, visibility: clean.visibility, response_format: 'url' };
+  // The private workspace selects no user-visible model or execution path.
+  return { prompt: clean.prompt.trim(), n: clean.count,
+    size: RATIOS.find(r => r.value === clean.ratio)!.size, quality: clean.quality, response_format: 'url' };
 }
 
 /** Only same-origin artifact paths and encoded raster data are displayable. */
@@ -270,7 +201,7 @@ export function readLibrary(value: unknown): { images: StudioImage[]; cursor: st
       ratio: typeof row.aspectRatio === 'string' && /^\d{1,2}:\d{1,2}$/.test(row.aspectRatio) ? row.aspectRatio : '1:1',
       quality: row.quality === 'hd' ? 'hd' : 'standard', createdAt: typeof row.createdAt === 'string' && Number.isFinite(Date.parse(row.createdAt)) ? row.createdAt : '',
       favorite: row.isFavorite === true, saved: true,
-      visibility: row.visibility === 'private' ? 'private' : row.visibility === 'unlisted' ? 'unlisted' : 'public' });
+      workClass: 'private' });
   }
   return { images, cursor: typeof data.nextCursor === 'string' ? data.nextCursor : null,
     previousCursor: typeof data.previousCursor === 'string' ? data.previousCursor : null,
@@ -296,11 +227,11 @@ export function readGeneration(value: unknown, settings: StudioSettings, id: str
     }
     if (!url) throw new Error('Invalid image artifact');
     return { id: `${id}-${index}`, url, thumbnailUrl: thumbnailUrl(url), detailsLoaded: true, prompt: settings.prompt, ratio: settings.ratio,
-      quality: settings.quality, createdAt: new Date().toISOString(), favorite: false, saved: false, visibility: settings.visibility };
+      quality: settings.quality, createdAt: new Date().toISOString(), favorite: false, saved: false, workClass: 'private' };
   });
 }
 export function studioError(status: number): string {
-  if (status === 402) return 'Your free image generation quota is used up. Upgrade to Pro to keep creating.';
+  if (status === 402) return 'Creation allowance exhausted. Review your plan to continue private creation.';
   if (status === 403) return 'This action isn’t available for your account.';
   if (status === 401) return 'Your session has expired. Sign in again to continue.';
   if (status === 429) return 'Your request limit has been reached. Wait before trying again.';

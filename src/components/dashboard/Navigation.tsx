@@ -25,7 +25,8 @@ import {
   Activity,
   LogOut,
   Menu,
-  X
+  X,
+  Lock,
 } from 'lucide-react';
 
 const isProductRoute = (pathname: string) =>
@@ -341,6 +342,30 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
                     </div>
 
                     <Link
+                      href={IMAGE_PATHS.create}
+                      className={styles.accountLinkItem}
+                      role="menuitem"
+                      aria-current={pathname === IMAGE_PATHS.create ? 'page' : undefined}
+                      onClick={() => setIsAccountOpen(false)}
+                    >
+                      <Lock size={14} className="text-indigo-400" aria-hidden="true" />
+                      <span>Private creation</span>
+                    </Link>
+
+                    <Link
+                      href={IMAGE_PATHS.library}
+                      className={styles.accountLinkItem}
+                      role="menuitem"
+                      aria-current={pathname === IMAGE_PATHS.library ? 'page' : undefined}
+                      onClick={() => setIsAccountOpen(false)}
+                    >
+                      <Sparkles size={14} className="text-indigo-400" aria-hidden="true" />
+                      <span>My creations</span>
+                    </Link>
+
+                    <div className={styles.accountDivider} />
+
+                    <Link
                       href={BILLING_PATHS.overview}
                       className={styles.accountLinkItem}
                       role="menuitem"
@@ -560,6 +585,22 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
               {user ? (
                 <div className="flex flex-col gap-2">
                   <div className="px-2 text-xs text-zinc-400">Signed in as {user.email}</div>
+                  <Link
+                    href={IMAGE_PATHS.create}
+                    className={styles.drawerAccountLink}
+                    aria-current={pathname === IMAGE_PATHS.create ? 'page' : undefined}
+                    onClick={closeMobileMenu}
+                  >
+                    Private creation
+                  </Link>
+                  <Link
+                    href={IMAGE_PATHS.library}
+                    className={styles.drawerAccountLink}
+                    aria-current={pathname === IMAGE_PATHS.library ? 'page' : undefined}
+                    onClick={closeMobileMenu}
+                  >
+                    My creations
+                  </Link>
                   <Link
                     href={BILLING_PATHS.overview}
                     className={styles.drawerAccountLink}

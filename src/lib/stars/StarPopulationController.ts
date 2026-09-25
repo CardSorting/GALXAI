@@ -580,6 +580,7 @@ async function verifyContentProvenance(pool: Pool, accountId: string, generation
     asset_status: string | null;
     is_public: boolean | null;
     visibility: string | null;
+    work_class: string | null;
   }>(`
     SELECT generation.account_id,
            generation.state AS generation_state,
@@ -589,7 +590,8 @@ async function verifyContentProvenance(pool: Pool, accountId: string, generation
            library.user_id,
            library.status AS asset_status,
            library.is_public,
-           library.visibility
+           library.visibility,
+           library.work_class
     FROM private.galx_generation_records AS generation
     LEFT JOIN private.galx_generation_assets AS mapping ON mapping.generation_id = generation.id
     LEFT JOIN public.user_image_library AS library ON library.id = mapping.asset_id
@@ -608,7 +610,8 @@ async function verifyContentProvenance(pool: Pool, accountId: string, generation
       && row.user_id === accountId
       && row.asset_status === 'completed'
       && row.is_public === true
-      && row.visibility === 'public');
+      && row.visibility === 'public'
+      && row.work_class === 'star_published');
 }
 
 async function markAttemptCompleted(pool: Pool, attemptId: string, assetIds: string[]): Promise<void> {
@@ -660,7 +663,7 @@ async function runOneOpportunity(
         response_format: 'b64_json',
         sessionId: `stars/${cohortKey}`,
         idempotencyKey: `star:${cohortKey}:${star.definition.handle}:content:${opportunity}`,
-      }, true, false, false);
+      }, { priority: true, schedule: false, workClass: 'star_published' });
     generationId = request.id;
     if (!attempt.generation_id) await markAttemptGenerating(pool, attempt.attempt_id, generationId);
     await pool.query(`

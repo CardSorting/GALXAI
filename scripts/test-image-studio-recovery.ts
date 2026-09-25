@@ -24,14 +24,14 @@ test('availability stays silent while generation survives transient failures, re
     if (init?.method === 'POST') {
       posts++; submitted.push({key:(init.headers as Record<string,string>)['Idempotency-Key'],body:String(init.body)});
       if (mode === 'lost') throw new Error('lost acknowledgement');
-      return Response.json({id:`request-${posts}`,status:'queued'}, {status:202});
+      return Response.json({id:`request-${posts}`,status:'in_progress'}, {status:202});
     }
     if (url.includes('/requests/')) {
       polled.push(url);
       if (mode === 'complete') return result();
       if (mode === 'busy') return Response.json({error:{code:'generation_not_started',message:'private-sentinel'}},{status:503});
       if (mode === 'transient') return Response.json({error:{code:'temporarily_unavailable'}},{status:503,headers:{'Retry-After':'1'}});
-      return Response.json({status:'queued'}, {status:202});
+      return Response.json({status:'in_progress'}, {status:202});
     }
     return Response.json({success:true,records:[]});
   };

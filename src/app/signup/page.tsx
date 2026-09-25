@@ -183,7 +183,7 @@ function SignUpContent() {
               href={DEFAULT_POST_AUTH_PATH}
               className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white transition-colors"
             >
-              Create images
+              Private workspace
             </Link>
           </div>
         </div>
@@ -220,7 +220,7 @@ function SignUpContent() {
                     href={DEFAULT_POST_AUTH_PATH}
                     className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-cyan-400 via-indigo-400 to-cyan-500 hover:from-cyan-300 hover:to-indigo-300 text-black font-black text-xs uppercase tracking-wider shadow-lg shadow-cyan-500/20 transition-all flex items-center justify-center gap-2 group cursor-pointer"
                   >
-                    <span>Create images</span>
+                    <span>Private workspace</span>
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
                   </Link>
                 )}
@@ -262,7 +262,7 @@ function SignUpContent() {
                   {confirmationEmail ? 'Check your email' : 'Create GALX AI Account'}
                 </h1>
                 <p className="text-xs text-zinc-400">
-                  {confirmationEmail ? <>Open the confirmation link sent to <strong className="text-zinc-200 break-all">{confirmationEmail}</strong> to finish signing up.</> : 'Synthesize images, explore the live stream, and manage your credits in GALX.'}
+                  {confirmationEmail ? <>Open the confirmation link sent to <strong className="text-zinc-200 break-all">{confirmationEmail}</strong> to finish signing up.</> : 'Explore published Star Works, follow the Stars, and manage access to private creation.'}
                 </p>
               </div>
 

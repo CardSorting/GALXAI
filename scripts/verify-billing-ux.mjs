@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { IMAGE_PLAN_OFFERS } from '../src/lib/data/pricingSummary.ts';
 
 const build = process.argv[2];
 assert(build?.startsWith('/private/tmp/galx-billing-audit-'), 'Use the isolated billing validation build.');
@@ -28,12 +29,12 @@ const billing = {
 const plan = {
   access: 'paid_plan_required', checkoutAvailable: true, hasPaymentProfile: true,
   offers: [
-    { id: 'pro', name: 'GALX Pro', audience: 'For people creating in GALX Images.', monthlyPriceUsd: 10, checkoutAvailable: true },
-    { id: 'creator', name: 'Creator', audience: 'A steady solo creative practice.', monthlyPriceUsd: 15, checkoutAvailable: true },
-    { id: 'studio', name: 'Studio', audience: 'A focused workspace for heavier individual use.', monthlyPriceUsd: 35, checkoutAvailable: true },
-    { id: 'max', name: 'MAX', audience: 'Maximum room for one creator’s Image Studio practice.', monthlyPriceUsd: 200, checkoutAvailable: true },
+    { id: 'pro', name: 'GALX Pro', audience: 'For the GALX Sites workspace.', monthlyPriceUsd: 10, checkoutAvailable: true },
+    ...IMAGE_PLAN_OFFERS.map(offer => ({ id: offer.id, name: offer.name, audience: offer.audience,
+      monthlyPriceUsd: offer.monthlyPrice, checkoutAvailable: true, allowance: offer.allowance })),
   ],
   subscription: { state: 'none', periodEnd: null, endsAt: null },
+  imageSubscription: { state: 'none', plan: null, planName: null, allowanceConfigured: false, periodEnd: null, endsAt: null },
 };
 
 try {
@@ -106,13 +107,22 @@ try {
       results.billingPages.push({ route, status: 200, overflow: false });
     }
     await page.goto(base + '/billing/plan');
-    const proButton = page.getByRole('button', { name: /Choose Pro · \$10\/month/ });
+    const proButton = page.getByRole('button', { name: /Choose GALX Pro · \$10\/month/ });
     assert(await proButton.isVisible());
-    await page.waitForFunction(() => Array.from(document.querySelectorAll('button')).some(button => button.textContent?.includes('Choose Pro · $10/month') && !button.disabled));
+    await page.waitForFunction(() => Array.from(document.querySelectorAll('button')).some(button => button.textContent?.includes('Choose GALX Pro · $10/month') && !button.disabled));
     assert.equal(await proButton.isDisabled(), false);
-    for (const label of ['Creator', 'Studio', 'MAX']) {
+    for (const label of ['Workshop', 'Studio', 'MAX']) {
       assert.equal(await page.getByText(label, { exact: true }).count(), 1, label);
     }
+    plan.imageSubscription = { state: 'active', plan: 'workshop', planName: 'Workshop', allowanceConfigured: true,
+      periodEnd: '2026-10-24T00:00:00.000Z', endsAt: null };
+    await page.goto(base + '/billing/plan');
+    await page.getByRole('heading', { name: 'Your Image Studio plan', exact: true }).waitFor();
+    assert.match(await page.getByRole('main').first().innerText(), /100 units per month · Standard 1 unit · HD 2 units/);
+    const privateCreation = page.getByRole('link', { name: 'Open private creation', exact: true });
+    assert.equal(await privateCreation.getAttribute('href'), '/images/create');
+    assert.match(await page.getByRole('main').first().innerText(), /Workshop · private creation only/);
+    assert.doesNotMatch(await page.getByRole('main').first().innerText(), /\bcreator\b/i);
     await page.goto(base + '/billing/credits');
     assert.equal(await page.getByRole('textbox', { name: 'Custom amount' }).count(), 0);
     assert.equal(await page.getByRole('button', { name: /Continue to checkout/i }).count(), 0);

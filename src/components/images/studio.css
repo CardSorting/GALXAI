@@ -257,6 +257,18 @@
   color: #fbbf24;
 }
 
+.studio-allowance-summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: min(1080px, calc(100% - 32px));
+  margin: 14px auto 0;
+  padding: 10px 12px;
+  border: 1px solid var(--studio-line);
+  border-radius: 12px;
+  background: var(--studio-panel);
+}
+
 @media (max-width: 620px) {
   .studio-readiness {
     align-items: flex-start;
@@ -269,6 +281,13 @@
   .studio-readiness-action {
     align-self: center;
     white-space: nowrap;
+  }
+
+  .studio-allowance-summary {
+    align-items: flex-start;
+    width: calc(100% - 20px);
+    max-width: calc(100% - 20px);
+    padding: 10px;
   }
 }
 
@@ -780,76 +799,6 @@
   font-weight: 600;
 }
 
-.studio-dock-visibility {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-}
-
-.studio-dock-visibility-btn {
-  display: flex;
-  align-items: flex-start;
-  gap: 9px;
-  min-width: 0;
-  padding: 10px;
-  border: 1px solid var(--studio-line);
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.04);
-  color: var(--studio-muted);
-  text-align: left;
-  transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
-}
-
-.studio-dock-visibility-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: #f3f4f6;
-}
-
-.studio-dock-visibility-btn:disabled {
-  cursor: not-allowed;
-  opacity: 0.62;
-}
-
-.studio-dock-visibility-btn:disabled:hover {
-  background: rgba(255, 255, 255, 0.04);
-  color: var(--studio-muted);
-}
-
-.studio-dock-visibility-btn.active {
-  border-color: #818cf8;
-  background: rgba(99, 102, 241, 0.18);
-  color: #fff;
-}
-
-.studio-dock-visibility-btn.active.private {
-  border-color: var(--studio-selected);
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.studio-dock-visibility-btn svg {
-  flex: 0 0 auto;
-  margin-top: 1px;
-}
-
-.studio-dock-visibility-btn span {
-  display: grid;
-  min-width: 0;
-  gap: 2px;
-}
-
-.studio-dock-visibility-btn strong {
-  font-size: 12px;
-  font-weight: 600;
-  color: inherit;
-}
-
-.studio-dock-visibility-btn small {
-  overflow-wrap: anywhere;
-  color: var(--studio-muted);
-  font-size: 10px;
-  line-height: 1.35;
-}
-
 /* Popover Row for Inspiration */
 .studio-popover-row {
   display: flex;
@@ -1140,8 +1089,5 @@
   }
   .studio-dock-ratios {
     grid-template-columns: repeat(3, 1fr);
-  }
-  .studio-dock-visibility {
-    grid-template-columns: 1fr;
   }
 }

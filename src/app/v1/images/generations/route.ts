@@ -1,17 +1,12 @@
 import { NextRequest } from 'next/server';
-import { galxRouter } from '@/core/router/GalxModelRouter';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 import { GalxSeatTierEngine } from '@/core/subscription/GalxSeatTierEngine';
-import { ImageRequestService, imageRequestResponse } from '@/lib/images/request-service';
-import { GenerationAccess } from '@/lib/billing/generation-access';
-import { FreeQuotaError } from '@/lib/billing/free-generation-quota';
-import { FreeGenerationGateError } from '@/lib/billing/free-generation-gate';
+import { ImageRequestService, ImageStorageUnavailableError, imageRequestResponse } from '@/lib/images/request-service';
+import { ImageAllowanceError } from '@/lib/billing/image-allowance';
 import { ImageRequestConflict } from '@/lib/images/request-repository';
-import { ModelCatalog } from '@/core/router/ModelCatalog';
 import { ImageCapacityError } from '@/core/router/ImageCapacityError';
 import { RelayDispatchError } from '@/core/router/adapters/RelayChatTransport';
 import type { ImageGenerationRequest } from '@/core/contracts/GalxContracts';
-import { normalizeImageOutput, type ImageResponseFormat } from '@/lib/security/normalize-image-output';
 import { imageError, imageHeaders } from '@/lib/security/public-image-http';
 import { logImageFailure } from '@/lib/security/private-image-diagnostics';
 import { enforceDeveloperApiKeyAccess } from '@/lib/security/developer-access';
@@ -28,14 +23,7 @@ export async function OPTIONS() {
   } });
 }
 
-const imageAliases = new Set([
-  'galx-nova-image', 'galx-nova', 'nova-image', 'nova', 'galx_nova_image', 'galx_nova',
-  'openai-gpt-image-latest', 'gpt-image-latest', 'image', 'images',
-  'openai-gpt-image-2', 'gpt-image-2', 'gpt-image-2.0', 'openai-gpt-image-1.5', 'gpt-image-1.5',
-  'openai-gpt-image-1', 'gpt-image-1', 'dall-e-2', 'dall-e-3', 'dalle-3', 'photoreal'
-]);
-
-/** Public image contract. Internal dispatch results must pass private normalization. */
+/** Authenticated private-workspace contract. Internal dispatch results must pass private normalization. */
 export async function POST(req: NextRequest) {
   const requestId = crypto.randomUUID();
   try {
@@ -52,17 +40,18 @@ export async function POST(req: NextRequest) {
     } catch { return imageError('invalid_request', requestId); }
     const prompt = raw.prompt ?? raw.text ?? raw.description ?? raw.input ?? raw.image_prompt;
     if (typeof prompt !== 'string' || !prompt.trim() || prompt.length > 32_000) return imageError('invalid_request', requestId);
-    const requested = raw.model ?? 'galx-nova-image';
-    if (typeof requested !== 'string' || !imageAliases.has(requested.toLowerCase())) return imageError('unsupported_input', requestId);
-    const model = ModelCatalog.resolveModel(requested);
+    // Model identity and selection are server-side. A human workspace request
+    // can ask for the supported image capability, not choose its execution model.
+    if (raw.model !== undefined) return imageError('unsupported_input', requestId);
     const format = raw.response_format ?? raw.responseFormat ?? (req.headers.get('accept')?.includes('application/json') ? 'b64_json' : 'binary');
     if (!['binary', 'url', 'b64_json'].includes(String(format))) return imageError('unsupported_input', requestId);
     const outputFormat = raw.output_format;
     if (outputFormat !== undefined && !['png', 'jpeg', 'webp'].includes(String(outputFormat))) return imageError('unsupported_input', requestId);
-    const requestedVisibility = raw.visibility ?? (raw.stealth === true ? 'private' : undefined);
-    if (requestedVisibility !== undefined && !['public', 'unlisted', 'private'].includes(String(requestedVisibility))) return imageError('unsupported_input', requestId);
-    if (raw.stealth !== undefined && typeof raw.stealth !== 'boolean') return imageError('unsupported_input', requestId);
-    if (raw.stealth === true && raw.visibility !== undefined && raw.visibility !== null && raw.visibility !== 'private') return imageError('unsupported_input', requestId);
+    if (raw.visibility === 'public' || raw.visibility === 'unlisted' || raw.isPublic === true || raw.publish === true || raw.shareToExplore === true) {
+      return imageError('publishing_forbidden', requestId);
+    }
+    if (raw.visibility !== undefined || raw.isPublic !== undefined || raw.publish !== undefined ||
+        raw.shareToExplore !== undefined || raw.stealth !== undefined) return imageError('unsupported_input', requestId);
     const n = raw.n ?? raw.num_images ?? raw.count ?? 1;
     if (typeof n !== 'number' || !Number.isInteger(n) || n < 1 || n > 4 || (format === 'binary' && n !== 1)) return imageError('invalid_request', requestId);
     if (raw.quality !== undefined && !['standard', 'hd'].includes(String(raw.quality))) return imageError('unsupported_input', requestId);
@@ -73,43 +62,38 @@ export async function POST(req: NextRequest) {
     const entitlement = await seat.resolveUserSeatTier(auth);
     if (entitlement.isCapped) return imageError('rate_limited', requestId, 60);
     const body: ImageGenerationRequest = {
-      prompt, model: model.id, n, size, quality: raw.quality === 'hd' ? 'hd' : 'standard',
+      prompt, model: 'galx-nova-image', n, size, quality: raw.quality === 'hd' ? 'hd' : 'standard',
       response_format: 'b64_json',
-      visibility: (requestedVisibility as ImageGenerationRequest['visibility']) || 'public',
       sessionId: typeof raw.session_id === 'string' ? raw.session_id : typeof raw.sessionId === 'string' ? raw.sessionId : 'default',
       idempotencyKey: req.headers.get('idempotency-key') || undefined,
     };
     if (body.idempotencyKey && !/^[\x21-\x7e]{1,128}$/.test(body.idempotencyKey)) return imageError('invalid_request', requestId);
     if ((body.sessionId?.length || 0) > 128) return imageError('invalid_request', requestId);
-    const free = await GenerationAccess.resolve(auth.userId) === 'free';
+    const service = ImageRequestService.getInstance();
     if (req.headers.get('x-galx-async') === 'true' || req.headers.get('prefer') === 'respond-async') {
-      const task = await ImageRequestService.getInstance().create(auth.userId, { ...body,
-        response_format: format === 'url' ? 'url' : 'b64_json', outputFormat: outputFormat as ImageFormat | undefined }, entitlement.isPriorityUser, free);
+      const task = await service.create(auth.userId, { ...body,
+        response_format: format === 'url' ? 'url' : 'b64_json', outputFormat: outputFormat as ImageFormat | undefined },
+      { priority: entitlement.isPriorityUser, schedule: true });
       const taskUrl = `/v1/images/requests/${encodeURIComponent(task.id)}`;
       const headers = imageHeaders(requestId, 'application/json');
       headers.set('Location', taskUrl);
       headers.set('Retry-After', '3');
-      return new Response(JSON.stringify({ id: task.id, status: task.state, task_url: taskUrl }), { status: 202, headers });
+      return new Response(JSON.stringify({ id: task.id, status: 'in_progress', task_url: taskUrl }), { status: 202, headers });
     }
-    if (free) {
-      const service=ImageRequestService.getInstance();
-      const task=await service.create(auth.userId,{...body,response_format:format==='url'?'url':'b64_json',outputFormat:outputFormat as ImageFormat | undefined},entitlement.isPriorityUser,true,false);
-      await service.run(auth.userId,task.id,true);
-      const completed=await service.repository.get(auth.userId,task.id);
-      if(completed?.state==='completed') return imageRequestResponse(completed,requestId,format!=='binary');
-      return imageError(completed?.state==='failed'||completed?.state==='cancelled'?'generation_failed':'timeout',requestId);
-    }
-    // Only explicitly supported request fields reach dispatch. No user-selected shards or internal headers.
-    const result = await galxRouter.routeImageGeneration({ request: body, userId: auth.userId,
-      requestId, isPriorityUser: entitlement.isPriorityUser, signal: req.signal, usageBillingBasis: 'message',
-      usageCapUsd: auth.authType === 'developer_key' ? auth.apiKey?.spendCapUsd : undefined });
-    return await normalizeImageOutput(result, { requestId, userId: auth.userId,
-      responseFormat: format as ImageResponseFormat, outputFormat: outputFormat as ImageFormat | undefined });
+    // Every human call uses a durable receipt whose purchased allowance is
+    // reserved in the same transaction before the worker can claim/dispatch.
+    const task = await service.create(auth.userId, { ...body,
+      response_format: format === 'url' ? 'url' : 'b64_json', outputFormat: outputFormat as ImageFormat | undefined },
+    { priority: entitlement.isPriorityUser, schedule: false });
+    await service.run(auth.userId, task.id, true);
+    const completed = await service.repository.get(auth.userId, task.id);
+    if (completed?.state === 'completed') return imageRequestResponse(completed, requestId, format !== 'binary');
+    return imageError(completed?.state === 'failed' || completed?.state === 'cancelled' ? 'generation_failed' : 'timeout', requestId);
   } catch (error) {
     logImageFailure(requestId, error);
-    if (error instanceof FreeGenerationGateError) return imageError(error.code,requestId);
-    if (error instanceof FreeQuotaError) return imageError('free_quota_exhausted',requestId);
+    if (error instanceof ImageAllowanceError) return imageError(error.code, requestId);
     if (error instanceof ImageRequestConflict) return imageError('idempotency_conflict', requestId);
+    if (error instanceof ImageStorageUnavailableError) return imageError('temporarily_unavailable', requestId, 3);
     if (error instanceof ImageCapacityError) return imageError('temporarily_unavailable', requestId, error.retryAfterSeconds);
     const failure = error as { status?: number; code?: string; reason?: string; name?: string };
     if (failure?.status === 429) return imageError('rate_limited', requestId, 5);

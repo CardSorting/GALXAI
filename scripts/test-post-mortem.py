@@ -76,6 +76,19 @@ class IncidentGuardTests(unittest.TestCase):
         self.events[0]['supersedes'] = 'EVT-future'
         self.assertTrue(any('earlier event' in error for error in self.errors()))
 
+    def test_append_only_correction_supersedes_invalid_evidence(self):
+        self.events[0]['evidence'] = ['scripts/nonexistent-test.ts']
+        correction = {'id': 'EVT-2', 'incident': 'INC-20260913-IMAGES',
+            'observed_at': '2026-09-15T00:00:00Z', 'kind': 'correction',
+            'supersedes': 'EVT-1', 'observation': 'Corrects evidence reference',
+            'action': 'Preserve original and link valid evidence', 'result': 'Correction retained',
+            'next_step': 'Use corrected reference', 'evidence': ['src/lib/images/example.ts']}
+        self.events.append(correction)
+        self.assertEqual(self.errors(), [])
+        views = guard.generated_views(self.root, self.register, self.events)
+        self.assertIn('superseded by correction `EVT-2`', views['post-mortem/ROLLING_LOG.md'])
+        self.assertNotIn('nonexistent-test.ts', views['post-mortem/ROLLING_LOG.md'])
+
     def test_credentials_field_rejected_from_journal(self):
         self.events[0]['authorization'] = 'should never be retained'
         self.assertTrue(any('unexpected journal fields' in error for error in self.errors()))

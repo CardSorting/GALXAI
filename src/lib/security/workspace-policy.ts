@@ -6,6 +6,9 @@ import { authEntryPath } from '@/lib/auth/redirects';
 /** Product availability never grants anonymous access to account workspaces. */
 export function isWorkspacePath(pathname: string): boolean {
   const path = normalizedPath(pathname);
+  // The legacy Images landing path now redirects to public discovery; only the
+  // explicit creation and owner-library routes are private workspaces.
+  if (path === '/images') return false;
   if (/^\/images\/studio\/(?:desert|glass|paper)\.webp$/.test(path)) return false;
   return /^\/(?:images|sites|library)(?:\/|$)/.test(path);
 }

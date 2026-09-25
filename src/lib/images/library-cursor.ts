@@ -4,7 +4,7 @@ import type { ImageLibraryFilterOptions } from '@/core/contracts/GalxContracts';
 export class InvalidImageLibraryQuery extends Error {}
 export interface LibraryCursor { createdAt: string; id: string; before?: boolean; scope?: string }
 export function libraryScope(owner: string, options: ImageLibraryFilterOptions): string {
-  return createHash('sha256').update(JSON.stringify([owner, options.sort || 'newest', options.search || '', options.isFavorite, options.visibility || '', options.sessionId || '', options.aspectRatio || '', options.includeSummary !== false])).digest('hex').slice(0, 32);
+  return createHash('sha256').update(JSON.stringify([owner, options.sort || 'newest', options.search || '', options.isFavorite, options.sessionId || '', options.aspectRatio || '', options.includeSummary !== false])).digest('hex').slice(0, 32);
 }
 export function encodeLibraryCursor(cursor: LibraryCursor): string {
   return Buffer.from(JSON.stringify(cursor)).toString('base64url');
@@ -24,20 +24,17 @@ export function decodeLibraryCursor(value?: string, scope?: string): LibraryCurs
 }
 
 export function readImageLibraryQuery(params: URLSearchParams): ImageLibraryFilterOptions {
-  const allowed = ['limit','sort','search','sessionId','aspectRatio','isFavorite','visibility','cursor','summary'];
+  const allowed = ['limit','sort','search','sessionId','aspectRatio','isFavorite','cursor','summary'];
   for (const key of params.keys()) if (!allowed.includes(key) || params.getAll(key).length !== 1) throw new InvalidImageLibraryQuery();
   const limit = Number(params.get('limit') ?? 48), sort = params.get('sort') ?? 'newest';
   const search = params.get('search')?.trim(), sessionId = params.get('sessionId') || undefined, aspectRatio = params.get('aspectRatio') || undefined;
-  const rawVis = params.get('visibility');
   if (!Number.isSafeInteger(limit) || limit < 1 || limit > 100 || !['newest','oldest'].includes(sort) ||
     (search && search.length > 200) || (sessionId && !/^[A-Za-z0-9._:-]{1,160}$/.test(sessionId)) ||
     (aspectRatio && aspectRatio !== 'all' && !/^\d{1,2}:\d{1,2}$/.test(aspectRatio)) ||
     (params.has('isFavorite') && !['true','false'].includes(params.get('isFavorite')!)) ||
-    (rawVis && !['public','private','unlisted','all'].includes(rawVis)) ||
     (params.has('summary') && !['full','none'].includes(params.get('summary')!))) throw new InvalidImageLibraryQuery();
   const cursor = params.get('cursor') || undefined;
   decodeLibraryCursor(cursor);
-  const visibility = (rawVis && rawVis !== 'all') ? (rawVis as 'public' | 'unlisted' | 'private') : undefined;
   return { limit, sort: sort as 'newest' | 'oldest', search: search || undefined, sessionId, aspectRatio,
-    isFavorite: params.has('isFavorite') ? params.get('isFavorite') === 'true' : undefined, visibility, cursor, includeSummary: params.get('summary') !== 'none' };
+    isFavorite: params.has('isFavorite') ? params.get('isFavorite') === 'true' : undefined, cursor, includeSummary: params.get('summary') !== 'none' };
 }

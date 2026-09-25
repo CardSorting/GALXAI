@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { GenerationGateNotice, useGenerationGate } from '@/components/dashboard/GenerationGateNotice';
 import { usePathname } from 'next/navigation';
 import { IMAGE_PATHS, imageView, type ImageView } from '@/lib/images/navigation';
 import { authEntryPath } from '@/lib/auth/redirects';
@@ -13,12 +12,10 @@ import {
   CircleAlert,
   Check,
   ChevronDown,
-  Compass,
   Copy,
   ImageIcon,
   LoaderCircle,
   Lock,
-  Globe2,
   Pause,
   Play,
   Plus,
@@ -33,7 +30,6 @@ import { WorkspaceSessionBoundary } from '@/components/auth/WorkspaceSessionBoun
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 import {
   DEFAULT_SETTINGS,
-  IMAGE_MODEL,
   INSPIRATION_PROMPTS,
   MAX_PROMPT,
   RATIOS,
@@ -43,7 +39,6 @@ import {
 } from './studio-contract';
 import { useImageStudio } from './use-image-studio';
 import { StudioArtwork as Artwork } from './StudioArtwork';
-import { PublicImageMasonryStream } from './PublicImageMasonryStream';
 import './studio.css';
 
 export function ImageStudio() {
@@ -71,10 +66,10 @@ function StudioWorkspace({
 }) {
   const pathname = usePathname();
   const selectedView = imageView(pathname);
-  const [activeTab, setActiveTab] = useState<'stream' | 'creations' | 'favorites'>(() => {
+  const [activeTab, setActiveTab] = useState<'creations' | 'favorites'>(() => {
     if (selectedView === 'library') return 'creations';
     if (selectedView === 'favorites') return 'favorites';
-    return 'stream';
+    return 'creations';
   });
   const [active, setActive] = useState<StudioImage | null>(null);
   const [activeCollection, setActiveCollection] = useState<StudioImage[]>([]);
@@ -105,8 +100,13 @@ function StudioWorkspace({
   const lastCopied = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { settings, setSettings, getDetails } = studio;
-  const gate = useGenerationGate('images', false, settings.count);
+  const setNotice = studio.setNotice;
   const busy = studio.submitting || studio.polling;
+  const allowance = studio.imageAllowance?.allowance;
+  const requestedAllowanceUnits = allowance
+    ? settings.count * (settings.quality === 'hd' ? allowance.hdOutputUnits : allowance.standardOutputUnits)
+    : Number.POSITIVE_INFINITY;
+  const allowanceCannotCoverBatch = Boolean(allowance && requestedAllowanceUnits > allowance.remainingUnits);
   const activeImage = active;
   const activeIndex = activeCollection.findIndex((image) => image.id === active?.id);
   const dialogOpen = Boolean(active);
@@ -199,15 +199,17 @@ function StudioWorkspace({
 
   useEffect(() => () => reuseController.current?.abort(), []);
 
-  // Parse prompt from URL if user arrived from homepage remix or explore stream
+  // Public Star concepts may prefill a private draft; opening the workspace
+  // never starts inference. The user explicitly submits after checking allowance.
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const sp = new URLSearchParams(window.location.search);
       const urlPrompt = sp.get('prompt');
       const urlRatio = sp.get('aspect_ratio') || sp.get('ratio');
       const urlTab = sp.get('tab');
+      const remixWorkId = sp.getAll('remix_work').length === 1 ? sp.get('remix_work') : null;
 
-      if (urlPrompt || urlRatio) {
+      if (!remixWorkId && (urlPrompt || urlRatio)) {
         setSettings((prev) => ({
           ...prev,
           ...(urlPrompt ? { prompt: urlPrompt } : {}),
@@ -219,15 +221,44 @@ function StudioWorkspace({
         requestAnimationFrame(() => {
           promptRef.current?.focus();
         });
-      } else if (urlTab === 'stream') {
-        setActiveTab('stream');
+      } else if (remixWorkId && /^[A-Za-z0-9_-]{1,160}$/.test(remixWorkId)) {
+        setActiveTab('creations');
+        if (urlRatio && ['1:1', '16:9', '9:16', '3:2', '4:3'].includes(urlRatio)) {
+          setSettings((prev) => ({ ...prev, ratio: urlRatio as any }));
+        }
+        const controller = new AbortController();
+        void fetch(`/api/images/feed?image_id=${encodeURIComponent(remixWorkId)}&limit=1`, {
+          cache: 'no-store', signal: controller.signal,
+        }).then(async (response) => {
+          const payload = await response.json();
+          const source = response.ok && payload?.success === true && Array.isArray(payload.items)
+            ? payload.items.find((item: any) => item?.id === remixWorkId && item?.author?.participantKind === 'star' && typeof item?.prompt === 'string')
+            : null;
+          if (controller.signal.aborted) return;
+          if (!source) {
+            setNotice('That published Star Work is no longer available. No image request was sent.');
+            return;
+          }
+          const context = [
+            'Create a new, distinct private variation inspired by this Star Work. Keep its central idea and mood while changing the composition and details.',
+            '',
+            'Published Star concept:',
+            source.prompt,
+          ].join('\n');
+          setSettings((prev) => ({ ...prev, prompt: context }));
+          setNotice('Star concept loaded as private creative context. No image request was sent.');
+          requestAnimationFrame(() => promptRef.current?.focus());
+        }).catch(() => {
+          if (!controller.signal.aborted) setNotice('The Star Work could not be loaded. No image request was sent.');
+        });
+        return () => controller.abort();
       } else if (urlTab === 'favorites') {
         setActiveTab('favorites');
       } else if (urlTab === 'creations') {
         setActiveTab('creations');
       }
     }
-  }, [setSettings]);
+  }, [setNotice, setSettings]);
 
   // Dialog open/close lifecycle
   useEffect(() => {
@@ -255,8 +286,7 @@ function StudioWorkspace({
     const path = IMAGE_PATHS[next];
     if (window.location.pathname !== path) window.history.pushState(null, '', path);
     if (next === 'favorites') setActiveTab('favorites');
-    else if (next === 'library') setActiveTab('creations');
-    else setActiveTab('stream');
+    else setActiveTab('creations');
   }
 
   function focusPrompt() {
@@ -369,22 +399,12 @@ function StudioWorkspace({
           <Link href="/" className="studio-brand-link" title="Return to GALX Home">
             <Sparkles className="studio-brand-sparkle" aria-hidden="true" />
             <span className="studio-brand-title">GALX Images</span>
-            <span className="studio-brand-attribution">Powered by GALX Nova.</span>
+            <span className="studio-brand-attribution">Private creation workspace</span>
           </Link>
         </div>
 
         {/* View Switcher Pills */}
         <nav className="studio-top-tabs" aria-label="Studio views">
-          <button
-            type="button"
-            className={`studio-tab-pill ${activeTab === 'stream' ? 'active' : ''}`}
-            onClick={() => setActiveTab('stream')}
-            aria-pressed={activeTab === 'stream'}
-          >
-            <Compass size={15} aria-hidden="true" />
-            <span>Community Stream</span>
-          </button>
-
           <button
             type="button"
             className={`studio-tab-pill ${activeTab === 'creations' ? 'active' : ''}`}
@@ -461,23 +481,43 @@ function StudioWorkspace({
         </div>
       )}
 
+      {owner && (
+        <div className={`studio-allowance-summary ${studio.allowanceUnavailable ? 'studio-readiness-error' : 'studio-readiness-warning'}`} role={studio.allowanceUnavailable ? 'alert' : 'status'} aria-live="polite">
+          <div className="studio-readiness-icon" aria-hidden="true"><Lock size={16} /></div>
+          <div className="studio-readiness-copy">
+            <strong>{studio.allowanceChecking && !studio.imageAllowance
+              ? 'Checking your private allowance…'
+              : studio.allowanceUnavailable
+                ? 'Creation allowance unavailable'
+                : !studio.imageAllowance?.plan
+                  ? 'Private creation needs a paid tier'
+                  : allowance?.remainingUnits === 0
+                    ? 'Creation allowance exhausted'
+                    : allowanceCannotCoverBatch
+                      ? 'This batch exceeds your remaining allowance'
+                      : `${studio.imageAllowance.plan.name} · ${allowance?.remainingUnits ?? 0} creation units remaining`}</strong>
+            <span>{studio.allowanceChecking && !studio.imageAllowance
+              ? 'Your available allowance is being checked before any request can be sent.'
+              : studio.allowanceUnavailable
+                ? 'No image request will be dispatched until your plan and remaining allowance can be verified.'
+                : !studio.imageAllowance?.plan
+                  ? 'Choose a GALX Images tier to create privately. Your work will remain in your library.'
+                  : allowance?.remainingUnits === 0
+                    ? `Your allowance renews ${allowance ? new Date(allowance.renewsAt).toLocaleDateString() : ''}. No inference will be dispatched; browsing and your saved library remain available.`
+                    : allowanceCannotCoverBatch
+                        ? `This batch needs ${requestedAllowanceUnits} units; ${allowance?.remainingUnits ?? 0} remain. Reduce the image count or choose Standard detail.`
+                      : allowance
+                        ? `Each Standard image uses ${allowance.standardOutputUnits} ${allowance.standardOutputUnits === 1 ? 'unit' : 'units'}; HD uses ${allowance.hdOutputUnits} units. Renews ${new Date(allowance.renewsAt).toLocaleDateString()}.`
+                        : 'Your private monthly creation allowance is being checked.'}</span>
+          </div>
+          {(!studio.imageAllowance?.plan || allowance?.remainingUnits === 0) && <Link href="/billing/plan" className="studio-readiness-action">Review plans <ArrowRight size={14} aria-hidden="true" /></Link>}
+          {studio.allowanceUnavailable && <button type="button" className="studio-readiness-action" disabled={studio.allowanceChecking} onClick={() => void studio.refreshAllowance()}>Try again <ArrowRight size={14} aria-hidden="true" /></button>}
+        </div>
+      )}
+
       {/* --- Main Visual Content Area --- */}
       <section className="studio-content-area" ref={canvasRef} tabIndex={-1}>
-        {/* VIEW 1: Community Stream (Pinterest-style Masonry Grid) */}
-        {activeTab === 'stream' && (
-          <div className="studio-stream-view">
-            <PublicImageMasonryStream
-              showFilters={false}
-              onSelectPrompt={(prompt, ratio) => {
-                applyPrompt(prompt, ratio || '1:1');
-                setActiveTab('creations');
-                changeView('library');
-              }}
-            />
-          </div>
-        )}
-
-        {/* VIEW 2: My Creations */}
+        {/* Private workspace. Public discovery lives on Explore and Star pages. */}
         {activeTab === 'creations' && (
           <div className="studio-creations-view">
             {/* Active generation ongoing */}
@@ -486,18 +526,15 @@ function StudioWorkspace({
                 <div className="studio-active-gen-header">
                   <div className="studio-active-gen-badge">
                     <LoaderCircle className="studio-spin" size={16} />
-                    <span>{studio.submitting ? 'Submitting request…' : studio.progress || 'Synthesizing…'}</span>
+                    <span>{studio.submitting ? 'Starting private creation…' : studio.progress || 'Your private creation is in progress.'}</span>
                   </div>
-                  <span className="studio-active-gen-time">
-                    {Math.floor(studio.elapsed / 60)}:{String(studio.elapsed % 60).padStart(2, '0')} elapsed
-                  </span>
+                  <span className="studio-active-gen-time">Private creation</span>
                 </div>
                 <p className="studio-active-gen-prompt">{studio.pending?.settings.prompt || settings.prompt}</p>
                 <div className="studio-active-gen-meta">
                   <span>Aspect: {settings.ratio}</span>
                   <span>Count: {settings.count}</span>
-                  <span>Service: {IMAGE_MODEL.name}</span>
-                  <span>{settings.visibility === 'private' ? 'Private mode' : 'Public'}</span>
+                  <span>Private creation</span>
                 </div>
               </div>
             )}
@@ -524,7 +561,7 @@ function StudioWorkspace({
                       <Artwork image={image} />
                       <div className="masonry-card-badges">
                         <span className="masonry-badge masonry-badge-ratio">{image.ratio}</span>
-                        {image.visibility === 'private' && <span className="masonry-badge masonry-badge-private"><Lock size={11} aria-hidden="true" />Private</span>}
+                        <span className="masonry-badge masonry-badge-private"><Lock size={11} aria-hidden="true" />Private</span>
                       </div>
                     </div>
                   </article>
@@ -535,8 +572,8 @@ function StudioWorkspace({
                 <div className="studio-empty-icon">
                   <Sparkles size={32} />
                 </div>
-                <h3>Your canvas is waiting</h3>
-                <p>Describe your idea in the dock below and press Enter to generate your first masterpiece.</p>
+                <h3>Your private canvas is ready</h3>
+                <p>Describe an idea below. Nothing you create here is published to GALX.</p>
                 <div className="studio-empty-starter-chips">
                   {INSPIRATION_PROMPTS.slice(0, 3).map((prompt, i) => (
                     <button
@@ -555,7 +592,7 @@ function StudioWorkspace({
           </div>
         )}
 
-        {/* VIEW 3: Favorites */}
+        {/* Private Favorites */}
         {activeTab === 'favorites' && (
           <div className="studio-favorites-view">
             {owner ? (
@@ -592,10 +629,10 @@ function StudioWorkspace({
                     <Star size={32} />
                   </div>
                   <h3>No favorites saved yet</h3>
-                  <p>Star any image in the stream or your creations to keep it in your favorites collection.</p>
-                  <button type="button" className="studio-primary" style={{ width: 'auto', marginTop: 12 }} onClick={() => setActiveTab('stream')}>
-                    Explore Community Stream
-                  </button>
+                  <p>Save private creations or public Star Works to your personal favorites.</p>
+                  <Link href="/explore" className="studio-primary" style={{ width: 'auto', marginTop: 12 }}>
+                    Explore Star Works
+                  </Link>
                 </div>
               )
             ) : (
@@ -626,10 +663,10 @@ function StudioWorkspace({
               <span className="studio-dock-pulse" />
               <span className="studio-dock-progress-text">
                 {studio.submitting
-                  ? 'Submitting prompt…'
+                  ? 'Starting private creation…'
                   : studio.polling
-                  ? `${studio.progress || 'Synthesizing…'} (${Math.floor(studio.elapsed / 60)}:${String(studio.elapsed % 60).padStart(2, '0')})`
-                  : 'Paused'}
+                  ? (studio.progress || 'Your private creation is in progress.')
+                  : 'Updates paused. Creation continues.'}
               </span>
               <span className="studio-dock-progress-ratio">{settings.ratio}</span>
             </div>
@@ -720,37 +757,13 @@ function StudioWorkspace({
               </div>
             </div>
 
-            {/* Publication selector: a user-owned privacy choice, not a paid tier. */}
+            {/* Human Works always remain private and cannot be published. */}
             <div className="studio-popover-section">
               <div className="studio-popover-label-row">
-                <label className="studio-popover-label" id="studio-visibility-label">Sharing</label>
-                <span className="studio-popover-note">{owner ? 'Included for signed-in creators' : 'Sign in to choose'}</span>
+                <span className="studio-popover-label"><Lock size={14} aria-hidden="true" />Private creation</span>
+                <span className="studio-popover-note">Only you</span>
               </div>
-              <div className="studio-dock-visibility" role="radiogroup" aria-labelledby="studio-visibility-label">
-                <button
-                  type="button"
-                  className={`studio-dock-visibility-btn ${settings.visibility === 'public' ? 'active' : ''}`}
-                  aria-pressed={settings.visibility === 'public'}
-                  disabled={!owner}
-                  title={!owner ? 'Sign in to choose sharing' : undefined}
-                  onClick={() => setSettings((prev) => ({ ...prev, visibility: 'public' }))}
-                >
-                  <Globe2 size={15} aria-hidden="true" />
-                  <span><strong>Public</strong><small>May appear in Explore</small></span>
-                </button>
-                <button
-                  type="button"
-                  className={`studio-dock-visibility-btn ${settings.visibility === 'private' ? 'active private' : ''}`}
-                  aria-pressed={settings.visibility === 'private'}
-                  disabled={!owner}
-                  title={!owner ? 'Sign in to choose sharing' : undefined}
-                  onClick={() => setSettings((prev) => ({ ...prev, visibility: 'private' }))}
-                >
-                  <Lock size={15} aria-hidden="true" />
-                  <span><strong>Private mode</strong><small>Stealth · only you can open it</small></span>
-                </button>
-              </div>
-              <p className="studio-field-hint">{owner ? 'Private creations stay in your library and are excluded from Explore and the community stream. You can publish them later.' : 'Sign in to generate and choose whether a creation is public or private.'}</p>
+              <p className="studio-field-hint">Your creations stay in your private library. Human accounts cannot publish Works to GALX.</p>
             </div>
 
             {/* Quick Inspiration & Actions */}
@@ -783,7 +796,6 @@ function StudioWorkspace({
               )}
             </div>
 
-            {owner && <GenerationGateNotice kind="images" quantity={settings.count} />}
           </div>
         )}
 
@@ -793,7 +805,7 @@ function StudioWorkspace({
           className="studio-dock-bar"
           onSubmit={(e) => {
             e.preventDefault();
-            if (gate.blocked || busy || !settings.prompt.trim()) return;
+            if (busy || !settings.prompt.trim() || !studio.imageAllowance?.privateCreationAvailable || allowanceCannotCoverBatch || studio.allowanceUnavailable || studio.allowanceChecking) return;
             setOptionsOpen(false);
             setActiveTab('creations');
             void studio.generate();
@@ -806,7 +818,7 @@ function StudioWorkspace({
             onClick={() => setOptionsOpen((v) => !v)}
             aria-label={optionsOpen ? 'Close settings' : 'Image generation settings'}
             aria-expanded={optionsOpen}
-            title="Settings (aspect ratio, count, sharing)"
+            title="Private creation settings"
           >
             <Plus size={20} />
           </button>
@@ -827,7 +839,7 @@ function StudioWorkspace({
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
                 e.preventDefault();
-                if (!settings.prompt.trim() || busy || gate.blocked) return;
+                if (!settings.prompt.trim() || busy || !studio.imageAllowance?.privateCreationAvailable || allowanceCannotCoverBatch || studio.allowanceUnavailable || studio.allowanceChecking) return;
                 formRef.current?.requestSubmit();
               }
             }}
@@ -849,7 +861,10 @@ function StudioWorkspace({
               className="studio-dock-submit-btn"
               disabled={
                 studio.availability === 'unavailable' ||
-                gate.blocked ||
+                !studio.imageAllowance?.privateCreationAvailable ||
+                allowanceCannotCoverBatch ||
+                studio.allowanceUnavailable ||
+                studio.allowanceChecking ||
                 !studio.ready ||
                 authLoading ||
                 !settings.prompt.trim() ||
@@ -966,10 +981,6 @@ function StudioWorkspace({
 
                 <dl>
                   <div>
-                    <dt>Service</dt>
-                    <dd>{IMAGE_MODEL.name}</dd>
-                  </div>
-                  <div>
                     <dt>Aspect ratio</dt>
                     <dd>{activeImage.ratio}</dd>
                   </div>
@@ -978,8 +989,8 @@ function StudioWorkspace({
                     <dd>{activeImage.quality === 'hd' ? 'High detail' : 'Standard'}</dd>
                   </div>
                   <div>
-                    <dt>Visibility</dt>
-                    <dd>{activeImage.visibility === 'private' ? 'Private · only you' : activeImage.visibility === 'unlisted' ? 'Unlisted' : 'Public · Explore'}</dd>
+                    <dt>Work type</dt>
+                    <dd>Private · only you</dd>
                   </div>
                   {activeImage.createdAt && (
                     <div>
@@ -1029,20 +1040,6 @@ function StudioWorkspace({
                       fill={activeImage.favorite ? 'currentColor' : 'none'}
                     />
                     {activeImage.favorite ? 'Remove from favorites' : 'Add to favorites'}
-                  </button>
-                )}
-
-                {activeImage.saved && (
-                  <button
-                    className="studio-secondary"
-                    disabled={studio.busyAsset === activeImage.id}
-                    onClick={async () => {
-                      const next = activeImage.visibility === 'private' ? 'public' : 'private';
-                      if (await studio.setVisibility(activeImage, next)) setActive({ ...activeImage, visibility: next });
-                    }}
-                  >
-                    {activeImage.visibility === 'private' ? <Globe2 size={16} aria-hidden="true" /> : <Lock size={16} aria-hidden="true" />}
-                    {activeImage.visibility === 'private' ? 'Publish to Explore' : 'Make private'}
                   </button>
                 )}
 

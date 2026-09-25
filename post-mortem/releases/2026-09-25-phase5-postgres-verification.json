@@ -1,0 +1,60 @@
+{
+  "classification": "private",
+  "observed_at": "2026-09-25T06:58:40Z",
+  "scope": "Phase 5 local runtime verification against a uniquely owned disposable PostgreSQL 17/pgvector container. No production or hosted database, object storage, CDN, environment setting, or deployment was inspected or changed.",
+  "working_tree_revision": "Repository HEAD plus uncommitted Phase 3-5 working-tree changes; see git status at handoff.",
+  "command": "env -u GALX_INTEGRATION_DATABASE_URL npm run test:image:db",
+  "result": "PASS",
+  "runtime_evidence": {
+    "fixture": "scripts/run-supabase-integration.ts created an ephemeral PostgreSQL 17/pgvector container bound to loopback with tmpfs data, a memory limit, isolated child environment, and ownership-checked cleanup.",
+    "migrations_applied": 153,
+    "database_assertions_passed": 71,
+    "database_assertions_failed": 0,
+    "test_output": "{\"checks\":71,\"failed\":0,\"scope\":\"disposable PostgreSQL only\"}"
+  },
+  "verified_behaviors": [
+    "All repository migrations applied in lexical order; the targeted image request, private human Work/Star publishing, and allowance migrations were safely replayed for idempotency checks.",
+    "Owner-private Works remained visible only through the owner-scoped library path; anon and authenticated owner/non-owner checks did not expose another human's Work.",
+    "Human writes and transitions into Star-published/public state were rejected; the internal authorized Star path published a Work visible in the public feed and Star archive.",
+    "Public feed/archive projections excluded private human Works; role grants, RLS, forced RLS, and projection predicates were checked against PostgreSQL catalogs and role execution.",
+    "Unapproved allowance configuration failed closed; reservations were atomic under concurrent idempotent and competing requests, with insufficient quota rejected before dispatch.",
+    "Successful, known pre-dispatch rejection/cancellation, expiration, and ambiguous/unknown lifecycle outcomes preserved their specified reserved/settled/released accounting; replayed cleanup and worker calls did not double-transition or dispatch.",
+    "Browser roles had no direct private-table access or write grants on public projections; denied-role probes used savepoints so one expected SQL error did not contaminate later assertions in the same transaction."
+  ],
+  "defects_found_and_fixed": [
+    "Removed the historical four-argument fn_batch_mutate_image_library overload; its coexistence with a defaulted five-argument version made ordinary four-argument repository calls ambiguous.",
+    "Changed the image-request generation trigger to bootstrap a missing human identity only; PostgreSQL fires a BEFORE INSERT identity trigger even for an ON CONFLICT DO NOTHING attempt, which previously conflicted with immutable autonomous Star classification.",
+    "Corrected the grant assertion so its public projection write check excludes SELECT, and isolated expected-denial probes with savepoints. These were integration-harness defects, not permission-policy relaxations."
+  ],
+  "release_certification": {
+    "command": "npm run release:certify",
+    "result": "RELEASE NOT READY",
+    "local_pass_gates": [
+      "typecheck",
+      "lint",
+      "application/security tests",
+      "image scale tests",
+      "authentication/session tests",
+      "billing lifecycle tests",
+      "migration/static integrity",
+      "Postgres migration/integration and RLS/grant tests",
+      "production build",
+      "sleeping-Star invariant",
+      "Sites fairness tests",
+      "local production HTTP probe",
+      "read-only local privacy/deployment audit",
+      "database/grant verification"
+    ],
+    "remaining_gates": {
+      "documentation checks": "FAIL at that run because scripts/test-image-requests-db.ts changed after its semantic review; a focused review refresh and certification rerun are required.",
+      "compiled boundary scan": "FAIL at that run for the same stale source-review fingerprint; the emitted scan did inspect 526 assets without reporting private markers/runtime trace paths.",
+      "hosted deployment audit": "BLOCKED; no explicit read-only production database target was selected, and object-storage/CDN inventories and deployed environment/route evidence remain absent.",
+      "allowance configuration": "UNAPPROVED; no plan allowance or output cost/weight values were invented."
+    }
+  },
+  "limits": [
+    "Disposable PostgreSQL runtime behavior is verified only for the repository fixture; it is not proof that hosted Supabase has the same migrations, grants, policies, views, or settings.",
+    "Historical public object URLs, bucket visibility, CDN caches, deployed authentication, and production route authorization remain unverified.",
+    "No image provider request, paid creation, production write, migration deployment, cache purge, or allowance activation occurred."
+  ]
+}

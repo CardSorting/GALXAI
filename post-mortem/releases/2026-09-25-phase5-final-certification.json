@@ -1,0 +1,43 @@
+{
+  "classification": "private",
+  "observed_at": "2026-09-25T07:13:56Z",
+  "command": "npm run release:certify",
+  "result": "RELEASE NOT READY",
+  "counts": { "PASS": 16, "FAIL": 0, "BLOCKED": 1, "UNAPPROVED": 1 },
+  "gates": {
+    "PASS": [
+      "typecheck",
+      "lint",
+      "application/security tests",
+      "image scale tests",
+      "authentication/session tests",
+      "billing lifecycle tests",
+      "migration/static integrity",
+      "Postgres migration/integration and RLS/grant tests",
+      "documentation checks",
+      "production build",
+      "compiled boundary scan",
+      "sleeping-Star invariant",
+      "Sites fairness tests",
+      "local production HTTP probe",
+      "read-only local privacy/deployment audit",
+      "database/grant verification"
+    ],
+    "BLOCKED": ["hosted/deployment audit"],
+    "UNAPPROVED": ["allowance configuration"]
+  },
+  "external_findings": {
+    "cloudflare": "Read-only account inventory did not contain the configured private-image bucket. The configured public asset bucket's R2 custom-domain and r2.dev serving settings were disabled; unauthenticated HEAD of its hostname root returned 403. No object inventory or per-object CDN/origin check was available.",
+    "historical_human_assets": "UNVERIFIED; no conclusion that old human-generated images are or are not publicly reachable is supportable without the complete historical inventory and per-object origin/cache probes.",
+    "hosted_supabase": "BLOCKED; no explicit GALX_RELEASE_AUDIT_DATABASE_URL or equivalent selected read-only database session was provided.",
+    "deployed_application": "BLOCKED; production environment/binding presence, deployed route authorization, and deployed Worker/application revisions were not inspected in a selected read-only console."
+  },
+  "business_input": "Workshop, Studio, and MAX monthly units and Standard/HD output weights remain UNAPPROVED. No values were invented; paid image checkout and dispatch stay fail-closed.",
+  "runtime_evidence": "post-mortem/releases/2026-09-25-phase5-postgres-verification.json records 153 migrations and 71 passed assertions against disposable PostgreSQL only.",
+  "hosted_audit_evidence": "post-mortem/releases/2026-09-25-phase5-hosted-readonly-audit.json records the bounded Cloudflare observations and their limits.",
+  "actions_not_taken": [
+    "No production migration, deployment, setting change, bucket creation/deletion, cache purge, image generation, upload, or paid inference occurred.",
+    "No allowance values were approved or activated."
+  ],
+  "release_condition": "Do not claim release readiness until the missing private-storage binding is reconciled by its owner, a complete human-asset/object/CDN inventory is verified, hosted Supabase and deployed application gates pass, and allowance economics are explicitly approved and re-certified."
+}

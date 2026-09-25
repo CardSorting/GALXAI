@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
-import { ImageRequestService, imageRequestResponse, imageRequestSnapshot } from '@/lib/images/request-service';
+import { ImageRequestService, imageRequestResponse, imageRequestSnapshot, publicImageRequestStatus } from '@/lib/images/request-service';
 import { imageError, imageHeaders } from '@/lib/security/public-image-http';
 import { logImageFailure } from '@/lib/security/private-image-diagnostics';
 import { enforceDeveloperApiKeyAccess } from '@/lib/security/developer-access';
@@ -27,7 +27,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     if (task.state === 'failed' || task.state === 'cancelled') return imageError('generation_failed', requestId);
     if (task.state !== 'completed') {
       const headers = imageHeaders(requestId, 'application/json'); headers.set('Retry-After', '3');
-      return new Response(JSON.stringify({ id: task.id, status: task.state }), { status: 202, headers });
+      return new Response(JSON.stringify({ id: task.id, status: publicImageRequestStatus(task.state) }), { status: 202, headers });
     }
     return await imageRequestResponse(task,requestId,Boolean(req.headers.get('accept')?.includes('application/json')));
   } catch (error) { logImageFailure(requestId, error); return imageError('temporarily_unavailable', requestId, 3); }

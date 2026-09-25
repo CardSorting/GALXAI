@@ -1,12 +1,11 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { GENERATION_QUOTA_CHANGED } from '@/lib/billing/free-generation-contract';
 import { workspaceFetch } from '@/lib/auth/workspace-client';
 import { startActivityPolling, imageStatusDelay, retryAfterDelay } from '@/lib/resilience/activity-polling';
-import { DEFAULT_SETTINGS, appendCreations, generationBody, readGeneration, readLibrary, readImageDetail, readPending, readSettings, studioError,
-  estimateGenerationSeconds, calculateGenerationProgress, readPendingGenerations, generationStatusFailure, MAX_ACTIVE_GENERATIONS,
-  type PendingGeneration, type StudioImage, type StudioSettings } from './studio-contract';
+import { DEFAULT_SETTINGS, appendCreations, generationBody, readGeneration, readLibrary, readImageDetail, readPending, readSettings, readPrivateAllowance, studioError,
+  readPendingGenerations, generationStatusFailure, MAX_ACTIVE_GENERATIONS,
+  type PendingGeneration, type StudioImage, type StudioImageAllowance, type StudioSettings } from './studio-contract';
 
 function stored(key: string): unknown {
   try { return JSON.parse(sessionStorage.getItem(key) || 'null'); } catch { return null; }
@@ -33,6 +32,10 @@ export function useImageStudio(owner: string | null, token?: string, libraryActi
   const [availability, setAvailability] = useState<'available' | 'unavailable' | 'unknown'>('unknown');
   const [checkingAvailability, setCheckingAvailability] = useState(false);
   const [availabilityRetryAt, setAvailabilityRetryAt] = useState(0);
+  const [imageAllowance, setImageAllowance] = useState<StudioImageAllowance | null>(null);
+  const [allowanceChecking, setAllowanceChecking] = useState(true);
+  const [allowanceUnavailable, setAllowanceUnavailable] = useState(false);
+  const allowanceSequence = useRef(0);
   const availabilityLock = useRef(false);
   const availabilitySequence = useRef(0);
   const availabilityAttempt = useRef(0);
@@ -62,6 +65,28 @@ export function useImageStudio(owner: string | null, token?: string, libraryActi
   const assetLock = useRef(false);
   const activeTasks = useRef<Map<string, PendingGeneration>>(new Map());
   const headers = useCallback((): Record<string, string> => ({ Accept: 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) }), [token]);
+
+  const refreshAllowance = useCallback(async () => {
+    const sequence = ++allowanceSequence.current;
+    if (!owner) { setImageAllowance(null); setAllowanceUnavailable(false); setAllowanceChecking(false); return; }
+    setAllowanceChecking(true);
+    try {
+      const response = await workspaceFetch(owner, '/api/billing/image-allowance', {
+        headers: headers(), cache: 'no-store', signal: AbortSignal.timeout(8000),
+      });
+      if (!response.ok) throw new Error('Allowance unavailable');
+      const value = readPrivateAllowance(await response.json());
+      if (alive.current && sequence === allowanceSequence.current) {
+        setImageAllowance(value); setAllowanceUnavailable(false);
+      }
+    } catch {
+      if (alive.current && sequence === allowanceSequence.current) setAllowanceUnavailable(true);
+    } finally {
+      if (alive.current && sequence === allowanceSequence.current) setAllowanceChecking(false);
+    }
+  }, [headers, owner]);
+
+  useEffect(() => { void refreshAllowance(); }, [refreshAllowance]);
 
   const checkAvailability = useCallback(async (manual = false) => {
     if (!owner || availabilityLock.current) return;
@@ -226,7 +251,7 @@ export function useImageStudio(owner: string | null, token?: string, libraryActi
     if (!polling || !owner || activeTasks.current.size === 0) return;
     let active = true, attempt = 0;
     const checkStartedAt = Date.now();
-    setError(''); setProgress('Checking your generation…');
+    setError(''); setProgress('Checking your private creation…');
     const stop = startActivityPolling(async signal => {
       const tasks = [...activeTasks.current.values()].filter(task => !task.paused);
       if (!tasks.length) { setPolling(false); return null; }
@@ -247,17 +272,17 @@ export function useImageStudio(owner: string | null, token?: string, libraryActi
               const time = Date.now(); setNow(time); setRetryAt(time + Math.max(5000, delay));
               setError('Your image generation did not start. Try again shortly.');
               void checkAvailability();
-              window.dispatchEvent(new Event(GENERATION_QUOTA_CHANGED));
+              void refreshAllowance();
             } else if (failure === 'auth' || failure === 'unconfirmed') {
               task.paused = true; changed = true;
               setError(studioError(response.status));
             } else {
-              setProgress('Reconnecting… Your generation may still be running.');
+              setProgress('Your private creation is still in progress.');
             }
             return;
           }
           if (response.status === 202) {
-            if (task.id === pending?.id) setProgress(payload?.status === 'queued' ? 'Waiting to start…' : 'Creating your images…');
+            if (task.id === pending?.id) setProgress('Your private creation is in progress.');
             return;
           }
           const completed = readGeneration(payload, task.settings, task.id);
@@ -265,7 +290,7 @@ export function useImageStudio(owner: string | null, token?: string, libraryActi
           activeTasks.current.delete(task.id); changed = true; completedAny = true;
           setNotice('Your images are ready. Download them or reuse the prompt.');
         } catch {
-          if (active && alive.current && !signal.aborted) setProgress('Reconnecting… Your generation may still be running.');
+          if (active && alive.current && !signal.aborted) setProgress('Your private creation is still in progress.');
         }
       }));
       if (!active || !alive.current || signal.aborted) return null;
@@ -279,10 +304,18 @@ export function useImageStudio(owner: string | null, token?: string, libraryActi
       return delay;
     });
     return () => { active = false; stop(); };
-  }, [headers, owner, pending?.id, polling, refresh, persistTasks, checkAvailability]);
+  }, [headers, owner, pending?.id, polling, refresh, refreshAllowance, persistTasks, checkAvailability]);
 
   async function generate(recovery?: PendingGeneration) {
-    if (!owner || !settings.prompt.trim() || submitting || submitLock.current || (!recovery && availability === 'unavailable') || (uncertain && !recovery) || activeTasks.current.size >= MAX_ACTIVE_GENERATIONS || Date.now() < retryAt) return;
+    const requestedSettings = recovery?.settings || settings;
+    const requestedUnits = imageAllowance?.allowance
+      ? requestedSettings.count * (requestedSettings.quality === 'hd' ? imageAllowance.allowance.hdOutputUnits : imageAllowance.allowance.standardOutputUnits)
+      : Number.POSITIVE_INFINITY;
+    const allowanceBlocks = !imageAllowance?.plan || !imageAllowance.privateCreationAvailable ||
+      requestedUnits > (imageAllowance.allowance?.remainingUnits ?? 0);
+    if (!owner || !requestedSettings.prompt.trim() || submitting || submitLock.current ||
+      (!recovery && (availability === 'unavailable' || allowanceUnavailable || allowanceChecking || allowanceBlocks)) ||
+      (uncertain && !recovery) || activeTasks.current.size >= MAX_ACTIVE_GENERATIONS || Date.now() < retryAt) return;
     submitLock.current = true; setSubmitting(true); setError(''); setNotice('');
     setUncertain(false); save(`${key}:unconfirmed`, null);
     const controller = new AbortController(); submitController.current = controller;
@@ -296,15 +329,17 @@ export function useImageStudio(owner: string | null, token?: string, libraryActi
     try {
       const response = await workspaceFetch(owner, '/v1/images/generations', { method: 'POST', headers: { ...headers(), 'Content-Type': 'application/json', Prefer: 'respond-async', 'Idempotency-Key': id },
         body: JSON.stringify(generationBody(snapshot)), signal: controller.signal });
-      window.dispatchEvent(new Event(GENERATION_QUOTA_CHANGED));
+      void refreshAllowance();
       if (!alive.current) return;
       if (!response.ok) {
         const seconds = Number(response.headers.get('Retry-After'));
         if (Number.isFinite(seconds) && seconds > 0) { const time = Date.now(); setNow(time); setRetryAt(time + Math.min(seconds, 3600) * 1000); }
         const code=(await response.json().catch(()=>null))?.error?.code;
-        setError(code==='free_generation_paused'?'Free image creation is temporarily paused. Your quota was not used. Try later or explore Pro.'
-          : code==='free_generation_busy'?'Free image creation is busy right now. Your quota was not used. Try again later.'
-          : code==='free_quota_exhausted'?'Your free image quota is used up. Explore Pro to keep creating.':studioError(response.status));
+        setError(code==='image_plan_required'?'A paid GALX Images tier is required for private creation.'
+          : code==='image_allowance_exhausted'?'Creation allowance exhausted. Review your plan or wait for renewal.'
+          : code==='image_allowance_unavailable'?'Your creation allowance could not be verified. No image was dispatched; try again shortly.'
+          : code==='publishing_forbidden'?'Human accounts cannot publish Works to GALX.'
+          : studioError(response.status));
         if (response.status >= 500) setUncertain(true);
         else { save(`${key}:unconfirmed`, null); save(`${key}:submission`, null); setRecoverableSubmission(false); }
         return;
@@ -319,7 +354,7 @@ export function useImageStudio(owner: string | null, token?: string, libraryActi
       } else {
         const completed = readGeneration(payload, snapshot, id);
         setCreations(current => appendCreations(current, completed, pinned.current));
-        save(`${key}:unconfirmed`, null); save(`${key}:submission`, null); setRecoverableSubmission(false); refresh(); setNotice('Your images are ready.');
+        save(`${key}:unconfirmed`, null); save(`${key}:submission`, null); setRecoverableSubmission(false); refresh(); void refreshAllowance(); setNotice('Your images are ready.');
       }
     } catch {
       if (alive.current) { setError('The connection was interrupted. Your images may still finish. Check your library before generating again.'); setUncertain(true); }
@@ -351,26 +386,6 @@ export function useImageStudio(owner: string | null, token?: string, libraryActi
     finally { assetLock.current = false; if (alive.current) setBusyAsset(null); }
   }
 
-  async function setVisibility(image: StudioImage, visibility: 'public' | 'private') {
-    if (!owner || !image.saved || assetLock.current || image.visibility === visibility) return false;
-    assetLock.current = true; setBusyAsset(image.id);
-    try {
-      const response = await workspaceFetch(owner, `/api/images/library/${encodeURIComponent(image.id)}`, { method: 'PATCH', headers: { ...headers(), 'Content-Type': 'application/json' },
-        body: JSON.stringify({ visibility }), signal: AbortSignal.timeout(20_000) });
-      const payload = await response.json().catch(() => null);
-      if (!response.ok || payload?.success !== true) throw new Error('Visibility could not be saved. Try again.');
-      if (!alive.current) return false;
-      setImages(current => current.map(item => item.id === image.id ? { ...item, visibility } : item));
-      setCreations(current => current.map(item => item.id === image.id ? { ...item, visibility } : item));
-      setNotice(visibility === 'private'
-        ? 'Private mode on. This creation is hidden from Explore and the community stream.'
-        : 'Published. This creation can appear in Explore and the community stream.');
-      return true;
-    } catch {
-      if (alive.current) setNotice('Visibility could not be saved. Try again.');
-      return false;
-    } finally { assetLock.current = false; if (alive.current) setBusyAsset(null); }
-  }
   function clearPending() {
     // Explicit dismissal releases only paused/unconfirmed work; active work stays tracked.
     for (const task of activeTasks.current.values()) if (task.paused) activeTasks.current.delete(task.id);
@@ -392,19 +407,12 @@ export function useImageStudio(owner: string | null, token?: string, libraryActi
     clearPending();
   }
 
-  const elapsed = pending ? Math.max(0, Math.floor((now - pending.startedAt) / 1000)) : submitting ? 1 : 0;
-  const activeSettings = pending?.settings || submission || settings;
-  const estimatedTotal = estimateGenerationSeconds(activeSettings);
-  const progressMetrics = calculateGenerationProgress(elapsed, estimatedTotal, pending ? (progress.includes('Waiting') ? 'queued' : 'processing') : 'queued');
-
   return { availability, checkingAvailability, checkAvailability, recoverableSubmission, recoverSubmission: () => { const original = readPending(stored(`${key}:submission`)); if (original) void generate(original); }, activeCount, atCapacity: activeCount >= MAX_ACTIVE_GENERATIONS, resumeUpdates, settings, setSettings, ready, pending, polling, setPolling, submitting, submission, uncertain, progress, error, notice, setNotice,
-    retryIn: Math.max(0, Math.ceil((retryAt - now) / 1000)), elapsed,
-    estimatedTotal, remainingSeconds: progressMetrics.remainingSeconds, progressPercent: progressMetrics.percent,
-    generationPhase: progressMetrics.phase, phaseStatusText: progressMetrics.statusText,
+    retryIn: Math.max(0, Math.ceil((retryAt - now) / 1000)),
     creations, images, total, cursor, previousCursor, page, getDetails, libraryLoading: libraryLoading || Boolean(owner && libraryActive && !libraryView.current), libraryError, search, setSearch, favorites, sort, setSort,
-    generate, refresh, retryLibrary: () => { if (!libraryLoading) void fetchLibrary(libraryRetry.current.cursor, libraryRetry.current.page); },
+    generate, refresh, imageAllowance, allowanceChecking, allowanceUnavailable, refreshAllowance, retryLibrary: () => { if (!libraryLoading) void fetchLibrary(libraryRetry.current.cursor, libraryRetry.current.page); },
     firstPage: () => { if (!libraryLoading) void fetchLibrary(); },
     nextPage: () => { if (cursor && !libraryLoading) void fetchLibrary(cursor, page + 1); },
     previousPage: () => { if (previousCursor && !libraryLoading) void fetchLibrary(previousCursor, Math.max(1, page - 1)); },
-    toggleFavorite, setVisibility, busyAsset, clearPending, cancelPending };
+    toggleFavorite, busyAsset, clearPending, cancelPending };
 }

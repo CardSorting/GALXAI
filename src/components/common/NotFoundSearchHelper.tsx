@@ -9,8 +9,8 @@ import { Search, ArrowRight, Sparkles } from 'lucide-react';
 import { recordRecentVisit } from '@/lib/resilience/recent-navigation';
 
 const publicPages = [
-  { id: 'images', title: 'Image Studio', href: '/images', category: 'Product', description: 'Create generative images with floating composer.' },
-  { id: 'stream', title: 'Community Stream', href: '/#stream', category: 'Product', description: 'Explore live public masonry stream of community creations.' },
+  { id: 'images', title: 'Private Image Studio', href: '/images/create', category: 'Product', description: 'Create privately with an eligible image plan.' },
+  { id: 'stream', title: 'Explore', href: '/explore', category: 'Product', description: 'Browse published Works by Stars.' },
   { id: 'billing', title: 'Account and billing', href: BILLING_PATHS.overview, category: 'Account', description: 'Your credits, plan and payments.' },
 ];
 
@@ -59,7 +59,7 @@ export function NotFoundSearchHelper() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Find Images, Sites, or account pages…"
+          placeholder="Find Explore, private creation, Sites, or account pages…"
           className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-black/60 border border-white/10 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all font-sans"
           aria-label="Find a page"
         />

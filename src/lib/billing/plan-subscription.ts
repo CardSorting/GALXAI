@@ -8,6 +8,8 @@ import { USAGE_PRICING } from './usage-pricing';
 import { BILLING_PATHS } from './navigation';
 import type { FairPolicy } from '../sites/fair-store';
 import { IMAGE_PLAN_BY_ID, IMAGE_PLAN_CATALOG, type ImagePlanId, type ImagePlanKey } from './image-plan-catalog';
+import { imagePlanAllowanceApproved, IMAGE_ALLOWANCE_CONFIGURATION, type ImageAllowanceConfiguration } from './image-allowance-config';
+import { GalxUnifiedR2StorageManager } from '../../core/storage/GalxUnifiedR2StorageManager';
 
 export const PRO_LOOKUP_KEY = 'galx_pro_monthly_v1';
 export const PRO_PRODUCT_ID = 'galx_pro_v1';
@@ -45,14 +47,30 @@ export async function proPrice(stripe: Stripe, policy: FairPolicy) {
 /** Validate an active image tier before creating a Checkout Session. The public
  * plan ID is mapped to one server-owned lookup key; callers cannot supply a
  * Stripe Price ID or arbitrary amount. */
-export async function imagePlanPrice(stripe: Stripe, policy: FairPolicy, planId: ImagePlanId) {
-  if (policy.mode !== 'enforce') throw new BillingError('Plan checkout is temporarily unavailable.', 503);
+export async function imagePlanPrice(
+  stripe: Stripe,
+  planId: ImagePlanId,
+  allowanceConfiguration: ImageAllowanceConfiguration = IMAGE_ALLOWANCE_CONFIGURATION,
+) {
   const plan = IMAGE_PLAN_BY_ID[planId];
-  if (!plan || !plan.checkoutEnabled || plan.catalogStatus !== 'active') throw new BillingError('That plan is temporarily unavailable.', 503);
-  const prices = await stripe.prices.list({ lookup_keys: [plan.stripeLookupKey], active: true, limit: 2 }, requestOptions);
+  if (!plan || !plan.checkoutEnabled || plan.catalogStatus !== 'active' ||
+      !imagePlanAllowanceApproved(allowanceConfiguration, plan.planKey)) {
+    throw new BillingError('That plan is temporarily unavailable.', 503);
+  }
+  // Do not accept payment for private creation until the authoritative
+  // server-side storage path is configured. This check runs before Stripe I/O.
+  if (!GalxUnifiedR2StorageManager.getInstance().isPrivateImageStorageConfigured()) {
+    throw new BillingError('Private creation checkout is temporarily unavailable.', 503);
+  }
+  const [prices, product] = await Promise.all([
+    stripe.prices.list({ lookup_keys: [plan.stripeLookupKey], active: true, limit: 2 }, requestOptions),
+    stripe.products.retrieve(plan.stripeProductId, {}, requestOptions),
+  ]);
   const price = prices.data[0];
-  if (prices.has_more || prices.data.length !== 1 || !price || !policy.paid_price_ids.includes(price.id) ||
+  if (prices.has_more || prices.data.length !== 1 || !price || !product.active || product.name !== plan.name ||
+      product.metadata?.galxPlan !== plan.planKey || product.metadata?.galxPublicPlan !== plan.publicId || product.metadata?.galxSurface !== 'images' ||
       objectId(price.product) !== plan.stripeProductId || price.metadata?.galxPlan !== plan.planKey ||
+      price.metadata?.galxPublicPlan !== plan.publicId ||
       price.metadata?.catalogStatus !== 'active' || price.metadata?.checkoutEnabled !== 'true' ||
       price.currency !== 'usd' || price.unit_amount !== plan.monthlyPriceUsd * 100 ||
       price.recurring?.interval !== 'month' || price.recurring.interval_count !== 1 || price.recurring.usage_type !== 'licensed') {
@@ -185,7 +203,7 @@ export async function createProCheckout(pool: Pool, stripe: Stripe, policy: Fair
     idempotencyPrefix: 'pro-checkout', customerIdempotencyPrefix: 'pro-customer',
     legacyReturnPath: BILLING_PATHS.overview, legacyReturnHash: '#plan',
     checkoutLockPrefix: 'consumer-plan-checkout', keySeedPrefix: 'pro',
-    isExistingSubscription: subscription => subscription.items.data.some(item => policy.paid_price_ids.includes(item.price.id)),
+    isExistingSubscription: subscription => subscription.items.data.some(item => objectId(item.price.product) === PRO_PRODUCT_ID),
   }, input);
 }
 
@@ -195,13 +213,13 @@ export async function createProCheckout(pool: Pool, stripe: Stripe, policy: Fair
 export async function createImagePlanCheckout(
   pool: Pool,
   stripe: Stripe,
-  policy: FairPolicy,
   planId: ImagePlanId,
   input: { userId: string; requestId: string; origin: string },
 ) {
   const plan = IMAGE_PLAN_BY_ID[planId];
   if (!plan) throw new BillingError('That plan is not available.', 400);
-  const price = await imagePlanPrice(stripe, policy, planId);
+  const price = await imagePlanPrice(stripe, planId);
+  const imageProducts = new Set<string>(IMAGE_PLAN_CATALOG.map(item => item.stripeProductId));
   return createSubscriptionCheckout(pool, stripe, {
     planKey: plan.planKey,
     price,
@@ -213,7 +231,7 @@ export async function createImagePlanCheckout(
     checkoutLockPrefix: 'consumer-plan-checkout',
     keySeedPrefix: `images-${plan.id}`,
     checkoutNotice: `${plan.name} is a recurring Image Studio subscription at $${plan.monthlyPriceUsd}/month for one account.`,
-    isExistingSubscription: subscription => subscription.items.data.some(item => policy.paid_price_ids.includes(item.price.id)),
+    isExistingSubscription: subscription => subscription.items.data.some(item => imageProducts.has(objectId(item.price.product) || '')),
   }, input);
 }
 

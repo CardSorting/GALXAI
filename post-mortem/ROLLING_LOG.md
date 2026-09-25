@@ -1040,7 +1040,7 @@ Incident: `INC-20260916-REGISTRATION`. Kind: `observation`.
 
 **Next step:** Preserve a specific allowlisted error and obtain owner choice before reconciling historical authorization.
 
-Evidence: [README.md](incidents/2026/2026-09-16-relay-registration/README.md).
+Evidence: superseded by correction `EVT-20260916-relay-registration-count-correction`; see that dated record below.
 
 ## EVT-20260916-relay-registration-count-correction — 2026-09-16T01:34:36.209528+00:00
 
@@ -1883,3 +1883,261 @@ Incident: `INC-20260913-IMAGES`. Kind: `verification`.
 **Next step:** Keep ACT-018 open until sign-in, Docker/Colima restart, unhealthy-service restart, sleep/wake and duplicate-owner acceptance are evidenced. Retain the assigned reviews for ACT-005/006/008/014.
 
 Evidence: [2026-09-23-local-relay-readiness-hardening.json](releases/2026-09-23-local-relay-readiness-hardening.json), [CURRENT_STATE.md](CURRENT_STATE.md), [register.json](register.json), [0159-local-mac-relay-operation.md](../docs/adr/0159-local-mac-relay-operation.md), [relay-pool-services.md](../docs/runbooks/relay-pool-services.md), [reviews.json](../docs/knowledge/reviews.json).
+
+## EVT-20260924-phase4-act001-review — 2026-09-24T23:35:03Z
+
+Incident: `INC-20260912-STORAGE`. Kind: `follow-up`.
+
+**Observation:** Reviewed overdue ACT-001. This local release-certification pass did not collect same-date storage metrics and deployment inventory.
+
+**Action:** Kept ACT-001 open and extended its next review date by one week; no storage or deployment resources were queried or changed.
+
+**Result:** The evidence required to close the action remains unavailable in this task. ACT-001 remains open with its closure criteria unchanged.
+
+**Next step:** Deployment maintainer records actual storage totals and current deployment inventory for the same date range while preserving active aliases and compatible rollback capacity.
+
+Evidence: [2026-09-24-phase4-action-review.json](releases/2026-09-24-phase4-action-review.json).
+
+## EVT-20260924-phase4-act005-review — 2026-09-24T23:35:03Z
+
+Incident: `INC-20260913-IMAGES`. Kind: `follow-up`.
+
+**Observation:** Reviewed overdue ACT-005 against the Phase 4 image lifecycle design and tests. Safe queued-expiry release is covered in source intent, but bounded retention for queued/failed payloads and expired receipts is still undefined.
+
+**Action:** Kept ACT-005 open and set its next review for 2026-10-01; no receipt cleanup, replay, or data deletion was performed.
+
+**Result:** Retention remains an unresolved privacy/idempotency task. Ambiguous outcomes continue to reserve usage and cannot be automatically retried or refunded.
+
+**Next step:** Image maintainer specifies and tests bounded retention for accepted, expired, and ambiguous operations before any activation.
+
+Evidence: [2026-09-24-phase4-action-review.json](releases/2026-09-24-phase4-action-review.json), [private-image-accounting.md](../docs/maintainers/private-image-accounting.md), [test-image-requests-db.ts](../scripts/test-image-requests-db.ts).
+
+## EVT-20260924-phase4-act006-review — 2026-09-24T23:35:03Z
+
+Incident: `INC-20260912-AUTH`. Kind: `follow-up`.
+
+**Observation:** Reviewed overdue ACT-006. Local session tests exercise separation between ordinary authentication and administrative authority, but this pass did not inventory every production administrator credential dependency or hosted role.
+
+**Action:** Kept ACT-006 open and set its next review for 2026-10-01; no credentials or hosted configuration were inspected.
+
+**Result:** A complete administrator dependency audit remains outstanding; public Auth verification is not treated as administrative access.
+
+**Next step:** Identity maintainer inventories administrator-only paths and verifies least-privilege authority independently of ordinary user authentication.
+
+Evidence: [2026-09-24-phase4-action-review.json](releases/2026-09-24-phase4-action-review.json), [test-auth-identity-boundary.ts](../scripts/test-auth-identity-boundary.ts), [test-workspace-auth.ts](../scripts/test-workspace-auth.ts).
+
+## EVT-20260924-phase4-act008-review — 2026-09-24T23:35:03Z
+
+Incident: `INC-20260913-DOCS`. Kind: `follow-up`.
+
+**Observation:** Reviewed overdue ACT-008 alongside the Phase 4 source-bound guides and the docs impact inventory. Generated catalog/domain/inventory paths are the only unmapped paths; registered-domain reviews still require explicit semantic attestations.
+
+**Action:** Kept ACT-008 open and set its next review for 2026-10-01. No fingerprints were refreshed before body review.
+
+**Result:** Documentation review debt is being addressed with retained evidence; the action remains ongoing and open.
+
+**Next step:** Documentation maintainer continues weekly source-bound review and records evidence before refreshing review fingerprints.
+
+Evidence: [2026-09-24-phase4-action-review.json](releases/2026-09-24-phase4-action-review.json), [change-with-documentation.md](../docs/how-to/change-with-documentation.md), [DOCUMENTATION_POLICY.md](../docs/DOCUMENTATION_POLICY.md).
+
+## EVT-20260924-phase4-act014-review — 2026-09-24T23:35:03Z
+
+Incident: `INC-20260913-WORKSPACE`. Kind: `follow-up`.
+
+**Observation:** Reviewed overdue ACT-014. Local auth/session tests pass, but durable device approval/poll ownership and single-use database behavior remain runtime-unverified because Docker/PostgreSQL could not start.
+
+**Action:** Kept ACT-014 open and set its next review for 2026-10-01; legacy elevation stays closed.
+
+**Result:** The database acceptance gate is blocked, not presumed successful. No hosted database was mutated.
+
+**Next step:** Run device-grant ownership, expiry, and one-time-consumption checks against a disposable PostgreSQL instance before changing the action status.
+
+Evidence: superseded by correction `EVT-20260924-phase4-act014-correction`; see that dated record below.
+
+## EVT-20260924-phase4-act015-review — 2026-09-24T23:35:03Z
+
+Incident: `INC-20260913-WORKSPACE`. Kind: `follow-up`.
+
+**Observation:** Reviewed overdue ACT-015. The prior refreshed-profile availability observation remains nonreproduced, and no hosted Auth/private lookup diagnostics were inspected.
+
+**Action:** Kept ACT-015 open and set its next review for 2026-10-01; no production identity request was made.
+
+**Result:** No cause or nonrecurrence claim is inferred from this local image release task.
+
+**Next step:** If the symptom recurs, retain allowlisted status/timing and correlate private Auth/lookup evidence; otherwise record an evidence-backed monitoring disposition.
+
+Evidence: superseded by correction `EVT-20260924-phase4-act015-correction`; see that dated record below.
+
+## EVT-20260924-phase4-act016-review — 2026-09-24T23:35:03Z
+
+Incident: `INC-20260913-RENDER`. Kind: `follow-up`.
+
+**Observation:** Reviewed overdue ACT-016. Local rendered/build boundary checks are in scope, but this pass did not correlate a production digest or execute the authenticated Images/Sites recovery matrix.
+
+**Action:** Kept ACT-016 open and set its next review for 2026-10-01; no deployment was made.
+
+**Result:** Local checks cannot substitute for deployed acceptance or resolve the reported production digest.
+
+**Next step:** Release maintainer privately correlates the digest and completes deployed authenticated Images/Sites acceptance.
+
+Evidence: [2026-09-24-phase4-action-review.json](releases/2026-09-24-phase4-action-review.json), [release-certification.ts](../scripts/release-certification.ts).
+
+## EVT-20260924-phase4-act020-review — 2026-09-24T23:35:03Z
+
+Incident: `INC-20260913-IMAGES`. Kind: `follow-up`.
+
+**Observation:** Reviewed overdue ACT-020 against Phase 4. No signed-in production generation, library, Favorite, or download was performed; allowance configuration remains unapproved and hosted route authorization is unaudited.
+
+**Action:** Kept ACT-020 open and set its next review for 2026-10-01. No provider inference or production write was issued.
+
+**Result:** The local private path remains subject to local tests only; live capacity, auth, settlement, and deployed privacy are not claimed.
+
+**Next step:** After business approval and release authorization, verify fresh capability and complete signed-in production generation/library/download acceptance without replaying unknown work.
+
+Evidence: [2026-09-24-phase4-action-review.json](releases/2026-09-24-phase4-action-review.json), [release-certification.ts](../scripts/release-certification.ts), [private-image-release-audit.md](../docs/runbooks/private-image-release-audit.md).
+
+## EVT-20260924-phase4-act025-review — 2026-09-24T23:35:03Z
+
+Incident: `INC-20260916-SHAREDQUOTA`. Kind: `follow-up`.
+
+**Observation:** Reviewed overdue ACT-025. The Phase 4 image allowance work does not establish separate relay/SDK caller distribution or deliberate continuation with owner-scoped revision-aware checkpoints.
+
+**Action:** Kept ACT-025 open and set its next review for 2026-10-01; no provider workload or retry was issued.
+
+**Result:** The existing no-replay/unknown-outcome rule remains unchanged; hard provider spending bounds are not inferred.
+
+**Next step:** Relay/SDK maintainer completes compatible caller distribution and deliberate continuation/checkpoint acceptance.
+
+Evidence: [2026-09-24-phase4-action-review.json](releases/2026-09-24-phase4-action-review.json).
+
+## EVT-20260924-phase4-act028-review — 2026-09-24T23:35:03Z
+
+Incident: `INC-20260916-SESSION`. Kind: `follow-up`.
+
+**Observation:** Reviewed overdue ACT-028. Local auth/session regressions pass, but real provider/email callbacks, account switching, physical browser-history restoration, and failed-revocation browser acceptance remain untested.
+
+**Action:** Kept ACT-028 open and set its next review for 2026-10-01; no production identity or browser session was altered.
+
+**Result:** Unit and local route evidence does not establish those external browser/provider cases.
+
+**Next step:** Security/access maintainer completes the explicit provider and original-browser acceptance matrix while retaining session authority and revocation checks.
+
+Evidence: superseded by correction `EVT-20260924-phase4-act028-correction`; see that dated record below.
+
+## EVT-20260924-phase4-action-evidence-correction — 2026-09-24T23:40:00Z
+
+Incident: `INC-20260913-WORKSPACE`. Kind: `follow-up`.
+
+**Observation:** The Phase 4 action-review append included an invalid path-like evidence label for the auth-session suite in ACT-014, ACT-015, and ACT-028 follow-up records.
+
+**Action:** Preserved the original append-only events and recorded the valid local evidence paths here; no source or production state changed.
+
+**Result:** The applicable local evidence file is scripts/test-workspace-auth.ts. ACT-014 database behavior remains runtime-blocked; ACT-015 hosted behavior and ACT-028 external browser/provider behavior remain unverified.
+
+**Next step:** Use this correction with the original follow-up records when validating evidence paths; do not interpret local tests as hosted acceptance.
+
+Evidence: [2026-09-24-phase4-action-review.json](releases/2026-09-24-phase4-action-review.json), [test-workspace-auth.ts](../scripts/test-workspace-auth.ts).
+
+## EVT-20260924-phase4-act014-correction — 2026-09-24T23:41:00Z
+
+Incident: `INC-20260913-WORKSPACE`. Kind: `correction`.
+
+**Observation:** Corrects the evidence list in the ACT-014 Phase 4 follow-up; the original journal record remains preserved.
+
+**Action:** Replace the invalid evidence label scripts/test-auth:sessions with scripts/test-workspace-auth.ts for this follow-up only.
+
+**Result:** Valid local auth evidence is now linked. PostgreSQL ownership, expiry, and one-time-consumption behavior remain runtime-blocked.
+
+**Next step:** Use the corrected evidence reference with the original ACT-014 review record.
+
+Evidence: [2026-09-24-phase4-action-review.json](releases/2026-09-24-phase4-action-review.json), [test-workspace-auth.ts](../scripts/test-workspace-auth.ts).
+
+Corrects `EVT-20260924-phase4-act014-review`; the original entry remains retained.
+
+## EVT-20260924-phase4-act015-correction — 2026-09-24T23:41:00Z
+
+Incident: `INC-20260913-WORKSPACE`. Kind: `correction`.
+
+**Observation:** Corrects the evidence list in the ACT-015 Phase 4 follow-up; the original journal record remains preserved.
+
+**Action:** Replace the invalid evidence label scripts/test-auth:sessions with scripts/test-workspace-auth.ts for this follow-up only.
+
+**Result:** Valid local auth evidence is now linked. Hosted Auth and private-lookup diagnostics remain unverified.
+
+**Next step:** Use the corrected evidence reference with the original ACT-015 review record.
+
+Evidence: [2026-09-24-phase4-action-review.json](releases/2026-09-24-phase4-action-review.json), [test-workspace-auth.ts](../scripts/test-workspace-auth.ts).
+
+Corrects `EVT-20260924-phase4-act015-review`; the original entry remains retained.
+
+## EVT-20260924-phase4-act028-correction — 2026-09-24T23:41:00Z
+
+Incident: `INC-20260916-SESSION`. Kind: `correction`.
+
+**Observation:** Corrects the evidence list in the ACT-028 Phase 4 follow-up; the original journal record remains preserved.
+
+**Action:** Replace the invalid evidence label scripts/test-auth:sessions with scripts/test-workspace-auth.ts for this follow-up only.
+
+**Result:** Valid local auth evidence is now linked. External provider callbacks and browser acceptance remain unverified.
+
+**Next step:** Use the corrected evidence reference with the original ACT-028 review record.
+
+Evidence: [2026-09-24-phase4-action-review.json](releases/2026-09-24-phase4-action-review.json), [test-workspace-auth.ts](../scripts/test-workspace-auth.ts).
+
+Corrects `EVT-20260924-phase4-act028-review`; the original entry remains retained.
+
+## EVT-20260925-phase5-image-postgres-verification — 2026-09-25T06:58:40Z
+
+Incident: `INC-20260913-IMAGES`. Kind: `verification`.
+
+**Observation:** The Docker-backed image database suite applied all 153 migrations and passed 71 checks against a disposable PostgreSQL 17/pgvector fixture. The run exposed and led to fixes for an ambiguous image-library RPC overload and Star identity bootstrap behavior; the grant and role-denial probes were also corrected without relaxing policy.
+
+**Action:** Removed the obsolete four-argument RPC overload, made generation identity bootstrap skip pre-existing Star identities, and strengthened the database assertions for role grants, views, private ownership, allowance reservation, and idempotent lifecycle transitions.
+
+**Result:** Local disposable Postgres integration passed. No production database/storage/CDN was accessed or mutated. The hosted privacy audit remains blocked pending an explicit read-only target and historical asset/cache evidence; allowance economics remain unapproved.
+
+**Next step:** Refresh only the semantically affected image/database review attestations using the retained runtime evidence, rerun release certification, and obtain an explicitly authorized read-only hosted inventory before any release-readiness claim.
+
+Evidence: [2026-09-25-phase5-postgres-verification.json](releases/2026-09-25-phase5-postgres-verification.json), [test-image-requests-db.ts](../scripts/test-image-requests-db.ts), [20260924020000_private_human_works_star_publication_boundary.sql](../supabase/migrations/20260924020000_private_human_works_star_publication_boundary.sql), [run-supabase-integration.ts](../scripts/run-supabase-integration.ts).
+
+## EVT-20260925-phase5-hosted-cloudflare-readonly — 2026-09-25T07:10:02Z
+
+Incident: `INC-20260913-IMAGES`. Kind: `verification`.
+
+**Observation:** A read-only R2 metadata audit selected the account through the repository's production configuration. The declared private image bucket was absent from that account's bucket inventory; the public asset custom-domain and development-URL serving options were disabled. An unauthenticated HEAD to the asset hostname root returned 403, which does not establish per-object privacy.
+
+**Action:** Preserved the findings and limits in a private release artifact. Did not create the missing bucket, change serving settings, list/download objects, inspect credentials, or mutate/deploy production resources.
+
+**Result:** Historical human-generated objects and cached copies remain UNVERIFIED because no complete object/provenance inventory or per-object probes were available. Hosted Supabase metadata and deployed app/Worker settings remain BLOCKED because no explicit read-only target was selected.
+
+**Next step:** Have the release owner provide an authorized read-only Supabase database target plus object-inventory access/export and deployment-console evidence; reconcile every legacy human asset and origin/cache URL before any privacy claim or remediation.
+
+Evidence: [2026-09-25-phase5-hosted-readonly-audit.json](releases/2026-09-25-phase5-hosted-readonly-audit.json), [private-image-release-audit.md](../docs/runbooks/private-image-release-audit.md), [audit-image-release.ts](../scripts/audit-image-release.ts), [wrangler.toml](../wrangler.toml).
+
+## EVT-20260925-phase5-final-certification — 2026-09-25T07:13:56Z
+
+Incident: `INC-20260913-IMAGES`. Kind: `verification`.
+
+**Observation:** After all ten semantic documentation reviews and the critical source review were current, final release certification reported 16 PASS, 0 FAIL, 1 BLOCKED, and 1 UNAPPROVED. Documentation, compiled boundary scan, local production build/HTTP, lifecycle, and disposable Postgres gates passed.
+
+**Action:** Stopped at the release boundary. Kept allowance economics unapproved and left all production remediation for separately authorized work; no bucket, route, database, or CDN changes were made.
+
+**Result:** RELEASE NOT READY. The hosted/deployment gate is blocked, and allowance configuration is unapproved. The production R2 account inventory is missing the configured private-image bucket; historical human image reachability remains UNVERIFIED rather than being inferred from disabled public toggles or a root 403.
+
+**Next step:** Release owner supplies explicit read-only Supabase, complete object/CDN inventory, and deployed-console evidence; separately approves Workshop/Studio/MAX and Standard/HD allowance values before any activation or final certification.
+
+Evidence: [2026-09-25-phase5-final-certification.json](releases/2026-09-25-phase5-final-certification.json), [2026-09-25-phase5-postgres-verification.json](releases/2026-09-25-phase5-postgres-verification.json), [2026-09-25-phase5-hosted-readonly-audit.json](releases/2026-09-25-phase5-hosted-readonly-audit.json), [release-certification.ts](../scripts/release-certification.ts).
+
+## EVT-20260925-image-finalization-certification — 2026-09-25T08:41:39Z
+
+Incident: `INC-20260913-IMAGES`. Kind: `verification`.
+
+**Observation:** The owner approved launch allowance defaults of Workshop 100, Studio 500, MAX 2,000 monthly units, Standard 1 unit, and HD 2 units. The canonical local configuration now carries these values, and the full local release runner reports 17 PASS, 0 FAIL, 1 hosted/deployment BLOCKED, and 0 UNAPPROVED with status RELEASE CANDIDATE READY. Disposable PostgreSQL passed 72 integration checks across 153 migrations; docs tests and billing lifecycle tests passed.
+
+**Action:** Completed local-only allowance activation and release verification, reconciled the application-side Vercel private R2 path, and documented the current local candidate. No production database, storage, CDN, environment, payment, or deployment resource was changed; no inference was triggered.
+
+**Result:** RELEASE CANDIDATE READY; PRODUCTION NOT DEPLOYED. Historical human-image provenance/CDN reachability remains UNKNOWN/UNVERIFIED without a privacy claim. Hosted database and deployed configuration remain unverified; the application fails closed until its private bucket configuration is present. Ambiguous execution outcomes remain reserved without retry or refund.
+
+**Next step:** Before deployment, identify and inspect the exact production Supabase target and migration history, provision/configure the private Vercel-side R2 bucket through the authorized operational process, then execute the controlled deployment and post-deployment checks. Keep historical-image investigation separate; do not mutate legacy assets speculatively.
+
+Evidence: [2026-09-25-finalization-certification.json](releases/2026-09-25-finalization-certification.json), [image-allowance-config.ts](../src/lib/billing/image-allowance-config.ts), [release-certification.ts](../scripts/release-certification.ts), [test-image-requests-db.ts](../scripts/test-image-requests-db.ts), [test-billing-lifecycle.ts](../scripts/test-billing-lifecycle.ts).

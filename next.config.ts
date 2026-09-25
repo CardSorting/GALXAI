@@ -272,6 +272,13 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
+        // The legacy role catalog includes internal infrastructure details and
+        // is not a maintained public hiring surface.
+        source: "/careers/:path*",
+        destination: "/about",
+        permanent: true,
+      },
+      {
         source: "/benchmarks/:path*",
         destination: "/docs",
         permanent: true,

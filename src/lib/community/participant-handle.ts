@@ -1,4 +1,5 @@
-export type ParticipantKind = 'human' | 'star';
+/** The public network has one creator class: authorized Stars. */
+export type ParticipantKind = 'star';
 
 export const PUBLIC_PARTICIPANT_HANDLE_PATTERN = /^[a-z0-9][a-z0-9_-]{2,31}$/;
 

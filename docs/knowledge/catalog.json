@@ -15,7 +15,7 @@
     },
     {
       "path": "docs/API_BASE_URL.md",
-      "title": "API base URL and authentication",
+      "title": "Accessing GALX",
       "scope": "current-guide",
       "kind": "reference",
       "domains": [
@@ -27,7 +27,7 @@
     },
     {
       "path": "docs/API_REFERENCE.md",
-      "title": "API reference",
+      "title": "Product capabilities",
       "scope": "current-guide",
       "kind": "reference",
       "domains": [],
@@ -116,7 +116,7 @@
     },
     {
       "path": "docs/DEVELOPER_CLIENT_SDK.md",
-      "title": "🌌 GALXAI Universal Developer Client SDK",
+      "title": "Developer client SDK — retired public guide",
       "scope": "domain-reference",
       "kind": "reference",
       "domains": [],
@@ -214,7 +214,7 @@
     },
     {
       "path": "docs/GTM_STRATEGY.md",
-      "title": "GALX Go-To-Market and positioning strategy",
+      "title": "GALX positioning and product narrative",
       "scope": "commercial-draft",
       "kind": "draft",
       "domains": [],
@@ -362,7 +362,7 @@
     },
     {
       "path": "docs/QUICKSTART.md",
-      "title": "API quickstart",
+      "title": "Getting started with GALX",
       "scope": "current-guide",
       "kind": "reference",
       "domains": [],
@@ -2223,7 +2223,7 @@
       "curation": "assigned",
       "keywords": [],
       "decision": {
-        "status": "proposed",
+        "status": "superseded",
         "delivery": "deployed",
         "domain": "sites",
         "owner": "Product/API maintainer",
@@ -2233,6 +2233,7 @@
           "post-mortem/releases/2026-09-14-free-generation-gate.json"
         ],
         "supersedes": [],
+        "superseded_by": "docs/adr/0160-private-human-creation-star-publishing.md",
         "target": "galx.ai account generation gate",
         "revision": "d19e4ee1ad4b446e689bb4b85db48ec3a6f08fb0",
         "observed_at": "2026-09-14T04:36:11.300721Z"
@@ -2249,7 +2250,7 @@
       "curation": "assigned",
       "keywords": [],
       "decision": {
-        "status": "proposed",
+        "status": "superseded",
         "delivery": "deployed",
         "domain": "sites",
         "owner": "Product/API maintainer",
@@ -2259,6 +2260,7 @@
           "post-mortem/releases/2026-09-14-free-generation-gate.json"
         ],
         "supersedes": [],
+        "superseded_by": "docs/adr/0160-private-human-creation-star-publishing.md",
         "target": "galx.ai account generation gate",
         "revision": "d19e4ee1ad4b446e689bb4b85db48ec3a6f08fb0",
         "observed_at": "2026-09-14T04:36:11.300721Z"
@@ -2471,6 +2473,34 @@
           "scripts/macos/RelayMonitors.swift"
         ],
         "supersedes": []
+      }
+    },
+    {
+      "path": "docs/adr/0160-private-human-creation-star-publishing.md",
+      "title": "ADR 0160: Private human creation and Star-only publishing",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": {
+        "status": "accepted",
+        "delivery": "local",
+        "domain": "images",
+        "owner": "Product/API maintainer",
+        "date": "2026-09-24",
+        "evidence": [
+          "docs/PRODUCT_SURFACE_STRATEGY.md",
+          "docs/maintainers/FREE_GENERATION_QUOTA.md",
+          "supabase/migrations/20260924020000_private_human_works_star_publication_boundary.sql",
+          "supabase/migrations/20260924030000_private_image_allowance_accounting.sql"
+        ],
+        "supersedes": [
+          "docs/adr/0149-one-time-free-generation.md",
+          "docs/adr/0150-free-generation-admission-gate.md"
+        ],
+        "target": "GALX application source and reviewed database migrations; not deployed",
+        "revision": "working tree under review"
       }
     },
     {
@@ -3164,7 +3194,7 @@
     },
     {
       "path": "docs/maintainers/FREE_GENERATION_QUOTA.md",
-      "title": "Free generation quota operations",
+      "title": "Legacy free generation and current image allowance",
       "scope": "current-guide",
       "kind": "how-to",
       "domains": [
@@ -3267,7 +3297,7 @@
     },
     {
       "path": "docs/maintainers/PUBLIC_DISCOVERY.md",
-      "title": "Public navigation, pricing and knowledge base",
+      "title": "Public navigation, pricing, and knowledge base",
       "scope": "current-guide",
       "kind": "reference",
       "domains": [
@@ -3629,6 +3659,27 @@
         "controller",
         "federation",
         "unassigned"
+      ],
+      "decision": null
+    },
+    {
+      "path": "docs/maintainers/private-image-accounting.md",
+      "title": "Private image allowance and accounting lifecycle",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [
+        "images",
+        "database",
+        "billing"
+      ],
+      "curation": "assigned",
+      "keywords": [
+        "private",
+        "image",
+        "allowance",
+        "reservation",
+        "accounting",
+        "lifecycle"
       ],
       "decision": null
     },
@@ -4127,6 +4178,27 @@
       ],
       "curation": "assigned",
       "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/runbooks/private-image-release-audit.md",
+      "title": "Private image release and privacy audit",
+      "scope": "current-guide",
+      "kind": "runbook",
+      "domains": [
+        "images",
+        "database",
+        "delivery"
+      ],
+      "curation": "assigned",
+      "keywords": [
+        "private",
+        "image",
+        "release",
+        "privacy",
+        "audit",
+        "verification"
+      ],
       "decision": null
     },
     {

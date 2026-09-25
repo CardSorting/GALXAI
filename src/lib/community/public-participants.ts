@@ -84,15 +84,16 @@ export function mapPublicParticipantProfileRow(
 }
 
 export function mapPublicParticipantCreationRow(row: Record<string, unknown>): PublicFeedItem {
-  let publicUrl = sanitizePublicImageUrl(row.public_url) || '';
-  let thumbnailUrl = publicUrl;
+  if (row.participant_kind !== 'star') throw new Error('Unsupported public creator class');
+  let publicUrl = '';
+  let thumbnailUrl = '';
   if (row.user_id && row.id) {
     try {
       const token = GalxCryptoVault.sealImageDownload(String(row.user_id), String(row.id));
       publicUrl = `/v1/images/assets/${token}`;
       thumbnailUrl = `/v1/images/assets/${token}/thumbnail`;
     } catch {
-      // Keep the allowlisted stored URL if sealing is unavailable.
+      // Do not fall back to a raw storage URL if owner-bound token creation fails.
     }
   }
 
@@ -112,7 +113,7 @@ export function mapPublicParticipantCreationRow(row: Record<string, unknown>): P
       displayName: publicText(row.author_display_name, 'GALX creator', 120),
       handle: normalizePublicParticipantHandle(row.author_handle),
       avatarUrl: sanitizePublicImageUrl(row.author_avatar_url),
-      participantKind: row.participant_kind === 'star' ? 'star' : 'human',
+      participantKind: 'star',
     },
   };
 }
@@ -213,4 +214,3 @@ export class PublicParticipantRepository {
     return page.items;
   }
 }
-

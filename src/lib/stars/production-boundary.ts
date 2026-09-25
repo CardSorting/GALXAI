@@ -9,7 +9,8 @@
  * 2. Identity is persistent.
  * 3. Runtime is temporary.
  * 4. The audience controls attention; the lab controls production.
- * 5. NO public client action can trigger or transition a Star from DORMANT to AWAKEN.
+ * 5. Public discovery and engagement actions cannot trigger Star production.
+ *    This boundary is independent of authenticated, metered private human creation.
  */
 
 export type StarLifecycleState =
@@ -43,14 +44,14 @@ export interface PublishedArtifactCandidate {
 }
 
 /**
- * Hard Wall Guard: Asserts that production execution is strictly confined
- * to authorized private lab runners and never invocable by public clients.
+ * Star publication guard: public production remains limited to authorized
+ * Star operations and cannot be invoked through discovery or human accounts.
  */
 export function assertPrivateLabProductionAuthority(authorizationSecret?: string | null): void {
   const labSecret = process.env.GALX_LAB_PRODUCTION_SECRET;
   if (!labSecret || authorizationSecret !== labSecret) {
     throw new Error(
-      'HARD WALL VIOLATION: Unauthorized attempt to enter Star production boundary. Public traffic cannot enqueue or execute generative inference.'
+      'Unauthorized attempt to enter Star production boundary. Only authorized Star operations may publish public Works.'
     );
   }
 }

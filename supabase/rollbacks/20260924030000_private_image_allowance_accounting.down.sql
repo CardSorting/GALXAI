@@ -1,0 +1,3 @@
+-- Intentionally non-reversible: removing the private reservation ledger or
+-- restoring unmetered human image requests would violate the product boundary.
+-- Keep the tables and fail-closed application contract if code is rolled back.

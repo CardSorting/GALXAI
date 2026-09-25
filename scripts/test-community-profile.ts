@@ -82,7 +82,10 @@ test('creation projection excludes database-only fields and canonicalizes attrib
 
 test('profile routes are discoverable without broadening private path exemptions', () => {
   const urls = sitemap().map((entry) => new URL(entry.url).pathname);
+  assert.ok(urls.includes('/stars'));
   assert.ok(urls.includes('/profile/soravale'));
+  assert.equal(isPublicProductPath('/stars'), true);
+  assert.equal(isPublicProductPath('/collections'), true);
   assert.equal(isPublicProductPath('/profile'), false);
   assert.equal(isPublicProductPath('/profile/soravale'), true);
   assert.equal(isPublicProductPath('/api/community/participants/soravale'), true);
@@ -96,6 +99,7 @@ test('Explore moderation stays separate from the complete Star profile gallery',
   const repository = readFileSync(resolve('src/lib/community/public-participants.ts'), 'utf8');
   const feedRoute = readFileSync(resolve('src/app/api/images/feed/route.ts'), 'utf8');
   const masonry = readFileSync(resolve('src/components/images/PublicImageMasonryStream.tsx'), 'utf8');
+  const phaseThree = readFileSync(resolve('supabase/migrations/20260924020000_private_human_works_star_publication_boundary.sql'), 'utf8');
 
   assert.match(migration, /ADD COLUMN is_explore_visible BOOLEAN NOT NULL DEFAULT true/);
   assert.match(migration, /SET is_explore_visible = false/);
@@ -111,4 +115,9 @@ test('Explore moderation stays separate from the complete Star profile gallery',
   assert.match(masonry, /const isProfileGallery = Boolean\(authorHandle\)/);
   assert.match(repairMigration, /ABS\(EXTRACT\(EPOCH FROM/);
   assert.match(repairMigration, /is_explore_visible = false/);
+  assert.match(phaseThree, /work_class IN \('private','star_published'\)/);
+  assert.match(phaseThree, /IF NEW\.work_class = 'star_published'/);
+  assert.match(phaseThree, /active.*Star/is);
+  assert.match(phaseThree, /REVOKE ALL ON public\.user_image_library FROM PUBLIC, anon, authenticated/);
+  assert.match(phaseThree, /CREATE OR REPLACE VIEW public\.community_creations_feed/);
 });

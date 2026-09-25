@@ -3,8 +3,8 @@
  *
  * This command is deliberately separate from staging. It activates only the
  * reviewed Products and recurring Prices, reconciles the existing GALX Pro
- * lookup key to the published $10 contract when there are no live consumer
- * subscriptions, and updates the private fair-use price allowlist. It never
+ * lookup key to the published $10 Sites contract when there are no live Pro
+ * subscriptions, and keeps the Sites fair-use price allowlist Pro-only. It never
  * creates customers, subscriptions, invoices, payments, tax registrations, or
  * application entitlements.
  */
@@ -35,6 +35,7 @@ const activeStatuses = new Set(['active', 'trialing', 'past_due', 'unpaid', 'pau
 
 const imageMetadata = (plan: typeof IMAGE_PLAN_CATALOG[number]) => ({
   galxPlan: plan.planKey,
+  galxPublicPlan: plan.publicId,
   galxSurface: 'images',
   catalogStatus: 'active',
   checkoutEnabled: 'true',
@@ -60,7 +61,7 @@ async function activeSubscriptionsForPrices(priceIds: Set<string>) {
 
 async function activateImagePlan(plan: typeof IMAGE_PLAN_CATALOG[number]) {
   const product = await stripe.products.retrieve(plan.stripeProductId, {}, requestOptions);
-  const legacyName = plan.id === 'max' ? 'GALX Images — Team' : null;
+  const legacyName = plan.id === 'creator' ? 'GALX Images — Creator' : plan.id === 'max' ? 'GALX Images — Team' : null;
   if (!product.livemode || ![plan.name, legacyName].includes(product.name) || product.metadata.galxPlan !== plan.planKey) {
     throw new Error(`The ${plan.id} Product does not match the reviewed catalog contract.`);
   }
@@ -99,7 +100,7 @@ async function activateImagePlan(plan: typeof IMAGE_PLAN_CATALOG[number]) {
       lookup_key: plan.stripeLookupKey,
       transfer_lookup_key: true,
       metadata: { ...exact.metadata, ...metadata },
-      nickname: `${plan.id} monthly`,
+      nickname: `${plan.publicId} monthly`,
     }, requestOptions);
   } else {
     // Stripe Price amounts are immutable. Transfer the stable lookup key to a
@@ -112,13 +113,13 @@ async function activateImagePlan(plan: typeof IMAGE_PLAN_CATALOG[number]) {
       lookup_key: plan.stripeLookupKey,
       transfer_lookup_key: true,
       active: false,
-      nickname: `${plan.id} monthly`,
+      nickname: `${plan.publicId} monthly`,
       metadata,
     }, { ...requestOptions, idempotencyKey: `galx-images-${plan.id}-price-${version}` });
     activated = await stripe.prices.update(activated.id, {
       active: true,
       metadata,
-      nickname: `${plan.id} monthly`,
+      nickname: `${plan.publicId} monthly`,
     }, requestOptions);
   }
   if (!activated.active || objectId(activated.product) !== updatedProduct.id || activated.unit_amount !== amount ||
@@ -130,8 +131,8 @@ async function activateImagePlan(plan: typeof IMAGE_PLAN_CATALOG[number]) {
 async function reconcilePro() {
   const product = await stripe.products.retrieve(PRO_PRODUCT_ID, {}, requestOptions);
   if (!product.livemode || product.name !== PRO_PLAN.name || product.metadata.galxPlan !== 'pro-v1') throw new Error('The GALX Pro Product does not match the published contract.');
-  const proMetadata = { galxPlan: 'pro-v1', galxSurface: 'images', catalogStatus: 'active', checkoutEnabled: 'true', pricingVersion: version };
-  await stripe.products.update(product.id, { active: true, metadata: { ...product.metadata, ...proMetadata }, description: 'Image creation and exploration for one account, with published plan terms.' }, requestOptions);
+  const proMetadata = { galxPlan: 'pro-v1', galxSurface: 'sites', catalogStatus: 'active', checkoutEnabled: 'true', pricingVersion: version };
+  await stripe.products.update(product.id, { active: true, metadata: { ...product.metadata, ...proMetadata }, description: 'GALX Pro for one account, with Sites workspace access under published plan terms.' }, requestOptions);
 
   const [activeLookup, inactiveLookup] = await Promise.all([
     stripe.prices.list({ lookup_keys: [PRO_LOOKUP_KEY], active: true, limit: 10 }, requestOptions),
@@ -194,14 +195,14 @@ await verifyWebhook();
 const pro = await reconcilePro();
 const imagePrices = [];
 for (const plan of IMAGE_PLAN_CATALOG) imagePrices.push(await activateImagePlan(plan));
-await updateFairPolicy([pro.price.id, ...imagePrices.map(price => price.id)]);
+await updateFairPolicy([pro.price.id]);
 const portals = await stripe.billingPortal.configurations.list({ active: true, limit: 100 }, requestOptions);
 const portal = portals.data.find(item => item.metadata?.galxPlan === 'pro-v1');
 if (portals.has_more || !portal || !portal.features.subscription_cancel.enabled || portal.features.subscription_cancel.mode !== 'at_period_end' || portal.features.subscription_update.enabled) throw new Error('The restricted billing portal is not ready.');
 const tax = await stripe.tax.registrations.list({ status: 'active', limit: 100 }, requestOptions);
 console.log(JSON.stringify({
   mode: 'live', catalogStatus: 'active', webhookReady: true,
-  plansActivated: ['pro', ...IMAGE_PLAN_CATALOG.map(plan => plan.id)],
+  plansActivated: ['pro', ...IMAGE_PLAN_CATALOG.map(plan => plan.publicId)],
   proPriceReconciledToPublishedAmount: pro.reconciledPreviousAmount,
   billingPortalReady: true,
   activeTaxRegistrations: tax.data.length,

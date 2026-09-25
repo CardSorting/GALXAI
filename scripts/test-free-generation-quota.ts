@@ -10,7 +10,7 @@ import { FairUsageError } from '../src/lib/sites/fair-policy';
 const owner='00000000-0000-4000-8000-000000000001';
 const availability={sites:'available' as const,images:'available' as const};
 const secret='PRIVATE_CANARY_database_grant_identity';
-test('quota endpoint derives ownership from verified identity and projects a no-store DTO',async()=>{
+test('quota endpoint derives ownership from verified identity and projects only supported Site allowance',async()=>{
   let reads=0,pro=false;
   const handle=generationQuotaRoute({availability:async()=>availability,authenticate:async request=>{
     if(request.headers.get('authorization')!=='Bearer verified') throw Object.assign(new AccountIdentityError(),{message:secret});
@@ -27,11 +27,11 @@ test('quota endpoint derives ownership from verified identity and projects a no-
   assert.equal((await send('',undefined,'POST')).status,405);
   const response=await send();assert.equal(response.headers.get('cache-control'),'private, no-store');
   assert.deepEqual([...response.headers.keys()].sort(),['cache-control','content-type','x-content-type-options']);
-  assert.deepEqual(await response.json(),{plan:'free',quota:{sites:1,images:5,siteTurns:3},availability});
+  assert.deepEqual(await response.json(),{plan:'free',quota:{sites:1,siteTurns:3},availability:{sites:'available'}});
   pro=true;assert.deepEqual(await (await send()).json(),{plan:'pro',quota:null});assert.equal(reads,1);
 });
 test('invalid quota data and authority outages cannot become free access or leak diagnostics',async()=>{
-  for(const quota of [null,{}, {sites:2,images:5,siteTurns:3},{sites:1,images:6,siteTurns:3},{sites:1,images:5,siteTurns:4},{sites:1,images:-1,siteTurns:3},{sites:1,images:1.5,siteTurns:3}]){
+  for(const quota of [null,{}, {sites:2,images:5,siteTurns:3},{sites:1,images:5,siteTurns:4}]){
     assert.equal(readGenerationAllowance({plan:'free',quota}),null);
     const response=await generationQuotaRoute({availability:async()=>availability,authenticate:async()=>({id:owner}),plan:async()=>'free',quota:async()=>quota as any})(new Request('https://galx.ai/quota'));
     assert.equal(response.status,503);assert.doesNotMatch(await response.text(),/PRIVATE_CANARY|TypeError|stack/);
@@ -62,8 +62,8 @@ test('only authoritative absence of Pro permits free membership; grants and outa
 
 test('availability uses a closed allowlist and does not expose policy or grant fields',async()=>{
   const quota={sites:1,images:5,siteTurns:3};
-  for(const availability of [null,{}, {sites:'enabled',images:'available'},{sites:'available',images:1}])assert.equal(readGenerationAllowance({plan:'free',quota,availability}),null);
-  assert.deepEqual(readGenerationAllowance({plan:'free',quota,availability:{sites:'paused',images:'busy',policy:secret},source:secret}),{plan:'free',quota,availability:{sites:'paused',images:'busy'}});
+  for(const availability of [null,{}, {sites:'enabled',images:'available'}])assert.equal(readGenerationAllowance({plan:'free',quota,availability}),null);
+  assert.deepEqual(readGenerationAllowance({plan:'free',quota,availability:{sites:'paused',images:secret,policy:secret},source:secret}),{plan:'free',quota:{sites:1,siteTurns:3},availability:{sites:'paused'}});
   const response=await generationQuotaRoute({authenticate:async()=>({id:owner}),plan:async()=>'free',quota:async()=>quota,availability:async()=>{throw new Error(secret);}})(new Request('https://galx.ai/quota'));
   assert.equal(response.status,503);assert.doesNotMatch(await response.text(),/PRIVATE_CANARY/);
 });

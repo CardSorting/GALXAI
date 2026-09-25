@@ -2,7 +2,7 @@ import { after } from 'next/server';
 import { ImageCapacityError } from '../../core/router/ImageCapacityError';
 import { RelayDispatchError } from '../../core/router/adapters/RelayChatTransport';
 import { getPostgresPool } from '../db/postgres';
-import { ImageRequestRepository, type ImageRequestRecord, type StoredImageRequest } from './request-repository';
+import { ImageRequestRepository, type ImageRequestRecord, type ImageWorkClass, type StoredImageRequest } from './request-repository';
 import type { GalxModelRouter } from '../../core/router/GalxModelRouter';
 import { GalxUnifiedR2StorageManager } from '../../core/storage/GalxUnifiedR2StorageManager';
 import { normalizeImageOutput } from '../security/normalize-image-output';
@@ -16,6 +16,10 @@ const generateImage: GalxModelRouter['routeImageGeneration'] = async (input) => 
   return galxRouter.routeImageGeneration(input);
 };
 
+export class ImageStorageUnavailableError extends Error {
+  constructor() { super('Private image storage unavailable'); }
+}
+
 export class ImageRequestService {
   private static instance: ImageRequestService;
   static getInstance() {
@@ -28,9 +32,10 @@ export class ImageRequestService {
     private readonly generate = generateImage,
     private readonly schedule: (work: () => Promise<void>) => void = after) {}
 
-  async create(owner: string, payload: StoredImageRequest, priority: boolean, free = false, schedule = true) {
-    if (!GalxUnifiedR2StorageManager.getInstance().isConfigured()) throw new Error('Image storage unavailable');
-    const record = await this.repository.create(owner, payload, priority, free);
+  async create(owner: string, payload: StoredImageRequest, options: { priority: boolean; schedule?: boolean; workClass?: ImageWorkClass }) {
+    const { priority, schedule = true, workClass = 'private' } = options;
+    if (!GalxUnifiedR2StorageManager.getInstance().isPrivateImageStorageConfigured()) throw new ImageStorageUnavailableError();
+    const record = await this.repository.create(owner, payload, priority, workClass);
     if(schedule) this.resume(record);
     return record;
   }
@@ -46,6 +51,7 @@ export class ImageRequestService {
       try {
         const { outputFormat: _output, ...input } = request.payload;
         const result = await this.generate({ request: { ...input, response_format: 'b64_json' }, userId: owner, requestId: id,
+          workClass: request.work_class,
           isPriorityUser: request.is_priority, signal: AbortSignal.timeout(135000) });
         const assets = result.data.map(item => item.asset_id);
         if (assets.length !== (request.payload.n || 1) || assets.some(id => typeof id !== 'string' || !/^[A-Za-z0-9_-]{1,160}$/.test(id))) throw new Error('Image storage incomplete');
@@ -78,8 +84,12 @@ export function imageRequestResponse(record: ImageRequestRecord, requestId: stri
 }
 
 /** Explicit public DTO, including for SSE. Never serialize the private receipt. */
+export function publicImageRequestStatus(state: ImageRequestRecord['state']): 'in_progress' | 'completed' | 'failed' | 'cancelled' {
+  return state === 'completed' || state === 'failed' || state === 'cancelled' ? state : 'in_progress';
+}
+
 export async function imageRequestSnapshot(record: ImageRequestRecord) {
-  return { id: record.id, status: record.state,
+  return { id: record.id, status: publicImageRequestStatus(record.state),
     ...(record.state === 'failed' && record.failure_code === 'generation_not_started' ? { error: { code: 'generation_not_started' } } : {}),
     ...(record.state === 'completed' ? { result: { data: await (await imageRequestResponse(record,crypto.randomUUID(),true)).json() } } : {}),
   };

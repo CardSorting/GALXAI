@@ -3618,6 +3618,7 @@ export interface Database {
           is_public: boolean;
           is_explore_visible: boolean;
           visibility: 'public' | 'unlisted' | 'private';
+          work_class: 'private' | 'star_published';
           likes_count: number;
           remix_count: number;
           views_count: number;
@@ -3647,9 +3648,10 @@ export interface Database {
           latency_ms?: number;
           cost_usd?: number;
           is_favorite?: boolean;
-          is_public?: boolean;
-          is_explore_visible?: boolean;
-          visibility?: 'public' | 'unlisted' | 'private';
+          is_public?: false;
+          is_explore_visible?: false;
+          visibility?: 'private';
+          work_class?: 'private';
           likes_count?: number;
           remix_count?: number;
           views_count?: number;
@@ -3787,9 +3789,8 @@ export interface Database {
         Args: {
           p_user_id: string;
           p_asset_ids: string[];
-          p_action: 'favorite' | 'delete' | 'visibility';
+          p_action: 'favorite' | 'delete';
           p_is_favorite?: boolean;
-          p_visibility?: string;
         };
         Returns: Json;
       };

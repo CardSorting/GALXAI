@@ -74,6 +74,9 @@ export async function PATCH(
 
     const body = await req.json().catch(() => ({}));
     const repo = ImageLibraryRepository.getInstance();
+    if (Object.prototype.hasOwnProperty.call(body, 'visibility') || Object.prototype.hasOwnProperty.call(body, 'isPublic')) {
+      return NextResponse.json({ success: false, error: 'publishing_forbidden' }, { status: 403, headers: { 'Cache-Control': 'private, no-store' } });
+    }
 
     let updated = null;
     let hasMutations = false;
@@ -89,27 +92,9 @@ export async function PATCH(
       }
     }
 
-    let targetVisibility: 'public' | 'unlisted' | 'private' | undefined;
-    if (body.visibility === 'public' || body.visibility === 'unlisted' || body.visibility === 'private') {
-      targetVisibility = body.visibility;
-    } else if (typeof body.isPublic === 'boolean') {
-      targetVisibility = body.isPublic ? 'public' : 'private';
-    }
-
-    if (targetVisibility) {
-      hasMutations = true;
-      updated = await repo.setVisibility(userId, assetId, targetVisibility);
-      if (!updated) {
-        return NextResponse.json(
-          { success: false, error: 'Asset not found or unauthorized' },
-          { status: 404 }
-        );
-      }
-    }
-
     if (!hasMutations) {
       return NextResponse.json(
-        { success: false, error: 'No valid update properties provided. Supported: isFavorite, visibility, isPublic' },
+        { success: false, error: 'No valid update properties provided. Supported: isFavorite' },
         { status: 400 }
       );
     }

@@ -180,7 +180,9 @@ export async function GET(req: NextRequest) {
     `;
 
     const result = await executePostgresQuery<any>(query, params);
-    const rows = result?.rows || [];
+    // Fail closed if a stale view or unexpected row ever reintroduces a human
+    // account into the public publishing corpus.
+    const rows = (result?.rows || []).filter((row: any) => row.participant_kind === 'star');
 
     if (rows.length === limit) {
       const last = rows[rows.length - 1];
@@ -193,17 +195,15 @@ export async function GET(req: NextRequest) {
     }
 
     items = rows.map((r: any) => {
-      let publicUrl = r.public_url;
-      let thumbnailUrl = r.public_url;
+      let publicUrl = '';
+      let thumbnailUrl = '';
 
       if (r.user_id && r.id) {
         try {
           const token = GalxCryptoVault.sealImageDownload(r.user_id, r.id);
           publicUrl = `/v1/images/assets/${token}`;
           thumbnailUrl = `/v1/images/assets/${token}/thumbnail`;
-        } catch {
-          // Keep original
-        }
+        } catch { /* Do not fall back to a raw storage URL. */ }
       }
 
       return {
@@ -221,10 +221,10 @@ export async function GET(req: NextRequest) {
         author: {
           displayName: typeof r.author_display_name === 'string' && r.author_display_name.trim()
             ? r.author_display_name.trim()
-            : 'GALX creator',
+            : 'GALX Star',
           handle: normalizePublicParticipantHandle(r.author_handle),
           avatarUrl: sanitizePublicImageUrl(r.author_avatar_url),
-          participantKind: r.participant_kind === 'star' ? 'star' : 'human',
+          participantKind: 'star',
         },
       };
     });
@@ -266,10 +266,10 @@ export async function GET(req: NextRequest) {
            LIMIT 1`,
           directParams
         );
-        if (directRes?.rows?.[0]) {
+        if (directRes?.rows?.[0]?.participant_kind === 'star') {
           const r = directRes.rows[0];
-          let pubUrl = r.public_url;
-          let thumbUrl = r.public_url;
+          let pubUrl = '';
+          let thumbUrl = '';
           if (r.user_id && r.id) {
             try {
               const token = GalxCryptoVault.sealImageDownload(r.user_id, r.id);
@@ -292,10 +292,10 @@ export async function GET(req: NextRequest) {
             author: {
               displayName: typeof r.author_display_name === 'string' && r.author_display_name.trim()
                 ? r.author_display_name.trim()
-                : 'GALX creator',
+                : 'GALX Star',
               handle: normalizePublicParticipantHandle(r.author_handle),
               avatarUrl: sanitizePublicImageUrl(r.author_avatar_url),
-              participantKind: r.participant_kind === 'star' ? 'star' : 'human',
+              participantKind: 'star',
             },
           });
         }

@@ -50,11 +50,9 @@ export async function settleFreeCapacity(db:Database,owner:string,kind:FreeGener
 }
 /** Advisory UI state; admission always repeats the checks under a lock. */
 export async function readFreeAvailability(db:Database,owner:string) {
-  const result={} as {sites:FreeGenerationAvailability;images:FreeGenerationAvailability};
-  for(const kind of ['site','image'] as const) {
-    const gate=(await db.query<Gate>('SELECT *,clock_timestamp() AS now FROM private.galx_free_generation_policy WHERE kind=$1',[kind])).rows[0];
-    result[kind==='site'?'sites':'images']=funded(gate,1)?state(gate,await counts(db,kind,owner),1):'paused';
-  }
+  const kind='site' as const;
+  const gate=(await db.query<Gate>('SELECT *,clock_timestamp() AS now FROM private.galx_free_generation_policy WHERE kind=$1',[kind])).rows[0];
+  const result={sites:funded(gate,1)?state(gate,await counts(db,kind,owner),1):'paused' as FreeGenerationAvailability};
   if(result.sites==='available'){
     const policy=(await db.query('SELECT mode,limits FROM private.galx_sites_fair_policy WHERE singleton')).rows[0];
     const limits=policy?.mode==='enforce'?readFairLimits(policy.limits):null;

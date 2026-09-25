@@ -13,10 +13,16 @@ const application: ApplicationInput = { introduction: 'I build tools for a small
   use_case: 'A project with sufficient detail', expected_traffic: 'exploring', cohort_interest: 'next' };
 
 test('only product and supporting endpoints bypass preview, including async images and site publication', () => {
-  for (const path of ['/explore','/images','/sites','/sites/id','/v1/images/generations','/v1/images/requests/id','/v1/images/requests/id/stream', '/v1/images/assets/token','/api/images/availability','/api/images/feed','/api/images/library/id','/api/sites/workspace','/api/sites/published/name','/api/stripe/webhook','/images/studio/desert.webp','/images/showcase/cafe_cat.jpg','/.well-known/security.txt','/.well-known/pgp-key.txt']) assert.equal(isPublicProductPath(path), true, path);
+  for (const path of ['/explore','/stars','/collections','/profile/ilyx','/images','/sites','/sites/id','/v1/images/generations','/v1/images/requests/id','/v1/images/requests/id/stream', '/v1/images/assets/token','/api/images/availability','/api/images/feed','/api/images/library/id','/api/billing/image-allowance','/api/sites/workspace','/api/sites/published/name','/api/stripe/webhook','/images/studio/desert.webp','/images/showcase/cafe_cat.jpg','/.well-known/security.txt','/.well-known/pgp-key.txt']) assert.equal(isPublicProductPath(path), true, path);
   for (const path of ['/v1/chat/completions','/v1/models','/v1/models/id.png','/v1/messages','/api/generate','/api/run','/api/chat','/api/keys','/api/auth/tokens/restricted','/api/sites/workspace-evil','/v1/images/generations/evil','/api/images/availability/diagnostics','/api/new-service','/playground','/docs','/keys','/models/opengraph-image','/llms-full.txt']) assert.equal(isPublicProductPath(path), false, path);
   assert.equal(normalizedPath('/v1/chat/completions/'), '/v1/chat/completions');
   assert.equal(isPublicProductPath('/api/%73ites/workspace-evil'), false);
+});
+
+test('discovery pages and authenticated allowance reads do not require developer approval', async () => {
+  for (const path of ['/explore', '/stars', '/collections', '/profile/ilyx', '/api/billing/image-allowance']) {
+    assert.equal(await previewMiddleware(new NextRequest(`https://galx.ai${path}`)), null, path);
+  }
 });
 
 test('public dynamic profile chunks bypass preview without exposing private sibling chunks', async () => {
@@ -32,6 +38,8 @@ test('public dynamic profile chunks bypass preview without exposing private sibl
     '/_next/static/chunks/app/profile/%5Bhandle%5D/diagnostics/page-fixture.js',
     '/_next/static/chunks/app/profile/%5Bhandle%5D/private/page-fixture.js',
     '/_next/static/chunks/app/admin/page-fixture.js',
+    '/_next/static/chunks/app/careers/page-fixture.js',
+    '/_next/static/chunks/app/careers/%5Bslug%5D/page-fixture.js',
     '/_next/static/chunks/app/api/community/participants/%5Bhandle%5D/page-fixture.js',
   ]) {
     assert.equal(isPublicFrameworkAssetPath(path), false, path);

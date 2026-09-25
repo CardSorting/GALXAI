@@ -1,5 +1,5 @@
-import { permanentRedirect } from 'next/navigation';
+import { redirect } from 'next/navigation';
 
 export default function Page() {
-  permanentRedirect('/docs/sdks#http');
+  redirect('/docs');
 }

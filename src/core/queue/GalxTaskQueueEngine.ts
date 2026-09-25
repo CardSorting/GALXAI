@@ -30,6 +30,15 @@ interface DestinationCircuitBreakerState {
   openUntilMs: number;
 }
 
+function containsImageGeneration(value: unknown, depth = 0): boolean {
+  if (depth > 12) return true;
+  if (Array.isArray(value)) return value.some(item => containsImageGeneration(item, depth + 1));
+  if (!value || typeof value !== 'object') return false;
+  const record = value as Record<string, unknown>;
+  if (record.taskKind === 'image_generation') return true;
+  return Object.values(record).some(item => containsImageGeneration(item, depth + 1));
+}
+
 /**
  * Enterprise CloudTasks & CloudRun-Inspired Asynchronous Queue & Push/Pull Worker Substrate.
  * Fully backed by BroccoliDB L1 In-Memory Reactive Tables, Multi-Modal Secondary & Composite Indexing,
@@ -389,6 +398,12 @@ export class GalxTaskQueueEngine {
   // =========================================================================
 
   public createTask(options: CreateTaskOptions): { task: GalxTask; deduplicated: boolean } {
+    // Image inference must enter through ImageRequestService so a durable,
+    // owner-scoped allowance reservation exists before dispatch. Star
+    // production uses that same lifecycle with its server-only publisher class.
+    if (containsImageGeneration(options.target) || containsImageGeneration(options.pipelineSteps)) {
+      throw new Error('Image creation must use the supported private creation flow.');
+    }
     const queueId = options.queueId || 'default';
     const queue = this.persistence.queueTable.get(queueId);
     if (!queue) {
@@ -1553,38 +1568,7 @@ export class GalxTaskQueueEngine {
         }).catch(() => {});
       }
     } else if (target.taskKind === 'image_generation' && target.imagePayload) {
-      const res = await router.routeImageGeneration({
-        request: target.imagePayload,
-        userId: task.userId,
-        requestId: `async_${task.id}`,
-        isPriorityUser: target.isPriorityUser
-      });
-
-      task.result = {
-        statusCode: 200,
-        data: res,
-        shardId: res.shardId,
-        modelUsed: res.modelUsed,
-        completedAtMs: Date.now()
-      };
-
-      task.attempts.push({
-        attemptNumber: task.dispatchCount,
-        startedAtMs: startTime,
-        completedAtMs: Date.now(),
-        durationMs: Date.now() - startTime,
-        responseStatusCode: 200,
-        shardIdUsed: res.shardId,
-        modelUsed: res.modelUsed
-      });
-
-      if (target.webhookCompletionUrl) {
-        this.dispatchWebhookCallback(target.webhookCompletionUrl, target.webhookHmacSecret, {
-          taskId: task.id,
-          status: 'COMPLETED',
-          result: (await publicTaskResponse(task)).result
-        }).catch(() => {});
-      }
+      throw new Error('Image creation must use the supported private creation flow.');
     } else {
       throw new Error(`Invalid internal model target payload for task '${task.id}'`);
     }

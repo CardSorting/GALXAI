@@ -1,12 +1,12 @@
 import { isPublicReadingPath } from '@/lib/public-content/routes';
 /** Products exempt from developer approval; account/session gates still apply. */
-const publicPages = new Set(['/', '/home', '/about', '/explore', '/images', '/images/library', '/images/favorites', '/library', '/sites', '/pricing',
+const publicPages = new Set(['/', '/home', '/about', '/explore', '/stars', '/collections', '/images', '/images/library', '/images/favorites', '/library', '/sites', '/pricing',
   '/login', '/signup', '/auth/signin', '/auth/signup', '/auth/callback', '/terms', '/privacy', '/status', '/checkout', '/checkout/success']);
 const publicApis = new Set(['/api/health', '/api/openapi.json', '/api/auth/signup-offer', '/api/auth/session',
   '/api/developer-access', '/api/developer-access/feedback', '/api/developer-access/check',
   '/api/sites/workspace', '/api/sites/content', '/api/sites/domains',
   '/api/images/availability', '/api/images/feed', '/api/images/moderate', '/api/images/library', '/api/images/library/batch', '/v1/images/generations',
-  '/api/billing', '/api/billing/plan', '/api/billing/quote', '/api/billing/generation-quota', '/api/wallet/summary',
+  '/api/billing', '/api/billing/plan', '/api/billing/quote', '/api/billing/generation-quota', '/api/billing/image-allowance', '/api/wallet/summary',
   '/api/wallet/usage', '/api/wallet/transactions', '/api/wallet/deposit', '/api/wallet/estimate', '/api/wallet/auto-topup',
   '/api/stripe/config', '/api/stripe/checkout', '/api/stripe/session', '/api/stripe/portal', '/api/stripe/webhook',
   '/api/seo/rates', '/api/compute/pool']);

@@ -104,7 +104,7 @@ export default async function Image() {
 
         {/* Badges */}
         <div style={{ display: 'flex', gap: '14px' }}>
-          {['Create in GALX', 'Powered by GALX Nova', 'Public by default', 'Private integrations'].map((item, i) => (
+          {['Discover the Stars', 'Private creation', 'Star-published Works', 'No human publishing'].map((item, i) => (
             <div
               key={i}
               style={{

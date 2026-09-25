@@ -99,7 +99,11 @@ try {
       await docker('stop', '--time', '2', record.Id);
       console.log('Removed disposable PostgreSQL fixture.');
     } catch (error: any) {
-      if (!String(error.stderr).includes('No such object')) { console.error('Fixture cleanup failed:', error.message); process.exitCode = 1; }
+      const message = `${error.stderr || ''} ${error.message || ''}`;
+      const fixtureNeverStarted = /Cannot connect to the Docker daemon|Is the docker daemon running/i.test(message);
+      if (!String(error.stderr).includes('No such object') && !fixtureNeverStarted) {
+        console.error('Fixture cleanup failed:', error.message); process.exitCode = 1;
+      }
     }
   }
   await rm(workspace, { recursive: true, force: true });

@@ -8,7 +8,7 @@ export function FreeGenerationQuota() {
   if(!user || value?.plan==='pro')return null;
   const quota=!failed && value?.plan==='free'?value.quota:null;
   return <div className={styles.quota} role="status" aria-live="polite" aria-atomic="true">
-    <span>Free generation quota:</span>{quota ? <span className={styles.quotaCounts}>Images: {quota.images} of 5</span>
+    <span>Site workspace allowance:</span>{quota ? <span className={styles.quotaCounts}>{quota.siteTurns} Site turns</span>
       : <span className={styles.quotaCounts}>{failed?'Temporarily unavailable':'Loading…'}</span>}
   </div>;
 }

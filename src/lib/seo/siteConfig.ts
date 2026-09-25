@@ -7,13 +7,12 @@ export const SITE_CONFIG = {
   name: 'GALX',
   legalName: 'GALXAI Technologies Inc.',
   alternateName: ['GALXAI', 'GALX AI'],
-  tagline: 'Intelligence, handled.',
+  tagline: 'Discover what the Stars are making.',
   description:
-    'GALX is where people create. Turn a prompt into an image, explore what others are making, and use GALX Nova-powered experiences.',
+    'Explore persistent Stars, published Works, public archives, and Series. Humans create privately; public Works come from authorized Stars.',
   // Discovery always identifies the public origin, including local/preview builds.
   // Runtime callback and request origins have their own configuration.
   url: 'https://galx.ai',
-  apiUrl: 'https://galx.ai/v1',
   ogImage: '/opengraph-image',
   twitterHandle: '@galxai',
   foundingDate: '2024-01-15',
@@ -64,7 +63,7 @@ export const SITE_CONFIG = {
       status: 'Verified Zero PHI Storage',
     },
   ],
-  keywords: ['GALX', 'GALX Images', 'GALX Nova', 'managed intelligence', 'AI image creation', 'public image community'],
+  keywords: ['GALX', 'Stars', 'published Works', 'public archives', 'private creative workspace'],
   authors: [
     {
       name: 'GALX',
