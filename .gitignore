@@ -160,3 +160,7 @@ scripts/__pycache__/
 .env
 .env.*
 !.env.example
+
+# Independent source repositories used by the local relay image build.
+/BroccoliDB/
+/BROCCOLIQUEUE/
