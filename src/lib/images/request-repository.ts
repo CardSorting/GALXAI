@@ -13,7 +13,12 @@ export interface ImageRequestRecord {
   response_format?: 'url' | 'b64_json'; output_format?: ImageFormat;
   failure_code?: string;
 }
-export type StoredImageRequest = ImageGenerationRequest & { outputFormat?: ImageFormat };
+export type StoredImageRequest = ImageGenerationRequest & {
+  outputFormat?: ImageFormat;
+  /** Server-resolved context for an authenticated private remix. Never serialized to a client. */
+  sourceWorkId?: string;
+  privateContext?: string;
+};
 interface ClaimedRequest extends ImageRequestRecord { payload: StoredImageRequest; is_priority: boolean }
 export class ImageRequestConflict extends Error {}
 
@@ -31,10 +36,17 @@ export class ImageRequestRepository {
   ) {}
 
   async create(owner: string, payload: StoredImageRequest, priority: boolean, workClass: ImageWorkClass = 'private'): Promise<ImageRequestRecord> {
+    if ((payload.sourceWorkId !== undefined || payload.privateContext !== undefined) &&
+      (workClass !== 'private' || typeof payload.sourceWorkId !== 'string' ||
+        !/^[A-Za-z0-9_.-]{1,200}$/.test(payload.sourceWorkId) ||
+        typeof payload.privateContext !== 'string' || !payload.privateContext.trim() || payload.privateContext.length > 4_000)) {
+      throw new Error('Private remix context is invalid');
+    }
     const key = payload.idempotencyKey || randomUUID();
     const hash = createHash('sha256').update(JSON.stringify({ prompt: payload.prompt, model: payload.model,
       n: payload.n, size: payload.size, quality: payload.quality, sessionId: payload.sessionId,
-      responseFormat: payload.response_format, outputFormat: payload.outputFormat, workClass })).digest('hex');
+      responseFormat: payload.response_format, outputFormat: payload.outputFormat, workClass,
+      sourceWorkId: payload.sourceWorkId, privateContext: payload.privateContext })).digest('hex');
     const db = workClass === 'private' ? await this.pool.connect?.() : null;
     if (workClass === 'private' && !db) throw new Error('Quota storage unavailable');
     try {

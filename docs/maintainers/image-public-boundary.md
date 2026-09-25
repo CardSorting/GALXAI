@@ -19,7 +19,13 @@ missing, creation and checkout fail closed. The Publishing Boundary reserves
 public Works for authorized Stars. Human-generated and remixed Works are
 non-publishable owner-scoped records, not private rows waiting for a visibility
 toggle. Public discovery projections include only eligible published Star
-Works.
+Works. A new Star generation is a private candidate; only a durable, exact-asset
+selection record can publish it. The visibility change and selection event are
+committed together. Withheld candidates stay private, and previously published
+Works retain their existing state when a Star's production runtime is inactive.
+Activation gates new Star generation, not preservation of public work or review
+of a completed candidate. A private append-only archive retains the provenance
+for verified pre-cutover Star works restored by the continuity migration.
 
 Community discovery is part of the public image boundary. Star profiles use the
 canonical `/profile/<handle>` route and `/api/community/participants/<handle>`
@@ -42,6 +48,14 @@ vote. Handles are
 normalized before they become links, avatars accept only site-relative or
 HTTPS image URLs, and malformed gallery cursors are rejected with a generic 400
 response.
+
+Public feed and Star archive reads pass through explicit server DTOs. Their
+database projections are service-role-only even though their schema is named
+`public`; direct anonymous and authenticated PostgREST reads are denied. The
+server may read a selected Star Work's private production record to support an
+authenticated remix, but the browser sends only the work identifier and its own
+direction. The stored production record is never returned in public feed,
+profile, collection, search, or share metadata.
 
 Human creation always targets the private non-publishable class. No request
 field, signed-in account, paid tier, UI action, or legacy visibility mutation
@@ -133,7 +147,7 @@ The [workspace authentication runbook](../operations/workspace-auth.md) owns the
 
 Initial browser profile failures withhold the studio inside the shared shell, preserving public navigation and Home. Manual session recovery retains same-tab drafts; its pending, unsuccessful and offline states use authored messages. A 403 image error says the action is unavailable for the account and never claims that the session expired. The shared loading shell announces a longer wait after six seconds, outside its decorative busy region. The compiled navigation fixture additionally verifies draft continuity, keyboard recovery, themes and reflow; no new storage or mutation-retry contract is introduced.
 
-The workspace entry suite tests middleware variants, independent server-page denial, Auth outages, valid and revoked native sessions, and expired-session refresh. Existing browser-only account fixtures must provide a verified server session before opening the studio; do not bypass the gate. The compiled HTTP verifier expects sign-in redirects from Images and Sites, scans the public sign-in/home pages and their assets, and preserves capability/JSON/binary checks.
+The workspace entry suite tests middleware variants, independent server-page denial, Auth outages, valid and revoked native sessions, and expired-session refresh. Existing browser-only account fixtures must provide a verified server session before opening the studio; do not bypass the gate. The compiled HTTP verifier expects sign-in redirects from `/images/create`, `/images/library`, `/images/favorites`, and `/library`, including file-like children. `/images` redirects to public Explore and `/sites` is a retired alias; the verifier checks those redirects separately. It scans the public sign-in/home pages and their assets and preserves capability/JSON/binary checks.
 The HTTP suite opens a loopback server around the actual route handlers and merges
 middleware headers. It tests binary success, explicit JSON, format conversions,
 metadata removal, malformed input, auth failures, rate limits, unavailable models,

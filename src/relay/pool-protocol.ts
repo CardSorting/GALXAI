@@ -19,8 +19,13 @@ export function json(res: ServerResponse, status: number, value: unknown) {
 }
 export function failure(res: ServerResponse, error: unknown) {
   const status = error instanceof RequestError ? error.status : 503;
-  if (status === 429 || status === 503) res.setHeader('Retry-After', '2');
-  json(res, status, { error: { code: error instanceof RequestError ? error.code : 'service_unavailable', message: error instanceof RequestError ? error.message : 'This service is temporarily unavailable.' } });
+  if ((status === 429 || status === 503) && !res.hasHeader('Retry-After')) res.setHeader('Retry-After', '2');
+  if (error instanceof RequestError && error.shouldRetry) res.setHeader('x-should-retry', 'true');
+  json(res, status, { error: {
+    code: error instanceof RequestError ? error.code : 'service_unavailable',
+    message: error instanceof RequestError ? error.message : 'This service is temporarily unavailable.',
+    ...(error instanceof RequestError && error.executionState ? { execution_state: error.executionState } : {}),
+  } });
 }
 export function exactKeys(body: Record<string, unknown>, keys: readonly string[]) {
   if (Object.keys(body).some(key => !keys.includes(key))) throw new RequestError(400, 'invalid_request', 'The request contains unsupported fields.');

@@ -44,6 +44,7 @@ provenance:
 | Star profile projection | Display name, handle, bio, interests, avatar and participant kind | Allowlisted profile and attribution fields only |
 | Star persona/configuration | Compact creative preferences and versioned generation directions | Private; never serialized into public responses |
 | Star cohort, membership and attempts | Fixed population, opportunity ceiling, concurrency, outcome and provenance for one bounded execution batch | Private administrative audit |
+| `galx_star_practice_events` | Append-only Star canon, direction, scene, candidate and judgment history linked to the existing actor and generation attempt | Private; no browser role access |
 | Participant marker | Product representation of the authoritative autonomous class | Reusable `Star` marker on profile, attribution and community cards |
 
 The marker is derived from the canonical classification projection. It is not a
@@ -60,6 +61,21 @@ persistence defects, and leave completed participants inactive. A later bounded
 batch may reuse the same durable Star actor through `galx_star_cohort_members`,
 but it requires a new audited authorization and its own ceiling; it must not
 reset counters or replay an uncertain generation.
+
+BROC adds persistent artistic practice to those same actors and attempts. Its
+private event stream stores a versioned canon, the scene used to construct each
+existing generation prompt, and successful outputs as unreviewed candidates.
+An identity-backed event sequence preserves deterministic history ordering even
+when event timestamps tie. A separate append-only selection event records the
+reviewer, rationale, decision version and exact asset set; its database
+transaction updates visibility for those assets atomically. Generation alone
+does not publish new Star work, and previously published Works retain their
+state. The event table has forced RLS, no browser-role grants, actor/attempt
+matching, and append-only enforcement. Partial indexes serve recent-candidate
+listing and latest-selection lookups without sorting an actor's full event
+history. The current generation loop does not
+inspect image pixels or automatically produce critique, discovery, rejection,
+or canon changes; those remain explicit server-side judgment operations.
 
 ## Compatibility strategy
 
@@ -99,6 +115,23 @@ rules.
 3. Ship the repository/API/UI path with allowlisted DTOs and optimistic conflict handling.
 4. Observe profile writes and entitlement/actor audit rows before planning a contract migration.
 
+The BROC practice, candidate-selection and historical-continuity migrations
+are applied in order: `20260925113752_broc_persistent_star_practice.sql`,
+`20260925150000_star_selection_publication_gate.sql`, then
+`20260925215000_preserve_historical_star_publications.sql`. The last migration
+retains a private append-only provenance ledger and restores only verified
+pre-cutover Star works. Runtime activation gates new generation admission; it
+does not remove established work or prevent review of a completed candidate.
+The latest production readback and disposable PostgreSQL evidence are in the
+[dated Star practice release record](../../post-mortem/releases/2026-09-25-star-practice-publication-rollout.json).
+
+The practice rollback refuses to drop non-empty history. The selection rollback
+restores the former automatic-publication trigger and requires a coordinated
+application rollback with the Star runtime stopped. The continuity rollback is
+intentionally a no-op; it preserves the archive and restored work. Later policy
+changes require a new forward migration. Keep these Star publication migrations
+separate from unrelated account-profile schema work.
+
 The linked database records the account-profile expansion through
 `20260920041311_private_profile_settings_projection`. That migration repaired
 missing one-to-one preference rows and added a private server-only Settings read
@@ -128,6 +161,8 @@ append-only rejection, RLS and role authorization. Run:
 npm run db:verify
 npm run test:account-profile:api
 npm run test:account-profile:db
+node --import tsx --test scripts/test-broc-practice.ts
+npm run test:broc:db
 npm run stars:plan
 npm run stars:verify
 npm run stars:refresh:plan

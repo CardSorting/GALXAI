@@ -26,9 +26,11 @@ test('community stream audit: 0 broken test fixtures leak into feed', async () =
 
     // 2. Assert valid properties
     assert.ok(item.id && typeof item.id === 'string', 'Item must have valid string id');
-    assert.ok(item.prompt && item.prompt.trim().length > 0, 'Item must have non-empty prompt');
+    assert.equal('prompt' in item, false, 'Public work metadata must not expose production prompts');
+    assert.equal('remix_count' in item, false, 'Public work metadata must not expose a free remix counter');
     assert.ok(item.aspect_ratio && typeof item.aspect_ratio === 'string', 'Item must have valid aspect_ratio');
     assert.ok(item.public_url && typeof item.public_url === 'string', 'Item must have valid public_url');
+    assert.ok(item.author?.displayName, 'Public work metadata must keep Star attribution');
 
     // 3. Test URL mapping
     if (item.public_url.startsWith('/v1/images/assets/')) {
@@ -77,16 +79,19 @@ test('community stream audit: aspect ratio and search filters adhere strictly', 
     assert.equal(it.aspect_ratio, '16:9', `Expected ratio 16:9, got ${it.aspect_ratio}`);
   }
 
-  // Test prompt query filter: cat
-  const queryReq = new NextRequest('http://localhost:3000/api/images/feed?q=cat');
+  // Public discovery search matches Star identity, never production prompt text.
+  const firstItem = ratioData.items[0];
+  const query = firstItem.author.handle || firstItem.author.displayName;
+  const queryReq = new NextRequest(`http://localhost:3000/api/images/feed?q=${encodeURIComponent(query)}`);
   const queryRes = await getFeed(queryReq);
   const queryData = await queryRes.json();
   assert.equal(queryRes.status, 200);
-  assert.ok(queryData.items.length > 0, 'Must return matching query items for "cat"');
+  assert.ok(queryData.items.length > 0, 'Must return works matching the Star identity search');
   for (const it of queryData.items) {
     assert.ok(
-      it.prompt.toLowerCase().includes('cat'),
-      `Expected prompt to match query "cat", got "${it.prompt}"`
+      (it.author.handle || '').toLowerCase().includes(query.toLowerCase()) ||
+        it.author.displayName.toLowerCase().includes(query.toLowerCase()),
+      'Search results must match public Star identity fields',
     );
   }
 });

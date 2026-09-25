@@ -20,6 +20,18 @@ export class ImageStorageUnavailableError extends Error {
   constructor() { super('Private image storage unavailable'); }
 }
 
+export function buildPrivateRemixPrompt(direction: string, sourceContext: string): string {
+  const cleanDirection = direction.trim();
+  const cleanSource = sourceContext.trim();
+  if (!cleanDirection || !cleanSource || cleanSource.length > 4_000) throw new Error('Private remix context is invalid');
+  return [
+    'Create a distinct private work inspired by the published Star work described below.',
+    'Use the source only as private creative context. Change the composition and visual decisions; do not reproduce the source image.',
+    `Private Star work context: ${cleanSource}`,
+    `Patron direction: ${cleanDirection}`,
+  ].join('\n\n');
+}
+
 export class ImageRequestService {
   private static instance: ImageRequestService;
   static getInstance() {
@@ -49,9 +61,16 @@ export class ImageRequestService {
       const request = await this.repository.claim(owner,id);
       if (!request) return;
       try {
-        const { outputFormat: _output, ...input } = request.payload;
-        const result = await this.generate({ request: { ...input, response_format: 'b64_json' }, userId: owner, requestId: id,
+        const { outputFormat: _output, sourceWorkId, privateContext, ...input } = request.payload;
+        const prompt = sourceWorkId && privateContext
+          ? buildPrivateRemixPrompt(input.prompt, privateContext)
+          : input.prompt;
+        const result = await this.generate({ request: { ...input, prompt, response_format: 'b64_json' }, userId: owner, requestId: id,
           workClass: request.work_class,
+          ...(sourceWorkId && privateContext ? {
+            privateDisplayPrompt: input.prompt,
+            privateSourceWorkId: sourceWorkId,
+          } : {}),
           isPriorityUser: request.is_priority, signal: AbortSignal.timeout(135000) });
         const assets = result.data.map(item => item.asset_id);
         if (assets.length !== (request.payload.n || 1) || assets.some(id => typeof id !== 'string' || !/^[A-Za-z0-9_-]{1,160}$/.test(id))) throw new Error('Image storage incomplete');

@@ -3,7 +3,13 @@ import { performance } from 'node:perf_hooks';
 import { functionInput, functionToolContract } from './function-tools.js';
 
 export class RequestError extends Error {
-  constructor(public status: number, public code: string, message: string) { super(message); }
+  constructor(
+    public status: number,
+    public code: string,
+    message: string,
+    public executionState?: 'not_accepted' | 'unknown' | 'failed',
+    public shouldRetry = false,
+  ) { super(message); }
 }
 export function readJsonBody(req: IncomingMessage, maxBytes: number, timeoutMs: number): Promise<Record<string, any>> {
   return new Promise((resolve, reject) => {

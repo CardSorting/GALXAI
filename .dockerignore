@@ -4,6 +4,7 @@
 /docs/
 /*.md
 /.git/
+**/.git/
 /.relay/
 /.broccolidb/
 /.data/
@@ -22,8 +23,11 @@
 
 # Use declared source/dependencies, not the host's generated output.
 /node_modules/
+**/node_modules/
 /.next/
 /out/
 /dist/
+**/dist/
 *.tsbuildinfo
+**/*.tsbuildinfo
 *.log

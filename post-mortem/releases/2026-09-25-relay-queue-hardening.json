@@ -1,0 +1,39 @@
+{
+  "classification": "private",
+  "observed_at": "2026-09-25T19:33:00Z",
+  "scope": "Interim local Premium queue hardening deployment.",
+  "authorization": "Owner requested a durable local queue in front of the existing relay and deployment to Docker.",
+  "deployment": {
+    "installed_runtime": {
+      "tag": "galxai-relay-premium:queue-hardening-20260925-r2",
+      "image_id": "sha256:9758b118dd4a0eba8dbfa677513b6643191c9364aecc0b15a9415dc3da0eadce",
+      "architecture": "arm64",
+      "status": "running and healthy",
+      "state_volume": "existing /state volume preserved"
+    },
+    "central_image_pins_changed": false,
+    "monitor_image_pin_changed": false,
+    "registration_or_execution_gates_changed": false,
+    "public_application_cutover": false
+  },
+  "verification": {
+    "local_installation_verifier": "passed; 27 checks",
+    "service_image_verifier": "passed; 32 checks across 3 images and split Docker contexts",
+    "source_checks": [
+      "TypeScript passed",
+      "relay queue tests passed",
+      "relay service tests passed; 41 tests",
+      "root production build passed",
+      "BROCCOLIQUEUE tests passed; 24 tests",
+      "BroccoliDB checks passed; 42 tests",
+      "isolated image smoke passed as UID 1000 with no network and read-only root filesystem"
+    ],
+    "container_contract": "Only the Premium runtime target changed; the existing named /state volume and loopback listener were retained."
+  },
+  "limits": [
+    "No provider generation was submitted by the operator.",
+    "No public application cutover or gate change occurred.",
+    "Queue persistence is local to the existing Premium installation; no cross-host scheduling was qualified.",
+    "The retained local queue volume is private by file mode but is not encrypted against host administrator or disk access."
+  ]
+}

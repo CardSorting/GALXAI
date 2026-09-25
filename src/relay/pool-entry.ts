@@ -35,13 +35,29 @@ export async function poolEntrypoint() {
     const identity={pool,installationId:config.installationId};
     mkdirSync('/state',{recursive:true,mode:0o700});
     if(policy.component==='runtime') {
+      // The runtime's local durable queue contains request bodies and generated results.
+      process.umask(0o077);
       assertProjectDatabase(config.databaseUrl,PROJECTS[pool]);
       if(!decodeURIComponent(new URL(config.databaseUrl).username).startsWith('galx_execution_service'))throw Error('A dedicated execution principal is required.');
       if(['operatorToken','viewerToken','registrarToken','vault','identitySecret'].some(k=>config[k]))throw Error('Runtime received management authority.');
       if(!/^[A-Za-z0-9_-]{32,256}$/.test(config.inferenceKey)||!/^[A-Za-z0-9_-]{32,256}$/.test(config.capabilityKey)||new Set([config.inferenceKey,config.capabilityKey,config.runtimeToken]).size!==3)throw Error('Separate inference, capability, and runtime keys are required.');
       const db=new Pool({connectionString:config.databaseUrl,ssl,max:4,connectionTimeoutMillis:5000,statement_timeout:5000,query_timeout:6000});
-      const runtime=new PoolRuntime(new PoolExecution(new CentralClient(config.centralOrigin,config.runtimeToken,identity),new PostgresExecutionStore(db,pool,identity.installationId)),config.inferenceKey,'/state',config.capabilityKey);
-      await runtime.start();close=async()=>{await runtime.stop();await db.end();};
+      try {
+        const runtime=new PoolRuntime(new PoolExecution(new CentralClient(config.centralOrigin,config.runtimeToken,identity),new PostgresExecutionStore(db,pool,identity.installationId)),config.inferenceKey,'/state',config.capabilityKey);
+        await runtime.start();
+        close=async()=>{
+          const failures:unknown[]=[];
+          try { await runtime.stop(); } catch(error) { failures.push(error); }
+          // Runtime shutdown drains accepted HTTP work and the local queue before
+          // closing the execution store. Ending the pool concurrently can sever
+          // in-flight settlement and make the queue's graceful drain meaningless.
+          try { await db.end(); } catch(error) { failures.push(error); }
+          if(failures.length)throw new AggregateError(failures,'Premium runtime resources did not all stop cleanly');
+        };
+      } catch(error) {
+        await db.end().catch(()=>{});
+        throw error;
+      }
     } else {
       if(['runtimeToken','databaseUrl','vault','identitySecret','inferenceKey'].some(k=>config[k]))throw Error('Monitor received execution authority.');
       const tokens=[config.operatorToken,config.viewerToken,config.registrarToken];if(new Set(tokens).size!==3)throw Error('Separate service credentials are required.');

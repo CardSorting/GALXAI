@@ -2141,3 +2141,31 @@ Incident: `INC-20260913-IMAGES`. Kind: `verification`.
 **Next step:** Before deployment, identify and inspect the exact production Supabase target and migration history, provision/configure the private Vercel-side R2 bucket through the authorized operational process, then execute the controlled deployment and post-deployment checks. Keep historical-image investigation separate; do not mutate legacy assets speculatively.
 
 Evidence: [2026-09-25-finalization-certification.json](releases/2026-09-25-finalization-certification.json), [image-allowance-config.ts](../src/lib/billing/image-allowance-config.ts), [release-certification.ts](../scripts/release-certification.ts), [test-image-requests-db.ts](../scripts/test-image-requests-db.ts), [test-billing-lifecycle.ts](../scripts/test-billing-lifecycle.ts).
+
+## EVT-20260925-star-practice-publication-rollout — 2026-09-25T22:19:48Z
+
+Incident: `INC-20260913-IMAGES`. Kind: `verification`.
+
+**Observation:** The shared database audit found that runtime activation had also filtered previously completed Star works and blocked review of completed candidates.
+
+**Action:** Applied the forward-only continuity migration, restored only provenance-matched pre-cutover work, removed activation from completed-candidate review eligibility, deployed the compatible existing application, and ran live database, feed, route, HTTP, and browser-asset checks.
+
+**Result:** 156 migrations are applied with none pending; 11 historical Star works are public, no public human works or prompt fields are present, 12 profiles remain, all Stars are inactive, and no queued or generating image/Star requests exist. Production smoke, cache/access, public HTTP and asset scans passed.
+
+**Next step:** Keep Stars inactive until separately authorized; retain the disabled-actor, provenance, archive immutability, review and public-projection regressions. Review the existing SECURITY DEFINER participant projection in a separate focused security task.
+
+Evidence: [2026-09-25-star-practice-publication-rollout.json](releases/2026-09-25-star-practice-publication-rollout.json), [20260925215000_preserve_historical_star_publications.sql](../supabase/migrations/20260925215000_preserve_historical_star_publications.sql), [test-image-requests-db.ts](../scripts/test-image-requests-db.ts), [store.ts](../BROC/store.ts), [images.md](failure-modes/images.md).
+
+## EVT-20260925-premium-relay-queue-current-readback — 2026-09-25T22:26:37Z
+
+Incident: `INC-20260913-IMAGES`. Kind: `verification`.
+
+**Observation:** The production application and database rollout did not change the local Premium relay queue; a final runtime readback checked its image and service endpoints.
+
+**Action:** Read the running container identity and queried its liveness and readiness endpoints without restarting or mutating the service.
+
+**Result:** The Premium relay remained on the existing R4 image and was running; both liveness and readiness returned HTTP 200. No queue request or provider generation was submitted.
+
+**Next step:** Keep queue changes and recovery in the separately reviewed relay runbook and release record; rebuild only when relay source or image configuration changes.
+
+Evidence: [2026-09-25-relay-queue-recovery-hardening.json](releases/2026-09-25-relay-queue-recovery-hardening.json), [images.json](../docker/relay-pools/local/images.json), [relay-pool-services.md](../docs/runbooks/relay-pool-services.md).

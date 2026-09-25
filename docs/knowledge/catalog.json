@@ -2504,6 +2504,98 @@
       }
     },
     {
+      "path": "docs/adr/0161-broc-persistent-star-practice.md",
+      "title": "ADR 0161: BROC persistent practice for existing Stars",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [
+        "database"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": {
+        "status": "proposed",
+        "delivery": "local",
+        "domain": "database",
+        "owner": "Database operator",
+        "date": "2026-09-25",
+        "evidence": [
+          "BROC/practice.ts",
+          "BROC/store.ts",
+          "src/lib/stars/StarPopulationController.ts",
+          "supabase/migrations/20260925113752_broc_persistent_star_practice.sql",
+          "scripts/test-broc-practice.ts",
+          "docs/maintainers/ACCOUNT_PROFILE_SCHEMA.md",
+          "post-mortem/releases/2026-09-25-broc-practice-local-review.json"
+        ],
+        "supersedes": []
+      }
+    },
+    {
+      "path": "docs/adr/0162-local-durable-relay-ingress-queue.md",
+      "title": "ADR 0162: Local durable ingress queue for the Premium relay",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [
+        "relay"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": {
+        "status": "accepted",
+        "delivery": "local",
+        "domain": "relay",
+        "owner": "Relay operator",
+        "date": "2026-09-25",
+        "evidence": [
+          "src/relay/pool-request-queue.ts",
+          "src/relay/pool-runtime.ts",
+          "BroccoliDB/src/broccolidb-kernel.ts",
+          "BROCCOLIQUEUE/src/queue.ts",
+          "scripts/test-relay-pool-queue.ts",
+          "docs/QUEUE_SPECIFICATION.md",
+          "docs/runbooks/relay-pool-services.md",
+          "post-mortem/releases/2026-09-25-relay-local-queue.json",
+          "post-mortem/releases/2026-09-25-relay-queue-recovery-hardening.json"
+        ],
+        "supersedes": [],
+        "target": "Existing local Premium Docker runtime only; no public application cutover",
+        "revision": "galxai-relay-premium:queue-hardening-20260925-r4; sha256:4f9ca6fb2e528d3dd9cdb4e1b69f2d6eb717af20987335a10b932c6bb6ab4713",
+        "acceptance_basis": "The owner explicitly directed use of BROCCOLIQUEUE and BroccoliDB for a local queue in front of the existing relay runtime."
+      }
+    },
+    {
+      "path": "docs/adr/0163-star-candidate-selection-before-exhibition.md",
+      "title": "ADR 0163: Star candidate selection before exhibition",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [
+        "images",
+        "database"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": {
+        "status": "accepted",
+        "delivery": "local",
+        "domain": "images",
+        "owner": "Product/API maintainer",
+        "date": "2026-09-25",
+        "evidence": [
+          "docs/adr/0163-star-candidate-selection-before-exhibition.md",
+          "docs/maintainers/image-public-boundary.md",
+          "scripts/review-star-candidates.ts",
+          "scripts/test-broc-selection.ts",
+          "scripts/test-image-requests-db.ts",
+          "post-mortem/releases/2026-09-25-star-selection-local-verification.json"
+        ],
+        "supersedes": [],
+        "target": "GALX source and disposable PostgreSQL verification; no shared database migration or application deployment",
+        "revision": "working tree under review",
+        "acceptance_basis": "The institutional mandate requires an explicit selection decision before new Star work is exhibited."
+      }
+    },
+    {
       "path": "docs/adr/README.md",
       "title": "Architecture decision records",
       "scope": "current-guide",

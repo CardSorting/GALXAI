@@ -1268,6 +1268,10 @@ export interface ImageGenerationRecord {
   readonly userId: string;
   /** Publication authority is a content class, never a user visibility preference. */
   readonly workClass?: 'private' | 'star_published';
+  /** Current database publication flags are required before a Star artifact is delivered. */
+  readonly isPublic?: boolean;
+  readonly visibility?: string;
+  readonly isExploreVisible?: boolean;
   readonly sessionId: string;
   readonly status: 'queued' | 'generating' | 'completed' | 'failed';
   readonly prompt: string;

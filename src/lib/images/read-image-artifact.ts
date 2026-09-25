@@ -9,6 +9,10 @@ import { sanitizeImageArtifact, sanitizeImageThumbnail, type PublicImageArtifact
 const thumbnails = new BroccoliBoundedCache<PublicImageArtifact>('galx_image_thumbnails', { entries: 128, bytes: 16 * 1024 * 1024, ttlMs: 300_000 });
 const transforms = new BroccoliReadCoordinator(2, 64);
 
+export function isExhibitedStarAsset(asset: { workClass?: string; isPublic?: boolean; visibility?: string }): boolean {
+  return asset.workClass === 'star_published' && asset.isPublic === true && asset.visibility === 'public';
+}
+
 /** Authorization precedes every cache hit, including reads after deletion. */
 export async function readImageArtifact(token: string, thumbnail = false, request?: NextRequest): Promise<PublicImageArtifact | null> {
   const identity = GalxCryptoVault.openImageDownload(token);
@@ -17,7 +21,9 @@ export async function readImageArtifact(token: string, thumbnail = false, reques
   if (!asset || asset.status !== 'completed') return null;
   // Publication is a distinct content class, never a user-selected visibility
   // toggle. All other Works stay owner-scoped even if a stale link is copied.
-  if (asset.workClass !== 'star_published') {
+  if (asset.workClass === 'star_published') {
+    if (!isExhibitedStarAsset(asset)) return null;
+  } else {
     if (!request) return null;
     const auth = await GalxAuthEngine.getInstance().resolveAuthIdentity(request);
     if (!auth.authenticated || auth.userId !== identity.userId) return null;

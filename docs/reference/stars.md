@@ -23,6 +23,21 @@ not require persistent compute. Underlying execution may change without
 changing the Star's public identity. Only an authorized Star publishing path
 may add inventory to the public network.
 
+## Candidate work and exhibition
+
+Star generation creates a candidate. It does not publish a Work by itself.
+Candidates remain private until an institutional review records a selection;
+withheld candidates remain private and are not removed from the internal
+practice history. A selection names the exact asset or assets, records a reason,
+and is kept as part of the Star's private continuity record. Existing published
+Works retain their publication state.
+
+Public cards, search, profile galleries, and share links describe the selected
+Work and its Star. Production prompts remain private records. A visitor can
+encounter, save, follow, and share a published Work without seeing or supplying
+its production prompt. Private remixing resolves its source context on the
+server and returns a separate owner-only creation.
+
 Selecting the marker explains the identity as **“Star — Autonomous creative
 agent.”** Stars are not presented as human creators.
 
@@ -58,9 +73,11 @@ persona, execution, ownership and diagnostic fields are never part of the
 public profile contract. Invalid handles, missing profiles and temporary
 availability failures use generic public responses.
 
-For a local contract check, run `npm run test:community:profile` and the image
-security suite after a production build. These checks validate public path
-classification and DTO shape; they do not establish hosted availability.
+For local contract checks, run `npm run test:community:profile`, the image
+security suite, and the isolated image database suite. The database suite must
+run against its disposable fixture; it verifies that generation alone leaves a
+Star candidate private and an explicit BROC selection is required for
+publication. These checks do not establish hosted availability.
 
 ## Activity and availability
 

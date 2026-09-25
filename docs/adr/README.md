@@ -178,3 +178,6 @@ Use the [authoring guide](../maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md) f
 - [0158: Canonical account profiles and actor provenance](0158-canonical-account-profiles-and-actor-provenance.md)
 - [0159: Local Mac relay operation with bounded availability](0159-local-mac-relay-operation.md)
 - [0160: Private human creation and Star-only publishing](0160-private-human-creation-star-publishing.md)
+- [0161: BROC persistent practice for existing Stars](0161-broc-persistent-star-practice.md)
+- [0162: Local durable ingress queue for the Premium relay](0162-local-durable-relay-ingress-queue.md)
+- [0163: Star candidate selection before exhibition](0163-star-candidate-selection-before-exhibition.md)

@@ -6,8 +6,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
   Sparkles,
-  Copy,
-  Check,
   Download,
   Search,
   X,
@@ -44,7 +42,6 @@ interface PublicImageMasonryStreamProps {
   className?: string;
   showToolbar?: boolean;
   showFilters?: boolean;
-  onSelectPrompt?: (prompt: string, ratio?: string) => void;
   authorHandle?: string | null;
   emptyTitle?: string;
   emptyDescription?: string;
@@ -126,7 +123,6 @@ export function PublicImageMasonryStream({
   className = '',
   showToolbar = true,
   showFilters = true,
-  onSelectPrompt,
   authorHandle,
   emptyTitle,
   emptyDescription,
@@ -220,7 +216,6 @@ export function PublicImageMasonryStream({
 
   const [activeModalIndex, setActiveModalIndex] = useState<number | null>(null);
   const [isZoomed, setIsZoomed] = useState(false);
-  const [copiedId, setCopiedId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [toastUndoable, setToastUndoable] = useState(false);
   const [loadedImages, setLoadedImages] = useState<Record<string, boolean>>({});
@@ -586,15 +581,6 @@ export function PublicImageMasonryStream({
     return () => observer.disconnect();
   }, [cursor, hasMore, fetchFeed]);
 
-  // Copy prompt helper
-  const handleCopyPrompt = (e: React.MouseEvent, item: PublicFeedItem) => {
-    e.stopPropagation();
-    navigator.clipboard.writeText(item.prompt);
-    setCopiedId(item.id);
-    showToast('Prompt copied to clipboard');
-    setTimeout(() => setCopiedId(null), 2000);
-  };
-
   // Like toggle with optimistic UI, local persistence, and server sync
   const handleToggleLike = (e: React.MouseEvent, item: PublicFeedItem) => {
     e.stopPropagation();
@@ -934,7 +920,7 @@ export function PublicImageMasonryStream({
     return () => window.removeEventListener('popstate', handlePop);
   }, [items]);
 
-  // Modal keyboard handling (Esc to close, Left/Right arrows to navigate, C to copy, Z to zoom)
+  // Modal keyboard handling (Esc to close, Left/Right arrows to navigate, Z to zoom)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!activeModalItem) return;
@@ -947,12 +933,6 @@ export function PublicImageMasonryStream({
         handleNextImage();
       } else if (e.key === 'z' || e.key === 'Z') {
         setIsZoomed((prev) => !prev);
-      } else if (e.key === 'c' || e.key === 'C') {
-        if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-        navigator.clipboard.writeText(activeModalItem.prompt);
-        setCopiedId(activeModalItem.id);
-        showToast('Creative concept copied to clipboard');
-        setTimeout(() => setCopiedId(null), 2000);
       } else if (e.key === 's' || e.key === 'S' || e.key === 'b' || e.key === 'B') {
         if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
         toggleSaveWork(activeModalItem);
@@ -1106,10 +1086,10 @@ export function PublicImageMasonryStream({
               <Search size={15} aria-hidden="true" />
               <input
                 type="text"
-                placeholder="Search stream prompts…"
+                placeholder="Search Stars…"
                 value={searchQuery}
                 onChange={handleSearchChange}
-                aria-label="Search prompt stream"
+                aria-label="Search Stars"
               />
               {searchQuery && (
                 <button
@@ -1180,7 +1160,7 @@ export function PublicImageMasonryStream({
                 onClick={() => openModalByIndex(idx)}
                 tabIndex={0}
                 role="button"
-                aria-label={`View image: ${item.prompt}`}
+                aria-label={`View work by ${item.author.displayName}`}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
@@ -1205,7 +1185,7 @@ export function PublicImageMasonryStream({
                   {/* High-res live asset with impression trigger */}
                   <img
                     src={imageSrcMap[item.id] || item.thumbnail_url || item.public_url}
-                    alt={item.prompt}
+                    alt={`Published work by ${item.author.displayName}`}
                     loading="lazy"
                     className={`masonry-image ${isLoaded ? 'loaded' : ''}`}
                     onLoad={() => {
@@ -1311,7 +1291,7 @@ export function PublicImageMasonryStream({
           onClick={closeModal}
           role="dialog"
           aria-modal="true"
-          aria-labelledby="modal-prompt-title"
+          aria-labelledby="modal-work-title"
         >
           <div
             className="masonry-modal-dialog"
@@ -1338,7 +1318,7 @@ export function PublicImageMasonryStream({
               >
                 <img
                   src={imageSrcMap[activeModalItem.id] || activeModalItem.public_url}
-                  alt={activeModalItem.prompt}
+                  alt={`Published work by ${activeModalItem.author.displayName}`}
                   className={`masonry-modal-img ${isZoomed ? 'zoomed' : ''}`}
                   onError={(e) => {
                     handleImageError(activeModalItem, e.currentTarget.src);
@@ -1425,10 +1405,9 @@ export function PublicImageMasonryStream({
                 </button>
               </div>
 
-              <h4 className="masonry-modal-section-title" id="modal-prompt-title">
-                Creative Concept
+              <h4 className="masonry-modal-section-title" id="modal-work-title">
+                Published work
               </h4>
-              <p className="masonry-modal-prompt">{activeModalItem.prompt}</p>
 
               {/* Technical Metadata Grid */}
               <div className="masonry-modal-meta-grid">
@@ -1461,7 +1440,7 @@ export function PublicImageMasonryStream({
                   type="button"
                   className="masonry-modal-primary-btn"
                   onClick={(event) => handlePrivateRemix(event, activeModalItem)}
-                  title="Use this Star concept in your private workspace"
+                  title="Make a private work inspired by this Star work"
                 >
                   <Sparkles size={16} />
                   <span>Remix privately</span>
@@ -1501,15 +1480,6 @@ export function PublicImageMasonryStream({
                 <button
                   type="button"
                   className="masonry-modal-secondary-btn"
-                  onClick={(e) => handleCopyPrompt(e, activeModalItem)}
-                >
-                  {copiedId === activeModalItem.id ? <Check size={15} /> : <Copy size={15} />}
-                  <span>{copiedId === activeModalItem.id ? 'Copied to Clipboard!' : 'Copy Concept Text'}</span>
-                </button>
-
-                <button
-                  type="button"
-                  className="masonry-modal-secondary-btn"
                   onClick={(e) => handleDownload(e, activeModalItem)}
                 >
                   <Download size={15} />
@@ -1542,7 +1512,6 @@ export function PublicImageMasonryStream({
                 <span><kbd>Esc</kbd> Close</span>
                 <span><kbd>←</kbd> <kbd>→</kbd> Navigate</span>
                 <span><kbd>Z</kbd> Zoom 1:1</span>
-                <span><kbd>C</kbd> Copy</span>
               </div>
             </div>
           </div>

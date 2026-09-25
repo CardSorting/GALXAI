@@ -7,8 +7,8 @@
       "component": "central"
     },
     {
-      "tag": "galxai-relay-premium:cooldown-scope-20260920-r1",
-      "id": "sha256:869e2718d86e2fe217ddd38ed6151a6954d333dc8ae1084e056ed01100c1e110",
+      "tag": "galxai-relay-premium:queue-hardening-20260925-r4",
+      "id": "sha256:4f9ca6fb2e528d3dd9cdb4e1b69f2d6eb717af20987335a10b932c6bb6ab4713",
       "architecture": "arm64",
       "component": "runtime",
       "pool": "premium"

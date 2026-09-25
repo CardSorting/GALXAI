@@ -288,7 +288,8 @@ test('private image capabilities require the owning signed-in account', async ()
     getAsset: async (userId: string, assetId: string) => userId === 'customer' && assetId === 'private-asset'
       ? { id: assetId, userId, status: 'completed', workClass: 'private', r2Key: 'private-key', sha256: 'sha', updatedAt: 'now' }
       : userId === 'customer' && assetId === 'star-work'
-        ? { id: assetId, userId, status: 'completed', workClass: 'star_published', r2Key: 'star-key', sha256: 'sha', updatedAt: 'now' }
+        ? { id: assetId, userId, status: 'completed', workClass: 'star_published', isPublic: true,
+          visibility: 'public', r2Key: 'star-key', sha256: 'sha', updatedAt: 'now' }
       : null,
   }) as any;
   GalxR2AssetAdapter.getInstance = () => ({ getAssetBuffer: async () => fixture }) as any;

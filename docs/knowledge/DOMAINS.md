@@ -54,8 +54,9 @@ Owner role: **Product/API maintainer**. Domain: `images`.
 - [Legacy free generation and current image allowance](../../docs/maintainers/FREE_GENERATION_QUOTA.md)
 - [Private image allowance and accounting lifecycle](../../docs/maintainers/private-image-accounting.md)
 - [Private image release and privacy audit](../../docs/runbooks/private-image-release-audit.md)
+- [ADR 0163: Star candidate selection before exhibition](../../docs/adr/0163-star-candidate-selection-before-exhibition.md)
 
-Relevant checks (select for the change; impact discovery never executes these): `npm run test:image:security`, `npm run test:image:db`, `npm run test:image:scale`, `npm run test:image:library-db`, `npm run test:relay:image`, `npm run test:free-quota`, `npm run test:free-quota:db`.
+Relevant checks (select for the change; impact discovery never executes these): `npm run test:image:security`, `npm run test:image:db`, `npm run test:image:scale`, `npm run test:image:library-db`, `npm run test:relay:image`, `npm run test:free-quota`, `npm run test:free-quota:db`, `npm run test:image:remix`, `npm run test:community:profile`, `npm run test:collections:privacy`, `npm run test:broc:selection`.
 
 ## Identity and private developer preview
 
@@ -127,6 +128,17 @@ Owner role: **Relay operator**. Domain: `relay`.
 - [ADR 0152: Manual desktop-only shard authority](../../docs/adr/0152-manual-desktop-only-shard-authority.md)
 - [Build and inspect the Premium relay images](../../docs/runbooks/relay-pool-images.md)
 - [Operate the local Premium relay and monitor](../../docs/runbooks/relay-pool-services.md)
+- [ADR 0162: Local durable ingress queue for the Premium relay](../../docs/adr/0162-local-durable-relay-ingress-queue.md)
+- [README](../../BroccoliDB/README.md)
+- [README](../../BroccoliDB/docs/README.md)
+- [API](../../BroccoliDB/docs/API.md)
+- [ARCHITECTURE](../../BroccoliDB/docs/ARCHITECTURE.md)
+- [OPERATIONS](../../BroccoliDB/docs/OPERATIONS.md)
+- [CONTRIBUTING](../../BroccoliDB/docs/CONTRIBUTING.md)
+- [README](../../BroccoliDB/docs/adr/README.md)
+- [ADR-006-wal-compaction-without-history](../../BroccoliDB/docs/adr/ADR-006-wal-compaction-without-history.md)
+- [API](../../BROCCOLIQUEUE/docs/API.md)
+- [operations](../../BROCCOLIQUEUE/docs/operations.md)
 - [Central account management and isolated relay contract](../../docs/reference/relay-account-management.md)
 - [Legacy federation API](../../docs/reference/legacy-federation-api.md)
 - [Legacy federation operations](../../docs/maintainers/legacy-federation-operations.md)
@@ -172,10 +184,12 @@ Owner role: **Database operator**. Domain: `database`.
 - [Central account management and isolated relay contract](../../docs/reference/relay-account-management.md)
 - [Canonical account profile and actor model](../../docs/maintainers/ACCOUNT_PROFILE_SCHEMA.md)
 - [ADR 0158: Canonical account profiles with explicit actor provenance](../../docs/adr/0158-canonical-account-profiles-and-actor-provenance.md)
+- [ADR 0161: BROC persistent practice for existing Stars](../../docs/adr/0161-broc-persistent-star-practice.md)
 - [Private image allowance and accounting lifecycle](../../docs/maintainers/private-image-accounting.md)
 - [Private image release and privacy audit](../../docs/runbooks/private-image-release-audit.md)
+- [ADR 0163: Star candidate selection before exhibition](../../docs/adr/0163-star-candidate-selection-before-exhibition.md)
 
-Relevant checks (select for the change; impact discovery never executes these): `npm run db:verify`, `npm run db:test`, `npm run test:relay:manual-db`, `npm run test:relay:authorization-db`, `npm run test:relay:activation-db`.
+Relevant checks (select for the change; impact discovery never executes these): `npm run db:verify`, `npm run db:test`, `npm run test:broc`, `npm run test:broc:db`, `npm run test:relay:manual-db`, `npm run test:relay:authorization-db`, `npm run test:relay:activation-db`, `npm run test:broc:selection`, `npm run test:image:db`.
 
 ## Release and deployment boundaries
 

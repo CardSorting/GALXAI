@@ -1,0 +1,7 @@
+-- Intentionally forward-only.
+--
+-- This migration restores verified historical Star Works and records the
+-- private provenance used to justify that restoration. Removing the archive or
+-- reapplying actor-activation filters would lose continuity and can silently
+-- withdraw previously published work. Preserve the evidence and use a new
+-- forward migration for any later policy change.

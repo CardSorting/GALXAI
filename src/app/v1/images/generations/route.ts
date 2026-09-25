@@ -11,6 +11,7 @@ import { imageError, imageHeaders } from '@/lib/security/public-image-http';
 import { logImageFailure } from '@/lib/security/private-image-diagnostics';
 import { enforceDeveloperApiKeyAccess } from '@/lib/security/developer-access';
 import type { ImageFormat } from '@/lib/security/image-artifact';
+import { loadPublicStarRemixContext } from '@/lib/images/star-remix-context';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -40,6 +41,13 @@ export async function POST(req: NextRequest) {
     } catch { return imageError('invalid_request', requestId); }
     const prompt = raw.prompt ?? raw.text ?? raw.description ?? raw.input ?? raw.image_prompt;
     if (typeof prompt !== 'string' || !prompt.trim() || prompt.length > 32_000) return imageError('invalid_request', requestId);
+    if (raw.private_context !== undefined || raw.privateContext !== undefined || raw.sourceWorkId !== undefined) {
+      return imageError('unsupported_input', requestId);
+    }
+    const sourceWorkId = raw.source_work_id;
+    if (sourceWorkId !== undefined && (typeof sourceWorkId !== 'string' || !/^[A-Za-z0-9_.-]{1,200}$/.test(sourceWorkId))) {
+      return imageError('invalid_request', requestId);
+    }
     // Model identity and selection are server-side. A human workspace request
     // can ask for the supported image capability, not choose its execution model.
     if (raw.model !== undefined) return imageError('unsupported_input', requestId);
@@ -61,6 +69,15 @@ export async function POST(req: NextRequest) {
     const seat = GalxSeatTierEngine.getInstance();
     const entitlement = await seat.resolveUserSeatTier(auth);
     if (entitlement.isCapped) return imageError('rate_limited', requestId, 60);
+    let privateContext: string | undefined;
+    if (typeof sourceWorkId === 'string') {
+      try {
+        privateContext = (await loadPublicStarRemixContext(sourceWorkId))?.prompt;
+      } catch {
+        return imageError('temporarily_unavailable', requestId, 3);
+      }
+      if (!privateContext) return imageError('invalid_request', requestId);
+    }
     const body: ImageGenerationRequest = {
       prompt, model: 'galx-nova-image', n, size, quality: raw.quality === 'hd' ? 'hd' : 'standard',
       response_format: 'b64_json',
@@ -70,8 +87,12 @@ export async function POST(req: NextRequest) {
     if (body.idempotencyKey && !/^[\x21-\x7e]{1,128}$/.test(body.idempotencyKey)) return imageError('invalid_request', requestId);
     if ((body.sessionId?.length || 0) > 128) return imageError('invalid_request', requestId);
     const service = ImageRequestService.getInstance();
+    const remixContext = typeof sourceWorkId === 'string' && privateContext
+      ? { sourceWorkId, privateContext }
+      : {};
     if (req.headers.get('x-galx-async') === 'true' || req.headers.get('prefer') === 'respond-async') {
-      const task = await service.create(auth.userId, { ...body,
+      const storedBody = { ...body, ...remixContext };
+      const task = await service.create(auth.userId, { ...storedBody,
         response_format: format === 'url' ? 'url' : 'b64_json', outputFormat: outputFormat as ImageFormat | undefined },
       { priority: entitlement.isPriorityUser, schedule: true });
       const taskUrl = `/v1/images/requests/${encodeURIComponent(task.id)}`;
@@ -82,7 +103,8 @@ export async function POST(req: NextRequest) {
     }
     // Every human call uses a durable receipt whose purchased allowance is
     // reserved in the same transaction before the worker can claim/dispatch.
-    const task = await service.create(auth.userId, { ...body,
+    const storedBody = { ...body, ...remixContext };
+    const task = await service.create(auth.userId, { ...storedBody,
       response_format: format === 'url' ? 'url' : 'b64_json', outputFormat: outputFormat as ImageFormat | undefined },
     { priority: entitlement.isPriorityUser, schedule: false });
     await service.run(auth.userId, task.id, true);

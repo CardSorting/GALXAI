@@ -19,7 +19,17 @@ const keepOnlineAgentFile = path.join(homedir(), 'Library/LaunchAgents/ai.galx.r
 const pools = ['premium'];
 const gateway = '192.168.105.2';
 const [action, selected] = process.argv.slice(2);
-const reviewedImages = JSON.parse(readFileSync('docker/relay-pools/local/images.json')).images;
+function reviewedImages() {
+  const manifest = JSON.parse(readFileSync('docker/relay-pools/local/images.json', 'utf8'));
+  if (!Array.isArray(manifest.images)) throw Error('The local service image manifest is invalid.');
+  return manifest.images;
+}
+function reviewedImage(pool, service) {
+  const component = service === 'relay' ? 'runtime' : service;
+  const image = reviewedImages().find(entry => entry.component === component && (!entry.pool || entry.pool === pool));
+  if (!image) throw Error('The local service image manifest is incomplete.');
+  return image;
+}
 let sleepAssertion = 'not-requested';
 let expectedCentralServices;
 function run(bin, args, input) {
@@ -37,7 +47,7 @@ function guest(pool, args, input) {
 }
 function docker(pool, args) { return run('docker', ['--context', pool === 'central' ? 'desktop-linux' : `colima-${pool}`, ...args]); }
 function checkImages(pool) {
-  for (const image of reviewedImages.filter(image => !pool || !image.pool || image.pool === pool)) {
+  for (const image of reviewedImages().filter(image => !pool || !image.pool || image.pool === pool)) {
     if (docker(image.pool ?? 'central', ['image', 'inspect', image.tag, '--format', '{{.Id}}']) !== image.id) throw Error('A local image differs from the reviewed service release.');
   }
 }
@@ -125,8 +135,8 @@ async function supervise() {
     try {
       const failedCause = firstFailedCause({
         central: centralAvailable(),
-        monitor: await monitorAvailable('premium'),
-        relay: await runtimeAvailable('premium'),
+        monitor: await monitorAvailable('premium') && poolServiceImageMatches('premium', 'monitor'),
+        relay: await runtimeAvailable('premium') && poolServiceImageMatches('premium', 'relay'),
       });
       if (failedCause) {
         currentCause = failedCause;
@@ -242,7 +252,8 @@ async function withLauncherLock(operation) {
 async function wakeMonitor(pool, repair = false) {
   monitorOrigin(pool);
   return withLauncherLock(async () => {
-    if (!repair && centralAvailable() && await monitorAvailable(pool) && await runtimeAvailable(pool)) return;
+    if (!repair && centralAvailable() && await monitorAvailable(pool) && await runtimeAvailable(pool)
+      && poolServiceImageMatches(pool, 'monitor') && poolServiceImageMatches(pool, 'relay')) return;
     console.log('Starting Premium…');
     if (!existsSync(path.join(homedir(), '.colima', pool, 'colima.yaml'))) throw Error('This monitor has not been installed on this Mac.');
     const desktopReady = () => { try { docker('central', ['info', '--format', '{{.ID}}']); return true; } catch { return false; } };
@@ -262,22 +273,30 @@ async function wakeMonitor(pool, repair = false) {
 }
 async function startPool(pool) {
   poolCompose(pool, ['up', '-d', '--no-build', '--pull', 'never', 'monitor']);
-  try { await waitFor(() => monitorAvailable(pool), 45); }
+  try { await waitFor(() => monitorAvailable(pool) && poolServiceImageMatches(pool, 'monitor'), 45); }
   catch {
     if (!(await monitorAvailable(pool))) {
       recoverPoolService(pool, 'monitor');
-      await waitFor(() => monitorAvailable(pool), 45);
-    }
+      await waitFor(() => monitorAvailable(pool) && poolServiceImageMatches(pool, 'monitor'), 45);
+    } else if (!poolServiceImageMatches(pool, 'monitor')) throw Error('The Premium monitor does not match its reviewed image.');
   }
-  if (await runtimeAvailable(pool)) return;
+  const replacingImage = !poolServiceImageMatches(pool, 'relay');
+  if (await runtimeAvailable(pool) && !replacingImage) return;
+  if (replacingImage && poolServiceState(pool, 'relay') === 'running') {
+    console.log('Draining the previous Premium runtime before replacing its image…');
+    poolCompose(pool, ['stop', '--timeout', '480', 'relay']);
+  }
   const config = JSON.parse(readFileSync(path.join(components, `${pool}-monitor.json`)));
   const deadline = await monitorHandoff(pool, config);
   if (deadline > Date.now()) console.log('Waiting for the previous runtime to release ownership…');
   await waitFor(() => Date.now() >= deadline, 67);
   if (!centralAvailable()) throw Error('Central service health changed during runtime handoff.');
-  if (await runtimeAvailable(pool)) return;
-  recoverPoolService(pool, 'relay');
-  await waitFor(() => runtimeAvailable(pool), 45);
+  if (await runtimeAvailable(pool) && poolServiceImageMatches(pool, 'relay')) return;
+  if (replacingImage) {
+    if (poolServiceState(pool, 'relay') === 'unknown') throw Error('The Premium runtime needs manual review before image replacement.');
+    poolCompose(pool, ['up', '-d', '--no-build', '--pull', 'never', 'relay']);
+  } else recoverPoolService(pool, 'relay');
+  await waitFor(() => runtimeAvailable(pool) && poolServiceImageMatches(pool, 'relay'), 45);
 }
 function poolServiceState(pool, service) {
   if (!pools.includes(pool) || !['monitor', 'relay'].includes(service)) return 'unknown';
@@ -293,6 +312,24 @@ function poolServiceState(pool, service) {
         container?.Config?.Labels?.['com.docker.compose.service'] !== service) return 'unknown';
     return typeof container.State?.Status === 'string' ? container.State.Status : 'unknown';
   } catch { return 'unknown'; }
+}
+function poolServiceImageMatches(pool, service) {
+  if (!pools.includes(pool) || !['monitor', 'relay'].includes(service)) return false;
+  const expected = reviewedImage(pool, service);
+  if (typeof expected.tag !== 'string' || !/^[\w./:-]+$/.test(expected.tag)
+    || typeof expected.id !== 'string' || !/^sha256:[a-f0-9]{64}$/i.test(expected.id)) return false;
+  try {
+    const project = `galx-${pool}`;
+    const ids = docker(pool, ['ps', '-aq', '--filter', `label=com.docker.compose.project=${project}`,
+      '--filter', `label=com.docker.compose.service=${service}`]).split('\n').filter(Boolean);
+    if (ids.length !== 1 || !/^[a-f0-9]{12,64}$/i.test(ids[0])) return false;
+    const records = JSON.parse(docker(pool, ['inspect', ids[0]]));
+    const container = records.length === 1 ? records[0] : undefined;
+    return container?.Config?.Labels?.['com.docker.compose.project'] === project
+      && container?.Config?.Labels?.['com.docker.compose.service'] === service
+      && container?.Config?.Image === expected.tag
+      && container?.Image === expected.id;
+  } catch { return false; }
 }
 function recoverPoolService(pool, service) {
   const action = poolServiceRecoveryAction(poolServiceState(pool, service));
@@ -325,12 +362,14 @@ function centralCompose(args) {
 }
 function poolCompose(pool, args) {
   const upper = pool.toUpperCase();
+  const monitorImage = reviewedImage(pool, 'monitor');
+  const runtimeImage = reviewedImage(pool, 'relay');
   const gid = guest(pool, ['stat', '-c', '%g', '/var/run/docker.sock']);
   if (!/^\d+$/.test(gid)) throw Error('Invalid Docker group.');
   return guest(pool, ['sudo', '-n', 'env', `GALX_${upper}_RUNTIME_CONFIG_FILE=/opt/galx/config/runtime.json`,
     `GALX_${upper}_MONITOR_CONFIG_FILE=/opt/galx/config/monitor.json`, `GALX_DOCKER_SOCKET_GID=${gid}`, `GALX_LOCAL_GATEWAY=${gateway}`,
-    `GALX_LOCAL_MONITOR_IMAGE=${reviewedImages.find(image => image.component === 'monitor' && image.pool === pool).tag}`,
-    `GALX_LOCAL_RUNTIME_IMAGE=${reviewedImages.find(image => image.component === 'runtime' && image.pool === pool).tag}`,
+    `GALX_LOCAL_MONITOR_IMAGE=${monitorImage.tag}`,
+    `GALX_LOCAL_RUNTIME_IMAGE=${runtimeImage.tag}`,
     'docker', 'compose', '--env-file', '/dev/null', '-f', '/opt/galx/services.yaml', '-f', '/opt/galx/local.yaml', ...args]);
 }
 function certificates() {
@@ -379,7 +418,7 @@ async function verify() {
       const kind = c.Config.Labels['io.galx.component'];
       const mounts = c.Mounts.map(m => m.Destination);
       check(mounts.every(m => ['/state', '/run/secrets/component-config', '/run/secrets/local-ca', ...(kind === 'monitor' ? ['/var/run/docker.sock'] : [])].includes(m)), 'Unexpected mount.');
-      check(c.Image === reviewedImages.find(image => image.pool === pool && image.component === kind)?.id, 'Image changed.');
+      check(c.Image === reviewedImages().find(image => image.pool === pool && image.component === kind)?.id, 'Image changed.');
     }
     const runtime = containers.find(c => c.Config.Labels['io.galx.component'] === 'runtime');
     const origin = 'http://127.0.0.1:13311';

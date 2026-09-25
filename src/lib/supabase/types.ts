@@ -298,20 +298,38 @@ export interface Database {
         Update: { status?: 'granted' | 'duplicate'; identity_hash?: string; transaction_id?: string; granted_at?: string };
         Relationships: [];
       };
-      user_star_follows: {
+     user_star_follows: {
+       Row: {
+         user_id: string;
+         star_handle: string;
+         followed_at: string;
+       };
+       Insert: {
+         user_id: string;
+         star_handle: string;
+         followed_at?: string;
+       };
+       Update: {
+         followed_at?: string;
+       };
+       Relationships: [];
+     };
+      galx_star_practice_events: {
         Row: {
-          user_id: string;
-          star_handle: string;
-          followed_at: string;
+          event_id: string;
+          actor_id: string;
+          attempt_id: string | null;
+          event_type: 'canon' | 'canon_revision' | 'direction' | 'scene' | 'candidate' | 'critique' | 'discovery' | 'rejection';
+          event_payload: Json;
+          created_at: string;
         };
         Insert: {
-          user_id: string;
-          star_handle: string;
-          followed_at?: string;
+          actor_id: string;
+          attempt_id: string | null;
+          event_type: 'canon' | 'canon_revision' | 'direction' | 'scene' | 'candidate' | 'critique' | 'discovery' | 'rejection';
+          event_payload?: Json;
         };
-        Update: {
-          followed_at?: string;
-        };
+        Update: never;
         Relationships: [];
       };
     };

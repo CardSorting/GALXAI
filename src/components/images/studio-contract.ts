@@ -11,7 +11,7 @@ export const RATIOS = [
   { value: '4:3', label: 'Classic', size: '1024x768', width: 24, height: 18, useCase: 'Standard Photo' },
 ] as const;
 export type Ratio = typeof RATIOS[number]['value'];
-export interface StudioSettings { prompt: string; ratio: Ratio; quality: 'standard' | 'hd'; count: number }
+export interface StudioSettings { prompt: string; ratio: Ratio; quality: 'standard' | 'hd'; count: number; remixWorkId?: string }
 export interface StudioImage {
   id: string; prompt: string; url: string; ratio: string; quality: 'standard' | 'hd';
   createdAt: string; favorite: boolean; saved: boolean;
@@ -136,11 +136,15 @@ export function readPrivateAllowance(value: unknown): StudioImageAllowance {
 }
 export function readSettings(value: unknown): StudioSettings {
   const data = object(value);
+  const remixWorkId = typeof data.remixWorkId === 'string' && /^[A-Za-z0-9_-]{1,160}$/.test(data.remixWorkId)
+    ? data.remixWorkId
+    : undefined;
   return {
     prompt: typeof data.prompt === 'string' ? data.prompt.slice(0, MAX_PROMPT) : '',
     ratio: RATIOS.some(r => r.value === data.ratio) ? data.ratio as Ratio : '1:1',
     quality: data.quality === 'hd' ? 'hd' : 'standard',
     count: Number.isInteger(data.count) && Number(data.count) >= 1 && Number(data.count) <= 4 ? Number(data.count) : 1,
+    ...(remixWorkId ? { remixWorkId } : {}),
   };
 }
 export function readPending(value: unknown): PendingGeneration | null {
@@ -171,7 +175,8 @@ export function generationBody(settings: StudioSettings) {
   const clean = readSettings(settings);
   // The private workspace selects no user-visible model or execution path.
   return { prompt: clean.prompt.trim(), n: clean.count,
-    size: RATIOS.find(r => r.value === clean.ratio)!.size, quality: clean.quality, response_format: 'url' };
+    size: RATIOS.find(r => r.value === clean.ratio)!.size, quality: clean.quality, response_format: 'url',
+    ...(clean.remixWorkId ? { source_work_id: clean.remixWorkId } : {}) };
 }
 
 /** Only same-origin artifact paths and encoded raster data are displayable. */

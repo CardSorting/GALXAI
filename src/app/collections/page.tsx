@@ -78,7 +78,6 @@ export default function CollectionsPage() {
     const q = searchQuery.toLowerCase();
     return savedWorks.filter(
       (w) =>
-        w.prompt.toLowerCase().includes(q) ||
         w.author.displayName.toLowerCase().includes(q) ||
         (w.author.handle && w.author.handle.toLowerCase().includes(q))
     );
@@ -230,7 +229,7 @@ export default function CollectionsPage() {
                   <Search size={24} aria-hidden="true" />
                 </div>
                 <h3>No saved works matched “{searchQuery}”</h3>
-                <p>Try searching for a different visual term or creator handle.</p>
+                <p>Try searching for another Star name or handle.</p>
                 <button
                   type="button"
                   className={styles.toolBtn}
@@ -248,7 +247,7 @@ export default function CollectionsPage() {
                       onClick={() => setActiveInspectWork(work)}
                       role="button"
                       tabIndex={0}
-                      aria-label={`Inspect ${work.prompt}`}
+                      aria-label={`Inspect work by ${work.author.displayName}`}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' || e.key === ' ') {
                           e.preventDefault();
@@ -260,7 +259,7 @@ export default function CollectionsPage() {
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={work.thumbnail_url || work.public_url}
-                        alt={work.prompt}
+                        alt={`Published work by ${work.author.displayName}`}
                         className={styles.workImg}
                         loading="lazy"
                       />
@@ -416,7 +415,7 @@ export default function CollectionsPage() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={activeInspectWork.public_url}
-                alt={activeInspectWork.prompt}
+                alt={`Published work by ${activeInspectWork.author.displayName}`}
                 className={styles.modalImg}
               />
             </div>
@@ -439,12 +438,7 @@ export default function CollectionsPage() {
                 )}
               </div>
 
-              <div>
-                <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider block mb-2">
-                  Creative Concept
-                </span>
-                <p className={styles.modalPrompt}>{activeInspectWork.prompt}</p>
-              </div>
+              <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Published work</p>
 
               <div className="mt-auto flex flex-col gap-2 pt-4 border-t border-zinc-800">
                 <button

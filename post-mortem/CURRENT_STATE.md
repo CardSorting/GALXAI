@@ -2,7 +2,77 @@
 
 <!-- docs-scope: current-guide -->
 
-Reconciled 2026-09-23 UTC. At the latest direct check (19:20 UTC), this Mac was on AC power at 100%; Docker Desktop, the Premium Colima VM, both healthy central Compose services and both Premium services were running. The relay and monitor answered their fixed liveness checks. Keep Premium online and its supervisor were running, with a fresh heartbeat, no recovery cause and the AC idle-sleep assertion process active. Fresh local verification passed 27 checks at 19:16 UTC; focused supervisor and access-boundary tests passed (5 and 6), and the production build generated all 162 static pages. The supervisor was reloaded with the service-scoped monitor/runtime recovery path; no relay, monitor or central container was restarted during the audit. That failure branch was not fault-injected, and host/sign-in/sleep/wake/duplicate-owner acceptance remains open under ACT-018. The [targeted recovery audit](releases/2026-09-23-local-relay-targeted-recovery.json) retains the finding, verification and limits. The four older overdue actions ACT-005, ACT-006, ACT-008 and ACT-014 remain open. The DigitalOcean candidate remains unprovisioned; no public ingress or execution gate changed. Current-state notes are observations, not a live feed. Before an intervention, inspect the current target, process and migration history again. [Open items](OPEN_ITEMS.md) remain part of this handover.
+### BROC selection and historical-work continuity — production verified — 2026-09-25 22:26 UTC
+
+The linked application database has 156 migrations applied, with no pending
+or remote-only migrations. The continuity migration archived and restored 11
+provenance-matched historical Star works. Database readback found 11 published
+Star works, zero public human works, 12 participant profiles, zero enabled
+Stars, and no pending/queued image requests or Star attempts. The private
+archive is forced-RLS and has no SELECT grant for application roles.
+
+The compatible existing application is deployed to production. Live
+acceptance passed 13 smoke checks, 38 route/cache checks and a sanitized
+public-boundary scan of 37 browser assets. The public feed returned 11 unique
+Star works with an explicit DTO and no prompt field. No Star was activated,
+no new candidate was generated or selected, and no allowance or queue state
+changed. The Premium relay queue remains on its separately recorded R4 image;
+fresh local readback found it running and both liveness and readiness returned
+HTTP 200. This rollout did not rebuild or restart the Docker queue.
+See the [private rollout record](releases/2026-09-25-star-practice-publication-rollout.json)
+for exact evidence and limitations. The older
+[local verification record](releases/2026-09-25-star-selection-local-verification.json)
+remains historical evidence, not current migration or deployment state.
+
+The database advisor still reports one existing SECURITY DEFINER view on the
+curated participant projection. This pass preserved its established grants and
+did not redesign it; retain that review item for a separate focused security
+change. The internal candidate-review command was not run against production,
+and no curatorial selection was made.
+
+### Star publication and prompt privacy pass — local-only verification before shared migration — 2026-09-25 21:14 UTC
+
+The existing GALX application now keeps production prompts out of public Star
+feeds, profiles, search, saved-work exports and sharing metadata. Private remix
+resolves a currently published Star source on the server and uses the existing
+authenticated allowance path. New Star output is an unreviewed private
+candidate until a deliberate selection records the exact asset IDs, rationale
+and reviewer and updates visibility atomically. Human work remains private;
+previously published Star work retains its state. Existing navigation and
+interaction layout were preserved.
+
+Local checks passed: 69 image security tests, 3 private remix tests, 7 community
+profile tests, 1 saved-work privacy test, 6 BROC practice tests, 3 selection
+tests, 76 image database assertions and 20 BROC database assertions. Both
+database suites used disposable PostgreSQL 17 containers and replayed 155
+migrations. Static migration integrity found 155 paired migrations/rollbacks
+with zero warnings. TypeScript and the production build passed; the build
+generated 155 static pages. The compiled boundary scan checked 526
+browser/rendered assets. Documentation sync/checks, documentation tests and the
+diff check also passed. The [private verification record](releases/2026-09-25-star-selection-local-verification.json)
+retains exact scope and limitations.
+
+At this observation, the BROC practice and selection migrations were still
+unapplied to a shared database. That state was superseded by the later
+continuity migration rollout above. This local-only pass did not deploy the
+application, submit provider generation, or change the existing Premium queue
+runtime. Its tests remain evidence for the code at that point, not hosted
+acceptance. The selection rollback restores automatic Star publication;
+coordinate any rollback with application version and drain state.
+
+### Premium relay queue recovery hardening — 2026-09-25 20:00 UTC
+
+The Premium runtime runs `galxai-relay-premium:queue-hardening-20260925-r4` (`sha256:4f9ca6fb2e528d3dd9cdb4e1b69f2d6eb717af20987335a10b932c6bb6ab4713`, ARM64). The existing `/state` volume `galx-premium_premium_execution` remains attached; central and monitor image pins are unchanged. Fresh local verification passed 27 checks, and the split-context service-image verifier passed 32 checks. TypeScript, queue (13), relay services (41), and the production build passed. This pass fixed two queue recovery gaps: accepted internal jobs now remain eligible during graceful drain, and recovered work whose claim timestamp is at or past its persisted deadline returns `not_accepted` before relay dispatch. Runtime drain now freezes periodic worker refresh and awaits any in-flight sync before closing scheduler/execution resources. The deployment audit also found that the existing long-running supervisor could restore a healthy but stale image because it cached the manifest and checked liveness only. The supervisor now reloads the manifest for each reconciliation and requires both image tag and immutable ID to match before declaring a service current; it was reloaded, drained the stale runtime through the existing ownership fence, and started R4. The [private R4 release record](releases/2026-09-25-relay-queue-recovery-hardening.json) preserves the interim rollout evidence and limits. No provider generation was submitted by the operator, no public application cutover occurred, and no registration policy or execution gate changed.
+
+### R2 interim queue hardening deployment — 2026-09-25 19:33 UTC
+
+R2 (`galxai-relay-premium:queue-hardening-20260925-r2`, `sha256:9758b118dd4a0eba8dbfa677513b6643191c9364aecc0b15a9415dc3da0eadce`, ARM64) was the runtime before the later R3/R4 audit. It retained the existing `/state` volume and unchanged central/monitor pins. The [dated R2 release record](releases/2026-09-25-relay-queue-hardening.json) records its 27-check local verification and implementation evidence; its tag remains available as rollback evidence.
+
+### Initial local Premium durable queue deployment — 2026-09-25 18:30 UTC
+
+The existing local Premium runtime was updated to `galxai-relay-premium:queue-20260925-r1` (`sha256:db2e951d6171f8004760b001a9af220e7d9fb953f7823b370e2509c283d0e532`). It is running healthy with the existing `/state` volume; the central and monitor image pins remain unchanged. Fresh local verification passed 27 checks. This was a local runtime deployment only: no provider generation, public application cutover, registration policy change or execution gate change was performed. The [private release record](releases/2026-09-25-relay-local-queue.json) records validation and limits.
+
+Prior host-health observation, reconciled 2026-09-23 UTC: at the direct check (19:20 UTC), this Mac was on AC power at 100%; Docker Desktop, the Premium Colima VM, both healthy central Compose services and both Premium services were running. The relay and monitor answered their fixed liveness checks. Keep Premium online and its supervisor were running, with a fresh heartbeat, no recovery cause and the AC idle-sleep assertion process active. Fresh local verification passed 27 checks at 19:16 UTC; focused supervisor and access-boundary tests passed (5 and 6), and the production build generated all 162 static pages. The supervisor was reloaded with the service-scoped monitor/runtime recovery path; no relay, monitor or central container was restarted during the audit. That failure branch was not fault-injected, and host/sign-in/sleep/wake/duplicate-owner acceptance remains open under ACT-018. The [targeted recovery audit](releases/2026-09-23-local-relay-targeted-recovery.json) retains the finding, verification and limits. The four older overdue actions ACT-005, ACT-006, ACT-008 and ACT-014 remain open. The DigitalOcean candidate remains unprovisioned; no public ingress or execution gate changed. Current-state notes are observations, not a live feed. Before an intervention, inspect the current target, process and migration history again. [Open items](OPEN_ITEMS.md) remain part of this handover.
 
 ### Image private-creation release candidate — 2026-09-25 UTC
 

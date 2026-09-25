@@ -9,6 +9,7 @@ import { ImageAllowanceError, readImageAllowance } from '../src/lib/billing/imag
 import { IMAGE_ALLOWANCE_CONFIGURATION, type ImageAllowanceConfiguration } from '../src/lib/billing/image-allowance-config';
 import { RelayDispatchError } from '../src/core/router/adapters/RelayChatTransport';
 import { ImageLibraryRepository } from '../src/lib/supabase/repositories/ImageLibraryRepository';
+import { BrocPracticeRepository } from '../BROC/store';
 const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 8 });
 const otherPool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 });
 const approvedFixture = IMAGE_ALLOWANCE_CONFIGURATION;
@@ -32,8 +33,15 @@ try {
   await pool.query(migration); await pool.query(migration); checks++;
   const workBoundary=readFileSync(new URL('../supabase/migrations/20260924020000_private_human_works_star_publication_boundary.sql',import.meta.url),'utf8');
   const allowanceMigration=readFileSync(new URL('../supabase/migrations/20260924030000_private_image_allowance_accounting.sql',import.meta.url),'utf8');
+  const brocMigration=readFileSync(new URL('../supabase/migrations/20260925113752_broc_persistent_star_practice.sql',import.meta.url),'utf8');
+  const starSelectionMigration=readFileSync(new URL('../supabase/migrations/20260925150000_star_selection_publication_gate.sql',import.meta.url),'utf8');
+  const starArchiveMigration=readFileSync(new URL('../supabase/migrations/20260925215000_preserve_historical_star_publications.sql',import.meta.url),'utf8');
   await pool.query(workBoundary); await pool.query(workBoundary);
   await pool.query(allowanceMigration); await pool.query(allowanceMigration); checks++;
+  await pool.query(brocMigration);
+  await pool.query(starSelectionMigration);
+  await pool.query(starArchiveMigration);
+  await pool.query(starArchiveMigration); checks++;
   assert.equal(Number((await pool.query(`SELECT count(*)::int AS count FROM pg_proc
     WHERE pronamespace='public'::regnamespace AND proname='fn_batch_mutate_image_library'`)).rows[0].count),1);
   assert.equal((await pool.query("SELECT to_regprocedure('public.fn_batch_mutate_image_library(text,text[],text,boolean)') IS NULL AS removed")).rows[0].removed,true); checks++;
@@ -176,16 +184,112 @@ try {
   const handle=`phase4-${randomUUID().slice(0,8)}`;
   await pool.query(`INSERT INTO private.galx_star_profiles(actor_id,account_profile_id,cohort_id,handle,bio,interests)
     VALUES($1,$2,$3,$4,'A controlled publishing fixture.',$5)`,[actorId,starProfileId,cohortId,handle,['fixture']]);
+  await pool.query(`INSERT INTO private.galx_star_cohort_members
+    (cohort_id,actor_id,control_owner_account_id,is_enabled) VALUES($1,$2,$3,true)`,[cohortId,actorId,owner]);
   const starRepo=new ImageRequestRepository(pool,IMAGE_ALLOWANCE_CONFIGURATION);
   const starRequest=await starRepo.create(starAccount,{...payload,idempotencyKey:randomUUID()},false,'star_published');
   assert.equal((await starRepo.claim(starAccount,starRequest.id))?.work_class,'star_published');
+  const attemptId=(await pool.query(`INSERT INTO private.galx_star_generation_attempts
+    (cohort_id,actor_id,generation_id,kind,opportunity_number,prompt,parameters,created_at)
+    VALUES($1,$2,$3,'content',1,'Private fixture production record','{}',TIMESTAMPTZ '2026-09-25 20:00:00+00') RETURNING attempt_id`,
+  [cohortId,actorId,starRequest.id])).rows[0].attempt_id as string;
+  await pool.query(`UPDATE private.galx_generation_records
+    SET metadata=COALESCE(metadata,'{}'::jsonb)||jsonb_build_object('starAttemptId',$2::text),
+        created_at=TIMESTAMPTZ '2026-09-25 20:00:00+00',updated_at=now()
+    WHERE id=$1::text AND account_id=$3::text`,[starRequest.id,attemptId,starAccount]);
   await asset('published-work',starAccount,starRequest.id,'star_published');
   await starRepo.complete(starAccount,starRequest.id,['published-work']);
+  await pool.query(`UPDATE private.galx_star_generation_attempts
+    SET state='completed',asset_ids=ARRAY['published-work']::text[],completed_at=now(),relay_confirmed_at=now()
+    WHERE attempt_id=$1`,[attemptId]);
+  await pool.query(`UPDATE private.galx_image_requests
+    SET created_at=TIMESTAMPTZ '2026-09-25 20:00:00+00' WHERE id=$1`,[starRequest.id]);
+  await pool.query(`UPDATE public.user_image_library
+    SET created_at=TIMESTAMPTZ '2026-09-25 20:00:00+00' WHERE id='published-work'`);
+  await pool.query(`INSERT INTO private.galx_star_practice_events(actor_id,attempt_id,event_type,event_payload)
+    VALUES($1,$2,'candidate',$3::jsonb)`,[actorId,attemptId,JSON.stringify({version:1,status:'unreviewed_candidate',assetCount:1})]);
+  // A direct visibility write cannot bypass the institutional selection event.
+  await pool.query(`UPDATE public.user_image_library SET is_public=true,visibility='public',is_explore_visible=true
+    WHERE id='published-work'`);
   assert.deepEqual((await pool.query('SELECT work_class,is_public,visibility,is_explore_visible FROM public.user_image_library WHERE id=$1',['published-work'])).rows[0],
-    { work_class: 'star_published', is_public: true, visibility: 'public', is_explore_visible: true });
+    { work_class: 'star_published', is_public: false, visibility: 'private', is_explore_visible: false }); checks++;
+
+  // Build a provenance-valid pre-cutover work without a candidate event. Model
+  // the already-applied boundary migration's private flags, then verify the
+  // append-only archive is the only supported restoration path.
+  const legacyRequest=await starRepo.create(starAccount,{...payload,idempotencyKey:randomUUID()},false,'star_published');
+  assert.equal((await starRepo.claim(starAccount,legacyRequest.id))?.work_class,'star_published');
+  const legacyAttemptId=(await pool.query(`INSERT INTO private.galx_star_generation_attempts
+    (cohort_id,actor_id,generation_id,kind,opportunity_number,prompt,parameters,created_at)
+    VALUES($1,$2,$3,'content',2,'Historical fixture production record','{}',TIMESTAMPTZ '2026-09-25 20:00:00+00')
+    RETURNING attempt_id`,[cohortId,actorId,legacyRequest.id])).rows[0].attempt_id as string;
+  await pool.query(`UPDATE private.galx_generation_records
+    SET metadata=COALESCE(metadata,'{}'::jsonb)||jsonb_build_object('starAttemptId',$2::text),
+        created_at=TIMESTAMPTZ '2026-09-25 20:00:00+00',updated_at=now()
+    WHERE id=$1::text AND account_id=$3::text`,[legacyRequest.id,legacyAttemptId,starAccount]);
+  await asset('legacy-work',starAccount,legacyRequest.id,'star_published');
+  await starRepo.complete(starAccount,legacyRequest.id,['legacy-work']);
+  await pool.query(`UPDATE private.galx_star_generation_attempts
+    SET state='completed',asset_ids=ARRAY['legacy-work']::text[],completed_at=now(),relay_confirmed_at=now()
+    WHERE attempt_id=$1`,[legacyAttemptId]);
+  await pool.query(`UPDATE private.galx_image_requests
+    SET created_at=TIMESTAMPTZ '2026-09-25 20:00:00+00' WHERE id=$1`,[legacyRequest.id]);
+  await pool.query(`UPDATE public.user_image_library
+    SET created_at=TIMESTAMPTZ '2026-09-25 20:00:00+00' WHERE id='legacy-work'`);
+  await pool.query('UPDATE private.galx_autonomous_actors SET is_enabled=false WHERE actor_id=$1',[actorId]);
+  await assert.rejects(starRepo.create(starAccount,{...payload,idempotencyKey:randomUUID()},false,'star_published'),
+    (error:any)=>error.code==='23514'); checks++;
+
+  // Simulate the historical class demotion performed by migration 240200.
+  // Only this disposable fixture disables those two guards while staging it.
+  await pool.query('ALTER TABLE private.galx_image_requests DISABLE TRIGGER galx_guard_image_request_work_class');
+  try {
+    await pool.query("UPDATE private.galx_image_requests SET work_class='private' WHERE id=$1",[legacyRequest.id]);
+  } finally {
+    await pool.query('ALTER TABLE private.galx_image_requests ENABLE TRIGGER galx_guard_image_request_work_class');
+  }
+  await pool.query("UPDATE private.galx_generation_records SET work_class='private' WHERE id=$1",[legacyRequest.id]);
+  await pool.query('ALTER TABLE public.user_image_library DISABLE TRIGGER galx_enforce_image_work_class');
+  try {
+    await pool.query(`UPDATE public.user_image_library
+      SET work_class='private',is_public=false,visibility='private',is_explore_visible=false
+      WHERE id='legacy-work'`);
+  } finally {
+    await pool.query('ALTER TABLE public.user_image_library ENABLE TRIGGER galx_enforce_image_work_class');
+  }
+  await pool.query(`INSERT INTO private.galx_star_publication_archive
+    (asset_id,generation_id,attempt_id,actor_id,source_migration_version,source_cutoff_at)
+    VALUES('legacy-work',$1,$2,$3,'20260924020000',TIMESTAMPTZ '2026-09-25 21:32:27.807+00')`,
+  [legacyRequest.id,legacyAttemptId,actorId]);
+  await pool.query(`UPDATE private.galx_image_requests SET work_class='star_published' WHERE id=$1`,[legacyRequest.id]);
+  await pool.query(`UPDATE private.galx_generation_records SET work_class='star_published' WHERE id=$1`,[legacyRequest.id]);
+  await pool.query(`UPDATE public.user_image_library
+    SET work_class='star_published',is_public=true,visibility='public',is_explore_visible=true
+    WHERE id='legacy-work'`);
+  assert.deepEqual((await pool.query(`SELECT work_class,is_public,visibility,is_explore_visible
+    FROM public.user_image_library WHERE id='legacy-work'`)).rows[0],
+    {work_class:'star_published',is_public:true,visibility:'public',is_explore_visible:true}); checks++;
+  await assert.rejects(pool.query(`INSERT INTO private.galx_star_publication_archive
+    (asset_id,generation_id,attempt_id,actor_id,source_migration_version,source_cutoff_at)
+    VALUES('published-work',$1,$2,$3,'20260924020000',TIMESTAMPTZ '2026-09-25 21:32:27.807+00')`,
+  [starRequest.id,attemptId,actorId]),(error:any)=>error.code==='23514'); checks++;
+  await assert.rejects(pool.query("UPDATE private.galx_star_publication_archive SET recorded_at=now() WHERE asset_id='legacy-work'"),
+    (error:any)=>error.code==='55000'); checks++;
+
+  const selection = await new BrocPracticeRepository().recordCandidateDecision(
+    pool,
+    attemptId,
+    ['published-work'],
+    'The selected work advances the Star’s current formal question.',
+    'Integration Curator',
+  );
+  assert.equal(selection.decision,'selected');
+  assert.deepEqual((await pool.query('SELECT work_class,is_public,visibility,is_explore_visible FROM public.user_image_library WHERE id=$1',['published-work'])).rows[0],
+    { work_class: 'star_published', is_public: true, visibility: 'public', is_explore_visible: true }); checks++;
   const feedIds=(await pool.query('SELECT id FROM public.community_creations_feed')).rows.map(row=>row.id);
   const archiveIds=(await pool.query('SELECT id FROM public.community_star_profile_creations WHERE user_id=$1',[starAccount])).rows.map(row=>row.id);
   assert(feedIds.includes('published-work')); assert(archiveIds.includes('published-work'));
+  assert(feedIds.includes('legacy-work')); assert(archiveIds.includes('legacy-work'));
   assert(!feedIds.includes('owned')); assert(!archiveIds.includes('owned'));
   const participant=(await pool.query('SELECT * FROM public.community_participant_profiles WHERE handle=$1',[handle])).rows[0];
   assert.equal(participant.participant_kind,'star');
@@ -206,10 +310,17 @@ try {
       has_table_privilege('service_role','public.community_star_profile_creations','SELECT') AS service_archive,
       has_table_privilege('anon','public.community_participant_profiles','SELECT') AS anon_profiles,
       has_table_privilege('authenticated','public.community_participant_profiles','SELECT') AS auth_profiles,
-      has_table_privilege('service_role','public.community_participant_profiles','SELECT') AS service_profiles`)).rows[0];
+      has_table_privilege('service_role','public.community_participant_profiles','SELECT') AS service_profiles,
+      has_table_privilege('anon','private.galx_star_publication_archive','SELECT') AS anon_archive_ledger,
+      has_table_privilege('authenticated','private.galx_star_publication_archive','SELECT') AS auth_archive_ledger,
+      has_table_privilege('service_role','private.galx_star_publication_archive','SELECT') AS service_archive_ledger,
+      has_table_privilege('anon','public.user_image_stats','SELECT') AS anon_stats,
+      has_function_privilege('anon','public.fn_increment_image_remix(text)','EXECUTE') AS anon_remix_rpc`)).rows[0];
   assert.deepEqual(grants,{anon_select:false,auth_select:false,anon_insert:false,anon_update:false,anon_delete:false,
     auth_insert:false,auth_update:false,auth_delete:false,anon_feed:false,auth_feed:false,anon_archive:false,auth_archive:false,
-    service_feed:true,service_archive:true,anon_profiles:true,auth_profiles:true,service_profiles:true});
+    service_feed:true,service_archive:true,anon_profiles:true,auth_profiles:true,service_profiles:true,
+    anon_archive_ledger:false,auth_archive_ledger:false,service_archive_ledger:false,
+    anon_stats:false,anon_remix_rpc:false});
   const databaseGrants = (await pool.query(`SELECT
     COALESCE(bool_or(has_table_privilege(role_name,to_regclass(relation_name),privilege))
       FILTER (WHERE relation_name LIKE 'private.%'),false) AS browser_or_postgrest_private_access,
@@ -219,7 +330,7 @@ try {
     CROSS JOIN (VALUES ('public.community_creations_feed'),('public.community_star_profile_creations'),
       ('public.community_participant_profiles'),('private.galx_image_requests'),('private.galx_generation_records'),
       ('private.galx_generation_assets'),('private.galx_image_plan_period_usage'),
-      ('private.galx_image_usage_reservations')) AS relations(relation_name)
+      ('private.galx_image_usage_reservations'),('private.galx_star_publication_archive')) AS relations(relation_name)
     CROSS JOIN (VALUES ('INSERT'),('UPDATE'),('DELETE'),('TRUNCATE'),('REFERENCES'),('TRIGGER')) AS privileges(privilege)`)).rows[0];
   const browserViewWritePrivileges = (await pool.query(`SELECT role_name, relation_name, privilege
     FROM (VALUES ('anon'),('authenticated')) AS roles(role_name)
@@ -230,6 +341,17 @@ try {
     ORDER BY role_name,relation_name,privilege`)).rows;
   assert.deepEqual(browserViewWritePrivileges, [], `Unexpected browser write privileges: ${JSON.stringify(browserViewWritePrivileges)}`);
   assert.deepEqual(databaseGrants,{browser_or_postgrest_private_access:false,browser_view_write:false}); checks++;
+  const practiceIndexes=(await pool.query(`SELECT indexname FROM pg_indexes
+    WHERE schemaname='private' AND tablename='galx_star_practice_events'
+      AND indexname IN ('galx_star_practice_events_candidate_recent','galx_star_practice_events_selection_recent')
+    ORDER BY indexname`)).rows.map((row:any)=>row.indexname);
+  assert.deepEqual(practiceIndexes,['galx_star_practice_events_candidate_recent','galx_star_practice_events_selection_recent']); checks++;
+  const archiveSecurity=(await pool.query(`SELECT relrowsecurity,relforcerowsecurity FROM pg_class
+    WHERE oid='private.galx_star_publication_archive'::regclass`)).rows[0];
+  assert.deepEqual(archiveSecurity,{relrowsecurity:true,relforcerowsecurity:true}); checks++;
+  const publicParticipantPredicate=(await pool.query(`SELECT pg_get_functiondef(
+    'private.galx_is_public_participant(text)'::regprocedure) AS definition`)).rows[0].definition as string;
+  assert(!publicParticipantPredicate.includes('is_enabled')); checks++;
   const viewRules=(await pool.query(`SELECT
     position('star_published' in pg_get_viewdef('public.community_creations_feed'::regclass,true)) > 0 AS feed_star,
     position('is_public' in pg_get_viewdef('public.community_creations_feed'::regclass,true)) > 0 AS feed_public,
@@ -237,18 +359,18 @@ try {
     position('is_explore_visible' in pg_get_viewdef('public.community_creations_feed'::regclass,true)) > 0 AS feed_explore,
     position('account_class' in pg_get_viewdef('public.community_creations_feed'::regclass,true)) > 0 AS feed_autonomous,
     position('is_discoverable' in pg_get_viewdef('public.community_creations_feed'::regclass,true)) > 0 AS feed_discoverable,
-    position('is_enabled' in pg_get_viewdef('public.community_creations_feed'::regclass,true)) > 0 AS feed_enabled,
+    position('is_enabled' in pg_get_viewdef('public.community_creations_feed'::regclass,true)) = 0 AS feed_enabled,
     position('profile.status' in pg_get_viewdef('public.community_creations_feed'::regclass,true)) > 0 AS feed_active,
     position('star_published' in pg_get_viewdef('public.community_star_profile_creations'::regclass,true)) > 0 AS archive_star,
     position('is_public' in pg_get_viewdef('public.community_star_profile_creations'::regclass,true)) > 0 AS archive_public,
     position('visibility' in pg_get_viewdef('public.community_star_profile_creations'::regclass,true)) > 0 AS archive_visibility,
     position('account_class' in pg_get_viewdef('public.community_star_profile_creations'::regclass,true)) > 0 AS archive_autonomous,
     position('is_discoverable' in pg_get_viewdef('public.community_star_profile_creations'::regclass,true)) > 0 AS archive_discoverable,
-    position('is_enabled' in pg_get_viewdef('public.community_star_profile_creations'::regclass,true)) > 0 AS archive_enabled,
+    position('is_enabled' in pg_get_viewdef('public.community_star_profile_creations'::regclass,true)) = 0 AS archive_enabled,
     position('profile.status' in pg_get_viewdef('public.community_star_profile_creations'::regclass,true)) > 0 AS archive_active,
     position('account_class' in pg_get_viewdef('public.community_participant_profiles'::regclass,true)) > 0 AS profile_autonomous,
     position('is_discoverable' in pg_get_viewdef('public.community_participant_profiles'::regclass,true)) > 0 AS profile_discoverable,
-    position('is_enabled' in pg_get_viewdef('public.community_participant_profiles'::regclass,true)) > 0 AS profile_enabled,
+    position('is_enabled' in pg_get_viewdef('public.community_participant_profiles'::regclass,true)) = 0 AS profile_enabled,
     position('profile.status' in pg_get_viewdef('public.community_participant_profiles'::regclass,true)) > 0 AS profile_active`)).rows[0];
   assert(Object.values(viewRules).every(Boolean)); checks++;
   for (const sql of [
@@ -306,6 +428,10 @@ try {
         const profiles=(await client.query('SELECT handle,participant_kind FROM public.community_participant_profiles')).rows;
         assert(profiles.some(row=>row.handle===handle&&row.participant_kind==='star'));
         await expectDenied('SELECT id FROM public.community_creations_feed');
+        await expectDenied('SELECT image_id FROM public.user_image_stats');
+        await expectDenied("SELECT public.fn_increment_image_remix('published-work')");
+        await expectDenied(`INSERT INTO public.user_image_interactions(image_id,session_hash,interaction_type)
+          VALUES('published-work','unmetered-remix-fixture','remix')`);
       }
       await expectDenied('SELECT id FROM public.community_star_profile_creations');
     } finally { await client.query('ROLLBACK'); client.release(); }

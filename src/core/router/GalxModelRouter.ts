@@ -24,7 +24,7 @@ import { isolatedRelaysEnabled, isolatedImagesEnabled, isolatedChat, isolatedIma
 import { ImageCapacityError } from './ImageCapacityError';
 import { GalxPreflightValidator } from '../validator/GalxPreflightValidator';
 import { GalxMetricsEngine } from '../telemetry/GalxMetricsEngine';
-import { GalxPrivacyComplianceEngine } from '../privacy/GalxPrivacyComplianceEngine';
+import { GalxPrivacyComplianceEngine, type ResolvedPrivacyPolicy } from '../privacy/GalxPrivacyComplianceEngine';
 import { GalxZDRProtocol } from '../privacy/GalxZDRProtocol';
 import { GalxAuthEngine } from '../auth/GalxAuthEngine';
 import { GalxSeatTierEngine } from '../subscription/GalxSeatTierEngine';
@@ -52,6 +52,10 @@ export interface RouteImageOptions {
   signal?: AbortSignal;
   /** Server-only content class. Public clients never pass this field through. */
   workClass?: 'private' | 'star_published';
+  /** Human-authored text to retain privately when inference uses server-only source context. */
+  privateDisplayPrompt?: string;
+  /** Private lineage reference for an authenticated Star-inspired creation. */
+  privateSourceWorkId?: string;
   /** Public Developer API usage is counted as completed messages, never tokens. */
   usageBillingBasis?: 'message' | 'legacy_token' | 'administrative';
   /** Private administrator allocation applied to message reservations. */
@@ -989,7 +993,11 @@ export class GalxModelRouter {
         void GalxSeatTierEngine.getInstance().recordSeatTokenDraw(userId,cost.totalCostUsd).catch(()=>{});
         GalxSeatTierEngine.getInstance().recordSeatUsage(userId,modelSpec.id,1000,requestId);
       }
-      await this.persistImageGeneration(result, options.request, userId, requestId, modelSpec.id, incomingHeaders, options.workClass);
+      const recordPrompt = options.privateDisplayPrompt
+        ? this.sanitizePrivateDisplayPrompt(options.privateDisplayPrompt, options.request, privacyPolicy)
+        : options.request.prompt;
+      await this.persistImageGeneration(result, options.request, userId, requestId, modelSpec.id, incomingHeaders,
+        options.workClass, recordPrompt, options.privateSourceWorkId);
       return {...result,modelUsed:modelSpec.id,shardId:''};
     }
     const { sanitizedRequest, redactionResult } = this.privacyEngine.sanitizeImageRequest(
@@ -1199,7 +1207,11 @@ export class GalxModelRouter {
         statusCode: 200
       });
 
-      await this.persistImageGeneration(result, sanitizedRequest, userId, requestId, modelSpec.id, incomingHeaders, options.workClass);
+      const recordPrompt = options.privateDisplayPrompt
+        ? this.sanitizePrivateDisplayPrompt(options.privateDisplayPrompt, options.request, privacyPolicy)
+        : sanitizedRequest.prompt;
+      await this.persistImageGeneration(result, sanitizedRequest, userId, requestId, modelSpec.id, incomingHeaders,
+        options.workClass, recordPrompt, options.privateSourceWorkId);
 
       // Return private diagnostics to the public normalization boundary.
       return result;
@@ -1243,7 +1255,13 @@ export class GalxModelRouter {
     }
   }
 
-  private async persistImageGeneration(result: ImageGenerationResponse, sanitizedRequest: ImageGenerationRequest, userId: string, requestId: string, modelId: string, incomingHeaders?: RouteImageOptions["headers"], workClass: RouteImageOptions['workClass'] = 'private') {
+  private sanitizePrivateDisplayPrompt(prompt: string, request: ImageGenerationRequest, privacyPolicy: ResolvedPrivacyPolicy): string {
+    const { sanitizedRequest, redactionResult } = this.privacyEngine.sanitizeImageRequest({ ...request, prompt }, privacyPolicy);
+    if (redactionResult?.tokenMap) this.privacyEngine['redactor'].zeroizeTokenMap(redactionResult.tokenMap);
+    return sanitizedRequest.prompt;
+  }
+
+  private async persistImageGeneration(result: ImageGenerationResponse, sanitizedRequest: ImageGenerationRequest, userId: string, requestId: string, modelId: string, incomingHeaders?: RouteImageOptions["headers"], workClass: RouteImageOptions['workClass'] = 'private', recordPrompt = sanitizedRequest.prompt, privateSourceWorkId?: string) {
       // Store only decoded/re-encoded image bytes in the private image bucket.
       const effectiveSessionId =
         sanitizedRequest.sessionId ||
@@ -1264,20 +1282,21 @@ export class GalxModelRouter {
               sessionId: effectiveSessionId,
               data: imageSource,
               contentType: item.content_type || 'image/png',
-              prompt: sanitizedRequest.prompt || '',
-              revisedPrompt: item.revised_prompt,
+              prompt: recordPrompt || '',
+              revisedPrompt: privateSourceWorkId ? undefined : item.revised_prompt,
               model: modelId,
               size: sanitizedRequest.size || '1024x1024',
               quality: sanitizedRequest.quality || 'standard',
               workClass,
               deferManifestUpdate: true,
               metadata: {
-                prompt: sanitizedRequest.prompt || '',
-                revisedPrompt: item.revised_prompt || '',
+                prompt: recordPrompt || '',
+                revisedPrompt: privateSourceWorkId ? '' : item.revised_prompt || '',
                 model: modelId,
                 dimensions: sanitizedRequest.size || '1024x1024',
                 quality: sanitizedRequest.quality || 'standard',
                 requestId,
+                ...(privateSourceWorkId ? { sourceWorkId: privateSourceWorkId } : {}),
               },
             });
             mirroredImages.push(uploaded);

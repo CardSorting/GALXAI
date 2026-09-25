@@ -155,7 +155,8 @@
       "evidence": [
         "post-mortem/incidents/2026/2026-09-13-image-generation/README.md",
         "post-mortem/releases/2026-09-16-premium-image-preflight.json",
-        "post-mortem/releases/2026-09-16-premium-image-connection.json"
+        "post-mortem/releases/2026-09-16-premium-image-connection.json",
+        "post-mortem/releases/2026-09-25-star-practice-publication-rollout.json"
       ],
       "failure_modes": [
         "FM-IMG-001",
@@ -163,6 +164,7 @@
         "FM-IMG-003",
         "FM-IMG-004",
         "FM-IMG-005",
+        "FM-IMG-007",
         "FM-CTRL-001",
         "FM-DEPLOY-002"
       ],
@@ -888,6 +890,22 @@
         "src/components/images/PublicImageMasonryStream.tsx",
         "src/components/images/masonry-stream.css",
         "post-mortem/incidents/2026/2026-09-20-profile-lightbox/recovery.json"
+      ]
+    },
+    {
+      "id": "ACT-035",
+      "incident": "INC-20260913-IMAGES",
+      "owner": "Database and image maintainers",
+      "review_by": "2026-10-25",
+      "status": "completed",
+      "next_step": "Keep regressions for disabled-Star admission denial, candidate review independent of activation, strict archive provenance, archive immutability, role denial and public feed membership in the existing disposable database suite. Preserve the zero-activation and no-generation production gate for future Star work.",
+      "closure": "Applied the forward continuity migration, restored only 11 provenance-matched historical Star works, deployed the compatible application, and verified 11 public Star feed works with zero public human works and no prompt fields. No Star was activated and no new work was generated or selected.",
+      "evidence": [
+        "post-mortem/releases/2026-09-25-star-practice-publication-rollout.json",
+        "supabase/migrations/20260925215000_preserve_historical_star_publications.sql",
+        "scripts/test-image-requests-db.ts",
+        "BROC/store.ts",
+        "post-mortem/failure-modes/images.md"
       ]
     }
   ]

@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { executePostgresQuery } from '@/lib/db/postgres';
-import { GalxCryptoVault } from '@/core/vault/GalxCryptoVault';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 import { handleExploreHideMutation } from '@/lib/images/explore-hide';
 import type { ParticipantKind } from '@/lib/community/participant-handle';
+import { mapPublicParticipantCreationRow } from '@/lib/community/public-participants';
 import {
   normalizePublicParticipantHandle,
-  sanitizePublicImageUrl,
 } from '@/lib/community/participant-handle';
 
 export const runtime = 'nodejs';
@@ -14,7 +13,6 @@ export const dynamic = 'force-dynamic';
 
 export interface PublicFeedItem {
   id: string;
-  prompt: string;
   aspect_ratio: string;
   dimensions: string;
   public_url: string;
@@ -22,7 +20,6 @@ export interface PublicFeedItem {
   created_at: string;
   lqip: string | null;
   likes_count?: number;
-  remix_count?: number;
   views_count?: number;
   author: {
     displayName: string;
@@ -47,7 +44,6 @@ export async function GET(req: NextRequest) {
   const aspectRatio = searchParams.get('aspect_ratio');
   const q = searchParams.get('q')?.trim();
   const sort = searchParams.get('sort') || 'recent';
-  const tag = searchParams.get('tag')?.toLowerCase().trim();
   const rawAuthorHandle = searchParams.get('author_handle')?.trim();
   const requestedId = searchParams.get('image_id') || searchParams.get('id') || searchParams.get('image');
 
@@ -96,18 +92,12 @@ export async function GET(req: NextRequest) {
       params.push(aspectRatio);
     }
 
-    // Filter by prompt search
+    // Search only public Star identity. Production prompts remain server-side.
     if (q && q.length <= 100) {
       const sanitized = q.replace(/[%_\\]/g, '\\$&');
-      conditions.push(`prompt ILIKE $${paramIndex++}`);
+      conditions.push(`(author_display_name ILIKE $${paramIndex} OR author_handle ILIKE $${paramIndex})`);
+      paramIndex++;
       params.push(`%${sanitized}%`);
-    }
-
-    // Filter by style tag
-    if (tag && tag !== 'all') {
-      const sanitizedTag = tag.replace(/[%_\\]/g, '\\$&');
-      conditions.push(`prompt ILIKE $${paramIndex++}`);
-      params.push(`%${sanitizedTag}%`);
     }
 
     if (authorHandle) {
@@ -160,14 +150,12 @@ export async function GET(req: NextRequest) {
       SELECT
         id,
         user_id,
-        prompt,
         aspect_ratio,
         dimensions,
         public_url,
         created_at,
         lqip,
         likes_count,
-        remix_count,
         views_count,
         author_display_name,
         author_handle,
@@ -194,40 +182,7 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    items = rows.map((r: any) => {
-      let publicUrl = '';
-      let thumbnailUrl = '';
-
-      if (r.user_id && r.id) {
-        try {
-          const token = GalxCryptoVault.sealImageDownload(r.user_id, r.id);
-          publicUrl = `/v1/images/assets/${token}`;
-          thumbnailUrl = `/v1/images/assets/${token}/thumbnail`;
-        } catch { /* Do not fall back to a raw storage URL. */ }
-      }
-
-      return {
-        id: r.id,
-        prompt: r.prompt,
-        aspect_ratio: r.aspect_ratio || '1:1',
-        dimensions: r.dimensions || '1024x1024',
-        public_url: publicUrl,
-        thumbnail_url: thumbnailUrl,
-        created_at: new Date(r.created_at).toISOString(),
-        lqip: r.lqip || null,
-        likes_count: Number(r.likes_count || 0),
-        remix_count: Number(r.remix_count || 0),
-        views_count: Number(r.views_count || 0),
-        author: {
-          displayName: typeof r.author_display_name === 'string' && r.author_display_name.trim()
-            ? r.author_display_name.trim()
-            : 'GALX Star',
-          handle: normalizePublicParticipantHandle(r.author_handle),
-          avatarUrl: sanitizePublicImageUrl(r.author_avatar_url),
-          participantKind: 'star',
-        },
-      };
-    });
+    items = rows.map((row: any) => mapPublicParticipantCreationRow(row));
   } catch {
     // Keep the public stream empty when the live feed is unavailable.
   }
@@ -259,7 +214,7 @@ export async function GET(req: NextRequest) {
           directParams.push(viewerUserId);
         }
         const directRes = await executePostgresQuery(
-          `SELECT id, user_id, prompt, aspect_ratio, dimensions, public_url, created_at, lqip, likes_count, remix_count, views_count,
+          `SELECT id, user_id, aspect_ratio, dimensions, public_url, created_at, lqip, likes_count, views_count,
                   author_display_name, author_handle, author_avatar_url, participant_kind
            FROM ${feedView}
            WHERE ${directConditions.join(' AND ')}
@@ -267,37 +222,7 @@ export async function GET(req: NextRequest) {
           directParams
         );
         if (directRes?.rows?.[0]?.participant_kind === 'star') {
-          const r = directRes.rows[0];
-          let pubUrl = '';
-          let thumbUrl = '';
-          if (r.user_id && r.id) {
-            try {
-              const token = GalxCryptoVault.sealImageDownload(r.user_id, r.id);
-              pubUrl = `/v1/images/assets/${token}`;
-              thumbUrl = `/v1/images/assets/${token}/thumbnail`;
-            } catch {}
-          }
-          items.unshift({
-            id: r.id,
-            prompt: r.prompt,
-            aspect_ratio: r.aspect_ratio || '1:1',
-            dimensions: r.dimensions || '1024x1024',
-            public_url: pubUrl,
-            thumbnail_url: thumbUrl,
-            created_at: new Date(r.created_at).toISOString(),
-            lqip: r.lqip || null,
-            likes_count: Number(r.likes_count || 0),
-            remix_count: Number(r.remix_count || 0),
-            views_count: Number(r.views_count || 0),
-            author: {
-              displayName: typeof r.author_display_name === 'string' && r.author_display_name.trim()
-                ? r.author_display_name.trim()
-                : 'GALX Star',
-              handle: normalizePublicParticipantHandle(r.author_handle),
-              avatarUrl: sanitizePublicImageUrl(r.author_avatar_url),
-              participantKind: 'star',
-            },
-          });
+          items.unshift(mapPublicParticipantCreationRow(directRes.rows[0]));
         }
       } catch {
         // Ignore single-item lookup failure
@@ -371,18 +296,6 @@ export async function POST(req: NextRequest) {
           await executePostgresQuery(query, [ids, sessionHash]);
         } catch {
           // Ignore offline errors for view telemetry
-        }
-      }
-      return NextResponse.json({ success: true });
-    }
-
-    if (action === 'remix') {
-      if (imageId && typeof imageId === 'string') {
-        try {
-          const query = `SELECT public.fn_increment_image_remix($1);`;
-          await executePostgresQuery(query, [imageId]);
-        } catch {
-          // Ignore offline errors for remix telemetry
         }
       }
       return NextResponse.json({ success: true });

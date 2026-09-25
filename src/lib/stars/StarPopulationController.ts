@@ -4,6 +4,8 @@ import { RelayDispatchError } from '@/core/router/adapters/RelayChatTransport';
 import { ImageCapacityError } from '@/core/router/ImageCapacityError';
 import { ImageRequestRepository } from '@/lib/images/request-repository';
 import { ImageRequestService } from '@/lib/images/request-service';
+import { buildBrocPrompt, buildBrocScene, type BrocScenePlan } from '../../../BROC/practice';
+import { BrocPracticeRepository } from '../../../BROC/store';
 import {
   STAR_CONTENT_OPPORTUNITIES,
   STAR_COHORT_KEY,
@@ -24,7 +26,6 @@ import {
   STAR_QUALIFICATION_MAX_GENERATION_CONCURRENCY,
   STAR_QUALIFICATION_CONTENT_OPPORTUNITIES,
   STAR_RUN_KEY,
-  buildStarPrompt,
   renderStarAvatarSvg,
   type StarDefinition,
 } from './star-cohort';
@@ -172,9 +173,12 @@ interface AttemptRow {
   generation_id: string | null;
   state: 'queued' | 'generating' | 'completed' | 'failed' | 'cancelled';
   asset_ids: string[];
+  prompt: string;
 }
 
 export class StarPopulationSystemicError extends Error {}
+
+const brocPracticeRepository = new BrocPracticeRepository();
 
 export function getStarPopulationPlan(mode: StarPopulationMode = 'initial'): StarPopulationPlan {
   const config = getStarExecutionConfig(mode);
@@ -521,35 +525,54 @@ async function ensureAvatar(pool: Pool, star: StarRuntime, cohortKey: string): P
   return 'created';
 }
 
-async function getAttempt(pool: Pool, cohortId: string, actorId: string, opportunity: number): Promise<AttemptRow | null> {
-  const result = await pool.query<AttemptRow>(`
-    SELECT attempt_id, generation_id, state, asset_ids
-    FROM private.galx_star_generation_attempts
-    WHERE cohort_id = $1 AND actor_id = $2 AND kind = 'content' AND opportunity_number = $3
-    LIMIT 1
-  `, [cohortId, actorId, opportunity]);
-  return result.rows[0] || null;
-}
-
-async function createAttempt(pool: Pool, cohortId: string, star: StarRuntime, opportunity: number, prompt: string, size: string): Promise<AttemptRow> {
-  const result = await pool.query<AttemptRow>(`
-    INSERT INTO private.galx_star_generation_attempts
-      (cohort_id, actor_id, kind, opportunity_number, prompt, parameters, estimated_cost_usd)
-    SELECT $1::uuid, actor.actor_id, 'content', $3, $4,
-           jsonb_build_object('model', $5::text, 'size', $6::text, 'quality', 'standard', 'execution', 'galx-relay'), 0
-    FROM private.galx_autonomous_actors AS actor
-    JOIN private.galx_star_cohort_members AS member
-      ON member.actor_id = actor.actor_id
-     AND member.cohort_id = $1::uuid
-     AND member.is_enabled = true
-    WHERE actor.actor_id = $2
-    ON CONFLICT (cohort_id, actor_id, kind, opportunity_number) DO NOTHING
-    RETURNING attempt_id, generation_id, state, asset_ids
-  `, [cohortId, star.actorId, opportunity, prompt, STAR_MODEL, size]);
-  if (result.rows[0]) return result.rows[0];
-  const existing = await getAttempt(pool, cohortId, star.actorId, opportunity);
-  if (!existing) throw new StarPopulationSystemicError('Star generation attempt was not persisted');
-  return existing;
+async function createAttempt(
+  pool: Pool,
+  cohortId: string,
+  star: StarRuntime,
+  opportunity: number,
+  prompt: string,
+  size: string,
+  scene: BrocScenePlan,
+): Promise<AttemptRow> {
+  return withTransaction(pool, async (client) => {
+    const result = await client.query<AttemptRow>(`
+      INSERT INTO private.galx_star_generation_attempts
+        (cohort_id, actor_id, kind, opportunity_number, prompt, parameters, estimated_cost_usd)
+      SELECT $1::uuid, actor.actor_id, 'content', $3, $4,
+             jsonb_build_object('model', $5::text, 'size', $6::text, 'quality', 'standard', 'execution', 'galx-relay'), 0
+      FROM private.galx_autonomous_actors AS actor
+      JOIN private.galx_star_cohort_members AS member
+        ON member.actor_id = actor.actor_id
+       AND member.cohort_id = $1::uuid
+       AND member.is_enabled = true
+      WHERE actor.actor_id = $2
+      ON CONFLICT (cohort_id, actor_id, kind, opportunity_number) DO NOTHING
+      RETURNING attempt_id, generation_id, state, asset_ids, prompt
+    `, [cohortId, star.actorId, opportunity, prompt, STAR_MODEL, size]);
+    if (result.rows[0]) {
+      await brocPracticeRepository.appendScene(client, star.actorId, result.rows[0].attempt_id, scene);
+      return result.rows[0];
+    }
+    const existing = await client.query<AttemptRow & { has_broc_scene: boolean }>(`
+      SELECT attempt.attempt_id, attempt.generation_id, attempt.state, attempt.asset_ids, attempt.prompt,
+             EXISTS (
+               SELECT 1
+               FROM private.galx_star_practice_events AS practice
+               WHERE practice.attempt_id = attempt.attempt_id
+                 AND practice.event_type = 'scene'
+             ) AS has_broc_scene
+      FROM private.galx_star_generation_attempts AS attempt
+      WHERE attempt.cohort_id = $1 AND attempt.actor_id = $2
+        AND attempt.kind = 'content' AND attempt.opportunity_number = $3
+      LIMIT 1
+    `, [cohortId, star.actorId, opportunity]);
+    const savedAttempt = existing.rows[0];
+    if (!savedAttempt) throw new StarPopulationSystemicError('Star generation attempt was not persisted');
+    if (!savedAttempt.has_broc_scene && !['completed', 'failed', 'cancelled'].includes(savedAttempt.state)) {
+      throw new StarPopulationSystemicError('An in-flight Star attempt has no persisted BROC scene');
+    }
+    return savedAttempt;
+  });
 }
 
 async function markAttemptGenerating(pool: Pool, attemptId: string, generationId: string): Promise<void> {
@@ -580,6 +603,7 @@ async function verifyContentProvenance(pool: Pool, accountId: string, generation
     asset_status: string | null;
     is_public: boolean | null;
     visibility: string | null;
+    is_explore_visible: boolean | null;
     work_class: string | null;
   }>(`
     SELECT generation.account_id,
@@ -591,6 +615,7 @@ async function verifyContentProvenance(pool: Pool, accountId: string, generation
            library.status AS asset_status,
            library.is_public,
            library.visibility,
+           library.is_explore_visible,
            library.work_class
     FROM private.galx_generation_records AS generation
     LEFT JOIN private.galx_generation_assets AS mapping ON mapping.generation_id = generation.id
@@ -609,17 +634,30 @@ async function verifyContentProvenance(pool: Pool, accountId: string, generation
       && row.generation_asset_id === generationId
       && row.user_id === accountId
       && row.asset_status === 'completed'
-      && row.is_public === true
-      && row.visibility === 'public'
+      && row.is_public === false
+      && row.visibility === 'private'
+      && row.is_explore_visible === false
       && row.work_class === 'star_published');
 }
 
-async function markAttemptCompleted(pool: Pool, attemptId: string, assetIds: string[]): Promise<void> {
-  await pool.query(`
-    UPDATE private.galx_star_generation_attempts
-    SET state = 'completed', asset_ids = $2::text[], relay_confirmed_at = now(), completed_at = now()
-    WHERE attempt_id = $1 AND state IN ('queued', 'generating')
-  `, [attemptId, assetIds]);
+async function markAttemptCompleted(pool: Pool, attemptId: string, actorId: string, assetIds: string[]): Promise<void> {
+  await withTransaction(pool, async (client) => {
+    await client.query(`
+      UPDATE private.galx_star_generation_attempts
+      SET state = 'completed', asset_ids = $2::text[], relay_confirmed_at = now(), completed_at = now()
+      WHERE attempt_id = $1 AND state IN ('queued', 'generating')
+    `, [attemptId, assetIds]);
+    const saved = await client.query<{ state: AttemptRow['state'] }>(`
+      SELECT state
+      FROM private.galx_star_generation_attempts
+      WHERE attempt_id = $1
+      FOR UPDATE
+    `, [attemptId]);
+    if (saved.rows[0]?.state !== 'completed') {
+      throw new StarPopulationSystemicError('Star generation attempt did not reach a completed state');
+    }
+    await brocPracticeRepository.appendCandidate(client, actorId, attemptId, assetIds.length);
+  });
 }
 
 async function runOneOpportunity(
@@ -637,11 +675,14 @@ async function runOneOpportunity(
   await sleep(stableJitter(starIndex, opportunity));
   if (stop.reason) return;
 
-  const prompt = buildStarPrompt(star.definition, opportunity);
   const size = STAR_GENERATION_SIZES[(starIndex + opportunity - 1) % STAR_GENERATION_SIZES.length];
+  let prompt = '';
   let attempt: AttemptRow;
   try {
-    attempt = await createAttempt(pool, cohortId, star, opportunity, prompt, size);
+    const practice = await brocPracticeRepository.loadContext(pool, star.actorId, star.definition);
+    const scene = buildBrocScene(practice, opportunity);
+    prompt = buildBrocPrompt(star.definition, practice.canon, scene, practice.recentEvents, opportunity);
+    attempt = await createAttempt(pool, cohortId, star, opportunity, prompt, size, scene);
   } catch (error) {
     report.anomalies.push(`Star attempt persistence failed for ${star.definition.handle} opportunity ${opportunity}: ${safeFailureCode(error)}`);
     stop.reason = 'Systemic Star attempt persistence defect';
@@ -651,11 +692,12 @@ async function runOneOpportunity(
 
   report.contentAttempts += 1;
   let generationId = attempt.generation_id;
+  let outputVerified = false;
   try {
     const request = generationId
       ? { id: generationId }
       : await service.create(star.accountId, {
-        prompt,
+        prompt: attempt.prompt,
         model: STAR_MODEL,
         n: 1,
         size,
@@ -683,11 +725,17 @@ async function runOneOpportunity(
     }
     const valid = await verifyContentProvenance(pool, star.accountId, generationId, completed.asset_ids);
     if (!valid) throw new StarPopulationSystemicError('Star generation provenance verification failed');
-    await markAttemptCompleted(pool, attempt.attempt_id, completed.asset_ids);
+    outputVerified = true;
+    await markAttemptCompleted(pool, attempt.attempt_id, star.actorId, completed.asset_ids);
     report.successfulContentGenerations += 1;
     report.relayConfirmedGenerations += 1;
     report.provenanceVerifiedGenerations += 1;
   } catch (error) {
+    if (outputVerified) {
+      report.anomalies.push('BROC practice persistence failed for ' + star.definition.handle + ' opportunity ' + opportunity + ': ' + safeFailureCode(error));
+      stop.reason = 'Systemic Star practice persistence defect';
+      return;
+    }
     const code = safeFailureCode(error);
     await markAttemptFailed(pool, attempt.attempt_id, code);
     report.failedContentGenerations += 1;

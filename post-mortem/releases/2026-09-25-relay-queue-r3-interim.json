@@ -1,0 +1,40 @@
+{
+  "classification": "private",
+  "observed_at": "2026-09-25T20:00:52Z",
+  "scope": "Interim R3 Premium queue rollout and follow-up runtime audit.",
+  "authorization": "Owner requested a durable local queue in front of the existing relay, followed by a deeper resilience audit and Docker deployment.",
+  "deployment": {
+    "interim_runtime": {
+      "tag": "galxai-relay-premium:queue-hardening-20260925-r3",
+      "image_id": "sha256:00ae0d5abd096bb353cd6875e22349e3a1b6c96f9e652c8eea2067fe00b3200b",
+      "architecture": "arm64",
+      "status": "loaded and briefly running; superseded by R4"
+    },
+    "state_volume": "existing /state volume preserved",
+    "central_and_monitor_pins_changed": false,
+    "registration_or_execution_gates_changed": false,
+    "operator_provider_generation": false
+  },
+  "findings": [
+    {
+      "observation": "The runtime route's public readiness snapshot rejected already-claimed internal queue work after graceful admission closed.",
+      "containment": "R3 was replaced before this latent shutdown path was accepted as complete.",
+      "correction": "R4 evaluates internal queued work under the drain exception while public requests remain unready."
+    },
+    {
+      "observation": "A persisted waiting job could be claimed after its original deadline elapsed during runtime replacement because deadline handling only ran when a caller was waiting.",
+      "containment": "No provider canary was submitted by the operator.",
+      "correction": "R4 checks the recorded claim timestamp before entering the relay handler and returns safe not_accepted without dispatch for an expired pre-claim job."
+    },
+    {
+      "observation": "The existing supervisor restored a healthy older image after the manifest changed; it had cached image pins at process start and checked liveness without comparing the running tag and immutable image ID.",
+      "containment": "The stale runtime exited cleanly and was replaced through the existing ownership handoff.",
+      "correction": "The host supervisor now rereads image pins during each reconciliation, requires tag and image ID agreement, and drains healthy stale runtimes before replacement. The existing launch agent was reloaded with the corrected source."
+    }
+  ],
+  "limits": [
+    "The intermediate R3 tag remains as local rollback evidence but is not the current manifest pin.",
+    "No customer-traffic classification or provider generation canary is claimed for the brief R3 interval.",
+    "R4 deployment and final local acceptance are recorded separately in 2026-09-25-relay-queue-recovery-hardening.json."
+  ]
+}

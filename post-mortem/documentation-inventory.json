@@ -1389,6 +1389,24 @@
       "title": "ADR 0160: Private human creation and Star-only publishing"
     },
     {
+      "path": "docs/adr/0161-broc-persistent-star-practice.md",
+      "scope": "decision-record",
+      "category": "docs",
+      "title": "ADR 0161: BROC persistent practice for existing Stars"
+    },
+    {
+      "path": "docs/adr/0162-local-durable-relay-ingress-queue.md",
+      "scope": "decision-record",
+      "category": "docs",
+      "title": "ADR 0162: Local durable ingress queue for the Premium relay"
+    },
+    {
+      "path": "docs/adr/0163-star-candidate-selection-before-exhibition.md",
+      "scope": "decision-record",
+      "category": "docs",
+      "title": "ADR 0163: Star candidate selection before exhibition"
+    },
+    {
       "path": "docs/adr/README.md",
       "scope": "current-guide",
       "category": "docs",

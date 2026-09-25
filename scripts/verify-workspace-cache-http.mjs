@@ -17,19 +17,55 @@ const privateCache = (response, label) => {
   assert(!['HIT', 'STALE', 'UPDATING'].includes(response.headers.get('cf-cache-status')), label);
 };
 
-for (const path of ['/images', '/images/library', '/images/favorites', '/sites', '/library', '/images/private.css', '/sites/private.js', '/library/private.png']) {
+// These are the active account workspaces. /images is a public legacy entry
+// that redirects to /explore, and /sites is a retired public alias, so neither
+// belongs in the private-workspace authentication assertions.
+const privatePaths = [
+  '/images/create',
+  '/images/library',
+  '/images/favorites',
+  '/library',
+  '/images/create/private.css',
+  '/images/library/private.js',
+  '/images/favorites/private.png',
+  '/library/private.png',
+];
+for (const path of privatePaths) {
   for (const method of ['GET', 'HEAD']) {
     for (const headers of [{}, { cookie: 'galx_session=galx_sess_retired', rsc: '1', 'next-router-prefetch': '1' }]) {
       const response = await request(path, { method, headers });
       assert.equal(response.status, 307, path);
-      const location = new URL(response.headers.get('location'), origin);
+      const rawLocation = response.headers.get('location');
+      assert(rawLocation, path);
+      const location = new URL(rawLocation, origin);
       assert.equal(location.origin, origin.origin, path);
       assert.equal(location.pathname, '/login', path);
+      assert.equal(location.searchParams.get('next'), path, path);
       privateCache(response, path);
       await response.arrayBuffer();
       result.checks.push({ path, method, legacy_prefetch: Boolean(headers.cookie), status: response.status, cache: response.headers.get('cache-control') });
     }
   }
+}
+
+// Keep the old Images entry usable as a discovery redirect and keep saved
+// private-view bookmarks behind the private cache policy while they migrate.
+for (const [path, destination] of [
+  ['/images', '/explore'],
+  ['/images?view=library', '/images/library'],
+  ['/images?view=favorites', '/images/favorites'],
+  ['/images?view=create', '/images/create'],
+]) {
+  const response = await request(path);
+  assert.equal(response.status, 308, path);
+  const rawLocation = response.headers.get('location');
+  assert(rawLocation, path);
+  const location = new URL(rawLocation, origin);
+  assert.equal(location.origin, origin.origin, path);
+  assert.equal(location.pathname, destination, path);
+  privateCache(response, path);
+  await response.arrayBuffer();
+  result.checks.push({ path, status: response.status, cache: response.headers.get('cache-control') });
 }
 
 const signin = await request('/login');

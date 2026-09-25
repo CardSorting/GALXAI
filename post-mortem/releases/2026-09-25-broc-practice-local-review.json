@@ -1,0 +1,53 @@
+{
+  "classification": "private",
+  "reviewed_at": "2026-09-25T12:10:22Z",
+  "scope": "Local semantic review of BROC as a persistent practice layer integrated into the existing Star and generation path.",
+  "guides_read_or_reconciled": [
+    "docs/maintainers/ACCOUNT_PROFILE_SCHEMA.md",
+    "docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md",
+    "docs/maintainers/image-public-boundary.md",
+    "docs/reference/stars.md",
+    "docs/adr/0161-broc-persistent-star-practice.md",
+    "docs/adr/README.md",
+    "docs/maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md",
+    "docs/knowledge/README.md",
+    "docs/reference/knowledge-commands.md"
+  ],
+  "implementation_contracts_reviewed": [
+    "BROC/practice.ts",
+    "BROC/store.ts",
+    "src/lib/stars/StarPopulationController.ts",
+    "src/lib/supabase/types.ts",
+    "supabase/migrations/20260925113752_broc_persistent_star_practice.sql",
+    "supabase/rollbacks/20260925113752_broc_persistent_star_practice.down.sql",
+    "scripts/test-broc-practice.ts",
+    "scripts/test-broc-practice-db.ts",
+    "scripts/run-supabase-integration.ts",
+    "package.json",
+    "docs/knowledge/registry.json"
+  ],
+  "findings": [
+    "BROC prepares a medium-aware scene and bounded brief from the existing Star definition, versioned practice canon, and recent history; it saves the scene with the existing immutable attempt prompt. A legacy in-flight attempt without a scene stops safely instead of resuming outside BROC.",
+    "The existing image request service and publication path remain in use. Successful output is recorded as an unreviewed candidate; this integration does not inspect generated pixels or automatically promote work into canon.",
+    "Practice records are private and append-only, linked to existing Star actors and generation attempts. The local migration is additive, has a paired data-preserving rollback, and is not applied to the linked database.",
+    "No BROC application, route, public response field, Star registry, generation service, or deployment target was added. ADR 0161 remains proposed with local delivery evidence."
+  ],
+  "focused_checks": {
+    "typecheck": "PASS: npx tsc --noEmit",
+    "production_build": "PASS: npm run build; Next.js generated 155 static pages and completed trace collection after the final controller change.",
+    "broc_unit": "PASS: npm run test:broc; 6 tests.",
+    "broc_database": "PASS: npm run test:broc:db; 20 assertions against disposable PostgreSQL 17 after replaying 154 migrations.",
+    "image_public_and_auth_boundary": "PASS: npm run test:image:security; 67 tests.",
+    "star_qualification": "PASS: npm run test:stars:qualification; 2 tests.",
+    "relay_capabilities": "PASS: npm run test:relay:capabilities; 170 tests.",
+    "database_static_integrity": "PASS: npm run db:verify; 154 migration files with paired rollbacks, zero fatal violations, zero warnings.",
+    "full_database_suite": "The disposable fixture replayed all 154 migrations and passed its first 33 checks, then the existing generic suite stopped at TypeError: galxDb.assets.uploadAsset is not a function in scripts/test-supabase-integration.ts:568. The focused BROC database suite passed separately.",
+    "documentation_and_assets": "PASS: npm run docs:sync, npm run docs:check, npm run docs:check:build, and npm run test:docs. The compiled boundary scan inspected 526 browser/rendered assets without private markers or runtime trace paths. docs:impact reports only docs/knowledge/reviews.json and post-mortem/review.json as unmapped; these are self-referential review attestations, not product source files."
+  },
+  "production_changes": "NONE",
+  "limits": [
+    "The migration remains unapplied and the Star source integration is local only.",
+    "Pixel-level critique, explicit human direction controls, and automatic canon changes are not implemented by this integration.",
+    "The full generic database suite retains its separate existing asset-upload test failure; no unrelated repair was made."
+  ]
+}

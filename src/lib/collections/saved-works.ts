@@ -1,6 +1,7 @@
 'use client';
 
 import type { PublicFeedItem } from '@/app/api/images/feed/route';
+import { normalizePublicParticipantHandle, sanitizePublicImageUrl } from '@/lib/community/participant-handle';
 
 const SAVED_WORKS_STORAGE_KEY = 'galx_saved_works';
 const FOLLOWED_STARS_STORAGE_KEY = 'galx_followed_stars';
@@ -12,7 +13,6 @@ export interface SavedWorkItem {
   id: string;
   public_url: string;
   thumbnail_url?: string;
-  prompt: string;
   aspect_ratio: string;
   author: {
     displayName: string;
@@ -27,12 +27,71 @@ export interface SavedWorkItem {
 // SAVED WORKS MANAGEMENT (Pinterest / Are.na)
 // ==========================================
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function savedAssetUrl(value: unknown): string | null {
+  if (typeof value !== 'string' || value.length > 2048) return null;
+  try {
+    const origin = typeof window === 'undefined' ? 'https://galx.ai' : window.location.origin;
+    const url = new URL(value, origin);
+    if (url.origin !== origin || url.username || url.password || url.search || url.hash ||
+      !/^\/v1\/images\/assets\/[A-Za-z0-9_.-]+(?:\/thumbnail)?$/.test(url.pathname)) return null;
+    return url.pathname;
+  } catch {
+    return null;
+  }
+}
+
+function normalizeSavedWork(value: unknown): SavedWorkItem | null {
+  if (!isRecord(value) || typeof value.id !== 'string' || !/^[A-Za-z0-9_.-]{1,200}$/.test(value.id)) return null;
+  const publicUrl = savedAssetUrl(value.public_url);
+  if (!publicUrl) return null;
+  const author = isRecord(value.author) ? value.author : {};
+  const displayName = typeof author.displayName === 'string' && author.displayName.trim()
+    ? author.displayName.trim().slice(0, 120)
+    : 'GALX Star';
+  const savedAt = typeof value.saved_at === 'string' && Number.isFinite(Date.parse(value.saved_at))
+    ? new Date(value.saved_at).toISOString()
+    : new Date(0).toISOString();
+  const ratios = new Set(['1:1', '16:9', '9:16', '3:2', '4:3', '2:3', '3:4']);
+  const thumbnailUrl = savedAssetUrl(value.thumbnail_url);
+  const handle = normalizePublicParticipantHandle(author.handle);
+  const avatarUrl = sanitizePublicImageUrl(author.avatarUrl);
+  return {
+    id: value.id,
+    public_url: publicUrl,
+    ...(thumbnailUrl ? { thumbnail_url: thumbnailUrl } : {}),
+    aspect_ratio: typeof value.aspect_ratio === 'string' && ratios.has(value.aspect_ratio) ? value.aspect_ratio : '1:1',
+    author: {
+      displayName,
+      handle,
+      avatarUrl,
+    },
+    saved_at: savedAt,
+    ...(typeof value.board === 'string' && value.board.trim()
+      ? { board: value.board.trim().slice(0, 80) }
+      : {}),
+  };
+}
+
 export function getSavedWorks(): SavedWorkItem[] {
   if (typeof window === 'undefined') return [];
   try {
     const raw = localStorage.getItem(SAVED_WORKS_STORAGE_KEY);
     if (!raw) return [];
-    return JSON.parse(raw);
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) {
+      localStorage.removeItem(SAVED_WORKS_STORAGE_KEY);
+      return [];
+    }
+    const works = parsed.map(normalizeSavedWork).filter((work): work is SavedWorkItem => work !== null);
+    // Migrate the browser-only curation cache to the public work allowlist.
+    // This does not alter private generation receipts or execution history.
+    const normalized = JSON.stringify(works);
+    if (normalized !== raw) localStorage.setItem(SAVED_WORKS_STORAGE_KEY, normalized);
+    return works;
   } catch {
     return [];
   }
@@ -59,12 +118,11 @@ export function toggleSaveWork(item: PublicFeedItem, board: string = 'all'): boo
         id: item.id,
         public_url: item.public_url,
         thumbnail_url: item.thumbnail_url,
-        prompt: item.prompt,
         aspect_ratio: item.aspect_ratio || '1:1',
         author: {
           displayName: item.author.displayName || 'GALX Star',
-          handle: item.author.handle,
-          avatarUrl: item.author.avatarUrl,
+          handle: normalizePublicParticipantHandle(item.author.handle),
+          avatarUrl: sanitizePublicImageUrl(item.author.avatarUrl),
         },
         saved_at: new Date().toISOString(),
         board: board || 'all',
@@ -195,4 +253,3 @@ export function toggleFollowStar(handle: string): boolean {
     return false;
   }
 }
-

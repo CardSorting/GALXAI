@@ -1,0 +1,73 @@
+{
+  "classification": "private",
+  "observed_at": "2026-09-25T20:00:52Z",
+  "scope": "Final local Premium durable relay queue recovery hardening and Docker deployment.",
+  "authorization": "Owner explicitly requested the local BROCCOLIQUEUE and BroccoliDB ingress queue, Docker image recreation/deployment, and an additional thorough resilience audit.",
+  "deployment": {
+    "installed_runtime": {
+      "tag": "galxai-relay-premium:queue-hardening-20260925-r4",
+      "image_id": "sha256:4f9ca6fb2e528d3dd9cdb4e1b69f2d6eb717af20987335a10b932c6bb6ab4713",
+      "architecture": "arm64",
+      "status": "running and healthy",
+      "state_volume": "existing galx-premium_premium_execution volume preserved"
+    },
+    "reconciled_stale_runtime": {
+      "tag": "galxai-relay-premium:cooldown-scope-20260920-r1",
+      "image_id": "sha256:869e2718d86e2fe217ddd38ed6151a6954d333dc8ae1084e056ed01100c1e110",
+      "outcome": "stopped cleanly after supervisor image-identity reconciliation"
+    },
+    "central_image": "galxai-relay-central:connections-20260916; unchanged",
+    "monitor_image": "galxai-monitor-premium:automatic-20260916-r2; unchanged",
+    "supervisor": "existing local launch agent reloaded; running after exact image reconciliation",
+    "registration_or_execution_gates_changed": false,
+    "public_application_cutover": false
+  },
+  "implementation_corrections": [
+    "Already-claimed queue work retains readiness while graceful shutdown closes new public admission.",
+    "Periodic runtime refresh stops when drain begins; any in-flight sync is awaited before scheduler and execution cleanup.",
+    "Recovered waiting jobs are checked against their original absolute deadline at claim time before relay-handler entry; expired work returns not_accepted without provider dispatch.",
+    "The supervisor reloads the image manifest during reconciliation and requires both expected tag and immutable image ID. A healthy but stale runtime is gracefully drained and replaced after the existing ownership fence."
+  ],
+  "semantic_review": {
+    "reviewed_sources": [
+      "src/relay/pool-runtime.ts",
+      "src/relay/pool-request-queue.ts",
+      "src/relay/pool-queue-http.ts",
+      "src/relay/pool-entry.ts",
+      "BROCCOLIQUEUE/src/queue.ts",
+      "BroccoliDB/src/broccolidb-kernel.js",
+      "scripts/relay-local.mjs",
+      "scripts/verify-relay-service-images.mjs",
+      "scripts/test-relay-pool-queue.ts",
+      "Dockerfile.relay-services",
+      "docker/relay-pools/local/images.json",
+      "docker/relay-pools/services.premium.yaml"
+    ],
+    "reviewed_guides": [
+      "docs/QUEUE_SPECIFICATION.md",
+      "docs/adr/0162-local-durable-relay-ingress-queue.md",
+      "docs/runbooks/relay-pool-services.md",
+      "docs/how-to/change-with-documentation.md"
+    ],
+    "review_notes": "Reviewed queue admission, idempotency, public response allowlists, artifact sanitation, storage permissions, claim lease/deadline recovery, graceful shutdown, database close ordering, supervisor manifest reconciliation, image identity, deployment and rollback boundaries. No provider request was sent; local tests and deployment checks are recorded separately."
+  },
+  "verification": {
+    "typecheck": "npx tsc --noEmit passed",
+    "relay_queue": "13 tests passed, including graceful shutdown execution-store ordering, accepted-work drain, and expired persisted deadline recovery",
+    "relay_services": "41 tests passed",
+    "production_build": "root Next.js production build passed",
+    "image_build": "Premium runtime target only; ARM64 image built and loaded into the Premium Docker VM",
+    "image_smoke": "bundle import passed as UID 1000 with no network, read-only root filesystem and bounded tmpfs",
+    "service_image_verifier": "32 checks passed for 3 images across split Docker contexts",
+    "local_acceptance": "27 checks passed; authenticated monitor, scoped services and TLS verified",
+    "post_deployment_status": "central services healthy; Premium monitor and R4 runtime healthy; supervisor running",
+    "state_volume": "the existing named /state volume remained mounted"
+  },
+  "limits": [
+    "No provider generation was submitted by the operator; local acceptance does not qualify every provider/model/workload.",
+    "No public application cutover, account registration policy change or execution gate change occurred.",
+    "The queue is a single-installation local queue and is not a cross-host broker or cross-pool scheduler.",
+    "Queue contents are protected by local runtime ownership and file permissions but are not encrypted against host administrator or physical disk access.",
+    "An interrupted dispatched execution remains governed by the existing execution ledger and is not automatically redispatched after an uncertain outcome."
+  ]
+}

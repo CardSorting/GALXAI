@@ -199,8 +199,8 @@ function StudioWorkspace({
 
   useEffect(() => () => reuseController.current?.abort(), []);
 
-  // Public Star concepts may prefill a private draft; opening the workspace
-  // never starts inference. The user explicitly submits after checking allowance.
+  // A Star Work ID is carried privately to the authenticated generation route.
+  // Source production text stays server-side; opening the workspace sends nothing.
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const sp = new URLSearchParams(window.location.search);
@@ -223,35 +223,15 @@ function StudioWorkspace({
         });
       } else if (remixWorkId && /^[A-Za-z0-9_-]{1,160}$/.test(remixWorkId)) {
         setActiveTab('creations');
-        if (urlRatio && ['1:1', '16:9', '9:16', '3:2', '4:3'].includes(urlRatio)) {
-          setSettings((prev) => ({ ...prev, ratio: urlRatio as any }));
-        }
-        const controller = new AbortController();
-        void fetch(`/api/images/feed?image_id=${encodeURIComponent(remixWorkId)}&limit=1`, {
-          cache: 'no-store', signal: controller.signal,
-        }).then(async (response) => {
-          const payload = await response.json();
-          const source = response.ok && payload?.success === true && Array.isArray(payload.items)
-            ? payload.items.find((item: any) => item?.id === remixWorkId && item?.author?.participantKind === 'star' && typeof item?.prompt === 'string')
-            : null;
-          if (controller.signal.aborted) return;
-          if (!source) {
-            setNotice('That published Star Work is no longer available. No image request was sent.');
-            return;
-          }
-          const context = [
-            'Create a new, distinct private variation inspired by this Star Work. Keep its central idea and mood while changing the composition and details.',
-            '',
-            'Published Star concept:',
-            source.prompt,
-          ].join('\n');
-          setSettings((prev) => ({ ...prev, prompt: context }));
-          setNotice('Star concept loaded as private creative context. No image request was sent.');
-          requestAnimationFrame(() => promptRef.current?.focus());
-        }).catch(() => {
-          if (!controller.signal.aborted) setNotice('The Star Work could not be loaded. No image request was sent.');
-        });
-        return () => controller.abort();
+        setSettings((prev) => ({
+          ...prev,
+          remixWorkId,
+          ...(urlRatio && ['1:1', '16:9', '9:16', '3:2', '4:3'].includes(urlRatio)
+            ? { ratio: urlRatio as any }
+            : {}),
+        }));
+        setNotice('Add your direction for a private work inspired by the Star Work. No request was sent.');
+        requestAnimationFrame(() => promptRef.current?.focus());
       } else if (urlTab === 'favorites') {
         setActiveTab('favorites');
       } else if (urlTab === 'creations') {

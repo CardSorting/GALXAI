@@ -22,3 +22,6 @@ Generated metadata, separate from [the full ADR catalog](../adr/README.md). Unre
 | [ADR 0158: Canonical account profiles with explicit actor provenance](../../docs/adr/0158-canonical-account-profiles-and-actor-provenance.md) | proposed | local | Account platform maintainer |
 | [ADR 0159: Local Mac relay operation with bounded availability](../../docs/adr/0159-local-mac-relay-operation.md) | accepted | local | Relay operator |
 | [ADR 0160: Private human creation and Star-only publishing](../../docs/adr/0160-private-human-creation-star-publishing.md) | accepted | local | Product/API maintainer |
+| [ADR 0161: BROC persistent practice for existing Stars](../../docs/adr/0161-broc-persistent-star-practice.md) | proposed | local | Database operator |
+| [ADR 0162: Local durable ingress queue for the Premium relay](../../docs/adr/0162-local-durable-relay-ingress-queue.md) | accepted | local | Relay operator |
+| [ADR 0163: Star candidate selection before exhibition](../../docs/adr/0163-star-candidate-selection-before-exhibition.md) | accepted | local | Product/API maintainer |

@@ -7,7 +7,7 @@ import { GalxaiRelayServer } from './relay-server.js';
 import { PoolExecution, type AssignedAccount, type ExecutionRecord } from './pool-execution.js';
 import { bearer, equalSecret, failure, hash, json, requestWorkload, type Workload } from './pool-protocol.js';
 import { RequestError, readJsonBody } from './request-policy.js';
-import { sanitizeImageArtifact } from '../lib/security/image-artifact.js';
+import { decodeImageBase64, sanitizeImageArtifact } from '../lib/security/image-artifact.js';
 import { CODEX_IMAGE_ALIAS } from './image-compatibility.js';
 import { publicJob, publicUsage, boundedJson } from './pool-public-response.js';
 import { sitesContractRequest, sitesContractReply } from './sites-contract.js';
@@ -31,6 +31,8 @@ import {
   PRIVATE_RELAY_FAILURE_HEADER,
   type PrivateRelayFailure,
 } from './private-failure.js';
+import { PoolRequestQueue, type QueuedGenerationRequest, type QueuedHttpResponse } from './pool-request-queue.js';
+import { asIncomingMessage, asServerResponse, QueueIncomingMessage, QueueServerResponse, serializeQueueResponse, writeQueueResponse } from './pool-queue-http.js';
 
 interface WorkerCircuit {
   consecutiveFailures: number;
@@ -48,19 +50,40 @@ type Worker = {
 };
 
 const WORKER_CIRCUIT_MAX_MS = MAX_PRIVATE_RETRY_AFTER_MS;
+const GENERATION_ERROR_MESSAGES:Readonly<Record<string,string>>={
+  service_unavailable:'This service is temporarily unavailable.',
+  service_busy:'This service is busy. Try again shortly.',
+  busy:'Try again shortly.',
+  request_key_required:'Supply an Idempotency-Key.',
+  request_in_progress:'Check the existing request.',
+  idempotency_conflict:'This request key was already used.',
+  result_unconfirmed:'The original result is unavailable. Do not repeat this request.',
+  capability_unavailable:'This request requires an unavailable capability.',
+  context_budget_exceeded:'Shorten this conversation before continuing.',
+  output_budget_exceeded:'Choose an output limit between 1 and 16384 tokens.',
+  relay_fleet_unavailable:'The request could not be completed. Check its status before retrying.',
+  request_unavailable:'Check the existing request before continuing.',
+};
+
+class QueueAdmissionDeadlineError extends RequestError {
+  constructor() { super(503, 'service_busy', 'This service is busy. Try again shortly.', 'not_accepted', true); }
+}
 
 export class PoolRuntime {
   readonly server: http.Server;
   private workers = new Map<string,Worker>();
-  private refreshedAt = 0; private stopped = false; private timer?: NodeJS.Timeout;
+  private refreshedAt = 0; private stopped = false; private draining = false; private timer?: NodeJS.Timeout;
   private syncing?: Promise<void>; private pending = new Set<string>();
+  private stopPromise?: Promise<void>;
   private readonly scheduler = new PoolScheduler();
   private readonly submissions = new RequestBulkhead();
   private readonly observations = new RequestBulkhead();
   private readonly streams = new RequestBulkhead(64,8);
-  private ready() {
+  private requestQueue?: PoolRequestQueue;
+  private ready(queuedWork = false) {
     const age=Date.now()-this.refreshedAt;
-    return !this.stopped && age>=0 && age<20000 && [...this.workers.values()].some(w=>!w.engine.credentialRejected());
+    const queueReady=!this.requestQueue || this.requestQueue.healthy || queuedWork && this.draining;
+    return !this.stopped && (!this.draining || queuedWork) && queueReady && age>=0 && age<20000 && [...this.workers.values()].some(w=>!w.engine.credentialRejected());
   }
   private workerCircuit(worker: Worker, workload: Workload): WorkerCircuit | undefined {
     return worker.failureCircuits?.[workload];
@@ -123,12 +146,90 @@ export class PoolRuntime {
     return undefined;
   }
   async start(port=3001, host='0.0.0.0') {
-    await this.execution.store.call('identity');
-    await this.execution.central.call('/runtime/claim',{epoch:this.execution.epoch});
-    await this.execution.store.call('recover',{epoch:this.execution.epoch});
-    await this.sync();
-    const schedule=()=>{ if (this.stopped) return; this.timer=setTimeout(async()=>{await this.sync().catch(()=>{this.refreshedAt=0;});schedule();},10000);this.timer.unref();}; schedule();
-    this.server.listen(port,host); await once(this.server,'listening');
+    try {
+      await this.execution.store.call('identity');
+      await this.execution.central.call('/runtime/claim',{epoch:this.execution.epoch});
+      await this.execution.store.call('recover',{epoch:this.execution.epoch});
+      await this.sync();
+      this.requestQueue=await PoolRequestQueue.open(this.stateDirectory,(request,signal)=>this.executeQueuedRequest(request,signal));
+      await this.requestQueue.startWorkers();
+      const schedule=()=>{ if (this.stopped||this.draining) return; this.timer=setTimeout(async()=>{
+        this.timer=undefined;
+        if(this.stopped||this.draining)return;
+        await this.sync().catch(()=>{this.refreshedAt=0;});schedule();
+      },10000);this.timer.unref();}; schedule();
+      this.server.listen(port,host); await once(this.server,'listening');
+    } catch (error) {
+      clearTimeout(this.timer);
+      const failures: unknown[]=[];
+      if(this.server.listening) await new Promise<void>(resolve=>this.server.close(()=>resolve())).catch(reason=>failures.push(reason));
+      const queue=this.requestQueue;
+      this.requestQueue=undefined;
+      const cleanup=await Promise.allSettled([
+        ...(queue?[queue.close()]:[]),
+      ]);
+      failures.push(...cleanup.flatMap(result=>result.status==='rejected'?[result.reason]:[]));
+      const engineCleanup=await Promise.allSettled([...this.workers.values()].map(worker=>worker.engine.stop()));
+      failures.push(...engineCleanup.flatMap(result=>result.status==='rejected'?[result.reason]:[]));
+      this.workers.clear();
+      this.execution.stop();
+      await this.execution.settlePending().catch(reason=>failures.push(reason));
+      if(failures.length) throw new AggregateError([error,...failures],'Premium runtime startup and cleanup failed');
+      throw error;
+    }
+  }
+  private async executeQueuedRequest(request:QueuedGenerationRequest,signal:AbortSignal):Promise<QueuedHttpResponse> {
+    const inbound=new QueueIncomingMessage(request.pathname,{
+      'x-galx-tenant':request.delegated,
+      'idempotency-key':request.idempotencyKey,
+    },request.body);
+    const outbound=new QueueServerResponse();
+    const req=asIncomingMessage(inbound),res=asServerResponse(outbound);
+    try {
+      await this.route(req,res,{signal,...(request.deadlineAtEpochMs===undefined?{}:{deadlineAtEpochMs:request.deadlineAtEpochMs})});
+    } catch (error) {
+      if (!outbound.headersSent && error instanceof QueueAdmissionDeadlineError) {
+        res.setHeader('retry-after','5');
+        res.setHeader('x-should-retry','true');
+        json(res,503,{error:{code:'service_busy',message:'This service is busy. Try again shortly.',execution_state:'not_accepted'}});
+      } else if (!outbound.headersSent) failure(res,error);
+      else outbound.destroy();
+    }
+    if (!outbound.headersSent) {
+      outbound.setHeader('x-should-retry',signal.aborted?'true':'false');
+      failure(res,new RequestError(503,'request_unavailable','Check the existing request before continuing.'));
+    }
+    return serializeQueueResponse(outbound);
+  }
+  private async publicQueuedResponse(pathname:string,requestBody:Record<string,any>,response:QueuedHttpResponse):Promise<QueuedHttpResponse> {
+    const safeFailure=():QueuedHttpResponse=>({status:503,headers:{'content-type':'application/json','cache-control':'no-store',
+      'x-content-type-options':'nosniff','referrer-policy':'no-referrer','x-should-retry':'false'},
+      body:JSON.stringify({error:{code:'request_unavailable',message:'Check the existing request before continuing.',execution_state:'unknown'}}),encoding:'utf8'});
+    if(response.status>=400) {
+      let value:any;try{value=JSON.parse(response.body);}catch{return safeFailure();}
+      const code=typeof value?.error?.code==='string'&&Object.hasOwn(GENERATION_ERROR_MESSAGES,value.error.code)?value.error.code:'request_unavailable';
+      const executionState=['not_accepted','unknown','failed'].includes(value?.error?.execution_state)?value.error.execution_state:'unknown';
+      return {...response,headers:{...response.headers,'content-type':'application/json'},
+        body:JSON.stringify({error:{code,message:GENERATION_ERROR_MESSAGES[code]??GENERATION_ERROR_MESSAGES.request_unavailable,execution_state:executionState}}),encoding:'utf8'};
+    }
+    try {
+      if(pathname==='/v1/images/generations') {
+        if(response.encoding==='base64'&&['image/png','image/jpeg','image/webp'].includes(response.headers['content-type']??'')) {
+          const artifact=await sanitizeImageArtifact(Buffer.from(response.body,'base64'));
+          return {...response,headers:{...response.headers,'content-type':artifact.contentType},body:artifact.bytes.toString('base64'),encoding:'base64'};
+        }
+        if(response.encoding!=='utf8'||response.headers['content-type']!=='application/json'||requestBody.response_format!=='b64_json') return safeFailure();
+        const value=JSON.parse(response.body),encoded=value?.data?.[0]?.b64_json;
+        if(!Number.isSafeInteger(value?.created)||value.created<0||typeof encoded!=='string') return safeFailure();
+        const artifact=await sanitizeImageArtifact(decodeImageBase64(encoded));
+        return {...response,body:JSON.stringify({created:value.created,data:[{b64_json:artifact.bytes.toString('base64')}]}),encoding:'utf8'};
+      }
+      if(response.encoding!=='utf8'||response.headers['content-type']!=='application/json') return safeFailure();
+      const safe=publicJob(JSON.parse(response.body));
+      return {...response,body:JSON.stringify(safe),encoding:'utf8'};
+    } catch {
+      return safeFailure();
+    }
   }
   async sync() {
     if (this.syncing) return this.syncing;
@@ -176,9 +277,10 @@ export class PoolRuntime {
     }
     this.refreshedAt=Date.now(); await this.execution.settlePending();
   }
-  private async route(req:http.IncomingMessage,res:http.ServerResponse) {
+  private async route(req:http.IncomingMessage,res:http.ServerResponse,queueExecution?:{signal:AbortSignal;deadlineAtEpochMs?:number}) {
     const pathname=new URL(req.url ?? '/','http://local').pathname;
-    const ready=this.ready();
+    const internalQueuedGeneration=Boolean(queueExecution && req.method==='POST' && ['/v1/chat/completions','/v1/images/generations'].includes(pathname));
+    const ready=this.ready(internalQueuedGeneration);
     if (req.method==='GET' && ['/health/live','/health/ready','/health'].includes(pathname)) return json(res,pathname==='/health/ready'&&!ready?503:200,{ok:pathname==='/health/ready'?ready:true});
     if (pathname==='/api/sites/contract' && req.method==='GET') {
       if(req.headers.origin || !this.capabilityKey || !equalSecret(bearer(req),this.capabilityKey))throw new RequestError(401,'unauthorized','Provide valid authorization.');
@@ -187,7 +289,7 @@ export class PoolRuntime {
       if(!ready||![...this.workers.values()].some(w=>w.account.models.includes(requested.model)))throw new RequestError(503,'service_unavailable','This service is temporarily unavailable.');
       return json(res,200,sitesContractReply(requested));
     }
-    if (req.headers.origin || !equalSecret(bearer(req),this.inferenceKey)) throw new RequestError(401,'unauthorized','Provide valid authorization.');
+    if (!internalQueuedGeneration && (req.headers.origin || !equalSecret(bearer(req),this.inferenceKey))) throw new RequestError(401,'unauthorized','Provide valid authorization.');
     if(pathname==='/v1/images/availability' && req.method==='GET') {
       const model = new URL(req.url ?? '/', 'http://local').searchParams.get('model');
       if (!model || !/^[a-zA-Z0-9._:-]{1,128}$/.test(model)) throw new RequestError(400, 'invalid_request', 'Specify a valid image model.');
@@ -219,6 +321,7 @@ export class PoolRuntime {
     let releaseRequest: (() => void) | undefined;
     let releaseStream: (() => void) | undefined;
     const queueAbort = generation ? new AbortController() : undefined;
+    const queueSignalAbort = () => { queueAbort?.abort(); if (queueExecution) req.aborted = true; };
     let reselectWorker: (() => Promise<Worker | undefined>) | undefined;
     const abortQueueWait = () => {
       admission?.clientDisconnected();
@@ -227,12 +330,15 @@ export class PoolRuntime {
     if (queueAbort) {
       req.once('aborted', abortQueueWait);
       res.once('close', abortQueueWait);
+      if (queueExecution?.signal.aborted) queueSignalAbort();
+      else queueExecution?.signal.addEventListener('abort', queueSignalAbort, { once: true });
     }
     let provenNew = false;
     try {
       // Bound body parsing and dependency lookups before allocating their buffers/queries.
       // Recovery reads/cancel have a separate allowance from new submissions.
-      releaseRequest = (generation ? this.submissions : this.observations).reserve(tenantSha256);
+      if (!internalQueuedGeneration) releaseRequest = (generation ? this.submissions : this.observations).reserve(tenantSha256);
+      else releaseRequest = () => {};
       if (!releaseRequest) {
         res.setHeader('Retry-After','5');
         throw new RequestError(503,'service_busy','This service is busy. Try again shortly.');
@@ -249,9 +355,11 @@ export class PoolRuntime {
         lock=hash(JSON.stringify([tenantSha256,workload,key]));
         admission=new AdmissionLifecycle(lock,tenantSha256,workload);
         this.observeAdmission(admission, 'received');
-        if (this.pending.has(lock)) throw new RequestError(409,'request_in_progress','Check the existing request.');
-        if (this.pending.size>=128) throw new RequestError(429,'busy','Try again shortly.');
-        this.pending.add(lock); ownsLock=true;
+        if (!internalQueuedGeneration) {
+          if (this.pending.has(lock)) throw new RequestError(409,'request_in_progress','Check the existing request.');
+          if (this.pending.size>=128) throw new RequestError(429,'busy','Try again shortly.');
+          this.pending.add(lock); ownsLock=true;
+        }
         const previous:ExecutionRecord|null=await this.execution.store.call('lookup',{requestKey:lock,tenantSha256});
         // Lookup can outlive the caller or the projection. Do not spend a new grant
         // for abandoned work, or use a readiness decision made before this await.
@@ -263,7 +371,9 @@ export class PoolRuntime {
           return json(res,202,{id:previous.executionId,status:previous.state==='running'?'running':previous.state==='completed'?'completed':'failed',statusUrl:`/v1/jobs/${previous.executionId}`,streamUrl:`/v1/jobs/${previous.executionId}/stream`});
         }
         provenNew = true;
-        if (workload==='images') admission.setDeadline(performance.now()+IMAGE_QUEUE_MAX_WAIT_MS);
+        const queuedNonStreamingRequest=this.requestQueue && !(pathname==='/v1/chat/completions' && body.stream===true);
+        const deadlineAtEpochMs=queueExecution?.deadlineAtEpochMs ?? (workload==='images' || queuedNonStreamingRequest ? Date.now()+IMAGE_QUEUE_MAX_WAIT_MS : undefined);
+        if (deadlineAtEpochMs!==undefined) admission.setDeadline(performance.now()+Math.max(0,deadlineAtEpochMs-Date.now()));
         if (body.require_output_limit === true) throw new RequestError(400,'capability_unavailable','This request requires an unavailable capability.');
         if (workload === 'text') {
           if (Buffer.byteLength(JSON.stringify({messages:body.messages,tools:body.tools})) > 262144)
@@ -271,14 +381,50 @@ export class PoolRuntime {
           if (body.max_tokens !== undefined && (!Number.isSafeInteger(body.max_tokens) || body.max_tokens < 1 || body.max_tokens > 16384))
             throw new RequestError(400,'output_budget_exceeded','Choose an output limit between 1 and 16384 tokens.');
         }
-        if (!this.ready()) throw new RequestError(503,'service_unavailable','This service is temporarily unavailable.');
+        if (!this.ready(internalQueuedGeneration)) {
+          if(internalQueuedGeneration)throw new QueueAdmissionDeadlineError();
+          throw new RequestError(503,'service_unavailable','This service is temporarily unavailable.');
+        }
         const model=body.model ?? 'gpt-5.6-terra'; const capability=workload==='images'?`image:${model}`:model;
+        if (!internalQueuedGeneration && this.requestQueue && !(pathname==='/v1/chat/completions' && body.stream===true)) {
+          if(!admission.queue())throw new QueueAdmissionDeadlineError();
+          const idempotencyKey=req.headers['idempotency-key'] as string;
+          const queuedRequestBase= {
+            pathname:pathname as QueuedGenerationRequest['pathname'], body, delegated,
+            idempotencyKey, requestKey:lock!, owner:tenantSha256, workload,
+            ...(deadlineAtEpochMs===undefined?{}:{deadlineAtEpochMs}),
+          };
+          const queuedRequest:QueuedGenerationRequest={...queuedRequestBase,fingerprint:hash(JSON.stringify({
+            pathname:queuedRequestBase.pathname,body:queuedRequestBase.body,delegated:queuedRequestBase.delegated,
+            idempotencyKey:queuedRequestBase.idempotencyKey,owner:queuedRequestBase.owner,workload:queuedRequestBase.workload,
+          }))};
+          let queueJob;
+          try {
+            if (!this.requestQueue.healthy) throw new RequestError(503,'service_unavailable','This service is temporarily unavailable.');
+            queueJob=await this.requestQueue.enqueue(queuedRequest);
+          } catch (error) {
+            if ((error as {code?:string})?.code==='idempotency_conflict') throw new RequestError(409,'idempotency_conflict','This request key was already used.');
+            if ((error as {code?:string})?.code==='queue_full') { res.setHeader('Retry-After','5'); throw new RequestError(429,'busy','Try again shortly.','not_accepted',true); }
+            if ((error as {code?:string})?.code==='queue_unavailable') throw new RequestError(503,'service_unavailable','This service is temporarily unavailable.','not_accepted',true);
+            throw error;
+          }
+          const disconnect=()=>!req.aborted&&!res.destroyed;
+          const result=await this.requestQueue!.waitForResult(queueJob.id,disconnect);
+          if (!result) return;
+          if (result.status>=200 && result.status<300) admission.complete(); else admission.fail();
+          writeQueueResponse(res,await this.publicQueuedResponse(pathname,body,result));
+          this.requestQueue.acknowledge(queueJob.id);
+          return;
+        }
         const generationAdmission = admission;
         reselectWorker = async (): Promise<Worker | undefined> => {
           for (;;) {
-            if (!generationAdmission.queue()) return;
+            if (!generationAdmission.queue()) {
+              if(generationAdmission.state==='timed_out') throw new QueueAdmissionDeadlineError();
+              return;
+            }
             if (attemptedWorkerIds.size) this.observeAdmission(generationAdmission, 'reselection_started', undefined, 'excluded_target');
-            if (!this.ready()) throw new RequestError(503,'service_unavailable','This service is temporarily unavailable.');
+            if (!this.ready(internalQueuedGeneration)) throw new RequestError(503,'service_unavailable','This service is temporarily unavailable.','not_accepted',true);
             const now=Date.now();
             const candidates=[...this.workers.values()].filter(w=>{
               this.observeAdmission(generationAdmission, 'candidate_evaluated', w.account.id);
@@ -335,12 +481,12 @@ export class PoolRuntime {
             if (!imageCapacityBlocked) {
               this.observeAdmission(generationAdmission, 'candidate_rejected', undefined, 'no_compatible_candidate');
               res.setHeader('Retry-After','5');
-              throw new RequestError(503,'service_busy','This service is busy. Try again shortly.');
+              throw new RequestError(503,'service_busy','This service is busy. Try again shortly.','not_accepted',true);
             }
             const remainingQueueMs=generationAdmission.remainingWaitMs() ?? IMAGE_QUEUE_MAX_WAIT_MS;
             if (remainingQueueMs<1) {
               res.setHeader('Retry-After','5');
-              throw new RequestError(503,'service_busy','This service is busy. Try again shortly.');
+              throw new RequestError(503,'service_busy','This service is busy. Try again shortly.','not_accepted',true);
             }
             try {
               await this.scheduler.waitForAvailability('images',tenantSha256,{
@@ -356,7 +502,7 @@ export class PoolRuntime {
               if (error instanceof SchedulerQueueError && error.reason==='timeout') generationAdmission.timeout();
               else if (error instanceof SchedulerQueueError && error.reason==='full') generationAdmission.reject();
               res.setHeader('Retry-After','5');
-              throw new RequestError(error instanceof SchedulerQueueError && error.reason==='full'?429:503,'service_busy','This service is busy. Try again shortly.');
+              throw new RequestError(error instanceof SchedulerQueueError && error.reason==='full'?429:503,'service_busy','This service is busy. Try again shortly.','not_accepted',true);
             }
             if (req.aborted || res.destroyed) { generationAdmission.clientDisconnected(); return; }
           }
@@ -378,7 +524,9 @@ export class PoolRuntime {
         if (admission && !admission.beginDispatch()) {
           this.observeAdmission(admission, 'reservation_rejected', worker.account.id,
             admission.state === 'cancelled' ? 'cancelled' : admission.state === 'timed_out' ? 'deadline_expired' : 'reservation_unavailable');
-          return;
+          if(req.aborted||res.destroyed)return;
+          throw admission.state==='timed_out'?new QueueAdmissionDeadlineError()
+            :new RequestError(503,'service_unavailable','This service is temporarily unavailable.','not_accepted',true);
         }
         attemptedWorkerIds.add(worker.account.id);
         if (admission) {
@@ -387,7 +535,7 @@ export class PoolRuntime {
         }
         let response:Response;
         try {
-          response=await fetch(`http://127.0.0.1:${worker.port}${pathname}`,{method:req.method,redirect:'error',signal:AbortSignal.timeout(310000),
+          response=await fetch(`http://127.0.0.1:${worker.port}${pathname}`,{method:req.method,redirect:'error',signal:queueExecution ? AbortSignal.any([AbortSignal.timeout(310000),queueExecution.signal]) : AbortSignal.timeout(310000),
             headers:{Authorization:`Bearer ${worker.key}`,'Content-Type':'application/json','x-galx-tenant':delegated,
               ...(typeof req.headers['idempotency-key']==='string'?{'idempotency-key':req.headers['idempotency-key']}:{}),
               ...(typeof req.headers['last-event-id']==='string'?{'last-event-id':req.headers['last-event-id']}: {})},body:body?JSON.stringify(body):req.method==='POST'?'{}':undefined});
@@ -453,6 +601,7 @@ export class PoolRuntime {
       if (queueAbort) {
         req.off('aborted', abortQueueWait);
         res.off('close', abortQueueWait);
+        queueExecution?.signal.removeEventListener('abort',queueSignalAbort);
       }
       if (admission) this.observeAdmission(admission, 'terminal', undefined, this.terminalAdmissionReason(admission));
       admission?.cleanup();
@@ -473,5 +622,34 @@ export class PoolRuntime {
       }}res.end();
     } finally {res.off('close',close);await reader.cancel().catch(()=>{});}
   }
-  async stop(){this.stopped=true;clearTimeout(this.timer);this.refreshedAt=0;this.scheduler.close();this.server.close();await this.syncing?.catch(()=>{});await Promise.all([...this.workers.values()].map(w=>w.engine.stop()));this.workers.clear();this.execution.stop();await this.execution.settlePending().catch(()=>{});}
+  stop():Promise<void>{
+    if(this.stopPromise)return this.stopPromise;
+    const operation=this.stopInternal();
+    this.stopPromise=operation;
+    return operation;
+  }
+  private async stopInternal(){
+    this.draining=true;
+    if(this.timer)clearTimeout(this.timer);
+    this.timer=undefined;
+    const failures:unknown[]=[];
+    const queue=this.requestQueue;
+    queue?.beginDrain();
+    const serverClosed=new Promise<void>(resolve=>{if(!this.server.listening){resolve();return;}this.server.close(()=>resolve());});
+    const initial=await Promise.allSettled([serverClosed,this.syncing??Promise.resolve()]);
+    failures.push(...initial.flatMap(result=>result.status==='rejected'?[result.reason]:[]));
+    const cleanup=await Promise.allSettled(queue?[queue.close()]:[]);
+    failures.push(...cleanup.flatMap(result=>result.status==='rejected'?[result.reason]:[]));
+    this.requestQueue=undefined;
+    this.stopped=true;clearTimeout(this.timer);
+    const finalSync=await Promise.allSettled(this.syncing?[this.syncing]:[]);
+    failures.push(...finalSync.flatMap(result=>result.status==='rejected'?[result.reason]:[]));
+    this.refreshedAt=0;this.scheduler.close();
+    const engineCleanup=await Promise.allSettled([...this.workers.values()].map(worker=>worker.engine.stop()));
+    failures.push(...engineCleanup.flatMap(result=>result.status==='rejected'?[result.reason]:[]));
+    this.workers.clear();
+    this.execution.stop();
+    await this.execution.settlePending().catch(error=>failures.push(error));
+    if(failures.length) throw new AggregateError(failures,'Premium runtime shutdown was incomplete');
+  }
 }

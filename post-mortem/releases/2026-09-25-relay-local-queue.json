@@ -1,0 +1,44 @@
+{
+  "classification": "private",
+  "observed_at": "2026-09-25T18:30:13Z",
+  "scope": "Local Premium runtime queue implementation and deployment.",
+  "authorization": "Owner requested a local durable queue in front of the existing relay and deployment to Docker.",
+  "deployment": {
+    "previous_runtime": {
+      "tag": "galxai-relay-premium:cooldown-scope-20260920-r1",
+      "image_id": "sha256:869e2718d86e2fe217ddd38ed6151a6954d333dc8ae1084e056ed01100c1e110"
+    },
+    "installed_runtime": {
+      "tag": "galxai-relay-premium:queue-20260925-r1",
+      "image_id": "sha256:db2e951d6171f8004760b001a9af220e7d9fb953f7823b370e2509c283d0e532",
+      "architecture": "arm64",
+      "status": "running and healthy",
+      "state_volume": "existing /state volume preserved"
+    },
+    "central_image_pins_changed": false,
+    "monitor_image_pin_changed": false,
+    "registration_or_execution_gates_changed": false,
+    "public_application_cutover": false
+  },
+  "verification": {
+    "local_installation_verifier": "passed; 27 checks",
+    "post_deployment_service_status": "Premium relay and monitor healthy; central services healthy",
+    "source_checks": [
+      "npx tsc --noEmit passed",
+      "test:relay:queue passed; 2 tests",
+      "test:relay:services passed; 41 tests",
+      "root Next.js production build passed",
+      "BroccoliDB package check passed; 42 tests",
+      "BROCCOLIQUEUE tests passed; 23 tests",
+      "Premium ARM64 image built and loaded into the Premium Docker VM",
+      "network-isolated image smoke passed as runtime UID 1000"
+    ],
+    "container_contract": "The deployed runtime retained the existing named /state volume and the existing loopback listener."
+  },
+  "limits": [
+    "No provider generation was submitted as part of deployment verification.",
+    "No customer response or public application cutover was performed.",
+    "The runtime queue is local to this Premium installation; no cross-pool scheduling was verified.",
+    "The previous runtime image and pre-deployment image manifest remain available for local rollback."
+  ]
+}

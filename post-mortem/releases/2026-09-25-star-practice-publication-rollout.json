@@ -1,0 +1,66 @@
+{
+  "classification": "private",
+  "reviewed_at": "2026-09-25T22:24:50Z",
+  "scope": "Apply BROC practice, Star selection and historical-publication continuity migrations; deploy the compatible existing application; verify privacy and public continuity without activating or generating Star work.",
+  "guides_read_or_reconciled": [
+    "docs/DOCUMENTATION_POLICY.md",
+    "docs/how-to/change-with-documentation.md",
+    "docs/maintainers/ACCOUNT_PROFILE_SCHEMA.md",
+    "docs/maintainers/image-public-boundary.md",
+    "docs/operations/workspace-auth.md",
+    "docs/reference/stars.md",
+    "docs/adr/0161-broc-persistent-star-practice.md",
+    "docs/adr/0163-star-candidate-selection-before-exhibition.md",
+    "post-mortem/runbooks/image-generation.md",
+    "post-mortem/failure-modes/images.md"
+  ],
+  "implementation_contracts_reviewed": [
+    "BROC/store.ts",
+    "src/app/api/images/feed/route.ts",
+    "src/lib/community/public-participants.ts",
+    "src/lib/stars/StarPopulationController.ts",
+    "scripts/review-star-candidates.ts",
+    "scripts/test-image-requests-db.ts",
+    "supabase/migrations/20260925113752_broc_persistent_star_practice.sql",
+    "supabase/migrations/20260925150000_star_selection_publication_gate.sql",
+    "supabase/migrations/20260925215000_preserve_historical_star_publications.sql",
+    "supabase/rollbacks/20260925215000_preserve_historical_star_publications.down.sql"
+  ],
+  "findings": [
+    "The forward migration preserves only pre-cutover completed Star works whose autonomous identity, actor, discoverable active profile, attempt, generation, request, stored asset, timestamps and existing publication state agree. It excludes work with a BROC candidate or selection event.",
+    "The archive ledger is append-only, forced-RLS, and inaccessible to anon, authenticated and service_role. New Star request admission still requires actor activation. Activation no longer hides established work or blocks review of a completed candidate.",
+    "Selection remains a separate internal decision. The production selection command was not run and no new Star candidate was generated or selected.",
+    "Existing application surfaces and navigation were retained. No new application, dashboard, route shell, publishing path or public prompt surface was added.",
+    "Public feed readback returned 11 unique Star works. The response used the explicit public DTO, contained no prompt field, and returned no human works.",
+    "The existing Premium relay queue was not changed by this rollout; its current R4 deployment remains documented in its separate private release record."
+  ],
+  "focused_checks": {
+    "disposable_image_database": "PASS: npm run test:image:db; 82 checks against disposable PostgreSQL 17 after all 156 migrations, including disabled-actor admission denial, completed-candidate review, archive provenance, append-only enforcement, grants, forced RLS and public projections.",
+    "disposable_broc_database": "PASS: npm run test:broc:db; 20 assertions against disposable PostgreSQL 17 after 156 migrations.",
+    "selection_and_practice": "PASS: npm run test:broc:selection (3 tests) and npm run test:broc (6 tests).",
+    "image_privacy": "PASS: npm run test:image:security (69 tests), npm run test:image:remix (3 tests), npm run test:community:profile (7 tests), and npm run test:collections:privacy (1 test).",
+    "typecheck_and_build": "PASS: npx tsc --noEmit and npm run build; Next.js generated 155 static pages. Existing edge-runtime static-generation warning remains.",
+    "lint_and_readiness": "PASS: npm run lint (0 errors, 8 existing warnings) and npm run vercel:verify (8 phases).",
+    "migration_integrity": "PASS: npm run db:verify; 156 migration/rollback pairs, no warnings or fatal violations.",
+    "live_migration_status": "PASS: npm run db:status; 156 applied, 0 pending, 0 remote-only.",
+    "live_database_readback": "PASS: 11 archived/restored historical Star works; 11 published Star works; 0 public human works; 12 participant profiles; 0 enabled Stars; 0 pending/queued image requests or Star attempts; archive forced RLS and no application-role SELECT grants.",
+    "production_deployment": "PASS: Vercel production deployment dpl_G5mPH2Ez4F2aHuEYkWvnhSqdXmT9 reported Ready; remote build compiled, checked types and generated 155 static pages.",
+    "live_smoke": "PASS: npm run vercel:smoke -- --url=https://galx.ai; 13 checks.",
+    "live_workspace_boundary": "PASS: node scripts/verify-workspace-cache-http.mjs https://galx.ai; 38 checks for cache and protected-route behavior.",
+    "live_public_http_and_assets": "PASS: GALX_VERIFY_ORIGIN=https://galx.ai node --import tsx scripts/verify-image-public-http.ts; protected response bodies, headers, errors and rendered pages checked; 37 browser assets scanned.",
+    "live_feed": "PASS: GET /api/images/feed?limit=48 returned HTTP 200 and 11 unique Star DTOs; no prompt field; no human participant kind."
+  },
+  "documentation": "PASS: npm run docs:sync generated 3 knowledge views and 4 incident indexes; npm run docs:check validated 377 guides, 41 incident documents and 163 ADRs; npm run test:docs passed 24 incident and 17 knowledge tests; npm run docs:check:build scanned 526 browser/rendered assets; git diff --check passed. All 10 knowledge domains have current review attestations.",
+  "documentation_impact": "PASS: npm run docs:impact reviewed mapped changes across knowledge, images, access, relay, database, delivery, BroccoliDB and client-efficiency. The remaining unmapped paths are generated incident views, self-referential review records, private current-state/register/event records and private dated release evidence; no implementation boundary was left unmapped.",
+  "production_changes": "Applied the three BROC/Star migrations to the existing linked application database and deployed the compatible existing GALX application. No Star activation, generation, candidate selection, allowance change, queue mutation or new Docker build was performed.",
+  "known_findings": [
+    "The linked database advisor still reports one existing SECURITY DEFINER view on public.community_participant_profiles. It remains the curated participant projection with its existing explicit output and grants; this rollout did not redesign that permission model. Track a separate focused review before changing it.",
+    "The internal candidate-review command was not executed against production; selection and withholding were tested in disposable PostgreSQL only."
+  ],
+  "limits": [
+    "The live feed verifies publication continuity and the prompt-free response shape; it is not a review or selection of any new work.",
+    "The release did not perform provider inference, enable a Star, change purchased allowances, or test account-specific private generation.",
+    "The production public-boundary scan covered the listed routes and 37 browser assets, not every possible third-party cache or previously downloaded copy.",
+    "No new queue runtime was built because the relay queue source and deployed image were unchanged in this migration/application rollout."
+  ]
+}

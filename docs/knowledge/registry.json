@@ -14,7 +14,9 @@
         "docs/PRODUCT_SURFACE_STRATEGY.md",
         "docs/WALLET_AND_BILLING_STRATEGY.md",
         "docs/DEVELOPER_CLIENT_SDK.md",
+        "docs/CATALOG.md",
         "docs/adr/0160-private-human-creation-star-publishing.md",
+        "docs/adr/0161-broc-persistent-star-practice.md",
         "src/app/docs/**/*.tsx",
         "src/app/docs/agent-setup/route.ts",
         "scripts/docs-kb.py",
@@ -23,12 +25,18 @@
         "scripts/verify-post-mortem.py",
         "scripts/test-post-mortem.py",
         "docs/knowledge/registry.json",
+        "docs/knowledge/DECISIONS.md",
+        "docs/knowledge/DOMAINS.md",
+        "docs/knowledge/catalog.json",
+        "post-mortem/documentation-inventory.json",
+        "post-mortem/releases/2026-09-25-broc-practice-local-review.json",
         ".github/workflows/documentation.yml",
         ".github/workflows/vercel-preflight.yml",
         ".github/workflows/deploy-cloudflare.yml",
         ".github/CODEOWNERS",
         ".github/PULL_REQUEST_TEMPLATE.md",
-        "package.json"
+        "package.json",
+        "docs/adr/0163-star-candidate-selection-before-exhibition.md"
       ],
       "guides": [
         "docs/README.md",
@@ -88,6 +96,7 @@
         "docs/reference/billing-pages.md",
         "docs/reference/stars.md",
         "docs/adr/0160-private-human-creation-star-publishing.md",
+        "docs/adr/0161-broc-persistent-star-practice.md",
         "src/app/api/openapi.json/route.ts",
         "src/app/api/queues/**/tasks/route.ts",
         "src/app/images/create/page.tsx",
@@ -159,9 +168,21 @@
         "src/app/profile/**/*.tsx",
         "src/app/profile/**/*.css",
         "src/lib/stars/StarPopulationController.ts",
+        "BROC/practice.ts",
+        "scripts/test-broc-practice.ts",
         "scripts/populate-stars.ts",
         "scripts/reconcile-stars.ts",
-        "scripts/verify-stars.ts"
+        "scripts/verify-stars.ts",
+        "docs/adr/0163-star-candidate-selection-before-exhibition.md",
+        "scripts/review-star-candidates.ts",
+        "scripts/test-broc-selection.ts",
+        "scripts/test-private-remix.ts",
+        "scripts/test-saved-works.ts",
+        "scripts/test-community-stream-audit.ts",
+        "src/app/collections/page.tsx",
+        "src/lib/collections/saved-works.ts",
+        "post-mortem/failure-modes/README.md",
+        "post-mortem/failure-modes/images.md"
       ],
       "guides": [
         "docs/QUEUE_SPECIFICATION.md",
@@ -172,7 +193,8 @@
         "docs/maintainers/readable-urls.md",
         "docs/maintainers/FREE_GENERATION_QUOTA.md",
         "docs/maintainers/private-image-accounting.md",
-        "docs/runbooks/private-image-release-audit.md"
+        "docs/runbooks/private-image-release-audit.md",
+        "docs/adr/0163-star-candidate-selection-before-exhibition.md"
       ],
       "checks": [
         "npm run test:image:security",
@@ -181,7 +203,11 @@
         "npm run test:image:library-db",
         "npm run test:relay:image",
         "npm run test:free-quota",
-        "npm run test:free-quota:db"
+        "npm run test:free-quota:db",
+        "npm run test:image:remix",
+        "npm run test:community:profile",
+        "npm run test:collections:privacy",
+        "npm run test:broc:selection"
       ]
     },
     "access": {
@@ -384,6 +410,12 @@
         "scripts/verify-relay-pool-images.mjs",
         "Dockerfile.relay-services",
         "Dockerfile.relay-services.dockerignore",
+        "BroccoliDB/*",
+        "BroccoliDB/src/**/*.ts",
+        "BroccoliDB/test/**/*.ts",
+        "BROCCOLIQUEUE/*",
+        "BROCCOLIQUEUE/src/**/*.ts",
+        "BROCCOLIQUEUE/test/**/*.js",
         "src/relay/pool-*.html",
         "src/relay/pool-*.js",
         "src/relay/pool-*.css",
@@ -410,6 +442,7 @@
         "scripts/verify-relay-digitalocean.ts",
         "scripts/test-relay-digitalocean.ts",
         "scripts/verify-relay-service-images.mjs",
+        "scripts/test-relay-pool-queue.ts",
         "scripts/verify-relay-pool-monitor.ts",
         "scripts/test-relay-services.ts",
         "scripts/test-relay-registration-errors.ts",
@@ -436,6 +469,7 @@
         "src/relay/request-bulkhead.ts",
         "src/relay/admission-lifecycle.ts",
         "src/relay/pool-runtime.ts",
+        "src/relay/pool-request-queue.ts",
         "src/relay/relay-server.ts",
         "scripts/test-relay-admission-lifecycle.ts",
         "scripts/test-relay-overload.ts",
@@ -468,6 +502,17 @@
         "docs/adr/0152-manual-desktop-only-shard-authority.md",
         "docs/runbooks/relay-pool-images.md",
         "docs/runbooks/relay-pool-services.md",
+        "docs/adr/0162-local-durable-relay-ingress-queue.md",
+        "BroccoliDB/README.md",
+        "BroccoliDB/docs/README.md",
+        "BroccoliDB/docs/API.md",
+        "BroccoliDB/docs/ARCHITECTURE.md",
+        "BroccoliDB/docs/OPERATIONS.md",
+        "BroccoliDB/docs/CONTRIBUTING.md",
+        "BroccoliDB/docs/adr/README.md",
+        "BroccoliDB/docs/adr/ADR-006-wal-compaction-without-history.md",
+        "BROCCOLIQUEUE/docs/API.md",
+        "BROCCOLIQUEUE/docs/operations.md",
         "docs/reference/relay-account-management.md",
         "docs/reference/legacy-federation-api.md",
         "docs/maintainers/legacy-federation-operations.md",
@@ -543,12 +588,18 @@
         "scripts/test-relay-activation-db.ts",
         "scripts/test-account-profile-db.ts",
         "scripts/test-account-profile-api.ts",
+        "BROC/store.ts",
+        "scripts/test-broc-practice.ts",
+        "scripts/test-broc-practice-db.ts",
         "scripts/test-image-requests-db.ts",
         "scripts/audit-image-release.ts",
         "src/lib/stars/**/*.ts",
         "scripts/populate-stars.ts",
         "scripts/reconcile-stars.ts",
-        "scripts/verify-stars.ts"
+        "scripts/verify-stars.ts",
+        "docs/adr/0163-star-candidate-selection-before-exhibition.md",
+        "scripts/review-star-candidates.ts",
+        "scripts/test-broc-selection.ts"
       ],
       "guides": [
         "docs/SUPABASE_PARANOID_ARCHITECTURE_SPEC.md",
@@ -559,15 +610,21 @@
         "docs/reference/relay-account-management.md",
         "docs/maintainers/ACCOUNT_PROFILE_SCHEMA.md",
         "docs/adr/0158-canonical-account-profiles-and-actor-provenance.md",
+        "docs/adr/0161-broc-persistent-star-practice.md",
         "docs/maintainers/private-image-accounting.md",
-        "docs/runbooks/private-image-release-audit.md"
+        "docs/runbooks/private-image-release-audit.md",
+        "docs/adr/0163-star-candidate-selection-before-exhibition.md"
       ],
       "checks": [
         "npm run db:verify",
         "npm run db:test",
+        "npm run test:broc",
+        "npm run test:broc:db",
         "npm run test:relay:manual-db",
         "npm run test:relay:authorization-db",
-        "npm run test:relay:activation-db"
+        "npm run test:relay:activation-db",
+        "npm run test:broc:selection",
+        "npm run test:image:db"
       ]
     },
     "delivery": {
@@ -1407,6 +1464,64 @@
       ],
       "target": "GALX application source and reviewed database migrations; not deployed",
       "revision": "working tree under review"
+    },
+    "docs/adr/0161-broc-persistent-star-practice.md": {
+      "status": "proposed",
+      "delivery": "local",
+      "domain": "database",
+      "owner": "Database operator",
+      "date": "2026-09-25",
+      "evidence": [
+        "BROC/practice.ts",
+        "BROC/store.ts",
+        "src/lib/stars/StarPopulationController.ts",
+        "supabase/migrations/20260925113752_broc_persistent_star_practice.sql",
+        "scripts/test-broc-practice.ts",
+        "docs/maintainers/ACCOUNT_PROFILE_SCHEMA.md",
+        "post-mortem/releases/2026-09-25-broc-practice-local-review.json"
+      ],
+      "supersedes": []
+    },
+    "docs/adr/0162-local-durable-relay-ingress-queue.md": {
+      "status": "accepted",
+      "delivery": "local",
+      "domain": "relay",
+      "owner": "Relay operator",
+      "date": "2026-09-25",
+      "evidence": [
+        "src/relay/pool-request-queue.ts",
+        "src/relay/pool-runtime.ts",
+        "BroccoliDB/src/broccolidb-kernel.ts",
+        "BROCCOLIQUEUE/src/queue.ts",
+        "scripts/test-relay-pool-queue.ts",
+        "docs/QUEUE_SPECIFICATION.md",
+        "docs/runbooks/relay-pool-services.md",
+        "post-mortem/releases/2026-09-25-relay-local-queue.json",
+        "post-mortem/releases/2026-09-25-relay-queue-recovery-hardening.json"
+      ],
+      "supersedes": [],
+      "target": "Existing local Premium Docker runtime only; no public application cutover",
+      "revision": "galxai-relay-premium:queue-hardening-20260925-r4; sha256:4f9ca6fb2e528d3dd9cdb4e1b69f2d6eb717af20987335a10b932c6bb6ab4713",
+      "acceptance_basis": "The owner explicitly directed use of BROCCOLIQUEUE and BroccoliDB for a local queue in front of the existing relay runtime."
+    },
+    "docs/adr/0163-star-candidate-selection-before-exhibition.md": {
+      "status": "accepted",
+      "delivery": "local",
+      "domain": "images",
+      "owner": "Product/API maintainer",
+      "date": "2026-09-25",
+      "evidence": [
+        "docs/adr/0163-star-candidate-selection-before-exhibition.md",
+        "docs/maintainers/image-public-boundary.md",
+        "scripts/review-star-candidates.ts",
+        "scripts/test-broc-selection.ts",
+        "scripts/test-image-requests-db.ts",
+        "post-mortem/releases/2026-09-25-star-selection-local-verification.json"
+      ],
+      "supersedes": [],
+      "target": "GALX source and disposable PostgreSQL verification; no shared database migration or application deployment",
+      "revision": "working tree under review",
+      "acceptance_basis": "The institutional mandate requires an explicit selection decision before new Star work is exhibited."
     }
   },
   "managed_adr_from": 145,

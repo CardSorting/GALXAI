@@ -39,3 +39,22 @@ Transport success is not durable image completion. The Premium branch must share
 A modal z-index cannot overtake navigation when the modal remains inside a lower stacking context. Render public image dialogs through a body-level portal, then keep the backdrop above every application-shell layer. Lock background scrolling only while the dialog is open and restore both body styles and the previously focused element on close.
 
 Do not size the lightbox from requested aspect metadata alone. The sanitized artifact's intrinsic dimensions govern containment because stored or historical metadata can describe a different requested shape. Give the dialog explicit viewport-bounded rows and columns, set every grid/flex minimum to zero, use a border-box media cell, and contain the image within both axes. On narrow viewports, keep close, previous, next and zoom controls inside the media layer while the details panel scrolls independently. Verify the actual deep link in clean desktop and narrow-viewport browsers; a successful build does not detect stacking or overflow failures.
+
+## FM-IMG-007 — inactive Star loses established public work
+
+Runtime activation answers whether a Star may start new work. It is not
+publication history. Reusing `actor.is_enabled` in backfills or public views can
+silently withdraw completed work when a bounded cohort is deactivated, and can
+block curatorial review of a completed candidate. Keep activation checks in
+new-request admission. Public projections must instead validate the autonomous
+identity, discoverable active profile and publication state. Preserve legacy
+publication provenance in a private append-only archive; restore only rows whose
+attempt, generation, request and stored asset agree, before the release cutoff,
+and which have no candidate or selection event.
+
+Regression coverage must prove that a disabled Star cannot start a new request,
+can still have a completed candidate selected, keeps established public works
+visible, and cannot archive post-cutover or already-reviewed work. Browser roles
+and `service_role` receive no archive-ledger access. Reconcile the public feed
+and profile views after every actor-lifecycle or publication migration; do not
+activate Stars or regenerate work to repair continuity.

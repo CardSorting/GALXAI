@@ -53,7 +53,7 @@ test('creation projection excludes database-only fields and canonicalizes attrib
   const creation = mapPublicParticipantCreationRow({
     id: 'showcase-sora-1',
     user_id: null,
-    prompt: 'A luminous observatory',
+    prompt: 'PRIVATE_STAR_PROMPT_CANARY',
     aspect_ratio: '1:1',
     dimensions: '1024x1024',
     public_url: '/images/showcase/sora-1.png',
@@ -72,12 +72,42 @@ test('creation projection excludes database-only fields and canonicalizes attrib
 
   assert.deepEqual(Object.keys(creation).sort(), [
     'aspect_ratio', 'author', 'created_at', 'dimensions', 'id', 'likes_count', 'lqip',
-    'prompt', 'public_url', 'remix_count', 'thumbnail_url', 'views_count',
+    'public_url', 'thumbnail_url', 'views_count',
   ]);
   assert.equal(creation.author.handle, 'soravale');
   assert.equal(creation.author.participantKind, 'star');
   assert.equal('seed' in creation, false);
   assert.equal('model' in creation, false);
+  assert.equal('prompt' in creation, false);
+  assert.equal('remix_count' in creation, false);
+  assert.doesNotMatch(JSON.stringify(creation), /PRIVATE_STAR_PROMPT_CANARY/);
+});
+
+test('public feed contract hides production text and unauthenticated remix telemetry', () => {
+  const feedRoute = readFileSync(resolve('src/app/api/images/feed/route.ts'), 'utf8');
+  const dto = feedRoute.match(/export interface PublicFeedItem \{([\s\S]*?)\n\}/)?.[1] || '';
+  assert.doesNotMatch(dto, /\bprompt\b|\bremix_count\b/);
+  assert.doesNotMatch(feedRoute, /action === 'remix'/);
+  assert.match(feedRoute, /author_display_name ILIKE/);
+  assert.match(feedRoute, /mapPublicParticipantCreationRow/);
+});
+
+test('new Star works require an explicit selection before public artifact delivery', async () => {
+  const { isExhibitedStarAsset } = await import('../src/lib/images/read-image-artifact');
+  const migration = readFileSync(resolve('supabase/migrations/20260925150000_star_selection_publication_gate.sql'), 'utf8');
+  const rollback = readFileSync(resolve('supabase/rollbacks/20260925150000_star_selection_publication_gate.down.sql'), 'utf8');
+  assert.equal(isExhibitedStarAsset({ workClass: 'star_published', isPublic: false, visibility: 'private' }), false);
+  assert.equal(isExhibitedStarAsset({ workClass: 'star_published' }), false);
+  assert.equal(isExhibitedStarAsset({ workClass: 'star_published', isPublic: true, visibility: 'public' }), true);
+  assert.match(migration, /event_type = 'selection'/);
+  assert.match(migration, /Only completed Star attempts can become practice candidates or selections/);
+  assert.match(migration, /Generation creates an eligible Star Work candidate, not an exhibition/);
+  assert.match(migration, /REVOKE ALL ON FUNCTION public\.fn_increment_image_remix/);
+  assert.match(migration, /REVOKE SELECT ON TABLE public\.user_image_stats/);
+  assert.match(migration, /galx_reject_unmetered_remix_interaction/);
+  assert.match(migration, /Remix activity requires a metered private generation/);
+  assert.match(rollback, /Restore automatic Star publication behavior/);
+  assert.match(rollback, /selection history remains/i);
 });
 
 test('profile routes are discoverable without broadening private path exemptions', () => {

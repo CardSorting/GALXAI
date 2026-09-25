@@ -99,7 +99,6 @@ export function mapPublicParticipantCreationRow(row: Record<string, unknown>): P
 
   return {
     id: publicText(row.id, '', 200),
-    prompt: publicText(row.prompt, '', 4000),
     aspect_ratio: publicText(row.aspect_ratio, '1:1', 16),
     dimensions: publicText(row.dimensions, '1024x1024', 32),
     public_url: publicUrl,
@@ -107,7 +106,6 @@ export function mapPublicParticipantCreationRow(row: Record<string, unknown>): P
     created_at: new Date(String(row.created_at)).toISOString(),
     lqip: typeof row.lqip === 'string' ? row.lqip.slice(0, 100000) : null,
     likes_count: Number.isFinite(Number(row.likes_count)) ? Math.max(0, Number(row.likes_count)) : 0,
-    remix_count: Number.isFinite(Number(row.remix_count)) ? Math.max(0, Number(row.remix_count)) : 0,
     views_count: Number.isFinite(Number(row.views_count)) ? Math.max(0, Number(row.views_count)) : 0,
     author: {
       displayName: publicText(row.author_display_name, 'GALX creator', 120),
@@ -184,8 +182,8 @@ export class PublicParticipantRepository {
 
     try {
       const result = await executePostgresQuery(`
-        SELECT id, user_id, prompt, aspect_ratio, dimensions, public_url,
-               created_at, lqip, likes_count, remix_count, views_count,
+        SELECT id, user_id, aspect_ratio, dimensions, public_url,
+               created_at, lqip, likes_count, views_count,
                author_display_name, author_handle, author_avatar_url, participant_kind
         FROM public.community_star_profile_creations
         WHERE ${conditions.join(' AND ')}
