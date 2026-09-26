@@ -88,6 +88,7 @@ export async function createOrbitCheckout(pool: Pool, stripe: Stripe, input: { u
     }
     const metadata = { galxRelationship: 'orbit-v1', orbitCheckout: attempt.id, starActor: offer.actor_id };
     const session = await stripe.checkout.sessions.create({ mode: 'subscription', customer,
+      automatic_tax: { enabled: true }, billing_address_collection: 'required', customer_update: { address: 'auto' },
       line_items: [{ price: attempt.price_id, quantity: 1 }], client_reference_id: input.userId,
       metadata, subscription_data: { metadata }, allow_promotion_codes: false,
       integration_identifier: `galx_orbit_${attempt.id.replace(/-/g,'').slice(0,8).split('').map(c=>String.fromCharCode(97+parseInt(c,16))).join('')}`,

@@ -4932,6 +4932,16 @@
       "decision": null
     },
     {
+      "path": "post-mortem/incidents/2026/2026-09-26-checkout-tax/README.md",
+      "title": "Checkout tax omitted",
+      "scope": "operational-record",
+      "kind": "navigation",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
       "path": "post-mortem/runbooks/controller-lock.md",
       "title": "Controller ownership and stale-lock recovery",
       "scope": "current-guide",

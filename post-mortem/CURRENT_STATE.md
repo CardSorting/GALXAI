@@ -2,6 +2,16 @@
 
 <!-- docs-scope: current-guide -->
 
+### Documentation release blocker cleared — September 26, 2026
+
+The owner requested repair of the two previously excluded clean-checkout evidence links. Both now resolve to the existing private release records. Full documentation validation and 41 documentation fixture tests pass. Earlier failed-check observations below remain historical. This correction does not deploy the Checkout tax change or complete ACT-038 provider acceptance.
+
+
+### Checkout tax correction — local implementation — September 26, 2026
+
+[INC-20260926-TAX](incidents/2026/2026-09-26-checkout-tax/README.md) records the reported 4/4 warning. All four live sessions inspected were expired and unpaid; none was open. Live tax settings and a US registration are active. Both local Checkout writers now request automatic tax and a current billing address. The retired one-off route and live recurring release gate remain closed. Deployment and isolated provider acceptance remain ACT-038; historical session counts are not deployment evidence.
+
+
 ### Orbit release fixture and source review — local acceptance — 2026-09-26
 
 The obsolete generic asset-upload fixture is repaired without changing the

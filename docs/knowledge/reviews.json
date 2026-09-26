@@ -1,11 +1,11 @@
 {
   "knowledge": {
-    "reviewer": "Codex release maintainer",
-    "note": "Reviewed the bounded changed contracts and affected guide bodies named in post-mortem/releases/2026-09-26-orbit-release-review.json; reconciled fixture and tax-deferral guidance. Broader fingerprints are change detection, not exhaustive audit or production acceptance.",
+    "reviewer": "Codex",
+    "note": "Reviewed Checkout tax/address changes and affected guide bodies, live read-only observations, unchanged launch/authority boundaries and incident evidence; bounded scope and remaining deployment limits retained.",
     "reviewed_at": "2026-09-26",
     "review_by": "2026-10-03",
     "evidence": {
-      "post-mortem/releases/2026-09-26-orbit-release-review.json": "d8e207d75f21d7511f0db2c5743a5c739537f120e69d19f59432eab81ecffdf8"
+      "post-mortem/releases/2026-09-26-checkout-tax-local.json": "994b1bcac2bed829975ab8fe02f631033edc0afc1e777ee2bd847c21e385267d"
     },
     "files": {
       ".github/CODEOWNERS": "ef2f416d15f027dc8f197ad844289c9a44c8e843d3214d1590a3a380e939d13f",
@@ -42,7 +42,7 @@
       "docs/knowledge/DESIGN_RATIONALE.md": "edd3cf9b49ed794fbe8bf14448fd0c56cb4d8df832bab81cdf07e9ea2e2204a1",
       "docs/knowledge/DOMAINS.md": "2e477fc91de62d7622ccbaadbcef0064535f67cff617bbe16dfac63cccd359b8",
       "docs/knowledge/README.md": "5ad219aeee44a9c065db2ca69e5a6498966fed42e2d8c74773dbc055d0220931",
-      "docs/knowledge/catalog.json": "7d9f4a88b374251ea47b18e7cb0d6686a352f181b8fec59bde01339cffd9ed30",
+      "docs/knowledge/catalog.json": "b835b6a5e4cde25c05e4fb3b8e07c0ffd69847d37ba886f43a48cb067a041c63",
       "docs/knowledge/registry.json": "9ab209b45eb40b2c38a71bd2c361949772d5423567bb29a181ae84a7cbffb35a",
       "docs/knowledge/templates/adr.md": "28773b3cbdb53ad34f08d0362e87b6dba24b6fd76ddb6c85db8ad63d99ad1331",
       "docs/knowledge/templates/runbook.md": "19679a7eb8c1a3aafd87852fa93817e7bf9ef4696772c8deb1617366c290abc1",
@@ -61,7 +61,7 @@
       "docs/tutorials/README.md": "7cc84f00412108e1c8ec84ef127b15027b606bd16c2dc290f6efc607b9ca5268",
       "docs/tutorials/first-change.md": "06b7c9501cfe62893978e1da6556d6d4fc0d88f4e36b484d05dad4ad72d9fd60",
       "package.json": "629bb6d06c133bb5ae117ff13a7d74265d21db1a1beb3d79264ca17aff6e2480",
-      "post-mortem/documentation-inventory.json": "48059ca4faa039ba1d8285b871784ee2ef0fbc50951f04b1ecb5e36577f5a8d9",
+      "post-mortem/documentation-inventory.json": "e8bdf2cd802a7b583b8e0f26f253ce61045a8dfff13a4a4658e7a6ccccde60a5",
       "post-mortem/releases/2026-09-25-broc-practice-local-review.json": "43ac12b5294864a7dd2b9fbff52367693e2739eb4083263aa05a87abdc8e0616",
       "scripts/docs-kb.py": "57642bcce6edcdec6b14dc285e973c1c7ba43d9b8908903826befcba6e992d88",
       "scripts/test-docs-kb.py": "83aa914e66cc04d866fd4c77554760748f8e1d07378326c49ac1738f12851856",
@@ -102,12 +102,12 @@
     }
   },
   "images": {
-    "reviewer": "Codex release maintainer",
-    "note": "Reviewed the bounded changed contracts and affected guide bodies named in post-mortem/releases/2026-09-26-orbit-release-review.json; reconciled fixture and tax-deferral guidance. Broader fingerprints are change detection, not exhaustive audit or production acceptance.",
+    "reviewer": "Codex",
+    "note": "Reviewed affected billing guide against private-image accounting and public-boundary authority; tax change grants no image entitlement. Scope recorded in evidence.",
     "reviewed_at": "2026-09-26",
     "review_by": "2026-10-03",
     "evidence": {
-      "post-mortem/releases/2026-09-26-orbit-release-review.json": "d8e207d75f21d7511f0db2c5743a5c739537f120e69d19f59432eab81ecffdf8"
+      "post-mortem/releases/2026-09-26-checkout-tax-local.json": "994b1bcac2bed829975ab8fe02f631033edc0afc1e777ee2bd847c21e385267d"
     },
     "files": {
       "BROC/practice.ts": "19499a05b7f9e481fcd0c4c04242bde79accc9da7f66daff91a229258c810167",
@@ -131,7 +131,7 @@
       "docs/maintainers/image-studio-review.md": "3bcb21854e3df8d4c01a077e4d605c43f86b48b57848521b1d71e466864198b1",
       "docs/maintainers/private-image-accounting.md": "c7b381496d593a0eab863f2746a6d5acb9f5c03ac06a934cc6b4e39f2c666b62",
       "docs/maintainers/readable-urls.md": "5a89ddc75b34f511bd5fc88c2eaededcf597c656449256f2f7dddf87d1c0c8c4",
-      "docs/reference/billing-pages.md": "59bd3e28a01156eb68df4e72253ea9dbb7eee966e67800f411785d4fc1e2136f",
+      "docs/reference/billing-pages.md": "f83ec8d60b650e1ad724b61b600250f63d8e525b744639666a839a63df0eca15",
       "docs/reference/stars.md": "2ca908ef590a8c8211467532e5f506c23799790d224175a0b75a2147521b69d2",
       "docs/runbooks/private-image-release-audit.md": "4e1810aeb595ea04ba64556656c615c1d1628bc9697675bf792ec211e4691d1a",
       "post-mortem/failure-modes/README.md": "4e6c4d90c1f1a87f8b45afba7f0617a882a8fa19403ded261f677a12b5fb0c00",
@@ -1181,12 +1181,12 @@
     }
   },
   "delivery": {
-    "reviewer": "Codex release maintainer",
-    "note": "Reviewed the bounded changed contracts and affected guide bodies named in post-mortem/releases/2026-09-26-orbit-release-review.json; reconciled fixture and tax-deferral guidance. Broader fingerprints are change detection, not exhaustive audit or production acceptance.",
+    "reviewer": "Codex",
+    "note": "Reviewed full changed webhook guide and release-readiness procedure; build/asset checks are local, payment gate and known docs blockers remain.",
     "reviewed_at": "2026-09-26",
     "review_by": "2026-10-03",
     "evidence": {
-      "post-mortem/releases/2026-09-26-orbit-release-review.json": "d8e207d75f21d7511f0db2c5743a5c739537f120e69d19f59432eab81ecffdf8"
+      "post-mortem/releases/2026-09-26-checkout-tax-local.json": "994b1bcac2bed829975ab8fe02f631033edc0afc1e777ee2bd847c21e385267d"
     },
     "files": {
       ".dockerignore": "fabeb0a64e0040d7feb0b9ea2d6f88d109479a61974a7c41aee3f54be23b70e2",
@@ -1204,7 +1204,7 @@
       "docs/playbooks/02-deployment-and-release.md": "81e9a3764f54d92b728b18e6bc91864b9d45a9edf1371250f76a9ff6bc640246",
       "docs/runbooks/private-image-release-audit.md": "4e1810aeb595ea04ba64556656c615c1d1628bc9697675bf792ec211e4691d1a",
       "docs/runbooks/release-readiness.md": "f8a05dbb4ce3260c24c697e51b9b2b07cd503d48f4a1050e4eeecb6818d9819c",
-      "docs/runbooks/stripe-webhook-delivery.md": "a4381cfbd986d8776f9a175af06c71cc13c7f118bf8bddafcdec4b6d83426ea5",
+      "docs/runbooks/stripe-webhook-delivery.md": "a3c25a9c232581aed59ce125083508c9e2f2e394d8a127ccdbd9b41c7aed0075",
       "package.json": "629bb6d06c133bb5ae117ff13a7d74265d21db1a1beb3d79264ca17aff6e2480",
       "post-mortem/failure-modes/README.md": "4e6c4d90c1f1a87f8b45afba7f0617a882a8fa19403ded261f677a12b5fb0c00",
       "post-mortem/failure-modes/deployment.md": "bb1eedf1a47abce3e8c87dd49ae335e38d66dcc1b9f99634eaad8200a94078fc",
@@ -1835,22 +1835,23 @@
     }
   },
   "billing": {
-    "reviewer": "Codex release maintainer",
-    "note": "Reviewed the bounded changed contracts and affected guide bodies named in post-mortem/releases/2026-09-26-orbit-release-review.json; reconciled fixture and tax-deferral guidance. Broader fingerprints are change detection, not exhaustive audit or production acceptance.",
+    "reviewer": "Codex",
+    "note": "Reviewed complete commercial guide and unchanged tax source contract; corrected stale documentation-blocker statement after verifying both evidence links and full docs/test results. Prior runtime acceptance remains unchanged.",
     "reviewed_at": "2026-09-26",
     "review_by": "2026-10-03",
     "evidence": {
-      "post-mortem/releases/2026-09-26-orbit-release-review.json": "d8e207d75f21d7511f0db2c5743a5c739537f120e69d19f59432eab81ecffdf8"
+      "post-mortem/releases/2026-09-26-checkout-tax-local.json": "994b1bcac2bed829975ab8fe02f631033edc0afc1e777ee2bd847c21e385267d",
+      "post-mortem/releases/2026-09-26-checkout-tax-doc-links.json": "e53fc8f694a181f9ccdf2fa95480cb06e701774fc650907938cf4ead6343d328"
     },
     "files": {
       ".impeccable/surfaces/src-app-billing-page-tsx.md": "df34c030bfe556da9841bf826df4c1dc90d3aa6475412d674a4bf2854c5b0889",
       "docs/WALLET_AND_BILLING_STRATEGY.md": "881b786e0c054cd4b27caf6417f1b5dc551a72e7ba8978b4aab6ce36766ea633",
       "docs/adr/0164-orbit-foundry-public-identity.md": "c18e85b1070f324392137e3fa6018196d6615f28766278944c1e2a72a3c8ad97",
-      "docs/maintainers/ORBIT_FOUNDRY.md": "3d775c2d4b73530ce95f9f409e627f6b58c4eab851afb18ad7c45d6f4cc79b88",
+      "docs/maintainers/ORBIT_FOUNDRY.md": "27c217add69b3041962c0a7872b926253dfa483adae052960ac0100fc5b3b2ca",
       "docs/maintainers/SITES_FAIR_USAGE.md": "94593f8b1f7ef8c83d9168657a3a1c2cff0adc9e8bd2f93a5403da73410a1bcc",
       "docs/maintainers/private-image-accounting.md": "c7b381496d593a0eab863f2746a6d5acb9f5c03ac06a934cc6b4e39f2c666b62",
-      "docs/reference/billing-pages.md": "59bd3e28a01156eb68df4e72253ea9dbb7eee966e67800f411785d4fc1e2136f",
-      "docs/runbooks/stripe-webhook-delivery.md": "a4381cfbd986d8776f9a175af06c71cc13c7f118bf8bddafcdec4b6d83426ea5",
+      "docs/reference/billing-pages.md": "f83ec8d60b650e1ad724b61b600250f63d8e525b744639666a839a63df0eca15",
+      "docs/runbooks/stripe-webhook-delivery.md": "a3c25a9c232581aed59ce125083508c9e2f2e394d8a127ccdbd9b41c7aed0075",
       "next.config.ts": "b16b3dfb0074f3e924a461d78ec871a421766690e03603fbaa298397108d8c95",
       "scripts/activate-image-plan-catalog.ts": "db1aca2d1fddc4a77e4cfb29af210ae6e9680100a5f0cb64232d9565641e260a",
       "scripts/lib/stripe-webhook-target.ts": "a849c2441e61d6573a9fe7a9b6cad3e24bf86919cd1b5ebeeac2e5b97ab9e2db",
@@ -1863,7 +1864,7 @@
       "scripts/test-billing-navigation.ts": "3503b5e75cfad70ace5e655b77e063951ae58b4d408d44799d2c4db4f682b1e2",
       "scripts/test-billing-public-boundary.ts": "96aace744c9aa8cb2645088cf8f6f28a8972e1e50fdc35fceb7559b4ce8fbd49",
       "scripts/test-billing.ts": "fea243a5310434b46dede14a73a59430fb0c3dfc5282a6098e664c1e19b53bfb",
-      "scripts/test-orbit.ts": "756eb3bf9e2c14777d31c1b59ff0e553df169ed4d951ad18634c8a0912c90038",
+      "scripts/test-orbit.ts": "831a68d9c9bbfc6ebe6222da965a4b3a4e44f67fc6bab78872f223c9d2b6b3ba",
       "scripts/test-sites-plans-db.ts": "ae3d5f8e260094b35caa99c50a2b7d5ceb13720e689ab3e41dd4f16284aafebe",
       "scripts/test-stripe-integration.ts": "5e6333b307d31b6c297447132510b925ad295e3f86c78e7eaf00bba37a9073ac",
       "scripts/test-stripe-pricing-strategy.ts": "9dbc7b53ffe36af583e6148612ac512156422c2bcb661b75661ae7edaf2e2b48",
@@ -1931,10 +1932,10 @@
       "src/lib/billing/image-allowance.ts": "f0f40b3fb7bd33db7b7ad1fecfa097ec6965d5ae440f5e1408791e50e747d79e",
       "src/lib/billing/image-plan-catalog.ts": "30011c99fdc12f0498c1b8cdcc47b58fad9df3f13bb92b6090f84b85b108eb84",
       "src/lib/billing/navigation.ts": "c0069053559e49dc78a9b05d0179577c90d3729af2fc644b04239b422904d43e",
-      "src/lib/billing/orbit.ts": "339cae730220fd2bbfd3db1b6906bab52df4899db7017931adc02ce48271b270",
+      "src/lib/billing/orbit.ts": "452ef56957bdd6cfe2e1196a8e63baccd4cb0ef45e2016699457bab690ef0ce3",
       "src/lib/billing/payment.ts": "9eecd90e8bfd5beed2c4ca90c0989d6a8c120d4b6a03be894a66914dc844daf1",
       "src/lib/billing/plan-status.ts": "ecaeb0d023a2dd45ef830a19d16a86271291521eb8528c8dfa6eae9ac4a59560",
-      "src/lib/billing/plan-subscription.ts": "bb7213c252261c9d934b12a1dc3fb6d87ecf3b50b61cb040c48327f6797148e9",
+      "src/lib/billing/plan-subscription.ts": "f05aeb3f5bc737a6919fe99f25fb82649581d2c7a6a3b2c14c929e2f397e69b5",
       "src/lib/billing/portal.ts": "1b557e2125451ba7730fbeb01db00fad923f91de210748a146965843bb0ac0df",
       "src/lib/billing/pro-plan.ts": "91dca015555707aa846d1815bd77cbd12d1365e83b3b4acbde9bc7d8516bd29a",
       "src/lib/billing/quote.ts": "75b6da7ec1874e8729d37051d22b244b98567d1f8f3271a02094d22abbfeb766",

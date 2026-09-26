@@ -2239,3 +2239,45 @@ Incident: `INC-20260925-ARCHIVE`. Kind: `verification`.
 **Next step:** Proceed through exact-target rollout and hosted acceptance without claiming payment-provider E2E or designated patron material. Keep ACT-037 open until hosted archive geometry is verified.
 
 Evidence: [2026-09-26-orbit-release-review.json](releases/2026-09-26-orbit-release-review.json), [test-supabase-integration.ts](../scripts/test-supabase-integration.ts), [test-private-image-storage.ts](../scripts/test-private-image-storage.ts).
+
+## EVT-20260926-checkout-tax — 2026-09-26T16:47:01.141048Z
+
+Incident: `INC-20260926-TAX`. Kind: `containment`.
+
+**Observation:** Four live sessions in the preceding 30 days omitted automatic tax; all expired and unpaid. Tax settings and one US registration are active.
+
+**Action:** Inspected live Stripe state read-only; enabled automatic tax and current billing-address collection in both local session writers and added provider-boundary regression fixtures.
+
+**Result:** 26 focused tax, Orbit and public-boundary tests passed. No open session needed mutation; live recurring launch remains closed.
+
+**Next step:** Finish local build/documentation checks and retain ACT-038 for hosted/provider acceptance.
+
+Evidence: [README.md](incidents/2026/2026-09-26-checkout-tax/README.md), [test-orbit.ts](../scripts/test-orbit.ts).
+
+## EVT-20260926-checkout-tax-verification — 2026-09-26T16:48:20.825605Z
+
+Incident: `INC-20260926-TAX`. Kind: `verification`.
+
+**Observation:** Local tax correction is implemented; live sessions are historical expired/unpaid attempts.
+
+**Action:** Ran 26 focused tax/Orbit/public DTO tests, billing lifecycle and webhook rejection tests, TypeScript, production build, 526-asset compiled scan, 41 documentation tests, and bounded source/guide semantic review.
+
+**Result:** Application checks passed. Full documentation check remains blocked by two pre-existing clean-checkout incident links. No deployment or provider payment ran.
+
+**Next step:** Keep ACT-038 open for hosted deployment and isolated provider tax-calculation acceptance; preserve independent paid-launch gate.
+
+Evidence: [2026-09-26-checkout-tax-local.json](releases/2026-09-26-checkout-tax-local.json).
+
+## EVT-20260926-checkout-tax-doc-links — 2026-09-26T16:50:14.454410Z
+
+Incident: `INC-20260926-TAX`. Kind: `verification`.
+
+**Observation:** Two incorrect parent-directory references blocked full documentation validation. The owner explicitly requested their repair.
+
+**Action:** Corrected both links to the existing private clean-checkout release records, verified the destinations, regenerated documentation, and reconciled current guide/status text.
+
+**Result:** Full docs:check and 41 documentation tests pass; prior failed observations remain historical. No runtime or production mutation occurred.
+
+**Next step:** Continue ACT-038 deployment and isolated provider tax-calculation acceptance; documentation-link failures no longer block it.
+
+Evidence: [2026-09-26-checkout-tax-doc-links.json](releases/2026-09-26-checkout-tax-doc-links.json).

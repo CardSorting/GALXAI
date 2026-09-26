@@ -1,0 +1,32 @@
+{
+  "date": "2026-09-26",
+  "scope": "Local Checkout automatic-tax correction; live Stripe reads only",
+  "source_contracts": [
+    "src/lib/billing/orbit.ts",
+    "src/lib/billing/plan-subscription.ts",
+    "src/lib/billing/commercial-launch.ts",
+    "src/app/api/billing/orbit/route.ts",
+    "src/app/api/billing/plan/route.ts",
+    "scripts/test-orbit.ts"
+  ],
+  "review": {
+    "billing": "Reviewed both creation paths, owner-bound response/exception handling, existing release gate, and the complete Orbit/Foundry, billing-pages and webhook guides. Corrected stale tax configuration findings; no registration or product classification selected.",
+    "images": "Reviewed billing-pages and private-image-accounting guide against the unchanged Foundry allowance/launch boundary. Tax settings confer no entitlement or publishing authority. Broader image modules were not re-audited.",
+    "delivery": "Reviewed the complete webhook and release-readiness guides. Local build and fixture acceptance remain separate from hosted rollout and provider E2E. Existing two unrelated clean-checkout incident links remain a docs gate failure.",
+    "knowledge": "Reviewed documentation policy, change procedure, knowledge operations, incident triage and current-state delta. Incident journal is append-only; ACT-038 remains open; generated sync does not accept ADRs or attest reviews."
+  },
+  "validation": {
+    "focused": "26/26 Orbit, tax creation and billing public-boundary tests passed",
+    "billing": "Billing lifecycle and raw webhook signature/mode/body rejection suite passed",
+    "build": "Production build passed; 155 static pages",
+    "compiled_scan": "526 browser/rendered assets checked; no private-marker findings",
+    "docs_tests": "41/41 documentation fixture tests passed"
+  },
+  "limits": [
+    "Not deployed; no provider test payment or tax-calculation completion was performed.",
+    "All four recent live sessions are expired/unpaid; no open session remediation was possible or necessary.",
+    "No registrations, defaults, prices, payments or customers mutated.",
+    "Full docs:check retains two pre-existing broken incident evidence links.",
+    "Review scope is changed contracts and affected guide bodies, not an exhaustive audit of each fingerprinted domain."
+  ]
+}

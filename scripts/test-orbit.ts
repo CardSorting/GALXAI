@@ -7,7 +7,10 @@ import { publicStarHandle,historicalStarHandle,publicStarIdentity } from '../src
 import { getAllStarRoster } from '../src/lib/stars/star-cohort';
 import { IMAGE_PLAN_CATALOG } from '../src/lib/billing/image-plan-catalog';
 import { PUBLIC_IMAGE_PLAN_OFFERS } from '../src/lib/data/image-plan-offers';
-import { createProCheckout } from '../src/lib/billing/plan-subscription';
+import type { Pool } from 'pg';
+import { createOrbitCheckout } from '../src/lib/billing/orbit';
+import { GalxUnifiedR2StorageManager } from '../src/core/storage/GalxUnifiedR2StorageManager';
+import { createProCheckout, createImagePlanCheckout } from '../src/lib/billing/plan-subscription';
 import { NextRequest } from 'next/server';
 import { GET as getOrbit,POST as postOrbit } from '../src/app/api/billing/orbit/route';
 import { isPublicProductPath } from '../src/lib/security/preview-policy';
@@ -84,3 +87,46 @@ test('anonymous Orbit requests and cross-origin writes fail before provider acce
   assert.equal(write.status,403);
   assert.deepEqual(Object.keys(await write.json()),['error']);
 });
+
+for (const flow of ['orbit', 'foundry'] as const) {
+  test(`${flow} sends tax and current customer address to Stripe, preserving private response`, async t => {
+    const requestId = '11111111-1111-4111-8111-111111111111';
+    const attempt = { id: requestId, request_id: requestId, user_id: 'owner', actor_id: 'star',
+      price_id: 'price_test', customer_id: 'cus_existing', session_id: null, return_path: null,
+      state: 'pending', livemode: false, created_at: new Date(), expires_at: new Date(Date.now()+3600000) };
+    const offer = { actor_id: 'star', stripe_price_id: 'price_test', enabled: true, livemode: false, handle: 'vanta', display_name: 'VANTA' };
+    const query = async (sql: string) => {
+      if (sql.includes('FROM private.galx_orbit_offers')) return { rows: [offer], rowCount: 1 };
+      if (sql.includes('FROM private.galx_orbit_works')) return { rows: [{}], rowCount: 1 };
+      if (sql.includes('FROM private.galx_orbit_subscriptions')) return { rows: [], rowCount: 0 };
+      if (sql.includes('FROM galx_stripe_customers')) return { rows: [{stripe_customer_id:'cus_existing'}], rowCount: 1 };
+      if (sql.includes('RETURNING') || sql.includes('SELECT * FROM private.galx_plan_checkouts')) return { rows: [attempt], rowCount: 1 };
+      if (/^(BEGIN|COMMIT|ROLLBACK|SET |SELECT pg_advisory|UPDATE |INSERT INTO private.galx_orbit_checkouts)/.test(sql)) return { rows: [], rowCount: 1 };
+      throw new Error(`Unexpected fixture query: ${sql}`);
+    };
+    const pool = { query, connect: async () => ({query,release(){}}) } as unknown as Pool;
+    const product = { id:'galx_foundry_v1',name:'Foundry',active:true,metadata:{galxPlan:'team-v1',galxPublicPlan:'foundry',galxSurface:'images'} };
+    const price = { id:'price_test',active:true,livemode:false,currency:'usd',unit_amount:flow==='orbit'?1000:20000,
+      recurring:{interval:'month',interval_count:1,usage_type:'licensed'},
+      product:flow==='orbit'?{active:true,name:'Orbit VANTA',metadata:{galxRelationship:'orbit-v1',starActor:'star'}}:product.id,
+      metadata:{...product.metadata,catalogStatus:'active',checkoutEnabled:'true'} };
+    let calls=0;
+    const stripe = { prices:{retrieve:async()=>price,list:async()=>({data:[price],has_more:false})}, products:{retrieve:async()=>product},
+      subscriptions:{list:()=>({data:[],has_more:false,async *[Symbol.asyncIterator](){}})},
+      checkout:{sessions:{create:async(input: Stripe.Checkout.SessionCreateParams)=>{
+        calls++;
+        assert.deepEqual(input.automatic_tax,{enabled:true});
+        assert.equal(input.billing_address_collection,'required');
+        assert.deepEqual(input.customer_update,{address:'auto'});
+        assert.equal(input.customer,'cus_existing');
+        assert.equal(input.payment_method_types,undefined);
+        assert.deepEqual(input.line_items,[{price:'price_test',quantity:1}]);
+        return {id:'cs_test',url:'https://checkout.stripe.com/c/pay/cs_test',automatic_tax:{enabled:true},internal:'private'};
+      }}} } as unknown as Stripe;
+    t.mock.method(GalxUnifiedR2StorageManager.getInstance(),'isPrivateImageStorageConfigured',()=>true);
+    const result = flow==='orbit' ? await createOrbitCheckout(pool,stripe,{userId:'owner',handle:'vanta',origin:'https://galx.ai'}) :
+      await createImagePlanCheckout(pool,stripe,'max',{userId:'owner',requestId,origin:'https://galx.ai'});
+    assert.equal(calls,1);
+    assert.deepEqual(result,{url:'https://checkout.stripe.com/c/pay/cs_test'});
+  });
+}

@@ -176,6 +176,7 @@ async function createSubscriptionCheckout(
     const returnPath = row.return_path || definition.legacyReturnPath || definition.returnPath;
     const returnHash = row.return_path ? '' : definition.legacyReturnHash || '';
     const session = await stripe.checkout.sessions.create({ mode: 'subscription', customer, client_reference_id: input.userId,
+      automatic_tax: { enabled: true }, billing_address_collection: 'required', customer_update: { address: 'auto' },
       line_items: [{ price: row.price_id, quantity: 1 }, ...(definition.additionalPrices || []).map(price => ({ price: price.id, quantity: 1 }))], allow_promotion_codes: false,
       ...(definition.checkoutNotice ? { custom_text: { submit: { message: definition.checkoutNotice } } } : {}),
       integration_identifier: `${definition.integrationPrefix}_${key.slice(0,8).split('').map(c=>String.fromCharCode(97+parseInt(c,16))).join('')}`,

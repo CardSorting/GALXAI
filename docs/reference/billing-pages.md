@@ -25,8 +25,10 @@ does not enable human publication, public profiles, feeds, Series, or uploads.
 ## Image entitlement and allowance
 
 All new live recurring checkout remains disabled pending payment release acceptance.
-The owner deferred tax readiness as a rollout prerequisite on September 26, 2026;
-that decision does not establish compliance or change tax configuration.
+The September 26 tax follow-up enables automatic tax and current billing-address
+collection in both local session writers. Active live tax settings and a US
+registration were observed; deployment and provider payment acceptance remain
+separate. See the complete [tax procedure](../maintainers/ORBIT_FOUNDRY.md#checkout-tax).
 A test Foundry checkout is available only when the server-side plan price and policy
 match and a bounded allowance is configured for the plan. Private generation
 and remix independently recheck current account ownership, purchased

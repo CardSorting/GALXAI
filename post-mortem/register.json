@@ -4,6 +4,22 @@
   "notes": "Severity assigned retrospectively where the original record had no incident label. Recovered historical records retain their original verification scope; no fresh live test is implied.",
   "incidents": [
     {
+      "id": "INC-20260926-TAX",
+      "category": "billing",
+      "severity": "SEV-3",
+      "status": "contained",
+      "title": "Recent Checkout sessions omitted automatic tax",
+      "owner": "Codex (active responder)",
+      "record": "post-mortem/incidents/2026/2026-09-26-checkout-tax/README.md",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-09-26-checkout-tax/README.md",
+        "src/lib/billing/orbit.ts",
+        "src/lib/billing/plan-subscription.ts"
+      ],
+      "failure_modes": [],
+      "recovery_evidence": []
+    },
+    {
       "id": "INC-20260925-ARCHIVE",
       "category": "images",
       "severity": "SEV-3",
@@ -434,6 +450,18 @@
     }
   ],
   "actions": [
+    {
+      "id": "ACT-038",
+      "incident": "INC-20260926-TAX",
+      "owner": "Billing and release maintainers",
+      "review_by": "2026-10-03",
+      "status": "open",
+      "next_step": "The documentation-link blocker is cleared. Deploy reviewed Checkout tax fields and verify an isolated provider session completes tax calculation; retain the independent live payment acceptance gate.",
+      "closure": "Record hosted revision and provider acceptance, distinguishing historical expired sessions from newly created sessions.",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-09-26-checkout-tax/README.md"
+      ]
+    },
     {
       "id": "ACT-037",
       "incident": "INC-20260925-ARCHIVE",

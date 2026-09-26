@@ -12,7 +12,9 @@ Read the alert's account ID and URL, then confirm the authenticated account with
 
 The current commercial model is independent Orbit ($10 per Star/month) and
 Foundry ($200/month), with new live recurring checkout closed pending payment
-release acceptance. Tax readiness was deferred by the owner, not resolved.
+release acceptance. The September 26 tax follow-up adds automatic tax to local
+Checkout creation; the commercial guide records live configuration observations
+and the remaining provider acceptance limits.
 Sites and legacy creation sales are retired; historical lifecycle
 events still reconcile. Orbit uses a distinct attempt/relationship projection
 and never invokes generation-plan or wallet writers. Subscription creation,

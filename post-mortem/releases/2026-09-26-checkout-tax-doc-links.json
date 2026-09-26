@@ -1,0 +1,27 @@
+{
+  "date": "2026-09-26",
+  "scope": "Documentation-only correction after explicit owner request",
+  "changes": [
+    "Corrected two relative paths in the clean-checkout incident from ../../../../releases to ../../../releases.",
+    "Verified both existing destination records parse as JSON; preserved original evidence.",
+    "Reconciled the complete commercial guide verification section and current-state note; ACT-038 stays open for hosted/provider acceptance."
+  ],
+  "reviewed": [
+    "post-mortem/incidents/2026/2026-09-25-clean-checkout-build/README.md",
+    "post-mortem/releases/2026-09-25-clean-checkout-package-boundary-local.json",
+    "post-mortem/releases/2026-09-25-clean-checkout-package-boundary-production.json",
+    "docs/maintainers/ORBIT_FOUNDRY.md",
+    "post-mortem/CURRENT_STATE.md",
+    "post-mortem/register.json"
+  ],
+  "validation": {
+    "docs:sync": "passed",
+    "docs:check": "passed: 380 guides, 44 incident documents, 164 ADRs, 10 domains",
+    "test:docs": "41 tests passed",
+    "git diff --check": "passed"
+  },
+  "limits": [
+    "No runtime source change in this follow-up; prior production-build and billing-test evidence remains dated.",
+    "No deployment, database mutation or provider checkout performed."
+  ]
+}

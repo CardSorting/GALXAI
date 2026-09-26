@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "reviewer": "Codex release maintainer",
-  "reviewed_at": "2026-09-26T09:37:55.179292Z",
-  "note": "Reviewed affected critical watch-set changes: product scope, test command, current-state evidence, deployment failure mode, database runbook, image DB fixture, artifact reader, exact Orbit access exemption, and new patron-work projection. See post-mortem/releases/2026-09-26-orbit-release-review.json. Retains local/hosted separation and excluded pre-existing links; no operational activation.",
+  "reviewer": "Codex",
+  "reviewed_at": "2026-09-26T16:50:15.493646Z",
+  "note": "Reviewed current-state documentation-blocker correction against repaired incident links, preserved destination evidence, passing full documentation checks and open ACT-038; no deployment claim.",
   "files": {
     ".dockerignore": "fabeb0a64e0040d7feb0b9ea2d6f88d109479a61974a7c41aee3f54be23b70e2",
     ".github/workflows/vercel-preflight.yml": "60856940957e45075d1c54de644d3ba0268fad16b35b3ed5eb8005bc40a5b4b3",
@@ -40,7 +40,7 @@
     "docs/operations/wallet-lifecycle.md": "ddc86ed1d3347f5fff19a07581bc040c52eee7a115c279a2ba28bceae92303db",
     "docs/operations/workspace-auth.md": "4d6476f69d9cd64d91c9f0a7dd5f23edd92f1d51716c721f92efa8d92798a84e",
     "package.json": "629bb6d06c133bb5ae117ff13a7d74265d21db1a1beb3d79264ca17aff6e2480",
-    "post-mortem/CURRENT_STATE.md": "3f0c6555892f7af96a5e05b3a67b823581b3d9a46add1d882a0f91a1a51866d4",
+    "post-mortem/CURRENT_STATE.md": "6f16b8f8feb700225cd3712d47cce46178ad7cac3d7d8a8b0883e9611021b451",
     "post-mortem/README.md": "d671ebd5f35836fc392ebbef6035530ebb57e39e81cced339892be30439614bb",
     "post-mortem/failure-modes/README.md": "4e6c4d90c1f1a87f8b45afba7f0617a882a8fa19403ded261f677a12b5fb0c00",
     "post-mortem/failure-modes/access-and-documentation.md": "270a62e90cc0f9674dd81e62fe7ef3781e34dc7a4373c1914b71da5bbb558002",
