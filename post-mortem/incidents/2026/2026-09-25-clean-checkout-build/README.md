@@ -16,7 +16,7 @@ Incident INC-20260925-CHECKOUT, SEV-3 deployment failure. Vercel production buil
 - Live acceptance passed 38 cache checks and the public HTTP boundary check covering preflight, protected diagnostics, public schema, rendered pages, and 38 browser assets.
 - A read-only Docker check found the Premium R4 queue image still running and ready. No runtime restart or queue mutation occurred.
 
-The [local verification record](../../../../releases/2026-09-25-clean-checkout-package-boundary-local.json) retains package checks and local bundle evidence. The [production recovery record](../../../../releases/2026-09-25-clean-checkout-package-boundary-production.json) retains the deployment and live acceptance details.
+The [local verification record](../../../releases/2026-09-25-clean-checkout-package-boundary-local.json) retains package checks and local bundle evidence. The [production recovery record](../../../releases/2026-09-25-clean-checkout-package-boundary-production.json) retains the deployment and live acceptance details.
 
 ## Cause and contributing conditions
 
