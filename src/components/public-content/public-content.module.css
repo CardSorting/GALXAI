@@ -22,6 +22,12 @@
 .pricingIntro { max-width: 760px; padding-block: 20px 48px; }
 .pricingIntro .textLink { margin-top: 20px; }
 .pricingIntroLinks { display: flex; flex-wrap: wrap; gap: 8px 24px; }
+.discoveryAccess { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 24px 40px; padding-block: 32px; border-block: 1px solid var(--reading-line); }
+.discoveryAccess > div { flex: 1 1 320px; min-width: 0; }
+.discoveryAccess h2 { font-size: 1.5rem; font-weight: 500; line-height: 1.4; }
+.discoveryAccess p { max-width: 60ch; margin-top: 12px; color: var(--reading-muted); line-height: 1.75; }
+.discoveryAccess .discoveryNote { font-size: .8125rem; }
+.discoveryAccess > a { flex-shrink: 0; }
 .beta { display: flex; gap: 10px; align-items: flex-start; margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--reading-line); color: var(--reading-muted); font-size: .875rem; line-height: 1.7; max-width: 42ch; }
 .beta svg { flex-shrink: 0; margin-top: 3px; }
 .pricingOptions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
@@ -134,8 +140,9 @@
   .page { padding: 20px 20px 64px; }
   .breadcrumbs { margin-bottom: 28px; }
   .pricingHero, .readingLayout, .otherProducts { grid-template-columns: minmax(0, 1fr); gap: 32px; }
-  .pricingIntro { padding: 0; }
-  .pricingIntroLinks { display: block; }
+  .pricingIntro { padding: 0 0 32px; }
+  .pricingIntroLinks { flex-direction: column; align-items: flex-start; gap: 8px; margin-top: 20px; }
+  .pricingIntroLinks .textLink { margin-top: 0; }
   .pricingIntro > p, .intro > p { font-size: 1rem; margin-top: 20px; }
   .beta { margin-top: 24px; }
   .option { padding: 24px 20px; }

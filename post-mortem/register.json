@@ -4,6 +4,41 @@
   "notes": "Severity assigned retrospectively where the original record had no incident label. Recovered historical records retain their original verification scope; no fresh live test is implied.",
   "incidents": [
     {
+      "id": "INC-20260925-ARCHIVE",
+      "category": "images",
+      "severity": "SEV-3",
+      "status": "investigating",
+      "title": "Homepage archive completion card overlaps the following section",
+      "owner": "Codex (active responder)",
+      "record": "post-mortem/incidents/2026/2026-09-25-home-archive-overlap/README.md",
+      "evidence": ["src/components/images/masonry-stream.css", "post-mortem/incidents/2026/2026-09-25-home-archive-overlap/README.md"],
+      "failure_modes": [],
+      "recovery_evidence": []
+    },
+    {
+      "id": "INC-20260925-CHECKOUT",
+      "category": "deployment",
+      "severity": "SEV-3",
+      "status": "recovered",
+      "title": "Hosted build omitted sibling package source",
+      "owner": "Codex (active responder)",
+      "record": "post-mortem/incidents/2026/2026-09-25-clean-checkout-build/README.md",
+      "evidence": [
+        "post-mortem/releases/2026-09-25-clean-checkout-package-boundary-local.json",
+        "post-mortem/releases/2026-09-25-clean-checkout-package-boundary-production.json",
+        "package.json",
+        "package-lock.json",
+        "src/relay/pool-request-queue.ts",
+        "Dockerfile.relay-services"
+      ],
+      "failure_modes": [
+        "FM-DEPLOY-003"
+      ],
+      "recovery_evidence": [
+        "post-mortem/releases/2026-09-25-clean-checkout-package-boundary-production.json"
+      ]
+    },
+    {
       "id": "INC-20260920-LIGHTBOX",
       "category": "images",
       "severity": "SEV-2",
@@ -399,6 +434,16 @@
     }
   ],
   "actions": [
+    {
+      "id": "ACT-037",
+      "incident": "INC-20260925-ARCHIVE",
+      "owner": "Frontend and release maintainers",
+      "review_by": "2026-10-02",
+      "status": "open",
+      "next_step": "Deploy the content-sized sentinel correction and verify the completed archive card remains above the following section on desktop and narrow phones. Retain completed-feed layout coverage for future stream changes.",
+      "closure": "Record hosted desktop/mobile acceptance and verify card bounds are contained by the sentinel, with no overlap or horizontal overflow.",
+      "evidence": ["post-mortem/incidents/2026/2026-09-25-home-archive-overlap/README.md", "src/components/images/masonry-stream.css", "post-mortem/releases/2026-09-26-orbit-release-review.json"]
+    },
     {
       "id": "ACT-001",
       "incident": "INC-20260912-STORAGE",
@@ -906,6 +951,24 @@
         "scripts/test-image-requests-db.ts",
         "BROC/store.ts",
         "post-mortem/failure-modes/images.md"
+      ]
+    },
+    {
+      "id": "ACT-036",
+      "incident": "INC-20260925-CHECKOUT",
+      "owner": "Release and relay maintainers",
+      "review_by": "2026-10-25",
+      "status": "completed",
+      "next_step": "Keep hosted application imports on pinned immutable package entry points and local Docker bundling on explicit source aliases. When changing either package revision, push its repository first and repeat the Git-triggered production build and live boundary acceptance.",
+      "closure": "Pinned BroccoliDB and BROCCOLIQUEUE to exact HTTPS archive revisions, removed sibling-source imports from the hosted path, preserved Docker's explicit local aliases, and verified the clean Git-triggered production deployment plus live cache and public HTTP/assets checks.",
+      "evidence": [
+        "post-mortem/releases/2026-09-25-clean-checkout-package-boundary-local.json",
+        "post-mortem/releases/2026-09-25-clean-checkout-package-boundary-production.json",
+        "package.json",
+        "package-lock.json",
+        "src/relay/pool-request-queue.ts",
+        "Dockerfile.relay-services",
+        "docs/runbooks/relay-pool-services.md"
       ]
     }
   ]

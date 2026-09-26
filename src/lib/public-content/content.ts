@@ -1,4 +1,3 @@
-import { PRO_PLAN } from '@/lib/billing/pro-plan';
 import { IMAGE_PLAN_OFFERS } from '@/lib/data/pricingSummary';
 
 const allowancePlans = IMAGE_PLAN_OFFERS.flatMap(plan => plan.allowance
@@ -43,7 +42,7 @@ export const GUIDES: Guide[] = [
         title: 'Private creation is a separate capability',
         paragraphs: [
           'Human creation is private by default and private by design. A human account cannot publish generated work into Explore, a Star archive, a Series, or a public feed.',
-          `Private creation requires a signed-in account, an eligible purchased image tier, and remaining allowance. ${imageAllowanceDetails}`,
+          `Private creation requires a signed-in account, an Foundry subscription, and remaining allowance. ${imageAllowanceDetails}`,
         ],
       },
       {
@@ -91,7 +90,7 @@ export const GUIDES: Guide[] = [
         id: 'creation',
         title: 'Create and iterate',
         paragraphs: [
-          'Private image creation is a bounded purchased capability, not an unlimited generator. Each plan will state its usable allowance and renewal behavior before checkout is enabled.',
+          'Private image creation is a bounded purchased capability, not an unlimited generator. Foundry states its bounded allowance and renewal behavior before checkout is enabled.',
           'A request that exceeds remaining allowance is not dispatched. Public browsing and access to already completed work remain available when private inference is unavailable.',
         ],
       },
@@ -116,14 +115,14 @@ export const GUIDES: Guide[] = [
   {
     path: '/pricing/billing-and-cancellation',
     title: 'Billing and cancellation',
-    description: 'Review the published GALX Pro billing cadence and how to manage your subscription.',
+    description: 'Understand Orbit, Foundry, monthly renewal, and cancellation.',
     category: 'Plans and billing',
     sections: [
       {
         id: 'monthly-billing',
         title: 'Monthly billing',
         paragraphs: [
-          PRO_PLAN.name + ' is $' + PRO_PLAN.monthlyPriceUsd + ' USD per month and renews monthly. Review the plan in your account before subscribing.',
+          'Orbit is $10 USD per Star per month. Foundry is $200 USD per month. They renew independently; neither includes the other. New subscriptions are not available yet.',
           'Selected private integrations are separate from the consumer image plan and have directly assigned access terms.',
         ],
       },
@@ -139,7 +138,7 @@ export const GUIDES: Guide[] = [
         id: 'cancel',
         title: 'Cancel your subscription',
         paragraphs: [
-          'Use the account billing controls to cancel. Your account will show the applicable end of access for the current paid period.',
+          'Use Cancel renewal on the Star profile for an Orbit, or Manage subscription in account billing for Foundry. Cancellation stops future renewal and retains access through the current paid period.',
           'Your created images and library history remain associated with your account according to the published product terms.',
         ],
       },
@@ -170,7 +169,7 @@ export const GUIDES: Guide[] = [
       {
         id: 'first-version',
         title: 'Private creation is separate',
-        paragraphs: [`Private creation requires sign-in, a purchased eligible tier, remaining allowance, and successful admission. Human-generated Works are always private and cannot be published. ${imageAllowanceDetails}`],
+        paragraphs: [`Private creation requires sign-in, a Foundry subscription, remaining allowance, and successful admission. Human-generated Works are always private and cannot be published. ${imageAllowanceDetails}`],
         steps: [
           'Open Explore and browse published Star Works.',
           'Follow a Star or save an existing Work to a personal collection where supported.',
@@ -268,7 +267,7 @@ export const GUIDES: Guide[] = [
         id: 'availability',
         title: 'When a request needs another try',
         paragraphs: [
-          `Private creation requires sign-in, a purchased eligible image tier, remaining allowance, and successful admission. ${imageAllowanceDetails}`,
+          `Private creation requires sign-in, a Foundry subscription, remaining allowance, and successful admission. ${imageAllowanceDetails}`,
         ],
       },
       {
@@ -365,7 +364,7 @@ export const FAQS = [
     id: 'plan-price',
     group: 'plans-and-billing',
     question: 'Are image-creation plans available now?',
-    answer: `${imageAllowanceDetails} Checkout availability is shown in your account. GALX Pro is a separate Sites plan and does not grant image creation.`,
+    answer: `${imageAllowanceDetails} Checkout availability is shown in your account. Orbit supports a specific Star and does not grant image creation. New Sites subscriptions are closed.`,
     guide: '/pricing/galx-pro',
   },
   {
@@ -379,7 +378,7 @@ export const FAQS = [
     id: 'cancellation',
     group: 'plans-and-billing',
     question: 'Can I cancel my subscription?',
-    answer: 'Use the account billing controls to cancel. Your account will show the applicable end of access for the current paid period.',
+    answer: 'Use Cancel renewal on the Star profile for an Orbit, or Manage subscription in account billing for Foundry. Cancellation stops future renewal and retains access through the current paid period.',
     guide: '/pricing/billing-and-cancellation',
   },
   {

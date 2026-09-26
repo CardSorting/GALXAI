@@ -10,13 +10,19 @@ Use for a Stripe failed-delivery alert or missing billing update. Owner: billing
 
 Read the alert's account ID and URL, then confirm the authenticated account with `stripe whoami --format json`. The CLI profile can differ from the application's configured account. Inspect endpoint IDs, URLs, `livemode`, status and subscriptions without printing keys, signing secrets or customer payloads. Preserve the original event IDs and receipt history.
 
-The active public billing path is the Image Studio subscription catalog (GALX
-Pro, Creator, Studio, and MAX): subscription creation, updates and deletion,
-invoice payment events, and the rest of the shared event allowlist. Readiness
+The current commercial model is independent Orbit ($10 per Star/month) and
+Foundry ($200/month), with new live recurring checkout closed pending payment
+release acceptance. Tax readiness was deferred by the owner, not resolved.
+Sites and legacy creation sales are retired; historical lifecycle
+events still reconcile. Orbit uses a distinct attempt/relationship projection
+and never invokes generation-plan or wallet writers. Subscription creation,
+updates/deletion, invoice payment events and the shared event allowlist remain
+required. See [Orbit and Foundry](../maintainers/ORBIT_FOUNDRY.md). Readiness
 also verifies the unique restricted customer portal: invoice history,
 payment-method updates and period-end cancellation enabled; subscription changes
-disabled. All four plans use the same one-account capability boundary; plan
-names and prices do not grant unsupported seats, quotas, video, editing, or
+disabled. Foundry preserves one-account private-creation boundaries; Orbit
+provides access to one Star's designated digital work, not production access.
+Neither grants unsupported seats, quotas, video, editing, Sites, or
 workspace features. Private developer access is no longer a Stripe checkout
 product. Its credential, allocation, metering, and revocation lifecycle is
 administered in `/admin` and must not be inferred from a subscription event.
@@ -40,14 +46,15 @@ Stop dependent changes when account/mode ownership is uncertain, the signature d
 Retain endpoint IDs, event subscriptions, URL and prior status in private allowlisted evidence. Re-enable a disabled test endpoint only after an isolated receiver is verified; restoring a known failing production target reintroduces the incident. Do not delete receipts, rewrite ledger history or rotate unrelated live credentials. Apply application rollback only with the compatible durable billing schema.
 
 The retired catalog provisioner and product seeder are guards; they cannot
-recreate prepaid Developer or compute-pack objects. Pro provisioning must use
-the existing live-authority, webhook, portal, and policy preflights. Private
+recreate prepaid Developer or compute-pack objects. New Pro sales are closed;
+do not run its provisioner to reactivate prices. Replacement inactive catalog
+preparation follows the commercial guide and does not approve paid launch. Private
 developer access is provisioned through the existing admin control plane, not
 through Stripe. This runbook does not authorize a live provisioning action.
 
 ## Verification and evidence
 
-Run `npm run test:stripe` for the current Image Studio catalog and
+Run `npm run test:stripe` for the current Foundry catalog and
 retired-Developer billing boundary and
 `npm run test:billing:lifecycle` for provider-state, portal, DTO, URL and
 signature/mode/body checks. Run `npm run test:developer-preview` for the

@@ -25,3 +25,4 @@ Generated metadata, separate from [the full ADR catalog](../adr/README.md). Unre
 | [ADR 0161: BROC persistent practice for existing Stars](../../docs/adr/0161-broc-persistent-star-practice.md) | proposed | local | Database operator |
 | [ADR 0162: Local durable ingress queue for the Premium relay](../../docs/adr/0162-local-durable-relay-ingress-queue.md) | accepted | local | Relay operator |
 | [ADR 0163: Star candidate selection before exhibition](../../docs/adr/0163-star-candidate-selection-before-exhibition.md) | accepted | local | Product/API maintainer |
+| [ADR 0164: Independent Star patronage and private creation](../../docs/adr/0164-orbit-foundry-public-identity.md) | proposed | local | Billing maintainer |

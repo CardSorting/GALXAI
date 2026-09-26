@@ -2169,3 +2169,73 @@ Incident: `INC-20260913-IMAGES`. Kind: `verification`.
 **Next step:** Keep queue changes and recovery in the separately reviewed relay runbook and release record; rebuild only when relay source or image configuration changes.
 
 Evidence: [2026-09-25-relay-queue-recovery-hardening.json](releases/2026-09-25-relay-queue-recovery-hardening.json), [images.json](../docker/relay-pools/local/images.json), [relay-pool-services.md](../docs/runbooks/relay-pool-services.md).
+
+## EVT-20260925-clean-checkout-build-failure — 2026-09-25T22:51:35Z
+
+Incident: `INC-20260925-CHECKOUT`. Kind: `observation`.
+
+**Observation:** Vercel production builds from clean root checkouts failed after GALXAI referenced source files in its independent sibling repositories. One inspected build reported a missing BroccoliDB source module. The previous Ready production deployment remained serving; no interruption was observed.
+
+**Action:** Kept the prior Ready release active, diagnosed the checkout boundary, and prepared a package-entry-point correction pinned to immutable HTTPS archives while retaining local Docker aliases.
+
+**Result:** The source correction and local package/build checks passed, but hosted recovery had not yet been established at this observation.
+
+**Next step:** Push the corrected root commit and verify the Git-triggered production build, aliases, live cache behavior, public HTTP responses and browser assets.
+
+Evidence: [2026-09-25-clean-checkout-package-boundary-local.json](releases/2026-09-25-clean-checkout-package-boundary-local.json), [deployment.md](failure-modes/deployment.md).
+
+## EVT-20260925-clean-checkout-build-recovery — 2026-09-25T22:58:00Z
+
+Incident: `INC-20260925-CHECKOUT`. Kind: `verification`.
+
+**Observation:** Root commit 63b54f8 completed a clean Git-triggered Vercel production deployment. The deployment reached Ready on galx.ai and www.galx.ai; its build compiled, passed type validation and generated 155 static pages.
+
+**Action:** Ran 38 live cache checks and the public HTTP boundary check for preflight, protected diagnostics, public schema, rendered pages and 38 browser assets. Read the Premium relay image identity and readiness without restarting Docker.
+
+**Result:** The production package boundary is recovered and live checks passed. The Premium R4 relay remains running and ready. No schema, queue, allowance or Star state changed; no provider generation was submitted.
+
+**Next step:** Keep package source revisions pinned and repeat clean Git deployment and live boundary acceptance whenever either package revision changes.
+
+Evidence: [2026-09-25-clean-checkout-package-boundary-local.json](releases/2026-09-25-clean-checkout-package-boundary-local.json), [2026-09-25-clean-checkout-package-boundary-production.json](releases/2026-09-25-clean-checkout-package-boundary-production.json), [relay-pool-services.md](../docs/runbooks/relay-pool-services.md).
+
+## EVT-20260926-home-archive-local — 2026-09-26T00:14:21Z
+
+Incident: `INC-20260925-ARCHIVE`. Kind: `verification`.
+
+**Observation:** The user reported the homepage archive completion card overlapping its following section. Source and local browser reproduction confirmed a fixed 60px sentinel could not contain the completion card.
+
+**Action:** Changed the sentinel to a minimum height. Replaced the homepage discovery price table and pricing-page zero-dollar tier with direct discovery navigation and a no-subscription explanation. Shortened homepage chapter labels to prevent narrow-phone overflow.
+
+**Result:** Local production build and 69 image security/authorization tests passed, followed by 11 public/billing boundary tests. Local synthetic-feed browser checks passed card containment, following-section separation, keyboard focus, link targets and no document overflow at 1440, 768, 390 and 320 pixels. Initial browser fixture had invalid author fields and was corrected; a streamed hidden duplicate required visible-section selection. Documentation checking found unrelated pre-existing broken incident links.
+
+**Next step:** Complete the final responsive visual review and documentation reconciliation. Deploy and verify the affected hosted path before claiming recovery; ACT-037 remains open.
+
+Evidence: [masonry-stream.css](../src/components/images/masonry-stream.css), [verify-discovery-ui.mjs](../scripts/verify-discovery-ui.mjs), [README.md](incidents/2026/2026-09-25-home-archive-overlap/README.md).
+
+## EVT-20260926-home-discovery-review — 2026-09-26T00:23:26Z
+
+Incident: `INC-20260925-ARCHIVE`. Kind: `verification`.
+
+**Observation:** Final local browser captures include the corrected pricing introduction spacing and discovery section at four viewport widths.
+
+**Action:** Ran the production build and focused lint, repeated the browser acceptance on the final build, reconciled affected discovery/navigation/design guides, and obtained an independent scoped visual review.
+
+**Result:** All four viewport checks passed and all 12 captures were accepted with reviewer disposition ship and no material fixes. Documentation sync completed, but documentation validation remains blocked by existing incident links and stale review records. No production deployment occurred.
+
+**Next step:** Retain ACT-037 for hosted acceptance; resolve documentation validation separately without bypassing semantic review.
+
+Evidence: [2026-09-26-discovery-ux-local.json](releases/2026-09-26-discovery-ux-local.json), [verify-discovery-ui.mjs](../scripts/verify-discovery-ui.mjs), [DESIGN.md](../src/components/home/DESIGN.md).
+
+## EVT-20260926-orbit-fixture-review — 2026-09-26T09:38:00Z
+
+Incident: `INC-20260925-ARCHIVE`. Kind: `verification`.
+
+**Observation:** The rollout precheck stopped on a removed generic storage API in the general database fixture and stale source/guide attestations.
+
+**Action:** Replaced the obsolete public-upload expectation with the current missing-private-storage rejection, independently verified positive private-upload sanitization, reconciled tax-deferral wording, and completed bounded semantic review of nine affected domains and the critical watch set.
+
+**Result:** General database 94 checks, scoped image database 96 checks, 157 migration pairs, Orbit 22, session 44 and documentation 41 tests passed; image security and billing lifecycle passed. Production build generated 155 pages. Source and knowledge guards passed; the compiled boundary scan checked 526 assets. Full docs validation retains only the two excluded pre-existing links.
+
+**Next step:** Proceed through exact-target rollout and hosted acceptance without claiming payment-provider E2E or designated patron material. Keep ACT-037 open until hosted archive geometry is verified.
+
+Evidence: [2026-09-26-orbit-release-review.json](releases/2026-09-26-orbit-release-review.json), [test-supabase-integration.ts](../scripts/test-supabase-integration.ts), [test-private-image-storage.ts](../scripts/test-private-image-storage.ts).

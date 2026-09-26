@@ -6,40 +6,12 @@ import { approvedAllowanceFor, IMAGE_ALLOWANCE_CONFIGURATION, type ImagePlanKey 
 
 const offerDefinitions = [
   {
-    id: 'workshop',
-    planKey: 'creator-v1',
-    name: 'Workshop',
-    audience: 'A private creative practice.',
-    monthlyPrice: 15,
-    status: 'Private plan',
-    features: [
-      'Bounded private image creation when an allowance is available',
-      'Remix published Star Works privately',
-      'Personal library, favorites, remix, and downloads',
-    ],
-    boundary: 'One account. Human-generated Works remain private and cannot be published to GALX.',
-  },
-  {
-    id: 'studio',
-    planKey: 'studio-v1',
-    name: 'Studio',
-    audience: 'A focused workspace for heavier individual use.',
-    monthlyPrice: 35,
-    status: 'Private plan',
-    features: [
-      'Bounded private image creation when an allowance is available',
-      'Remix published Star Works privately',
-      'Personal library, favorites, remix, and downloads',
-    ],
-    boundary: 'One account. Human-generated Works remain private and cannot be published to GALX.',
-  },
-  {
-    id: 'max',
+    id: 'foundry',
     planKey: 'team-v1',
-    name: 'MAX',
-    audience: 'More room for an individual Image Studio practice.',
+    name: 'Foundry',
+    audience: 'Access the machinery.',
     monthlyPrice: 200,
-    status: 'Private plan',
+    status: 'Not yet available',
     features: [
       'Bounded private image creation when an allowance is available',
       'Remix published Star Works privately',

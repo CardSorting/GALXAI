@@ -1,0 +1,77 @@
+{
+  "observed_at": "2026-09-26T09:36:14Z",
+  "scope": "Repair the isolated database fixture and reconcile source-bound release documentation for the local Orbit/Foundry/VANTA candidate",
+  "review_method": "Read changed contracts and affected canonical guide bodies. Attestations renew change-detection fingerprints, not an exhaustive audit of every file in their broader inventory. No ADR acceptance or production acceptance is inferred.",
+  "fixture_repair": {
+    "path": "scripts/test-supabase-integration.ts",
+    "cause": "The old test invoked the removed uploadAsset API and expected a public storage URL without credentials.",
+    "correction": "Use uploadUserSessionImage and assert the exact missing-private-storage rejection. Retain network denial and disposable database guards. Successful upload and sanitization remain independently covered by test-private-image-storage.ts.",
+    "production_behavior_changed": false
+  },
+  "reviews": {
+    "knowledge": {
+      "guides": ["docs/DOCUMENTATION_POLICY.md", "docs/how-to/change-with-documentation.md", "docs/reference/knowledge-commands.md", "docs/knowledge/README.md", "PRODUCT.md", "docs/PRODUCT_SURFACE_STRATEGY.md"],
+      "contracts": ["docs/knowledge/registry.json", "scripts/docs-kb.py", "scripts/verify-post-mortem.py", "package.json"],
+      "finding": "New commercial paths are mapped, proposed ADR status stays separate from local delivery, and retained evidence is distinct from generated indexes. Unmapped design notes, proposals and dated incident evidence do not add runtime authority."
+    },
+    "images": {
+      "guides": ["docs/maintainers/image-public-boundary.md", "docs/maintainers/private-image-accounting.md"],
+      "contracts": ["src/lib/images/read-image-artifact.ts", "src/lib/images/orbit-works.ts", "src/lib/community/public-participants.ts", "src/lib/collections/saved-works.ts", "src/app/api/images/feed/route.ts", "scripts/test-image-requests-db.ts"],
+      "finding": "Patron reads require designation, autonomous provenance and fresh matching payment before cache lookup. Human-private work remains excluded. Alias projection retains original actor/owner keys. No production origin privacy claim is made."
+    },
+    "access": {
+      "guides": ["docs/operations/developer-preview.md", "docs/maintainers/ORBIT_FOUNDRY.md"],
+      "contracts": ["src/lib/security/preview-policy.ts", "src/app/api/billing/orbit/route.ts", "src/lib/images/read-image-artifact.ts"],
+      "finding": "Orbit has an exact product-route exemption, not a namespace or account-auth bypass. The handler verifies the account and origin, allowlists request/response fields, and keeps private no-store responses."
+    },
+    "sites": {
+      "guides": ["docs/maintainers/SITES_FAIR_USAGE.md", "docs/maintainers/SITES_OPERATIONS.md"],
+      "contracts": ["src/lib/billing/plan-subscription.ts", "src/app/api/billing/plan/route.ts", "src/components/sites/SitesWorkspace.tsx"],
+      "finding": "New Sites purchases reject without provider writes. Neither new relationship enters Sites eligibility. Historical infrastructure and grants remain; no Sites runtime deployment or policy mutation was performed. Reconciled stale tax-prerequisite wording."
+    },
+    "relay": {
+      "guides": ["docs/DEPLOYMENT.md", "docs/maintainers/ACCOUNT_PROFILE_SCHEMA.md"],
+      "contracts": ["src/lib/stars/star-cohort.ts", "src/lib/stars/star-domain.ts", "src/lib/community/star-public-identity.ts", "package.json"],
+      "finding": "Changed roster helpers project public identity only. Generation definitions, internal agents, BROC and runtime controls are unchanged. Package change adds a test command, not a runtime dependency. This is not a fresh relay qualification."
+    },
+    "database": {
+      "guides": ["docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md", "docs/maintainers/ACCOUNT_PROFILE_SCHEMA.md", "docs/maintainers/private-image-accounting.md", "docs/maintainers/ORBIT_FOUNDRY.md"],
+      "contracts": ["scripts/run-supabase-integration.ts", "scripts/test-supabase-integration.ts", "scripts/lib/integration-test-environment.ts", "scripts/lib/integration-no-network.ts", "supabase/migrations/20260926081213_orbit_public_identity.sql", "supabase/rollbacks/20260926081213_orbit_public_identity.down.sql", "scripts/test-image-requests-db.ts"],
+      "finding": "Additive private relationships force RLS and revoke direct browser/service grants. Public views retain publication predicates; raw creation views stay service-only. The guarded rollback refuses populated commercial history. Disposable replay passes; shared migration remains unapplied."
+    },
+    "delivery": {
+      "guides": ["docs/DEPLOYMENT.md", "docs/runbooks/release-readiness.md", "post-mortem/failure-modes/deployment.md", "docs/runbooks/stripe-webhook-delivery.md"],
+      "contracts": ["package.json", "next.config.ts", ".vercelignore", ".dockerignore", "post-mortem/CURRENT_STATE.md"],
+      "finding": "Local build and test acceptance is distinct from hosted release; private incident material remains excluded. The two known incident links are explicitly excluded from repair, not suppressed in the validator."
+    },
+    "client-efficiency": {
+      "guides": ["docs/maintainers/PUBLIC_DISCOVERY.md", "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md", "docs/PRODUCT_SURFACE_STRATEGY.md"],
+      "contracts": ["src/components/home/PublicHome.tsx", "src/components/home/HomeMotion.tsx", "src/components/home/public-home.module.css", "src/components/images/masonry-stream.css", "src/components/images/CaughtUpCard.tsx", "src/app/collections/page.tsx"],
+      "finding": "Discovery no longer presents a zero-dollar tier; the sentinel reserves content height and native legacy anchors remain. Collections receives public roster data from the server. Prior visual acceptance is retained, not rerun or represented as field performance evidence. Reconciled stale tax-prerequisite wording."
+    },
+    "billing": {
+      "guides": ["docs/maintainers/ORBIT_FOUNDRY.md", "docs/reference/billing-pages.md", "docs/runbooks/stripe-webhook-delivery.md", "docs/adr/0164-orbit-foundry-public-identity.md"],
+      "contracts": ["src/lib/billing/orbit.ts", "src/app/api/billing/orbit/route.ts", "src/lib/billing/commercial-launch.ts", "src/lib/billing/image-plan-catalog.ts", "src/lib/billing/plan-subscription.ts", "src/lib/billing/portal.ts", "src/app/api/stripe/webhook/route.ts", "src/app/api/billing/plan/route.ts", "scripts/test-billing-lifecycle.ts"],
+      "finding": "Independent Orbit and Foundry contracts retain retired history without enabling old sales. Paid entitlement rechecks provider evidence; cancellation is period-end. Tax prerequisite deferral is now consistent across active guides. Provider E2E remains outstanding; checkout stays closed."
+    }
+  },
+  "validation": {
+    "db:test": "94/94 passed; 157 migrations replayed in disposable PostgreSQL",
+    "db:verify": "157 paired migrations; zero violations or warnings",
+    "test-private-image-storage": "passed; synthetic positive upload, sanitization and fail-closed cases",
+    "test:image:db": "96 checks passed; disposable PostgreSQL",
+    "test:orbit": "22 passed",
+    "test:image:security": "passed",
+    "test:billing:lifecycle": "passed, including webhook endpoint checks",
+    "test:auth:sessions": "44 passed",
+    "test:docs": "41 passed",
+    "build": "passed; type validation and 155 static pages"
+  },
+  "limits": [
+    "No production deployment, shared migration, provider generation, Stripe activation or tax mutation.",
+    "Provider checkout/webhook/renewal/portal E2E and designated VANTA patron material remain separate paid-launch prerequisites.",
+    "The full docs:check command still reports the two explicitly excluded pre-existing incident links; no validator exception was added.",
+    "A duplicate Sora Vale suggestion remains in the archive card source list. It is outside this fixture/documentation repair; no fresh visual audit is claimed.",
+    "Earlier dated failed prechecks and implementation evidence remain unmodified."
+  ]
+}

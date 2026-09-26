@@ -1,0 +1,40 @@
+{
+  "classification": "private",
+  "observed_at": "2026-09-26",
+  "scope": "Local working-tree refinement of homepage archive completion, discovery section, chapter navigation and pricing discovery introduction. Not a production deployment or whole-site certification.",
+  "changes": [
+    "Shared archive sentinel reserves intrinsic card height with min-height instead of a fixed 60px height.",
+    "Homepage replaces the zero-dollar feature table with Explore, Stars and Collections destination rows and a secondary private creation plans link.",
+    "Pricing describes no-subscription public discovery outside monetary plan cards.",
+    "Saving copy discloses browser-local persistence without claiming account sync or notifications.",
+    "Short chapter labels fit narrow phones; legacy #pricing still reaches #discover.",
+    "Mobile pricing introduction links stack with spacing and the next divider clears the introduction."
+  ],
+  "research": [
+    {"source": "https://help.behance.net/hc/en-us/articles/204484044-Guide-Discover-Creative-Work-on-Behance", "application": "Adapted the published-work discovery, creator-follow and collection-save journey; no activity-feed or notification parity claimed."},
+    {"source": "https://help.pinterest.com/en/article/save-pins-on-pinterest", "application": "Used clear save/collection vocabulary; no board collaboration or synchronization capability claimed."}
+  ],
+  "verification": {
+    "production_build": "Passed compilation, type validation and 155 static pages after final CSS changes.",
+    "image_security_and_authorization": "69 tests passed.",
+    "public_and_billing_boundary": "11 tests passed after the copy replacement.",
+    "focused_eslint": "Passed for PublicHome.tsx, HomeMotion.tsx and pricing/page.tsx.",
+    "browser": "scripts/verify-discovery-ui.mjs passed at 1440, 768, 390 and 320 CSS pixels using a synthetic one-work completed feed. Checked card containment and following-section gap, document overflow, four discovery destinations, visible keyboard outlines, 44px link targets, legacy anchor and no zero-dollar discovery copy. External requests and API mutations were intercepted.",
+    "screenshots": ".impeccable/review/discovery-refinement: 12 captures independently inspected; reviewer disposition ship for scoped local surfaces after affected design guidance was reconciled. No material visual fixes. Tall section captures used a taller viewport to avoid fixed-header capture occlusion.",
+    "compiled_boundary": "525 browser/rendered assets scanned without a private marker finding; command still failed because an unrelated deployment guide review is stale.",
+    "documentation_tests": "Documentation guard regression suites passed.",
+    "documentation_check": "Blocked by two pre-existing broken relative links in the clean-checkout build incident and stale knowledge/images/delivery/client-efficiency review records. No review fingerprints were refreshed to bypass semantic review."
+  },
+  "bounded_audit": {
+    "scale": "0-4 per dimension; heuristic scoped source/render review, not a certification",
+    "accessibility": {"score": 3, "evidence": "Native links, semantic list and labelled region, 44px targets and visible keyboard outlines; no full assistive-technology or automated contrast audit performed."},
+    "performance": {"score": 3, "evidence": "Static content and CSS; no added runtime dependency, image request or new animation. No field performance measurements."},
+    "responsive": {"score": 4, "evidence": "Scoped desktop/tablet/phone layouts pass four widths, completed-card containment and no horizontal document overflow."},
+    "theming": {"score": 3, "evidence": "New rows use existing home foreground, muted, divider and accent tokens; existing global palette discrepancies remain outside scope."},
+    "implementation_integrity": {"score": 4, "evidence": "Clear destination links match actual collection behavior and preserve creation/publication boundaries."},
+    "total": "17/20 within the stated scope",
+    "resolved": ["P1 fixed-height completion overflow", "P1 narrow chapter navigation overflow", "P2 confusing zero-dollar discovery tier", "P2 crowded mobile pricing links and divider"],
+    "remaining": ["Unrelated broken incident links and stale review attestations", "Hosted acceptance under ACT-037", "Legacy design warnings outside revised sections; no suppressions added"]
+  },
+  "limits": ["No hosted visual acceptance or deployment", "No real account, purchase, publication or generation operations", "No new database or API behavior", "No comprehensive screen-reader, physical-device or field performance certification"]
+}

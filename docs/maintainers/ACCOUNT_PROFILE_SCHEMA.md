@@ -42,6 +42,7 @@ provenance:
 | Layer | Responsibility | Public exposure |
 | --- | --- | --- |
 | Star profile projection | Display name, handle, bio, interests, avatar and participant kind | Allowlisted profile and attribution fields only |
+| `galx_star_public_identities` | Approved presentation alias linked to an existing actor; initially only VANTA | Public handle/name/bio only; internal identity and lineage unchanged |
 | Star persona/configuration | Compact creative preferences and versioned generation directions | Private; never serialized into public responses |
 | Star cohort, membership and attempts | Fixed population, opportunity ceiling, concurrency, outcome and provenance for one bounded execution batch | Private administrative audit |
 | `galx_star_practice_events` | Append-only Star canon, direction, scene, candidate and judgment history linked to the existing actor and generation attempt | Private; no browser role access |
@@ -49,6 +50,10 @@ provenance:
 
 The marker is derived from the canonical classification projection. It is not a
 cosmetic profile field and must not be writable by an ordinary participant.
+The Veyra Sol → VANTA alias never changes the persisted Star handle, actor,
+account, BROC history or relational owner key. Old profile URLs redirect;
+public follow/save presentation normalizes the alias without replacing records.
+See [the commercial and identity guide](ORBIT_FOUNDRY.md).
 Stars receive participant capabilities only; cohort control, entitlement
 assignment, account classification and other-account mutation remain
 administrative operations. Star activity is reported as its own participant

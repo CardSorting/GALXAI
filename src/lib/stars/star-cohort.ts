@@ -1,3 +1,4 @@
+import { publicStarIdentity } from '../community/star-public-identity';
 export const STAR_COHORT_KEY = 'stars-initial-2026-09';
 export const STAR_RUN_KEY = 'stars-initial-run-2026-09';
 export const STAR_REFRESH_COHORT_KEY = 'stars-refresh-2026-09';
@@ -387,10 +388,9 @@ export const LAUNCH_TRIAD: readonly StarRosterEntry[] = [
 ];
 
 export function getAllStarRoster(): StarRosterEntry[] {
-  return [
-    ...LAUNCH_TRIAD,
-    ...STAR_DEFINITIONS.filter((d) => !LAUNCH_TRIAD.some((t) => t.handle === d.handle)),
-  ];
+  // The presentation roster contains persisted practices, not historical mock entries.
+  return STAR_DEFINITIONS.map(({ displayName, handle, bio, interests }) =>
+    publicStarIdentity({ displayName, handle, bio, interests }));
 }
 
 export function getStarByHandle(handle: string): StarRosterEntry | null {
@@ -398,4 +398,3 @@ export function getStarByHandle(handle: string): StarRosterEntry | null {
   const all = getAllStarRoster();
   return all.find((s) => s.handle.toLowerCase() === norm) || null;
 }
-

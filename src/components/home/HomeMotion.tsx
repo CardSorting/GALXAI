@@ -7,10 +7,10 @@ import { useStoryEntrance } from './use-story-entrance';
 import styles from './public-home.module.css';
 
 const chapters = [
-  { id: 'stream', label: 'Community Stream' },
-  { id: 'possibilities', label: 'Possibilities' },
-  { id: 'pricing', label: 'Pricing' },
-  { id: 'faq', label: 'Questions' },
+  { id: 'stream', label: 'Releases' },
+  { id: 'possibilities', label: 'About' },
+  { id: 'discover', label: 'Discover' },
+  { id: 'faq', label: 'FAQ' },
 ];
 const preferenceKey = 'galx-home-motion-paused';
 

@@ -208,6 +208,54 @@ try {
     SET created_at=TIMESTAMPTZ '2026-09-25 20:00:00+00' WHERE id='published-work'`);
   await pool.query(`INSERT INTO private.galx_star_practice_events(actor_id,attempt_id,event_type,event_payload)
     VALUES($1,$2,'candidate',$3::jsonb)`,[actorId,attemptId,JSON.stringify({version:1,status:'unreviewed_candidate',assetCount:1})]);
+  // Orbit designates the existing Star candidate without modifying public publication or generation history.
+  await pool.query('INSERT INTO private.galx_orbit_offers(actor_id) VALUES($1)',[actorId]);
+  await pool.query("INSERT INTO private.galx_orbit_works(asset_id,actor_id,title) VALUES('published-work',$1,'Patron fixture')",[actorId]);
+  assert.equal((await pool.query("SELECT work_class,is_public,visibility FROM public.user_image_library WHERE id='published-work'")).rows[0].is_public,false);
+  await assert.rejects(pool.query("INSERT INTO private.galx_orbit_works(asset_id,actor_id,title) VALUES('owned',$1,'Forbidden human work')",[actorId]),(error:any)=>error.code==='23514');
+  const { mayReadOrbitWork,readOrbitWorks }=await import('../src/lib/images/orbit-works');
+  assert.equal(await mayReadOrbitWork(pool,{} as never,owner,'published-work',starAccount,false),false);
+  assert.equal(await mayReadOrbitWork(pool,{} as never,owner,'published-work','different-owner',false),false);
+  const orbitAttempt=crypto.randomUUID();
+  await pool.query(`INSERT INTO private.galx_orbit_checkouts(id,user_id,actor_id,price_id,customer_id,livemode,state)
+    VALUES($1,$2,$3,'price_patron','cus_patron',false,'complete')`,[orbitAttempt,owner,actorId]);
+  await pool.query(`INSERT INTO private.galx_orbit_subscriptions(subscription_id,checkout_id,user_id,actor_id,customer_id,price_id,livemode,status)
+    VALUES('sub_patron',$1,$2,$3,'cus_patron','price_patron',false,'active')`,[orbitAttempt,owner,actorId]);
+  const period={start:Math.floor(Date.now()/1000)-60,end:Math.floor(Date.now()/1000)+3600};
+  const paidStripe={subscriptions:{retrieve:async()=>({id:'sub_patron',customer:'cus_patron',livemode:false,status:'active',cancel_at_period_end:false,
+    metadata:{galxRelationship:'orbit-v1',orbitCheckout:orbitAttempt,starActor:actorId},
+    items:{data:[{quantity:1,price:{id:'price_patron',currency:'usd',unit_amount:1000,recurring:{interval:'month',interval_count:1}}}]},
+    latest_invoice:{id:'in_patron',status:'paid',livemode:false,currency:'usd',subtotal:1000,total:1000,amount_paid:1000,customer:'cus_patron',parent:{subscription_details:{subscription:'sub_patron'}}}})},
+    invoices:{listLineItems:async function*(){yield {pricing:{price_details:{price:'price_patron'}},parent:{subscription_item_details:{subscription:'sub_patron',proration:false}},period};}},
+    invoicePayments:{list:async function*(){yield {amount_paid:1000,payment:{payment_intent:'pi_patron'}};}},
+    paymentIntents:{retrieve:async()=>({status:'succeeded',livemode:false,customer:'cus_patron',latest_charge:{paid:true,disputed:false,amount_refunded:0}})}};
+  assert.equal(await mayReadOrbitWork(pool,paidStripe as never,owner,'published-work',starAccount,false),true);
+  assert.equal(await mayReadOrbitWork(pool,paidStripe as never,'other-patron','published-work',starAccount,false),false);
+  assert.equal(await mayReadOrbitWork(pool,paidStripe as never,owner,'published-work',starAccount,true),false);
+  await pool.query("UPDATE private.galx_orbit_subscriptions SET revoked=true WHERE subscription_id='sub_patron'");
+  assert.equal(await mayReadOrbitWork(pool,paidStripe as never,owner,'published-work',starAccount,false),false);
+  checks+=4;
+  const patronWorks=await readOrbitWorks(pool,actorId);
+  assert.equal(patronWorks.length,1);
+  assert.deepEqual(Object.keys(patronWorks[0]).sort(),['id','imageUrl','publishedAt','thumbnailUrl','title']);
+  assert(!JSON.stringify(patronWorks).includes('Private fixture production record'));
+  for(const role of ['anon','authenticated','service_role']) {
+    const client=await pool.connect();
+    try {
+      await client.query('BEGIN');await client.query(`SET LOCAL ROLE ${role}`);
+      await assert.rejects(client.query('SELECT * FROM private.galx_orbit_works'),(error:any)=>error.code==='42501');
+      await client.query('ROLLBACK');
+    } finally {client.release();}
+  }
+  const aliasFixture=await pool.connect();
+  try {
+    await aliasFixture.query('BEGIN');
+    await aliasFixture.query(readFileSync(new URL('../supabase/migrations/20260926081213_orbit_public_identity.sql',import.meta.url),'utf8'));
+    await aliasFixture.query("INSERT INTO private.galx_star_public_identities(actor_id,handle,display_name,bio) VALUES($1,'vanta','VANTA','Architectural practice.')",[actorId]);
+    assert.equal((await aliasFixture.query("SELECT handle FROM public.community_participant_profiles WHERE handle='vanta'")).rows.length,1);
+    assert.equal((await aliasFixture.query('SELECT handle FROM private.galx_star_profiles WHERE actor_id=$1',[actorId])).rows[0].handle,handle);
+  } finally {await aliasFixture.query('ROLLBACK');aliasFixture.release();}
+  checks+=10;
   // A direct visibility write cannot bypass the institutional selection event.
   await pool.query(`UPDATE public.user_image_library SET is_public=true,visibility='public',is_explore_visible=true
     WHERE id='published-work'`);

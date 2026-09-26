@@ -189,6 +189,7 @@ Owner role: **Release operator**. Domain: `delivery`.
 - [Application deployment and configuration](../../docs/VERCEL_DEPLOYMENT.md)
 - [Prepare and verify a release](../../docs/runbooks/release-readiness.md)
 - [Deployment storage containment](../../post-mortem/runbooks/deployment-storage.md)
+- [Deployment failures](../../post-mortem/failure-modes/deployment.md)
 - [Relay deployment and transport recovery](../../docs/VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md)
 - [Cloudflare implementation and deployment boundaries](../../docs/CLOUDFLARE_STRATEGY.md)
 - [Cloudflare maintainer runbook](../../docs/maintainers/CLOUDFLARE_EDGE_MESH_MAINTAINER_RUNBOOK.md)
@@ -232,5 +233,6 @@ Owner role: **Billing maintainer**. Domain: `billing`.
 - [DESIGN](../../src/components/home/DESIGN.md)
 - [DESIGN](../../src/components/public-content/DESIGN.md)
 - [Private image allowance and accounting lifecycle](../../docs/maintainers/private-image-accounting.md)
+- [Orbit, Foundry, and public Star identity](../../docs/maintainers/ORBIT_FOUNDRY.md)
 
-Relevant checks (select for the change; impact discovery never executes these): `npm run test:billing:lifecycle`, `npm run test:sites:plans:db`, `npm run build`.
+Relevant checks (select for the change; impact discovery never executes these): `npm run test:billing:lifecycle`, `npm run test:orbit`, `npm run test:sites:plans:db`, `npm run build`.

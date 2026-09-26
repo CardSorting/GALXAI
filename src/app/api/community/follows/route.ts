@@ -3,6 +3,7 @@ import { executePostgresQuery } from '@/lib/db/postgres';
 import { normalizePublicParticipantHandle } from '@/lib/community/participant-handle';
 import { getCanonicalStar } from '@/lib/stars/star-domain';
 import { requireAccountIdentity } from '@/lib/auth/accountIdentity';
+import { historicalStarHandle } from '@/lib/community/star-public-identity';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -40,14 +41,14 @@ export async function GET(request: NextRequest) {
         SELECT 1 FROM private.user_star_follows
         WHERE user_id = $1 AND star_handle = $2
         LIMIT 1
-      `, [actor.id, handle]);
+      `, [actor.id, historicalStarHandle(handle)]);
       isFollowing = Boolean(followCheck && followCheck.rows.length > 0);
     }
 
     const countResult = await executePostgresQuery(`
       SELECT COUNT(*)::int as count FROM private.user_star_follows
       WHERE star_handle = $1
-    `, [handle]);
+    `, [historicalStarHandle(handle)]);
     if (countResult && countResult.rows[0]) {
       followerCount = Number(countResult.rows[0].count) || 0;
       memoryFollowCounts[handle] = followerCount;
@@ -87,13 +88,13 @@ export async function POST(request: NextRequest) {
         INSERT INTO private.user_star_follows (user_id, star_handle, followed_at)
         VALUES ($1, $2, now())
         ON CONFLICT (user_id, star_handle) DO NOTHING
-      `, [actorId, handle]);
+      `, [actorId, historicalStarHandle(handle)]);
       memoryFollowCounts[handle] = (memoryFollowCounts[handle] || 0) + 1;
     } else {
       await executePostgresQuery(`
         DELETE FROM private.user_star_follows
         WHERE user_id = $1 AND star_handle = $2
-      `, [actorId, handle]);
+      `, [actorId, historicalStarHandle(handle)]);
       memoryFollowCounts[handle] = Math.max(0, (memoryFollowCounts[handle] || 1) - 1);
     }
   } catch {

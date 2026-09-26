@@ -84,6 +84,29 @@ export type GalxAccountProfileStatus = 'active' | 'suspended' | 'archived';
 export interface Database {
   private: {
     Tables: {
+      galx_star_public_identities: {
+        Row: { actor_id:string; handle:string; display_name:string; bio:string };
+        Insert: { actor_id:string; handle:string; display_name:string; bio:string }; Update: {handle?:string;display_name?:string;bio?:string}; Relationships: [];
+      };
+      galx_orbit_offers: {
+        Row: {actor_id:string;stripe_price_id:string|null;enabled:boolean;livemode:boolean};
+        Insert: {actor_id:string;stripe_price_id?:string|null;enabled?:boolean;livemode?:boolean};
+        Update: {stripe_price_id?:string|null;enabled?:boolean;livemode?:boolean}; Relationships: [];
+      };
+      galx_orbit_checkouts: {
+        Row: {id:string;user_id:string;actor_id:string;price_id:string;customer_id:string|null;session_id:string|null;checkout_url:string|null;livemode:boolean;state:'pending'|'open'|'complete'|'expired';lease_until:string|null;lease_token:string|null;created_at:string;expires_at:string};
+        Insert: {id:string;user_id:string;actor_id:string;price_id:string;livemode:boolean};
+        Update: {customer_id?:string;session_id?:string;checkout_url?:string;state?:'pending'|'open'|'complete'|'expired';lease_until?:string|null;lease_token?:string|null}; Relationships: [];
+      };
+      galx_orbit_subscriptions: {
+        Row: {subscription_id:string;checkout_id:string;user_id:string;actor_id:string;customer_id:string;price_id:string;livemode:boolean;status:string;cancel_at_period_end:boolean;paid_through:string|null;revoked:boolean;updated_at:string};
+        Insert: {subscription_id:string;checkout_id:string;user_id:string;actor_id:string;customer_id:string;price_id:string;livemode:boolean;status:string};
+        Update: {status?:string;cancel_at_period_end?:boolean;paid_through?:string|null;revoked?:boolean;updated_at?:string}; Relationships: [];
+      };
+      galx_orbit_works: {
+        Row: {asset_id:string;actor_id:string;title:string;published_at:string};
+        Insert: {asset_id:string;actor_id:string;title:string;published_at?:string}; Update: {title?:string}; Relationships: [];
+      };
       galx_account_profiles: {
         Row: {
           id: string;

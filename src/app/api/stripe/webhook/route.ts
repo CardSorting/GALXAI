@@ -5,6 +5,7 @@ import { getStripeConfig } from '@/lib/stripe/config';
 import { getPostgresPool } from '@/lib/db/postgres';
 import { fulfillStripeEvent } from '@/lib/billing/fulfillment';
 import { developerPrice, isProPaymentAdjustment } from '@/lib/billing/plan-subscription';
+import { fulfillOrbitEvent } from '@/lib/billing/orbit';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
@@ -31,6 +32,7 @@ export async function POST(req: NextRequest) {
     const stripe = engine.getClient()!;
     const pool = getPostgresPool();
     if (!pool) throw new Error('Storage unavailable');
+    if (await fulfillOrbitEvent(pool,stripe,event)) return NextResponse.json({ received:true });
     const eventObject = event.data.object as any;
     // New subscription activation still verifies the currently approved Price.
     // Known checkout/subscription records carry their durable Price identity so

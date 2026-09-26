@@ -2,6 +2,7 @@ import { createHash, randomUUID } from 'node:crypto';
 import type { Pool, PoolClient } from 'pg';
 import type Stripe from 'stripe';
 import { BillingError } from './account';
+import { requireTestSubscriptionCheckout } from './commercial-launch';
 import { hostedPaymentUrl } from './payment';
 import { DEVELOPER_ACCESS, PRO_PLAN } from './pro-plan';
 import { USAGE_PRICING } from './usage-pricing';
@@ -194,17 +195,9 @@ async function createSubscriptionCheckout(
   }
 }
 
-/** Existing consumer Pro subscription checkout. Its public and Stripe terms are unchanged. */
+/** Historical subscription reconciliation remains supported; new Sites sales are closed. */
 export async function createProCheckout(pool: Pool, stripe: Stripe, policy: FairPolicy, input: { userId: string; requestId: string; origin: string }) {
-  const price = await proPrice(stripe, policy);
-  return createSubscriptionCheckout(pool, stripe, {
-    planKey: 'pro-v1', price,
-    returnPath: BILLING_PATHS.plan, returnParam: 'plan_checkout', integrationPrefix: 'galx_pro',
-    idempotencyPrefix: 'pro-checkout', customerIdempotencyPrefix: 'pro-customer',
-    legacyReturnPath: BILLING_PATHS.overview, legacyReturnHash: '#plan',
-    checkoutLockPrefix: 'consumer-plan-checkout', keySeedPrefix: 'pro',
-    isExistingSubscription: subscription => subscription.items.data.some(item => objectId(item.price.product) === PRO_PRODUCT_ID),
-  }, input);
+  throw new BillingError('New Sites subscriptions are closed.', 410);
 }
 
 /** Checkout for the active Image Studio catalog tiers. The same subscription
@@ -218,8 +211,10 @@ export async function createImagePlanCheckout(
 ) {
   const plan = IMAGE_PLAN_BY_ID[planId];
   if (!plan) throw new BillingError('That plan is not available.', 400);
+  if (!plan.checkoutEnabled) throw new BillingError('This purchase option has been retired.', 410);
   const price = await imagePlanPrice(stripe, planId);
-  const imageProducts = new Set<string>(IMAGE_PLAN_CATALOG.map(item => item.stripeProductId));
+  requireTestSubscriptionCheckout(price.livemode);
+  const imageProducts = new Set<string>([...IMAGE_PLAN_CATALOG.map(item => item.stripeProductId), 'galx_images_team_v1']);
   return createSubscriptionCheckout(pool, stripe, {
     planKey: plan.planKey,
     price,

@@ -4,6 +4,7 @@ import { BILLING_PATHS } from '@/lib/billing/navigation';
 import Link from 'next/link';
 import { useState } from 'react';
 import { PlanPanel } from './PlanPanel';
+import { OrbitPanel } from '@/components/community/OrbitPanel';
 import { useBilling } from './BillingProvider';
 import { billingCsv } from '@/lib/billing/csv';
 import type { BillingPage } from '@/lib/billing/navigation';
@@ -24,7 +25,7 @@ export function BillingClient({ page = 'overview' }: { page?: BillingPage }) {
   const { accountId, token, email, loading, loadingMore, data, error, load } = state;
   return <div className="space-y-7 pt-6">
     <div className="flex flex-wrap items-center justify-between gap-3"><p className="min-w-0 break-all text-sm text-zinc-400">{email}</p>{page !== 'plan' && <button type="button" className={button} disabled={loading || loadingMore} onClick={() => { void load(); if (page === 'overview') setPlanRefresh(value => value + 1); window.dispatchEvent(new Event('galx_wallet_update')); }}>{loading && data ? 'Refreshing…' : 'Refresh'}</button>}</div>
-    {page === 'plan' ? <PlanPanel accountId={accountId} token={token} returnSearch={state.planSearch} /> : <>
+    {page === 'plan' ? <><PlanPanel accountId={accountId} token={token} returnSearch={state.planSearch} /><OrbitPanel handle="vanta" name="VANTA" /></> : <>
       {error && <p role="alert" className="text-sm leading-6 text-red-300">{data ? 'Showing your last checked billing details. ' : ''}{error}</p>}
       {loading && <p role="status" className="text-sm text-zinc-400">{data ? 'Updating billing details…' : 'Loading billing…'}</p>}
       {page === 'overview' && <>
@@ -36,7 +37,7 @@ export function BillingClient({ page = 'overview' }: { page?: BillingPage }) {
         ].map(([href, title, description]) => <Link key={href} href={href} className="group block py-5 focus-visible:outline-indigo-300"><span className="text-sm font-medium text-indigo-300 underline-offset-4 group-hover:underline">{title}</span><p className="mt-1 text-sm leading-6 text-zinc-400">{description}</p></Link>)}</div>
       </>}
       {page === 'credits' && <>
-        {data && <><BalanceSummary /><div className="border-t border-white/10 pt-5 space-y-2"><p className="text-sm leading-6 text-zinc-400">This page shows existing account credit and its history.</p><div className="flex flex-wrap gap-x-6"><Link href={BILLING_PATHS.transactions} className={link}>View transactions</Link><Link href={BILLING_PATHS.plan} className={link}>View GALX Pro</Link></div></div></>}
+        {data && <><BalanceSummary /><div className="border-t border-white/10 pt-5 space-y-2"><p className="text-sm leading-6 text-zinc-400">This page shows existing account credit and its history.</p><div className="flex flex-wrap gap-x-6"><Link href={BILLING_PATHS.transactions} className={link}>View transactions</Link><Link href={BILLING_PATHS.plan} className={link}>View subscriptions</Link></div></div></>}
       </>}
       {page === 'transactions' && data && <Transactions />}
       {page === 'invoices' && <Invoices />}
@@ -105,7 +106,7 @@ function Invoices() {
 
 function PaymentSettings() {
   const { data } = useBilling();
-  return <div className="space-y-8"><section aria-labelledby="payment-methods"><h2 id="payment-methods" className="text-xl font-semibold">Payment methods</h2><p className="mb-5 mt-3 max-w-2xl text-sm leading-6 text-zinc-400">{data && !data.hasCustomer ? 'Your billing profile is created when you subscribe to GALX Pro.' : 'Open Stripe to review or update your saved payment methods. You can return to GALX when you’re done.'}</p><PortalButton />{data && !data.hasCustomer && <div className="mt-3 flex flex-wrap gap-x-6"><Link href={BILLING_PATHS.plan} className={link}>Explore Pro</Link></div>}</section>
+  return <div className="space-y-8"><section aria-labelledby="payment-methods"><h2 id="payment-methods" className="text-xl font-semibold">Payment methods</h2><p className="mb-5 mt-3 max-w-2xl text-sm leading-6 text-zinc-400">{data && !data.hasCustomer ? 'Your billing profile is created when you start a subscription checkout.' : 'Open Stripe to review or update your saved payment methods. You can return to GALX when you’re done.'}</p><PortalButton />{data && !data.hasCustomer && <div className="mt-3 flex flex-wrap gap-x-6"><Link href={BILLING_PATHS.plan} className={link}>View subscriptions</Link></div>}</section>
     {data?.summary.autoReloadEnabled && <section className="border-t border-white/10 pt-6"><h2 className="font-semibold">Automatic reload</h2><p className="mt-2 text-sm leading-6 text-zinc-400">Auto-reload is enabled on this account. Contact <a href="mailto:support@galx.ai" className="text-indigo-300 underline underline-offset-4">billing support</a> to change it.</p></section>}
     <section className="border-t border-white/10 pt-6"><h2 className="font-semibold">More billing options</h2><div className="mt-2 flex flex-wrap gap-x-6"><Link href={BILLING_PATHS.plan} className={link}>Manage your plan</Link><Link href={BILLING_PATHS.invoices} className={link}>View invoices</Link></div></section>
   </div>;

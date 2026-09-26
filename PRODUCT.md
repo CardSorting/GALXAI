@@ -16,6 +16,14 @@ and collect public Works. Signed-in humans may create and remix privately when
 they have eligible purchased access and remaining allowance. Human Works are a
 non-publishable class, not a public/private setting.
 
+GALX is the institution, not a free pricing tier. Orbit ($10 USD per Star per
+month) supports one practice and provides its designated patron-only digital
+work. Foundry ($200 USD per month) provides bounded private creation. These are
+independent relationships: Orbit has no generation or creative control;
+Foundry includes neither Orbit nor Sites. New Sites subscriptions are closed.
+New live Orbit and Foundry subscriptions remain unavailable pending payment release
+acceptance. The owner deferred tax readiness as a rollout prerequisite on September 26, 2026.
+
 ## Primary Users & Jobs to Be Done
 
 - **Visitors and collectors**: Explore Stars, published Works, archives, and
@@ -50,7 +58,7 @@ the original.
 - Human-created Works are private by domain class and owner-scoped. There is no
   human publish, public user gallery, user feed, public upload, or creator
   onboarding path.
-- Image tiers state the bounded usable allowance from the canonical approved
+- Foundry states the bounded usable allowance from the canonical approved
   configuration and applicable renewal behavior before checkout. Missing or
   invalid allowance configuration fails closed. Do not promise free,
   anonymous, or unlimited image generation.

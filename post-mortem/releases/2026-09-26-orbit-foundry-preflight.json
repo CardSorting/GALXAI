@@ -1,0 +1,51 @@
+{
+  "date": "2026-09-26",
+  "scope": "Read-only commercial and public Star identity preflight",
+  "status": "preflight_complete_product_mapping_required",
+  "deployment": "none",
+  "mutations": "No Stripe, database, subscription, identity, generation, or runtime mutations",
+  "authorized_target": {
+    "public": "GALX; no zero-dollar plan",
+    "orbit": { "monthlyUsdPerStar": 10, "benefit": "designated digital patron works; no creation entitlement", "canaryPublicName": "VANTA" },
+    "foundry": { "monthlyUsd": 200, "benefit": "bounded private creation; independent of Orbit" }
+  },
+  "observations": {
+    "stripeMode": "live",
+    "stripeSubscriptionsAllStatuses": 0,
+    "stripeSubscriptionListingFullyPaginated": true,
+    "stripeOpenCheckoutSessions": 0,
+    "stripeSubscriptionSchedulesAllStatuses": 0,
+    "databasePlanSubscriptions": 0,
+    "databaseDurableFollows": 0,
+    "activeStripeTaxRegistrations": 0,
+    "appliedDatabaseMigrations": 156,
+    "pendingDatabaseMigrations": 0,
+    "publicDatabaseStarProfiles": 12,
+    "publicDatabaseStarWorks": 11,
+    "fallbackCatalogStars": 10,
+    "astraHasLivePublicProfile": false,
+    "legacyCatalogVerifier": "Failed the Workshop product contract: live product is named Creator while local catalog expects Workshop. No write performed."
+  },
+  "identityDependencies": [
+    "private.galx_validate_star_profile rejects changing the persisted handle",
+    "StarPopulationController derives account IDs and generation idempotency keys from internal handles and checks canonical identity matches",
+    "Durable follow records and browser-local follows refer to handles",
+    "Public profile and work projections emit persisted handles",
+    "A public identity alias layer must retain existing actors, account IDs, works, provenance, old links, and historical records; changing the runtime definitions is not a safe public rename"
+  ],
+  "requiredBillingTreatment": [
+    "No customer migration or cancellation is currently required in the inspected live Stripe account",
+    "Recheck subscriptions, schedules, and open checkouts immediately before retirement; this observation is not an atomic cutover",
+    "Disable new legacy offer checkout paths and archive legacy prices without deleting products, invoices, or transaction records",
+    "If new legacy customers appear before cutover, preserve their agreed price and paid access pending an explicitly approved grandfathering or cancellation treatment; never silently reprice",
+    "Existing GALX Pro is a separate Sites entitlement, not Orbit; its future treatment needs resolution without silently granting Sites access through Orbit",
+    "Review tax obligations and registrations before launch; do not claim automatic tax collection is configured"
+  ],
+  "remaining": [
+    "Resolve twelve persisted practices versus eight proposed names; do not merge or remove practices to fit the candidate roster",
+    "Confirm mapping of an existing persisted practice to the VANTA canary",
+    "Resolve existing Sites commercial access under the exclusive GALX/Orbit/Foundry vocabulary",
+    "Implement and test aliases, offer retirement, independent Orbit subscription lifecycle, protected artifacts, subscription management, and Foundry presentation",
+    "Run disposable database authorization tests, adversarial HTTP tests, production build, and rendered asset checks before deployment"
+  ]
+}

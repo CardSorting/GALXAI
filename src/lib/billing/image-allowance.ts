@@ -10,7 +10,7 @@ import {
 
 export type { ImagePlanKey, ImageQuality } from './image-allowance-config';
 export type ImageAllowanceFailure = 'image_plan_required' | 'image_allowance_exhausted' | 'image_allowance_unavailable';
-export type ImagePublicPlanId = 'workshop' | 'studio' | 'max';
+export type ImagePublicPlanId = 'workshop' | 'studio' | 'foundry';
 export type ImageSubscriptionState = 'none' | 'active' | 'ending' | 'payment_required' | 'processing' | 'paused' | 'canceled' | 'unavailable';
 
 export class ImageAllowanceError extends Error {
@@ -52,7 +52,7 @@ async function readActiveImagePlan(
 }
 
 export interface ImageAllowanceSnapshot {
-  plan: 'workshop' | 'studio' | 'max';
+  plan: 'workshop' | 'studio' | 'foundry';
   planName: string;
   available: boolean;
   exhausted: boolean;
@@ -67,7 +67,7 @@ export interface ImageAllowanceSnapshot {
 const publicPlanName: Record<ImagePlanKey, { id: ImageAllowanceSnapshot['plan']; name: string }> = {
   'creator-v1': { id: 'workshop', name: 'Workshop' },
   'studio-v1': { id: 'studio', name: 'Studio' },
-  'team-v1': { id: 'max', name: 'MAX' },
+  'team-v1': { id: 'foundry', name: 'Foundry' },
 };
 
 export interface ImagePlanSummary {

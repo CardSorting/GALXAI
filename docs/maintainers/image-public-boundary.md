@@ -21,7 +21,9 @@ non-publishable owner-scoped records, not private rows waiting for a visibility
 toggle. Public discovery projections include only eligible published Star
 Works. A new Star generation is a private candidate; only a durable, exact-asset
 selection record can publish it. The visibility change and selection event are
-committed together. Withheld candidates stay private, and previously published
+committed together. Withheld candidates stay private unless explicitly designated
+for active patrons of that exact Star under [Orbit](ORBIT_FOUNDRY.md); that
+designation is not public exhibition. Previously published
 Works retain their existing state when a Star's production runtime is inactive.
 Activation gates new Star generation, not preservation of public work or review
 of a completed candidate. A private append-only archive retains the provenance
@@ -80,8 +82,11 @@ image fields. The native and relay adapters request base64 so normalization neve
 fetches an arbitrary provider URL. Downloads resolve an authenticated, expiring
 opaque capability and re-encode stored images again, including historical assets.
 For a private row, the capability is additionally checked against the current
-owner session before every cache lookup; copying a private URL to another
-account or an anonymous browser returns the same generic not-found category.
+owner session before every cache lookup. For a designated patron-only Star work,
+the non-owner must instead have current paid Orbit access to that exact Star,
+verified before cache access. Human-private works never use this exception.
+Copying either protected URL to an ineligible account or anonymous browser returns
+the same generic not-found category.
 Historic `unlisted` or human-public rows do not establish a current publishing
 capability; the current data boundary classifies human Works as private and
 Star Works as published. Historical origin controls and cached copies require

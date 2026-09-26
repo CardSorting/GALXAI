@@ -15,6 +15,7 @@ import { PRO_LOOKUP_KEY, PRO_PRODUCT_ID } from '../src/lib/billing/plan-subscrip
 import { PRO_PLAN } from '../src/lib/billing/pro-plan';
 
 const secretKey = process.env.STRIPE_SECRET_KEY || '';
+throw new Error('This legacy activation workflow is retired. Orbit and Foundry require explicit tax-readiness approval before live launch.');
 if (!/^(sk|rk)_live_[A-Za-z0-9]+$/.test(secretKey)) throw new Error('A valid live Stripe key is required');
 if (!process.argv.includes('--activate')) throw new Error('Activation is explicit. Re-run with --activate.');
 

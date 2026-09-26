@@ -2597,6 +2597,30 @@
       }
     },
     {
+      "path": "docs/adr/0164-orbit-foundry-public-identity.md",
+      "title": "ADR 0164: Independent Star patronage and private creation",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": {
+        "status": "proposed",
+        "delivery": "local",
+        "domain": "billing",
+        "owner": "Billing maintainer",
+        "date": "2026-09-26",
+        "evidence": [
+          "docs/maintainers/ORBIT_FOUNDRY.md",
+          "supabase/migrations/20260926081213_orbit_public_identity.sql",
+          "scripts/test-orbit.ts"
+        ],
+        "supersedes": [],
+        "target": "Local application and migration; live legacy catalog archived, replacement catalog inactive; no paid launch",
+        "revision": "working tree under review"
+      }
+    },
+    {
       "path": "docs/adr/README.md",
       "title": "Architecture decision records",
       "scope": "current-guide",
@@ -3367,6 +3391,18 @@
       "decision": null
     },
     {
+      "path": "docs/maintainers/ORBIT_FOUNDRY.md",
+      "title": "Orbit, Foundry, and public Star identity",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [
+        "billing"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": null
+    },
+    {
       "path": "docs/maintainers/PERFORMANCE_BENCHMARKING_AND_SLOS.md",
       "title": "📊 Maintainer Guide: Performance Benchmarking & Service Level Objectives (SLOs)",
       "scope": "research-reference",
@@ -3586,6 +3622,16 @@
         "sites"
       ],
       "curation": "assigned",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/maintainers/STAR_IDENTITY_PROPOSAL.md",
+      "title": "Remaining Star identity proposals",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
       "keywords": [],
       "decision": null
     },
@@ -4628,8 +4674,10 @@
       "title": "Deployment failures",
       "scope": "current-guide",
       "kind": "reference",
-      "domains": [],
-      "curation": "unreviewed",
+      "domains": [
+        "delivery"
+      ],
+      "curation": "assigned",
       "keywords": [],
       "decision": null
     },
@@ -4856,6 +4904,26 @@
     {
       "path": "post-mortem/incidents/2026/2026-09-20-profile-lightbox/README.md",
       "title": "Public profile lightbox viewport overflow",
+      "scope": "operational-record",
+      "kind": "navigation",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-09-25-clean-checkout-build/README.md",
+      "title": "Hosted build omitted sibling package source",
+      "scope": "operational-record",
+      "kind": "navigation",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-09-25-home-archive-overlap/README.md",
+      "title": "Homepage archive completion overlap",
       "scope": "operational-record",
       "kind": "navigation",
       "domains": [],

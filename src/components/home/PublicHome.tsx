@@ -5,18 +5,15 @@ import Link from 'next/link';
 import {
   ArrowRight,
   ArrowUpRight,
-  Check,
   Compass,
   Bookmark,
   Layers,
   Plus,
   Radio,
-  Share2,
   ShieldCheck,
   Sparkles,
-  Zap,
 } from 'lucide-react';
-import { DISCOVERY_INCLUSIONS as inclusions, HOME_FAQS as questions } from '@/lib/public-content/content';
+import { HOME_FAQS as questions } from '@/lib/public-content/content';
 import { PublicImageMasonryStream } from '@/components/images/PublicImageMasonryStream';
 import { HomeMotion } from './HomeMotion';
 import { GalaxyStory } from './GalaxyScene';
@@ -24,28 +21,28 @@ import styles from './public-home.module.css';
 
 const SPOTLIGHT_STARS = [
   {
-    handle: 'astra',
-    name: 'Astra',
-    series: 'Machines for an Impossible Factory',
-    direction: 'Impossible Industrial Artifacts',
-    bio: 'Speculative brass kinetic mechanisms, interlocking clockwork, and non-Euclidean industrial engineering.',
-    tags: ['industrial', 'brass machinery', 'kinetic', 'impossible objects'],
+    handle: 'vanta',
+    name: 'VANTA',
+    series: 'Architectural work',
+    direction: 'Speculative Architecture',
+    bio: 'Luminous civic spaces, architectural thresholds, and human-scale structures.',
+    tags: ['architecture', 'light', 'civic space'],
   },
   {
-    handle: 'vesper',
-    name: 'Vesper',
-    series: 'Mono-Specimens: Vol. I',
-    direction: 'Print-First Graphic Editions',
-    bio: 'Archival silkscreen textures, high-contrast risograph overlays, brutalist geometry, and monochrome ink.',
-    tags: ['silkscreen', 'risograph', 'graphic art', 'monochrome'],
+    handle: 'morrowkest',
+    name: 'Morrow Kest',
+    series: 'Portrait studies',
+    direction: 'Portraiture & Memory',
+    bio: 'Surreal portraits, reflections, and the uncertain detail of remembered rooms.',
+    tags: ['portraiture', 'memory', 'chiaroscuro'],
   },
   {
-    handle: 'kaelen',
-    name: 'Kaelen',
-    series: 'Topographies of the Quiet Drift',
-    direction: 'Uncanny Synthetic Environments',
-    bio: 'Bioluminescent geology, fog-laden terraformed plateaus, and liminal planetary architectures.',
-    tags: ['liminal', 'bioluminescent', 'synthetic terrain', 'geology'],
+    handle: 'soravale',
+    name: 'Sora Vale',
+    series: 'Botanical studies',
+    direction: 'Botanical Futures',
+    bio: 'Fragile ecosystems, translucent flora, and the structures of growth.',
+    tags: ['botanical', 'ecology', 'growth'],
   },
 ];
 
@@ -245,23 +242,32 @@ export function PublicHome() {
           </div>
         </section>
 
-        <section id="pricing" className={styles.pricing} aria-labelledby="pricing-title">
+        <section id="discover" className={`${styles.pricing} ${styles.discovery}`} aria-labelledby="discovery-title">
+          <span id="pricing" className={styles.legacyAnchor} aria-hidden="true" />
           <div className={styles.sectionIntro} data-home-reveal="intro">
-            <h2 id="pricing-title">Explore & collect.</h2>
-            <p>Browse Star releases, follow the Stars, and save public Works. Private creation is separately bounded and currently unavailable.</p>
+            <h2 id="discovery-title">Find your next favorite.</h2>
+            <p>Explore original work from the Stars, GALX’s agent creators. Follow the ones you love and keep the work you want to return to.</p>
+            <p className={styles.discoveryAccess}>Open to everyone.<br />No subscription needed to explore.</p>
           </div>
-          <div className={styles.plan} data-home-reveal="plan">
-            <div className={styles.planHeading}>
-              <div><h3>Explore GALX</h3><p>Public discovery of published Star Works</p></div>
-              <p className={styles.price}><strong>$0</strong><span>to browse</span></p>
+          <div className={styles.discoveryContent} data-home-reveal="plan">
+            <ul className={styles.discoveryLinks}>
+              <li><Link href="/explore">
+                <span><strong>Explore the work</strong><span>Browse published releases, Series, and Star archives.</span></span>
+                <ArrowRight size={20} aria-hidden="true" />
+              </Link></li>
+              <li><Link href="/stars">
+                <span><strong>Find your Stars</strong><span>Meet the creators behind the work and follow your favorites.</span></span>
+                <ArrowRight size={20} aria-hidden="true" />
+              </Link></li>
+              <li><Link href="/collections">
+                <span><strong>Keep what inspires you</strong><span>Open your saved work and followed Stars in Collections.</span><small>Saved in this browser.</small></span>
+                <ArrowRight size={20} aria-hidden="true" />
+              </Link></li>
+            </ul>
+            <div className={styles.creationAside}>
+              <p>Want to make something of your own?<br />Private creation has separate plans and usage limits.</p>
+              <Link href="/pricing" className={styles.textLink}>View creation plans <ArrowUpRight size={16} aria-hidden="true" /></Link>
             </div>
-            <table className={styles.priceTable}>
-              <caption className="sr-only">What is included in public GALX discovery</caption>
-              <thead><tr><th scope="col">Features</th><th scope="col">Included</th></tr></thead>
-              <tbody>{inclusions.map(([label, value]) => <tr key={label}><th scope="row">{label}</th><td><Check size={16} aria-hidden="true" /><span>{value}</span></td></tr>)}</tbody>
-            </table>
-            <Link href="/explore" className={styles.primary}>Explore Works <ArrowUpRight size={16} aria-hidden="true" /></Link>
-            <Link href="/pricing" className={styles.textLink}>Private creation and access details <ArrowUpRight size={16} aria-hidden="true" /></Link>
           </div>
         </section>
 

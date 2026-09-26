@@ -71,6 +71,8 @@ components:
 
 # Design System: GALX public homepage
 
+September 25, 2026 scope: the discovery layout, discovery component, and local navigation below have been reconciled with the built Star-network homepage. Unrelated Sites/Image Studio descriptions and preview-specific tokens are retained as historical records of the September 13 homepage, not current instructions or product promises. This narrow merge does not certify those older surfaces; [PRODUCT.md](../../../PRODUCT.md) owns current product scope.
+
 ## Overview
 
 **Creative North Star: "The established GALX dark world"**
@@ -131,7 +133,7 @@ At 1000px, horizontal gaps tighten. At 760px, the hero and divided sections beco
 
 The example canvas shares one intrinsic grid area across all six authored results, so its tallest content at the current width determines the available height. Sizing copies stay `aria-hidden` and `visibility: hidden`; only the active result is visible and announced. Preserve this sizing when editing examples so the revision and entry actions remain stationary. At 380px and below, the address bar reserves a minimum height of 60px for a two-line address; the draft label does not shrink.
 
-The pricing table stays a semantic two-column table at narrow widths. Its first header cell retains a right gutter (20px); body labels have a right gutter of 20px, reducing to 16px at 760px. Wrapped labels must remain visibly separate from their values. Text can wrap within paragraphs and cells, and grid children can shrink without forcing document overflow.
+The discovery section uses the divided two-column layout: introduction and access message on the left, three full-row links and a separate creation-plan link on the right. Rows have 24px vertical padding, a 24px gap between text and arrow, and divider-only separation. At 760px and below, the introduction precedes the links in one column with a 34px gap and 52px section padding. At 380px and below, side gutters become 20px. Text wraps and grid children can shrink without forcing document overflow. There is no discovery pricing table or price figure.
 
 **The Divided Sections Rule.** Use spacing and rules to separate this homepage's content; reserve the enclosed light sheet for the illustrative Site.
 
@@ -165,11 +167,13 @@ Below the sheet, a separate pressed button toggles “See a revision” and “B
 
 “Use this idea” opens the selected first or revised brief as an editable, unsent draft in Sites. Existing unsent work takes precedence. The Sites sign-in step retains that destination through `/login?next=…`. Keep the explanatory caption adjacent to the action; choosing an example does not generate or publish a Site.
 
-### Pricing table
+### Discovery links
 
-The four-row table uses a screen-reader caption, column and row header scopes, thin row dividers, and no outer shell. Inclusion checks are decorative icons accompanying full text. Header and body columns preserve their gutters as copy wraps. The plan name and tabular price sit above; the action and supporting terms follow in normal document flow. Plan name and price come from [PRO_PLAN](../../lib/billing/pro-plan.ts), including the price cue near the hero action.
+The named discovery section presents a native list of three full-row links: Explore the work (`/explore`), Find your Stars (`/stars`), and Keep what inspires you (`/collections`). The introduction states that exploring needs no subscription. The Collections row discloses “Saved in this browser.” Keep that persistence qualifier adjacent to its destination; discovery is not a $0 subscription tier.
 
-The plan action leads signed-in visitors to `/billing/plan` and guests to `/login?next=/billing/plan`. Its adjacent copy describes plan review before subscribing, monthly renewal, and cancellation. Preserve that visible next-step explanation; the action itself does not charge the visitor.
+Row titles reuse the title role (20px, weight 500); secondary copy is 15px with 1.65 leading, and the browser note is 13px with 1.6 leading. Light text and muted descriptions sit directly on the dark ground with thin dividers and no card shell. Each row has a decorative trailing arrow. Hover turns the title and arrow amber; fine-pointer hover moves the arrow 4px. Native links retain the shared 3px amber keyboard outline and 5px offset, and reduced motion removes transition movement.
+
+Below the rows, a separate note explains that private creation has its own plans and usage limits. The understated “View creation plans” link leads to `/pricing`; it does not subscribe or charge the visitor. The discovery section uses `#discover`, while the hidden legacy `#pricing` anchor retains existing incoming fragment links at the same section. Both targets reserve 84px for the sticky navigation.
 
 ### FAQ disclosures
 
@@ -177,7 +181,9 @@ Six native `details` and `summary` pairs supply the open state and keyboard beha
 
 ### Reading motion and local navigation
 
-Below the hero, an opaque sticky section navigation links to Possibilities, Pricing and Questions. Its minimum height is 60px (56px on mobile), with a small amber underline for the current section and native anchor destinations. Section targets reserve 84px above them. A synchronized, named pause/resume button remains reachable in the bar, and the Image Studio action is available there on desktop. The shared product header remains separate and unchanged. On mobile, all three section links and the 44px motion control fit one row; the additional Image Studio action is omitted. The hero's mobile top padding is 68px for a calm first viewport.
+Below the hero, an opaque sticky section navigation links to Releases (`#stream`), About (`#possibilities`), Discover (`#discover`) and FAQ (`#faq`). Its minimum height is 60px (56px on mobile), with a small amber underline for the current section and native anchor destinations. Discovery reserves 84px above its target. A synchronized, named pause/resume button remains reachable in the bar, and the Private creation action links to `/images/create` on desktop. The shared product header remains separate and unchanged. On mobile, all four section links and the 44px motion control fit one row; the additional Private creation action is omitted. The hero's mobile top padding is 68px for a calm first viewport.
+
+The discovery links and creation note enter as one complete block using the existing 18px, 760ms arrival; there is no row cascade. The internal arrival name remains `plan` for compatibility and does not describe a public offer. Device reduced motion, pause, native anchor arrival, and focus or pointer interaction settle the content immediately through the existing reading-motion behavior. The remaining detailed entrance record below is historical where it refers to a pricing block.
 
 The benefit rows share a thin connected track with amber nodes. The track and constellation paths ease between scroll samples over 240ms; closing orbital rings use 300ms. This connects describing, revising, sharing and the next section without changing native scrolling.
 
@@ -195,8 +201,8 @@ The homepage uses the existing navigation and footer components. Their local pro
 - **Do** make the first viewport explain the creation loop before asking visitors to choose create or explore.
 - **Do** keep the light illustrative Site distinct from GALX interface typography.
 - **Do** use light primary actions, thin dividers, and small amber interaction details within this homepage.
-- **Do** preserve native button, table, link, and disclosure semantics with visible keyboard focus.
-- **Do** retain table gutters, wrapping actions, and the observed mobile stacking order.
+- **Do** preserve native list, link, button, and disclosure semantics with visible keyboard focus.
+- **Do** retain full-row discovery targets, wrapping copy, the browser-local saving disclosure, and introduction-first mobile stacking.
 - **Do** keep example actions stationary across every starter and revision at the current width.
 
 ### Don't:
@@ -205,5 +211,5 @@ The homepage uses the existing navigation and footer components. Their local pro
 - **Don't** turn this local homepage treatment into a replacement for the shared operator design system.
 - **Don't** use remote showcase images, fake editor controls, or decorative states that imply a completed generation.
 - **Don't** replace the illustrative label or pressed-state semantics with appearance alone.
-- **Don't** collapse the pricing header gutter when labels wrap on narrow screens.
+- **Don't** present public discovery as a priced subscription tier or imply that browser-local saves synchronize across devices.
 - **Don't** expose hidden sizing copies to assistive technology or silently replace an unsent draft.

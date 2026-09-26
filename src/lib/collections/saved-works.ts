@@ -65,7 +65,7 @@ function normalizeSavedWork(value: unknown): SavedWorkItem | null {
     ...(thumbnailUrl ? { thumbnail_url: thumbnailUrl } : {}),
     aspect_ratio: typeof value.aspect_ratio === 'string' && ratios.has(value.aspect_ratio) ? value.aspect_ratio : '1:1',
     author: {
-      displayName,
+      displayName: handle === 'vanta' ? 'VANTA' : displayName,
       handle,
       avatarUrl,
     },
@@ -200,7 +200,9 @@ export function getFollowedStars(): string[] {
   try {
     const stored = localStorage.getItem(FOLLOWED_STARS_STORAGE_KEY);
     if (!stored) return [];
-    return JSON.parse(stored);
+    const parsed: unknown = JSON.parse(stored);
+    if (!Array.isArray(parsed)) return [];
+    return Array.from(new Set(parsed.map(normalizePublicParticipantHandle).filter((handle): handle is string => Boolean(handle))));
   } catch {
     return [];
   }
@@ -209,14 +211,15 @@ export function getFollowedStars(): string[] {
 export function isStarFollowed(handle: string): boolean {
   if (typeof window === 'undefined') return false;
   const list = getFollowedStars();
-  return list.includes(handle.toLowerCase());
+  return list.includes(normalizePublicParticipantHandle(handle) || '');
 }
 
 export function toggleFollowStar(handle: string): boolean {
   if (typeof window === 'undefined') return false;
   try {
     const list = getFollowedStars();
-    const normalized = handle.toLowerCase();
+    const normalized = normalizePublicParticipantHandle(handle);
+    if (!normalized) return false;
     let updated: string[];
     let nowFollowing = false;
 

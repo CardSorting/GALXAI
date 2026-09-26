@@ -4,7 +4,7 @@
 
 > [!NOTE]
 > **Status: Current Sites access and admission runbook; separate from Image Studio.**
-> GALX Pro is the Sites workspace plan. This policy does not authorize Image Studio creation: Workshop, Studio, and MAX use their own purchased subscription projection and private allowance reservation. Keep Image Studio prices out of the Sites price allowlist.
+> New Sites subscription sales are closed. Historical GALX Pro eligibility and infrastructure remain intact. Foundry is separate private creation; Orbit is Star patronage. Neither grants Sites. Keep both products out of the Sites price allowlist. See [commercial retirement](ORBIT_FOUNDRY.md).
 
 Private maintainer runbook for [ADR 0140](../adr/0140-paid-sites-and-shared-fair-usage.md). Never expose this page, policy objects, private diagnostics or the supplied handoff/fixture in public assets. The historical user contract was [Sites content](../SITES_CONTENT.md).
 
@@ -122,9 +122,10 @@ The launch record below is historical evidence for the Sites policy. It is not
 the current public pricing authority. An earlier Image Studio catalog listed
 GALX Pro, Creator, Studio and MAX as monthly subscriptions; that historical
 listing is not current offer language or proof of present catalog state. Current
-Image Studio plan names are Workshop, Studio and MAX, separate from the
-Sites-only GALX Pro plan. Image checkout remains fail-closed until the public
-catalog and approved private allowance configuration are verified. Developer
+private-creation sales are Foundry only, separate from Orbit and historical
+Sites-only GALX Pro. All new live recurring checkout remains closed pending
+payment release acceptance; the owner deferred tax readiness as a rollout
+prerequisite. Legacy names remain only for historical reconciliation. Developer
 Access is not a public subscription or self-service API product; private access
 is deliberate administrator provisioning with bounded allocation and metering.
 Do not use the older Sites, Standard, prepaid, compute-pack, Creator or
@@ -145,11 +146,11 @@ At the time of the historical launch, application commit `8d82351` was deployed 
 | Snapshot / refresh / admission / reserved grant | 5 seconds / 2,000 ms / 4,000 ms / 3,000 ms | Fresh local evidence with bounded shared admission |
 | Attempts / request deadline | 1 / 45 seconds | Preserve single dispatch and existing receipt recovery |
 
-The historical provisioning procedure was `npm run sites:provision -- --prepare /absolute/private/policy.json`, followed by the reviewed policy action. Do not use it to recreate an old Sites, prepaid, or Developer catalog. Current Stripe catalog changes follow the private GALX Pro procedure and the current [billing page contract](../reference/billing-pages.md); private developer access is administered in `/admin`, not provisioned through Stripe. No live provisioning action is authorized by this guide.
+The historical provisioning procedure was `npm run sites:provision -- --prepare /absolute/private/policy.json`, followed by the reviewed policy action. Do not use it to recreate an old Sites, prepaid, or Developer catalog. Current Stripe catalog changes follow [Orbit and Foundry](ORBIT_FOUNDRY.md) and the current [billing page contract](../reference/billing-pages.md); private developer access is administered in `/admin`, not provisioned through Stripe. No live provisioning action is authorized by this guide.
 
 The historical Sites launch used an older commercial term and access policy; that term is not current pricing. The current `GET /api/billing/plan` response exposes only the verified consumer plan terms, active catalog offers, access state, checkout availability, payment-profile presence and an allowlisted subscription summary. Its POST accepts a server-generated checkout request ID plus an allowlisted plan selection, or a portal action; it never accepts caller-selected prices, customers, quantities, URLs or subscription authority. It contains no provider identifiers. Incomplete, foreign or ambiguous results disable new checkout; existing billing management remains reachable.
 
-Billing has dedicated [Plan, Credits, Transactions, Invoices and Payment settings pages](../reference/billing-pages.md) under a persistent account layout. Pricing and Pro upgrade actions open `/billing/plan`; `/billing` summarizes access and existing account credit separately. No public private-access page or checkout is exposed. Old checkout return URLs and section bookmarks continue into the relevant canonical page. The existing private return-path migration remains a prerequisite for the Pro checkout writer where it has not already been applied. These navigation rules do not alter paid-access or ledger authority.
+Billing has dedicated [Plan, Credits, Transactions, Invoices and Payment settings pages](../reference/billing-pages.md) under a persistent account layout. New Pro checkout paths are retired. `/billing/plan` presents Foundry and the VANTA Orbit canary; `/billing` summarizes access and existing account credit separately. No public private-access page or checkout is exposed. Old checkout return URLs and section bookmarks continue into the relevant canonical page. The existing private return-path migration remains a prerequisite for the Pro checkout writer where it has not already been applied. These navigation rules do not alter paid-access or ledger authority.
 
 `private.galx_plan_checkouts` permits one open subscription attempt per account. A short database transaction claims its durable lease; all Stripe calls run outside transactions. Identical provider parameters and idempotency keys survive lost acknowledgements. Another browser resumes the current checkout. An old uncertain attempt without a session reference remains closed for operator review rather than risking a second subscription. Checkout completion is not itself proof of paid access.
 
@@ -166,7 +167,7 @@ disabled. A missing, ambiguous or broader configuration fails closed instead of
 falling back to the account default. Historical purchases never create private
 Developer access.
 
-No active tax registrations were found. Provisioning leaves automatic tax disabled and does not create registrations or change existing tax settings. Review registrations and subscription tax collection before a later tax rollout; enabling an option alone is not registration.
+No active tax registrations were found in the September 26 inspection. Provisioning leaves automatic tax disabled and does not create registrations or change existing tax settings. The owner subsequently deferred tax readiness as a rollout prerequisite; payment release acceptance remains separate. The default tangible-goods tax code remains an unresolved digital-product classification finding, not a compliance determination; enabling an option alone is not registration.
 
 The historical verification evidence remains linked for its original Sites decision. Current verification is defined by [billing pages](../reference/billing-pages.md): `npm run test:stripe`, `npm run test:billing:lifecycle`, the reviewed-access tests, TypeScript, lint, production build and rendered public-page/asset scans. Those checks do not establish a live rollout or hosted payment acceptance.
 

@@ -377,14 +377,15 @@ ${agentMarkdown}
 
   if (command === 'tiers' || command === 'pricing') {
     console.log('\nGALX pricing strategy');
-    console.log('  GALX Pro: $10 USD / month for the consumer image experience.');
-    console.log('  GALX Nova Developer Access: $50 USD / month recurring for API access.');
-    console.log('  Usage is billed separately; no usage credits are included.\n');
+    console.log('  GALX: public discovery and following; no subscription required.');
+    console.log('  Orbit: $10 USD / Star / month for designated digital patron works.');
+    console.log('  Foundry: $200 USD / month for bounded private creation.');
+    console.log('  New subscriptions are not available yet. New Sites sales are closed.\n');
     return;
   }
 
   if (command === 'stripe') {
-    console.error('The legacy prepaid Stripe catalog is retired. Provision and manage the GALX Pro subscription through the private Pro billing procedure.');
+    console.error('Legacy commercial offers are retired. Use the reviewed Orbit/Foundry catalog procedure; live paid launch requires explicit tax readiness.');
     process.exitCode = 1;
     return;
     /* Legacy pack provisioning retained below for historical source review only. */

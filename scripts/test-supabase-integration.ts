@@ -9,6 +9,7 @@
 
 import './lib/require-isolated-integration-env.js';
 import { randomUUID } from 'node:crypto';
+import { rejects } from 'node:assert/strict';
 import {
   WorkspaceRepository,
   ProjectRepository,
@@ -564,16 +565,16 @@ async function runTests() {
       'Batch Micro-Metering: Executes multi-request token deduction in 1 batch'
     );
 
-    // 25. Zero-Egress Multimodal Asset Storage (Cloudflare R2)
-    const r2Asset = await galxDb.assets.uploadAsset({
-      data: Buffer.from('fake-image-bytes-from-dalle3'),
+    // 25. This database fixture deliberately has no remote storage credentials.
+    // The retired generic upload/public-URL contract must not be restored.
+    // Positive sanitization/private-upload coverage lives in test-private-image-storage.ts.
+    await rejects(() => galxDb.assets.uploadUserSessionImage({
+      userId: testDevUser,
+      data: Buffer.from('untrusted-image-fixture'),
       contentType: 'image/png',
-      folder: 'dalle_outputs'
-    });
-    assert(
-      r2Asset.publicUrl.includes('assets.galx.ai') && r2Asset.sizeBytes > 0,
-      'Cloudflare R2 Adapter: Ingests multimodal binary asset with 0 database egress'
-    );
+      workClass: 'private',
+    }), /Private image storage unavailable/);
+    assert(true, 'Cloudflare R2 Adapter: Missing private storage fails closed before upload');
 
     // 26. Fluent galxDb Facade & Batch Buffer
     galxDb.batch.enqueueTelemetry({ provider: 'openai', modelId: 'gpt-5.6-sol', shardId, latencyMs: 145 });

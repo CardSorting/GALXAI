@@ -24,7 +24,7 @@ export default function UsagePricingPage() {
         <p className="mt-3 max-w-2xl text-sm leading-7 text-zinc-400">When GALX authorizes a private integration, its allocation and operating terms are established directly with that cohort. Metering remains first-class infrastructure and does not imply general commercial availability.</p>
       </section>
       <nav className="mt-8 flex flex-wrap gap-x-6 gap-y-3 text-sm" aria-label="Usage actions">
-        <Link href="/pricing" className="inline-flex min-h-11 items-center px-2 py-2.5 text-cyan-300 underline underline-offset-4 hover:text-cyan-200">Review GALX Pro</Link>
+        <Link href="/pricing" className="inline-flex min-h-11 items-center px-2 py-2.5 text-cyan-300 underline underline-offset-4 hover:text-cyan-200">Review Orbit and Foundry</Link>
       </nav>
     </main>
   </div>;

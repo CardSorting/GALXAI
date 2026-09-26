@@ -5,9 +5,21 @@ primary_target: "src/app/page.tsx"
 related_targets: ["src/components/home/PublicHome.tsx","src/components/home/HomeMotion.tsx","src/components/home/use-story-entrance.ts","src/components/home/GalaxyScene.tsx","src/components/home/GalaxyFormation.tsx","src/components/home/use-galaxy-interactions.ts","src/components/home/SitesExample.tsx","src/components/home/PlanAction.tsx","src/components/home/public-home.module.css","route:/"]
 ---
 
-# Sites homepage
+# GALX homepage
 
 Built visual record: [scoped homepage DESIGN.md](../../src/components/home/DESIGN.md). It records the implemented homepage extension; this brief retains its product strategy and section sequence.
+
+## Discovery refinement — September 25, 2026
+
+The current homepage serves visitors discovering published Star Works. This code-led refinement extends its established dark visual world; no new visual-world seed or composition was required. The user requested familiar discovery navigation in place of the “Explore & collect” $0 feature table. Public discovery is open to everyone, with no subscription needed to explore; private creation remains a separate capability with plans and usage limits.
+
+After About and before FAQ, `#discover` pairs “Find your next favorite.” and an access explanation with three full-row destinations: Explore the work (`/explore`), Find your Stars (`/stars`), and Keep what inspires you (`/collections`). The Collections destination visibly says “Saved in this browser.” An understated creation-plan link to `/pricing` follows the list. No price figure, comparison table, or discovery tier remains in this section. The legacy `#pricing` fragment still lands here for compatibility.
+
+Keep divider-only rows, trailing arrows, native link/list semantics, visible keyboard outlines, and introduction-first stacking at 760px and below. The chapter bar reads Releases, About, Discover, FAQ; its Discover link targets `#discover`. Preserve reduced-motion and pause behavior; the destination list arrives as one block, without per-row choreography. Typography and spacing are recorded in the scoped design guide.
+
+Scope and evidence: this entry describes the built source, not deployment acceptance. The homepage hero, shared shell, existing Star spotlight, and other routes are outside this discovery refinement. The older Sites brief below is dated historical context, not current product guidance; [PRODUCT.md](../../PRODUCT.md) and the current source own present product behavior.
+
+## Historical Sites homepage brief — September 13, 2026
 
 Mode: Persuade. Primary target is `/`, not `/pricing` or the Sites editor. Extend the existing GALX dark identity and galaxy asset with a Sites-led story: first version, unlimited revisions and conversation turns under fair use, included public GALX address, one real $20/month GALX Pro pricing table, then a conceptual beta FAQ. Images remains accessible; developer access remains private and secondary.
 

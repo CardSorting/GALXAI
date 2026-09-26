@@ -1,0 +1,54 @@
+{
+  "classification": "private",
+  "reviewed_at": "2026-09-25T22:58:00Z",
+  "scope": "Record production recovery after hosted Git builds failed to resolve relay dependencies stored in local sibling repositories.",
+  "incident": "INC-20260925-CHECKOUT",
+  "source": {
+    "repository": "CardSorting/GALXAI",
+    "branch": "main",
+    "commit": "63b54f8",
+    "pushed": true
+  },
+  "failed_build": {
+    "deployment": "galxai-28knkpzh1-cardsortings-projects.vercel.app",
+    "status": "Error",
+    "error": "Cannot find module '../../BroccoliDB/src/broccolidb-kernel.js'",
+    "cause": "The hosted Git build checks out GALXAI without its independent sibling repositories, while the relay source imported files from those local paths.",
+    "impact": "The previous Ready production deployment remained serving; no interruption was observed."
+  },
+  "correction": {
+    "application_packages": {
+      "@noorm/broccolidb": "CardSorting/ABroccoliDB at f085f3f5dbceadc4cd6752b081ebfc51b02fe3f7",
+      "broccoli-queue": "CardSorting/BROCCOLIQUEUE at c38a7db40e8bcaf99c7f83af755c5e43a6d7feec"
+    },
+    "resolution": "The root manifest and lockfile pin immutable HTTPS archives; relay application source imports package entry points.",
+    "local_docker": "Dockerfile.relay-services keeps the local sibling source copies and explicit esbuild aliases.",
+    "repository_boundary": "BroccoliDB and BROCCOLIQUEUE remain independent repositories and are ignored by the GALXAI root repository."
+  },
+  "production_deployment": {
+    "id": "dpl_93E4W7Jxofbo8dPSG9JULhCn6s9w",
+    "url": "https://galxai-acalu9fs2-cardsortings-projects.vercel.app",
+    "status": "Ready",
+    "aliases": [
+      "https://galx.ai",
+      "https://www.galx.ai"
+    ],
+    "build": "Clean Git checkout at commit 63b54f8 installed both pinned packages, compiled successfully, passed type validation, generated 155 static pages, and completed in 3 minutes."
+  },
+  "live_acceptance": {
+    "cache": "PASS: 38 live cache checks; private routes uncached and versioned assets immutable.",
+    "public_http": "PASS: preflight, protected diagnostics, public schema, rendered pages, and 38 browser assets.",
+    "premium_relay": {
+      "image": "galxai-relay-premium:queue-hardening-20260925-r4",
+      "image_id": "sha256:4f9ca6fb2e528d3dd9cdb4e1b69f2d6eb717af20987335a10b932c6bb6ab4713",
+      "container_id": "cfee243ca950",
+      "status": "running",
+      "readiness": "{\"ok\":true}",
+      "changed_by_this_release": false
+    }
+  },
+  "limits": [
+    "This release changed dependency resolution and local image bundling only; it did not alter product behavior or database schema.",
+    "No provider generation, Star activation, queue mutation, account-policy change, or Docker restart was performed."
+  ]
+}

@@ -89,7 +89,6 @@ test('all billing entry points can use only the unique restricted cancellation p
 
 test('browser contract allowlists display fields and rejects malformed status', () => {
   const status = { access: 'included', checkoutAvailable: false, hasPaymentProfile: false, offers: [
-    { id: 'pro', name: 'GALX Pro', audience: 'For the GALX Sites workspace.', monthlyPriceUsd: 10, checkoutAvailable: false, allowance: null },
     ...IMAGE_PLAN_OFFERS.map(plan => ({ id: plan.id, name: plan.name, audience: plan.audience,
       monthlyPriceUsd: plan.monthlyPrice, checkoutAvailable: false, allowance: plan.allowance })),
   ], subscription: { state: 'none', periodEnd: null, endsAt: null },
@@ -98,7 +97,9 @@ test('browser contract allowlists display fields and rejects malformed status', 
   assert.equal(parsePlanStatus({ ...status, subscription: { ...status.subscription, periodEnd: 'bad date' } }), null);
   assert.equal(parsePlanStatus({ ...status, subscription: { ...status.subscription, state: 'PRIVATE_SENTINEL' } }), null);
   assert.equal(parsePlanStatus({ ...status, checkoutAvailable: 'true' }), null);
-  assert.equal(parsePlanStatus({ ...status, offers: [{ ...status.offers[1], id: 'creator' }] }), null);
+  for (const id of ['creator', 'workshop', 'studio', 'max', 'pro']) {
+    assert.equal(parsePlanStatus({ ...status, offers: [{ ...status.offers[0], id }] }), null);
+  }
 });
 
 test('image allowance activation uses the canonical approved configuration and fails closed when invalid', async () => {

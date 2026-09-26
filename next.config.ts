@@ -172,6 +172,11 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
+        source: '/profile/veyrasol',
+        destination: '/profile/vanta',
+        permanent: true,
+      },
+      {
         // Retired public catalog/benchmark hubs still contain historical
         // economics and implementation claims. Keep the roots aligned with
         // the current public landing surface; the more-specific redirects below

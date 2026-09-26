@@ -97,10 +97,10 @@ components:
   faq-disclosure:
     textColor: "{colors.foreground}"
   plan-card:
-    backgroundColor: "{colors.surface}"
+    backgroundColor: "rgba(13,16,28,.58)"
     textColor: "{colors.foreground}"
     rounded: "{rounded.plan}"
-    padding: "32px"
+    padding: "24px"
 ---
 
 # Design System: GALX public reading surfaces
@@ -134,7 +134,7 @@ Cool dark neutrals carry the reading hierarchy; the indigo family marks interact
 
 - **Page and header grounds** (`page-ground`, `header-ground`): the body utility supplies the page ground; the shared header uses the background custom property. The page component itself is transparent.
 - **Reading ink** (`foreground`, `reading-muted`): headings and controls use the light foreground; paragraphs, descriptions, labels, and supporting terms use the brighter muted tone extracted for these reading pages.
-- **Inset surface** (`surface`): plan card, search field, and example request background.
+- **Inset surface** (`surface`): search field and example request background; the Foundry offer uses a translucent variant recorded in its component token.
 - **Separation** (`reading-line`, `field-border`): thin dividers organize content; the search field has a stronger visible boundary.
 - **Topic hover** (`filter-hover`): a small tonal lift on unselected topic buttons.
 
@@ -156,7 +156,7 @@ Cool dark neutrals carry the reading hierarchy; the indigo family marks interact
 - **Label** (regular, .875rem): search labels, topic buttons, and chapter links. Breadcrumbs, chapter captions, and plan terms use .8125rem; guide categories use .75rem.
 - **Action** (weight 600, 1rem): primary actions. Underlined secondary links remain regular weight.
 
-Introductions use 1.125rem with 1.75 leading and a 58ch maximum, reducing to 1rem on narrow screens. Guide descriptions use 1rem with 1.65 leading and a 70ch maximum, reducing to .875rem on mobile. FAQ summaries use 1rem, weight 500, and 1.6 leading. The price figure is a local 3.75rem treatment with tabular numerals, weight 600, line height 1, and −.04em tracking. Headings balance; introductions and article paragraphs use pretty wrapping.
+Introductions use 1.125rem with 1.75 leading and a 58ch maximum, reducing to 1rem on narrow screens. Guide descriptions use 1rem with 1.65 leading and a 70ch maximum, reducing to .875rem on mobile. FAQ summaries use 1rem, weight 500, and 1.6 leading. Orbit and Foundry price figures use 1.5rem, weight 600, tabular numerals, and −.02em tracking; their billing units use a smaller regular label. Headings balance; introductions and article paragraphs use pretty wrapping.
 
 **The Reading Measure Rule.** Preserve the 72ch article maximum and generous paragraph leading when adding guides to this family.
 
@@ -164,9 +164,9 @@ Introductions use 1.125rem with 1.75 leading and a 58ch maximum, reducing to 1re
 
 The centered reading container has a maximum width of 1160px and padding of 32px 32px 88px. Breadcrumbs precede the introduction with a 44px lower margin. Major supporting sections use a 72px top gap. Guide rows separate content with 24px vertical padding and a 24px gap before their arrow. Support follows a top rule, 64px outer gap, and 32px inner padding.
 
-Pricing pairs its introduction and plan in columns of .95fr and 1.05fr with a 72px gap. Article and FAQ layouts use a 220px chapter rail, a flexible content column, and a 64px gap. The rail is sticky 28px from the viewport top; chapter anchor targets reserve the same scroll margin. The search field caps its width at 720px. Topics wrap in a row with 8px gaps. Result headings and counts wrap while keeping their source order.
+Pricing leads with an introduction capped at 760px, followed by a divided free-discovery row, separate Orbit and Foundry sections, allowance guidance, and related reading. The discovery row wraps its copy and exploration link with a 24px by 40px gap. Foundry currently occupies one track of the existing three-column offer grid, which becomes a single column at 900px; do not fabricate additional offers to fill it. Article and FAQ layouts use a 220px chapter rail, a flexible content column, and a 64px gap. The rail is sticky 28px from the viewport top; chapter anchor targets reserve the same scroll margin. The search field caps its width at 720px. Topics wrap in a row with 8px gaps. Result headings and counts wrap while keeping their source order.
 
-At 900px and below, pricing and reading gaps reduce to 32px, the chapter rail narrows to 180px, and the plan padding becomes 24px. At 680px and below, the page uses 20px side gutters and 64px bottom padding. Pricing, reading, and other-product columns stack with a 32px gap. The chapter rail becomes a static full-width list above the article, gains a lower divider, and hides its redundant return link. Breadcrumbs remain available and wrap. Plan padding becomes 24px 20px; section gaps become 48px; article section gaps become 36px. FAQ answers use the full content width.
+At 900px and below, reading gaps reduce to 32px and the chapter rail narrows to 180px. At 680px and below, the page uses 20px side gutters and 64px bottom padding. Pricing introduction links stack and its bottom padding reduces to 32px. Reading columns stack with a 32px gap. The chapter rail becomes a static full-width list above the article, gains a lower divider, and hides its redundant return link. Breadcrumbs remain available and wrap. The Foundry offer retains 24px padding; section gaps become 48px and article section gaps become 36px. FAQ answers use the full content width.
 
 The shared header becomes a single row at 1100px. Below that point, the brand and account action sit above a horizontally scrollable navigation row; keyboard focus brings an overflowed link into view. It does not automatically scroll the active label into view. The public reading routes have no workspace bottom navigation. Preserve normal document scrolling and native anchor destinations.
 
@@ -188,7 +188,7 @@ Primary links and recovery buttons are centered inline-flex controls with a 10px
 
 All local links, buttons, inputs, and summaries have a pale indigo focus-visible outline (2px), a 4px offset, and the focus radius. The search field provides its own focus-within outline with a 3px offset; its input suppresses the duplicate outline. Reduced motion disables local transitions and smooth scrolling while keeping immediate focus and state feedback.
 
-[PlanAction](../home/PlanAction.tsx) accepts both wrapper and action classes so pricing surfaces use this family's indigo treatment. The wrapper stacks its action and explanation with a 16px gap; supporting text uses .8125rem and 1.7 leading. Signed-in visitors continue to `/billing/plan`; guests continue through sign-in with that destination retained. Its adjacent copy explains plan review, monthly renewal, and cancellation. The link does not itself subscribe or charge the visitor.
+Pricing currently uses exploration, VANTA profile, and private-workspace status links. It does not render a purchase action while new subscriptions are unavailable. Preserve the distinction between navigation, account review, and an explicit subscription checkout.
 
 ### Search and topic filters
 
@@ -216,7 +216,9 @@ Native `details` and `summary` pairs provide disclosure semantics and keyboard b
 
 ### Plan and support containers
 
-The plan card is the sole bordered offer container. Its name, tabular price, inclusion list, action, and terms remain in normal document order. Inclusion checks are decorative and accompany complete text; horizontal rules separate the list. Offer values come from the existing plan and public-content sources, not duplicated visual constants.
+Free discovery has a divided row with an exploration link and browser-local collection note, not a $0 plan card. Orbit uses an open section with its $10 USD per Star per month price, scope, unavailable status, and VANTA profile link. Foundry uses the bordered offer container with its $200 USD monthly price, published allowance or explicit unavailable allowance, features, and terms in normal document order. The text status badge is not an action. Foundry excludes Orbit and Sites; new Sites subscriptions are closed. New Orbit and Foundry subscriptions remain unavailable pending tax readiness. Offer values come from public product sources, not duplicated visual constants.
+
+The September 26, 2026 finish review accepted local Orbit and Foundry pricing captures at 1440px and 390px in `.impeccable/review/discovery-refinement/`. This is dated local visual evidence; it does not establish deployment or account-payment acceptance. No new assets were generated.
 
 Support uses a divided, wrapping row with a heading, short paragraph, and underlined mail link. It opens the visitor's mail application and provides no form-submission or delivery-success state.
 

@@ -2,7 +2,7 @@
 
 <!-- docs-scope: current-guide -->
 
-Current product authority, reconciled September 25, 2026. [PRODUCT.md](../PRODUCT.md)
+Current product authority, reconciled September 26, 2026. [PRODUCT.md](../PRODUCT.md)
 summarizes the customer experience; [current state](../post-mortem/CURRENT_STATE.md)
 records deployment and acceptance evidence.
 
@@ -18,6 +18,24 @@ The public proposition remains **“Discover what the Stars are making. No
 prompting. Just discovery.”** The homepage leads with discovery, not an empty
 prompt. Private creation is a separate authenticated capability and is not
 advertised as free or unlimited.
+
+## Independent commercial relationships
+
+GALX itself has no paid or zero-dollar tier. **Orbit — $10 USD / Star / month**
+supports one Star and provides designated patron-only digital work from its
+practice. **Foundry — $200 USD / month** provides bounded private creation.
+Neither is an upgrade to the other. Following stays free; multiple Orbits are
+independent. No Orbit grants generation, commissions, prompting, creative
+control, publishing authority or Sites. Foundry does not include Sites.
+
+New Sites sales and legacy $15/$35 offers are retired without deleting their
+infrastructure or financial history. All new live recurring checkout remains
+disabled pending payment release acceptance. The owner deferred tax readiness as
+a rollout prerequisite on September 26, 2026; no tax configuration or compliance
+determination is implied. The only approved public
+identity migration is Veyra Sol → VANTA, with immutable identity and history
+preserved. Other Star naming proposals are not approved migrations. See the
+[commercial implementation guide](maintainers/ORBIT_FOUNDRY.md).
 
 ## Inference Boundary
 
@@ -46,7 +64,10 @@ reconciliation.
 > network. Public publishing is reserved for authorized GALX/HEAV3NS-operated
 > Stars.
 
-Published Work and Private Work are distinct domain classes. Private Work has
+Public Star Work, patron-accessible Star Work and private human Work are distinct
+access relationships. Patron access applies only to explicitly designated,
+provenance-backed Star material and never changes public exhibition or grants
+creative authority. Human Private Work has
 no visibility toggle and cannot be upgraded, shared to Explore, submitted to a
 Series, or exposed through public profiles, feeds, search, recommendations,
 sitemaps, or another user's library. Do not create a creator tier, Star

@@ -1,4 +1,5 @@
 import { GalxCryptoVault } from '@/core/vault/GalxCryptoVault';
+import { historicalStarHandle } from './star-public-identity';
 import { executePostgresQuery } from '@/lib/db/postgres';
 import type { PublicFeedItem } from '@/app/api/images/feed/route';
 import {
@@ -73,9 +74,9 @@ export function mapPublicParticipantProfileRow(
   const rawCreationCount = Number(row.creation_count);
 
   return {
-    displayName: publicText(row.display_name, normalizedHandle, 120),
+    displayName: normalizedHandle === 'vanta' ? 'VANTA' : publicText(row.display_name, normalizedHandle, 120),
     handle: normalizedHandle,
-    bio: publicText(row.bio, '', 500),
+    bio: normalizedHandle === 'vanta' ? publicText(row.bio, '', 500).replaceAll('Veyra Sol', 'VANTA') : publicText(row.bio, '', 500),
     interests,
     avatarUrl: sanitizePublicImageUrl(row.avatar_url),
     participantKind: 'star',
@@ -108,7 +109,7 @@ export function mapPublicParticipantCreationRow(row: Record<string, unknown>): P
     likes_count: Number.isFinite(Number(row.likes_count)) ? Math.max(0, Number(row.likes_count)) : 0,
     views_count: Number.isFinite(Number(row.views_count)) ? Math.max(0, Number(row.views_count)) : 0,
     author: {
-      displayName: publicText(row.author_display_name, 'GALX creator', 120),
+      displayName: normalizePublicParticipantHandle(row.author_handle) === 'vanta' ? 'VANTA' : publicText(row.author_display_name, 'GALX creator', 120),
       handle: normalizePublicParticipantHandle(row.author_handle),
       avatarUrl: sanitizePublicImageUrl(row.author_avatar_url),
       participantKind: 'star',
@@ -128,9 +129,9 @@ export class PublicParticipantRepository {
         SELECT display_name, handle, bio, avatar_url, interests,
                creation_count
         FROM public.community_participant_profiles
-        WHERE handle = $1 AND participant_kind = 'star'
+        WHERE handle = ANY($1::text[]) AND participant_kind = 'star'
         LIMIT 1
-      `, [normalized]);
+      `, [[normalized,historicalStarHandle(normalized)]]);
 
       if (result && result.rows[0]) {
         return mapPublicParticipantProfileRow(result.rows[0] as Record<string, unknown>, normalized);
@@ -165,9 +166,9 @@ export class PublicParticipantRepository {
 
     const boundedLimit = Math.max(1, Math.min(options.limit ?? 24, 48));
     const cursor = decodeCreationCursor(options.cursor);
-    const params: Array<string | number> = [normalized];
+    const params: Array<string | number | string[]> = [[normalized,historicalStarHandle(normalized)]];
     const conditions = [
-      'author_handle = $1',
+      'author_handle = ANY($1::text[])',
       "participant_kind = 'star'",
     ];
     let paramIndex = 2;

@@ -2,6 +2,93 @@
 
 <!-- docs-scope: current-guide -->
 
+### Orbit release fixture and source review — local acceptance — 2026-09-26
+
+The obsolete generic asset-upload fixture is repaired without changing the
+production adapter or weakening isolation. The general database suite passes
+94 checks; scoped image database checks pass 96; all 157 migration/rollback
+pairs pass static validation. Private storage, Orbit, image-security,
+billing-lifecycle, session and documentation tests pass. The production build
+passes type validation and generates 155 static pages.
+
+The [bounded source/guide review](releases/2026-09-26-orbit-release-review.json)
+reconciles the nine affected domains and corrects remaining active-guide tax
+prerequisite claims. Tax remains deferred, not certified. The two excluded
+pre-existing documentation links remain unchanged. No production deployment or
+shared migration occurred; paid launch still needs provider end-to-end testing
+and designated VANTA patron work. Earlier failed prechecks below are retained
+as dated evidence, not the current fixture result.
+
+### Orbit / Foundry — rollout instruction updated — 2026-09-26
+
+The owner authorized continued rollout and deferred the tax-readiness launch
+prerequisite. Tax findings below remain dated observations, not a current rollout
+prohibition or compliance determination. No tax settings were changed. Payment
+provider end-to-end acceptance and designated VANTA patron material remain
+outstanding. Fresh migration inventory still reports 156 applied and one pending.
+Release checks also identify stale source/guide reviews in addition to the two
+pre-existing documentation links the owner excluded from repair. No application
+deployment or database migration has occurred during this follow-up.
+The [fresh precheck evidence](releases/2026-09-26-orbit-rollout-followup.json)
+records 22 passing Orbit tests and the reproduced general database fixture
+failure (`uploadAsset` is not a function), after all 157 migrations applied
+successfully in the disposable fixture. Production migration remains pending.
+
+### Orbit / Foundry — live catalog retirement, local implementation — 2026-09-26
+
+The approved commercial retirement archived six obsolete Stripe prices after
+rechecking zero subscriptions, schedules and open checkouts. No subscriber or
+financial history was changed. Orbit VANTA ($10/Star/month) and Foundry
+($200/month) were prepared as separate inactive products/prices. Live recurring
+checkout was kept closed under the original tax-readiness prerequisite: zero
+active tax registrations and an unreviewed tangible-goods default code were
+observed. The follow-up decision above supersedes that prerequisite. No tax
+settings were changed.
+
+The VANTA alias, protected patron works, independent entitlements and period-end
+cancellation are local source only. Migration status is 156 applied and one
+pending; the application is not deployed. No additional Star was renamed and
+no live patron work was designated. The [implementation evidence](releases/2026-09-26-orbit-foundry-implementation.json)
+separates the catalog actions from local tests and remaining rollout gates.
+The [eleven-Star proposal](../docs/maintainers/STAR_IDENTITY_PROPOSAL.md) is for
+review only; eight practices have no completed work yet. Existing hosted
+deployment evidence below remains authoritative for the application.
+
+### Homepage discovery refinement — local only — 2026-09-26
+
+The homepage archive completion card now reserves its full height, and the
+discovery section and pricing introduction describe no-subscription browsing
+without a zero-dollar tier. Local production build, boundary tests, and
+desktop/tablet/phone fixture checks passed. The scoped visual review found no
+material issue in the supplied captures. This is not hosted recovery: the
+production deployment below remains the last verified deployment. See the
+[local UX evidence](releases/2026-09-26-discovery-ux-local.json) and
+[archive overlap incident](incidents/2026/2026-09-25-home-archive-overlap/README.md).
+ACT-037 retains deployment acceptance; documentation link/review failures remain
+separate from the passing local UI checks.
+
+### Clean-checkout deployment recovery — production verified — 2026-09-25 22:58 UTC
+
+Root commit 63b54f8 is deployed to production as Vercel deployment
+dpl_93E4W7Jxofbo8dPSG9JULhCn6s9w. The clean Git checkout compiled, passed
+type validation, and generated 155 static pages. The production aliases
+galx.ai and www.galx.ai point to the Ready deployment. The earlier failed
+builds did not interrupt the previous Ready release.
+
+Live acceptance passed 38 cache checks and the public image HTTP boundary
+check, which covered preflight, protected diagnostics, public schema, rendered
+pages, and 38 browser assets. The clean-checkout source boundary now uses
+immutable package snapshots; the local relay image continues to bundle source
+from the two independent package repositories. The Premium relay remains on
+the existing R4 image and readiness returned {"ok":true}. This packaging
+release changed no database schema or queue state, submitted no generation,
+and did not restart Docker.
+
+See the [private production recovery record](releases/2026-09-25-clean-checkout-package-boundary-production.json)
+and [incident record](incidents/2026/2026-09-25-clean-checkout-build/README.md).
+The [local verification record](releases/2026-09-25-clean-checkout-package-boundary-local.json)
+retains package checks and bundle evidence.
+
 ### BROC selection and historical-work continuity — production verified — 2026-09-25 22:26 UTC
 
 The linked application database has 156 migrations applied, with no pending

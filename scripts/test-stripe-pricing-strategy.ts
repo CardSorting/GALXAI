@@ -34,12 +34,12 @@ assert.equal('prices' in USAGE_PRICING, false);
 assert.deepEqual(IMAGE_PLAN_CATALOG.map(plan => [plan.id, plan.monthlyPriceUsd, plan.stripeLookupKey]), [
   ['creator', 15, 'galx_images_creator_monthly_v1'],
   ['studio', 35, 'galx_images_studio_monthly_v1'],
-  ['max', 200, 'galx_images_team_monthly_v1'],
+  ['max', 200, 'galx_foundry_monthly_v1'],
 ]);
-assert(IMAGE_PLAN_CATALOG.every(plan => plan.catalogStatus === 'active' && plan.checkoutEnabled === true));
+assert.deepEqual(IMAGE_PLAN_CATALOG.filter(plan => plan.checkoutEnabled).map(plan => plan.publicId), ['foundry']);
 assert.deepEqual(IMAGE_PLAN_OFFERS.map(plan => [plan.id, plan.monthlyPrice, plan.allowance?.monthlyUnits,
   plan.allowance?.standardOutputUnits, plan.allowance?.hdOutputUnits]), [
-  ['workshop', 15, 100, 1, 2], ['studio', 35, 500, 1, 2], ['max', 200, 2_000, 1, 2],
+  ['foundry', 200, 2_000, 1, 2],
 ]);
 assert.doesNotMatch(JSON.stringify(IMAGE_PLAN_OFFERS), /stripeProductId|stripeLookupKey|planKey|price_/);
 
@@ -51,11 +51,11 @@ const priceProvider = { prices: { list: async (input: any) => {
 } } } as any;
 assert.equal((await developerPrice(priceProvider)).id, price.id);
 
-const creator = IMAGE_PLAN_CATALOG.find(plan => plan.id === 'creator')!;
+const creator = IMAGE_PLAN_CATALOG.find(plan => plan.id === 'max')!;
 const approvedAllowanceFixture = IMAGE_ALLOWANCE_CONFIGURATION;
 const unapprovedCreatorConfiguration = {
   ...IMAGE_ALLOWANCE_CONFIGURATION,
-  plans: { ...IMAGE_ALLOWANCE_CONFIGURATION.plans, 'creator-v1': { status: 'UNAPPROVED' as const } },
+  plans: { ...IMAGE_ALLOWANCE_CONFIGURATION.plans, 'team-v1': { status: 'UNAPPROVED' as const } },
 } satisfies ImageAllowanceConfiguration;
 const imagePrice = { id: 'price_creator', product: creator.stripeProductId, metadata: { galxPlan: creator.planKey, galxPublicPlan: creator.publicId, catalogStatus: 'active', checkoutEnabled: 'true' }, currency: 'usd', unit_amount: creator.monthlyPriceUsd * 100,
   recurring: { interval: 'month', interval_count: 1, usage_type: 'licensed' } } as any;
@@ -101,7 +101,8 @@ assert.equal(providerCalls, 0);
 const response = await stripeConfig();
 const body = await response.json();
 assert.equal(response.status, 200);
-assert.equal(body.consumerPlan.monthlyPriceUsd, 10);
+assert.equal('consumerPlan' in body, false);
+assert.deepEqual(body.offers.map((offer: any) => [offer.id, offer.monthlyPriceUsd, offer.checkoutAvailable]), [['orbit',10,false],['foundry',200,false]]);
 assert.equal('developerAccess' in body, false);
 assert.equal('usagePricing' in body, false);
 assert.equal('packs' in body, false);
@@ -120,4 +121,4 @@ assert.equal((await computePool()).status, 410);
 assert.doesNotMatch(await (await seoRates()).text(), /input_per_1m|discount|rebate|balance/i);
 assert.doesNotMatch(await (await computePool()).text(), /freeGrant|monthlyAllowance|remainingUsd/i);
 
-console.log('Stripe pricing strategy checks passed: Pro remains public, Developer Access checkout is disabled, and legacy purchase routes remain retired.');
+console.log('Stripe pricing strategy checks passed: Orbit and Foundry are independent, live sales and legacy checkout are disabled, and legacy purchase routes remain retired.');

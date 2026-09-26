@@ -182,7 +182,11 @@
         "src/app/collections/page.tsx",
         "src/lib/collections/saved-works.ts",
         "post-mortem/failure-modes/README.md",
-        "post-mortem/failure-modes/images.md"
+        "post-mortem/failure-modes/images.md",
+        "src/app/api/community/follows/route.ts",
+        "src/app/collections/CollectionsClient.tsx",
+        "src/app/collections/page.tsx",
+        "scripts/verify-discovery-ui.mjs"
       ],
       "guides": [
         "docs/QUEUE_SPECIFICATION.md",
@@ -635,6 +639,7 @@
         "scripts/test-cloudflare-workers.ts",
         "scripts/lib/require-isolated-worker-env.ts",
         "scripts/verify-workspace-cache-http.mjs",
+        "post-mortem/failure-modes/README.md",
         ".env.example",
         "scripts/provision-stripe-all.ts",
         "scripts/lib/stripe-webhook-target.ts",
@@ -648,6 +653,7 @@
         "docs/VERCEL_DEPLOYMENT.md",
         "docs/runbooks/release-readiness.md",
         "post-mortem/runbooks/deployment-storage.md",
+        "post-mortem/failure-modes/deployment.md",
         "docs/VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md",
         "docs/CLOUDFLARE_STRATEGY.md",
         "docs/maintainers/CLOUDFLARE_EDGE_MESH_MAINTAINER_RUNBOOK.md",
@@ -826,7 +832,14 @@
         "scripts/verify-hybrid-broccolidb-omnisearch.ts",
         "supabase/migrations/*billing_canonical_returns.sql",
         "supabase/rollbacks/*billing_canonical_returns.down.sql",
-        "next.config.ts"
+        "next.config.ts",
+        "src/app/api/billing/orbit/route.ts",
+        "src/lib/billing/orbit.ts",
+        "src/lib/billing/commercial-launch.ts",
+        "scripts/orbit-commercial-catalog.ts",
+        "scripts/test-orbit.ts",
+        "scripts/verify-orbit-ui.mjs",
+        "docs/adr/0164-orbit-foundry-public-identity.md"
       ],
       "guides": [
         "docs/runbooks/stripe-webhook-delivery.md",
@@ -836,10 +849,12 @@
         "docs/WALLET_AND_BILLING_STRATEGY.md",
         "src/components/home/DESIGN.md",
         "src/components/public-content/DESIGN.md",
-        "docs/maintainers/private-image-accounting.md"
+        "docs/maintainers/private-image-accounting.md",
+        "docs/maintainers/ORBIT_FOUNDRY.md"
       ],
       "checks": [
         "npm run test:billing:lifecycle",
+        "npm run test:orbit",
         "npm run test:sites:plans:db",
         "npm run build"
       ]
@@ -1509,6 +1524,21 @@
       "target": "GALX source and disposable PostgreSQL verification; no shared database migration or application deployment",
       "revision": "working tree under review",
       "acceptance_basis": "The institutional mandate requires an explicit selection decision before new Star work is exhibited."
+    },
+    "docs/adr/0164-orbit-foundry-public-identity.md": {
+      "status": "proposed",
+      "delivery": "local",
+      "domain": "billing",
+      "owner": "Billing maintainer",
+      "date": "2026-09-26",
+      "evidence": [
+        "docs/maintainers/ORBIT_FOUNDRY.md",
+        "supabase/migrations/20260926081213_orbit_public_identity.sql",
+        "scripts/test-orbit.ts"
+      ],
+      "supersedes": [],
+      "target": "Local application and migration; live legacy catalog archived, replacement catalog inactive; no paid launch",
+      "revision": "working tree under review"
     }
   },
   "managed_adr_from": 145,

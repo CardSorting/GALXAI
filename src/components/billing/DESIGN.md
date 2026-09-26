@@ -1,6 +1,6 @@
 ---
 name: GALX Billing — local account workspace
-description: The six Billing pages and their relationship to the Image Studio plan rows.
+description: The six Billing pages, Foundry status, and independent Orbit management.
 colors:
   canvas: "#090b10"
   foreground: "#f4f4f5"
@@ -78,7 +78,7 @@ components:
 
 **Creative North Star: "Established Billing and Pricing"**
 
-This is a local record for the shared `BillingWorkspace.tsx` shell, account state in `BillingProvider.tsx`, the six destinations rendered by `BillingClient.tsx`, and their plan and credit controls. The related Image Studio plan rows are rendered by `src/components/pricing/PricingClient.tsx` through `src/app/pricing/page.tsx`. It extends the existing dark, compact account interface with restrained indigo actions and flat divided sections. It establishes no new product identity or global design rules.
+This is a local record for the shared `BillingWorkspace.tsx` shell, account state in `BillingProvider.tsx`, the six destinations rendered by `BillingClient.tsx`, and their plan and credit controls. Plan renders Foundry status followed by the independent VANTA Orbit panel, whose local visual record is [community/DESIGN.md](../community/DESIGN.md). Public pricing uses the separate [public reading design](../public-content/DESIGN.md). This extends the existing dark, compact account interface with restrained indigo actions and flat divided sections; it establishes no new global identity.
 
 Overview summarizes plan access and any existing account credit, then links to each billing task. The Plan page makes current access, terms, and the next action readable; Credits is a read-only account-credit and history surface. Pricing presents the offer; Billing establishes the account's current status. Product terms remain authoritative in the root `PRODUCT.md` and existing public plan data; this record captures how the interface presents them.
 
@@ -96,13 +96,13 @@ The local palette is a near-black canvas with cool neutral text and a small indi
 
 ### Primary
 
-- **Soft indigo wash** (`action-fill`) and **pale indigo text** (`action-text`) identify the plan's forward action and Pricing's choose-plan links.
+- **Soft indigo wash** (`action-fill`) and **pale indigo text** (`action-text`) identify the plan's forward action and billing task actions.
 - **Indigo outline** (`action-border`) bounds those controls without adding glow.
 - **Quiet indigo** (`link`) identifies task links and the plan controls' keyboard-focus outline. Active Billing navigation uses pale indigo text over a subtle neutral wash.
 
 ### Neutral
 
-- **Near-black canvas** (`canvas`) is shared by Billing and Pricing.
+- **Near-black canvas** (`canvas`) anchors Billing; public Pricing follows its own scoped reading palette.
 - **Bright neutral** (`foreground`) carries headings and secondary controls; **soft neutral** (`body`) carries plan inclusion and unpaid-status text.
 - **Muted neutral** (`muted`) carries supporting terms and loading or unconfirmed status.
 - **Fine divider** (`divider`) separates sections and plan rows. **Control outline** (`control-border`) and **subtle hover wash** (`control-hover`) distinguish secondary actions.
@@ -114,13 +114,13 @@ Success and error messages use the existing emerald and red status treatments wi
 The extension inherits Inter through the existing document font variable and fallback stack. There is no local display face. Semibold page and section headings establish hierarchy above regular body copy and sentence-case controls.
 
 - **Billing page heading:** use `headline` at all widths. Allow words to break when necessary so narrow screens and enlarged text stay within the content column.
-- **Pricing page heading:** use `headline`, changing to `headline-wide` at the small breakpoint.
+- **Public Pricing typography:** follow the public reading record rather than this account heading scale.
 - **Section heading:** use `title` for plan, account-credit and task sections.
 - **Introduction:** use `introduction` below the page title.
 - **Body:** use `body` for plan terms and explanations; brief status lines use the control line height.
 - **Controls and task links:** use `control`. Billing navigation uses the same size with a 1.5rem line height, and medium weight (500) for the active page. Pricing and wallet primary actions also use medium weight (500).
 
-Pricing's plan names use a smaller semibold heading (1.125rem with 1.75rem line height); prices are semibold, tabular-number values (1.5rem with 2rem line height). These remain row-specific roles, not a new global type scale.
+Offer labels retain compact semibold headings and tabular-number prices. These remain account-specific roles, not a new global type scale.
 
 ## Layout
 
@@ -132,23 +132,23 @@ Within the full Plan page, the status heading and Refresh plan control share a w
 
 Credit figures stack below 400px, use two columns from 400px, and expand to three columns on the full Credits page from 1024px. Transactions use a divided list below 640px and a horizontally scrollable table above it. Invoice rows, amounts and actions wrap at narrow widths and enlarged text sizes.
 
-Pricing retains its separate centered 64rem container, 2rem top padding and 4rem bottom padding. Its section navigation wraps with a 1.25rem gap, and its section anchors retain 6rem scroll clearance. Each Image Studio plan row uses the same flat treatment. Below 640px it stacks name and price, inclusion details, and the choose action. At 640px it becomes three columns (`1fr 1.4fr 11rem`) with a 1.5rem gap and the action aligned to the end. Each plan links directly to `/billing/plan?plan=<id>`.
+The Plan page places Orbit below Foundry in normal document flow. Orbit keeps its own status, controls, and patron Works; it does not become part of the Foundry offer selector. Public pricing composition is owned by the public reading design record.
 
 ## Elevation & Depth
 
-The Billing workspace, local plan section and Pricing row use no shadows, blur, floating cards, or decorative depth. Spacing, thin dividers, and the low-opacity navigation and action fills supply separation. This describes these Billing and Pricing surfaces only; other GALX surfaces retain their own design records.
+The Billing workspace and local plan sections use no shadows, blur, floating cards, or decorative depth. Spacing, thin dividers, and the low-opacity navigation and action fills supply separation. The offer selector has restrained bordered options; other GALX surfaces retain their own design records.
 
 **The Flat Sections Rule.** Keep this extension in the existing document flow, separated by rules rather than an elevated plan card.
 
 ## Shapes
 
-Controls, inputs and navigation links reuse the modest `control` corner radius; form and action controls have a thin border (1px). The plan section and Pricing row have no rounded outer shell. The desktop transaction table retains its existing rounded border (0.5rem). Underlined task links remain text links; active navigation uses a filled link rather than a badge.
+Controls, inputs and navigation links reuse the modest `control` corner radius; form and action controls have a thin border (1px). The plan section has no rounded outer shell. Offer options and the desktop transaction table retain their existing rounded border (0.5rem). Underlined task links remain text links; active navigation uses a filled link rather than a badge.
 
 ## Components
 
 ### Plan controls
 
-The forward action is a restrained filled control; refresh and management are outlined controls. All plan controls share the same padding and radius. Billing's plan controls use the subtle neutral hover wash; Pricing's choose-plan links strengthen their indigo fill on hover. Preserve the existing indigo keyboard-focus outline. Disabled buttons are visibly dimmed (opacity 0.5) and show the disabled cursor; an in-flight action names the operation (Opening checkout or Opening billing) and prevents repeated actions. These controls introduce no local motion or transform.
+The forward action is a restrained filled control; refresh and management are outlined controls. All plan controls share the same padding and radius. Billing's plan controls use the subtle neutral hover wash; task actions strengthen their indigo fill on hover. Preserve the existing indigo keyboard-focus outline. Disabled buttons are visibly dimmed (opacity 0.5) and show the disabled cursor; an in-flight action names the operation (Opening checkout or Opening billing) and prevents repeated actions. These controls introduce no local motion or transform.
 
 ### Billing navigation and task pages
 
@@ -157,7 +157,7 @@ Native links support direct entry, browser history and visible keyboard focus. T
 | Destination | Canonical address | Content and main action |
 | --- | --- | --- |
 | Overview | `/billing` | Compact plan status, existing account-credit summary and task links. Refresh checks both the plan and credit summaries. |
-| Plan | `/billing/plan` | Separate Sites Pro and private Image Studio status; choose or manage each product only under its own account status. |
+| Plan | `/billing/plan` | Foundry status and independent VANTA Orbit management; historical Sites subscriptions retain their own terms. |
 | Credits | `/billing/credits` | Existing account-credit figures and history; private API access is not a public billing plan. |
 | Transactions | `/billing/transactions` | Transaction filter, loaded rows, pagination and Export loaded rows. |
 | Invoices | `/billing/invoices` | Recent invoice rows, individual invoice links and hosted invoice history. |
@@ -171,7 +171,7 @@ Previously issued checkout return URLs and saved Billing section anchors resolve
 
 Overview shows the plan name or Your plan, a short status, any supplied period/end date, and View plan or Review payment linking to Plan. Its Refresh action checks both account credit and the compact plan status; each summary can announce its own refresh or failure while keeping its last checked data.
 
-The full Plan page uses a flat section with a wrapping heading/refresh row, a two-column detail list when space permits, then plan terms and actions. Show image-workspace offers—Workshop $15, Studio $35, and MAX $200 per month—only when the server confirms a published bounded allowance and checkout availability; GALX Pro is a separate product and does not grant image creation. Human image Works remain private, and no image plan grants Star publishing permissions. MAX is an individual tier and does not include account sharing, seats, or shared workspaces. Private API access is not a public subscription, does not appear as a public plan, and remains an administrator-controlled capability for approved cohorts. Display the current billing-period end or scheduled subscription end only when the server supplies it; complimentary access does not invent a renewal date. Dates are explicitly UTC. The following action states apply to the full Plan page; Overview routes to that page.
+The full Plan page uses a flat section with a wrapping heading/refresh row, a two-column detail list when space permits, then plan terms and actions. Foundry is $200 USD per month for bounded private creation for one account; Orbit and Sites are separate. New Foundry subscriptions remain unavailable pending tax readiness, and new Sites sales are closed. Historical subscriptions retain management and their original terms. Human Works remain private, and no consumer subscription grants Star publishing permissions, seats, or shared workspaces. Present any published allowance and checkout availability from verified status. Display a billing-period end or scheduled subscription end only when supplied; complimentary access does not invent a renewal date. Dates are explicitly UTC. The following action states apply to the full Plan page; Overview routes to that page.
 
 | State | Visible treatment and action |
 | --- | --- |
@@ -180,7 +180,7 @@ The full Plan page uses a flat section with a wrapping heading/refresh row, a tw
 | Confirmed Image Studio access | Active access text and Open Image Studio. Paid-subscription details remain separate from access. |
 | No subscription / ended subscription | Available offer selector and choose action at the stated price, only when the server permits checkout. |
 | Scheduled cancellation | Explicit subscription-end date and canceled-renewal copy; existing verified access can continue. |
-| Payment required | A text warning and Review payment opens the restricted Stripe portal, including when an independent grant still provides Pro access. |
+| Payment required | A text warning and Review payment opens the restricted Stripe portal; any separately verified access remains distinguishable. |
 | Paused / processing / unconfirmed | State-specific explanation and billing management; no second subscription checkout. |
 | Returned from checkout | Bounded read-only confirmation checks; no success claim from the URL and no automatic purchase replay. |
 | Checkout closed | Resume checkout uses the retained request identity. |
@@ -206,7 +206,9 @@ On a billing read failure, retain last checked amounts with an explicit stale-da
 
 ### Pricing relationship
 
-Pricing describes the three private Image Studio offers for one account; checkout stays closed until each bounded allowance is published. GALX Pro for Sites, private API access, and historical credit records remain separate. A choose-plan link opens `/billing/plan?plan=<id>`, where account status determines the next action. Keep the offers within the established divided plan list; they are not a current-plan badge or an account-status summary. Plan status must not be inferred from a wallet balance.
+Pricing presents free GALX discovery, Orbit for one Star, and Foundry private creation as separate relationships. GALX is the institution, not a $0 tier. New Orbit and Foundry subscriptions are unavailable; pricing provides exploration and workspace-status links rather than a purchase action. Plan status must not be inferred from a wallet balance. VANTA is the only approved public Star rename.
+
+The September 26, 2026 finish review accepted the local Orbit and pricing extension. Account Billing was source-reviewed only in that pass; do not claim a rendered account-flow or live-payment verification from those screenshots.
 
 ## Do's and Don'ts
 
@@ -219,7 +221,7 @@ Pricing describes the three private Image Studio offers for one account; checkou
 - **Do** keep six canonical billing destinations and use Overview for concise summaries and task links.
 - **Do** refresh both Overview summaries and preserve account drafts and filters during billing navigation.
 - **Do** preserve subscription management after a status failure and base known management availability on the payment profile.
-- **Do** keep historical account credit visually and conceptually separate from Pro plan access and administrator-controlled private access.
+- **Do** keep historical account credit visually and conceptually separate from Foundry, Orbit, and historical Sites access.
 
 ### Don't:
 

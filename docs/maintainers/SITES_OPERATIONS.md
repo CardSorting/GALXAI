@@ -2,6 +2,11 @@
 
 <!-- docs-scope: current-guide -->
 
+New Sites subscription sales are closed under [Orbit and Foundry](ORBIT_FOUNDRY.md).
+The infrastructure, existing access grants, receipts and historical financial data
+below remain operational history and recovery authority, not authorization to
+sell Pro again. Neither Orbit nor Foundry grants Sites access.
+
 > [!NOTE]
 > **Status: Retired / Sunset (September 2026)**
 > The Sites product line has been retired in favor of GALX Images. Heavy infrastructure requirements, custom domain worker overhead, and high inference quota usage motivated sunsetting Sites. Generation endpoints are disabled and client workspace URLs (`/sites`, `/sites/[id]`) redirect to `/images`. This guide is retained for historical traceability, billing audit, and legacy data recovery.

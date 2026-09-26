@@ -8,7 +8,6 @@ import { WorkspaceSessionBoundary } from '@/components/auth/WorkspaceSessionBoun
 import { renderSitePreview } from '@/lib/sites/site-preview';
 import { type SiteDocument, type SiteSummary, type SiteIntent, type SiteVersion } from '@/lib/sites/workspace-contract';
 import { SITE_STARTERS, type SiteStarterSelection } from '@/lib/sites/starters';
-import { PRO_PLAN } from '@/lib/billing/pro-plan';
 import { GenerationGateNotice, useGenerationGate } from '@/components/dashboard/GenerationGateNotice';
 import { useSitesWorkspace } from './use-sites-workspace';
 import { SiteNotesEditor } from './SiteNotesEditor';
@@ -150,7 +149,7 @@ function Workspace({owner,token,authLoading,initialId,initialStarter}: {owner:st
           <div className="sites-compose-area">
             {unread && !historicalWindow && <button className="sites-jump sites-button" onClick={()=>{stick.current=true;messagesRef.current?.scrollTo({top:messagesRef.current.scrollHeight,behavior:'instant'});setUnread(false);}}>Latest message<ArrowDown aria-hidden="true"/></button>}
             {checkpoint && <p className="sites-help">You’re previewing version {checkpoint.version}. <button className="sites-text-button" onClick={()=>setCheckpoint(null)}>Return to current draft to chat</button></p>}
-            {owner && !studio.setupLoading && studio.access==='paid_plan_required' && <p className="sites-help" role="status">Create and update Sites with {PRO_PLAN.name}. <Link href={BILLING_PATHS.plan}>View your plan<ArrowUpRight aria-hidden="true" size={14}/></Link></p>}
+            {owner && !studio.setupLoading && studio.access==='paid_plan_required' && <p className="sites-help" role="status">New Sites subscriptions are closed. Your existing work remains available. <Link href={BILLING_PATHS.plan}>Review billing<ArrowUpRight aria-hidden="true" size={14}/></Link></p>}
             {owner && !studio.setupLoading && studio.access==='unavailable' && <p className="sites-help" role="status">Site updates are unavailable right now. Your saved Sites are still here. Try again shortly.</p>}
             {site?.archived ? <div className="sites-archived"><p>This Site is archived.</p><button className="sites-button" onClick={()=>void studio.change({action:'archive',archived:false})}>Restore Site</button></div> : <form className="sites-composer" onSubmit={e=>{e.preventDefault();void submit();}}>
               <label className="sr-only" htmlFor="site-prompt">Describe your Site or ask for a change</label>
@@ -158,7 +157,7 @@ function Workspace({owner,token,authLoading,initialId,initialStarter}: {owner:st
               <div className="sites-composer-actions"><div className="sites-modes" aria-label="Message mode"><button type="button" aria-pressed={intent==='build'} onClick={()=>remember(prompt,'build')}>Build</button><button type="button" aria-pressed={intent==='discuss'} onClick={()=>remember(prompt,'discuss')}>Discuss</button></div>{owner?<button className="sites-send" type="submit" disabled={gate.blocked||studio.connection==='offline'||authLoading||studio.loading||openingSite||busy||Boolean(checkpoint)||site?.generating||!['included','free'].includes(studio.access)||!prompt.trim()||new TextEncoder().encode(prompt).length>2000} aria-label="Send message"><ArrowUp aria-hidden="true" /></button>:<Link className="sites-primary" href={`/login?next=${encodeURIComponent(initialStarter?.href || "/sites")}`}>Sign in to create<ArrowUpRight aria-hidden="true" /></Link>}</div>
             </form>}
             <p className="sites-composer-hint">{new TextEncoder().encode(prompt).length>2000?'Shorten your message to send it.':intent==='discuss'?'Explore ideas without changing your draft.':'Build applies your request to the current draft.'} <span>Shift + Enter for a new line.</span></p>
-            <p className="sites-help sites-plan-note">{studio.access==='included'?'Included with your plan.':`Create with ${PRO_PLAN.name} for $${PRO_PLAN.monthlyPriceUsd}/month.`} Fair use applies; you may need to pause between updates.</p>
+            <p className="sites-help sites-plan-note">{studio.access==='included'?'Your existing Sites access remains available. Fair use applies; you may need to pause between updates.':'New Sites subscriptions are closed. Foundry and Orbit do not include Sites.'}</p>
           </div>
         </>}
       </section>

@@ -278,7 +278,7 @@ export OPENAI_BASE_URL="${GALX_API_BASE_URL}"`,
         title: 'Access and usage boundary',
         badge: 'Private integrations',
         body: [
-          'General-purpose developer access is not self-service. GALX may authorize a bounded private integration with directly assigned terms. Metering remains in place for allocation controls, operating decisions, and capacity planning. The consumer Image Studio path remains separate under its existing GALX Pro/account contract.',
+          'General-purpose developer access is not self-service. GALX may authorize a bounded private integration with directly assigned terms. Metering remains in place for allocation controls, operating decisions, and capacity planning. The consumer Image Studio path remains separate under its separate Foundry private-creation contract.',
         ],
       },
       {
@@ -481,7 +481,7 @@ console.log(data);`,
         title: 'Creative Visual Synthesis',
         badge: 'Image generation',
         body: [
-          'Use the image capability identifier assigned to your authorized integration. The browser Image Studio uses its separate GALX Pro/account contract; private integration terms are assigned directly when access is authorized.',
+          'Use the image capability identifier assigned to your authorized integration. The browser Image Studio uses its separate Foundry private-creation contract; private integration terms are assigned directly when access is authorized.',
           'You can combine reasoning and image generation when both capabilities are documented for your access. Do not infer commercial terms from capability documentation.',
         ],
         code: [

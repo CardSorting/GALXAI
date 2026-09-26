@@ -149,6 +149,24 @@
 .benefitRows h3 { margin: 0; font-size: 20px; line-height: 1.4; font-weight: 500; letter-spacing: -.02em; }
 .benefitRows p { max-width: 60ch; margin-top: 10px; font-size: 16px; line-height: 1.75; color: var(--home-muted); }
 .pricing { border-top: 1px solid var(--home-line); }
+.discovery { position: relative; scroll-margin-top: 84px; }
+.legacyAnchor { position: absolute; top: 0; scroll-margin-top: 84px; }
+.discovery > *, .discoveryContent { min-width: 0; }
+.sectionIntro .discoveryAccess { margin-top: 28px; color: var(--home-fg); font-size: 14px; }
+.discoveryLinks { list-style: none; margin: 0; padding: 0; }
+.discoveryLinks li { border-bottom: 1px solid var(--home-line); }
+.discoveryLinks li:first-child { border-top: 1px solid var(--home-line); }
+.discoveryLinks a { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding-block: 24px; text-decoration: none; }
+.discoveryLinks a > span { min-width: 0; }
+.discoveryLinks strong { display: block; color: var(--home-fg); font-size: 20px; font-weight: 500; line-height: 1.4; letter-spacing: -.02em; transition: color .16s ease; }
+.discoveryLinks span > span { display: block; margin-top: 8px; color: var(--home-muted); font-size: 15px; line-height: 1.65; overflow-wrap: anywhere; }
+.discoveryLinks small { display: block; margin-top: 8px; color: var(--home-muted); font-size: 13px; line-height: 1.6; }
+.discoveryLinks svg { flex-shrink: 0; color: var(--home-muted); transition: color .16s ease, transform .16s var(--home-ease); }
+.discoveryLinks a:hover strong, .discoveryLinks a:hover svg { color: var(--home-accent); }
+@media (hover: hover) and (pointer: fine) { .discoveryLinks a:hover svg { transform: translateX(4px); } }
+.creationAside { margin-top: 32px; }
+.creationAside p { margin: 0; color: var(--home-muted); font-size: 14px; line-height: 1.75; }
+.creationAside .textLink { margin-top: 8px; }
 .plan { min-width: 0; }
 .planHeading { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding-bottom: 30px; }
 .planHeading h3 { font-size: 24px; font-weight: 500; letter-spacing: -.02em; }
@@ -202,8 +220,8 @@
   .hero, .benefits, .pricing, .faq { grid-template-columns: minmax(0, 1fr); }
   .hero { gap: 44px; padding-top: 68px; padding-bottom: 48px; }
   .chapters { gap: 12px; }
-  .chapterLinks { flex: 1; justify-content: space-between; gap: 16px; }
-  .chapterLinks a { min-height: 56px; }
+  .chapterLinks { flex: 1; min-width: 0; justify-content: space-between; gap: 16px; }
+  .chapterLinks a { min-width: 44px; min-height: 56px; justify-content: center; }
   .chapterStart { display: none; }
   .chapterActions { gap: 0; }
   .storyFlight { opacity: .14; }
@@ -230,6 +248,7 @@
 }
 @media (max-width: 380px) {
   .chapters { margin-inline: 20px; }
+  .chapterLinks { gap: 8px; }
   .hero, .benefits, .pricing, .faq, .close { padding-inline: 20px; }
   .heroCopy h1 { font-size: 48px; }
   .examplePaper { padding-inline: 22px; }

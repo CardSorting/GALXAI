@@ -10,6 +10,7 @@
  * Publication remains separate: only authorized Star operations publish Works.
  */
 
+import { historicalStarHandle, publicStarHandle, publicStarIdentity } from '../community/star-public-identity';
 export type StarStatus = 'dormant' | 'published' | 'archived';
 
 export interface StarSeries {
@@ -293,8 +294,11 @@ export function getCanonicalStars(): Star[] {
 }
 
 export function getCanonicalStar(handle: string): Star | null {
-  const norm = handle.toLowerCase().trim();
-  return CANONICAL_STARS.find((s) => s.handle.toLowerCase() === norm) || null;
+  const norm = historicalStarHandle(handle);
+  // These design fixtures never represented persisted Star practices.
+  if (['astra', 'vesper', 'kaelen'].includes(norm)) return null;
+  const star = CANONICAL_STARS.find((s) => s.handle.toLowerCase() === norm);
+  return star ? publicStarIdentity({ ...star, series: star.series.map(series => ({ ...series, starHandle: publicStarHandle(series.starHandle) })) }) : null;
 }
 
 export function getStarSeriesList(handle: string): StarSeries[] {

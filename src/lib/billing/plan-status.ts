@@ -1,6 +1,6 @@
 /** Customer-facing display state. It never grants access or contains provider IDs. */
 export type SubscriptionState = 'none' | 'active' | 'ending' | 'payment_required' | 'processing' | 'paused' | 'canceled' | 'unavailable';
-export type ConsumerPlanId = 'pro' | 'workshop' | 'studio' | 'max';
+export type ConsumerPlanId = 'pro' | 'workshop' | 'studio' | 'foundry';
 export interface ImageAllowanceOfferDisplay {
   monthlyUnits: number;
   standardOutputUnits: number;
@@ -49,7 +49,7 @@ export function parsePlanStatus(value: unknown): PlanStatus | null {
       Number.isSafeInteger((allowance as Record<string, unknown>).standardOutputUnits) && Number((allowance as Record<string, unknown>).standardOutputUnits) > 0 &&
       Number.isSafeInteger((allowance as Record<string, unknown>).hdOutputUnits) &&
       Number((allowance as Record<string, unknown>).hdOutputUnits) >= Number((allowance as Record<string, unknown>).standardOutputUnits));
-    return ['pro', 'workshop', 'studio', 'max'].includes(String(offer.id)) && typeof offer.name === 'string' &&
+    return ['foundry'].includes(String(offer.id)) && typeof offer.name === 'string' &&
       typeof offer.audience === 'string' && typeof offer.monthlyPriceUsd === 'number' && Number.isSafeInteger(offer.monthlyPriceUsd) &&
       offer.monthlyPriceUsd > 0 && offer.monthlyPriceUsd <= 100_000 && typeof offer.checkoutAvailable === 'boolean' && validAllowance &&
       (offer.id === 'pro' ? allowance === null : allowance !== null);
@@ -60,7 +60,7 @@ export function parsePlanStatus(value: unknown): PlanStatus | null {
       !subscription || !['none', 'active', 'ending', 'payment_required', 'processing', 'paused', 'canceled', 'unavailable'].includes(String(subscription.state)) ||
       !date(subscription.periodEnd) || !date(subscription.endsAt) ||
       !imageSubscription || !['none', 'active', 'ending', 'payment_required', 'processing', 'paused', 'canceled', 'unavailable'].includes(String(imageSubscription.state)) ||
-      !(imageSubscription.plan === null || ['workshop', 'studio', 'max'].includes(String(imageSubscription.plan))) ||
+      !(imageSubscription.plan === null || ['workshop', 'studio', 'foundry'].includes(String(imageSubscription.plan))) ||
       !(imageSubscription.planName === null || typeof imageSubscription.planName === 'string') ||
       typeof imageSubscription.allowanceConfigured !== 'boolean' ||
       !date(imageSubscription.periodEnd) || !date(imageSubscription.endsAt)) return null;

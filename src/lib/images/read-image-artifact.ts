@@ -5,6 +5,11 @@ import type { NextRequest } from 'next/server';
 import { ImageLibraryRepository } from '@/lib/supabase/repositories/ImageLibraryRepository';
 import { GalxR2AssetAdapter } from '@/workers/cloudflare/GalxR2AssetAdapter';
 import { sanitizeImageArtifact, sanitizeImageThumbnail, type PublicImageArtifact } from '@/lib/security/image-artifact';
+import { requireAccountIdentity } from '@/lib/auth/accountIdentity';
+import { getPostgresPool } from '@/lib/db/postgres';
+import { StripeEngine } from '@/lib/stripe/stripe';
+import { getStripeConfig } from '@/lib/stripe/config';
+import { mayReadOrbitWork } from './orbit-works';
 
 const thumbnails = new BroccoliBoundedCache<PublicImageArtifact>('galx_image_thumbnails', { entries: 128, bytes: 16 * 1024 * 1024, ttlMs: 300_000 });
 const transforms = new BroccoliReadCoordinator(2, 64);
@@ -21,12 +26,16 @@ export async function readImageArtifact(token: string, thumbnail = false, reques
   if (!asset || asset.status !== 'completed') return null;
   // Publication is a distinct content class, never a user-selected visibility
   // toggle. All other Works stay owner-scoped even if a stale link is copied.
-  if (asset.workClass === 'star_published') {
-    if (!isExhibitedStarAsset(asset)) return null;
-  } else {
+  if (!isExhibitedStarAsset(asset)) {
     if (!request) return null;
     const auth = await GalxAuthEngine.getInstance().resolveAuthIdentity(request);
-    if (!auth.authenticated || auth.userId !== identity.userId) return null;
+    if (!auth.authenticated) return null;
+    if (auth.userId !== identity.userId) {
+      const account = await requireAccountIdentity(request).catch(()=>null);
+      const pool = getPostgresPool();
+      const stripe = StripeEngine.getInstance().getClient();
+      if (!account || !pool || !stripe || !await mayReadOrbitWork(pool,stripe,account.id,identity.assetId,identity.userId,getStripeConfig().secretKey.includes('_live_'))) return null;
+    }
   }
   const key = JSON.stringify([asset.userId, asset.id, asset.sha256, asset.updatedAt, thumbnail]);
   const cached = thumbnail ? thumbnails.get(key) : undefined;

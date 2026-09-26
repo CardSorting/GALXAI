@@ -1,0 +1,23 @@
+{
+  "observed_at": "2026-09-26T09:28:51Z",
+  "scope": "Rollout prechecks and owner-directed tax prerequisite deferral",
+  "decision": "Tax readiness deferred by owner; not a rollout prohibition or a compliance determination. No tax configuration changed.",
+  "production_mutations": [],
+  "migration_inventory": {"applied":156,"pending":1,"remote_only":0},
+  "checks": {
+    "test:orbit": "22 passed",
+    "db:verify": "157 migration/rollback pairs; zero violations and zero warnings.",
+    "docs:sync": "Completed without refreshing review attestations.",
+    "git diff --check": "Passed",
+    "db:test": "Failed after applying all 157 migrations in a disposable fixture: galxDb.assets.uploadAsset is not a function at scripts/test-supabase-integration.ts:568. Fixture removed.",
+    "docs:check": "Two known pre-existing broken incident links remain excluded from repair by owner instruction.",
+    "source_review": "Critical review and nine knowledge domains remain stale; no fingerprints refreshed."
+  },
+  "remaining": [
+    "Resolve the existing database test fixture failure before production migration under the database and release runbooks.",
+    "Complete semantic source/guide reviews before production release.",
+    "Provider checkout, webhook, renewal, cancellation and portal end-to-end acceptance remains unperformed.",
+    "VANTA patron material must be designated before enabling its Orbit offer."
+  ],
+  "limitations": "No deployment, shared database migration, live product activation or checkout activation occurred. The code checkout gate remains closed for payment acceptance, not tax readiness."
+}

@@ -9,9 +9,9 @@ interface CaughtUpCardProps {
 }
 
 const STAR_SUGGESTIONS = [
-  { handle: 'astra', name: 'Astra', series: 'Impossible Machinery' },
-  { handle: 'vesper', name: 'Vesper', series: 'Print Editions' },
-  { handle: 'kaelen', name: 'Kaelen', series: 'Synthetic Terrain' },
+  { handle: 'vanta', name: 'VANTA', series: 'Architectural work' },
+  { handle: 'morrowkest', name: 'Morrow Kest', series: 'Portrait studies' },
+  { handle: 'soravale', name: 'Sora Vale', series: 'Botanical studies' },
   { handle: 'soravale', name: 'Sora Vale', series: 'Botanical Futures' },
 ];
 

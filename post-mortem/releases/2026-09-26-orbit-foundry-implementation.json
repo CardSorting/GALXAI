@@ -1,0 +1,71 @@
+{
+  "date": "2026-09-26",
+  "scope": "Approved VANTA alias and independent Orbit/Foundry economic layer",
+  "status": "local_implementation_live_catalog_retired_paid_launch_blocked",
+  "applicationDeployment": "none",
+  "database": {"applied": 156, "pending": 1, "pendingMigration": "20260926081213_orbit_public_identity", "sharedMutation": false},
+  "liveStripeActions": {
+    "preWriteSubscriptions": 0,
+    "preWriteSchedules": 0,
+    "preWriteOpenCheckouts": 0,
+    "obsoletePricesArchived": 6,
+    "paymentLinksClosed": 0,
+    "subscriptionsChanged": 0,
+    "financialHistoryDeleted": false,
+    "preparedInactiveProducts": ["Orbit VANTA — 10 USD/month", "Foundry — 200 USD/month"],
+    "taxSettingsChanged": false,
+    "liveCheckoutEnabled": false
+  },
+  "taxReadiness": {
+    "accountCountry": "US",
+    "taxHeadOfficeCountry": "US",
+    "chargesEnabled": true,
+    "detailsSubmitted": true,
+    "currentlyDueRequirements": 0,
+    "taxSettingsStatus": "active",
+    "activeRegistrations": 0,
+    "defaultTaxCode": "txcd_99999999",
+    "defaultTaxCodeName": "General - Tangible Goods",
+    "defaultTaxBehavior": "inferred_by_currency",
+    "decision": "Owner/advisor review of selling jurisdictions, obligations, digital classifications, price tax behavior and location collection required; no tax determination or configuration invented"
+  },
+  "identity": {
+    "approvedAlias": "Veyra Sol -> VANTA",
+    "immutableRecordsChanged": false,
+    "remainingRenamesApplied": 0,
+    "persistedStars": 12,
+    "completedWorks": 11,
+    "starsWithCompletedWorks": 4,
+    "starsWithoutCompletedWorks": 8,
+    "proposal": "docs/maintainers/STAR_IDENTITY_PROPOSAL.md"
+  },
+  "validation": {
+    "orbitUnitTests": 22,
+    "scopedDatabaseAssertions": 96,
+    "disposableMigrationsReplayed": 157,
+    "imageSecurityTests": 69,
+    "authSessionTests": 44,
+    "billingLifecycleTests": 20,
+    "stripePricingContract": "passed",
+    "migrationStaticIntegrity": "157 paired; zero errors/warnings",
+    "documentationUnitTests": 41,
+    "orbitUiWidths": [1440, 390, 320],
+    "discoveryUiWidths": [1440, 768, 390, 320],
+    "visualReviewerDisposition": "ship; supplied Orbit/pricing captures, account PlanPanel source only",
+    "compiledHttpLinkedAssets": 37,
+    "productionBuild": "passed; 155 static pages; no deployment",
+    "oldProfileRedirect": "308 to /profile/vanta; image query preserved",
+    "styleReviewLimits": "Existing out-of-scope stylesheet detector findings retained; authenticated thumbnail img advisory and existing Sites hook warning, no focused lint errors",
+    "providerCheckoutEndToEnd": "not run; test credentials unavailable",
+    "generalDatabaseSuite": "blocked by existing galxDb.assets.uploadAsset fixture API failure",
+    "documentationCheck": "two pre-existing incident-link failures left untouched; domain review fingerprints not blindly refreshed",
+    "compiledBoundaryScan": "526 browser/rendered assets checked; separate documentation review-fingerprint gate remains stale"
+  },
+  "remaining": [
+    "Compatible application deployment, additive database migration and hosted alias/access acceptance",
+    "Isolated Stripe test checkout, webhook replay/renewal, portal and period-end cancellation acceptance",
+    "Institutional selection of designated patron works and protected-origin acceptance",
+    "Review eleven proposed names; no additional rename is authorized",
+    "Explicit tax readiness resolution before any live recurring checkout"
+  ]
+}

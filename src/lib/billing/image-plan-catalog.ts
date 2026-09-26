@@ -17,7 +17,7 @@ export const IMAGE_PLAN_CATALOG = [
     stripeProductId: 'galx_images_creator_v1',
     stripeLookupKey: 'galx_images_creator_monthly_v1',
     catalogStatus: 'active',
-    checkoutEnabled: true,
+    checkoutEnabled: false,
     capabilities: [
       'Bounded private image creation',
       'Private remixing of published Star Works',
@@ -37,7 +37,7 @@ export const IMAGE_PLAN_CATALOG = [
     stripeProductId: 'galx_images_studio_v1',
     stripeLookupKey: 'galx_images_studio_monthly_v1',
     catalogStatus: 'active',
-    checkoutEnabled: true,
+    checkoutEnabled: false,
     capabilities: [
       'Bounded private image creation',
       'Private remixing of published Star Works',
@@ -47,17 +47,17 @@ export const IMAGE_PLAN_CATALOG = [
   },
   {
     // Keep the private plan key stable so existing checkout/webhook records
-    // continue to reconcile while the customer-facing name becomes MAX.
+    // continue to reconcile while the customer-facing name becomes Foundry.
     id: 'max',
-    publicId: 'max',
+    publicId: 'foundry',
     planKey: 'team-v1',
-    name: 'GALX Images — MAX',
-    audience: 'More room for an individual Image Studio practice.',
+    name: 'Foundry',
+    audience: 'Access the machinery.',
     monthlyPriceUsd: 200,
     currency: 'USD',
     interval: 'month',
-    stripeProductId: 'galx_images_team_v1',
-    stripeLookupKey: 'galx_images_team_monthly_v1',
+    stripeProductId: 'galx_foundry_v1',
+    stripeLookupKey: 'galx_foundry_monthly_v1',
     catalogStatus: 'active',
     checkoutEnabled: true,
     capabilities: [

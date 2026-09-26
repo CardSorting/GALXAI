@@ -4,6 +4,7 @@ import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 import { handleExploreHideMutation } from '@/lib/images/explore-hide';
 import type { ParticipantKind } from '@/lib/community/participant-handle';
 import { mapPublicParticipantCreationRow } from '@/lib/community/public-participants';
+import { historicalStarHandle } from '@/lib/community/star-public-identity';
 import {
   normalizePublicParticipantHandle,
 } from '@/lib/community/participant-handle';
@@ -95,14 +96,16 @@ export async function GET(req: NextRequest) {
     // Search only public Star identity. Production prompts remain server-side.
     if (q && q.length <= 100) {
       const sanitized = q.replace(/[%_\\]/g, '\\$&');
-      conditions.push(`(author_display_name ILIKE $${paramIndex} OR author_handle ILIKE $${paramIndex})`);
-      paramIndex++;
+      const searchIndex = paramIndex++;
+      const alias = normalizePublicParticipantHandle(q);
+      conditions.push(`(author_display_name ILIKE $${searchIndex} OR author_handle ILIKE $${searchIndex}${alias === 'vanta' ? ` OR author_handle = ANY($${paramIndex++}::text[])` : ''})`);
       params.push(`%${sanitized}%`);
+      if (alias === 'vanta') params.push(['vanta', 'veyrasol']);
     }
 
     if (authorHandle) {
-      conditions.push(`author_handle = $${paramIndex++}`);
-      params.push(authorHandle);
+      conditions.push(`author_handle = ANY($${paramIndex++}::text[])`);
+      params.push([authorHandle,historicalStarHandle(authorHandle)]);
     }
 
     if (viewerUserId) {

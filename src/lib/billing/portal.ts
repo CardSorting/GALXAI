@@ -6,7 +6,8 @@ export async function billingPortalConfiguration(stripe: Stripe) {
   const configurations = await stripe.billingPortal.configurations.list(
     { active: true, limit: 100 }, { timeout: 4000, maxNetworkRetries: 0 },
   );
-  const matches = configurations.data.filter(item => item.metadata?.galxPlan === 'pro-v1');
+  const current = configurations.data.filter(item => item.metadata?.galxCommercial === 'orbit-foundry-v1');
+  const matches = current.length ? current : configurations.data.filter(item => item.metadata?.galxPlan === 'pro-v1');
   const portal = matches[0];
   if (configurations.has_more || matches.length !== 1 || !portal?.active ||
       !portal.features.invoice_history.enabled || !portal.features.payment_method_update.enabled ||

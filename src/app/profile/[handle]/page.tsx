@@ -1,10 +1,11 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft, ArrowRight, ChevronDown, ChevronRight, Sparkles } from 'lucide-react';
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import { ParticipantAvatar, ParticipantMarker } from '@/components/community/ParticipantIdentity';
 import { ProfileShareButton } from '@/components/community/ProfileShareButton';
 import { FollowStarButton } from '@/components/community/FollowStarButton';
+import { OrbitPanel } from '@/components/community/OrbitPanel';
 import { PublicImageMasonryStream } from '@/components/images/PublicImageMasonryStream';
 import {
   PublicParticipantRepository,
@@ -70,6 +71,7 @@ export default async function ParticipantProfilePage({
   const { handle } = await params;
   const profile = await PublicParticipantRepository.getProfile(handle);
   if (!profile) notFound();
+  if (handle !== profile.handle) permanentRedirect(profilePath(profile.handle));
 
   const canonicalStar = getCanonicalStar(profile.handle);
   const seriesList = canonicalStar?.series || [];
@@ -157,6 +159,8 @@ export default async function ParticipantProfilePage({
             </p>
           </div>
         </header>
+
+        {profile.handle === 'vanta' && <OrbitPanel handle={profile.handle} name={profile.displayName} />}
 
         {seriesList.length > 0 && (
           <section className={styles.seriesSection} aria-labelledby="star-series-heading">

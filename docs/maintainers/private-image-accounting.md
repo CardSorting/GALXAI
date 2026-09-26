@@ -18,7 +18,11 @@ not broaden that backfill based on a user-controlled visibility field.
 ## Activation source
 
 `src/lib/billing/image-allowance-config.ts` is the single activation surface for
-Workshop (`creator-v1`), Studio (`studio-v1`), and MAX (`team-v1`). Launch
+historical `creator-v1`, `studio-v1`, and the retained `team-v1` accounting identity.
+Foundry is the only new private-creation offer and uses the existing `team-v1`
+allowance. The $15/$35 creation offers are closed; historical balances and records
+remain unchanged. Orbit is a separate Star relationship and cannot authorize
+generation. See [Orbit and Foundry](ORBIT_FOUNDRY.md). Launch
 monthly units and shared Standard/HD output weights are approved there.
 Checkout status, allowance presentation, and dispatch admission all consult
 this typed configuration. A missing, malformed, or unapproved value disables

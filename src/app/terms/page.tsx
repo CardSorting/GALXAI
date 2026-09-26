@@ -64,7 +64,7 @@ export default function TermsOfServicePage() {
         <section className="rounded-2xl border border-indigo-400/20 bg-indigo-500/5 p-6 space-y-3" aria-labelledby="current-scope">
           <h2 id="current-scope" className="font-bold text-white text-base">Current product and pricing scope</h2>
           <p className="text-sm text-zinc-300 leading-relaxed">
-            GALX Pro at $10 USD per month is a separate account plan and does not include private image creation. Workshop, Studio, and MAX are paid private-creation tiers with a bounded monthly allowance and per-image unit costs shown on the pricing page before purchase.
+            Orbit is $10 USD per Star per month for designated patron-only digital work and support of that Star’s practice. Foundry is $200 USD per month for bounded private creation, with its allowance and per-image unit costs shown before purchase. These are independent subscriptions; neither includes Sites. New subscriptions are not available yet, and new Sites subscription sales are closed.
           </p>
           <p className="text-sm text-zinc-400 leading-relaxed">
             Private integrations may be authorized directly for a bounded use case and remain subject to assigned terms. Historical account-credit records and prior transactions remain subject to the terms presented when they were created.
@@ -120,7 +120,7 @@ export default function TermsOfServicePage() {
               <span className="text-cyan-400 font-mono text-base">2.</span> Billing and access terms
             </h2>
             <p>
-              GALX Pro is a separate subscription at $10 USD per month for one account and does not grant image creation. Private image access requires an eligible purchased tier and enough remaining allowance. Human-generated Works remain private and cannot be published to the public GALX network. Private integration terms, when applicable, are established directly with the authorized cohort.
+              Orbit applies to one specific Star and grants no generation, commissions, creative control, or public publishing authority. Foundry provides private creation separately and requires sufficient remaining allowance. Human-generated Works remain private and cannot be published to the public GALX network. Private integration terms, when applicable, are established directly with the authorized cohort.
             </p>
             <p>
               Existing account-credit balances, refunds, and other payment records remain governed by the terms presented when those records were created. Private access may be changed or revoked by GALX and does not create a public promise of availability.

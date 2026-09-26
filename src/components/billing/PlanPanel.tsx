@@ -3,7 +3,6 @@ import { BILLING_PATHS } from '@/lib/billing/navigation';
 
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { PRO_PLAN } from '@/lib/billing/pro-plan';
 import { parsePlanStatus, type ConsumerPlanId, type PlanStatus } from '@/lib/billing/plan-status';
 
 const control = 'min-h-11 rounded-md border border-white/15 px-4 py-2.5 text-sm text-zinc-100 hover:bg-white/5 focus-visible:outline-indigo-300 disabled:cursor-not-allowed disabled:opacity-50';
@@ -14,7 +13,7 @@ export function PlanPanel({ token, accountId, compact = false, returnSearch, ref
   const [status, setStatus] = useState<PlanStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<'checkout' | 'portal' | null>(null);
-  const [selectedPlan, setSelectedPlan] = useState<ConsumerPlanId>('pro');
+  const [selectedPlan, setSelectedPlan] = useState<ConsumerPlanId>('foundry');
   const [error, setError] = useState('');
   const [actionError, setActionError] = useState('');
   const [returned, setReturned] = useState<'returned' | 'canceled' | null>(null);
@@ -40,7 +39,7 @@ export function PlanPanel({ token, accountId, compact = false, returnSearch, ref
       if (!selectionLocked.current) {
         const image = next.imageSubscription;
         const hasCurrentImagePlan = image.plan && ['active', 'ending', 'payment_required', 'paused', 'processing'].includes(image.state);
-        setSelectedPlan(current => selectionLocked.current ? current : hasCurrentImagePlan ? image.plan! : 'pro');
+        setSelectedPlan(current => selectionLocked.current ? current : hasCurrentImagePlan ? image.plan! : 'foundry');
       }
       const purchaseConfirmed = selectedPlan === 'pro'
         ? next.access === 'included'
@@ -62,7 +61,7 @@ export function PlanPanel({ token, accountId, compact = false, returnSearch, ref
     alive.current = true;
     const value = new URLSearchParams(window.location.search).get('plan_checkout') || new URLSearchParams(returnSearch).get('plan_checkout');
     const requestedPlan = new URLSearchParams(window.location.search).get('plan') || new URLSearchParams(returnSearch).get('plan');
-    if (requestedPlan && ['pro', 'workshop', 'studio', 'max'].includes(requestedPlan)) {
+    if (requestedPlan && ['foundry'].includes(requestedPlan)) {
       selectionLocked.current = true;
       setSelectedPlan(requestedPlan as ConsumerPlanId);
     }
@@ -123,24 +122,24 @@ export function PlanPanel({ token, accountId, compact = false, returnSearch, ref
   // A return URL is a hint to check; it never proves payment or permits another purchase.
   const confirming = returned === 'returned' && !included && !['payment_required', 'paused', 'canceled'].includes(subscription?.state || '');
   const selectedOffer = status?.offers.find(offer => offer.id === selectedPlan) || status?.offers[0];
-  let title = isImagePlan ? 'Private creation plan' : 'GALX Pro for Sites';
+  let title = isImagePlan ? 'Foundry' : 'Historical Sites subscription';
   let detail = 'Checking your plan…';
   if (status) {
     title = included || ['active', 'ending', 'payment_required', 'paused', 'processing'].includes(subscription?.state || '')
-      ? (isImagePlan ? 'Your Image Studio plan' : 'Your GALX Pro plan')
-      : (isImagePlan ? 'Private creation plans' : 'GALX Pro for Sites');
+      ? (isImagePlan ? 'Your private creation subscription' : 'Your historical Sites subscription')
+      : (isImagePlan ? 'Foundry' : 'Sites subscriptions are closed');
     detail = isImagePlan
       ? hasImagePlan
         ? status.imageSubscription.allowanceConfigured
           ? `${status.imageSubscription.planName} is active for private creation. Your remaining allowance is shown in Image Studio.`
           : `${status.imageSubscription.planName} is active, but private creation is unavailable until its bounded allowance is configured.`
-        : 'Choose a private Image Studio tier when checkout is available. Image plans do not grant public publishing permission.'
+        : 'Foundry is $200 USD/month for bounded private creation. Orbit is separate and includes no creation access. New subscriptions are not available yet.'
       : status.access === 'included'
-        ? 'GALX Pro Sites access is active. This plan does not grant Image Studio creation or Star publishing permission.'
-        : 'Choose GALX Pro for the separate Sites workspace.';
+        ? 'Historical Sites access is active. This plan does not grant Image Studio creation or Star publishing permission.'
+        : 'New Sites subscriptions are closed.';
     if (subscription?.state === 'ending') detail = isImagePlan
       ? 'Your Image Studio plan is set to end. Access continues through the paid period.'
-      : 'Your GALX Pro plan is set to end. Sites access continues through the paid period.';
+      : 'Your historical Sites subscription is set to end. Sites access continues through the paid period.';
     else if (paymentRequired) detail = 'Your subscription needs a payment update. Review it in billing to continue.';
     else if (subscription?.state === 'paused') detail = 'Your subscription is paused. Review it in billing.';
     else if (subscription?.state === 'processing') detail = 'Your subscription is being confirmed. Check billing before starting another checkout.';
@@ -158,8 +157,8 @@ export function PlanPanel({ token, accountId, compact = false, returnSearch, ref
     </div>
     <dl className="mt-5 grid gap-4 text-sm sm:grid-cols-2">
       <div><dt className="text-zinc-400">{included ? 'Current access' : ['none', 'canceled'].includes(subscription?.state || '') ? 'Selected plan' : 'Plan'}</dt><dd className="mt-1 leading-6 text-zinc-100">{included
-        ? isImagePlan ? `${status?.imageSubscription.planName || selectedOffer?.name} · private creation only` : 'GALX Pro Sites access · one account'
-        : `${selectedOffer?.name || PRO_PLAN.name} · $${selectedOffer?.monthlyPriceUsd || PRO_PLAN.monthlyPriceUsd} / month · one account`}</dd></div>
+        ? isImagePlan ? `${status?.imageSubscription.planName || selectedOffer?.name} · private creation only` : 'Historical Sites access · one account'
+        : `${selectedOffer?.name || 'Foundry'} · $${selectedOffer?.monthlyPriceUsd || 200} / month · one account`}</dd></div>
       {subscription?.endsAt ? <div><dt className="text-zinc-400">Subscription ends</dt><dd className="mt-1 leading-6 text-zinc-100">{date(subscription.endsAt)} · UTC</dd></div> : subscription?.periodEnd ? <div><dt className="text-zinc-400">Current billing period ends</dt><dd className="mt-1 leading-6 text-zinc-100">{date(subscription.periodEnd)} · UTC</dd></div> : null}
     </dl>
     {status?.offers.length ? <fieldset className="mt-6 grid gap-3 sm:grid-cols-2" aria-label="Choose a GALX plan"><legend className="sr-only">Choose a GALX plan</legend>{status.offers.map(offer => {
@@ -179,12 +178,12 @@ export function PlanPanel({ token, accountId, compact = false, returnSearch, ref
     })}</fieldset> : null}
     <p className="mt-4 max-w-2xl text-sm leading-6 text-zinc-400">{isImagePlan
       ? 'Image Studio plans provide bounded private creation for one account. They do not grant public publishing, seats, or shared workspaces.'
-      : 'GALX Pro is a separate Sites plan. It does not grant Image Studio creation or public publishing permission.'}</p>
-    <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">{subscription?.state === 'ending' ? 'Renewal is canceled. Review your subscription in billing; access continues through the paid period.' : isImagePlan ? 'Image plans renew monthly. Cancel in Manage subscription; private creation allowance renews under the plan terms.' : 'GALX Pro renews monthly. Cancel in Manage subscription; Sites access continues through the paid period.'}</p>
+      : 'New Sites subscriptions are closed. Foundry does not include Sites or Orbit.'}</p>
+    <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">{subscription?.state === 'ending' ? 'Renewal is canceled. Review your subscription in billing; access continues through the paid period.' : isImagePlan ? 'Image plans renew monthly. Cancel in Manage subscription; private creation allowance renews under the plan terms.' : 'Historical Sites subscriptions renew under their original terms. Cancel in Manage subscription; Sites access continues through the paid period.'}</p>
     {returned === 'canceled' && <p role="status" className="mt-4 text-sm leading-6 text-zinc-300">Checkout was closed. You can resume when you’re ready.</p>}
     {confirming && <p role="status" className="mt-4 text-sm leading-6 text-zinc-300">{waiting ? 'Confirming your subscription… This can take a moment.' : 'Your subscription is still being confirmed. Refresh your plan or open billing before paying again.'}</p>}
     <div className="mt-5 flex flex-wrap items-center gap-3">
-      {paymentRequired ? <button type="button" className={primary} disabled={Boolean(busy)} onClick={() => void action('portal')}>{busy === 'portal' ? 'Opening billing…' : 'Review payment'}</button> : included ? <Link href={isImagePlan ? '/images/create' : '/sites'} className={primary}>{isImagePlan ? 'Open private creation' : 'Open Sites workspace'}</Link> : <button type="button" className={primary} disabled={Boolean(busy) || loading || Boolean(error) || confirming || !selectedOffer?.checkoutAvailable} onClick={() => void action('checkout')}>{busy === 'checkout' ? 'Opening checkout…' : returned === 'canceled' ? 'Resume checkout' : `Choose ${selectedOffer?.name || PRO_PLAN.name} · $${selectedOffer?.monthlyPriceUsd || PRO_PLAN.monthlyPriceUsd}/month`}</button>}
+      {paymentRequired ? <button type="button" className={primary} disabled={Boolean(busy)} onClick={() => void action('portal')}>{busy === 'portal' ? 'Opening billing…' : 'Review payment'}</button> : included ? <Link href={isImagePlan ? '/images/create' : '/sites'} className={primary}>{isImagePlan ? 'Open private creation' : 'Open Sites workspace'}</Link> : <button type="button" className={primary} disabled={Boolean(busy) || loading || Boolean(error) || confirming || !selectedOffer?.checkoutAvailable} onClick={() => void action('checkout')}>{busy === 'checkout' ? 'Opening checkout…' : returned === 'canceled' ? 'Resume checkout' : `Choose ${selectedOffer?.name || 'Foundry'} · $${selectedOffer?.monthlyPriceUsd || 200}/month`}</button>}
       {included && paymentRequired && <Link href={isImagePlan ? '/images/create' : '/sites'} className={control}>{isImagePlan ? 'Open private creation' : 'Open Sites workspace'}</Link>}
       {canManage && !paymentRequired && <button type="button" className={control} disabled={Boolean(busy)} onClick={() => void action('portal')}>{busy === 'portal' ? 'Opening billing…' : 'Manage subscription'}</button>}
       <Link href="/pricing/galx-pro" className="inline-flex min-h-11 items-center text-sm text-indigo-300 underline underline-offset-4">View plan details</Link>

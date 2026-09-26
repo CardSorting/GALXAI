@@ -24,6 +24,14 @@ Private database guide. Read the applicable repository Supabase skills before da
 
 Inspect scripts before execution. Never disable fixture guards or point integration tests at production. Do not rely on hardcoded historical migration/test counts. Record exact versions and results in dated evidence.
 
+The general database suite has no object-storage credentials and verifies that
+the private image adapter rejects upload before any transport call. Do not
+restore the retired generic `uploadAsset` method or its public-URL expectation
+to repair a fixture. Successful private uploads, image re-encoding, stripped
+metadata, private object headers and remote-URL rejection are exercised by
+`scripts/test-private-image-storage.ts` in `npm run test:image:security` using
+a synthetic storage transport. Neither check constitutes live R2 acceptance.
+
 ## Prepare and validate
 
 Use the current Supabase CLI help to discover syntax. For this imperative repository, create a migration using `supabase migration new`, add its paired rollback and keep generated types consistent. Describe affected objects, authority, data volume, lock impact, compatibility and rollback limits before remote mutation.

@@ -1,4 +1,5 @@
 /** The public network has one creator class: authorized Stars. */
+import { publicStarHandle } from './star-public-identity';
 export type ParticipantKind = 'star';
 
 export const PUBLIC_PARTICIPANT_HANDLE_PATTERN = /^[a-z0-9][a-z0-9_-]{2,31}$/;
@@ -6,7 +7,7 @@ export const PUBLIC_PARTICIPANT_HANDLE_PATTERN = /^[a-z0-9][a-z0-9_-]{2,31}$/;
 export function normalizePublicParticipantHandle(handle: unknown): string | null {
   if (typeof handle !== 'string') return null;
   const normalized = handle.trim().toLowerCase();
-  return PUBLIC_PARTICIPANT_HANDLE_PATTERN.test(normalized) ? normalized : null;
+  return PUBLIC_PARTICIPANT_HANDLE_PATTERN.test(normalized) ? publicStarHandle(normalized) : null;
 }
 
 /** Only allow image URLs that are safe to hand to a browser image element. */
