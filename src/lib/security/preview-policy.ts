@@ -1,4 +1,5 @@
 import { isPublicReadingPath } from '@/lib/public-content/routes';
+import { isConnectPath } from '@/lib/connect/paths';
 /** Products exempt from developer approval; account/session gates still apply. */
 const publicPages = new Set(['/', '/home', '/about', '/explore', '/stars', '/collections', '/images', '/images/library', '/images/favorites', '/library', '/sites', '/pricing',
   '/login', '/signup', '/auth/signin', '/auth/signup', '/auth/callback', '/terms', '/privacy', '/status', '/checkout', '/checkout/success']);
@@ -20,7 +21,7 @@ export function normalizedPath(pathname: string): string {
 export function isApiPath(pathname: string): boolean { return /^\/(?:api|v1)(?:\/|$)/.test(pathname); }
 export function isPublicProductPath(pathname: string): boolean {
   const p = normalizedPath(pathname);
-  if (publicApis.has(p) || publicPages.has(p) || publicAssets.has(p) || isPublicReadingPath(p)) return true;
+  if (isConnectPath(p) || publicApis.has(p) || publicPages.has(p) || publicAssets.has(p) || isPublicReadingPath(p)) return true;
   // Resource identifiers never extend an exemption to sibling API namespaces.
   if (/^\/v1\/images\/(?:requests\/[^/]+(?:\/stream)?|assets\/[^/]+(?:\/thumbnail)?|sessions\/[^/]+)$/.test(p)) return true;
   if (/^\/api\/images\/library\/[^/]+$/.test(p) || /^\/api\/sites\/published\/[^/]+$/.test(p)) return true;

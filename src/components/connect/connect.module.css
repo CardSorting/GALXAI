@@ -1,0 +1,10 @@
+.content { overflow-wrap: anywhere; }
+.content > p { margin-block: 1.25rem; }
+.name { overflow-wrap: anywhere; }
+.secondary { color: var(--auth-muted); font-size: .875rem; line-height: 1.65; }
+.connections { list-style: none; margin: 1.5rem 0; padding: 0; }
+.connections li { border-block-start: 1px solid var(--auth-border); padding-block: 1.5rem; }
+.connections h2, .empty h2 { font-size: 1.125rem; font-weight: 600; line-height: 1.4; margin: 0 0 .5rem; }
+.connections p { margin: .25rem 0 .75rem; }
+.empty { margin-block: 2rem; }
+.notice { min-height: 1.5rem; }

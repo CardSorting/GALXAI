@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { DeveloperAccessRepository } from '@/lib/supabase/repositories/DeveloperAccessRepository';
 import { USAGE_PRICING } from '@/lib/billing/usage-pricing';
 import { hasInternalAccess } from './internal-access';
+import { retiredVercelInferencePath } from './inference-placement';
 
 export type PreviewIdentity = { authenticated: boolean; userId?: string };
 export type PreviewGateDependencies = {
@@ -37,6 +38,7 @@ export async function enforceDeveloperAccess(req: Request, deps = dependencies):
 /** Route-level guard also applies when a handler is called without middleware. */
 export function withDeveloperAccess<Args extends unknown[]>(handler: (req: NextRequest, ...args: Args) => Response | Promise<Response>) {
   return async (req: NextRequest, ...args: Args) => {
+    if (retiredVercelInferencePath(new URL(req.url).pathname)) return new NextResponse(null, { status: 410, headers: { 'Cache-Control': 'private, no-store' } });
     const denied = await enforceDeveloperAccess(req);
     if (denied) return denied;
     const response = await handler(req, ...args);
@@ -85,9 +87,13 @@ export async function enforceDeveloperApiKeyAccess(req: Request, authType: strin
 }
 
 export function withDeveloperUsageAccess<Args extends unknown[]>(handler: (req: NextRequest, ...args: Args) => Response | Promise<Response>) {
-  return withDeveloperAccess(async (req: NextRequest, ...args: Args) => {
+  const authorized = withDeveloperAccess(async (req: NextRequest, ...args: Args) => {
     const unavailable = usagePricingUnavailable(req);
     if (unavailable) return unavailable;
     return handler(req, ...args);
   });
+  return (req: NextRequest, ...args: Args) => {
+    if (retiredVercelInferencePath(new URL(req.url).pathname)) return new NextResponse(null, { status: 410, headers: { 'Cache-Control': 'private, no-store' } });
+    return authorized(req, ...args);
+  };
 }
