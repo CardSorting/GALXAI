@@ -5,7 +5,7 @@
  * 2. GalxEdgeRouter (In-Flight Failover across upstream provider shards)
  * 3. GalxEdgeConnectionPool (Pre-warmed Keep-Alive connection pools)
  * 4. GalxEdgeCache (Stale-While-Revalidate Edge Cache + BroccoliDB Table)
- * 5. GalxR2AssetAdapter (Zero-Egress Multimodal Storage + Indexing)
+ * 5. GalxR2AssetAdapter (Owner-scoped private artifacts and sanitized storage)
  * 6. GalxEdgeBatchBuffer (Micro-Batching Buffer for Token Draws & Telemetry)
  * 7. GalxSwarmCoordinatorDO (Durable Object Swarm State Sync)
  * 8. GalxEdgeWebhookDispatcher (HMAC-SHA256 Signed Outbound Webhooks)
@@ -14,13 +14,14 @@
  */
 
 import './lib/require-isolated-worker-env';
+import { execFileSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import { WalletRepository } from '../src/lib/supabase/repositories/WalletRepository';
 import { TelemetryRepository } from '../src/lib/supabase/repositories/TelemetryRepository';
 import { GalxEdgeGateway } from '../src/workers/cloudflare/GalxEdgeGateway';
 import { GalxEdgeRouter } from '../src/workers/cloudflare/GalxEdgeRouter';
 import { GalxEdgeConnectionPool } from '../src/workers/cloudflare/GalxEdgeConnectionPool';
 import { GalxEdgeCache } from '../src/workers/cloudflare/GalxEdgeCache';
-import { GalxR2AssetAdapter } from '../src/workers/cloudflare/GalxR2AssetAdapter';
 import { GalxEdgeBatchBuffer } from '../src/workers/cloudflare/GalxEdgeBatchBuffer';
 import { GalxSwarmCoordinatorDO } from '../src/workers/cloudflare/GalxSwarmCoordinatorDO';
 import { GalxEdgeWebhookDispatcher } from '../src/workers/cloudflare/GalxEdgeWebhookDispatcher';
@@ -407,18 +408,19 @@ async function runAllTests() {
   assert(queryResult.length === 1 && queryResult[0].key === 'test-key', 'BroccoliDB natural query on edge cache succeeded');
 
   // --- 5. GalxR2AssetAdapter Tests ---
-  console.log('\n--- Phase 5: GalxR2AssetAdapter Multimodal Storage & CDN ---');
-  const r2Adapter = GalxR2AssetAdapter.getInstance();
-  const upload = await r2Adapter.uploadAsset({
-    data: Buffer.from('fake-image-bytes-dalle-3'),
-    contentType: 'image/webp',
-    folder: 'dalle'
+  console.log('\n--- Phase 5: GalxR2AssetAdapter Private Artifact Boundary ---');
+  // Exercise the current storage contract with the shared fixture, not the
+  // retired generic public uploader. Give the child its own network denial,
+  // throwaway credentials and temporary storage before loading any singleton.
+  execFileSync(process.execPath, [
+    '--import', import.meta.resolve('tsx'),
+    '--import', fileURLToPath(new URL('./lib/require-isolated-worker-env.ts', import.meta.url)),
+    '--test', fileURLToPath(new URL('./test-private-image-storage.ts', import.meta.url)),
+  ], {
+    stdio: 'inherit', timeout: 30_000,
+    env: { ...process.env, TSX_TSCONFIG_PATH: fileURLToPath(new URL('../tsconfig.json', import.meta.url)) },
   });
-  assert(upload.publicUrl.startsWith('https://assets.galx.ai/dalle/'), 'R2 Asset URL uses assets.galx.ai CDN host');
-  assert(upload.sizeBytes > 0, 'R2 Asset size accurately recorded');
-  
-  const retrieved = r2Adapter.getAsset(upload.assetId);
-  assert(retrieved !== null && retrieved.assetId === upload.assetId, 'R2 Asset retrieved from BroccoliDB hot table');
+  console.log('  [✓] Private image storage fixture passed without external transport');
 
   // --- 6. GalxEdgeBatchBuffer Tests ---
   console.log('\n--- Phase 6: GalxEdgeBatchBuffer Micro-Batching ---');

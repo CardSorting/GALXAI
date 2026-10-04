@@ -1,8 +1,8 @@
 {
   "version": 1,
   "reviewer": "Codex",
-  "reviewed_at": "2026-10-04T02:23:58.519915Z",
-  "note": "Differential semantic review after accepted resilience pass: complete Vercel deployment guide now requires existing explicit Media/Connect package flow; Git push no longer triggers unrestricted build. Other watched source and guide fingerprints unchanged since preceding review.",
+  "reviewed_at": "2026-10-04T02:28:48.380828Z",
+  "note": "Reviewed differential image HTTP fixture assertions against configured-origin and opaque-capability policy. Application source and all other previously reviewed critical behavior remain unchanged.",
   "files": {
     ".dockerignore": "fabeb0a64e0040d7feb0b9ea2d6f88d109479a61974a7c41aee3f54be23b70e2",
     ".github/workflows/vercel-preflight.yml": "60856940957e45075d1c54de644d3ba0268fad16b35b3ed5eb8005bc40a5b4b3",
@@ -57,7 +57,7 @@
     "scripts/run-relay-federation.ts": "e37abe51cedb4125010b41a19e9a376bc9f1876d42d58b2fc24ee850f751fcad",
     "scripts/run-supabase-integration.ts": "72e2d47c2f79fc79be63d4375e58350abd5c6fd2ac9b922e406275788053035d",
     "scripts/test-auth-identity-boundary.ts": "7a4c8de24a4c82869d1adeb4c57567a574d206116b16df37681e8569bffefe93",
-    "scripts/test-image-public-http.ts": "381ac2e1b3458572dd4bb603039bb2a52b65e0121c4f7bb715215e23075c0f56",
+    "scripts/test-image-public-http.ts": "3912fa45409455b7748d9d73a25717be79a0a6c727a4fe8b77598325d3c166b7",
     "scripts/test-image-requests-db.ts": "7c6ff0b44c97929217e03d19511bfd4358c9ae741638c1f1677d1a4c086d9484",
     "scripts/test-post-mortem.py": "f7e16b5c1bfb12b9cd68ede174bb1db70d4c48c526dc7c48b29a6742e3dfbcb5",
     "scripts/verify-docs.py": "083c3dc63302861d5d754c67e8db11d837097f0660681951c65c7649e9540ae0",

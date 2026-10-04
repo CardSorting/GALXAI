@@ -135,7 +135,10 @@ test('raw image HTTP boundary: success, compatibility, errors, async and adversa
         const json = JSON.parse(raw); assert.deepEqual(Object.keys(json).sort(), ['created', 'data']);
         assert.deepEqual(Object.keys(json.data[0]), [format]);
         if (format === 'url') {
-          assert.match(json.data[0].url, /^https:\/\/galx\.ai\/v1\/images\/assets\/[A-Za-z0-9_.-]+$/);
+          const url = new URL(json.data[0].url);
+          assert.equal(url.origin, new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://galx.ai').origin);
+          assert.match(url.pathname, /^\/v1\/images\/assets\/[A-Za-z0-9_.-]+$/);
+          assert.equal(url.search + url.hash + url.username + url.password, '');
         } else {
           await inspectArtifact(new Response(Buffer.from(json.data[0].b64_json, 'base64'), { headers: { 'content-type': 'image/png' } }));
         }

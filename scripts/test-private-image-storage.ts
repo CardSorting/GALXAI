@@ -84,7 +84,10 @@ test('human artifacts use a distinct private bucket and sanitized bytes', async 
     });
     assert.equal(writes, 1);
     assert.equal(stored.key.startsWith('private/'), true);
-    assert.match(stored.publicUrl, /^https:\/\/galx\.ai\/v1\/images\/assets\//);
+    const url = new URL(stored.publicUrl);
+    assert.equal(url.origin, new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://galx.ai').origin);
+    assert.match(url.pathname, /^\/v1\/images\/assets\/[A-Za-z0-9_.-]+$/);
+    assert.equal(url.search + url.hash + url.username + url.password, '');
 
     await assert.rejects(() => adapter.uploadUserSessionImage({
       userId: 'owner', data: 'https://upstream.invalid/image.png', workClass: 'private', deferManifestUpdate: true,

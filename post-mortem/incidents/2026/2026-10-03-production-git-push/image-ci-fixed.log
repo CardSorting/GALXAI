@@ -1,0 +1,272 @@
+
+> galxai@0.1.0 test:image:security
+> node --import tsx --test scripts/test-image-public-http.ts scripts/test-image-availability.ts scripts/test-image-premium-routing.ts scripts/test-image-library-http.ts scripts/test-private-image-storage.ts scripts/test-public-information-boundary.ts scripts/test-community-profile.ts scripts/test-image-explore-hide.ts scripts/test-image-retry-contract.ts scripts/test-auth-identity-boundary.ts scripts/test-workspace-auth.ts scripts/test-auth-entry.ts
+
+✔ return destinations reject external URLs and recursive auth while preserving workspace context (2.837125ms)
+✔ legacy Images links lead to public discovery while selected library views remain private (0.175583ms)
+✔ explicit sign-in recovery preserves only safe destinations and bypasses existing-session redirects (0.410333ms)
+✔ sign-in notices and failures use finite public copy, never account existence or diagnostics (0.958667ms)
+✔ verification outage has an accessible document recovery response without auth or query disclosure (23.276875ms)
+✔ only an active owner request receiving 401 suspends the workspace; 403, outages and aborts do not (1.090166ms)
+✔ identity requires verified credentials and never trusts client elevation claims (23.946416ms)
+▶ image library and favorites verify sessions without administrator credentials
+  ✔ no service role configured (9.920375ms)
+  ✔ legacy public key is never elevated (2.762083ms)
+✔ image library and favorites verify sessions without administrator credentials (13.601125ms)
+✔ database throttling cannot reject valid sessions; authentication outages are not 401s (1.632375ms)
+✔ public participant handles normalize safely and reject traversal-shaped values (1.836417ms)
+✔ participant profile projection is an explicit public DTO (0.698291ms)
+✔ creation projection excludes database-only fields and canonicalizes attribution (3.497208ms)
+✔ public feed contract hides production text and unauthenticated remix telemetry (1.866167ms)
+✔ new Star works require an explicit selection before public artifact delivery (821.561583ms)
+✔ profile routes are discoverable without broadening private path exemptions (1.146208ms)
+✔ Explore moderation stays separate from the complete Star profile gallery (4.711292ms)
+✔ anonymous availability requests are denied before any upstream read (6.519125ms)
+✔ image availability allows only a bounded boolean and never submits work (1.530583ms)
+✔ image-only cutover uses Premium for both observation and dispatch and fails closed (83.908291ms)
+✔ dynamic image discovery bypasses a healthy but wrong local port (1.022916ms)
+✔ text and Sites discovery require the authenticated inference model contract (0.937416ms)
+✔ local Premium routing can read only the private runtime inference key (42.580959ms)
+✔ a valid not-accepted response does not poison endpoint discovery (2.253875ms)
+✔ Explore hide requires a signed-in account before touching the database (5.539208ms)
+✔ Explore hide uses the verified viewer, returns an allowlisted DTO, and supports undo (20.259459ms)
+✔ hide rate and account-cap responses stay generic and retryable (3.015125ms)
+✔ the schema closes the old global/anonymous moderation path and bounds personal hides (0.953375ms)
+✔ thumbnail delivery is an explicit public-product path, without exempting arbitrary child routes (1.221583ms)
+▶ raw library and thumbnail HTTP: compact DTOs, full details, sanitization, coalescing, authorization and recovery
+  ✔ compact cards use an exact allowlist and details retain the full prompt (34.77175ms)
+  ✔ thumbnail bytes are resized and freshly encoded, identical requests share storage work (177.37625ms)
+  ✔ expired, foreign and deleted capabilities cannot read warm thumbnails (12.317583ms)
+[image request failed] {
+  requestId: 'e73d12a9-8f9c-4a79-a12a-ca0c47bad122',
+  category: 'Error',
+  frames: [
+    '    at Object.getLibrary (/Users/bozoegg/Desktop/GALXAI/scripts/test-image-library-http.ts:33:30)',
+    '    at GET (/Users/bozoegg/Desktop/GALXAI/src/app/api/images/library/route.ts:30:38)',
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)',
+    '    at async Server.<anonymous> (/Users/bozoegg/Desktop/GALXAI/scripts/test-image-library-http.ts:46:65)'
+  ]
+}
+[image request failed] {
+  requestId: 'a6f3ff36-0505-43b2-b33e-7e8b9cfa24b6',
+  category: 'Error',
+  frames: [
+    '    at Object.getAsset (/Users/bozoegg/Desktop/GALXAI/scripts/test-image-library-http.ts:38:30)',
+    '    at readImageArtifact (/Users/bozoegg/Desktop/GALXAI/src/lib/images/read-image-artifact.ts:25:60)',
+    '    at GET (/Users/bozoegg/Desktop/GALXAI/src/app/v1/images/assets/[token]/thumbnail/route.ts:11:28)',
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)',
+    '    at async Server.<anonymous> (/Users/bozoegg/Desktop/GALXAI/scripts/test-image-library-http.ts:48:11)'
+  ]
+}
+  ✔ invalid filters, authentication and storage outages have safe explicit failures (11.490917ms)
+✔ raw library and thumbnail HTTP: compact DTOs, full details, sanitization, coalescing, authorization and recovery (260.75475ms)
+✔ Premium images bypass legacy admission and persist sanitized owned assets before completion (25.250459ms)
+✔ retired free-image error identifiers do not imply public/free creation (5.566417ms)
+▶ raw image HTTP boundary: success, compatibility, errors, async and adversarial fields
+  ✔ default binary and conversions discard metadata (71.834917ms)
+  ✔ JSON is an exact allowlist, including unknown future fields (17.629708ms)
+  ✔ human generation is always private and has no visibility toggle (22.996167ms)
+  ✔ malformed and unauthorized requests never dispatch (42.775541ms)
+[image request failed] {
+  requestId: 'c8e29303-43a2-4f20-8967-09735cd48181',
+  category: 'ProviderException',
+  frames: [
+    '    at TestContext.<anonymous> (/Users/bozoegg/Desktop/GALXAI/scripts/test-image-public-http.ts:174:24)',
+    '    at Test.runInAsyncScope (node:async_hooks:226:14)',
+    '    at Test.run (node:internal/test_runner/test:1402:25)',
+    '    at Test.start (node:internal/test_runner/test:1262:17)',
+    '    at TestContext.test (node:internal/test_runner/test:400:20)',
+    '    at TestContext.<anonymous> (/Users/bozoegg/Desktop/GALXAI/scripts/test-image-public-http.ts:172:13)',
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)',
+    '    at async Test.run (node:internal/test_runner/test:1409:7)',
+    '    at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)'
+  ]
+}
+[image request failed] {
+  requestId: '6640d508-2453-4ea5-a804-c56407863e1c',
+  category: 'RelayDispatchError',
+  frames: [
+    '    at TestContext.<anonymous> (/Users/bozoegg/Desktop/GALXAI/scripts/test-image-public-http.ts:175:10)',
+    '    at Test.runInAsyncScope (node:async_hooks:226:14)',
+    '    at Test.run (node:internal/test_runner/test:1402:25)',
+    '    at Test.start (node:internal/test_runner/test:1262:17)',
+    '    at TestContext.test (node:internal/test_runner/test:400:20)',
+    '    at TestContext.<anonymous> (/Users/bozoegg/Desktop/GALXAI/scripts/test-image-public-http.ts:172:13)',
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)',
+    '    at async Test.run (node:internal/test_runner/test:1409:7)',
+    '    at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)'
+  ]
+}
+[image request failed] {
+  requestId: 'd4b96707-5867-4a04-a861-0dfdc39e2381',
+  category: 'RelayDispatchError',
+  frames: [
+    '    at TestContext.<anonymous> (/Users/bozoegg/Desktop/GALXAI/scripts/test-image-public-http.ts:176:10)',
+    '    at Test.runInAsyncScope (node:async_hooks:226:14)',
+    '    at Test.run (node:internal/test_runner/test:1402:25)',
+    '    at Test.start (node:internal/test_runner/test:1262:17)',
+    '    at TestContext.test (node:internal/test_runner/test:400:20)',
+    '    at TestContext.<anonymous> (/Users/bozoegg/Desktop/GALXAI/scripts/test-image-public-http.ts:172:13)',
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)',
+    '    at async Test.run (node:internal/test_runner/test:1409:7)',
+    '    at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)'
+  ]
+}
+[image request failed] {
+  requestId: 'beaa75f0-41e8-4a43-8307-2c73c33cae44',
+  category: 'ImageCapacityError',
+  status: 503,
+  frames: [
+    '    at TestContext.<anonymous> (/Users/bozoegg/Desktop/GALXAI/scripts/test-image-public-http.ts:177:10)',
+    '    at Test.runInAsyncScope (node:async_hooks:226:14)',
+    '    at Test.run (node:internal/test_runner/test:1402:25)',
+    '    at Test.start (node:internal/test_runner/test:1262:17)',
+    '    at TestContext.test (node:internal/test_runner/test:400:20)',
+    '    at TestContext.<anonymous> (/Users/bozoegg/Desktop/GALXAI/scripts/test-image-public-http.ts:172:13)',
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)',
+    '    at async Test.run (node:internal/test_runner/test:1409:7)',
+    '    at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)'
+  ]
+}
+[image request failed] {
+  requestId: '949e0147-9ba2-49b0-ba52-ee65aef6114e',
+  category: 'Error',
+  status: 429,
+  frames: [
+    '    at TestContext.<anonymous> (/Users/bozoegg/Desktop/GALXAI/scripts/test-image-public-http.ts:178:24)',
+    '    at Test.runInAsyncScope (node:async_hooks:226:14)',
+    '    at Test.run (node:internal/test_runner/test:1402:25)',
+    '    at Test.start (node:internal/test_runner/test:1262:17)',
+    '    at TestContext.test (node:internal/test_runner/test:400:20)',
+    '    at TestContext.<anonymous> (/Users/bozoegg/Desktop/GALXAI/scripts/test-image-public-http.ts:172:13)',
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)',
+    '    at async Test.run (node:internal/test_runner/test:1409:7)',
+    '    at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)'
+  ]
+}
+  ✔ errors, exhausted retry paths, capacity and timeouts are generic (17.958ms)
+  ✔ async creation and retrieval expose customer state only (49.848ms)
+[image request failed] {
+  requestId: '1f99460e-c926-49ef-894e-bc6d53dbbc1f',
+  category: 'Error',
+  frames: [
+    '    at TestContext.<anonymous> (/Users/bozoegg/Desktop/GALXAI/scripts/test-image-public-http.ts:244:39)',
+    '    at Test.runInAsyncScope (node:async_hooks:226:14)',
+    '    at Test.run (node:internal/test_runner/test:1402:25)',
+    '    at Test.start (node:internal/test_runner/test:1262:17)',
+    '    at TestContext.test (node:internal/test_runner/test:400:20)',
+    '    at TestContext.<anonymous> (/Users/bozoegg/Desktop/GALXAI/scripts/test-image-public-http.ts:241:13)',
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)',
+    '    at async Test.run (node:internal/test_runner/test:1409:7)',
+    '    at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)'
+  ]
+}
+[image request failed] {
+  requestId: '99738f1d-fbf7-4e91-9d57-04ebc9d8bb4f',
+  category: 'Error',
+  frames: [
+    '    at TestContext.<anonymous> (/Users/bozoegg/Desktop/GALXAI/scripts/test-image-public-http.ts:244:39)',
+    '    at Test.runInAsyncScope (node:async_hooks:226:14)',
+    '    at Test.run (node:internal/test_runner/test:1402:25)',
+    '    at Test.start (node:internal/test_runner/test:1262:17)',
+    '    at TestContext.test (node:internal/test_runner/test:400:20)',
+    '    at TestContext.<anonymous> (/Users/bozoegg/Desktop/GALXAI/scripts/test-image-public-http.ts:241:13)',
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)',
+    '    at async Test.run (node:internal/test_runner/test:1409:7)',
+    '    at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)'
+  ]
+}
+[image request failed] {
+  requestId: 'c5c7f0bb-5f8f-4987-a6d8-d88a8b8111a0',
+  category: 'Error',
+  frames: [
+    '    at TestContext.<anonymous> (/Users/bozoegg/Desktop/GALXAI/scripts/test-image-public-http.ts:244:39)',
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)',
+    '    at async Test.run (node:internal/test_runner/test:1409:7)',
+    '    at async TestContext.<anonymous> (/Users/bozoegg/Desktop/GALXAI/scripts/test-image-public-http.ts:241:5)',
+    '    at async Test.run (node:internal/test_runner/test:1409:7)',
+    '    at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)'
+  ]
+}
+[image request failed] {
+  requestId: 'b17dd059-b443-4933-b58d-08bd2828675f',
+  category: 'Error',
+  frames: [
+    '    at TestContext.<anonymous> (/Users/bozoegg/Desktop/GALXAI/scripts/test-image-public-http.ts:244:39)',
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)',
+    '    at async Test.run (node:internal/test_runner/test:1409:7)',
+    '    at async TestContext.<anonymous> (/Users/bozoegg/Desktop/GALXAI/scripts/test-image-public-http.ts:241:5)',
+    '    at async Test.run (node:internal/test_runner/test:1409:7)',
+    '    at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)'
+  ]
+}
+[image request failed] {
+  requestId: '388bc634-cfe7-44d0-802e-966c5e6749c3',
+  category: 'Error',
+  frames: [
+    '    at TestContext.<anonymous> (/Users/bozoegg/Desktop/GALXAI/scripts/test-image-public-http.ts:250:37)',
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)',
+    '    at async Test.run (node:internal/test_runner/test:1409:7)',
+    '    at async TestContext.<anonymous> (/Users/bozoegg/Desktop/GALXAI/scripts/test-image-public-http.ts:241:5)',
+    '    at async Test.run (node:internal/test_runner/test:1409:7)',
+    '    at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)'
+  ]
+}
+  ✔ missing or exhausted purchased allowance never creates or dispatches work (11.932792ms)
+✔ raw image HTTP boundary: success, compatibility, errors, async and adversarial fields (240.780292ms)
+✔ artifact decoder rejects nonimages and metadata is removed in every supported source format (29.67975ms)
+✔ download capability is opaque, authenticated, expiring and purpose bound (0.618666ms)
+✔ private image capabilities require the owning signed-in account (4.394625ms)
+✔ SDK server adapters sanitize outputs and never fabricate success on failure (2.154291ms)
+✔ OpenAPI endpoint does not expose a public inference contract (0.333209ms)
+✔ private diagnostics omit arbitrary provider message payloads and credentials (0.255917ms)
+✔ alternate gateway projects JSON and maps upstream HTML failures (4.708334ms)
+[image request failed] {
+  requestId: 'daaa1018-562a-4680-8c1b-99bdef6e6804',
+  category: 'ImageCapacityError',
+  status: 503,
+  frames: [
+    '    at <anonymous> (/Users/bozoegg/Desktop/GALXAI/scripts/test-image-retry-contract.ts:32:26)',
+    '    at ModuleJob.run (node:internal/modules/esm/module_job:569:25)',
+    '    at async node:internal/modules/esm/loader:650:26',
+    '    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)'
+  ]
+}
+[image request failed] {
+  requestId: '7a2a933d-5055-40cd-ba92-1d144a81f9fb',
+  category: 'RelayDispatchError',
+  frames: [
+    '    at <anonymous> (/Users/bozoegg/Desktop/GALXAI/scripts/test-image-retry-contract.ts:32:70)',
+    '    at ModuleJob.run (node:internal/modules/esm/module_job:569:25)',
+    '    at async node:internal/modules/esm/loader:650:26',
+    '    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)'
+  ]
+}
+PASS: image HTTP retry hints distinguish admission from ambiguous dispatch and carry request IDs.
+PASS: queued image failures cannot trigger duplicate synthesis.
+PASS: Star systemic-stop classification distinguishes worker failures from fleet failures.
+✔ scripts/test-image-retry-contract.ts (1462.004667ms)
+✔ human artifacts use a distinct private bucket and sanitized bytes (345.810916ms)
+✔ administrator access fails closed for missing, user, and malformed credentials (1.06375ms)
+✔ public health does not enumerate infrastructure (3.188417ms)
+✔ Star profiles and participant APIs are public product surfaces without broadening private routes (0.974792ms)
+✔ operational routes reject anonymous and ordinary bearer callers before collecting data (285.532208ms)
+✔ legacy execution and general task submission cannot bypass private image admission (19.571375ms)
+✔ public model catalog contains no execution configuration (0.445833ms)
+✔ published documentation does not include operational implementation vocabulary (8.00075ms)
+✔ sitemap lists discovery and public Stars, never private creation workspaces (3.158375ms)
+✔ industry pages expose capabilities without internal topology or unverified infrastructure claims (2.008125ms)
+✔ anonymous navigation, RSC, prefetch and misleading paths never pass the workspace gate (13.895083ms)
+✔ forged sessions, anonymous Auth users and verification outages fail closed with sanitized responses (9.120833ms)
+✔ expired sessions refresh through Auth and propagate cookies to the request and response (3.228333ms)
+✔ native sessions use verified active session authority, never cookie presence (0.750334ms)
+✔ server page guard independently denies anonymous entry when middleware did not run (33.514792ms)
+✔ independent page verification distinguishes an outage from an invalid session (2.738291ms)
+ℹ tests 69
+ℹ suites 0
+ℹ pass 69
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1877.829541

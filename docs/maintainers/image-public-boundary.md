@@ -144,6 +144,13 @@ control.
 ## Verification
 
 Run `npm run test:image:security`, `npx tsc --noEmit`, and `npm run build`.
+Run the HTTP/storage fixtures with the CI deployment identity as well as the
+default configuration. Download capabilities must use the configured application
+origin, retain the exact opaque asset path, and contain no query, fragment or
+embedded credentials. Tests must not assume that every deployment uses `galx.ai`.
+The Cloudflare component suite invokes the same isolated private-storage fixture;
+it does not restore the retired generic public asset uploader. The fixture rejects
+network access and uses throwaway credentials and storage.
 The Explore preference tests additionally assert that anonymous callers are
 rejected before any write, caller-supplied viewer IDs are ignored, the response
 is an allowlisted DTO, rate/cap outcomes are generic and retryable, the private

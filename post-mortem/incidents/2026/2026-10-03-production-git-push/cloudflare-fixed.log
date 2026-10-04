@@ -1,0 +1,189 @@
+
+======================================================================
+   GALXAI CLOUDFLARE EDGE MESH VERIFICATION TEST SUITE
+======================================================================
+
+--- Phase 1: GalxEdgeGateway Ingress & SSE Streaming ---
+  [✓] Health endpoint returns HTTP 200
+  [✓] Health payload status is "healthy"
+  [✓] Health response uses the public field allowlist
+  [✓] Health timestamp is numeric
+  [✓] Health never reflects private ingress diagnostics
+  [✓] Invalid API key format rejected with HTTP 401
+  [✓] Production authentication fails closed when its backend is not configured
+  [✓] Production rejects API keys in query strings
+  [✓] Approval requests never follow redirects
+  [✓] Approval checks receive the presented key
+  [✓] List models returns HTTP 200
+  [✓] Models payload contains non-empty array
+  [✓] Model catalog contains "galx-nova"
+  [✓] Model catalog does not invent a wholesale pricing tier
+  [✓] Approval requests never follow redirects
+  [✓] Approval checks receive the presented key
+  [✓] pending preview access fails closed
+  [✓] Every developer request rechecks preview approval
+  [✓] Preview denial hides backend details
+  [✓] Approval requests never follow redirects
+  [✓] Approval checks receive the presented key
+  [✓] revoked preview access fails closed
+  [✓] Every developer request rechecks preview approval
+  [✓] Preview denial hides backend details
+  [✓] Approval requests never follow redirects
+  [✓] Approval checks receive the presented key
+  [✓] unavailable preview access fails closed
+  [✓] Every developer request rechecks preview approval
+  [✓] Preview denial hides backend details
+  [✓] Approval requests never follow redirects
+  [✓] Approval checks receive the presented key
+  [✓] unapproved success preview access fails closed
+  [✓] Every developer request rechecks preview approval
+  [✓] Preview denial hides backend details
+  [✓] Approval requests never follow redirects
+  [✓] Approval checks receive the presented key
+  [✓] malformed approval preview access fails closed
+  [✓] Every developer request rechecks preview approval
+  [✓] Preview denial hides backend details
+  [✓] Approval requests never follow redirects
+  [✓] Approval checks receive the presented key
+  [✓] Approval transport failure fails closed
+  [✓] Approval transport errors remain private
+  [✓] Approval requests never follow redirects
+  [✓] Approval checks receive the presented key
+  [✓] Non-streaming chat completion returns HTTP 200
+  [✓] Response has assistant message
+  [✓] Response includes token usage statistics
+  [✓] Local synthetic response is explicitly labeled
+  [✓] Edge responses preserve logical conversation identity
+  [✓] Edge responses preserve turn identity
+  [✓] Edge exposes the resolved session lifecycle mode
+  [✓] Direct edge execution does not claim durable session authority
+  [✓] Approval requests never follow redirects
+  [✓] Approval checks receive the presented key
+  [✓] Edge rejects conflicting body and header session identities
+  [✓] Approval requests never follow redirects
+  [✓] Approval checks receive the presented key
+  [✓] Unknown model IDs fail explicitly instead of silently changing models
+  [✓] Approval requests never follow redirects
+  [✓] Approval checks receive the presented key
+  [✓] Missing upstream compute fails closed instead of returning a synthetic success
+  [✓] Approval requests never follow redirects
+  [✓] Approval checks receive the presented key
+  [✓] Unverified model aliases cannot enable an enforcement route
+  [✓] Effective model remains the canonical Nova identifier
+  [✓] Approval requests never follow redirects
+  [✓] Approval checks receive the presented key
+  [✓] Streaming chat completion returns HTTP 200
+  [✓] Streaming response has text/event-stream content type
+  [✓] SSE stream contains "data:" chunks
+  [✓] SSE stream terminates with "[DONE]" marker
+  [✓] Approval requests never follow redirects
+  [✓] Approval checks receive the presented key
+  [✓] Embeddings endpoint returns HTTP 200
+  [✓] Embeddings returned 2 vector objects
+  [✓] Embedding vector has 1536 dimensions
+  [✓] Approval requests never follow redirects
+  [✓] Approval checks receive the presented key
+  [✓] Image forwarding never follows redirects
+  [✓] Default image response is binary
+  [✓] Trusted site image bytes survive forwarding
+  [✓] Image forwarding strips private headers
+  [✓] Approval requests never follow redirects
+  [✓] Approval checks receive the presented key
+  [✓] Image forwarding never follows redirects
+  [✓] Image JSON uses an explicit field allowlist
+  [✓] Image item JSON strips internal fields
+  [✓] Approval requests never follow redirects
+  [✓] Approval checks receive the presented key
+  [✓] Image forwarding never follows redirects
+  [✓] Async image submission preserves accepted status
+  [✓] Async image acknowledgement strips diagnostics
+  [✓] Approval requests never follow redirects
+  [✓] Approval checks receive the presented key
+  [✓] Image forwarding never follows redirects
+  [✓] Async retrieval preserves the completed artifact
+  [✓] Async retrieval uses nested public allowlists
+  [✓] Approval requests never follow redirects
+  [✓] Approval checks receive the presented key
+  [✓] Image forwarding never follows redirects
+  [✓] Image retrieval preserves owner denial without forwarding details
+  [✓] Approval requests never follow redirects
+  [✓] Approval checks receive the presented key
+  [✓] Image forwarding never follows redirects
+  [✓] Image retrieval preserves owner denial without forwarding details
+  [✓] Approval requests never follow redirects
+  [✓] Approval checks receive the presented key
+  [✓] Image forwarding never follows redirects
+  [✓] Image redirects fail closed
+  [✓] Approval requests never follow redirects
+  [✓] Approval checks receive the presented key
+  [✓] Image forwarding never follows redirects
+  [✓] Image upstream failure is sanitized
+  [✓] API image routes recheck Developer admission before forwarding
+
+--- Phase 2: GalxEdgeRouter In-Flight Provider Failover ---
+  [✓] Edge router made 2 attempts before succeeding
+  [✓] Edge router detected failover event
+  [✓] Edge router routed to healthy secondary shard
+
+--- Phase 3: GalxEdgeConnectionPool Pre-Warming ---
+  [✓] Connection metadata initializes its warm flag
+  [✓] Connection metadata supplies a keep-alive header
+
+--- Phase 4: GalxEdgeCache Stale-While-Revalidate ---
+  [✓] First fetch is a cache MISS
+  [✓] Fetcher called once
+  [✓] Immediate second fetch is a cache HIT
+  [✓] Fetcher not called again on HIT
+  [✓] BroccoliDB natural query on edge cache succeeded
+
+--- Phase 5: GalxR2AssetAdapter Private Artifact Boundary ---
+✔ human artifacts use a distinct private bucket and sanitized bytes (130.578ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 133.16775
+✔ /Users/bozoegg/Desktop/GALXAI/scripts/test-private-image-storage.ts (280.758708ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 286.444333
+  [✓] Private image storage fixture passed without external transport
+
+--- Phase 6: GalxEdgeBatchBuffer Micro-Batching ---
+  [✓] Batch entries reach isolated repository fixtures
+  [✓] Batch buffer successfully flushed token draws
+  [✓] Batch buffer successfully flushed telemetry samples
+
+--- Phase 7: GalxSwarmCoordinatorDO Durable Object Swarm State ---
+  [✓] Swarm DO maintains registered agents
+  [✓] Swarm DO stores shared context in edge memory
+  [✓] Swarm DO tracks agent status
+  [✓] Swarm DO HTTP fetch /state returns HTTP 200
+  [✓] Swarm DO HTTP RPC returns valid swarm ID
+  [✓] Swarm DO HTTP fetch /agent/register returns HTTP 200
+
+--- Phase 8: GalxEdgeWebhookDispatcher HMAC Signatures ---
+  [✓] Webhook dispatch simulation completes (no delivery attempted)
+  [✓] Webhook payload includes HMAC-SHA256 signature
+
+--- Phase 9: GalxEdgeWire Binary Codec ---
+  [✓] Payload encoded to Uint8Array binary format
+  [✓] Binary buffer accurately decoded back to typed object
+
+--- Phase 10: GalxEdgeQueueWorker Cron Task Fleet ---
+  [✓] Queue lease uses the requested bounded batch
+  [✓] Empty queue fixture is leased once and processes no tasks
+  [✓] No unmocked network requests occurred
+
+======================================================================
+   ALL 141 CLOUDFLARE EDGE VERIFICATION TESTS PASSED (0 FAILS)!
+======================================================================
+

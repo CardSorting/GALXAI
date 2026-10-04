@@ -1,0 +1,44 @@
+{
+  "observed_at": "2026-10-04T02:28:27.675383+00:00",
+  "failed_revision": "09e3a75e7849bcbe974b8786ae0f3e5c0c1836f8",
+  "ci_runs": {
+    "web": "https://github.com/CardSorting/GALXAI/actions/runs/37170990216",
+    "edge": "https://github.com/CardSorting/GALXAI/actions/runs/37170990234"
+  },
+  "failures": [
+    "Image HTTP and private-storage assertions hardcoded galx.ai; CI intentionally supplies galx.invalid.",
+    "Cloudflare component suite called removed uploadAsset and getAsset APIs with fake undecodable image bytes."
+  ],
+  "baseline": "All three test files were unchanged between the preceding origin/main revision 38a3cc48 and the first production push.",
+  "correction": [
+    "Assert the configured application origin and strict opaque image path, with no URL query, fragment or credentials.",
+    "Run the existing current private-storage fixture from the Cloudflare suite in its own bounded child process with network denial, throwaway credentials and isolated storage."
+  ],
+  "reviewed": {
+    "scripts/test-cloudflare-workers.ts": "c296f0f9b93387daf294d4f24bbd7d1492a3c669f560e2417731982a2b1e7b5c",
+    "scripts/test-image-public-http.ts": "3912fa45409455b7748d9d73a25717be79a0a6c727a4fe8b77598325d3c166b7",
+    "scripts/test-private-image-storage.ts": "b6167ecde8242664043cfed65e142d30b03fddfdfa56919a5ec8c2af247ffb0b",
+    "docs/maintainers/image-public-boundary.md": "aa6055c8e4929772bf05fb4b535b0694e99fe8d9f4bf2e9bd10f0c67ba93f229",
+    "src/lib/security/image-download-url.ts": "1a853c43d60796bf6eb6a52db6b9d5e3e4a2d810f00f57d3acd2d513ab979f30",
+    "src/workers/cloudflare/GalxR2AssetAdapter.ts": "3be7799e0bee39507be531e59556f60dc0f88ba11661f2d50a3fc1e86bf847d5",
+    "scripts/lib/require-isolated-worker-env.ts": "0d53a207db93e611839175b68520824b8f97753607cf05d8f0bf25929c362127"
+  },
+  "verification": {
+    "ci_environment_image_security": {
+      "passed": 69,
+      "failed": 0
+    },
+    "cloudflare_components": {
+      "passed": 141,
+      "failed": 0,
+      "private_storage_child": "passed",
+      "unmocked_network_requests": 0
+    }
+  },
+  "evidence": {
+    "post-mortem/incidents/2026/2026-10-03-production-git-push/image-ci-fixed.log": "0ffa37c1d55ee652ab8f5b2faafb60639ed36de35f0d4bfbb7eb86556ea93ca7",
+    "post-mortem/incidents/2026/2026-10-03-production-git-push/cloudflare-fixed.log": "dd73ac1ec637c496882cc1d3c80b4877a0fe97f190bbaaf96383a6670230d18e"
+  },
+  "scope": "Tests and maintainer guidance only. No application runtime source, worker runtime, database, grant, deployment image, ingress or accepted execution semantics changed. No real provider or host interruption.",
+  "limitations": "Remote follow-up CI remains to be observed; local fixture success does not certify a new production candidate."
+}

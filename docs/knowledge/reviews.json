@@ -103,11 +103,12 @@
     }
   },
   "images": {
-    "reviewer": "Codex — Mac origin/transport correction",
-    "note": "Reviewed the bounded source/guide delta and retained whole-image evidence; direct and fixed-private-origin trust, terminal-validated client transport, immutable package and separate live cutover limits. Prior unchanged inventories remain retained evidence; this is not a workspace-wide certification.",
+    "reviewer": "Codex",
+    "note": "Bounded CI-fixture correction: reviewed current image URL/storage contract and complete public-boundary guide; configured-origin and strict capability-path assertions replace production-host assumptions. 69 checks pass with CI environment. No runtime or commercial change.",
     "reviewed_at": "2026-10-04",
     "review_by": "2026-10-10",
     "evidence": {
+      "post-mortem/releases/2026-10-03-production-ci-fixtures.json": "5aa0c513a5dc860a6d334735927e376dba01e75c3dff173af3c54faae5a1ab58",
       "post-mortem/releases/2026-10-03-mac-origin-transport-review.json": "f6bb88d480af056fbab72cd11579478f4409aa594efb0b1acc8403406d46bae5"
     },
     "files": {
@@ -128,7 +129,7 @@
       "docs/maintainers/FREE_GENERATION_QUOTA.md": "deed3002f798e59eef2cb8536fe17c2e394c7302f058e3fa952726e4a00195e5",
       "docs/maintainers/PUBLIC_DISCOVERY.md": "3e2f0538e6f4408855be844ffeba143548cba330bab41deca2d7be71d388d9a1",
       "docs/maintainers/image-library-scale.md": "733dbe50cedb08e18b231ce1c88ddcc71d460957eefccfd4fbcba3a9d6f34912",
-      "docs/maintainers/image-public-boundary.md": "efb0c192f6e0d45ac162bef817d590b784663f1d17bcb97da177153fcf5fb82c",
+      "docs/maintainers/image-public-boundary.md": "aa6055c8e4929772bf05fb4b535b0694e99fe8d9f4bf2e9bd10f0c67ba93f229",
       "docs/maintainers/image-studio-review.md": "3bcb21854e3df8d4c01a077e4d605c43f86b48b57848521b1d71e466864198b1",
       "docs/maintainers/private-image-accounting.md": "c7b381496d593a0eab863f2746a6d5acb9f5c03ac06a934cc6b4e39f2c666b62",
       "docs/maintainers/readable-urls.md": "5a89ddc75b34f511bd5fc88c2eaededcf597c656449256f2f7dddf87d1c0c8c4",
@@ -157,12 +158,12 @@
       "scripts/test-image-library-scale-db.ts": "131e2decca645d22522ffbd90170a3e47f81b6db068d93f6429d3c5d30ee02b7",
       "scripts/test-image-library-scale.ts": "1d4aeade107bc2d715654f4853bdc1be660bded657ca8cabd0fd34a67423389e",
       "scripts/test-image-premium-routing.ts": "48305c56723a463200071dd96bde80303dccdb43db61761c66e57add18b7359c",
-      "scripts/test-image-public-http.ts": "381ac2e1b3458572dd4bb603039bb2a52b65e0121c4f7bb715215e23075c0f56",
+      "scripts/test-image-public-http.ts": "3912fa45409455b7748d9d73a25717be79a0a6c727a4fe8b77598325d3c166b7",
       "scripts/test-image-requests-db.ts": "7c6ff0b44c97929217e03d19511bfd4358c9ae741638c1f1677d1a4c086d9484",
       "scripts/test-image-retry-contract.ts": "88f7f184d1df5c120a5b659e10a41d699110389bd8e7b43391f6cf642d5d5194",
       "scripts/test-image-studio-recovery.ts": "a8e90f4fad6b2563b2ef4af773a27b86933c089dacc6a6111708c853775aa96b",
       "scripts/test-image-studio.ts": "4dcfe2cfd0c4944e75e345ddb3ecb9e32a1b974cddf0dfc1467ee0b6d98bcca3",
-      "scripts/test-private-image-storage.ts": "d41db5872329f1925d246feb1f3d25b23370643eb1a71b10c6abe971a4b861b1",
+      "scripts/test-private-image-storage.ts": "b6167ecde8242664043cfed65e142d30b03fddfdfa56919a5ec8c2af247ffb0b",
       "scripts/test-private-remix.ts": "606188e812641db6ea26cfb5ea084e30b622a3b73925669313e1e8763ba72646",
       "scripts/test-public-information-boundary.ts": "ac9138eeafc3f3331540e735b4f32d45f090ee9dafcc940afeb6c47e1a019423",
       "scripts/test-relay-image-generation.ts": "d66f497b893ed0026806fbc928dbafff65be90b2e505e86c7da32b4df9d67140",
@@ -1197,12 +1198,12 @@
   },
   "delivery": {
     "reviewer": "Codex",
-    "note": "Bounded release follow-up: reviewed canonical deployment guide, Git hook configuration, accepted source overlay and independent retired-inference guards. Disabled automatic full-source Vercel deployment; serving accepted artifacts remain unchanged. Prior source review remains supporting evidence.",
+    "note": "Reviewed test-only Cloudflare correction against current private-storage fixture, network-denial bootstrap and canonical release boundaries. 141 component checks and private-storage child pass; accepted deployed artifacts unchanged.",
     "reviewed_at": "2026-10-04",
     "review_by": "2026-10-10",
     "evidence": {
-      "post-mortem/releases/2026-10-03-production-push-placement-review.json": "2836e8e3c06798c107c270a6019c47be1b2d4fb2c4fdbcad873538d9e3f8457b",
-      "post-mortem/releases/2026-10-03-nova-nondisruptive-resilience-review.json": "3812d91c999a195d2785ef4d00e5f6f2cf6abf4dfa5cff4769e8d0b223ab4f8c"
+      "post-mortem/releases/2026-10-03-production-ci-fixtures.json": "5aa0c513a5dc860a6d334735927e376dba01e75c3dff173af3c54faae5a1ab58",
+      "post-mortem/releases/2026-10-03-production-push-placement-review.json": "2836e8e3c06798c107c270a6019c47be1b2d4fb2c4fdbcad873538d9e3f8457b"
     },
     "files": {
       ".dockerignore": "fabeb0a64e0040d7feb0b9ea2d6f88d109479a61974a7c41aee3f54be23b70e2",
@@ -1249,7 +1250,7 @@
       "scripts/release-certification.ts": "8b332c8d75a6774f6f2db7cae95b49f158fe4eb317e6daefee673b53df40b00e",
       "scripts/retain-hosted-output.mjs": "68396b0d76a34be4e7aeff827a8dcb6a926c42be58a155f2b644fe8ba7f6d267",
       "scripts/self-host.mjs": "6d27055ba848644a98790edd4419c7c068238748406d857da4ddf4d7b92081c0",
-      "scripts/test-cloudflare-workers.ts": "187a8a2b8a62fee72bdecd4cbe8f1e532cffbefe9394848984c7e9c610169c58",
+      "scripts/test-cloudflare-workers.ts": "c296f0f9b93387daf294d4f24bbd7d1492a3c669f560e2417731982a2b1e7b5c",
       "scripts/test-hosted-packaging.mjs": "ba02ed131139b0557da10a1fe3c556a8a2f2d7308334bad0c772b20094f91af3",
       "scripts/test-nova-retirement.ts": "aec7fd21ba9cc1566a3c745903f5804121e06272ccc03bb6b35234325798fe8a",
       "scripts/test-self-host-resilience.ts": "949670344b5b6042d399c08d9c0759c3f9fa614e974e597e55cc49a75514607e",
