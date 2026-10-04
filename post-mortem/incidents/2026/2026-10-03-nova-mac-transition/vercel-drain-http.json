@@ -1,0 +1,107 @@
+{
+  "at": "2026-10-04T01:34:44.220Z",
+  "observations": [
+    {
+      "origin": "https://galx.ai",
+      "path": "/v1/inference",
+      "status": 403,
+      "bytes": 93
+    },
+    {
+      "origin": "https://galx.ai",
+      "path": "/v1/chat/completions",
+      "status": 403,
+      "bytes": 93
+    },
+    {
+      "origin": "https://galx.ai",
+      "path": "/api/generate",
+      "status": 403,
+      "bytes": 93
+    },
+    {
+      "origin": "https://galx.ai",
+      "path": "/api/queues",
+      "status": 403,
+      "bytes": 93
+    },
+    {
+      "origin": "https://galxai-204k0uq49-cardsortings-projects.vercel.app",
+      "path": "/v1/inference",
+      "status": 401,
+      "bytes": 599
+    },
+    {
+      "origin": "https://galxai-204k0uq49-cardsortings-projects.vercel.app",
+      "path": "/v1/chat/completions",
+      "status": 401,
+      "bytes": 608
+    },
+    {
+      "origin": "https://galxai-204k0uq49-cardsortings-projects.vercel.app",
+      "path": "/api/generate",
+      "status": 401,
+      "bytes": 599
+    },
+    {
+      "origin": "https://galxai-204k0uq49-cardsortings-projects.vercel.app",
+      "path": "/api/queues",
+      "status": 401,
+      "bytes": 597
+    },
+    {
+      "origin": "https://galxai-hdwgzxjp5-cardsortings-projects.vercel.app",
+      "path": "/v1/inference",
+      "status": 401,
+      "bytes": 599
+    },
+    {
+      "origin": "https://galxai-hdwgzxjp5-cardsortings-projects.vercel.app",
+      "path": "/v1/chat/completions",
+      "status": 401,
+      "bytes": 608
+    },
+    {
+      "origin": "https://galxai-hdwgzxjp5-cardsortings-projects.vercel.app",
+      "path": "/api/generate",
+      "status": 401,
+      "bytes": 599
+    },
+    {
+      "origin": "https://galxai-hdwgzxjp5-cardsortings-projects.vercel.app",
+      "path": "/api/queues",
+      "status": 401,
+      "bytes": 597
+    },
+    {
+      "origin": "https://galx.ai",
+      "path": "/",
+      "status": 200,
+      "bytes": 74646
+    },
+    {
+      "origin": "https://galx.ai",
+      "path": "/connect",
+      "status": 200,
+      "bytes": 45489
+    },
+    {
+      "origin": "https://galx.ai",
+      "path": "/.well-known/oauth-authorization-server",
+      "status": 200,
+      "bytes": 527
+    },
+    {
+      "origin": "https://galx.ai",
+      "path": "/explore",
+      "status": 200,
+      "bytes": 57291
+    },
+    {
+      "origin": "https://galx.ai",
+      "path": "/stars",
+      "status": 200,
+      "bytes": 111604
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "classification": "private",
+  "observed_at": "2026-10-03T23:23:22.421775+00:00",
+  "scope": "Owner-proposed temporary whole-application placement assessment and offline production boot only.",
+  "reviewed_complete_affected_guides": [
+    "docs/VERCEL_DEPLOYMENT.md",
+    "docs/DEPLOYMENT.md",
+    "docs/operations/galx-connect.md"
+  ],
+  "current_state_delta": "New dated Mac-host observation; earlier split-Hobby and Vercel evidence remains historical and unchanged.",
+  "sources_inspected": [
+    "Dockerfile",
+    ".dockerignore",
+    "next.config.ts",
+    "scripts/package-hosted-candidate.mjs",
+    "scripts/relay-local.mjs",
+    "src/app/v1/inference/route.ts",
+    "src/lib/nova/inference.ts",
+    ".relay/hosted-adaptation/build-03/app/node_modules/next/dist/server/lib/start-server.js"
+  ],
+  "semantic_conclusions": [
+    "The same accepted Next production application can boot outside Vercel. Whole-app placement avoids a bespoke Nova adapter solely for invocation lifetime.",
+    "Self-hosting retains Nova application deadlines and after registration; the observed shutdown is idle, not active-inference acceptance.",
+    "Existing primary database/storage and private provider authority remain separate; no account or infrastructure migration is needed for this proposal.",
+    "Existing AC supervision already asserts against idle system sleep. Configuration alone must not be treated as current sleep readiness; outages and forced sleep remain limits.",
+    "The existing output was exercised under x86 emulation; neither a retained self-hosted package nor a native build was produced.",
+    "The edge timeout, client aggregation/keepalive work, deployment supervision and full authority/Media acceptance still block cutover.",
+    "No plan purchase, candidate rebuild, live setting change or public activation occurred."
+  ],
+  "actual_checks": {
+    "http_observations": 7,
+    "production_boot": "Node 22.23.2 / Next 15.5.25, x86-64 Linux, external network disabled, read-only accepted build",
+    "idle_sigterm_ms": 58,
+    "runtime_source_unchanged": 1886,
+    "earlier_compiled_files_unchanged": 2291,
+    "compiled_nova_equals_retained_artifact": true,
+    "read_only_host_observation": true
+  },
+  "retained_evidence": [
+    "post-mortem/releases/2026-10-03-mac-self-hosting-assessment.json"
+  ],
+  "review_delta": {
+    "connect": [
+      "docs/operations/galx-connect.md"
+    ],
+    "delivery": [
+      "docs/VERCEL_DEPLOYMENT.md",
+      "docs/DEPLOYMENT.md"
+    ],
+    "critical": [
+      "docs/VERCEL_DEPLOYMENT.md",
+      "docs/DEPLOYMENT.md",
+      "docs/operations/galx-connect.md",
+      "post-mortem/CURRENT_STATE.md"
+    ]
+  },
+  "unmapped_review": "Current-state/register/journal are governed by the existing incident policy. Private diagnostic/evidence paths are excluded from application builds. This is not an accepted architecture decision or implemented new service.",
+  "limits": [
+    "No real database/account/provider or live network acceptance.",
+    "No active-inference shutdown, public cutover or new package proof.",
+    "Existing public-release gates remain separate."
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "classification": "private",
+  "observed_at": "2026-10-03T23:23:57.326Z",
+  "scope": "Temporary Mac self-hosting assessment verification; no runtime source change or deployment.",
+  "checks": {
+    "offline_next_production_http_observations": 7,
+    "idle_sigterm_exit": 0,
+    "documentation_validation": "passed; existing overdue prevention actions retained",
+    "documentation_fixtures": 42,
+    "diff_check": "passed",
+    "evidence_integrity_failures": [],
+    "known_private_credential_matches": [],
+    "credential_scan_files": 13,
+    "credential_scan_scope": "Exact known private values/build canaries, public build values excluded; no universal detector claim",
+    "same_compiled_nova_payload": true,
+    "source_delta": [],
+    "compiled_delta": []
+  },
+  "limits": "No new production build, immutable Mac package, native ARM64 release, real account/database/provider request, active shutdown, public route or cohort activation.",
+  "evidence": [
+    {
+      "path": "post-mortem/releases/2026-10-03-mac-self-hosting-assessment.json",
+      "sha256": "a9910e876fc2a8f722b8feb8b13ba459e7898fef0cac62942d1c9c820e9b6286"
+    },
+    {
+      "path": "post-mortem/releases/2026-10-03-mac-self-hosting-review.json",
+      "sha256": "335196b280fc14ab51671f7ac63a4c8cbbe229be79f47ca3535b76d532c67167"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-mac-self-hosting/diff-check.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-mac-self-hosting/docs-check.log",
+      "sha256": "7c2ffa63b2facb189ce3e37a599e0ddb0746a92b2a5503433d79821b39ec8c77"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-mac-self-hosting/docs-impact.log",
+      "sha256": "cc6e0eda4850ae4ce85881d8407359da649b5e7c326bf99898cf31037572c5b3"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-mac-self-hosting/docs-sync.log",
+      "sha256": "b3bb999758d64f8d8ee4357ee9c0033fb147e3fa2507d1ced90bcdcdbb0e6164"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-mac-self-hosting/docs-tests.log",
+      "sha256": "75fd03399e4f7820fb0c80dc430e2db53c283ca7079272442d25799144d5ed60"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-mac-self-hosting/host-readback.json",
+      "sha256": "0bf391344f8be0db03c62910cd57ad61a73dc79050eae7cf46fb012f0cbbf9cb"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-mac-self-hosting/preservation.json",
+      "sha256": "2a1370f7f10b2072ba6ad4840e7200bb4798ae1ac18d1f170b6897a228bb8d08"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-mac-self-hosting/probe.cjs",
+      "sha256": "3da287b5bdf0ab4d04c9559c475ffe4b32795bacbf7142ede7ced39e61136bab"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-mac-self-hosting/probe.log",
+      "sha256": "8a51a76a6b0848f062440fd8626a39f94ced96875bd83af2a75c8f8b43eaf32f"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-mac-self-hosting/result.json",
+      "sha256": "8a51a76a6b0848f062440fd8626a39f94ced96875bd83af2a75c8f8b43eaf32f"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-mac-self-hosting/server.log",
+      "sha256": "8e189e7159779e96c95f0472b898b127f190a8b5c17c103545c3bb9caebcb5bf"
+    }
+  ]
+}

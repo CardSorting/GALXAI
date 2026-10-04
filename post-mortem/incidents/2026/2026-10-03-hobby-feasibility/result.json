@@ -1,0 +1,38 @@
+{
+  "at": "2026-10-03T22:43:51.820Z",
+  "scope": "Actual existing edge/tunnel to local synthetic origin. No Vercel candidate invocation, Nova execution, database or provider request.",
+  "originDelayMs": 310000,
+  "results": [
+    {
+      "mode": "json",
+      "status": 524,
+      "firstByteMs": 125064,
+      "elapsedMs": 125064,
+      "completed": false,
+      "done": false,
+      "error": null
+    },
+    {
+      "mode": "stream",
+      "status": 200,
+      "firstByteMs": 186,
+      "elapsedMs": 310191,
+      "completed": true,
+      "done": true,
+      "error": null
+    }
+  ],
+  "jobs": [
+    {
+      "mode": "json",
+      "endRequested": false,
+      "originConnectionLifetimeMs": 125016
+    },
+    {
+      "mode": "stream",
+      "endRequested": true,
+      "originConnectionLifetimeMs": 310005
+    }
+  ],
+  "sameServingDeployment": "dpl_9FSaL3M6JffKDjaUHP98RhU3crzG"
+}

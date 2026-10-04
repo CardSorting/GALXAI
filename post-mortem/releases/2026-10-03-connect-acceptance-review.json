@@ -1,0 +1,97 @@
+{
+  "classification": "private",
+  "observed_at": "2026-10-03T14:43:19.117607+00:00",
+  "scope": "Incremental semantic review after the initial bounded Connect implementation. Actual existing-account acceptance found two browser integration defects; provider completion is still blocked. This review does not certify hosted rollout, provider execution or the entire broader domain inventory.",
+  "prior_bounded_review": "post-mortem/releases/2026-10-03-connect-local-review.json",
+  "acceptance_evidence": "post-mortem/releases/2026-10-03-connect-real-acceptance.json",
+  "source_sha256": {
+    "src/app/auth/callback/route.ts": "42367f691776d3d4b625ff749d549b8df2b29407a56b49fcb530e8c661ecf1a9",
+    "src/lib/connect/config.ts": "4e13d3626a3d96eaf8ec06f5ff2962f8a1633f7459c80575041d2fb3d22b4653",
+    "src/lib/connect/http.ts": "b2872fcde6d34092748637d7d101963d47c3b0ec560f889bcadeb84ebcc7c954",
+    "src/app/v1/inference/route.ts": "9de15a281c4baf66527705a1af059c0d90608afd4e5e9503365115e2f3e1dfec",
+    "src/sdk/connect.ts": "3561bb495a9e06cbde1bf14c7a2c514f5d01d8057bde4eba20262a409cb21d4f",
+    "scripts/test-connect.ts": "401cf3450ac037e054d7134ad0e2f54c5b56efb9171f1bacac0598da33af4cf8",
+    "scripts/test-connect-sdk.ts": "2a6c1ec8564740b8c86f737889097ca2ecabed7d72c0a57accca0ddf7d272c3a",
+    "src/lib/nova/contract.ts": "ab56a047f77cf2c28862f95d9ec7c1c35f141ddd4b08c769c7e1261d7146f051",
+    "src/lib/nova/inference.ts": "85a57c5b383bbc67bd2dad866d8014010d3333a3349d7e729dcb398151f0787d",
+    "src/lib/nova/executor.ts": "94a576fdc1cef857928dfc00e332d5331d8be03d25d8f2711e3fb77da17c7d40",
+    "src/lib/supabase/repositories/ConnectRepository.ts": "3e9ffc6fdee174a8ec5b55c86e3c7eb755e4f2084175e0596e59887639478d52",
+    "supabase/migrations/20261003131619_galx_connect_grants.sql": "03eecff2b2fa7e48c912d5e3a13b064e169af6d50f1b3e95b9e1fa4b10277034"
+  },
+  "canonical_guides_inspected": {
+    "docs/operations/galx-connect.md": "a1e572c956eedbe131d13e00448bde4bb659e896ebd31572e268749728d01237",
+    "docs/operations/workspace-auth.md": "fb9df2f86a15fb7992a29e965dcea8f19b228cc32a47fadb36be0bf427594b97",
+    "docs/DEVELOPER_CLIENT_SDK.md": "a9e1d31c20cdbb344d2816e8470996c6509bf700eace1151fe5064eb9f3bd559",
+    "docs/SECURITY_POSTURE_AND_THREAT_MODEL.md": "8c5355e091344c3d81204123b9eb9be4f7aa96289801729052f5a691b8653925",
+    "docs/adr/0165-galx-connect-nova-boundaries.md": "f1b8039545b6ecefbb058586f081c3640354ae3d76a617c40547626739ce093f",
+    "docs/DOCUMENTATION_POLICY.md": "ab2030f9d15010634b9a2d9cf2bc680fdf4ae961c2ee3f9f7ad567e99d49d40c",
+    "docs/how-to/change-with-documentation.md": "abcf6bfb2f0aadcf8cfc2fdae18ac8f3f84565f127c34f7453d50e7283006e40",
+    "docs/reference/knowledge-commands.md": "3ae9092ea941ebc459a2895b8c2eebb4c1c8d59659d718a2c353a1a6be6e8379",
+    "post-mortem/CURRENT_STATE.md": "16b73f8529b95f3487526c7b1139d239d0113a261b1dca950a75c77c694b284b",
+    "post-mortem/incidents/2026/2026-10-03-connect-acceptance/README.md": "51c06e1bdc9b9cdf3f42c3314bcd00a53300a7151c822b681eb9d65f19354ece",
+    "docs/maintainers/RELAY_CREDENTIAL_ENROLLMENT.md": "e288a78bb8fc826e68c257b5066f2e30fb382dd60f45e39539ad7521bad15989"
+  },
+  "domain_review": {
+    "connect": "Reviewed real browser/HTTP lifecycle against config, handlers, bearer-only Nova route, SDK, repository, executor and new regressions. Exact native Request authority fixes loopback checks and account cookies; the SDK default fetch binds its receiver. No changes to entitlement/grant/capacity/unknown-outcome policy. Runbook and ADR delivery facts now distinguish the applied real migration and verified authorization from blocked provider execution.",
+    "access": "Reviewed the callback change against safe return paths, private cookie propagation and session mutation CSRF checks. Actual Google callback retains IP-loopback authority. Account and media regressions pass. Full workspace-auth guide and threat-model body retain existing account, provider and privilege boundaries; no broader hosted session matrix is claimed.",
+    "images": "Reviewed changed SDK guide in full: real-cohort delivery status affects Connect text inference only. Private human media, Star publishing and availability of public discovery remain unchanged. The initial broader review remains the record for unchanged image implementation and guides; 69 image-security regressions were rerun.",
+    "knowledge": "Reviewed policy/workflow and current-state/incident authority; separate immutable HTTP evidence, blocked real-acceptance record, retained initial local evidence, explicit thirteen-warning classification and ACT-039. SDK and ADR wording distinguish decision, migration, local execution, provider acceptance and hosted deployment. Sync does not refresh reviews."
+  },
+  "checks": {
+    "npm run test:connect": {
+      "result": "passed; 26 tests",
+      "local_log": "/tmp/galx-connect-acceptance-tests.log",
+      "log_sha256": "7894c4e48fd1376547e41372f2f43c7d7903633fd9e8a2e535129fdad4d6dd63"
+    },
+    "npm run test:connect:db": {
+      "result": "passed; 135 checks, 158 migrations, disposable PostgreSQL",
+      "local_log": "/tmp/galx-connect-db-tests.log",
+      "log_sha256": "6b31739655ad5b1be3edcad27c67a4776c4eddee15919b80d0b26781089c4369"
+    },
+    "npm run db:test": {
+      "result": "passed; 94 general database checks, disposable PostgreSQL",
+      "local_log": "/tmp/galx-connect-general-db-tests.log",
+      "log_sha256": "38a6eabcc2b88fb495be0f69d90c64224080ad2fda2a42e2336db3eddfa88705"
+    },
+    "npm run db:verify": {
+      "result": "passed; 158 migration/rollback pairs, zero violations/warnings",
+      "local_log": "/tmp/galx-connect-db-verify.log",
+      "log_sha256": "097d8a28c4779fa96cd8389c563cedd2d1dbfd5f41384d1fc04be041e8b76333"
+    },
+    "npm run test:auth:sessions": {
+      "result": "passed; 44 tests",
+      "local_log": "/tmp/galx-connect-auth-tests.log",
+      "log_sha256": "cf96dd19aba0696d0633ec0d85e6812f8a75a0e3573b90439e3f2024c2cd872b"
+    },
+    "npm run test:image:security": {
+      "result": "passed; 69 tests",
+      "local_log": "/tmp/galx-connect-media-tests.log",
+      "log_sha256": "d753f841f5069b2ab4ee786eaefc354deb70e18e6cf40e9869e774b90a273a91"
+    },
+    "npm run build": {
+      "result": "passed; compilation, TypeScript and 157 static pages",
+      "local_log": "/tmp/galx-connect-acceptance-build.log",
+      "log_sha256": "5decad213c479550746a90600803ddae19b55cddee97273c462684bb160d0ed3"
+    },
+    "npm run db:push -- --dry-run --version 20261003131619": {
+      "result": "passed; exact migration validated and rolled back",
+      "local_log": "/tmp/galx-connect-migration-dry-run.log",
+      "log_sha256": "53865376f7a4db6e7d9c8684762762fc887433cd7794fafa7da470564e040dbe"
+    },
+    "npm run db:push -- --version 20261003131619": {
+      "result": "passed; exact migration applied to existing primary only",
+      "local_log": "/tmp/galx-connect-migration-apply.log",
+      "log_sha256": "b2a325c2406c8adf05f021462cd9011c5e31c68b3805b2b3858042281adf9c4e"
+    }
+  },
+  "sanitization": "42 inspected native HTTP observations retained with OAuth token values/codes/verifiers/cookies omitted; actual client screens and error/warning console inspected. Two rendered pages and 22 served assets pass selected-marker scan. Compiled guard scanned 538 assets but first run failed stale documentation; final gates follow this attestation.",
+  "remaining_limits": [
+    "No provider result or upstream outcome was fabricated.",
+    "Real cancellation, timeout, exhaustion, and disconnect during execution remain untested while provider readiness is unavailable.",
+    "Synthetic database/executor coverage must not be read as real-provider acceptance.",
+    "No existing warning was automatically closed or given a new deadline.",
+    "Natural-expiry, refresh/reuse and disconnect are real-account evidence; request result/stream, real exhaustion/cancellation/timeout and disconnect during active execution are not.",
+    "No controlled deployment or public launch is approved. The supervised cohort is closed while manual provider renewal is pending."
+  ],
+  "unmapped_paths": "Inspected the new incident, retained HTTP/acceptance/review evidence, current-state/journal/register and generated indexes. They are private operational evidence, not unmapped runtime functionality."
+}

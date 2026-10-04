@@ -1,0 +1,95 @@
+{
+  "at": "2026-10-04T02:07:06.577Z",
+  "status": "PASSED",
+  "image": "sha256:5157984bc06524aac0ca8fbf2051eebfe6f3b7994aa7d0793e8404c097289345",
+  "manifestSha256": "45e7b152b1feb8d058271f08ed437dc244a1d5e0cc428fe4f4b171307ad14c64",
+  "receiptSha256": "1fa0c626895e8b8d5fa010fa28fd66cb2d0a9e9fd588af3dce6a352662a2707b",
+  "testSha256": "949670344b5b6042d399c08d9c0759c3f9fa614e974e597e55cc49a75514607e",
+  "runId": "1a6098ec-b4e9-4219-b903-e78f657d4212",
+  "migrations": 159,
+  "realAccount": false,
+  "realProvider": false,
+  "productionDatabase": false,
+  "results": [
+    {
+      "name": "verified recovery archive loaded without replacing a service",
+      "image": "sha256:5157984bc06524aac0ca8fbf2051eebfe6f3b7994aa7d0793e8404c097289345",
+      "archiveSha256": "0cdec4031bbacc521fb6059bd61da12dbd6c88b50610c4f55b5ade7fbc812345"
+    },
+    {
+      "name": "baseline completion, scoped authorization and durable revocation",
+      "completedId": "55ec6db1-6742-46ef-a493-2e3039733312",
+      "state": "completed"
+    },
+    {
+      "name": "read-only root and bounded cache exhaustion preserve inference",
+      "denied": "EROFS",
+      "bytes": 134217728,
+      "code": "ENOSPC"
+    },
+    {
+      "name": "isolated ingress death and restart retain neutral outcome without replay",
+      "state": "unknown",
+      "newAttempts": 1,
+      "replayed": false,
+      "liveIngressTouched": false
+    },
+    {
+      "name": "container death and explicit restart preserve credentials, records and revoked authority",
+      "recoveryMs": 6116,
+      "persistedState": "running",
+      "clientOutcome": "unknown",
+      "automaticReplay": false,
+      "providerFailuresAdded": 0
+    },
+    {
+      "name": "partial exact quota credit survives application container restart",
+      "persisted": {
+        "tokens": "0",
+        "requests": "0",
+        "token_credit": "2500000000",
+        "request_credit": "2000000",
+        "at": "1700000000001"
+      }
+    },
+    {
+      "name": "fresh container and synthetic database reconstruction preserve authority and exact quota",
+      "dumpSha256": "436f538eb803cf7004462a829ba0f0536255ab41fda1cb79287adecdcb6df536",
+      "restoredDatabase": "disposable fixture",
+      "bytes": 1291616,
+      "quota": {
+        "tokens": "5",
+        "requests": "0",
+        "token_credit": "0",
+        "request_credit": "12000000",
+        "at": "1700000000006"
+      },
+      "newConsent": true,
+      "revokedRefreshDenied": true,
+      "unknownReplayed": false,
+      "offDevice": false
+    },
+    {
+      "name": "memory pressure confined to disposable 64 MiB cgroup",
+      "limitBytes": 67108864,
+      "swapLimitBytes": 67108864,
+      "oomKilled": true,
+      "liveHostPressureTest": false
+    },
+    {
+      "name": "accepted receipt, private asset boundary and neutral provider signal unchanged"
+    }
+  ],
+  "metrics": {
+    "submissions": 6,
+    "attempts": 6,
+    "disconnects": 2,
+    "explicitFailures": 0
+  },
+  "limits": [
+    "Isolated same-Mac reconstruction; no off-device or hardware-loss proof.",
+    "Synthetic ingress restart; shared live connector was untouched.",
+    "No physical host, host network, Docker daemon, power policy, login or sleep mutation.",
+    "Memory OOM was a separate bounded cgroup; application SIGKILL covers abrupt execution loss."
+  ]
+}

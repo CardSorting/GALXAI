@@ -1,0 +1,113 @@
+{
+  "at": "2026-10-03T21:45:18.705Z",
+  "path": "local Nova -> actual Cloudflare edge/tunnel -> authenticated synthetic origin",
+  "syntheticOrigin": true,
+  "realProvider": false,
+  "realAccount": false,
+  "realVercelInvocation": false,
+  "requiredPathPattern": "^/(health(/live)?|v1/(models|chat/completions|jobs/[A-Za-z0-9_.:-]+/(stream|receipt)))$",
+  "results": [
+    {
+      "mode": "complete",
+      "status": 200,
+      "state": "completed",
+      "novaDispatches": 1,
+      "ingressPosts": 1,
+      "firstWhileOriginOpen": true,
+      "originSawClose": true,
+      "elapsedMs": 1728,
+      "sanitized": true
+    },
+    {
+      "mode": "rejected",
+      "status": 503,
+      "state": "not_accepted",
+      "novaDispatches": 1,
+      "ingressPosts": 1,
+      "firstWhileOriginOpen": false,
+      "originSawClose": null,
+      "elapsedMs": 509,
+      "sanitized": true
+    },
+    {
+      "mode": "provider_failure",
+      "status": 200,
+      "state": "unknown",
+      "novaDispatches": 1,
+      "ingressPosts": 1,
+      "firstWhileOriginOpen": true,
+      "originSawClose": true,
+      "elapsedMs": 1392,
+      "sanitized": true
+    },
+    {
+      "mode": "unknown",
+      "status": 200,
+      "state": "unknown",
+      "novaDispatches": 1,
+      "ingressPosts": 1,
+      "firstWhileOriginOpen": true,
+      "originSawClose": true,
+      "elapsedMs": 1370,
+      "sanitized": true
+    },
+    {
+      "mode": "lost",
+      "status": 200,
+      "state": "unknown",
+      "novaDispatches": 1,
+      "ingressPosts": 1,
+      "firstWhileOriginOpen": true,
+      "originSawClose": true,
+      "elapsedMs": 1554,
+      "sanitized": true
+    },
+    {
+      "mode": "cancel",
+      "status": 200,
+      "state": "unknown",
+      "novaDispatches": 1,
+      "ingressPosts": 1,
+      "firstWhileOriginOpen": true,
+      "originSawClose": true,
+      "elapsedMs": 587,
+      "sanitized": true
+    },
+    {
+      "mode": "deadline",
+      "status": 200,
+      "state": "unknown",
+      "novaDispatches": 1,
+      "ingressPosts": 1,
+      "firstWhileOriginOpen": true,
+      "originSawClose": true,
+      "elapsedMs": 1851,
+      "sanitized": true
+    },
+    {
+      "mode": "ambiguous",
+      "status": 502,
+      "state": "unknown",
+      "novaDispatches": 1,
+      "ingressPosts": 1,
+      "firstWhileOriginOpen": false,
+      "originSawClose": false,
+      "elapsedMs": 508,
+      "sanitized": true
+    },
+    {
+      "mode": "duplicate-attachment",
+      "submissions": 2,
+      "providerAttempts": 1,
+      "attachments": 2,
+      "sameJob": true
+    }
+  ],
+  "counters": {
+    "attempts": 8,
+    "unauthorized": 1,
+    "disconnects": 2,
+    "requests": 25
+  },
+  "providerHealthEvidence": "Separately verified using the real relay engine regression suite; synthetic origin does not classify provider health."
+}

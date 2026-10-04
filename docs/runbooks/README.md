@@ -8,6 +8,8 @@ Pick the symptom or operation. Each entry leads to the canonical procedure; inci
 | --- | --- | --- |
 | Production failure, unclear blast radius | [Incident triage](../../post-mortem/runbooks/triage.md) | Incident lead |
 | Images, history or Favorites fail | [Image generation recovery](../../post-mortem/runbooks/image-generation.md) | Product/API maintainer |
+| Mac Nova packaging, startup, shutdown or rollback | [Mac self-hosting](mac-self-hosting.md) | Release operator |
+| Nova ingress cutover, Vercel retirement or containment | [Nova hosting transition](nova-hosting-transition.md) | Release operator |
 | Premium setup, hosted access or activation | [Isolated service installation](relay-pool-services.md) | Relay operator |
 | Admission state, queue ownership or dispatch uncertainty | [Relay admission lifecycle](relay-admission-lifecycle.md) | Relay maintainer |
 | Account health, rename, removal or registration repair | [Account management](../reference/relay-account-management.md), [manual registration](../maintainers/RELAY_CREDENTIAL_ENROLLMENT.md) | Own-pool operator |

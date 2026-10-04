@@ -1,0 +1,358 @@
+{
+  "classification": "private",
+  "title": "Mac self-host origin and transport correction \u2014 new candidate acceptance",
+  "observed_at": "2026-10-04T00:56:31.572950+00:00",
+  "determination": "READY FOR CONTROLLED REAL-PROVIDER ACCEPTANCE",
+  "scope": "Explicitly authorized narrow origin/transport source correction, new clean candidate and private synthetic whole-image acceptance. No real-provider inference or production rollout.",
+  "root_cause": {
+    "origin": "Next 15.5.25 constructs the native request URL from the fixed internal listener, 0.0.0.0:3000. A request whose raw Host was nova.galx.ai reached authorization with https://0.0.0.0:3000/v1/inference. The old exact configured-resource comparison returned 401 before database admission, although direct repository admission for the same synthetic authority passed.",
+    "callback": "The NextURL accessor also applies unanchored loopback normalization to the serialized URL, changing an embedded registered redirect_uri from 127.0.0.1:4401 to localhost:4401. Exact callback validation correctly rejected this mutated query. Reading the original native URL preserves the registered callback without expanding trust.",
+    "evidence": [
+      "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/origin-before-http.json",
+      "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/query-normalization.json"
+    ],
+    "failed_attempts_retained": [
+      "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/runtime-01-failure.json",
+      "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/runtime-02-failure.json",
+      "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/runtime-03-failure.json"
+    ],
+    "fixture_corrections": [
+      "Node fetch did not send the requested Host override; raw node:http is used for exact authority tests. No application bypass was added.",
+      "The existing endpoint policy correctly rejected plain HTTP on a Docker hostname. The final isolated provider fixture shares an anchored internal network namespace with the application and uses authenticated HTTP loopback. Provider authority remains outside browser/client state. No application endpoint policy change was made."
+    ]
+  },
+  "trust_model": {
+    "external_origins": [
+      "https://galx.ai",
+      "https://nova.galx.ai"
+    ],
+    "internal_listener": "0.0.0.0:3000 inside the container; operator publication only at 127.0.0.1:17787 on the Mac",
+    "configuration": "The bootstrap exclusively selects GALX_REQUEST_ORIGIN_MODE=mac-loopback-v1 and GALX_SELF_HOST_AUTHORITY=0.0.0.0:3000. Incoming metadata, ambient overrides and private JSON cannot choose this trust mode.",
+    "resolution": "Require the native fixed listener, then select only exact HTTPS authorities from NEXT_PUBLIC_APP_URL, GALX_CONNECT_ORIGIN and GALX_NOVA_RESOURCE. Raw Host is a bounded virtual-host selector, not an identity credential. Unknown hosts, ports and raw loopback aliases fail closed. Canonical scheme is configured, not forwarded.",
+    "untrusted_metadata": "Origin, Forwarded, X-Forwarded-Host, X-Forwarded-Proto and forwarded ports cannot select canonical identity. Browser Origin is independently checked by the existing registered-client/same-origin policy.",
+    "direct_deployment": "Default direct mode retains native Request authority and exact IP-loopback ports. Forged header claims cannot rewrite it.",
+    "authorization": "Issuer, Nova audience, inference scope, client registration, PKCE, current application grant and explicit entitlement remain independently mandatory. Canonical Host, loopback reachability and a GALX browser cookie confer no Nova authority.",
+    "callback": "Original native query parameters and validated registered redirect are preserved exactly. Account/workspace redirects and cookie mutation checks share the helper.",
+    "future_ingress": "No public proxy trust relationship is established. Public routing needs separately reviewed exact host/path ingress, private-surface denial and acceptance."
+  },
+  "source_correction": {
+    "minimum_application_paths": [
+      "package.json",
+      "src/app/auth/callback/route.ts",
+      "src/lib/auth/session-http.ts",
+      "src/lib/connect/config.ts",
+      "src/lib/connect/http.ts",
+      "src/lib/nova/inference.ts",
+      "src/lib/nova/keepalive.ts",
+      "src/lib/security/preview-middleware.ts",
+      "src/lib/security/request-origin.ts",
+      "src/middleware.ts",
+      "src/sdk/connect.ts",
+      "src/sdk/inference-result.ts",
+      "src/utils/supabase/middleware.ts"
+    ],
+    "policy": "One native canonical-URL helper used by middleware, account callback/session checks and Connect/Nova origin checks; original native authorization query retained.",
+    "transport": "Pull-based 15-second SSE comment keepalive, one pending upstream read/timer, private/no-store/no-transform; one SSE invocation with bounded terminal-validated default JSON aggregation in the first-party SDK.",
+    "client_bounds": {
+      "content_bytes": 2000000,
+      "pending_frame_bytes": 256000,
+      "wire_bytes": 16000000,
+      "terminal": "consistent allowlisted response, supported finish reason and [DONE]; otherwise outcome_unconfirmed or propagated abort; no retry"
+    },
+    "unchanged": "Dependency lock; GALX identity; grant/entitlement storage; PKCE; audience/scope; revocation; quota arithmetic; provider-health classification; admission; terminal state machine; duplicate/no-replay; existing routing strategy; pricing/Media.",
+    "evidence": "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/source-difference.json"
+  },
+  "new_candidate": {
+    "sourceRevision": "38a3cc48f32f5f404592109c8cae3ddac5fa6f61",
+    "workingTreeSnapshot": true,
+    "sourceManifestSha256": "0360f576c586b5be0ef9a3a86a12806ef188100ee1a78022a6e51f7a5da2753d",
+    "sourceFiles": 1655,
+    "dependencyLockSha256": "17ec13ed2df5810416a9c52ab5cc772e15adcaec679bbafd9a2a61ac3b4742f1",
+    "builder": {
+      "image": "node@sha256:43aeff40f4afc22e83f7589a2f37e111cff5ca84529571f1c8415bcc5fcc21b2",
+      "platform": "linux/amd64",
+      "node": "22.23.2",
+      "cli": "48.5.0"
+    },
+    "publicBuildInputSha256": "50b70630f12d58caee09369795ff5720d9d624bb34a512da41d36410941545ea",
+    "compiledPayloadSha256": "ce1b474421c42610451b65695e4802c8918d08336a9af41819ab44e8a51302bc",
+    "compiledHashAlgorithm": "SHA-256 of JSON.stringify(sorted map of runtime/.next/server and runtime/.next/static relative paths to file SHA-256; keys sorted by JavaScript localeCompare)",
+    "compiledFiles": 1964,
+    "novaRouteSha256": "b08890da4294b1bb16b81fdfcb2640d760b438869a41ee0938306b5db0958ce1",
+    "hostedArchiveSha256": "9d1957414e9f59f65252cee3b49fa8ef5778daeded291aac937211526576950c",
+    "hostedManifestSha256": "8590412368d1ae3d747e96094485d9b78432ca05a55b36ac32581a4e53fe889d",
+    "macImage": "sha256:5157984bc06524aac0ca8fbf2051eebfe6f3b7994aa7d0793e8404c097289345",
+    "macManifestSha256": "45e7b152b1feb8d058271f08ed437dc244a1d5e0cc428fe4f4b171307ad14c64",
+    "recoveryArchive": {
+      "path": ".relay/mac-origin-correction/package-02/image.tar",
+      "sha256": "0cdec4031bbacc521fb6059bd61da12dbd6c88b50610c4f55b5ade7fbc812345",
+      "recordedSha256": "0cdec4031bbacc521fb6059bd61da12dbd6c88b50610c4f55b5ade7fbc812345"
+    },
+    "equivalence": {
+      "tracedFiles": 4514,
+      "startupTraceFiles": 1956,
+      "startupTraceWarnings": 122,
+      "comparedToAcceptedArtifact": 2382,
+      "bytesChanged": 0,
+      "publicFilesScanned": 819,
+      "applicationBytes": 180717218
+    },
+    "priorCandidateRetained": ".relay/mac-production/package-05",
+    "intermediateFailedCandidate": ".relay/mac-origin-correction/package-01",
+    "acceptedBuild": ".relay/mac-origin-correction/build-02",
+    "selfHostPackage": ".relay/mac-origin-correction/package-02",
+    "realProvider": false,
+    "publicDeployment": false
+  },
+  "artifact_verification": {
+    "status": "VERIFIED",
+    "manifestSha256": "45e7b152b1feb8d058271f08ed437dc244a1d5e0cc428fe4f4b171307ad14c64",
+    "image": "sha256:5157984bc06524aac0ca8fbf2051eebfe6f3b7994aa7d0793e8404c097289345",
+    "archiveVerified": true,
+    "files": 4519,
+    "equivalence": {
+      "tracedFiles": 4514,
+      "startupTraceFiles": 1956,
+      "startupTraceWarnings": 122,
+      "comparedToAcceptedArtifact": 2382,
+      "bytesChanged": 0,
+      "publicFilesScanned": 819,
+      "applicationBytes": 180717218
+    },
+    "deployed": false
+  },
+  "transport": {
+    "success": "Actual immutable Next image to controlled provider to raw HTTP and fresh Chromium; no development server substitute.",
+    "incremental_raw_http": {
+      "first_chunk_ms": 40,
+      "complete_ms": 2008,
+      "next_buffered": false
+    },
+    "incremental_chromium": {
+      "first_chunk_ms": 136,
+      "quiet_keepalive_ms": 15146,
+      "complete_buffered_answer_ms": 17184,
+      "console_errors": 0,
+      "credential_exposed": false,
+      "client_bundle_sha256": "db43df369bab3566bd3b1b5acc1463f8b40b67a6c107a4fd3bd436b071f926ab",
+      "scope": "Test-only loopback ingress forwards once to the packaged image; hash-verified candidate client buffer; no deployed proxy."
+    },
+    "cancellation": "After stream initiation, client abort propagated; execution persisted unknown; no automatic replay.",
+    "disconnect": "Lost client socket persisted unknown, no added explicit provider-failure signal, no replay.",
+    "deadline": "Unchanged 300-second execution deadline with SIGTERM during the active request: unknown persisted, 304278 ms total, 19 heartbeats, clean exit 0, no added provider-failure signal.",
+    "duplicate": "409 refers to the existing execution; provider-attempt count remains unchanged. This is the existing retained-execution contract, not a new stream-resume feature.",
+    "replay_protection": "SDK submits exactly once; fixed fixture ingress forwards once; Nova retains duplicate admission and unknown/no-replay behavior. No new production proxy/retry layer introduced. Future public ingress is outside this acceptance.",
+    "provider_failure": "Controlled explicit failure contributes one fixture failure signal; provider drops/incomplete output/cancellation/deadline do not. Actual relay provider-health behavior is independently covered by the 98 established checks; no health implementation changed.",
+    "capacity": "Two concurrent admitted requests; excess request rejected 503 without provider dispatch. Grant permission does not bypass available capacity.",
+    "evidence": "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/whole-image-acceptance.json"
+  },
+  "negative_origin_authorization_matrix": [
+    {
+      "case": "Configured Nova host with valid grant/entitlement and allowed client origin",
+      "result": "200, provider completion"
+    },
+    {
+      "case": "Incorrect browser Origin with valid scoped credential",
+      "result": "401 before provider"
+    },
+    {
+      "case": "Forged/unconfigured Host with forwarded Nova authority",
+      "result": "400 before provider"
+    },
+    {
+      "case": "Forged forwarded Host and scheme with valid configured Host",
+      "result": "Ignored; expected authority retained and incremental stream succeeds"
+    },
+    {
+      "case": "Unexpected Nova :3000 port",
+      "result": "400 before provider"
+    },
+    {
+      "case": "Direct raw loopback Host 127.0.0.1:3000 or 0.0.0.0:3000",
+      "result": "400; configured Host remains necessary and never replaces route authorization"
+    },
+    {
+      "case": "Media host with otherwise valid Nova credential",
+      "result": "401"
+    },
+    {
+      "case": "GALX cookie alone / no scoped token / unknown grant",
+      "result": "401"
+    },
+    {
+      "case": "Valid account without explicit entitlement",
+      "result": "403 inference_access_required"
+    },
+    {
+      "case": "Unauthorized client / absent client grant / missing scope / wrong audience",
+      "result": "Denied; packaged HTTP checks plus isolated database contract constraints and established Connect negative matrix"
+    },
+    {
+      "case": "Expired or consumed authorization",
+      "result": "401"
+    },
+    {
+      "case": "Revoked connection or refresh reuse",
+      "result": "Denied; refresh cannot silently restore authority"
+    },
+    {
+      "case": "Direct-mode forged forwarding metadata",
+      "result": "Native origin unchanged; focused origin policy test"
+    },
+    {
+      "case": "Invalid self-host mode/internal authority/configuration",
+      "result": "Fail closed; focused origin/package tests"
+    }
+  ],
+  "whole_image_acceptance": {
+    "checks": 44,
+    "receipt": "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/acceptance-receipt.json",
+    "evidence": "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/whole-image-acceptance.json",
+    "database": "Disposable PostgreSQL 17/pgvector; 159-migration chain; no production database mutation.",
+    "authorization_path": "Actual packaged HTTP authorize, PKCE exchange, refresh and revoke; synthetic account session/consent actor directly decides consent through the repository. No real portal sign-in is claimed.",
+    "archive": "Retained archive SHA verified and reloaded via docker load; immutable image ID and manifest labels checked.",
+    "runtime_policy": "Loopback only, non-root, read-only, bounded memory/CPU/PIDs/cache/logs, immutable image, private file configuration, 480-second shutdown grace.",
+    "restart": "Graceful stop/start reseeds only disposable cache; unknown/completed execution records and revoked grants remain unchanged; duplicate dispatch denied.",
+    "hard_crash": "SIGKILL cannot commit a terminal write. The original running row remains retained; public duplicate outcome is unknown and restart does not dispatch again. One automatic container restart observed; no historical execution mutation.",
+    "operator_rehearsal": "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/operator-rehearsal.json",
+    "cleanup": "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/cleanup.json",
+    "limits": [
+      "Synthetic account session/consent actor and provider; actual packaged HTTP authorization initiation, PKCE exchange, refresh, revocation and inference. No real sign-in, live tunnel or upstream acceptance.",
+      "Browser uses a loopback fixture ingress, fixed canonical host and the hash-verified candidate client buffer; no production proxy was added.",
+      "Provider-health classification is separately verified by the established relay suite; the HTTP fixture counts only its explicit failure signals.",
+      "No host reboot, forced sleep or Docker daemon failure was induced."
+    ]
+  },
+  "revocation": {
+    "new_denial_after_acknowledgement_ms": 55,
+    "design": "No grant-cache delay. Each admission checks current grant under database locking; no new admission after successful revocation acknowledgement. Already admitted work may finish once.",
+    "refresh_restores_authority": false,
+    "survives_restart": true,
+    "independent_client_unaffected": true,
+    "account_profile_and_completed_record_unchanged": true,
+    "media_home_status": 200,
+    "historical_175_ms": "Retained historical acceptance, not an SLA or comparison target."
+  },
+  "regression": [
+    {
+      "command": "npm run test:connect",
+      "result": "PASSED",
+      "checks": 50,
+      "evidence": "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/origin-connect-tests-final.log"
+    },
+    {
+      "command": "node --import tsx --test scripts/test-auth-callback.ts scripts/test-auth-entry.ts scripts/test-auth-identity-boundary.ts scripts/test-browser-session.ts scripts/test-developer-preview.ts scripts/test-preview-admin.ts scripts/test-preview-read-sync.ts scripts/test-self-host.mjs scripts/test-session-lifecycle.ts scripts/test-workspace-auth.ts",
+      "result": "PASSED",
+      "checks": 88,
+      "command_note": "Reproduction command for the test files identified from retained named passing checks.",
+      "evidence": "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/auth-package-tests.log"
+    },
+    {
+      "command": "node --import tsx --test scripts/test-public-information-boundary.ts scripts/test-relay-admission-observability.ts scripts/test-relay-chat-transport.ts scripts/test-relay-desktops.ts scripts/test-relay-monitor-model.mjs scripts/test-relay-monitor-resilience.ts scripts/test-relay-overload.ts scripts/test-relay-registration-errors.ts scripts/test-relay-services.ts",
+      "result": "PASSED",
+      "checks": 98,
+      "evidence": "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/relay-boundary-tests.log",
+      "command_note": "Reproduction command for the test files identified from retained named passing checks."
+    },
+    {
+      "command": "npm run test:connect:db",
+      "result": "PASSED",
+      "checks": 135,
+      "evidence": "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/connect-db-final.log"
+    },
+    {
+      "command": "npm run test:relay:refill-db",
+      "result": "PASSED",
+      "checks": 82,
+      "evidence": "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/refill-db.log"
+    },
+    {
+      "command": "node --test scripts/test-self-host.mjs",
+      "result": "PASSED",
+      "checks": 19,
+      "note": "Final rerun after fixture/gate changes; not added to the 88 count.",
+      "evidence": "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/package-tests-final.log"
+    },
+    {
+      "command": "DOCKER_CONTEXT=desktop-linux node scripts/package-hosted-candidate.mjs .relay/mac-origin-correction/build-02 .relay/hosted-adaptation/public-build-inputs.json",
+      "result": "PASSED",
+      "local_log": ".relay/mac-origin-correction/build-02.log"
+    },
+    {
+      "command": "node scripts/self-host.mjs verify .relay/mac-origin-correction/package-02",
+      "result": "PASSED",
+      "evidence": "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/package-verification-final.json"
+    },
+    {
+      "command": "node --import tsx scripts/test-self-host-runtime.ts .relay/mac-origin-correction/package-02 .relay/hosted-adaptation/public-build-inputs.json .relay/mac-origin-correction/runtime-04 .relay/mac-origin-correction/build-02",
+      "result": "PASSED",
+      "checks": 44,
+      "evidence": "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/whole-image-acceptance.json"
+    },
+    {
+      "command": "Private operator plan / stage / status / disabled probe / stop / resume / status / stop",
+      "result": "PASSED",
+      "cli_commands": 8,
+      "probe_status": 503,
+      "evidence": "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/operator-rehearsal.json"
+    },
+    {
+      "command": "Compiled private boundary guard plus new-candidate public payload scan",
+      "result": "PASSED",
+      "standard_assets": 538,
+      "broader_public_files": 819,
+      "evidence": [
+        "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/compiled-boundary-check-final.log",
+        "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/asset-scan-final.json"
+      ]
+    }
+  ],
+  "actions": {
+    "ACT-044": {
+      "status": "CLOSED",
+      "basis": "New clean source/compiled payload, immutable image and reloadable archive have retained provenance, unchanged dependency lock and zero mapped payload mutations."
+    },
+    "ACT-045": {
+      "status": "CLOSED",
+      "basis": "Private Mac origin and complete whole-image synthetic stream/cancel/deadline/disconnect/duplicate/drain/restart transport now pass. Closure is for the supported private Mac candidate, not a Vercel Hobby long invocation or public cutover."
+    },
+    "ACT-046": {
+      "status": "CLOSED",
+      "basis": "New packaged image enforces configured issuer/resource/first-party registry plus explicit eligibility and client grant; negative cases and revocation pass. Disabled operator staging remains closed. No real Mac secret completeness, portal login or live grant activation is implied."
+    }
+  },
+  "remaining_issues": [
+    {
+      "classification": "BLOCKS CONTROLLED ROLLOUT",
+      "action": "ACT-047",
+      "finding": "Before any production traffic: separately authorize and verify actual Mac runtime configuration, real existing-account sign-in/consent and provider acceptance, Media/storage continuity, public ingress/no-replay, migration compatibility, independent recovery copy and compatible rollback. These are the next live acceptance/cutover gates, not failures of the completed private synthetic test."
+    },
+    {
+      "classification": "BLOCKS PUBLIC RELEASE",
+      "finding": "Existing recovery/authentication gates, ACT-043 and host availability/reboot/sleep acceptance remain separate and unmodified."
+    },
+    {
+      "classification": "NON-BLOCKING FOLLOW-UP",
+      "finding": "Eight high audit package-family findings belong to declared build/lint dependencies whose reported affected nodes are absent from the traced image. Lock unchanged; not a full vendored-code security audit. 122 optional/dynamic startup trace warnings and three metadata-page packaging warnings retained; exercised paths pass.",
+      "evidence": "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/dependency-warning-triage.json"
+    },
+    {
+      "classification": "NON-BLOCKING FOLLOW-UP",
+      "finding": "Billing knowledge-domain review became due at UTC date rollover; no billing source changed. Do not refresh unrelated review evidence as part of this pass."
+    }
+  ],
+  "mutations": {
+    "new_source_candidate": true,
+    "private_loopback_disabled_stage_and_stop": true,
+    "synthetic_disposable_database": true,
+    "real_provider_inference": false,
+    "production_database": false,
+    "real_grants_or_accounts": false,
+    "historical_execution_records": false,
+    "public_routes_or_dns": false,
+    "production_rollout": false,
+    "paid_upgrade": false
+  },
+  "stop": "The new candidate passed the authorized synthetic whole-image gate. Stop here; real-provider acceptance and production traffic require separate authorization.",
+  "documentation_verification_record": "post-mortem/releases/2026-10-03-mac-origin-transport-verification.json"
+}

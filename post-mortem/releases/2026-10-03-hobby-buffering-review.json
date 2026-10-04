@@ -1,0 +1,59 @@
+{
+  "classification": "private",
+  "observed_at": "2026-10-03T22:44:17.050684Z",
+  "scope": "Budget-constrained transport feasibility, source inspection and private operational guidance only; no accepted source or artifact changes.",
+  "reviewed_complete_affected_guides": [
+    "docs/VERCEL_DEPLOYMENT.md",
+    "docs/operations/galx-connect.md"
+  ],
+  "current_state_review": "New dated feasibility observation supersedes only the pending paid-decision instruction. Prior acceptance, hashes and deployments remain historical evidence.",
+  "source_contracts_inspected": [
+    "src/lib/nova/inference.ts",
+    "src/lib/nova/executor.ts",
+    "src/lib/nova/contract.ts",
+    "src/app/v1/inference/route.ts",
+    "src/lib/connect/config.ts",
+    "src/lib/supabase/repositories/ConnectRepository.ts",
+    "src/sdk/connect.ts",
+    "src/core/router/adapters/RelayChatTransport.ts",
+    "src/relay/relay-server.ts",
+    "src/relay/pool-execution.ts",
+    "src/relay/durable-receipts.ts",
+    "examples/connect/native.ts",
+    "examples/connect/browser/client.ts"
+  ],
+  "semantic_conclusions": [
+    "Owner declined paid hosting. No later purchase or repeated upgrade approval request is inferred.",
+    "A Hobby invocation cannot own 300 seconds of execution plus cleanup. Buffering/after/waitUntil preserve the same limit.",
+    "The existing SDK already separates issuer and resource. Proposed persistent resource placement must reuse the complete Connect/Nova authorization, admission, sanitization and finalization boundary; raw runtime exposure is prohibited.",
+    "Actual authenticated synthetic edge probe: silent JSON returned 524 after 125064 ms; SSE completed after 310191 ms. These are transport measurements only, not Nova/provider acceptance. Temporary path removed.",
+    "Both first-party clients currently default to JSON. SSE aggregation under an explicit bound is a proposed SDK/client adaptation; no claim of unchanged long raw-JSON compatibility.",
+    "Current runtime output rings are temporary; existing opt-in durable receipts have a different output limit and are not enabled by Nova. Submit/poll would be a larger protocol change and remains deferred.",
+    "All 1886 accepted runtime source hashes and retained artifact match. ACT-045 remains open for implementation/acceptance. ACT-044/046 retain the prior candidate/configuration scope; any replacement requires reacceptance.",
+    "Hobby eligibility is separate from duration and is not established by a private cohort. No commercial eligibility, public launch or continuous uptime is claimed."
+  ],
+  "checks": {
+    "existing_buffer_receipt_boundary_tests": 46,
+    "actual_edge_transport_modes": 2,
+    "runtime_source_files_unchanged": 1886,
+    "artifact_unchanged": true
+  },
+  "retained_evidence": [
+    "post-mortem/releases/2026-10-03-hobby-buffering-feasibility.json"
+  ],
+  "review_delta": {
+    "connect": [
+      "docs/operations/galx-connect.md"
+    ],
+    "delivery": [
+      "docs/VERCEL_DEPLOYMENT.md"
+    ],
+    "critical": [
+      "docs/VERCEL_DEPLOYMENT.md",
+      "docs/operations/galx-connect.md",
+      "post-mortem/CURRENT_STATE.md"
+    ]
+  },
+  "unmapped_review": "Current state and incident JSON/journal are governed by the existing critical incident policy; new private fixture/evidence paths are excluded from runtime/deployment. No new product source mapping is needed.",
+  "limits": "No new runtime implementation, build, migration, authority grant, real inference, paid upgrade or deployment. Previous clean candidate and acceptance remain separate. Documentation verification follows in its own record."
+}

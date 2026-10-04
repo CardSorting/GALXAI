@@ -8,6 +8,7 @@ Private current guidance for [central account authority and isolated pools](refe
 
 | Boundary | Required authority |
 | --- | --- |
+| Connected application to Nova | Resource-bound opaque token, active application grant, current inference entitlement and bounded admission |
 | Customer to application | Verified session, owned resource and operation-specific access |
 | Application to runtime | Distinct destination inference key plus server-derived tenant identity |
 | Operator/viewer to monitor | Own-pool host-issued session, centrally authorized role |
@@ -18,6 +19,14 @@ Private current guidance for [central account authority and isolated pools](refe
 | Monitor to desktops | Own VM's daemon and centrally scoped saved registration |
 
 Ordinary authentication, preview approval, task IDs, model output and tenant hints do not grant administration. Viewer access is a separately authorized operational role, not every signed-in GALX user.
+
+## Delegated application access
+
+[Connect](operations/galx-connect.md) approves only inference use by a reviewed application. Existing account identity authorizes the consent screen and connection management; Nova accepts no account JWT as delegated inference authority. The application credential conveys no library, payment, publishing, Star or administration permission. Identity, service entitlement, revocable application grant and operational admission remain independent.
+
+Registered redirect/origin checks, S256 PKCE, browser-bound consent, state/issuer verification and refresh rotation constrain public clients. Each admission observes the primary grant record. Successful disconnect blocks future admissions; already-admitted work may finish. Ending access and local browser logout are separate operations. Foreign keys specify removal of dependent records if account deletion is permitted; the existing identity-retention guard currently blocks direct auth-user deletion, and no erasure workflow is added here. Provider material stays server-side and the host keeps application credentials out of agent context; arbitrary code requires enforced runtime isolation.
+
+This boundary is disabled by default, has local synthetic acceptance only, and introduces no commercial pass, automatic subscription mapping, quota wallet or second account system. Follow the runbook for precise token lifetimes, cleanup, failures and activation evidence. The operational provider boundary below retains its separate authority.
 
 ## Enrollment and credential custody
 

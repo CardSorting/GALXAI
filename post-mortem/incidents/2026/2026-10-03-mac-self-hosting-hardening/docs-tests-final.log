@@ -1,0 +1,61 @@
+
+> galxai@0.1.0 test:docs
+> python3 scripts/test-post-mortem.py && python3 scripts/test-docs-kb.py
+
+test_append_only_correction_supersedes_invalid_evidence (__main__.IncidentGuardTests.test_append_only_correction_supersedes_invalid_evidence) ... ok
+test_changed_and_new_source_requires_review (__main__.IncidentGuardTests.test_changed_and_new_source_requires_review) ... ok
+test_ci_checks_event_baseline_and_rejects_invalid_ref (__main__.IncidentGuardTests.test_ci_checks_event_baseline_and_rejects_invalid_ref) ... ok
+test_closed_incident_cannot_hide_open_actions (__main__.IncidentGuardTests.test_closed_incident_cannot_hide_open_actions) ... ok
+test_committed_journal_can_only_be_extended (__main__.IncidentGuardTests.test_committed_journal_can_only_be_extended) ... ok
+test_compiled_asset_check_requires_a_build (__main__.IncidentGuardTests.test_compiled_asset_check_requires_a_build) ... ok
+test_compiled_knowledge_trace_and_marker_rejected (__main__.IncidentGuardTests.test_compiled_knowledge_trace_and_marker_rejected) ... ok
+test_compiled_private_content_and_runtime_trace_rejected (__main__.IncidentGuardTests.test_compiled_private_content_and_runtime_trace_rejected) ... ok
+test_completed_action_requires_evidence (__main__.IncidentGuardTests.test_completed_action_requires_evidence) ... ok
+test_correction_must_reference_prior_event (__main__.IncidentGuardTests.test_correction_must_reference_prior_event) ... ok
+test_credentials_field_rejected_from_journal (__main__.IncidentGuardTests.test_credentials_field_rejected_from_journal) ... ok
+test_duplicate_events_rejected (__main__.IncidentGuardTests.test_duplicate_events_rejected) ... ok
+test_kind_correction_preserves_original_and_cannot_hide_other_invalid_fields (__main__.IncidentGuardTests.test_kind_correction_preserves_original_and_cannot_hide_other_invalid_fields) ... ok
+test_missing_deployment_exclusion_rejected (__main__.IncidentGuardTests.test_missing_deployment_exclusion_rejected) ... ok
+test_missing_docker_exclusion_rejected (__main__.IncidentGuardTests.test_missing_docker_exclusion_rejected) ... ok
+test_navigation_generation_does_not_change_review_attestation (__main__.IncidentGuardTests.test_navigation_generation_does_not_change_review_attestation) ... ok
+test_outside_workspace_evidence_rejected (__main__.IncidentGuardTests.test_outside_workspace_evidence_rejected) ... ok
+test_private_knowledge_imports_rejected_but_product_docs_allowed (__main__.IncidentGuardTests.test_private_knowledge_imports_rejected_but_product_docs_allowed) ... ok
+test_private_runtime_import_and_marker_rejected (__main__.IncidentGuardTests.test_private_runtime_import_and_marker_rejected) ... ok
+test_raw_evidence_cannot_close_incident (__main__.IncidentGuardTests.test_raw_evidence_cannot_close_incident) ... ok
+test_recovery_requires_evidence (__main__.IncidentGuardTests.test_recovery_requires_evidence) ... ok
+test_retired_evidence_cannot_hide_a_restored_source_file (__main__.IncidentGuardTests.test_retired_evidence_cannot_hide_a_restored_source_file) ... ok
+test_retired_evidence_preserves_deleted_source_reference (__main__.IncidentGuardTests.test_retired_evidence_preserves_deleted_source_reference) ... ok
+test_utc_timestamps_accept_equivalent_offsets_without_rewriting_events (__main__.IncidentGuardTests.test_utc_timestamps_accept_equivalent_offsets_without_rewriting_events) ... ok
+test_valid_recovered_incident_can_keep_open_prevention (__main__.IncidentGuardTests.test_valid_recovered_incident_can_keep_open_prevention) ... ok
+
+----------------------------------------------------------------------
+Ran 25 tests in 0.109s
+
+OK
+Compiled boundary scan: 1 browser/rendered assets; private markers and runtime trace paths checked.
+Compiled boundary scan: 1 browser/rendered assets; private markers and runtime trace paths checked.
+Compiled boundary scan: 1 browser/rendered assets; private markers and runtime trace paths checked.
+Compiled boundary scan: 1 browser/rendered assets; private markers and runtime trace paths checked.
+Compiled boundary scan: 1 browser/rendered assets; private markers and runtime trace paths checked.
+Compiled boundary scan: 1 browser/rendered assets; private markers and runtime trace paths checked.
+Rendered 4 indexes and inventoried 7 authored Markdown files; review not changed.
+.................
+----------------------------------------------------------------------
+Ran 17 tests in 0.217s
+
+OK
+{
+  "images": {
+    "state": "unreviewed",
+    "owner": "Image maintainer",
+    "review_by": null
+  }
+}
+{
+  "images": {
+    "state": "due",
+    "owner": "Image maintainer",
+    "review_by": "2000-01-01"
+  }
+}
+Generated 3 knowledge views; review records unchanged.

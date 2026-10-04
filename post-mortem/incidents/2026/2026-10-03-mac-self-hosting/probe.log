@@ -1,0 +1,62 @@
+{
+  "at": "2026-10-03T23:19:52.057Z",
+  "runtime": "v22.23.2",
+  "architecture": "x64",
+  "framework": "15.5.25",
+  "mode": "next start production; unchanged retained clean-build output mounted read-only",
+  "network": "none; loopback probes inside container only",
+  "realDatabase": false,
+  "realProvider": false,
+  "connectEnabled": false,
+  "checks": [
+    {
+      "name": "production home",
+      "status": 200,
+      "bytes": 74531,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "name": "rendered browser asset",
+      "status": 200,
+      "bytes": 3526
+    },
+    {
+      "name": "/connect",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "sanitized": true
+    },
+    {
+      "name": "/.well-known/oauth-authorization-server",
+      "status": 503,
+      "contentType": "application/json",
+      "sanitized": true
+    },
+    {
+      "name": "/.well-known/oauth-protected-resource",
+      "status": 503,
+      "contentType": "application/json",
+      "sanitized": true
+    },
+    {
+      "name": "/v1/inference",
+      "status": 503,
+      "contentType": "application/json",
+      "sanitized": true
+    },
+    {
+      "name": "/post-mortem/CURRENT_STATE.md",
+      "status": 404,
+      "contentType": "text/plain; charset=utf-8",
+      "sanitized": true
+    }
+  ],
+  "readyAndProbeElapsedMs": 8047,
+  "rssKiB": 381560,
+  "idleSigtermMs": 58,
+  "exit": {
+    "code": 0,
+    "signal": null
+  },
+  "limits": "Idle shutdown only; active inference, real accounts, real storage, ARM64 package and public cutover not accepted by this smoke probe."
+}

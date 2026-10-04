@@ -1,0 +1,27 @@
+{
+  "firewallEnabled": true,
+  "rules": [
+    {
+      "id": "nova-inference-retired",
+      "name": "Retired inference entry points",
+      "description": "Retire legacy compute execution; preserve Media, image generation and shared Connect.",
+      "active": true,
+      "conditionGroup": [
+        {
+          "conditions": [
+            {
+              "type": "path",
+              "op": "re",
+              "value": "^/(v1/(inference|chat/completions|completions|messages|embeddings)/?$|api/(chat|generate|run)/?$|api/queues(/.*)?$)"
+            }
+          ]
+        }
+      ],
+      "action": {
+        "mitigate": {
+          "action": "deny"
+        }
+      }
+    }
+  ]
+}

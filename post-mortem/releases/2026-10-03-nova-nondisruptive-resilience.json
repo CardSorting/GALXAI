@@ -1,0 +1,240 @@
+{
+  "classification": "private",
+  "observed_at": "2026-10-04T02:10:13.515783+00:00",
+  "objective": "Establish service resilience without interrupting the actively used Mac workstation.",
+  "determination": "SUFFICIENTLY RECOVERABLE FOR CONTINUED CONTROLLED OPERATION",
+  "production_readiness_claimed": false,
+  "accepted_candidate": {
+    "image": "sha256:5157984bc06524aac0ca8fbf2051eebfe6f3b7994aa7d0793e8404c097289345",
+    "manifest_sha256": "45e7b152b1feb8d058271f08ed437dc244a1d5e0cc428fe4f4b171307ad14c64",
+    "recovery_archive_sha256": "0cdec4031bbacc521fb6059bd61da12dbd6c88b50610c4f55b5ade7fbc812345",
+    "whole_image_receipt_sha256": "1fa0c626895e8b8d5fa010fa28fd66cb2d0a9e9fd588af3dce6a352662a2707b",
+    "modified": false,
+    "monitor_image": "sha256:0ab24b83ce3f2536f88b3994a716671d7b87495ebc5bdb90c5cafa3a50aa05ed",
+    "monitor_image_modified": false
+  },
+  "fresh_evidence": {
+    "nova": "post-mortem/incidents/2026/2026-10-03-nova-nondisruptive-resilience/isolated-01/result.json",
+    "cleanup": "post-mortem/incidents/2026/2026-10-03-nova-nondisruptive-resilience/isolated-01/cleanup.json",
+    "monitor": "post-mortem/incidents/2026/2026-10-03-nova-nondisruptive-resilience/monitor-result.json",
+    "baseline": "post-mortem/incidents/2026/2026-10-03-nova-nondisruptive-resilience/baseline.json",
+    "after": "post-mortem/incidents/2026/2026-10-03-nova-nondisruptive-resilience/after.json",
+    "live_private_control_and_browser_boundary": "post-mortem/incidents/2026/2026-10-03-nova-nondisruptive-resilience/live-boundary.json"
+  },
+  "service_checks": [
+    {
+      "name": "verified recovery archive loaded without replacing a service",
+      "image": "sha256:5157984bc06524aac0ca8fbf2051eebfe6f3b7994aa7d0793e8404c097289345",
+      "archiveSha256": "0cdec4031bbacc521fb6059bd61da12dbd6c88b50610c4f55b5ade7fbc812345"
+    },
+    {
+      "name": "baseline completion, scoped authorization and durable revocation",
+      "completedId": "55ec6db1-6742-46ef-a493-2e3039733312",
+      "state": "completed"
+    },
+    {
+      "name": "read-only root and bounded cache exhaustion preserve inference",
+      "denied": "EROFS",
+      "bytes": 134217728,
+      "code": "ENOSPC"
+    },
+    {
+      "name": "isolated ingress death and restart retain neutral outcome without replay",
+      "state": "unknown",
+      "newAttempts": 1,
+      "replayed": false,
+      "liveIngressTouched": false
+    },
+    {
+      "name": "container death and explicit restart preserve credentials, records and revoked authority",
+      "recoveryMs": 6116,
+      "persistedState": "running",
+      "clientOutcome": "unknown",
+      "automaticReplay": false,
+      "providerFailuresAdded": 0
+    },
+    {
+      "name": "partial exact quota credit survives application container restart",
+      "persisted": {
+        "tokens": "0",
+        "requests": "0",
+        "token_credit": "2500000000",
+        "request_credit": "2000000",
+        "at": "1700000000001"
+      }
+    },
+    {
+      "name": "fresh container and synthetic database reconstruction preserve authority and exact quota",
+      "dumpSha256": "436f538eb803cf7004462a829ba0f0536255ab41fda1cb79287adecdcb6df536",
+      "restoredDatabase": "disposable fixture",
+      "bytes": 1291616,
+      "quota": {
+        "tokens": "5",
+        "requests": "0",
+        "token_credit": "0",
+        "request_credit": "12000000",
+        "at": "1700000000006"
+      },
+      "newConsent": true,
+      "revokedRefreshDenied": true,
+      "unknownReplayed": false,
+      "offDevice": false
+    },
+    {
+      "name": "memory pressure confined to disposable 64 MiB cgroup",
+      "limitBytes": 67108864,
+      "swapLimitBytes": 67108864,
+      "oomKilled": true,
+      "liveHostPressureTest": false
+    },
+    {
+      "name": "accepted receipt, private asset boundary and neutral provider signal unchanged"
+    }
+  ],
+  "monitor_checks": {
+    "count": 90,
+    "recovery_ms": 332,
+    "actual_packaged_entrypoint": true,
+    "process_death_recovered": true,
+    "control_connection_loss_fails_closed": true,
+    "old_browser_session_invalid_after_restart": true,
+    "fresh_ticket_and_sanitized_status_work": true,
+    "revoked_control_credential_denied_after_restart": true,
+    "private_ownership_fields": [
+      "installationId",
+      "lastSeenAt",
+      "pool"
+    ],
+    "browser_status_allowlist": [
+      "accounts",
+      "activity",
+      "automaticActivation",
+      "desktopAvailable",
+      "desktops",
+      "executionAllowed",
+      "pool",
+      "registrationAllowed",
+      "registrations",
+      "relayFresh",
+      "role"
+    ],
+    "no_real_docker_socket": true,
+    "network": "none; synthetic loopback authority and Unix daemon"
+  },
+  "unaffected_live_operation": {
+    "containers_checked": 10,
+    "ids_images_start_times_restart_counts_unchanged": true,
+    "nova_healthy": true,
+    "private_config_hash_unchanged": true,
+    "private_ownership_valid": true,
+    "anonymous_browser_status": 401,
+    "public_routes_modified": false,
+    "shared_ingress_restarted": false,
+    "physical_host_interrupted": false,
+    "power_settings_changed": false,
+    "real_provider_inference": false,
+    "production_database_modified": false,
+    "grants_issued": false
+  },
+  "retained_evidence": [
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/whole-image-acceptance.json",
+      "scope": "Unchanged image: automatic process-exit restart, 300-second deadline with active graceful drain, cancellation/provider disconnect, duplicate/current-grant/capacity and streaming behavior; 44 checks. Not rerun in this supplemental pass."
+    },
+    {
+      "path": "post-mortem/releases/2026-10-03-nova-mac-transition.json",
+      "scope": "Live same-image stop/archive reload/resume, monitor restart, completed/unknown retention and real revocation 252 ms. Historical transition observation, not a new SLA or new real-provider test."
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/refill-tests.log",
+      "scope": "82 exact-refill boundary/concurrency checks and 18000 partitioned evaluations on the unchanged migration. Supplemental pass independently tests partial-credit restart and synthetic dump reconstruction."
+    }
+  ],
+  "deferred": [
+    {
+      "drill": "Physical Mac reboot or shutdown",
+      "status": "UNVERIFIED — DEFERRED BY OPERATOR",
+      "reason": "Would interrupt or risk the actively used workstation; explicit operator amendment prohibits this drill."
+    },
+    {
+      "drill": "Physical power loss or power-cycle",
+      "status": "UNVERIFIED — DEFERRED BY OPERATOR",
+      "reason": "Would interrupt or risk the actively used workstation; explicit operator amendment prohibits this drill."
+    },
+    {
+      "drill": "macOS sleep/wake or closed-lid interruption",
+      "status": "UNVERIFIED — DEFERRED BY OPERATOR",
+      "reason": "Would interrupt or risk the actively used workstation; explicit operator amendment prohibits this drill."
+    },
+    {
+      "drill": "Logout/login session interruption",
+      "status": "UNVERIFIED — DEFERRED BY OPERATOR",
+      "reason": "Would interrupt or risk the actively used workstation; explicit operator amendment prohibits this drill."
+    },
+    {
+      "drill": "Host-level network interruption",
+      "status": "UNVERIFIED — DEFERRED BY OPERATOR",
+      "reason": "Would interrupt or risk the actively used workstation; explicit operator amendment prohibits this drill."
+    },
+    {
+      "drill": "Destructive host disk pressure",
+      "status": "UNVERIFIED — DEFERRED BY OPERATOR",
+      "reason": "Would interrupt or risk the actively used workstation; explicit operator amendment prohibits this drill."
+    },
+    {
+      "drill": "Shared Docker daemon or VM restart that interrupts unrelated work",
+      "status": "UNVERIFIED — DEFERRED BY OPERATOR",
+      "reason": "Would interrupt or risk the actively used workstation; explicit operator amendment prohibits this drill."
+    },
+    {
+      "drill": "Shared live ingress restart that interrupts unrelated work",
+      "status": "UNVERIFIED — DEFERRED BY OPERATOR",
+      "reason": "Would interrupt or risk the actively used workstation; explicit operator amendment prohibits this drill."
+    }
+  ],
+  "other_unverified": [
+    {
+      "drill": "Off-device recovery and hardware-loss restoration",
+      "status": "UNVERIFIED — NOT EXERCISED",
+      "reason": "Reconstruction used an isolated fresh container and empty database on the same Mac; no independent recovery target was used."
+    },
+    {
+      "drill": "Application-level OOM recovery",
+      "status": "UNVERIFIED — NOT EXERCISED",
+      "reason": "OOM containment used a separate 64 MiB cgroup; actual Nova abrupt loss was tested with SIGKILL. These are distinct observations."
+    }
+  ],
+  "operational_assumption": {
+    "claim": "The documented startup configuration will survive a normal host reboot.",
+    "purpose": "Provisional continuation of controlled development only.",
+    "acceptance_evidence": false,
+    "production_readiness_evidence": false
+  },
+  "test_harness_correction": {
+    "original_issue": "The monitor package fixture assumed host temporary bind mounts, which the isolated Premium daemon intentionally cannot access. Two starts were rejected before monitor code ran.",
+    "correction": "Transfer bounded synthetic test modules through stdin into container tmpfs; retain network none, read-only root, non-root user, scoped synthetic Unix daemon, CPU/memory/swap/PID bounds and label-checked cleanup. No runtime image or isolation policy changed.",
+    "failures": [
+      "post-mortem/incidents/2026/2026-10-03-nova-nondisruptive-resilience/monitor-01.log",
+      "post-mortem/incidents/2026/2026-10-03-nova-nondisruptive-resilience/monitor-02.log"
+    ],
+    "successful_run": "post-mortem/incidents/2026/2026-10-03-nova-nondisruptive-resilience/monitor-03.log"
+  },
+  "limits": [
+    "A killed process/container cannot promise a terminal database write. The retained running record remained honest; duplicate response was unknown with no new upstream attempt.",
+    "Synthetic ingress restart is not a live Cloudflare connector restart drill.",
+    "Same-Mac dump/reconstruction is not off-device backup acceptance.",
+    "No inference semantics, Connect policy, quota arithmetic, production image, active configuration or route changed.",
+    "Public-release gates and broader ACT-018 recovery work remain open; no public/commercial activation or production-readiness certification."
+  ],
+  "action_status": {
+    "ACT-018": "REMAINS OPEN — safe service evidence added; physical drills explicitly deferred and remaining legacy recovery subitems retain their separate scope.",
+    "ACT-044": "CLOSED — unchanged accepted candidate",
+    "ACT-045": "CLOSED — unchanged accepted candidate",
+    "ACT-046": "CLOSED — unchanged accepted candidate"
+  },
+  "authoritative_references": [
+    "https://docs.docker.com/engine/containers/start-containers-automatically/",
+    "https://www.postgresql.org/docs/17/backup-dump.html"
+  ],
+  "stop": "All selected safe supplemental resilience checks completed. Stop; do not induce physical-host or unrelated-service interruption."
+}

@@ -9,10 +9,14 @@ eligible purchased tier and remaining allowance. Human-generated and remixed
 Works stay in the owner's private library. Human accounts cannot publish to the
 public GALX network; public Works come from authorized Stars.
 
-There is no anonymous or unlimited image-generation path and no public,
-self-service inference API. Existing private integrations, if separately
-authorized, are outside the public product contract. Image-plan checkout and
-creation availability depend on approved allowance configuration.
+Connect with GALX extends inference access to supported applications a person
+chooses, with permission they can revoke. Availability will be announced after
+validation. It does not grant library access or publishing rights.
+
+There is no anonymous or unlimited image-generation path or unrestricted API-key
+signup. Existing private integrations retain their separate authorization.
+Image-plan checkout and creation availability depend on approved allowance
+configuration.
 
 Sites is a separate GALX product. Its account, billing, and publication terms
 remain documented separately.

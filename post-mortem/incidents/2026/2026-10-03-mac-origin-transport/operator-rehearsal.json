@@ -1,0 +1,139 @@
+{
+  "at": "2026-10-04T00:51:56.956Z",
+  "status": "PASSED",
+  "scope": "Disabled private loopback stage with throwaway keys; no database/provider credentials; no public routing or real cohort.",
+  "records": [
+    {
+      "command": "plan",
+      "result": {
+        "status": "PLAN RETAINED",
+        "image": "sha256:5157984bc06524aac0ca8fbf2051eebfe6f3b7994aa7d0793e8404c097289345",
+        "port": 17787,
+        "connect": "disabled",
+        "configurationValuesPrinted": false,
+        "deployed": false
+      }
+    },
+    {
+      "command": "stage",
+      "result": {
+        "containers": [
+          {
+            "id": "99fc55fb1176dad883c54233fecfd4474268bb62b12c7fdfa731071a1728a07e",
+            "image": "sha256:5157984bc06524aac0ca8fbf2051eebfe6f3b7994aa7d0793e8404c097289345",
+            "status": "running",
+            "health": "healthy",
+            "exitCode": 0,
+            "oomKilled": false,
+            "restarts": 0,
+            "startedAt": "2026-10-04T00:51:43.042663253Z",
+            "finishedAt": "0001-01-01T00:00:00Z"
+          }
+        ],
+        "publicCutover": false,
+        "connect": "disabled"
+      }
+    },
+    {
+      "command": "status",
+      "result": {
+        "containers": [
+          {
+            "id": "99fc55fb1176dad883c54233fecfd4474268bb62b12c7fdfa731071a1728a07e",
+            "image": "sha256:5157984bc06524aac0ca8fbf2051eebfe6f3b7994aa7d0793e8404c097289345",
+            "status": "running",
+            "health": "healthy",
+            "exitCode": 0,
+            "oomKilled": false,
+            "restarts": 0,
+            "startedAt": "2026-10-04T00:51:43.042663253Z",
+            "finishedAt": "0001-01-01T00:00:00Z"
+          }
+        ],
+        "readiness": "Liveness is not inference acceptance."
+      }
+    },
+    {
+      "command": "disabled Nova probe",
+      "status": 503,
+      "code": "access_check_unavailable"
+    },
+    {
+      "command": "stop",
+      "result": {
+        "containers": [
+          {
+            "id": "99fc55fb1176dad883c54233fecfd4474268bb62b12c7fdfa731071a1728a07e",
+            "image": "sha256:5157984bc06524aac0ca8fbf2051eebfe6f3b7994aa7d0793e8404c097289345",
+            "status": "exited",
+            "health": "unhealthy",
+            "exitCode": 0,
+            "oomKilled": false,
+            "restarts": 0,
+            "startedAt": "2026-10-04T00:51:43.042663253Z",
+            "finishedAt": "2026-10-04T00:51:49.713156298Z"
+          }
+        ],
+        "note": "A forced exit is not terminal-write acceptance; preserve uncertain executions."
+      }
+    },
+    {
+      "command": "resume",
+      "result": {
+        "containers": [
+          {
+            "id": "99fc55fb1176dad883c54233fecfd4474268bb62b12c7fdfa731071a1728a07e",
+            "image": "sha256:5157984bc06524aac0ca8fbf2051eebfe6f3b7994aa7d0793e8404c097289345",
+            "status": "running",
+            "health": "healthy",
+            "exitCode": 0,
+            "oomKilled": false,
+            "restarts": 0,
+            "startedAt": "2026-10-04T00:51:50.206879173Z",
+            "finishedAt": "2026-10-04T00:51:49.713156298Z"
+          }
+        ],
+        "publicCutover": false,
+        "connect": "disabled"
+      }
+    },
+    {
+      "command": "status after resume",
+      "result": {
+        "containers": [
+          {
+            "id": "99fc55fb1176dad883c54233fecfd4474268bb62b12c7fdfa731071a1728a07e",
+            "image": "sha256:5157984bc06524aac0ca8fbf2051eebfe6f3b7994aa7d0793e8404c097289345",
+            "status": "running",
+            "health": "healthy",
+            "exitCode": 0,
+            "oomKilled": false,
+            "restarts": 0,
+            "startedAt": "2026-10-04T00:51:50.206879173Z",
+            "finishedAt": "2026-10-04T00:51:49.713156298Z"
+          }
+        ],
+        "readiness": "Liveness is not inference acceptance."
+      }
+    },
+    {
+      "command": "stop after resume",
+      "result": {
+        "containers": [
+          {
+            "id": "99fc55fb1176dad883c54233fecfd4474268bb62b12c7fdfa731071a1728a07e",
+            "image": "sha256:5157984bc06524aac0ca8fbf2051eebfe6f3b7994aa7d0793e8404c097289345",
+            "status": "exited",
+            "health": "unhealthy",
+            "exitCode": 0,
+            "oomKilled": false,
+            "restarts": 0,
+            "startedAt": "2026-10-04T00:51:50.206879173Z",
+            "finishedAt": "2026-10-04T00:51:56.763435801Z"
+          }
+        ],
+        "note": "A forced exit is not terminal-write acceptance; preserve uncertain executions."
+      }
+    }
+  ]
+}

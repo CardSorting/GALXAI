@@ -182,3 +182,6 @@ Use the [authoring guide](../maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md) f
 - [0162: Local durable ingress queue for the Premium relay](0162-local-durable-relay-ingress-queue.md)
 - [0163: Star candidate selection before exhibition](0163-star-candidate-selection-before-exhibition.md)
 - [0164: Independent Star patronage and private creation](0164-orbit-foundry-public-identity.md)
+- [0165: GALX Media, Connect and Nova boundaries](0165-galx-connect-nova-boundaries.md) — accepted responsibility split; local implementation, activation and hosted acceptance separate.
+- [0166: Canonical origin at the private self-host listener](0166-private-self-host-request-origin.md) — authorized Mac compatibility correction; synthetic whole-image acceptance, real-provider acceptance and public activation remain separate.
+- [0167: Mac Nova runtime and Vercel inference retirement](0167-nova-mac-runtime-placement.md) — accepted placement; controlled real-provider transition verified, public/commercial activation excluded.

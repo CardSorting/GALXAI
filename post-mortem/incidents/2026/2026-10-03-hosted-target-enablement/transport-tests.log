@@ -1,0 +1,17 @@
+✔ REST image errors retain status/backoff and caller cancellation remains health-neutral (13.918291ms)
+✔ relay JSON and streaming completions require DONE and preserve output and usage (3.973792ms)
+✔ relay failures, malformed frames, cancellation and partial EOF cannot become empty successes (2.644292ms)
+✔ first-output deadline remains active after the 202 and SSE headers; caller abort is honored (39.981959ms)
+✔ unsafe attachment destinations and relay HTTP failures are rejected (1.003209ms)
+✔ configured relay errors never invoke direct WebSocket or CLI fallback (0.486458ms)
+✔ image relay errors and deadlines never replay synthesis; valid images are preserved (21.015709ms)
+✔ relay failures preserve retry authority and task identity without replay or raw provider text (0.49075ms)
+✔ confirmed quota stop is actionable while arbitrary diagnostics stay out of public recovery (0.639334ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 287.453583

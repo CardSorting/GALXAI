@@ -1,0 +1,11 @@
+{
+  "at": "2026-10-03T21:54:14.838Z",
+  "members": 1,
+  "roles": {
+    "OWNER": 1
+  },
+  "planDecisionRequired": "Current Hobby ceiling is 300s; retained route requires 360s. Prepare Pro with 800s capability without reducing the accepted execution deadline. No subscription purchase performed.",
+  "publishedPlatformFee": "$20/month with one deploying seat included; on-demand usage extra",
+  "pricingSource": "https://vercel.com/docs/plans/pro-plan",
+  "durationSource": "https://vercel.com/docs/functions/limitations#max-duration"
+}

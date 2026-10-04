@@ -1,0 +1,32 @@
+✔ VANTA alias is reversible and preserves all twelve real practices (1.199459ms)
+✔ Foundry is the only new creation offer; live recurring checkout remains denied (0.226833ms)
+✔ Sites checkout is retired without any provider or database call (0.228125ms)
+✔ Orbit management requires account verification, not developer enrollment, and has no namespace wildcard (0.332167ms)
+✔ paid current invoice with matching identity grants only Orbit access (1.9665ms)
+✔ cannot reuse Orbit for a different customer_id (0.184958ms)
+✔ cannot reuse Orbit for a different actor_id (0.0815ms)
+✔ cannot reuse Orbit for a different checkout_id (0.13075ms)
+✔ cannot reuse Orbit for a different price_id (0.116375ms)
+✔ cannot reuse Orbit for a different livemode (0.144666ms)
+✔ cannot reuse Orbit for a different subscription_id (0.112833ms)
+✔ trialing cannot read patron work (0.094542ms)
+✔ past_due cannot read patron work (0.066417ms)
+✔ unpaid cannot read patron work (0.061792ms)
+✔ canceled cannot read patron work (0.057583ms)
+✔ incomplete cannot read patron work (0.050959ms)
+✔ incomplete_expired cannot read patron work (0.036875ms)
+✔ paused cannot read patron work (0.0285ms)
+✔ expiry, refund, dispute, revocation and unpaid invoices deny access (0.148875ms)
+✔ period-end cancellation retains paid access and never immediately deletes subscription (0.178209ms)
+✔ provider outages fail closed and issue no mutations (0.090542ms)
+✔ anonymous Orbit requests and cross-origin writes fail before provider access (4.384958ms)
+✔ orbit sends tax and current customer address to Stripe, preserving private response (0.976917ms)
+✔ foundry sends tax and current customer address to Stripe, preserving private response (0.628542ms)
+ℹ tests 24
+ℹ suites 0
+ℹ pass 24
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 745.324416

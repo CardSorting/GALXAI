@@ -1,0 +1,24 @@
+{
+  "method": "Authenticated Vercel Usage dashboard through browser; both metrics in same selected view",
+  "team": "cardsortings-projects",
+  "team_id": "team_mlJF16byaaURWNNfkpk72mVy",
+  "project_inventory_scope": "prj_NmtiUenK2cf924eREKuCgiDS0uC4",
+  "usage_filter": "All Projects",
+  "displayed_range": "Last 30 Days; Sep 3, 2pm - Oct 3, 2pm",
+  "range_timezone": "Dashboard display; no timezone conversion assumed",
+  "deployment_storage": {
+    "used": "107.91 MB",
+    "allowance": "10 GB"
+  },
+  "functions_storage": {
+    "used": "541.19 MB",
+    "allowance": "10 GB"
+  },
+  "source_url": "https://vercel.com/cardsortings-projects/~/usage#deployments-storage",
+  "deployment_pages_complete": true,
+  "project_deployments": 3,
+  "capacity_determination": "Both observed storage metrics below allowance; storage does not block a candidate. No deployment was attempted to test other platform limits.",
+  "no_cleanup_performed": true,
+  "time_precision": "Observation date; exact browser sampling timestamp was not retained.",
+  "observed_on": "2026-10-03"
+}

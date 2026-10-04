@@ -1,0 +1,29 @@
+{
+  "at": "2026-10-03T21:46:04.855Z",
+  "version": 9,
+  "config": {
+    "ingress": [
+      {
+        "path": "^/v1/images/(availability|generations)$",
+        "service": "http://host.docker.internal:13301",
+        "hostname": "images-service.galx.ai",
+        "originRequest": {
+          "connectTimeout": 10
+        }
+      },
+      {
+        "service": "http://host.docker.internal:3001",
+        "hostname": "relay.galx.ai",
+        "originRequest": {
+          "connectTimeout": 10
+        }
+      },
+      {
+        "service": "http_status:404"
+      }
+    ],
+    "warp-routing": {
+      "enabled": false
+    }
+  }
+}

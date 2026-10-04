@@ -1,0 +1,27 @@
+{
+  "at": "2026-10-04T02:07:07.643Z",
+  "containers": [
+    {
+      "role": "pressure",
+      "removed": true
+    },
+    {
+      "role": "app",
+      "removed": true
+    },
+    {
+      "role": "provider",
+      "removed": true
+    },
+    {
+      "role": "db",
+      "removed": true
+    },
+    {
+      "role": "entrance",
+      "removed": true
+    }
+  ],
+  "privateConfigRemoved": true,
+  "completed": true
+}

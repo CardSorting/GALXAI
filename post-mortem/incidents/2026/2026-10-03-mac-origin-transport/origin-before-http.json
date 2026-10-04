@@ -1,0 +1,48 @@
+{
+  "at": "2026-10-04T00:13:43.196Z",
+  "image": "sha256:70b0c58c6a6f27bbf7dceaa13a1a555a822bf4afbae31ff2fce234724b12c27b",
+  "externalOrigin": "https://nova.galx.ai",
+  "transport": "Isolated loopback HTTP to standard Next server; network none",
+  "trustedProxy": "none in fixture; production tunnel not changed",
+  "incomingHeaders": {
+    "host": "nova.galx.ai",
+    "x-forwarded-proto": "https"
+  },
+  "traces": [
+    {
+      "path": "/v1/inference",
+      "host": "nova.galx.ai",
+      "forwardedHost": "nova.galx.ai",
+      "forwardedProto": "https",
+      "forwardedPort": "3000",
+      "forwarded": null,
+      "internalUrl": "https://0.0.0.0:3000/v1/inference",
+      "frameworkHostname": "0.0.0.0",
+      "frameworkPort": 3000
+    },
+    {
+      "path": "/v1/inference",
+      "host": "nova.galx.ai",
+      "forwardedHost": "nova.galx.ai",
+      "forwardedProto": "https",
+      "forwardedPort": "3000",
+      "forwarded": null,
+      "internalUrl": "https://0.0.0.0:3000/v1/inference",
+      "frameworkHostname": "0.0.0.0",
+      "frameworkPort": 3000
+    }
+  ],
+  "response": {
+    "status": 401,
+    "body": {
+      "error": {
+        "code": "invalid_token",
+        "message": "Connect this application again to continue.",
+        "execution_state": "not_accepted"
+      }
+    }
+  },
+  "grantControl": "Prior same-image repository control admitted a valid scoped token; full HTTP denied before admission.",
+  "realProvider": false,
+  "diagnosticOnly": "Observer wraps request-metadata attachment to log allowlisted fields without changing its return or behavior. Instrumentation is not retained in the application."
+}

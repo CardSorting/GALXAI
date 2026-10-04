@@ -1,0 +1,28 @@
+✔ standard container contract bounds authority, resource use, logs and shutdown (1.188375ms)
+✔ plan refuses mutable image tag (0.174542ms)
+✔ plan refuses privileged port (0.056958ms)
+✔ plan refuses non-numeric port (0.058ms)
+✔ plan refuses another service project (0.128458ms)
+✔ plan refuses interpolated mount (0.104334ms)
+✔ plan refuses relative mount (0.067167ms)
+✔ preparation cannot enable Connect or smuggle process/cloud/provider authority (0.692791ms)
+✔ configuration errors never echo secret values (0.448167ms)
+✔ private Nova profile requires explicit first-party authority and excludes Media and provider accounts (0.391084ms)
+✔ configuration file must be regular, private and valid JSON (2.0015ms)
+✔ paths cannot traverse or dereference private sibling files (1.620791ms)
+✔ packaging retains accepted payloads and omits ambient workspace files (18.561167ms)
+✔ modified accepted source prevents packaging (7.14875ms)
+✔ modified compiled Nova prevents packaging (8.900542ms)
+✔ trace traversal and symlink substitution prevent packaging (8.507916ms)
+✔ build-only secrets and private public content prevent packaging (9.328875ms)
+✔ release verification detects changed, missing, extra and symlink files (16.944417ms)
+✔ a package that boots cannot be staged without matching whole-image acceptance (293.897875ms)
+✔ operator commands fence configuration drift, explicit resume and Docker context without printing secrets (1975.768875ms)
+ℹ tests 20
+ℹ suites 0
+ℹ pass 20
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2419.578417

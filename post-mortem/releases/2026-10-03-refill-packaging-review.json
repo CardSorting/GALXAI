@@ -1,0 +1,53 @@
+{
+  "classification": "private",
+  "observed_at": "2026-10-03T20:47:31.620161+00:00",
+  "scope": "Explicit bounded semantic review of refill arithmetic, independent clean packaging, whole affected guide bodies and incident evidence; no deployment/authorization/outcome expansion.",
+  "prior_review": "post-mortem/releases/2026-10-03-neutral-outcomes-review.json",
+  "acceptance_record": "post-mortem/releases/2026-10-03-refill-packaging-closure.json",
+  "acceptance_sha256": "b6a613ed6eff4ed4e17b3ff0886977b47c68b90092e2184d770352d5bcfc7e59",
+  "clean_build_input_manifest": "post-mortem/incidents/2026/2026-10-03-neutral-outcomes/closure-build-inputs.json",
+  "clean_build_input_manifest_sha256": "5ed06371ee95627fc4a4705fa9cd9271ad4f73e9bd555b972e89261ff33c9d35",
+  "canonical_guides_inspected": {
+    "docs/runbooks/relay-pool-services.md": "79dd0410ba04935f19f86d6c500b48009bcc3e980d45efe6004c13a44946bd0f",
+    "docs/reference/relay-account-management.md": "bf89ac9d23f02e88a124fa01a2d2a5d443b5cc615a7d05d5c8d536e4d3739de1",
+    "docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md": "344c6cc08d003a2ad33dc9788fa5902164bba84726417a5cc19f07d9979404aa",
+    "docs/maintainers/RELAY_HARDENING.md": "b9c0e7a6a53048127c677b00eaf33f330dcca7d70bde17a6fb8a155499845d5a",
+    "docs/runbooks/release-readiness.md": "f8a05dbb4ce3260c24c697e51b9b2b07cd503d48f4a1050e4eeecb6818d9819c",
+    "docs/DOCUMENTATION_POLICY.md": "ab2030f9d15010634b9a2d9cf2bc680fdf4ae961c2ee3f9f7ad567e99d49d40c",
+    "docs/how-to/change-with-documentation.md": "abcf6bfb2f0aadcf8cfc2fdae18ac8f3f84565f127c34f7453d50e7283006e40",
+    "docs/reference/knowledge-commands.md": "3ae9092ea941ebc459a2895b8c2eebb4c1c8d59659d718a2c353a1a6be6e8379",
+    "post-mortem/CURRENT_STATE.md": "cb88da3e4c5bf571b8b9651ee5a4249e94c270a203884aa8310b70b63c5e3f56",
+    "post-mortem/incidents/2026/2026-10-03-neutral-outcomes/README.md": "ab55ddc9dacbae8d2654dddbb6a759ee3cb60db793d213955a299f02a3b2e57b"
+  },
+  "source_contracts_inspected": {
+    "supabase/migrations/20261003202702_relay_refill_integer_credit.sql": "b7d889f57506a5c0755764e16b8a7511dc56f9722f25abf5f88ed1b493a5adef",
+    "supabase/rollbacks/20261003202702_relay_refill_integer_credit.down.sql": "bd6f085823c381f9eaade9d7cc6cc201ce92d57a7317b2700ede23d8f27166c2",
+    "src/lib/supabase/types.ts": "9636a9ab2930e4feecb77616254f59bf56d42a0180f6c260623e90aad1f3611c",
+    "Dockerfile.relay-services": "6b10987002bc4f8af0ce3be95872b27e8c45872bbd356f6e22d82f137a665633",
+    "Dockerfile.relay-services.dockerignore": "5ae095bad425b19a6278a74f71a0497252b48833e417332c39affd062305b2b7",
+    "docker/relay-pools/package.json": "9e885cd3ea69b3ccfc10b248438a06d269809c205e3a61474245d3dc0deb8123",
+    "docker/relay-pools/package-lock.json": "cc06adc320de6e0e85a26931b2131cbf8a9e0e0004e9d0c3b9de165b9fd80a35",
+    "scripts/test-relay-refill-db.ts": "b6cf7f240448759bcb17e5c5ef44c35aedd4a037a8af655750a18db0daf5f9b2",
+    "scripts/test-relay-monitor-package.mjs": "a26eb6e5496869a893588c654d2f2219121c351e05e1b078e8ba22e2b29c0e9c",
+    "scripts/test-relay-authorization-db.ts": "7f4a5b161ab5e21ae3f30ffddeb263e65df5ff824f50ebe2efaff1b4526cb8bd",
+    "scripts/run-supabase-integration.ts": "72e2d47c2f79fc79be63d4375e58350abd5c6fd2ac9b922e406275788053035d",
+    "package.json": "ad9b833e2bc8f07e6057ca3575735f7a08ff59ec18e27dc847dcd897563dbe0c",
+    "docs/knowledge/registry.json": "f10c72d76e9c540df03ff2f6c261d05d549e81dde3fad990775364bffdeb8b61",
+    "post-mortem/register.json": "bf953ddf1f8e415052539606bc2e0c162d0c5fb8405078734fee245a7b19e32c"
+  },
+  "semantic_review": {
+    "relay": "Only Docker build inputs and isolated test coverage change. Package archives match the existing root pins and clean local package repository commits. Their source is bundled, build dependencies omitted at runtime, and same-version Docker CLI is copied from a digest-pinned official artifact. The actual clean image starts and preserves unknown availability, strict role/origin checks, private host handoff, browser allowlists and revocation. All src/relay, Nova, Connect runtime/repository and execution-migration baseline files remain unchanged. Guides replace the emergency retained-image procedure with one declared clean build and distinguish candidate from installed state.",
+    "database": "Reproduced serialization failure in both original/default and production-shaped capacity. D=3e9 exactly represents legacy 1e-9 fractions and units/minute at millisecond resolution. Existing account lock orders persisted timestamp/numerator, balance and admission. NUMERIC integer intermediates avoid overflow before caps; div/mod avoid rounding feedback; time never rewinds. New nullable fields preserve legacy state lazily. Full pre/post-refill function body matches historical definition. Function/search_path/privileges unchanged, direct browser reads denied. DOWN intentionally closes new admission while retaining exact state; UP resumes. No shared migration or historical rewrite. Whole migration/reference guides explain units, tests, scoped rollout and rollback limits.",
+    "delivery": "Root package adds two bounded local verification commands only. The canonical build uses Node/npm plus Docker, clean declared inputs, locked in-container installation, fresh builder/no cache and same-context artifact checks. Three native candidates are retained but no installed pin/config changes. Production application build passes; destination architecture/host readiness and exact pending migration selection remain separate decisions under release-readiness. ARM64 offline artifact proof does not claim AMD64, hosted or new provider acceptance.",
+    "knowledge": "Added domain ownership for both new tests, reconciled current-state and dated incident narrative, closed ACT-041/042 only at the user-authorized engineering milestone and retained their original failure evidence. Original thirteen overdue actions/deadlines unchanged. Read-only legacy advisor finding has separate public-release follow-up ACT-043. No other issue repaired or ADR delivery advanced. Generated navigation and review attestations remain separate."
+  },
+  "verification": "Acceptance record contains command/result/count/log hashes for 82 refill, 29 image, 76 packaged monitor, 43 service, 51 connection, 6 access, 26 Connect, 135 Connect DB, 224 authorization/connection/execution DB and 94 general DB checks, 159 migration pairs and 157-page production build. Final docs/compiled asset scan follow this review and are appended to the journal.",
+  "unmapped_paths_review": "docs:impact maps new source/test boundaries to relay/database. Remaining unmapped paths are private dated evidence, journal/register/current-state and generated review metadata governed by the existing incident guard. No unowned public runtime source added.",
+  "remaining_limits": [
+    "Primary refill migration is staged, not shared-applied; installed services unchanged.",
+    "Native ARM64 candidate tested with synthetic offline control/Docker API; no new real provider or hosted acceptance.",
+    "Existing 175 ms remains historical evidence, not a new measurement or SLA.",
+    "ACT-001 target inventory blocks controlled rollout; existing public-release gates and new independent legacy RPC review remain.",
+    "Broad domain fingerprints detect drift; unchanged prior work retains its earlier review, not a new exhaustive audit."
+  ]
+}

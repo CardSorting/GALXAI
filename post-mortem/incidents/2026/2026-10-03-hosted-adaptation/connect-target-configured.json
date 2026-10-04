@@ -1,0 +1,79 @@
+{
+  "at": "2026-10-03T21:39:20.412Z",
+  "productionUnchanged": true,
+  "productionId": "dpl_9FSaL3M6JffKDjaUHP98RhU3crzG",
+  "configuration": {
+    "GALX_CONNECT_ENABLED": "0",
+    "GALX_CONNECT_ORIGIN": "https://galx.ai",
+    "GALX_NOVA_RESOURCE": "https://nova.galx.ai",
+    "GALX_CONNECT_CLIENTS": "[{\"id\":\"reference-native\",\"name\":\"GALX controlled native reference\",\"kind\":\"native\",\"redirectUris\":[\"http://127.0.0.1/callback\"],\"origins\":[]},{\"id\":\"reference-browser\",\"name\":\"GALX controlled browser reference\",\"kind\":\"browser\",\"redirectUris\":[\"http://127.0.0.1:4400/callback\"],\"origins\":[\"http://127.0.0.1:4400\"]}]"
+  },
+  "clients": [
+    {
+      "id": "reference-native",
+      "name": "GALX controlled native reference",
+      "kind": "native",
+      "redirectUris": [
+        "http://127.0.0.1/callback"
+      ],
+      "origins": []
+    },
+    {
+      "id": "reference-browser",
+      "name": "GALX controlled browser reference",
+      "kind": "browser",
+      "redirectUris": [
+        "http://127.0.0.1:4400/callback"
+      ],
+      "origins": [
+        "http://127.0.0.1:4400"
+      ]
+    }
+  ],
+  "verified": [
+    {
+      "key": "GALX_CONNECT_ENABLED",
+      "id": "qsHYPf1oCu6tImXa",
+      "type": "encrypted",
+      "target": [
+        "production"
+      ],
+      "exactReadback": true
+    },
+    {
+      "key": "GALX_CONNECT_ORIGIN",
+      "id": "EDaCPdC0TAKSJpJG",
+      "type": "encrypted",
+      "target": [
+        "production"
+      ],
+      "exactReadback": true
+    },
+    {
+      "key": "GALX_NOVA_RESOURCE",
+      "id": "6rciDB3QPSFsGpoP",
+      "type": "encrypted",
+      "target": [
+        "production"
+      ],
+      "exactReadback": true
+    },
+    {
+      "key": "GALX_CONNECT_CLIENTS",
+      "id": "daPy1w0B8ZLgybn0",
+      "type": "encrypted",
+      "target": [
+        "production"
+      ],
+      "exactReadback": true
+    }
+  ],
+  "activation": false,
+  "grantsIssued": 0,
+  "entitlementsIssued": 0,
+  "installCommand": {
+    "before": "npm install",
+    "after": "npm ci"
+  },
+  "rollback": "Remove the four recorded environment IDs; restore installCommand. No existing environment variables were overwritten."
+}

@@ -54,7 +54,7 @@ External provider ingestion routes remain closed under [the authentication bound
 
 ## Workspace organization
 
-Pool monitors organize accounts and registrations with search/status/health filters and retained Removed views. They do not implement legacy custom tabs, drag/drop groups or editable pool selection. Rename affects labels only. Account removal revokes permanently; unfinished registration restoration requires a new Connect check. The [management contract](reference/relay-account-management.md#account-and-registration-management) defines revision/idempotency rules and desktop cleanup.
+Pool monitors organize accounts and registrations with search, saved-state and request-status filters and retained Removed views. Unknown availability is neutral; historical request failures do not veto reconnect. They do not implement legacy custom tabs, drag/drop groups or editable pool selection. Rename affects labels only. Account removal revokes permanently; unfinished registration restoration requires a new Connect check. The [management contract](reference/relay-account-management.md#account-and-registration-management) defines revision/idempotency rules and desktop cleanup.
 
 ## Request identity and bounds
 

@@ -1,0 +1,437 @@
+{
+  "classification": "private",
+  "observed_at": "2026-10-03T14:44:31.890908+00:00",
+  "status": "blocked_not_accepted",
+  "scope": "Existing real GALX identity, reviewed first-party browser client plus independent native revocation control, one supervised local production-build environment, actual installed inference runtime. No hosted application deployment.",
+  "cohort": {
+    "account_id": "a58fa68f-3545-4235-9825-807431813081",
+    "account_created_at": "2026-09-03T16:38:46.439Z",
+    "issuer_and_resource": "http://127.0.0.1:3000",
+    "browser_client": "reference-browser",
+    "native_control_client": "reference-native",
+    "entitlement_expiry": "2026-10-04T00:00:00Z",
+    "explicit_operator_entitlement": true,
+    "cleanup": {
+      "observed_at": "2026-10-03T14:39:50.044Z",
+      "temporary_entitlement_enabled": false,
+      "active_grants": 0,
+      "revoked_grants": 3,
+      "account_intact": true,
+      "media_session_intact": true,
+      "reference_client_credentials_cleared": true,
+      "history_retained": true,
+      "note": "Explicit end-access restored the starting no-entitlement state. No account/media deletion, subscription conversion or provider-account mutation.",
+      "local_processes_stopped": true,
+      "ports_no_longer_listening": [
+        3000,
+        4400,
+        4411,
+        4412
+      ]
+    }
+  },
+  "database": {
+    "migration": "20261003131619_galx_connect_grants",
+    "dry_run": "passed and rolled back",
+    "apply": "one exact migration applied",
+    "unrelated_orbit_migration": "20260926081213 remains pending",
+    "private_tables": 6,
+    "forced_rls": true,
+    "client_and_service_role_privileges": false
+  },
+  "findings": [
+    {
+      "id": "loopback_origin",
+      "observation": "NextRequest normalizes IP-loopback URLs to localhost, rejecting configured origins and moving the account callback away from its cookies.",
+      "repair": "Read the native Request URL for exact Connect/Nova authority and account callback destinations; retain same-origin consent enforcement.",
+      "verification": "Real browser Connect entry and actual NextRequest adversarial-origin regression."
+    },
+    {
+      "id": "browser_fetch_receiver",
+      "observation": "Browser SDK rejected valid callbacks before token exchange because unbound fetch was invoked with the connection object as receiver.",
+      "repair": "Bind the default fetch to globalThis.",
+      "verification": "Real browser PKCE exchange succeeded after repair; regression covers exchange, invoke and revoke receiver."
+    },
+    {
+      "id": "provider_session_expiry",
+      "observation": "Runtime liveness 200 and fresh authority heartbeat coexist with inference readiness/models 503. Both assigned credentials are past expiry.",
+      "credential_expiry_dates": [
+        "2026-09-26T01:21:00.000Z",
+        "2026-09-29T21:06:50.000Z"
+      ],
+      "provider_submissions": 0,
+      "containment": "Fail closed before dispatch. Existing runtime/account ownership is preserved. Manual sign-in in the existing managed desktop and explicit reconnect are pending."
+    }
+  ],
+  "authorization_lifecycle": {
+    "google_account_sign_in": "real existing account succeeded",
+    "browser_consent": "succeeded",
+    "browser_pkce_exchange": "succeeded after receiver fix",
+    "native_consent_and_pkce": "succeeded",
+    "without_entitlement": "403 inference_access_required; no admission",
+    "with_entitlement": "admitted locally then 503 service_busy/not_accepted because provider path is unavailable",
+    "real_provider_result": "NOT OBTAINED. All five admitted records ended not_accepted; no provider inference POST occurred.",
+    "native_access_expiry": "Issued at 14:26:59.614Z with 300-second lifetime; denied at 14:32:05.311Z without clock/database manipulation. A 14:31:33.714Z probe before expiry still reached the unavailable service.",
+    "native_refresh": "Rotated successfully at 14:32:05.597Z; replacement access reached Nova admission.",
+    "browser_refresh": "Browser reference renewed through the SDK after access expiry and remained connected; database records confirm one consumed refresh generation.",
+    "browser_callback_final_retest": "After the final build, real Google sign-in returned to http://127.0.0.1:3000/connect without manual host correction; verified portal state showed the existing account."
+  },
+  "warning_classification": [
+    {
+      "id": "ACT-037",
+      "classification": "NON-BLOCKING / DOCUMENTED",
+      "rationale": "Archive layout is outside the Connect text-inference cohort. Hosted layout acceptance remains open."
+    },
+    {
+      "id": "ACT-001",
+      "classification": "BLOCKS CONTROLLED DEPLOYMENT",
+      "rationale": "Hosted storage/deployment inventory must be checked before a Vercel release. It does not block the supervised local environment."
+    },
+    {
+      "id": "ACT-018",
+      "classification": "BLOCKS PUBLIC RELEASE",
+      "rationale": "Owner-Mac restart, recovery-storage and unattended recovery drills remain incomplete. A supervised cohort does not prove unattended public availability."
+    },
+    {
+      "id": "ACT-005",
+      "classification": "NON-BLOCKING / DOCUMENTED",
+      "rationale": "Image payload retention is independent of this text-only contract. No image records or cleanup policy changed."
+    },
+    {
+      "id": "ACT-006",
+      "classification": "NON-BLOCKING / DOCUMENTED",
+      "rationale": "The unrelated administrator credential audit stays open. Connect consent uses verified ordinary account authority, while inference uses its own grant."
+    },
+    {
+      "id": "ACT-008",
+      "classification": "NON-BLOCKING / DOCUMENTED",
+      "rationale": "Ongoing documentation maintenance is addressed for the changed domains in this pass; the ongoing action is not closed or rescheduled."
+    },
+    {
+      "id": "ACT-014",
+      "classification": "BLOCKS PUBLIC RELEASE",
+      "rationale": "Broader sensitive-action/device-grant acceptance remains incomplete. Legacy elevation stays closed and is not used by this cohort."
+    },
+    {
+      "id": "ACT-015",
+      "classification": "NON-BLOCKING / DOCUMENTED",
+      "rationale": "The earlier nonreproduced profile observation remains monitored. Current real-account entry succeeded; no cached identity fallback was added."
+    },
+    {
+      "id": "ACT-016",
+      "classification": "NON-BLOCKING / DOCUMENTED",
+      "rationale": "The original Images/Sites render-recovery matrix is outside this acceptance path. Account/media regressions are retained separately."
+    },
+    {
+      "id": "ACT-020",
+      "classification": "NON-BLOCKING / DOCUMENTED",
+      "rationale": "Signed-in image generation/library/download qualification is separate from bounded Connect text inference."
+    },
+    {
+      "id": "ACT-025",
+      "classification": "NON-BLOCKING / DOCUMENTED",
+      "rationale": "Legacy continuation/caller rollout is not invoked by the single-submit SDK. Provider-enforced token spending caps remain unproven; local output/concurrency limits are not represented as such caps."
+    },
+    {
+      "id": "ACT-028",
+      "classification": "BLOCKS PUBLIC RELEASE",
+      "rationale": "The full hosted account-switch/history/failed-revocation and email/provider callback matrix remains incomplete. Local Google entry is narrower evidence."
+    },
+    {
+      "id": "ACT-032",
+      "classification": "NON-BLOCKING / DOCUMENTED",
+      "rationale": "The inactive Star cohort and image qualification remain untouched; no replay, activation or population work is authorized by this pass."
+    }
+  ],
+  "limits": [
+    "No provider result or upstream outcome was fabricated.",
+    "Real cancellation, timeout, exhaustion, and disconnect during execution remain untested while provider readiness is unavailable.",
+    "Synthetic database/executor coverage must not be read as real-provider acceptance.",
+    "No existing warning was automatically closed or given a new deadline."
+  ],
+  "base_revision": "38a3cc48f32f5f404592109c8cae3ddac5fa6f61",
+  "revision": "uncommitted working tree; exact source hashes below",
+  "evidence": {
+    "http_record": "post-mortem/releases/2026-10-03-connect-real-http.json",
+    "http_sha256": "dda2d9bca6d04c0871f0183e10b6cb2acdc477aae8db104bed9ff22454b5ee99",
+    "observations": 42,
+    "browser": "Actual Chrome UI: existing Google account authentication, consent, PKCE, reference-client results, connection management, Media reload. Read through the computer-use browser API. No browser cookie/token export.",
+    "browser_limit": "A real-cookie-only Nova form navigation ended at browser ERR_BLOCKED_BY_CLIENT, so no precise HTTP response is claimed for that attempt. Raw cookie-only HTTP and isolated bearer-only regressions passed.",
+    "harness_correction": "The first negative-test driver run stopped after another-client refresh with a ReferenceError in the harness. Corrected the harness alias and reran. The failed observation remains in the retained HTTP record."
+  },
+  "revocation": {
+    "designed_window": "No grant-cache delay: each new admission locks and checks the current grant in the primary database. Once disconnect is acknowledged, not-yet-admitted work is denied. Work admitted before disconnect can still dispatch/finish.",
+    "observed_ack_at": "2026-10-03T14:32:06.086Z",
+    "first_denial_at": "2026-10-03T14:32:06.253Z",
+    "maximum_observed_denial_response_ms_after_ack": 167,
+    "sample_count": 1,
+    "measurement_limit": "Time includes the first immediate post-ack request round trip. This is one observed upper bound for denial, not a 167-ms propagation SLA.",
+    "refresh_after_disconnect": "400 invalid_grant at 14:32:06.427Z",
+    "independent_client": "Browser client remained authorized and admitted a new request at 14:32:31.746Z, returning service_busy rather than invalid_token.",
+    "refresh_reuse": "Fresh native consent followed by rotation succeeded at 14:33:36.312Z. Reusing the spent refresh token returned 400 invalid_grant at 14:33:36.546Z; the newest access token then returned 401 at 14:33:36.716Z.",
+    "owner_portal_disconnect": "Browser connection revoked at 14:35:01.675Z; portal showed no connected applications; reference inference requested reconnection. SDK disconnect subsequently cleared local credentials.",
+    "account_and_media": "Existing account remains verified/non-anonymous. Hosted Explore and its signed-in account menu remained usable. No media/publishing/Star records were changed.",
+    "completed_record_limit": "No real completed inference record exists in this run. All five not_accepted records remained retained. Completed-record immutability and no duplicate dispatch are fixture evidence, not live provider evidence."
+  },
+  "negative_authorization_matrix": [
+    {
+      "case": "valid grant plus entitlement",
+      "live": "Nova admission succeeds; execution path fails closed with 503 service_busy/not_accepted",
+      "fixture": "Completed synthetic inference passes"
+    },
+    {
+      "case": "expired credential",
+      "live": "401 invalid_token after natural five-minute expiry"
+    },
+    {
+      "case": "malformed credential",
+      "live": "401 invalid_token"
+    },
+    {
+      "case": "wrong audience",
+      "live": "Authorization and refresh requests with another resource return 400 invalid_target; no wrong-audience credential was manufactured in the real database",
+      "fixture": "Admission against another resource rejects the valid token as invalid_token"
+    },
+    {
+      "case": "missing inference scope",
+      "live": "Authorization with empty scope returns 400 invalid_scope; no unsupported-scope credential is issued",
+      "source": "Grant scope is constrained to inference:invoke; no live database corruption was introduced"
+    },
+    {
+      "case": "revoked connection",
+      "live": "401 invalid_token; refresh returns 400 invalid_grant"
+    },
+    {
+      "case": "nonexistent grant",
+      "live": "Well-shaped unrecognized opaque token returns 401 invalid_token"
+    },
+    {
+      "case": "valid GALX identity without inference entitlement",
+      "live": "Real consent and token exchange succeed; Nova returns 403 inference_access_required and keeps the application connected"
+    },
+    {
+      "case": "valid entitlement without this client authorization",
+      "live": "Missing bearer returns 401 even while account entitlement is active; unknown client cannot start authorization (400 invalid_client). No entitlement-only bypass exists"
+    },
+    {
+      "case": "authorization for another client",
+      "live": "Native grant cannot be refreshed as browser client (400 invalid_grant); native token sent from browser-client Origin is rejected (401)",
+      "limit": "Bearer access is not cryptographically bound to a native executable. A stolen native bearer used without Origin is outside this public-client isolation claim."
+    },
+    {
+      "case": "prohibited reuse/replay",
+      "live": "Spent refresh reuse revokes its grant and current access token",
+      "fixture": "Concurrent authorization-code redemption permits only one exchange, then replay revokes; duplicate inference keys never dispatch again, including unknown outcomes"
+    },
+    {
+      "case": "GALX login or browser cookie as Nova credential",
+      "live": "Verified account portal is usable; raw cookie-only requests return 401. Real browser form request was blocked by the browser and yielded no inspectable HTTP response",
+      "fixture": "Account JWT, absent bearer and malformed credentials never dispatch; Nova authority reads only its distinct bearer contract"
+    }
+  ],
+  "nova_execution": {
+    "admissions": 5,
+    "states": {
+      "not_accepted": 5
+    },
+    "provider_attempts": 0,
+    "terminal_observation": "Known pre-dispatch rejection only; no completed, failed, cancelled, timed_out or unknown provider outcome was observed.",
+    "no_replay": "No automatic retry or alternate routing was added. Manual probes used distinct request IDs and only followed known non-admission.",
+    "runtime_prerequisites": "Existing server-side endpoint discovery must establish current authority and usable capability. ModelCatalog and RelayChatTransport then derive the configured upstream request and server credential under the existing runtime account assignment. Client supplies only its delegated Nova bearer and inference input.",
+    "blocker": "Both installed provider sessions were expired. Runtime liveness returned 200 while readiness and authenticated model inventory returned 503. Actual account-to-provider execution remains unresolved until manual sign-in and explicit reconnect.",
+    "request_records": [
+      {
+        "id": "0da2c22a-f0b9-45d4-ad65-aeaef06e1a21",
+        "grant_id": "78b248b5-9639-45ef-bcac-350e32ac05a7",
+        "state": "not_accepted",
+        "created_at": "2026-10-03T14:26:37.623Z",
+        "lease_until": "2026-10-03T14:32:37.623Z"
+      },
+      {
+        "id": "ef417fc5-6201-48b7-82ef-b6cbc1dcb250",
+        "grant_id": "a48b1e76-e51c-43cb-afd1-27965b92e3a1",
+        "state": "not_accepted",
+        "created_at": "2026-10-03T14:27:18.190Z",
+        "lease_until": "2026-10-03T14:33:18.190Z"
+      },
+      {
+        "id": "b1f6573a-77d4-4368-be00-8fcd48d6f9ae",
+        "grant_id": "a48b1e76-e51c-43cb-afd1-27965b92e3a1",
+        "state": "not_accepted",
+        "created_at": "2026-10-03T14:31:33.258Z",
+        "lease_until": "2026-10-03T14:37:33.258Z"
+      },
+      {
+        "id": "09f13ddd-1540-4325-865d-4c6496a17d77",
+        "grant_id": "a48b1e76-e51c-43cb-afd1-27965b92e3a1",
+        "state": "not_accepted",
+        "created_at": "2026-10-03T14:32:05.610Z",
+        "lease_until": "2026-10-03T14:38:05.610Z"
+      },
+      {
+        "id": "ef71fb1e-baa4-4a3a-80e4-2291b4bebd54",
+        "grant_id": "78b248b5-9639-45ef-bcac-350e32ac05a7",
+        "state": "not_accepted",
+        "created_at": "2026-10-03T14:32:31.746Z",
+        "lease_until": "2026-10-03T14:38:31.746Z"
+      }
+    ]
+  },
+  "capacity_behavior": [
+    {
+      "case": "admission and unavailable provider path",
+      "live": "Five authorized bounded requests admitted and ended not_accepted; 503 retained login/grant authority"
+    },
+    {
+      "case": "authorization/entitlement rejection",
+      "live": "401/403 before admission; no provider attempt"
+    },
+    {
+      "case": "shared account capacity exhaustion",
+      "live": "Not exercised with real in-flight provider work",
+      "fixture": "Two clients share two active account slots; the next admission is service_busy; completing work releases capacity"
+    },
+    {
+      "case": "cancellation",
+      "live": "Not exercised: provider path unavailable",
+      "fixture": "Consumer cancellation aborts executor and preserves unknown state"
+    },
+    {
+      "case": "timeout",
+      "live": "Not exercised: provider path unavailable",
+      "source": "Existing bounded executor deadlines retained; no new timeout test or runtime acceptance claim"
+    },
+    {
+      "case": "disconnect during execution",
+      "live": "Not exercised: no execution began",
+      "source": "Disconnect blocks subsequent admissions, not already admitted work; no autonomous replay"
+    },
+    {
+      "case": "unknown outcome",
+      "live": "Not observed; no ambiguous attempt replayed",
+      "fixture": "Unknown and truncated/error/false-success streams retain uncertainty and never replay automatically"
+    }
+  ],
+  "sanitization": {
+    "live_http": "Observed 400/401/403/503 bodies and headers contain only public error contracts; OAuth success exposes delegated credential fields only. Complete inspected native response observations retained separately.",
+    "browser_console": "Reference client error/warning log scan returned [] after final lifecycle. Final portal and reference screens contain no private routing/account information.",
+    "native_logs": "Only allowlisted public response data and token field names retained; no credential values.",
+    "success_and_stream_limit": "No live provider output or SSE stream was available to inspect. Adversarial fixture tests exercise both JSON and SSE allowlists and strip upstream identifiers/headers/diagnostics.",
+    "rendered_scan": {
+      "at": "2026-10-03T14:36:52.567Z",
+      "environment": "local production build",
+      "pages": [
+        {
+          "path": "/connect",
+          "status": 200,
+          "bytes": 35993,
+          "sha256": "164b6c43ef8be415966e88b359224d3df0e3fcc78e1424625193a3667a584ffc"
+        },
+        {
+          "path": "/connect/consent",
+          "status": 200,
+          "bytes": 37376,
+          "sha256": "f54eaab86de196e83da5465d6ca93f6e10fa7179b50b9343298c800ba2e5c01b"
+        }
+      ],
+      "served_assets_scanned": 22,
+      "result": "passed"
+    },
+    "compiled_scan": "PASSED final docs:check:build: 538 browser/rendered assets scanned for selected private markers and private runtime trace paths; thirteen pre-existing overdue prevention warnings remain. This is local-build evidence, not a hosted-site scan.",
+    "claim_limit": "No complete hosted-site or arbitrary secret-disclosure certification."
+  },
+  "verification": {
+    "npm run test:connect": {
+      "result": "passed; 26 tests",
+      "local_log": "/tmp/galx-connect-acceptance-tests.log",
+      "log_sha256": "7894c4e48fd1376547e41372f2f43c7d7903633fd9e8a2e535129fdad4d6dd63"
+    },
+    "npm run test:connect:db": {
+      "result": "passed; 135 checks, 158 migrations, disposable PostgreSQL",
+      "local_log": "/tmp/galx-connect-db-tests.log",
+      "log_sha256": "6b31739655ad5b1be3edcad27c67a4776c4eddee15919b80d0b26781089c4369"
+    },
+    "npm run db:test": {
+      "result": "passed; 94 general database checks, disposable PostgreSQL",
+      "local_log": "/tmp/galx-connect-general-db-tests.log",
+      "log_sha256": "38a6eabcc2b88fb495be0f69d90c64224080ad2fda2a42e2336db3eddfa88705"
+    },
+    "npm run db:verify": {
+      "result": "passed; 158 migration/rollback pairs, zero violations/warnings",
+      "local_log": "/tmp/galx-connect-db-verify.log",
+      "log_sha256": "097d8a28c4779fa96cd8389c563cedd2d1dbfd5f41384d1fc04be041e8b76333"
+    },
+    "npm run test:auth:sessions": {
+      "result": "passed; 44 tests",
+      "local_log": "/tmp/galx-connect-auth-tests.log",
+      "log_sha256": "cf96dd19aba0696d0633ec0d85e6812f8a75a0e3573b90439e3f2024c2cd872b"
+    },
+    "npm run test:image:security": {
+      "result": "passed; 69 tests",
+      "local_log": "/tmp/galx-connect-media-tests.log",
+      "log_sha256": "d753f841f5069b2ab4ee786eaefc354deb70e18e6cf40e9869e774b90a273a91"
+    },
+    "npm run build": {
+      "result": "passed; compilation, TypeScript and 157 static pages",
+      "local_log": "/tmp/galx-connect-acceptance-build.log",
+      "log_sha256": "5decad213c479550746a90600803ddae19b55cddee97273c462684bb160d0ed3"
+    },
+    "npm run db:push -- --dry-run --version 20261003131619": {
+      "result": "passed; exact migration validated and rolled back",
+      "local_log": "/tmp/galx-connect-migration-dry-run.log",
+      "log_sha256": "53865376f7a4db6e7d9c8684762762fc887433cd7794fafa7da470564e040dbe"
+    },
+    "npm run db:push -- --version 20261003131619": {
+      "result": "passed; exact migration applied to existing primary only",
+      "local_log": "/tmp/galx-connect-migration-apply.log",
+      "log_sha256": "b2a325c2406c8adf05f021462cd9011c5e31c68b3805b2b3858042281adf9c4e"
+    },
+    "npm run docs:sync": {
+      "result": "passed; generated indexes only; reviews attested separately",
+      "local_log": "/tmp/galx-connect-acceptance-docs-sync-final.log",
+      "log_sha256": "00654fc26a2573cad1f4c508d6f925cbc1e36a4ec2e6e8ca7a90b99eb29626bb"
+    },
+    "npm run docs:check": {
+      "result": "passed; 382 guides, 45 incident documents, 165 ADRs, 11 knowledge domains; thirteen existing overdue-action warnings retained",
+      "local_log": "/tmp/galx-connect-acceptance-docs-check-final.log",
+      "log_sha256": "faac96e5cd7fe3801803b9a1c7a5020d9cec49a2e0d36940eebc260c36ca2b3a"
+    },
+    "npm run docs:check:build": {
+      "result": "passed; 538 browser/rendered assets, selected private markers and trace boundary; same thirteen warnings",
+      "local_log": "/tmp/galx-connect-acceptance-build-boundary-final.log",
+      "log_sha256": "7f55dee2e7911dc0dc8750d5cd21d75c001d2646d9a99f7508b63da1581e16f0"
+    },
+    "npm run test:docs": {
+      "result": "passed; 24 incident-guard and 17 knowledge tests",
+      "local_log": "/tmp/galx-connect-acceptance-docs-tests.log",
+      "log_sha256": "a507db0a05f0ec55e2857232e54416004e7f3b4450dd897eeaf139b37d89dcea"
+    },
+    "git diff --check": {
+      "result": "passed"
+    }
+  },
+  "source_sha256": {
+    "src/app/auth/callback/route.ts": "42367f691776d3d4b625ff749d549b8df2b29407a56b49fcb530e8c661ecf1a9",
+    "src/lib/connect/config.ts": "4e13d3626a3d96eaf8ec06f5ff2962f8a1633f7459c80575041d2fb3d22b4653",
+    "src/lib/connect/http.ts": "b2872fcde6d34092748637d7d101963d47c3b0ec560f889bcadeb84ebcc7c954",
+    "src/app/v1/inference/route.ts": "9de15a281c4baf66527705a1af059c0d90608afd4e5e9503365115e2f3e1dfec",
+    "src/sdk/connect.ts": "3561bb495a9e06cbde1bf14c7a2c514f5d01d8057bde4eba20262a409cb21d4f",
+    "scripts/test-connect.ts": "401cf3450ac037e054d7134ad0e2f54c5b56efb9171f1bacac0598da33af4cf8",
+    "scripts/test-connect-sdk.ts": "2a6c1ec8564740b8c86f737889097ca2ecabed7d72c0a57accca0ddf7d272c3a",
+    "src/lib/nova/contract.ts": "ab56a047f77cf2c28862f95d9ec7c1c35f141ddd4b08c769c7e1261d7146f051",
+    "src/lib/nova/inference.ts": "85a57c5b383bbc67bd2dad866d8014010d3333a3349d7e729dcb398151f0787d",
+    "src/lib/nova/executor.ts": "94a576fdc1cef857928dfc00e332d5331d8be03d25d8f2711e3fb77da17c7d40",
+    "src/lib/supabase/repositories/ConnectRepository.ts": "3e9ffc6fdee174a8ec5b55c86e3c7eb755e4f2084175e0596e59887639478d52",
+    "supabase/migrations/20261003131619_galx_connect_grants.sql": "03eecff2b2fa7e48c912d5e3a13b064e169af6d50f1b3e95b9e1fa4b10277034"
+  },
+  "warning_summary": {
+    "BLOCKS ACCEPTANCE": 0,
+    "BLOCKS CONTROLLED DEPLOYMENT": 1,
+    "BLOCKS PUBLIC RELEASE": 3,
+    "NON-BLOCKING / DOCUMENTED": 9,
+    "new_acceptance_blocker": "ACT-039, separate from the thirteen existing overdue actions; manual provider renewal and remaining real execution matrix required"
+  },
+  "controlled_deployment_ready": false,
+  "next_step": "Renew one existing provider account through the existing managed desktop and explicit Reconnect account workflow. Resume this bounded cohort with explicit entitlement and fresh consent; complete real result/terminal, cancellation/timeout/capacity and revocation evidence without replaying unknown outcomes. ACT-001 deployment inventory also remains a pre-release check.",
+  "review_evidence": "post-mortem/releases/2026-10-03-connect-acceptance-review.json"
+}

@@ -1,0 +1,220 @@
+[BroccoliDB Relay] Listening on http://127.0.0.1:0
+[BroccoliDB Relay] Shards enrolled: 1 | Target WS: ws://127.0.0.1:61923
+✔ usage requires complete transport evidence and accounts for reasoning within total output (1.27525ms)
+(node:52842) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+[BroccoliDB Relay] Entering graceful drain mode...
+[BroccoliDB Relay] HTTP listener closed cleanly.
+[BroccoliDB Relay] Recovered 0 in-flight jobs from checkpoint snapshot.
+[BroccoliDB Relay] Listening on http://127.0.0.1:0
+[BroccoliDB Relay] Shards enrolled: 1 | Target WS: ws://127.0.0.1:61923
+[BroccoliDB Relay] Entering graceful drain mode...
+[BroccoliDB Relay] HTTP listener closed cleanly.
+[BroccoliDB Relay] Listening on http://127.0.0.1:0
+[BroccoliDB Relay] Shards enrolled: 1 | Target WS: ws://127.0.0.1:61997
+✔ real worker retains allowlisted usage for live output, terminal replay and read-only transport recovery (570.468833ms)
+✔ operator error diagnostics allowlist values, never provider strings or credentials (0.686666ms)
+[BroccoliDB Relay] Entering graceful drain mode...
+[BroccoliDB Relay] HTTP listener closed cleanly.
+[BroccoliDB Relay] Listening on http://127.0.0.1:0
+[BroccoliDB Relay] Shards enrolled: 1 | Target WS: ws://127.0.0.1:1
+✔ private rejection diagnostics identify the job without changing failure or replay policy (199.154ms)
+[BroccoliDB Relay] Entering graceful drain mode...
+[BroccoliDB Relay] HTTP listener closed cleanly.
+[BroccoliDB Relay] Listening on http://127.0.0.1:0
+[BroccoliDB Relay] Shards enrolled: 1 | Target WS: ws://127.0.0.1:62044
+✔ required output ceiling rejects disabled forwarding before queueing or opening a provider connection (24.319333ms)
+[BroccoliDB Relay] Entering graceful drain mode...
+[BroccoliDB Relay] HTTP listener closed cleanly.
+[BroccoliDB Relay] Listening on http://127.0.0.1:0
+[BroccoliDB Relay] Shards enrolled: 1 | Target WS: ws://127.0.0.1:62067
+✔ durable jobs stop on oversized output, provider failure or receipt commit failure, without hidden retries (220.858667ms)
+[BroccoliDB Relay] Entering graceful drain mode...
+[BroccoliDB Relay] HTTP listener closed cleanly.
+✔ different billed operation keys cannot share an identical prompt execution (113.159833ms)
+✔ SIGKILL recovery distinguishes queued, unknown and durably completed work without replay (237.842667ms)
+✔ a replacement writer fences prior dispatch and completion before releasing queued evidence (106.731625ms)
+✔ restoring an earlier receipt snapshot preserves identity and fails closed after restart (104.602792ms)
+✔ expired not-started evidence becomes an unknown tombstone instead of releasing admission (64.945417ms)
+✔ capacity fails closed, unknown receipts never expire, and expired terminal evidence becomes an unknown tombstone (156.566833ms)
+✔ missing or inconsistent usage remains unknown; private provider fields are discarded (200.742ms)
+✔ unsafe paths, foreign databases and damaged evidence fail closed (121.313541ms)
+[Relay:Shards] Loaded 0 unique account(s).
+[BroccoliDB Relay] Listening on http://127.0.0.1:0
+[BroccoliDB Relay] Shards enrolled: 3 | Target WS: ws://127.0.0.1:61922
+(node:52844) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+[BroccoliDB Relay] Entering graceful drain mode...
+[BroccoliDB Relay] HTTP listener closed cleanly.
+[Relay:Shards] Loaded 0 unique account(s).
+[BroccoliDB Relay] Listening on http://127.0.0.1:0
+[BroccoliDB Relay] Shards enrolled: 3 | Target WS: ws://127.0.0.1:61933
+✔ API principals isolate deduplication, job reads, streams and cancellation (91.390208ms)
+[BroccoliDB Relay] Entering graceful drain mode...
+[BroccoliDB Relay] HTTP listener closed cleanly.
+[Relay:Shards] Loaded 0 unique account(s).
+[BroccoliDB Relay] Listening on http://127.0.0.1:0
+[BroccoliDB Relay] Shards enrolled: 3 | Target WS: ws://127.0.0.1:61938
+✔ malformed requests are rejected before consuming shard capacity (38.538333ms)
+[BroccoliDB Relay] Entering graceful drain mode...
+[BroccoliDB Relay] HTTP listener closed cleanly.
+[Relay:Shards] Loaded 0 unique account(s).
+[BroccoliDB Relay] Listening on http://127.0.0.1:0
+[BroccoliDB Relay] Shards enrolled: 3 | Target WS: ws://127.0.0.1:61942
+✔ permanent provider errors do not retry or quarantine healthy shards; sessions expire (53.050875ms)
+[BroccoliDB Relay] Entering graceful drain mode...
+[BroccoliDB Relay] HTTP listener closed cleanly.
+✔ image wall deadline closes the transport, returns capacity and stops attempts (68.477083ms)
+✔ retry credits bound outage amplification and recover over time or success (0.216833ms)
+[Relay:Shards] Loaded 0 unique account(s).
+[BroccoliDB Relay] Listening on http://127.0.0.1:0
+[BroccoliDB Relay] Shards enrolled: 3 | Target WS: ws://127.0.0.1:61951
+✔ body parser preserves split UTF-8 and enforces byte and time limits (6.611292ms)
+[BroccoliDB Relay] Entering graceful drain mode...
+[BroccoliDB Relay] HTTP listener closed cleanly.
+[Relay:Shards] Loaded 0 unique account(s).
+[BroccoliDB Relay] Listening on http://127.0.0.1:0
+[BroccoliDB Relay] Shards enrolled: 3 | Target WS: ws://127.0.0.1:61956
+✔ bounded replay returns an explicit conflict instead of silently omitting earlier output (24.766709ms)
+[BroccoliDB Relay] Entering graceful drain mode...
+[BroccoliDB Relay] HTTP listener closed cleanly.
+[Relay:Shards] Loaded 0 unique account(s).
+[BroccoliDB Relay] Listening on http://127.0.0.1:0
+[BroccoliDB Relay] Shards enrolled: 3 | Target WS: ws://127.0.0.1:61961
+✔ concurrent image idempotency prevents duplicate dispatch and conflicting cached reuse (17.829791ms)
+[AntiFragileRelay] Upstream failure (upstream_error_insufficient_quota) on shard only-shard. Scheduling queue-owned recovery 1/3 in 6251ms...
+[BroccoliDB Relay] Entering graceful drain mode...
+[BroccoliDB Relay] HTTP listener closed cleanly.
+[Relay:Shards] Loaded 0 unique account(s).
+[BroccoliDB Relay] Listening on http://127.0.0.1:0
+[BroccoliDB Relay] Shards enrolled: 3 | Target WS: ws://127.0.0.1:61967
+[BroccoliDB Relay] Entering graceful drain mode...
+✔ cancellation during backoff cannot release another job capacity on the failed shard (40.707791ms)
+[BroccoliDB Relay] HTTP listener closed cleanly.
+[Relay:Shards] Loaded 0 unique account(s).
+[BroccoliDB Relay] Listening on http://127.0.0.1:0
+[BroccoliDB Relay] Shards enrolled: 3 | Target WS: ws://127.0.0.1:61970
+✔ cancelled recovery probes do not count as successful provider recovery (11.088458ms)
+[BroccoliDB Relay] Entering graceful drain mode...
+[BroccoliDB Relay] HTTP listener closed cleanly.
+[Relay:Shards] Loaded 0 unique account(s).
+[BroccoliDB Relay] Listening on http://127.0.0.1:0
+[BroccoliDB Relay] Shards enrolled: 3 | Target WS: ws://127.0.0.1:61976
+✔ overload rejects new inference before provider dispatch while telemetry remains reachable (18.779583ms)
+[BroccoliDB Relay] Entering graceful drain mode...
+[BroccoliDB Relay] HTTP listener closed cleanly.
+[Relay:Shards] Loaded 0 unique account(s).
+[BroccoliDB Relay] Listening on http://127.0.0.1:0
+[BroccoliDB Relay] Shards enrolled: 3 | Target WS: ws://127.0.0.1:61982
+✔ readiness fails during drain; unfinished HTTP bodies cannot hold shutdown open (118.711166ms)
+[BroccoliDB Relay] Entering graceful drain mode...
+[BroccoliDB Relay] HTTP listener closed cleanly.
+[Relay:Shards] Loaded 0 unique account(s).
+[BroccoliDB Relay] Listening on http://127.0.0.1:0
+[BroccoliDB Relay] Shards enrolled: 3 | Target WS: ws://127.0.0.1:61985
+✔ image work can finish during grace rather than being aborted when drain begins (28.223333ms)
+[BroccoliDB Relay] Entering graceful drain mode...
+[BroccoliDB Relay] HTTP listener closed cleanly.
+[Relay:Shards] Loaded 0 unique account(s).
+[BroccoliDB Relay] Listening on http://127.0.0.1:0
+[BroccoliDB Relay] Shards enrolled: 3 | Target WS: ws://127.0.0.1:61990
+✔ invalid reconnection does not cancel the existing disconnect grace timer (38.74725ms)
+[BroccoliDB Relay] Entering graceful drain mode...
+[BroccoliDB Relay] HTTP listener closed cleanly.
+[Relay:Shards] Loaded 0 unique account(s).
+[BroccoliDB Relay] Listening on http://127.0.0.1:0
+[BroccoliDB Relay] Shards enrolled: 3 | Target WS: ws://127.0.0.1:61995
+[BroccoliDB Relay] Recovered 1 in-flight jobs from checkpoint snapshot.
+[BroccoliDB Relay] Entering graceful drain mode...
+✔ memory-pressure admission fails closed without making liveness fail (12.056084ms)
+[BroccoliDB Relay] HTTP listener closed cleanly.
+[Relay:Shards] Loaded 0 unique account(s).
+[BroccoliDB Relay] Listening on http://127.0.0.1:0
+[BroccoliDB Relay] Shards enrolled: 3 | Target WS: ws://127.0.0.1:62000
+✔ crash recovery does not advertise jobs as resumable when their transport and output are gone (14.982125ms)
+[BroccoliDB Relay] Entering graceful drain mode...
+[BroccoliDB Relay] HTTP listener closed cleanly.
+[Relay:Shards] Loaded 0 unique account(s).
+[BroccoliDB Relay] Listening on http://127.0.0.1:0
+[BroccoliDB Relay] Shards enrolled: 3 | Target WS: ws://127.0.0.1:62005
+✔ async operation contract exposes status polling and reports chunks without invented token counts or ETA (24.977ms)
+[BroccoliDB Relay] Entering graceful drain mode...
+[BroccoliDB Relay] HTTP listener closed cleanly.
+[Relay:Shards] Loaded 0 unique account(s).
+[BroccoliDB Relay] Listening on http://127.0.0.1:0
+[BroccoliDB Relay] Shards enrolled: 3 | Target WS: ws://127.0.0.1:62010
+✔ cancellation is idempotent and never represents a refund transaction (36.64675ms)
+✔ retry configuration rejects unbounded counts and timer overflow (0.825ms)
+[BroccoliDB Relay] Entering graceful drain mode...
+[BroccoliDB Relay] HTTP listener closed cleanly.
+[Relay:Shards] Loaded 0 unique account(s).
+[BroccoliDB Relay] Listening on http://127.0.0.1:0
+[BroccoliDB Relay] Shards enrolled: 3 | Target WS: ws://127.0.0.1:62017
+✔ cancellation while failover awaits registry cannot acquire replacement capacity (25.104958ms)
+[BroccoliDB Relay] Entering graceful drain mode...
+[BroccoliDB Relay] HTTP listener closed cleanly.
+[Relay:Shards] Loaded 0 unique account(s).
+[BroccoliDB Relay] Listening on http://127.0.0.1:0
+[BroccoliDB Relay] Shards enrolled: 3 | Target WS: ws://127.0.0.1:62021
+✔ zero retries stops after first provider failure and exposes terminal recovery (15.968292ms)
+[BroccoliDB Relay] Entering graceful drain mode...
+[BroccoliDB Relay] HTTP listener closed cleanly.
+[Relay:Shards] Loaded 0 unique account(s).
+[BroccoliDB Relay] Listening on http://127.0.0.1:0
+[BroccoliDB Relay] Shards enrolled: 3 | Target WS: ws://127.0.0.1:62026
+✔ administrator boundaries protect metrics, telemetry and fleet mutations (45.11125ms)
+[BroccoliDB Relay] Entering graceful drain mode...
+[BroccoliDB Relay] HTTP listener closed cleanly.
+[Relay:Shards] Loaded 0 unique account(s).
+[BroccoliDB Relay] Listening on http://127.0.0.1:0
+[BroccoliDB Relay] Shards enrolled: 3 | Target WS: ws://127.0.0.1:62032
+✔ local relay rejects cross-origin writes and DNS-rebinding hostnames (21.978792ms)
+[BroccoliDB Relay] Entering graceful drain mode...
+[BroccoliDB Relay] HTTP listener closed cleanly.
+[Relay:Shards] Loaded 0 unique account(s).
+[BroccoliDB Relay] Listening on http://127.0.0.1:0
+[BroccoliDB Relay] Shards enrolled: 3 | Target WS: ws://127.0.0.1:62036
+✔ explicit browser allowlist still requires an authenticated API request (14.629375ms)
+[BroccoliDB Relay] Entering graceful drain mode...
+[BroccoliDB Relay] HTTP listener closed cleanly.
+[Relay:Shards] Loaded 0 unique account(s).
+[BroccoliDB Relay] Listening on http://127.0.0.1:0
+[BroccoliDB Relay] Shards enrolled: 3 | Target WS: ws://127.0.0.1:62047
+✔ management bodies have size limits, validation and read deadlines (58.104291ms)
+[BroccoliDB Relay] Entering graceful drain mode...
+[BroccoliDB Relay] HTTP listener closed cleanly.
+[Relay:Shards] Loaded 0 unique account(s).
+[BroccoliDB Relay] Listening on http://127.0.0.1:0
+[BroccoliDB Relay] Shards enrolled: 3 | Target WS: ws://127.0.0.1:62051
+✔ network listeners require credentials and dedicated admin keys stay separate (9.90725ms)
+[BroccoliDB Relay] Entering graceful drain mode...
+[BroccoliDB Relay] HTTP listener closed cleanly.
+[Relay:Shards] Loaded 0 unique account(s).
+[BroccoliDB Relay] Listening on http://127.0.0.1:0
+[BroccoliDB Relay] Shards enrolled: 3 | Target WS: ws://127.0.0.1:62056
+✔ image responses larger than the request-body limit remain receivable (10.601959ms)
+[BroccoliDB Relay] Entering graceful drain mode...
+[BroccoliDB Relay] HTTP listener closed cleanly.
+[Relay:Shards] Loaded 0 unique account(s).
+[BroccoliDB Relay] Listening on http://127.0.0.1:0
+[BroccoliDB Relay] Shards enrolled: 3 | Target WS: ws://127.0.0.1:62059
+✔ image response size remains bounded independently of request bodies (3.106875ms)
+[BroccoliDB Relay] Entering graceful drain mode...
+[BroccoliDB Relay] HTTP listener closed cleanly.
+[Relay:Shards] Loaded 0 unique account(s).
+[BroccoliDB Relay] Listening on http://127.0.0.1:0
+[BroccoliDB Relay] Shards enrolled: 3 | Target WS: ws://127.0.0.1:62061
+✔ image transport failure never dispatches a second synthesis on another shard (2.108875ms)
+[BroccoliDB Relay] Entering graceful drain mode...
+[BroccoliDB Relay] HTTP listener closed cleanly.
+✔ uncertain image receipts block replay and conflicting intent without retaining response bodies (6.950667ms)
+✔ receipt reads enforce identity, terminal evidence, body bounds and a public field allowlist (58.161958ms)
+✔ receipt references reject path traversal, credentials and nonlocal cleartext origins before fetching (0.358334ms)
+ℹ tests 46
+ℹ suites 0
+ℹ pass 46
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1511.833667

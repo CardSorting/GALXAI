@@ -1,0 +1,9 @@
+{"check":"verified recovery archive loaded without replacing a service","status":"PASSED"}
+{"check":"baseline completion, scoped authorization and durable revocation","status":"PASSED"}
+{"check":"read-only root and bounded cache exhaustion preserve inference","status":"PASSED"}
+{"check":"isolated ingress death and restart retain neutral outcome without replay","status":"PASSED"}
+{"check":"container death and explicit restart preserve credentials, records and revoked authority","status":"PASSED"}
+{"check":"partial exact quota credit survives application container restart","status":"PASSED"}
+{"check":"fresh container and synthetic database reconstruction preserve authority and exact quota","status":"PASSED"}
+{"check":"memory pressure confined to disposable 64 MiB cgroup","status":"PASSED"}
+{"check":"accepted receipt, private asset boundary and neutral provider signal unchanged","status":"PASSED"}

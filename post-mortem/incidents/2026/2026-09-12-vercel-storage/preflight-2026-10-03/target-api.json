@@ -1,0 +1,463 @@
+{
+  "at": "2026-10-03T20:53:20.739Z",
+  "scope": "read-only provider inventory; explicitly selected fields; no credential values",
+  "project": {
+    "id": "prj_NmtiUenK2cf924eREKuCgiDS0uC4",
+    "name": "galxai",
+    "framework": "nextjs",
+    "nodeVersion": "22.x",
+    "installCommand": "npm install",
+    "buildCommand": "next build",
+    "rootDirectory": null,
+    "serverlessFunctionRegion": "iad1",
+    "resourceConfig": {
+      "fluid": true,
+      "functionDefaultRegions": [
+        "iad1"
+      ],
+      "buildMachineType": "basic",
+      "buildMachineSelection": "fixed"
+    },
+    "ssoProtection": {
+      "deploymentType": "all_except_custom_domains"
+    },
+    "autoExposeSystemEnvs": true,
+    "createdAt": 1787547099425,
+    "updatedAt": 1790441952769,
+    "link": {
+      "type": "github",
+      "repo": "GALXAI",
+      "org": "CardSorting",
+      "productionBranch": "main"
+    },
+    "targets": {
+      "production": {
+        "id": "dpl_9FSaL3M6JffKDjaUHP98RhU3crzG",
+        "url": "galxai-204k0uq49-cardsortings-projects.vercel.app",
+        "readyState": "READY",
+        "createdAt": 1790441645794,
+        "target": "production"
+      }
+    }
+  },
+  "team": {
+    "id": "team_mlJF16byaaURWNNfkpk72mVy",
+    "slug": "cardsortings-projects",
+    "name": "cardsorting's projects",
+    "billing": {
+      "plan": "hobby",
+      "status": "active",
+      "period": null
+    }
+  },
+  "domains": [
+    {
+      "name": "www.galx.ai",
+      "verified": true,
+      "redirect": "galx.ai",
+      "redirectStatusCode": 308,
+      "gitBranch": null
+    },
+    {
+      "name": "galx.ai",
+      "verified": true,
+      "redirect": null,
+      "redirectStatusCode": null,
+      "gitBranch": null
+    },
+    {
+      "name": "galxai.vercel.app",
+      "verified": true,
+      "redirect": null,
+      "gitBranch": null
+    }
+  ],
+  "envInventory": [
+    {
+      "id": "dJ1mk1JvHTldSZjJ",
+      "key": "GALX_PREMIUM_IMAGES_ENABLED",
+      "type": "encrypted",
+      "target": [
+        "production"
+      ],
+      "createdAt": 1789576886985,
+      "updatedAt": 1789576886985,
+      "valueReturned": true
+    },
+    {
+      "id": "l3DG0zXj2hexFmv4",
+      "key": "GALX_PREMIUM_RELAY_URL",
+      "type": "encrypted",
+      "target": [
+        "production"
+      ],
+      "createdAt": 1789576886985,
+      "updatedAt": 1789576886985,
+      "valueReturned": true
+    },
+    {
+      "id": "xwpfpcyjIB6M5jfj",
+      "key": "GALX_PREMIUM_RELAY_KEY",
+      "type": "encrypted",
+      "target": [
+        "production"
+      ],
+      "createdAt": 1789576886985,
+      "updatedAt": 1789576886985,
+      "valueReturned": true
+    },
+    {
+      "id": "RTPWIX6jaH8lkMtg",
+      "key": "VM_RELAY_API_KEY",
+      "type": "sensitive",
+      "target": [
+        "production"
+      ],
+      "createdAt": 1788811283585,
+      "updatedAt": 1788811283585,
+      "valueReturned": true
+    },
+    {
+      "id": "7kmiMADpjKB32tJv",
+      "key": "VM_RELAY_URL",
+      "type": "encrypted",
+      "target": [
+        "development"
+      ],
+      "createdAt": 1788589577860,
+      "updatedAt": 1788589577860,
+      "valueReturned": true
+    },
+    {
+      "id": "rTKBvkBhXUq7CpuF",
+      "key": "VM_RELAY_URL",
+      "type": "encrypted",
+      "target": [
+        "preview"
+      ],
+      "createdAt": 1788589572734,
+      "updatedAt": 1788589572734,
+      "valueReturned": true
+    },
+    {
+      "id": "8zkCqmZ4eSqSvO4T",
+      "key": "VM_RELAY_URL",
+      "type": "sensitive",
+      "target": [
+        "production"
+      ],
+      "createdAt": 1788589569507,
+      "updatedAt": 1788811282793,
+      "valueReturned": true
+    },
+    {
+      "id": "liXe42DDHK1RoAjo",
+      "key": "SUPABASE_TIMEOUT_MS",
+      "type": "encrypted",
+      "target": [
+        "production"
+      ],
+      "createdAt": 1787547123497,
+      "updatedAt": 1787547123497,
+      "valueReturned": true
+    },
+    {
+      "id": "m1daEUCqQr3OgQYF",
+      "key": "SUPABASE_POOL_SIZE",
+      "type": "encrypted",
+      "target": [
+        "production"
+      ],
+      "createdAt": 1787547121943,
+      "updatedAt": 1787547121943,
+      "valueReturned": true
+    },
+    {
+      "id": "4wszWYUaCDw008tn",
+      "key": "GALX_VAULT_ACTIVE_KEY_VERSION",
+      "type": "encrypted",
+      "target": [
+        "production"
+      ],
+      "createdAt": 1787547117254,
+      "updatedAt": 1787547117254,
+      "valueReturned": true
+    },
+    {
+      "id": "hSvLe3PMm8NT0jDH",
+      "key": "GALX_VAULT_KEY",
+      "type": "encrypted",
+      "target": [
+        "production"
+      ],
+      "createdAt": 1787547115747,
+      "updatedAt": 1787547115747,
+      "valueReturned": true
+    },
+    {
+      "id": "QpHEBm51cxmpKI2f",
+      "key": "GALX_VAULT_MASTER_SECRET",
+      "type": "encrypted",
+      "target": [
+        "production"
+      ],
+      "createdAt": 1787547114109,
+      "updatedAt": 1787547114109,
+      "valueReturned": true
+    },
+    {
+      "id": "gPAQ5Lzfd9yfSAEX",
+      "key": "DATABASE_URL",
+      "type": "encrypted",
+      "target": [
+        "production"
+      ],
+      "createdAt": 1787547112609,
+      "updatedAt": 1787547112609,
+      "valueReturned": true
+    },
+    {
+      "id": "WRn62NdHfmqUnf2P",
+      "key": "SUPABASE_SERVICE_ROLE_KEY",
+      "type": "encrypted",
+      "target": [
+        "production"
+      ],
+      "createdAt": 1787547111019,
+      "updatedAt": 1787547111019,
+      "valueReturned": true
+    },
+    {
+      "id": "tMYAWyZa6ecpDpPO",
+      "key": "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
+      "type": "encrypted",
+      "target": [
+        "production"
+      ],
+      "createdAt": 1787547109495,
+      "updatedAt": 1787547109495,
+      "valueReturned": true
+    },
+    {
+      "id": "sA8lzeV7qQfrikkz",
+      "key": "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+      "type": "encrypted",
+      "target": [
+        "production"
+      ],
+      "createdAt": 1787547107805,
+      "updatedAt": 1787547107805,
+      "valueReturned": true
+    },
+    {
+      "id": "zp6ZKh62YPdZSd5r",
+      "key": "NEXT_PUBLIC_SUPABASE_URL",
+      "type": "encrypted",
+      "target": [
+        "production"
+      ],
+      "createdAt": 1787547106267,
+      "updatedAt": 1787547106267,
+      "valueReturned": true
+    }
+  ],
+  "envStatus": 200,
+  "deployments": [
+    {
+      "uid": "dpl_9FSaL3M6JffKDjaUHP98RhU3crzG",
+      "name": "galxai",
+      "url": "galxai-204k0uq49-cardsortings-projects.vercel.app",
+      "created": 1790441645794,
+      "state": "READY",
+      "readyState": "READY",
+      "target": "production",
+      "buildingAt": 1790441647440,
+      "ready": 1790441952436,
+      "source": "git",
+      "git": {
+        "githubCommitSha": "38a3cc48f32f5f404592109c8cae3ddac5fa6f61",
+        "githubCommitRef": "main"
+      }
+    },
+    {
+      "uid": "dpl_7DGrbtGmqbMAPvG2s8bXG6p3oGex",
+      "name": "galxai",
+      "url": "galxai-gp90wbv7n-cardsortings-projects.vercel.app",
+      "created": 1790415652326,
+      "state": "READY",
+      "readyState": "READY",
+      "target": "production",
+      "buildingAt": 1790415653552,
+      "ready": 1790415861924,
+      "source": "git",
+      "git": {
+        "githubCommitSha": "300a1af3f1d825c9799d20efd25b2ee5c438ab14",
+        "githubCommitRef": "main"
+      }
+    },
+    {
+      "uid": "dpl_93E4W7Jxofbo8dPSG9JULhCn6s9w",
+      "name": "galxai",
+      "url": "galxai-acalu9fs2-cardsortings-projects.vercel.app",
+      "created": 1790376823559,
+      "state": "READY",
+      "readyState": "READY",
+      "target": "production",
+      "buildingAt": 1790376824775,
+      "ready": 1790377026125,
+      "source": "git",
+      "git": {
+        "githubCommitSha": "63b54f8323fb1dc63a3dca0ed02e377f54e882bb",
+        "githubCommitRef": "main"
+      }
+    }
+  ],
+  "paginationComplete": true,
+  "currentDeployment": {
+    "id": "dpl_9FSaL3M6JffKDjaUHP98RhU3crzG",
+    "url": "galxai-204k0uq49-cardsortings-projects.vercel.app",
+    "name": "galxai",
+    "readyState": "READY",
+    "target": "production",
+    "createdAt": 1790441645794,
+    "ready": 1790441952436,
+    "regions": [
+      "iad1"
+    ],
+    "gitSource": {
+      "ref": "main",
+      "repoId": 1342455865,
+      "sha": "38a3cc48f32f5f404592109c8cae3ddac5fa6f61",
+      "type": "github",
+      "prId": null
+    },
+    "alias": [
+      "galx.ai",
+      "galxai.vercel.app",
+      "www.galx.ai",
+      "galxai-cardsortings-projects.vercel.app",
+      "galxai-git-main-cardsortings-projects.vercel.app"
+    ],
+    "source": "git",
+    "meta": {
+      "githubCommitSha": "38a3cc48f32f5f404592109c8cae3ddac5fa6f61",
+      "githubCommitRef": "main"
+    }
+  },
+  "cloudflare": {
+    "zones": [
+      {
+        "id": "8b826c42c2f1962c695bc74f48289885",
+        "name": "galx.ai",
+        "status": "active"
+      }
+    ],
+    "zonesStatus": 200,
+    "dns": [
+      {
+        "id": "2bad3bca4cbea47a040fe94e43b23e74",
+        "type": "CNAME",
+        "name": "galx.ai",
+        "content": "8bfc0582af6eb119.vercel-dns-017.com",
+        "proxied": true,
+        "ttl": 1
+      },
+      {
+        "id": "41b5250cdcea01e6956c574878242bee",
+        "type": "CNAME",
+        "name": "images-service.galx.ai",
+        "content": "3df90220-304b-4771-8be8-4569bc147b4e.cfargotunnel.com",
+        "proxied": true,
+        "ttl": 1
+      },
+      {
+        "id": "3041298c527782d2672eff7dc88d4b75",
+        "type": "CNAME",
+        "name": "relay.galx.ai",
+        "content": "3df90220-304b-4771-8be8-4569bc147b4e.cfargotunnel.com",
+        "proxied": true,
+        "ttl": 1
+      },
+      {
+        "id": "95842f0c16a53ec09ab9db3e78b4b014",
+        "type": "CNAME",
+        "name": "www.galx.ai",
+        "content": "8bfc0582af6eb119.vercel-dns-017.com",
+        "proxied": true,
+        "ttl": 1
+      },
+      {
+        "id": "e0b950c66882bf010282155d77735c1a",
+        "type": "TXT",
+        "name": "galx.ai",
+        "content": "\"google-site-verification=3BbDZmtxVlYeo81rdw5zYxI5iAc8J1YgQKqNQZqnqG4\"",
+        "proxied": false,
+        "ttl": 3600
+      },
+      {
+        "id": "8cd5e38883427463a263695c718c080a",
+        "type": "AAAA",
+        "name": "api.galx.ai",
+        "content": "100::",
+        "proxied": true,
+        "ttl": 1
+      }
+    ],
+    "workerRoutes": [],
+    "accountId": "33f8b2564698c222880cbad3e42decad",
+    "tunnels": [
+      {
+        "id": "3df90220-304b-4771-8be8-4569bc147b4e",
+        "name": "galxai-production-relay",
+        "status": "healthy",
+        "created_at": "2026-09-07T19:47:21.195683Z",
+        "deleted_at": null,
+        "remote_config": true,
+        "config_src": "cloudflare",
+        "conns_active_at": "2026-10-02T18:56:39.655218Z",
+        "conns_inactive_at": null
+      }
+    ],
+    "tunnelStatus": 200,
+    "accessApps": [],
+    "accessStatus": 200,
+    "workerDomains": [
+      {
+        "id": "86d63909a9bbaa19d62e530185e8e0d832ccabe5",
+        "hostname": "api-staging.galx.ai",
+        "service": "galxai-edge-gateway-staging",
+        "environment": "production",
+        "zone_name": "galx.ai"
+      },
+      {
+        "id": "2202439966ba4d0a632733ff0e7b0c807e444017",
+        "hostname": "api.galx.ai",
+        "service": "galxai-edge-gateway",
+        "environment": "production",
+        "zone_name": "galx.ai"
+      }
+    ],
+    "tunnelConfigs": [
+      {
+        "id": "3df90220-304b-4771-8be8-4569bc147b4e",
+        "name": "galxai-production-relay",
+        "httpStatus": 200,
+        "version": 3,
+        "ingress": [
+          {
+            "hostname": "images-service.galx.ai",
+            "path": "^/v1/images/(availability|generations)$",
+            "service": "http://host.docker.internal:13301"
+          },
+          {
+            "hostname": "relay.galx.ai",
+            "service": "http://host.docker.internal:3001"
+          },
+          {
+            "service": "http_status:404"
+          }
+        ]
+      }
+    ]
+  }
+}

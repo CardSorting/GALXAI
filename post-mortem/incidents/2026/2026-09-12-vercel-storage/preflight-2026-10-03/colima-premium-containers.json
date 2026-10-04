@@ -1,0 +1,161 @@
+[
+  {
+    "name": "/galx-premium-monitor-1",
+    "image": "galxai-monitor-premium:neutral-outcomes-20261003-r3",
+    "imageId": "sha256:0ab24b83ce3f2536f88b3994a716671d7b87495ebc5bdb90c5cafa3a50aa05ed",
+    "state": {
+      "Status": "running",
+      "Running": true,
+      "StartedAt": "2026-10-03T20:08:28.792780329Z",
+      "ExitCode": 0
+    },
+    "health": null,
+    "ports": {},
+    "networkMode": "host",
+    "readonly": true,
+    "privileged": false,
+    "user": "1000:1000",
+    "envNames": [
+      "NODE_EXTRA_CA_CERTS",
+      "PATH",
+      "NODE_VERSION",
+      "YARN_VERSION",
+      "NODE_ENV"
+    ],
+    "mountTargets": [
+      "/state",
+      "/var/run/docker.sock",
+      "/run/secrets/local-ca",
+      "/run/secrets/component-config"
+    ]
+  },
+  {
+    "name": "/galx-premium-relay-1",
+    "image": "galxai-relay-premium:neutral-outcomes-20261003",
+    "imageId": "sha256:a1feb16ef31ae0f97cc231b85d06578496335d79221d13e36a4c40b8524a545f",
+    "state": {
+      "Status": "running",
+      "Running": true,
+      "StartedAt": "2026-10-03T20:01:20.624697405Z",
+      "ExitCode": 0
+    },
+    "health": null,
+    "ports": {
+      "3001/tcp": [
+        {
+          "HostIp": "127.0.0.1",
+          "HostPort": "13301"
+        }
+      ]
+    },
+    "networkMode": "galx-premium_default",
+    "readonly": true,
+    "privileged": false,
+    "user": "1000:1000",
+    "envNames": [
+      "NODE_EXTRA_CA_CERTS",
+      "PATH",
+      "NODE_VERSION",
+      "YARN_VERSION",
+      "NODE_ENV"
+    ],
+    "mountTargets": [
+      "/run/secrets/component-config",
+      "/run/secrets/local-ca",
+      "/state"
+    ]
+  },
+  {
+    "name": "/galx-desktop-pool-premium-3e1862ff-5683-492a-9894-743ff0473087",
+    "image": "galxai-relay-desktop@sha256:d4271abf3955a28eabeb35b526c80b6aa27439eda176bd0f2fe9b1bb0d4c24a5",
+    "imageId": "sha256:d4271abf3955a28eabeb35b526c80b6aa27439eda176bd0f2fe9b1bb0d4c24a5",
+    "state": {
+      "Status": "exited",
+      "Running": false,
+      "StartedAt": "2026-09-20T05:08:21.924931341Z",
+      "ExitCode": 143
+    },
+    "health": "unhealthy",
+    "ports": {},
+    "networkMode": "galx-desktop-pool-premium-3e1862ff-5683-492a-9894-743ff0473087-net",
+    "readonly": false,
+    "privileged": false,
+    "user": "1000:1000",
+    "envNames": [
+      "PATH",
+      "NODE_VERSION",
+      "YARN_VERSION",
+      "DEBIAN_FRONTEND",
+      "HOME",
+      "DISPLAY",
+      "LANG",
+      "XDG_RUNTIME_DIR",
+      "NPM_CONFIG_PREFIX"
+    ],
+    "mountTargets": [
+      "/home/operator"
+    ]
+  },
+  {
+    "name": "/galx-desktop-pool-premium-f83b2d06-91fa-4504-90a9-e3f3b44f9e33",
+    "image": "galxai-relay-desktop@sha256:d4271abf3955a28eabeb35b526c80b6aa27439eda176bd0f2fe9b1bb0d4c24a5",
+    "imageId": "sha256:d4271abf3955a28eabeb35b526c80b6aa27439eda176bd0f2fe9b1bb0d4c24a5",
+    "state": {
+      "Status": "running",
+      "Running": true,
+      "StartedAt": "2026-10-02T17:28:47.571459253Z",
+      "ExitCode": 0
+    },
+    "health": "healthy",
+    "ports": {},
+    "networkMode": "galx-desktop-pool-premium-f83b2d06-91fa-4504-90a9-e3f3b44f9e33-net",
+    "readonly": false,
+    "privileged": false,
+    "user": "1000:1000",
+    "envNames": [
+      "PATH",
+      "NODE_VERSION",
+      "YARN_VERSION",
+      "DEBIAN_FRONTEND",
+      "HOME",
+      "DISPLAY",
+      "LANG",
+      "XDG_RUNTIME_DIR",
+      "NPM_CONFIG_PREFIX"
+    ],
+    "mountTargets": [
+      "/home/operator"
+    ]
+  },
+  {
+    "name": "/galx-desktop-pool-premium-68250425-41d6-44f9-977c-a636c5921645",
+    "image": "galxai-relay-desktop@sha256:d4271abf3955a28eabeb35b526c80b6aa27439eda176bd0f2fe9b1bb0d4c24a5",
+    "imageId": "sha256:d4271abf3955a28eabeb35b526c80b6aa27439eda176bd0f2fe9b1bb0d4c24a5",
+    "state": {
+      "Status": "running",
+      "Running": true,
+      "StartedAt": "2026-10-02T17:28:47.571191337Z",
+      "ExitCode": 0
+    },
+    "health": "healthy",
+    "ports": {},
+    "networkMode": "galx-desktop-pool-premium-68250425-41d6-44f9-977c-a636c5921645-net",
+    "readonly": false,
+    "privileged": false,
+    "user": "1000:1000",
+    "envNames": [
+      "PATH",
+      "NODE_VERSION",
+      "YARN_VERSION",
+      "DEBIAN_FRONTEND",
+      "HOME",
+      "DISPLAY",
+      "LANG",
+      "XDG_RUNTIME_DIR",
+      "NPM_CONFIG_PREFIX"
+    ],
+    "mountTargets": [
+      "/home/operator"
+    ]
+  }
+]

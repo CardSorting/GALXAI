@@ -1,0 +1,181 @@
+{
+  "classification": "private",
+  "observed_at": "2026-10-04T00:00:57.724991+00:00",
+  "status": "NOT READY \u2014 BLOCKERS REMAIN",
+  "action": "ACT-045",
+  "scope": "Temporary Mac self-hosting packaging and operator hardening; accepted application unchanged; no public cutover.",
+  "candidate": {
+    "image": "sha256:70b0c58c6a6f27bbf7dceaa13a1a555a822bf4afbae31ff2fce234724b12c27b",
+    "tag": "galxai-web:selfhost-2afadf8c22f92685",
+    "manifestSha256": "2afadf8c22f92685245228d805d6f5fac658c108ed105ad585c1c33b7be3976d",
+    "imageArchiveSha256": "f9f3a692bd38e0863786f5f4483ebf9f307fad27da3948b983edba66421590ea",
+    "platform": "linux/amd64",
+    "builtAt": "2026-10-03T23:58:18.996Z",
+    "deployed": false,
+    "package_directory": ".relay/mac-production/package-05",
+    "source_revision": "38a3cc48f32f5f404592109c8cae3ddac5fa6f61",
+    "source_manifest_sha256": "44862b3e81a1dfaf59b52b40762ce7d674830b8772d4506070c957c10d41d40d",
+    "dependency_lock_sha256": "17ec13ed2df5810416a9c52ab5cc772e15adcaec679bbafd9a2a61ac3b4742f1",
+    "accepted_archive_sha256": "b11d853b80851b2ee978b5d0d0bb2cedb66ced423f545e91b44aeaf8c4a9e235",
+    "framework": "15.5.25",
+    "base_image": "node@sha256:43aeff40f4afc22e83f7589a2f37e111cff5ca84529571f1c8415bcc5fcc21b2",
+    "configuration_overrides": [],
+    "application_payload_equivalence": {
+      "tracedFiles": 4514,
+      "startupTraceFiles": 1956,
+      "startupTraceWarnings": 122,
+      "comparedToAcceptedArtifact": 2382,
+      "bytesChanged": 0,
+      "publicFilesScanned": 819,
+      "applicationBytes": 180681732
+    },
+    "preservation": {
+      "at": "2026-10-03T23:57:53.329059+00:00",
+      "sourceFiles": 1886,
+      "sourceDelta": [],
+      "compiledFiles": 2291,
+      "compiledDelta": [],
+      "acceptedArchiveSha256": "b11d853b80851b2ee978b5d0d0bb2cedb66ced423f545e91b44aeaf8c4a9e235"
+    }
+  },
+  "implemented": [
+    "Canonical private operator CLI: doctor, package, verify, build, plan, stage, status, stop and explicit resume. No DNS, tunnel, entitlement or production database mutation commands.",
+    "Retained traced production package and digest-identified image/archive; explicit runtime startup trace from the accepted pinned dependencies fixes the demonstrated missing start-server dependency.",
+    "Fixed Docker Desktop context separate from the provider daemon; UID 1000, read-only root, capability drop, no-new-privileges, no Docker socket and one owner-only read-only configuration mount.",
+    "Loopback-only planned listener, 1536 MiB memory, 2 CPUs, 160 PIDs, bounded cache/tmpfs and rotated 10 MiB logs with 3 retained files.",
+    "Standard Next startup under Docker init; 480-second graceful-stop budget, explicit stopped-state resume and one restart owner. No inference replay or health-triggered killer.",
+    "Plan refuses missing, failed, stale or mismatched whole-image acceptance. No receipt was issued for this image.",
+    "One canonical runbook with task navigation, recovery/rollback, private configuration rules and explicit local/hosted acceptance distinctions."
+  ],
+  "original_failures_and_corrections": [
+    {
+      "finding": "Serverless output traces omit the persistent framework startup module. The first image could not load start-server.",
+      "correction": "Trace the declared startup module using Next's own pinned NFT in the target Node image with no network, then include only traced files. Later images boot under the constrained policy.",
+      "classification": "FIXED IN PACKAGING"
+    },
+    {
+      "finding": "Read-only application hosting requires bounded writable Next cache and regenerated app/pages output.",
+      "correction": "Retain immutable seeds and recreate bounded tmpfs runtime copies on each start. No application cache semantics changed.",
+      "classification": "HARDENING IMPLEMENTED; BOOT VERIFIED"
+    },
+    {
+      "finding": "Whole-image middleware redirects point to https://0.0.0.0:3000/docs; native request-origin checks reject a valid Nova credential with 401 invalid_token.",
+      "correction": "Not patched. Configuration-only trustHostHeader, unspecified hostname and skipMiddlewareUrlNormalize did not correct the framework behavior. Ineffective overrides removed.",
+      "classification": "BLOCKS CONTROLLED ROLLOUT"
+    }
+  ],
+  "origin_diagnostic": {
+    "method": "Disposable full production image, 159 existing migrations in tmpfs PostgreSQL, synthetic accounts and provider, no external egress.",
+    "expected_middleware_origin": "https://galx.ai",
+    "actual_middleware_origin": "https://0.0.0.0:3000",
+    "valid_token_direct_repository_admission": true,
+    "valid_token_full_http_status": 401,
+    "valid_token_full_http_error": "invalid_token",
+    "client_execution_state": "not_accepted",
+    "provider_attempts": 0,
+    "scope_limit": "Repository control used a separate synthetic pre-dispatch admission and settled it not_accepted. Negative HTTP denials alone do not establish working authorization: even the valid token is rejected before admission.",
+    "evidence": [
+      "post-mortem/incidents/2026/2026-10-03-mac-self-hosting-hardening/runtime-07-failure.json",
+      "post-mortem/incidents/2026/2026-10-03-mac-self-hosting-hardening/origin-diagnostic-02.json"
+    ]
+  },
+  "candidate_change_stop": {
+    "reason": "The retained application assumes the native Request URL has the public authority. Next 15.5.25 persistent hosting constructs internal authorities in runMiddleware and attachRequestMeta; render-server supplies localhost even when startup hostname is omitted. The application relies on that native URL for both redirects and strict Connect/Nova origin checks.",
+    "smallest_proposed_change": [
+      "Introduce one reviewed public-origin resolution contract at the application HTTP boundary using configured exact issuer/resource/application origins and the trusted exact-host ingress. Reject unknown/malformed authorities and forged forwarded authorities; do not accept arbitrary X-Forwarded-Host or replace every request with the configured audience.",
+      "Use that contract for Connect/Nova request-origin validation and same-site middleware/auth redirects. Keep URL paths, callback registration, tokens, scopes, PKCE, entitlement checks and current-grant revocation unchanged.",
+      "Build a separately identified candidate from the reviewed source snapshot. Preserve this candidate and failed evidence; do not patch compiled output, Next internals, or Location headers as a substitute."
+    ],
+    "directly_affected_sources": [
+      "src/lib/connect/config.ts:requestOrigin",
+      "src/middleware.ts:canonical redirects",
+      "src/lib/connect/http.ts:origin checks",
+      "src/app/v1/inference/route.ts:origin checks"
+    ],
+    "acceptance_requiring_renewal": [
+      "host/callback/redirect and forged-header boundary",
+      "Connect authorization, token exchange and revocation",
+      "Media session/redirect independence",
+      "full packaged HTTP inference plus 300-second deadline and active drain",
+      "duplicate/no-replay and abrupt-loss recovery",
+      "public responses, rendered pages, browser assets and private configuration isolation"
+    ],
+    "prior_evidence_status": "Historical evidence remains valid for its original candidate and target. It cannot certify the modified candidate or this failing full-server path.",
+    "applied": false
+  },
+  "verification": {
+    "packaging_operator_tests": {
+      "passed": 19,
+      "failed": 0
+    },
+    "existing_connect_nova_tests": {
+      "passed": 35,
+      "failed": 0
+    },
+    "existing_relay_services_tests": {
+      "passed": 43,
+      "failed": 0
+    },
+    "isolated_host_lifetime": {
+      "completed_ms": 428,
+      "disconnect_unknown_ms": 437,
+      "deadline_unknown_ms": 300391,
+      "passed": 3,
+      "scope": "Existing helper/Next after fixture, not whole-image active shutdown."
+    },
+    "production_package_build": "passed; no application recompilation",
+    "whole_image_acceptance": "FAILED at public-origin boundary; no acceptance receipt",
+    "whole_image_boot": "passed with read-only root, UID 1000, bounded caches and private configuration; home/connect/health 200, private files 404",
+    "active_sigterm_crash_restart_revocation": "NOT REACHED in whole-image test; no new revocation measurement",
+    "public_artifact_scan": {
+      "files": 819,
+      "private_markers_or_build_canaries_found": 0,
+      "scope": "Selected public markers plus exact build canaries, not a universal credential detector."
+    },
+    "preserved_production_build_scan": "See boundary-build.log; no new compiled application generated.",
+    "documentation": "Final review/sync/check/42 fixtures recorded in separate verification record."
+  },
+  "remaining_issues": [
+    {
+      "classification": "BLOCKS CONTROLLED ROLLOUT",
+      "issue": "Public-origin compatibility correction and renewed whole-image acceptance. ACT-045 remains open."
+    },
+    {
+      "classification": "BLOCKS CONTROLLED ROLLOUT",
+      "issue": "Public SSE keepalives and bounded first-party complete-answer aggregation remain unimplemented; earlier 125-second silent-response and 310-second streaming observations do not certify this package."
+    },
+    {
+      "classification": "BLOCKS CONTROLLED ROLLOUT",
+      "issue": "Real runtime configuration, actual Media/Auth/storage and controlled-account/provider acceptance, live transport, drain/restart and compatible rollback must be demonstrated before cutover. No real service configuration assembled in this pass."
+    },
+    {
+      "classification": "BLOCKS PUBLIC RELEASE",
+      "issue": "Existing authentication/recovery gates and ACT-043 unchanged; no unrelated remediation."
+    },
+    {
+      "classification": "NON-BLOCKING FOLLOW-UP",
+      "issue": "Single-Mac power/network/login/Docker availability is one failure domain; no HA, reboot, sleep/wake or backup-restore drill established by this local rehearsal."
+    },
+    {
+      "classification": "NON-BLOCKING FOLLOW-UP",
+      "issue": "122 framework tracing warnings retained. Booted core paths do not qualify every optional Media/billing/storage integration; validate intended surfaces before controlled cutover."
+    }
+  ],
+  "not_performed": [
+    "application source or compiled candidate modification",
+    "real provider inference",
+    "production grants or execution-record mutation",
+    "production database migration",
+    "public deployment or routing change",
+    "paid service upgrade"
+  ],
+  "standards": [
+    "https://nextjs.org/docs/15/app/guides/self-hosting",
+    "https://nextjs.org/docs/15/app/api-reference/config/next-config-js/output",
+    "https://docs.docker.com/reference/compose-file/services/",
+    "https://docs.docker.com/engine/containers/start-containers-automatically/",
+    "https://developers.cloudflare.com/tunnel/reference/origin-parameters/"
+  ],
+  "next_step": "Resolve the bounded application-origin change under the earlier candidate-change stop rule, then renew acceptance including remaining transport/client work. Do not stage or cut over this failed candidate.",
+  "evidence_directory": "post-mortem/incidents/2026/2026-10-03-mac-self-hosting-hardening"
+}

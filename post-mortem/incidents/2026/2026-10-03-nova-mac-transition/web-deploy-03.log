@@ -1,0 +1,15 @@
+(node:15986) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Vercel CLI 48.5.0
+Retrieving project…
+Deploying cardsortings-projects/galxai
+Uploading [--------------------] (0.0B/42.2MB)
+Uploading [=====---------------] (10.6MB/42.2MB)
+Uploading [==========----------] (21.1MB/42.2MB)
+Uploading [===============-----] (31.6MB/42.2MB)
+Uploading [====================] (42.2MB/42.2MB)
+Inspect: https://vercel.com/cardsortings-projects/galxai/4uwFyPMJ6YV7njXsWQbb7a8MZHKh [6s]
+Production: https://galxai-32sh7g34p-cardsortings-projects.vercel.app [6s]
+https://galxai-32sh7g34p-cardsortings-projects.vercel.appBuilding
+Building
+Completing

@@ -473,7 +473,9 @@
         "src/relay/relay-server.ts",
         "scripts/test-relay-admission-lifecycle.ts",
         "scripts/test-relay-overload.ts",
-        "scripts/test-relay-activation-db.ts"
+        "scripts/test-relay-activation-db.ts",
+        "scripts/test-relay-monitor-package.mjs",
+        "scripts/test-relay-refill-db.ts"
       ],
       "guides": [
         "docs/ARCHITECTURE.md",
@@ -542,7 +544,9 @@
         "npm run test:relay:services",
         "npm run verify:relay:service-images",
         "npm run test:agent:tools",
-        "npm run test:relay:activation-db"
+        "npm run test:relay:activation-db",
+        "npm run test:relay:refill-db",
+        "npm run test:relay:monitor-package"
       ]
     },
     "database": {
@@ -589,7 +593,8 @@
         "scripts/verify-stars.ts",
         "docs/adr/0163-star-candidate-selection-before-exhibition.md",
         "scripts/review-star-candidates.ts",
-        "scripts/test-broc-selection.ts"
+        "scripts/test-broc-selection.ts",
+        "scripts/test-relay-refill-db.ts"
       ],
       "guides": [
         "docs/SUPABASE_PARANOID_ARCHITECTURE_SPEC.md",
@@ -614,7 +619,8 @@
         "npm run test:relay:authorization-db",
         "npm run test:relay:activation-db",
         "npm run test:broc:selection",
-        "npm run test:image:db"
+        "npm run test:image:db",
+        "npm run test:relay:refill-db"
       ]
     },
     "delivery": {
@@ -646,7 +652,23 @@
         "scripts/test-stripe-webhook-target.ts",
         "scripts/audit-image-release.ts",
         "scripts/release-certification.ts",
-        "package.json"
+        "package.json",
+        "scripts/package-hosted-candidate.mjs",
+        "scripts/retain-hosted-output.mjs",
+        "deploy/hosted/*",
+        "scripts/test-hosted-packaging.mjs",
+        "scripts/self-host.mjs",
+        "scripts/lib/self-host.mjs",
+        "scripts/package-self-hosted.mjs",
+        "scripts/test-self-host.mjs",
+        "scripts/test-self-host-runtime.ts",
+        "scripts/fixtures/self-host-*.cjs",
+        "deploy/self-host/*",
+        "scripts/fixtures/self-host-*.ts",
+        "scripts/prepare-connect-web.mjs",
+        "scripts/test-nova-retirement.ts",
+        "src/lib/security/inference-placement.ts",
+        "scripts/test-self-host-resilience.ts"
       ],
       "guides": [
         "docs/DEPLOYMENT.md",
@@ -659,7 +681,10 @@
         "docs/maintainers/CLOUDFLARE_EDGE_MESH_MAINTAINER_RUNBOOK.md",
         "docs/playbooks/02-deployment-and-release.md",
         "docs/runbooks/stripe-webhook-delivery.md",
-        "docs/runbooks/private-image-release-audit.md"
+        "docs/runbooks/private-image-release-audit.md",
+        "docs/runbooks/mac-self-hosting.md",
+        "docs/runbooks/nova-hosting-transition.md",
+        "docs/adr/0167-nova-mac-runtime-placement.md"
       ],
       "checks": [
         "npm run docs:check",
@@ -856,6 +881,61 @@
         "npm run test:billing:lifecycle",
         "npm run test:orbit",
         "npm run test:sites:plans:db",
+        "npm run build"
+      ]
+    },
+    "connect": {
+      "title": "GALX Connect and Nova",
+      "owner": "Security/access and inference maintainers",
+      "sources": [
+        "src/lib/connect/**/*.ts",
+        "src/lib/nova/**/*.ts",
+        "src/lib/supabase/repositories/ConnectRepository.ts",
+        "src/app/connect/**/*.tsx",
+        "src/components/connect/**/*",
+        "src/app/oauth/**/route.ts",
+        "src/app/api/connect/**/route.ts",
+        "src/app/.well-known/oauth-authorization-server/route.ts",
+        "src/app/.well-known/oauth-protected-resource/route.ts",
+        "src/app/v1/inference/route.ts",
+        "src/sdk/connect.ts",
+        "examples/connect/**/*",
+        "scripts/manage-connect.ts",
+        "scripts/test-connect*.ts",
+        "scripts/test-nova.ts",
+        "scripts/verify-connect-ui.ts",
+        "supabase/migrations/20261003131619_galx_connect_grants.sql",
+        "supabase/rollbacks/20261003131619_galx_connect_grants.down.sql",
+        "src/lib/auth/request-session.ts",
+        "src/lib/auth/session-http.ts",
+        "src/core/router/adapters/RelayChatTransport.ts",
+        "src/core/router/adapters/RelayEndpointDiscovery.ts",
+        "src/core/router/ModelCatalog.ts",
+        ".impeccable/surfaces/src-app-connect-page-tsx.md",
+        "scripts/test-nova-host-lifetime.mjs",
+        "scripts/fixtures/nova-host-lifetime.ts",
+        "src/sdk/inference-result.ts",
+        "src/lib/security/request-origin.ts",
+        "scripts/test-request-origin.ts",
+        "scripts/test-inference-client-buffer.ts",
+        "src/lib/security/inference-placement.ts",
+        "scripts/test-nova-retirement.ts"
+      ],
+      "guides": [
+        "docs/operations/galx-connect.md",
+        "docs/adr/0165-galx-connect-nova-boundaries.md",
+        "docs/DEVELOPER_CLIENT_SDK.md",
+        "docs/operations/workspace-auth.md",
+        "docs/SECURITY_POSTURE_AND_THREAT_MODEL.md",
+        "docs/adr/0166-private-self-host-request-origin.md",
+        "docs/runbooks/nova-hosting-transition.md",
+        "docs/adr/0167-nova-mac-runtime-placement.md"
+      ],
+      "checks": [
+        "npm run test:connect",
+        "npm run test:connect:db",
+        "npm run db:verify",
+        "npm run test:auth:sessions",
         "npm run build"
       ]
     }
@@ -1227,6 +1307,55 @@
         "handoff",
         "ambiguous"
       ]
+    },
+    "docs/operations/galx-connect.md": {
+      "kind": "runbook",
+      "keywords": [
+        "connect",
+        "nova",
+        "consent",
+        "oauth",
+        "pkce",
+        "revocation",
+        "entitlement"
+      ]
+    },
+    "docs/runbooks/mac-self-hosting.md": {
+      "kind": "runbook",
+      "keywords": [
+        "mac",
+        "self-hosting",
+        "docker",
+        "production",
+        "startup",
+        "shutdown",
+        "rollback",
+        "nova",
+        "operator"
+      ]
+    },
+    "docs/runbooks/nova-hosting-transition.md": {
+      "kind": "runbook",
+      "keywords": [
+        "nova",
+        "mac",
+        "vercel",
+        "retirement",
+        "cutover",
+        "rollback",
+        "cohort",
+        "ingress"
+      ]
+    },
+    "docs/adr/0167-nova-mac-runtime-placement.md": {
+      "kind": "decision",
+      "keywords": [
+        "nova",
+        "mac",
+        "vercel",
+        "retirement",
+        "runtime"
+      ]
     }
   },
   "runbooks": [
@@ -1238,7 +1367,10 @@
     "docs/runbooks/relay-pool-services.md",
     "docs/runbooks/relay-admission-lifecycle.md",
     "docs/runbooks/stripe-webhook-delivery.md",
-    "docs/runbooks/private-image-release-audit.md"
+    "docs/runbooks/private-image-release-audit.md",
+    "docs/operations/galx-connect.md",
+    "docs/runbooks/mac-self-hosting.md",
+    "docs/runbooks/nova-hosting-transition.md"
   ],
   "decisions": {
     "docs/adr/0145-maintained-knowledge-and-decision-lifecycle.md": {
@@ -1539,6 +1671,57 @@
       "supersedes": [],
       "target": "Local application and migration; live legacy catalog archived, replacement catalog inactive; no paid launch",
       "revision": "working tree under review"
+    },
+    "docs/adr/0165-galx-connect-nova-boundaries.md": {
+      "status": "accepted",
+      "delivery": "local",
+      "domain": "connect",
+      "owner": "Security/access and inference maintainers",
+      "date": "2026-10-03",
+      "evidence": [
+        "docs/operations/galx-connect.md",
+        "src/lib/connect/http.ts",
+        "src/lib/supabase/repositories/ConnectRepository.ts",
+        "src/lib/nova/inference.ts",
+        "scripts/test-connect-db.ts",
+        "post-mortem/releases/2026-10-03-connect-local-review.json"
+      ],
+      "supersedes": [],
+      "target": "Local source and isolated fixtures; disabled by default; no production migration or deployment",
+      "revision": "working tree under review",
+      "acceptance_basis": "The user explicitly directed the Media/Connect/Nova responsibility split and bounded implementation. Explicit operator entitlement is a documented implementation assumption, not a new price or subscription migration."
+    },
+    "docs/adr/0166-private-self-host-request-origin.md": {
+      "status": "accepted",
+      "delivery": "local",
+      "domain": "connect",
+      "owner": "Security/access and release maintainers",
+      "date": "2026-10-03",
+      "evidence": [
+        "docs/runbooks/mac-self-hosting.md",
+        "src/lib/security/request-origin.ts",
+        "post-mortem/releases/2026-10-03-mac-origin-transport-correction.json"
+      ],
+      "supersedes": [],
+      "target": "Private Mac listener and synthetic whole-image acceptance; public activation excluded",
+      "revision": "New candidate in dated correction record",
+      "acceptance_basis": "User explicitly authorized the narrow self-host origin/transport source correction and a superseding candidate; no authorization to enable production traffic."
+    },
+    "docs/adr/0167-nova-mac-runtime-placement.md": {
+      "status": "accepted",
+      "delivery": "verified",
+      "domain": "delivery",
+      "owner": "Release and security/access maintainers",
+      "date": "2026-10-03",
+      "evidence": [
+        "docs/runbooks/nova-hosting-transition.md",
+        "post-mortem/releases/2026-10-03-nova-mac-transition.json"
+      ],
+      "supersedes": [],
+      "target": "Controlled Mac Nova ingress at nova.galx.ai; existing GALX Media and Connect retained on Vercel; no public launch",
+      "revision": "Mac sha256:5157984bc06524aac0ca8fbf2051eebfe6f3b7994aa7d0793e8404c097289345; web dpl_4uwFyPMJ6YV7njXsWQbb7a8MZHKh",
+      "observed_at": "2026-10-04T01:49:34.816Z",
+      "acceptance_basis": "Owner explicitly authorized the gated real-provider transition, Nova-only cutover and Vercel retirement. No broader commercial/public activation."
     }
   },
   "managed_adr_from": 145,

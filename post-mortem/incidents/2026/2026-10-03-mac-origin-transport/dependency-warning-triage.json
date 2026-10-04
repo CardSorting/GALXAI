@@ -1,0 +1,85 @@
+{
+  "lockUnchanged": true,
+  "auditCounts": {
+    "info": 0,
+    "low": 0,
+    "moderate": 0,
+    "high": 8,
+    "critical": 0,
+    "total": 8
+  },
+  "findings": [
+    {
+      "package": "@next/eslint-plugin-next",
+      "severity": "high",
+      "affectedDeclaredNodes": [
+        "node_modules/@next/eslint-plugin-next"
+      ],
+      "retainedAffectedNodeFiles": 0
+    },
+    {
+      "package": "brace-expansion",
+      "severity": "high",
+      "affectedDeclaredNodes": [
+        "node_modules/@typescript-eslint/typescript-estree/node_modules/brace-expansion",
+        "node_modules/brace-expansion"
+      ],
+      "retainedAffectedNodeFiles": 0
+    },
+    {
+      "package": "braces",
+      "severity": "high",
+      "affectedDeclaredNodes": [
+        "node_modules/braces"
+      ],
+      "retainedAffectedNodeFiles": 0
+    },
+    {
+      "package": "chokidar",
+      "severity": "high",
+      "affectedDeclaredNodes": [
+        "node_modules/chokidar"
+      ],
+      "retainedAffectedNodeFiles": 0
+    },
+    {
+      "package": "eslint-config-next",
+      "severity": "high",
+      "affectedDeclaredNodes": [
+        "node_modules/eslint-config-next"
+      ],
+      "retainedAffectedNodeFiles": 0
+    },
+    {
+      "package": "fast-glob",
+      "severity": "high",
+      "affectedDeclaredNodes": [
+        "node_modules/fast-glob",
+        "node_modules/tailwindcss/node_modules/fast-glob"
+      ],
+      "retainedAffectedNodeFiles": 0
+    },
+    {
+      "package": "micromatch",
+      "severity": "high",
+      "affectedDeclaredNodes": [
+        "node_modules/micromatch"
+      ],
+      "retainedAffectedNodeFiles": 0
+    },
+    {
+      "package": "tailwindcss",
+      "severity": "high",
+      "affectedDeclaredNodes": [
+        "node_modules/tailwindcss"
+      ],
+      "retainedAffectedNodeFiles": 0
+    }
+  ],
+  "classification": "NON-BLOCKING FOLLOW-UP",
+  "basis": "Reported affected declared package nodes are absent from the traced Mac runtime; existing trusted build-toolchain cleanup is outside this correction. This is not a vendored-code or entire dependency security certification.",
+  "otherWarnings": [
+    "122 optional/dynamic Next startup-trace warnings; actual requested image paths exercised by runtime acceptance.",
+    "Three generated metadata-page Vercel configuration warnings; no changed Nova function configuration and no Vercel deployment."
+  ]
+}

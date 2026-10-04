@@ -1,0 +1,73 @@
+{
+  "at": "2026-10-03T21:19:03.411Z",
+  "kind": "offline allowed-host-teardown reproduction",
+  "node": "v22.23.2",
+  "platform": "linux",
+  "architecture": "arm64",
+  "realProvider": false,
+  "realDatabase": false,
+  "hostedInvocation": false,
+  "network": "disabled",
+  "applicationSourceChanged": false,
+  "results": [
+    {
+      "mode": "complete",
+      "durableState": "completed",
+      "dispatches": 1,
+      "providerFailures": 0,
+      "upstreamCancelled": false,
+      "signalAborted": false,
+      "cleanupStarted": true,
+      "cleanupCommitted": true,
+      "responseSanitized": true,
+      "exit": {
+        "code": 0,
+        "signal": null
+      },
+      "messages": [
+        "cleanup-started",
+        "finished"
+      ]
+    },
+    {
+      "mode": "cancel-persistent",
+      "durableState": "unknown",
+      "dispatches": 1,
+      "providerFailures": 0,
+      "upstreamCancelled": true,
+      "signalAborted": true,
+      "cleanupStarted": true,
+      "cleanupCommitted": true,
+      "responseSanitized": true,
+      "exit": {
+        "code": 0,
+        "signal": null
+      },
+      "messages": [
+        "stream-observed",
+        "cleanup-started",
+        "finished"
+      ]
+    },
+    {
+      "mode": "cancel-reclaimed",
+      "durableState": "running",
+      "dispatches": 1,
+      "providerFailures": 0,
+      "upstreamCancelled": true,
+      "signalAborted": true,
+      "cleanupStarted": true,
+      "cleanupCommitted": false,
+      "responseSanitized": true,
+      "exit": {
+        "code": null,
+        "signal": "SIGKILL"
+      },
+      "messages": [
+        "stream-observed",
+        "cleanup-started"
+      ]
+    }
+  ],
+  "conclusion": "The unchanged Nova implementation completes terminal persistence in a surviving process. Reclaiming an unprotected invocation after cancellation can leave its admission running. This models the documented host contract; it is not a live Vercel failure measurement."
+}

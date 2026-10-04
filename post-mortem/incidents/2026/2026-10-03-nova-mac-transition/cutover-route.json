@@ -1,0 +1,11 @@
+{
+  "at": "2026-10-04T01:35:52.852Z",
+  "id": "d81c745d26c0dfb33f79bbdb81686934",
+  "name": "nova.galx.ai",
+  "type": "CNAME",
+  "content": "3df90220-304b-4771-8be8-4569bc147b4e.cfargotunnel.com",
+  "proxied": true,
+  "ttl": 1,
+  "realProviderGatePassed": true,
+  "controlledAcceptancePending": true
+}

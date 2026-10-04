@@ -20,6 +20,8 @@ Private operational records. Start here during a failure; do not publish this di
 
 `register.json` owns incident status and follow-up actions. `events.jsonl` is the append-only troubleshooting and containment journal. The incident index, rolling log and open-items view are generated from those files; run `npm run docs:sync` after editing them. Recovery is an incident state; completed prevention work needs its own evidence.
 
+Correct an earlier evidence reference or event-kind label by appending a complete `correction` event with `supersedes` pointing to the earlier event in the same incident. Preserve the original line. A kind correction does not waive identity, timestamp, required-field or private-field validation; the new correction still requires valid retained evidence.
+
 When an append-only record names source that is intentionally retired, `retired-evidence.json` records the retirement date, current replacement and dated historical evidence. This keeps the original observation intact without restoring deleted runtime or test files.
 
 ## Working rules

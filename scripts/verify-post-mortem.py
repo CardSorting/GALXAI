@@ -241,6 +241,7 @@ def validate_records(root, register, events, retired=None):
     seen = set()
     allowed = {'id', 'incident', 'observed_at', 'kind', 'observation', 'action', 'result', 'next_step', 'evidence', 'supersedes'}
     superseded_events = {row.get('supersedes') for row in events if row.get('supersedes')}
+    kind_corrections = {(row.get('incident'), row.get('supersedes')) for row in events if row.get('kind') == 'correction' and row.get('supersedes')}
     for row in events:
         if set(row) - allowed:
             errors.append(f"{row.get('id')}: unexpected journal fields")
@@ -256,7 +257,9 @@ def validate_records(root, register, events, retired=None):
             parsed = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
             if parsed.utcoffset() is None or parsed.utcoffset().total_seconds() != 0:
                 errors.append(f"{row['id']}: timestamp must be UTC")
-        if row['kind'] not in {'observation', 'containment', 'recovery', 'verification', 'follow-up', 'correction'}:
+        # A misspelled historical kind can be corrected without rewriting the
+        # append-only journal. All other record checks still apply to both rows.
+        if row['kind'] not in {'observation', 'containment', 'recovery', 'verification', 'follow-up', 'correction'} and (row['incident'], row['id']) not in kind_corrections:
             errors.append(f"{row['id']}: invalid event kind")
         if not all(row.get(k) for k in ('observation', 'action', 'result', 'next_step')):
             errors.append(f"{row['id']}: incomplete observation/action/result/next step")

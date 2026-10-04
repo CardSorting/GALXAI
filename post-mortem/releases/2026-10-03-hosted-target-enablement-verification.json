@@ -1,0 +1,97 @@
+{
+  "classification": "private",
+  "observed_at": "2026-10-03T21:25:49.474579+00:00",
+  "status": "validation complete; target enablement stopped",
+  "record": "post-mortem/releases/2026-10-03-hosted-target-enablement.json",
+  "checks": [
+    {
+      "command": "npm run test:connect",
+      "exit_code": 0,
+      "passed": 26
+    },
+    {
+      "command": "npm run test:relay:services",
+      "exit_code": 0,
+      "passed": 43
+    },
+    {
+      "command": "node --import tsx --test scripts/test-relay-chat-transport.ts",
+      "exit_code": 0,
+      "passed": 9
+    },
+    {
+      "command": "isolated Node 22 lifetime fixture",
+      "exit_code": 0,
+      "cases": 3,
+      "result": "Normal and persistent-cancel controls pass; modeled unprotected teardown reproduces missing terminal persistence."
+    },
+    {
+      "command": "npm run test:docs",
+      "exit_code": 0,
+      "passed": 42
+    },
+    {
+      "command": "npm run docs:sync",
+      "exit_code": 0
+    },
+    {
+      "command": "npm run docs:check",
+      "exit_code": 0
+    },
+    {
+      "command": "npm run docs:check:build",
+      "exit_code": 0,
+      "existing_browser_and_rendered_assets": 538,
+      "private_marker_failures": 0
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0
+    }
+  ],
+  "initial_build_guard": {
+    "exit_code": 1,
+    "reason": "Expected generated-view and review staleness after guide edits. Completed semantic review/attestation and index synchronization; final invocation passed. No private boundary finding was hidden."
+  },
+  "frozen_source_files": 1886,
+  "frozen_compiled_files": 2291,
+  "changed_frozen_files": 0,
+  "known_credential_matches": 0,
+  "credential_scan_limit": "Exact values from existing local environment, component and provider CLI credentials; no claim of universal secret detection.",
+  "accepted_candidate_rebuilt": false,
+  "new_hosted_artifact": false,
+  "target_configuration_changed": false,
+  "cohort_opened": false,
+  "deployed": false,
+  "real_provider_inference": false,
+  "limits": "Offline allowed-lifecycle counterexample and existing local regression only. No live Vercel cancellation or 300-second limit test, hosted Connect/cohort proof, new revocation timing or hosted artifact equivalence.",
+  "action_states": {
+    "ACT-001": "CLOSED",
+    "ACT-044": "REMAINS OPEN",
+    "ACT-045": "REMAINS OPEN",
+    "ACT-046": "REMAINS OPEN"
+  },
+  "remaining_warnings": "Existing overdue prevention notices and public-release classifications retained; no deadlines extended and no unrelated repairs.",
+  "evidence": [
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-target-enablement/documentation-tests.log",
+      "sha256": "1837f195a52cc6ff0c54e77a1fd61ee58df8ba05d12db1f2a33244fa8e658f24"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-target-enablement/documentation-check.log",
+      "sha256": "60e58e7b16c5d996281f3d34d4e78497ca851b7250765c8579d3d979b5167c99"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-target-enablement/build-boundary.log",
+      "sha256": "21b7900f0f9c0ad43ae9c86b471960b26521c6e630c8a3d46f9070b894c62bd7"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-target-enablement/build-boundary-final.log",
+      "sha256": "281ee6a383832d5f243515c966ecde59aeef3daf82727028451d7d873f8f6091"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-target-enablement/evidence-verification.json",
+      "sha256": "770e6e9113f150d08c668c2175c250e97cf286da9718ad180be2de5b6504fa11"
+    }
+  ]
+}

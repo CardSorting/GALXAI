@@ -1,0 +1,46 @@
+✔ retained output preserves selected bytes and internal aliases without ambient workspace files (38.757042ms)
+✔ function aliases cannot escape the retained artifact (5.103792ms)
+✔ undeclared dependencies outside the isolated build are rejected (3.612583ms)
+✔ launcher accepts only fixed destinations and never sends a mismatched credential (1.217416ms)
+✔ launcher binds its short-lived ticket to the selected loopback origin and operator role (14.250958ms)
+✔ untrusted replies never become launcher URLs or diagnostic output (0.793125ms)
+✔ unavailable or redirected health never reports available (0.438834ms)
+✔ cold startup respects the existing ownership fence and rejects uncertain timestamps (0.137583ms)
+✔ runtime handoff uses private control evidence and rejects missing or foreign authority (1.341125ms)
+✔ automatic activation explains readiness without overriding intentional pauses (0.656875ms)
+✔ confirmation needs a fresh non-future heartbeat and matching revision and epoch (0.12075ms)
+✔ account filters combine name and state, keeping revoked accounts out of sign-in attention (1.20125ms)
+✔ desktop login completion does not imply reviewed or registered central access (0.16325ms)
+✔ health separates a failed refresh from reported problems and normal paused state (33.900209ms)
+✔ removed resources are isolated from active filters and unfinished registration cleanup stays visible (0.323458ms)
+✔ a stopped desktop is normal for a registered account with current access (0.121417ms)
+✔ rejected credentials require reconnect even before expiry and keep the saved account state (0.09825ms)
+✔ unknown status and retained failures never become an enable veto (0.201375ms)
+✔ standard container contract bounds authority, resource use, logs and shutdown (1.293666ms)
+✔ plan refuses mutable image tag (0.193792ms)
+✔ plan refuses privileged port (0.063917ms)
+✔ plan refuses non-numeric port (0.055625ms)
+✔ plan refuses another service project (0.08225ms)
+✔ plan refuses interpolated mount (0.094875ms)
+✔ plan refuses relative mount (0.048084ms)
+✔ preparation cannot enable Connect or smuggle process/cloud/provider authority (0.642625ms)
+✔ configuration errors never echo secret values (0.266958ms)
+✔ private Nova profile requires explicit first-party authority and excludes Media and provider accounts (0.311166ms)
+✔ configuration file must be regular, private and valid JSON (2.329083ms)
+✔ paths cannot traverse or dereference private sibling files (1.694917ms)
+✔ packaging retains accepted payloads and omits ambient workspace files (21.214791ms)
+✔ modified accepted source prevents packaging (8.532125ms)
+✔ modified compiled Nova prevents packaging (9.18175ms)
+✔ trace traversal and symlink substitution prevent packaging (8.579417ms)
+✔ build-only secrets and private public content prevent packaging (10.682667ms)
+✔ release verification detects changed, missing, extra and symlink files (17.9835ms)
+✔ a package that boots cannot be staged without matching whole-image acceptance (307.01125ms)
+✔ operator commands fence configuration drift, explicit resume and Docker context without printing secrets (2327.175375ms)
+ℹ tests 38
+ℹ suites 0
+ℹ pass 38
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2830.532583

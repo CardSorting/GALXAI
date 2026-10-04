@@ -1,0 +1,324 @@
+{
+  "at": "2026-10-04T01:49:34.816Z",
+  "status": "PASSED",
+  "checks": [
+    {
+      "url": "https://galx.ai/",
+      "method": "GET",
+      "status": 200,
+      "bytes": 74677,
+      "sha256": "bbd05f055161624e52fb1abc84f13a1e9a8e8cccb7acf49aebcc8071cead6116",
+      "contentType": "text/html; charset=utf-8",
+      "cacheControl": "public, max-age=0, must-revalidate"
+    },
+    {
+      "url": "https://galx.ai/connect",
+      "method": "GET",
+      "status": 200,
+      "bytes": 45514,
+      "sha256": "425e8914eeaa1b2cdaf3fb2466084d61d21d288d78555fb1f16ce02ff8ab59fd",
+      "contentType": "text/html; charset=utf-8",
+      "cacheControl": "private, no-store"
+    },
+    {
+      "url": "https://galx.ai/explore",
+      "method": "GET",
+      "status": 200,
+      "bytes": 57324,
+      "sha256": "4e29fb273500866f11080fd4d03a9e4882920a1bef90418f305aafd86db2a994",
+      "contentType": "text/html; charset=utf-8",
+      "cacheControl": "private, no-cache, no-store, max-age=0, must-revalidate"
+    },
+    {
+      "url": "https://galx.ai/stars",
+      "method": "GET",
+      "status": 200,
+      "bytes": 111631,
+      "sha256": "2f076f62103d23aeb2bf88d705711dc8e890fc9d72c736b386206bb5f4d35c14",
+      "contentType": "text/html; charset=utf-8",
+      "cacheControl": "public, max-age=0, must-revalidate"
+    },
+    {
+      "url": "https://galx.ai/.well-known/oauth-authorization-server",
+      "method": "GET",
+      "status": 200,
+      "bytes": 527,
+      "sha256": "c81111568b8cd063bb366b35ce0d14d01ec86e4194bf0b254746bc66f7fbde05",
+      "contentType": "application/json",
+      "cacheControl": "private, no-store"
+    },
+    {
+      "url": "https://galx.ai/v1/inference",
+      "method": "POST",
+      "status": 403,
+      "bytes": 59,
+      "sha256": "286f2d9beeaa0ab1786a0ab838e75033170e9e297d481f4059e702bd7ae51bc3",
+      "contentType": "text/plain; charset=utf-8",
+      "cacheControl": "private, no-store, max-age=0"
+    },
+    {
+      "url": "https://galx.ai/v1/chat/completions",
+      "method": "POST",
+      "status": 403,
+      "bytes": 59,
+      "sha256": "739896b3e3e64038ed012e51fababfd17fefc452abccba65cfa8ed7bf22573b3",
+      "contentType": "text/plain; charset=utf-8",
+      "cacheControl": "private, no-store, max-age=0"
+    },
+    {
+      "url": "https://galx.ai/v1/completions",
+      "method": "POST",
+      "status": 403,
+      "bytes": 59,
+      "sha256": "3df84e96f2257b3955a0a829f1f8b48568489aa2462f08a5f36696a1bb12d138",
+      "contentType": "text/plain; charset=utf-8",
+      "cacheControl": "private, no-store, max-age=0"
+    },
+    {
+      "url": "https://galx.ai/v1/messages",
+      "method": "POST",
+      "status": 403,
+      "bytes": 59,
+      "sha256": "eab015562f8ce648a8ef1b6ee214c53fde3426dd1e0842e10cf2b47b81a8b3e4",
+      "contentType": "text/plain; charset=utf-8",
+      "cacheControl": "private, no-store, max-age=0"
+    },
+    {
+      "url": "https://galx.ai/v1/embeddings",
+      "method": "POST",
+      "status": 403,
+      "bytes": 59,
+      "sha256": "f210a10fbca0b7a78ed5b2746f85b393034aa364984481bfab2e72158fbb9259",
+      "contentType": "text/plain; charset=utf-8",
+      "cacheControl": "private, no-store, max-age=0"
+    },
+    {
+      "url": "https://galx.ai/api/chat",
+      "method": "POST",
+      "status": 403,
+      "bytes": 59,
+      "sha256": "0e6ddfc63c451ab8b54295091396cb5d2ae1db6ef009d9083b0c7a5afecfbb65",
+      "contentType": "text/plain; charset=utf-8",
+      "cacheControl": "private, no-store, max-age=0"
+    },
+    {
+      "url": "https://galx.ai/api/generate",
+      "method": "POST",
+      "status": 403,
+      "bytes": 59,
+      "sha256": "d15eaedaaf1e158717d5e3b1d8a7bfce32a5402742bd7fbe11393e82361f4bac",
+      "contentType": "text/plain; charset=utf-8",
+      "cacheControl": "private, no-store, max-age=0"
+    },
+    {
+      "url": "https://galx.ai/api/run",
+      "method": "POST",
+      "status": 403,
+      "bytes": 59,
+      "sha256": "ced9fbcae55d5f363797d83004e7baa71122afeb73e359c96fdce03bf2ae7f86",
+      "contentType": "text/plain; charset=utf-8",
+      "cacheControl": "private, no-store, max-age=0"
+    },
+    {
+      "url": "https://galx.ai/api/queues",
+      "method": "POST",
+      "status": 403,
+      "bytes": 59,
+      "sha256": "9256a3cd306b3a960a697dfbdca90af9348dc78aeb792cb040a70356c852b883",
+      "contentType": "text/plain; charset=utf-8",
+      "cacheControl": "private, no-store, max-age=0"
+    },
+    {
+      "url": "https://galx.ai/api/queues/example/tasks",
+      "method": "POST",
+      "status": 403,
+      "bytes": 59,
+      "sha256": "4f9674407e4faefa8bcb026b4c3632bf6d5f7bbb378488d778e1c07eb3e307e4",
+      "contentType": "text/plain; charset=utf-8",
+      "cacheControl": "private, no-store, max-age=0"
+    },
+    {
+      "url": "https://galxai-204k0uq49-cardsortings-projects.vercel.app/v1/chat/completions",
+      "method": "POST",
+      "status": 302,
+      "bytes": 263,
+      "sha256": "078d44efe538819a52deef2d03cc221b5b81ea1ae1f577dc80710db061c3766f",
+      "contentType": "text/plain",
+      "cacheControl": "no-store, max-age=0"
+    },
+    {
+      "url": "https://galxai-git-main-cardsortings-projects.vercel.app/v1/chat/completions",
+      "method": "POST",
+      "status": 302,
+      "bytes": 263,
+      "sha256": "078d44efe538819a52deef2d03cc221b5b81ea1ae1f577dc80710db061c3766f",
+      "contentType": "text/plain",
+      "cacheControl": "no-store, max-age=0"
+    },
+    {
+      "url": "https://nova.galx.ai/.well-known/oauth-protected-resource",
+      "method": "GET",
+      "status": 200,
+      "bytes": 157,
+      "sha256": "dee9e16a8d69fdd886741bd3b6f0be33b29355d600382a1d383e015b3aa168ce",
+      "contentType": "application/json",
+      "cacheControl": "private, no-store"
+    },
+    {
+      "url": "https://nova.galx.ai/v1/inference",
+      "method": "POST",
+      "status": 401,
+      "bytes": 123,
+      "sha256": "75e15d2f5d2f5fa2d84873258e6b1befb5ba4dbf4b5e69b26afbab80dd7bad4d",
+      "contentType": "application/json",
+      "cacheControl": "private, no-store"
+    },
+    {
+      "url": "https://nova.galx.ai/",
+      "method": "GET",
+      "status": 404,
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "contentType": null,
+      "cacheControl": null
+    },
+    {
+      "url": "https://nova.galx.ai/connect",
+      "method": "GET",
+      "status": 404,
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "contentType": null,
+      "cacheControl": null
+    },
+    {
+      "url": "https://nova.galx.ai/api/status",
+      "method": "GET",
+      "status": 404,
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "contentType": null,
+      "cacheControl": null
+    },
+    {
+      "url": "https://nova.galx.ai/operator/status",
+      "method": "GET",
+      "status": 404,
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "contentType": null,
+      "cacheControl": null
+    },
+    {
+      "url": "https://nova.galx.ai/healthz",
+      "method": "GET",
+      "status": 404,
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "contentType": null,
+      "cacheControl": null
+    },
+    {
+      "url": "https://nova.galx.ai/metrics",
+      "method": "GET",
+      "status": 404,
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "contentType": null,
+      "cacheControl": null
+    },
+    {
+      "url": "https://nova.galx.ai/post-mortem/CURRENT_STATE.md",
+      "method": "GET",
+      "status": 404,
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "contentType": null,
+      "cacheControl": null
+    },
+    {
+      "url": "https://nova.galx.ai/v1/chat/completions",
+      "method": "GET",
+      "status": 404,
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "contentType": null,
+      "cacheControl": null
+    },
+    {
+      "url": "https://nova.galx.ai/api/queues",
+      "method": "GET",
+      "status": 404,
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "contentType": null,
+      "cacheControl": null
+    }
+  ],
+  "liveAssets": {
+    "inventory": 409,
+    "publicAssets": 285,
+    "byteIdenticalAssets": 284,
+    "privateAssetDenials": 124,
+    "platformSuffix": {
+      "path": "/_next/static/chunks/webpack-ca6774db66e642f6.js",
+      "bytes": 461,
+      "sha256": "377c2d4bd4ee0c365f0556222c8efeeb0d28f6b36484bb0c4a74d29e2b1a13ff",
+      "kind": "Vercel explicit cookie-opt-in toolbar loader with this deployment ID",
+      "applicationPrefixByteIdentical": true
+    },
+    "applicationPayloadsMatch": true,
+    "privateMarkers": 0,
+    "credentialMatches": 0
+  },
+  "novaDns": [
+    {
+      "id": "d81c745d26c0dfb33f79bbdb81686934",
+      "name": "nova.galx.ai",
+      "type": "CNAME",
+      "content": "3df90220-304b-4771-8be8-4569bc147b4e.cfargotunnel.com",
+      "proxied": true
+    }
+  ],
+  "tunnelVersion": 17,
+  "ingress": [
+    {
+      "path": "^/(v1/inference|\\.well-known/oauth-protected-resource)$",
+      "service": "http://host.docker.internal:17787",
+      "hostname": "nova.galx.ai",
+      "originRequest": {
+        "http2Origin": false,
+        "connectTimeout": 10,
+        "httpHostHeader": "nova.galx.ai",
+        "keepAliveTimeout": 30,
+        "keepAliveConnections": 10,
+        "disableChunkedEncoding": false
+      }
+    },
+    {
+      "path": "^/(health(/live)?|v1/(images/(availability|generations)|models|chat/completions|jobs/[A-Za-z0-9_.:-]+/(stream|receipt)))$",
+      "service": "http://host.docker.internal:13301",
+      "hostname": "images-service.galx.ai",
+      "originRequest": {
+        "connectTimeout": 10
+      }
+    },
+    {
+      "service": "http://host.docker.internal:3001",
+      "hostname": "relay.galx.ai",
+      "originRequest": {
+        "connectTimeout": 10
+      }
+    },
+    {
+      "service": "http_status:404"
+    }
+  ],
+  "vercelDomains": [
+    "www.galx.ai",
+    "galx.ai",
+    "galxai.vercel.app"
+  ],
+  "pilotRemoved": true,
+  "vercelNovaBindingAbsent": true
+}

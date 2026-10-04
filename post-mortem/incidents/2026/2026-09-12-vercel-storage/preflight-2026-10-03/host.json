@@ -1,0 +1,865 @@
+{
+  "at": "2026-10-03T21:00:12.091Z",
+  "firewall": {
+    "chains": [
+      {
+        "name": "output",
+        "hook": "output",
+        "priority": -150,
+        "policy": "accept"
+      },
+      {
+        "name": "forward",
+        "hook": "forward",
+        "priority": -150,
+        "policy": "accept"
+      },
+      {
+        "name": "input",
+        "hook": "input",
+        "priority": -150,
+        "policy": "accept"
+      }
+    ],
+    "rules": [
+      {
+        "chain": "output",
+        "expr": [
+          {
+            "match": {
+              "op": "in",
+              "left": {
+                "ct": {
+                  "key": "state"
+                }
+              },
+              "right": [
+                "established",
+                "related"
+              ]
+            }
+          },
+          {
+            "accept": null
+          }
+        ]
+      },
+      {
+        "chain": "output",
+        "expr": [
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "meta": {
+                  "key": "oifname"
+                }
+              },
+              "right": "lo"
+            }
+          },
+          {
+            "accept": null
+          }
+        ]
+      },
+      {
+        "chain": "output",
+        "expr": [
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "ip",
+                  "field": "daddr"
+                }
+              },
+              "right": "192.168.105.2"
+            }
+          },
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "tcp",
+                  "field": "dport"
+                }
+              },
+              "right": 13443
+            }
+          },
+          {
+            "accept": null
+          }
+        ]
+      },
+      {
+        "chain": "output",
+        "expr": [
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "ip",
+                  "field": "daddr"
+                }
+              },
+              "right": "192.168.105.2"
+            }
+          },
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "udp",
+                  "field": "dport"
+                }
+              },
+              "right": 53
+            }
+          },
+          {
+            "accept": null
+          }
+        ]
+      },
+      {
+        "chain": "output",
+        "expr": [
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "ip",
+                  "field": "daddr"
+                }
+              },
+              "right": "192.168.105.2"
+            }
+          },
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "tcp",
+                  "field": "dport"
+                }
+              },
+              "right": 53
+            }
+          },
+          {
+            "accept": null
+          }
+        ]
+      },
+      {
+        "chain": "output",
+        "expr": [
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "ip",
+                  "field": "daddr"
+                }
+              },
+              "right": {
+                "set": [
+                  "192.168.105.2",
+                  "255.255.255.255"
+                ]
+              }
+            }
+          },
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "udp",
+                  "field": "sport"
+                }
+              },
+              "right": 68
+            }
+          },
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "udp",
+                  "field": "dport"
+                }
+              },
+              "right": 67
+            }
+          },
+          {
+            "accept": null
+          }
+        ]
+      },
+      {
+        "chain": "output",
+        "expr": [
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "ip",
+                  "field": "daddr"
+                }
+              },
+              "right": "192.168.105.2"
+            }
+          },
+          {
+            "counter": {
+              "packets": 0,
+              "bytes": 0
+            }
+          },
+          {
+            "drop": null
+          }
+        ]
+      },
+      {
+        "chain": "output",
+        "expr": [
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "meta": {
+                  "key": "oifname"
+                }
+              },
+              "right": "eth0"
+            }
+          },
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "ip",
+                  "field": "daddr"
+                }
+              },
+              "right": {
+                "set": [
+                  {
+                    "prefix": {
+                      "addr": "10.0.0.0",
+                      "len": 8
+                    }
+                  },
+                  {
+                    "prefix": {
+                      "addr": "100.64.0.0",
+                      "len": 10
+                    }
+                  },
+                  {
+                    "prefix": {
+                      "addr": "169.254.0.0",
+                      "len": 16
+                    }
+                  },
+                  {
+                    "prefix": {
+                      "addr": "172.16.0.0",
+                      "len": 12
+                    }
+                  },
+                  {
+                    "prefix": {
+                      "addr": "192.168.0.0",
+                      "len": 16
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "counter": {
+              "packets": 0,
+              "bytes": 0
+            }
+          },
+          {
+            "drop": null
+          }
+        ]
+      },
+      {
+        "chain": "output",
+        "expr": [
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "meta": {
+                  "key": "oifname"
+                }
+              },
+              "right": "eth0"
+            }
+          },
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "meta": {
+                  "key": "nfproto"
+                }
+              },
+              "right": "ipv6"
+            }
+          },
+          {
+            "counter": {
+              "packets": 35,
+              "bytes": 1960
+            }
+          },
+          {
+            "drop": null
+          }
+        ]
+      },
+      {
+        "chain": "forward",
+        "expr": [
+          {
+            "match": {
+              "op": "in",
+              "left": {
+                "ct": {
+                  "key": "state"
+                }
+              },
+              "right": [
+                "established",
+                "related"
+              ]
+            }
+          },
+          {
+            "accept": null
+          }
+        ]
+      },
+      {
+        "chain": "forward",
+        "expr": [
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "meta": {
+                  "key": "oifname"
+                }
+              },
+              "right": "lo"
+            }
+          },
+          {
+            "accept": null
+          }
+        ]
+      },
+      {
+        "chain": "forward",
+        "expr": [
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "ip",
+                  "field": "daddr"
+                }
+              },
+              "right": "192.168.105.2"
+            }
+          },
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "tcp",
+                  "field": "dport"
+                }
+              },
+              "right": 13443
+            }
+          },
+          {
+            "accept": null
+          }
+        ]
+      },
+      {
+        "chain": "forward",
+        "expr": [
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "ip",
+                  "field": "daddr"
+                }
+              },
+              "right": "192.168.105.2"
+            }
+          },
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "udp",
+                  "field": "dport"
+                }
+              },
+              "right": 53
+            }
+          },
+          {
+            "accept": null
+          }
+        ]
+      },
+      {
+        "chain": "forward",
+        "expr": [
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "ip",
+                  "field": "daddr"
+                }
+              },
+              "right": "192.168.105.2"
+            }
+          },
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "tcp",
+                  "field": "dport"
+                }
+              },
+              "right": 53
+            }
+          },
+          {
+            "accept": null
+          }
+        ]
+      },
+      {
+        "chain": "forward",
+        "expr": [
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "ip",
+                  "field": "daddr"
+                }
+              },
+              "right": {
+                "set": [
+                  "192.168.105.2",
+                  "255.255.255.255"
+                ]
+              }
+            }
+          },
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "udp",
+                  "field": "sport"
+                }
+              },
+              "right": 68
+            }
+          },
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "udp",
+                  "field": "dport"
+                }
+              },
+              "right": 67
+            }
+          },
+          {
+            "accept": null
+          }
+        ]
+      },
+      {
+        "chain": "forward",
+        "expr": [
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "ip",
+                  "field": "daddr"
+                }
+              },
+              "right": "192.168.105.2"
+            }
+          },
+          {
+            "counter": {
+              "packets": 0,
+              "bytes": 0
+            }
+          },
+          {
+            "drop": null
+          }
+        ]
+      },
+      {
+        "chain": "forward",
+        "expr": [
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "meta": {
+                  "key": "oifname"
+                }
+              },
+              "right": "eth0"
+            }
+          },
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "ip",
+                  "field": "daddr"
+                }
+              },
+              "right": {
+                "set": [
+                  {
+                    "prefix": {
+                      "addr": "10.0.0.0",
+                      "len": 8
+                    }
+                  },
+                  {
+                    "prefix": {
+                      "addr": "100.64.0.0",
+                      "len": 10
+                    }
+                  },
+                  {
+                    "prefix": {
+                      "addr": "169.254.0.0",
+                      "len": 16
+                    }
+                  },
+                  {
+                    "prefix": {
+                      "addr": "172.16.0.0",
+                      "len": 12
+                    }
+                  },
+                  {
+                    "prefix": {
+                      "addr": "192.168.0.0",
+                      "len": 16
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "counter": {
+              "packets": 0,
+              "bytes": 0
+            }
+          },
+          {
+            "drop": null
+          }
+        ]
+      },
+      {
+        "chain": "forward",
+        "expr": [
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "meta": {
+                  "key": "oifname"
+                }
+              },
+              "right": "eth0"
+            }
+          },
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "meta": {
+                  "key": "nfproto"
+                }
+              },
+              "right": "ipv6"
+            }
+          },
+          {
+            "counter": {
+              "packets": 0,
+              "bytes": 0
+            }
+          },
+          {
+            "drop": null
+          }
+        ]
+      },
+      {
+        "chain": "input",
+        "expr": [
+          {
+            "match": {
+              "op": "in",
+              "left": {
+                "ct": {
+                  "key": "state"
+                }
+              },
+              "right": [
+                "established",
+                "related"
+              ]
+            }
+          },
+          {
+            "accept": null
+          }
+        ]
+      },
+      {
+        "chain": "input",
+        "expr": [
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "meta": {
+                  "key": "iifname"
+                }
+              },
+              "right": "lo"
+            }
+          },
+          {
+            "accept": null
+          }
+        ]
+      },
+      {
+        "chain": "input",
+        "expr": [
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "meta": {
+                  "key": "iifname"
+                }
+              },
+              "right": "eth0"
+            }
+          },
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "ip",
+                  "field": "saddr"
+                }
+              },
+              "right": "192.168.105.2"
+            }
+          },
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "tcp",
+                  "field": "dport"
+                }
+              },
+              "right": 22
+            }
+          },
+          {
+            "accept": null
+          }
+        ]
+      },
+      {
+        "chain": "input",
+        "expr": [
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "meta": {
+                  "key": "iifname"
+                }
+              },
+              "right": "eth0"
+            }
+          },
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "udp",
+                  "field": "sport"
+                }
+              },
+              "right": 67
+            }
+          },
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "payload": {
+                  "protocol": "udp",
+                  "field": "dport"
+                }
+              },
+              "right": 68
+            }
+          },
+          {
+            "accept": null
+          }
+        ]
+      },
+      {
+        "chain": "input",
+        "expr": [
+          {
+            "match": {
+              "op": "==",
+              "left": {
+                "meta": {
+                  "key": "iifname"
+                }
+              },
+              "right": "eth0"
+            }
+          },
+          {
+            "counter": {
+              "packets": 16,
+              "bytes": 832
+            }
+          },
+          {
+            "drop": null
+          }
+        ]
+      }
+    ]
+  },
+  "firewallService": "active",
+  "guestListeners": [
+    "State  Recv-Q Send-Q                    Local Address:Port  Peer Address:PortProcess",
+    "LISTEN 0      32                        192.168.105.1:53         0.0.0.0:*          ",
+    "LISTEN 0      32                            127.0.0.1:53         0.0.0.0:*          ",
+    "LISTEN 0      4096                          127.0.0.1:13301      0.0.0.0:*          ",
+    "LISTEN 0      511                           127.0.0.1:13311      0.0.0.0:*          ",
+    "LISTEN 0      4096                            0.0.0.0:22         0.0.0.0:*          ",
+    "LISTEN 0      32     [fe80::5055:55ff:fee0:6cfc]%eth0:53            [::]:*          ",
+    "LISTEN 0      32                                [::1]:53            [::]:*          ",
+    "LISTEN 0      4096                               [::]:22            [::]:*"
+  ],
+  "configFiles": [
+    {
+      "file": "docker/relay-pools/local/images.json",
+      "sha256": "a2da32923e1aa3291e78463ac17d3ca41bc46e2fa22f45d0a3fd0d99ee42bbf0",
+      "mode": "644",
+      "modified": "2026-10-03T20:08:25.807Z"
+    },
+    {
+      "file": ".relay/service-deployment/authority.json",
+      "sha256": "302e5803e7c5f45b5614361223a2018497c353852b979df9dd5abb9aa043aabb",
+      "mode": "600",
+      "modified": "2026-09-15T17:08:50.563Z"
+    },
+    {
+      "file": ".relay/service-deployment/components/central.json",
+      "sha256": "9ccb627bfc6d0841e49f99790c03ad1e69a4c8795a618c5389736d5437513205",
+      "mode": "600",
+      "modified": "2026-09-15T17:08:50.563Z"
+    },
+    {
+      "file": ".relay/service-deployment/components/premium-runtime.json",
+      "sha256": "68067dade7700e88df1c757248a41acaeae97e31ab21ebfe06b10e1d42ef40d9",
+      "mode": "600",
+      "modified": "2026-09-15T17:08:50.564Z"
+    },
+    {
+      "file": ".relay/service-deployment/components/premium-monitor.json",
+      "sha256": "ca395575f7e251ea95e84791394548b6188cdb0cfb7b5db5e8ae2ec75feb8899",
+      "mode": "600",
+      "modified": "2026-09-15T17:08:50.564Z"
+    }
+  ],
+  "providerReadiness": {
+    "httpStatus": 200,
+    "catalogAccepted": true,
+    "modelCount": 4,
+    "inferenceInvoked": false
+  }
+}

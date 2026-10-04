@@ -1,0 +1,44 @@
+{
+  "observed_at": "2026-10-04T02:23:57.151479+00:00",
+  "scope": "Commit and push already-completed work while preserving the serving accepted artifacts.",
+  "finding": "Project Git integration remains enabled for main and uses next build. A full-source rebuild would include Mac-only Nova routes, unlike the accepted Media/Connect-only release.",
+  "correction": "vercel.json git.deploymentEnabled=false disables automatic Git deployments. GitHub checks still run. Explicit prebuilt Media/Connect deployments remain the canonical deployment procedure.",
+  "source_contract": "https://vercel.com/docs/project-configuration/git-configuration#gitdeploymentenabled",
+  "reviewed": {
+    "vercel.json": "25b302af9b62fa452243b70e2ae5b5ea3cfd6ccbc245ef17ed61ba3ac96e308d",
+    "docs/VERCEL_DEPLOYMENT.md": "69fa755145954c91ba56c904c64b9a981d519b4c6a8e49e492b29ca1521ddc9c",
+    "docs/runbooks/nova-hosting-transition.md": "f0f21589ca93d13d7247dc34764e9ae4300ea40d5484f38d5eec110488853c43",
+    "scripts/prepare-connect-web.mjs": "4f14b1c95af02a298ebb2971926ad0b9e53e79dc89f1ee99ad6b0dc3bd65bdb1",
+    "src/lib/security/inference-placement.ts": "4c90fcccf8bb4c63a3676a5ff2d3dcae405a7ee2d4905347d78c9efdf94fece5",
+    "src/app/v1/inference/route.ts": "278783e4f30baf84d3d598443d1641a35c5b8342827b5476171a5084cbe9fa85"
+  },
+  "preserved": [
+    "Accepted running Mac image and recovery archive",
+    "Serving Media/Connect artifact",
+    "Project-wide retired-inference firewall",
+    "Fail-closed Vercel inference source guard",
+    "Mac-only Nova domain and controlled ingress",
+    "Shared GALX identities, Connect grants and all execution records"
+  ],
+  "verification": {
+    "configuration": {
+      "$schema": "https://openapi.vercel.sh/vercel.json",
+      "git": {
+        "deploymentEnabled": false
+      },
+      "framework": "nextjs",
+      "cleanUrls": true,
+      "regions": [
+        "iad1"
+      ]
+    },
+    "route_guard_tests": "13 passed; retained in production-git-review record",
+    "documentation": "Complete deployment guide reconciled with canonical package procedure and existing transition runbook"
+  },
+  "limits": [
+    "This changes repository deployment configuration only; it does not produce or deploy a new application candidate.",
+    "Git hook suppression and current production health must be observed after push.",
+    "No physical host lifecycle testing, provider request, commercial activation or billing change."
+  ],
+  "prior_evidence": "post-mortem/releases/2026-10-03-nova-nondisruptive-resilience-review.json"
+}

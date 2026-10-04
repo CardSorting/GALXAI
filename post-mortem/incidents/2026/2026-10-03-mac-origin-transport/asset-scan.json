@@ -1,0 +1,5 @@
+{
+  "files": 819,
+  "privateOriginPolicyAndCanaryLeaks": [],
+  "scope": "New compiled browser assets, public files and rendered HTML/RSC/body; private policy strings remain server-side."
+}

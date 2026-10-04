@@ -1,0 +1,90 @@
+[
+  {
+    "label": "expected",
+    "status": 200,
+    "headers": {
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "DENY",
+      "referrer-policy": "no-referrer",
+      "permissions-policy": "camera=(), microphone=(), geolocation=(), payment=(self)",
+      "strict-transport-security": "max-age=63072000; includeSubDomains; preload",
+      "cross-origin-opener-policy": "same-origin-allow-popups",
+      "cross-origin-resource-policy": "same-site",
+      "content-security-policy": "frame-ancestors 'none'",
+      "cache-control": "private, no-store",
+      "x-robots-tag": "noindex, nofollow",
+      "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch",
+      "content-type": "application/json",
+      "pragma": "no-cache",
+      "date": "Sun, 04 Oct 2026 01:21:33 GMT",
+      "connection": "keep-alive",
+      "keep-alive": "timeout=5",
+      "transfer-encoding": "chunked"
+    },
+    "body": "{\"resource\":\"https://nova.galx.ai\",\"authorization_servers\":[\"https://galx.ai\"],\"scopes_supported\":[\"inference:invoke\"],\"bearer_methods_supported\":[\"header\"]}"
+  },
+  {
+    "label": "no_auth",
+    "status": 401,
+    "headers": {
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "DENY",
+      "referrer-policy": "no-referrer",
+      "permissions-policy": "camera=(), microphone=(), geolocation=(), payment=(self)",
+      "strict-transport-security": "max-age=63072000; includeSubDomains; preload",
+      "cross-origin-opener-policy": "same-origin-allow-popups",
+      "cross-origin-resource-policy": "same-site",
+      "cache-control": "private, no-store",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-robots-tag": "noindex, nofollow",
+      "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Origin",
+      "content-type": "application/json",
+      "www-authenticate": "Bearer error=\"invalid_token\"",
+      "date": "Sun, 04 Oct 2026 01:21:33 GMT",
+      "connection": "keep-alive",
+      "keep-alive": "timeout=5",
+      "transfer-encoding": "chunked"
+    },
+    "body": "{\"error\":{\"code\":\"invalid_token\",\"message\":\"Connect this application again to continue.\",\"execution_state\":\"not_accepted\"}}"
+  },
+  {
+    "label": "forged_host",
+    "status": 400,
+    "headers": {
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "SAMEORIGIN",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "permissions-policy": "camera=(), microphone=(), geolocation=(), payment=(self)",
+      "strict-transport-security": "max-age=63072000; includeSubDomains; preload",
+      "cross-origin-opener-policy": "same-origin-allow-popups",
+      "cross-origin-resource-policy": "same-site",
+      "cache-control": "private, no-store",
+      "content-type": "application/json",
+      "date": "Sun, 04 Oct 2026 01:21:33 GMT",
+      "connection": "keep-alive",
+      "keep-alive": "timeout=5",
+      "transfer-encoding": "chunked"
+    },
+    "body": "{\"error\":{\"code\":\"invalid_request\",\"message\":\"Request not allowed.\"}}"
+  },
+  {
+    "label": "wrong_port",
+    "status": 400,
+    "headers": {
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "SAMEORIGIN",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "permissions-policy": "camera=(), microphone=(), geolocation=(), payment=(self)",
+      "strict-transport-security": "max-age=63072000; includeSubDomains; preload",
+      "cross-origin-opener-policy": "same-origin-allow-popups",
+      "cross-origin-resource-policy": "same-site",
+      "cache-control": "private, no-store",
+      "content-type": "application/json",
+      "date": "Sun, 04 Oct 2026 01:21:33 GMT",
+      "connection": "keep-alive",
+      "keep-alive": "timeout=5",
+      "transfer-encoding": "chunked"
+    },
+    "body": "{\"error\":{\"code\":\"invalid_request\",\"message\":\"Request not allowed.\"}}"
+  }
+]

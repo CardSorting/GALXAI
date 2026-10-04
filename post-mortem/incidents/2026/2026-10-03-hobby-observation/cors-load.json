@@ -1,0 +1,10 @@
+{
+  "at": "2026-10-03T23:10:00.534Z",
+  "scope": "Selected CORS exports; local subprocess with only PATH. No account/provider/database environment supplied.",
+  "runtime": "v26.8.1",
+  "exit": 0,
+  "result": {
+    "imported": true
+  },
+  "stderrPresent": false
+}

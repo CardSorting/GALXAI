@@ -1,0 +1,40 @@
+{
+  "at": "2026-10-03T23:44:36.985Z",
+  "name": "AssertionError",
+  "message": "Expected values to be strictly equal:\n+ actual - expected\n\n+ 'https://0.0.0.0:3000'\n- 'https://galx.ai'\n           ^\n",
+  "completedChecks": [
+    {
+      "name": "whole package boot under enforced runtime policy",
+      "image": "sha256:ceed4d278486415ffe82023318ab4abdb0067c70a91b97f7eec48b7676e39201",
+      "readOnly": true,
+      "uid": 1000,
+      "boundedCaches": true,
+      "secretNotInDockerEnvironment": true
+    },
+    {
+      "name": "HTTP boundary /",
+      "status": 200,
+      "sanitized": true
+    },
+    {
+      "name": "HTTP boundary /connect",
+      "status": 200,
+      "sanitized": true
+    },
+    {
+      "name": "HTTP boundary /api/health",
+      "status": 200,
+      "sanitized": true
+    },
+    {
+      "name": "HTTP boundary /post-mortem/CURRENT_STATE.md",
+      "status": 404,
+      "sanitized": true
+    },
+    {
+      "name": "HTTP boundary /.env",
+      "status": 404,
+      "sanitized": true
+    }
+  ]
+}

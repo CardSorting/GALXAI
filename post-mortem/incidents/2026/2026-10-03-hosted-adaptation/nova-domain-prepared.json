@@ -1,0 +1,14 @@
+{
+  "at": "2026-10-03T21:39:33.886Z",
+  "domain": "nova.galx.ai",
+  "verified": true,
+  "dns": {
+    "id": "d81c745d26c0dfb33f79bbdb81686934",
+    "type": "CNAME",
+    "content": "a76166bfd6d0ea1e.vercel-dns-017.com",
+    "proxied": false,
+    "ttl": 300
+  },
+  "productionUnchanged": true,
+  "rollback": "Delete only the recorded explicit CNAME and remove nova.galx.ai from this project; existing apex and wildcard remain untouched."
+}

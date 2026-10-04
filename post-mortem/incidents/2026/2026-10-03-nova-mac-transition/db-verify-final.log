@@ -1,0 +1,19 @@
+
+> galxai@0.1.0 db:verify
+> tsx scripts/verify-supabase-integrity.ts
+
+======================================================================
+   🛡️  GALXAI: PARANOID SUPABASE POSTGRESQL INTEGRITY LINTER  
+   Enforcing 10 Invariant Commandments for Autonomous AI Containment   
+======================================================================
+
+Audited Migrations : 159 files
+Rollback Presence  : 159 paired .down.sql files (content not executed)
+Fatal Violations   : 0
+Warnings           : 0
+
+======================================================================
+  STATIC POSTGRESQL INTEGRITY CHECKS PASSED                           
+  SQL execution and applied migration state require separate checks.  
+======================================================================
+

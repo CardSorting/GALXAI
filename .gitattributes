@@ -1,0 +1,2 @@
+# Retained machine evidence is hashed byte-for-byte; never normalize its output.
+post-mortem/**/*.log -text -diff

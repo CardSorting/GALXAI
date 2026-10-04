@@ -1,0 +1,8 @@
+
+> galxai@0.1.0 test:connect:db
+> node --import tsx scripts/run-supabase-integration.ts --connect
+
+Starting disposable PostgreSQL 17 / pgvector fixture...
+Applied 159 migrations to the disposable fixture.
+{"checks":135,"failed":0,"scope":"Disposable PostgreSQL: PKCE/consent, cold revocation, shared account admission, refresh reuse, RLS/privileges, HTTP handlers, media isolation and rollback. Synthetic existing identity and inference executor; no live provider calls."}
+Removed disposable PostgreSQL fixture.

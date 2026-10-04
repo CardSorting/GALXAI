@@ -1,0 +1,24 @@
+node:internal/errors:999
+  const err = new Error(message);
+              ^
+
+Error: Command failed: docker --context colima-premium run --rm --name galx-monitor-package-e2aa8dc4-0128-46eb-a0df-cecebc817030 --label galx.package.check=e2aa8dc4-0128-46eb-a0df-cecebc817030 --network none --read-only --cap-drop ALL --security-opt no-new-privileges:true --pids-limit 128 --memory 512m --tmpfs /tmp:rw,nosuid,nodev,size=16777216 --tmpfs /state:rw,nosuid,nodev,uid=1000,gid=1000,mode=0700,size=16777216 --tmpfs /run/secrets:rw,nosuid,nodev,uid=1000,gid=1000,mode=0700,size=1048576 --mount type=bind,src=/Users/bozoegg/Desktop/GALXAI/.relay/galx-monitor-package-y39NmT,dst=/checks,readonly --env DOCKER_HOST=unix:///tmp/fixture-docker.sock --entrypoint node sha256:0ab24b83ce3f2536f88b3994a716671d7b87495ebc5bdb90c5cafa3a50aa05ed /checks/check.mjs --inside
+docker: Error response from daemon: invalid mount config for type "bind": bind source path does not exist: /Users/bozoegg/Desktop/GALXAI/.relay/galx-monitor-package-y39NmT.
+See 'docker run --help'.
+
+    at genericNodeError (node:internal/errors:999:15)
+    at wrappedFn (node:internal/errors:544:14)
+    at ChildProcess.exithandler (node:child_process:417:12)
+    at ChildProcess.emit (node:events:514:20)
+    at maybeClose (node:internal/child_process:1125:16)
+    at ChildProcess._handle.onexit (node:internal/child_process:305:5) {
+  code: 125,
+  killed: false,
+  signal: null,
+  cmd: 'docker --context colima-premium run --rm --name galx-monitor-package-e2aa8dc4-0128-46eb-a0df-cecebc817030 --label galx.package.check=e2aa8dc4-0128-46eb-a0df-cecebc817030 --network none --read-only --cap-drop ALL --security-opt no-new-privileges:true --pids-limit 128 --memory 512m --tmpfs /tmp:rw,nosuid,nodev,size=16777216 --tmpfs /state:rw,nosuid,nodev,uid=1000,gid=1000,mode=0700,size=16777216 --tmpfs /run/secrets:rw,nosuid,nodev,uid=1000,gid=1000,mode=0700,size=1048576 --mount type=bind,src=/Users/bozoegg/Desktop/GALXAI/.relay/galx-monitor-package-y39NmT,dst=/checks,readonly --env DOCKER_HOST=unix:///tmp/fixture-docker.sock --entrypoint node sha256:0ab24b83ce3f2536f88b3994a716671d7b87495ebc5bdb90c5cafa3a50aa05ed /checks/check.mjs --inside',
+  stdout: '',
+  stderr: 'docker: Error response from daemon: invalid mount config for type "bind": bind source path does not exist: /Users/bozoegg/Desktop/GALXAI/.relay/galx-monitor-package-y39NmT.\n' +
+    "See 'docker run --help'.\n"
+}
+
+Node.js v26.8.1

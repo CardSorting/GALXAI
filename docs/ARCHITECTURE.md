@@ -6,9 +6,21 @@ Private maintainer guide. The implemented relay strategy has one central account
 
 ## Authority and topology
 
+The product has three responsibility boundaries: GALX Media owns media relationships,
+Connect delegates inference using existing verified identity, and Nova executes
+permitted requests. Media and short Connect endpoints remain on Vercel. Nova runs
+in the accepted persistent Next image on the Mac behind exact controlled ingress;
+Vercel inference entry points are retired. Primary identity/grant and execution
+storage remain unchanged. This placement imports no gallery, publishing or
+checkout policy into Nova and introduces no second account system.
+[Connect operations](operations/galx-connect.md) owns grants, entitlement and admission;
+[ADR 0167](adr/0167-nova-mac-runtime-placement.md) and the
+[transition runbook](runbooks/nova-hosting-transition.md) own placement and recovery.
+
 | Component | Responsibility | Boundary |
 | --- | --- | --- |
 | Product application | Verified customer identity, entitlements, owned resources, durable product receipts and public responses | Server-only relay selection; customers cannot select provider accounts |
+| Nova resource | Scoped current-grant validation, operational admission, sanitized inference and terminal persistence | Mac loopback Next listener; only controlled Nova ingress; no public monitor/control path |
 | Central account service | Manual registration, account names, encrypted credentials, exclusive assignments, lifecycle history and existing account leases/budgets | Supabase `mazhcjisettrzbqhorvp` only; no Docker socket |
 | Premium runtime | Assigned paid accounts; text, Sites and images | Own Colima VM/daemon, execution project `prgjcyokylzcsqrjmkaa`, keys and state |
 | Premium monitor | Fixed operator/viewer access, account management and manual sign-in desktop | Loopback origin and session; central authorization on privileged requests |
@@ -47,12 +59,14 @@ allowlists; image artifacts are re-encoded and stripped of upstream metadata.
 The public image alias does not promise an unverified underlying model. See
 [image boundaries](maintainers/image-public-boundary.md).
 
-The inference gateway still reserves work before dispatch, accounts for
-completed consumption, enforces per-key allocations, and retains its request,
+Existing private gateway routes still reserve work before dispatch, account for
+completed consumption, enforce per-key allocations, and retain their request,
 recovery and audit records. Metering is an operational control and accounting
 source, not a public price promise. Public capability docs therefore describe
 what an approved integration can call, while this private guide retains the
-implementation authority needed to operate the system.
+implementation authority needed to operate the system. Nova's Connect path
+uses current application grants and account-wide operational admission without
+per-user token balances, allocation purchases or quota refunds.
 
 ## Sites content and delivery
 

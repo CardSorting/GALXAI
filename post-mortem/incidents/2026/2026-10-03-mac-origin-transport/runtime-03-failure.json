@@ -1,0 +1,128 @@
+{
+  "at": "2026-10-04T00:42:37.023Z",
+  "name": "AssertionError",
+  "message": "{\"error\":{\"code\":\"service_busy\",\"message\":\"Inference is busy. Try again later; your application is still connected.\",\"execution_state\":\"not_accepted\"}}\n\n503 !== 200\n",
+  "completedChecks": [
+    {
+      "name": "verified recovery archive accepted by Docker",
+      "image": "sha256:5157984bc06524aac0ca8fbf2051eebfe6f3b7994aa7d0793e8404c097289345",
+      "architecture": "amd64",
+      "archiveSha256": "0cdec4031bbacc521fb6059bd61da12dbd6c88b50610c4f55b5ade7fbc812345"
+    },
+    {
+      "name": "whole package boot under enforced runtime policy",
+      "image": "sha256:5157984bc06524aac0ca8fbf2051eebfe6f3b7994aa7d0793e8404c097289345",
+      "readOnly": true,
+      "uid": 1000,
+      "boundedCaches": true,
+      "secretNotInDockerEnvironment": true
+    },
+    {
+      "name": "HTTP boundary /",
+      "status": 200,
+      "sanitized": true
+    },
+    {
+      "name": "HTTP boundary /connect",
+      "status": 200,
+      "sanitized": true
+    },
+    {
+      "name": "HTTP boundary /api/health",
+      "status": 200,
+      "sanitized": true
+    },
+    {
+      "name": "HTTP boundary /post-mortem/CURRENT_STATE.md",
+      "status": 404,
+      "sanitized": true
+    },
+    {
+      "name": "HTTP boundary /.env",
+      "status": 404,
+      "sanitized": true
+    },
+    {
+      "name": "HTTP boundary /docs/VERCEL_DEPLOYMENT.md",
+      "status": 308,
+      "sanitized": true
+    },
+    {
+      "name": "HTTP boundary /api/internal/telemetry",
+      "status": 404,
+      "sanitized": true
+    },
+    {
+      "name": "HTTP boundary /operator/status",
+      "status": 404,
+      "sanitized": true
+    },
+    {
+      "name": "packaged canonical issuer metadata",
+      "status": 200,
+      "issuer": "https://galx.ai"
+    },
+    {
+      "name": "browser session does not authorize Nova",
+      "status": 401,
+      "code": "invalid_token",
+      "providerAttempts": 0
+    },
+    {
+      "name": "cookie without Nova credential denied",
+      "status": 401
+    },
+    {
+      "name": "unknown grant",
+      "status": 401,
+      "code": "invalid_token",
+      "providerAttempts": 0
+    },
+    {
+      "name": "no explicit entitlement",
+      "status": 403,
+      "code": "inference_access_required",
+      "providerAttempts": 0
+    },
+    {
+      "name": "Nova credential cannot manage the GALX account",
+      "status": 401
+    },
+    {
+      "name": "wrong client origin",
+      "status": 401,
+      "code": "invalid_token",
+      "providerAttempts": 0
+    },
+    {
+      "name": "wrong host cannot borrow forwarded Nova authority",
+      "status": 400,
+      "code": "invalid_request",
+      "providerAttempts": 0
+    },
+    {
+      "name": "unconfigured authority nova.galx.ai:3000",
+      "status": 400,
+      "code": "invalid_request",
+      "providerAttempts": 0
+    },
+    {
+      "name": "unconfigured authority 127.0.0.1:3000",
+      "status": 400,
+      "code": "invalid_request",
+      "providerAttempts": 0
+    },
+    {
+      "name": "unconfigured authority 0.0.0.0:3000",
+      "status": 400,
+      "code": "invalid_request",
+      "providerAttempts": 0
+    },
+    {
+      "name": "Media authority cannot invoke Nova",
+      "status": 401,
+      "code": "invalid_token",
+      "providerAttempts": 0
+    }
+  ]
+}

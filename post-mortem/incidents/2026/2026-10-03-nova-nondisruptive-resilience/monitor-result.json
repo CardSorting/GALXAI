@@ -1,0 +1,64 @@
+{
+  "image": "sha256:0ab24b83ce3f2536f88b3994a716671d7b87495ebc5bdb90c5cafa3a50aa05ed",
+  "architecture": "arm64",
+  "checks": 90,
+  "cli": "Docker version 29.5.3, build d1c06ef6b41d88d76866aea43c246cd7c63d04fa",
+  "entrypointStarted": true,
+  "monitorRecoveryMs": 332,
+  "processDeathRecovered": true,
+  "controlLossFailClosed": true,
+  "revocationSurvivesRestart": true,
+  "browserFields": [
+    "accounts",
+    "activity",
+    "automaticActivation",
+    "desktopAvailable",
+    "desktops",
+    "executionAllowed",
+    "pool",
+    "registrationAllowed",
+    "registrations",
+    "relayFresh",
+    "role"
+  ],
+  "privateOwnershipFields": [
+    "installationId",
+    "lastSeenAt",
+    "pool"
+  ],
+  "controlRoutes": [
+    "/operator/status"
+  ],
+  "projectFiles": [
+    "component.json",
+    "desktop",
+    "desktop-activity.js",
+    "desktop-login.html",
+    "desktop-login.js",
+    "desktop-organizer.css",
+    "desktop-organizer.js",
+    "desktops.html",
+    "desktops.js",
+    "entrypoint.mjs",
+    "node_modules",
+    "package-lock.json",
+    "package.json",
+    "pool-desktop.html",
+    "pool-desktop.js",
+    "pool-monitor-access.css",
+    "pool-monitor-login.html",
+    "pool-monitor-login.js",
+    "pool-monitor-model.js",
+    "pool-monitor.css",
+    "pool-monitor.html",
+    "pool-monitor.js",
+    "service.mjs"
+  ],
+  "productionDependencies": [
+    "@novnc/novnc",
+    "pg",
+    "sharp",
+    "ws"
+  ],
+  "network": "none; synthetic loopback control and Unix daemon only"
+}

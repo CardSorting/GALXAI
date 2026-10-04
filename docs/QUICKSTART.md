@@ -6,6 +6,12 @@ Start by exploring what the Stars are making. Browse public Works and Series,
 follow Stars, and save the pieces you want to return to. This public discovery
 experience does not depend on image generation being available.
 
+Connect with GALX provides a separate path for supported external tools:
+authorize that application using your existing account, then use eligible
+inference access there. No public profile or gallery participation is required.
+Connect availability will be announced separately from the existing Media
+experience.
+
 For private creation, sign in and open the creative workspace. An eligible
 purchased tier and available allowance are required before generation or
 private remix begins. The workspace shows whether creation is available and the

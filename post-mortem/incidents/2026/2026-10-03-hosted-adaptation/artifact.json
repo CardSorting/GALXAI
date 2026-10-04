@@ -1,0 +1,14 @@
+{
+  "at": "2026-10-03T21:55:30.938Z",
+  "format": "Vercel Build Output API",
+  "functions": 33,
+  "mappedReferences": 9121,
+  "retainedPayloads": 1839,
+  "files": 3740,
+  "manifestSha256": "20e4e1df10c7b17d8bec3fd8c4f168d33b371e5ab26892f19d4d8dfc98a19ccf",
+  "archiveSha256": "b11d853b80851b2ee978b5d0d0bb2cedb66ced423f545e91b44aeaf8c4a9e235",
+  "archiveBytes": 48816495,
+  "applicationPayloadBytesChanged": 0,
+  "workspaceDependencies": false,
+  "deployed": false
+}

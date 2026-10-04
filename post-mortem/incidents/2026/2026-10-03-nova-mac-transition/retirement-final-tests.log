@@ -1,0 +1,21 @@
+✔ only product and supporting endpoints bypass preview, including async images and site publication (1.329583ms)
+✔ discovery pages and authenticated allowance reads do not require developer approval (2.396167ms)
+✔ public dynamic profile chunks bypass preview without exposing private sibling chunks (4.706833ms)
+✔ anonymous, pending, revoked, forged grants, and unavailable authority cannot dispatch (2.451875ms)
+✔ account quota reads bypass developer approval but retain account authentication (0.544833ms)
+✔ public developer enrollment and feedback are retired without reaching storage (0.960292ms)
+✔ profile validation accepts either profile and rejects hostile URLs and missing cohort interest (2.698458ms)
+✔ direct handlers deny anonymous execution and key minting before handling input (88.649625ms)
+✔ API hostname rechecks approval for images while preserving metered private access (2.375125ms)
+✔ authorization probes validate keys without charging request quota or usage (0.893625ms)
+✔ Developer Access billing metadata is retained for reconciliation but not checkout (1.232ms)
+✔ private usage pricing gate remains available to preserve metering (0.107792ms)
+✔ Vercel denies every inference entry before authorization, input parsing or dispatch (330.738292ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1024.652959

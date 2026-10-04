@@ -1,0 +1,45 @@
+{
+  "classification": "private",
+  "observed_at": "2026-10-03T21:08:56.140824+00:00",
+  "scope": "Read-only controlled rollout preflight; no implementation or deployment change.",
+  "reviewed_complete_affected_guides": [
+    "post-mortem/runbooks/deployment-storage.md"
+  ],
+  "current_state_review": "Reviewed new leading determination, historical ordering and earlier ACT-001 statements as dated evidence; retained prior observations without rewriting them.",
+  "source_contracts_inspected": [
+    "src/lib/connect/config.ts",
+    "src/lib/supabase/repositories/ConnectRepository.ts",
+    "src/lib/nova/executor.ts",
+    "src/core/router/adapters/RelayEndpointDiscovery.ts",
+    "src/relay/pool-central.ts",
+    "scripts/relay-local.mjs",
+    "scripts/lib/relay-local-access.mjs",
+    "supabase/migrations/20261003202702_relay_refill_integer_credit.sql",
+    "supabase/rollbacks/20261003202702_relay_refill_integer_credit.down.sql",
+    "deploy/relay-execution/supabase/migrations/20261003195250_relay_execution_neutral_outcomes.sql",
+    ".vercelignore"
+  ],
+  "supporting_guides_inspected": [
+    "docs/DEPLOYMENT.md",
+    "docs/VERCEL_DEPLOYMENT.md",
+    "docs/operations/galx-connect.md",
+    "docs/runbooks/relay-pool-services.md",
+    "docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md",
+    "docs/DOCUMENTATION_POLICY.md",
+    "docs/how-to/change-with-documentation.md"
+  ],
+  "semantic_conclusions": [
+    "ACT-001 closes observed storage/inventory only. Three new target gates keep controlled rollout blocked.",
+    "Source and compiled hashes unchanged; prior arithmetic/build/lifecycle acceptance remains valid for the frozen candidate, not proof of target acceptance.",
+    "Current deployed neutral outcomes, scoped grants and private/browser boundary preserved. Existing images remain installed.",
+    "Migration plan applies only pending refill; normal rollback retains additive exact state and neutral execution schema.",
+    "Hosted web packaging needs separate authorization; no rebuild/deploy or cohort enablement performed.",
+    "Required cohort perimeter and hosted text transport are absent; public-release warnings remain separately classified."
+  ],
+  "retained_evidence": [
+    "post-mortem/releases/2026-10-03-controlled-rollout-preflight.json"
+  ],
+  "unmapped_review": "New incident JSON evidence is intentionally private under post-mortem and excluded by deployment inputs; no new runtime source boundary. Existing broad dirty tree predates this pass and is not reclassified.",
+  "limits": "Only two critical watched guides changed since prior semantic attestation. Unchanged source hashes preserve that prior review; this is not a new exhaustive application security audit.",
+  "delivery_review_delta": "Only post-mortem/runbooks/deployment-storage.md differs from the preceding delivery-domain review; its complete body was reviewed against current dashboard and API evidence. All other delivery source/guide digests remain identical. The preceding refill/packaging attestation is retained as a second evidence reference."
+}

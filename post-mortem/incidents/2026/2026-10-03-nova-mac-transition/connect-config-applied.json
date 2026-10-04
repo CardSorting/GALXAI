@@ -1,0 +1,11 @@
+{
+  "at": "2026-10-04T01:39:17.377Z",
+  "name": "GALX_CONNECT_ENABLED",
+  "target": [
+    "production"
+  ],
+  "before": "0",
+  "after": "1",
+  "otherConfigurationChanged": false,
+  "cohortAuthority": "existing explicit entitlement plus revocable first-party application grant"
+}

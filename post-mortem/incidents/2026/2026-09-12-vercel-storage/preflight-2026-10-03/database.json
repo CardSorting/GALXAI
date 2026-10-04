@@ -1,0 +1,853 @@
+{
+  "at": "2026-10-03T20:58:15.963Z",
+  "mode": "Repeatable-read READ ONLY transactions; only identity/pending read actions invoked on restricted execution interface.",
+  "primary": {
+    "tlsAuthorized": true,
+    "server": [
+      {
+        "version": "17.6",
+        "database": "postgres",
+        "role": "postgres",
+        "read_only": "on"
+      }
+    ],
+    "history": [
+      {
+        "version": "20260822000001",
+        "name": "galxai_schema_core"
+      },
+      {
+        "version": "20260822000002",
+        "name": "galxai_schema_apex"
+      },
+      {
+        "version": "20260822000003",
+        "name": "galxai_user_sessions_auth"
+      },
+      {
+        "version": "20260822000004",
+        "name": "galxai_auth_hardening_v2"
+      },
+      {
+        "version": "20260822000005",
+        "name": "galxai_schema_edge_mesh"
+      },
+      {
+        "version": "20260822000006",
+        "name": "galxai_auth_hardening_v3"
+      },
+      {
+        "version": "20260822000007",
+        "name": "galxai_schema_ultra"
+      },
+      {
+        "version": "20260822000008",
+        "name": "galxai_schema_quantum"
+      },
+      {
+        "version": "20260822000009",
+        "name": "galxai_oauth_authoritative_mesh"
+      },
+      {
+        "version": "20260822000010",
+        "name": "galxai_oauth_fapi_apex_hardening"
+      },
+      {
+        "version": "20260822000011",
+        "name": "galxai_oauth_rtr_family_mesh"
+      },
+      {
+        "version": "20260822000012",
+        "name": "galxai_oauth_backchannel_and_vacuum_mesh"
+      },
+      {
+        "version": "20260822000013",
+        "name": "galxai_stripe_billing_mesh"
+      },
+      {
+        "version": "20260822000014",
+        "name": "galxai_teams_and_seats_governance_mesh"
+      },
+      {
+        "version": "20260822000015",
+        "name": "galxai_enterprise_edge_mesh_and_cache_governance"
+      },
+      {
+        "version": "20260822000016",
+        "name": "galxai_project_allocations_and_smart_routing_mesh"
+      },
+      {
+        "version": "20260822000017",
+        "name": "galxai_slo_canaries_and_outage_ledger"
+      },
+      {
+        "version": "20260822000018",
+        "name": "galxai_spend_governance_and_forensic_remediation"
+      },
+      {
+        "version": "20260822000019",
+        "name": "galxai_stripe_refund_and_dispute_mesh"
+      },
+      {
+        "version": "20260822000020",
+        "name": "galxai_postgresql_paranoid_apex_hardening"
+      },
+      {
+        "version": "20260822000021",
+        "name": "galxai_postgresql_hyperscale_governance_and_vacuum_armor"
+      },
+      {
+        "version": "20260822000022",
+        "name": "galxai_postgresql_sovereign_security_and_keyset_armor"
+      },
+      {
+        "version": "20260822000023",
+        "name": "galxai_postgresql_apex_fts_and_partial_index_mesh"
+      },
+      {
+        "version": "20260822000024",
+        "name": "galxai_inference_credit_hold_and_preauth_mesh"
+      },
+      {
+        "version": "20260822000025",
+        "name": "galxai_tamper_proof_cryptographic_ledger_mesh"
+      },
+      {
+        "version": "20260822000026",
+        "name": "galxai_postgresql_security_definer_core_procedures"
+      },
+      {
+        "version": "20260822000027",
+        "name": "galxai_postgresql_rpc_wallet_and_ledger_access"
+      },
+      {
+        "version": "20260822000028",
+        "name": "galxai_postgresql_ledger_hash_width_expansion"
+      },
+      {
+        "version": "20260822000029",
+        "name": "galxai_postgresql_batch_coalesce_and_cache_mesh"
+      },
+      {
+        "version": "20260822000030",
+        "name": "galxai_postgresql_bulk_array_and_audit_mesh"
+      },
+      {
+        "version": "20260822000031",
+        "name": "galxai_postgresql_native_unnest_and_session_heartbeat_mesh"
+      },
+      {
+        "version": "20260822000032",
+        "name": "galxai_postgresql_credit_slicing_and_burst_mesh"
+      },
+      {
+        "version": "20260822000033",
+        "name": "galxai_postgresql_composite_gateway_pipeline_mesh"
+      },
+      {
+        "version": "20260822000034",
+        "name": "galxai_postgresql_roundtrip_reduction_apex_mesh"
+      },
+      {
+        "version": "20260822000035",
+        "name": "galxai_postgresql_token_verification_and_merkle_window_mesh"
+      },
+      {
+        "version": "20260822000036",
+        "name": "galxai_postgresql_multi_rpc_and_org_hierarchy_mesh"
+      },
+      {
+        "version": "20260822000037",
+        "name": "galxai_postgresql_atomic_merkle_and_slo_rollup_mesh"
+      },
+      {
+        "version": "20260822000038",
+        "name": "galxai_custom_personas_and_image_studio_mesh"
+      },
+      {
+        "version": "20260822000039",
+        "name": "galxai_chat_sessions_and_messages_hybrid_mesh"
+      },
+      {
+        "version": "20260822000040",
+        "name": "galxai_chat_roundtrip_reduction_mesh"
+      },
+      {
+        "version": "20260822000041",
+        "name": "galxai_chat_delta_sync_and_etag_apex"
+      },
+      {
+        "version": "20260822000042",
+        "name": "galxai_chat_unified_personas_and_stream_tap_apex"
+      },
+      {
+        "version": "20260822000043",
+        "name": "galxai_chat_quantum_multi_session_mesh_and_cte_apex"
+      },
+      {
+        "version": "20260822000044",
+        "name": "galxai_seat_dual_rolling_windows_and_concurrency_mesh"
+      },
+      {
+        "version": "20260822000045",
+        "name": "galxai_seat_zero_roundtrip_composite_pipeline_apex"
+      },
+      {
+        "version": "20260822000046",
+        "name": "galxai_chat_hybrid_rolling_context_mesh"
+      },
+      {
+        "version": "20260822000047",
+        "name": "galxai_chat_semantic_entity_memory_and_chunk_mesh"
+      },
+      {
+        "version": "20260822000048",
+        "name": "galxai_chat_content_addressable_doc_mesh_and_rag"
+      },
+      {
+        "version": "20260822000049",
+        "name": "galxai_chat_temporal_entity_graph_and_cache_topology"
+      },
+      {
+        "version": "20260822000050",
+        "name": "galxai_chat_atomic_turn_pairs_and_stable_cache_mesh"
+      },
+      {
+        "version": "20260822000051",
+        "name": "galxai_chat_evolutionary_context_pyramid_and_episodes"
+      },
+      {
+        "version": "20260822000052",
+        "name": "galxai_chat_zenith_universal_context_mesh"
+      },
+      {
+        "version": "20260829000053",
+        "name": "galxai_chat_context_production_hardening"
+      },
+      {
+        "version": "20260901000054",
+        "name": "galxai_lumi_and_community_qos_pools_mesh"
+      },
+      {
+        "version": "20260901000055",
+        "name": "galxai_tier_shards_and_predictive_routing_mesh"
+      },
+      {
+        "version": "20260901000056",
+        "name": "galxai_cryptographic_vault_shard_splitting_mesh"
+      },
+      {
+        "version": "20260901000057",
+        "name": "galxai_lumi_and_community_pools_industrial_apex"
+      },
+      {
+        "version": "20260901000058",
+        "name": "galxai_lumi_and_community_qos_sovereign_zenith"
+      },
+      {
+        "version": "20260901000059",
+        "name": "galxai_pools_ietf_burst_and_warmup_mesh"
+      },
+      {
+        "version": "20260901000060",
+        "name": "galxai_zero_roundtrip_qos_mesh_and_vectorized_sync"
+      },
+      {
+        "version": "20260901000061",
+        "name": "galxai_streaming_deltas_and_crdt_sync_mesh"
+      },
+      {
+        "version": "20260901000062",
+        "name": "galxai_prompt_compaction_and_semantic_cache_mesh"
+      },
+      {
+        "version": "20260901000063",
+        "name": "galxai_quality_survivability_and_sentinel_mesh"
+      },
+      {
+        "version": "20260901000064",
+        "name": "galxai_context_window_preservation_and_attention_anchor_mesh"
+      },
+      {
+        "version": "20260901000065",
+        "name": "galxai_semantic_ast_skeletons_and_context_pyramid_mesh"
+      },
+      {
+        "version": "20260901000066",
+        "name": "galxai_context_salience_and_working_memory_mesh"
+      },
+      {
+        "version": "20260901000067",
+        "name": "galxai_high_throughput_io_authority_and_pipeline_mesh"
+      },
+      {
+        "version": "20260901000068",
+        "name": "galxai_zero_egress_and_compact_projections_mesh"
+      },
+      {
+        "version": "20260901000069",
+        "name": "galxai_origin_hit_rate_mitigation_and_swr_mesh"
+      },
+      {
+        "version": "20260901000070",
+        "name": "galxai_xfetch_and_bloom_origin_shield_mesh"
+      },
+      {
+        "version": "20260901000071",
+        "name": "galxai_authoritative_merkle_epochs_and_governor_mesh"
+      },
+      {
+        "version": "20260903000072",
+        "name": "galxai_developer_keys_retrieval_and_direct_governance"
+      },
+      {
+        "version": "20260903000073",
+        "name": "galxai_developer_keys_watermark_and_sync_index"
+      },
+      {
+        "version": "20260904150000",
+        "name": "galxai_shard_authority_registry_hardening"
+      },
+      {
+        "version": "20260904160000",
+        "name": "galxai_shard_lease_rpc_and_journal_hardening"
+      },
+      {
+        "version": "20260904170000",
+        "name": "galxai_authoritative_shard_leases"
+      },
+      {
+        "version": "20260904180000",
+        "name": "galxai_shard_capacity_and_registry_rpc_hardening"
+      },
+      {
+        "version": "20260904190000",
+        "name": "galxai_authoritative_quota_refill_and_rolling_window"
+      },
+      {
+        "version": "20260904200000",
+        "name": "galxai_retire_competing_shard_authorities"
+      },
+      {
+        "version": "20260904210000",
+        "name": "galxai_qos_work_authority_least_privilege"
+      },
+      {
+        "version": "20260904220000",
+        "name": "galxai_live_integration_contract_repair"
+      },
+      {
+        "version": "20260904230000",
+        "name": "galxai_tenant_authority_reconciliation"
+      },
+      {
+        "version": "20260905011334",
+        "name": "retire_browser_client_tables"
+      },
+      {
+        "version": "20260905093500",
+        "name": "galxai_user_image_library_and_batch_buffer"
+      },
+      {
+        "version": "20260905162048",
+        "name": "image_library_live_schema_reconciliation"
+      },
+      {
+        "version": "20260906000001",
+        "name": "billing_payment_recovery"
+      },
+      {
+        "version": "20260907190322",
+        "name": "wallet_account_lifecycle"
+      },
+      {
+        "version": "20260907191200",
+        "name": "function_search_path_and_vector_security"
+      },
+      {
+        "version": "20260907210015",
+        "name": "galxai_expired_cooldown_probe_recovery"
+      },
+      {
+        "version": "20260907211705",
+        "name": "galxai_cooldown_health_evidence_and_fencing"
+      },
+      {
+        "version": "20260907215504",
+        "name": "galxai_observation_only_health_ingestion"
+      },
+      {
+        "version": "20260910071450",
+        "name": "signup_credit_allowance"
+      },
+      {
+        "version": "20260911153205",
+        "name": "sites_custom_domains"
+      },
+      {
+        "version": "20260911163542",
+        "name": "sites_domain_automation"
+      },
+      {
+        "version": "20260912003002",
+        "name": "sites_workspace"
+      },
+      {
+        "version": "20260912030611",
+        "name": "sites_paid_fair_usage"
+      },
+      {
+        "version": "20260912041351",
+        "name": "sites_pro_subscription"
+      },
+      {
+        "version": "20260912060747",
+        "name": "sites_conversation_sessions"
+      },
+      {
+        "version": "20260912071633",
+        "name": "sites_hybrid_context_search"
+      },
+      {
+        "version": "20260912215724",
+        "name": "developer_private_preview"
+      },
+      {
+        "version": "20260912222003",
+        "name": "preview_admin_workspace"
+      },
+      {
+        "version": "20260912234139",
+        "name": "developer_cohort_application"
+      },
+      {
+        "version": "20260913025900",
+        "name": "durable_image_requests"
+      },
+      {
+        "version": "20260913071757",
+        "name": "image_library_bounded_pages"
+      },
+      {
+        "version": "20260913201023",
+        "name": "account_session_liveness"
+      },
+      {
+        "version": "20260914030425",
+        "name": "free_generation_quota"
+      },
+      {
+        "version": "20260914035003",
+        "name": "free_generation_admission_gate"
+      },
+      {
+        "version": "20260914231914",
+        "name": "manual_desktop_shard_enrollment"
+      },
+      {
+        "version": "20260915073601",
+        "name": "central_relay_account_foundation"
+      },
+      {
+        "version": "20260915081527",
+        "name": "central_relay_authorization"
+      },
+      {
+        "version": "20260915163434",
+        "name": "relay_legacy_assignment_guard"
+      },
+      {
+        "version": "20260915191404",
+        "name": "relay_account_management"
+      },
+      {
+        "version": "20260916003207",
+        "name": "billing_canonical_returns"
+      },
+      {
+        "version": "20260916013944",
+        "name": "relay_connection_lifecycle"
+      },
+      {
+        "version": "20260916040459",
+        "name": "relay_automatic_activation"
+      },
+      {
+        "version": "20260916161120",
+        "name": "isolate_account_session_lookup"
+      },
+      {
+        "version": "20260917040000",
+        "name": "public_image_stream_schema_and_rls"
+      },
+      {
+        "version": "20260917050000",
+        "name": "anti_locking_image_stats_and_interactions"
+      },
+      {
+        "version": "20260917060000",
+        "name": "audit_explore_permissions_and_idempotent_likes"
+      },
+      {
+        "version": "20260917070000",
+        "name": "user_image_library_permissions_and_visibility"
+      },
+      {
+        "version": "20260917080000",
+        "name": "community_explore_moderation_hide"
+      },
+      {
+        "version": "20260917090000",
+        "name": "compute_tier_enrichment"
+      },
+      {
+        "version": "20260917100000",
+        "name": "community_feed_test_isolation_and_resilience"
+      },
+      {
+        "version": "20260918090000",
+        "name": "retire_standard_relay"
+      },
+      {
+        "version": "20260918120000",
+        "name": "remove_standard_relay_schema"
+      },
+      {
+        "version": "20260918130000",
+        "name": "purge_retired_standard_shards"
+      },
+      {
+        "version": "20260918212835",
+        "name": "nova_developer_subscription_entitlement"
+      },
+      {
+        "version": "20260918225057",
+        "name": "nova_message_metering_basis"
+      },
+      {
+        "version": "20260918231500",
+        "name": "nova_message_billing_outbox"
+      },
+      {
+        "version": "20260918240000",
+        "name": "nova_message_usage_cap"
+      },
+      {
+        "version": "20260918241000",
+        "name": "nova_message_billing_delivery"
+      },
+      {
+        "version": "20260918242000",
+        "name": "nova_message_usage_workspace"
+      },
+      {
+        "version": "20260918250000",
+        "name": "private_developer_access_controls"
+      },
+      {
+        "version": "20260918251000",
+        "name": "private_access_allocation_sync"
+      },
+      {
+        "version": "20260919090000",
+        "name": "reuse_safe_shard_registry_revisions"
+      },
+      {
+        "version": "20260919110000",
+        "name": "autonomous_account_identity_and_provenance"
+      },
+      {
+        "version": "20260919120000",
+        "name": "canonical_account_profiles_and_ownership_bridge"
+      },
+      {
+        "version": "20260919130000",
+        "name": "star_participant_profiles_and_population_controls"
+      },
+      {
+        "version": "20260919140000",
+        "name": "star_cohort_recovery_controls"
+      },
+      {
+        "version": "20260919150000",
+        "name": "star_generation_request_and_counter_repairs"
+      },
+      {
+        "version": "20260919160000",
+        "name": "sync_generation_receipts_with_image_requests"
+      },
+      {
+        "version": "20260919170000",
+        "name": "star_cohort_membership_and_refresh"
+      },
+      {
+        "version": "20260919180000",
+        "name": "star_refresh_constraint_repair"
+      },
+      {
+        "version": "20260920041311",
+        "name": "private_profile_settings_projection"
+      },
+      {
+        "version": "20260920064323",
+        "name": "remove_public_developer_return_path"
+      },
+      {
+        "version": "20260920072707",
+        "name": "star_profile_explore_visibility_boundary"
+      },
+      {
+        "version": "20260920075103",
+        "name": "restore_legacy_star_profile_visibility"
+      },
+      {
+        "version": "20260920120000",
+        "name": "personal_explore_hide_controls"
+      },
+      {
+        "version": "20260920123000",
+        "name": "personal_explore_hide_privilege_repair"
+      },
+      {
+        "version": "20260920130000",
+        "name": "image_plan_checkout_contract"
+      },
+      {
+        "version": "20260924010000",
+        "name": "user_star_follows"
+      },
+      {
+        "version": "20260924020000",
+        "name": "private_human_works_star_publication_boundary"
+      },
+      {
+        "version": "20260924030000",
+        "name": "private_image_allowance_accounting"
+      },
+      {
+        "version": "20260925113752",
+        "name": "broc_persistent_star_practice"
+      },
+      {
+        "version": "20260925150000",
+        "name": "star_selection_publication_gate"
+      },
+      {
+        "version": "20260925215000",
+        "name": "preserve_historical_star_publications"
+      },
+      {
+        "version": "20261003131619",
+        "name": "galx_connect_grants"
+      }
+    ],
+    "quotaColumns": [
+      {
+        "column_name": "max_tokens",
+        "data_type": "bigint",
+        "is_nullable": "NO",
+        "numeric_scale": 0
+      },
+      {
+        "column_name": "remaining_tokens",
+        "data_type": "bigint",
+        "is_nullable": "NO",
+        "numeric_scale": 0
+      },
+      {
+        "column_name": "refill_rate_per_minute",
+        "data_type": "bigint",
+        "is_nullable": "NO",
+        "numeric_scale": 0
+      },
+      {
+        "column_name": "max_requests",
+        "data_type": "integer",
+        "is_nullable": "NO",
+        "numeric_scale": 0
+      },
+      {
+        "column_name": "remaining_requests",
+        "data_type": "integer",
+        "is_nullable": "NO",
+        "numeric_scale": 0
+      },
+      {
+        "column_name": "last_refill_timestamp_ms",
+        "data_type": "bigint",
+        "is_nullable": "NO",
+        "numeric_scale": 0
+      },
+      {
+        "column_name": "token_refill_remainder",
+        "data_type": "numeric",
+        "is_nullable": "NO",
+        "numeric_scale": 9
+      },
+      {
+        "column_name": "request_refill_remainder",
+        "data_type": "numeric",
+        "is_nullable": "NO",
+        "numeric_scale": 9
+      }
+    ],
+    "quotaShape": [
+      {
+        "accounts": 3,
+        "max_tokens": "500000",
+        "refill_rate_per_minute": "50000",
+        "max_requests": 40,
+        "max_concurrency_ceiling": 50,
+        "legacy_valid": true,
+        "with_fraction": 0,
+        "active": 0
+      }
+    ],
+    "cohort": [
+      {
+        "user_id": "a58fa68f-3545-4235-9825-807431813081",
+        "enabled": false,
+        "valid_until": "2026-10-03T21:00:00.000Z",
+        "existing_account": true,
+        "active_grants": 0
+      }
+    ],
+    "grants": [
+      {
+        "client_id": "reference-native",
+        "resource": "http://127.0.0.1:3000",
+        "scope": "inference:invoke",
+        "total": 4,
+        "active": 0
+      },
+      {
+        "client_id": "reference-browser",
+        "resource": "http://127.0.0.1:3000",
+        "scope": "inference:invoke",
+        "total": 2,
+        "active": 0
+      }
+    ],
+    "novaRecords": [
+      {
+        "state": "completed",
+        "records": 2,
+        "future_reservations": 0
+      },
+      {
+        "state": "unknown",
+        "records": 2,
+        "future_reservations": 0
+      },
+      {
+        "state": "not_accepted",
+        "records": 5,
+        "future_reservations": 0
+      }
+    ],
+    "privatePrivileges": [
+      {
+        "r": "anon",
+        "entitlement_read": false,
+        "grant_read": false,
+        "quota_read": false
+      },
+      {
+        "r": "authenticated",
+        "entitlement_read": false,
+        "grant_read": false,
+        "quota_read": false
+      },
+      {
+        "r": "service_role",
+        "entitlement_read": false,
+        "grant_read": false,
+        "quota_read": true
+      }
+    ],
+    "refillFunction": [
+      {
+        "body_md5": "c6344d47b38c43568ae064be66e2bebe",
+        "args": "p_shard_id character varying, p_user_id character varying, p_estimated_tokens bigint, p_lease_ttl_ms bigint, p_job_id character varying, p_now_ms bigint",
+        "result": "jsonb"
+      }
+    ],
+    "accountLocks": [
+      {
+        "mode": "AccessShareLock",
+        "granted": true,
+        "count": 1
+      }
+    ]
+  },
+  "execution": {
+    "tlsAuthorized": true,
+    "server": [
+      {
+        "version": "17.6",
+        "database": "postgres",
+        "role": "galx_execution_service",
+        "read_only": "on"
+      }
+    ],
+    "history": {
+      "errorCode": "42501"
+    },
+    "contract": [
+      {
+        "body_md5": "af0b353a295ee0e6a783bde52459ee17",
+        "nullableFinish": true,
+        "neutralRecovery": true,
+        "definition_sha256": "b509608b5a708998b3302d9be8ee464e8f95c15bd7caef05453bd8bf0e7bba1d"
+      }
+    ],
+    "records": {
+      "errorCode": "42501"
+    },
+    "pendingSettlement": [
+      {
+        "records": 0
+      }
+    ],
+    "identity": [
+      {
+        "pool": "premium"
+      }
+    ]
+  },
+  "executionOwner": {
+    "executions": [
+      {
+        "records": 20,
+        "settled": true,
+        "state": "completed",
+        "success": true
+      },
+      {
+        "records": 10,
+        "settled": true,
+        "state": "unknown",
+        "success": false
+      },
+      {
+        "records": 1,
+        "settled": true,
+        "state": "unknown",
+        "success": null
+      }
+    ],
+    "migrations": [
+      {
+        "name": "relay_execution",
+        "version": "20260915082628"
+      },
+      {
+        "name": "relay_execution_neutral_outcomes",
+        "version": "20261003195250"
+      }
+    ],
+    "read_only": "on",
+    "retained_digest": "bb3249cc2d73bf36b4d5bfbc4c03a3fe",
+    "server_version": "17.6"
+  }
+}

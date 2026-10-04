@@ -1,0 +1,49 @@
+{
+  "at": "2026-10-03T20:52:47.092165+00:00",
+  "base_revision": "38a3cc48f32f5f404592109c8cae3ddac5fa6f61",
+  "working_tree": "accepted uncommitted candidate over base revision; do not substitute HEAD alone",
+  "runtime_manifest_sha256": "aa7f5156d3110278e83699e8e073e4347974365911601096bc62e48ffd325d5c",
+  "runtime_files": 1886,
+  "images": [
+    {
+      "tag": "galxai-relay-central:closure-clean-20261003",
+      "id": "sha256:a0a4a04390f3ebbdd114689ad6e469cc8b1ff6b2515aad380cb28538d0448523",
+      "architecture": "arm64",
+      "component": "central",
+      "repoDigests": [
+        "galxai-relay-central@sha256:a0a4a04390f3ebbdd114689ad6e469cc8b1ff6b2515aad380cb28538d0448523"
+      ],
+      "created": "2026-10-03T20:29:11.104750379Z",
+      "os": "linux",
+      "bytes": 71817470
+    },
+    {
+      "tag": "galxai-relay-premium:closure-clean-20261003",
+      "id": "sha256:def038ce77818ef7355392f656ad4cf858ddd2cdc534e9f2fc83069edbeaf075",
+      "architecture": "arm64",
+      "component": "runtime",
+      "pool": "premium",
+      "repoDigests": [
+        "galxai-relay-premium@sha256:def038ce77818ef7355392f656ad4cf858ddd2cdc534e9f2fc83069edbeaf075"
+      ],
+      "created": "2026-10-03T20:29:11.110571587Z",
+      "os": "linux",
+      "bytes": 71817539
+    },
+    {
+      "tag": "galxai-monitor-premium:closure-clean-20261003",
+      "id": "sha256:08b3ea12058826316509b9f69c444f6f71d5c5b01382df99e672884bc123908b",
+      "architecture": "arm64",
+      "component": "monitor",
+      "pool": "premium",
+      "repoDigests": [
+        "galxai-monitor-premium@sha256:08b3ea12058826316509b9f69c444f6f71d5c5b01382df99e672884bc123908b"
+      ],
+      "created": "2026-10-03T20:29:11.402759379Z",
+      "os": "linux",
+      "bytes": 89658655
+    }
+  ],
+  "next_build_id": "5dfhz5cUzQI8WbdZtDjra",
+  "vercel_output_modified": "2026-08-24T17:19:08.497189+00:00"
+}

@@ -1,0 +1,11 @@
+file:///Users/bozoegg/Desktop/GALXAI/.relay/nova-transition/final-surface.mjs:19
+const queue=[...assets];await Promise.all(Array.from({length:4},async()=>{for(let p; (p=queue.pop());){const expected=fs.readFileSync(p);const r=await fetch('https://galx.ai'+p.slice(staticRoot.length),{redirect:'error',signal:AbortSignal.timeout(15000)});if(!r.ok)throw Error('Live asset unavailable');const b=Buffer.from(await r.arrayBuffer());scan(b);if(!b.equals(expected))throw Error('Live asset differs from accepted web artifact');assetBytes+=b.length;verifiedAssets++;}}));
+                                                                                                                                                                                                                                                                                                                                                                                               ^
+
+Error: Live asset differs from accepted web artifact
+    at file:///Users/bozoegg/Desktop/GALXAI/.relay/nova-transition/final-surface.mjs:19:384
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async Promise.all (index 3)
+    at async file:///Users/bozoegg/Desktop/GALXAI/.relay/nova-transition/final-surface.mjs:19:25
+
+Node.js v26.8.1

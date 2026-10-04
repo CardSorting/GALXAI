@@ -14,7 +14,7 @@ No account enters Premium through host discovery. The central registrar validate
 
 ## Eligibility before load
 
-In full isolated mode, the application chooses Premium before dispatch for text, Sites and images. An independent Premium image switch remains available for image availability/generation. The path skips legacy account selection and never falls back to another deployment. The runtime verifies its execution gate and fresh scoped projection, then rotates across matching healthy engines. This service does not use the legacy load-weighted reverse index.
+In full isolated mode, the application chooses Premium before dispatch for text, Sites and images. An independent Premium image switch remains available for image availability/generation. The path skips legacy account selection and never falls back to another deployment. The runtime verifies its execution gate and fresh scoped projection, then rotates across matching eligible engines. This service does not use the legacy load-weighted reverse index.
 
 The engine reserves durable execution identity, acquires the existing central lease and binds it before provider I/O. Assignment, installation epoch, revision, credential, workload, permission, expiry and budget checks are central. There is no legacy, alternate-model or uncertain-execution fallback.
 
@@ -22,8 +22,8 @@ The engine reserves durable execution identity, acquires the existing central le
 
 | State/change | New pool behavior |
 | --- | --- |
-| Named registration with saved login | Requires explicit Review access and Register account; not serving capacity |
-| Registered account | Saved paused; explicit Enable after execution activation |
+| Named registration with saved login | Requires explicit Connect account and central verification; saved files alone do not grant capacity |
+| Registered account | New connections can enable under verified automatic activation; otherwise saved paused; reconnect preserves existing intent |
 | Enabled, current assigned account | Own runtime can start an in-process engine and acknowledge its revision |
 | Pause, revocation, removal or revision change | Stop old engine/authorization; do not assume legacy hold/drain semantics |
 | Expired sign-in | Repair manually in the bound desktop, then explicitly save reviewed sign-in |
@@ -35,7 +35,7 @@ Rename updates account and linked registration labels without changing identity.
 
 ## Health authority and stale results
 
-The monitor separates saved state, relay confirmation and health. Applied needs matching revision/epoch and a fresh non-future heartbeat. Health labels distinguish expiry, access denial, cooldown, repeated failures and overdue application from unknown connectivity. A registered account's stopped desktop is not a failure. No issues detected describes observed metadata, not a provider canary.
+The monitor separates saved state, relay confirmation and request status. Applied needs matching revision/epoch and a fresh non-future heartbeat. Availability defaults to unknown; no continuous upstream health verdict is implied. Expiry, explicit denial, live cooldown, retained request failures and overdue application have separate reasons. Historical failures do not veto reconnect or independently authorized Enable. A registered account's stopped desktop is not a failure. Provider evidence is nullable: actual completion is positive, an attributable provider availability failure is negative, and cancellation/deadline/transport loss/local failure is neutral. Neutral settlement preserves counters while terminal unknown execution remains non-replayable.
 
 Runtime grants last 30 seconds and renew every eight seconds with independent expiry. Central ownership uses epoch fencing and a greater-than-60-second stale-owner handoff. These are different from the UI's 45-second confirmation freshness. Observation-only health cannot mint a grant, clear cooldowns or widen account authority.
 
@@ -59,12 +59,12 @@ Historical fixed/metered work keeps its original pricing, occupancy and receipt 
 
 ## Operational visibility
 
-Open **GALX Monitors** or the fixed Premium app. The console has Accounts, Registration and Activity with separate operator/viewer sessions and central authorization. Name/status/health filters, issues-first ordering and Manage dialogs affect only its own authorized snapshot. Registration is manual; refresh does not sign in or generate content. Operational records and assets remain private.
+Open **GALX Monitors** or the fixed Premium app. The console has Accounts, Connections and Activity with separate operator/viewer sessions and central authorization. Name/saved-state/request-status filters, issues-first ordering and Manage dialogs affect only its own authorized snapshot. Registration is manual; refresh does not sign in or generate content. Operational records and assets remain private.
 
 The older `relay:open` and `relay:desktops` commands address only the retained single-controller federation. Its per-shard Docker workers, guardian, holds, reverse index and signed jobs remain documented in [legacy operations](maintainers/legacy-federation-operations.md) and [legacy API](reference/legacy-federation-api.md), not as the new pool runtime.
 
 ## Verification and deployment boundary
 
-Central migrations, the Premium execution schema and local service images are installed and tested. At the [management acceptance](../post-mortem/releases/2026-09-15-relay-account-management.json), registration was open and execution closed. Manual paid sign-in, provider qualification and public application cutover remain separate. Hosted SSH targets are optional future deployment inputs, not missing prerequisites for the installed local setup.
+Central migrations, the Premium execution schema and local service images are installed and tested. At the [management acceptance](../post-mortem/releases/2026-09-15-relay-account-management.json), registration was open and execution closed. Later [bounded real Connect acceptance](../post-mortem/releases/2026-10-03-connect-provider-recovery.json) demonstrated text inference, and the [outcome correction](../post-mortem/releases/2026-10-03-neutral-outcomes.json) demonstrated neutral cancellation on the installed runtime. Wider workload qualification and public application cutover remain separate. Hosted SSH targets are optional future deployment inputs, not missing prerequisites for the installed local setup.
 
 Keep earlier ADRs and dated fixtures as history. They do not certify physical-host separation, real provider capability, screen readers or production throughput. Use the [service runbook](runbooks/relay-pool-services.md) for activation and retention-preserving rollback.

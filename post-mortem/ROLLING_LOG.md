@@ -2281,3 +2281,511 @@ Incident: `INC-20260926-TAX`. Kind: `verification`.
 **Next step:** Continue ACT-038 deployment and isolated provider tax-calculation acceptance; documentation-link failures no longer block it.
 
 Evidence: [2026-09-26-checkout-tax-doc-links.json](releases/2026-09-26-checkout-tax-doc-links.json).
+
+## EVT-20261003-connect-cohort — 2026-10-03T14:26:14Z
+
+Incident: `INC-20261003-CONNECT`. Kind: `verification`.
+
+**Observation:** The real existing account completed Google sign-in, consent and browser/native PKCE after two browser integration defects were found. No entitlement initially existed.
+
+**Action:** Validated and applied only Connect migration 20261003131619; repaired native request-origin handling and the SDK browser fetch receiver; created one explicit bounded entitlement after confirming 403 without access.
+
+**Result:** The six private tables have forced RLS with client/service-role access denied. Account-authorized inference now reaches Nova admission; the unrelated Orbit migration remains pending.
+
+**Next step:** Verify real upstream readiness and complete revocation and the remaining negative matrix.
+
+Evidence: [2026-10-03-connect-real-acceptance.json](releases/2026-10-03-connect-real-acceptance.json).
+
+## EVT-20261003-connect-provider-blocked — 2026-10-03T14:27:18Z
+
+Incident: `INC-20261003-CONNECT`. Kind: `containment`.
+
+**Observation:** Actual inference readiness and authenticated model inventory return 503 despite live processes and a fresh runtime heartbeat. Both assigned provider credentials are expired.
+
+**Action:** Inspected only allowlisted status/expiry evidence; retained ownership and requested manual renewal through the existing account desktop. No inference POST reached the provider.
+
+**Result:** Authorized Nova attempts return sanitized service_busy/not_accepted and the client remains connected. No ambiguous attempt was replayed.
+
+**Next step:** Complete ACT-039 after one existing provider account is explicitly reconnected. Thirteen earlier actions remain open with individual acceptance/deployment/release classifications.
+
+Evidence: [2026-10-03-connect-real-acceptance.json](releases/2026-10-03-connect-real-acceptance.json).
+
+## EVT-20261003-connect-revocation-and-containment — 2026-10-03T14:43:19.117607+00:00
+
+Incident: `INC-20261003-CONNECT`. Kind: `verification`.
+
+**Observation:** Real scoped credentials expired naturally, rotated successfully and were denied after disconnect. The first post-ack denial completed within 167 ms. Reuse of a spent refresh token separately revoked its grant; another authorized client remained usable.
+
+**Action:** Retained allowlisted HTTP evidence; revoked the browser cohort grant, cleared reference-client credentials, disabled the temporary entitlement and stopped local test processes. Reconciled affected guides and classified the thirteen existing warnings without changing their deadlines.
+
+**Result:** Account and Media remained intact; three grants revoked and five not_accepted requests retained. Relevant source/database/account/media regressions and production build pass. No provider inference was dispatched because provider sessions remain expired.
+
+**Next step:** Manual provider sign-in and explicit reconnect are required before ACT-039 can complete the real result, execution-time behavior and post-completion revocation matrix. This is not controlled-deployment readiness.
+
+Evidence: [2026-10-03-connect-real-acceptance.json](releases/2026-10-03-connect-real-acceptance.json), [2026-10-03-connect-real-http.json](releases/2026-10-03-connect-real-http.json).
+
+## EVT-20261003-connect-final-local-verification — 2026-10-03T14:44:31.890908+00:00
+
+Incident: `INC-20261003-CONNECT`. Kind: `verification`.
+
+**Observation:** Final source/guide semantic review is recorded. Documentation and compiled-boundary gates now pass after stale generated views and fingerprints were reconciled.
+
+**Action:** Ran docs:sync, docs:check, docs:check:build, test:docs and git diff --check; preserved the earlier failed validation as dated evidence.
+
+**Result:** 382 guides, 45 incident documents, 165 ADRs and 11 knowledge domains validate. All 41 documentation fixtures pass; 538 compiled browser/rendered assets pass selected-marker/trace checks. Thirteen existing overdue prevention warnings remain classified, not closed.
+
+**Next step:** ACT-039 remains blocked by expired provider sessions. Renew one existing account manually, then resume real provider result and execution-lifecycle acceptance. System is not ready for controlled deployment.
+
+Evidence: [2026-10-03-connect-real-acceptance.json](releases/2026-10-03-connect-real-acceptance.json), [2026-10-03-connect-acceptance-review.json](releases/2026-10-03-connect-acceptance-review.json).
+
+## EVT-20261003-provider-reconnect-confirmed — 2026-10-03T19:35:44Z
+
+Incident: `INC-20261003-CONNECT`. Kind: `recovery`.
+
+**Observation:** The owner reported that six repeated failures and an old cached sign-in prevented saving. The existing Pro credential was actually renewed through October 13, and explicit Save new sign-in succeeded without changing identity.
+
+**Action:** Inspected the same monitor/desktop and scoped account metadata; confirmed real readiness; issued one bounded Connect SDK request through the actual Nova/provider path.
+
+**Result:** HTTP 200 returned CONNECT_ACCEPTANCE_OK. The retained six-failure warning cleared after successful execution; the account displayed Connected / No issues detected. No counter reset, account replacement, cache deletion, service restart or code change was performed.
+
+**Next step:** Complete bounded live revocation and execution-behavior checks, retaining earlier failed acceptance as dated evidence.
+
+Evidence: [2026-10-03-connect-provider-recovery.json](releases/2026-10-03-connect-provider-recovery.json), [2026-10-03-connect-provider-http.json](releases/2026-10-03-connect-provider-http.json).
+
+## EVT-20261003-connect-real-lifecycle-completed — 2026-10-03T19:45:05.633964+00:00
+
+Incident: `INC-20261003-CONNECT`. Kind: `verification`.
+
+**Observation:** Two real requests completed and settled through the same existing provider account. Revocation denied new admissions within 169/175-ms observed round trips and prevented refresh, while the independent browser client remained usable.
+
+**Action:** Exercised a one-second client deadline, real streaming, shared account capacity denial, disconnect during streaming and explicit cancellation. Read original execution records and final account/grant state; revoked all test grants, withdrew temporary entitlement and stopped local test servers.
+
+**Result:** Nova retained two honest unknown outcomes without replay; the timed-out observer’s original provider request had completed, while the cancelled stream remained unknown. Completed records and Media were unchanged. ACT-039 is completed for the bounded cohort; longer executor deadlines were not forced. One cancellation remains recorded in provider failure history.
+
+**Next step:** Stop at acceptance. ACT-001 deployment inventory and the thirteen existing warning classifications remain unchanged; no hosted or public launch is implied.
+
+Evidence: [2026-10-03-connect-provider-recovery.json](releases/2026-10-03-connect-provider-recovery.json), [2026-10-03-connect-provider-http.json](releases/2026-10-03-connect-provider-http.json).
+
+## EVT-20261003-connect-recovery-final-checks — 2026-10-03T19:46:39.895968+00:00
+
+Incident: `INC-20261003-CONNECT`. Kind: `verification`.
+
+**Observation:** Final docs and compiled-boundary validation pass after the explicit recovery review. At 19:46:21 UTC both uncertain reservations had elapsed with zero occupied slots; the two unknown and two completed records were retained.
+
+**Action:** Ran docs:sync, docs:check, docs:check:build, test:docs and whitespace validation. Read final reservation state without modifying any request or counter.
+
+**Result:** All 41 documentation tests pass and 538 compiled assets pass selected-marker checks. Thirteen previous warning classifications remain unchanged. The same source/build hashes retain prior app, database, account and Media regression evidence.
+
+**Next step:** Stop the bounded acceptance pass. Controlled hosted deployment still requires ACT-001; the longer executor deadlines were not forced.
+
+Evidence: [2026-10-03-connect-provider-recovery.json](releases/2026-10-03-connect-provider-recovery.json), [2026-10-03-connect-recovery-review.json](releases/2026-10-03-connect-recovery-review.json).
+
+## EVT-20261003-neutral-outcomes-local — 2026-10-03T19:59:41.884644+00:00
+
+Incident: `INC-20261003-OUTCOMES`. Kind: `observation`.
+
+**Observation:** Cancellation, lost transport and admission interruption were coerced into false provider health evidence; the monitor used retained failure attention as an enable veto.
+
+**Action:** Added nullable evidence settlement, neutral crash recovery, explicit provider-response classification and separate recovery control eligibility. Added regression coverage and a paired execution-only migration.
+
+**Result:** Focused, authorization, isolation, capacity, Connect and production-build checks pass. Separate existing quota-rounding, obsolete fixture and monitor package-pin failures were recorded without weakening production guards.
+
+**Next step:** Verify and install the bounded local correction, preserve original execution records and the previous real acceptance evidence.
+
+Evidence: [README.md](incidents/2026/2026-10-03-neutral-outcomes/README.md), [test-relay-execution-db.ts](../scripts/test-relay-execution-db.ts), [test-relay-services.ts](../scripts/test-relay-services.ts).
+
+## EVT-20261003-neutral-outcomes-schema — 2026-10-03T20:00:25.632796+00:00
+
+Incident: `INC-20261003-OUTCOMES`. Kind: `action`.
+
+**Observation:** The execution project had exactly its original migration, matching function body, zero active/unsettled rows and 30 retained records. Security advisors reported no issues.
+
+**Action:** Applied execution-only migration 20261003195250 in a transaction with scope/history/drain guards and a short table lock. Selected reviewed runtime image and retained-base monitor asset patch.
+
+**Result:** Neutral recovery is installed; all 30 retained records remain. Anonymous function execution and runtime direct table reads remain denied. Runtime replacement is in progress. Primary database migration history, account settings and credentials are untouched.
+
+**Next step:** Verify installed images and one new cancellation without changing historical outcomes.
+
+Evidence: superseded by correction `EVT-20261003-neutral-outcomes-schema-kind-correction`; see that dated record below.
+
+## EVT-20261003-neutral-outcomes-installed — 2026-10-03T20:16:34.196171+00:00
+
+Incident: `INC-20261003-OUTCOMES`. Kind: `verification`.
+
+**Observation:** Installed nullable execution settlement and matching runtime/monitor report unknown availability without blocking reconnect on failure history. Browser ownership fields remain private.
+
+**Action:** Verified final images, corrected private launcher handoff, reloaded the keep-online supervisor and exercised one real provider stream followed by explicit cancellation and an exact duplicate request.
+
+**Result:** Cancellation settled unknown/null with no new failure or replay. Duplicate attached to the original execution. Four previous acceptance records unchanged; 31 retained records and zero active/unsettled. Thirty-two image and 30 installed checks pass. ACT-040 complete; incident recovered with ACT-041/042 open.
+
+**Next step:** Finish explicit semantic/documentation verification. No new product layer or hosted rollout. Preserve the original thirteen warnings and prior 175 ms revocation evidence.
+
+Evidence: [2026-10-03-neutral-outcomes.json](releases/2026-10-03-neutral-outcomes.json), [README.md](incidents/2026/2026-10-03-neutral-outcomes/README.md).
+
+## EVT-20261003-neutral-outcomes-schema-kind-correction — 2026-10-03T20:18:16.004338+00:00
+
+Incident: `INC-20261003-OUTCOMES`. Kind: `correction`.
+
+**Observation:** Corrects the unsupported action event-kind label in the earlier schema entry; original observation is retained unchanged in the append-only journal. The execution project had exactly its original migration, matching function body, zero active/unsettled rows and 30 retained records. Security advisors reported no issues.
+
+**Action:** Applied execution-only migration 20261003195250 in a transaction with scope/history/drain guards and a short table lock. Selected reviewed runtime image and retained-base monitor asset patch.
+
+**Result:** Neutral recovery is installed; all 30 retained records remain. Anonymous function execution and runtime direct table reads remain denied. Runtime replacement is in progress. Primary database migration history, account settings and credentials are untouched.
+
+**Next step:** Use the installed verification event for later runtime/monitor recovery. The corrected schema entry records the earlier migration step only.
+
+Evidence: [README.md](incidents/2026/2026-10-03-neutral-outcomes/README.md), [20261003195250_relay_execution_neutral_outcomes.sql](../deploy/relay-execution/supabase/migrations/20261003195250_relay_execution_neutral_outcomes.sql), [images.json](../docker/relay-pools/local/images.json).
+
+Corrects `EVT-20261003-neutral-outcomes-schema`; the original entry remains retained.
+
+## EVT-20261003-neutral-outcomes-final-checks — 2026-10-03T20:19:29.622787+00:00
+
+Incident: `INC-20261003-OUTCOMES`. Kind: `verification`.
+
+**Observation:** Final reviewed source and whole affected guides agree on neutral unknown outcomes, separate recovery eligibility and scoped installed acceptance. All original thirteen overdue prevention warnings remain unchanged.
+
+**Action:** Ran docs:sync, docs:check, test:docs, docs:check:build and git diff --check after the explicit semantic review. Preserved the malformed historical event-kind with a complete appended correction; adversarial tests retain the other record checks.
+
+**Result:** All documentation/incident/knowledge checks pass; 25 incident-guard and 17 knowledge fixture tests pass. Selected private-boundary scan covers 538 compiled browser/rendered assets. No hosted deployment was made. Log SHA-256: {"galx-unknown-docs-sync-final.log":"b3bb999758d64f8d8ee4357ee9c0033fb147e3fa2507d1ced90bcdcdbb0e6164","galx-unknown-docs-check-final.log":"b857830c5f55e35612bf0a50d92035051a4cdf2399fe03ec7fe761120c2c41ba","galx-unknown-docs-tests-final.log":"ea80f93053342b95ecae7a56341942c7ef1fe6076c15584a82a2b393ceb1962a","galx-unknown-build-boundary-final.log":"72015f8a25dba3af38dcb1cec9872d97f1b4748f69c98aba3724995142fb0737"}
+
+**Next step:** Stop the bounded correction. Keep existing local service running; ACT-041 quota-refill and ACT-042 clean-image packaging remain open, alongside ACT-001 and the earlier deployment/public-release warnings.
+
+Evidence: [2026-10-03-neutral-outcomes.json](releases/2026-10-03-neutral-outcomes.json), [2026-10-03-neutral-outcomes-review.json](releases/2026-10-03-neutral-outcomes-review.json).
+
+## EVT-20261003-refill-packaging-reproduced — 2026-10-03T20:27:03.278202+00:00
+
+Incident: `INC-20261003-OUTCOMES`. Kind: `observation`.
+
+**Observation:** ACT-041 reproduced against all 158 existing migrations: 2 ms plus 1 ms refill at 10,000,000 units/minute stores remainder 1 and raises constraint 23514 instead of admitting at 500 units. Clean no-cache monitor build fails on ignored sibling repository COPY inputs.
+
+**Action:** Captured synthetic quota state/arithmetic/admission and first clean-build failure with no shared mutations. Read-only primary migration inventory remains 157 applied, one unrelated Orbit migration pending.
+
+**Result:** Two independent defects established before implementation. Existing execution, authorization, health, credential and revocation sources are hashed as protected baseline.
+
+**Next step:** Correct exact refill state and declared monitor packaging, then run focused cross-regressions; no hosted rollout.
+
+Evidence: [closure-reproduction.json](incidents/2026/2026-10-03-neutral-outcomes/closure-reproduction.json).
+
+## EVT-20261003-refill-packaging-verified — 2026-10-03T20:46:17.047015+00:00
+
+Incident: `INC-20261003-OUTCOMES`. Kind: `verification`.
+
+**Observation:** ACT-041 repeated fractional rounding and ACT-042 undeclared source/unavailable CLI inputs were reproduced independently before their fixes.
+
+**Action:** Verified staged exact-credit migration in full isolated chain and clean-built all native service candidates using fresh repository inputs and builder. Ran actual packaged entrypoint, adversarial private/public boundary and scoped cross-regressions.
+
+**Result:** 82 refill, 29 image and 76 monitor-package checks pass; Connect/service/authorization/general DB suites and 157-page production build pass. All 113 protected baseline files and installed pins unchanged. ACT-041/042 engineering closure complete; shared migration and service installation not performed. Read-only advisors yielded separate pre-existing RPC access follow-up ACT-043.
+
+**Next step:** Finish semantic/documentation verification, retain artifacts, remove only owned fixtures/builders and stop. A separately authorized rollout still requires ACT-001 target inventory.
+
+Evidence: [2026-10-03-refill-packaging-closure.json](releases/2026-10-03-refill-packaging-closure.json), [README.md](incidents/2026/2026-10-03-neutral-outcomes/README.md).
+
+## EVT-20261003-refill-packaging-final-checks — 2026-10-03T20:48:29.708905+00:00
+
+Incident: `INC-20261003-OUTCOMES`. Kind: `verification`.
+
+**Observation:** Exact refill and clean native packaging review complete; installed source boundaries and service pins remain unchanged.
+
+**Action:** Ran docs:sync, docs:check, test:docs, docs:check:build and git diff --check after explicit semantic attestation. Removed only the two owned BuildKit builders and isolated checkout directories; retained all three tested candidate images.
+
+**Result:** Documentation/incident/knowledge checks pass; 25 incident and 17 knowledge fixtures pass; 538 compiled browser/rendered assets pass the selected private-marker scan. Original thirteen overdue warnings remain, with separate non-overdue ACT-043 public-release access follow-up. No deployment or shared database mutation. Log SHA-256: {"galx-closure-docs-sync-final.log":"b3bb999758d64f8d8ee4357ee9c0033fb147e3fa2507d1ced90bcdcdbb0e6164","galx-closure-docs-check-final.log":"545596648d63556ba8f2d9eea2735b79da254960b4c45fa2baac5b83af33eaf2","galx-closure-docs-tests-final.log":"0d6dbabd727cd673fdf219450f3a08983c4c53dd5a65f5f4007512a30feb487a","galx-closure-build-boundary-final.log":"c1d9966f6a13b559c660e415cabb715f7bafebd3a3333e4c11e42df4cd34cf24"}
+
+**Next step:** Stop this pass. ACT-041/042 engineering closure is complete. Consider controlled hosted rollout only as a separate decision after ACT-001 target inventory; preserve public-release gates.
+
+Evidence: [2026-10-03-refill-packaging-closure.json](releases/2026-10-03-refill-packaging-closure.json), [2026-10-03-refill-packaging-review.json](releases/2026-10-03-refill-packaging-review.json), [closure-build-inputs.json](incidents/2026/2026-10-03-neutral-outcomes/closure-build-inputs.json).
+
+## EVT-20261003-controlled-rollout-preflight — 2026-10-03T21:06:21.769441+00:00
+
+Incident: `INC-20261003-PREFLIGHT`. Kind: `verification`.
+
+**Observation:** Read-only target inspection completes ACT-001 storage/deployment/architecture inventory. Both storage metrics are below 10 GB and three current Ready deployments/aliases remain. Existing accepted candidate is not ready against observed hosted target.
+
+**Action:** Froze candidate source/artifact hashes; inspected current Vercel/Cloudflare/local services, private control, configuration names, primary/execution history, provider TLS and retained rollback images. No rebuild, deployment, migration, grants, provider inference or configuration mutation.
+
+**Result:** ACT-001 complete; storage incident recovered. ACT-044 hosted artifact, ACT-045 text transport and ACT-046 cohort/origin configuration block controlled rollout. Thirty-one execution records remain settled; cohort entitlement disabled and all six grants revoked. Neutral outcomes and the prior 175 ms historical revocation observation unchanged.
+
+**Next step:** Finish documentation/evidence checks, then stop. Resolve only the three target gates under a separate mandate before explicit rollout authorization. Public-release gates and nine follow-ups remain separate.
+
+Evidence: [2026-10-03-controlled-rollout-preflight.json](releases/2026-10-03-controlled-rollout-preflight.json).
+
+## EVT-20261003-controlled-rollout-preflight-checks — 2026-10-03T21:09:32.131673+00:00
+
+Incident: `INC-20261003-PREFLIGHT`. Kind: `verification`.
+
+**Observation:** Preflight documentation and evidence are complete. Target is NOT READY; no implementation or rollout action followed the findings.
+
+**Action:** Performed explicit critical/delivery semantic review; ran docs:sync, docs:check, test:docs, existing-build boundary scan, credential-value scan and git diff --check. Compared 1,886 source and 2,291 compiled file hashes to freeze.
+
+**Result:** All checks pass: 25 incident and 17 knowledge tests, 538 selected compiled assets, no credential-value matches and zero frozen candidate differences. ACT-001 closed; ACT-044/045/046 remain controlled-rollout blockers. Twelve prior overdue warnings remain unchanged.
+
+**Next step:** Stop. Separately resolve hosted artifact, text transport and cohort/origin configuration, then require explicit rollout authorization. No public-release work or Nova semantics changes.
+
+Evidence: [2026-10-03-controlled-rollout-preflight.json](releases/2026-10-03-controlled-rollout-preflight.json), [2026-10-03-controlled-rollout-preflight-review.json](releases/2026-10-03-controlled-rollout-preflight-review.json).
+
+## EVT-20261003-hosted-enablement-stopped — 2026-10-03T21:23:25.091589+00:00
+
+Incident: `INC-20261003-PREFLIGHT`. Kind: `verification`.
+
+**Observation:** Target enablement inspection found a host request-lifetime incompatibility in addition to the retained image-only ingress: cancellation permits unregistered terminal persistence to be reclaimed, and the host ceiling equals Nova execution deadline.
+
+**Action:** Read target metadata and frozen manifests; ran a network-disabled Node 22 fixture using unchanged Nova source. Preserved all accepted bytes and stopped before candidate changes, packaging, target configuration or rollout under the owner governing rule.
+
+**Result:** Synthetic normal completion persisted completed, persistent-process cancellation persisted unknown, and modeled invocation teardown during the same write retained running. Seventy-eight existing regression checks pass. ACT-044/045/046 remain open; ACT-001 stays closed. No real inference, authority grant or historical-record mutation.
+
+**Next step:** Record the smallest host-lifecycle adaptation and required reacceptance, complete evidence/documentation validation and stop. A separate direction must resolve lifecycle and duration compatibility before enablement resumes; rollout is not authorized.
+
+Evidence: [2026-10-03-hosted-target-enablement.json](releases/2026-10-03-hosted-target-enablement.json).
+
+## EVT-20261003-hosted-enablement-validation — 2026-10-03T21:25:49.474971+00:00
+
+Incident: `INC-20261003-PREFLIGHT`. Kind: `verification`.
+
+**Observation:** Final stopped-enablement documentation and preserved-artifact validation is complete.
+
+**Action:** Reviewed the two complete affected guides and current-state ordering, retained bounded attestations, synchronized indexes, checked private evidence and ran documentation plus preserved-build guards.
+
+**Result:** Seventy-eight existing runtime/protocol/transport tests and 42 documentation fixtures pass. Documentation guard and 538-asset scan pass; 1,886 source and 2,291 compiled files remain unchanged; known credential-value scan found none. Initial stale guide/index check was resolved without source or artifact mutation. ACT-044/045/046 remain open.
+
+**Next step:** Stop as required by the candidate-change condition. Await separate direction for the demonstrated host lifecycle and duration incompatibility; no rollout authorization inferred.
+
+Evidence: [2026-10-03-hosted-target-enablement.json](releases/2026-10-03-hosted-target-enablement.json), [2026-10-03-hosted-target-enablement-verification.json](releases/2026-10-03-hosted-target-enablement-verification.json).
+
+## EVT-20261003-hosted-adaptation-resumed — 2026-10-03T21:51:59.700351+00:00
+
+Incident: `INC-20261003-PREFLIGHT`. Kind: `action`.
+
+**Observation:** The owner explicitly requested resolution of the stopped hosted-enablement issues, authorizing the narrow candidate lifetime adaptation and renewed packaging/acceptance while preserving the rollout prohibition.
+
+**Action:** Registered Nova terminal persistence through Next after() before admission; retained the 300-second execution deadline and declared a 360-second host duration with cancellation support. Staged disabled Connect settings, prepared the Nova domain and added only the authenticated transport paths after synthetic edge rehearsal.
+
+**Result:** Thirty-five Connect/Nova tests, 135 disposable database checks, 43 relay service checks and 29 transport/boundary checks pass. Actual Next after() teardown fixture persisted unknown at the full 300-second deadline. Synthetic edge completion, interruptions, failure, unknown, duplicate and ambiguous one-shot dispatch pass. Production deployment, cohort authority and all 31 retained execution records remain unchanged. Fresh packaging attempts exposed missing declared BROC inputs and import-time throwaway build-key requirements; fresh packaging with those declared inputs is in progress.
+
+**Next step:** Finish the clean artifact, isolated packaged-handler authorization/revocation/cancellation rehearsal and boundary scans. The observed Hobby duration limit still requires an authorized hosting decision; do not deploy or open the cohort.
+
+Evidence: superseded by correction `EVT-20261003-hosted-adaptation-journal-correction`; see that dated record below.
+
+## EVT-20261003-hosted-adaptation-verified — 2026-10-03T22:10:49.564039Z
+
+Incident: `INC-20261003-PREFLIGHT`. Kind: `verification`.
+
+**Observation:** Authorized lifetime adaptation, matching artifact, actual edge transport and disabled cohort preparation completed. Current Hobby duration remains insufficient.
+
+**Action:** Registered terminal work before admission, retained one-write/no-replay semantics, built pinned clean Linux artifact, staged closed Connect settings and narrow ingress, and exercised synthetic host/edge/packaged checks.
+
+**Result:** ACT-044 and ACT-046 closed; ACT-045 remains open for 360-second hosting support. Five-minute edge unknown used one attempt; isolated revocation denied in 15 ms. Serving deployment and 31 historical executions unchanged. No rollout, real inference, production migration or purchase.
+
+**Next step:** Obtain the explicit hosting decision and verify actual duration support; keep Connect disabled and require a separate rollout mandate.
+
+Evidence: [2026-10-03-hosted-adaptation.json](releases/2026-10-03-hosted-adaptation.json).
+
+## EVT-20261003-hosted-adaptation-journal-correction — 2026-10-03T22:10:49.564039Z
+
+Incident: `INC-20261003-PREFLIGHT`. Kind: `correction`.
+
+**Observation:** The resumed-work entry used the unsupported journal kind action; the underlying observation and evidence remain retained.
+
+**Action:** Append this valid correction for the journal kind without rewriting the resumed-work entry.
+
+**Result:** The resumed action is classified as containment while candidate preparation and the duration blocker remain separate. The final verification record supersedes its in-progress build status.
+
+**Next step:** Keep the prepared candidate disabled pending the explicit hosting decision; no rollout authorized.
+
+Evidence: [2026-10-03-hosted-adaptation.json](releases/2026-10-03-hosted-adaptation.json).
+
+Corrects `EVT-20261003-hosted-adaptation-resumed`; the original entry remains retained.
+
+## EVT-20261003-hosted-adaptation-validation — 2026-10-03T22:13:59.085684Z
+
+Incident: `INC-20261003-PREFLIGHT`. Kind: `verification`.
+
+**Observation:** Final candidate, target, documentation and private-evidence validation completed.
+
+**Action:** Retained explicit source/guide reviews, synchronized generated documentation, ran documentation guards and 42 fixtures, checked the working diff and scanned 45 private evidence files against known secret values.
+
+**Result:** All scoped checks passed. Matching hosted package and disabled cohort are ready; ACT-044/046 closed. ACT-045 remains open only because current Hobby duration cannot satisfy 360 seconds. Full execution deadline and one-shot unknown behavior were preserved. No deployment, real inference, purchase or historical rewrite.
+
+**Next step:** Owner approval requested for the concrete $20/month Pro option plus metered usage; no approval assumed. Verify actual supported host budget after the decision, then stop for separately authorized rollout.
+
+Evidence: [2026-10-03-hosted-adaptation.json](releases/2026-10-03-hosted-adaptation.json), [2026-10-03-hosted-adaptation-verification.json](releases/2026-10-03-hosted-adaptation-verification.json).
+
+## EVT-20261003-hobby-buffering-feasibility — 2026-10-03T22:44:16.864102Z
+
+Incident: `INC-20261003-PREFLIGHT`. Kind: `verification`.
+
+**Observation:** Owner declined the paid host upgrade and requested a buffering alternative on existing resources.
+
+**Action:** Inspected current Nova/SDK/buffer ownership, current host limits and closed target configuration; exercised isolated buffer/receipt tests and two authenticated synthetic responses through a temporary narrow path on the existing edge.
+
+**Result:** 46 isolated checks passed. Silent JSON returned 524 after 125064 ms; streaming completed after 310191 ms. Probe path removed, candidate source/artifact unchanged, no real inference or deployment. Existing Hobby duration cannot be extended by buffering or after().
+
+**Next step:** Use existing persistent compute for the full Nova boundary and bounded client-side aggregation over SSE, subject to implementation/acceptance and plan eligibility. ACT-045 remains open. No further Pro approval request or rollout inferred.
+
+Evidence: [2026-10-03-hobby-buffering-feasibility.json](releases/2026-10-03-hobby-buffering-feasibility.json).
+
+## EVT-20261003-hobby-buffering-observation — 2026-10-03T23:11:47.233102+00:00
+
+Incident: `INC-20261003-PREFLIGHT`. Kind: `verification`.
+
+**Observation:** Continued observational assessment found Node request-close, public keepalive and client wire-budget requirements for the proposed persistent resource placement.
+
+**Action:** Read host metadata and source dependencies; ran six isolated unchanged-Nova diagnostic cases on each of x86-64 and ARM64 Node 22; reconciled private implementation requirements.
+
+**Result:** Normal completion, disconnect with delayed terminal ownership, projected-byte amplification, filtered keepalives and failed-write honesty were recorded. Runtime source, compiled files and archive match. No target, authority, database or deployment mutation.
+
+**Next step:** ACT-045 stays open for bounded adapter/client/packaging implementation and renewed acceptance. Preserve execution semantics and separate rollout authorization.
+
+Evidence: [2026-10-03-hobby-buffering-observation.json](releases/2026-10-03-hobby-buffering-observation.json).
+
+## EVT-20261003-mac-self-hosting-assessment — 2026-10-03T23:23:22.421244+00:00
+
+Incident: `INC-20261003-PREFLIGHT`. Kind: `verification`.
+
+**Observation:** Owner proposed temporary full-application hosting on the existing Mac instead of splitting for Hobby.
+
+**Action:** Inspected host capacity and existing AC keep-awake supervision; booted unchanged clean-build Next output in a disposable network-disabled container and checked seven HTTP surfaces plus idle shutdown.
+
+**Result:** Production boot and disabled/public-boundary smoke checks passed. Compiled Nova payload matches the accepted artifact. No live route, grant, database, source, artifact or deployment changed; fixture removed.
+
+**Next step:** Retain and rehearse the self-hosted package, supervision, full streaming/client-buffer and authorization/Media path, then obtain separately authorized public cutover. ACT-045 remains open.
+
+Evidence: [2026-10-03-mac-self-hosting-assessment.json](releases/2026-10-03-mac-self-hosting-assessment.json).
+
+## EVT-20261003-mac-self-hosting-hardening — 2026-10-04T00:01:24.165276+00:00
+
+Incident: `INC-20261003-PREFLIGHT`. Kind: `verification`.
+
+**Observation:** Deeper Mac self-hosting hardening reproduced a full-server origin incompatibility that the earlier disabled boot smoke test did not exercise.
+
+**Action:** Retained traced image/archive; implemented bounded runtime and guarded operator commands; exercised disposable full-chain database and full Next HTTP image, plus existing regressions. Removed ineffective framework configuration overrides and stopped before accepted application changes.
+
+**Result:** 19 packaging/operator and 78 existing protocol/service checks pass. Separate full 300-second lifetime fixture persists unknown. Image boots, but public redirects use the internal authority and a token accepted by direct repository admission receives HTTP 401 before dispatch. Whole-image lifecycle acceptance fails; no receipt or staging permitted. 1,886 source and 2,291 compiled files unchanged.
+
+**Next step:** ACT-045 stays open for the documented bounded public-origin correction, renewed whole-image acceptance and outstanding public transport/client/configuration/rollback checks. No public rollout inferred.
+
+Evidence: [2026-10-03-mac-self-hosting-hardening.json](releases/2026-10-03-mac-self-hosting-hardening.json).
+
+## EVT-20261003-mac-origin-correction-authorized — 2026-10-04T00:28:56.585255+00:00
+
+Incident: `INC-20261003-PREFLIGHT`. Kind: `observation`.
+
+**Observation:** Owner explicitly authorized a narrowly scoped origin/transport source correction and a new Mac candidate; no real-provider inference or public rollout.
+
+**Action:** Traced actual raw HTTP Host through retained Next request metadata; introduced one configured-origin policy, bounded SSE comments and complete-answer client buffering. Replaced the test Host override with raw HTTP because Node fetch ignores it.
+
+**Result:** Observed Host nova.galx.ai becomes internal Next URL https://0.0.0.0:3000/v1/inference and fails before database admission. New source passes 49 Connect/origin/client, 88 account/preview/package, 98 relay/boundary, 135 disposable Connect database and 82 refill checks. Clean production build completed; image rehearsal pending.
+
+**Next step:** Retain new image/archive; prove packaged synthetic transport, active drain/restart, revocation and private boundary; report readiness separately from real-provider/public traffic.
+
+Evidence: [origin-before-http.json](incidents/2026/2026-10-03-mac-origin-transport/origin-before-http.json).
+
+## EVT-20261003-mac-origin-query-correction — 2026-10-04T00:34:39.350269+00:00
+
+Incident: `INC-20261003-PREFLIGHT`. Kind: `verification`.
+
+**Observation:** First corrected image fixed canonical redirects and issuer metadata but whole-image native authorization still returned 400.
+
+**Action:** Preserved both failed rehearsals and reproduced NextURL normalization of an embedded registered IP callback into localhost. Changed Connect authorization/consent query reads to the same canonical native URL helper, without broadening registration.
+
+**Result:** 50 protocol/origin/client checks and 135 disposable database checks pass. A fresh clean build supersedes the failed intermediate candidate; no inference or acceptance receipt came from those failed image runs.
+
+**Next step:** Repackage the fresh build and complete the unchanged whole-image transport/lifecycle gate.
+
+Evidence: [query-normalization.json](incidents/2026/2026-10-03-mac-origin-transport/query-normalization.json), [runtime-02-failure.json](incidents/2026/2026-10-03-mac-origin-transport/runtime-02-failure.json).
+
+## EVT-20261003-mac-origin-whole-image-accepted — 2026-10-04T00:56:31.572950+00:00
+
+Incident: `INC-20261003-PREFLIGHT`. Kind: `verification`.
+
+**Observation:** The newly authorized Mac origin/transport candidate passes complete synthetic whole-image acceptance and the disabled operator workflow.
+
+**Action:** Preserved failed candidates; corrected canonical native origin and embedded callback query handling; added bounded SSE liveness and client aggregation; clean-built, packaged, verified archive recovery and ran packaged authorization/transport/drain/restart plus scoped regressions.
+
+**Result:** 44 whole-image checks pass, including real Chromium incremental bytes, unchanged 300-second deadline with 304278 ms clean drain, 55 ms post-acknowledgement revocation denial, capacity and no replay. Forced process loss retains running/unknown uncertainty without another dispatch. Eight disabled operator commands pass; private fixtures and staged container removed. ACT-044/045/046 close for the new private Mac candidate.
+
+**Next step:** READY FOR CONTROLLED REAL-PROVIDER ACCEPTANCE only. ACT-047 retains actual runtime/account/provider/Media/storage/public-path/rollback gates before production traffic. No real inference, live grant, production record, public route or paid plan changed; stop pending separate authority.
+
+Evidence: [2026-10-03-mac-origin-transport-correction.json](releases/2026-10-03-mac-origin-transport-correction.json), [whole-image-acceptance.json](incidents/2026/2026-10-03-mac-origin-transport/whole-image-acceptance.json), [operator-rehearsal.json](incidents/2026/2026-10-03-mac-origin-transport/operator-rehearsal.json).
+
+## EVT-20261003-NOVA-MAC-TRANSITION-START — 2026-10-04T01:22:10.734Z
+
+Incident: `INC-20261003-PREFLIGHT`. Kind: `observation`.
+
+**Observation:** Owner authorized gated Nova-only Mac transition. Vercel currently serves September 26 Media with no Connect or Nova execution route; no active Nova leases.
+
+**Action:** Retained target configuration names, domain/deployment identities and dependencies. Staged accepted Mac image privately. Validated and applied only existing exact-refill migration after 94 database checks.
+
+**Result:** Loopback origin denial and provider readiness pass; provider failure counts unchanged. Media/Connect-only artifact built from deployed Media plus accepted Connect integration. Public Nova route unchanged.
+
+**Next step:** Verify web artifact, enable shared Connect without Vercel inference, complete private real-provider/revocation/recovery acceptance before Nova cutover.
+
+Evidence: [2026-10-03-mac-origin-transport-correction.json](releases/2026-10-03-mac-origin-transport-correction.json).
+
+## EVT-20261003-NOVA-real-provider-recovery — 2026-10-04T01:53:40.300651+00:00
+
+Incident: `INC-20261003-PREFLIGHT`. Kind: `verification`.
+
+**Observation:** Existing account completed consent/PKCE on shared GALX Connect; valid grant without entitlement was denied. One explicit two-hour entitlement then enabled private Mac admission.
+
+**Action:** Ran one bounded provider completion and one cancellation through the acceptance ingress; revoked, verified refresh denial, stopped, reloaded the verified archive, resumed the same image and restarted the monitor.
+
+**Result:** Completion persisted completed; cancellation unknown with unchanged provider failures. Revocation denied within 313 ms; recovery retained completed/unknown history and revoked authority.
+
+**Next step:** Drain Vercel inference before final Nova cutover.
+
+Evidence: [client-observations.json](incidents/2026/2026-10-03-nova-mac-transition/client-observations.json), [execution-correlation.json](incidents/2026/2026-10-03-nova-mac-transition/execution-correlation.json), [operational-recovered.json](incidents/2026/2026-10-03-nova-mac-transition/operational-recovered.json).
+
+## EVT-20261003-NOVA-cutover-accepted — 2026-10-04T01:53:40.300651+00:00
+
+Incident: `INC-20261003-PREFLIGHT`. Kind: `verification`.
+
+**Observation:** Zero active Nova executions, provider leases and legacy queue tasks remained before Nova DNS cutover. Vercel admission was denied by the project firewall.
+
+**Action:** Switched only nova.galx.ai to exact Mac ingress after the real-provider/recovery gate. Ran the final hostname completion/interruption pair, duplicates, revocation and minimum 300-second controlled observation.
+
+**Result:** Two additional original provider attempts: completed and neutral unknown. Duplicate probes dispatched nothing. Final-path revocation denial measured 252 ms; refresh failed. All 21 observations over 313188 ms passed without rollback.
+
+**Next step:** Retire the obsolete Vercel Nova binding/alias and verify retained Media/Connect.
+
+Evidence: [drain-database.json](incidents/2026/2026-10-03-nova-mac-transition/drain-database.json), [cutover-route.json](incidents/2026/2026-10-03-nova-mac-transition/cutover-route.json), [controlled-observation.json](incidents/2026/2026-10-03-nova-mac-transition/controlled-observation.json).
+
+## EVT-20261003-NOVA-vercel-retired — 2026-10-04T01:53:40.300651+00:00
+
+Incident: `INC-20261003-PREFLIGHT`. Kind: `recovery`.
+
+**Observation:** Final clean Media/Connect artifact is Ready; the accepted Mac image remains unchanged. Retired Vercel legacy text/queue paths are protected in source and by a project-wide firewall.
+
+**Action:** Removed the Nova Vercel project-domain binding/alias and temporary pilot route; retained shared Media/Auth/Connect/image/Sites settings and deployment evidence. Reconciled an empty successful DELETE response by read-only inventory before any retry.
+
+**Result:** Mac is the sole Nova runtime. Final 28 route checks and 409 browser-asset observations pass; 284 exact assets, one reviewed 461-byte opt-in Vercel suffix and 124 private denials. Existing GALX account and rendered Explore remain usable; Connect shows no active connections.
+
+**Next step:** Close ACT-047, retain records and stop. Existing public-release and Mac availability gates remain separate.
+
+Evidence: [2026-10-03-nova-mac-transition.json](releases/2026-10-03-nova-mac-transition.json), [vercel-retirement.json](incidents/2026/2026-10-03-nova-mac-transition/vercel-retirement.json), [final-surface.json](incidents/2026/2026-10-03-nova-mac-transition/final-surface.json).
+
+## EVT-20261003-NOVA-workstation-restriction — 2026-10-04T02:10:13.515783+00:00
+
+Incident: `INC-20260913-IMAGES`. Kind: `observation`.
+
+**Observation:** Owner explicitly prohibited physical-host and unrelated-work disruption during resilience testing.
+
+**Action:** Scoped faults to disposable labeled containers with synthetic state; left shared ingress and all live services running. Updated ACT-018 and current procedures.
+
+**Result:** Host reboot/power/sleep/logout/network and destructive-storage drills classified UNVERIFIED — DEFERRED BY OPERATOR; documented reboot startup remains an operational assumption only.
+
+**Next step:** Retain safe service evidence without closing physical-host or off-device gaps.
+
+Evidence: [2026-10-03-nova-nondisruptive-resilience.json](releases/2026-10-03-nova-nondisruptive-resilience.json).
+
+## EVT-20261003-NOVA-nondisruptive-recovery — 2026-10-04T02:10:13.515783+00:00
+
+Incident: `INC-20260913-IMAGES`. Kind: `verification`.
+
+**Observation:** The accepted Nova and monitor images are unchanged; whole-image process/deadline and live transition evidence already exist.
+
+**Action:** Loaded the verified archive and exercised isolated container death/restart, ingress loss, cache exhaustion, synthetic state reconstruction, exact refill persistence, 64 MiB OOM containment and packaged monitor process/control failures. Corrected only the monitor fixture transfer mechanism for the daemon with no Mac mounts.
+
+**Result:** Nine Nova check groups and 90 monitor checks passed. Nova recovery verification took 6116 ms and monitor recovery 332 ms. Revoked access/refresh stayed denied; uncertain work was not replayed. Ten live container identities/start times/restart counts and private configuration remained unchanged; all test resources were removed.
+
+**Next step:** Continue controlled operation within the documented limits and stop this drill. Do not induce a host interruption.
+
+Evidence: [2026-10-03-nova-nondisruptive-resilience.json](releases/2026-10-03-nova-nondisruptive-resilience.json), [result.json](incidents/2026/2026-10-03-nova-nondisruptive-resilience/isolated-01/result.json), [monitor-result.json](incidents/2026/2026-10-03-nova-nondisruptive-resilience/monitor-result.json), [after.json](incidents/2026/2026-10-03-nova-nondisruptive-resilience/after.json).

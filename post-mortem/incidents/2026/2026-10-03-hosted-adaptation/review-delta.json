@@ -1,0 +1,27 @@
+{
+  "knowledge": [
+    "docs/knowledge/registry.json"
+  ],
+  "connect": [
+    "docs/operations/galx-connect.md",
+    "scripts/fixtures/nova-host-lifetime.ts",
+    "scripts/test-nova-host-lifetime.mjs",
+    "scripts/test-nova.ts",
+    "src/app/v1/inference/route.ts",
+    "src/lib/nova/inference.ts"
+  ],
+  "delivery": [
+    "deploy/hosted/package-lock.json",
+    "deploy/hosted/package.json",
+    "docs/VERCEL_DEPLOYMENT.md",
+    "scripts/package-hosted-candidate.mjs",
+    "scripts/retain-hosted-output.mjs",
+    "scripts/test-hosted-packaging.mjs",
+    "vercel.json"
+  ],
+  "critical": [
+    "docs/VERCEL_DEPLOYMENT.md",
+    "docs/operations/galx-connect.md",
+    "post-mortem/CURRENT_STATE.md"
+  ]
+}

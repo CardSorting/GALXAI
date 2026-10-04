@@ -1,0 +1,224 @@
+{
+  "at": "2026-10-03T20:59:41.177Z",
+  "readOnly": true,
+  "hostedConfig": {
+    "readMethod": "GET specific environment variable; plaintext compared in memory only",
+    "premiumURLReadable": true,
+    "keyMatchesInstalledRuntime": true,
+    "primaryUrlMatchesLocal": true,
+    "connectEnabledPresent": false,
+    "issuerPresent": false,
+    "audiencePresent": false,
+    "clientRegistryPresent": false,
+    "premiumEndpointOrigin": "https://images-service.galx.ai"
+  },
+  "http": [
+    {
+      "url": "https://galx.ai/",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "bytes": 74677,
+      "ms": 197,
+      "bodySha256": "7831d5b389d143c2110ce966f4de46a47ba218d1401faa413499cb656f82d4eb"
+    },
+    {
+      "url": "https://galx.ai/.well-known/oauth-authorization-server",
+      "status": 404,
+      "contentType": "text/plain; charset=utf-8",
+      "bytes": 25,
+      "ms": 138,
+      "bodySha256": "65d1cb2e193cbca0168e8de3a1c19cbc83af6b6ca80e1e565e470413c34501c2"
+    },
+    {
+      "url": "https://galx.ai/v1/inference",
+      "status": 401,
+      "contentType": "application/json",
+      "bytes": 103,
+      "ms": 162,
+      "bodySha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e"
+    },
+    {
+      "url": "https://connect.galx.ai/",
+      "status": 525,
+      "contentType": "text/html; charset=UTF-8",
+      "bytes": 7736,
+      "ms": 1283,
+      "bodySha256": "7ad40668ba3c535783dc0250ca4291f9a530feb423edf8266ca64b82afa03d37"
+    },
+    {
+      "url": "https://nova.galx.ai/.well-known/oauth-protected-resource",
+      "status": 525,
+      "contentType": "text/html; charset=UTF-8",
+      "bytes": 7721,
+      "ms": 1304,
+      "bodySha256": "68716622e39a1df2f470df41580beb23c7487ad428bdc076b744155f3058989a"
+    },
+    {
+      "url": "https://images-service.galx.ai/health/live",
+      "status": 404,
+      "contentType": null,
+      "bytes": 0,
+      "ms": 155,
+      "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "url": "https://images-service.galx.ai/v1/models",
+      "status": 404,
+      "contentType": null,
+      "bytes": 0,
+      "ms": 242,
+      "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "url": "https://relay.galx.ai/health/live",
+      "status": 401,
+      "contentType": "application/json",
+      "bytes": 159,
+      "ms": 186,
+      "bodySha256": "e520306c9821850a864a24a77d439cf7574166bf0dd7db7802f656117870ac58"
+    },
+    {
+      "url": "http://127.0.0.1:13301/health/live",
+      "status": 200,
+      "contentType": "application/json",
+      "bytes": 11,
+      "ms": 20,
+      "bodySha256": "4062edaf750fb8074e7e83e0c9028c94e32468a8b6f1614774328ef045150f93"
+    },
+    {
+      "url": "http://127.0.0.1:13301/health/ready",
+      "status": 200,
+      "contentType": "application/json",
+      "bytes": 11,
+      "ms": 19,
+      "bodySha256": "4062edaf750fb8074e7e83e0c9028c94e32468a8b6f1614774328ef045150f93"
+    },
+    {
+      "url": "http://127.0.0.1:13311/api/status",
+      "status": 401,
+      "contentType": "application/json",
+      "bytes": 90,
+      "ms": 18,
+      "bodySha256": "ae7cbaa5924f4b459af8b12fb8d69b9b8a9bed2a1942dc02f459602000a19c96"
+    }
+  ],
+  "privateControl": {
+    "httpStatus": 200,
+    "pool": "premium",
+    "ownershipPresent": true,
+    "ownershipMatches": true,
+    "lastSeenAt": "2026-10-03T20:59:37.206703+00:00",
+    "fieldNames": [
+      "accounts",
+      "activity",
+      "automaticActivation",
+      "epoch",
+      "executionAllowed",
+      "installationId",
+      "lastSeenAt",
+      "pool",
+      "registrationAllowed",
+      "registrations"
+    ]
+  },
+  "rollbackImages": [
+    {
+      "context": "desktop-linux",
+      "tag": "galxai-relay-central:connections-20260916",
+      "id": "sha256:e7a4c80fa704d4abb7b423a48a66afad4d809c70dd5df3592eb772e823284bb3",
+      "architecture": "arm64",
+      "os": "linux",
+      "size": 71751670,
+      "repoDigests": [
+        "galxai-relay-central@sha256:e7a4c80fa704d4abb7b423a48a66afad4d809c70dd5df3592eb772e823284bb3"
+      ],
+      "created": "2026-09-16T01:51:27.257877919Z"
+    },
+    {
+      "context": "colima-premium",
+      "tag": "galxai-relay-premium:neutral-outcomes-20261003",
+      "id": "sha256:a1feb16ef31ae0f97cc231b85d06578496335d79221d13e36a4c40b8524a545f",
+      "architecture": "arm64",
+      "os": "linux",
+      "size": 71817831,
+      "repoDigests": [
+        "galxai-relay-premium@sha256:a1feb16ef31ae0f97cc231b85d06578496335d79221d13e36a4c40b8524a545f"
+      ],
+      "created": "2026-10-03T13:57:11.807263227-06:00"
+    },
+    {
+      "context": "colima-premium",
+      "tag": "galxai-monitor-premium:neutral-outcomes-20261003-r3",
+      "id": "sha256:0ab24b83ce3f2536f88b3994a716671d7b87495ebc5bdb90c5cafa3a50aa05ed",
+      "architecture": "arm64",
+      "os": "linux",
+      "size": 81874367,
+      "repoDigests": [
+        "galxai-monitor-premium@sha256:0ab24b83ce3f2536f88b3994a716671d7b87495ebc5bdb90c5cafa3a50aa05ed"
+      ],
+      "created": "2026-10-03T14:05:03.655022865-06:00"
+    }
+  ],
+  "worker": {
+    "settingsHttpStatus": 200,
+    "compatibilityDate": "2026-08-22",
+    "compatibilityFlags": [
+      "nodejs_compat"
+    ],
+    "bindings": [
+      {
+        "name": "ASSET_BUCKET",
+        "type": "r2_bucket"
+      },
+      {
+        "name": "EDGE_CACHE",
+        "type": "kv_namespace"
+      },
+      {
+        "name": "ENVIRONMENT",
+        "type": "plain_text"
+      },
+      {
+        "name": "PUBLIC_ASSETS_URL",
+        "type": "plain_text"
+      },
+      {
+        "name": "RATE_LIMIT_KV",
+        "type": "kv_namespace"
+      },
+      {
+        "name": "STRIPE_SECRET_KEY",
+        "type": "secret_text"
+      },
+      {
+        "name": "SUPABASE_URL",
+        "type": "plain_text"
+      },
+      {
+        "name": "TRAINING_DATASET_BUCKET",
+        "type": "r2_bucket"
+      }
+    ],
+    "deploymentsHttpStatus": 200,
+    "deployments": [
+      {
+        "id": "84ee3b33-ebf9-46db-90f2-f13a1b31726f",
+        "createdOn": "2026-09-19T00:01:54.963539Z",
+        "versions": [
+          {
+            "version_id": "9712cd56-aaad-40f5-b5bb-616899e15712",
+            "percentage": 100
+          }
+        ]
+      }
+    ]
+  },
+  "wildcardDNS": [
+    {
+      "name": "*.galx.ai",
+      "type": "CNAME",
+      "content": "cname.vercel-dns.com",
+      "proxied": true
+    }
+  ]
+}

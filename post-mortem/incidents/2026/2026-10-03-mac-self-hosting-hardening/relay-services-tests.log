@@ -1,0 +1,165 @@
+
+> galxai@0.1.0 test:relay:services
+> node --import tsx --test scripts/test-relay-admission-observability.ts scripts/test-relay-services.ts scripts/test-relay-registration-errors.ts scripts/test-relay-monitor-resilience.ts scripts/test-relay-overload.ts
+
+✔ private admission events are allowlisted, bounded and sink failures are non-fatal (1.785833ms)
+✔ central status reads retry transient failures but credential mutations remain single-shot (457.515917ms)
+✔ safe-read circuit opens after bounded failures and rejects a retry herd (1315.4785ms)
+✔ parallel safe reads spend a bounded retry budget instead of amplifying an outage (176.143333ms)
+✔ monitor coalesces duplicate connect clicks into one credential write (191.70275ms)
+✔ completion storms persist once and do not wait for a stalled remote settlement (6.093375ms)
+✔ settlement failure stops fan-out, backs off and drains only eight retained receipts per pass (0.733958ms)
+✔ an acquired but unbound lease is retained and blocks new admission until its exact settlement succeeds (1.473958ms)
+✔ settlement preserves confirmed success, confirmed failure and neutral interruption independently (1.13525ms)
+✔ request bulkheads bound total work and each owner without queuing or stale-release leaks (0.26125ms)
+✔ registration errors preserve historical duplicates without exposing credentials (32.279666ms)
+✔ registration errors preserve revoked account without exposing credentials (10.929042ms)
+✔ registration errors preserve different desktop without exposing credentials (6.002458ms)
+✔ registration errors preserve missing sign-in without exposing credentials (5.248375ms)
+✔ registration errors preserve expired sign-in without exposing credentials (4.534917ms)
+✔ registration errors preserve provider rejects credential without exposing credentials (5.686167ms)
+✔ registration errors preserve inventory unavailable without exposing credentials (4.999625ms)
+✔ registration errors preserve unknown upstream error without exposing credentials (4.907417ms)
+✔ central client uses its own allowlist, including hostile prototype and unknown error codes (1.549375ms)
+✔ connect verifies before one scoped write; unchanged refresh still checks rejected connection state (3.981542ms)
+✔ fixed project, origin, and workload boundaries reject retired configuration (1.697458ms)
+✔ central HTTP routes cannot expose registration context or refresh tokens to a runtime (39.269708ms)
+✔ execution admission persists first, fails closed and retains settlement when central is unavailable (1.926583ms)
+[BroccoliDB Relay] Listening on http://127.0.0.1:0
+[BroccoliDB Relay] Shards enrolled: 1 | Target WS: ws://127.0.0.1:65399
+(node:73862) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+[BroccoliDB Relay] Entering graceful drain mode...
+[BroccoliDB Relay] HTTP listener closed cleanly.
+✔ real relay engine blocks forbidden work before admission and aborts upstream when its grant expires (61.862ms)
+[BroccoliDB Relay] Listening on http://127.0.0.1:0
+[BroccoliDB Relay] Shards enrolled: 1 | Target WS: ws://127.0.0.1:65403
+[BroccoliDB Relay] Entering graceful drain mode...
+[BroccoliDB Relay] HTTP listener closed cleanly.
+[BroccoliDB Relay] Listening on http://127.0.0.1:0
+[BroccoliDB Relay] Shards enrolled: 1 | Target WS: ws://127.0.0.1:65407
+[BroccoliDB Relay] Entering graceful drain mode...
+[BroccoliDB Relay] HTTP listener closed cleanly.
+[BroccoliDB Relay] Listening on http://127.0.0.1:0
+[BroccoliDB Relay] Shards enrolled: 1 | Target WS: ws://127.0.0.1:65411
+[BroccoliDB Relay] Entering graceful drain mode...
+[BroccoliDB Relay] HTTP listener closed cleanly.
+[BroccoliDB Relay] Listening on http://127.0.0.1:0
+[BroccoliDB Relay] Shards enrolled: 1 | Target WS: ws://127.0.0.1:65415
+[BroccoliDB Relay] Entering graceful drain mode...
+[BroccoliDB Relay] HTTP listener closed cleanly.
+[BroccoliDB Relay] Listening on http://127.0.0.1:0
+[BroccoliDB Relay] Shards enrolled: 1 | Target WS: ws://127.0.0.1:65419
+[BroccoliDB Relay] Entering graceful drain mode...
+[BroccoliDB Relay] HTTP listener closed cleanly.
+[BroccoliDB Relay] Listening on http://127.0.0.1:0
+[BroccoliDB Relay] Shards enrolled: 1 | Target WS: ws://127.0.0.1:65424
+[BroccoliDB Relay] Entering graceful drain mode...
+[BroccoliDB Relay] HTTP listener closed cleanly.
+✔ provider evidence stays distinct from cancellation, deadline and transport loss (392.564792ms)
+✔ two real monitor servers isolate sessions, deny viewer mutations and enforce central revocation (421.35725ms)
+✔ public job DTOs strip nested operational data and bound response bytes (1.35975ms)
+{"event":"relay_admission","at":"2026-10-03T23:37:20.379Z","requestId":"05062a084ff2437ae7297fe56cd823fe94816db32c814ed4e8d661b3a89284a8","workload":"images","name":"received","state":"received","queuePasses":0}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.380Z","requestId":"05062a084ff2437ae7297fe56cd823fe94816db32c814ed4e8d661b3a89284a8","workload":"images","name":"candidate_evaluated","state":"queued","targetId":"a","queuePasses":1}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.380Z","requestId":"05062a084ff2437ae7297fe56cd823fe94816db32c814ed4e8d661b3a89284a8","workload":"images","name":"candidate_evaluated","state":"queued","targetId":"b","queuePasses":1}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.392Z","requestId":"05062a084ff2437ae7297fe56cd823fe94816db32c814ed4e8d661b3a89284a8","workload":"images","name":"reservation_attempted","state":"queued","targetId":"a","queuePasses":1}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.392Z","requestId":"05062a084ff2437ae7297fe56cd823fe94816db32c814ed4e8d661b3a89284a8","workload":"images","name":"reservation_acquired","state":"admitted","targetId":"a","queuePasses":1}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.392Z","requestId":"05062a084ff2437ae7297fe56cd823fe94816db32c814ed4e8d661b3a89284a8","workload":"images","name":"dispatch_started","state":"dispatched","targetId":"a","queuePasses":1}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.392Z","requestId":"05062a084ff2437ae7297fe56cd823fe94816db32c814ed4e8d661b3a89284a8","workload":"images","name":"worker_pregrant_started","state":"dispatched","targetId":"a","queuePasses":1}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.394Z","requestId":"05062a084ff2437ae7297fe56cd823fe94816db32c814ed4e8d661b3a89284a8","workload":"images","name":"terminal","state":"failed","reason":"unknown","queuePasses":1}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.396Z","requestId":"55a9c3c8562bdef8e228cf2def62c5eacfb69ca1f82f3a76f89616184be9d784","workload":"images","name":"received","state":"received","queuePasses":0}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.396Z","requestId":"55a9c3c8562bdef8e228cf2def62c5eacfb69ca1f82f3a76f89616184be9d784","workload":"images","name":"candidate_evaluated","state":"queued","targetId":"a","queuePasses":1}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.396Z","requestId":"55a9c3c8562bdef8e228cf2def62c5eacfb69ca1f82f3a76f89616184be9d784","workload":"images","name":"candidate_rejected","state":"queued","targetId":"a","reason":"cooling_or_quarantined","queuePasses":1}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.396Z","requestId":"55a9c3c8562bdef8e228cf2def62c5eacfb69ca1f82f3a76f89616184be9d784","workload":"images","name":"candidate_evaluated","state":"queued","targetId":"b","queuePasses":1}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.396Z","requestId":"55a9c3c8562bdef8e228cf2def62c5eacfb69ca1f82f3a76f89616184be9d784","workload":"images","name":"reservation_attempted","state":"queued","targetId":"b","queuePasses":1}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.396Z","requestId":"55a9c3c8562bdef8e228cf2def62c5eacfb69ca1f82f3a76f89616184be9d784","workload":"images","name":"reservation_acquired","state":"admitted","targetId":"b","queuePasses":1}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.396Z","requestId":"55a9c3c8562bdef8e228cf2def62c5eacfb69ca1f82f3a76f89616184be9d784","workload":"images","name":"dispatch_started","state":"dispatched","targetId":"b","queuePasses":1}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.396Z","requestId":"55a9c3c8562bdef8e228cf2def62c5eacfb69ca1f82f3a76f89616184be9d784","workload":"images","name":"worker_pregrant_started","state":"dispatched","targetId":"b","queuePasses":1}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.397Z","requestId":"55a9c3c8562bdef8e228cf2def62c5eacfb69ca1f82f3a76f89616184be9d784","workload":"images","name":"terminal","state":"failed","reason":"unknown","queuePasses":1}
+✔ private worker failures open a scoped circuit, fail over future work, and stay out of public responses (21.529708ms)
+✔ confirmed pre-generation image rejection fails over within one admission lifecycle (8.8165ms)
+{"event":"relay_admission","at":"2026-10-03T23:37:20.408Z","requestId":"d3251b2f20693b1d56bcbb5dfb876f5ed8a159e1454e0c7defa0700358e314ad","workload":"images","name":"received","state":"received","queuePasses":0}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.408Z","requestId":"d3251b2f20693b1d56bcbb5dfb876f5ed8a159e1454e0c7defa0700358e314ad","workload":"images","name":"candidate_evaluated","state":"queued","targetId":"a","queuePasses":1}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.408Z","requestId":"d3251b2f20693b1d56bcbb5dfb876f5ed8a159e1454e0c7defa0700358e314ad","workload":"images","name":"candidate_evaluated","state":"queued","targetId":"b","queuePasses":1}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.408Z","requestId":"d3251b2f20693b1d56bcbb5dfb876f5ed8a159e1454e0c7defa0700358e314ad","workload":"images","name":"reservation_attempted","state":"queued","targetId":"a","queuePasses":1}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.408Z","requestId":"d3251b2f20693b1d56bcbb5dfb876f5ed8a159e1454e0c7defa0700358e314ad","workload":"images","name":"reservation_acquired","state":"admitted","targetId":"a","queuePasses":1}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.408Z","requestId":"d3251b2f20693b1d56bcbb5dfb876f5ed8a159e1454e0c7defa0700358e314ad","workload":"images","name":"dispatch_started","state":"dispatched","targetId":"a","queuePasses":1}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.408Z","requestId":"d3251b2f20693b1d56bcbb5dfb876f5ed8a159e1454e0c7defa0700358e314ad","workload":"images","name":"worker_pregrant_started","state":"dispatched","targetId":"a","queuePasses":1}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.409Z","requestId":"d3251b2f20693b1d56bcbb5dfb876f5ed8a159e1454e0c7defa0700358e314ad","workload":"images","name":"worker_pregrant_rejected","state":"dispatched","targetId":"a","reason":"worker_pregrant_rejected","queuePasses":1}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.409Z","requestId":"d3251b2f20693b1d56bcbb5dfb876f5ed8a159e1454e0c7defa0700358e314ad","workload":"images","name":"reselection_started","state":"queued","reason":"excluded_target","queuePasses":2}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.409Z","requestId":"d3251b2f20693b1d56bcbb5dfb876f5ed8a159e1454e0c7defa0700358e314ad","workload":"images","name":"candidate_evaluated","state":"queued","targetId":"a","queuePasses":2}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.409Z","requestId":"d3251b2f20693b1d56bcbb5dfb876f5ed8a159e1454e0c7defa0700358e314ad","workload":"images","name":"candidate_rejected","state":"queued","targetId":"a","reason":"excluded_target","queuePasses":2}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.409Z","requestId":"d3251b2f20693b1d56bcbb5dfb876f5ed8a159e1454e0c7defa0700358e314ad","workload":"images","name":"candidate_evaluated","state":"queued","targetId":"b","queuePasses":2}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.409Z","requestId":"d3251b2f20693b1d56bcbb5dfb876f5ed8a159e1454e0c7defa0700358e314ad","workload":"images","name":"reservation_attempted","state":"queued","targetId":"b","queuePasses":2}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.409Z","requestId":"d3251b2f20693b1d56bcbb5dfb876f5ed8a159e1454e0c7defa0700358e314ad","workload":"images","name":"reservation_acquired","state":"admitted","targetId":"b","queuePasses":2}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.409Z","requestId":"d3251b2f20693b1d56bcbb5dfb876f5ed8a159e1454e0c7defa0700358e314ad","workload":"images","name":"dispatch_started","state":"dispatched","targetId":"b","queuePasses":2}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.409Z","requestId":"d3251b2f20693b1d56bcbb5dfb876f5ed8a159e1454e0c7defa0700358e314ad","workload":"images","name":"worker_pregrant_started","state":"dispatched","targetId":"b","queuePasses":2}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.410Z","requestId":"d3251b2f20693b1d56bcbb5dfb876f5ed8a159e1454e0c7defa0700358e314ad","workload":"images","name":"terminal","state":"failed","reason":"unknown","queuePasses":2}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.411Z","requestId":"339496dac348fdaaf0d60c7cff442feea3548270f06311120426725fc7f75e09","workload":"images","name":"received","state":"received","queuePasses":0}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.411Z","requestId":"339496dac348fdaaf0d60c7cff442feea3548270f06311120426725fc7f75e09","workload":"images","name":"candidate_evaluated","state":"queued","targetId":"a","queuePasses":1}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.411Z","requestId":"339496dac348fdaaf0d60c7cff442feea3548270f06311120426725fc7f75e09","workload":"images","name":"candidate_rejected","state":"queued","targetId":"a","reason":"cooling_or_quarantined","queuePasses":1}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.411Z","requestId":"339496dac348fdaaf0d60c7cff442feea3548270f06311120426725fc7f75e09","workload":"images","name":"candidate_evaluated","state":"queued","targetId":"b","queuePasses":1}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.411Z","requestId":"339496dac348fdaaf0d60c7cff442feea3548270f06311120426725fc7f75e09","workload":"images","name":"reservation_attempted","state":"queued","targetId":"b","queuePasses":1}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.411Z","requestId":"339496dac348fdaaf0d60c7cff442feea3548270f06311120426725fc7f75e09","workload":"images","name":"reservation_acquired","state":"admitted","targetId":"b","queuePasses":1}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.411Z","requestId":"339496dac348fdaaf0d60c7cff442feea3548270f06311120426725fc7f75e09","workload":"images","name":"dispatch_started","state":"dispatched","targetId":"b","queuePasses":1}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.411Z","requestId":"339496dac348fdaaf0d60c7cff442feea3548270f06311120426725fc7f75e09","workload":"images","name":"worker_pregrant_started","state":"dispatched","targetId":"b","queuePasses":1}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.414Z","requestId":"339496dac348fdaaf0d60c7cff442feea3548270f06311120426725fc7f75e09","workload":"images","name":"terminal","state":"completed","queuePasses":1}
+✔ ambiguous image outcome does not suppress future capacity on the worker that received it (7.788ms)
+[BroccoliDB Relay] Listening on http://127.0.0.1:0
+[BroccoliDB Relay] Shards enrolled: 1 | Target WS: wss://chatgpt.com/backend-api/codex/responses
+[BroccoliDB Relay] Entering graceful drain mode...
+[BroccoliDB Relay] HTTP listener closed cleanly.
+✔ single assigned image worker preserves target-local quota scope for its parent pool (5.134125ms)
+{"event":"relay_admission","at":"2026-10-03T23:37:20.421Z","requestId":"35bc404a5539f4716139696d6bfbdf831998c05a23904dcb62114038745b0737","workload":"images","name":"received","state":"received","queuePasses":0}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.421Z","requestId":"35bc404a5539f4716139696d6bfbdf831998c05a23904dcb62114038745b0737","workload":"images","name":"candidate_evaluated","state":"queued","targetId":"a","queuePasses":1}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.421Z","requestId":"35bc404a5539f4716139696d6bfbdf831998c05a23904dcb62114038745b0737","workload":"images","name":"candidate_evaluated","state":"queued","targetId":"b","queuePasses":1}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.421Z","requestId":"35bc404a5539f4716139696d6bfbdf831998c05a23904dcb62114038745b0737","workload":"images","name":"reservation_attempted","state":"queued","targetId":"a","queuePasses":1}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.421Z","requestId":"35bc404a5539f4716139696d6bfbdf831998c05a23904dcb62114038745b0737","workload":"images","name":"reservation_acquired","state":"admitted","targetId":"a","queuePasses":1}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.421Z","requestId":"35bc404a5539f4716139696d6bfbdf831998c05a23904dcb62114038745b0737","workload":"images","name":"dispatch_started","state":"dispatched","targetId":"a","queuePasses":1}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.421Z","requestId":"35bc404a5539f4716139696d6bfbdf831998c05a23904dcb62114038745b0737","workload":"images","name":"worker_pregrant_started","state":"dispatched","targetId":"a","queuePasses":1}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.424Z","requestId":"35bc404a5539f4716139696d6bfbdf831998c05a23904dcb62114038745b0737","workload":"images","name":"terminal","state":"completed","queuePasses":1}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.424Z","requestId":"ca52d9b5f8b359d5b9eb1b4be9a260f835209b3d43f269c7fc3d4bc63b050624","workload":"images","name":"received","state":"received","queuePasses":0}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.424Z","requestId":"ca52d9b5f8b359d5b9eb1b4be9a260f835209b3d43f269c7fc3d4bc63b050624","workload":"images","name":"candidate_evaluated","state":"queued","targetId":"a","queuePasses":1}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.425Z","requestId":"ca52d9b5f8b359d5b9eb1b4be9a260f835209b3d43f269c7fc3d4bc63b050624","workload":"images","name":"candidate_rejected","state":"queued","targetId":"a","reason":"cooling_or_quarantined","queuePasses":1}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.425Z","requestId":"ca52d9b5f8b359d5b9eb1b4be9a260f835209b3d43f269c7fc3d4bc63b050624","workload":"images","name":"candidate_evaluated","state":"queued","targetId":"b","queuePasses":1}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.425Z","requestId":"ca52d9b5f8b359d5b9eb1b4be9a260f835209b3d43f269c7fc3d4bc63b050624","workload":"images","name":"reservation_attempted","state":"queued","targetId":"b","queuePasses":1}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.425Z","requestId":"ca52d9b5f8b359d5b9eb1b4be9a260f835209b3d43f269c7fc3d4bc63b050624","workload":"images","name":"reservation_acquired","state":"admitted","targetId":"b","queuePasses":1}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.425Z","requestId":"ca52d9b5f8b359d5b9eb1b4be9a260f835209b3d43f269c7fc3d4bc63b050624","workload":"images","name":"dispatch_started","state":"dispatched","targetId":"b","queuePasses":1}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.425Z","requestId":"ca52d9b5f8b359d5b9eb1b4be9a260f835209b3d43f269c7fc3d4bc63b050624","workload":"images","name":"worker_pregrant_started","state":"dispatched","targetId":"b","queuePasses":1}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.426Z","requestId":"ca52d9b5f8b359d5b9eb1b4be9a260f835209b3d43f269c7fc3d4bc63b050624","workload":"images","name":"terminal","state":"completed","queuePasses":1}
+✔ a worker quarantined during an active request keeps that request once and stays excluded afterward (6.84225ms)
+{"event":"relay_admission","at":"2026-10-03T23:37:20.428Z","requestId":"25e491148dc1d4b3269c249a95d94d4780d54b01a657f267d77f635202969e2f","workload":"images","name":"received","state":"received","queuePasses":0}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.428Z","requestId":"25e491148dc1d4b3269c249a95d94d4780d54b01a657f267d77f635202969e2f","workload":"images","name":"candidate_evaluated","state":"queued","targetId":"a","queuePasses":1}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.428Z","requestId":"25e491148dc1d4b3269c249a95d94d4780d54b01a657f267d77f635202969e2f","workload":"images","name":"candidate_evaluated","state":"queued","targetId":"b","queuePasses":1}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.428Z","requestId":"25e491148dc1d4b3269c249a95d94d4780d54b01a657f267d77f635202969e2f","workload":"images","name":"reservation_attempted","state":"queued","targetId":"a","queuePasses":1}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.428Z","requestId":"25e491148dc1d4b3269c249a95d94d4780d54b01a657f267d77f635202969e2f","workload":"images","name":"reservation_acquired","state":"admitted","targetId":"a","queuePasses":1}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.428Z","requestId":"25e491148dc1d4b3269c249a95d94d4780d54b01a657f267d77f635202969e2f","workload":"images","name":"dispatch_started","state":"dispatched","targetId":"a","queuePasses":1}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.428Z","requestId":"25e491148dc1d4b3269c249a95d94d4780d54b01a657f267d77f635202969e2f","workload":"images","name":"worker_pregrant_started","state":"dispatched","targetId":"a","queuePasses":1}
+{"event":"relay_admission","at":"2026-10-03T23:37:20.432Z","requestId":"25e491148dc1d4b3269c249a95d94d4780d54b01a657f267d77f635202969e2f","workload":"images","name":"terminal","state":"failed","reason":"ambiguous_dispatch","queuePasses":1}
+✔ ambiguous worker POST outcomes are never replayed to another worker (5.839667ms)
+[BroccoliDB Relay] Listening on http://127.0.0.1:0
+[BroccoliDB Relay] Shards enrolled: 1 | Target WS: wss://chatgpt.com/backend-api/codex/responses
+[BroccoliDB Relay] Entering graceful drain mode...
+[BroccoliDB Relay] HTTP listener closed cleanly.
+✔ Premium image alias needs a grant and performs no background image probe (18.39775ms)
+[BroccoliDB Relay] Listening on http://127.0.0.1:0
+[BroccoliDB Relay] Shards enrolled: 1 | Target WS: wss://chatgpt.com/backend-api/codex/responses
+[BroccoliDB Relay] Entering graceful drain mode...
+[BroccoliDB Relay] HTTP listener closed cleanly.
+✔ Premium image workers publish a private capability outcome without leaking it to callers (3.811208ms)
+✔ model-backed image requests preserve the requested model for Codex tool dispatch (0.298167ms)
+✔ application selection fixes Sites/images to Premium and never borrows after failure (7.113292ms)
+✔ runtime HTTP gateway rebuilds job, receipt and stream bodies without private fields (10.138167ms)
+✔ Premium private preflight never advertises an unsupported provider output ceiling (5.671166ms)
+✔ grant expires without another request and terminal database failures block new admission until reconciled (802.724625ms)
+✔ application router delegates without reading account credentials or acquiring a second lease (198.138666ms)
+✔ manual registration reports the required account class without forwarding remote error text (0.288083ms)
+✔ Premium availability reads actual engine evidence without worker HTTP or provider calls (13.952042ms)
+ℹ tests 43
+ℹ suites 0
+ℹ pass 43
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2542.973333

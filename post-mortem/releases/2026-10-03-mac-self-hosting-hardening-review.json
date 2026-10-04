@@ -1,0 +1,103 @@
+{
+  "classification": "private",
+  "observed_at": "2026-10-04T00:02:28.901020+00:00",
+  "reviewer": "Codex \u2014 bounded Mac self-hosting hardening review",
+  "scope": "Semantic review of added hosting tooling, complete affected deployment/Connect guides and new operator runbook; navigation/registry changes. This attestation does not certify failed acceptance or the entire preexisting dirty workspace.",
+  "inspected_paths": [
+    "deploy/self-host/Dockerfile",
+    "deploy/self-host/server.cjs",
+    "deploy/self-host/runtime-config.cjs",
+    "deploy/self-host/healthcheck.cjs",
+    "scripts/lib/self-host.mjs",
+    "scripts/package-self-hosted.mjs",
+    "scripts/self-host.mjs",
+    "scripts/test-self-host.mjs",
+    "scripts/test-self-host-runtime.ts",
+    "scripts/fixtures/self-host-provider.cjs",
+    "scripts/fixtures/self-host-fixture-proxy.cjs",
+    "docs/runbooks/mac-self-hosting.md",
+    "docs/DEPLOYMENT.md",
+    "docs/VERCEL_DEPLOYMENT.md",
+    "docs/operations/galx-connect.md",
+    "docs/README.md",
+    "docs/runbooks/README.md",
+    "docs/knowledge/registry.json",
+    "post-mortem/CURRENT_STATE.md",
+    "post-mortem/register.json"
+  ],
+  "reviewed_contracts": [
+    "Retained source/artifact equivalence and output-trace dependency ownership",
+    "Pinned runtime, limits, cache write paths, immutable image/archive, private configuration and allowlisted operator output",
+    "Docker context/authority isolation, one restart owner, no implicit replacement, explicit resume and 480-second stop",
+    "Whole-image acceptance gating; failure must not generate acceptance or permit staging",
+    "Synthetic full-chain database/network isolation; cleanup verifies owned labels; no real upstream",
+    "Public/native request-origin mismatch traced through Next 15.5.25 runMiddleware, attachRequestMeta and render-server and unchanged GALX requestOrigin; direct repository/HTTP contrast recorded",
+    "Current guide bodies distinguish implemented safeguards, passed checks, failed image acceptance, unexecuted lifecycle tests and separate rollout authority"
+  ],
+  "evidence": [
+    "post-mortem/releases/2026-10-03-mac-self-hosting-hardening.json",
+    "post-mortem/incidents/2026/2026-10-03-mac-self-hosting-hardening/origin-diagnostic-02.json"
+  ],
+  "actual_checks": {
+    "packaging_operator": 19,
+    "connect_nova": 35,
+    "relay_services": 43,
+    "helper_host_lifecycle": 3,
+    "whole_image": "FAILED \u2014 public-origin handling; remaining lifecycle checks not reached",
+    "public_payload_files_scanned": 819,
+    "preserved_source_files": 1886,
+    "preserved_compiled_files": 2291
+  },
+  "review_delta": {
+    "delivery": [
+      "deploy/self-host/*",
+      "scripts/self-host.mjs",
+      "scripts/lib/self-host.mjs",
+      "scripts/package-self-hosted.mjs",
+      "scripts/test-self-host.mjs",
+      "scripts/test-self-host-runtime.ts",
+      "scripts/fixtures/self-host-*.cjs",
+      "docs/runbooks/mac-self-hosting.md",
+      "docs/DEPLOYMENT.md",
+      "docs/VERCEL_DEPLOYMENT.md"
+    ],
+    "connect": [
+      "docs/operations/galx-connect.md"
+    ],
+    "knowledge": [
+      "docs/README.md",
+      "docs/runbooks/README.md",
+      "docs/knowledge/registry.json"
+    ]
+  },
+  "unmapped_review": "New private incident/release evidence and append-only journal follow the existing incident policy. No new runtime source or public surface is unmapped. Existing working-tree changes and prior domain evidence are retained; broader inventories are drift detection, not an exhaustive new semantic review.",
+  "limitations": [
+    "Application origin correction is proposed, not applied.",
+    "No whole-image successful inference, active drain, crash/restart or new revocation measurement.",
+    "No live provider/account/Media/storage/public edge acceptance or deployment.",
+    "No claim that all optional traced dependencies, HA, reboot/sleep recovery or backups are verified.",
+    "Existing public-release blockers and overdue prevention actions remain unchanged."
+  ],
+  "reviewed_file_hashes": {
+    "deploy/self-host/Dockerfile": "b90cd0594fbe613579a86f063cad6ad78685d8109dbd0113441c8d854d2fc6be",
+    "deploy/self-host/server.cjs": "41caa9aef48fd9c2fe4e1f42027349e9f9591fdab15df9bd6d06508dca81315b",
+    "deploy/self-host/runtime-config.cjs": "6258b5a4167ade91a3a6258db09b5f17820cd752425c7087c5d6b17d2c26c151",
+    "deploy/self-host/healthcheck.cjs": "ecac97db7f83a3509649acd6464f0c3b50640b6d4fc21da17034a7282048b869",
+    "scripts/lib/self-host.mjs": "44d24e6260698ea9941300b2489a7500407017af1220d3cfaad605e60ef2b052",
+    "scripts/package-self-hosted.mjs": "a1ef11891f4884edd732d9c431915d99ac617e9a2ad07e1098947468a5828c79",
+    "scripts/self-host.mjs": "e85eec7333127f447e05017613bacccc684dbee4890a148499b4ff6f96c114e7",
+    "scripts/test-self-host.mjs": "277f7eddbb101f1558d059b5954ce8dbdf849720ae9cf21c839bd70c140c1210",
+    "scripts/test-self-host-runtime.ts": "1a01f4ba9e9111d7da69843896911b33e87ca29fdd55f10f080c7cb1038c01b6",
+    "scripts/fixtures/self-host-provider.cjs": "8a32731cae4e2e65d8523c32e60e8d86204472de85054ca4a496982ef5b6dbed",
+    "scripts/fixtures/self-host-fixture-proxy.cjs": "9586f882927645d9e99b39b3d78018a98b71e73cb8c97ee905212c1c61abc932",
+    "docs/runbooks/mac-self-hosting.md": "4b7d0ec41d0456992054caa293b7ab6cbd764e50a9c11d186ef1262a11cdf02c",
+    "docs/DEPLOYMENT.md": "1055f11a70fa75e20fbffef5fa6e67039dda0273cc1c1ed1c6bfdde43d54832c",
+    "docs/VERCEL_DEPLOYMENT.md": "cac16d703222149cd4870223440e68e1204f806a7f77700b63f963d7fa066153",
+    "docs/operations/galx-connect.md": "dddf23e9e690a3cf336a6b9574524c2cafa199066157cce02df46d5ed579d8bb",
+    "docs/README.md": "e5f18d333eecb8df85307e31281b1996e60f9ab35bf9776db1c789c82ac5839e",
+    "docs/runbooks/README.md": "4b05eda64ccf1561c56a702e6a0be010901b0b3970f0a0949208bbde5f594cea",
+    "docs/knowledge/registry.json": "6c113d5c6bc9aa4c039f4e67a02efad99eb5560d26ffc5b6a819cb56c66db870",
+    "post-mortem/CURRENT_STATE.md": "475d307a23051a1ef374d2d180e2abf0c21c24d7d160a62b56e24ff48b244a91",
+    "post-mortem/register.json": "c4a7f9197870f1e2f9e8ff2f65319c13f020d3cdaccb3982b7768c18307cea74"
+  }
+}

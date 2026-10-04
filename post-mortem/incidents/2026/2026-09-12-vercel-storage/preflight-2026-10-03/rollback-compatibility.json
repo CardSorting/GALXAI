@@ -1,0 +1,17 @@
+{
+  "at": "2026-10-03T21:01:59.789Z",
+  "providerEgress": {
+    "tlsAuthorized": true,
+    "protocol": "TLSv1.3",
+    "providerCredentialsSent": false,
+    "inferenceSent": false
+  },
+  "installedCentral": {
+    "serviceSha256": "e8d5006043036fdbf7241472482615e335cc71e7a88bd7622788cb80ae30ca47",
+    "usesStableControlRPC": true,
+    "directRefillColumnReference": false
+  },
+  "migrationUpSha256": "b7d889f57506a5c0755764e16b8a7511dc56f9722f25abf5f88ed1b493a5adef",
+  "migrationDownSha256": "bd6f085823c381f9eaade9d7cc6cc201ce92d57a7317b2700ede23d8f27166c2",
+  "sourceControlContract": true
+}

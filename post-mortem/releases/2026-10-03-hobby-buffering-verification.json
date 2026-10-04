@@ -1,0 +1,122 @@
+{
+  "classification": "private",
+  "observed_at": "2026-10-03T22:47:00.368Z",
+  "scope": "No-new-subscription feasibility, actual-edge synthetic transport and documentation verification. No new runtime acceptance or deployment.",
+  "checks": {
+    "buffer_receipt_tests": 46,
+    "documentation_fixture_tests": 42,
+    "documentation_validation": "passed, existing overdue prevention warnings retained",
+    "diff_check": "passed",
+    "retained_evidence_hash_failures": [],
+    "known_private_credential_scan": {
+      "files": 18,
+      "matching_files": [],
+      "limit": "Exact known private values and build canaries; public build values excluded. Not a universal secret-detector claim."
+    },
+    "runtime_source_files": 1886,
+    "changed_runtime_source_files": [],
+    "accepted_archive_sha256": "b11d853b80851b2ee978b5d0d0bb2cedb66ced423f545e91b44aeaf8c4a9e235",
+    "accepted_archive_unchanged": true
+  },
+  "transport": {
+    "scope": "Actual existing edge/tunnel to local synthetic origin. No Vercel candidate invocation, Nova execution, database or provider request.",
+    "json": {
+      "mode": "json",
+      "status": 524,
+      "firstByteMs": 125064,
+      "elapsedMs": 125064,
+      "completed": false,
+      "done": false,
+      "error": null
+    },
+    "stream": {
+      "mode": "stream",
+      "status": 200,
+      "firstByteMs": 186,
+      "elapsedMs": 310191,
+      "completed": true,
+      "done": true,
+      "error": null
+    },
+    "cleanup": {
+      "at": "2026-10-03T22:43:52.656Z",
+      "temporaryRuleRemoved": true,
+      "version": 14,
+      "otherRulesPreserved": true
+    }
+  },
+  "boundaries": {
+    "new_runtime_build": false,
+    "paid_upgrade": false,
+    "real_provider_attempts": 0,
+    "database_changes": [],
+    "deployment": false,
+    "cohort_activation": false
+  },
+  "evidence": [
+    {
+      "path": "post-mortem/releases/2026-10-03-hobby-buffering-feasibility.json",
+      "sha256": "b03b7d194e7b0a242a069e5abf6a508652591eb534795930660a2a1d418223e6"
+    },
+    {
+      "path": "post-mortem/releases/2026-10-03-hobby-buffering-review.json",
+      "sha256": "60403771795bef2174dcdd7886b86562787222de48f31c892843eeca7616c22d"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hobby-feasibility/before.json",
+      "sha256": "d9f81e55feb3936248dd39272fa5e58f2fa0fd95c22c7e04cb3e123363099f34"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hobby-feasibility/buffer-checks.log",
+      "sha256": "f094390d8a5da29dcf5d39f83d9657035f6f9fb98275464f6f87a65024a28064"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hobby-feasibility/candidate-preservation.json",
+      "sha256": "c52f5953443453c7e298fa323f4846481baaaf61e682fa4c4d8df270b1375e09"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hobby-feasibility/cleanup.json",
+      "sha256": "da1d20fd5135ad235d40a4a4725d3ab8d55a59c0b20bb98b8f3b721b336f1805"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hobby-feasibility/closed-config-readback.json",
+      "sha256": "ecefc3ec17b807a6b16b0a95d7ea5915b28d24070d9912f739093552ac38b6d7"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hobby-feasibility/diff-check.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hobby-feasibility/docs-check.log",
+      "sha256": "b27067aba3ee4366f2ef38ef8e09a9e27a4ab832d31495ce4cb6d4f8a0aefb5f"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hobby-feasibility/docs-impact.log",
+      "sha256": "6ed2fc1c5cd4e16d46a4d688d654ba9407c74901ec6a71f8441e810c755544f3"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hobby-feasibility/docs-sync.log",
+      "sha256": "b3bb999758d64f8d8ee4357ee9c0033fb147e3fa2507d1ced90bcdcdbb0e6164"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hobby-feasibility/docs-tests.log",
+      "sha256": "70ac08741585edc817c7d27fd88064b6b7ab261fcc0425c7f31041719b48c10c"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hobby-feasibility/probe.log",
+      "sha256": "04e3d8525ea47b75d293e2f8986480b6c927e45eadd4fba3cd08c2c12fe64dbb"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hobby-feasibility/probe.ts",
+      "sha256": "2b30820dbd19a78b7d43db4724fc0e7de27c7c666a1f3ddffb899b102ab2f076"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hobby-feasibility/result.json",
+      "sha256": "b0d7a2a525b2f644d91029f3ccd01f73117c87fa09a328dd88ffb2df546552a2"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hobby-feasibility/temporary-route.json",
+      "sha256": "63e9c8eb0fca02e4d31939070b0403602f307d84dff57fde39e2b42f00fc4b11"
+    }
+  ]
+}

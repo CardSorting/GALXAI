@@ -1,0 +1,686 @@
+{
+  "classification": "private",
+  "title": "Controlled Rollout Preflight Record",
+  "observed_at": "2026-10-03T21:05:26.467361+00:00",
+  "determination": "NOT READY \u2014 BLOCKERS REMAIN",
+  "authorization": "Read-only target preflight. No deployment, migration, rebuild, image installation, DNS/route/env/gate mutation, inference request, grant issuance or rollback was performed.",
+  "act_001": {
+    "determination": "CLOSED",
+    "basis": "Both storage totals and complete current project inventory observed in the same team/date window. Serving aliases, current/prior deployments, actual host/architecture, network paths, configuration names, database history, local rollback images and schema contracts verified. This closes inventory/accounting, not rollout acceptance. Newly demonstrated target gaps have separate actions ACT-044/045/046.",
+    "incident_state": "INC-20260912-STORAGE recovered; no additional deletion was required."
+  },
+  "target_inventory": {
+    "application": {
+      "provider": "Vercel",
+      "project_id": "prj_NmtiUenK2cf924eREKuCgiDS0uC4",
+      "team_id": "team_mlJF16byaaURWNNfkpk72mVy",
+      "current": {
+        "id": "dpl_9FSaL3M6JffKDjaUHP98RhU3crzG",
+        "url": "galxai-204k0uq49-cardsortings-projects.vercel.app",
+        "readyState": "READY",
+        "createdAt": 1790441645794,
+        "target": "production"
+      },
+      "source_revision": "38a3cc48f32f5f404592109c8cae3ddac5fa6f61",
+      "runtime": "Node 22.x, Next.js, Fluid, iad1; npm install then next build",
+      "public_media": "galx.ai and www.galx.ai; homepage HTTP 200. No signed-in media mutation performed.",
+      "protection": "all_except_custom_domains; no observed Cloudflare Access application. This does not establish a cohort-only candidate perimeter.",
+      "api_gateway": {
+        "id": "84ee3b33-ebf9-46db-90f2-f13a1b31726f",
+        "createdOn": "2026-09-19T00:01:54.963539Z",
+        "versions": [
+          {
+            "version_id": "9712cd56-aaad-40f5-b5bb-616899e15712",
+            "percentage": 100
+          }
+        ]
+      },
+      "storage_evidence": "post-mortem/incidents/2026/2026-09-12-vercel-storage/preflight-2026-10-03/storage.json"
+    },
+    "paths": [
+      {
+        "name": "GALX Media",
+        "observed": "galx.ai -> proxied Vercel DNS -> current immutable production deployment"
+      },
+      {
+        "name": "Connect authorization",
+        "observed": "No GALX_CONNECT_* production environment entries; authorization-server metadata on galx.ai returns 404. Existing web deployment predates uncommitted Connect source."
+      },
+      {
+        "name": "nova.galx.ai and connect.galx.ai",
+        "observed": "No exact DNS or Vercel project-domain registrations. Wildcard *.galx.ai -> cname.vercel-dns.com exists; both probe paths return 525. These are not working registered endpoints."
+      },
+      {
+        "name": "Hosted inference transport",
+        "observed": "GALX_PREMIUM_RELAY_URL is images-service.galx.ai; its server key matches installed runtime. Tunnel accepts only ^/v1/images/(availability|generations)$. /health/live and /v1/models return 404. Candidate text discovery cannot use it."
+      },
+      {
+        "name": "Private central control",
+        "observed": "Docker Desktop authority + local HTTPS proxy at loopback 13443; monitor -> authenticated /operator/status returns 200, matching ownership and fresh heartbeat. No public route observed."
+      },
+      {
+        "name": "Runtime and monitor",
+        "observed": "One Premium Colima ARM64 VM, 2 CPUs, approximately 3 GB; runtime loopback 13301, monitor loopback 13311. Both healthy; anonymous monitor status 401. Persistent isolation firewall active. Monitor alone mounts its daemon socket."
+      },
+      {
+        "name": "Provider egress",
+        "observed": "Installed runtime -> chatgpt.com TLS 1.3 with verified peer; no provider credential transmitted by this preflight. Authenticated local model discovery HTTP 200 with four entries. This is connectivity/readiness evidence, not new provider inference acceptance."
+      },
+      {
+        "name": "Primary database",
+        "observed": "Hosted DATABASE_URL equals inspected primary credential in memory. PostgreSQL 17.6; 157 migrations; Connect applied; refill and unrelated Orbit pending. Primary/control inventory connection verified TLS."
+      },
+      {
+        "name": "Execution database",
+        "observed": "Separate PostgreSQL 17.6; versions 20260915082628 and 20261003195250 applied. Restricted runtime TLS verified; direct history/record reads denied as intended; owner Management API READ ONLY inventory succeeded. 31 settled records, zero active/pending."
+      }
+    ],
+    "capacity": {
+      "primary_accounts": 3,
+      "tokens_per_account": 500000,
+      "refill_tokens_per_minute": 50000,
+      "requests_per_minute": 40,
+      "configured_concurrency_ceiling_per_account": 50,
+      "observed_active_leases": 0,
+      "candidate_shared_admission": "2 concurrent slots/user across clients; 12 admissions/minute/user; 64 global; six-minute reservation. These are existing code constants, not new settings.",
+      "power": "Owner host observed on battery, 47%, supervisor running. Local availability depends on host power/network. AC/lid-open supervision required for the planned observation window; no hosted runtime exists."
+    },
+    "configuration_evidence": [
+      "post-mortem/incidents/2026/2026-09-12-vercel-storage/preflight-2026-10-03/target-api.json",
+      "post-mortem/incidents/2026/2026-09-12-vercel-storage/preflight-2026-10-03/target-probes.json",
+      "post-mortem/incidents/2026/2026-09-12-vercel-storage/preflight-2026-10-03/host.json",
+      "post-mortem/incidents/2026/2026-09-12-vercel-storage/preflight-2026-10-03/database.json"
+    ]
+  },
+  "candidate_inventory": {
+    "source_revision": "38a3cc48f32f5f404592109c8cae3ddac5fa6f61",
+    "source_state": "Accepted uncommitted working tree above HEAD. HEAD alone would omit Connect and corrections; do not deploy HEAD as this candidate.",
+    "source_manifest": "post-mortem/incidents/2026/2026-09-12-vercel-storage/preflight-2026-10-03/candidate-source-manifest.json",
+    "source_manifest_sha256": "aa7f5156d3110278e83699e8e073e4347974365911601096bc62e48ffd325d5c",
+    "source_files": 1886,
+    "images": [
+      {
+        "tag": "galxai-relay-central:closure-clean-20261003",
+        "id": "sha256:a0a4a04390f3ebbdd114689ad6e469cc8b1ff6b2515aad380cb28538d0448523",
+        "architecture": "arm64",
+        "component": "central",
+        "repoDigests": [
+          "galxai-relay-central@sha256:a0a4a04390f3ebbdd114689ad6e469cc8b1ff6b2515aad380cb28538d0448523"
+        ],
+        "created": "2026-10-03T20:29:11.104750379Z",
+        "os": "linux",
+        "bytes": 71817470
+      },
+      {
+        "tag": "galxai-relay-premium:closure-clean-20261003",
+        "id": "sha256:def038ce77818ef7355392f656ad4cf858ddd2cdc534e9f2fc83069edbeaf075",
+        "architecture": "arm64",
+        "component": "runtime",
+        "pool": "premium",
+        "repoDigests": [
+          "galxai-relay-premium@sha256:def038ce77818ef7355392f656ad4cf858ddd2cdc534e9f2fc83069edbeaf075"
+        ],
+        "created": "2026-10-03T20:29:11.110571587Z",
+        "os": "linux",
+        "bytes": 71817539
+      },
+      {
+        "tag": "galxai-monitor-premium:closure-clean-20261003",
+        "id": "sha256:08b3ea12058826316509b9f69c444f6f71d5c5b01382df99e672884bc123908b",
+        "architecture": "arm64",
+        "component": "monitor",
+        "pool": "premium",
+        "repoDigests": [
+          "galxai-monitor-premium@sha256:08b3ea12058826316509b9f69c444f6f71d5c5b01382df99e672884bc123908b"
+        ],
+        "created": "2026-10-03T20:29:11.402759379Z",
+        "os": "linux",
+        "bytes": 89658655
+      }
+    ],
+    "location": "All three native linux/arm64 candidates exist in desktop-linux daemon. RepoDigests are local image metadata; no registry publication or cross-daemon transfer is claimed.",
+    "monitor_artifact": "galxai-monitor-premium:closure-clean-20261003@sha256:08b3ea12058826316509b9f69c444f6f71d5c5b01382df99e672884bc123908b",
+    "component_selection": "Retain the currently installed central authority/proxy: its stable SQL protocol is compatible and this pass supplies no need to replace it. Candidate central image is frozen but not a required rollout replacement. Stage only selected runtime/monitor images after separate authorization.",
+    "web_build": {
+      "build_id": "5dfhz5cUzQI8WbdZtDjra",
+      "compiled_manifest": "post-mortem/incidents/2026/2026-09-12-vercel-storage/preflight-2026-10-03/candidate-web-manifest.json",
+      "compiled_manifest_sha256": "2d15ca60c7f2e6a9deca0ad759794e31b345360b52ebded5c2b53e87990d5c7c",
+      "compiled_files": 2291,
+      "vercel_build_output_modified": "2026-08-24T17:19:08.497189+00:00",
+      "standalone_output_present": false,
+      "compatibility": "A Next.js .next tree is present; a corresponding Vercel Build Output candidate is not. The August output predates this candidate. The target normally builds Linux Vercel artifacts from source. Packaging/rebuilding a frozen hosted candidate needs a separate decision; do not use stale --prebuilt or silently run a new build."
+    },
+    "required_configuration_names": {
+      "web": [
+        "GALX_CONNECT_ENABLED",
+        "GALX_CONNECT_ORIGIN",
+        "GALX_NOVA_RESOURCE",
+        "GALX_CONNECT_CLIENTS",
+        "DATABASE_URL",
+        "NEXT_PUBLIC_SUPABASE_URL",
+        "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+        "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
+        "SUPABASE_SERVICE_ROLE_KEY",
+        "GALX_PREMIUM_RELAY_URL",
+        "GALX_PREMIUM_RELAY_KEY"
+      ],
+      "central_secret_file": [
+        "databaseUrl",
+        "databaseCa",
+        "identitySecret",
+        "vault"
+      ],
+      "runtime_secret_file": [
+        "databaseUrl",
+        "databaseCa",
+        "centralOrigin",
+        "runtimeToken",
+        "inferenceKey",
+        "capabilityKey",
+        "installationId",
+        "pool"
+      ],
+      "monitor_secret_file": [
+        "centralOrigin",
+        "operatorToken",
+        "viewerToken",
+        "registrarToken",
+        "installationId",
+        "pool",
+        "desktopImage"
+      ],
+      "note": "Names and file references only; values are not retained. Provider credentials stay in existing server-controlled account/desktop authority. No Connect client receives these files or keys. Nova calls isolated text transport directly; do not toggle unrelated image/Sites routing flags."
+    },
+    "expected_topology": "Existing account portal/application -> reachable authenticated text transport -> same isolated runtime/provider; existing central control, monitor and separate execution database retained. No new service or host migration is proposed.",
+    "accepted_validation": "post-mortem/releases/2026-10-03-refill-packaging-closure.json"
+  },
+  "drift_report": [
+    {
+      "finding": "September storage values/deployment IDs are historical. Current storage is below allowance; all three current Ready deployments are newer.",
+      "classification": "NON-BLOCKING FOLLOW-UP",
+      "resolution": "ACT-001 closed with fresh evidence; no deletion."
+    },
+    {
+      "finding": "Accepted source includes uncommitted implementation; current production is HEAD without that implementation. Local Vercel output is stale.",
+      "classification": "BLOCKS CONTROLLED ROLLOUT",
+      "action": "ACT-044"
+    },
+    {
+      "finding": "Local text acceptance does not establish hosted reachability: configured tunnel is deliberately image-only. Legacy relay ingress is not a permitted fallback.",
+      "classification": "BLOCKS CONTROLLED ROLLOUT",
+      "action": "ACT-045"
+    },
+    {
+      "finding": "Intended Connect/Nova origins, registry and an enforceable cohort-only perimeter are not configured. Wildcard DNS is not valid endpoint registration.",
+      "classification": "BLOCKS CONTROLLED ROLLOUT",
+      "action": "ACT-046"
+    },
+    {
+      "finding": "Execution/runtime neutral correction is installed; exact quota correction and clean candidates are staged.",
+      "classification": "NON-BLOCKING FOLLOW-UP",
+      "resolution": "Explicit migration and selected image installation belong only in the later authorized rollout."
+    },
+    {
+      "finding": "Physical runtime remains on owner Mac, not a hosted VM.",
+      "classification": "NON-BLOCKING FOLLOW-UP",
+      "resolution": "Preserve chosen local topology and supervised window. ACT-018 remains a public-release recovery gate."
+    }
+  ],
+  "migration_plan": {
+    "already_applied": {
+      "primary_connect": "20261003131619",
+      "execution": [
+        "20260915082628",
+        "20261003195250"
+      ]
+    },
+    "exact_unapplied_sequence": [
+      "PRIMARY ONLY: 20261003202702_relay_refill_integer_credit.sql"
+    ],
+    "up_sha256": "b7d889f57506a5c0755764e16b8a7511dc56f9722f25abf5f88ed1b493a5adef",
+    "down_sha256": "bd6f085823c381f9eaade9d7cc6cc201ce92d57a7317b2700ede23d8f27166c2",
+    "excluded_pending": "20260926081213_orbit_public_identity.sql; unrelated and must remain pending. No execution migration is needed.",
+    "preconditions": [
+      "Reconfirm exact project identities, unchanged history/function hashes, retained execution digest and zero active/unsettled work.",
+      "Verify rollback files/images and retain private configuration snapshots. Keep cohort disabled.",
+      "Use only the exact-version transaction; three-second lock timeout and ten-second statement timeout fail the attempt safely. Never use an unscoped db push or --force."
+    ],
+    "later_commands": [
+      "node --env-file-if-exists=.env.local --import tsx scripts/push-migrations-direct.ts --dry-run --version 20261003202702",
+      "After explicit rollout authorization and successful exact-version rehearsal: node --env-file-if-exists=.env.local --import tsx scripts/push-migrations-direct.ts --version 20261003202702"
+    ],
+    "command_status": "Not run in preflight. The first command executes SQL inside a rolled-back transaction; it is not a read-only inventory command.",
+    "safety": "Adds two nullable BIGINT internal numerators; no backfill or execution writes. Three observed account rows have valid legacy fractions, all zero. Initialization occurs once under the existing account lock. Connect tables already coexist with existing auth accounts and browser roles cannot read grants/entitlements.",
+    "forward_compatibility": "Existing acquire function signature and JSON response remain unchanged. Inspected running central bundle calls private.relay_control and has no direct refill-column reference. Current hosted HEAD uses the unchanged lease RPC. Earlier isolated 82 refill and 224 authorization/execution checks cover arithmetic, retained rollback and unchanged surrounding rules. Keep the additive corrected schema on ordinary application/image rollback.",
+    "rollback_strategy": "Do not drop numerators, restore old fractions, restore old database snapshots or undo the execution neutral migration. Normal rollback retains the new exact function and state with compatible prior images. If the arithmetic migration itself is unsafe, its paired DOWN closes new acquisition while retaining credit/leases/history; it is containment with inference downtime, not restored old arithmetic. Reapply reviewed UP to resume.",
+    "not_proven": "No target migration or old-binary/migrated-target live restoration drill was performed. The readiness conclusion is blocked for the observed artifact/transport/cohort gaps; later rollout must recheck these compatibility assertions and stop on changed state."
+  },
+  "cohort": {
+    "account_count": 1,
+    "account_selector": {
+      "user_id": "a58fa68f-3545-4235-9825-807431813081",
+      "reason": "Existing October 3 acceptance account; exact UUID is required only for the private controlled allowlist. No email/profile data retained."
+    },
+    "observed_state": "Existing auth account intact. Explicit entitlement disabled; all six historical grants revoked; nine retained Nova records: two completed, two unknown, five not_accepted. No current reservations. Do not revive old grants.",
+    "qualified_clients": [
+      {
+        "id": "reference-native",
+        "kind": "native",
+        "redirectUris": [
+          "http://127.0.0.1/callback"
+        ],
+        "origins": []
+      },
+      {
+        "id": "reference-browser",
+        "kind": "browser",
+        "redirectUris": [
+          "http://127.0.0.1:4400/callback"
+        ],
+        "origins": [
+          "http://127.0.0.1:4400"
+        ]
+      }
+    ],
+    "access_rule": "Only this existing account, with a later explicit time-bounded inference grant, may invoke through these operator-reviewed first-party clients. PKCE S256, exact redirect registration, scope inference:invoke and exact Nova resource apply. Begin with native; browser is the independently authorized revocation control. No enrollment, purchasing, entitlement automation, marketplace or publishing rights.",
+    "proposed_window": "60 minutes from explicit enablement; operator may end earlier. No entitlement issued during preflight.",
+    "perimeter_gate": "Before enabling, document and verify a cohort-only edge/access rule covering both authorization and inference routes on every reachable hostname, including alternate deployment/project origins. Existing Vercel protection excludes custom domains; no Cloudflare Access app is present. Hiding links, public client IDs or an explicit entitlement alone does not prove the entire candidate is inaccessible to the public. Do not ship a bypass secret in the reference client.",
+    "reversal": "Disable only this explicit inference entitlement and revoke only grants created for this rollout. Preserve GALX identity, Media state and every historical grant/execution. Remove candidate route exposure after draining; leave other client/account authority untouched."
+  },
+  "rollout_sequence": [
+    {
+      "step": 0,
+      "action": "STOP until ACT-044/045/046 close and owner explicitly authorizes this exact candidate, origin/perimeter, migration and window. This record is not an executable authorization."
+    },
+    {
+      "step": 1,
+      "action": "Re-run read-only inventory; match frozen source/artifact digests, production aliases, database identities/history, private configuration fingerprints and rollback images. Capture encrypted configuration/route backups in operator-only storage. Abort on drift."
+    },
+    {
+      "step": 2,
+      "action": "Verify retained rollback artifacts at their actual destinations, restore procedure and client-access closure. Confirm host on AC with stable network/lid open, fresh monitor/control evidence, zero active work and zero pending settlement. Do not manufacture completion for a retained unknown."
+    },
+    {
+      "step": 3,
+      "action": "Rehearse and apply only primary 20261003202702 using the exact-version sequence above. Compare history, constraints, grants, retained execution digest and protocol signature. No execution migration, Orbit migration or account rewrite."
+    },
+    {
+      "step": 4,
+      "action": "Transfer the already-reviewed ARM64 runtime/monitor images by docker save/load between desktop-linux and colima-premium; verify IDs after transfer. Retain old tags/configuration/volumes. No rebuild. Keep central image/proxy unchanged unless separately justified."
+    },
+    {
+      "step": 5,
+      "action": "With new Nova admissions disabled, drain accepted work; install selected pins using the existing local service procedure and private ownership handoff. Enforce 61 seconds after the prior owner lastSeenAt before a new runtime epoch; do not bypass fencing or replay work. Verify installed image IDs, non-root/read-only restrictions and original volume mounts."
+    },
+    {
+      "step": 6,
+      "action": "Deploy the separately frozen compatible web artifact disabled, behind the approved cohort perimeter. Do not promote galx.ai or expose a public alias merely because deployment is Ready. GALX_CONNECT_ENABLED stays absent/0 initially; no active entitlement. Use the exact approved issuer/resource/client registry and only the reviewed authenticated text transport."
+    },
+    {
+      "step": 7,
+      "action": "Check internal health, authenticated model discovery, current private control ownership, browser DTO allowlist, database connection and origin/CORS/PKCE behavior. Verify off-cohort callers and alternate-origin bypass attempts are denied before enabling."
+    },
+    {
+      "step": 8,
+      "action": "Enable Connect only behind the approved perimeter and grant the single existing account inference access for the 60-minute window. Vercel environment changes are deployment-scoped: if flag activation requires a new deployment, reuse the same separately approved frozen Build Output, record its new deployment ID, verify artifact identity and perimeter before admission, and do not rebuild source. Consent creates new scoped grants; none are inferred from GALX login or Media participation."
+    },
+    {
+      "step": 9,
+      "action": "Run the bounded acceptance probes below, recording private request/grant identifiers, before/after execution counts and sanitized client events. Do not retry unknown attempts to improve the result."
+    },
+    {
+      "step": 10,
+      "action": "Observe for 30 minutes after probes with 15-second local health/control sampling, including at least one refresh and the six-minute reservation horizon. Keep global traffic closed. Apply predetermined stop/rollback triggers."
+    },
+    {
+      "step": 11,
+      "action": "If every probe passes, hold the same cohort only for the remainder of its approved window and report. Expansion/public release requires a separate decision. At window end disable the explicit entitlement and revoke remaining rollout grants. On any trigger execute the containment/rollback order below."
+    }
+  ],
+  "acceptance_probes": [
+    {
+      "id": "AUTH",
+      "procedure": "Existing account starts native authorization, authenticates at existing GALX portal, consents, exchanges a one-use PKCE code and receives audience/scope-restricted authorization. Browser session alone, malformed/expired/wrong-audience/missing-scope tokens, no entitlement, another client and replayed code/refresh must be denied with zero new upstream dispatch.",
+      "evidence": "HTTP status and public error code, grant ID, client ID, entitlement decision; never raw credentials."
+    },
+    {
+      "id": "INFERENCE",
+      "procedure": "One tiny streamed request with a unique request key and bounded output; verify admission, exactly one upstream execution, sanitized events and honest terminal outcome. A genuine unknown is recorded without replay; successful real inference remains a required acceptance proof.",
+      "evidence": "Nova request ID -> private execution ID, provider-attempt count, terminal state and result hash, not prompt/credential dumps."
+    },
+    {
+      "id": "INTERRUPT",
+      "procedure": "After receiving real stream output, cancel once. Confirm caller interruption/terminal unknown and unchanged provider failure count; wait for settlement and prove no subsequent dispatch for that original key.",
+      "evidence": "Before/after account failure count and execution record; cancellation is neutral, not a health test."
+    },
+    {
+      "id": "DUPLICATE",
+      "procedure": "Resubmit the identical private runtime request key/fingerprint to the existing execution, proving attachment and a single upstream attempt. At the public Nova boundary the same submitted request key returns the established 409 request_already_submitted with prior outcome; it must not create a new upstream execution. Do not change either established contract to manufacture a streamed replay.",
+      "evidence": "Original execution identity retained, dispatch count unchanged; both boundary responses recorded."
+    },
+    {
+      "id": "REVOKE",
+      "procedure": "Keep independently consented browser client active. Disconnect native, timestamp committed acknowledgement with a monotonic clock, immediately request new admission and refresh using that connection, then verify browser client and GALX Media remain usable.",
+      "contract": "Every new admission/refresh after disconnect acknowledgement must fail; existing shared row-lock checks have no propagation cache. Requests admitted earlier may finish. Measure request round-trip separately; do not use historical 175 ms as an SLA.",
+      "evidence": "Acknowledgement/admission times, denial status, measured elapsed ms, independent client result and unchanged completed records."
+    },
+    {
+      "id": "CAPACITY",
+      "procedure": "Use the single user and at most two concurrent small requests across its two clients; a third admission must return service_busy without a provider attempt. Cancel/settle once and respect the retained unknown reservation deadline. No destructive or provider-quota exhaustion load.",
+      "evidence": "Configured caps, active slot counts, third-call denial, unchanged login/grant and provider-health counters."
+    },
+    {
+      "id": "PRIVATE_BOUNDARY",
+      "procedure": "Authenticated local monitor reads current private control ownership, while browser status contains only its documented DTO fields. Anonymous monitor access remains denied. Inspect response headers, raw bodies, streams, SDK errors, browser/native logs and delivered assets for keys/private IDs/topology.",
+      "evidence": "Field allowlists and redacted artifact hashes. Whole live-site cleanliness is not claimed by this preflight."
+    },
+    {
+      "id": "HOSTED_DEADLINE",
+      "procedure": "Before declaring target acceptance, validate interruption at the target execution limit without replay. Current Vercel Hobby Fluid maximum and route maxDuration are 300 s; executor wall limit is also 300 s. Outer-host termination can precede cleanup, so record the actual client/durable state and six-minute reservation behavior; do not infer a guaranteed terminal update from local cancellation tests.",
+      "evidence": "Target-produced interruption evidence or an explicit unresolved acceptance blocker; no timeout semantics change authorized."
+    }
+  ],
+  "rollback": {
+    "verified_artifacts": [
+      {
+        "context": "desktop-linux",
+        "tag": "galxai-relay-central:connections-20260916",
+        "id": "sha256:e7a4c80fa704d4abb7b423a48a66afad4d809c70dd5df3592eb772e823284bb3",
+        "architecture": "arm64",
+        "os": "linux",
+        "size": 71751670,
+        "repoDigests": [
+          "galxai-relay-central@sha256:e7a4c80fa704d4abb7b423a48a66afad4d809c70dd5df3592eb772e823284bb3"
+        ],
+        "created": "2026-09-16T01:51:27.257877919Z"
+      },
+      {
+        "context": "colima-premium",
+        "tag": "galxai-relay-premium:neutral-outcomes-20261003",
+        "id": "sha256:a1feb16ef31ae0f97cc231b85d06578496335d79221d13e36a4c40b8524a545f",
+        "architecture": "arm64",
+        "os": "linux",
+        "size": 71817831,
+        "repoDigests": [
+          "galxai-relay-premium@sha256:a1feb16ef31ae0f97cc231b85d06578496335d79221d13e36a4c40b8524a545f"
+        ],
+        "created": "2026-10-03T13:57:11.807263227-06:00"
+      },
+      {
+        "context": "colima-premium",
+        "tag": "galxai-monitor-premium:neutral-outcomes-20261003-r3",
+        "id": "sha256:0ab24b83ce3f2536f88b3994a716671d7b87495ebc5bdb90c5cafa3a50aa05ed",
+        "architecture": "arm64",
+        "os": "linux",
+        "size": 81874367,
+        "repoDigests": [
+          "galxai-monitor-premium@sha256:0ab24b83ce3f2536f88b3994a716671d7b87495ebc5bdb90c5cafa3a50aa05ed"
+        ],
+        "created": "2026-10-03T14:05:03.655022865-06:00"
+      }
+    ],
+    "web_restore_target": {
+      "id": "dpl_9FSaL3M6JffKDjaUHP98RhU3crzG",
+      "url": "galxai-204k0uq49-cardsortings-projects.vercel.app",
+      "readyState": "READY",
+      "createdAt": 1790441645794,
+      "target": "production"
+    },
+    "additional_retained_web_deployments": [
+      {
+        "uid": "dpl_7DGrbtGmqbMAPvG2s8bXG6p3oGex",
+        "name": "galxai",
+        "url": "galxai-gp90wbv7n-cardsortings-projects.vercel.app",
+        "created": 1790415652326,
+        "state": "READY",
+        "readyState": "READY",
+        "target": "production",
+        "buildingAt": 1790415653552,
+        "ready": 1790415861924,
+        "source": "git",
+        "git": {
+          "githubCommitSha": "300a1af3f1d825c9799d20efd25b2ee5c438ab14",
+          "githubCommitRef": "main"
+        }
+      },
+      {
+        "uid": "dpl_93E4W7Jxofbo8dPSG9JULhCn6s9w",
+        "name": "galxai",
+        "url": "galxai-acalu9fs2-cardsortings-projects.vercel.app",
+        "created": 1790376823559,
+        "state": "READY",
+        "readyState": "READY",
+        "target": "production",
+        "buildingAt": 1790376824775,
+        "ready": 1790377026125,
+        "source": "git",
+        "git": {
+          "githubCommitSha": "63b54f8323fb1dc63a3dca0ed02e377f54e882bb",
+          "githubCommitRef": "main"
+        }
+      }
+    ],
+    "configuration": "post-mortem/incidents/2026/2026-09-12-vercel-storage/preflight-2026-10-03/host.json",
+    "route_baseline": "post-mortem/incidents/2026/2026-09-12-vercel-storage/preflight-2026-10-03/target-api.json",
+    "compatibility_evidence": "post-mortem/incidents/2026/2026-09-12-vercel-storage/preflight-2026-10-03/rollback-compatibility.json",
+    "database_strategy": "Keep additive refill schema/function on ordinary rollback; keep Connect tables and neutral execution migration. No destructive schema downgrade or record rewind.",
+    "order": [
+      "Immediately stop new cohort admission at the perimeter and disable only the rollout entitlement; revoke rollout-created grants. Preserve account identity, original readers and historical execution records.",
+      "Drain in-flight work or record an unconfirmed interruption without replay; verify pending settlement and ownership. If exposure occurred, close the exposed path first and contain compromised credentials through a separately scoped incident action.",
+      "Remove candidate route/alias exposure. Restore the recorded previous Vercel deployment only if an alias was changed; preserve GALX Media aliases throughout a private candidate deployment. Never rebuild old source to approximate rollback.",
+      "Restore prior runtime/monitor image IDs and exact baseline configuration/mounts using the local service procedure and 61-second owner handoff. Central authority/proxy normally stays unchanged. Do not downgrade to pre-neutral runtime or migration.",
+      "Retain new additive quota state with old compatible services. If quota function is corrupt, use the reviewed fail-closed DOWN transaction as containment and keep inference closed pending forward repair.",
+      "Verify media reachability, old runtime/monitor health, private ownership, sanitized browser status, zero unexpected new attempts and intact execution digest; keep cohort closed."
+    ],
+    "transition": "Media need not be interrupted when its serving alias stays unchanged. Replacing the single local runtime pauses inference; drain time plus at least 61 seconds ownership fencing and startup/readiness delay apply. No measured recovery-time guarantee is claimed.",
+    "automatic_triggers": [
+      {
+        "signal": "Authorization bypass",
+        "threshold": "Any confirmed occurrence; immediately close cohort and execute rollback/containment order."
+      },
+      {
+        "signal": "Provider or application credential exposure",
+        "threshold": "Any confirmed occurrence; immediately close cohort and execute rollback/containment order."
+      },
+      {
+        "signal": "Public ownership evidence exposure",
+        "threshold": "Any confirmed occurrence; immediately close cohort and execute rollback/containment order."
+      },
+      {
+        "signal": "Incorrect entitlement acceptance",
+        "threshold": "Any confirmed occurrence; immediately close cohort and execute rollback/containment order."
+      },
+      {
+        "signal": "A new admission or refresh accepted after committed revocation acknowledgement",
+        "threshold": "Any confirmed occurrence; immediately close cohort and execute rollback/containment order."
+      },
+      {
+        "signal": "Duplicate upstream execution for one original request key",
+        "threshold": "Any confirmed occurrence; immediately close cohort and execute rollback/containment order."
+      },
+      {
+        "signal": "Migration corruption or unexpected existing-record mutation",
+        "threshold": "Any confirmed occurrence; immediately close cohort and execute rollback/containment order."
+      },
+      {
+        "signal": "Cancellation/deadline/lost connection increments provider failure count",
+        "threshold": "Any confirmed occurrence; immediately close cohort and execute rollback/containment order."
+      },
+      {
+        "signal": "Unknown terminal execution automatically redispatched",
+        "threshold": "Any confirmed occurrence; immediately close cohort and execute rollback/containment order."
+      }
+    ],
+    "operational_triggers": [
+      {
+        "signal": "Monitor/control evidence unavailable or ownership mismatch",
+        "threshold": "Ownership mismatch immediately; required evidence unavailable on three consecutive 15-second probes after startup grace. Keep gate closed during startup."
+      },
+      {
+        "signal": "Candidate-attributable instability",
+        "threshold": "Three consecutive 15-second internal health failures, two process restarts within five minutes, or three consecutive local protocol/DB errors with old baseline healthy. Close cohort automatically; distinguish provider-origin unavailability."
+      }
+    ],
+    "not_automatic_triggers": [
+      "Ordinary provider unavailability by itself",
+      "A genuine terminal unknown with no automatic replay"
+    ],
+    "automation_limit": "These are the mandated later rollout abort rules, not a newly installed autonomous rollback controller. The rollout executor must enforce them; none was installed or exercised here."
+  },
+  "remaining_blockers": {
+    "BLOCKS CONTROLLED ROLLOUT": [
+      {
+        "id": "ACT-044",
+        "finding": "No frozen compatible hosted Connect/Nova artifact. Current .vercel/output is stale; .next is not a Vercel Build Output deployment.",
+        "closure": "Separately authorize target packaging/build from the frozen source, verify only necessary target adaptation, retain immutable hosted artifact and validation. Do not rebuild in this pass."
+      },
+      {
+        "id": "ACT-045",
+        "finding": "Actual hosted Premium endpoint only permits image paths and cannot pass Nova text discovery/dispatch.",
+        "closure": "Approve a narrow authenticated server transport through existing ingress for required text health/models/chat paths; preserve image routes, private control/monitor and original-operation readers. Prove reachability from the target before cohort enablement."
+      },
+      {
+        "id": "ACT-046",
+        "finding": "Issuer/resource domain registration, Connect client registry and an enforced cohort-only perimeter are missing.",
+        "closure": "Approve exact origins and first-party callbacks; demonstrate cohort-only access on every hostname with alternate-origin bypass denial and existing-account login. Keep registration/entitlement automation absent."
+      }
+    ],
+    "BLOCKS PUBLIC RELEASE": [
+      "ACT-014: remaining elevation/device-proof/password controls",
+      "ACT-018: host fault/recovery drills",
+      "ACT-028: remaining real account/session matrix",
+      "ACT-043: legacy account-tier RPC review. Not used by explicit Connect entitlement/grant checks; no newly observed dependency justified expanding its inspection."
+    ],
+    "NON-BLOCKING FOLLOW-UP": [
+      "ACT-037",
+      "ACT-005",
+      "ACT-006",
+      "ACT-008",
+      "ACT-015",
+      "ACT-016",
+      "ACT-020",
+      "ACT-025",
+      "ACT-032",
+      "Unrelated performance findings; unprovisioned hosted infrastructure; exact runtime recovery duration."
+    ],
+    "closed_before_this_pass": [
+      "ACT-041 quota arithmetic",
+      "ACT-042 clean monitor packaging"
+    ]
+  },
+  "verification": {
+    "new_checks": "Vercel authenticated usage + complete REST inventory; Cloudflare DNS/tunnel/Worker/Access inventory; read-only HTTP and private control probes; Docker image/host/firewall checks; PostgreSQL READ ONLY primary/restricted execution inventory and owner Management API history; provider TLS egress; frozen source/artifact manifests. No new provider inference or revocation timing.",
+    "historical_acceptance": "October 3 provider lifecycle and neutral-outcome records remain historical. 175 ms is unchanged historical evidence. Prior acceptance suites/production build apply to unchanged candidate bytes; no rebuild performed.",
+    "limits": [
+      "Preflight does not prove post-deployment acceptance, live rollback timing, hosted deadline behavior or all public pages/bundles clean.",
+      "A 401 from current galx.ai/v1/inference does not prove Connect is deployed; source revision and missing issuer metadata/config show it is not this candidate.",
+      "Initial environment-list values were encrypted; comparisons use the documented per-variable decrypted GET in memory. Neither ciphertext mismatch nor masked secrets were treated as missing values.",
+      "Restricted execution history/row queries correctly returned 42501; final owner read-only inventory was acquired with CLI --linked --project-ref. No permissions changed."
+    ],
+    "frozen_candidate_check": {
+      "at": "2026-10-03T21:07:25.966Z",
+      "privateFilesChecked": 12,
+      "rawCredentialMatches": [],
+      "sourceFilesChecked": 1886,
+      "compiledFilesChecked": 2291,
+      "changed": {
+        "source": [],
+        "compiled": []
+      },
+      "evidenceDigestsMatch": true
+    },
+    "documentation": {
+      "commands": [
+        {
+          "command": "npm run docs:sync",
+          "exit_code": 0,
+          "log_sha256": "b3bb999758d64f8d8ee4357ee9c0033fb147e3fa2507d1ced90bcdcdbb0e6164"
+        },
+        {
+          "command": "npm run docs:check",
+          "exit_code": 0,
+          "log_sha256": "a01bf40b601bb1662733573e4fc2c5f6722502e69d4a65cc4f61ede5c5a56531"
+        },
+        {
+          "command": "npm run test:docs",
+          "exit_code": 0,
+          "log_sha256": "1e5aabe5fd60d5fa72c968f1ca810a54045004a31b0d7dbd5f42f973dc5b0c35"
+        },
+        {
+          "command": "npm run docs:check:build",
+          "exit_code": 0,
+          "log_sha256": "6ac02e741977cd2c04cd2f0684b08c9fda6d1c3bd2b92e553117d07de58bc75d"
+        }
+      ],
+      "tests": {
+        "incident_guard": 25,
+        "knowledge_guard": 17
+      },
+      "existing_compiled_assets_scanned": 538,
+      "git_diff_check": "passed",
+      "warnings": "12 pre-existing overdue warnings remain after ACT-001 closure; their classifications unchanged. Three new rollout actions and ACT-043 have October 10 review dates.",
+      "production_build": "Not rebuilt; preserved accepted build and all frozen source/compiled hashes. Selected asset boundary scan does not certify the live site."
+    }
+  },
+  "evidence": [
+    {
+      "path": "post-mortem/incidents/2026/2026-09-12-vercel-storage/preflight-2026-10-03/candidate-freeze.json",
+      "sha256": "42e3376170aa1adb6c85c37f8d98e89439a1bd68a4dcdb003445642685dd1fc0"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-09-12-vercel-storage/preflight-2026-10-03/candidate-source-manifest.json",
+      "sha256": "aa7f5156d3110278e83699e8e073e4347974365911601096bc62e48ffd325d5c"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-09-12-vercel-storage/preflight-2026-10-03/candidate-web-manifest.json",
+      "sha256": "2d15ca60c7f2e6a9deca0ad759794e31b345360b52ebded5c2b53e87990d5c7c"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-09-12-vercel-storage/preflight-2026-10-03/colima-premium-containers.json",
+      "sha256": "2ac1ec010913b747102c9402172c9a88b21686ed513bdaf0255f73e3f1146c16"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-09-12-vercel-storage/preflight-2026-10-03/database.json",
+      "sha256": "9fb12e894a8144a2e59cc3757e17e20e508cdb94d1f02ec94b87043100972cf7"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-09-12-vercel-storage/preflight-2026-10-03/desktop-linux-containers.json",
+      "sha256": "e7c88259505a5ce3117c4864d031feb21e0df5c108c4064e118f7debdac6d1e7"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-09-12-vercel-storage/preflight-2026-10-03/host.json",
+      "sha256": "0d81de36073e1634aa8ff3d15b451b2eedcd0f117fbcc3219c7c056a22f1f887"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-09-12-vercel-storage/preflight-2026-10-03/rollback-compatibility.json",
+      "sha256": "5069a146f96767353f442eb48b93e95cae8fe123c410a137700dd62fcaf326ec"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-09-12-vercel-storage/preflight-2026-10-03/storage.json",
+      "sha256": "d28ed49bc7d3c175a4893437cfd8878cff1b162638fca626f6a99fe12ae87f73"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-09-12-vercel-storage/preflight-2026-10-03/target-api.json",
+      "sha256": "c292698394dbadf8da4ad7e3864dd0caefcbb76baa1efbad834ca3111626c011"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-09-12-vercel-storage/preflight-2026-10-03/target-probes.json",
+      "sha256": "09bf4f676c04f6440c117e4b903160fcdf16af70d7ad1b22bbc3811342a28481"
+    }
+  ],
+  "external_references": [
+    {
+      "url": "https://vercel.com/docs/functions/limitations",
+      "used_for": "Current Hobby Fluid maximum 300 s and stream execution limit; actual project enables Fluid."
+    },
+    {
+      "url": "https://vercel.com/docs/rest-api/projects/retrieve-the-decrypted-value-of-an-environment-variable-of-a-project-by-id",
+      "used_for": "Read-only in-memory exact configuration comparison."
+    },
+    {
+      "url": "https://developers.cloudflare.com/api/resources/zero_trust/subresources/tunnels/subresources/cloudflared/subresources/configurations/methods/get/",
+      "used_for": "Read-only ingress inventory."
+    }
+  ],
+  "stop": "Do not deploy or rebuild. Return this record for separate resolution of ACT-044/045/046 and an explicit rollout decision."
+}

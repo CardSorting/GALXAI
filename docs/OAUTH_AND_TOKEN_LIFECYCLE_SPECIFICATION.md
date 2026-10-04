@@ -8,6 +8,7 @@ Private reference. [Account management](reference/relay-account-management.md) o
 
 | Credential or session | Establishment and renewal | Authority |
 | --- | --- | --- |
+| Connect application credential | Existing account consent, authorization code with S256 PKCE; rotating refresh token | Nova inference only, current grant and entitlement required; no account/media/admin rights |
 | GALX account session | Verified application login and account session flow | Current customer identity/permissions only |
 | Pool monitor session | Fixed native launcher exchanges a scoped one-use ticket; relaunch after expiry | Own-pool viewer or operator privileges checked centrally |
 | Registrar principal | Private monitor configuration, separate from viewer/operator | Narrow saved-login review/registration handoff for its fixed installation |
@@ -16,7 +17,7 @@ Private reference. [Account management](reference/relay-account-management.md) o
 | Replacement sign-in | Manual same-desktop sign-in, then **Reconnect → Save new sign-in** | Revision-checked central credential replacement |
 | Runtime projection/grant | Scoped runtime principal, current epoch/revisions and existing central account lease | Own-pool execution for a bounded renewable interval |
 
-Provider renewal, browser reconnection, GALX session renewal and vault re-encryption are separate. Opening a monitor never signs in to a provider or reviews credentials. The new monitor has no legacy background saved-file synchronization bridge. No independent provider refresh-token daemon establishes managed authority.
+Connect application authorization, provider renewal, browser reconnection, GALX session renewal and vault re-encryption are separate. [Connect operations](operations/galx-connect.md) owns its five-minute access tokens, thirty-day absolute refresh lifetime, reuse revocation and zero grant-cache delay after acknowledged disconnect. It is locally implemented, disabled pending rollout, and does not reopen the provider paths below. Opening a monitor never signs in to a provider or reviews credentials. The new monitor has no legacy background saved-file synchronization bridge. No independent provider refresh-token daemon establishes managed authority.
 
 ## Registration and renewal
 

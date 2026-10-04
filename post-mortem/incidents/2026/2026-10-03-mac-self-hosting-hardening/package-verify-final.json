@@ -1,0 +1,17 @@
+{
+  "status": "VERIFIED",
+  "manifestSha256": "2afadf8c22f92685245228d805d6f5fac658c108ed105ad585c1c33b7be3976d",
+  "image": "sha256:70b0c58c6a6f27bbf7dceaa13a1a555a822bf4afbae31ff2fce234724b12c27b",
+  "archiveVerified": true,
+  "files": 4519,
+  "equivalence": {
+    "tracedFiles": 4514,
+    "startupTraceFiles": 1956,
+    "startupTraceWarnings": 122,
+    "comparedToAcceptedArtifact": 2382,
+    "bytesChanged": 0,
+    "publicFilesScanned": 819,
+    "applicationBytes": 180681732
+  },
+  "deployed": false
+}

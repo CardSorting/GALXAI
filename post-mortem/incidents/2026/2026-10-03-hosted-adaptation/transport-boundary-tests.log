@@ -1,0 +1,38 @@
+✔ identity requires verified credentials and never trusts client elevation claims (10.303958ms)
+▶ image library and favorites verify sessions without administrator credentials
+  ✔ no service role configured (5.440458ms)
+  ✔ legacy public key is never elevated (3.011833ms)
+✔ image library and favorites verify sessions without administrator credentials (9.410625ms)
+✔ database throttling cannot reject valid sessions; authentication outages are not 401s (2.00825ms)
+✔ administrator access fails closed for missing, user, and malformed credentials (1.027042ms)
+✔ public health does not enumerate infrastructure (2.066209ms)
+✔ Star profiles and participant APIs are public product surfaces without broadening private routes (0.592334ms)
+✔ operational routes reject anonymous and ordinary bearer callers before collecting data (236.201875ms)
+✔ legacy execution and general task submission cannot bypass private image admission (21.698ms)
+✔ public model catalog contains no execution configuration (0.493459ms)
+✔ published documentation does not include operational implementation vocabulary (7.276875ms)
+✔ sitemap lists discovery and public Stars, never private creation workspaces (4.695916ms)
+✔ industry pages expose capabilities without internal topology or unverified infrastructure claims (2.757667ms)
+✔ REST image errors retain status/backoff and caller cancellation remains health-neutral (16.81275ms)
+✔ relay JSON and streaming completions require DONE and preserve output and usage (2.973667ms)
+✔ relay failures, malformed frames, cancellation and partial EOF cannot become empty successes (1.831041ms)
+✔ first-output deadline remains active after the 202 and SSE headers; caller abort is honored (38.912667ms)
+✔ unsafe attachment destinations and relay HTTP failures are rejected (1.298833ms)
+✔ configured relay errors never invoke direct WebSocket or CLI fallback (0.533334ms)
+✔ image relay errors and deadlines never replay synthesis; valid images are preserved (21.001042ms)
+✔ relay failures preserve retry authority and task identity without replay or raw provider text (0.541958ms)
+✔ confirmed quota stop is actionable while arbitrary diagnostics stay out of public recovery (0.571625ms)
+✔ anonymous navigation, RSC, prefetch and misleading paths never pass the workspace gate (12.365792ms)
+✔ forged sessions, anonymous Auth users and verification outages fail closed with sanitized responses (10.256875ms)
+✔ expired sessions refresh through Auth and propagate cookies to the request and response (3.320917ms)
+✔ native sessions use verified active session authority, never cookie presence (0.673625ms)
+✔ server page guard independently denies anonymous entry when middleware did not run (40.108542ms)
+✔ independent page verification distinguishes an outage from an invalid session (2.43725ms)
+ℹ tests 29
+ℹ suites 0
+ℹ pass 29
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 687.857917

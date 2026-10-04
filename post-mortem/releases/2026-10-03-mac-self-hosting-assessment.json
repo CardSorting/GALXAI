@@ -1,0 +1,253 @@
+{
+  "classification": "private",
+  "observed_at": "2026-10-03T23:22:46.367Z",
+  "purpose": "Evaluate the owner-proposed temporary whole-application self-hosting on the existing Mac; local disposable readiness work only.",
+  "determination": "RECOMMENDED TEMPORARY PLACEMENT — LOCAL PRODUCTION BOOT VERIFIED; CUTOVER NOT READY",
+  "recommended_shape": {
+    "web": "Run the existing Next.js production application with next start in one supervised container on the existing general Mac host. It serves GALX Media, Connect and the scoped Nova resource.",
+    "private_execution": "Keep the existing Premium runtime/monitor and provider credentials in their current isolated daemon. The web container receives only its own existing server configuration; do not give it or the browser the provider desktop authority.",
+    "data": "Keep existing Supabase identity/database and object storage. No data migration, second account system or new entitlement policy.",
+    "public_path": "Use the existing Cloudflare Tunnel with explicit galx.ai/www behavior and narrowly scoped nova.galx.ai routes. Preserve the existing issuer/audience/callback URLs. No DNS or ingress change performed.",
+    "financial": "No new hosting subscription or Vercel plan change. Existing data/provider/network/electricity usage and limits remain."
+  },
+  "simplification": {
+    "removes": "The requirement to split the application for Hobby and author a bespoke persistent Nova request adapter solely to escape Vercel invocation lifetime.",
+    "keeps": "Nova existing execution helper, authorization, admission, after registration and 300-second deadline. Next start owns the standard Node request lifecycle.",
+    "limits": "Whole-app self-hosting does not remove edge read limits or add crash-durable output. Streaming, bounded client aggregation, quiet-stream keepalives and no replay still need end-to-end acceptance."
+  },
+  "actual_probe": {
+    "at": "2026-10-03T23:19:52.057Z",
+    "runtime": "v22.23.2",
+    "architecture": "x64",
+    "framework": "15.5.25",
+    "mode": "next start production; unchanged retained clean-build output mounted read-only",
+    "network": "none; loopback probes inside container only",
+    "realDatabase": false,
+    "realProvider": false,
+    "connectEnabled": false,
+    "checks": [
+      {
+        "name": "production home",
+        "status": 200,
+        "bytes": 74531,
+        "contentType": "text/html; charset=utf-8"
+      },
+      {
+        "name": "rendered browser asset",
+        "status": 200,
+        "bytes": 3526
+      },
+      {
+        "name": "/connect",
+        "status": 200,
+        "contentType": "text/html; charset=utf-8",
+        "sanitized": true
+      },
+      {
+        "name": "/.well-known/oauth-authorization-server",
+        "status": 503,
+        "contentType": "application/json",
+        "sanitized": true
+      },
+      {
+        "name": "/.well-known/oauth-protected-resource",
+        "status": 503,
+        "contentType": "application/json",
+        "sanitized": true
+      },
+      {
+        "name": "/v1/inference",
+        "status": 503,
+        "contentType": "application/json",
+        "sanitized": true
+      },
+      {
+        "name": "/post-mortem/CURRENT_STATE.md",
+        "status": 404,
+        "contentType": "text/plain; charset=utf-8",
+        "sanitized": true
+      }
+    ],
+    "readyAndProbeElapsedMs": 8047,
+    "rssKiB": 381560,
+    "idleSigtermMs": 58,
+    "exit": {
+      "code": 0,
+      "signal": null
+    },
+    "limits": "Idle shutdown only; active inference, real accounts, real storage, ARM64 package and public cutover not accepted by this smoke probe."
+  },
+  "preservation": {
+    "at": "2026-10-03T23:20:40.657Z",
+    "sourceFiles": 1886,
+    "sourceDelta": [],
+    "compiledFiles": 2291,
+    "compiledDelta": [],
+    "acceptedArchiveSha256": "b11d853b80851b2ee978b5d0d0bb2cedb66ced423f545e91b44aeaf8c4a9e235",
+    "bootedNextInferenceSha256": "0a63d7f26685c36bba3d982acd8cf8ac933a02888f77deba762f61634eecd13e",
+    "retainedArtifactInferenceSha256": "0a63d7f26685c36bba3d982acd8cf8ac933a02888f77deba762f61634eecd13e",
+    "sameInferencePayload": true
+  },
+  "host": {
+    "at": "2026-10-03T23:21:22.774889+00:00",
+    "physicalMemoryBytes": 17179869184,
+    "physicalCpus": 10,
+    "disk": [
+      "482797652",
+      "328135816",
+      "119579964",
+      "74%"
+    ],
+    "power": {
+      "source": "ac",
+      "caffeinatePresent": true,
+      "systemSleepAssertion": true,
+      "limits": "AC idle-sleep prevention does not promise closed-lid, outage or forced-sleep availability."
+    },
+    "containers": {
+      "desktop-linux": [
+        {
+          "name": "galx-local-authority-tls-1",
+          "cpuPercent": "0.25%",
+          "memory": "27.93MiB / 96MiB"
+        },
+        {
+          "name": "galx-local-authority-authority-1",
+          "cpuPercent": "0.00%",
+          "memory": "42.06MiB / 384MiB"
+        },
+        {
+          "name": "galx-image-tunnel",
+          "cpuPercent": "0.58%",
+          "memory": "30.62MiB / 7.748GiB"
+        },
+        {
+          "name": "galx-desktop-production-dceeb65e-3096-4b41-bdad-d3af1eb9a734",
+          "cpuPercent": "0.25%",
+          "memory": "81.6MiB / 2GiB"
+        },
+        {
+          "name": "galx-desktop-production-aede28dd-74d9-4055-9c31-e9beb4696623",
+          "cpuPercent": "0.34%",
+          "memory": "80.51MiB / 2GiB"
+        }
+      ],
+      "colima-premium": [
+        {
+          "name": "galx-premium-monitor-1",
+          "cpuPercent": "0.12%",
+          "memory": "33.16MiB / 384MiB"
+        },
+        {
+          "name": "galx-premium-relay-1",
+          "cpuPercent": "1.11%",
+          "memory": "38.46MiB / 2GiB"
+        },
+        {
+          "name": "galx-desktop-pool-premium-f83b2d06-91fa-4504-90a9-e3f3b44f9e33",
+          "cpuPercent": "0.22%",
+          "memory": "139.4MiB / 2GiB"
+        },
+        {
+          "name": "galx-desktop-pool-premium-68250425-41d6-44f9-977c-a636c5921645",
+          "cpuPercent": "0.31%",
+          "memory": "741.6MiB / 2GiB"
+        }
+      ]
+    }
+  },
+  "interpretation": [
+    "The unchanged clean-build Next application serves the home page and browser script, exposes the disabled Connect page, returns sanitized 503 for disabled authorization/resource/inference endpoints, and denies the private incident path.",
+    "Idle SIGTERM completed in 58 ms. This does not certify active-request drain, host reboot, sleep/wake recovery, public traffic or real provider inference.",
+    "Observed process RSS was 381560 KiB under x86-64 emulation on the Mac. This is one smoke snapshot, not a capacity or production-memory guarantee.",
+    "The existing AC keep-awake supervisor is active; the one-minute idle-sleep configuration is currently countered by its assertion. Do not change global power settings based only on that configuration reading.",
+    "The generic repository Dockerfile is not a proven self-hosted release procedure. The smoke test reused retained clean-build output and did not rebuild or install a candidate."
+  ],
+  "bounded_next_steps": [
+    {
+      "step": 1,
+      "action": "Retain an immutable self-hosted package from the accepted source/build with explicit runtime dependencies, static assets and configuration; include no private guides, source workspace or secrets. Existing tested Linux x86-64 output may be rehearsed under emulation; a native ARM64 rebuild is a separately identified artifact if chosen, not silently substituted."
+    },
+    {
+      "step": 2,
+      "action": "Stage one disabled web container on loopback, outside the provider daemon, with restricted authority, bounded memory/logs, a health check and automatic restart. Run Node directly so SIGTERM reaches the server; allow at least the existing full request lifetime plus bounded terminal I/O before forced stop."
+    },
+    {
+      "step": 3,
+      "action": "Verify exact hosted domains/callbacks, Media/Auth/assets and storage behavior, full 300-second Nova stream/deadline, quiet-stream keepalive, bounded client aggregation, active shutdown, current-grant revocation, duplicate/no-replay and public response/asset boundaries."
+    },
+    {
+      "step": 4,
+      "action": "Capture current DNS/ingress/serving artifacts and define rollback. Keep Connect disabled, explicit grants authoritative and cohort closed throughout preparation."
+    },
+    {
+      "step": 5,
+      "action": "Perform public hostname cutover and cohort opening only under the separately authorized rollout. Observe the supervised Mac availability; retain prior artifacts and unchanged database history."
+    }
+  ],
+  "unresolved": [
+    {
+      "classification": "BLOCKS CONTROLLED ROLLOUT",
+      "action": "ACT-045",
+      "item": "A retained self-hosted package, full-path transport/client acceptance, new-process supervision and configuration/rollback proof are still required."
+    },
+    {
+      "classification": "BLOCKS PUBLIC RELEASE",
+      "item": "Existing authentication/recovery gates and ACT-043 remain independent; a Mac host does not close them."
+    },
+    {
+      "classification": "NON-BLOCKING FOLLOW-UP FOR A SUPERVISED COHORT",
+      "item": "Single owner Mac remains dependent on power, wake state, user sign-in and internet. No independent always-on availability is claimed."
+    }
+  ],
+  "target_changes": [],
+  "database_changes": [],
+  "real_provider_attempts": 0,
+  "paid_changes": [],
+  "deployment": false,
+  "cohort_enabled": false,
+  "references": [
+    {
+      "url": "https://nextjs.org/docs/15/app/guides/self-hosting",
+      "claim": "Production Node/Docker hosting and streaming are supported; version-pinned implementation was inspected and booted."
+    },
+    {
+      "url": "https://nextjs.org/docs/15/app/api-reference/file-conventions/route-segment-config#maxduration",
+      "claim": "Route duration metadata is enforced by deployment platforms; the existing Nova deadline remains application-owned."
+    },
+    {
+      "url": "https://nextjs.org/docs/app/guides/self-hosting#after",
+      "claim": "Next production self-hosting supports after and graceful shutdown; this probe establishes only idle shutdown in the actual 15.5.25 artifact."
+    }
+  ],
+  "evidence": [
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-mac-self-hosting/docs-impact.log",
+      "sha256": "cc6e0eda4850ae4ce85881d8407359da649b5e7c326bf99898cf31037572c5b3"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-mac-self-hosting/host-readback.json",
+      "sha256": "0bf391344f8be0db03c62910cd57ad61a73dc79050eae7cf46fb012f0cbbf9cb"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-mac-self-hosting/preservation.json",
+      "sha256": "2a1370f7f10b2072ba6ad4840e7200bb4798ae1ac18d1f170b6897a228bb8d08"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-mac-self-hosting/probe.cjs",
+      "sha256": "3da287b5bdf0ab4d04c9559c475ffe4b32795bacbf7142ede7ced39e61136bab"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-mac-self-hosting/probe.log",
+      "sha256": "8a51a76a6b0848f062440fd8626a39f94ced96875bd83af2a75c8f8b43eaf32f"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-mac-self-hosting/result.json",
+      "sha256": "8a51a76a6b0848f062440fd8626a39f94ced96875bd83af2a75c8f8b43eaf32f"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-mac-self-hosting/server.log",
+      "sha256": "8e189e7159779e96c95f0472b898b127f190a8b5c17c103545c3bb9caebcb5bf"
+    }
+  ]
+}

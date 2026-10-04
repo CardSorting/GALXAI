@@ -1,0 +1,6 @@
+Starting disposable PostgreSQL 17 / pgvector fixture...
+Applied 159 migrations to the disposable fixture.
+{"old_failure":{"rate":"10000000","tokenCap":"10000000","requestCap":"10000","first":2,"total":3,"want":500},"stored":{"remaining_tokens":"333","token_refill_remainder":"0.333333333","last_refill_timestamp_ms":"1700000000002"},"expected_tokens":500,"actual":"23514, no new lease"}
+{"old_failure":{"rate":"50000","tokenCap":"500000","requestCap":"40","first":1,"total":6,"want":5},"stored":{"remaining_tokens":"0","token_refill_remainder":"0.833333333","last_refill_timestamp_ms":"1700000000001"},"expected_tokens":5,"actual":"23514, no new lease"}
+Refill correctness: 82 checks passed; original failures, boundaries/caps, 18000 partitioned evaluations, fresh processes, concurrency, privileges and retained rollback.
+Removed disposable PostgreSQL fixture.

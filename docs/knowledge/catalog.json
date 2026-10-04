@@ -116,11 +116,13 @@
     },
     {
       "path": "docs/DEVELOPER_CLIENT_SDK.md",
-      "title": "Developer client SDK — retired public guide",
+      "title": "Client integration boundaries",
       "scope": "domain-reference",
       "kind": "reference",
-      "domains": [],
-      "curation": "unreviewed",
+      "domains": [
+        "connect"
+      ],
+      "curation": "assigned",
       "keywords": [],
       "decision": null
     },
@@ -491,7 +493,8 @@
       "scope": "domain-reference",
       "kind": "reference",
       "domains": [
-        "access"
+        "access",
+        "connect"
       ],
       "curation": "assigned",
       "keywords": [],
@@ -599,7 +602,7 @@
     },
     {
       "path": "docs/TELEMETRY_AND_OBSERVABILITY.md",
-      "title": "Relay health and operational visibility",
+      "title": "Relay request evidence and operational visibility",
       "scope": "current-guide",
       "kind": "reference",
       "domains": [
@@ -2621,6 +2624,97 @@
       }
     },
     {
+      "path": "docs/adr/0165-galx-connect-nova-boundaries.md",
+      "title": "ADR 0165: GALX Media, Connect and Nova boundaries",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [
+        "connect"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": {
+        "status": "accepted",
+        "delivery": "local",
+        "domain": "connect",
+        "owner": "Security/access and inference maintainers",
+        "date": "2026-10-03",
+        "evidence": [
+          "docs/operations/galx-connect.md",
+          "src/lib/connect/http.ts",
+          "src/lib/supabase/repositories/ConnectRepository.ts",
+          "src/lib/nova/inference.ts",
+          "scripts/test-connect-db.ts",
+          "post-mortem/releases/2026-10-03-connect-local-review.json"
+        ],
+        "supersedes": [],
+        "target": "Local source and isolated fixtures; disabled by default; no production migration or deployment",
+        "revision": "working tree under review",
+        "acceptance_basis": "The user explicitly directed the Media/Connect/Nova responsibility split and bounded implementation. Explicit operator entitlement is a documented implementation assumption, not a new price or subscription migration."
+      }
+    },
+    {
+      "path": "docs/adr/0166-private-self-host-request-origin.md",
+      "title": "ADR 0166: Canonical origin at the private self-host listener",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [
+        "connect"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": {
+        "status": "accepted",
+        "delivery": "local",
+        "domain": "connect",
+        "owner": "Security/access and release maintainers",
+        "date": "2026-10-03",
+        "evidence": [
+          "docs/runbooks/mac-self-hosting.md",
+          "src/lib/security/request-origin.ts",
+          "post-mortem/releases/2026-10-03-mac-origin-transport-correction.json"
+        ],
+        "supersedes": [],
+        "target": "Private Mac listener and synthetic whole-image acceptance; public activation excluded",
+        "revision": "New candidate in dated correction record",
+        "acceptance_basis": "User explicitly authorized the narrow self-host origin/transport source correction and a superseding candidate; no authorization to enable production traffic."
+      }
+    },
+    {
+      "path": "docs/adr/0167-nova-mac-runtime-placement.md",
+      "title": "ADR 0167: Mac Nova runtime and Vercel inference retirement",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [
+        "delivery",
+        "connect"
+      ],
+      "curation": "assigned",
+      "keywords": [
+        "nova",
+        "mac",
+        "vercel",
+        "retirement",
+        "runtime"
+      ],
+      "decision": {
+        "status": "accepted",
+        "delivery": "verified",
+        "domain": "delivery",
+        "owner": "Release and security/access maintainers",
+        "date": "2026-10-03",
+        "evidence": [
+          "docs/runbooks/nova-hosting-transition.md",
+          "post-mortem/releases/2026-10-03-nova-mac-transition.json"
+        ],
+        "supersedes": [],
+        "target": "Controlled Mac Nova ingress at nova.galx.ai; existing GALX Media and Connect retained on Vercel; no public launch",
+        "revision": "Mac sha256:5157984bc06524aac0ca8fbf2051eebfe6f3b7994aa7d0793e8404c097289345; web dpl_4uwFyPMJ6YV7njXsWQbb7a8MZHKh",
+        "observed_at": "2026-10-04T01:49:34.816Z",
+        "acceptance_basis": "Owner explicitly authorized the gated real-provider transition, Nova-only cutover and Vercel retirement. No broader commercial/public activation."
+      }
+    },
+    {
       "path": "docs/adr/README.md",
       "title": "Architecture decision records",
       "scope": "current-guide",
@@ -3536,7 +3630,7 @@
     },
     {
       "path": "docs/maintainers/RELAY_TELEMETRY_UX.md",
-      "title": "Account health and management UX",
+      "title": "Account request status and management UX",
       "scope": "current-guide",
       "kind": "reference",
       "domains": [
@@ -3899,6 +3993,26 @@
       "decision": null
     },
     {
+      "path": "docs/operations/galx-connect.md",
+      "title": "GALX Connect and Nova",
+      "scope": "current-guide",
+      "kind": "runbook",
+      "domains": [
+        "connect"
+      ],
+      "curation": "assigned",
+      "keywords": [
+        "connect",
+        "nova",
+        "consent",
+        "oauth",
+        "pkce",
+        "revocation",
+        "entitlement"
+      ],
+      "decision": null
+    },
+    {
       "path": "docs/operations/preview-activation.md",
       "title": "Private preview activation — 2026-09-12",
       "scope": "operational-record",
@@ -3981,7 +4095,8 @@
       "scope": "current-guide",
       "kind": "runbook",
       "domains": [
-        "access"
+        "access",
+        "connect"
       ],
       "curation": "assigned",
       "keywords": [
@@ -4317,6 +4432,50 @@
       ],
       "curation": "assigned",
       "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/runbooks/mac-self-hosting.md",
+      "title": "Operate Mac-hosted Nova",
+      "scope": "current-guide",
+      "kind": "runbook",
+      "domains": [
+        "delivery"
+      ],
+      "curation": "assigned",
+      "keywords": [
+        "mac",
+        "self-hosting",
+        "docker",
+        "production",
+        "startup",
+        "shutdown",
+        "rollback",
+        "nova",
+        "operator"
+      ],
+      "decision": null
+    },
+    {
+      "path": "docs/runbooks/nova-hosting-transition.md",
+      "title": "Nova hosting transition and retirement",
+      "scope": "current-guide",
+      "kind": "runbook",
+      "domains": [
+        "delivery",
+        "connect"
+      ],
+      "curation": "assigned",
+      "keywords": [
+        "nova",
+        "mac",
+        "vercel",
+        "retirement",
+        "cutover",
+        "rollback",
+        "cohort",
+        "ingress"
+      ],
       "decision": null
     },
     {
@@ -4934,6 +5093,26 @@
     {
       "path": "post-mortem/incidents/2026/2026-09-26-checkout-tax/README.md",
       "title": "Checkout tax omitted",
+      "scope": "operational-record",
+      "kind": "navigation",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-connect-acceptance/README.md",
+      "title": "Connect real acceptance: browser defects and unavailable provider session",
+      "scope": "operational-record",
+      "kind": "navigation",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-neutral-outcomes/README.md",
+      "title": "Interrupted work incorrectly counted as provider failure",
       "scope": "operational-record",
       "kind": "navigation",
       "domains": [],

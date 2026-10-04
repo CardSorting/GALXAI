@@ -1,0 +1,11 @@
+✔ retained output preserves selected bytes and internal aliases without ambient workspace files (21.803458ms)
+✔ function aliases cannot escape the retained artifact (3.692042ms)
+✔ undeclared dependencies outside the isolated build are rejected (2.610459ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 95.337916

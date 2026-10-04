@@ -1,0 +1,97 @@
+{
+  "classification": "private",
+  "observed_at": "2026-10-03T22:12:05.811411Z",
+  "scope": "Owner-authorized bounded host-lifetime adaptation, clean hosted package, narrow transport configuration and disabled first-party cohort preparation; no rollout or real provider acceptance.",
+  "reviewed_complete_affected_guides": [
+    "docs/VERCEL_DEPLOYMENT.md",
+    "docs/operations/galx-connect.md"
+  ],
+  "knowledge_contracts_reviewed": [
+    "docs/DOCUMENTATION_POLICY.md",
+    "docs/how-to/change-with-documentation.md",
+    "docs/AGENTS.md",
+    "docs/knowledge/README.md",
+    "docs/reference/knowledge-commands.md",
+    "docs/runbooks/release-readiness.md"
+  ],
+  "current_state_review": "Reviewed new leading observation, action/incident classification and all affected procedures. Earlier stopped and real-acceptance evidence remains dated and intact; configuration, candidate and deployment are separate.",
+  "source_contracts_inspected": [
+    "src/app/v1/inference/route.ts",
+    "src/lib/nova/inference.ts",
+    "src/lib/nova/executor.ts",
+    "src/lib/supabase/repositories/ConnectRepository.ts",
+    "src/core/router/adapters/RelayChatTransport.ts",
+    "src/core/router/adapters/RelayEndpointDiscovery.ts",
+    "src/lib/connect/config.ts",
+    "src/lib/connect/http.ts",
+    "src/relay/pool-execution.ts",
+    "vercel.json",
+    "scripts/package-hosted-candidate.mjs",
+    "scripts/retain-hosted-output.mjs",
+    "scripts/test-hosted-packaging.mjs",
+    "scripts/test-nova.ts",
+    "scripts/test-nova-host-lifetime.mjs",
+    "scripts/fixtures/nova-host-lifetime.ts",
+    "deploy/hosted/package.json",
+    "deploy/hosted/package-lock.json",
+    "node_modules/next/dist/server/after/after-context.js"
+  ],
+  "semantic_conclusions": [
+    "Terminal work registers before admission/dispatch, and interruption after handoff attempts one existing unknown write. All finalizers share the same write, including failure; buffered completion cannot contradict a claimed unknown. Existing output projection and provider semantics are retained.",
+    "The 300-second execution limit is unchanged. A declared 360-second host budget gives finalization margin but remains incompatible with observed Hobby. Host-budget purchase and rollout are not inferred from this request.",
+    "Fresh Linux build inputs include only the explicit snapshot, tracked BROC modules and two locked dependency sets. Import-time throwaway seeds have no real authority and are absent from output. Retention copies exact mapped bytes and permits only contained aliases. Clean successful application build plus separately rerun corrected packaging are disclosed.",
+    "Only three original runtime-source files differ. Original compiled output, quota/native artifacts and accepted protocol/health/replay contracts are unchanged. New tests cover exercised races, host lifetime and discovered package boundary cases.",
+    "Target mutations prepare only reviewed inference ingress, verified Nova binding, disabled Connect settings and locked installation. Explicit private entitlement plus a current scoped client grant remains the admission boundary; no real cohort authority was issued.",
+    "Actual edge synthetic checks and packaged Linux/PostgreSQL checks are distinct evidence. The full edge deadline used one attempt and retained unknown; modeled host reclamation persisted terminal state before teardown. Neither is a live Vercel candidate invocation or a new real-provider lifecycle.",
+    "Post-revocation denial measured 15 ms only in the disposable packaged fixture. Historical 175 ms remains separate; the contract is acknowledged revocation with no grant-cache delay.",
+    "Public assets and responses are allowlisted and scanned. Two unchanged private legacy fallback strings and locked build/lint dependency advisories remain bounded follow-ups. ACT-044/046 close; ACT-045 remains open for the actual invocation budget. Public-release gates and previous deadlines are unchanged.",
+    "Knowledge registry changes map new packaging and host-lifetime files to existing domains. No new ADR was accepted and no delivery state was advanced automatically. Only the recorded delta is newly reviewed; the broader fingerprint inventory is change detection."
+  ],
+  "actual_checks": {
+    "connect_nova": 35,
+    "disposable_connect_database": 135,
+    "relay_services": 43,
+    "transport_and_boundary": 29,
+    "account_sessions": 44,
+    "packaging_adversarial": 3,
+    "actual_next_host_lifetime": 3,
+    "packaged_handler": 19,
+    "actual_edge_cases": 9,
+    "full_300s_actual_edge_cases": 1,
+    "production_pages": 157,
+    "compiled_boundary_assets": 538
+  },
+  "retained_evidence": [
+    "post-mortem/releases/2026-10-03-hosted-adaptation.json"
+  ],
+  "review_delta": {
+    "knowledge": [
+      "docs/knowledge/registry.json"
+    ],
+    "connect": [
+      "docs/operations/galx-connect.md",
+      "scripts/fixtures/nova-host-lifetime.ts",
+      "scripts/test-nova-host-lifetime.mjs",
+      "scripts/test-nova.ts",
+      "src/app/v1/inference/route.ts",
+      "src/lib/nova/inference.ts"
+    ],
+    "delivery": [
+      "deploy/hosted/package-lock.json",
+      "deploy/hosted/package.json",
+      "docs/VERCEL_DEPLOYMENT.md",
+      "scripts/package-hosted-candidate.mjs",
+      "scripts/retain-hosted-output.mjs",
+      "scripts/test-hosted-packaging.mjs",
+      "vercel.json"
+    ],
+    "critical": [
+      "docs/VERCEL_DEPLOYMENT.md",
+      "docs/operations/galx-connect.md",
+      "post-mortem/CURRENT_STATE.md"
+    ]
+  },
+  "unchanged_inventory": "Prior domain and critical fingerprints were compared; only the listed existing paths and newly mapped source files differ. Application lock unchanged; separate tooling lock pinned. No claim of exhaustive dependency/module audit.",
+  "unmapped_review": "Explicit impact scan returns no unmapped changed source. Retained operational fixtures, logs and JSON evidence are private post-mortem material excluded from runtime/deployment. No schema or production database mutation introduced.",
+  "limits": "No rollout, paid plan purchase, hosted candidate invocation, public launch or real-provider attempt. No new production grants or historical record rewrite. Final docs checks are recorded separately after this semantic attestation."
+}

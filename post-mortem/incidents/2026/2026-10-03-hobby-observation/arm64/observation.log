@@ -1,0 +1,90 @@
+{
+  "at": "2026-10-03T23:09:34.488Z",
+  "node": "v22.23.2",
+  "platform": "linux",
+  "architecture": "arm64",
+  "network": "container loopback only; external networking disabled",
+  "realDatabase": false,
+  "realProvider": false,
+  "prototypeOnly": true,
+  "cases": 6,
+  "results": [
+    {
+      "case": "naive_request_close_hook_counterexample",
+      "status": 400,
+      "dispatches": 0,
+      "states": [],
+      "events": [
+        {
+          "event": "request_close",
+          "complete": true,
+          "responseFinished": false
+        },
+        {
+          "event": "response_close",
+          "finished": true
+        }
+      ]
+    },
+    {
+      "case": "response_close_hook_normal_completion",
+      "status": 200,
+      "dispatches": 1,
+      "states": [
+        "completed"
+      ],
+      "events": [
+        {
+          "event": "request_close",
+          "complete": true,
+          "responseFinished": false
+        },
+        {
+          "event": "response_close",
+          "finished": true
+        }
+      ]
+    },
+    {
+      "case": "disconnect_retains_terminal_owner",
+      "dispatches": 1,
+      "states": [
+        "unknown"
+      ],
+      "writeAfterSocketClose": true,
+      "events": [
+        "socket_closed",
+        "execution_aborted",
+        "terminal_persisted"
+      ]
+    },
+    {
+      "case": "wire_limit_is_not_content_limit",
+      "upstreamBytes": 680088,
+      "publicBytes": 3240195,
+      "publicEvents": 20002,
+      "states": [
+        "completed"
+      ],
+      "inference": "A two-million-byte client wire cap would reject this currently valid response. Choose content, frame and wire budgets separately."
+    },
+    {
+      "case": "upstream_activity_does_not_publish_keepalive",
+      "quietDespiteInput": true,
+      "sourceFrames": 10,
+      "states": [
+        "completed"
+      ],
+      "inference": "The host needs a public transport keepalive after authorized SSE headers. It must not reset provider execution deadlines or signal completion."
+    },
+    {
+      "case": "terminal_write_failure_no_success_marker",
+      "attemptedStates": [
+        "completed"
+      ],
+      "committed": false,
+      "publicUnknown": true,
+      "automaticReplay": false
+    }
+  ]
+}

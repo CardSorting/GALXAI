@@ -1,0 +1,33 @@
+
+> galxai@0.1.0 test:billing:lifecycle
+> node --import tsx --test scripts/test-billing-lifecycle.ts scripts/test-billing-navigation.ts scripts/test-billing-public-boundary.ts scripts/test-stripe-webhook-target.ts && node --import tsx scripts/test-stripe-webhook-endpoint.ts
+
+✔ subscription display distinguishes active and scheduled cancellation without leaking provider records (2.253459ms)
+✔ payment, pause, canceled and pending states do not become paid access (0.348291ms)
+✔ ambiguous, foreign, truncated or unavailable provider evidence fails closed (0.298709ms)
+✔ all billing entry points can use only the unique restricted cancellation portal (0.588583ms)
+✔ browser contract allowlists display fields and rejects malformed status (0.320125ms)
+✔ image allowance activation uses the canonical approved configuration and fails closed when invalid (0.142083ms)
+✔ Image billing summary maps internal keys without leaking them and rejects unapproved creation (0.285709ms)
+✔ readiness includes lifecycle delivery and invoice links forbid alternate ports and credentials (0.152ms)
+✔ billing has distinct task destinations and preserves existing checkout returns (0.814583ms)
+✔ retired entries resolve to explicit tasks without retaining unsupported purchase plans (362.48625ms)
+✔ one credit form resumes account-scoped old retry records and clears both namespaces (0.570292ms)
+✔ current UI has no retired billing route implementations or navigation targets (145.362125ms)
+✔ search routes each billing intent to its task (6.165458ms)
+✔ legacy billing navigation cannot forward arbitrary destinations, secrets or malformed receipt parameters (0.139375ms)
+✔ checkout returns redirect before rendering, with private headers and only supported query fields (1.169875ms)
+✔ billing transaction DTOs exclude operational notes and unexpected fields (1.032709ms)
+✔ billing invoice DTOs allowlist fields and status without changing private records (1.65325ms)
+✔ test provisioning refuses known production receivers including equivalent host spellings (0.640375ms)
+✔ provisioning refuses gateway/redirect hosts in both modes and never falls back to production (0.229834ms)
+✔ explicit application origins retain mode separation (0.233875ms)
+ℹ tests 20
+ℹ suites 0
+ℹ pass 20
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 696.080333
+Webhook routes reject missing/invalid signatures, wrong payment mode, and oversized bodies.

@@ -1,0 +1,16 @@
+{
+  "platform": "darwin/arm64",
+  "context": "desktop-linux",
+  "engine": "29.7.2",
+  "architecture": "aarch64",
+  "dockerMemoryBytes": 8319504384,
+  "hostMemoryBytes": 17179869184,
+  "compose": "5.5.0",
+  "keepAwakeAssertion": true,
+  "status": "OBSERVED — release readiness requires the runbook acceptance checks",
+  "limits": [
+    "Docker Desktop must be running after login.",
+    "One Mac is one failure domain.",
+    "A liveness check does not establish provider or account readiness."
+  ]
+}

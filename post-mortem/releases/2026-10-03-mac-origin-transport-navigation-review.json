@@ -1,0 +1,18 @@
+{
+  "classification": "private",
+  "observed_at": "2026-10-04T00:59:00.557659+00:00",
+  "scope": "ADR navigation correction after final documentation guard identified missing catalog entry.",
+  "reviewer": "Codex \u2014 bounded Mac correction navigation review",
+  "finding": "docs:check correctly rejected ADR 0166 because the manually curated complete ADR catalog did not include it. Generated-index sync does not own this catalog.",
+  "correction": "Added the exact ADR 0166 link with local acceptance versus real-provider/public activation scope. No runtime/source/artifact change.",
+  "inspected_paths": [
+    "docs/adr/README.md",
+    "docs/adr/0166-private-self-host-request-origin.md",
+    "scripts/verify-docs.py"
+  ],
+  "reviewed_file_sha256": "20db309f8522f3c30664baa9711d3473f52ce00ce72c781664dd3eb936d859e5",
+  "evidence": [
+    "post-mortem/releases/2026-10-03-mac-origin-transport-review.json"
+  ],
+  "limits": "Navigation-only follow-up; no new runtime claims or automatic decision acceptance."
+}

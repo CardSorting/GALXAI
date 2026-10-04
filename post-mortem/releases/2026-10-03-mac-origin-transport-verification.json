@@ -1,0 +1,135 @@
+{
+  "classification": "private",
+  "observed_at": "2026-10-04T01:00:03.325212+00:00",
+  "result": "PASSED \u2014 bounded Mac origin/transport correction verification",
+  "candidate": {
+    "sourceRevision": "38a3cc48f32f5f404592109c8cae3ddac5fa6f61",
+    "workingTreeSnapshot": true,
+    "sourceManifestSha256": "0360f576c586b5be0ef9a3a86a12806ef188100ee1a78022a6e51f7a5da2753d",
+    "sourceFiles": 1655,
+    "dependencyLockSha256": "17ec13ed2df5810416a9c52ab5cc772e15adcaec679bbafd9a2a61ac3b4742f1",
+    "builder": {
+      "image": "node@sha256:43aeff40f4afc22e83f7589a2f37e111cff5ca84529571f1c8415bcc5fcc21b2",
+      "platform": "linux/amd64",
+      "node": "22.23.2",
+      "cli": "48.5.0"
+    },
+    "publicBuildInputSha256": "50b70630f12d58caee09369795ff5720d9d624bb34a512da41d36410941545ea",
+    "compiledPayloadSha256": "ce1b474421c42610451b65695e4802c8918d08336a9af41819ab44e8a51302bc",
+    "compiledHashAlgorithm": "SHA-256 of JSON.stringify(sorted map of runtime/.next/server and runtime/.next/static relative paths to file SHA-256; keys sorted by JavaScript localeCompare)",
+    "compiledFiles": 1964,
+    "novaRouteSha256": "b08890da4294b1bb16b81fdfcb2640d760b438869a41ee0938306b5db0958ce1",
+    "hostedArchiveSha256": "9d1957414e9f59f65252cee3b49fa8ef5778daeded291aac937211526576950c",
+    "hostedManifestSha256": "8590412368d1ae3d747e96094485d9b78432ca05a55b36ac32581a4e53fe889d",
+    "macImage": "sha256:5157984bc06524aac0ca8fbf2051eebfe6f3b7994aa7d0793e8404c097289345",
+    "macManifestSha256": "45e7b152b1feb8d058271f08ed437dc244a1d5e0cc428fe4f4b171307ad14c64",
+    "recoveryArchive": {
+      "path": ".relay/mac-origin-correction/package-02/image.tar",
+      "sha256": "0cdec4031bbacc521fb6059bd61da12dbd6c88b50610c4f55b5ade7fbc812345",
+      "recordedSha256": "0cdec4031bbacc521fb6059bd61da12dbd6c88b50610c4f55b5ade7fbc812345"
+    },
+    "equivalence": {
+      "tracedFiles": 4514,
+      "startupTraceFiles": 1956,
+      "startupTraceWarnings": 122,
+      "comparedToAcceptedArtifact": 2382,
+      "bytesChanged": 0,
+      "publicFilesScanned": 819,
+      "applicationBytes": 180717218
+    },
+    "priorCandidateRetained": ".relay/mac-production/package-05",
+    "intermediateFailedCandidate": ".relay/mac-origin-correction/package-01",
+    "acceptedBuild": ".relay/mac-origin-correction/build-02",
+    "selfHostPackage": ".relay/mac-origin-correction/package-02",
+    "realProvider": false,
+    "publicDeployment": false
+  },
+  "whole_image": {
+    "checks": 44,
+    "evidence": "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/whole-image-acceptance.json",
+    "receipt": "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/acceptance-receipt.json",
+    "receipt_still_matches_current_runtime_test_and_all_fixtures": true,
+    "result_sha256": "b16da23ca0aa23015bc826ff5772ab67d830e7c3c53440b0c63a1830d2a137e8",
+    "revocation_after_ack_ms": 55,
+    "full_deadline_and_drain_ms": 304278
+  },
+  "final_checks": [
+    {
+      "command": "npm run docs:sync",
+      "exit_code": 0,
+      "log": "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/docs-sync-final.log"
+    },
+    {
+      "command": "npm run docs:check",
+      "exit_code": 0,
+      "log": "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/docs-check-final.log",
+      "scope": "384 guides, 46 incident documents, 166 ADRs; 26 incidents, 192 events, 47 actions; 430 knowledge documents, 11 domains"
+    },
+    {
+      "command": "npm run test:docs",
+      "exit_code": 0,
+      "tests": 42,
+      "log": "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/docs-tests-final.log"
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0,
+      "log": "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/diff-check-final.log"
+    },
+    {
+      "command": "node scripts/self-host.mjs verify .relay/mac-origin-correction/package-02",
+      "exit_code": 0,
+      "files": 4519,
+      "archive_verified": true
+    },
+    {
+      "command": "Compare current source files to clean candidate source manifest",
+      "files": 1655,
+      "changed": 0
+    },
+    {
+      "command": "Verify current runtime-test/fixture and result hashes against immutable-image acceptance receipt",
+      "matched": true
+    }
+  ],
+  "documentation_repair": "Initial docs:check found a missing manually curated ADR catalog link; corrected and semantically reviewed that navigation entry, then reran sync/check and all 42 documentation tests. The failed guard is retained.",
+  "reviews": [
+    "post-mortem/releases/2026-10-03-mac-origin-transport-review.json",
+    "post-mortem/releases/2026-10-03-mac-origin-transport-navigation-review.json"
+  ],
+  "warnings": "Existing overdue prevention reviews remain visible. Billing knowledge review became due at UTC rollover and was not extended; docs:audit/CI deadline readiness is not claimed. Build/lint dependency and startup-trace warnings remain classified in the correction record.",
+  "evidence_sha256": {
+    "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/acceptance-receipt.json": "1fa0c626895e8b8d5fa010fa28fd66cb2d0a9e9fd588af3dce6a352662a2707b",
+    "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/asset-scan-final.json": "bfd0f08940f2021d04aa784b59bc0ec0f054eb76e53a58bb47b543e81321e120",
+    "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/asset-scan.json": "b99c9d84887a56e849daed045624b127dbe0803f77716cf1cbbfddaaa60ecfd7",
+    "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/auth-package-tests.log": "e7f27d16055c6a5f627178cfb8204ced091b182a3b7e6200b8b3ce20c62e29d4",
+    "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/candidate.json": "6a1a7c187595c5588139149459b11759cce5155322fb036b0864b2762d6c3e38",
+    "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/cleanup.json": "d64c8e1aa3a597fdda52f3ad501efeba45a5a2c8c37d02dd3fd13a77c61babf6",
+    "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/compiled-boundary-check-final.log": "5dfbf8a0061c6ced20d2e6b8314ec27f183b3e8355e0b5d1affe910fb5701c82",
+    "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/connect-db-final.log": "3e6ea6a514c6d778c22b19df548e6b1b2833393f8bf344f65ecfe2ef2d9d22c7",
+    "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/dependency-warning-triage.json": "1d3a5b405cf775c290ed1ffea89401a1b04eb2afc94b6b4985d835645409394f",
+    "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/diff-check-final.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/docs-check-before-catalog-fix.log": "0d014615cedc31e2f16ce1ac8660dc88bfce31485a5ec1d3abeaf35948d24c62",
+    "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/docs-check-final.log": "bf93f61d1d3310823a1a51e7c86d2e1e3721368dea2ea0bdba99dd2ee65f9aee",
+    "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/docs-sync-final.log": "dc8246f3450944d6315097c786828d56d8f4650a99048373f18e769146dc9203",
+    "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/docs-tests-final.log": "57fff6857bc164d3d5a21fd0b1c74eacc6c675b11472d600f0e87c40a3e050b1",
+    "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/doctor.json": "862392c8c8ee66eae1a400c76d7a218555a7420915b4f2f476188b2289797002",
+    "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/final-preservation-and-evidence-scan.json": "1b0d4ff179df51f0dd9abc891223eb82bd8c1cf37a64a2cb5c60947a499d4e7a",
+    "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/operator-rehearsal.json": "6503352c7084af9937abc9491feeb23a2b8615a05ea3ec86a2114d2dbd8a7daa",
+    "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/origin-before-http.json": "68137e4c77df6ac62640bc4a8444cd11175eb42cb5fe3f016b433c513cce8c4d",
+    "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/origin-connect-tests-final.log": "58e059e8e145532618bba315cd20babcd742f285dd46824df44611ba216a03a7",
+    "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/package-tests-final.log": "6c4bce2e59c0978e50dd70767cec3f97889b56fa3d6a61b09460a768742ab7d3",
+    "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/package-verification-final.json": "b09a2f7410d0dc13c77d1dc4a496dc3a93f0c769ebfdc383a65fb9f35a48d124",
+    "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/query-normalization.json": "42edd1e475fc23438bf67c980a8378dca7122b0eb1c999a872290ba116776a44",
+    "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/refill-db.log": "c9c3d6c99d18adb9ecab392e692be2d6e546f40e07490fd9da944b6c5d99fd9b",
+    "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/relay-boundary-tests.log": "361e88ad92073a3f48d353f6c57d3af2692c3f1a2be704966c4f279c2e845b3e",
+    "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/runtime-01-failure.json": "0794e52033a39247cf7788151a237d2b97a3a67082f8ee1f481483cb51e579bd",
+    "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/runtime-02-failure.json": "473fefe941b01d6c3d3ef8af6cd9dfdf8c16d832a170cd66f593af1e3d756a98",
+    "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/runtime-03-failure.json": "c9eeeedbdb954ceaf9a239ff54defab72b5b73fa6bc2eaa2752ac58caffb7f42",
+    "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/source-difference.json": "92874692dfd67ff5893cd0a65aac061c30cc4b8b252c0cef6dd6422667d020e4",
+    "post-mortem/incidents/2026/2026-10-03-mac-origin-transport/whole-image-acceptance.json": "b16da23ca0aa23015bc826ff5772ab67d830e7c3c53440b0c63a1830d2a137e8"
+  },
+  "cleanup": "Owned test containers/networks and disabled stage removed; private runtime configuration removed; prior running services untouched.",
+  "real_provider_inference": false,
+  "production_rollout": false
+}

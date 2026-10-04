@@ -1,0 +1,20 @@
+{
+  "previous": "44862b3e81a1dfaf59b52b40762ce7d674830b8772d4506070c957c10d41d40d",
+  "current": "0360f576c586b5be0ef9a3a86a12806ef188100ee1a78022a6e51f7a5da2753d",
+  "dependencyLockUnchanged": true,
+  "changed": [
+    "package.json",
+    "src/app/auth/callback/route.ts",
+    "src/lib/auth/session-http.ts",
+    "src/lib/connect/config.ts",
+    "src/lib/connect/http.ts",
+    "src/lib/nova/inference.ts",
+    "src/lib/nova/keepalive.ts",
+    "src/lib/security/preview-middleware.ts",
+    "src/lib/security/request-origin.ts",
+    "src/middleware.ts",
+    "src/sdk/connect.ts",
+    "src/sdk/inference-result.ts",
+    "src/utils/supabase/middleware.ts"
+  ]
+}

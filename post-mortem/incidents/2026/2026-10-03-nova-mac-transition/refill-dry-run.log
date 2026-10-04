@@ -1,0 +1,147 @@
+[Connecting] Attempting postgresql://postgres.mazhcjisettrzbqhorvp:***@aws-0-us-west-2.pooler.supabase.com:6543/postgres?pgbouncer=true...
+[Connected] Successfully connected via postgresql://postgres.mazhcjisettrzbqhorvp:***@aws-0-us-west-2.pooler.supabase.com:6543/postgres?pgbouncer=true
+[Status] Already applied migrations: [
+  '20260822000001', '20260822000002', '20260822000003', '20260822000004',
+  '20260822000005', '20260822000006', '20260822000007', '20260822000008',
+  '20260822000009', '20260822000010', '20260822000011', '20260822000012',
+  '20260822000013', '20260822000014', '20260822000015', '20260822000016',
+  '20260822000017', '20260822000018', '20260822000019', '20260822000020',
+  '20260822000021', '20260822000022', '20260822000023', '20260822000024',
+  '20260822000025', '20260822000026', '20260822000027', '20260822000028',
+  '20260822000029', '20260822000030', '20260822000031', '20260822000032',
+  '20260822000033', '20260822000034', '20260822000035', '20260822000036',
+  '20260822000037', '20260822000038', '20260822000039', '20260822000040',
+  '20260822000041', '20260822000042', '20260822000043', '20260822000044',
+  '20260822000045', '20260822000046', '20260822000047', '20260822000048',
+  '20260822000049', '20260822000050', '20260822000051', '20260822000052',
+  '20260829000053', '20260901000054', '20260901000055', '20260901000056',
+  '20260901000057', '20260901000058', '20260901000059', '20260901000060',
+  '20260901000061', '20260901000062', '20260901000063', '20260901000064',
+  '20260901000065', '20260901000066', '20260901000067', '20260901000068',
+  '20260901000069', '20260901000070', '20260901000071', '20260903000072',
+  '20260903000073', '20260904150000', '20260904160000', '20260904170000',
+  '20260904180000', '20260904190000', '20260904200000', '20260904210000',
+  '20260904220000', '20260904230000', '20260905011334', '20260905093500',
+  '20260905162048', '20260906000001', '20260907190322', '20260907191200',
+  '20260907210015', '20260907211705', '20260907215504', '20260910071450',
+  '20260911153205', '20260911163542', '20260912003002', '20260912030611',
+  '20260912041351', '20260912060747', '20260912071633', '20260912215724',
+  ... 57 more items
+]
+[Migrations] Found 159 total local migration files.
+
+==================================================
+[Applying] Migration: 20261003202702_relay_refill_integer_credit.sql (v20261003202702)
+==================================================
+[Dry Run] Validated and rolled back: 20261003202702_relay_refill_integer_credit.sql
+
+==================================================
+VALIDATED 1 MIGRATION(S); ALL CHANGES ROLLED BACK.
+==================================================
+
+Verified Public Tables (105 total):
+  - chat_conversations
+  - chat_messages
+  - community_anti_abuse_quarantine
+  - community_creations_feed
+  - community_free_pool_daily_ledger
+  - community_grant_allocations
+  - community_participant_profiles
+  - community_star_profile_creations
+  - community_user_monthly_grants
+  - galx_api_key_scopes
+  - galx_audit_logs
+  - galx_authoritative_data_epochs
+  - galx_billing_notification_channels
+  - galx_budget_alerts
+  - galx_chat_context_episodes
+  - galx_chat_document_chunks
+  - galx_chat_memory_graph_edges
+  - galx_chat_rolling_memory
+  - galx_chat_stream_deltas
+  - galx_chat_universal_workspace_anchors
+  - galx_codebase_ast_skeletons
+  - galx_compliance_records
+  - galx_context_salience_scores
+  - galx_department_cost_allocations
+  - galx_departmental_spend_attributions
+  - galx_developer_keys
+  - galx_distributed_locks
+  - galx_edge_shard_metrics
+  - galx_embeddings_store
+  - galx_environments
+  - galx_forensic_waste_incidents
+  - galx_governance_audit_events
+  - galx_idempotency_keys
+  - galx_incident_outage_ledger
+  - galx_io_execution_authority_metrics
+  - galx_metrics_telemetry
+  - galx_model_quality_sentinel_ledger
+  - galx_model_route_evidence
+  - galx_model_routing_rules
+  - galx_oauth_backchannel_logouts
+  - galx_oauth_device_codes
+  - galx_oauth_dpop_proofs
+  - galx_oauth_identities
+  - galx_oauth_pushed_requests
+  - galx_oauth_requests
+  - galx_organization_members
+  - galx_organizations
+  - galx_origin_query_hit_ledger
+  - galx_origin_shield_bloom_filters
+  - galx_project_spend_allocations
+  - galx_projects
+  - galx_prompt_cache_registry
+  - galx_prompt_compaction_cache
+  - galx_quality_remediation_rules
+  - galx_queue_events
+  - galx_rate_limit_quotas
+  - galx_scheduled_maintenance_windows
+  - galx_seat_request_leases
+  - galx_seat_rolling_usage_events
+  - galx_seat_rolling_windows_state
+  - galx_session_attention_anchors
+  - galx_session_risk_events
+  - galx_shard_accounts
+  - galx_shard_concurrency_leases
+  - galx_shard_health_probes
+  - galx_shard_health_telemetry_ledger
+  - galx_shard_leases
+  - galx_shard_registry_events
+  - galx_slo_agreements
+  - galx_spend_governance_policies
+  - galx_stripe_checkout_sessions
+  - galx_stripe_customers
+  - galx_stripe_events
+  - galx_stripe_invoices
+  - galx_synthetic_canary_probes
+  - galx_task_attempts
+  - galx_task_queues
+  - galx_tasks
+  - galx_team_cost_centers
+  - galx_team_invitations
+  - galx_token_revocation_log
+  - galx_user_sessions
+  - galx_vault_threshold_shards
+  - galx_wallet_holds
+  - galx_wallet_transactions
+  - galx_wallets
+  - galx_webhook_deliveries
+  - galx_workspace_members
+  - galx_workspaces
+  - image_library_gc_outbox
+  - image_moderation_events
+  - lumi_cluster_pool_metrics
+  - lumi_cluster_telemetry_rollups_1m
+  - lumi_compute_settlement_ledger
+  - lumi_model_warp_multipliers
+  - lumi_pool_queue_tickets
+  - lumi_user_pool_leases
+  - lumi_user_rolling_quotas
+  - pool_canary_warmup_schedules
+  - pool_tenant_burst_quotas
+  - user_image_explore_hide_limits
+  - user_image_explore_hides
+  - user_image_interactions
+  - user_image_library
+  - user_image_stats

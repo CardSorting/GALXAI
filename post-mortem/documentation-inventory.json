@@ -138,7 +138,7 @@
       "path": "docs/DEVELOPER_CLIENT_SDK.md",
       "scope": "domain-reference",
       "category": "docs",
-      "title": "Developer client SDK — retired public guide"
+      "title": "Client integration boundaries"
     },
     {
       "path": "docs/DEVELOPER_GATEWAY_KEY_ARCHITECTURE.md",
@@ -396,7 +396,7 @@
       "path": "docs/TELEMETRY_AND_OBSERVABILITY.md",
       "scope": "current-guide",
       "category": "docs",
-      "title": "Relay health and operational visibility"
+      "title": "Relay request evidence and operational visibility"
     },
     {
       "path": "docs/TRAINING_ROADMAP_AND_EXECUTION_PLAN.md",
@@ -1413,6 +1413,24 @@
       "title": "ADR 0164: Independent Star patronage and private creation"
     },
     {
+      "path": "docs/adr/0165-galx-connect-nova-boundaries.md",
+      "scope": "decision-record",
+      "category": "docs",
+      "title": "ADR 0165: GALX Media, Connect and Nova boundaries"
+    },
+    {
+      "path": "docs/adr/0166-private-self-host-request-origin.md",
+      "scope": "decision-record",
+      "category": "docs",
+      "title": "ADR 0166: Canonical origin at the private self-host listener"
+    },
+    {
+      "path": "docs/adr/0167-nova-mac-runtime-placement.md",
+      "scope": "decision-record",
+      "category": "docs",
+      "title": "ADR 0167: Mac Nova runtime and Vercel inference retirement"
+    },
+    {
       "path": "docs/adr/README.md",
       "scope": "current-guide",
       "category": "docs",
@@ -1878,7 +1896,7 @@
       "path": "docs/maintainers/RELAY_TELEMETRY_UX.md",
       "scope": "current-guide",
       "category": "docs",
-      "title": "Account health and management UX"
+      "title": "Account request status and management UX"
     },
     {
       "path": "docs/maintainers/RELEASE_ENGINEERING_AND_VERSIONING.md",
@@ -2047,6 +2065,12 @@
       "scope": "current-guide",
       "category": "docs",
       "title": "Private developer access"
+    },
+    {
+      "path": "docs/operations/galx-connect.md",
+      "scope": "current-guide",
+      "category": "docs",
+      "title": "GALX Connect and Nova"
     },
     {
       "path": "docs/operations/preview-activation.md",
@@ -2245,6 +2269,18 @@
       "scope": "current-guide",
       "category": "docs",
       "title": "Reconcile stale knowledge"
+    },
+    {
+      "path": "docs/runbooks/mac-self-hosting.md",
+      "scope": "current-guide",
+      "category": "docs",
+      "title": "Operate Mac-hosted Nova"
+    },
+    {
+      "path": "docs/runbooks/nova-hosting-transition.md",
+      "scope": "current-guide",
+      "category": "docs",
+      "title": "Nova hosting transition and retirement"
     },
     {
       "path": "docs/runbooks/private-image-release-audit.md",
@@ -2941,6 +2977,18 @@
       "scope": "operational-record",
       "category": "post-mortem",
       "title": "Checkout tax omitted"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-connect-acceptance/README.md",
+      "scope": "operational-record",
+      "category": "post-mortem",
+      "title": "Connect real acceptance: browser defects and unavailable provider session"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-neutral-outcomes/README.md",
+      "scope": "operational-record",
+      "category": "post-mortem",
+      "title": "Interrupted work incorrectly counted as provider failure"
     },
     {
       "path": "post-mortem/runbooks/controller-lock.md",

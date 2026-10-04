@@ -1,0 +1,31 @@
+{
+  "at": "2026-10-04T01:52:43.808Z",
+  "method": "Existing Chrome account, browser accessibility observation after client hydration",
+  "connect": {
+    "url": "https://galx.ai/connect",
+    "title": "Connected applications",
+    "existingAccountIntact": true,
+    "message": "No applications connected",
+    "entitlementMessage": "Your account has inference access.",
+    "privateImplementationVisible": false
+  },
+  "media": {
+    "url": "https://galx.ai/explore",
+    "title": "Explore releases",
+    "existingAccountIntact": true,
+    "publishedWorksRendered": 11,
+    "starLinksVisible": true,
+    "collectionActionsVisible": true,
+    "privateImplementationVisible": false
+  },
+  "beforeMutation": {
+    "imageStudio": "Image Studio could not be opened",
+    "classification": "Pre-existing; preserved Media source. Not a new transition failure."
+  },
+  "notExercised": [
+    "Paid image generation",
+    "New publication",
+    "Billing/checkout",
+    "Stars mutation"
+  ]
+}

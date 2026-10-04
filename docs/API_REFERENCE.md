@@ -14,8 +14,14 @@ Work stays in its owner's private library. A Star Work may be remixed privately;
 that does not alter or republish the original.
 
 Human accounts cannot publish generated content to Explore, Star archives,
-Series, feeds, or public search. There is no public developer API, self-service
-API key, anonymous inference, or unlimited image-generation offer.
+Series, feeds, or public search. There is no self-service API-key enrollment,
+anonymous inference, or unlimited image-generation offer.
+
+Connect with GALX is the separate supported-application inference experience.
+When available, people authorize an application using their existing account
+and can later disconnect it. The application may use eligible inference access;
+it receives no library, billing, publishing or Star permissions. Media
+participation is not required. Availability will be announced after validation.
 
 This page describes customer-visible capabilities only. It intentionally does
 not document request endpoints, credentials, provider identities, routing,

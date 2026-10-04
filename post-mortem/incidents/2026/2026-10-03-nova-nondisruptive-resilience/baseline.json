@@ -1,0 +1,110 @@
+{
+  "at": "2026-10-04T02:06:27.317110+00:00",
+  "containers": [
+    {
+      "context": "desktop-linux",
+      "name": "galx-web-nova-web-1",
+      "id": "21451d8b3a79385fd5b50454824178ff6fe18c42f9ad440571939e9bc1ac1777",
+      "image": "sha256:5157984bc06524aac0ca8fbf2051eebfe6f3b7994aa7d0793e8404c097289345",
+      "startedAt": "2026-10-04T01:28:32.462950554Z",
+      "status": "running",
+      "restarts": 0,
+      "health": "healthy"
+    },
+    {
+      "context": "desktop-linux",
+      "name": "galx-local-authority-tls-1",
+      "id": "13efd8344483d745167a83c92940658cbce581938919d1b9404f9597a31c43b8",
+      "image": "sha256:e7a4c80fa704d4abb7b423a48a66afad4d809c70dd5df3592eb772e823284bb3",
+      "startedAt": "2026-10-02T18:56:39.174687417Z",
+      "status": "running",
+      "restarts": 0,
+      "health": "healthy"
+    },
+    {
+      "context": "desktop-linux",
+      "name": "galx-local-authority-authority-1",
+      "id": "0756ed943e1d2c52f21af4cffaa5105ec89e93e0464b18889d11808ab760b502",
+      "image": "sha256:e7a4c80fa704d4abb7b423a48a66afad4d809c70dd5df3592eb772e823284bb3",
+      "startedAt": "2026-10-02T18:56:39.103220625Z",
+      "status": "running",
+      "restarts": 0,
+      "health": "healthy"
+    },
+    {
+      "context": "desktop-linux",
+      "name": "galx-image-tunnel",
+      "id": "d0a08675989f0772e73858013ad14bd315603aceebc1ac3bb873c182c401286d",
+      "image": "sha256:51c9cefcb4569df44e1ad403ab1d3d8065aa8e84339bcfc6aee75502e1140339",
+      "startedAt": "2026-10-02T18:56:39.103827834Z",
+      "status": "running",
+      "restarts": 0,
+      "health": null
+    },
+    {
+      "context": "desktop-linux",
+      "name": "galx-desktop-production-dceeb65e-3096-4b41-bdad-d3af1eb9a734",
+      "id": "de19f47b6a0da12ad219438771f6da25ae614c858f9787e7f83f9dfcb30208b5",
+      "image": "sha256:d4271abf3955a28eabeb35b526c80b6aa27439eda176bd0f2fe9b1bb0d4c24a5",
+      "startedAt": "2026-10-02T18:56:39.095429709Z",
+      "status": "running",
+      "restarts": 0,
+      "health": "healthy"
+    },
+    {
+      "context": "desktop-linux",
+      "name": "galx-desktop-production-aede28dd-74d9-4055-9c31-e9beb4696623",
+      "id": "c6e35e96aac8cd94a8954ae8c198cfb7af89057ce195dbd9a77d90f3b80f11d4",
+      "image": "sha256:0fccf55f2c1e2bd35636e4ae4d4a75347749c25e4bce473100dfd8a9abe02a79",
+      "startedAt": "2026-10-02T18:56:39.096810167Z",
+      "status": "running",
+      "restarts": 0,
+      "health": "healthy"
+    },
+    {
+      "context": "colima-premium",
+      "name": "galx-premium-monitor-1",
+      "id": "45b948d9d7b58b5b8f383c72a5f29d12442f8e189e08d2dc377a7028badd567c",
+      "image": "sha256:0ab24b83ce3f2536f88b3994a716671d7b87495ebc5bdb90c5cafa3a50aa05ed",
+      "startedAt": "2026-10-04T01:28:40.996650924Z",
+      "status": "running",
+      "restarts": 0,
+      "health": null
+    },
+    {
+      "context": "colima-premium",
+      "name": "galx-premium-relay-1",
+      "id": "fb548e7cfc447c005c8168359a8f312022bd7a6ac03688c8627b08b41bf8fb4a",
+      "image": "sha256:a1feb16ef31ae0f97cc231b85d06578496335d79221d13e36a4c40b8524a545f",
+      "startedAt": "2026-10-03T20:01:20.624697405Z",
+      "status": "running",
+      "restarts": 0,
+      "health": null
+    },
+    {
+      "context": "colima-premium",
+      "name": "galx-desktop-pool-premium-f83b2d06-91fa-4504-90a9-e3f3b44f9e33",
+      "id": "c10694e4ddc779437cf6a5cbc10028b52dfc54c2ace1f97a02697f191d58b320",
+      "image": "sha256:d4271abf3955a28eabeb35b526c80b6aa27439eda176bd0f2fe9b1bb0d4c24a5",
+      "startedAt": "2026-10-02T17:28:47.571459253Z",
+      "status": "running",
+      "restarts": 0,
+      "health": "healthy"
+    },
+    {
+      "context": "colima-premium",
+      "name": "galx-desktop-pool-premium-68250425-41d6-44f9-977c-a636c5921645",
+      "id": "dd33692014bb8b64d72b1850f4ef62d3ad9212dadc921e7fc7100b352587fc7d",
+      "image": "sha256:d4271abf3955a28eabeb35b526c80b6aa27439eda176bd0f2fe9b1bb0d4c24a5",
+      "startedAt": "2026-10-02T17:28:47.571191337Z",
+      "status": "running",
+      "restarts": 0,
+      "health": "healthy"
+    }
+  ],
+  "privateFileHashes": {
+    ".relay/mac-origin-correction/package-02/manifest.json": "45e7b152b1feb8d058271f08ed437dc244a1d5e0cc428fe4f4b171307ad14c64",
+    ".relay/mac-origin-correction/package-02/acceptance.json": "1fa0c626895e8b8d5fa010fa28fd66cb2d0a9e9fd588af3dce6a352662a2707b",
+    ".relay/nova-transition/nova-runtime.json": "b6d603657e724c4f34db6b8cbbbf6627406e896d104ce69eee25aca0740abf4b"
+  }
+}

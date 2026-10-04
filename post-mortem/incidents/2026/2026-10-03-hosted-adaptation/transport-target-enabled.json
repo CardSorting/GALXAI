@@ -1,0 +1,64 @@
+{
+  "at": "2026-10-03T21:46:06.692Z",
+  "previousVersion": 9,
+  "version": 10,
+  "config": {
+    "ingress": [
+      {
+        "path": "^/(health(/live)?|v1/(images/(availability|generations)|models|chat/completions|jobs/[A-Za-z0-9_.:-]+/(stream|receipt)))$",
+        "service": "http://host.docker.internal:13301",
+        "hostname": "images-service.galx.ai",
+        "originRequest": {
+          "connectTimeout": 10
+        }
+      },
+      {
+        "service": "http://host.docker.internal:3001",
+        "hostname": "relay.galx.ai",
+        "originRequest": {
+          "connectTimeout": 10
+        }
+      },
+      {
+        "service": "http_status:404"
+      }
+    ],
+    "warp-routing": {
+      "enabled": false
+    }
+  },
+  "observed": [
+    {
+      "path": "/health/live",
+      "authenticated": true,
+      "status": 200,
+      "sanitized": true,
+      "ok": true
+    },
+    {
+      "path": "/v1/models",
+      "authenticated": true,
+      "status": 200,
+      "modelCount": 4
+    },
+    {
+      "path": "/v1/models",
+      "authenticated": false,
+      "status": 401
+    },
+    {
+      "path": "/operator/status",
+      "authenticated": true,
+      "status": 404
+    },
+    {
+      "path": "/v1/jobs/private-test/stream",
+      "authenticated": false,
+      "status": 401
+    }
+  ],
+  "realInference": false,
+  "providerCredentialsChanged": false,
+  "replayControls": "No proxy worker added; exact paths, existing server credential, one-shot RelayChatTransport and durable idempotency retained. Synthetic ambiguous POST arrived once.",
+  "rollback": "Restore the images-service rule path from the before record, preserving any unrelated newer rules."
+}

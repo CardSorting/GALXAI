@@ -1,0 +1,9 @@
+{
+  "image": "sha256:70b0c58c6a6f27bbf7dceaa13a1a555a822bf4afbae31ff2fce234724b12c27b",
+  "tag": "galxai-web:selfhost-2afadf8c22f92685",
+  "manifestSha256": "2afadf8c22f92685245228d805d6f5fac658c108ed105ad585c1c33b7be3976d",
+  "imageArchiveSha256": "f9f3a692bd38e0863786f5f4483ebf9f307fad27da3948b983edba66421590ea",
+  "platform": "linux/amd64",
+  "builtAt": "2026-10-03T23:58:18.996Z",
+  "deployed": false
+}

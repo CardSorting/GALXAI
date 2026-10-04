@@ -1,0 +1,184 @@
+{
+  "classification": "private",
+  "observed_at": "2026-10-03T22:44:16.807Z",
+  "purpose": "Identify a no-new-subscription route after the owner declined the paid host upgrade; feasibility and bounded next implementation, not a rollout or new accepted candidate.",
+  "status": "FEASIBLE DIRECTION IDENTIFIED — IMPLEMENTATION AND ACCEPTANCE REQUIRED",
+  "financial_constraint": {
+    "vercel_upgrade": "Declined by owner; do not request or purchase again without a changed instruction.",
+    "new_monthly_hosting_subscription": "None proposed; reuse existing persistent compute and tunnel.",
+    "cost_limit": "Existing electricity, network, database/provider usage and operational limits still apply; no unlimited/free-compute claim."
+  },
+  "conclusion": "Keep Media and Connect authorization on the existing eligible Hobby deployment. Place the complete Nova resource boundary, including current-grant admission, public projection and terminal persistence, in an isolated process on existing persistent compute. Route nova.galx.ai directly to that boundary, outside any Vercel invocation/rewrite. Use live SSE over the edge, buffering the complete-answer presentation inside the first-party client with explicit bounds.",
+  "why_buffering_inside_hobby_fails": [
+    "Hobby invocation duration remains 300 seconds including response streaming. Waiting, response buffering, heartbeats and waitUntil/after do not add time beyond the invocation deadline.",
+    "300 seconds of accepted execution plus terminal database I/O cannot be guaranteed inside a 300-second invocation. Do not lower the accepted deadline to 240/270 seconds as an undocumented workaround.",
+    "A 202 response followed by unawaited work in the same invocation still loses its owner when that invocation is reclaimed. A real handoff needs a separately durable authority."
+  ],
+  "observed_edge_probe": {
+    "at": "2026-10-03T22:43:51.820Z",
+    "scope": "Actual existing edge/tunnel to local synthetic origin. No Vercel candidate invocation, Nova execution, database or provider request.",
+    "originDelayMs": 310000,
+    "results": [
+      {
+        "mode": "json",
+        "status": 524,
+        "firstByteMs": 125064,
+        "elapsedMs": 125064,
+        "completed": false,
+        "done": false,
+        "error": null
+      },
+      {
+        "mode": "stream",
+        "status": 200,
+        "firstByteMs": 186,
+        "elapsedMs": 310191,
+        "completed": true,
+        "done": true,
+        "error": null
+      }
+    ],
+    "jobs": [
+      {
+        "mode": "json",
+        "endRequested": false,
+        "originConnectionLifetimeMs": 125016
+      },
+      {
+        "mode": "stream",
+        "endRequested": true,
+        "originConnectionLifetimeMs": 310005
+      }
+    ],
+    "sameServingDeployment": "dpl_9FSaL3M6JffKDjaUHP98RhU3crzG"
+  },
+  "transport_inference": "The current tunnel returned 524 for a silent buffered JSON response after approximately 125 seconds, while the live stream exceeded 300 seconds. Direct placement alone cannot claim unchanged long raw-JSON compatibility. Streaming-first reference clients must assemble complete answers locally.",
+  "existing_primitives": {
+    "sdk": "Already separates issuer and resource; invokes the resource directly with a scoped Bearer and stable request ID. Both reference clients currently default to nonstreaming, so they need explicit adaptation.",
+    "nova": "Existing invokeNova/ConnectRepository own current-grant authorization, explicit entitlement, shared admission, sanitized projection, terminal persistence and no replay. Move/reuse the entire boundary; do not expose the raw provider runtime as Nova.",
+    "runtime_buffer": "Bounded event retention, per-subscriber queues, slow-drain eviction and cursor conflict handling already exist. The ordinary output ring is memory state and is not recovered after restart.",
+    "durable_receipts": "An opt-in retained receipt facility already exists, with crash fencing and no replay, but Nova does not request it and its 12000-byte output limit is not a substitute for the existing Nova result contract. Do not silently enable it or promise a new async retrieval API.",
+    "checks": "46 existing isolated checks pass: buffer bounds, owner isolation, retained receipt identity/body bounds, crash fencing and no replay. No new regression code was needed for this source-inspection pass."
+  },
+  "proposed_budgets": {
+    "hobby": "Only authorization/consent/token/refresh/revoke and media requests. Existing SDK token/revoke calls have 15000 ms client deadlines. No inference stream or terminal write owned by a Hobby invocation.",
+    "nova": "Keep the 300000 ms execution deadline and existing first-output/idle/output/admission bounds. The persistent host owns bounded terminal I/O after interruption, independent of any Vercel cleanup budget.",
+    "client_buffer": "For a complete-answer UI, request the already-supported SSE representation and accumulate only sanitized content under a reviewed explicit byte limit. Resolve only after confirmed terminal completion; abort/EOF/error retains unknown. No automatic POST retry or synthetic success.",
+    "capacity": "No new entitlement or waiting-room capacity. Preserve two slots per account, twelve admissions/minute and sixty-four shared reservations plus current provider-side limits. Existing buffer caps are not extra compute slots.",
+    "shutdown": "Stop admitting before shutdown and drain/finalize owned requests within their existing deadline plus database limits; abrupt loss must never dispatch again."
+  },
+  "minimal_implementation": [
+    "Package a small Node 22 resource adapter on the existing supervised host, using the accepted Nova helper, current-grant adapter, resource-origin validation and CORS projection. Keep database/access authority isolated from provider desktop/agent execution. Expose only reviewed Nova/resource-metadata routes; control and ownership interfaces remain private.",
+    "Prepare a separate Hobby-compatible web output that does not carry a 360-second inference function. Preserve current artifacts; do not just set its host declaration to 300 while leaving the long execution path enabled.",
+    "Point only the Nova resource hostname at the authenticated persistent adapter through existing ingress during a separately authorized rollout. Never send long inference back through a Vercel function or unproven rewrite.",
+    "Change first-party complete-answer calls to stream internally and buffer locally with cancellation, size and terminal checks. Keep invoke/connection permissions and provider credentials unchanged. Direct raw JSON callers over the tunnel do not inherit a 300-second success guarantee.",
+    "Rerun artifact provenance, Node-host request lifetime, full-duration SSE, client aggregation, negative authorization/revocation, shared admission, duplicate/no-replay, shutdown/restart and public-boundary checks before considering ACT-045 closure."
+  ],
+  "alternative_if_all_requests_must_touch_hobby": {
+    "design": "Short authenticated submit/read requests with persisted opaque operation references and a separate execution owner on existing compute; e.g. bounded 15-second submission and 20-second read windows are design targets, not measured guarantees.",
+    "additional_scope": "Requires an explicit Nova-to-worker handoff, durable ownership/idempotency mapping, result retention, owner/grant checks on every read, cancellation and interrupted-reader semantics, plus SDK integration. Current ring buffers and private upstream job IDs cannot be exposed as the public contract.",
+    "recommendation": "Defer this larger async protocol change; direct scoped Nova streaming with client-side buffering is smaller for the first-party cohort."
+  },
+  "acceptance_to_preserve": [
+    "Same account identity and explicit entitlement plus scoped client grant; ordinary sessions deny.",
+    "Acknowledged revocation blocks new admissions and refresh; an already-admitted request retains its existing policy.",
+    "Cancellation/deadline/transport loss stay neutral for provider health.",
+    "Unknown remains terminal and is never automatically replayed; reconnecting/reading stored output is not permission to recompute.",
+    "Only allowlisted public results leave Nova. Provider credentials and private ownership evidence never enter clients.",
+    "No quota, pricing, YOLO Pass, identity migration, new routing policy or historical record changes."
+  ],
+  "remaining": [
+    {
+      "classification": "BLOCKS CONTROLLED ROLLOUT",
+      "action": "ACT-045",
+      "finding": "Existing validated web artifact still requires 360 seconds. The described persistent resource adapter, client buffering and compatible web package are not implemented or accepted."
+    },
+    {
+      "classification": "HOSTING ELIGIBILITY — MUST BE ESTABLISHED BEFORE HOSTED USE",
+      "finding": "Vercel documents Hobby as personal non-commercial use only. Technical separation does not establish that GALX qualifies, and private/cohort-only access does not itself settle that question. If this is commercial/institutional use, reuse existing hosting for the web/Connect surface as well or obtain an eligible hosting arrangement; no purchase or migration authorized here."
+    },
+    {
+      "classification": "NON-BLOCKING FOLLOW-UP FOR A SUPERVISED COHORT",
+      "finding": "Existing persistent compute depends on owner-host power, network and supervision. No new availability guarantee or public-launch readiness."
+    }
+  ],
+  "candidate_preservation": {
+    "at": "2026-10-03T22:39:35.903Z",
+    "runtimeSourceFiles": 1886,
+    "changedRuntimeSourceFiles": [],
+    "acceptedArtifactSha256": "b11d853b80851b2ee978b5d0d0bb2cedb66ced423f545e91b44aeaf8c4a9e235",
+    "archiveUnchanged": true
+  },
+  "observed_plan": "hobby",
+  "production_id": "dpl_9FSaL3M6JffKDjaUHP98RhU3crzG",
+  "activation": false,
+  "code_changes": [],
+  "production_database_changes": [],
+  "real_provider_attempts": 0,
+  "deployment": false,
+  "action_status": {
+    "ACT-044": "CLOSED for the retained prior candidate; new packaging must be reaccepted if this proposal is implemented.",
+    "ACT-045": "REMAINS OPEN",
+    "ACT-046": "CLOSED for staged disabled configuration; the new resource host will need the same boundary revalidation."
+  },
+  "references": [
+    {
+      "url": "https://vercel.com/docs/functions/limitations#max-duration",
+      "claim": "300-second Hobby wall duration includes streamed response time."
+    },
+    {
+      "url": "https://vercel.com/docs/functions/functions-api-reference/vercel-functions-package#waituntil",
+      "claim": "waitUntil shares the invocation timeout; timed-out promises are cancelled."
+    },
+    {
+      "url": "https://vercel.com/docs/plans/hobby",
+      "claim": "Hobby is restricted to personal non-commercial use."
+    },
+    {
+      "url": "https://developers.cloudflare.com/fundamentals/reference/connection-limits/",
+      "claim": "Origin read timeouts are distinct from request execution duration; actual target probe retained separately."
+    }
+  ],
+  "evidence": [
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hobby-feasibility/before.json",
+      "sha256": "d9f81e55feb3936248dd39272fa5e58f2fa0fd95c22c7e04cb3e123363099f34"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hobby-feasibility/buffer-checks.log",
+      "sha256": "f094390d8a5da29dcf5d39f83d9657035f6f9fb98275464f6f87a65024a28064"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hobby-feasibility/candidate-preservation.json",
+      "sha256": "c52f5953443453c7e298fa323f4846481baaaf61e682fa4c4d8df270b1375e09"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hobby-feasibility/cleanup.json",
+      "sha256": "da1d20fd5135ad235d40a4a4725d3ab8d55a59c0b20bb98b8f3b721b336f1805"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hobby-feasibility/closed-config-readback.json",
+      "sha256": "ecefc3ec17b807a6b16b0a95d7ea5915b28d24070d9912f739093552ac38b6d7"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hobby-feasibility/docs-impact.log",
+      "sha256": "6ed2fc1c5cd4e16d46a4d688d654ba9407c74901ec6a71f8441e810c755544f3"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hobby-feasibility/probe.log",
+      "sha256": "04e3d8525ea47b75d293e2f8986480b6c927e45eadd4fba3cd08c2c12fe64dbb"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hobby-feasibility/probe.ts",
+      "sha256": "2b30820dbd19a78b7d43db4724fc0e7de27c7c666a1f3ddffb899b102ab2f076"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hobby-feasibility/result.json",
+      "sha256": "b0d7a2a525b2f644d91029f3ccd01f73117c87fa09a328dd88ffb2df546552a2"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hobby-feasibility/temporary-route.json",
+      "sha256": "63e9c8eb0fca02e4d31939070b0403602f307d84dff57fde39e2b42f00fc4b11"
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "at": "2026-10-04T01:45:56.814Z",
+  "status": "RETIRED",
+  "releaseId": "dpl_4uwFyPMJ6YV7njXsWQbb7a8MZHKh",
+  "releaseUrl": "galxai-32sh7g34p-cardsortings-projects.vercel.app",
+  "sourceManifest": "ef292883a4e84af9b91b14d7f86fdb237c3e5489abd7d3890257f425c0642d3f",
+  "novaProjectBindingRemoved": true,
+  "novaAliasRemoved": true,
+  "remainingDomains": [
+    "www.galx.ai",
+    "galx.ai",
+    "galxai.vercel.app"
+  ],
+  "remainingAliases": [
+    "www.galx.ai",
+    "galx.ai",
+    "galxai.vercel.app",
+    "galxai-git-main-cardsortings-projects.vercel.app",
+    "galxai-cardsortings-projects.vercel.app"
+  ],
+  "sharedConfigurationRetained": true,
+  "projectFirewallProtectsOldReleases": true,
+  "scheduledExecutions": [],
+  "historicalDeploymentsRetained": true,
+  "mutationReceiptNote": "Project-domain DELETE succeeded but returned an empty body; original generic JSON helper threw. Read-only domain and alias inventories proved removal before any retry. No duplicate mutation performed."
+}

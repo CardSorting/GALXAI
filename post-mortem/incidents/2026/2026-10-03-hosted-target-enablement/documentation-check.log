@@ -1,0 +1,19 @@
+
+> galxai@0.1.0 docs:check
+> python3 scripts/verify-docs.py && python3 scripts/verify-post-mortem.py && python3 scripts/docs-kb.py check
+
+Documentation validation passed: 382 guides, 46 incident documents, 165 ADRs; scope, coverage, local targets, and current-guide anchors.
+Review overdue: ACT-037 (2026-10-02, Frontend and release maintainers)
+Review overdue: ACT-018 (2026-09-27, relay maintainer)
+Review overdue: ACT-005 (2026-10-01, image maintainer)
+Review overdue: ACT-006 (2026-10-01, identity maintainer)
+Review overdue: ACT-008 (2026-10-01, documentation maintainer)
+Review overdue: ACT-014 (2026-10-01, security/account maintainer)
+Review overdue: ACT-015 (2026-10-01, security/account maintainer)
+Review overdue: ACT-016 (2026-10-01, application/release maintainer)
+Review overdue: ACT-020 (2026-10-01, image maintainer)
+Review overdue: ACT-025 (2026-10-01, Relay and SDK maintainer)
+Review overdue: ACT-028 (2026-10-01, Security/access maintainer)
+Review overdue: ACT-032 (2026-09-26, Product/image maintainer)
+Incident validation passed: 26 incidents, 180 events, 46 actions; inventory, references, publication boundary and source review.
+Knowledge validation passed: 428 documents, 11 domains; lifecycle, runbook contracts and source review.

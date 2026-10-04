@@ -1,0 +1,19 @@
+{
+  "at": "2026-10-03T21:25:00.227Z",
+  "privateFilesChecked": 11,
+  "knownCredentialValueMatches": [],
+  "evidenceDrift": [],
+  "frozen": {
+    "source": {
+      "files": 1886,
+      "manifestSha256": "aa7f5156d3110278e83699e8e073e4347974365911601096bc62e48ffd325d5c",
+      "changed": []
+    },
+    "compiled": {
+      "files": 2291,
+      "manifestSha256": "2d15ca60c7f2e6a9deca0ad759794e31b345360b52ebded5c2b53e87990d5c7c",
+      "changed": []
+    }
+  },
+  "scope": "Exact known-value credential scan and frozen hashes; not a universal secret detector or new live-site scan."
+}

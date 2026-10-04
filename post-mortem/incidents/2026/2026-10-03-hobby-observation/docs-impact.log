@@ -1,0 +1,58 @@
+
+> galxai@0.1.0 docs:impact
+> python3 scripts/docs-kb.py impact --files docs/VERCEL_DEPLOYMENT.md docs/operations/galx-connect.md post-mortem/CURRENT_STATE.md post-mortem/register.json post-mortem/events.jsonl
+
+{
+  "domains": {
+    "delivery": {
+      "changed": [
+        "docs/VERCEL_DEPLOYMENT.md"
+      ],
+      "owner": "Release operator",
+      "guides": [
+        "docs/DEPLOYMENT.md",
+        "docs/VERCEL_DEPLOYMENT.md",
+        "docs/runbooks/release-readiness.md",
+        "post-mortem/runbooks/deployment-storage.md",
+        "post-mortem/failure-modes/deployment.md",
+        "docs/VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md",
+        "docs/CLOUDFLARE_STRATEGY.md",
+        "docs/maintainers/CLOUDFLARE_EDGE_MESH_MAINTAINER_RUNBOOK.md",
+        "docs/playbooks/02-deployment-and-release.md",
+        "docs/runbooks/stripe-webhook-delivery.md",
+        "docs/runbooks/private-image-release-audit.md"
+      ],
+      "checks": [
+        "npm run docs:check",
+        "npm run build",
+        "npm run docs:check:build"
+      ]
+    },
+    "connect": {
+      "changed": [
+        "docs/operations/galx-connect.md"
+      ],
+      "owner": "Security/access and inference maintainers",
+      "guides": [
+        "docs/operations/galx-connect.md",
+        "docs/adr/0165-galx-connect-nova-boundaries.md",
+        "docs/DEVELOPER_CLIENT_SDK.md",
+        "docs/operations/workspace-auth.md",
+        "docs/SECURITY_POSTURE_AND_THREAT_MODEL.md"
+      ],
+      "checks": [
+        "npm run test:connect",
+        "npm run test:connect:db",
+        "npm run db:verify",
+        "npm run test:auth:sessions",
+        "npm run build"
+      ]
+    }
+  },
+  "unmapped": [
+    "post-mortem/CURRENT_STATE.md",
+    "post-mortem/events.jsonl",
+    "post-mortem/register.json"
+  ],
+  "notice": "Discovery only. Unmapped paths require judgment; no test or deployment was executed."
+}

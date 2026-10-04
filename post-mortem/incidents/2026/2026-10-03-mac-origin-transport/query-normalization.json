@@ -1,0 +1,5 @@
+{
+  "nativeCallback": "http://127.0.0.1:4401/callback",
+  "frameworkCallback": "http://localhost:4401/callback",
+  "consequence": "An exact registered IP-loopback callback becomes an unregistered localhost callback before validation."
+}

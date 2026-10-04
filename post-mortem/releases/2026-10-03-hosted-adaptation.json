@@ -1,0 +1,964 @@
+{
+  "classification": "private",
+  "observed_at": "2026-10-03T22:10:15.088Z",
+  "status": "NOT READY — BLOCKERS REMAIN",
+  "authorization": "Owner request to resolve the stopped enablement issues authorizes the bounded candidate adaptation and target preparation. No controlled rollout, real provider inference, new production authority or paid plan purchase was performed.",
+  "determination": {
+    "ACT-001": "CLOSED",
+    "ACT-044": "CLOSED",
+    "ACT-045": "REMAINS OPEN",
+    "ACT-046": "CLOSED",
+    "question": "Is the target technically prepared for a separately authorized controlled rollout?",
+    "answer": "NOT READY — BLOCKERS REMAIN",
+    "remaining_controlled_blocker": "Observed Vercel Hobby Fluid invocation ceiling is 300 seconds; the adapted artifact requires 360 seconds to retain Nova’s full 300-second execution deadline plus finalization margin. A hosting decision is pending."
+  },
+  "candidate": {
+    "base_revision": "38a3cc48f32f5f404592109c8cae3ddac5fa6f61",
+    "scope": "Explicit dirty-tree source snapshot, not a claim that HEAD contains the complete candidate",
+    "original_source_files": 1886,
+    "changed_original_source_files": [
+      "src/app/v1/inference/route.ts",
+      "src/lib/nova/inference.ts",
+      "vercel.json"
+    ],
+    "new_source_manifest_sha256": "ca7dad8443da052e2acd3add82f110c4746f26eb1e660ad84dc9f395630bcf74",
+    "build_input_manifest_sha256": "44862b3e81a1dfaf59b52b40762ce7d674830b8772d4506070c957c10d41d40d",
+    "application_dependency_lock_sha256": "17ec13ed2df5810416a9c52ab5cc772e15adcaec679bbafd9a2a61ac3b4742f1",
+    "tooling_dependency_lock_sha256": "b102d1c984fe16498d2e7e43d116f31d30578726aadfb34131259bbf59090376",
+    "compiled_build_id": "it2xLwqC8zEXT42C-CoPL",
+    "original_compiled_files_preserved": 2291,
+    "original_compiled_differences": [],
+    "artifact": {
+      "at": "2026-10-03T21:55:30.938Z",
+      "format": "Vercel Build Output API",
+      "functions": 33,
+      "mappedReferences": 9121,
+      "retainedPayloads": 1839,
+      "files": 3740,
+      "manifestSha256": "20e4e1df10c7b17d8bec3fd8c4f168d33b371e5ab26892f19d4d8dfc98a19ccf",
+      "archiveSha256": "b11d853b80851b2ee978b5d0d0bb2cedb66ced423f545e91b44aeaf8c4a9e235",
+      "archiveBytes": 48816495,
+      "applicationPayloadBytesChanged": 0,
+      "workspaceDependencies": false,
+      "deployed": false,
+      "retained_path": "/Users/bozoegg/Desktop/GALXAI/.relay/hosted-adaptation/build-03/hosted-candidate.tgz"
+    },
+    "runtime": {
+      "node": "22.23.2",
+      "architecture": "linux/x86_64",
+      "hosting_runtime": "nodejs22.x",
+      "framework": "Next.js 15.5.25",
+      "builder": {
+        "image": "node@sha256:43aeff40f4afc22e83f7589a2f37e111cff5ca84529571f1c8415bcc5fcc21b2",
+        "platform": "linux/amd64",
+        "node": "22.23.2",
+        "cli": "48.5.0"
+      },
+      "entrypoint": "v1/inference.func/___next_launcher.cjs",
+      "max_duration_seconds": 360,
+      "supports_cancellation": true
+    },
+    "database_migrations_introduced_by_this_pass": [],
+    "native_runtime_monitor_and_quota_source": "Unchanged against the original frozen source inventory; previous native artifacts and migration plan retained."
+  },
+  "ACT_044": {
+    "original_mismatch": "Missing matching hosted package; the retained August output did not represent the accepted dirty source snapshot.",
+    "correction": "Produced fresh Linux/glibc Vercel Build Output from explicit repository inputs, unchanged application lock, pinned Vercel 48.5.0 tooling lock and Node image digest. Retained exact function dependency bytes inside output/shared rather than relying on the build workspace.",
+    "clean_build_findings": [
+      {
+        "attempt": 1,
+        "result": "Build compilation succeeded; typecheck exposed omitted tracked BROC modules. Added those two repository inputs to packaging, without modifying their code."
+      },
+      {
+        "attempt": 2,
+        "result": "Typecheck succeeded; page collection exposed import-time vault validation. Added declared fresh throwaway vault/audit values, following the existing CI pattern, without reading or changing production roots."
+      },
+      {
+        "attempt": 3,
+        "result": "Full production build generated 157 pages and hosted functions. Packaging guard flagged 670 internal builder aliases. Reviewed them, allowed only relative aliases contained within the package, and reran retention without changing application payloads."
+      }
+    ],
+    "canonical_command": "DOCKER_CONTEXT=desktop-linux node scripts/package-hosted-candidate.mjs <new-output-path> <declared-public-build-inputs.json>",
+    "actual_final_sequence": [
+      "Fresh build-03: isolated npm ci + pinned vercel build --prod completed successfully",
+      "Corrected retention: node scripts/retain-hosted-output.mjs .relay/hosted-adaptation/build-03",
+      "Independent archive extraction, all 3740 manifest entries verified",
+      "Packaged Nova launcher exercised in Linux Node 22 against disposable PostgreSQL and a synthetic origin"
+    ],
+    "equivalence": "Only the three authorized source files differ from the original candidate manifest. All staged source inputs and locked dependencies remained unchanged during build. Repackaging changed filePathMap metadata only; mapped application bytes are identical. Build IDs, Linux native binaries and framework-generated outputs belong to this newly revalidated candidate, not a claim of byte identity with the earlier Mac build.",
+    "archive": {
+      "at": "2026-10-03T21:55:30.938Z",
+      "format": "Vercel Build Output API",
+      "functions": 33,
+      "mappedReferences": 9121,
+      "retainedPayloads": 1839,
+      "files": 3740,
+      "manifestSha256": "20e4e1df10c7b17d8bec3fd8c4f168d33b371e5ab26892f19d4d8dfc98a19ccf",
+      "archiveSha256": "b11d853b80851b2ee978b5d0d0bb2cedb66ced423f545e91b44aeaf8c4a9e235",
+      "archiveBytes": 48816495,
+      "applicationPayloadBytesChanged": 0,
+      "workspaceDependencies": false,
+      "deployed": false
+    },
+    "public_boundary": {
+      "compiled_assets_scanned": 538,
+      "known_private_credential_matches": 0,
+      "build_canary_matches": 0,
+      "private_marker_matches_in_public_assets": 0,
+      "external_or_missing_runtime_references": 0,
+      "native_elf_machine": "x86_64 (62)",
+      "inherited_findings": {
+        "classification": "NON-BLOCKING FOLLOW-UP",
+        "sources": [
+          "src/core/router/adapters/OpenAIAdapter.ts",
+          "src/core/relay/GalxRelaySupervisor.ts"
+        ],
+        "unchangedFromFrozenSource": true,
+        "notReferencedByNovaFunction": true,
+        "publicAssetMatches": 0,
+        "reason": "Two existing optional local CLI/supervisor fallback literals in private legacy server chunks. Not consumed by the clean build, absent from the Nova function and public assets. Preserved under the no-unrelated-candidate-change boundary."
+      }
+    }
+  },
+  "ACT_045": {
+    "original_incompatibilities": [
+      "Image-only ingress prevented Nova health/model discovery, text POST and stream/receipt reads.",
+      "Cancellation cleanup was not registered with the host and could be reclaimed before its terminal write.",
+      "Host ceiling equaled execution deadline, leaving no cleanup margin."
+    ],
+    "application_adaptation": "One promise is registered with Next after() before admission/dispatch. Abort/deadline also attempts the existing unknown write after response handoff. Concurrent finalizers share one write, including ambiguous failure. Buffered completion cannot convert a claimed unknown into public success. Non-admitted paths settle registration without execution.",
+    "infrastructure_correction": {
+      "at": "2026-10-03T21:46:06.692Z",
+      "previousVersion": 9,
+      "version": 10,
+      "config": {
+        "ingress": [
+          {
+            "path": "^/(health(/live)?|v1/(images/(availability|generations)|models|chat/completions|jobs/[A-Za-z0-9_.:-]+/(stream|receipt)))$",
+            "service": "http://host.docker.internal:13301",
+            "hostname": "images-service.galx.ai",
+            "originRequest": {
+              "connectTimeout": 10
+            }
+          },
+          {
+            "service": "http://host.docker.internal:3001",
+            "hostname": "relay.galx.ai",
+            "originRequest": {
+              "connectTimeout": 10
+            }
+          },
+          {
+            "service": "http_status:404"
+          }
+        ],
+        "warp-routing": {
+          "enabled": false
+        }
+      },
+      "observed": [
+        {
+          "path": "/health/live",
+          "authenticated": true,
+          "status": 200,
+          "sanitized": true,
+          "ok": true
+        },
+        {
+          "path": "/v1/models",
+          "authenticated": true,
+          "status": 200,
+          "modelCount": 4
+        },
+        {
+          "path": "/v1/models",
+          "authenticated": false,
+          "status": 401
+        },
+        {
+          "path": "/operator/status",
+          "authenticated": true,
+          "status": 404
+        },
+        {
+          "path": "/v1/jobs/private-test/stream",
+          "authenticated": false,
+          "status": 401
+        }
+      ],
+      "realInference": false,
+      "providerCredentialsChanged": false,
+      "replayControls": "No proxy worker added; exact paths, existing server credential, one-shot RelayChatTransport and durable idempotency retained. Synthetic ambiguous POST arrived once.",
+      "rollback": "Restore the images-service rule path from the before record, preserving any unrelated newer rules."
+    },
+    "requirements": [
+      {
+        "boundary": "request",
+        "contract": "One JSON POST /v1/inference; scoped Nova Bearer and stable Idempotency-Key; 256000-byte input and 10000ms body-read limit."
+      },
+      {
+        "boundary": "upstream discovery and dispatch",
+        "contract": "Authenticated GET /health/live (or /health), GET /v1/models, one POST /v1/chat/completions, same-origin validated GET /v1/jobs/{id}/stream; receipt read path retained. Provider and routing credentials remain server-side."
+      },
+      {
+        "boundary": "stream",
+        "contract": "SSE Content-Type, immediate frames, no-transform, no whole-response buffering; bounded events/output. No upstream fields/headers forwarded wholesale."
+      },
+      {
+        "boundary": "time",
+        "contract": "Nova execution and upstream wall deadline remain 300000ms; first-output and stream-idle limits remain 45000ms. Host maxDuration is 360s; actual Hobby plan cannot meet it."
+      },
+      {
+        "boundary": "cancellation and loss",
+        "contract": "Abort stops retrieval and persists terminal unknown through host-registered cleanup. It does not promise upstream cancellation and does not count a provider failure."
+      },
+      {
+        "boundary": "replay",
+        "contract": "Redirects rejected; adapter and SDK submit once; stable request identity and retained SQL authority reject duplicate Nova work and attach original upstream jobs. Unknown is never automatically replayed."
+      }
+    ],
+    "lifetime_evidence": {
+      "at": "2026-10-03T21:43:16.886Z",
+      "node": "v22.23.2",
+      "platform": "linux",
+      "architecture": "x64",
+      "framework": "Next 15.5.25 after() + AfterContext",
+      "realHostInvocation": false,
+      "network": "disabled",
+      "realProvider": false,
+      "realDatabase": false,
+      "results": [
+        {
+          "mode": "completed",
+          "durableState": "completed",
+          "registrations": 1,
+          "dispatches": 1,
+          "writes": 1,
+          "committed": true,
+          "signalAborted": false,
+          "sanitized": true,
+          "elapsedMs": 432,
+          "exit": {
+            "code": null,
+            "signal": "SIGKILL"
+          },
+          "messages": [
+            "stream-observed",
+            "cleanup-started",
+            "host-work-settled"
+          ]
+        },
+        {
+          "mode": "disconnect",
+          "durableState": "unknown",
+          "registrations": 1,
+          "dispatches": 1,
+          "writes": 1,
+          "committed": true,
+          "signalAborted": true,
+          "sanitized": true,
+          "elapsedMs": 465,
+          "exit": {
+            "code": null,
+            "signal": "SIGKILL"
+          },
+          "messages": [
+            "stream-observed",
+            "cleanup-started",
+            "host-work-settled"
+          ]
+        },
+        {
+          "mode": "deadline",
+          "durableState": "unknown",
+          "registrations": 1,
+          "dispatches": 1,
+          "writes": 1,
+          "committed": true,
+          "signalAborted": true,
+          "sanitized": true,
+          "elapsedMs": 300472,
+          "exit": {
+            "code": null,
+            "signal": "SIGKILL"
+          },
+          "messages": [
+            "stream-observed",
+            "cleanup-started",
+            "host-work-settled"
+          ]
+        }
+      ]
+    },
+    "edge_evidence": {
+      "at": "2026-10-03T21:45:18.705Z",
+      "path": "local Nova -> actual Cloudflare edge/tunnel -> authenticated synthetic origin",
+      "syntheticOrigin": true,
+      "realProvider": false,
+      "realAccount": false,
+      "realVercelInvocation": false,
+      "requiredPathPattern": "^/(health(/live)?|v1/(models|chat/completions|jobs/[A-Za-z0-9_.:-]+/(stream|receipt)))$",
+      "results": [
+        {
+          "mode": "complete",
+          "status": 200,
+          "state": "completed",
+          "novaDispatches": 1,
+          "ingressPosts": 1,
+          "firstWhileOriginOpen": true,
+          "originSawClose": true,
+          "elapsedMs": 1728,
+          "sanitized": true
+        },
+        {
+          "mode": "rejected",
+          "status": 503,
+          "state": "not_accepted",
+          "novaDispatches": 1,
+          "ingressPosts": 1,
+          "firstWhileOriginOpen": false,
+          "originSawClose": null,
+          "elapsedMs": 509,
+          "sanitized": true
+        },
+        {
+          "mode": "provider_failure",
+          "status": 200,
+          "state": "unknown",
+          "novaDispatches": 1,
+          "ingressPosts": 1,
+          "firstWhileOriginOpen": true,
+          "originSawClose": true,
+          "elapsedMs": 1392,
+          "sanitized": true
+        },
+        {
+          "mode": "unknown",
+          "status": 200,
+          "state": "unknown",
+          "novaDispatches": 1,
+          "ingressPosts": 1,
+          "firstWhileOriginOpen": true,
+          "originSawClose": true,
+          "elapsedMs": 1370,
+          "sanitized": true
+        },
+        {
+          "mode": "lost",
+          "status": 200,
+          "state": "unknown",
+          "novaDispatches": 1,
+          "ingressPosts": 1,
+          "firstWhileOriginOpen": true,
+          "originSawClose": true,
+          "elapsedMs": 1554,
+          "sanitized": true
+        },
+        {
+          "mode": "cancel",
+          "status": 200,
+          "state": "unknown",
+          "novaDispatches": 1,
+          "ingressPosts": 1,
+          "firstWhileOriginOpen": true,
+          "originSawClose": true,
+          "elapsedMs": 587,
+          "sanitized": true
+        },
+        {
+          "mode": "deadline",
+          "status": 200,
+          "state": "unknown",
+          "novaDispatches": 1,
+          "ingressPosts": 1,
+          "firstWhileOriginOpen": true,
+          "originSawClose": true,
+          "elapsedMs": 1851,
+          "sanitized": true
+        },
+        {
+          "mode": "ambiguous",
+          "status": 502,
+          "state": "unknown",
+          "novaDispatches": 1,
+          "ingressPosts": 1,
+          "firstWhileOriginOpen": false,
+          "originSawClose": false,
+          "elapsedMs": 508,
+          "sanitized": true
+        },
+        {
+          "mode": "duplicate-attachment",
+          "submissions": 2,
+          "providerAttempts": 1,
+          "attachments": 2,
+          "sameJob": true
+        }
+      ],
+      "counters": {
+        "attempts": 8,
+        "unauthorized": 1,
+        "disconnects": 2,
+        "requests": 25
+      },
+      "providerHealthEvidence": "Separately verified using the real relay engine regression suite; synthetic origin does not classify provider health."
+    },
+    "full_edge_deadline": {
+      "at": "2026-10-03T22:09:53.562Z",
+      "path": "local Nova -> actual Cloudflare edge/tunnel -> authenticated synthetic origin",
+      "syntheticOrigin": true,
+      "realProvider": false,
+      "realAccount": false,
+      "realVercelInvocation": false,
+      "requiredPathPattern": "^/(health(/live)?|v1/(models|chat/completions|jobs/[A-Za-z0-9_.:-]+/(stream|receipt)))$",
+      "results": [
+        {
+          "mode": "wall-deadline",
+          "status": 200,
+          "state": "unknown",
+          "novaDispatches": 1,
+          "ingressPosts": 1,
+          "firstWhileOriginOpen": true,
+          "originSawClose": true,
+          "elapsedMs": 300413,
+          "sanitized": true
+        }
+      ],
+      "counters": {
+        "attempts": 1,
+        "unauthorized": 1,
+        "disconnects": 1,
+        "requests": 7
+      },
+      "fullExecutionDeadlineMs": 300000,
+      "heartbeatIntervalMs": 30000,
+      "providerHealthEvidence": "Separately verified using the real relay engine regression suite; synthetic origin does not classify provider health."
+    },
+    "replay_proof": "Actual edge/tunnel delivered exactly one ambiguous mutation POST and one synthetic attempt. Duplicate upstream submissions attached the same job with one synthetic attempt; packaged Nova duplicates of completed and unknown work did not dispatch. Established real-engine no-replay/health tests pass. This proves the observed path and retained application controls, not a guarantee about every future hosting implementation.",
+    "remaining": "Obtain authorization for a sufficient host budget, then observe it on the actual target. The published Pro option is $20/month for the existing one deploying seat, plus metered usage. No purchase or rollout was performed."
+  },
+  "ACT_046": {
+    "configured": {
+      "at": "2026-10-03T21:39:20.412Z",
+      "productionUnchanged": true,
+      "productionId": "dpl_9FSaL3M6JffKDjaUHP98RhU3crzG",
+      "configuration": {
+        "GALX_CONNECT_ENABLED": "0",
+        "GALX_CONNECT_ORIGIN": "https://galx.ai",
+        "GALX_NOVA_RESOURCE": "https://nova.galx.ai",
+        "GALX_CONNECT_CLIENTS": "[{\"id\":\"reference-native\",\"name\":\"GALX controlled native reference\",\"kind\":\"native\",\"redirectUris\":[\"http://127.0.0.1/callback\"],\"origins\":[]},{\"id\":\"reference-browser\",\"name\":\"GALX controlled browser reference\",\"kind\":\"browser\",\"redirectUris\":[\"http://127.0.0.1:4400/callback\"],\"origins\":[\"http://127.0.0.1:4400\"]}]"
+      },
+      "clients": [
+        {
+          "id": "reference-native",
+          "name": "GALX controlled native reference",
+          "kind": "native",
+          "redirectUris": [
+            "http://127.0.0.1/callback"
+          ],
+          "origins": []
+        },
+        {
+          "id": "reference-browser",
+          "name": "GALX controlled browser reference",
+          "kind": "browser",
+          "redirectUris": [
+            "http://127.0.0.1:4400/callback"
+          ],
+          "origins": [
+            "http://127.0.0.1:4400"
+          ]
+        }
+      ],
+      "verified": [
+        {
+          "key": "GALX_CONNECT_ENABLED",
+          "id": "qsHYPf1oCu6tImXa",
+          "type": "encrypted",
+          "target": [
+            "production"
+          ],
+          "exactReadback": true
+        },
+        {
+          "key": "GALX_CONNECT_ORIGIN",
+          "id": "EDaCPdC0TAKSJpJG",
+          "type": "encrypted",
+          "target": [
+            "production"
+          ],
+          "exactReadback": true
+        },
+        {
+          "key": "GALX_NOVA_RESOURCE",
+          "id": "6rciDB3QPSFsGpoP",
+          "type": "encrypted",
+          "target": [
+            "production"
+          ],
+          "exactReadback": true
+        },
+        {
+          "key": "GALX_CONNECT_CLIENTS",
+          "id": "daPy1w0B8ZLgybn0",
+          "type": "encrypted",
+          "target": [
+            "production"
+          ],
+          "exactReadback": true
+        }
+      ],
+      "activation": false,
+      "grantsIssued": 0,
+      "entitlementsIssued": 0,
+      "installCommand": {
+        "before": "npm install",
+        "after": "npm ci"
+      },
+      "rollback": "Remove the four recorded environment IDs; restore installCommand. No existing environment variables were overwritten."
+    },
+    "domain": {
+      "at": "2026-10-03T21:39:33.886Z",
+      "domain": "nova.galx.ai",
+      "verified": true,
+      "dns": {
+        "id": "d81c745d26c0dfb33f79bbdb81686934",
+        "type": "CNAME",
+        "content": "a76166bfd6d0ea1e.vercel-dns-017.com",
+        "proxied": false,
+        "ttl": 300
+      },
+      "productionUnchanged": true,
+      "rollback": "Delete only the recorded explicit CNAME and remove nova.galx.ai from this project; existing apex and wildcard remain untouched."
+    },
+    "cohort": "Existing GALX accounts only. An operator-enabled, unexpired private.galx_inference_access row AND a current scoped grant to one of the two reviewed first-party clients are required. No public registration or automatic entitlement. The single historical real entitlement remains disabled/expired and all six historical grants remain revoked.",
+    "positive_case": "The packaged handler admitted a fixture account with explicit entitlement and a reference-native grant; the accepted repository consent/PKCE exchange issued its resource token. Synthetic provider output was returned through the compiled route.",
+    "authorization_matrix": [
+      {
+        "name": "ordinary GALX session is not a Nova credential",
+        "status": 401,
+        "code": "invalid_token",
+        "providerAttempts": 0
+      },
+      {
+        "name": "malformed credential",
+        "status": 401,
+        "code": "invalid_token",
+        "providerAttempts": 0
+      },
+      {
+        "name": "entitlement without application authorization",
+        "status": 401,
+        "code": "invalid_token",
+        "providerAttempts": 0
+      },
+      {
+        "name": "valid Connect authorization without explicit entitlement",
+        "status": 403,
+        "code": "inference_access_required",
+        "providerAttempts": 0
+      },
+      {
+        "name": "another client origin",
+        "status": 401,
+        "code": "invalid_token",
+        "providerAttempts": 0
+      },
+      {
+        "name": "alternate host",
+        "status": 401,
+        "code": "invalid_token",
+        "providerAttempts": 0
+      },
+      {
+        "name": "explicit cohort + client grant + packaged Nova + synthetic provider",
+        "status": 200,
+        "state": "completed",
+        "sanitized": true
+      },
+      {
+        "name": "duplicate Nova request",
+        "status": 409,
+        "newProviderAttempts": 0
+      },
+      {
+        "name": "wrong client refresh",
+        "code": "invalid_grant"
+      },
+      {
+        "name": "consumed authorization",
+        "status": 401,
+        "code": "invalid_token",
+        "providerAttempts": 0
+      },
+      {
+        "name": "expired authorization",
+        "status": 401,
+        "code": "invalid_token",
+        "providerAttempts": 0
+      },
+      {
+        "name": "wrong audience",
+        "status": 401,
+        "code": "invalid_token",
+        "providerAttempts": 0
+      },
+      {
+        "name": "missing inference scope",
+        "result": "authoritative store rejects invalid scope before a credential can exist",
+        "sqlState": "23514"
+      },
+      {
+        "name": "unregistered client",
+        "status": 401,
+        "code": "invalid_token",
+        "providerAttempts": 0
+      },
+      {
+        "name": "revoked connection",
+        "status": 401,
+        "code": "invalid_token",
+        "providerAttempts": 0
+      },
+      {
+        "name": "revocation",
+        "denialAfterAcknowledgementMs": 15,
+        "refreshDenied": true,
+        "independentClientWorks": true,
+        "completedRecordUnchanged": true,
+        "accountsAndMediaProfilesUnchanged": true
+      },
+      {
+        "name": "packaged host cancellation",
+        "state": "unknown",
+        "registeredBeforeResponse": true,
+        "noReplay": true
+      },
+      {
+        "name": "terminal unknown duplicate",
+        "status": 409,
+        "state": "unknown",
+        "newProviderAttempts": 0
+      },
+      {
+        "name": "shared capacity after two unknown reservations",
+        "status": 503,
+        "code": "service_busy",
+        "providerAttempts": 0
+      }
+    ],
+    "revocation": {
+      "design": "Every new admission checks and locks the current grant; no grant-cache propagation delay. Requests already admitted may finish. Acknowledged disconnect prevents later admission and refresh.",
+      "new_measurement_ms": 15,
+      "scope": "Disposable PostgreSQL and packaged Linux handler; not a live hosted latency measurement or SLA",
+      "historical_measurement_ms": 175,
+      "independent_client_and_account_media_state": "Preserved in fixture and existing account readback; completed fixture records remained unchanged."
+    },
+    "activation": false
+  },
+  "integrated_rehearsal": {
+    "artifact_sha256": "b11d853b80851b2ee978b5d0d0bb2cedb66ced423f545e91b44aeaf8c4a9e235",
+    "checks": 19,
+    "metrics": {
+      "submissions": 4,
+      "attempts": 4,
+      "registered": 35,
+      "settled": 35,
+      "disconnects": 1
+    },
+    "fixture_migrations": 159,
+    "configuration": {
+      "issuer": "https://galx.ai",
+      "resource": "https://nova.galx.ai",
+      "clients": [
+        "reference-native",
+        "reference-browser"
+      ]
+    },
+    "network": "dedicated disposable Docker bridge; fixture wrapper rejects non-fixture fetch/TCP and all TLS egress",
+    "composition": "Retained artifact -> hosted issuer/resource/client configuration -> explicit fixture eligibility and scoped grant -> compiled Nova launcher with host waitUntil context -> synthetic provider -> sanitized completion/unknown -> revoke -> denial. Actual edge/tunnel transport is verified separately using the same Nova execution adapter.",
+    "limits": "No new real-account consent, actual hosted candidate invocation or real provider inference. Existing real acceptance remains historical. No production migration, cohort activation or deployment."
+  },
+  "regression": {
+    "connect_nova_tests": 35,
+    "connect_database_checks": 135,
+    "relay_services_tests": 43,
+    "transport_and_public_boundary_tests": 29,
+    "account_session_tests": 44,
+    "packaging_boundary_tests": 3,
+    "host_lifetime_cases": 3,
+    "packaged_handler_checks": 19,
+    "unknown_default_and_provider_health": "Existing engine tests distinguish explicit provider error from neutral cancellation, deadline, transport loss and request rejection. Core provider-health/execution source is unchanged.",
+    "duplicate_and_unknown": "Unknown remains terminal; duplicate completed/unknown Nova requests do not dispatch. Upstream duplicate attaches the same job; no ambiguous mutation replay.",
+    "quota": "Frozen refill migration and admission source unchanged; no quota state or entitlement model changes.",
+    "private_control_and_browser": "Service/monitor authorization and adversarial DTO tests pass. New ingress excludes operator controls (404), unauthenticated model/job reads deny (401), and public package scans contain no private credential values or private markers.",
+    "retained_execution_digest": "bb3249cc2d73bf36b4d5bfbc4c03a3fe",
+    "retained_execution_records": 31,
+    "history_changed": false
+  },
+  "observed_target": {
+    "productionId": "dpl_9FSaL3M6JffKDjaUHP98RhU3crzG",
+    "readyState": "READY",
+    "nodeVersion": "22.x",
+    "plan": "hobby",
+    "planStatus": "active",
+    "resourceConfig": {
+      "fluid": true,
+      "functionDefaultRegions": [
+        "iad1"
+      ],
+      "buildMachineType": "basic",
+      "buildMachineSelection": "fixed"
+    },
+    "transportVersion": 12,
+    "ingress": [
+      {
+        "path": "^/(health(/live)?|v1/(images/(availability|generations)|models|chat/completions|jobs/[A-Za-z0-9_.:-]+/(stream|receipt)))$",
+        "service": "http://host.docker.internal:13301",
+        "hostname": "images-service.galx.ai",
+        "originRequest": {
+          "connectTimeout": 10
+        }
+      },
+      {
+        "service": "http://host.docker.internal:3001",
+        "hostname": "relay.galx.ai",
+        "originRequest": {
+          "connectTimeout": 10
+        }
+      },
+      {
+        "service": "http_status:404"
+      }
+    ]
+  },
+  "rollback": {
+    "application": "No new deployment to roll back; prior serving dpl_9FSaL3M6JffKDjaUHP98RhU3crzG remains Ready. Native image rollback inventory from the preflight is unchanged.",
+    "configuration": "Remove the four newly recorded production environment entries by ID and restore npm install if withdrawing preparation. Remove only the added Nova domain/CNAME. Restore the prior image-only ingress path while preserving unrelated operator changes. No real grants or migrations need reversal.",
+    "reference": "post-mortem/releases/2026-10-03-controlled-rollout-preflight.json"
+  },
+  "remaining_findings": [
+    {
+      "classification": "BLOCKS CONTROLLED ROLLOUT",
+      "action": "ACT-045",
+      "finding": "Current hosting plan cannot honor the artifact’s 360-second duration."
+    },
+    {
+      "classification": "BLOCKS PUBLIC RELEASE",
+      "actions": [
+        "ACT-014",
+        "ACT-018",
+        "ACT-028",
+        "ACT-043"
+      ],
+      "finding": "Existing recovery/authentication and account-tier RPC gates remain separate and unchanged."
+    },
+    {
+      "classification": "NON-BLOCKING FOLLOW-UP",
+      "finding": "Two frozen legacy private server fallback path literals; no public/Nova reference or build dependency, so no unrelated candidate cleanup.",
+      "evidence": {
+        "classification": "NON-BLOCKING FOLLOW-UP",
+        "sources": [
+          "src/core/router/adapters/OpenAIAdapter.ts",
+          "src/core/relay/GalxRelaySupervisor.ts"
+        ],
+        "unchangedFromFrozenSource": true,
+        "notReferencedByNovaFunction": true,
+        "publicAssetMatches": 0,
+        "reason": "Two existing optional local CLI/supervisor fallback literals in private legacy server chunks. Not consumed by the clean build, absent from the Nova function and public assets. Preserved under the no-unrelated-candidate-change boundary."
+      }
+    },
+    {
+      "classification": "NON-BLOCKING FOLLOW-UP",
+      "finding": "Existing locked build/lint pattern-expansion dependency advisories; affected installed package paths are absent from the retained function payload. No package upgrades in this pass.",
+      "evidence": {
+        "affectedInstalledPackagesReferencedByArtifact": {},
+        "classification": "NON-BLOCKING FOLLOW-UP",
+        "reason": "Existing locked pattern expansion packages used by build/lint tooling. No affected installed package paths appear in the retained function payload; no dependency updates in this bounded pass."
+      }
+    },
+    {
+      "classification": "NON-BLOCKING FOLLOW-UP",
+      "finding": "Earlier nine follow-ups and prevention deadlines remain unchanged."
+    }
+  ],
+  "failed_rehearsal_notes": [
+    "A newly created temporary hostname continued to resolve through the wildcard path and returned TLS errors during two bounded attempts. Its temporary DNS/rules were removed. The successful transport tests used the existing target hostname and changed only its previously unavailable text paths; existing image routes remained intact.",
+    "The first archive rehearsal used an internal Docker network whose ports were not published. No application request ran. The final disposable bridge fixture uses explicit fetch/TCP/TLS egress guards and no production authority.",
+    "Artifact retention initially rejected valid internal builder aliases and the Mac temporary-directory realpath alias. Targeted packaging fixes and three adversarial regression tests now pass."
+  ],
+  "evidence": [
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-adaptation/api.mjs",
+      "sha256": "fd4f4daa2b18ef544481040a85d8f569c30e64ca35d32086dc6f9927990ddf4c"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-adaptation/archive-verification.json",
+      "sha256": "0330779414a0b347d493fd83640c2b502c3aeb2402d06cd780db1e32a37d2d42"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-adaptation/artifact-host.cjs",
+      "sha256": "f7079c4f986f96028179b7cde1e69a07e7dd9074cca6c3d0d518c0a6daf2935c"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-adaptation/artifact-manifest.json",
+      "sha256": "2a9be6f4cea2a5a6c8b1ee0d141e1b12f49b5cb88a21d5ae9afc6512495c4044"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-adaptation/artifact-rehearsal-final.log",
+      "sha256": "6805a73136eee71df569ea182fb2a752fed1ac47920c0d610c9be95b99251f5f"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-adaptation/artifact-rehearsal-result.json",
+      "sha256": "703194c31e15c56617913b2e45204cc21839c988dcdb6ca1ad769b2fbff718ba"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-adaptation/artifact-rehearsal.ts",
+      "sha256": "dbe550374ee83d3d5dc02e50f12778aa35d65734e8d8f45b95bb29a3f590e75c"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-adaptation/artifact-scan.json",
+      "sha256": "83e220e54f52d7965dc140b5575b7028487d61d91aa14c0aeab0c3dda55942e2"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-adaptation/artifact.json",
+      "sha256": "07ed014bc8b65c3f1cc90917f9d173e383241ce1820e76a0d84ed2b5a41edcea"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-adaptation/auth-session-tests.log",
+      "sha256": "96a3ee017f1e74d59881daa568ee9766c6ea58bfb764e4cc65f02b1496c4debc"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-adaptation/build-01.log",
+      "sha256": "b583e9f0ec39b1dff6787e09e8fbea2c162a8349fa65a9d424eb261258de2301"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-adaptation/build-02.log",
+      "sha256": "727dc7d065ef2707ddaf2985a284556dd501a58ece0babfbf3110ba83f4e7313"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-adaptation/build-03.log",
+      "sha256": "e2d408c085f1aa9c89dda3b7e8ef08b3d36db39a36c40cba81afba522b90ba5d"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-adaptation/build-boundary.log",
+      "sha256": "3d1cdf19b4d119936d9d6876afa24288514c2fb172fc970cb7670cb80366f641"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-adaptation/candidate-source-manifest.json",
+      "sha256": "ca7dad8443da052e2acd3add82f110c4746f26eb1e660ad84dc9f395630bcf74"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-adaptation/connect-db-tests.log",
+      "sha256": "5bfa72b496bfc4b1235d92ed6375c9449abcca8aaddfd55f8e4a42f81e432265"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-adaptation/connect-target-before.json",
+      "sha256": "25eaed5f5d53081e9ecbc2a6b1288044b8249f2c488efad67ed6498116acdcd5"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-adaptation/connect-target-configured.json",
+      "sha256": "d445fa9155180b0b671924b9dabad857b8ceeac36028e8fed9a0dccd09922498"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-adaptation/connect-tests.log",
+      "sha256": "c23f9e36f7178cadb4e855ee0fbb7df72ef50bddcbbcda7e13cb1dfbcfd5c411"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-adaptation/dependency-artifact-review.json",
+      "sha256": "722df1288ef79094fdb9d3c4c32434a9abc5a681dfe5a2407dc0310c8ae57737"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-adaptation/edge-existing-host-cleanup.json",
+      "sha256": "2f7acdcce568c093ee4073938d8e19112157f3e0eb483f3f6255a6ab0ac01bc5"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-adaptation/edge-existing-host-result.json",
+      "sha256": "e86d03e9f4f2a7490c431a417af2b49404eb3b052707a6021d27e4e4f98b2e19"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-adaptation/edge-existing-host.ts",
+      "sha256": "b8f2b59c9576b6a4586ebef308e20ed351ef4e088834866d68be6ef078ef41e6"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-adaptation/edge-full-deadline-cleanup.json",
+      "sha256": "1cf43489a817a2bc128cbbb9d48a8f7c5401c2df421aac913231a09277e2e7fd"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-adaptation/edge-full-deadline-result.json",
+      "sha256": "420df4c422e35c0ebe1cfe6f0f1d477a58fc858205128d1acedd39d4a66067e1"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-adaptation/edge-full-deadline.log",
+      "sha256": "8240d55cfb6cfb98285cdc9968555e2604e611cf0c079fa47116b0d33075c05b"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-adaptation/edge-full-deadline.ts",
+      "sha256": "f0f2578d280b565f051304ed5efd6e0c39c83ad4cdb1e1838b216979a7c847c1"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-adaptation/edge-rehearsal-02.log",
+      "sha256": "9f9df4e67feab716cc9a5fb06af84545215814df923e1501b01c2405aaaac32c"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-adaptation/edge-rehearsal.log",
+      "sha256": "828596669fe3191c75b672e02b098a1081ba1d35253759a124b783c7b916686d"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-adaptation/hosting-decision.json",
+      "sha256": "710202c353d0002fda4869a4556401f390b43b48f5be78d5ddcb976efc86da56"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-adaptation/lifetime-result.json",
+      "sha256": "56897ea312054dabbefaf9367d7360dcdccdf55449061edddf5fe853ed388996"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-adaptation/lifetime.log",
+      "sha256": "5ab274190d23c6f827dde37edf14261c7d4bf060347b4e503d98c93864e0f624"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-adaptation/nova-domain-prepared.json",
+      "sha256": "bd6d7eaa6a7143531199051b4b6e4b204290503a8642fcb6b5495eb09018b323"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-adaptation/packaging-tests.log",
+      "sha256": "8d20813f93196d40c5b4d294ac280ded1e35c01e9117df286806f07ac13e1602"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-adaptation/production-audit.json",
+      "sha256": "c228d996f0100793696969bcc146fc31a7298d18060a8a03ea67ecae1f3da05d"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-adaptation/provenance.json",
+      "sha256": "ac65fd30920996dd2f06b734e576f726ee958f72b26588502b9a1efc6638dafe"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-adaptation/relay-services-tests.log",
+      "sha256": "6312132155dac943d6fe050d09b0806664a28c3af91f950ae939877bd372b3d9"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-adaptation/scan-artifact.mjs",
+      "sha256": "ae5433fb3f0227384de6852c3716048a5e2389c291adaff57e723f458e05ae87"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-adaptation/target-state-readback.json",
+      "sha256": "1a533314b2bd059d624ffb9e2c1da82c2835fd22263065c9884acba0549150c1"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-adaptation/target-state-readback.mjs",
+      "sha256": "54346f33954b67c118feb3ab0cf433b02ae54dbbdce202b80cf689a4810e721a"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-adaptation/transport-boundary-tests.log",
+      "sha256": "90546c802a0fb1d574258a4ab72114c5b255164421606b50839e6b749b198583"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-adaptation/transport-target-before.json",
+      "sha256": "4f080f712b08f01d0f7f1ef0c09f89f137f799a927e8c05bf59723de48127e1b"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-adaptation/transport-target-enabled.json",
+      "sha256": "3e355176707d2a8bc75932649a6f50f961fdccc10d7e0eb9239ae39c3add09ad"
+    }
+  ]
+}

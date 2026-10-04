@@ -1,0 +1,8 @@
+{
+  "at": "2026-10-04T00:58:20.486165+00:00",
+  "source_files_checked": 1655,
+  "source_files_changed_since_clean_build": [],
+  "private_evidence_files_scanned": 25,
+  "build_canary_or_credential_pattern_findings": [],
+  "limits": "Checks named build canaries and credential patterns; does not certify all possible secret formats. Raw private runtime configuration was removed after owned fixtures."
+}

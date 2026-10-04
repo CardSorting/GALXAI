@@ -1,0 +1,956 @@
+{
+  "classification": "private",
+  "captured_at": "2026-10-03T14:42:07.905305+00:00",
+  "environment": "Local production Next.js build, actual existing primary database, real existing GALX account; native reference SDK in a supervised harness. No simulated account session or grant repository in these observations.",
+  "capture_policy": "Allowlisted observation fields. Inference/denial response bodies and HTTP headers retained after inspection. OAuth success records retain only field names, scope and expiry; all token values, authorization codes, verifier, cookies and account email omitted. Error-body hashes preserve raw-body provenance. OAuth validation elapsed_ms is only the body-read interval; do not interpret it as network latency.",
+  "harness_sha256": "d279305e844cef60e10d879538d84377927a859f03f31cd171f773ae0d46142d",
+  "observations": [
+    {
+      "at": "2026-10-03T14:25:48.502Z",
+      "label": "native_authorization_started",
+      "client": "reference-native",
+      "pkce": "S256"
+    },
+    {
+      "at": "2026-10-03T14:25:59.854Z",
+      "label": "sdk_token_exchange",
+      "status": 200,
+      "fields": [
+        "access_token",
+        "token_type",
+        "expires_in",
+        "refresh_token",
+        "scope"
+      ],
+      "scope": "inference:invoke",
+      "expires_in": 300,
+      "provider_credential_received": false
+    },
+    {
+      "at": "2026-10-03T14:25:59.856Z",
+      "label": "native_connected",
+      "connected": true
+    },
+    {
+      "at": "2026-10-03T14:26:14.764Z",
+      "label": "sdk_invoke",
+      "status": 403,
+      "elapsed_ms": 224,
+      "headers": {
+        "cache-control": "private, no-store",
+        "connection": "keep-alive",
+        "content-security-policy": "frame-ancestors 'none'",
+        "content-type": "application/json",
+        "cross-origin-opener-policy": "same-origin-allow-popups",
+        "cross-origin-resource-policy": "same-site",
+        "date": "Sat, 03 Oct 2026 14:26:14 GMT",
+        "keep-alive": "timeout=5",
+        "permissions-policy": "camera=(), microphone=(), geolocation=(), payment=(self)",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=63072000; includeSubDomains; preload",
+        "transfer-encoding": "chunked",
+        "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Origin",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY",
+        "x-robots-tag": "noindex, nofollow"
+      },
+      "body": {
+        "error": {
+          "code": "inference_access_required",
+          "message": "Your account does not currently have inference access. Your application is still connected.",
+          "execution_state": "not_accepted"
+        }
+      },
+      "body_sha256": "59a9ea7c835b61deac0554c3c590b5e0067a223c8c8791f62817654cbfa6e509"
+    },
+    {
+      "at": "2026-10-03T14:26:14.768Z",
+      "label": "missing_credential",
+      "status": 401,
+      "elapsed_ms": 4,
+      "headers": {
+        "cache-control": "private, no-store",
+        "connection": "keep-alive",
+        "content-security-policy": "frame-ancestors 'none'",
+        "content-type": "application/json",
+        "cross-origin-opener-policy": "same-origin-allow-popups",
+        "cross-origin-resource-policy": "same-site",
+        "date": "Sat, 03 Oct 2026 14:26:14 GMT",
+        "keep-alive": "timeout=5",
+        "permissions-policy": "camera=(), microphone=(), geolocation=(), payment=(self)",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=63072000; includeSubDomains; preload",
+        "transfer-encoding": "chunked",
+        "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Origin",
+        "www-authenticate": "Bearer error=\"invalid_token\"",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY",
+        "x-robots-tag": "noindex, nofollow"
+      },
+      "body": {
+        "error": {
+          "code": "invalid_token",
+          "message": "Connect this application again to continue.",
+          "execution_state": "not_accepted"
+        }
+      },
+      "body_sha256": "75e15d2f5d2f5fa2d84873258e6b1befb5ba4dbf4b5e69b26afbab80dd7bad4d"
+    },
+    {
+      "at": "2026-10-03T14:26:14.774Z",
+      "label": "cookie_without_bearer",
+      "status": 401,
+      "elapsed_ms": 5,
+      "headers": {
+        "cache-control": "private, no-store",
+        "connection": "keep-alive",
+        "content-security-policy": "frame-ancestors 'none'",
+        "content-type": "application/json",
+        "cross-origin-opener-policy": "same-origin-allow-popups",
+        "cross-origin-resource-policy": "same-site",
+        "date": "Sat, 03 Oct 2026 14:26:14 GMT",
+        "keep-alive": "timeout=5",
+        "permissions-policy": "camera=(), microphone=(), geolocation=(), payment=(self)",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=63072000; includeSubDomains; preload",
+        "transfer-encoding": "chunked",
+        "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Origin",
+        "www-authenticate": "Bearer error=\"invalid_token\"",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY",
+        "x-robots-tag": "noindex, nofollow"
+      },
+      "body": {
+        "error": {
+          "code": "invalid_token",
+          "message": "Connect this application again to continue.",
+          "execution_state": "not_accepted"
+        }
+      },
+      "body_sha256": "75e15d2f5d2f5fa2d84873258e6b1befb5ba4dbf4b5e69b26afbab80dd7bad4d"
+    },
+    {
+      "at": "2026-10-03T14:26:14.778Z",
+      "label": "malformed_credential",
+      "status": 401,
+      "elapsed_ms": 4,
+      "headers": {
+        "cache-control": "private, no-store",
+        "connection": "keep-alive",
+        "content-security-policy": "frame-ancestors 'none'",
+        "content-type": "application/json",
+        "cross-origin-opener-policy": "same-origin-allow-popups",
+        "cross-origin-resource-policy": "same-site",
+        "date": "Sat, 03 Oct 2026 14:26:14 GMT",
+        "keep-alive": "timeout=5",
+        "permissions-policy": "camera=(), microphone=(), geolocation=(), payment=(self)",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=63072000; includeSubDomains; preload",
+        "transfer-encoding": "chunked",
+        "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Origin",
+        "www-authenticate": "Bearer error=\"invalid_token\"",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY",
+        "x-robots-tag": "noindex, nofollow"
+      },
+      "body": {
+        "error": {
+          "code": "invalid_token",
+          "message": "Connect this application again to continue.",
+          "execution_state": "not_accepted"
+        }
+      },
+      "body_sha256": "75e15d2f5d2f5fa2d84873258e6b1befb5ba4dbf4b5e69b26afbab80dd7bad4d"
+    },
+    {
+      "at": "2026-10-03T14:26:14.907Z",
+      "label": "nonexistent_grant",
+      "status": 401,
+      "elapsed_ms": 128,
+      "headers": {
+        "cache-control": "private, no-store",
+        "connection": "keep-alive",
+        "content-security-policy": "frame-ancestors 'none'",
+        "content-type": "application/json",
+        "cross-origin-opener-policy": "same-origin-allow-popups",
+        "cross-origin-resource-policy": "same-site",
+        "date": "Sat, 03 Oct 2026 14:26:14 GMT",
+        "keep-alive": "timeout=5",
+        "permissions-policy": "camera=(), microphone=(), geolocation=(), payment=(self)",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=63072000; includeSubDomains; preload",
+        "transfer-encoding": "chunked",
+        "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Origin",
+        "www-authenticate": "Bearer error=\"invalid_token\"",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY",
+        "x-robots-tag": "noindex, nofollow"
+      },
+      "body": {
+        "error": {
+          "code": "invalid_token",
+          "message": "Connect this application again to continue.",
+          "execution_state": "not_accepted"
+        }
+      },
+      "body_sha256": "75e15d2f5d2f5fa2d84873258e6b1befb5ba4dbf4b5e69b26afbab80dd7bad4d"
+    },
+    {
+      "at": "2026-10-03T14:26:15.071Z",
+      "label": "wrong_client_origin",
+      "status": 401,
+      "elapsed_ms": 163,
+      "headers": {
+        "access-control-allow-headers": "Authorization, Content-Type, Idempotency-Key",
+        "access-control-allow-methods": "POST, OPTIONS",
+        "access-control-allow-origin": "http://127.0.0.1:4400",
+        "access-control-expose-headers": "Retry-After",
+        "cache-control": "private, no-store",
+        "connection": "keep-alive",
+        "content-security-policy": "frame-ancestors 'none'",
+        "content-type": "application/json",
+        "cross-origin-opener-policy": "same-origin-allow-popups",
+        "cross-origin-resource-policy": "same-site",
+        "date": "Sat, 03 Oct 2026 14:26:15 GMT",
+        "keep-alive": "timeout=5",
+        "permissions-policy": "camera=(), microphone=(), geolocation=(), payment=(self)",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=63072000; includeSubDomains; preload",
+        "transfer-encoding": "chunked",
+        "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Origin",
+        "www-authenticate": "Bearer error=\"invalid_token\"",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY",
+        "x-robots-tag": "noindex, nofollow"
+      },
+      "body": {
+        "error": {
+          "code": "invalid_token",
+          "message": "Connect this application again to continue.",
+          "execution_state": "not_accepted"
+        }
+      },
+      "body_sha256": "75e15d2f5d2f5fa2d84873258e6b1befb5ba4dbf4b5e69b26afbab80dd7bad4d"
+    },
+    {
+      "at": "2026-10-03T14:26:15.077Z",
+      "label": "wrong_audience",
+      "status": 400,
+      "elapsed_ms": 0,
+      "headers": {
+        "cache-control": "private, no-store",
+        "connection": "keep-alive",
+        "content-security-policy": "frame-ancestors 'none'",
+        "content-type": "application/json",
+        "cross-origin-opener-policy": "same-origin-allow-popups",
+        "cross-origin-resource-policy": "same-site",
+        "date": "Sat, 03 Oct 2026 14:26:15 GMT",
+        "keep-alive": "timeout=5",
+        "permissions-policy": "camera=(), microphone=(), geolocation=(), payment=(self)",
+        "pragma": "no-cache",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=63072000; includeSubDomains; preload",
+        "transfer-encoding": "chunked",
+        "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY",
+        "x-robots-tag": "noindex, nofollow"
+      },
+      "body": {
+        "error": "invalid_target",
+        "error_description": "This service is not supported."
+      },
+      "body_sha256": "7604739e2283d41bf39218b3cf2f157a7633c8648de4e9029a62ae9cae1ed1e1"
+    },
+    {
+      "at": "2026-10-03T14:26:15.081Z",
+      "label": "missing_scope",
+      "status": 400,
+      "elapsed_ms": 0,
+      "headers": {
+        "cache-control": "private, no-store",
+        "connection": "keep-alive",
+        "content-security-policy": "frame-ancestors 'none'",
+        "content-type": "application/json",
+        "cross-origin-opener-policy": "same-origin-allow-popups",
+        "cross-origin-resource-policy": "same-site",
+        "date": "Sat, 03 Oct 2026 14:26:15 GMT",
+        "keep-alive": "timeout=5",
+        "permissions-policy": "camera=(), microphone=(), geolocation=(), payment=(self)",
+        "pragma": "no-cache",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=63072000; includeSubDomains; preload",
+        "transfer-encoding": "chunked",
+        "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY",
+        "x-robots-tag": "noindex, nofollow"
+      },
+      "body": {
+        "error": "invalid_scope",
+        "error_description": "This permission is not supported."
+      },
+      "body_sha256": "63516f884fc3bac6cc1aae0bf1d88818cbe5f5e14dd7df11c1e0d1e6c6127a81"
+    },
+    {
+      "at": "2026-10-03T14:26:15.087Z",
+      "label": "unknown_client",
+      "status": 400,
+      "elapsed_ms": 0,
+      "headers": {
+        "cache-control": "private, no-store",
+        "connection": "keep-alive",
+        "content-security-policy": "frame-ancestors 'none'",
+        "content-type": "application/json",
+        "cross-origin-opener-policy": "same-origin-allow-popups",
+        "cross-origin-resource-policy": "same-site",
+        "date": "Sat, 03 Oct 2026 14:26:15 GMT",
+        "keep-alive": "timeout=5",
+        "permissions-policy": "camera=(), microphone=(), geolocation=(), payment=(self)",
+        "pragma": "no-cache",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=63072000; includeSubDomains; preload",
+        "transfer-encoding": "chunked",
+        "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY",
+        "x-robots-tag": "noindex, nofollow"
+      },
+      "body": {
+        "error": "invalid_client",
+        "error_description": "This application is not supported."
+      },
+      "body_sha256": "25a8963a6b5ea15cfe41c76fa46b904eb38b76e94fb6fa2f2b9c65b735daa289"
+    },
+    {
+      "at": "2026-10-03T14:26:15.249Z",
+      "label": "another_client_refresh",
+      "status": 400,
+      "elapsed_ms": 161,
+      "fields": [
+        "error",
+        "error_description"
+      ],
+      "error": "invalid_grant"
+    },
+    {
+      "at": "2026-10-03T14:26:15.249Z",
+      "label": "driver_error",
+      "kind": "ReferenceError"
+    },
+    {
+      "at": "2026-10-03T14:26:48.566Z",
+      "label": "native_authorization_started",
+      "client": "reference-native",
+      "pkce": "S256"
+    },
+    {
+      "at": "2026-10-03T14:26:59.614Z",
+      "label": "sdk_token_exchange",
+      "status": 200,
+      "fields": [
+        "access_token",
+        "token_type",
+        "expires_in",
+        "refresh_token",
+        "scope"
+      ],
+      "scope": "inference:invoke",
+      "expires_in": 300,
+      "provider_credential_received": false
+    },
+    {
+      "at": "2026-10-03T14:26:59.616Z",
+      "label": "native_connected",
+      "connected": true
+    },
+    {
+      "at": "2026-10-03T14:27:17.692Z",
+      "label": "missing_credential",
+      "status": 401,
+      "elapsed_ms": 5,
+      "headers": {
+        "cache-control": "private, no-store",
+        "connection": "keep-alive",
+        "content-security-policy": "frame-ancestors 'none'",
+        "content-type": "application/json",
+        "cross-origin-opener-policy": "same-origin-allow-popups",
+        "cross-origin-resource-policy": "same-site",
+        "date": "Sat, 03 Oct 2026 14:27:17 GMT",
+        "keep-alive": "timeout=5",
+        "permissions-policy": "camera=(), microphone=(), geolocation=(), payment=(self)",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=63072000; includeSubDomains; preload",
+        "transfer-encoding": "chunked",
+        "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Origin",
+        "www-authenticate": "Bearer error=\"invalid_token\"",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY",
+        "x-robots-tag": "noindex, nofollow"
+      },
+      "body": {
+        "error": {
+          "code": "invalid_token",
+          "message": "Connect this application again to continue.",
+          "execution_state": "not_accepted"
+        }
+      },
+      "body_sha256": "75e15d2f5d2f5fa2d84873258e6b1befb5ba4dbf4b5e69b26afbab80dd7bad4d"
+    },
+    {
+      "at": "2026-10-03T14:27:17.697Z",
+      "label": "cookie_without_bearer",
+      "status": 401,
+      "elapsed_ms": 4,
+      "headers": {
+        "cache-control": "private, no-store",
+        "connection": "keep-alive",
+        "content-security-policy": "frame-ancestors 'none'",
+        "content-type": "application/json",
+        "cross-origin-opener-policy": "same-origin-allow-popups",
+        "cross-origin-resource-policy": "same-site",
+        "date": "Sat, 03 Oct 2026 14:27:17 GMT",
+        "keep-alive": "timeout=5",
+        "permissions-policy": "camera=(), microphone=(), geolocation=(), payment=(self)",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=63072000; includeSubDomains; preload",
+        "transfer-encoding": "chunked",
+        "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Origin",
+        "www-authenticate": "Bearer error=\"invalid_token\"",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY",
+        "x-robots-tag": "noindex, nofollow"
+      },
+      "body": {
+        "error": {
+          "code": "invalid_token",
+          "message": "Connect this application again to continue.",
+          "execution_state": "not_accepted"
+        }
+      },
+      "body_sha256": "75e15d2f5d2f5fa2d84873258e6b1befb5ba4dbf4b5e69b26afbab80dd7bad4d"
+    },
+    {
+      "at": "2026-10-03T14:27:17.701Z",
+      "label": "malformed_credential",
+      "status": 401,
+      "elapsed_ms": 3,
+      "headers": {
+        "cache-control": "private, no-store",
+        "connection": "keep-alive",
+        "content-security-policy": "frame-ancestors 'none'",
+        "content-type": "application/json",
+        "cross-origin-opener-policy": "same-origin-allow-popups",
+        "cross-origin-resource-policy": "same-site",
+        "date": "Sat, 03 Oct 2026 14:27:17 GMT",
+        "keep-alive": "timeout=5",
+        "permissions-policy": "camera=(), microphone=(), geolocation=(), payment=(self)",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=63072000; includeSubDomains; preload",
+        "transfer-encoding": "chunked",
+        "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Origin",
+        "www-authenticate": "Bearer error=\"invalid_token\"",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY",
+        "x-robots-tag": "noindex, nofollow"
+      },
+      "body": {
+        "error": {
+          "code": "invalid_token",
+          "message": "Connect this application again to continue.",
+          "execution_state": "not_accepted"
+        }
+      },
+      "body_sha256": "75e15d2f5d2f5fa2d84873258e6b1befb5ba4dbf4b5e69b26afbab80dd7bad4d"
+    },
+    {
+      "at": "2026-10-03T14:27:17.833Z",
+      "label": "nonexistent_grant",
+      "status": 401,
+      "elapsed_ms": 132,
+      "headers": {
+        "cache-control": "private, no-store",
+        "connection": "keep-alive",
+        "content-security-policy": "frame-ancestors 'none'",
+        "content-type": "application/json",
+        "cross-origin-opener-policy": "same-origin-allow-popups",
+        "cross-origin-resource-policy": "same-site",
+        "date": "Sat, 03 Oct 2026 14:27:17 GMT",
+        "keep-alive": "timeout=5",
+        "permissions-policy": "camera=(), microphone=(), geolocation=(), payment=(self)",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=63072000; includeSubDomains; preload",
+        "transfer-encoding": "chunked",
+        "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Origin",
+        "www-authenticate": "Bearer error=\"invalid_token\"",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY",
+        "x-robots-tag": "noindex, nofollow"
+      },
+      "body": {
+        "error": {
+          "code": "invalid_token",
+          "message": "Connect this application again to continue.",
+          "execution_state": "not_accepted"
+        }
+      },
+      "body_sha256": "75e15d2f5d2f5fa2d84873258e6b1befb5ba4dbf4b5e69b26afbab80dd7bad4d"
+    },
+    {
+      "at": "2026-10-03T14:27:17.994Z",
+      "label": "wrong_client_origin",
+      "status": 401,
+      "elapsed_ms": 161,
+      "headers": {
+        "access-control-allow-headers": "Authorization, Content-Type, Idempotency-Key",
+        "access-control-allow-methods": "POST, OPTIONS",
+        "access-control-allow-origin": "http://127.0.0.1:4400",
+        "access-control-expose-headers": "Retry-After",
+        "cache-control": "private, no-store",
+        "connection": "keep-alive",
+        "content-security-policy": "frame-ancestors 'none'",
+        "content-type": "application/json",
+        "cross-origin-opener-policy": "same-origin-allow-popups",
+        "cross-origin-resource-policy": "same-site",
+        "date": "Sat, 03 Oct 2026 14:27:17 GMT",
+        "keep-alive": "timeout=5",
+        "permissions-policy": "camera=(), microphone=(), geolocation=(), payment=(self)",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=63072000; includeSubDomains; preload",
+        "transfer-encoding": "chunked",
+        "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Origin",
+        "www-authenticate": "Bearer error=\"invalid_token\"",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY",
+        "x-robots-tag": "noindex, nofollow"
+      },
+      "body": {
+        "error": {
+          "code": "invalid_token",
+          "message": "Connect this application again to continue.",
+          "execution_state": "not_accepted"
+        }
+      },
+      "body_sha256": "75e15d2f5d2f5fa2d84873258e6b1befb5ba4dbf4b5e69b26afbab80dd7bad4d"
+    },
+    {
+      "at": "2026-10-03T14:27:18.000Z",
+      "label": "wrong_audience",
+      "status": 400,
+      "elapsed_ms": 1,
+      "headers": {
+        "cache-control": "private, no-store",
+        "connection": "keep-alive",
+        "content-security-policy": "frame-ancestors 'none'",
+        "content-type": "application/json",
+        "cross-origin-opener-policy": "same-origin-allow-popups",
+        "cross-origin-resource-policy": "same-site",
+        "date": "Sat, 03 Oct 2026 14:27:17 GMT",
+        "keep-alive": "timeout=5",
+        "permissions-policy": "camera=(), microphone=(), geolocation=(), payment=(self)",
+        "pragma": "no-cache",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=63072000; includeSubDomains; preload",
+        "transfer-encoding": "chunked",
+        "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY",
+        "x-robots-tag": "noindex, nofollow"
+      },
+      "body": {
+        "error": "invalid_target",
+        "error_description": "This service is not supported."
+      },
+      "body_sha256": "7604739e2283d41bf39218b3cf2f157a7633c8648de4e9029a62ae9cae1ed1e1"
+    },
+    {
+      "at": "2026-10-03T14:27:18.005Z",
+      "label": "missing_scope",
+      "status": 400,
+      "elapsed_ms": 0,
+      "headers": {
+        "cache-control": "private, no-store",
+        "connection": "keep-alive",
+        "content-security-policy": "frame-ancestors 'none'",
+        "content-type": "application/json",
+        "cross-origin-opener-policy": "same-origin-allow-popups",
+        "cross-origin-resource-policy": "same-site",
+        "date": "Sat, 03 Oct 2026 14:27:18 GMT",
+        "keep-alive": "timeout=5",
+        "permissions-policy": "camera=(), microphone=(), geolocation=(), payment=(self)",
+        "pragma": "no-cache",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=63072000; includeSubDomains; preload",
+        "transfer-encoding": "chunked",
+        "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY",
+        "x-robots-tag": "noindex, nofollow"
+      },
+      "body": {
+        "error": "invalid_scope",
+        "error_description": "This permission is not supported."
+      },
+      "body_sha256": "63516f884fc3bac6cc1aae0bf1d88818cbe5f5e14dd7df11c1e0d1e6c6127a81"
+    },
+    {
+      "at": "2026-10-03T14:27:18.011Z",
+      "label": "unknown_client",
+      "status": 400,
+      "elapsed_ms": 1,
+      "headers": {
+        "cache-control": "private, no-store",
+        "connection": "keep-alive",
+        "content-security-policy": "frame-ancestors 'none'",
+        "content-type": "application/json",
+        "cross-origin-opener-policy": "same-origin-allow-popups",
+        "cross-origin-resource-policy": "same-site",
+        "date": "Sat, 03 Oct 2026 14:27:18 GMT",
+        "keep-alive": "timeout=5",
+        "permissions-policy": "camera=(), microphone=(), geolocation=(), payment=(self)",
+        "pragma": "no-cache",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=63072000; includeSubDomains; preload",
+        "transfer-encoding": "chunked",
+        "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY",
+        "x-robots-tag": "noindex, nofollow"
+      },
+      "body": {
+        "error": "invalid_client",
+        "error_description": "This application is not supported."
+      },
+      "body_sha256": "25a8963a6b5ea15cfe41c76fa46b904eb38b76e94fb6fa2f2b9c65b735daa289"
+    },
+    {
+      "at": "2026-10-03T14:27:18.172Z",
+      "label": "another_client_refresh",
+      "status": 400,
+      "elapsed_ms": 161,
+      "fields": [
+        "error",
+        "error_description"
+      ],
+      "error": "invalid_grant"
+    },
+    {
+      "at": "2026-10-03T14:27:18.177Z",
+      "label": "wrong_resource_refresh",
+      "status": 400,
+      "elapsed_ms": 5,
+      "fields": [
+        "error",
+        "error_description"
+      ],
+      "error": "invalid_target"
+    },
+    {
+      "at": "2026-10-03T14:27:18.600Z",
+      "label": "current_access",
+      "status": 503,
+      "elapsed_ms": 423,
+      "headers": {
+        "cache-control": "private, no-store",
+        "connection": "keep-alive",
+        "content-security-policy": "frame-ancestors 'none'",
+        "content-type": "application/json",
+        "cross-origin-opener-policy": "same-origin-allow-popups",
+        "cross-origin-resource-policy": "same-site",
+        "date": "Sat, 03 Oct 2026 14:27:18 GMT",
+        "keep-alive": "timeout=5",
+        "permissions-policy": "camera=(), microphone=(), geolocation=(), payment=(self)",
+        "referrer-policy": "no-referrer",
+        "retry-after": "3",
+        "strict-transport-security": "max-age=63072000; includeSubDomains; preload",
+        "transfer-encoding": "chunked",
+        "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Origin",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY",
+        "x-robots-tag": "noindex, nofollow"
+      },
+      "body": {
+        "error": {
+          "code": "service_busy",
+          "message": "Inference is busy. Try again later; your application is still connected.",
+          "execution_state": "not_accepted"
+        }
+      },
+      "body_sha256": "31e8434b95aedbcbd07888d5407d51976419cb09030003a966a1d4c594c51fbe"
+    },
+    {
+      "at": "2026-10-03T14:31:33.714Z",
+      "label": "initial_access",
+      "status": 503,
+      "elapsed_ms": 655,
+      "headers": {
+        "cache-control": "private, no-store",
+        "connection": "keep-alive",
+        "content-security-policy": "frame-ancestors 'none'",
+        "content-type": "application/json",
+        "cross-origin-opener-policy": "same-origin-allow-popups",
+        "cross-origin-resource-policy": "same-site",
+        "date": "Sat, 03 Oct 2026 14:31:33 GMT",
+        "keep-alive": "timeout=5",
+        "permissions-policy": "camera=(), microphone=(), geolocation=(), payment=(self)",
+        "referrer-policy": "no-referrer",
+        "retry-after": "3",
+        "strict-transport-security": "max-age=63072000; includeSubDomains; preload",
+        "transfer-encoding": "chunked",
+        "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Origin",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY",
+        "x-robots-tag": "noindex, nofollow"
+      },
+      "body": {
+        "error": {
+          "code": "service_busy",
+          "message": "Inference is busy. Try again later; your application is still connected.",
+          "execution_state": "not_accepted"
+        }
+      },
+      "body_sha256": "31e8434b95aedbcbd07888d5407d51976419cb09030003a966a1d4c594c51fbe"
+    },
+    {
+      "at": "2026-10-03T14:32:05.311Z",
+      "label": "initial_access",
+      "status": 401,
+      "elapsed_ms": 412,
+      "headers": {
+        "cache-control": "private, no-store",
+        "connection": "keep-alive",
+        "content-security-policy": "frame-ancestors 'none'",
+        "content-type": "application/json",
+        "cross-origin-opener-policy": "same-origin-allow-popups",
+        "cross-origin-resource-policy": "same-site",
+        "date": "Sat, 03 Oct 2026 14:32:05 GMT",
+        "keep-alive": "timeout=5",
+        "permissions-policy": "camera=(), microphone=(), geolocation=(), payment=(self)",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=63072000; includeSubDomains; preload",
+        "transfer-encoding": "chunked",
+        "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Origin",
+        "www-authenticate": "Bearer error=\"invalid_token\"",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY",
+        "x-robots-tag": "noindex, nofollow"
+      },
+      "body": {
+        "error": {
+          "code": "invalid_token",
+          "message": "Connect this application again to continue.",
+          "execution_state": "not_accepted"
+        }
+      },
+      "body_sha256": "75e15d2f5d2f5fa2d84873258e6b1befb5ba4dbf4b5e69b26afbab80dd7bad4d"
+    },
+    {
+      "at": "2026-10-03T14:32:05.597Z",
+      "label": "refresh_rotation",
+      "status": 200,
+      "elapsed_ms": 284,
+      "fields": [
+        "access_token",
+        "token_type",
+        "expires_in",
+        "refresh_token",
+        "scope"
+      ],
+      "expires_in": 300
+    },
+    {
+      "at": "2026-10-03T14:32:06.032Z",
+      "label": "current_access",
+      "status": 503,
+      "elapsed_ms": 434,
+      "headers": {
+        "cache-control": "private, no-store",
+        "connection": "keep-alive",
+        "content-security-policy": "frame-ancestors 'none'",
+        "content-type": "application/json",
+        "cross-origin-opener-policy": "same-origin-allow-popups",
+        "cross-origin-resource-policy": "same-site",
+        "date": "Sat, 03 Oct 2026 14:32:06 GMT",
+        "keep-alive": "timeout=5",
+        "permissions-policy": "camera=(), microphone=(), geolocation=(), payment=(self)",
+        "referrer-policy": "no-referrer",
+        "retry-after": "3",
+        "strict-transport-security": "max-age=63072000; includeSubDomains; preload",
+        "transfer-encoding": "chunked",
+        "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Origin",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY",
+        "x-robots-tag": "noindex, nofollow"
+      },
+      "body": {
+        "error": {
+          "code": "service_busy",
+          "message": "Inference is busy. Try again later; your application is still connected.",
+          "execution_state": "not_accepted"
+        }
+      },
+      "body_sha256": "31e8434b95aedbcbd07888d5407d51976419cb09030003a966a1d4c594c51fbe"
+    },
+    {
+      "at": "2026-10-03T14:32:06.086Z",
+      "label": "disconnect",
+      "status": 200,
+      "elapsed_ms": 53,
+      "headers": {
+        "cache-control": "private, no-store",
+        "connection": "keep-alive",
+        "content-security-policy": "frame-ancestors 'none'",
+        "cross-origin-opener-policy": "same-origin-allow-popups",
+        "cross-origin-resource-policy": "same-site",
+        "date": "Sat, 03 Oct 2026 14:32:06 GMT",
+        "keep-alive": "timeout=5",
+        "permissions-policy": "camera=(), microphone=(), geolocation=(), payment=(self)",
+        "pragma": "no-cache",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=63072000; includeSubDomains; preload",
+        "transfer-encoding": "chunked",
+        "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Origin",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY",
+        "x-robots-tag": "noindex, nofollow"
+      },
+      "body": {
+        "stream": ""
+      },
+      "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "at": "2026-10-03T14:32:06.253Z",
+      "label": "post_revocation",
+      "status": 401,
+      "elapsed_ms": 167,
+      "headers": {
+        "cache-control": "private, no-store",
+        "connection": "keep-alive",
+        "content-security-policy": "frame-ancestors 'none'",
+        "content-type": "application/json",
+        "cross-origin-opener-policy": "same-origin-allow-popups",
+        "cross-origin-resource-policy": "same-site",
+        "date": "Sat, 03 Oct 2026 14:32:06 GMT",
+        "keep-alive": "timeout=5",
+        "permissions-policy": "camera=(), microphone=(), geolocation=(), payment=(self)",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=63072000; includeSubDomains; preload",
+        "transfer-encoding": "chunked",
+        "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Origin",
+        "www-authenticate": "Bearer error=\"invalid_token\"",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY",
+        "x-robots-tag": "noindex, nofollow"
+      },
+      "body": {
+        "error": {
+          "code": "invalid_token",
+          "message": "Connect this application again to continue.",
+          "execution_state": "not_accepted"
+        }
+      },
+      "body_sha256": "75e15d2f5d2f5fa2d84873258e6b1befb5ba4dbf4b5e69b26afbab80dd7bad4d"
+    },
+    {
+      "at": "2026-10-03T14:32:06.253Z",
+      "label": "revocation_observed",
+      "milliseconds_after_ack": 167
+    },
+    {
+      "at": "2026-10-03T14:32:06.427Z",
+      "label": "refresh_after_revocation",
+      "status": 400,
+      "elapsed_ms": 173,
+      "fields": [
+        "error",
+        "error_description"
+      ],
+      "error": "invalid_grant"
+    },
+    {
+      "at": "2026-10-03T14:33:07.329Z",
+      "label": "native_authorization_started",
+      "client": "reference-native",
+      "pkce": "S256"
+    },
+    {
+      "at": "2026-10-03T14:33:23.016Z",
+      "label": "sdk_token_exchange",
+      "status": 200,
+      "fields": [
+        "access_token",
+        "token_type",
+        "expires_in",
+        "refresh_token",
+        "scope"
+      ],
+      "scope": "inference:invoke",
+      "expires_in": 300,
+      "provider_credential_received": false
+    },
+    {
+      "at": "2026-10-03T14:33:23.018Z",
+      "label": "native_connected",
+      "connected": true
+    },
+    {
+      "at": "2026-10-03T14:33:36.312Z",
+      "label": "refresh_rotation",
+      "status": 200,
+      "elapsed_ms": 265,
+      "fields": [
+        "access_token",
+        "token_type",
+        "expires_in",
+        "refresh_token",
+        "scope"
+      ],
+      "expires_in": 300
+    },
+    {
+      "at": "2026-10-03T14:33:36.546Z",
+      "label": "refresh_reuse",
+      "status": 400,
+      "elapsed_ms": 233,
+      "fields": [
+        "error",
+        "error_description"
+      ],
+      "error": "invalid_grant"
+    },
+    {
+      "at": "2026-10-03T14:33:36.716Z",
+      "label": "current_access",
+      "status": 401,
+      "elapsed_ms": 169,
+      "headers": {
+        "cache-control": "private, no-store",
+        "connection": "keep-alive",
+        "content-security-policy": "frame-ancestors 'none'",
+        "content-type": "application/json",
+        "cross-origin-opener-policy": "same-origin-allow-popups",
+        "cross-origin-resource-policy": "same-site",
+        "date": "Sat, 03 Oct 2026 14:33:36 GMT",
+        "keep-alive": "timeout=5",
+        "permissions-policy": "camera=(), microphone=(), geolocation=(), payment=(self)",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=63072000; includeSubDomains; preload",
+        "transfer-encoding": "chunked",
+        "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Origin",
+        "www-authenticate": "Bearer error=\"invalid_token\"",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY",
+        "x-robots-tag": "noindex, nofollow"
+      },
+      "body": {
+        "error": {
+          "code": "invalid_token",
+          "message": "Connect this application again to continue.",
+          "execution_state": "not_accepted"
+        }
+      },
+      "body_sha256": "75e15d2f5d2f5fa2d84873258e6b1befb5ba4dbf4b5e69b26afbab80dd7bad4d"
+    }
+  ]
+}

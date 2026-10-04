@@ -1,0 +1,48 @@
+{
+  "at": "2026-10-04T01:20:19.816Z",
+  "configNames": [
+    "DATABASE_URL",
+    "GALX_AUDIT_SIGNING_SECRET",
+    "GALX_CONNECT_CLIENTS",
+    "GALX_CONNECT_ENABLED",
+    "GALX_CONNECT_ORIGIN",
+    "GALX_NOVA_RESOURCE",
+    "GALX_PREMIUM_RELAY_KEY",
+    "GALX_PREMIUM_RELAY_URL",
+    "GALX_VAULT_KEY_V1",
+    "NEXT_PUBLIC_APP_URL",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+    "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
+    "NEXT_PUBLIC_SUPABASE_URL",
+    "SUPABASE_DB_CA_CERT",
+    "SUPABASE_DB_SSL_MODE",
+    "SUPABASE_POOL_MAX_USES",
+    "SUPABASE_POOL_SIZE",
+    "SUPABASE_TIMEOUT_MS"
+  ],
+  "configMode": "0600",
+  "providerReadiness": {
+    "status": 200,
+    "catalogAccepted": true,
+    "modelCount": 4,
+    "inferenceInvoked": false
+  },
+  "privateControl": {
+    "httpStatus": 200,
+    "ownershipPresent": true,
+    "ownershipMatches": true,
+    "lastSeenAt": "2026-10-04T01:20:14.852441+00:00",
+    "fieldNames": [
+      "accounts",
+      "activity",
+      "automaticActivation",
+      "epoch",
+      "executionAllowed",
+      "installationId",
+      "lastSeenAt",
+      "pool",
+      "registrationAllowed",
+      "registrations"
+    ]
+  }
+}

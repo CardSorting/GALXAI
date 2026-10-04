@@ -1,0 +1,85 @@
+{
+  "classification": "private",
+  "observed_at": "2026-10-04T02:11:56.486014+00:00",
+  "reviewer": "Codex — non-disruptive resilience review",
+  "scope": "Supplemental fixture and operator-policy changes only. Actual runtime images, authority, execution semantics and live configuration are unchanged. Domain fingerprints detect drift; this is not an exhaustive workspace audit.",
+  "inspected_paths": [
+    "scripts/test-self-host-resilience.ts",
+    "scripts/test-relay-monitor-package.mjs",
+    "scripts/test-self-host-runtime.ts",
+    "scripts/lib/self-host.mjs",
+    "scripts/fixtures/self-host-provider.cjs",
+    "scripts/fixtures/self-host-fixture-proxy.cjs",
+    "scripts/fixtures/self-host-http.ts",
+    "scripts/test-relay-refill-db.ts",
+    "docs/DOCUMENTATION_POLICY.md",
+    "docs/how-to/change-with-documentation.md",
+    "docs/runbooks/mac-self-hosting.md",
+    "docs/runbooks/nova-hosting-transition.md",
+    "docs/runbooks/relay-pool-services.md",
+    "docs/DEPLOYMENT.md",
+    "docs/knowledge/registry.json",
+    "docs/reference/knowledge-commands.md",
+    "post-mortem/CURRENT_STATE.md",
+    "post-mortem/register.json"
+  ],
+  "review_delta": {
+    "delivery": [
+      "scripts/test-self-host-resilience.ts",
+      "docs/runbooks/mac-self-hosting.md",
+      "docs/runbooks/nova-hosting-transition.md",
+      "docs/DEPLOYMENT.md"
+    ],
+    "relay": [
+      "scripts/test-relay-monitor-package.mjs",
+      "docs/runbooks/relay-pool-services.md"
+    ],
+    "connect": [
+      "docs/runbooks/nova-hosting-transition.md"
+    ],
+    "knowledge": [
+      "docs/knowledge/registry.json"
+    ]
+  },
+  "reviewed_contracts": [
+    "User amendment is authoritative: no physical reboot/power/sleep/logout or host-network/storage disruption, power-policy changes or unrelated shared-service restart. Normal-reboot startup assumption is explicitly not evidence.",
+    "New Nova fixture uses only label-owned disposable resources and synthetic authority/state; accepted archive/manifest/receipt checked and receipt unmodified. It cannot accept ambient database configuration.",
+    "Same immutable Next image is exercised through actual HTTP; interrupted duplicate does not dispatch, revoked token/refresh remain denied, completed state and exact persisted credit survive restart and new database/container reconstruction.",
+    "Supplemental fixture emits no credentials, removes private configuration and owned resources; internal-only application/provider/database and loopback-only fixed entrance. Memory pressure isolated to a separate 64 MiB no-swap cgroup; cache pressure limited to replica tmpfs.",
+    "Monitor test transfers only bounded synthetic code via stdin to tmpfs, replacing a workstation-bind assumption incompatible with the isolated daemon. Actual packaged entrypoint, ownership projection, sanitized status, control loss and restart/revocation checks pass. No live socket or credentials are mounted.",
+    "Current guide bodies and ACT-018 distinguish safe service evidence, historical acceptance, explicit operator deferrals and off-device gaps. Current-state entry supersedes prior actionable drill directions without rewriting historical records.",
+    "All ten live services retain IDs/images/start times/restart counts and Nova configuration hash. Shared ingress, actual grants, production databases and provider work were untouched."
+  ],
+  "verification": [
+    "Nine isolated Nova check groups passed against the accepted image.",
+    "90 packaged monitor checks passed after harness correction; first two bind-rejection logs retained.",
+    "20 established self-host operator tests passed.",
+    "42 documentation guard tests passed; git diff --check passed."
+  ],
+  "limitations": [
+    "No production build rerun or new artifact: test/documentation-only changes. Retained production build/whole-image acceptance still binds unchanged application bytes, and this supplemental test re-verifies the archive/package and public assets.",
+    "No physical-host, shared-daemon, live connector or off-device recovery test. No new real inference.",
+    "Separate OOM containment is not application OOM acceptance; container SIGKILL is independently evidenced.",
+    "ACT-018 remains open; existing public-release gates and due billing review are not repaired or reclassified."
+  ],
+  "reviewed_file_hashes": {
+    "scripts/test-self-host-resilience.ts": "949670344b5b6042d399c08d9c0759c3f9fa614e974e597e55cc49a75514607e",
+    "scripts/test-relay-monitor-package.mjs": "576509f367c6307cfaa022687aedf3c33b6b51a07e1f916a9b0d13c8bd694aed",
+    "scripts/test-self-host-runtime.ts": "e60206f20428297e6f63565f32faf78776380f0245aa72b0c00a6244eadd0f84",
+    "scripts/lib/self-host.mjs": "b5bb3ffa6404a76066412a43f5c21ed6ff2155cb5535261d6f32200754791b46",
+    "scripts/fixtures/self-host-provider.cjs": "b0348ac4fa676a884391857fba1380b673792f57d9c2d6519f382c0d871dd9da",
+    "scripts/fixtures/self-host-fixture-proxy.cjs": "9586f882927645d9e99b39b3d78018a98b71e73cb8c97ee905212c1c61abc932",
+    "scripts/fixtures/self-host-http.ts": "4209e84bd34d8ffe0d6c9ea2000d32df74a493a0e80a5b6ed173decddbeec5a2",
+    "scripts/test-relay-refill-db.ts": "b6cf7f240448759bcb17e5c5ef44c35aedd4a037a8af655750a18db0daf5f9b2",
+    "docs/DOCUMENTATION_POLICY.md": "ab2030f9d15010634b9a2d9cf2bc680fdf4ae961c2ee3f9f7ad567e99d49d40c",
+    "docs/how-to/change-with-documentation.md": "abcf6bfb2f0aadcf8cfc2fdae18ac8f3f84565f127c34f7453d50e7283006e40",
+    "docs/runbooks/mac-self-hosting.md": "6a110ea33a4bf3964b197f3a24f42d438279635f52f909afd2256d8c09f9030e",
+    "docs/runbooks/nova-hosting-transition.md": "f0f21589ca93d13d7247dc34764e9ae4300ea40d5484f38d5eec110488853c43",
+    "docs/runbooks/relay-pool-services.md": "13dda8b86c384b9b8527bc3210bc9e98544c1e540591c9ab63cabdd52c1413d9",
+    "docs/DEPLOYMENT.md": "925c5db94f9f235668bf25c1beff32d473154bda066fb0a4e847f5cb58bdf5d5",
+    "docs/knowledge/registry.json": "89cf8e8f8fcfe0e64acba3e0026b5cfea3db2b0ab16aa9088e06cf15bd1eda23",
+    "docs/reference/knowledge-commands.md": "3ae9092ea941ebc459a2895b8c2eebb4c1c8d59659d718a2c353a1a6be6e8379",
+    "post-mortem/CURRENT_STATE.md": "d8b38326aadcff7bb601693770421c0640efb6083623f65c76f3da41b10ef9da",
+    "post-mortem/register.json": "e336be43a3c36240841719f7b6de78453f9234303968e8ec93189f95fa54bb79"
+  }
+}

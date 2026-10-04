@@ -2,11 +2,18 @@
 
 <!-- docs-scope: current-guide -->
 
-Current product authority, reconciled September 26, 2026. [PRODUCT.md](../PRODUCT.md)
+Current product authority, reconciled October 3, 2026. [PRODUCT.md](../PRODUCT.md)
 summarizes the customer experience; [current state](../post-mortem/CURRENT_STATE.md)
 records deployment and acceptance evidence.
 
 ## Product and access boundaries
+
+GALX Media is HEAV3NS' media experience. Connect delegates a person's inference
+permission to a supported tool; Nova performs computation. These responsibilities
+share existing identity and may share a deployment. Connect is locally implemented
+and disabled pending activation evidence. It does not create a second account
+system or require gallery participation. [Connect operations](operations/galx-connect.md)
+owns the bounded client contract and release procedure.
 
 | Plane | Availability | What belongs here |
 | --- | --- | --- |
@@ -39,15 +46,23 @@ preserved. Other Star naming proposals are not approved migrations. See the
 
 ## Inference Boundary
 
-> Public discovery never requires inference. User-triggered inference requires
-> authentication, a valid purchased entitlement, available quota/credits, and
-> successful admission before dispatch.
+> Public discovery never requires inference. Inference requires verified identity,
+> current service entitlement, permitted use and operational admission. Connect
+> application grants never confer media, publishing or administrative authority.
 
-Only the user's explicit private generation or remix operation may request
-human inference. Each request has an owner and a purchased allowance. Usage is
+Within Media, only an explicit private generation or remix operation requests
+human image inference. Each image request has an owner and a purchased allowance. Usage is
 reserved before dispatch and reconciled according to the existing lifecycle;
 ambiguous outcomes are not automatically replayed or silently refunded.
 Pageviews, follows, saves, and searches do not become image requests.
+
+External supported tools may request bounded text inference through Connect.
+An account, service entitlement, application grant and available capacity are
+independent. The initial eligibility adapter uses explicit operator grants;
+existing commercial subscriptions are not automatically converted. No pass price,
+token balance, purchase automation, agent authority or marketplace is implied.
+Stopping a task, disconnecting an application and ending service access remain
+distinct. Unknown execution must not be replayed automatically.
 
 Launch allowances are approved in the canonical typed configuration at
 `src/lib/billing/image-allowance-config.ts`; pricing, checkout eligibility,

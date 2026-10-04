@@ -1,0 +1,16 @@
+{
+  "containers": [
+    {
+      "id": "21451d8b3a79385fd5b50454824178ff6fe18c42f9ad440571939e9bc1ac1777",
+      "image": "sha256:5157984bc06524aac0ca8fbf2051eebfe6f3b7994aa7d0793e8404c097289345",
+      "status": "exited",
+      "health": "unhealthy",
+      "exitCode": 0,
+      "oomKilled": false,
+      "restarts": 0,
+      "startedAt": "2026-10-04T01:20:36.478628291Z",
+      "finishedAt": "2026-10-04T01:28:06.412468264Z"
+    }
+  ],
+  "note": "A forced exit is not terminal-write acceptance; preserve uncertain executions."
+}

@@ -18,7 +18,7 @@ Private terminology reference. Definitions point to owning contracts; they do no
 | Monitor | Fixed pool operator/viewer interface using scoped central authorization; no combined browser registry |
 | Saved revision | Version committed centrally by a lifecycle/credential operation |
 | Applied revision | Matching account/credential revision reported by the current runtime epoch with fresh evidence |
-| Health | Observed issue/freshness classification; missing contact is unknown, and No issues detected is not inference proof |
+| Request status / account health evidence | Availability defaults to unknown; explicit request results supply evidence. Cancellation and transport uncertainty are neutral, and saved credentials are not a continuous health verdict |
 | Remove account | Permanent central revocation with retained assignment, credentials, leases, files and history; not upstream logout |
 | Restore registration | Restore an unfinished removed registration with new review; never restore a removed registered account |
 | Execution epoch | Current central runtime ownership generation that fences stale execution/acknowledgments |

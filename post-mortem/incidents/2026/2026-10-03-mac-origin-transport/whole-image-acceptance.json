@@ -1,0 +1,323 @@
+{
+  "at": "2026-10-04T00:50:37.670Z",
+  "image": "sha256:5157984bc06524aac0ca8fbf2051eebfe6f3b7994aa7d0793e8404c097289345",
+  "manifestSha256": "45e7b152b1feb8d058271f08ed437dc244a1d5e0cc428fe4f4b171307ad14c64",
+  "network": "dedicated internal Docker bridge; application/provider/database have no external egress",
+  "realProvider": false,
+  "realAccount": false,
+  "productionDatabase": false,
+  "migrations": 159,
+  "results": [
+    {
+      "name": "verified recovery archive accepted by Docker",
+      "image": "sha256:5157984bc06524aac0ca8fbf2051eebfe6f3b7994aa7d0793e8404c097289345",
+      "architecture": "amd64",
+      "archiveSha256": "0cdec4031bbacc521fb6059bd61da12dbd6c88b50610c4f55b5ade7fbc812345"
+    },
+    {
+      "name": "whole package boot under enforced runtime policy",
+      "image": "sha256:5157984bc06524aac0ca8fbf2051eebfe6f3b7994aa7d0793e8404c097289345",
+      "readOnly": true,
+      "uid": 1000,
+      "boundedCaches": true,
+      "secretNotInDockerEnvironment": true,
+      "fixtureProviderTransport": "authenticated loopback in a shared internal network namespace; no external egress"
+    },
+    {
+      "name": "HTTP boundary /",
+      "status": 200,
+      "sanitized": true
+    },
+    {
+      "name": "HTTP boundary /connect",
+      "status": 200,
+      "sanitized": true
+    },
+    {
+      "name": "HTTP boundary /api/health",
+      "status": 200,
+      "sanitized": true
+    },
+    {
+      "name": "HTTP boundary /post-mortem/CURRENT_STATE.md",
+      "status": 404,
+      "sanitized": true
+    },
+    {
+      "name": "HTTP boundary /.env",
+      "status": 404,
+      "sanitized": true
+    },
+    {
+      "name": "HTTP boundary /docs/VERCEL_DEPLOYMENT.md",
+      "status": 308,
+      "sanitized": true
+    },
+    {
+      "name": "HTTP boundary /api/internal/telemetry",
+      "status": 404,
+      "sanitized": true
+    },
+    {
+      "name": "HTTP boundary /operator/status",
+      "status": 404,
+      "sanitized": true
+    },
+    {
+      "name": "packaged canonical issuer metadata",
+      "status": 200,
+      "issuer": "https://galx.ai"
+    },
+    {
+      "name": "browser session does not authorize Nova",
+      "status": 401,
+      "code": "invalid_token",
+      "providerAttempts": 0
+    },
+    {
+      "name": "cookie without Nova credential denied",
+      "status": 401
+    },
+    {
+      "name": "unknown grant",
+      "status": 401,
+      "code": "invalid_token",
+      "providerAttempts": 0
+    },
+    {
+      "name": "no explicit entitlement",
+      "status": 403,
+      "code": "inference_access_required",
+      "providerAttempts": 0
+    },
+    {
+      "name": "Nova credential cannot manage the GALX account",
+      "status": 401
+    },
+    {
+      "name": "wrong client origin",
+      "status": 401,
+      "code": "invalid_token",
+      "providerAttempts": 0
+    },
+    {
+      "name": "wrong host cannot borrow forwarded Nova authority",
+      "status": 400,
+      "code": "invalid_request",
+      "providerAttempts": 0
+    },
+    {
+      "name": "unconfigured authority nova.galx.ai:3000",
+      "status": 400,
+      "code": "invalid_request",
+      "providerAttempts": 0
+    },
+    {
+      "name": "unconfigured authority 127.0.0.1:3000",
+      "status": 400,
+      "code": "invalid_request",
+      "providerAttempts": 0
+    },
+    {
+      "name": "unconfigured authority 0.0.0.0:3000",
+      "status": 400,
+      "code": "invalid_request",
+      "providerAttempts": 0
+    },
+    {
+      "name": "Media authority cannot invoke Nova",
+      "status": 401,
+      "code": "invalid_token",
+      "providerAttempts": 0
+    },
+    {
+      "name": "full Next application to synthetic provider",
+      "requestId": "0c16015c-3664-4255-b9cb-49ba0398a510",
+      "status": 200,
+      "state": "completed",
+      "sanitized": true
+    },
+    {
+      "name": "duplicate preserves original execution",
+      "status": 409,
+      "newProviderAttempts": 0
+    },
+    {
+      "name": "client-visible incremental stream; forged forwarding metadata ignored",
+      "firstChunkMs": 40,
+      "completionMs": 2008,
+      "bufferedByNext": false
+    },
+    {
+      "name": "consumed access token",
+      "status": 401,
+      "code": "invalid_token",
+      "providerAttempts": 0
+    },
+    {
+      "name": "expired authorization",
+      "status": 401,
+      "code": "invalid_token",
+      "providerAttempts": 0
+    },
+    {
+      "name": "wrong audience",
+      "status": 401,
+      "code": "invalid_token",
+      "providerAttempts": 0
+    },
+    {
+      "name": "revocation",
+      "connectionId": "afd649d4-4940-4369-8a8f-7b796ce7ecbf",
+      "denialAfterAcknowledgementMs": 55,
+      "refreshDenied": true,
+      "independentClientWorks": true,
+      "completedRecordUnchanged": true
+    },
+    {
+      "name": "GALX identity and Media remain independent",
+      "accountRecordUnchanged": true,
+      "profilesUnchanged": true,
+      "mediaHttpStatus": 200
+    },
+    {
+      "name": "real Chromium streaming and bounded client aggregation from accepted source",
+      "status": 200,
+      "arrivals": [
+        {
+          "ms": 136,
+          "bytes": 191,
+          "keepalive": false
+        },
+        {
+          "ms": 15146,
+          "bytes": 13,
+          "keepalive": true
+        },
+        {
+          "ms": 17155,
+          "bytes": 193,
+          "keepalive": false
+        },
+        {
+          "ms": 17180,
+          "bytes": 14,
+          "keepalive": false
+        }
+      ],
+      "completedMs": 17184,
+      "content": "Synthetic result.Synthetic result.",
+      "finish": "stop",
+      "keys": [
+        "id",
+        "object",
+        "model",
+        "choices"
+      ],
+      "credentialExposed": false,
+      "consoleErrors": 0,
+      "clientBundleSha256": "db43df369bab3566bd3b1b5acc1463f8b40b67a6c107a4fd3bd436b071f926ab"
+    },
+    {
+      "name": "socket cancellation persists neutral terminal outcome",
+      "requestId": "ffc9fd08-08d2-417a-a0c7-8fc2e8021db8",
+      "state": "unknown",
+      "automaticReplay": false
+    },
+    {
+      "name": "revocation during execution denies new work",
+      "status": 401,
+      "code": "invalid_token",
+      "providerAttempts": 0
+    },
+    {
+      "name": "already-admitted execution can finish after disconnect",
+      "state": "completed",
+      "providerAttempts": 1,
+      "replayed": false
+    },
+    {
+      "name": "synthetic provider reject",
+      "state": "not_accepted",
+      "newProviderAttempts": 0,
+      "explicitProviderFailureSignals": 0,
+      "replayed": false
+    },
+    {
+      "name": "synthetic provider fail",
+      "state": "unknown",
+      "newProviderAttempts": 1,
+      "explicitProviderFailureSignals": 1,
+      "replayed": false
+    },
+    {
+      "name": "synthetic provider drop",
+      "state": "unknown",
+      "newProviderAttempts": 1,
+      "explicitProviderFailureSignals": 0,
+      "replayed": false
+    },
+    {
+      "name": "synthetic provider unknown",
+      "state": "unknown",
+      "newProviderAttempts": 1,
+      "explicitProviderFailureSignals": 0,
+      "replayed": false
+    },
+    {
+      "name": "shared admission remains bounded",
+      "active": 2,
+      "excessStatus": 503,
+      "excessProviderAttempts": 0
+    },
+    {
+      "name": "lost client socket",
+      "state": "unknown",
+      "explicitProviderFailuresAdded": 0,
+      "replayed": false
+    },
+    {
+      "name": "unchanged 300-second deadline and active SIGTERM drain",
+      "requestId": "2efe0552-8418-472f-81bf-4ebaf85ba65b",
+      "elapsedMs": 304278,
+      "state": "unknown",
+      "exitCode": 0,
+      "heartbeats": 19,
+      "explicitProviderFailuresAdded": 0,
+      "replayed": false
+    },
+    {
+      "name": "revocation survives application restart",
+      "status": 401,
+      "code": "invalid_token",
+      "providerAttempts": 0
+    },
+    {
+      "name": "restart retains unknown and duplicate denial",
+      "newProviderAttempts": 0,
+      "state": "unknown",
+      "cacheReseeded": true
+    },
+    {
+      "name": "abrupt process loss recovers without replay",
+      "requestId": "23c9c48c-8839-4d9b-9cbb-e146ba27f463",
+      "persistedState": "running",
+      "clientOutcome": "unknown",
+      "newProviderAttemptsAfterRestart": 0,
+      "restartCount": 1,
+      "note": "SIGKILL cannot commit terminal work; retained record is preserved and duplicate admission remains denied."
+    }
+  ],
+  "metrics": {
+    "submissions": 15,
+    "attempts": 14,
+    "disconnects": 6,
+    "explicitFailures": 1
+  },
+  "limits": [
+    "Synthetic account session/consent actor and provider; actual packaged HTTP authorization initiation, PKCE exchange, refresh, revocation and inference. No real sign-in, live tunnel or upstream acceptance.",
+    "Browser uses a loopback fixture ingress, fixed canonical host and the hash-verified candidate client buffer; no production proxy was added.",
+    "Provider-health classification is separately verified by the established relay suite; the HTTP fixture counts only its explicit failure signals.",
+    "No host reboot, forced sleep or Docker daemon failure was induced."
+  ]
+}

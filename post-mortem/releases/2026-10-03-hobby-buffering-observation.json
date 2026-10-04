@@ -1,0 +1,192 @@
+{
+  "classification": "private",
+  "observed_at": "2026-10-03T23:11:06.288Z",
+  "purpose": "Continue observational design validation of the no-new-subscription path. No accepted runtime edits or target mutation.",
+  "status": "IMPLEMENTATION REQUIREMENTS REFINED \u2014 ACT-045 REMAINS OPEN",
+  "previous_evidence": "post-mortem/releases/2026-10-03-hobby-buffering-feasibility.json",
+  "previous_edge_measurement": {
+    "json_status": 524,
+    "json_ms": 125064,
+    "sse_status": 200,
+    "sse_ms": 310191,
+    "rerun_this_turn": false
+  },
+  "new_observations": [
+    {
+      "id": "OBS-01",
+      "finding": "Node request close is not client-response disconnect.",
+      "evidence": "The naive incoming.close hook rejected a completed valid upload with HTTP 400 and zero dispatches. Guarding incomplete uploads and using response.close with !writableFinished allowed one completed execution.",
+      "requirement": "Abort on incomplete upload or prematurely closed response; do not abort on every completed incoming request. Preserve one registered terminal owner beyond the socket lifetime."
+    },
+    {
+      "id": "OBS-02",
+      "finding": "Client disconnection does not have to lose terminal persistence on a persistent host.",
+      "evidence": "Both architectures recorded socket close, execution abort and one delayed unknown write, in that order. The 120 ms write completed after socket close. Simulated storage only.",
+      "requirement": "Track terminalWork separately from the response pump. During controlled shutdown stop admission, drain owned requests and terminal writes, then close the database pool. Abrupt process loss is still not a persistence guarantee."
+    },
+    {
+      "id": "OBS-03",
+      "finding": "Upstream activity is not a public transport keepalive.",
+      "evidence": "Unchanged Nova filtered upstream comment and empty-choice frames; the public reader remained pending until content arrived. Existing RelayChatTransport also discards comments and resets idle time only on data.",
+      "requirement": "After authorized SSE headers, the Node response adapter emits bounded comment keepalives (15 seconds is the previously probed design value). Comments must not reset inference TTFT/idle/wall timers, bypass authorization, reveal infrastructure, or signify completion. Serialize comment and data writes with backpressure and stop the timer on every exit."
+    },
+    {
+      "id": "OBS-04",
+      "finding": "The upstream byte cap is not a safe copy for a client wire cap.",
+      "evidence": "680088 upstream bytes projected to 3240195 public SSE bytes across 20002 delivered chunks, with terminal completed. This contains many empty deltas; it is synthetic adversarial evidence, not observed production traffic.",
+      "requirement": "Retain only allowlisted text plus minimal request/terminal state. Bound UTF-8 answer bytes, pending event bytes and total wire/event overhead separately. Derive and test wire/frame limits against the largest accepted projection; do not claim the exact new limits are accepted yet."
+    },
+    {
+      "id": "OBS-05",
+      "finding": "A finish-reason frame alone does not authorize complete-answer success.",
+      "evidence": "A simulated terminal storage failure attempted one completed write, returned sanitized outcome_unconfirmed and emitted no DONE. No second write or dispatch was attempted.",
+      "requirement": "The client requires a valid stop/length finish reason followed by DONE; EOF, abort, malformed frames or an error yields unconfirmed output without automatic POST replay. A failed client delivery does not rewrite an already completed server record."
+    },
+    {
+      "id": "OBS-06",
+      "finding": "The complete resource boundary can reuse existing modules, but its dependencies and authority placement need deliberate packaging.",
+      "evidence": "inference bundles from two source files; executor from nine; repository from four plus pg. Selected CORS/header exports retain broader framework/account imports under the tested esbuild settings, but import succeeds in a clean local subprocess with only PATH and no server credentials.",
+      "requirement": "Declare existing locked runtime dependencies or make only a justified transport-helper extraction. Broad refactoring is unnecessary. Run the Nova adapter outside the provider/monitor daemon: the current monitor has that daemon socket, while the proposed adapter needs primary grant authority. Do not place primary database credentials into the provider runtime."
+    }
+  ],
+  "host": {
+    "metadata": "post-mortem/incidents/2026/2026-10-03-hobby-observation/host-metadata.json",
+    "observed_architecture": "Both existing daemon targets are ARM64. Docker Desktop: 10 assigned CPUs and 8319504384 memory bytes; Premium VM: 2 assigned CPUs and 3039596544 memory bytes.",
+    "interpretation": "These are configured limits and current containers, not spare-capacity or load measurements. Existing runtime has an eight-minute configured stop grace; a new adapter needs its own supervised lifecycle. No existing process was stopped or reconfigured."
+  },
+  "test_scope": {
+    "architectures": [
+      {
+        "node": "v22.23.2",
+        "architecture": "x64",
+        "cases": 6
+      },
+      {
+        "node": "v22.23.2",
+        "architecture": "arm64",
+        "cases": 6
+      }
+    ],
+    "method": "Two pinned Node 22 containers, external network disabled, loopback HTTP permitted, synthetic admission and delayed in-memory terminal storage. Six diagnostic cases repeated on each architecture.",
+    "limits": [
+      "No real Connect account, grant lookup, provider or database was exercised.",
+      "No full 300-second rerun this turn; prior edge/lifetime measurements remain historical.",
+      "No production client aggregator, resource adapter, keepalive wrapper or shutdown supervisor is implemented.",
+      "No new build artifact is accepted. The CORS dependency diagnostic ran separately on local Node 26.8.1."
+    ]
+  },
+  "minimum_implementation": [
+    {
+      "part": "Persistent resource adapter",
+      "change": "Exact resource host/path validation; reuse current grant/entitlement/admission, executor and public projector; preserve CORS, OPTIONS and protected-resource metadata. No account cookies as Nova authority; fail closed before forwarding."
+    },
+    {
+      "part": "Host lifecycle",
+      "change": "Track registered terminalWork, bridge correct upload/response aborts, flush authorized SSE headers, bound backpressure/keepalive, and drain before pool shutdown. Keep original 300000 ms execution and conservative finalization."
+    },
+    {
+      "part": "First-party aggregation",
+      "change": "Opt into stream:true; stream-decode frames and accumulate allowlisted content under separate byte limits. Validate terminal reason plus DONE. Keep partial output explicitly unconfirmed; do not store GALX credentials in output or retry ambiguous work."
+    },
+    {
+      "part": "Packaging",
+      "change": "Retain the prior 360-second web artifact. Produce a new Hobby-compatible portal/web output with the long resource endpoint absent or fail-closed, and a separately identified native ARM64 resource package with explicit dependencies. Do not deploy a rewired old archive."
+    },
+    {
+      "part": "Acceptance",
+      "change": "Verify disabled and wrong-host routing, complete authorization/entitlement/revocation matrix, source/package provenance, full-duration delayed/streamed/quiet responses, slow reader, cancellation, shutdown, capacity, duplicate/no-replay, buffer limits, browser/native results and public/private scans. Rollout remains separately authorized."
+    }
+  ],
+  "no_new_product_scope": [
+    "No durable submit/poll queue or public result-retrieval API.",
+    "No changes to quota, provider-health classification, unknown semantics, identity, grants, pricing or historical records.",
+    "Current Nova duplicates return the recorded conflict without resubmission; the underlying execution attachment behavior is unchanged. Do not invent a public resume operation."
+  ],
+  "required_authority_placement": {
+    "proposed": "A constrained resource process/container on the existing general host, isolated from the Premium provider/desktop daemon. Same primary Connect database authority, no new account data store.",
+    "not_yet_proven": "Exact database principal/configuration for the new adapter, host scheduling headroom and supervised restart acceptance. No new credential issuance or role changes occurred."
+  },
+  "financial_and_eligibility": {
+    "paid_upgrade": "Declined; no purchase or recurring subscription added.",
+    "hobby": "Short requests only, subject to the documented personal/non-commercial eligibility. This pass does not determine commercial eligibility.",
+    "fallback": "Existing host may also serve web/Connect if required; that package/placement is not accepted by this observation."
+  },
+  "preservation": {
+    "at": "2026-10-03T23:09:19.791Z",
+    "runtimeSourceFiles": 1886,
+    "sourceDelta": [],
+    "compiledFiles": 2291,
+    "compiledDelta": [],
+    "archiveSha256": "b11d853b80851b2ee978b5d0d0bb2cedb66ced423f545e91b44aeaf8c4a9e235"
+  },
+  "target_mutations": [],
+  "candidate_source_changes": [],
+  "database_mutations": [],
+  "real_provider_attempts": 0,
+  "deployment": false,
+  "action_status": {
+    "ACT-044": "Prior candidate closure only; replacement package must be reaccepted.",
+    "ACT-045": "REMAINS OPEN",
+    "ACT-046": "Prior disabled configuration closure only; new host must repeat the boundary proof."
+  },
+  "references": [
+    {
+      "url": "https://nodejs.org/download/release/v22.23.2/docs/api/http.html",
+      "claim": "IncomingMessage close after completed upload differs from prematurely closed ServerResponse; write backpressure and drain are explicit."
+    },
+    {
+      "url": "https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/configure-tunnels/origin-parameters/",
+      "claim": "Origin connection settings are distinct from the execution owner. The actual-edge timing proof remains in the earlier record."
+    }
+  ],
+  "evidence": [
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hobby-observation/arm64/observation.log",
+      "sha256": "ae1b22ea7f6315c127731420387229f36bd81a30104eb0e0c5359e9f6a6197e8"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hobby-observation/arm64/result.json",
+      "sha256": "ae1b22ea7f6315c127731420387229f36bd81a30104eb0e0c5359e9f6a6197e8"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hobby-observation/bundle-inputs.json",
+      "sha256": "f566ab522f4e0d5dfe1c4c603efa06945c07f1ffe634406a15d49474a94afe51"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hobby-observation/cors-import-boundary.json",
+      "sha256": "f69d9b8455420596f0e3731400ea97eb19ab083de4977a49400e3e258346c7ee"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hobby-observation/cors-load.json",
+      "sha256": "67fc72321dd8712680151d59556cb2e8379838a01f0fe4e961041431f4d2e91b"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hobby-observation/docs-impact.log",
+      "sha256": "6ed2fc1c5cd4e16d46a4d688d654ba9407c74901ec6a71f8441e810c755544f3"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hobby-observation/host-metadata.json",
+      "sha256": "8bbe5416f3c771bf537f9f2d846258aa00da01eb41322e9ce09426ae7f4b4718"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hobby-observation/import-boundary.json",
+      "sha256": "82ace34178dc53a3df9abb6dd078926c67ef314b7f792e605f045febc8c80b8f"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hobby-observation/observation.log",
+      "sha256": "67a0f005f40a89caa20b35a6e628fbc02ccbcd6ba3da78fa0fe2f6d9af6c30d5"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hobby-observation/observe.ts",
+      "sha256": "b8c2cb8959f1c5ede9c5cefb1188b403905ae398d9e5bbc75bf170b3c6470b6c"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hobby-observation/preservation.json",
+      "sha256": "f4a0d175e40980df812b54b16349d7d9925d8fd65514174913a5d7327aa5072f"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hobby-observation/result.json",
+      "sha256": "67a0f005f40a89caa20b35a6e628fbc02ccbcd6ba3da78fa0fe2f6d9af6c30d5"
+    }
+  ]
+}

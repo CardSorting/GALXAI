@@ -1,0 +1,477 @@
+{
+  "scope": "Only CORS/header named exports, no authorization handlers",
+  "sourceInputs": [
+    "src/lib/connect/config.ts",
+    "src/lib/db/postgres.ts",
+    "src/lib/nova/contract.ts",
+    "src/lib/supabase/repositories/ConnectRepository.ts",
+    "src/lib/supabase/config.ts",
+    "src/core/broccolidb/broccolidb-aggregation.ts",
+    "src/core/broccolidb/broccolidb-table.ts",
+    "src/core/broccolidb/BroccoliAuthoritativeGovernor.ts",
+    "src/lib/supabase/client.ts",
+    "src/lib/auth/active-account-session.ts",
+    "src/core/vault/GalxCryptoVault.ts",
+    "src/lib/supabase/types.ts",
+    "src/core/broccolidb/broccolidb-natural-query.ts",
+    "src/lib/supabase/repositories/WorkspaceRepository.ts",
+    "src/lib/supabase/repositories/ProjectRepository.ts",
+    "src/lib/cache/GalxRequestCoalescer.ts",
+    "src/lib/cache/GalxBatchDataLoader.ts",
+    "src/lib/supabase/repositories/ApiKeyRepository.ts",
+    "src/relay/registry-egress-guard.ts",
+    "src/relay/registry-api-reader.ts",
+    "src/relay/shard-registry-sync.ts",
+    "src/lib/supabase/repositories/ShardProjectionReader.ts",
+    "src/core/pool/LeaseHealthTransition.ts",
+    "src/lib/supabase/repositories/ShardRepository.ts",
+    "src/lib/supabase/repositories/QueueRepository.ts",
+    "src/lib/supabase/repositories/TaskRepository.ts",
+    "src/lib/billing/wallet.ts",
+    "src/lib/billing/legacy-wallet-pricing.ts",
+    "src/lib/supabase/repositories/WalletRepository.ts",
+    "src/lib/supabase/repositories/TelemetryRepository.ts",
+    "src/lib/supabase/repositories/EmbeddingsRepository.ts",
+    "src/lib/supabase/repositories/DistributedLockRepository.ts",
+    "src/lib/supabase/repositories/IdempotencyRepository.ts",
+    "src/lib/supabase/repositories/AuditRepository.ts",
+    "src/lib/supabase/repositories/BudgetRepository.ts",
+    "src/lib/supabase/repositories/ShardHealthRepository.ts",
+    "src/lib/supabase/repositories/SessionRepository.ts",
+    "src/core/router/ModelCatalog.ts",
+    "src/core/router/PublicModelCatalog.ts",
+    "src/core/pricing/TokenCostCalculator.ts",
+    "src/core/governance/PromptPrefixRestructurer.ts",
+    "src/core/governance/AgentCircuitBreaker.ts",
+    "src/core/governance/GalxSpendGovernanceEngine.ts",
+    "src/core/optimization/ContextCompactor.ts",
+    "src/core/optimization/OutputVerbosityOptimizer.ts",
+    "src/core/broccolidb/BroccoliPromptCASVault.ts",
+    "src/core/optimization/SemanticEdgeCache.ts",
+    "src/core/broccolidb/BroccoliSpendLease.ts",
+    "src/core/broccolidb/BroccoliSpendAnalytics.ts",
+    "src/core/broccolidb/BroccoliSpendWAL.ts",
+    "src/core/governance/SpendAnomalyDetector.ts",
+    "src/core/broccolidb/BroccoliSpendStreamer.ts",
+    "src/core/broccolidb/BroccoliSpendTimeline.ts",
+    "src/core/broccolidb/BroccoliSpendSubstrate.ts",
+    "src/core/chat/GalxChatRequestNormalizer.ts",
+    "src/lib/billing/usage-pricing.ts",
+    "src/workers/cloudflare/GalxEdgeGateway.ts",
+    "src/workers/cloudflare/GalxEdgeQueueWorker.ts",
+    "src/workers/cloudflare/GalxEdgeCache.ts",
+    "src/workers/cloudflare/GalxEdgeBatchBuffer.ts",
+    "src/core/broccolidb/broccolidb-bounded-cache.ts",
+    "src/lib/images/library-cursor.ts",
+    "src/core/telemetry/BroccoliTelemetryEngine.ts",
+    "src/core/storage/bounded-object-body.ts",
+    "src/core/storage/GalxUnifiedR2StorageManager.ts",
+    "src/core/broccolidb/BroccoliImageLibraryBuffer.ts",
+    "src/lib/security/image-download-url.ts",
+    "src/lib/security/image-artifact.ts",
+    "src/workers/cloudflare/GalxR2AssetAdapter.ts",
+    "src/workers/cloudflare/GalxEdgeWire.ts",
+    "src/workers/cloudflare/GalxEdgeRouter.ts",
+    "src/workers/cloudflare/GalxSwarmCoordinatorDO.ts",
+    "src/workers/cloudflare/GalxEdgeSpeculativeEngine.ts",
+    "src/workers/cloudflare/GalxEdgeConnectionPool.ts",
+    "src/workers/cloudflare/GalxEdgeWebhookDispatcher.ts",
+    "src/lib/supabase/GalxSupabaseClient.ts",
+    "src/lib/supabase/repositories/StripeRepository.ts",
+    "src/lib/supabase/repositories/TeamGovernanceRepository.ts",
+    "src/lib/supabase/repositories/EdgeGovernanceRepository.ts",
+    "src/lib/supabase/repositories/ProjectRoutingRepository.ts",
+    "src/lib/supabase/repositories/SloCanaryRepository.ts",
+    "src/lib/supabase/index.ts",
+    "src/lib/storage/GalxPersistence.ts",
+    "src/core/auth/GalxAuthEngine.ts",
+    "src/lib/auth/session-http.ts",
+    "src/lib/auth/session-profile.ts",
+    "src/lib/auth/request-session.ts",
+    "src/lib/images/navigation.ts",
+    "src/lib/auth/redirects.ts",
+    "src/lib/connect/http.ts",
+    "<stdin>"
+  ],
+  "retainedSourceInputs": [
+    {
+      "path": "src/lib/db/postgres.ts",
+      "bytes": 5108
+    },
+    {
+      "path": "src/lib/supabase/config.ts",
+      "bytes": 1809
+    },
+    {
+      "path": "src/core/broccolidb/broccolidb-aggregation.ts",
+      "bytes": 5823
+    },
+    {
+      "path": "src/core/broccolidb/broccolidb-table.ts",
+      "bytes": 32500
+    },
+    {
+      "path": "src/core/broccolidb/BroccoliAuthoritativeGovernor.ts",
+      "bytes": 5576
+    },
+    {
+      "path": "src/lib/supabase/client.ts",
+      "bytes": 3571
+    },
+    {
+      "path": "src/core/broccolidb/broccolidb-natural-query.ts",
+      "bytes": 6889
+    },
+    {
+      "path": "src/lib/supabase/repositories/WorkspaceRepository.ts",
+      "bytes": 8137
+    },
+    {
+      "path": "src/lib/connect/http.ts",
+      "bytes": 10939
+    },
+    {
+      "path": "src/lib/connect/config.ts",
+      "bytes": 3923
+    },
+    {
+      "path": "src/lib/supabase/repositories/ConnectRepository.ts",
+      "bytes": 12061
+    },
+    {
+      "path": "src/lib/nova/contract.ts",
+      "bytes": 280
+    },
+    {
+      "path": "src/lib/auth/request-session.ts",
+      "bytes": 2736
+    },
+    {
+      "path": "src/core/auth/GalxAuthEngine.ts",
+      "bytes": 22557
+    },
+    {
+      "path": "src/lib/auth/active-account-session.ts",
+      "bytes": 742
+    },
+    {
+      "path": "src/core/vault/GalxCryptoVault.ts",
+      "bytes": 27884
+    },
+    {
+      "path": "src/lib/supabase/index.ts",
+      "bytes": 58
+    },
+    {
+      "path": "src/lib/supabase/GalxSupabaseClient.ts",
+      "bytes": 2457
+    },
+    {
+      "path": "src/lib/supabase/repositories/ProjectRepository.ts",
+      "bytes": 4633
+    },
+    {
+      "path": "src/lib/supabase/repositories/ApiKeyRepository.ts",
+      "bytes": 27319
+    },
+    {
+      "path": "src/lib/cache/GalxRequestCoalescer.ts",
+      "bytes": 3746
+    },
+    {
+      "path": "src/lib/cache/GalxBatchDataLoader.ts",
+      "bytes": 3181
+    },
+    {
+      "path": "src/lib/supabase/repositories/ShardRepository.ts",
+      "bytes": 26719
+    },
+    {
+      "path": "src/lib/supabase/repositories/ShardProjectionReader.ts",
+      "bytes": 8206
+    },
+    {
+      "path": "src/relay/registry-egress-guard.ts",
+      "bytes": 5924
+    },
+    {
+      "path": "src/relay/registry-api-reader.ts",
+      "bytes": 3754
+    },
+    {
+      "path": "src/relay/shard-registry-sync.ts",
+      "bytes": 6365
+    },
+    {
+      "path": "src/core/pool/LeaseHealthTransition.ts",
+      "bytes": 1592
+    },
+    {
+      "path": "src/lib/supabase/repositories/QueueRepository.ts",
+      "bytes": 6235
+    },
+    {
+      "path": "src/lib/supabase/repositories/TaskRepository.ts",
+      "bytes": 16238
+    },
+    {
+      "path": "src/lib/supabase/repositories/WalletRepository.ts",
+      "bytes": 38323
+    },
+    {
+      "path": "src/lib/billing/wallet.ts",
+      "bytes": 624
+    },
+    {
+      "path": "src/lib/billing/legacy-wallet-pricing.ts",
+      "bytes": 739
+    },
+    {
+      "path": "src/lib/supabase/repositories/TelemetryRepository.ts",
+      "bytes": 6378
+    },
+    {
+      "path": "src/lib/supabase/repositories/EmbeddingsRepository.ts",
+      "bytes": 6473
+    },
+    {
+      "path": "src/lib/supabase/repositories/DistributedLockRepository.ts",
+      "bytes": 3101
+    },
+    {
+      "path": "src/lib/supabase/repositories/IdempotencyRepository.ts",
+      "bytes": 4131
+    },
+    {
+      "path": "src/lib/supabase/repositories/AuditRepository.ts",
+      "bytes": 10910
+    },
+    {
+      "path": "src/lib/supabase/repositories/BudgetRepository.ts",
+      "bytes": 7257
+    },
+    {
+      "path": "src/lib/supabase/repositories/ShardHealthRepository.ts",
+      "bytes": 3128
+    },
+    {
+      "path": "src/lib/supabase/repositories/SessionRepository.ts",
+      "bytes": 17015
+    },
+    {
+      "path": "src/core/router/ModelCatalog.ts",
+      "bytes": 12327
+    },
+    {
+      "path": "src/core/router/PublicModelCatalog.ts",
+      "bytes": 1231
+    },
+    {
+      "path": "src/core/pricing/TokenCostCalculator.ts",
+      "bytes": 20825
+    },
+    {
+      "path": "src/core/governance/PromptPrefixRestructurer.ts",
+      "bytes": 1976
+    },
+    {
+      "path": "src/core/governance/AgentCircuitBreaker.ts",
+      "bytes": 2368
+    },
+    {
+      "path": "src/core/governance/GalxSpendGovernanceEngine.ts",
+      "bytes": 9306
+    },
+    {
+      "path": "src/core/optimization/ContextCompactor.ts",
+      "bytes": 3004
+    },
+    {
+      "path": "src/core/optimization/OutputVerbosityOptimizer.ts",
+      "bytes": 1485
+    },
+    {
+      "path": "src/core/broccolidb/BroccoliPromptCASVault.ts",
+      "bytes": 3589
+    },
+    {
+      "path": "src/core/optimization/SemanticEdgeCache.ts",
+      "bytes": 3340
+    },
+    {
+      "path": "src/core/broccolidb/BroccoliSpendLease.ts",
+      "bytes": 4851
+    },
+    {
+      "path": "src/core/broccolidb/BroccoliSpendWAL.ts",
+      "bytes": 2323
+    },
+    {
+      "path": "src/core/broccolidb/BroccoliSpendAnalytics.ts",
+      "bytes": 1730
+    },
+    {
+      "path": "src/core/governance/SpendAnomalyDetector.ts",
+      "bytes": 4251
+    },
+    {
+      "path": "src/core/broccolidb/BroccoliSpendStreamer.ts",
+      "bytes": 1401
+    },
+    {
+      "path": "src/core/broccolidb/BroccoliSpendTimeline.ts",
+      "bytes": 2928
+    },
+    {
+      "path": "src/core/broccolidb/BroccoliSpendSubstrate.ts",
+      "bytes": 2419
+    },
+    {
+      "path": "src/core/chat/GalxChatRequestNormalizer.ts",
+      "bytes": 5011
+    },
+    {
+      "path": "src/lib/billing/usage-pricing.ts",
+      "bytes": 402
+    },
+    {
+      "path": "src/workers/cloudflare/GalxEdgeGateway.ts",
+      "bytes": 40302
+    },
+    {
+      "path": "src/workers/cloudflare/GalxEdgeQueueWorker.ts",
+      "bytes": 4167
+    },
+    {
+      "path": "src/workers/cloudflare/GalxEdgeCache.ts",
+      "bytes": 3007
+    },
+    {
+      "path": "src/workers/cloudflare/GalxEdgeBatchBuffer.ts",
+      "bytes": 4692
+    },
+    {
+      "path": "src/workers/cloudflare/GalxR2AssetAdapter.ts",
+      "bytes": 14872
+    },
+    {
+      "path": "src/core/broccolidb/broccolidb-bounded-cache.ts",
+      "bytes": 3201
+    },
+    {
+      "path": "src/lib/images/library-cursor.ts",
+      "bytes": 1501
+    },
+    {
+      "path": "src/core/broccolidb/BroccoliImageLibraryBuffer.ts",
+      "bytes": 27993
+    },
+    {
+      "path": "src/core/storage/GalxUnifiedR2StorageManager.ts",
+      "bytes": 58539
+    },
+    {
+      "path": "src/core/telemetry/BroccoliTelemetryEngine.ts",
+      "bytes": 5179
+    },
+    {
+      "path": "src/core/storage/bounded-object-body.ts",
+      "bytes": 823
+    },
+    {
+      "path": "src/lib/security/image-download-url.ts",
+      "bytes": 228
+    },
+    {
+      "path": "src/lib/security/image-artifact.ts",
+      "bytes": 1316
+    },
+    {
+      "path": "src/workers/cloudflare/GalxEdgeWire.ts",
+      "bytes": 931
+    },
+    {
+      "path": "src/workers/cloudflare/GalxEdgeRouter.ts",
+      "bytes": 1545
+    },
+    {
+      "path": "src/workers/cloudflare/GalxSwarmCoordinatorDO.ts",
+      "bytes": 3384
+    },
+    {
+      "path": "src/workers/cloudflare/GalxEdgeSpeculativeEngine.ts",
+      "bytes": 654
+    },
+    {
+      "path": "src/workers/cloudflare/GalxEdgeConnectionPool.ts",
+      "bytes": 863
+    },
+    {
+      "path": "src/workers/cloudflare/GalxEdgeWebhookDispatcher.ts",
+      "bytes": 1051
+    },
+    {
+      "path": "src/lib/supabase/repositories/StripeRepository.ts",
+      "bytes": 40
+    },
+    {
+      "path": "src/lib/supabase/repositories/TeamGovernanceRepository.ts",
+      "bytes": 11858
+    },
+    {
+      "path": "src/lib/supabase/repositories/EdgeGovernanceRepository.ts",
+      "bytes": 4421
+    },
+    {
+      "path": "src/lib/supabase/repositories/ProjectRoutingRepository.ts",
+      "bytes": 4188
+    },
+    {
+      "path": "src/lib/supabase/repositories/SloCanaryRepository.ts",
+      "bytes": 3334
+    },
+    {
+      "path": "src/lib/storage/GalxPersistence.ts",
+      "bytes": 9360
+    },
+    {
+      "path": "src/lib/auth/session-http.ts",
+      "bytes": 1461
+    },
+    {
+      "path": "src/lib/auth/session-profile.ts",
+      "bytes": 219
+    }
+  ],
+  "externalImports": [
+    "pg",
+    "@supabase/supabase-js",
+    "next/server",
+    "node:crypto",
+    "node:crypto",
+    "@supabase/ssr",
+    "node:crypto",
+    "node:crypto",
+    "node:crypto",
+    "node:fs",
+    "node:path",
+    "node:crypto",
+    "node:crypto",
+    "node:crypto",
+    "node:crypto",
+    "node:crypto",
+    "node:crypto",
+    "node:crypto",
+    "node:crypto",
+    "node:crypto",
+    "node:crypto",
+    "node:crypto",
+    "node:fs",
+    "node:path",
+    "node:zlib",
+    "sharp",
+    "node:crypto",
+    "next/server"
+  ],
+  "bytes": 664270
+}

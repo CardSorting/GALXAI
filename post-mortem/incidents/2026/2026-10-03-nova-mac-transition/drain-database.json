@@ -1,0 +1,30 @@
+{
+  "at": "2026-10-04T01:35:07.988Z",
+  "activeNova": [
+    {
+      "running": 0
+    }
+  ],
+  "providerLeases": [
+    {
+      "active": 0
+    }
+  ],
+  "legacyQueueStates": [],
+  "quota": [
+    {
+      "accounts": 3,
+      "bounded": true,
+      "token_credit_valid": true,
+      "request_credit_valid": true
+    }
+  ],
+  "migration": [
+    {
+      "version": "20261003131619"
+    },
+    {
+      "version": "20261003202702"
+    }
+  ]
+}

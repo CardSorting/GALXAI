@@ -1,0 +1,10 @@
+file:///Users/bozoegg/Desktop/GALXAI/.relay/nova-transition/final-surface.mjs:8
+const probe=async(url,method,status)=>{const r=await fetch(url,{method,redirect:'manual',signal:AbortSignal.timeout(15000)});const b=Buffer.from(await r.arrayBuffer());scan(b);scan(Buffer.from(JSON.stringify([...r.headers].filter(([k])=>k!=='set-cookie'))));checks.push({url,method,status:r.status,bytes:b.length,sha256:createHash('sha256').update(b).digest('hex'),contentType:r.headers.get('content-type'),cacheControl:r.headers.get('cache-control')});if(r.status!==status)throw Error('HTTP mismatch '+url+' '+r.status);return b;};
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                ^
+
+Error: HTTP mismatch https://galxai-204k0uq49-cardsortings-projects.vercel.app/v1/chat/completions 302
+    at probe (file:///Users/bozoegg/Desktop/GALXAI/.relay/nova-transition/final-surface.mjs:8:481)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async file:///Users/bozoegg/Desktop/GALXAI/.relay/nova-transition/final-surface.mjs:11:124
+
+Node.js v26.8.1

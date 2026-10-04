@@ -1,0 +1,6 @@
+
+> galxai@0.1.0 docs:sync
+> python3 scripts/docs-kb.py sync && python3 scripts/verify-post-mortem.py --sync
+
+Generated 3 knowledge views; review records unchanged.
+Rendered 4 indexes and inventoried 517 authored Markdown files; review not changed.

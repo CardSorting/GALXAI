@@ -1,0 +1,51 @@
+{
+  "classification": "private",
+  "observed_at": "2026-10-03T19:45:47.363490+00:00",
+  "scope": "Incremental operational acceptance review. No application, runtime, SDK or database source changed in this follow-up; previous bounded review and unchanged source hashes retain their test provenance.",
+  "prior_review": "post-mortem/releases/2026-10-03-connect-acceptance-review.json",
+  "acceptance_record": "post-mortem/releases/2026-10-03-connect-provider-recovery.json",
+  "http_record": "post-mortem/releases/2026-10-03-connect-provider-http.json",
+  "canonical_guides_inspected": {
+    "docs/operations/galx-connect.md": "4828ebbefa2fc8d496b4ea05d3b7fd3309fec71e233e9a6d8105b443e1d7a9b6",
+    "docs/DEVELOPER_CLIENT_SDK.md": "88b2a116f3802015593131a4604e0f316da6661de5594b4fa7199823ee2fad05",
+    "docs/SECURITY_POSTURE_AND_THREAT_MODEL.md": "fb1651e790de61267c5dd62582709923bde63b4be7c6f296c19f1e88ae43656f",
+    "docs/adr/0165-galx-connect-nova-boundaries.md": "e464bba8e29085c7caba56e44f40ddefc9e7f0611668c7b52ecf4333c3f047c7",
+    "docs/maintainers/RELAY_CREDENTIAL_ENROLLMENT.md": "51d5664879fe25fc98b3abfc3f6ca61a0ae363ca231c20938c03d6a1e0bb530e",
+    "post-mortem/CURRENT_STATE.md": "e2800958cf8c88315d7032dbbcb59531abd47a93af242334d9883b52e8f97275",
+    "post-mortem/incidents/2026/2026-10-03-connect-acceptance/README.md": "17fe23690aad17874a5fe8e80b10a4f00eaa04f5c0497ec1ac0beb6ca07d1530"
+  },
+  "source_contracts_inspected": {
+    "src/lib/connect/config.ts": "4e13d3626a3d96eaf8ec06f5ff2962f8a1633f7459c80575041d2fb3d22b4653",
+    "src/lib/connect/http.ts": "b2872fcde6d34092748637d7d101963d47c3b0ec560f889bcadeb84ebcc7c954",
+    "src/lib/supabase/repositories/ConnectRepository.ts": "3e9ffc6fdee174a8ec5b55c86e3c7eb755e4f2084175e0596e59887639478d52",
+    "src/lib/nova/inference.ts": "85a57c5b383bbc67bd2dad866d8014010d3333a3349d7e729dcb398151f0787d",
+    "src/lib/nova/executor.ts": "94a576fdc1cef857928dfc00e332d5331d8be03d25d8f2711e3fb77da17c7d40",
+    "src/sdk/connect.ts": "3561bb495a9e06cbde1bf14c7a2c514f5d01d8057bde4eba20262a409cb21d4f",
+    "src/relay/pool-monitor-model.js": "b0f4163e89bcfdedd99960b9703695649c5e6e2795fdb4dcddf460d5176a1ad1",
+    "src/relay/pool-monitor-server.ts": "e03552b3201f587cb5bf816d2940d5be21331e419320fab764aa4dd267ca34e9",
+    "src/relay/pool-central.ts": "4b855a4f2143ca9f96fa1da30bbae4909ac386b097137f177e03cdb3c42edcbd",
+    "src/relay/desktop-credential-refresh.ts": "2cb9a548f169ad5b00a630b18c00fa45ed5c6211984b7c6e17c99abbb745fba3",
+    "src/relay/pool-execution.ts": "1618bfcaade3abb636bb338f19df566edf408121d18a7a40d498dac8e7dfc54b",
+    "src/relay/pool-runtime.ts": "5c6b0107e95a65cdf1d9ed61c28bed6de0f39be5d495fd0c4c03835e3e7e177f",
+    "deploy/relay-execution/supabase/migrations/20260915082628_relay_execution.sql": "fc61d7c30bdd57706ffb4212788741302760722e7285c25c9b4cb93d629b137e",
+    "supabase/migrations/20260916013944_relay_connection_lifecycle.sql": "367e42543e8eb790873a5708a5bee9126a2407b64ea6ba1a6977ef672282a5fc",
+    "supabase/migrations/20260915191404_relay_account_management.sql": "b8dd9fbe88e1463ab24c5b361bd4b66bf1b4d3af3de4f034a7c87053568f6e8f",
+    "supabase/migrations/20260914231914_manual_desktop_shard_enrollment.sql": "9281aece1e5709ff28bc020c7c66a3b64541231084d6867715791e4ee982ddc9",
+    "supabase/migrations/20260907211705_galxai_cooldown_health_evidence_and_fencing.sql": "8f21408d8375ba97d2c0c56b14aa60cb12254d50c9391db9acbd1d3c503bff28"
+  },
+  "semantic_review": {
+    "connect": "Real scoped native and browser grants, provider output, refresh, revocation and capacity now supplement earlier protocol/negative fixtures. Runbook, ADR and SDK delivery facts reflect actual local acceptance with no hosted rollout. Unknown outcomes, retained reservations and already-admitted work are described without fabricated completion or replay.",
+    "access": "Threat-model text now records actual inference-only credential success and independent account/Media authority. Existing workspace-auth policy and callback implementation are unchanged from the prior review. Full threat-model guide inspected; no broader provider privilege claim added.",
+    "images": "Complete SDK guide retains private human creation and Star publishing boundaries. Only local Connect text-acceptance status changed; Media live inspection shows the account and published works unchanged. Prior image-boundary regressions apply to byte-identical source.",
+    "relay": "Complete credential-enrollment guide and relevant account-management reference reviewed against registrar refresh, stored revision, scoped runtime records and health-fenced settlement. Explicit reconnect does not erase failures. Real success cleared six old failures; one intentional cancellation remains. Client deadline and underlying provider completion can differ, and no replay or health reset was used.",
+    "knowledge": "Retained earlier failed acceptance, appended recovery/verification events, updated current-state and recovered incident/ACT-039. ADR intent remains accepted and hosted delivery remains unclaimed. All thirteen earlier warnings and deadlines retain their classification. Generated indexes do not certify this review."
+  },
+  "verification": "Two real completed provider requests, a 472-event sanitized partial stream, shared capacity denial, client deadline, cancellation and in-flight disconnect were observed. Three measured revocation bounds across passes: 167,169,175 ms. Account intact; six grants revoked, entitlement disabled, all local test processes stopped. Existing 26/135/94/44/69 suites and production build retain exact source-hash provenance; documentation and compiled boundaries are rerun after this review.",
+  "limits": [
+    "Supervised local production build against the existing primary database and installed provider path; not hosted Connect activation.",
+    "Client deadline was exercised; executor first-output/idle/wall deadlines and every possible provider terminal state were not forced.",
+    "Negative authorization cases retain their exact live/fixture provenance in the earlier record; no real account was corrupted to forge invalid grants.",
+    "Compiled selected-marker scans and observed public responses are scoped verification, not a universal security certification.",
+    "ACT-001 still gates controlled hosted deployment; public-release warnings remain open."
+  ]
+}

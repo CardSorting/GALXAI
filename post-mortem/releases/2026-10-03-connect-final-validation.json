@@ -1,0 +1,105 @@
+{
+  "classification": "private",
+  "observed_at": "2026-10-03",
+  "base_revision": "38a3cc48f32f5f404592109c8cae3ddac5fa6f61",
+  "revision": "uncommitted working tree",
+  "scope": "Final validation after the bounded Connect source/guide review; no production migration, deployment or real-provider acceptance.",
+  "related_review": "post-mortem/releases/2026-10-03-connect-local-review.json",
+  "checks": {
+    "connect_protocol_sdk_and_raw_http": {
+      "command": "npm run test:connect",
+      "result": "passed",
+      "tests": 24
+    },
+    "connect_database": {
+      "command": "npm run test:connect:db",
+      "result": "passed",
+      "checks": 135,
+      "migrations": 158,
+      "environment": "Disposable PostgreSQL; synthetic identities and inference executor"
+    },
+    "account_regressions": {
+      "command": "npm run test:auth:sessions",
+      "result": "passed",
+      "tests": 44
+    },
+    "media_boundary_regressions": {
+      "command": "npm run test:image:security",
+      "result": "passed",
+      "tests": 69
+    },
+    "migration_pairs": {
+      "command": "npm run db:verify",
+      "result": "passed",
+      "pairs": 158
+    },
+    "production_build": {
+      "command": "npm run build",
+      "result": "passed",
+      "static_pages": 157,
+      "scope": "Includes final Nova original-stream validation; compilation and TypeScript validation"
+    },
+    "connect_ui": {
+      "command": "scripts/verify-connect-ui.ts with temporary Playwright and Axe modules",
+      "result": "passed",
+      "states": 14,
+      "viewports": [
+        1440,
+        390
+      ],
+      "axe_violations": 0,
+      "captures_opened": 4,
+      "scope": "Isolated compiled preview; remote/API/account requests intercepted; final F1 label fix confirmed"
+    },
+    "finish_review": {
+      "result": "ship at F1 verdict scope",
+      "finding": "Disconnect Label-in-Name",
+      "finding_status": "resolved",
+      "limitations": "No hosted or manual assistive-technology acceptance"
+    },
+    "docs_sync": {
+      "command": "npm run docs:sync",
+      "result": "passed",
+      "reviews_refreshed_by_sync": false
+    },
+    "docs_check": {
+      "command": "npm run docs:check",
+      "result": "passed",
+      "guides": 382,
+      "incident_documents": 44,
+      "adrs": 165,
+      "knowledge_domains": 11,
+      "warnings": "13 existing overdue prevention actions; register unchanged from base revision"
+    },
+    "compiled_boundary": {
+      "command": "npm run docs:check:build",
+      "result": "passed",
+      "browser_and_rendered_assets": 538,
+      "selected_private_marker_findings": 0,
+      "warnings": "Same 13 existing overdue prevention actions; not a live-site scan"
+    },
+    "documentation_fixtures": {
+      "command": "npm run test:docs",
+      "result": "passed",
+      "incident_guard_tests": 24,
+      "knowledge_tests": 17
+    },
+    "whitespace": {
+      "command": "git diff --check",
+      "result": "passed"
+    }
+  },
+  "release_state": {
+    "enabled_by_default": false,
+    "production_migration": false,
+    "production_deployment": false,
+    "hosted_acceptance": false,
+    "entitlement": "Explicit time-bounded operator grant only; no automatic commercial subscription conversion"
+  },
+  "remaining_scope": [
+    "Review the exact pending migration set; an earlier Orbit migration remains unapplied.",
+    "Configure reviewed client registrations and target origins before activation.",
+    "Verify actual existing-account sign-in, approved provider result, cancellation, unavailable capacity and acknowledged revocation on the target.",
+    "Existing incident prevention deadlines and account-erasure policy retain their separate authority."
+  ]
+}

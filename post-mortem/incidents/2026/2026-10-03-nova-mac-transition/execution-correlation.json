@@ -1,0 +1,67 @@
+{
+  "at": "2026-10-04T01:50:55.053Z",
+  "attempts": [
+    {
+      "novaRequestId": "9b426e92-fe42-4a24-945a-cb71a404a06e",
+      "novaState": "completed",
+      "providerExecutionId": "job_mut54d97_5d7c2c81",
+      "providerRequestHash": "03ac35cce58e3fb8a5c57e373b488d4389a65f4f76cc237012296efdd8af72f2",
+      "providerState": "completed",
+      "success": true,
+      "settled": true,
+      "actualTokens": 23,
+      "createdAt": "2026-10-04 01:26:41.169196+00"
+    },
+    {
+      "novaRequestId": "7633fed6-7036-4b4c-b7e0-aa847f32343d",
+      "novaState": "unknown",
+      "providerExecutionId": "job_mut553hh_67bc7c43",
+      "providerRequestHash": "f22ee47d5122d3fcd49d0fb2d19fe588628f4b3175d1f03f116b0c189fe6ca01",
+      "providerState": "unknown",
+      "success": null,
+      "settled": true,
+      "actualTokens": null,
+      "createdAt": "2026-10-04 01:27:15.164543+00"
+    },
+    {
+      "novaRequestId": "bf436251-b869-419f-a95a-914ab32eaa51",
+      "novaState": "completed",
+      "providerExecutionId": "job_mut5h3mm_8886bf34",
+      "providerRequestHash": "97b15216c58edad06cfc02feaec714c7260a781e75748468e46bdceaa9d4acf7",
+      "providerState": "completed",
+      "success": true,
+      "settled": true,
+      "actualTokens": 23,
+      "createdAt": "2026-10-04 01:36:35.213724+00"
+    },
+    {
+      "novaRequestId": "425f9e1e-d971-4d10-b01d-ce731b26e1ea",
+      "novaState": "unknown",
+      "providerExecutionId": "job_mut5i7qg_0c071c00",
+      "providerRequestHash": "1f0d65ef740b86826e6aee763722aeaae4504b3433ddd93403430114d0ac2588",
+      "providerState": "unknown",
+      "success": null,
+      "settled": true,
+      "actualTokens": null,
+      "createdAt": "2026-10-04 01:37:27.213704+00"
+    }
+  ],
+  "historicalRecordsPreserved": true,
+  "historicalRecordCount": 9,
+  "providerFailureCountsUnchangedAcrossInterruptions": true,
+  "finalFailureCounts": [
+    0,
+    0,
+    0
+  ],
+  "activeAccountLeases": 0,
+  "unrevokedGrants": 0,
+  "explicitEntitlements": [
+    {
+      "enabled": true,
+      "valid_until": "2026-10-04T03:26:28.848Z"
+    }
+  ],
+  "quotaEvidence": "drain-database.json",
+  "recoveryState": "state-after-recovery.json"
+}

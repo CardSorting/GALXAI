@@ -1,0 +1,57 @@
+
+> galxai@0.1.0 test:auth:sessions
+> node --import tsx --test scripts/test-session-lifecycle.ts scripts/test-workspace-auth.ts scripts/test-auth-entry.ts scripts/test-auth-identity-boundary.ts scripts/test-browser-session.ts scripts/test-auth-callback.ts
+
+✔ entry and callback middleware never wait for or refresh the previous account (4.803209ms)
+✔ successful PKCE exchange survives an unrelated open data circuit and writes cookies to its private redirect (14.572959ms)
+✔ failed callbacks preserve safe destinations and reach the form even with another existing session (8.019ms)
+✔ callback exchange has one overall deadline, honors cancellation and does not replay failed mutations (4.1795ms)
+✔ return destinations reject external URLs and recursive auth while preserving workspace context (1.442042ms)
+✔ legacy Images links lead to public discovery while selected library views remain private (0.170334ms)
+✔ explicit sign-in recovery preserves only safe destinations and bypasses existing-session redirects (0.32675ms)
+✔ sign-in notices and failures use finite public copy, never account existence or diagnostics (0.313541ms)
+✔ verification outage has an accessible document recovery response without auth or query disclosure (5.68175ms)
+✔ only an active owner request receiving 401 suspends the workspace; 403, outages and aborts do not (1.002417ms)
+✔ identity requires verified credentials and never trusts client elevation claims (9.198ms)
+▶ image library and favorites verify sessions without administrator credentials
+  ✔ no service role configured (8.772625ms)
+  ✔ legacy public key is never elevated (2.409417ms)
+✔ image library and favorites verify sessions without administrator credentials (12.118875ms)
+✔ database throttling cannot reject valid sessions; authentication outages are not 401s (1.65225ms)
+✔ browser checks use current cookies, retry one transient read and allowlist the profile (268.175084ms)
+✔ 401 terminates without replay; denied, malformed and long-backoff responses never retry (0.979667ms)
+✔ network recovery is finite and cancellation stops the delayed second read (501.297375ms)
+✔ retired provider endpoints reach their terminal denial without preview or session work (7.300292ms)
+✔ copied JWTs fail immediately after logout across profile, workspace and API authority while other sessions continue (21.470333ms)
+✔ internal administration rejects legacy secrets and account metadata, and canonical cookie failure cannot fall back to a native alias (0.828459ms)
+✔ session endpoints reject anonymous credentials, IDs, API keys and forged authority before any session mutation (7.321459ms)
+✔ native profile requires provenance, full account scope and matching database owner; credentials and claims never enter its DTO (1.345625ms)
+✔ browser logout requires same-origin intent, revokes the verified owner, clears all cookie chunks, and keeps failure retryable (1.191625ms)
+✔ Supabase session verification rejects anonymous users, separates outages, and signs out only the current session (5.411583ms)
+✔ session management allowlists devices and cannot revoke another account or elevate without new proof (1.694375ms)
+✔ engine revocation rejects plain IDs and verifies session ownership and account provenance (0.352917ms)
+✔ provider refresh resolves only the verified account’s connection; public DTOs cannot forward operational objects (0.284208ms)
+✔ ordinary authenticated users never receive operational diagnostics or synthetic symmetric JWKS keys (4.305291ms)
+✔ late browser responses cannot restore old identities and storage contains only an owner hint (0.335042ms)
+✔ restricted tokens cannot outlive their parent or widen its scopes (2.24375ms)
+✔ device authorization never acknowledges an uncommitted grant or falls back to consumed memory state (2.787ms)
+✔ device approval issues a separate bounded credential and never shares the current browser token (12.801ms)
+✔ logout preserves rotated refresh cookies when revocation is temporarily unavailable (4.8315ms)
+✔ profile preserves refreshed cookies when the subsequent active-session check fails (0.94675ms)
+✔ provider callback is closed before exchanging any provider credential (1.725041ms)
+✔ native session storage never grants cached authorization or acknowledges failed writes (1.445292ms)
+✔ native token rotation honors the previous-token grace window and reports database outages as unavailable (0.228333ms)
+✔ anonymous navigation, RSC, prefetch and misleading paths never pass the workspace gate (19.280958ms)
+✔ forged sessions, anonymous Auth users and verification outages fail closed with sanitized responses (18.045875ms)
+✔ expired sessions refresh through Auth and propagate cookies to the request and response (7.736834ms)
+✔ native sessions use verified active session authority, never cookie presence (0.770791ms)
+✔ server page guard independently denies anonymous entry when middleware did not run (62.268ms)
+✔ independent page verification distinguishes an outage from an invalid session (2.831834ms)
+ℹ tests 44
+ℹ suites 0
+ℹ pass 44
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 932.995459

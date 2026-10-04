@@ -1,0 +1,84 @@
+{
+  "classification": "private",
+  "observed_at": "2026-10-04T02:12:24.371794+00:00",
+  "record": "post-mortem/releases/2026-10-03-nova-nondisruptive-resilience.json",
+  "checks": [
+    {
+      "command": "node --import tsx scripts/test-self-host-resilience.ts .relay/mac-origin-correction/package-02 .relay/hosted-adaptation/public-build-inputs.json post-mortem/incidents/2026/2026-10-03-nova-nondisruptive-resilience/isolated-01",
+      "result": "PASSED",
+      "groups": 9,
+      "evidence": "post-mortem/incidents/2026/2026-10-03-nova-nondisruptive-resilience/isolated-01/result.json"
+    },
+    {
+      "command": "GALX_RELAY_SERVICE_TAG=neutral-outcomes-20261003-r3 GALX_PREMIUM_DOCKER_CONTEXT=colima-premium node scripts/test-relay-monitor-package.mjs",
+      "result": "PASSED",
+      "checks": 90,
+      "evidence": "post-mortem/incidents/2026/2026-10-03-nova-nondisruptive-resilience/monitor-03.log"
+    },
+    {
+      "command": "node --test scripts/test-self-host.mjs",
+      "result": "PASSED",
+      "checks": 20,
+      "evidence": "post-mortem/incidents/2026/2026-10-03-nova-nondisruptive-resilience/operator-tests.log"
+    },
+    {
+      "command": "npm run docs:sync",
+      "result": "PASSED",
+      "evidence": "post-mortem/incidents/2026/2026-10-03-nova-nondisruptive-resilience/docs-sync.log"
+    },
+    {
+      "command": "npm run docs:check",
+      "result": "PASSED",
+      "evidence": "post-mortem/incidents/2026/2026-10-03-nova-nondisruptive-resilience/docs-check-final.log"
+    },
+    {
+      "command": "npm run test:docs",
+      "result": "PASSED",
+      "checks": 42,
+      "evidence": "post-mortem/incidents/2026/2026-10-03-nova-nondisruptive-resilience/docs-tests.log"
+    },
+    {
+      "command": "git diff --check",
+      "result": "PASSED"
+    },
+    {
+      "check": "Append-only journal prefix",
+      "result": "PASSED",
+      "evidence": "post-mortem/incidents/2026/2026-10-03-nova-nondisruptive-resilience/journal-prefix.json"
+    },
+    {
+      "check": "All ten live services, accepted receipt and private configuration unchanged",
+      "result": "PASSED",
+      "evidence": "post-mortem/incidents/2026/2026-10-03-nova-nondisruptive-resilience/after.json"
+    }
+  ],
+  "production_build": "Not repeated: application/runtime source and images unchanged. The existing production artifact, archive and whole-image receipt were verified by the supplemental fixture; no new candidate was created.",
+  "image": "sha256:5157984bc06524aac0ca8fbf2051eebfe6f3b7994aa7d0793e8404c097289345",
+  "scope_limits": [
+    "Physical host and disruptive shared-service tests remain UNVERIFIED — DEFERRED BY OPERATOR. No production-readiness inference from startup assumptions.",
+    "No new live-provider, production database, grant, route, ingress or power-policy mutation.",
+    "Two monitor harness bind-mount starts failed before fixture entrypoint execution; final stdin/tmpfs correction passed on the same immutable image.",
+    "No off-device reconstruction. Existing overdue prevention items and due billing-domain review remain; all-domain docs:audit/CI deadline readiness is not asserted."
+  ],
+  "evidence_sha256": {
+    "post-mortem/incidents/2026/2026-10-03-nova-nondisruptive-resilience/act018-before.json": "d90651240103756c22c5911dd787de81b6b27114271bb9693102cf583d08f458",
+    "post-mortem/incidents/2026/2026-10-03-nova-nondisruptive-resilience/after.json": "2fbbad3e9175efb709e53c7b29d633dec3271fe2519914d67d9435dc506af9df",
+    "post-mortem/incidents/2026/2026-10-03-nova-nondisruptive-resilience/baseline.json": "6640150b9abc2a2cdc58ef995251cbe083e0fca1e180d399a66867d76e02df53",
+    "post-mortem/incidents/2026/2026-10-03-nova-nondisruptive-resilience/docs-check-before-review.log": "57b16646580136ab282b154bb018810819c5d340e37eea9e78f4341b9de5bccf",
+    "post-mortem/incidents/2026/2026-10-03-nova-nondisruptive-resilience/docs-check-final.log": "944eb1e6d74ae7930e0d963adac88584d6fc1ca9a42471b3837551714aea35c4",
+    "post-mortem/incidents/2026/2026-10-03-nova-nondisruptive-resilience/docs-impact.log": "f76368f717c14697a68121a810f341d8d3b3065d6c3da43e43540cd799b97c30",
+    "post-mortem/incidents/2026/2026-10-03-nova-nondisruptive-resilience/docs-status-before-review.log": "1bcc00893c831a15e3eb6fa35537a9aaca4a2de8346e9364da234252b119b798",
+    "post-mortem/incidents/2026/2026-10-03-nova-nondisruptive-resilience/docs-sync.log": "1e450e2cf2562b064b3d6b8d8b35886d61fa76049ecd23b189018edf46536367",
+    "post-mortem/incidents/2026/2026-10-03-nova-nondisruptive-resilience/docs-tests.log": "d86a5425c294edbb41165d6762c4ee6960e21dafb40ffb4074c112c80d211fdd",
+    "post-mortem/incidents/2026/2026-10-03-nova-nondisruptive-resilience/isolated-01/cleanup.json": "0286b69f06b1ac54fb6b2ddd7744e3cb97bae971311f472f69c3f3bd8fd5bd1b",
+    "post-mortem/incidents/2026/2026-10-03-nova-nondisruptive-resilience/isolated-01/result.json": "efd792c24dbd46dc72359c04b3d137b723139bfad3eeba54b80600a13eafa24d",
+    "post-mortem/incidents/2026/2026-10-03-nova-nondisruptive-resilience/isolated-01.log": "c3788584da9f9eabf7e39370638b4779fd74dc697f4ad03e06a7429af33d8ab0",
+    "post-mortem/incidents/2026/2026-10-03-nova-nondisruptive-resilience/journal-prefix.json": "eab213469a982ed4d8f7c50cf29dfe86651b3a3376363334334f97296606ca9f",
+    "post-mortem/incidents/2026/2026-10-03-nova-nondisruptive-resilience/live-boundary.json": "b01ffe85bbe5c97eb4a7e375c3daecabef5b6c5a4ae457f6779a07e981e3ff30",
+    "post-mortem/incidents/2026/2026-10-03-nova-nondisruptive-resilience/monitor-01.log": "4c65533836de88726bab2eb6b86fa6fc99f79d8e5823a87057209cb3cbd258a2",
+    "post-mortem/incidents/2026/2026-10-03-nova-nondisruptive-resilience/monitor-02.log": "722afe98ffa502e9f33136254926febcc8cc722597fb38cb61ef450cab344e7c",
+    "post-mortem/incidents/2026/2026-10-03-nova-nondisruptive-resilience/monitor-03.log": "1319bb3603f759c70a4eb02e01b94a16ba987e7fe56e0d42fbfc5828d78aac7b",
+    "post-mortem/incidents/2026/2026-10-03-nova-nondisruptive-resilience/monitor-result.json": "ac1db90013c564869402586f6c4e60327bb53835c6a68ff21309940f1b931d32",
+    "post-mortem/incidents/2026/2026-10-03-nova-nondisruptive-resilience/operator-tests.log": "bda34d99326f7401439fd98f716767ae4393ef5a8b9edb2a2f1082a8482e058d"
+  }
+}

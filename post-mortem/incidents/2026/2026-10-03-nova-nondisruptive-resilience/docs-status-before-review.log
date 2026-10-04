@@ -1,0 +1,61 @@
+
+> galxai@0.1.0 docs:status
+> python3 scripts/docs-kb.py status
+
+{
+  "knowledge": {
+    "state": "stale",
+    "owner": "Documentation maintainer",
+    "review_by": "2026-10-10"
+  },
+  "images": {
+    "state": "reviewed",
+    "owner": "Product/API maintainer",
+    "review_by": "2026-10-10"
+  },
+  "access": {
+    "state": "reviewed",
+    "owner": "Security/access maintainer",
+    "review_by": "2026-10-10"
+  },
+  "sites": {
+    "state": "reviewed",
+    "owner": "Sites maintainer",
+    "review_by": "2026-10-10"
+  },
+  "relay": {
+    "state": "stale",
+    "owner": "Relay operator",
+    "review_by": "2026-10-10"
+  },
+  "database": {
+    "state": "reviewed",
+    "owner": "Database operator",
+    "review_by": "2026-10-10"
+  },
+  "delivery": {
+    "state": "stale",
+    "owner": "Release operator",
+    "review_by": "2026-10-10"
+  },
+  "broccolidb": {
+    "state": "reviewed",
+    "owner": "BroccoliDB maintainer",
+    "review_by": "2026-10-25"
+  },
+  "client-efficiency": {
+    "state": "reviewed",
+    "owner": "Product/performance maintainer",
+    "review_by": "2026-10-10"
+  },
+  "billing": {
+    "state": "due",
+    "owner": "Billing maintainer",
+    "review_by": "2026-10-03"
+  },
+  "connect": {
+    "state": "stale",
+    "owner": "Security/access and inference maintainers",
+    "review_by": "2026-10-10"
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "classification": "private",
+  "observed_at": "2026-10-03",
+  "scope": "Host enablement stopped at the mandated candidate-code-change gate; documentation/evidence changes only.",
+  "reviewed_complete_affected_guides": [
+    "docs/VERCEL_DEPLOYMENT.md",
+    "docs/operations/galx-connect.md"
+  ],
+  "current_state_review": "Reviewed new leading stopped determination and chronological historical sections; earlier observations remain dated evidence, not current authorization.",
+  "source_contracts_inspected": [
+    "src/app/v1/inference/route.ts",
+    "src/lib/nova/inference.ts",
+    "src/lib/nova/executor.ts",
+    "src/lib/supabase/repositories/ConnectRepository.ts",
+    "src/core/router/adapters/RelayChatTransport.ts",
+    "src/core/router/adapters/RelayEndpointDiscovery.ts",
+    "vercel.json",
+    "node_modules/next/dist/server/pipe-readable.js"
+  ],
+  "semantic_conclusions": [
+    "No accepted source, compiled payload, configuration, database record or installed image changed. ACT-044/045/046 remain open; ACT-001 remains closed.",
+    "Cancellation registration is an application lifetime responsibility on the observed host. A route flag or ingress path change alone does not protect final persistence.",
+    "The network-disabled Node 22 child-process experiment models a documented allowed host teardown. It is explicitly not a measured hosted failure, real DB test, provider execution or compatible hosted artifact.",
+    "Host and application ceilings coincide. Preserve execution semantics and require separate direction for a bounded lifetime adaptation and host budget; no lower deadline, rollout or plan purchase performed.",
+    "Explicit inference eligibility remains separate from client grant and capacity. Configuration/rehearsal is uncompleted; ordinary login is not reclassified as entitlement.",
+    "Historical provider lifecycle, revocation measurement, exact refill and native packaging evidence remain intact; any changed web candidate needs its own acceptance."
+  ],
+  "actual_checks": {
+    "connect": 26,
+    "runtime_services": 43,
+    "transport": 9,
+    "offline_lifetime_cases": 3,
+    "limits": "Existing Node 26 test runner for repository suites; exact Node 22 Linux image for lifecycle experiment. No real hosted probe or new build."
+  },
+  "retained_evidence": [
+    "post-mortem/releases/2026-10-03-hosted-target-enablement.json"
+  ],
+  "review_delta": {
+    "delivery": [
+      "docs/VERCEL_DEPLOYMENT.md"
+    ],
+    "connect": [
+      "docs/operations/galx-connect.md"
+    ],
+    "critical": [
+      "docs/VERCEL_DEPLOYMENT.md",
+      "docs/operations/galx-connect.md",
+      "post-mortem/CURRENT_STATE.md"
+    ]
+  },
+  "unchanged_inventory": "Compared existing domain and critical review fingerprints; only the listed guide/current-state paths differ. No broad source review refresh is implied.",
+  "unmapped_review": "New release records and synthetic fixture evidence are private post-mortem files excluded from runtime and deployment. No new runtime or database source is introduced."
+}

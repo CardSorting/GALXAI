@@ -1,0 +1,282 @@
+{
+  "startedAt": "2026-10-04T01:36:33.624Z",
+  "elapsedMs": 313188,
+  "minimumWindowMs": 300000,
+  "rolledBack": false,
+  "observations": [
+    {
+      "at": "2026-10-04T01:36:33.625Z",
+      "index": 0,
+      "ms": 2,
+      "discovery": 200,
+      "denial": 401,
+      "control": {
+        "ok": true,
+        "owned": true,
+        "fresh": true
+      },
+      "passed": true
+    },
+    {
+      "at": "2026-10-04T01:36:49.266Z",
+      "index": 1,
+      "ms": 15642,
+      "discovery": 200,
+      "denial": 401,
+      "control": {
+        "ok": true,
+        "owned": true,
+        "fresh": true
+      },
+      "passed": true
+    },
+    {
+      "at": "2026-10-04T01:37:04.787Z",
+      "index": 2,
+      "ms": 31163,
+      "discovery": 200,
+      "denial": 401,
+      "control": {
+        "ok": true,
+        "owned": true,
+        "fresh": true
+      },
+      "passed": true
+    },
+    {
+      "at": "2026-10-04T01:37:20.555Z",
+      "index": 3,
+      "ms": 46931,
+      "discovery": 200,
+      "denial": 401,
+      "control": {
+        "ok": true,
+        "owned": true,
+        "fresh": true
+      },
+      "passed": true
+    },
+    {
+      "at": "2026-10-04T01:37:36.170Z",
+      "index": 4,
+      "ms": 62546,
+      "discovery": 200,
+      "denial": 401,
+      "control": {
+        "ok": true,
+        "owned": true,
+        "fresh": true
+      },
+      "passed": true
+    },
+    {
+      "at": "2026-10-04T01:37:51.863Z",
+      "index": 5,
+      "ms": 78239,
+      "discovery": 200,
+      "denial": 401,
+      "control": {
+        "ok": true,
+        "owned": true,
+        "fresh": true
+      },
+      "passed": true
+    },
+    {
+      "at": "2026-10-04T01:38:07.840Z",
+      "index": 6,
+      "ms": 94216,
+      "discovery": 200,
+      "denial": 401,
+      "control": {
+        "ok": true,
+        "owned": true,
+        "fresh": true
+      },
+      "passed": true
+    },
+    {
+      "at": "2026-10-04T01:38:23.373Z",
+      "index": 7,
+      "ms": 109749,
+      "discovery": 200,
+      "denial": 401,
+      "control": {
+        "ok": true,
+        "owned": true,
+        "fresh": true
+      },
+      "passed": true
+    },
+    {
+      "at": "2026-10-04T01:38:38.921Z",
+      "index": 8,
+      "ms": 125297,
+      "discovery": 200,
+      "denial": 401,
+      "control": {
+        "ok": true,
+        "owned": true,
+        "fresh": true
+      },
+      "passed": true
+    },
+    {
+      "at": "2026-10-04T01:38:54.601Z",
+      "index": 9,
+      "ms": 140977,
+      "discovery": 200,
+      "denial": 401,
+      "control": {
+        "ok": true,
+        "owned": true,
+        "fresh": true
+      },
+      "passed": true
+    },
+    {
+      "at": "2026-10-04T01:39:10.225Z",
+      "index": 10,
+      "ms": 156601,
+      "discovery": 200,
+      "denial": 401,
+      "control": {
+        "ok": true,
+        "owned": true,
+        "fresh": true
+      },
+      "passed": true
+    },
+    {
+      "at": "2026-10-04T01:39:25.868Z",
+      "index": 11,
+      "ms": 172244,
+      "discovery": 200,
+      "denial": 401,
+      "control": {
+        "ok": true,
+        "owned": true,
+        "fresh": true
+      },
+      "passed": true
+    },
+    {
+      "at": "2026-10-04T01:39:41.404Z",
+      "index": 12,
+      "ms": 187780,
+      "discovery": 200,
+      "denial": 401,
+      "control": {
+        "ok": true,
+        "owned": true,
+        "fresh": true
+      },
+      "passed": true
+    },
+    {
+      "at": "2026-10-04T01:39:57.057Z",
+      "index": 13,
+      "ms": 203433,
+      "discovery": 200,
+      "denial": 401,
+      "control": {
+        "ok": true,
+        "owned": true,
+        "fresh": true
+      },
+      "passed": true
+    },
+    {
+      "at": "2026-10-04T01:40:12.571Z",
+      "index": 14,
+      "ms": 218947,
+      "discovery": 200,
+      "denial": 401,
+      "control": {
+        "ok": true,
+        "owned": true,
+        "fresh": true
+      },
+      "passed": true
+    },
+    {
+      "at": "2026-10-04T01:40:28.232Z",
+      "index": 15,
+      "ms": 234608,
+      "discovery": 200,
+      "denial": 401,
+      "control": {
+        "ok": true,
+        "owned": true,
+        "fresh": true
+      },
+      "passed": true
+    },
+    {
+      "at": "2026-10-04T01:40:43.763Z",
+      "index": 16,
+      "ms": 250139,
+      "discovery": 200,
+      "denial": 401,
+      "control": {
+        "ok": true,
+        "owned": true,
+        "fresh": true
+      },
+      "passed": true
+    },
+    {
+      "at": "2026-10-04T01:40:59.405Z",
+      "index": 17,
+      "ms": 265781,
+      "discovery": 200,
+      "denial": 401,
+      "control": {
+        "ok": true,
+        "owned": true,
+        "fresh": true
+      },
+      "passed": true
+    },
+    {
+      "at": "2026-10-04T01:41:14.986Z",
+      "index": 18,
+      "ms": 281362,
+      "discovery": 200,
+      "denial": 401,
+      "control": {
+        "ok": true,
+        "owned": true,
+        "fresh": true
+      },
+      "passed": true
+    },
+    {
+      "at": "2026-10-04T01:41:30.707Z",
+      "index": 19,
+      "ms": 297083,
+      "discovery": 200,
+      "denial": 401,
+      "control": {
+        "ok": true,
+        "owned": true,
+        "fresh": true
+      },
+      "passed": true
+    },
+    {
+      "at": "2026-10-04T01:41:46.256Z",
+      "index": 20,
+      "ms": 312632,
+      "discovery": 200,
+      "denial": 401,
+      "control": {
+        "ok": true,
+        "owned": true,
+        "fresh": true
+      },
+      "passed": true
+    }
+  ],
+  "status": "PASSED"
+}

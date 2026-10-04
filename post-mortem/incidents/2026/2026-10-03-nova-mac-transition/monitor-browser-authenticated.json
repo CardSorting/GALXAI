@@ -1,0 +1,22 @@
+{
+  "at": "2026-10-04T01:33:03.285Z",
+  "status": 200,
+  "role": "operator",
+  "fields": [
+    "accounts",
+    "activity",
+    "automaticActivation",
+    "desktopAvailable",
+    "desktops",
+    "executionAllowed",
+    "pool",
+    "registrationAllowed",
+    "registrations",
+    "relayFresh",
+    "role"
+  ],
+  "accountCount": 2,
+  "privateOwnershipAbsent": true,
+  "credentialValuesAbsent": true,
+  "serverOwnershipVerifiedSeparately": true
+}

@@ -1,0 +1,506 @@
+[
+  {
+    "at": "2026-10-04T01:24:57.805Z",
+    "label": "authorization_started",
+    "client": "reference-native",
+    "issuer": "https://galx.ai",
+    "resource": "https://nova.galx.ai",
+    "pkce": "S256"
+  },
+  {
+    "at": "2026-10-04T01:25:38.803Z",
+    "label": "authorization_started",
+    "client": "reference-native",
+    "issuer": "https://galx.ai",
+    "resource": "https://nova.galx.ai",
+    "pkce": "S256"
+  },
+  {
+    "at": "2026-10-04T01:26:04.781Z",
+    "label": "token_exchange",
+    "status": 200,
+    "fields": [
+      "access_token",
+      "expires_in",
+      "refresh_token",
+      "scope",
+      "token_type"
+    ],
+    "scope": "inference:invoke",
+    "expires_in": 300,
+    "providerCredentialsReceived": false
+  },
+  {
+    "at": "2026-10-04T01:26:04.783Z",
+    "label": "connected",
+    "connected": true
+  },
+  {
+    "at": "2026-10-04T01:26:18.725Z",
+    "label": "denial_probe",
+    "status": 403,
+    "elapsed_ms": 765,
+    "body": {
+      "error": {
+        "code": "inference_access_required",
+        "message": "Your account does not currently have inference access. Your application is still connected.",
+        "execution_state": "not_accepted"
+      }
+    },
+    "contentType": "application/json",
+    "cacheControl": "private, no-store",
+    "bodySha256": "59a9ea7c835b61deac0554c3c590b5e0067a223c8c8791f62817654cbfa6e509"
+  },
+  {
+    "at": "2026-10-04T01:26:18.825Z",
+    "label": "missing",
+    "status": 401,
+    "elapsed_ms": 99,
+    "body": {
+      "error": {
+        "code": "invalid_token",
+        "message": "Connect this application again to continue.",
+        "execution_state": "not_accepted"
+      }
+    },
+    "contentType": "application/json",
+    "cacheControl": "private, no-store",
+    "bodySha256": "75e15d2f5d2f5fa2d84873258e6b1befb5ba4dbf4b5e69b26afbab80dd7bad4d"
+  },
+  {
+    "at": "2026-10-04T01:26:18.926Z",
+    "label": "media_cookie_only",
+    "status": 401,
+    "elapsed_ms": 101,
+    "body": {
+      "error": {
+        "code": "invalid_token",
+        "message": "Connect this application again to continue.",
+        "execution_state": "not_accepted"
+      }
+    },
+    "contentType": "application/json",
+    "cacheControl": "private, no-store",
+    "bodySha256": "75e15d2f5d2f5fa2d84873258e6b1befb5ba4dbf4b5e69b26afbab80dd7bad4d"
+  },
+  {
+    "at": "2026-10-04T01:26:19.049Z",
+    "label": "malformed",
+    "status": 401,
+    "elapsed_ms": 123,
+    "body": {
+      "error": {
+        "code": "invalid_token",
+        "message": "Connect this application again to continue.",
+        "execution_state": "not_accepted"
+      }
+    },
+    "contentType": "application/json",
+    "cacheControl": "private, no-store",
+    "bodySha256": "75e15d2f5d2f5fa2d84873258e6b1befb5ba4dbf4b5e69b26afbab80dd7bad4d"
+  },
+  {
+    "at": "2026-10-04T01:26:19.284Z",
+    "label": "nonexistent",
+    "status": 401,
+    "elapsed_ms": 235,
+    "body": {
+      "error": {
+        "code": "invalid_token",
+        "message": "Connect this application again to continue.",
+        "execution_state": "not_accepted"
+      }
+    },
+    "contentType": "application/json",
+    "cacheControl": "private, no-store",
+    "bodySha256": "75e15d2f5d2f5fa2d84873258e6b1befb5ba4dbf4b5e69b26afbab80dd7bad4d"
+  },
+  {
+    "at": "2026-10-04T01:26:19.557Z",
+    "label": "unauthorized_browser",
+    "status": 401,
+    "elapsed_ms": 273,
+    "body": {
+      "error": {
+        "code": "invalid_token",
+        "message": "Connect this application again to continue.",
+        "execution_state": "not_accepted"
+      }
+    },
+    "contentType": "application/json",
+    "cacheControl": "private, no-store",
+    "bodySha256": "75e15d2f5d2f5fa2d84873258e6b1befb5ba4dbf4b5e69b26afbab80dd7bad4d"
+  },
+  {
+    "at": "2026-10-04T01:26:19.787Z",
+    "label": "wrong_audience",
+    "status": 400,
+    "elapsed_ms": 0,
+    "body": {
+      "error": "invalid_target",
+      "error_description": "This service is not supported."
+    },
+    "contentType": "application/json",
+    "cacheControl": "private, no-store",
+    "bodySha256": "7604739e2283d41bf39218b3cf2f157a7633c8648de4e9029a62ae9cae1ed1e1"
+  },
+  {
+    "at": "2026-10-04T01:26:19.983Z",
+    "label": "wrong_client",
+    "status": 400,
+    "elapsed_ms": 1,
+    "body": {
+      "error": "invalid_client",
+      "error_description": "This application is not supported."
+    },
+    "contentType": "application/json",
+    "cacheControl": "private, no-store",
+    "bodySha256": "25a8963a6b5ea15cfe41c76fa46b904eb38b76e94fb6fa2f2b9c65b735daa289"
+  },
+  {
+    "at": "2026-10-04T01:26:20.152Z",
+    "label": "missing_scope",
+    "status": 400,
+    "elapsed_ms": 0,
+    "body": {
+      "error": "invalid_scope",
+      "error_description": "This permission is not supported."
+    },
+    "contentType": "application/json",
+    "cacheControl": "private, no-store",
+    "bodySha256": "63516f884fc3bac6cc1aae0bf1d88818cbe5f5e14dd7df11c1e0d1e6c6127a81"
+  },
+  {
+    "at": "2026-10-04T01:26:43.466Z",
+    "label": "completion",
+    "target": "https://nova-acceptance-20261003.galx.ai",
+    "status": 200,
+    "requestKey": "ad72e1a4-0597-47c1-8428-9fff55a78b21",
+    "requestId": "9b426e92-fe42-4a24-945a-cb71a404a06e",
+    "firstByteMs": 3393,
+    "firstContentMs": 3394,
+    "totalMs": 3645,
+    "bytes": 1066,
+    "chunks": 6,
+    "frames": 7,
+    "finishReason": "stop",
+    "done": true,
+    "cancelled": false,
+    "outputCharacters": 18,
+    "outputSha256": "d5705b58f54c47d03716ca0176d9b3c450889d8850aa516b4b23a2636dee7c06",
+    "expectedReply": false,
+    "automaticReplay": false
+  },
+  {
+    "at": "2026-10-04T01:27:01.179Z",
+    "label": "duplicate",
+    "status": 409,
+    "elapsed_ms": 553,
+    "body": {
+      "error": {
+        "code": "request_already_submitted",
+        "message": "This request was already submitted. It has not been started again.",
+        "execution_state": "completed"
+      }
+    },
+    "contentType": "application/json",
+    "cacheControl": "private, no-store",
+    "bodySha256": "dc06223c0815b58fbf355e9ee17d52f49999e0bc1647e3ca49cc57272a2954f6"
+  },
+  {
+    "at": "2026-10-04T01:27:17.634Z",
+    "label": "interruption",
+    "target": "https://nova-acceptance-20261003.galx.ai",
+    "status": 200,
+    "requestKey": "c24f30c9-82fc-4a2e-9af8-53b6a82edfb5",
+    "requestId": "7633fed6-7036-4b4c-b7e0-aa847f32343d",
+    "firstByteMs": 4072,
+    "firstContentMs": 4072,
+    "totalMs": 4077,
+    "bytes": 175,
+    "chunks": 1,
+    "frames": 1,
+    "finishReason": null,
+    "done": false,
+    "cancelled": true,
+    "outputCharacters": 1,
+    "outputSha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+    "expectedReply": false,
+    "automaticReplay": false
+  },
+  {
+    "at": "2026-10-04T01:27:40.807Z",
+    "label": "duplicate",
+    "status": 409,
+    "elapsed_ms": 564,
+    "body": {
+      "error": {
+        "code": "request_already_submitted",
+        "message": "This request was already submitted. It has not been started again.",
+        "execution_state": "unknown"
+      }
+    },
+    "contentType": "application/json",
+    "cacheControl": "private, no-store",
+    "bodySha256": "d33ef894156421b9772f0b9161f7eb47451285e24625e71a92ba680e384f2dfd"
+  },
+  {
+    "at": "2026-10-04T01:27:41.967Z",
+    "label": "refresh",
+    "status": 200,
+    "rotated": true,
+    "ms": 1159
+  },
+  {
+    "at": "2026-10-04T01:27:42.233Z",
+    "label": "revocation_acknowledgement",
+    "status": 200,
+    "elapsed_ms": 0,
+    "body": {
+      "bytes": 0
+    },
+    "contentType": null,
+    "cacheControl": "private, no-store",
+    "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "at": "2026-10-04T01:27:42.546Z",
+    "label": "post_revocation",
+    "status": 401,
+    "elapsed_ms": 312,
+    "body": {
+      "error": {
+        "code": "invalid_token",
+        "message": "Connect this application again to continue.",
+        "execution_state": "not_accepted"
+      }
+    },
+    "contentType": "application/json",
+    "cacheControl": "private, no-store",
+    "bodySha256": "75e15d2f5d2f5fa2d84873258e6b1befb5ba4dbf4b5e69b26afbab80dd7bad4d"
+  },
+  {
+    "at": "2026-10-04T01:27:42.546Z",
+    "label": "revocation_measurement",
+    "millisecondsAfterAcknowledgement": 313,
+    "denied": true
+  },
+  {
+    "at": "2026-10-04T01:27:43.027Z",
+    "label": "refresh_after_revocation",
+    "status": 400,
+    "error": "invalid_grant",
+    "authorityRestored": false
+  },
+  {
+    "at": "2026-10-04T01:29:15.222Z",
+    "label": "denial_probe",
+    "status": 401,
+    "elapsed_ms": 737,
+    "body": {
+      "error": {
+        "code": "invalid_token",
+        "message": "Connect this application again to continue.",
+        "execution_state": "not_accepted"
+      }
+    },
+    "contentType": "application/json",
+    "cacheControl": "private, no-store",
+    "bodySha256": "75e15d2f5d2f5fa2d84873258e6b1befb5ba4dbf4b5e69b26afbab80dd7bad4d"
+  },
+  {
+    "at": "2026-10-04T01:29:15.225Z",
+    "label": "authorization_started",
+    "client": "reference-native",
+    "issuer": "https://galx.ai",
+    "resource": "https://nova.galx.ai",
+    "pkce": "S256"
+  },
+  {
+    "at": "2026-10-04T01:30:58.464Z",
+    "label": "token_exchange",
+    "status": 200,
+    "fields": [
+      "access_token",
+      "expires_in",
+      "refresh_token",
+      "scope",
+      "token_type"
+    ],
+    "scope": "inference:invoke",
+    "expires_in": 300,
+    "providerCredentialsReceived": false
+  },
+  {
+    "at": "2026-10-04T01:30:58.465Z",
+    "label": "connected",
+    "connected": true
+  },
+  {
+    "at": "2026-10-04T01:33:05.411Z",
+    "label": "denial_probe",
+    "status": 503,
+    "elapsed_ms": 934,
+    "body": {
+      "error": {
+        "code": "service_busy",
+        "message": "Inference is busy. Try again later; your application is still connected.",
+        "execution_state": "not_accepted"
+      }
+    },
+    "contentType": "application/json",
+    "cacheControl": "private, no-store",
+    "bodySha256": "31e8434b95aedbcbd07888d5407d51976419cb09030003a966a1d4c594c51fbe"
+  },
+  {
+    "at": "2026-10-04T01:36:32.268Z",
+    "label": "target_selected",
+    "target": "https://nova.galx.ai"
+  },
+  {
+    "at": "2026-10-04T01:36:33.709Z",
+    "label": "token_exchange",
+    "status": 200,
+    "fields": [
+      "access_token",
+      "expires_in",
+      "refresh_token",
+      "scope",
+      "token_type"
+    ],
+    "scope": "inference:invoke",
+    "expires_in": 300,
+    "providerCredentialsReceived": false
+  },
+  {
+    "at": "2026-10-04T01:36:37.398Z",
+    "label": "completion",
+    "target": "https://nova.galx.ai",
+    "status": 200,
+    "requestKey": "ed98a78b-4781-4257-b745-41902aa3d627",
+    "requestId": "bf436251-b869-419f-a95a-914ab32eaa51",
+    "firstByteMs": 5061,
+    "firstContentMs": 5061,
+    "totalMs": 5125,
+    "bytes": 1066,
+    "chunks": 5,
+    "frames": 7,
+    "finishReason": "stop",
+    "done": true,
+    "cancelled": false,
+    "outputCharacters": 18,
+    "outputSha256": "d5705b58f54c47d03716ca0176d9b3c450889d8850aa516b4b23a2636dee7c06",
+    "expectedReply": false,
+    "automaticReplay": false
+  },
+  {
+    "at": "2026-10-04T01:37:26.312Z",
+    "label": "duplicate",
+    "status": 409,
+    "elapsed_ms": 692,
+    "body": {
+      "error": {
+        "code": "request_already_submitted",
+        "message": "This request was already submitted. It has not been started again.",
+        "execution_state": "completed"
+      }
+    },
+    "contentType": "application/json",
+    "cacheControl": "private, no-store",
+    "bodySha256": "dc06223c0815b58fbf355e9ee17d52f49999e0bc1647e3ca49cc57272a2954f6"
+  },
+  {
+    "at": "2026-10-04T01:37:29.619Z",
+    "label": "interruption",
+    "target": "https://nova.galx.ai",
+    "status": 200,
+    "requestKey": "453eaf87-fbaa-4725-8895-fea3fb66aa38",
+    "requestId": "425f9e1e-d971-4d10-b01d-ce731b26e1ea",
+    "firstByteMs": 3302,
+    "firstContentMs": 3302,
+    "totalMs": 3304,
+    "bytes": 175,
+    "chunks": 1,
+    "frames": 1,
+    "finishReason": null,
+    "done": false,
+    "cancelled": true,
+    "outputCharacters": 1,
+    "outputSha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+    "expectedReply": false,
+    "automaticReplay": false
+  },
+  {
+    "at": "2026-10-04T01:38:00.014Z",
+    "label": "duplicate",
+    "status": 409,
+    "elapsed_ms": 512,
+    "body": {
+      "error": {
+        "code": "request_already_submitted",
+        "message": "This request was already submitted. It has not been started again.",
+        "execution_state": "unknown"
+      }
+    },
+    "contentType": "application/json",
+    "cacheControl": "private, no-store",
+    "bodySha256": "d33ef894156421b9772f0b9161f7eb47451285e24625e71a92ba680e384f2dfd"
+  },
+  {
+    "at": "2026-10-04T01:38:00.674Z",
+    "label": "revocation_acknowledgement",
+    "status": 200,
+    "elapsed_ms": 2,
+    "body": {
+      "bytes": 0
+    },
+    "contentType": null,
+    "cacheControl": "private, no-store",
+    "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "at": "2026-10-04T01:38:00.924Z",
+    "label": "post_revocation",
+    "status": 401,
+    "elapsed_ms": 249,
+    "body": {
+      "error": {
+        "code": "invalid_token",
+        "message": "Connect this application again to continue.",
+        "execution_state": "not_accepted"
+      }
+    },
+    "contentType": "application/json",
+    "cacheControl": "private, no-store",
+    "bodySha256": "75e15d2f5d2f5fa2d84873258e6b1befb5ba4dbf4b5e69b26afbab80dd7bad4d"
+  },
+  {
+    "at": "2026-10-04T01:38:00.924Z",
+    "label": "revocation_measurement",
+    "millisecondsAfterAcknowledgement": 252,
+    "denied": true
+  },
+  {
+    "at": "2026-10-04T01:38:01.396Z",
+    "label": "refresh_after_revocation",
+    "status": 400,
+    "error": "invalid_grant",
+    "authorityRestored": false
+  },
+  {
+    "at": "2026-10-04T01:46:16.574Z",
+    "label": "denial_probe",
+    "status": 401,
+    "elapsed_ms": 748,
+    "body": {
+      "error": {
+        "code": "invalid_token",
+        "message": "Connect this application again to continue.",
+        "execution_state": "not_accepted"
+      }
+    },
+    "contentType": "application/json",
+    "cacheControl": "private, no-store",
+    "bodySha256": "75e15d2f5d2f5fa2d84873258e6b1befb5ba4dbf4b5e69b26afbab80dd7bad4d"
+  }
+]

@@ -1,0 +1,68 @@
+{
+  "kind": "bounded-local-release-verification",
+  "observed_at": "2026-10-04T02:22:08.962294+00:00",
+  "base_revision": "38a3cc48f32f5f404592109c8cae3ddac5fa6f61",
+  "scope": "Commit and production push of completed Connect/Nova transition and non-disruptive resilience work. This review renews the unchanged billing contract review; it does not authorize commercial activation.",
+  "billing_review": {
+    "unchanged_fingerprint_count": 110,
+    "fingerprint_drift": [],
+    "source_reviewed": [
+      "src/lib/billing/commercial-launch.ts",
+      "src/lib/billing/checkout.ts",
+      "src/lib/billing/orbit.ts",
+      "src/lib/billing/plan-subscription.ts"
+    ],
+    "guides_reviewed": [
+      "docs/maintainers/ORBIT_FOUNDRY.md",
+      "docs/reference/billing-pages.md",
+      "docs/runbooks/stripe-webhook-delivery.md"
+    ],
+    "findings": [
+      "Live recurring sales remain disabled in source. Retired top-up checkout remains side-effect-free and closed.",
+      "Checkout creation retains mode/account binding, durable idempotency, bounded ownership checks, automatic tax and required current billing address.",
+      "Webhook authority remains signed server-side confirmation, not the browser success page. Fresh local tests reject invalid or missing signatures, incorrect payment mode and oversized bodies.",
+      "Current commercial guides retain their separate real-provider and public-release gates. ACT-038 and other public-release actions are not closed by this review."
+    ],
+    "limitations": [
+      "This is a bounded review of current checkout/release contracts and unchanged domain fingerprints, not a new audit of every billing source or historical reference.",
+      "docs/WALLET_AND_BILLING_STRATEGY.md remains an older domain-reference; current instructions are the reviewed canonical guides.",
+      "No Stripe API calls, payment, price change, registration change, SDK upgrade, billing configuration change or live financial acceptance was performed."
+    ]
+  },
+  "fresh_checks": {
+    "billing_lifecycle": {
+      "passed": 20,
+      "webhook_endpoint_check": "passed"
+    },
+    "orbit": {
+      "passed": 24
+    },
+    "connect": "passed",
+    "retired_vercel_inference": "passed",
+    "public_image_security": {
+      "passed": 69
+    },
+    "clean_index_documentation": "passed in an independent Git checkout without ignored runtime state"
+  },
+  "evidence": {
+    "post-mortem/incidents/2026/2026-10-03-production-git-push/billing-tests.log": {
+      "sha256": "5632c15dbdf0647d632100e33881e33bca0c175a10ff96aa9fee8cc571d1be2d"
+    },
+    "post-mortem/incidents/2026/2026-10-03-production-git-push/orbit-tests.log": {
+      "sha256": "5e6765382ab2c5f5cc920bf4ea9b25771074c9bfa481f8c6c9407c91a468e7cf"
+    },
+    "post-mortem/incidents/2026/2026-10-03-production-git-push/connect-tests.log": {
+      "sha256": "8b95837c4bb4b03feadba1590d9148f46f62d0e21098c738b11d253ce11268bb"
+    },
+    "post-mortem/incidents/2026/2026-10-03-production-git-push/retirement-tests.log": {
+      "sha256": "f86f2dfbe8c37ad783634ac6aeec32b526c9fc6fa3c6efaa6e29dfe835e2793d"
+    },
+    "post-mortem/incidents/2026/2026-10-03-production-git-push/image-security.log": {
+      "sha256": "84f1b7b5a020fe84163f87d934b0737b4cbfb67b6fc8357e6e679b385a61e8d8"
+    },
+    "post-mortem/incidents/2026/2026-10-03-production-git-push/clean-docs-reviewed.log": {
+      "sha256": "d07777995ae309a03fefc4511629492b664ed23f93cffdb8d55f8e42d04df80a"
+    }
+  },
+  "host_constraints": "No physical host lifecycle test, system power setting change, shared ingress restart, provider inference or accepted Mac image replacement."
+}

@@ -1,0 +1,11 @@
+{
+  "directory": "/Users/bozoegg/Desktop/GALXAI/.relay/mac-production/package-05",
+  "manifestSha256": "2afadf8c22f92685245228d805d6f5fac658c108ed105ad585c1c33b7be3976d",
+  "tracedFiles": 4514,
+  "startupTraceFiles": 1956,
+  "startupTraceWarnings": 122,
+  "comparedToAcceptedArtifact": 2382,
+  "bytesChanged": 0,
+  "publicFilesScanned": 819,
+  "applicationBytes": 180681732
+}

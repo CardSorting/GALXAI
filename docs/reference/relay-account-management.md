@@ -24,7 +24,7 @@ The fixed Premium monitor uses port 13311 on loopback and the runtime uses port 
 
 ## Durable schema
 
-The main migration set contains the manual desktop policy, central foundation `20260915073601`, central authorization `20260915081527`, legacy assignment guard `20260915163434`, management `20260915191404`, connection lifecycle `20260916013944`, automatic activation `20260916040459` and reuse-safe registry revisions `20260919090000`. Each execution project contains only its fixed execution migration `20260915082628`. Never apply the application's migration directory to either execution project.
+The main migration set contains the manual desktop policy, central foundation `20260915073601`, central authorization `20260915081527`, legacy assignment guard `20260915163434`, management `20260915191404`, connection lifecycle `20260916013944`, automatic activation `20260916040459` and reuse-safe registry revisions `20260919090000`. The active execution project contains the fixed execution migration `20260915082628` and neutral-outcome correction `20261003195250`; both live only under `deploy/relay-execution/supabase/migrations`. Never apply the application's migration directory to either execution project.
 
 | Main-project relation | Purpose |
 | --- | --- |
@@ -40,6 +40,16 @@ The main migration set contains the manual desktop policy, central foundation `2
 | `private.galx_relay_lease_bindings` | Destination/workload/epoch binding to the existing account lease ledger |
 
 Private relations use forced RLS and explicit privilege denial. Application, ordinary authenticated, service, desktop-writer and control roles cannot directly read/write the management journal. Narrow SQL functions check service principal and scope. Database owners remain trusted; this does not contain a malicious owner.
+
+## Exact operational refill
+
+Primary migration `20261003202702` corrects fractional refill arithmetic without changing this account's configured capacity, rate or admission rules. It is a verified staged correction; [current state](../../post-mortem/CURRENT_STATE.md) distinguishes its fixture acceptance from target application.
+
+The existing account row lock serializes refill and admission. Authoritative state is the integer balance, persisted millisecond timestamp and separate exact token/request numerators. One whole unit is `3,000,000,000` numerator units, representing both legacy nine-decimal fractions and integer units/minute evaluated at millisecond resolution. New credit is `elapsed_ms × rate_per_minute × 50,000`; integer quotient and remainder determine the new balance and fractional carry. Requests keep the existing rate of `max_requests` per minute. Cap the balance before bounded integer conversion and discard excess credit at full capacity.
+
+Nullable numerators initialize once from retained legacy fractions under that lock. Legacy remainder columns thereafter contain truncated compatibility projections and never feed initialized exact state. No backfill or historical execution rewrite is needed. The timestamp never moves backward; repeated reads cannot count an interval twice. A new process reconstructs the same credit from these persisted values. This remains an operational capacity bound, independent of Connect identity/entitlement/grants, provider evidence and execution outcomes.
+
+`npm run test:relay:refill-db` owns boundary, partition, restart, race and privilege checks. [Migration recovery](../maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md#exact-operational-refill) preserves exact state and closes new admission on rollback; it does not restore known-broken rounding.
 
 ## Manual registration and renewal
 
@@ -99,30 +109,32 @@ Management requests carry an expected revision and immutable operation ID. Store
 
 Dialogs name the affected record and consequence. Removal initially focuses Cancel. Rename keeps the draft on error. Close and refresh after a conflict before reviewing and explicitly retrying. Browser session storage retains non-secret exact intent when available. No uncertain mutation or generation retries automatically.
 
-## Health, filters and confirmation
+## Request status, filters and confirmation
 
-Accounts combine name search, Status and Health filters with **Issues first** or **Name A–Z** sorting. A summary links to attention items. Default lists/counts exclude removed records; Removed is a separate status. Connections has its own search and active, attention, in-progress, ready, registered, unknown and removed filters. Filtering only uses the already-authorized own-pool snapshot.
+Accounts combine name search, Status and Request status filters with **Issues first** or **Name A–Z** sorting. A summary links to attention items. Default lists/counts exclude removed records; Removed is a separate status. Connections has its own search and active, attention, in-progress, ready, registered, unknown and removed filters. Filtering only uses the already-authorized own-pool snapshot.
 
 | Condition | Presentation |
 | --- | --- |
 | Expired, unconfirmed or explicitly rejected sign-in | Reconnect required; repair the existing connection |
 | Central access unavailable | Access unavailable; inspect saved sign-in |
 | Reported cooldown or future cooldown deadline | Cooling down; respect the recorded limit |
-| At least three consecutive reported failures | Repeated failures; review before enabling |
+| At least three retained failures | Previous requests failed; advisory history does not block reconnect or independently authorized Enable |
 | Allowed execution, unmatched revision, at least 90 seconds since save | Update not confirmed; inspect the owning runtime |
 | Monitor disconnected or relay confirmation unavailable | Status unavailable/Awaiting relay; unknown health, not an account failure |
-| Current metadata with no detected issue | No issues detected; not proof of a successful provider request |
+| Current credentials and no current access block | Availability unknown; each request supplies its own result, with no continuous upstream health verdict |
 | Removed registration with a still-running desktop | Desktop still running; stop to finish cleanup |
 
-Health uses an icon, label and explanation. Saved state is distinct from relay confirmation. Applied requires a non-future heartbeat younger than 45 seconds and matching revision/epoch. Connections needing attention stay expanded in the main list; healthy completed connections collapse under Connected accounts. Errors appear once beside the affected action. A registered account inherits account health even when its desktop is stopped; unfinished registration needs a usable desktop to proceed. Polling is every ten seconds while visible and preserves filters, disclosures and useful focus. Refresh failure retains a labeled snapshot and disables mutations.
+Request status uses an icon, label and explanation. Enable eligibility is separate from warning attention: disconnected/stale monitor state, operator holds, removal/revocation, expired/rejected sign-in, explicit unavailable access and an unexpired cooldown still block it. Failure history and neutral unknown observations do not. Saving a replacement remains an explicit registrar action under the registration gate. Saved state is distinct from relay confirmation. Applied requires a non-future heartbeat younger than 45 seconds and matching revision/epoch. Connections needing attention stay expanded in the main list; completed connections without attention collapse under Connected accounts. Errors appear once beside the affected action. A registered account inherits account health even when its desktop is stopped; unfinished registration needs a usable desktop to proceed. Polling is every ten seconds while visible and preserves filters, disclosures and useful focus. Refresh failure retains a labeled snapshot and disables mutations.
 
 ## Execution and recovery
 
 The runtime claims its installation epoch, recovers old execution records and reconciles scoped accounts. Central owner handoff requires the prior heartbeat to be over 60 seconds old; no startup override weakens that check. The runtime selects among its own matching engines and persists identity before acquiring/binding the central account lease.
 
-Premium uses health-aware account rotation across models, with up to four ongoing jobs per healthy account, immediate provider-cooldown exclusion and bounded backoff after explicit central admission denial. Reconciliation refreshes cooldown/model observations even without a control revision change. These local admission restrictions do not introduce another account budget or change management authority. The monitor's central health snapshot is not live local scheduling telemetry; a busy response alone does not identify a broken registration.
+Premium uses current eligibility and request evidence for account rotation across models, with up to four ongoing jobs per eligible account, immediate provider-cooldown exclusion and bounded backoff after explicit central admission denial. Reconciliation refreshes cooldown/model observations even without a control revision change. These local admission restrictions do not introduce another account budget or change management authority. The monitor's central health snapshot is not live local scheduling telemetry; a busy response alone does not identify a broken registration.
 
 Grants last 30 seconds and renew every eight seconds, with independent expiry and a ten-minute central maximum. Central outage denies new grants and renewal. Account changes invalidate old authorization. Pause in this implementation stops old engines/renewal; it is not the legacy hold that preserves a worker and lets all accepted work drain normally.
+
+Provider evidence is nullable end to end: confirmed completion is `true`; a reported provider availability failure is `false`; cancellation, deadlines, lost transport, local failures and restart recovery are `null`. Request/model rejection is neutral to the account. Central settlement already supports `null`, which releases the lease without changing success/failure counters. This is distinct from the retained execution state: an unconfirmed result remains terminal `unknown`, including when a concrete negative response cannot establish a completed result. No automatic replay follows. Existing records and prior counters are not rewritten.
 
 Terminal writes and original lease settlement can retry. Unconfirmed terminal writes block new local admission. Restart marks incomplete work unknown without redispatch. A crash between acquire and local bind may leave a lease to expire; it cannot authorize another provider attempt. Retained records do not guarantee artifact/receipt retrieval after account removal or epoch replacement. No cross-host job migration exists.
 
@@ -137,5 +149,7 @@ Operational snapshots, topology, provider access details and audit records remai
 ## Verification and rollback
 
 The [management release](../../post-mortem/releases/2026-09-15-relay-account-management.json) records applied central schema, final local image IDs, database/authorization tests, 28 browser variants, 69 live checks and installed monitor acceptance. The later [connection acceptance](../../post-mortem/incidents/2026/2026-09-16-relay-registration/connection-lifecycle.json) records retirement of 56 unused legacy credentials and one manually verified Premium connection, paused and acknowledged. The later [automatic activation release](../../post-mortem/releases/2026-09-16-relay-automatic-activation.json) records the installed Premium policy. Generation qualification and public application cutover remain separate. Do not turn an old count into a live health claim.
+
+The [October 3 outcome correction](../../post-mortem/releases/2026-10-03-neutral-outcomes.json) records an installed runtime, matching monitor server/UI and execution-function correction. A new real streaming cancellation settled as `unknown`/neutral, left the prior failure count at one and preserved earlier completed/unknown records.
 
 Use the [database procedure](../maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md) and [local service procedure](../runbooks/relay-pool-services.md). Close gates before rollback, preserve assignments, removed markers, journals, homes and original operations. The automatic-activation DOWN disarms automation and closes both gates/protocol while retaining policy and history. The lifecycle DOWN closes both gates and protocol access while retaining retired tombstones and rejection evidence. The management DOWN similarly retains schema/history; it does not undo revocation or revive accounts. Image rollback alone cannot roll back central state.

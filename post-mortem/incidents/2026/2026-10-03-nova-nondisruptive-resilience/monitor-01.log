@@ -1,0 +1,24 @@
+node:internal/errors:999
+  const err = new Error(message);
+              ^
+
+Error: Command failed: docker --context colima-premium run --rm --name galx-monitor-package-7e2f28a9-ed33-4363-9885-66d687b2876e --label galx.package.check=7e2f28a9-ed33-4363-9885-66d687b2876e --network none --read-only --cap-drop ALL --security-opt no-new-privileges:true --pids-limit 128 --memory 512m --tmpfs /tmp:rw,nosuid,nodev,size=16777216 --tmpfs /state:rw,nosuid,nodev,uid=1000,gid=1000,mode=0700,size=16777216 --tmpfs /run/secrets:rw,nosuid,nodev,uid=1000,gid=1000,mode=0700,size=1048576 --mount type=bind,src=/var/folders/98/ss6g9t1x6_b1gppqp2d64ftr0000gn/T/galx-monitor-package-UM5xil,dst=/checks,readonly --env DOCKER_HOST=unix:///tmp/fixture-docker.sock --entrypoint node sha256:0ab24b83ce3f2536f88b3994a716671d7b87495ebc5bdb90c5cafa3a50aa05ed /checks/check.mjs --inside
+docker: Error response from daemon: invalid mount config for type "bind": bind source path does not exist: /var/folders/98/ss6g9t1x6_b1gppqp2d64ftr0000gn/T/galx-monitor-package-UM5xil.
+See 'docker run --help'.
+
+    at genericNodeError (node:internal/errors:999:15)
+    at wrappedFn (node:internal/errors:544:14)
+    at ChildProcess.exithandler (node:child_process:417:12)
+    at ChildProcess.emit (node:events:514:20)
+    at maybeClose (node:internal/child_process:1125:16)
+    at ChildProcess._handle.onexit (node:internal/child_process:305:5) {
+  code: 125,
+  killed: false,
+  signal: null,
+  cmd: 'docker --context colima-premium run --rm --name galx-monitor-package-7e2f28a9-ed33-4363-9885-66d687b2876e --label galx.package.check=7e2f28a9-ed33-4363-9885-66d687b2876e --network none --read-only --cap-drop ALL --security-opt no-new-privileges:true --pids-limit 128 --memory 512m --tmpfs /tmp:rw,nosuid,nodev,size=16777216 --tmpfs /state:rw,nosuid,nodev,uid=1000,gid=1000,mode=0700,size=16777216 --tmpfs /run/secrets:rw,nosuid,nodev,uid=1000,gid=1000,mode=0700,size=1048576 --mount type=bind,src=/var/folders/98/ss6g9t1x6_b1gppqp2d64ftr0000gn/T/galx-monitor-package-UM5xil,dst=/checks,readonly --env DOCKER_HOST=unix:///tmp/fixture-docker.sock --entrypoint node sha256:0ab24b83ce3f2536f88b3994a716671d7b87495ebc5bdb90c5cafa3a50aa05ed /checks/check.mjs --inside',
+  stdout: '',
+  stderr: 'docker: Error response from daemon: invalid mount config for type "bind": bind source path does not exist: /var/folders/98/ss6g9t1x6_b1gppqp2d64ftr0000gn/T/galx-monitor-package-UM5xil.\n' +
+    "See 'docker run --help'.\n"
+}
+
+Node.js v26.8.1

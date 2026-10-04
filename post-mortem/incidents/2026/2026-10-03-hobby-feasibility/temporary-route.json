@@ -1,0 +1,10 @@
+{
+  "at": "2026-10-03T22:38:41.013Z",
+  "version": 13,
+  "rule": {
+    "hostname": "images-service.galx.ai",
+    "path": "^/_transport_probe/dd1788f85ba195eb5ffdd965/(ready|json|stream)$",
+    "service": "http://host.docker.internal:13392"
+  },
+  "syntheticOnly": true
+}

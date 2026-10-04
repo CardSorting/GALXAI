@@ -1,0 +1,5 @@
+[
+  "src/lib/nova/contract.ts",
+  "src/lib/nova/inference.ts",
+  ".relay/hobby-observation/observe.ts"
+]

@@ -1,0 +1,86 @@
+{
+  "active": {
+    "projectKey": "prj_NmtiUenK2cf924eREKuCgiDS0uC4#active",
+    "version": 1,
+    "ownerId": "team_mlJF16byaaURWNNfkpk72mVy",
+    "crs": {
+      "sd": {
+        "active": false,
+        "action": "log"
+      },
+      "gen": {
+        "active": false,
+        "action": "log"
+      },
+      "sf": {
+        "active": false,
+        "action": "log"
+      },
+      "java": {
+        "active": false,
+        "action": "log"
+      },
+      "ma": {
+        "active": false,
+        "action": "log"
+      },
+      "rfi": {
+        "active": false,
+        "action": "log"
+      },
+      "rce": {
+        "active": false,
+        "action": "log"
+      },
+      "php": {
+        "active": false,
+        "action": "log"
+      },
+      "xss": {
+        "active": false,
+        "action": "log"
+      },
+      "lfi": {
+        "active": false,
+        "action": "log"
+      },
+      "sqli": {
+        "active": false,
+        "action": "log"
+      }
+    },
+    "changes": [],
+    "firewallEnabled": true,
+    "ips": [],
+    "id": "waf_tH6pQvVg0gkA",
+    "updatedAt": "2026-10-04T01:34:29.281Z",
+    "rules": [
+      {
+        "name": "Retired inference entry points",
+        "description": "Retire legacy compute execution; preserve Media, image generation and shared Connect.",
+        "active": true,
+        "action": {
+          "mitigate": {
+            "action": "deny"
+          }
+        },
+        "id": "rule_retired_inference_entry_points_woXEEL",
+        "conditionGroup": [
+          {
+            "conditions": [
+              {
+                "type": "path",
+                "op": "re",
+                "value": "^/(v1/(inference|chat/completions|completions|messages|embeddings)/?$|api/(chat|generate|run)/?$|api/queues(/.*)?$)"
+              }
+            ]
+          }
+        ],
+        "valid": true,
+        "validationErrors": null
+      }
+    ]
+  },
+  "draft": null,
+  "versions": []
+}

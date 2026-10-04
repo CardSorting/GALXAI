@@ -1,0 +1,42 @@
+{
+  "sourceRevision": "38a3cc48f32f5f404592109c8cae3ddac5fa6f61",
+  "workingTreeSnapshot": true,
+  "sourceManifestSha256": "0360f576c586b5be0ef9a3a86a12806ef188100ee1a78022a6e51f7a5da2753d",
+  "sourceFiles": 1655,
+  "dependencyLockSha256": "17ec13ed2df5810416a9c52ab5cc772e15adcaec679bbafd9a2a61ac3b4742f1",
+  "builder": {
+    "image": "node@sha256:43aeff40f4afc22e83f7589a2f37e111cff5ca84529571f1c8415bcc5fcc21b2",
+    "platform": "linux/amd64",
+    "node": "22.23.2",
+    "cli": "48.5.0"
+  },
+  "publicBuildInputSha256": "50b70630f12d58caee09369795ff5720d9d624bb34a512da41d36410941545ea",
+  "compiledPayloadSha256": "ce1b474421c42610451b65695e4802c8918d08336a9af41819ab44e8a51302bc",
+  "compiledHashAlgorithm": "SHA-256 of JSON.stringify(sorted map of runtime/.next/server and runtime/.next/static relative paths to file SHA-256; keys sorted by JavaScript localeCompare)",
+  "compiledFiles": 1964,
+  "novaRouteSha256": "b08890da4294b1bb16b81fdfcb2640d760b438869a41ee0938306b5db0958ce1",
+  "hostedArchiveSha256": "9d1957414e9f59f65252cee3b49fa8ef5778daeded291aac937211526576950c",
+  "hostedManifestSha256": "8590412368d1ae3d747e96094485d9b78432ca05a55b36ac32581a4e53fe889d",
+  "macImage": "sha256:5157984bc06524aac0ca8fbf2051eebfe6f3b7994aa7d0793e8404c097289345",
+  "macManifestSha256": "45e7b152b1feb8d058271f08ed437dc244a1d5e0cc428fe4f4b171307ad14c64",
+  "recoveryArchive": {
+    "path": ".relay/mac-origin-correction/package-02/image.tar",
+    "sha256": "0cdec4031bbacc521fb6059bd61da12dbd6c88b50610c4f55b5ade7fbc812345",
+    "recordedSha256": "0cdec4031bbacc521fb6059bd61da12dbd6c88b50610c4f55b5ade7fbc812345"
+  },
+  "equivalence": {
+    "tracedFiles": 4514,
+    "startupTraceFiles": 1956,
+    "startupTraceWarnings": 122,
+    "comparedToAcceptedArtifact": 2382,
+    "bytesChanged": 0,
+    "publicFilesScanned": 819,
+    "applicationBytes": 180717218
+  },
+  "priorCandidateRetained": ".relay/mac-production/package-05",
+  "intermediateFailedCandidate": ".relay/mac-origin-correction/package-01",
+  "acceptedBuild": ".relay/mac-origin-correction/build-02",
+  "selfHostPackage": ".relay/mac-origin-correction/package-02",
+  "realProvider": false,
+  "publicDeployment": false
+}

@@ -1,0 +1,110 @@
+
+> galxai@0.1.0 db:test
+> node --import tsx scripts/run-supabase-integration.ts
+
+Starting disposable PostgreSQL 17 / pgvector fixture...
+Applied 159 migrations to the disposable fixture.
+======================================================================
+   GALXAI: SUPABASE & CLOUDFLARE EDGE ARCHITECTURE TEST SUITE      
+======================================================================
+
+  [✓] Test 1: Supabase Config: Resolves valid connection pooling and timeout constants
+  [✓] Test 2: Supabase Config: Loads DATABASE_URL from the server-only environment
+  [✓] Test 3: Supabase PostgreSQL: Connects through the configured transaction pooler
+  [✓] Test 4: Workspace: Creates workspace with spend cap
+  [✓] Test 5: ApiKeyRepo: Finds active key by SHA-256 hash lookup
+  [✓] Test 6: ApiKeyRepo: Revoked key is immediately excluded from active hash lookup
+  [✓] Test 7: ShardRepo: Ingests and retrieves AES-256-GCM encrypted shard account
+  [✓] Test 8: ShardRepo: Atomically acquires execution lease with monotonic fencing token
+  [✓] Test 9: ShardRepo: Atomically releases lease and commits actual token usage
+  [✓] Test 10: QueueRepo: Saves and retrieves CloudTasks queue configuration
+  [✓] Test 11: TaskRepo: Enqueues task with FIFO group partitioning and priority
+  [✓] Test 12: TaskRepo: Leases task to worker with monotonic fencing token and lease TTL
+  [✓] Test 13: TaskRepo: Records worker execution attempt trace
+  [✓] Test 14: WalletRepo: 50% Instant Match Model ($10 deposit yields $15 total compute credit)
+  [✓] Test 15: WalletRepo: Debits exact micro-metered token cost from compute balance
+  [✓] Test 16: WalletRepo: Reserves inference credit pre-auth hold
+  [✓] Test 17: WalletRepo: Commits actual token usage and refunds unused hold remainder
+  [✓] Test 18: WalletRepo: Verifies cryptographic SHA-256 Merkle ledger chain integrity
+  [✓] Test 19: TelemetryRepo: Calculates rolling P50/P90/P99 latency percentiles
+  [✓] Test 20: AuditRepo: Ingests immutable security audit event
+  [✓] Test 21: GalxPersistence: Unified Supabase persistence layer operates seamlessly
+  [✓] Test 22: EmbeddingsRepo: Vector cosine search and pgvector interface verified
+  [✓] Test 23: Idempotency: Locks in-flight request on first attempt
+  [✓] Test 24: Idempotency: Instant cached response replay for identical key & payload
+  [✓] Test 25: DistributedLock: Acquires mutex lock with initial fencing token
+  [✓] Test 26: DistributedLock: Rejects concurrent lock acquisition from distinct worker
+  [✓] Test 27: DistributedLock: Releases lock and grants to next worker with incremented fencing token
+  [✓] Test 28: ProjectRepo: Creates Project with default Production & Development environments
+  [✓] Test 29: Cloudflare Edge Gateway: Dispatches zero-egress SSE stream directly from global edge PoP
+  [✓] Test 30: Cloudflare Edge Queue Worker: Executes batch pull and report cycle
+  [✓] Test 31: Edge Cache: Miss fetches fresh computation and populates edge cache
+  [✓] Test 32: Edge Cache: Hit returns instantly with 0 compute/database egress
+  [✓] Test 33: Batch Micro-Metering: Executes multi-request token deduction in 1 batch
+  [✓] Test 34: Cloudflare R2 Adapter: Missing private storage fails closed before upload
+  [✓] Test 35: GalxEdgeBatchBuffer: Asynchronously accumulates and flushes micro-batches to Supabase
+  [✓] Test 36: GalxEdgeWire: Encodes and decodes compact binary payload with zero data loss
+  [✓] Test 37: GalxEdgeRouter: Intercepts upstream 429 and transparently fails over to secondary shard
+  [✓] Test 38: GalxSwarmCoordinatorDO: Synchronizes multi-agent swarm state in edge memory
+  [✓] Test 39: BudgetRepo: Ingests workspace threshold policy (80% alert threshold)
+  [✓] Test 40: BudgetRepo: Evaluates current spend against spend cap and evaluates alert triggers
+  [✓] Test 41: GalxEdgeSpeculativeEngine: Creates zero-egress speculative token transform pipeline
+  [✓] Test 42: GalxEdgeConnectionPool: Resolves warm HTTP/2 keep-alive socket headers for upstream endpoints
+  [✓] Test 43: GalxEdgeWebhookDispatcher: Dispatches signed HMAC-SHA256 event webhook with zero egress
+  [✓] Test 44: ShardHealthRepo: Records edge health heartbeats and calculates rolling shard status
+  [✓] Test 45: SessionRepo: Ingests and retrieves session record by SHA-256 token hash
+  [✓] Test 46: SessionRepo: Updates session last_active_at_ms activity heartbeat
+  [✓] Test 47: SessionRepo: Instantly revokes session and excludes from active token hash resolution
+  [✓] Test 48: SessionRepo: Scavenges expired and long-revoked sessions cleanly
+  [✓] Test 49: SessionRepo: Atomically rotates session token with sequence increment and grace buffer
+  [✓] Test 50: SessionRepo: Accepts concurrent in-flight token replay inside 30-second grace window
+  [✓] Test 51: SessionRepo: Revokes all other remote devices while maintaining active session
+  [✓] Test 52: SessionRepo: Rejects elevation without independently verified fresh proof
+  [✓] Test 53: SessionRepo: Ingests risk anomaly event and calculates composite security posture grade
+  [✓] Test 54: GalxRequestCoalescer: Coalesces 50 concurrent in-flight requests into 1 single database fetch
+  [✓] Test 55: GalxRequestCoalescer: Negative-caches null responses to prevent non-existent key stampedes
+  [✓] Test 56: WalletRepo: Atomically executes multi-user coalesced batch debit in deadlock-free sorted order
+  [✓] Test 57: GalxEdgeBatchBuffer: Asynchronously coalesces stream token draws and resolves caller promises on batch flush
+  [✓] Test 58: GalxBatchDataLoader: Coalesces 20 individual load() calls in a tick into 1 single batch function execution
+  [✓] Test 59: GalxRequestCoalescer: Fetches initial value
+  [✓] Test 60: GalxRequestCoalescer: SWR returns stale value immediately (0ms latency)
+  [✓] Test 61: GalxRequestCoalescer: SWR background revalidation updates cache
+  [✓] Test 62: WalletRepo: Resolves multiple user wallets in 1 batched array RPC lookup
+  [✓] Test 63: ApiKeyRepo: Resolves multiple API keys by hashes in 1 batched array RPC lookup
+  [✓] Test 64: AuditRepo: Ingests bulk audit events via high-velocity PostgreSQL jsonb_to_recordset RPC
+  [✓] Test 65: GalxWriteBehindBuffer: Double-buffering atomic swap and monotonic batch draining verified
+  [✓] Test 66: GalxMultiTierCache: Fetches and tags L3 DB payload
+  [✓] Test 67: GalxMultiTierCache: Returns L1 cached result
+  [✓] Test 68: GalxMultiTierCache: O(1) Tagged invalidation purges matching cache keys
+  [✓] Test 69: WalletRepo: Executes native C-array UNNEST batch debit with zero JSON parsing overhead
+  [✓] Test 70: SessionRepo: Bulk touches session activity heartbeats in 1 single UNNEST query
+  [✓] Test 71: GalxXFetchEngine: Populates initial value in BroccoliDB L1 table
+  [✓] Test 72: GalxXFetchEngine: Returns cached value with 0ms latency
+  [✓] Test 73: GalxBurstSmoother: Schedules 15 burst tasks with AIMD limiting and calculates BroccoliDB percentiles
+  [✓] Test 74: GalxCreditSlicer: Leases $0.50 credit slice into BroccoliDB reactive table
+  [✓] Test 75: GalxCreditSlicer: Local micro-debit executes with 0ms DB egress
+  [✓] Test 76: GalxCreditSlicer: Local micro-debit executes with 0ms DB egress
+  [✓] Test 77: GalxCreditSlicer: Local micro-debit executes with 0ms DB egress
+  [✓] Test 78: GalxCreditSlicer: Local micro-debit executes with 0ms DB egress
+  [✓] Test 79: GalxCreditSlicer: Local micro-debit executes with 0ms DB egress
+  [✓] Test 80: GalxCreditSlicer: Reconciles $0.25 spent tokens to PostgreSQL and releases unspent credit
+  [✓] Test 81: DistributedLock: Acquires distributed recompute locks for coordinated XFetch recomputation
+  [✓] Test 82: GalxGatewayMesh: 1-hop atomic preflight resolves key, workspace, wallet, and shard lease in 1 RPC
+  [✓] Test 83: GalxGatewayMesh: Hot caller preflight returns instantly from BroccoliDB L1 table (0ms)
+  [✓] Test 84: GalxGatewayMesh: 1-hop composite postflight debits wallet, releases lease, and logs audit in 1 RPC
+  [✓] Test 85: Workspace: 1-hop composite state query aggregates workspace, environments, keys, budget alerts, and audits
+  [✓] Test 86: Stripe: 1-hop bulk deposit fulfillment processes multiple deposits with 50% match
+  [✓] Test 87: Model Routing: 1-hop atomic policy routing selects provider and logs evidence in 1 RPC
+  [✓] Test 88: GalxMultiQueryPipeliner: Batches 3 RPC calls into 1 multiplexed multi-RPC roundtrip
+  [✓] Test 89: Token Verification: 1-hop multi-token lookup checks API keys and sessions simultaneously
+  [✓] Test 90: Merkle Proofs: 1-hop windowed Merkle chain integrity verification executes natively in PostgreSQL
+  [✓] Test 91: Organization: 1-hop full hierarchy state hydration returns complete org graph
+  [✓] Test 92: Multi-RPC Dispatcher: Executes heterogenous RPCs in 1 single JSON roundtrip
+  [✓] Test 93: Merkle Leaf: Appends cryptographic Merkle leaf with C-native SHA-256 parent chaining in 1 RPC
+  [✓] Test 94: Synthetic Canary: 1-hop probe ingestion and SLO error budget evaluation
+
+======================================================================
+   ALL 94/94 APEX ZERO-EGRESS & DATABASE TESTS PASSED!
+======================================================================
+
+Removed disposable PostgreSQL fixture.

@@ -1,0 +1,71 @@
+{
+  "inputs": {
+    "src/lib/nova/contract.ts": {
+      "bytes": 897,
+      "imports": [],
+      "format": "esm"
+    },
+    "src/lib/nova/inference.ts": {
+      "bytes": 11048,
+      "imports": [
+        {
+          "path": "node:crypto",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "src/lib/nova/contract.ts",
+          "kind": "import-statement",
+          "original": "./contract"
+        }
+      ],
+      "format": "esm"
+    },
+    ".relay/target-enablement/lifetime-child.ts": {
+      "bytes": 3214,
+      "imports": [
+        {
+          "path": "node:fs",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "src/lib/nova/inference.ts",
+          "kind": "import-statement",
+          "original": "../../src/lib/nova/inference"
+        }
+      ],
+      "format": "esm"
+    }
+  },
+  "outputs": {
+    ".relay/target-enablement/lifetime-child.cjs": {
+      "imports": [
+        {
+          "path": "node:fs",
+          "kind": "require-call",
+          "external": true
+        },
+        {
+          "path": "node:crypto",
+          "kind": "require-call",
+          "external": true
+        }
+      ],
+      "exports": [],
+      "entryPoint": ".relay/target-enablement/lifetime-child.ts",
+      "inputs": {
+        ".relay/target-enablement/lifetime-child.ts": {
+          "bytesInOutput": 2980
+        },
+        "src/lib/nova/inference.ts": {
+          "bytesInOutput": 10366
+        },
+        "src/lib/nova/contract.ts": {
+          "bytesInOutput": 280
+        }
+      },
+      "bytes": 14985
+    }
+  }
+}

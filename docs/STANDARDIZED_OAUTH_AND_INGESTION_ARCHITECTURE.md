@@ -8,6 +8,12 @@ Private reference. [Workspace authentication](operations/workspace-auth.md) owns
 
 GALX signup, verified login, session renewal, developer approval, customer plan and staff authorization do not enroll provider credentials. Pool monitor operator/viewer sessions and registrar/runtime principals are separately scoped to one fixed installation. An inference key, ordinary authenticated account or browser-selected ID cannot grant management or peer-pool access.
 
+## GALX Connect application permission
+
+[Connect](operations/galx-connect.md) uses the existing verified GALX identity to approve a narrowly scoped application grant. Its registered public clients use authorization code with S256 PKCE and Nova-specific opaque credentials. Token exchange does not expose account tokens or provider credentials. Consent, entitlement and capacity are distinct; account/Star/publishing privileges never follow from inference permission. Current grant checks and rotating refresh-token reuse detection enforce revocation without a cached-grant window after disconnect acknowledgement.
+
+The new `/oauth/authorize`, `/oauth/token`, `/oauth/revoke` and OAuth discovery endpoints are a different contract from the retired `/api/auth/oauth/*` provider-ingestion endpoints. Exact middleware exemptions dispatch to handlers that enforce their own authority; no prefix reopens legacy routes. Connect is disabled by default and has only local acceptance evidence. It requires no new identity system or deployment split.
+
 ## Manual registration path
 
 Use **GALX Premium** for verified paid provider accounts. **Register account → prepare desktop → manual sign-in → Review access → register** commits authority only in `mazhcjisettrzbqhorvp`, with an exclusive immutable assignment and the current activation policy. The monitor's scoped registrar validates saved login; the browser never uploads a token. Creation, polling, labels and desktop files alone cannot register or enable an account.

@@ -1,0 +1,244 @@
+[
+  {
+    "name": "/galx-local-authority-tls-1",
+    "image": "galxai-relay-central:connections-20260916",
+    "imageId": "sha256:e7a4c80fa704d4abb7b423a48a66afad4d809c70dd5df3592eb772e823284bb3",
+    "state": {
+      "Status": "running",
+      "Running": true,
+      "StartedAt": "2026-10-02T18:56:39.174687417Z",
+      "ExitCode": 0
+    },
+    "health": "healthy",
+    "ports": {
+      "8443/tcp": [
+        {
+          "HostIp": "127.0.0.1",
+          "HostPort": "13443"
+        }
+      ]
+    },
+    "networkMode": "galx-local-authority_authority",
+    "readonly": true,
+    "privileged": false,
+    "user": "1000:1000",
+    "envNames": [
+      "PATH",
+      "NODE_VERSION",
+      "YARN_VERSION",
+      "NODE_ENV"
+    ],
+    "mountTargets": [
+      "/local/authority-proxy.mjs",
+      "/run/secrets/tls-ca",
+      "/run/secrets/tls-cert",
+      "/run/secrets/tls-key"
+    ]
+  },
+  {
+    "name": "/galx-local-authority-authority-1",
+    "image": "galxai-relay-central:connections-20260916",
+    "imageId": "sha256:e7a4c80fa704d4abb7b423a48a66afad4d809c70dd5df3592eb772e823284bb3",
+    "state": {
+      "Status": "running",
+      "Running": true,
+      "StartedAt": "2026-10-02T18:56:39.103220625Z",
+      "ExitCode": 0
+    },
+    "health": "healthy",
+    "ports": {
+      "3000/tcp": null
+    },
+    "networkMode": "galx-local-authority_authority",
+    "readonly": true,
+    "privileged": false,
+    "user": "1000:1000",
+    "envNames": [
+      "PATH",
+      "NODE_VERSION",
+      "YARN_VERSION",
+      "NODE_ENV"
+    ],
+    "mountTargets": [
+      "/run/secrets/component-config"
+    ]
+  },
+  {
+    "name": "/galx-image-tunnel",
+    "image": "sha256:51c9cefcb4569df44e1ad403ab1d3d8065aa8e84339bcfc6aee75502e1140339",
+    "imageId": "sha256:51c9cefcb4569df44e1ad403ab1d3d8065aa8e84339bcfc6aee75502e1140339",
+    "state": {
+      "Status": "running",
+      "Running": true,
+      "StartedAt": "2026-10-02T18:56:39.103827834Z",
+      "ExitCode": 0
+    },
+    "health": null,
+    "ports": {},
+    "networkMode": "bridge",
+    "readonly": true,
+    "privileged": false,
+    "user": "501:20",
+    "envNames": [
+      "PATH",
+      "SSL_CERT_FILE"
+    ],
+    "mountTargets": [
+      "/run/tunnel-token"
+    ]
+  },
+  {
+    "name": "/galx-desktop-production-dceeb65e-3096-4b41-bdad-d3af1eb9a734",
+    "image": "galxai-relay-desktop:v1",
+    "imageId": "sha256:d4271abf3955a28eabeb35b526c80b6aa27439eda176bd0f2fe9b1bb0d4c24a5",
+    "state": {
+      "Status": "running",
+      "Running": true,
+      "StartedAt": "2026-10-02T18:56:39.095429709Z",
+      "ExitCode": 0
+    },
+    "health": "healthy",
+    "ports": {},
+    "networkMode": "galx-desktop-production-dceeb65e-3096-4b41-bdad-d3af1eb9a734-net",
+    "readonly": false,
+    "privileged": false,
+    "user": "1000:1000",
+    "envNames": [
+      "PATH",
+      "NODE_VERSION",
+      "YARN_VERSION",
+      "DEBIAN_FRONTEND",
+      "HOME",
+      "DISPLAY",
+      "LANG",
+      "XDG_RUNTIME_DIR",
+      "NPM_CONFIG_PREFIX"
+    ],
+    "mountTargets": [
+      "/home/operator"
+    ]
+  },
+  {
+    "name": "/galx-desktop-production-aede28dd-74d9-4055-9c31-e9beb4696623",
+    "image": "galxai-relay-desktop:v1",
+    "imageId": "sha256:0fccf55f2c1e2bd35636e4ae4d4a75347749c25e4bce473100dfd8a9abe02a79",
+    "state": {
+      "Status": "running",
+      "Running": true,
+      "StartedAt": "2026-10-02T18:56:39.096810167Z",
+      "ExitCode": 0
+    },
+    "health": "healthy",
+    "ports": {},
+    "networkMode": "galx-desktop-production-aede28dd-74d9-4055-9c31-e9beb4696623-net",
+    "readonly": false,
+    "privileged": false,
+    "user": "1000:1000",
+    "envNames": [
+      "PATH",
+      "NODE_VERSION",
+      "YARN_VERSION",
+      "DEBIAN_FRONTEND",
+      "HOME",
+      "DISPLAY",
+      "LANG",
+      "XDG_RUNTIME_DIR",
+      "NPM_CONFIG_PREFIX"
+    ],
+    "mountTargets": [
+      "/home/operator"
+    ]
+  },
+  {
+    "name": "/galxai-relay",
+    "image": "galxai-relay:latest",
+    "imageId": "sha256:c46167f9c7240666094959fc763b5480fbf173c16fd10fc89c755b334f3637d5",
+    "state": {
+      "Status": "exited",
+      "Running": false,
+      "StartedAt": "2026-09-07T21:46:15.121843754Z",
+      "ExitCode": 0
+    },
+    "health": "unhealthy",
+    "ports": {},
+    "networkMode": "galxai_default",
+    "readonly": true,
+    "privileged": false,
+    "user": "1000:1000",
+    "envNames": [
+      "RELAY_SHARD_CONCURRENCY",
+      "GALX_VAULT_KEY_V2",
+      "RELAY_API_KEYS",
+      "RELAY_MAX_CONCURRENT_REQUESTS",
+      "RELAY_DISCOVER_HOST_CREDENTIALS",
+      "GALX_VAULT_KEY_V1",
+      "RELAY_MAX_RSS_MB",
+      "RELAY_ALLOWED_ORIGINS",
+      "GALX_VAULT_KEY",
+      "GALX_VAULT_MASTER_SECRET",
+      "DATABASE_URL",
+      "NODE_ENV",
+      "SUPABASE_SERVICE_ROLE_KEY",
+      "RELAY_QUOTA_WINDOW_MAX",
+      "SUPABASE_URL",
+      "SUPABASE_SECRET_KEY",
+      "HOST",
+      "CODEX_WS_ENDPOINT",
+      "RELAY_ADMIN_API_KEYS",
+      "PORT",
+      "RELAY_STATE_SNAPSHOT_PATH",
+      "PATH",
+      "NODE_VERSION",
+      "YARN_VERSION"
+    ],
+    "mountTargets": [
+      "/app/.broccolidb"
+    ]
+  },
+  {
+    "name": "/galxai-relay-cooldown-canary",
+    "image": "galxai-relay:cooldown-hardening",
+    "imageId": "sha256:c46167f9c7240666094959fc763b5480fbf173c16fd10fc89c755b334f3637d5",
+    "state": {
+      "Status": "exited",
+      "Running": false,
+      "StartedAt": "2026-09-07T21:43:48.298564797Z",
+      "ExitCode": 0
+    },
+    "health": "unhealthy",
+    "ports": {},
+    "networkMode": "galxai-cooldown-canary_default",
+    "readonly": true,
+    "privileged": false,
+    "user": "1000:1000",
+    "envNames": [
+      "NODE_ENV",
+      "SUPABASE_URL",
+      "RELAY_MAX_CONCURRENT_REQUESTS",
+      "RELAY_ADMIN_API_KEYS",
+      "GALX_VAULT_KEY_V1",
+      "RELAY_MAX_RSS_MB",
+      "RELAY_SHARD_CONCURRENCY",
+      "RELAY_API_KEYS",
+      "RELAY_QUOTA_WINDOW_MAX",
+      "SUPABASE_SERVICE_ROLE_KEY",
+      "RELAY_STATE_SNAPSHOT_PATH",
+      "RELAY_DISCOVER_HOST_CREDENTIALS",
+      "CODEX_WS_ENDPOINT",
+      "SUPABASE_SECRET_KEY",
+      "HOST",
+      "DATABASE_URL",
+      "GALX_VAULT_KEY_V2",
+      "RELAY_ALLOWED_ORIGINS",
+      "GALX_VAULT_MASTER_SECRET",
+      "PORT",
+      "GALX_VAULT_KEY",
+      "PATH",
+      "NODE_VERSION",
+      "YARN_VERSION"
+    ],
+    "mountTargets": [
+      "/app/.broccolidb"
+    ]
+  }
+]

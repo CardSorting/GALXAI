@@ -1,0 +1,73 @@
+{
+  "at": "2026-10-03T21:43:16.886Z",
+  "node": "v22.23.2",
+  "platform": "linux",
+  "architecture": "x64",
+  "framework": "Next 15.5.25 after() + AfterContext",
+  "realHostInvocation": false,
+  "network": "disabled",
+  "realProvider": false,
+  "realDatabase": false,
+  "results": [
+    {
+      "mode": "completed",
+      "durableState": "completed",
+      "registrations": 1,
+      "dispatches": 1,
+      "writes": 1,
+      "committed": true,
+      "signalAborted": false,
+      "sanitized": true,
+      "elapsedMs": 432,
+      "exit": {
+        "code": null,
+        "signal": "SIGKILL"
+      },
+      "messages": [
+        "stream-observed",
+        "cleanup-started",
+        "host-work-settled"
+      ]
+    },
+    {
+      "mode": "disconnect",
+      "durableState": "unknown",
+      "registrations": 1,
+      "dispatches": 1,
+      "writes": 1,
+      "committed": true,
+      "signalAborted": true,
+      "sanitized": true,
+      "elapsedMs": 465,
+      "exit": {
+        "code": null,
+        "signal": "SIGKILL"
+      },
+      "messages": [
+        "stream-observed",
+        "cleanup-started",
+        "host-work-settled"
+      ]
+    },
+    {
+      "mode": "deadline",
+      "durableState": "unknown",
+      "registrations": 1,
+      "dispatches": 1,
+      "writes": 1,
+      "committed": true,
+      "signalAborted": true,
+      "sanitized": true,
+      "elapsedMs": 300472,
+      "exit": {
+        "code": null,
+        "signal": "SIGKILL"
+      },
+      "messages": [
+        "stream-observed",
+        "cleanup-started",
+        "host-work-settled"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "at": "2026-10-03T22:01:42.863Z",
+  "regularFiles": 3070,
+  "internalAliases": 670,
+  "credentialMatches": [],
+  "developerPaths": [
+    ".vercel/output/shared/a577de570b884a513b83d3f16341a1eb76c5ec414cefa58ed2edb68e0b91cae4",
+    ".vercel/output/shared/d08582415dc7e9e0c5b2f2927aa20433939edce306fae090b0e859ad02302d82"
+  ],
+  "integrityFailures": [],
+  "publicPrivateMarkerFailures": [],
+  "mutatedSourceInputs": [],
+  "externalOrMissingRuntimeReferences": [],
+  "elfMachineCounts": {
+    "62": 2
+  },
+  "originalSourceDelta": [
+    "src/app/v1/inference/route.ts",
+    "src/lib/nova/inference.ts",
+    "vercel.json"
+  ],
+  "originalCompiledDelta": [],
+  "inheritedDeveloperPathReview": {
+    "classification": "NON-BLOCKING FOLLOW-UP",
+    "sources": [
+      "src/core/router/adapters/OpenAIAdapter.ts",
+      "src/core/relay/GalxRelaySupervisor.ts"
+    ],
+    "unchangedFromFrozenSource": true,
+    "notReferencedByNovaFunction": true,
+    "publicAssetMatches": 0,
+    "reason": "Two existing optional local CLI/supervisor fallback literals in private legacy server chunks. Not consumed by the clean build, absent from the Nova function and public assets. Preserved under the no-unrelated-candidate-change boundary."
+  },
+  "knownCredentialScan": "Exact existing private credential values and throwaway build values; public Supabase keys explicitly excluded; no universal secret-detection claim."
+}

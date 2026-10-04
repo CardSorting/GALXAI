@@ -1,0 +1,72 @@
+{
+  "at": "2026-10-04T00:30:51.327Z",
+  "name": "AssertionError",
+  "message": "Expected values to be strictly equal:\n\n400 !== 303\n",
+  "completedChecks": [
+    {
+      "name": "verified recovery archive accepted by Docker",
+      "image": "sha256:8a82a0f2ab9ee727bd652cd6fb77d3116f1a04ea81a9e882ff18ee8b90e7fdce",
+      "architecture": "amd64",
+      "archiveSha256": "1999f70c603dd7d25689fa1956af1aac7ee6b9382bbc16caccf06e184a6167db"
+    },
+    {
+      "name": "whole package boot under enforced runtime policy",
+      "image": "sha256:8a82a0f2ab9ee727bd652cd6fb77d3116f1a04ea81a9e882ff18ee8b90e7fdce",
+      "readOnly": true,
+      "uid": 1000,
+      "boundedCaches": true,
+      "secretNotInDockerEnvironment": true
+    },
+    {
+      "name": "HTTP boundary /",
+      "status": 200,
+      "sanitized": true
+    },
+    {
+      "name": "HTTP boundary /connect",
+      "status": 200,
+      "sanitized": true
+    },
+    {
+      "name": "HTTP boundary /api/health",
+      "status": 200,
+      "sanitized": true
+    },
+    {
+      "name": "HTTP boundary /post-mortem/CURRENT_STATE.md",
+      "status": 404,
+      "sanitized": true
+    },
+    {
+      "name": "HTTP boundary /.env",
+      "status": 404,
+      "sanitized": true
+    },
+    {
+      "name": "HTTP boundary /docs/VERCEL_DEPLOYMENT.md",
+      "status": 308,
+      "sanitized": true
+    },
+    {
+      "name": "HTTP boundary /api/internal/telemetry",
+      "status": 404,
+      "sanitized": true
+    },
+    {
+      "name": "browser session does not authorize Nova",
+      "status": 401,
+      "code": "invalid_token",
+      "providerAttempts": 0
+    },
+    {
+      "name": "cookie without Nova credential denied",
+      "status": 401
+    },
+    {
+      "name": "unknown grant",
+      "status": 401,
+      "code": "invalid_token",
+      "providerAttempts": 0
+    }
+  ]
+}

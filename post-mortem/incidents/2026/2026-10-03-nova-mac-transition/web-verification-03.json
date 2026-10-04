@@ -1,0 +1,27 @@
+{
+  "at": "2026-10-04T01:42:03.463Z",
+  "status": "PASSED",
+  "publicAssets": 543,
+  "publicCredentialMatches": 0,
+  "privateMarkers": 0,
+  "novaFunctionAbsent": true,
+  "novaDiscoveryAbsent": true,
+  "hobbyDurationsCompatible": true,
+  "sourceSha256": "ef292883a4e84af9b91b14d7f86fdb237c3e5489abd7d3890257f425c0642d3f",
+  "lock": "17ec13ed2df5810416a9c52ab5cc772e15adcaec679bbafd9a2a61ac3b4742f1",
+  "artifact": {
+    "at": "2026-10-04T01:39:42.240Z",
+    "format": "Vercel Build Output API",
+    "functions": 32,
+    "mappedReferences": 8339,
+    "retainedPayloads": 1835,
+    "files": 3726,
+    "manifestSha256": "170858a60b59faaa97bbfb0e504de7f23566c7d4576bc15e2b1b97e04de6b8b9",
+    "archiveSha256": "518c43156b388e2add0ece9fc874114a7506b7c4b86436a6250305b5b74d541c",
+    "archiveBytes": 48755197,
+    "applicationPayloadBytesChanged": 0,
+    "workspaceDependencies": false,
+    "deployed": false
+  },
+  "retirementGuardTests": "retirement-final-tests.log"
+}

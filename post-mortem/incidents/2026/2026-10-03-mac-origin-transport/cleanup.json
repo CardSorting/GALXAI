@@ -1,0 +1,8 @@
+{
+  "observed_at": "2026-10-04T00:56:31.572950+00:00",
+  "fixture_containers_remaining": 0,
+  "fixture_networks_remaining": 0,
+  "operator_project_containers_remaining": 0,
+  "operator_private_configuration_removed": true,
+  "scope": "Read-only Docker label inventory after finally cleanup; no existing service was removed."
+}

@@ -1,0 +1,128 @@
+{
+  "at": "2026-10-03T23:59:52.878Z",
+  "name": "AssertionError",
+  "message": "{\"error\":{\"code\":\"invalid_token\",\"message\":\"Connect this application again to continue.\",\"execution_state\":\"not_accepted\"}}\n\n401 !== 200\n",
+  "completedChecks": [
+    {
+      "name": "whole package boot under enforced runtime policy",
+      "image": "sha256:70b0c58c6a6f27bbf7dceaa13a1a555a822bf4afbae31ff2fce234724b12c27b",
+      "readOnly": true,
+      "uid": 1000,
+      "boundedCaches": true,
+      "secretNotInDockerEnvironment": true
+    },
+    {
+      "name": "HTTP boundary /",
+      "status": 200,
+      "sanitized": true
+    },
+    {
+      "name": "HTTP boundary /connect",
+      "status": 200,
+      "sanitized": true
+    },
+    {
+      "name": "HTTP boundary /api/health",
+      "status": 200,
+      "sanitized": true
+    },
+    {
+      "name": "HTTP boundary /post-mortem/CURRENT_STATE.md",
+      "status": 404,
+      "sanitized": true
+    },
+    {
+      "name": "HTTP boundary /.env",
+      "status": 404,
+      "sanitized": true
+    },
+    {
+      "name": "DIAGNOSTIC ONLY: middleware authority",
+      "expected": "https://galx.ai",
+      "actual": "https://0.0.0.0:3000"
+    },
+    {
+      "name": "HTTP boundary /docs/VERCEL_DEPLOYMENT.md",
+      "status": 308,
+      "sanitized": true
+    },
+    {
+      "name": "HTTP boundary /api/internal/telemetry",
+      "status": 404,
+      "sanitized": true
+    },
+    {
+      "name": "DIAGNOSTIC ONLY: browser session does not authorize Nova",
+      "expected": 401,
+      "actual": 401
+    },
+    {
+      "name": "browser session does not authorize Nova",
+      "status": 401,
+      "code": "invalid_token",
+      "providerAttempts": 0
+    },
+    {
+      "name": "DIAGNOSTIC ONLY: unknown grant",
+      "expected": 401,
+      "actual": 401
+    },
+    {
+      "name": "unknown grant",
+      "status": 401,
+      "code": "invalid_token",
+      "providerAttempts": 0
+    },
+    {
+      "name": "DIAGNOSTIC ONLY: no explicit entitlement",
+      "expected": 403,
+      "actual": 401
+    },
+    {
+      "name": "no explicit entitlement",
+      "status": 401,
+      "code": "invalid_token",
+      "providerAttempts": 0
+    },
+    {
+      "name": "DIAGNOSTIC ONLY: wrong client origin",
+      "expected": 401,
+      "actual": 401
+    },
+    {
+      "name": "wrong client origin",
+      "status": 401,
+      "code": "invalid_token",
+      "providerAttempts": 0
+    },
+    {
+      "name": "DIAGNOSTIC ONLY: wrong host cannot borrow forwarded Nova authority",
+      "expected": 401,
+      "actual": 401
+    },
+    {
+      "name": "wrong host cannot borrow forwarded Nova authority",
+      "status": 401,
+      "code": "invalid_token",
+      "providerAttempts": 0
+    },
+    {
+      "name": "DIAGNOSTIC ONLY: same token admitted directly by unchanged repository",
+      "admitted": true,
+      "dispatched": false
+    },
+    {
+      "name": "DIAGNOSTIC ONLY: explicitly entitled and scoped client",
+      "expected": 200,
+      "actual": 401,
+      "providerAttempts": 0,
+      "clientResponse": {
+        "error": {
+          "code": "invalid_token",
+          "message": "Connect this application again to continue.",
+          "execution_state": "not_accepted"
+        }
+      }
+    }
+  ]
+}

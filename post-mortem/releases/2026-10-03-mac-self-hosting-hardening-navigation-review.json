@@ -1,0 +1,18 @@
+{
+  "classification": "private",
+  "observed_at": "2026-10-04T00:03:41.303047+00:00",
+  "scope": "Explicit inspection of generated navigation after synchronization; extends the semantic hardening review without changing it.",
+  "reviewed_changes": [
+    "New canonical Mac self-hosting runbook appears once in catalog, delivery guide list and document inventory.",
+    "Runbook is current-guide/runbook in the delivery domain with operator search keywords.",
+    "Generated current-state/incident navigation reflects retained package and open origin/transport blocker; no decision is accepted or deployment claimed."
+  ],
+  "files": {
+    "docs/CATALOG.md": "c39e3d90ba2d170d9704b2307f0dfa925639b45976bfa5d722b9242c462a6ef2",
+    "docs/knowledge/DOMAINS.md": "f38cf8e60f870ecdb82b462b25e2f1fdea1b3728acda0cd7ac22f7a8481cc25a",
+    "docs/knowledge/catalog.json": "cfc75b02f2b58b3199ea92386e99157dc3bf11b7b8fd800dcd5ade09f8f0b5f5",
+    "post-mortem/documentation-inventory.json": "b8f99c46aa41f0ea98c2335d4613ab333b285e2317f9d223e55a65bfe3616af3"
+  },
+  "parent_review": "post-mortem/releases/2026-10-03-mac-self-hosting-hardening-review.json",
+  "limits": "Generated navigation correctness is not runtime acceptance; whole-image origin failure remains open."
+}

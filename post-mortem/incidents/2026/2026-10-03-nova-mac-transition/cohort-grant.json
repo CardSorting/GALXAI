@@ -1,0 +1,12 @@
+{
+  "at": "2026-10-04T01:26:29.273Z",
+  "existingAccounts": 1,
+  "firstPartyClients": [
+    "reference-native",
+    "reference-browser"
+  ],
+  "explicitEntitlementExpiresAt": "2026-10-04T03:26:28.848Z",
+  "automaticEntitlements": false,
+  "publicRegistration": false,
+  "exitCode": 0
+}

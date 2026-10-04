@@ -1,0 +1,404 @@
+npm warn deprecated stream-to-promise@2.2.0: Deprecated. Use node:stream/promises and node:stream/consumers instead.
+npm warn deprecated path-match@1.2.4: This package is archived and no longer maintained. For support, visit https://github.com/expressjs/express/discussions
+npm warn deprecated tar@6.2.1: Old versions of tar are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+
+added 249 packages in 9s
+npm notice
+npm notice New major version of npm available! 10.9.8 -> 12.2.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+npm notice To update run: npm install -g npm@12.2.0
+npm notice
+Vercel CLI 48.5.0
+WARN! Build not running on Vercel. System environment variables will not be available.
+Running "install" command: `npm ci`...
+npm warn deprecated eslint@9.39.5: This version is no longer supported. Please see https://eslint.org/version-support for other options.
+
+added 461 packages, and audited 462 packages in 49s
+
+160 packages are looking for funding
+  run `npm fund` for details
+
+11 vulnerabilities (2 moderate, 9 high)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+Detected Next.js version: 15.5.25
+Running "next build"
+   ▲ Next.js 15.5.25
+   - Experiments (use with caution):
+     · staleTimes
+     · serverActions
+     · optimizePackageImports
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 2.2min
+   Skipping linting
+   Checking validity of types ...
+   Collecting page data ...
+ ⚠ Using edge runtime on a page currently disables static generation for that page
+   Generating static pages (0/157) ...
+   Generating static pages (39/157) 
+   Generating static pages (78/157) 
+   Generating static pages (117/157) 
+ ✓ Generating static pages (157/157)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                              Size  First Load JS
+┌ ○ /                                                 8.36 kB         206 kB
+├ ○ /_not-found                                         744 B         103 kB
+├ ƒ /.well-known/oauth-authorization-server             744 B         103 kB
+├ ƒ /.well-known/openid-configuration                   744 B         103 kB
+├ ○ /about                                            1.71 kB         203 kB
+├ ƒ /admin                                            11.9 kB         189 kB
+├ ○ /agents                                             744 B         103 kB
+├ ○ /alternatives                                       744 B         103 kB
+├ ƒ /alternatives/[slug]                                744 B         103 kB
+├ ƒ /alternatives/opengraph-image                       744 B         103 kB
+├ ƒ /api/account/profile                                744 B         103 kB
+├ ƒ /api/admin/preview                                  744 B         103 kB
+├ ƒ /api/audit/broccolidb                               744 B         103 kB
+├ ƒ /api/audit/broccolidb/compact                       744 B         103 kB
+├ ƒ /api/audit/ingest                                   744 B         103 kB
+├ ƒ /api/auth/audit/activity                            744 B         103 kB
+├ ƒ /api/auth/identities                                744 B         103 kB
+├ ƒ /api/auth/ingest                                    744 B         103 kB
+├ ƒ /api/auth/oauth/callback                            744 B         103 kB
+├ ƒ /api/auth/oauth/device/approve                      744 B         103 kB
+├ ƒ /api/auth/oauth/device/code                         744 B         103 kB
+├ ƒ /api/auth/oauth/device/token                        744 B         103 kB
+├ ƒ /api/auth/oauth/introspect                          744 B         103 kB
+├ ƒ /api/auth/oauth/par                                 744 B         103 kB
+├ ƒ /api/auth/oauth/refresh                             744 B         103 kB
+├ ƒ /api/auth/oauth/revoke                              744 B         103 kB
+├ ƒ /api/auth/oauth/url                                 744 B         103 kB
+├ ƒ /api/auth/openai                                    744 B         103 kB
+├ ƒ /api/auth/security/posture                          744 B         103 kB
+├ ƒ /api/auth/session                                   744 B         103 kB
+├ ƒ /api/auth/sessions                                  744 B         103 kB
+├ ƒ /api/auth/sessions/[id]                             744 B         103 kB
+├ ƒ /api/auth/signup-offer                              744 B         103 kB
+├ ƒ /api/auth/sudo/elevate                              744 B         103 kB
+├ ƒ /api/auth/tokens/restricted                         744 B         103 kB
+├ ƒ /api/auth/vault/jwks                                744 B         103 kB
+├ ƒ /api/auth/vault/re-wrap                             744 B         103 kB
+├ ƒ /api/billing                                        744 B         103 kB
+├ ƒ /api/billing/generation-quota                       744 B         103 kB
+├ ƒ /api/billing/image-allowance                        744 B         103 kB
+├ ƒ /api/billing/orbit                                  744 B         103 kB
+├ ƒ /api/billing/plan                                   744 B         103 kB
+├ ƒ /api/billing/quote                                  744 B         103 kB
+├ ƒ /api/billing/usage                                  744 B         103 kB
+├ ƒ /api/broccolidb/compact                             744 B         103 kB
+├ ƒ /api/chat                                           744 B         103 kB
+├ ƒ /api/chat/feedback                                  744 B         103 kB
+├ ƒ /api/chat/messages                                  744 B         103 kB
+├ ƒ /api/chat/sessions                                  744 B         103 kB
+├ ƒ /api/chat/sync                                      744 B         103 kB
+├ ƒ /api/chat/tier                                      744 B         103 kB
+├ ƒ /api/client/bootstrap                               744 B         103 kB
+├ ƒ /api/community/follows                              744 B         103 kB
+├ ƒ /api/community/participants/[handle]                744 B         103 kB
+├ ƒ /api/compliance/dsar/erase                          744 B         103 kB
+├ ƒ /api/compliance/dsar/export                         744 B         103 kB
+├ ƒ /api/compliance/eu-ai-act/annex-iv                  744 B         103 kB
+├ ƒ /api/compliance/gdpr/ropa                           744 B         103 kB
+├ ƒ /api/compliance/privacy/posture                     744 B         103 kB
+├ ƒ /api/compliance/privacy/verify                      744 B         103 kB
+├ ƒ /api/compliance/redact                              744 B         103 kB
+├ ƒ /api/compliance/soc2/controls                       744 B         103 kB
+├ ƒ /api/compliance/soc2/drift                          744 B         103 kB
+├ ƒ /api/compliance/soc2/evidence                       744 B         103 kB
+├ ƒ /api/compliance/soc2/oscal                          744 B         103 kB
+├ ƒ /api/compliance/soc2/posture                        744 B         103 kB
+├ ƒ /api/compute/pool                                   744 B         103 kB
+├ ƒ /api/connect/connections                            744 B         103 kB
+├ ƒ /api/connect/consent                                744 B         103 kB
+├ ƒ /api/developer-access                               744 B         103 kB
+├ ƒ /api/developer-access/check                         744 B         103 kB
+├ ƒ /api/developer-access/feedback                      744 B         103 kB
+├ ƒ /api/generate                                       744 B         103 kB
+├ ƒ /api/health                                         744 B         103 kB
+├ ƒ /api/images/availability                            744 B         103 kB
+├ ƒ /api/images/feed                                    744 B         103 kB
+├ ƒ /api/images/library                                 744 B         103 kB
+├ ƒ /api/images/library/[assetId]                       744 B         103 kB
+├ ƒ /api/images/library/batch                           744 B         103 kB
+├ ƒ /api/images/moderate                                744 B         103 kB
+├ ƒ /api/inbound/lead                                   744 B         103 kB
+├ ƒ /api/ingest                                         744 B         103 kB
+├ ƒ /api/internal/credits/stripe                        744 B         103 kB
+├ ƒ /api/internal/sites/domains/process                 744 B         103 kB
+├ ƒ /api/internal/telemetry                             744 B         103 kB
+├ ƒ /api/internal/training                              744 B         103 kB
+├ ƒ /api/internal/training/curate                       744 B         103 kB
+├ ƒ /api/keys                                           744 B         103 kB
+├ ƒ /api/keys/[id]                                      744 B         103 kB
+├ ƒ /api/keys/[id]/roll                                 744 B         103 kB
+├ ƒ /api/keys/activity                                  744 B         103 kB
+├ ƒ /api/keys/verify                                    744 B         103 kB
+├ ƒ /api/models/suggestions                             744 B         103 kB
+├ ƒ /api/og                                             744 B         103 kB
+├ ƒ /api/openapi.json                                   744 B         103 kB
+├ ƒ /api/queues                                         744 B         103 kB
+├ ƒ /api/queues/[queueId]                               744 B         103 kB
+├ ƒ /api/queues/[queueId]/lease                         744 B         103 kB
+├ ƒ /api/queues/[queueId]/purge                         744 B         103 kB
+├ ƒ /api/queues/[queueId]/redrive                       744 B         103 kB
+├ ƒ /api/queues/[queueId]/stream                        744 B         103 kB
+├ ƒ /api/queues/[queueId]/tasks                         744 B         103 kB
+├ ƒ /api/queues/[queueId]/tasks/[taskId]                744 B         103 kB
+├ ƒ /api/queues/[queueId]/tasks/[taskId]/acknowledge    744 B         103 kB
+├ ƒ /api/queues/[queueId]/tasks/[taskId]/fail           744 B         103 kB
+├ ƒ /api/queues/[queueId]/tasks/[taskId]/progress       744 B         103 kB
+├ ƒ /api/queues/[queueId]/tasks/[taskId]/retry          744 B         103 kB
+├ ƒ /api/queues/[queueId]/tasks/[taskId]/stream         744 B         103 kB
+├ ƒ /api/queues/[queueId]/tasks/batch                   744 B         103 kB
+├ ƒ /api/queues/[queueId]/tasks/bulk-cancel             744 B         103 kB
+├ ƒ /api/relay/status                                   744 B         103 kB
+├ ƒ /api/run                                            744 B         103 kB
+├ ƒ /api/seo/indexnow                                   744 B         103 kB
+├ ƒ /api/seo/rates                                      744 B         103 kB
+├ ƒ /api/shards                                         744 B         103 kB
+├ ƒ /api/shards/[id]                                    744 B         103 kB
+├ ƒ /api/shards/[id]/retract                            744 B         103 kB
+├ ƒ /api/show                                           744 B         103 kB
+├ ƒ /api/sites/content                                  744 B         103 kB
+├ ƒ /api/sites/domains                                  744 B         103 kB
+├ ƒ /api/sites/published/[hostname]                     744 B         103 kB
+├ ƒ /api/sites/workspace                                744 B         103 kB
+├ ƒ /api/stripe/checkout                                744 B         103 kB
+├ ƒ /api/stripe/config                                  744 B         103 kB
+├ ƒ /api/stripe/portal                                  744 B         103 kB
+├ ƒ /api/stripe/session                                 744 B         103 kB
+├ ƒ /api/stripe/webhook                                 744 B         103 kB
+├ ƒ /api/tags                                           744 B         103 kB
+├ ƒ /api/teams/seats                                    744 B         103 kB
+├ ƒ /api/version                                        744 B         103 kB
+├ ƒ /api/wallet/auto-topup                              744 B         103 kB
+├ ƒ /api/wallet/deposit                                 744 B         103 kB
+├ ƒ /api/wallet/estimate                                744 B         103 kB
+├ ƒ /api/wallet/summary                                 744 B         103 kB
+├ ƒ /api/wallet/transactions                            744 B         103 kB
+├ ƒ /api/wallet/usage                                   744 B         103 kB
+├ ƒ /apple-icon                                         744 B         103 kB
+├ ○ /architecture                                       744 B         103 kB
+├ ƒ /architecture/[slug]                                744 B         103 kB
+├ ○ /audit                                            19.2 kB         220 kB
+├ ƒ /auth/callback                                      744 B         103 kB
+├ ○ /auth/connect                                       610 B         103 kB
+├ ƒ /auth/signin                                        744 B         103 kB
+├ ƒ /auth/signup                                        744 B         103 kB
+├ ○ /benchmarks                                         744 B         103 kB
+├ ƒ /benchmarks/[workload]                              744 B         103 kB
+├ ƒ /benchmarks/opengraph-image                         744 B         103 kB
+├ ○ /billing                                            139 B         189 kB
+├ ○ /billing/credits                                    139 B         189 kB
+├ ○ /billing/invoices                                   139 B         189 kB
+├ ƒ /billing/opengraph-image                            744 B         103 kB
+├ ○ /billing/payment-methods                            139 B         189 kB
+├ ○ /billing/plan                                       139 B         189 kB
+├ ○ /billing/transactions                               139 B         189 kB
+├ ○ /calculator                                         744 B         103 kB
+├ ○ /capabilities                                       744 B         103 kB
+├ ƒ /capabilities/[slug]                                744 B         103 kB
+├ ƒ /capabilities/opengraph-image                       744 B         103 kB
+├ ○ /careers                                          17.9 kB         219 kB
+├ ● /careers/[slug]                                   5.66 kB         207 kB
+├   ├ /careers/dist-systems-engineer
+├   ├ /careers/gpu-cuda-engineer
+├   ├ /careers/kernel-ebpf-specialist
+├   └ [+14 more paths]
+├ ○ /collections                                      7.27 kB         113 kB
+├ ○ /compliance                                         744 B         103 kB
+├ ƒ /compliance/[id]                                    744 B         103 kB
+├ ○ /connect                                            145 B         182 kB
+├ ƒ /connect/consent                                    144 B         182 kB
+├ ○ /cookbook                                           744 B         103 kB
+├ ƒ /cookbook/[slug]                                    744 B         103 kB
+├ ƒ /cookbook/opengraph-image                           744 B         103 kB
+├ ○ /device                                            2.9 kB         204 kB
+├ ○ /docs                                               166 B         106 kB
+├ ƒ /docs/agent-setup                                   744 B         103 kB
+├ ○ /docs/agents                                        744 B         103 kB
+├ ○ /docs/api-reference                                 744 B         103 kB
+├ ○ /docs/architecture                                  744 B         103 kB
+├ ○ /docs/cookbook                                      744 B         103 kB
+├ ○ /docs/embeddings                                    744 B         103 kB
+├ ○ /docs/error-handling                                744 B         103 kB
+├ ○ /docs/errors                                        744 B         103 kB
+├ ƒ /docs/errors/[code]                                 744 B         103 kB
+├ ○ /docs/examples                                      744 B         103 kB
+├ ○ /docs/function-calling                              744 B         103 kB
+├ ○ /docs/ide-setup                                     744 B         103 kB
+├ ○ /docs/integrations                                  744 B         103 kB
+├ ƒ /docs/integrations/[slug]                           744 B         103 kB
+├ ○ /docs/migration                                     744 B         103 kB
+├ ○ /docs/models-guide                                  744 B         103 kB
+├ ƒ /docs/opengraph-image                               744 B         103 kB
+├ ○ /docs/prompt-caching                                744 B         103 kB
+├ ○ /docs/quickstart                                    744 B         103 kB
+├ ○ /docs/rate-limits                                   744 B         103 kB
+├ ○ /docs/sdks                                          744 B         103 kB
+├ ƒ /docs/sdks/[lang]                                   744 B         103 kB
+├ ○ /docs/sdks/python                                   744 B         103 kB
+├ ○ /docs/sdks/typescript                               744 B         103 kB
+├ ○ /docs/security-spec                                 744 B         103 kB
+├ ○ /docs/simple                                        744 B         103 kB
+├ ○ /docs/streaming                                     744 B         103 kB
+├ ○ /docs/structured-outputs                            744 B         103 kB
+├ ƒ /explore                                            405 B         192 kB
+├ ○ /faq                                                206 B         183 kB
+├ ƒ /faq/opengraph-image                                744 B         103 kB
+├ ƒ /feed.xml                                           744 B         103 kB
+├ ○ /glossary                                           744 B         103 kB
+├ ƒ /glossary/[slug]                                    744 B         103 kB
+├ ƒ /glossary/opengraph-image                           744 B         103 kB
+├ ○ /grants                                             744 B         103 kB
+├ ○ /home                                               744 B         103 kB
+├ ○ /how-it-works                                       744 B         103 kB
+├ ƒ /how-it-works/opengraph-image                       744 B         103 kB
+├ ƒ /icon                                               744 B         103 kB
+├ ƒ /images                                             744 B         103 kB
+├ ƒ /images/create                                      148 B         202 kB
+├ ƒ /images/favorites                                   148 B         202 kB
+├ ƒ /images/library                                     148 B         202 kB
+├ ○ /industries                                         744 B         103 kB
+├ ƒ /industries/[slug]                                  744 B         103 kB
+├ ƒ /industries/opengraph-image                         744 B         103 kB
+├ ○ /keys                                               199 B         201 kB
+├ ƒ /keys/[id]                                          744 B         103 kB
+├ ○ /keys/activity                                      744 B         103 kB
+├ ○ /keys/new                                           744 B         103 kB
+├ ƒ /keys/opengraph-image                               744 B         103 kB
+├ ○ /keys/permissions                                   744 B         103 kB
+├ ○ /keys/rate-limits                                   744 B         103 kB
+├ ○ /knowledge-base                                   1.41 kB         190 kB
+├ ○ /knowledge-base/getting-started                     220 B         183 kB
+├ ○ /knowledge-base/public-beta                         220 B         183 kB
+├ ○ /knowledge-base/public-creations                    220 B         183 kB
+├ ○ /knowledge-base/publishing-your-site                744 B         103 kB
+├ ○ /knowledge-base/remixing-creations                  220 B         183 kB
+├ ○ /knowledge-base/revising-your-site                  744 B         103 kB
+├ ƒ /library                                          8.85 kB         216 kB
+├ ƒ /login                                            5.86 kB         183 kB
+├ ○ /manifest.webmanifest                               744 B         103 kB
+├ ○ /migrate                                            744 B         103 kB
+├ ƒ /migrate/[slug]                                     744 B         103 kB
+├ ƒ /migrate/opengraph-image                            744 B         103 kB
+├ ○ /models                                             744 B         103 kB
+├ ƒ /models/[id]                                        744 B         103 kB
+├ ○ /models/compare                                     744 B         103 kB
+├ ○ /models/resolver                                    744 B         103 kB
+├ ○ /models/routing                                     744 B         103 kB
+├ ○ /models/vs                                          744 B         103 kB
+├ ƒ /models/vs/[slug]                                   744 B         103 kB
+├ ƒ /oauth/authorize                                    744 B         103 kB
+├ ƒ /oauth/revoke                                       744 B         103 kB
+├ ƒ /oauth/token                                        744 B         103 kB
+├ ƒ /opengraph-image                                    744 B         103 kB
+├ ○ /playground                                         744 B         103 kB
+├ ○ /postmortems                                        744 B         103 kB
+├ ƒ /postmortems/[slug]                                 744 B         103 kB
+├ ○ /postmortems/opengraph-image                        744 B         103 kB
+├ ○ /pricing                                            206 B         183 kB
+├ ○ /pricing/billing-and-cancellation                   220 B         183 kB
+├ ○ /pricing/calculator                                 744 B         103 kB
+├ ○ /pricing/developer                                  744 B         103 kB
+├ ○ /pricing/fair-use                                   220 B         183 kB
+├ ○ /pricing/galx-pro                                   220 B         183 kB
+├ ƒ /pricing/opengraph-image                            744 B         103 kB
+├ ○ /pricing/seats                                      744 B         103 kB
+├ ○ /pricing/usage                                    1.71 kB         203 kB
+├ ○ /privacy                                          1.69 kB         203 kB
+├ ƒ /profile/[handle]                                 4.31 kB         196 kB
+├ ○ /providers                                          744 B         103 kB
+├ ƒ /providers/[slug]                                   744 B         103 kB
+├ ƒ /providers/opengraph-image                          744 B         103 kB
+├ ○ /queues                                             744 B         103 kB
+├ ○ /reliability                                        744 B         103 kB
+├ ƒ /reliability/[slug]                                 744 B         103 kB
+├ ○ /reliability/opengraph-image                        744 B         103 kB
+├ ○ /robots.txt                                         744 B         103 kB
+├ ○ /security                                           744 B         103 kB
+├ ƒ /security/[slug]                                    744 B         103 kB
+├ ƒ /security/opengraph-image                           744 B         103 kB
+├ ○ /security/patterns                                  744 B         103 kB
+├ ƒ /security/patterns/[slug]                           744 B         103 kB
+├ ○ /signup                                           7.92 kB         185 kB
+├ ○ /sitemap.xml                                        744 B         103 kB
+├ ƒ /sites                                            1.92 kB         108 kB
+├ ƒ /sites/[id]                                       1.92 kB         108 kB
+├ ○ /solutions                                          744 B         103 kB
+├ ƒ /solutions/[slug]                                   744 B         103 kB
+├ ○ /solutions/enterprise                               744 B         103 kB
+├ ƒ /solutions/opengraph-image                          744 B         103 kB
+├ ○ /solutions/small-business                           744 B         103 kB
+├ ○ /stars                                            3.31 kB         109 kB
+├ ○ /status                                           2.04 kB         203 kB
+├ ƒ /status/opengraph-image                             744 B         103 kB
+├ ○ /teams                                              744 B         103 kB
+├ ○ /teams/activity                                   2.39 kB         210 kB
+├ ○ /teams/cost-centers                                3.6 kB         212 kB
+├ ○ /teams/invites                                      744 B         103 kB
+├ ○ /teams/roles                                      2.93 kB         207 kB
+├ ○ /teams/seats                                      4.37 kB         209 kB
+├ ○ /teams/security                                   3.05 kB         211 kB
+├ ○ /teams/settings                                      3 kB         211 kB
+├ ○ /teams/spend-limits                               3.58 kB         212 kB
+├ ○ /teams/sso                                         2.8 kB         211 kB
+├ ○ /telemetry                                          744 B         103 kB
+├ ○ /terms                                            1.71 kB         203 kB
+├ ƒ /todos                                              744 B         103 kB
+├ ○ /tools                                              744 B         103 kB
+├ ○ /tools/api-key-checker                              744 B         103 kB
+├ ○ /tools/api-request-builder                          744 B         103 kB
+├ ○ /tools/context-window-visualizer                    744 B         103 kB
+├ ○ /tools/embeddings-calculator                        744 B         103 kB
+├ ○ /tools/function-calling-builder                     744 B         103 kB
+├ ○ /tools/json-schema-generator                        744 B         103 kB
+├ ○ /tools/latency-estimator                            744 B         103 kB
+├ ○ /tools/model-cost-comparator                        744 B         103 kB
+├ ○ /tools/prompt-caching-calculator                    744 B         103 kB
+├ ○ /tools/prompt-compressor                            744 B         103 kB
+├ ○ /tools/roi-calculator                               744 B         103 kB
+├ ○ /tools/stream-benchmark                             744 B         103 kB
+├ ○ /tools/token-counter                                744 B         103 kB
+├ ƒ /twitter-image                                      744 B         103 kB
+├ ƒ /v1/chat/completions                                744 B         103 kB
+├ ƒ /v1/completions                                     744 B         103 kB
+├ ƒ /v1/embeddings                                      744 B         103 kB
+├ ƒ /v1/images/assets/[token]                           744 B         103 kB
+├ ƒ /v1/images/assets/[token]/thumbnail                 744 B         103 kB
+├ ƒ /v1/images/generations                              744 B         103 kB
+├ ƒ /v1/images/requests/[id]                            744 B         103 kB
+├ ƒ /v1/images/requests/[id]/stream                     744 B         103 kB
+├ ƒ /v1/images/sessions/[sessionId]                     744 B         103 kB
+├ ƒ /v1/messages                                        744 B         103 kB
+├ ƒ /v1/models                                          744 B         103 kB
+├ ƒ /v1/models/[id]                                     744 B         103 kB
+├ ○ /vault                                              744 B         103 kB
+├ ƒ /vault/opengraph-image                              744 B         103 kB
+├ ƒ /vault/shards/[id]                                  744 B         103 kB
+└ ○ /vault/simulator                                    744 B         103 kB
++ First Load JS shared by all                          102 kB
+  ├ chunks/1255-306db9f231b54263.js                     46 kB
+  ├ chunks/4bd1b696-100b9d70ed4e49c1.js               54.2 kB
+  └ other shared chunks (total)                       2.02 kB
+
+
+○  (Static)   prerendered as static content
+●  (SSG)      prerendered as static HTML (uses generateStaticParams)
+ƒ  (Dynamic)  server-rendered on demand
+
+Traced Next.js server files in: 2.287s
+Created all serverless functions in: 5.929s
+Collected static files (public/, static/, .next/static): 131.471ms
+Build Completed in .vercel/output [6m]
+Hosted build retained at /Users/bozoegg/Desktop/GALXAI/.relay/nova-transition/web-build-03/app/.vercel/output; no deployment performed.

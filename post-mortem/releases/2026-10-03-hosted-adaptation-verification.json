@@ -1,0 +1,117 @@
+{
+  "classification": "private",
+  "observed_at": "2026-10-03T22:13:59.039Z",
+  "status": "verification passed; host-duration decision pending",
+  "candidate": {
+    "archive": "b11d853b80851b2ee978b5d0d0bb2cedb66ced423f545e91b44aeaf8c4a9e235",
+    "source_delta": [
+      "src/lib/nova/inference.ts",
+      "src/app/v1/inference/route.ts",
+      "vercel.json"
+    ],
+    "prior_compiled_files_unchanged": 2291
+  },
+  "checks": [
+    {
+      "command": "npm run test:connect",
+      "result": "35 passed"
+    },
+    {
+      "command": "npm run test:connect:db",
+      "result": "135 checks passed on disposable PostgreSQL 17; 159-migration chain"
+    },
+    {
+      "command": "npm run test:relay:services",
+      "result": "43 passed"
+    },
+    {
+      "command": "node --import tsx --test scripts/test-relay-chat-transport.ts scripts/test-auth-identity-boundary.ts scripts/test-workspace-auth.ts scripts/test-public-information-boundary.ts",
+      "result": "29 passed"
+    },
+    {
+      "command": "npm run test:auth:sessions",
+      "result": "44 passed"
+    },
+    {
+      "command": "node --test scripts/test-hosted-packaging.mjs",
+      "result": "3 passed"
+    },
+    {
+      "command": "node scripts/test-nova-host-lifetime.mjs",
+      "result": "3 Linux Node 22 cases using actual Next after()/AfterContext; completion, disconnect and full 300-second deadline persist before modeled reclamation"
+    },
+    {
+      "command": "node --import tsx .relay/hosted-adaptation/edge-existing-host.ts",
+      "result": "9 real edge/tunnel synthetic cases; temporary rule removed"
+    },
+    {
+      "command": "node --import tsx .relay/hosted-adaptation/edge-full-deadline.ts",
+      "result": "300413 ms, one dispatch/POST, terminal unknown, connection closed, no replay; temporary rule removed"
+    },
+    {
+      "command": "node --import tsx .relay/hosted-adaptation/artifact-rehearsal.ts",
+      "result": "19 packaged handler checks; 15 ms revocation denial; fixture containers and network removed"
+    },
+    {
+      "command": "Pinned clean Vercel build followed by reviewed artifact retention and independent archive inspection",
+      "result": "157 pages, 33 physical functions, all 3740 entries verified, 538 public compiled assets scanned"
+    },
+    {
+      "command": "npm run docs:sync",
+      "result": "generated views only; explicit semantic domain and critical attestations recorded separately"
+    },
+    {
+      "command": "npm run docs:check",
+      "result": "passed; historical prevention warnings preserved"
+    },
+    {
+      "command": "npm run test:docs",
+      "result": "25 incident + 17 knowledge fixtures passed"
+    },
+    {
+      "command": "git diff --check",
+      "result": "passed"
+    },
+    {
+      "command": "Exact private credential/build-canary scan of 45 retained evidence files",
+      "result": "zero matches; no universal secret-detection claim"
+    }
+  ],
+  "target": "Same serving deployment; Connect remains disabled, six historical grants revoked, 31 executions unchanged. No deployment, purchase, real inference or production migration.",
+  "classification_by_action": {
+    "ACT-044": "CLOSED",
+    "ACT-045": "REMAINS OPEN",
+    "ACT-046": "CLOSED"
+  },
+  "remaining": "Current Hobby ceiling 300s cannot satisfy the 360s artifact. Explicit Pro billing approval requested after the concrete candidate and acceptance evidence were ready; no reply or approval assumed.",
+  "evidence": [
+    {
+      "path": "post-mortem/releases/2026-10-03-hosted-adaptation.json",
+      "sha256": "7ec6e7c5e69ad2cf8265dfcf50c2d398df60af102d91cd1c2b14da9f2676a152"
+    },
+    {
+      "path": "post-mortem/releases/2026-10-03-hosted-adaptation-review.json",
+      "sha256": "a6cab1e4c236c122f619c61dcb695f0d21d74d6856102ae4de1fc2df7acf8b4e"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-adaptation/docs-check.log",
+      "sha256": "625d9ca54369473c69d721be64d2225d93f5e9c192e09b00799a64c808ce625e"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-adaptation/docs-tests.log",
+      "sha256": "a44d03f4d5ca6f1ecc0180c728fa5596c465510defa39fedb86fdaa648a02bae"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-adaptation/docs-impact-complete.log",
+      "sha256": "c52f18cb98fa1d2987fbf09c3878b909c00bda4fa8a06a6cd62a4ddfec7c78f4"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-adaptation/evidence-secret-scan.json",
+      "sha256": "2664067f1ad444ab15d32ff6b92d23ab6d59bb59e52296fbe2e3016f5bfa94db"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-adaptation/review-delta.json",
+      "sha256": "2f333077b8135ec7f9e12ba77fc25c4d5304253fc85911c81fd2b18a1af79b76"
+    }
+  ]
+}

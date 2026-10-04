@@ -31,13 +31,17 @@ The earlier [management acceptance](../../post-mortem/releases/2026-09-15-relay-
 
 ## Refresh an existing account
 
-1. In Accounts, inspect Health and open **Reconnect** or **Connection settings** for that account.
+1. In Accounts, inspect Request status and open **Reconnect** or **Connection settings** for that account.
 2. Reuse its matching registration and desktop. Start the desktop if stopped.
 3. Complete manual provider sign-in there.
-4. Use **Reconnect account** to review and commit the replacement centrally.
+4. Use **Reconnect account** (older monitor versions label it **Save new sign-in**) to review and commit the replacement centrally.
 5. Inspect saved account state, relay confirmation and actual capability separately. Reconnect preserves enabled/paused intent; a deliberately paused account still requires Enable.
 
 The new pool workflow has no automatic provider-session renewal or background saved-file synchronization. A successfully saved guest login does not update central authority until the explicit registrar action. The legacy controller's optional saved-file sync is a different retained workflow and cannot update assigned pool accounts.
+
+A successful reconnect preserves execution history, including earlier failure counts. The warning alone does not mean the replacement was rejected or that the old sign-in is still in use. Retained failures are advisory and do not disable reconnect or otherwise-authorized Enable. Availability defaults to unknown; current sign-in and relay confirmation do not claim a continuous provider health signal. Reconcile the saved expiry, verification time and runtime readiness before another sign-in. When those checks permit execution, qualify one bounded request with a fresh identity; successful settlement can clear the old consecutive-failure count under the existing health rules. Do not reset counters or remove the account to suppress the warning. The [October 3 recovery](../../post-mortem/releases/2026-10-03-connect-provider-recovery.json) demonstrated this sequence: the replacement was already saved, explicit verification succeeded, then real inference cleared six retained failures.
+
+An interrupted request supplies no confirmed provider result. Cancellation, deadline, transport loss and local authorization failures settle neutrally without adding failures; a real provider availability failure remains negative evidence. An `unknown` execution is still terminal and cannot be automatically replayed. The [installed outcome correction](../../post-mortem/releases/2026-10-03-neutral-outcomes.json) keeps the earlier cancellation and its historical count unchanged while preventing new neutral interruptions from adding failures.
 
 ## Recoverable synchronization
 
@@ -57,7 +61,7 @@ The older fsynced credential-intent journal and automatic sync intervals apply o
 
 ## Rejected revisions and contamination
 
-Use the health reason before choosing a repair: expired sign-in, unavailable access, cooldown, repeated failures and unknown connectivity differ. Generic 403/5xx/timeout does not establish all model permissions or a paid/free classification. Never clear counters or mark a record healthy to create capacity.
+Use the observed request/access reason before choosing a repair: expired sign-in, explicit unavailable access, current cooldown, retained failures and unknown availability differ. Generic 403/5xx/timeout does not establish all model permissions or a paid/free classification. Never clear counters or mark a record healthy to create capacity.
 
 Use **Manage → Remove** to revoke an account and retain history, rather than deleting registry rows or homes. Removed registered accounts cannot be restored. An unfinished registration can be restored from Removed after cleanup and a new review. Known historical synthetic-fixture cleanup remains a narrowly scoped [legacy procedure](legacy-desktop-enrollment.md#rejected-revisions-and-contamination), not general account removal.
 

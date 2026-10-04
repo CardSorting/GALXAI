@@ -1,0 +1,46 @@
+{
+  "at": "2026-10-04T01:42:21.426Z",
+  "readOnly": true,
+  "attempts": [
+    {
+      "actual_tokens": 23,
+      "created_at": "2026-10-04 01:26:41.169196+00",
+      "execution_id": "job_mut54d97_5d7c2c81",
+      "request_key": "03ac35cce58e3fb8a5c57e373b488d4389a65f4f76cc237012296efdd8af72f2",
+      "settled": true,
+      "state": "completed",
+      "success": true,
+      "updated_at": "2026-10-04 01:26:53.386258+00"
+    },
+    {
+      "actual_tokens": null,
+      "created_at": "2026-10-04 01:27:15.164543+00",
+      "execution_id": "job_mut553hh_67bc7c43",
+      "request_key": "f22ee47d5122d3fcd49d0fb2d19fe588628f4b3175d1f03f116b0c189fe6ca01",
+      "settled": true,
+      "state": "unknown",
+      "success": null,
+      "updated_at": "2026-10-04 01:27:19.966159+00"
+    },
+    {
+      "actual_tokens": 23,
+      "created_at": "2026-10-04 01:36:35.213724+00",
+      "execution_id": "job_mut5h3mm_8886bf34",
+      "request_key": "97b15216c58edad06cfc02feaec714c7260a781e75748468e46bdceaa9d4acf7",
+      "settled": true,
+      "state": "completed",
+      "success": true,
+      "updated_at": "2026-10-04 01:36:37.513044+00"
+    },
+    {
+      "actual_tokens": null,
+      "created_at": "2026-10-04 01:37:27.213704+00",
+      "execution_id": "job_mut5i7qg_0c071c00",
+      "request_key": "1f0d65ef740b86826e6aee763722aeaae4504b3433ddd93403430114d0ac2588",
+      "settled": true,
+      "state": "unknown",
+      "success": null,
+      "updated_at": "2026-10-04 01:37:32.012143+00"
+    }
+  ]
+}

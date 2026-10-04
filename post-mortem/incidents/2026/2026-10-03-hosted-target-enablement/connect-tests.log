@@ -1,0 +1,38 @@
+
+> galxai@0.1.0 test:connect
+> node --import tsx --test scripts/test-connect.ts scripts/test-nova.ts scripts/test-connect-sdk.ts scripts/test-connect-http.ts
+
+✔ raw HTTP bodies, headers, streamed errors and capacity retain the public boundary (61.316708ms)
+✔ default browser fetch keeps its global receiver across exchange, inference and revocation (31.184625ms)
+✔ PKCE, state, issuer and registered callback are enforced without exposing credentials (11.46425ms)
+✔ runtime uses bearer-only direct inference, never retries busy or unknown outcomes, and disconnects separately (2.305959ms)
+✔ concurrent calls rotate once; a lost rotation response requires a new connection instead of token reuse (13.624333ms)
+✔ pending storage contains PKCE only and is removed before exchanging a one-use code (1.073791ms)
+✔ NextRequest loopback normalization preserves exact authority and consent CSRF boundaries (7.757875ms)
+✔ authorization validates exact client, resource, narrow scope, state and S256 before storage or redirects (2.77825ms)
+✔ valid authorization binds a private browser cookie and returns only a same-origin consent reference (1.755709ms)
+✔ native callback allows only the registered IP and path with an ephemeral port (0.180458ms)
+✔ consent and management require the existing account session; ambient-cookie mutations require same-origin intent (1.241667ms)
+✔ token endpoint checks origin, verifier, redirect, resource and duplicate fields; it never echoes diagnostics (1.499584ms)
+✔ metadata and preflights describe only the supported public-client contract (0.810042ms)
+✔ delegated credentials cannot become account, media, billing, publishing, or administrator identity (1.025416ms)
+✔ only finite Connect routes leave preview; login returns to consent without media enrollment (0.486083ms)
+✔ registration fails closed and has no default clients or entitlement (0.193334ms)
+✔ Connect entry never opens application routes on published Site hostnames (26.756ms)
+✔ no identity, malformed input, account JWT, or unsupported operations can dispatch (22.349791ms)
+✔ permission, entitlement, capacity, storage failure and duplicate work are distinct and never dispatch (1.783917ms)
+✔ nonstreaming response rebuilds the allowlist and records completion once (0.941584ms)
+✔ unknown execution is retained and never automatically replayed (0.340167ms)
+✔ known non-admission returns a capacity state without invalidating authorization (0.319375ms)
+✔ SSE re-encodes allowlisted content and strips upstream identifiers, headers and extra fields (1.081125ms)
+✔ truncated, erroneous and false-success SSE end honestly without a DONE marker (0.865708ms)
+✔ JSON clients validate the original stream and cannot inherit a fabricated default finish reason (1.240167ms)
+✔ cancellation propagates to execution and keeps an unknown outcome (0.473792ms)
+ℹ tests 26
+ℹ suites 0
+ℹ pass 26
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 584.304333

@@ -1,0 +1,5 @@
+{
+  "affectedInstalledPackagesReferencedByArtifact": {},
+  "classification": "NON-BLOCKING FOLLOW-UP",
+  "reason": "Existing locked pattern expansion packages used by build/lint tooling. No affected installed package paths appear in the retained function payload; no dependency updates in this bounded pass."
+}

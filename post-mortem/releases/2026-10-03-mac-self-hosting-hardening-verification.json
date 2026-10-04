@@ -1,0 +1,202 @@
+{
+  "classification": "private",
+  "observed_at": "2026-10-04T00:05:35.532188+00:00",
+  "determination": "NOT READY \u2014 BLOCKERS REMAIN",
+  "checks": {
+    "packaging_operator_tests": {
+      "passed": 19,
+      "failed": 0
+    },
+    "existing_connect_nova_tests": {
+      "passed": 35,
+      "failed": 0
+    },
+    "existing_relay_service_tests": {
+      "passed": 43,
+      "failed": 0
+    },
+    "separate_host_lifecycle_cases": {
+      "passed": 3,
+      "full_deadline_ms": 300391
+    },
+    "whole_image_acceptance": {
+      "status": "FAILED",
+      "reason": "Internal public-origin handling; valid credential denied before inference",
+      "later_drain_restart_revocation_checks": "NOT REACHED"
+    },
+    "actual_image_planning_gate": "Refused without acceptance; no plan/container created",
+    "image_archive_and_payload": "Verified; 2,382 mapped payloads unchanged, 819 public files scanned",
+    "production_build": "Retained accepted compiled application packaged as production image; no application recompilation",
+    "frozen_source_files_unchanged": 1886,
+    "frozen_compiled_files_unchanged": 2291,
+    "documentation_validation": "PASSED; existing overdue prevention actions retained",
+    "documentation_fixtures": 42,
+    "preserved_build_boundary_assets": 538,
+    "diff_check": "PASSED",
+    "private_evidence_secret_scan": {
+      "files": 33,
+      "matches": 0,
+      "scope": "Exact configured private values/build canaries, not a universal detector"
+    },
+    "owned_fixture_cleanup": "No remaining labeled containers or temporary runtime configuration files"
+  },
+  "commands": [
+    "node --test scripts/test-self-host.mjs",
+    "npm run test:connect",
+    "npm run test:relay:services",
+    "node scripts/test-nova-host-lifetime.mjs",
+    "node scripts/self-host.mjs package .relay/hosted-adaptation/build-03 .relay/mac-production/package-05",
+    "node scripts/self-host.mjs build .relay/mac-production/package-05",
+    "node scripts/self-host.mjs verify .relay/mac-production/package-05",
+    "node --import tsx scripts/test-self-host-runtime.ts .relay/mac-production/package-05 .relay/hosted-adaptation/public-build-inputs.json .relay/mac-production/runtime-07 \u2014 FAILED; evidence retained",
+    "npm run docs:sync",
+    "npm run docs:check",
+    "npm run test:docs",
+    "npm run docs:check:build",
+    "git diff --check"
+  ],
+  "limits": [
+    "No live target, production database/account, provider inference or cutover.",
+    "No new whole-image revocation latency; historical 175 ms evidence is not an SLA.",
+    "No changes to accepted application source/compiled files, quota, health, execution semantics or grant policy.",
+    "Whole-image origin correction and public transport/client/configuration/rollback acceptance remain required."
+  ],
+  "evidence": [
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-mac-self-hosting-hardening/boundary-build-final.log",
+      "sha256": "42778acb045b60fd8fa2fcbd38366e1d3dbb320543f2e6efc85aa1740c92c037"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-mac-self-hosting-hardening/boundary-build.log",
+      "sha256": "3d46674997ac56cc19d41db731a7b890985ce0689c706c69104578b7ec8d085d"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-mac-self-hosting-hardening/build-05.log",
+      "sha256": "b532d79db3e6e28a833975cd2fd8b179a55753de8adebf4ed7467cea82a8aa0d"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-mac-self-hosting-hardening/cleanup.json",
+      "sha256": "cf27f97bf774dba84ef07d660da5241307ef4bf0bdac9130118f46c82ea26791"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-mac-self-hosting-hardening/connect-tests.log",
+      "sha256": "1a93ffbf2454d40eed95bd672038b1347028eee1cd8215dd964c9cbff10d2e98"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-mac-self-hosting-hardening/diagnose-origins.ts",
+      "sha256": "89e614221fe5fd611915fb9bf02adf790d28b57e96f6de9be24012630a434c97"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-mac-self-hosting-hardening/diff-check-final.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-mac-self-hosting-hardening/docs-check-final.log",
+      "sha256": "8aef7bff4f5a59e9e922cef3c361209dba913e7c3491d65069aa5444b68d6bb0"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-mac-self-hosting-hardening/docs-impact-final.log",
+      "sha256": "9724b96b8976a9683ca0167d5cfc92f263fe333898c63d0b2f13389d1da8307b"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-mac-self-hosting-hardening/docs-sync-final.log",
+      "sha256": "b052637a8f1136dcb466fb87cb3540468ce6fc773981c505a6e8b1f9e3a76246"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-mac-self-hosting-hardening/docs-tests-final.log",
+      "sha256": "eee2196280fd7138b27de88fb6ad9c47b4fd156641aa8324736667b5c16c72d5"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-mac-self-hosting-hardening/doctor.json",
+      "sha256": "862392c8c8ee66eae1a400c76d7a218555a7420915b4f2f476188b2289797002"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-mac-self-hosting-hardening/evidence-secret-scan.json",
+      "sha256": "eee0e136d60f4622ae84ef846463900466e92320b99440546e28cdf74e909441"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-mac-self-hosting-hardening/lifetime-tests.log",
+      "sha256": "1595d0aedc4a975dbf8fdb69786a89fc40a425aa9c2907ba9c8afc1b2a8ae8f3"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-mac-self-hosting-hardening/origin-diagnostic-01.json",
+      "sha256": "5747fd41bbb2bb051de7d26b614d1686cf63bb6089056d4ea06cb8b68d95681f"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-mac-self-hosting-hardening/origin-diagnostic-02.json",
+      "sha256": "30dc5d311cfcf279c46844308776d99ea57746391c6707f43bfd29901146d4a1"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-mac-self-hosting-hardening/package-05.log",
+      "sha256": "78e1bd42dc2c6b3094d59c77734c5705aabd619d816fa602b37107de29e24a6b"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-mac-self-hosting-hardening/package-image.json",
+      "sha256": "e49eef302896a415000b4a3bcc7d08bf8b7d5cf8178a665525cf3f5baf28ed2e"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-mac-self-hosting-hardening/package-manifest.json",
+      "sha256": "2afadf8c22f92685245228d805d6f5fac658c108ed105ad585c1c33b7be3976d"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-mac-self-hosting-hardening/package-verify-final.json",
+      "sha256": "bf74cc3acf23c2bbd6017c1366b4c89cb1a1d9c3b19cb33d1ad304dae9884c43"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-mac-self-hosting-hardening/planning-gate.json",
+      "sha256": "73520488bd4e8259b10f88b399c83f4e693ceeabf28a8c74a10df3759a1f4f55"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-mac-self-hosting-hardening/preservation-final.json",
+      "sha256": "add6849f59f612dcb4bc1fb1974250c492217836853d503087638741df916e48"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-mac-self-hosting-hardening/relay-services-tests.log",
+      "sha256": "44c7ec4a000db4252f577b71ee007dce0f8280cba1a95c24d36b4cdb13c59a21"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-mac-self-hosting-hardening/runtime-01-failure.json",
+      "sha256": "30a1c6a5d7a1e8dd9fb0925640ae3bec3e18b32e6dfc781e9999f9eb4bfc2134"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-mac-self-hosting-hardening/runtime-02-failure.json",
+      "sha256": "419b54f3efcde8d94af0692a7ce0dc522555ab31318bffe39164dad7c3580de4"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-mac-self-hosting-hardening/runtime-03-failure.json",
+      "sha256": "e1e128607d16217b60447ce428c35f3c43f92ec10daef2bf25017bcc5538dc9c"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-mac-self-hosting-hardening/runtime-04-failure.json",
+      "sha256": "72f1103bce8f625695175541eeb2d03fef351c38c65177eb14fade9f430c6bfc"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-mac-self-hosting-hardening/runtime-05-failure.json",
+      "sha256": "55238f7422e37f16c88d229db34dd4832f4b08e70e0292b335b5ecd852363db3"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-mac-self-hosting-hardening/runtime-06-failure.json",
+      "sha256": "7a261d933686e8f5719d3895c16ae76c210a48be2e3d956dbdf57f4e5275f39d"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-mac-self-hosting-hardening/runtime-07-failure.json",
+      "sha256": "10a95481b205ab48c7f5b13f00afed1239e94f9be47b52a862449a26b7ee57f8"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-mac-self-hosting-hardening/unit-tests.log",
+      "sha256": "d1c389e00e8e1e3684e8d51d00071f01b5d6d329c6e688c1c7a6d80f671f7179"
+    },
+    {
+      "path": "post-mortem/releases/2026-10-03-mac-self-hosting-hardening.json",
+      "sha256": "a83fd9c6df5214f1f8b2b3d1e610f0a44408f4f3cb2fda72d4257478cc1ffd1e"
+    },
+    {
+      "path": "post-mortem/releases/2026-10-03-mac-self-hosting-hardening-review.json",
+      "sha256": "3e08610dc9f31e081a9260c5f3190d5c25229544ad48badd2b0707ce4209182d"
+    },
+    {
+      "path": "post-mortem/releases/2026-10-03-mac-self-hosting-hardening-navigation-review.json",
+      "sha256": "baed175cb91d25bb4dc2bf9dc612f9ac49aac6fc8f260b200d2fc18349d96a5e"
+    }
+  ]
+}

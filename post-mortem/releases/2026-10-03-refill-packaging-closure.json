@@ -1,0 +1,291 @@
+{
+  "classification": "private",
+  "observed_at": "2026-10-03T20:45:25.160754+00:00",
+  "status": "ACT-041/042 closed at verified staged migration and clean native artifact; not deployed",
+  "base_revision": "38a3cc48f32f5f404592109c8cae3ddac5fa6f61",
+  "scope": "Bounded arithmetic and packaging correction only. Pre-existing working-tree Connect/neutral-outcomes work retained. No shared mutation, service replacement, provider inference, account/grant changes or hosted rollout.",
+  "reproduction_evidence": "post-mortem/incidents/2026/2026-10-03-neutral-outcomes/closure-reproduction.json",
+  "quota": {
+    "mechanism": "Repeated NUMERIC(20,9) serialization rounds fractional carry to 1.000000000 after floor, violating galx_shards_refill_remainders_valid (23514); refill rolls back and admission throws.",
+    "default_case": {
+      "capacity_tokens": 10000000,
+      "refill_tokens_per_minute": 10000000,
+      "initial_tokens": 0,
+      "first_elapsed_ms": 2,
+      "persisted_tokens": 333,
+      "persisted_fraction": "0.333333333",
+      "second_elapsed_ms": 1,
+      "expected_total_tokens": 500,
+      "actual_before": "exception; persisted tokens remain 333; no lease",
+      "after": "500 available; admitted"
+    },
+    "production_shaped_case": {
+      "configuration_source": "Read-only inventory of three existing idle accounts; no identifiers or credentials retained here",
+      "capacity_tokens": 500000,
+      "refill_tokens_per_minute": 50000,
+      "request_capacity": 40,
+      "synthetic_initial_tokens": 0,
+      "first_elapsed_ms": 1,
+      "persisted_tokens": 0,
+      "persisted_fraction": "0.833333333",
+      "second_elapsed_ms": 5,
+      "expected_total_tokens": 5,
+      "actual_before": "exception; persisted tokens remain zero; no lease",
+      "after": "5 available; admitted",
+      "log_sha256": "dc6186355052614e810e8e66e5fae0049e4cf20595d4d8e606bb8e2d1bbc43a1"
+    },
+    "correction": "Two nullable internal BIGINT numerators initialize exactly once from legacy fractions under the existing account row lock. Exact integer-valued NUMERIC intermediates use div/mod; old fractions become truncated compatibility projections only.",
+    "invariant": "One whole token/request is D=3000000000 numerator units. Saved numerator + elapsed integer milliseconds * integer units/minute * 50000 yields integer quotient and remainder. Cap balance before bounded cast; discard surplus at full capacity; never rewind timestamp. Observation frequency cannot alter capacity.",
+    "boundaries": [
+      "zero elapsed",
+      "sub-interval",
+      "just below",
+      "exact boundary",
+      "just above",
+      "multiple intervals",
+      "long idle",
+      "already full",
+      "nearly full",
+      "complete exhaustion",
+      "zero rate",
+      "legacy fractions",
+      "legacy plus elapsed",
+      "uninitialized timestamp",
+      "maximum BIGINT rate and long idle"
+    ],
+    "restart_and_partition": "18000 evaluations across three rates match a single interval and independent BigInt oracle. Same-time reads add nothing; backward clock/catch-up counts once. Fresh Node processes reconstruct partial depletion and long idle exactly.",
+    "concurrency": "12 concurrent admissions at one-unit boundary: one accepted, 11 quota denials, one reservation/lease. Duplicate retains the same lease and state.",
+    "unchanged": "Full pre/post-refill function bodies match original. Private role and column denial retained. No policy/health/entitlement/outcome/retry changes.",
+    "migration": "20261003202702_relay_refill_integer_credit.sql",
+    "rollback": "DOWN closes new acquisition and retains exact state, leases, settlement and history; UP resumes. Does not restore broken rounding.",
+    "target_state": "NOT APPLIED to shared primary. Read-only history: 157 applied, pending only unrelated Orbit and this correction. Execution project untouched."
+  },
+  "clean_build": {
+    "first_failure": "Fresh checkout/builder failed COPY of ignored BroccoliDB/src and BROCCOLIQUEUE/src; both are undeclared local workspaces.",
+    "independent_second_failure": "Original docker-cli=29.5.3-r1 unavailable in Alpine index, reproduced in pinned Node image.",
+    "second_failure_log_sha256": "338b076780a7c7c5810e95df48f569a57177e512ccdc0cf89ab0d838fadd5f2b",
+    "correction": "Relay manifest/lock declare the two existing immutable source commits/integrities. Builder installs/bundles package source, runtime omits build dependencies. Same Docker CLI 29.5.3 copied from official digest-pinned image, without mutable APK resolution.",
+    "cli_image": "docker:29.5.3-cli@sha256:11e1133c30f3ceb73c6bdc7dfb78b3f9ed8e8e0d1d0400e91c5ec2eb240bf2ff",
+    "method": "Second isolated copy of Git-declared candidate source; excludes ignored files, local configuration, node_modules, .next, .relay and both sibling repositories. Fresh docker-container builder, --no-cache. Locked install/generation inside Docker; host needs Node/npm and Docker only.",
+    "command": "TAG=closure-clean-20261003 npm run relay:services:build -- --no-cache --progress=plain",
+    "exit_code": 0,
+    "build_log_sha256": "8fbf0b3546298ad21ac47344b1c25ff191f260613f00de0444dc8c2c864af0b9",
+    "declared_build_input_files": 536,
+    "input_manifest_sha256": "5ed06371ee95627fc4a4705fa9cd9271ad4f73e9bd555b972e89261ff33c9d35",
+    "canonical_procedure": "docs/runbooks/relay-pool-services.md#1-database-and-artifact-preparation",
+    "images": [
+      {
+        "tag": "galxai-relay-central:closure-clean-20261003",
+        "id": "sha256:a0a4a04390f3ebbdd114689ad6e469cc8b1ff6b2515aad380cb28538d0448523",
+        "architecture": "arm64",
+        "component": "central"
+      },
+      {
+        "tag": "galxai-relay-premium:closure-clean-20261003",
+        "id": "sha256:def038ce77818ef7355392f656ad4cf858ddd2cdc534e9f2fc83069edbeaf075",
+        "architecture": "arm64",
+        "component": "runtime",
+        "pool": "premium"
+      },
+      {
+        "tag": "galxai-monitor-premium:closure-clean-20261003",
+        "id": "sha256:08b3ea12058826316509b9f69c444f6f71d5c5b01382df99e672884bc123908b",
+        "architecture": "arm64",
+        "component": "monitor",
+        "pool": "premium"
+      }
+    ],
+    "artifact_verification": {
+      "image": "sha256:08b3ea12058826316509b9f69c444f6f71d5c5b01382df99e672884bc123908b",
+      "architecture": "arm64",
+      "checks": 76,
+      "cli": "Docker version 29.5.3, build d1c06ef",
+      "entrypointStarted": true,
+      "browserFields": [
+        "accounts",
+        "activity",
+        "automaticActivation",
+        "desktopAvailable",
+        "desktops",
+        "executionAllowed",
+        "pool",
+        "registrationAllowed",
+        "registrations",
+        "relayFresh",
+        "role"
+      ],
+      "privateOwnershipFields": [
+        "installationId",
+        "lastSeenAt",
+        "pool"
+      ],
+      "controlRoutes": [
+        "/operator/status"
+      ],
+      "projectFiles": [
+        "component.json",
+        "desktop",
+        "desktop-activity.js",
+        "desktop-login.html",
+        "desktop-login.js",
+        "desktop-organizer.css",
+        "desktop-organizer.js",
+        "desktops.html",
+        "desktops.js",
+        "entrypoint.mjs",
+        "node_modules",
+        "package-lock.json",
+        "package.json",
+        "pool-desktop.html",
+        "pool-desktop.js",
+        "pool-monitor-access.css",
+        "pool-monitor-login.html",
+        "pool-monitor-login.js",
+        "pool-monitor-model.js",
+        "pool-monitor.css",
+        "pool-monitor.html",
+        "pool-monitor.js",
+        "service.mjs"
+      ],
+      "productionDependencies": [
+        "@novnc/novnc",
+        "pg",
+        "sharp",
+        "ws"
+      ],
+      "network": "none; synthetic loopback control and Unix daemon only"
+    },
+    "limit": "Actual image entrypoint/CLI/HTTP/private handoff tested offline against synthetic authorities; not newly installed serving stack or real desktop/provider. Native arm64 only; installed manifest/pins unchanged."
+  },
+  "regression": {
+    "protected_baseline_files": 113,
+    "protected_changes": [],
+    "baseline_sha256": "34342b74f6f5342831bdbf9eb636ce157fda53edc42a0c1b1a037f4a45d9509b",
+    "neutral_outcomes": "unknown remains default availability; cancellation/deadline/loss neutral; attributable provider failure distinct",
+    "execution": "terminal unknown/no replay and original duplicate attachment verified by service, execution and Connect fixtures. No retained executions written.",
+    "connect": "26 protocol and 135 database/HTTP checks preserve consent/PKCE, credential/client/scope/audience/entitlement rules, revocation, refresh reuse, independent clients/Media and shared admission.",
+    "revocation": "Existing current-grant contract verified by fixtures. No new live latency measurement; 175 ms remains historical evidence, not SLA.",
+    "private_public": "Actual candidate preserves three-field private handoff and sanitized eleven-field browser status. Hostile private fields/tokens/identities absent from response bodies/headers/assets/logs.",
+    "installed_manifest_sha256": "a2da32923e1aa3291e78463ac17d3ca41bc46e2fa22f45d0a3fd0d99ee42bbf0"
+  },
+  "verification": [
+    {
+      "command": "npm run test:relay:refill-db",
+      "result": "passed",
+      "checks": 82,
+      "log": "/tmp/galx-closure-refill-after.log",
+      "sha256": "98fbcbd5b67f30e396141681bdacafab29f3f987777484f9c818865c0f218358"
+    },
+    {
+      "command": "npm run test:relay:services",
+      "result": "passed",
+      "checks": 43,
+      "log": "/tmp/galx-closure-services.log",
+      "sha256": "fb3c6d36dbe5be44b28ce0feb0a49b697d1724ed8c7b8d731ef1048e0d04f3de"
+    },
+    {
+      "command": "npm run test:relay:access",
+      "result": "passed",
+      "checks": 6,
+      "log": "/tmp/galx-closure-access.log",
+      "sha256": "c91444632758a9387f63b26be3082b5b50377290a80130b021c3c3d9eef0491f"
+    },
+    {
+      "command": "npm run test:relay:connection",
+      "result": "passed",
+      "checks": 51,
+      "log": "/tmp/galx-closure-connections.log",
+      "sha256": "449065793e7cee0104602ebe7a7b2295be3699339a0caa6b344ea40b4722d2f8"
+    },
+    {
+      "command": "npm run test:connect",
+      "result": "passed",
+      "checks": 26,
+      "log": "/tmp/galx-closure-connect.log",
+      "sha256": "1ee60dbb1b053035839975cf61e9ae64239be20aaeec79f4e5b7597caa272284"
+    },
+    {
+      "command": "npm run test:connect:db",
+      "result": "passed",
+      "checks": 135,
+      "log": "/tmp/galx-closure-connect-db.log",
+      "sha256": "5bfa72b496bfc4b1235d92ed6375c9449abcca8aaddfd55f8e4a42f81e432265"
+    },
+    {
+      "command": "npm run test:relay:authorization-db",
+      "result": "passed",
+      "checks": 224,
+      "log": "/tmp/galx-closure-authorization-db.log",
+      "sha256": "763ca4dcd7da29b4350a39c78dea0c8d54a874c588c42292dc1b24ca002911ce"
+    },
+    {
+      "command": "npm run db:test",
+      "result": "passed",
+      "checks": 94,
+      "log": "/tmp/galx-closure-general-db.log",
+      "sha256": "4df38bfb1944cc77ce3c7b44a19026cce843fd2c359c475e8a1db26a6352ac3c"
+    },
+    {
+      "command": "npm run db:verify",
+      "result": "passed",
+      "checks": "159 migration/rollback pairs",
+      "log": "/tmp/galx-closure-db-verify.log",
+      "sha256": "63587190a3b1daa6a67600e7b6791d8016a4044b6920aed013ee75fc3af99067"
+    },
+    {
+      "command": "npm run build",
+      "result": "passed",
+      "checks": "compiled/typechecked; 157 pages",
+      "log": "/tmp/galx-closure-production-build.log",
+      "sha256": "ef78256641919f255e9846eb51ef8fc36b6e8f0e8862f1e23a9ad96b7feede01"
+    },
+    {
+      "command": "GALX_RELAY_SERVICE_TAG=closure-clean-20261003 GALX_PREMIUM_DOCKER_CONTEXT=desktop-linux npm run verify:relay:service-images",
+      "checks": 29,
+      "result": "passed",
+      "log": "/tmp/galx-closure-image-verification.log",
+      "sha256": "48678813eeacffc691e6aad861c668c80661a19152b1d7ea0fa7bc69eed362b6"
+    },
+    {
+      "command": "GALX_RELAY_SERVICE_TAG=closure-clean-20261003 npm run test:relay:monitor-package",
+      "checks": 76,
+      "result": "passed",
+      "log": "/tmp/galx-closure-monitor-package-final.log",
+      "sha256": "46e0ee2c1d39732de296a94f8dc80f49edc75b5e4f2b2cc5115af98536c9ebca"
+    }
+  ],
+  "other_observations": {
+    "fixture_correction": "First package test included expiry in ticket exchange and used wrong cookie prefix; strict endpoint correctly rejected it. Fixed fixture only, no product authorization changes.",
+    "read_only_advisors": {
+      "scope": "existing primary unchanged by this pass",
+      "findings": "1 error and 85 warnings",
+      "sha256": "0905aeaab263091b47e0cfaba4445d0267f943c1474068b2972e2bd8683e62d4",
+      "triage": "View warning is the explicit discoverable-Star public projection. 70 performance warnings: init plans, multiple policies, duplicate indexes. Password warning retained in ACT-014. Fourteen definer-execute warnings span seven functions/two roles; legacy account-tier RPC takes supplied user ID and returns wallet metadata without visible owner check. Separate ACT-043 public-release review; no customer rows queried or shared permissions changed."
+    }
+  },
+  "remaining_classification": {
+    "BLOCKS CONTROLLED ROLLOUT": [
+      "ACT-001: refresh deployment/storage/target architecture inventory; target-host readiness remains unproved. Separate decision must authorize exact staged migration and artifact selection."
+    ],
+    "BLOCKS PUBLIC RELEASE": [
+      "ACT-018: host fault/recovery drills",
+      "ACT-014: elevation/device-proof/password follow-ups",
+      "ACT-028: remaining real account/session matrix",
+      "ACT-043: legacy account-tier RPC browser access review; pre-existing, outside Connect/Nova"
+    ],
+    "NON-BLOCKING FOLLOW-UP": [
+      "ACT-037",
+      "ACT-005",
+      "ACT-006",
+      "ACT-008",
+      "ACT-015",
+      "ACT-016",
+      "ACT-020",
+      "ACT-025",
+      "ACT-032",
+      "Unrelated existing performance/advisor findings"
+    ]
+  },
+  "final_determination": "YES: both requested defects are closed sufficiently to consider a separately authorized controlled hosted rollout. No shared migration or rollout performed. ACT-001 and public-release gates remain. Stop this engineering pass.",
+  "documentation_verification": "Subsequent semantic review and append-only event record final docs, fixture and compiled-boundary verification."
+}

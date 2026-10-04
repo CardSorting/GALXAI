@@ -1,0 +1,32 @@
+{
+  "at": "2026-10-03T22:40:52.979Z",
+  "reviewedEntries": [
+    {
+      "key": "GALX_CONNECT_ENABLED",
+      "id": "qsHYPf1oCu6tImXa",
+      "type": "encrypted",
+      "exactReadback": true
+    },
+    {
+      "key": "GALX_CONNECT_ORIGIN",
+      "id": "EDaCPdC0TAKSJpJG",
+      "type": "encrypted",
+      "exactReadback": true
+    },
+    {
+      "key": "GALX_NOVA_RESOURCE",
+      "id": "6rciDB3QPSFsGpoP",
+      "type": "encrypted",
+      "exactReadback": true
+    },
+    {
+      "key": "GALX_CONNECT_CLIENTS",
+      "id": "daPy1w0B8ZLgybn0",
+      "type": "encrypted",
+      "exactReadback": true
+    }
+  ],
+  "activation": false,
+  "grantsIssued": 0,
+  "note": "Collection endpoint returned encrypted representations; exact values checked with each existing entry GET endpoint."
+}

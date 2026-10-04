@@ -1,0 +1,15 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Edge fixture must become ready
+    at <anonymous> (/Users/bozoegg/Desktop/GALXAI/.relay/hosted-adaptation/edge-rehearsal.ts:65:217) {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}
+
+Node.js v26.8.1

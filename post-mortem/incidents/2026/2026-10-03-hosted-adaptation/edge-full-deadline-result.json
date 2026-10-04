@@ -1,0 +1,31 @@
+{
+  "at": "2026-10-03T22:09:53.562Z",
+  "path": "local Nova -> actual Cloudflare edge/tunnel -> authenticated synthetic origin",
+  "syntheticOrigin": true,
+  "realProvider": false,
+  "realAccount": false,
+  "realVercelInvocation": false,
+  "requiredPathPattern": "^/(health(/live)?|v1/(models|chat/completions|jobs/[A-Za-z0-9_.:-]+/(stream|receipt)))$",
+  "results": [
+    {
+      "mode": "wall-deadline",
+      "status": 200,
+      "state": "unknown",
+      "novaDispatches": 1,
+      "ingressPosts": 1,
+      "firstWhileOriginOpen": true,
+      "originSawClose": true,
+      "elapsedMs": 300413,
+      "sanitized": true
+    }
+  ],
+  "counters": {
+    "attempts": 1,
+    "unauthorized": 1,
+    "disconnects": 1,
+    "requests": 7
+  },
+  "fullExecutionDeadlineMs": 300000,
+  "heartbeatIntervalMs": 30000,
+  "providerHealthEvidence": "Separately verified using the real relay engine regression suite; synthetic origin does not classify provider health."
+}

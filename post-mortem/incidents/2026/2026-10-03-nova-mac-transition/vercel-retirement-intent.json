@@ -1,0 +1,55 @@
+{
+  "at": "2026-10-04T01:43:38.295Z",
+  "release": {
+    "id": "dpl_4uwFyPMJ6YV7njXsWQbb7a8MZHKh",
+    "url": "galxai-32sh7g34p-cardsortings-projects.vercel.app",
+    "scope": "media-connect-only",
+    "source": "ef292883a4e84af9b91b14d7f86fdb237c3e5489abd7d3890257f425c0642d3f",
+    "crons": []
+  },
+  "checks": [
+    {
+      "url": "https://galx.ai/",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "url": "https://galx.ai/.well-known/oauth-authorization-server",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "url": "https://galx.ai/connect",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "url": "https://galx.ai/v1/inference",
+      "method": "POST",
+      "status": 403
+    },
+    {
+      "url": "https://galx.ai/api/queues",
+      "method": "GET",
+      "status": 403
+    },
+    {
+      "url": "https://nova.galx.ai/.well-known/oauth-protected-resource",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "url": "https://nova.galx.ai/v1/inference",
+      "method": "POST",
+      "status": 401
+    }
+  ],
+  "removeOnly": "nova.galx.ai project binding and alias",
+  "retain": [
+    "www.galx.ai",
+    "galx.ai",
+    "galxai.vercel.app"
+  ],
+  "secretsRemoved": [],
+  "reason": "No Nova-exclusive provider credential exists on Vercel. Shared Media/Connect credentials remain required."
+}

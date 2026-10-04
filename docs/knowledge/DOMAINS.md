@@ -105,7 +105,7 @@ Owner role: **Relay operator**. Domain: `relay`.
 - [GALX architecture](../../docs/ARCHITECTURE.md)
 - [Relay execution and account authority contract](../../docs/FEDERATION_STRATEGY.md)
 - [Relay operations and implementation entry point](../../docs/RELAY_VNEXT_RUNBOOK.md)
-- [Relay health and operational visibility](../../docs/TELEMETRY_AND_OBSERVABILITY.md)
+- [Relay request evidence and operational visibility](../../docs/TELEMETRY_AND_OBSERVABILITY.md)
 - [Telemetry sources and interpretation](../../docs/maintainers/TELEMETRY_AND_METRICS_OBSERVABILITY.md)
 - [Relay request and account telemetry](../../docs/maintainers/RELAY_TELEMETRY.md)
 - [Relay hardening checks](../../docs/maintainers/RELAY_HARDENING.md)
@@ -140,7 +140,7 @@ Owner role: **Relay operator**. Domain: `relay`.
 - [Model catalog and observed availability](../../docs/MODEL_CATALOG.md)
 - [Security boundaries](../../docs/SECURITY.md)
 - [Relay security reference](../../docs/relay-security.md)
-- [Account health and management UX](../../docs/maintainers/RELAY_TELEMETRY_UX.md)
+- [Account request status and management UX](../../docs/maintainers/RELAY_TELEMETRY_UX.md)
 - [Subsystem ownership and dependencies](../../docs/maintainers/SUBSYSTEM_INTERNALS_AND_DEPENDENCY_GRAPH.md)
 - [Maintainer glossary](../../docs/maintainers/MAINTAINER_GLOSSARY_AND_LEXICON.md)
 - [Frequently asked questions](../../docs/FAQS.md)
@@ -160,7 +160,7 @@ Owner role: **Relay operator**. Domain: `relay`.
 - [ADR 0157: Compatible relay requests and honest output budgets](../../docs/adr/0157-compatible-relay-output-budgets.md)
 - [Relay admission lifecycle](../../docs/runbooks/relay-admission-lifecycle.md)
 
-Relevant checks (select for the change; impact discovery never executes these): `npm run test:relay:capabilities`, `npm run test:relay:desktop-login`, `npm run test:relay:pool-images`, `npm run verify:relay:pool-images`, `npm run test:relay:services`, `npm run verify:relay:service-images`, `npm run test:agent:tools`, `npm run test:relay:activation-db`.
+Relevant checks (select for the change; impact discovery never executes these): `npm run test:relay:capabilities`, `npm run test:relay:desktop-login`, `npm run test:relay:pool-images`, `npm run verify:relay:pool-images`, `npm run test:relay:services`, `npm run verify:relay:service-images`, `npm run test:agent:tools`, `npm run test:relay:activation-db`, `npm run test:relay:refill-db`, `npm run test:relay:monitor-package`.
 
 ## Database authority and migrations
 
@@ -179,7 +179,7 @@ Owner role: **Database operator**. Domain: `database`.
 - [Private image release and privacy audit](../../docs/runbooks/private-image-release-audit.md)
 - [ADR 0163: Star candidate selection before exhibition](../../docs/adr/0163-star-candidate-selection-before-exhibition.md)
 
-Relevant checks (select for the change; impact discovery never executes these): `npm run db:verify`, `npm run db:test`, `npm run test:broc`, `npm run test:broc:db`, `npm run test:relay:manual-db`, `npm run test:relay:authorization-db`, `npm run test:relay:activation-db`, `npm run test:broc:selection`, `npm run test:image:db`.
+Relevant checks (select for the change; impact discovery never executes these): `npm run db:verify`, `npm run db:test`, `npm run test:broc`, `npm run test:broc:db`, `npm run test:relay:manual-db`, `npm run test:relay:authorization-db`, `npm run test:relay:activation-db`, `npm run test:broc:selection`, `npm run test:image:db`, `npm run test:relay:refill-db`.
 
 ## Release and deployment boundaries
 
@@ -196,6 +196,9 @@ Owner role: **Release operator**. Domain: `delivery`.
 - [Deployment and release](../../docs/playbooks/02-deployment-and-release.md)
 - [Recover Stripe webhook delivery](../../docs/runbooks/stripe-webhook-delivery.md)
 - [Private image release and privacy audit](../../docs/runbooks/private-image-release-audit.md)
+- [Operate Mac-hosted Nova](../../docs/runbooks/mac-self-hosting.md)
+- [Nova hosting transition and retirement](../../docs/runbooks/nova-hosting-transition.md)
+- [ADR 0167: Mac Nova runtime and Vercel inference retirement](../../docs/adr/0167-nova-mac-runtime-placement.md)
 
 Relevant checks (select for the change; impact discovery never executes these): `npm run docs:check`, `npm run build`, `npm run docs:check:build`.
 
@@ -236,3 +239,18 @@ Owner role: **Billing maintainer**. Domain: `billing`.
 - [Orbit, Foundry, and public Star identity](../../docs/maintainers/ORBIT_FOUNDRY.md)
 
 Relevant checks (select for the change; impact discovery never executes these): `npm run test:billing:lifecycle`, `npm run test:orbit`, `npm run test:sites:plans:db`, `npm run build`.
+
+## GALX Connect and Nova
+
+Owner role: **Security/access and inference maintainers**. Domain: `connect`.
+
+- [GALX Connect and Nova](../../docs/operations/galx-connect.md)
+- [ADR 0165: GALX Media, Connect and Nova boundaries](../../docs/adr/0165-galx-connect-nova-boundaries.md)
+- [Client integration boundaries](../../docs/DEVELOPER_CLIENT_SDK.md)
+- [Workspace authentication and recovery](../../docs/operations/workspace-auth.md)
+- [Authentication security posture and threat model](../../docs/SECURITY_POSTURE_AND_THREAT_MODEL.md)
+- [ADR 0166: Canonical origin at the private self-host listener](../../docs/adr/0166-private-self-host-request-origin.md)
+- [Nova hosting transition and retirement](../../docs/runbooks/nova-hosting-transition.md)
+- [ADR 0167: Mac Nova runtime and Vercel inference retirement](../../docs/adr/0167-nova-mac-runtime-placement.md)
+
+Relevant checks (select for the change; impact discovery never executes these): `npm run test:connect`, `npm run test:connect:db`, `npm run db:verify`, `npm run test:auth:sessions`, `npm run build`.

@@ -1,0 +1,154 @@
+{
+  "at": "2026-10-03T22:02:32.324Z",
+  "artifact": {
+    "at": "2026-10-03T21:55:30.938Z",
+    "format": "Vercel Build Output API",
+    "functions": 33,
+    "mappedReferences": 9121,
+    "retainedPayloads": 1839,
+    "files": 3740,
+    "manifestSha256": "20e4e1df10c7b17d8bec3fd8c4f168d33b371e5ab26892f19d4d8dfc98a19ccf",
+    "archiveSha256": "b11d853b80851b2ee978b5d0d0bb2cedb66ced423f545e91b44aeaf8c4a9e235",
+    "archiveBytes": 48816495,
+    "applicationPayloadBytesChanged": 0,
+    "workspaceDependencies": false,
+    "deployed": false
+  },
+  "runtime": "Node 22.23.2 linux/amd64",
+  "network": "dedicated disposable Docker bridge; fixture wrapper rejects non-fixture fetch/TCP and all TLS egress",
+  "fixtureMigrations": 159,
+  "targetConfigurationReused": true,
+  "realCohortEnabled": false,
+  "realProvider": false,
+  "realAccount": false,
+  "realVercelInvocation": false,
+  "configuration": {
+    "issuer": "https://galx.ai",
+    "resource": "https://nova.galx.ai",
+    "clients": [
+      "reference-native",
+      "reference-browser"
+    ]
+  },
+  "results": [
+    {
+      "name": "ordinary GALX session is not a Nova credential",
+      "status": 401,
+      "code": "invalid_token",
+      "providerAttempts": 0
+    },
+    {
+      "name": "malformed credential",
+      "status": 401,
+      "code": "invalid_token",
+      "providerAttempts": 0
+    },
+    {
+      "name": "entitlement without application authorization",
+      "status": 401,
+      "code": "invalid_token",
+      "providerAttempts": 0
+    },
+    {
+      "name": "valid Connect authorization without explicit entitlement",
+      "status": 403,
+      "code": "inference_access_required",
+      "providerAttempts": 0
+    },
+    {
+      "name": "another client origin",
+      "status": 401,
+      "code": "invalid_token",
+      "providerAttempts": 0
+    },
+    {
+      "name": "alternate host",
+      "status": 401,
+      "code": "invalid_token",
+      "providerAttempts": 0
+    },
+    {
+      "name": "explicit cohort + client grant + packaged Nova + synthetic provider",
+      "status": 200,
+      "state": "completed",
+      "sanitized": true
+    },
+    {
+      "name": "duplicate Nova request",
+      "status": 409,
+      "newProviderAttempts": 0
+    },
+    {
+      "name": "wrong client refresh",
+      "code": "invalid_grant"
+    },
+    {
+      "name": "consumed authorization",
+      "status": 401,
+      "code": "invalid_token",
+      "providerAttempts": 0
+    },
+    {
+      "name": "expired authorization",
+      "status": 401,
+      "code": "invalid_token",
+      "providerAttempts": 0
+    },
+    {
+      "name": "wrong audience",
+      "status": 401,
+      "code": "invalid_token",
+      "providerAttempts": 0
+    },
+    {
+      "name": "missing inference scope",
+      "result": "authoritative store rejects invalid scope before a credential can exist",
+      "sqlState": "23514"
+    },
+    {
+      "name": "unregistered client",
+      "status": 401,
+      "code": "invalid_token",
+      "providerAttempts": 0
+    },
+    {
+      "name": "revoked connection",
+      "status": 401,
+      "code": "invalid_token",
+      "providerAttempts": 0
+    },
+    {
+      "name": "revocation",
+      "denialAfterAcknowledgementMs": 15,
+      "refreshDenied": true,
+      "independentClientWorks": true,
+      "completedRecordUnchanged": true,
+      "accountsAndMediaProfilesUnchanged": true
+    },
+    {
+      "name": "packaged host cancellation",
+      "state": "unknown",
+      "registeredBeforeResponse": true,
+      "noReplay": true
+    },
+    {
+      "name": "terminal unknown duplicate",
+      "status": 409,
+      "state": "unknown",
+      "newProviderAttempts": 0
+    },
+    {
+      "name": "shared capacity after two unknown reservations",
+      "status": 503,
+      "code": "service_busy",
+      "providerAttempts": 0
+    }
+  ],
+  "metrics": {
+    "submissions": 4,
+    "attempts": 4,
+    "registered": 35,
+    "settled": 35,
+    "disconnects": 1
+  }
+}

@@ -1,12 +1,12 @@
-# Account health and management UX
+# Account request status and management UX
 
 <!-- docs-scope: current-guide -->
 
-Private contract for the two fixed pool monitors. Each uses Accounts, Registration and Activity with persistent destination identity and independent authorization. [The complete account reference](../reference/relay-account-management.md) owns state definitions and [the surface brief](../../.impeccable/surfaces/src-relay-pool-monitor-html.md) owns measured design choices.
+Private contract for the fixed Premium monitor. It uses Accounts, Connections and Activity with persistent destination identity and independent authorization. [The complete account reference](../reference/relay-account-management.md) owns state definitions and [the surface brief](../../.impeccable/surfaces/src-relay-pool-monitor-html.md) owns measured design choices.
 
-Lead with attention count, recognizable name, health label/reason and next action. Pair icons with text. Keep saved state, relay confirmation, sign-in and desktop connection separate. Unknown connectivity is not a failed account; an intentionally paused account and a stopped completed-registration desktop are not failures.
+Lead with attention count, recognizable name, request-status label/reason and next action. Pair icons with text. Keep saved state, relay confirmation, sign-in and desktop connection separate. Availability defaults to unknown because upstream supplies request outcomes, not continuous health. Cancellation, deadlines and transport loss do not add provider failures. Retained failures remain advisory and cannot veto reconnect or independently authorized Enable. Current credential rejection, expiry, revocation, cooldown and operator holds still apply. An intentionally paused account and a stopped completed-registration desktop are not failures.
 
-Combine account search, status and health with Issues first/Name A–Z sorting. Registration gets its own search/status filters. Preserve filters, disclosure state and useful focus through refresh; announce result counts and provide Clear filters. Removed records stay out of active counts but remain available under Removed.
+Combine account search, saved status and Request status with Issues first/Name A–Z sorting. Connections gets its own search/status filters. Preserve filters, disclosure state and useful focus through refresh; announce result counts and provide Clear filters. Removed records stay out of active counts but remain available under Removed.
 
 Use a consistent **Manage** disclosure. Rename preselects the existing name and retains drafts on failure. Removal names the record, explains permanent account revocation versus restorable unfinished registration, preserves history/files and initially focuses Cancel. Disable duplicate submission; stale revision conflicts require review after refresh. Exact explicit retries retain intent identity when available.
 

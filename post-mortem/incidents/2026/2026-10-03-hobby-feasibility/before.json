@@ -1,0 +1,32 @@
+{
+  "at": "2026-10-03T22:38:40.119Z",
+  "version": 12,
+  "config": {
+    "ingress": [
+      {
+        "path": "^/(health(/live)?|v1/(images/(availability|generations)|models|chat/completions|jobs/[A-Za-z0-9_.:-]+/(stream|receipt)))$",
+        "service": "http://host.docker.internal:13301",
+        "hostname": "images-service.galx.ai",
+        "originRequest": {
+          "connectTimeout": 10
+        }
+      },
+      {
+        "service": "http://host.docker.internal:3001",
+        "hostname": "relay.galx.ai",
+        "originRequest": {
+          "connectTimeout": 10
+        }
+      },
+      {
+        "service": "http_status:404"
+      }
+    ],
+    "warp-routing": {
+      "enabled": false
+    }
+  },
+  "plan": "hobby",
+  "productionId": "dpl_9FSaL3M6JffKDjaUHP98RhU3crzG",
+  "productionState": "READY"
+}

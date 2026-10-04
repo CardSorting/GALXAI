@@ -1,0 +1,59 @@
+{
+  "classification": "private",
+  "at": "2026-10-03T20:27:03.277599+00:00",
+  "quota": {
+    "reproduction": "persisted fractional rounding",
+    "before": {
+      "remaining_tokens": "0",
+      "max_tokens": "10000000",
+      "refill_rate_per_minute": "10000000",
+      "token_refill_remainder": "0.000000000",
+      "remaining_requests": 10000,
+      "max_requests": 10000,
+      "request_refill_remainder": "0.000000000",
+      "last_refill_timestamp_ms": "1700000000000"
+    },
+    "afterTwoMs": {
+      "remaining_tokens": "333",
+      "max_tokens": "10000000",
+      "refill_rate_per_minute": "10000000",
+      "token_refill_remainder": "0.333333333",
+      "remaining_requests": 10000,
+      "max_requests": 10000,
+      "request_refill_remainder": "0.000000000",
+      "last_refill_timestamp_ms": "1700000000002"
+    },
+    "secondElapsedMs": 1,
+    "arithmetic": {
+      "computed_credit": "166.9999999996666667",
+      "whole_credit": "166",
+      "stored_remainder": "1.000000000"
+    },
+    "exactTotalCreditAfterThreeMs": 500,
+    "expectedAdmission": "admitted",
+    "actualAdmission": "constraint exception; transaction rolled back",
+    "failure": {
+      "code": "23514",
+      "constraint": "galx_shards_refill_remainders_valid"
+    },
+    "afterFailure": {
+      "remaining_tokens": "333",
+      "max_tokens": "10000000",
+      "refill_rate_per_minute": "10000000",
+      "token_refill_remainder": "0.333333333",
+      "remaining_requests": 10000,
+      "max_requests": 10000,
+      "request_refill_remainder": "0.000000000",
+      "last_refill_timestamp_ms": "1700000000002"
+    }
+  },
+  "quota_log_sha256": "309db121e471f54b0d8de09e31d802b4552fa1687e6cdfd6f5b8fb896515f74e",
+  "clean_build": {
+    "method": "A new temporary checkout snapshot of Git-declared source, excluding every ignored input, with a fresh docker-container BuildKit builder and --no-cache. No node_modules, .next, local env, retained image or sibling workspace.",
+    "command": "TAG=closure-before-20261003 npm run relay:services:build -- premium-monitor --no-cache --progress=plain",
+    "exit_code": 1,
+    "first_failure": "COPY BroccoliDB/src and COPY BROCCOLIQUEUE/src refer to ignored, undeclared sibling workspaces absent from the checkout.",
+    "log_sha256": "dc4f138b3a9324591acb0d171e53624b3e63d2e075f226ce7392772274cc22e1"
+  },
+  "scope": "Reproduced before changing quota or packaging implementation. No shared database mutation or service replacement."
+}

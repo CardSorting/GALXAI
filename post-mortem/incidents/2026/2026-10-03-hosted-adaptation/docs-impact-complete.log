@@ -1,0 +1,105 @@
+
+> galxai@0.1.0 docs:impact
+> python3 scripts/docs-kb.py impact --files src/lib/nova/inference.ts src/app/v1/inference/route.ts scripts/test-nova.ts scripts/test-nova-host-lifetime.mjs scripts/fixtures/nova-host-lifetime.ts scripts/package-hosted-candidate.mjs scripts/retain-hosted-output.mjs scripts/test-hosted-packaging.mjs deploy/hosted/package.json deploy/hosted/package-lock.json vercel.json docs/knowledge/registry.json
+
+{
+  "domains": {
+    "knowledge": {
+      "changed": [
+        "docs/knowledge/registry.json"
+      ],
+      "owner": "Documentation maintainer",
+      "guides": [
+        "docs/README.md",
+        "docs/AGENTS.md",
+        "docs/DOCUMENTATION_POLICY.md",
+        "docs/knowledge/README.md",
+        "docs/knowledge/DESIGN_RATIONALE.md",
+        "docs/tutorials/README.md",
+        "docs/tutorials/first-change.md",
+        "docs/how-to/README.md",
+        "docs/how-to/change-with-documentation.md",
+        "docs/runbooks/README.md",
+        "docs/runbooks/knowledge-maintenance.md",
+        "docs/runbooks/release-readiness.md",
+        "docs/reference/README.md",
+        "docs/reference/stars.md",
+        "docs/reference/knowledge-commands.md",
+        "docs/explanations/README.md",
+        "docs/maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md",
+        "docs/maintainers/CI_PIPELINE_AND_AUTOMATION_SPEC.md",
+        "docs/maintainers/SUBSYSTEM_MAINTAINER_MATRIX.md",
+        "docs/maintainers/DAY_1_TO_30_ONBOARDING_ROADMAP.md",
+        "docs/maintainers/MAINTAINER_ONBOARDING_ASSESSMENT.md",
+        "docs/knowledge/templates/adr.md",
+        "docs/knowledge/templates/runbook.md",
+        "docs/adr/README.md",
+        "docs/adr/0145-maintained-knowledge-and-decision-lifecycle.md",
+        "docs/runbooks/weekly-knowledge-audit.md",
+        "MAINTAINERS.md",
+        "HANDOVER.md",
+        "context.md",
+        "docs/DEVELOPER_GUIDE.md"
+      ],
+      "checks": [
+        "npm run docs:audit",
+        "npm run test:docs"
+      ]
+    },
+    "delivery": {
+      "changed": [
+        "deploy/hosted/package-lock.json",
+        "deploy/hosted/package.json",
+        "scripts/package-hosted-candidate.mjs",
+        "scripts/retain-hosted-output.mjs",
+        "scripts/test-hosted-packaging.mjs",
+        "vercel.json"
+      ],
+      "owner": "Release operator",
+      "guides": [
+        "docs/DEPLOYMENT.md",
+        "docs/VERCEL_DEPLOYMENT.md",
+        "docs/runbooks/release-readiness.md",
+        "post-mortem/runbooks/deployment-storage.md",
+        "post-mortem/failure-modes/deployment.md",
+        "docs/VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md",
+        "docs/CLOUDFLARE_STRATEGY.md",
+        "docs/maintainers/CLOUDFLARE_EDGE_MESH_MAINTAINER_RUNBOOK.md",
+        "docs/playbooks/02-deployment-and-release.md",
+        "docs/runbooks/stripe-webhook-delivery.md",
+        "docs/runbooks/private-image-release-audit.md"
+      ],
+      "checks": [
+        "npm run docs:check",
+        "npm run build",
+        "npm run docs:check:build"
+      ]
+    },
+    "connect": {
+      "changed": [
+        "scripts/fixtures/nova-host-lifetime.ts",
+        "scripts/test-nova-host-lifetime.mjs",
+        "scripts/test-nova.ts",
+        "src/app/v1/inference/route.ts",
+        "src/lib/nova/inference.ts"
+      ],
+      "owner": "Security/access and inference maintainers",
+      "guides": [
+        "docs/operations/galx-connect.md",
+        "docs/adr/0165-galx-connect-nova-boundaries.md",
+        "docs/DEVELOPER_CLIENT_SDK.md",
+        "docs/operations/workspace-auth.md",
+        "docs/SECURITY_POSTURE_AND_THREAT_MODEL.md"
+      ],
+      "checks": [
+        "npm run test:connect",
+        "npm run test:connect:db",
+        "npm run db:verify",
+        "npm run test:auth:sessions",
+        "npm run build"
+      ]
+    }
+  },
+  "unmapped": [],
+  "notice": "Discovery only. Unmapped paths require judgment; no test or deployment was executed."
+}

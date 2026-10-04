@@ -1,0 +1,62 @@
+{
+  "at": "2026-10-03T21:19:27.888Z",
+  "access": "read-only GET; selected metadata; no credential values",
+  "project": {
+    "id": "prj_NmtiUenK2cf924eREKuCgiDS0uC4",
+    "nodeVersion": "22.x",
+    "resourceConfig": {
+      "fluid": true,
+      "functionDefaultRegions": [
+        "iad1"
+      ],
+      "buildMachineType": "basic",
+      "buildMachineSelection": "fixed"
+    },
+    "ssoProtection": {
+      "deploymentType": "all_except_custom_domains"
+    }
+  },
+  "plan": {
+    "plan": "hobby",
+    "status": "active"
+  },
+  "production": {
+    "id": "dpl_9FSaL3M6JffKDjaUHP98RhU3crzG",
+    "url": "galxai-204k0uq49-cardsortings-projects.vercel.app",
+    "readyState": "READY",
+    "createdAt": 1790441645794
+  },
+  "connectConfiguration": [],
+  "transport": {
+    "version": 3,
+    "ingress": [
+      {
+        "hostname": "images-service.galx.ai",
+        "path": "^/v1/images/(availability|generations)$",
+        "service": "http://host.docker.internal:13301"
+      },
+      {
+        "hostname": "relay.galx.ai",
+        "service": "http://host.docker.internal:3001"
+      },
+      {
+        "service": "http_status:404"
+      }
+    ]
+  },
+  "frozenCandidate": {
+    "source": {
+      "manifestSha256": "aa7f5156d3110278e83699e8e073e4347974365911601096bc62e48ffd325d5c",
+      "files": 1886,
+      "changed": []
+    },
+    "compiled": {
+      "manifestSha256": "2d15ca60c7f2e6a9deca0ad759794e31b345360b52ebded5c2b53e87990d5c7c",
+      "files": 2291,
+      "changed": []
+    }
+  },
+  "dependencyLockSha256": "17ec13ed2df5810416a9c52ab5cc772e15adcaec679bbafd9a2a61ac3b4742f1",
+  "candidateRouteSha256": "9de15a281c4baf66527705a1af059c0d90608afd4e5e9503365115e2f3e1dfec",
+  "compiledRouteSha256": "a2304195aa32fae7d952a086d3bc71da6dc7b68042b66476055543875d2adde1"
+}

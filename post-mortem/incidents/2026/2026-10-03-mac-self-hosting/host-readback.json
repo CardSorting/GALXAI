@@ -1,0 +1,68 @@
+{
+  "at": "2026-10-03T23:21:22.774889+00:00",
+  "physicalMemoryBytes": 17179869184,
+  "physicalCpus": 10,
+  "disk": [
+    "482797652",
+    "328135816",
+    "119579964",
+    "74%"
+  ],
+  "power": {
+    "source": "ac",
+    "caffeinatePresent": true,
+    "systemSleepAssertion": true,
+    "limits": "AC idle-sleep prevention does not promise closed-lid, outage or forced-sleep availability."
+  },
+  "containers": {
+    "desktop-linux": [
+      {
+        "name": "galx-local-authority-tls-1",
+        "cpuPercent": "0.25%",
+        "memory": "27.93MiB / 96MiB"
+      },
+      {
+        "name": "galx-local-authority-authority-1",
+        "cpuPercent": "0.00%",
+        "memory": "42.06MiB / 384MiB"
+      },
+      {
+        "name": "galx-image-tunnel",
+        "cpuPercent": "0.58%",
+        "memory": "30.62MiB / 7.748GiB"
+      },
+      {
+        "name": "galx-desktop-production-dceeb65e-3096-4b41-bdad-d3af1eb9a734",
+        "cpuPercent": "0.25%",
+        "memory": "81.6MiB / 2GiB"
+      },
+      {
+        "name": "galx-desktop-production-aede28dd-74d9-4055-9c31-e9beb4696623",
+        "cpuPercent": "0.34%",
+        "memory": "80.51MiB / 2GiB"
+      }
+    ],
+    "colima-premium": [
+      {
+        "name": "galx-premium-monitor-1",
+        "cpuPercent": "0.12%",
+        "memory": "33.16MiB / 384MiB"
+      },
+      {
+        "name": "galx-premium-relay-1",
+        "cpuPercent": "1.11%",
+        "memory": "38.46MiB / 2GiB"
+      },
+      {
+        "name": "galx-desktop-pool-premium-f83b2d06-91fa-4504-90a9-e3f3b44f9e33",
+        "cpuPercent": "0.22%",
+        "memory": "139.4MiB / 2GiB"
+      },
+      {
+        "name": "galx-desktop-pool-premium-68250425-41d6-44f9-977c-a636c5921645",
+        "cpuPercent": "0.31%",
+        "memory": "741.6MiB / 2GiB"
+      }
+    ]
+  }
+}

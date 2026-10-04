@@ -1,0 +1,66 @@
+{
+  "at": "2026-10-04T01:48:05.946Z",
+  "runtime": {
+    "image": "sha256:5157984bc06524aac0ca8fbf2051eebfe6f3b7994aa7d0793e8404c097289345",
+    "status": "running",
+    "health": "healthy",
+    "exitCode": 0,
+    "restarts": 0,
+    "user": "1000:1000",
+    "readOnly": true,
+    "ports": {
+      "3000/tcp": [
+        {
+          "HostIp": "127.0.0.1",
+          "HostPort": "17787"
+        }
+      ]
+    },
+    "memory": 1610612736,
+    "cpus": 2000000000,
+    "pids": 160,
+    "capDrop": [
+      "ALL"
+    ],
+    "securityOpt": [
+      "no-new-privileges:true"
+    ],
+    "logging": {
+      "Type": "json-file",
+      "Config": {
+        "max-file": "3",
+        "max-size": "10m"
+      }
+    },
+    "stopTimeout": 480,
+    "startedAt": "2026-10-04T01:28:32.462950554Z"
+  },
+  "privateControl": {
+    "httpStatus": 200,
+    "ownershipPresent": true,
+    "ownershipMatches": true,
+    "lastSeenAt": "2026-10-04T01:47:58.483218+00:00",
+    "executionAllowed": true,
+    "fieldNames": [
+      "accounts",
+      "activity",
+      "automaticActivation",
+      "epoch",
+      "executionAllowed",
+      "installationId",
+      "lastSeenAt",
+      "pool",
+      "registrationAllowed",
+      "registrations"
+    ]
+  },
+  "browser": {
+    "status": 401,
+    "authenticated": false,
+    "fields": [
+      "error"
+    ],
+    "privateEvidenceAbsent": true,
+    "bodySha256": "ae7cbaa5924f4b459af8b12fb8d69b9b8a9bed2a1942dc02f459602000a19c96"
+  }
+}

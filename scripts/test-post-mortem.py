@@ -93,6 +93,26 @@ class IncidentGuardTests(unittest.TestCase):
         self.events[0]['authorization'] = 'should never be retained'
         self.assertTrue(any('unexpected journal fields' in error for error in self.errors()))
 
+    def test_kind_correction_preserves_original_and_cannot_hide_other_invalid_fields(self):
+        self.events[0]['kind'] = 'action'
+        original = deepcopy(self.events[0])
+        self.assertTrue(any('invalid event kind' in error for error in self.errors()))
+        correction = {**deepcopy(self.events[0]), 'id': 'EVT-2', 'kind': 'verification',
+                      'supersedes': 'EVT-1'}
+        self.events.append(correction)
+        self.assertTrue(any('invalid event kind' in error for error in self.errors()))
+        correction['kind'] = 'correction'
+        correction['incident'] = 'INC-20260913-OTHER'
+        self.assertTrue(any('invalid event kind' in error for error in self.errors()))
+        correction['incident'] = original['incident']
+        self.assertEqual(self.errors(), [])
+        self.assertEqual(self.events[0], original)
+        self.events[0]['authorization'] = 'forbidden even when superseded'
+        self.assertTrue(any('unexpected journal fields' in error for error in self.errors()))
+        del self.events[0]['authorization']
+        correction['evidence'] = []
+        self.assertTrue(any('evidence is required' in error for error in self.errors()))
+
     def test_raw_evidence_cannot_close_incident(self):
         self.register['incidents'][0]['recovery_evidence'] = ['post-mortem/evidence/raw/trace.json']
         self.assertTrue(any('missing, raw' in error for error in self.errors()))

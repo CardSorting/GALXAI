@@ -1,0 +1,75 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import assert from 'node:assert/strict';
+import {execFileSync} from 'node:child_process';
+import {randomBytes,randomUUID,createHash} from 'node:crypto';
+import {Pool} from 'pg';
+import {ConnectRepository,connectHash,connectSecret} from '../../src/lib/supabase/repositories/ConnectRepository';
+const root=process.cwd(),build=path.resolve(process.argv[2]),out=path.join(root,'.relay/hosted-adaptation/artifact-rehearsal');fs.mkdirSync(out,{recursive:true});
+const configRecord=JSON.parse(fs.readFileSync('.relay/hosted-adaptation/connect-target-configured.json','utf8'));
+const config={issuer:configRecord.configuration.GALX_CONNECT_ORIGIN,resource:configRecord.configuration.GALX_NOVA_RESOURCE,clients:configRecord.clients};
+const func=path.join(build,'app/.vercel/output/functions/v1/inference.func'),material=path.join(out,'function');
+fs.cpSync(func,material,{recursive:true});const vc=JSON.parse(fs.readFileSync(path.join(func,'.vc-config.json'),'utf8'));
+for(const [name,reference] of Object.entries(vc.filePathMap||{})){const original=path.resolve(build,'app',reference as string);assert(original.startsWith(path.join(build,'app/.vercel/output/') ));fs.mkdirSync(path.dirname(path.join(material,name)),{recursive:true});fs.copyFileSync(original,path.join(material,name));}
+const id=randomUUID(),network='galx-artifact-'+id,db=network+'-db',app=network+'-app';
+const password=randomBytes(24).toString('hex'),wireKey=randomBytes(32).toString('hex');
+const docker=(args:string[],env:NodeJS.ProcessEnv={})=>execFileSync('docker',args,{encoding:'utf8',timeout:120000,env:{...process.env,DOCKER_CONTEXT:'desktop-linux',...env},stdio:['ignore','pipe','pipe']}).trim();
+let pool:Pool|undefined;const results:any[]=[];let appStarted=false,dbStarted=false,networkCreated=false;
+try{
+ docker(['network','create','--label','galx.fixture='+id,network]);networkCreated=true;
+ docker(['run','-d','--rm','--name',db,'--label','galx.fixture='+id,'--network',network,'-p','127.0.0.1::5432','--tmpfs','/var/lib/postgresql/data:rw,nosuid,noexec,size=536870912','--memory','768m','-e','POSTGRES_PASSWORD','-e','POSTGRES_DB=galx_integration_test','pgvector/pgvector@sha256:cf134a767f474095eeba57e0117be8e568e011a63f33fbf252f14c9b760f8e6f'],{POSTGRES_PASSWORD:password});dbStarted=true;
+ const binding=docker(['port',db,'5432/tcp']);assert.match(binding,/^127\.0\.0\.1:\d+$/);
+ pool=new Pool({connectionString:'postgresql://postgres:'+password+'@'+binding+'/galx_integration_test',connectionTimeoutMillis:1000,max:5});
+ for(let i=0;;i++){try{await pool.query('SELECT 1');break;}catch{if(i===40)throw Error('Fixture database unavailable');await new Promise(r=>setTimeout(r,250));}}
+ await pool.query(fs.readFileSync('scripts/fixtures/integration-bootstrap.sql','utf8'));
+ const migrations=fs.readdirSync('supabase/migrations').filter(f=>/^\d+_.+\.sql$/.test(f)).sort();
+ for(const f of migrations){await pool.query('BEGIN');try{await pool.query(fs.readFileSync('supabase/migrations/'+f,'utf8'));await pool.query('COMMIT');}catch(e){await pool.query('ROLLBACK');throw e;}}
+ const env={...configRecord.configuration,GALX_CONNECT_ENABLED:'1',DATABASE_URL:'postgresql://postgres:'+password+'@'+db+'/galx_integration_test?sslmode=disable',GALX_PREMIUM_RELAY_URL:'http://127.0.0.1:7779',GALX_PREMIUM_RELAY_KEY:wireKey,GALX_VAULT_KEY_V1:randomBytes(32).toString('hex'),GALX_AUDIT_SIGNING_SECRET:randomBytes(32).toString('hex'),NODE_ENV:'production',VERCEL:'1'};
+ const publicInputs=JSON.parse(fs.readFileSync('.relay/hosted-adaptation/public-build-inputs.json','utf8')).publicEnvironment;
+ Object.assign(env,publicInputs);
+ docker(['run','-d','--rm','--name',app,'--label','galx.fixture='+id,'--platform','linux/amd64','--network',network,'-p','127.0.0.1::7777','--memory','1g','--mount','type=bind,src='+material+',dst=/function,readonly','--mount','type=bind,src='+path.join(root,'.relay/hosted-adaptation/artifact-host.cjs')+',dst=/fixture/host.cjs,readonly',...Object.keys(env).flatMap(k=>['-e',k]),'node@sha256:43aeff40f4afc22e83f7589a2f37e111cff5ca84529571f1c8415bcc5fcc21b2','node','/fixture/host.cjs'],env);appStarted=true;
+ const origin='http://'+docker(['port',app,'7777/tcp']);let ready=false;
+ for(let i=0;i<60;i++){try{if((await fetch(origin+'/_fixture/status')).ok){ready=true;break;}}catch{}await new Promise(r=>setTimeout(r,250));}assert(ready,'Artifact host did not start');
+ const repo=new ConnectRepository(config as any,pool),owner=randomUUID(),ordinary=randomUUID();await pool.query('INSERT INTO auth.users(id) VALUES ($1),($2)',[owner,ordinary]);
+ const usersBefore=(await pool.query('SELECT count(*)::int n FROM auth.users')).rows[0].n;
+ const mediaBefore=(await pool.query('SELECT count(*)::int n FROM private.galx_account_profiles')).rows[0].n;
+ const entitlement=async(user:string)=>pool!.query("INSERT INTO private.galx_inference_access(user_id,enabled,valid_until) VALUES ($1,true,now()+interval '1 day') ON CONFLICT(user_id) DO UPDATE SET enabled=true,valid_until=excluded.valid_until",[user]);
+ const connect=async(user=owner,client='reference-native')=>{const registered=config.clients.find((c:any)=>c.id===client),redirectUri=registered.redirectUris[0],challenge=createHash('sha256').update('v'.repeat(43)).digest('base64url'),browser=connectHash(connectSecret());const request=await repo.begin({client_id:client,redirect_uri:redirectUri,resource:config.resource,state:connectSecret(),challenge},browser);const redirect=new URL(await repo.decide(request,browser,user,true));return repo.exchange({clientId:client,code:redirect.searchParams.get('code')!,redirectUri,challenge});};
+ const status=async()=>await(await fetch(origin+'/_fixture/status')).json();
+ const invoke=(token:string,body='complete',key=randomUUID(),extra:Record<string,string>={},signal?:AbortSignal)=>fetch(origin+'/v1/inference',{method:'POST',signal,headers:{Authorization:'Bearer '+token,'Content-Type':'application/json','Idempotency-Key':key,...extra},body:JSON.stringify({messages:[{role:'user',content:body}],stream:true})});
+ const denied=async(name:string,token:string,expected:number,extra:Record<string,string>={})=>{const before=await status();const response=await invoke(token,'complete',randomUUID(),extra);const text=await response.text();assert.equal(response.status,expected,name+': '+text);assert(!text.includes(wireKey));assert(!/PRIVATE_|postgres|pooler|shard/i.test(text));assert.equal((await status()).attempts,before.attempts);results.push({name,status:response.status,code:JSON.parse(text).error.code,providerAttempts:0});};
+ await denied('ordinary GALX session is not a Nova credential','eyJfixture.session.jwt',401,{Cookie:'sb-fixture-auth-token=ordinary-session'});
+ await denied('malformed credential','not-a-token',401);
+ await entitlement(owner);await denied('entitlement without application authorization','galx_connect_at_'+'a'.repeat(43),401);
+ const noncohort=await connect(ordinary);await denied('valid Connect authorization without explicit entitlement',noncohort.access_token,403);
+ const token=await connect(),independent=await connect(owner,'reference-browser');
+ await denied('another client origin',token.access_token,401,{Origin:'http://127.0.0.1:4400'});
+ await denied('alternate host',token.access_token,401,{'x-fixture-host':'wrong.invalid'});
+ const key=randomUUID();let response=await invoke(token.access_token,'complete',key);let text=await response.text();assert.equal(response.status,200,text);assert(text.includes('[DONE]'));assert(!/PRIVATE_|reasoning_content|usage|cfargotunnel/.test(text));assert(!response.headers.has('x-galx-job-id'));assert(!response.headers.has('x-private-upstream'));const completedId=JSON.parse(text.split('\n')[0].slice(6)).id;
+ results.push({name:'explicit cohort + client grant + packaged Nova + synthetic provider',status:200,state:'completed',sanitized:true});
+ const beforeDuplicate=await status();response=await invoke(token.access_token,'complete',key);assert.equal(response.status,409);await response.text();assert.equal((await status()).attempts,beforeDuplicate.attempts);results.push({name:'duplicate Nova request',status:409,newProviderAttempts:0});
+ await assert.rejects(repo.refresh(token.refresh_token,'reference-browser'),(e:any)=>e.code==='invalid_grant');results.push({name:'wrong client refresh',code:'invalid_grant'});
+ const rotated=await repo.refresh(token.refresh_token,'reference-native');await denied('consumed authorization',token.access_token,401);
+ await pool.query("UPDATE private.galx_connect_tokens SET expires_at=now()-interval '1 second' WHERE access_hash=$1",[connectHash(rotated.access_token)]);await denied('expired authorization',rotated.access_token,401);
+ const current=await connect();const grant=(await pool.query('SELECT grant_id FROM private.galx_connect_tokens WHERE access_hash=$1',[connectHash(current.access_token)])).rows[0].grant_id;
+ await pool.query("UPDATE private.galx_connect_grants SET resource='https://wrong.invalid' WHERE id=$1",[grant]);await denied('wrong audience',current.access_token,401);await pool.query('UPDATE private.galx_connect_grants SET resource=$2 WHERE id=$1',[grant,config.resource]);
+ await assert.rejects(pool.query("UPDATE private.galx_connect_grants SET scope='' WHERE id=$1",[grant]),(e:any)=>e.code==='23514');results.push({name:'missing inference scope',result:'authoritative store rejects invalid scope before a credential can exist',sqlState:'23514'});
+ await pool.query("UPDATE private.galx_connect_grants SET client_id='unregistered-fixture' WHERE id=$1",[grant]);await denied('unregistered client',current.access_token,401);await pool.query("UPDATE private.galx_connect_grants SET client_id='reference-native' WHERE id=$1",[grant]);
+ const beforeRecord=(await pool.query('SELECT row_to_json(n) row FROM private.galx_nova_requests n WHERE id=$1',[completedId])).rows[0].row;
+ await repo.disconnect(grant,owner);const revokedAt=performance.now();await denied('revoked connection',current.access_token,401);const revocationMs=Math.round(performance.now()-revokedAt);
+ await assert.rejects(repo.refresh(current.refresh_token,'reference-native'),(e:any)=>e.code==='invalid_grant');
+ response=await invoke(independent.access_token,'complete',randomUUID(),{Origin:'http://127.0.0.1:4400'});assert.equal(response.status,200);assert((await response.text()).includes('[DONE]'));
+ assert.deepEqual((await pool.query('SELECT row_to_json(n) row FROM private.galx_nova_requests n WHERE id=$1',[completedId])).rows[0].row,beforeRecord);
+ assert.equal((await pool.query('SELECT count(*)::int n FROM auth.users')).rows[0].n,usersBefore);assert.equal((await pool.query('SELECT count(*)::int n FROM private.galx_account_profiles')).rows[0].n,mediaBefore);
+ results.push({name:'revocation',denialAfterAcknowledgementMs:revocationMs,refreshDenied:true,independentClientWorks:true,completedRecordUnchanged:true,accountsAndMediaProfilesUnchanged:true});
+ const interrupted=await connect();const controller=new AbortController();response=await invoke(interrupted.access_token,'hold',randomUUID(),{},controller.signal);assert.equal(response.status,200);const reader=response.body!.getReader();const first=await reader.read();const cancelId=JSON.parse(new TextDecoder().decode(first.value).split('\n')[0].slice(6)).id;controller.abort();await reader.cancel().catch(()=>{});
+ let state;for(let i=0;i<80;i++){state=(await pool.query('SELECT state FROM private.galx_nova_requests WHERE id=$1',[cancelId])).rows[0].state;if(state==='unknown')break;await new Promise(r=>setTimeout(r,25));}assert.equal(state,'unknown');
+ results.push({name:'packaged host cancellation',state,registeredBeforeResponse:true,noReplay:true});
+ const unknownKey=randomUUID();response=await invoke(interrupted.access_token,'unknown',unknownKey);text=await response.text();assert(text.includes('outcome_unconfirmed'));assert(!text.includes('[DONE]'));
+ const beforeUnknownDuplicate=await status();response=await invoke(interrupted.access_token,'unknown',unknownKey);assert.equal(response.status,409);const duplicateBody=await response.json();assert.equal(duplicateBody.error.execution_state,'unknown');assert.equal((await status()).attempts,beforeUnknownDuplicate.attempts);results.push({name:'terminal unknown duplicate',status:409,state:'unknown',newProviderAttempts:0});
+ await denied('shared capacity after two unknown reservations',interrupted.access_token,503);
+ const metrics=await status();assert.equal(metrics.registered,metrics.settled);assert(metrics.disconnects>=1);
+ fs.writeFileSync(path.join(out,'result.json'),JSON.stringify({at:new Date().toISOString(),artifact:JSON.parse(fs.readFileSync(path.join(build,'artifact.json'),'utf8')),runtime:'Node 22.23.2 linux/amd64',network:'dedicated disposable Docker bridge; fixture wrapper rejects non-fixture fetch/TCP and all TLS egress',fixtureMigrations:migrations.length,targetConfigurationReused:true,realCohortEnabled:false,realProvider:false,realAccount:false,realVercelInvocation:false,configuration:{issuer:config.issuer,resource:config.resource,clients:config.clients.map((c:any)=>c.id)},results,metrics},null,2)+'\n');
+ console.log(JSON.stringify({checks:results.length,metrics,revocationMs,artifact:vc.runtime,maxDuration:vc.maxDuration,supportsCancellation:vc.supportsCancellation}));
+}catch(e:any){if(appStarted)fs.writeFileSync(path.join(out,'host.log'),docker(['logs',app]));console.error(e.stack||e.message);process.exitCode=1;}
+finally{await pool?.end();for(const [name,started]of [[app,appStarted],[db,dbStarted]]as const)if(started){const label=docker(['inspect','--format','{{ index .Config.Labels "galx.fixture" }}',name]);assert.equal(label,id);docker(['stop','--time','2',name]);}if(networkCreated)docker(['network','rm',network]);}

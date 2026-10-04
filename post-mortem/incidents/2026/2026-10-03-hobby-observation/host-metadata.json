@@ -1,0 +1,119 @@
+{
+  "at": "2026-10-03T23:08:58.345055+00:00",
+  "scope": "Read-only container metadata; no environment or command-line secrets collected",
+  "contexts": {
+    "desktop-linux": {
+      "architecture": "aarch64",
+      "cpus": 10,
+      "memoryBytes": 8319504384,
+      "containers": [
+        {
+          "name": "galx-local-authority-tls-1",
+          "imageId": "sha256:e7a4c80fa704d4abb7b423a48a66afad4d809c70dd5df3592eb772e823284bb3",
+          "state": "running",
+          "health": "healthy",
+          "memoryLimitBytes": 100663296,
+          "readOnlyRoot": true,
+          "restartPolicy": "unless-stopped",
+          "stopTimeoutSeconds": null,
+          "hasDockerSocket": false
+        },
+        {
+          "name": "galx-local-authority-authority-1",
+          "imageId": "sha256:e7a4c80fa704d4abb7b423a48a66afad4d809c70dd5df3592eb772e823284bb3",
+          "state": "running",
+          "health": "healthy",
+          "memoryLimitBytes": 402653184,
+          "readOnlyRoot": true,
+          "restartPolicy": "unless-stopped",
+          "stopTimeoutSeconds": null,
+          "hasDockerSocket": false
+        },
+        {
+          "name": "galx-image-tunnel",
+          "imageId": "sha256:51c9cefcb4569df44e1ad403ab1d3d8065aa8e84339bcfc6aee75502e1140339",
+          "state": "running",
+          "health": null,
+          "memoryLimitBytes": 0,
+          "readOnlyRoot": true,
+          "restartPolicy": "unless-stopped",
+          "stopTimeoutSeconds": null,
+          "hasDockerSocket": false
+        },
+        {
+          "name": "galx-desktop-production-dceeb65e-3096-4b41-bdad-d3af1eb9a734",
+          "imageId": "sha256:d4271abf3955a28eabeb35b526c80b6aa27439eda176bd0f2fe9b1bb0d4c24a5",
+          "state": "running",
+          "health": "healthy",
+          "memoryLimitBytes": 2147483648,
+          "readOnlyRoot": false,
+          "restartPolicy": "unless-stopped",
+          "stopTimeoutSeconds": null,
+          "hasDockerSocket": false
+        },
+        {
+          "name": "galx-desktop-production-aede28dd-74d9-4055-9c31-e9beb4696623",
+          "imageId": "sha256:0fccf55f2c1e2bd35636e4ae4d4a75347749c25e4bce473100dfd8a9abe02a79",
+          "state": "running",
+          "health": "healthy",
+          "memoryLimitBytes": 2147483648,
+          "readOnlyRoot": false,
+          "restartPolicy": "unless-stopped",
+          "stopTimeoutSeconds": null,
+          "hasDockerSocket": false
+        }
+      ]
+    },
+    "colima-premium": {
+      "architecture": "aarch64",
+      "cpus": 2,
+      "memoryBytes": 3039596544,
+      "containers": [
+        {
+          "name": "galx-premium-monitor-1",
+          "imageId": "sha256:0ab24b83ce3f2536f88b3994a716671d7b87495ebc5bdb90c5cafa3a50aa05ed",
+          "state": "running",
+          "health": null,
+          "memoryLimitBytes": 402653184,
+          "readOnlyRoot": true,
+          "restartPolicy": "unless-stopped",
+          "stopTimeoutSeconds": null,
+          "hasDockerSocket": true
+        },
+        {
+          "name": "galx-premium-relay-1",
+          "imageId": "sha256:a1feb16ef31ae0f97cc231b85d06578496335d79221d13e36a4c40b8524a545f",
+          "state": "running",
+          "health": null,
+          "memoryLimitBytes": 2147483648,
+          "readOnlyRoot": true,
+          "restartPolicy": "unless-stopped",
+          "stopTimeoutSeconds": 480,
+          "hasDockerSocket": false
+        },
+        {
+          "name": "galx-desktop-pool-premium-f83b2d06-91fa-4504-90a9-e3f3b44f9e33",
+          "imageId": "sha256:d4271abf3955a28eabeb35b526c80b6aa27439eda176bd0f2fe9b1bb0d4c24a5",
+          "state": "running",
+          "health": "healthy",
+          "memoryLimitBytes": 2147483648,
+          "readOnlyRoot": false,
+          "restartPolicy": "unless-stopped",
+          "stopTimeoutSeconds": null,
+          "hasDockerSocket": false
+        },
+        {
+          "name": "galx-desktop-pool-premium-68250425-41d6-44f9-977c-a636c5921645",
+          "imageId": "sha256:d4271abf3955a28eabeb35b526c80b6aa27439eda176bd0f2fe9b1bb0d4c24a5",
+          "state": "running",
+          "health": "healthy",
+          "memoryLimitBytes": 2147483648,
+          "readOnlyRoot": false,
+          "restartPolicy": "unless-stopped",
+          "stopTimeoutSeconds": null,
+          "hasDockerSocket": false
+        }
+      ]
+    }
+  }
+}

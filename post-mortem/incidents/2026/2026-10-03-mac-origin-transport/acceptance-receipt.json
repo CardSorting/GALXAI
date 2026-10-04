@@ -1,0 +1,10 @@
+{
+  "status": "PASSED",
+  "kind": "local-synthetic-only",
+  "image": "sha256:5157984bc06524aac0ca8fbf2051eebfe6f3b7994aa7d0793e8404c097289345",
+  "manifestSha256": "45e7b152b1feb8d058271f08ed437dc244a1d5e0cc428fe4f4b171307ad14c64",
+  "testSha256": "81bb4ec9d0751b1c99d50db86469b027c3693c9235265509acca7d57cd24a4fb",
+  "resultSha256": "b16da23ca0aa23015bc826ff5772ab67d830e7c3c53440b0c63a1830d2a137e8",
+  "observedAt": "2026-10-04T00:50:37.675Z",
+  "publicCutoverAccepted": false
+}

@@ -1,0 +1,39 @@
+{
+  "classification": "private",
+  "observed_at": "2026-10-04T01:56:06.788092+00:00",
+  "reviewer": "Codex hosting navigation reviewer",
+  "scope": "Generated and manually curated navigation reconciliation after the full source/guide semantic review. Does not extend due billing review or change prior ADR acceptance.",
+  "inspected_paths": [
+    "docs/CATALOG.md",
+    "docs/knowledge/DECISIONS.md",
+    "docs/knowledge/DOMAINS.md",
+    "docs/knowledge/catalog.json",
+    "post-mortem/documentation-inventory.json",
+    "docs/knowledge/registry.json",
+    "docs/README.md",
+    "docs/adr/README.md",
+    "docs/runbooks/README.md"
+  ],
+  "findings": [
+    "Two new private guides/ADR registered; 167 ADRs retain individual decision versus delivery state.",
+    "ADR 0167 is accepted by explicit user authority and verified only for controlled Nova placement; observed timestamp copied exactly from final live evidence.",
+    "Current-state and incident navigation show ACT-047 complete without closing ACT-018 or public-release gates.",
+    "Delivery/connect ownership includes preparation and retirement source; no public docs or browser imports reference private records.",
+    "Initial docs:check passed scopes/links/incidents but found knowledge fingerprints stale after generation. Reviewed the generated catalog/domain/decision/inventory delta before this attestation."
+  ],
+  "evidence": [
+    "post-mortem/releases/2026-10-03-nova-mac-transition-review.json",
+    "post-mortem/releases/2026-10-03-nova-mac-transition.json"
+  ],
+  "file_hashes": {
+    "docs/CATALOG.md": "3fb34166c0ee68f343e4e8288b5f2b291ad1d8a2f76fa6af257d529a5eb04b91",
+    "docs/knowledge/DECISIONS.md": "2d08035662840885d96354d0b18aa35dc39232cc9444e933e6d6b238072280da",
+    "docs/knowledge/DOMAINS.md": "613073470d426db998a4dc143b0a943c4cfc7a41ecc5a48d431e9c2a919ba252",
+    "docs/knowledge/catalog.json": "0278f064e27f781740103cd29558468c6ca895223758b54407b19a387e9b8b10",
+    "post-mortem/documentation-inventory.json": "5efce68bd01864a6995751455238c9808b9f356e8b62f1967276e3cdd6c1cbb3",
+    "docs/knowledge/registry.json": "de4914a9d5706bdd41097e1521ae1d2a95c28e2435b4801dcb89144935123f05",
+    "docs/README.md": "46f64edf489d2e6cbcad9b340954a42101fe911f29f88e2c76a6a041b1b47d92",
+    "docs/adr/README.md": "c2f182fc4ee87e57af16f9d82545c9f9bdc47116509417638c83985afe34d44f",
+    "docs/runbooks/README.md": "d28a31c42a0e0190acd8c0a560630f33c22b7244c308e876f4984700d9e7d322"
+  }
+}

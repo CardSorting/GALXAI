@@ -1,0 +1,74 @@
+{
+  "classification": "private",
+  "observed_at": "2026-10-03T23:12:21.171948+00:00",
+  "scope": "Private operational observation and proposed adapter/client requirements only; accepted source and build preserved.",
+  "reviewed_complete_affected_guides": [
+    "docs/VERCEL_DEPLOYMENT.md",
+    "docs/operations/galx-connect.md"
+  ],
+  "reviewed_current_state_delta": "New dated observation only; previous observations and acceptance results remain historical.",
+  "source_contracts_inspected": [
+    "src/app/v1/inference/route.ts",
+    "src/lib/nova/inference.ts",
+    "src/lib/nova/executor.ts",
+    "src/lib/nova/contract.ts",
+    "src/lib/connect/config.ts",
+    "src/lib/connect/http.ts",
+    "src/lib/supabase/repositories/ConnectRepository.ts",
+    "src/lib/db/postgres.ts",
+    "src/sdk/connect.ts",
+    "src/core/router/adapters/RelayChatTransport.ts",
+    "examples/connect/browser/client.ts",
+    "examples/connect/native.ts",
+    "src/relay/pool-entry.ts",
+    "docker/relay-pools/services.premium.yaml",
+    "scripts/package-hosted-candidate.mjs",
+    "scripts/fixtures/nova-host-lifetime.ts"
+  ],
+  "semantic_conclusions": [
+    "Node completed-request close must not be treated as response disconnect; tested with the unchanged helper in two Node 22 architectures.",
+    "Terminal work stays owned after socket close. Synthetic delayed persistence is evidence about the adapter, not production database acceptance.",
+    "Public keepalives and separate content/frame/wire budgets are required by the observed projector behavior. Neither is implemented by this observation.",
+    "Client success still requires terminal evidence and DONE; ambiguous writes never automatically retry.",
+    "Current authority, provider-health, quota and no-replay behavior are preserved. Dependency inspection is not permission for architectural cleanup.",
+    "Host metadata proves placement constraints, not spare capacity, a deployed adapter or a public readiness claim.",
+    "The declined upgrade remains declined. Hobby eligibility remains a separate existing requirement.",
+    "ACT-045 remains open. ACT-044/046 preserve their prior scopes and require reacceptance for a replacement."
+  ],
+  "actual_checks": {
+    "unchanged_nova_diagnostic_cases": 6,
+    "architectures": [
+      "linux/amd64 Node 22.23.2",
+      "linux/arm64 Node 22.23.2"
+    ],
+    "total_case_executions": 12,
+    "external_container_network": "disabled",
+    "source_files_unchanged": 1886,
+    "compiled_files_unchanged": 2291,
+    "archive_unchanged": true,
+    "read_only_host_metadata": true,
+    "import_boundary_diagnostic": "esbuild in-memory bundles plus selected CORS import with only PATH on local Node 26.8.1"
+  },
+  "retained_evidence": [
+    "post-mortem/releases/2026-10-03-hobby-buffering-observation.json"
+  ],
+  "review_delta": {
+    "connect": [
+      "docs/operations/galx-connect.md"
+    ],
+    "delivery": [
+      "docs/VERCEL_DEPLOYMENT.md"
+    ],
+    "critical": [
+      "docs/VERCEL_DEPLOYMENT.md",
+      "docs/operations/galx-connect.md",
+      "post-mortem/CURRENT_STATE.md"
+    ]
+  },
+  "unmapped_review": "Current-state/register/journal remain under the existing incident policy. Private diagnostic sources and JSON evidence are excluded from runtime/deployment; no new source mapping or accepted ADR is required.",
+  "limitations": [
+    "No real database, provider, account lifecycle or full-duration rerun.",
+    "No candidate rebuild, source change, target reconfiguration, deployment or credential issuance.",
+    "No ready-for-rollout claim; exact client budgets and deployable Node adapter remain work."
+  ]
+}

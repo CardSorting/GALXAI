@@ -1,0 +1,50 @@
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 825B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/node@sha256:43aeff40f4afc22e83f7589a2f37e111cff5ca84529571f1c8415bcc5fcc21b2
+#2 DONE 0.1s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 76B done
+#3 DONE 0.0s
+
+#4 [1/4] FROM docker.io/library/node@sha256:43aeff40f4afc22e83f7589a2f37e111cff5ca84529571f1c8415bcc5fcc21b2
+#4 resolve docker.io/library/node@sha256:43aeff40f4afc22e83f7589a2f37e111cff5ca84529571f1c8415bcc5fcc21b2 done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 181.24MB 3.0s done
+#5 DONE 3.0s
+
+#6 [2/4] WORKDIR /app
+#6 CACHED
+
+#7 [3/4] COPY --chown=1000:1000 runtime/ /app/
+#7 DONE 1.9s
+
+#8 [4/4] RUN mkdir -p /opt/galx-seed /app/.next/cache &&     cp -a /app/.next/server/app /opt/galx-seed/app &&     cp -a /app/.next/server/pages /opt/galx-seed/pages
+#8 DONE 0.7s
+
+#9 exporting to image
+#9 exporting layers
+#9 exporting layers 5.9s done
+#9 exporting manifest sha256:6e1025019814b47fa9757f3b4d351a8854491d3a1aa0b5dc1f8c8454462eee8e done
+#9 exporting config sha256:564118bae3162821945c5f793186192b2177c7cc9874fb999de975a9407731b6 done
+#9 exporting attestation manifest sha256:2eb4e27f8fa4a3ff38b338901c8b12f2dc5c3b0821fbfd886c3289b0c114321b done
+#9 exporting manifest list sha256:70b0c58c6a6f27bbf7dceaa13a1a555a822bf4afbae31ff2fce234724b12c27b done
+#9 naming to docker.io/library/galxai-web:selfhost-2afadf8c22f92685 done
+#9 DONE 5.9s
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/1evs41ikog6r1m05m70p1nmz2
+{
+  "image": "sha256:70b0c58c6a6f27bbf7dceaa13a1a555a822bf4afbae31ff2fce234724b12c27b",
+  "tag": "galxai-web:selfhost-2afadf8c22f92685",
+  "manifestSha256": "2afadf8c22f92685245228d805d6f5fac658c108ed105ad585c1c33b7be3976d",
+  "imageArchiveSha256": "f9f3a692bd38e0863786f5f4483ebf9f307fad27da3948b983edba66421590ea",
+  "platform": "linux/amd64",
+  "builtAt": "2026-10-03T23:58:18.996Z",
+  "deployed": false
+}

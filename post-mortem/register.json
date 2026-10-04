@@ -4,6 +4,51 @@
   "notes": "Severity assigned retrospectively where the original record had no incident label. Recovered historical records retain their original verification scope; no fresh live test is implied.",
   "incidents": [
     {
+      "id": "INC-20261003-OUTCOMES",
+      "category": "controller",
+      "severity": "SEV-3",
+      "status": "recovered",
+      "title": "Interrupted execution counted as provider failure",
+      "owner": "Inference/access maintainer",
+      "record": "post-mortem/incidents/2026/2026-10-03-neutral-outcomes/README.md",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-10-03-neutral-outcomes/README.md",
+        "src/relay/pool-execution.ts",
+        "src/relay/relay-server.ts",
+        "deploy/relay-execution/supabase/migrations/20261003195250_relay_execution_neutral_outcomes.sql",
+        "post-mortem/releases/2026-10-03-neutral-outcomes.json",
+        "post-mortem/releases/2026-10-03-refill-packaging-closure.json"
+      ],
+      "failure_modes": [
+        "FM-CTRL-002"
+      ],
+      "recovery_evidence": [
+        "post-mortem/releases/2026-10-03-neutral-outcomes.json"
+      ]
+    },
+    {
+      "id": "INC-20261003-CONNECT",
+      "category": "inference",
+      "severity": "SEV-2",
+      "status": "recovered",
+      "title": "Real Connect acceptance found browser integration defects and expired provider sessions",
+      "owner": "Codex (active responder)",
+      "record": "post-mortem/incidents/2026/2026-10-03-connect-acceptance/README.md",
+      "evidence": [
+        "post-mortem/releases/2026-10-03-connect-real-acceptance.json",
+        "post-mortem/incidents/2026/2026-10-03-connect-acceptance/README.md",
+        "post-mortem/releases/2026-10-03-connect-provider-recovery.json",
+        "post-mortem/releases/2026-10-03-connect-provider-http.json"
+      ],
+      "failure_modes": [
+        "FM-CTRL-002"
+      ],
+      "recovery_evidence": [
+        "post-mortem/releases/2026-10-03-connect-provider-recovery.json",
+        "post-mortem/releases/2026-10-03-connect-provider-http.json"
+      ]
+    },
+    {
       "id": "INC-20260926-TAX",
       "category": "billing",
       "severity": "SEV-3",
@@ -27,7 +72,10 @@
       "title": "Homepage archive completion card overlaps the following section",
       "owner": "Codex (active responder)",
       "record": "post-mortem/incidents/2026/2026-09-25-home-archive-overlap/README.md",
-      "evidence": ["src/components/images/masonry-stream.css", "post-mortem/incidents/2026/2026-09-25-home-archive-overlap/README.md"],
+      "evidence": [
+        "src/components/images/masonry-stream.css",
+        "post-mortem/incidents/2026/2026-09-25-home-archive-overlap/README.md"
+      ],
       "failure_modes": [],
       "recovery_evidence": []
     },
@@ -164,7 +212,7 @@
       "id": "INC-20260912-STORAGE",
       "category": "deployment",
       "severity": "SEV-2",
-      "status": "contained",
+      "status": "recovered",
       "title": "Deployment storage pressure",
       "owner": "maintainer",
       "record": "post-mortem/incidents/2026/2026-09-12-vercel-storage/README.md",
@@ -174,7 +222,9 @@
       "failure_modes": [
         "FM-DEPLOY-001"
       ],
-      "recovery_evidence": []
+      "recovery_evidence": [
+        "post-mortem/releases/2026-10-03-controlled-rollout-preflight.json"
+      ]
     },
     {
       "id": "INC-20260912-AUTH",
@@ -447,6 +497,34 @@
       "recovery_evidence": [
         "post-mortem/events.jsonl"
       ]
+    },
+    {
+      "id": "INC-20261003-PREFLIGHT",
+      "category": "deployment",
+      "severity": "SEV-3",
+      "status": "closed",
+      "title": "Controlled Mac Nova transition accepted; obsolete Vercel inference retired",
+      "owner": "deployment maintainer",
+      "record": "post-mortem/releases/2026-10-03-nova-mac-transition.json",
+      "evidence": [
+        "post-mortem/releases/2026-10-03-controlled-rollout-preflight.json",
+        "post-mortem/releases/2026-10-03-hosted-target-enablement.json",
+        "post-mortem/releases/2026-10-03-hosted-adaptation.json",
+        "post-mortem/releases/2026-10-03-hobby-buffering-feasibility.json",
+        "post-mortem/releases/2026-10-03-hobby-buffering-observation.json",
+        "post-mortem/releases/2026-10-03-mac-self-hosting-assessment.json",
+        "post-mortem/releases/2026-10-03-mac-self-hosting-hardening.json",
+        "post-mortem/releases/2026-10-03-mac-origin-transport-correction.json",
+        "post-mortem/releases/2026-10-03-nova-mac-transition.json"
+      ],
+      "failure_modes": [
+        "FM-DEPLOY-002"
+      ],
+      "recovery_evidence": [
+        "post-mortem/releases/2026-10-03-nova-mac-transition.json",
+        "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/controlled-observation.json",
+        "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/vercel-retirement.json"
+      ]
     }
   ],
   "actions": [
@@ -470,16 +548,23 @@
       "status": "open",
       "next_step": "Deploy the content-sized sentinel correction and verify the completed archive card remains above the following section on desktop and narrow phones. Retain completed-feed layout coverage for future stream changes.",
       "closure": "Record hosted desktop/mobile acceptance and verify card bounds are contained by the sentinel, with no overlap or horizontal overflow.",
-      "evidence": ["post-mortem/incidents/2026/2026-09-25-home-archive-overlap/README.md", "src/components/images/masonry-stream.css", "post-mortem/releases/2026-09-26-orbit-release-review.json"]
+      "evidence": [
+        "post-mortem/incidents/2026/2026-09-25-home-archive-overlap/README.md",
+        "src/components/images/masonry-stream.css",
+        "post-mortem/releases/2026-09-26-orbit-release-review.json"
+      ]
     },
     {
       "id": "ACT-001",
       "incident": "INC-20260912-STORAGE",
       "owner": "deployment maintainer",
       "review_by": "2026-10-01",
-      "status": "open",
-      "next_step": "Recheck both storage metrics and current deployment inventory in the same team/date range.",
-      "closure": "Record actual totals and whether deployment capacity is available; retain compatible rollback and active aliases."
+      "status": "completed",
+      "next_step": "Closed by October 3 read-only preflight: both storage totals are below their 10 GB allowances; all three current Ready deployments, serving aliases, actual local/hosted architecture and retained rollback artifacts are inventoried. No cleanup or deployment performed. Separate target-readiness gaps are ACT-044/045/046.",
+      "closure": "Record actual totals and whether deployment capacity is available; retain compatible rollback and active aliases.",
+      "evidence": [
+        "post-mortem/releases/2026-10-03-controlled-rollout-preflight.json"
+      ]
     },
     {
       "id": "ACT-002",
@@ -518,21 +603,22 @@
       "owner": "relay maintainer",
       "review_by": "2026-09-27",
       "status": "open",
-      "next_step": "Run each explicitly not-run isolated acceptance subitem separately: Docker-daemon restart during work; Docker unavailable at startup then restored; host reboot and unattended guardian boot; retained-state restoration; full/read-only recovery storage; and exhausted restart-budget recovery. Also exercise the owner-Mac Keep Premium online LaunchAgent across sign-in, Docker Desktop/Colima recovery and sleep/wake; verify fresh central/monitor/runtime health, identity/isolation and no duplicate owner. Retain local checks for supervisor heartbeat freshness, fixed recovery categories, retry estimate, AC sleep assertion state and conflicting LaunchAgent preservation. The local stack now uses healthy-service readiness checks, a five-minute post-jitter retry cap and a service-scoped monitor/runtime recovery branch that preserves the runtime handoff fence. The unhealthy-service branch and host failure drills remain untested; normal health and source fixtures do not establish fault recovery. Current fixture and disposable Docker results are recorded in act018-isolated-drills-20260914.json. Keep this action open until each acceptance subitem has dated evidence.",
-      "closure": "For each subitem record fault-to-detection, safe authority handover, required-capability readiness, first successful request, independent duplicate-dispatch outcome and rollback/cleanup evidence. Mark unsupported destructive drills not run; do not close ACT-018 from fixture or canary coverage.",
+      "next_step": "Preserve the operator amendment: physical Mac reboot/shutdown/power loss, logout/login, sleep/wake, host-network interruption, destructive host disk pressure, and shared daemon/ingress restarts that disrupt unrelated work are UNVERIFIED — DEFERRED BY OPERATOR. Do not perform these drills or change system-wide power settings. Normal-reboot startup is a provisional operational assumption, not acceptance evidence. Continue only independently authorized, non-disruptive service/isolated recovery work. The October 3 Nova supplement verifies container death/restart, isolated ingress loss, exact-credit restart/restore, synthetic reconstruction, bounded cache/OOM containment, and packaged monitor death/control-loss/revocation recovery. It leaves all ten live containers unchanged. It does not close older Premium supervisor subitems: Docker unavailable/restored, exhausted restart budget, unhealthy-service recovery, or full/read-only recovery storage; each needs its own safe isolated evidence. Historical acceptance and the single-host/off-device limitations remain explicit.",
+      "closure": "Keep ACT-018 open until each separately scoped subitem has dated evidence of detection, authority handover, capability readiness, request/duplicate outcome and cleanup. Physical-host and disruptive shared-service drills remain UNVERIFIED — DEFERRED BY OPERATOR, neither passed nor failed; do not bypass the restriction to close this action. Nova service-level recovery is sufficient for continued controlled operation, not physical-host resilience or production-readiness certification.",
       "evidence": [
         "post-mortem/incidents/2026/2026-09-13-image-generation/act018-isolated-drills-20260914.json",
         "docs/adr/0159-local-mac-relay-operation.md",
         "docs/runbooks/relay-pool-services.md",
         "scripts/relay-local.mjs",
         "scripts/macos/RelayMonitors.swift",
-      "scripts/test-relay-controller-supervisor.py",
-      "scripts/test-relay-launcher-worker-recovery.ts",
-      "scripts/test-relay-lifecycle-docker.ts",
+        "scripts/test-relay-controller-supervisor.py",
+        "scripts/test-relay-launcher-worker-recovery.ts",
+        "scripts/test-relay-lifecycle-docker.ts",
         "post-mortem/releases/2026-09-23-local-relay-supervisor-acceptance.json",
         "post-mortem/releases/2026-09-23-local-relay-menu-ux-hardening.json",
         "post-mortem/releases/2026-09-23-local-relay-readiness-hardening.json",
-        "post-mortem/releases/2026-09-23-local-relay-targeted-recovery.json"
+        "post-mortem/releases/2026-09-23-local-relay-targeted-recovery.json",
+        "post-mortem/releases/2026-10-03-nova-nondisruptive-resilience.json"
       ]
     },
     {
@@ -997,6 +1083,143 @@
         "src/relay/pool-request-queue.ts",
         "Dockerfile.relay-services",
         "docs/runbooks/relay-pool-services.md"
+      ]
+    },
+    {
+      "id": "ACT-039",
+      "incident": "INC-20261003-CONNECT",
+      "owner": "Account owner and inference/access maintainer",
+      "review_by": "2026-10-04",
+      "status": "completed",
+      "next_step": "Retain the bounded real acceptance and uncertainty evidence. Stop this implementation pass. Before any hosted rollout, satisfy the separately classified deployment gate; longer executor deadlines remain explicitly unforced.",
+      "closure": "Existing account completed real provider inference through Connect/Nova; refresh and post-completion revocation deny future requests while another client remains usable. Shared capacity, real SSE, client deadline, cancellation and disconnect during streaming are recorded with no replay or fabricated terminal success. No provider credentials reached either client. All test grants revoked and temporary entitlement withdrawn; Media and completed records intact. Hosted rollout and public launch are not inferred.",
+      "evidence": [
+        "post-mortem/releases/2026-10-03-connect-real-acceptance.json",
+        "post-mortem/incidents/2026/2026-10-03-connect-acceptance/README.md",
+        "post-mortem/releases/2026-10-03-connect-provider-recovery.json",
+        "post-mortem/releases/2026-10-03-connect-provider-http.json"
+      ]
+    },
+    {
+      "id": "ACT-040",
+      "incident": "INC-20261003-OUTCOMES",
+      "owner": "Inference/access maintainer",
+      "review_by": "2026-10-04",
+      "status": "completed",
+      "next_step": "Retain installed acceptance and stop this bounded correction. Separate quota-refill and clean-image packaging actions remain open.",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-10-03-neutral-outcomes/README.md",
+        "post-mortem/releases/2026-10-03-neutral-outcomes.json"
+      ],
+      "closure": "Execution-only nullable settlement and reviewed runtime/monitor/launcher installed. One real stream cancelled into terminal unknown with neutral evidence, unchanged failure count, no replay and retained earlier records. Final image and installed security checks pass."
+    },
+    {
+      "id": "ACT-041",
+      "incident": "INC-20261003-OUTCOMES",
+      "owner": "Inference/access maintainer",
+      "review_by": "2026-10-04",
+      "status": "completed",
+      "next_step": "Exact refill migration reproduced and verified with 82 isolated boundary/restart/concurrency/rollback checks. Engineering closure is complete; apply only the reviewed primary version during a separately authorized rollout. No shared mutation occurred.",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-10-03-neutral-outcomes/README.md",
+        "post-mortem/releases/2026-10-03-neutral-outcomes.json",
+        "post-mortem/releases/2026-10-03-refill-packaging-closure.json"
+      ],
+      "closure": "Per the bounded October 3 mandate: reproduce original and production-shaped failure, preserve admission boundaries, prove deterministic arithmetic/restart/concurrency and retained rollback, and identify the exact staged primary migration. Target application is a separate deployment decision."
+    },
+    {
+      "id": "ACT-042",
+      "incident": "INC-20261003-OUTCOMES",
+      "owner": "Inference/access maintainer",
+      "review_by": "2026-10-04",
+      "status": "completed",
+      "next_step": "Clean isolated checkout and fresh builder now produce the monitor through declared locked inputs; 29 image and 76 actual package startup/boundary checks pass. Installed manifest unchanged; retain candidate and earlier rollback images for the separate deployment decision.",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-10-03-neutral-outcomes/README.md",
+        "post-mortem/releases/2026-10-03-neutral-outcomes.json",
+        "post-mortem/releases/2026-10-03-refill-packaging-closure.json"
+      ],
+      "closure": "A clean native image builds without ignored workspaces, retained images or mutable exact-version APK availability, starts via its real entrypoint and preserves private ownership/browser authorization boundaries. Destination-host acceptance remains separate."
+    },
+    {
+      "id": "ACT-043",
+      "incident": "INC-20261003-OUTCOMES",
+      "owner": "Security/account maintainer",
+      "review_by": "2026-10-10",
+      "status": "open",
+      "next_step": "BLOCKS PUBLIC RELEASE: independently review the pre-existing public.fn_get_account_tier_limits(text) browser execution grants and supplied account-ID access. Read-only advisors report anon/authenticated definer execution; the retained source returns wallet metadata without an owner check. Review reachability and restrict to intended server authority or verified account ownership with isolated tests. No customer rows were queried and no grants changed in the bounded refill/build pass.",
+      "evidence": [
+        "post-mortem/releases/2026-10-03-refill-packaging-closure.json",
+        "supabase/migrations/20260917090000_compute_tier_enrichment.sql"
+      ],
+      "closure": "The exact deployed function, allowed callers and ownership boundary are verified and any unauthorized account metadata access is denied with negative tests, without changing Connect/Nova permissions or execution semantics."
+    },
+    {
+      "id": "ACT-044",
+      "incident": "INC-20261003-PREFLIGHT",
+      "owner": "deployment and access maintainers",
+      "review_by": "2026-10-10",
+      "status": "completed",
+      "next_step": "Retain the accepted Mac candidate and synthetic whole-image receipt. The separately authorized real-provider transition, final ingress, shared Media/Connect placement and Vercel retirement are now verified under ACT-047. Future candidate or ingress changes require affected acceptance; public release remains separate.",
+      "closure": "New clean source/compiled payload, immutable image and reloadable archive have retained provenance, unchanged dependency lock and zero mapped payload mutations.",
+      "evidence": [
+        "post-mortem/releases/2026-10-03-controlled-rollout-preflight.json",
+        "post-mortem/releases/2026-10-03-hosted-target-enablement.json",
+        "post-mortem/releases/2026-10-03-hosted-adaptation.json",
+        "post-mortem/releases/2026-10-03-mac-origin-transport-correction.json",
+        "post-mortem/releases/2026-10-03-nova-mac-transition.json"
+      ]
+    },
+    {
+      "id": "ACT-045",
+      "incident": "INC-20261003-PREFLIGHT",
+      "owner": "deployment and access maintainers",
+      "review_by": "2026-10-10",
+      "status": "completed",
+      "next_step": "Retain the accepted Mac candidate and synthetic whole-image receipt. The separately authorized real-provider transition, final ingress, shared Media/Connect placement and Vercel retirement are now verified under ACT-047. Future candidate or ingress changes require affected acceptance; public release remains separate.",
+      "closure": "Private Mac origin and complete whole-image synthetic stream/cancel/deadline/disconnect/duplicate/drain/restart transport now pass. Closure is for the supported private Mac candidate, not a Vercel Hobby long invocation or public cutover.",
+      "evidence": [
+        "post-mortem/releases/2026-10-03-controlled-rollout-preflight.json",
+        "post-mortem/releases/2026-10-03-hosted-target-enablement.json",
+        "post-mortem/releases/2026-10-03-hosted-adaptation.json",
+        "post-mortem/releases/2026-10-03-hobby-buffering-feasibility.json",
+        "post-mortem/releases/2026-10-03-hobby-buffering-observation.json",
+        "post-mortem/releases/2026-10-03-mac-self-hosting-assessment.json",
+        "post-mortem/releases/2026-10-03-mac-self-hosting-hardening.json",
+        "post-mortem/releases/2026-10-03-mac-origin-transport-correction.json",
+        "post-mortem/releases/2026-10-03-nova-mac-transition.json"
+      ]
+    },
+    {
+      "id": "ACT-046",
+      "incident": "INC-20261003-PREFLIGHT",
+      "owner": "deployment and access maintainers",
+      "review_by": "2026-10-10",
+      "status": "completed",
+      "next_step": "Retain the accepted Mac candidate and synthetic whole-image receipt. The separately authorized real-provider transition, final ingress, shared Media/Connect placement and Vercel retirement are now verified under ACT-047. Future candidate or ingress changes require affected acceptance; public release remains separate.",
+      "closure": "New packaged image enforces configured issuer/resource/first-party registry plus explicit eligibility and client grant; negative cases and revocation pass. Disabled operator staging remains closed. No real Mac secret completeness, portal login or live grant activation is implied.",
+      "evidence": [
+        "post-mortem/releases/2026-10-03-controlled-rollout-preflight.json",
+        "post-mortem/releases/2026-10-03-hosted-target-enablement.json",
+        "post-mortem/releases/2026-10-03-hosted-adaptation.json",
+        "post-mortem/releases/2026-10-03-mac-origin-transport-correction.json",
+        "post-mortem/releases/2026-10-03-nova-mac-transition.json"
+      ]
+    },
+    {
+      "id": "ACT-047",
+      "incident": "INC-20261003-PREFLIGHT",
+      "owner": "deployment and access maintainers",
+      "review_by": "2026-10-10",
+      "status": "completed",
+      "next_step": "Controlled Nova-only transition complete. Retain immutable Mac/web recovery artifacts, retired-path firewall and current-state evidence. Stop; public/commercial activation and ACT-018 host/daemon/sleep/off-device recovery drills remain separate.",
+      "closure": "Owner-authorized final placement keeps Media and Connect on their existing web surface and moves only Nova to the accepted Mac image. Real existing-account/provider completion, neutral interruption, current-grant revocation, archive reload/restart, preserved execution/quota state, drain, exact ingress, five-minute controlled observation and Vercel Nova retirement are verified. Earlier whole-application Media/storage migration scope is superseded by retained placement; off-device hardware-loss recovery is an explicit availability limit, not claimed by the tested Vercel-independent local archive.",
+      "evidence": [
+        "post-mortem/releases/2026-10-03-mac-origin-transport-correction.json",
+        "post-mortem/releases/2026-10-03-mac-self-hosting-hardening.json",
+        "post-mortem/releases/2026-10-03-nova-mac-transition.json",
+        "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/vercel-retirement.json",
+        "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/final-surface.json"
       ]
     }
   ]

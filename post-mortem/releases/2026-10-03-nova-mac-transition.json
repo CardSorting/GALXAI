@@ -1,0 +1,846 @@
+{
+  "version": 1,
+  "classification": "Private operational evidence",
+  "observedAt": "2026-10-04T01:52:43.810Z",
+  "date": "2026-10-03 America/Denver",
+  "status": "MAC NOVA ACTIVE — VERCEL NOVA DECOMMISSIONED",
+  "authority": "Owner explicitly authorized gated real-provider acceptance, Nova-only Mac cutover and obsolete Vercel inference retirement; public release/commercial activation excluded.",
+  "macRuntime": {
+    "responsibilities": {
+      "media": "Existing Vercel GALX web surface",
+      "connect": "Existing GALX identity, consent, PKCE, token/refresh/revocation on https://galx.ai",
+      "nova": "Accepted persistent Next image on Docker Desktop; sole Nova inference runtime",
+      "provider": "Existing private Premium execution path and central account authority; unchanged"
+    },
+    "image": "sha256:5157984bc06524aac0ca8fbf2051eebfe6f3b7994aa7d0793e8404c097289345",
+    "packageManifestSha256": "45e7b152b1feb8d058271f08ed437dc244a1d5e0cc428fe4f4b171307ad14c64",
+    "recoveryArchiveSha256": "0cdec4031bbacc521fb6059bd61da12dbd6c88b50610c4f55b5ade7fbc812345",
+    "sourceRevision": "38a3cc48f32f5f404592109c8cae3ddac5fa6f61 plus retained accepted working-tree snapshot",
+    "sourceSha256": "0360f576c586b5be0ef9a3a86a12806ef188100ee1a78022a6e51f7a5da2753d",
+    "compiledSha256": "ce1b474421c42610451b65695e4802c8918d08336a9af41819ab44e8a51302bc",
+    "dependencyLockSha256": "17ec13ed2df5810416a9c52ab5cc772e15adcaec679bbafd9a2a61ac3b4742f1",
+    "acceptedMacArtifactChanged": false,
+    "platform": "linux/amd64",
+    "package": ".relay/mac-origin-correction/package-02",
+    "operatorPlan": ".relay/nova-transition/plan",
+    "operatorCommands": [
+      "node scripts/self-host.mjs status .relay/nova-transition/plan",
+      "node scripts/self-host.mjs stop .relay/nova-transition/plan",
+      "node scripts/self-host.mjs resume .relay/nova-transition/plan"
+    ],
+    "policy": {
+      "image": "sha256:5157984bc06524aac0ca8fbf2051eebfe6f3b7994aa7d0793e8404c097289345",
+      "status": "running",
+      "health": "healthy",
+      "exitCode": 0,
+      "restarts": 0,
+      "user": "1000:1000",
+      "readOnly": true,
+      "ports": {
+        "3000/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "17787"
+          }
+        ]
+      },
+      "memory": 1610612736,
+      "cpus": 2000000000,
+      "pids": 160,
+      "capDrop": [
+        "ALL"
+      ],
+      "securityOpt": [
+        "no-new-privileges:true"
+      ],
+      "logging": {
+        "Type": "json-file",
+        "Config": {
+          "max-file": "3",
+          "max-size": "10m"
+        }
+      },
+      "stopTimeout": 480,
+      "startedAt": "2026-10-04T01:28:32.462950554Z"
+    },
+    "configurationNames": [
+      "DATABASE_URL",
+      "GALX_AUDIT_SIGNING_SECRET",
+      "GALX_CONNECT_CLIENTS",
+      "GALX_CONNECT_ENABLED",
+      "GALX_CONNECT_ORIGIN",
+      "GALX_NOVA_RESOURCE",
+      "GALX_PREMIUM_RELAY_KEY",
+      "GALX_PREMIUM_RELAY_URL",
+      "GALX_VAULT_KEY_V1",
+      "NEXT_PUBLIC_APP_URL",
+      "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+      "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
+      "NEXT_PUBLIC_SUPABASE_URL",
+      "SUPABASE_DB_CA_CERT",
+      "SUPABASE_DB_SSL_MODE",
+      "SUPABASE_POOL_MAX_USES",
+      "SUPABASE_POOL_SIZE",
+      "SUPABASE_TIMEOUT_MS"
+    ],
+    "configurationMode": "0600, separate from image; Nova-only allowlist; no provider account credentials, Media storage/billing/admin secrets or Docker socket",
+    "recovery": {
+      "cleanStop": true,
+      "exitCode": 0,
+      "verifiedArchiveLoaded": true,
+      "sameImageResumed": true,
+      "monitorRestarted": true,
+      "privateOwnershipRestored": true,
+      "revokedGrantStillDenied": true,
+      "newConsentAfterRecovery": true,
+      "historyPreserved": true,
+      "quotaPersisted": true,
+      "dependsOnVercelForExecutionState": false,
+      "hostOrDaemonRestart": "Not forced: would interrupt unrelated shared services; remains ACT-018",
+      "offDeviceDisasterRecovery": "Not demonstrated; local archive does not cover hardware loss"
+    }
+  },
+  "ingress": {
+    "hostname": "https://nova.galx.ai",
+    "path": "client → TLS Cloudflare edge/tunnel → exact host/path rule → host loopback:17787 → accepted Next/Nova → existing private provider path",
+    "allowedPaths": [
+      "/v1/inference",
+      "/.well-known/oauth-protected-resource"
+    ],
+    "canonicalHost": "nova.galx.ai",
+    "forwardedMetadataGrantsAuthority": false,
+    "streaming": "Incremental SSE; bounded 15-second quiet comments; SDK complete-answer buffer validates terminal data",
+    "deadlines": {
+      "executionSeconds": 300,
+      "shutdownSeconds": 480
+    },
+    "bodyLimitBytes": 256000,
+    "privatePathsExcluded": true,
+    "automaticReplay": "No retry layer added. Installed cloudflared 2026.8.3 source has a single context-bound origin RoundTrip for the non-replayable streaming body; retained provider/Nova IDs prove four original attempts despite repeated duplicate probes. Network failures still yield honest uncertainty.",
+    "pilotRemoved": true,
+    "evidence": "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/final-surface.json"
+  },
+  "realProvider": {
+    "existingAccounts": 1,
+    "authorizedClient": "reference-native",
+    "explicitEligibilityExpiry": "2026-10-04T03:26:28.848Z",
+    "providerCredentialsReceivedByClient": false,
+    "attempts": [
+      {
+        "novaRequestId": "9b426e92-fe42-4a24-945a-cb71a404a06e",
+        "novaState": "completed",
+        "providerExecutionId": "job_mut54d97_5d7c2c81",
+        "providerRequestHash": "03ac35cce58e3fb8a5c57e373b488d4389a65f4f76cc237012296efdd8af72f2",
+        "providerState": "completed",
+        "success": true,
+        "settled": true,
+        "actualTokens": 23,
+        "createdAt": "2026-10-04 01:26:41.169196+00"
+      },
+      {
+        "novaRequestId": "7633fed6-7036-4b4c-b7e0-aa847f32343d",
+        "novaState": "unknown",
+        "providerExecutionId": "job_mut553hh_67bc7c43",
+        "providerRequestHash": "f22ee47d5122d3fcd49d0fb2d19fe588628f4b3175d1f03f116b0c189fe6ca01",
+        "providerState": "unknown",
+        "success": null,
+        "settled": true,
+        "actualTokens": null,
+        "createdAt": "2026-10-04 01:27:15.164543+00"
+      },
+      {
+        "novaRequestId": "bf436251-b869-419f-a95a-914ab32eaa51",
+        "novaState": "completed",
+        "providerExecutionId": "job_mut5h3mm_8886bf34",
+        "providerRequestHash": "97b15216c58edad06cfc02feaec714c7260a781e75748468e46bdceaa9d4acf7",
+        "providerState": "completed",
+        "success": true,
+        "settled": true,
+        "actualTokens": 23,
+        "createdAt": "2026-10-04 01:36:35.213724+00"
+      },
+      {
+        "novaRequestId": "425f9e1e-d971-4d10-b01d-ce731b26e1ea",
+        "novaState": "unknown",
+        "providerExecutionId": "job_mut5i7qg_0c071c00",
+        "providerRequestHash": "1f0d65ef740b86826e6aee763722aeaae4504b3433ddd93403430114d0ac2588",
+        "providerState": "unknown",
+        "success": null,
+        "settled": true,
+        "actualTokens": null,
+        "createdAt": "2026-10-04 01:37:27.213704+00"
+      }
+    ],
+    "volume": {
+      "upstreamAttempts": 4,
+      "completed": 2,
+      "interrupted": 2,
+      "completedReportedTokens": 46,
+      "interruptedTokenUsage": "Unknown; each request bounded at 512 output tokens and cancelled immediately after first delta"
+    },
+    "streaming": [
+      {
+        "at": "2026-10-04T01:26:43.466Z",
+        "label": "completion",
+        "target": "https://nova-acceptance-20261003.galx.ai",
+        "status": 200,
+        "requestKey": "ad72e1a4-0597-47c1-8428-9fff55a78b21",
+        "requestId": "9b426e92-fe42-4a24-945a-cb71a404a06e",
+        "firstByteMs": 3393,
+        "firstContentMs": 3394,
+        "totalMs": 3645,
+        "bytes": 1066,
+        "chunks": 6,
+        "frames": 7,
+        "finishReason": "stop",
+        "done": true,
+        "cancelled": false,
+        "outputCharacters": 18,
+        "outputSha256": "d5705b58f54c47d03716ca0176d9b3c450889d8850aa516b4b23a2636dee7c06",
+        "expectedReply": false,
+        "automaticReplay": false
+      },
+      {
+        "at": "2026-10-04T01:27:17.634Z",
+        "label": "interruption",
+        "target": "https://nova-acceptance-20261003.galx.ai",
+        "status": 200,
+        "requestKey": "c24f30c9-82fc-4a2e-9af8-53b6a82edfb5",
+        "requestId": "7633fed6-7036-4b4c-b7e0-aa847f32343d",
+        "firstByteMs": 4072,
+        "firstContentMs": 4072,
+        "totalMs": 4077,
+        "bytes": 175,
+        "chunks": 1,
+        "frames": 1,
+        "finishReason": null,
+        "done": false,
+        "cancelled": true,
+        "outputCharacters": 1,
+        "outputSha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+        "expectedReply": false,
+        "automaticReplay": false
+      },
+      {
+        "at": "2026-10-04T01:36:37.398Z",
+        "label": "completion",
+        "target": "https://nova.galx.ai",
+        "status": 200,
+        "requestKey": "ed98a78b-4781-4257-b745-41902aa3d627",
+        "requestId": "bf436251-b869-419f-a95a-914ab32eaa51",
+        "firstByteMs": 5061,
+        "firstContentMs": 5061,
+        "totalMs": 5125,
+        "bytes": 1066,
+        "chunks": 5,
+        "frames": 7,
+        "finishReason": "stop",
+        "done": true,
+        "cancelled": false,
+        "outputCharacters": 18,
+        "outputSha256": "d5705b58f54c47d03716ca0176d9b3c450889d8850aa516b4b23a2636dee7c06",
+        "expectedReply": false,
+        "automaticReplay": false
+      },
+      {
+        "at": "2026-10-04T01:37:29.619Z",
+        "label": "interruption",
+        "target": "https://nova.galx.ai",
+        "status": 200,
+        "requestKey": "453eaf87-fbaa-4725-8895-fea3fb66aa38",
+        "requestId": "425f9e1e-d971-4d10-b01d-ce731b26e1ea",
+        "firstByteMs": 3302,
+        "firstContentMs": 3302,
+        "totalMs": 3304,
+        "bytes": 175,
+        "chunks": 1,
+        "frames": 1,
+        "finishReason": null,
+        "done": false,
+        "cancelled": true,
+        "outputCharacters": 1,
+        "outputSha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+        "expectedReply": false,
+        "automaticReplay": false
+      }
+    ],
+    "literalResponseObservation": "Both completed outputs omitted the final punctuation requested by the probe. expectedReply:false is retained; valid stream completion and provider/Nova terminal success passed. No attempt was retried to obtain prettier output.",
+    "providerFailuresUnchanged": true,
+    "duplicates": "409 original state completed/unknown; no new provider execution or output replay",
+    "unknownIsTerminal": true
+  },
+  "connect": {
+    "issuer": "https://galx.ai",
+    "resource": "https://nova.galx.ai",
+    "scope": "inference:invoke",
+    "pkce": "S256",
+    "registry": [
+      "reference-native",
+      "reference-browser"
+    ],
+    "ordinaryLoginIsNotNovaAuthority": true,
+    "explicitGrantsRemainAuthoritative": true,
+    "liveNegativeCases": [
+      {
+        "at": "2026-10-04T01:26:18.725Z",
+        "label": "denial_probe",
+        "status": 403,
+        "elapsed_ms": 765,
+        "body": {
+          "error": {
+            "code": "inference_access_required",
+            "message": "Your account does not currently have inference access. Your application is still connected.",
+            "execution_state": "not_accepted"
+          }
+        },
+        "contentType": "application/json",
+        "cacheControl": "private, no-store",
+        "bodySha256": "59a9ea7c835b61deac0554c3c590b5e0067a223c8c8791f62817654cbfa6e509"
+      },
+      {
+        "at": "2026-10-04T01:26:18.825Z",
+        "label": "missing",
+        "status": 401,
+        "elapsed_ms": 99,
+        "body": {
+          "error": {
+            "code": "invalid_token",
+            "message": "Connect this application again to continue.",
+            "execution_state": "not_accepted"
+          }
+        },
+        "contentType": "application/json",
+        "cacheControl": "private, no-store",
+        "bodySha256": "75e15d2f5d2f5fa2d84873258e6b1befb5ba4dbf4b5e69b26afbab80dd7bad4d"
+      },
+      {
+        "at": "2026-10-04T01:26:18.926Z",
+        "label": "media_cookie_only",
+        "status": 401,
+        "elapsed_ms": 101,
+        "body": {
+          "error": {
+            "code": "invalid_token",
+            "message": "Connect this application again to continue.",
+            "execution_state": "not_accepted"
+          }
+        },
+        "contentType": "application/json",
+        "cacheControl": "private, no-store",
+        "bodySha256": "75e15d2f5d2f5fa2d84873258e6b1befb5ba4dbf4b5e69b26afbab80dd7bad4d"
+      },
+      {
+        "at": "2026-10-04T01:26:19.049Z",
+        "label": "malformed",
+        "status": 401,
+        "elapsed_ms": 123,
+        "body": {
+          "error": {
+            "code": "invalid_token",
+            "message": "Connect this application again to continue.",
+            "execution_state": "not_accepted"
+          }
+        },
+        "contentType": "application/json",
+        "cacheControl": "private, no-store",
+        "bodySha256": "75e15d2f5d2f5fa2d84873258e6b1befb5ba4dbf4b5e69b26afbab80dd7bad4d"
+      },
+      {
+        "at": "2026-10-04T01:26:19.284Z",
+        "label": "nonexistent",
+        "status": 401,
+        "elapsed_ms": 235,
+        "body": {
+          "error": {
+            "code": "invalid_token",
+            "message": "Connect this application again to continue.",
+            "execution_state": "not_accepted"
+          }
+        },
+        "contentType": "application/json",
+        "cacheControl": "private, no-store",
+        "bodySha256": "75e15d2f5d2f5fa2d84873258e6b1befb5ba4dbf4b5e69b26afbab80dd7bad4d"
+      },
+      {
+        "at": "2026-10-04T01:26:19.557Z",
+        "label": "unauthorized_browser",
+        "status": 401,
+        "elapsed_ms": 273,
+        "body": {
+          "error": {
+            "code": "invalid_token",
+            "message": "Connect this application again to continue.",
+            "execution_state": "not_accepted"
+          }
+        },
+        "contentType": "application/json",
+        "cacheControl": "private, no-store",
+        "bodySha256": "75e15d2f5d2f5fa2d84873258e6b1befb5ba4dbf4b5e69b26afbab80dd7bad4d"
+      },
+      {
+        "at": "2026-10-04T01:26:19.787Z",
+        "label": "wrong_audience",
+        "status": 400,
+        "elapsed_ms": 0,
+        "body": {
+          "error": "invalid_target",
+          "error_description": "This service is not supported."
+        },
+        "contentType": "application/json",
+        "cacheControl": "private, no-store",
+        "bodySha256": "7604739e2283d41bf39218b3cf2f157a7633c8648de4e9029a62ae9cae1ed1e1"
+      },
+      {
+        "at": "2026-10-04T01:26:19.983Z",
+        "label": "wrong_client",
+        "status": 400,
+        "elapsed_ms": 1,
+        "body": {
+          "error": "invalid_client",
+          "error_description": "This application is not supported."
+        },
+        "contentType": "application/json",
+        "cacheControl": "private, no-store",
+        "bodySha256": "25a8963a6b5ea15cfe41c76fa46b904eb38b76e94fb6fa2f2b9c65b735daa289"
+      },
+      {
+        "at": "2026-10-04T01:26:20.152Z",
+        "label": "missing_scope",
+        "status": 400,
+        "elapsed_ms": 0,
+        "body": {
+          "error": "invalid_scope",
+          "error_description": "This permission is not supported."
+        },
+        "contentType": "application/json",
+        "cacheControl": "private, no-store",
+        "bodySha256": "63516f884fc3bac6cc1aae0bf1d88818cbe5f5e14dd7df11c1e0d1e6c6127a81"
+      },
+      {
+        "at": "2026-10-04T01:29:15.222Z",
+        "label": "denial_probe",
+        "status": 401,
+        "elapsed_ms": 737,
+        "body": {
+          "error": {
+            "code": "invalid_token",
+            "message": "Connect this application again to continue.",
+            "execution_state": "not_accepted"
+          }
+        },
+        "contentType": "application/json",
+        "cacheControl": "private, no-store",
+        "bodySha256": "75e15d2f5d2f5fa2d84873258e6b1befb5ba4dbf4b5e69b26afbab80dd7bad4d"
+      },
+      {
+        "at": "2026-10-04T01:33:05.411Z",
+        "label": "denial_probe",
+        "status": 503,
+        "elapsed_ms": 934,
+        "body": {
+          "error": {
+            "code": "service_busy",
+            "message": "Inference is busy. Try again later; your application is still connected.",
+            "execution_state": "not_accepted"
+          }
+        },
+        "contentType": "application/json",
+        "cacheControl": "private, no-store",
+        "bodySha256": "31e8434b95aedbcbd07888d5407d51976419cb09030003a966a1d4c594c51fbe"
+      },
+      {
+        "at": "2026-10-04T01:46:16.574Z",
+        "label": "denial_probe",
+        "status": 401,
+        "elapsed_ms": 748,
+        "body": {
+          "error": {
+            "code": "invalid_token",
+            "message": "Connect this application again to continue.",
+            "execution_state": "not_accepted"
+          }
+        },
+        "contentType": "application/json",
+        "cacheControl": "private, no-store",
+        "bodySha256": "75e15d2f5d2f5fa2d84873258e6b1befb5ba4dbf4b5e69b26afbab80dd7bad4d"
+      }
+    ],
+    "negativeCoverageLimit": "Live wrong-client/audience/scope probes validate authorization-request rejection. Expired token, token audience/client binding and prohibited replay also have established 135-check disposable database coverage; these were not all separately minted as live invalid credentials.",
+    "revocation": [
+      {
+        "at": "2026-10-04T01:27:42.233Z",
+        "label": "revocation_acknowledgement",
+        "status": 200,
+        "elapsed_ms": 0,
+        "body": {
+          "bytes": 0
+        },
+        "contentType": null,
+        "cacheControl": "private, no-store",
+        "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "at": "2026-10-04T01:27:42.546Z",
+        "label": "post_revocation",
+        "status": 401,
+        "elapsed_ms": 312,
+        "body": {
+          "error": {
+            "code": "invalid_token",
+            "message": "Connect this application again to continue.",
+            "execution_state": "not_accepted"
+          }
+        },
+        "contentType": "application/json",
+        "cacheControl": "private, no-store",
+        "bodySha256": "75e15d2f5d2f5fa2d84873258e6b1befb5ba4dbf4b5e69b26afbab80dd7bad4d"
+      },
+      {
+        "at": "2026-10-04T01:27:42.546Z",
+        "label": "revocation_measurement",
+        "millisecondsAfterAcknowledgement": 313,
+        "denied": true
+      },
+      {
+        "at": "2026-10-04T01:27:43.027Z",
+        "label": "refresh_after_revocation",
+        "status": 400,
+        "error": "invalid_grant",
+        "authorityRestored": false
+      },
+      {
+        "at": "2026-10-04T01:38:00.674Z",
+        "label": "revocation_acknowledgement",
+        "status": 200,
+        "elapsed_ms": 2,
+        "body": {
+          "bytes": 0
+        },
+        "contentType": null,
+        "cacheControl": "private, no-store",
+        "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "at": "2026-10-04T01:38:00.924Z",
+        "label": "post_revocation",
+        "status": 401,
+        "elapsed_ms": 249,
+        "body": {
+          "error": {
+            "code": "invalid_token",
+            "message": "Connect this application again to continue.",
+            "execution_state": "not_accepted"
+          }
+        },
+        "contentType": "application/json",
+        "cacheControl": "private, no-store",
+        "bodySha256": "75e15d2f5d2f5fa2d84873258e6b1befb5ba4dbf4b5e69b26afbab80dd7bad4d"
+      },
+      {
+        "at": "2026-10-04T01:38:00.924Z",
+        "label": "revocation_measurement",
+        "millisecondsAfterAcknowledgement": 252,
+        "denied": true
+      },
+      {
+        "at": "2026-10-04T01:38:01.396Z",
+        "label": "refresh_after_revocation",
+        "status": 400,
+        "error": "invalid_grant",
+        "authorityRestored": false
+      }
+    ],
+    "finalPathRevocationMs": 252,
+    "measurementIsSla": false,
+    "designedContract": "No grant-cache delay: after acknowledged durable revocation, requests not already admitted are denied",
+    "refreshRestoredAuthority": false,
+    "unrevokedConnectionsAtClose": 0,
+    "existingGalxAccountRetained": true
+  },
+  "capacity": {
+    "configuredGlobalSlots": 64,
+    "configuredPerAccountSlots": 2,
+    "admissionsPerMinute": 12,
+    "unknownReservationSeconds": 360,
+    "liveProbe": "Bounded admission-lock contention returned 503 service_busy without provider dispatch. No destructive load or sustained capacity test.",
+    "quota": "Exact persisted integer fractional credit; reviewed migration applied; bounded values verified after restart and later requests",
+    "syntheticCoverage": "Accepted whole-image capacity and 82 refill checks including 18000 partitioned evaluations, fresh processes and concurrency"
+  },
+  "cutover": {
+    "previous": {
+      "id": "dpl_9FSaL3M6JffKDjaUHP98RhU3crzG",
+      "url": "galxai-204k0uq49-cardsortings-projects.vercel.app",
+      "readyState": "READY",
+      "createdAt": 1790441645794,
+      "target": "production",
+      "aliases": [
+        "galx.ai",
+        "galxai.vercel.app",
+        "www.galx.ai",
+        "galxai-cardsortings-projects.vercel.app",
+        "galxai-git-main-cardsortings-projects.vercel.app"
+      ],
+      "gitRevision": "38a3cc48f32f5f404592109c8cae3ddac5fa6f61",
+      "nodeVersion": "22.x",
+      "functions": null,
+      "crons": [],
+      "regions": [
+        "iad1"
+      ]
+    },
+    "previousNovaDns": {
+      "id": "d81c745d26c0dfb33f79bbdb81686934",
+      "name": "nova.galx.ai",
+      "type": "CNAME",
+      "content": "a76166bfd6d0ea1e.vercel-dns-017.com",
+      "proxied": false,
+      "ttl": 300
+    },
+    "drain": {
+      "at": "2026-10-04T01:35:07.988Z",
+      "activeNova": [
+        {
+          "running": 0
+        }
+      ],
+      "providerLeases": [
+        {
+          "active": 0
+        }
+      ],
+      "legacyQueueStates": [],
+      "quota": [
+        {
+          "accounts": 3,
+          "bounded": true,
+          "token_credit_valid": true,
+          "request_credit_valid": true
+        }
+      ],
+      "migration": [
+        {
+          "version": "20261003131619"
+        },
+        {
+          "version": "20261003202702"
+        }
+      ]
+    },
+    "route": {
+      "at": "2026-10-04T01:35:52.852Z",
+      "id": "d81c745d26c0dfb33f79bbdb81686934",
+      "name": "nova.galx.ai",
+      "type": "CNAME",
+      "content": "3df90220-304b-4771-8be8-4569bc147b4e.cfargotunnel.com",
+      "proxied": true,
+      "ttl": 1,
+      "realProviderGatePassed": true,
+      "controlledAcceptancePending": true
+    },
+    "acceptance": "Real final-hostname completion, neutral interruption, duplicate denial and Connect revocation passed before retirement",
+    "controlledObservation": {
+      "status": "PASSED",
+      "samples": 21,
+      "elapsedMs": 313188,
+      "rolledBack": false
+    },
+    "publicEnrollmentOpened": false
+  },
+  "vercelRetirement": {
+    "at": "2026-10-04T01:45:56.814Z",
+    "status": "RETIRED",
+    "releaseId": "dpl_4uwFyPMJ6YV7njXsWQbb7a8MZHKh",
+    "releaseUrl": "galxai-32sh7g34p-cardsortings-projects.vercel.app",
+    "sourceManifest": "ef292883a4e84af9b91b14d7f86fdb237c3e5489abd7d3890257f425c0642d3f",
+    "novaProjectBindingRemoved": true,
+    "novaAliasRemoved": true,
+    "remainingDomains": [
+      "www.galx.ai",
+      "galx.ai",
+      "galxai.vercel.app"
+    ],
+    "remainingAliases": [
+      "www.galx.ai",
+      "galx.ai",
+      "galxai.vercel.app",
+      "galxai-git-main-cardsortings-projects.vercel.app",
+      "galxai-cardsortings-projects.vercel.app"
+    ],
+    "sharedConfigurationRetained": true,
+    "projectFirewallProtectsOldReleases": true,
+    "scheduledExecutions": [],
+    "historicalDeploymentsRetained": true,
+    "mutationReceiptNote": "Project-domain DELETE succeeded but returned an empty body; original generic JSON helper threw. Read-only domain and alias inventories proved removal before any retry. No duplicate mutation performed.",
+    "webSourceSha256": "ef292883a4e84af9b91b14d7f86fdb237c3e5489abd7d3890257f425c0642d3f",
+    "webArtifactManifestSha256": "170858a60b59faaa97bbfb0e504de7f23566c7d4576bc15e2b1b97e04de6b8b9",
+    "webArchiveSha256": "518c43156b388e2add0ece9fc874114a7506b7c4b86436a6250305b5b74d541c",
+    "sourcePreparation": "Observed September 26 Media revision plus 25 reviewed Connect/auth/retirement overlay files; separate source provenance retained",
+    "disabled": [
+      "Nova route/resource-discovery function absent from deployed web package",
+      "Vercel text/chat/completion/message/embedding/run routes denied before operator/ordinary authorization",
+      "Legacy compute queue routes denied, including read-triggered dispatch",
+      "Project firewall denies retired entry points across retained releases",
+      "Nova project domain and alias removed; subsequent Media releases cannot claim it"
+    ],
+    "removedSecrets": [],
+    "secretFinding": "No Nova-exclusive provider secret was present. Shared Media image/Sites relay capabilities remain required and were retained.",
+    "retained": [
+      "GALX Media source and domains",
+      "Shared GALX Auth/session infrastructure",
+      "Connect issuer/client/token/grant configuration",
+      "Database/Auth/object storage/billing configuration",
+      "Existing Media image/Sites transport",
+      "Historical compatible deployment metadata"
+    ],
+    "schedules": "No Vercel crons existed; legacy compute queue is empty and disabled. No new schedule added.",
+    "hooks": "Existing Media Git integration retained. Project-wide retirement firewall is independent of those deployments.",
+    "dualPrimary": false
+  },
+  "migration": {
+    "applied": [
+      "20261003202702_relay_refill_integer_credit"
+    ],
+    "alreadyPresent": [
+      "20261003131619_galx_connect_grants"
+    ],
+    "notApplied": [
+      "20260926081213_orbit_public_identity"
+    ],
+    "dryRun": "Rollback-only application passed before mutation",
+    "existingRowsRewritten": false,
+    "compatibility": "Additive nullable BIGINT fractional-credit state; existing rows initialize safely under existing account lock. No DOWN migration used for hosting rollback."
+  },
+  "preserved": {
+    "neutralUnknown": true,
+    "explicitProviderFailureAccounting": "43 service checks; no deliberate live provider failure",
+    "deadline": "Unchanged image retains synthetic full 300-second deadline and active shutdown acceptance; no long paid deadline test repeated",
+    "noReplay": true,
+    "duplicateOriginalExecution": true,
+    "quota": true,
+    "credentialIsolation": true,
+    "privateOwnershipEvidence": true,
+    "browserSanitization": true,
+    "recovery": true,
+    "historicalExecutionRecordsPreserved": 9
+  },
+  "modifications": [
+    "Explicit Nova-only operator configuration/profile; existing hardening and whole-image gate unchanged",
+    "Reproducible Media/Connect source overlay and isolated source-root packaging",
+    "Vercel-only placement guards before middleware, direct Nova route and legacy route/queue dispatch",
+    "Removed obsolete Vercel Nova duration/cancellation hosting declaration; Mac image unchanged",
+    "Reviewed ingress, project firewall and domain cutover/retirement configuration; one bounded entitlement"
+  ],
+  "verification": {
+    "logs": "post-mortem/incidents/2026/2026-10-03-nova-mac-transition",
+    "counts": {
+      "connectOriginClient": 50,
+      "accountSessions": 44,
+      "selfHostOperator": 20,
+      "retirementDeveloperBoundary": 13,
+      "baseDatabase": 94,
+      "connectDatabase": 135,
+      "refill": 82,
+      "relayServices": 43,
+      "packageMonitorBoundaries": 38
+    },
+    "macPackageFiles": 4519,
+    "macPublicAssets": 819,
+    "webPublicAssets": 543,
+    "finalLiveSurface": {
+      "inventory": 409,
+      "publicAssets": 285,
+      "byteIdenticalAssets": 284,
+      "privateAssetDenials": 124,
+      "platformSuffix": {
+        "path": "/_next/static/chunks/webpack-ca6774db66e642f6.js",
+        "bytes": 461,
+        "sha256": "377c2d4bd4ee0c365f0556222c8efeeb0d28f6b36484bb0c4a74d29e2b1a13ff",
+        "kind": "Vercel explicit cookie-opt-in toolbar loader with this deployment ID",
+        "applicationPrefixByteIdentical": true
+      },
+      "applicationPayloadsMatch": true,
+      "privateMarkers": 0,
+      "credentialMatches": 0
+    },
+    "finalHttpProbes": 28,
+    "documentation": "See separate verification record after semantic review and documentation guards"
+  },
+  "remainingIssues": [
+    {
+      "classification": "BLOCKS PUBLIC RELEASE",
+      "items": [
+        "Existing ACT-014/018/028/043 remain separate; no recovery/auth/account-tier gates closed here",
+        "Mac power, sleep, logout, daemon restart, internet loss and independent-storage restoration remain unproven availability drills",
+        "Existing hosting-plan commercial eligibility is outside this technical transition; no paid upgrade or commercial activation occurred"
+      ]
+    },
+    {
+      "classification": "NON-BLOCKING FOLLOW-UP",
+      "items": [
+        "Image Studio error was observed before any mutation; unchanged Media source retained, no unrelated repair attempted",
+        "This five-minute controlled observation is not continuous uptime/SLO evidence",
+        "No new Media creation, billing, publication, high load or unsafe provider fault tests performed"
+      ]
+    }
+  ],
+  "actionStatus": {
+    "ACT-044": "CLOSED — accepted private Mac artifact preserved",
+    "ACT-045": "CLOSED — synthetic lifetime plus controlled real final-ingress evidence",
+    "ACT-046": "CLOSED — explicit hosted identity/client/grant/cohort proof",
+    "ACT-047": "CLOSED — authorized Nova-only real-provider transition and retirement. Earlier whole-app Media/storage scope is superseded by retained Media placement; off-device hardware recovery remains a separate availability follow-up."
+  },
+  "rollback": "Contain Nova at tunnel ingress, preserve records, drain within 480 seconds, restore verified Mac image/configuration. Prior Vercel DNS is deny-only containment, never a second inference primary. Retain shared web recovery and additive schemas.",
+  "evidence": [
+    "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/target-before.json",
+    "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/tunnel-before.json",
+    "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/runtime-preparation.json",
+    "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/mac-preflight-http.json",
+    "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/cohort-grant.json",
+    "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/connect-config-applied.json",
+    "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/web-verification-03.json",
+    "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/controlled-observation.json",
+    "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/cutover-intent.json",
+    "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/cutover-route.json",
+    "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/drain-database.json",
+    "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/execution-correlation.json",
+    "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/operational-recovered.json",
+    "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/monitor-browser-authenticated.json",
+    "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/vercel-drain-http.json",
+    "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/vercel-firewall-intent.json",
+    "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/vercel-firewall-after.json",
+    "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/vercel-retirement-intent.json",
+    "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/vercel-retirement.json",
+    "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/pilot-removed.json",
+    "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/final-surface.json",
+    "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/operator-final-status.json",
+    "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/.galx-connect-source.json",
+    "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/provenance.json",
+    "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/artifact.json",
+    "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/operational-final.json",
+    "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/client-observations.json",
+    "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/provider-attempts.json",
+    "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/connect-tests.log",
+    "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/auth-tests.log",
+    "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/operator-tests.log",
+    "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/retirement-final-tests.log",
+    "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/db-test.log",
+    "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/connect-db-tests.log",
+    "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/refill-tests.log",
+    "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/relay-tests.log",
+    "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/package-boundary-tests.log",
+    "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/db-verify-final.log",
+    "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/refill-dry-run.log",
+    "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/refill-apply.log",
+    "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/mac-verification.log",
+    "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/recovery-stop.log",
+    "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/recovery-load.log",
+    "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/recovery-resume.log",
+    "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/monitor-restart.log",
+    "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/web-build-03.log",
+    "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/web-deploy-03.log",
+    "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/final-surface-first-observation.log",
+    "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/final-surface-asset-observation.log",
+    "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/browser-observations.json"
+  ],
+  "stop": "Transition complete; no public release or commercial activation."
+}

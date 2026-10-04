@@ -1,0 +1,49 @@
+{
+  "at": "2026-10-04T01:35:51.842Z",
+  "before": {
+    "id": "d81c745d26c0dfb33f79bbdb81686934",
+    "name": "nova.galx.ai",
+    "type": "CNAME",
+    "content": "a76166bfd6d0ea1e.vercel-dns-017.com",
+    "proxied": false,
+    "ttl": 300
+  },
+  "liveVersion": 15,
+  "rule": {
+    "path": "^/(v1/inference|\\.well-known/oauth-protected-resource)$",
+    "service": "http://host.docker.internal:17787",
+    "hostname": "nova.galx.ai",
+    "originRequest": {
+      "http2Origin": false,
+      "connectTimeout": 10,
+      "httpHostHeader": "nova.galx.ai",
+      "keepAliveTimeout": 30,
+      "keepAliveConnections": 10,
+      "disableChunkedEncoding": false
+    }
+  },
+  "image": "sha256:5157984bc06524aac0ca8fbf2051eebfe6f3b7994aa7d0793e8404c097289345",
+  "controlledWindowSeconds": 300,
+  "eligibility": "One existing account, explicit two-hour entitlement, first-party native client grant; no public enrollment",
+  "rollback": {
+    "dns": {
+      "id": "d81c745d26c0dfb33f79bbdb81686934",
+      "name": "nova.galx.ai",
+      "type": "CNAME",
+      "content": "a76166bfd6d0ea1e.vercel-dns-017.com",
+      "proxied": false,
+      "ttl": 300
+    },
+    "admission": "Prior Vercel route is deny-only, never another primary",
+    "automaticTriggers": [
+      "authorization bypass",
+      "credential or private-control exposure",
+      "replay or duplicate execution",
+      "revocation contract failure",
+      "state corruption",
+      "neutral provider failure",
+      "monitor ownership lost",
+      "three consecutive failed liveness probes"
+    ]
+  }
+}

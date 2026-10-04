@@ -1,0 +1,118 @@
+{
+  "classification": "private",
+  "observed_at": "2026-10-03T23:13:03.037Z",
+  "scope": "Observation evidence verification. No runtime implementation, deployed adapter or new candidate acceptance.",
+  "diagnostics": {
+    "cases_per_architecture": 6,
+    "architectures": [
+      "linux/amd64",
+      "linux/arm64"
+    ],
+    "runtime": "Node 22.23.2",
+    "builder": "Existing locked esbuild; bundled unchanged Nova inference.ts and contract.ts plus private diagnostic only",
+    "network": "Containers use --network none; only loopback HTTP is exercised.",
+    "pinned_images": {
+      "linux/amd64": "node@sha256:43aeff40f4afc22e83f7589a2f37e111cff5ca84529571f1c8415bcc5fcc21b2",
+      "linux/arm64": "node:22-alpine@sha256:c610fcdfb1d5b4740dd70c284ed3cb16bb857e0f7166196e36a5501df7a3aa32"
+    },
+    "reproduction": "Restore retained observe.ts to .relay/hobby-observation/observe.ts, bundle it with platform=node target=node22 format=esm and existing esbuild. Run that bundle in each pinned image with external network disabled and a separate writable /evidence directory. No ambient server environment, authority files or dependency tree is mounted into the container."
+  },
+  "checks": {
+    "documentation_validation": "passed; existing overdue actions retained",
+    "documentation_fixtures": 42,
+    "diff_check": "passed",
+    "evidence_integrity_failures": [],
+    "known_credential_scan": {
+      "files": 20,
+      "matching_files": [],
+      "scope": "Exact known private values and build canaries, excluding declared public build values. No universal secret-detection claim."
+    },
+    "preservation": {
+      "at": "2026-10-03T23:09:19.791Z",
+      "runtimeSourceFiles": 1886,
+      "sourceDelta": [],
+      "compiledFiles": 2291,
+      "compiledDelta": [],
+      "archiveSha256": "b11d853b80851b2ee978b5d0d0bb2cedb66ced423f545e91b44aeaf8c4a9e235"
+    }
+  },
+  "limits": [
+    "No new production build was run; prior artifact and compiled output were hash-checked and preserved.",
+    "No real account, database, provider, host reconfiguration or rollout.",
+    "Full-duration quiet stream, client parser, supervision and new-host authorization remain required implementation acceptance."
+  ],
+  "evidence": [
+    {
+      "path": "post-mortem/releases/2026-10-03-hobby-buffering-observation.json",
+      "sha256": "ae833740f458f2f0b3d73319adce45e3b681b58f12cdbe73658d4af98a9ac566"
+    },
+    {
+      "path": "post-mortem/releases/2026-10-03-hobby-buffering-observation-review.json",
+      "sha256": "1429918c611684685a8b1b66f452800951e68a9714334922aeaa8e68a0336e98"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hobby-observation/arm64/observation.log",
+      "sha256": "ae1b22ea7f6315c127731420387229f36bd81a30104eb0e0c5359e9f6a6197e8"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hobby-observation/arm64/result.json",
+      "sha256": "ae1b22ea7f6315c127731420387229f36bd81a30104eb0e0c5359e9f6a6197e8"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hobby-observation/bundle-inputs.json",
+      "sha256": "f566ab522f4e0d5dfe1c4c603efa06945c07f1ffe634406a15d49474a94afe51"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hobby-observation/cors-import-boundary.json",
+      "sha256": "f69d9b8455420596f0e3731400ea97eb19ab083de4977a49400e3e258346c7ee"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hobby-observation/cors-load.json",
+      "sha256": "67fc72321dd8712680151d59556cb2e8379838a01f0fe4e961041431f4d2e91b"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hobby-observation/diff-check.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hobby-observation/docs-check.log",
+      "sha256": "f162a399affa14c31ec4c6bd0e812d2ecd18d62bbf25b6b4db259d0f687577b7"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hobby-observation/docs-impact.log",
+      "sha256": "6ed2fc1c5cd4e16d46a4d688d654ba9407c74901ec6a71f8441e810c755544f3"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hobby-observation/docs-sync.log",
+      "sha256": "b3bb999758d64f8d8ee4357ee9c0033fb147e3fa2507d1ced90bcdcdbb0e6164"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hobby-observation/docs-tests.log",
+      "sha256": "3b0e81adc20e9edecd470fdfbd2fa8c40d0a76c7651d4fac4bfaa0db3ff3576b"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hobby-observation/host-metadata.json",
+      "sha256": "8bbe5416f3c771bf537f9f2d846258aa00da01eb41322e9ce09426ae7f4b4718"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hobby-observation/import-boundary.json",
+      "sha256": "82ace34178dc53a3df9abb6dd078926c67ef314b7f792e605f045febc8c80b8f"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hobby-observation/observation.log",
+      "sha256": "67a0f005f40a89caa20b35a6e628fbc02ccbcd6ba3da78fa0fe2f6d9af6c30d5"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hobby-observation/observe.ts",
+      "sha256": "b8c2cb8959f1c5ede9c5cefb1188b403905ae398d9e5bbc75bf170b3c6470b6c"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hobby-observation/preservation.json",
+      "sha256": "f4a0d175e40980df812b54b16349d7d9925d8fd65514174913a5d7327aa5072f"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hobby-observation/result.json",
+      "sha256": "67a0f005f40a89caa20b35a6e628fbc02ccbcd6ba3da78fa0fe2f6d9af6c30d5"
+    }
+  ]
+}

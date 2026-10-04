@@ -1,0 +1,445 @@
+{
+  "classification": "private",
+  "title": "Hosted Target Enablement Record",
+  "observed_at": "2026-10-03T21:22:40.267629+00:00",
+  "determination": "NOT READY \u2014 BLOCKERS REMAIN",
+  "scope": "ACT-044/045/046 together; target packaging and configuration authorized, rollout and real inference not authorized.",
+  "stop_condition": {
+    "triggered": true,
+    "authority": "User governing rule: stop and report if candidate code modification becomes necessary; do not silently create a new accepted candidate.",
+    "reason": "The observed Vercel Node hosting contract cannot certify cancellation plus durable terminal persistence for the unchanged candidate. Enabling disconnect notification permits reclamation of its unregistered asynchronous cleanup. Infrastructure-only ingress widening does not register application work.",
+    "actions_after_trigger": "Evidence retention, source/target readback, bounded existing regression checks and documentation only.",
+    "no_mutations": [
+      "accepted application source",
+      "accepted compiled candidate",
+      "hosted configuration",
+      "ingress or DNS",
+      "deployed images",
+      "database schema or records",
+      "existing accounts",
+      "grants or cohort access"
+    ],
+    "no_deployment": true,
+    "no_provider_inference": true
+  },
+  "target_observation": {
+    "at": "2026-10-03T21:19:27.888Z",
+    "project": {
+      "id": "prj_NmtiUenK2cf924eREKuCgiDS0uC4",
+      "nodeVersion": "22.x",
+      "resourceConfig": {
+        "fluid": true,
+        "functionDefaultRegions": [
+          "iad1"
+        ],
+        "buildMachineType": "basic",
+        "buildMachineSelection": "fixed"
+      },
+      "ssoProtection": {
+        "deploymentType": "all_except_custom_domains"
+      }
+    },
+    "plan": {
+      "plan": "hobby",
+      "status": "active"
+    },
+    "production": {
+      "id": "dpl_9FSaL3M6JffKDjaUHP98RhU3crzG",
+      "url": "galxai-204k0uq49-cardsortings-projects.vercel.app",
+      "readyState": "READY",
+      "createdAt": 1790441645794
+    },
+    "transport": {
+      "version": 3,
+      "ingress": [
+        {
+          "hostname": "images-service.galx.ai",
+          "path": "^/v1/images/(availability|generations)$",
+          "service": "http://host.docker.internal:13301"
+        },
+        {
+          "hostname": "relay.galx.ai",
+          "service": "http://host.docker.internal:3001"
+        },
+        {
+          "service": "http_status:404"
+        }
+      ]
+    },
+    "connect_configuration": [],
+    "actual_path": "Client -> proxied GALX hostname -> existing Vercel Node application -> configured images-service origin -> Cloudflare Tunnel path filter -> loopback Premium runtime -> server-owned provider path. Current path filter admits images only. Nova/Connect candidate is not installed.",
+    "inventory_authority": "post-mortem/releases/2026-10-03-controlled-rollout-preflight.json"
+  },
+  "ACT-044": {
+    "status": "REMAINS OPEN",
+    "mismatch_classification": [
+      "missing artifact",
+      "stale artifact",
+      "different packaging"
+    ],
+    "original_mismatch": "October 3 accepted Next.js output exists without a matching hosted Build Output package. Retained .vercel/output is dated August 24 and cannot stand in for it.",
+    "accepted_identity": {
+      "base_source_revision": "38a3cc48f32f5f404592109c8cae3ddac5fa6f61",
+      "source_state": "accepted uncommitted candidate over base revision; do not substitute HEAD alone",
+      "source": {
+        "manifestSha256": "aa7f5156d3110278e83699e8e073e4347974365911601096bc62e48ffd325d5c",
+        "files": 1886,
+        "changed": []
+      },
+      "compiled": {
+        "manifestSha256": "2d15ca60c7f2e6a9deca0ad759794e31b345360b52ebded5c2b53e87990d5c7c",
+        "files": 2291,
+        "changed": []
+      },
+      "next_build_id": "5dfhz5cUzQI8WbdZtDjra",
+      "dependency_lock_sha256": "17ec13ed2df5810416a9c52ab5cc772e15adcaec679bbafd9a2a61ac3b4742f1",
+      "route_source_sha256": "9de15a281c4baf66527705a1af059c0d90608afd4e5e9503365115e2f3e1dfec",
+      "route_compiled_sha256": "a2304195aa32fae7d952a086d3bc71da6dc7b68042b66476055543875d2adde1",
+      "existing_native_candidates": [
+        {
+          "tag": "galxai-relay-central:closure-clean-20261003",
+          "id": "sha256:a0a4a04390f3ebbdd114689ad6e469cc8b1ff6b2515aad380cb28538d0448523",
+          "architecture": "arm64",
+          "component": "central",
+          "repoDigests": [
+            "galxai-relay-central@sha256:a0a4a04390f3ebbdd114689ad6e469cc8b1ff6b2515aad380cb28538d0448523"
+          ],
+          "created": "2026-10-03T20:29:11.104750379Z",
+          "os": "linux",
+          "bytes": 71817470
+        },
+        {
+          "tag": "galxai-relay-premium:closure-clean-20261003",
+          "id": "sha256:def038ce77818ef7355392f656ad4cf858ddd2cdc534e9f2fc83069edbeaf075",
+          "architecture": "arm64",
+          "component": "runtime",
+          "pool": "premium",
+          "repoDigests": [
+            "galxai-relay-premium@sha256:def038ce77818ef7355392f656ad4cf858ddd2cdc534e9f2fc83069edbeaf075"
+          ],
+          "created": "2026-10-03T20:29:11.110571587Z",
+          "os": "linux",
+          "bytes": 71817539
+        },
+        {
+          "tag": "galxai-monitor-premium:closure-clean-20261003",
+          "id": "sha256:08b3ea12058826316509b9f69c444f6f71d5c5b01382df99e672884bc123908b",
+          "architecture": "arm64",
+          "component": "monitor",
+          "pool": "premium",
+          "repoDigests": [
+            "galxai-monitor-premium@sha256:08b3ea12058826316509b9f69c444f6f71d5c5b01382df99e672884bc123908b"
+          ],
+          "created": "2026-10-03T20:29:11.402759379Z",
+          "os": "linux",
+          "bytes": 89658655
+        }
+      ]
+    },
+    "build_provenance": "No hosted packaging/build was attempted after the lifecycle incompatibility triggered the governing stop. The diagnostic fixture transpiles only the unchanged Nova inference/contract modules into a test bundle; it is not a deployable application artifact.",
+    "build_inputs_and_architecture": "The preflight manifests and lock identify the accepted runtime payload. Full clean hosted input capture, pinned builder, Linux function architecture and packaging equivalence remain to be established; local ARM64 native images do not prove a Vercel function architecture.",
+    "expected_entrypoint": "Vercel Next.js Node function for /v1/inference, generated from the accepted route; no compatible hosted function package retained.",
+    "resulting_hosted_artifact": null,
+    "resulting_hosted_digest": null,
+    "equivalence_evidence": "All 1,886 frozen runtime-source files and 2,291 accepted compiled files match. This preserves the baseline and is not hosted artifact equivalence."
+  },
+  "ACT-045": {
+    "status": "REMAINS OPEN",
+    "original_incompatibility": "The actual tunnel rule only forwards /v1/images/(availability|generations). Text liveness/models discovery, chat submission, and per-job stream retrieval cannot traverse that origin.",
+    "additional_host_incompatibility": {
+      "cancellation": "The candidate has async terminal persistence in publicStream.cancel and in the abort/error path. It has no application-owned after/waitUntil registration before dispatch. Opting into host cancellation alone allows that persistence to be abandoned.",
+      "duration": "Current Hobby Fluid maximum = 300 s. Route maxDuration = 300 s; Nova AbortSignal deadline = 300,000 ms; relay wall deadline = 300,000 ms. No outer-host cleanup margin exists. This is a configuration/source bound comparison, not a measured 300-second hosted failure.",
+      "counterexample": "The same unmodified inference source persisted completed on success and unknown after cancellation in a surviving Node 22 process. Reclaiming an invocation when the async terminal write began left the synthetic durable record running. Dispatch count stayed one. See offline fixture limitations below."
+    },
+    "infrastructure_correction_applied": null,
+    "correction_required_but_not_applied": "Preserve existing image routes and add only the authenticated discovery/submission/job-read paths to the reviewed transport. That is insufficient alone: separately approve a host lifecycle adapter and a hosting budget exceeding the unchanged execution deadline plus bounded finalization. No plan purchase, host migration, route widening or retry configuration change was made.",
+    "requirements": [
+      {
+        "boundary": "public initiation",
+        "requirement": "HTTPS POST /v1/inference; opaque scoped bearer; application/json; Idempotency-Key 16\u2013128 safe characters; redirects never confer authority",
+        "evidence": "route, Connect configuration and invokeNova source; 26 existing Connect/Nova tests pass",
+        "hosted_verified": false
+      },
+      {
+        "boundary": "body",
+        "requirement": "10 s body read; 256,000 bytes; 128 messages; 96,000 content characters; maximum 4,096 requested output tokens",
+        "evidence": "unchanged readBody",
+        "hosted_verified": false
+      },
+      {
+        "boundary": "discovery",
+        "requirement": "Authenticated GET /health/live with /health fallback, then /v1/models; bounded 900 ms probes; no control or monitor port discovery",
+        "evidence": "RelayEndpointDiscovery; current tunnel rule does not forward these paths",
+        "hosted_verified": false
+      },
+      {
+        "boundary": "submission",
+        "requirement": "One authenticated POST /v1/chat/completions carrying server-side inference bearer, tenant and idempotency key; require 202 and original job identifier",
+        "evidence": "RelayChatTransport; nine transport tests pass",
+        "hosted_verified": false
+      },
+      {
+        "boundary": "stream",
+        "requirement": "GET /v1/jobs/{id}/stream on the same validated origin, SSE unbuffered with text/event-stream, propagate backpressure and disconnect; optional original receipt reader remains at its origin",
+        "evidence": "accepted transport and public projector; current ingress rejects the path",
+        "hosted_verified": false
+      },
+      {
+        "boundary": "deadlines",
+        "requirement": "45 s first-output and idle deadlines; 300 s execution wall deadline; hosting lifetime must accommodate bounded terminal persistence",
+        "evidence": "executor/transport source plus observed Hobby Fluid ceiling; no full-duration hosted probe",
+        "hosted_verified": false
+      },
+      {
+        "boundary": "cancellation / connection loss",
+        "requirement": "Abort retrieval and persist terminal unknown neutrally; no promise of upstream cancellation; keep the original execution identity",
+        "evidence": "persistent fixture succeeds; reclaimed invocation fixture misses terminal persistence",
+        "hosted_verified": false
+      },
+      {
+        "boundary": "completion / error",
+        "requirement": "Rebuild allowlisted SSE/JSON; require permitted finish_reason and DONE for success; truncated streams stay unknown; sanitize host-level failures as well",
+        "evidence": "Nova projector tests pass; no newly configured host error path",
+        "hosted_verified": false
+      },
+      {
+        "boundary": "duplicate",
+        "requirement": "Nova returns duplicate state without dispatch; runtime duplicate attaches to original execution; neither proxy nor SDK may replay an inference POST",
+        "evidence": "source and existing transport/service regression; complete hosted proxy chain not rehearsed",
+        "hosted_verified": false
+      }
+    ],
+    "verification_matrix": {
+      "success_stream": "PASS offline Nova fixture and existing transport/service tests; no hosted acceptance",
+      "cancel": "PASS persistent process; FAIL compatibility proof under modeled permitted invocation reclamation",
+      "lost_client_connection": "Host lifecycle incompatibility identified; actual hosted connection-loss test not run",
+      "deadline": "Existing first-output/idle/caller deadline tests pass; full host ceiling not exercised; zero cleanup budget is unresolved",
+      "provider_rejection_and_failure": "Existing synthetic runtime service checks pass, with explicit provider failure distinct from neutral interruption",
+      "duplicate": "Existing runtime/transport checks pass; hosted end-to-end attachment not exercised",
+      "unknown": "No replay in existing tests; terminal persistence cannot be certified on this host"
+    },
+    "automatic_replay_proof": "The application/SDK/transport remain single-dispatch and tests pass. No proof is claimed for the unconfigured full hosted inference path. A genuine unknown is not retried to obtain a successful demonstration."
+  },
+  "ACT-046": {
+    "status": "REMAINS OPEN",
+    "hosted_connect_configuration": "Readback still contains no GALX_CONNECT_* or GALX_NOVA_* settings. No domains, callbacks, flag or cohort access were configured after the stop.",
+    "required_names": [
+      "GALX_CONNECT_ENABLED",
+      "GALX_CONNECT_ORIGIN",
+      "GALX_CONNECT_CLIENTS",
+      "GALX_NOVA_RESOURCE",
+      "DATABASE_URL",
+      "NEXT_PUBLIC_SUPABASE_URL",
+      "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+      "SUPABASE_SERVICE_ROLE_KEY",
+      "GALX_PREMIUM_RELAY_URL",
+      "GALX_PREMIUM_RELAY_KEY"
+    ],
+    "cohort_mechanism": "Existing explicit private inference-access record (enabled and unexpired) AND an unrevoked client/resource/scope-bound grant, checked under the existing admission transaction. Login, Media subscription, endpoint knowledge and retained records are insufficient. No separate identity or automatic entitlement layer is needed.",
+    "configuration_decisions_pending": "Exact issuer/resource origins and first-party native/browser callbacks, alternate-host authority checks and closed activation must be retained and tested with the compatible artifact. Existing guide permits same issuer/resource origin; new hostnames are not inherently required.",
+    "positive_authorization": "No new hosted cohort eligibility probe. Current source retains explicit entitlement plus scoped authorization; existing isolated protocol tests pass. Historical real acceptance is not recertified by this run.",
+    "negative_authorization_matrix": [
+      {
+        "case": "ordinary GALX account",
+        "required": "DENIED",
+        "this_pass_hosted_evidence": "NOT EXERCISED \u2014 stopped before configuration/rehearsal"
+      },
+      {
+        "case": "authenticated non-cohort account",
+        "required": "DENIED",
+        "this_pass_hosted_evidence": "NOT EXERCISED \u2014 stopped before configuration/rehearsal"
+      },
+      {
+        "case": "cohort account without client authorization",
+        "required": "DENIED",
+        "this_pass_hosted_evidence": "NOT EXERCISED \u2014 stopped before configuration/rehearsal"
+      },
+      {
+        "case": "valid authorization without inference grant",
+        "required": "DENIED",
+        "this_pass_hosted_evidence": "NOT EXERCISED \u2014 stopped before configuration/rehearsal"
+      },
+      {
+        "case": "wrong client",
+        "required": "DENIED",
+        "this_pass_hosted_evidence": "NOT EXERCISED \u2014 stopped before configuration/rehearsal"
+      },
+      {
+        "case": "wrong audience",
+        "required": "DENIED",
+        "this_pass_hosted_evidence": "NOT EXERCISED \u2014 stopped before configuration/rehearsal"
+      },
+      {
+        "case": "revoked connection",
+        "required": "DENIED",
+        "this_pass_hosted_evidence": "NOT EXERCISED \u2014 stopped before configuration/rehearsal"
+      },
+      {
+        "case": "expired authorization",
+        "required": "DENIED",
+        "this_pass_hosted_evidence": "NOT EXERCISED \u2014 stopped before configuration/rehearsal"
+      }
+    ],
+    "revocation": "Design remains a current-grant database check with no cache delay after acknowledged disconnect. No new live measurement. 175 ms remains historical acceptance evidence.",
+    "media_independence": "No Media code, settings, galleries, Stars, publishing permissions or accounts changed. Hosted activation and alternate-origin isolation remain untested."
+  },
+  "integrated_rehearsal": {
+    "status": "NOT RUN \u2014 individual closure conditions not satisfied",
+    "artifact_used": "No hosted candidate. Diagnostic bundle only, containing frozen inference.ts and contract.ts plus fixture.",
+    "authorization_path": "Synthetic NovaAccess contract, not a real account or Connect/cohort integration.",
+    "transport_path": "In-memory Web Response stream inside network-disabled Linux Node 22 container, not Cloudflare or Vercel.",
+    "synthetic_outcomes": [
+      "completed in surviving process",
+      "unknown after awaited cancellation",
+      "running retained after modeled unprotected invocation teardown"
+    ],
+    "boundary_scan": "Synthetic public output omitted injected private provider/model/header fields. No web artifact or public asset was created. Existing compiled boundary scan is recorded separately."
+  },
+  "regression": {
+    "quota_refill": "Frozen migration/source unchanged; earlier 82-check arithmetic evidence preserved, not rerun.",
+    "neutral_outcomes_and_provider_failures": "43 existing service tests pass, including explicit provider evidence versus cancellation/deadline/transport loss.",
+    "terminal_unknown_and_no_replay": "26 Connect/Nova and nine transport tests pass in the existing persistent test environment. Newly demonstrated hosted terminal-persistence gap is not hidden by those passing checks.",
+    "duplicate_attachment": "Existing service/transport tests pass; no new real execution or hosted duplicate sent.",
+    "connect_authorization_and_revocation": "26 protocol/HTTP/SDK/Nova checks pass; live database/revocation acceptance not rerun and no authority reissued.",
+    "credential_isolation_private_evidence_browser_sanitization": "Existing service tests cover private monitor evidence and rebuilt public gateway/stream bodies; fixture output also sanitized. No provider credential loaded into fixture, source artifact or client.",
+    "production_build": "No rebuild after stop. Accepted compiled payload preserved and existing asset boundary guard rerun below; not a clean hosted artifact."
+  },
+  "smallest_followup_and_reacceptance": {
+    "why_unchanged_candidate_cannot_be_certified_on_observed_target": "A route-level disconnect flag cannot extend application-owned persistence. Leaving cancellation disabled does not demonstrate required disconnect propagation. Enabling it without host lifetime registration permits unfinished terminal writes. Equal host/application ceilings independently prevent a cleanup guarantee at maximum duration.",
+    "minimal_candidate_change": "A narrow Nova hosting lifecycle adapter: register a deferred terminal-lifecycle promise with Next after / host waitUntil before any dispatch; settle it on all completion, pre-admission, abort and error paths after existing terminal persistence. Expose/track that lifecycle without reclassifying outcomes, changing grants, replaying work or rewriting records. Expected affected boundary: src/app/v1/inference/route.ts and the completion contract in src/lib/nova/inference.ts.",
+    "separate_target_requirement": "Retain the accepted 300-second execution deadline and provide a larger host/function budget for bounded cleanup. Raising a plan limit alone does not supply the missing lifecycle registration. No purchase, deadline reduction or alternative-host migration is authorized by this stopped run.",
+    "invalidated_if_changed": [
+      "Frozen web source manifest and compiled manifest would no longer identify the new candidate",
+      "Hosted artifact provenance/equivalence must be established for the adapted candidate",
+      "Cancellation, deadline, finalization and public response acceptance must be rerun for that new payload"
+    ],
+    "preserved_historical_evidence": "The earlier real provider lifecycle, 175 ms revocation observation, quota correction and clean native monitor build remain dated evidence. They are neither erased nor promoted to hosted certification.",
+    "required_retests": [
+      "New lifecycle integration tests: host cancellation before and after stream start, teardown during terminal persistence, registered cleanup completion, full-duration deadline with cleanup margin, all deferred promises settle; no upstream replay.",
+      "npm run test:connect and npm run test:connect:db with isolated fixtures; include the full cohort authorization/expiry/reuse/revocation matrix.",
+      "npm run test:relay:services and node --import tsx --test scripts/test-relay-chat-transport.ts; preserve neutral interruptions, explicit failure accounting, duplicate attachment and private/public projection.",
+      "npm run test:auth:sessions and relevant public-boundary checks for the new route artifact; no Media/identity authority changes.",
+      "Clean pinned hosted packaging from newly approved source, production build, application-payload equivalence and private-asset/credential scan.",
+      "Synthetic complete hosted-path stream, cancel, loss, deadline, provider rejection/failure, duplicate and unknown probes before any real cohort opening."
+    ]
+  },
+  "verification": {
+    "offline_fixture": {
+      "runtime_image": "node@sha256:c610fcdfb1d5b4740dd70c284ed3cb16bb857e0f7166196e36a5501df7a3aa32",
+      "node": "22.23.2",
+      "architecture": "linux/arm64",
+      "network": "none",
+      "cases": 3,
+      "expected_incompatibility_reproduced": true,
+      "real_database": false,
+      "real_provider": false,
+      "hosting_emulation_limit": "Deliberate process reclamation models a permitted host action; it is not a live Vercel test or an x86 artifact proof."
+    },
+    "existing_checks": [
+      {
+        "command": "npm run test:connect",
+        "passed": 26,
+        "failed": 0
+      },
+      {
+        "command": "npm run test:relay:services",
+        "passed": 43,
+        "failed": 0
+      },
+      {
+        "command": "node --import tsx --test scripts/test-relay-chat-transport.ts",
+        "passed": 9,
+        "failed": 0
+      }
+    ],
+    "documentation_and_scan": {
+      "record": "post-mortem/releases/2026-10-03-hosted-target-enablement-verification.json",
+      "scope": "Documentation guards and scan of the preserved accepted build; no new production build after stop."
+    },
+    "fixture_reproduction": "From repository root, copy the retained lifetime-child.ts and lifetime-runner.mjs to .relay/target-enablement/. Bundle the child using esbuild with platform=node, target=node22, format=cjs (metafile retained); run the runner in the exact Node image with --network none, --read-only, fixture bind /fixture readonly and an empty writable /evidence directory. The resulting source manifest must still match the frozen candidate.",
+    "local_tooling_limit": "Homebrew Node 22 failed to start because an installed simdjson library was missing. No repair was attempted. The fixture instead used the already retained digest-pinned Linux Node 22 image; ordinary repository regressions used the existing Node 26.8.1 test runner."
+  },
+  "remaining_findings": {
+    "BLOCKS CONTROLLED ROLLOUT": [
+      "ACT-044 matching hosted artifact missing",
+      "ACT-045 route reachability plus host cancellation/finalization and duration incompatibility",
+      "ACT-046 hosted Connect configuration and cohort enforcement unestablished"
+    ],
+    "BLOCKS PUBLIC RELEASE": [
+      "ACT-014",
+      "ACT-018",
+      "ACT-028",
+      "ACT-043 \u2014 unchanged and not expanded"
+    ],
+    "NON-BLOCKING FOLLOW-UP": [
+      "Existing nine follow-ups unchanged",
+      "Local Homebrew Node 22 dynamic-library repair, if needed for future local work; pinned isolated Node 22 fixture works"
+    ]
+  },
+  "evidence": [
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-target-enablement/target-observation.json",
+      "sha256": "82336d96ce4262a893f27837b2d7b671e29857b1a64f948669a5ea930a43d158"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-target-enablement/lifetime-reproduction.json",
+      "sha256": "7bffea7233b5c06d76a2db6e1a2738fde2c1b6d3e100dc6eaf9da332b1efeb41"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-target-enablement/lifetime-child.ts",
+      "sha256": "2c6fff98b7228f0b29acfd7de45463118f05fa5af39226f6edecf72bb3d65a43"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-target-enablement/lifetime-runner.mjs",
+      "sha256": "e9a5f03f3568ed47dae30cb9335262590432e0e64453a0865138996d93649f81"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-target-enablement/lifetime-metafile.json",
+      "sha256": "4ed7845e4f202be57537b589fc445d7142c055f11c2d39beae93437b349baf53"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-target-enablement/connect-tests.log",
+      "sha256": "c1756d2e94f8204cb0d85f3d41570b946966035b18454bf00ec31c89080948e7"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-target-enablement/relay-services-tests.log",
+      "sha256": "47eb1b5dc8c9abde3d738c1311fc65ce6eaf95d0f9b12be30014fa74ef64a4ea"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-03-hosted-target-enablement/transport-tests.log",
+      "sha256": "4da9adb0d9f6724526122a56c99246737170a717af32c6ed207a629a53c647ca"
+    }
+  ],
+  "source_references": [
+    "src/app/v1/inference/route.ts",
+    "src/lib/nova/inference.ts",
+    "src/lib/nova/executor.ts",
+    "src/lib/supabase/repositories/ConnectRepository.ts",
+    "src/core/router/adapters/RelayChatTransport.ts",
+    "src/core/router/adapters/RelayEndpointDiscovery.ts",
+    "vercel.json"
+  ],
+  "external_references": [
+    {
+      "url": "https://vercel.com/docs/functions/functions-api-reference#cancel-requests",
+      "observed": "2026-10-03",
+      "supports": "Cancellation is opt-in; work required after cancellation must have host lifetime registration."
+    },
+    {
+      "url": "https://vercel.com/docs/functions/limitations#max-duration",
+      "observed": "2026-10-03",
+      "supports": "Fluid Hobby function duration is capped at 300 seconds, including streamed response lifetime."
+    },
+    {
+      "url": "https://developers.cloudflare.com/cloudflare-one/troubleshooting/tunnel/",
+      "observed": "2026-10-03",
+      "supports": "Tunnel streaming requires the proper SSE content type; no corrected tunnel was exercised."
+    }
+  ],
+  "final_classification": {
+    "ACT-044": "REMAINS OPEN",
+    "ACT-045": "REMAINS OPEN",
+    "ACT-046": "REMAINS OPEN"
+  },
+  "next_operation": "Stop. Report the scoped lifecycle incompatibility and obtain a separate direction for candidate adaptation/target lifetime before resuming enablement. Successful local regressions confer no rollout authorization."
+}

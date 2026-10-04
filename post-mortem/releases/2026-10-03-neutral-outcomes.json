@@ -1,0 +1,322 @@
+{
+  "classification": "private",
+  "observed_at": "2026-10-03T20:16:34.196171+00:00",
+  "status": "installed_local_correction_verified",
+  "base_revision": "38a3cc48f32f5f404592109c8cae3ddac5fa6f61",
+  "scope": "Existing Premium installation, one existing provider account, unchanged Connect/Nova authorization contract. This follow-up corrects provider evidence and recovery controls after the bounded real Connect acceptance; it does not repeat OAuth or add a product surface.",
+  "prior_acceptance": "post-mortem/releases/2026-10-03-connect-provider-recovery.json",
+  "incident": "INC-20261003-OUTCOMES",
+  "semantics": {
+    "availability": "Unknown is the default; credential freshness and relay confirmation do not establish continuous provider health.",
+    "positive": "Confirmed provider completion settles success=true under the existing fenced central health rules.",
+    "negative": "An attributable provider availability/access failure settles success=false. Request/model validation alone does not establish account failure.",
+    "neutral": "Cancellation, deadlines, lost transport, local admission/authorization failure and restart recovery settle success=null without modifying success/failure history.",
+    "terminal": "Unknown remains terminal. Settlement retry is permitted; execution replay is not.",
+    "recovery_controls": "Failure history is advisory; reconnect remains under its existing registration authority. Enable separately requires current credentials, fresh relay/control state, execution policy and no current access block or future cooldown."
+  },
+  "execution_migration": {
+    "version": "20261003195250",
+    "up": "deploy/relay-execution/supabase/migrations/20261003195250_relay_execution_neutral_outcomes.sql",
+    "down": "deploy/relay-execution/supabase/rollbacks/20261003195250_relay_execution_neutral_outcomes.down.sql",
+    "preflight": "Matching installation, exact prior function, only original execution migration, 30 retained records and zero active/unsettled records.",
+    "apply": "Execution-only transaction with identity/history/drain guards, short lock/statement limits and migration-history insertion. No primary database migration or historical backfill.",
+    "privileges": "Pinned search_path and existing definer/role boundary preserved. Runtime direct table reads and anonymous execution remain denied.",
+    "advisors": "Execution project security advisors reported no issues before and after.",
+    "final": {
+      "active": 0,
+      "neutral_unknown": 1,
+      "retained_records": 31,
+      "unsettled": 0
+    },
+    "rollback": "DOWN restores the original function while retaining rows. Coordinate with a runtime execution hold; old runtime code coerces neutral outcomes into failures. Prefer forward repair."
+  },
+  "installed_images": {
+    "images": [
+      {
+        "tag": "galxai-relay-central:connections-20260916",
+        "id": "sha256:e7a4c80fa704d4abb7b423a48a66afad4d809c70dd5df3592eb772e823284bb3",
+        "architecture": "arm64",
+        "component": "central"
+      },
+      {
+        "tag": "galxai-relay-premium:neutral-outcomes-20261003",
+        "id": "sha256:a1feb16ef31ae0f97cc231b85d06578496335d79221d13e36a4c40b8524a545f",
+        "architecture": "arm64",
+        "component": "runtime",
+        "pool": "premium"
+      },
+      {
+        "tag": "galxai-monitor-premium:neutral-outcomes-20261003-r3",
+        "id": "sha256:0ab24b83ce3f2536f88b3994a716671d7b87495ebc5bdb90c5cafa3a50aa05ed",
+        "architecture": "arm64",
+        "component": "monitor",
+        "pool": "premium"
+      }
+    ]
+  },
+  "rollout": {
+    "central": "Unchanged installed image and primary schema.",
+    "runtime": "Reviewed new image installed through existing local launcher and ownership fence.",
+    "monitor": "Retained inspected dependency image plus matching current server bundle and three static assets; new pinned image verified before final acceptance.",
+    "host": "Private authenticated ownership read replaces reliance on omitted browser fields. Keep-online supervisor reloaded without stopping the serving stack.",
+    "credentials": "Existing provider sign-in/desktop/account retained. No credential copies, reset, replacement or cached-session deletion.",
+    "retention": "Original images and deployment identity retained locally; prior terminal records not rewritten."
+  },
+  "real_provider_probe": {
+    "at": "2026-10-03T20:03:40.131Z",
+    "operation": "16185be9-8106-456f-9033-d44190aaca98",
+    "requestKey": "f36d8b3760f0affac699dd6d686338293cb38b54d25da0f4d1df77b30143d757",
+    "dispatches": 1,
+    "admissionStatus": 202,
+    "executionId": "job_mustkz9m_d0c80026",
+    "streamStatus": 200,
+    "observedText": true,
+    "cancelStatus": 200,
+    "terminal": {
+      "state": "unknown",
+      "success": null,
+      "settled": true,
+      "executionId": "job_mustkz9m_d0c80026"
+    },
+    "priorRecordsUnchanged": true,
+    "duplicateStatus": 202,
+    "sameExecutionAfterDuplicate": true,
+    "interpretation": "One initial generation dispatch streamed real provider text. Explicit cancellation retained unknown with neutral evidence. A deliberate duplicate POST returned 202 and the original execution; no second execution/provider attempt was created.",
+    "counter_before": 1,
+    "counter_after": 1,
+    "previous_acceptance_records_compared": 4,
+    "credential_boundary": "Server harness used existing private runtime authority in memory. It did not receive a provider API key; no credentials or raw provider response are retained here."
+  },
+  "final_runtime": {
+    "observed_at": "2026-10-03T20:12:14.664Z",
+    "readiness_http": 200,
+    "relay_fresh": true,
+    "browser_exposes_epoch": false,
+    "cohort_account": {
+      "state": "enabled",
+      "connectionState": "connected",
+      "applied": true,
+      "failures": 1
+    },
+    "active": 0,
+    "unsettled": 0
+  },
+  "browser_verification": {
+    "surface": "Installed operator monitor, original existing account tab; desktop and 390x844 viewport.",
+    "result": "Connected, Availability unknown, current sign-in details and enabled Reconnect account action. No horizontal overflow or browser console errors observed. Temporary viewport override reset.",
+    "scope": "Actual provider account has one retained failure. Six-failure recovery eligibility, expiry, revocation, cooldown and operator holds are covered by model/HTTP fixtures without manufacturing live failures."
+  },
+  "verification": {
+    "npm run test:relay:services": {
+      "result": "43 passed; real local WebSocket engine completion/error/loss, cancellation and deadline fixture plus service isolation.",
+      "local_log": "/tmp/galx-unknown-services.log",
+      "sha256": "cc03291e4440b19854f23de6dfed02ea575a06c02ab25db852588cb36800d9bd"
+    },
+    "npm run test:relay:connection": {
+      "result": "51 passed; final monitor copy was separately retested.",
+      "local_log": "/tmp/galx-unknown-connections.log",
+      "sha256": "17d32c68b27c988c88a6d53b62c223a651b73fa8ea52bdc16cebfddc35de68e5"
+    },
+    "npm run test:connect": {
+      "result": "26 passed; scoped credentials, response allowlists and honest outcomes.",
+      "local_log": "/tmp/galx-unknown-connect.log",
+      "sha256": "630f386da87ef2a100842e8c997d078c02a6a68f6189a8970a4c1edd76132b19"
+    },
+    "npm run test:cooldown": {
+      "result": "23 passed; bounded capacity, uncertainty and continuation controls.",
+      "local_log": "/tmp/galx-unknown-cooldown.log",
+      "sha256": "2e09071909dfdca9c5497148495959fc15b96aad9255257694edf73b2c8cab4d"
+    },
+    "npm run test:relay:authorization-db": {
+      "result": "111 central authorization, 70 connection and 43 execution checks passed. Separate disposable databases; UP/DOWN retention and privileges tested.",
+      "local_log": "/tmp/galx-unknown-auth-db.log",
+      "sha256": "0b3309a8a7249debba13d142d6d0d6f596f72ed4ed8d1a49754a7113be1c72f6"
+    },
+    "npm run db:test": {
+      "result": "94 passed in the isolated primary-database fixture.",
+      "local_log": "/tmp/galx-unknown-general-db.log",
+      "sha256": "38a6eabcc2b88fb495be0f69d90c64224080ad2fda2a42e2336db3eddfa88705"
+    },
+    "npm run db:verify": {
+      "result": "158 primary migration pairs passed static verification; the execution pair was tested separately.",
+      "local_log": "/tmp/galx-unknown-db-verify.log",
+      "sha256": "097d8a28c4779fa96cd8389c563cedd2d1dbfd5f41384d1fc04be041e8b76333"
+    },
+    "npm run build": {
+      "result": "Passed type/production compilation and 157 pages. Later edits were monitor assets, host launcher, tests and private documentation; compiled application/runtime source unchanged.",
+      "local_log": "/tmp/galx-unknown-build.log",
+      "sha256": "3bb5cf564766180aad15a939ed7c50ffa5c4b67fde742386a39c6be6b31a0373"
+    },
+    "npm run docs:check:build": {
+      "result": "538 compiled browser/rendered assets passed selected private-marker checks before final documentation reconciliation. Not a scan of every live hosted surface.",
+      "local_log": "/tmp/galx-unknown-boundary.log",
+      "sha256": "3009476129ce3989e60e77084f338b004b4160646f1b2b9672080b0d70d9cb5d"
+    },
+    "focused public/transport/image/health regressions": {
+      "result": "44 passed: test-relay-hardening, test-relay-chat-transport, test-image-retry-contract, test-image-admission-errors, test-pool-health-evidence.",
+      "local_log": "/tmp/galx-unknown-boundary-regressions.log",
+      "sha256": "97fd70f356bd016a07a3c7bf7f2f6fa83302360588c3456153a475f1af6f0657"
+    },
+    "final monitor model": {
+      "result": "9 passed on final copy/control semantics.",
+      "local_log": "/tmp/galx-unknown-monitor-final.log",
+      "sha256": "d1ef124f15c3b05a9e7c95a5bad2edde77eb3ea2a5c027090fb3f550b35721fb"
+    },
+    "npm run test:relay:access": {
+      "result": "6 passed; private ownership reader rejects missing/foreign authority.",
+      "local_log": "/tmp/galx-unknown-host-access.log",
+      "sha256": "5162d4d6113d4c691b4ffe0801260766bc2787601159d3a00d5e5e906825acd8"
+    },
+    "npm run test:relay:local-supervisor": {
+      "result": "5 passed; bounded recovery and fixed categories.",
+      "local_log": "/tmp/galx-unknown-supervisor.log",
+      "sha256": "51c70137bb382ce5851d9e0fb45233574be8313ae82dc2e45094d283128122c9"
+    },
+    "npm run verify:relay:service-images": {
+      "result": "32 checks passed for the final three-image candidate manifest.",
+      "local_log": "/tmp/galx-unknown-images-verify-final.log",
+      "sha256": "8f4327c38de7837b6409f79dd93e19a122c09a20d88bc37b388c10114378cd27"
+    },
+    "npm run relay:local -- verify": {
+      "result": "30 installed checks passed: image identities, host/VM/container isolation, role enforcement, browser field allowlist and private handoff evidence.",
+      "local_log": "/tmp/galx-unknown-installed-verification-final.log",
+      "sha256": "82f2ba8dad6d06527a56376b71bc42654cfa079d07936738752f872b99e00676"
+    },
+    "execution security advisors": {
+      "result": "No issues found.",
+      "local_log": "/tmp/galx-unknown-advisors-final-cli.log",
+      "sha256": "5e90e921eea538117e5569ccc5f1255165bba1e3f0a0d79654adeddac9c129cb"
+    }
+  },
+  "failures_and_modifications": [
+    {
+      "finding": "Non-success boolean coercion manufactured provider failures.",
+      "correction": "Nullable settlement through runtime, durable function and central release; explicit attribution of provider negative evidence."
+    },
+    {
+      "finding": "Monitor reported healthy default metadata and treated attention as an enable veto.",
+      "correction": "Unknown availability copy, request-status labels and separate enable authority; historical failures stay retained."
+    },
+    {
+      "finding": "Initial assets-only monitor candidate did not match its older server snapshot.",
+      "correction": "Rebuilt on retained dependencies with the matching reviewed server bundle and UI, then verified installed state."
+    },
+    {
+      "finding": "The current sanitized monitor DTO omits private fields expected by the old launcher.",
+      "correction": "Host administrator reads only needed ownership evidence through central control; browser DTO remains allowlisted."
+    },
+    {
+      "finding": "Older connection fixture attempted DELETE with a role that has no DELETE privilege.",
+      "correction": "Assert denied deletion and retained account/desktop identity. No production grant expansion."
+    },
+    {
+      "finding": "Expanded fixture exposed a pre-existing fractional-refill rounding constraint failure.",
+      "correction": "ACT-041 remains open. Exact per-millisecond refill isolates the new settlement assertions; no production constraint or quota policy weakened."
+    },
+    {
+      "finding": "Pinned Alpine docker-cli package is no longer served for clean monitor builds.",
+      "correction": "ACT-042 remains open. This supervised local update uses retained inspected dependencies, not an unreviewed package upgrade."
+    }
+  ],
+  "warning_classification": [
+    {
+      "id": "ACT-037",
+      "classification": "NON-BLOCKING / DOCUMENTED",
+      "rationale": "Archive layout is outside the Connect text-inference cohort. Hosted layout acceptance remains open."
+    },
+    {
+      "id": "ACT-001",
+      "classification": "BLOCKS CONTROLLED DEPLOYMENT",
+      "rationale": "Hosted storage/deployment inventory must be checked before a Vercel release. It does not block the supervised local environment."
+    },
+    {
+      "id": "ACT-018",
+      "classification": "BLOCKS PUBLIC RELEASE",
+      "rationale": "Owner-Mac restart, recovery-storage and unattended recovery drills remain incomplete. A supervised cohort does not prove unattended public availability."
+    },
+    {
+      "id": "ACT-005",
+      "classification": "NON-BLOCKING / DOCUMENTED",
+      "rationale": "Image payload retention is independent of this text-only contract. No image records or cleanup policy changed."
+    },
+    {
+      "id": "ACT-006",
+      "classification": "NON-BLOCKING / DOCUMENTED",
+      "rationale": "The unrelated administrator credential audit stays open. Connect consent uses verified ordinary account authority, while inference uses its own grant."
+    },
+    {
+      "id": "ACT-008",
+      "classification": "NON-BLOCKING / DOCUMENTED",
+      "rationale": "Ongoing documentation maintenance is addressed for the changed domains in this pass; the ongoing action is not closed or rescheduled."
+    },
+    {
+      "id": "ACT-014",
+      "classification": "BLOCKS PUBLIC RELEASE",
+      "rationale": "Broader sensitive-action/device-grant acceptance remains incomplete. Legacy elevation stays closed and is not used by this cohort."
+    },
+    {
+      "id": "ACT-015",
+      "classification": "NON-BLOCKING / DOCUMENTED",
+      "rationale": "The earlier nonreproduced profile observation remains monitored. Current real-account entry succeeded; no cached identity fallback was added."
+    },
+    {
+      "id": "ACT-016",
+      "classification": "NON-BLOCKING / DOCUMENTED",
+      "rationale": "The original Images/Sites render-recovery matrix is outside this acceptance path. Account/media regressions are retained separately."
+    },
+    {
+      "id": "ACT-020",
+      "classification": "NON-BLOCKING / DOCUMENTED",
+      "rationale": "Signed-in image generation/library/download qualification is separate from bounded Connect text inference."
+    },
+    {
+      "id": "ACT-025",
+      "classification": "NON-BLOCKING / DOCUMENTED",
+      "rationale": "Legacy continuation/caller rollout is not invoked by the single-submit SDK. Provider-enforced token spending caps remain unproven; local output/concurrency limits are not represented as such caps."
+    },
+    {
+      "id": "ACT-028",
+      "classification": "BLOCKS PUBLIC RELEASE",
+      "rationale": "The full hosted account-switch/history/failed-revocation and email/provider callback matrix remains incomplete. Local Google entry is narrower evidence."
+    },
+    {
+      "id": "ACT-032",
+      "classification": "NON-BLOCKING / DOCUMENTED",
+      "rationale": "The inactive Star cohort and image qualification remain untouched; no replay, activation or population work is authorized by this pass."
+    }
+  ],
+  "new_followups": [
+    {
+      "id": "ACT-041",
+      "classification": "BLOCKS CONTROLLED DEPLOYMENT",
+      "scope": "Wider rollout beyond the demonstrated supervised cohort requires reproducing and correcting the existing admission/refill edge; current admission remains fail-closed."
+    },
+    {
+      "id": "ACT-042",
+      "classification": "BLOCKS CONTROLLED DEPLOYMENT",
+      "scope": "A new clean environment requires a reproducible monitor build. The already installed retained-image correction is verified."
+    }
+  ],
+  "revocation": {
+    "previous_max_observed_ms": 175,
+    "designed_policy": "Reuse the exact admission/revocation policy and timing limitations in the prior acceptance record. This correction does not alter Connect grants or repeat its lifecycle.",
+    "refresh_restores_revoked_access": false,
+    "prior_independent_client_and_media_usable": true
+  },
+  "limits": [
+    "Supervised existing local installation accepted; hosted Connect remains undeployed and ACT-001 still gates hosted rollout.",
+    "No new OAuth grant, entitlement, provider account or public enrollment was created by this correction.",
+    "Real cancellation verified. Executor deadlines and transport failures were exercised in the local engine fixture, not forcibly induced across the live provider.",
+    "Existing unknown and completed records were preserved. Historical false evidence was not backfilled or reset.",
+    "Provider credentials stayed server-side; selected tests/scans and observed responses are bounded evidence, not a universal security certification.",
+    "Original thirteen prevention-warning statuses/deadlines unchanged; ACT-041 and ACT-042 remain open.",
+    "Temporary synthetic monitor server was stopped; provider/monitor services remain running."
+  ],
+  "readiness": {
+    "existing_supervised_local_installation": true,
+    "new_clean_environment": false,
+    "controlled_hosted_deployment": false,
+    "public_launch": false
+  },
+  "documentation_verification": "Final source/guide review and docs checks are recorded as a later append-only incident verification event."
+}

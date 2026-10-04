@@ -3,9 +3,12 @@
 <!-- docs-scope: current-guide -->
 
 GALX has retired Developer Access as a public subscription and self-service
-product. The inference gateway, API request handling, API-key authentication,
-metering, accounting, quota reservation, scheduling, reliability controls, and
-administrative records remain operational. The change removes the public
+product. Private API-key authority, metering, accounting, quota reservation and
+administrative records remain operational within their assigned deployment.
+The [Nova hosting transition](../runbooks/nova-hosting-transition.md) retires
+Vercel text/completion/run/embedding and compute-queue entry points, including
+operator calls. Nova now accepts only its scoped Connect contract on the Mac;
+existing private developer credentials are not translated into Connect grants. The change removes the public
 obligation to accept arbitrary developer demand; it does not roll back the
 machinery.
 
@@ -18,10 +21,16 @@ machinery.
 | Authorized administrator | Review a bounded cohort, provision credentials, allocate, meter, and revoke | `/admin` |
 | Approved private integration | Call the assigned API scope within its allocation | API base URL |
 
-There is no public route, checkout, enrollment form, waitlist, application
+For retired Developer Access, there is no public route, checkout, enrollment form, waitlist, application
 flow, automatic key issuance, upgrade path, or public inference price sheet.
 Protected page requests return a generic not-found response. Do not add a
 replacement public application or waitlist without a separate product decision.
+
+The October 3 [Connect decision](../adr/0165-galx-connect-nova-boundaries.md)
+introduces a supported-application consent path with its own account/grant
+checks on exact preview-exempt routes. It does not reopen private developer
+credentials, allocations or enrollment. Existing Developer Access is not
+automatically converted to Connect entitlement. See [Connect operations](galx-connect.md).
 
 ## Private access lifecycle
 
@@ -48,9 +57,10 @@ Private access is always:
 
 ## Preserved infrastructure
 
-The retirement is a distribution change, not an infrastructure rollback. Keep
-the following available to GALX products, internal systems, experiments, and
-explicitly authorized private integrations:
+Developer Access product retirement preserves the following shared authorities
+for GALX products and explicitly authorized integrations where their deployment
+still supports them. This does not reopen the separately retired Vercel inference
+or queue paths:
 
 - gateway endpoints and request handling;
 - API-key verification, scopes, expiry, rotation, and revocation;
