@@ -84,6 +84,30 @@ export type GalxAccountProfileStatus = 'active' | 'suspended' | 'archived';
 export interface Database {
   private: {
     Tables: {
+      galx_inference_access: {
+        Row: { user_id: string; enabled: boolean; valid_until: string; updated_at: string };
+        Insert: { user_id: string; enabled?: boolean; valid_until: string }; Update: { enabled?: boolean; valid_until?: string; updated_at?: string }; Relationships: [];
+      };
+      galx_connect_requests: {
+        Row: { id: string; client_id: string; redirect_uri: string; resource: string; state: string; challenge: string; browser_hash: string; created_at: string; expires_at: string; decided_at: string | null };
+        Insert: { id: string; client_id: string; redirect_uri: string; resource: string; state: string; challenge: string; browser_hash: string }; Update: { decided_at?: string }; Relationships: [];
+      };
+      galx_connect_grants: {
+        Row: { id: string; user_id: string; client_id: string; resource: string; scope: string; created_at: string; revoked_at: string | null };
+        Insert: { id: string; user_id: string; client_id: string; resource: string }; Update: { revoked_at?: string }; Relationships: [];
+      };
+      galx_connect_codes: {
+        Row: { code_hash: string; grant_id: string; redirect_uri: string; challenge: string; expires_at: string; consumed_at: string | null };
+        Insert: { code_hash: string; grant_id: string; redirect_uri: string; challenge: string }; Update: { consumed_at?: string }; Relationships: [];
+      };
+      galx_connect_tokens: {
+        Row: { access_hash: string; refresh_hash: string; grant_id: string; expires_at: string; refresh_expires_at: string; consumed_at: string | null };
+        Insert: { access_hash: string; refresh_hash: string; grant_id: string; refresh_expires_at?: string }; Update: { consumed_at?: string }; Relationships: [];
+      };
+      galx_nova_requests: {
+        Row: { id: string; grant_id: string; user_id: string; request_key: string; fingerprint: string; state: 'running' | 'completed' | 'not_accepted' | 'unknown'; created_at: string; lease_until: string };
+        Insert: { id: string; grant_id: string; user_id: string; request_key: string; fingerprint: string }; Update: { state?: 'completed' | 'not_accepted' | 'unknown' }; Relationships: [];
+      };
       galx_star_public_identities: {
         Row: { actor_id:string; handle:string; display_name:string; bio:string };
         Insert: { actor_id:string; handle:string; display_name:string; bio:string }; Update: {handle?:string;display_name?:string;bio?:string}; Relationships: [];
@@ -749,6 +773,8 @@ export interface Database {
           ewma_latency_p95_ms: number;
           hydraulic_headroom_score: number;
           circuit_state: string;
+          token_refill_numerator: number | null;
+          request_refill_numerator: number | null;
           token_refill_remainder: number;
           request_refill_remainder: number;
           created_at_ms: number;
@@ -802,6 +828,8 @@ export interface Database {
           ewma_latency_p95_ms?: number;
           hydraulic_headroom_score?: number;
           circuit_state?: string;
+          token_refill_numerator?: number | null;
+          request_refill_numerator?: number | null;
           token_refill_remainder?: number;
           request_refill_remainder?: number;
           created_at_ms: number;
@@ -855,6 +883,8 @@ export interface Database {
           ewma_latency_p95_ms?: number;
           hydraulic_headroom_score?: number;
           circuit_state?: string;
+          token_refill_numerator?: number | null;
+          request_refill_numerator?: number | null;
           token_refill_remainder?: number;
           request_refill_remainder?: number;
           created_at_ms?: number;

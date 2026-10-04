@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import type { CookieOptions } from '@supabase/ssr';
+import { canonicalRequestOrigin } from '../security/request-origin';
 export type SessionCookie = { name: string; value: string; options: CookieOptions };
 
 /** Propagate only SDK cookie mutations onto an application-owned response. */
@@ -48,11 +49,12 @@ export function sessionBearer(request: Request): string | undefined {
 /** A bearer credential may be used by a CLI; ambient browser cookies require same-origin intent. */
 export function requireSessionMutation(request: Request) {
   const origin = request.headers.get('origin');
-  if ((origin !== null && origin !== new URL(request.url).origin) || ['cross-site', 'same-site'].includes(request.headers.get('sec-fetch-site') || '')) throw new SessionAccessError(403);
-  if (!sessionBearer(request) && origin !== new URL(request.url).origin && request.headers.get('sec-fetch-site') !== 'same-origin') throw new SessionAccessError(403);
+  const expected = canonicalRequestOrigin(request);
+  if (!expected || (origin !== null && origin !== expected) || ['cross-site', 'same-site'].includes(request.headers.get('sec-fetch-site') || '')) throw new SessionAccessError(403);
+  if (!sessionBearer(request) && origin !== expected && request.headers.get('sec-fetch-site') !== 'same-origin') throw new SessionAccessError(403);
 }
 export function clearSessionCookies(request: NextRequest, response: NextResponse) {
   const names = new Set(['galx_session', 'galx_user_role', 'galx_logout_pending', ...request.cookies.getAll().map(c => c.name).filter(name => /^sb-.+-auth-token(?:\.\d+|-code-verifier)?$/.test(name))]);
-  for (const name of names) response.cookies.set(name, '', { path: '/', maxAge: 0, sameSite: 'lax', secure: request.nextUrl.protocol === 'https:', httpOnly: name.startsWith('galx_') && name !== 'galx_logout_pending' });
+  for (const name of names) response.cookies.set(name, '', { path: '/', maxAge: 0, sameSite: 'lax', secure: canonicalRequestOrigin(request).startsWith('https:'), httpOnly: name.startsWith('galx_') && name !== 'galx_logout_pending' });
   return response;
 }

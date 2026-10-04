@@ -7,6 +7,10 @@
   "module": "./src/sdk/index.ts",
   "types": "./src/sdk/index.ts",
   "exports": {
+    "./connect": {
+      "types": "./src/sdk/connect.ts",
+      "default": "./src/sdk/connect.ts"
+    },
     ".": {
       "types": "./src/sdk/index.ts",
       "default": "./src/sdk/index.ts"
@@ -261,6 +265,8 @@
     "stripe:trigger:invoice": "stripe trigger invoice.payment_succeeded",
     "test:stripe": "tsx scripts/test-stripe-pricing-strategy.ts",
     "test:billing:lifecycle": "node --import tsx --test scripts/test-billing-lifecycle.ts scripts/test-billing-navigation.ts scripts/test-billing-public-boundary.ts scripts/test-stripe-webhook-target.ts && node --import tsx scripts/test-stripe-webhook-endpoint.ts",
+    "test:connect": "node --import tsx --test scripts/test-connect.ts scripts/test-nova.ts scripts/test-connect-sdk.ts scripts/test-connect-http.ts scripts/test-request-origin.ts scripts/test-inference-client-buffer.ts",
+    "test:connect:db": "node --import tsx scripts/run-supabase-integration.ts --connect",
     "test:orbit": "node --import tsx --test scripts/test-orbit.ts",
     "test:router": "tsx scripts/validate-galxai-router.ts",
     "test:relay:image": "node --import tsx scripts/run-supabase-integration.ts --image-assets",
@@ -410,7 +416,9 @@
     "test:relay:queue": "node --import tsx --test scripts/test-relay-pool-queue.ts",
     "test:relay:activation-db": "node --import tsx scripts/run-supabase-integration.ts --relay-activation",
     "test:relay:authorization-db": "tsx scripts/run-supabase-integration.ts --relay-authorization",
-    "verify:relay:monitors": "tsx scripts/verify-relay-pool-monitor.ts"
+    "verify:relay:monitors": "tsx scripts/verify-relay-pool-monitor.ts",
+    "test:relay:refill-db": "node --import tsx scripts/run-supabase-integration.ts --relay-refill",
+    "test:relay:monitor-package": "node scripts/test-relay-monitor-package.mjs"
   },
   "dependencies": {
     "@eslint/eslintrc": "^3",

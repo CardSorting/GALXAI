@@ -18,6 +18,7 @@ export function MobileBottomNav() {
     pathname.startsWith('/auth/') ||
     pathname === '/login' ||
     pathname === '/signup' ||
+    /^\/connect(?:\/|$)/.test(pathname) ||
     /^\/admin(?:\/|$)/.test(pathname)
   ) {
     return null;

@@ -90,6 +90,38 @@ test('real relay engine blocks forbidden work before admission and aborts upstre
   }finally{await engine.stop();wss.close();await close(upstream);await rm(directory,{recursive:true,force:true});}
 });
 
+test('provider evidence stays distinct from cancellation, deadline and transport loss',async()=>{
+  for (const kind of ['completed','provider_error','invalid_request','transport_loss','cancel','deadline'] as const) {
+    const directory=await mkdtemp(path.join(tmpdir(),'pool-outcome-'));
+    const upstream=http.createServer(),wss=new WebSocketServer({server:upstream}),upstreamOrigin=await listen(upstream);
+    let attempts=0, sent=false;const settled:Array<boolean|null>=[];
+    wss.on('connection',socket=>{attempts++;socket.on('message',()=>{
+      sent=true;
+      if(kind==='provider_error'||kind==='invalid_request')socket.send(JSON.stringify({type:'response.failed',response:{status:'failed',error:{code:kind==='provider_error'?'server_error':'invalid_request_error',message:'private diagnostic'}}}));
+      else {
+        socket.send(JSON.stringify({type:'response.output_text.delta',delta:'fixture output'}));
+        if(kind==='completed')socket.send(JSON.stringify({type:'response.completed',response:{status:'completed'}}));
+        if(kind==='transport_loss')socket.terminate();
+      }
+    });});
+    const engine=new GalxaiRelayServer({host:'127.0.0.1',port:0,assignedShardId:'own',assignedShard:{id:'own',accessToken:'fixture-token',accountId:'fixture-account'},registryEnabled:false,discoverHostCredentials:false,apiKeys:[key('outcome')],maxUpstreamRetries:0,drainTimeoutMs:100,jobMaxWallTimeMs:kind==='deadline'?300:5000,wsEndpoint:upstreamOrigin.replace('http:','ws:'),capabilityDiscovery:async()=>['fixture'],stateSnapshotPath:path.join(directory,'state.json'),executionPolicy:{pool:'premium',admit:async()=>({signal:new AbortController().signal,assert:()=>{},complete:async(success)=>{settled.push(success);}})}});
+    try {
+      await engine.start();const origin=`http://127.0.0.1:${engine.listeningPort()}`;
+      const headers={Authorization:`Bearer ${key('outcome')}`,'Content-Type':'application/json','Idempotency-Key':randomUUID()};
+      const response=await fetch(origin+'/v1/chat/completions',{method:'POST',headers,body:JSON.stringify({model:'fixture',messages:[{role:'user',content:'fixture'}]})});
+      assert.equal(response.status,202,kind);const job=await response.json();
+      for(let i=0;i<100&&!sent;i++)await new Promise(r=>setTimeout(r,10));assert(sent,kind);
+      if(kind==='cancel')assert.equal((await fetch(origin+`/v1/jobs/${job.id}/cancel`,{method:'POST',headers})).status,200);
+      for(let i=0;i<150&&!settled.length;i++)await new Promise(r=>setTimeout(r,10));
+      assert.deepEqual(settled,[kind==='completed'?true:kind==='provider_error'?false:null],kind);
+      assert.equal(attempts,1,kind+' must not replay');
+      const status=await (await fetch(origin+`/v1/jobs/${job.id}`,{headers})).text();
+      assert(!status.includes('providerFailureObserved'),kind+' private evidence stays private');
+      if(kind!=='provider_error')assert.equal((engine as any).shardsTable.get('own').consecutiveFailures,0,kind);
+    } finally {await engine.stop();wss.close();await close(upstream);await rm(directory,{recursive:true,force:true});}
+  }
+});
+
 test('two real monitor servers isolate sessions, deny viewer mutations and enforce central revocation',async()=>{
   const directory=await mkdtemp(path.join(tmpdir(),'pool-monitor-'));let mutations=0,revoked=false;const monitors:any[]=[];
   try{

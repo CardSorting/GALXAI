@@ -363,6 +363,11 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
                       <span>My creations</span>
                     </Link>
 
+                    <Link href="/connect" className={styles.accountLinkItem} role="menuitem" onClick={() => setIsAccountOpen(false)}>
+                      <Lock size={14} className="text-indigo-400" aria-hidden="true" />
+                      <span>Connected applications</span>
+                    </Link>
+
                     <div className={styles.accountDivider} />
 
                     <Link

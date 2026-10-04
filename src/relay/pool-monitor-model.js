@@ -8,6 +8,14 @@ export function accountApplied(account, state) {
 export function needsSignIn(account, now = Date.now()) {
   return account.connectionState === 'sign_in_required' || !(Number(account.credentialExpiresAt) > now);
 }
+// Presentation warnings are not authority. Retained failures and an unknown
+// outcome must not prevent recovery; admission still enforces current limits.
+export function accountCanEnable(account, state, connected = true, now = Date.now()) {
+  return connected && !account.removedAt && account.state !== 'revoked'
+    && (state.executionAllowed === true || state.automaticActivation === true) && relayFresh(state)
+    && !needsSignIn(account, now) && account.healthSignal !== 'unavailable'
+    && !(Number(account.cooldownUntilMs) > now);
+}
 export function executionStatus(state, now = Date.now()) {
   if (state.executionAllowed) return { label: 'Allowed', detail: '' };
   if (!state.automaticActivation) return { label: 'Paused', detail: 'Execution is paused for this relay. An operator must resume it before accounts can serve requests.' };
@@ -28,18 +36,18 @@ const health = (code, label, detail, attention = false, rank = 5) => ({ code, la
 export function accountHealth(account, state, connected = true, now = Date.now()) {
   if (account.removedAt) return health('removed', 'Removed', 'Access revoked. History retained.', false, 9);
   if (account.state === 'revoked') return health('revoked', 'Revoked', 'This account can no longer be enabled.', false, 8);
-  if (!connected) return health('unknown', 'Status unavailable', 'Reconnect to check the current account health.', false, 3);
+  if (!connected) return health('unknown', 'Status unavailable', 'Reconnect to load the current account status.', false, 3);
   if (needsSignIn(account, now)) return health('signin', 'Reconnect required', account.connectionState === 'sign_in_required' ? 'This account needs a fresh sign-in. Reconnect it to restore access.' : 'This account’s sign-in has expired. Reconnect it to restore access.', true, 0);
   if (account.healthSignal === 'unavailable') return health('failures', 'Access unavailable', 'The account reported unavailable access. Review its sign-in.', true, 0);
   if (Number(account.cooldownUntilMs) > now || account.healthSignal === 'cooldown') return health('cooldown', 'Cooling down', Number(account.cooldownUntilMs) > now ? 'Requests are paused until ' + new Date(Number(account.cooldownUntilMs)).toLocaleString() + '.' : 'The account reported a temporary limit. Refresh before enabling it.', true, 1);
-  if (Number(account.consecutiveFailures) >= 3) return health('failures', 'Repeated failures', account.consecutiveFailures + ' consecutive failures reported. Review the account before enabling it.', true, 1);
+  if (Number(account.consecutiveFailures) >= 3) return health('failures', 'Previous requests failed', account.consecutiveFailures + ' failures recorded. You can reconnect this account; request history does not block saving a new sign-in.', true, 1);
   if (!relayFresh(state, now)) return health('unknown', 'Awaiting relay', 'Account confirmation is unavailable until the relay reconnects.', false, 3);
   if (state.executionAllowed && !accountApplied(account, state, now)) {
     const elapsed = now - Date.parse(account.updatedAt);
     const overdue = Number.isFinite(elapsed) && elapsed >= 90000;
     return health('confirmation', overdue ? 'Update not confirmed' : 'Applying change', overdue ? 'The saved change has not been confirmed for over 90 seconds. Refresh or inspect the relay.' : 'The change is saved. Waiting for the relay to apply it.', overdue, overdue ? 2 : 4);
   }
-  return health('ok', 'No issues detected', account.state === 'paused' ? 'Sign-in is current. The account is intentionally paused.' : 'Sign-in and the latest account state are current.', false, 6);
+  return health('unknown', 'Availability unknown', account.state === 'paused' ? 'Sign-in is current. The account is intentionally paused.' : 'Sign-in is current. Each request reports its own result.', false, 6);
 }
 export function registrationHealth(registration, state, connected = true, now = Date.now()) {
   const desktop = state.desktops?.find(d => d.id === registration.desktopId);

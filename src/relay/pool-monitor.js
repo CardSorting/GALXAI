@@ -1,4 +1,4 @@
-import { accountHealth, registrationHealth, filterRegistrations, accountApplied, filterAccounts, needsSignIn, registrationStep, relayFresh, executionStatus } from '/assets/monitor-model.js';
+import { accountHealth, accountCanEnable, registrationHealth, filterRegistrations, accountApplied, filterAccounts, needsSignIn, registrationStep, relayFresh, executionStatus } from '/assets/monitor-model.js';
 
 const $ = id => document.getElementById(id);
 const node = (tag, text, className) => {
@@ -345,9 +345,9 @@ function renderAccounts() {
     if (operator && !account.removedAt && account.state !== 'revoked') {
       const enabled = account.state === 'enabled';
       const toggle = button(enabled ? 'Pause' : 'Enable', account.id, () => accountAction(account, enabled ? 'paused' : 'enabled'),
-        false, !enabled && ((!state.executionAllowed && !state.automaticActivation) || expired || condition.attention || !relayFresh(state)));
+        false, !enabled && !accountCanEnable(account, state, connected));
       if (!enabled && toggle.disabled) toggle.title = !state.executionAllowed && !state.automaticActivation ? 'Execution is paused for this relay.' :
-        expired ? 'Update the sign-in before enabling this account.' : 'Wait for the relay to reconnect.';
+        expired ? 'Update the sign-in before enabling this account.' : !relayFresh(state) ? 'Wait for the relay to reconnect.' : 'Current access or capacity is unavailable.';
       actions.append(toggle);
       if (state.registrations.some(r => r.accountId === account.id)) {
         actions.append(button(expired ? 'Reconnect' : 'Connection settings', account.id, () => goToRegistration(account.id)));

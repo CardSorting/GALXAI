@@ -9,7 +9,8 @@ import { performance } from 'node:perf_hooks';
 export interface ExecutionGrant {
   signal: AbortSignal;
   assert(): void;
-  complete(success: boolean, actualTokens?: number): Promise<void>;
+  // null is no confirmed provider result, never a negative health observation.
+  complete(success: boolean | null, actualTokens?: number): Promise<void>;
 }
 export interface ExecutionPolicy {
   pool: PoolId;
@@ -24,7 +25,7 @@ export interface AssignedAccount {
 export interface ExecutionRecord {
   requestKey: string; requestSha256: string; tenantSha256: string; accountId: string; epoch: string;
   executionId: string; workload: Workload; leaseId?: string; state: 'reserved' | 'running' | 'completed' | 'unknown';
-  success?: boolean; actualTokens?: number; settled: boolean;
+  success?: boolean | null; actualTokens?: number; settled: boolean;
 }
 export interface ExecutionStore {
   call(action: string, body?: Record<string, unknown>): Promise<any>;
@@ -83,7 +84,7 @@ export class PoolExecution {
     }
     const pending: ExecutionRecord[] = await this.store.call('pending');
     for (const row of pending.filter(row => row.leaseId).slice(0,Math.max(0,remaining))) {
-        const result = await this.central.call('/runtime/settle',{epoch:row.epoch,leaseId:row.leaseId,success:row.success === true,actualTokens:row.actualTokens ?? null});
+        const result = await this.central.call('/runtime/settle',{epoch:row.epoch,leaseId:row.leaseId,success:row.success ?? null,actualTokens:row.actualTokens ?? null});
         if (result.success !== true) throw Error('Settlement unconfirmed.');
         await this.store.call('settled',{requestKey:row.requestKey,leaseId:row.leaseId});
     }
@@ -94,7 +95,7 @@ export class PoolExecution {
       // Preserve original receipts. A dependency failure ends the batch, never retries execution.
     }
   }
-  stop() { for (const grant of this.grants) void grant.complete(false).catch(()=>{}); }
+  stop() { for (const grant of this.grants) void grant.complete(null).catch(()=>{}); }
   accountAvailable(accountId: string, now = Date.now()) {
     return (this.activeAccounts.get(accountId) ?? 0) < 4
       && (this.admissionDenials.get(accountId)?.until ?? 0) <= now;
@@ -142,10 +143,10 @@ export class PoolExecution {
       // A success started before a concurrent denial cannot clear that newer evidence.
       if (this.admissionDenials.get(account.id) === previousDenial) this.admissionDenials.delete(account.id);
     } catch {
-      this.finishes.set(requestKey,{requestKey,executionId,success:false});
+      this.finishes.set(requestKey,{requestKey,executionId,success:null});
       // Acquisition may have succeeded before the execution database became unavailable.
       // If binding failed, retain the exact acquired lease for the shared paced settlement path.
-      if (authorization?.leaseId) this.unboundLeases.set(authorization.leaseId, { epoch:this.epoch,leaseId:authorization.leaseId,success:false,actualTokens:null });
+      if (authorization?.leaseId) this.unboundLeases.set(authorization.leaseId, { epoch:this.epoch,leaseId:authorization.leaseId,success:null,actualTokens:null });
       await this.settlePending().catch(()=>{});
       throw new RequestError(503,'service_unavailable','This request could not be authorized. Check its status before retrying.');
     }
@@ -166,7 +167,7 @@ export class PoolExecution {
         void this.settlePending().catch(()=>{});
       },
     };
-    try { update(authorization); } catch { await grant.complete(false); throw new RequestError(503,'service_unavailable','This request could not be authorized.'); }
+    try { update(authorization); } catch { await grant.complete(null); throw new RequestError(503,'service_unavailable','This request could not be authorized.'); }
     const renew = () => { renewal = setTimeout(async()=>{
       if (done || abort.signal.aborted) return;
       try { update(await this.central.call('/runtime/renew',{...common,leaseId:authorization.leaseId,fencingToken:authorization.fencingToken})); }

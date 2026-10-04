@@ -47,13 +47,12 @@ export async function connectionDatabaseChecks(db: pg.Pool, scopes: any, call: (
   await call('premium','operator','set_account',{id:randomUUID(),accountId,expectedRevision:4,command:'revoked',requestSha256:hash('revoke connection')});
   await denied(call('premium','registrar','refresh',{...refresh,credentialRevision:hash('another fresh token')}));
 
-  // Deterministic enrollment IDs can be reused after a row is removed. The
-  // append-only journal must advance past the old insert/delete revisions.
+  // The desktop writer can enroll/refresh, but cannot erase account history.
   const reusableId='codex_sh_'+hash(randomUUID()).slice(0,24),reusableDesktop=randomUUID();
   await db.query('SELECT private.enroll_desktop_shard($1,$2,NULL)',[reusableDesktop,JSON.stringify({...row,id:reusableId})]);
-  const remover=await db.connect();try{await remover.query('SET ROLE galx_desktop_writer');await remover.query('DELETE FROM public.galx_shard_accounts WHERE id=$1',[reusableId]);}finally{await remover.query('RESET ROLE').catch(()=>{});remover.release();}
-  eq((await db.query('SELECT private.enroll_desktop_shard($1,$2,NULL) AS id',[randomUUID(),JSON.stringify({...row,id:reusableId})])).rows[0].id,reusableId);
-  eq((await db.query('SELECT registry_revision FROM public.galx_shard_accounts WHERE id=$1',[reusableId])).rows[0].registry_revision,'3');
+  const remover=await db.connect();try{await remover.query('SET ROLE galx_desktop_writer');await denied(remover.query('DELETE FROM public.galx_shard_accounts WHERE id=$1',[reusableId]));}finally{await remover.query('RESET ROLE').catch(()=>{});remover.release();}
+  eq((await db.query('SELECT managed_desktop_id FROM public.galx_shard_accounts WHERE id=$1',[reusableId])).rows[0].managed_desktop_id,reusableDesktop);
+  eq((await db.query('SELECT registry_revision FROM public.galx_shard_accounts WHERE id=$1',[reusableId])).rows[0].registry_revision,'1');
 
   // Purging legacy material is owner-only, dependency-checked, all-or-nothing and irreversible.
   const legacyIds=Array.from({length:3},()=> 'codex_sh_'+hash(randomUUID()).slice(0,24));

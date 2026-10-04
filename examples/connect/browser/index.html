@@ -1,0 +1,7 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Independent GALX reference client</title>
+<style>body{max-width:42rem;margin:3rem auto;padding:0 1.25rem;font:1rem/1.6 system-ui;background:#07080d;color:#f3f4f6}button,textarea{font:inherit}button{min-height:44px;padding:.5rem 1rem;cursor:pointer}textarea{display:block;width:100%;box-sizing:border-box;min-height:10rem;margin:.5rem 0 1rem;padding:.75rem}nav{display:flex;gap:.75rem;flex-wrap:wrap;margin:1rem 0}pre{white-space:pre-wrap;overflow-wrap:anywhere}button:focus-visible,textarea:focus-visible,a:focus-visible{outline:3px solid #6366f1;outline-offset:3px}button:disabled{cursor:default}</style></head>
+<body><main><h1>A tool of your own</h1><p>This independent reference client uses your GALX inference access. Start with a connection, then bring an idea.</p>
+<nav aria-label="Connection"><button id="connect">Connect with GALX</button><button id="disconnect" disabled>Disconnect application</button><a id="manage">Manage connections</a></nav>
+<form><label for="prompt">What would you like to make?</label><textarea id="prompt" required maxlength="20000"></textarea><button id="invoke" disabled>Generate</button> <button id="stop" type="button" disabled>Stop this task</button></form>
+<p id="status" role="status"></p><pre id="result" aria-label="Inference result"></pre></main><script type="module" src="/client.js"></script></body></html>

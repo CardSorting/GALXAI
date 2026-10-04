@@ -4,6 +4,7 @@ import { BroccoliAuthoritativeGovernor } from "@/core/broccolidb/BroccoliAuthori
 import { verifyWorkspaceSession } from '@/lib/auth/workspace-session';
 import { isWorkspacePath, workspaceSignInPath } from '@/lib/security/workspace-policy';
 import { workspaceUnavailableResponse } from '@/lib/security/workspace-unavailable';
+import { canonicalRequestUrl } from '@/lib/security/request-origin';
 
 const defaultUrl = 'https://mazhcjisettrzbqhorvp.supabase.co';
 const defaultKey = 'sb_publishable_9eyEPgM-hF00Va7TLE90yA_LV4iGcoE';
@@ -121,7 +122,7 @@ export const updateSession = async (request: NextRequest) => {
       result = workspaceUnavailableResponse(request);
     } else if (state !== 'authenticated') {
       result = ['GET', 'HEAD'].includes(method)
-        ? NextResponse.redirect(new URL(workspaceSignInPath(pathname, request.nextUrl.searchParams), request.url))
+        ? NextResponse.redirect(new URL(workspaceSignInPath(pathname, request.nextUrl.searchParams), canonicalRequestUrl(request)))
         : new NextResponse('Authentication required.', { status: 401 });
     }
     // Keep refreshed/cleared cookies on redirects and failures as well as success.

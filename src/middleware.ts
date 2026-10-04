@@ -9,32 +9,53 @@ import { legacyAuthPath } from '@/lib/auth/redirects';
 import { legacyImagePath } from '@/lib/images/navigation';
 import { isClosedProviderPath } from '@/lib/auth/provider-connection-route';
 import { billingCompatibilityPath } from '@/lib/billing/compatibility';
+import { isConnectPath } from '@/lib/connect/paths';
+import { canonicalRequestUrl } from '@/lib/security/request-origin';
+import { retiredVercelInferencePath } from '@/lib/security/inference-placement';
 
 export async function middleware(request: NextRequest) {
+  let requestUrl: URL;
+  try { requestUrl = canonicalRequestUrl(request); }
+  catch { return NextResponse.json({ error: { code: 'invalid_request', message: 'Request not allowed.' } }, { status: 400, headers: { 'Cache-Control': 'private, no-store' } }); }
   const pathname = request.nextUrl.pathname;
+  // Deployment retirement guard; does not proxy or execute Nova on Vercel.
+  if (retiredVercelInferencePath(pathname)) {
+    return new NextResponse(null, { status: 410, headers: { 'Cache-Control': 'private, no-store' } });
+  }
   const host = (request.headers.get('host') || '').toLowerCase().split(':')[0];
   if (/^[a-z0-9-]+\.[a-z0-9-]+\.galx\.ai$/.test(host)) {
     if (!['GET','HEAD'].includes(request.method) || pathname !== '/') return new NextResponse('Site unavailable.',{status:404,headers:{'Cache-Control':'private, no-store'}});
     return publishedSiteProxy(request,host);
+  }
+  // These routes verify their own account or delegated grant. Do not refresh
+  // media cookies or require developer-preview approval for an OAuth client.
+  if (isConnectPath(pathname)) {
+    const response = NextResponse.next();
+    response.headers.set('Cache-Control', 'private, no-store');
+    response.headers.set('Referrer-Policy', 'no-referrer');
+    response.headers.set('X-Frame-Options', 'DENY');
+    response.headers.set('Content-Security-Policy', "frame-ancestors 'none'");
+    response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+    return response;
   }
   // Retired handlers return a terminal denial without parsing input or starting
   // an account/preview authentication flow. This is an exact route allowlist.
   if (isClosedProviderPath(pathname)) return NextResponse.next();
   const billingDestination = billingCompatibilityPath(pathname, request.nextUrl.searchParams);
   if (billingDestination && ['GET', 'HEAD'].includes(request.method)) {
-    return NextResponse.redirect(new URL(billingDestination, request.url), { status: 307,
+    return NextResponse.redirect(new URL(billingDestination, requestUrl), { status: 307,
       headers: { 'Cache-Control': 'private, no-store', 'X-Robots-Tag': 'noindex, nofollow' } });
   }
   // Migrate bookmarks before rendering; only finite public fields reach Location.
   const canonical = legacyAuthPath(pathname, request.nextUrl.searchParams) ?? legacyImagePath(pathname, request.nextUrl.searchParams);
   if (canonical && ['GET', 'HEAD'].includes(request.method)) {
-    return NextResponse.redirect(new URL(canonical, request.url), { status: 308,
+    return NextResponse.redirect(new URL(canonical, requestUrl), { status: 308,
       headers: { 'Cache-Control': 'private, no-store', 'X-Robots-Tag': 'noindex, nofollow' } });
   }
   // Retire the old public developer guides. Preserve only the product-capability
   // overview, and discard query parameters when redirecting legacy paths.
   if (pathname.startsWith('/docs/') && ['GET', 'HEAD'].includes(request.method)) {
-    return NextResponse.redirect(new URL('/docs', request.url), { status: 308,
+    return NextResponse.redirect(new URL('/docs', requestUrl), { status: 308,
       headers: { 'Cache-Control': 'public, max-age=3600', 'X-Robots-Tag': 'noindex, nofollow' } });
   }
   if (pathname.startsWith('/docs/') && request.method !== 'GET' && request.method !== 'HEAD') {

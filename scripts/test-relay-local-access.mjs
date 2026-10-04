@@ -47,15 +47,14 @@ test('cold startup respects the existing ownership fence and rejects uncertain t
   assert.throws(() => handoffDeadline('2026-09-15T19:00:00Z', now));
 });
 
-test('runtime health uses its own fixed port and handoff reads validate identity and revoke their session', async () => {
+test('runtime handoff uses private control evidence and rejects missing or foreign authority', async () => {
   await runtimeAvailable('premium', async url => { assert.equal(url, 'http://127.0.0.1:13301/health/live'); return Response.json({ ok: true }); });
-  let revoked = false;
-  await assert.rejects(monitorHandoff('premium', { pool: 'premium', operatorToken: 'synthetic', installationId: 'own' }, async (url, options) => {
-    if (url.endsWith('/session/ticket')) return Response.json({ ticket: 'a'.repeat(64), role: 'operator' });
-    if (options.method === 'DELETE') { revoked = true; return Response.json({}); }
-    if (url.endsWith('/session')) return Response.json({}, { headers: { 'set-cookie': 'scoped=synthetic; HttpOnly' } });
-    assert.equal(options.headers.Cookie, 'scoped=synthetic');
-    return Response.json({ pool: 'retired', installationId: 'peer', lastSeenAt: null });
-  }), /installation changed/);
-  assert(revoked);
+  const config={pool:'premium',installationId:'own'};
+  await assert.rejects(monitorHandoff('premium',config,async()=>({pool:'retired',installationId:'peer',lastSeenAt:null})),/installation changed/);
+  await assert.rejects(monitorHandoff('premium',config,async()=>({pool:'premium',role:'operator'})),/installation changed/);
+  await assert.rejects(monitorHandoff('premium',config,async()=>({...config})),/could not be verified/);
+  await assert.rejects(monitorHandoff('premium',config,async()=>({...config,lastSeenAt:123})),/could not be verified/);
+  const last=new Date().toISOString();
+  assert.equal(await monitorHandoff('premium',config,async()=>({...config,lastSeenAt:last})),Date.parse(last)+61000);
+  assert((await monitorHandoff('premium',config,async()=>({...config,lastSeenAt:null})))<=Date.now());
 });

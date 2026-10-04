@@ -2,13 +2,17 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { getSupabaseConfig } from '@/lib/supabase/config';
 import { DEFAULT_POST_AUTH_PATH, safeAuthRedirect, authRecoveryPath } from '@/lib/auth/redirects';
+import { canonicalRequestUrl } from '@/lib/security/request-origin';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 /** Request-scoped PKCE exchange, independent of the application's data-query circuit. */
 export async function GET(request: NextRequest) {
-  const { searchParams, origin } = new URL(request.url);
+  let url: URL;
+  try { url = canonicalRequestUrl(request); }
+  catch { return NextResponse.json({ error: 'Request not allowed.' }, { status: 400, headers: { 'Cache-Control': 'private, no-store' } }); }
+  const { searchParams, origin } = url;
   const next = safeAuthRedirect(searchParams.get('next') || searchParams.get('redirect') || searchParams.get('returnUrl') || DEFAULT_POST_AUTH_PATH);
   const changes: { name: string; value: string; options: CookieOptions }[] = [];
   const redirect = (path: string) => {
@@ -41,7 +45,7 @@ export async function GET(request: NextRequest) {
     if (error || !data.session) return redirect(authRecoveryPath(next, 'auth_exchange_failed'));
     const response = redirect(next);
     for (const name of ['galx_session', 'galx_user_role']) {
-      response.cookies.set(name, '', { path: '/', maxAge: 0, sameSite: 'lax', secure: request.nextUrl.protocol === 'https:', httpOnly: true });
+      response.cookies.set(name, '', { path: '/', maxAge: 0, sameSite: 'lax', secure: url.protocol === 'https:', httpOnly: true });
     }
     return response;
   } catch {

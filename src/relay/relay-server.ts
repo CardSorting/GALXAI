@@ -252,6 +252,7 @@ export interface JobRecord extends Record<string, unknown> {
   seqCounter: number;
   isDetached: boolean;
   error?: string;
+  providerFailureObserved?: boolean;
   estimatedTokens: number;
   maxOutputTokens?: number;
   usage?: CompletionUsage;
@@ -403,7 +404,7 @@ type JobBusEvent =
   | { type: 'job:token'; jobId: string; token: JobTokenRecord }
   | { type: 'job:reasoning'; jobId: string; text: string }
   | { type: 'job:keepalive'; jobId: string; text: string }
-  | { type: 'job:transport_drop'; jobId: string; attemptId: number; shardId: string; reason: string; isQuotaError?: boolean; retryAtMs?: number; unauthorized?: boolean; retryable?: boolean }
+  | { type: 'job:transport_drop'; jobId: string; attemptId: number; shardId: string; reason: string; isQuotaError?: boolean; retryAtMs?: number; unauthorized?: boolean; retryable?: boolean; providerFailureObserved?: boolean }
   | { type: 'job:done'; jobId: string }
   | { type: 'job:error'; jobId: string; reason: string }
   | { type: 'job:cancelled'; jobId: string; reason?: string }
@@ -1068,7 +1069,14 @@ export class GalxaiRelayServer extends EventEmitter {
     this.jobsTable.subscribe((change) => {
       if (change.after && ['completed', 'failed', 'cancelled'].includes(change.after.status)) {
         const grant = this.executionGrants.get(change.after.id);
-        if (grant) { this.executionGrants.delete(change.after.id); void grant.complete(change.after.status === 'completed',change.after.usage?.total_tokens).catch(()=>{}); }
+        if (grant) {
+          this.executionGrants.delete(change.after.id);
+          // Job termination is not an upstream health verdict. In particular,
+          // cancellation, deadlines, local errors and lost transport are neutral.
+          const success = change.after.status === 'completed' ? true
+            : change.after.status === 'failed' && change.after.providerFailureObserved === true ? false : null;
+          void grant.complete(success,change.after.usage?.total_tokens).catch(()=>{});
+        }
         this.telemetry.finish(change.after.id, change.after.status as 'completed' | 'failed' | 'cancelled', change.after.error);
         const session = this.sessions.get(change.after.id);
         if (session) {
@@ -2190,7 +2198,7 @@ export class GalxaiRelayServer extends EventEmitter {
           createdAt: Math.floor(jobRecord.createdAtMs / 1000),
         }));
       } catch (err: unknown) {
-        await pendingGrant?.complete(false).catch(()=>{});
+        await pendingGrant?.complete(null).catch(()=>{});
         if (res.writableEnded || res.destroyed) return;
         const failure = err instanceof RequestError ? err : new RequestError(500, 'internal_error', 'Relay could not process this request. Use the trace ID to investigate.');
         res.writeHead(failure.status, { 'Content-Type': 'application/json' });
@@ -2207,7 +2215,7 @@ export class GalxaiRelayServer extends EventEmitter {
     res: http.ServerResponse,
     tenantId: string
   ): Promise<void> {
-    let grant: ExecutionGrant | undefined, completed = false;
+    let grant: ExecutionGrant | undefined, completed = false, providerFailureObserved = false;
     try {
         const body = await readJsonBody(req, this.config.maxPayloadBytes, this.config.httpBodyTimeoutMs);
         if (this.config.executionPolicy) requestWorkload(this.config.executionPolicy.pool,req.url ?? '',body);
@@ -2300,6 +2308,7 @@ export class GalxaiRelayServer extends EventEmitter {
           res.end(responseBytes);
         } catch (err: any) {
           this.metrics.totalImageJobsFailed++;
+          providerFailureObserved = !controller.signal.aborted && err.providerFailureObserved === true;
           if (traceId) this.telemetry.finish(traceId, 'failed', controller.signal.aborted ? String(controller.signal.reason?.message || 'image_wall_time_exceeded') : err.telemetryReason || err.message);
           if (res.destroyed || res.writableEnded) return;
           if (err.preGenerationTargetRejection === true) {
@@ -2344,7 +2353,7 @@ export class GalxaiRelayServer extends EventEmitter {
         const failure = err instanceof RequestError ? err : new RequestError(500, 'internal_error', 'Relay could not process this request. Use the trace ID to investigate.');
         res.writeHead(failure.status, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ error: { message: failure.message, code: failure.code } }));
-      } finally { await grant?.complete(completed).catch(()=>{}); }
+      } finally { await grant?.complete(completed ? true : providerFailureObserved ? false : null).catch(()=>{}); }
   }
 
   private async synthesizeImageWithFailover(prompt: string, body: Record<string, unknown>, model: string, traceId?: string, signal: AbortSignal = AbortSignal.timeout(this.config.jobMaxWallTimeMs)) {
@@ -2387,11 +2396,13 @@ export class GalxaiRelayServer extends EventEmitter {
         const negative = classifyCapabilityFailure(imageFailureFrame(error));
         if (negative && capabilityTicket) this.capabilities.observe(capabilityTicket, imageModel, negative.state, negative.reason, alias);
         const failure = classifyUpstreamError(imageFailureFrame(error));
+        // Only an actual provider response can change account failure history.
+        error.providerFailureObserved = Boolean(error.upstream) && (failure.quota || failure.unauthorized || failure.retryable);
         error.telemetryReason = error.upstream ? `upstream_error_${failure.code}` : error.message;
         this.telemetry.failedAttempt(traceId, error.telemetryReason);
         const safeFailover = isConfirmedPreGenerationImageFailure(error, failure);
         if (failure.quota) this.recordQuotaFailure(shard.id, failure.deadline, true, undefined, true);
-        else if (failure.retryable) this.recordShardFailure(shard.id, failure.unauthorized, true);
+        else if (error.providerFailureObserved) this.recordShardFailure(shard.id, failure.unauthorized, true);
         else this.releaseShard(shard.id, false, true);
 
         // This is target failover, not a generic request retry. The same
@@ -2863,7 +2874,7 @@ export class GalxaiRelayServer extends EventEmitter {
     // Transport failure publication. Retry and terminal policy runs from the
     // bus consumer after this WebSocket callback has returned.
     let failoverTriggered = false;
-    const triggerFailover = (reason: string, isQuotaError = false, closeCode = 1006, retryAtMs?: number, unauthorized = false, retryable = true) => {
+    const triggerFailover = (reason: string, isQuotaError = false, closeCode = 1006, retryAtMs?: number, unauthorized = false, retryable = true, providerFailureObserved = false) => {
       if (failoverTriggered) return;
       failoverTriggered = true;
 
@@ -2875,7 +2886,7 @@ export class GalxaiRelayServer extends EventEmitter {
         attemptId: attempt.id,
         shardId: shard.id,
         reason,
-        isQuotaError, retryAtMs, unauthorized, retryable,
+        isQuotaError, retryAtMs, unauthorized, retryable, providerFailureObserved,
       });
     };
 
@@ -2892,7 +2903,8 @@ export class GalxaiRelayServer extends EventEmitter {
         response.resume();
         try { this.config.onUpstreamDiagnostic?.(upstreamDiagnostic({ status: response.statusCode }), { jobId: job.id }); } catch { /* Diagnostics never affect execution. */ }
         triggerFailover(`upstream_http_${response.statusCode}`, response.statusCode === 429, 1006,
-          retryDeadline(response.headers['retry-after']), response.statusCode === 401, ![400, 404, 405, 413, 422].includes(response.statusCode || 0));
+          retryDeadline(response.headers['retry-after']), response.statusCode === 401, ![400, 404, 405, 413, 422].includes(response.statusCode || 0),
+          response.statusCode === 401 || response.statusCode === 429 || Number(response.statusCode) >= 500);
       });
       this.tuneSocket(ws);
     } catch (err: any) {
@@ -3190,7 +3202,8 @@ export class GalxaiRelayServer extends EventEmitter {
           const negative = classifyCapabilityFailure(data);
           if (negative && capabilityTicket) this.capabilities.observe(capabilityTicket, job.model, negative.state, negative.reason);
           const failure = classifyUpstreamError(data);
-          triggerFailover(`upstream_error_${failure.code}`, failure.quota, 1006, failure.deadline, failure.unauthorized, failure.retryable);
+          triggerFailover(`upstream_error_${failure.code}`, failure.quota, 1006, failure.deadline, failure.unauthorized, failure.retryable,
+            failure.quota || failure.unauthorized || failure.retryable);
           return;
         }
       } catch (err: any) {
@@ -3320,6 +3333,7 @@ export class GalxaiRelayServer extends EventEmitter {
     // retry backoff must not release another job's slot on the same shard.
     if (session.currentShardId !== event.shardId) return;
     session.currentShardId = undefined;
+    if (event.providerFailureObserved) this.jobsTable.put(job.id, { ...job, providerFailureObserved: true });
     this.telemetry.failedAttempt(event.jobId, event.reason);
     // A metered request is one provider attempt. A retry would require another
     // independently reserved operation and evidence for both attempts.
@@ -3331,8 +3345,10 @@ export class GalxaiRelayServer extends EventEmitter {
     if (event.isQuotaError) {
       this.metrics.totalShardCooldownEjections++;
       this.recordQuotaFailure(event.shardId, event.retryAtMs, true, event.jobId);
-    } else {
+    } else if (event.providerFailureObserved) {
       this.recordShardFailure(event.shardId, event.unauthorized);
+    } else {
+      this.releaseShard(event.shardId);
     }
 
     if (job.durableReceipt) {

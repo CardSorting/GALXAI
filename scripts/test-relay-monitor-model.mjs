@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { accountHealth, registrationHealth, filterRegistrations, accountApplied, filterAccounts, needsSignIn, registrationStep, relayFresh, executionStatus } from '../src/relay/pool-monitor-model.js';
+import { accountHealth, accountCanEnable, registrationHealth, filterRegistrations, accountApplied, filterAccounts, needsSignIn, registrationStep, relayFresh, executionStatus } from '../src/relay/pool-monitor-model.js';
 
 test('automatic activation explains readiness without overriding intentional pauses', () => {
  const now=Date.now(), a={state:'enabled',credentialExpiresAt:now+60000};
@@ -50,7 +50,7 @@ test('desktop login completion does not imply reviewed or registered central acc
 test('health separates a failed refresh from reported problems and normal paused state', () => {
   const now=Date.now(), state={relayFresh:true,executionAllowed:true};
   const account={id:'one',name:'Studio',state:'paused',revision:1,applied:true,credentialExpiresAt:now+10000};
-  assert.equal(accountHealth(account,state,true,now).code,'ok');
+  assert.equal(accountHealth(account,state,true,now).code,'unknown');
   assert.equal(accountHealth({...account,credentialExpiresAt:0},state,false,now).code,'unknown');
   assert.equal(accountHealth({...account,credentialExpiresAt:0},state,true,now).code,'signin');
   assert.equal(accountHealth({...account,cooldownUntilMs:now+1000},state,true,now).code,'cooldown');
@@ -75,7 +75,7 @@ test('removed resources are isolated from active filters and unfinished registra
 test('a stopped desktop is normal for a registered account with current access', () => {
   const now=Date.now(),account={id:'a',state:'paused',credentialExpiresAt:now+10000};
   const state={accounts:[account],executionAllowed:false,relayFresh:true,desktopAvailable:true,desktops:[{id:'desk',state:'stopped',canConnect:false}]};
-  assert.equal(registrationHealth({accountId:'a',desktopId:'desk',state:'registered'},state,true,now).code,'ok');
+  assert.equal(registrationHealth({accountId:'a',desktopId:'desk',state:'registered'},state,true,now).code,'unknown');
   assert.equal(registrationHealth({desktopId:'desk',state:'prepared'},state,true,now).code,'desktop');
   assert.equal(filterRegistrations([{name:'Draft',desktopId:'desk',state:'prepared'}],'draft','attention',state,true,now).length,1);
 });
@@ -86,4 +86,25 @@ test('rejected credentials require reconnect even before expiry and keep the sav
   assert.equal(accountHealth(account,{relayFresh:true},true,now).code,'signin');
   assert.deepEqual(filterAccounts([account],'','attention',now),[account]);
   assert.equal(account.state,'enabled');
+});
+
+test('unknown status and retained failures never become an enable veto', () => {
+  const now=Date.now(), state={relayFresh:true,executionAllowed:true};
+  const account={state:'paused',credentialExpiresAt:now+3600000,applied:true,consecutiveFailures:6};
+  assert.equal(accountHealth(account,state,true,now).attention,true);
+  assert.equal(accountCanEnable(account,state,true,now),true);
+  const neutral=accountHealth({...account,consecutiveFailures:0},state,true,now);
+  assert.equal(neutral.code,'unknown'); assert.equal(neutral.attention,false);
+  assert.equal(neutral.label,'Availability unknown');
+  assert.equal(accountHealth({...account,consecutiveFailures:1},state,true,now).label,'Availability unknown');
+  assert.equal(accountCanEnable({...account,healthSignal:'unknown'},state,true,now),true);
+  // Actual authorization, operator holds and unexpired capacity limits still apply.
+  for (const override of [{state:'revoked'},{removedAt:'date'},{credentialExpiresAt:now-1},
+    {connectionState:'sign_in_required'},{healthSignal:'unavailable'},{cooldownUntilMs:now+1000}]) {
+    assert.equal(accountCanEnable({...account,...override},state,true,now),false);
+  }
+  assert.equal(accountCanEnable(account,state,false,now),false);
+  assert.equal(accountCanEnable(account,{...state,relayFresh:false},true,now),false);
+  assert.equal(accountCanEnable(account,{...state,executionAllowed:false},true,now),false);
+  assert.equal(accountCanEnable(account,{...state,executionAllowed:false,automaticActivation:true},true,now),true);
 });

@@ -12,7 +12,7 @@ export function Footer() {
   const pathname = usePathname();
 
   // Omit footer on admin surfaces and dedicated login screens
-  if (/^\/admin(?:\/|$)/.test(pathname) || pathname === '/login') {
+  if (/^\/(?:admin|connect)(?:\/|$)/.test(pathname) || pathname === '/login') {
     return null;
   }
 

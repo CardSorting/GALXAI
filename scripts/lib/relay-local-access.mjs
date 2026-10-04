@@ -39,21 +39,13 @@ export function handoffDeadline(lastSeenAt, now = Date.now()) {
   return Math.max(now, last + 61000);
 }
 
-export async function monitorHandoff(pool, config, fetcher = fetch) {
-  const origin = monitorOrigin(pool);
-  const url = new URL(await monitorTicket(pool, config, fetcher));
-  const ticket = new URLSearchParams(url.hash.slice(1)).get('ticket');
-  const session = await fetcher(`${origin}/session`, { method: 'POST', redirect: 'error', signal: AbortSignal.timeout(15000), headers: { Origin: origin, 'Content-Type': 'application/json' }, body: JSON.stringify({ ticket, role: 'operator' }) });
-  if (!session.ok) throw Error('Could not check the runtime handoff.');
-  const cookie = session.headers.get('set-cookie')?.split(';')[0];
-  if (!cookie) throw Error('Could not check the runtime handoff.');
-  try {
-    const response = await fetcher(`${origin}/api/status`, { headers: { Cookie: cookie }, redirect: 'error', signal: AbortSignal.timeout(15000) });
-    if (!response.ok) throw Error('Could not check the runtime handoff.');
-    const status = await response.json();
-    if (status.pool !== pool || status.installationId !== config.installationId) throw Error('The runtime installation changed.');
-    return handoffDeadline(status.lastSeenAt);
-  } finally {
-    await fetcher(`${origin}/session`, { method: 'DELETE', headers: { Origin: origin, Cookie: cookie }, redirect: 'error', signal: AbortSignal.timeout(5000) }).catch(() => {});
-  }
+export async function monitorHandoff(pool, config, readControlStatus) {
+  monitorOrigin(pool);
+  if (config.pool !== pool || typeof config.installationId !== 'string' || !config.installationId || typeof readControlStatus !== 'function') throw Error('Could not check the runtime handoff.');
+  // Host administrator reads central authority directly. Browser snapshots
+  // deliberately omit installation identity and the ownership timestamp.
+  const status = await readControlStatus();
+  if (status?.pool !== pool || status.installationId !== config.installationId) throw Error('The runtime installation changed.');
+  if (!Object.hasOwn(status,'lastSeenAt') || status.lastSeenAt !== null && typeof status.lastSeenAt !== 'string') throw Error('The last runtime update could not be verified.');
+  return handoffDeadline(status.lastSeenAt);
 }

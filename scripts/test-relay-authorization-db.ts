@@ -93,6 +93,17 @@ try {
     equal((await call(pool,'runtime','renew',{...acquire,...lease})).leaseId,lease.leaseId);
     await call(pool,'runtime','acknowledge',{...acquire});
     await denied(call(pool,'runtime','acknowledge',{...acquire,revision:1}));
+    for(const success of [false,null,true]) {
+      const before=(await database.query('SELECT consecutive_failures,consecutive_successes FROM public.galx_shard_accounts WHERE id=$1',[account.accountId])).rows[0];
+      const probe=await call(pool,'runtime','acquire',{...acquire,requestKey:hash('evidence-'+success),requestSha256:hash('evidence-body-'+success)});
+      assert(probe.leaseId);checks++;
+      equal((await call(pool,'runtime','settle',{epoch:s.epoch,leaseId:probe.leaseId,success})).success,true);
+      const after=(await database.query('SELECT consecutive_failures,consecutive_successes FROM public.galx_shard_accounts WHERE id=$1',[account.accountId])).rows[0];
+      if(success===null)equal(after,before);
+      else equal(after.consecutive_failures,success?0:before.consecutive_failures+1);
+      equal((await call(pool,'runtime','settle',{epoch:s.epoch,leaseId:probe.leaseId,success:success!==true})).replayed,true);
+      equal((await database.query('SELECT consecutive_failures,consecutive_successes FROM public.galx_shard_accounts WHERE id=$1',[account.accountId])).rows[0],after);
+    }
     const pause={id:randomUUID(),accountId:account.accountId,command:'paused',expectedRevision:2,requestSha256:hash('pause'+pool)};
     equal((await call(pool,'operator','set_account',pause)).savedRevision,3);
     await denied(call(pool,'runtime','renew',{...acquire,...lease}));

@@ -46,6 +46,15 @@ function guest(pool, args, input) {
   return run('ssh', ['-F', sshConfigs.get(pool), '-T', '-o', 'ConnectTimeout=8', `colima-${pool}`, args.map(quote).join(' ')], input);
 }
 function docker(pool, args) { return run('docker', ['--context', pool === 'central' ? 'desktop-linux' : `colima-${pool}`, ...args]); }
+function readControlStatus(pool) {
+  monitorOrigin(pool);
+  const id = docker(pool, ['ps', '-q', '--filter', `label=com.docker.compose.project=galx-${pool}`, '--filter', 'label=com.docker.compose.service=monitor']);
+  if (!/^[a-f0-9]{12,64}$/.test(id)) throw Error('The owning monitor could not be verified.');
+  // Run inside the inspected component's existing TLS/configuration boundary.
+  // Only fixed status fields leave this administrator-only process, never keys.
+  return JSON.parse(docker(pool, ['exec', id, 'node', '--input-type=module', '-e',
+    "import fs from 'node:fs';const c=JSON.parse(fs.readFileSync('/run/secrets/component-config'));const r=await fetch(c.centralOrigin+'/operator/status',{method:'POST',redirect:'error',signal:AbortSignal.timeout(15000),headers:{Authorization:'Bearer '+c.operatorToken,'Content-Type':'application/json'},body:JSON.stringify({pool:c.pool,installationId:c.installationId})});if(!r.ok)throw Error('Control status unavailable');const s=await r.json();console.log(JSON.stringify({pool:s.pool,installationId:s.installationId,lastSeenAt:s.lastSeenAt}));"]));
+}
 function checkImages(pool) {
   for (const image of reviewedImages().filter(image => !pool || !image.pool || image.pool === pool)) {
     if (docker(image.pool ?? 'central', ['image', 'inspect', image.tag, '--format', '{{.Id}}']) !== image.id) throw Error('A local image differs from the reviewed service release.');
@@ -287,7 +296,7 @@ async function startPool(pool) {
     poolCompose(pool, ['stop', '--timeout', '480', 'relay']);
   }
   const config = JSON.parse(readFileSync(path.join(components, `${pool}-monitor.json`)));
-  const deadline = await monitorHandoff(pool, config);
+  const deadline = await monitorHandoff(pool, config, () => readControlStatus(pool));
   if (deadline > Date.now()) console.log('Waiting for the previous runtime to release ownership…');
   await waitFor(() => Date.now() >= deadline, 67);
   if (!centralAvailable()) throw Error('Central service health changed during runtime handoff.');
@@ -425,6 +434,7 @@ async function verify() {
     const config = JSON.parse(readFileSync(path.join(components, `${pool}-monitor.json`)));
     const authority = JSON.parse(readFileSync(path.join(state, 'authority.json')));
     check(config.installationId === authority.pools[pool].installationId, 'Unexpected local installation identity.');
+    await monitorHandoff(pool, config, () => readControlStatus(pool)); checks++;
     record.installationId = config.installationId;
     const denied = await fetch(`${origin}/api/status`); check(denied.status === 401, 'Anonymous monitor access.');
     for (const role of ['operator', 'viewer']) {
@@ -436,7 +446,8 @@ async function verify() {
       const cookie = session.headers.get('set-cookie')?.split(';')[0]; check(cookie, 'Missing session cookie.');
       const statusReply = await fetch(`${origin}/api/status`, { headers: { Cookie: cookie }, signal: AbortSignal.timeout(15000) });
       check(statusReply.ok, 'Monitor status unavailable.');
-      const status = await statusReply.json(); check(status.pool === pool && status.installationId === config.installationId && status.role === role && status.desktopAvailable, 'Monitor or desktop destination mismatch.');
+      const status = await statusReply.json(); check(status.pool === pool && status.role === role && status.desktopAvailable, 'Monitor or desktop destination mismatch.');
+      check(!('installationId' in status) && !('epoch' in status) && !('lastSeenAt' in status), 'Private control identity leaked into the browser snapshot.');
       if (role === 'operator') { cookies[pool] = cookie; record.registrationAllowed = status.registrationAllowed; record.executionAllowed = status.executionAllowed; record.accounts = status.accounts?.length ?? 0; }
       else {
         const write = await fetch(`${origin}/api/registrations/prepare`, { method: 'POST', headers: { Cookie: cookie, Origin: origin, 'Content-Type': 'application/json' }, body: '{}' });

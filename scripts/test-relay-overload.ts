@@ -8,7 +8,7 @@ async function until(predicate:()=>boolean){for(let i=0;i<200;i++){if(predicate(
 function fixture(){
   let now=0,lease=0;
   const rows=new Map<string,any>();
-  const c={finishActive:0,finishPeak:0,finishes:0,pending:0,settles:0,settleActive:0,settlePeak:0,failSettle:false,failBind:false,failFinish:false,gate:undefined as Promise<void>|undefined};
+  const c={finishActive:0,finishPeak:0,finishes:0,pending:0,settles:0,settleActive:0,settlePeak:0,failSettle:false,failBind:false,failFinish:false,settledSuccess:[] as Array<boolean|null>,gate:undefined as Promise<void>|undefined};
   const store={call:async(action:string,b:any={})=>{
     if(action==='reserve'){const row={...b,state:'reserved'};rows.set(b.requestKey,row);return row;}
     const row=rows.get(b.requestKey);
@@ -18,9 +18,9 @@ function fixture(){
     if(action==='settled'){row.settled=true;return row;}
     throw Error('Unexpected store action');
   }};
-  const central={identity:{pool:'premium'},call:async(route:string)=>{
+  const central={identity:{pool:'premium'},call:async(route:string,body:any)=>{
     if(route==='/runtime/acquire')return{leaseId:`lease_${++lease}`,expiresAtMs:Date.now()+30000,fencingToken:1};
-    assert.equal(route,'/runtime/settle');c.settles++;c.settleActive++;c.settlePeak=Math.max(c.settlePeak,c.settleActive);
+    assert.equal(route,'/runtime/settle');c.settledSuccess.push(body.success);c.settles++;c.settleActive++;c.settlePeak=Math.max(c.settlePeak,c.settleActive);
     try{await c.gate;return{success:!c.failSettle};}finally{c.settleActive--;}
   }};
   const execution=new PoolExecution(central as any,store,'fixture-epoch',{now:()=>now,random:()=>0.5});
@@ -57,9 +57,24 @@ test('settlement failure stops fan-out, backs off and drains only eight retained
 test('an acquired but unbound lease is retained and blocks new admission until its exact settlement succeeds',async()=>{
   const f=fixture();f.c.failBind=true;f.c.failSettle=true;
   await assert.rejects(()=>f.admit('failed-bind'));assert.equal(f.c.settles,1);
+  assert.deepEqual(f.c.settledSuccess,[null]);
   await assert.rejects(()=>f.admit('must-wait'));assert.equal(f.rows.size,1);
   f.advance(2000);f.c.failSettle=false;f.c.failBind=false;await f.execution.settlePending();
   const grant=await f.admit('after-reconciliation');await grant.complete(true);f.execution.stop();await f.execution.settlePending();
+});
+
+test('settlement preserves confirmed success, confirmed failure and neutral interruption independently',async()=>{
+  const f=fixture();
+  for(const success of [true,false,null]) {
+    const grant=await f.admit('result-'+success);await grant.complete(success);
+    f.advance(2000);await f.execution.settlePending();
+  }
+  await f.admit('shutdown');f.execution.stop();
+  await until(()=>[...f.rows.values()].every(r=>r.state==='completed'));
+  f.advance(2000);await f.execution.settlePending();
+  assert.deepEqual(f.c.settledSuccess,[true,false,null,null]);
+  assert.equal(f.execution.accountAvailable('own'),true);
+  assert([...f.rows.values()].every(r=>r.settled));
 });
 
 test('request bulkheads bound total work and each owner without queuing or stale-release leaks',()=>{

@@ -2,7 +2,7 @@
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { randomBytes,randomUUID } from 'node:crypto';
-import { mkdir,readFile,writeFile,stat } from 'node:fs/promises';
+import { mkdir,readFile,readdir,writeFile,stat } from 'node:fs/promises';
 import path from 'node:path';
 import { hash,PROJECTS,type PoolId } from '../src/relay/pool-protocol.js';
 const exec=promisify(execFile),root=path.resolve('.relay/service-deployment');
@@ -19,16 +19,17 @@ async function query(project:string,sql:string,label:string){const sqlFile=path.
   const start=result.stdout.indexOf('{'),parsed=JSON.parse(result.stdout.slice(start));return parsed.rows;
 }catch{throw Error(`${label} was not confirmed. Inspect the project status before retrying.`);}}
 if(args[0]==='--apply-databases'){
-  const migration=await readFile('deploy/relay-execution/supabase/migrations/20260915082628_relay_execution.sql','utf8');
+  const migrationDirectory='deploy/relay-execution/supabase/migrations';
+  const migrations=await Promise.all((await readdir(migrationDirectory)).filter(f=>/^\d{14}_.+\.sql$/.test(f)).sort().map(async file=>({version:file.slice(0,14),name:file.slice(15,-4),sql:await readFile(path.join(migrationDirectory,file),'utf8')})));
   for(const pool of ACTIVE_POOLS){const p=state.pools[pool];
     const existing=await query(PROJECTS[pool],"SELECT count(*)::integer AS count FROM information_schema.tables WHERE table_schema='private'",pool+'-preflight');
     if(existing[0].count!==0){const rows=await query(PROJECTS[pool],"SELECT pool_id,installation_id,project_ref FROM private.relay_identity",pool+'-identity');if(rows.length!==1||rows[0].installation_id!==p.installationId||rows[0].pool_id!==pool)throw Error('Existing execution identity differs.');}
     else{
-      await query(PROJECTS[pool],`BEGIN; ${migration}
+      await query(PROJECTS[pool],`BEGIN; ${migrations.map(m=>m.sql).join('\n')}
         INSERT INTO private.relay_identity(pool_id,installation_id,project_ref) VALUES(${quote(pool)},${quote(p.installationId)},${quote(PROJECTS[pool])});
         CREATE SCHEMA IF NOT EXISTS supabase_migrations;
         CREATE TABLE IF NOT EXISTS supabase_migrations.schema_migrations(version text PRIMARY KEY,statements text[],name text);
-        INSERT INTO supabase_migrations.schema_migrations VALUES('20260915082628',ARRAY[${quote(migration)}],'relay_execution');
+        ${migrations.map(m=>`INSERT INTO supabase_migrations.schema_migrations VALUES(${quote(m.version)},ARRAY[${quote(m.sql)}],${quote(m.name)});`).join('\n')}
         COMMIT; SELECT 'applied' AS result;`,pool+'-migration');
     }
     await query(PROJECTS[pool],`DO $$ BEGIN IF NOT EXISTS(SELECT FROM pg_roles WHERE rolname='galx_execution_service') THEN CREATE ROLE galx_execution_service LOGIN INHERIT NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS; END IF; END $$;
