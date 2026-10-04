@@ -1,0 +1,8 @@
+{
+  "name": "galx-hosted-packaging",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Pinned offline hosted-artifact tooling; does not deploy.",
+  "engines": { "node": "22.x" },
+  "dependencies": { "vercel": "48.5.0" }
+}

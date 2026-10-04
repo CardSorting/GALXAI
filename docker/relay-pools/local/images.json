@@ -7,15 +7,15 @@
       "component": "central"
     },
     {
-      "tag": "galxai-relay-premium:queue-hardening-20260925-r4",
-      "id": "sha256:4f9ca6fb2e528d3dd9cdb4e1b69f2d6eb717af20987335a10b932c6bb6ab4713",
+      "tag": "galxai-relay-premium:neutral-outcomes-20261003",
+      "id": "sha256:a1feb16ef31ae0f97cc231b85d06578496335d79221d13e36a4c40b8524a545f",
       "architecture": "arm64",
       "component": "runtime",
       "pool": "premium"
     },
     {
-      "tag": "galxai-monitor-premium:automatic-20260916-r2",
-      "id": "sha256:f98c1b99682338b9a03f1c49b66640c23a7075449fd11184a537ae393ac16a29",
+      "tag": "galxai-monitor-premium:neutral-outcomes-20261003-r3",
+      "id": "sha256:0ab24b83ce3f2536f88b3994a716671d7b87495ebc5bdb90c5cafa3a50aa05ed",
       "architecture": "arm64",
       "component": "monitor",
       "pool": "premium"

@@ -16,11 +16,5 @@
 !src/lib/
 !src/lib/security/
 !src/lib/security/image-artifact.ts
-!BroccoliDB/
-!BroccoliDB/src/
-!BroccoliDB/src/**
-!BROCCOLIQUEUE/
-!BROCCOLIQUEUE/src/
-!BROCCOLIQUEUE/src/**
 **/__pycache__/
 **/*.pyc

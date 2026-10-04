@@ -1,0 +1,8 @@
+# Correction on an inspected, retained monitor image. Keep pinned dependencies;
+# copy the matching server bundle and UI contract from the reviewed source.
+ARG MONITOR_BASE
+ARG RUNTIME_IMAGE
+FROM ${RUNTIME_IMAGE} AS implementation
+FROM ${MONITOR_BASE}
+COPY --from=implementation /app/service.mjs /app/service.mjs
+COPY src/relay/pool-monitor.html src/relay/pool-monitor.js src/relay/pool-monitor-model.js /app/
