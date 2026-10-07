@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "classification": "private",
+  "observedAt": "2026-10-07T22:00:30.969Z",
+  "result": "PASSED",
+  "sourceManifestSha256": "da5af9fa81c2115e46bc660bd44f8a415b14568b04fec2fc682e67eabd9a3561",
+  "dependencyLockSha256": "d8bb0860ae266479d2a6648fff6c46fdc7a0c95863bad72c68a326bdd5fb3600",
+  "artifact": {
+    "at": "2026-10-07T22:00:25.283Z",
+    "format": "Vercel Build Output API",
+    "functions": 32,
+    "mappedReferences": 8348,
+    "retainedPayloads": 1844,
+    "files": 3753,
+    "manifestSha256": "540c90e83a4596f65f39a6195834421a461a699ae92c12293176becca3e02312",
+    "archiveSha256": "3c127529af5a940b9c2143ac9ef35f0766fd646f323fdb76d22a479c01583c13",
+    "archiveBytes": 48818100,
+    "applicationPayloadBytesChanged": 0,
+    "excludedDiagnostics": [
+      {
+        "path": "static/_next/__private/trace",
+        "sha256": "3dcd1f9d3815c1c0d328fb72be3b70dbdfbd9d01c79f8b33780f0fd0a9ee6392"
+      }
+    ],
+    "workspaceDependencies": false,
+    "deployed": false
+  },
+  "retainedManifestEntries": 3753,
+  "publicAssets": 549,
+  "functionConfigs": 32,
+  "privateConfigurationMatches": 0,
+  "privatePublicMarkers": 0,
+  "publicMarkerReview": {
+    "knownPublicAlias": "galx-nova-image",
+    "location": "existing audit simulator model option and public image DTO",
+    "reason": "Public GALX alias, not upstream execution identity; no underlying provider/model promise. Retained unchanged."
+  },
+  "buildDiagnosticsExcluded": [
+    {
+      "path": "static/_next/__private/trace",
+      "sha256": "3dcd1f9d3815c1c0d328fb72be3b70dbdfbd9d01c79f8b33780f0fd0a9ee6392"
+    }
+  ],
+  "buildToolsAbsentFromRuntime": true,
+  "runtimeDependencyAdvisories": 0,
+  "sharpVersion": "0.35.5",
+  "novaInferenceAndDiscoveryAbsent": true,
+  "compatibleDurations": true,
+  "scope": "Exact retained clean Media/Connect plus programme/dependency overlay. No deployment or visual acceptance."
+}

@@ -39,6 +39,24 @@ test('function aliases cannot escape the retained artifact', () => {
   } finally { fs.rmSync(f.root, { recursive: true, force: true }); }
 });
 
+test('build diagnostics cannot become public static artifacts', () => {
+  const f = fixture();
+  try {
+    const diagnostics = path.join(f.output, 'static/_next/__private');
+    fs.mkdirSync(diagnostics, { recursive: true });
+    fs.writeFileSync(path.join(diagnostics, 'trace'), 'PRIVATE_SOURCE_PATH_AND_TIMINGS');
+    fs.writeFileSync(path.join(f.output, 'static/approved.js'), 'PUBLIC_APPLICATION_BYTES');
+    const result = retainHostedOutput(f.root);
+    assert(!fs.existsSync(diagnostics));
+    assert.equal(result.excludedDiagnostics.length, 1);
+    assert.equal(result.excludedDiagnostics[0].path, 'static/_next/__private/trace');
+    const manifest = fs.readFileSync(path.join(f.root, 'artifact-manifest.json'), 'utf8');
+    assert(!manifest.includes('__private'));
+    assert.equal(fs.readFileSync(path.join(f.output, 'static/approved.js'), 'utf8'), 'PUBLIC_APPLICATION_BYTES');
+    assert.equal(result.applicationPayloadBytesChanged, 0);
+  } finally { fs.rmSync(f.root, { recursive: true, force: true }); }
+});
+
 test('undeclared dependencies outside the isolated build are rejected', () => {
   const f = fixture(), outside = fs.mkdtempSync(path.join(os.tmpdir(), 'galx-hosted-outside-'));
   try {

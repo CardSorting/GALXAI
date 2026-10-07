@@ -1,0 +1,465 @@
+{
+  "version": 1,
+  "classification": "private",
+  "observedAt": "2026-10-07T22:04:35.125Z",
+  "target": "https://galx.ai",
+  "pages": [
+    {
+      "path": "/exhibitions",
+      "status": 200,
+      "images": 4,
+      "canonical": "https://galx.ai/exhibitions",
+      "bodySha256": "7f8ecb0c05539c06ac7ca7a0cb467fbdf48d5d00a5aeb336677631b1787ce1a1"
+    },
+    {
+      "path": "/exhibitions/instruments-for-the-impossible",
+      "status": 200,
+      "images": 12,
+      "canonical": "https://galx.ai/exhibitions/instruments-for-the-impossible",
+      "bodySha256": "8a1afed1ed1140df842d7dc0fcbc9d3c734a842f5fe7116efd8b4d614967bd50"
+    },
+    {
+      "path": "/exhibitions/things-that-hold-time",
+      "status": 200,
+      "images": 12,
+      "canonical": "https://galx.ai/exhibitions/things-that-hold-time",
+      "bodySha256": "4dd5d97f422de2b80da59b6bb4fd140cabdfa9e3873d1fca7303ebc972c00e44"
+    },
+    {
+      "path": "/editorials/what-an-object-can-ask",
+      "status": 200,
+      "images": 1,
+      "canonical": "https://galx.ai/editorials/what-an-object-can-ask",
+      "bodySha256": "48a882471e0a95f1c64d5085b16723a1193f031e955d92ca28aa5aa1dcdf7609"
+    },
+    {
+      "path": "/editorials/reading-the-trace",
+      "status": 200,
+      "images": 1,
+      "canonical": "https://galx.ai/editorials/reading-the-trace",
+      "bodySha256": "adb4d8745c2db27a8140a101b8d9ce17d3142a907fd1d96ab6e277a958d607b0"
+    }
+  ],
+  "bundles": [
+    {
+      "path": "/_next/static/css/58632e25534e2cc0.css",
+      "status": 200,
+      "sha256": "317bf7b518e533018f91ebb7a689b4c26049d8509d89b443c4e48ec8dd46dba2"
+    },
+    {
+      "path": "/_next/static/css/d4f5d1a73a37fec5.css",
+      "status": 200,
+      "sha256": "56df028529427ac5a6586dfc62feb812b93c2be54de7e497af8b26bdcf28e4a0"
+    },
+    {
+      "path": "/_next/static/css/fdf7d4e9e188178c.css",
+      "status": 200,
+      "sha256": "f592d752cc814f119d028dcf94dc591735d176dacf98b498d5dfbddd912097cd"
+    },
+    {
+      "path": "/_next/static/css/b6448837cfad3460.css",
+      "status": 200,
+      "sha256": "48586729517d70086b3206c7072338368d1db6c9c216eae1533badb07024de7d"
+    },
+    {
+      "path": "/_next/static/chunks/4bd1b696-100b9d70ed4e49c1.js",
+      "status": 200,
+      "sha256": "5421e13a91a9389517b66179f3b4b5eaa0d95245438066d4d7b19ac30aeb809b"
+    },
+    {
+      "path": "/_next/static/chunks/1255-306db9f231b54263.js",
+      "status": 200,
+      "sha256": "6f76c08b6dfa66d96a35c60cd5dbcb886f607fce6171bdffe532222ad3238020"
+    },
+    {
+      "path": "/_next/static/chunks/main-app-c875ab0dc9dbe3e7.js",
+      "status": 200,
+      "sha256": "47f8cd597e4522c1c912d8a40fe33c29060edda2b1ea1df8f555400225621637"
+    },
+    {
+      "path": "/_next/static/chunks/44530001-a26648c04669f22e.js",
+      "status": 200,
+      "sha256": "2ae36604e0ac1f9707036b30e5f3837e3c02a9ba300c16e36b479f614f512338"
+    },
+    {
+      "path": "/_next/static/chunks/2619-04bc32f026a0d946.js",
+      "status": 200,
+      "sha256": "a9b6c2213ea787a015c0169d198b4a90d7a44a0cc17abb0d132e8362d3016ced"
+    },
+    {
+      "path": "/_next/static/chunks/9686-8359d81c722290fa.js",
+      "status": 200,
+      "sha256": "aec46b12e6e605ed325f09e716c7b3cbd4c90258c8aa2578c229d15dcb3d151a"
+    },
+    {
+      "path": "/_next/static/chunks/8805-a9c9215be7d82965.js",
+      "status": 200,
+      "sha256": "eec2ad72367811d1eb42cc84357fc7504e5563d43d52125a949f342c1351c546"
+    },
+    {
+      "path": "/_next/static/chunks/4989-9ddca21e21abb1a9.js",
+      "status": 200,
+      "sha256": "43540a9ae6491981bfc7cdc2c828335ce726a743b343ac29ccf2c4a5553b5ad2"
+    },
+    {
+      "path": "/_next/static/chunks/8624-32641517e25196d4.js",
+      "status": 200,
+      "sha256": "530c02a661e047f26afb309d8b3ad6e35e3f8c1776ad3ac7248f66a1ba54270b"
+    },
+    {
+      "path": "/_next/static/chunks/app/layout-275ca485d745fd29.js",
+      "status": 200,
+      "sha256": "efe2872797e93c4ad977c256c4713d67f601a04031300364b6de0e2559be3416"
+    },
+    {
+      "path": "/_next/static/chunks/app/error-4d1d0e117e4d9744.js",
+      "status": 200,
+      "sha256": "892d74017e67b3bfadbc24cbc4ed6d529dc3c45980b5bb02133ab9bdbcaa2cd4"
+    },
+    {
+      "path": "/_next/static/chunks/app/global-error-27cd47ebb0426c09.js",
+      "status": 200,
+      "sha256": "5d93276b3599d682a6f57831a0ee3051e44b78dce4a4cca3f212fd815ea07ead"
+    },
+    {
+      "path": "/_next/static/chunks/app/not-found-55a2aefcbf474dd5.js",
+      "status": 200,
+      "sha256": "ff4d9f7631f838fe807ad334d3f2fd2b25e501c4031cb7a269a0ed438824c8cb"
+    },
+    {
+      "path": "/_next/static/chunks/app/exhibitions/page-ec205639884cc393.js",
+      "status": 200,
+      "sha256": "63db8b7c180a23f37bb9e21c76db4c4692546c37315424d3fbc181ce31752389"
+    },
+    {
+      "path": "/_next/static/chunks/polyfills-42372ed130431b0a.js",
+      "status": 200,
+      "sha256": "0973c1d64c88adc8e3c950410cb58b288f72118d5965b78049438deb8f2f9683"
+    },
+    {
+      "path": "/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js",
+      "status": 200,
+      "sha256": "2595496fe48df6fcf9b1bc57c29a744c121eb4dd11566466bc13d2e52e6bbcc8"
+    },
+    {
+      "path": "/_next/static/chunks/webpack-0598162444d8b865.js",
+      "status": 200,
+      "sha256": "f891ce7e46f7a3b4d6292cfa6c0ef86665d618a65eb661fbbd4a9d2a68c41104"
+    },
+    {
+      "path": "/_next/static/chunks/app/exhibitions/%5Bslug%5D/page-09eafa3f1afc6589.js",
+      "status": 200,
+      "sha256": "a6e83010fe5727663617c08812447b9479bb142dec3c5537ba9edf3b88443bfc"
+    },
+    {
+      "path": "/_next/static/chunks/app/editorials/%5Bslug%5D/page-09eafa3f1afc6589.js",
+      "status": 200,
+      "sha256": "a6e83010fe5727663617c08812447b9479bb142dec3c5537ba9edf3b88443bfc"
+    }
+  ],
+  "artifacts": [
+    {
+      "kind": "image",
+      "status": 200,
+      "width": 1536,
+      "height": 1024,
+      "metadataAbsent": true,
+      "sha256": "5fa97cc3fb1cfe71c988bb671bded7eefb0887b83fd6d72fadad424461d30528"
+    },
+    {
+      "kind": "image",
+      "status": 200,
+      "width": 1536,
+      "height": 1024,
+      "metadataAbsent": true,
+      "sha256": "84d0a9704fe8e45651673f4efbdff07596d5fce5caf0d214218db8789af2f191"
+    },
+    {
+      "kind": "thumbnail",
+      "status": 200,
+      "width": 341,
+      "height": 512,
+      "metadataAbsent": true,
+      "sha256": "b2970bdd2ad93942d94c961d74ce0ae2352fd5cc42c69fba3d109f1540b63c71"
+    },
+    {
+      "kind": "thumbnail",
+      "status": 200,
+      "width": 512,
+      "height": 341,
+      "metadataAbsent": true,
+      "sha256": "1f79eb71064844317c7c488f44b2a422469a158f0ff2532aa456bd62ebe29163"
+    },
+    {
+      "kind": "image",
+      "status": 200,
+      "width": 1536,
+      "height": 1024,
+      "metadataAbsent": true,
+      "sha256": "5fa97cc3fb1cfe71c988bb671bded7eefb0887b83fd6d72fadad424461d30528"
+    },
+    {
+      "kind": "image",
+      "status": 200,
+      "width": 1374,
+      "height": 1145,
+      "metadataAbsent": true,
+      "sha256": "6e342055c3b6ef9a1148d63696f37de3bf6215ab1cd0e4d88c03b0fb81faefab"
+    },
+    {
+      "kind": "image",
+      "status": 200,
+      "width": 1536,
+      "height": 1024,
+      "metadataAbsent": true,
+      "sha256": "301e4a5b06f88a492a77dffd4ce27322cc1962018898b4c8702f41fde93d3350"
+    },
+    {
+      "kind": "image",
+      "status": 200,
+      "width": 1145,
+      "height": 1374,
+      "metadataAbsent": true,
+      "sha256": "eec32fa19b1d238f5aec2fcbbbfad4a55b4cc7cd317f06b17bdf1d7be15d28e3"
+    },
+    {
+      "kind": "image",
+      "status": 200,
+      "width": 1024,
+      "height": 1536,
+      "metadataAbsent": true,
+      "sha256": "274cedaabbd49cfe9ce9c886383b92453366eb9fd5eeab41485f3bffc23ea8e9"
+    },
+    {
+      "kind": "image",
+      "status": 200,
+      "width": 1536,
+      "height": 1024,
+      "metadataAbsent": true,
+      "sha256": "ed3007ced0573cd73e6fc515efe07d10a89959f4c5cd3bcf3231df313a6dc5de"
+    },
+    {
+      "kind": "image",
+      "status": 200,
+      "width": 1374,
+      "height": 1145,
+      "metadataAbsent": true,
+      "sha256": "13a356f884beb95cfd67d05dd531a157e92c3e8c59c0717ceb13f4ed6100c09d"
+    },
+    {
+      "kind": "image",
+      "status": 200,
+      "width": 1145,
+      "height": 1374,
+      "metadataAbsent": true,
+      "sha256": "ee95902d3543b90c2e7ad7231acdca99893a2d4198bb30a5829427bedc41af26"
+    },
+    {
+      "kind": "image",
+      "status": 200,
+      "width": 1536,
+      "height": 1024,
+      "metadataAbsent": true,
+      "sha256": "a6952f966afda52cd526cf0eb943c80410766930e307ed3c6668343830a4dab5"
+    },
+    {
+      "kind": "image",
+      "status": 200,
+      "width": 1312,
+      "height": 1199,
+      "metadataAbsent": true,
+      "sha256": "243f5ab2409e78e855cb1131a7d98d87f59aced78ffa59f449a80937ecc24bda"
+    },
+    {
+      "kind": "image",
+      "status": 200,
+      "width": 1536,
+      "height": 1024,
+      "metadataAbsent": true,
+      "sha256": "d087aec049a2d23c81e7e94d984806ec7c83fa54e1593a48482e0e7848dc525d"
+    },
+    {
+      "kind": "image",
+      "status": 200,
+      "width": 1254,
+      "height": 1254,
+      "metadataAbsent": true,
+      "sha256": "793a001434e1129dcdac27483f502446c7598b40b1618a506ff897f87aa837df"
+    },
+    {
+      "kind": "image",
+      "status": 200,
+      "width": 1536,
+      "height": 1024,
+      "metadataAbsent": true,
+      "sha256": "0947401eeba7656c86877e87c683184a0d468352cda6f84661981894cb5d1f84"
+    },
+    {
+      "kind": "image",
+      "status": 200,
+      "width": 1024,
+      "height": 1536,
+      "metadataAbsent": true,
+      "sha256": "a2409d37a70882910d7843b8558f1f60b66512122e514042ce4bbe027322f8db"
+    },
+    {
+      "kind": "image",
+      "status": 200,
+      "width": 1536,
+      "height": 1024,
+      "metadataAbsent": true,
+      "sha256": "13801d4c63deb5c93c48c4ddcf950d6e0296ea1483808efa93a25681cab2d060"
+    },
+    {
+      "kind": "image",
+      "status": 200,
+      "width": 1024,
+      "height": 1536,
+      "metadataAbsent": true,
+      "sha256": "7d4720a54b958f612dd6ee84e0b55d5ab64f97a33e173731b3107b67193a40be"
+    },
+    {
+      "kind": "image",
+      "status": 200,
+      "width": 1024,
+      "height": 1536,
+      "metadataAbsent": true,
+      "sha256": "b6b148e79253614f658cea0f5a4b5c5c5146b9e05985f09753604ef9875d3e9e"
+    },
+    {
+      "kind": "image",
+      "status": 200,
+      "width": 1536,
+      "height": 1024,
+      "metadataAbsent": true,
+      "sha256": "9427250904d2a8dccd59e1de35d99d63ede7e698e17f3891f61188ecadbbf873"
+    },
+    {
+      "kind": "image",
+      "status": 200,
+      "width": 1254,
+      "height": 1254,
+      "metadataAbsent": true,
+      "sha256": "0ff1a2e9f1ffc5f14cb6580df55dd8f3cb9914100254f48f3d8d4e65c01f3f4e"
+    },
+    {
+      "kind": "image",
+      "status": 200,
+      "width": 1536,
+      "height": 1024,
+      "metadataAbsent": true,
+      "sha256": "84d0a9704fe8e45651673f4efbdff07596d5fce5caf0d214218db8789af2f191"
+    },
+    {
+      "kind": "image",
+      "status": 200,
+      "width": 1536,
+      "height": 1024,
+      "metadataAbsent": true,
+      "sha256": "28c3afb91415d985efaea85c6f31272b06223354de3d2f2342c2aa9117efefdc"
+    },
+    {
+      "kind": "image",
+      "status": 200,
+      "width": 1374,
+      "height": 1145,
+      "metadataAbsent": true,
+      "sha256": "7a579b24cce0fcd622b5b98888d1228fbade25d3858d5441d737e04dbf6f1895"
+    },
+    {
+      "kind": "image",
+      "status": 200,
+      "width": 1672,
+      "height": 941,
+      "metadataAbsent": true,
+      "sha256": "4373a6b1f40a4f3c8f520a65ce342972cf2f5f0190df49486c878b4268eeeecd"
+    },
+    {
+      "kind": "image",
+      "status": 200,
+      "width": 1536,
+      "height": 1024,
+      "metadataAbsent": true,
+      "sha256": "9dd83b544a3309f499a0731ecdf4d6b9cfe435338786f7a7b3c48fbbaca846a9"
+    },
+    {
+      "kind": "image",
+      "status": 200,
+      "width": 1024,
+      "height": 1536,
+      "metadataAbsent": true,
+      "sha256": "274cedaabbd49cfe9ce9c886383b92453366eb9fd5eeab41485f3bffc23ea8e9"
+    },
+    {
+      "kind": "image",
+      "status": 200,
+      "width": 1536,
+      "height": 1024,
+      "metadataAbsent": true,
+      "sha256": "84d0a9704fe8e45651673f4efbdff07596d5fce5caf0d214218db8789af2f191"
+    }
+  ],
+  "denials": [
+    {
+      "path": "/exhibitions/draft",
+      "ordinaryBearer": false,
+      "status": 404
+    },
+    {
+      "path": "/exhibitions/draft",
+      "ordinaryBearer": true,
+      "status": 404
+    },
+    {
+      "path": "/editorials/private",
+      "ordinaryBearer": false,
+      "status": 404
+    },
+    {
+      "path": "/editorials/private",
+      "ordinaryBearer": true,
+      "status": 404
+    },
+    {
+      "path": "/exhibitions/instruments-for-the-impossible/diagnostics",
+      "ordinaryBearer": false,
+      "status": 404
+    },
+    {
+      "path": "/exhibitions/instruments-for-the-impossible/diagnostics",
+      "ordinaryBearer": true,
+      "status": 404
+    },
+    {
+      "path": "/api/exhibitions",
+      "ordinaryBearer": false,
+      "status": 401
+    },
+    {
+      "path": "/api/exhibitions",
+      "ordinaryBearer": true,
+      "status": 401
+    },
+    {
+      "path": "/v1/images/assets/invalid-token",
+      "ordinaryBearer": false,
+      "status": 404
+    },
+    {
+      "path": "/v1/images/assets/invalid-token",
+      "ordinaryBearer": true,
+      "status": 404
+    },
+    {
+      "path": "/api/relay/status",
+      "ordinaryBearer": false,
+      "status": 401
+    },
+    {
+      "path": "/api/relay/status",
+      "ordinaryBearer": true,
+      "status": 401
+    }
+  ],
+  "limits": "Live canonical-host HTTP, RSC, browser assets and sanitized image artifacts; no browser layout, full accessibility audit, sign-in, consent, payment or new generation."
+}

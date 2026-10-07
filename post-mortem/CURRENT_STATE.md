@@ -4,6 +4,54 @@
 
 The newest observation appears first. Earlier dated sections retain evidence from their stated observation; they do not override the latest determination or authorize a new action.
 
+### Exhibition and editorial programme — deployed October 7, 2026
+
+The owner authorized the commit and production push after the denied visual
+review was disclosed. Feature commit `436d457b16e9a84eb817ce2970dd2df560128f30`
+is on private repository `main`. `/exhibitions`, both twelve-work exhibitions
+and the two accompanying essays are now served by
+`dpl_B2967E91VEBhmCUpcdfNDTAvSVtU` on `galx.ai`, `www.galx.ai` and
+`galxai.vercel.app`. The [deployment record](releases/2026-10-07-exhibition-programme-deployment.json)
+retains exact alias readback, source selection, package identity and rollback.
+The project’s older production-target pointer is not the serving alias identity.
+
+The clean hosted source extends the hash-verified accepted Media/Connect
+snapshot with the exact programme patch, public files and reviewed dependency
+correction. Source manifest is
+`da5af9fa81c2115e46bc660bd44f8a415b14568b04fec2fc682e67eabd9a3561`;
+retained archive is
+`3c127529af5a940b9c2143ac9ef35f0766fd646f323fdb76d22a479c01583c13`.
+The pinned Linux Node 22 production build generated 158 static pages. Package
+verification covered 3,753 retained entries and 549 static assets. A build trace
+found during preflight was excluded before upload; four packaging regression
+checks pass and no application bytes changed during retention. Runtime audit
+reports zero advisories; the full development audit still reports 13 advisories.
+
+Protected-candidate and canonical public checks each passed five programme
+pages, 22 linked browser assets, 30 sanitized image/thumbnail responses and
+12 hostile/unauthorized denials. The [full public scan](releases/2026-10-07-exhibition-programme-public-scan.json)
+passed 20 rendered pages, 29 route checks and 414 browser assets, including
+protected-asset denials, with no tested private marker, configured secret or
+residency brief match. Ten public baseline checks preserve the canonical Connect
+issuer and S256, private reading boundaries, diagnostic denial and inference
+retirement. All 38 canonical-host cache checks pass. These are dated, scoped
+HTTP/artifact checks; desktop/mobile visual acceptance remains **recapture**.
+
+GitHub documentation and gateway checks passed; gateway deployment was skipped.
+The application workflow failed in the unchanged legacy free-image database
+fixture, whose boolean fourth argument predates the current private/STAR image
+contract. Its preceding image/identity/session/billing and isolated Auth/image
+database checks passed; later checks were skipped. Full application CI is not
+certified by this release. The failure and unchanged-source comparison remain
+in the deployment record, with no quota/schema repair hidden in this page pass.
+
+The previous serving release `dpl_QBr2WUvRcvF5RFqJvdc8FaZGaqHV` and exact
+artifact remain compatible rollback evidence. The Mac Nova image, relay
+services, database/grants, actors and retirement firewall remain unchanged;
+the Nova hostname is absent from the Vercel domain list. No generation, residency
+replay, consent/grant mutation, paid settlement or Sites publication occurred.
+Existing prevention actions retain their separate status.
+
 ### Exhibition and editorial programme — October 7, 2026, local only
 
 The owner requested a formal institutional presentation of the published STAR

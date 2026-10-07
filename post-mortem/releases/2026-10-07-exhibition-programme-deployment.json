@@ -1,0 +1,232 @@
+{
+  "version": 1,
+  "classification": "private",
+  "observedAt": "2026-10-07T22:05:23.433Z",
+  "status": "DEPLOYED",
+  "acceptance": "Scoped protected-candidate and canonical public HTTP checks passed; visual review pending, full GitHub application CI failed in unchanged legacy fixture.",
+  "authorization": "Owner requested git commit and push to production after visual-review limitation was disclosed.",
+  "featureCommit": "436d457b16e9a84eb817ce2970dd2df560128f30",
+  "branch": "main",
+  "repositoryVisibility": "private",
+  "source": {
+    "version": 1,
+    "acceptedSourceManifestSha256": "ef292883a4e84af9b91b14d7f86fdb237c3e5489abd7d3890257f425c0642d3f",
+    "baseRevision": "aa5b2c1aa33bc912d0d457fce94ba0cb84bc83d2",
+    "delta": "New programme files and exact working-tree programme patch only; prior accepted Connect/Media source preserved.",
+    "newSourceFiles": {
+      "public/fonts/bodoni-moda-OFL.txt": "931dfe2e0cd3c9443295f5c1d754b8a8403bf060df50c1d5900267ade83d0046",
+      "src/app/editorials/[slug]/page.tsx": "6aa7538269d84fb16a7088a1ffa9bb1ce49de7250cab050923e4b0c5a89872ff",
+      "src/app/editorials/page.tsx": "688490c2e4e71374122f3267f7af9e6e1be9f874d1a33dd48f01e1016cf4f71d",
+      "src/app/exhibitions/[slug]/page.tsx": "868b582defd2760fcb1778e2c41037b58b1d820fe274c825dbe9711cd4d82425",
+      "src/app/exhibitions/page.tsx": "0f293a6d75bef0547537b221e555fc872c8adbcc6e12295bc442d7d826e8e5d4",
+      "src/components/exhibitions/ArtworkImage.tsx": "c3e0839c70406e8b0726d06094d44770d50eae5c856c4070e7c7490087307919",
+      "src/components/exhibitions/Programme.tsx": "9ca7c2c5cd30174385833342dfd12b0c98df9aea4c188bfd61ef4aab8787cda5",
+      "src/components/exhibitions/fonts/BodoniModa.ttf": "550f5e34ee0a828d7941b1fe9bc58b34e5260d3f33a61532e6d0a0114e79a5cf",
+      "src/components/exhibitions/programme.module.css": "1ff3f181b4cc356501837c1ddafabca1e5fe011bf6f16f8f4dad7bfdaadb2b62",
+      "src/lib/exhibitions/catalog.ts": "5a5d9ef0870fbdaa65fd37dc5b6c83661a61b2ad5fc234b4177fc1b2d9722efd",
+      "src/lib/exhibitions/paths.ts": "e195e3210ddcc87b50e7a9b305068ec7f673cbb473f39394a9af61d8ddfc0ee3",
+      "src/lib/exhibitions/public-artwork.ts": "ba6106f108f1d21b451a129a3cceeae13c2cd1fbddd8c0e6b1fb4979af5a409b",
+      "src/lib/exhibitions/published-works.ts": "4a9e4de6b14f1456a485da946911b328f513e9c8b3b4b6bf2e6224e7b9bb0fbb"
+    },
+    "patchSha256": "419b9c1b864338c282cb90d04d7098fb28f0f7e4df6f1b876cb1565639c3f797",
+    "deployed": true,
+    "dependencyCorrectionFiles": {
+      "package.json": "d05821f475268559db698775def3fb91112a8e4cb90d2ee58ab169758876bcb4",
+      "package-lock.json": "d8bb0860ae266479d2a6648fff6c46fdc7a0c95863bad72c68a326bdd5fb3600"
+    },
+    "abandonedCandidate": "build: stopped during compilation after required runtime audit failed; never deployed",
+    "sourceManifestSha256": "da5af9fa81c2115e46bc660bd44f8a415b14568b04fec2fc682e67eabd9a3561",
+    "selection": "Accepted Media/Connect snapshot plus exact programme/shared-file patch and explicit dependency correction. Main also contains Mac-only source and was not deployed wholesale."
+  },
+  "target": {
+    "observedAt": "2026-10-07T22:03:56.856Z",
+    "deployment": {
+      "id": "dpl_B2967E91VEBhmCUpcdfNDTAvSVtU",
+      "url": "galxai-etbxekia1-cardsortings-projects.vercel.app",
+      "readyState": "READY",
+      "target": "production",
+      "public": false
+    },
+    "aliases": [
+      {
+        "alias": "galx.ai",
+        "deploymentId": "dpl_B2967E91VEBhmCUpcdfNDTAvSVtU"
+      },
+      {
+        "alias": "www.galx.ai",
+        "deploymentId": "dpl_B2967E91VEBhmCUpcdfNDTAvSVtU"
+      },
+      {
+        "alias": "galxai.vercel.app",
+        "deploymentId": "dpl_B2967E91VEBhmCUpcdfNDTAvSVtU"
+      }
+    ],
+    "projectTargetProductionId": "dpl_4uwFyPMJ6YV7njXsWQbb7a8MZHKh",
+    "domains": [
+      "www.galx.ai",
+      "galx.ai",
+      "galxai.vercel.app"
+    ]
+  },
+  "rollback": {
+    "deploymentId": "dpl_QBr2WUvRcvF5RFqJvdc8FaZGaqHV",
+    "retainedPackage": ".relay/residency-delivery-20261007/app/.vercel/output",
+    "preserveRetirementFirewall": true
+  },
+  "packaging": {
+    "artifact": {
+      "at": "2026-10-07T22:00:25.283Z",
+      "format": "Vercel Build Output API",
+      "functions": 32,
+      "mappedReferences": 8348,
+      "retainedPayloads": 1844,
+      "files": 3753,
+      "manifestSha256": "540c90e83a4596f65f39a6195834421a461a699ae92c12293176becca3e02312",
+      "archiveSha256": "3c127529af5a940b9c2143ac9ef35f0766fd646f323fdb76d22a479c01583c13",
+      "archiveBytes": 48818100,
+      "applicationPayloadBytesChanged": 0,
+      "excludedDiagnostics": [
+        {
+          "path": "static/_next/__private/trace",
+          "sha256": "3dcd1f9d3815c1c0d328fb72be3b70dbdfbd9d01c79f8b33780f0fd0a9ee6392"
+        }
+      ],
+      "workspaceDependencies": false,
+      "deployed": false
+    },
+    "retainedFiles": 3753,
+    "publicAssets": 549,
+    "functionConfigs": 32,
+    "retentionScriptSha256": "6f2247d4526e25c3bf9dfb280fd0a8996f75e1d70b8cff802605ac2a3a83158a",
+    "packagingRegressionChecks": 4,
+    "diagnosticsExcluded": [
+      {
+        "path": "static/_next/__private/trace",
+        "sha256": "3dcd1f9d3815c1c0d328fb72be3b70dbdfbd9d01c79f8b33780f0fd0a9ee6392"
+      }
+    ],
+    "applicationBytesChangedByRetention": 0,
+    "correctedBuild": "Clean pinned Linux Node 22 production build passed; 158 static pages. Packaging exclusion reused those exact compiled application bytes, regenerated the manifest/archive and passed exact verification."
+  },
+  "checks": {
+    "candidate": {
+      "pages": 5,
+      "browserAssets": 22,
+      "sanitizedArtifacts": 30,
+      "denials": 12,
+      "baseline": 10
+    },
+    "public": {
+      "pages": 5,
+      "browserAssets": 23,
+      "sanitizedArtifacts": 30,
+      "denials": 12,
+      "baseline": 10,
+      "cache": 38,
+      "fullScan": {
+        "renderedPages": 20,
+        "httpChecks": 29,
+        "browserAssets": 414,
+        "byteIdentical": 289,
+        "privateAssetDenials": 124,
+        "platformToolbar": 1,
+        "privateMarkers": 0,
+        "secretMatches": 0,
+        "residencyPromptMatches": 0,
+        "excludedPublicKeyAliases": [
+          "SUPABASE_SERVICE_ROLE_KEY"
+        ]
+      }
+    },
+    "runtimeDependencyAdvisories": 0,
+    "remainingDevelopmentDependencyAdvisories": {
+      "info": 0,
+      "low": 0,
+      "moderate": 3,
+      "high": 10,
+      "critical": 0,
+      "total": 13
+    },
+    "exactPrivateConfigurationMatches": 0
+  },
+  "githubChecks": {
+    "commit": "436d457b16e9a84eb817ce2970dd2df560128f30",
+    "documentation": {
+      "result": "success",
+      "run": 37693015648
+    },
+    "gateway": {
+      "result": "success",
+      "run": 37693015634,
+      "deploymentStep": "skipped"
+    },
+    "application": {
+      "result": "failure",
+      "run": 37693015641,
+      "failure": "scripts/test-free-generation-gate-db.ts:29 expected FreeGenerationGateError while calling ImageRequestRepository.create with the retired boolean fourth argument. Current fourth argument is the private/star_published work class. No quota/schema/runtime repair was included in this programme release.",
+      "unchangedSourceComparison": [
+        {
+          "path": "scripts/test-free-generation-gate-db.ts",
+          "unchangedFromPreviousMain": true,
+          "sha256": "2919f39490203795965f494f61b288305ea7136e544515cc504d9e8a0ff7e037"
+        },
+        {
+          "path": "scripts/test-free-generation-quota-db.ts",
+          "unchangedFromPreviousMain": true,
+          "sha256": "26d3381b0a90285cce6d954b954601fb7a5a4596998389ac7091cfb7b49d9b04"
+        },
+        {
+          "path": "src/lib/images/request-repository.ts",
+          "unchangedFromPreviousMain": true,
+          "sha256": "c0a891270d5f6bf193dc56466c058b6333880efc4944b62098ec436ad3928e0c"
+        }
+      ],
+      "precedingChecks": "Documentation, image/identity/security, account session, billing, isolated Auth and image database checks passed before this failure; subsequent workflow checks skipped. No full CI success claimed."
+    }
+  },
+  "preserved": {
+    "macNovaImageAndService": true,
+    "databaseAndGrants": true,
+    "relayServicesAndActors": true,
+    "noNewGenerationOrResidencyReplay": true,
+    "hostingConfiguration": true,
+    "novaDomainNotBoundToVercel": true
+  },
+  "limits": [
+    "Browser security denied local page review; finish disposition remains recapture. No desktop/mobile visual acceptance.",
+    "No authenticated sign-in/Connect consent, paid creation/settlement, Sites publication, load test or continuous availability claim.",
+    "Runtime dependency audit is clean; full development audit and full application GitHub CI are not clean."
+  ],
+  "evidence": [
+    "post-mortem/releases/2026-10-07-exhibition-programme-package-review.json",
+    "post-mortem/releases/2026-10-07-exhibition-programme-candidate-http.json",
+    "post-mortem/releases/2026-10-07-exhibition-programme-candidate-baseline.json",
+    "post-mortem/releases/2026-10-07-exhibition-programme-public-http.json",
+    "post-mortem/releases/2026-10-07-exhibition-programme-public-baseline.json",
+    "post-mortem/releases/2026-10-07-exhibition-programme-public-cache.json",
+    "post-mortem/releases/2026-10-07-exhibition-programme-public-scan.json",
+    "post-mortem/releases/2026-10-07-exhibition-programme-dependency-review.json",
+    "post-mortem/releases/2026-10-07-exhibition-programme-local-review.json"
+  ],
+  "semanticReview": {
+    "sources": [
+      "scripts/retain-hosted-output.mjs",
+      "scripts/test-hosted-packaging.mjs",
+      "scripts/package-hosted-candidate.mjs",
+      "src/lib/exhibitions/catalog.ts",
+      "src/lib/exhibitions/public-artwork.ts",
+      "src/lib/exhibitions/published-works.ts",
+      "src/lib/community/public-participants.ts",
+      "src/lib/security/preview-policy.ts"
+    ],
+    "completeGuides": [
+      "docs/VERCEL_DEPLOYMENT.md",
+      "docs/reference/exhibition-programme.md",
+      "docs/runbooks/release-readiness.md",
+      "docs/DOCUMENTATION_POLICY.md",
+      "docs/how-to/change-with-documentation.md"
+    ],
+    "correction": "Exclude build diagnostics before static manifest/archive; retain paths/hashes privately and preserve actual application bytes. A broad package scan match for galx-nova-image was reviewed as an existing public GALX alias in the audit simulator/public DTO, not an upstream model identity. No model capability change.",
+    "remainingLimits": "Bounded source and complete affected-guide review; not an exhaustive audit of unchanged component inventories. Preserve wider prior domain evidence and existing unrelated prevention actions. No ADR status changed."
+  }
+}

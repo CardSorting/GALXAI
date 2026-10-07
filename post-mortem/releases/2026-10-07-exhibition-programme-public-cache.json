@@ -1,0 +1,261 @@
+{
+  "observed_at": "2026-10-07T22:03:47.168Z",
+  "origin": "https://galx.ai",
+  "checks": [
+    {
+      "path": "/images/create",
+      "method": "GET",
+      "legacy_prefetch": false,
+      "status": 307,
+      "cache": "private, no-store"
+    },
+    {
+      "path": "/images/create",
+      "method": "GET",
+      "legacy_prefetch": true,
+      "status": 307,
+      "cache": "private, no-store"
+    },
+    {
+      "path": "/images/create",
+      "method": "HEAD",
+      "legacy_prefetch": false,
+      "status": 307,
+      "cache": "private, no-store"
+    },
+    {
+      "path": "/images/create",
+      "method": "HEAD",
+      "legacy_prefetch": true,
+      "status": 307,
+      "cache": "private, no-store"
+    },
+    {
+      "path": "/images/library",
+      "method": "GET",
+      "legacy_prefetch": false,
+      "status": 307,
+      "cache": "private, no-store"
+    },
+    {
+      "path": "/images/library",
+      "method": "GET",
+      "legacy_prefetch": true,
+      "status": 307,
+      "cache": "private, no-store"
+    },
+    {
+      "path": "/images/library",
+      "method": "HEAD",
+      "legacy_prefetch": false,
+      "status": 307,
+      "cache": "private, no-store"
+    },
+    {
+      "path": "/images/library",
+      "method": "HEAD",
+      "legacy_prefetch": true,
+      "status": 307,
+      "cache": "private, no-store"
+    },
+    {
+      "path": "/images/favorites",
+      "method": "GET",
+      "legacy_prefetch": false,
+      "status": 307,
+      "cache": "private, no-store"
+    },
+    {
+      "path": "/images/favorites",
+      "method": "GET",
+      "legacy_prefetch": true,
+      "status": 307,
+      "cache": "private, no-store"
+    },
+    {
+      "path": "/images/favorites",
+      "method": "HEAD",
+      "legacy_prefetch": false,
+      "status": 307,
+      "cache": "private, no-store"
+    },
+    {
+      "path": "/images/favorites",
+      "method": "HEAD",
+      "legacy_prefetch": true,
+      "status": 307,
+      "cache": "private, no-store"
+    },
+    {
+      "path": "/library",
+      "method": "GET",
+      "legacy_prefetch": false,
+      "status": 307,
+      "cache": "private, no-store"
+    },
+    {
+      "path": "/library",
+      "method": "GET",
+      "legacy_prefetch": true,
+      "status": 307,
+      "cache": "private, no-store"
+    },
+    {
+      "path": "/library",
+      "method": "HEAD",
+      "legacy_prefetch": false,
+      "status": 307,
+      "cache": "private, no-store"
+    },
+    {
+      "path": "/library",
+      "method": "HEAD",
+      "legacy_prefetch": true,
+      "status": 307,
+      "cache": "private, no-store"
+    },
+    {
+      "path": "/images/create/private.css",
+      "method": "GET",
+      "legacy_prefetch": false,
+      "status": 307,
+      "cache": "private, no-store"
+    },
+    {
+      "path": "/images/create/private.css",
+      "method": "GET",
+      "legacy_prefetch": true,
+      "status": 307,
+      "cache": "private, no-store"
+    },
+    {
+      "path": "/images/create/private.css",
+      "method": "HEAD",
+      "legacy_prefetch": false,
+      "status": 307,
+      "cache": "private, no-store"
+    },
+    {
+      "path": "/images/create/private.css",
+      "method": "HEAD",
+      "legacy_prefetch": true,
+      "status": 307,
+      "cache": "private, no-store"
+    },
+    {
+      "path": "/images/library/private.js",
+      "method": "GET",
+      "legacy_prefetch": false,
+      "status": 307,
+      "cache": "private, no-store"
+    },
+    {
+      "path": "/images/library/private.js",
+      "method": "GET",
+      "legacy_prefetch": true,
+      "status": 307,
+      "cache": "private, no-store"
+    },
+    {
+      "path": "/images/library/private.js",
+      "method": "HEAD",
+      "legacy_prefetch": false,
+      "status": 307,
+      "cache": "private, no-store"
+    },
+    {
+      "path": "/images/library/private.js",
+      "method": "HEAD",
+      "legacy_prefetch": true,
+      "status": 307,
+      "cache": "private, no-store"
+    },
+    {
+      "path": "/images/favorites/private.png",
+      "method": "GET",
+      "legacy_prefetch": false,
+      "status": 307,
+      "cache": "private, no-store"
+    },
+    {
+      "path": "/images/favorites/private.png",
+      "method": "GET",
+      "legacy_prefetch": true,
+      "status": 307,
+      "cache": "private, no-store"
+    },
+    {
+      "path": "/images/favorites/private.png",
+      "method": "HEAD",
+      "legacy_prefetch": false,
+      "status": 307,
+      "cache": "private, no-store"
+    },
+    {
+      "path": "/images/favorites/private.png",
+      "method": "HEAD",
+      "legacy_prefetch": true,
+      "status": 307,
+      "cache": "private, no-store"
+    },
+    {
+      "path": "/library/private.png",
+      "method": "GET",
+      "legacy_prefetch": false,
+      "status": 307,
+      "cache": "private, no-store"
+    },
+    {
+      "path": "/library/private.png",
+      "method": "GET",
+      "legacy_prefetch": true,
+      "status": 307,
+      "cache": "private, no-store"
+    },
+    {
+      "path": "/library/private.png",
+      "method": "HEAD",
+      "legacy_prefetch": false,
+      "status": 307,
+      "cache": "private, no-store"
+    },
+    {
+      "path": "/library/private.png",
+      "method": "HEAD",
+      "legacy_prefetch": true,
+      "status": 307,
+      "cache": "private, no-store"
+    },
+    {
+      "path": "/images",
+      "status": 308,
+      "cache": "private, no-store"
+    },
+    {
+      "path": "/images?view=library",
+      "status": 308,
+      "cache": "private, no-store"
+    },
+    {
+      "path": "/images?view=favorites",
+      "status": 308,
+      "cache": "private, no-store"
+    },
+    {
+      "path": "/images?view=create",
+      "status": 308,
+      "cache": "private, no-store"
+    },
+    {
+      "path": "/login",
+      "status": 200,
+      "cache": "private, no-cache, no-store, max-age=0, must-revalidate"
+    },
+    {
+      "path": "versioned browser asset",
+      "status": 200,
+      "cache": "public,max-age=31536000,immutable"
+    }
+  ],
+  "result": "passed"
+}

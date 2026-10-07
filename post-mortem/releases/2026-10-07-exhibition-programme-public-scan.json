@@ -1,0 +1,3110 @@
+{
+  "version": 1,
+  "classification": "private",
+  "observedAt": "2026-10-07T22:04:25.392Z",
+  "target": "https://galx.ai",
+  "status": "PASSED",
+  "httpChecks": [
+    {
+      "route": "/",
+      "status": 200,
+      "bytes": 74985,
+      "sha256": "68b669935352d7e56864565545c9f40ba5e441ddf8a53331b2dfdc5ca68305bc"
+    },
+    {
+      "route": "/exhibitions",
+      "status": 200,
+      "bytes": 64715,
+      "sha256": "6571383bd492335d9a35a4a7bc0a9d3b6564c4455fc3a449b9ff0bdc5c2105f6"
+    },
+    {
+      "route": "/exhibitions/instruments-for-the-impossible",
+      "status": 200,
+      "bytes": 98746,
+      "sha256": "a7155e5df9830b799be71a7357f488fe6091e3e8cac7993af65994fd79e6f4b5"
+    },
+    {
+      "route": "/exhibitions/things-that-hold-time",
+      "status": 200,
+      "bytes": 96908,
+      "sha256": "8ae575c8777a733a294d23b7900cdb96aac4b294316f298c642b93e93ae9d89f"
+    },
+    {
+      "route": "/editorials/what-an-object-can-ask",
+      "status": 200,
+      "bytes": 60932,
+      "sha256": "53b8f9c9d3d3481b4d3e7dc231c6f1946b79e819ae583a990e5886fbf7070cc8"
+    },
+    {
+      "route": "/editorials/reading-the-trace",
+      "status": 200,
+      "bytes": 60612,
+      "sha256": "1bd1afddf2196b66587573050f15e022b422a5616143e9e5f5648a7614490cb5"
+    },
+    {
+      "route": "/explore?sort=recent",
+      "status": 200,
+      "bytes": 57670,
+      "sha256": "3e152043083c0ed27388b78b58ed71a973a8c38e852cd148d2e22e46f5667358"
+    },
+    {
+      "route": "/stars",
+      "status": 200,
+      "bytes": 111939,
+      "sha256": "37a0fd5f743cff54432af4a64c2d8451f1e0adcd8f4a267270ef14b559f087b2"
+    },
+    {
+      "route": "/profile/vanta",
+      "status": 200,
+      "bytes": 103109,
+      "sha256": "4f06cc8e56f8b524948a061bfbaca18299dcae356c1df801cd27f0bb580115fa"
+    },
+    {
+      "route": "/profile/morrowkest",
+      "status": 200,
+      "bytes": 102106,
+      "sha256": "85f6b00bbc02e13a18d1da1c2c41690ab90c3c764fc07a04e37997790d22e4d8"
+    },
+    {
+      "route": "/profile/soravale",
+      "status": 200,
+      "bytes": 105670,
+      "sha256": "ab49c6594118bb57b3f747115d6cb44150831271a2e0b434e70661e861753f65"
+    },
+    {
+      "route": "/profile/ilyx",
+      "status": 200,
+      "bytes": 92789,
+      "sha256": "c93cf77e6cf8a592275267f8dffd29b35fe4e0359cd823af81acbb23fbca69ca"
+    },
+    {
+      "route": "/profile/nemiorra",
+      "status": 200,
+      "bytes": 88609,
+      "sha256": "9578f0e14539f925305910b1473d0bcdfaf7ac82bf7c1c5524f0bcc0c6796de6"
+    },
+    {
+      "route": "/profile/caelrune",
+      "status": 200,
+      "bytes": 88715,
+      "sha256": "aa0017d02b7b92b604eb6935821f200b63e4de85df17a4eb6a021cdce688a3af"
+    },
+    {
+      "route": "/profile/ossathread",
+      "status": 200,
+      "bytes": 87037,
+      "sha256": "e78fc1cb38e78ef811637c5d7190c870b957191459acbdc162b242cc96f24344"
+    },
+    {
+      "route": "/profile/juniperarc",
+      "status": 200,
+      "bytes": 87045,
+      "sha256": "da753c768953d8aa83104cad7bc6fd8f066e7279cbcf605c1cf4d085f0836783"
+    },
+    {
+      "route": "/profile/tavianash",
+      "status": 200,
+      "bytes": 88914,
+      "sha256": "7ed574a3a72fe5517b34075d30749abf262a1670352ef8f0c19bb7664db0f471"
+    },
+    {
+      "route": "/profile/lumakade",
+      "status": 200,
+      "bytes": 86983,
+      "sha256": "ffe15da0b0c57674f3625449a955129e98c6d64cb01ee5e8a6a7eaaec58e3ba5"
+    },
+    {
+      "route": "/profile/serenvoss",
+      "status": 200,
+      "bytes": 86958,
+      "sha256": "58818bc4c62478e4b7e866d7838401a1883ef18e2097030a2815cf213be5efc9"
+    },
+    {
+      "route": "/profile/nyxenbloom",
+      "status": 200,
+      "bytes": 87123,
+      "sha256": "e7522f934851345c78b4ad7450d824562153c58f73b8ed2569ea58fa23ad576e"
+    },
+    {
+      "route": "/v1/images/generations",
+      "method": "POST",
+      "status": 401,
+      "bytes": 130,
+      "sha256": "78edfac2c60cd6ee78f924884517afdef4cdda9c837e4795d6706a87d4d05f90"
+    },
+    {
+      "route": "/v1/images/assets/invalid-capability",
+      "method": "GET",
+      "status": 404,
+      "bytes": 130,
+      "sha256": "94564c49cd87582e42049938b50bcef798c4fe05ce22620f0f52b5b8200f3855"
+    },
+    {
+      "route": "/v1/images/assets/invalid-capability/thumbnail",
+      "method": "GET",
+      "status": 404,
+      "bytes": 130,
+      "sha256": "a057c615972f4774fdc8123f5a1787ee52bc1941ff05f0fa399cd960d8171530"
+    },
+    {
+      "route": "/api/relay/status",
+      "method": "GET",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e"
+    },
+    {
+      "route": "/api/internal/telemetry",
+      "method": "GET",
+      "status": 404,
+      "bytes": 21,
+      "sha256": "c8d3eae160a892e32837db3dcae515e843e5383fef52b8141940c8bcf8b6d59f"
+    },
+    {
+      "route": "/post-mortem/CURRENT_STATE.md",
+      "method": "GET",
+      "status": 404,
+      "bytes": 25,
+      "sha256": "65d1cb2e193cbca0168e8de3a1c19cbc83af6b6ca80e1e565e470413c34501c2"
+    },
+    {
+      "route": "/v1/inference",
+      "method": "POST",
+      "status": 403,
+      "bytes": 59,
+      "sha256": "4cc88869b7876fb32d9567db3d5b90ed71c5fe7042dc706b92ca00cfd680d6e1"
+    },
+    {
+      "route": "/v1/embeddings",
+      "method": "POST",
+      "status": 403,
+      "bytes": 59,
+      "sha256": "87545c9275dff35b73a49f1d1740690e060b511621955e25a239755cfdc9c512"
+    },
+    {
+      "route": "/api/queues",
+      "method": "POST",
+      "status": 403,
+      "bytes": 59,
+      "sha256": "f30d10e34c20dcea4bc03c88ab6165957d9dc0c5d4ec599f19d35328e4bc793e"
+    }
+  ],
+  "assets": [
+    {
+      "path": "/_next/static/chunks/1255-306db9f231b54263.js",
+      "status": 200,
+      "bytes": 174127,
+      "sha256": "6f76c08b6dfa66d96a35c60cd5dbcb886f607fce6171bdffe532222ad3238020",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/2619-04bc32f026a0d946.js",
+      "status": 200,
+      "bytes": 8564,
+      "sha256": "a9b6c2213ea787a015c0169d198b4a90d7a44a0cc17abb0d132e8362d3016ced",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/2800-5b509cbd15a62c71.js",
+      "status": 200,
+      "bytes": 39338,
+      "sha256": "b22c72ec6ce13f79ed7208762db7bdf759e9f13a042e92511be3b3b64d1c8999",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/2848-db6a6cdde117325c.js",
+      "status": 200,
+      "bytes": 18454,
+      "sha256": "0582104df2c1ba680ec293e9fe3d31d022c357acecef2130f4e25b051eb85ea3",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/4238-5363639f80387e01.js",
+      "status": 200,
+      "bytes": 11718,
+      "sha256": "8a8e4fa7fff8868061dfa185acd99d83e8fab983f26de9ecd8388e87e515ff0b",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/4402-6c190c901bb47647.js",
+      "status": 200,
+      "bytes": 15164,
+      "sha256": "da428c62dd54baf6ee8c87ef2b61dbb27fea504bda63af3cf3638691cd5983dd",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/44530001-a26648c04669f22e.js",
+      "status": 200,
+      "bytes": 63874,
+      "sha256": "2ae36604e0ac1f9707036b30e5f3837e3c02a9ba300c16e36b479f614f512338",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/4989-9ddca21e21abb1a9.js",
+      "status": 200,
+      "bytes": 10990,
+      "sha256": "43540a9ae6491981bfc7cdc2c828335ce726a743b343ac29ccf2c4a5553b5ad2",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/4bd1b696-100b9d70ed4e49c1.js",
+      "status": 200,
+      "bytes": 173025,
+      "sha256": "5421e13a91a9389517b66179f3b4b5eaa0d95245438066d4d7b19ac30aeb809b",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/5472-d05d1a3eab746a4d.js",
+      "status": 200,
+      "bytes": 7157,
+      "sha256": "405850b2e719c3295c44d917c880d25e6e0143a27a4f965da53adcfd9869f5f3",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/5613-24d72e9901f48bdd.js",
+      "status": 200,
+      "bytes": 42884,
+      "sha256": "8b384e5ff7f3358d14aa142fe8cca30c54505cdab8e305854bc63305ab3d6f7c",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/5782-ea3e6e051931547b.js",
+      "status": 200,
+      "bytes": 11085,
+      "sha256": "9f247f2fd46571c00bab56f40d26136dcba1fca678f80a7ce1fd8c3cfbc98581",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/6368-bec8c8346e688a56.js",
+      "status": 200,
+      "bytes": 9508,
+      "sha256": "fcd24c2af0a04ff122f8ba1a0fe6d4f9aae5768932afac4065821bf03371db21",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/8410-e3ffc05519805937.js",
+      "status": 200,
+      "bytes": 13923,
+      "sha256": "f9227e09e067b8edd6bf5d17491e83bf3721846c5d5ab5aa258c214a79db50d5",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/8805-a9c9215be7d82965.js",
+      "status": 200,
+      "bytes": 6516,
+      "sha256": "eec2ad72367811d1eb42cc84357fc7504e5563d43d52125a949f342c1351c546",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/8624-32641517e25196d4.js",
+      "status": 200,
+      "bytes": 77118,
+      "sha256": "530c02a661e047f26afb309d8b3ad6e35e3f8c1776ad3ac7248f66a1ba54270b",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/9686-8359d81c722290fa.js",
+      "status": 200,
+      "bytes": 191738,
+      "sha256": "aec46b12e6e605ed325f09e716c7b3cbd4c90258c8aa2578c229d15dcb3d151a",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/1622-a35e8a4e7615e30f.js",
+      "status": 200,
+      "bytes": 60630,
+      "sha256": "06e29538d05345cb38b20093dcbe029eedf99eac7ba71361bdd86e2e6b263aea",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/about/page-b05cbad1b77af669.js",
+      "status": 200,
+      "bytes": 4071,
+      "sha256": "80cdd2394acf33bf4749a6f08c092cb40504335aa80d62e9c39d2bd937bfec5f",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/_not-found/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/.well-known/openid-configuration/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/.well-known/oauth-authorization-server/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/admin/page-e99df21c466adc32.js",
+      "status": 401,
+      "bytes": 101,
+      "sha256": "cf6dd7a723a80bda12d12c30909bcb8ddea165f6e5b8b0c6b00c3f778280e592",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/alternatives/[slug]/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/agents/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/alternatives/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/alternatives/opengraph-image/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/account/profile/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/admin/preview/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/audit/broccolidb/compact/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/audit/broccolidb/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/audit/ingest/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/auth/audit/activity/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/auth/identities/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/auth/ingest/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/auth/oauth/callback/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/auth/oauth/device/approve/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/auth/oauth/device/code/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/auth/oauth/device/token/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/auth/oauth/par/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/auth/oauth/refresh/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/auth/oauth/introspect/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/auth/oauth/revoke/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/auth/oauth/url/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/auth/openai/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/auth/security/posture/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/auth/session/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/auth/sessions/[id]/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/auth/sessions/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/auth/signup-offer/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/auth/sudo/elevate/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/auth/tokens/restricted/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/auth/vault/jwks/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/auth/vault/re-wrap/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/billing/generation-quota/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/billing/orbit/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/billing/image-allowance/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/billing/plan/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/billing/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/billing/quote/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/billing/usage/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/chat/messages/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/chat/feedback/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/broccolidb/compact/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/chat/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/chat/sessions/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/client/bootstrap/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/chat/tier/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/chat/sync/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/community/follows/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/community/participants/[handle]/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/compliance/dsar/export/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/compliance/dsar/erase/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/compliance/eu-ai-act/annex-iv/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/compliance/gdpr/ropa/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/compliance/privacy/posture/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/compliance/redact/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/compliance/privacy/verify/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/compliance/soc2/controls/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/compliance/soc2/drift/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/compliance/soc2/evidence/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/compliance/soc2/oscal/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/compliance/soc2/posture/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/compute/pool/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/connect/connections/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/connect/consent/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/developer-access/check/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/developer-access/feedback/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/developer-access/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/generate/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/images/availability/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/health/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/images/library/[assetId]/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/images/feed/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/images/library/batch/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/images/library/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/images/moderate/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/inbound/lead/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/internal/sites/domains/process/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/ingest/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/internal/credits/stripe/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/internal/telemetry/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/keys/[id]/roll/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/internal/training/curate/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/internal/training/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/keys/[id]/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/keys/activity/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/keys/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/keys/verify/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/models/suggestions/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/og/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/queues/[queueId]/lease/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/queues/[queueId]/purge/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/openapi.json/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/queues/[queueId]/redrive/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/queues/[queueId]/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/queues/[queueId]/stream/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/queues/[queueId]/tasks/[taskId]/acknowledge/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/queues/[queueId]/tasks/[taskId]/fail/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/queues/[queueId]/tasks/[taskId]/progress/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/queues/[queueId]/tasks/[taskId]/retry/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/queues/[queueId]/tasks/[taskId]/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/queues/[queueId]/tasks/[taskId]/stream/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/queues/[queueId]/tasks/batch/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/queues/[queueId]/tasks/bulk-cancel/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/queues/[queueId]/tasks/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/relay/status/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/queues/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/run/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/seo/rates/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/seo/indexnow/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/shards/[id]/retract/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/shards/[id]/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/sites/content/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/shards/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/show/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/sites/domains/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/sites/published/[hostname]/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/sites/workspace/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/stripe/checkout/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/stripe/config/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/stripe/portal/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/stripe/session/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/stripe/webhook/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/tags/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/wallet/auto-topup/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/teams/seats/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/version/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/wallet/estimate/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/wallet/summary/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/wallet/deposit/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/apple-icon/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/architecture/error-eff3f8470632aa79.js",
+      "status": 200,
+      "bytes": 9394,
+      "sha256": "444ec07518051e245cd779b244911e924991a51753df870d7d30c3f188f97375",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/architecture/[slug]/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/wallet/transactions/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/api/wallet/usage/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/auth/connect/error-1529a957e5039d1e.js",
+      "status": 200,
+      "bytes": 9641,
+      "sha256": "dfc277ebc2b8bec802fa4f538645d52f10274dc0d945b9871f3239da574f525e",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/audit/page-2e430e3eb13a47dd.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/auth/connect/page-dd782be9ea1af8d4.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/architecture/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/auth/callback/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/auth/signin/page-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/benchmarks/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/billing/credits/page-2f69757c84615914.js",
+      "status": 200,
+      "bytes": 150,
+      "sha256": "8b90ace16e8bf288825e29dd6aa1be52b8dae2e8098bf5985da46d6d00ec2391",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/benchmarks/[workload]/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/billing/error-49df2d6d22b7be97.js",
+      "status": 200,
+      "bytes": 2785,
+      "sha256": "aa4e3c23cea569ec90a15ac4ddcbc936bbc9b0faddabb8d6aa0b3a8678ca3bd6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/benchmarks/opengraph-image/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/billing/layout-df0a0b9ffff538a9.js",
+      "status": 200,
+      "bytes": 7848,
+      "sha256": "b4b68137b3e0c73a479e04a322a9d11fb89cf4adef0c64bd7644f37c4f340e0b",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/billing/invoices/page-3bb61fcade752b10.js",
+      "status": 200,
+      "bytes": 150,
+      "sha256": "00ae2e48181c9c02691797dbe0276a4c49f8ebed68226f85c7b88f3a98ba4b44",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/billing/page-20d5726177730bf4.js",
+      "status": 200,
+      "bytes": 150,
+      "sha256": "38a62be4ecd75de8d18c700cfe9a7494f3a03956d5ba6cf1edf926b12e9c6159",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/billing/payment-methods/page-6c21920cc80f776f.js",
+      "status": 200,
+      "bytes": 150,
+      "sha256": "50b6a5563a71663c4c0110d4ba50982250628965939b984f5727dfe22b2ac37f",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/auth/signup/page-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/billing/plan/page-c890ae8759b5d142.js",
+      "status": 200,
+      "bytes": 150,
+      "sha256": "b12180495d5f6288d87e3bd5768776a71b7e2f670c17b9992a2adeea4ef23a70",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/billing/transactions/page-9a48832c366c9c89.js",
+      "status": 200,
+      "bytes": 150,
+      "sha256": "14e588c85b988a61c2c04f9a898a5731706d8699ab038af8c49d45b81dac9083",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/calculator/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/billing/opengraph-image/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/capabilities/[slug]/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/billing/loading-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/capabilities/opengraph-image/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/capabilities/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/careers/[slug]/page-e092928e7c509bc4.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/careers/page-b8375a8b7693035a.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/compliance/[id]/error-a06422f50ceb9c36.js",
+      "status": 200,
+      "bytes": 9417,
+      "sha256": "790fc9bf015f50b2a46f62889b365bc4189e4ad88a19d2d32f29bced01723bb6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/collections/page-44459b2083d669fb.js",
+      "status": 200,
+      "bytes": 21719,
+      "sha256": "561140d42b3107118a102ceadeca278197cd08361f90b2f3882600c6b4d17c5a",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/compliance/error-e79dd46ebcc6f6c8.js",
+      "status": 200,
+      "bytes": 9423,
+      "sha256": "8155f17cb917cc4c8567ab8afe312aac1c8c9ede6c7723d7709d6015ec0ded55",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/connect/consent/page-517eb2bed5399910.js",
+      "status": 200,
+      "bytes": 160,
+      "sha256": "f6b22f46d174f00c66323a751d2350f10b741d3fc4ee9116dcf97bef21137972",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/connect/page-5ee5e3a57bacba94.js",
+      "status": 200,
+      "bytes": 160,
+      "sha256": "97503a5777aac018084dd3f43b095a85d1c86d38b14a4947c9e72a1533b51d8d",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/compliance/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/compliance/[id]/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/cookbook/[slug]/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/device/page-7fefa269659dda32.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/cookbook/opengraph-image/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/cookbook/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/docs/agents/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/docs/api-reference/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/docs/architecture/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/docs/error-129fedec5881bcf2.js",
+      "status": 200,
+      "bytes": 891,
+      "sha256": "824fe3c035515160971f230e74349bc89a5494db54c1eea25e8e5667fe615876",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/docs/agent-setup/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/docs/cookbook/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/docs/embeddings/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/docs/error-handling/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/docs/errors/[code]/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/docs/errors/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/docs/examples/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/docs/ide-setup/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/docs/integrations/[slug]/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/docs/integrations/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/docs/function-calling/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/docs/layout-54853fac50302722.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/docs/migration/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/docs/models-guide/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/docs/opengraph-image/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/docs/prompt-caching/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/docs/page-06f421021f5c83b9.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/docs/quickstart/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/docs/rate-limits/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/docs/sdks/[lang]/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/docs/sdks/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/docs/sdks/typescript/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/docs/sdks/python/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/docs/security-spec/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/docs/simple/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/docs/streaming/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/docs/structured-outputs/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/error-4d1d0e117e4d9744.js",
+      "status": 200,
+      "bytes": 4371,
+      "sha256": "892d74017e67b3bfadbc24cbc4ed6d529dc3c45980b5bb02133ab9bdbcaa2cd4",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/exhibitions/page-ec205639884cc393.js",
+      "status": 200,
+      "bytes": 4245,
+      "sha256": "63db8b7c180a23f37bb9e21c76db4c4692546c37315424d3fbc181ce31752389",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/editorials/[slug]/page-09eafa3f1afc6589.js",
+      "status": 200,
+      "bytes": 4250,
+      "sha256": "a6e83010fe5727663617c08812447b9479bb142dec3c5537ba9edf3b88443bfc",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/explore/page-fd4a485c82b2f6df.js",
+      "status": 200,
+      "bytes": 743,
+      "sha256": "85012397fdc33d6835ba95f92a686b4d339e088d5bae67a12c71f2bd499c2be6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/faq/error-0548857bc0d2c350.js",
+      "status": 200,
+      "bytes": 9319,
+      "sha256": "0a3ff002f61fb1703e5bc12d78173b4b99113b33a672f89fd450cc06a076f8a5",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/faq/page-83b64ef1ab436264.js",
+      "status": 200,
+      "bytes": 301,
+      "sha256": "eca1011809209bd4c06f7f27b77c26591053496778aae7f9c5401031a83dc8e1",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/exhibitions/[slug]/page-09eafa3f1afc6589.js",
+      "status": 200,
+      "bytes": 4250,
+      "sha256": "a6e83010fe5727663617c08812447b9479bb142dec3c5537ba9edf3b88443bfc",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/global-error-27cd47ebb0426c09.js",
+      "status": 200,
+      "bytes": 4962,
+      "sha256": "5d93276b3599d682a6f57831a0ee3051e44b78dce4a4cca3f212fd815ea07ead",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/editorials/page-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/feed.xml/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/faq/opengraph-image/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/glossary/[slug]/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/grants/error-3ccf32d129135767.js",
+      "status": 200,
+      "bytes": 9693,
+      "sha256": "76904b2665ff3af1a3a26a11595872f7f1e5ab88e9e3013e1adfec919dea6a95",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/glossary/opengraph-image/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/how-it-works/error-2668d9c9f7323264.js",
+      "status": 200,
+      "bytes": 9341,
+      "sha256": "d572f268f4b041309c6bc5b5920242f5ab57b0946e97d7203a44b76dea2f2943",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/glossary/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/grants/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/home/page-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/how-it-works/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/images/create/page-afcf3ec6af17da46.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/how-it-works/opengraph-image/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/images/error-00af41b93bd6d974.js",
+      "status": 200,
+      "bytes": 4471,
+      "sha256": "3f802701906a95c9208b5f448ecd7247bc44ec6b44ff80b34930b240b424fe5e",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/images/favorites/page-6a9c49f4ff579b9d.js",
+      "status": 200,
+      "bytes": 165,
+      "sha256": "5c002abe2a6c19822bc87a0c1e50cee4d7ff2fef0e261326599749117274dcdb",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/images/library/page-b37b3e8cec259960.js",
+      "status": 200,
+      "bytes": 165,
+      "sha256": "eb2d10778dab54280750cf9633713ae429be3bd8c8c616ac15e37b4c61555967",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/icon/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/images/loading-e4b25606b8502233.js",
+      "status": 200,
+      "bytes": 3430,
+      "sha256": "a8c6761a5b8c425cda15d657165dc6fcab906860fb117226f8554e829ce0cc44",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/industries/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/industries/[slug]/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/keys/[id]/error-45143e7684fa47cf.js",
+      "status": 200,
+      "bytes": 9634,
+      "sha256": "22a1313a95a16a9a0d84e16c8c541b1be754689e6e9eb1afec0be78c64bb1faf",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/images/page-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/keys/error-3d82ef51d4f3daf0.js",
+      "status": 200,
+      "bytes": 9659,
+      "sha256": "f1690807ccc5d74349c71f8f3a3ca1765a36d1e91c97f9fa5f8586d958af6a54",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/industries/opengraph-image/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/keys/activity/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/keys/[id]/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/keys/new/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/keys/page-d4ceafc1ecc3bb1d.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/knowledge-base/getting-started/page-0999c5c599e97450.js",
+      "status": 200,
+      "bytes": 326,
+      "sha256": "9a4e887f917219a46b022597ccaf2eac32a02f8281f04ef7a4eb36baebda356a",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/knowledge-base/page-35b383839fb7dfc1.js",
+      "status": 200,
+      "bytes": 3380,
+      "sha256": "45fc7703c8cc21e37ac959a45460e8ca66a8355736ae9469a4f60aa9172a0fa9",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/keys/rate-limits/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/keys/opengraph-image/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/keys/permissions/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/knowledge-base/public-beta/page-0999c5c599e97450.js",
+      "status": 200,
+      "bytes": 326,
+      "sha256": "9a4e887f917219a46b022597ccaf2eac32a02f8281f04ef7a4eb36baebda356a",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/knowledge-base/public-creations/page-0999c5c599e97450.js",
+      "status": 200,
+      "bytes": 326,
+      "sha256": "9a4e887f917219a46b022597ccaf2eac32a02f8281f04ef7a4eb36baebda356a",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/knowledge-base/remixing-creations/page-0999c5c599e97450.js",
+      "status": 200,
+      "bytes": 326,
+      "sha256": "9a4e887f917219a46b022597ccaf2eac32a02f8281f04ef7a4eb36baebda356a",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/layout-275ca485d745fd29.js",
+      "status": 200,
+      "bytes": 56991,
+      "sha256": "efe2872797e93c4ad977c256c4713d67f601a04031300364b6de0e2559be3416",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/library/loading-54853fac50302722.js",
+      "status": 200,
+      "bytes": 221,
+      "sha256": "0800aafa94b6edcd18c545d6f11b4259eef9d4c30d4c29d41908d2a4d07c2f23",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/library/page-c33c3e26fb782762.js",
+      "status": 200,
+      "bytes": 32433,
+      "sha256": "74640f29516347429c149473dafbea8aab60eb2786f93a15b37978ec96592ba4",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/login/page-a2b27ec2f02db6eb.js",
+      "status": 200,
+      "bytes": 16268,
+      "sha256": "fd8dddb43d9204735494ccdb5da78f9270aeb60ef6d221468fa4de8b6e4a943a",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/knowledge-base/revising-your-site/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/migrate/[slug]/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/loading-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/manifest.webmanifest/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/models/[id]/error-41dee45044f6af5d.js",
+      "status": 200,
+      "bytes": 2892,
+      "sha256": "619b3dfea06e9ec9949b21e03ddf1ba1fdb093b775f84426e4ed14296b7d73ba",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/models/[id]/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/migrate/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/migrate/opengraph-image/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/models/error-a15294392e241bca.js",
+      "status": 200,
+      "bytes": 9354,
+      "sha256": "7ce4ba4c59c1eb59579bb768ad9b6a6d27cf7a5ce25ec4ab838f635a88052204",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/knowledge-base/publishing-your-site/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/models/routing/layout-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/models/compare/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/models/resolver/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/models/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/not-found-55a2aefcbf474dd5.js",
+      "status": 200,
+      "bytes": 4048,
+      "sha256": "ff4d9f7631f838fe807ad334d3f2fd2b25e501c4031cb7a269a0ed438824c8cb",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/models/routing/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/models/vs/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/models/vs/[slug]/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/oauth/token/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/oauth/authorize/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/oauth/revoke/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/page-819e940d653aa579.js",
+      "status": 200,
+      "bytes": 27419,
+      "sha256": "0fcf2f5413a9f135a8383576e61e953ea470c27c6d2db5599cda5c3c4c11d745",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/playground/error-7926f706ec83ea6f.js",
+      "status": 200,
+      "bytes": 9547,
+      "sha256": "ccfe57de406ec59ceeb391c68ebd6c6a7db310f7490ee48b44e768043dc95e65",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/opengraph-image/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/postmortems/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/pricing/billing-and-cancellation/page-0999c5c599e97450.js",
+      "status": 200,
+      "bytes": 326,
+      "sha256": "9a4e887f917219a46b022597ccaf2eac32a02f8281f04ef7a4eb36baebda356a",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/playground/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/postmortems/[slug]/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/pricing/error-833675e3d02834ac.js",
+      "status": 200,
+      "bytes": 9505,
+      "sha256": "cbba8a8f9a855f5eaee46c80e140290e8ee917c2f159901058d3f29736a6b071",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/pricing/fair-use/page-0999c5c599e97450.js",
+      "status": 200,
+      "bytes": 326,
+      "sha256": "9a4e887f917219a46b022597ccaf2eac32a02f8281f04ef7a4eb36baebda356a",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/pricing/galx-pro/page-0999c5c599e97450.js",
+      "status": 200,
+      "bytes": 326,
+      "sha256": "9a4e887f917219a46b022597ccaf2eac32a02f8281f04ef7a4eb36baebda356a",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/postmortems/opengraph-image/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/pricing/page-83b64ef1ab436264.js",
+      "status": 200,
+      "bytes": 301,
+      "sha256": "eca1011809209bd4c06f7f27b77c26591053496778aae7f9c5401031a83dc8e1",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/pricing/developer/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/pricing/calculator/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/privacy/page-b82916d50d2b8885.js",
+      "status": 200,
+      "bytes": 4016,
+      "sha256": "e2754946665fcba7d7861fbd31b8d57f4eff980620dc062835dfd23ad38b5cab",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/pricing/usage/page-b05cbad1b77af669.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/profile/[handle]/error-a4594b659506aaed.js",
+      "status": 200,
+      "bytes": 5425,
+      "sha256": "5a4510bbf5f44f2ce188e03eb8a6f59365ad258b2d34c7468aa9befbe08425f7",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/profile/[handle]/loading-6a7e00cb55816e41.js",
+      "status": 200,
+      "bytes": 2763,
+      "sha256": "30f30f6d821913ae3472ecd0665ab71ed34510f457603afcaf8cfe77de5fc624",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/profile/[handle]/not-found-730e767ef9aac03d.js",
+      "status": 200,
+      "bytes": 2812,
+      "sha256": "8d9a4e73e91a97c5216fea2c92a6995f52e6f330af0273882ac9bcb91b81e473",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/profile/[handle]/page-0dda210787da93da.js",
+      "status": 200,
+      "bytes": 11187,
+      "sha256": "bebf643adecd4dd93f10e020bbd684445e8599f910cd5f20e588b56bf9c2e32d",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/pricing/seats/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/providers/[slug]/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/queues/error-1172d6034be50045.js",
+      "status": 200,
+      "bytes": 9829,
+      "sha256": "d2541dabbbc2edc9b58f1a2a550b91fddba049986050edd086a27826fa6bb7df",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/pricing/opengraph-image/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/providers/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/providers/opengraph-image/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/queues/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/reliability/[slug]/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/reliability/opengraph-image/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/reliability/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/security/[slug]/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/security/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/robots.txt/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/security/patterns/[slug]/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/signup/page-4fb6c16f81c234f8.js",
+      "status": 200,
+      "bytes": 25608,
+      "sha256": "f1c8bfbfac29ec648a080df8d05a7de1f6f8e94b883aa06c052ee42ea4a1485a",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/security/opengraph-image/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/sites/[id]/page-27f9c857e92439a3.js",
+      "status": 200,
+      "bytes": 4217,
+      "sha256": "81099c0dd18bdf383bbc14bc9f96231314983e5de1321ebcf5cf76fd41e88c43",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/sites/error-f68a94d16321a939.js",
+      "status": 200,
+      "bytes": 4464,
+      "sha256": "4b64d3b666bb4f08ed3f76a34eb1229ca1adef935c864efdd673adf9ac01fe0c",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/security/patterns/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/sites/loading-e4b25606b8502233.js",
+      "status": 200,
+      "bytes": 3430,
+      "sha256": "a8c6761a5b8c425cda15d657165dc6fcab906860fb117226f8554e829ce0cc44",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/sites/page-27f9c857e92439a3.js",
+      "status": 200,
+      "bytes": 4217,
+      "sha256": "81099c0dd18bdf383bbc14bc9f96231314983e5de1321ebcf5cf76fd41e88c43",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/signup/layout-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/solutions/[slug]/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/solutions/enterprise/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/sitemap.xml/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/stars/page-61ce4b88724fe624.js",
+      "status": 200,
+      "bytes": 7626,
+      "sha256": "ec72b969b7042ef7b2dcdfe275d4827b917f3aa4b0447f688a80014995737464",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/status/error-17b240e0b1a80e53.js",
+      "status": 200,
+      "bytes": 9333,
+      "sha256": "917521a4fa66a00d0918b9bd0e1c281efa579d024ee0b3cc9b805882020580fb",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/solutions/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/status/page-c4b9493e1e846fde.js",
+      "status": 200,
+      "bytes": 4850,
+      "sha256": "12d344d707ba1bc545bb94b8623296b93662161e56977cee54b001278d8dc969",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/solutions/small-business/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/solutions/opengraph-image/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/teams/activity/page-20a4fb845c29b0bf.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/teams/invites/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/teams/cost-centers/page-868f64bb12ba9af6.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/status/opengraph-image/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/teams/layout-e75b0928efe2338f.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/teams/roles/page-557145b80daa0ec9.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/teams/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/teams/seats/page-c836ad12b481204b.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/teams/settings/page-92d3e16f168f6050.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/teams/security/page-9430068558204928.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/telemetry/error-bee4911c1504ddbf.js",
+      "status": 200,
+      "bytes": 9402,
+      "sha256": "ab4f676f5d3d7a5a389643102dca67c3362f3e586c5766bc6a5be377e6e8400c",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/teams/spend-limits/page-96a1e9660b0a9b1f.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/terms/page-b05cbad1b77af669.js",
+      "status": 200,
+      "bytes": 4071,
+      "sha256": "80cdd2394acf33bf4749a6f08c092cb40504335aa80d62e9c39d2bd937bfec5f",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/todos/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/teams/sso/page-adb38208b40d2d8c.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/telemetry/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/tools/api-key-checker/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/tools/api-request-builder/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/tools/function-calling-builder/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/tools/context-window-visualizer/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/tools/embeddings-calculator/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/tools/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/tools/json-schema-generator/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/tools/latency-estimator/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/tools/model-cost-comparator/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/tools/roi-calculator/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/tools/prompt-caching-calculator/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/tools/prompt-compressor/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/tools/stream-benchmark/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/tools/token-counter/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/app/twitter-image/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/v1/chat/completions/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/v1/completions/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/v1/embeddings/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/v1/images/assets/[token]/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/v1/images/assets/[token]/thumbnail/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/v1/images/generations/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/v1/images/requests/[id]/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/v1/images/requests/[id]/stream/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/v1/messages/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/v1/images/sessions/[sessionId]/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/vault/error-297b004ca44e22db.js",
+      "status": 200,
+      "bytes": 9431,
+      "sha256": "07ef10989c820651fd2862896d161ff910d3540215751c9461e1f67377f503b5",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/v1/models/[id]/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/vault/shards/[id]/error-019182ed46d21c35.js",
+      "status": 200,
+      "bytes": 9407,
+      "sha256": "cb0a7b29219e70883e5f8dbab86d7c10ba61e388a8dee4c8bcb39096aa6bc503",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/v1/models/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/vault/shards/[id]/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/framework-d063bb259975c6cd.js",
+      "status": 200,
+      "bytes": 189787,
+      "sha256": "224d973861250d2daa5bac1700c7ddae7c42dfc76acbe38a84e8c6ab92106bbd",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/vault/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/main-app-c875ab0dc9dbe3e7.js",
+      "status": 200,
+      "bytes": 527,
+      "sha256": "47f8cd597e4522c1c912d8a40fe33c29060edda2b1ea1df8f555400225621637",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/app/vault/opengraph-image/route-597968d02ae27601.js",
+      "status": 200,
+      "bytes": 1513,
+      "sha256": "5d5dcfc09f30663f1268ccdefb83a036349ab94022ba20de142579515f2f17a6",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/pages/_app-4b3fb5e477a0267f.js",
+      "status": 200,
+      "bytes": 241,
+      "sha256": "d3f2172891ac520b6d4eb036a19fa208deecee602769042607797a44cb8206e4",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/main-f8f5921797036943.js",
+      "status": 200,
+      "bytes": 137804,
+      "sha256": "6046f8b5758b9a5e7b84fee898a701c9efd712bd3776ba263dc10b26d14de62b",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/pages/_error-c970d8b55ace1b48.js",
+      "status": 200,
+      "bytes": 224,
+      "sha256": "545e4e7cf70e6ed422c080e115d64bb10c05eb15a71f1c5bae0c231a2a8eac61",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/chunks/webpack-0598162444d8b865.js",
+      "status": 200,
+      "bytes": 3999,
+      "sha256": "f891ce7e46f7a3b4d6292cfa6c0ef86665d618a65eb661fbbd4a9d2a68c41104",
+      "classification": "unchanged_application_with_opt_in_platform_toolbar",
+      "suffixBytes": 461
+    },
+    {
+      "path": "/_next/static/chunks/app/vault/simulator/page-597968d02ae27601.js",
+      "status": 401,
+      "bytes": 103,
+      "sha256": "f54d0e9f9798adac3ace97b75ffeb39167926f7f2fbe536e54a4d8ffe6ec112e",
+      "classification": "private_asset_denied"
+    },
+    {
+      "path": "/_next/static/chunks/polyfills-42372ed130431b0a.js",
+      "status": 200,
+      "bytes": 112594,
+      "sha256": "0973c1d64c88adc8e3c950410cb58b288f72118d5965b78049438deb8f2f9683",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/css/58632e25534e2cc0.css",
+      "status": 200,
+      "bytes": 4167,
+      "sha256": "317bf7b518e533018f91ebb7a689b4c26049d8509d89b443c4e48ec8dd46dba2",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/css/4f029be476540265.css",
+      "status": 200,
+      "bytes": 16769,
+      "sha256": "d0a2e376510b7fccb4d67eca21b44d74233b9d9f6711d49a9acffe67aaf95034",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/css/83fb1400f34143f2.css",
+      "status": 200,
+      "bytes": 4759,
+      "sha256": "e4f5e31f2cff2d6e9f6b63bc76b518860769bad58b90868977f0b7b58765bdac",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/css/594cdad03b328209.css",
+      "status": 200,
+      "bytes": 22628,
+      "sha256": "bdf6446f491345246a93b48889a2dfe4525885917678507440a258024fde2e82",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/css/6331b8c169a20e6d.css",
+      "status": 200,
+      "bytes": 52452,
+      "sha256": "56802f0dbf6128c6458c6bc71ec1c237e36634ea87d889f8497982d6ad0295a4",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/css/766e943c8b8b9576.css",
+      "status": 200,
+      "bytes": 11128,
+      "sha256": "4b6072421bc4c24e0c2d33901a0d8d48788937a3061b2f1d8e7266f19f7c3edf",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/css/b6448837cfad3460.css",
+      "status": 200,
+      "bytes": 10921,
+      "sha256": "48586729517d70086b3206c7072338368d1db6c9c216eae1533badb07024de7d",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/css/abc453d75ea920eb.css",
+      "status": 200,
+      "bytes": 651,
+      "sha256": "d9cce3232d12a0855dfa9683e7f8a2b009b98bdaee9dad975795d310836668ad",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/css/d4f5d1a73a37fec5.css",
+      "status": 200,
+      "bytes": 117905,
+      "sha256": "56df028529427ac5a6586dfc62feb812b93c2be54de7e497af8b26bdcf28e4a0",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/css/e3460a91c8cac6d3.css",
+      "status": 200,
+      "bytes": 27321,
+      "sha256": "e9a0c700b35a3d89332ed960ebccf14e2602abfdcfbcf57a09d84eb57256c896",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/css/e8eab0635bdbbea3.css",
+      "status": 200,
+      "bytes": 9163,
+      "sha256": "dc574cf07e7c0b3ef8ff330092c5c8872b32eab8cb6d3d1cec81a2f1820314b0",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/css/fdf7d4e9e188178c.css",
+      "status": 200,
+      "bytes": 27190,
+      "sha256": "f592d752cc814f119d028dcf94dc591735d176dacf98b498d5dfbddd912097cd",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/di0Zw7qB8fnNvEnQvBaXQ/_buildManifest.js",
+      "status": 200,
+      "bytes": 12753,
+      "sha256": "54067c33e9801388dca179be80099f59aefc86a2812234619362636b948cd1f8",
+      "classification": "byte_identical_public_asset"
+    },
+    {
+      "path": "/_next/static/di0Zw7qB8fnNvEnQvBaXQ/_ssgManifest.js",
+      "status": 200,
+      "bytes": 107,
+      "sha256": "557b8be6ce9d258198a1c1f083ce864b1d01ec40f7d00c5a273a920b914cb307",
+      "classification": "byte_identical_public_asset"
+    }
+  ],
+  "summary": {
+    "renderedPages": 20,
+    "httpChecks": 29,
+    "browserAssets": 414,
+    "byteIdentical": 289,
+    "privateAssetDenials": 124,
+    "platformToolbar": 1,
+    "privateMarkers": 0,
+    "secretMatches": 0,
+    "residencyPromptMatches": 0,
+    "excludedPublicKeyAliases": [
+      "SUPABASE_SERVICE_ROLE_KEY"
+    ]
+  },
+  "limits": [
+    "Scans the exact new programme package asset inventory and the programme/residency pages. Does not certify all historical externally hosted images or continuous availability."
+  ]
+}

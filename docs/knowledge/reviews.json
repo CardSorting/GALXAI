@@ -1,7 +1,7 @@
 {
   "knowledge": {
     "reviewer": "Codex production release maintainer",
-    "note": "Bounded release review: hash-verified accepted Media source plus exact programme overlay, hostname aliases distinct from project target pointer, complete affected clean-package/programme guides, explicit sharp/source-map/brace patch lock delta and build-only dependency classification. Required runtime audit and affected regressions pass; remaining development advisories and denied visual review retained. No runtime-image, service, database, grant, payment or residency replay change. Prior wider evidence retained; candidate deployment remains pending.",
+    "note": "Reviewed exact accepted-source programme/dependency overlay, diagnostics exclusion with four adversarial packaging checks, regenerated archive/manifest, protected candidate and actual three-alias readback, full scoped public HTML/RSC/assets/artifact/cache acceptance and complete affected deployment/programme guides. Preserve earlier wider evidence. Visual review remains recapture; development advisories and unchanged legacy quota GitHub fixture failure are retained, not certified clean. No database, grant, service, runtime-image, generation or ADR status change. Private unmapped release records inspected as dated evidence; CURRENT_STATE remains the single current-state authority.",
     "reviewed_at": "2026-10-07",
     "review_by": "2026-10-14",
     "evidence": {
@@ -9,7 +9,8 @@
       "post-mortem/releases/2026-10-07-star-residency-verification.json": "38c5e451fe249b4df204f1a9a032e550c1a013337798a3be9430f26186d04674",
       "post-mortem/releases/2026-10-07-exhibition-programme-local-review.json": "c0abd8605baf01403f11fdfb24eb9cc18a37ddb1798e59d2b00746cc37ed7a3a",
       "post-mortem/releases/2026-10-07-exhibition-programme-release-preflight.json": "f85b3976b3adfb3119c50e7586f38a7d8a0e68dda6a89a80c6d314165eeb78f4",
-      "post-mortem/releases/2026-10-07-exhibition-programme-dependency-review.json": "fbdc73a891cb85f2c9d6ddc2fc514b9258ffe54a10c7eede4b05cceebad9c04b"
+      "post-mortem/releases/2026-10-07-exhibition-programme-dependency-review.json": "fbdc73a891cb85f2c9d6ddc2fc514b9258ffe54a10c7eede4b05cceebad9c04b",
+      "post-mortem/releases/2026-10-07-exhibition-programme-deployment.json": "f4d09ac5f83e7d0a2a14f57080ef84c68d39d26d62a396c8f6a606f08cb962c4"
     },
     "files": {
       ".github/CODEOWNERS": "ef2f416d15f027dc8f197ad844289c9a44c8e843d3214d1590a3a380e939d13f",
@@ -107,7 +108,7 @@
   },
   "images": {
     "reviewer": "Codex production release maintainer",
-    "note": "Bounded release review: hash-verified accepted Media source plus exact programme overlay, hostname aliases distinct from project target pointer, complete affected clean-package/programme guides, explicit sharp/source-map/brace patch lock delta and build-only dependency classification. Required runtime audit and affected regressions pass; remaining development advisories and denied visual review retained. No runtime-image, service, database, grant, payment or residency replay change. Prior wider evidence retained; candidate deployment remains pending.",
+    "note": "Reviewed exact accepted-source programme/dependency overlay, diagnostics exclusion with four adversarial packaging checks, regenerated archive/manifest, protected candidate and actual three-alias readback, full scoped public HTML/RSC/assets/artifact/cache acceptance and complete affected deployment/programme guides. Preserve earlier wider evidence. Visual review remains recapture; development advisories and unchanged legacy quota GitHub fixture failure are retained, not certified clean. No database, grant, service, runtime-image, generation or ADR status change. Private unmapped release records inspected as dated evidence; CURRENT_STATE remains the single current-state authority.",
     "reviewed_at": "2026-10-07",
     "review_by": "2026-10-14",
     "evidence": {
@@ -116,7 +117,8 @@
       "post-mortem/releases/2026-10-07-star-residency-v2-verification.json": "ce2a33e00b56d30e0b7e5709170bebc753975c6d6ba37f72c879a8d0a7240495",
       "post-mortem/releases/2026-10-07-exhibition-programme-local-review.json": "c0abd8605baf01403f11fdfb24eb9cc18a37ddb1798e59d2b00746cc37ed7a3a",
       "post-mortem/releases/2026-10-07-exhibition-programme-release-preflight.json": "f85b3976b3adfb3119c50e7586f38a7d8a0e68dda6a89a80c6d314165eeb78f4",
-      "post-mortem/releases/2026-10-07-exhibition-programme-dependency-review.json": "fbdc73a891cb85f2c9d6ddc2fc514b9258ffe54a10c7eede4b05cceebad9c04b"
+      "post-mortem/releases/2026-10-07-exhibition-programme-dependency-review.json": "fbdc73a891cb85f2c9d6ddc2fc514b9258ffe54a10c7eede4b05cceebad9c04b",
+      "post-mortem/releases/2026-10-07-exhibition-programme-deployment.json": "f4d09ac5f83e7d0a2a14f57080ef84c68d39d26d62a396c8f6a606f08cb962c4"
     },
     "files": {
       "BROC/practice.ts": "19499a05b7f9e481fcd0c4c04242bde79accc9da7f66daff91a229258c810167",
@@ -1235,7 +1237,7 @@
   },
   "delivery": {
     "reviewer": "Codex production release maintainer",
-    "note": "Bounded release review: hash-verified accepted Media source plus exact programme overlay, hostname aliases distinct from project target pointer, complete affected clean-package/programme guides, explicit sharp/source-map/brace patch lock delta and build-only dependency classification. Required runtime audit and affected regressions pass; remaining development advisories and denied visual review retained. No runtime-image, service, database, grant, payment or residency replay change. Prior wider evidence retained; candidate deployment remains pending.",
+    "note": "Reviewed exact accepted-source programme/dependency overlay, diagnostics exclusion with four adversarial packaging checks, regenerated archive/manifest, protected candidate and actual three-alias readback, full scoped public HTML/RSC/assets/artifact/cache acceptance and complete affected deployment/programme guides. Preserve earlier wider evidence. Visual review remains recapture; development advisories and unchanged legacy quota GitHub fixture failure are retained, not certified clean. No database, grant, service, runtime-image, generation or ADR status change. Private unmapped release records inspected as dated evidence; CURRENT_STATE remains the single current-state authority.",
     "reviewed_at": "2026-10-07",
     "review_by": "2026-10-14",
     "evidence": {
@@ -1243,7 +1245,8 @@
       "post-mortem/releases/2026-10-07-star-residency-verification.json": "38c5e451fe249b4df204f1a9a032e550c1a013337798a3be9430f26186d04674",
       "post-mortem/releases/2026-10-07-exhibition-programme-local-review.json": "c0abd8605baf01403f11fdfb24eb9cc18a37ddb1798e59d2b00746cc37ed7a3a",
       "post-mortem/releases/2026-10-07-exhibition-programme-release-preflight.json": "f85b3976b3adfb3119c50e7586f38a7d8a0e68dda6a89a80c6d314165eeb78f4",
-      "post-mortem/releases/2026-10-07-exhibition-programme-dependency-review.json": "fbdc73a891cb85f2c9d6ddc2fc514b9258ffe54a10c7eede4b05cceebad9c04b"
+      "post-mortem/releases/2026-10-07-exhibition-programme-dependency-review.json": "fbdc73a891cb85f2c9d6ddc2fc514b9258ffe54a10c7eede4b05cceebad9c04b",
+      "post-mortem/releases/2026-10-07-exhibition-programme-deployment.json": "f4d09ac5f83e7d0a2a14f57080ef84c68d39d26d62a396c8f6a606f08cb962c4"
     },
     "files": {
       ".dockerignore": "fabeb0a64e0040d7feb0b9ea2d6f88d109479a61974a7c41aee3f54be23b70e2",
@@ -1261,7 +1264,7 @@
       "deploy/self-host/server.cjs": "cdbd2b7e118e428d3506d9e12c6dbec8f526214952b5cfc88e19134dddd65f91",
       "docs/CLOUDFLARE_STRATEGY.md": "ade180c2aca74d8a784822d208fcdfbfedbece1873a990a61143d9fa96ef037c",
       "docs/DEPLOYMENT.md": "925c5db94f9f235668bf25c1beff32d473154bda066fb0a4e847f5cb58bdf5d5",
-      "docs/VERCEL_DEPLOYMENT.md": "99720ef6b46164adc7bb00abbe5a0f59aa47a620cd6ccb655c76b0a593ef5624",
+      "docs/VERCEL_DEPLOYMENT.md": "6e7dadc9c951145e1b637a83acb35df4f31f0abfc1531d8b1ecc1abd404c27b1",
       "docs/VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md": "0642193dbe4bbe1d941aadb11d5a78981f1a1be23c575de23fbd1f00c05a1a0e",
       "docs/adr/0167-nova-mac-runtime-placement.md": "c91bb1adc7a4b60a30ae0b2f72965f9c750c69974d5b1e69ef7cb7e3daf78794",
       "docs/maintainers/CLOUDFLARE_EDGE_MESH_MAINTAINER_RUNBOOK.md": "15571a03c6ce52400aea457f4797ca0ebc273892563c81c4c137074a6a822aa0",
@@ -1288,10 +1291,10 @@
       "scripts/prepare-connect-web.mjs": "4f14b1c95af02a298ebb2971926ad0b9e53e79dc89f1ee99ad6b0dc3bd65bdb1",
       "scripts/provision-stripe-all.ts": "bacd1fa7ef366ea60e1c8f9df293626575aeb6facde0d5c00d3468811c0092e6",
       "scripts/release-certification.ts": "8b332c8d75a6774f6f2db7cae95b49f158fe4eb317e6daefee673b53df40b00e",
-      "scripts/retain-hosted-output.mjs": "68396b0d76a34be4e7aeff827a8dcb6a926c42be58a155f2b644fe8ba7f6d267",
+      "scripts/retain-hosted-output.mjs": "6f2247d4526e25c3bf9dfb280fd0a8996f75e1d70b8cff802605ac2a3a83158a",
       "scripts/self-host.mjs": "6d27055ba848644a98790edd4419c7c068238748406d857da4ddf4d7b92081c0",
       "scripts/test-cloudflare-workers.ts": "c296f0f9b93387daf294d4f24bbd7d1492a3c669f560e2417731982a2b1e7b5c",
-      "scripts/test-hosted-packaging.mjs": "ba02ed131139b0557da10a1fe3c556a8a2f2d7308334bad0c772b20094f91af3",
+      "scripts/test-hosted-packaging.mjs": "037da5489e6fc395a5e8001d72f9ae806223fb5c7592c65d6e5a7873c1782461",
       "scripts/test-nova-retirement.ts": "aec7fd21ba9cc1566a3c745903f5804121e06272ccc03bb6b35234325798fe8a",
       "scripts/test-self-host-resilience.ts": "949670344b5b6042d399c08d9c0759c3f9fa614e974e597e55cc49a75514607e",
       "scripts/test-self-host-runtime.ts": "e60206f20428297e6f63565f32faf78776380f0245aa72b0c00a6244eadd0f84",
@@ -1806,14 +1809,15 @@
   },
   "client-efficiency": {
     "reviewer": "Codex production release maintainer",
-    "note": "Bounded release review: hash-verified accepted Media source plus exact programme overlay, hostname aliases distinct from project target pointer, complete affected clean-package/programme guides, explicit sharp/source-map/brace patch lock delta and build-only dependency classification. Required runtime audit and affected regressions pass; remaining development advisories and denied visual review retained. No runtime-image, service, database, grant, payment or residency replay change. Prior wider evidence retained; candidate deployment remains pending.",
+    "note": "Reviewed exact accepted-source programme/dependency overlay, diagnostics exclusion with four adversarial packaging checks, regenerated archive/manifest, protected candidate and actual three-alias readback, full scoped public HTML/RSC/assets/artifact/cache acceptance and complete affected deployment/programme guides. Preserve earlier wider evidence. Visual review remains recapture; development advisories and unchanged legacy quota GitHub fixture failure are retained, not certified clean. No database, grant, service, runtime-image, generation or ADR status change. Private unmapped release records inspected as dated evidence; CURRENT_STATE remains the single current-state authority.",
     "reviewed_at": "2026-10-07",
     "review_by": "2026-10-14",
     "evidence": {
       "post-mortem/releases/2026-10-03-connect-local-review.json": "37e94394ab2210d6f722b4d3cd6ac041b6b229777ac6a20f7f9c14cf807d6807",
       "post-mortem/releases/2026-10-07-exhibition-programme-local-review.json": "c0abd8605baf01403f11fdfb24eb9cc18a37ddb1798e59d2b00746cc37ed7a3a",
       "post-mortem/releases/2026-10-07-exhibition-programme-release-preflight.json": "f85b3976b3adfb3119c50e7586f38a7d8a0e68dda6a89a80c6d314165eeb78f4",
-      "post-mortem/releases/2026-10-07-exhibition-programme-dependency-review.json": "fbdc73a891cb85f2c9d6ddc2fc514b9258ffe54a10c7eede4b05cceebad9c04b"
+      "post-mortem/releases/2026-10-07-exhibition-programme-dependency-review.json": "fbdc73a891cb85f2c9d6ddc2fc514b9258ffe54a10c7eede4b05cceebad9c04b",
+      "post-mortem/releases/2026-10-07-exhibition-programme-deployment.json": "f4d09ac5f83e7d0a2a14f57080ef84c68d39d26d62a396c8f6a606f08cb962c4"
     },
     "files": {
       ".impeccable/surfaces/exhibition-programme.md": "78e49387746523a4c213f25a611bc80d2bb25645af0b31545a3665719a33a0c0",

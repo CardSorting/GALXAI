@@ -1,8 +1,8 @@
 {
   "version": 1,
   "reviewer": "Codex production release maintainer",
-  "reviewed_at": "2026-10-07T21:54:53.540165Z",
-  "note": "Reviewed complete clean-package deployment guidance, programme guide and explicit dependency classifications/patch lock against the candidate preparation. Runtime audit passes, development advisories remain recorded, and only a bounded accepted-source overlay is intended. Prior critical review retained; no service/image replacement or new production acceptance is claimed before deployment.",
+  "reviewed_at": "2026-10-07T22:05:57.984013Z",
+  "note": "Reviewed affected critical guide and current-state bodies against exact hosted source/package evidence, actual alias readback, candidate/public HTTP and cache checks, and diagnostic exclusion regression. Previous reviewed watch-set boundaries remain unchanged. New dated current state retains recapture visual limitation, development advisories and unchanged legacy quota CI failure; no incident prevention closure, runtime-image or database change.",
   "files": {
     ".dockerignore": "fabeb0a64e0040d7feb0b9ea2d6f88d109479a61974a7c41aee3f54be23b70e2",
     ".github/workflows/vercel-preflight.yml": "60856940957e45075d1c54de644d3ba0268fad16b35b3ed5eb8005bc40a5b4b3",
@@ -23,7 +23,7 @@
     "docs/RESILIENCE_AND_DISASTER_RECOVERY.md": "587daa9a9186765e6dfd82b142139ad0b1743de0e9088f1c5e21b84c474e571a",
     "docs/SUPABASE_PARANOID_ARCHITECTURE_SPEC.md": "ab1dc59af8b7550711ec07eec53c7a106690ad3c078c659dd924594bee979c27",
     "docs/TROUBLESHOOTING.md": "0af6fd71c6e9ca466033f34e126b41656cecf399472db48d2b1eb77cf7f49108",
-    "docs/VERCEL_DEPLOYMENT.md": "99720ef6b46164adc7bb00abbe5a0f59aa47a620cd6ccb655c76b0a593ef5624",
+    "docs/VERCEL_DEPLOYMENT.md": "6e7dadc9c951145e1b637a83acb35df4f31f0abfc1531d8b1ecc1abd404c27b1",
     "docs/adr/0144-durable-images-and-incident-documentation.md": "e257b6c9ba769e8b5b05d5632169c6aa4b0229e2be50ba8eceb289d168a5811a",
     "docs/maintainers/DEBUGGING_AND_DIAGNOSTIC_RUNBOOKS.md": "a22910cebb0d77bc25b266416c5373ad1dbafbdf448e0532a24578114cb445e6",
     "docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md": "344c6cc08d003a2ad33dc9788fa5902164bba84726417a5cc19f07d9979404aa",
@@ -41,7 +41,7 @@
     "docs/operations/wallet-lifecycle.md": "ddc86ed1d3347f5fff19a07581bc040c52eee7a115c279a2ba28bceae92303db",
     "docs/operations/workspace-auth.md": "b73f4387b6fe5f4bcf1fd7b9f85b2b8b92ab896a463d0765e41d9eebee8e322d",
     "package.json": "d05821f475268559db698775def3fb91112a8e4cb90d2ee58ab169758876bcb4",
-    "post-mortem/CURRENT_STATE.md": "be239ba7c893e8b24f2f64d50f65b3567161c567e51e0f7b50a7dfc55358e297",
+    "post-mortem/CURRENT_STATE.md": "94045207c20ff2d0290ddc24176c21c6a41f1eec758506a340f6c0abe565568f",
     "post-mortem/README.md": "18c7edd2f27e5aa4c941fa07ca2ca71da3bc8757b45a07696fa59757233e03bf",
     "post-mortem/failure-modes/README.md": "629157ce509512a282c183744daf1cee051dba2da136c133018eda694d8dc590",
     "post-mortem/failure-modes/access-and-documentation.md": "270a62e90cc0f9674dd81e62fe7ef3781e34dc7a4373c1914b71da5bbb558002",

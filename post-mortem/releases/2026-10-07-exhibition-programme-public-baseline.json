@@ -1,0 +1,84 @@
+{
+  "version": 1,
+  "classification": "private",
+  "observedAt": "2026-10-07T22:03:48.156Z",
+  "target": "https://galx.ai",
+  "result": "PASSED",
+  "checks": [
+    {
+      "path": "/.well-known/oauth-authorization-server",
+      "method": "GET",
+      "status": 200,
+      "cache": "private, no-store",
+      "location": null
+    },
+    {
+      "path": "/v1/inference",
+      "method": "POST",
+      "status": 403,
+      "cache": "private, no-store, max-age=0",
+      "location": null
+    },
+    {
+      "path": "/v1/chat/completions",
+      "method": "POST",
+      "status": 403,
+      "cache": "private, no-store, max-age=0",
+      "location": null
+    },
+    {
+      "path": "/v1/embeddings",
+      "method": "POST",
+      "status": 403,
+      "cache": "private, no-store, max-age=0",
+      "location": null
+    },
+    {
+      "path": "/api/queues",
+      "method": "POST",
+      "status": 403,
+      "cache": "private, no-store, max-age=0",
+      "location": null
+    },
+    {
+      "path": "/post-mortem/CURRENT_STATE.md",
+      "method": "GET",
+      "status": 404,
+      "cache": "private, no-store",
+      "location": null
+    },
+    {
+      "path": "/_next/__private/trace",
+      "method": "GET",
+      "status": 404,
+      "cache": "private, no-store",
+      "location": null
+    },
+    {
+      "path": "/.env.local",
+      "method": "GET",
+      "status": 404,
+      "cache": "private, no-store",
+      "location": null
+    },
+    {
+      "path": "/login",
+      "method": "GET",
+      "status": 200,
+      "cache": "private, no-cache, no-store, max-age=0, must-revalidate",
+      "location": null
+    },
+    {
+      "path": "/images/library",
+      "method": "GET",
+      "status": 307,
+      "cache": "private, no-store",
+      "location": "https://galx.ai/login?next=/images/library"
+    }
+  ],
+  "issuer": "https://galx.ai",
+  "pkce": "S256",
+  "limits": [
+    "Anonymous read-only checks; no consent, grant, sign-in, paid generation or provider request."
+  ]
+}

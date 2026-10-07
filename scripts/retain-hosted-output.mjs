@@ -12,6 +12,18 @@ export function retainHostedOutput(buildDirectory) {
   const output = path.join(app, '.vercel/output');
   const sha = bytes => createHash('sha256').update(bytes).digest('hex');
   const walk = dir => fs.readdirSync(dir, { withFileTypes: true }).flatMap(item => item.isDirectory() ? walk(path.join(dir, item.name)) : [path.join(dir, item.name)]);
+  // Next's builder may copy build diagnostics into the static tree. They are
+  // never public application assets and can contain source paths and timings.
+  const diagnostics = path.join(output, 'static/_next/__private');
+  const excludedDiagnostics = [];
+  if (fs.existsSync(diagnostics)) {
+    if (!fs.lstatSync(diagnostics).isDirectory() || fs.lstatSync(diagnostics).isSymbolicLink()) throw new Error('Unexpected diagnostic output');
+    for (const name of walk(diagnostics).sort()) {
+      if (!fs.lstatSync(name).isFile() || fs.lstatSync(name).isSymbolicLink()) throw new Error('Unexpected diagnostic output');
+      excludedDiagnostics.push({ path: path.relative(output, name), sha256: sha(fs.readFileSync(name)) });
+    }
+    fs.rmSync(diagnostics, { recursive: true });
+  }
   const configs = walk(path.join(output, 'functions')).filter(name => name.endsWith('/.vc-config.json'));
   const shared = path.join(output, 'shared'); fs.mkdirSync(shared, { recursive: true });
   let references = 0;
@@ -39,7 +51,7 @@ export function retainHostedOutput(buildDirectory) {
   }
   fs.writeFileSync(path.join(build, 'artifact-manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
   execFileSync('tar', ['-czf', path.join(build, 'hosted-candidate.tgz'), '-C', app, '.vercel/output']);
-  const record = { at: new Date().toISOString(), format: 'Vercel Build Output API', functions: configs.length, mappedReferences: references, retainedPayloads: fs.readdirSync(shared).length, files: Object.keys(manifest).length, manifestSha256: sha(JSON.stringify(manifest)), archiveSha256: sha(fs.readFileSync(path.join(build, 'hosted-candidate.tgz'))), archiveBytes: fs.statSync(path.join(build, 'hosted-candidate.tgz')).size, applicationPayloadBytesChanged: 0, workspaceDependencies: false, deployed: false };
+  const record = { at: new Date().toISOString(), format: 'Vercel Build Output API', functions: configs.length, mappedReferences: references, retainedPayloads: fs.readdirSync(shared).length, files: Object.keys(manifest).length, manifestSha256: sha(JSON.stringify(manifest)), archiveSha256: sha(fs.readFileSync(path.join(build, 'hosted-candidate.tgz'))), archiveBytes: fs.statSync(path.join(build, 'hosted-candidate.tgz')).size, applicationPayloadBytesChanged: 0, excludedDiagnostics, workspaceDependencies: false, deployed: false };
   fs.writeFileSync(path.join(build, 'artifact.json'), JSON.stringify(record, null, 2) + '\n');
   return record;
 }
