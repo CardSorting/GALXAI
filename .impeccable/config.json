@@ -418,6 +418,276 @@
         "value": "inter",
         "createdAt": "2026-09-22T20:50:40.182Z",
         "reason": "Existing GALX DESIGN.md explicitly specifies Inter for project typography; this viewer follows that committed system."
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#14191e",
+        "files": [
+          "src/components/exhibitions/programme.module.css"
+        ],
+        "createdAt": "2026-10-07T20:51:21.724Z",
+        "reason": "Codex scoped design decision: user-requested formal exhibition programme; private direction contract documents these neutral tones and editorial type steps. Existing global identity remains intact."
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#34383d",
+        "files": [
+          "src/components/exhibitions/programme.module.css"
+        ],
+        "createdAt": "2026-10-07T20:51:21.784Z",
+        "reason": "Codex scoped design decision: user-requested formal exhibition programme; private direction contract documents these neutral tones and editorial type steps. Existing global identity remains intact."
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#777d80",
+        "files": [
+          "src/components/exhibitions/programme.module.css"
+        ],
+        "createdAt": "2026-10-07T20:51:21.843Z",
+        "reason": "Codex scoped design decision: user-requested formal exhibition programme; private direction contract documents these neutral tones and editorial type steps. Existing global identity remains intact."
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#c2c4c2",
+        "files": [
+          "src/components/exhibitions/programme.module.css"
+        ],
+        "createdAt": "2026-10-07T20:51:21.903Z",
+        "reason": "Codex scoped design decision: user-requested formal exhibition programme; private direction contract documents these neutral tones and editorial type steps. Existing global identity remains intact."
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#eeede7",
+        "files": [
+          "src/components/exhibitions/programme.module.css"
+        ],
+        "createdAt": "2026-10-07T20:51:21.959Z",
+        "reason": "Codex scoped design decision: user-requested formal exhibition programme; private direction contract documents these neutral tones and editorial type steps. Existing global identity remains intact."
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "15px",
+        "files": [
+          "src/components/exhibitions/programme.module.css"
+        ],
+        "createdAt": "2026-10-07T20:51:22.018Z",
+        "reason": "Codex scoped design decision: user-requested formal exhibition programme; private direction contract documents these neutral tones and editorial type steps. Existing global identity remains intact."
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "17px",
+        "files": [
+          "src/components/exhibitions/programme.module.css"
+        ],
+        "createdAt": "2026-10-07T20:51:22.075Z",
+        "reason": "Codex scoped design decision: user-requested formal exhibition programme; private direction contract documents these neutral tones and editorial type steps. Existing global identity remains intact."
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "23px",
+        "files": [
+          "src/components/exhibitions/programme.module.css"
+        ],
+        "createdAt": "2026-10-07T20:51:22.132Z",
+        "reason": "Codex scoped design decision: user-requested formal exhibition programme; private direction contract documents these neutral tones and editorial type steps. Existing global identity remains intact."
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "27px",
+        "files": [
+          "src/components/exhibitions/programme.module.css"
+        ],
+        "createdAt": "2026-10-07T20:51:22.188Z",
+        "reason": "Codex scoped design decision: user-requested formal exhibition programme; private direction contract documents these neutral tones and editorial type steps. Existing global identity remains intact."
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "28px",
+        "files": [
+          "src/components/exhibitions/programme.module.css"
+        ],
+        "createdAt": "2026-10-07T20:51:22.243Z",
+        "reason": "Codex scoped design decision: user-requested formal exhibition programme; private direction contract documents these neutral tones and editorial type steps. Existing global identity remains intact."
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "32px",
+        "files": [
+          "src/components/exhibitions/programme.module.css"
+        ],
+        "createdAt": "2026-10-07T20:51:22.326Z",
+        "reason": "Codex scoped design decision: user-requested formal exhibition programme; private direction contract documents these neutral tones and editorial type steps. Existing global identity remains intact."
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "40px",
+        "files": [
+          "src/components/exhibitions/programme.module.css"
+        ],
+        "createdAt": "2026-10-07T20:51:22.393Z",
+        "reason": "Codex scoped design decision: user-requested formal exhibition programme; private direction contract documents these neutral tones and editorial type steps. Existing global identity remains intact."
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "42px",
+        "files": [
+          "src/components/exhibitions/programme.module.css"
+        ],
+        "createdAt": "2026-10-07T20:51:22.453Z",
+        "reason": "Codex scoped design decision: user-requested formal exhibition programme; private direction contract documents these neutral tones and editorial type steps. Existing global identity remains intact."
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "46px",
+        "files": [
+          "src/components/exhibitions/programme.module.css"
+        ],
+        "createdAt": "2026-10-07T20:51:22.511Z",
+        "reason": "Codex scoped design decision: user-requested formal exhibition programme; private direction contract documents these neutral tones and editorial type steps. Existing global identity remains intact."
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "58px",
+        "files": [
+          "src/components/exhibitions/programme.module.css"
+        ],
+        "createdAt": "2026-10-07T20:51:22.570Z",
+        "reason": "Codex scoped design decision: user-requested formal exhibition programme; private direction contract documents these neutral tones and editorial type steps. Existing global identity remains intact."
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#14191e",
+        "files": [
+          "src/components/exhibitions/Programme.module.css"
+        ],
+        "createdAt": "2026-10-07T20:56:08.544Z",
+        "reason": "Codex intentional exhibition type/neutral ramp; exact case alias used by the hook on this case-insensitive filesystem. Same physical scoped stylesheet, private direction contract applies."
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#34383d",
+        "files": [
+          "src/components/exhibitions/Programme.module.css"
+        ],
+        "createdAt": "2026-10-07T20:56:08.610Z",
+        "reason": "Codex intentional exhibition type/neutral ramp; exact case alias used by the hook on this case-insensitive filesystem. Same physical scoped stylesheet, private direction contract applies."
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#777d80",
+        "files": [
+          "src/components/exhibitions/Programme.module.css"
+        ],
+        "createdAt": "2026-10-07T20:56:08.674Z",
+        "reason": "Codex intentional exhibition type/neutral ramp; exact case alias used by the hook on this case-insensitive filesystem. Same physical scoped stylesheet, private direction contract applies."
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#c2c4c2",
+        "files": [
+          "src/components/exhibitions/Programme.module.css"
+        ],
+        "createdAt": "2026-10-07T20:56:08.734Z",
+        "reason": "Codex intentional exhibition type/neutral ramp; exact case alias used by the hook on this case-insensitive filesystem. Same physical scoped stylesheet, private direction contract applies."
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#eeede7",
+        "files": [
+          "src/components/exhibitions/Programme.module.css"
+        ],
+        "createdAt": "2026-10-07T20:56:08.790Z",
+        "reason": "Codex intentional exhibition type/neutral ramp; exact case alias used by the hook on this case-insensitive filesystem. Same physical scoped stylesheet, private direction contract applies."
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "15px",
+        "files": [
+          "src/components/exhibitions/Programme.module.css"
+        ],
+        "createdAt": "2026-10-07T20:56:08.852Z",
+        "reason": "Codex intentional exhibition type/neutral ramp; exact case alias used by the hook on this case-insensitive filesystem. Same physical scoped stylesheet, private direction contract applies."
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "17px",
+        "files": [
+          "src/components/exhibitions/Programme.module.css"
+        ],
+        "createdAt": "2026-10-07T20:56:08.917Z",
+        "reason": "Codex intentional exhibition type/neutral ramp; exact case alias used by the hook on this case-insensitive filesystem. Same physical scoped stylesheet, private direction contract applies."
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "23px",
+        "files": [
+          "src/components/exhibitions/Programme.module.css"
+        ],
+        "createdAt": "2026-10-07T20:56:08.978Z",
+        "reason": "Codex intentional exhibition type/neutral ramp; exact case alias used by the hook on this case-insensitive filesystem. Same physical scoped stylesheet, private direction contract applies."
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "27px",
+        "files": [
+          "src/components/exhibitions/Programme.module.css"
+        ],
+        "createdAt": "2026-10-07T20:56:09.038Z",
+        "reason": "Codex intentional exhibition type/neutral ramp; exact case alias used by the hook on this case-insensitive filesystem. Same physical scoped stylesheet, private direction contract applies."
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "28px",
+        "files": [
+          "src/components/exhibitions/Programme.module.css"
+        ],
+        "createdAt": "2026-10-07T20:56:09.097Z",
+        "reason": "Codex intentional exhibition type/neutral ramp; exact case alias used by the hook on this case-insensitive filesystem. Same physical scoped stylesheet, private direction contract applies."
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "32px",
+        "files": [
+          "src/components/exhibitions/Programme.module.css"
+        ],
+        "createdAt": "2026-10-07T20:56:09.153Z",
+        "reason": "Codex intentional exhibition type/neutral ramp; exact case alias used by the hook on this case-insensitive filesystem. Same physical scoped stylesheet, private direction contract applies."
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "40px",
+        "files": [
+          "src/components/exhibitions/Programme.module.css"
+        ],
+        "createdAt": "2026-10-07T20:56:09.211Z",
+        "reason": "Codex intentional exhibition type/neutral ramp; exact case alias used by the hook on this case-insensitive filesystem. Same physical scoped stylesheet, private direction contract applies."
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "42px",
+        "files": [
+          "src/components/exhibitions/Programme.module.css"
+        ],
+        "createdAt": "2026-10-07T20:56:09.272Z",
+        "reason": "Codex intentional exhibition type/neutral ramp; exact case alias used by the hook on this case-insensitive filesystem. Same physical scoped stylesheet, private direction contract applies."
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "46px",
+        "files": [
+          "src/components/exhibitions/Programme.module.css"
+        ],
+        "createdAt": "2026-10-07T20:56:09.330Z",
+        "reason": "Codex intentional exhibition type/neutral ramp; exact case alias used by the hook on this case-insensitive filesystem. Same physical scoped stylesheet, private direction contract applies."
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "58px",
+        "files": [
+          "src/components/exhibitions/Programme.module.css"
+        ],
+        "createdAt": "2026-10-07T20:56:09.458Z",
+        "reason": "Codex intentional exhibition type/neutral ramp; exact case alias used by the hook on this case-insensitive filesystem. Same physical scoped stylesheet, private direction contract applies."
       }
     ]
   },

@@ -4307,6 +4307,19 @@
       "decision": null
     },
     {
+      "path": "docs/reference/exhibition-programme.md",
+      "title": "Exhibition and editorial programme",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [
+        "images",
+        "client-efficiency"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": null
+    },
+    {
       "path": "docs/reference/knowledge-commands.md",
       "title": "Knowledge commands and metadata",
       "scope": "current-guide",
@@ -4568,6 +4581,20 @@
       "domains": [
         "knowledge",
         "delivery"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/runbooks/star-residency.md",
+      "title": "Bounded Star artist residency",
+      "scope": "current-guide",
+      "kind": "runbook",
+      "domains": [
+        "images",
+        "relay",
+        "database"
       ],
       "curation": "assigned",
       "keywords": [],
@@ -5113,6 +5140,26 @@
     {
       "path": "post-mortem/incidents/2026/2026-10-03-neutral-outcomes/README.md",
       "title": "Interrupted work incorrectly counted as provider failure",
+      "scope": "operational-record",
+      "kind": "navigation",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-07-relay-connection/README.md",
+      "title": "Relay connection lost while its listener stayed alive",
+      "scope": "operational-record",
+      "kind": "navigation",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-07-star-image-delivery/README.md",
+      "title": "October 7 Star image delivery configuration",
       "scope": "operational-record",
       "kind": "navigation",
       "domains": [],

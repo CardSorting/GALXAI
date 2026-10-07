@@ -8,7 +8,7 @@ import { createHash } from 'node:crypto';
 import { composeHealth, firstFailedCause, poolServiceRecoveryAction, retryDelayMs, supervisorCauses } from './lib/relay-local-supervisor.mjs';
 import assert from 'node:assert/strict';
 import { homedir } from 'node:os';
-import { monitorOrigin, monitorTicket, monitorAvailable, runtimeAvailable, monitorHandoff } from './lib/relay-local-access.mjs';
+import { monitorOrigin, monitorTicket, monitorAvailable, runtimeAvailable, runtimeOwnershipFresh, monitorHandoff } from './lib/relay-local-access.mjs';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 process.chdir(root);
 const state = path.join(root, '.relay/service-deployment');
@@ -54,6 +54,11 @@ function readControlStatus(pool) {
   // Only fixed status fields leave this administrator-only process, never keys.
   return JSON.parse(docker(pool, ['exec', id, 'node', '--input-type=module', '-e',
     "import fs from 'node:fs';const c=JSON.parse(fs.readFileSync('/run/secrets/component-config'));const r=await fetch(c.centralOrigin+'/operator/status',{method:'POST',redirect:'error',signal:AbortSignal.timeout(15000),headers:{Authorization:'Bearer '+c.operatorToken,'Content-Type':'application/json'},body:JSON.stringify({pool:c.pool,installationId:c.installationId})});if(!r.ok)throw Error('Control status unavailable');const s=await r.json();console.log(JSON.stringify({pool:s.pool,installationId:s.installationId,lastSeenAt:s.lastSeenAt}));"]));
+}
+async function runtimeConnected(pool) {
+  if (!(await runtimeAvailable(pool)) || !poolServiceImageMatches(pool, 'relay')) return false;
+  const config = JSON.parse(readFileSync(path.join(components, `${pool}-monitor.json`)));
+  return runtimeOwnershipFresh(pool, config, () => readControlStatus(pool));
 }
 function checkImages(pool) {
   for (const image of reviewedImages().filter(image => !pool || !image.pool || image.pool === pool)) {
@@ -142,10 +147,17 @@ async function supervise() {
   });
   while (!stopping) {
     try {
+      currentCause = 'central';
+      const central = centralAvailable();
+      currentCause = 'monitor';
+      const monitor = await monitorAvailable('premium') && poolServiceImageMatches('premium', 'monitor');
+      currentCause = 'relay';
       const failedCause = firstFailedCause({
-        central: centralAvailable(),
-        monitor: await monitorAvailable('premium') && poolServiceImageMatches('premium', 'monitor'),
-        relay: await runtimeAvailable('premium') && poolServiceImageMatches('premium', 'relay'),
+        central,
+        monitor,
+        // A failed dependency must reach its existing recovery path before
+        // attempting the authorized control read through that dependency.
+        relay: central && monitor && await runtimeConnected('premium'),
       });
       if (failedCause) {
         currentCause = failedCause;
@@ -156,7 +168,7 @@ async function supervise() {
       currentCause = 'monitor';
       if (!(await monitorAvailable('premium'))) throw Error('Monitor is not healthy.');
       currentCause = 'relay';
-      if (!(await runtimeAvailable('premium'))) throw Error('Relay is not healthy.');
+      if (!(await runtimeConnected('premium'))) throw Error('Relay connection is not confirmed.');
       attempt = 0;
       reportedStatus = 'running';
       currentCause = null;
@@ -203,6 +215,8 @@ async function status() {
   } else console.log('Premium services: VM is stopped');
   console.log(`Premium monitor: ${await monitorAvailable('premium') ? 'Healthy' : 'Not responding'}`);
   console.log(`Premium relay: ${await runtimeAvailable('premium') ? 'Healthy' : 'Not responding'}`);
+  try { console.log(`Premium relay connection: ${await runtimeConnected('premium') ? 'Confirmed' : 'Not confirmed'}`); }
+  catch { console.log('Premium relay connection: Status unavailable'); }
   if (keepOnlineEnabled()) {
     try {
     const current = JSON.parse(readFileSync(supervisorStateFile, 'utf8'));
@@ -261,7 +275,7 @@ async function withLauncherLock(operation) {
 async function wakeMonitor(pool, repair = false) {
   monitorOrigin(pool);
   return withLauncherLock(async () => {
-    if (!repair && centralAvailable() && await monitorAvailable(pool) && await runtimeAvailable(pool)
+    if (!repair && centralAvailable() && await monitorAvailable(pool) && await runtimeConnected(pool)
       && poolServiceImageMatches(pool, 'monitor') && poolServiceImageMatches(pool, 'relay')) return;
     console.log('Starting Premium…');
     if (!existsSync(path.join(homedir(), '.colima', pool, 'colima.yaml'))) throw Error('This monitor has not been installed on this Mac.');
@@ -290,7 +304,7 @@ async function startPool(pool) {
     } else if (!poolServiceImageMatches(pool, 'monitor')) throw Error('The Premium monitor does not match its reviewed image.');
   }
   const replacingImage = !poolServiceImageMatches(pool, 'relay');
-  if (await runtimeAvailable(pool) && !replacingImage) return;
+  if (!replacingImage && await runtimeConnected(pool)) return;
   if (replacingImage && poolServiceState(pool, 'relay') === 'running') {
     console.log('Draining the previous Premium runtime before replacing its image…');
     poolCompose(pool, ['stop', '--timeout', '480', 'relay']);
@@ -300,12 +314,12 @@ async function startPool(pool) {
   if (deadline > Date.now()) console.log('Waiting for the previous runtime to release ownership…');
   await waitFor(() => Date.now() >= deadline, 67);
   if (!centralAvailable()) throw Error('Central service health changed during runtime handoff.');
-  if (await runtimeAvailable(pool) && poolServiceImageMatches(pool, 'relay')) return;
+  if (await runtimeConnected(pool)) return;
   if (replacingImage) {
     if (poolServiceState(pool, 'relay') === 'unknown') throw Error('The Premium runtime needs manual review before image replacement.');
     poolCompose(pool, ['up', '-d', '--no-build', '--pull', 'never', 'relay']);
   } else recoverPoolService(pool, 'relay');
-  await waitFor(() => runtimeAvailable(pool) && poolServiceImageMatches(pool, 'relay'), 45);
+  await waitFor(() => runtimeConnected(pool), 45);
 }
 function poolServiceState(pool, service) {
   if (!pools.includes(pool) || !['monitor', 'relay'].includes(service)) return 'unknown';

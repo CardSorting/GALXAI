@@ -8,6 +8,11 @@ Private application release guide. The application, gateway, central authority, 
 
 Use [package.json](../package.json), [.env.example](../.env.example) and the existing deployment project for runtime/build settings. Inspect the target environment's required configuration names, presence and credential types without printing values. Local configuration does not prove production configuration. Sensitive values omitted by an API response are not automatically missing.
 
+Resolve each intended hostname's actual alias assignment. Manual assignments can
+point to a newer accepted deployment than the project's production-target
+pointer. Record both; use the serving aliases and accepted artifact/source
+manifest to identify the release being extended and the compatible rollback.
+
 Account Auth verification needs its configured Auth URL, public credential and the applied active-session lookup migration; administrator clients still require privileged credentials and fail closed otherwise. Image persistence needs the configured database and private image migrations, plus `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_ASSETS_BUCKET_NAME` for legacy/public assets, and `R2_PRIVATE_IMAGES_BUCKET_NAME` for non-publishable human artifacts on the server. The Vercel application writes private images using its server-side R2 credentials; a `PRIVATE_IMAGE_BUCKET` Cloudflare Worker binding is not a runtime dependency. Provision the dedicated private bucket before configuring the application for paid creation. The private bucket must be distinct from the legacy/public asset bucket and have no public origin/custom domain. Required values remain encrypted/server-only; no public key is elevated into administration. A configured application bucket does not by itself establish that historical objects or any custom-domain origin are private; verify and protect those separately before release.
 
 The isolated transport is opt-in through server-only `GALX_ISOLATED_RELAYS_ENABLED=1`, `GALX_PREMIUM_RELAY_URL` and `GALX_PREMIUM_RELAY_KEY`. Premium handles text, Sites and images with no legacy dispatch fallback. Premium's capability key configures the separate Sites preflight. Follow [service operation](runbooks/relay-pool-services.md#6-preserve-the-application-boundary) for the current local boundary and separate ingress acceptance. Runtime central account leases replace application account selection/decryption and duplicate account leases, while product usage policy remains separate.
@@ -52,7 +57,7 @@ Keep existing Media image/Sites keys, Auth, database, vault/audit, object storag
 
 ## Canonical clean hosted package
 
-Use an explicit source snapshot and a new output path. The [packaging command](../scripts/package-hosted-candidate.mjs) copies only repository source, public assets, the tracked `BROC` modules and named build configuration. It installs application dependencies with `npm ci` from the unchanged application lock and build tooling from [its separate pinned lock](../deploy/hosted/package-lock.json). Linux x86-64 Node 22.23.2/glibc is pinned by image digest. No ambient dependencies, existing output, private guides, sibling directories or real server credentials enter the builder.
+Use an explicit source snapshot and a new output path. The [packaging command](../scripts/package-hosted-candidate.mjs) copies only repository source, public assets, the tracked `BROC` modules and named build configuration. It installs application dependencies with `npm ci` from the reviewed application lock and build tooling from [its separate pinned lock](../deploy/hosted/package-lock.json). Linux x86-64 Node 22.23.2/glibc is pinned by image digest. No ambient dependencies, existing output, private guides, sibling directories or real server credentials enter the builder.
 
 Prepare a private JSON input with `projectId`, `orgId` and an allowlisted `publicEnvironment` object. Obtain those public values from the intended target and record their digest. Do not include provider, database, deployment, vault or account tokens. The command rejects unapproved variable names. For the Media/Connect release, preserve the observed serving Media revision and overlay only the reviewed Connect/authentication and retirement files. The preparation command records the base revision and every overlay hash and refuses a base that already contains Nova execution. Run from the repository root:
 
@@ -62,6 +67,28 @@ DOCKER_CONTEXT=desktop-linux node scripts/package-hosted-candidate.mjs <new-outp
 ```
 
 The optional third argument selects the isolated source; omission packages the current repository snapshot and is appropriate only when that complete snapshot is the intended candidate. The October 3 transition preserved revision `38a3cc48f32f5f404592109c8cae3ddac5fa6f61` for Media. Do not replace unrelated Media code merely to retire Nova. Build tooling stays pinned by this repository's declared lock.
+
+For a later scoped Media feature, start from the complete source snapshot that
+matches the currently accepted artifact. Verify every existing source hash
+against that artifact's provenance before applying the feature's reviewed
+patch and new public files. Preserve previously accepted Connect, authentication,
+retirement and Media behavior rather than copying the broader development tree.
+Record the base snapshot revision, feature commit, overlay hashes and resulting
+source manifest. The exhibition programme uses this boundary: new programme
+routes/components/catalog/font and the exact navigation, public-reading,
+published-work lookup and sitemap delta. Relay operation and generation plans
+are committed separately from the hosted source selection; deploying the
+programme does not replay a residency or replace an accepted runtime.
+
+Run the required runtime dependency audit (`npm audit --omit=dev
+--audit-level=high`) on the reviewed application lock. A dependency correction is
+an explicit source-overlay change with its own hashes and regression evidence.
+Keep build-only tools classified as development dependencies and verify that
+they are absent from traced runtime payloads; classification does not repair or
+clear an advisory in those tools. The builder installs development dependencies
+from the lock for compilation. Retain remaining build-tool advisories and their
+trusted-source boundary separately from runtime audit results. Do not claim a
+clean full dependency audit based on an `--omit=dev` result.
 
 The existing vault/audit modules validate keys at import time during page collection. As in the established CI build, this isolated build uses fresh throwaway values with no database or provider authority. It does not rotate or consume production keys. The resulting package is scanned for those exact canaries and must contain neither. Real runtime secret references are configured separately by the deployment environment.
 

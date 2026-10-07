@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { isPublicReadingPath } from '@/lib/public-content/routes';
+import { isPublicProgrammePath } from '@/lib/exhibitions/paths';
 import { RouteRecovery } from '@/components/common/RouteRecovery';
 import type { ReactNode } from 'react';
 import { authRecoveryPath } from '@/lib/auth/redirects';
@@ -20,7 +21,7 @@ export function AuthSessionContent({ children }: { children: ReactNode }) {
       failureMessage="Sign-out could not be completed. Try again." />;
   }
   const accountEntry = pathname === '/login' || pathname === '/signup' || /^\/connect(?:\/|$)/.test(pathname);
-  if (status === 'unavailable' && !accountEntry && pathname !== '/' && !isPublicReadingPath(pathname)) {
+  if (status === 'unavailable' && !accountEntry && pathname !== '/' && !isPublicReadingPath(pathname) && !isPublicProgrammePath(pathname)) {
     return <RouteRecovery title="Let’s get you reconnected" description="We couldn’t reconnect to your account. Try again, or sign in to continue."
       secondaryHref={authRecoveryPath(workspaceReturnPath(pathname, new URLSearchParams(typeof window === 'undefined' ? '' : window.location.search)))} secondaryLabel="Sign in again"
       onRetry={retrySession} pendingLabel="Checking session…" failureMessage="Your session is still unavailable. Try again in a moment." />;

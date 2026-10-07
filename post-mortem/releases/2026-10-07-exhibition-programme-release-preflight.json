@@ -1,0 +1,90 @@
+{
+  "version": 1,
+  "classification": "private",
+  "observedAt": "2026-10-07T21:46:41.647558+00:00",
+  "authorization": "Owner: write the git commit and push to production. Follows disclosed local-only implementation and denied desktop/mobile browser review.",
+  "git": {
+    "repository": "CardSorting/GALXAI",
+    "private": true,
+    "branch": "main",
+    "baseRevision": "23d0d4fe959a03d621a4a0920edda8f45431b834",
+    "remoteUpToDate": true
+  },
+  "target": {
+    "at": "2026-10-07T21:45:12.143Z",
+    "projectTargetProductionId": "dpl_4uwFyPMJ6YV7njXsWQbb7a8MZHKh",
+    "servingDeploymentId": "dpl_QBr2WUvRcvF5RFqJvdc8FaZGaqHV",
+    "manualAliasAssignments": [
+      {
+        "alias": "galx.ai",
+        "id": "5503f04f322e6b9d7e6ec61fb4e6f7058b279bef420ff016301099f26d692215d5fc4eda1f16d45a563de6f0d6195825ca17998a36da806df7437c17bf054981",
+        "deploymentId": "dpl_QBr2WUvRcvF5RFqJvdc8FaZGaqHV"
+      },
+      {
+        "alias": "www.galx.ai",
+        "id": "57742fb741dd133b571baeb091e3c2e7a9284b44fe366febc3c24f75d3d11de7e0d44ecb5f7991ef7a40effeff058352df7158159efb22aa8369462d33a84173",
+        "deploymentId": "dpl_QBr2WUvRcvF5RFqJvdc8FaZGaqHV"
+      },
+      {
+        "alias": "galxai.vercel.app",
+        "id": "783cc73b13563190b2d41f24b77ade07a1e9473c6859e288ee1b6093cd4a4dfc3076663dff6fe2a46d98172d5758382b7f8177119b0ae7aa5f25c2ad853ac5d0",
+        "deploymentId": "dpl_QBr2WUvRcvF5RFqJvdc8FaZGaqHV"
+      }
+    ],
+    "domains": [
+      "galx.ai",
+      "galxai.vercel.app",
+      "www.galx.ai"
+    ],
+    "requiredRuntimeSettingNames": [
+      "R2_ACCOUNT_ID",
+      "R2_ACCESS_KEY_ID",
+      "R2_SECRET_ACCESS_KEY",
+      "R2_PRIVATE_IMAGES_BUCKET_NAME",
+      "R2_ASSETS_BUCKET_NAME",
+      "NEXT_PUBLIC_SUPABASE_URL"
+    ],
+    "missingRuntimeSettingNames": [],
+    "automaticPromotionDisabled": true,
+    "previousServingReleaseRetained": true
+  },
+  "sourceOverlay": {
+    "version": 1,
+    "acceptedSourceManifestSha256": "ef292883a4e84af9b91b14d7f86fdb237c3e5489abd7d3890257f425c0642d3f",
+    "baseRevision": "aa5b2c1aa33bc912d0d457fce94ba0cb84bc83d2",
+    "delta": "New programme files and exact working-tree programme patch only; prior accepted Connect/Media source preserved.",
+    "newSourceFiles": {
+      "public/fonts/bodoni-moda-OFL.txt": "931dfe2e0cd3c9443295f5c1d754b8a8403bf060df50c1d5900267ade83d0046",
+      "src/app/editorials/[slug]/page.tsx": "6aa7538269d84fb16a7088a1ffa9bb1ce49de7250cab050923e4b0c5a89872ff",
+      "src/app/editorials/page.tsx": "688490c2e4e71374122f3267f7af9e6e1be9f874d1a33dd48f01e1016cf4f71d",
+      "src/app/exhibitions/[slug]/page.tsx": "868b582defd2760fcb1778e2c41037b58b1d820fe274c825dbe9711cd4d82425",
+      "src/app/exhibitions/page.tsx": "0f293a6d75bef0547537b221e555fc872c8adbcc6e12295bc442d7d826e8e5d4",
+      "src/components/exhibitions/ArtworkImage.tsx": "c3e0839c70406e8b0726d06094d44770d50eae5c856c4070e7c7490087307919",
+      "src/components/exhibitions/Programme.tsx": "9ca7c2c5cd30174385833342dfd12b0c98df9aea4c188bfd61ef4aab8787cda5",
+      "src/components/exhibitions/fonts/BodoniModa.ttf": "550f5e34ee0a828d7941b1fe9bc58b34e5260d3f33a61532e6d0a0114e79a5cf",
+      "src/components/exhibitions/programme.module.css": "1ff3f181b4cc356501837c1ddafabca1e5fe011bf6f16f8f4dad7bfdaadb2b62",
+      "src/lib/exhibitions/catalog.ts": "5a5d9ef0870fbdaa65fd37dc5b6c83661a61b2ad5fc234b4177fc1b2d9722efd",
+      "src/lib/exhibitions/paths.ts": "e195e3210ddcc87b50e7a9b305068ec7f673cbb473f39394a9af61d8ddfc0ee3",
+      "src/lib/exhibitions/public-artwork.ts": "ba6106f108f1d21b451a129a3cceeae13c2cd1fbddd8c0e6b1fb4979af5a409b",
+      "src/lib/exhibitions/published-works.ts": "4a9e4de6b14f1456a485da946911b328f513e9c8b3b4b6bf2e6224e7b9bb0fbb"
+    },
+    "patchSha256": "419b9c1b864338c282cb90d04d7098fb28f0f7e4df6f1b876cb1565639c3f797",
+    "deployed": false
+  },
+  "runtimeSettingChanges": 0,
+  "databaseMutations": 0,
+  "newGenerations": 0,
+  "acceptedRuntimeChanges": 0,
+  "sequence": [
+    "Build clean Media/Connect artifact from hash-verified accepted source plus exact programme delta",
+    "Scan retained package and verify protected production candidate",
+    "Move only existing Media aliases",
+    "Verify public programme/artifacts, unchanged account/discovery and retired execution routes",
+    "Retain serving predecessor and append actual release evidence"
+  ],
+  "visualReview": {
+    "accepted": false,
+    "reason": "Local browser access denied; source/HTTP checks do not replace desktop/mobile acceptance."
+  },
+  "rollback": "Restore the exact three Media aliases to dpl_QBr2WUvRcvF5RFqJvdc8FaZGaqHV. Preserve images, selections, receipts, runtime authority and existing firewall."
+}

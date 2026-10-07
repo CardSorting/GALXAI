@@ -207,7 +207,7 @@ def validate_records(root, register, events, retired=None):
                     (not p.is_file() and name not in retired)):
                 errors.append(f'{label}: missing, raw, or outside-workspace evidence: {name}')
     for row in incidents.values():
-        if not re.fullmatch(r'INC-\d{8}-[A-Z]+', row['id']):
+        if not re.fullmatch(r'INC-\d{8}-[A-Z]+(?:-[A-Z]+)*', row['id']):
             errors.append(f"Invalid incident ID: {row['id']}")
         if row['status'] not in {'investigating', 'contained', 'recovered', 'closed'}:
             errors.append(f"Invalid incident status: {row['id']}")

@@ -421,7 +421,6 @@
     "test:relay:monitor-package": "node scripts/test-relay-monitor-package.mjs"
   },
   "dependencies": {
-    "@eslint/eslintrc": "^3",
     "@noorm/broccolidb": "https://codeload.github.com/CardSorting/ABroccoliDB/tar.gz/f085f3f5dbceadc4cd6752b081ebfc51b02fe3f7",
     "@novnc/novnc": "1.7.0",
     "@openai/codex-sdk": "^0.147.0",
@@ -435,8 +434,6 @@
     "autoprefixer": "^10.5.4",
     "broccoli-queue": "https://codeload.github.com/CardSorting/BROCCOLIQUEUE/tar.gz/c38a7db40e8bcaf99c7f83af755c5e43a6d7feec",
     "clsx": "^2.1.1",
-    "eslint": "^9",
-    "eslint-config-next": "^15.5.25",
     "framer-motion": "^12.4.7",
     "lucide-react": "^0.475.0",
     "next": "^15.5.25",
@@ -444,10 +441,9 @@
     "postcss": "^8.5.26",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "sharp": "^0.35.4",
+    "sharp": "^0.35.5",
     "stripe": "^22.5.0",
     "tailwind-merge": "^3.0.1",
-    "tailwindcss": "^3.4.1",
     "tsx": "^4.19.2",
     "typescript": "^5",
     "ws": "8.21.0"
@@ -460,8 +456,12 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20260823.1",
+    "@eslint/eslintrc": "^3",
     "@types/ws": "^8.18.1",
+    "eslint": "^9",
+    "eslint-config-next": "^15.5.25",
     "jsdom": "^30.1.0",
+    "tailwindcss": "^3.4.1",
     "wrangler": "^4.135.0"
   }
 }

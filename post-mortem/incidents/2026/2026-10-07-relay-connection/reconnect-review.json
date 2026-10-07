@@ -1,0 +1,63 @@
+{
+  "version": 1,
+  "classification": "private",
+  "observed_at": "2026-10-07T19:05:27.267648+00:00",
+  "scope": "Explicit normal manual reconnect follow-up; executable source, images, gates and schema unchanged from earlier verified repair",
+  "checks": {
+    "live_acceptance": "31 passed; both accounts connected and acknowledged; 160-second stability; local/ingress models200; invalid key and browser Origin401; raw body/header boundary passed",
+    "credential_comparison": "Latest selected desktop login matches private central projection and active runtime checkpoint; actual runtime inventory200. No tokens/hashes retained in this record.",
+    "production_build": "Earlier production build157 static pages and 538-asset scan retained in final-validation.json; no executable changes since those checks",
+    "provider_execution": "Not submitted",
+    "documentation_fixtures": "42 passed (25 incident guards,17 knowledge fixtures)"
+  },
+  "semantic_review": {
+    "source_contracts": [
+      "src/relay/pool-central.ts",
+      "src/relay/desktop-credential-refresh.ts",
+      "src/relay/desktop-credentials.ts",
+      "src/relay/pool-runtime.ts",
+      "src/relay/relay-server.ts",
+      "src/relay/capability-discovery.ts",
+      "src/relay/pool-monitor-server.ts",
+      "src/relay/pool-monitor.js",
+      "src/relay/desktop/read-credentials.py"
+    ],
+    "complete_affected_guides": [
+      "docs/reference/relay-account-management.md",
+      "docs/runbooks/relay-pool-services.md",
+      "post-mortem/incidents/2026/2026-10-07-relay-connection/README.md",
+      "post-mortem/CURRENT_STATE.md"
+    ],
+    "corrections": [
+      "Clarify latest completed manual login must be explicitly saved; diagnose mismatched saved and selected credentials before another sign-in",
+      "Separate earlier one-account acceptance from later two-account acceptance; complete only ACT-049 stated recovery scope"
+    ],
+    "limits": [
+      "Earlier token invalidation cause unknown; no automatic renewal or rejection bypass",
+      "No provider execution or continuous availability claim",
+      "Unchanged broader relay fingerprint inventory retains earlier review evidence"
+    ]
+  },
+  "knowledge_review": {
+    "paths": [
+      "docs/DOCUMENTATION_POLICY.md",
+      "docs/how-to/change-with-documentation.md",
+      "docs/reference/knowledge-commands.md",
+      "post-mortem/register.json",
+      "post-mortem/events.jsonl",
+      "docs/knowledge/catalog.json",
+      "post-mortem/documentation-inventory.json"
+    ],
+    "scope": "Append-only reconnect observation and recovery supplement, coherent latest status and narrowly completed action. Generated views derive from retained operational evidence. ADR decision status unchanged."
+  },
+  "database_review": {
+    "changed_scope": "Database domain drift is only the shared relay account management guide paragraph; no database source/schema/privilege change.",
+    "source_contracts": [
+      "supabase/migrations/20260916013944_relay_connection_lifecycle.sql",
+      "src/relay/pool-central.ts",
+      "src/relay/desktop-credential-refresh.ts"
+    ],
+    "inspected_contract": "Original registration and account locks; same rejected credential refused; successful fresh save clears only connection rejection; stale runtime/control/credential revisions cannot reject a replacement. Diagnostic guidance preserves these checks.",
+    "evidence_limits": "Existing database regressions are retained from prior reviews. This supplement uses the normal scoped refresh plus private status/projection and no owner SQL; it is not a new exhaustive database audit."
+  }
+}

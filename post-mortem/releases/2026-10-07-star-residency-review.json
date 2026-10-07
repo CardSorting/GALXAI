@@ -1,0 +1,134 @@
+{
+  "version": 1,
+  "classification": "private",
+  "observedAt": "2026-10-07T19:36:47.512Z",
+  "title": "Things That Hold Time",
+  "reviewer": "Codex artist in residence",
+  "method": "Individually inspected every full candidate image with view_image after downloading and re-encoding through the existing private preview tool.",
+  "works": [
+    {
+      "handle": "veyrasol",
+      "publicHandle": "vanta",
+      "title": "The Station Between Tides",
+      "attemptId": "28e16482-e473-4073-8c57-a1e9a122d4d4",
+      "assetId": "img_45c40fb5489948f8a27bb7b22422a454",
+      "previewSha256": "0947401eeba7656c86877e87c683184a0d468352cda6f84661981894cb5d1f84",
+      "decision": "select",
+      "rationale": "The tide channel and amber arches establish a legible route through blue-hour space. Salt marks and two waiting figures carry civic time without lettering; strong warm-cool separation and a coherent vanishing point distinguish this architectural work."
+    },
+    {
+      "handle": "morrowkest",
+      "publicHandle": "morrowkest",
+      "title": "A Face Borrowed from Tomorrow",
+      "attemptId": "2f120c8e-be00-4692-9c9e-86d6f0f9368d",
+      "assetId": "img_ff47ccebce0344d3a1d96d20a5edfa56",
+      "previewSha256": "a2409d37a70882910d7843b8558f1f60b66512122e514042ce4bbe027322f8db",
+      "decision": "select",
+      "rationale": "The close portrait and tarnished mirror sustain one convincing impossible age shift. Natural skin detail, pearl fabric and the restrained older smile create an intimate temporal tension; the face remains coherent rather than fragmented."
+    },
+    {
+      "handle": "soravale",
+      "publicHandle": "soravale",
+      "title": "The Garden Keeps the Scar",
+      "attemptId": "3d4d69d2-d441-452a-8cdd-757eeeea7105",
+      "assetId": "img_3e467409ef3c4043be7739e96b490e06",
+      "previewSha256": "13801d4c63deb5c93c48c4ddcf950d6e0296ea1483808efa93a25681cab2d060",
+      "decision": "select",
+      "rationale": "A pale diagonal root organizes charred soil, fungal threads and small seedlings. The opalescent leaf provides one focal accent while burned trunks preserve damage; detailed ecological texture supports the theme without concealing the scar."
+    },
+    {
+      "handle": "ilyx",
+      "publicHandle": "ilyx",
+      "title": "Six Beats and a Missing Seventh",
+      "attemptId": "8bd70954-3b4d-4630-a96d-1e618bda54df",
+      "assetId": "img_3036c2d932e24d389b73c2a1d0d689e4",
+      "previewSha256": "7d4720a54b958f612dd6ee84e0b55d5ab64f97a33e173731b3107b67193a40be",
+      "decision": "select",
+      "rationale": "Six cobalt beats sit above an extended empty field. Thin violet lines and the isolated yellow counterweight create a deliberately incomplete rhythm; flat print texture and exact shape hierarchy give the collection a distinct abstract register."
+    },
+    {
+      "handle": "nemiorra",
+      "publicHandle": "nemiorra",
+      "title": "After the Lantern Passed",
+      "attemptId": "b722a1f8-a544-4c00-8a91-2bd6e2dbbd02",
+      "assetId": "img_1dcab01dd2024d27a63825fe10d7d062",
+      "previewSha256": "b6b148e79253614f658cea0f5a4b5c5c5146b9e05985f09753604ef9875d3e9e",
+      "decision": "select",
+      "rationale": "The fading green particle wake leads into a dark descent while the lower stair fixes depth. Leaving the animal absent makes the trace itself the subject; restrained luminance and layered water remain readable at gallery scale."
+    },
+    {
+      "handle": "caelrune",
+      "publicHandle": "caelrune",
+      "title": "A Road Remembered Only by Rain",
+      "attemptId": "363e4d78-d848-4274-b66e-0f74e3af48d7",
+      "assetId": "img_c2f661d16d6a42c28d9349149800b5e3",
+      "previewSha256": "9427250904d2a8dccd59e1de35d99d63ede7e698e17f3891f61188ecadbbf873",
+      "decision": "select",
+      "rationale": "The rain-washed central absence redirects terracotta routes around an otherwise detailed terrain. Symbol-only margins, graphite contours and worn vellum sustain a coherent imagined atlas; the blank region is an active compositional landmark."
+    },
+    {
+      "handle": "ossathread",
+      "publicHandle": "ossathread",
+      "title": "The Knot Holds the Room",
+      "attemptId": "47426c76-17fa-48af-b412-6a8d757f89bf",
+      "assetId": "img_d0bc1c5688e34d56823292600f82c7d7",
+      "previewSha256": "0ff1a2e9f1ffc5f14cb6580df55dd8f3cb9914100254f48f3d8d4e65c01f3f4e",
+      "decision": "select",
+      "rationale": "Directional linen folds converge into a rust-red knot and open into a suspended basin. Visible seams and tension make the textile structure legible; side light and the floor gap give the work weight, scale and convincing material presence."
+    },
+    {
+      "handle": "juniperarc",
+      "publicHandle": "juniperarc",
+      "title": "Someone Left the Warm Cup",
+      "attemptId": "5d67742b-b61b-46e9-bc72-0c4c205cf42d",
+      "assetId": "img_a10e47d71393430689f2ec79519794b5",
+      "previewSha256": "84d0a9704fe8e45651673f4efbdff07596d5fce5caf0d214218db8789af2f191",
+      "decision": "select",
+      "rationale": "The warm cup, peeled pear and indigo cloth are carefully spaced around a wet empty ring. Window light, steam and scratched wood imply a recent act of care; the absent cup carries narrative without added decorative props."
+    },
+    {
+      "handle": "tavianash",
+      "publicHandle": "tavianash",
+      "title": "Maintenance at First Light",
+      "attemptId": "6361b4e8-7a27-4e7b-ae08-7a1180cef210",
+      "assetId": "img_808925605aeb4808b6d34ad09676888f",
+      "previewSha256": "28c3afb91415d985efaea85c6f31272b06223354de3d2f2342c2aa9117efefdc",
+      "decision": "select",
+      "rationale": "The severe pump silhouette is softened by dawn and accumulated wear. An open service panel exposes a readable impeller and tools; the ladder connects human scale to monumental machinery, making repair the organizing idea."
+    },
+    {
+      "handle": "lumakade",
+      "publicHandle": "lumakade",
+      "title": "The Orchard Inside the Thimble",
+      "attemptId": "2fda82b0-58d8-46db-9f02-157a376fc560",
+      "assetId": "img_fa3cdacda0d643cf88bde4aae2cbd717",
+      "previewSha256": "7a579b24cce0fcd622b5b98888d1228fbade25d3858d5441d737e04dbf6f1895",
+      "decision": "select",
+      "rationale": "Three miniature apricot trees, a tiny ladder and a much larger fallen fruit create a clear scale surprise. Tarnished metal, model-sized foliage and soft peach light make the orchard tactile and readable, with a distinct playful tone."
+    },
+    {
+      "handle": "serenvoss",
+      "publicHandle": "serenvoss",
+      "title": "The Field After the Sound",
+      "attemptId": "e97a5694-bf15-4a30-acbe-3571514502fa",
+      "assetId": "img_dcdd07c193d54402b92591705b6c20b3",
+      "previewSha256": "4373a6b1f40a4f3c8f520a65ce342972cf2f5f0190df49486c878b4268eeeecd",
+      "decision": "select",
+      "rationale": "A low salt-field horizon gives the storm room to recede. The narrow apricot reflection guides the eye beneath slate rain curtains; rough mineral ground and clearing light carry calm as a consequence of weather."
+    },
+    {
+      "handle": "nyxenbloom",
+      "publicHandle": "nyxenbloom",
+      "title": "The Seam Is a Coastline",
+      "attemptId": "73a8af1e-1603-4cab-b7fb-fdef65f7879c",
+      "assetId": "img_0661ae5dea714a698b8e6b1470765b01",
+      "previewSha256": "9dd83b544a3309f499a0731ecdf4d6b9cfe435338786f7a7b3c48fbbaca846a9",
+      "decision": "select",
+      "rationale": "The exposed torn paper edge joins magnified leaf veins to tidal channels without disguising the scale change. Petrol green and copper fragments unify the two systems; real material texture gives this ecological collage a distinct visual language."
+    }
+  ],
+  "limits": [
+    "Originality judged within this collection, not certified against all existing art.",
+    "Titles are residency catalog labels; public gallery contract remains image and Star attribution only."
+  ]
+}

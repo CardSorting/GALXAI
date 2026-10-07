@@ -1,0 +1,167 @@
+{
+  "version": 1,
+  "classification": "private",
+  "observedAt": "2026-10-07T18:36:09.307Z",
+  "sourceRevision": "23d0d4f",
+  "scope": "working tree local supervisor repair; unchanged accepted runtime and application images",
+  "checks": [
+    "fresh control heartbeat",
+    "new runtime epoch",
+    "existing gates retained",
+    "both existing account states acknowledged under current ownership",
+    "at least one existing connection is usable",
+    "local ready: status 200",
+    "local ready response boundary",
+    "local models: status 200",
+    "local model inventory",
+    "local models response boundary",
+    "local images: status 200",
+    "image observation contract",
+    "local images response boundary",
+    "local invalid authorization: status 401",
+    "local invalid authorization response boundary",
+    "local browser origin: status 401",
+    "local browser origin response boundary",
+    "ingress models: status 200",
+    "ingress model inventory",
+    "ingress models response boundary",
+    "ingress images: status 200",
+    "image observation contract",
+    "ingress images response boundary",
+    "ingress invalid authorization: status 401",
+    "ingress invalid authorization response boundary",
+    "ingress browser origin: status 401",
+    "ingress browser origin response boundary",
+    "actual backend discovery selects installed relay",
+    "heartbeat advances without another restart",
+    "reloaded supervisor confirms the connection"
+  ],
+  "control": {
+    "initialHeartbeat": "2026-10-07T18:35:42.659235+00:00",
+    "finalHeartbeat": "2026-10-07T18:36:04.327415+00:00",
+    "accounts": 2,
+    "connected": 1,
+    "signInRequired": 1
+  },
+  "responses": [
+    {
+      "target": "local",
+      "name": "ready",
+      "status": 200
+    },
+    {
+      "target": "local",
+      "name": "models",
+      "status": 200
+    },
+    {
+      "target": "local",
+      "name": "images",
+      "status": 200,
+      "available": null
+    },
+    {
+      "target": "local",
+      "name": "invalid authorization",
+      "status": 401
+    },
+    {
+      "target": "local",
+      "name": "browser origin",
+      "status": 401
+    },
+    {
+      "target": "ingress",
+      "name": "models",
+      "status": 200
+    },
+    {
+      "target": "ingress",
+      "name": "images",
+      "status": 200,
+      "available": null
+    },
+    {
+      "target": "ingress",
+      "name": "invalid authorization",
+      "status": 401
+    },
+    {
+      "target": "ingress",
+      "name": "browser origin",
+      "status": 401
+    }
+  ],
+  "supervisor": {
+    "status": "running",
+    "attempt": 0
+  },
+  "inventories": [
+    {
+      "context": "desktop-linux",
+      "containers": [
+        {
+          "name": "galx-web-nova-web-1",
+          "status": "Up 3 days (healthy)",
+          "image": "5157984bc065"
+        },
+        {
+          "name": "galx-local-authority-tls-1",
+          "status": "Up 5 days (healthy)",
+          "image": "galxai-relay-central:connections-20260916"
+        },
+        {
+          "name": "galx-local-authority-authority-1",
+          "status": "Up 5 days (healthy)",
+          "image": "galxai-relay-central:connections-20260916"
+        },
+        {
+          "name": "galx-image-tunnel",
+          "status": "Up 5 days",
+          "image": "51c9cefcb456"
+        },
+        {
+          "name": "galx-desktop-production-dceeb65e-3096-4b41-bdad-d3af1eb9a734",
+          "status": "Up 5 days (healthy)",
+          "image": "galxai-relay-desktop:v1"
+        },
+        {
+          "name": "galx-desktop-production-aede28dd-74d9-4055-9c31-e9beb4696623",
+          "status": "Up 5 days (healthy)",
+          "image": "0fccf55f2c1e"
+        }
+      ]
+    },
+    {
+      "context": "colima-premium",
+      "containers": [
+        {
+          "name": "galx-premium-monitor-1",
+          "status": "Up 3 days",
+          "image": "galxai-monitor-premium:neutral-outcomes-20261003-r3"
+        },
+        {
+          "name": "galx-premium-relay-1",
+          "status": "Up 6 minutes",
+          "image": "galxai-relay-premium:neutral-outcomes-20261003"
+        },
+        {
+          "name": "galx-desktop-pool-premium-f83b2d06-91fa-4504-90a9-e3f3b44f9e33",
+          "status": "Up 5 days (healthy)",
+          "image": "d4271abf3955"
+        },
+        {
+          "name": "galx-desktop-pool-premium-68250425-41d6-44f9-977c-a636c5921645",
+          "status": "Up 5 days (healthy)",
+          "image": "d4271abf3955"
+        }
+      ]
+    }
+  ],
+  "limits": [
+    "No provider generation submitted",
+    "One saved account requires fresh manual sign-in after credential rejection",
+    "Initial missed-heartbeat trigger unknown",
+    "Host and off-device acceptance remain unverified"
+  ]
+}

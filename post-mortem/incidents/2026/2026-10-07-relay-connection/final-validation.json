@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "classification": "private",
+  "observed_at": "2026-10-07T18:46:23.453934+00:00",
+  "results": {
+    "live_acceptance_checks": 30,
+    "relay_connection": "confirmed",
+    "final_supervisor": "running",
+    "stable_runtime_observation": "Final CLI reported the same relay running for 14 minutes after scoped recovery; monitor, central services and other service images retained.",
+    "regression_tests": "7 access, 6 supervisor, 43 relay service; image security suite passed",
+    "production_build": "passed; 157 static pages",
+    "compiled_boundary_scan": "passed; 538 browser/rendered assets",
+    "documentation_fixtures": "42 passed",
+    "docs_check": "passed with pre-existing overdue-action warnings",
+    "diff_check": "passed"
+  },
+  "limits": [
+    "No real provider inference submitted",
+    "One saved account needs manual reconnect under ACT-049",
+    "Original missed-heartbeat trigger unknown",
+    "No live-browser asset-cleanliness certification or public deployment"
+  ]
+}

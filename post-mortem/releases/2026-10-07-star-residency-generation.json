@@ -1,0 +1,100 @@
+{
+  "version": 1,
+  "classification": "private",
+  "observedAt": "2026-10-07T19:32:18.786Z",
+  "report": {
+    "plan": {
+      "cohortKey": "stars-residency-2026-10-07",
+      "runKey": "stars-residency-run-2026-10-07",
+      "starCount": 12,
+      "contentOpportunitiesPerStar": 1,
+      "maxContentAttempts": 12,
+      "avatarGenerationAttempts": 0,
+      "deterministicAvatarAssets": 12,
+      "realGenerationCeiling": 12,
+      "maxGenerationConcurrency": 1,
+      "schedulesCreated": 0,
+      "recurringGeneration": false
+    },
+    "stars": [
+      {
+        "displayName": "Veyra Sol",
+        "handle": "veyrasol",
+        "shortPersona": "adaptive public architecture and night transit; precise and luminous; measured experimentation"
+      },
+      {
+        "displayName": "Morrow Kest",
+        "handle": "morrowkest",
+        "shortPersona": "ambiguous portraits and half-remembered rooms; surreal and intimate; high experimentation"
+      },
+      {
+        "displayName": "Sora Vale",
+        "handle": "soravale",
+        "shortPersona": "engineered gardens and seed vaults; tender and observational; measured experimentation"
+      },
+      {
+        "displayName": "Ilyx",
+        "handle": "ilyx",
+        "shortPersona": "chromatic fields and modular forms; abstract and graphic; restless experimentation"
+      },
+      {
+        "displayName": "Nemi Orra",
+        "handle": "nemiorra",
+        "shortPersona": "deep ocean ecologies and submerged ruins; immersive and fluid; high experimentation"
+      },
+      {
+        "displayName": "Cael Rune",
+        "handle": "caelrune",
+        "shortPersona": "annotated maps and pilgrimage routes; mythic and hand-crafted; measured experimentation"
+      },
+      {
+        "displayName": "Ossa Thread",
+        "handle": "ossathread",
+        "shortPersona": "woven environments and fabric machines; tactile and warm; high experimentation"
+      },
+      {
+        "displayName": "Juniper Arc",
+        "handle": "juniperarc",
+        "shortPersona": "worktables and found objects; quiet and editorial; measured experimentation"
+      },
+      {
+        "displayName": "Tavian Ash",
+        "handle": "tavianash",
+        "shortPersona": "maintenance bays and modular machinery; monumental and monochrome; measured experimentation"
+      },
+      {
+        "displayName": "Luma Kade",
+        "handle": "lumakade",
+        "shortPersona": "tiny neighborhoods and impossible toys; playful and bright; restless experimentation"
+      },
+      {
+        "displayName": "Seren Voss",
+        "handle": "serenvoss",
+        "shortPersona": "storm fronts and highland paths; cinematic and restrained; measured experimentation"
+      },
+      {
+        "displayName": "Nyxen Bloom",
+        "handle": "nyxenbloom",
+        "shortPersona": "celestial archives and hybrid organisms; collage-driven and textural; restless experimentation"
+      }
+    ],
+    "created": 0,
+    "administrativeProAssignments": 12,
+    "avatarAssetsCreated": 12,
+    "avatarGenerations": 0,
+    "contentAttempts": 12,
+    "successfulContentGenerations": 12,
+    "failedContentGenerations": 0,
+    "relayConfirmedGenerations": 12,
+    "provenanceVerifiedGenerations": 12,
+    "frontendProjectionVerified": true,
+    "humanStarAnalyticsVerified": true,
+    "administrativeBillingRecordedUsd": 0,
+    "providerCostEstimateUsd": null,
+    "failures": [],
+    "anomalies": [],
+    "stoppedReason": null,
+    "inactiveAfterRun": true,
+    "cohortState": "completed"
+  }
+}

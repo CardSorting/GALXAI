@@ -186,7 +186,15 @@
         "src/app/api/community/follows/route.ts",
         "src/app/collections/CollectionsClient.tsx",
         "src/app/collections/page.tsx",
-        "scripts/verify-discovery-ui.mjs"
+        "scripts/verify-discovery-ui.mjs",
+        "src/lib/stars/star-residency.ts",
+        "scripts/test-star-qualification-plan.ts",
+        "src/app/exhibitions/**/*.tsx",
+        "src/app/editorials/**/*.tsx",
+        "src/components/exhibitions/**/*",
+        "src/lib/exhibitions/**/*.ts",
+        "scripts/test-exhibition-programme.ts",
+        "scripts/verify-exhibition-http.mjs"
       ],
       "guides": [
         "docs/QUEUE_SPECIFICATION.md",
@@ -198,7 +206,9 @@
         "docs/maintainers/FREE_GENERATION_QUOTA.md",
         "docs/maintainers/private-image-accounting.md",
         "docs/runbooks/private-image-release-audit.md",
-        "docs/adr/0163-star-candidate-selection-before-exhibition.md"
+        "docs/adr/0163-star-candidate-selection-before-exhibition.md",
+        "docs/runbooks/star-residency.md",
+        "docs/reference/exhibition-programme.md"
       ],
       "checks": [
         "npm run test:image:security",
@@ -534,7 +544,8 @@
         "docs/adr/0155-shared-quota-containment-and-bounded-continuation.md",
         "docs/adr/0156-verified-automatic-relay-activation.md",
         "docs/adr/0157-compatible-relay-output-budgets.md",
-        "docs/runbooks/relay-admission-lifecycle.md"
+        "docs/runbooks/relay-admission-lifecycle.md",
+        "docs/runbooks/star-residency.md"
       ],
       "checks": [
         "npm run test:relay:capabilities",
@@ -608,7 +619,8 @@
         "docs/adr/0161-broc-persistent-star-practice.md",
         "docs/maintainers/private-image-accounting.md",
         "docs/runbooks/private-image-release-audit.md",
-        "docs/adr/0163-star-candidate-selection-before-exhibition.md"
+        "docs/adr/0163-star-candidate-selection-before-exhibition.md",
+        "docs/runbooks/star-residency.md"
       ],
       "checks": [
         "npm run db:verify",
@@ -775,14 +787,24 @@
         "src/components/dashboard/GenerationGateNotice.tsx",
         "src/components/dashboard/generation-gate.module.css",
         "src/contexts/GenerationAllowanceContext.tsx",
-        "src/components/sites/sites.css"
+        "src/components/sites/sites.css",
+        "src/app/exhibitions/**/*.tsx",
+        "src/app/editorials/**/*.tsx",
+        "src/components/exhibitions/**/*",
+        "src/lib/exhibitions/**/*.ts",
+        "scripts/test-exhibition-programme.ts",
+        "public/fonts/bodoni-moda-OFL.txt",
+        "scripts/verify-exhibition-http.mjs",
+        "DESIGN.md",
+        ".impeccable/surfaces/exhibition-programme.md"
       ],
       "guides": [
         "docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md",
         "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md",
         "docs/maintainers/PUBLIC_DISCOVERY.md",
         "docs/maintainers/readable-urls.md",
-        "docs/PRODUCT_SURFACE_STRATEGY.md"
+        "docs/PRODUCT_SURFACE_STRATEGY.md",
+        "docs/reference/exhibition-programme.md"
       ],
       "checks": [
         "npm run test:egress:transport",
@@ -1370,7 +1392,8 @@
     "docs/runbooks/private-image-release-audit.md",
     "docs/operations/galx-connect.md",
     "docs/runbooks/mac-self-hosting.md",
-    "docs/runbooks/nova-hosting-transition.md"
+    "docs/runbooks/nova-hosting-transition.md",
+    "docs/runbooks/star-residency.md"
   ],
   "decisions": {
     "docs/adr/0145-maintained-knowledge-and-decision-lifecycle.md": {

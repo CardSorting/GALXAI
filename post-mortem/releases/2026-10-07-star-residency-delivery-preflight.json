@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "classification": "private",
+  "observedAt": "2026-10-07T19:43:53.260Z",
+  "authorization": "Complete owner-requested Star art population with usable public images; narrow storage configuration recovery only.",
+  "servingDeployment": "dpl_4uwFyPMJ6YV7njXsWQbb7a8MZHKh",
+  "candidateSource": "Exact accepted Media/Connect-only Build Output API package; no current working-tree source or Nova code.",
+  "sourceManifestSha256": "ef292883a4e84af9b91b14d7f86fdb237c3e5489abd7d3890257f425c0642d3f",
+  "artifactManifestSha256": "170858a60b59faaa97bbfb0e504de7f23566c7d4576bc15e2b1b97e04de6b8b9",
+  "verifiedFiles": 3726,
+  "applicationPayloadBytesChanged": 0,
+  "missingProductionSetting": "R2_PRIVATE_IMAGES_BUCKET_NAME",
+  "settingValue": "galxai-private-images",
+  "bucketPublicAccess": false,
+  "projectDomains": [
+    "www.galx.ai",
+    "galx.ai",
+    "galxai.vercel.app"
+  ],
+  "plan": [
+    "Add only the private bucket-name production setting",
+    "Upload byte-identical prebuilt package with automatic domain assignment disabled",
+    "Verify candidate assets and boundary using protected operator access",
+    "Move existing Media aliases after verification; no Nova domain binding, inference migration, service restart, grant or payment changes"
+  ],
+  "rollback": "Retain the current deployment and artifact. Restore exact Media aliases if candidate verification fails. Retain generated art and selection history."
+}

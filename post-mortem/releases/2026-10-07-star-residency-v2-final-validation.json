@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "classification": "private",
+  "observedAt": "2026-10-07T20:33:35.907539+00:00",
+  "status": "PASSED",
+  "publishedWorks": 12,
+  "totalPublicWorks": 35,
+  "populatedStars": 12,
+  "checks": {
+    "starPlan": 6,
+    "brocPractice": 6,
+    "brocSelection": 3,
+    "imageSecurity": 69,
+    "documentationFixtures": 43,
+    "productionBuildStaticPages": 157,
+    "compiledBoundaryAssets": 538,
+    "exactPhraseBuildScan": {
+      "assetsAndHtml": 549,
+      "privatePhrases": 72,
+      "matches": 0
+    },
+    "documentation": {
+      "knowledgeDocuments": 435,
+      "domains": 11,
+      "incidents": 28,
+      "journalEvents": 209,
+      "actions": 50
+    },
+    "domainReviews": "All eleven current; three affected domains explicitly reviewed with prior evidence retained",
+    "gitDiffCheck": true
+  },
+  "liveEvidence": "post-mortem/releases/2026-10-07-star-residency-v2-live-check.json",
+  "publicScan": "post-mortem/releases/2026-10-07-star-residency-v2-public-scan.json",
+  "sourceReview": "post-mortem/releases/2026-10-07-star-residency-v2-verification.json",
+  "retainedServingRelease": "dpl_QBr2WUvRcvF5RFqJvdc8FaZGaqHV",
+  "evidenceLogSha256": {
+    "residency-v2-documentation-check.log": "516953e28bc08c1b3ccfb7a3ee16717e2a9b602dca02875fc8b90bdccab10d74",
+    "residency-v2-build-boundary.log": "729b81e7b85fb8397d5835f4835514652cc51407b2a687c8bbd6719c251208d2",
+    "residency-v2-build-20261007.log": "66c3ffad22cb1e026e3334f6935c0dbc3dfbcf97c499e79d31aace4446bead1b"
+  },
+  "limits": [
+    "Thirteen pre-existing overdue prevention warnings retained.",
+    "Current source executed locally through the existing relay and selection workflow; serving application unchanged. No Git commit or deployment was part of this art population pass.",
+    "Existing requested dimension labels can differ from actual pixels; bell full image visibly contained in the lightbox.",
+    "No continuous publishing, global art originality, broader historical privacy or prevention-action closure claim."
+  ]
+}

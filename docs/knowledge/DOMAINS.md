@@ -55,6 +55,8 @@ Owner role: **Product/API maintainer**. Domain: `images`.
 - [Private image allowance and accounting lifecycle](../../docs/maintainers/private-image-accounting.md)
 - [Private image release and privacy audit](../../docs/runbooks/private-image-release-audit.md)
 - [ADR 0163: Star candidate selection before exhibition](../../docs/adr/0163-star-candidate-selection-before-exhibition.md)
+- [Bounded Star artist residency](../../docs/runbooks/star-residency.md)
+- [Exhibition and editorial programme](../../docs/reference/exhibition-programme.md)
 
 Relevant checks (select for the change; impact discovery never executes these): `npm run test:image:security`, `npm run test:image:db`, `npm run test:image:scale`, `npm run test:image:library-db`, `npm run test:relay:image`, `npm run test:free-quota`, `npm run test:free-quota:db`, `npm run test:image:remix`, `npm run test:community:profile`, `npm run test:collections:privacy`, `npm run test:broc:selection`.
 
@@ -159,6 +161,7 @@ Owner role: **Relay operator**. Domain: `relay`.
 - [ADR 0156: Verified automatic relay activation](../../docs/adr/0156-verified-automatic-relay-activation.md)
 - [ADR 0157: Compatible relay requests and honest output budgets](../../docs/adr/0157-compatible-relay-output-budgets.md)
 - [Relay admission lifecycle](../../docs/runbooks/relay-admission-lifecycle.md)
+- [Bounded Star artist residency](../../docs/runbooks/star-residency.md)
 
 Relevant checks (select for the change; impact discovery never executes these): `npm run test:relay:capabilities`, `npm run test:relay:desktop-login`, `npm run test:relay:pool-images`, `npm run verify:relay:pool-images`, `npm run test:relay:services`, `npm run verify:relay:service-images`, `npm run test:agent:tools`, `npm run test:relay:activation-db`, `npm run test:relay:refill-db`, `npm run test:relay:monitor-package`.
 
@@ -178,6 +181,7 @@ Owner role: **Database operator**. Domain: `database`.
 - [Private image allowance and accounting lifecycle](../../docs/maintainers/private-image-accounting.md)
 - [Private image release and privacy audit](../../docs/runbooks/private-image-release-audit.md)
 - [ADR 0163: Star candidate selection before exhibition](../../docs/adr/0163-star-candidate-selection-before-exhibition.md)
+- [Bounded Star artist residency](../../docs/runbooks/star-residency.md)
 
 Relevant checks (select for the change; impact discovery never executes these): `npm run db:verify`, `npm run db:test`, `npm run test:broc`, `npm run test:broc:db`, `npm run test:relay:manual-db`, `npm run test:relay:authorization-db`, `npm run test:relay:activation-db`, `npm run test:broc:selection`, `npm run test:image:db`, `npm run test:relay:refill-db`.
 
@@ -221,6 +225,7 @@ Owner role: **Product/performance maintainer**. Domain: `client-efficiency`.
 - [Public navigation, pricing, and knowledge base](../../docs/maintainers/PUBLIC_DISCOVERY.md)
 - [Readable product URLs](../../docs/maintainers/readable-urls.md)
 - [GALX product surface strategy](../../docs/PRODUCT_SURFACE_STRATEGY.md)
+- [Exhibition and editorial programme](../../docs/reference/exhibition-programme.md)
 
 Relevant checks (select for the change; impact discovery never executes these): `npm run test:egress:transport`, `npm run test:image:security`, `npm run build`.
 

@@ -2217,6 +2217,12 @@
       "title": "Billing pages and payment paths"
     },
     {
+      "path": "docs/reference/exhibition-programme.md",
+      "scope": "current-guide",
+      "category": "docs",
+      "title": "Exhibition and editorial programme"
+    },
+    {
       "path": "docs/reference/knowledge-commands.md",
       "scope": "current-guide",
       "category": "docs",
@@ -2311,6 +2317,12 @@
       "scope": "current-guide",
       "category": "docs",
       "title": "Prepare and verify a release"
+    },
+    {
+      "path": "docs/runbooks/star-residency.md",
+      "scope": "current-guide",
+      "category": "docs",
+      "title": "Bounded Star artist residency"
     },
     {
       "path": "docs/runbooks/stripe-webhook-delivery.md",
@@ -2989,6 +3001,18 @@
       "scope": "operational-record",
       "category": "post-mortem",
       "title": "Interrupted work incorrectly counted as provider failure"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-07-relay-connection/README.md",
+      "scope": "operational-record",
+      "category": "post-mortem",
+      "title": "Relay connection lost while its listener stayed alive"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-07-star-image-delivery/README.md",
+      "scope": "operational-record",
+      "category": "post-mortem",
+      "title": "October 7 Star image delivery configuration"
     },
     {
       "path": "post-mortem/runbooks/controller-lock.md",

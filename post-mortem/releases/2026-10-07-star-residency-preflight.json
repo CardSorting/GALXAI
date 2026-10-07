@@ -1,0 +1,145 @@
+{
+  "version": 1,
+  "classification": "private",
+  "observedAt": "2026-10-07T19:24:34.171Z",
+  "authorization": "Owner requested unique STAR creations and art generation through the relay, with Codex acting as artist in residence.",
+  "plan": {
+    "cohortKey": "stars-residency-2026-10-07",
+    "runKey": "stars-residency-run-2026-10-07",
+    "starCount": 12,
+    "contentOpportunitiesPerStar": 1,
+    "maxContentAttempts": 12,
+    "avatarGenerationAttempts": 0,
+    "deterministicAvatarAssets": 12,
+    "realGenerationCeiling": 12,
+    "maxGenerationConcurrency": 1,
+    "schedulesCreated": 0,
+    "recurringGeneration": false
+  },
+  "historicalCohorts": [
+    {
+      "cohort_key": "stars-initial-2026-09",
+      "state": "completed",
+      "max_content_attempts": 36,
+      "content_attempts": 36
+    },
+    {
+      "cohort_key": "stars-refresh-2026-09",
+      "state": "completed",
+      "max_content_attempts": 36,
+      "content_attempts": 36
+    },
+    {
+      "cohort_key": "stars-qualification-retry-2026-09",
+      "state": "disabled",
+      "max_content_attempts": 36,
+      "content_attempts": 3
+    },
+    {
+      "cohort_key": "stars-refresh-2026-09-r2",
+      "state": "disabled",
+      "max_content_attempts": 36,
+      "content_attempts": 12
+    },
+    {
+      "cohort_key": "stars-production-qualification-2026-09",
+      "state": "disabled",
+      "max_content_attempts": 8,
+      "content_attempts": 7
+    },
+    {
+      "cohort_key": "stars-production-qualification-2026-09-r2",
+      "state": "completed",
+      "max_content_attempts": 8,
+      "content_attempts": 8
+    }
+  ],
+  "stars": [
+    {
+      "handle": "caelrune",
+      "is_enabled": false,
+      "public_works": 0
+    },
+    {
+      "handle": "ilyx",
+      "is_enabled": false,
+      "public_works": 1
+    },
+    {
+      "handle": "juniperarc",
+      "is_enabled": false,
+      "public_works": 0
+    },
+    {
+      "handle": "lumakade",
+      "is_enabled": false,
+      "public_works": 0
+    },
+    {
+      "handle": "morrowkest",
+      "is_enabled": false,
+      "public_works": 3
+    },
+    {
+      "handle": "nemiorra",
+      "is_enabled": false,
+      "public_works": 0
+    },
+    {
+      "handle": "nyxenbloom",
+      "is_enabled": false,
+      "public_works": 0
+    },
+    {
+      "handle": "ossathread",
+      "is_enabled": false,
+      "public_works": 0
+    },
+    {
+      "handle": "serenvoss",
+      "is_enabled": false,
+      "public_works": 0
+    },
+    {
+      "handle": "soravale",
+      "is_enabled": false,
+      "public_works": 4
+    },
+    {
+      "handle": "tavianash",
+      "is_enabled": false,
+      "public_works": 0
+    },
+    {
+      "handle": "veyrasol",
+      "is_enabled": false,
+      "public_works": 3
+    }
+  ],
+  "activeAttempts": 0,
+  "storage": {
+    "createdBucket": "galxai-private-images",
+    "managedPublicAccess": false,
+    "customDomains": 0,
+    "authenticatedObjectListConfirmed": true,
+    "initialObjects": 0,
+    "configuration": "R2_PRIVATE_IMAGES_BUCKET_NAME added to ignored local environment only"
+  },
+  "relay": {
+    "selectedInstalledRuntime": true,
+    "imageCapability": "unknown"
+  },
+  "tests": {
+    "plan": 4,
+    "practice": 6,
+    "selection": 3,
+    "imageSecurity": 69,
+    "database": 94,
+    "staticDatabaseIntegrity": "159 paired migrations; zero violations"
+  },
+  "limits": [
+    "No new schema, payment, customer entitlement or recurring schedule",
+    "Historical cohorts and unknown requests will not be replayed",
+    "Generated candidates require separate visual review and exact-asset selection"
+  ]
+}

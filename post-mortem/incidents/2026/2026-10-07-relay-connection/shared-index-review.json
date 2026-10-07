@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "classification": "private",
+  "observed_at": "2026-10-07T18:45:14.298116+00:00",
+  "scope": "Change-focused review of the shared failure-mode index for images and delivery. The only fingerprint drift in those domains is post-mortem/failure-modes/README.md.",
+  "inspected": [
+    "post-mortem/failure-modes/README.md",
+    "post-mortem/failure-modes/controller.md",
+    "post-mortem/incidents/2026/2026-10-07-relay-connection/README.md"
+  ],
+  "finding": "Reviewed the complete shared index. FM-CTRL-003 links the new live-listener/stale-ownership symptom to guarded recovery. Existing identity, image, deployment and access instructions remain consistent and are unchanged. The new entry does not authorize provider work, replay, gate changes or a public deployment.",
+  "evidence": [
+    "post-mortem/incidents/2026/2026-10-07-relay-connection/verification.json",
+    "post-mortem/incidents/2026/2026-10-07-relay-connection/acceptance.json"
+  ],
+  "validation": [
+    "Production build passed",
+    "Image security and relay service regressions passed",
+    "42 documentation fixture tests passed"
+  ],
+  "limits": [
+    "Prior broader source inventories retain their previous review scope",
+    "One rejected account remains manual reconnect work",
+    "No public launch or hardware-loss acceptance"
+  ]
+}

@@ -1,0 +1,150 @@
+{
+  "version": 1,
+  "classification": "private",
+  "observedAt": "2026-10-07T20:30:36.405827+00:00",
+  "scope": "Second owner-authorized finite residency: new private briefs and versioned controller/CLI mode, existing generation and exact-asset selection transactions. Current source executed locally through the existing relay; no application/runtime deployment, schema or privilege change.",
+  "sourcesInspected": [
+    "src/lib/stars/star-residency.ts",
+    "src/lib/stars/StarPopulationController.ts",
+    "scripts/populate-stars.ts",
+    "scripts/test-star-qualification-plan.ts",
+    "scripts/review-star-candidates.ts"
+  ],
+  "completeAffectedGuidesInspected": [
+    "docs/runbooks/star-residency.md",
+    "docs/maintainers/ACCOUNT_PROFILE_SCHEMA.md",
+    "docs/reference/stars.md",
+    "docs/DOCUMENTATION_POLICY.md",
+    "docs/how-to/change-with-documentation.md",
+    "docs/runbooks/release-readiness.md",
+    "docs/reference/knowledge-commands.md",
+    "post-mortem/incidents/2026/2026-10-07-star-image-delivery/README.md",
+    "post-mortem/CURRENT_STATE.md"
+  ],
+  "retainedBaselineEvidence": {
+    "unchangedBroaderSourceAndGuides": "post-mortem/releases/2026-10-07-star-residency-verification.json",
+    "unchangedDatabaseAuthorizationAndImageFixtures": "post-mortem/releases/2026-10-07-star-residency-final-validation.json",
+    "priorDomainEvidence": {
+      "knowledge": [
+        "post-mortem/incidents/2026/2026-10-07-relay-connection/verification.json"
+      ],
+      "images": [
+        "post-mortem/incidents/2026/2026-10-07-relay-connection/shared-index-review.json"
+      ],
+      "database": [
+        "post-mortem/releases/2026-10-03-refill-packaging-review.json",
+        "post-mortem/incidents/2026/2026-10-07-relay-connection/reconnect-review.json"
+      ],
+      "relay": [
+        "post-mortem/incidents/2026/2026-10-07-relay-connection/verification.json",
+        "post-mortem/incidents/2026/2026-10-07-relay-connection/reconnect-review.json"
+      ],
+      "delivery": [
+        "post-mortem/incidents/2026/2026-10-07-relay-connection/shared-index-review.json"
+      ]
+    }
+  },
+  "semanticConclusions": [
+    "New fixed cohort/run keys and twelve-image ceiling, one opportunity per existing actor, concurrency one, no recurrence or resume. First private briefs, original persona directions and seven historical cohorts preserved.",
+    "Each new subject, question and formal focus survives the actual stored production prompt; distinct preview hashes and individual pixel reviews retained.",
+    "Existing exact-asset publication transaction and allowlisted public DTOs unchanged. No direct visibility SQL, schema, RLS or privilege changes.",
+    "Existing private storage configuration and serving release retained; fresh preflight proved hosted image and thumbnail delivery independently from local object access.",
+    "Both runs now closed. Canonical runbook distinguishes historical commands from a future newly versioned authorization and separates fresh focused checks from retained unchanged database evidence.",
+    "Unmapped private release/incident records and review indexes remain handled by incident and knowledge guards, outside runtime/browser content. No ADR decision status changed."
+  ],
+  "freshChecks": {
+    "starPlan": 6,
+    "cliRejections": {
+      "resumeWithSecondMode": true,
+      "multipleModes": true,
+      "dispatches": 0
+    },
+    "brocPractice": 6,
+    "brocSelection": 3,
+    "imageSecurity": 69,
+    "documentationFixtures": 43,
+    "productionBuild": {
+      "passed": true,
+      "staticPages": 157
+    },
+    "migrationStatus": {
+      "applied": 158,
+      "pendingUnrelatedOrbit": 1,
+      "appliedByThisPass": 0
+    },
+    "realGeneration": {
+      "completed": 12,
+      "failed": 0,
+      "replayed": 0,
+      "productionBriefComplete": 12
+    },
+    "preselection": {
+      "privateCandidates": 12,
+      "absentFromFeed": 12,
+      "artifactDenials": 24
+    },
+    "live": {
+      "profiles": 12,
+      "fullImages": 12,
+      "thumbnails": 12,
+      "embeddedMetadataAbsent": true,
+      "totalPublicWorks": 35,
+      "inactiveActors": 12,
+      "activeStarAttempts": 0,
+      "historicalCohortsUnchanged": 7
+    },
+    "publicScan": {
+      "renderedPages": 15,
+      "httpChecks": 24,
+      "browserAssets": 409,
+      "byteIdentical": 284,
+      "privateAssetDenials": 124,
+      "platformToolbar": 1,
+      "privateMarkers": 0,
+      "secretMatches": 0,
+      "residencyPromptMatches": 0,
+      "excludedPublicKeyAliases": [
+        "SUPABASE_SERVICE_ROLE_KEY"
+      ]
+    },
+    "gitDiffCheck": true,
+    "compiledBoundary": {
+      "files": 538,
+      "matches": 0,
+      "privateDocumentationTraces": 0
+    },
+    "authoredPhraseBuildScan": {
+      "version": 1,
+      "classification": "private",
+      "observedAt": "2026-10-07T20:31:24.980Z",
+      "scope": "Current local production browser JS/CSS and prerendered HTML; checks authored subjects, questions, formal focuses and fixed private cohort prefix.",
+      "files": 549,
+      "phrases": 72,
+      "privatePhraseMatches": 0,
+      "privateCohortMatches": 0
+    }
+  },
+  "browserObservation": {
+    "latestGallery": "New twelve attributed cards appear in Latest; first page holds 24 cards and remaining archive is continuable. Images outside the viewport lazy load.",
+    "workDetail": "New Nemi Orra share link resolves to the bell. Full 1024x1536 image loaded and was visibly contained in the desktop lightbox. Requested 1792x1024 label remains an existing metadata mismatch. Initial screenshots preceded settled hydration/image loading; final screenshot and DOM decode confirmed the artifact.",
+    "profile": "Nemi Orra profile visibly lists two published Works, newest first, preserving the earlier residency."
+  },
+  "evidence": [
+    "post-mortem/releases/2026-10-07-star-residency-v2-preflight.json",
+    "post-mortem/releases/2026-10-07-star-residency-v2-generation.json",
+    "post-mortem/releases/2026-10-07-star-residency-v2-private-check.json",
+    "post-mortem/releases/2026-10-07-star-residency-v2-review.json",
+    "post-mortem/releases/2026-10-07-star-residency-v2-selection.json",
+    "post-mortem/releases/2026-10-07-star-residency-v2-live-check.json",
+    "post-mortem/releases/2026-10-07-star-residency-v2-public-scan.json",
+    "post-mortem/releases/2026-10-07-star-residency-v2-build-scan.json"
+  ],
+  "limits": [
+    "Artistic originality judged within this collection and against the first residency, not against all historical art.",
+    "No new public Series entity or title DTO; private catalog titles describe the residency selection.",
+    "Unchanged database authorization 94 checks and isolated image suite 96 checks are earlier same-day evidence, not rerun in this second pass.",
+    "Existing requested dimension labels can differ from actual image dimensions; actual pixels decode and remain contained. No legacy metadata rewrite.",
+    "Exact approved public anonymous/publishable key aliases excluded from secret matches by actual value; no general secret-name exclusion.",
+    "No continuous publishing/availability, historical full-image privacy certification, host/off-device recovery, payment or commercial-release claim. Thirteen unrelated overdue prevention warnings retain their status."
+  ]
+}

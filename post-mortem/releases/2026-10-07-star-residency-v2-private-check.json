@@ -1,0 +1,134 @@
+{
+  "version": 1,
+  "classification": "private",
+  "observedAt": "2026-10-07T20:22:58.085Z",
+  "target": "https://galx.ai",
+  "candidateCount": 12,
+  "candidatesPrivate": true,
+  "absentFromPublicFeed": true,
+  "artifactDenials": [
+    {
+      "assetId": "img_3caaa1dcd38f4fdaaf0cd124220c2c4a",
+      "thumbnail": false,
+      "status": 404
+    },
+    {
+      "assetId": "img_3caaa1dcd38f4fdaaf0cd124220c2c4a",
+      "thumbnail": true,
+      "status": 404
+    },
+    {
+      "assetId": "img_20057ba1f41e40e1b1a55135c68840de",
+      "thumbnail": false,
+      "status": 404
+    },
+    {
+      "assetId": "img_20057ba1f41e40e1b1a55135c68840de",
+      "thumbnail": true,
+      "status": 404
+    },
+    {
+      "assetId": "img_61a764a2b89741aa8018b39c37e511a1",
+      "thumbnail": false,
+      "status": 404
+    },
+    {
+      "assetId": "img_61a764a2b89741aa8018b39c37e511a1",
+      "thumbnail": true,
+      "status": 404
+    },
+    {
+      "assetId": "img_9ded0e26bd21473aa9820e3153ac537c",
+      "thumbnail": false,
+      "status": 404
+    },
+    {
+      "assetId": "img_9ded0e26bd21473aa9820e3153ac537c",
+      "thumbnail": true,
+      "status": 404
+    },
+    {
+      "assetId": "img_c811bd82935a4df3ad0851990fc12c71",
+      "thumbnail": false,
+      "status": 404
+    },
+    {
+      "assetId": "img_c811bd82935a4df3ad0851990fc12c71",
+      "thumbnail": true,
+      "status": 404
+    },
+    {
+      "assetId": "img_96ac4e1cab3843939f7643475e04e86b",
+      "thumbnail": false,
+      "status": 404
+    },
+    {
+      "assetId": "img_96ac4e1cab3843939f7643475e04e86b",
+      "thumbnail": true,
+      "status": 404
+    },
+    {
+      "assetId": "img_69e170bdd3304e309ba695113e6ff66f",
+      "thumbnail": false,
+      "status": 404
+    },
+    {
+      "assetId": "img_69e170bdd3304e309ba695113e6ff66f",
+      "thumbnail": true,
+      "status": 404
+    },
+    {
+      "assetId": "img_a3d2698fb55c4c9ca721e07dc8406f2b",
+      "thumbnail": false,
+      "status": 404
+    },
+    {
+      "assetId": "img_a3d2698fb55c4c9ca721e07dc8406f2b",
+      "thumbnail": true,
+      "status": 404
+    },
+    {
+      "assetId": "img_b7a1b092191b4ff99f9a62fb21ce68f4",
+      "thumbnail": false,
+      "status": 404
+    },
+    {
+      "assetId": "img_b7a1b092191b4ff99f9a62fb21ce68f4",
+      "thumbnail": true,
+      "status": 404
+    },
+    {
+      "assetId": "img_e9107876d91d4e7786bcd9a80f7056e4",
+      "thumbnail": false,
+      "status": 404
+    },
+    {
+      "assetId": "img_e9107876d91d4e7786bcd9a80f7056e4",
+      "thumbnail": true,
+      "status": 404
+    },
+    {
+      "assetId": "img_25b97586a96a4ccbb304d12e113b917c",
+      "thumbnail": false,
+      "status": 404
+    },
+    {
+      "assetId": "img_25b97586a96a4ccbb304d12e113b917c",
+      "thumbnail": true,
+      "status": 404
+    },
+    {
+      "assetId": "img_3a603e25ec62490c8cbc158e07dff4c5",
+      "thumbnail": false,
+      "status": 404
+    },
+    {
+      "assetId": "img_3a603e25ec62490c8cbc158e07dff4c5",
+      "thumbnail": true,
+      "status": 404
+    }
+  ],
+  "limits": [
+    "Capabilities were created with the local server key; public feed absence and private database state independently verified. No capability tokens retained."
+  ]
+}

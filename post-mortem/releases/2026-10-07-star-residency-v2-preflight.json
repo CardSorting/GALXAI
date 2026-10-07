@@ -1,0 +1,153 @@
+{
+  "version": 1,
+  "classification": "private",
+  "observedAt": "2026-10-07T20:14:40.962Z",
+  "authorization": "Owner requested another pass for another push after the completed first twelve-work residency; bounded to twelve new candidates using the existing Stars and relay.",
+  "plan": {
+    "cohortKey": "stars-residency-2026-10-07-r2",
+    "runKey": "stars-residency-run-2026-10-07-r2",
+    "starCount": 12,
+    "contentOpportunitiesPerStar": 1,
+    "maxContentAttempts": 12,
+    "avatarGenerationAttempts": 0,
+    "deterministicAvatarAssets": 12,
+    "realGenerationCeiling": 12,
+    "maxGenerationConcurrency": 1,
+    "schedulesCreated": 0,
+    "recurringGeneration": false
+  },
+  "historicalCohorts": [
+    {
+      "cohort_key": "stars-initial-2026-09",
+      "state": "completed",
+      "max_content_attempts": 36,
+      "content_attempts": 36
+    },
+    {
+      "cohort_key": "stars-refresh-2026-09",
+      "state": "completed",
+      "max_content_attempts": 36,
+      "content_attempts": 36
+    },
+    {
+      "cohort_key": "stars-qualification-retry-2026-09",
+      "state": "disabled",
+      "max_content_attempts": 36,
+      "content_attempts": 3
+    },
+    {
+      "cohort_key": "stars-refresh-2026-09-r2",
+      "state": "disabled",
+      "max_content_attempts": 36,
+      "content_attempts": 12
+    },
+    {
+      "cohort_key": "stars-production-qualification-2026-09",
+      "state": "disabled",
+      "max_content_attempts": 8,
+      "content_attempts": 7
+    },
+    {
+      "cohort_key": "stars-production-qualification-2026-09-r2",
+      "state": "completed",
+      "max_content_attempts": 8,
+      "content_attempts": 8
+    },
+    {
+      "cohort_key": "stars-residency-2026-10-07",
+      "state": "completed",
+      "max_content_attempts": 12,
+      "content_attempts": 12
+    }
+  ],
+  "stars": [
+    {
+      "handle": "caelrune",
+      "is_enabled": false,
+      "public_works": 1
+    },
+    {
+      "handle": "ilyx",
+      "is_enabled": false,
+      "public_works": 2
+    },
+    {
+      "handle": "juniperarc",
+      "is_enabled": false,
+      "public_works": 1
+    },
+    {
+      "handle": "lumakade",
+      "is_enabled": false,
+      "public_works": 1
+    },
+    {
+      "handle": "morrowkest",
+      "is_enabled": false,
+      "public_works": 4
+    },
+    {
+      "handle": "nemiorra",
+      "is_enabled": false,
+      "public_works": 1
+    },
+    {
+      "handle": "nyxenbloom",
+      "is_enabled": false,
+      "public_works": 1
+    },
+    {
+      "handle": "ossathread",
+      "is_enabled": false,
+      "public_works": 1
+    },
+    {
+      "handle": "serenvoss",
+      "is_enabled": false,
+      "public_works": 1
+    },
+    {
+      "handle": "soravale",
+      "is_enabled": false,
+      "public_works": 5
+    },
+    {
+      "handle": "tavianash",
+      "is_enabled": false,
+      "public_works": 1
+    },
+    {
+      "handle": "veyrasol",
+      "is_enabled": false,
+      "public_works": 4
+    }
+  ],
+  "activeAttempts": 0,
+  "storage": {
+    "existingBucket": "galxai-private-images",
+    "managedPublicAccess": false,
+    "customDomains": 0,
+    "authenticatedObjectListConfirmed": true,
+    "existingObjectsPresent": true,
+    "productionImageAndThumbnailStatus": 200,
+    "configuration": "Existing private bucket configuration retained locally and in the serving production release"
+  },
+  "relay": {
+    "selectedInstalledRuntime": true,
+    "imageCapability": "available",
+    "ready": 200,
+    "connectedAccounts": 2,
+    "freshHeartbeat": true
+  },
+  "tests": {
+    "plan": 6,
+    "migrationStatus": "158 applied; one unrelated Orbit migration pending and not applied",
+    "reusedUnchangedBoundaryEvidence": "2026-10-07-star-residency-final-validation.json"
+  },
+  "limits": [
+    "No new schema, payment, customer entitlement or recurring schedule",
+    "Historical cohorts and unknown requests will not be replayed",
+    "Generated candidates require separate visual review and exact-asset selection"
+  ],
+  "operatorPreflightCorrection": "Initial read-only control inspection from the host could not resolve a container-only address and aborted before cohort creation or inference. Inspection was corrected to run inside the existing monitor; the executor was entered once after successful preflight."
+}

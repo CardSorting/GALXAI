@@ -20,6 +20,12 @@ Private operational records. Start here during a failure; do not publish this di
 
 `register.json` owns incident status and follow-up actions. `events.jsonl` is the append-only troubleshooting and containment journal. The incident index, rolling log and open-items view are generated from those files; run `npm run docs:sync` after editing them. Recovery is an incident state; completed prevention work needs its own evidence.
 
+Incident identifiers use `INC-YYYYMMDD-` followed by uppercase alphabetic
+segments, optionally separated by single hyphens, such as
+`INC-20261007-STAR-DELIVERY`. Keep the exact identifier consistent in the
+register, actions and journal. Empty, lowercase or numeric suffix segments are
+rejected; descriptive naming does not relax lifecycle or evidence checks.
+
 Correct an earlier evidence reference or event-kind label by appending a complete `correction` event with `supersedes` pointing to the earlier event in the same incident. Preserve the original line. A kind correction does not waive identity, timestamp, required-field or private-field validation; the new correction still requires valid retained evidence.
 
 When an append-only record names source that is intentionally retired, `retired-evidence.json` records the retirement date, current replacement and dated historical evidence. This keeps the original observation intact without restoring deleted runtime or test files.

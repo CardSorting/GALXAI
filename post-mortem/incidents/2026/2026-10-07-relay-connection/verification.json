@@ -1,0 +1,98 @@
+{
+  "version": 1,
+  "classification": "private",
+  "observed_at": "2026-10-07T18:43:00.617350+00:00",
+  "source_scope": "23d0d4f plus this working-tree launcher/access/test and private documentation diff",
+  "checks": [
+    {
+      "command": "npm run test:relay:access",
+      "result": "pass",
+      "tests": 7
+    },
+    {
+      "command": "npm run test:relay:local-supervisor",
+      "result": "pass",
+      "tests": 6,
+      "actual_process_scenarios": [
+        "fresh",
+        "stale",
+        "recovered-before-restart",
+        "foreign",
+        "control-unavailable",
+        "supervisor-central-down",
+        "supervisor-monitor-down"
+      ]
+    },
+    {
+      "command": "npm run test:image:security",
+      "result": "pass"
+    },
+    {
+      "command": "npm run test:relay:services",
+      "result": "pass",
+      "tests": 43
+    },
+    {
+      "command": "npm run build",
+      "result": "pass",
+      "static_pages": 157
+    },
+    {
+      "command": "npm run test:docs",
+      "result": "pass",
+      "tests": 42
+    },
+    {
+      "command": "compiled boundary scan",
+      "result": "pass",
+      "assets": 538,
+      "limitation": "First combined docs:check:build command failed for then-stale documentation, not for compiled asset leakage; rerun after reconciliation required."
+    }
+  ],
+  "semantic_review": {
+    "source_contracts": [
+      "scripts/relay-local.mjs",
+      "scripts/lib/relay-local-access.mjs",
+      "scripts/lib/relay-local-supervisor.mjs",
+      "scripts/test-relay-local-access.mjs",
+      "scripts/test-relay-local-supervisor.mjs",
+      "src/relay/pool-runtime.ts",
+      "src/relay/pool-protocol.ts",
+      "supabase/migrations/20260915191404_relay_account_management.sql"
+    ],
+    "complete_affected_guides": [
+      "docs/runbooks/relay-pool-services.md",
+      "docs/reference/relay-account-management.md",
+      "post-mortem/failure-modes/controller.md",
+      "post-mortem/failure-modes/README.md",
+      "post-mortem/CURRENT_STATE.md"
+    ],
+    "corrections": [
+      "Require private control freshness for a live runtime and recheck after ownership wait",
+      "Preserve central/monitor recovery before attempting dependent control reads",
+      "Distinguish recovered transport from separately rejected sign-in",
+      "Reconcile ingress paragraph with observed installed read contracts instead of historical image-only rule"
+    ],
+    "broader_fingerprint_scope": "Unchanged relay files/guides retain prior review evidence; this is a change-focused contract review, not exhaustive re-audit."
+  },
+  "knowledge_review": {
+    "paths": [
+      "docs/DOCUMENTATION_POLICY.md",
+      "docs/how-to/change-with-documentation.md",
+      "docs/reference/knowledge-commands.md",
+      "docs/knowledge/catalog.json",
+      "post-mortem/documentation-inventory.json",
+      "post-mortem/register.json",
+      "post-mortem/events.jsonl"
+    ],
+    "scope": "Generated catalog and inventory changes trace to the new private incident and coherent runbook/failure-mode updates. ADR decision status unchanged; journal remains append-only.",
+    "unmapped_paths": "Incident journal, register and evidence are governed by the dedicated incident validator rather than source-domain patterns."
+  },
+  "limitations": [
+    "No provider inference submitted",
+    "One account requires manual sign-in under ACT-049",
+    "Initial missed-heartbeat cause unknown",
+    "Existing unrelated overdue actions remain open",
+    "No public application deployment or live-browser asset certification"
+  ]
+}

@@ -1,0 +1,604 @@
+{
+  "version": 1,
+  "classification": "private",
+  "observedAt": "2026-10-07T21:20:51.891200+00:00",
+  "scope": "Local exhibition and editorial frontend feature, existing published STAR works, exact public reading exemptions and read-only selected-work lookup. Broader prior working-tree changes are outside this feature review.",
+  "delivery": {
+    "implemented": true,
+    "deployed": false,
+    "productionMutation": false,
+    "newGenerations": 0,
+    "databaseSchemaOrPrivilegeChanges": false
+  },
+  "programme": {
+    "exhibitions": 2,
+    "uniqueWorks": 24,
+    "essays": 2,
+    "canonicalIndex": "/exhibitions"
+  },
+  "publicBoundary": {
+    "intentionalEditorialCatalog": true,
+    "privateProductionRecordsImported": false,
+    "exactPublishedIdsAndAuthors": true,
+    "imageProjectionFields": [
+      "id",
+      "src",
+      "thumbnailSrc"
+    ],
+    "pendingLogoutStillWithholdsContent": true,
+    "privateRoutesAndApisRemainDenied": true
+  },
+  "checks": [
+    {
+      "command": "node --import tsx --test scripts/test-exhibition-programme.ts scripts/test-public-reading.ts scripts/test-public-information-boundary.ts scripts/test-developer-preview.ts scripts/test-community-profile.ts scripts/test-auth-provider-recovery.ts scripts/test-request-efficiency.ts",
+      "result": "passed",
+      "tests": 49
+    },
+    {
+      "command": "npm run test:image:security",
+      "result": "passed",
+      "tests": 69
+    },
+    {
+      "command": "npx tsc --noEmit",
+      "result": "passed"
+    },
+    {
+      "command": "focused eslint on changed programme and shared source",
+      "result": "passed"
+    },
+    {
+      "command": "npm run test:docs",
+      "result": "passed",
+      "tests": 43
+    },
+    {
+      "command": "npm run build",
+      "result": "passed",
+      "staticPages": 158,
+      "localBuildId": "cXATyb6jXEWn50NLTTcpe"
+    },
+    {
+      "command": "npm run docs:check:build",
+      "result": "compiled scan passed",
+      "browserAndRenderedAssets": 543,
+      "note": "Existing overdue prevention actions retained; final source/guide validation recorded by the closing documentation pass."
+    },
+    {
+      "command": "node --import tsx scripts/verify-exhibition-http.mjs",
+      "result": "passed",
+      "pages": 5,
+      "browserAssets": 22,
+      "sanitizedArtifacts": 30,
+      "hostileDenials": 12,
+      "metadataAbsent": [
+        "EXIF",
+        "XMP",
+        "IPTC",
+        "ICC",
+        "comments"
+      ],
+      "fullImageDimensions": "match reserved intrinsic dimensions"
+    }
+  ],
+  "semanticReview": {
+    "domains": [
+      "knowledge",
+      "images",
+      "access",
+      "delivery",
+      "client-efficiency",
+      "connect"
+    ],
+    "scope": "Complete affected guides and bounded programme source delta; retain earlier broader evidence. No ADR status or unrelated incident/prevention action changes."
+  },
+  "visualReview": {
+    "disposition": "recapture",
+    "accepted": false,
+    "screenshots": 0,
+    "reason": "Local browser access explicitly denied by browser security policy; no alternate renderer, browser, CDP or capture workaround used.",
+    "sourceFindingsResolved": [
+      "Programme introduction added above first artwork",
+      "Scoped typography and institutional layout documented without replacing the global visual identity"
+    ]
+  },
+  "limitations": [
+    "No desktop, mobile or actual-user-viewport visual acceptance.",
+    "No hosted deployment or live-site cleanliness claim.",
+    "Invalid-bearer HTTP checks supplement authorization fixtures; no real signed-in browser acceptance.",
+    "No comprehensive accessibility, assistive-technology or performance audit.",
+    "Existing Nova/Media delivery differences and unrelated prevention work remain separately governed."
+  ],
+  "evidence": {
+    "http": {
+      "version": 1,
+      "classification": "private",
+      "observedAt": "2026-10-07T21:19:53.149Z",
+      "target": "http://127.0.0.1:3421",
+      "pages": [
+        {
+          "path": "/exhibitions",
+          "status": 200,
+          "images": 4,
+          "canonical": "https://galx.ai/exhibitions",
+          "bodySha256": "df56511ca666e11ee1cb85655542a2e2c7b4cd4a703c8a805aacfbe0f916b6ff"
+        },
+        {
+          "path": "/exhibitions/instruments-for-the-impossible",
+          "status": 200,
+          "images": 12,
+          "canonical": "https://galx.ai/exhibitions/instruments-for-the-impossible",
+          "bodySha256": "6d3d7ed2f2ed05e9130b102091c045e848f09193ff70d54cca9da2cd2157c1ed"
+        },
+        {
+          "path": "/exhibitions/things-that-hold-time",
+          "status": 200,
+          "images": 12,
+          "canonical": "https://galx.ai/exhibitions/things-that-hold-time",
+          "bodySha256": "5f43de06b18377a6d367df1865876a4a622be831938aa6830b0f950f8f915f72"
+        },
+        {
+          "path": "/editorials/what-an-object-can-ask",
+          "status": 200,
+          "images": 1,
+          "canonical": "https://galx.ai/editorials/what-an-object-can-ask",
+          "bodySha256": "951eb27c614ea8268d9a318fe9303bbe591980d8f49356683a87cfb062d88402"
+        },
+        {
+          "path": "/editorials/reading-the-trace",
+          "status": 200,
+          "images": 1,
+          "canonical": "https://galx.ai/editorials/reading-the-trace",
+          "bodySha256": "18c17b786af4b45e274c6a359e60ad73d9dcf8a9309375d565a07a307f299eb4"
+        }
+      ],
+      "bundles": [
+        {
+          "path": "/_next/static/css/cf8a94d8f0136ff9.css",
+          "status": 200,
+          "sha256": "cd44c171d546c79e1e2d0690ec5c3d475a1b33b5b1b906504127cd0439daccfb"
+        },
+        {
+          "path": "/_next/static/css/d4f5d1a73a37fec5.css",
+          "status": 200,
+          "sha256": "56df028529427ac5a6586dfc62feb812b93c2be54de7e497af8b26bdcf28e4a0"
+        },
+        {
+          "path": "/_next/static/css/fdf7d4e9e188178c.css",
+          "status": 200,
+          "sha256": "f592d752cc814f119d028dcf94dc591735d176dacf98b498d5dfbddd912097cd"
+        },
+        {
+          "path": "/_next/static/css/b6448837cfad3460.css",
+          "status": 200,
+          "sha256": "48586729517d70086b3206c7072338368d1db6c9c216eae1533badb07024de7d"
+        },
+        {
+          "path": "/_next/static/chunks/4bd1b696-100b9d70ed4e49c1.js",
+          "status": 200,
+          "sha256": "5421e13a91a9389517b66179f3b4b5eaa0d95245438066d4d7b19ac30aeb809b"
+        },
+        {
+          "path": "/_next/static/chunks/1255-306db9f231b54263.js",
+          "status": 200,
+          "sha256": "6f76c08b6dfa66d96a35c60cd5dbcb886f607fce6171bdffe532222ad3238020"
+        },
+        {
+          "path": "/_next/static/chunks/main-app-e2c542d8c58b5679.js",
+          "status": 200,
+          "sha256": "03b45edf0fcd8353081bb5cf6ca190d4c976997e561504702217f0fa60178890"
+        },
+        {
+          "path": "/_next/static/chunks/44530001-a26648c04669f22e.js",
+          "status": 200,
+          "sha256": "2ae36604e0ac1f9707036b30e5f3837e3c02a9ba300c16e36b479f614f512338"
+        },
+        {
+          "path": "/_next/static/chunks/2619-04bc32f026a0d946.js",
+          "status": 200,
+          "sha256": "a9b6c2213ea787a015c0169d198b4a90d7a44a0cc17abb0d132e8362d3016ced"
+        },
+        {
+          "path": "/_next/static/chunks/9686-8359d81c722290fa.js",
+          "status": 200,
+          "sha256": "aec46b12e6e605ed325f09e716c7b3cbd4c90258c8aa2578c229d15dcb3d151a"
+        },
+        {
+          "path": "/_next/static/chunks/8805-a9c9215be7d82965.js",
+          "status": 200,
+          "sha256": "eec2ad72367811d1eb42cc84357fc7504e5563d43d52125a949f342c1351c546"
+        },
+        {
+          "path": "/_next/static/chunks/4989-9ddca21e21abb1a9.js",
+          "status": 200,
+          "sha256": "43540a9ae6491981bfc7cdc2c828335ce726a743b343ac29ccf2c4a5553b5ad2"
+        },
+        {
+          "path": "/_next/static/chunks/8624-f21dbd10bea0b372.js",
+          "status": 200,
+          "sha256": "f2a8ba2bdef93fc5a612717cfe2b49f40bde009e80396f8cb1d6a6300a7a2c17"
+        },
+        {
+          "path": "/_next/static/chunks/app/layout-08d748709fe5c766.js",
+          "status": 200,
+          "sha256": "358797100c6c1731336714c178e54c72947835ed491b2815bcb8235d3c374def"
+        },
+        {
+          "path": "/_next/static/chunks/app/error-0be274eaee634f24.js",
+          "status": 200,
+          "sha256": "8b73a8e9f295c062dbd437f85ddbd639b8f3915447f6f9c5c93810da82ac4140"
+        },
+        {
+          "path": "/_next/static/chunks/app/global-error-b1f4d973a9bbb062.js",
+          "status": 200,
+          "sha256": "d9ba7eb3881633de5d774c677013b8ae53d0978dbb2cc6431f9ac0df0ac88c89"
+        },
+        {
+          "path": "/_next/static/chunks/app/not-found-67a141d9e7631137.js",
+          "status": 200,
+          "sha256": "d926275dc3e902354051a5e75ec5dcafda9ea2ade8ec3aa22fb78633a63e3b84"
+        },
+        {
+          "path": "/_next/static/chunks/app/exhibitions/page-aa78ca9635ce5581.js",
+          "status": 200,
+          "sha256": "1f483a7bd0e88caed72dde7e3261728305b86fa71744069213e79764bd3bad6f"
+        },
+        {
+          "path": "/_next/static/chunks/polyfills-42372ed130431b0a.js",
+          "status": 200,
+          "sha256": "0973c1d64c88adc8e3c950410cb58b288f72118d5965b78049438deb8f2f9683"
+        },
+        {
+          "path": "/_next/static/chunks/webpack-451ed6b0ea53f3c9.js",
+          "status": 200,
+          "sha256": "c79b4673dc7c126e58206124c86254c3331d2e14e02306362b0d4be69aeb1aca"
+        },
+        {
+          "path": "/_next/static/chunks/app/exhibitions/%5Bslug%5D/page-951a27762182e67c.js",
+          "status": 200,
+          "sha256": "dc689a6b77375fd22551df0852a15f693ed42a09410e6b1de12a3d4589a9d39a"
+        },
+        {
+          "path": "/_next/static/chunks/app/editorials/%5Bslug%5D/page-951a27762182e67c.js",
+          "status": 200,
+          "sha256": "dc689a6b77375fd22551df0852a15f693ed42a09410e6b1de12a3d4589a9d39a"
+        }
+      ],
+      "artifacts": [
+        {
+          "kind": "image",
+          "status": 200,
+          "width": 1536,
+          "height": 1024,
+          "metadataAbsent": true,
+          "sha256": "5fa97cc3fb1cfe71c988bb671bded7eefb0887b83fd6d72fadad424461d30528"
+        },
+        {
+          "kind": "image",
+          "status": 200,
+          "width": 1536,
+          "height": 1024,
+          "metadataAbsent": true,
+          "sha256": "84d0a9704fe8e45651673f4efbdff07596d5fce5caf0d214218db8789af2f191"
+        },
+        {
+          "kind": "thumbnail",
+          "status": 200,
+          "width": 341,
+          "height": 512,
+          "metadataAbsent": true,
+          "sha256": "b2970bdd2ad93942d94c961d74ce0ae2352fd5cc42c69fba3d109f1540b63c71"
+        },
+        {
+          "kind": "thumbnail",
+          "status": 200,
+          "width": 512,
+          "height": 341,
+          "metadataAbsent": true,
+          "sha256": "1f79eb71064844317c7c488f44b2a422469a158f0ff2532aa456bd62ebe29163"
+        },
+        {
+          "kind": "image",
+          "status": 200,
+          "width": 1536,
+          "height": 1024,
+          "metadataAbsent": true,
+          "sha256": "5fa97cc3fb1cfe71c988bb671bded7eefb0887b83fd6d72fadad424461d30528"
+        },
+        {
+          "kind": "image",
+          "status": 200,
+          "width": 1374,
+          "height": 1145,
+          "metadataAbsent": true,
+          "sha256": "6e342055c3b6ef9a1148d63696f37de3bf6215ab1cd0e4d88c03b0fb81faefab"
+        },
+        {
+          "kind": "image",
+          "status": 200,
+          "width": 1536,
+          "height": 1024,
+          "metadataAbsent": true,
+          "sha256": "301e4a5b06f88a492a77dffd4ce27322cc1962018898b4c8702f41fde93d3350"
+        },
+        {
+          "kind": "image",
+          "status": 200,
+          "width": 1145,
+          "height": 1374,
+          "metadataAbsent": true,
+          "sha256": "eec32fa19b1d238f5aec2fcbbbfad4a55b4cc7cd317f06b17bdf1d7be15d28e3"
+        },
+        {
+          "kind": "image",
+          "status": 200,
+          "width": 1024,
+          "height": 1536,
+          "metadataAbsent": true,
+          "sha256": "274cedaabbd49cfe9ce9c886383b92453366eb9fd5eeab41485f3bffc23ea8e9"
+        },
+        {
+          "kind": "image",
+          "status": 200,
+          "width": 1536,
+          "height": 1024,
+          "metadataAbsent": true,
+          "sha256": "ed3007ced0573cd73e6fc515efe07d10a89959f4c5cd3bcf3231df313a6dc5de"
+        },
+        {
+          "kind": "image",
+          "status": 200,
+          "width": 1374,
+          "height": 1145,
+          "metadataAbsent": true,
+          "sha256": "13a356f884beb95cfd67d05dd531a157e92c3e8c59c0717ceb13f4ed6100c09d"
+        },
+        {
+          "kind": "image",
+          "status": 200,
+          "width": 1145,
+          "height": 1374,
+          "metadataAbsent": true,
+          "sha256": "ee95902d3543b90c2e7ad7231acdca99893a2d4198bb30a5829427bedc41af26"
+        },
+        {
+          "kind": "image",
+          "status": 200,
+          "width": 1536,
+          "height": 1024,
+          "metadataAbsent": true,
+          "sha256": "a6952f966afda52cd526cf0eb943c80410766930e307ed3c6668343830a4dab5"
+        },
+        {
+          "kind": "image",
+          "status": 200,
+          "width": 1312,
+          "height": 1199,
+          "metadataAbsent": true,
+          "sha256": "243f5ab2409e78e855cb1131a7d98d87f59aced78ffa59f449a80937ecc24bda"
+        },
+        {
+          "kind": "image",
+          "status": 200,
+          "width": 1536,
+          "height": 1024,
+          "metadataAbsent": true,
+          "sha256": "d087aec049a2d23c81e7e94d984806ec7c83fa54e1593a48482e0e7848dc525d"
+        },
+        {
+          "kind": "image",
+          "status": 200,
+          "width": 1254,
+          "height": 1254,
+          "metadataAbsent": true,
+          "sha256": "793a001434e1129dcdac27483f502446c7598b40b1618a506ff897f87aa837df"
+        },
+        {
+          "kind": "image",
+          "status": 200,
+          "width": 1536,
+          "height": 1024,
+          "metadataAbsent": true,
+          "sha256": "0947401eeba7656c86877e87c683184a0d468352cda6f84661981894cb5d1f84"
+        },
+        {
+          "kind": "image",
+          "status": 200,
+          "width": 1024,
+          "height": 1536,
+          "metadataAbsent": true,
+          "sha256": "a2409d37a70882910d7843b8558f1f60b66512122e514042ce4bbe027322f8db"
+        },
+        {
+          "kind": "image",
+          "status": 200,
+          "width": 1536,
+          "height": 1024,
+          "metadataAbsent": true,
+          "sha256": "13801d4c63deb5c93c48c4ddcf950d6e0296ea1483808efa93a25681cab2d060"
+        },
+        {
+          "kind": "image",
+          "status": 200,
+          "width": 1024,
+          "height": 1536,
+          "metadataAbsent": true,
+          "sha256": "7d4720a54b958f612dd6ee84e0b55d5ab64f97a33e173731b3107b67193a40be"
+        },
+        {
+          "kind": "image",
+          "status": 200,
+          "width": 1024,
+          "height": 1536,
+          "metadataAbsent": true,
+          "sha256": "b6b148e79253614f658cea0f5a4b5c5c5146b9e05985f09753604ef9875d3e9e"
+        },
+        {
+          "kind": "image",
+          "status": 200,
+          "width": 1536,
+          "height": 1024,
+          "metadataAbsent": true,
+          "sha256": "9427250904d2a8dccd59e1de35d99d63ede7e698e17f3891f61188ecadbbf873"
+        },
+        {
+          "kind": "image",
+          "status": 200,
+          "width": 1254,
+          "height": 1254,
+          "metadataAbsent": true,
+          "sha256": "0ff1a2e9f1ffc5f14cb6580df55dd8f3cb9914100254f48f3d8d4e65c01f3f4e"
+        },
+        {
+          "kind": "image",
+          "status": 200,
+          "width": 1536,
+          "height": 1024,
+          "metadataAbsent": true,
+          "sha256": "84d0a9704fe8e45651673f4efbdff07596d5fce5caf0d214218db8789af2f191"
+        },
+        {
+          "kind": "image",
+          "status": 200,
+          "width": 1536,
+          "height": 1024,
+          "metadataAbsent": true,
+          "sha256": "28c3afb91415d985efaea85c6f31272b06223354de3d2f2342c2aa9117efefdc"
+        },
+        {
+          "kind": "image",
+          "status": 200,
+          "width": 1374,
+          "height": 1145,
+          "metadataAbsent": true,
+          "sha256": "7a579b24cce0fcd622b5b98888d1228fbade25d3858d5441d737e04dbf6f1895"
+        },
+        {
+          "kind": "image",
+          "status": 200,
+          "width": 1672,
+          "height": 941,
+          "metadataAbsent": true,
+          "sha256": "4373a6b1f40a4f3c8f520a65ce342972cf2f5f0190df49486c878b4268eeeecd"
+        },
+        {
+          "kind": "image",
+          "status": 200,
+          "width": 1536,
+          "height": 1024,
+          "metadataAbsent": true,
+          "sha256": "9dd83b544a3309f499a0731ecdf4d6b9cfe435338786f7a7b3c48fbbaca846a9"
+        },
+        {
+          "kind": "image",
+          "status": 200,
+          "width": 1024,
+          "height": 1536,
+          "metadataAbsent": true,
+          "sha256": "274cedaabbd49cfe9ce9c886383b92453366eb9fd5eeab41485f3bffc23ea8e9"
+        },
+        {
+          "kind": "image",
+          "status": 200,
+          "width": 1536,
+          "height": 1024,
+          "metadataAbsent": true,
+          "sha256": "84d0a9704fe8e45651673f4efbdff07596d5fce5caf0d214218db8789af2f191"
+        }
+      ],
+      "denials": [
+        {
+          "path": "/exhibitions/draft",
+          "ordinaryBearer": false,
+          "status": 404
+        },
+        {
+          "path": "/exhibitions/draft",
+          "ordinaryBearer": true,
+          "status": 404
+        },
+        {
+          "path": "/editorials/private",
+          "ordinaryBearer": false,
+          "status": 404
+        },
+        {
+          "path": "/editorials/private",
+          "ordinaryBearer": true,
+          "status": 404
+        },
+        {
+          "path": "/exhibitions/instruments-for-the-impossible/diagnostics",
+          "ordinaryBearer": false,
+          "status": 404
+        },
+        {
+          "path": "/exhibitions/instruments-for-the-impossible/diagnostics",
+          "ordinaryBearer": true,
+          "status": 404
+        },
+        {
+          "path": "/api/exhibitions",
+          "ordinaryBearer": false,
+          "status": 401
+        },
+        {
+          "path": "/api/exhibitions",
+          "ordinaryBearer": true,
+          "status": 401
+        },
+        {
+          "path": "/v1/images/assets/invalid-token",
+          "ordinaryBearer": false,
+          "status": 404
+        },
+        {
+          "path": "/v1/images/assets/invalid-token",
+          "ordinaryBearer": true,
+          "status": 404
+        },
+        {
+          "path": "/api/relay/status",
+          "ordinaryBearer": false,
+          "status": 401
+        },
+        {
+          "path": "/api/relay/status",
+          "ordinaryBearer": true,
+          "status": 401
+        }
+      ],
+      "limits": "Local production HTTP/artifact checks, not a hosted deployment or full accessibility audit."
+    },
+    "sourceSha256": {
+      ".impeccable/surfaces/exhibition-programme.md": "78e49387746523a4c213f25a611bc80d2bb25645af0b31545a3665719a33a0c0",
+      "DESIGN.md": "95b8f6dbd5b4b30020967a4bbad847cd867b3dc771cccb92e94a0ad48a0d2e6b",
+      "docs/reference/exhibition-programme.md": "6d8fa299be54ed61bf1bc53a0450b4d5d4ffbd6b83f3b2156eead00af60d6fcc",
+      "public/fonts/bodoni-moda-OFL.txt": "931dfe2e0cd3c9443295f5c1d754b8a8403bf060df50c1d5900267ade83d0046",
+      "scripts/test-exhibition-programme.ts": "24abe95c7ec3208d5598fdb3e0ddc8c3207edcc00b201688fff53fbeba6dae57",
+      "scripts/test-public-reading.ts": "a9dd0661f89a0cc64d8df25d7483ead068a7a1375faab03cb33f331c0972e359",
+      "scripts/verify-exhibition-http.mjs": "24a7b6baab7b82a520745c91bc51a93a315d65a0a14a58990ae0e232a598891e",
+      "src/app/editorials/[slug]/page.tsx": "6aa7538269d84fb16a7088a1ffa9bb1ce49de7250cab050923e4b0c5a89872ff",
+      "src/app/editorials/page.tsx": "688490c2e4e71374122f3267f7af9e6e1be9f874d1a33dd48f01e1016cf4f71d",
+      "src/app/exhibitions/[slug]/page.tsx": "868b582defd2760fcb1778e2c41037b58b1d820fe274c825dbe9711cd4d82425",
+      "src/app/exhibitions/page.tsx": "0f293a6d75bef0547537b221e555fc872c8adbcc6e12295bc442d7d826e8e5d4",
+      "src/app/sitemap.ts": "89ba5eff163e3528ac03d5299f4c0d77afb160aa3f0199877ed96cd43fd9dfee",
+      "src/components/auth/AuthSessionContent.tsx": "0c933720f724e52aa03dc14a7f75111ed97544b681e9d0e8174db7d0197cbe1c",
+      "src/components/dashboard/Footer.tsx": "4f89800897d90ff51a4a1a605f55fc1f5c00e2ef16e3927e4f7dbbdc8a76fa3f",
+      "src/components/dashboard/MobileBottomNav.tsx": "19ddfd4d5a5c186f19f7ea5db6db8ac4c33be331a5d97a18d16239336e332a52",
+      "src/components/dashboard/Navigation.tsx": "f7fbba7d0caf288a9f15414ac7bcada6fa63e114c2eada19160132d46272ef33",
+      "src/components/exhibitions/ArtworkImage.tsx": "c3e0839c70406e8b0726d06094d44770d50eae5c856c4070e7c7490087307919",
+      "src/components/exhibitions/Programme.tsx": "9ca7c2c5cd30174385833342dfd12b0c98df9aea4c188bfd61ef4aab8787cda5",
+      "src/components/exhibitions/fonts/BodoniModa.ttf": "550f5e34ee0a828d7941b1fe9bc58b34e5260d3f33a61532e6d0a0114e79a5cf",
+      "src/components/exhibitions/programme.module.css": "1ff3f181b4cc356501837c1ddafabca1e5fe011bf6f16f8f4dad7bfdaadb2b62",
+      "src/lib/community/public-participants.ts": "56b31ef84dedf1ffabfd34d4bd4d04b91a607139e5652f9587516db3f14cdd69",
+      "src/lib/exhibitions/catalog.ts": "5a5d9ef0870fbdaa65fd37dc5b6c83661a61b2ad5fc234b4177fc1b2d9722efd",
+      "src/lib/exhibitions/paths.ts": "e195e3210ddcc87b50e7a9b305068ec7f673cbb473f39394a9af61d8ddfc0ee3",
+      "src/lib/exhibitions/public-artwork.ts": "ba6106f108f1d21b451a129a3cceeae13c2cd1fbddd8c0e6b1fb4979af5a409b",
+      "src/lib/exhibitions/published-works.ts": "4a9e4de6b14f1456a485da946911b328f513e9c8b3b4b6bf2e6224e7b9bb0fbb",
+      "src/lib/security/preview-policy.ts": "fdf563d5c7f8140b6396a39794bd850c7924c81a84b65008fbcee85e522771c9"
+    },
+    "privateFinishReview": ".impeccable/review/exhibitions/finish-review.md",
+    "privateSurfaceBrief": ".impeccable/surfaces/exhibition-programme.md"
+  }
+}

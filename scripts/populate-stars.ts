@@ -7,10 +7,12 @@ const refreshV2 = process.argv.includes('--refresh-v2');
 const retry = process.argv.includes('--retry');
 const qualification = process.argv.includes('--qualification');
 const qualificationV2 = process.argv.includes('--qualification-v2');
+const residency = process.argv.includes('--residency');
+const residencyV2 = process.argv.includes('--residency-v2');
 
-if ([refresh, refreshV2, retry, qualification, qualificationV2].filter(Boolean).length > 1) throw new Error('--refresh, --refresh-v2, --retry, --qualification, and --qualification-v2 are mutually exclusive');
+if ([refresh, refreshV2, retry, qualification, qualificationV2, residency, residencyV2].filter(Boolean).length > 1) throw new Error('Choose only one Star population mode');
 
-const populationMode = qualificationV2 ? 'qualification-v2' : qualification ? 'qualification' : retry ? 'retry' : refreshV2 ? 'refresh-v2' : refresh ? 'refresh' : 'initial';
+const populationMode = residencyV2 ? 'residency-v2' : residency ? 'residency' : qualificationV2 ? 'qualification-v2' : qualification ? 'qualification' : retry ? 'retry' : refreshV2 ? 'refresh-v2' : refresh ? 'refresh' : 'initial';
 
 function candidateDatabaseUrls(): string[] {
   if (process.env.DATABASE_URL) return [process.env.DATABASE_URL];
@@ -56,8 +58,8 @@ async function main(): Promise<void> {
     return;
   }
 
-  if (allowRecovery && (refresh || refreshV2 || retry || qualification || qualificationV2)) {
-    throw new Error('--resume cannot be combined with --refresh, --refresh-v2, --retry, --qualification, or --qualification-v2');
+  if (allowRecovery && (refresh || refreshV2 || retry || qualification || qualificationV2 || residency || residencyV2)) {
+    throw new Error('--resume cannot be combined with a new bounded Star population mode');
   }
 
   const pool = await connectPopulationPool();

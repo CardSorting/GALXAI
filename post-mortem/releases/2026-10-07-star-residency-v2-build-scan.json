@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "classification": "private",
+  "observedAt": "2026-10-07T20:31:24.980Z",
+  "scope": "Current local production browser JS/CSS and prerendered HTML; checks authored subjects, questions, formal focuses and fixed private cohort prefix.",
+  "files": 549,
+  "phrases": 72,
+  "privatePhraseMatches": 0,
+  "privateCohortMatches": 0
+}

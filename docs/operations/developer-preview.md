@@ -133,7 +133,12 @@ Public framework assets inherit access only from exact reviewed route
 templates. Dynamic templates are not concrete customer paths: for example,
 the public profile page emits a browser chunk under `profile/[handle]`, while
 the public page validator accepts only a normalized real handle. Keep that
-template in the explicit framework-asset allowlist. Do not exempt arbitrary
+template in the explicit framework-asset allowlist. The authored exhibition
+programme likewise permits only `exhibitions/[slug]` and `editorials/[slug]`
+page templates, while concrete public destinations remain in an exact finite
+allowlist. Drafts and private descendants are not exempt. See the
+[programme contract](../reference/exhibition-programme.md).
+Do not exempt arbitrary
 bracketed paths, private descendants, unrelated page chunks, or administrator
 assets.
 

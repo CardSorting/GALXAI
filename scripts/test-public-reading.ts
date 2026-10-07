@@ -56,7 +56,7 @@ test('anonymous, fake-user and prefetch requests can read only the curated pages
 
 test('search finds body text, tolerates whitespace/case, combines terms and recovers from no results', () => {
   assert.deepEqual(filterGuides('  CANCEL  ', 'All topics').map(guide => guide.path), filterGuides('cancel', 'All topics').map(guide => guide.path));
-  assert(filterGuides('alpine lake', 'All topics').some(guide => guide.path.endsWith('/getting-started')));
+  assert(filterGuides('personal collections', 'All topics').some(guide => guide.path.endsWith('/getting-started')));
   assert(filterGuides('paid period', 'Plans and billing').every(guide => guide.category === 'Plans and billing'));
   assert.equal(filterGuides('zzzz-no-match', 'All topics').length, 0);
   assert.equal(filterGuides('', 'All topics').length, GUIDES.length);

@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "classification": "private",
+  "observedAt": "2026-10-07T19:52:11.061Z",
+  "id": "dpl_QBr2WUvRcvF5RFqJvdc8FaZGaqHV",
+  "url": "galxai-g0b8k99nc-cardsortings-projects.vercel.app",
+  "state": "READY",
+  "target": "production",
+  "scope": "media-connect-only",
+  "sourceManifest": "ef292883a4e84af9b91b14d7f86fdb237c3e5489abd7d3890257f425c0642d3f",
+  "configurationRepair": "private-image-storage",
+  "publicDomains": [
+    "www.galx.ai",
+    "galx.ai",
+    "galxai.vercel.app"
+  ],
+  "aliasAssignments": [
+    {
+      "alias": "www.galx.ai",
+      "deploymentId": "dpl_QBr2WUvRcvF5RFqJvdc8FaZGaqHV"
+    },
+    {
+      "alias": "galx.ai",
+      "deploymentId": "dpl_QBr2WUvRcvF5RFqJvdc8FaZGaqHV"
+    },
+    {
+      "alias": "galxai.vercel.app",
+      "deploymentId": "dpl_QBr2WUvRcvF5RFqJvdc8FaZGaqHV"
+    }
+  ],
+  "previousServingDeployment": "dpl_4uwFyPMJ6YV7njXsWQbb7a8MZHKh",
+  "rollbackRetained": true,
+  "automaticPromotionDisabled": true
+}

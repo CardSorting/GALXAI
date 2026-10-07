@@ -1,0 +1,127 @@
+{
+  "version": 1,
+  "classification": "private",
+  "observedAt": "2026-10-07T19:36:52.175Z",
+  "decisions": [
+    {
+      "handle": "vanta",
+      "attemptId": "28e16482-e473-4073-8c57-a1e9a122d4d4",
+      "assetId": "img_45c40fb5489948f8a27bb7b22422a454",
+      "decision": "selected",
+      "selectedAssetIds": [
+        "img_45c40fb5489948f8a27bb7b22422a454"
+      ],
+      "decisionVersion": 1
+    },
+    {
+      "handle": "morrowkest",
+      "attemptId": "2f120c8e-be00-4692-9c9e-86d6f0f9368d",
+      "assetId": "img_ff47ccebce0344d3a1d96d20a5edfa56",
+      "decision": "selected",
+      "selectedAssetIds": [
+        "img_ff47ccebce0344d3a1d96d20a5edfa56"
+      ],
+      "decisionVersion": 1
+    },
+    {
+      "handle": "soravale",
+      "attemptId": "3d4d69d2-d441-452a-8cdd-757eeeea7105",
+      "assetId": "img_3e467409ef3c4043be7739e96b490e06",
+      "decision": "selected",
+      "selectedAssetIds": [
+        "img_3e467409ef3c4043be7739e96b490e06"
+      ],
+      "decisionVersion": 1
+    },
+    {
+      "handle": "ilyx",
+      "attemptId": "8bd70954-3b4d-4630-a96d-1e618bda54df",
+      "assetId": "img_3036c2d932e24d389b73c2a1d0d689e4",
+      "decision": "selected",
+      "selectedAssetIds": [
+        "img_3036c2d932e24d389b73c2a1d0d689e4"
+      ],
+      "decisionVersion": 1
+    },
+    {
+      "handle": "nemiorra",
+      "attemptId": "b722a1f8-a544-4c00-8a91-2bd6e2dbbd02",
+      "assetId": "img_1dcab01dd2024d27a63825fe10d7d062",
+      "decision": "selected",
+      "selectedAssetIds": [
+        "img_1dcab01dd2024d27a63825fe10d7d062"
+      ],
+      "decisionVersion": 1
+    },
+    {
+      "handle": "caelrune",
+      "attemptId": "363e4d78-d848-4274-b66e-0f74e3af48d7",
+      "assetId": "img_c2f661d16d6a42c28d9349149800b5e3",
+      "decision": "selected",
+      "selectedAssetIds": [
+        "img_c2f661d16d6a42c28d9349149800b5e3"
+      ],
+      "decisionVersion": 1
+    },
+    {
+      "handle": "ossathread",
+      "attemptId": "47426c76-17fa-48af-b412-6a8d757f89bf",
+      "assetId": "img_d0bc1c5688e34d56823292600f82c7d7",
+      "decision": "selected",
+      "selectedAssetIds": [
+        "img_d0bc1c5688e34d56823292600f82c7d7"
+      ],
+      "decisionVersion": 1
+    },
+    {
+      "handle": "juniperarc",
+      "attemptId": "5d67742b-b61b-46e9-bc72-0c4c205cf42d",
+      "assetId": "img_a10e47d71393430689f2ec79519794b5",
+      "decision": "selected",
+      "selectedAssetIds": [
+        "img_a10e47d71393430689f2ec79519794b5"
+      ],
+      "decisionVersion": 1
+    },
+    {
+      "handle": "tavianash",
+      "attemptId": "6361b4e8-7a27-4e7b-ae08-7a1180cef210",
+      "assetId": "img_808925605aeb4808b6d34ad09676888f",
+      "decision": "selected",
+      "selectedAssetIds": [
+        "img_808925605aeb4808b6d34ad09676888f"
+      ],
+      "decisionVersion": 1
+    },
+    {
+      "handle": "lumakade",
+      "attemptId": "2fda82b0-58d8-46db-9f02-157a376fc560",
+      "assetId": "img_fa3cdacda0d643cf88bde4aae2cbd717",
+      "decision": "selected",
+      "selectedAssetIds": [
+        "img_fa3cdacda0d643cf88bde4aae2cbd717"
+      ],
+      "decisionVersion": 1
+    },
+    {
+      "handle": "serenvoss",
+      "attemptId": "e97a5694-bf15-4a30-acbe-3571514502fa",
+      "assetId": "img_dcdd07c193d54402b92591705b6c20b3",
+      "decision": "selected",
+      "selectedAssetIds": [
+        "img_dcdd07c193d54402b92591705b6c20b3"
+      ],
+      "decisionVersion": 1
+    },
+    {
+      "handle": "nyxenbloom",
+      "attemptId": "73a8af1e-1603-4cab-b7fb-fdef65f7879c",
+      "assetId": "img_0661ae5dea714a698b8e6b1470765b01",
+      "decision": "selected",
+      "selectedAssetIds": [
+        "img_0661ae5dea714a698b8e6b1470765b01"
+      ],
+      "decisionVersion": 1
+    }
+  ]
+}

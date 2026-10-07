@@ -47,6 +47,18 @@ class IncidentGuardTests(unittest.TestCase):
     def test_valid_recovered_incident_can_keep_open_prevention(self):
         self.assertEqual(self.errors(), [])
 
+    def test_descriptive_incident_suffix_preserves_references_and_rejects_invalid_segments(self):
+        incident = self.register['incidents'][0]
+        for suffix in ('STAR-DELIVERY', 'star-delivery', 'STAR--DELIVERY', 'STAR-2'):
+            identifier = 'INC-20260913-' + suffix
+            incident['id'] = identifier
+            self.register['actions'][0]['incident'] = identifier
+            self.events[0]['incident'] = identifier
+            invalid = any('Invalid incident ID' in error for error in self.errors())
+            self.assertEqual(invalid, suffix != 'STAR-DELIVERY')
+            if suffix == 'STAR-DELIVERY':
+                self.assertEqual(self.errors(), [])
+
     def test_closed_incident_cannot_hide_open_actions(self):
         self.register['incidents'][0]['status'] = 'closed'
         self.assertTrue(any('closed with open' in error for error in self.errors()))

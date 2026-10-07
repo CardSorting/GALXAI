@@ -6,6 +6,10 @@ import { ImageRequestRepository } from '@/lib/images/request-repository';
 import { ImageRequestService } from '@/lib/images/request-service';
 import { buildBrocPrompt, buildBrocScene, type BrocScenePlan } from '../../../BROC/practice';
 import { BrocPracticeRepository } from '../../../BROC/store';
+import { STAR_RESIDENCY_COHORT_KEY, STAR_RESIDENCY_RUN_KEY, STAR_RESIDENCY_TITLE,
+  STAR_RESIDENCY_DEFINITIONS, STAR_RESIDENCY_WORKS,
+  STAR_RESIDENCY_V2_COHORT_KEY, STAR_RESIDENCY_V2_RUN_KEY, STAR_RESIDENCY_V2_TITLE,
+  STAR_RESIDENCY_V2_DEFINITIONS, STAR_RESIDENCY_V2_WORKS } from './star-residency';
 import {
   STAR_CONTENT_OPPORTUNITIES,
   STAR_COHORT_KEY,
@@ -33,7 +37,7 @@ import {
 const STAR_MODEL = 'galx-nova-image';
 const STAR_GENERATION_SIZES = ['1024x1024', '1792x1024', '1024x1792'] as const;
 
-export type StarPopulationMode = 'initial' | 'refresh' | 'refresh-v2' | 'retry' | 'qualification' | 'qualification-v2';
+export type StarPopulationMode = 'initial' | 'refresh' | 'refresh-v2' | 'retry' | 'qualification' | 'qualification-v2' | 'residency' | 'residency-v2';
 
 interface StarExecutionConfig {
   mode: StarPopulationMode;
@@ -47,6 +51,16 @@ interface StarExecutionConfig {
 }
 
 function getStarExecutionConfig(mode: StarPopulationMode = 'initial'): StarExecutionConfig {
+  if (mode === 'residency-v2') {
+    return { mode, cohortKey: STAR_RESIDENCY_V2_COHORT_KEY, runKey: STAR_RESIDENCY_V2_RUN_KEY,
+      label: STAR_RESIDENCY_V2_TITLE, definitions: STAR_RESIDENCY_V2_DEFINITIONS,
+      contentOpportunities: 1, maxContentAttempts: 12, maxGenerationConcurrency: 1 };
+  }
+  if (mode === 'residency') {
+    return { mode, cohortKey: STAR_RESIDENCY_COHORT_KEY, runKey: STAR_RESIDENCY_RUN_KEY,
+      label: STAR_RESIDENCY_TITLE, definitions: STAR_RESIDENCY_DEFINITIONS,
+      contentOpportunities: 1, maxContentAttempts: 12, maxGenerationConcurrency: 1 };
+  }
   if (mode === 'qualification-v2') {
     return {
       mode,
@@ -681,6 +695,18 @@ async function runOneOpportunity(
   try {
     const practice = await brocPracticeRepository.loadContext(pool, star.actorId, star.definition);
     const scene = buildBrocScene(practice, opportunity);
+    const residencyWorks = cohortKey === STAR_RESIDENCY_COHORT_KEY ? STAR_RESIDENCY_WORKS
+      : cohortKey === STAR_RESIDENCY_V2_COHORT_KEY ? STAR_RESIDENCY_V2_WORKS : undefined;
+    const residencyWork = residencyWorks?.find((work) => work.handle === star.definition.handle);
+    if (residencyWork) {
+      scene.question = residencyWork.question;
+      scene.formalFocus = residencyWork.formalFocus;
+      scene.directiveSource = 'director';
+      scene.preflight.recentQuestionRepeated = practice.recentEvents.some(event =>
+        event.eventType === 'scene' && event.payload.question === scene.question);
+      scene.preflight.recentFormalFocusRepeated = practice.recentEvents.some(event =>
+        event.eventType === 'scene' && event.payload.formalFocus === scene.formalFocus);
+    }
     prompt = buildBrocPrompt(star.definition, practice.canon, scene, practice.recentEvents, opportunity);
     attempt = await createAttempt(pool, cohortId, star, opportunity, prompt, size, scene);
   } catch (error) {

@@ -67,6 +67,14 @@ batch may reuse the same durable Star actor through `galx_star_cohort_members`,
 but it requires a new audited authorization and its own ceiling; it must not
 reset counters or replay an uncertain generation.
 
+The [bounded residency workflow](../runbooks/star-residency.md) reuses the same
+twelve durable actors with a fresh cohort and one authored opportunity per
+Star. A director scene supplies the residency question and formal focus while
+retaining the persistent canon. The private brief definitions do not rewrite
+the original persona directions, public identity, earlier cohorts or schema.
+Each authorized pass has a separate versioned plan and private evidence; the
+second pass does not replace the first definitions or reopen its closed run.
+
 BROC adds persistent artistic practice to those same actors and attempts. Its
 private event stream stores a versioned canon, the scene used to construct each
 existing generation prompt, and successful outputs as unreviewed candidates.

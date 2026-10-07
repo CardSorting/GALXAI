@@ -2789,3 +2789,157 @@ Incident: `INC-20260913-IMAGES`. Kind: `verification`.
 **Next step:** Continue controlled operation within the documented limits and stop this drill. Do not induce a host interruption.
 
 Evidence: [2026-10-03-nova-nondisruptive-resilience.json](releases/2026-10-03-nova-nondisruptive-resilience.json), [result.json](incidents/2026/2026-10-03-nova-nondisruptive-resilience/isolated-01/result.json), [monitor-result.json](incidents/2026/2026-10-03-nova-nondisruptive-resilience/monitor-result.json), [after.json](incidents/2026/2026-10-03-nova-nondisruptive-resilience/after.json).
+
+## EVT-20261007-RELAY-observation — 2026-10-07T18:29:23.823467+00:00
+
+Incident: `INC-20261007-RELAY`. Kind: `observation`.
+
+**Observation:** Relay and monitor listeners are live but authenticated model discovery returns 503 and image availability is false. Central ownership heartbeat stopped at 2026-10-04T12:02:26Z; both assigned connections are enabled and unexpired.
+
+**Action:** Inspected private control status and existing-epoch projection without submitting provider work. Added fresh ownership checks to the local launcher and supervisor; tested with isolated synthetic commands.
+
+**Result:** Existing epoch projection returns 403. Seven access and six supervisor tests pass, including actual-launcher stale recovery and rejection of foreign/unavailable evidence.
+
+**Next step:** Recover only the affected runtime through the existing handoff fence; reload the local supervisor and verify stable authenticated discovery.
+
+Evidence: [README.md](incidents/2026/2026-10-07-relay-connection/README.md), [test-relay-local-access.mjs](../scripts/test-relay-local-access.mjs), [test-relay-local-supervisor.mjs](../scripts/test-relay-local-supervisor.mjs).
+
+## EVT-20261007-RELAY-recovery — 2026-10-07T18:41:07.306286+00:00
+
+Incident: `INC-20261007-RELAY`. Kind: `recovery`.
+
+**Observation:** Confirmed stale central ownership was blocking the live runtime. Normal post-restart credential verification reported one separately rejected account.
+
+**Action:** Ran the tested local up path, restarted only the affected relay through the existing ownership fence and reloaded the supervisor. Rechecked fresh ownership before accepting recovery. Corrected two harness assumptions without changing authority.
+
+**Result:** Thirty read-only acceptance checks pass. Authenticated model inventory returns 200 locally and through ingress; invalid keys and browser origins remain denied. Backend text/image discovery resolves the installed runtime; the heartbeat advances and supervisor reports running. One existing account is connected and the other requires fresh manual sign-in. Image capability remains unknown.
+
+**Next step:** Complete ACT-048 for connection recovery; retain ACT-049 for manual reconnect and existing ACT-018 host limits. Finish documentation and production build verification.
+
+Evidence: [README.md](incidents/2026/2026-10-07-relay-connection/README.md), [acceptance.json](incidents/2026/2026-10-07-relay-connection/acceptance.json), [test-relay-local-supervisor.mjs](../scripts/test-relay-local-supervisor.mjs).
+
+## EVT-20261007-RELAY-verification — 2026-10-07T18:46:23.453934+00:00
+
+Incident: `INC-20261007-RELAY`. Kind: `verification`.
+
+**Observation:** Recovered relay remains connected after supervisor reload; new prerequisite-recovery regression checks are included.
+
+**Action:** Completed source/guide semantic review, generated navigation, documentation checks, production build, compiled boundary scan and final private status check.
+
+**Result:** All change-specific checks pass. Final connection is Confirmed and supervisor running; 538 compiled browser/rendered assets pass the private boundary scan. Existing overdue prevention warnings remain unchanged.
+
+**Next step:** Retain the correction and recovery evidence. The owner must complete fresh manual sign-in for ACT-049; do not clear rejection or replay uncertain work. Existing host and off-device follow-ups remain open.
+
+Evidence: [final-validation.json](incidents/2026/2026-10-07-relay-connection/final-validation.json), [acceptance.json](incidents/2026/2026-10-07-relay-connection/acceptance.json), [verification.json](incidents/2026/2026-10-07-relay-connection/verification.json).
+
+## EVT-20261007-RELAY-reconnect-observation — 2026-10-07T18:59:59.797448+00:00
+
+Incident: `INC-20261007-RELAY`. Kind: `observation`.
+
+**Observation:** Owner reports Reconnect required after reconnect. Central saved a fresh connection check at 18:49:56 UTC, then recorded rejection at 18:50:51. The selected desktop login changed at 18:50:48; its token differs from the rejected runtime checkpoint and passes a read-only inventory check.
+
+**Action:** Compared allowlisted connection metadata and private token fingerprints without retaining tokens. Checked current selected desktop login through the normal fixed credential reader.
+
+**Result:** A newer valid manually saved sign-in is not yet applied to central account authority. Runtime ownership remains fresh; rejection persistence is scoped to the older token.
+
+**Next step:** Apply the latest manual sign-in through one authorized normal registrar refresh, then verify account acknowledgment and stable connection across inventory refreshes.
+
+Evidence: [README.md](incidents/2026/2026-10-07-relay-connection/README.md).
+
+## EVT-20261007-RELAY-reconnect-recovery — 2026-10-07T19:05:27.267648+00:00
+
+Incident: `INC-20261007-RELAY`. Kind: `recovery`.
+
+**Observation:** Latest manually saved desktop sign-in differed from the earlier rejected credential and validated successfully. Runtime ownership stayed fresh.
+
+**Action:** Applied one normal scoped registrar refresh for the original account/desktop after checking file consistency. Verified private projection/checkpoint comparisons and read-only runtime inventory; updated complete reconnect guidance and current status.
+
+**Result:** Both accounts connected and acknowledged, including new revision10, for160 seconds across inventory refreshes. Thirty-one acceptance checks pass; local/ingress discovery200, invalid key/browser Origin401 and raw body/header boundaries preserved. An initial saved:false diagnostic compared account and registration IDs incorrectly; updated revision and status confirm save, with no retry. No service restart, schema/gate/image change or generation.
+
+**Next step:** Complete ACT-049 for the explicit manual reconnect. Retain earlier source/build acceptance, finish documentation checks and leave host/off-device prevention work open.
+
+Evidence: [README.md](incidents/2026/2026-10-07-relay-connection/README.md), [reconnect-acceptance.json](incidents/2026/2026-10-07-relay-connection/reconnect-acceptance.json), [reconnect-review.json](incidents/2026/2026-10-07-relay-connection/reconnect-review.json).
+
+## EVT-20261007-RELAY-reconnect-verification — 2026-10-07T19:08:37.514078+00:00
+
+Incident: `INC-20261007-RELAY`. Kind: `verification`.
+
+**Observation:** Final private status confirms two connected accounts, no sign-in-required account, matching acknowledgments and fresh ownership more than six minutes after manual reconnect.
+
+**Action:** Completed bounded source/guide review, documentation synchronization, documentation/incident/knowledge validation, 42 documentation fixtures, existing production-build asset scan and diff check.
+
+**Result:** All checks pass. Compiled scan covers538 browser/rendered assets; earlier production build remains unchanged. Existing13 overdue prevention warnings retained. ACT-049 completed only for verified manual reconnect; no public deployment or provider generation.
+
+**Next step:** Retain the completed recovery and normal rejection protections. Refresh the monitor view if it still displays its earlier snapshot; host/off-device and unrelated prevention work remain open.
+
+Evidence: [reconnect-acceptance.json](incidents/2026/2026-10-07-relay-connection/reconnect-acceptance.json), [reconnect-review.json](incidents/2026/2026-10-07-relay-connection/reconnect-review.json), [final-validation.json](incidents/2026/2026-10-07-relay-connection/final-validation.json).
+
+## EVT-20261007-STAR-DELIVERY-observation — 2026-10-07T19:43:22.396299+00:00
+
+Incident: `INC-20261007-STAR-DELIVERY`. Kind: `observation`.
+
+**Observation:** Twelve relay-generated images completed and passed pixel review. Selected works appear in public feed/profile; first image returns generic503. Production environment inventory lacks private bucket-name setting; diagnostic frames point at private-storage guard.
+
+**Action:** Preserved image/provenance/selection records. Verified exact accepted web package3726files unchanged; prepared configuration-only candidate with alias assignment disabled.
+
+**Result:** Private stored previews are intact; delivery guard fails closed. No inference replay, public bucket exposure, current source deployment or Nova mutation.
+
+**Next step:** Apply one production setting, verify protected candidate image delivery, then move exact Media aliases and check public bytes/pages.
+
+Evidence: [README.md](incidents/2026/2026-10-07-star-image-delivery/README.md), [2026-10-07-star-residency-delivery-preflight.json](releases/2026-10-07-star-residency-delivery-preflight.json).
+
+## EVT-20261007-STAR-DELIVERY-candidate — 2026-10-07T19:44:45.994470+00:00
+
+Incident: `INC-20261007-STAR-DELIVERY`. Kind: `containment`.
+
+**Observation:** The production bucket-name setting was absent; added only that server-side name. The accepted artifact manifest3726entries matches the preserved package.
+
+**Action:** Copied the exact prebuilt package with verbatim relative symlinks and verified every copied entry before uploading a production candidate with automatic alias assignment disabled. Initial copy rebased symlinks, was rejected before upload and replaced by a verified copy.
+
+**Result:** Serving aliases remain on the original deployment pending candidate verification. No application payload changes or inference retries.
+
+**Next step:** Verify selected image and thumbnail HTTP artifacts on protected candidate, then assign exact existing Media aliases.
+
+Evidence: [2026-10-07-star-residency-delivery-preflight.json](releases/2026-10-07-star-residency-delivery-preflight.json), [README.md](incidents/2026/2026-10-07-star-image-delivery/README.md).
+
+## EVT-20261007-STAR-DELIVERY-recovery — 2026-10-07T19:54:33.585753+00:00
+
+Incident: `INC-20261007-STAR-DELIVERY`. Kind: `recovery`.
+
+**Observation:** Protected candidate and live Media endpoints serve all twelve selected full images and thumbnails with stripped embedded metadata; every Star profile now has work.
+
+**Action:** Added only the private bucket-name production setting, deployed the byte-identical accepted web package, verified candidate first, then moved three exact existing Media aliases. Added hosted-storage preflight to complete private guide.
+
+**Result:** Twelve new Works;23total across12profiles. All actors inactive, no active Star attempts and six historical cohorts unchanged. Public scan15pages24checks409assets passes. Initial scan matched a locally misnamed setting equal to approved public anonymous key; actual public-key alias classified explicitly, no secret excluded by name alone. ACT-050 completed; original web release retained.
+
+**Next step:** Finish source/documentation attestation and validation. Retain prior host, historical-privacy and commercial-release limits.
+
+Evidence: [2026-10-07-star-residency-deployment.json](releases/2026-10-07-star-residency-deployment.json), [2026-10-07-star-residency-live-check.json](releases/2026-10-07-star-residency-live-check.json), [2026-10-07-star-residency-public-scan.json](releases/2026-10-07-star-residency-public-scan.json), [README.md](incidents/2026/2026-10-07-star-image-delivery/README.md).
+
+## EVT-20261007-STAR-DELIVERY-verification — 2026-10-07T19:59:16.914111+00:00
+
+Incident: `INC-20261007-STAR-DELIVERY`. Kind: `verification`.
+
+**Observation:** Residency and delivery acceptance complete:12new selected Works,23total across12populated Star profiles; live images and thumbnails decode with metadata stripped.
+
+**Action:** Completed bounded source/full-guide review, synchronized documentation, retained existing wider evidence, ran documentation/incident/knowledge gates,43fixtures,538compiled-asset scan and diff check. Removed local borrowed operator-bypass copy; project access unchanged.
+
+**Result:** All checks pass;13pre-existing overdue prevention warnings remain. ACT-050 completes only private-storage delivery recovery and documented hosted preflight. Existing relay/host/commercial/historical privacy gates retain separate authority.
+
+**Next step:** Browse published work. Any later production uses a fresh explicitly authorized cohort; retain original history and never replay this completed residency.
+
+Evidence: [2026-10-07-star-residency-final-validation.json](releases/2026-10-07-star-residency-final-validation.json), [2026-10-07-star-residency-verification.json](releases/2026-10-07-star-residency-verification.json), [2026-10-07-star-residency-public-scan.json](releases/2026-10-07-star-residency-public-scan.json).
+
+## EVT-20261007-STAR-DELIVERY-second-residency — 2026-10-07T20:30:36.405827+00:00
+
+Incident: `INC-20261007-STAR-DELIVERY`. Kind: `verification`.
+
+**Observation:** Owner requested a second finite art publication pass after the completed first residency. Twelve new relay generations completed and received individual pixel review and exact-asset BROC selection.
+
+**Action:** Used a fresh twelve-opportunity cohort and distinct authored briefs; verified the existing private bucket and live delivery before inference. Confirmed twelve private candidates absent from feed and twenty-four artifact denials before selection, then tested all new profiles, full images and thumbnails.
+
+**Result:** Twelve more selected Works published, 35 total across twelve Star archives. All seven prior cohorts unchanged; twelve actors inactive and no active Star attempts. Fresh 15-page, 24-HTTP-check and 409-browser-asset scan passed. Existing deployment and incident recovery status retained.
+
+**Next step:** Complete documentation and compiled-boundary checks, retain separate evidence, and never replay either completed residency. Broader prevention actions retain their existing status.
+
+Evidence: [2026-10-07-star-residency-v2-generation.json](releases/2026-10-07-star-residency-v2-generation.json), [2026-10-07-star-residency-v2-review.json](releases/2026-10-07-star-residency-v2-review.json), [2026-10-07-star-residency-v2-selection.json](releases/2026-10-07-star-residency-v2-selection.json), [2026-10-07-star-residency-v2-live-check.json](releases/2026-10-07-star-residency-v2-live-check.json), [2026-10-07-star-residency-v2-public-scan.json](releases/2026-10-07-star-residency-v2-public-scan.json).

@@ -4,6 +4,7 @@ import { IntentLink as Link } from '@/components/common/IntentLink';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePathname } from 'next/navigation';
 import { isPublicReadingPath } from '@/lib/public-content/routes';
+import { isPublicProgrammePath } from '@/lib/exhibitions/paths';
 import { IMAGE_PATHS } from '@/lib/images/navigation';
 import { Compass, Images, Search, Sparkles } from 'lucide-react';
 
@@ -14,7 +15,7 @@ export function MobileBottomNav() {
   // Hide on root marketing page, public reading docs, auth, and admin surfaces
   if (
     pathname === '/' ||
-    isPublicReadingPath(pathname) ||
+    isPublicReadingPath(pathname) || isPublicProgrammePath(pathname) ||
     pathname.startsWith('/auth/') ||
     pathname === '/login' ||
     pathname === '/signup' ||

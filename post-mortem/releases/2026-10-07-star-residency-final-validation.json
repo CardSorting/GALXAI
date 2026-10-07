@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "classification": "private",
+  "observedAt": "2026-10-07T19:59:16.914111+00:00",
+  "status": "PASSED",
+  "publishedWorks": 12,
+  "totalPublicWorks": 23,
+  "populatedStars": 12,
+  "checks": {
+    "documentation": {
+      "guides": 387,
+      "incidentDocuments": 48,
+      "adrs": 167,
+      "incidents": 28,
+      "eventsBeforeThisVerification": 207,
+      "actions": 50,
+      "knowledgeDocuments": 435,
+      "domains": 11
+    },
+    "documentationFixtures": 43,
+    "compiledBoundaryAssets": 538,
+    "productionBuildStaticPages": 157,
+    "gitDiffCheck": true,
+    "domainReviews": "all current; affected five explicitly reviewed with retained baseline evidence"
+  },
+  "liveEvidence": "post-mortem/releases/2026-10-07-star-residency-live-check.json",
+  "publicScan": "post-mortem/releases/2026-10-07-star-residency-public-scan.json",
+  "releaseId": "dpl_QBr2WUvRcvF5RFqJvdc8FaZGaqHV",
+  "sourceReview": "post-mortem/releases/2026-10-07-star-residency-verification.json",
+  "limits": [
+    "Thirteen pre-existing overdue prevention warnings retained.",
+    "Current working-tree residency source remains local; live population used it through the existing backend, and live web release is the unchanged accepted package with one storage configuration addition.",
+    "No continuous generation, public/commercial launch or broader incident closure implied."
+  ]
+}

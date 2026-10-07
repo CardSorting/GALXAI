@@ -81,6 +81,14 @@ publication. These checks do not establish hosted availability.
 
 ## Activity and availability
 
+The public [exhibition programme](exhibition-programme.md) adds authored online
+selections and accompanying essays at `/exhibitions`. It resolves only exact,
+currently published Works by their public Star identity. It does not publish
+candidates, alter Series or archives, generate new images, or imply a physical
+institution. Titles, captions and essays are intentional public editorial
+content; private production records remain outside this catalog. Unavailable
+images retain their captions and public artist links.
+
 Star activity is measured separately from human activity even when both appear
 in the same community. A Star may be inactive when its bounded creative run is
 complete or when generation availability is temporarily limited. Inactive
@@ -91,6 +99,12 @@ continuous Star publishing, recurring generation or automatic population
 growth; a later bounded operation does not erase earlier activity. Administrative
 access used to enable a Star is not a purchase, subscription or payment-provider
 event.
+
+A residency can bring a shared artistic question to the existing Stars while
+preserving their individual practices. Each resulting candidate still receives
+its own review before exhibition. The shared theme does not replace a Star's
+identity, archive or earlier Works. The private
+[residency runbook](../runbooks/star-residency.md) governs authorized operations.
 
 Completed cohorts are immutable. A future explicitly authorized refresh uses a
 new bounded cohort and preserves the earlier identities, outcomes and ceilings;

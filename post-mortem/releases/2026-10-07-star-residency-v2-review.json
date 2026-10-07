@@ -1,0 +1,134 @@
+{
+  "version": 1,
+  "classification": "private",
+  "observedAt": "2026-10-07T20:23:37.479Z",
+  "title": "Instruments for the Impossible",
+  "reviewer": "Codex artist in residence",
+  "method": "Individually inspected every full re-encoded candidate with view_image. Actual stored production prompts retain complete new brief, question and formal focus.",
+  "works": [
+    {
+      "handle": "veyrasol",
+      "publicHandle": "vanta",
+      "title": "A Stair That Measures Wind",
+      "attemptId": "14d516e4-804e-442a-a68a-9d22c96cb1a5",
+      "assetId": "img_3caaa1dcd38f4fdaaf0cd124220c2c4a",
+      "previewSha256": "5fa97cc3fb1cfe71c988bb671bded7eefb0887b83fd6d72fadad424461d30528",
+      "decision": "select",
+      "rationale": "The broad stair and continuous curving path lead three walkers through a dry plateau. Unequally tilted silver fins make wind visible against a clear blue sky; warm concrete, hard shadows and a coherent route distinguish this public architectural instrument from the earlier tidal station."
+    },
+    {
+      "handle": "morrowkest",
+      "publicHandle": "morrowkest",
+      "title": "The Weight of a Quiet Answer",
+      "attemptId": "585ae79c-b1d6-4d0e-9001-1279731117bb",
+      "assetId": "img_20057ba1f41e40e1b1a55135c68840de",
+      "previewSha256": "6e342055c3b6ef9a1148d63696f37de3bf6215ab1cd0e4d88c03b0fb81faefab",
+      "decision": "select",
+      "rationale": "The close profile and olive field concentrate attention on a small brass sphere floating above a coherent open palm. Skin, cotton and metal have specific texture; a calm gaze and restrained light make the impossible event intimate rather than theatrical, clearly distinct from the first mirrored portrait."
+    },
+    {
+      "handle": "soravale",
+      "publicHandle": "soravale",
+      "title": "The Pitch of Slow Growth",
+      "attemptId": "ebc283ee-8e89-4278-a4d1-007b1ee9bcb3",
+      "assetId": "img_61a764a2b89741aa8018b39c37e511a1",
+      "previewSha256": "301e4a5b06f88a492a77dffd4ce27322cc1962018898b4c8702f41fde93d3350",
+      "decision": "select",
+      "rationale": "One lichen-covered tine contrasts with a bare weathered tine across the tuning fork gap. Amber spore cups, wet slate and mineral grains create a convincing macro ecology; the manufactured instrument remains readable within slow biological growth, without repeating the burned-root study."
+    },
+    {
+      "handle": "ilyx",
+      "publicHandle": "ilyx",
+      "title": "An Equation for Staying Afloat",
+      "attemptId": "aaa10b72-9ecf-4ba1-bb1b-f9a47da75cbf",
+      "assetId": "img_9ded0e26bd21473aa9820e3153ac537c",
+      "previewSha256": "eec32fa19b1d238f5aec2fcbbbfad4a55b4cc7cd317f06b17bdf1d7be15d28e3",
+      "decision": "select",
+      "rationale": "The unequal black and vermilion semicircles meet at one narrow contact on a fine horizontal rule. Broad grey-paper margins and tactile print grain make optical equilibrium the subject; this compact two-form composition differs decisively from the first modular blue grid."
+    },
+    {
+      "handle": "nemiorra",
+      "publicHandle": "nemiorra",
+      "title": "A Bell That Rings in Silence",
+      "attemptId": "8f104dc9-b21d-4de4-86f6-210ab395168b",
+      "assetId": "img_c811bd82935a4df3ad0851990fc12c71",
+      "previewSha256": "274cedaabbd49cfe9ce9c886383b92453366eb9fd5eeab41485f3bffc23ea8e9",
+      "decision": "select",
+      "rationale": "The tarnished bell is framed from below against deep blue water. Its dark mouth holds one bright bubble while a sparse rising chain and a diagonal light shaft establish depth. Sediment and patina give the silent instrument weight, in contrast to the first absent-animal wake."
+    },
+    {
+      "handle": "caelrune",
+      "publicHandle": "caelrune",
+      "title": "An Atlas of Unbuilt Bridges",
+      "attemptId": "556427bd-0c1a-45a0-a42b-fc9c4b81755c",
+      "assetId": "img_96ac4e1cab3843939f7643475e04e86b",
+      "previewSha256": "ed3007ced0573cd73e6fc515efe07d10a89959f4c5cd3bcf3231df313a6dc5de",
+      "decision": "select",
+      "rationale": "Four chalk-toned islands sit in a broad blue field, with graphite contours and interrupted vermilion proposals reaching into open channels. Fold wear and symbol-only marginal drawings support the planning-atlas fiction; uncertainty lies in unfinished crossings, a different structure from the first rain-washed valley."
+    },
+    {
+      "handle": "ossathread",
+      "publicHandle": "ossathread",
+      "title": "A Balance for Unspoken Words",
+      "attemptId": "3b84ec2c-81e7-4bb2-afa9-553184930ad4",
+      "assetId": "img_69e170bdd3304e309ba695113e6ff66f",
+      "previewSha256": "13a356f884beb95cfd67d05dd531a157e92c3e8c59c0717ceb13f4ed6100c09d",
+      "decision": "select",
+      "rationale": "Mustard and navy felt pockets hang at unequal heights with pale stones visible inside. Stitched seams, separate suspension threads and a gently loaded cross-cord reveal weight and tension; cool space and soft shadows give the sculpture material credibility without repeating the first knot and basin."
+    },
+    {
+      "handle": "juniperarc",
+      "publicHandle": "juniperarc",
+      "title": "A Spoon for Catching Light",
+      "attemptId": "86000e09-4b2e-4875-8d7a-5bfda71bc343",
+      "assetId": "img_a3d2698fb55c4c9ca721e07dc8406f2b",
+      "previewSha256": "ee95902d3543b90c2e7ad7231acdca99893a2d4198bb30a5829427bedc41af26",
+      "decision": "select",
+      "rationale": "A diagonal silver spoon receives the bright caustic from a half-full glass. Scratched green paint, white linen and the warm directional shadow make ordinary wear specific; the light itself becomes the subject rather than the absent place setting of the earlier still life."
+    },
+    {
+      "handle": "tavianash",
+      "publicHandle": "tavianash",
+      "title": "The Machine That Saves a Shadow",
+      "attemptId": "d08daee0-55df-4a89-9e25-bc193366a884",
+      "assetId": "img_b7a1b092191b4ff99f9a62fb21ce68f4",
+      "previewSha256": "a6952f966afda52cd526cf0eb943c80410766930e307ed3c6668343830a4dab5",
+      "decision": "select",
+      "rationale": "Five severe steel vanes share a visible linkage and human-height crank. Graphite wear, hinges and one yellow light strip make daylight regulation legible; the small operator anchors scale without competing with the mechanism. This shutter array expands the industrial practice beyond the earlier pump cutaway."
+    },
+    {
+      "handle": "lumakade",
+      "publicHandle": "lumakade",
+      "title": "An Elevator for a Dandelion",
+      "attemptId": "0a2650c8-30bc-402f-a320-b9f84fd1976e",
+      "assetId": "img_e9107876d91d4e7786bcd9a80f7056e4",
+      "previewSha256": "243f5ab2409e78e855cb1131a7d98d87f59aced78ffa59f449a80937ecc24bda",
+      "decision": "select",
+      "rationale": "A dandelion seed rides upright in a walnut miniature lift under a clear bell jar. Brass pulley, taut lines and model stairs explain the tiny mechanism; lavender light and surrounding workshop toys add a playful cabinet-of-curiosities setting. Despite a richer setting than the brief, the seed remains the clear focal passenger and the work differs from the first orchard."
+    },
+    {
+      "handle": "serenvoss",
+      "publicHandle": "serenvoss",
+      "title": "The Hills Learn to Breathe",
+      "attemptId": "6f96359f-b98c-417c-9316-010b080509eb",
+      "assetId": "img_25b97586a96a4ccbb304d12e113b917c",
+      "previewSha256": "d087aec049a2d23c81e7e94d984806ec7c83fa54e1593a48482e0e7848dc525d",
+      "decision": "select",
+      "rationale": "Snow-dusted hill shoulders frame a luminous mist interval above still ochre water. Broad grey tones and restrained reflections give the clearing a breathing rhythm; the lake and enclosed winter valley differ from the first open salt field and dawn path."
+    },
+    {
+      "handle": "nyxenbloom",
+      "publicHandle": "nyxenbloom",
+      "title": "A Compass for the Unfamiliar",
+      "attemptId": "522bd091-ff24-4f42-99a7-8b8edbc845c0",
+      "assetId": "img_3a603e25ec62490c8cbc158e07dff4c5",
+      "previewSha256": "793a001434e1129dcdac27483f502446c7598b40b1618a506ff897f87aa837df",
+      "decision": "select",
+      "rationale": "Magnified cream wing scales meet a rough stone spiral around a sharply folded cobalt triangle. Torn edges and exposed adhesive retain the collage construction; the angular directional cue interrupts two incompatible growth patterns, a distinct material system from the first leaf-and-delta seam."
+    }
+  ],
+  "limits": [
+    "Originality judged within this collection and against the first residency, not certified against all existing art.",
+    "Titles are private residency catalog labels; public gallery contract remains image and Star attribution only."
+  ]
+}

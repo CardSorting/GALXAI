@@ -208,6 +208,29 @@ export class PublicParticipantRepository {
     }
   }
 
+  /** Read a bounded editorial selection without depending on the newest archive page. */
+  static async getSelectedCreations(handle: string, assetIds: readonly string[]): Promise<PublicFeedItem[]> {
+    const normalized = normalizePublicParticipantHandle(handle);
+    if (!normalized || assetIds.length === 0 || assetIds.length > 24 ||
+        assetIds.some(id => !/^img_[a-f0-9]{32}$/.test(id))) return [];
+    const ids = [...new Set(assetIds)];
+    try {
+      const result = await executePostgresQuery(`
+        SELECT id, user_id, aspect_ratio, dimensions, public_url,
+               created_at, lqip, likes_count, views_count,
+               author_display_name, author_handle, author_avatar_url, participant_kind
+        FROM public.community_star_profile_creations
+        WHERE author_handle = ANY($1::text[])
+          AND participant_kind = 'star'
+          AND id = ANY($2::text[])
+        LIMIT $3
+      `, [[normalized, historicalStarHandle(normalized)], ids, ids.length]);
+      return result?.rows.map(row => mapPublicParticipantCreationRow(row as Record<string, unknown>)) ?? [];
+    } catch {
+      return [];
+    }
+  }
+
   static async getCreations(handle: string, limit = 36): Promise<PublicFeedItem[]> {
     const page = await PublicParticipantRepository.getCreationsPage(handle, { limit });
     return page.items;

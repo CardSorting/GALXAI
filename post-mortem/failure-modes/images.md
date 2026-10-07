@@ -12,6 +12,16 @@ This is durable application receipt handling, not a durable distributed executio
 
 R2 settings must exist in the deployed environment, not only `.env.local`. Receipt completion verifies all returned asset IDs belong to the owner and exist as completed library records. JSON URL retrieval returns opaque download links without loading every image. Download delivery sanitizes the artifact again.
 
+The [October 7 Star delivery incident](../incidents/2026/2026-10-07-star-image-delivery/README.md)
+demonstrated a separate configuration guard: local generation, previews and
+public feed/profile rows succeeded while downloads returned generic 503 because
+the serving environment lacked `R2_PRIVATE_IMAGES_BUCKET_NAME`. Verify the
+hosted private bucket setting and server credentials before a residency. A
+configuration update needs a new deployment; verify the exact accepted package
+and candidate delivery before moving existing web aliases. Retain the private
+bucket, prior release and original artifacts. Do not expose the bucket or
+regenerate images to repair delivery.
+
 Favorite updates flush pending owned assets before the mutation and require durable completion before acknowledgement. BroccoliDB is a bounded optimization, not authority for a successful save. Do not “fix” a database outage by returning a fabricated successful favorite or exposing an object-storage URL.
 
 ## FM-IMG-003 — uncertain generation gets repeated

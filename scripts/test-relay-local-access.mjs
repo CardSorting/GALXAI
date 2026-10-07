@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { monitorOrigin, monitorTicket, monitorAvailable, runtimeAvailable, handoffDeadline, monitorHandoff } from './lib/relay-local-access.mjs';
+import { monitorOrigin, monitorTicket, monitorAvailable, runtimeAvailable, runtimeOwnershipFresh, handoffDeadline, monitorHandoff } from './lib/relay-local-access.mjs';
 
 test('launcher accepts only fixed destinations and never sends a mismatched credential', async () => {
   let calls = 0;
@@ -57,4 +57,21 @@ test('runtime handoff uses private control evidence and rejects missing or forei
   const last=new Date().toISOString();
   assert.equal(await monitorHandoff('premium',config,async()=>({...config,lastSeenAt:last})),Date.parse(last)+61000);
   assert((await monitorHandoff('premium',config,async()=>({...config,lastSeenAt:null})))<=Date.now());
+});
+
+test('a live listener with expired ownership is not a connected runtime', async () => {
+  const now = Date.parse('2026-10-07T18:00:00Z');
+  const config = {pool:'premium',installationId:'own'};
+  assert.equal(await runtimeAvailable('premium', async () => Response.json({ok:true})), true);
+  for (const age of [0, 10000, 44999, 45000, 61000, 3 * 86400000]) {
+    assert.equal(await runtimeOwnershipFresh('premium', config, async () => ({...config,lastSeenAt:new Date(now-age).toISOString()}), now), age < 45000);
+  }
+  assert.equal(await runtimeOwnershipFresh('premium', config, async () => ({...config,lastSeenAt:null}), now), false);
+  assert.equal(await runtimeOwnershipFresh('premium', config, async () => ({...config,lastSeenAt:new Date(now+1000).toISOString()}), now), false);
+  for (const status of [
+    {...config,lastSeenAt:'invalid'}, {...config,lastSeenAt:123}, {...config},
+    {...config,lastSeenAt:new Date(now+6000).toISOString()},
+    {...config,installationId:'foreign',lastSeenAt:new Date(now).toISOString()},
+  ]) await assert.rejects(runtimeOwnershipFresh('premium', config, async () => status, now));
+  await assert.rejects(runtimeOwnershipFresh('premium', config, async () => { throw Error('control unavailable'); }, now));
 });

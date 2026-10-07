@@ -39,7 +39,7 @@ export function handoffDeadline(lastSeenAt, now = Date.now()) {
   return Math.max(now, last + 61000);
 }
 
-export async function monitorHandoff(pool, config, readControlStatus) {
+async function runtimeControl(pool, config, readControlStatus) {
   monitorOrigin(pool);
   if (config.pool !== pool || typeof config.installationId !== 'string' || !config.installationId || typeof readControlStatus !== 'function') throw Error('Could not check the runtime handoff.');
   // Host administrator reads central authority directly. Browser snapshots
@@ -47,5 +47,18 @@ export async function monitorHandoff(pool, config, readControlStatus) {
   const status = await readControlStatus();
   if (status?.pool !== pool || status.installationId !== config.installationId) throw Error('The runtime installation changed.');
   if (!Object.hasOwn(status,'lastSeenAt') || status.lastSeenAt !== null && typeof status.lastSeenAt !== 'string') throw Error('The last runtime update could not be verified.');
+  return status;
+}
+
+/** Liveness cannot establish ownership after a missed control heartbeat. */
+export async function runtimeOwnershipFresh(pool, config, readControlStatus, now = Date.now()) {
+  const status = await runtimeControl(pool, config, readControlStatus);
+  handoffDeadline(status.lastSeenAt, now); // Reject malformed or implausibly future evidence.
+  const last = Date.parse(status.lastSeenAt);
+  return Number.isFinite(last) && last <= now && now - last < 45000;
+}
+
+export async function monitorHandoff(pool, config, readControlStatus) {
+  const status = await runtimeControl(pool, config, readControlStatus);
   return handoffDeadline(status.lastSeenAt);
 }

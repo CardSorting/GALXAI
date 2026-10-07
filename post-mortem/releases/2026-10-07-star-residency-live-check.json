@@ -1,0 +1,447 @@
+{
+  "version": 1,
+  "classification": "private",
+  "observedAt": "2026-10-07T19:48:55.835Z",
+  "target": "https://galx.ai",
+  "selectedWorks": 12,
+  "publicFeedCount": 23,
+  "responseAllowlists": true,
+  "artifactResults": [
+    {
+      "handle": "vanta",
+      "assetId": "img_45c40fb5489948f8a27bb7b22422a454",
+      "profileCount": 4,
+      "artifacts": [
+        {
+          "kind": "image",
+          "status": 200,
+          "contentType": "image/png",
+          "width": 1536,
+          "height": 1024,
+          "bytes": 3656102,
+          "sha256": "0947401eeba7656c86877e87c683184a0d468352cda6f84661981894cb5d1f84",
+          "embeddedMetadataAbsent": true
+        },
+        {
+          "kind": "thumbnail",
+          "status": 200,
+          "contentType": "image/webp",
+          "width": 512,
+          "height": 341,
+          "bytes": 33132,
+          "sha256": "01720773cb117fdc57f6ec72370206d69f21defc88b04c6b8fb8af49ff714c55",
+          "embeddedMetadataAbsent": true
+        }
+      ]
+    },
+    {
+      "handle": "morrowkest",
+      "assetId": "img_ff47ccebce0344d3a1d96d20a5edfa56",
+      "profileCount": 4,
+      "artifacts": [
+        {
+          "kind": "image",
+          "status": 200,
+          "contentType": "image/png",
+          "width": 1024,
+          "height": 1536,
+          "bytes": 2972931,
+          "sha256": "a2409d37a70882910d7843b8558f1f60b66512122e514042ce4bbe027322f8db",
+          "embeddedMetadataAbsent": true
+        },
+        {
+          "kind": "thumbnail",
+          "status": 200,
+          "contentType": "image/webp",
+          "width": 341,
+          "height": 512,
+          "bytes": 13708,
+          "sha256": "9c2ab8caad6f5d8a9e900220a56df8b9560c6a4e1754f3f2a0fd29e867a4cdbb",
+          "embeddedMetadataAbsent": true
+        }
+      ]
+    },
+    {
+      "handle": "soravale",
+      "assetId": "img_3e467409ef3c4043be7739e96b490e06",
+      "profileCount": 5,
+      "artifacts": [
+        {
+          "kind": "image",
+          "status": 200,
+          "contentType": "image/png",
+          "width": 1536,
+          "height": 1024,
+          "bytes": 3719664,
+          "sha256": "13801d4c63deb5c93c48c4ddcf950d6e0296ea1483808efa93a25681cab2d060",
+          "embeddedMetadataAbsent": true
+        },
+        {
+          "kind": "thumbnail",
+          "status": 200,
+          "contentType": "image/webp",
+          "width": 512,
+          "height": 341,
+          "bytes": 41760,
+          "sha256": "c588b0890ecd0b3f96f88da8e4bcdd421c850d7a1668b12d26290192d9ba34c8",
+          "embeddedMetadataAbsent": true
+        }
+      ]
+    },
+    {
+      "handle": "ilyx",
+      "assetId": "img_3036c2d932e24d389b73c2a1d0d689e4",
+      "profileCount": 2,
+      "artifacts": [
+        {
+          "kind": "image",
+          "status": 200,
+          "contentType": "image/png",
+          "width": 1024,
+          "height": 1536,
+          "bytes": 2764875,
+          "sha256": "7d4720a54b958f612dd6ee84e0b55d5ab64f97a33e173731b3107b67193a40be",
+          "embeddedMetadataAbsent": true
+        },
+        {
+          "kind": "thumbnail",
+          "status": 200,
+          "contentType": "image/webp",
+          "width": 341,
+          "height": 512,
+          "bytes": 4934,
+          "sha256": "34fce3e1bb89947d1efcbf06a9ce511a805335f9a636ee1071ac57e2ca40b6df",
+          "embeddedMetadataAbsent": true
+        }
+      ]
+    },
+    {
+      "handle": "nemiorra",
+      "assetId": "img_1dcab01dd2024d27a63825fe10d7d062",
+      "profileCount": 1,
+      "artifacts": [
+        {
+          "kind": "image",
+          "status": 200,
+          "contentType": "image/png",
+          "width": 1024,
+          "height": 1536,
+          "bytes": 2589216,
+          "sha256": "b6b148e79253614f658cea0f5a4b5c5c5146b9e05985f09753604ef9875d3e9e",
+          "embeddedMetadataAbsent": true
+        },
+        {
+          "kind": "thumbnail",
+          "status": 200,
+          "contentType": "image/webp",
+          "width": 341,
+          "height": 512,
+          "bytes": 14070,
+          "sha256": "16042197e076197c207ffe57541a29dcc6b153394d2e128b2ba35abee23ddf01",
+          "embeddedMetadataAbsent": true
+        }
+      ]
+    },
+    {
+      "handle": "caelrune",
+      "assetId": "img_c2f661d16d6a42c28d9349149800b5e3",
+      "profileCount": 1,
+      "artifacts": [
+        {
+          "kind": "image",
+          "status": 200,
+          "contentType": "image/png",
+          "width": 1536,
+          "height": 1024,
+          "bytes": 4161186,
+          "sha256": "9427250904d2a8dccd59e1de35d99d63ede7e698e17f3891f61188ecadbbf873",
+          "embeddedMetadataAbsent": true
+        },
+        {
+          "kind": "thumbnail",
+          "status": 200,
+          "contentType": "image/webp",
+          "width": 512,
+          "height": 341,
+          "bytes": 47320,
+          "sha256": "6fb1f2f9f8af7ddf7974d580ee61d1e1a57d45415ff0b57032d38a1b0281d6c4",
+          "embeddedMetadataAbsent": true
+        }
+      ]
+    },
+    {
+      "handle": "ossathread",
+      "assetId": "img_d0bc1c5688e34d56823292600f82c7d7",
+      "profileCount": 1,
+      "artifacts": [
+        {
+          "kind": "image",
+          "status": 200,
+          "contentType": "image/png",
+          "width": 1254,
+          "height": 1254,
+          "bytes": 3655390,
+          "sha256": "0ff1a2e9f1ffc5f14cb6580df55dd8f3cb9914100254f48f3d8d4e65c01f3f4e",
+          "embeddedMetadataAbsent": true
+        },
+        {
+          "kind": "thumbnail",
+          "status": 200,
+          "contentType": "image/webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 38128,
+          "sha256": "e779a8367bccb69a8e87695c6462599227aa6c5b76d0614dcda73c5c24029f29",
+          "embeddedMetadataAbsent": true
+        }
+      ]
+    },
+    {
+      "handle": "juniperarc",
+      "assetId": "img_a10e47d71393430689f2ec79519794b5",
+      "profileCount": 1,
+      "artifacts": [
+        {
+          "kind": "image",
+          "status": 200,
+          "contentType": "image/png",
+          "width": 1536,
+          "height": 1024,
+          "bytes": 3410197,
+          "sha256": "84d0a9704fe8e45651673f4efbdff07596d5fce5caf0d214218db8789af2f191",
+          "embeddedMetadataAbsent": true
+        },
+        {
+          "kind": "thumbnail",
+          "status": 200,
+          "contentType": "image/webp",
+          "width": 512,
+          "height": 341,
+          "bytes": 24174,
+          "sha256": "1f79eb71064844317c7c488f44b2a422469a158f0ff2532aa456bd62ebe29163",
+          "embeddedMetadataAbsent": true
+        }
+      ]
+    },
+    {
+      "handle": "tavianash",
+      "assetId": "img_808925605aeb4808b6d34ad09676888f",
+      "profileCount": 1,
+      "artifacts": [
+        {
+          "kind": "image",
+          "status": 200,
+          "contentType": "image/png",
+          "width": 1536,
+          "height": 1024,
+          "bytes": 3611970,
+          "sha256": "28c3afb91415d985efaea85c6f31272b06223354de3d2f2342c2aa9117efefdc",
+          "embeddedMetadataAbsent": true
+        },
+        {
+          "kind": "thumbnail",
+          "status": 200,
+          "contentType": "image/webp",
+          "width": 512,
+          "height": 341,
+          "bytes": 31106,
+          "sha256": "e119e3ce9091d1ce6d6b944c54bf1a67a4b5212f4c13107e9126575c83aedb76",
+          "embeddedMetadataAbsent": true
+        }
+      ]
+    },
+    {
+      "handle": "lumakade",
+      "assetId": "img_fa3cdacda0d643cf88bde4aae2cbd717",
+      "profileCount": 1,
+      "artifacts": [
+        {
+          "kind": "image",
+          "status": 200,
+          "contentType": "image/png",
+          "width": 1374,
+          "height": 1145,
+          "bytes": 4023233,
+          "sha256": "7a579b24cce0fcd622b5b98888d1228fbade25d3858d5441d737e04dbf6f1895",
+          "embeddedMetadataAbsent": true
+        },
+        {
+          "kind": "thumbnail",
+          "status": 200,
+          "contentType": "image/webp",
+          "width": 512,
+          "height": 427,
+          "bytes": 39848,
+          "sha256": "801277274e0739f9ec570f6d3d5f2213418461706b96a4b0fc17ae5fb3a9b78c",
+          "embeddedMetadataAbsent": true
+        }
+      ]
+    },
+    {
+      "handle": "serenvoss",
+      "assetId": "img_dcdd07c193d54402b92591705b6c20b3",
+      "profileCount": 1,
+      "artifacts": [
+        {
+          "kind": "image",
+          "status": 200,
+          "contentType": "image/png",
+          "width": 1672,
+          "height": 941,
+          "bytes": 3329110,
+          "sha256": "4373a6b1f40a4f3c8f520a65ce342972cf2f5f0190df49486c878b4268eeeecd",
+          "embeddedMetadataAbsent": true
+        },
+        {
+          "kind": "thumbnail",
+          "status": 200,
+          "contentType": "image/webp",
+          "width": 512,
+          "height": 288,
+          "bytes": 23158,
+          "sha256": "3265bfbd3b8da4fc876cb6685d1344e3fb81a3fed51bf62cd6391918d22de835",
+          "embeddedMetadataAbsent": true
+        }
+      ]
+    },
+    {
+      "handle": "nyxenbloom",
+      "assetId": "img_0661ae5dea714a698b8e6b1470765b01",
+      "profileCount": 1,
+      "artifacts": [
+        {
+          "kind": "image",
+          "status": 200,
+          "contentType": "image/png",
+          "width": 1536,
+          "height": 1024,
+          "bytes": 4327636,
+          "sha256": "9dd83b544a3309f499a0731ecdf4d6b9cfe435338786f7a7b3c48fbbaca846a9",
+          "embeddedMetadataAbsent": true
+        },
+        {
+          "kind": "thumbnail",
+          "status": 200,
+          "contentType": "image/webp",
+          "width": 512,
+          "height": 341,
+          "bytes": 54332,
+          "sha256": "3a5604db8c6249ee2d98941105215798419f00484d53e3b503aa37a0c259a0d8",
+          "embeddedMetadataAbsent": true
+        }
+      ]
+    }
+  ],
+  "historicalCohortsUnchanged": true,
+  "cohorts": [
+    {
+      "cohort_key": "stars-initial-2026-09",
+      "state": "completed",
+      "max_content_attempts": 36,
+      "content_attempts": 36
+    },
+    {
+      "cohort_key": "stars-refresh-2026-09",
+      "state": "completed",
+      "max_content_attempts": 36,
+      "content_attempts": 36
+    },
+    {
+      "cohort_key": "stars-qualification-retry-2026-09",
+      "state": "disabled",
+      "max_content_attempts": 36,
+      "content_attempts": 3
+    },
+    {
+      "cohort_key": "stars-refresh-2026-09-r2",
+      "state": "disabled",
+      "max_content_attempts": 36,
+      "content_attempts": 12
+    },
+    {
+      "cohort_key": "stars-production-qualification-2026-09",
+      "state": "disabled",
+      "max_content_attempts": 8,
+      "content_attempts": 7
+    },
+    {
+      "cohort_key": "stars-production-qualification-2026-09-r2",
+      "state": "completed",
+      "max_content_attempts": 8,
+      "content_attempts": 8
+    },
+    {
+      "cohort_key": "stars-residency-2026-10-07",
+      "state": "completed",
+      "max_content_attempts": 12,
+      "content_attempts": 12
+    }
+  ],
+  "actors": [
+    {
+      "handle": "caelrune",
+      "is_enabled": false,
+      "public_works": 1
+    },
+    {
+      "handle": "ilyx",
+      "is_enabled": false,
+      "public_works": 2
+    },
+    {
+      "handle": "juniperarc",
+      "is_enabled": false,
+      "public_works": 1
+    },
+    {
+      "handle": "lumakade",
+      "is_enabled": false,
+      "public_works": 1
+    },
+    {
+      "handle": "morrowkest",
+      "is_enabled": false,
+      "public_works": 4
+    },
+    {
+      "handle": "nemiorra",
+      "is_enabled": false,
+      "public_works": 1
+    },
+    {
+      "handle": "nyxenbloom",
+      "is_enabled": false,
+      "public_works": 1
+    },
+    {
+      "handle": "ossathread",
+      "is_enabled": false,
+      "public_works": 1
+    },
+    {
+      "handle": "serenvoss",
+      "is_enabled": false,
+      "public_works": 1
+    },
+    {
+      "handle": "soravale",
+      "is_enabled": false,
+      "public_works": 5
+    },
+    {
+      "handle": "tavianash",
+      "is_enabled": false,
+      "public_works": 1
+    },
+    {
+      "handle": "veyrasol",
+      "is_enabled": false,
+      "public_works": 4
+    }
+  ],
+  "activeAttempts": 0,
+  "limits": [
+    "HTTP checks cover this residency feed/profile/image/thumbnail set; rendered pages and browser assets require separate checks.",
+    "No public launch, relay service deployment, continuous generation or prevention-action closure is implied."
+  ]
+}

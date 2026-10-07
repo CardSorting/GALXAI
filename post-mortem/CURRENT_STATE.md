@@ -4,6 +4,134 @@
 
 The newest observation appears first. Earlier dated sections retain evidence from their stated observation; they do not override the latest determination or authorize a new action.
 
+### Exhibition and editorial programme — October 7, 2026, local only
+
+The owner requested a formal institutional presentation of the published STAR
+works. The local programme adds `/exhibitions`, two twelve-work exhibitions and
+two accompanying essays, with authored introductions, individual captions,
+public artist links and uncropped compositions. These titles and texts are
+intentional public editorial content in the new source catalog. The earlier
+residency records below retain their original private-catalog scope; production
+briefs, prompts and operational records remain private.
+
+The [programme reference](../docs/reference/exhibition-programme.md) owns the
+exact authored destinations, published-work lookup and image DTO contract.
+The lookup reads exact selected IDs from the existing published STAR projection;
+it does not publish candidates or change schema, grants, storage, generation,
+account/session authority or administrator permissions. The public reading
+exception applies to profile unavailability, never pending or failed sign-out.
+
+The [local review record](releases/2026-10-07-exhibition-programme-local-review.json)
+retains the focused/privacy tests, production build, HTTP/artifact checks,
+compiled-boundary scan and source/guide review. Local browser access was denied,
+so desktop, mobile and actual-user-viewport visual acceptance remain pending;
+the independent finish disposition is **recapture**, not visual approval.
+The scoped design brief records that limit. No deployment, new generation or
+production mutation occurred in this page pass. The previously verified serving
+release and residency/runtime observations below are not superseded by a local
+frontend build.
+
+### Second twelve-work Star residency published — October 7, 2026
+
+**INSTRUMENTS FOR THE IMPOSSIBLE: TWELVE MORE SELECTED WORKS, 35 PUBLIC WORKS
+TOTAL.** The owner requested another publication pass after the first residency.
+The [new preflight](releases/2026-10-07-star-residency-v2-preflight.json)
+retains seven historical cohorts, 23 existing public Works, twelve inactive
+actors and a fresh twelve-image ceiling. The new versioned plan preserves
+the first briefs and all durable identities. All twelve actual relay
+generations completed without failure or replay; stored prompts retained
+each new authored brief, question and formal focus. The controller closed
+the run and left all twelve actors inactive.
+
+Before selection, twelve private candidates were absent from Explore and
+24 full-image/thumbnail requests were denied. Each actual image received an
+individual pixel review. The [second private catalog](releases/2026-10-07-star-residency-v2-review.json)
+records distinct compositions and concrete rationales; the existing atomic,
+exact-asset BROC decisions published one new Work per Star. Titles remain
+private catalog labels, not a new public Series entity or response field.
+
+[Live verification](releases/2026-10-07-star-residency-v2-live-check.json)
+confirms twelve profiles, twelve full images and twelve thumbnails, with 200
+responses, allowlisted DTOs and decoded artifacts without EXIF/IPTC/XMP/ICC.
+All seven prior cohort states/counters are unchanged, all actors are inactive
+and no Star attempt remains active. The
+[fresh public scan](releases/2026-10-07-star-residency-v2-public-scan.json)
+passed 15 rendered pages, 24 HTTP checks and 409 browser assets, including
+124 protected-asset denials. No tested private marker, credential, brief,
+question or formal-focus match was found. Approved public-key aliases remain
+classified by their actual values. The browser showed the new attributed
+cards, Nemi Orra's full bell image through its share link, and both residency
+Works in the two-work Nemi archive. Lazy-loading outside the viewport is normal.
+
+Fresh plan/practice/selection and image-security tests passed, as did the
+production build with 157 static pages. Existing database authorization and
+image-fixture evidence is retained for unchanged boundaries; no migration,
+privilege change, new storage setting or web/relay deployment occurred. The
+serving web release remains `dpl_QBr2WUvRcvF5RFqJvdc8FaZGaqHV`. This second pass
+confirms the recovered delivery path without reopening either incident or
+closing broader prevention work. The
+[residency runbook](../docs/runbooks/star-residency.md) distinguishes both closed
+plans and their evidence. Any later pass requires its own newly versioned,
+explicitly authorized plan; neither completed residency may be replayed.
+
+The [bounded source and guide review](releases/2026-10-07-star-residency-v2-verification.json)
+retains prior domain evidence and limitations, including requested dimension
+labels that can differ from intrinsic image dimensions. The portrait bell
+remains fully contained in the lightbox despite that existing metadata mismatch.
+
+### Twelve-work Star residency published — October 7, 2026
+
+**THINGS THAT HOLD TIME: TWELVE NEW SELECTED WORKS, ONE PER EXISTING STAR.** The
+owner authorized unique Star art through the relay with Codex acting as artist
+in residence. The [preflight](releases/2026-10-07-star-residency-preflight.json)
+records a fresh twelve-opportunity cohort, concurrency one, existing identity
+reuse and no recurring schedule. All twelve real generations completed; each
+actual image received a separate pixel review and exact-asset BROC selection.
+The [private catalog and rationales](releases/2026-10-07-star-residency-review.json)
+span architecture, portraiture, botany, abstract print, underwater photography,
+cartography, textile sculpture, still life, industry, miniature worlds,
+landscape and collage. These catalog titles are not a new public DTO or Series
+entity. Original prompts and private practice records remain private.
+
+The [delivery incident](incidents/2026/2026-10-07-star-image-delivery/README.md)
+identified the missing production private-bucket setting after selected Works
+were listed but their image endpoint returned generic 503. Recovery added only
+`R2_PRIVATE_IMAGES_BUCKET_NAME` and uploaded the exact accepted Media/Connect
+package: all 3,726 artifact entries and application bytes unchanged. Protected
+candidate verification passed before the three existing Media domain aliases
+moved to `dpl_QBr2WUvRcvF5RFqJvdc8FaZGaqHV`. The preceding deployment remains
+retained; Nova domain binding, runtime, ingress and authority remain unchanged.
+The private bucket has no managed public access or custom domain.
+
+[Live artifact verification](releases/2026-10-07-star-residency-live-check.json)
+confirms all twelve full images and twelve thumbnails return 200, decode, and
+carry no embedded EXIF/IPTC/XMP/ICC metadata. Feed/profile DTOs remain
+allowlisted; all twelve profiles now have published work, with 23 Works total.
+All twelve actors are inactive, no Star attempts remain active, and all six
+historical cohort states/counters are unchanged. The
+[public scan](releases/2026-10-07-star-residency-public-scan.json) covers 15
+rendered pages, 24 HTTP checks and 409 browser assets: 284 byte-identical public
+assets, 124 private-asset denials and one unchanged application prefix with the
+reviewed opt-in platform toolbar suffix. No private marker, credential or
+residency prompt match remains. One locally misnamed server setting equals the
+approved public anonymous key and was classified by its actual public value.
+
+The production build passed with 157 static pages; focused plan/practice/
+selection, image security and disposable database checks passed. The
+[residency runbook](../docs/runbooks/star-residency.md) now requires hosted
+storage presence separately from local object access. ACT-050 is complete for
+delivery and that documented prevention step; broader host, historical-image
+privacy, payment, public/commercial-launch and continuous-availability gates
+retain their prior scope. Completed cohorts must not be reopened or replayed.
+
+### Relay and both account connections recovered — October 7, 2026
+
+**RELAY CONNECTION AND BOTH SAVED ACCOUNTS RECOVERED.** The [incident record](incidents/2026/2026-10-07-relay-connection/README.md) records a live listener with an expired central ownership heartbeat. The corrected local launcher/supervisor checks private heartbeat freshness as well as listener/image identity, preserves the ownership fence and rechecks before recovering only the affected runtime. The existing runtime image and volume were retained; the supervisor was reloaded. No ingress, gate, schema, account enablement or accepted application image was changed by the operator.
+
+[Thirty initial read-only acceptance checks](incidents/2026/2026-10-07-relay-connection/acceptance.json) passed with one usable account and one requiring manual sign-in. After the owner reconnected, the selected desktop login changed again after the saved connection check; the warning returned for the previously saved token. At 19:00 UTC the latest valid manual sign-in was applied once through normal scoped registrar refresh. [Thirty-one follow-up acceptance checks](incidents/2026/2026-10-07-relay-connection/reconnect-acceptance.json) confirm both accounts connected and acknowledged for 160 seconds across inventory refreshes, an unchanged advancing ownership heartbeat, authenticated local/ingress discovery, backend selection and raw body/header authorization boundaries. No service restart or authority bypass was needed for this follow-up. ACT-048 and ACT-049 are complete for their stated repairs.
+
+Image capability remains unknown; no provider generation was submitted. The initial missed-heartbeat trigger and the reason the earlier saved token became invalid remain unknown. ACT-018 host/off-device limits and unrelated prevention work remain open. These observations do not certify continuous availability or public release. The previously completed production build and 538-asset scan remain applicable to the unchanged executable source; the follow-up changes only private operational documentation and the explicit manual reconnect.
+
 ### Non-disruptive Nova resilience — October 3, 2026
 
 **SUFFICIENTLY RECOVERABLE FOR CONTINUED CONTROLLED OPERATION.** The [resilience record](releases/2026-10-03-nova-nondisruptive-resilience.json) applies the owner's workstation restriction. No physical host, host network, global power setting, shared daemon, live ingress, production database, grant or runtime configuration changed. All ten live container identities, images, start times and restart counts remained unchanged; Nova remained healthy and private monitor ownership remained valid. No real provider inference ran in this supplement.

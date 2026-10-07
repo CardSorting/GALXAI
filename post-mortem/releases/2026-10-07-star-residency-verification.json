@@ -1,0 +1,156 @@
+{
+  "version": 1,
+  "classification": "private",
+  "observedAt": "2026-10-07T19:56:31.715538+00:00",
+  "scope": "Owner-authorized twelve-work residency; finite source mode and documented operator workflow; exact accepted web artifact with one storage-name setting. Existing wider domain attestations retained, not replaced by a claim of exhaustive module audit.",
+  "sourcesInspected": [
+    "src/lib/stars/star-residency.ts",
+    "src/lib/stars/StarPopulationController.ts",
+    "scripts/populate-stars.ts",
+    "scripts/test-star-qualification-plan.ts",
+    "BROC/practice.ts",
+    "BROC/store.ts",
+    "src/lib/images/request-service.ts",
+    "src/lib/images/read-image-artifact.ts",
+    "src/workers/cloudflare/GalxR2AssetAdapter.ts",
+    "src/core/storage/GalxUnifiedR2StorageManager.ts",
+    "src/lib/community/public-participants.ts",
+    "src/app/api/images/feed/route.ts",
+    "scripts/verify-post-mortem.py",
+    "scripts/test-post-mortem.py",
+    "docs/knowledge/registry.json"
+  ],
+  "completeAffectedGuidesInspected": [
+    "docs/reference/stars.md",
+    "docs/runbooks/star-residency.md",
+    "docs/maintainers/ACCOUNT_PROFILE_SCHEMA.md",
+    "docs/maintainers/image-public-boundary.md",
+    "docs/runbooks/private-image-release-audit.md",
+    "docs/runbooks/release-readiness.md",
+    "docs/reference/knowledge-commands.md",
+    "docs/DOCUMENTATION_POLICY.md",
+    "docs/how-to/change-with-documentation.md",
+    "post-mortem/README.md",
+    "post-mortem/failure-modes/images.md",
+    "post-mortem/CURRENT_STATE.md"
+  ],
+  "retainedBaselineEvidence": {
+    "knowledge": [
+      "post-mortem/incidents/2026/2026-10-07-relay-connection/verification.json"
+    ],
+    "images": [
+      "post-mortem/incidents/2026/2026-10-07-relay-connection/shared-index-review.json"
+    ],
+    "database": [
+      "post-mortem/releases/2026-10-03-refill-packaging-review.json",
+      "post-mortem/incidents/2026/2026-10-07-relay-connection/reconnect-review.json"
+    ],
+    "relay": [
+      "post-mortem/incidents/2026/2026-10-07-relay-connection/verification.json",
+      "post-mortem/incidents/2026/2026-10-07-relay-connection/reconnect-review.json"
+    ],
+    "delivery": [
+      "post-mortem/incidents/2026/2026-10-07-relay-connection/shared-index-review.json"
+    ]
+  },
+  "semanticConclusions": [
+    "Fresh cohort preserves all twelve identities and original persona directions; one image per Star, concurrency one, no recurrence or resume.",
+    "Director scene supplies unique question/formal focus without canon rewrites. Authored brief remains within bounded production prompt.",
+    "Generation is private; pixel review and existing atomic exact-asset BROC selection authorize exhibition. No direct visibility SQL, schema, RLS or privilege changes.",
+    "Hosted private-storage presence is independent from local access; guard stays intact, no public bucket. Candidate verified before three existing Media aliases moved.",
+    "Accepted web package3726entries unchanged; current working-tree source not deployed. Nova runtime/domain authority unaffected.",
+    "Incident IDs allow descriptive uppercase alphabetic segments; malformed suffixes, lifecycle, reference and append-only guards remain enforced.",
+    "Residency source/test ownership and runbook registration added; ADR decision and historical delivery evidence retain prior status."
+  ],
+  "checks": {
+    "starPlan": 4,
+    "brocPractice": 6,
+    "brocSelection": 3,
+    "imageSecurity": 69,
+    "isolatedImageDatabase": {
+      "checks": 96,
+      "failed": 0,
+      "migrations": 159
+    },
+    "databaseAuthorization": {
+      "checks": 94,
+      "failed": 0
+    },
+    "databaseStatic": {
+      "pairedMigrations": 159,
+      "violations": 0
+    },
+    "productionBuild": {
+      "passed": true,
+      "staticPages": 157
+    },
+    "compiledAssetScan": {
+      "assets": 538,
+      "boundaryMatches": 0,
+      "documentationGate": "Initial invocation reported stale generated navigation, corrected by synchronization before final gate."
+    },
+    "documentationFixtures": {
+      "incident": 26,
+      "knowledge": 17
+    },
+    "realGeneration": {
+      "completed": 12,
+      "failed": 0,
+      "replayed": 0
+    },
+    "preselection": {
+      "privateCandidates": 12,
+      "absentFromFeed": 12,
+      "artifactDenials": 24
+    },
+    "candidateAndLive": {
+      "profiles": 12,
+      "fullImages": 12,
+      "thumbnails": 12,
+      "metadataAbsent": true,
+      "totalPublicWorks": 23,
+      "inactiveActors": 12,
+      "activeStarAttempts": 0,
+      "historicalCohortsUnchanged": 6
+    },
+    "publicScan": {
+      "renderedPages": 15,
+      "httpChecks": 24,
+      "browserAssets": 409,
+      "byteIdentical": 284,
+      "privateAssetDenials": 124,
+      "platformToolbar": 1,
+      "privateMarkers": 0,
+      "secretMatches": 0,
+      "residencyPromptMatches": 0,
+      "excludedPublicKeyAliases": [
+        "SUPABASE_SERVICE_ROLE_KEY"
+      ]
+    }
+  },
+  "browserObservation": {
+    "latestGallery": "Twenty-three attributed cards, twelve new Star works first; visible image thumbnails loaded. Below-viewport cards lazy load.",
+    "workDetail": "Luma Kade full-image modal visibly displays miniature orchard, correct Star attribution and public archive access.",
+    "profile": "Luma Kade formerly-empty profile displays one published work. Existing account remains usable; no private account details retained."
+  },
+  "unmappedPathReview": "Private release/incident records, journal/register and generated review indexes are intentionally handled by incident/source and knowledge guards; not runtime imports or browser content.",
+  "limits": [
+    "Originality judged within this collection, not all historic art.",
+    "Existing requested dimension labels can differ from intrinsic image dimensions; image sanitation/decode and lightbox use actual bytes. No legacy metadata rewrite.",
+    "Local service-role-named value equals the approved public anonymous key; scanner classifies only exact approved-public-key aliases, not secret names.",
+    "No paid human generation, subscription purchase, public registration/commercial launch, historical full-image privacy certification, continuous publishing or host/off-device resilience claim.",
+    "Existing thirteen overdue unrelated prevention actions remain open."
+  ],
+  "evidence": [
+    "post-mortem/releases/2026-10-07-star-residency-preflight.json",
+    "post-mortem/releases/2026-10-07-star-residency-generation.json",
+    "post-mortem/releases/2026-10-07-star-residency-private-check.json",
+    "post-mortem/releases/2026-10-07-star-residency-review.json",
+    "post-mortem/releases/2026-10-07-star-residency-selection.json",
+    "post-mortem/releases/2026-10-07-star-residency-delivery-preflight.json",
+    "post-mortem/releases/2026-10-07-star-residency-deployment.json",
+    "post-mortem/releases/2026-10-07-star-residency-candidate-check.json",
+    "post-mortem/releases/2026-10-07-star-residency-live-check.json",
+    "post-mortem/releases/2026-10-07-star-residency-public-scan.json"
+  ]
+}
