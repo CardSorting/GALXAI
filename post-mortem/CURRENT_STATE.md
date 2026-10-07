@@ -4,6 +4,31 @@
 
 The newest observation appears first. Earlier dated sections retain evidence from their stated observation; they do not override the latest determination or authorize a new action.
 
+### Application CI and source cleanup — verified October 7, 2026
+
+The [hosted correction](releases/2026-10-07-ci-fixture-repair-hosted.json)
+verifies complete application run `37697229999` and documentation audit
+`37697229897` at `298fc8d8db22a39ee660bbe8db0790f0cc12e6ab`.
+The quota fixture now tests retired free entry points, unchanged historical
+ledgers and current purchased image admission. Later private-storage and
+registry fixtures also match current authority. Historical gate races, RLS,
+rollback and adversarial current boundaries remain covered. All application
+steps passed, including clean installation, lint/typecheck, credential-free
+production build and compiled private-content scan. ACT-051 is complete;
+INC-20261007-CI is closed. The earlier failed runs below remain dated evidence.
+
+All eight workspace Git checkouts were clean at acceptance. The formerly dirty
+deployed exhibition source is retained remotely as `b11441426cbed83d91dad9757f7f7520598d572e`
+on `archive/exhibition-programme-source-2026-10-07`, after 1,662 source-file
+hashes matched the deployed manifest. No accepted snapshot or source work was
+discarded. Main and that archive branch were synchronized with their remotes.
+
+This correction changes tests, workflow naming and private documentation only.
+It does not deploy the broader main source or change the serving programme,
+Mac runtime, database/grants, generation or retirement firewall. Production
+identities and visual **recapture** remain as recorded below; other prevention
+actions retain their separate status.
+
 ### Exhibition and editorial programme — deployed October 7, 2026
 
 The owner authorized the commit and production push after the denied visual

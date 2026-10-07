@@ -2957,3 +2957,17 @@ Incident: `INC-20261007-CI`. Kind: `containment`.
 **Next step:** Complete fresh credential-free build and source/guide attestations, push main and observe the entire hosted workflow. Retain all archived source and other incident actions.
 
 Evidence: [2026-10-07-ci-fixture-repair-local.json](releases/2026-10-07-ci-fixture-repair-local.json), [README.md](incidents/2026/2026-10-07-ci-fixture-drift/README.md).
+
+## EVT-20261007-CI-hosted-acceptance — 2026-10-07T22:42:26.494719+00:00
+
+Incident: `INC-20261007-CI`. Kind: `recovery`.
+
+**Observation:** Pushed fixture correction completed the entire hosted application workflow and documentation audit. All eight workspace Git checkouts were clean.
+
+**Action:** Verified actual hosted steps including production build and compiled boundary scan; retained exact code revision, run URLs and deployed-source archive identity. Closed only CI incident and ACT-051.
+
+**Result:** Application 37697229999 and documentation 37697229897 pass at 298fc8d; archive b114414 is remotely retained. No runtime, generation, deployment or database mutation.
+
+**Next step:** Commit and push dated acceptance records; preserve separate visual recapture and existing prevention actions.
+
+Evidence: [2026-10-07-ci-fixture-repair-hosted.json](releases/2026-10-07-ci-fixture-repair-hosted.json), [README.md](incidents/2026/2026-10-07-ci-fixture-drift/README.md).

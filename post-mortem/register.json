@@ -7,16 +7,20 @@
       "id": "INC-20261007-CI",
       "category": "deployment",
       "severity": "SEV-3",
-      "status": "contained",
+      "status": "closed",
       "title": "Retired fixtures fail application CI and hide later checks",
       "owner": "CI/release maintainer",
       "record": "post-mortem/incidents/2026/2026-10-07-ci-fixture-drift/README.md",
       "evidence": [
         "post-mortem/incidents/2026/2026-10-07-ci-fixture-drift/README.md",
-        "post-mortem/releases/2026-10-07-ci-fixture-repair-local.json"
+        "post-mortem/releases/2026-10-07-ci-fixture-repair-local.json",
+        "post-mortem/releases/2026-10-07-ci-fixture-repair-hosted.json"
       ],
       "failure_modes": [
         "FM-DEPLOY-004"
+      ],
+      "recovery_evidence": [
+        "post-mortem/releases/2026-10-07-ci-fixture-repair-hosted.json"
       ]
     },
     {
@@ -1340,12 +1344,13 @@
       "incident": "INC-20261007-CI",
       "owner": "CI/release maintainer",
       "review_by": "2026-10-14",
-      "status": "open",
-      "next_step": "Require the complete GitHub application workflow on the fixture correction, preserve retirement/private storage/pool isolation regressions, and verify every workspace Git checkout is clean and pushed as intended.",
-      "closure": "Current fixtures and all later workflow steps, including isolated production build and compiled public boundary scan, pass on the pushed revision; deployed-source archive is retained remotely and all workspace Git checkouts are clean.",
+      "status": "completed",
+      "next_step": "Retain current contract regressions and full workflow evidence. Future authority/product changes require reconciled fixtures and complete hosted validation; do not reopen retired behavior or discard archived source.",
+      "closure": "Complete hosted application and documentation workflows pass at 298fc8d, including clean checkout/install, current contract fixtures, production build and compiled boundary scan; all eight checkouts clean and deployed-source archive retained remotely.",
       "evidence": [
         "post-mortem/incidents/2026/2026-10-07-ci-fixture-drift/README.md",
-        "post-mortem/releases/2026-10-07-ci-fixture-repair-local.json"
+        "post-mortem/releases/2026-10-07-ci-fixture-repair-local.json",
+        "post-mortem/releases/2026-10-07-ci-fixture-repair-hosted.json"
       ]
     }
   ]

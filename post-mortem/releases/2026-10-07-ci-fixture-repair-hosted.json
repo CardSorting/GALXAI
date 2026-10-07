@@ -1,0 +1,265 @@
+{
+  "classification": "private",
+  "observed_at": "2026-10-07T22:42:26.494719+00:00",
+  "scope": "Complete hosted application CI and Git cleanup acceptance; no deployment",
+  "revision": "298fc8d8db22a39ee660bbe8db0790f0cc12e6ab",
+  "application": {
+    "run_id": 37697229999,
+    "url": "https://github.com/CardSorting/GALXAI/actions/runs/37697229999",
+    "status": "completed",
+    "conclusion": "success",
+    "steps": [
+      {
+        "name": "Set up job",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Checkout Source Code",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Setup Node.js 22",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Install Dependencies",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Verify documentation and incident prevention records",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Verify incident guard rejects unsafe and stale records",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Verify public image, identity and ownership boundaries",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Verify account session lifecycle and immediate revocation",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Verify billing lifecycle, portal safety and webhook boundaries",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Verify active-session authority in isolated PostgreSQL",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Verify durable image requests and Favorites in isolated PostgreSQL",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Verify retired grants, image allowance isolation and Site regressions",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Verify isolated historical image artifact fixture",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Verify YAML security patch",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Audit production dependencies",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Run 8-Phase Vercel Pre-Flight Audit Engine",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Verify browser agent deployment contract",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Verify logical agent session isolation",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Verify cooldown recovery and image retry contract",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Install isolated database test tools",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Verify egress budgets and bounded replay",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Verify physical-request budgets and isolated build credentials",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Verify controller authority during slow worker I/O",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "ESLint & Style Checks",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "TypeScript Type Safety Check",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Next.js Production Build",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Verify incident records stay outside compiled public assets",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Post Setup Node.js 22",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Post Checkout Source Code",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Complete job",
+        "status": "completed",
+        "conclusion": "success"
+      }
+    ],
+    "environment": "GitHub ubuntu-latest, Node 22, clean checkout and npm ci, isolated PostgreSQL, synthetic storage and credential-free production build",
+    "raw_log_sha256": "e973efe5ef8b403b345b7d3625bf19c4ebfdd022c3bd45b3049c2958f0ac68d1"
+  },
+  "documentation": {
+    "run_id": 37697229897,
+    "url": "https://github.com/CardSorting/GALXAI/actions/runs/37697229897",
+    "revision": "298fc8d8db22a39ee660bbe8db0790f0cc12e6ab",
+    "status": "completed",
+    "conclusion": "success"
+  },
+  "local_evidence": "post-mortem/releases/2026-10-07-ci-fixture-repair-local.json",
+  "private_value_scan": {
+    "commit": "298fc8d8db22a39ee660bbe8db0790f0cc12e6ab",
+    "files": 24,
+    "privateValueMatches": 0
+  },
+  "git_checkouts_at_acceptance": [
+    {
+      "path": ".",
+      "branch": "main",
+      "commit": "298fc8d8db22a39ee660bbe8db0790f0cc12e6ab",
+      "clean": true,
+      "changes": [],
+      "ahead_behind": "0\t0"
+    },
+    {
+      "path": ".relay/nova-transition/web-source",
+      "branch": "archive/nova-web-source-2026-10-03-01",
+      "commit": "a22e9952047e7d6d6bde670c6483a873fc231cf8",
+      "clean": true,
+      "changes": [],
+      "ahead_behind": "no upstream"
+    },
+    {
+      "path": ".relay/nova-transition/web-source-02",
+      "branch": "archive/nova-web-source-2026-10-03-02",
+      "commit": "58ce9f1431f44e46b329ee023bb8983b3031e087",
+      "clean": true,
+      "changes": [],
+      "ahead_behind": "no upstream"
+    },
+    {
+      "path": ".relay/nova-transition/web-source-03",
+      "branch": "archive/nova-web-source-2026-10-03-03",
+      "commit": "aa5b2c1aa33bc912d0d457fce94ba0cb84bc83d2",
+      "clean": true,
+      "changes": [],
+      "ahead_behind": "no upstream"
+    },
+    {
+      "path": ".relay/production-push/clean-index",
+      "branch": "archive/production-verification-2026-10-03",
+      "commit": "09e3a75e7849bcbe974b8786ae0f3e5c0c1836f8",
+      "clean": true,
+      "changes": [],
+      "ahead_behind": "no upstream"
+    },
+    {
+      "path": ".relay/exhibitions-production-20261007/source",
+      "branch": "archive/exhibition-programme-source-2026-10-07",
+      "commit": "b11441426cbed83d91dad9757f7f7520598d572e",
+      "clean": true,
+      "changes": [],
+      "ahead_behind": "0\t0"
+    },
+    {
+      "path": "BroccoliDB",
+      "branch": "main",
+      "commit": "f085f3f5dbceadc4cd6752b081ebfc51b02fe3f7",
+      "clean": true,
+      "changes": [],
+      "ahead_behind": "0\t0"
+    },
+    {
+      "path": "BROCCOLIQUEUE",
+      "branch": "main",
+      "commit": "c38a7db40e8bcaf99c7f83af755c5e43a6d7feec",
+      "clean": true,
+      "changes": [],
+      "ahead_behind": "0\t0"
+    }
+  ],
+  "archive": {
+    "branch": "archive/exhibition-programme-source-2026-10-07",
+    "commit": "b11441426cbed83d91dad9757f7f7520598d572e",
+    "remote_retained": true,
+    "deployed_source_manifest_sha256": "da5af9fa81c2115e46bc660bd44f8a415b14568b04fec2fc682e67eabd9a3561",
+    "files_verified": 1662
+  },
+  "inspected_paths": [
+    ".github/workflows/vercel-preflight.yml",
+    "post-mortem/CURRENT_STATE.md",
+    "post-mortem/incidents/2026/2026-10-07-ci-fixture-drift/README.md",
+    "post-mortem/register.json",
+    "post-mortem/events.jsonl"
+  ],
+  "limits": [
+    "This CI correction changes fixtures, workflow naming and private documentation only; no application runtime, migration, database/grant, service, generation, deployment, dependency or ADR decision change.",
+    "The serving exhibition programme and Mac Nova release retain their previously recorded identities; this Git push is not a production deployment.",
+    "Visual recapture and other historical prevention actions retain their separate status.",
+    "This acceptance names the tested code revision; any subsequent evidence-only commit has its own documentation/CI results."
+  ]
+}

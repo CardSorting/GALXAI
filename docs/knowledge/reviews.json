@@ -1,7 +1,7 @@
 {
   "knowledge": {
     "reviewer": "Codex CI fixture maintainer",
-    "note": "Bounded review of unchanged runtime contracts and complete affected guides for retired quota/current purchased image fixtures, synthetic private storage and current registry schema/authority. Preserve wider dated evidence; no runtime, migration, grant or deployment mutation. Historical compatibility/RLS/rollback and adversarial tests retained. Unmapped registry tests inspected and assigned relay ownership; hosted acceptance still pending.",
+    "note": "Retain bounded full-guide/source contract review and earlier wider evidence; complete hosted application 37697229999 and documentation 37697229897 now pass at 298fc8d, including current quota/private storage/registry fixtures, clean install, production build and compiled public boundary. Reviewed dated acceptance/current-state/incident closure and exact remote archive retention. Eight Git checkouts clean at acceptance. No runtime, database, grants, generation, deployment or ADR status change; visual recapture and other actions remain separate.",
     "reviewed_at": "2026-10-07",
     "review_by": "2026-10-14",
     "evidence": {
@@ -11,7 +11,8 @@
       "post-mortem/releases/2026-10-07-exhibition-programme-release-preflight.json": "f85b3976b3adfb3119c50e7586f38a7d8a0e68dda6a89a80c6d314165eeb78f4",
       "post-mortem/releases/2026-10-07-exhibition-programme-dependency-review.json": "fbdc73a891cb85f2c9d6ddc2fc514b9258ffe54a10c7eede4b05cceebad9c04b",
       "post-mortem/releases/2026-10-07-exhibition-programme-deployment.json": "f4d09ac5f83e7d0a2a14f57080ef84c68d39d26d62a396c8f6a606f08cb962c4",
-      "post-mortem/releases/2026-10-07-ci-fixture-repair-local.json": "83e5fc969556cfea079da765b2209bc75b4b7b0e890cd745018d7b1669ff7442"
+      "post-mortem/releases/2026-10-07-ci-fixture-repair-local.json": "83e5fc969556cfea079da765b2209bc75b4b7b0e890cd745018d7b1669ff7442",
+      "post-mortem/releases/2026-10-07-ci-fixture-repair-hosted.json": "453aaa4ddcb63fe08c3154216e9e857dd78943e700467ffb691efbf0d9bc6623"
     },
     "files": {
       ".github/CODEOWNERS": "ef2f416d15f027dc8f197ad844289c9a44c8e843d3214d1590a3a380e939d13f",
@@ -109,7 +110,7 @@
   },
   "images": {
     "reviewer": "Codex CI fixture maintainer",
-    "note": "Bounded review of unchanged runtime contracts and complete affected guides for retired quota/current purchased image fixtures, synthetic private storage and current registry schema/authority. Preserve wider dated evidence; no runtime, migration, grant or deployment mutation. Historical compatibility/RLS/rollback and adversarial tests retained. Unmapped registry tests inspected and assigned relay ownership; hosted acceptance still pending.",
+    "note": "Retain bounded full-guide/source contract review and earlier wider evidence; complete hosted application 37697229999 and documentation 37697229897 now pass at 298fc8d, including current quota/private storage/registry fixtures, clean install, production build and compiled public boundary. Reviewed dated acceptance/current-state/incident closure and exact remote archive retention. Eight Git checkouts clean at acceptance. No runtime, database, grants, generation, deployment or ADR status change; visual recapture and other actions remain separate.",
     "reviewed_at": "2026-10-07",
     "review_by": "2026-10-14",
     "evidence": {
@@ -120,7 +121,8 @@
       "post-mortem/releases/2026-10-07-exhibition-programme-release-preflight.json": "f85b3976b3adfb3119c50e7586f38a7d8a0e68dda6a89a80c6d314165eeb78f4",
       "post-mortem/releases/2026-10-07-exhibition-programme-dependency-review.json": "fbdc73a891cb85f2c9d6ddc2fc514b9258ffe54a10c7eede4b05cceebad9c04b",
       "post-mortem/releases/2026-10-07-exhibition-programme-deployment.json": "f4d09ac5f83e7d0a2a14f57080ef84c68d39d26d62a396c8f6a606f08cb962c4",
-      "post-mortem/releases/2026-10-07-ci-fixture-repair-local.json": "83e5fc969556cfea079da765b2209bc75b4b7b0e890cd745018d7b1669ff7442"
+      "post-mortem/releases/2026-10-07-ci-fixture-repair-local.json": "83e5fc969556cfea079da765b2209bc75b4b7b0e890cd745018d7b1669ff7442",
+      "post-mortem/releases/2026-10-07-ci-fixture-repair-hosted.json": "453aaa4ddcb63fe08c3154216e9e857dd78943e700467ffb691efbf0d9bc6623"
     },
     "files": {
       "BROC/practice.ts": "19499a05b7f9e481fcd0c4c04242bde79accc9da7f66daff91a229258c810167",
@@ -310,13 +312,14 @@
   },
   "access": {
     "reviewer": "Codex CI fixture maintainer",
-    "note": "Bounded review of unchanged runtime contracts and complete affected guides for retired quota/current purchased image fixtures, synthetic private storage and current registry schema/authority. Preserve wider dated evidence; no runtime, migration, grant or deployment mutation. Historical compatibility/RLS/rollback and adversarial tests retained. Unmapped registry tests inspected and assigned relay ownership; hosted acceptance still pending.",
+    "note": "Retain bounded full-guide/source contract review and earlier wider evidence; complete hosted application 37697229999 and documentation 37697229897 now pass at 298fc8d, including current quota/private storage/registry fixtures, clean install, production build and compiled public boundary. Reviewed dated acceptance/current-state/incident closure and exact remote archive retention. Eight Git checkouts clean at acceptance. No runtime, database, grants, generation, deployment or ADR status change; visual recapture and other actions remain separate.",
     "reviewed_at": "2026-10-07",
     "review_by": "2026-10-14",
     "evidence": {
       "post-mortem/releases/2026-10-03-nova-mac-transition-review.json": "eef04fd112f3e19b6ddf45926bb2a6b4306eb3a0e4eeac3ebc4e3beac08aed79",
       "post-mortem/releases/2026-10-07-exhibition-programme-local-review.json": "c0abd8605baf01403f11fdfb24eb9cc18a37ddb1798e59d2b00746cc37ed7a3a",
-      "post-mortem/releases/2026-10-07-ci-fixture-repair-local.json": "83e5fc969556cfea079da765b2209bc75b4b7b0e890cd745018d7b1669ff7442"
+      "post-mortem/releases/2026-10-07-ci-fixture-repair-local.json": "83e5fc969556cfea079da765b2209bc75b4b7b0e890cd745018d7b1669ff7442",
+      "post-mortem/releases/2026-10-07-ci-fixture-repair-hosted.json": "453aaa4ddcb63fe08c3154216e9e857dd78943e700467ffb691efbf0d9bc6623"
     },
     "files": {
       "docs/OAUTH_AND_TOKEN_LIFECYCLE_SPECIFICATION.md": "a5840e5e0d081e07e04b96375c0842149ae83fc19e1154849aaf91a4d5a4b95e",
@@ -470,12 +473,13 @@
   },
   "sites": {
     "reviewer": "Codex CI fixture maintainer",
-    "note": "Bounded review of unchanged runtime contracts and complete affected guides for retired quota/current purchased image fixtures, synthetic private storage and current registry schema/authority. Preserve wider dated evidence; no runtime, migration, grant or deployment mutation. Historical compatibility/RLS/rollback and adversarial tests retained. Unmapped registry tests inspected and assigned relay ownership; hosted acceptance still pending.",
+    "note": "Retain bounded full-guide/source contract review and earlier wider evidence; complete hosted application 37697229999 and documentation 37697229897 now pass at 298fc8d, including current quota/private storage/registry fixtures, clean install, production build and compiled public boundary. Reviewed dated acceptance/current-state/incident closure and exact remote archive retention. Eight Git checkouts clean at acceptance. No runtime, database, grants, generation, deployment or ADR status change; visual recapture and other actions remain separate.",
     "reviewed_at": "2026-10-07",
     "review_by": "2026-10-14",
     "evidence": {
       "post-mortem/releases/2026-10-03-connect-local-review.json": "37e94394ab2210d6f722b4d3cd6ac041b6b229777ac6a20f7f9c14cf807d6807",
-      "post-mortem/releases/2026-10-07-ci-fixture-repair-local.json": "83e5fc969556cfea079da765b2209bc75b4b7b0e890cd745018d7b1669ff7442"
+      "post-mortem/releases/2026-10-07-ci-fixture-repair-local.json": "83e5fc969556cfea079da765b2209bc75b4b7b0e890cd745018d7b1669ff7442",
+      "post-mortem/releases/2026-10-07-ci-fixture-repair-hosted.json": "453aaa4ddcb63fe08c3154216e9e857dd78943e700467ffb691efbf0d9bc6623"
     },
     "files": {
       "docs/API_BASE_URL.md": "90ad9593668b5be61c0ee8ed940f53604d94f741c2ed250f3e9f44876cb50ca8",
@@ -548,7 +552,7 @@
   },
   "relay": {
     "reviewer": "Codex CI fixture maintainer",
-    "note": "Bounded review of unchanged runtime contracts and complete affected guides for retired quota/current purchased image fixtures, synthetic private storage and current registry schema/authority. Preserve wider dated evidence; no runtime, migration, grant or deployment mutation. Historical compatibility/RLS/rollback and adversarial tests retained. Unmapped registry tests inspected and assigned relay ownership; hosted acceptance still pending.",
+    "note": "Retain bounded full-guide/source contract review and earlier wider evidence; complete hosted application 37697229999 and documentation 37697229897 now pass at 298fc8d, including current quota/private storage/registry fixtures, clean install, production build and compiled public boundary. Reviewed dated acceptance/current-state/incident closure and exact remote archive retention. Eight Git checkouts clean at acceptance. No runtime, database, grants, generation, deployment or ADR status change; visual recapture and other actions remain separate.",
     "reviewed_at": "2026-10-07",
     "review_by": "2026-10-14",
     "evidence": {
@@ -558,7 +562,8 @@
       "post-mortem/releases/2026-10-07-star-residency-v2-verification.json": "ce2a33e00b56d30e0b7e5709170bebc753975c6d6ba37f72c879a8d0a7240495",
       "post-mortem/releases/2026-10-07-exhibition-programme-release-preflight.json": "f85b3976b3adfb3119c50e7586f38a7d8a0e68dda6a89a80c6d314165eeb78f4",
       "post-mortem/releases/2026-10-07-exhibition-programme-dependency-review.json": "fbdc73a891cb85f2c9d6ddc2fc514b9258ffe54a10c7eede4b05cceebad9c04b",
-      "post-mortem/releases/2026-10-07-ci-fixture-repair-local.json": "83e5fc969556cfea079da765b2209bc75b4b7b0e890cd745018d7b1669ff7442"
+      "post-mortem/releases/2026-10-07-ci-fixture-repair-local.json": "83e5fc969556cfea079da765b2209bc75b4b7b0e890cd745018d7b1669ff7442",
+      "post-mortem/releases/2026-10-07-ci-fixture-repair-hosted.json": "453aaa4ddcb63fe08c3154216e9e857dd78943e700467ffb691efbf0d9bc6623"
     },
     "files": {
       ".env.example": "e06dd941e9099f4cd1ccda9b5379e09863c4ba378600ef0263b982ed9e414ec4",
@@ -818,7 +823,7 @@
   },
   "database": {
     "reviewer": "Codex CI fixture maintainer",
-    "note": "Bounded review of unchanged runtime contracts and complete affected guides for retired quota/current purchased image fixtures, synthetic private storage and current registry schema/authority. Preserve wider dated evidence; no runtime, migration, grant or deployment mutation. Historical compatibility/RLS/rollback and adversarial tests retained. Unmapped registry tests inspected and assigned relay ownership; hosted acceptance still pending.",
+    "note": "Retain bounded full-guide/source contract review and earlier wider evidence; complete hosted application 37697229999 and documentation 37697229897 now pass at 298fc8d, including current quota/private storage/registry fixtures, clean install, production build and compiled public boundary. Reviewed dated acceptance/current-state/incident closure and exact remote archive retention. Eight Git checkouts clean at acceptance. No runtime, database, grants, generation, deployment or ADR status change; visual recapture and other actions remain separate.",
     "reviewed_at": "2026-10-07",
     "review_by": "2026-10-14",
     "evidence": {
@@ -826,7 +831,8 @@
       "post-mortem/incidents/2026/2026-10-07-relay-connection/reconnect-review.json": "1078d3a6c10258e84fb95dce37e79396edf53ac036fc2d6027ac6064c06d89f5",
       "post-mortem/releases/2026-10-07-star-residency-verification.json": "38c5e451fe249b4df204f1a9a032e550c1a013337798a3be9430f26186d04674",
       "post-mortem/releases/2026-10-07-star-residency-v2-verification.json": "ce2a33e00b56d30e0b7e5709170bebc753975c6d6ba37f72c879a8d0a7240495",
-      "post-mortem/releases/2026-10-07-ci-fixture-repair-local.json": "83e5fc969556cfea079da765b2209bc75b4b7b0e890cd745018d7b1669ff7442"
+      "post-mortem/releases/2026-10-07-ci-fixture-repair-local.json": "83e5fc969556cfea079da765b2209bc75b4b7b0e890cd745018d7b1669ff7442",
+      "post-mortem/releases/2026-10-07-ci-fixture-repair-hosted.json": "453aaa4ddcb63fe08c3154216e9e857dd78943e700467ffb691efbf0d9bc6623"
     },
     "files": {
       "BROC/store.ts": "17390f446cba5ae0b51b2b9937e352a082ac0e87c00b66cf174745136f915b9b",
@@ -1246,7 +1252,7 @@
   },
   "delivery": {
     "reviewer": "Codex CI fixture maintainer",
-    "note": "Bounded review of unchanged runtime contracts and complete affected guides for retired quota/current purchased image fixtures, synthetic private storage and current registry schema/authority. Preserve wider dated evidence; no runtime, migration, grant or deployment mutation. Historical compatibility/RLS/rollback and adversarial tests retained. Unmapped registry tests inspected and assigned relay ownership; hosted acceptance still pending.",
+    "note": "Retain bounded full-guide/source contract review and earlier wider evidence; complete hosted application 37697229999 and documentation 37697229897 now pass at 298fc8d, including current quota/private storage/registry fixtures, clean install, production build and compiled public boundary. Reviewed dated acceptance/current-state/incident closure and exact remote archive retention. Eight Git checkouts clean at acceptance. No runtime, database, grants, generation, deployment or ADR status change; visual recapture and other actions remain separate.",
     "reviewed_at": "2026-10-07",
     "review_by": "2026-10-14",
     "evidence": {
@@ -1256,7 +1262,8 @@
       "post-mortem/releases/2026-10-07-exhibition-programme-release-preflight.json": "f85b3976b3adfb3119c50e7586f38a7d8a0e68dda6a89a80c6d314165eeb78f4",
       "post-mortem/releases/2026-10-07-exhibition-programme-dependency-review.json": "fbdc73a891cb85f2c9d6ddc2fc514b9258ffe54a10c7eede4b05cceebad9c04b",
       "post-mortem/releases/2026-10-07-exhibition-programme-deployment.json": "f4d09ac5f83e7d0a2a14f57080ef84c68d39d26d62a396c8f6a606f08cb962c4",
-      "post-mortem/releases/2026-10-07-ci-fixture-repair-local.json": "83e5fc969556cfea079da765b2209bc75b4b7b0e890cd745018d7b1669ff7442"
+      "post-mortem/releases/2026-10-07-ci-fixture-repair-local.json": "83e5fc969556cfea079da765b2209bc75b4b7b0e890cd745018d7b1669ff7442",
+      "post-mortem/releases/2026-10-07-ci-fixture-repair-hosted.json": "453aaa4ddcb63fe08c3154216e9e857dd78943e700467ffb691efbf0d9bc6623"
     },
     "files": {
       ".dockerignore": "fabeb0a64e0040d7feb0b9ea2d6f88d109479a61974a7c41aee3f54be23b70e2",

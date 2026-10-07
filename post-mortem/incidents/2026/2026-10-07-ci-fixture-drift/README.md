@@ -27,3 +27,19 @@ compiled boundary scan, plus retained contract regression coverage. Follow
 and [CI contracts](../../../../docs/maintainers/CI_PIPELINE_AND_AUTOMATION_SPEC.md).
 Production/runtime/database configuration and earlier incident actions remain
 outside this correction.
+
+## Hosted acceptance — October 7, 2026
+
+The [complete hosted result](../../../releases/2026-10-07-ci-fixture-repair-hosted.json)
+verifies application run `37697229999` and documentation run `37697229897` at
+`298fc8d8db22a39ee660bbe8db0790f0cc12e6ab`. All application steps passed,
+including the formerly failing quota fixture, later storage/registry checks,
+lint/typecheck, clean credential-free production build and compiled private
+boundary scan. No test was skipped to resolve the failure.
+
+ACT-051 is completed and this CI incident is closed. Contract regressions remain
+in the existing workflow; eight Git checkouts were clean, with current main and
+the deployed-source archive synchronized to their remotes. This is CI/Git
+acceptance, not a new production release. Earlier visual and prevention limits
+remain separate. Original failed-run and local-only observations above are
+retained as dated evidence.

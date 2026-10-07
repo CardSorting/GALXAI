@@ -1,8 +1,8 @@
 {
   "version": 1,
   "reviewer": "Codex CI fixture maintainer",
-  "reviewed_at": "2026-10-07T22:34:23.914091Z",
-  "note": "Reviewed affected critical source contracts and complete CI/quota/database/deployment guides. Reconciled stale fixtures while preserving public/private and ownership boundaries, historical RLS/rollback and dated release evidence. Recorded local isolated tests and exact archive retention; no runtime, database, generation, deployment or ADR decision change. Hosted acceptance remains pending.",
+  "reviewed_at": "2026-10-07T22:42:52.351904Z",
+  "note": "Reviewed bounded hosted acceptance, complete current-state amendment, incident closure and append-only event; original failure and release evidence retained. Complete application and docs CI pass at 298fc8d with production build and compiled scan, remotely retained exact archive and all eight checkouts clean. Critical source/guide contracts remain reconciled; no runtime, database, generation, deployment or ADR status change. Visual recapture and other prevention actions stay separate.",
   "files": {
     ".dockerignore": "fabeb0a64e0040d7feb0b9ea2d6f88d109479a61974a7c41aee3f54be23b70e2",
     ".github/workflows/vercel-preflight.yml": "a3489384482756c5795da7498ecf8fc455ea2204868af52fc56a9aa0a856f936",
@@ -41,7 +41,7 @@
     "docs/operations/wallet-lifecycle.md": "ddc86ed1d3347f5fff19a07581bc040c52eee7a115c279a2ba28bceae92303db",
     "docs/operations/workspace-auth.md": "b73f4387b6fe5f4bcf1fd7b9f85b2b8b92ab896a463d0765e41d9eebee8e322d",
     "package.json": "d05821f475268559db698775def3fb91112a8e4cb90d2ee58ab169758876bcb4",
-    "post-mortem/CURRENT_STATE.md": "94045207c20ff2d0290ddc24176c21c6a41f1eec758506a340f6c0abe565568f",
+    "post-mortem/CURRENT_STATE.md": "36ba76df4cf6c1266e570f2c50cc5b33cc42213c2c889fd2e129f97aa0a2b412",
     "post-mortem/README.md": "18c7edd2f27e5aa4c941fa07ca2ca71da3bc8757b45a07696fa59757233e03bf",
     "post-mortem/failure-modes/README.md": "f0252593b71afd1f42cb45a07f11c830641b9baf4572a8ab8cbe3d706170f221",
     "post-mortem/failure-modes/access-and-documentation.md": "270a62e90cc0f9674dd81e62fe7ef3781e34dc7a4373c1914b71da5bbb558002",
