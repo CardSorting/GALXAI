@@ -3003,6 +3003,12 @@
       "title": "Interrupted work incorrectly counted as provider failure"
     },
     {
+      "path": "post-mortem/incidents/2026/2026-10-07-ci-fixture-drift/README.md",
+      "scope": "operational-record",
+      "category": "post-mortem",
+      "title": "October 7 application CI fixture drift"
+    },
+    {
       "path": "post-mortem/incidents/2026/2026-10-07-relay-connection/README.md",
       "scope": "operational-record",
       "category": "post-mortem",

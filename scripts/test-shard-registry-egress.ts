@@ -23,6 +23,7 @@ before(async () => {
   await pool.query(`CREATE TABLE public.galx_shard_accounts (
     id text PRIMARY KEY, user_id text DEFAULT 'owner', provider text DEFAULT 'openai',
     status text DEFAULT 'healthy', permission_retracted boolean DEFAULT false,
+    managed_desktop_id text, desktop_enrolled_at bigint, relay_pool_id text,
     encrypted_ciphertext text, encrypted_iv text DEFAULT 'iv', encrypted_tag text DEFAULT 'tag',
     key_version text DEFAULT 'v1', credential_expires_at_ms bigint, cooldown_until_ms bigint,
     registry_revision bigint DEFAULT 1, created_at timestamptz DEFAULT now(),
@@ -38,6 +39,8 @@ after(async () => {
 test('real SQL transfers only changes, detects revocation/rotation/deletion/recreation, and bounds idle egress', async () => {
   await pool.query(`INSERT INTO public.galx_shard_accounts (id,encrypted_ciphertext)
     SELECT 'shard-' || n, repeat('encrypted-payload-', 200) FROM generate_series(1,56) AS n`);
+  await pool.query(`INSERT INTO public.galx_shard_accounts (id,encrypted_ciphertext,relay_pool_id)
+    VALUES ('pooled','never-in-application-registry','private-pool')`);
   const responses: RegistryDelta[] = [];
   const sync = new ShardRegistrySync(async known => {
     const result = await pool.query(REGISTRY_DELTA_SQL, [JSON.stringify(Object.fromEntries([...known].map(([id, entry]) => [id, entry.fingerprint]))), REGISTRY_MAX_RESPONSE_BYTES]);
@@ -84,6 +87,7 @@ test('real SQL transfers only changes, detects revocation/rotation/deletion/recr
 
 function row(id: string, revision = 1): RegistryRow {
   return { id, user_id: 'owner', provider: 'openai', status: 'healthy', permission_retracted: false,
+    managed_desktop_id: null, desktop_enrolled_at: null,
     encrypted_ciphertext: 'ciphertext', encrypted_iv: 'iv', encrypted_tag: 'tag', key_version: 'v1',
     credential_expires_at_ms: null, cooldown_until_ms: null, registry_revision: revision, created_at: '2026-09-08T00:00:00Z' };
 }

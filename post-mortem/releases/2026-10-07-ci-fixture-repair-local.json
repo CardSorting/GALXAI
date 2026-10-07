@@ -1,0 +1,173 @@
+{
+  "classification": "private",
+  "observed_at": "2026-10-07T22:33:41.879855+00:00",
+  "scope": "working tree relative to fb7d26633dc1a6c0759f70dbec401b68b25adb14; fixture and private guide correction only",
+  "failed_hosted_runs": [
+    {
+      "id": 37693015641,
+      "revision": "436d457b16e9a84eb817ce2970dd2df560128f30",
+      "step": "legacy quota database fixture"
+    },
+    {
+      "id": 37694045530,
+      "revision": "fb7d26633dc1a6c0759f70dbec401b68b25adb14",
+      "step": "legacy quota database fixture"
+    }
+  ],
+  "cause": "Retired boolean image argument and positive free-quota expectations contradicted current retirement, purchased private image admission and immutable Auth ownership. Later fixtures also assumed private local storage fallback, old registry schemas and application credential maintenance.",
+  "correction": [
+    "Retain historical internal gate races, ledger RLS and paired rollback; test zero quota/no new grants/unchanged history and retired Site denials.",
+    "Test purchased private admission independent of legacy policy locks; reject historical balance and Sites metadata without a purchased plan.",
+    "Replace local private-storage fallback expectation with missing-config denial and synthetic signed HTTP, sanitized metadata, dedicated bucket, catalog/manifest and owner scope.",
+    "Reconcile registry fixture columns, exclude assigned pool records and verify retired application refresh/rewrap performs no authority read.",
+    "Map previously unmapped registry source/tests to relay ownership; no runtime or migration change."
+  ],
+  "inspected_sources": [
+    "scripts/test-free-generation-gate-db.ts",
+    "scripts/test-free-generation-quota-db.ts",
+    "scripts/test-relay-image-generation.ts",
+    "scripts/test-shard-projection-egress.ts",
+    "scripts/test-shard-registry-egress.ts",
+    "src/lib/billing/free-generation-quota.ts",
+    "src/lib/billing/free-generation-gate.ts",
+    "src/lib/billing/image-allowance.ts",
+    "src/lib/billing/image-allowance-config.ts",
+    "src/lib/images/request-repository.ts",
+    "src/lib/sites/workspace-repository.ts",
+    "src/core/storage/GalxUnifiedR2StorageManager.ts",
+    "src/workers/cloudflare/GalxR2AssetAdapter.ts",
+    "src/relay/shard-registry-sync.ts",
+    "src/lib/supabase/repositories/ShardProjectionReader.ts",
+    "src/core/auth/GalxAuthEngine.ts",
+    ".github/workflows/vercel-preflight.yml"
+  ],
+  "full_guide_review": [
+    "docs/maintainers/CI_PIPELINE_AND_AUTOMATION_SPEC.md",
+    "docs/maintainers/FREE_GENERATION_QUOTA.md",
+    "docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md",
+    "docs/maintainers/MULTI_TENANT_SHARD_AND_KEY_ROTATION.md",
+    "docs/DOCUMENTATION_POLICY.md",
+    "docs/how-to/change-with-documentation.md",
+    "docs/reference/knowledge-commands.md",
+    "post-mortem/failure-modes/deployment.md",
+    "post-mortem/failure-modes/README.md"
+  ],
+  "checks": [
+    {
+      "command": "npm run test:free-quota:db",
+      "result": "passed",
+      "checks": 67,
+      "historical_gate_checks": 31,
+      "runtime": "Node 22.23.2",
+      "database": "owned disposable PostgreSQL 17; 159 migrations"
+    },
+    {
+      "command": "npm run test:image:db",
+      "result": "passed",
+      "checks": 96,
+      "runtime": "Node 22.23.2",
+      "database": "owned disposable PostgreSQL 17; 159 migrations"
+    },
+    {
+      "command": "npm run test:relay:image",
+      "result": "passed",
+      "checks": 15,
+      "runtime": "Node 22.23.2",
+      "transport": "closed synthetic signed object HTTP; no network"
+    },
+    {
+      "command": "npm run test:egress",
+      "result": "passed",
+      "tests": 44,
+      "runtime": "Node 22.23.2",
+      "database": "private ephemeral local PostgreSQL Unix sockets"
+    },
+    {
+      "command": "npm run test:egress:transport",
+      "result": "passed",
+      "tests": 43,
+      "runtime": "Node 22.23.2"
+    },
+    {
+      "command": "node --import tsx --test scripts/test-relay-capabilities.ts",
+      "result": "passed",
+      "tests": 21,
+      "runtime": "Node 22.23.2"
+    },
+    {
+      "command": "npm run test:yaml:security; npm run test:browser-agent; npm run test:sessions; npm run test:cooldown",
+      "result": "passed",
+      "runtime": "Node 22.23.2"
+    },
+    {
+      "command": "npm run vercel:verify -- --offline",
+      "result": "passed",
+      "phases": 8,
+      "limit": "existing build at this observation; does not certify deployment"
+    },
+    {
+      "command": "npm run test:image:security",
+      "result": "passed",
+      "tests": 69,
+      "runtime": "Node 22.23.2"
+    },
+    {
+      "command": "npm run test:free-quota",
+      "result": "passed",
+      "tests": 4,
+      "runtime": "Node 22.23.2"
+    },
+    {
+      "command": "npm run test:sites:workspace",
+      "result": "passed",
+      "tests": 19,
+      "runtime": "Node 22.23.2"
+    },
+    {
+      "command": "npm run test:auth:sessions",
+      "result": "passed",
+      "tests": 44,
+      "runtime": "Node 22.23.2"
+    },
+    {
+      "command": "npm run test:billing:lifecycle",
+      "result": "passed",
+      "tests": 20,
+      "runtime": "Node 22.23.2"
+    },
+    {
+      "command": "npm run lint; npx tsc --noEmit",
+      "result": "passed",
+      "runtime": "Node 22.23.2"
+    },
+    {
+      "command": "CI=true node scripts/build-ci.mjs",
+      "result": "passed",
+      "runtime": "Node 22.23.2",
+      "environment": "temporary source copy of HEAD plus tracked fixture/guide changes; no dotenv or server credentials; existing installed locked dependencies reused by symlink; validation only, not deployed"
+    },
+    {
+      "command": "validate_build(fresh validation source copy)",
+      "result": "passed",
+      "scope": "fresh generated browser/rendered artifacts and private runtime trace paths; full docs/source checks run separately in Git workspace"
+    }
+  ],
+  "archive_resolution": {
+    "path": ".relay/exhibitions-production-20261007/source",
+    "branch": "archive/exhibition-programme-source-2026-10-07",
+    "commit": "b11441426cbed83d91dad9757f7f7520598d572e",
+    "pushed": true,
+    "source_files_verified": 1662,
+    "source_manifest_sha256": "da5af9fa81c2115e46bc660bd44f8a415b14568b04fec2fc682e67eabd9a3561",
+    "changed_files": 22,
+    "configured_private_value_matches": 0,
+    "checkout_clean": true,
+    "disposition": "Retain deployed Media/Connect source on private remote archive branch; do not merge older source into main."
+  },
+  "limits": [
+    "Full hosted workflow pending; fresh local credential-free production build passed. Local dependency reuse is not a clean npm ci proof; require hosted checkout/install.",
+    "Earlier wider review evidence is retained; this bounded fixture review does not certify all domain inventory modules.",
+    "Serving production deployment, Mac runtime, database/schema/grants, records, generation and deployment configuration unchanged.",
+    "Visual recapture and existing broader prevention actions retain their separate status."
+  ]
+}

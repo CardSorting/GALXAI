@@ -8,7 +8,31 @@ This page describes the checked-in workflows. Their presence does not prove they
 
 [vercel-preflight.yml](../../.github/workflows/vercel-preflight.yml) triggers on pushes and pull requests targeting `main` or `staging`. It uses Node.js 22, `npm ci`, fixture public configuration, read-only contents permission and a fifteen-minute job timeout. New runs cancel older runs in the same configured concurrency group.
 
-The workflow runs documentation/incident validation and guard tests; image/identity security, account-session lifecycle and isolated active-session database checks, isolated image database checks and the historical image artifact fixture; free-generation authority/DTO, disposable quota accounting and aggregate gate races (including paid progress during free saturation/pause), and Sites workspace regressions; YAML security and production dependency audit; offline Vercel preflight; browser-agent, session and cooldown checks; isolated egress checks, including client request budgets and Sites bootstrap ownership/response tests through `test:egress:transport`; controller capability tests; lint/type checks; an isolated Next.js production build; and the compiled private-content check. The YAML and [package scripts](../../package.json) are authoritative for the exact commands and order.
+The workflow runs documentation/incident validation and guard tests; image/identity security, account-session lifecycle and isolated active-session database checks, isolated image database checks and the historical image artifact fixture; quota DTO/authority tests, retired grant and purchased image allowance isolation, retained historical gate races, and Sites workspace regressions; YAML security and production dependency audit; offline Vercel preflight; browser-agent, session and cooldown checks; isolated egress checks, including client request budgets and Sites bootstrap ownership/response tests through `test:egress:transport`; controller capability tests; lint/type checks; an isolated Next.js production build; and the compiled private-content check. The YAML and [package scripts](../../package.json) are authoritative for the exact commands and order.
+
+The historical `test:free-quota:db` command verifies that quota reads return zero
+without creating or rewriting grants, retired free Site entry points reject
+before work is persisted, and a historical balance or Sites Pro grant cannot
+replace a purchased private image allowance. Purchased requests use the current
+`private` work class and remain independent of the legacy policy lock. Ledger
+RLS, role denial, retained rollback and canonical ownership are tested against
+the complete migration chain. The accompanying gate fixture exercises internal
+historical ledger/policy compatibility, including bounded races and retained
+Site reservation stop behavior; it does not restore public free generation.
+Current reservation weights, exhaustion, settlement, release and replay remain
+covered by `test:image:db`. Do not restore retired boolean image arguments or old
+free allowances to make a fixture pass.
+
+`test:relay:image` keeps its historical command name but uses a disposable
+catalog and a closed synthetic signed object transport, with fixture-only
+credentials. It verifies missing private storage rejects before a write,
+re-encoded bytes strip metadata, private objects stay out of public assets, and
+catalog, manifest and owner-scoped reads agree. It performs no real R2 request
+or generation. Registry egress fixtures include the current desktop fields and
+pool-assignment column, verify assigned records stay outside application
+projections, and confirm retired application refresh/rewrap entry points cannot
+read credential authority. Actual administrator rotation and desktop renewal
+remain separate procedures.
 
 It does not run every repository test, a paid inference benchmark, or automatically merge a PR. Select additional component tests from the [domain map](../knowledge/DOMAINS.md). Record real inference acceptance separately when authorized and relevant.
 

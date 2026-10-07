@@ -2943,3 +2943,17 @@ Incident: `INC-20261007-STAR-DELIVERY`. Kind: `verification`.
 **Next step:** Complete documentation and compiled-boundary checks, retain separate evidence, and never replay either completed residency. Broader prevention actions retain their existing status.
 
 Evidence: [2026-10-07-star-residency-v2-generation.json](releases/2026-10-07-star-residency-v2-generation.json), [2026-10-07-star-residency-v2-review.json](releases/2026-10-07-star-residency-v2-review.json), [2026-10-07-star-residency-v2-selection.json](releases/2026-10-07-star-residency-v2-selection.json), [2026-10-07-star-residency-v2-live-check.json](releases/2026-10-07-star-residency-v2-live-check.json), [2026-10-07-star-residency-v2-public-scan.json](releases/2026-10-07-star-residency-v2-public-scan.json).
+
+## EVT-20261007-CI-local-correction — 2026-10-07T22:33:41.879855+00:00
+
+Incident: `INC-20261007-CI`. Kind: `containment`.
+
+**Observation:** Hosted CI stopped in unchanged quota fixtures; later isolated commands reproduced stale storage and registry fixtures. Serving programme continued. One archive checkout was dirty.
+
+**Action:** Reconciled test contracts without changing runtime or skipping checks; retained historical races/RLS/rollback and adversarial current authority coverage. Verified and pushed deployed-source archive b114414.
+
+**Result:** Quota 67, image DB 96, synthetic storage 15, egress 44 and transport 43 pass locally under Node 22; complete hosted run remains pending.
+
+**Next step:** Complete fresh credential-free build and source/guide attestations, push main and observe the entire hosted workflow. Retain all archived source and other incident actions.
+
+Evidence: [2026-10-07-ci-fixture-repair-local.json](releases/2026-10-07-ci-fixture-repair-local.json), [README.md](incidents/2026/2026-10-07-ci-fixture-drift/README.md).

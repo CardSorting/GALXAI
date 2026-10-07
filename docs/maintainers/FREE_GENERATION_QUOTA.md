@@ -47,14 +47,21 @@ or reinterpret its remaining count as purchased allowance.
 
 ## Other workspace allowances
 
-Sites access, Site turns, and fair-use admission remain separate from the
-Image Studio contract. Keep Site behavior documented in the
+The former free Site assignment and turn entry points are also retired:
+assignment and free-site validation reject with `free_site_limit`, while a free
+turn rejects with `free_quota_exhausted`. The compatibility quota reader returns
+zero Site, image and turn counts without creating a grant or rewriting retained
+history. Enabling a historical policy cannot reopen these entry points.
+
+Retained Sites access, Site turns, and fair-use admission remain separate from
+the Image Studio contract. Keep Site behavior documented in the
 [Sites workspace](SITES_WORKSPACE.md), [Sites fair-use](SITES_FAIR_USAGE.md),
 and [workspace operations](SITES_OPERATIONS.md) guides. Never couple Image
 plan exhaustion or an image-service outage to Explore, Star archives, or
 unrelated Sites access.
 
-The shared account quota response contains only its supported Site fields.
+The shared account quota response contains only its supported Site fields;
+its field shape is not proof of an active free offer.
 Image plan, remaining units, and renewal information come from the dedicated
 private image allowance contract. Project exact DTO allowlists; do not forward
 legacy image counts, identity hashes, billing IDs, policy counters, or internal
@@ -91,3 +98,13 @@ database tests where the disposable integration environment is available,
 TypeScript, lint, and a production build. Record actual results and scope.
 Local fixtures do not prove hosted allowance configuration, live R2 privacy,
 deployment, or real-user acceptance.
+
+`npm run test:free-quota:db` uses the guarded disposable database to verify
+retirement, unchanged historical records, purchased image admission independent
+of legacy policy locks, canonical ownership and private ledger role denial. Its
+historical gate fixture separately exercises internal compatibility functions
+and seeded old Site reservations. Those fixture rows are not production
+provisioning instructions. `npm run test:image:db` owns current purchased
+reservation races, exhaustion, replay, settlement and release evidence. Keep
+both boundaries covered; never change current product authority to satisfy a
+retired fixture contract.

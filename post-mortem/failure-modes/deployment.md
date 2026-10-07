@@ -25,3 +25,20 @@ The local workspace contained the independent BroccoliDB and BROCCOLIQUEUE repos
 Keep the app boundary explicit: pin each required package to an immutable HTTPS archive in the root manifest and lockfile, import its package entry point, and keep local Docker source bundling behind explicit esbuild aliases. Push package repositories before updating the root pin. Verify installation, typecheck and production build from the root checkout, then require the Git-triggered deployment and live acceptance before marking recovery complete. Do not solve this by checking another application, generated dependency tree, or deployment target into GALXAI.
 
 The [September 25 incident record](../incidents/2026/2026-09-25-clean-checkout-build/README.md) documents the failure and recovery. The [relay services runbook](../../docs/runbooks/relay-pool-services.md) owns local image packaging.
+
+## FM-DEPLOY-004 — retired fixtures hide later CI failures
+
+The October 7 application workflow stopped in an unchanged quota fixture that
+still passed a boolean free-image argument to the current private/STAR request
+contract. Later storage and registry fixtures also retained retired assumptions
+and were never reached by that hosted run. The production programme continued
+serving; this was a validation failure, not observed service downtime.
+
+Reproduce under the workflow's Node version using isolated authority. Reconcile
+fixtures with current product retirement, purchased allowance, private storage
+and registry projections while preserving adversarial tests and historical
+ledger/rollback coverage. Inspect every later workflow command, then require
+the complete hosted run including its production build. Never reopen a retired
+product, weaken ownership or storage guards, skip a test, or treat local success
+as hosted acceptance. See [CI contracts](../../docs/maintainers/CI_PIPELINE_AND_AUTOMATION_SPEC.md)
+and the [dated correction](../incidents/2026/2026-10-07-ci-fixture-drift/README.md).

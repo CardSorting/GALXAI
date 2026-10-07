@@ -5148,6 +5148,16 @@
       "decision": null
     },
     {
+      "path": "post-mortem/incidents/2026/2026-10-07-ci-fixture-drift/README.md",
+      "title": "October 7 application CI fixture drift",
+      "scope": "operational-record",
+      "kind": "navigation",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
       "path": "post-mortem/incidents/2026/2026-10-07-relay-connection/README.md",
       "title": "Relay connection lost while its listener stayed alive",
       "scope": "operational-record",

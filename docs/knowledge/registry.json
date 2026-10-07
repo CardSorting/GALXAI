@@ -485,7 +485,10 @@
         "scripts/test-relay-overload.ts",
         "scripts/test-relay-activation-db.ts",
         "scripts/test-relay-monitor-package.mjs",
-        "scripts/test-relay-refill-db.ts"
+        "scripts/test-relay-refill-db.ts",
+        "src/lib/supabase/repositories/ShardProjectionReader.ts",
+        "scripts/test-shard-projection-egress.ts",
+        "scripts/test-shard-registry-egress.ts"
       ],
       "guides": [
         "docs/ARCHITECTURE.md",
@@ -557,7 +560,8 @@
         "npm run test:agent:tools",
         "npm run test:relay:activation-db",
         "npm run test:relay:refill-db",
-        "npm run test:relay:monitor-package"
+        "npm run test:relay:monitor-package",
+        "npm run test:egress"
       ]
     },
     "database": {

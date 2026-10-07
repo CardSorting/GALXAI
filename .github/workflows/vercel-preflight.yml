@@ -64,7 +64,7 @@ jobs:
       - name: Verify durable image requests and Favorites in isolated PostgreSQL
         run: npm run test:image:db
 
-      - name: Verify free-generation authority, quota and recovery
+      - name: Verify retired grants, image allowance isolation and Site regressions
         run: |
           npm run test:free-quota
           npm run test:free-quota:db

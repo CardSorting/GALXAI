@@ -26,7 +26,7 @@ before(async () => {
   const types: Record<string, string> = { id: 'text PRIMARY KEY', user_id: 'text', priority: 'integer',
     registry_revision: 'bigint', reserved_tokens: 'bigint', fencing_token: 'bigint',
     permission_retracted: 'boolean', privacy_capabilities: 'jsonb', created_at: 'timestamptz DEFAULT now()' };
-  await pool.query(`CREATE TABLE public.galx_shard_accounts (${SHARD_PROJECTION_COLUMNS.map(column => `${column} ${types[column] ?? 'text'}`).join(',')})`);
+  await pool.query(`CREATE TABLE public.galx_shard_accounts (${SHARD_PROJECTION_COLUMNS.map(column => `${column} ${types[column] ?? 'text'}`).join(',')}, relay_pool_id text)`);
 });
 after(async () => {
   await pool?.end();
@@ -62,31 +62,26 @@ test('constructor does no authority I/O; explicit first use is single-flight and
   assert.equal(calls, failedCalls + 1, 'an initial outage must not poison the process forever');
 });
 
-test('credential maintenance explicitly awaits fresh authority and fails closed before reading a cold projection', async t => {
+test('retired credential maintenance cannot read or mutate authority through the application engine', async t => {
   const { galxRouter } = await import('../src/core/router/GalxModelRouter');
   const { GalxAuthEngine } = await import('../src/core/auth/GalxAuthEngine');
   const { GalxPersistence } = await import('../src/lib/storage/GalxPersistence');
   const engine = GalxAuthEngine.getInstance();
-  let release!: () => void, reads = 0;
-  t.mock.method(galxRouter.substrate, 'ensureFreshFromAuthority', () => new Promise<void>(done => { release = done; }));
+  let reads = 0;
+  t.mock.method(galxRouter.substrate, 'ensureFreshFromAuthority', async () => { reads++; throw new Error('unexpected authority read'); });
   t.mock.method(galxRouter.substrate, 'getAccount', () => { reads++; return undefined; });
   t.mock.method(galxRouter.substrate, 'listAccounts', () => { reads++; return []; });
   t.mock.method(GalxPersistence.getInstance(), 'logAudit', () => {});
-  const refresh = engine.refreshProviderShardTokens('not-present');
-  assert.equal(reads, 0); release();
-  assert.equal(await refresh, false); assert.equal(reads, 1);
-  const rewrap = engine.reencryptVaultShards();
-  assert.equal(reads, 1); release();
-  assert.deepEqual(await rewrap, { total: 0, reencrypted: 0 }); assert.equal(reads, 2);
-  t.mock.method(galxRouter.substrate, 'ensureFreshFromAuthority', async () => { throw new Error('authority unavailable'); });
   assert.equal(await engine.refreshProviderShardTokens('not-present'), false);
-  await assert.rejects(engine.reencryptVaultShards(), /authority unavailable/);
-  assert.equal(reads, 2, 'an authority failure must not be reported as an empty successful rewrap');
+  await assert.rejects(engine.reencryptVaultShards(), /private transactional vault rotation command/);
+  assert.equal(reads, 0, 'retired entry points must not touch the projection or credential cache');
 });
 
 test('scoped real SQL coalesces reads, sends only deltas, preserves counters and omits unchanged envelopes', async () => {
   await pool.query(`INSERT INTO public.galx_shard_accounts(id,user_id,priority,registry_revision,reserved_tokens,fencing_token,encrypted_ciphertext,encrypted_iv,encrypted_tag)
     VALUES ('a','alice',20,1,4,1,repeat('cipher',1000),'iv','tag'),('b','bob',10,1,2,1,'b-secret','iv','tag')`);
+  await pool.query(`INSERT INTO public.galx_shard_accounts(id,user_id,priority,relay_pool_id,encrypted_ciphertext)
+    VALUES ('pooled','alice',100,'private-pool','never-in-application-projection')`);
   let calls = 0, now = 0, offline = false;
   const responses: Record<string, any>[] = [];
   const reader = new ShardProjectionReader({ config,

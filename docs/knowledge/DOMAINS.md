@@ -163,7 +163,7 @@ Owner role: **Relay operator**. Domain: `relay`.
 - [Relay admission lifecycle](../../docs/runbooks/relay-admission-lifecycle.md)
 - [Bounded Star artist residency](../../docs/runbooks/star-residency.md)
 
-Relevant checks (select for the change; impact discovery never executes these): `npm run test:relay:capabilities`, `npm run test:relay:desktop-login`, `npm run test:relay:pool-images`, `npm run verify:relay:pool-images`, `npm run test:relay:services`, `npm run verify:relay:service-images`, `npm run test:agent:tools`, `npm run test:relay:activation-db`, `npm run test:relay:refill-db`, `npm run test:relay:monitor-package`.
+Relevant checks (select for the change; impact discovery never executes these): `npm run test:relay:capabilities`, `npm run test:relay:desktop-login`, `npm run test:relay:pool-images`, `npm run verify:relay:pool-images`, `npm run test:relay:services`, `npm run verify:relay:service-images`, `npm run test:agent:tools`, `npm run test:relay:activation-db`, `npm run test:relay:refill-db`, `npm run test:relay:monitor-package`, `npm run test:egress`.
 
 ## Database authority and migrations
 

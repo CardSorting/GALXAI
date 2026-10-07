@@ -1,7 +1,7 @@
 {
   "knowledge": {
-    "reviewer": "Codex production release maintainer",
-    "note": "Reviewed exact accepted-source programme/dependency overlay, diagnostics exclusion with four adversarial packaging checks, regenerated archive/manifest, protected candidate and actual three-alias readback, full scoped public HTML/RSC/assets/artifact/cache acceptance and complete affected deployment/programme guides. Preserve earlier wider evidence. Visual review remains recapture; development advisories and unchanged legacy quota GitHub fixture failure are retained, not certified clean. No database, grant, service, runtime-image, generation or ADR status change. Private unmapped release records inspected as dated evidence; CURRENT_STATE remains the single current-state authority.",
+    "reviewer": "Codex CI fixture maintainer",
+    "note": "Bounded review of unchanged runtime contracts and complete affected guides for retired quota/current purchased image fixtures, synthetic private storage and current registry schema/authority. Preserve wider dated evidence; no runtime, migration, grant or deployment mutation. Historical compatibility/RLS/rollback and adversarial tests retained. Unmapped registry tests inspected and assigned relay ownership; hosted acceptance still pending.",
     "reviewed_at": "2026-10-07",
     "review_by": "2026-10-14",
     "evidence": {
@@ -10,14 +10,15 @@
       "post-mortem/releases/2026-10-07-exhibition-programme-local-review.json": "c0abd8605baf01403f11fdfb24eb9cc18a37ddb1798e59d2b00746cc37ed7a3a",
       "post-mortem/releases/2026-10-07-exhibition-programme-release-preflight.json": "f85b3976b3adfb3119c50e7586f38a7d8a0e68dda6a89a80c6d314165eeb78f4",
       "post-mortem/releases/2026-10-07-exhibition-programme-dependency-review.json": "fbdc73a891cb85f2c9d6ddc2fc514b9258ffe54a10c7eede4b05cceebad9c04b",
-      "post-mortem/releases/2026-10-07-exhibition-programme-deployment.json": "f4d09ac5f83e7d0a2a14f57080ef84c68d39d26d62a396c8f6a606f08cb962c4"
+      "post-mortem/releases/2026-10-07-exhibition-programme-deployment.json": "f4d09ac5f83e7d0a2a14f57080ef84c68d39d26d62a396c8f6a606f08cb962c4",
+      "post-mortem/releases/2026-10-07-ci-fixture-repair-local.json": "83e5fc969556cfea079da765b2209bc75b4b7b0e890cd745018d7b1669ff7442"
     },
     "files": {
       ".github/CODEOWNERS": "ef2f416d15f027dc8f197ad844289c9a44c8e843d3214d1590a3a380e939d13f",
       ".github/PULL_REQUEST_TEMPLATE.md": "3c2167417f717108954f797e3a3561d4ea92b70338a0cdd6f05fa8eb2f03c1cd",
       ".github/workflows/deploy-cloudflare.yml": "85bf52af1949398b2a6f62fe6e86b289c24639649653783643e24dffaff91edb",
       ".github/workflows/documentation.yml": "957c4159e35ec3d160953fa2d6fd6183ec6b8b198b1049839437b4bb87424f7e",
-      ".github/workflows/vercel-preflight.yml": "60856940957e45075d1c54de644d3ba0268fad16b35b3ed5eb8005bc40a5b4b3",
+      ".github/workflows/vercel-preflight.yml": "a3489384482756c5795da7498ecf8fc455ea2204868af52fc56a9aa0a856f936",
       "HANDOVER.md": "65499cdba27c6a58d7e1e536c714298195698413013742beeaaa4fa75791d733",
       "MAINTAINERS.md": "4760685c57abd3e10aad8a575638834a96b1a5cdda9d7ff16e772b62e8ce24ce",
       "PRODUCT.md": "e58dc7a45d35773c78c01fcc6700c20d5d175addc15766e723e5fcd3b78a2b71",
@@ -45,14 +46,14 @@
       "docs/how-to/change-with-documentation.md": "abcf6bfb2f0aadcf8cfc2fdae18ac8f3f84565f127c34f7453d50e7283006e40",
       "docs/knowledge/DECISIONS.md": "2d08035662840885d96354d0b18aa35dc39232cc9444e933e6d6b238072280da",
       "docs/knowledge/DESIGN_RATIONALE.md": "edd3cf9b49ed794fbe8bf14448fd0c56cb4d8df832bab81cdf07e9ea2e2204a1",
-      "docs/knowledge/DOMAINS.md": "f5be455fc34a9d77a750b4edaab77fe7aa8385e2e91bbb7589048a9ff27108b0",
+      "docs/knowledge/DOMAINS.md": "4c22c54dab0a27a7e1b15d6c1713ad3c66fc5b88f2afe11fc9b43dd0959983f5",
       "docs/knowledge/README.md": "5ad219aeee44a9c065db2ca69e5a6498966fed42e2d8c74773dbc055d0220931",
-      "docs/knowledge/catalog.json": "ff1f2eea98ae384ce1c5481b238e393d481791e52f91720aac6dd99a4f56f11b",
-      "docs/knowledge/registry.json": "2872134afbe905556bc3ee33c62c72e9c56f5c34a5651eacdab6cd3f7901458e",
+      "docs/knowledge/catalog.json": "68819441421bc72f4751a2e310bdc5db8b6063703d41d142c1000ba1729ef1b8",
+      "docs/knowledge/registry.json": "61b104db7e98213cd7487339300e7cb756701504c75344f3b8f6215c09acaf05",
       "docs/knowledge/templates/adr.md": "28773b3cbdb53ad34f08d0362e87b6dba24b6fd76ddb6c85db8ad63d99ad1331",
       "docs/knowledge/templates/runbook.md": "19679a7eb8c1a3aafd87852fa93817e7bf9ef4696772c8deb1617366c290abc1",
       "docs/maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md": "b7df75535611c14aabe599764a6f6c2a4f0f1461d068929602c68e39d8ce850d",
-      "docs/maintainers/CI_PIPELINE_AND_AUTOMATION_SPEC.md": "79b2f5f67ab7fe231f9ba34fb789ae9385bdafa069acee1c0ea8eaf159ff4640",
+      "docs/maintainers/CI_PIPELINE_AND_AUTOMATION_SPEC.md": "e90481fd510164cb2c780af1d27583f1dcf1b10d7a55f6b67015166b92145a3d",
       "docs/maintainers/DAY_1_TO_30_ONBOARDING_ROADMAP.md": "e9295b186cf9d5f9bc0c6a943f54af40ff52122aa5f8d880d5263c00d2dd7fd4",
       "docs/maintainers/MAINTAINER_ONBOARDING_ASSESSMENT.md": "619331130e6bd5559c36059c617449712178a0fb16b8ef6487a00402bd8bd525",
       "docs/maintainers/SUBSYSTEM_MAINTAINER_MATRIX.md": "9d0dad1aa9c7ce7790428d7ae587c8e4acb456538380062d0a65de8859791b57",
@@ -66,7 +67,7 @@
       "docs/tutorials/README.md": "7cc84f00412108e1c8ec84ef127b15027b606bd16c2dc290f6efc607b9ca5268",
       "docs/tutorials/first-change.md": "06b7c9501cfe62893978e1da6556d6d4fc0d88f4e36b484d05dad4ad72d9fd60",
       "package.json": "d05821f475268559db698775def3fb91112a8e4cb90d2ee58ab169758876bcb4",
-      "post-mortem/documentation-inventory.json": "d70412e6ff447c809fd070d5fd44d2bdf0da9b21912e195dd0e82d27c27797a3",
+      "post-mortem/documentation-inventory.json": "04f515def91a06661fec51e246e0b0c0e230e558b65ce7bde9e5dec7b797806d",
       "post-mortem/releases/2026-09-25-broc-practice-local-review.json": "43ac12b5294864a7dd2b9fbff52367693e2739eb4083263aa05a87abdc8e0616",
       "scripts/docs-kb.py": "57642bcce6edcdec6b14dc285e973c1c7ba43d9b8908903826befcba6e992d88",
       "scripts/test-docs-kb.py": "83aa914e66cc04d866fd4c77554760748f8e1d07378326c49ac1738f12851856",
@@ -107,8 +108,8 @@
     }
   },
   "images": {
-    "reviewer": "Codex production release maintainer",
-    "note": "Reviewed exact accepted-source programme/dependency overlay, diagnostics exclusion with four adversarial packaging checks, regenerated archive/manifest, protected candidate and actual three-alias readback, full scoped public HTML/RSC/assets/artifact/cache acceptance and complete affected deployment/programme guides. Preserve earlier wider evidence. Visual review remains recapture; development advisories and unchanged legacy quota GitHub fixture failure are retained, not certified clean. No database, grant, service, runtime-image, generation or ADR status change. Private unmapped release records inspected as dated evidence; CURRENT_STATE remains the single current-state authority.",
+    "reviewer": "Codex CI fixture maintainer",
+    "note": "Bounded review of unchanged runtime contracts and complete affected guides for retired quota/current purchased image fixtures, synthetic private storage and current registry schema/authority. Preserve wider dated evidence; no runtime, migration, grant or deployment mutation. Historical compatibility/RLS/rollback and adversarial tests retained. Unmapped registry tests inspected and assigned relay ownership; hosted acceptance still pending.",
     "reviewed_at": "2026-10-07",
     "review_by": "2026-10-14",
     "evidence": {
@@ -118,7 +119,8 @@
       "post-mortem/releases/2026-10-07-exhibition-programme-local-review.json": "c0abd8605baf01403f11fdfb24eb9cc18a37ddb1798e59d2b00746cc37ed7a3a",
       "post-mortem/releases/2026-10-07-exhibition-programme-release-preflight.json": "f85b3976b3adfb3119c50e7586f38a7d8a0e68dda6a89a80c6d314165eeb78f4",
       "post-mortem/releases/2026-10-07-exhibition-programme-dependency-review.json": "fbdc73a891cb85f2c9d6ddc2fc514b9258ffe54a10c7eede4b05cceebad9c04b",
-      "post-mortem/releases/2026-10-07-exhibition-programme-deployment.json": "f4d09ac5f83e7d0a2a14f57080ef84c68d39d26d62a396c8f6a606f08cb962c4"
+      "post-mortem/releases/2026-10-07-exhibition-programme-deployment.json": "f4d09ac5f83e7d0a2a14f57080ef84c68d39d26d62a396c8f6a606f08cb962c4",
+      "post-mortem/releases/2026-10-07-ci-fixture-repair-local.json": "83e5fc969556cfea079da765b2209bc75b4b7b0e890cd745018d7b1669ff7442"
     },
     "files": {
       "BROC/practice.ts": "19499a05b7f9e481fcd0c4c04242bde79accc9da7f66daff91a229258c810167",
@@ -135,7 +137,7 @@
       "docs/adr/0160-private-human-creation-star-publishing.md": "2f33531fb50bbea8daafb8a5891aba654c92879b832078e0b21588f7cf504948",
       "docs/adr/0161-broc-persistent-star-practice.md": "dc51973d7a84df662d4d96760c71019228aad8e025d7139520eeb490dddac0c5",
       "docs/adr/0163-star-candidate-selection-before-exhibition.md": "de1bc70e9ad495fd0bd559a2462db49068d7eb864a451333f64708e3c0b94dd5",
-      "docs/maintainers/FREE_GENERATION_QUOTA.md": "deed3002f798e59eef2cb8536fe17c2e394c7302f058e3fa952726e4a00195e5",
+      "docs/maintainers/FREE_GENERATION_QUOTA.md": "37c1dfadc67fa9cde7083edb01d3de6b6bfe325164fde318f3356b8e3a6f8833",
       "docs/maintainers/PUBLIC_DISCOVERY.md": "31f27265b511a01da5afe1557db5f67c2e71430c83f8966731d3d817ca5480ea",
       "docs/maintainers/image-library-scale.md": "733dbe50cedb08e18b231ce1c88ddcc71d460957eefccfd4fbcba3a9d6f34912",
       "docs/maintainers/image-public-boundary.md": "aa6055c8e4929772bf05fb4b535b0694e99fe8d9f4bf2e9bd10f0c67ba93f229",
@@ -147,7 +149,7 @@
       "docs/reference/stars.md": "fc573dcb36e3f0becd269ee6ddba2ea2ab74e27570edafcf4490deeee34b29a0",
       "docs/runbooks/private-image-release-audit.md": "4e1810aeb595ea04ba64556656c615c1d1628bc9697675bf792ec211e4691d1a",
       "docs/runbooks/star-residency.md": "a5fb0c36a57bc1f4794fb199d80696d30c73680dca582fcbcdf4f015fdcd6b1c",
-      "post-mortem/failure-modes/README.md": "629157ce509512a282c183744daf1cee051dba2da136c133018eda694d8dc590",
+      "post-mortem/failure-modes/README.md": "f0252593b71afd1f42cb45a07f11c830641b9baf4572a8ab8cbe3d706170f221",
       "post-mortem/failure-modes/images.md": "75b23a005f7aaf0b5abea684b22878b3f5398123211d4348828acdf141a4c8de",
       "post-mortem/runbooks/image-generation.md": "2c3fff4894df4ac46cc44d71e7788c90b165b281eec939ee39603159f07c4117",
       "scripts/audit-image-release.ts": "feb31da1c86b5cdecdd3a3fb7739648051b6eceb0517c05416619a55da134838",
@@ -160,8 +162,8 @@
       "scripts/test-community-profile.ts": "6229e2139b30406fdc0a66e91d1d67d5e4f564de3e9265c69a8434606a618e10",
       "scripts/test-community-stream-audit.ts": "75cf437ecf348df32b91b1527faae1a5fcf220bd287bb79a25bcb16509e0c5e4",
       "scripts/test-exhibition-programme.ts": "24abe95c7ec3208d5598fdb3e0ddc8c3207edcc00b201688fff53fbeba6dae57",
-      "scripts/test-free-generation-gate-db.ts": "2919f39490203795965f494f61b288305ea7136e544515cc504d9e8a0ff7e037",
-      "scripts/test-free-generation-quota-db.ts": "26d3381b0a90285cce6d954b954601fb7a5a4596998389ac7091cfb7b49d9b04",
+      "scripts/test-free-generation-gate-db.ts": "3c5c3383cab8111c633ae42579dcac90935b8963ff35dee461fb1ca1763bb445",
+      "scripts/test-free-generation-quota-db.ts": "c61677cdfaf2dd0b34ab40a5f0dc761dfc0f401fe608ee12b6bc53a614917693",
       "scripts/test-free-generation-quota.ts": "c1af31de5aae4f1d81bba93a1a97019133b98ff69f500b2be570c03c012ec2ac",
       "scripts/test-image-availability.ts": "528ae3de6acb10af1ed72c9de8f9783673d3b8c154071787d3e3293d0b7b3623",
       "scripts/test-image-explore-hide.ts": "60f679a61bf6133c08b92725440598ea43d7ee21617c5390ece37cd425d54d09",
@@ -178,7 +180,7 @@
       "scripts/test-private-image-storage.ts": "b6167ecde8242664043cfed65e142d30b03fddfdfa56919a5ec8c2af247ffb0b",
       "scripts/test-private-remix.ts": "606188e812641db6ea26cfb5ea084e30b622a3b73925669313e1e8763ba72646",
       "scripts/test-public-information-boundary.ts": "ac9138eeafc3f3331540e735b4f32d45f090ee9dafcc940afeb6c47e1a019423",
-      "scripts/test-relay-image-generation.ts": "d66f497b893ed0026806fbc928dbafff65be90b2e505e86c7da32b4df9d67140",
+      "scripts/test-relay-image-generation.ts": "d7098c9abf926869f7c1e026f991cb23d6a9508efb83d060342f66a69db93f46",
       "scripts/test-saved-works.ts": "718391de8308d75f35ec18b532ac6f3aefa46ff60a0166230f697255253dfed9",
       "scripts/test-sleeping-star-invariant.ts": "81277c7abe4008bc90f55b7a45bc6bb0b8d0edf3aaf43aee89530102beeb32b1",
       "scripts/test-star-qualification-plan.ts": "9cc0d23e93d7ed93627c989f105cb9f0ba584666865a810a3c2223557adc69aa",
@@ -307,13 +309,14 @@
     }
   },
   "access": {
-    "reviewer": "Codex exhibition maintainer",
-    "note": "Reviewed exact programme path and dynamic-template exemptions and complete affected preview/workspace-auth guides. Profile-unavailable public reading retains pending-logout, private workspace/API and administrator boundaries. Adversarial fixtures and hostile local HTTP denials passed; prior wider access evidence retained.",
+    "reviewer": "Codex CI fixture maintainer",
+    "note": "Bounded review of unchanged runtime contracts and complete affected guides for retired quota/current purchased image fixtures, synthetic private storage and current registry schema/authority. Preserve wider dated evidence; no runtime, migration, grant or deployment mutation. Historical compatibility/RLS/rollback and adversarial tests retained. Unmapped registry tests inspected and assigned relay ownership; hosted acceptance still pending.",
     "reviewed_at": "2026-10-07",
     "review_by": "2026-10-14",
     "evidence": {
       "post-mortem/releases/2026-10-03-nova-mac-transition-review.json": "eef04fd112f3e19b6ddf45926bb2a6b4306eb3a0e4eeac3ebc4e3beac08aed79",
-      "post-mortem/releases/2026-10-07-exhibition-programme-local-review.json": "c0abd8605baf01403f11fdfb24eb9cc18a37ddb1798e59d2b00746cc37ed7a3a"
+      "post-mortem/releases/2026-10-07-exhibition-programme-local-review.json": "c0abd8605baf01403f11fdfb24eb9cc18a37ddb1798e59d2b00746cc37ed7a3a",
+      "post-mortem/releases/2026-10-07-ci-fixture-repair-local.json": "83e5fc969556cfea079da765b2209bc75b4b7b0e890cd745018d7b1669ff7442"
     },
     "files": {
       "docs/OAUTH_AND_TOKEN_LIFECYCLE_SPECIFICATION.md": "a5840e5e0d081e07e04b96375c0842149ae83fc19e1154849aaf91a4d5a4b95e",
@@ -322,7 +325,7 @@
       "docs/SECURITY_POSTURE_AND_THREAT_MODEL.md": "9af58d1513ed0ae17e45f984fbb37c1a03b9a9ac6343a56a6b4c2824e2187c91",
       "docs/STANDARDIZED_OAUTH_AND_INGESTION_ARCHITECTURE.md": "a868af89bfa178e22ae68161ed96d28a9b4da080f6108573b0da05f2cb73e908",
       "docs/adr/0147-verified-account-and-session-authority.md": "5c97eaabc0faa667f329c44ed0366125c96cb0cbd4625f7cf84649b882e57a96",
-      "docs/maintainers/FREE_GENERATION_QUOTA.md": "deed3002f798e59eef2cb8536fe17c2e394c7302f058e3fa952726e4a00195e5",
+      "docs/maintainers/FREE_GENERATION_QUOTA.md": "37c1dfadc67fa9cde7083edb01d3de6b6bfe325164fde318f3356b8e3a6f8833",
       "docs/maintainers/readable-urls.md": "5a89ddc75b34f511bd5fc88c2eaededcf597c656449256f2f7dddf87d1c0c8c4",
       "docs/operations/developer-preview.md": "e0c7998d5c29f1ec259694b2b5b8616ccb3965fcd2e7329ca4d58cca3d86dea9",
       "docs/operations/preview-activation.md": "20b77ed5c8fdc5c318f5186964d8ce5079a3ec17cccd15898b0fd947f86794d4",
@@ -338,8 +341,8 @@
       "scripts/test-auth-provider-recovery.ts": "b97fb5e6c21e01fe830752e580b26208a2d96b219a8b773f1aba4702c63f83fe",
       "scripts/test-browser-session.ts": "2bcb16b82cc74f011dfa8c7d4d799145e084520b0d43b96addc552f4de9230e1",
       "scripts/test-developer-preview.ts": "790543e88f8d1ce2e34503b6db8fb11e3ae3f37d8a59c322176dbe36462ce50d",
-      "scripts/test-free-generation-gate-db.ts": "2919f39490203795965f494f61b288305ea7136e544515cc504d9e8a0ff7e037",
-      "scripts/test-free-generation-quota-db.ts": "26d3381b0a90285cce6d954b954601fb7a5a4596998389ac7091cfb7b49d9b04",
+      "scripts/test-free-generation-gate-db.ts": "3c5c3383cab8111c633ae42579dcac90935b8963ff35dee461fb1ca1763bb445",
+      "scripts/test-free-generation-quota-db.ts": "c61677cdfaf2dd0b34ab40a5f0dc761dfc0f401fe608ee12b6bc53a614917693",
       "scripts/test-free-generation-quota.ts": "c1af31de5aae4f1d81bba93a1a97019133b98ff69f500b2be570c03c012ec2ac",
       "scripts/test-preview-admin.ts": "3cbe5d792ba585ab10377d3ba3cf6c8992bda2f6b0266311c803d335c8b64a24",
       "scripts/test-preview-read-sync.ts": "bbd27e91f88a78c461890ad05e7ba988c674c35eb9096ee0bfb8f33a3825989c",
@@ -466,12 +469,13 @@
     }
   },
   "sites": {
-    "reviewer": "Codex",
-    "note": "Reviewed API_BASE_URL capability clarification and middleware published-Site authority: Connect grants no Site authority and exact Connect paths remain denied on published hosts. Site entitlement/publication implementation unchanged; bounded changed-contract scope is retained.",
-    "reviewed_at": "2026-10-03",
-    "review_by": "2026-10-10",
+    "reviewer": "Codex CI fixture maintainer",
+    "note": "Bounded review of unchanged runtime contracts and complete affected guides for retired quota/current purchased image fixtures, synthetic private storage and current registry schema/authority. Preserve wider dated evidence; no runtime, migration, grant or deployment mutation. Historical compatibility/RLS/rollback and adversarial tests retained. Unmapped registry tests inspected and assigned relay ownership; hosted acceptance still pending.",
+    "reviewed_at": "2026-10-07",
+    "review_by": "2026-10-14",
     "evidence": {
-      "post-mortem/releases/2026-10-03-connect-local-review.json": "37e94394ab2210d6f722b4d3cd6ac041b6b229777ac6a20f7f9c14cf807d6807"
+      "post-mortem/releases/2026-10-03-connect-local-review.json": "37e94394ab2210d6f722b4d3cd6ac041b6b229777ac6a20f7f9c14cf807d6807",
+      "post-mortem/releases/2026-10-07-ci-fixture-repair-local.json": "83e5fc969556cfea079da765b2209bc75b4b7b0e890cd745018d7b1669ff7442"
     },
     "files": {
       "docs/API_BASE_URL.md": "90ad9593668b5be61c0ee8ed940f53604d94f741c2ed250f3e9f44876cb50ca8",
@@ -480,14 +484,14 @@
       "docs/adr/0148-complimentary-pro-access.md": "4d454694d9a03c11485d32a428c9b7bb1de635f00e62f60ed51ac86619ad6922",
       "docs/adr/0149-one-time-free-generation.md": "b01abb8941252b6f7e2b3f0359428d9b8afe9effbda7e1af2badc4cce9d4fd43",
       "docs/adr/0150-free-generation-admission-gate.md": "135151cdb2ce88ea8ec8f8f60d3d0d03e5fc8fd086b766927f2e19a577b6a408",
-      "docs/maintainers/FREE_GENERATION_QUOTA.md": "deed3002f798e59eef2cb8536fe17c2e394c7302f058e3fa952726e4a00195e5",
+      "docs/maintainers/FREE_GENERATION_QUOTA.md": "37c1dfadc67fa9cde7083edb01d3de6b6bfe325164fde318f3356b8e3a6f8833",
       "docs/maintainers/SITES_DOMAINS.md": "99e64a33d4a55c03cc0dc59a2cf4b1b91beb38429911fd90f1e938e3bcc9f59a",
       "docs/maintainers/SITES_FAIR_USAGE.md": "94593f8b1f7ef8c83d9168657a3a1c2cff0adc9e8bd2f93a5403da73410a1bcc",
       "docs/maintainers/SITES_OPERATIONS.md": "977fa6b88c5f446fc808331431d85c674ebfb791fd2cc146d28cb3c85e359566",
       "docs/maintainers/SITES_WORKSPACE.md": "f09934fe65973d944cd5eaff361405a2c0ea83ebc7a0b2950ba62bcd746b93bb",
       "scripts/manage-pro-access.ts": "1ebddafc9bfcc287daf63cfab41d7fd20825b51840fd697dcb41a873fa1d2dbb",
-      "scripts/test-free-generation-gate-db.ts": "2919f39490203795965f494f61b288305ea7136e544515cc504d9e8a0ff7e037",
-      "scripts/test-free-generation-quota-db.ts": "26d3381b0a90285cce6d954b954601fb7a5a4596998389ac7091cfb7b49d9b04",
+      "scripts/test-free-generation-gate-db.ts": "3c5c3383cab8111c633ae42579dcac90935b8963ff35dee461fb1ca1763bb445",
+      "scripts/test-free-generation-quota-db.ts": "c61677cdfaf2dd0b34ab40a5f0dc761dfc0f401fe608ee12b6bc53a614917693",
       "scripts/test-free-generation-quota.ts": "c1af31de5aae4f1d81bba93a1a97019133b98ff69f500b2be570c03c012ec2ac",
       "scripts/test-sites-fair-db.ts": "81c54900423732529355f40b450ab354edee2b24a705e6a95e19e97faba01b92",
       "scripts/test-sites-fair.ts": "a7bcdb66c9afe4247c3abde1b95cb4e01e719cce37be57d25f94e33b5d958110",
@@ -543,8 +547,8 @@
     }
   },
   "relay": {
-    "reviewer": "Codex production release maintainer",
-    "note": "Bounded release review: hash-verified accepted Media source plus exact programme overlay, hostname aliases distinct from project target pointer, complete affected clean-package/programme guides, explicit sharp/source-map/brace patch lock delta and build-only dependency classification. Required runtime audit and affected regressions pass; remaining development advisories and denied visual review retained. No runtime-image, service, database, grant, payment or residency replay change. Prior wider evidence retained; candidate deployment remains pending.",
+    "reviewer": "Codex CI fixture maintainer",
+    "note": "Bounded review of unchanged runtime contracts and complete affected guides for retired quota/current purchased image fixtures, synthetic private storage and current registry schema/authority. Preserve wider dated evidence; no runtime, migration, grant or deployment mutation. Historical compatibility/RLS/rollback and adversarial tests retained. Unmapped registry tests inspected and assigned relay ownership; hosted acceptance still pending.",
     "reviewed_at": "2026-10-07",
     "review_by": "2026-10-14",
     "evidence": {
@@ -553,7 +557,8 @@
       "post-mortem/releases/2026-10-07-star-residency-verification.json": "38c5e451fe249b4df204f1a9a032e550c1a013337798a3be9430f26186d04674",
       "post-mortem/releases/2026-10-07-star-residency-v2-verification.json": "ce2a33e00b56d30e0b7e5709170bebc753975c6d6ba37f72c879a8d0a7240495",
       "post-mortem/releases/2026-10-07-exhibition-programme-release-preflight.json": "f85b3976b3adfb3119c50e7586f38a7d8a0e68dda6a89a80c6d314165eeb78f4",
-      "post-mortem/releases/2026-10-07-exhibition-programme-dependency-review.json": "fbdc73a891cb85f2c9d6ddc2fc514b9258ffe54a10c7eede4b05cceebad9c04b"
+      "post-mortem/releases/2026-10-07-exhibition-programme-dependency-review.json": "fbdc73a891cb85f2c9d6ddc2fc514b9258ffe54a10c7eede4b05cceebad9c04b",
+      "post-mortem/releases/2026-10-07-ci-fixture-repair-local.json": "83e5fc969556cfea079da765b2209bc75b4b7b0e890cd745018d7b1669ff7442"
     },
     "files": {
       ".env.example": "e06dd941e9099f4cd1ccda9b5379e09863c4ba378600ef0263b982ed9e414ec4",
@@ -706,6 +711,8 @@
       "scripts/test-relay-registration-errors.ts": "50a58133ab9a77c75abfe28312e7a227715a7062ba91b2aaf79690c8dbab45a6",
       "scripts/test-relay-services.ts": "f2a632ab1bcfba54bc9ea664e3ef9348f93e6ae2cac8bdae94d141321b3fb1ab",
       "scripts/test-shard-enrollment-storage.ts": "9fec2353a1579d6e7fff3b816161f64561e4462673e81168625369c9131970f4",
+      "scripts/test-shard-projection-egress.ts": "c7b1db3f61c20754ba923015b59546aa5f162700da26060e514b8c7d918302ae",
+      "scripts/test-shard-registry-egress.ts": "8d3646c0e0a3251d2b890bcbb5f1af408196028346c17d1fa5048cdf0c1487e1",
       "scripts/test-star-qualification-plan.ts": "9cc0d23e93d7ed93627c989f105cb9f0ba584666865a810a3c2223557adc69aa",
       "scripts/verify-relay-digitalocean.ts": "be337841529713d39917205c2f097bf1287ba7e905364bcba51f564b2040ac41",
       "scripts/verify-relay-hosts.ts": "8f5c0cdd6e2a1aba23f7e5474156b065429b753db297b15f4ac195ea86ef426c",
@@ -731,6 +738,7 @@
       "src/lib/stars/star-cohort.ts": "d175baa81b66a8a3d1959870b0f9ab88e5a4b4a5e27a4422c94ac532454ddf8f",
       "src/lib/stars/star-domain.ts": "aa90b41bebf785218bee14461869d70a34b86b90a34714fff7b3bb4fd9438910",
       "src/lib/stars/star-residency.ts": "c02b6bdf60b8e9d19842dd232e1c62d6160e027ac711521db9da493b4cbfc8c5",
+      "src/lib/supabase/repositories/ShardProjectionReader.ts": "22f54fab59e4f853355c3f342c1dfff553adb8a471cc98d7b2814d2460a3db2d",
       "src/relay/admission-lifecycle.ts": "82c8805b2da0c9ec87119e22d5a31cefa58006f901fa0d35d25f9f8614eef3cc",
       "src/relay/admission-observability.ts": "d8b631711411e4fe5284683d6eede715c1399603fdfcfd4ab4efd25d49b9ae24",
       "src/relay/admission-receipt-journal.ts": "fe1ca56660b6fe9b0f5e8c4e84a738f1cd0ece9f6d534973bec05b296bd8bbf7",
@@ -809,15 +817,16 @@
     }
   },
   "database": {
-    "reviewer": "Codex residency maintainer",
-    "note": "Reviewed separate fixed-cohort actor reuse and preserved first definitions; complete revised account-profile and residency guide. Existing cohort and selection SQL unchanged, seven prior counters preserved and actors inactive. Prior 94 authorization and 96 image fixture checks retained as earlier evidence; no new schema or privilege changes.",
+    "reviewer": "Codex CI fixture maintainer",
+    "note": "Bounded review of unchanged runtime contracts and complete affected guides for retired quota/current purchased image fixtures, synthetic private storage and current registry schema/authority. Preserve wider dated evidence; no runtime, migration, grant or deployment mutation. Historical compatibility/RLS/rollback and adversarial tests retained. Unmapped registry tests inspected and assigned relay ownership; hosted acceptance still pending.",
     "reviewed_at": "2026-10-07",
     "review_by": "2026-10-14",
     "evidence": {
       "post-mortem/releases/2026-10-03-refill-packaging-review.json": "5e5e6ab672b33525a337fdbcd7c70b13ce2e315d4d672d28a4728d36b99e08aa",
       "post-mortem/incidents/2026/2026-10-07-relay-connection/reconnect-review.json": "1078d3a6c10258e84fb95dce37e79396edf53ac036fc2d6027ac6064c06d89f5",
       "post-mortem/releases/2026-10-07-star-residency-verification.json": "38c5e451fe249b4df204f1a9a032e550c1a013337798a3be9430f26186d04674",
-      "post-mortem/releases/2026-10-07-star-residency-v2-verification.json": "ce2a33e00b56d30e0b7e5709170bebc753975c6d6ba37f72c879a8d0a7240495"
+      "post-mortem/releases/2026-10-07-star-residency-v2-verification.json": "ce2a33e00b56d30e0b7e5709170bebc753975c6d6ba37f72c879a8d0a7240495",
+      "post-mortem/releases/2026-10-07-ci-fixture-repair-local.json": "83e5fc969556cfea079da765b2209bc75b4b7b0e890cd745018d7b1669ff7442"
     },
     "files": {
       "BROC/store.ts": "17390f446cba5ae0b51b2b9937e352a082ac0e87c00b66cf174745136f915b9b",
@@ -831,9 +840,9 @@
       "docs/adr/0161-broc-persistent-star-practice.md": "dc51973d7a84df662d4d96760c71019228aad8e025d7139520eeb490dddac0c5",
       "docs/adr/0163-star-candidate-selection-before-exhibition.md": "de1bc70e9ad495fd0bd559a2462db49068d7eb864a451333f64708e3c0b94dd5",
       "docs/maintainers/ACCOUNT_PROFILE_SCHEMA.md": "d5914e271fd9f87da8e05aada378a0037690bb03fa08721491a2aa70b7920060",
-      "docs/maintainers/FREE_GENERATION_QUOTA.md": "deed3002f798e59eef2cb8536fe17c2e394c7302f058e3fa952726e4a00195e5",
+      "docs/maintainers/FREE_GENERATION_QUOTA.md": "37c1dfadc67fa9cde7083edb01d3de6b6bfe325164fde318f3356b8e3a6f8833",
       "docs/maintainers/MULTI_TENANT_SHARD_AND_KEY_ROTATION.md": "88fc33c58a99de11adce46559d1d5522d59699dceb9bf5df659823b1e428ff2b",
-      "docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md": "344c6cc08d003a2ad33dc9788fa5902164bba84726417a5cc19f07d9979404aa",
+      "docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md": "ae758210fc74130f21c71eb4f8de141f27185c082c9d952d6c5c4bb107672692",
       "docs/maintainers/private-image-accounting.md": "c7b381496d593a0eab863f2746a6d5acb9f5c03ac06a934cc6b4e39f2c666b62",
       "docs/reference/relay-account-management.md": "02a975c9ef622bb3c364a898fc1a37c419dd522e97f0948880f30a520a3339c4",
       "docs/runbooks/private-image-release-audit.md": "4e1810aeb595ea04ba64556656c615c1d1628bc9697675bf792ec211e4691d1a",
@@ -1236,8 +1245,8 @@
     }
   },
   "delivery": {
-    "reviewer": "Codex production release maintainer",
-    "note": "Reviewed exact accepted-source programme/dependency overlay, diagnostics exclusion with four adversarial packaging checks, regenerated archive/manifest, protected candidate and actual three-alias readback, full scoped public HTML/RSC/assets/artifact/cache acceptance and complete affected deployment/programme guides. Preserve earlier wider evidence. Visual review remains recapture; development advisories and unchanged legacy quota GitHub fixture failure are retained, not certified clean. No database, grant, service, runtime-image, generation or ADR status change. Private unmapped release records inspected as dated evidence; CURRENT_STATE remains the single current-state authority.",
+    "reviewer": "Codex CI fixture maintainer",
+    "note": "Bounded review of unchanged runtime contracts and complete affected guides for retired quota/current purchased image fixtures, synthetic private storage and current registry schema/authority. Preserve wider dated evidence; no runtime, migration, grant or deployment mutation. Historical compatibility/RLS/rollback and adversarial tests retained. Unmapped registry tests inspected and assigned relay ownership; hosted acceptance still pending.",
     "reviewed_at": "2026-10-07",
     "review_by": "2026-10-14",
     "evidence": {
@@ -1246,14 +1255,15 @@
       "post-mortem/releases/2026-10-07-exhibition-programme-local-review.json": "c0abd8605baf01403f11fdfb24eb9cc18a37ddb1798e59d2b00746cc37ed7a3a",
       "post-mortem/releases/2026-10-07-exhibition-programme-release-preflight.json": "f85b3976b3adfb3119c50e7586f38a7d8a0e68dda6a89a80c6d314165eeb78f4",
       "post-mortem/releases/2026-10-07-exhibition-programme-dependency-review.json": "fbdc73a891cb85f2c9d6ddc2fc514b9258ffe54a10c7eede4b05cceebad9c04b",
-      "post-mortem/releases/2026-10-07-exhibition-programme-deployment.json": "f4d09ac5f83e7d0a2a14f57080ef84c68d39d26d62a396c8f6a606f08cb962c4"
+      "post-mortem/releases/2026-10-07-exhibition-programme-deployment.json": "f4d09ac5f83e7d0a2a14f57080ef84c68d39d26d62a396c8f6a606f08cb962c4",
+      "post-mortem/releases/2026-10-07-ci-fixture-repair-local.json": "83e5fc969556cfea079da765b2209bc75b4b7b0e890cd745018d7b1669ff7442"
     },
     "files": {
       ".dockerignore": "fabeb0a64e0040d7feb0b9ea2d6f88d109479a61974a7c41aee3f54be23b70e2",
       ".env.example": "e06dd941e9099f4cd1ccda9b5379e09863c4ba378600ef0263b982ed9e414ec4",
       ".github/workflows/deploy-cloudflare.yml": "85bf52af1949398b2a6f62fe6e86b289c24639649653783643e24dffaff91edb",
       ".github/workflows/documentation.yml": "957c4159e35ec3d160953fa2d6fd6183ec6b8b198b1049839437b4bb87424f7e",
-      ".github/workflows/vercel-preflight.yml": "60856940957e45075d1c54de644d3ba0268fad16b35b3ed5eb8005bc40a5b4b3",
+      ".github/workflows/vercel-preflight.yml": "a3489384482756c5795da7498ecf8fc455ea2204868af52fc56a9aa0a856f936",
       ".vercelignore": "214191596019d67bf5054427ba4d059446ccc34f02578494be7e1819abdc351d",
       "Dockerfile": "29d2a98ee3575fad57064b78b5e3a383a0ab6f2bef203d9e8f10901f8440a603",
       "deploy/hosted/package-lock.json": "b102d1c984fe16498d2e7e43d116f31d30578726aadfb34131259bbf59090376",
@@ -1275,8 +1285,8 @@
       "docs/runbooks/release-readiness.md": "f8a05dbb4ce3260c24c697e51b9b2b07cd503d48f4a1050e4eeecb6818d9819c",
       "docs/runbooks/stripe-webhook-delivery.md": "a3c25a9c232581aed59ce125083508c9e2f2e394d8a127ccdbd9b41c7aed0075",
       "package.json": "d05821f475268559db698775def3fb91112a8e4cb90d2ee58ab169758876bcb4",
-      "post-mortem/failure-modes/README.md": "629157ce509512a282c183744daf1cee051dba2da136c133018eda694d8dc590",
-      "post-mortem/failure-modes/deployment.md": "bb1eedf1a47abce3e8c87dd49ae335e38d66dcc1b9f99634eaad8200a94078fc",
+      "post-mortem/failure-modes/README.md": "f0252593b71afd1f42cb45a07f11c830641b9baf4572a8ab8cbe3d706170f221",
+      "post-mortem/failure-modes/deployment.md": "43b29b32c954d1fc89522fedd40f85b50bba3b764c7d0601dd5bab621555bf46",
       "post-mortem/runbooks/deployment-storage.md": "c04ad2b74da9e76c0d9d94d1755d28ba1ab3cf066d5bb16506afb243f0eedf71",
       "scripts/audit-image-release.ts": "feb31da1c86b5cdecdd3a3fb7739648051b6eceb0517c05416619a55da134838",
       "scripts/fixtures/self-host-browser.ts": "58fa670bd79e0ed6de83ca6facf02f9623ad1d45c6be65442442d50faa6720cc",

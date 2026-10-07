@@ -17,8 +17,8 @@ Private database guide. Read the applicable repository Supabase skills before da
 | `npm run db:test` | Full suite against an isolated disposable PostgreSQL fixture |
 | `npm run test:auth:db` | Final-chain session lookup, owner/revocation checks, isolated schema privileges and retained rollback/reapply; never repairs historical grants before its first assertion |
 | `npm run test:image:library-db` | Large-library pagination, role, old-asset and rollback checks against 50,000 owned fixture images |
-| `npm run test:relay:image` | Historical command name for isolated object/catalog consistency, decoding and ownership checks; no live relay or generation |
-| `npm run test:free-quota:db` | Private allowance enrollment, concurrent deductions, retries, non-start release and retained rollback in an isolated fixture |
+| `npm run test:relay:image` | Historical command name for disposable catalog and synthetic signed object HTTP; missing private-storage denial, sanitized bytes, bucket separation, manifest consistency and ownership; no live storage, relay or generation |
+| `npm run test:free-quota:db` | Retired free entry-point denial, unchanged ledger, purchased image isolation, historical policy compatibility/races, role denial and retained rollback in an isolated fixture |
 | `npm run test:image:db` | Image receipts/Favorites suite against that isolated fixture |
 | `npm run db:migrate` | Legacy manager apply action is intentionally disabled; not the production migration workflow |
 | `npm run db:push` | Direct migration mutation script; not a harmless preflight and not the default workflow below |
@@ -72,7 +72,19 @@ Before application, run the targeted adversarial suite, the full image security
 suite, `npm run db:verify`, and a production build. Rehearse the exact migration
 with `node --env-file-if-exists=.env.local --import tsx scripts/push-migrations-direct.ts --dry-run --version 20260920120000` and the privilege repair with the corresponding `20260920123000` version; inspect that both are the only pending versions. The paired DOWN files remove only the new preference objects or retain the restricted privilege boundary and intentionally do not reopen the retired anonymous/global path; restore by reapplying the UP migrations, not by manually granting the old function. After application, verify migration history, table/function privileges, private cache headers for authenticated Explore reads, and that a Star profile still returns its complete public gallery. Do not apply these migrations to a relay execution project.
 
-The [free-generation migrations](FREE_GENERATION_QUOTA.md) add private grants/usage, followed by the aggregate policy, capacity flag, bounded-query indexes and Sites tier. Apply both in timestamp order before dependent handlers. The aggregate policy seeds paused; its DOWN file disables new free admission while retaining every record. The older quota DOWN only reasserts privileges. Use the compatible gate or a Pro-only application rollback, never the earlier unbounded free implementation.
+The historical [free-generation migrations](FREE_GENERATION_QUOTA.md) retain
+private grants/usage, the aggregate policy, capacity flag, bounded-query indexes
+and Sites tier. Preserve their order in the complete migration chain; they do
+not authorize new free grants or reactivate retired handlers. The aggregate
+policy seeds paused; its DOWN file disables admission while retaining every
+record, and the older quota DOWN only reasserts privileges. Current free Site
+entry points reject, the compatibility quota reader returns zeros, and private
+human images require purchased allowance reservations. A rollback must preserve
+that retirement and existing owner/accounting records; never restore an earlier
+free implementation to satisfy a historical fixture. The quota integration
+command distinguishes current retirement/isolation checks from low-level
+historical ledger/policy compatibility. Current image accounting lifecycle tests
+remain in `test:image:db`.
 
 ### Durable Star follows
 
