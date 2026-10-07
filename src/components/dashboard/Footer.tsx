@@ -59,6 +59,11 @@ export function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/exhibitions" className={styles.footerLink}>
+                  <span>Exhibitions</span>
+                </Link>
+              </li>
+              <li>
                 <Link href="/collections" className={styles.footerLink}>
                   <span>Collections</span>
                 </Link>

@@ -10,6 +10,7 @@ import { BILLING_PATHS } from '@/lib/billing/navigation';
 import { IMAGE_PATHS } from '@/lib/images/navigation';
 import { authEntryPath } from '@/lib/auth/redirects';
 import { isPublicReadingPath } from '@/lib/public-content/routes';
+import { isPublicProgrammePath } from '@/lib/exhibitions/paths';
 import { CommandMenu } from '@/components/common/CommandMenu';
 import styles from './navigation.module.css';
 import {
@@ -36,7 +37,7 @@ const isProductRoute = (pathname: string) =>
   /^\/images(?:\/|$)/.test(pathname) ||
   /^\/explore(?:\/|$)/.test(pathname) ||
   /^\/profile\/[a-z0-9][a-z0-9_-]{2,31}$/.test(pathname) ||
-  isPublicReadingPath(pathname);
+  isPublicReadingPath(pathname) || isPublicProgrammePath(pathname);
 
 function NavigationFeedback({ label }: { label: string }) {
   const { pending } = useLinkStatus();
@@ -218,6 +219,7 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
   const isStarsActive = pathname === '/stars' || pathname.startsWith('/stars/') || pathname.startsWith('/profile/');
   const isExploreActive = pathname === '/explore' || pathname.startsWith('/explore/');
   const isCollectionsActive = pathname === '/collections' || pathname.startsWith('/collections/');
+  const isExhibitionsActive = isPublicProgrammePath(pathname);
   const isPricingActive = pathname === '/pricing' || pathname.startsWith('/pricing/');
   const isDocsActive = pathname === '/docs' || pathname.startsWith('/docs/');
 
@@ -233,7 +235,7 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
             </Link>
           </div>
 
-          {/* Primary navigation: Explore, Stars, Collections, Pricing */}
+          {/* Primary public destinations */}
           <nav aria-label="Main navigation" className={styles.desktopNav}>
             <Link
               href="/explore"
@@ -251,6 +253,11 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
             >
               <span>Stars</span>
               <NavigationFeedback label="Stars" />
+            </Link>
+
+            <Link href="/exhibitions" className={styles.navLink} aria-current={isExhibitionsActive ? 'page' : undefined}>
+              <span>Exhibitions</span>
+              <NavigationFeedback label="Exhibitions" />
             </Link>
 
             <Link
@@ -514,6 +521,10 @@ export function Navigation({ inLayout = false }: { inLayout?: boolean } = {}) {
                     >
                       <Sparkles size={18} aria-hidden="true" className="text-amber-400" />
                       <span><strong>Stars</strong><small>Autonomous creators and series</small></span>
+                    </Link>
+                    <Link href="/exhibitions" className={styles.drawerLink} aria-current={isExhibitionsActive ? 'page' : undefined} onClick={closeMobileMenu}>
+                      <BookOpen size={18} aria-hidden="true" />
+                      <span><strong>Exhibitions</strong><small>Curated works and editorial essays</small></span>
                     </Link>
                     <Link
                       href="/collections"
