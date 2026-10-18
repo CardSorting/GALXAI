@@ -144,6 +144,14 @@ The `web-image-viewer` correction selects only `web-plan-create-asset` →
 same configuration, acceptance and clean-drain guards. It contains private
 inspector images at their natural proportions and removes the passive no-tier
 notice. Creation admission, native data, Auth, Nova and ingress remain unchanged.
+The `web-editorials` correction selects only `web-plan-image-viewer` →
+`web-plan-editorials`, retaining `web-editorials-correction.json` and the same
+configuration, matching whole-image acceptance and clean-drain guards. It
+introduces the editorial index and essay reading layout, artwork captions,
+copy-link and print controls. Prepare its accepted plan before running
+`node scripts/rollout-native-web-correction.mjs web-editorials`; verify the
+canonical editorial pages, rendered assets, sanitized artwork responses and
+unauthorized/private-path denials after replacement.
 Prepare the new accepted plan before running
 `node scripts/rollout-native-web-correction.mjs web-notice`. The predecessors named by the original `web`/`nova` corrections have known
 mixed-cookie and stream-drain defects. The later notice predecessor preserves

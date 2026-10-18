@@ -1,0 +1,42 @@
+{
+  "observedAt": "2026-10-18T18:02:16.392908+00:00",
+  "classification": "private",
+  "scope": "Semantic review of the finite editorial native web replacement; deployment and live acceptance remain separate.",
+  "sourceRevision": "a3ae4fe",
+  "inspected": [
+    "scripts/rollout-native-web-correction.mjs",
+    "scripts/self-host.mjs",
+    "scripts/lib/self-host.mjs",
+    "scripts/package-hosted-candidate.mjs",
+    "scripts/package-self-hosted.mjs",
+    "docs/runbooks/mac-self-hosting.md",
+    "docs/DEPLOYMENT.md",
+    "docs/VERCEL_DEPLOYMENT.md",
+    "docs/runbooks/release-readiness.md",
+    "docs/DOCUMENTATION_POLICY.md",
+    "docs/how-to/change-with-documentation.md",
+    "post-mortem/CURRENT_STATE.md",
+    "post-mortem/releases/2026-10-18-library-image-ratio.json"
+  ],
+  "sourceSelection": {
+    "servingBase": "web-build-10",
+    "existingInputsCompared": 1675,
+    "changedExistingInputs": 8,
+    "newInputs": 5,
+    "changes": "Only reviewed editorial routes, sitemap, programme presentation and editorial catalog/helpers/components. Application dependency lock, runtime, Auth, native account, media admission and ingress inputs are unchanged."
+  },
+  "operatorChange": "Adds one finite web-editorials plan pair and unique phase receipt. Preserves identical project, loopback port, runtime config path/hash, owned prior image, read-only/tiny disposable mounts, successful matching whole-image acceptance, 480-second drain, clean exit/no OOM and no arbitrary replacement. No public response changes.",
+  "guideReconciliation": "Complete Mac hosting procedure reviewed; new finite plan/receipt and affected live HTTP/artifact/denial verification added. Native authority, recovery and deferred host-fault limits preserved. Access/security behavior and other canonical guide instructions remain applicable without change.",
+  "checks": {
+    "selfHostPolicy": "22 pass",
+    "operatorSyntax": "pass",
+    "editorialAndPublicBoundary": "47 pass before source commit; detailed evidence in 2026-10-18-essay-reading-review.json",
+    "documentation": "Final synchronization/checks required after attestation"
+  },
+  "limitations": [
+    "Immutable Linux build and matching whole-image rehearsal are pending at this observation.",
+    "No public rollout is claimed here.",
+    "Existing ACT-058 fixture failure explanation and ACT-052 manual renewals are not resolved by this feature.",
+    "No host power/shared-daemon faults, paid generation, payment, publication or social code-exchange tests."
+  ]
+}

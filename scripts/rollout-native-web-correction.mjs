@@ -11,8 +11,9 @@ const corrections={
  'web-notice':{role:'web',previous:'web-plan-cookie-fix',next:'web-plan-no-busy-notice',receipt:'web-notice-correction.json'},
  'web-create-asset':{role:'web',previous:'web-plan-no-busy-notice',next:'web-plan-create-asset',receipt:'web-create-asset-correction.json'},
  'web-image-viewer':{role:'web',previous:'web-plan-create-asset',next:'web-plan-image-viewer',receipt:'web-image-viewer-correction.json'},
+ 'web-editorials':{role:'web',previous:'web-plan-image-viewer',next:'web-plan-editorials',receipt:'web-editorials-correction.json'},
 };
-assert(Object.hasOwn(corrections,correction)&&process.argv.length<4,'Choose only a reviewed web, nova, web-notice, web-create-asset or web-image-viewer correction.');
+assert(Object.hasOwn(corrections,correction)&&process.argv.length<4,'Choose only a reviewed web, nova, web-notice, web-create-asset, web-image-viewer or web-editorials correction.');
 const selected=corrections[correction],role=selected.role,nova=role==='nova';
 const previousPlan=state+'/'+selected.previous,nextPlan=state+'/'+selected.next,receiptFile=state+'/'+selected.receipt;
 const read=async file=>JSON.parse(await fs.readFile(file,'utf8'));

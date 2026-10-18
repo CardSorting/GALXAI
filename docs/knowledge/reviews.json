@@ -302,12 +302,12 @@
     }
   },
   "access": {
-    "reviewer": "Codex image and release maintainer",
-    "note": "Incremental viewer/notice and finite web replacement review; complete affected guide contracts reconciled. Cache/database/transport algorithms and knowledge authority are unchanged; broader fingerprint inventory is not an exhaustive new module audit. First failed rehearsal retained under open ACT-058.",
+    "reviewer": "Codex editorial release maintainer",
+    "note": "Reviewed finite editorial plan pair and preserved native access configuration, authority and rejection guards; no Auth or authorization behavior change.",
     "reviewed_at": "2026-10-18",
     "review_by": "2026-10-25",
     "evidence": {
-      "docs/knowledge/audits/2026-10-18-library-viewer-review.json": "8cad0cb6c1c956b6168dd76dbd0023964fe249910a3d725891db131d6cde17e9"
+      "docs/knowledge/audits/2026-10-18-editorial-release-review.json": "7579d1842c31812c61c2e0a4960db406b7abb3a2fdd4c6d26290e7c5f8244a6a"
     },
     "files": {
       "docs/OAUTH_AND_TOKEN_LIFECYCLE_SPECIFICATION.md": "a5840e5e0d081e07e04b96375c0842149ae83fc19e1154849aaf91a4d5a4b95e",
@@ -334,7 +334,7 @@
       "scripts/lib/account-providers.mjs": "ccf165badf64411410dee1bf6530000bfbd438da2199caf23cd2585752ffe52c",
       "scripts/local-account-gateway.mjs": "9354953a8de9e1b827a5df83b1e5b38a563cefa3c1f6f6ef83e304b7208fbaa3",
       "scripts/manage-free-generation.ts": "7a1f786789e9507e758c13db2e750c5edc982fec2b714e646d7e0bf9526fbb2b",
-      "scripts/rollout-native-web-correction.mjs": "d946da5add5982e98d4f75af3b07a6519fcc1c027a42fc40e9637755cc484d69",
+      "scripts/rollout-native-web-correction.mjs": "13a0f974c24d72d2a4e39da9042b1942bfc0ac5b0505c4ae6eb4ae6cb9cc933d",
       "scripts/stage-local-account-services.mjs": "56f321f09f651f7a7f15fc1c1cf269c73303300312588f32364354cc8b85c433",
       "scripts/test-account-email-configuration.mjs": "fb74d04ce98b1bc519489a0ca6656995a4b3ed7eecaf4181d48b368e55e7584f",
       "scripts/test-account-provider-configuration.mjs": "15ca3575a0111152b01b541a636caa8075ec6ca3088b9928a58de4ab14730b89",
@@ -1284,12 +1284,12 @@
     }
   },
   "delivery": {
-    "reviewer": "Codex editorial maintainer",
-    "note": "Reviewed canonical editorial sitemap coverage, current target authority and programme release/rollback guidance against deployment boundaries and release readiness. Local build and browser/HTTP acceptance remain separate from deployment. Broader delivery fingerprint inventory is not a new infrastructure audit.",
+    "reviewer": "Codex editorial release maintainer",
+    "note": "Reviewed immutable source selection, finite replacement guards and full canonical hosting/release procedures; runtime and live acceptance remain pending and separate.",
     "reviewed_at": "2026-10-18",
     "review_by": "2026-10-25",
     "evidence": {
-      "docs/knowledge/audits/2026-10-18-editorial-review.json": "b7978516592e8dd8e0d2f2f6cb1c2f948888ef0c931a5d56784cf24e2ce54ac4"
+      "docs/knowledge/audits/2026-10-18-editorial-release-review.json": "7579d1842c31812c61c2e0a4960db406b7abb3a2fdd4c6d26290e7c5f8244a6a"
     },
     "files": {
       ".dockerignore": "fabeb0a64e0040d7feb0b9ea2d6f88d109479a61974a7c41aee3f54be23b70e2",
@@ -1313,7 +1313,7 @@
       "docs/maintainers/CLOUDFLARE_EDGE_MESH_MAINTAINER_RUNBOOK.md": "15571a03c6ce52400aea457f4797ca0ebc273892563c81c4c137074a6a822aa0",
       "docs/playbooks/02-deployment-and-release.md": "81e9a3764f54d92b728b18e6bc91864b9d45a9edf1371250f76a9ff6bc640246",
       "docs/runbooks/local-account-migration.md": "643f04926b634cd5ec369ef11b21fc07c1a25199ad4141a50d94e784d771c7a0",
-      "docs/runbooks/mac-self-hosting.md": "370fd70fa69329f356f27c8026b6a233d8e2cb2e155e90af0a92edf741a033ed",
+      "docs/runbooks/mac-self-hosting.md": "124ed1b38c63273f9355965b863d32502e452578d05276fe0fe31092dde41d4f",
       "docs/runbooks/nova-hosting-transition.md": "a10e1aa080dec61d61643cc4e7f0cbd0ef5a7cf8dfb84955f5a224acafc3cb11",
       "docs/runbooks/private-image-release-audit.md": "4e1810aeb595ea04ba64556656c615c1d1628bc9697675bf792ec211e4691d1a",
       "docs/runbooks/release-readiness.md": "f8a05dbb4ce3260c24c697e51b9b2b07cd503d48f4a1050e4eeecb6818d9819c",
@@ -1344,7 +1344,7 @@
       "scripts/retain-hosted-output.mjs": "6f2247d4526e25c3bf9dfb280fd0a8996f75e1d70b8cff802605ac2a3a83158a",
       "scripts/retire-central-hosted-database.mjs": "d48f96d2b14e0c63ea72ccf82a0b847beb1125176df69a31949d80ed3ed53e26",
       "scripts/retire-legacy-edge-source.mjs": "25a8483be3b1ff07e0ac9089f442c7cd02c0afdcee1590cc849f9ed47577bba4",
-      "scripts/rollout-native-web-correction.mjs": "d946da5add5982e98d4f75af3b07a6519fcc1c027a42fc40e9637755cc484d69",
+      "scripts/rollout-native-web-correction.mjs": "13a0f974c24d72d2a4e39da9042b1942bfc0ac5b0505c4ae6eb4ae6cb9cc933d",
       "scripts/select-native-development-database.mjs": "562cef689d7d53e54f89bf76865e0617666054676cc24a4aeb6e8b9baf93bf1b",
       "scripts/self-host.mjs": "812e7f9f0d73730f3e9fd0f4b73b0222981d0195dd38f8bcd56730f5604c9596",
       "scripts/test-cloudflare-workers.ts": "10948fa25e75212cde2ec94c6879631550e106795c70eda6fd2df2527097ffbd",
