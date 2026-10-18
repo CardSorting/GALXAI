@@ -3,7 +3,7 @@ import path from 'node:path';
 import os from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { BASE_IMAGE, STOP_SECONDS, composePlan, readConfig, validateNovaConfig, sha256, hashFile, verifyPackage, runtimeAcceptanceHash } from './lib/self-host.mjs';
+import { BASE_IMAGE, STOP_SECONDS, composePlan, readConfig, validateNovaConfig, validateNovaNativeConfig, validateAccountMigrationConfig, sha256, hashFile, verifyPackage, runtimeAcceptanceHash } from './lib/self-host.mjs';
 import { packageSelfHosted } from './package-self-hosted.mjs';
 
 const help = `GALX self-hosting preparation — private operator commands
@@ -14,15 +14,19 @@ const help = `GALX self-hosting preparation — private operator commands
   node scripts/self-host.mjs build <package>
   node scripts/self-host.mjs plan <package> <private-config.json> <new-plan-directory> [port]
   node scripts/self-host.mjs plan-nova <package> <private-config.json> <new-plan-directory> [port]
+  node scripts/self-host.mjs plan-nova-native <package> <private-config.json> <new-plan-directory> [port]
+  node scripts/self-host.mjs plan-account-migration <package> <private-config.json> <new-plan-directory> [port]
   node scripts/self-host.mjs stage <plan-directory>
   node scripts/self-host.mjs resume <plan-directory>
   node scripts/self-host.mjs status <plan-directory>
   node scripts/self-host.mjs stop <plan-directory>
 
 doctor / verify / status are read-only. package / build / plan create local
-artifacts. stage creates one disabled loopback application; it never replaces an
+artifacts. stage creates one application under the selected private profile; it never replaces an
 existing container. plan-nova is the separately authorized private Nova runtime
 profile; it excludes unrelated Media/billing authority and opens no ingress.
+plan-account-migration stages the whole web application against the local account
+copy for private acceptance, preserving Connect. It changes no public ingress.
 resume explicitly starts that same stopped container.
 stop allows 480 seconds for requests and terminal work.
 No command changes DNS, tunnel routes, grants, databases or live deployments.
@@ -45,8 +49,10 @@ function loadPlan(directory) {
   if (sha256(fs.readFileSync(composeFile)) !== record.composeSha256) throw Error('Plan changed; prepare a new reviewed plan.');
   const expected = composePlan(record);
   if (JSON.stringify(json(composeFile)) !== JSON.stringify(expected)) throw Error('Plan contains unapproved runtime settings.');
-  if (record.phase && !['disabled-loopback-preparation', 'private-nova-acceptance'].includes(record.phase)) throw Error('Unknown activation phase.');
+  if (record.phase && !['disabled-loopback-preparation', 'private-nova-acceptance','private-nova-native-acceptance','private-account-migration-acceptance'].includes(record.phase)) throw Error('Unknown activation phase.');
   if (record.phase === 'private-nova-acceptance' && record.project !== 'galx-web-nova') throw Error('Private Nova requires its own project identity.');
+  if (record.phase === 'private-nova-native-acceptance' && record.project !== 'galx-web-nova-native') throw Error('Native Nova requires its own project identity.');
+  if (record.phase === 'private-account-migration-acceptance' && record.project !== 'galx-web-account-migration') throw Error('Account migration requires its own project identity.');
   return { root, record, composeFile };
 }
 function inspect(project) {
@@ -97,12 +103,16 @@ async function main() {
     fs.writeFileSync(path.join(root, 'image.json'), JSON.stringify(record, null, 2) + '\n', { mode: 0o600 });
     console.log(JSON.stringify(record, null, 2)); return;
   }
-  if (['plan', 'plan-nova'].includes(command)) {
+  if (['plan', 'plan-nova','plan-nova-native','plan-account-migration'].includes(command)) {
     if (args.length < 3 || args.length > 4) throw Error('plan requires package, private config, new directory and optional port.');
     const [directory, config, destination, portValue] = args, root = fs.realpathSync(directory), manifest = verifyPackage(root);
-    const nova = command === 'plan-nova';
-    const image = json(path.join(root, 'image.json')), configFile = fs.realpathSync(config), values = readConfig(config, { preparation: !nova });
+    const novaNative=command==='plan-nova-native';
+    const nova = command === 'plan-nova'||novaNative;
+    const accountMigration=command==='plan-account-migration';
+    const image = json(path.join(root, 'image.json')), configFile = fs.realpathSync(config), values = readConfig(config, { preparation: !nova&&!accountMigration });
     if (nova) validateNovaConfig(values);
+    if (novaNative) validateNovaNativeConfig(values);
+    if (accountMigration) validateAccountMigrationConfig(values);
     if (image.manifestSha256 !== sha256(fs.readFileSync(path.join(root, 'manifest.json')))) throw Error('Image does not match the verified package.');
     const acceptanceFile = path.join(root, 'acceptance.json');
     if (!fs.existsSync(acceptanceFile)) throw Error('Run the whole-image runtime acceptance before preparing a stage plan.');
@@ -110,12 +120,12 @@ async function main() {
     if (acceptance.status !== 'PASSED' || acceptance.image !== image.image || acceptance.manifestSha256 !== image.manifestSha256 || acceptance.testSha256 !== runtimeAcceptanceHash(path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..'))) throw Error('Local runtime acceptance does not match this image and current test.');
     for (const [name, digest] of Object.entries(manifest.publicInputHashes)) if (sha256(values[name] || '') !== digest) throw Error('Public runtime configuration differs from the compiled build.');
     if (fs.existsSync(destination)) throw Error('Plan directory must not exist.');
-    const record = { image: image.image, configFile, port: portValue ? Number(portValue) : 17787, project: nova ? 'galx-web-nova' : 'galx-web-stage', manifestSha256: image.manifestSha256, configSha256: sha256(fs.readFileSync(config)), phase: nova ? 'private-nova-acceptance' : 'disabled-loopback-preparation', localAcceptance: { image: acceptance.image, manifestSha256: acceptance.manifestSha256, status: acceptance.status, receiptSha256: hashFile(acceptanceFile) } };
+    const record = { image: image.image, configFile, port: portValue ? Number(portValue) : accountMigration?17788:novaNative?17789:17787, project: novaNative?'galx-web-nova-native':nova ? 'galx-web-nova' : accountMigration?'galx-web-account-migration':'galx-web-stage', manifestSha256: image.manifestSha256, configSha256: sha256(fs.readFileSync(config)), phase: novaNative?'private-nova-native-acceptance':nova ? 'private-nova-acceptance' : accountMigration?'private-account-migration-acceptance':'disabled-loopback-preparation', localAcceptance: { image: acceptance.image, manifestSha256: acceptance.manifestSha256, status: acceptance.status, receiptSha256: hashFile(acceptanceFile) } };
     const compose = composePlan(record), bytes = JSON.stringify(compose, null, 2) + '\n';
     fs.mkdirSync(destination, { recursive: true, mode: 0o700 });
     fs.writeFileSync(path.join(destination, 'compose.json'), bytes, { mode: 0o600 });
     fs.writeFileSync(path.join(destination, 'plan.json'), JSON.stringify({ ...record, composeSha256: sha256(bytes) }, null, 2) + '\n', { mode: 0o600 });
-    console.log(JSON.stringify({ status: 'PLAN RETAINED', image: image.image, port: record.port, connect: nova ? 'private acceptance only' : 'disabled', configurationValuesPrinted: false, deployed: false }, null, 2)); return;
+    console.log(JSON.stringify({ status: 'PLAN RETAINED', image: image.image, port: record.port, connect: nova||accountMigration ? 'configured; authorization and public routing are separate' : 'disabled', configurationValuesPrinted: false, deployed: false }, null, 2)); return;
   }
   if (['stage', 'resume', 'status', 'stop'].includes(command)) {
     if (args.length !== 1) throw Error(`${command} requires a plan directory.`);
@@ -127,9 +137,12 @@ async function main() {
       docker([...base, 'stop', '--timeout', String(STOP_SECONDS), 'web'], { timeout: (STOP_SECONDS + 30) * 1000 });
       console.log(JSON.stringify({ containers: inspect(record.project), note: 'A forced exit is not terminal-write acceptance; preserve uncertain executions.' }, null, 2)); return;
     }
-    const nova = record.phase === 'private-nova-acceptance';
-    const values = readConfig(record.configFile, { preparation: !nova });
+    const novaNative=record.phase==='private-nova-native-acceptance';
+    const nova = record.phase === 'private-nova-acceptance'||novaNative,accountMigration=record.phase==='private-account-migration-acceptance';
+    const values = readConfig(record.configFile, { preparation: !nova&&!accountMigration });
     if (nova) validateNovaConfig(values);
+    if (novaNative) validateNovaNativeConfig(values);
+    if (accountMigration) validateAccountMigrationConfig(values);
     if (record.localAcceptance?.status !== 'PASSED' || record.localAcceptance.image !== record.image || record.localAcceptance.manifestSha256 !== record.manifestSha256) throw Error('Plan lacks matching whole-image acceptance.');
     if (sha256(fs.readFileSync(record.configFile)) !== record.configSha256) throw Error('Configuration changed; prepare a new plan.');
     const image = JSON.parse(docker(['image', 'inspect', record.image]))[0];
@@ -141,7 +154,7 @@ async function main() {
       if (current.length) throw Error('Container already exists. Use status or resume; no implicit replacement.');
       docker([...base, 'up', '-d', '--no-build', '--pull', 'never', '--no-recreate', '--wait', '--wait-timeout', '90', 'web'], { timeout: 120000 });
     }
-    console.log(JSON.stringify({ containers: inspect(record.project), publicCutover: false, connect: nova ? 'private acceptance only' : 'disabled' }, null, 2)); return;
+    console.log(JSON.stringify({ containers: inspect(record.project), publicRoutingChanged: false, connect: nova||accountMigration ? 'configured; authorization and public routing are separate' : 'disabled' }, null, 2)); return;
   }
   throw Error('Unknown command. Use --help.');
 }

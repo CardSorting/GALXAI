@@ -13,11 +13,11 @@ if (!destination || !configuration || process.argv.length > 5) throw new Error('
 const root = fs.realpathSync(sourceRoot || repository);
 const output = path.resolve(destination), input = JSON.parse(fs.readFileSync(configuration, 'utf8'));
 if (fs.existsSync(output)) throw new Error('Output must not exist; cached or partial builds are not accepted');
-const allowed = new Set(['NEXT_PUBLIC_APP_URL', 'NEXT_PUBLIC_SUPABASE_URL', 'NEXT_PUBLIC_SUPABASE_ANON_KEY', 'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY', 'NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY', 'NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION', 'NEXT_PUBLIC_BING_SITE_VERIFICATION', 'NEXT_PUBLIC_YANDEX_SITE_VERIFICATION', 'NEXT_PUBLIC_BAIDU_SITE_VERIFICATION', 'NEXT_PUBLIC_GALX_EDGE_URL', 'PUBLIC_ASSETS_URL']);
+const allowed = new Set(['NEXT_PUBLIC_APP_URL', 'NEXT_PUBLIC_ACCOUNT_API_URL', 'NEXT_PUBLIC_ACCOUNT_PUBLISHABLE_KEY', 'NEXT_PUBLIC_SUPABASE_URL', 'NEXT_PUBLIC_SUPABASE_ANON_KEY', 'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY', 'NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY', 'NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION', 'NEXT_PUBLIC_BING_SITE_VERIFICATION', 'NEXT_PUBLIC_YANDEX_SITE_VERIFICATION', 'NEXT_PUBLIC_BAIDU_SITE_VERIFICATION', 'NEXT_PUBLIC_GALX_EDGE_URL', 'PUBLIC_ASSETS_URL']);
 for (const [key, value] of Object.entries(input.publicEnvironment || {})) {
   if (!allowed.has(key) || typeof value !== 'string' || /[\r\n\u0000]/.test(value)) throw new Error('Unapproved build variable');
 }
-if (!input.projectId || !input.orgId || !input.publicEnvironment?.NEXT_PUBLIC_SUPABASE_URL) throw new Error('Missing declared project/public build inputs');
+if (!input.projectId || !input.orgId || !(input.publicEnvironment?.NEXT_PUBLIC_ACCOUNT_API_URL || input.publicEnvironment?.NEXT_PUBLIC_SUPABASE_URL)) throw new Error('Missing declared project/public build inputs');
 const app = path.join(output, 'app'), tooling = path.join(output, 'tooling');
 fs.mkdirSync(app, { recursive: true }); fs.mkdirSync(tooling);
 const sha = value => createHash('sha256').update(value).digest('hex');

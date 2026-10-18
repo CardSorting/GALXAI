@@ -1,14 +1,14 @@
 {
   "images": [
     {
-      "tag": "galxai-relay-central:connections-20260916",
-      "id": "sha256:e7a4c80fa704d4abb7b423a48a66afad4d809c70dd5df3592eb772e823284bb3",
+      "tag": "galxai-relay-central:native-postgres-20261017",
+      "id": "sha256:bc3cb2a63fd62a5dafd130335819f8eec7b9198a83c81be39471be2091b72069",
       "architecture": "arm64",
       "component": "central"
     },
     {
-      "tag": "galxai-relay-premium:neutral-outcomes-20261003",
-      "id": "sha256:a1feb16ef31ae0f97cc231b85d06578496335d79221d13e36a4c40b8524a545f",
+      "tag": "galxai-relay-premium:native-postgres-20261017",
+      "id": "sha256:c0a84fa0ffddeba14a60ab1e494d0528f671fdaf95512eb1db036ca0e270574f",
       "architecture": "arm64",
       "component": "runtime",
       "pool": "premium"

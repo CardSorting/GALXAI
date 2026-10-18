@@ -29,3 +29,4 @@ Generated metadata, separate from [the full ADR catalog](../adr/README.md). Unre
 | [ADR 0165: GALX Media, Connect and Nova boundaries](../../docs/adr/0165-galx-connect-nova-boundaries.md) | accepted | local | Security/access and inference maintainers |
 | [ADR 0166: Canonical origin at the private self-host listener](../../docs/adr/0166-private-self-host-request-origin.md) | accepted | local | Security/access and release maintainers |
 | [ADR 0167: Mac Nova runtime and Vercel inference retirement](../../docs/adr/0167-nova-mac-runtime-placement.md) | accepted | verified | Release and security/access maintainers |
+| [ADR 0168: Local PostgreSQL for GALXAI and Premium](../../docs/adr/0168-local-postgres-database-placement.md) | accepted | local | Database operator |

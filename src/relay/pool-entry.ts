@@ -20,7 +20,7 @@ export async function poolEntrypoint() {
   const ssl={rejectUnauthorized:true,...(config.databaseCa?{ca:String(config.databaseCa)}:{})};
   let close:()=>Promise<void>;
   if(policy.component==='central') {
-    assertProjectDatabase(config.databaseUrl,PROJECTS.central);
+    assertProjectDatabase(config.databaseUrl,PROJECTS.central,config.databaseDeployment);
     if(!decodeURIComponent(new URL(config.databaseUrl).username).startsWith('galx_control_service'))throw Error('A dedicated central database principal is required.');
     if(!config.vault||Object.keys(config.vault).some(k=>!/^GALX_VAULT_(KEY_V[12]|ACTIVE_KEY_VERSION|MASTER_SECRET)$/.test(k)))throw Error('Invalid vault configuration.');
     Object.assign(process.env,config.vault);
@@ -37,7 +37,7 @@ export async function poolEntrypoint() {
     if(policy.component==='runtime') {
       // The runtime's local durable queue contains request bodies and generated results.
       process.umask(0o077);
-      assertProjectDatabase(config.databaseUrl,PROJECTS[pool]);
+      assertProjectDatabase(config.databaseUrl,PROJECTS[pool],config.databaseDeployment);
       if(!decodeURIComponent(new URL(config.databaseUrl).username).startsWith('galx_execution_service'))throw Error('A dedicated execution principal is required.');
       if(['operatorToken','viewerToken','registrarToken','vault','identitySecret'].some(k=>config[k]))throw Error('Runtime received management authority.');
       if(!/^[A-Za-z0-9_-]{32,256}$/.test(config.inferenceKey)||!/^[A-Za-z0-9_-]{32,256}$/.test(config.capabilityKey)||new Set([config.inferenceKey,config.capabilityKey,config.runtimeToken]).size!==3)throw Error('Separate inference, capability, and runtime keys are required.');

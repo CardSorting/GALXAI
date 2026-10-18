@@ -6,6 +6,7 @@ import { getSupabaseConfig } from '@/lib/supabase/config';
 import { sessionBearer, SessionAccessError } from './session-http';
 import { sessionProfile } from './session-profile';
 import { isAccountSessionActive } from './active-account-session';
+import { accountClientOptions } from './account-client-options';
 
 export async function requireRequestSession(request: NextRequest) {
   const explicit = sessionBearer(request);
@@ -22,7 +23,7 @@ export async function requireRequestSession(request: NextRequest) {
   if (!explicit && !hasCookie && !native) throw new SessionAccessError(401);
   if (native && !/^eyJ[A-Za-z0-9_-]*\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(native)) throw new SessionAccessError(401);
   if (!config.hasDataApiCredential) throw new SessionAccessError(503);
-  const client = createServerClient(config.supabaseUrl, config.supabaseAnonKey, { cookies: { getAll: () => request.cookies.getAll(), setAll: values => { changes.push(...values); } },
+  const client = createServerClient(config.supabaseUrl, config.supabaseAnonKey, { ...accountClientOptions(), cookies: { getAll: () => request.cookies.getAll(), setAll: values => { changes.push(...values); } },
     global: { fetch: (input, init) => fetch(input, { ...init, cache: 'no-store', signal: init?.signal ? AbortSignal.any([init.signal, AbortSignal.timeout(8000)]) : AbortSignal.timeout(8000) }) } });
   const credential = explicit ?? (hasCookie ? undefined : native);
   try {

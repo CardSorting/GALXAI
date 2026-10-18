@@ -4,6 +4,17 @@
 
 Private component reference, reconciled September 15, 2026. Use [the database runbook](maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md) for current procedures and the actual migrations for object-specific privileges. This reference does not substitute generic policies for reviewed schema.
 
+October 17 placement update: [ADR 0168](adr/0168-local-postgres-database-placement.md)
+accepts local PostgreSQL replacements for the central and Premium databases.
+Both databases now serve native authority after fenced final copies; central
+Auth/web/Nova are also local. Premium's hosted project is deleted; central's
+retained source is write-guarded, stale and paused; the original organization is Free.
+[Local migration operations](runbooks/local-postgres.md) owns separate clusters,
+permissions, recovery and remaining provider/retirement gates. Protocol project
+identifiers retain their operational meaning rather than physical placement. Native
+transport requires the explicit reviewed destination mapping and verified TLS;
+a local URL does not bypass identity validation.
+
 ## Identity and authorization
 
 Application identity is verified server-side. Public Auth credentials can verify a bearer token without constructing an administrator client; a publishable key never grants admin authority. Temporary verification failure must remain distinct from a rejected credential. User IDs and editable metadata are not proof of authorization.
@@ -18,9 +29,9 @@ Financial, audit and accepted-operation state must commit atomically at their de
 
 ## Central relay account and execution authority
 
-The implemented authority is [central account management](reference/relay-account-management.md). Only `mazhcjisettrzbqhorvp` owns canonical encrypted accounts, manual desktop provenance, exclusive immutable assignments, registration/review state, account revisions, lifecycle operations, runtime principals/epochs and bindings to the existing account lease/budget ledger. The central private tables force RLS and have no customer/service-role table grants. A restricted login executes the private protocol; hashed principal lookup determines role, pool and installation. Request JSON cannot broaden that scope.
+The implemented authority is [central account management](reference/relay-account-management.md). Only native central `galxai`, retaining protocol ID `mazhcjisettrzbqhorvp`, owns canonical encrypted accounts, manual desktop provenance, exclusive immutable assignments, registration/review state, account revisions, lifecycle operations, runtime principals/epochs and bindings to the existing account lease/budget ledger. Central private tables force RLS and have no customer/service-role table grants. A restricted login executes the private protocol; hashed principal lookup determines role, pool and installation. Request JSON cannot broaden that scope.
 
-Premium `prgjcyokylzcsqrjmkaa` holds only fixed installation identity and execution reservations/outcomes. Its restricted runtime login cannot manage accounts, read credential tables or obtain the main vault key. Runtime projections carry only own-account access under central authorization. No registry, credential copy or second capacity ledger is deployed there.
+Premium's local `galx_relay_premium` database, retaining protocol identity `prgjcyokylzcsqrjmkaa`, holds only fixed installation identity and execution reservations/outcomes. Its restricted runtime login cannot manage accounts, read credential tables or obtain the main vault key. Runtime projections carry only own-account access under central authorization. No registry, credential copy or second capacity ledger is deployed there.
 
 Management migration `20260915191404` is applied only centrally. Rename/remove/restore require expected revision and immutable operation identity tied to actor, pool, installation, record and request hash. Every registration mutation advances revision, including review/ticket updates. Concurrent changes cannot overwrite newer state. Registered-account rename synchronizes the linked registration. Account removal retains canonical identity, assignment, ciphertext, leases and immutable operation history, revokes access and cannot be undone through restore. Unfinished registration removal permits restoration only with fresh review.
 
@@ -32,7 +43,7 @@ Central removal commits before monitor desktop cleanup; a failed stop is reporte
 
 Base migration `20260914231914` pairs `managed_desktop_id uuid` with `desktop_enrolled_at timestamptz`, uniquely binds non-null desktops and protects credential/identity/provenance fields with a private no-login writer role. Generic upsert/service inserts are disabled; ordinary repository saves allow only policy metadata. Source labels and existing ciphertext do not establish provenance.
 
-New pool registration is explicit manual sign-in followed by an atomic Connect action that verifies and registers in paused state. Renewal is explicit **Reconnect → Save new sign-in** in the owning monitor; no background bridge establishes authority. Legacy **Enroll shard** and conditional saved-file synchronization remain only for eligible unassigned accounts in [legacy enrollment](maintainers/legacy-desktop-enrollment.md). Legacy readers, credential writers and acquire/renew/release functions reject assigned accounts or bound leases. No account is automatically classified, copied or reassigned.
+New pool registration is explicit manual sign-in followed by an atomic Connect action. With verified automatic activation armed, a new connection enables and its ready runtime activates atomically; an explicit hold retains paused state. Existing account pauses are preserved. Renewal is explicit **Reconnect → Save new sign-in** in the owning monitor; no background bridge establishes authority. Legacy **Enroll shard** and conditional saved-file synchronization remain only for eligible unassigned accounts in [legacy enrollment](maintainers/legacy-desktop-enrollment.md). Legacy readers, credential writers and acquire/renew/release functions reject assigned accounts or bound leases. No account is automatically classified, copied or reassigned.
 
 Revoked/dead/conflicting records cannot be revived by enrollment. Deliberate [vault rewrap](maintainers/MULTI_TENANT_SHARD_AND_KEY_ROTATION.md) preserves plaintext, identity and binding under reviewed administrator authority. Database owners can change schema and remain trusted; application-role denial is not protection from the owner.
 

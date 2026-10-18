@@ -1,0 +1,108 @@
+{
+  "observedAt": "2026-10-17T20:49:05Z",
+  "kind": "Planned migration; partial live database cutover and private replacement acceptance",
+  "baseRevision": "51da3b1ede7a38522195fb44f8f4535eaf87dc48",
+  "workingTreeSnapshot": true,
+  "premium": {
+    "phase": "verified-local",
+    "database": "galx_relay_premium",
+    "protocolIdentityRetained": "prgjcyokylzcsqrjmkaa",
+    "drainStartedAt": "2026-10-17T20:24:06.622Z",
+    "cleanExit": true,
+    "hostedExecutionLoginEnabled": false,
+    "hostedExecutionConnections": 0,
+    "finalSourceSnapshot": ".data/local-postgres/source-premium-2026-10-17T20-29-59-164Z",
+    "restoredTables": 30,
+    "restoredRows": 144,
+    "rowHashesOwnersEffectiveAclsRls": "match immediately after final restore",
+    "restrictedRoleAudit": "pass",
+    "nativeTlsTransport": "pass; own fixed destination and CA, untrusted CA rejected, central DB and other Mac access denied",
+    "runtimeImage": "sha256:c0a84fa0ffddeba14a60ab1e494d0528f671fdaf95512eb1db036ca0e270574f",
+    "runtimeTag": "galxai-relay-premium:native-postgres-20261017",
+    "localStartedAt": "2026-10-17T20:36:59.327Z",
+    "verifiedAt": "2026-10-17T20:37:19.217Z",
+    "localServiceChecks": 30,
+    "ownershipAndSupervisor": "Current central ownership confirmed; original restart supervisor restored",
+    "preserved": ["Original installation/principals/keys", "Existing queue and execution volume", "Manual desktops and provider account intent", "Old local preparation database under a separate name"],
+    "postCutoverBackupRecovery": "30 tables restored with matching hashes at 2026-10-17T20:42:22.884Z",
+    "generation": {
+      "readiness": 503,
+      "modelPreflight": 503,
+      "registeredEnabledAccounts": 2,
+      "providerCredentials": "Both expired before the database cutover; manual sign-in/reconnect required",
+      "canary": "preflight-blocked",
+      "providerRequestSent": false,
+      "newGenerationOrSettlementAccepted": false
+    },
+    "retirement": {
+      "hostedProjectRetired": false,
+      "encryptedArchiveBytes": 156761,
+      "encryptedArchiveSha256": "0cf5e68dd4c2bb9ab3d3ba41be664c5d53aaf523368b1442bfd36ffc63b9c195",
+      "encryption": "AES-256-GCM with purpose-separated HKDF; existing externally retained production seed",
+      "localDecryptHash": "match",
+      "tamperRejected": true,
+      "uploaded": false,
+      "offDeviceRecoveryVerified": false,
+      "deletionApproved": false,
+      "limits": "Database archive only; not VM disks, queues or every component secret. Hosted deletion awaits explicit owner approval after private off-device recovery verification."
+    }
+  },
+  "central": {
+    "liveAuthority": "Hosted central PostgreSQL and Auth retained",
+    "phase": "preparation",
+    "authImage": "supabase/gotrue@sha256:1736a63078f5922b198c4cbe50f80ab9a2d3b54fe8b7b6cfb2e9dc5dbbc12c6b",
+    "postgrestImage": "postgrest/postgrest@sha256:c7cd7e265a85b05248abf53f4473fcec7e327c282d0bd0cf60f1551996d09fcf",
+    "transport": "Private loopback services, verified native database TLS, fixed native account gateway and narrow application response allowlists",
+    "authServiceChecks": 17,
+    "actualWebSdkHttpChecks": 33,
+    "canary": "Confirmed example.invalid account without email; soft deleted through Auth, immutable operational link retained",
+    "identity": "Original account UUIDs/password hashes retained; fresh local signing key requires sign-in recovery, hosted browser session continuity not promised",
+    "remaining": [
+      "Replacement SMTP provider and accepted sender; real verification/recovery delivery",
+      "Save exact Google/GitHub callback registrations after action-time approval and verify provider return",
+      "Close/drain every central writer and take a fresh final synchronized copy into a new destination",
+      "Switch web, Nova and central clients with exactly one writer; contain old aliases/jobs/direct callers",
+      "Exact-host public HTTPS placement and live account/Connect/object/authorization/browser asset acceptance",
+      "Independent recovery, retention acceptance and explicit hosted retirement"
+    ]
+  },
+  "webCandidate": {
+    "publiclyActivated": false,
+    "privateLoopbackPort": 17788,
+    "build": "Pinned Docker Node 22.23.2, Next 15.5.25, Vercel CLI 48.5.0; 158 pages, credential-free private build canaries",
+    "sourceManifestSha256": "9df44c7af3312d41631a2ada3078d009853f19c060751349f5f3c8087ee1cc69",
+    "manifestSha256": "e12710882210eb8ce6b88d50686c78b996e608fcff1b7f04119930061ad9fa51",
+    "image": "sha256:1ec80cace28b4f695da5f452d7578f688a00245b2d5b46ed63b4c193964c8a8d",
+    "archiveSha256": "b66c24c9c672cc70d0ff55e9245cae47fda964b7ba9393752bbef0fbf610367e",
+    "artifactByteComparisons": 2405,
+    "wholeImageChecks": 44,
+    "wholeImageFixture": "Isolated internal Docker network, synthetic account/provider and disposable database; actual packaged HTTP and headless browser, 300-second deadline/drain, revocation/restart/crash/duplicate denial",
+    "compiledBoundary": "Standard guard: 545 assets, zero errors. Additional exact private-value/marker scan: 571 HTML/JS files, nine private values compared, zero findings",
+    "publicIngress": "Existing Vercel Media/Connect, Mac Nova, Cloudflare routes and DNS unchanged",
+    "liveSiteCleanClaim": false
+  },
+  "verification": {
+    "isolatedDatabaseIntegration": "94/94 pass; disposable database removed",
+    "databaseStaticIntegrity": "Zero violations or warnings",
+    "accountSessionRegressions": "44 pass",
+    "typeScript": "pass",
+    "publicAccountNativeMappingPostgresPolicyPackagingSelfHost": "39 pass",
+    "documentationGuardTests": "43 pass; final sync/review/check recorded in the documentation review artifact"
+  },
+  "retainedFailures": [
+    "Initial web build could not access sandboxed Docker; explicit host permission used for the clean build",
+    "First whole-image acceptance failed a transient startup health probe; fixture now requires real JSON health with bounded startup checks, original failure retained",
+    "Initial staged Auth duration translation used explicit zero seconds; corrected to source unlimited semantics by omitting optional durations, replaced owned staging container and passed acceptance",
+    "Initial Premium activation transfer timed out because async execFile did not write its input; fixed stdin delivery and resumed only the recorded interrupted activation with exact config/manifest identities, without replaying work",
+    "Generation canary stopped at unavailable capability preflight; no provider request submitted"
+  ],
+  "limits": [
+    "Both hosted projects still exist and can incur charges; no zero-cost or zero-egress claim",
+    "Central staging copy is not a replica and includes synthetic operational records; initial setup hashes are dated evidence only",
+    "OAuth forms are prepared, unsaved; real email/provider callback acceptance remains unverified",
+    "Email provisioning preflight blocked on account connectivity and an unusable Stripe Projects session; no credentials overwritten or service provisioned",
+    "Mac login services require power, owner session and open lid; no boot-before-login or device-loss availability claim",
+    "No physical reboot, forced sleep, shared daemon failure or disruptive host drill performed",
+    "No pending Orbit migration applied, unrelated incident prevention action closed or older proposed ADR accepted"
+  ]
+}

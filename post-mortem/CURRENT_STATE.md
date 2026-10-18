@@ -4,6 +4,163 @@
 
 The newest observation appears first. Earlier dated sections retain evidence from their stated observation; they do not override the latest determination or authorize a new action.
 
+### Native cutover accepted; paid Supabase operation stopped — October 17 migration, verified October 18 UTC
+
+The [central cutover record](releases/2026-10-17-central-native-cutover.json)
+records the final consistent 196-table / 7,870-row copy, matching hashes, owners,
+effective ACLs and RLS, native-only removal of imported source guards, and active
+native Auth, PostgREST, central control, canonical web and narrow Nova. Both native
+databases and the original restart supervisor are active. Developer transport is
+also native. The preparation databases and original source snapshots remain
+separate; never restore them over accepted local operations.
+
+The corrected immutable web/Nova image passes all 44 isolated whole-image checks,
+including the unchanged 300-second deadline (304,410 ms observed), clean SIGTERM
+exit, restart, revocation and no replay. Both profiles replaced their exact prior
+containers after clean drains, retaining configuration and data. Existing-owner
+GitHub return preserves identity. The browser retains old hosted cookies and now
+renders three private Library images and authorized Favorites. The same Library
+still renders after the hosted source is inactive. Actual public acceptance passes
+65 account/asset checks with 38 browser assets and eleven configured secrets/zero
+matches; 38 cache checks, image HTTP/37 assets and five exhibition pages with 30
+sanitized artifacts/12 denials also pass. Generation remains a separate scope.
+
+Premium's hosted project is deleted. The original organization now shows **Free
+Plan**; Pro is cancelled. Hosted GALXAI is **INACTIVE** after a single acknowledged
+pause and status-only reconciliation. Before pause, all 196 frozen source hashes,
+195 guards, thirteen preserved account UUIDs, zero hosted functions/jobs and empty
+Storage/Vault were checked. It was the organization's only remaining project.
+Central is retained as a paused, stale archive, not permanently deleted or a live
+fallback. No invoice payment was submitted; historical usage/invoices remain.
+Do not resume the source or claim the past bill disappeared.
+
+Resend SMTP is provisioned on its observed Free plan (3,000/month, 100/day,
+pay-as-you-go disabled). Domain verification, SMTP certificate/authentication,
+actual confirmation/recovery delivery and preparation token-route checks passed.
+Fresh post-activation off-device recovery downloaded/decrypted the encrypted
+private archive and restored all 196 table hashes, owners, effective ACLs and RLS;
+the nonsecret role/grant recipe is retained separately. This is a recovery point,
+not VM, queue, full-secret or fresh-device recovery. Keep the external seed source.
+
+ACT-054/055 are completed by actual cookie/Library and full-image/dual-profile
+acceptance. Both failed earlier immutable candidates remain in the incident/release
+records and append-only journal; neither was deployed. The
+[account incident](incidents/2026/2026-10-17-account-cutover/README.md) remains
+contained for ACT-053: the owner must add/save the existing Google client's real
+secret and complete actual return acceptance. ACT-052 separately requires manual
+renewal of both expired Premium provider sign-ins and explicit reconnect. No new
+generation was submitted or replayed. Keep the Mac powered, signed in and lid open;
+login services do not establish pre-login, logout, reboot or hardware-failure uptime.
+Earlier dated sections retain only their original observation.
+
+### Premium hosted retirement and real account email — October 17, 2026
+
+The [retirement and email record](releases/2026-10-17-premium-retirement-account-email.json)
+supersedes the earlier pending-retirement/email observation below. After owner
+approval, Premium's encrypted archive was uploaded to existing private R2,
+downloaded with its hash unchanged, decrypted and restored into an isolated
+database. All 30 tables' hashes, owners and RLS matched. The hosted Premium
+project was deleted and its absence verified at 21:10 UTC; central remains
+present and local Premium remains active. This is a database recovery point,
+not a backup of VM disks, queues or every secret, nor a zero-billing claim.
+
+The exact additional GALX callback was saved successfully in both existing
+Google and GitHub clients, with old callbacks retained and no wildcard matching.
+Resend now verifies galx.ai using three additive DNS records, with existing mail
+routing unchanged. Its observed transactional plan is Free: 3,000 per month,
+100 per day, and pay-as-you-go disabled. A separate sending-only key is restricted
+to galx.ai and retained owner-only. Local Auth uses implicit TLS on port 465;
+certificate and SMTP authentication checks pass. Both owner-alias confirmation
+and recovery setup emails are delivered according to Resend. Seven actual
+account-route checks pass using their stored canary tokens, and the temporary
+account was soft deleted. The message's confirmation URL uses the expected
+canonical verification path. No customer email or hosted Auth user was changed.
+
+Central data/Auth, web, Nova and authority still use the hosted central source.
+The SMTP-enabled replacement remains private while final writer-fence/copy and
+public cutover work proceeds. Actual social return and served-site acceptance
+remain separate. Premium provider sign-in expiry and ACT-052 remain open; no
+generation was submitted or accepted. Preserve earlier dated attempts below.
+
+### Premium database live locally; central replacement staged — October 17, 2026
+
+The [continuation record](releases/2026-10-17-local-account-migration.json)
+records Premium's completed native PostgreSQL switch. Its runtime drained
+cleanly, the hosted execution login was disabled with zero remaining execution
+connections, and a fresh consistent copy verified all 30 tables / 144 rows,
+owners, effective ACLs and RLS before activation. The reviewed native runtime
+uses its own restricted local database through verified TLS. Thirty local
+checks pass, including current ownership, monitor authorization and isolation;
+the original restart supervisor is restored. Existing queue/state, desktops,
+installation identity and the separate preparation database are retained.
+The post-cutover backup restored with all 30 table hashes matching.
+
+Execution is allowed and two registered accounts are enabled, but both provider
+sign-ins expired before the drain. Readiness/model preflight is unavailable;
+the generation canary stopped before any provider request. Manual renewal in
+the owning desktops and explicit reconnect remain separate from this database
+acceptance. [The expiry incident](incidents/2026/2026-10-17-provider-expiry/README.md)
+and ACT-052 retain that open recovery work. Do not weaken provider policy or
+replay uncertain work.
+
+Central data/Auth and the serving web/Nova/authority clients remain on Supabase.
+Pinned local Auth/PostgREST, a narrow private gateway and the whole-web candidate
+are running privately against the preparation copy: 17 service checks and 33
+actual SDK/cookie/HTTP checks pass. The clean production build, 44 whole-image
+checks, compiled private-content scan, 94 database integration checks and
+TypeScript pass. These are private acceptance, not live-site acceptance.
+The whole-web candidate is on loopback 17788; public ingress/DNS is unchanged.
+
+Real SMTP delivery and Google/GitHub callback registration/return remain gates.
+Callback forms are prepared but unsaved pending action-time owner approval.
+The email catalog preflight is blocked by account connectivity and an unusable
+Projects session; no service was provisioned. Final central writer containment,
+fresh copy, client/public cutover and served-page/asset acceptance remain.
+Hosted browser session continuity is not promised with the new local signing key.
+
+Neither Supabase project has been retired. Premium's encrypted recovery archive
+passes local decryption/hash and tamper checks, but private off-device upload,
+download/restore and irreversible hosted deletion await owner approval. No
+off-device recovery or cost cessation is claimed. Preserve the external seed
+recovery source. Use [account migration](../docs/runbooks/local-account-migration.md)
+and [database recovery](../docs/runbooks/local-postgres.md); keep the Mac powered,
+signed in and its lid open. Earlier setup receipts below remain dated history.
+
+### Local PostgreSQL copies — prepared October 17, 2026
+
+The owner requested on-device replacements for both GALXAI and GALX Relay
+Premium. [Setup evidence](releases/2026-10-17-local-postgres-setup.json) records
+two dedicated native PostgreSQL 17.11 clusters: central `galxai` on loopback
+55432 and Premium `galx_relay_premium` on loopback 55433. The main copy has
+196 tables / 7,870 rows; Premium has 30 tables / 144 rows. Every included
+table's row hash/count, owner, effective ACL and RLS flags matches its retained
+consistent source snapshot. Original migration history and operational IDs
+remain. No pending Orbit migration was applied.
+
+Restricted service logins pass private-table, role escalation, DDL, bad-password,
+administrator TCP, cross-cluster and browser-role denial checks. Both local
+backups were restored in disposable databases and matched all table hashes.
+Login LaunchAgents start each cluster under caffeinate, restart it automatically
+and schedule daily backups retaining fourteen completed archives. A deliberate
+exit of each new database was followed by automatic restart and full data
+verification. Operator access uses a private peer-authenticated socket; application
+owners are not cluster superusers. The real application pool and authenticated
+transaction scope work against the local main copy.
+
+This is verified local preparation. Hosted writers remain active; neither
+`.env.local`, running relay configurations, deployed applications nor hosted
+projects were switched or retired. These snapshots are not replicas of later
+writes. Hosted Auth/Data API callers, fixed relay destination/TLS validation,
+remote application reachability, final writer freeze/synchronization and client
+acceptance remain cutover gates. Supabase charges have not been stopped by
+this setup. Public service state remains the earlier dated deployment evidence.
+
+Keep the owner signed in and the Mac powered with the lid open. The agents do
+not start before login or survive logout, and same-disk backups do not cover
+device loss. Use the complete [local database runbook](../docs/runbooks/local-postgres.md)
+for operation, recovery and remaining migration work. [ADR 0168](../docs/adr/0168-local-postgres-database-placement.md)
+records accepted placement intent separately from this limited delivery.
+
 ### Application CI and source cleanup — verified October 7, 2026
 
 The [hosted correction](releases/2026-10-07-ci-fixture-repair-hosted.json)

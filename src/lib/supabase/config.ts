@@ -33,15 +33,19 @@ function isAdminCredential(key: string): boolean {
 
 export function getSupabaseConfig(): SupabaseConfig {
   const configuredUrl =
+    process.env.ACCOUNT_API_INTERNAL_URL ||
+    process.env.NEXT_PUBLIC_ACCOUNT_API_URL ||
     process.env.NEXT_PUBLIC_SUPABASE_URL ||
     process.env.SUPABASE_URL ||
     '';
   const configuredPublishableKey =
+    process.env.NEXT_PUBLIC_ACCOUNT_PUBLISHABLE_KEY ||
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
     process.env.SUPABASE_ANON_KEY ||
     '';
   const configuredServiceRoleKey =
+    process.env.ACCOUNT_API_SERVICE_KEY ||
     process.env.SUPABASE_SERVICE_ROLE_KEY ||
     process.env.SUPABASE_SECRET_KEY ||
     '';

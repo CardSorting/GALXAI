@@ -9,23 +9,50 @@
 
 import { Pool, PoolClient, PoolConfig, QueryResult, QueryResultRow } from 'pg';
 
-export type PostgresSslMode = 'require' | 'verify-full';
+export type PostgresSslMode = 'disable' | 'require' | 'verify-full';
 
 /**
  * Builds the TLS policy shared by runtime pools and migration tooling.
- * `require` encrypts transport; `verify-full` also authenticates the Supabase
- * endpoint and requires the project CA certificate from Database Settings.
+ * Plaintext is allowed only on numeric loopback addresses. Remote connections
+ * retain the existing encrypted default; verify-full also authenticates peers.
  */
-export function getPostgresSslConfig(): PoolConfig['ssl'] {
-  const mode = (process.env.SUPABASE_DB_SSL_MODE || 'require') as PostgresSslMode;
-  if (mode !== 'require' && mode !== 'verify-full') {
-    throw new Error('SUPABASE_DB_SSL_MODE must be either require or verify-full.');
+export function getPostgresSslConfig(databaseUrl = process.env.DATABASE_URL): PoolConfig['ssl'] {
+  const url = databaseUrl ? new URL(databaseUrl) : undefined;
+  const seen = new Set<string>();
+  for (const key of url?.searchParams.keys() || []) {
+    const normalized = key.toLowerCase();
+    if (seen.has(normalized)) throw new Error('Duplicate PostgreSQL URL options are not allowed.');
+    seen.add(normalized);
+    if (['host', 'hostaddr', 'port', 'dbname', 'user', 'password', 'service', 'servicefile'].includes(normalized)) {
+      throw new Error('PostgreSQL URL options cannot override the connection destination.');
+    }
+  }
+  const configuredMode = process.env.POSTGRES_SSL_MODE || process.env.SUPABASE_DB_SSL_MODE;
+  const urlMode = url?.searchParams.get('sslmode');
+  if (configuredMode && urlMode && configuredMode !== urlMode) {
+    throw new Error('Conflicting PostgreSQL TLS settings.');
+  }
+  // These URL options otherwise silently override node-postgres's ssl object.
+  if (['sslcert', 'sslkey', 'sslrootcert', 'ssl', 'uselibpqcompat'].some(key => url?.searchParams.has(key))) {
+    throw new Error('Configure PostgreSQL TLS using the server environment.');
+  }
+  const mode = configuredMode || urlMode || 'require';
+  if (!['disable', 'require', 'verify-full'].includes(mode)) {
+    throw new Error('POSTGRES_SSL_MODE must be disable, require, or verify-full.');
+  }
+  if (mode === 'disable') {
+    if (!url || !['127.0.0.1', '[::1]'].includes(url.hostname)) {
+      throw new Error('Unencrypted PostgreSQL connections require a numeric loopback address.');
+    }
+    return false;
   }
 
-  const ca = process.env.SUPABASE_DB_CA_CERT?.replace(/\\n/g, '\n').trim();
+  // A URL sslmode would replace the CA settings below; strict mode must use env.
+  if (mode === 'verify-full' && urlMode) throw new Error('Set verify-full in POSTGRES_SSL_MODE, not the URL.');
+  const ca = (process.env.POSTGRES_CA_CERT || process.env.SUPABASE_DB_CA_CERT)?.replace(/\\n/g, '\n').trim();
   if (mode === 'verify-full' && !ca) {
     throw new Error(
-      'SUPABASE_DB_CA_CERT is required when SUPABASE_DB_SSL_MODE=verify-full.'
+      'POSTGRES_CA_CERT is required when POSTGRES_SSL_MODE=verify-full.'
     );
   }
 
@@ -155,8 +182,8 @@ export function getPostgresPool(): Pool | null {
     const config: PoolConfig = {
       connectionString: dbUrl,
       ssl: getPostgresSslConfig(),
-      max: Number(process.env.SUPABASE_POOL_SIZE || '15'),
-      maxUses: Number(process.env.SUPABASE_POOL_MAX_USES || '7500'),
+      max: Number(process.env.POSTGRES_POOL_SIZE || process.env.SUPABASE_POOL_SIZE || '15'),
+      maxUses: Number(process.env.POSTGRES_POOL_MAX_USES || process.env.SUPABASE_POOL_MAX_USES || '7500'),
       idleTimeoutMillis: 30000,
       connectionTimeoutMillis: 5000,
       statement_timeout: 6000,

@@ -5,12 +5,15 @@ import { verifyWorkspaceSession } from '@/lib/auth/workspace-session';
 import { isWorkspacePath, workspaceSignInPath } from '@/lib/security/workspace-policy';
 import { workspaceUnavailableResponse } from '@/lib/security/workspace-unavailable';
 import { canonicalRequestUrl } from '@/lib/security/request-origin';
+import { accountClientOptions } from '@/lib/auth/account-client-options';
+import { isAccountApiPath } from '@/lib/auth/account-api-paths';
 
-const defaultUrl = 'https://mazhcjisettrzbqhorvp.supabase.co';
-const defaultKey = 'sb_publishable_9eyEPgM-hF00Va7TLE90yA_LV4iGcoE';
+const defaultUrl = 'https://galx.ai';
+const defaultKey = 'sb_publishable_unconfigured';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || defaultUrl;
+const supabaseUrl = process.env.ACCOUNT_API_INTERNAL_URL || process.env.NEXT_PUBLIC_ACCOUNT_API_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || defaultUrl;
 const supabaseKey =
+  process.env.NEXT_PUBLIC_ACCOUNT_PUBLISHABLE_KEY ||
   process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
   defaultKey;
@@ -48,6 +51,7 @@ export const createClient = (request: NextRequest) => {
     supabaseUrl!,
     supabaseKey!,
     {
+      ...accountClientOptions(),
       cookies: {
         getAll() {
           return request.cookies.getAll();
@@ -157,7 +161,7 @@ export const updateSession = async (request: NextRequest) => {
   }
 
   // 2. Fast path: Skip blocking auth network roundtrips for API & V1 inference routes
-  if (pathname.startsWith('/v1/') || pathname.startsWith('/api/')) {
+  if (pathname.startsWith('/v1/') || pathname.startsWith('/api/') || isAccountApiPath(pathname)) {
     const apiResponse = NextResponse.next({ request });
     return applySecurityHeaders(apiResponse, pathname);
   }
@@ -178,6 +182,7 @@ export const updateSession = async (request: NextRequest) => {
     supabaseUrl!,
     supabaseKey!,
     {
+      ...accountClientOptions(),
       cookies: {
         getAll() {
           return request.cookies.getAll();

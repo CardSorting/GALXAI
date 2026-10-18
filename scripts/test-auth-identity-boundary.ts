@@ -55,6 +55,29 @@ test('identity requires verified credentials and never trusts client elevation c
   } finally { auth.getUser = original; globalThis.fetch = originalFetch; }
 });
 
+test('local account cookies take precedence over retained hosted cookies without fallback', async () => {
+  const previousUrl=process.env.NEXT_PUBLIC_ACCOUNT_API_URL;
+  process.env.NEXT_PUBLIC_ACCOUNT_API_URL='https://galx.ai';resetSupabaseClients();
+  const engine=Object.create(GalxAuthEngine.prototype) as GalxAuthEngine,auth=getSupabaseAuthClient().auth;
+  const previousGetUser=auth.getUser,previousFetch=globalThis.fetch,seen:string[]=[];
+  const current=forged.replace('attacker-chosen','local-user');
+  const encode=(token:string)=>'base64-'+Buffer.from(JSON.stringify({access_token:token})).toString('base64url');
+  const old=encode('eyJold.hosted.signature'),encoded=encode(current),mid=Math.floor(encoded.length/2);
+  const resolve=(cookie:string)=>engine.resolveAuthIdentity(new Request('https://galx.ai/api/images/library',{headers:{cookie}}));
+  globalThis.fetch=async()=>Response.json(true);
+  auth.getUser=async token=>{seen.push(token!);assert.equal(token,current);return {data:{user:{id:'verified-local-owner'}},error:null} as any;};
+  try{
+    for(const cookie of [`sb-retained-auth-token=${old}; sb-galx-auth-token=${encoded}`,`sb-retained-auth-token=${old}; sb-galx-auth-token.1=${encoded.slice(mid)}; sb-galx-auth-token.0=${encoded.slice(0,mid)}`]){
+      const result=await resolve(cookie);assert(result.authenticated);assert.equal(result.userId,'verified-local-owner');assert.equal(result.isSudoElevated,false);
+    }
+    assert.equal(seen.length,2);
+    for(const cookie of [`sb-retained-auth-token=${old}; galx_session=${current}`,`sb-galx-auth-token=malformed; sb-retained-auth-token=${old}; galx_session=${current}`,`sb-galx-auth-token.1=${encoded}; sb-retained-auth-token=${old}`])assert.equal((await resolve(cookie)).authenticated,false);
+    assert.equal(seen.length,2,'Retained, malformed or incomplete cookies must not select another identity.');
+    auth.getUser=async()=>({data:{user:null},error:{status:401,message:'revoked'}}) as any;
+    assert.equal((await resolve(`sb-retained-auth-token=${old}; sb-galx-auth-token=${encoded}`)).authenticated,false);
+  }finally{auth.getUser=previousGetUser;globalThis.fetch=previousFetch;if(previousUrl===undefined)delete process.env.NEXT_PUBLIC_ACCOUNT_API_URL;else process.env.NEXT_PUBLIC_ACCOUNT_API_URL=previousUrl;resetSupabaseClients();}
+});
+
 test('image library and favorites verify sessions without administrator credentials', async t => {
   const engine = Object.create(GalxAuthEngine.prototype) as GalxAuthEngine;
   const originalEngine = GalxAuthEngine.getInstance;

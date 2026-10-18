@@ -147,6 +147,9 @@ export async function executeRelayChat(options: RelayChatOptions) {
     return response;
   };
   let reader: ReadableStreamDefaultReader<Uint8Array> | undefined;
+  // Forward teardown without making terminal delivery depend on a remote
+  // cancellation acknowledgement. Some response readers never settle cancel.
+  const cancelReader = () => { void reader?.cancel().catch(() => {}); };
   let accepted = false;
   try {
     let job: { id: string; streamUrl: string };
@@ -203,19 +206,19 @@ export async function executeRelayChat(options: RelayChatOptions) {
       const stream = new ReadableStream<Uint8Array>({
         async pull(target) {
           try {
-            if (next.done) { cleanup(); await reader?.cancel(); target.close(); return; }
+            if (next.done) { cleanup(); cancelReader(); target.close(); return; }
             const data = next.value;
             target.enqueue(encoder.encode(`data: ${data}\n\n`));
-            if (data === '[DONE]') { cleanup(); await reader?.cancel(); target.close(); return; }
+            if (data === '[DONE]') { cleanup(); cancelReader(); target.close(); return; }
             next = await iterator.next();
           } catch (error) {
-            cleanup(); await reader?.cancel().catch(() => {});
+            cleanup(); cancelReader();
             const state = error instanceof RelayDispatchError && error.executionState === 'failed' ? 'failed' : 'unknown';
             target.enqueue(encoder.encode(`data: ${JSON.stringify({error:{code:'request_failed',message:'The request could not complete.',execution_state:state}})}\n\n`));
             target.close();
           }
         },
-        async cancel() { controller.abort(); cleanup(); await reader?.cancel().catch(() => {}); }
+        cancel() { controller.abort(); cleanup(); cancelReader(); }
       });
       const responseHeaders = { 'content-type': 'text/event-stream; charset=utf-8', 'cache-control': 'no-cache, no-transform', 'x-galx-job-id': job.id };
       return { response: new Response(stream, { headers: responseHeaders }), headers: responseHeaders };
@@ -236,13 +239,13 @@ export async function executeRelayChat(options: RelayChatOptions) {
       if (event.usage) usage = event.usage;
       if (text.length + reasoning.length > 16 * 1024 * 1024) throw new RelayDispatchError('output_too_large');
     }
-    await reader.cancel(); cleanup();
+    cancelReader(); cleanup();
     const result = { id: job.id, object: 'chat.completion', created: Math.floor(Date.now() / 1000), model: options.payload.model,
       choices: [{ index: 0, message: { role: 'assistant', content: text, ...(toolCalls.length ? { tool_calls: toolCalls } : {}), ...(reasoning ? { reasoning_content: reasoning } : {}) }, finish_reason: finishReason }],
       ...(usage ? { usage } : {}) };
     return { response: Response.json(result), headers: { 'content-type': 'application/json' } };
   } catch (error) {
-    controller.abort(); cleanup(); await reader?.cancel().catch(() => {});
+    controller.abort(); cleanup(); cancelReader();
     if (error instanceof RelayDispatchError) {
       if (!error.executionState) Object.assign(error, { executionState: accepted ? 'accepted' : 'unknown', shouldRetry: false });
       throw error;

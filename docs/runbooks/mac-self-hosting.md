@@ -1,10 +1,12 @@
-# Operate Mac-hosted Nova
+# Operate Mac-hosted web and Nova
 
 <!-- docs-scope: current-guide -->
 
-Private release-operator runbook. [Current state](../../post-mortem/CURRENT_STATE.md) records the active placement. This procedure operates Nova on the owner's existing Mac using the accepted complete Next image with Nova-only runtime configuration and ingress. GALX Media and shared Connect authentication remain on Vercel. The [transition record](../../post-mortem/releases/2026-10-03-nova-mac-transition.json) owns real-provider, cutover and retirement evidence; the [origin correction record](../../post-mortem/releases/2026-10-03-mac-origin-transport-correction.json) owns the unchanged image's synthetic whole-image acceptance. Prior incompatible candidates remain historical evidence.
+Private release-operator runbook. [Current state](../../post-mortem/CURRENT_STATE.md) records active placement. Canonical web/Media/Connect and separate narrow Nova now run on the owner's Mac against native central data/Auth. The [October 17 cutover record](../../post-mortem/releases/2026-10-17-central-native-cutover.json) owns activation, account corrections and limits. The October 3 [transition](../../post-mortem/releases/2026-10-03-nova-mac-transition.json) and [origin correction](../../post-mortem/releases/2026-10-03-mac-origin-transport-correction.json) remain dated evidence for preceding Nova-only placement; their unchanged-byte observation does not certify a later image.
 
 A verified archive or healthy startup cannot authorize staging without its matching successful acceptance receipt. Operator commands do not grant new cohort membership or change public routes. Follow the [transition runbook](nova-hosting-transition.md) for separately authorized future changes.
+
+The October 17 [account migration](local-account-migration.md) uses `plan-account-migration` for whole-web authority and `plan-nova-native` for Nova's separate narrow profile. Both preserve canonical issuer/resource, signing seeds and exact permissions. Initial final-copy/public switch is complete; Google secret recovery and mixed-cookie Library correction retain separate acceptance. Plans/staging do not themselves change ingress; their output does not determine whether a running listener is publicly routed.
 
 ## Purpose and trigger
 
@@ -17,7 +19,7 @@ node scripts/self-host.mjs --help
 node scripts/self-host.mjs doctor
 ```
 
-The application stays in the general `desktop-linux` Docker context, outside the Premium provider/desktop daemon. Existing Supabase identity and primary/execution databases remain authoritative. The reviewed tunnel carries only the exact Nova host and allowed resource paths to this container; Media object storage stays with the web surface. No command in this tool changes tunnel routes, DNS, grants, database schema, provider accounts or the live Vercel deployment.
+Both applications stay in `desktop-linux`, outside the Premium provider/desktop daemon. Native central owns account/application data; Premium uses its separate native execution cluster. Exact canonical ingress reaches web; only authored Nova resource paths reach its separate container. R2 authority stays with web, never Nova. The retained www Vercel deployment redirects canonically. No self-host command changes DNS/routes, grants, schema, provider accounts or Vercel; the separate inspected ingress operator owns routing changes.
 
 ## Authority and prerequisites
 
@@ -61,9 +63,22 @@ npm run test:connect
 npm run test:relay:services
 ```
 
-The runtime test creates a uniquely labeled internal Docker network, disposable PostgreSQL data in tmpfs, synthetic accounts/grants and a fixed provider fixture. The fixture anchors a shared network namespace so the application can use authenticated HTTP loopback, as its existing endpoint policy requires; a plain HTTP Docker hostname is correctly rejected. The application retains separate process, filesystem, configuration and resource limits. This test-only placement preserves provider reachability across application restart and is not a production topology change. A test-only TCP entrance exposes those fixtures solely to host loopback; the application, provider and database have no public egress. It loads the existing migrations into that disposable database only. Cleanup verifies ownership labels before removing resources and removes the temporary configuration file. No production database URL is accepted from the environment.
+The runtime test creates a uniquely labeled internal Docker network, disposable PostgreSQL data in tmpfs, synthetic accounts/grants and a fixed provider fixture. The fixture anchors a shared network namespace so the application can use authenticated HTTP loopback and an authenticated database TCP bridge on numeric loopback, as the existing plaintext destination policies require; plain Docker hostnames are correctly rejected. The application retains separate process, filesystem, configuration and resource limits. This test-only placement preserves reachability across application restart and is not a production topology change. A test-only TCP entrance exposes those fixtures solely to host loopback; the application, provider and database have no public egress. It loads the existing migrations into that disposable database only. Cleanup verifies ownership labels before removing resources and removes the temporary configuration file. No production database URL is accepted from the environment.
 
 When earlier checks pass, the full deadline test takes five minutes. It sends SIGTERM while Nova is active and verifies terminal persistence before process exit. It also exercises an abrupt application-process crash: abrupt loss cannot commit terminal work, so the original retained record must remain honest and a repeated request must be denied without another upstream attempt. Restart recovery must not rewrite execution history.
+
+A remote reader cancellation acknowledgement must not hold local terminal
+delivery or shutdown open. Run the Nova and relay hung-ack regressions when
+changing this boundary, then require a fresh whole-image receipt. Capture both
+stdout and stderr with fixture secrets redacted and selected exit/SQL state on
+failure. A deadline or forced-stop failure is retained evidence, never a reason
+to shorten the 300/480-second budgets or skip the gate. See
+[FM-DEPLOY-005](../../post-mortem/failure-modes/deployment.md#fm-deploy-005--reader-cancellation-acknowledgement-blocks-terminal-cleanup).
+
+Also test a pending source read whose executor ignores abort. The local public
+stream must observe its existing request/deadline signal independently, retain
+terminal persistence and close with an unknown outcome. A completed database
+write alone does not prove the HTTP body or host drain finished.
 
 The fixture drives actual HTTP authorization initiation, PKCE exchange, refresh and revocation through the image. Only the account-session/consent actor and provider are synthetic. A raw Node HTTP adapter sends the canonical Host: Node fetch does not honor a custom Host override. The real Chromium probe uses a separate loopback-only fixture entrance that forwards exactly once to Next, without buffering response bodies or replaying requests. It uses the hash-verified candidate buffer source, measures first/terminal bytes, and observes a quiet-stream keepalive. No such test proxy is added to deployment infrastructure.
 
@@ -71,19 +86,19 @@ Inference, cancellation, lost connection, full deadline with active drain, resta
 
 ### 3. Prepare explicit runtime configuration
 
-After the whole-image rehearsal has produced its acceptance receipt, use a dedicated owner-only JSON file (`chmod 600`) outside the application package, with the existing application configuration names and values. See the allowlist in [runtime-config.cjs](../../deploy/self-host/runtime-config.cjs). No ambient `.env` is loaded. Do not mount the workspace, Docker socket, provider desktop homes, cloud management tokens or provider credentials into the application.
+After the whole-image rehearsal has produced its acceptance receipt, use a dedicated owner-only JSON file (`chmod 600`) outside the application package, with the existing application configuration names and values. See the allowlist in [runtime-config.cjs](../../deploy/self-host/runtime-config.cjs). No ambient `.env` is loaded. Do not mount the workspace, Docker socket, provider desktop homes or general cloud management credentials. The active Nova profile also excludes billing, storage, account-admin and scoped publishing credentials. The separately fenced whole-web migration profile retains the existing web app's necessary billing/storage/scoped publishing authority; it does not give that authority to Nova.
 
 For the active Nova profile, supply only the primary database/TLS and pool bounds, existing vault/audit keys, Connect enable/issuer/resource/client registration, public build identity and the existing server-side relay capability required by Nova. `validateNovaConfig` in [the operator library](../../scripts/lib/self-host.mjs) rejects unrelated Media, storage, billing and administrator settings. Provider account credentials never enter this file. Public inputs must match the compiled image; runtime settings cannot rewrite browser assets. Preserve vault/signing roots. Database CA certificates may use literal `\n` as the existing client permits. Never import the entire developer environment.
 
 The active profile requires `GALX_CONNECT_ENABLED=1`, `GALX_CONNECT_ORIGIN=https://galx.ai`, `GALX_NOVA_RESOURCE=https://nova.galx.ai` and the reviewed first-party registry. This enables validation; the primary database's explicit entitlement and application grant still determine eligibility. It creates no grant. Use:
 
 ```sh
-node scripts/self-host.mjs plan-nova <package-directory> <private-nova-runtime.json> <new-plan-directory>
+node scripts/self-host.mjs plan-nova-native <package-directory> <private-nova-runtime.json> <new-plan-directory>
 ```
 
-The generic `plan` command remains available for disabled preparation with `GALX_CONNECT_ENABLED=0`. Do not confuse that disabled fixture with the active Nova profile. Both paths require the matching successful whole-image receipt and unchanged image/configuration fingerprints.
+`plan-nova-native` additionally requires native central's fixed verified-TLS destination/local account transport and rejects hosted aliases. Legacy `plan-nova` retains hosted compatibility for explicitly reviewed historical recovery, not current authority. Generic `plan` remains disabled preparation with `GALX_CONNECT_ENABLED=0`. Whole web uses `plan-account-migration` with its declared broader configuration. All require matching whole-image acceptance and unchanged fingerprints.
 
-The generated Compose plan binds only `127.0.0.1:17787` (an optional final port argument selects another unprivileged loopback port). It references an immutable image ID and one read-only configuration file. It prints no values. The retained plan fingerprints both configuration and Compose policy; changing either requires a new reviewed plan.
+Native Nova defaults to `127.0.0.1:17789` under `galx-web-nova-native`; whole web defaults to 17788 under `galx-web-account-migration`. The earlier hosted-compatible Nova project/17787 is retained stopped. An explicit final argument selects another unprivileged loopback port. Plans reference an immutable image and one read-only private configuration, print no values, and fingerprint configuration/Compose policy. Changes require a new reviewed plan.
 
 ### 4. Stage, inspect and stop
 
@@ -98,11 +113,27 @@ node scripts/self-host.mjs resume <plan-directory>
 
 `stage` creates one loopback container in the explicitly selected disabled-preparation or Nova profile and refuses to replace an existing one. `resume` explicitly starts that same stopped container only when its image and configuration still match. Neither changes public routing. A lost Docker command acknowledgement requires `status` before another mutation. Raw `docker inspect`, resolved Compose configuration and application logs are private administrator material; the tool emits only an allowlisted status summary.
 
-The container runs as UID/GID 1000, drops capabilities, denies privilege escalation, has no Docker socket, uses a read-only root and has explicit memory/CPU/PID/log bounds. Node starts directly under Docker's init, so signals reach Next. Next's existing SIGTERM handler is intended to stop new connections, drain active requests and wait for registered `after` work; the whole-image active-drain check must demonstrate that behavior before staging. The 480-second stop grace exceeds Nova's unchanged 300-second deadline and bounded terminal I/O. Never substitute Compose's default ten-second stop or force removal during an active operation.
+The container runs as UID/GID 1000, drops capabilities, denies privilege escalation, has no Docker socket, uses a read-only root and has explicit memory/CPU/PID/log bounds. These protections also apply to `plan-account-migration`, whose fixed project is `galx-web-account-migration` and default loopback port is 17788; only its explicit validated local central database/account API and preserved web configuration are accepted. All profiles require the matching whole-image receipt. Node starts directly under Docker's init, so signals reach Next. Next's existing SIGTERM handler is intended to stop new connections, drain active requests and wait for registered `after` work; the whole-image active-drain check must demonstrate that behavior before staging. The 480-second stop grace exceeds Nova's unchanged 300-second deadline and bounded terminal I/O. Never substitute Compose's default ten-second stop or force removal during an active operation.
 
 Next writes regenerated pages beside its server output. The image retains an immutable seed; bounded tmpfs mounts hold runtime copies of the app/pages output, image/fetch cache and temporary files. Every start reseeds the runtime output. Cache loss is acceptable; database identity, grants, execution history and object storage are never reconstructed from this cache. Cache exhaustion must be diagnosed rather than giving the container a writable copy of the entire checkout.
 
-Docker `unless-stopped` owns recovery after process exit. An unhealthy health check does not restart the container. Do not add an automatic health-based killer: failed dependencies or a quiet inference stream are not proof that terminating an active process is safe. A manual stop remains stopped across Docker restarts.
+Docker `unless-stopped` owns recovery after process exit. An unhealthy check does not restart the container. Do not add an automatic health-based killer: failed dependencies or quiet streams do not prove safe termination. A manual stop remains stopped across Docker restarts. For a reviewed immutable web replacement, retain the preceding package/configuration, drain the exact owned container with the full allowance and verify clean exit/no OOM before removing only its disposable container/cache. Stage the new reviewed plan against the same live native authority; never roll the database back with the image.
+
+The October 17 correction operator is deliberately bound to the retained
+`web-plan-final` / `nova-plan-final` and newly reviewed `web-plan-cookie-fix` /
+`nova-plan-terminal-fix` plans under `.data/postgres-cutover`. Each replacement
+requires the same project, port and exact configuration hash, matching whole-image
+acceptance, a clean old exit, and only tmpfs/read-only configuration mounts. Run
+`node scripts/rollout-native-web-correction.mjs` for web and the same command with
+`nova` for the narrow Nova profile, only after preparing those accepted plans.
+Its separate private phase receipts prevent blind repeat. Inspect an interrupted
+phase before taking a recovery action; never delete persistent data or change
+DNS/database authority to complete an image correction. This bounded operator is
+not a reusable arbitrary-container replacement tool. Both replacements now run
+the accepted correction image; retain their completed phase receipts. The older
+image has known mixed-cookie and stream-drain defects, so its retention is not
+full account-recovery acceptance. Recover with a verified compatible native
+image, preserving current data and the source's inactive state.
 
 ### 5. Preserve the accepted ingress
 
@@ -136,7 +167,7 @@ Before a planned replacement, withdraw the ingress route or close admission thro
 
 The operator tool never applies database migrations. The controlled transition applied only the already-reviewed additive exact-refill migration after a rollback-only dry run; the accepted Connect schema was already present. Inspect actual migration state before a later release and verify forward compatibility before promising rollback. Preserve grants, identities, completed records and unknown records. Do not invoke a destructive migration DOWN just to change application placement.
 
-For containment, deny Nova ingress first, preserve active/unknown records, then drain the candidate. A prior Vercel route is deny-only and cannot serve as a long-inference fallback under Hobby. Restore a compatible Mac image/configuration when independently verified; do not reinstate a second primary or remove the retirement firewall. Media restoration and Nova availability are separate operations.
+For containment, withdraw only the affected exact-host route, preserve active/unknown records, then drain its container. A prior Vercel Nova route is deny-only and cannot serve as a long-inference fallback. Restore a compatible native Mac image/configuration after verification; do not reinstate a hosted writer, restore stale data or remove the retirement firewall. Web/account recovery and Nova availability remain separate scopes.
 
 If an unplanned host interruption has already occurred, confirm login, Docker Desktop, the existing keep-awake owner, tunnel connectivity and application status using bounded read-only checks before any new inference. Do not induce that interruption for acceptance. Physical-host and shared-daemon fault drills remain **UNVERIFIED — DEFERRED BY OPERATOR**; this Mac is not a high-availability cluster.
 
@@ -158,6 +189,6 @@ The [non-disruptive resilience record](../../post-mortem/releases/2026-10-03-nov
 
 ## Verification and evidence
 
-Keep image/manifest/archive digests, public-input hashes, named checks, timestamps, observed revocation latency, terminal states and actual limitations in private release evidence. Never retain runtime credentials or unnecessary identity data. Preserve failed attempts and distinguish ACT-044/045/046 synthetic target acceptance from ACT-047 real-provider/cutover evidence. The latter records the owner-authorized controlled transition. Host power, login, sleep/wake and disruptive shared-daemon drills are **UNVERIFIED — DEFERRED BY OPERATOR**. Off-device restoration remains unverified separately. None is passed, failed or waived by the provisional reboot-startup assumption; continued controlled operation is not public-launch or production-readiness certification.
+Keep image/manifest/archive digests, public-input hashes, named checks, timestamps, observed revocation latency, terminal states and actual limitations in private release evidence. Never retain runtime credentials or unnecessary identity data. Preserve failed attempts and distinguish ACT-044/045/046 synthetic target acceptance from ACT-047 real-provider/cutover evidence. The latter records the owner-authorized controlled transition. Host power, login, sleep/wake and disruptive shared-daemon drills are **UNVERIFIED — DEFERRED BY OPERATOR**. Native database off-device recovery is separately verified in the October 17 record; complete application-package/VM/queue/secret recovery remains unverified. None is passed, failed or waived by the provisional reboot-startup assumption; continued controlled operation is not public-launch or production-readiness certification.
 
 Authoritative implementation references: [Next self-hosting and graceful `after` shutdown](https://nextjs.org/docs/15/app/guides/self-hosting), [Next output tracing](https://nextjs.org/docs/15/app/api-reference/config/next-config-js/output), [Docker service limits and stop grace](https://docs.docker.com/reference/compose-file/services/), [Docker restart policy](https://docs.docker.com/engine/containers/start-containers-automatically/), and [Cloudflare origin parameters](https://developers.cloudflare.com/tunnel/reference/origin-parameters/). These define the selected familiar operating patterns; local and hosted evidence determine whether this particular release satisfies them.

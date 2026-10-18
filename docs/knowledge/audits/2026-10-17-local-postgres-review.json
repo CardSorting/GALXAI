@@ -1,0 +1,77 @@
+{
+  "reviewedAt": "2026-10-17",
+  "reviewer": "Codex local PostgreSQL maintainer",
+  "scope": "Incremental complete affected-guide and source-contract review for local setup of both named databases. Prior domain reviews retain their wider unchanged scope; this is not a new exhaustive audit of every fingerprinted file.",
+  "sourcesInspected": [
+    "scripts/local-postgres.mjs",
+    "scripts/test-postgres-configuration.ts",
+    "scripts/test-postgres-admission.ts",
+    "src/lib/db/postgres.ts",
+    "src/lib/supabase/config.ts",
+    "src/lib/supabase/client.ts",
+    "src/lib/supabase/repositories/RelayAccountInventoryRepository.ts",
+    "src/relay/pool-protocol.ts",
+    "src/relay/pool-entry.ts",
+    "scripts/run-supabase-integration.ts",
+    "scripts/fixtures/integration-bootstrap.sql",
+    "scripts/export-relay-services.ts",
+    "scripts/setup-relay-services.ts",
+    "package.json",
+    ".env.example",
+    ".gitignore",
+    ".vercelignore",
+    ".dockerignore",
+    "docs/knowledge/registry.json"
+  ],
+  "completeAffectedGuidesInspected": [
+    "docs/runbooks/local-postgres.md",
+    "docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md",
+    "docs/SUPABASE_PARANOID_ARCHITECTURE_SPEC.md",
+    "docs/MIGRATION_GUIDE.md",
+    "docs/runbooks/README.md",
+    "docs/adr/0016-authoritative-supabase-postgresql-substrate.md",
+    "docs/adr/0153-central-account-authority-isolated-relays.md",
+    "docs/adr/0168-local-postgres-database-placement.md",
+    "docs/adr/README.md"
+  ],
+  "policyInspected": [
+    "AGENTS.md",
+    "docs/AGENTS.md",
+    "docs/DOCUMENTATION_POLICY.md",
+    "docs/how-to/change-with-documentation.md",
+    "docs/reference/knowledge-commands.md",
+    "docs/maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md",
+    "docs/runbooks/release-readiness.md",
+    "docs/runbooks/relay-pool-services.md"
+  ],
+  "currentStateReview": "Reviewed the new dated local-copy determination against retained component acceptance. Earlier deployment observations remain historical and unchanged; no serving alias, account action, schema/grant mutation on source or incident closure is inferred.",
+  "findingsResolved": [
+    "Dedicated central and Premium clusters preserve separate service role boundaries; no default Homebrew data directory is reused.",
+    "Original object owners, role membership, table grants and forced RLS are preserved; imported logins and cluster elevation are not copied.",
+    "Snapshot row hashes/counts and effective ACL comparison distinguish restored state from ongoing source writes.",
+    "URL-level TLS destination overrides, duplicate options and remote plaintext fail closed; provider-neutral environment names retain legacy fallbacks.",
+    "Supabase Auth, Data API, remote/container transport validation and final writer synchronization remain concrete cutover gates.",
+    "Services require owner login, power and an open lid; backup restore is proven locally, while device-loss recovery remains separate.",
+    "New runbook, ADR decision/local delivery metadata, ownership mappings, exact npm commands and canonical navigation are registered without accepting older proposals."
+  ],
+  "checks": {
+    "configurationAdmission": 7,
+    "isolatedDatabaseIntegration": 94,
+    "publicHttpAndAuthorization": 69,
+    "documentationGuards": 43,
+    "staticIntegrity": "zero violations/warnings",
+    "localCopies": "226 tables with matching row hashes/counts, owners, effective ACLs and RLS; restricted role denials; both backup restores and automatic restarts passed",
+    "buildAndTypecheck": "Final results and actual runtime version are retained in setup evidence; no deployment or live clean claim."
+  },
+  "retainedEvidence": [
+    "post-mortem/releases/2026-10-17-local-postgres-setup.json"
+  ],
+  "impactReview": "Knowledge changes are command/navigation/registry additions; relay changes are example settings and a complete migration-guide clarification, with runtime URL/TLS checks intentionally unchanged. Delivery remains local preparation. Database changes are the private operator and connection policy, with no application SQL migration. No changed path is treated as automatically reviewed because generated sync succeeded.",
+  "limitations": [
+    "No final client cutover, hosted retirement or zero-egress/billing claim.",
+    "Copied auth tables do not implement a running Auth service.",
+    "No on-boot system daemon or off-device backup was configured.",
+    "Function restore uses original archive definitions/owners/ACLs, but table hashes do not certify every function contract.",
+    "Native Node 22 on this Mac has a broken external dynamic-library dependency; this task does not repair unrelated toolchains."
+  ]
+}

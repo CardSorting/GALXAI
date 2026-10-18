@@ -8,6 +8,16 @@
 ## Status
 **Accepted & Implemented**
 
+October 17, 2026 placement refinement: [ADR 0168](0168-local-postgres-database-placement.md)
+accepts moving the central and Premium database responsibilities to separate
+local PostgreSQL clusters. PostgreSQL authority and the original rationale below
+remain; Supabase hosting is no longer the intended destination for those
+responsibilities. The [central cutover record](../../post-mortem/releases/2026-10-17-central-native-cutover.json)
+and [Premium retirement evidence](../../post-mortem/releases/2026-10-17-premium-retirement-account-email.json)
+retain activation, account acceptance limits and retirement observations separately
+from this historical decision. Neither this note nor copied data certifies all
+provider, availability or billing gates.
+
 ## Context
 Decentralized edge compute workers require a single, strictly consistent, ACID-compliant authoritative storage substrate to manage tenant identities, API key hashes, cryptographic hardware-grade shard secrets, double-entry wallet ledgers, FIFO queue partitions, and pgvector embeddings.
 

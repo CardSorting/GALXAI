@@ -49,8 +49,16 @@ export function serviceOrigin(value: string) {
   if (u.username || u.password || u.search || u.hash || u.pathname !== '/' || (u.protocol !== 'https:' && !(u.protocol === 'http:' && ['127.0.0.1', '[::1]'].includes(u.hostname)))) throw Error('An exact HTTPS service origin is required.');
   return u.origin;
 }
-export function assertProjectDatabase(value: string, project: string) {
+export function assertProjectDatabase(value: string, project: string, deployment?: unknown) {
   const u = new URL(value);
+  if(deployment!==undefined){
+    const central=project===PROJECTS.central,premium=project===PROJECTS.premium;
+    if(deployment!=='native-postgres-v1'||(!central&&!premium)||!['postgres:','postgresql:'].includes(u.protocol)||u.search||u.hash
+      ||u.hostname!==(central?'host.docker.internal':'galx-postgres-premium.internal')
+      ||u.port!==(central?'55432':'55433')||u.pathname!==(central?'/galxai':'/galx_relay_premium')
+      ||decodeURIComponent(u.username)!==(central?'galx_control_service':'galx_execution_service')||!u.password)throw Error('Database project mismatch.');
+    return;
+  }
   if (!['postgres:', 'postgresql:'].includes(u.protocol) || !(u.hostname === `db.${project}.supabase.co` || u.hostname.endsWith('.pooler.supabase.com') && decodeURIComponent(u.username).endsWith(`.${project}`))) throw Error('Database project mismatch.');
 }
 /** Client-owned functions are text inference. Provider-hosted tools cannot bypass pool scope. */

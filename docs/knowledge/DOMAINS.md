@@ -69,6 +69,7 @@ Owner role: **Security/access maintainer**. Domain: `access`.
 - [Private preview activation — 2026-09-12](../../docs/operations/preview-activation.md)
 - [Developer preview reads and hybrid sync](../../docs/operations/preview-hybrid-sync.md)
 - [Workspace authentication and recovery](../../docs/operations/workspace-auth.md)
+- [Local account and application migration](../../docs/runbooks/local-account-migration.md)
 - [Authentication and credential registration boundaries](../../docs/STANDARDIZED_OAUTH_AND_INGESTION_ARCHITECTURE.md)
 - [Authentication security posture and threat model](../../docs/SECURITY_POSTURE_AND_THREAT_MODEL.md)
 - [ADR 0147: Verified account and session authority](../../docs/adr/0147-verified-account-and-session-authority.md)
@@ -171,6 +172,9 @@ Owner role: **Database operator**. Domain: `database`.
 
 - [Supabase authority and operational boundaries](../../docs/SUPABASE_PARANOID_ARCHITECTURE_SPEC.md)
 - [PostgreSQL migration and recovery operations](../../docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md)
+- [Local PostgreSQL setup and migration](../../docs/runbooks/local-postgres.md)
+- [Local account and application migration](../../docs/runbooks/local-account-migration.md)
+- [ADR 0168: Local PostgreSQL for GALXAI and Premium](../../docs/adr/0168-local-postgres-database-placement.md)
 - [Legacy free generation and current image allowance](../../docs/maintainers/FREE_GENERATION_QUOTA.md)
 - [Maintainer runbook: shard authority and key rotation](../../docs/maintainers/MULTI_TENANT_SHARD_AND_KEY_ROTATION.md)
 - [Migration to central accounts and isolated relays](../../docs/MIGRATION_GUIDE.md)
@@ -183,7 +187,7 @@ Owner role: **Database operator**. Domain: `database`.
 - [ADR 0163: Star candidate selection before exhibition](../../docs/adr/0163-star-candidate-selection-before-exhibition.md)
 - [Bounded Star artist residency](../../docs/runbooks/star-residency.md)
 
-Relevant checks (select for the change; impact discovery never executes these): `npm run db:verify`, `npm run db:test`, `npm run test:broc`, `npm run test:broc:db`, `npm run test:relay:manual-db`, `npm run test:relay:authorization-db`, `npm run test:relay:activation-db`, `npm run test:broc:selection`, `npm run test:image:db`, `npm run test:relay:refill-db`.
+Relevant checks (select for the change; impact discovery never executes these): `npm run db:verify`, `npm run test:postgres:configuration`, `npm run db:test`, `npm run test:broc`, `npm run test:broc:db`, `npm run test:relay:manual-db`, `npm run test:relay:authorization-db`, `npm run test:relay:activation-db`, `npm run test:broc:selection`, `npm run test:image:db`, `npm run test:relay:refill-db`.
 
 ## Release and deployment boundaries
 
@@ -200,7 +204,8 @@ Owner role: **Release operator**. Domain: `delivery`.
 - [Deployment and release](../../docs/playbooks/02-deployment-and-release.md)
 - [Recover Stripe webhook delivery](../../docs/runbooks/stripe-webhook-delivery.md)
 - [Private image release and privacy audit](../../docs/runbooks/private-image-release-audit.md)
-- [Operate Mac-hosted Nova](../../docs/runbooks/mac-self-hosting.md)
+- [Operate Mac-hosted web and Nova](../../docs/runbooks/mac-self-hosting.md)
+- [Local account and application migration](../../docs/runbooks/local-account-migration.md)
 - [Nova hosting transition and retirement](../../docs/runbooks/nova-hosting-transition.md)
 - [ADR 0167: Mac Nova runtime and Vercel inference retirement](../../docs/adr/0167-nova-mac-runtime-placement.md)
 

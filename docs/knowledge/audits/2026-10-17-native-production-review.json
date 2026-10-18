@@ -1,0 +1,88 @@
+{
+  "reviewedAt": "2026-10-17",
+  "reviewer": "Codex native migration maintainer",
+  "scope": "Incremental semantic review of the changed production migration, email, OAuth, ingress, recovery, cookie and stream-lifecycle contracts and complete affected guide bodies. Earlier reviews retain their original dated scope. Domain fingerprint inventory is broader than this inspected change and is not a new exhaustive audit of every matched file.",
+  "priorReviews": [
+    "docs/knowledge/audits/2026-10-17-local-postgres-review.json",
+    "docs/knowledge/audits/2026-10-17-local-account-migration-review.json"
+  ],
+  "changedContractsInspected": [
+    "scripts/lib/account-email.mjs and test-account-email-configuration.mjs: fixed sender/provider, owner-only file, no credential output",
+    "scripts/lib/account-providers.mjs and test-account-provider-configuration.mjs: exact client identity, reject exported fingerprints, retained real material and private Google handoff",
+    "scripts/capture-account-email-key.mjs and capture-account-provider-key.mjs: bounded numeric-loopback, origin/CSRF, one-use capture, owner-only files",
+    "scripts/stage-local-account-services.mjs: selected provider refresh, same owned Auth image, retained prior configuration, no verification/signing-policy weakening",
+    "scripts/configure-account-email-dns.mjs and configure-local-account-ingress.mjs: additive email records, exact retained route identity, semantic readback and interrupted-phase inspection",
+    "deploy/postgres-cutover/central-source-freeze.sql and paired down: bounded exact source guard, protected platform roles, native cleanup distinct from source disarm, no thaw after local writes",
+    "scripts/probe-central-source-freeze.mjs, probe-native-source-guard-cleanup.mjs, inspect-central-cutover.mjs and migrate-central-local-database.mjs: rollback-only probes, ordered drain/fence/copy/activate, final snapshot ownership/ACL/RLS, explicit resume from accepted phases",
+    "scripts/local-postgres.mjs, select-native-development-database.mjs and prepare-nova-database-config.mjs: native placement, retained source configuration/CA, deleted-source refusal, fixed verified TLS and narrow Nova authority Paused as well as deleted sources now refuse export.",
+    "scripts/backup-local-postgres-offdevice.mjs: consistent exported snapshot, authenticated encryption, bucket privacy, same-object recovery, role recipe, disposable schema/extension prerequisites",
+    "scripts/retire-premium-hosted-database.mjs and retire-central-hosted-database.mjs: exact resource identity, explicit irreversible scope, recovery/data/traffic gates, retained private phase and post-delete absence; central deletion not executed at this review Original organization identity and absence of unrelated projects also gate the proposed billing scope. Free receipt and native/source/recovery review gate one pause POST; status-only inspect completes INACTIVE without replay. Permanent deletion remains separate and was not executed.",
+    "src/core/auth/GalxAuthEngine.ts and scripts/test-auth-identity-boundary.ts: fixed local cookie wins over retained hosted cookie, stale/malformed/incomplete/revoked identities never fall back",
+    "src/lib/nova/inference.ts, src/core/router/adapters/RelayChatTransport.ts, scripts/test-nova.ts and test-relay-chat-transport.ts: remote cancellation acknowledgement cannot hold local terminal delivery/cleanup; persistence, unknown and no replay retained",
+    "scripts/test-self-host-runtime.ts: retain full deadline/drain checks and add bounded redacted stderr/process/SQL diagnostics on failure",
+    "scripts/self-host.mjs, lib/self-host.mjs and rollout-native-web-correction.mjs: matching immutable-image acceptance, same native configuration/project/port, clean drain, disposable container-only replacement for web and Nova",
+    "scripts/verify-account-cutover.mjs, verify-native-account-owner.mjs and verify-exhibition-http.mjs: actual served boundaries, existing UUID/session, scoped output evidence",
+    "docker/relay-pools/local/central.yaml and images.json: exact accepted native central image; Premium identity retained",
+    "package.json and docs/knowledge/registry.json: validation commands and affected source-to-guide ownership"
+  ],
+  "completeGuideBodiesInspected": [
+    "docs/runbooks/local-account-migration.md",
+    "docs/runbooks/local-postgres.md",
+    "docs/runbooks/mac-self-hosting.md",
+    "docs/runbooks/relay-pool-services.md",
+    "docs/runbooks/nova-hosting-transition.md",
+    "docs/operations/workspace-auth.md",
+    "docs/operations/galx-connect.md",
+    "docs/reference/relay-account-management.md",
+    "docs/MIGRATION_GUIDE.md",
+    "docs/SUPABASE_PARANOID_ARCHITECTURE_SPEC.md",
+    "docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md",
+    "docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md",
+    "docs/adr/0168-local-postgres-database-placement.md"
+  ],
+  "semanticFindings": [
+    "Current native placement is distinct from the original setup/preparation observations and from retained stale hosted data.",
+    "Fixed deployment protocol IDs and original owners/ACL/RLS/signing authority remain; no pending Orbit migration is applied by placement changes.",
+    "Email provisioning, delivered messages and token verification have separate evidence. Google/GitHub callback registration alone does not prove usable secrets or real code exchange.",
+    "Actual GitHub return preserves the existing UUID. Google credential change and expired Premium provider renewal remain owner handoffs.",
+    "Hosted source write guards prevent application/session mutations but allow reads and do not stop project or organization billing.",
+    "Encrypted off-device database recovery is accepted separately from VM, queue, full-secret and fresh-device recovery. Daily local backups are not daily off-device scheduling.",
+    "Whole-image cookie-only failure is preserved, never deployed or relabeled as success. Hung-cancellation regressions failed before the repair; full new-image acceptance is mandatory.",
+    "Correction rollout preserves the accepted native writer and prior image/configuration; no stale source fallback or database restore accompanies it.",
+    "Found and removed a stale Premium-section instruction saying central phase remained preparation; the current guide now identifies central-local-authority and forbids resetting it.",
+    "ADR 0168 accepted intent does not certify incomplete delivery; older proposed ADR status and all historical evidence remain unchanged.",
+    "Second isolated rehearsal retained terminal rows but hung on a public read. Independent local read interruption against the original signal has a failing-before/passing-after regression; deadlines/persistence/no replay remain unchanged.",
+    "Selected Free plus pause to stop ongoing paid source operation without unrequested permanent central deletion. Verified only the intended project remained in the original organization; cancellation/template/add-on effects do not alter native configuration.",
+    "Documented pause submission before the one POST, retained its PAUSING timeout, reconciled only status to INACTIVE and added inactive-source export refusal. No automatic mutation retry or source resume.",
+    "Final whole-image and actual existing-owner/public acceptance close ACT-054/055 only. Google and Premium sign-in owner steps and older unrelated prevention actions stay open."
+  ],
+  "verification": {
+    "nativeFinalCentralCopy": "196 tables / 7870 rows, hashes/owners/effective ACLs/RLS match before activation",
+    "nativeRelayTransportOwnershipIsolation": "30 pass",
+    "smtp": "Verified sender, certificate/hostname, SMTP AUTH, delivered owner-alias confirmation/recovery and seven actual preparation account-route checks",
+    "centralOffDeviceRecovery": "196 tables downloaded/decrypted/restored with hashes/owners/effective ACLs/RLS; nonsecret role recipe uploaded/read back",
+    "premiumRetirement": "Approved encrypted recovery verified and hosted project absence accepted",
+    "initialPublicAcceptance": "65 HTTP/asset checks, 38 browser assets, eleven configured secrets compared, zero private matches; 38 cache checks; five exhibition pages and 30 sanitized image artifacts",
+    "existingOwnerGithub": "Actual provider return, preserved UUID and native active session",
+    "mixedCookieAuthRegression": "45 Auth tests pass",
+    "terminalCleanup": "33 focused Nova/relay tests, 53 Connect tests and TypeScript pass after pending-read repair; both failed full-image rehearsals remain preserved and were never deployed.",
+    "typeScript": "pass after cookie/terminal changes",
+    "documentationTests": "43 guard tests and structural validation pass; sync/check/test:docs must run after final explicit attestations.",
+    "newImmutableImageAndLiveCorrection": "Fresh Node 22 production build06 passes with 158 pages and all 1,675 source inputs unchanged. All 2,405 compared artifact files are unchanged; 830 package public files and 545 compiled assets scanned with zero boundary errors. Image sha256:71d4431550d2814e02c2e7b8db7fdc89bc65bde5f2ea285f12ce428be760bb1b passes 44 full-image checks, including the 304,410 ms deadline/clean exit, restart, revocation and no replay. Both native profiles run it after clean drains. Existing-owner Library renders three private images and Favorites is authorized; Library still works after hosted source INACTIVE.",
+    "correctedPublicAcceptance": "65 checks / 38 browser assets / 11 configured secrets / zero private matches; 38 cache checks; image HTTP / 37 assets; five exhibition pages / 23 assets / 30 sanitized artifacts / 12 denials. Repeated on the corrected serving image; social Google return and generation remain separate.",
+    "hostedCostStop": "Original organization Free Plan verified after cancellation; exact source pause POST200, status-only reconciliation confirmed INACTIVE. Premium absent. No invoice payment or permanent central deletion; native web/Nova and protected Library remain available afterward."
+  },
+  "evidence": [
+    "post-mortem/releases/2026-10-17-central-native-cutover.json",
+    "post-mortem/releases/2026-10-17-premium-retirement-account-email.json",
+    "post-mortem/incidents/2026/2026-10-17-account-cutover/README.md",
+    "post-mortem/incidents/2026/2026-10-17-provider-expiry/README.md"
+  ],
+  "impactReview": "Reviewed knowledge/images/access/relay/database/delivery/client-efficiency/connect mappings and unmapped private evidence, journal, register, current state and generated discovery views. New operator paths are mapped. New deployment failure mode is covered by delivery. No unmapped runtime contract remains.",
+  "limits": [
+    "Google owner credential handoff and Premium provider manual renewals remain open; no new generation/settlement accepted.",
+    "Local services require powered awake signed-in Mac; no logout/reboot/sleep/shared-daemon or fresh-device drill.",
+    "No unrelated prevention action closed or review deadline waived.",
+    "Central is a paused stale archive under Free, not deleted or a writer fallback. Historical bills remain. Optional later permanent deletion needs its own paused-source review; no resume merely for cleanup."
+  ]
+}

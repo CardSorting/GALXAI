@@ -4,6 +4,8 @@
 
 Private maintainer guide for request efficiency. Never import this document, platform quota figures or implementation diagnostics into product content. [Current operating state](../../post-mortem/CURRENT_STATE.md) owns deployment evidence; this implementation is not evidence of a live cost reduction.
 
+October 17 placement: canonical web/Connect and separate Nova now run on the Mac with native central/Auth. The Vercel baseline below remains dated; its counters no longer describe canonical request execution. Preserve these request/authorization budgets to bound local work. Use the [account migration procedure](../runbooks/local-account-migration.md) for source retirement and billing: write guards do not prevent source reads, project deletion is separate from organization subscription cancellation, and local placement alone is not invoice evidence. Never restore stale hosted data as a scheduler rollback.
+
 ## Baseline and priorities
 
 The user supplied this usage snapshot on September 12, 2026. The billing-period start/end and project/environment attribution were not supplied. Percentages below use the first displayed allowance; the additional comparison figures do not establish the active plan or available credits.
@@ -78,7 +80,7 @@ Long-lived streams can exchange invocation count for provisioned-memory duration
 
 ## Measurement and operating procedure
 
-1. Record the exact Vercel billing interval, active allowances, project and production/preview split. Keep only aggregate evidence. Compare function CPU/invocations, origin bytes, ISR reads and middleware work by route using [Observability Insights](https://vercel.com/docs/observability/insights). Separate real sessions, crawlers, API traffic and previews where the available filters support it.
+1. Identify actual serving placement first. For native canonical traffic record local request/CPU/connection and transfer observations; for retained Vercel releases record that project's exact interval, production/preview attribution and allowances separately. Use [Vercel Observability](https://vercel.com/docs/observability/insights) only for those hosted workloads. Keep aggregate evidence and separate sessions, crawlers, API traffic and previews where available. Do not attribute native traffic to an obsolete Vercel counter.
 2. Use the same time span and task mix before/after a deployment. Compare bootstrap calls per Sites open, status calls per completed image, CPU per 1,000 useful actions and origin bytes per action. Also compare time to usable workspace, completion-discovery delay, error rates and user-triggered retries. Aggregate counters alone cannot validate the change.
 3. Review the largest CPU and transfer routes first. Retain existing connection reuse and bounded queries. Investigate repeated membership/readiness calls only with service-level measurements; never lengthen entitlement proofs on quota pressure alone. Compare compressed response sizes and cache statuses for public pages before changing ISR or asset TTLs.
 4. Configure available usage notifications and [Vercel anomaly alerts](https://vercel.com/docs/alerts) in the existing project after confirming the plan and notification destination. This pass does not enable a paid observability tier, change account notifications or impose an automatic production pause. Suggested operator review thresholds are 50%, 75% and 90% of the verified allowance, with burn rate considered against days remaining; they are policy suggestions, not installed alerts or provider defaults.

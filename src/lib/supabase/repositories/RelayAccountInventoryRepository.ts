@@ -18,7 +18,10 @@ export function assertCentralAccountDatabase(connectionString: string | undefine
   try { connection = new URL(connectionString || ''); } catch { throw Error('Central account database is not configured.'); }
   const direct = connection.hostname === `db.${ACCOUNT_AUTHORITY_PROJECT}.supabase.co`;
   const pooled = connection.hostname.endsWith('.pooler.supabase.com') && decodeURIComponent(connection.username).endsWith(`.${ACCOUNT_AUTHORITY_PROJECT}`);
-  if (!['postgres:', 'postgresql:'].includes(connection.protocol) || (!direct && !pooled)) {
+  const local=process.env.GALX_DATABASE_DEPLOYMENT==='native-postgres-v1'
+    &&['127.0.0.1','host.docker.internal'].includes(connection.hostname)&&connection.port==='55432'
+    &&connection.pathname==='/galxai'&&decodeURIComponent(connection.username)==='postgres'&&!connection.search&&!connection.hash;
+  if (!['postgres:', 'postgresql:'].includes(connection.protocol) || (!direct && !pooled && !local)) {
     throw Error('Account management requires the main GALXAI database.');
   }
 }

@@ -25,6 +25,24 @@ test('REST image errors retain status/backoff and caller cancellation remains he
 
 const options = { url: 'https://relay.test', key: 'relay-test-key', payload: { model: 'test-model', stream: false }, ttftTimeoutMs: 1000 };
 const delta = (text: string) => `data: ${JSON.stringify({ choices: [{ delta: { content: text }, finish_reason: null }] })}\n\n`;
+test('relay terminal errors and client cancellation do not await upstream cancel acknowledgement',async t=>{
+  for(const mode of ['error','cancel'])await t.test(mode,async()=>{
+    const original=globalThis.fetch;let release!:()=>void,cancelled=false,posts=0;
+    const cleanup=new Promise<void>(resolve=>{release=resolve;});let timer:ReturnType<typeof setTimeout>;
+    const within=<T>(promise:Promise<T>)=>Promise.race([promise,new Promise<T>((_,reject)=>{timer=setTimeout(()=>reject(new Error('Relay terminal waited for upstream cancel')),200);})]);
+    globalThis.fetch=async(input)=>{
+      const url=new URL(String(input));assert.equal(url.origin,'https://relay.test');
+      if(url.pathname==='/v1/chat/completions'){posts++;return Response.json({id:'test',streamUrl:'/v1/jobs/test/stream'},{status:202});}
+      return new Response(new ReadableStream<Uint8Array>({start(c){c.enqueue(new TextEncoder().encode(delta('partial')+(mode==='error'?'data: {"error":{"message":"PRIVATE_DIAGNOSTIC","execution_state":"unknown"}}\n\n':'')));},cancel(){cancelled=true;return cleanup;}}),{headers:{'Content-Type':'text/event-stream'}});
+    };
+    try{
+      const result=await executeRelayChat({...options,payload:{...options.payload,stream:true}});
+      if(mode==='error'){const body=await within(result.response.text());assert.match(body,/request_failed/);assert.doesNotMatch(body,/PRIVATE|\[DONE\]/);}
+      else{const reader=result.response.body!.getReader();await reader.read();await within(reader.cancel());}
+      assert(cancelled);assert.equal(posts,1);
+    }finally{clearTimeout(timer!);release();globalThis.fetch=original;}
+  });
+});
 async function fixture(body: string | null, run: () => Promise<void>, admissionStatus = 202, streamUrl = '/v1/jobs/test/stream') {
   const original = globalThis.fetch;
   let cancelled = false;

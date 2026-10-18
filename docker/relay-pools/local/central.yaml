@@ -1,7 +1,7 @@
 name: galx-local-authority
 services:
   authority:
-    image: galxai-relay-central:connections-20260916
+    image: galxai-relay-central:native-postgres-20261017
     user: '1000:1000'
     read_only: true
     cap_drop: [ALL]
@@ -20,7 +20,7 @@ services:
     networks: [authority, egress]
     logging: {driver: json-file, options: {max-size: 10m, max-file: '3'}}
   tls:
-    image: galxai-relay-central:connections-20260916
+    image: galxai-relay-central:native-postgres-20261017
     entrypoint: [node, /local/authority-proxy.mjs]
     user: '1000:1000'
     read_only: true

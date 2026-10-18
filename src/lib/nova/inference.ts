@@ -53,17 +53,27 @@ function publicChunk(value: any, id: string) {
 }
 
 /** Output is projected anew. No upstream IDs, models, usage, headers or diagnostic fields escape. */
-function publicStream(source: ReadableStream<Uint8Array>, id: string, finalize: (state: NovaState) => Promise<void>, abort: () => void) {
+function publicStream(source: ReadableStream<Uint8Array>, id: string, finalize: (state: NovaState) => Promise<void>, abort: () => void, signal: AbortSignal) {
   const reader = source.getReader(), decoder = new TextDecoder();
   let pending = '', total = 0, terminal = false, closed = false;
-  const stop = async () => { abort(); await reader.cancel().catch(() => {}); };
+  // Local interruption must also unblock a pending read when the execution
+  // transport fails to acknowledge its signal. Never invent remote completion.
+  const interrupted = Symbol('interrupted');
+  let wake!: (value: typeof interrupted) => void;
+  const interruption = new Promise<typeof interrupted>(resolve => { wake = resolve; });
+  const onAbort = () => wake(interrupted);
+  if (signal.aborted) onAbort(); else signal.addEventListener('abort', onAbort, { once: true });
+  // Cancellation is forwarded, not a remote acknowledgement requirement.
+  // A hung upstream cancel must not hold a persisted terminal response open.
+  const stop = () => { signal.removeEventListener('abort', onAbort); abort(); void reader.cancel().catch(() => {}); };
   return new ReadableStream<Uint8Array>({
     async pull(controller) {
       try {
         while (!closed) {
           const boundary = /\r?\n\r?\n/.exec(pending);
           if (!boundary) {
-            const part = await reader.read(); if (part.done) throw new Error('Incomplete result');
+            const part = await Promise.race([reader.read(), interruption]);
+            if (part === interrupted || part.done) throw new Error('Incomplete result');
             total += part.value.byteLength; if (total > 2_000_000) throw new Error('Oversized result');
             pending += decoder.decode(part.value, { stream: true });
             if (pending.length > 256_000) throw new Error('Oversized event');
@@ -134,7 +144,7 @@ export async function invokeNova(request: Request, resource: string, access: Nov
     if (!response.ok || !response.body) throw new NovaError('outcome_unconfirmed', 502, 'unknown');
     if (response.headers.get('content-type')?.includes('text/event-stream')) {
       const h = headers(); h.set('Content-Type', 'text/event-stream; charset=utf-8');
-      const projected = new Response(publicStream(response.body, admission.id, finalize, abort), { headers: h });
+      const projected = new Response(publicStream(response.body, admission.id, finalize, abort, signal), { headers: h });
       if (input.stream) {
         streaming = true;
         h.set('Cache-Control', 'private, no-store, no-transform');

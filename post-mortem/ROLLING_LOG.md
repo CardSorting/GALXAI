@@ -2971,3 +2971,73 @@ Incident: `INC-20261007-CI`. Kind: `recovery`.
 **Next step:** Commit and push dated acceptance records; preserve separate visual recapture and existing prevention actions.
 
 Evidence: [2026-10-07-ci-fixture-repair-hosted.json](releases/2026-10-07-ci-fixture-repair-hosted.json), [README.md](incidents/2026/2026-10-07-ci-fixture-drift/README.md).
+
+## EVT-20261017-PROVIDER-EXPIRY-OBSERVED — 2026-10-17T20:43:22.133Z
+
+Incident: `INC-20261017-PROVIDER-EXPIRY`. Kind: `observation`.
+
+**Observation:** Premium liveness and current central ownership pass, but readiness and authenticated model discovery return 503. Both enabled provider sign-ins expired before the 20:24 UTC database drain; customer request impact and original expiry trigger unknown.
+
+**Action:** Read authorized private projection and preserved its aggregate expiry finding. Capability preflight stopped the owned generation canary before provider I/O; no gate, account or credential workaround applied.
+
+**Result:** Native database acceptance and post-cutover backup restore pass. Provider generation remains unavailable; no generation or settlement canary passed.
+
+**Next step:** ACT-052: manual owning-desktop sign-in and explicit reconnect, then separate capability and actual execution/settlement acceptance. Keep original blocked receipt and accepted/uncertain work.
+
+Evidence: [README.md](incidents/2026/2026-10-17-provider-expiry/README.md), [2026-10-17-local-account-migration.json](releases/2026-10-17-local-account-migration.json).
+
+## EVT-20261017-ACCOUNT-CUTOVER-OBSERVED — 2026-10-17T22:26:20.267045+00:00
+
+Incident: `INC-20261017-ACCOUNT-CUTOVER`. Kind: `containment`.
+
+**Observation:** Actual canonical Google callback rejects the exported provider fingerprint; existing owner GitHub login succeeds after selecting retained real client material. Signed-in Library reports expired recovery while its profile is verified. Customer impact unknown.
+
+**Action:** Retained diagnostics privately, preserved native authority and source write guard, added fingerprint rejection and fixed canonical-cookie selection with adversarial regressions. Started a clean immutable correction build. Prepared explicit owner Google credential and Premium sign-in handoffs.
+
+**Result:** No identity/ownership/TLS bypass or source thaw. Existing UUID and native session verified; production cookie correction and Google handoff remain pending.
+
+**Next step:** Complete correction build and whole-image/public/signed-in acceptance; retain provider handoff and ACT-052/053/054 separately.
+
+Evidence: [README.md](incidents/2026/2026-10-17-account-cutover/README.md), [2026-10-17-central-native-cutover.json](releases/2026-10-17-central-native-cutover.json).
+
+## EVT-20261017-TERMINAL-CLEANUP-REPAIR — 2026-10-17T23:16:15.497116+00:00
+
+Incident: `INC-20261017-ACCOUNT-CUTOVER`. Kind: `containment`.
+
+**Observation:** The isolated whole-image cookie candidate aborted after 40 checks and the full 480-second stop allowance. No live service was replaced. Hung reader cancellation acknowledgements reproducibly prevented terminal closure in Nova and relay transport.
+
+**Action:** Retained failed fixture and pre-repair regression evidence, made cancellation initiation nonblocking, preserved terminal unknown persistence/no replay, and added bounded stderr/exit diagnostics for future fixture failures.
+
+**Result:** All 32 focused Nova/relay transport and 52 Connect tests pass. A new clean immutable production build is in progress; no whole-image or live correction pass is yet claimed.
+
+**Next step:** ACT-055: require fresh full runtime acceptance, then cleanly replace both native profiles; ACT-054 signed-in Library and ACT-053 Google handoff remain separate.
+
+Evidence: [2026-10-17-central-native-cutover.json](releases/2026-10-17-central-native-cutover.json), [README.md](incidents/2026/2026-10-17-account-cutover/README.md).
+
+## EVT-20261017-PENDING-READ-REPAIR — 2026-10-17T23:42:39.842795+00:00
+
+Incident: `INC-20261017-ACCOUNT-CUTOVER`. Kind: `containment`.
+
+**Observation:** Whole-image attempt 06 still failed after 40 checks and full shutdown allowance, exit 137/no OOM. All fourteen synthetic request rows were terminal; eight unknown. No production service replacement occurred.
+
+**Action:** Preserved failure, read only isolated state/log summaries, reproduced public read remaining open when execution ignores abort, and made local read interruption observe the existing combined request/deadline signal independently.
+
+**Result:** New regression fails before and passes after; 33 focused tests and TypeScript pass. Fresh immutable build06 is in progress; no full runtime or live correction acceptance claimed.
+
+**Next step:** Require complete new-image acceptance, then web and Nova replacement and actual existing-owner Library acceptance. ACT-053/052 manual renewals remain open.
+
+Evidence: [2026-10-17-central-native-cutover.json](releases/2026-10-17-central-native-cutover.json), [README.md](incidents/2026/2026-10-17-account-cutover/README.md).
+
+## EVT-20261018-NATIVE-CORRECTION-COST-STOP — 2026-10-18T00:13:21.475430+00:00
+
+Incident: `INC-20261017-ACCOUNT-CUTOVER`. Kind: `recovery`.
+
+**Observation:** Fresh image06 passes all44 isolated whole-image checks, including304410ms deadline/clean exit/restart/no replay. Both native web/Nova profiles run it after clean drains. Existing-owner Library/Favorites and actual public response/artifact scans pass.
+
+**Action:** Completed ACT-054/055, preserved both failed candidates, verified all frozen source hashes/195guards/13preserved account UUIDs and no unscoped platform data. Cancelled Pro through Free, then sent one documented source pause POST200. Initial PAUSING exceeded the bounded observation; status-only inspect confirmed INACTIVE without replay.
+
+**Result:** Premium remains deleted; hosted central is retained paused under Free. Actual private Library and web/Nova still work after source pause. No permanent central deletion, invoice payment, native authority/key/data rollback, entitlement bypass or new generation.
+
+**Next step:** ACT-053 owner Google secret handoff/actual return and ACT-052 owning-desktop provider renewals remain. Preserve external recovery seed and private archives; complete source/documentation review and Git delivery.
+
+Evidence: [2026-10-17-central-native-cutover.json](releases/2026-10-17-central-native-cutover.json), [README.md](incidents/2026/2026-10-17-account-cutover/README.md).

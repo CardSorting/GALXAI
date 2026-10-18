@@ -242,6 +242,15 @@
         "scripts/test-public-information-boundary.ts",
         "src/middleware.ts",
         "src/utils/supabase/middleware.ts",
+        "src/utils/supabase/*.ts",
+        "src/lib/env.ts",
+        "src/app/auth/v1/**/*.ts",
+        "src/app/rest/v1/**/*.ts",
+        "scripts/test-public-account-api.ts",
+        "scripts/test-local-account-services.mjs",
+        "scripts/test-local-account-web.ts",
+        "scripts/local-account-gateway.mjs",
+        "scripts/stage-local-account-services.mjs",
         "src/lib/auth/workspace-session.ts",
         "src/lib/auth/require-workspace-session.ts",
         "scripts/test-workspace-auth.ts",
@@ -301,7 +310,19 @@
         "scripts/test-browser-session.ts",
         "src/components/auth/SessionConnectionNotice.tsx",
         "scripts/verify-session-recovery-server.cjs",
-        "scripts/test-auth-callback.ts"
+        "scripts/test-auth-callback.ts",
+        "scripts/lib/account-email.mjs",
+        "scripts/lib/account-providers.mjs",
+        "scripts/test-account-email-configuration.mjs",
+        "scripts/test-account-provider-configuration.mjs",
+        "scripts/test-local-account-email.ts",
+        "scripts/check-account-email.mjs",
+        "scripts/capture-account-email-key.mjs",
+        "scripts/capture-account-provider-key.mjs",
+        "scripts/verify-native-account-owner.mjs",
+        "scripts/verify-account-cutover.mjs",
+        "post-mortem/failure-modes/identity.md",
+        "scripts/rollout-native-web-correction.mjs"
       ],
       "guides": [
         "docs/operations/developer-preview.md",
@@ -309,6 +330,7 @@
         "docs/operations/preview-activation.md",
         "docs/operations/preview-hybrid-sync.md",
         "docs/operations/workspace-auth.md",
+        "docs/runbooks/local-account-migration.md",
         "docs/STANDARDIZED_OAUTH_AND_INGESTION_ARCHITECTURE.md",
         "docs/SECURITY_POSTURE_AND_THREAT_MODEL.md",
         "docs/adr/0147-verified-account-and-session-authority.md",
@@ -445,6 +467,9 @@
         "scripts/open-pool-monitor.ts",
         "scripts/install-relay-peer-isolation.py",
         "scripts/install-relay-local-isolation.py",
+        "scripts/stage-local-relay-databases.mjs",
+        "scripts/migrate-premium-local-database.mjs",
+        "scripts/verify-premium-local-execution.mjs",
         "scripts/install-relay-digitalocean-firewall.py",
         "scripts/provision-relay-digitalocean.sh",
         "scripts/relay-local.mjs",
@@ -488,7 +513,9 @@
         "scripts/test-relay-refill-db.ts",
         "src/lib/supabase/repositories/ShardProjectionReader.ts",
         "scripts/test-shard-projection-egress.ts",
-        "scripts/test-shard-registry-egress.ts"
+        "scripts/test-shard-registry-egress.ts",
+        "scripts/migrate-central-local-database.mjs",
+        "scripts/retire-premium-hosted-database.mjs"
       ],
       "guides": [
         "docs/ARCHITECTURE.md",
@@ -572,6 +599,20 @@
         "supabase/rollbacks/*.sql",
         "src/lib/supabase/**/*.ts",
         "src/lib/db/postgres.ts",
+        "scripts/local-postgres.mjs",
+        "scripts/stage-local-account-services.mjs",
+        "scripts/stage-local-relay-databases.mjs",
+        "scripts/migrate-premium-local-database.mjs",
+        "scripts/verify-premium-local-execution.mjs",
+        "scripts/prepare-premium-retirement.mjs",
+        "scripts/local-account-gateway.mjs",
+        "scripts/prepare-account-web-config.mjs",
+        "scripts/test-local-account-services.mjs",
+        "scripts/test-local-account-web.ts",
+        "scripts/test-local-database-placement.ts",
+        "scripts/test-postgres-configuration.ts",
+        "scripts/test-postgres-admission.ts",
+        ".env.example",
         "scripts/run-supabase-integration.ts",
         "scripts/verify-supabase-integrity.ts",
         "scripts/manage-migrations.ts",
@@ -609,11 +650,24 @@
         "docs/adr/0163-star-candidate-selection-before-exhibition.md",
         "scripts/review-star-candidates.ts",
         "scripts/test-broc-selection.ts",
-        "scripts/test-relay-refill-db.ts"
+        "scripts/test-relay-refill-db.ts",
+        "deploy/postgres-cutover/*.sql",
+        "scripts/migrate-central-local-database.mjs",
+        "scripts/inspect-central-cutover.mjs",
+        "scripts/probe-central-source-freeze.mjs",
+        "scripts/probe-native-source-guard-cleanup.mjs",
+        "scripts/backup-local-postgres-offdevice.mjs",
+        "scripts/select-native-development-database.mjs",
+        "scripts/retire-premium-hosted-database.mjs",
+        "docs/adr/0016-authoritative-supabase-postgresql-substrate.md",
+        "scripts/retire-central-hosted-database.mjs"
       ],
       "guides": [
         "docs/SUPABASE_PARANOID_ARCHITECTURE_SPEC.md",
         "docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md",
+        "docs/runbooks/local-postgres.md",
+        "docs/runbooks/local-account-migration.md",
+        "docs/adr/0168-local-postgres-database-placement.md",
         "docs/maintainers/FREE_GENERATION_QUOTA.md",
         "docs/maintainers/MULTI_TENANT_SHARD_AND_KEY_ROTATION.md",
         "docs/MIGRATION_GUIDE.md",
@@ -628,6 +682,7 @@
       ],
       "checks": [
         "npm run db:verify",
+        "npm run test:postgres:configuration",
         "npm run db:test",
         "npm run test:broc",
         "npm run test:broc:db",
@@ -682,9 +737,18 @@
         "deploy/self-host/*",
         "scripts/fixtures/self-host-*.ts",
         "scripts/prepare-connect-web.mjs",
+        "scripts/prepare-account-web-config.mjs",
         "scripts/test-nova-retirement.ts",
         "src/lib/security/inference-placement.ts",
-        "scripts/test-self-host-resilience.ts"
+        "scripts/test-self-host-resilience.ts",
+        "scripts/configure-account-email-dns.mjs",
+        "scripts/configure-local-account-ingress.mjs",
+        "scripts/prepare-nova-database-config.mjs",
+        "scripts/migrate-central-local-database.mjs",
+        "scripts/backup-local-postgres-offdevice.mjs",
+        "scripts/select-native-development-database.mjs",
+        "scripts/rollout-native-web-correction.mjs",
+        "scripts/retire-central-hosted-database.mjs"
       ],
       "guides": [
         "docs/DEPLOYMENT.md",
@@ -699,6 +763,7 @@
         "docs/runbooks/stripe-webhook-delivery.md",
         "docs/runbooks/private-image-release-audit.md",
         "docs/runbooks/mac-self-hosting.md",
+        "docs/runbooks/local-account-migration.md",
         "docs/runbooks/nova-hosting-transition.md",
         "docs/adr/0167-nova-mac-runtime-placement.md"
       ],
@@ -1373,6 +1438,38 @@
         "ingress"
       ]
     },
+    "docs/runbooks/local-postgres.md": {
+      "kind": "runbook",
+      "keywords": [
+        "postgres",
+        "local",
+        "database",
+        "migration",
+        "backup",
+        "launchd"
+      ]
+    },
+    "docs/runbooks/local-account-migration.md": {
+      "kind": "runbook",
+      "keywords": [
+        "postgres",
+        "auth",
+        "local",
+        "migration",
+        "smtp",
+        "callback",
+        "cutover"
+      ]
+    },
+    "docs/adr/0168-local-postgres-database-placement.md": {
+      "kind": "decision",
+      "keywords": [
+        "postgres",
+        "mac",
+        "database",
+        "egress"
+      ]
+    },
     "docs/adr/0167-nova-mac-runtime-placement.md": {
       "kind": "decision",
       "keywords": [
@@ -1397,7 +1494,9 @@
     "docs/operations/galx-connect.md",
     "docs/runbooks/mac-self-hosting.md",
     "docs/runbooks/nova-hosting-transition.md",
-    "docs/runbooks/star-residency.md"
+    "docs/runbooks/star-residency.md",
+    "docs/runbooks/local-postgres.md",
+    "docs/runbooks/local-account-migration.md"
   ],
   "decisions": {
     "docs/adr/0145-maintained-knowledge-and-decision-lifecycle.md": {
@@ -1749,6 +1848,19 @@
       "revision": "Mac sha256:5157984bc06524aac0ca8fbf2051eebfe6f3b7994aa7d0793e8404c097289345; web dpl_4uwFyPMJ6YV7njXsWQbb7a8MZHKh",
       "observed_at": "2026-10-04T01:49:34.816Z",
       "acceptance_basis": "Owner explicitly authorized the gated real-provider transition, Nova-only cutover and Vercel retirement. No broader commercial/public activation."
+    },
+    "docs/adr/0168-local-postgres-database-placement.md": {
+      "status": "accepted",
+      "delivery": "local",
+      "domain": "database",
+      "owner": "Database operator",
+      "date": "2026-10-17",
+      "evidence": [
+        "post-mortem/releases/2026-10-17-local-postgres-setup.json",
+        "post-mortem/releases/2026-10-17-local-account-migration.json"
+      ],
+      "supersedes": [],
+      "acceptance_basis": "Owner explicitly requested on-device PostgreSQL and continued migration for GALXAI and Premium. Partial local delivery: Premium execution database cut over after source fencing/final verification; central Auth/web privately accepted but not public. Hosted retirement and complete central cutover remain pending."
     }
   },
   "managed_adr_from": 145,

@@ -4,13 +4,17 @@ const fs = require('node:fs');
 // Explicit application configuration boundary. Host/cloud/provider management
 // tokens and process-injection variables are deliberately not accepted.
 const allowed = new Set([
+  'NEXT_PUBLIC_ACCOUNT_API_URL', 'NEXT_PUBLIC_ACCOUNT_PUBLISHABLE_KEY',
+  'ACCOUNT_API_INTERNAL_URL', 'ACCOUNT_API_SERVICE_KEY', 'GALX_DATABASE_DEPLOYMENT',
+  'POSTGRES_SSL_MODE', 'POSTGRES_CA_CERT', 'POSTGRES_POOL_SIZE', 'POSTGRES_POOL_MAX_USES',
   'NEXT_PUBLIC_APP_URL', 'NEXT_PUBLIC_SUPABASE_URL', 'NEXT_PUBLIC_SUPABASE_ANON_KEY',
   'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY', 'NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY',
+  'NEXT_PUBLIC_GALX_EDGE_URL','PUBLIC_ASSETS_URL',
   'NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION', 'NEXT_PUBLIC_BING_SITE_VERIFICATION',
   'NEXT_PUBLIC_YANDEX_SITE_VERIFICATION', 'NEXT_PUBLIC_BAIDU_SITE_VERIFICATION',
   'DATABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY', 'SUPABASE_SECRET_KEY', 'SUPABASE_URL', 'SUPABASE_ANON_KEY',
   'SUPABASE_DB_SSL_MODE', 'SUPABASE_DB_CA_CERT', 'SUPABASE_POOL_SIZE', 'SUPABASE_POOL_MAX_USES', 'SUPABASE_TIMEOUT_MS',
-  'GALX_VAULT_KEY_V1', 'GALX_VAULT_ACTIVE_KEY_VERSION', 'GALX_AUDIT_SIGNING_SECRET', 'SESSION_SECRET',
+  'GALX_VAULT_KEY_V1', 'GALX_VAULT_KEY', 'GALX_VAULT_MASTER_SECRET', 'GALX_VAULT_ACTIVE_KEY_VERSION', 'GALX_AUDIT_SIGNING_SECRET', 'SESSION_SECRET',
   'GALX_CONNECT_ENABLED', 'GALX_CONNECT_ORIGIN', 'GALX_NOVA_RESOURCE', 'GALX_CONNECT_CLIENTS',
   'GALX_ISOLATED_RELAYS_ENABLED', 'GALX_PREMIUM_IMAGES_ENABLED', 'GALX_PREMIUM_RELAY_URL',
   'GALX_PREMIUM_RELAY_KEY', 'GALX_INTERNAL_ADMIN_KEY',
@@ -19,6 +23,12 @@ const allowed = new Set([
   'R2_TRAINING_BUCKET_NAME', 'R2_WEBAPPS_BUCKET_NAME', 'R2_DREAMBEES_BUCKET_NAME', 'R2_STICKER_BUCKET_NAME',
   'STRIPE_SECRET_KEY', 'STRIPE_PUBLISHABLE_KEY', 'STRIPE_WEBHOOK_SECRET', 'STRIPE_CREDITS_WEBHOOK_SECRET',
   'STRIPE_WEBHOOK_SECRET_LIVE', 'STRIPE_WEBHOOK_SECRET_PRODUCTION',
+  'VM_RELAY_URL','VM_RELAY_API_KEY',
+  'GALX_SITES_COHORT_ACCOUNT_IDS','GALX_SITES_CONTENT_ENABLED','GALX_SITES_DELIVERY_MODE',
+  'GALX_SITES_ACTIVATION_EVIDENCE','GALX_SITES_RATE_CARD','GALX_SITES_RELAY_ADMIN_KEY',
+  'GALX_SITES_DOMAINS_ENABLED','GALX_SITES_DOMAINS_WORKER_ENABLED','GALX_SITES_MANAGED_PUBLISH_ENABLED',
+  'GALX_SITES_DNS_API_TOKEN','GALX_SITES_DNS_ZONE_ID','GALX_SITES_WORKER_TOKEN',
+  'GALX_SITES_HOSTING_CNAME','GALX_SITES_HOSTING_PROJECT','GALX_SITES_HOSTING_TEAM','GALX_SITES_HOSTING_TOKEN',
 ]);
 function validateConfig(input, { preparation = false } = {}) {
   if (!input || Object.getPrototypeOf(input) !== Object.prototype) throw Error('Runtime configuration must be a JSON object.');
@@ -26,12 +36,13 @@ function validateConfig(input, { preparation = false } = {}) {
     if (!allowed.has(name)) throw Error('Runtime configuration contains an unapproved name.');
     if (typeof value !== 'string' || !value || value.length > 65536 || /[\u0000\r\n]/.test(value)) throw Error('Runtime configuration contains an invalid value.');
   }
-  for (const name of ['GALX_VAULT_KEY_V1', 'GALX_AUDIT_SIGNING_SECRET', 'NEXT_PUBLIC_APP_URL', 'NEXT_PUBLIC_SUPABASE_URL', 'GALX_CONNECT_ENABLED', 'GALX_CONNECT_ORIGIN', 'GALX_NOVA_RESOURCE', 'GALX_CONNECT_CLIENTS']) {
+  for (const name of ['GALX_VAULT_KEY_V1', 'GALX_AUDIT_SIGNING_SECRET', 'NEXT_PUBLIC_APP_URL', 'GALX_CONNECT_ENABLED', 'GALX_CONNECT_ORIGIN', 'GALX_NOVA_RESOURCE', 'GALX_CONNECT_CLIENTS']) {
     if (!input[name]) throw Error(`Runtime configuration is missing ${name}.`);
   }
+  if (!input.NEXT_PUBLIC_ACCOUNT_API_URL && !input.NEXT_PUBLIC_SUPABASE_URL) throw Error('Runtime configuration is missing its account API origin.');
   if (!['0', '1'].includes(input.GALX_CONNECT_ENABLED)) throw Error('Connect activation must be explicit.');
   if (preparation && input.GALX_CONNECT_ENABLED !== '0') throw Error('Preparation requires Connect disabled.');
-  for (const name of ['NEXT_PUBLIC_APP_URL', 'NEXT_PUBLIC_SUPABASE_URL', 'GALX_CONNECT_ORIGIN', 'GALX_NOVA_RESOURCE']) {
+  for (const name of ['NEXT_PUBLIC_APP_URL', 'NEXT_PUBLIC_ACCOUNT_API_URL', 'NEXT_PUBLIC_SUPABASE_URL', 'GALX_CONNECT_ORIGIN', 'GALX_NOVA_RESOURCE'].filter(name => input[name])) {
     let url; try { url = new URL(input[name]); } catch { throw Error(`Invalid ${name}.`); }
     if (url.protocol !== 'https:' || url.username || url.password || url.hash || url.search || url.pathname !== '/') throw Error(`Invalid ${name}.`);
   }

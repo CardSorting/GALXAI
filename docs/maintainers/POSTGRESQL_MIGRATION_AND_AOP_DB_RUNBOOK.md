@@ -4,6 +4,22 @@
 
 Private database guide. Read the applicable repository Supabase skills before database changes, then inspect [migration source](../../supabase/migrations), [rollback pairs](../../supabase/rollbacks) and [current incident state](../../post-mortem/CURRENT_STATE.md). This document does not authorize an unrelated production mutation.
 
+The owner's October 17 database placement direction prepares separate local
+GALXAI and Premium clusters. Use the complete [local PostgreSQL runbook](../runbooks/local-postgres.md)
+for setup, snapshots, restore checks, login services and backups. The
+[continuation record](../../post-mortem/releases/2026-10-17-local-account-migration.json)
+records Premium's source fence, final copy and native runtime switch. Later
+[central cutover evidence](../../post-mortem/releases/2026-10-17-central-native-cutover.json)
+records final central copy and native Auth/web/Nova/authority activation.
+Premium's hosted project is deleted after private off-device recovery; central's
+retained source is guarded against writes. SMTP and actual GitHub return pass;
+Google credential recovery, mixed-cookie correction and final retirement/billing
+remain separately evidenced gates. Source guards are paired one-time operator SQL
+under `deploy/postgres-cutover/`, not pending application migrations. A generated
+template or copied database alone authorizes neither activation nor retirement.
+The exact-migration and fixture procedures below apply to the reviewed target,
+independently of provider.
+
 ## Separate inventory, fixtures and mutation
 
 | Command | Actual role |

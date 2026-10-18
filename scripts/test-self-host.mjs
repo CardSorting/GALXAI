@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { spawnSync } from 'node:child_process';
-import { BASE_IMAGE, STOP_SECONDS, sha256, hashFile, inside, regularFile, assertPayloadPath, composePlan, readConfig, validateConfig, validateNovaConfig, verifyPackage, runtimeAcceptanceHash } from './lib/self-host.mjs';
+import { BASE_IMAGE, STOP_SECONDS, sha256, hashFile, inside, regularFile, assertPayloadPath, composePlan, readConfig, validateConfig, validateNovaConfig, validateNovaNativeConfig, validateAccountMigrationConfig, verifyPackage, runtimeAcceptanceHash } from './lib/self-host.mjs';
 import { packageSelfHosted } from './package-self-hosted.mjs';
 
 const config = () => ({ GALX_CONNECT_ENABLED: '0', GALX_CONNECT_ORIGIN: 'https://galx.ai', GALX_NOVA_RESOURCE: 'https://nova.galx.ai', GALX_CONNECT_CLIENTS: '[]', NEXT_PUBLIC_APP_URL: 'https://galx.ai', NEXT_PUBLIC_SUPABASE_URL: 'https://fixture.invalid', GALX_VAULT_KEY_V1: 'a'.repeat(64), GALX_AUDIT_SIGNING_SECRET: 'b'.repeat(64) });
@@ -77,6 +77,19 @@ test('private Nova profile requires explicit first-party authority and excludes 
   assert.throws(() => validateNovaConfig({ ...values, GALX_NOVA_RESOURCE: 'https://other.example' }));
   assert.throws(() => validateNovaConfig({ ...values, GALX_CONNECT_ENABLED: '0' }));
   assert.throws(() => validateNovaConfig({ ...values, GALX_CONNECT_CLIENTS: '[{"id":"unreviewed-app"}]' }));
+});
+test('whole-web migration preserves identity and TLS without weakening the Nova profile',()=>{
+  const values={...config(),GALX_CONNECT_ENABLED:'1',GALX_CONNECT_CLIENTS:'[{"id":"reference-native"}]',GALX_DATABASE_DEPLOYMENT:'native-postgres-v1',DATABASE_URL:'postgresql://postgres:PRIVATE_CANARY@host.docker.internal:55432/galxai',POSTGRES_SSL_MODE:'verify-full',POSTGRES_CA_CERT:'-----BEGIN CERTIFICATE----- fixture',NEXT_PUBLIC_ACCOUNT_API_URL:'https://galx.ai',NEXT_PUBLIC_ACCOUNT_PUBLISHABLE_KEY:'sb_publishable_'+'a'.repeat(43),ACCOUNT_API_INTERNAL_URL:'http://host.docker.internal:55110',ACCOUNT_API_SERVICE_KEY:'header.'+Buffer.from('{"role":"service_role"}').toString('base64url')+'.signature'};
+  delete values.NEXT_PUBLIC_SUPABASE_URL;
+  assert.equal(validateAccountMigrationConfig(validateConfig(values)).GALX_CONNECT_ENABLED,'1');
+  for(const change of [{POSTGRES_SSL_MODE:'disable'},{DATABASE_URL:'postgresql://postgres:PRIVATE_CANARY@host.docker.internal:55433/galx_relay_premium'},{ACCOUNT_API_INTERNAL_URL:'https://remote.invalid'},{ACCOUNT_API_SERVICE_KEY:'not-admin'},{SUPABASE_SERVICE_ROLE_KEY:'PRIVATE_CANARY'},{NEXT_PUBLIC_ACCOUNT_API_URL:'https://other.invalid'}])assert.throws(()=>validateAccountMigrationConfig({...values,...change}),error=>!error.message.includes('PRIVATE_CANARY'));
+  assert.throws(()=>validateNovaConfig(values));
+  assert.throws(()=>validateConfig({...values,CLOUDFLARE_API_TOKEN:'PRIVATE_CANARY'}));
+});
+test('native Nova retains its narrow authority and fixed verified central destination',()=>{
+  const values={...config(),GALX_CONNECT_ENABLED:'1',GALX_CONNECT_CLIENTS:'[{"id":"reference-native"}]',GALX_DATABASE_DEPLOYMENT:'native-postgres-v1',DATABASE_URL:'postgresql://postgres:PRIVATE_CANARY@host.docker.internal:55432/galxai',POSTGRES_SSL_MODE:'verify-full',POSTGRES_CA_CERT:'-----BEGIN CERTIFICATE----- fixture',NEXT_PUBLIC_ACCOUNT_API_URL:'https://galx.ai',NEXT_PUBLIC_ACCOUNT_PUBLISHABLE_KEY:'sb_publishable_'+'a'.repeat(43),ACCOUNT_API_INTERNAL_URL:'http://host.docker.internal:55110',PUBLIC_ASSETS_URL:'https://assets.example.invalid',GALX_PREMIUM_RELAY_URL:'https://fixture.invalid',GALX_PREMIUM_RELAY_KEY:'PRIVATE_CANARY'};
+  delete values.NEXT_PUBLIC_SUPABASE_URL;assert.deepEqual(validateNovaNativeConfig(validateConfig(values)),values);
+  for(const change of [{ACCOUNT_API_SERVICE_KEY:'PRIVATE_CANARY'},{R2_SECRET_ACCESS_KEY:'PRIVATE_CANARY'},{STRIPE_SECRET_KEY:'PRIVATE_CANARY'},{POSTGRES_SSL_MODE:'disable'},{DATABASE_URL:'postgresql://postgres:PRIVATE_CANARY@host.docker.internal:55433/galx_relay_premium'},{NEXT_PUBLIC_SUPABASE_URL:'https://fixture.invalid'},{ACCOUNT_API_INTERNAL_URL:'https://remote.invalid'}])assert.throws(()=>validateNovaNativeConfig({...values,...change}),e=>!e.message.includes('PRIVATE_CANARY'));
 });
 test('configuration file must be regular, private and valid JSON', t => {
   const root = temporary(t), file = path.join(root, 'config.json'); fs.writeFileSync(file, JSON.stringify(config()), { mode: 0o600 });

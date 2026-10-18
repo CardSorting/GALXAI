@@ -29,8 +29,8 @@ export interface ServerEnv extends ClientEnv {
   VERCEL_GIT_COMMIT_SHA?: string;
 }
 
-const DEFAULT_SUPABASE_URL = 'https://mazhcjisettrzbqhorvp.supabase.co';
-const DEFAULT_SUPABASE_ANON_KEY = 'sb_publishable_9eyEPgM-hF00Va7TLE90yA_LV4iGcoE';
+const DEFAULT_SUPABASE_URL = 'https://galx.ai';
+const DEFAULT_SUPABASE_ANON_KEY = 'sb_publishable_unconfigured';
 const DEFAULT_VAULT_SECRET = 'galxai-apex-vault-master-secret-key-32b';
 
 /**
@@ -40,13 +40,13 @@ const DEFAULT_VAULT_SECRET = 'galxai-apex-vault-master-secret-key-32b';
 export function getClientEnv(): ClientEnv {
   return {
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL || 'https://galx.ai',
-    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL || DEFAULT_SUPABASE_URL,
+    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_ACCOUNT_API_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || DEFAULT_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY:
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+      process.env.NEXT_PUBLIC_ACCOUNT_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
       process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
       DEFAULT_SUPABASE_ANON_KEY,
     NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:
-      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+      process.env.NEXT_PUBLIC_ACCOUNT_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
       DEFAULT_SUPABASE_ANON_KEY,
     NEXT_PUBLIC_GALX_EDGE_URL: process.env.NEXT_PUBLIC_GALX_EDGE_URL || 'https://api.galx.ai',
@@ -68,7 +68,7 @@ export function getServerEnv(): ServerEnv {
   return {
     ...clientEnv,
     DATABASE_URL: process.env.DATABASE_URL,
-    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
+    SUPABASE_SERVICE_ROLE_KEY: process.env.ACCOUNT_API_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY,
     GALX_VAULT_MASTER_SECRET: vaultSecret,
     GALX_VAULT_KEY: vaultSecret,
     GALX_VAULT_ACTIVE_KEY_VERSION: process.env.GALX_VAULT_ACTIVE_KEY_VERSION || 'v1',

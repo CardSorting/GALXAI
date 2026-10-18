@@ -3,6 +3,7 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { getSupabaseConfig } from '@/lib/supabase/config';
 import { DEFAULT_POST_AUTH_PATH, safeAuthRedirect, authRecoveryPath } from '@/lib/auth/redirects';
 import { canonicalRequestUrl } from '@/lib/security/request-origin';
+import { accountClientOptions } from '@/lib/auth/account-client-options';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -33,6 +34,7 @@ export async function GET(request: NextRequest) {
     if (!config.hasDataApiCredential) throw new Error('Sign-in unavailable');
     const deadline = AbortSignal.any([request.signal, AbortSignal.timeout(10_000)]);
     const supabase = createServerClient(config.supabaseUrl, config.supabaseAnonKey, {
+      ...accountClientOptions(),
       cookies: { getAll: () => request.cookies.getAll(), setAll: values => { changes.push(...values); } },
       global: { fetch: (input, init) => {
         const signal = init?.signal ? AbortSignal.any([init.signal, deadline]) : deadline;

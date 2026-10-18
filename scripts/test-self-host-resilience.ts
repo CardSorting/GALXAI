@@ -97,11 +97,11 @@ try {
   }
   owned.add(names.provider);
   docker(['run', '-d', '--name', names.provider, ...label, '--network', network, '--read-only', '--memory', '128m', '--memory-swap', '128m', '--cpus', '0.5', '--pids-limit', '32',
-    '--cap-drop', 'ALL', '--user', '1000:1000', '-e', 'FIXTURE_KEY', '--mount', `type=bind,src=${path.join(root, 'scripts/fixtures/self-host-provider.cjs')},dst=/fixture/provider.cjs,readonly`, BASE_IMAGE, 'node', '/fixture/provider.cjs']);
+    '--cap-drop', 'ALL', '--user', '1000:1000', '-e', 'FIXTURE_KEY', '-e', 'FIXTURE_DATABASE', '--mount', `type=bind,src=${path.join(root, 'scripts/fixtures/self-host-provider.cjs')},dst=/fixture/provider.cjs,readonly`, BASE_IMAGE, 'node', '/fixture/provider.cjs']);
   providerOrigin = 'http://' + docker(['port', names.entrance, '7779/tcp']);
   origin = 'http://' + docker(['port', names.entrance, '3000/tcp']);
   runtime = { ...publicInputs, GALX_CONNECT_ENABLED: '1', GALX_CONNECT_ORIGIN: config.issuer, GALX_NOVA_RESOURCE: config.resource, GALX_CONNECT_CLIENTS: JSON.stringify(config.clients),
-    DATABASE_URL: `postgresql://postgres:${password}@${names.db}/${databaseName}?sslmode=disable`, GALX_PREMIUM_RELAY_URL: 'http://127.0.0.1:7779', GALX_PREMIUM_RELAY_KEY: secret,
+    DATABASE_URL: `postgresql://postgres:${password}@127.0.0.1:55432/${databaseName}?sslmode=disable`, GALX_PREMIUM_RELAY_URL: 'http://127.0.0.1:7779', GALX_PREMIUM_RELAY_KEY: secret,
     GALX_VAULT_KEY_V1: randomBytes(32).toString('hex'), GALX_AUDIT_SIGNING_SECRET: randomBytes(32).toString('hex') };
   fs.writeFileSync(configFile, JSON.stringify(runtime), { mode: 0o600 }); const configHash = hashFile(configFile);
   startApp(); await healthy();
@@ -199,7 +199,7 @@ try {
   const creditAfter = await credit(); assert.equal(creditAfter.tokens, '5'); assert.equal(creditAfter.token_credit, '0');
   await refill(t0 + 6); assert.deepEqual(await credit(), creditAfter);
   mutate(names.app, 'rm'); owned.delete(names.app);
-  runtime.DATABASE_URL = `postgresql://postgres:${password}@${names.db}/${databaseName}?sslmode=disable`;
+  runtime.DATABASE_URL = `postgresql://postgres:${password}@127.0.0.1:55432/${databaseName}?sslmode=disable`;
   fs.writeFileSync(configFile, JSON.stringify(runtime), { mode: 0o600 });
   startApp(); await healthy(); await denied(revoked);
   const attemptsBeforeReconstruction = (await status()).attempts;

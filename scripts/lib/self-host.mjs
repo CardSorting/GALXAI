@@ -87,6 +87,8 @@ export function composePlan({ image, configFile, port = 17787, project = 'galx-w
  * billing, account-administration or provider-account credential configuration. */
 export function validateNovaConfig(values) {
   const names = new Set(['DATABASE_URL', 'SUPABASE_DB_SSL_MODE', 'SUPABASE_DB_CA_CERT', 'SUPABASE_POOL_SIZE', 'SUPABASE_POOL_MAX_USES', 'SUPABASE_TIMEOUT_MS',
+    'POSTGRES_SSL_MODE', 'POSTGRES_CA_CERT', 'POSTGRES_POOL_SIZE', 'POSTGRES_POOL_MAX_USES', 'GALX_DATABASE_DEPLOYMENT',
+    'ACCOUNT_API_INTERNAL_URL','PUBLIC_ASSETS_URL',
     'GALX_VAULT_KEY_V1', 'GALX_VAULT_ACTIVE_KEY_VERSION', 'GALX_AUDIT_SIGNING_SECRET',
     'GALX_CONNECT_ENABLED', 'GALX_CONNECT_ORIGIN', 'GALX_NOVA_RESOURCE', 'GALX_CONNECT_CLIENTS',
     'GALX_PREMIUM_RELAY_URL', 'GALX_PREMIUM_RELAY_KEY']);
@@ -95,5 +97,32 @@ export function validateNovaConfig(values) {
   if (values.GALX_CONNECT_ORIGIN !== 'https://galx.ai' || values.GALX_NOVA_RESOURCE !== 'https://nova.galx.ai') throw Error('Nova deployment identity does not match the approved transition.');
   const clients = JSON.parse(values.GALX_CONNECT_CLIENTS);
   if (!clients.length || clients.some(c => !['reference-native', 'reference-browser'].includes(c.id))) throw Error('Nova acceptance requires the approved first-party registry.');
+  return values;
+}
+
+/** Private whole-application acceptance for the explicitly requested DB move.
+ * This profile retains account, billing and storage authority on the web host;
+ * it does not broaden the separate Nova process or publish a listener. */
+export function validateNativeCentralDatabase(values) {
+  if(values.GALX_DATABASE_DEPLOYMENT!=='native-postgres-v1'||values.POSTGRES_SSL_MODE!=='verify-full'||!values.POSTGRES_CA_CERT?.includes('BEGIN CERTIFICATE'))throw Error('Account migration requires verified local database TLS.');
+  const database=new URL(values.DATABASE_URL);
+  if(!['postgres:','postgresql:'].includes(database.protocol)||database.hostname!=='host.docker.internal'||database.port!=='55432'||database.pathname!=='/galxai'||database.username!=='postgres'||!database.password||database.search||database.hash)throw Error('Account migration requires its explicit central database owner.');
+  return values;
+}
+export function validateNovaNativeConfig(values) {
+  validateNovaConfig(values);validateNativeCentralDatabase(values);
+  if(values.NEXT_PUBLIC_ACCOUNT_API_URL!=='https://galx.ai'||values.ACCOUNT_API_INTERNAL_URL!=='http://host.docker.internal:55110')throw Error('Native Nova must use the reviewed local account transport.');
+  for(const name of Object.keys(values))if(/^(SUPABASE_|NEXT_PUBLIC_SUPABASE_)/.test(name))throw Error('Native Nova must not retain hosted compatibility credentials.');
+  return values;
+}
+export function validateAccountMigrationConfig(values) {
+  validateNativeCentralDatabase(values);
+  if(values.NEXT_PUBLIC_APP_URL!=='https://galx.ai'||values.NEXT_PUBLIC_ACCOUNT_API_URL!=='https://galx.ai'||values.ACCOUNT_API_INTERNAL_URL!=='http://host.docker.internal:55110'||!/^sb_publishable_[A-Za-z0-9_-]{32,}$/.test(values.NEXT_PUBLIC_ACCOUNT_PUBLISHABLE_KEY||''))throw Error('Account migration API identity differs.');
+  let role;try{role=JSON.parse(Buffer.from(values.ACCOUNT_API_SERVICE_KEY.split('.')[1],'base64url')).role;}catch{}
+  if(role!=='service_role')throw Error('Account migration requires the local administrator service credential.');
+  if(values.GALX_CONNECT_ENABLED!=='1'||values.GALX_CONNECT_ORIGIN!=='https://galx.ai'||values.GALX_NOVA_RESOURCE!=='https://nova.galx.ai')throw Error('Account migration must preserve the existing Connect identity.');
+  const clients=JSON.parse(values.GALX_CONNECT_CLIENTS);
+  if(!clients.length||clients.some(c=>!['reference-native','reference-browser'].includes(c.id)))throw Error('Account migration requires the existing first-party registry.');
+  for(const name of Object.keys(values))if(/^(SUPABASE_|NEXT_PUBLIC_SUPABASE_)/.test(name))throw Error('Account migration configuration must not retain hosted compatibility credentials.');
   return values;
 }

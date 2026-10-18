@@ -1,0 +1,76 @@
+{
+  "observedAt": "2026-10-17T21:31:13.077Z",
+  "premiumHostedRetirement": {
+    "project": "prgjcyokylzcsqrjmkaa",
+    "name": "GALX Relay Premium",
+    "authorized": true,
+    "phase": "deleted-verified",
+    "submittedAt": "2026-10-17T21:10:00.431Z",
+    "recoverySha256": "0cf5e68dd4c2bb9ab3d3ba41be664c5d53aaf523368b1442bfd36ffc63b9c195",
+    "responseStatus": 200,
+    "verifiedAt": "2026-10-17T21:10:04.892Z",
+    "centralRetained": true
+  },
+  "premiumOffDeviceRecovery": {
+    "verified": true,
+    "tables": 30,
+    "downloadHash": "match",
+    "encryptedSha256": "0cf5e68dd4c2bb9ab3d3ba41be664c5d53aaf523368b1442bfd36ffc63b9c195"
+  },
+  "callbacks": {
+    "observedAt": "2026-10-17T21:09:48.498Z",
+    "callback": "https://galx.ai/auth/v1/callback",
+    "github": "Application updated successfully",
+    "google": "OAuth client saved",
+    "oldCallbacksRetained": true,
+    "wildcardMatching": false,
+    "providerReturnExchangeVerified": false,
+    "authorization": "Owner instructed go ahead and implement remaining fixes after the exact action and destination questions."
+  },
+  "email": {
+    "observedAt": "2026-10-17T21:30:19.495Z",
+    "provider": "Resend",
+    "provisioned": true,
+    "domain": "galx.ai",
+    "domainVerified": true,
+    "dnsRecordsCreated": 3,
+    "existingMailRoutingChanged": false,
+    "domainRestrictedSendingKey": true,
+    "transactionalTier": "Free",
+    "monthlyLimit": 3000,
+    "dailyLimit": 100,
+    "payAsYouGoEnabled": false,
+    "smtpTlsVerified": true,
+    "smtpAuthenticated": true,
+    "confirmationEmail": "delivered",
+    "recoveryEmail": "delivered",
+    "sender": "accounts@galx.ai",
+    "confirmationLink": {
+      "host": "galx.ai",
+      "path": "/auth/v1/verify",
+      "queryKeys": [
+        "token",
+        "type",
+        "redirect_to"
+      ],
+      "flow": "signup",
+      "returnHost": "galx.ai"
+    },
+    "accountHttpChecks": 7,
+    "temporaryAccountSoftDeleted": true,
+    "privateTokenVerification": true,
+    "actualUserInboxRead": false,
+    "publicActivation": false
+  },
+  "central": {
+    "hostedRetained": true,
+    "writerFreeze": false,
+    "publicCutover": false
+  },
+  "limits": [
+    "Premium provider sign-ins remain expired; no real generation canary passed.",
+    "Private SMTP acceptance and saved callback registrations do not establish public sign-in acceptance.",
+    "Free email tier is bounded to the observed provider allowance; no paid subscription or pay-as-you-go enabled.",
+    "Central project and organization subscription remain; no zero-billing claim."
+  ]
+}

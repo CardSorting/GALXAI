@@ -2,7 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import assert from 'node:assert/strict';
-import { execFileSync, execFile } from 'node:child_process';
+import { execFileSync, execFile, spawnSync } from 'node:child_process';
 import { promisify } from 'node:util';
 import { randomBytes, randomUUID, createHash } from 'node:crypto';
 import { Pool } from 'pg';
@@ -65,9 +65,9 @@ try {
     catch (e) { await pool.query('ROLLBACK'); throw e; }
   }
   owned.add(providerName);
-  docker(['run', '-d', '--name', providerName, '--label', `galx.fixture=${runId}`, '--network', network, '-p', '127.0.0.1::7779', '--read-only', '--memory', '128m', '--cap-drop', 'ALL', '--user', '1000:1000', '-e', 'FIXTURE_KEY', '--mount', `type=bind,src=${path.join(root, 'scripts/fixtures/self-host-provider.cjs')},dst=/fixture/provider.cjs,readonly`, BASE_IMAGE, 'node', '/fixture/provider.cjs']);
+  docker(['run', '-d', '--name', providerName, '--label', `galx.fixture=${runId}`, '--network', network, '-p', '127.0.0.1::7779', '--read-only', '--memory', '128m', '--cap-drop', 'ALL', '--user', '1000:1000', '-e', 'FIXTURE_KEY', '-e', 'FIXTURE_DATABASE', '--mount', `type=bind,src=${path.join(root, 'scripts/fixtures/self-host-provider.cjs')},dst=/fixture/provider.cjs,readonly`, BASE_IMAGE, 'node', '/fixture/provider.cjs']);
   const providerOrigin = 'http://' + docker(['port', proxyName, '7779/tcp']);
-  const runtime = { ...publicInputs, GALX_CONNECT_ENABLED: '1', GALX_CONNECT_ORIGIN: config.issuer, GALX_NOVA_RESOURCE: config.resource, GALX_CONNECT_CLIENTS: JSON.stringify(config.clients), DATABASE_URL: `postgresql://postgres:${password}@${dbName}/galx_integration_test?sslmode=disable`, GALX_PREMIUM_RELAY_URL: 'http://127.0.0.1:7779', GALX_PREMIUM_RELAY_KEY: secret, GALX_VAULT_KEY_V1: randomBytes(32).toString('hex'), GALX_AUDIT_SIGNING_SECRET: randomBytes(32).toString('hex') };
+  const runtime = { ...publicInputs, GALX_CONNECT_ENABLED: '1', GALX_CONNECT_ORIGIN: config.issuer, GALX_NOVA_RESOURCE: config.resource, GALX_CONNECT_CLIENTS: JSON.stringify(config.clients), DATABASE_URL: `postgresql://postgres:${password}@127.0.0.1:55432/galx_integration_test?sslmode=disable`, GALX_PREMIUM_RELAY_URL: 'http://127.0.0.1:7779', GALX_PREMIUM_RELAY_KEY: secret, GALX_VAULT_KEY_V1: randomBytes(32).toString('hex'), GALX_AUDIT_SIGNING_SECRET: randomBytes(32).toString('hex') };
   const configFile = path.join(output, 'runtime-private.json'); fs.writeFileSync(configFile, JSON.stringify(runtime), { mode: 0o600 });
   const policy = composePlan({ image: image.image, configFile }).services.web;
   // Synthetic provider anchors an internal network namespace across application
@@ -78,7 +78,15 @@ try {
   const origin = 'http://' + docker(['port', proxyName, '3000/tcp']);
   const headers = { Host: 'galx.ai', 'X-Forwarded-Proto': 'https' };
   for (let i = 0; ; i++) { try { if ((await fetch(origin + '/api/health', { headers })).ok) break; } catch {} if (i === 100) throw Error('Packaged application unavailable'); await delay(250); }
-  docker(['exec', appName, 'node', '/app/healthcheck.cjs']);
+  const initialHealth=await fetch(origin+'/api/health',{headers});
+  assert.equal(initialHealth.status,200);
+  assert.equal((await initialHealth.json()).status,'healthy','Packaged HTTP must return actual liveness, not an HTML fallback.');
+  // Cold emulated startup can still occupy the event loop after the first
+  // response. Match the container's bounded repeated liveness observations.
+  for(let attempt=0;;attempt++){
+    try{docker(['exec', appName, 'node', '/app/healthcheck.cjs']);break;}
+    catch{if(attempt===2)throw Error('Packaged native liveness failed after three observations.');await delay(1000);}
+  }
   const record = JSON.parse(docker(['inspect', appName]))[0];
   assert(record.HostConfig.ReadonlyRootfs); assert.equal(record.HostConfig.StopTimeout ?? record.Config.StopTimeout, STOP_SECONDS);
   assert.equal(record.Config.User, '1000:1000'); assert.equal(record.Mounts.filter((m: any) => m.Type === 'bind').length, 1);
@@ -273,7 +281,14 @@ try {
   fs.writeFileSync(path.join(packageDir, 'acceptance.json'), JSON.stringify({ status: 'PASSED', kind: 'local-synthetic-only', image: image.image, manifestSha256: image.manifestSha256, testSha256: runtimeAcceptanceHash(root), resultSha256: hashFile(path.join(output, 'result.json')), observedAt: new Date().toISOString(), publicCutoverAccepted: false }, null, 2) + '\n', { mode: 0o600 });
   console.log(JSON.stringify({ checks: results.length, revocationMs, fullDeadlineMs: elapsedMs, state: 'passed' }));
 } catch (error: any) {
-  fs.writeFileSync(path.join(output, 'failure.json'), JSON.stringify({ at: new Date().toISOString(), name: error.name, message: String(error.message).replaceAll(secret, '[redacted]').replaceAll(password, '[redacted]'), completedChecks: results }, null, 2));
+  let lifecycleStateCounts:unknown,fixtureExit:unknown;
+  try{
+    const logs=spawnSync('docker',['--context','desktop-linux','logs','--tail','35',appName],{env,encoding:'utf8',timeout:15000,maxBuffer:65536});
+    fs.writeFileSync(path.join(output,'runtime-log.private.txt'),(logs.stdout+'\n'+logs.stderr).replaceAll(secret,'[redacted]').replaceAll(password,'[redacted]').slice(-16384),{mode:0o600});
+    const observed=JSON.parse(docker(['inspect',appName]))[0];fixtureExit={running:observed.State.Running,exitCode:observed.State.ExitCode,oomKilled:observed.State.OOMKilled};
+    lifecycleStateCounts=(await pool?.query('SELECT state,count(*)::int count FROM private.galx_nova_requests GROUP BY state ORDER BY state'))?.rows;
+  }catch{}
+  fs.writeFileSync(path.join(output, 'failure.json'), JSON.stringify({ at: new Date().toISOString(), name: error.name, message: String(error.message).replaceAll(secret, '[redacted]').replaceAll(password, '[redacted]'), completedChecks: results,lifecycleStateCounts,fixtureExit }, null, 2));
   console.error('Self-host runtime fixture failed. Private evidence records the bounded failure.'); process.exitCode = 1;
 } finally {
   await browser.close();

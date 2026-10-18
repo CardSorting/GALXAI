@@ -6,6 +6,8 @@ Date: 2026-10-03. Decision: accepted by the owner's explicit transition mandate.
 
 ## Context
 
+October 17 topic-specific refinement: [ADR 0168](0168-local-postgres-database-placement.md) and the owner's application/Auth continuation move canonical Media/Connect and account storage to the Mac as well, in a separate whole-web authority profile. Nova's narrow configuration, origin contract, lifecycle and Vercel execution retirement remain. The original transition choice and observations below stay dated; [current cutover evidence](../../post-mortem/releases/2026-10-17-central-native-cutover.json) owns subsequent delivery and limitations.
+
 The accepted Nova request requires a 300-second execution deadline plus time for terminal persistence. The existing Hobby invocation ceiling cannot provide that lifecycle. A paid plan is unavailable. The Mac image has already passed synthetic whole-image origin, streaming, cancellation, deadline, shutdown, recovery and authorization acceptance. Keeping Vercel as another executor would preserve the incompatibility and create competing admission paths.
 
 ## Decision

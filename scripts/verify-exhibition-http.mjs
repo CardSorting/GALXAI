@@ -6,7 +6,7 @@ import sharp from 'sharp';
 import { EXHIBITIONS, EDITORIALS } from '../src/lib/exhibitions/catalog.ts';
 
 const base = process.env.GALX_UI_BASE || 'http://127.0.0.1:3421';
-const output = '.impeccable/review/exhibitions/http-verification.json';
+const output = process.env.GALX_EXHIBITION_HTTP_RESULT || '.impeccable/review/exhibitions/http-verification.json';
 const privateText = /P-AHT|GALX_VAULT_|GALX_INTERNAL_|executionModel|upstreamId|personaVersion|attemptId|credential source|shard configuration|post-mortem\/|residency-v2|dcd3f989|service_role|community_star_profile_creations/i;
 const pages = ['/exhibitions', ...EXHIBITIONS.map(show => `/exhibitions/${show.slug}`), ...EDITORIALS.map(essay => `/editorials/${essay.slug}`)];
 const assets = new Set();

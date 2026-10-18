@@ -22,6 +22,8 @@ Pick the symptom or operation. Each entry leads to the canonical procedure; inci
 | Sites deferrals or unresolved operations | [Fair usage](../maintainers/SITES_FAIR_USAGE.md), [workspace](../maintainers/SITES_WORKSPACE.md) | Sites maintainer |
 | Published site or address mismatch | [Domain operations](../maintainers/SITES_DOMAINS.md) | Sites maintainer |
 | Database migration or authorization issue | [Database runbook](../maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md) | Database operator |
+| Local PostgreSQL setup, copies and recovery | [Local database runbook](local-postgres.md) | Database operator |
+| Replace hosted Auth, stage the web app and coordinate local cutover | [Local account migration](local-account-migration.md) | Access, database and release operators |
 | Relay capacity, runtime or account state | [Relay operations](../RELAY_VNEXT_RUNBOOK.md); [legacy controller](../maintainers/legacy-federation-operations.md) only for the retained deployment | Relay operator |
 
 For a new procedure, copy the [runbook template](../knowledge/templates/runbook.md), fill every section, and register its path in `registry.json` under `runbooks`. The contract check applies to registered standardized runbooks. Existing component runbooks retain their structure until reviewed and migrated; catalog inclusion alone is not such a review.

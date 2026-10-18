@@ -12,6 +12,7 @@ import { billingCompatibilityPath } from '@/lib/billing/compatibility';
 import { isConnectPath } from '@/lib/connect/paths';
 import { canonicalRequestUrl } from '@/lib/security/request-origin';
 import { retiredVercelInferencePath } from '@/lib/security/inference-placement';
+import { isAccountApiPath } from '@/lib/auth/account-api-paths';
 
 export async function middleware(request: NextRequest) {
   let requestUrl: URL;
@@ -41,6 +42,7 @@ export async function middleware(request: NextRequest) {
   // Retired handlers return a terminal denial without parsing input or starting
   // an account/preview authentication flow. This is an exact route allowlist.
   if (isClosedProviderPath(pathname)) return NextResponse.next();
+  if (isAccountApiPath(pathname)) return NextResponse.next({headers:{'Cache-Control':'private, no-store','Referrer-Policy':'no-referrer'}});
   const billingDestination = billingCompatibilityPath(pathname, request.nextUrl.searchParams);
   if (billingDestination && ['GET', 'HEAD'].includes(request.method)) {
     return NextResponse.redirect(new URL(billingDestination, requestUrl), { status: 307,

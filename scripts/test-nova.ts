@@ -68,8 +68,39 @@ test('cancellation propagates to execution and keeps an unknown outcome', async 
 });
 
 function deferred<T = void>() { let resolve!: (value: T | PromiseLike<T>) => void; const promise = new Promise<T>(r => { resolve = r; }); return { promise, resolve }; }
+async function within<T>(value:Promise<T>,milliseconds=200):Promise<T>{
+  let timer:ReturnType<typeof setTimeout>;
+  try{return await Promise.race([value,new Promise<T>((_,reject)=>{timer=setTimeout(()=>reject(new Error('Terminal response waited for upstream cancellation')),milliseconds);})]);}
+  finally{clearTimeout(timer!);}
+}
+test('terminal error closes after persistence even if upstream cancellation never acknowledges',async()=>{
+  const a=access(),cleanup=deferred();let cancelled=false,dispatches=0,hostWork!:Promise<void>;
+  const source=new ReadableStream<Uint8Array>({start(c){c.enqueue(new TextEncoder().encode('data: {"error":{"message":"PRIVATE_DIAGNOSTIC"}}\n\n'));},cancel(){cancelled=true;return cleanup.promise;}});
+  try{
+    const response=await invokeNova(request({messages:[{role:'user',content:'Hello'}],stream:true}),'https://nova.test',a.impl,async()=>{dispatches++;return new Response(source,{headers:{'Content-Type':'text/event-stream'}});},work=>{hostWork=work;});
+    const body=await within(response.text());await within(hostWork);
+    assert.match(body,/outcome_unconfirmed/);assert.doesNotMatch(body,/PRIVATE|\[DONE\]/);assert.deepEqual(a.states,['unknown']);assert(cancelled);assert.equal(dispatches,1);
+  }finally{cleanup.resolve();}
+});
+test('client cancellation persists unknown without waiting for upstream acknowledgement',async()=>{
+  const a=access(),cleanup=deferred();let cancelled=false,hostWork!:Promise<void>;
+  const source=new ReadableStream<Uint8Array>({start(c){c.enqueue(new TextEncoder().encode('data: {"choices":[{"delta":{"content":"part"},"finish_reason":null}]}\n\n'));},cancel(){cancelled=true;return cleanup.promise;}});
+  try{
+    const response=await invokeNova(request({messages:[{role:'user',content:'Hello'}],stream:true}),'https://nova.test',a.impl,async()=>new Response(source,{headers:{'Content-Type':'text/event-stream'}}),work=>{hostWork=work;});
+    const reader=response.body!.getReader();await reader.read();await within(reader.cancel());await within(hostWork);assert(cancelled);assert.deepEqual(a.states,['unknown']);
+  }finally{cleanup.resolve();}
+});
 const streamRequest = (signal?: AbortSignal) => request({ messages: [{ role: 'user', content: 'Hi' }], stream: true }, {}, signal);
 const partialStream = () => new Response(new ReadableStream<Uint8Array>({ start(c) { c.enqueue(new TextEncoder().encode('data: {"choices":[{"delta":{"content":"part"},"finish_reason":null}]}\n\n')); } }), { headers: { 'Content-Type': 'text/event-stream' } });
+
+test('abort closes a pending public read after persistence even when execution ignores its signal',async()=>{
+  const control=new AbortController(),a=access();let hostWork!:Promise<void>,calls=0;
+  const response=await invokeNova(streamRequest(control.signal),'https://nova.test',a.impl,async()=>{calls++;return partialStream();},task=>{hostWork=task;});
+  const reader=response.body!.getReader();await reader.read();
+  const rest=(async()=>{let text='';for(;;){const part=await reader.read();if(part.done)return text;text+=new TextDecoder().decode(part.value);}})();
+  try{control.abort();await within(hostWork);const terminal=await within(rest);assert.match(terminal,/outcome_unconfirmed/);assert.doesNotMatch(terminal,/\[DONE\]|PRIVATE/);assert.deepEqual(a.states,['unknown']);assert.equal(calls,1);}
+  finally{await reader.cancel();}
+});
 
 test('host lifetime is registered before admission and remains pending through terminal persistence', async () => {
   const commit = deferred(), started = deferred(); let registered = false, released = false, writes = 0, hostWork!: Promise<void>;

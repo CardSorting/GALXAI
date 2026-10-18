@@ -4,6 +4,18 @@
 
 Private migration guide. [Current state](../post-mortem/CURRENT_STATE.md) records delivery; [ADR 0153](adr/0153-central-account-authority-isolated-relays.md) records the decision separately from acceptance. The full target contract is [account management](reference/relay-account-management.md).
 
+The October 17 [local database placement](adr/0168-local-postgres-database-placement.md)
+adds native replacements on this Mac. Both databases and central Auth/web/Nova/
+authority now use native storage after drained, guarded and verified final copies.
+The [central cutover record](../post-mortem/releases/2026-10-17-central-native-cutover.json)
+separates activation from account correction and retirement acceptance. Premium's
+hosted project is deleted after encrypted off-device recovery; central's source
+is paused with durable write guards and the original organization is Free. Follow the complete
+[database](runbooks/local-postgres.md) and [account migration](runbooks/local-account-migration.md)
+procedures. Google credential recovery and provider session renewal remain
+separate. Pro is cancelled and the central source is inactive; historical usage
+invoices remain.
+
 ## Application clients
 
 Clients keep the entitled public model/API contracts and their application credentials. They never upload provider credentials, choose an internal account or enroll a relay. GALX customer plan and provider account class are separate. Retired connection endpoints return 410. Catalog presence does not establish availability; canonical image capability remains `openai-gpt-image-latest`, without an unverified provider-model promise.
@@ -12,7 +24,7 @@ Preserve operation identity and original recovery URLs. Default image responses 
 
 ## Target authority and ownership
 
-The main project `mazhcjisettrzbqhorvp` alone owns canonical accounts, encrypted credentials, exclusive pool assignment, lifecycle history and the existing account lease ledger. Premium's `prgjcyokylzcsqrjmkaa` holds only fixed execution identity and execution records. There is no copied registry or second account budget.
+Native central `galxai`, retaining protocol identity `mazhcjisettrzbqhorvp`, owns canonical accounts, encrypted credentials, exclusive pool assignment, lifecycle history and the existing account lease ledger. Premium's local `galx_relay_premium` holds only fixed execution identity and execution records; `prgjcyokylzcsqrjmkaa` remains its protocol identity rather than a physical hosted destination. There is no copied registry or second account budget.
 
 Premium contains verified paid provider accounts and supports text, Sites and images. Its VM, daemon, disk, monitor and scoped secrets are isolated from the central service; the local Mac administrator remains trusted. Legacy admission/writers reject assigned accounts. No automatic classification, transfer, borrowing or failover is supported.
 
@@ -41,7 +53,7 @@ Rename, health filtering and removal use the central revision-aware management c
 
 ## Application cutover and recovery
 
-The latest local acceptance records registration open, execution closed and zero registered accounts. Real manual sign-ins, capability qualification, activation and public application cutover remain pending. The existing public deployment still uses its retained federation path; its [legacy enrollment procedure](maintainers/legacy-desktop-enrollment.md) applies only to eligible unassigned records.
+The October 17 observation records execution allowed and two enabled accounts with fresh runtime ownership. Both provider sign-ins expired before Premium's switch; readiness/model preflight are unavailable and no new generation was submitted. Renew manually, then qualify capabilities. Canonical Media/Connect and Nova now run on the Mac against native central; www retains its canonical redirect. Real GitHub identity and actual public artifact delivery pass, and the corrected mixed-cookie Library is accepted; Google return remains open in its own incident. Earlier generation/deployment receipts remain dated. The [legacy enrollment procedure](maintainers/legacy-desktop-enrollment.md) applies only to eligible unassigned records.
 
 After local qualification, configure the server-only isolated transport and Premium endpoint/key using the service runbook. Premium handles text, Sites and images. The isolated path bypasses application credential selection and duplicate account lease acquisition, while customer quota/fair usage remains independent. A cloud-hosted application cannot reach the Mac's loopback endpoint directly.
 

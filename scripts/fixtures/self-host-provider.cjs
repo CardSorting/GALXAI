@@ -1,5 +1,19 @@
 // Offline fixture only. Never included in the application image.
 const http = require('node:http');
+// The disposable database stays on the internal fixture network. Expose its
+// authenticated PostgreSQL protocol on numeric loopback in the application's
+// shared fixture namespace; production plaintext rules are not relaxed.
+if (process.env.FIXTURE_DATABASE) {
+  const net = require('node:net'), host = process.env.FIXTURE_DATABASE;
+  if (!/^[a-z0-9][a-z0-9-]{1,120}$/.test(host)) throw Error('Invalid fixture database host');
+  const bridge = net.createServer(client => {
+    const upstream = net.connect(5432, host);
+    client.on('error', () => upstream.destroy()); upstream.on('error', () => client.destroy());
+    client.on('close', () => upstream.destroy()); upstream.on('close', () => client.destroy());
+    client.pipe(upstream); upstream.pipe(client);
+  });
+  bridge.maxConnections = 20; bridge.listen(55432, '127.0.0.1');
+}
 const jobs = new Map();
 let submissions = 0, attempts = 0, disconnects = 0, explicitFailures = 0;
 const json = (res, status, value) => { res.writeHead(status, { 'Content-Type': 'application/json' }); res.end(JSON.stringify(value)); };

@@ -1431,6 +1431,12 @@
       "title": "ADR 0167: Mac Nova runtime and Vercel inference retirement"
     },
     {
+      "path": "docs/adr/0168-local-postgres-database-placement.md",
+      "scope": "decision-record",
+      "category": "docs",
+      "title": "ADR 0168: Local PostgreSQL for GALXAI and Premium"
+    },
+    {
       "path": "docs/adr/README.md",
       "scope": "current-guide",
       "category": "docs",
@@ -2277,10 +2283,22 @@
       "title": "Reconcile stale knowledge"
     },
     {
+      "path": "docs/runbooks/local-account-migration.md",
+      "scope": "current-guide",
+      "category": "docs",
+      "title": "Local account and application migration"
+    },
+    {
+      "path": "docs/runbooks/local-postgres.md",
+      "scope": "current-guide",
+      "category": "docs",
+      "title": "Local PostgreSQL setup and migration"
+    },
+    {
       "path": "docs/runbooks/mac-self-hosting.md",
       "scope": "current-guide",
       "category": "docs",
-      "title": "Operate Mac-hosted Nova"
+      "title": "Operate Mac-hosted web and Nova"
     },
     {
       "path": "docs/runbooks/nova-hosting-transition.md",
@@ -3019,6 +3037,18 @@
       "scope": "operational-record",
       "category": "post-mortem",
       "title": "October 7 Star image delivery configuration"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-17-account-cutover/README.md",
+      "scope": "operational-record",
+      "category": "post-mortem",
+      "title": "Account migration: provider fingerprints and retained browser cookies"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-17-provider-expiry/README.md",
+      "scope": "operational-record",
+      "category": "post-mortem",
+      "title": "Premium generation unavailable with expired provider sign-ins"
     },
     {
       "path": "post-mortem/runbooks/controller-lock.md",

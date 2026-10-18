@@ -10,6 +10,8 @@ Private implementation reference for the installed Premium service. [Service ope
 | --- | --- | --- | --- | --- |
 | Premium | Paid, verified during manual review | Text, Sites, images | `mazhcjisettrzbqhorvp` | `prgjcyokylzcsqrjmkaa` |
 
+These identifiers are retained protocol identities, not current hosted destinations. October 17's final copies select native central `galxai` and native execution `galx_relay_premium` through fixed verified-TLS mappings. Premium's hosted project is deleted after off-device recovery; the retained central source is write-guarded and stale after local writes. See [native operations](../runbooks/local-postgres.md) and [current cutover evidence](../../post-mortem/releases/2026-10-17-central-native-cutover.json). Account and provider acceptance remain separate from placement.
+
 GALX customer billing tiers do not select or classify provider accounts. Premium accepts client-owned function calling as text inference and handles text, Sites and images after central admission. No account borrowing, shared sessions or legacy dispatch fallback exists.
 
 Pool and installation scope derive from the authenticated central principal. A request body, UI filter or database session variable cannot grant another destination. An account has one retained assignment and one owning desktop; moving it across pools is unsupported. Existing unassigned accounts remain separate and cannot be silently promoted.
@@ -18,7 +20,7 @@ Pool and installation scope derive from the authenticated central principal. A r
 
 The central service and TLS proxy run on Docker Desktop. Premium has a dedicated Colima Linux VM with its own daemon, disks, runtime container, monitor container, state and keys. The Mac and its administrator remain a common trusted boundary.
 
-Only central receives the main database login and vault settings. A runtime receives its own restricted execution database login and narrow central runtime principal. It hosts assigned account engines in-process; it has no Docker socket. Each monitor receives its own operator/viewer/registrar principals and its own daemon socket for desktops. Neither VM receives the other's configuration, browser profiles or credentials. A monitor's daemon access is powerful within its own VM.
+Within relay components, only central receives its restricted control database login and vault settings. The separate whole-web app retains reviewed application-owner authority. A runtime receives only its own restricted execution login and narrow central principal; its assigned engines run in-process without a Docker socket. Each monitor has its own operator/viewer/registrar principals and own-daemon socket for desktops. Neither VM receives the other's configuration/profiles/credentials. Monitor daemon access remains powerful within its VM.
 
 The fixed Premium monitor uses port 13311 on loopback and the runtime uses port 13301. The local central origin uses verified HTTPS on 13443. **GALX Monitors** and **GALX Premium** issue one-use scoped sign-in links. The signed-out app link contains no credential. Startup preserves the central ownership handoff interval; local listeners alone do not prove execution readiness.
 

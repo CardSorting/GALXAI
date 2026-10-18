@@ -42,3 +42,29 @@ the complete hosted run including its production build. Never reopen a retired
 product, weaken ownership or storage guards, skip a test, or treat local success
 as hosted acceptance. See [CI contracts](../../docs/maintainers/CI_PIPELINE_AND_AUTOMATION_SPEC.md)
 and the [dated correction](../incidents/2026/2026-10-07-ci-fixture-drift/README.md).
+
+## FM-DEPLOY-005 — reader cancellation acknowledgement blocks terminal cleanup
+
+The October 17 cookie correction's isolated whole-image rehearsal aborted after
+40 checks and the full 480-second stop allowance; that image was not deployed.
+Focused tests then reproduced both Nova and relay response cleanup waiting on a
+reader cancellation promise that never acknowledged. These tests establish the
+bounded defect, not every cause of the original fixture failure.
+
+Initiate remote cancellation without awaiting its acknowledgement before local
+terminal delivery/closure or cleanup. Preserve the registered terminal database
+write, honest `unknown`, unchanged deadlines and no replay. Test malformed stream
+termination and client cancellation with a deliberately unacknowledged cancel,
+then require the complete immutable-image active-drain, lost-socket and restart
+checks. Capture redacted stdout/stderr and selected process/SQL states on fixture
+failure; never turn a forced stop or missing receipt into acceptance. The
+[account migration incident](../incidents/2026/2026-10-17-account-cutover/README.md)
+and ACT-055 track renewed acceptance and both native profile replacements.
+
+The next full-image attempt still failed: all synthetic records were terminal,
+but the public pending read remained open. Nonblocking cancel acknowledgement
+alone was insufficient. Separately reproduce an executor that ignores abort;
+the local pending read must react to the original request/deadline signal and
+close after terminal persistence, without requiring another source chunk or
+remote acknowledgement. Keep both failed rehearsals and require a new complete
+image pass; unit coverage does not certify the final host drain.

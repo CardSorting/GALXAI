@@ -4,6 +4,42 @@
   "notes": "Severity assigned retrospectively where the original record had no incident label. Recovered historical records retain their original verification scope; no fresh live test is implied.",
   "incidents": [
     {
+      "id": "INC-20261017-ACCOUNT-CUTOVER",
+      "category": "identity",
+      "severity": "SEV-2",
+      "status": "contained",
+      "title": "Provider secret fingerprints and retained cookies break account migration paths",
+      "owner": "Codex (active responder)",
+      "record": "post-mortem/incidents/2026/2026-10-17-account-cutover/README.md",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-10-17-account-cutover/README.md",
+        "post-mortem/releases/2026-10-17-central-native-cutover.json"
+      ],
+      "failure_modes": [
+        "FM-AUTH-005",
+        "FM-AUTH-006",
+        "FM-DEPLOY-005"
+      ],
+      "recovery_evidence": []
+    },
+    {
+      "id": "INC-20261017-PROVIDER-EXPIRY",
+      "category": "controller",
+      "severity": "SEV-2",
+      "status": "contained",
+      "title": "Premium provider sign-ins expired before database cutover",
+      "owner": "Codex (active responder)",
+      "record": "post-mortem/incidents/2026/2026-10-17-provider-expiry/README.md",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-10-17-provider-expiry/README.md",
+        "post-mortem/releases/2026-10-17-local-account-migration.json"
+      ],
+      "failure_modes": [
+        "FM-CTRL-004"
+      ],
+      "recovery_evidence": []
+    },
+    {
       "id": "INC-20261007-CI",
       "category": "deployment",
       "severity": "SEV-3",
@@ -1351,6 +1387,58 @@
         "post-mortem/incidents/2026/2026-10-07-ci-fixture-drift/README.md",
         "post-mortem/releases/2026-10-07-ci-fixture-repair-local.json",
         "post-mortem/releases/2026-10-07-ci-fixture-repair-hosted.json"
+      ]
+    },
+    {
+      "id": "ACT-052",
+      "incident": "INC-20261017-PROVIDER-EXPIRY",
+      "owner": "Relay operator",
+      "review_by": "2026-10-18",
+      "status": "open",
+      "next_step": "Complete manual sign-in in each owning Premium desktop and explicitly review reconnect. Verify same identity, applied revision, fresh ownership and authenticated capability; qualify an independently identified request with local execution and central settlement. Preserve the blocked canary receipt and do not automatically resubmit uncertain work.",
+      "closure": "Affected requested capability and execution/settlement accepted after manual renewal, with private credential-free evidence retained; database recovery alone does not close this action.",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-10-17-provider-expiry/README.md",
+        "post-mortem/releases/2026-10-17-local-account-migration.json"
+      ]
+    },
+    {
+      "id": "ACT-053",
+      "incident": "INC-20261017-ACCOUNT-CUTOVER",
+      "owner": "Account/release operator",
+      "review_by": "2026-10-18",
+      "status": "open",
+      "next_step": "Owner adds a secret for the existing Google client and saves it privately; refresh only local Auth provider credentials, then verify real Google return and preserved account identity. Do not publish secrets or disable old credentials before acceptance.",
+      "closure": "Actual Google code exchange and current local account session pass; secret fingerprint rejection remains tested.",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-10-17-account-cutover/README.md",
+        "post-mortem/releases/2026-10-17-central-native-cutover.json"
+      ]
+    },
+    {
+      "id": "ACT-054",
+      "incident": "INC-20261017-ACCOUNT-CUTOVER",
+      "owner": "Account/release operator",
+      "review_by": "2026-10-18",
+      "status": "completed",
+      "next_step": "Retain the accepted immutable image, production receipts and adversarial regressions; repeat affected acceptance on later changes.",
+      "closure": "Clean Node 22 build and all 44 whole-image checks pass, including 304,410 ms full deadline/clean exit/restart/no replay. Both exact native profiles run the accepted image after clean drains. Existing owner browser retains hosted cookies and renders three private Library images and authorized Favorites; actual public scans pass.",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-10-17-account-cutover/README.md",
+        "post-mortem/releases/2026-10-17-central-native-cutover.json"
+      ]
+    },
+    {
+      "id": "ACT-055",
+      "incident": "INC-20261017-ACCOUNT-CUTOVER",
+      "owner": "Application/release operator",
+      "review_by": "2026-10-18",
+      "status": "completed",
+      "next_step": "Retain the accepted immutable image, production receipts and adversarial regressions; repeat affected acceptance on later changes.",
+      "closure": "Clean Node 22 build and all 44 whole-image checks pass, including 304,410 ms full deadline/clean exit/restart/no replay. Both exact native profiles run the accepted image after clean drains. Existing owner browser retains hosted cookies and renders three private Library images and authorized Favorites; actual public scans pass.",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-10-17-account-cutover/README.md",
+        "post-mortem/releases/2026-10-17-central-native-cutover.json"
       ]
     }
   ]

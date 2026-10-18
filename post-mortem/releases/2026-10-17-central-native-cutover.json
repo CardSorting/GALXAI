@@ -1,0 +1,252 @@
+{
+  "observedAt": "2026-10-17T22:26:44.568940+00:00",
+  "classification": "private",
+  "status": "Native central/Auth/corrected web/Nova and SMTP serving; Pro cancelled and old central paused; Google/provider owner handoffs remain",
+  "central": {
+    "sourceProject": "mazhcjisettrzbqhorvp",
+    "phase": "local-running",
+    "sourceGuardTables": 195,
+    "sourceMetadataException": "auth.schema_migrations platform version marker only",
+    "upSha256": "5f8b2b33e979212e061dac5399691d87c416eded636c1e6e5771b828ec0f403a",
+    "downSha256": "aa81c09a81cbbec0a06c781e7ff1af52c9d1f0d2f400f39458cec65f96776ed0",
+    "sourceFencedAt": "2026-10-17T21:54:16.925Z",
+    "copy": {
+      "tables": 196,
+      "rows": 7870,
+      "tableHashes": "match",
+      "owners": "match",
+      "tableAcls": "match",
+      "rls": "match",
+      "sourceCapturedAt": "2026-10-17T21:54:56.276Z"
+    },
+    "nativeSourceGuardsRemoved": true,
+    "preparationDatabaseRetained": true,
+    "acceptedLocalWrites": true,
+    "sourceThawForbidden": true,
+    "hostedProjectRetired": false
+  },
+  "offDeviceRecovery": {
+    "verifiedAt": "2026-10-17T22:20:08.857Z",
+    "encryptedSha256": "057f97fbc7f9a9081054aa12b6a90969196b2edaaa6fe17a70a1e980242b1a33",
+    "bucketPrivate": true,
+    "uploaded": true,
+    "downloadHash": "match",
+    "decryptionHash": "match",
+    "restoredTables": 196,
+    "tableHashesOwnersEffectiveAclsRls": "match",
+    "offDeviceRecoveryVerified": true,
+    "roleGrantRecipeUploaded": true,
+    "limits": "Database and nonsecret role/grant recipe only. Passwords, service configuration, queues, VM disks and cryptographic recovery seed are separate."
+  },
+  "publicIngress": {
+    "canonicalWebLocal": true,
+    "novaNative": true,
+    "wwwCanonicalRedirectRetained": true,
+    "otherRoutesPreserved": true,
+    "privateSurfacesExposed": false
+  },
+  "initialPublicAcceptance": {
+    "observedAt": "2026-10-17T22:16:28.045Z",
+    "result": "pass",
+    "checks": 65,
+    "browserAssets": 38,
+    "configuredSecretsCompared": 11,
+    "privateMatches": 0,
+    "canonicalRedirects": true,
+    "novaIssuerRetained": true,
+    "scope": "Actual public raw HTTP, rendered HTML/browser assets, account/provider initiation, origin/admin/forgery/private artifact denials. Social code exchange, signed-in continuity, generation and settlement are separate."
+  },
+  "existingOwnerGithubAcceptance": {
+    "observedAt": "2026-10-17T22:17:13.128Z",
+    "actualGithubProviderReturn": true,
+    "existingAccountUuidPreserved": true,
+    "nativeActiveSession": true,
+    "publicAccountMenuVerified": true,
+    "sourceWritesGuarded": true,
+    "noSyntheticAccountCreated": true
+  },
+  "email": {
+    "provider": "Resend",
+    "domainVerified": true,
+    "transactionalTier": "Free",
+    "monthlyLimit": 3000,
+    "dailyLimit": 100,
+    "payAsYouGoEnabled": false,
+    "smtpTlsVerified": true,
+    "smtpAuthenticated": true,
+    "confirmationEmail": "delivered",
+    "recoveryEmail": "delivered"
+  },
+  "premium": {
+    "localDatabaseActive": true,
+    "hostedProjectDeleted": true,
+    "providerSignInsExpired": 2,
+    "generationSubmitted": false
+  },
+  "corrections": {
+    "managementSecretFingerprints": "Actual Google exchange rejected source fingerprint. Real retained GitHub secret installed for the unchanged client; real exchange and UUID/session verified. Google owner credential handoff pending.",
+    "retainedBrowserCookies": "Fixed canonical-cookie selection is deployed in accepted image; existing owner browser retains old hosted cookies and renders three private Library images plus authorized Favorites empty state. No session or entitlement workaround.",
+    "restorePrerequisites": "Recovery reused the exact downloaded encrypted object after installing required extensions and handling only empty disposable default schemas. No live data changed.",
+    "ingressReadback": "Cloudflare reordered JSON fields; semantic comparison confirmed exact values before completing only the pending DNS update.",
+    "drain": "Pinned private REST service logged SIGTERM and exited 255. No connected preparation client remained; all application/runtime drains exited cleanly.",
+    "terminalCleanup": {
+      "failedCandidate": "web-package-04",
+      "wholeImageAttempt": "web-runtime-acceptance-05",
+      "completedChecks": 40,
+      "result": "aborted after full 480-second stop allowance; not accepted or deployed",
+      "deterministicReproduction": "Nova and relay hung cancellation acknowledgement regressions failed before repair",
+      "repair": "Do not await remote reader cancellation acknowledgement before local terminal response/cleanup; unknown persistence and no replay retained",
+      "focusedTests": 32,
+      "connectTests": 52,
+      "newBuild": "Clean Node 22.23.2 production build passed; 158 pages, 1675 source inputs unchanged, 545 compiled public assets scanned with zero private-boundary errors. Full whole-image acceptance in progress.",
+      "deployment": "Serving image03 unchanged"
+    },
+    "pendingReadInterruption": {
+      "wholeImageAttempt": "web-runtime-acceptance-06",
+      "completedChecks": 40,
+      "result": "aborted after full 480-second stop; fixture exit 137, no OOM; never deployed",
+      "terminalRecords": {
+        "completed": 5,
+        "not_accepted": 1,
+        "unknown": 8
+      },
+      "observation": "Terminal persistence completed but local response remained open; nonblocking cancel acknowledgement alone was insufficient.",
+      "reproduction": "New pending public read with executor ignoring abort fails before repair and passes after.",
+      "repair": "Race each public source read against the original combined request/deadline signal, preserve terminal persistence before unknown delivery, remove listener on cleanup. No deadline shortening or replay.",
+      "focusedTests": 33,
+      "typeScript": "pass",
+      "newCandidate": "Build06 clean production build, package equivalence and private-boundary scan passed; whole-image07 in progress.",
+      "connectTests": 53
+    }
+  },
+  "limits": [
+    "Provider renewals require manual owning-desktop sign-in and explicit reconnect.",
+    "Database archive and nonsecret role/grant recipe are not VM, queue or full secret recovery.",
+    "External vault-seed recovery source remains retained.",
+    "Physical host, logout/reboot and shared-daemon fault drills not performed.",
+    "Google provider return remains pending owner credential handoff; Library correction is accepted.",
+    "Historical Supabase usage/invoices remain; Free plus INACTIVE stops ongoing paid source operation, not historical obligations."
+  ],
+  "failedCorrectionCandidate05": {
+    "observedAt": "2026-10-17T23:29:45.215Z",
+    "image": "sha256:0edbcea71f048de9ab5ac5eca54e25b4d0c1ad93f5f27dba0d0b48fa620520dc",
+    "manifestSha256": "32ba885e19570a0b82fed3059169a70c621babf3fea4597ce364bee58c3acbda",
+    "imageArchiveSha256": "d5fa91467d74cb64ba1ae7b95b78ebb0c195934abd3053cbfced66aa049afc07",
+    "sourceManifestSha256": "9e44e383a793d2b757c429cb0a718982d5f857f4b00ba4c361de61fd8d5894e4",
+    "sourceFiles": 1675,
+    "sourceDrift": [],
+    "compiledPublicAssetsScanned": 545,
+    "compiledPrivateBoundaryErrors": 0,
+    "wholeImageAcceptance": "in progress; no deployment"
+  },
+  "correctionCandidate": {
+    "image": "sha256:71d4431550d2814e02c2e7b8db7fdc89bc65bde5f2ea285f12ce428be760bb1b",
+    "manifestSha256": "facf17966529588a4c67c2397727ca27fbbca5992354ed316ef84c4c53abe3e6",
+    "imageArchiveSha256": "f702a6480397dc8a9316fa84dc361d31e493e4cc02fb504c5cb591f1254ba5f9",
+    "sourceManifestSha256": "10b86c606ea1f9fc384222256419a4ca0089195603ec1d815dc10b67696f2b53",
+    "sourceFiles": 1675,
+    "sourceDrift": [],
+    "compiledPublicAssetsScanned": 545,
+    "compiledPrivateBoundaryErrors": 0,
+    "wholeImageAcceptance": {
+      "checks": 44,
+      "status": "PASSED",
+      "realProvider": false,
+      "productionDatabase": false,
+      "deadline": {
+        "name": "unchanged 300-second deadline and active SIGTERM drain",
+        "requestId": "3070d47a-fc34-4fef-b75b-53bcdf5ca9ce",
+        "elapsedMs": 304410,
+        "state": "unknown",
+        "exitCode": 0,
+        "heartbeats": 19,
+        "explicitProviderFailuresAdded": 0,
+        "replayed": false
+      }
+    }
+  },
+  "correctedNativeWebAndNova": {
+    "web": {
+      "role": "web",
+      "phase": "corrected-running",
+      "startedAt": "2026-10-18T00:02:02.672Z",
+      "previousContainerId": "823d56e60f9c85df3087f84fa7cf9cd84a45255e266dbc4c5c4093cf4a2343fd",
+      "previousImage": "sha256:1ec80cace28b4f695da5f452d7578f688a00245b2d5b46ed63b4c193964c8a8d",
+      "nextImage": "sha256:71d4431550d2814e02c2e7b8db7fdc89bc65bde5f2ea285f12ce428be760bb1b",
+      "previousPlan": ".data/postgres-cutover/web-plan-final",
+      "nextPlan": ".data/postgres-cutover/web-plan-cookie-fix",
+      "databaseChanged": false,
+      "publicRoutingChanged": false,
+      "previousPackageRetained": true,
+      "containerId": "dd4906fe7f30c4b2121bf11fb6cb9d9c96947b1a8a0e439f720309b027d5c406"
+    },
+    "nova": {
+      "role": "nova",
+      "phase": "corrected-running",
+      "startedAt": "2026-10-18T00:02:14.764Z",
+      "previousContainerId": "6516484e22636519a4fedcac7ec255226065936c9bf69408ff626640ac6bf170",
+      "previousImage": "sha256:1ec80cace28b4f695da5f452d7578f688a00245b2d5b46ed63b4c193964c8a8d",
+      "nextImage": "sha256:71d4431550d2814e02c2e7b8db7fdc89bc65bde5f2ea285f12ce428be760bb1b",
+      "previousPlan": ".data/postgres-cutover/nova-plan-final",
+      "nextPlan": ".data/postgres-cutover/nova-plan-terminal-fix",
+      "databaseChanged": false,
+      "publicRoutingChanged": false,
+      "previousPackageRetained": true,
+      "containerId": "0eb612e5047f5ac4bc0b313b946b9305f9a506e24854a1be64a99a8de163b5ee"
+    }
+  },
+  "signedInLibraryCorrection": {
+    "observedAt": "2026-10-18T00:02:29.330704+00:00",
+    "result": "pass",
+    "image": "sha256:71d4431550d2814e02c2e7b8db7fdc89bc65bde5f2ea285f12ce428be760bb1b",
+    "actualExistingOwnerBrowser": true,
+    "retainedHostedCookiesCleared": false,
+    "nativeAccountHeaderVerified": true,
+    "privateLibraryImagesRendered": 3,
+    "favoritesAuthorizedEmptyState": true,
+    "sessionExpiredRecoveryAbsent": true,
+    "generationSubmitted": false,
+    "entitlementsUnchanged": true,
+    "scope": "Actual existing GitHub-owner browser with retained hosted cookies; protected Library data and Favorites render on canonical host. No account elevation, new generation or owner-session revocation.",
+    "afterSourcePause": {
+      "observedAt": "2026-10-18T00:13:21.473095+00:00",
+      "hostedStatus": "INACTIVE",
+      "authorizedWorkspace": true,
+      "privateImageViews": 3,
+      "sessionRecoveryAbsent": true
+    }
+  },
+  "correctedPublicAcceptance": {
+    "observedAt": "2026-10-18T00:02:18.790Z",
+    "result": "pass",
+    "checks": 65,
+    "browserAssets": 38,
+    "configuredSecretsCompared": 11,
+    "privateMatches": 0,
+    "canonicalRedirects": true,
+    "novaIssuerRetained": true,
+    "scope": "Actual public raw HTTP, rendered HTML/browser assets, account/provider initiation, origin/admin/forgery/private artifact denials. Social code exchange, signed-in continuity, generation and settlement are separate."
+  },
+  "correctedExhibitionAcceptance": {
+    "pages": 5,
+    "browserAssets": 23,
+    "sanitizedArtifacts": 30,
+    "denials": 12
+  },
+  "hostedCostStop": {
+    "verifiedAt": "2026-10-18T00:09:51.204Z",
+    "organizationPlan": "Free",
+    "proSubscriptionCancelled": true,
+    "centralHostedStatus": "INACTIVE",
+    "centralHostedDeleted": false,
+    "premiumHostedDeleted": true,
+    "pauseRequestStatus": 200,
+    "sourceGuardTables": 195,
+    "allSourceAccountsPreserved": 13,
+    "unrelatedOrganizationProjects": 0,
+    "historicalInvoicesRetained": true,
+    "invoicePaymentSubmitted": false,
+    "scope": "Only the original organization and named source; native databases/configuration, OAuth clients, R2 and external seed recovery retained. No permanent central deletion."
+  },
+  "latestVerifiedAt": "2026-10-18T00:13:21.473881+00:00"
+}

@@ -514,7 +514,11 @@ export class GalxAuthEngine {
             return [cookie.slice(0, separator).trim(), cookie.slice(separator + 1).trim()];
           }));
           const hasCanonicalSession = [...cookies.keys()].some(name => /^sb-.+-auth-token(?:\.\d+)?$/.test(name));
-          const sessionName = [...cookies.keys()].find(name => /^sb-.+-auth-token(?:\.0)?$/.test(name));
+          // Local account transport has one fixed cookie identity. A retained
+          // hosted cookie must neither shadow it nor become a fallback identity.
+          const sessionName = process.env.NEXT_PUBLIC_ACCOUNT_API_URL
+            ? ['sb-galx-auth-token','sb-galx-auth-token.0'].find(name => cookies.has(name))
+            : [...cookies.keys()].find(name => /^sb-.+-auth-token(?:\.0)?$/.test(name));
           if (sessionName) {
             const baseName = sessionName.replace(/\.0$/, '');
             let encoded = cookies.get(baseName);

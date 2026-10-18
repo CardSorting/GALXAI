@@ -1,12 +1,14 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { accountClientOptions } from '@/lib/auth/account-client-options';
 import { BroccoliAuthoritativeGovernor } from "@/core/broccolidb/BroccoliAuthoritativeGovernor";
 
-const defaultUrl = 'https://mazhcjisettrzbqhorvp.supabase.co';
-const defaultKey = 'sb_publishable_9eyEPgM-hF00Va7TLE90yA_LV4iGcoE';
+const defaultUrl = 'https://galx.ai';
+const defaultKey = 'sb_publishable_unconfigured';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || defaultUrl;
+const supabaseUrl = process.env.ACCOUNT_API_INTERNAL_URL || process.env.NEXT_PUBLIC_ACCOUNT_API_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || defaultUrl;
 const supabaseKey =
+  process.env.NEXT_PUBLIC_ACCOUNT_PUBLISHABLE_KEY ||
   process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
   defaultKey;
@@ -38,6 +40,7 @@ export const createClient = (cookieStore: Awaited<ReturnType<typeof cookies>>) =
     supabaseUrl!,
     supabaseKey!,
     {
+      ...accountClientOptions(),
       cookies: {
         getAll() {
           return cookieStore.getAll();

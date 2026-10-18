@@ -2715,6 +2715,35 @@
       }
     },
     {
+      "path": "docs/adr/0168-local-postgres-database-placement.md",
+      "title": "ADR 0168: Local PostgreSQL for GALXAI and Premium",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [
+        "database"
+      ],
+      "curation": "assigned",
+      "keywords": [
+        "postgres",
+        "mac",
+        "database",
+        "egress"
+      ],
+      "decision": {
+        "status": "accepted",
+        "delivery": "local",
+        "domain": "database",
+        "owner": "Database operator",
+        "date": "2026-10-17",
+        "evidence": [
+          "post-mortem/releases/2026-10-17-local-postgres-setup.json",
+          "post-mortem/releases/2026-10-17-local-account-migration.json"
+        ],
+        "supersedes": [],
+        "acceptance_basis": "Owner explicitly requested on-device PostgreSQL and continued migration for GALXAI and Premium. Partial local delivery: Premium execution database cut over after source fencing/final verification; central Auth/web privately accepted but not public. Hosted retirement and complete central cutover remain pending."
+      }
+    },
+    {
       "path": "docs/adr/README.md",
       "title": "Architecture decision records",
       "scope": "current-guide",
@@ -4448,8 +4477,49 @@
       "decision": null
     },
     {
+      "path": "docs/runbooks/local-account-migration.md",
+      "title": "Local account and application migration",
+      "scope": "current-guide",
+      "kind": "runbook",
+      "domains": [
+        "access",
+        "database",
+        "delivery"
+      ],
+      "curation": "assigned",
+      "keywords": [
+        "postgres",
+        "auth",
+        "local",
+        "migration",
+        "smtp",
+        "callback",
+        "cutover"
+      ],
+      "decision": null
+    },
+    {
+      "path": "docs/runbooks/local-postgres.md",
+      "title": "Local PostgreSQL setup and migration",
+      "scope": "current-guide",
+      "kind": "runbook",
+      "domains": [
+        "database"
+      ],
+      "curation": "assigned",
+      "keywords": [
+        "postgres",
+        "local",
+        "database",
+        "migration",
+        "backup",
+        "launchd"
+      ],
+      "decision": null
+    },
+    {
       "path": "docs/runbooks/mac-self-hosting.md",
-      "title": "Operate Mac-hosted Nova",
+      "title": "Operate Mac-hosted web and Nova",
       "scope": "current-guide",
       "kind": "runbook",
       "domains": [
@@ -5170,6 +5240,26 @@
     {
       "path": "post-mortem/incidents/2026/2026-10-07-star-image-delivery/README.md",
       "title": "October 7 Star image delivery configuration",
+      "scope": "operational-record",
+      "kind": "navigation",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-17-account-cutover/README.md",
+      "title": "Account migration: provider fingerprints and retained browser cookies",
+      "scope": "operational-record",
+      "kind": "navigation",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-10-17-provider-expiry/README.md",
+      "title": "Premium generation unavailable with expired provider sign-ins",
       "scope": "operational-record",
       "kind": "navigation",
       "domains": [],

@@ -4,6 +4,15 @@
 
 Date: 2026-09-15. Status: proposed implementation. Delivery: database schemas applied and local Docker/VM services installed with manual registration open; serving activation and provider qualification remain pending. Owner: Relay operator. The user's explicit requirement is that accounts are managed only from Supabase project `mazhcjisettrzbqhorvp`; this record does not claim delivery of the complete proposed split.
 
+October 17, 2026 placement refinement: [ADR 0168](0168-local-postgres-database-placement.md)
+accepts replacing the GALXAI and Premium hosted database placement with distinct
+local PostgreSQL clusters. Central ownership, credential isolation and execution
+scope remain; this does not accept this entire earlier proposal or change its
+dated delivery observations. The [central cutover record](../../post-mortem/releases/2026-10-17-central-native-cutover.json)
+and [Premium retirement evidence](../../post-mortem/releases/2026-10-17-premium-retirement-account-email.json)
+record subsequent native authority and scoped acceptance/retirement, separately
+from this proposal's original scope and status.
+
 ## Context and decision drivers
 
 Premium must use paid upstream accounts and permit text, Sites and images. Standard must use free upstream accounts and permit text only. The user requires two isolated relays and two manual-registration monitors, while retaining one account-management authority in the original GALXAI project. Two Supabase projects have been provisioned for execution state; neither holds an account registry.

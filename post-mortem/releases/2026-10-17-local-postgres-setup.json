@@ -1,0 +1,164 @@
+{
+  "observed_at": "2026-10-17T18:57:15.224Z",
+  "kind": "planned local database preparation",
+  "revision": "51da3b1ede7a38522195fb44f8f4535eaf87dc48 plus current local setup working tree",
+  "authorization": "Owner requested on-device PostgreSQL setup replacing Supabase operation and identified GALXAI and GALX Relay Premium.",
+  "status": "verified copies; no active-client cutover",
+  "components": [
+    {
+      "name": "central",
+      "database": "galxai",
+      "tables": 196,
+      "rows": 7870,
+      "source_captured_at": "2026-10-17T18:29:10.994Z",
+      "copied_data_hashes": "match",
+      "table_owners": "match",
+      "effective_table_acls": "match",
+      "rls_flags": "match",
+      "authorization_checks": {
+        "observedAt": "2026-10-17T18:35:35.780Z",
+        "name": "central",
+        "serviceLogin": "pass",
+        "restrictedProtocol": "pass",
+        "directTableDenial": "pass",
+        "roleEscalationDenial": "pass",
+        "ddlDenial": "pass",
+        "incorrectPasswordDenial": "pass",
+        "adminTcpDenial": "pass",
+        "otherClusterDenial": "pass",
+        "browserRolesDenied": "pass",
+        "loopbackAndDurability": "pass"
+      },
+      "backup_restore_checks": {
+        "observedAt": "2026-10-17T18:35:40.354Z",
+        "name": "central",
+        "restoredTables": 196,
+        "dataHashes": "match",
+        "backup": "2026-10-17T18-32-29-315Z.dump",
+        "result": "pass"
+      },
+      "automatic_restart_checks": {
+        "observedAt": "2026-10-17T18:50:47.529Z",
+        "name": "central",
+        "automaticallyRestarted": true,
+        "sourceDataRetained": true
+      }
+    },
+    {
+      "name": "premium",
+      "database": "galx_relay_premium",
+      "tables": 30,
+      "rows": 144,
+      "source_captured_at": "2026-10-17T18:30:29.242Z",
+      "copied_data_hashes": "match",
+      "table_owners": "match",
+      "effective_table_acls": "match",
+      "rls_flags": "match",
+      "authorization_checks": {
+        "observedAt": "2026-10-17T18:35:35.987Z",
+        "name": "premium",
+        "serviceLogin": "pass",
+        "restrictedProtocol": "pass",
+        "directTableDenial": "pass",
+        "roleEscalationDenial": "pass",
+        "ddlDenial": "pass",
+        "incorrectPasswordDenial": "pass",
+        "adminTcpDenial": "pass",
+        "otherClusterDenial": "pass",
+        "browserRolesDenied": "pass",
+        "loopbackAndDurability": "pass"
+      },
+      "backup_restore_checks": {
+        "observedAt": "2026-10-17T18:35:41.624Z",
+        "name": "premium",
+        "restoredTables": 30,
+        "dataHashes": "match",
+        "backup": "2026-10-17T18-32-29-701Z.dump",
+        "result": "pass"
+      },
+      "automatic_restart_checks": {
+        "observedAt": "2026-10-17T18:50:48.190Z",
+        "name": "premium",
+        "automaticallyRestarted": true,
+        "sourceDataRetained": true
+      }
+    }
+  ],
+  "environment": {
+    "postgres": "17.11 Homebrew, native macOS",
+    "pgvector": "0.8.7 (source 0.8.2)",
+    "node": "v26.8.1"
+  },
+  "operating_controls": {
+    "separate_clusters": true,
+    "loopback_only": true,
+    "postgres_app_superuser": false,
+    "mac_admin": "socket peer only",
+    "passwords": "fresh SCRAM credentials retained only in ignored private state",
+    "services": "user LaunchAgents, crash restart and caffeinate -is",
+    "startup": "after owner login, not before login or after logout",
+    "backups": "daily, fourteen completed local archives; both restore rehearsals passed"
+  },
+  "tests": {
+    "postgres_configuration_and_admission": 7,
+    "isolated_database_integration": 94,
+    "public_http_image_auth_boundary": 69,
+    "static_database_integrity": "pass, zero violations/warnings",
+    "typescript": "pass; npx tsc --noEmit after final build generation completed",
+    "application_pool": "real local pool and authenticated transaction scope pass",
+    "production_build": "pass; Next.js 15.5.25, native Node 26.8.1",
+    "compiled_private_scan": "pass; npm run docs:check:build after the final build",
+    "documentation": "pass; docs:sync, docs:check and 43 documentation guard tests; explicit bounded source/guide attestations recorded"
+  },
+  "preparation_errors_resolved": [
+    "Premium CLI migration login requires explicit SET ROLE postgres.",
+    "Restore requires explicit --dbname even with PGDATABASE.",
+    "Equivalent default owner ACLs and reordered ACL arrays require semantic comparison.",
+    "LaunchAgent locale must be explicit on this macOS host.",
+    "Immediate launchd recovery requires checking postmaster start time rather than waiting for pidfile disappearance.",
+    "A standalone typecheck concurrent with Next rebuilding its generated .next/types raced file removal; the final sequential typecheck passes."
+  ],
+  "known_environment_limit": "Installed Homebrew Node 22 cannot start because its simdjson.29 dynamic library is absent; successful native checks use the Mac default Node 26. No unrelated Homebrew repair was attempted.",
+  "boundaries": {
+    "source_schema_or_data_changed": false,
+    "hosted_writers_stopped": false,
+    "application_env_changed": false,
+    "relay_component_configs_changed": false,
+    "public_deployment_changed": false,
+    "supabase_auth_service_migrated": false,
+    "all_supabase_platform_schemas_cloned": false,
+    "hosted_projects_retired": false,
+    "off_device_backup_configured": false,
+    "pending_orbit_migration_applied": false
+  },
+  "remaining": [
+    "Inventory all hosted/Auth/Data API and background writers and replace remaining service dependencies.",
+    "Review secure local/container/remote transports and preserve fixed central/Premium identity validation.",
+    "Freeze/drain writers, take fresh final snapshots, restore new empty destinations and verify before changing active clients.",
+    "Verify end-to-end acceptance and independent recovery before retiring hosted resources."
+  ],
+  "claims_excluded": [
+    "No claim that local preparation stops Supabase billing.",
+    "No live site clean scan or new public HTTP acceptance.",
+    "No guaranteed uptime before login, after logout, lid close, shutdown, power loss or device failure.",
+    "Table hashes and table privilege verification do not prove every function or application workflow."
+  ],
+  "final_verification_at": "2026-10-17T19:04:25.622Z",
+  "impact_review": {
+    "mapped_domains": [
+      "knowledge",
+      "relay",
+      "database",
+      "delivery"
+    ],
+    "unmapped_reviewed": {
+      "docs/adr/0016-authoritative-supabase-postgresql-substrate.md": "Dated partial placement refinement preserves the historical decision body and original status; source contract covered by the new database runbook/ADR.",
+      "docs/knowledge/audits/2026-10-17-local-postgres-review.json": "Private retained bounded semantic review evidence, hashed in four explicit domain attestations.",
+      "docs/knowledge/reviews.json": "Explicit attestation metadata, never refreshed by synchronization.",
+      "post-mortem/CURRENT_STATE.md": "Dated prepared-copy status, independently covered by the incident source/guide review guard.",
+      "post-mortem/releases/2026-10-17-local-postgres-setup.json": "Credential-free local setup evidence; not runtime input or a public source.",
+      "post-mortem/review.json": "Explicit critical source/guide attestation metadata."
+    },
+    "existing_overdue_prevention_actions": "Retained unchanged; docs:check emits their pre-existing review reminders without failing this change. No unrelated action was auto-completed or renewed."
+  }
+}

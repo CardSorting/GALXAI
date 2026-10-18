@@ -1,6 +1,7 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { getSupabaseConfig } from '@/lib/supabase/config';
 import { isAccountSessionActive } from './active-account-session';
+import { accountClientOptions } from './account-client-options';
 
 type SessionState = 'authenticated' | 'unauthenticated' | 'unavailable';
 interface WorkspaceCookies {
@@ -22,6 +23,7 @@ export async function verifyWorkspaceSession(cookies: WorkspaceCookies): Promise
       const config = getSupabaseConfig();
       if (!config.hasDataApiCredential) return 'unavailable';
       const client = createServerClient(config.supabaseUrl, config.supabaseAnonKey, {
+        ...accountClientOptions(),
         cookies: { getAll: () => cookies.getAll(), setAll: values => cookies.setAll?.(values) },
         global: { fetch: (input, init) => fetch(input, { ...init, cache: 'no-store',
           signal: init?.signal ? AbortSignal.any([init.signal, AbortSignal.timeout(8000)]) : AbortSignal.timeout(8000),
