@@ -1,0 +1,101 @@
+{
+  "observedAt": "2026-10-18T00:59:41.934013+00:00",
+  "classification": "private operational evidence",
+  "scope": "Post-native-cutover edge source retirement; due Sites/billing contract review",
+  "baseRevision": "87c5ff4990f4eff26b5f96f556e1ccfd66c706f0",
+  "productionEdge": {
+    "phase": "verified",
+    "submittedAt": "2026-10-18T00:39:55.913Z",
+    "account": "33f8b2564698c222880cbad3e42decad",
+    "worker": "galxai-edge-gateway",
+    "previousContentSha256": "ef162e81a2e3aebedb7c22503dfd24a3d4cad0e66319e30d3cc3992b3787ea5b",
+    "configurationSha256": "f9906d15623e2d7f3617d2c3ee4c507773688b7590a773ad59011bd13f870e37",
+    "previousDatabaseCredentialPresent": false,
+    "privateApiActivated": false,
+    "nativeApplicationChanged": false,
+    "paymentCredentialChanged": false,
+    "objectStorageChanged": false,
+    "verifiedAt": "2026-10-18T00:40:01.345Z",
+    "hostedSourceBindingRemoved": true,
+    "cronSchedules": 0,
+    "otherBindingsPreserved": true
+  },
+  "stagingEdge": {
+    "phase": "verified",
+    "submittedAt": "2026-10-18T00:54:02.014Z",
+    "account": "33f8b2564698c222880cbad3e42decad",
+    "worker": "galxai-edge-gateway-staging",
+    "previousContentSha256": "6e14dbba552b50c6bd9da507e6d203958796976fd9390f1e25b93d3593d70468",
+    "configurationSha256": "f9906d15623e2d7f3617d2c3ee4c507773688b7590a773ad59011bd13f870e37",
+    "previousDatabaseCredentialPresent": false,
+    "privateApiActivated": false,
+    "nativeApplicationChanged": false,
+    "paymentCredentialChanged": false,
+    "objectStorageChanged": false,
+    "verifiedAt": "2026-10-18T00:54:06.575Z",
+    "hostedSourceBindingRemoved": true,
+    "cronSchedules": 0,
+    "otherBindingsPreserved": true
+  },
+  "productionHttp": {
+    "observedAt": "2026-10-18T00:44:50.249Z",
+    "healthStatus": 200,
+    "healthFields": [
+      "status",
+      "timestamp"
+    ],
+    "privateApiStatus": 503,
+    "configurationDiagnosticsExposed": false,
+    "sourceBindingPresent": false,
+    "schedules": 0,
+    "privateApiActivated": false
+  },
+  "stagingHttp": {
+    "health": 200,
+    "privateApi": 503,
+    "genericUnavailableMessage": true
+  },
+  "authority": {
+    "nativeApplicationReplaced": false,
+    "nativeWebAndNovaImage": "sha256:71d4431550d2814e02c2e7b8db7fdc89bc65bde5f2ea285f12ce428be760bb1b",
+    "nativeAcceptance": "post-mortem/releases/2026-10-17-central-native-cutover.json",
+    "privateApiActivated": false,
+    "paymentSubmitted": false,
+    "sitesPublished": false
+  },
+  "checks": {
+    "worker": "143 pass; no unexpected external transport",
+    "typeScript": "pass",
+    "billingLifecycle": "20 pass plus webhook signature/mode/body-size HTTP denials",
+    "sitesOrbitQuota": "81 pass; isolated transports",
+    "operatorSyntax": "pass",
+    "workerBundle": "Wrangler dry-run pass; production/staging deployed and binding/schedule readbacks match"
+  },
+  "hostedBaseChecks": {
+    "application": {
+      "run": 39082175833,
+      "conclusion": "success"
+    },
+    "worker": {
+      "run": 39082175824,
+      "conclusion": "success",
+      "deploymentStep": "skipped; manual component deployment above verified"
+    },
+    "knowledge": {
+      "run": 39082175949,
+      "conclusion": "failure",
+      "reason": "Sites and billing review deadlines overdue; no structural/source drift bypassed"
+    }
+  },
+  "findings": [
+    "Production had no database service credential before cleanup; staging also had none. Native task and message-billing queues were empty in the read-only aggregate inspection. Do not activate these old worker paths to remove a dependency.",
+    "The independent Sites domain scheduler uses the canonical backend; its database transport moved with native web configuration. One external domain reservation and zero managed workspaces were retained; no new publication qualified.",
+    "Reconciled full affected deployment, Sites retirement/free-offer and billing guide bodies. Old Vercel placement, editor/export instructions and early tax observations no longer override current contracts. Historical release records and ADR statuses are unchanged."
+  ],
+  "limits": [
+    "Actual Google secret/return and two Premium provider renewals remain owner handoffs. No new generation or payment acceptance.",
+    "Native web image remains its previously accepted artifact; this follow-up changes the separate Worker component and private documentation. An unchanged embedded compatibility gateway factory is not a newly deployed native artifact.",
+    "No whole-host, fresh-device, VM/queue/full-secret recovery or daily off-device schedule accepted. No unrelated incident action closed.",
+    "Central remains paused under Free, Premium deleted, historical invoices retained."
+  ]
+}

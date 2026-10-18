@@ -348,13 +348,13 @@
       "path": "docs/SITES_CONTENT.md",
       "scope": "current-guide",
       "category": "docs",
-      "title": "Site content generation (Retired)"
+      "title": "Sites content (Retired)"
     },
     {
       "path": "docs/SITES_WORKSPACE.md",
       "scope": "current-guide",
       "category": "docs",
-      "title": "Create and manage Sites (Retired)"
+      "title": "Sites workspace (Retired)"
     },
     {
       "path": "docs/SITE_ADDRESSES.md",

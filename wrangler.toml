@@ -12,7 +12,6 @@ routes = [
 
 [vars]
 ENVIRONMENT = "production"
-SUPABASE_URL = "https://mazhcjisettrzbqhorvp.supabase.co"
 PUBLIC_ASSETS_URL = "https://assets.galx.ai"
 
 # Cloudflare KV for edge rate limiting & fast auth
@@ -34,14 +33,10 @@ bucket_name = "galxai-assets"
 binding = "TRAINING_DATASET_BUCKET"
 bucket_name = "galxai-training-datasets"
 
-# Hyperdrive Connection Accelerator to Supabase PostgreSQL (optional)
-# [[hyperdrive]]
-# binding = "HYPERDRIVE"
-# id = "galxai_hyperdrive_pool"
-
-# Automated Cron Triggers for background worker queue polling (every minute)
+# The legacy worker has no assigned database authority. Keep historical private
+# API code/records, but do not select the inactive hosted source or poll it.
 [triggers]
-crons = ["* * * * *"]
+crons = []
 
 # Staging Environment Overrides
 [env.staging]
@@ -53,7 +48,6 @@ routes = [
 
 [env.staging.vars]
 ENVIRONMENT = "staging"
-SUPABASE_URL = "https://mazhcjisettrzbqhorvp.supabase.co"
 PUBLIC_ASSETS_URL = "https://assets-staging.galx.ai"
 
 [[env.staging.kv_namespaces]]

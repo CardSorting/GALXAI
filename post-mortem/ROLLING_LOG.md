@@ -3041,3 +3041,17 @@ Incident: `INC-20261017-ACCOUNT-CUTOVER`. Kind: `recovery`.
 **Next step:** ACT-053 owner Google secret handoff/actual return and ACT-052 owning-desktop provider renewals remain. Preserve external recovery seed and private archives; complete source/documentation review and Git delivery.
 
 Evidence: [2026-10-17-central-native-cutover.json](releases/2026-10-17-central-native-cutover.json), [README.md](incidents/2026/2026-10-17-account-cutover/README.md).
+
+## EVT-20261018-EDGE-SOURCE-CLEANUP — 2026-10-18T00:59:41.934013+00:00
+
+Incident: `INC-20261017-ACCOUNT-CUTOVER`. Kind: `verification`.
+
+**Observation:** Production and staging legacy edge still selected the paused source URL and a minute cron but neither held a database service credential. Main migration application/Worker CI pass; knowledge CI found overdue Sites/billing reviews.
+
+**Action:** Removed only obsolete source binding and cron, added production/staging no-I/O scheduled guard and generic access failure text, retained all other bindings, deployed/read back both exact Workers. Renewed contract review and reconciled affected deployment/Sites/billing guides.
+
+**Result:** 143 Worker, 81 Sites/Orbit/quota, billing lifecycle/webhook and TypeScript checks pass. Production/staging health and private API denial accepted. Native image/configuration, domain reservations and payment authority preserved.
+
+**Next step:** Run final documentation audit, push follow-up and inspect hosted checks. ACT-053 Google owner credential/return and ACT-052 two manual provider renewals remain; no unrelated prevention closure.
+
+Evidence: [2026-10-18-edge-source-cleanup.json](releases/2026-10-18-edge-source-cleanup.json), [2026-10-18-edge-sites-billing-review.json](../docs/knowledge/audits/2026-10-18-edge-sites-billing-review.json).

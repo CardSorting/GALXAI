@@ -9,14 +9,14 @@ sell Pro again. Neither Orbit nor Foundry grants Sites access.
 
 > [!NOTE]
 > **Status: Retired / Sunset (September 2026)**
-> The Sites product line has been retired in favor of GALX Images. Heavy infrastructure requirements, custom domain worker overhead, and high inference quota usage motivated sunsetting Sites. Generation endpoints are disabled and client workspace URLs (`/sites`, `/sites/[id]`) redirect to `/images`. This guide is retained for historical traceability, billing audit, and legacy data recovery.
+> The Sites product line has been retired in favor of GALX Images. Heavy infrastructure requirements, custom domain worker overhead, and high inference quota usage motivated sunsetting Sites. Client workspace URLs (`/sites`, `/sites/[id]`) require verified account entry and then redirect to `/images`. Retained APIs still enforce their independent access/admission gates; source presence is not generation availability. This guide is retained for historical traceability, billing audit, and legacy data recovery.
 
 Private maintainer guide. [ADR 0140](../adr/0140-paid-sites-and-shared-fair-usage.md) supersedes new per-generation pricing with eligible paid-plan access and shared fair usage; [ADR 0148](../adr/0148-complimentary-pro-access.md) adds explicit operator-provisioned complimentary Pro access. The [fair-use runbook](SITES_FAIR_USAGE.md) defines historical configuration, admission, membership and rollout. Public documentation describes only [the capability and access contract](../SITES_CONTENT.md).
 
 
-## Current path
+## Retained API and recovery path
 
-The browser workspace and content API use the same included-generation adapter and shared authority. They neither quote new generation prices nor reserve, debit or settle wallet funds for new work. The standalone content API requires current Pro eligibility. The browser workspace additionally offers one allocated free Site and three total turns under [quota operations](FREE_GENERATION_QUOTA.md); only that Site can publish through free access. Browsing, export, recovery and unpublishing preserve existing work.
+The retained workspace and content APIs use the same included-generation adapter and shared authority. They neither quote new generation prices nor reserve, debit or settle wallet funds for new work. The standalone content API requires current Pro eligibility. The former one-Site/three-turn offer is retired under [quota operations](FREE_GENERATION_QUOTA.md); compatibility branches and old reservations do not create new free grants. Browsing, export, recovery and unpublishing preserve existing work.
 
 The [workspace runbook](SITES_WORKSPACE.md) covers private drafts, publication snapshots and managed hosting. [Address operations](SITES_DOMAINS.md) covers the existing DNS worker. The optional native workflow retains its own connection and domain gates. No new worker or external service is added for fair usage.
 

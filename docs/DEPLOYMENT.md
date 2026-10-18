@@ -9,18 +9,19 @@ Private release guide. [Current state](../post-mortem/CURRENT_STATE.md) owns the
 | Central service and HTTPS proxy | Main-project account authority, protocol and lifecycle journal; runs on the owner's Docker Desktop |
 | Premium runtime and monitor | Dedicated Premium Colima VM on the same Mac; own Linux daemon, disk, service files, execution database and manual desktops; monitor stays loopback-only |
 | Native monitor launchers | Fixed local destinations and scoped ticket access; no account or inference authority |
-| GALX Media and Connect | Vercel web release; existing identity, media and short delegated-authorization endpoints |
+| GALX Media and Connect | Accepted full-web Next image on Docker Desktop; canonical `galx.ai` ingress, native account authority and preserved media/billing configuration |
 | Nova | Accepted persistent Next image on Docker Desktop; exact controlled ingress at `nova.galx.ai`; no Vercel executor |
-| Gateway | Separate assets/service boundary; customer authorization and sanitized responses |
+| Native PostgreSQL and Auth | Separate central and Premium clusters; pinned Auth/PostgREST and narrow account gateway; owner login services, not pre-login boot daemons |
+| Gateway | Separate assets/service boundary; deployed private API has no database credential and remains unavailable; obsolete source binding and cron removed |
 | Retained federation | Existing controller/worker deployment and original jobs; [legacy operations](maintainers/legacy-federation-operations.md) |
 
 Source, built image, installed image, open execution and successful provider work are distinct states. The owner selected the local Mac operating path because hosted alternatives were unaffordable or did not work. On September 23, fresh local acceptance passed 26 checks; the [current state](../post-mortem/CURRENT_STATE.md) records the latest host and supervisor status. The [menu recovery audit](../post-mortem/releases/2026-09-23-local-relay-menu-ux-hardening.json) records private retry-status and login-item validation changes. Physical-host reboot, power, sign-out/login, sleep/wake and disruptive shared-daemon/network drills are **UNVERIFIED — DEFERRED BY OPERATOR** under [ACT-018](../post-mortem/register.json). Do not perform them or change global power settings; use [isolated service resilience checks](runbooks/mac-self-hosting.md#non-disruptive-resilience-acceptance). Normal-reboot startup is only a provisional operational assumption, not production-readiness evidence. Local service health does not establish provider workload qualification. Direct loopback URLs are not public application origins; any existing external ingress and its acceptance remain separate. The DigitalOcean candidate remains unprovisioned. See [the retained local acceptance record](../post-mortem/releases/2026-09-23-local-relay-supervisor-acceptance.json).
 
 ## Local pool release
 
-The [Mac Nova runtime](runbooks/mac-self-hosting.md) uses the accepted clean immutable image, reloadable archive, private configuration and loopback-only service port. Its dedicated `plan-nova` profile rejects unrelated Media/billing/admin configuration and still requires matching whole-image acceptance. `node scripts/self-host.mjs --help` owns stage/status/stop/resume. The 480-second stop allowance preserves Nova's 300-second execution deadline and terminal persistence. The exact origin policy rejects unconfigured hosts/ports and ignores untrusted forwarded authority.
+The [Mac Nova runtime](runbooks/mac-self-hosting.md) uses the accepted clean immutable image, reloadable archive, private configuration and loopback-only service port. Its dedicated `plan-nova-native` profile rejects unrelated Media/billing/admin configuration and requires matching whole-image acceptance. The full-web profile holds its separately reviewed configuration. `node scripts/self-host.mjs --help` owns stage/status/stop/resume. The 480-second stop allowance preserves Nova's 300-second execution deadline and terminal persistence. The exact origin policy rejects unconfigured hosts/ports and ignores untrusted forwarded authority.
 
-The [controlled transition](../post-mortem/releases/2026-10-03-nova-mac-transition.json) moved `nova.galx.ai` to the Mac after real-provider, interruption, revocation, recovery and drain evidence. The Vercel Media/Connect artifact has no Nova resource function; its retired text/queue paths and historical releases are denied. No Media source, database identity or object-storage responsibility moved to the Mac. [The transition runbook](runbooks/nova-hosting-transition.md) defines rollback and verification. Public release, new commercial activation and host power/sleep recovery remain separate decisions.
+The [October 3 transition](../post-mortem/releases/2026-10-03-nova-mac-transition.json) moved only Nova. The later [native account cutover](runbooks/local-account-migration.md) moved central storage, Auth, Media/Connect and Nova's database transport. Account UUIDs, object storage and existing cryptographic authority are preserved. The Vercel www deployment remains a canonical redirect and retained configuration supports external seed recovery; it is not the current application executor. Its historical inference retirement protections remain. The original Supabase organization is Free, central is paused and Premium is deleted. Never resume the stale source as writer rollback. New commercial activation and host power/sleep recovery remain separate decisions.
 
 Preserve the exact image manifest, VM/daemon identities, peer-denial rules, desktop homes and central/execution state. Do not copy main-project credentials into either runtime or use one pool's secrets in the other. A runtime hosts account engines inside its own container; it does not use the retained controller's one-worker-container-per-account deployment procedure.
 
@@ -32,7 +33,7 @@ Run the relevant [hardening checks](maintainers/RELAY_HARDENING.md), production 
 
 ## Manual desktop authority release boundary
 
-The base manual policy migration `20260914231914` precedes the central foundation, authorization, legacy-assignment guard and management migrations. All account authority stays in the main project; execution-only migrations belong to their two separate targets. Use [database rollout](maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md) rather than applying the main migration directory to an execution project.
+The base manual policy migration `20260914231914` precedes the central foundation, authorization, legacy-assignment guard and management migrations. All account authority stays in the native central database; execution-only migrations belong to their separate targets. Historical project identifiers remain protocol identifiers, not live Supabase destinations. Use [database rollout](maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md) rather than applying the main migration directory to an execution database.
 
 Current registration is **Register account → manual sign-in → Review access → register paused** in the fixed pool monitor. Later renewal uses explicit **Update saved sign-in → Save new sign-in**. Rename/remove/restore are central, revision-aware operations. Removal retains files and history; a registered account cannot be restored. The [complete lifecycle contract](reference/relay-account-management.md) owns these behaviors.
 
@@ -41,6 +42,8 @@ The retained controller's **Enroll shard**, saved-file synchronization and maint
 ## Billing release boundary
 
 Stripe billing has an account/mode boundary. Use [webhook recovery](runbooks/stripe-webhook-delivery.md) to verify the receiver, signing secret and event mode together. Test events require isolated storage; the API host is not a billing receiver. Provisioning validates an explicit HTTPS application origin before provider writes and refuses known production hosts for test delivery.
+
+The canonical receiver now runs in the accepted native full-web profile with its existing Stripe configuration. Moving it does not open recurring checkout, submit a payment or establish a provider checkout/webhook/renewal cycle. Keep the live sales gate closed pending that separate release acceptance.
 
 ## Image and access release boundaries
 
@@ -52,11 +55,13 @@ Preserve owner-scoped receipts and committed artifacts through rollback. The pop
 
 Gateway component verification uses isolated transports and a dry-run bundle; its workflow also triggers on fixture and dependency changes. Verify the actual hosted test and bundle steps separately from the token-conditional deployment step. A skipped deployment is not a new gateway release.
 
+Production and staging edge cleanup removed only their obsolete Supabase URL and minute cron. Production/staging scheduled handlers also return before constructing dispatch or billing services. Preserve all other bindings, including existing payment and storage bindings. Do not add a database credential or activate private API/payment processing as cleanup. `scripts/retire-legacy-edge-source.mjs` retains exact before/after receipts and refuses automatic replay after an uncertain submission. The separate Sites domain scheduler still calls the fixed canonical backend and is not this retired polling loop.
+
 For storage pressure, use [bounded deployment cleanup](../post-mortem/runbooks/deployment-storage.md). Preserve aliases and a compatible rollback; verify storage-accounting totals separately from removed-deployment counts.
 
 ## Sites strategy rollout
 
-The paid Sites policy in ADR 0140 is a separate cutover from earlier fixed/metered deployments. Follow [Sites rollout](maintainers/SITES_FAIR_USAGE.md#verification-and-rollout): apply the additive private migration, deploy the included generation path with admission disabled, verify current paid-plan mapping and operator-approved limits, then qualify a controlled rollout. Preserve receipt volumes, signing authority and original-operation readers.
+New Sites sales and browser entry are retired. The [Sites runbook](maintainers/SITES_FAIR_USAGE.md#verification-and-rollout) describes retained admission/recovery contracts, not authorization to reopen a cohort. Native migration preserves existing policy, receipts, domain reservations and financial records. It does not apply the pending Orbit migration, create a Site or qualify new publication. Any future reactivation needs a separate product decision and bounded acceptance.
 
 Earlier feature flags do not enable the replacement policy. Keep historical wallet reconciliation and current included recovery available during rollback. [Managed publication](maintainers/SITES_WORKSPACE.md) and native delivery retain their separate hosting and verification requirements.
 

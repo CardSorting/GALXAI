@@ -27,6 +27,7 @@ import { GalxSwarmCoordinatorDO } from '../src/workers/cloudflare/GalxSwarmCoord
 import { GalxEdgeWebhookDispatcher } from '../src/workers/cloudflare/GalxEdgeWebhookDispatcher';
 import { GalxEdgeWire } from '../src/workers/cloudflare/GalxEdgeWire';
 import { GalxEdgeQueueWorker } from '../src/workers/cloudflare/GalxEdgeQueueWorker';
+import workerEntrypoint from '../src/workers/cloudflare/index';
 
 const mockEnv = {
   ENVIRONMENT: 'test',
@@ -124,6 +125,11 @@ async function runAllTests() {
     headers: { Authorization: 'Bearer galx_live_test_key_123' }
   }));
   assert(unconfiguredAuthResp.status === 503, 'Production authentication fails closed when its backend is not configured');
+  const unavailableBody=await unconfiguredAuthResp.text();
+  assert(!/configured|backend|supabase|postgres|fail.closed/i.test(unavailableBody.replaceAll('authentication_backend_unavailable','')), 'Unavailable access response contains no configuration diagnostics');
+  const beforeScheduled={approvalCalls,imageCalls,queueCalls,unexpectedRequests};let scheduledWork=false;
+  await workerEntrypoint.scheduled({cron:'* * * * *',scheduledTime:Date.now(),type:'scheduled'},{...mockEnv,ENVIRONMENT:'production',STRIPE_SECRET_KEY:'sk_test_isolated_fixture'},{waitUntil(){scheduledWork=true;},passThroughOnException(){throw Error('No fallback');}});
+  assert(!scheduledWork&&JSON.stringify(beforeScheduled)===JSON.stringify({approvalCalls,imageCalls,queueCalls,unexpectedRequests}), 'Production schedule performs no database, payment or dispatch work even with residual bindings');
 
   const queryCredentialResp = await unconfiguredAuthGateway.handleRequest(new Request(
     'https://api.galx.ai/v1/models?api_key=galx_live_test_key_123'

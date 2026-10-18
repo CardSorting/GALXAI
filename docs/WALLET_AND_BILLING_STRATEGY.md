@@ -2,7 +2,7 @@
 
 <!-- docs-scope: domain-reference -->
 
-Private maintainer reference, reconciled September 24, 2026. Product authority
+Private maintainer reference, reconciled October 18, 2026. Product authority
 is [ADR 0160](adr/0160-private-human-creation-star-publishing.md), the
 [billing page contract](reference/billing-pages.md), and the
 [current operating state](../post-mortem/CURRENT_STATE.md). Historic wallet,
@@ -14,10 +14,9 @@ current Image Studio offer.
 | Surface | Current meaning | Payment behavior |
 | --- | --- | --- |
 | Explore GALX | Public Stars, published Works, archives, and Series | Browsing does not invoke inference |
-| Workshop | Individual private Image Studio tier | Checkout is closed until bounded allowance terms are configured |
-| Studio | Individual private Image Studio tier | Checkout is closed until bounded allowance terms are configured |
-| MAX | Highest individual private Image Studio tier | Checkout is closed until bounded allowance terms are configured; no shared seats/workspace |
-| GALX Pro | Separate Sites product where still supported | Its existing billing contract is independent of Image Studio allowance |
+| Orbit | Independent $10 USD monthly patronage for one Star | New live checkout remains closed pending provider release acceptance |
+| Foundry | $200 USD monthly bounded private creation for one account | New live checkout remains closed; existing eligible entitlements retain accounting |
+| GALX Pro and older image tiers | Historical products and original records | New sales are closed; no conversion to Orbit or Foundry is inferred |
 | Private integrations | Separately authorized access, not a public consumer product | No public self-service API checkout or onboarding |
 | Historical account records | Prior transactions, invoices, refunds, and credits | Retained for owner-scoped display and reconciliation |
 
@@ -27,13 +26,16 @@ that makes a human Work publishable.
 
 ## Private Image Studio access
 
-An eligible purchased tier is intended to provide a bounded private image
-allowance. The amount, output weights, and renewal contract must be explicitly
-configured before checkout or generation is enabled. These values are not
-inferred from plan price, historical free use, supplier cost, or capacity.
-Until that configuration is approved, checkout and human generation fail
-closed; do not present a tier as usable compute merely because a subscription
-record exists.
+Foundry retains the approved `team-v1` private allowance. Historical plan keys
+and period snapshots keep their original identities. The canonical typed
+[allowance configuration](../src/lib/billing/image-allowance-config.ts) owns
+approved units and output weights; missing or malformed configuration fails
+closed. No allowance is inferred from price, old free grants, supplier cost or
+capacity. A subscription row alone grants nothing: each request verifies current
+purchased entitlement, allowance and admission. The independent live-sales gate
+remains closed pending provider release acceptance. [Orbit and Foundry](maintainers/ORBIT_FOUNDRY.md)
+own current offers and the dated Checkout tax correction; tax configuration is
+not a substitute for payment acceptance.
 
 The customer-facing allowance reports the tier, whether creation is available,
 remaining usable units, and renewal timing where applicable. It does not expose
@@ -80,6 +82,12 @@ Keep these concerns separate in source, docs, and tests:
 - customer billing and historical ledger reconciliation;
 - private integration authorization and consumer access; and
 - local source changes, deployment, and verified acceptance.
+
+The canonical webhook receiver and private billing storage now run in the
+accepted native full-web/central profiles, with existing Stripe account, mode and
+signing configuration preserved. The edge API host is not the webhook receiver;
+removing its obsolete polling schedule does not activate payment processing.
+Migration acceptance did not submit a charge or qualify a provider payment cycle.
 
 Preserve Stripe webhook fulfillment, historical reconciliation, and existing
 Sites billing independently of Image allowance. Do not rename private plan

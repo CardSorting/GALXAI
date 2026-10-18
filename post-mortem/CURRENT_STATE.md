@@ -4,6 +4,28 @@
 
 The newest observation appears first. Earlier dated sections retain evidence from their stated observation; they do not override the latest determination or authorize a new action.
 
+### Edge source cleanup and final delivery checks — October 18 UTC
+
+The [edge cleanup record](releases/2026-10-18-edge-source-cleanup.json) records
+verified production/staging deployments with only the obsolete Supabase URL and
+minute polling cron removed. Other bindings are preserved. Both had no database
+service credential; private API remains unavailable with generic errors. The
+scheduled handler also refuses production/staging background dispatch and billing.
+The separate Sites domain scheduler still uses the fixed canonical backend;
+existing domain reservations are preserved. No payment or Site was submitted.
+
+The native application remains the previously accepted immutable image below;
+this is a separate Worker component release. All 143 worker checks, 81 isolated
+Sites/Orbit/quota checks, billing lifecycle/webhook checks and TypeScript pass.
+The main migration commit's hosted application and Worker workflows pass; its
+knowledge workflow identified two overdue domain reviews. The
+[renewed semantic review](../docs/knowledge/audits/2026-10-18-edge-sites-billing-review.json)
+reconciles complete affected guides with native placement, retired Sites entry,
+free-grant rejection and the independent live-sales gate. Historical failures,
+ADR decision status and unrelated incident actions remain unchanged. Final
+follow-up Git/CI delivery is recorded separately; a fingerprint is not deployment.
+Google owner credential/return and both manual provider renewals remain open.
+
 ### Native cutover accepted; paid Supabase operation stopped — October 17 migration, verified October 18 UTC
 
 The [central cutover record](releases/2026-10-17-central-native-cutover.json)

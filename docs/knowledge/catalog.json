@@ -512,7 +512,7 @@
     },
     {
       "path": "docs/SITES_CONTENT.md",
-      "title": "Site content generation (Retired)",
+      "title": "Sites content (Retired)",
       "scope": "current-guide",
       "kind": "reference",
       "domains": [
@@ -524,7 +524,7 @@
     },
     {
       "path": "docs/SITES_WORKSPACE.md",
-      "title": "Create and manage Sites (Retired)",
+      "title": "Sites workspace (Retired)",
       "scope": "current-guide",
       "kind": "reference",
       "domains": [

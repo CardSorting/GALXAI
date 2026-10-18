@@ -34,6 +34,10 @@ export default {
    * Cron Schedule Handler (Zero-Egress Background Queue Dispatcher)
    */
   async scheduled(event: CloudflareScheduledEvent, env: CloudflareEnv, ctx: CloudflareExecutionContext): Promise<void> {
+    // Production has no assigned database credential. Do not activate legacy
+    // polling or billing while the application authority lives elsewhere.
+    // Retain the isolated fixtures and records without issuing background I/O.
+    if (env.ENVIRONMENT !== 'test' && env.ENVIRONMENT !== 'development') return;
     const worker = new GalxEdgeQueueWorker(env);
     const messageBilling = new GalxMessageBillingWorker(env);
     ctx.waitUntil(Promise.all([

@@ -13,7 +13,8 @@
       "record": "post-mortem/incidents/2026/2026-10-17-account-cutover/README.md",
       "evidence": [
         "post-mortem/incidents/2026/2026-10-17-account-cutover/README.md",
-        "post-mortem/releases/2026-10-17-central-native-cutover.json"
+        "post-mortem/releases/2026-10-17-central-native-cutover.json",
+        "post-mortem/releases/2026-10-18-edge-source-cleanup.json"
       ],
       "failure_modes": [
         "FM-AUTH-005",

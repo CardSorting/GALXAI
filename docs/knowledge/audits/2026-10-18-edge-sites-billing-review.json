@@ -1,0 +1,78 @@
+{
+  "reviewedAt": "2026-10-18",
+  "reviewer": "Codex release and account migration maintainer",
+  "scope": "Renewed contract-focused review for due Sites and billing domains, plus incremental source/guide review for the separate edge release and current deployment documentation. Fingerprints cover a broader unchanged inventory; this is not an exhaustive new audit of every matched module or all historical design tokens.",
+  "priorReview": "docs/knowledge/audits/2026-10-17-native-production-review.json",
+  "sourceContractsInspected": [
+    "src/workers/cloudflare/index.ts; GalxEdgeGateway.ts; wrangler.toml; scripts/test-cloudflare-workers.ts; scripts/retire-legacy-edge-source.mjs: production/staging no background I/O, generic HTTP errors, exact binding preservation, phase-before-submission and no automatic retry",
+    "src/app/sites/page.tsx and [id]/page.tsx: verified entry then Images redirect, no editor/draft export",
+    "src/lib/sites/paid-access.ts: current protected grants or paid invoice/charge evidence, account/product isolation, no staff/JWT grant, bounded short proof",
+    "src/lib/sites/workspace-route.ts, included-content-route.ts, published-route.ts and published-proxy.ts: owner authority, allowlisted DTOs, immutable public content and narrow header/credential transport",
+    "workers/sites-domains/index.ts: fixed canonical backend, machine credential, no database destination, no redirects",
+    "src/lib/billing/commercial-launch.ts and image-allowance-config.ts: live recurring checkout closed independently of typed purchased allowance",
+    "src/app/api/stripe/webhook/route.ts: raw bounded body, signature and exact mode check, native PostgreSQL fulfillment, generic response",
+    "Existing billing/Sites test contracts: ownership, idempotency, uncertainty retention, retired free grants, tax/address session fields and no live sales; no production Stripe mutation"
+  ],
+  "completeGuideBodiesInspected": [
+    "docs/DEPLOYMENT.md",
+    "docs/VERCEL_DEPLOYMENT.md",
+    "docs/WALLET_AND_BILLING_STRATEGY.md",
+    "docs/maintainers/SITES_OPERATIONS.md",
+    "docs/maintainers/SITES_WORKSPACE.md",
+    "docs/maintainers/SITES_DOMAINS.md",
+    "docs/maintainers/SITES_FAIR_USAGE.md",
+    "docs/maintainers/FREE_GENERATION_QUOTA.md",
+    "docs/SITES_WORKSPACE.md",
+    "docs/SITES_CONTENT.md",
+    "docs/API_BASE_URL.md",
+    "docs/maintainers/private-image-accounting.md",
+    "docs/maintainers/ORBIT_FOUNDRY.md",
+    "docs/reference/billing-pages.md",
+    "docs/runbooks/stripe-webhook-delivery.md"
+  ],
+  "supportingInspection": [
+    "ADR 0148/0149/0150 retain explicit grant and dated free-admission decision scope without retrospective acceptance.",
+    "Billing/public-reading DESIGN product-state sections aligned to current payment acceptance gate; home DESIGN retains its explicit historical surface limit. No visual redesign or new screenshot acceptance.",
+    "Knowledge documentation policy/change/review command contract, ownership mappings, newest current-state section and affected register/journal entries. Prior native review retains the broader unchanged canonical-guide evidence."
+  ],
+  "corrections": [
+    "Production had no database service credential before cleanup; staging also had none. Native task and message-billing queues were empty in the read-only aggregate inspection. Do not activate these old worker paths to remove a dependency.",
+    "The independent Sites domain scheduler uses the canonical backend; its database transport moved with native web configuration. One external domain reservation and zero managed workspaces were retained; no new publication qualified.",
+    "Reconciled full affected deployment, Sites retirement/free-offer and billing guide bodies. Old Vercel placement, editor/export instructions and early tax observations no longer override current contracts. Historical release records and ADR statuses are unchanged."
+  ],
+  "verification": {
+    "worker": "143 pass; no unexpected external transport",
+    "typeScript": "pass",
+    "billingLifecycle": "20 pass plus webhook signature/mode/body-size HTTP denials",
+    "sitesOrbitQuota": "81 pass; isolated transports",
+    "operatorSyntax": "pass",
+    "workerBundle": "Wrangler dry-run pass; production/staging deployed and binding/schedule readbacks match"
+  },
+  "hostedBaseChecks": {
+    "application": {
+      "run": 39082175833,
+      "conclusion": "success"
+    },
+    "worker": {
+      "run": 39082175824,
+      "conclusion": "success",
+      "deploymentStep": "skipped; manual component deployment above verified"
+    },
+    "knowledge": {
+      "run": 39082175949,
+      "conclusion": "failure",
+      "reason": "Sites and billing review deadlines overdue; no structural/source drift bypassed"
+    }
+  },
+  "evidence": [
+    "post-mortem/releases/2026-10-18-edge-source-cleanup.json",
+    "post-mortem/releases/2026-10-17-central-native-cutover.json"
+  ],
+  "limits": [
+    "Actual Google secret/return and two Premium provider renewals remain owner handoffs. No new generation or payment acceptance.",
+    "Native web image remains its previously accepted artifact; this follow-up changes the separate Worker component and private documentation. An unchanged embedded compatibility gateway factory is not a newly deployed native artifact.",
+    "No whole-host, fresh-device, VM/queue/full-secret recovery or daily off-device schedule accepted. No unrelated incident action closed.",
+    "Central remains paused under Free, Premium deleted, historical invoices retained."
+  ],
+  "impactReview": "Mapped the new bounded edge operator into delivery. Reviewed changed source, guide, registry, operational evidence and generated-view paths. No database schema, Stripe object, Sites grant or publication changed. Existing overdue incident actions are not review-deadline waivers."
+}

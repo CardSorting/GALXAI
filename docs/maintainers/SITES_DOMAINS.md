@@ -4,11 +4,11 @@
 
 > [!NOTE]
 > **Status: Retired / Sunset (September 2026)**
-> Automatic Sites domain provisioning and subdomain binding have been sunset alongside the retirement of the Sites product. DNS workers and background schedulers are preserved for historical audit only.
+> New Sites sales and browser authoring are retired. Existing domain reservations, reconciliation code and the separate domain scheduler are preserved; retirement does not delete DNS or release owned names.
 
 Private maintainer runbook. [ADR 0137](../adr/0137-account-owned-sites-subdomains.md) defines address ownership; [ADR 0138](../adr/0138-automatic-sites-domain-provisioning.md) defines automatic discovery and reconciliation. [Site addresses](../SITE_ADDRESSES.md) is the historical capability contract. Never bundle this guide, native registrations or queue rows into product output.
 
-New browser-created Sites use [workspace-managed publishing](SITES_WORKSPACE.md), which needs no customer companion. The discovery lifecycle below remains the separate path for customer-native Sites.
+The retained [workspace-managed publishing contract](SITES_WORKSPACE.md) needs no customer companion, but current browser entry redirects to Images. The discovery lifecycle below describes existing customer-native connections and recovery, not permission to enroll a new cohort. The native account cutover preserved one external-domain reservation and zero managed workspaces; no new publication was tested.
 
 ## Automatic lifecycle
 
@@ -55,14 +55,14 @@ The host must supervise restart and renew the customer session/connection. This 
 
 Migration `20260911153205_sites_custom_domains.sql` owns namespaces and domain reservations. Migration `20260911163542_sites_domain_automation.sql` adds `retry_count`, `automation_stopped` and the partial due-work index. Both tables retain forced RLS and revoked PUBLIC/anon/authenticated/service_role access. No public SQL function or Data API permission is added.
 
-Deploy in this order: apply the additive migration; install the backend machine secret and worker flag; deploy the backend; upload the same secret to the scheduler; deploy `workers/sites-domains/wrangler.jsonc`. The scheduler has no public route or preview URL. It calls only `POST https://galx.ai/api/internal/sites/domains/process` with no submitted scope. This route uses timing-safe machine authentication and returns an empty 204 on a completed batch. Unknown failures return generic codes; customer JWTs, cookies and claimed administrator roles cannot authorize it.
+For a separately approved recovery installation, deploy in this order: apply only a reviewed missing additive migration; install the backend machine secret and worker flag; deploy the backend; upload the same secret to the scheduler; deploy `workers/sites-domains/wrangler.jsonc`. The scheduler has no public route or preview URL. It calls only `POST https://galx.ai/api/internal/sites/domains/process` with no submitted scope. This route uses timing-safe machine authentication and returns an empty 204 on a completed batch. Unknown failures return generic codes; customer JWTs, cookies and claimed administrator roles cannot authorize it.
 
 ```sh
 npm run worker:sites:build
 npm run worker:sites:deploy
 ```
 
-Use Wrangler's secret input mechanism for `GALX_SITES_WORKER_TOKEN`; never pass its value in an argument or print it. The existing main edge gateway is a separate worker and is not redeployed by these commands. The scheduler holds neither PostgreSQL nor DNS credentials, and the backend keeps the existing connection pool. It binds the native fetch receiver and enables `global_fetch_strictly_public` so the fixed backend request uses public routing. The scheduler never follows redirects or forwards its secret to another destination. Failures log only a fixed category, optional HTTP status and coarse redirect category to administrator-only Worker logs; no response body, raw URL, credentials or account data is logged.
+Use Wrangler's secret input mechanism for `GALX_SITES_WORKER_TOKEN`; never pass its value in an argument or print it. The existing main edge gateway is a separate worker and is not redeployed by these commands. Its obsolete database polling cron is removed; this fixed canonical-backend domain scheduler is a different contract. The backend now uses native central storage; the scheduler holds no database destination to migrate. The scheduler holds neither PostgreSQL nor DNS credentials, and the backend keeps the existing connection pool. It binds the native fetch receiver and enables `global_fetch_strictly_public` so the fixed backend request uses public routing. The scheduler never follows redirects or forwards its secret to another destination. Failures log only a fixed category, optional HTTP status and coarse redirect category to administrator-only Worker logs; no response body, raw URL, credentials or account data is logged.
 
 Claims use `FOR UPDATE SKIP LOCKED`, at most four rows, exact server cohort filtering, two-minute leases and UUID completion fencing. Database transactions end before network operations. External work has a 60-second deadline; each DNS/HTTPS request has a six-second deadline; the backend platform limit is 90 seconds and scheduler HTTP deadline is 85 seconds. Pending work backs off from 30 seconds to 15 minutes. Active rows leave the queue; DNS conflicts set a private stop flag. Duplicate enqueue requests cannot steal leases, reset backoff or clear conflict stops.
 

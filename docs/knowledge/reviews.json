@@ -1,11 +1,11 @@
 {
   "knowledge": {
-    "reviewer": "Codex native migration maintainer",
-    "note": "Reconciled complete owning guides, private current state, incident actions and journal, source ownership mappings and decision versus delivery. Historical evidence and older proposed ADR status preserved; inspected unmapped evidence/generated discovery paths.",
+    "reviewer": "Codex release and account migration maintainer",
+    "note": "Contract-focused semantic review and whole affected guide reconciliation; unchanged broader fingerprint inventory is not an exhaustive module audit. Separate edge deployments and native authority retained; due Sites/billing reviewed with actual isolated checks.",
     "reviewed_at": "2026-10-18",
-    "review_by": "2026-10-24",
+    "review_by": "2026-10-25",
     "evidence": {
-      "docs/knowledge/audits/2026-10-17-native-production-review.json": "3de6a32cf32168d9c5a6327f194147f3f6174429510b0c277fb4fbba2fdb43ad"
+      "docs/knowledge/audits/2026-10-18-edge-sites-billing-review.json": "c3dfbc858032e8fa48c184929bb8e2f5dd460784b6ac5e541eae7745f6413f48"
     },
     "files": {
       ".github/CODEOWNERS": "ef2f416d15f027dc8f197ad844289c9a44c8e843d3214d1590a3a380e939d13f",
@@ -21,7 +21,7 @@
       "docs/AGENTS.md": "0a1e687ab43a1e6c2266720e175de60cd6f10958cdf3456690c1f743c4784044",
       "docs/API_BASE_URL.md": "90ad9593668b5be61c0ee8ed940f53604d94f741c2ed250f3e9f44876cb50ca8",
       "docs/API_REFERENCE.md": "8c3bc35838f58500d9fabff191f8a089ee6d78b4c48b2ae11674577ffe911539",
-      "docs/CATALOG.md": "acaf010b9098f389625c25865e7a6a0aa846ea5486528d45d2d3ce720f04d25d",
+      "docs/CATALOG.md": "6623b36520ac7e80204904edcea333f88b7e10c6f2812c2377e91152c3d195d2",
       "docs/DEVELOPER_CLIENT_SDK.md": "dedfbb7409ed49c158f099235a8467bb0ebeace819854ac2f937a36739adcc41",
       "docs/DEVELOPER_GUIDE.md": "30522d59018a321e59dc129154e81390f8c352130231990829bfeb42840fae39",
       "docs/DOCUMENTATION_POLICY.md": "ab2030f9d15010634b9a2d9cf2bc680fdf4ae961c2ee3f9f7ad567e99d49d40c",
@@ -29,7 +29,7 @@
       "docs/PRODUCT_SURFACE_STRATEGY.md": "699ada020d9d1a7a5d557d2cd1b7863edb82a36b49c62eb8a437918277b9d57b",
       "docs/QUICKSTART.md": "1e67b0dd78819f7149efd93e9510ced3156f448b517bf28ab6e438facade6111",
       "docs/README.md": "46f64edf489d2e6cbcad9b340954a42101fe911f29f88e2c76a6a041b1b47d92",
-      "docs/WALLET_AND_BILLING_STRATEGY.md": "881b786e0c054cd4b27caf6417f1b5dc551a72e7ba8978b4aab6ce36766ea633",
+      "docs/WALLET_AND_BILLING_STRATEGY.md": "0f07e7986fd94a2e536c4a4399f865675d57ef1ba5d07c562a7d048ca506f8e6",
       "docs/adr/0145-maintained-knowledge-and-decision-lifecycle.md": "6fae04f9767dc698da73123151fdc6aa4f61f40786f176a9e5f9db336188d47a",
       "docs/adr/0160-private-human-creation-star-publishing.md": "2f33531fb50bbea8daafb8a5891aba654c92879b832078e0b21588f7cf504948",
       "docs/adr/0161-broc-persistent-star-practice.md": "dc51973d7a84df662d4d96760c71019228aad8e025d7139520eeb490dddac0c5",
@@ -40,10 +40,10 @@
       "docs/how-to/change-with-documentation.md": "abcf6bfb2f0aadcf8cfc2fdae18ac8f3f84565f127c34f7453d50e7283006e40",
       "docs/knowledge/DECISIONS.md": "26078f82104015710e2c3a4719c52f3865003107d321ddf394d226710aad4457",
       "docs/knowledge/DESIGN_RATIONALE.md": "edd3cf9b49ed794fbe8bf14448fd0c56cb4d8df832bab81cdf07e9ea2e2204a1",
-      "docs/knowledge/DOMAINS.md": "346298af1bd31ca1f4f94bc7501bf888fcb52fc0a334deb2e1d9b80d0e2f7eee",
+      "docs/knowledge/DOMAINS.md": "11cde8983be0dff8a44981bdfbae15181ed37f3bde7c6429533cd488323e515e",
       "docs/knowledge/README.md": "5ad219aeee44a9c065db2ca69e5a6498966fed42e2d8c74773dbc055d0220931",
-      "docs/knowledge/catalog.json": "25c2dcf82a30778c25e66485e84a5c7b38ed8e87a19bec5251e329dee9555855",
-      "docs/knowledge/registry.json": "b621fb71c25422fb96532fce6d403c9b748c29d54c99bc1781e0af4ddd421638",
+      "docs/knowledge/catalog.json": "4a90489f1f5c4d7fa49c71573e2e9aa7ee3f2ce0b3e3eab54729943ab5958ce0",
+      "docs/knowledge/registry.json": "128d5d945d5d7021be621b0368a8523c7a613b7978a35b73c1b0bfe1499e74f6",
       "docs/knowledge/templates/adr.md": "28773b3cbdb53ad34f08d0362e87b6dba24b6fd76ddb6c85db8ad63d99ad1331",
       "docs/knowledge/templates/runbook.md": "19679a7eb8c1a3aafd87852fa93817e7bf9ef4696772c8deb1617366c290abc1",
       "docs/maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md": "b7df75535611c14aabe599764a6f6c2a4f0f1461d068929602c68e39d8ce850d",
@@ -61,7 +61,7 @@
       "docs/tutorials/README.md": "7cc84f00412108e1c8ec84ef127b15027b606bd16c2dc290f6efc607b9ca5268",
       "docs/tutorials/first-change.md": "06b7c9501cfe62893978e1da6556d6d4fc0d88f4e36b484d05dad4ad72d9fd60",
       "package.json": "98ec21911ced7fd2e3f7fa6ffbd6caa12061d822dadc75aa9053dac4e07cf240",
-      "post-mortem/documentation-inventory.json": "72cc3506146969e8da90a3aac3ced9eae91243f3b7a73fcbafddb354f96e8c72",
+      "post-mortem/documentation-inventory.json": "572f96828d66da1d3a61c9bc75fb3c76bdea1cd3715816bb9a3a010adb52e98d",
       "post-mortem/releases/2026-09-25-broc-practice-local-review.json": "43ac12b5294864a7dd2b9fbff52367693e2739eb4083263aa05a87abdc8e0616",
       "scripts/docs-kb.py": "57642bcce6edcdec6b14dc285e973c1c7ba43d9b8908903826befcba6e992d88",
       "scripts/test-docs-kb.py": "83aa914e66cc04d866fd4c77554760748f8e1d07378326c49ac1738f12851856",
@@ -102,12 +102,12 @@
     }
   },
   "images": {
-    "reviewer": "Codex native migration maintainer",
-    "note": "Reviewed canonical cookie authority and owner Library recovery with retained hosted cookies; public allowlists/artifact contracts unchanged. Actual corrected-image image HTTP, 37 assets, 30 sanitized exhibition artifacts and owner Library accepted; no new generation qualification.",
+    "reviewer": "Codex release and account migration maintainer",
+    "note": "Contract-focused semantic review and whole affected guide reconciliation; unchanged broader fingerprint inventory is not an exhaustive module audit. Separate edge deployments and native authority retained; due Sites/billing reviewed with actual isolated checks.",
     "reviewed_at": "2026-10-18",
-    "review_by": "2026-10-24",
+    "review_by": "2026-10-25",
     "evidence": {
-      "docs/knowledge/audits/2026-10-17-native-production-review.json": "3de6a32cf32168d9c5a6327f194147f3f6174429510b0c277fb4fbba2fdb43ad"
+      "docs/knowledge/audits/2026-10-18-edge-sites-billing-review.json": "c3dfbc858032e8fa48c184929bb8e2f5dd460784b6ac5e541eae7745f6413f48"
     },
     "files": {
       "BROC/practice.ts": "19499a05b7f9e481fcd0c4c04242bde79accc9da7f66daff91a229258c810167",
@@ -120,7 +120,7 @@
       "docs/PRODUCT_SURFACE_STRATEGY.md": "699ada020d9d1a7a5d557d2cd1b7863edb82a36b49c62eb8a437918277b9d57b",
       "docs/QUEUE_SPECIFICATION.md": "3749fdfbdc57231a98a11601f10abe187c054ff9d30d1508b5f86b2e856d7f38",
       "docs/QUICKSTART.md": "1e67b0dd78819f7149efd93e9510ced3156f448b517bf28ab6e438facade6111",
-      "docs/WALLET_AND_BILLING_STRATEGY.md": "881b786e0c054cd4b27caf6417f1b5dc551a72e7ba8978b4aab6ce36766ea633",
+      "docs/WALLET_AND_BILLING_STRATEGY.md": "0f07e7986fd94a2e536c4a4399f865675d57ef1ba5d07c562a7d048ca506f8e6",
       "docs/adr/0160-private-human-creation-star-publishing.md": "2f33531fb50bbea8daafb8a5891aba654c92879b832078e0b21588f7cf504948",
       "docs/adr/0161-broc-persistent-star-practice.md": "dc51973d7a84df662d4d96760c71019228aad8e025d7139520eeb490dddac0c5",
       "docs/adr/0163-star-candidate-selection-before-exhibition.md": "de1bc70e9ad495fd0bd559a2462db49068d7eb864a451333f64708e3c0b94dd5",
@@ -480,27 +480,25 @@
     }
   },
   "sites": {
-    "reviewer": "Codex CI fixture maintainer",
-    "note": "Retain bounded full-guide/source contract review and earlier wider evidence; complete hosted application 37697229999 and documentation 37697229897 now pass at 298fc8d, including current quota/private storage/registry fixtures, clean install, production build and compiled public boundary. Reviewed dated acceptance/current-state/incident closure and exact remote archive retention. Eight Git checkouts clean at acceptance. No runtime, database, grants, generation, deployment or ADR status change; visual recapture and other actions remain separate.",
-    "reviewed_at": "2026-10-07",
-    "review_by": "2026-10-14",
+    "reviewer": "Codex release and account migration maintainer",
+    "note": "Contract-focused semantic review and whole affected guide reconciliation; unchanged broader fingerprint inventory is not an exhaustive module audit. Separate edge deployments and native authority retained; due Sites/billing reviewed with actual isolated checks.",
+    "reviewed_at": "2026-10-18",
+    "review_by": "2026-10-25",
     "evidence": {
-      "post-mortem/releases/2026-10-03-connect-local-review.json": "37e94394ab2210d6f722b4d3cd6ac041b6b229777ac6a20f7f9c14cf807d6807",
-      "post-mortem/releases/2026-10-07-ci-fixture-repair-local.json": "83e5fc969556cfea079da765b2209bc75b4b7b0e890cd745018d7b1669ff7442",
-      "post-mortem/releases/2026-10-07-ci-fixture-repair-hosted.json": "453aaa4ddcb63fe08c3154216e9e857dd78943e700467ffb691efbf0d9bc6623"
+      "docs/knowledge/audits/2026-10-18-edge-sites-billing-review.json": "c3dfbc858032e8fa48c184929bb8e2f5dd460784b6ac5e541eae7745f6413f48"
     },
     "files": {
       "docs/API_BASE_URL.md": "90ad9593668b5be61c0ee8ed940f53604d94f741c2ed250f3e9f44876cb50ca8",
-      "docs/SITES_CONTENT.md": "cbb15cbb1961ee539a4ee77d070f440b1a5fb5168a3fffbb2c8c25098a59b69a",
-      "docs/SITES_WORKSPACE.md": "25bc8b58f78fed467fde5332c1d466c0a70be91ece119127919f279d6ab48af8",
+      "docs/SITES_CONTENT.md": "e406c0625246d7ef03fb1eaa7513233baaa6edf924d1e1c289e24961b8b310fb",
+      "docs/SITES_WORKSPACE.md": "dd7277af19ed5299ea0d2dc7f5c6390d6a98e19eed5c264a647c9fe53a9a5e81",
       "docs/adr/0148-complimentary-pro-access.md": "4d454694d9a03c11485d32a428c9b7bb1de635f00e62f60ed51ac86619ad6922",
       "docs/adr/0149-one-time-free-generation.md": "b01abb8941252b6f7e2b3f0359428d9b8afe9effbda7e1af2badc4cce9d4fd43",
       "docs/adr/0150-free-generation-admission-gate.md": "135151cdb2ce88ea8ec8f8f60d3d0d03e5fc8fd086b766927f2e19a577b6a408",
       "docs/maintainers/FREE_GENERATION_QUOTA.md": "37c1dfadc67fa9cde7083edb01d3de6b6bfe325164fde318f3356b8e3a6f8833",
-      "docs/maintainers/SITES_DOMAINS.md": "99e64a33d4a55c03cc0dc59a2cf4b1b91beb38429911fd90f1e938e3bcc9f59a",
-      "docs/maintainers/SITES_FAIR_USAGE.md": "94593f8b1f7ef8c83d9168657a3a1c2cff0adc9e8bd2f93a5403da73410a1bcc",
-      "docs/maintainers/SITES_OPERATIONS.md": "977fa6b88c5f446fc808331431d85c674ebfb791fd2cc146d28cb3c85e359566",
-      "docs/maintainers/SITES_WORKSPACE.md": "f09934fe65973d944cd5eaff361405a2c0ea83ebc7a0b2950ba62bcd746b93bb",
+      "docs/maintainers/SITES_DOMAINS.md": "cef7750bdd1fd915786378edf4a05b83a2ad169ee6c09bdd4db91e6d04d6f3d8",
+      "docs/maintainers/SITES_FAIR_USAGE.md": "eb5c0d63f739081dec082c676415b669f60546470e2269170df474b47b4b2103",
+      "docs/maintainers/SITES_OPERATIONS.md": "0d9d9054ad00b612e8e9abd16b178906eeea88c3aea38301cc6317543f727929",
+      "docs/maintainers/SITES_WORKSPACE.md": "fec3fe3da8dc24554e77c427768aed6d451ffacca962475619d1628c4e0f16a2",
       "scripts/manage-pro-access.ts": "1ebddafc9bfcc287daf63cfab41d7fd20825b51840fd697dcb41a873fa1d2dbb",
       "scripts/test-free-generation-gate-db.ts": "3c5c3383cab8111c633ae42579dcac90935b8963ff35dee461fb1ca1763bb445",
       "scripts/test-free-generation-quota-db.ts": "c61677cdfaf2dd0b34ab40a5f0dc761dfc0f401fe608ee12b6bc53a614917693",
@@ -1280,12 +1278,12 @@
     }
   },
   "delivery": {
-    "reviewer": "Codex native migration maintainer",
-    "note": "Reviewed exact ingress/DNS preservation, immutable package/image gates, both retained failed rehearsals, corrected 44-check full acceptance and clean dual-profile replacement. Reviewed Free cancellation and one pause POST/status-only reconciliation to INACTIVE, exact organization scope and historical invoice limits; permanent central deletion not performed.",
+    "reviewer": "Codex release and account migration maintainer",
+    "note": "Contract-focused semantic review and whole affected guide reconciliation; unchanged broader fingerprint inventory is not an exhaustive module audit. Separate edge deployments and native authority retained; due Sites/billing reviewed with actual isolated checks.",
     "reviewed_at": "2026-10-18",
-    "review_by": "2026-10-24",
+    "review_by": "2026-10-25",
     "evidence": {
-      "docs/knowledge/audits/2026-10-17-native-production-review.json": "3de6a32cf32168d9c5a6327f194147f3f6174429510b0c277fb4fbba2fdb43ad"
+      "docs/knowledge/audits/2026-10-18-edge-sites-billing-review.json": "c3dfbc858032e8fa48c184929bb8e2f5dd460784b6ac5e541eae7745f6413f48"
     },
     "files": {
       ".dockerignore": "fabeb0a64e0040d7feb0b9ea2d6f88d109479a61974a7c41aee3f54be23b70e2",
@@ -1302,8 +1300,8 @@
       "deploy/self-host/runtime-config.cjs": "27ec383129b4e7903fe77ca14944ef0ef52197b37c8bc1ddd88d19b64b6cccb5",
       "deploy/self-host/server.cjs": "cdbd2b7e118e428d3506d9e12c6dbec8f526214952b5cfc88e19134dddd65f91",
       "docs/CLOUDFLARE_STRATEGY.md": "ade180c2aca74d8a784822d208fcdfbfedbece1873a990a61143d9fa96ef037c",
-      "docs/DEPLOYMENT.md": "925c5db94f9f235668bf25c1beff32d473154bda066fb0a4e847f5cb58bdf5d5",
-      "docs/VERCEL_DEPLOYMENT.md": "6e7dadc9c951145e1b637a83acb35df4f31f0abfc1531d8b1ecc1abd404c27b1",
+      "docs/DEPLOYMENT.md": "56cbd39e3c817f2971d15500ecd939c179e45355da770d5a4c42a4ff6c0d39a1",
+      "docs/VERCEL_DEPLOYMENT.md": "5c719402d81eeabee7a8902928ec45a4e8313b432eff31e7c6a32f4294c0f56c",
       "docs/VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md": "0642193dbe4bbe1d941aadb11d5a78981f1a1be23c575de23fbd1f00c05a1a0e",
       "docs/adr/0167-nova-mac-runtime-placement.md": "d6e69106f9b5fe09549b3dda90d14ea2b5254e13671342ba74fcd9ab7537f227",
       "docs/maintainers/CLOUDFLARE_EDGE_MESH_MAINTAINER_RUNBOOK.md": "15571a03c6ce52400aea457f4797ca0ebc273892563c81c4c137074a6a822aa0",
@@ -1339,10 +1337,11 @@
       "scripts/release-certification.ts": "8b332c8d75a6774f6f2db7cae95b49f158fe4eb317e6daefee673b53df40b00e",
       "scripts/retain-hosted-output.mjs": "6f2247d4526e25c3bf9dfb280fd0a8996f75e1d70b8cff802605ac2a3a83158a",
       "scripts/retire-central-hosted-database.mjs": "d48f96d2b14e0c63ea72ccf82a0b847beb1125176df69a31949d80ed3ed53e26",
+      "scripts/retire-legacy-edge-source.mjs": "25a8483be3b1ff07e0ac9089f442c7cd02c0afdcee1590cc849f9ed47577bba4",
       "scripts/rollout-native-web-correction.mjs": "85b41e5d70b9c7f8ade50562e29efb28b792b58eb35076ea528d7945d012bcdf",
       "scripts/select-native-development-database.mjs": "562cef689d7d53e54f89bf76865e0617666054676cc24a4aeb6e8b9baf93bf1b",
       "scripts/self-host.mjs": "812e7f9f0d73730f3e9fd0f4b73b0222981d0195dd38f8bcd56730f5604c9596",
-      "scripts/test-cloudflare-workers.ts": "c296f0f9b93387daf294d4f24bbd7d1492a3c669f560e2417731982a2b1e7b5c",
+      "scripts/test-cloudflare-workers.ts": "10948fa25e75212cde2ec94c6879631550e106795c70eda6fd2df2527097ffbd",
       "scripts/test-hosted-packaging.mjs": "037da5489e6fc395a5e8001d72f9ae806223fb5c7592c65d6e5a7873c1782461",
       "scripts/test-nova-retirement.ts": "aec7fd21ba9cc1566a3c745903f5804121e06272ccc03bb6b35234325798fe8a",
       "scripts/test-self-host-resilience.ts": "d84c6c65639c637ceb2f824044cb031bead3995b592088b71f0c845b50c9ddcd",
@@ -1389,7 +1388,7 @@
       "src/workers/cloudflare/GalxEdgeBatchBuffer.ts": "f7cb56bf5ad809150e4e7c84749a17c4aee59790d60375201bcff3d2b3016cfd",
       "src/workers/cloudflare/GalxEdgeCache.ts": "1f2e0128247a60dd8462c043abe52ba0986b36f1ab423d69ea211f3f977e1baa",
       "src/workers/cloudflare/GalxEdgeConnectionPool.ts": "24f5748052b40364d55272e42c0edce726a5d305b6a7fa2a73909ac1f89a02b1",
-      "src/workers/cloudflare/GalxEdgeGateway.ts": "9e513ad9bc873dc4b32a5c6d0df97cf330e740cd2a75db69d6e40b4ddd154e3a",
+      "src/workers/cloudflare/GalxEdgeGateway.ts": "9fd5c49a7f279048790d654ad6e0e7c810ef14515be50de8c0dfc30a423ecb69",
       "src/workers/cloudflare/GalxEdgeQueueWorker.ts": "635a8ad2014ebfaccc78669bc5efe160221f6070d759e73c1f168a16952d0b69",
       "src/workers/cloudflare/GalxEdgeRouter.ts": "1f9c9f6ba8d5fb9cb2a080de712d620e97cebe6df5bb9dedbf8eafeeb4bf88db",
       "src/workers/cloudflare/GalxEdgeSpeculativeEngine.ts": "2f919607e7ac2e909161354d9c79aae2dbb9f7a6758b0a4c29172640c2082efb",
@@ -1398,11 +1397,11 @@
       "src/workers/cloudflare/GalxMessageBillingWorker.ts": "d57352f9db270b9245cfdae99cecf65555bfd3ac1218354cca72aa715b71f387",
       "src/workers/cloudflare/GalxR2AssetAdapter.ts": "3be7799e0bee39507be531e59556f60dc0f88ba11661f2d50a3fc1e86bf847d5",
       "src/workers/cloudflare/GalxSwarmCoordinatorDO.ts": "d9cd3c3ae16ed4a421dba82fcf9c67340d7a8a2f19aaf9bf7e59d58e446f2dde",
-      "src/workers/cloudflare/index.ts": "6192dbf49b58a617204ed7a3c4e8b9a6e9700bc51255479872d32b2eb1365fd8",
+      "src/workers/cloudflare/index.ts": "6c7de6d2e9f1143bb6f3edeba6657bb31d9fe2ef08425da3132f2f75e06a8dc1",
       "vercel.json": "25b302af9b62fa452243b70e2ae5b5ea3cfd6ccbc245ef17ed61ba3ac96e308d",
       "workers/sites-domains/index.ts": "3f41a04cb75e4a4c004de4d4bfd1c79de87e0c69e36f417dc01faf06f66d5cc5",
       "workers/sites-domains/wrangler.jsonc": "1766b11f80f974cb45161e390eb01f67ab5d98aa3309d0f0857d241d5e35b474",
-      "wrangler.toml": "a3d9f3b9d147f859f1e407acfda240c61a9cd2bd47dc01e1c5390012bf2b7293"
+      "wrangler.toml": "f9906d15623e2d7f3617d2c3ee4c507773688b7590a773ad59011bd13f870e37"
     }
   },
   "broccolidb": {
@@ -1857,12 +1856,12 @@
     }
   },
   "client-efficiency": {
-    "reviewer": "Codex native migration maintainer",
-    "note": "Reconciled native web/Nova placement and prior Vercel measurement scope; reviewed bounded streamed transport and cancellation cleanup without shortened deadlines, request replay, quota changes or renewed provider traffic. Existing source/build/public and full runtime evidence remains scoped.",
+    "reviewer": "Codex release and account migration maintainer",
+    "note": "Contract-focused semantic review and whole affected guide reconciliation; unchanged broader fingerprint inventory is not an exhaustive module audit. Separate edge deployments and native authority retained; due Sites/billing reviewed with actual isolated checks.",
     "reviewed_at": "2026-10-18",
-    "review_by": "2026-10-24",
+    "review_by": "2026-10-25",
     "evidence": {
-      "docs/knowledge/audits/2026-10-17-native-production-review.json": "3de6a32cf32168d9c5a6327f194147f3f6174429510b0c277fb4fbba2fdb43ad"
+      "docs/knowledge/audits/2026-10-18-edge-sites-billing-review.json": "c3dfbc858032e8fa48c184929bb8e2f5dd460784b6ac5e541eae7745f6413f48"
     },
     "files": {
       ".impeccable/surfaces/exhibition-programme.md": "78e49387746523a4c213f25a611bc80d2bb25645af0b31545a3665719a33a0c0",
@@ -1963,7 +1962,7 @@
       "src/components/images/ImageStudio.tsx": "578296b55b9d18b2b898d012867a422d9980a23c7bcc093c0048385013f735c1",
       "src/components/images/use-image-studio.ts": "f530fdba333a4d5703f5a6ef4359beb9e4f994c8bea7fe031349403a8f974414",
       "src/components/public-content/DESIGN.json": "98cc3fa17888b3f862e700aa77dabd0bd17ef4ce6f14f8e8babc9673e123fd48",
-      "src/components/public-content/DESIGN.md": "4e2d9eea8096434269f090da7b9c456ff66172580666e0bb198c33f10e9176c4",
+      "src/components/public-content/DESIGN.md": "d0e19f286929a1c957b417b49ddf14439f7d37e784e48b579390b63b9e4110e9",
       "src/components/public-content/KnowledgeSearch.tsx": "9793cb618c86ec0e61ae2bf0be8b2e608d465e4b87e705da9c75d14070fa106f",
       "src/components/public-content/ReadingPage.tsx": "c428cf8ebe2cc8cdc48d954be883e823aecef753e14ef330003526c969fcfb9c",
       "src/components/public-content/public-content.module.css": "e9368c5006362748061d7af11d5a2612657c06358e72c6076b8b9d5bba9fb3fc",
@@ -1987,19 +1986,19 @@
     }
   },
   "billing": {
-    "reviewer": "Codex",
-    "note": "Bounded review of unchanged checkout/release source and current commercial guides; 20 billing lifecycle and 24 Orbit checks plus webhook boundary verification passed. No live Stripe operation or commercial activation. Historical domain references are not re-attested as current guidance.",
-    "reviewed_at": "2026-10-04",
-    "review_by": "2026-10-10",
+    "reviewer": "Codex release and account migration maintainer",
+    "note": "Contract-focused semantic review and whole affected guide reconciliation; unchanged broader fingerprint inventory is not an exhaustive module audit. Separate edge deployments and native authority retained; due Sites/billing reviewed with actual isolated checks.",
+    "reviewed_at": "2026-10-18",
+    "review_by": "2026-10-25",
     "evidence": {
-      "post-mortem/releases/2026-10-03-production-git-review.json": "9f4464c71574693ec8dd3a7005ebca1c0830807003199c838bbe2504ba21500b"
+      "docs/knowledge/audits/2026-10-18-edge-sites-billing-review.json": "c3dfbc858032e8fa48c184929bb8e2f5dd460784b6ac5e541eae7745f6413f48"
     },
     "files": {
       ".impeccable/surfaces/src-app-billing-page-tsx.md": "df34c030bfe556da9841bf826df4c1dc90d3aa6475412d674a4bf2854c5b0889",
-      "docs/WALLET_AND_BILLING_STRATEGY.md": "881b786e0c054cd4b27caf6417f1b5dc551a72e7ba8978b4aab6ce36766ea633",
+      "docs/WALLET_AND_BILLING_STRATEGY.md": "0f07e7986fd94a2e536c4a4399f865675d57ef1ba5d07c562a7d048ca506f8e6",
       "docs/adr/0164-orbit-foundry-public-identity.md": "c18e85b1070f324392137e3fa6018196d6615f28766278944c1e2a72a3c8ad97",
       "docs/maintainers/ORBIT_FOUNDRY.md": "27c217add69b3041962c0a7872b926253dfa483adae052960ac0100fc5b3b2ca",
-      "docs/maintainers/SITES_FAIR_USAGE.md": "94593f8b1f7ef8c83d9168657a3a1c2cff0adc9e8bd2f93a5403da73410a1bcc",
+      "docs/maintainers/SITES_FAIR_USAGE.md": "eb5c0d63f739081dec082c676415b669f60546470e2269170df474b47b4b2103",
       "docs/maintainers/private-image-accounting.md": "c7b381496d593a0eab863f2746a6d5acb9f5c03ac06a934cc6b4e39f2c666b62",
       "docs/reference/billing-pages.md": "f83ec8d60b650e1ad724b61b600250f63d8e525b744639666a839a63df0eca15",
       "docs/runbooks/stripe-webhook-delivery.md": "a3c25a9c232581aed59ce125083508c9e2f2e394d8a127ccdbd9b41c7aed0075",
@@ -2059,7 +2058,7 @@
       "src/components/billing/BillingProvider.tsx": "cdfefd2683186cc736ee105739b84fd0426a15666d3b063ff02c1714a61c781a",
       "src/components/billing/BillingWorkspace.tsx": "dd50bbbbd1a041aed1bf10d99081abf04c13328e199471d33773ef3812e24cad",
       "src/components/billing/CheckoutStatus.tsx": "43e4054b4bb34433c603a5ef3034a31bb4b4968a1ccc92ef48ce56c370bc50b6",
-      "src/components/billing/DESIGN.md": "4339826f6206c38bf8a9250a4fd566b0dc916963750e05c0083110f49ddbbe7a",
+      "src/components/billing/DESIGN.md": "113402c63b2f58ef2d95a77b0a489803540490c2b9089998d8f7f9a8787eeac8",
       "src/components/billing/PlanPanel.tsx": "d4b45b41ce80e9f592c0de1b6ec2c44999ba2156353825fded12e3531194a96e",
       "src/components/billing/SeatsManagementClient.tsx": "4392f9525163626cbdee73ac28c73dbcf69d46d3c7cd37b86baa6ce659d91814",
       "src/components/billing/TopUpForm.tsx": "b3ebf09ff5e70949dfa8ad465d381d80c29fdd9c7b2957a81071727920b7bb67",
@@ -2071,7 +2070,7 @@
       "src/components/home/DESIGN.md": "3d61acf9f47991ef85ec45c5b841dba16dcc3ca05ba5bd13965b30e2bc998b82",
       "src/components/home/PlanAction.tsx": "26a45e547692545ada770f821c00edb058aa4866a065b3e2681a94db4a782897",
       "src/components/pricing/PricingClient.tsx": "81495c74e1d9aba0256ab8934f0ddf695ca7f59665fbee73e3c33600ca73a6db",
-      "src/components/public-content/DESIGN.md": "4e2d9eea8096434269f090da7b9c456ff66172580666e0bb198c33f10e9176c4",
+      "src/components/public-content/DESIGN.md": "d0e19f286929a1c957b417b49ddf14439f7d37e784e48b579390b63b9e4110e9",
       "src/components/teams/TeamsSubNav.tsx": "12ca1e90ab0c98b9166822234b13f6b958e863363ef2222bd05e73fb62b931b2",
       "src/lib/billing/account.ts": "c211925fcce0e39199b93eb8097cafe5c413a2809a8d1c00baf0bf7ad036dc1c",
       "src/lib/billing/checkout-attempt.ts": "e4f55f31f802419da368cd2be8e64bf2f979e350987f952ec734905e5ab17ed5",

@@ -29,7 +29,8 @@ export interface CloudflareEnv {
   ENVIRONMENT?: string;
   /** Test-only transport fixture; production cannot override the public status. */
   USAGE_PRICING_TEST_OVERRIDE?: 'published';
-  SUPABASE_URL: string;
+  /** Legacy isolated transport fixtures; not selected by the deployed worker. */
+  SUPABASE_URL?: string;
   SUPABASE_SERVICE_ROLE_KEY?: string;
   GALX_VAULT_MASTER_SECRET?: string;
   PUBLIC_ASSETS_URL?: string;
@@ -398,7 +399,7 @@ export class GalxEdgeGateway {
         ok: false,
         status: 503,
         code: 'authentication_backend_unavailable',
-        message: 'Gateway authentication is not configured. The request was denied fail-closed.'
+        message: 'Access could not be verified. Try again later.'
       };
     }
 
@@ -425,7 +426,7 @@ export class GalxEdgeGateway {
           ok: false,
           status: 503,
           code: 'authentication_backend_unavailable',
-          message: 'Gateway authentication could not be verified. The request was denied fail-closed.'
+          message: 'Access could not be verified. Try again later.'
         };
       }
 
@@ -482,7 +483,7 @@ export class GalxEdgeGateway {
         ok: false,
         status: 503,
         code: 'authentication_backend_unavailable',
-        message: 'Gateway authentication could not be verified. The request was denied fail-closed.'
+        message: 'Access could not be verified. Try again later.'
       };
     }
   }

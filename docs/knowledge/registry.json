@@ -748,7 +748,8 @@
         "scripts/backup-local-postgres-offdevice.mjs",
         "scripts/select-native-development-database.mjs",
         "scripts/rollout-native-web-correction.mjs",
-        "scripts/retire-central-hosted-database.mjs"
+        "scripts/retire-central-hosted-database.mjs",
+        "scripts/retire-legacy-edge-source.mjs"
       ],
       "guides": [
         "docs/DEPLOYMENT.md",

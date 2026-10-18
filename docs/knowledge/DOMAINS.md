@@ -94,8 +94,8 @@ Owner role: **Sites maintainer**. Domain: `sites`.
 - [ADR 0148: Explicit complimentary Pro access](../../docs/adr/0148-complimentary-pro-access.md)
 - [Legacy free generation and current image allowance](../../docs/maintainers/FREE_GENERATION_QUOTA.md)
 - [ADR 0149: One-time free generation allowance](../../docs/adr/0149-one-time-free-generation.md)
-- [Create and manage Sites (Retired)](../../docs/SITES_WORKSPACE.md)
-- [Site content generation (Retired)](../../docs/SITES_CONTENT.md)
+- [Sites workspace (Retired)](../../docs/SITES_WORKSPACE.md)
+- [Sites content (Retired)](../../docs/SITES_CONTENT.md)
 - [ADR 0150: Bounded free admission and paid capacity protection](../../docs/adr/0150-free-generation-admission-gate.md)
 - [Accessing GALX](../../docs/API_BASE_URL.md)
 
