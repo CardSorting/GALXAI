@@ -70,6 +70,15 @@ The initial workflow references for creation, prompt reuse, searchable organizat
 
 The September 10 interface included three built-in Imagegen inspiration assets and example labels. The September 13 results refinement removes their imports, starter data, and related Create copy. Existing raster files remain historical/fixture material, documented in [the private asset note](../assets/image-studio.md); they are not current starter content or evidence of GALX output. No new raster assets, visual-world exercise, comp, seed, or quality board were needed for this extension. Fixture screenshots use controlled image responses and do not establish live model output.
 
+## Passive availability notice
+
+The October 18 refinement removes the automatic floating busy notice during
+background availability failure. Browsing saved images and editing a retained
+prompt do not require that interruption. Existing availability checks and the
+disabled Generate control still prevent unavailable dispatch; actual generation
+errors and uncertain-operation recovery retain their authored feedback. No
+replacement popup, new style or automatic generation retry is introduced.
+
 ## Evidence and limits
 
 The subsequent large-library implementation and local checks are recorded in [the scale guide](../../docs/maintainers/image-library-scale.md) and [dated evidence](../../docs/knowledge/audits/2026-09-13-image-library-scale.json). It adds bounded paging, compact previews, lazy details and bounded BroccoliDB reads. The following checkpoints retain their original narrower scope.

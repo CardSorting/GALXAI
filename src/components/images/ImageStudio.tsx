@@ -150,14 +150,7 @@ function StudioWorkspace({
         body: studio.error,
         action: studio.uncertain ? 'Check My Creations' : 'Check again',
       }
-      : studio.availability === 'unavailable'
-        ? {
-            tone: 'warning',
-            title: 'Image creation is busy right now',
-            body: 'Your prompt is saved. We’ll check again automatically, or you can retry now.',
-            action: 'Check again',
-          }
-        : null;
+    : null;
 
   // Sync route to active tab
   useEffect(() => {

@@ -3055,3 +3055,45 @@ Incident: `INC-20261017-ACCOUNT-CUTOVER`. Kind: `verification`.
 **Next step:** Run final documentation audit, push follow-up and inspect hosted checks. ACT-053 Google owner credential/return and ACT-052 two manual provider renewals remain; no unrelated prevention closure.
 
 Evidence: [2026-10-18-edge-source-cleanup.json](releases/2026-10-18-edge-source-cleanup.json), [2026-10-18-edge-sites-billing-review.json](../docs/knowledge/audits/2026-10-18-edge-sites-billing-review.json).
+
+## EVT-20261018-GOOGLE-RETURN-ACCEPTED — 2026-10-18T01:19:50.078635+00:00
+
+Incident: `INC-20261017-ACCOUNT-CUTOVER`. Kind: `recovery`.
+
+**Observation:** Owner saved the existing Google client replacement through the one-use local form. Actual Google account selection returned to the signed-in GALX account.
+
+**Action:** Validated exact client/private file, changed only the Google secret, retained the prior pinned Auth container and all other configuration, then compared read-only native account/session records to a pre-return baseline.
+
+**Result:** Original account UUID and Google identity preserved, current sign-in and fresh active native session verified. ACT-053 completed; account-cutover incident recovered. No old credential disabled or new generation submitted.
+
+**Next step:** Finish the separately requested passive busy-notice web correction; ACT-052 provider desktop renewals remain.
+
+Evidence: [2026-10-18-google-and-image-notice.json](releases/2026-10-18-google-and-image-notice.json).
+
+## EVT-20261018-CREATE-ASSET-FAILURE — 2026-10-18T01:40:11.829850+00:00
+
+Incident: `INC-20261018-CREATE-ASSET`. Kind: `observation`.
+
+**Observation:** Notice image08 passes44 whole-image and65 general public checks; actual Library has3owned images/no popup, but actual Create fails to load its entry script. Public and private listener return401 for an asset present in the build.
+
+**Action:** Retained all earlier passing/failed evidence, traced an existing missing exact consumer route, added a failing-before/passing-after middleware regression and one-line correction. Extended live verifier with the accepted Create asset list; building fresh09 without changing roles, data or ingress.
+
+**Result:** 71 image/security checks and TypeScript pass. No Create recovery claimed; ACT-056 open. Google remains accepted, and no new inference was submitted.
+
+**Next step:** Require fresh image09 acceptance, exact web-only replacement, raw Create script and actual desktop/mobile verification.
+
+Evidence: [README.md](incidents/2026/2026-10-18-create-asset/README.md), [2026-10-18-google-and-image-notice.json](releases/2026-10-18-google-and-image-notice.json).
+
+## EVT-20261018-CREATE-AND-NOTICE-ACCEPTED — 2026-10-18T01:56:08.067348+00:00
+
+Incident: `INC-20261018-CREATE-ASSET`. Kind: `recovery`.
+
+**Observation:** Fresh image09 passes44 whole-image checks. Exact Create script now serves200JavaScript/immutable/accepted bytes; actual owner editor renders at desktop/390px without busy popup or render recovery. Library retains3owned images.
+
+**Action:** Applied only the reviewed web-create-asset plan after a clean owned-container drain; retained configuration/data/previous packages and all earlier failed Create evidence. Added exact entry-asset public verification and kept private page/API/chunk sibling denials.
+
+**Result:** 71 image/security,9studio,3provider,TypeScript/ESLint,545compiled assets,69live checks/42assets/13secrets zero matches and38cache checks pass. ACT-056 completed and incident recovered; Google ACT-053 remains completed. No new inference, role/data/ingress/Nova change or styling suppression.
+
+**Next step:** Finish explicit source/guide review and Git delivery. ACT-052 provider manual renewals and unrelated prevention work remain; pre-existing mobile/style findings are not claimed fixed.
+
+Evidence: [2026-10-18-google-and-image-notice.json](releases/2026-10-18-google-and-image-notice.json), [README.md](incidents/2026/2026-10-18-create-asset/README.md).

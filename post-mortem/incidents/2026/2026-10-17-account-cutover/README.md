@@ -4,7 +4,7 @@
 
 ## Impact and scope
 
-INC-20261017-ACCOUNT-CUTOVER, SEV-2, identity. Observed during the October 17 planned central migration. The replacement serves canonical traffic against the final native database. Email delivery and actual GitHub login work, with the existing owner UUID preserved. Google rejects its configured secret. A browser with retained hosted cookies also reaches session-expired recovery in Library despite a verified account header. Customer impact outside these owned checks is unknown. No private workspace data was exposed.
+INC-20261017-ACCOUNT-CUTOVER, SEV-2, identity. Originally observed during the October 17 planned central migration. At that observation the replacement served canonical traffic against the final native database. Email delivery and actual GitHub login worked, with the existing owner UUID preserved. Google rejected its configured secret. A browser with retained hosted cookies also reached session-expired recovery in Library despite a verified account header. Customer impact outside these owned checks is unknown. No private workspace data was exposed.
 
 ## Evidence and cause
 
@@ -51,7 +51,17 @@ initial PAUSING observation timed out. It is retained, not permanently deleted.
 Native authority/configuration and independent recovery remain intact; no invoice
 payment or new generation was submitted. Historical usage/invoices remain.
 
-ACT-053 still tracks Google's manual credential handoff and actual provider
-return. Keep it separate from ACT-052, whose expired Premium upstream sign-ins
-predate this migration. See [identity failure modes](../../../failure-modes/identity.md).
-The incident remains contained; partial recovery does not close either owner step.
+On October 18 the owner created and privately saved a replacement secret for
+the exact existing Google client, leaving its predecessor enabled. Provider-only
+refresh replaced the owned pinned Auth container; a configuration hash confirms
+all settings except Google's secret are unchanged, including GitHub, JWT, SMTP,
+callbacks and verification. Actual browser Google exchange returned to GALX with
+the existing account menu. A fresh native active session and current account
+sign-in after the pre-return baseline preserve the original account UUID and
+Google identity. The identity table's historical last-sign-in field is not used
+as fresh-return evidence. ACT-053 is completed by the
+[Google recovery record](../../../releases/2026-10-18-google-and-image-notice.json).
+
+This incident is recovered. ACT-052 remains separate: both expired Premium
+upstream sign-ins predate this migration and need owning-desktop renewal. No
+inference was submitted. See [identity failure modes](../../../failure-modes/identity.md).

@@ -10,7 +10,7 @@ Preview snapshots and BroccoliDB batching reduce repeated payloads; current data
 
 ## FM-ACCESS-002 — public product exemption bypasses account entry
 
-An anonymous HTTP 200 from `/images` or `/sites` exposes an account workspace even when its APIs independently reject unauthenticated calls. Exemption from developer approval does not grant anonymous workspace access. Middleware must verify sessions before static-asset bypasses; each Images/Sites server page must independently guard rendering and remain dynamic. Cookie existence, forged identity/approval headers and client-side prompts cannot replace verification. Preserve refresh cookies, use private no-store responses, and distinguish temporary verification failure from invalid credentials.
+An anonymous HTTP 200 exposing `/images/create`, `/images/library`, `/images/favorites` or `/sites` bypasses account entry even when its APIs independently reject unauthenticated calls. Bare `/images` is a legacy redirect to public Explore; it is not the private creation route. Exemption from developer approval does not grant anonymous workspace access. Middleware must verify sessions before static-asset bypasses; each Images/Sites server page must independently guard rendering and remain dynamic. Cookie existence, forged identity/approval headers and client-side prompts cannot replace verification. Preserve refresh cookies, use private no-store responses, and distinguish temporary verification failure from invalid credentials.
 
 Run the workspace entry cases in `npm run test:image:security`, build production output, then check raw redirects, RSC/prefetch variants, misleading extensions and existing-session access. Preserve published Site snapshots and image capabilities. Use the [workspace authentication runbook](../../docs/operations/workspace-auth.md) for server-backed browser checks, safe return context and explicit 401/503 recovery. Browser-local identity cannot decide whether sign-in is complete. See the [workspace-auth incident](../incidents/2026/2026-09-13-workspace-auth/README.md); ACT-013 retains completed release acceptance; current state owns its dated result. The broader session audit also requires server-verified profiles, confirmed account email for staff operations, native account provenance, owner-bound revocation and explicit current-browser logout. Never treat provider keys, raw session IDs or a supplied sudo duration as account/fresh-proof authority. Run `npm run test:auth:sessions`; preserve rotated refresh cookies when logout must be retried. ACT-014 tracks future fresh-proof and durable device acceptance.
 
@@ -19,6 +19,16 @@ A downstream cache override is part of this boundary: September 13 live acceptan
 ## FM-ACCESS-003 — a public dynamic route loads a protected framework chunk
 
 A public page can render on the server while its browser bundle is denied if framework assets infer access from a route template such as `/profile/[handle]` using a validator that only accepts concrete public handles. The browser then receives a private JSON denial where JavaScript is required and reports a chunk-load failure.
+
+The same failure can affect an authenticated consumer workspace: omitting
+`/images/create` from developer exemptions denies its browser entry script even
+though the account page passes its independent session guard. Consumer script
+availability never grants anonymous workspace or API access. The
+[October 18 instance](../incidents/2026/2026-10-18-create-asset/README.md) records
+that omission and the general-public-check coverage gap. Include the retained
+Create build's exact entry assets when running
+`node scripts/verify-account-cutover.mjs <accepted-build-directory>`; general
+homepage/shared-asset success is insufficient.
 
 Keep framework-asset exemptions as an explicit route-template allowlist. Never make all page chunks public or treat arbitrary bracketed paths as product routes. Regression coverage must request both encoded and decoded forms of the reviewed template, deny private descendants and unrelated page chunks, and verify the raw hosted asset body, content type and cache behavior after deployment.
 

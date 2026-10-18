@@ -1,11 +1,11 @@
 {
   "knowledge": {
-    "reviewer": "Codex release and account migration maintainer",
-    "note": "Contract-focused semantic review and whole affected guide reconciliation; unchanged broader fingerprint inventory is not an exhaustive module audit. Separate edge deployments and native authority retained; due Sites/billing reviewed with actual isolated checks.",
+    "reviewer": "Codex account and application maintainer",
+    "note": "Reviewed generated catalog/inventory additions for the dated private Create-asset incident against its complete record and current-state chronology. Only one operational record was added; knowledge policy, ADR lifecycle, guide authorities and historical review evidence are unchanged. Broader unchanged fingerprint inventory is not a new exhaustive audit.",
     "reviewed_at": "2026-10-18",
     "review_by": "2026-10-25",
     "evidence": {
-      "docs/knowledge/audits/2026-10-18-edge-sites-billing-review.json": "c3dfbc858032e8fa48c184929bb8e2f5dd460784b6ac5e541eae7745f6413f48"
+      "docs/knowledge/audits/2026-10-18-google-image-notice-review.json": "3f0fc5e167bab0e734c7b226c381741ea3144478c5c044d4324315bfa9d9c88f"
     },
     "files": {
       ".github/CODEOWNERS": "ef2f416d15f027dc8f197ad844289c9a44c8e843d3214d1590a3a380e939d13f",
@@ -42,7 +42,7 @@
       "docs/knowledge/DESIGN_RATIONALE.md": "edd3cf9b49ed794fbe8bf14448fd0c56cb4d8df832bab81cdf07e9ea2e2204a1",
       "docs/knowledge/DOMAINS.md": "11cde8983be0dff8a44981bdfbae15181ed37f3bde7c6429533cd488323e515e",
       "docs/knowledge/README.md": "5ad219aeee44a9c065db2ca69e5a6498966fed42e2d8c74773dbc055d0220931",
-      "docs/knowledge/catalog.json": "4a90489f1f5c4d7fa49c71573e2e9aa7ee3f2ce0b3e3eab54729943ab5958ce0",
+      "docs/knowledge/catalog.json": "de9d2742e6f495769c53cfb6b9c77015c2cae1bb4f1499bc0c265c4fabe4392a",
       "docs/knowledge/registry.json": "128d5d945d5d7021be621b0368a8523c7a613b7978a35b73c1b0bfe1499e74f6",
       "docs/knowledge/templates/adr.md": "28773b3cbdb53ad34f08d0362e87b6dba24b6fd76ddb6c85db8ad63d99ad1331",
       "docs/knowledge/templates/runbook.md": "19679a7eb8c1a3aafd87852fa93817e7bf9ef4696772c8deb1617366c290abc1",
@@ -61,7 +61,7 @@
       "docs/tutorials/README.md": "7cc84f00412108e1c8ec84ef127b15027b606bd16c2dc290f6efc607b9ca5268",
       "docs/tutorials/first-change.md": "06b7c9501cfe62893978e1da6556d6d4fc0d88f4e36b484d05dad4ad72d9fd60",
       "package.json": "98ec21911ced7fd2e3f7fa6ffbd6caa12061d822dadc75aa9053dac4e07cf240",
-      "post-mortem/documentation-inventory.json": "572f96828d66da1d3a61c9bc75fb3c76bdea1cd3715816bb9a3a010adb52e98d",
+      "post-mortem/documentation-inventory.json": "aa7effbb6f47c719c3530ce2cfc0bdc87b2eee919609eb9031c1cfcaa2154698",
       "post-mortem/releases/2026-09-25-broc-practice-local-review.json": "43ac12b5294864a7dd2b9fbff52367693e2739eb4083263aa05a87abdc8e0616",
       "scripts/docs-kb.py": "57642bcce6edcdec6b14dc285e973c1c7ba43d9b8908903826befcba6e992d88",
       "scripts/test-docs-kb.py": "83aa914e66cc04d866fd4c77554760748f8e1d07378326c49ac1738f12851856",
@@ -102,12 +102,12 @@
     }
   },
   "images": {
-    "reviewer": "Codex release and account migration maintainer",
-    "note": "Contract-focused semantic review and whole affected guide reconciliation; unchanged broader fingerprint inventory is not an exhaustive module audit. Separate edge deployments and native authority retained; due Sites/billing reviewed with actual isolated checks.",
+    "reviewer": "Codex account and application maintainer",
+    "note": "Incremental semantic review of Google credential/session recovery, passive notice removal, exact Create asset exemption and bounded web delivery; complete affected guide contracts reconciled. Broader unchanged fingerprint inventory is not an exhaustive new module audit.",
     "reviewed_at": "2026-10-18",
     "review_by": "2026-10-25",
     "evidence": {
-      "docs/knowledge/audits/2026-10-18-edge-sites-billing-review.json": "c3dfbc858032e8fa48c184929bb8e2f5dd460784b6ac5e541eae7745f6413f48"
+      "docs/knowledge/audits/2026-10-18-google-image-notice-review.json": "3f0fc5e167bab0e734c7b226c381741ea3144478c5c044d4324315bfa9d9c88f"
     },
     "files": {
       "BROC/practice.ts": "19499a05b7f9e481fcd0c4c04242bde79accc9da7f66daff91a229258c810167",
@@ -127,7 +127,7 @@
       "docs/maintainers/FREE_GENERATION_QUOTA.md": "37c1dfadc67fa9cde7083edb01d3de6b6bfe325164fde318f3356b8e3a6f8833",
       "docs/maintainers/PUBLIC_DISCOVERY.md": "31f27265b511a01da5afe1557db5f67c2e71430c83f8966731d3d817ca5480ea",
       "docs/maintainers/image-library-scale.md": "733dbe50cedb08e18b231ce1c88ddcc71d460957eefccfd4fbcba3a9d6f34912",
-      "docs/maintainers/image-public-boundary.md": "aa6055c8e4929772bf05fb4b535b0694e99fe8d9f4bf2e9bd10f0c67ba93f229",
+      "docs/maintainers/image-public-boundary.md": "d75e3f0bed03a2fe912c822916af591135ee8f4dc8463d5dd495bf58e1eb5fbc",
       "docs/maintainers/image-studio-review.md": "3bcb21854e3df8d4c01a077e4d605c43f86b48b57848521b1d71e466864198b1",
       "docs/maintainers/private-image-accounting.md": "c7b381496d593a0eab863f2746a6d5acb9f5c03ac06a934cc6b4e39f2c666b62",
       "docs/maintainers/readable-urls.md": "5a89ddc75b34f511bd5fc88c2eaededcf597c656449256f2f7dddf87d1c0c8c4",
@@ -237,7 +237,7 @@
       "src/components/exhibitions/programme.module.css": "1ff3f181b4cc356501837c1ddafabca1e5fe011bf6f16f8f4dad7bfdaadb2b62",
       "src/components/images/CaughtUpCard.tsx": "f005c11afe834a055b453addcab04f896b66e753a760a795e296626d157c5ea8",
       "src/components/images/GenerationCanvas.tsx": "e0406c47c3ceb6b289cfcd2e28681c615b65c285fdf4f3b1c95700cdac6cf1a6",
-      "src/components/images/ImageStudio.tsx": "578296b55b9d18b2b898d012867a422d9980a23c7bcc093c0048385013f735c1",
+      "src/components/images/ImageStudio.tsx": "bae1200c53f11605d6b9f13a255cd50c428823f33a957fe15da6dfcd147fca5b",
       "src/components/images/PublicImageMasonryStream.tsx": "d53312bc232a761e0b589567bbea2e2f0f816992c885cbd12bd2ff9cbae97b2e",
       "src/components/images/StudioArtwork.tsx": "427128b4f3ea300222b74fdfe132564237030507f1d40c20093c89ef52e26229",
       "src/components/images/masonry-stream.css": "3a062a2723b627b92574ac3083b07f156cb7679102ef66756c02937875df7ebd",
@@ -296,12 +296,12 @@
     }
   },
   "access": {
-    "reviewer": "Codex native migration maintainer",
-    "note": "Reviewed SMTP provisioning and private capture, exact OAuth identities/fingerprint rejection and provider refresh, canonical cookie priority/no fallback, public DTO/origin/admin denials and complete account/workspace guides. Actual GitHub and Library accepted; Google owner credential and Premium renewals remain separate.",
+    "reviewer": "Codex account and application maintainer",
+    "note": "Incremental semantic review of Google credential/session recovery, passive notice removal, exact Create asset exemption and bounded web delivery; complete affected guide contracts reconciled. Broader unchanged fingerprint inventory is not an exhaustive new module audit.",
     "reviewed_at": "2026-10-18",
-    "review_by": "2026-10-24",
+    "review_by": "2026-10-25",
     "evidence": {
-      "docs/knowledge/audits/2026-10-17-native-production-review.json": "3de6a32cf32168d9c5a6327f194147f3f6174429510b0c277fb4fbba2fdb43ad"
+      "docs/knowledge/audits/2026-10-18-google-image-notice-review.json": "3f0fc5e167bab0e734c7b226c381741ea3144478c5c044d4324315bfa9d9c88f"
     },
     "files": {
       "docs/OAUTH_AND_TOKEN_LIFECYCLE_SPECIFICATION.md": "a5840e5e0d081e07e04b96375c0842149ae83fc19e1154849aaf91a4d5a4b95e",
@@ -316,10 +316,10 @@
       "docs/operations/preview-activation.md": "20b77ed5c8fdc5c318f5186964d8ce5079a3ec17cccd15898b0fd947f86794d4",
       "docs/operations/preview-admin.md": "a459aa1c69322837467a917640ec44240bc18afcd99f0d76e44fad80187da47f",
       "docs/operations/preview-hybrid-sync.md": "1ac7ce76537660cfc507a595c942d4da2324060b8a3f15ddf9ab96d993ff38e9",
-      "docs/operations/workspace-auth.md": "5268baca67e3857c5b3dbc109a720ecb748168fe02b0535f697dbe42f9c26277",
+      "docs/operations/workspace-auth.md": "d0f39f0509be859ee59c64cac91241b5fa8db006410c95c3c76d35b8b69b953b",
       "docs/playbooks/05-security-key-rotation-and-compliance.md": "586381c97e8128eb9cf56d92b8ca987ff443f397a0ccdef0f9835bd68537a522",
       "docs/relay-security.md": "9a6f3502b9c715d831a672deee30ef630b5b7653f6fc1c3164dba24fff66afbd",
-      "docs/runbooks/local-account-migration.md": "ba429e19850f5ba6a51a5ae33aec7527c77da1ae3c765f996721c77b59da9680",
+      "docs/runbooks/local-account-migration.md": "643f04926b634cd5ec369ef11b21fc07c1a25199ad4141a50d94e784d771c7a0",
       "post-mortem/failure-modes/identity.md": "58f65b5e38f4236fd1a0c786daf916b10469650ffb6a9c9e4c3066da5cbcadda",
       "scripts/capture-account-email-key.mjs": "65ae0541edb6b4c85d5385a45369297dd09c887130299cffae26f729189baa1a",
       "scripts/capture-account-provider-key.mjs": "46b9af0d9341691e6b07a75c31fd818d231338d98622b1950fef283054da55b8",
@@ -328,7 +328,7 @@
       "scripts/lib/account-providers.mjs": "ccf165badf64411410dee1bf6530000bfbd438da2199caf23cd2585752ffe52c",
       "scripts/local-account-gateway.mjs": "9354953a8de9e1b827a5df83b1e5b38a563cefa3c1f6f6ef83e304b7208fbaa3",
       "scripts/manage-free-generation.ts": "7a1f786789e9507e758c13db2e750c5edc982fec2b714e646d7e0bf9526fbb2b",
-      "scripts/rollout-native-web-correction.mjs": "85b41e5d70b9c7f8ade50562e29efb28b792b58eb35076ea528d7945d012bcdf",
+      "scripts/rollout-native-web-correction.mjs": "8aeefa8e1e084f4078a0e354b73178076c303cb49508e730da0661876f9b94b6",
       "scripts/stage-local-account-services.mjs": "56f321f09f651f7a7f15fc1c1cf269c73303300312588f32364354cc8b85c433",
       "scripts/test-account-email-configuration.mjs": "fb74d04ce98b1bc519489a0ca6656995a4b3ed7eecaf4181d48b368e55e7584f",
       "scripts/test-account-provider-configuration.mjs": "15ca3575a0111152b01b541a636caa8075ec6ca3088b9928a58de4ab14730b89",
@@ -350,8 +350,8 @@
       "scripts/test-public-information-boundary.ts": "ac9138eeafc3f3331540e735b4f32d45f090ee9dafcc940afeb6c47e1a019423",
       "scripts/test-session-lifecycle.ts": "ce26ed207ead54373298770ca738abd61533ccb70da6c4e022c6e34f33044ae3",
       "scripts/test-url-navigation.ts": "534f0b352cfa4d1bbbd6a8e9db58f18b3a13ae30e11818aca53f7845b5988a63",
-      "scripts/test-workspace-auth.ts": "0336a535097892c5f0ce31b320a3d3d1e62789f465d0782a8dd8cbd679c5868a",
-      "scripts/verify-account-cutover.mjs": "6213fbbb68727fc565cb74937ff6284736e1659b2ffc978fb7d8f12cf93b022c",
+      "scripts/test-workspace-auth.ts": "44a1309289300e26f88eed1d3f3ba1e5abc35e32581247f7b5d89d5c25b53cd3",
+      "scripts/verify-account-cutover.mjs": "143aff6c7722bb27e9556593d01482bdc3c9db95001efe64c50b28e8faf44c72",
       "scripts/verify-auth-entry-server.cjs": "598d88ba9e781042126b4725944d2e3834324b6bed7b3465aa1d8f272d14e932",
       "scripts/verify-auth-entry-ui.ts": "c807594c59c6baf96f693f78c2e9454a73cd26ffe0f0ed4aabbc71ac77600a86",
       "scripts/verify-free-generation-ui.mjs": "a03011864866e4d172a07d67f185fcbd996df3c5347fc9338825719793ddbdbd",
@@ -458,7 +458,7 @@
       "src/lib/security/normalize-image-output.ts": "205920bbb0a1df05c955211edc4d738b21cabefbe04bd0a5386ac5e0ac0af4bd",
       "src/lib/security/preview-admin.ts": "a3b9a346555aa0328652956bbae443ad438930dc9d73f76a0444f1e116ab59ec",
       "src/lib/security/preview-middleware.ts": "5d5354e66a31f19921644f3d0b013c55511705362da291102976dd2b3399fced",
-      "src/lib/security/preview-policy.ts": "fdf563d5c7f8140b6396a39794bd850c7924c81a84b65008fbcee85e522771c9",
+      "src/lib/security/preview-policy.ts": "8388405e79cf01e4cc213c2b98817a86e56378e5fcc91386376a2a9976b0fa29",
       "src/lib/security/private-image-diagnostics.ts": "b2f34531192d580a86ff2bfe9cc65df9586ec28abb5648e0fc5cace2aba40255",
       "src/lib/security/public-image-http.ts": "23559492802447890162fba79edfd1f7da4336609b19f9a5af5803387fa2320e",
       "src/lib/security/public-image-record.ts": "14d379770c06b20adf3ab64f0faa655564da7ffb33f39c61a73b73595fb94e06",
@@ -826,12 +826,12 @@
     }
   },
   "database": {
-    "reviewer": "Codex native migration maintainer",
-    "note": "Reviewed complete local database/migration guides, bounded source guard SQL and rollback-only probes, final 196-table copy/owners/ACL/RLS, consistent encrypted off-device recovery, native developer authority and inactive-source export refusal. Preserved pending Orbit migration and independent VM/queue/secret recovery limits.",
+    "reviewer": "Codex account and application maintainer",
+    "note": "Incremental semantic review of Google credential/session recovery, passive notice removal, exact Create asset exemption and bounded web delivery; complete affected guide contracts reconciled. Broader unchanged fingerprint inventory is not an exhaustive new module audit.",
     "reviewed_at": "2026-10-18",
-    "review_by": "2026-10-24",
+    "review_by": "2026-10-25",
     "evidence": {
-      "docs/knowledge/audits/2026-10-17-native-production-review.json": "3de6a32cf32168d9c5a6327f194147f3f6174429510b0c277fb4fbba2fdb43ad"
+      "docs/knowledge/audits/2026-10-18-google-image-notice-review.json": "3f0fc5e167bab0e734c7b226c381741ea3144478c5c044d4324315bfa9d9c88f"
     },
     "files": {
       ".env.example": "8916cd23d8ee11f036034af525f65ff639cab923b9c3ca34b27d38fe7a97966e",
@@ -855,7 +855,7 @@
       "docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md": "85e6a7de368dc053561094e3857905ae1878689cceb0b03f64ac86fbcb5698eb",
       "docs/maintainers/private-image-accounting.md": "c7b381496d593a0eab863f2746a6d5acb9f5c03ac06a934cc6b4e39f2c666b62",
       "docs/reference/relay-account-management.md": "ab0951c351a56118ff2d6d3006384e6e680b761168993ad0809ce346ceb1e01c",
-      "docs/runbooks/local-account-migration.md": "ba429e19850f5ba6a51a5ae33aec7527c77da1ae3c765f996721c77b59da9680",
+      "docs/runbooks/local-account-migration.md": "643f04926b634cd5ec369ef11b21fc07c1a25199ad4141a50d94e784d771c7a0",
       "docs/runbooks/local-postgres.md": "10ab03cee671733895bf4410de8d5be867335102b9420067e01bb7bbd7d2bf82",
       "docs/runbooks/private-image-release-audit.md": "4e1810aeb595ea04ba64556656c615c1d1628bc9697675bf792ec211e4691d1a",
       "docs/runbooks/star-residency.md": "a5fb0c36a57bc1f4794fb199d80696d30c73680dca582fcbcdf4f015fdcd6b1c",
@@ -1278,12 +1278,12 @@
     }
   },
   "delivery": {
-    "reviewer": "Codex release and account migration maintainer",
-    "note": "Contract-focused semantic review and whole affected guide reconciliation; unchanged broader fingerprint inventory is not an exhaustive module audit. Separate edge deployments and native authority retained; due Sites/billing reviewed with actual isolated checks.",
+    "reviewer": "Codex account and application maintainer",
+    "note": "Incremental semantic review of Google credential/session recovery, passive notice removal, exact Create asset exemption and bounded web delivery; complete affected guide contracts reconciled. Broader unchanged fingerprint inventory is not an exhaustive new module audit.",
     "reviewed_at": "2026-10-18",
     "review_by": "2026-10-25",
     "evidence": {
-      "docs/knowledge/audits/2026-10-18-edge-sites-billing-review.json": "c3dfbc858032e8fa48c184929bb8e2f5dd460784b6ac5e541eae7745f6413f48"
+      "docs/knowledge/audits/2026-10-18-google-image-notice-review.json": "3f0fc5e167bab0e734c7b226c381741ea3144478c5c044d4324315bfa9d9c88f"
     },
     "files": {
       ".dockerignore": "fabeb0a64e0040d7feb0b9ea2d6f88d109479a61974a7c41aee3f54be23b70e2",
@@ -1306,8 +1306,8 @@
       "docs/adr/0167-nova-mac-runtime-placement.md": "d6e69106f9b5fe09549b3dda90d14ea2b5254e13671342ba74fcd9ab7537f227",
       "docs/maintainers/CLOUDFLARE_EDGE_MESH_MAINTAINER_RUNBOOK.md": "15571a03c6ce52400aea457f4797ca0ebc273892563c81c4c137074a6a822aa0",
       "docs/playbooks/02-deployment-and-release.md": "81e9a3764f54d92b728b18e6bc91864b9d45a9edf1371250f76a9ff6bc640246",
-      "docs/runbooks/local-account-migration.md": "ba429e19850f5ba6a51a5ae33aec7527c77da1ae3c765f996721c77b59da9680",
-      "docs/runbooks/mac-self-hosting.md": "391bb3d621b7204161445cea530cbbfdad660a405249414d88710a521ae5c54f",
+      "docs/runbooks/local-account-migration.md": "643f04926b634cd5ec369ef11b21fc07c1a25199ad4141a50d94e784d771c7a0",
+      "docs/runbooks/mac-self-hosting.md": "1013fd666ca4525016c16c404a366d6f66df87ad397ffc66582f41b746ae72c6",
       "docs/runbooks/nova-hosting-transition.md": "a10e1aa080dec61d61643cc4e7f0cbd0ef5a7cf8dfb84955f5a224acafc3cb11",
       "docs/runbooks/private-image-release-audit.md": "4e1810aeb595ea04ba64556656c615c1d1628bc9697675bf792ec211e4691d1a",
       "docs/runbooks/release-readiness.md": "f8a05dbb4ce3260c24c697e51b9b2b07cd503d48f4a1050e4eeecb6818d9819c",
@@ -1338,7 +1338,7 @@
       "scripts/retain-hosted-output.mjs": "6f2247d4526e25c3bf9dfb280fd0a8996f75e1d70b8cff802605ac2a3a83158a",
       "scripts/retire-central-hosted-database.mjs": "d48f96d2b14e0c63ea72ccf82a0b847beb1125176df69a31949d80ed3ed53e26",
       "scripts/retire-legacy-edge-source.mjs": "25a8483be3b1ff07e0ac9089f442c7cd02c0afdcee1590cc849f9ed47577bba4",
-      "scripts/rollout-native-web-correction.mjs": "85b41e5d70b9c7f8ade50562e29efb28b792b58eb35076ea528d7945d012bcdf",
+      "scripts/rollout-native-web-correction.mjs": "8aeefa8e1e084f4078a0e354b73178076c303cb49508e730da0661876f9b94b6",
       "scripts/select-native-development-database.mjs": "562cef689d7d53e54f89bf76865e0617666054676cc24a4aeb6e8b9baf93bf1b",
       "scripts/self-host.mjs": "812e7f9f0d73730f3e9fd0f4b73b0222981d0195dd38f8bcd56730f5604c9596",
       "scripts/test-cloudflare-workers.ts": "10948fa25e75212cde2ec94c6879631550e106795c70eda6fd2df2527097ffbd",
@@ -1856,12 +1856,12 @@
     }
   },
   "client-efficiency": {
-    "reviewer": "Codex release and account migration maintainer",
-    "note": "Contract-focused semantic review and whole affected guide reconciliation; unchanged broader fingerprint inventory is not an exhaustive module audit. Separate edge deployments and native authority retained; due Sites/billing reviewed with actual isolated checks.",
+    "reviewer": "Codex account and application maintainer",
+    "note": "Incremental semantic review of Google credential/session recovery, passive notice removal, exact Create asset exemption and bounded web delivery; complete affected guide contracts reconciled. Broader unchanged fingerprint inventory is not an exhaustive new module audit.",
     "reviewed_at": "2026-10-18",
     "review_by": "2026-10-25",
     "evidence": {
-      "docs/knowledge/audits/2026-10-18-edge-sites-billing-review.json": "c3dfbc858032e8fa48c184929bb8e2f5dd460784b6ac5e541eae7745f6413f48"
+      "docs/knowledge/audits/2026-10-18-google-image-notice-review.json": "3f0fc5e167bab0e734c7b226c381741ea3144478c5c044d4324315bfa9d9c88f"
     },
     "files": {
       ".impeccable/surfaces/exhibition-programme.md": "78e49387746523a4c213f25a611bc80d2bb25645af0b31545a3665719a33a0c0",
@@ -1959,7 +1959,7 @@
       "src/components/home/public-home.module.css": "a581fc700ba5fe756bea87bd14b3a94cc086d358cf60605b96e5f4bc2ece54f4",
       "src/components/home/use-galaxy-interactions.ts": "0a654c3abd4d7f562172df5d79afd94ee3b1c86509693dbc69d993920497d348",
       "src/components/home/use-story-entrance.ts": "8e3d8a6634a4b67456cff4d17ef76e2d450b136a4b844b86c21b4ec6b6b24a67",
-      "src/components/images/ImageStudio.tsx": "578296b55b9d18b2b898d012867a422d9980a23c7bcc093c0048385013f735c1",
+      "src/components/images/ImageStudio.tsx": "bae1200c53f11605d6b9f13a255cd50c428823f33a957fe15da6dfcd147fca5b",
       "src/components/images/use-image-studio.ts": "f530fdba333a4d5703f5a6ef4359beb9e4f994c8bea7fe031349403a8f974414",
       "src/components/public-content/DESIGN.json": "98cc3fa17888b3f862e700aa77dabd0bd17ef4ce6f14f8e8babc9673e123fd48",
       "src/components/public-content/DESIGN.md": "d0e19f286929a1c957b417b49ddf14439f7d37e784e48b579390b63b9e4110e9",
@@ -2107,12 +2107,12 @@
     }
   },
   "connect": {
-    "reviewer": "Codex native migration maintainer",
-    "note": "Reviewed complete Connect guide, registered terminal persistence, nonblocking remote cancel acknowledgement and local pending-read interruption by the original signal. Pre-repair regressions retained; 53 Connect tests and full 304410 ms deadline/clean exit/restart/no replay pass. Grant, issuer, entitlement and neutral provider-outcome contracts preserved.",
+    "reviewer": "Codex account and application maintainer",
+    "note": "Incremental semantic review of Google credential/session recovery, passive notice removal, exact Create asset exemption and bounded web delivery; complete affected guide contracts reconciled. Broader unchanged fingerprint inventory is not an exhaustive new module audit.",
     "reviewed_at": "2026-10-18",
-    "review_by": "2026-10-24",
+    "review_by": "2026-10-25",
     "evidence": {
-      "docs/knowledge/audits/2026-10-17-native-production-review.json": "3de6a32cf32168d9c5a6327f194147f3f6174429510b0c277fb4fbba2fdb43ad"
+      "docs/knowledge/audits/2026-10-18-google-image-notice-review.json": "3f0fc5e167bab0e734c7b226c381741ea3144478c5c044d4324315bfa9d9c88f"
     },
     "files": {
       ".impeccable/surfaces/src-app-connect-page-tsx.md": "7251229c55b7220d84a222bbc099b02d4b9bfd06bffdaba675b8ac8380c68fdd",
@@ -2122,7 +2122,7 @@
       "docs/adr/0166-private-self-host-request-origin.md": "ae869ab116c8689436921435defbae1a34ed88e4c8d1f5de2953ccdb5b3762bc",
       "docs/adr/0167-nova-mac-runtime-placement.md": "d6e69106f9b5fe09549b3dda90d14ea2b5254e13671342ba74fcd9ab7537f227",
       "docs/operations/galx-connect.md": "10e372c3c31826317f8a1047090ced770eb16e1b65116d70cb14679cf2c413f0",
-      "docs/operations/workspace-auth.md": "5268baca67e3857c5b3dbc109a720ecb748168fe02b0535f697dbe42f9c26277",
+      "docs/operations/workspace-auth.md": "d0f39f0509be859ee59c64cac91241b5fa8db006410c95c3c76d35b8b69b953b",
       "docs/runbooks/nova-hosting-transition.md": "a10e1aa080dec61d61643cc4e7f0cbd0ef5a7cf8dfb84955f5a224acafc3cb11",
       "examples/connect/browser/client.ts": "93a938b441b8a75e86ae73e73145ae3d1275309844001ca2064a3cb2604da699",
       "examples/connect/browser/index.html": "7ea1868007d6f603aa6f4aa857cb705029602f1ce96e706ccf603b935ad25c6b",

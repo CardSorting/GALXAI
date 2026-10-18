@@ -4,10 +4,16 @@ import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import assert from 'node:assert/strict';
 const exec=promisify(execFile),state='.data/postgres-cutover';
-const role=process.argv[2]||'web';
-assert(['web','nova'].includes(role)&&process.argv.length<4,'Choose only the reviewed web or nova role.');
-const nova=role==='nova',previousPlan=state+(nova?'/nova-plan-final':'/web-plan-final'),nextPlan=state+(nova?'/nova-plan-terminal-fix':'/web-plan-cookie-fix');
-const receiptFile=state+(nova?'/nova-terminal-correction.json':'/web-cookie-correction.json');
+const correction=process.argv[2]||'web';
+const corrections={
+ web:{role:'web',previous:'web-plan-final',next:'web-plan-cookie-fix',receipt:'web-cookie-correction.json'},
+ nova:{role:'nova',previous:'nova-plan-final',next:'nova-plan-terminal-fix',receipt:'nova-terminal-correction.json'},
+ 'web-notice':{role:'web',previous:'web-plan-cookie-fix',next:'web-plan-no-busy-notice',receipt:'web-notice-correction.json'},
+ 'web-create-asset':{role:'web',previous:'web-plan-no-busy-notice',next:'web-plan-create-asset',receipt:'web-create-asset-correction.json'},
+};
+assert(Object.hasOwn(corrections,correction)&&process.argv.length<4,'Choose only a reviewed web, nova, web-notice or web-create-asset correction.');
+const selected=corrections[correction],role=selected.role,nova=role==='nova';
+const previousPlan=state+'/'+selected.previous,nextPlan=state+'/'+selected.next,receiptFile=state+'/'+selected.receipt;
 const read=async file=>JSON.parse(await fs.readFile(file,'utf8'));
 const save=async value=>{await fs.writeFile(receiptFile,JSON.stringify(value,null,2),{mode:0o600});await fs.chmod(receiptFile,0o600);};
 const run=async(bin,args,timeout=120000)=>(await exec(bin,args,{timeout,maxBuffer:2097152,encoding:'utf8'})).stdout;
@@ -28,4 +34,4 @@ try{
  const after=JSON.parse(await docker(['inspect',name]))[0];assert.equal(after.Image,next.image);assert.equal(after.State.Health.Status,'healthy');assert(after.State.Running);
  receipt.phase='corrected-running';receipt.containerId=after.Id;receipt.startedAt=new Date().toISOString();await save(receipt);
  console.log('Reviewed '+role+' correction is healthy on the same native authority; previous package/configuration retained and no database or public route changed.');
-}catch(error){await fs.writeFile(state+'/'+role+'-correction-error.secret.log',String(error.stderr||error.stack||error.message),{mode:0o600});console.error('Correction stopped; inspect its private phase before retrying. No request, database rollback or mutation was replayed.');process.exitCode=1;}
+}catch(error){await fs.writeFile(state+'/'+correction+'-correction-error.secret.log',String(error.stderr||error.stack||error.message),{mode:0o600});console.error('Correction stopped; inspect its private phase before retrying. No request, database rollback or mutation was replayed.');process.exitCode=1;}

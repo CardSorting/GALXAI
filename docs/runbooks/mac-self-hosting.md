@@ -6,7 +6,7 @@ Private release-operator runbook. [Current state](../../post-mortem/CURRENT_STAT
 
 A verified archive or healthy startup cannot authorize staging without its matching successful acceptance receipt. Operator commands do not grant new cohort membership or change public routes. Follow the [transition runbook](nova-hosting-transition.md) for separately authorized future changes.
 
-The October 17 [account migration](local-account-migration.md) uses `plan-account-migration` for whole-web authority and `plan-nova-native` for Nova's separate narrow profile. Both preserve canonical issuer/resource, signing seeds and exact permissions. Initial final-copy/public switch is complete; Google secret recovery and mixed-cookie Library correction retain separate acceptance. Plans/staging do not themselves change ingress; their output does not determine whether a running listener is publicly routed.
+The October 17 [account migration](local-account-migration.md) uses `plan-account-migration` for whole-web authority and `plan-nova-native` for Nova's separate narrow profile. Both preserve canonical issuer/resource, signing seeds and exact permissions. Initial final-copy/public switch is complete; Google secret recovery/actual return and mixed-cookie Library correction have separately recorded acceptance. Plans/staging do not themselves change ingress; their output does not determine whether a running listener is publicly routed.
 
 ## Purpose and trigger
 
@@ -129,11 +129,22 @@ acceptance, a clean old exit, and only tmpfs/read-only configuration mounts. Run
 Its separate private phase receipts prevent blind repeat. Inspect an interrupted
 phase before taking a recovery action; never delete persistent data or change
 DNS/database authority to complete an image correction. This bounded operator is
-not a reusable arbitrary-container replacement tool. Both replacements now run
-the accepted correction image; retain their completed phase receipts. The older
-image has known mixed-cookie and stream-drain defects, so its retention is not
-full account-recovery acceptance. Recover with a verified compatible native
-image, preserving current data and the source's inactive state.
+not a reusable arbitrary-container replacement tool. Both original replacements ran
+the accepted correction image; retain their completed phase receipts. The later
+`web-notice` correction selects only `web-plan-cookie-fix` →
+`web-plan-no-busy-notice`, with its own `web-notice-correction.json` receipt,
+the same configuration and all the same acceptance/drain guards. It removes the
+passive image-availability popup in the full-web profile; Nova is unchanged.
+The subsequent `web-create-asset` correction selects `web-plan-no-busy-notice` →
+`web-plan-create-asset`, with its own `web-create-asset-correction.json` phase
+receipt and identical configuration/drain checks. It restores the exact Create
+script classification while preserving workspace authentication.
+Prepare the new accepted plan before running
+`node scripts/rollout-native-web-correction.mjs web-notice`. The predecessors named by the original `web`/`nova` corrections have known
+mixed-cookie and stream-drain defects. The later notice predecessor preserves
+those repairs but still denies Create's entry script. Retention alone is not
+full workflow acceptance. Recover with a verified compatible native image,
+preserving current data and the source's inactive state.
 
 ### 5. Preserve the accepted ingress
 

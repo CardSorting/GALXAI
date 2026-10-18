@@ -7,21 +7,24 @@
       "id": "INC-20261017-ACCOUNT-CUTOVER",
       "category": "identity",
       "severity": "SEV-2",
-      "status": "contained",
+      "status": "recovered",
       "title": "Provider secret fingerprints and retained cookies break account migration paths",
       "owner": "Codex (active responder)",
       "record": "post-mortem/incidents/2026/2026-10-17-account-cutover/README.md",
       "evidence": [
         "post-mortem/incidents/2026/2026-10-17-account-cutover/README.md",
         "post-mortem/releases/2026-10-17-central-native-cutover.json",
-        "post-mortem/releases/2026-10-18-edge-source-cleanup.json"
+        "post-mortem/releases/2026-10-18-edge-source-cleanup.json",
+        "post-mortem/releases/2026-10-18-google-and-image-notice.json"
       ],
       "failure_modes": [
         "FM-AUTH-005",
         "FM-AUTH-006",
         "FM-DEPLOY-005"
       ],
-      "recovery_evidence": []
+      "recovery_evidence": [
+        "post-mortem/releases/2026-10-18-google-and-image-notice.json"
+      ]
     },
     {
       "id": "INC-20261017-PROVIDER-EXPIRY",
@@ -633,6 +636,25 @@
         "post-mortem/releases/2026-10-03-nova-mac-transition.json",
         "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/controlled-observation.json",
         "post-mortem/incidents/2026/2026-10-03-nova-mac-transition/vercel-retirement.json"
+      ]
+    },
+    {
+      "id": "INC-20261018-CREATE-ASSET",
+      "category": "authorization",
+      "severity": "SEV-2",
+      "status": "recovered",
+      "title": "Create entry script inherits an unrelated developer approval gate",
+      "owner": "Codex (active responder)",
+      "record": "post-mortem/incidents/2026/2026-10-18-create-asset/README.md",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-10-18-create-asset/README.md",
+        "post-mortem/releases/2026-10-18-google-and-image-notice.json"
+      ],
+      "failure_modes": [
+        "FM-ACCESS-003"
+      ],
+      "recovery_evidence": [
+        "post-mortem/releases/2026-10-18-google-and-image-notice.json"
       ]
     }
   ],
@@ -1408,12 +1430,13 @@
       "incident": "INC-20261017-ACCOUNT-CUTOVER",
       "owner": "Account/release operator",
       "review_by": "2026-10-18",
-      "status": "open",
-      "next_step": "Owner adds a secret for the existing Google client and saves it privately; refresh only local Auth provider credentials, then verify real Google return and preserved account identity. Do not publish secrets or disable old credentials before acceptance.",
-      "closure": "Actual Google code exchange and current local account session pass; secret fingerprint rejection remains tested.",
+      "status": "completed",
+      "next_step": "Retain the private credential and predecessor; future rotation must preserve exact client identity and verification. Repeat actual return and native-session acceptance after provider changes.",
+      "closure": "Owner privately saved a real secret for the existing Google client. Provider-only pinned Auth replacement preserves every other setting. Actual Google browser return, original account UUID/Google identity and fresh native session after the baseline are verified.",
       "evidence": [
         "post-mortem/incidents/2026/2026-10-17-account-cutover/README.md",
-        "post-mortem/releases/2026-10-17-central-native-cutover.json"
+        "post-mortem/releases/2026-10-17-central-native-cutover.json",
+        "post-mortem/releases/2026-10-18-google-and-image-notice.json"
       ]
     },
     {
@@ -1440,6 +1463,19 @@
       "evidence": [
         "post-mortem/incidents/2026/2026-10-17-account-cutover/README.md",
         "post-mortem/releases/2026-10-17-central-native-cutover.json"
+      ]
+    },
+    {
+      "id": "ACT-056",
+      "incident": "INC-20261018-CREATE-ASSET",
+      "owner": "Access/release maintainer",
+      "review_by": "2026-10-18",
+      "status": "completed",
+      "next_step": "Retain the exact-route middleware regression and accepted-build Create asset verifier; repeat actual entry/authorization checks after relevant route or release changes.",
+      "closure": "Fresh image09 passes44 whole-image checks and clean web-only replacement. Exact Create JavaScript returns200 with immutable cache and accepted bytes; desktop/phone editor and retained3-image Library have no busy popup. All69 public/asset and38 cache checks pass; anonymous page/API and private chunk sibling denials remain enforced.",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-10-18-create-asset/README.md",
+        "post-mortem/releases/2026-10-18-google-and-image-notice.json"
       ]
     }
   ]

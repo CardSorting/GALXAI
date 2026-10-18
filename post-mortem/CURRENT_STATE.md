@@ -4,6 +4,75 @@
 
 The newest observation appears first. Earlier dated sections retain evidence from their stated observation; they do not override the latest determination or authorize a new action.
 
+### Google and Create accepted; passive busy popup removed — October 18 UTC
+
+The [final Google and Image Studio record](releases/2026-10-18-google-and-image-notice.json)
+records the completed owner Google credential handoff, provider-only Auth refresh,
+actual Google return, original account/identity and fresh native session. ACT-053
+is completed. The old Google credential remains enabled; JWT, SMTP, GitHub and
+all other Auth settings are unchanged.
+
+The accepted final web image removes the automatic “Image creation is busy right
+now” notice and adds the exact Create route to the consumer-script exemption.
+The signed-in Create editor now renders on desktop and phone without the popup
+or recovery screen; existing Generate/allowance/availability gates remain.
+Library retains three owned images. ACT-056 is completed and the
+[Create asset incident](incidents/2026/2026-10-18-create-asset/README.md) is recovered,
+with the failing-before regression and accepted-build entry-asset verifier retained.
+
+Fresh build09 and all44 whole-image checks pass, including the full deadline,
+clean drain/restart/revocation and no replay. Only the owned web container was
+replaced with unchanged configuration, databases, Auth, Nova and ingress. The
+exact Create script is HTTP200 JavaScript, immutable and byte-identical to the
+accepted build. All69 live account/asset checks,42 browser assets,13 configured
+credentials/zero matches,545 compiled assets and38 cache checks pass. The earlier
+notice image's passing general checks and failed actual Create observation remain
+retained below; they are not relabeled as complete workflow acceptance.
+
+No generation or payment was submitted. ACT-052 still requires the two manual
+Premium provider renewals. Existing narrow-screen overflow and fifteen unchanged
+studio styling advisories are outside this popup/script correction; no detector
+suppression or styling change was added. Physical-host and recovery limits below
+remain. Final source/documentation delivery is separate from these live results.
+
+### Busy notice removed in Library; Create asset correction in progress — October 18 UTC
+
+The [Create asset incident](incidents/2026/2026-10-18-create-asset/README.md)
+records the additional acceptance failure: Library renders three owned images
+without the busy popup, but Create's entry script returns 401 from both the
+public hostname and local listener. An existing exact-route omission in the
+developer-exemption policy denies that consumer script; the policy predates the
+notice change. No account/data grant is added to repair it.
+
+The first notice image passed all 44 full-image checks and was replaced after a
+clean drain. It also passes 65 general public checks and twenty exact served
+Library-asset comparisons, with thirteen configured secrets/zero matches. Those
+checks did not cover Create's entry bundle and do not override the failed actual
+Create screen. A new full-middleware regression fails before the one-line fix;
+all 71 image/security checks and TypeScript pass afterward. Candidate build09 is
+in progress. ACT-056 remains open for its matching image and actual browser/asset
+acceptance. Google credential/return recovery is complete; ACT-052 still owns the
+separate Premium provider renewals. Native data, Auth, Nova and ingress are retained.
+
+### Google sign-in recovered; passive image notice correction in preparation — October 18 UTC
+
+The [Google and Image Studio record](releases/2026-10-18-google-and-image-notice.json)
+records the owner's private replacement secret for the exact existing Google
+client, with its predecessor still enabled. Provider-only refresh replaced the
+owned pinned Auth container. Every configuration field except Google's secret
+is unchanged. Actual Google browser return shows the existing account, whose
+original UUID and Google identity are preserved with a fresh active native
+session. ACT-053 is completed and the account-cutover incident is recovered.
+Premium provider renewal remains separate under ACT-052.
+
+The owner reported the floating “Image creation is busy right now” notice
+obstructing the workspace. Its passive availability branch is removed in source;
+prompt storage, disabled submission, ownership/allowance gates and actual-error
+recovery are retained. Seventy image/security checks, nine studio contracts,
+three provider configuration checks and TypeScript pass. A fresh pinned clean
+build is running; the UI is not yet deployed. Required immutable-image and
+served desktop/mobile acceptance remain. No new generation was submitted.
+
 ### Edge source cleanup and final delivery checks — October 18 UTC
 
 The [edge cleanup record](releases/2026-10-18-edge-source-cleanup.json) records

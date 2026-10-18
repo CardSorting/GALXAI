@@ -1,0 +1,60 @@
+{
+  "reviewedAt": "2026-10-18",
+  "reviewer": "Codex account and application maintainer",
+  "scope": "Incremental semantic review of the owner Google credential recovery, passive availability-popup removal, exact Create browser asset classification, bounded web replacements and complete affected guide contracts. Broader domain fingerprint inventory remains detection, not an exhaustive new audit of unchanged modules or historical design records.",
+  "priorReview": "docs/knowledge/audits/2026-10-18-edge-sites-billing-review.json",
+  "contractsInspected": [
+    "scripts/lib/account-providers.mjs, capture-account-provider-key.mjs and stage-local-account-services.mjs: exact existing client, private one-use owner capture, fingerprint rejection, Google-only update, pinned owned Auth replacement, unchanged JWT/SMTP/GitHub/configuration",
+    "src/components/images/ImageStudio.tsx and use-image-studio.ts: remove only passive unavailability notice; preserve prompt persistence, availability/purchase guards, uncertain-operation and actual-error feedback",
+    "src/lib/security/preview-policy.ts and src/middleware.ts, workspace-policy.ts, preview-middleware.ts: exact consumer route exemption, verified workspace entry before static exemptions, private sibling/admin chunk denial",
+    "scripts/test-workspace-auth.ts: failing-before/pass-after real middleware static-script check with no identity I/O, private template denial and anonymous-page redirect; existing adversarial coverage remains",
+    "scripts/verify-account-cutover.mjs: compare actual Google/GitHub secrets as well as web/SMTP values; optional accepted-build bounded exact Create assets; no arbitrary host, query, parent path or credential forwarding",
+    "scripts/rollout-native-web-correction.mjs: four finite prior/next plan pairs, separate phase/error receipts, same image/role/project/configuration identity, full clean drain and disposable-only container replacement"
+  ],
+  "guideBodiesInspected": [
+    "docs/operations/workspace-auth.md",
+    "docs/runbooks/local-account-migration.md",
+    "docs/runbooks/mac-self-hosting.md",
+    "docs/maintainers/image-public-boundary.md",
+    "post-mortem/failure-modes/access-and-documentation.md",
+    "post-mortem/incidents/2026/2026-10-17-account-cutover/README.md",
+    "post-mortem/incidents/2026/2026-10-18-create-asset/README.md"
+  ],
+  "supportingContext": [
+    "Existing private image surface brief and incumbent studio.css; no visual redesign, CSS change or suppression. All15 reported color/radius/font-size advisories predate this change.",
+    "Current-state chronology, append-only journal, register closure evidence and unchanged prior knowledge policy/whole-image release contracts. Dated failed Create observation preserved rather than overwritten by general passing checks."
+  ],
+  "findings": [
+    "Google identity last_sign_in_at is historical, so freshness uses actual browser return and new native session/current account timestamp; no account recreated.",
+    "Notice-only image08 passed44 synthetic lifecycle and65general checks but actual Create failed401. The exact route omission predates it. Retained counterexample, one-line source correction and real middleware regression close the asset gap.",
+    "Consumer scripts contain no account grant. Private page/API/administrator gates remain; no developer approval or staff role was granted to repair UI.",
+    "Final image09 only changes preview-policy.ts from image08; app bytes remain those of the new clean build. No Nova, database, ingress or configuration rollback."
+  ],
+  "verification": {
+    "providerConfiguration": "3 pass",
+    "imageSecurityAndAuthorization": "71 pass",
+    "studioContracts": "9 pass",
+    "typeScript": "pass",
+    "targetedEslint": "pass",
+    "operatorAndVerifierSyntax": "pass",
+    "productionBuild": "Fresh Node22 build09;158 static pages",
+    "compiledBoundary": "545 browser/rendered assets;13 configured credentials;zero matches;removed popup absent",
+    "wholeImage": "44 pass; full deadline/clean drain/restart/revocation/no replay",
+    "liveAccountAndAssets": "69 pass;42 browser assets including exact Create entry;13 configured credentials;zero matches",
+    "liveCache": "38 pass",
+    "createAssetBytes": "HTTP200 JavaScript,immutable,byte-identical to accepted build",
+    "documentationFixtures": "43 pass"
+  },
+  "evidence": [
+    "post-mortem/releases/2026-10-18-google-and-image-notice.json",
+    "post-mortem/incidents/2026/2026-10-18-create-asset/README.md"
+  ],
+  "impactReview": "Reviewed images/access/database/delivery/client-efficiency/connect ownership and private unmapped surface/evidence/journal/register/current-state paths. No new unmapped runtime boundary. Existing ADR statuses and unrelated overdue actions remain unchanged.",
+  "limits": [
+    "No new inference or paid settlement submitted. Two expired Premium provider sessions still need manual renewal.",
+    "The Google identity last_sign_in_at field is historical; actual browser return, current account sign-in and a new active native session prove freshness.",
+    "Unchanged studio CSS has pre-existing narrow-screen horizontal overflow and fifteen design-token advisories; this focused fix does not certify a complete responsive/design audit. No suppressions added.",
+    "Image08 passed its synthetic/general checks but failed actual Create entry. That evidence and image remain retained; image09 corrects the exact route omission.",
+    "Native web correction changes neither Nova nor databases/ingress. Host power/login, complete secret/VM/queue recovery and unrelated prevention actions retain their previous limits."
+  ]
+}

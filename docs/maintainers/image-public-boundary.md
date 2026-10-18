@@ -29,6 +29,12 @@ Activation gates new Star generation, not preservation of public work or review
 of a completed candidate. A private append-only archive retains the provenance
 for verified pre-cutover Star works restored by the continuity migration.
 
+Background creation unavailability does not open a floating busy notice over the
+private workspace or saved Library. Prompt persistence, availability checks and
+disabled submission remain in force. Actual generation errors and uncertain
+operation recovery retain their authored feedback; removing a passive notice
+does not authorize a request or retry.
+
 Community discovery is part of the public image boundary. Star profiles use the
 canonical `/profile/<handle>` route and `/api/community/participants/<handle>`
 endpoint. Both expose explicit identity and creation DTOs only; the gallery is

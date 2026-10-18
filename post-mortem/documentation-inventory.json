@@ -3051,6 +3051,12 @@
       "title": "Premium generation unavailable with expired provider sign-ins"
     },
     {
+      "path": "post-mortem/incidents/2026/2026-10-18-create-asset/README.md",
+      "scope": "operational-record",
+      "category": "post-mortem",
+      "title": "Private Create page cannot load its browser entry"
+    },
+    {
       "path": "post-mortem/runbooks/controller-lock.md",
       "scope": "current-guide",
       "category": "post-mortem",

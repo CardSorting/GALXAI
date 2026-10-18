@@ -2,7 +2,7 @@ import { isPublicReadingPath } from '@/lib/public-content/routes';
 import { isPublicProgrammePath } from '@/lib/exhibitions/paths';
 import { isConnectPath } from '@/lib/connect/paths';
 /** Products exempt from developer approval; account/session gates still apply. */
-const publicPages = new Set(['/', '/home', '/about', '/explore', '/stars', '/collections', '/images', '/images/library', '/images/favorites', '/library', '/sites', '/pricing',
+const publicPages = new Set(['/', '/home', '/about', '/explore', '/stars', '/collections', '/images', '/images/create', '/images/library', '/images/favorites', '/library', '/sites', '/pricing',
   '/login', '/signup', '/auth/signin', '/auth/signup', '/auth/callback', '/terms', '/privacy', '/status', '/checkout', '/checkout/success']);
 const publicApis = new Set(['/api/health', '/api/openapi.json', '/api/auth/signup-offer', '/api/auth/session',
   '/api/developer-access', '/api/developer-access/feedback', '/api/developer-access/check',

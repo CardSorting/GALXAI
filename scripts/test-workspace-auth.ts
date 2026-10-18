@@ -16,6 +16,25 @@ const cookie = (expires = 4102444800) => `base64-${Buffer.from(JSON.stringify({ 
 const sessionCookie = `sb-auth-auth-token=${cookie()}`;
 const paths = ['/images/create', '/images/library', '/images/favorites', '/images/future', '/sites', '/sites/', '/%73ites', '/sites/00000000-0000-4000-8000-000000000000', '/sites/draft.js', '/sites/deep/path', '/library'];
 
+test('Create scripts load without developer approval while private route templates stay protected', async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async () => { throw new Error('Public creation scripts must not query identity or storage'); };
+  try {
+    for (const file of ['page-fixture.js', 'layout-fixture.js']) {
+      const response = await middleware(new NextRequest(`https://galx.ai/_next/static/chunks/app/images/create/${file}`));
+      assert.equal(response.headers.get('x-middleware-next'), '1');
+      assert.equal(response.status, 200);
+    }
+    const { isPublicFrameworkAssetPath } = await import('../src/lib/security/preview-policy');
+    for (const route of ['images/create/diagnostics', 'images/create-other', 'admin', 'api/internal/telemetry']) {
+      assert.equal(isPublicFrameworkAssetPath(`/_next/static/chunks/app/${route}/page-fixture.js`), false, route);
+    }
+    const page = await middleware(new NextRequest('https://galx.ai/images/create'));
+    assert.equal(page.status, 307);
+    assert.equal(new URL(page.headers.get('location')!).pathname, '/login');
+  } finally { globalThis.fetch = originalFetch; }
+});
+
 test('anonymous navigation, RSC, prefetch and misleading paths never pass the workspace gate', async () => {
   const originalFetch = globalThis.fetch;
   globalThis.fetch = async () => { throw new Error('Anonymous requests must not query identity or storage'); };

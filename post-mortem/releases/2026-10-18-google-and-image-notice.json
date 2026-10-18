@@ -1,0 +1,169 @@
+{
+  "observedAt": "2026-10-18T01:19:50.078635+00:00",
+  "classification": "private operational evidence",
+  "scope": "Existing Google client credential recovery and passive Image Studio busy-notice removal",
+  "google": {
+    "ownerSavedPrivately": true,
+    "oldCredentialDisabled": false,
+    "sameExistingClient": true,
+    "onlyChangedSettingNames": [
+      "GOTRUE_EXTERNAL_GOOGLE_SECRET"
+    ],
+    "otherSettingsPreserved": true,
+    "authImageUnchanged": true,
+    "actualReturn": {
+      "observedAt": "2026-10-18T01:16:49.231Z",
+      "actualGoogleProviderReturn": true,
+      "browserAccountMenuVerified": true,
+      "existingAccountUuidPreserved": true,
+      "originalGoogleIdentityPreserved": true,
+      "freshNativeActiveSession": true,
+      "afterCredentialRefresh": true,
+      "newAccountCreated": false,
+      "verificationBasis": "Observed exact Google account chooser and return, current account last-sign-in and fresh active session after the saved pre-return baseline. Identity last_sign_in_at is retained historical data and is not used as freshness proof.",
+      "googleConsoleBothPriorAndNewCredentialsEnabled": true
+    }
+  },
+  "imageNotice": {
+    "state": "accepted-live",
+    "deployed": true,
+    "image": "sha256:e42a140dab966d3b601f6ee15622231793fa8dac3ca107c3faf38ddee8e64ad7",
+    "manifestSha256": "5ddb1ed51a35dbb7bc9d6f4df54c29890d55b5d7b8707ff37a7813710f435ae9",
+    "imageArchiveSha256": "44aed56ae9c92f083f8da64522a86ad8774eab1ec03ec8e07effd3805aa157ca",
+    "plan": ".data/postgres-cutover/web-plan-create-asset",
+    "onlyChangedApplicationFileSinceNoticeImage": "src/lib/security/preview-policy.ts",
+    "promptPersistenceChanged": false,
+    "availabilityOrEntitlementGatesChanged": false,
+    "automaticGenerationReplayAdded": false,
+    "actualFailureFeedbackRetained": true,
+    "cssChanged": false,
+    "novaChanged": false,
+    "databaseChanged": false,
+    "ingressChanged": false,
+    "cleanOwnedContainerReplacement": true
+  },
+  "checks": {
+    "providerConfiguration": "3 pass",
+    "imageSecurityAndAuthorization": "71 pass",
+    "studioContracts": "9 pass",
+    "typeScript": "pass",
+    "targetedEslint": "pass",
+    "operatorAndVerifierSyntax": "pass",
+    "productionBuild": "Fresh Node22 build09;158 static pages",
+    "compiledBoundary": "545 browser/rendered assets;13 configured credentials;zero matches;removed popup absent",
+    "wholeImage": "44 pass; full deadline/clean drain/restart/revocation/no replay",
+    "liveAccountAndAssets": "69 pass;42 browser assets including exact Create entry;13 configured credentials;zero matches",
+    "liveCache": "38 pass",
+    "createAssetBytes": "HTTP200 JavaScript,immutable,byte-identical to accepted build",
+    "documentationFixtures": "43 pass"
+  },
+  "designHookTriage": {
+    "reported": 15,
+    "newlyIntroduced": 0,
+    "unchangedFile": "src/components/images/studio.css",
+    "decision": "Retain incumbent style in this focused popup removal; five color, eight radius and two font-size advisories predate the change. No CSS, global design-system or detector-ignore change.",
+    "suppressionsAdded": 0
+  },
+  "limits": [
+    "No new inference or paid settlement submitted. Two expired Premium provider sessions still need manual renewal.",
+    "The Google identity last_sign_in_at field is historical; actual browser return, current account sign-in and a new active native session prove freshness.",
+    "Unchanged studio CSS has pre-existing narrow-screen horizontal overflow and fifteen design-token advisories; this focused fix does not certify a complete responsive/design audit. No suppressions added.",
+    "Image08 passed its synthetic/general checks but failed actual Create entry. That evidence and image remain retained; image09 corrects the exact route omission.",
+    "Native web correction changes neither Nova nor databases/ingress. Host power/login, complete secret/VM/queue recovery and unrelated prevention actions retain their previous limits."
+  ],
+  "noticeImage08": {
+    "image": "sha256:c4028fc52510032e835cbe911df1f74ca2f45680fd37ed7646bf0561899fbff8",
+    "wholeImageChecks": 44,
+    "fullDeadlineMs": 304353,
+    "revocationMs": 55,
+    "liveLibraryImages": 3,
+    "popupAbsent": true,
+    "generalPublicChecks": 65,
+    "publicAssets": 38,
+    "servedStudioAssetsByteIdentical": 20,
+    "configuredSecretsCompared": 13,
+    "matches": 0,
+    "liveCreate": "failed: entry JavaScript returns401; generic render recovery",
+    "coverageGap": "General public/shared assets and synthetic lifecycle checks did not request this private Create entry bundle."
+  },
+  "createAssetCorrection": {
+    "state": "accepted-live",
+    "incident": "INC-20261018-CREATE-ASSET",
+    "action": "ACT-056",
+    "sourceChange": "Exact /images/create developer exemption; account page and API gates retained",
+    "regression": "Failed before the fix; 71 image/security tests pass afterward",
+    "rawCreateAsset": {
+      "observedAt": "2026-10-18T01:55:09.362Z",
+      "status": 200,
+      "javaScriptContentType": true,
+      "immutableCache": true,
+      "byteIdenticalToAcceptedBuild": true,
+      "privatePageAndApiGatesRetained": true
+    },
+    "publicAcceptance": {
+      "observedAt": "2026-10-18T01:54:50.068Z",
+      "result": "pass",
+      "checks": 69,
+      "browserAssets": 42,
+      "createEntryAssetsVerified": true,
+      "configuredSecretsCompared": 13,
+      "privateMatches": 0,
+      "canonicalRedirects": true,
+      "novaIssuerRetained": true,
+      "scope": "Actual public raw HTTP, rendered HTML/browser assets, optional accepted-build Create entry assets, account/provider initiation, origin/admin/forgery/private artifact denials. Social code exchange, signed-in continuity, generation and settlement are separate."
+    },
+    "compiledScan": {
+      "observedAt": "2026-10-18T01:45:27.982248+00:00",
+      "compiledBrowserAndRenderedAssets": 545,
+      "actualCredentialsCompared": 13,
+      "credentialMatches": 0,
+      "removedNoticeMatches": 0
+    },
+    "wholeImage": {
+      "checks": 44,
+      "metrics": {
+        "submissions": 15,
+        "attempts": 14,
+        "disconnects": 6,
+        "explicitFailures": 1
+      }
+    },
+    "browser": {
+      "desktopCreateEditorPresent": true,
+      "phoneCreateEditorPresent": true,
+      "busyPopupAbsent": true,
+      "renderRecoveryAbsent": true,
+      "generateDisabledUnderExistingGates": true,
+      "libraryOwnedImages": 3,
+      "viewportRestored": true,
+      "newGenerationSubmitted": false
+    },
+    "previousPolicyUnchangedByNoticeBuild": true
+  },
+  "latestObservedAt": "2026-10-18T01:56:08.067348+00:00",
+  "initialPreparation": {
+    "observedAt": "2026-10-18T01:19:50.078635+00:00",
+    "imageNotice": {
+      "sourceChanged": true,
+      "deployed": false,
+      "state": "clean-build-running",
+      "buildDirectory": ".data/postgres-cutover/web-build-08",
+      "sourceSha256": "bae1200c53f11605d6b9f13a255cd50c428823f33a957fe15da6dfcd147fca5b",
+      "promptPersistenceChanged": false,
+      "availabilityOrEntitlementGatesChanged": false,
+      "automaticGenerationReplayAdded": false,
+      "actualFailureFeedbackRetained": true,
+      "cssChanged": false
+    },
+    "checks": {
+      "providerConfiguration": "3 pass",
+      "imageSecurityAndAuthorization": "70 pass",
+      "studioContracts": "9 pass",
+      "typeScript": "pass",
+      "operatorAndVerifierSyntax": "pass",
+      "productionBuild": "running",
+      "wholeImage": "pending",
+      "servedDesktopMobile": "pending"
+    }
+  }
+}
