@@ -4,6 +4,7 @@ import { NextRequest } from 'next/server';
 import { EXHIBITIONS, EDITORIALS } from '../src/lib/exhibitions/catalog';
 import { PUBLIC_PROGRAMME_PATHS } from '../src/lib/exhibitions/paths';
 import { selectPublishedArtwork } from '../src/lib/exhibitions/public-artwork';
+import { editorialDate, editorialReadingMinutes, getEditorialContext, nextEditorial } from '../src/lib/exhibitions/editorials';
 import { isPublicProductPath, isPublicFrameworkAssetPath } from '../src/lib/security/preview-policy';
 import { previewMiddleware } from '../src/lib/security/preview-middleware';
 import sitemap from '../src/app/sitemap';
@@ -12,6 +13,7 @@ test('the programme has exact canonical routes, complete captions and linked ess
   const paths = new Set<string>(PUBLIC_PROGRAMME_PATHS);
   const urls = new Set(sitemap().map(entry => new URL(entry.url).pathname));
   assert.equal(paths.size, PUBLIC_PROGRAMME_PATHS.length);
+  assert(urls.has('/editorials'), 'the editorial index is a canonical destination');
   const ids = new Set<string>();
   for (const show of EXHIBITIONS) {
     assert(paths.has(`/exhibitions/${show.slug}`));
@@ -31,8 +33,37 @@ test('the programme has exact canonical routes, complete captions and linked ess
     assert(urls.has(`/editorials/${essay.slug}`));
     assert(EXHIBITIONS.find(show => show.slug === essay.exhibitionSlug)?.works.some(work => work.id === essay.imageId));
     assert(essay.paragraphs.join(' ').split(/\s+/).length >= 400);
+    assert.match(essay.publishedOn, /^\d{4}-\d{2}-\d{2}$/);
+    assert.equal(editorialDate(essay.publishedOn), '7 October 2026');
+    assert.equal(essay.byline, 'GALX Editorial');
+    assert(Number.isInteger(essay.figureAfterParagraph));
+    assert(essay.figureAfterParagraph > 0 && essay.figureAfterParagraph < essay.paragraphs.length);
+    const context = getEditorialContext(essay);
+    assert(context);
+    assert.equal(context.work.id, essay.imageId);
+    // The illustration follows the passage discussing its work.
+    assert(essay.paragraphs[essay.figureAfterParagraph - 1].includes(context.work.artist));
   }
   assert.doesNotMatch(JSON.stringify({ EXHIBITIONS, EDITORIALS }), /supabase|upstream|credential|shard|executionModel|attemptId|personaVersion|residency-v2|P-AHT|checkpoint/i);
+});
+
+test('editorial context fails closed and reading estimates follow content', () => {
+  const essay = EDITORIALS[0];
+  assert.equal(getEditorialContext({ ...essay, exhibitionSlug: 'private-draft' }), null);
+  assert.equal(getEditorialContext({ ...essay, imageId: EXHIBITIONS[1].works[0].id }), null);
+  assert.equal(editorialReadingMinutes({ paragraphs: [] }), 1);
+  assert.equal(editorialReadingMinutes({ paragraphs: ['word '.repeat(200)] }), 1);
+  assert.equal(editorialReadingMinutes({ paragraphs: ['word '.repeat(201)] }), 2);
+});
+
+test('onward reading follows the authored sequence and never suggests the same or an unknown essay', () => {
+  const essays = ['first', 'second', 'third'].map(slug => ({ ...EDITORIALS[0], slug }));
+  assert.equal(nextEditorial('first', essays)?.slug, 'second');
+  assert.equal(nextEditorial('second', essays)?.slug, 'third');
+  assert.equal(nextEditorial('third', essays)?.slug, 'first');
+  assert.equal(nextEditorial('unknown', essays), null);
+  assert.equal(nextEditorial('first', [essays[0]]), null);
+  assert.equal(nextEditorial('first', []), null);
 });
 
 test('anonymous and ordinary users can read exact programme destinations and shared route templates', async () => {

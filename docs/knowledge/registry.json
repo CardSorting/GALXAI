@@ -194,6 +194,7 @@
         "src/components/exhibitions/**/*",
         "src/lib/exhibitions/**/*.ts",
         "scripts/test-exhibition-programme.ts",
+        "scripts/test-essay-actions.ts",
         "scripts/verify-exhibition-http.mjs"
       ],
       "guides": [
@@ -863,6 +864,7 @@
         "src/components/exhibitions/**/*",
         "src/lib/exhibitions/**/*.ts",
         "scripts/test-exhibition-programme.ts",
+        "scripts/test-essay-actions.ts",
         "public/fonts/bodoni-moda-OFL.txt",
         "scripts/verify-exhibition-http.mjs",
         "DESIGN.md",

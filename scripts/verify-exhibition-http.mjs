@@ -8,7 +8,7 @@ import { EXHIBITIONS, EDITORIALS } from '../src/lib/exhibitions/catalog.ts';
 const base = process.env.GALX_UI_BASE || 'http://127.0.0.1:3421';
 const output = process.env.GALX_EXHIBITION_HTTP_RESULT || '.impeccable/review/exhibitions/http-verification.json';
 const privateText = /P-AHT|GALX_VAULT_|GALX_INTERNAL_|executionModel|upstreamId|personaVersion|attemptId|credential source|shard configuration|post-mortem\/|residency-v2|dcd3f989|service_role|community_star_profile_creations/i;
-const pages = ['/exhibitions', ...EXHIBITIONS.map(show => `/exhibitions/${show.slug}`), ...EDITORIALS.map(essay => `/editorials/${essay.slug}`)];
+const pages = ['/exhibitions', '/editorials', ...EXHIBITIONS.map(show => `/exhibitions/${show.slug}`), ...EDITORIALS.map(essay => `/editorials/${essay.slug}`)];
 const assets = new Set();
 const imageUrls = new Set();
 const imageDimensions = new Map();
@@ -28,6 +28,31 @@ for (const path of pages) {
   assert(!html.includes('Artwork temporarily unavailable'), `published artworks missing: ${path}`);
   const canonical = document.querySelector('link[rel="canonical"]')?.getAttribute('href');
   assert.equal(new URL(canonical).pathname, path);
+  if (path === '/editorials') {
+    assert.equal(document.querySelectorAll('main article').length, EDITORIALS.length);
+    assert(!document.querySelector('meta[http-equiv="refresh"]'));
+    for (const essay of EDITORIALS) assert(document.querySelector(`main h2 a[href="/editorials/${essay.slug}"]`));
+  }
+  if (path.startsWith('/editorials/')) {
+    const essay = EDITORIALS.find(item => path.endsWith(`/${item.slug}`));
+    assert.equal(document.querySelector('meta[property="og:type"]')?.content, 'article');
+    const schema = [...document.querySelectorAll('script[type="application/ld+json"]')]
+      .map(node => JSON.parse(node.textContent)).find(item => item['@type'] === 'Article');
+    assert.equal(schema?.headline, essay.title);
+    assert.equal(schema?.datePublished, essay.publishedOn);
+    assert.deepEqual(Object.keys(schema).sort(), ['@context', '@type', 'author', 'datePublished', 'description', 'headline', 'mainEntityOfPage']);
+    assert(document.querySelector(`main time[datetime="${essay.publishedOn}"]`));
+    assert(document.querySelector('nav[aria-label="Breadcrumb"] a[href="/editorials"]'));
+    assert.equal(document.querySelector('nav[aria-label="Breadcrumb"] [aria-current="page"]')?.textContent, essay.title);
+    const actions = document.querySelector('[role="group"][aria-label="Essay actions"]');
+    assert(actions?.querySelector('a[href="#illustrated-work"]'));
+    assert.deepEqual([...actions.querySelectorAll('button')].map(button => button.textContent), ['Copy link', 'Print']);
+    const figure = document.querySelector('#illustrated-work');
+    assert.equal(figure.querySelector('img')?.getAttribute('loading'), 'eager');
+    assert(figure?.textContent.includes(EXHIBITIONS.flatMap(show => show.works).find(work => work.id === essay.imageId).caption));
+    assert.equal(figure.previousElementSibling.textContent, essay.paragraphs[essay.figureAfterParagraph - 1]);
+    assert(document.querySelector('nav[aria-labelledby="read-next"] a[href="/editorials"]'));
+  }
   // React can deliver media in streamed segments outside main before hydration.
   const images = [...document.querySelectorAll('img[src^="/v1/images/assets/"]')];
   for (const image of images) {
@@ -67,18 +92,6 @@ for (const path of imageUrls) {
   const dimensions = imageDimensions.get(path);
   if (dimensions) assert.deepEqual({ width: metadata.width, height: metadata.height }, dimensions, 'published intrinsic image dimensions');
   artifacts.push({ kind: path.endsWith('/thumbnail') ? 'thumbnail' : 'image', status: response.status, width: metadata.width, height: metadata.height, metadataAbsent: true, sha256: createHash('sha256').update(bytes).digest('hex') });
-}
-const redirect = await read('/editorials');
-if (redirect.status === 307) {
-  assert.equal(redirect.headers.get('location'), '/exhibitions#editorials');
-} else {
-  // The root layout can flush before Next emits this server redirect.
-  assert.equal(redirect.status, 200);
-  const body = await redirect.text();
-  assert.doesNotMatch(body, privateText);
-  const document = new JSDOM(body).window.document;
-  assert.equal(document.querySelector('meta[http-equiv="refresh"]')?.getAttribute('content'), '1;url=/exhibitions#editorials');
-  assert(body.includes('NEXT_REDIRECT;replace;/exhibitions#editorials;307;'));
 }
 const denials = [];
 for (const path of ['/exhibitions/draft', '/editorials/private', '/exhibitions/instruments-for-the-impossible/diagnostics', '/api/exhibitions', '/v1/images/assets/invalid-token', '/api/relay/status']) {

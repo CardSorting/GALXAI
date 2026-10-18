@@ -2,185 +2,135 @@
 version: 1
 slug: "exhibition-programme"
 primary_target: "src/app/exhibitions/page.tsx"
-related_targets: ["src/app/exhibitions/[slug]/page.tsx", "src/app/editorials/page.tsx", "src/app/editorials/[slug]/page.tsx", "src/components/exhibitions/Programme.tsx", "src/components/exhibitions/ArtworkImage.tsx", "src/components/exhibitions/programme.module.css", "src/lib/exhibitions/catalog.ts", "route:/exhibitions", "route:/exhibitions/instruments-for-the-impossible", "route:/exhibitions/things-that-hold-time", "route:/editorials/what-an-object-can-ask", "route:/editorials/reading-the-trace"]
+related_targets: ["src/app/exhibitions/[slug]/page.tsx", "src/app/editorials/page.tsx", "src/app/editorials/[slug]/page.tsx", "src/components/exhibitions/Programme.tsx", "src/components/exhibitions/ArtworkImage.tsx", "src/components/exhibitions/programme.module.css", "src/components/exhibitions/editorial.module.css", "src/components/exhibitions/Editorial.tsx", "src/components/exhibitions/EssayActions.tsx", "src/components/exhibitions/essay-actions.module.css", "src/lib/exhibitions/editorials.ts", "src/lib/exhibitions/catalog.ts", "route:/exhibitions", "route:/exhibitions/instruments-for-the-impossible", "route:/exhibitions/things-that-hold-time", "route:/editorials/what-an-object-can-ask", "route:/editorials/reading-the-trace"]
 ---
 
 # Exhibition and editorial programme
 
-Private maintainer design brief, documented from implemented source on October 7,
-2026. [PRODUCT.md](../../PRODUCT.md) owns product truth; [DESIGN.md](../../DESIGN.md)
-owns GALX's global identity. The [direction contract](../review/exhibitions/direction.md)
-owns this scoped institutional addition. This is a code-led extension with no
-approved design comp. It does not replace global tokens or component semantics.
+Private maintainer design brief, reconciled October 18, 2026. [PRODUCT.md](../../PRODUCT.md)
+owns product truth; [DESIGN.md](../../DESIGN.md) owns GALX identity. The
+[direction contract](../review/exhibitions/direction.md) pins the institutional
+extension. [Programme maintenance](../../docs/reference/exhibition-programme.md)
+owns publication and access. No private brief or production record is imported
+into public pages. This is implemented source guidance, not hosted acceptance.
 
-## Overview
+## Intent and mode
 
-Mode: Experience for the programme and exhibitions; Read for the essays. The
-thesis is to let distinct STAR practices acquire meaning through sustained
-looking and specific curatorial writing. Existing GALX navigation surrounds a
-quiet charcoal reading surface. Uncropped published works, restrained serif
-headings, precise captions and generous separation carry the requested gravity.
+Experience for exhibitions; Read for editorials. Preserve the charcoal ground,
+warm off-white, Bodoni Moda display, Inter text, thin rules and uncropped STAR
+Works. The thesis remains sustained looking and specific curatorial writing.
+No fabricated publication credentials, issue numbers or physical medium claims.
 
-The index begins with “Exhibitions & editorials” and a short programme
-introduction, followed by the first exhibition's VANTA work and adjacent entry
-text. A second exhibition reverses the image/text relationship; an editorial
-index and a link to STAR practices follow. Exhibition details present a cover,
-introduction and varied work sequence. Essays place an artwork between two
-groups of paragraphs and return to their accompanying exhibition.
+## Destinations and reading order
 
-This document is private design guidance. Public titles, captions, essays and
-metadata describe the works and the reading experience. Do not publish this
-brief, the direction contract or private production records. The
-[programme reference](../../docs/reference/exhibition-programme.md) owns the
-publication and access contract. `.impeccable/` is excluded from deployment;
-no private Markdown is imported by the programme.
+The exhibition index leads with the VANTA work and entry to Instruments for the
+Impossible, then Things That Hold Time, editorial previews and STAR practices.
+The `#editorials` bookmark remains valid and offers All editorials.
 
-## Colors
+`/editorials` is its own canonical index. A Bodoni masthead and concise
+introduction precede programme navigation. A lead essay pairs a large title,
+standfirst, byline/date/estimated reading time and Read essay action with its
+uncropped artwork. A ruled, smaller secondary entry follows. Text precedes
+artwork in DOM and visual order on desktop and phone. Both retain artist,
+work title, year, medium and View work links. No search/filter is added for two
+authored entries.
 
-The programme's neutral values are scoped to its stylesheet. Artwork supplies
-the colour; this surface adds no independent chromatic accent.
+Essays use one centered, left-aligned reading axis. A breadcrumb names the
+current essay and returns to Editorials; title, standfirst, metadata and small
+View artwork / Copy link / Print controls precede the prose directly. No
+reference rail interrupts the opening paragraph. The illustration follows its
+authored paragraph, with intrinsic proportions determining its width: a
+landscape can break out wider while a portrait remains narrower. Caption,
+artist practice and View work remain attached to the image.
 
-| Source value | Role |
-| --- | --- |
-| `#0b0e12` | Charcoal programme ground and reversed selection text |
-| `#eeede7` | Warm off-white primary text, focus outline and selection fill |
-| `#c2c4c2` | Supporting prose, work titles and unavailable-state text |
-| `#adafae` | Muted dates, bylines and medium labels |
-| `#34383d` | Thin section and masthead rules |
-| `#777d80` | Text-action underline |
-| `#14191e` | Reserved artwork loading/background field |
-| `#fff` | Link hover text |
+The completion section links the accompanying exhibition; Read next follows
+authored order and wraps after the final essay. No contents list, progress
+indicator or scroll listener is needed for these short essays.
 
-These values are descriptive extraction from
-`src/components/exhibitions/programme.module.css`, not additions to the global
-palette. Shared navigation retains its existing treatment.
+## Scoped tokens and typography
 
-## Typography
+The programme stylesheet owns `--paper` (#eeede7), `--ink-supporting` (#c2c4c2),
+`--ink-muted` (#adafae), `--ground` (#0b0e12), `--rule` (#34383d),
+`--image-ground` (#14191e), `--action-rule` (#777d80) and `--link-hover` (#fff).
+Editorial CSS inherits these rather than duplicating a palette. Shared global
+navigation keeps its own system. Print overrides the local reading palette.
 
-The intentional exception is **Bodoni Moda** for exhibition display headings,
-editorial titles, the exhibition introduction heading and essay initial. It is
-loaded locally by `Programme.tsx` with the declared weight range (400–500), swap
-display and Georgia/serif fallbacks. Used heading weights are 400. Body,
-masthead, section labels, dates and navigation inherit the existing Inter stack.
-Do not extend this exception into workspace controls or global heading rules.
+Bodoni Moda is self-hosted through Programme with declared weights 400–500 and
+swap display; used display weight is 400 with Georgia fallbacks. It applies to
+exhibition and editorial headings only. Inter remains the reading/metadata voice.
 
-| Role | Implemented desktop values |
-| --- | --- |
-| Programme masthead | Inter; `clamp(27px, 2.8vw, 40px)`; weight 400; line-height 1.15; tracking −0.03em |
-| Exhibition display | Bodoni Moda; `clamp(42px, 4.9vw, 72px)`; line-height 1.04; tracking −0.025em; balanced wrapping |
-| Second programme exhibition | Bodoni Moda; `clamp(36px, 4.1vw, 58px)` |
-| Essay display | Bodoni Moda; `clamp(46px, 6vw, 82px)`; inherited display line-height and tracking |
-| Editorial index title | Bodoni Moda; 30px; line-height 1.2; tracking −0.02em |
-| Exhibition introduction heading | Bodoni Moda; 36px; line-height 1.2; tracking −0.02em |
-| Section heading | Inter; 23px; weight 400; tracking −0.025em |
-| Essay/introduction prose | Inter; 17px; line-height 1.95; maximum measure 70ch; paragraph separation 24px |
-| Standfirst | Inter; 17px; line-height 1.8; maximum measure 48ch, 44ch on essays |
-| Index supporting prose | Inter; 14–15px; line-height 1.7–1.8; maximum measures 34–39ch |
-| Captions and dates | Inter; 12px; line-height 1.65–1.8; captions keep artist, work title/year and medium distinct |
-| Text actions | Inter; 14px; back link and section navigation 13px |
+- Editorial masthead: 3.5–6rem fluid display.
+- Lead essay title: 2.75–4.5rem; secondary: 2.5–3.5rem.
+- Article title: 3–5.5rem desktop, 2.75–4rem phone, balanced wrapping.
+- Article standfirst: 20px desktop, 18px phone, 1.75 leading.
+- Long-form prose: 18px desktop, 17px phone, 1.85 leading, maximum 46rem (about 65ch at 18px Inter).
+- Metadata: 13px, wrapping author/date/reading estimate with deliberate gaps.
+- Essay captions: 13px identity; 14px curatorial copy at 1.8 leading. Other programme captions retain 12px identity.
 
-At widths up to 1000px the general display becomes 46px and feature supporting
-prose becomes 14px. At widths up to 700px the masthead is 28px, general display
-uses `clamp(40px, 11vw, 60px)`, second exhibition display is 42px, essay display is
-48px, editorial index titles are 28px and introduction headings are 32px. Long
-prose becomes 16px with line-height 1.9; standfirsts become 16px. The essay's
-opening paragraph has a floated Bodoni initial (4.4em), implemented through a
-pseudo-element rather than duplicated text.
+The editorial record owns date and byline. UTC formatting avoids date drift.
+Reading time is text length at 200 words/minute rounded up, minimum one minute.
+No factual essay text is replaced by presentation logic.
 
-## Layout
+## Layout and adaptation
 
-The content container is bounded at 1320px with a minimum of 56px side margins;
-the margins become 32px at widths up to 1000px and 20px at widths up to 700px. Programme padding is
-48px above and 88px below, reducing to 30px and 56px on narrow layouts.
+The shared 1320px container uses 56px minimum side margins, 32px below 1000px,
+and 20px below 700px. Programme padding is 48/88px, 30/56px on phones.
+The editorial lead uses text/artwork columns (1:1.1); the secondary is 1:.65,
+with generous separation and a thin rule. Below 700px each becomes one column,
+keeping DOM, visual and keyboard order aligned. Artwork fields bound height
+rather than cropping image content.
 
-The first programme exhibition uses an image/text grid (1.7:1), becoming 1.6:1
-at 1600px and wider and 1.4:1 up to 1000px. The second uses text/image columns (1:1.35).
-On narrow layouts both put the artwork before its exhibition text. The editorial
-index uses two columns with small images alongside text, then a single column
-up to 700px. Rules and section gaps (96px desktop; 64px narrow) separate chapters
-without wrapping them in cards.
+Articles are bounded at 1040px. Headline, deck, metadata, controls, prose and
+exhibition completion share a centered 46rem maximum measure. The prose uses a
+three-track grid with paragraphs in the center and artwork spanning the tracks.
+Artwork width is bounded by its intrinsic ratio at 40rem high and a 52rem width
+ceiling, so captions align with the actual composition. There is no sidebar or
+pre-prose context row at any width. Paragraph gaps remain 24px; figures use
+40px vertical separation, 32px on phones. Breadcrumbs and tools wrap naturally.
+Footer and related reading remain distinct from essay prose.
 
-Exhibition detail uses a two-column heading, an 1100px maximum cover, and a
-one-to-two-column introduction with 88px separation above it. The remaining
-works use two columns; every third work beginning with the first remaining
-work spans both columns and is bounded at 960px. At widths up to 700px headings,
-introduction and work sequence become single columns, the introduction gap
-above becomes 56px and work separation becomes 48px.
+Exhibition compositions retain their existing cover, introduction and varied
+work sequence. Exhibition editorial previews now stack image and text on
+phones. They keep small thumbnails alongside text on wider screens.
 
-Essay headers are centred and bounded at 920px. Reading columns are bounded at
-70ch; the inserted artwork at 800px. Header and byline align left on narrow
-layouts, and reading/artwork gaps reduce from 60px to 40px. These are source
-rules; no rendered reflow or actual viewport fit has been accepted in this pass.
+## Interaction and failure handling
 
-## Elevation & Depth
+Use ordinary IntentLinks, disabled viewport prefetch and existing bounded
+hover/focus warmups. In-page artwork navigation reserves 112px scroll space.
+Actions, section links, artist links and View work reserve at least 44px height.
+Links have off-white visible focus, underlines/hover feedback and scoped text
+selection. Reduced motion retains state feedback without arrow translation.
 
-The scoped surface is flat. It declares no shadows, gradients or backdrop blur.
-Neutral ground, thin horizontal rules, scale and spacing distinguish content.
-The surrounding shared shell remains governed by its existing design guidance.
+Only allowlisted published artifacts are passed to the client image component.
+Intrinsic dimensions reserve aspect ratio; `object-fit: contain` preserves the
+whole work. First index art is eager/high priority; essay illustration loading is eager
+with normal fetch priority for artwork jumps and print availability; other
+subsequent programme art remains lazy.
+A failed lookup or image error shows an unavailable state while captions and
+practice links remain. Compact previews use short error text that fits their
+frame. No substitute artwork or generation is triggered. Missing detail slugs
+or invalid essay associations fail closed before image retrieval.
 
-## Shapes
+Copy link writes only the canonical public address, announces completion and
+shows a focused selectable address when the clipboard is unavailable or denied.
+One in-flight write and a component-lifecycle fence prevent duplicate and stale
+feedback. Print opens the browser dialog only after a click. Both use 44px
+controls and the existing neutral palette/focus treatment. No success toast,
+remote dependency or fixed toolbar competes with reading.
 
-Artwork fields are rectangular and declare no corner radius or decorative
-frame. Intrinsic dimensions reserve each image's aspect ratio; images use
-contain fitting. Work-sequence images have a 640px maximum height on wider
-layouts, removed up to 700px. Essay artwork has a 600px maximum height. Captions
-remain outside the image field. Text actions use a single bottom rule rather
-than a filled button shape.
+Print CSS uses dark ink on white and removes the shared header, ambient layer,
+footer, local controls and onward reading on essay pages. Normal block flow,
+widow/orphan handling and figure grouping support paper. The print frame drops
+its aspect reserve; contained artwork uses at most half the page height and
+compact 9pt captions, so small-paper pagination can keep artwork and caption
+together. Explicit image-frame classes support this treatment without depending
+on nested div order. These rules do not
+promise a particular printer or paper-size result; acceptance is dated separately.
 
-## Components
+## Evidence and limits
 
-- **Programme shell:** one main reading surface and bounded content container;
-  scopes the local display font and palette to these routes.
-- **Programme navigation:** native anchors to Exhibitions and Editorials;
-  shared GALX navigation and footer expose the index. The workspace mobile
-  bottom bar is omitted for these authored reading destinations.
-- **Artwork:** an image with authored alt text, then a figure caption containing
-  public artist-profile link, title/year and “Digital work.” Detail figures add
-  curatorial captions. A “View work” link is present when the published source
-  exists. The first cover is eager/high priority; subsequent images are lazy.
-- **Artwork unavailable:** absent published source or a client image error
-  replaces the image with “Artwork temporarily unavailable” and recovery
-  context in a status region. Captions and artist links remain. No substitute
-  image or generation action is introduced.
-- **Programme text link:** an action label with a Lucide arrow, minimum height
-  44px, bottom rule and 12px vertical padding. Hover turns text white and moves
-  the arrow 2px right and 2px up over 180ms ease-out. Reduced motion disables the
-  transition and translation. Back links and “View work” links also use a
-  44px minimum height; section links have their own text-link padding.
-- **Focus and browser selection:** links receive an off-white 2px visible-focus
-  outline with a 6px offset. Underline offset is 5px. Selection reverses the
-  scoped foreground and background. These are CSS declarations, not observed
-  keyboard or contrast-audit results.
-- **Route and content states:** unknown detail slugs invoke the existing
-  not-found surface. The catalogue contains two complete exhibitions and two
-  essays; there is no catalogue-empty interface, form, disabled control,
-  custom route-loading state or new mutation state to document. Pending image
-  loads retain the image field rather than an authored spinner.
-
-## Do's and Don'ts
-
-- **Do** preserve full work compositions, precise captions and public practice
-  links; use the existing sanitized published-artifact contract.
-- **Do** keep Bodoni display type and the neutral ramp within this institutional
-  reading scope. Body copy and shared controls retain the incumbent sans voice.
-- **Do** keep titles and work content ahead of navigation ornament, and preserve
-  clear exhibition-to-essay return paths.
-- **Don't** infer a physical medium, venue, curator identity, edition or
-  commercial offer from the art or this presentation.
-- **Don't** promote private production context or design evidence into public
-  copy, metadata, image artifacts or browser props.
-
-October 7 validation limit: this brief reflects source inspection after the
-programme introduction correction. The retained
-[local HTTP record](../review/exhibitions/http-verification.json) reports five
-canonical reading responses, linked asset retrieval, selected image dimensions
-and absent embedded metadata, plus hostile-route denials at its stated time.
-That dated snapshot does not certify the final source identity or a rendered
-visual result. No browser, substitute renderer or screenshot was used because
-local browser access was explicitly denied. The
-[formal finish disposition](../review/exhibitions/finish-review.md) remains
-**recapture**: desktop, mobile and actual-user-viewport evidence is missing.
-Responsive composition, on-screen artwork accuracy, font rendering, focus
-visibility, overflow, comprehensive accessibility and live-site acceptance
-remain unverified. Tests and build checks are recorded separately by the owning
-change; documentation does not grant visual acceptance or deployment status.
+The October 7 [HTTP record](../review/exhibitions/http-verification.json) and
+[finish disposition](../review/exhibitions/finish-review.md) remain dated evidence
+of that implementation; they do not describe this revised editorial layout.
+The October 18 change records its local checks separately. Local production,
+browser and boundary results never establish deployment or live-site cleanliness.

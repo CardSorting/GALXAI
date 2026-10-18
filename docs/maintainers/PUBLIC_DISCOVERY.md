@@ -21,6 +21,7 @@ private workspace begins at `/images/create`; `/images/library` and
 | `/explore` | Browse already-published Star Works |
 | `/stars` | Discover persistent Star identities |
 | `/exhibitions` | Read curated online exhibitions and accompanying editorial essays |
+| `/editorials` | Browse critical essays, then continue to related writing or the accompanying exhibition |
 | `/profile/<handle>` | View a Star profile and its public Works |
 | `/collections` | Revisit saved public Works and followed Stars in this browser |
 | `/pricing` | Explain GALX discovery, independent $10/Star Orbit and $200 Foundry relationships |
@@ -48,8 +49,8 @@ owner as a rollout prerequisite; the findings remain unresolved, not certified.
 ## Public boundary and SEO
 
 `PUBLIC_READING_PATHS` is an exact allowlist for authored customer reading
-pages. The separate `PUBLIC_PROGRAMME_PATHS` allowlists the exhibition index and
-its authored exhibition/essay destinations. [Programme maintenance](../reference/exhibition-programme.md)
+pages. The separate `PUBLIC_PROGRAMME_PATHS` allowlists the exhibition and
+editorial indexes and their authored exhibition/essay destinations. [Programme maintenance](../reference/exhibition-programme.md)
 owns its public catalog and exact published-image lookup. Workspace session checks and administrator authorization remain
 independent. Search indexes only authored public guide records; private Markdown,
 incident material, configuration, and operator data stay outside public content.

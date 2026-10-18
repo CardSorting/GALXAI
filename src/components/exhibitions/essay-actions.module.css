@@ -1,0 +1,12 @@
+.tools { margin-top: 24px; font-size: .8125rem; }
+.actions { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 24px; border-block: 1px solid var(--rule); padding-block: 4px; }
+.actions a, .actions button { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 8px 0; color: var(--ink-supporting); background: transparent; border: 0; font: inherit; cursor: pointer; }
+.actions a:hover, .actions button:hover { color: var(--paper); text-decoration: underline; text-underline-offset: 5px; }
+.actions button:focus-visible, .fallback input:focus-visible { outline: 2px solid var(--paper); outline-offset: 4px; }
+.actions button:disabled { cursor: progress; color: var(--ink-muted); }
+.status:empty { margin: 0; }
+.status { color: var(--ink-supporting); line-height: 1.7; margin-top: 12px; }
+.fallback { display: grid; gap: 8px; color: var(--paper); margin-top: 12px; }
+.fallback input { min-width: 0; width: 100%; border: 1px solid var(--rule); padding: 12px; background: var(--ground); color: var(--paper); font: inherit; border-radius: 0; }
+@media (max-width: 360px) { .actions { column-gap: 16px; } }
+@media print { .tools { display: none; } }

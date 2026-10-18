@@ -1,0 +1,94 @@
+{
+  "reviewedAt": "2026-10-18",
+  "reviewer": "Codex essay reading maintainer",
+  "classification": "private",
+  "priorReview": "docs/knowledge/audits/2026-10-18-editorial-review.json",
+  "scope": "A further essay-detail reading and ergonomics pass. Preserve the preceding editorial-index work and dated evidence. This incremental semantic review does not recertify the broad image/client/delivery/knowledge fingerprint inventories.",
+  "sourceContractsInspected": [
+    "Essay header and prose previously differed by232px at1312px. One centered46rem reading spine now aligns breadcrumb, headline, standfirst, metadata, actions, prose and exhibition completion. The pre-prose reference rail is removed at all widths.",
+    "Prose paragraphs occupy a center grid track; authored illustrations can span the reading frame. Intrinsic dimensions bound figures to52rem wide and a natural40rem height, so landscapes break wider and portraits keep captions near the work.",
+    "Artwork and ArtworkImage expose explicit class hooks and loading control; the essay illustration is eager at normal fetch priority. Identity, View work and curatorial-caption DOM order matches the existing visual order.",
+    "Breadcrumb current location is the actual essay title. nextEditorial follows authored order, wraps at the end and returns null for unknown or single-entry sequences. No self recommendation or guessed route.",
+    "EssayActions receives only the canonical public URL. It never copies location query/fragment, reads the clipboard or sends a remote request. An in-flight ref deduplicates writes; a lifecycle generation fence ignores obsolete completions. Success is announced in a persistent polite region. Missing/denied clipboard access exposes a focused, selected read-only canonical address with authored generic copy.",
+    "Print is explicit browser-dialog activation. Print-only CSS hides shared navigation/decorations/footer and local controls, uses ordinary block text flow, removes image aspect reserves and bounds contained images to half a page height with compact captions. No physical print job was submitted.",
+    "Article metadata, public schema and exact published-artifact projection remain allowlisted. No catalog prose, publication authority, private account/session, image storage or commercial contract is changed.",
+    "Knowledge registry adds only test-essay-actions.ts to the existing images and client-efficiency source mappings; no domain, decision status, lifecycle authority or generated attestation behavior changes."
+  ],
+  "guideBodiesInspected": [
+    "docs/reference/exhibition-programme.md",
+    ".impeccable/surfaces/exhibition-programme.md",
+    "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md",
+    "docs/DOCUMENTATION_POLICY.md",
+    "docs/how-to/change-with-documentation.md",
+    "docs/knowledge/README.md",
+    "docs/reference/knowledge-commands.md"
+  ],
+  "guideCorrections": [
+    "Reconciled complete essay presentation, navigation, failure handling, print and verification contracts in the programme guide and surface brief.",
+    "Navigation guidance now describes actual-title breadcrumbs, authored-order continuation and explicit canonical-copy/print actions.",
+    "Surface brief related targets now include the editorial components, stylesheet, action component and helper for future scoped context resolution."
+  ],
+  "audit": {
+    "scores": {
+      "accessibility": 3,
+      "performance": 3,
+      "theming": 4,
+      "responsiveDesign": 3,
+      "implementationIntegrity": 4
+    },
+    "total": 17,
+    "rating": "Good; scoped heuristic, not a whole-site certification",
+    "findings": [
+      {
+        "severity": "P2",
+        "issue": "Headline/prose axes diverged and the mobile context block delayed paragraph one",
+        "resolution": "Single aligned reading spine; exhibition context at completion"
+      },
+      {
+        "severity": "P2",
+        "issue": "Read next always chose the first different essay",
+        "resolution": "Authored-order successor with explicit wrap and empty/unknown behavior"
+      },
+      {
+        "severity": "P3",
+        "issue": "Generic Essay breadcrumb did not identify current location",
+        "resolution": "Actual essay title and structural separator"
+      },
+      {
+        "severity": "P3",
+        "issue": "Caption visual and DOM order differed; figure styling depended on nested div order",
+        "resolution": "Aligned semantic order and explicit artwork/frame class hooks"
+      },
+      {
+        "severity": "P2",
+        "issue": "First real A6 print inspection split a portrait image from its caption",
+        "resolution": "Final print image bound and compact caption keep both on one page; A6 preview reduced from7to5pages and A4 uses3pages"
+      }
+    ],
+    "unresolvedFindingsInScope": [],
+    "designDetector": "Zero unsuppressed findings; no new ignore was added in this essay pass."
+  },
+  "verification": {
+    "nodeRuntime": "Official SHA256-verified temporary Node22.23.2 from the preceding pass.",
+    "productionBuild": "Pass, including TypeScript and157static pages; clean candidate frWyCYcwF2AR-Wo5HaQX4 matches1679current source inputs. Disposable import-time build keys, no existing dotenv copied.",
+    "contractAndAuthorizationTests": "47 pass under Node22: canonical-copy success, denied/unsupported fallback, focus/selection, duplicate-write prevention, navigation races, explicit print activation, next-essay order, exact public routes, hostile siblings, DTO poisoning and administrator denials.",
+    "firstTestCorrection": "The initial DOM fixture imported ReactDOM before installing its document, triggering the legacy input polyfill. Corrected fixture initialization order; focus/selection and all race assertions pass without application workarounds.",
+    "eslint": "Targeted essay/programme/helper ESLint pass.",
+    "documentationFixtures": "43 pass.",
+    "compiledBoundary": "544browser/rendered assets and runtime traces pass private-content guard; build-only key canaries absent from555browser/rendered/CSS assets.",
+    "httpBoundary": "Final build passes6canonical programme pages,23linked browser assets,32sanitized image responses and12anonymous/ordinary-user denials. RawHTML,RSC,headers,explicit Article schema,title breadcrumb,tools,eager image and figure placement checked.",
+    "browser": "Chrome CUA:1312desktop and390phone actual captures; final320and768checks on both essays show no horizontal overflow,0pxheadline/prose alignment delta and44pxCopy/Print targets. LiveCopy link reports success. Artwork jumps display uncropped images; no browser errors observed. Temporary viewport reset.",
+    "print": "Actual native Chrome print preview: A6portrait image and full caption share page3in5pages; A4image/caption grouping verified on page2in3pages. Shared navigation, ambient ground, footer and tools absent. OriginalA6paper setting restored, preview cancelled, prior user tab restored. Browser preview only, no physical print or saved PDF."
+  },
+  "impactReview": "Mapped images/client-efficiency source changes and the finite knowledge-registry mapping. Delivery fingerprints retain the earlier sitemap work but this essay increment adds no delivery change. Unmapped exact-value detector config, prior/new private review evidence and generated review metadata were inspected; no unmapped runtime boundary.",
+  "evidence": [
+    ".impeccable/review/exhibitions/2026-10-18-essay-reading-http.json"
+  ],
+  "limits": [
+    "Local production preview only; no deployment, live-site acceptance, account mutation, generation or payment.",
+    "No full assistive-technology, automated whole-page accessibility, field Core Web Vitals or exhaustive browser/printer certification.",
+    "Clipboard denial and race cases use a disposable DOM fixture; live browser copy success and print activation were exercised.",
+    "Other paper sizes and print destinations remain user-controlled; no physical print job or PDF accessibility/export certification.",
+    "Existing unrelated overdue operational reviews remain open."
+  ]
+}

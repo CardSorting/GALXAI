@@ -1,0 +1,116 @@
+{
+  "reviewedAt": "2026-10-18",
+  "reviewer": "Codex editorial maintainer",
+  "classification": "private",
+  "scope": "Editorial index, both authored essay routes, related exhibition previews and shared programme presentation. Incremental source and guide review; broader fingerprint inventory does not establish a new exhaustive image, delivery or client-efficiency audit.",
+  "sourceContractsInspected": [
+    "Editorial index now resolves a canonical 200 page with lead and secondary essays, factual public copy, shared UTC dates/bylines/reading estimates and full published artwork. Sitemap lists the index; exact public path exemptions are unchanged.",
+    "Article detail validates authored exhibition/work association before publication lookup, renders paragraphs in order with explicit figure placement, includes the existing caption and offers native breadcrumbs, artwork anchor, exhibition continuation and onward essay reading.",
+    "Article metadata and JSON-LD project explicit public fields. No private source records, whole-object spreads or diagnostic data enter browser props. Existing published-work projection and sanitized artifact URLs retain authority.",
+    "Editorial stylesheet inherits scoped neutral tokens. Fluid Bodoni display and 66ch Inter prose, wrapping metadata/captions, frame-level image bounds and phone stacks replace cramped preview columns. All controls retain native semantics and visible focus; no new scroll controller or client library.",
+    "Compact unavailable-state text and padding fit thumbnail use; full figures retain caption/practice recovery context. Existing image decoding/publication contracts are unchanged.",
+    "Five exact font-size exceptions scoped only to editorial.module.css preserve the documented institutional reading scale; no file or rule is globally suppressed."
+  ],
+  "guideBodiesInspected": [
+    "docs/reference/exhibition-programme.md",
+    "docs/maintainers/PUBLIC_DISCOVERY.md",
+    "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md",
+    "docs/maintainers/readable-urls.md",
+    "docs/PRODUCT_SURFACE_STRATEGY.md",
+    "docs/reference/stars.md",
+    "docs/maintainers/image-public-boundary.md",
+    "docs/DEPLOYMENT.md",
+    "docs/runbooks/release-readiness.md"
+  ],
+  "guideCorrections": [
+    "Canonical editorial index replaces the obsolete redirect and sitemap omission throughout the owning programme reference and related discovery/navigation guides.",
+    "Surface brief reconciled in full with authored composition, metadata, mobile states, scoped tokens and local verification limits. Original October 7 evidence remains historical.",
+    "Release guidance now follows current-state target authority rather than treating original Vercel observations as current deployment instructions."
+  ],
+  "initialAudit": {
+    "scores": {
+      "accessibility": 3,
+      "performance": 3,
+      "theming": 2,
+      "responsiveDesign": 2,
+      "implementationIntegrity": 2
+    },
+    "total": 12,
+    "rating": "Acceptable; source-based assessment",
+    "findings": [
+      {
+        "severity": "P2",
+        "issue": "No editorial index; /editorials redirected into exhibition previews",
+        "resolution": "Dedicated canonical publication index and preserved exhibition-section bookmarks"
+      },
+      {
+        "severity": "P2",
+        "issue": "Fixed paragraph slicing detached the trace illustration from its discussion and hid curatorial captions",
+        "resolution": "Typed authored figure positions and full caption presentation"
+      },
+      {
+        "severity": "P2",
+        "issue": "Essay exit returned to exhibition top with no onward reading",
+        "resolution": "Editorial breadcrumb, exhibition context and read-next section"
+      },
+      {
+        "severity": "P2",
+        "issue": "Phone preview text squeezed beside fixed thumbnail tracks",
+        "resolution": "Single-column preview and editorial entries with fluid headings"
+      },
+      {
+        "severity": "P2",
+        "issue": "Full image recovery copy could clip inside compact preview frames",
+        "resolution": "Short compact state, reduced padding and frame-level image bounds"
+      },
+      {
+        "severity": "P3",
+        "issue": "Publication date/byline duplicated and stylesheet palette literals repeated",
+        "resolution": "Shared typed publication metadata and scoped neutral variables"
+      }
+    ]
+  },
+  "verification": {
+    "routeBoundaryPublicInformationAndAuthorizationTests": "45 pass",
+    "imageHttpAndAccountRecoveryTests": "17 pass",
+    "documentationFixtures": "43 pass",
+    "targetedEslint": "pass",
+    "designDetector": "zero unsuppressed findings",
+    "sourceContrastRatios": {
+      "primary": 16.49,
+      "supporting": 11.02,
+      "muted": 8.77
+    },
+    "productionBuild": "Pass: isolated Node22.23.2 Next15.5.25 production build, including TypeScript and static generation. Candidate OW9YPLu0HD1Nc8geKMy3o matches1677 working-tree build inputs.",
+    "browserReview": "Chrome via CUA:1312px desktop,768px tablet,390px phone and320px narrow reflow. Editorial index and both essays inspected; observed no horizontal overflow, full artwork containment, visible captions,17/18px prose,2px off-white keyboard outline with6px offset, native illustration-anchor navigation and complete read-next\u2192essay\u2192editorial-index flow. No browser console errors observed. Temporary viewport override reset.",
+    "compiledAndHttpScans": "544 browser/rendered assets and runtime traces pass the private-content guard; build-only secret canaries absent from 555 browser/rendered/CSS assets. HTTP verifier passes6canonical pages,23linked browser assets,32sanitized image responses and12anonymous/ordinary-user denials, including raw HTML,RSC,headers,article schema and figure placement.",
+    "buildEnvironment": "Initial sandbox font lookup failed; installed Homebrew Node22 cannot start due missing dylib. Used official temporary Node22.23.2 with verified SHA256. Root-directory compilation was interrupted after prolonged compilation; clean source snapshot compiled in26seconds, then completed type checks/static generation. Existing dotenv was not copied into the build; disposable keys satisfy import-time validation. Preview uses existing local runtime configuration for read-only published-artwork retrieval."
+  },
+  "impactReview": "Mapped images, delivery and client-efficiency source contracts; private .impeccable/config.json is an inspected unmapped exact-value detector configuration, not an unmapped runtime boundary. No schema, credentials, authentication, commercial policy, publishing authority or deployment mutation.",
+  "limits": [
+    "Local development change; no live deployment, production generation, payment or account mutation.",
+    "Automated and manual checks are scoped; no full assistive-technology certification, field Core Web Vitals or whole-site audit.",
+    "Existing unrelated overdue operational reviews remain open.",
+    "Browser failure-state review was source-led; forced client image errors, print output and comprehensive assistive-technology/zoom behavior were not exercised.",
+    "Full-page captures do not force offscreen lazy artwork to load; actual illustration navigation confirmed loaded images and full compositions."
+  ],
+  "priorReview": "docs/knowledge/audits/2026-10-18-library-viewer-review.json",
+  "finalAudit": {
+    "scores": {
+      "accessibility": 3,
+      "performance": 3,
+      "theming": 4,
+      "responsiveDesign": 3,
+      "implementationIntegrity": 4
+    },
+    "total": 17,
+    "rating": "Good; scoped technical review, no comprehensive accessibility or field performance claim",
+    "remainingP0": 0,
+    "remainingP1": 0,
+    "unresolvedFindingsInScope": [],
+    "intentionalExceptions": "Five exact Bodoni/reading font-size values scoped to editorial.module.css and documented in the surface brief; no global rule or whole-file suppression."
+  },
+  "evidence": [
+    ".impeccable/review/exhibitions/2026-10-18-editorial-http.json"
+  ]
+}

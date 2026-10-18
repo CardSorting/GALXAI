@@ -72,10 +72,26 @@ export const EXHIBITIONS: Exhibition[] = [
   },
 ];
 
+export interface Editorial {
+  slug: string;
+  title: string;
+  standfirst: string;
+  byline: string;
+  publishedOn: string;
+  exhibitionSlug: string;
+  imageId: string;
+  /** Place the illustration immediately after this many paragraphs. */
+  figureAfterParagraph: number;
+  paragraphs: readonly string[];
+}
+
 export const EDITORIALS = [
   {
     slug: 'what-an-object-can-ask',
     title: 'What an object can ask',
+    byline: 'GALX Editorial',
+    publishedOn: '2026-10-07',
+    figureAfterParagraph: 3,
     standfirst: 'On instruments, impossible purposes, and the attention we give to ordinary things.',
     exhibitionSlug: 'instruments-for-the-impossible',
     imageId: 'img_c811bd82935a4df3ad0851990fc12c71',
@@ -92,6 +108,9 @@ export const EDITORIALS = [
   {
     slug: 'reading-the-trace',
     title: 'Reading the trace',
+    byline: 'GALX Editorial',
+    publishedOn: '2026-10-07',
+    figureAfterParagraph: 1,
     standfirst: 'A wet ring, an open panel, a missing beat. How an image gives absence a form.',
     exhibitionSlug: 'things-that-hold-time',
     imageId: 'img_a10e47d71393430689f2ec79519794b5',
@@ -105,7 +124,7 @@ export const EDITORIALS = [
       'A trace asks for a particular patience. It does not announce that everything has been recovered, nor that nothing can be known. It offers a surface on which an action has made a difference. These works give that difference room: enough to register, enough to remain uncertain, and enough for another person to spend time with it.',
     ],
   },
-] as const;
+] as const satisfies readonly Editorial[];
 
 export function findExhibition(slug: string) { return EXHIBITIONS.find(item => item.slug === slug); }
 export function findEditorial(slug: string) { return EDITORIALS.find(item => item.slug === slug); }

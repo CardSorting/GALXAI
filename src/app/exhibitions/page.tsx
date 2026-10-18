@@ -4,6 +4,7 @@ import { getPublishedWorks } from '@/lib/exhibitions/published-works';
 import { constructMetadata } from '@/lib/seo/metadata';
 import { ProgrammeShell, ProgrammeLink, Artwork } from '@/components/exhibitions/Programme';
 import { ArtworkImage } from '@/components/exhibitions/ArtworkImage';
+import { EditorialMeta } from '@/components/exhibitions/Editorial';
 import styles from '@/components/exhibitions/programme.module.css';
 
 export const dynamic = 'force-dynamic';
@@ -43,15 +44,15 @@ export default async function ExhibitionsPage() {
       <Artwork work={previousHero} src={images.get(previousHero.id)?.src ?? null} />
     </section>
     <section id="editorials" aria-labelledby="editorials-title">
-      <div className={styles.sectionHeader}><h2 id="editorials-title">Editorials</h2><p>Writing from the programme</p></div>
+      <div className={styles.sectionHeader}><h2 id="editorials-title">Editorials</h2><ProgrammeLink href="/editorials">All editorials</ProgrammeLink></div>
       <div className={styles.editorialGrid}>
         {EDITORIALS.map((essay, index) => {
           const work = editorialWorks[index];
           return <article className={styles.editorialItem} key={essay.slug}>
-            <ArtworkImage src={images.get(work.id)?.thumbnailSrc ?? images.get(work.id)?.src ?? null} alt={work.alt} width={work.width} height={work.height} />
+            <ArtworkImage src={images.get(work.id)?.thumbnailSrc ?? images.get(work.id)?.src ?? null} alt={work.alt} width={work.width} height={work.height} compact />
             <div><h3><Link href={`/editorials/${essay.slug}`}>{essay.title}</Link></h3>
-              <div className={styles.date}>GALX Editorial · 7 October 2026</div>
-              <p>{essay.standfirst}</p><ProgrammeLink href={`/editorials/${essay.slug}`}>Read essay</ProgrammeLink>
+              <EditorialMeta essay={essay} className={styles.editorialMetadata} />
+              <p>{essay.standfirst}</p><ProgrammeLink href={`/editorials/${essay.slug}`} ariaLabel={`Read essay: ${essay.title}`}>Read essay</ProgrammeLink>
             </div>
           </article>;
         })}

@@ -778,6 +778,96 @@
         ],
         "createdAt": "2026-10-18T02:21:14.963Z",
         "reason": "Codex maintainer: preserve incumbent prompt-editor and inspector-toolbar hierarchy for the narrowly scoped image-fitting/notice correction; existing source and private surface brief govern refinement."
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "3.5rem",
+        "files": [
+          "src/components/exhibitions/editorial.module.css"
+        ],
+        "createdAt": "2026-10-18T17:13:08.974Z",
+        "reason": "Codex: scoped Bodoni editorial display scale documented in exhibition-programme surface brief, extending the existing institutional typography exception."
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "2.75rem",
+        "files": [
+          "src/components/exhibitions/editorial.module.css"
+        ],
+        "createdAt": "2026-10-18T17:13:09.036Z",
+        "reason": "Codex: fluid Bodoni editorial heading endpoint documented in the scoped exhibition-programme brief; not a global type change."
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "2.5rem",
+        "files": [
+          "src/components/exhibitions/editorial.module.css"
+        ],
+        "createdAt": "2026-10-18T17:13:09.102Z",
+        "reason": "Codex: secondary editorial heading scale documented in the scoped exhibition-programme brief."
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "5.5rem",
+        "files": [
+          "src/components/exhibitions/editorial.module.css"
+        ],
+        "createdAt": "2026-10-18T17:13:09.166Z",
+        "reason": "Codex: article display endpoint documented in the scoped exhibition-programme brief, within the six-rem craft ceiling."
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "1.0625rem",
+        "files": [
+          "src/components/exhibitions/editorial.module.css"
+        ],
+        "createdAt": "2026-10-18T17:13:09.224Z",
+        "reason": "Codex: 17px phone reading size preserves the programme reading scale; documented in the scoped exhibition-programme brief."
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "3.5rem",
+        "files": [
+          "src/components/exhibitions/Editorial.module.css"
+        ],
+        "createdAt": "2026-10-18T17:44:08.723Z",
+        "reason": "Codex: case-insensitive macOS resolves this hook-reported path to editorial.module.css. Same documented and browser-verified institutional Bodoni scale; canonical lowercase path already has this exact exception."
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "2.75rem",
+        "files": [
+          "src/components/exhibitions/Editorial.module.css"
+        ],
+        "createdAt": "2026-10-18T17:44:08.781Z",
+        "reason": "Codex: hook-reported case alias of editorial.module.css on macOS; same documented fluid Bodoni editorial heading endpoint already excepted under the canonical spelling."
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "2.5rem",
+        "files": [
+          "src/components/exhibitions/Editorial.module.css"
+        ],
+        "createdAt": "2026-10-18T17:44:08.837Z",
+        "reason": "Codex: hook-reported case alias of editorial.module.css on macOS; same documented secondary editorial heading scale already excepted under the canonical spelling."
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "5.5rem",
+        "files": [
+          "src/components/exhibitions/Editorial.module.css"
+        ],
+        "createdAt": "2026-10-18T17:44:08.941Z",
+        "reason": "Codex: hook-reported case alias of editorial.module.css on macOS; same documented and rendered article display endpoint already excepted under the canonical spelling."
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "1.0625rem",
+        "files": [
+          "src/components/exhibitions/Editorial.module.css"
+        ],
+        "createdAt": "2026-10-18T17:44:08.998Z",
+        "reason": "Codex: hook-reported case alias of editorial.module.css on macOS; same 17px phone reading size documented in the scoped brief and verified at320/390px, already excepted under the canonical spelling."
       }
     ]
   },
