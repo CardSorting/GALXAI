@@ -1,0 +1,248 @@
+{
+  "observedAt": "2026-10-18T18:27:35.009803+00:00",
+  "status": "accepted-live",
+  "authorization": "Owner explicitly requested Git commits and push to deployment on October 18, 2026.",
+  "scope": "Editorial index, essay reading layout and controls; finite native web image replacement.",
+  "source": {
+    "featureCommit": "a3ae4fe629906731ac38fe8c0921835e3d0db5a3",
+    "operatorCommit": "e5eee4ed6eb56a32b751f85895dde015e933fab2",
+    "baseServingBuild": "web-build-10",
+    "runtimeInputs": 1680,
+    "sourceManifestSha256": "bb2fc189629a737d5159022793fbe62ad9285ee094a8354015fc3a3a2dbb067e",
+    "dependencyLockSha256": "d8bb0860ae266479d2a6648fff6c46fdc7a0c95863bad72c68a326bdd5fb3600",
+    "publicBuildInputSha256": "6169a5b046719416aee7be781079e1d9efb06b69387a51b28bce10321773267a",
+    "selection": "All existing accepted input hashes compared; eight editorial source files changed, five editorial source files added. No unrelated runtime/dependency/configuration change."
+  },
+  "build": {
+    "id": "FSp3VHSZrZi3jDPnaBQhU",
+    "node": "22.23.2",
+    "platform": "linux/amd64",
+    "staticPages": 157,
+    "status": "pass",
+    "privateExclusions": "No ambient dependencies, dotenv, source workspace/private guides or real server credentials in the builder."
+  },
+  "immutablePackage": {
+    "image": "sha256:71b536bb07c2ef2108af36e416c9f2c0c1b12f3f50581e731b845fdb2f7f8fac",
+    "tag": "galxai-web:selfhost-0ba39e76ebc5431f",
+    "manifestSha256": "0ba39e76ebc5431fa0c918295fe31d558ac860300cd804ca84699092489b80b2",
+    "imageArchiveSha256": "562ccd8e7d2d3dfa8c341d1c922c472773445c554b4a7f83cec2427fc601e7a3",
+    "platform": "linux/amd64",
+    "builtAt": "2026-10-18T18:16:09.205Z",
+    "deployed": false
+  },
+  "packageEquivalence": {
+    "tracedFiles": 4543,
+    "startupTraceFiles": 1956,
+    "startupTraceWarnings": 122,
+    "comparedToAcceptedArtifact": 2405,
+    "bytesChanged": 0,
+    "publicFilesScanned": 828,
+    "applicationBytes": 181874134
+  },
+  "checks": {
+    "editorialAndAuthorization": "47 pass",
+    "packagingPolicy": "22 pass",
+    "documentationFixtures": "43 pass",
+    "githubPreflight": "success, run 39152355538",
+    "githubDocumentation": "success, run 39152355701",
+    "compiledBoundary": {
+      "observedAt": "2026-10-18T18:09:35.900583+00:00",
+      "status": "pass",
+      "buildId": "FSp3VHSZrZi3jDPnaBQhU",
+      "sourceRevision": "a3ae4fe629906731ac38fe8c0921835e3d0db5a3",
+      "sourceManifestSha256": "bb2fc189629a737d5159022793fbe62ad9285ee094a8354015fc3a3a2dbb067e",
+      "sourceInputsCompared": 1680,
+      "publicFilesScanned": 826,
+      "configuredSecretsCompared": 13,
+      "secretMatches": 0,
+      "buildCanaryMatches": 0,
+      "privateTraceGuard": "pass"
+    },
+    "wholeImage": {
+      "checks": 44,
+      "revocationMs": 53,
+      "fullDeadlineMs": 304376,
+      "state": "passed",
+      "scope": "Unchanged harness and full budgets; isolated synthetic data and provider only. Historical ACT-058 cause remains unestablished."
+    },
+    "liveAccountAndAssets": {
+      "observedAt": "2026-10-18T18:24:18.336Z",
+      "result": "pass",
+      "checks": 70,
+      "browserAssets": 43,
+      "createEntryAssetsVerified": true,
+      "configuredSecretsCompared": 13,
+      "privateMatches": 0,
+      "canonicalRedirects": true,
+      "novaIssuerRetained": true,
+      "scope": "Actual public raw HTTP, rendered HTML/browser assets, optional accepted-build Create entry assets, account/provider initiation, origin/admin/forgery/private artifact denials. Social code exchange, signed-in continuity, generation and settlement are separate."
+    },
+    "liveEditorialHttp": {
+      "observedAt": "2026-10-18T18:24:36.666Z",
+      "target": "https://galx.ai",
+      "pages": 6,
+      "browserAssets": 24,
+      "sanitizedArtifacts": 32,
+      "anonymousAndOrdinaryUserDenials": 12,
+      "status": "pass",
+      "scope": "Actual canonical public HTTP, RSC, headers, article metadata/schema, caption position, binary artifacts and linked browser assets. The generic verifier retains an older local-only limits label; this record names the actual live target and scope."
+    },
+    "liveCache": {
+      "checks": 38,
+      "status": "pass",
+      "scope": "Private routes uncached; versioned public assets immutable."
+    },
+    "servedIdentity": {
+      "observedAt": "2026-10-18T18:27:00.279906+00:00",
+      "status": "pass",
+      "acceptedApplicationAssetsCompared": 23,
+      "allServedApplicationBytesMatchAcceptedBuild": true,
+      "edgeInjectedAssetsScannedSeparately": [
+        "/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"
+      ],
+      "webImageMatchesAcceptedPackage": true,
+      "webConfigurationUnchanged": true,
+      "novaContainerAndImageUnchanged": true,
+      "verificationCorrection": "Initial comparison assumed every script was a Next build asset; exact observed edge email-decoder path is now explicitly accounted for separately. No application or image bytes changed."
+    }
+  },
+  "preparationAttempts": [
+    {
+      "directory": "web-build-11",
+      "result": "Sandbox denied Docker socket before the builder ran; retained attempt, no serving change.",
+      "successor": "web-build-11-accepted-source",
+      "successorResult": "Pinned clean build passed after approved local Docker access."
+    }
+  ],
+  "preserved": {
+    "configuration": true,
+    "database": true,
+    "auth": true,
+    "nova": true,
+    "ingress": true,
+    "billing": true,
+    "mediaAdmission": true,
+    "priorPackage": "web-package-10"
+  },
+  "designTriage": {
+    "intentionalTypographySteps": [
+      "3.5rem",
+      "2.75rem",
+      "2.5rem",
+      "5.5rem",
+      "1.0625rem"
+    ],
+    "scope": "Exact file-scoped values retained in the editorial stylesheet; uppercase/lowercase path aliases address the macOS same-inode inference. No global rule or file ignore."
+  },
+  "limitations": [
+    "Existing ACT-058 historical fixture failure explanation/repeatability and ACT-052 manual provider renewals remain open.",
+    "Physical host/shared-daemon fault drills remain deferred; no new availability guarantee.",
+    "No paid generation, settlement, Sites publication or social code exchange exercised.",
+    "Local A4/A6 print-preview acceptance is retained in the essay review; no physical printing or PDF accessibility certification."
+  ],
+  "evidence": [
+    "docs/knowledge/audits/2026-10-18-editorial-review.json",
+    "docs/knowledge/audits/2026-10-18-essay-reading-review.json",
+    "docs/knowledge/audits/2026-10-18-editorial-release-review.json"
+  ],
+  "preparedAt": "2026-10-18T18:16:37.428288+00:00",
+  "live": {
+    "plan": "web-plan-editorials",
+    "image": "sha256:71b536bb07c2ef2108af36e416c9f2c0c1b12f3f50581e731b845fdb2f7f8fac",
+    "phase": "corrected-running",
+    "cleanOwnedWebReplacement": true,
+    "previousPackageRetained": true,
+    "configurationChanged": false,
+    "databaseChanged": false,
+    "authChanged": false,
+    "novaChanged": false,
+    "ingressChanged": false
+  },
+  "browser": {
+    "observedAt": "2026-10-18T18:27:35.009803+00:00",
+    "target": "https://galx.ai/editorials",
+    "index": {
+      "entries": 2,
+      "desktopViewport": [
+        1312,
+        644
+      ],
+      "phoneViewport": [
+        390,
+        844
+      ],
+      "horizontalOverflow": false
+    },
+    "essays": [
+      {
+        "path": "/editorials/what-an-object-can-ask",
+        "desktop": {
+          "viewport": [
+            1312,
+            644
+          ],
+          "titleX": 285,
+          "proseX": 285,
+          "proseWidth": 736,
+          "proseFontPx": 18
+        },
+        "phone": {
+          "viewport": [
+            390,
+            844
+          ],
+          "titleX": 20,
+          "proseX": 20,
+          "proseWidth": 344,
+          "proseFontPx": 17,
+          "buttonHeights": [
+            44,
+            44
+          ]
+        },
+        "horizontalOverflow": false,
+        "artworkLoaded": true,
+        "artworkFit": "contain"
+      },
+      {
+        "path": "/editorials/reading-the-trace",
+        "desktop": {
+          "viewport": [
+            1312,
+            644
+          ],
+          "titleX": 285,
+          "proseX": 285,
+          "proseWidth": 736,
+          "proseFontPx": 18
+        },
+        "phone": {
+          "viewport": [
+            390,
+            844
+          ],
+          "titleX": 20,
+          "proseX": 20,
+          "proseWidth": 344,
+          "proseFontPx": 17,
+          "buttonHeights": [
+            44,
+            44
+          ]
+        },
+        "horizontalOverflow": false,
+        "artworkLoaded": true,
+        "artworkFit": "contain"
+      }
+    ],
+    "copyLink": "Visible Link copied button and polite Essay link copied status",
+    "navigation": "Index to essay, artwork anchor, read next to second essay, wrap to first, breadcrumb return to index",
+    "consoleErrors": 0,
+    "viewportReset": true,
+    "limits": "Actual browser scope is index/essay reading and controls. No account menu, generation, billing or publication action."
+  },
+  "remaining": [
+    "ACT-058 historical fixture failure explanation/repeatability remains open; this fresh unchanged rehearsal passes.",
+    "ACT-052 two manual provider renewals and existing host/recovery limitations remain."
+  ]
+}

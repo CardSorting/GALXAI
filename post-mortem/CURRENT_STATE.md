@@ -4,6 +4,35 @@
 
 The newest observation appears first. Earlier dated sections retain evidence from their stated observation; they do not override the latest determination or authorize a new action.
 
+### Editorial reading release accepted live — October 18 UTC
+
+The [editorial release](releases/2026-10-18-editorial-reading.json) records the
+owner-authorized build11 and finite web-only replacement. Feature commit
+`a3ae4fe` and bounded operator commit `e5eee4e` are pushed to main. The canonical
+editorial index and both essays now serve the reviewed reading layout, complete
+artwork captions, copy-link and print controls, and continuation navigation.
+Actual desktop and phone inspection confirms aligned reading columns,
+uncropped loaded artwork, 44px controls, working navigation/copy feedback,
+no horizontal overflow and no browser console errors. The viewport is restored.
+
+The clean pinned Linux build passes with 157 static pages. All 44 unchanged
+whole-image checks pass, including a 304,376 ms deadline/clean drain, 53 ms revocation,
+restart and duplicate denial. The public scan checks 826 files against 13 configured
+credentials and build canaries with zero matches; private markers and runtime
+traces also pass. All 1,680 runtime source inputs match the reviewed snapshot.
+The live checks pass six pages, 24 browser assets, 32 sanitized artwork responses,
+12 anonymous/ordinary-user denials, 70 account/asset checks and 38 cache checks.
+All 23 application assets match accepted bytes; the additional edge email-decoder
+asset is separately scanned. The previous image/archive remains verified and
+retained. Runtime configuration, native data, Auth, Nova and ingress are unchanged.
+
+The 47 editorial/public-boundary checks, 22 packaging-policy checks, 43 documentation
+fixtures and source/operator GitHub checks pass. Local A4/A6 print preview evidence
+is retained separately; no physical printing or PDF accessibility certification
+is claimed. Existing ACT-058's historical fixture failure cause, ACT-052's manual
+provider renewals and host/recovery limits remain open. This successful rehearsal
+does not establish the earlier failure's cause or certify disruptive host faults.
+
 ### Library proportions and no-tier notice accepted live — October 18 UTC
 
 The [viewer release](releases/2026-10-18-library-image-ratio.json) records build10,

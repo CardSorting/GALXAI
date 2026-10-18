@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "reviewer": "Codex image and release maintainer",
-  "reviewed_at": "2026-10-18T03:11:39.692979Z",
-  "note": "Reviewed exact inspector containment, settled-no-plan presentation, unchanged admission and bounded web replacement; complete affected guide/current-state/incident bodies reconciled. Preserved first failed rehearsal and open ACT-058; later44-check repeat is acceptance, not an explanation of that failure. See retained library viewer semantic evidence.",
+  "reviewer": "Codex editorial release maintainer",
+  "reviewed_at": "2026-10-18T18:27:47.484887Z",
+  "note": "Semantically reviewed the new complete current-state section against immutable build11/package/acceptance receipts and actual live browser, raw HTTP, artifact, asset identity and cache evidence in the editorial-reading release record. Existing incident actions, historical failures, authority and deferred host/recovery limits are preserved; no incident closure or broader runtime change.",
   "files": {
     ".dockerignore": "fabeb0a64e0040d7feb0b9ea2d6f88d109479a61974a7c41aee3f54be23b70e2",
     ".github/workflows/vercel-preflight.yml": "a3489384482756c5795da7498ecf8fc455ea2204868af52fc56a9aa0a856f936",
@@ -41,7 +41,7 @@
     "docs/operations/wallet-lifecycle.md": "ddc86ed1d3347f5fff19a07581bc040c52eee7a115c279a2ba28bceae92303db",
     "docs/operations/workspace-auth.md": "d0f39f0509be859ee59c64cac91241b5fa8db006410c95c3c76d35b8b69b953b",
     "package.json": "98ec21911ced7fd2e3f7fa6ffbd6caa12061d822dadc75aa9053dac4e07cf240",
-    "post-mortem/CURRENT_STATE.md": "d45dc630794d9b33704da39e76880811dfd04fc3ca2e614d970d9372c3c398f8",
+    "post-mortem/CURRENT_STATE.md": "4782fa2949224eff23148bda6afa04ee18d2eb73e13891c62d9497af5d521907",
     "post-mortem/README.md": "18c7edd2f27e5aa4c941fa07ca2ca71da3bc8757b45a07696fa59757233e03bf",
     "post-mortem/failure-modes/README.md": "bd1c1287fc67ce736afa7de32df99d189929f8005e5d06c988b7774682f30c23",
     "post-mortem/failure-modes/access-and-documentation.md": "b55199e1df7dd979b9fb0d9aef1afcfdf4b12d5b8a9cb48fcc45fc4f147356d5",
