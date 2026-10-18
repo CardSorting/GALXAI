@@ -139,6 +139,11 @@ The subsequent `web-create-asset` correction selects `web-plan-no-busy-notice` â
 `web-plan-create-asset`, with its own `web-create-asset-correction.json` phase
 receipt and identical configuration/drain checks. It restores the exact Create
 script classification while preserving workspace authentication.
+The `web-image-viewer` correction selects only `web-plan-create-asset` â†’
+`web-plan-image-viewer`, retaining `web-image-viewer-correction.json` and the
+same configuration, acceptance and clean-drain guards. It contains private
+inspector images at their natural proportions and removes the passive no-tier
+notice. Creation admission, native data, Auth, Nova and ingress remain unchanged.
 Prepare the new accepted plan before running
 `node scripts/rollout-native-web-correction.mjs web-notice`. The predecessors named by the original `web`/`nova` corrections have known
 mixed-cookie and stream-drain defects. The later notice predecessor preserves

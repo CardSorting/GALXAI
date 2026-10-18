@@ -3057,6 +3057,12 @@
       "title": "Private Create page cannot load its browser entry"
     },
     {
+      "path": "post-mortem/incidents/2026/2026-10-18-library-image-ratio/README.md",
+      "scope": "operational-record",
+      "category": "post-mortem",
+      "title": "Private Library viewer stretches image pixels"
+    },
+    {
       "path": "post-mortem/runbooks/controller-lock.md",
       "scope": "current-guide",
       "category": "post-mortem",

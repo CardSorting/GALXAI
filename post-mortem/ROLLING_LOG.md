@@ -3097,3 +3097,45 @@ Incident: `INC-20261018-CREATE-ASSET`. Kind: `recovery`.
 **Next step:** Finish explicit source/guide review and Git delivery. ACT-052 provider manual renewals and unrelated prevention work remain; pre-existing mobile/style findings are not claimed fixed.
 
 Evidence: [2026-10-18-google-and-image-notice.json](releases/2026-10-18-google-and-image-notice.json), [README.md](incidents/2026/2026-10-18-create-asset/README.md).
+
+## EVT-20261018-LIBRARY-RATIO-OBSERVED — 2026-10-18T02:21:48.920777+00:00
+
+Incident: `INC-20261018-LIBRARY-IMAGE-RATIO`. Kind: `observation`.
+
+**Observation:** Owner reports saved-image stretching. Actual open private inspector displays a 1312x1199 original in an 812x580 fill box; computed object-fit is fill and requested ratio metadata is descriptive.
+
+**Action:** Scoped containment to private inspector artwork and removed the owner-named passive no-tier notice. Retained image bytes, metadata, private access and creation admission. Preparing fresh accepted build and bounded web replacement.
+
+**Result:** 71 image/security,9 studio,TypeScript and targeted ESLint pass; live recovery is pending. One inspector control radius normalized; existing surface style exceptions recorded narrowly without global rule suppression.
+
+**Next step:** Complete build/image rehearsal and actual desktop/phone viewer/notice and served-boundary acceptance before closing ACT-057.
+
+Evidence: [README.md](incidents/2026/2026-10-18-library-image-ratio/README.md), [2026-10-18-library-image-ratio.json](releases/2026-10-18-library-image-ratio.json).
+
+## EVT-20261018-VIEWER-REHEARSAL-FAILURE — 2026-10-18T02:42:44.149661+00:00
+
+Incident: `INC-20261018-LIBRARY-IMAGE-RATIO`. Kind: `observation`.
+
+**Observation:** Fresh build10/package passes source/asset equivalence and configured-secret scans. Its first isolated rehearsal passes43 checks including304698ms deadline/clean drain, restart/revocation and duplicate denial, then gets503 instead of409 at the first post-forced-crash duplicate. No OOM; fixture application is running.
+
+**Action:** Retained failed evidence and did not deploy. Reviewed the unchanged server source and exact failure stage. Prepare one new isolated rehearsal of the same immutable image with unchanged assertions/budgets and disposable data only.
+
+**Result:** Cause remains unestablished; first failure is not relabeled passing. ACT-058 tracks separate repeatability/diagnostic prevention; ACT-057 still awaits complete matching rehearsal and live viewer acceptance.
+
+**Next step:** Investigate any repeated failure; require full successful image acceptance before bounded web replacement.
+
+Evidence: [README.md](incidents/2026/2026-10-18-library-image-ratio/README.md), [2026-10-18-library-image-ratio.json](releases/2026-10-18-library-image-ratio.json).
+
+## EVT-20261018-LIBRARY-RATIO-ACCEPTED — 2026-10-18T03:11:27.845283+00:00
+
+Incident: `INC-20261018-LIBRARY-IMAGE-RATIO`. Kind: `recovery`.
+
+**Observation:** Same immutable image10 and unchanged harness pass all44 fresh-repeat checks,304418ms deadline/clean drain and59ms revocation. Actual desktop/phone inspector contains the same1312x1199 original instead of stretching to its panel.
+
+**Action:** Completed only the finite accepted web-image-viewer replacement after clean exit; configuration/data/Auth/Nova/ingress and original images remain unchanged. Verified Library/Create paid-tier notice absence and existing disabled Generate controls without submitting work.
+
+**Result:** ACT-057 completed and viewer incident recovered.69live account/asset checks42assets13secrets zero matches,38cache checks and2exactLibraryCSS comparisons pass;3owned images retained. First43-check rehearsal failure remains retained and unexplained under openACT-058.
+
+**Next step:** Complete reviewed source/Git delivery. Preserve ACT-058 repeatability investigation and ACT-052 manual provider renewals; do not claim a full responsive/host recovery audit.
+
+Evidence: [README.md](incidents/2026/2026-10-18-library-image-ratio/README.md), [2026-10-18-library-image-ratio.json](releases/2026-10-18-library-image-ratio.json).

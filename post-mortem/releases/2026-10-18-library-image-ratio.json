@@ -1,0 +1,178 @@
+{
+  "observedAt": "2026-10-18T02:21:48.920777+00:00",
+  "status": "accepted-live",
+  "scope": "Private inspector image proportions and owner-requested passive no-tier notice removal; unchanged generation entitlement and native authority.",
+  "before": {
+    "naturalDimensions": [
+      1312,
+      1199
+    ],
+    "imagePanel": [
+      812,
+      580
+    ],
+    "computedObjectFit": "fill",
+    "requestedRatioMetadata": "1:1",
+    "sourceRevision": "7df8dbf35f2410ffd83e86e08fa6762d2e8192ab"
+  },
+  "sourceChanges": [
+    "Inspector-only object-fit containment; actual intrinsic dimensions govern visible image",
+    "Hide only planless-account passive allowance notice; retain initial checking, unavailable, purchased-plan allowance/exhaustion and batch feedback; no admission change",
+    "Inspector action radius corrected from 10px to documented 8px",
+    "Finite web-image-viewer prior/next plan pair with identical owned-container/configuration/clean-drain guards"
+  ],
+  "checks": {
+    "imageSecurity": "71 pass",
+    "studioContracts": "9 pass",
+    "typeScript": "pass",
+    "targetedEslint": "pass",
+    "layoutDetector": "no findings",
+    "designDetector": "no findings after one radius fix and scoped incumbent-value exceptions",
+    "compiledAssets": {
+      "observedAt": "2026-10-18T02:32:29.206576+00:00",
+      "status": "pass",
+      "browserAndRenderedAssets": 557,
+      "actualConfiguredSecretsCompared": 13,
+      "secretMatches": 0,
+      "removedNoticeMatches": 0,
+      "inspectorContainmentPresent": true,
+      "privateTraceGuard": "pass",
+      "scannerCorrection": "Initial literal-format assertion did not allow the normal vendor-prefixed object-fit declaration. Inspected compiled rule and checked its explicit standard declaration; application/build unchanged."
+    },
+    "documentationFixtures": "43 pass",
+    "wholeImage": {
+      "checks": 44,
+      "fullDeadlineMs": 304418,
+      "revocationMs": 59,
+      "sameImageAndHarnessAsFirstFailure": true,
+      "assertionsOrBudgetsChanged": false,
+      "scope": "Fresh isolated synthetic fixture; not real provider/host fault acceptance"
+    },
+    "liveAccountAndAssets": {
+      "observedAt": "2026-10-18T02:49:25.354Z",
+      "result": "pass",
+      "checks": 69,
+      "browserAssets": 42,
+      "createEntryAssetsVerified": true,
+      "configuredSecretsCompared": 13,
+      "privateMatches": 0,
+      "canonicalRedirects": true,
+      "novaIssuerRetained": true,
+      "scope": "Actual public raw HTTP, rendered HTML/browser assets, optional accepted-build Create entry assets, account/provider initiation, origin/admin/forgery/private artifact denials. Social code exchange, signed-in continuity, generation and settlement are separate."
+    },
+    "cache": "38 pass",
+    "servedLibraryCss": {
+      "observedAt": "2026-10-18T03:10:40.037Z",
+      "status": "pass",
+      "cssAssets": 2,
+      "acceptedBytesUnchanged": true,
+      "immutable": true,
+      "inspectorContainmentPresent": true
+    }
+  },
+  "designTriage": {
+    "realProblemFixed": "Inspector actions use documented 8px control radius",
+    "retainedAdvisories": 14,
+    "fileScopedValueExceptions": 10,
+    "file": "src/components/images/studio.css",
+    "basis": "Codex maintainer preserves incumbent semantic notice colors, dock/empty-state silhouettes and prompt/toolbar type hierarchy under the private surface brief refinement contract. Reasons recorded by hook-admin; no global rule/file suppression.",
+    "noBroaderResponsiveAudit": true
+  },
+  "limits": [
+    "No generation/payment or stored artifact/metadata mutation",
+    "Existing host and recovery limits remain; two Premium provider renewals remain manual",
+    "Existing unrelated narrow-screen page overflow remains outside this media fitting correction"
+  ],
+  "latestObservedAt": "2026-10-18T03:11:27.845283+00:00",
+  "build": {
+    "sourceRevision": "7df8dbf35f2410ffd83e86e08fa6762d2e8192ab",
+    "workingTreeSnapshot": true,
+    "node": "22.23.2",
+    "staticPages": 158,
+    "changedApplicationFilesFromPriorBuild": [
+      "src/components/images/ImageStudio.tsx",
+      "src/components/images/studio.css"
+    ],
+    "dependencyLockChanged": false
+  },
+  "immutablePackage": {
+    "image": "sha256:28004f38428d8df6c2e2671b3d79bd31653a1051160d6208a57c744392e56d4d",
+    "tag": "galxai-web:selfhost-9d7f2efbca72c9f3",
+    "manifestSha256": "9d7f2efbca72c9f3c3da32aae0758cee049ce0714d0ad66cf024a050df8a501a",
+    "imageArchiveSha256": "133ab2be64f023fdcf97b569a6f3b7285f6374795866071f6c061c8d9d4a2cc3",
+    "platform": "linux/amd64",
+    "builtAt": "2026-10-18T02:34:13.641Z",
+    "deployed": false
+  },
+  "firstRehearsal": {
+    "completedChecks": 43,
+    "failedCheck": "First duplicate assertion after forced fixture-process restart",
+    "observedStatus": 503,
+    "expectedStatus": 409,
+    "fullDeadlineMs": 304698,
+    "cleanDeadlineExit": true,
+    "applicationRunningAfterCrash": true,
+    "oomKilled": false,
+    "retainedFailureDirectory": ".data/postgres-cutover/web-runtime-acceptance-10",
+    "cause": "Not established. Earlier deadline/restart/revocation and duplicate checks passed. Application server inputs are unchanged; no production fault or image-generation replay was induced."
+  },
+  "live": {
+    "plan": "web-plan-image-viewer",
+    "image": "sha256:28004f38428d8df6c2e2671b3d79bd31653a1051160d6208a57c744392e56d4d",
+    "cleanOwnedWebReplacement": true,
+    "nativeConfigurationChanged": false,
+    "databaseChanged": false,
+    "authChanged": false,
+    "novaChanged": false,
+    "ingressChanged": false
+  },
+  "browser": {
+    "desktop": {
+      "viewport": [
+        1312,
+        588
+      ],
+      "naturalDimensions": [
+        1312,
+        1199
+      ],
+      "imagePanel": [
+        812,
+        580
+      ],
+      "objectFit": "contain",
+      "complete": true
+    },
+    "phone": {
+      "viewport": [
+        390,
+        844
+      ],
+      "naturalDimensions": [
+        1312,
+        1199
+      ],
+      "imagePanel": [
+        334,
+        379.796875
+      ],
+      "objectFit": "contain",
+      "complete": true
+    },
+    "libraryOwnedImages": 3,
+    "libraryPaidTierNotice": false,
+    "createPaidTierNotice": false,
+    "createQuotedUpsellBody": false,
+    "createBusyNotice": false,
+    "createRenderRecovery": false,
+    "createEditorPresent": true,
+    "generateDisabled": true,
+    "viewportReset": true,
+    "scope": "Actual owner session, same existing metadata-mismatched image; no prompt edits, generation, payment or favorite mutation. Existing paging label and unrelated overflow are not certified."
+  },
+  "remaining": [
+    "ACT-058 first post-forced-crash fixture503 explanation/repeatability",
+    "ACT-052 two manual Premium provider renewals",
+    "Source/documentation Git delivery; existing host and recovery limitations"
+  ]
+}

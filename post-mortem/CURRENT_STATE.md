@@ -4,6 +4,48 @@
 
 The newest observation appears first. Earlier dated sections retain evidence from their stated observation; they do not override the latest determination or authorize a new action.
 
+### Library proportions and no-tier notice accepted live — October 18 UTC
+
+The [viewer release](releases/2026-10-18-library-image-ratio.json) records build10,
+its matching immutable package and clean web-only replacement. Actual desktop
+and phone inspection confirms intrinsic image containment instead of stretching,
+including an original whose dimensions differ from its requested-ratio label.
+Library retains three owned images. The owner-named paid-tier notice is absent
+from Library and Create; existing Generate/allowance controls remain. No stored
+artifact, metadata, generation, payment, data/Auth/Nova or ingress change occurred.
+
+The unchanged repeat rehearsal passes all44 checks, including the full304418ms
+deadline, clean drain/restart/revocation and no replay. All69 live checks,
+42browser assets/13configured credentials with zero matches,38cache checks and
+two exact Library CSS byte comparisons pass. The compiled scan checks545
+JavaScript/rendered assets plus12CSS files with zero credential/removed-copy
+matches. Seventy-one image/security checks,9studio checks, TypeScript, ESLint
+and43documentation fixtures pass. ACT-057 is completed and the
+[viewer incident](incidents/2026/2026-10-18-library-image-ratio/README.md) is recovered.
+
+The first image10 rehearsal's43passing checks and post-forced-crash503/409
+failure remain retained. The same image, harness, assertions and full budgets
+passed on the fresh isolated repeat; that does not establish the first failure's
+cause. ACT-058 owns separate diagnostic/repeatability prevention. ACT-052 still
+owns manual Premium renewals; host/recovery limits and unrelated page overflow
+remain. One inspector radius issue was fixed; ten exact, file-scoped design
+exceptions preserve incumbent Studio styling without global rule suppression.
+Source delivery is recorded separately from this live acceptance.
+
+### Library image proportions corrected in source; acceptance pending — October 18 UTC
+
+The owner reported stretching in the private Library inspector. Actual live
+inspection found `object-fit: fill` distorting an original to its media panel.
+The [viewer incident](incidents/2026/2026-10-18-library-image-ratio/README.md)
+and [release record](releases/2026-10-18-library-image-ratio.json) retain the
+measurement. Source now contains inspector artwork at its natural proportions
+and removes the additional owner-named passive paid-tier notice. Creation
+eligibility, allowance verification and stored artifacts remain unchanged.
+Seventy-one image/security checks, nine studio checks, TypeScript and targeted
+ESLint pass. Fresh build10, matching whole-image rehearsal and actual
+desktop/phone/served-asset acceptance remain pending under ACT-057. The current
+serving image remains the accepted predecessor below until that gate passes.
+
 ### Google and Create accepted; passive busy popup removed — October 18 UTC
 
 The [final Google and Image Studio record](releases/2026-10-18-google-and-image-notice.json)

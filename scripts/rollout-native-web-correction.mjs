@@ -10,8 +10,9 @@ const corrections={
  nova:{role:'nova',previous:'nova-plan-final',next:'nova-plan-terminal-fix',receipt:'nova-terminal-correction.json'},
  'web-notice':{role:'web',previous:'web-plan-cookie-fix',next:'web-plan-no-busy-notice',receipt:'web-notice-correction.json'},
  'web-create-asset':{role:'web',previous:'web-plan-no-busy-notice',next:'web-plan-create-asset',receipt:'web-create-asset-correction.json'},
+ 'web-image-viewer':{role:'web',previous:'web-plan-create-asset',next:'web-plan-image-viewer',receipt:'web-image-viewer-correction.json'},
 };
-assert(Object.hasOwn(corrections,correction)&&process.argv.length<4,'Choose only a reviewed web, nova, web-notice or web-create-asset correction.');
+assert(Object.hasOwn(corrections,correction)&&process.argv.length<4,'Choose only a reviewed web, nova, web-notice, web-create-asset or web-image-viewer correction.');
 const selected=corrections[correction],role=selected.role,nova=role==='nova';
 const previousPlan=state+'/'+selected.previous,nextPlan=state+'/'+selected.next,receiptFile=state+'/'+selected.receipt;
 const read=async file=>JSON.parse(await fs.readFile(file,'utf8'));

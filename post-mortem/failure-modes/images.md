@@ -50,6 +50,15 @@ A modal z-index cannot overtake navigation when the modal remains inside a lower
 
 Do not size the lightbox from requested aspect metadata alone. The sanitized artifact's intrinsic dimensions govern containment because stored or historical metadata can describe a different requested shape. Give the dialog explicit viewport-bounded rows and columns, set every grid/flex minimum to zero, use a border-box media cell, and contain the image within both axes. On narrow viewports, keep close, previous, next and zoom controls inside the media layer while the details panel scrolls independently. Verify the actual deep link in clean desktop and narrow-viewport browsers; a successful build does not detect stacking or overflow failures.
 
+The private Library inspector has a related independent failure: a Next Image
+with `fill` and no object-fit rule uses the browser's `fill` default, distorting
+the original to the media panel. Scope `object-fit: contain` to the inspector
+artwork; the full-resolution artifact's natural dimensions govern the pixels,
+not the panel or requested ratio label. Verify an actual owned original on
+desktop and phone, including a metadata-mismatched asset. Keep private access,
+original bytes, thumbnail behavior and download delivery unchanged. See the
+[October 18 private viewer incident](../incidents/2026/2026-10-18-library-image-ratio/README.md).
+
 ## FM-IMG-007 — inactive Star loses established public work
 
 Runtime activation answers whether a Star may start new work. It is not

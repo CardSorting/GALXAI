@@ -11,6 +11,17 @@ related_targets: ["src/components/images/ImageStudio.tsx","src/components/images
 
 Operate. `/images` lets a person describe an image, select supported settings, generate, inspect completed work, and return to saved images. Hosted image creation was explicitly restored at the user's request on 2026-09-10; the earlier retirement decision does not govern this surface. This is private maintainer context, not public product documentation. Do not import its design rationale, implementation details, or verification diagnostics into public UI, metadata, browser assets, or responses.
 
+The October 18 viewer correction contains inspector artwork using the actual
+artifact's intrinsic proportions, independently of requested-ratio labels.
+Empty space around an image is preferable to distortion or cropping. Accounts
+without an Image tier receive no passive paid-tier banner; admission and actual
+allowance/error feedback retain their existing contract. Inspector actions use
+the documented 8px control radius. Ten exact value exceptions, scoped only to
+`studio.css` through hook-admin, retain existing semantic notice colors,
+dock/empty-state silhouettes and prompt/toolbar type hierarchy; they do not
+establish global tokens or suppress other detector rules. This focused
+refinement does not certify unrelated page overflow or responsive behavior.
+
 The September 13 results and ergonomics refinements extend the existing GALX identity recorded in `DESIGN.md`: restrained indigo actions, dark panels, inherited sans-serif typography, compact controls, and subtle borders. Blank space is deliberate; user-generated work supplies the visual content. The API Request Inspector's restriction on generated-content libraries remains scoped to that inspector. Neither the global design system nor its sidecar is rewritten for this surface.
 
 ## Direction and first viewport

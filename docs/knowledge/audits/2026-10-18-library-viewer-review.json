@@ -1,0 +1,50 @@
+{
+  "reviewedAt": "2026-10-18",
+  "reviewer": "Codex image and release maintainer",
+  "scope": "Incremental semantic review of private inspector containment and removal of the owner-named passive no-tier notice. A routine presentation correction preserves account, admission, artifact and native-hosting authority; no ADR decision is changed. Unchanged broader fingerprint inventory is not a new exhaustive module audit.",
+  "priorReview": "docs/knowledge/audits/2026-10-18-google-image-notice-review.json",
+  "sourceContractsInspected": [
+    "StudioArtwork.tsx uses Next Image fill; studio.css previously omitted object-fit in the private inspector. Inspector-scoped contain uses intrinsic artifact dimensions while preserving thumbnails, original/download bytes and requested metadata.",
+    "ImageStudio.tsx hides the summary for a settled no-plan account, removes both quoted upsell strings, retains initial checking and verification-failure states plus purchased-plan allowance/exhaustion/batch feedback. Optional plan access avoids null-plan rendering failures. Submission guards, persistence and recovery are unchanged.",
+    "rollout-native-web-correction.mjs adds only the finite web-image-viewer predecessor/successor/receipt triple. Matching project, port, configuration hash, current image, owned mounts and clean full drain remain mandatory; no arbitrary container, data or ingress replacement.",
+    "The clean build source manifest differs from build09 only in ImageStudio.tsx and studio.css; dependency locks and all other application inputs are unchanged.",
+    "Impeccable config adds ten exact value exceptions scoped solely to studio.css for incumbent semantic colors, dock/empty-state silhouettes and prompt/toolbar hierarchy. One real inspector-control radius issue is corrected to the documented 8px scale. No global rule or whole-file suppression."
+  ],
+  "guideBodiesInspected": [
+    "docs/maintainers/image-library-scale.md",
+    "docs/maintainers/image-public-boundary.md",
+    "docs/runbooks/mac-self-hosting.md",
+    "post-mortem/failure-modes/images.md",
+    "post-mortem/incidents/2026/2026-10-18-library-image-ratio/README.md"
+  ],
+  "supportingContext": [
+    "Private Image Studio surface brief, incumbent CSS and DESIGN.md token scale; preserve the existing Operate surface and progressive disclosure.",
+    "Artifact remains primary, prompt/actions secondary; toolbar precedes the unchanged desktop media/detail columns and phone stack. Only image fitting changes grouping/geometry. Existing panel spacing, content density, focus order and overflow behavior are not re-certified.",
+    "Documentation policy/change workflow and current-state/journal/register contracts: observations are dated, committed journal remains an exact prefix, generated inventory adds only the private incident. Knowledge/ADR authority is unchanged.",
+    "Final incident/current-state/release bodies explicitly preserve the first43-check post-crash503failure and open ACT-058; they distinguish later matching acceptance from explanation of the first failure."
+  ],
+  "verification": {
+    "imageSecurityAndAuthorization": "71 pass",
+    "studioContracts": "9 pass",
+    "typeScript": "pass",
+    "targetedEslint": "pass",
+    "operatorSyntax": "pass",
+    "productionBuild": "Fresh pinned Node22.23.2 build10;158 static pages",
+    "compiledBoundary": "545 JavaScript/rendered files plus12 CSS assets;13 configured credentials;zero matches;both removed notices absent;inspector containment present",
+    "scannerCorrection": "Initial literal CSS assertion rejected the normal vendor-prefixed declaration. Inspected the actual rule and checked its standard object-fit declaration; no application/build mutation.",
+    "packageEquivalence": "4546 traced files;2405 accepted artifact comparisons;zero application bytes changed",
+    "documentationFixtures": "43 pass",
+    "wholeImageAndLiveAcceptance": "Unchanged repeat44pass;304418ms deadline;59ms revocation. Actual desktop/phone original containment, no paid notice in Library/Create,3owned images,69HTTP/asset checks42assets13secrets zero matches,38cache checks,2LibraryCSS exact-byte comparisons."
+  },
+  "evidence": [
+    "post-mortem/releases/2026-10-18-library-image-ratio.json",
+    "post-mortem/incidents/2026/2026-10-18-library-image-ratio/README.md"
+  ],
+  "impactReview": "Images/access/delivery/client-efficiency contracts and the guide-only BroccoliDB mapping inspected. Cache, database, transport and egress algorithms are unchanged. Private unmapped design config/brief, evidence, journal and register paths reviewed; no unmapped new runtime boundary. Knowledge catalog/inventory add only this dated private incident.",
+  "limits": [
+    "No new generation, payment, stored artifact/metadata mutation, account grant or upstream credential change.",
+    "Two Premium provider renewals remain manual; existing physical-host and recovery limits remain.",
+    "The first image10 rehearsal passes43 checks but returns503 instead of409 at the first post-forced-crash duplicate. No production mutation occurred. Failure evidence remains retained; ACT-058 owns explanation/repeatability, and a later passing run cannot explain that initial failure. Assertions, budgets, application and harness are unchanged.",
+    "This is a scoped image-fitting/notice correction, not a complete responsive, accessibility or whole-site audit. Unrelated narrow-screen page overflow remains outside scope."
+  ]
+}

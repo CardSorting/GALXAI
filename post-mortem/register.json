@@ -656,6 +656,25 @@
       "recovery_evidence": [
         "post-mortem/releases/2026-10-18-google-and-image-notice.json"
       ]
+    },
+    {
+      "id": "INC-20261018-LIBRARY-IMAGE-RATIO",
+      "category": "frontend",
+      "severity": "SEV-3",
+      "status": "recovered",
+      "title": "Private Library inspector stretches artifacts to its media panel",
+      "owner": "Codex (active responder)",
+      "record": "post-mortem/incidents/2026/2026-10-18-library-image-ratio/README.md",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-10-18-library-image-ratio/README.md",
+        "post-mortem/releases/2026-10-18-library-image-ratio.json"
+      ],
+      "failure_modes": [
+        "FM-IMG-006"
+      ],
+      "recovery_evidence": [
+        "post-mortem/releases/2026-10-18-library-image-ratio.json"
+      ]
     }
   ],
   "actions": [
@@ -1476,6 +1495,32 @@
       "evidence": [
         "post-mortem/incidents/2026/2026-10-18-create-asset/README.md",
         "post-mortem/releases/2026-10-18-google-and-image-notice.json"
+      ]
+    },
+    {
+      "id": "ACT-057",
+      "incident": "INC-20261018-LIBRARY-IMAGE-RATIO",
+      "owner": "Image/release maintainer",
+      "review_by": "2026-10-19",
+      "status": "completed",
+      "next_step": "Retain inspector intrinsic containment and settled-no-plan notice absence; repeat actual desktop/phone media and entitlement/boundary checks after relevant changes. ACT-058 separately owns the initial runtime fixture failure.",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-10-18-library-image-ratio/README.md",
+        "post-mortem/releases/2026-10-18-library-image-ratio.json"
+      ],
+      "closure": "Exact build10 immutable image passes all44 unchanged repeat checks and clean web-only replacement. Actual desktop/phone original is contained without stretching; Library/Create have no paid-tier notice,3owned images remain,69live/38cache and2acceptedCSS comparisons pass. No artifact or eligibility change."
+    },
+    {
+      "id": "ACT-058",
+      "incident": "INC-20261018-LIBRARY-IMAGE-RATIO",
+      "owner": "Runtime acceptance maintainer",
+      "review_by": "2026-10-25",
+      "status": "open",
+      "next_step": "Explain the isolated first post-crash duplicate503 with bounded allowlisted readiness/error-code evidence; preserve exact duplicate/no-replay assertions and full deadline budgets. Keep this separate from the private viewer fix.",
+      "closure": "Require explained repeatable post-crash behavior; a later passing rehearsal alone does not explain the first failure.",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-10-18-library-image-ratio/README.md",
+        "post-mortem/releases/2026-10-18-library-image-ratio.json"
       ]
     }
   ]

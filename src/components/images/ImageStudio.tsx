@@ -454,7 +454,7 @@ function StudioWorkspace({
         </div>
       )}
 
-      {owner && (
+      {owner && (studio.imageAllowance?.plan || studio.allowanceUnavailable || (studio.allowanceChecking && !studio.imageAllowance)) && (
         <div className={`studio-allowance-summary ${studio.allowanceUnavailable ? 'studio-readiness-error' : 'studio-readiness-warning'}`} role={studio.allowanceUnavailable ? 'alert' : 'status'} aria-live="polite">
           <div className="studio-readiness-icon" aria-hidden="true"><Lock size={16} /></div>
           <div className="studio-readiness-copy">
@@ -462,20 +462,16 @@ function StudioWorkspace({
               ? 'Checking your private allowance…'
               : studio.allowanceUnavailable
                 ? 'Creation allowance unavailable'
-                : !studio.imageAllowance?.plan
-                  ? 'Private creation needs a paid tier'
-                  : allowance?.remainingUnits === 0
+                : allowance?.remainingUnits === 0
                     ? 'Creation allowance exhausted'
                     : allowanceCannotCoverBatch
                       ? 'This batch exceeds your remaining allowance'
-                      : `${studio.imageAllowance.plan.name} · ${allowance?.remainingUnits ?? 0} creation units remaining`}</strong>
+                      : `${studio.imageAllowance?.plan?.name ?? 'Private creation'} · ${allowance?.remainingUnits ?? 0} creation units remaining`}</strong>
             <span>{studio.allowanceChecking && !studio.imageAllowance
               ? 'Your available allowance is being checked before any request can be sent.'
               : studio.allowanceUnavailable
                 ? 'No image request will be dispatched until your plan and remaining allowance can be verified.'
-                : !studio.imageAllowance?.plan
-                  ? 'Choose a GALX Images tier to create privately. Your work will remain in your library.'
-                  : allowance?.remainingUnits === 0
+                : allowance?.remainingUnits === 0
                     ? `Your allowance renews ${allowance ? new Date(allowance.renewsAt).toLocaleDateString() : ''}. No inference will be dispatched; browsing and your saved library remain available.`
                     : allowanceCannotCoverBatch
                         ? `This batch needs ${requestedAllowanceUnits} units; ${allowance?.remainingUnits ?? 0} remain. Reduce the image count or choose Standard detail.`
@@ -483,7 +479,7 @@ function StudioWorkspace({
                         ? `Each Standard image uses ${allowance.standardOutputUnits} ${allowance.standardOutputUnits === 1 ? 'unit' : 'units'}; HD uses ${allowance.hdOutputUnits} units. Renews ${new Date(allowance.renewsAt).toLocaleDateString()}.`
                         : 'Your private monthly creation allowance is being checked.'}</span>
           </div>
-          {(!studio.imageAllowance?.plan || allowance?.remainingUnits === 0) && <Link href="/billing/plan" className="studio-readiness-action">Review plans <ArrowRight size={14} aria-hidden="true" /></Link>}
+          {allowance?.remainingUnits === 0 && <Link href="/billing/plan" className="studio-readiness-action">Review plans <ArrowRight size={14} aria-hidden="true" /></Link>}
           {studio.allowanceUnavailable && <button type="button" className="studio-readiness-action" disabled={studio.allowanceChecking} onClick={() => void studio.refreshAllowance()}>Try again <ArrowRight size={14} aria-hidden="true" /></button>}
         </div>
       )}

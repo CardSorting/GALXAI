@@ -35,6 +35,14 @@ disabled submission remain in force. Actual generation errors and uncertain
 operation recovery retain their authored feedback; removing a passive notice
 does not authorize a request or retry.
 
+An account without a purchased Image tier also receives no passive paid-tier
+upsell notice in the studio. Plan checking/failure and existing purchased
+allowance feedback remain. Eligibility and reservation checks still deny
+unentitled generation before dispatch; hiding a notice grants no creation units.
+Private image inspection uses the artifact's intrinsic proportions with
+`object-fit: contain`, independently of requested aspect-ratio metadata, so the
+full original remains visible without distortion in desktop and phone panels.
+
 Community discovery is part of the public image boundary. Star profiles use the
 canonical `/profile/<handle>` route and `/api/community/participants/<handle>`
 endpoint. Both expose explicit identity and creation DTOs only; the gallery is

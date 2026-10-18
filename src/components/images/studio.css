@@ -904,6 +904,10 @@
   place-items: center;
 }
 
+.studio-inspector-image .studio-artwork {
+  object-fit: contain;
+}
+
 .studio-inspector-details {
   padding: 24px;
   display: flex;
@@ -960,7 +964,7 @@
   justify-content: center;
   gap: 8px;
   min-height: 42px;
-  border-radius: 10px;
+  border-radius: 8px;
   font-size: 13px;
   font-weight: 550;
   padding: 8px 16px;

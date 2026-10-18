@@ -688,6 +688,96 @@
         ],
         "createdAt": "2026-10-07T20:56:09.458Z",
         "reason": "Codex intentional exhibition type/neutral ramp; exact case alias used by the hook on this case-insensitive filesystem. Same physical scoped stylesheet, private direction contract applies."
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#b9bfce",
+        "files": [
+          "src/components/images/studio.css"
+        ],
+        "createdAt": "2026-10-18T02:21:14.413Z",
+        "reason": "Codex maintainer: preserve the incumbent Studio notice text contrast in the existing dark surface; scoped refinement follows the private image surface brief."
+      },
+      {
+        "rule": "design-system-color",
+        "value": "rgba(129, 140, 248, 0.44)",
+        "files": [
+          "src/components/images/studio.css"
+        ],
+        "createdAt": "2026-10-18T02:21:14.477Z",
+        "reason": "Codex maintainer: preserve the incumbent Studio indigo notice-action border and its hover hierarchy; existing surface identity, not a new global color."
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#dbe2ff",
+        "files": [
+          "src/components/images/studio.css"
+        ],
+        "createdAt": "2026-10-18T02:21:14.534Z",
+        "reason": "Codex maintainer: preserve incumbent readable indigo notice-action text on the dark Studio surface; existing image surface brief and source are the visual authority."
+      },
+      {
+        "rule": "design-system-color",
+        "value": "rgba(165, 180, 252, 0.7)",
+        "files": [
+          "src/components/images/studio.css"
+        ],
+        "createdAt": "2026-10-18T02:21:14.591Z",
+        "reason": "Codex maintainer: preserve incumbent indigo hover-border contrast in the Studio notice action; file-specific refinement exception."
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#fb7185",
+        "files": [
+          "src/components/images/studio.css"
+        ],
+        "createdAt": "2026-10-18T02:21:14.647Z",
+        "reason": "Codex maintainer: preserve the incumbent rose error icon as a semantic error state distinct from indigo actions and amber warnings; private Studio context."
+      },
+      {
+        "rule": "design-system-radius",
+        "value": "20px",
+        "files": [
+          "src/components/images/studio.css"
+        ],
+        "createdAt": "2026-10-18T02:21:14.702Z",
+        "reason": "Codex maintainer: preserve existing Studio empty-state and dock-popover silhouettes outside the requested viewer/notice correction; private surface brief requires incumbent identity."
+      },
+      {
+        "rule": "design-system-radius",
+        "value": "18px",
+        "files": [
+          "src/components/images/studio.css"
+        ],
+        "createdAt": "2026-10-18T02:21:14.767Z",
+        "reason": "Codex maintainer: preserve the existing Studio empty-state icon silhouette outside the viewer/notice correction; existing source is incumbent visual context."
+      },
+      {
+        "rule": "design-system-radius",
+        "value": "10px",
+        "files": [
+          "src/components/images/studio.css"
+        ],
+        "createdAt": "2026-10-18T02:21:14.827Z",
+        "reason": "Codex maintainer: preserve existing dock ratio/count and legacy starter-chip shapes outside the viewer correction; inspector actions were separately normalized to the documented 8px scale."
+      },
+      {
+        "rule": "design-system-radius",
+        "value": "22px",
+        "files": [
+          "src/components/images/studio.css"
+        ],
+        "createdAt": "2026-10-18T02:21:14.896Z",
+        "reason": "Codex maintainer: preserve the established floating dock pill silhouette described by the private Studio surface brief; this is not a global radius token."
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "15px",
+        "files": [
+          "src/components/images/studio.css"
+        ],
+        "createdAt": "2026-10-18T02:21:14.963Z",
+        "reason": "Codex maintainer: preserve incumbent prompt-editor and inspector-toolbar hierarchy for the narrowly scoped image-fitting/notice correction; existing source and private surface brief govern refinement."
       }
     ]
   },
